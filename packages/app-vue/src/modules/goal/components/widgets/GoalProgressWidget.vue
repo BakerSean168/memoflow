@@ -22,13 +22,15 @@ withDefaults(
   defineProps<{
     goals: GoalHomeProgressItem[];
     loading?: boolean;
+    error?: string | null;
   }>(),
-  { loading: false },
+  { loading: false, error: null },
 );
 
 defineEmits<{
   'view-all': [];
   select: [id: string];
+  retry: [];
 }>();
 
 const { t } = useI18n();
@@ -81,15 +83,37 @@ const { t } = useI18n();
               <span
                 class="text-[11px] text-muted-foreground font-mono"
                 data-testid="goal-progress-value"
-              >{{ goal.progress }}%</span>
+                >{{ goal.progress }}%</span
+              >
             </div>
             <Progress :model-value="goal.progress" class="h-1.5" />
           </button>
         </div>
       </template>
-      <p v-else class="py-6 text-center text-xs text-muted-foreground">
+      <p v-else-if="!error" class="py-6 text-center text-xs text-muted-foreground">
         {{ t('goal.homeProgress.empty') }}
       </p>
+      <div
+        v-if="!loading && error"
+        class="flex min-h-8 items-center gap-2"
+        :class="goals.length ? 'mt-2 border-t border-[hsl(var(--border-subtle)/0.6)] pt-2' : 'py-4'"
+        data-testid="goal-progress-error"
+        role="alert"
+      >
+        <p class="min-w-0 flex-1 truncate text-xs text-muted-foreground">
+          {{ t('goal.homeProgress.loadError') }}
+        </p>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          class="h-7 shrink-0 rounded-md px-2 text-xs text-foreground"
+          data-testid="goal-progress-retry"
+          @click="$emit('retry')"
+        >
+          {{ t('goal.homeProgress.retry') }}
+        </Button>
+      </div>
     </CardContent>
   </Card>
 </template>

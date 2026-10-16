@@ -4,6 +4,31 @@ import { requireYmd } from '@memoflow/contracts/primitives';
 import ProductDatePicker from './ProductDatePicker.vue';
 
 describe('ProductDatePicker', () => {
+  it('reserves a single validation line and associates only a visible parse error', async () => {
+    const wrapper = mount(ProductDatePicker, {
+      props: { modelValue: null, label: 'Start', testId: 'start-picker' },
+      attachTo: document.body,
+    });
+    await wrapper.get('[data-testid="start-picker"]').trigger('click');
+    const query = new DOMWrapper(
+      document.querySelector<HTMLInputElement>('[data-testid="start-picker-query"]')!,
+    );
+    const slot = document.querySelector('[aria-live="polite"]');
+    expect(slot?.classList.contains('min-h-4')).toBe(true);
+    expect(query.attributes('aria-describedby')).toBeUndefined();
+    await query.setValue('not a date');
+    await query.trigger('keydown', { key: 'Enter' });
+    expect(query.attributes('aria-invalid')).toBe('true');
+    expect(query.attributes('aria-describedby')).toBe('start-picker-validation');
+    expect(document.querySelector('#start-picker-validation')?.getAttribute('title')).toBe(
+      'Enter a supported date format.',
+    );
+    await query.setValue('2026/10/16');
+    await query.trigger('keydown', { key: 'Enter' });
+    expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual([requireYmd('2026-10-16')]);
+    wrapper.unmount();
+  });
+
   it('presents an exact-day value in the compact editable slash format', async () => {
     const wrapper = mount(ProductDatePicker, {
       props: {
@@ -62,9 +87,7 @@ describe('ProductDatePicker', () => {
     await q4.trigger('click');
     await flushPromises();
 
-    expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual([
-      requireYmd(`${year}-10-01`),
-    ]);
+    expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual([requireYmd(`${year}-10-01`)]);
     wrapper.unmount();
   });
 

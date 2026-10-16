@@ -4,20 +4,25 @@
   使用 TaskReminderConfig.triggers 数组结构
 -->
 <template>
-  <section class="space-y-4">
+  <section
+    class="space-y-4"
+    role="group"
+    :aria-label="t('task.reminderSection.title')"
+    :aria-describedby="errors.length > 0 ? 'task-reminder-validation' : undefined"
+  >
     <div>
       <!-- 显示验证错误 -->
-      <Alert v-if="errors.length > 0" variant="destructive" class="mb-4">
-        <AlertDescription>
-          <ul class="mb-0">
-            <li v-for="error in errors" :key="error">{{ error }}</li>
-          </ul>
-        </AlertDescription>
-      </Alert>
+      <ProductInlineValidation
+        id="task-reminder-validation"
+        :visible="errors.length > 0"
+        :message="errors.join('；')"
+      />
 
       <div class="grid grid-cols-12 gap-4">
         <div class="col-span-12">
-          <div class="flex items-center justify-between gap-3 rounded-lg bg-[hsl(var(--surface-raised)/0.34)] px-2.5 py-2 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)]">
+          <div
+            class="flex items-center justify-between gap-3 rounded-lg bg-[hsl(var(--surface-raised)/0.34)] px-2.5 py-2 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)]"
+          >
             <div class="flex min-w-0 items-center gap-2">
               <Bell class="h-4 w-4 shrink-0 text-muted-foreground" />
               <Label for="task-reminder-enabled" class="cursor-pointer">
@@ -241,6 +246,7 @@
 </template>
 
 <script setup lang="ts">
+import { ProductInlineValidation } from '../../../../../shared/components';
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { TaskReminderType, ReminderTimeUnit } from '@memoflow/contracts/task';
@@ -249,8 +255,6 @@ import type { TaskPlanViewModel } from '../../types';
 import {
   Card,
   CardContent,
-  Alert,
-  AlertDescription,
   Switch,
   Label,
   Select,

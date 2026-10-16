@@ -17,18 +17,25 @@ describe('MemoFlow product form language', () => {
     expect(schedule).toContain('schedule-property-chips');
   });
 
-  it('keeps primary create/edit dialogs on the shared ProductDialogShell', () => {
+  it('keeps primary create/edit flows on the shared pane or legacy dialog shell', () => {
     expect(read('modules/goal/components/dialogs/GoalFormFrame.vue')).toContain(
       '<ProductDialogShell',
     );
     for (const file of [
       'modules/goal/components/dialogs/GoalRecordDialog.vue',
-      'modules/task/components/dialogs/TaskPlanDialog.vue',
       'modules/task/components/dialogs/TemplateSelectionDialog.vue',
-      'modules/schedule/components/CreateScheduleDialog.vue',
     ]) {
       expect(read(file), file).toContain('ProductDialogShell');
     }
+    for (const file of [
+      'modules/task/components/dialogs/TaskPlanDialog.vue',
+      'modules/schedule/components/CreateScheduleDialog.vue',
+    ]) {
+      expect(read(file), file).toContain('ProductEditorFrame');
+    }
+    const frame = read('shared/components/ProductEditorFrame.vue');
+    expect(frame).toContain('<ProductDialogShell');
+    expect(frame).toContain('<PaneScopedDialog');
   });
 
   it('keeps active Repository projection dialogs on the shared product dialog shell', () => {

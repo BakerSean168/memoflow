@@ -1,178 +1,183 @@
 <template>
-  <Dialog :open="open" @update:open="handleOpenChange">
-    <ProductDialogShell
-      :open="open"
-      test-id="routine-editor-dialog"
-      recipe="workspace"
-      initial-focus-selector="[data-testid='routine-name-input']"
+  <ProductEditorFrame
+    :open="open"
+    :presentation="presentation"
+    :close-disabled="saving"
+    test-id="routine-editor-dialog"
+    title-id="routine-editor-panel-title"
+    recipe="workspace"
+    initial-focus-selector="[data-testid='routine-name-input']"
+    return-focus-selector="[data-testid='routine-create-button']"
+    @update:open="handleOpenChange"
+  >
+    <template #title>{{ routine ? t('routine.edit') : t('routine.create') }}</template>
+
+    <form
+      id="routine-editor-form"
+      class="flex min-h-full flex-col gap-6"
+      @submit.prevent="submit"
+      @focusout="timingTouched = true"
     >
-      <template #title>{{ routine ? t('routine.edit') : t('routine.create') }}</template>
-
-      <form
-        id="routine-editor-form"
-        class="flex min-h-full flex-col gap-6"
-        @submit.prevent="submit"
+      <section
+        class="space-y-4 border-b border-[hsl(var(--border-subtle))] pb-5"
+        data-testid="routine-identity-section"
       >
-        <section
-          class="space-y-4 border-b border-[hsl(var(--border-subtle))] pb-5"
-          data-testid="routine-identity-section"
-        >
-          <div>
-            <ProductAutoTextarea
-              v-model="name"
-              :max-length="100"
-              :rows="1"
-              data-testid="routine-name-input"
-              class="min-h-10 text-xl font-semibold leading-tight text-foreground sm:text-2xl"
-              :placeholder="t('routine.form.namePlaceholder')"
-              :aria-label="t('routine.form.name')"
-              :disabled="saving"
-              @limit-exceeded="nameLimitFeedback.show()"
-            />
-            <Transition
-              enter-active-class="transition-opacity duration-150"
-              leave-active-class="transition-opacity duration-150"
-              enter-from-class="opacity-0"
-              leave-to-class="opacity-0"
-            >
-              <p
-                v-if="nameLimitFeedback.visible.value"
-                class="mt-1 text-xs text-destructive"
-                role="alert"
+        <div>
+          <ProductAutoTextarea
+            v-model="name"
+            :max-length="100"
+            :rows="1"
+            data-testid="routine-name-input"
+            class="min-h-10 text-xl font-semibold leading-tight text-foreground sm:text-2xl"
+            :placeholder="t('routine.form.namePlaceholder')"
+            :aria-label="t('routine.form.name')"
+            :aria-describedby="nameError ? 'routine-name-limit-feedback' : undefined"
+            focus-ring
+            :aria-invalid="Boolean(nameError)"
+            :disabled="saving"
+            @blur="nameTouched = true"
+            @limit-exceeded="nameLimitFeedback.show()"
+          />
+          <ProductInlineValidation
+            id="routine-name-limit-feedback"
+            test-id="routine-name-limit-error"
+            :visible="Boolean(nameError)"
+            :message="nameError"
+          />
+        </div>
+
+        <div>
+          <ProductAutoTextarea
+            v-model="description"
+            :max-length="2000"
+            :rows="2"
+            data-testid="routine-description-input"
+            class="min-h-8 text-sm leading-5 text-muted-foreground"
+            :placeholder="t('routine.form.descriptionPlaceholder')"
+            :aria-label="t('routine.form.description')"
+            :aria-describedby="
+              descriptionLimitFeedback.visible.value
+                ? 'routine-description-limit-feedback'
+                : undefined
+            "
+            :aria-invalid="descriptionLimitFeedback.visible.value"
+            :focus-ring="true"
+            :disabled="saving"
+            @limit-exceeded="descriptionLimitFeedback.show()"
+          />
+          <ProductInlineValidation
+            id="routine-description-limit-feedback"
+            test-id="routine-description-limit-error"
+            :visible="descriptionLimitFeedback.visible.value"
+            :message="t('routine.form.descriptionLimitExceeded')"
+          />
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2" data-testid="routine-property-chips">
+          <DropdownMenu :modal="false">
+            <DropdownMenuTrigger as-child>
+              <ProductPropertyChip
+                :disabled="saving"
+                :aria-label="t('routine.form.triggerType')"
+                data-testid="routine-trigger-type"
+                :data-trigger-type="triggerType"
               >
-                {{ t('routine.form.nameLimitExceeded') }}
-              </p>
-            </Transition>
-          </div>
-
-          <div>
-            <ProductAutoTextarea
-              v-model="description"
-              :max-length="2000"
-              :rows="2"
-              data-testid="routine-description-input"
-              class="min-h-8 text-sm leading-5 text-muted-foreground"
-              :placeholder="t('routine.form.descriptionPlaceholder')"
-              :aria-label="t('routine.form.description')"
-              :disabled="saving"
-              @limit-exceeded="descriptionLimitFeedback.show()"
-            />
-            <Transition
-              enter-active-class="transition-opacity duration-150"
-              leave-active-class="transition-opacity duration-150"
-              enter-from-class="opacity-0"
-              leave-to-class="opacity-0"
-            >
-              <p
-                v-if="descriptionLimitFeedback.visible.value"
-                class="mt-1 text-xs text-destructive"
-                role="alert"
+                <template #icon>
+                  <component :is="currentTriggerOption.icon" class="h-3.5 w-3.5" />
+                </template>
+                {{ triggerChipLabel }}
+              </ProductPropertyChip>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" class="w-52">
+              <DropdownMenuRadioGroup
+                :model-value="triggerType"
+                @update:model-value="updateTriggerType"
               >
-                {{ t('routine.form.descriptionLimitExceeded') }}
-              </p>
-            </Transition>
-          </div>
-
-          <div class="flex flex-wrap items-center gap-2" data-testid="routine-property-chips">
-            <DropdownMenu>
-              <DropdownMenuTrigger as-child>
-                <ProductPropertyChip
-                  :disabled="saving"
-                  :aria-label="t('routine.form.triggerType')"
-                  data-testid="routine-trigger-type"
-                  :data-trigger-type="triggerType"
+                <DropdownMenuRadioItem
+                  v-for="option in triggerOptions"
+                  :key="option.value"
+                  :value="option.value"
+                  :data-testid="`routine-trigger-option-${option.value}`"
+                  class="gap-2"
                 >
-                  <template #icon>
-                    <component :is="currentTriggerOption.icon" class="h-3.5 w-3.5" />
-                  </template>
-                  {{ triggerChipLabel }}
-                </ProductPropertyChip>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" class="w-52">
-                <DropdownMenuRadioGroup
-                  :model-value="triggerType"
-                  @update:model-value="updateTriggerType"
-                >
-                  <DropdownMenuRadioItem
-                    v-for="option in triggerOptions"
-                    :key="option.value"
-                    :value="option.value"
-                    :data-testid="`routine-trigger-option-${option.value}`"
-                    class="gap-2"
-                  >
-                    <component :is="option.icon" class="h-4 w-4 shrink-0 text-muted-foreground" />
-                    <span>{{ option.label }}</span>
-                  </DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <component :is="option.icon" class="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <span>{{ option.label }}</span>
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-            <ElapsedTriggerEditor
-              v-if="triggerType === 'Elapsed'"
-              v-model:duration-minutes="durationMinutes"
-              v-model:anchor="elapsedAnchor"
-              :disabled="saving"
-            />
+          <ElapsedTriggerEditor
+            v-if="triggerType === 'Elapsed'"
+            v-model:duration-minutes="durationMinutes"
+            v-model:anchor="elapsedAnchor"
+            :disabled="saving"
+          />
 
-            <ActiveUsageTriggerEditor
-              v-if="triggerType === 'ActiveUsage'"
-              v-model:active-minutes="activeMinutes"
-              v-model:natural-break-minutes="naturalBreakMinutes"
-              v-model:anchor="activeAnchor"
-              :disabled="saving"
-            />
+          <ActiveUsageTriggerEditor
+            v-if="triggerType === 'ActiveUsage'"
+            v-model:active-minutes="activeMinutes"
+            v-model:natural-break-minutes="naturalBreakMinutes"
+            v-model:anchor="activeAnchor"
+            :disabled="saving"
+          />
 
-            <ProfileScopeControl
-              v-model:selected-profile-ids="selectedProfileIds"
-              :profiles="profiles"
-              :disabled="saving"
-            />
-          </div>
+          <ProfileScopeControl
+            v-model:selected-profile-ids="selectedProfileIds"
+            :profiles="profiles"
+            :disabled="saving"
+          />
+        </div>
 
-          <p
-            v-if="requiresDesktopRuntime"
-            class="flex items-center gap-1.5 text-xs text-muted-foreground"
-            data-testid="routine-desktop-runtime-hint"
-          >
-            <Monitor class="h-3.5 w-3.5 shrink-0" />
-            {{ t('routine.form.desktopRuntimeRequired') }}
-          </p>
-        </section>
-
-        <WallClockTriggerEditor
-          v-if="triggerType === 'WallClock'"
-          v-model:local-time="localTime"
-          v-model:start-date="startDate"
-          v-model:frequency="frequency"
-          v-model:recurrence-interval="recurrenceInterval"
-          v-model:selected-weekdays="selectedWeekdays"
-          v-model:time-zone="timeZone"
-          :disabled="saving"
-        />
-      </form>
-
-      <template #footer>
-        <Button
-          type="button"
-          variant="ghost"
-          data-testid="routine-editor-cancel"
-          :disabled="saving"
-          @click="requestClose()"
+        <p
+          v-if="requiresDesktopRuntime"
+          class="flex items-center gap-1.5 text-xs text-muted-foreground"
+          data-testid="routine-desktop-runtime-hint"
         >
-          {{ t('routine.form.cancel') }}
-        </Button>
-        <Button
-          type="submit"
-          form="routine-editor-form"
-          :disabled="!canSubmit || saving"
-          :loading="saving"
-          data-testid="routine-editor-save"
-        >
-          {{ routine ? t('routine.form.save') : t('routine.form.create') }}
-        </Button>
-      </template>
-    </ProductDialogShell>
-  </Dialog>
+          <Monitor class="h-3.5 w-3.5 shrink-0" />
+          {{ t('routine.form.desktopRuntimeRequired') }}
+        </p>
+      </section>
+
+      <WallClockTriggerEditor
+        v-if="triggerType === 'WallClock'"
+        v-model:local-time="localTime"
+        v-model:start-date="startDate"
+        v-model:frequency="frequency"
+        v-model:recurrence-interval="recurrenceInterval"
+        v-model:selected-weekdays="selectedWeekdays"
+        v-model:time-zone="timeZone"
+        :disabled="saving"
+      />
+      <ProductInlineValidation
+        id="routine-submit-feedback"
+        test-id="routine-submit-error"
+        :visible="Boolean(submitError || timingError)"
+        :message="submitError || timingError"
+      />
+    </form>
+
+    <template #footer>
+      <Button
+        type="button"
+        variant="ghost"
+        data-testid="routine-editor-cancel"
+        :disabled="saving"
+        @click="requestClose()"
+      >
+        {{ t('routine.form.cancel') }}
+      </Button>
+      <Button
+        type="submit"
+        form="routine-editor-form"
+        :disabled="!canSubmit || saving"
+        :loading="saving"
+        data-testid="routine-editor-save"
+      >
+        {{ routine ? t('routine.form.save') : t('routine.form.create') }}
+      </Button>
+    </template>
+  </ProductEditorFrame>
 </template>
 
 <script setup lang="ts">
@@ -181,7 +186,6 @@ import { useI18n } from 'vue-i18n';
 import { Activity, CircleOff, Clock3, Monitor, Repeat2 } from '@lucide/vue';
 import {
   Button,
-  Dialog,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuRadioGroup,
@@ -201,7 +205,8 @@ import {
 } from '@memoflow/contracts/primitives';
 import {
   ProductAutoTextarea,
-  ProductDialogShell,
+  ProductEditorFrame,
+  ProductInlineValidation,
   ProductPropertyChip,
 } from '../../../shared/components';
 import { useTransientFeedback } from '../../../shared/composables/useTransientFeedback';
@@ -227,7 +232,9 @@ export interface RoutineEditorPreset {
 const props = withDefaults(
   defineProps<{
     open: boolean;
+    presentation?: 'dialog' | 'panel';
     saving?: boolean;
+    submitError?: string | null;
     routine?: RoutineDefinitionDto | null;
     profiles: readonly RoutineProfileDto[];
     membershipProfileIds?: readonly string[];
@@ -235,7 +242,9 @@ const props = withDefaults(
     localRuntimeAvailable?: boolean;
   }>(),
   {
+    presentation: 'dialog',
     saving: false,
+    submitError: null,
     routine: null,
     membershipProfileIds: () => [],
     preset: null,
@@ -245,6 +254,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   'update:open': [value: boolean];
+  'dirty-change': [dirty: boolean];
   save: [
     value: {
       name: string;
@@ -258,6 +268,8 @@ const emit = defineEmits<{
 const { t } = useI18n();
 
 const name = ref('');
+const nameTouched = ref(false);
+const timingTouched = ref(false);
 const description = ref('');
 const triggerType = ref<RoutineEditorTriggerType>('None');
 const localTime = ref('09:00');
@@ -275,6 +287,19 @@ const selectedProfileIds = ref<string[]>([]);
 const formBaseline = ref('');
 const nameLimitFeedback = useTransientFeedback();
 const descriptionLimitFeedback = useTransientFeedback();
+watch(
+  () => name.value,
+  (value) => {
+    if (value.length < 100) nameLimitFeedback.hide();
+  },
+);
+const nameError = computed(() =>
+  nameTouched.value && !name.value.trim()
+    ? t('routine.form.nameRequired')
+    : nameLimitFeedback.visible.value
+      ? t('routine.form.nameLimitExceeded')
+      : '',
+);
 
 const triggerOptions = computed(() => [
   { value: 'None' as const, label: t('routine.form.noTiming'), icon: CircleOff },
@@ -321,6 +346,7 @@ function snapshotForm(): string {
 }
 
 const isDirty = computed(() => props.open && snapshotForm() !== formBaseline.value);
+watch(isDirty, (dirty) => emit('dirty-change', dirty), { immediate: true });
 
 function localYmd(): string {
   return String(getProductTodayYmd());
@@ -331,6 +357,8 @@ function productTimeZone(): string {
 }
 
 function resetForm(): void {
+  nameTouched.value = false;
+  timingTouched.value = false;
   const source = props.routine;
   const preset = props.preset;
   name.value = source?.name ?? preset?.name ?? '';
@@ -394,6 +422,12 @@ const canSubmit = computed(() => {
   return true;
 });
 
+const timingError = computed(() =>
+  timingTouched.value && name.value.trim() && !canSubmit.value
+    ? t('routine.form.invalidTiming')
+    : '',
+);
+
 function updateTriggerType(value: unknown): void {
   if (typeof value !== 'string') return;
   const option = triggerOptions.value.find((candidate) => candidate.value === value);
@@ -455,6 +489,7 @@ function buildTrigger(): RoutineTriggerDto | null {
 }
 
 function submit(): void {
+  nameTouched.value = true;
   if (!canSubmit.value || props.saving) return;
   emit('save', {
     name: name.value.trim(),

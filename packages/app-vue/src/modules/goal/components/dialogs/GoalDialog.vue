@@ -45,23 +45,18 @@
             data-testid="goal-name-input"
             class="min-h-10 text-xl font-semibold leading-tight text-foreground sm:text-2xl"
             :placeholder="t('goal.dialog.goalTitlePlaceholder')"
+            :aria-describedby="nameError ? 'goal-name-limit-feedback' : undefined"
+            :aria-invalid="Boolean(nameError)"
+            focus-ring
+            @blur="nameTouched = true"
             @limit-exceeded="nameLimitFeedback.show()"
           />
-          <Transition
-            enter-active-class="transition-opacity duration-150"
-            leave-active-class="transition-opacity duration-150"
-            enter-from-class="opacity-0"
-            leave-to-class="opacity-0"
-          >
-            <p
-              v-if="nameLimitFeedback.visible.value"
-              class="mt-1 text-xs text-destructive"
-              role="alert"
-              data-testid="goal-name-limit-error"
-            >
-              {{ t('goal.dialog.nameLimitExceeded') }}
-            </p>
-          </Transition>
+          <ProductInlineValidation
+            id="goal-name-limit-feedback"
+            test-id="goal-name-limit-error"
+            :visible="Boolean(nameError)"
+            :message="nameError"
+          />
         </div>
 
         <div>
@@ -76,23 +71,19 @@
             data-testid="goal-summary-input"
             class="min-h-8 text-sm leading-5 text-muted-foreground"
             :placeholder="t('goal.dialog.summaryPlaceholder')"
+            :aria-describedby="
+              summaryLimitFeedback.visible.value ? 'goal-summary-limit-feedback' : undefined
+            "
+            :aria-invalid="summaryLimitFeedback.visible.value || undefined"
+            :focus-ring="true"
             @limit-exceeded="summaryLimitFeedback.show()"
           />
-          <Transition
-            enter-active-class="transition-opacity duration-150"
-            leave-active-class="transition-opacity duration-150"
-            enter-from-class="opacity-0"
-            leave-to-class="opacity-0"
-          >
-            <p
-              v-if="summaryLimitFeedback.visible.value"
-              class="mt-1 text-xs text-destructive"
-              role="alert"
-              data-testid="goal-summary-limit-error"
-            >
-              {{ t('goal.dialog.summaryLimitExceeded') }}
-            </p>
-          </Transition>
+          <ProductInlineValidation
+            id="goal-summary-limit-feedback"
+            test-id="goal-summary-limit-error"
+            :visible="summaryLimitFeedback.visible.value"
+            :message="t('goal.dialog.summaryLimitExceeded')"
+          />
         </div>
 
         <div class="flex flex-wrap items-center gap-2" data-testid="goal-property-chips">
@@ -179,12 +170,11 @@
           </Popover>
         </div>
 
-        <p v-if="labelCreateError" role="alert" class="text-xs text-destructive">
-          {{ labelCreateError }}
-        </p>
-        <p v-if="formError" role="alert" class="text-xs text-destructive">
-          {{ formError }}
-        </p>
+        <ProductInlineValidation
+          test-id="goal-submit-error"
+          :visible="Boolean(formError || labelCreateError)"
+          :message="formError || labelCreateError || ''"
+        />
       </section>
 
       <section class="space-y-2" data-testid="goal-description-section">
@@ -199,23 +189,19 @@
           data-testid="goal-description-input"
           class="min-h-32 text-sm leading-6 text-foreground/90"
           :placeholder="t('goal.dialog.descriptionLongPlaceholder')"
+          :aria-describedby="
+            descriptionLimitFeedback.visible.value ? 'goal-description-limit-feedback' : undefined
+          "
+          :aria-invalid="descriptionLimitFeedback.visible.value || undefined"
+          :focus-ring="true"
           @limit-exceeded="descriptionLimitFeedback.show()"
         />
-        <Transition
-          enter-active-class="transition-opacity duration-150"
-          leave-active-class="transition-opacity duration-150"
-          enter-from-class="opacity-0"
-          leave-to-class="opacity-0"
-        >
-          <p
-            v-if="descriptionLimitFeedback.visible.value"
-            class="text-xs text-destructive"
-            role="alert"
-            data-testid="goal-description-limit-error"
-          >
-            {{ t('goal.dialog.descriptionLimitExceeded') }}
-          </p>
-        </Transition>
+        <ProductInlineValidation
+          id="goal-description-limit-feedback"
+          test-id="goal-description-limit-error"
+          :visible="descriptionLimitFeedback.visible.value"
+          :message="t('goal.dialog.descriptionLimitExceeded')"
+        />
       </section>
 
       <div
@@ -324,6 +310,7 @@ import {
   ProductAutoTextarea,
   ProductPropertyChip,
 } from '../../../../shared/components';
+import ProductInlineValidation from '../../../../shared/components/ProductInlineValidation.vue';
 import { validateGoalNativePatch } from '../../composables/validateGoalNativePatch';
 import GoalFormFrame from './GoalFormFrame.vue';
 import GoalReminderChip from '../GoalReminderChip.vue';
@@ -662,8 +649,22 @@ const isDirty = computed(() => props.open && snapshotDraft() !== initialSnapshot
 const labelCreateError = ref<string | null>(null);
 const formError = ref<string | null>(null);
 const nameLimitFeedback = useTransientFeedback();
+const nameTouched = ref(false);
+const nameError = computed(() =>
+  nameTouched.value && !draft.name.trim()
+    ? t('goal.dialog.titleRequired')
+    : nameLimitFeedback.visible.value
+      ? t('goal.dialog.nameLimitExceeded')
+      : '',
+);
 const summaryLimitFeedback = useTransientFeedback();
 const descriptionLimitFeedback = useTransientFeedback();
+watch(
+  () => draft.name,
+  (value) => {
+    if (value.length < 80) nameLimitFeedback.hide();
+  },
+);
 const krEditorOpen = ref(false);
 const persistedStatus = computed(() =>
   props.mode === 'edit' ? (props.goal?.status ?? GoalStatus.Planned) : GoalStatus.Planned,
@@ -703,6 +704,7 @@ function reset(): void {
   draft.keyResults = goal?.keyResults?.map(mapKeyResult) ?? [];
   labelCreateError.value = null;
   formError.value = null;
+  nameTouched.value = false;
   nameLimitFeedback.hide();
   summaryLimitFeedback.hide();
   descriptionLimitFeedback.hide();
@@ -978,13 +980,18 @@ function validateReminderConfig(): boolean {
 }
 
 async function save(): Promise<void> {
+  nameTouched.value = true;
   if (submitting.value || isSaving.value || editingBlocked.value) return;
   if (submitCoordinator) {
     await submitCoordinator();
     return;
   }
   if (control.value !== null) return;
-  await saveOwner();
+  try {
+    await saveOwner();
+  } catch {
+    // The owner reports the failure inline; native callers still receive the rejection.
+  }
 }
 
 async function saveOwner(
@@ -1001,6 +1008,9 @@ async function saveOwner(
   submitting.value = true;
   try {
     return (await persistDraft(context)) ?? null;
+  } catch (error) {
+    formError.value = t('common.operationFailed');
+    throw error;
   } finally {
     submitting.value = false;
   }
@@ -1070,7 +1080,11 @@ async function persistDraft(context?: GoalNativeSubmitContext): Promise<GoalClie
       return;
     }
     const saved = await updateGoal(String(props.goal.id), parsed.data);
-    if (!saved || !sameIdentity()) return;
+    if (!saved) {
+      formError.value = t('common.operationFailed');
+      return;
+    }
+    if (!sameIdentity()) return;
     const finalGoal = await transitionGoalStatus(saved, requestedStatus);
     if (!sameIdentity()) return;
     emit('updated', finalGoal ?? saved);
@@ -1107,6 +1121,7 @@ async function persistDraft(context?: GoalNativeSubmitContext): Promise<GoalClie
   context?.onCreateAttempt?.();
   const saved = await createGoal(parsed.data);
   if (!saved) {
+    formError.value = t('common.operationFailed');
     if (!context && lastCreateRejected?.value) await checkpoint.allowEditing();
     else if (!context) void checkCheckpoint();
     return;

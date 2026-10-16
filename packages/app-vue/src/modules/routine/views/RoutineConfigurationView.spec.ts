@@ -142,7 +142,8 @@ describe('RoutineConfigurationView', () => {
     const scope = wrapper.find('[data-testid="routine-profile-scope-control"]');
     expect(scope.exists()).toBe(true);
     const createButton = wrapper.find('[data-testid="routine-create-button"]');
-    expect(createButton.classes()).toContain('@2xl/panel:px-3');
+    expect(createButton.classes()).toEqual(expect.arrayContaining(['h-8', 'w-8']));
+    expect(createButton.attributes('aria-label')).toBe('New routine');
     expect(scope.find('[data-testid="routine-global-enabled-control"]').exists()).toBe(true);
     expect(scope.find('[data-testid="routine-create-profile-button"]').exists()).toBe(true);
     expect(scope.find('[data-testid="routine-create-button"]').exists()).toBe(false);

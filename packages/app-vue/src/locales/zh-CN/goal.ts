@@ -73,6 +73,8 @@ export default {
     title: '目标进度',
     viewAll: '查看全部',
     empty: '暂无活跃目标',
+    loadError: '暂时无法更新目标',
+    retry: '重试',
   },
   error: {
     loadListFailed: '加载目标列表失败',

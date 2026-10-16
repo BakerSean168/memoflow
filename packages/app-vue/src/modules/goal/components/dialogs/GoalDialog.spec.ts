@@ -434,6 +434,43 @@ function timeframePicker(wrapper: ReturnType<typeof mount>, testId: string) {
 }
 
 describe('GoalDialog vNext surface (GOAL-5101)', () => {
+  it('keeps the draft and a readable inline failure when persistence throws', async () => {
+    mocks.createGoal.mockRejectedValueOnce(new Error('offline'));
+    const wrapper = mount(GoalDialog, {
+      props: { open: true, mode: 'create', presentation: 'panel' },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    await dom('goal-name-input').setValue('Keep failed goal');
+    await dom('save-goal-button').trigger('click');
+    await flushPromises();
+    expect(dom('goal-name-input').element).toHaveProperty('value', 'Keep failed goal');
+    expect(dom('goal-submit-error').attributes('title')).toBeTruthy();
+    expect(wrapper.emitted('created')).toBeUndefined();
+    wrapper.unmount();
+  });
+
+  it('announces an empty title after blur and clears the reserved error line after correction', async () => {
+    const wrapper = mount(GoalDialog, {
+      props: { open: true, mode: 'create', presentation: 'panel' },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    await nextTick();
+    const name = dom('goal-name-input');
+    const slot = name.element.nextElementSibling;
+    expect(name.attributes('aria-describedby')).toBeUndefined();
+    await name.trigger('blur');
+    expect(name.attributes('aria-invalid')).toBe('true');
+    expect(dom('goal-name-limit-error').text()).toBe('Goal name is required');
+    expect(name.classes()).toContain('focus-visible:ring-2');
+    await name.setValue('Corrected goal');
+    expect(document.querySelector('[data-testid="goal-name-limit-error"]')).toBeNull();
+    expect(name.element.nextElementSibling).toBe(slot);
+    expect(name.attributes('aria-describedby')).toBeUndefined();
+    wrapper.unmount();
+  });
+
   it('saves through the scoped owner capability once and rejects a concurrent save', async () => {
     const created = createMockGoal({ name: 'Scoped Goal' });
     let complete!: () => void;
@@ -819,20 +856,41 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     await nextTick();
 
     const name = dom('goal-name-input');
+    expect(name.attributes('aria-describedby')).toBeUndefined();
+    expect(name.element.nextElementSibling?.classList.contains('min-h-4')).toBe(true);
     await name.setValue('x'.repeat(81));
     await nextTick();
     expect((name.element as HTMLTextAreaElement).value).toHaveLength(80);
-    expect(document.querySelector('[data-testid="goal-name-limit-error"]')).not.toBeNull();
+    expect(name.attributes('aria-describedby')).toBe('goal-name-limit-feedback');
+    expect(name.attributes('aria-invalid')).toBe('true');
+    expect(dom('goal-name-limit-error').attributes('role')).toBe('alert');
+    expect(dom('goal-name-limit-error').classes()).toContain('truncate');
 
     const summary = dom('goal-summary-input');
+    expect(summary.attributes('aria-describedby')).toBeUndefined();
+    expect(summary.element.nextElementSibling?.classList.contains('min-h-4')).toBe(true);
     await summary.setValue('y'.repeat(256));
     await nextTick();
     expect((summary.element as HTMLTextAreaElement).value).toHaveLength(255);
-    expect(document.querySelector('[data-testid="goal-summary-limit-error"]')).not.toBeNull();
+    expect(summary.attributes('aria-describedby')).toBe('goal-summary-limit-feedback');
+    expect(summary.attributes('aria-invalid')).toBe('true');
+    expect(dom('goal-summary-limit-error').attributes('role')).toBe('alert');
+    expect(summary.classes()).toContain('focus-visible:ring-2');
+
+    const description = dom('goal-description-input');
+    expect(description.attributes('aria-describedby')).toBeUndefined();
+    expect(description.element.nextElementSibling?.classList.contains('min-h-4')).toBe(true);
+    await description.setValue('z'.repeat(10001));
+    await nextTick();
+    expect((description.element as HTMLTextAreaElement).value).toHaveLength(10000);
+    expect(description.attributes('aria-describedby')).toBe('goal-description-limit-feedback');
+    expect(description.attributes('aria-invalid')).toBe('true');
+    expect(dom('goal-description-limit-error').attributes('role')).toBe('alert');
+    expect(description.classes()).toContain('focus-visible:ring-2');
 
     expect(name.classes()).toContain('resize-none');
     expect(name.classes()).toContain('border-0');
-    expect(name.classes()).toContain('focus-visible:ring-0');
+    expect(name.classes()).toContain('focus-visible:ring-2');
     wrapper.unmount();
   });
 

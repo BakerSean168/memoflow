@@ -15,12 +15,12 @@ defineProps<{
   <Button
     v-bind="$attrs"
     type="button"
-    size="sm"
-    class="h-8 shrink-0 px-2 shadow-sm shadow-primary/15 @2xl/panel:px-3"
+    size="icon"
+    class="h-8 w-8 shrink-0 rounded-md p-0 shadow-sm shadow-primary/15"
     :aria-label="label"
+    :title="label"
     :disabled="disabled"
   >
-    <component :is="icon" class="h-4 w-4 @2xl/panel:mr-1.5" />
-    <span class="hidden @2xl/panel:inline">{{ label }}</span>
+    <component :is="icon" class="h-4 w-4" aria-hidden="true" />
   </Button>
 </template>

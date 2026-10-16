@@ -1,5 +1,5 @@
 <template>
-  <DropdownMenu>
+  <DropdownMenu :modal="false">
     <DropdownMenuTrigger as-child>
       <Button
         type="button"
@@ -8,6 +8,7 @@
         :class="['h-8 max-w-44 shrink-0 gap-1.5 px-2', triggerClass]"
         :disabled="disabled"
         :aria-label="accessibleLabel"
+        :title="currentLabel"
         :data-testid="testId"
       >
         <component :is="icon ?? ListFilter" class="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -27,6 +28,7 @@
           v-for="option in options"
           :key="option.value"
           :value="option.value"
+          :title="option.label"
           :disabled="disabled || option.disabled"
           :data-testid="option.itemTestId ?? (testId ? `${testId}-${option.value}` : undefined)"
         >
@@ -91,6 +93,7 @@ const currentOption = computed(() =>
 const currentLabel = computed(() => currentOption.value?.label ?? props.modelValue);
 
 function handleUpdate(value: unknown): void {
+  if (props.disabled) return;
   if (typeof value !== 'string' || !value || value === props.modelValue) return;
   if (!props.options.some((option) => option.value === value && !option.disabled)) return;
   emit('update:modelValue', value);

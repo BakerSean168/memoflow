@@ -26,7 +26,8 @@
     </PopoverTrigger>
     <PopoverContent
       align="start"
-      class="w-[19rem] max-w-[calc(100vw-1rem)] overflow-hidden rounded-xl border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay))] p-0 shadow-[0_18px_48px_-22px_rgba(0,0,0,0.52),0_4px_14px_-10px_rgba(0,0,0,0.45),inset_0_1px_0_hsl(var(--foreground)/0.025)]"
+      :class="pickerWidth === 'pane' ? 'w-[23rem]' : 'w-[19rem]'"
+      class="max-w-[calc(100vw-1rem)] overflow-hidden rounded-xl border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay))] p-0 shadow-[0_18px_48px_-22px_rgba(0,0,0,0.52),0_4px_14px_-10px_rgba(0,0,0,0.45),inset_0_1px_0_hsl(var(--foreground)/0.025)]"
     >
       <ProductTemporalPickerSurface
         :label="label"
@@ -71,14 +72,11 @@
 import { computed, ref, watch } from 'vue';
 import { CalendarDays } from '@lucide/vue';
 import type { Ymd } from '@memoflow/contracts/primitives';
-import {
-  Button,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@memoflow/ui-vue-shadcn';
+import { Button, Popover, PopoverContent, PopoverTrigger } from '@memoflow/ui-vue-shadcn';
 import ProductPropertyChip from './ProductPropertyChip.vue';
-import ProductTemporalPickerSurface, { type TemporalPickerKind } from './ProductTemporalPickerSurface.vue';
+import ProductTemporalPickerSurface, {
+  type TemporalPickerKind,
+} from './ProductTemporalPickerSurface.vue';
 import { handleCalendarSelect } from '../utils/handle-calendar-select';
 import { parseToCalendarDate } from '../utils/parse-to-date';
 import {
@@ -97,6 +95,7 @@ import {
 const props = withDefaults(
   defineProps<{
     modelValue: Ymd | null;
+    pickerWidth?: 'standard' | 'pane';
     label: string;
     placeholder?: string;
     inputPlaceholder?: string;
@@ -125,6 +124,7 @@ const props = withDefaults(
     testId: 'product-date-picker',
     ariaLabel: 'Choose date',
     disabled: false,
+    pickerWidth: 'standard',
     variant: 'chip',
     dayLabel: 'Day',
     monthLabel: 'Month',
@@ -187,9 +187,7 @@ function isKindAllowed(value: TemporalPickerKind): boolean {
 }
 
 function setPrecision(value: ParsedProductDateInput): void {
-  kind.value = isKindAllowed(value.kind)
-    ? value.kind
-    : (effectiveAllowedKinds.value[0] ?? 'day');
+  kind.value = isKindAllowed(value.kind) ? value.kind : (effectiveAllowedKinds.value[0] ?? 'day');
   if (value.kind === 'day') {
     seedControlsFromYmd(value.date as Ymd);
     return;
@@ -247,9 +245,18 @@ function updateYear(value: number): void {
     commit({ kind: 'year', year: value });
   }
 }
-function selectMonth(value: number): void { monthValue.value = value; commit({ kind: 'month', year: yearValue.value, month: value }); }
-function selectQuarter(value: 1 | 2 | 3 | 4): void { quarterValue.value = value; commit({ kind: 'quarter', year: yearValue.value, quarter: value }); }
-function selectHalf(value: 1 | 2): void { halfValue.value = value; commit({ kind: 'halfYear', year: yearValue.value, half: value }); }
+function selectMonth(value: number): void {
+  monthValue.value = value;
+  commit({ kind: 'month', year: yearValue.value, month: value });
+}
+function selectQuarter(value: 1 | 2 | 3 | 4): void {
+  quarterValue.value = value;
+  commit({ kind: 'quarter', year: yearValue.value, quarter: value });
+}
+function selectHalf(value: 1 | 2): void {
+  halfValue.value = value;
+  commit({ kind: 'halfYear', year: yearValue.value, half: value });
+}
 
 function handleCalendarValue(value: unknown): void {
   handleCalendarSelect(value, (ymd) => {

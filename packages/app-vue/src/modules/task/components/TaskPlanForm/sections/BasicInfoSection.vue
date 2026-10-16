@@ -2,21 +2,12 @@
   <div aria-labelledby="task-basic-info-heading">
     <h3 id="task-basic-info-heading" class="sr-only">{{ t('task.basicInfo.title') }}</h3>
 
-    <Transition
-      enter-active-class="transition-opacity duration-150"
-      leave-active-class="transition-opacity duration-150"
-      enter-from-class="opacity-0"
-      leave-to-class="opacity-0"
-    >
-      <p
-        v-if="showValidationErrors"
-        class="mb-1 text-xs text-destructive"
-        role="alert"
-        data-testid="task-title-validation-error"
-      >
-        {{ Object.values(validationErrors)[0] }}
-      </p>
-    </Transition>
+    <ProductInlineValidation
+      id="task-title-validation-error"
+      :visible="showValidationErrors"
+      :message="Object.values(validationErrors)[0] ?? ''"
+      test-id="task-title-validation-error"
+    />
 
     <Label for="task-plan-title" class="sr-only">{{ t('task.basicInfo.taskTitle') }}</Label>
     <ProductAutoTextarea
@@ -25,6 +16,9 @@
       :disabled="readonly"
       :max-length="100"
       :rows="1"
+      focus-ring
+      :aria-invalid="showValidationErrors"
+      :aria-describedby="showValidationErrors ? 'task-title-validation-error' : undefined"
       data-testid="task-plan-title-input"
       class="min-h-10 text-xl font-semibold leading-tight text-foreground sm:text-2xl"
       :placeholder="t('task.basicInfo.titlePlaceholderRequired')"
@@ -37,7 +31,7 @@
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Label } from '@memoflow/ui-vue-shadcn';
-import { ProductAutoTextarea } from '../../../../../shared/components';
+import { ProductAutoTextarea, ProductInlineValidation } from '../../../../../shared/components';
 import { useBasicInfoValidation } from '../../../composables/useBasicInfoValidation';
 import type { TaskPlanViewModel } from '../../types';
 

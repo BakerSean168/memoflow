@@ -35,6 +35,40 @@ afterAll(() => {
 });
 
 describe('CreateScheduleDialog submission lifecycle', () => {
+  it('keeps a stable title error slot, rejects whitespace and disables all editable fields while saving', async () => {
+    const onSubmit = vi.fn().mockResolvedValue(false);
+    const wrapper = mount(CreateScheduleDialog, {
+      props: { modelValue: true, presentation: 'panel', onSubmit },
+      global: { plugins: [i18n] },
+    });
+    const title = wrapper.get('[data-testid="schedule-title-input"]');
+    const slot = wrapper.get('[data-testid="schedule-title-feedback"]');
+    const slotElement = slot.element;
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    await title.setValue('   ');
+    await title.trigger('blur');
+    expect(title.attributes('aria-invalid')).toBe('true');
+    expect(title.attributes('aria-describedby')).toBe(
+      wrapper.get('[role="alert"]').attributes('id'),
+    );
+    await wrapper.get('form').trigger('submit');
+    expect(onSubmit).not.toHaveBeenCalled();
+    await title.setValue('Keep this schedule');
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    expect(slot.element).toBe(slotElement);
+    await wrapper.get('form').trigger('submit');
+    await flushPromises();
+    expect(wrapper.get('[data-testid="schedule-submit-error"]').text()).toContain(
+      'Your changes are still here',
+    );
+    expect((title.element as HTMLInputElement).value).toBe('Keep this schedule');
+    await wrapper.setProps({ loading: true });
+    expect(wrapper.get('fieldset').attributes('disabled')).toBeDefined();
+    await wrapper.get('form').trigger('submit');
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    wrapper.unmount();
+  });
+
   beforeEach(() => {
     confirmMock.mockReset();
     confirmMock.mockResolvedValue(true);

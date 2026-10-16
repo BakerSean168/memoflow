@@ -5,17 +5,21 @@ import { createI18n } from 'vue-i18n';
 import { defineComponent, h, nextTick } from 'vue';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import TodayOverviewPanel from './TodayOverviewPanel.vue';
+import GoalProgressWidget from '../../modules/goal/components/widgets/GoalProgressWidget.vue';
+import type { GoalHomeProgressItem } from '@memoflow/contracts/goal';
 
 const goalHomeMocks = vi.hoisted(() => ({
   refresh: vi.fn(async () => undefined),
+  errorMessage: null as string | null,
 }));
 
 vi.mock('../../modules/goal/composables/useGoalHomeSummary', async () => {
-  const { ref } = await import('vue');
+  const { computed, ref } = await import('vue');
   return {
     useGoalHomeSummary: () => ({
       goals: ref([]),
       isLoading: ref(false),
+      error: computed(() => goalHomeMocks.errorMessage),
       refresh: goalHomeMocks.refresh,
     }),
   };
@@ -39,12 +43,22 @@ const DailyTodoWidgetStub = defineComponent({
 
 const GoalProgressWidgetStub = defineComponent({
   name: 'GoalProgressWidget',
-  emits: ['view-all', 'select'],
-  setup(_, { emit }) {
+  props: { error: { type: String, default: null } },
+  emits: ['view-all', 'select', 'retry'],
+  setup(props, { emit }) {
     return () =>
       h('div', { 'data-testid': 'goal-progress-widget' }, [
         h('button', { onClick: () => emit('view-all') }, 'goals'),
         h('button', { onClick: () => emit('select', 'goal-1') }, 'goal'),
+        ...(props.error
+          ? [
+              h(
+                'button',
+                { 'data-testid': 'goal-progress-retry', onClick: () => emit('retry') },
+                'retry',
+              ),
+            ]
+          : []),
       ]);
   },
 });
@@ -105,6 +119,7 @@ function mountPanel(active: boolean, locale: 'en-US' | 'zh-CN' = 'en-US') {
 describe('TodayOverviewPanel', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    goalHomeMocks.errorMessage = null;
   });
 
   afterEach(() => {
@@ -154,6 +169,76 @@ describe('TodayOverviewPanel', () => {
       ['goal', '/goals/goal-1'],
       ['task', '/tasks/plan-1'],
     ]);
+  });
+
+  it('passes goal summary failures to the widget and wires its retry to refresh', async () => {
+    goalHomeMocks.errorMessage = 'Could not load goals';
+    const wrapper = mountPanel(true);
+    await nextTick();
+
+    expect(wrapper.getComponent(GoalProgressWidgetStub).props('error')).toBe(
+      'Could not load goals',
+    );
+    goalHomeMocks.refresh.mockClear();
+    await wrapper.get('[data-testid="goal-progress-retry"]').trigger('click');
+    expect(goalHomeMocks.refresh).toHaveBeenCalledOnce();
+  });
+
+  it('renders Goal progress errors without claiming the user has no goals', async () => {
+    const i18n = createI18n({
+      legacy: false,
+      locale: 'zh-CN',
+      messages: {
+        'zh-CN': {
+          goal: {
+            homeProgress: {
+              title: '目标进度',
+              viewAll: '查看全部',
+              empty: '暂无活跃目标',
+              loadError: '暂时无法更新目标',
+              retry: '重试',
+            },
+          },
+        },
+      },
+    });
+    const passthrough = { template: '<div><slot /></div>' };
+    const cachedGoal: GoalHomeProgressItem = {
+      id: 'cached',
+      name: '缓存目标',
+      progress: 32,
+      status: 'Planned',
+      target: null,
+      keyResultCount: 1,
+    };
+    const wrapper = mount(GoalProgressWidget, {
+      props: { goals: [], error: 'Request failed' },
+      global: {
+        plugins: [i18n],
+        stubs: {
+          Card: passthrough,
+          CardHeader: passthrough,
+          CardTitle: passthrough,
+          CardContent: passthrough,
+          Progress: passthrough,
+          Skeleton: passthrough,
+          Button: { template: '<button type="button"><slot /></button>' },
+        },
+      },
+    });
+
+    expect(wrapper.get('[data-testid="goal-progress-error"]').text()).toContain('暂时无法更新目标');
+    expect(wrapper.text()).not.toContain('暂无活跃目标');
+    await wrapper.get('[data-testid="goal-progress-retry"]').trigger('click');
+    expect(wrapper.emitted('retry')).toHaveLength(1);
+
+    await wrapper.setProps({ goals: [cachedGoal] });
+    expect(wrapper.get('[data-testid="goal-progress-item"]').text()).toContain('缓存目标');
+    expect(wrapper.get('[data-testid="goal-progress-error"]').exists()).toBe(true);
+
+    await wrapper.setProps({ error: null });
+    expect(wrapper.find('[data-testid="goal-progress-error"]').exists()).toBe(false);
+    expect(wrapper.get('[data-testid="goal-progress-item"]').exists()).toBe(true);
   });
 
   it('reconciles the Goal owner projection after task completion', async () => {

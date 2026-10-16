@@ -62,7 +62,7 @@
       </div>
 
       <div class="shrink-0 @2xl/panel:hidden">
-        <DropdownMenu>
+        <DropdownMenu :modal="false">
           <DropdownMenuTrigger as-child>
             <Button
               type="button"

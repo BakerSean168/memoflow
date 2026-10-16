@@ -1,9 +1,10 @@
 <template>
   <div
-    class="task-management-view flex h-full min-h-0 flex-col bg-background"
+    class="task-management-view relative isolate flex h-full min-h-0 flex-col overflow-hidden bg-background"
     data-testid="task-management-view"
   >
     <TaskPageToolbar
+      :inert="showDialog || showQuickTaskDialog"
       :active-surface="activeSurface"
       :visible-item-count="visibleItemCount"
       :occurrence-status-filter="occurrenceStatusFilter"
@@ -22,6 +23,7 @@
     />
 
     <main
+      :inert="showDialog || showQuickTaskDialog"
       class="flex min-h-0 flex-1 flex-col overflow-y-auto px-3 py-3 @md/panel:px-5 @md/panel:py-4"
       data-scroll-host="task-management"
       data-testid="task-management-scroll-host"
@@ -181,13 +183,17 @@
 
     <QuickTaskDialog
       v-model="showQuickTaskDialog"
+      presentation="panel"
       :saving="isSaving"
+      :submit-error="quickSubmitError"
+      @dirty-change="quickCreateDirty = $event"
       @save="handleQuickSubmit"
       @cancel="closeQuickTaskDialog"
     />
 
     <TaskPlanDialog
       v-model="showDialog"
+      presentation="panel"
       mode="create"
       :template="null"
       :saving="isSaving"
@@ -210,7 +216,16 @@
 import { vKeyboardList } from '../../../shared/keyboard/list-adapter';
 import { buildTaskPlanCreateRequest } from '../utils/task-plan-create-request';
 
-import { computed, onMounted, onActivated, onDeactivated, onBeforeUnmount, ref, watch } from 'vue';
+import {
+  computed,
+  nextTick,
+  onMounted,
+  onActivated,
+  onDeactivated,
+  onBeforeUnmount,
+  ref,
+  watch,
+} from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -274,6 +289,7 @@ onBeforeUnmount(() => {
   handleSessionChange(null);
 });
 const fullCreateDirty = ref(false);
+const quickCreateDirty = ref(false);
 const fullCreateBusy = ref(false);
 
 const goalService = useStrictInject(GOAL_SERVICE_KEY, 'GoalService');
@@ -288,6 +304,10 @@ const labelFilterIds = ref<string[]>([]);
 const occurrenceSort = ref<TaskOccurrenceSort>('time');
 const showDialog = ref(false);
 const showQuickTaskDialog = ref(false);
+const quickSubmitError = ref('');
+watch(showQuickTaskDialog, () => {
+  quickSubmitError.value = '';
+});
 const createInitialGoalBinding = ref<TaskPlanViewModel['goalBinding']>(null);
 const scopedGoalName = ref<string | null>(null);
 const scopedKeyResultTitle = ref<string | null>(null);
@@ -346,7 +366,11 @@ const {
 const { createPlanSafe, abandonPlanSafe, deletePlanSafe, isSaving } = useTaskPlanMutations();
 usePanelSurfaceStatus(
   computed(() =>
-    fullCreateBusy.value || isSaving.value ? 'busy' : fullCreateDirty.value ? 'dirty' : 'clean',
+    fullCreateBusy.value || isSaving.value
+      ? 'busy'
+      : fullCreateDirty.value || quickCreateDirty.value
+        ? 'dirty'
+        : 'clean',
   ),
 );
 const {
@@ -581,8 +605,12 @@ function closeQuickTaskDialog() {
 }
 
 async function handleQuickSubmit({ title }: { title: string }) {
+  quickSubmitError.value = '';
   const saved = await createPlanSafe(buildQuickTaskRequest(title), 'quick');
-  if (!saved) return;
+  if (!saved) {
+    quickSubmitError.value = t('task.error.operationFailed');
+    return;
+  }
   closeQuickTaskDialog();
   await loadTodayOccurrences(true);
 }
@@ -634,11 +662,17 @@ watch(activeSurface, (surface) => {
 
 watch(
   () => route.query.dialog,
-  (dialog) => {
+  async (dialog, previousDialog) => {
+    // Cached Task owners must not consume another tab's dialog query or clear its draft.
+    await nextTick();
+    if (!surfaceActive) return;
     showQuickTaskDialog.value = dialog === 'quick-task';
-    showDialog.value = dialog === 'task-plan';
+    // Only this query's full-editor transition owns its close. A create-and-bind
+    // command can open the ordinary editor while the route update is settling.
+    if (dialog === 'task-plan') showDialog.value = true;
+    else if (previousDialog === 'task-plan') showDialog.value = false;
   },
-  { immediate: true },
+  { immediate: true, flush: 'post' },
 );
 
 watch(

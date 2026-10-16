@@ -9,6 +9,8 @@
           :placeholder="inputPlaceholder"
           :data-testid="`${testId}-query`"
           :aria-label="ariaLabel"
+          :aria-invalid="parseError || undefined"
+          :aria-describedby="parseError ? `${testId}-validation` : undefined"
           class="h-8 rounded-md border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.34)] px-2.5 pr-8 text-[13px] shadow-none focus-visible:border-primary/50 focus-visible:ring-primary/40"
           @update:model-value="emit('update:query', String($event))"
           @keydown.enter.prevent="emit('commit-query')"
@@ -26,7 +28,11 @@
         </button>
       </div>
 
-      <p v-if="parseError" class="text-xs text-destructive" role="alert">{{ invalidText }}</p>
+      <ProductInlineValidation
+        :id="`${testId}-validation`"
+        :visible="parseError"
+        :message="invalidText"
+      />
     </div>
 
     <ToggleGroup
@@ -129,14 +135,9 @@
 <script setup lang="ts">
 import { computed, shallowRef, watch } from 'vue';
 import { CircleX } from '@lucide/vue';
+import ProductInlineValidation from './ProductInlineValidation.vue';
 import type { DateValue } from '@internationalized/date';
-import {
-  Button,
-  Calendar,
-  Input,
-  ToggleGroup,
-  ToggleGroupItem,
-} from '@memoflow/ui-vue-shadcn';
+import { Button, Calendar, Input, ToggleGroup, ToggleGroupItem } from '@memoflow/ui-vue-shadcn';
 
 type WeekStartsOn = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 

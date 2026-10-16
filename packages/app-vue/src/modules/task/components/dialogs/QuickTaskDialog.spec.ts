@@ -78,6 +78,22 @@ function mountDialog() {
 }
 
 describe('QuickTaskDialog', () => {
+  it('supports a non-modal business pane while retaining the title-only save contract', async () => {
+    const wrapper = mount(QuickTaskDialog, {
+      props: { modelValue: true, presentation: 'panel' },
+      global: { plugins: [i18n] },
+    });
+    const pane = wrapper.get('[data-editor-presentation="pane"]');
+    expect(pane.attributes('aria-modal')).toBe('false');
+    await wrapper.get('input').setValue('  Pane quick task  ');
+    await wrapper.get('form').trigger('submit');
+    expect(wrapper.emitted('save')).toEqual([[{ title: 'Pane quick task' }]]);
+    await wrapper.setProps({ saving: true });
+    await pane.trigger('keydown', { key: 'Escape' });
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+    wrapper.unmount();
+  });
+
   beforeEach(() => {
     confirmMock.mockReset();
     confirmMock.mockResolvedValue(true);

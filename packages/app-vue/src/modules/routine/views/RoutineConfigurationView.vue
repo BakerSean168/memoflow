@@ -1,9 +1,13 @@
 <template>
   <div
-    class="flex h-full min-h-0 flex-col overflow-hidden"
+    class="relative isolate flex h-full min-h-0 flex-col overflow-hidden"
     data-testid="routine-configuration-center"
   >
-    <ModuleHeader family="collection" data-testid="routine-list-toolbar">
+    <ModuleHeader
+      :inert="routineDialogOpen || profileDialogOpen"
+      family="collection"
+      data-testid="routine-list-toolbar"
+    >
       <template #leading>
         <ProductSingleSelectFilter
           :model-value="selectedState"
@@ -17,17 +21,15 @@
 
       <template #actions>
         <div class="flex shrink-0 items-center gap-1">
-          <div
-            class="flex h-8 items-center rounded-md border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.5)] p-0.5"
-            data-testid="routine-profile-scope-control"
-          >
-            <DropdownMenu>
+          <div class="flex h-8 items-center gap-1" data-testid="routine-profile-scope-control">
+            <DropdownMenu :modal="false">
               <DropdownMenuTrigger as-child>
                 <Button
                   variant="ghost"
                   size="sm"
-                  class="h-7 max-w-56 gap-1.5 rounded-sm px-2 text-muted-foreground"
+                  class="h-8 max-w-56 gap-1.5 rounded-md px-2 text-muted-foreground"
                   data-testid="routine-profile-filter"
+                  :title="selectedProfileLabel"
                 >
                   <Layers3 class="h-3.5 w-3.5" />
                   <span class="truncate">{{ selectedProfileLabel }}</span>
@@ -168,17 +170,16 @@
             </div>
           </div>
 
-          <DropdownMenu>
+          <DropdownMenu :modal="false">
             <DropdownMenuTrigger as-child>
               <Button
-                size="sm"
-                class="h-8 shrink-0 px-2 shadow-sm shadow-primary/15 @2xl/panel:px-3"
+                size="icon"
+                class="h-8 w-8 shrink-0 rounded-md p-0 shadow-sm shadow-primary/15"
                 :aria-label="t('routine.create')"
+                :title="t('routine.create')"
                 data-testid="routine-create-button"
               >
-                <Plus class="h-4 w-4 @2xl/panel:mr-1.5" />
-                <span class="hidden @2xl/panel:inline">{{ t('routine.create') }}</span>
-                <ChevronDown class="ml-1 hidden h-3.5 w-3.5 opacity-70 @2xl/panel:block" />
+                <Plus class="h-4 w-4" aria-hidden="true" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" class="w-72" data-testid="routine-create-menu">
@@ -213,6 +214,7 @@
     </ModuleHeader>
 
     <div
+      :inert="routineDialogOpen || profileDialogOpen"
       class="min-h-0 flex-1 overflow-y-auto"
       data-testid="routine-scroll-host"
       data-scroll-host="routine"
@@ -341,7 +343,7 @@
                   @update:model-value="toggleRoutine(routine, $event)"
                 />
 
-                <DropdownMenu>
+                <DropdownMenu :modal="false">
                   <DropdownMenuTrigger as-child>
                     <Button
                       variant="ghost"
@@ -397,19 +399,25 @@
 
     <RoutineEditorDialog
       v-model:open="routineDialogOpen"
+      presentation="panel"
       :saving="mutating"
+      :submit-error="routineSubmitError"
       :routine="editingRoutine"
       :profiles="snapshot.profiles"
       :membership-profile-ids="editingMembershipProfileIds"
       :preset="routinePreset"
       :local-runtime-available="snapshot.capabilities.localRuntime"
+      @dirty-change="routineDirty = $event"
       @save="saveRoutine"
     />
 
     <RoutineProfileDialog
       v-model:open="profileDialogOpen"
+      presentation="panel"
       :saving="mutating"
+      :submit-error="profileSubmitError"
       :profile="editingProfile"
+      @dirty-change="profileDirty = $event"
       @save="saveProfile"
     />
   </div>
@@ -464,6 +472,7 @@ import RoutineEditorDialog, {
   type RoutineEditorPreset,
 } from '../components/RoutineEditorDialog.vue';
 import RoutineProfileDialog from '../components/RoutineProfileDialog.vue';
+import { usePanelSurfaceStatus } from '../../../layouts/shell/usePanelSurfaceStatus';
 import { useRoutineConfiguration } from '../composables/useRoutineConfiguration';
 import {
   formatProductHm,
@@ -509,6 +518,15 @@ const methodLocaleKeyById: Record<RoutineMethodId, string> = {
 const selectedState = ref<RoutineStateFilter>('all');
 const selectedProfileId = ref<string | null>(null);
 const routineDialogOpen = ref(false);
+const routineDirty = ref(false);
+const profileDirty = ref(false);
+usePanelSurfaceStatus(
+  computed(() =>
+    mutating.value ? 'busy' : routineDirty.value || profileDirty.value ? 'dirty' : 'clean',
+  ),
+);
+const routineSubmitError = ref('');
+const profileSubmitError = ref('');
 const editingRoutine = ref<RoutineDefinitionDto | null>(null);
 const routinePreset = ref<RoutineEditorPreset | null>(null);
 const profileDialogOpen = ref(false);
@@ -686,12 +704,14 @@ function methodPreset(method: RoutineMethodRecord): RoutineEditorPreset | null {
 }
 
 function openCreateRoutine(method?: RoutineMethodRecord): void {
+  routineSubmitError.value = '';
   editingRoutine.value = null;
   routinePreset.value = method ? methodPreset(method) : null;
   routineDialogOpen.value = true;
 }
 
 function openEditRoutine(routine: RoutineDefinitionDto): void {
+  routineSubmitError.value = '';
   editingRoutine.value = routine;
   routinePreset.value = null;
   routineDialogOpen.value = true;
@@ -720,11 +740,13 @@ function clearRoutineRouteSelection(): void {
 }
 
 function openCreateProfile(): void {
+  profileSubmitError.value = '';
   editingProfile.value = null;
   profileDialogOpen.value = true;
 }
 
 function openEditProfile(profile: RoutineProfileDto): void {
+  profileSubmitError.value = '';
   editingProfile.value = profile;
   profileDialogOpen.value = true;
 }
@@ -735,6 +757,7 @@ async function saveRoutine(value: {
   trigger: RoutineTriggerDto | null;
   profileIds: string[];
 }): Promise<void> {
+  routineSubmitError.value = '';
   try {
     const current = editingRoutine.value;
     if (!current) {
@@ -776,11 +799,13 @@ async function saveRoutine(value: {
     editingRoutine.value = null;
     routinePreset.value = null;
   } catch {
+    routineSubmitError.value = error.value || t('routine.toast.operationFailed');
     toast.error(t('routine.toast.operationFailed'), { description: error.value ?? undefined });
   }
 }
 
 async function saveProfile(value: { name: string; description: string | null }): Promise<void> {
+  profileSubmitError.value = '';
   try {
     const current = editingProfile.value;
     if (!current) {
@@ -797,6 +822,7 @@ async function saveProfile(value: { name: string; description: string | null }):
     profileDialogOpen.value = false;
     editingProfile.value = null;
   } catch {
+    profileSubmitError.value = error.value || t('routine.toast.operationFailed');
     toast.error(t('routine.toast.operationFailed'), { description: error.value ?? undefined });
   }
 }

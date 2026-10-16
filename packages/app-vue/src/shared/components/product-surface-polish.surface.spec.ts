@@ -211,8 +211,8 @@ describe('MemoFlow product surface polish', () => {
     expect(read('modules/goal/components/GoalPageToolbar.vue')).toContain(
       '<ProductSurfaceHeader family="collection"',
     );
-    expect(read('modules/schedule/views/ScheduleCalendarView.vue')).toContain(
-      '<ProductSurfaceHeader family="calendar"',
+    expect(read('modules/schedule/views/ScheduleCalendarView.vue')).toMatch(
+      /<ProductSurfaceHeader\b[^>]*\bfamily="calendar"/,
     );
     expect(read('modules/repository/components/DocumentWorkspaceToolbar.vue')).toContain(
       '<ProductSurfaceHeader family="document"',
