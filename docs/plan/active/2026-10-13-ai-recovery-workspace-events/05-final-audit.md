@@ -86,3 +86,9 @@ S7 补修后按受影响范围重验，最终候选由官方报告绑定；不�
 Docker 服务已更新本轮实现，仍需最终 HEAD 构建、运行、浏览器 revision 完全一致，并取得正式 PASS。
 Windows/macOS 实机及真实 provider 推理不在本机 Chromium/受控 workflow 测试的通过范围内。
 未确认生产 rollout，不将 prod-like 或 main 合并描述为生产上线。
+
+## 2026-10-16 Windows IPC 实机增量审计
+
+`main@331bdb0f7d549d11b1ad7632cabf1a5a22385886` 的 Windows Electron 真实 IPC/Conversation event 订阅、ACK、重放、Guest 身份隔离已通过（见 `04-acceptance.md`）；同版本 Windows NSIS / Linux AppImage 更新测试通过。此次新增自动化 `apps/desktop/e2e/workspace-ipc.spec.mts` 与 Windows Workflow 门禁，目的是让后续 exact-SHA 候选持续复验上述已经观察的行为。
+
+仍保持 Goal/Attention Windows 事件端到端、实际可用 non-Codex provider 上游 429/quota、中断后原生 Goal 草稿 handoff 与重复保存防护为**未完全验收**。尚未获得这些真实证据，不关闭 #454 / #456 / #457，不声明正式发布。

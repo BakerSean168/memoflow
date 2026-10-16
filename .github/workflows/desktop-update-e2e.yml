@@ -83,6 +83,20 @@ jobs:
           --platform windows
           --arch x64
 
+      - name: Run Windows Workspace IPC and owner-isolation E2E
+        working-directory: apps/desktop
+        shell: pwsh
+        run: pnpm exec playwright test e2e/workspace-ipc.spec.mts --config playwright.config.ts --workers=1
+
+      - name: Upload Windows Workspace IPC evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: desktop-workspace-ipc-windows
+          path: apps/desktop/test-results
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: Package synthetic N and current N+1 NSIS fixtures
         id: fixtures
         shell: pwsh

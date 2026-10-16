@@ -45,7 +45,7 @@ test('repository E2E ownership is execution-aware and complete', () => {
   assert.equal(inventory.e2eGovernance.countsByLane.required, 22);
   assert.equal(inventory.e2eGovernance.countsByLane.nightly, 5);
   assert.equal(inventory.e2eGovernance.countsByLane.debug, undefined);
-  assert.equal(inventory.e2eGovernance.countsByRole.canonical, 25);
+  assert.equal(inventory.e2eGovernance.countsByRole.canonical, 26);
   assert.equal(inventory.e2eGovernance.countsByRole.diagnostic, undefined);
   assert.equal(inventory.e2eGovernance.automatedCollectorCount, 4);
   assert.equal(inventory.e2eGovernance.automationBindingCount, 5);
@@ -55,6 +55,12 @@ test('repository E2E ownership is execution-aware and complete', () => {
   );
   assert.equal(goalWorkflow?.collectors.length, 2);
   assert.equal(goalWorkflow?.e2eOwnership.primaryCollector, 'apps/web/playwright.config.ts');
+
+  const workspaceIpc = inventory.primary.find(
+    (entry) => entry.path === 'apps/desktop/e2e/workspace-ipc.spec.mts',
+  );
+  assert.equal(workspaceIpc?.e2eOwnership.role, 'canonical');
+  assert.equal(workspaceIpc?.e2eOwnership.primaryCollector, 'apps/desktop/playwright.config.ts');
 
   const goalReference = inventory.collectors.find(
     (collector) => collector.id === 'apps/web/playwright.goal-reference.config.ts',

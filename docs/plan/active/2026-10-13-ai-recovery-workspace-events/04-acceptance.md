@@ -125,3 +125,14 @@ S6/S7 现已包含实际代码及定向测试，当前本地候选的四项目 t
 - `git diff --check`：通过。
 
 S0 conformance：A01–A04 由原生 owner 与 composable/Shell 测试覆盖；A05 的“不解除冻结、不清空 pending、不允许第二次 create”已覆盖，终止 run 后新增人工核验入口尚未提供；A06 本地 authority/lease release 已覆盖，远端 release 中断继续使用原有 TTL 行为，未实测网络故障。其他验收项均待对应切片，不以 902 个单元/组件测试代替真实 provider/API/PG/双进程 SSE、浏览器或 Desktop 实机验收。本轮未改传输、存储或部署配置，未执行 Docker/prod-like 部署。
+
+## 2026-10-16 · Windows Electron Workspace IPC 真实事件验收（#454）
+
+以下是该阶段的**增量实机证据**，并不代表 #454 全部验收门禁已关闭：
+
+- 基线：`main@331bdb0f7d549d11b1ad7632cabf1a5a22385886`；Windows 11 上隔离 `D:\AgentValidation` 工作树，官方 Electron 44.4.5，实际编译的 Desktop Main/Preload/Renderer。真实 IPC handlers、PowerSync 本地 Conversation owner、独立 WebContents 与隔离 Guest Profile 均参与。
+- 真实 Windows Playwright `workspace-ipc-qa.spec.mts`：`1/1 PASS`，退出 0；`stream.ready`、准确 ACK/错误 ACK、重复订阅冲突、实际创建 Conversation 推送 `conversation.updated`（`resourceVersion=1`）、STOP、无效 cursor reset、旧 cursor 重订阅与事件重放均实际通过。
+- 同一个真实 Electron 进程中创建第二个 Guest；原 Guest 的 Conversation 无法由新身份列出，旧身份 cursor 对新身份返回 `stream.reset_required(reason=invalid)`，跨身份不可读。
+- 该测试现作为 `apps/desktop/e2e/workspace-ipc.spec.mts` 进入独立 Windows Workflow `Desktop Update Installed E2E`，其 Workflow 通过结果必须单独按最新 commit SHA 核实；本地成功不自动等于未来 CI 通过。
+- 相关独立证据：[CI #38893771350](https://github.com/BakerSean168/memoflow/actions/runs/38893771350) `main` 20/20；[Installed Update E2E #38899197567](https://github.com/BakerSean168/memoflow/actions/runs/38899197567) Windows NSIS 与 Linux AppImage 更新均通过。Windows Desktop IPC 52/52 与本机真实 Electron Auth/Profile 5/5 已通过，均属不同验收层。
+- **尚缺**：实际产生并核验 `workflow.updated`（Goal AI workflow）及 `attention.changed`（Attention）两条事件流的真实 Windows 端到端场景，以及受控可用 non-Codex 上游真实 429/quota 中断和完整 Agent 发送/恢复。不得用 Conversation 的通过结果替代这些项目，不得因此关闭 #454 或解除发布门禁。
