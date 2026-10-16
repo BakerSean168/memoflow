@@ -5505,6 +5505,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/routine/components/RoutineProfileDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/routine/components/RoutineUpcomingWidget.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5917,6 +5925,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/BasicInfoSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ChecklistSection.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6288,6 +6304,14 @@
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductDialogShell.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductEditorFrame.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -13406,7 +13430,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 300
+      "fileCount": 303
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -14167,7 +14191,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1225,
+    "unit": 1228,
     "integration": 48,
     "smoke": 3,
     "boundary-ipc": 8,

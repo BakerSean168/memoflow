@@ -1,3 +1,4 @@
+import GlobalConfirmDialog from '@memoflow/app-vue/shared/components/GlobalConfirmDialog.vue';
 import { bootstrapVisualApp } from '../../visual-regression/app-environment';
 import { faker } from '@faker-js/faker';
 import { createApp, defineComponent, h, ref } from 'vue';
@@ -357,6 +358,7 @@ const app = createApp(
         : h('main', { class: '@container/panel h-screen w-full' }, [
             creating.value ? null : h(RouterView),
             renderGoalEditor(),
+            h(GlobalConfirmDialog),
           ]),
   }),
 );
