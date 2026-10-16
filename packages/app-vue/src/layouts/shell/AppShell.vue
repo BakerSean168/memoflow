@@ -617,27 +617,34 @@ function startPanelResize(e: PointerEvent) {
     }
   };
 
-  // On slower machines the trailing native pointer focus default (the drag
-  // handle is focusable) or a menu closing with the same gesture can land one
-  // frame after the restore below, silently stealing focus. Once the restore
-  // frame has run, redirect focus taken by the drag handle or cleared to body
-  // back to the user's element until the gesture window closes. Keyboard users
-  // never Tab within two frames of a pointer release, so the guard cannot
-  // swallow their focus.
-  const scheduleFocusGuard = () => {
+  // The trailing native pointer focus default (the drag handle is focusable) or
+  // a menu closing with the same gesture can steal focus long after the restore
+  // frame ran — on loaded machines this lands well beyond the next animation
+  // frame. Until the user performs the next real interaction or the deadline
+  // passes, redirect focus taken by the drag handle or cleared to body back to
+  // the user's element. Tab and mouse presses end the guard before their focus
+  // side effects, so keyboard and pointer users keep full control.
+  const guardLateFocusTheft = () => {
     if (!focusedElement) return;
     let settled = false;
+    const settle = () => {
+      if (settled) return;
+      settled = true;
+      document.removeEventListener('focusin', onFocusIn, true);
+      document.removeEventListener('pointerdown', settle, true);
+      document.removeEventListener('keydown', settle, true);
+      window.clearTimeout(guardDeadline);
+    };
     const onFocusIn = (event: FocusEvent) => {
       if (settled) return;
       if (event.target === captureTarget || event.target === document.body) {
         restoreFocusedElement();
       }
     };
-    document.addEventListener('focusin', onFocusIn, { capture: true });
-    window.requestAnimationFrame(() => {
-      settled = true;
-      document.removeEventListener('focusin', onFocusIn, true);
-    });
+    document.addEventListener('focusin', onFocusIn, true);
+    document.addEventListener('pointerdown', settle, true);
+    document.addEventListener('keydown', settle, true);
+    const guardDeadline = window.setTimeout(settle, 2000);
   };
 
   const cleanup = (pointerId?: number, restoreFocusAfterGesture = true) => {
@@ -661,7 +668,7 @@ function startPanelResize(e: PointerEvent) {
       // Restore on the next frame so the user's active input wins after the full gesture settles.
       window.requestAnimationFrame(() => {
         restoreFocusedElement();
-        scheduleFocusGuard();
+        guardLateFocusTheft();
       });
     }
   };

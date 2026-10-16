@@ -349,7 +349,20 @@ test.describe('Task Plan CRUD Operations', () => {
     await expect(toolbar).toHaveAttribute('data-instance-probe', 'stable');
     await expect(statusFilter).toBeVisible();
     await expect(statusFilter).toContainText(/Pending|待处理/);
-    await expect(statusFilter).toBeFocused();
+    // Pin the resize gesture's focus contract; the retry reports the actual
+    // focus owner on failure so CI-only focus thieves are identifiable from
+    // the log alone.
+    await expect(async () => {
+      const focusOwner = await page.evaluate(() => {
+        const element = document.activeElement;
+        if (!element || element === document.body) return 'body';
+        return (
+          element.getAttribute('data-testid') ??
+          `${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ''}`
+        );
+      });
+      expect(focusOwner).toBe('task-status-filter');
+    }).toPass({ timeout: 10_000 });
     expect(await scrollHost.evaluate((element) => element.scrollTop)).toBe(96);
     await expectToolbarToFit(toolbar);
 
