@@ -156,7 +156,8 @@ function Write-FailureDiagnostics(
     installedVersion = Get-InstalledProductVersion $InstalledExecutable
     baseProcessId = if ($null -ne $BaseProcess) { $BaseProcess.Id } else { $null }
     baseProcessHasExited = if ($null -ne $BaseProcess) { $BaseProcess.HasExited } else { $null }
-    baseExitedAt = if ($null -ne $BaseExitedAt) { $BaseExitedAt.Value.ToString('o') } else { $null }
+    # PowerShell unwraps a bound Nullable[DateTime] as DateTime; .Value throws under StrictMode.
+    baseExitedAt = if ($null -ne $BaseExitedAt) { ([DateTime]$BaseExitedAt).ToUniversalTime().ToString('o') } else { $null }
     matchingProcesses = $processes
     updaterCacheFiles = $updaterCacheFiles
   }
@@ -347,6 +348,9 @@ try {
   }
 
   if ($null -eq $successStatus) {
+    $baseExited = if ($null -ne $baseProcess) { $baseProcess.HasExited } else { $null }
+    $lastInstalledVersion = Get-InstalledProductVersion $installedExecutable
+    Write-Host "[update-e2e] timeout baseExited=$baseExited installedVersion=$lastInstalledVersion expectedVersion=$ExpectedVersion"
     $diagnosticsPath = Join-Path $runtimeRoot 'failure-diagnostics.json'
     Write-FailureDiagnostics `
       -Path $diagnosticsPath `
