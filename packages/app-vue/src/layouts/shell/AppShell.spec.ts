@@ -510,6 +510,42 @@ describe('AppShell right-panel integration', () => {
     host.remove();
   });
 
+  it('redirects a late native focus steal that lands after the resize restore', async () => {
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    const { wrapper } = await mountShell('/goals', host);
+    const input = wrapper.get('[data-testid="shell-resize-focus-probe"]')
+      .element as HTMLInputElement;
+    const resizer = wrapper.get('[data-testid="business-panel-resizer"]');
+    const scheduledFrames: FrameRequestCallback[] = [];
+    const animationFrame = vi
+      .spyOn(window, 'requestAnimationFrame')
+      .mockImplementation((callback: FrameRequestCallback) => {
+        scheduledFrames.push(callback);
+        return scheduledFrames.length;
+      });
+
+    input.focus();
+    await resizer.trigger('pointerdown', { pointerId: 7, clientX: 700 });
+    window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 7, bubbles: true }));
+
+    // The restore settles first; only afterwards does the browser's trailing
+    // native focus default steal focus for the focusable drag handle.
+    scheduledFrames.splice(0, 1).forEach((frame) => frame(performance.now()));
+    expect(document.activeElement).toBe(input);
+    (resizer.element as HTMLElement).focus();
+    expect(document.activeElement).toBe(input);
+
+    // Once the gesture window closes, focus changes are left alone again.
+    while (scheduledFrames.length > 0) scheduledFrames.shift()?.(performance.now());
+    (resizer.element as HTMLElement).focus();
+    expect(document.activeElement).toBe(resizer.element);
+
+    animationFrame.mockRestore();
+    wrapper.unmount();
+    host.remove();
+  });
+
   it.each(
     (['select', 'new', 'keyboard-new', 'delete'] as const).flatMap((action) =>
       (['split', 'focus'] as const).flatMap((layout) =>

@@ -617,6 +617,29 @@ function startPanelResize(e: PointerEvent) {
     }
   };
 
+  // On slower machines the trailing native pointer focus default (the drag
+  // handle is focusable) or a menu closing with the same gesture can land one
+  // frame after the restore below, silently stealing focus. Once the restore
+  // frame has run, redirect focus taken by the drag handle or cleared to body
+  // back to the user's element until the gesture window closes. Keyboard users
+  // never Tab within two frames of a pointer release, so the guard cannot
+  // swallow their focus.
+  const scheduleFocusGuard = () => {
+    if (!focusedElement) return;
+    let settled = false;
+    const onFocusIn = (event: FocusEvent) => {
+      if (settled) return;
+      if (event.target === captureTarget || event.target === document.body) {
+        restoreFocusedElement();
+      }
+    };
+    document.addEventListener('focusin', onFocusIn, { capture: true });
+    window.requestAnimationFrame(() => {
+      settled = true;
+      document.removeEventListener('focusin', onFocusIn, true);
+    });
+  };
+
   const cleanup = (pointerId?: number, restoreFocusAfterGesture = true) => {
     if (typeof pointerId === 'number') {
       try {
@@ -636,7 +659,10 @@ function startPanelResize(e: PointerEvent) {
     if (restoreFocusAfterGesture) {
       // Chromium may apply the native pointer/mouse focus default after pointerup listeners.
       // Restore on the next frame so the user's active input wins after the full gesture settles.
-      window.requestAnimationFrame(restoreFocusedElement);
+      window.requestAnimationFrame(() => {
+        restoreFocusedElement();
+        scheduleFocusGuard();
+      });
     }
   };
 

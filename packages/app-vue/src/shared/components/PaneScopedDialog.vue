@@ -18,10 +18,12 @@ const props = withDefaults(
     titleId: string;
     closeTestId?: string;
     closeDisabled?: boolean;
+    /** Freezes this pane (its owning form) while a nested picker surface is open. */
+    inert?: boolean;
     size?: 'compact' | 'standard' | 'wide' | 'picker';
     heightMode?: 'content' | 'workspace';
   }>(),
-  { closeDisabled: false, size: 'wide', heightMode: 'workspace' },
+  { closeDisabled: false, inert: false, size: 'wide', heightMode: 'workspace' },
 );
 const emit = defineEmits<{ close: [] }>();
 const { t } = useI18n();
@@ -45,6 +47,7 @@ const heightClass = computed(() =>
 <template>
   <div
     v-if="open"
+    :inert="inert"
     class="absolute inset-0 z-20 isolate flex min-h-0 min-w-0 items-center justify-center overflow-hidden p-4 @2xl/panel:p-6"
     data-testid="pane-scoped-dialog-host"
     data-dialog-scope="business-content"

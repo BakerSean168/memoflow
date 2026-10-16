@@ -183,6 +183,24 @@ describe('ProductEditorFrame', () => {
     },
   );
 
+  it('applies the explicit inert contract to the pane host while a nested picker owns the gesture', async () => {
+    const isInert = (element: HTMLElement) =>
+      element.hasAttribute('inert') || element.inert === true;
+    const wrapper = mount(ProductEditorFrame, {
+      attachTo: document.body,
+      props: { ...props, presentation: 'panel', inert: true },
+      slots,
+      global: global(),
+    });
+    await settleFocus();
+    const host = document.querySelector<HTMLElement>('[data-testid="pane-scoped-dialog-host"]')!;
+    expect(host).not.toBeNull();
+    expect(isInert(host)).toBe(true);
+    await wrapper.setProps({ inert: false });
+    await settleFocus();
+    expect(isInert(host)).toBe(false);
+  });
+
   it('keeps task, routine and schedule edits constrained to their owning pane', () => {
     for (const [owner, dialog] of [
       [

@@ -18,6 +18,11 @@ const props = withDefaults(
     initialFocusSelector?: string;
     returnFocusSelector?: string;
     closeDisabled?: boolean;
+    /**
+     * Owners with nested pane pickers set this while a picker is open so only
+     * the owning form goes inert; the sibling picker surface stays interactive.
+     */
+    inert?: boolean;
     recipe?: 'form' | 'inspect' | 'config' | 'workspace';
     bodyClass?: string;
     contentClass?: string;
@@ -29,6 +34,7 @@ const props = withDefaults(
     initialFocusSelector: undefined,
     returnFocusSelector: undefined,
     closeDisabled: false,
+    inert: false,
     recipe: 'workspace',
     bodyClass: undefined,
     contentClass: undefined,
@@ -89,6 +95,7 @@ watch(
     :test-id="testId"
     :title-id="titleId"
     :close-disabled="closeDisabled"
+    :inert="inert"
     :size="paneSize"
     :height-mode="paneHeightMode"
     @close="emit('update:open', false)"

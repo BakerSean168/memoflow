@@ -456,4 +456,48 @@ describe('CreateScheduleDialog submission lifecycle', () => {
     expect(wrapper.emitted('update:modelValue')).toEqual([[false]]);
     wrapper.unmount();
   }, 20_000);
+
+  it('inerts only the owning schedule form while a nested pane picker is open', async () => {
+    const isInert = (element: Element) =>
+      element.hasAttribute('inert') || (element as HTMLElement).inert === true;
+    const wrapper = mount(CreateScheduleDialog, {
+      props: { modelValue: true, presentation: 'panel', onSubmit: vi.fn().mockResolvedValue(true) },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    await nextTick();
+
+    const paneHosts = () => [
+      ...document.querySelectorAll('[data-testid="pane-scoped-dialog-host"]'),
+    ];
+    expect(paneHosts()).toHaveLength(1);
+    expect(isInert(paneHosts()[0]!)).toBe(false);
+
+    await new DOMWrapper(
+      document.querySelector<HTMLButtonElement>('[data-testid="schedule-start-time-button"]')!,
+    ).trigger('click');
+    await nextTick();
+
+    // The nested picker is a sibling surface: the owning schedule form goes
+    // inert, the picker itself stays interactive, and nothing outside the
+    // pane host (the AI Chat column) is ever inerted.
+    const hosts = paneHosts();
+    expect(hosts).toHaveLength(2);
+    expect(isInert(hosts[0]!)).toBe(true);
+    expect(isInert(hosts[1]!)).toBe(false);
+    expect(hosts[0]!.contains(hosts[1]!)).toBe(false);
+    expect(document.body.hasAttribute('inert')).toBe(false);
+    expect(
+      hosts[1]!.querySelector('[data-testid="schedule-start-date-time-picker"] input'),
+    ).not.toBeNull();
+
+    // Closing the picker hands interaction straight back to the form.
+    const pickerCancel = hosts[1]!.querySelector<HTMLButtonElement>('footer button')!;
+    await new DOMWrapper(pickerCancel).trigger('click');
+    await nextTick();
+    const restored = paneHosts();
+    expect(restored).toHaveLength(1);
+    expect(isInert(restored[0]!)).toBe(false);
+    wrapper.unmount();
+  }, 20_000);
 });
