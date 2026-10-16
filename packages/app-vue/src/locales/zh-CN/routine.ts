@@ -27,6 +27,7 @@ export default {
     overrides: '临时状态',
   },
   profile: {
+    nameRequired: '请输入场景名称',
     title: '场景',
     all: '全部',
     filter: '场景',
@@ -107,6 +108,8 @@ export default {
     snooze10m: '10 分钟后提醒',
   },
   form: {
+    invalidTiming: '请检查时间、时区和重复日期设置',
+    nameRequired: '请输入习惯名称',
     name: '名称',
     namePlaceholder: '例程名称',
     nameLimitExceeded: '例程名称不能超过 100 个字符',

@@ -16,7 +16,12 @@ const emit = defineEmits<{
 }>();
 
 const { t, locale } = useI18n();
-const { goals: goalProgress, isLoading, refresh: refreshGoalSummary } = useGoalHomeSummary();
+const {
+  goals: goalProgress,
+  isLoading,
+  error: goalProgressError,
+  refresh: refreshGoalSummary,
+} = useGoalHomeSummary();
 const goalReconciliationDelays = [0, 250, 500, 1_000, 2_000] as const;
 let goalRefreshGeneration = 0;
 
@@ -114,6 +119,8 @@ onBeforeUnmount(() => {
         class="min-h-[9rem]"
         :goals="goalProgress"
         :loading="isLoading"
+        :error="goalProgressError"
+        @retry="refreshGoalSummary"
         @view-all="emit('open-route', 'goal', '/goals')"
         @select="(id) => emit('open-route', 'goal', `/goals/${id}`)"
       />

@@ -102,7 +102,7 @@ describe('ConversationSidebar search', () => {
     });
     try {
       const toggle = wrapper.get('[data-testid="conversation-search-toggle"]');
-      expect(toggle.classes()).toEqual(expect.arrayContaining(['h-8', 'w-8']));
+      expect(toggle.classes()).toEqual(expect.arrayContaining(['h-8', 'min-w-0']));
       await toggle.trigger('click');
       const input = wrapper.get('[data-testid="conversation-search-input"]');
       expect(document.activeElement).toBe(input.element);
@@ -154,5 +154,30 @@ describe('ConversationSidebar search', () => {
     await clear.trigger('click');
     expect(wrapper.text()).toContain('Personal systems architecture');
     expect(wrapper.text()).toContain('Infrastructure migration');
+  });
+});
+describe('ConversationSidebar compact toolbar', () => {
+  it('keeps searchable conversations and new chat in a single 44px row', async () => {
+    const wrapper = mount(ConversationSidebar, {
+      props: { groups, activeConversationId: 'a' },
+      global: { plugins: [i18n] },
+    });
+    try {
+      const toolbar = wrapper.get('[data-testid="conversation-toolbar"]');
+      const search = toolbar.get('[data-testid="conversation-search-toggle"]');
+      const create = toolbar.get('[data-testid="shell-new-conversation"]');
+      expect(toolbar.classes()).toContain('h-11');
+      expect(create.classes()).toEqual(expect.arrayContaining(['h-8', 'w-8', 'shrink-0']));
+      expect(create.attributes('aria-label')).toBe('New Chat');
+      expect(create.text()).toBe('');
+      expect(wrapper.text()).not.toContain('MemoFlow');
+      await search.trigger('click');
+      expect(toolbar.find('[data-testid="conversation-search-input"]').exists()).toBe(true);
+      expect(wrapper.findAll('[data-testid="conversation-toolbar"]')).toHaveLength(1);
+      await create.trigger('click');
+      expect(wrapper.emitted('new-conversation')).toEqual([[]]);
+    } finally {
+      wrapper.unmount();
+    }
   });
 });

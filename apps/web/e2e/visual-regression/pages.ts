@@ -3,6 +3,11 @@ import { createApp, defineComponent, h } from 'vue';
 import { createPinia } from 'pinia';
 import { createI18n } from 'vue-i18n';
 import { createMemoryHistory, createRouter, RouterView } from 'vue-router';
+import type {
+  CreateRoutineRequest,
+  CreateRoutineProfileRequest,
+} from '@memoflow/contracts/routine';
+import type { CreateTaskPlanReq } from '@memoflow/contracts/task';
 import { RoutineConfigurationSnapshotSchema } from '@memoflow/contracts/routine';
 import { AIWorkflowRunViewSchema } from '@memoflow/contracts/ai';
 import { fail, ok } from '@memoflow/contracts/result';
@@ -16,6 +21,7 @@ import NotificationListPage from '@memoflow/app-vue/modules/notification/views/N
 import KnowledgeProjectionWorkspaceView from '@memoflow/app-vue/modules/repository/views/KnowledgeProjectionWorkspaceView.vue';
 import UserSettingsView from '@memoflow/app-vue/modules/setting/views/UserSettingsView.vue';
 import TaskManagementView from '@memoflow/app-vue/modules/task/views/TaskManagementView.vue';
+import GlobalConfirmDialog from '@memoflow/app-vue/shared/components/GlobalConfirmDialog.vue';
 import AppShell from '@memoflow/app-vue/layouts/shell/AppShell.vue';
 import {
   template,
@@ -26,6 +32,10 @@ import '../../src/styles/index.css';
 const params = new URLSearchParams(location.search);
 const { locale, profile } = bootstrapVisualApp(params);
 const surface = params.get('surface') ?? 'routine';
+const scopedAcceptance = params.get('acceptance') === '459';
+const writes: { owner: string; name: string }[] = [];
+let taskAttempts = 0;
+let routineAttempts = 0;
 const stamp = Date.parse('2026-09-30T09:00:00Z');
 const routineSnapshot = RoutineConfigurationSnapshotSchema.parse({
   definitions: [
@@ -142,6 +152,14 @@ const repository = {
   listReferenceableKnowledgeDocuments: async () => ok({ documents: [] }),
 };
 const task = {
+  async createPlan(request: CreateTaskPlanReq) {
+    if (!scopedAcceptance) throw new Error('Unexpected fixture write');
+    writes.push({ owner: 'task', name: request.name });
+    if (params.has('failCreate') && taskAttempts++ === 0)
+      return fail({ code: 'INTERNAL_ERROR', message: 'Offline: retry the same draft' });
+    const created = { ...template, title: request.name, schedule: request.schedule };
+    return ok({ plan: { toDTO: () => created }, occurrenceCount: 1, todayOccurrenceCreated: true });
+  },
   listPlans: async () => ok({ plans: [{ toDTO: () => template }], total: 1 }),
   listOccurrencesByDateRange: async () => ok([{ toDTO: () => instance() }]),
   getPlan: async (id: string) =>
@@ -180,7 +198,16 @@ const router = createRouter({
         {
           path: '/',
           component: AppShell,
-          children: [{ path: 'tasks', name: 'task-list', component: TaskManagementView }],
+          children: [
+            { path: 'tasks', name: 'task-list', component: TaskManagementView },
+            { path: 'routines', name: 'routine-list', component: RoutineConfigurationView },
+            {
+              path: 'settings',
+              name: 'settings',
+              components: { settings: UserSettingsView },
+              meta: { shellScene: 'settings' },
+            },
+          ],
         },
       ]
     : [
@@ -199,6 +226,7 @@ const app = createApp(
       return () =>
         h('main', { class: '@container/panel h-screen w-full bg-background text-foreground' }, [
           h(RouterView),
+          h(GlobalConfirmDialog),
         ]);
     },
   }),
@@ -215,9 +243,22 @@ app
     }),
   );
 installServerStateRuntime(app, 'web', { identityScope: 'visual-matrix' });
-// Fixture doubles expose only supported reads; unexpected writes fail closed.
+// Fixture doubles expose supported reads and explicitly gated #459 writes; unexpected writes fail closed.
 app.provide(keys.ROUTINE_SERVICE_KEY, {
   getConfigurationSnapshot: async () => ok(routineSnapshot),
+  getUpcomingOccurrences: async () => ok({ occurrences: [] }),
+  async createRoutine(request: CreateRoutineRequest) {
+    if (!scopedAcceptance) throw new Error('Unexpected fixture write');
+    writes.push({ owner: 'routine', name: request.name });
+    if (params.has('failCreate') && routineAttempts++ === 0)
+      return fail({ code: 'INTERNAL_ERROR', message: 'Offline: retry the same draft' });
+    return ok({ id: 'routine-created', version: 1 });
+  },
+  async createProfile(request: CreateRoutineProfileRequest) {
+    if (!scopedAcceptance) throw new Error('Unexpected fixture write');
+    writes.push({ owner: 'profile', name: request.name });
+    return ok({ id: 'profile-created', version: 1 });
+  },
 } as never);
 app.provide(keys.REPOSITORY_SERVICE_KEY, repository as never);
 app.provide(keys.TASK_SERVICE_KEY, task as never);
@@ -289,7 +330,15 @@ app.provide(keys.AI_CLIENT_KEY, {
                 metadata: { mode: 'task-create' },
               },
             ]
-          : [],
+          : scopedAcceptance
+            ? ['conversation-a', 'conversation-b'].map((id) => ({
+                id,
+                name: id,
+                createdAt: stamp,
+                updatedAt: stamp,
+                metadata: { mode: 'chat' },
+              }))
+            : [],
     }),
 } as never);
 app.provide(keys.AI_ASSISTANT_RUNTIME_KEY, {
@@ -324,3 +373,10 @@ if (shell) {
   if (surface === 'shell-focus') store.setLayout('focus', 'user');
 }
 app.mount('#app');
+if (scopedAcceptance)
+  Object.assign(window, {
+    scopedEditorEvidence: () => ({
+      writes: structuredClone(writes),
+      route: router.currentRoute.value.fullPath,
+    }),
+  });

@@ -68,6 +68,7 @@ import type { GoalNativeEditSession } from '../composables/goalNativeEditSession
 const nativeSurface = useGoalNativeSurfaceRegistration();
 let unregisterSession: (() => void) | null = null;
 let currentSession: GoalNativeEditSession | null = null;
+let pendingUserFocus = false;
 let surfaceActive = true;
 let goalsStale = false;
 function handleSessionChange(session: GoalNativeEditSession | null): void {
@@ -75,6 +76,10 @@ function handleSessionChange(session: GoalNativeEditSession | null): void {
   currentSession = session;
   unregisterSession =
     session && surfaceActive ? (nativeSurface?.register(route.fullPath, session) ?? null) : null;
+  if (session && surfaceActive && pendingUserFocus) {
+    pendingUserFocus = false;
+    void session.focus('name');
+  }
 }
 onActivated(() => {
   surfaceActive = true;
@@ -87,6 +92,7 @@ onActivated(() => {
 });
 onDeactivated(() => {
   surfaceActive = false;
+  pendingUserFocus = false;
   returnFocusTarget = null;
   handleSessionChange(null);
 });
@@ -160,6 +166,7 @@ const views = computed(() => [
 ]);
 
 async function openCreate() {
+  pendingUserFocus = true;
   // The explicit toolbar action is the correct return target even if a mouse
   // click did not make it document.activeElement.
   returnFocusTarget = document.querySelector<HTMLElement>('[data-testid="create-goal-entry"]');
@@ -174,7 +181,10 @@ async function openCreate() {
   // Focus only on an explicit user entry. AI-controlled opening must never steal
   // keyboard focus from the concurrently visible conversation composer.
   await nextTick();
-  if (surfaceActive && route.query.goalForm === 'create') await currentSession?.focus('name');
+  if (surfaceActive && route.query.goalForm === 'create' && currentSession && pendingUserFocus) {
+    pendingUserFocus = false;
+    await currentSession.focus('name');
+  }
 }
 function handleDialogOpenUpdate(open: boolean) {
   if (open) return;

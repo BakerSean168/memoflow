@@ -1,5 +1,5 @@
 <template>
-  <DropdownMenu>
+  <DropdownMenu :modal="false">
     <DropdownMenuTrigger as-child>
       <Button
         type="button"
@@ -8,6 +8,7 @@
         :class="['h-8 max-w-44 shrink-0 gap-1.5 px-2', triggerClass]"
         :disabled="disabled"
         :aria-label="accessibleLabel"
+        :title="currentLabel"
         :data-testid="testId"
       >
         <component :is="icon ?? ListFilter" class="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -27,6 +28,7 @@
           v-for="option in options"
           :key="option.value"
           :value="option.value"
+          :title="option.label"
           :disabled="disabled || option.disabled"
           :data-testid="option.itemTestId ?? (testId ? `${testId}-${option.value}` : undefined)"
         >
@@ -45,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, type Component, type HTMLAttributes } from 'vue';
+import { computed, onBeforeUnmount, type Component, type HTMLAttributes } from 'vue';
 import { ChevronDown, ListFilter } from '@lucide/vue';
 import {
   Button,
@@ -91,8 +93,60 @@ const currentOption = computed(() =>
 const currentLabel = computed(() => currentOption.value?.label ?? props.modelValue);
 
 function handleUpdate(value: unknown): void {
+  if (props.disabled) return;
   if (typeof value !== 'string' || !value || value === props.modelValue) return;
   if (!props.options.some((option) => option.value === value && !option.disabled)) return;
   emit('update:modelValue', value);
+  keepTriggerFocusThroughMenuTeardown();
 }
+
+let teardownGuard: (() => void) | null = null;
+
+/**
+ * The non-modal menu's content unmounts through a deferred exit animation.
+ * Under load that teardown can complete seconds later, and reka's unmount
+ * focus restore can pull focus into the exiting node just before it is
+ * removed — dropping focus to body with nothing to recover it. Focus that
+ * enters a closing menu surface or is cleared to body while the teardown is
+ * still in flight is redirected to this filter's trigger, which is where the
+ * menu's own close behavior intends it to be. A freshly reopened menu has
+ * data-state="open" and never matches, so user intent is never overridden.
+ */
+function keepTriggerFocusThroughMenuTeardown(): void {
+  teardownGuard?.();
+  teardownGuard = null;
+  const trigger = props.testId
+    ? document.querySelector<HTMLElement>(`[data-testid="${CSS.escape(props.testId)}"]`)
+    : null;
+  if (!trigger) return;
+  const restore = () => {
+    if (trigger.isConnected && document.activeElement !== trigger) {
+      trigger.focus({ preventScroll: true });
+    }
+  };
+  const onFocusIn = (event: FocusEvent) => {
+    const target = event.target;
+    if (
+      target === document.body ||
+      (target instanceof Element && target.closest('[data-reka-menu-content][data-state="closed"]'))
+    ) {
+      restore();
+    }
+  };
+  document.addEventListener('focusin', onFocusIn, true);
+  const deadline = window.setTimeout(() => {
+    if (teardownGuard === teardown) teardownGuard = null;
+    document.removeEventListener('focusin', onFocusIn, true);
+  }, 3000);
+  const teardown = () => {
+    window.clearTimeout(deadline);
+    document.removeEventListener('focusin', onFocusIn, true);
+  };
+  teardownGuard = teardown;
+}
+
+onBeforeUnmount(() => {
+  teardownGuard?.();
+  teardownGuard = null;
+});
 </script>

@@ -1,6 +1,6 @@
 import { defineComponent, h } from 'vue';
 import { mount } from '@vue/test-utils';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import ProductSingleSelectFilter from './ProductSingleSelectFilter.vue';
 
 const options = [
@@ -70,5 +70,42 @@ describe('ProductSingleSelectFilter', () => {
     await wrapper.vm.$nextTick();
 
     expect(wrapper.emitted('update:modelValue')).toEqual([['active']]);
+  });
+
+  it('keeps the trigger focused when the closing menu surface steals focus late', async () => {
+    vi.useFakeTimers();
+    const wrapper = render();
+    document.body.appendChild(wrapper.element);
+    const trigger = wrapper.get('[data-testid="status-filter"]').element as HTMLElement;
+    trigger.focus();
+    expect(document.activeElement).toBe(trigger);
+
+    wrapper.findComponent(RadioGroupStub).vm.$emit('update:modelValue', 'active');
+    await wrapper.vm.$nextTick();
+
+    // Model the deferred teardown steal: focus lands on the exiting content node.
+    const exitingContent = document.createElement('div');
+    exitingContent.setAttribute('data-reka-menu-content', '');
+    exitingContent.setAttribute('data-state', 'closed');
+    exitingContent.tabIndex = -1;
+    document.body.appendChild(exitingContent);
+    exitingContent.focus();
+    expect(document.activeElement).toBe(trigger);
+
+    // A freshly reopened menu surface keeps its own focus.
+    exitingContent.setAttribute('data-state', 'open');
+    exitingContent.focus();
+    expect(document.activeElement).toBe(exitingContent);
+
+    // After the teardown window expires, later focus moves are left alone.
+    exitingContent.setAttribute('data-state', 'closed');
+    vi.advanceTimersByTime(3000);
+    exitingContent.focus();
+    expect(document.activeElement).toBe(exitingContent);
+
+    exitingContent.remove();
+    wrapper.element.remove();
+    wrapper.unmount();
+    vi.useRealTimers();
   });
 });

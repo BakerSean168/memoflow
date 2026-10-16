@@ -116,6 +116,24 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 describe('Task full-create native session', () => {
+  it('retains the native draft and reports an inline failure when owner persistence returns no plan', async () => {
+    const { wrapper, session, submitOwner } = render();
+    const savedOwner = vi.fn().mockResolvedValueOnce(null).mockResolvedValue(createMockTaskPlan());
+    await wrapper.setProps({ submitOwner: savedOwner });
+    session.patch({ title: 'Retained after failure' });
+    await flushPromises();
+    await dom('task-dialog-save-button').trigger('click');
+    await flushPromises();
+    expect(dom('task-submit-error').text()).toBeTruthy();
+    expect(dom('task-submit-error').classes()).toContain('truncate');
+    expect(dom('task-plan-title-input').element).toHaveProperty('value', 'Retained after failure');
+    expect(session.readDraftState().dirty).toBe(true);
+    await dom('task-dialog-save-button').trigger('click');
+    await flushPromises();
+    expect(savedOwner).toHaveBeenCalledTimes(2);
+    expect(submitOwner).not.toHaveBeenCalled();
+  });
+
   it('semantic patches and manual input mutate the same detached draft and publish dirty', async () => {
     const { wrapper, session } = render();
     session.patch({ title: 'Proposed', importance: 'Important' });

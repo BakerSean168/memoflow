@@ -77,14 +77,31 @@ test.describe('Routine authenticated product journey', () => {
     await createdCard.locator('button').first().click();
     await expect(page.getByTestId('routine-editor-dialog')).toBeVisible();
     await page.getByTestId('routine-name-input').fill(dirtyRoutineName);
-    await page.mouse.click(8, 8);
+
+    // The pane-scoped editor's backdrop is a purely visual dim. An accidental
+    // click on it neither closes the editor nor discards the dirty draft.
+    const backdrop = page.getByTestId('pane-scoped-dialog-backdrop');
+    const backdropBox = await backdrop.boundingBox();
+    if (!backdropBox) {
+      throw new Error('Expected the routine editor pane backdrop to be measurable');
+    }
+    // Stay clear of the panel resize gutter on the left edge and of the
+    // centered form surface: aim at the backdrop's exposed top-right corner.
+    await page.mouse.click(backdropBox.x + backdropBox.width - 12, backdropBox.y + 12);
+    await expect(page.getByTestId('routine-editor-dialog')).toBeVisible();
+    await expect(page.getByTestId('routine-name-input')).toHaveValue(dirtyRoutineName);
+
+    // The pane header Close button is the explicit discard affordance; the
+    // dirty close guard must offer cancel and confirm as separate paths.
+    const editorClose = page.getByTestId('routine-editor-dialog').locator('header button').last();
+    await editorClose.click();
     await expect(page.getByTestId('global-confirm-dialog')).toBeVisible();
     await page.getByTestId('global-confirm-cancel').click();
     await expect(page.getByTestId('global-confirm-dialog')).toBeHidden();
     await expect(page.getByTestId('routine-editor-dialog')).toBeVisible();
     await expect(page.getByTestId('routine-name-input')).toHaveValue(dirtyRoutineName);
 
-    await page.mouse.click(8, 8);
+    await editorClose.click();
     await expect(page.getByTestId('global-confirm-dialog')).toBeVisible();
     await page.getByTestId('global-confirm-confirm').click();
     await expect(page.getByTestId('routine-editor-dialog')).toBeHidden();

@@ -505,6 +505,49 @@ describe('AppShell right-panel integration', () => {
     }
     expect(document.activeElement).toBe(input);
 
+    // Close the lingering gesture guard so it cannot leak into later tests.
+    document.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 21, bubbles: true }));
+    animationFrame.mockRestore();
+    wrapper.unmount();
+    host.remove();
+  });
+
+  it('redirects a late native focus steal that lands after the resize restore', async () => {
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    const { wrapper } = await mountShell('/goals', host);
+    const input = wrapper.get('[data-testid="shell-resize-focus-probe"]')
+      .element as HTMLInputElement;
+    const resizer = wrapper.get('[data-testid="business-panel-resizer"]');
+    const scheduledFrames: FrameRequestCallback[] = [];
+    const animationFrame = vi
+      .spyOn(window, 'requestAnimationFrame')
+      .mockImplementation((callback: FrameRequestCallback) => {
+        scheduledFrames.push(callback);
+        return scheduledFrames.length;
+      });
+
+    input.focus();
+    await resizer.trigger('pointerdown', { pointerId: 7, clientX: 700 });
+    window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 7, bubbles: true }));
+
+    // The restore settles first; only afterwards does the browser's trailing
+    // native focus default steal focus for the focusable drag handle. The
+    // gesture guard must keep redirecting such late steals — not just for one
+    // frame — because loaded machines can defer the native default far beyond
+    // the next animation frame.
+    scheduledFrames.splice(0, 1).forEach((frame) => frame(performance.now()));
+    expect(document.activeElement).toBe(input);
+    (resizer.element as HTMLElement).focus();
+    expect(document.activeElement).toBe(input);
+    (resizer.element as HTMLElement).focus();
+    expect(document.activeElement).toBe(input);
+
+    // A real user interaction ends the guard; later focus changes stay untouched.
+    document.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 9, bubbles: true }));
+    (resizer.element as HTMLElement).focus();
+    expect(document.activeElement).toBe(resizer.element);
+
     animationFrame.mockRestore();
     wrapper.unmount();
     host.remove();

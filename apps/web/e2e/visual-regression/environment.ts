@@ -13,6 +13,7 @@ export async function openVisualCase(
     width: 'wide' | 'narrow';
     query?: string;
     host?: 'web' | 'desktop';
+    clock?: 'fixed' | 'running';
   },
 ) {
   const externalRequests: string[] = [];
@@ -36,7 +37,10 @@ export async function openVisualCase(
     colorScheme: entry.theme === 'dark' ? 'dark' : 'light',
     reducedMotion: 'reduce',
   });
-  await page.clock.setFixedTime(new Date(VISUAL_TIME));
+  // Vue ignores bubbling events timestamped at the listener's installation time.
+  // Interactions need a progressing Date.now; screenshot-only cases keep fixed time.
+  if (entry.clock === 'running') await page.clock.install({ time: new Date(VISUAL_TIME) });
+  else await page.clock.setFixedTime(new Date(VISUAL_TIME));
   const query = new URLSearchParams({
     owner: entry.owner,
     theme: entry.theme,

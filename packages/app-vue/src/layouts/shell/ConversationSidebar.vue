@@ -3,7 +3,7 @@
  * ConversationSidebar (UI 重构 V2 壳)
  *
  * 左侧栏 = 纯 AI 会话列表（V2 §5 决策 #4，无 Projects 树、无业务对象）。
- * 结构：品牌 + 搜索 → 「新对话」→ 会话列表（按时间分组）→ 底部账户菜单。
+ * 结构：搜索 + 新对话同排 → 会话列表（按时间分组）→ 底部账户菜单。
  *
  * 账户入口（诊断修订 §9）：头像打开账户菜单，不再直达 Settings。
  */
@@ -36,7 +36,6 @@ import {
   TooltipProvider,
 } from '@memoflow/ui-vue-shadcn';
 import type { ProfileSummary } from '@memoflow/contracts/electron';
-import { APP_NAME_ZH } from '@memoflow/assets';
 import type {
   ConversationAttentionStatus,
   ConversationAttentionMap,
@@ -154,69 +153,62 @@ const identityLabel = () => {
     data-testid="conversation-sidebar"
     class="conversation-sidebar relative flex h-full flex-col bg-transparent text-sidebar-foreground"
   >
-    <!-- 头：品牌 + 搜索 -->
-    <div class="flex h-11 shrink-0 items-center justify-between px-3">
-      <span
-        class="truncate text-[12px] font-semibold tracking-[-0.01em] text-[hsl(var(--foreground-muted))]"
-        >{{ APP_NAME_ZH }}</span
+    <!-- 搜索与新会话保持同一工具行，搜索展开时高度不变 -->
+    <div class="flex h-11 shrink-0 items-center gap-1.5 px-2" data-testid="conversation-toolbar">
+      <div
+        class="flex h-8 min-w-0 flex-1 items-center rounded-md bg-[hsl(var(--surface-raised)/0.35)] transition-colors hover:bg-[hsl(var(--hover))]"
+        data-testid="conversation-search"
       >
-      <button
-        ref="searchToggle"
-        type="button"
-        class="flex h-8 w-8 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground"
-        :class="searchOpen ? 'bg-[hsl(var(--selected)/0.82)] text-foreground' : ''"
-        :title="t('shell.search')"
-        :aria-label="t('shell.search')"
-        :aria-pressed="searchOpen"
-        data-testid="conversation-search-toggle"
-        @click="toggleSearch"
-      >
-        <Search class="h-4 w-4" />
-      </button>
-    </div>
-
-    <div v-if="searchOpen" class="shrink-0 px-2 pb-1.5" data-testid="conversation-search">
-      <div class="relative">
-        <Search
-          class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground/65"
-        />
-        <input
-          ref="searchInput"
-          v-model="searchQuery"
-          type="search"
-          autocomplete="off"
-          class="h-8 w-full rounded-md border border-sidebar-border/60 bg-background/45 pl-8 pr-8 text-xs text-foreground outline-none placeholder:text-muted-foreground/55 focus:border-ring/55 focus:ring-1 focus:ring-ring/20"
-          :placeholder="t('shell.conversation.searchPlaceholder')"
-          :aria-label="t('shell.conversation.searchPlaceholder')"
-          data-testid="conversation-search-input"
-          @keydown.escape.stop.prevent="closeSearch"
-        />
         <button
-          v-if="searchQuery"
+          ref="searchToggle"
           type="button"
-          class="absolute right-0 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
-          :aria-label="t('shell.conversation.clearSearch')"
-          :title="t('shell.conversation.clearSearch')"
-          data-testid="conversation-search-clear"
-          @click="searchQuery = ''"
+          class="flex h-8 min-w-0 items-center gap-2 rounded-md px-2 text-left text-[12px] text-[hsl(var(--foreground-subtle))] transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          :class="searchOpen ? 'w-8 shrink-0 justify-center p-0' : 'w-full flex-1'"
+          :title="t('shell.search')"
+          :aria-label="t('shell.search')"
+          :aria-pressed="searchOpen"
+          data-testid="conversation-search-toggle"
+          @click="toggleSearch"
         >
-          <X class="h-3.5 w-3.5" />
+          <Search class="h-4 w-4 shrink-0" />
+          <span v-if="!searchOpen" class="min-w-0 truncate">{{
+            t('shell.conversation.searchPlaceholder')
+          }}</span>
         </button>
+        <template v-if="searchOpen">
+          <input
+            ref="searchInput"
+            v-model="searchQuery"
+            type="search"
+            autocomplete="off"
+            class="h-8 min-w-0 flex-1 border-0 bg-transparent pr-1 text-xs text-foreground outline-none placeholder:text-muted-foreground/55 focus-visible:outline-none"
+            :placeholder="t('shell.conversation.searchPlaceholder')"
+            :aria-label="t('shell.conversation.searchPlaceholder')"
+            data-testid="conversation-search-input"
+            @keydown.escape.stop.prevent="closeSearch"
+          />
+          <button
+            v-if="searchQuery"
+            type="button"
+            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            :aria-label="t('shell.conversation.clearSearch')"
+            :title="t('shell.conversation.clearSearch')"
+            data-testid="conversation-search-clear"
+            @click="searchQuery = ''"
+          >
+            <X class="h-3.5 w-3.5" />
+          </button>
+        </template>
       </div>
-    </div>
-
-    <!-- 新对话 -->
-    <div class="shrink-0 px-2 py-1">
       <button
         type="button"
         data-testid="shell-new-conversation"
-        class="group flex h-8 w-full items-center gap-2 rounded-lg bg-[hsl(var(--surface-raised)/0.52)] px-2.5 text-left text-[12.5px] font-medium text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.62),inset_0_1px_0_hsl(var(--foreground)/0.02)] transition-colors hover:bg-[hsl(var(--hover))]"
+        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-[hsl(var(--foreground-subtle))] transition-colors hover:bg-[hsl(var(--hover))] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        :aria-label="t('shell.newChat')"
+        :title="t('shell.newChat')"
         @click="emit('new-conversation')"
       >
-        <SquarePen
-          class="h-3.5 w-3.5 text-[hsl(var(--foreground-subtle))] transition-colors group-hover:text-foreground"
-        />
-        <span>{{ t('shell.newChat') }}</span>
+        <SquarePen class="h-4 w-4" />
       </button>
     </div>
 

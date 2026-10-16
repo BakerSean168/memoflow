@@ -1,10 +1,61 @@
 <template>
-  <Dialog :open="open" @update:open="setOpen">
+  <ProductEditorFrame
+    v-if="presentation === 'panel'"
+    presentation="panel"
+    :open="open"
+    :test-id="testId"
+    :title-id="testId + '-title'"
+    pane-size="picker"
+    pane-height-mode="content"
+    initial-focus-selector="input"
+    @update:open="setOpen"
+  >
+    <template #title>{{ title }}</template>
+    <template v-if="description" #description>{{ description }}</template>
+    <ProductDateTimePickerFields
+      v-model:calendar-placeholder="calendarPlaceholder"
+      v-model:hour-draft="hourDraft"
+      v-model:minute-draft="minuteDraft"
+      :selected-date="selectedDate"
+      :product-locale="productLocale"
+      :week-starts-on="weekStartsOn"
+      :min-calendar-date="minCalendarDate"
+      :today-calendar-date="todayCalendarDate"
+      :return-to-today-label="returnToTodayLabel"
+      :time-label="timeLabel"
+      :time-zone-label="timeZoneLabel"
+      :hour-label="hourLabel"
+      :minute-label="minuteLabel"
+      :validation-message="validationMessage"
+      :preview-label="previewLabel"
+      @select-day="handleCalendarValue"
+      @normalize-numeric="normalizeNumericDraft"
+      @normalize-clock="normalizeClockPart"
+      @adjust-clock="adjustClockPart"
+    />
+    <template #footer>
+      <Button type="button" variant="ghost" size="sm" @click="setOpen(false)">
+        {{ cancelLabel }}
+      </Button>
+      <Button
+        type="button"
+        size="sm"
+        class="min-w-20"
+        :disabled="disabled || !canApply"
+        @click="apply"
+      >
+        {{ applyLabel }}
+      </Button>
+    </template>
+  </ProductEditorFrame>
+  <Dialog v-else :open="open" @update:open="setOpen">
     <DialogContent
       class="w-[23rem] max-w-[calc(100vw-1.25rem)] gap-0 overflow-hidden rounded-xl border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay))] p-0 shadow-[0_24px_64px_-26px_rgba(0,0,0,0.62),0_6px_18px_-12px_rgba(0,0,0,0.44),inset_0_1px_0_hsl(var(--foreground)/0.025)]"
       :data-testid="testId"
     >
-      <DialogHeader class="border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.42)] px-5 pb-4 pt-5 text-left">
+      <DialogHeader
+        class="border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.42)] px-5 pb-4 pt-5 text-left"
+      >
         <DialogTitle class="flex items-center gap-2 text-[15px] font-semibold tracking-[-0.01em]">
           <span
             class="flex h-7 w-7 items-center justify-center rounded-lg bg-[hsl(var(--surface-raised)/0.66)] text-[hsl(var(--foreground-muted))] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)]"
@@ -18,73 +69,27 @@
         </DialogDescription>
       </DialogHeader>
 
-      <div class="p-4">
-        <div class="rounded-xl bg-[hsl(var(--surface-raised)/0.28)] p-3 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)]">
-          <Calendar
-            appearance="linear"
-            v-model:placeholder="calendarPlaceholder"
-            :model-value="selectedDate"
-            :locale="productLocale"
-            :week-starts-on="weekStartsOn"
-            :weekday-format="'short'"
-            :fixed-weeks="true"
-            :min-value="minCalendarDate"
-            :return-date="todayCalendarDate"
-            :return-to-selected-label="returnToTodayLabel"
-            @update:model-value="handleCalendarValue"
-          />
-        </div>
-
-        <div
-          class="mt-3 flex items-center gap-3 rounded-xl bg-[hsl(var(--surface-raised)/0.28)] px-3 py-2.5 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)]"
-        >
-          <Clock3 class="h-4 w-4 shrink-0 text-muted-foreground" />
-          <div class="min-w-0 flex-1">
-            <p class="text-xs font-medium text-foreground/85">{{ timeLabel }}</p>
-            <p class="mt-0.5 truncate text-[11px] text-muted-foreground">
-              {{ timeZoneLabel }}
-            </p>
-          </div>
-
-          <div class="flex shrink-0 items-center gap-1.5" :aria-label="timeLabel">
-            <Input
-              ref="hourInput"
-              v-model="hourDraft"
-              type="text"
-              inputmode="numeric"
-              maxlength="2"
-              class="h-8 w-11 rounded-md border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.34)] px-1 text-center text-sm tabular-nums shadow-none focus-visible:border-primary/50 focus-visible:ring-1 focus-visible:ring-primary/35"
-              :aria-label="hourLabel"
-              @input="normalizeNumericDraft('hour')"
-              @blur="normalizeClockPart('hour')"
-              @keydown.up.prevent="adjustClockPart('hour', 1)"
-              @keydown.down.prevent="adjustClockPart('hour', -1)"
-            />
-            <span class="text-sm font-medium text-muted-foreground">:</span>
-            <Input
-              v-model="minuteDraft"
-              type="text"
-              inputmode="numeric"
-              maxlength="2"
-              class="h-8 w-11 rounded-md border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.34)] px-1 text-center text-sm tabular-nums shadow-none focus-visible:border-primary/50 focus-visible:ring-1 focus-visible:ring-primary/35"
-              :aria-label="minuteLabel"
-              @input="normalizeNumericDraft('minute')"
-              @blur="normalizeClockPart('minute')"
-              @keydown.up.prevent="adjustClockPart('minute', 1)"
-              @keydown.down.prevent="adjustClockPart('minute', -1)"
-            />
-          </div>
-        </div>
-
-        <div class="mt-2 min-h-5 px-1">
-          <p v-if="validationMessage" class="text-xs text-destructive" role="alert">
-            {{ validationMessage }}
-          </p>
-          <p v-else-if="previewLabel" class="text-xs tabular-nums text-muted-foreground">
-            {{ previewLabel }}
-          </p>
-        </div>
-      </div>
+      <ProductDateTimePickerFields
+        v-model:calendar-placeholder="calendarPlaceholder"
+        v-model:hour-draft="hourDraft"
+        v-model:minute-draft="minuteDraft"
+        :selected-date="selectedDate"
+        :product-locale="productLocale"
+        :week-starts-on="weekStartsOn"
+        :min-calendar-date="minCalendarDate"
+        :today-calendar-date="todayCalendarDate"
+        :return-to-today-label="returnToTodayLabel"
+        :time-label="timeLabel"
+        :time-zone-label="timeZoneLabel"
+        :hour-label="hourLabel"
+        :minute-label="minuteLabel"
+        :validation-message="validationMessage"
+        :preview-label="previewLabel"
+        @select-day="handleCalendarValue"
+        @normalize-numeric="normalizeNumericDraft"
+        @normalize-clock="normalizeClockPart"
+        @adjust-clock="adjustClockPart"
+      />
 
       <DialogFooter
         class="border-t border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.42)] px-4 py-3 sm:justify-end sm:space-x-2"
@@ -108,21 +113,21 @@
 
 <script setup lang="ts">
 import { computed, ref, shallowRef, watch } from 'vue';
-import { CalendarClock, Clock3 } from '@lucide/vue';
+import { CalendarClock } from '@lucide/vue';
 import type { DateValue } from '@internationalized/date';
 import type { Instant, Ymd } from '@memoflow/contracts/primitives';
 import {
   Button,
-  Calendar,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  Input,
 } from '@memoflow/ui-vue-shadcn';
 import { parseToCalendarDate } from '../utils/parse-to-date';
+import ProductEditorFrame from './ProductEditorFrame.vue';
+import ProductDateTimePickerFields from './ProductDateTimePickerFields.vue';
 import { handleCalendarSelect } from '../utils/handle-calendar-select';
 import {
   formatProductDateTime,
@@ -138,6 +143,7 @@ const props = withDefaults(
   defineProps<{
     modelValue: Instant | null;
     open: boolean;
+    presentation?: 'dialog' | 'panel';
     title: string;
     description?: string;
     timeLabel?: string;
@@ -153,6 +159,7 @@ const props = withDefaults(
     testId?: string;
   }>(),
   {
+    presentation: 'dialog',
     description: '',
     timeLabel: 'Time',
     hourLabel: 'Hour',
@@ -238,6 +245,7 @@ watch(
   (open) => {
     if (open) seedDraft();
   },
+  { immediate: true },
 );
 
 function roundUpToFiveMinutes(value: number): Instant {
@@ -303,7 +311,7 @@ function setOpen(value: boolean): void {
 }
 
 function apply(): void {
-  if (!canApply.value || draftInstant.value == null) return;
+  if (props.disabled || !props.open || !canApply.value || draftInstant.value == null) return;
   emit('update:modelValue', draftInstant.value);
   emit('apply', draftInstant.value);
   emit('update:open', false);

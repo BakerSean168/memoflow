@@ -326,7 +326,7 @@ const Root = defineComponent({
           surface === 'crud' ||
           surface === 'collision' ||
           (surface === 'task-quick' && router.currentRoute.value.path === '/')
-            ? h('section', { class: 'h-[800px]' }, [h(ScheduleCalendarView)])
+            ? h('section', { style: { height: '800px' } }, [h(ScheduleCalendarView)])
             : null,
           surface === 'calendar'
             ? h('section', { class: 'h-[760px] min-w-0 rounded-xl border bg-card p-3' }, [

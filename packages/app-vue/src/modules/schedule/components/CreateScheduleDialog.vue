@@ -1,29 +1,34 @@
 <template>
-  <Dialog :open="modelValue" @update:open="handleVisibleChange">
-    <ProductDialogShell
-      :open="modelValue"
-      test-id="schedule-dialog"
-      recipe="config"
-      content-class="sm:max-w-[620px]"
-      initial-focus-selector="[data-testid='schedule-title-input']"
-    >
-      <template #icon>
-        <span
-          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"
-          aria-hidden="true"
-        >
-          <CalendarPlus2 class="h-4.5 w-4.5" />
-        </span>
-      </template>
+  <ProductEditorFrame
+    :inert="presentation === 'panel' && (startPickerOpen || endPickerOpen)"
+    :open="modelValue"
+    :presentation="presentation"
+    :close-disabled="busy"
+    test-id="schedule-dialog"
+    title-id="schedule-panel-title"
+    recipe="config"
+    content-class="sm:max-w-[620px]"
+    initial-focus-selector="[data-testid='schedule-title-input']"
+    @update:open="handleVisibleChange"
+  >
+    <template #icon>
+      <span
+        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"
+        aria-hidden="true"
+      >
+        <CalendarPlus2 class="h-4.5 w-4.5" />
+      </span>
+    </template>
 
-      <template #title>
-        {{
-          isEditing ? t('schedule.createDialog.titleEdit') : t('schedule.createDialog.titleCreate')
-        }}
-      </template>
-      <template #description>{{ t('schedule.createDialog.description') }}</template>
+    <template #title>
+      {{
+        isEditing ? t('schedule.createDialog.titleEdit') : t('schedule.createDialog.titleCreate')
+      }}
+    </template>
+    <template #description>{{ t('schedule.createDialog.description') }}</template>
 
-      <form id="schedule-form" class="space-y-4" @submit.prevent="handleSubmit">
+    <form id="schedule-form" class="space-y-4" novalidate @submit.prevent="handleSubmit">
+      <fieldset :disabled="busy" class="min-w-0 space-y-4">
         <section class="border-b border-border/60 pb-4" data-testid="schedule-identity-section">
           <Label for="title" class="sr-only">{{ t('schedule.createDialog.fieldTitle') }}</Label>
           <Input
@@ -31,9 +36,18 @@
             v-model="formData.title"
             :placeholder="t('schedule.createDialog.fieldTitlePlaceholder')"
             maxlength="200"
-            required
+            :aria-invalid="Boolean(titleError) || undefined"
+            :aria-describedby="titleError ? 'schedule-title-error' : undefined"
+            @blur="titleTouched = true"
             data-testid="schedule-title-input"
-            class="h-10 border-0 bg-transparent px-0 text-xl font-semibold tracking-[-0.015em] shadow-none placeholder:text-muted-foreground/55 focus-visible:ring-0"
+            class="h-10 border-0 bg-transparent px-0 text-xl font-semibold tracking-[-0.015em] shadow-none placeholder:text-muted-foreground/55 focus-visible:ring-2 focus-visible:ring-ring"
+          />
+
+          <ProductInlineValidation
+            id="schedule-title-error"
+            data-testid="schedule-title-feedback"
+            :visible="Boolean(titleError)"
+            :message="titleError"
           />
 
           <Label for="description" class="sr-only">
@@ -45,7 +59,7 @@
             :placeholder="t('schedule.createDialog.fieldDescriptionPlaceholder')"
             rows="2"
             maxlength="1000"
-            class="min-h-11 resize-none border-0 bg-transparent px-0 py-1 text-sm leading-5 text-foreground/80 shadow-none placeholder:text-muted-foreground/55 focus-visible:ring-0"
+            class="min-h-11 resize-none border-0 bg-transparent px-0 py-1 text-sm leading-5 text-foreground/80 shadow-none placeholder:text-muted-foreground/55 focus-visible:ring-2 focus-visible:ring-ring"
           />
         </section>
 
@@ -77,7 +91,10 @@
             </label>
           </div>
 
-          <div v-if="formData.allDay" class="mt-3 grid gap-2 sm:grid-cols-[1fr_auto_1fr]">
+          <div
+            v-if="formData.allDay"
+            class="mt-3 grid gap-2 @lg/panel:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"
+          >
             <div class="space-y-1.5">
               <p class="text-[11px] font-medium text-muted-foreground">
                 {{ t('schedule.createDialog.fieldStartDate') }}
@@ -85,6 +102,7 @@
               <ProductDatePicker
                 v-model="startDateModel"
                 variant="field"
+                :picker-width="presentation === 'panel' ? 'pane' : 'standard'"
                 :label="t('schedule.createDialog.fieldStartDate')"
                 :placeholder="t('schedule.createDialog.fieldStartDate')"
                 :input-placeholder="t('schedule.createDialog.exactDateInputPlaceholder')"
@@ -98,7 +116,7 @@
             </div>
 
             <ArrowRight
-              class="hidden h-4 w-4 self-end text-muted-foreground/70 sm:block sm:mb-2.5"
+              class="hidden h-4 w-4 self-end text-muted-foreground/70 @lg/panel:block @lg/panel:mb-2.5"
             />
 
             <div class="space-y-1.5">
@@ -108,6 +126,7 @@
               <ProductDatePicker
                 v-model="endDateModel"
                 variant="field"
+                :picker-width="presentation === 'panel' ? 'pane' : 'standard'"
                 :label="t('schedule.createDialog.fieldEndDate')"
                 :placeholder="t('schedule.createDialog.fieldEndDate')"
                 :input-placeholder="t('schedule.createDialog.exactDateInputPlaceholder')"
@@ -121,7 +140,10 @@
             </div>
           </div>
 
-          <div v-else class="mt-3 grid gap-2 sm:grid-cols-[1fr_auto_1fr]">
+          <div
+            v-else
+            class="mt-3 grid gap-2 @lg/panel:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"
+          >
             <button
               type="button"
               class="group min-w-0 rounded-lg bg-[hsl(var(--surface)/0.68)] px-3 py-2.5 text-left shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.5)] transition-[background-color,box-shadow] hover:bg-[hsl(var(--hover)/0.72)] hover:shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.72)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/45"
@@ -136,7 +158,9 @@
               </span>
             </button>
 
-            <ArrowRight class="hidden h-4 w-4 self-center text-muted-foreground/70 sm:block" />
+            <ArrowRight
+              class="hidden h-4 w-4 self-center text-muted-foreground/70 @lg/panel:block"
+            />
 
             <button
               type="button"
@@ -262,35 +286,34 @@
             />
           </div>
         </section>
+      </fieldset>
+      <ProductInlineValidation
+        data-testid="schedule-submit-feedback"
+        test-id="schedule-submit-error"
+        :visible="Boolean(submitError)"
+        :message="submitError"
+      />
+    </form>
 
-        <p
-          v-if="submitError"
-          role="alert"
-          class="rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive"
-        >
-          {{ submitError }}
-        </p>
-      </form>
-
-      <template #footer>
-        <Button type="button" variant="ghost" :disabled="busy" @click="requestClose()">
-          {{ t('common.cancel') }}
-        </Button>
-        <Button
-          type="submit"
-          form="schedule-form"
-          class="min-w-20"
-          :disabled="busy"
-          data-testid="schedule-save-button"
-        >
-          <Loader2 v-if="busy" class="mr-2 h-4 w-4 animate-spin" />
-          {{ isEditing ? t('common.save') : t('common.create') }}
-        </Button>
-      </template>
-    </ProductDialogShell>
-  </Dialog>
+    <template #footer>
+      <Button type="button" variant="ghost" :disabled="busy" @click="requestClose()">
+        {{ t('common.cancel') }}
+      </Button>
+      <Button
+        type="submit"
+        form="schedule-form"
+        class="min-w-20"
+        :disabled="busy"
+        data-testid="schedule-save-button"
+      >
+        <Loader2 v-if="busy" class="mr-2 h-4 w-4 animate-spin" />
+        {{ isEditing ? t('common.save') : t('common.create') }}
+      </Button>
+    </template>
+  </ProductEditorFrame>
 
   <ProductDateTimePicker
+    :presentation="presentation"
     :open="startPickerOpen"
     :model-value="timedStartInstant"
     :title="t('schedule.createDialog.startPickerTitle')"
@@ -308,6 +331,7 @@
   />
 
   <ProductDateTimePicker
+    :presentation="presentation"
     :open="endPickerOpen"
     :model-value="timedEndInstant"
     :min-value="timedStartInstant"
@@ -341,13 +365,14 @@ import {
   Users,
   X,
 } from '@lucide/vue';
-import { Badge, Button, Dialog, Input, Label, Switch, Textarea } from '@memoflow/ui-vue-shadcn';
+import { Badge, Button, Input, Label, Switch, Textarea } from '@memoflow/ui-vue-shadcn';
 import type { CalendarEntryClientDTO, CreateScheduleRequest } from '@memoflow/contracts/schedule';
 import { requireYmd, type Instant, type Ymd } from '@memoflow/contracts/primitives';
 import {
   ProductDatePicker,
   ProductDateTimePicker,
-  ProductDialogShell,
+  ProductEditorFrame,
+  ProductInlineValidation,
   ProductPropertyChip,
 } from '../../../shared/components';
 import { useDialogCloseGuard } from '../../../shared/composables/useDialogCloseGuard';
@@ -364,6 +389,7 @@ interface InitialScheduleRange {
 
 interface Props {
   modelValue: boolean;
+  presentation?: 'dialog' | 'panel';
   schedule?: CalendarEntryClientDTO | null;
   initialRange?: InitialScheduleRange | null;
   loading?: boolean;
@@ -375,6 +401,7 @@ interface Emits {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  presentation: 'dialog',
   schedule: null,
   initialRange: null,
   loading: false,
@@ -386,6 +413,12 @@ const { t, locale } = useI18n();
 const DEFAULT_TIMED_DURATION_MS = 60 * 60 * 1000;
 const submitting = ref(false);
 const submitError = ref('');
+const titleTouched = ref(false);
+const titleError = computed(() =>
+  titleTouched.value && !formData.title.trim()
+    ? t('schedule.createDialog.fieldTitlePlaceholder')
+    : '',
+);
 const busy = computed(() => props.loading || submitting.value);
 const startPickerOpen = ref(false);
 const endPickerOpen = ref(false);
@@ -596,6 +629,7 @@ function seedInitialRange(range: InitialScheduleRange): void {
 }
 
 function resetForm(): void {
+  titleTouched.value = false;
   formData.title = '';
   formData.description = '';
   seedDefaultRange();
@@ -607,6 +641,19 @@ function resetForm(): void {
   startPickerOpen.value = false;
   endPickerOpen.value = false;
 }
+
+watch(
+  () => [
+    formData.startDate,
+    formData.endDate,
+    formData.startTime,
+    formData.endTime,
+    formData.allDay,
+  ],
+  () => {
+    if (submitError.value === t('schedule.createDialog.invalidRange')) submitError.value = '';
+  },
+);
 
 function closeNow(): void {
   emit('update:modelValue', false);
@@ -638,6 +685,8 @@ function removeAttendee(index: number): void {
 
 async function handleSubmit(): Promise<void> {
   if (!props.modelValue || busy.value) return;
+  titleTouched.value = true;
+  if (!formData.title.trim()) return;
   const time = getProductTime();
   const startDate = time.input.parseDateValue(formData.startDate);
   const endDate = time.input.parseDateValue(formData.endDate);

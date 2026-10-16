@@ -10,7 +10,7 @@ import ResponsivePrimaryAction from './ResponsivePrimaryAction.vue';
 const source = readFileSync(resolve(__dirname, 'ResponsivePrimaryAction.vue'), 'utf8');
 
 describe('ResponsivePrimaryAction', () => {
-  it('keeps one accessible primary action and collapses its label below the panel 2xl tier', () => {
+  it('keeps one 32px accessible icon action without a visible label at any width', () => {
     const wrapper = shallowMount(ResponsivePrimaryAction, {
       props: { label: 'New plan', icon: Plus },
       attrs: { 'data-testid': 'create-entry' },
@@ -18,8 +18,9 @@ describe('ResponsivePrimaryAction', () => {
 
     expect(wrapper.attributes('aria-label')).toBe('New plan');
     expect(wrapper.attributes('data-testid')).toBe('create-entry');
-    expect(source).toContain('@2xl/panel:mr-1.5');
-    expect(source).toContain('hidden @2xl/panel:inline');
+    expect(wrapper.attributes('title')).toBe('New plan');
+    expect(source).toContain('class="h-8 w-8');
+    expect(source).not.toContain('@2xl/panel:inline');
   });
 
   it('is the canonical primary-create action for Goal, Task, and Schedule toolbars', () => {

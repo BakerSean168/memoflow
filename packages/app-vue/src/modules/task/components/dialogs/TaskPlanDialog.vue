@@ -1,71 +1,79 @@
 <template>
-  <Dialog :open="visible" @update:open="setVisible">
-    <ProductDialogShell
-      :open="visible"
-      test-id="task-plan-dialog"
-      recipe="workspace"
-      body-class="flex flex-col"
-      initial-focus-selector="[data-testid='task-plan-title-input']"
-    >
-      <template #title>
+  <ProductEditorFrame
+    :open="visible"
+    :presentation="presentation"
+    :close-disabled="saving"
+    test-id="task-plan-dialog"
+    title-id="task-plan-panel-title"
+    recipe="workspace"
+    body-class="flex flex-col"
+    initial-focus-selector="[data-testid='task-plan-title-input']"
+    @update:open="setVisible"
+  >
+    <template #title>
+      {{
+        mode === 'edit'
+          ? t('task.templateDialog.editTitle')
+          : mode === 'copy'
+            ? t('task.templateDialog.copyTitle')
+            : t('task.templateDialog.createTitle')
+      }}
+    </template>
+    <template #status>
+      <p
+        v-if="mode === 'edit' && (localTemplate?.futurePendingOccurrenceCount ?? 0) > 0"
+        class="mx-6 mt-4 rounded-md border border-info/30 bg-info/10 px-3 py-2 text-sm text-foreground"
+        role="status"
+        data-testid="task-plan-update-impact"
+      >
         {{
-          mode === 'edit'
-            ? t('task.templateDialog.editTitle')
-            : mode === 'copy'
-              ? t('task.templateDialog.copyTitle')
-              : t('task.templateDialog.createTitle')
+          t('task.templateDialog.updateImpact', {
+            count: localTemplate?.futurePendingOccurrenceCount ?? 0,
+          })
         }}
-      </template>
-      <template #status>
-        <p
-          v-if="mode === 'edit' && (localTemplate?.futurePendingOccurrenceCount ?? 0) > 0"
-          class="mx-6 mt-4 rounded-md border border-info/30 bg-info/10 px-3 py-2 text-sm text-foreground"
-          role="status"
-          data-testid="task-plan-update-impact"
-        >
-          {{
-            t('task.templateDialog.updateImpact', {
-              count: localTemplate?.futurePendingOccurrenceCount ?? 0,
-            })
-          }}
-        </p>
-      </template>
+      </p>
+    </template>
 
-      <TaskPlanForm
-        v-if="localTemplate"
-        ref="formRef"
-        :model-value="localTemplate"
-        :is-edit-mode="mode === 'edit'"
-        :readonly="saving"
-        :goals="goalOptions"
-        :key-results-by-goal="keyResultsByGoal"
-        :loading-goals="loadingGoals"
-        :loading-key-results="loadingKeyResults"
-        :key-result-errors-by-goal="keyResultErrorsByGoal"
-        :on-request-key-results="requestKeyResults"
-        @update:model-value="handleTemplateUpdate"
-        @update:validation="handleValidationUpdate"
-        @close="handleCancel"
-        @submit="handleSave"
-      />
+    <TaskPlanForm
+      v-if="localTemplate"
+      ref="formRef"
+      :model-value="localTemplate"
+      :is-edit-mode="mode === 'edit'"
+      :readonly="saving"
+      :goals="goalOptions"
+      :key-results-by-goal="keyResultsByGoal"
+      :loading-goals="loadingGoals"
+      :loading-key-results="loadingKeyResults"
+      :key-result-errors-by-goal="keyResultErrorsByGoal"
+      :on-request-key-results="requestKeyResults"
+      @update:model-value="handleTemplateUpdate"
+      @update:validation="handleValidationUpdate"
+      @close="handleCancel"
+      @submit="handleSave"
+    />
 
-      <template #footer>
-        <Button variant="ghost" :disabled="saving" @click="handleCancel">{{
-          t('task.templateDialog.cancel')
-        }}</Button>
-        <Button
-          data-testid="task-dialog-save-button"
-          :disabled="!canSave"
-          :loading="saving"
-          @click="handleSave"
-        >
-          {{
-            mode === 'edit' ? t('task.templateDialog.saveChanges') : t('task.templateDialog.create')
-          }}
-        </Button>
-      </template>
-    </ProductDialogShell>
-  </Dialog>
+    <ProductInlineValidation
+      test-id="task-submit-error"
+      :visible="Boolean(submitError)"
+      :message="submitError"
+    />
+
+    <template #footer>
+      <Button variant="ghost" :disabled="saving" @click="handleCancel">{{
+        t('task.templateDialog.cancel')
+      }}</Button>
+      <Button
+        data-testid="task-dialog-save-button"
+        :disabled="!canSave"
+        :loading="saving"
+        @click="handleSave"
+      >
+        {{
+          mode === 'edit' ? t('task.templateDialog.saveChanges') : t('task.templateDialog.create')
+        }}
+      </Button>
+    </template>
+  </ProductEditorFrame>
 </template>
 
 <script setup lang="ts">
@@ -80,7 +88,7 @@ import {
   onActivated,
 } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Dialog, Button } from '@memoflow/ui-vue-shadcn';
+import { Button } from '@memoflow/ui-vue-shadcn';
 import TaskPlanForm from '../TaskPlanForm/TaskPlanForm.vue';
 import type { TaskPlanViewModel } from '../types';
 import { buildTaskPlanCreateRequest } from '../../utils/task-plan-create-request';
@@ -93,11 +101,12 @@ import { useLabelCatalog } from '../../../../shared/composables/useLabelCatalog'
 import { TaskPlanScheduleSchema } from '@memoflow/contracts/task';
 import { getProductTime } from '../../../../shared/utils/product-time';
 import { useTaskGoalBindingOptions } from '../../composables/useTaskGoalBindingOptions';
-import { ProductDialogShell } from '../../../../shared/components';
+import { ProductEditorFrame, ProductInlineValidation } from '../../../../shared/components';
 import { useDialogDraftStore } from '../../../../layouts/shell/dialog-draft-store';
 import { useDialogCloseGuard } from '../../../../shared/composables/useDialogCloseGuard';
 
 const { t } = useI18n();
+const submitError = ref('');
 const dialogDraftStore = useDialogDraftStore();
 const {
   goals: goalOptions,
@@ -181,6 +190,7 @@ function createCopyDraft(template: TaskPlanViewModel | null): TaskPlanViewModel 
 const props = withDefaults(
   defineProps<{
     modelValue: boolean;
+    presentation?: 'dialog' | 'panel';
     template?: TaskPlanViewModel | null;
     mode?: 'create' | 'edit' | 'copy';
     saving?: boolean;
@@ -191,6 +201,7 @@ const props = withDefaults(
     initialGoalBinding?: TaskPlanViewModel['goalBinding'];
   }>(),
   {
+    presentation: 'dialog',
     template: null,
     mode: 'create',
     saving: false,
@@ -246,6 +257,7 @@ function initializeDraft(): void {
     localTemplate.value = createEditDraft(props.template ?? null);
   }
 
+  submitError.value = '';
   isValid.value = false;
   clearGoalBindingErrors();
   draftBaseline.value = JSON.stringify(localTemplate.value);
@@ -358,6 +370,7 @@ function cancelOwner() {
   clearDraft();
   localTemplate.value = null;
   draftBaseline.value = null;
+  submitError.value = '';
   isValid.value = false;
   clearGoalBindingErrors();
   emit('dirty-change', false);
@@ -368,8 +381,13 @@ function cancelOwner() {
 const handleSave = async () => {
   if (!canSave.value) return;
   if (submitCoordinator) return submitCoordinator();
-  if (props.submitOwner) await saveOwner();
-  else if (localTemplate.value) emit('save', cloneTemplate(localTemplate.value));
+  if (props.submitOwner) {
+    try {
+      await saveOwner();
+    } catch {
+      /* saveOwner retains the draft and inline error. */
+    }
+  } else if (localTemplate.value) emit('save', cloneTemplate(localTemplate.value));
 };
 
 async function saveOwner(context?: TaskNativeSubmitContext): Promise<TaskPlanClientDTO | null> {
@@ -379,6 +397,7 @@ async function saveOwner(context?: TaskNativeSubmitContext): Promise<TaskPlanCli
     throw new Error('Task draft changed while saving workflow revision');
   if (!props.submitOwner) throw new Error('Task owner submission is unavailable');
   buildTaskPlanCreateRequest(draft, context?.createId);
+  submitError.value = '';
   submitting.value = true;
   try {
     // Native form validation precedes label commands and owner persistence.
@@ -387,7 +406,12 @@ async function saveOwner(context?: TaskNativeSubmitContext): Promise<TaskPlanCli
         ...new Set([...(draft.labelIds ?? []), ...(await resolveNames(context.pendingLabelNames))]),
       ];
     }
-    return await props.submitOwner(draft, context);
+    const saved = await props.submitOwner(draft, context);
+    if (!saved) submitError.value = t('task.error.operationFailed');
+    return saved;
+  } catch (error) {
+    submitError.value = t('task.error.operationFailed');
+    throw error;
   } finally {
     submitting.value = false;
   }

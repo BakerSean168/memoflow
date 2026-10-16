@@ -5,7 +5,12 @@
     :placeholder="placeholder"
     :rows="rows"
     :aria-invalid="ariaInvalid || undefined"
-    class="block w-full resize-none overflow-hidden border-0 bg-transparent px-0 py-1 shadow-none outline-none placeholder:text-muted-foreground focus-visible:bg-transparent focus-visible:outline-none focus-visible:ring-0"
+    class="block w-full resize-none overflow-hidden border-0 bg-transparent px-0 py-1 shadow-none outline-none placeholder:text-muted-foreground focus-visible:bg-transparent focus-visible:outline-none"
+    :class="
+      focusRing
+        ? 'rounded-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0'
+        : 'focus-visible:ring-0'
+    "
     @input="handleInput"
     @compositionstart="composing = true"
     @compositionend="handleCompositionEnd"
@@ -22,12 +27,14 @@ const props = withDefaults(
     placeholder?: string;
     rows?: number;
     ariaInvalid?: boolean;
+    focusRing?: boolean;
   }>(),
   {
     maxLength: undefined,
     placeholder: undefined,
     rows: 1,
     ariaInvalid: false,
+    focusRing: false,
   },
 );
 

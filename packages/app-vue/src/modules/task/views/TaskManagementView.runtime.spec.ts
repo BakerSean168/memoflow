@@ -253,7 +253,7 @@ describe('Task Management quick create', () => {
       const dialog = wrapper.findComponent(QuickTaskDialog);
       await wrapper.get('input').setValue('Unsaved draft');
       if (action === 'cancel') await dialog.get('button[type="button"]').trigger('click');
-      else dialog.findComponent({ name: 'DialogStub' }).vm.$emit('update:open', false);
+      else await dialog.get('[role="dialog"]').trigger('keydown', { key: 'Escape' });
       await flushPromises();
       expect(dialog.props('modelValue')).toBe(false);
       expect(mocks.route.query).toEqual(unrelated);

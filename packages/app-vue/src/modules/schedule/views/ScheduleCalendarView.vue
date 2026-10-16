@@ -1,11 +1,15 @@
 <template>
   <div
-    class="flex h-full min-h-0 flex-col overflow-hidden bg-background"
+    class="relative isolate flex h-full min-h-0 flex-col overflow-hidden bg-background"
     data-testid="schedule-calendar-view"
   >
-    <ProductSurfaceHeader family="calendar" data-testid="schedule-page-toolbar">
+    <ProductSurfaceHeader
+      :inert="showCreateDialog"
+      family="calendar"
+      data-testid="schedule-page-toolbar"
+    >
       <div
-        class="flex min-w-0 items-center gap-0.5 rounded-lg bg-[hsl(var(--surface-raised)/0.55)] p-0.5 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.55)]"
+        class="flex min-w-0 items-center gap-0.5"
         role="tablist"
         :aria-label="t('schedule.route.calendar')"
         data-testid="schedule-view-tabs"
@@ -18,11 +22,10 @@
           role="tab"
           :aria-selected="activeView === tab.value"
           :aria-label="tab.label"
+          :title="tab.label"
           :class="[
             'h-7 rounded-md px-2 text-[hsl(var(--foreground-muted))] shadow-none hover:bg-[hsl(var(--hover))] hover:text-foreground @xl/panel:px-3',
-            activeView === tab.value
-              ? 'bg-[hsl(var(--surface-overlay))] font-semibold text-foreground shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.65)]'
-              : '',
+            activeView === tab.value ? 'bg-accent font-semibold text-foreground' : '',
           ]"
           :data-testid="`schedule-view-tab-${tab.value}`"
           @click="changeView(tab.value)"
@@ -37,7 +40,7 @@
         data-testid="schedule-period-navigation"
       >
         <Button
-          variant="outline"
+          variant="ghost"
           size="icon"
           class="h-7 w-7 shrink-0 rounded-md border-transparent bg-transparent text-[hsl(var(--foreground-muted))] shadow-none hover:bg-[hsl(var(--hover))] hover:text-foreground"
           :aria-label="t('schedule.calendar.previousPeriod')"
@@ -53,7 +56,7 @@
           {{ currentPeriodTitle }}
         </p>
         <Button
-          variant="outline"
+          variant="ghost"
           size="icon"
           class="h-7 w-7 shrink-0 rounded-md border-transparent bg-transparent text-[hsl(var(--foreground-muted))] shadow-none hover:bg-[hsl(var(--hover))] hover:text-foreground"
           :aria-label="t('schedule.calendar.nextPeriod')"
@@ -63,7 +66,7 @@
           <ChevronRight class="h-4 w-4" />
         </Button>
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
           class="h-7 shrink-0 border-transparent bg-transparent px-2 text-[12px] font-medium text-[hsl(var(--foreground-muted))] shadow-none hover:bg-[hsl(var(--hover))] hover:text-foreground"
           data-testid="schedule-today"
@@ -83,7 +86,11 @@
       />
     </ProductSurfaceHeader>
 
-    <div class="min-h-0 flex-1 overflow-hidden" data-testid="schedule-calendar-content">
+    <div
+      :inert="showCreateDialog"
+      class="min-h-0 flex-1 overflow-hidden"
+      data-testid="schedule-calendar-content"
+    >
       <PlannerCalendar
         ref="plannerCalendarRef"
         :projections="projections"
@@ -128,6 +135,7 @@
     </PlannerEventDialog>
     <CreateScheduleDialog
       v-model="showCreateDialog"
+      presentation="panel"
       :schedule="editingSchedule"
       :initial-range="pendingCreateRange"
       :on-submit="handleSaveSchedule"

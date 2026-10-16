@@ -35,6 +35,40 @@ afterAll(() => {
 });
 
 describe('CreateScheduleDialog submission lifecycle', () => {
+  it('keeps a stable title error slot, rejects whitespace and disables all editable fields while saving', async () => {
+    const onSubmit = vi.fn().mockResolvedValue(false);
+    const wrapper = mount(CreateScheduleDialog, {
+      props: { modelValue: true, presentation: 'panel', onSubmit },
+      global: { plugins: [i18n] },
+    });
+    const title = wrapper.get('[data-testid="schedule-title-input"]');
+    const slot = wrapper.get('[data-testid="schedule-title-feedback"]');
+    const slotElement = slot.element;
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    await title.setValue('   ');
+    await title.trigger('blur');
+    expect(title.attributes('aria-invalid')).toBe('true');
+    expect(title.attributes('aria-describedby')).toBe(
+      wrapper.get('[role="alert"]').attributes('id'),
+    );
+    await wrapper.get('form').trigger('submit');
+    expect(onSubmit).not.toHaveBeenCalled();
+    await title.setValue('Keep this schedule');
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    expect(slot.element).toBe(slotElement);
+    await wrapper.get('form').trigger('submit');
+    await flushPromises();
+    expect(wrapper.get('[data-testid="schedule-submit-error"]').text()).toContain(
+      'Your changes are still here',
+    );
+    expect((title.element as HTMLInputElement).value).toBe('Keep this schedule');
+    await wrapper.setProps({ loading: true });
+    expect(wrapper.get('fieldset').attributes('disabled')).toBeDefined();
+    await wrapper.get('form').trigger('submit');
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    wrapper.unmount();
+  });
+
   beforeEach(() => {
     confirmMock.mockReset();
     confirmMock.mockResolvedValue(true);
@@ -420,6 +454,50 @@ describe('CreateScheduleDialog submission lifecycle', () => {
     expect(onSubmit).toHaveBeenCalledTimes(2);
     expect(onSubmit.mock.calls[0]).toEqual(onSubmit.mock.calls[1]);
     expect(wrapper.emitted('update:modelValue')).toEqual([[false]]);
+    wrapper.unmount();
+  }, 20_000);
+
+  it('inerts only the owning schedule form while a nested pane picker is open', async () => {
+    const isInert = (element: Element) =>
+      element.hasAttribute('inert') || (element as HTMLElement).inert === true;
+    const wrapper = mount(CreateScheduleDialog, {
+      props: { modelValue: true, presentation: 'panel', onSubmit: vi.fn().mockResolvedValue(true) },
+      attachTo: document.body,
+      global: { plugins: [i18n] },
+    });
+    await nextTick();
+
+    const paneHosts = () => [
+      ...document.querySelectorAll('[data-testid="pane-scoped-dialog-host"]'),
+    ];
+    expect(paneHosts()).toHaveLength(1);
+    expect(isInert(paneHosts()[0]!)).toBe(false);
+
+    await new DOMWrapper(
+      document.querySelector<HTMLButtonElement>('[data-testid="schedule-start-time-button"]')!,
+    ).trigger('click');
+    await nextTick();
+
+    // The nested picker is a sibling surface: the owning schedule form goes
+    // inert, the picker itself stays interactive, and nothing outside the
+    // pane host (the AI Chat column) is ever inerted.
+    const hosts = paneHosts();
+    expect(hosts).toHaveLength(2);
+    expect(isInert(hosts[0]!)).toBe(true);
+    expect(isInert(hosts[1]!)).toBe(false);
+    expect(hosts[0]!.contains(hosts[1]!)).toBe(false);
+    expect(document.body.hasAttribute('inert')).toBe(false);
+    expect(
+      hosts[1]!.querySelector('[data-testid="schedule-start-date-time-picker"] input'),
+    ).not.toBeNull();
+
+    // Closing the picker hands interaction straight back to the form.
+    const pickerCancel = hosts[1]!.querySelector<HTMLButtonElement>('footer button')!;
+    await new DOMWrapper(pickerCancel).trigger('click');
+    await nextTick();
+    const restored = paneHosts();
+    expect(restored).toHaveLength(1);
+    expect(isInert(restored[0]!)).toBe(false);
     wrapper.unmount();
   }, 20_000);
 });

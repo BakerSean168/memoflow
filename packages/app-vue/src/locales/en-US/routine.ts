@@ -27,6 +27,7 @@ export default {
     overrides: 'Temporary state',
   },
   profile: {
+    nameRequired: 'Enter a profile name',
     title: 'Contexts',
     all: 'All',
     filter: 'Context',
@@ -107,6 +108,8 @@ export default {
     snooze10m: 'Remind in 10 min',
   },
   form: {
+    invalidTiming: 'Check the time, time zone and recurrence dates',
+    nameRequired: 'Enter a routine name',
     name: 'Name',
     namePlaceholder: 'Routine name',
     nameLimitExceeded: 'Routine name cannot exceed 100 characters',

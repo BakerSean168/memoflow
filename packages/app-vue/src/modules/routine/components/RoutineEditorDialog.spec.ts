@@ -112,6 +112,49 @@ async function editNumber(name: string, value: string) {
 }
 
 describe('RoutineEditorDialog Product controls', () => {
+  it('shows required feedback only after blur and keeps a failed save draft editable', async () => {
+    const wrapper = await openEditor();
+    const name = testId('routine-name-input');
+    expect(name.attributes('aria-invalid')).toBeUndefined();
+    await name.trigger('blur');
+    expect(name.attributes('aria-invalid')).toBe('true');
+    expect(testId('routine-name-limit-error').text()).toBe('Enter a routine name');
+    await name.setValue('Keep my draft');
+    expect(document.querySelector('[data-testid="routine-name-limit-error"]')).toBeNull();
+    expect(name.classes()).toContain('focus-visible:ring-2');
+    await wrapper.setProps({ submitError: 'Offline: try again' });
+    expect(testId('routine-submit-error').attributes('title')).toBe('Offline: try again');
+    expect((name.element as HTMLTextAreaElement).value).toBe('Keep my draft');
+    await element('#routine-editor-form').trigger('submit');
+    expect(wrapper.emitted('save')?.at(-1)?.[0]).toMatchObject({ name: 'Keep my draft' });
+  });
+
+  it('keeps name and description limit feedback within a reserved accessible line', async () => {
+    await openEditor();
+
+    const name = testId('routine-name-input');
+    expect(name.attributes('aria-describedby')).toBeUndefined();
+    expect(name.element.nextElementSibling?.classList.contains('min-h-4')).toBe(true);
+    await name.setValue('n'.repeat(101));
+    await flushPromises();
+
+    expect((name.element as HTMLTextAreaElement).value).toHaveLength(100);
+    expect(name.attributes('aria-describedby')).toBe('routine-name-limit-feedback');
+    expect(testId('routine-name-limit-error').attributes('role')).toBe('alert');
+    expect(testId('routine-name-limit-error').classes()).toContain('truncate');
+    expect(name.classes()).toContain('focus-visible:ring-2');
+
+    const description = testId('routine-description-input');
+    expect(description.element.nextElementSibling?.classList.contains('min-h-4')).toBe(true);
+    await description.setValue('d'.repeat(2001));
+    await flushPromises();
+
+    expect((description.element as HTMLTextAreaElement).value).toHaveLength(2000);
+    expect(description.attributes('aria-describedby')).toBe('routine-description-limit-feedback');
+    expect(testId('routine-description-limit-error').attributes('role')).toBe('alert');
+    expect(description.classes()).toContain('focus-visible:ring-2');
+  });
+
   it('defaults a new WallClock to Product zone and Product today', async () => {
     // A fixed instant is already the following day in the Product zone.
     vi.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-10-01T20:00:00Z'));

@@ -1,5 +1,10 @@
 <template>
-  <section class="space-y-4">
+  <section
+    class="space-y-4"
+    role="group"
+    :aria-label="t('task.timeConfig.title')"
+    :aria-describedby="Boolean(validationError) ? 'task-time-validation' : undefined"
+  >
     <div>
       <div class="mb-4">
         <div class="px-1 pb-1.5 text-xs text-muted-foreground">
@@ -185,9 +190,11 @@
       </div>
 
       <!-- 验证提示 -->
-      <Alert v-if="validationError" variant="destructive" class="mt-2">
-        <AlertDescription>{{ validationError }}</AlertDescription>
-      </Alert>
+      <ProductInlineValidation
+        id="task-time-validation"
+        :visible="Boolean(validationError)"
+        :message="validationError ?? ''"
+      />
     </div>
   </section>
 </template>
@@ -201,8 +208,6 @@ import type { TaskPlanViewModel } from '../../types';
 import {
   Button,
   Label,
-  Alert,
-  AlertDescription,
   Select,
   SelectTrigger,
   SelectValue,
@@ -211,7 +216,7 @@ import {
 } from '@memoflow/ui-vue-shadcn';
 import { translateResultError } from '../../../../../shared/utils/translate-result-error';
 import { padTwoDigits } from '../../../../../shared/utils/pad-two-digits';
-import { ProductDatePicker } from '../../../../../shared/components';
+import { ProductDatePicker, ProductInlineValidation } from '../../../../../shared/components';
 import { CalendarDays, Check, Clock3, Timer } from '@lucide/vue';
 import { requireYmd, type Ymd } from '@memoflow/contracts/primitives';
 

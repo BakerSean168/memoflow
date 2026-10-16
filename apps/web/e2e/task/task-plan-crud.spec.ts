@@ -53,7 +53,9 @@ test.describe('Task Plan CRUD Operations', () => {
     await taskTitleInput(page).fill(planTitle);
     await taskDescriptionInput(page).fill('Verifies checklist create and occurrence persistence.');
 
-    const dialogBodyBox = await dialog.getByTestId('product-dialog-body').boundingBox();
+    // The pane-scoped editor keeps its fixed-height workspace body scrollable
+    // through the pane dialog scroll host; the checklist must still reach its bottom.
+    const dialogBodyBox = await dialog.locator('[data-scroll-host="pane-dialog"]').boundingBox();
     const checklistBox = await dialog.getByTestId('task-checklist-editor').boundingBox();
     if (!dialogBodyBox || !checklistBox) {
       throw new Error('Expected Task workspace body and checklist geometry to be measurable');
@@ -347,7 +349,20 @@ test.describe('Task Plan CRUD Operations', () => {
     await expect(toolbar).toHaveAttribute('data-instance-probe', 'stable');
     await expect(statusFilter).toBeVisible();
     await expect(statusFilter).toContainText(/Pending|待处理/);
-    await expect(statusFilter).toBeFocused();
+    // Pin the resize gesture's focus contract; the retry reports the actual
+    // focus owner on failure so CI-only focus thieves are identifiable from
+    // the log alone.
+    await expect(async () => {
+      const focusOwner = await page.evaluate(() => {
+        const element = document.activeElement;
+        if (!element || element === document.body) return 'body';
+        return (
+          element.getAttribute('data-testid') ??
+          `${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ''}`
+        );
+      });
+      expect(focusOwner).toBe('task-status-filter');
+    }).toPass({ timeout: 10_000 });
     expect(await scrollHost.evaluate((element) => element.scrollTop)).toBe(96);
     await expectToolbarToFit(toolbar);
 

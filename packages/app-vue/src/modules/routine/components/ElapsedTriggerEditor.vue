@@ -36,7 +36,7 @@
     </ProductPopoverSurface>
   </Popover>
 
-  <DropdownMenu>
+  <DropdownMenu :modal="false">
     <DropdownMenuTrigger as-child>
       <ProductPropertyChip
         :disabled="disabled"

@@ -53,6 +53,7 @@ function clearSelection(): void {
         aria-haspopup="listbox"
         :aria-expanded="open"
         :aria-label="ariaLabel"
+        :title="label"
         :disabled="disabled"
         data-testid="label-filter-trigger"
       >

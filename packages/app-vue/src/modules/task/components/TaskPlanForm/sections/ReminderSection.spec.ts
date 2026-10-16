@@ -1,5 +1,6 @@
 /** @vitest-environment happy-dom */
 import { mount } from '@vue/test-utils';
+import { nextTick } from 'vue';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it } from 'vitest';
 import { ReminderTimeUnit, TaskReminderType } from '@memoflow/contracts/task';
@@ -69,6 +70,30 @@ function plan(): TaskPlanViewModel {
 }
 
 describe('ReminderSection multi-trigger parity', () => {
+  it('keeps validation in one reserved line and clears it after correcting a trigger', async () => {
+    const invalid = plan();
+    invalid.reminderConfig!.triggers[0]!.relativeValue = -1;
+    const wrapper = mount(ReminderSection, {
+      props: { modelValue: invalid },
+      global: { plugins: [i18n] },
+    });
+    await nextTick();
+    const slot = wrapper.get('[aria-live="polite"]');
+    const slotElement = slot.element;
+    expect(slot.classes()).toContain('min-h-4');
+    const error = wrapper.get('[role="alert"]');
+    expect(error.classes()).toContain('truncate');
+    expect(error.attributes('title')).toContain('positive value');
+    expect(wrapper.attributes('aria-describedby')).toBe(error.attributes('id'));
+    await wrapper
+      .get('[data-testid="task-reminder-trigger-0"] input[type="number"]')
+      .setValue('15');
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    expect(wrapper.get('[aria-live="polite"]').element).toBe(slotElement);
+    expect(wrapper.emitted('update:validation')?.at(-1)).toEqual([true]);
+    wrapper.unmount();
+  });
+
   it('preserves multiple triggers and can append another trigger without collapsing the existing set', async () => {
     const wrapper = mount(ReminderSection, {
       props: { modelValue: plan() },

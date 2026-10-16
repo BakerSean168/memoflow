@@ -30,7 +30,7 @@
     <div class="routine-property-row">
       <span class="routine-property-label">{{ t('routine.form.frequency') }}</span>
       <div class="flex justify-end">
-        <DropdownMenu>
+        <DropdownMenu :modal="false">
           <DropdownMenuTrigger as-child>
             <ProductPropertyChip
               :disabled="disabled"
