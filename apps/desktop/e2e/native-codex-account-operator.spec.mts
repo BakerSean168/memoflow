@@ -127,13 +127,19 @@ test('operator-approved installed Windows Codex A-B-A Home isolation and native 
     const picker = first.window.getByTestId('ai-chat-model-selector');
     await expect(picker).toBeVisible();
     await picker.click();
+    // Sidebar browsing is read-only; the explicit Select Agent button
+    // materializes the default only after the user confirms the selection.
     await first.window.getByTestId('ai-model-picker-agent-local:codex').click();
+    expect((await connections(app)).data).toEqual([]);
+    await first.window.getByTestId('ai-model-picker-select-agent').click();
     await expect
       .poll(async () => (await connections(app!)).data as Array<{ id: string; driver: string }>)
       .toEqual([expect.objectContaining({ driver: 'codex' })]);
     const persisted = (await connections(app)).data as Array<{ id: string; driver: string }>;
     expect(persisted).toHaveLength(1);
     selectedId = persisted[0]!.id;
+    // Selecting the Agent closes the picker; reopen it for a native Model ID.
+    await picker.click();
     await expect(first.window.getByTestId('ai-model-picker-option').first()).toBeVisible();
     await first.window.getByTestId('ai-model-picker-option').first().click();
     await first.window.getByTestId('ai-chat-composer').fill('UNSENT read-only Codex QA draft');
