@@ -2,7 +2,10 @@ import { z } from 'zod';
 import { randomBytes } from 'node:crypto';
 import { LocalAgentToolBridge, LocalAgentRepository, type LocalToolContext } from '@memoflow/ai';
 import type { IKnowledgeSourcePort, KnowledgeSourceNote } from '@memoflow/ai/ports';
-import { KnowledgeDocumentIdSchema } from '@memoflow/contracts/repository';
+import {
+  KnowledgeDocumentIdSchema,
+  KnowledgeDocumentIdWireSchema,
+} from '@memoflow/contracts/repository';
 import {
   createTaskPowerSyncReadQueries,
   createTaskPowerSyncAgentMutations,
@@ -60,7 +63,7 @@ export function createDesktopLocalAgentTools(
     registerTools(server, context: LocalToolContext) {
       if (knowledge) {
         const reference = z.object({
-          documentId: KnowledgeDocumentIdSchema,
+          documentId: KnowledgeDocumentIdWireSchema,
           url: z.string().max(1024),
           spaceId: z.string(),
           path: z.string(),
@@ -140,7 +143,7 @@ export function createDesktopLocalAgentTools(
               'Read one managed local Vault note by the stable documentId from knowledge_search. Source paths are references, never write permissions.',
             inputSchema: z
               .object({
-                documentId: KnowledgeDocumentIdSchema,
+                documentId: KnowledgeDocumentIdWireSchema,
                 spaceId: z.string().min(1).max(512).optional(),
               })
               .strict(),
@@ -151,7 +154,7 @@ export function createDesktopLocalAgentTools(
             read(async () => {
               const note = await knowledge.getNoteById(
                 context.identityId,
-                input.documentId,
+                KnowledgeDocumentIdSchema.parse(input.documentId),
                 input.spaceId,
               );
               if (!note) return { note: null };

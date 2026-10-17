@@ -55,6 +55,41 @@ it('reads a confirmed local Vault note through MCP and rejects paths as document
       conversationId: 'test',
       runId: 'test',
     });
+    // The modern MCP tools/list response must be JSON-Schema serializable.
+    // Domain KnowledgeDocumentIdSchema uses Zod .transform() and must never
+    // be exposed directly as an MCP output schema (SDK returns -32603).
+    const catalogResponse = await fetch(grant.url, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${grant.token}`,
+        accept: 'application/json, text/event-stream',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 19, method: 'tools/list' }),
+    });
+    expect(catalogResponse.status).toBe(200);
+    // Stateless MCP may return a JSON-RPC frame directly or as an SSE data event.
+    const catalogBody = await catalogResponse.text();
+    const frame = catalogBody.trimStart().startsWith('{')
+      ? catalogBody
+      : catalogBody
+          .split('\n')
+          .find((line) => line.startsWith('data: '))
+          ?.slice('data: '.length);
+    expect(frame, 'MCP tools/list must return a JSON-RPC result frame').toBeTruthy();
+    const catalog = JSON.parse(frame!);
+    expect(catalog.error).toBeUndefined();
+    const knowledgeEntries = catalog.result.tools.filter((tool: { name: string }) =>
+      tool.name.startsWith('knowledge_'),
+    ) as Array<{ name: string; inputSchema: unknown; outputSchema: unknown }>;
+    expect(knowledgeEntries.map((tool) => tool.name)).toEqual(
+      expect.arrayContaining(['knowledge_search', 'knowledge_get']),
+    );
+    for (const tool of knowledgeEntries) {
+      expect(tool.inputSchema).toMatchObject({ type: 'object' });
+      expect(tool.outputSchema).toMatchObject({ type: 'object' });
+    }
+
     async function call(name: string, args: unknown) {
       return (
         await fetch(grant.url, {

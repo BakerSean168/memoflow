@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { CreateConfirmedKnowledgeNoteSchema, KnowledgeDocumentIdSchema } from '..';
+import { z } from 'zod';
+import {
+  CreateConfirmedKnowledgeNoteSchema,
+  KnowledgeDocumentIdSchema,
+  KnowledgeDocumentIdWireSchema,
+} from '..';
 
 const DOCUMENT_ID = 'kdoc_550e8400-e29b-41d4-a716-446655440390';
 
@@ -23,6 +28,17 @@ describe('ADR-090 KnowledgeDocumentId contracts', () => {
     expect(KnowledgeDocumentIdSchema.parse(DOCUMENT_ID)).toBe(DOCUMENT_ID);
     expect(KnowledgeDocumentIdSchema.safeParse('KnowledgeDocumentId_123').success).toBe(false);
     expect(KnowledgeDocumentIdSchema.safeParse('kdoc_notes-architecture').success).toBe(false);
+  });
+
+  it('retains strict ID validation in the MCP wire schema without a non-serializable transform', () => {
+    expect(KnowledgeDocumentIdWireSchema.parse(DOCUMENT_ID)).toBe(DOCUMENT_ID);
+    expect(KnowledgeDocumentIdWireSchema.safeParse('kdoc_notes-architecture').success).toBe(false);
+    const outputSchema = z.toJSONSchema(z.object({ documentId: KnowledgeDocumentIdWireSchema }), {
+      io: 'output',
+    });
+    expect(outputSchema.properties).toMatchObject({
+      documentId: { type: 'string' },
+    });
   });
 
   it('accepts a matching explicit memoflow_id marker', () => {

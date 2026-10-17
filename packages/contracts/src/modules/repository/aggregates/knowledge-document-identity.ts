@@ -7,13 +7,18 @@ import { ID_PREFIXES } from '../../../primitives/ids';
 const UUID_BODY = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
 
 /** Exact external marker format stored as `memoflow_id` in Markdown frontmatter. */
-export const KnowledgeDocumentIdSchema = z
+/** Public MCP wire form: same strict validation, but JSON Schema serializable. */
+export const KnowledgeDocumentIdWireSchema = z
   .string()
   .regex(
     new RegExp(`^${ID_PREFIXES.KnowledgeDocumentId}_${UUID_BODY}$`, 'i'),
     'Invalid KnowledgeDocumentId',
-  )
-  .transform((value): KnowledgeDocumentId => value as KnowledgeDocumentId);
+  );
+
+/** Domain form preserves the nominal identifier after wire validation. */
+export const KnowledgeDocumentIdSchema = KnowledgeDocumentIdWireSchema.transform(
+  (value): KnowledgeDocumentId => value as KnowledgeDocumentId,
+);
 
 export const KnowledgeDocumentIdentityOriginSchema = z.enum([
   'MemoFlowCreated',
