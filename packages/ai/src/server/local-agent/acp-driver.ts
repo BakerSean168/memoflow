@@ -171,7 +171,16 @@ export class AcpDriver {
       : this.connection.executablePath;
     if (antigravity && !antigravityHasCachedAuth(this.connection.homePath))
       throw new LocalAgentError('LOCAL_AGENT_LOGIN_REQUIRED');
-    if (antigravity) this.temporaryDirectory = await mkdtemp(join(tmpdir(), 'mf-agy-'));
+    if (antigravity) {
+      this.temporaryDirectory = await mkdtemp(join(tmpdir(), 'mf-agy-'));
+      if (this.cancelled) {
+        // cancel() may finish close() while filesystem preflight is still pending.
+        // Do not spawn or authenticate a native process after the turn is stopped.
+        await rm(this.temporaryDirectory, { recursive: true, force: true });
+        this.temporaryDirectory = undefined;
+        throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
+      }
+    }
     const transport = this.makeTransport({
       protocol: 'acp',
       driver: this.connection.driver,

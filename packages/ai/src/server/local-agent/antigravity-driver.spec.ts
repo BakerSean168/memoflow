@@ -11,9 +11,25 @@ import type { NativeProcessOptions, NativeRpcTransport } from './native-rpc-tran
 import { nativeIdentity, nativeModelVisibilityContext } from './native-identity';
 import { LocalAgentError, type LocalAgentFailureCode } from '../../shared/local-agent-error';
 
+const temporaryPreflight = vi.hoisted(() => ({
+  onCreated: undefined as ((directory: string) => void) | undefined,
+}));
+vi.mock('node:fs/promises', async (importOriginal) => {
+  const original = await importOriginal<typeof import('node:fs/promises')>();
+  return {
+    ...original,
+    mkdtemp: async (prefix: string) => {
+      const directory = await original.mkdtemp(prefix);
+      if (prefix.endsWith('mf-agy-')) temporaryPreflight.onCreated?.(directory);
+      return directory;
+    },
+  };
+});
+
 const homes: string[] = [];
 afterEach(async () => {
   vi.unstubAllEnvs();
+  temporaryPreflight.onCreated = undefined;
   await Promise.all(homes.splice(0).map((home) => rm(home, { recursive: true, force: true })));
 });
 
@@ -394,4 +410,19 @@ it('cancels pending native permission without accepting a stale response or gran
     method: 'session/cancel',
     params: { sessionId: 'agy-session' },
   });
+});
+
+it('stops during asynchronous native preflight without spawning an Agent or leaking its temporary directory', async () => {
+  const fixture = await setup();
+  const driver = fixture.make();
+  let directory = '';
+  temporaryPreflight.onCreated = (created) => {
+    directory = created;
+    driver.cancel();
+  };
+  const events = await collect(driver);
+  expect(events).toEqual([{ type: 'cancelled' }]);
+  expect(fixture.transports).toHaveLength(0);
+  expect(directory).not.toBe('');
+  expect(existsSync(directory)).toBe(false);
 });
