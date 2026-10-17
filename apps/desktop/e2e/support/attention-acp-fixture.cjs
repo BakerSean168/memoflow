@@ -1,5 +1,7 @@
 'use strict';
 
+const fs = require('node:fs');
+
 // Test-only DSH/ACP JSON-RPC peer. Never connects to a model or the network.
 // Production Desktop does not load this file. A test-owned isolated executable
 // path is passed through the same public Native Connection IPC as user settings.
@@ -42,15 +44,19 @@ process.stdin.on('data', (chunk) => {
         ],
       };
     } else if (request.method === 'session/prompt') {
-      // Deterministic native failure after the real LocalAgent runtime has
-      // emitted assistant.run.started. This is NOT a genuine upstream 429.
-      process.stdout.write(
-        JSON.stringify({
-          jsonrpc: '2.0',
-          id: request.id,
-          error: { code: -32001, message: 'Offline QA fixture: execution unavailable' },
-        }) + '\n',
-      );
+      if (process.env.MEMOFLOW_ATTENTION_QA_PROMPT_LOG)
+        fs.appendFileSync(process.env.MEMOFLOW_ATTENTION_QA_PROMPT_LOG, '1');
+      // Deliberately simulate transport-level native ACP errors after a real
+      // Desktop assistant.run.started. These are NOT real upstream responses.
+      // A diagnostic marker must NEVER be forwarded to UI events or storage.
+      const mode = process.env.MEMOFLOW_ATTENTION_QA_FAILURE;
+      const error =
+        mode === 'rate_limited'
+          ? { code: 429, message: 'Too Many Requests PRIVATE_ACP_QA_DIAGNOSTIC' }
+          : mode === 'quota_exhausted'
+            ? { code: -32001, message: '429 insufficient_quota PRIVATE_ACP_QA_DIAGNOSTIC' }
+            : { code: -32001, message: 'Offline QA fixture: execution unavailable' };
+      process.stdout.write(JSON.stringify({ jsonrpc: '2.0', id: request.id, error }) + '\n');
       continue;
     } else {
       process.stdout.write(
