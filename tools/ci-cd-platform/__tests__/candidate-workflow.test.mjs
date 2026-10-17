@@ -52,6 +52,19 @@ test('staging promotion is freshness-gated and moves only coherent digest identi
   assert.doesNotMatch(workflow, /gh release/u);
 });
 
+test('candidate registry reuse inspects OCI revision labels with valid Go template quoting', async () => {
+  const workflow = await read('.github/workflows/candidate-publish.yml');
+  const revisionChecks = [
+    ...workflow.matchAll(/--format '(\{\{index \.Config\.Labels [^']+\}\})'/gu),
+  ];
+  assert.equal(revisionChecks.length, 3, 'all 3 candidate revision checks must be present');
+  for (const [, template] of revisionChecks) {
+    // The outer shell quotes already protect the template. Escaped double quotes
+    // are passed to Docker literally, causing a Go template parsing error.
+    assert.equal(template, '{{index .Config.Labels "org.opencontainers.image.revision"}}');
+  }
+});
+
 test('candidate workflow pins every third-party Action to an immutable commit', async () => {
   const workflow = await read('.github/workflows/candidate-publish.yml');
   const uses = [...workflow.matchAll(/^\s*uses:\s*([^\s#]+)(?:\s+#.*)?$/gmu)].map(

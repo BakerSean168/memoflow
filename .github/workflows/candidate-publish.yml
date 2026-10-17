@@ -346,7 +346,7 @@ jobs:
             global_digest="$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$global_ref" --format '{{.Manifest.Digest}}')"
             test "$china_digest" = "$global_digest"
             bash ./tools/ci-cd-platform/registry-operation-retry.sh docker pull "$china_ref" >/dev/null
-            test "$(docker image inspect "$china_ref" --format '{{index .Config.Labels \"org.opencontainers.image.revision\"}}')" = "${{ needs.resolve.outputs.revision }}"
+            test "$(docker image inspect "$china_ref" --format '{{index .Config.Labels "org.opencontainers.image.revision"}}')" = "${{ needs.resolve.outputs.revision }}"
             echo 'reuse=true' >> "$GITHUB_OUTPUT"
             echo "digest=$china_digest" >> "$GITHUB_OUTPUT"
           else
