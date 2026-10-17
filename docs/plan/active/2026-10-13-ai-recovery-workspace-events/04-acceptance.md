@@ -160,3 +160,15 @@ S0 conformance：A01–A04 由原生 owner 与 composable/Shell 测试覆盖；A
 - Windows Playwright **1/1 passed**，测试案例 8.5 秒、总运行 9.2 秒、退出码 0；无 Agent Tool Grant、无自动重试、无额外推理。密钥和原生认证文件均未读取/复制/记录。测试数据使用独立临时 Guest/Profile 并在测试后销毁。
 - 已添加可复用的 `apps/desktop/e2e/live-dsh-operator.spec.mts`。**默认一律跳过**；仅 Windows 操作者明确设置 `MEMOFLOW_RUN_LIVE_DSH_QA=CONFIRM_ONE_PAID_REQUEST`，同时指定 `MEMOFLOW_QA_DSH_EXECUTABLE`、使用已经单独完成认证的 DSH CLI，并在独立构建环境中调用时才会发起最多一条真实推理。CI 不应设置该授权变量；脚本不输出原生认证数据或模型全文。
 - **尚未完成**：由**真实上游返回**的 429/quota（不能通过大量请求人为触发）、Composer/Goal 草稿无损恢复、Goal 人工确认和唯一保存、跨账户真实身份切换、签名正式安装包同版本的 Live Provider 发送。此项仅证明隔离开发构建的普通 DSH Flash 成功路径，#454/#456/#457 **均继续 Open**，不解除 Release、Prod-like 或 Prod 门禁。
+
+## 2026-10-17 · Release 冻结下的 Windows 安装版 Native QA 补强（待独立验收）
+
+本轮源码基线 main@90bd7caa73e2522351e4acfef351f51d26debd36，使用独立分支 test/windows-native-installed-acceptance-20261017，**不进行任何正式 Release / 生产部署**。功能范围是补齐 #454/#456/#457 的可复用验收缺口，不把创建测试等同于测试成功。
+
+- Windows Desktop Update Installed E2E 新增**无认证 Codex 安装版**测试：更新 N→N+1 后，从安装证明取得 exe 路径、版本和独立记录的 SHA-256；另起临时 MemoFlow Profile 和空 Codex Home，验证不能伪造账号/模型，也不能仅探测就创建 Connection。保留原 AGY 离线 Composer 测试。
+- Windows updater 安装报告新增 installedExecutableSha256，Workflow 在另一个 Playwright 进程重新计算比对；Playwright 再核对运行 exe 的哈希、版本和 packaged 状态。须由本轮精确 SHA 的真实 GitHub Windows Run 通过才可标为完成。
+- 新增**人工显式同意、零推理**的 Codex 真实 Windows A→空 B→A 测试：只查账号和模型目录，明确选择 Native Agent 后仅一个 Connection、显示可选模型但**不点击发送**，空 Home 不能继承认证信息，恢复 A 后身份/连接可用。默认无 opt-in 跳过；不读取/复制认证文件，不记录用户邮箱。
+- 真实 DSH Send 测试支持指定**已安装**可执行文件及对应 app.asar preload，默认仍因需单独授权而跳过；之前的 DSH Windows 实时发送证据仅绑定开发态构建。
+- 本轮 Linux 的 Windows 专用 3 项 Playwright 收集均显示 Skip（符合默认安全要求），**不是 Windows 实机通过**。最新 Windows NSIS E2E、操作员真实账号、Profile 隔离与签名安装候选仍需独立结果。#454/#456/#457 **保持 Open**。
+
+参见 windows-native-provider-operator-qa.md。三个发布工作流必须保持 disabled_manually，任何 CI 或 staging 通过不构成发布授权。

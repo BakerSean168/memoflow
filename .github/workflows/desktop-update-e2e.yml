@@ -251,6 +251,12 @@ jobs:
           if (-not $report.receiptCleared) {
             throw "Desktop Update E2E receipt was not cleared"
           }
+          if ($report.installedExecutableSha256 -notmatch '^[0-9a-f]{64}$') {
+            throw 'Installed candidate did not carry a valid SHA256 receipt'
+          }
+          if ((Get-FileHash -LiteralPath $report.installedExecutable -Algorithm SHA256).Hash.ToLowerInvariant() -ne $report.installedExecutableSha256) {
+            throw 'Installed executable hash differs from the completed update proof'
+          }
           if ($report.profileRegistrySemanticSha256Before -ne $report.profileRegistrySemanticSha256After) {
             throw "Profile registry semantic identity drifted across update"
           }
@@ -268,7 +274,11 @@ jobs:
             throw 'An independently verified installed executable is required'
           }
           $env:MEMOFLOW_PACKAGED_EXECUTABLE = $report.installedExecutable
-          pnpm exec playwright test e2e/antigravity-composer.spec.mts --config playwright.config.ts --workers=1
+          $env:MEMOFLOW_QA_EXPECTED_EXE_SHA256 = $report.installedExecutableSha256
+          $env:MEMOFLOW_QA_EXPECTED_VERSION = $report.expectedVersion
+          # The Codex case uses an empty native Home and cannot access real
+          # accounts; the authorized live-account and paid DSH tests stay opt-in.
+          pnpm exec playwright test e2e/antigravity-composer.spec.mts e2e/native-codex-unconfigured-installed.spec.mts --config playwright.config.ts --workers=1
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Upload installed Windows Native Composer evidence

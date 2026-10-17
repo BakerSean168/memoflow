@@ -92,3 +92,16 @@ Windows/macOS 实机及真实 provider 推理不在本机 Chromium/受控 workfl
 `main@331bdb0f7d549d11b1ad7632cabf1a5a22385886` 的 Windows Electron 真实 IPC/Conversation event 订阅、ACK、重放、Guest 身份隔离已通过（见 `04-acceptance.md`）；同版本 Windows NSIS / Linux AppImage 更新测试通过。此次新增自动化 `apps/desktop/e2e/workspace-ipc.spec.mts` 与 Windows Workflow 门禁，目的是让后续 exact-SHA 候选持续复验上述已经观察的行为。
 
 仍保持 Goal/Attention Windows 事件端到端、实际可用 non-Codex provider 上游 429/quota、中断后原生 Goal 草稿 handoff 与重复保存防护为**未完全验收**。尚未获得这些真实证据，不关闭 #454 / #456 / #457，不声明正式发布。
+
+## 2026-10-17 · 版本发布冻结后的增量审计边界
+
+**当前冻结对象**：main@90bd7caa73e2522351e4acfef351f51d26debd36 / source 0.20.1。Latest Published 仍为 v0.19.0，v0.20.0 是未公开 Draft，v0.20.1 尚未发布。此文件早期 S0–S7 的结果属于当时源码与环境，不能自动推断新源码已完成所有产品验收。
+
+本轮在**实质性 Native Windows 验收代码 PR** 中补充 #454/#456/#457 的 Release 候选实测链路：
+
+1. 默认 CI：安装版 N→N+1、installedExecutableSha256 跨步骤一致性、安装后空 Codex Home 登录/模型/连接副作用防护，及原 AGY 离线 Composer；不使用真实认证。
+2. 操作员显式同意的私有检查：同 SHA/版本/哈希已安装 Electron、真实 Windows Codex 账号 A→空 B→A；只查询账号和模型、明确选择 Agent，**0 次推理**。
+3. 另需**单独明确授权**的安装版 DSH 真实 Send，检查流式终态和持久聊天；本轮绝不默认触发。
+4. 真实上游 429 不可通过耗尽额度制造；已有注入 429/quota 只能证明应用内部分类、Attention、草稿和重复保存，不能描述为上游 429 实测。
+
+**代码、类型检查、CI 成功**与**Windows 实机、签名安装候选、真实账号验收**分别记账；CI 离线夹具不等同于正式签名客户端。完整证据见 04-acceptance.md 同期增量记录。新分支 Windows CI、操作员证据须逐项核对后才更新完成状态。发版必须等待全部 Issue DoD、精确版本 SHA、Windows/其他平台及项目级 Go/No-Go 验收一致，**保持 #454/#456/#457 Open，禁止发布**。
