@@ -308,7 +308,7 @@
       "executor": "nx:run-commands",
       "cache": false,
       "options": {
-        "command": "node ../../node_modules/@playwright/test/cli.js test e2e/packaged-runtime/packaged-runtime.spec.ts --config playwright.config.ts",
+        "command": "node ../../node_modules/@playwright/test/cli.js test e2e/packaged-runtime/packaged-runtime.spec.ts e2e/packaged-runtime/provider-layout-window.spec.ts --config playwright.config.ts --workers=1",
         "cwd": "apps/desktop"
       }
     }
