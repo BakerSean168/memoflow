@@ -1,12 +1,30 @@
 ---
 tags: [plan, acceptance, ai, goal, events]
-status: in-progress
+status: completed
 created: 2026-10-14T00:00:00Z
-updated: 2026-10-14T00:00:00Z
+updated: 2026-10-17T00:00:00Z
 description: S0–S7 接管审计、当前候选验收矩阵和交付证据
 ---
 
 # 最终接管审计
+
+## 2026-10-17 · S0–S7 最终关闭与归档决定
+
+| 验收门槛                            | 结果                 | 可追溯证据                                                          |
+| ----------------------------------- | -------------------- | ------------------------------------------------------------------- |
+| 源码、类型、治理及覆盖率            | PASS                 | main f3fa740b0ed5；CI 39039134084、Coverage 39039134090             |
+| Windows NSIS 与 Linux AppImage 更新 | PASS                 | 统一精确源码运行 39039153773，两个平台 success                      |
+| Windows 真实安装版 Native/Workspace | 9/9 PASS，0 skip     | 同 run Playwright + JUnit；EXE SHA256 11c46fda…7157464              |
+| Windows 安装版 Provider UI          | 2/2 PASS             | 同 run packaged-runtime 真实桌面报告（840/1280/1600）               |
+| Windows Codex 真实 A→空 B→A         | 1/1 PASS，0 付费请求 | 同一真实 EXE、只读账户/模型目录、显式 Select Agent、单一 Connection |
+| ACP quota/429 与 Goal 人工草稿恢复  | 按原 DoD PASS        | 六种离线故障、真实 Windows Goal 双案例、S0–S7 A01–A23               |
+| 已授权非 Codex 真正成功 Send        | PASS（历史 SHA）     | 先前 Windows MemoFlow Desktop IPC → DSH Flash 流式/持久化记录       |
+| #454/#456/#457                      | CLOSED               | GitHub Issues 2026-10-17 收口记录                                   |
+| 正式版本发布                        | 未执行               | 未签名 QA 候选；三个发行工作流维持禁用                              |
+
+此表为该专项的最终完成基线；下面的「尚未推送」「Windows 待验收」「不可关闭」等文字均为对应日期的历史检查点，不再构成当前产品阻塞。正式发行签名、资产审核与发布决策属于独立 Release 生命周期，不需要强行触发新的产品实现 Issue，也不能将 0.20.1 候选称为 Published Release。
+
+---
 
 接管基线 `20b4c81a440`，PR #451 的接管时远端 HEAD 为 `18210ad0f9f`。
 历史日志不能证明最终候选通过；本轮证据保存在 `reports/s0s7-final/`，正式容器报告在

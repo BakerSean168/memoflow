@@ -1,12 +1,18 @@
 ---
 tags: [plan, ai, goal, events]
-status: in-progress
+status: completed
 created: 2026-10-13T00:00:00Z
-updated: 2026-10-13T00:00:00Z
+updated: 2026-10-17T00:00:00Z
 description: Goal Embedded 后续优化：失败恢复、原生草稿交接与可靠事件同步的实施入口
 ---
 
 # AI 失败恢复与 Workspace 事件同步
+
+## 最终状态（2026-10-17）
+
+本专项 S0–S7 已完成，验收 A01–A23、真实 PostgreSQL/LibSQL、浏览器与 Windows Desktop 安装版均有实测证据。主分支候选 f3fa740b0ed5a55ca6bf7f472bff1aba560e806c 的 CI、Coverage、Windows NSIS、Linux AppImage、Windows Native/Workspace 9/9 均通过。真实 Windows Codex 账号 A→空账号 B→恢复 A 也在该哈希的实际可执行文件上通过，未进行付费模型调用。
+
+对应 Issue #454、#456、#457 均已关闭；原始业务验收与正式版本发布分离。最新正式版仍是 v0.19.0，发布工作流手动禁用。下列 2026-10-13～16 的未完成文字是历史阶段记录，不能再作为当前任务状态。
 
 用户已授权在 `feat/goal-pane-embedded-editor-20261013` / PR #451 继续优化，先评审并形成系列文档，再开始实施。本计划落实该方向；不将整套事件架构标记为已交付。
 
@@ -36,4 +42,4 @@ S5 已接通 Attention 的 PostgreSQL 原生事务触发器与 Desktop PowerSync
 
 S6 Conversation 精确事件同步与 S7 独立人工草稿检查点现已有工作区代码及定向测试。2026-10-14 续跑已验证 Conversation 的 PowerSync 版本事件、独立测试 PostgreSQL 事务/删除和 Workspace 多 owner 游标；Goal 检查点的原生保存回归与 Workflow 已创建 Goal 的字符串 ID 恢复核验也已通过。当前实现已在本地提交 `9f6e9e33237`、尚未推送，完整 Desktop 集成、prod-like 部署与当前候选 CI 尚未全面通过，不能宣称 S0–S7 最终交付；详见验收文档。
 
-这是 [AI Interaction / Goal Workflow Convergence](../2026-10-04-ai-interaction-goal-workflow-convergence.md) 与 [Ask User + Goal Business Surface](../2026-10-12-ask-user-business-surface.md) 的后续专项；旧文档中的阶段性能力和验证记录不能替代本分支现状。
+这是 [AI Interaction / Goal Workflow Convergence](../../active/2026-10-04-ai-interaction-goal-workflow-convergence.md) 与 [Ask User + Goal Business Surface](../../active/2026-10-12-ask-user-business-surface.md) 的后续专项；旧文档中的阶段性能力和验证记录不能替代本分支现状。

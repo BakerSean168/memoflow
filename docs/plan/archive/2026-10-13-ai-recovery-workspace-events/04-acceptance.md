@@ -7,6 +7,17 @@ description: AI 失败恢复和可靠实时同步的验收场景与本轮证据
 
 # 验收与证据
 
+## 最终验收（2026-10-17）——原 Issue 范围已通过
+
+1. **精确源码与系统验收**：主分支 f3fa740b0ed5a55ca6bf7f472bff1aba560e806c；[Main CI #39039134084](https://github.com/BakerSean168/memoflow/actions/runs/39039134084)、[Coverage #39039134090](https://github.com/BakerSean168/memoflow/actions/runs/39039134090) 均 PASS。
+2. **单次安装版完整验收**：[Desktop Update Installed E2E #39039153773](https://github.com/BakerSean168/memoflow/actions/runs/39039153773) 完成；Windows NSIS N→N+1 和 Linux AppImage N→N+1 均 PASS。下载的原始 Windows Playwright/JUnit 是 9/9 PASS、0 失败/0 跳过；同一真实安装版 Provider UI 测试 2/2 PASS，覆盖 840/1280/1600 三宽度。
+3. **可执行文件溯源**：候选 0.20.1 的安装后 EXE SHA256 为 11c46fdaf9f6f329e29b68f2862cae6dba9538e405f24bd128f44cdde7157464；NSIS Setup SHA256 为 7798fe495952097b6a3da985e4d8a9696a900db45c97c7f17e5fe3c71de949e8；Profile Registry 和数据保全哈希在升级前后相同。未覆盖 Windows 当前 0.19.0 日常安装。
+4. **真实账号与模型目录**：基于同一精确哈希的 Windows 程序，Codex 真实账号 A→空 Home B→恢复 A 只读 Operator 测试 1/1 PASS；7 个真实 Native Model ID，显式「选择 Agent」之后恰好 1 个 Connection，B 不泄漏 A 账号信息，恢复时不重复创建，Composer 可选模型与准备发送。0 计费请求，日志不输出私人身份资料。
+5. **失败与业务恢复**：DSH／AGY 六种未安装/限流/配额错误为明确标识的**离线 ACP fixture**，验证安全分类、Attention、cursor/ACK 和无自动重试。人工 Goal 草稿和双 Save 仅产生一个权威记录、重启恢复的历史 Windows 故障 2/2 PASS，配合下方 A01–A23 真实浏览器与存储测试。以前的用户授权 DSH Flash 真正 Desktop IPC Send 成功并持久化；其原始 SHA 比这次候选早，不能声称是最终候选上的真实付费发送。
+6. **先前一次 QA 假失败**：Codex Operator 用侧栏 Codex 浏览动作直接判定应该创建 Connection，遗漏了显式「选择 Agent」，不符合产品设计。修正后同一 EXE 原位测试 PASS；已修复回归测试脚本。不是剩余产品缺陷。
+
+**最终产品门槛**：#454、#456、#457 已完成并关闭。**正式发布仍冻结**：候选 Windows 安装包 NotSigned，三条发行工作流仍禁用；该签名与发行审核不再被误算为 S0–S7 功能未完成。以下段落保留其原日期证据与中间 Pending，不代表当前阻塞。
+
 2026-10-14 正式接管后的 S0–S7 / A01–A23 完成矩阵、修复与交付状态统一见
 [05-final-audit.md](./05-final-audit.md)。本文件以下的执行日志保留历史提交与范围，不代表当前候选或当前部署。
 

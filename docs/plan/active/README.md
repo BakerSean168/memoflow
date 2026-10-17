@@ -11,12 +11,14 @@ updated: 2026-10-07T00:00:00Z
 
 本目录存放仍在推进中的计划。
 
+## 2026-10-17 本轮已完成并归档
+
+- [AI failure recovery / Workspace events · S0–S7](../archive/2026-10-13-ai-recovery-workspace-events/README.md)：A01–A23、Windows 安装版、真实 Codex 账号 A→B→A 及确定性故障完成闭环；#454／#456／#457 关闭。正式发行在独立 Release 流程继续冻结。
+
 ## 当前计划
 
 - [Antigravity BYOA and release closeout](./2026-10-17-antigravity-byoa-release.md): #468 is merged; add official AGY ACP, deterministic failure recovery, exact-candidate Desktop/installation validation, then the standard release lifecycle.
 - [Issue 459 UI closeout](./2026-10-16-ui-459-closure.md): implementation and real Web owner journeys were accepted; PR #460 merged at `331bdb0f7d549d11b1ad7632cabf1a5a22385886`, and #459 is closed. The current release combines these UI changes with the separately verified native Agent work.
-
-- [AI failure recovery and Workspace events](./2026-10-13-ai-recovery-workspace-events/README.md): S0-S7 implementation is merged; Windows Conversation/Goal/Attention evidence was extended by #461-#468. Deterministic 429/quota injection is valid recovery evidence. Remaining exact-candidate release checks are tracked in #454/#456/#457 and the current AGY closeout plan.
 
 2026-10-13 repository consolidation: these plans also retain pending product acceptance and historical checkpoints; their presence is not evidence of a running implementation task. Useful existing code is consolidated through PR #449 rather than held on idle branches. See the [consolidation audit](../archive/2026-10-13-main-branch-consolidation.md) for verified scope and explicit remaining acceptance limits.
 
