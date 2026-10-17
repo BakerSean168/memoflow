@@ -118,6 +118,16 @@ jobs:
           RELEASE_TAG: ${{ needs.resolve.outputs.tag }}
         run: node ./tools/ci-cd-platform/release-tools/release-contract.mjs --require-release --expected-tag "$RELEASE_TAG" --write-notes release-notes.md
 
+      - name: Require dedicated release API credential
+        env:
+          RELEASE_WRITE_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+        shell: bash
+        run: |
+          test -n "$RELEASE_WRITE_TOKEN" || {
+            echo 'RELEASE_PLEASE_TOKEN is required to create/publish GitHub Releases' >&2
+            exit 1
+          }
+
       - name: Create or validate draft release and tag
         id: prepare
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
@@ -125,6 +135,7 @@ jobs:
           RELEASE_TAG: ${{ needs.resolve.outputs.tag }}
           RELEASE_SHA: ${{ needs.resolve.outputs.sha }}
         with:
+          github-token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           script: |
             const fs = require('node:fs');
             const tag = process.env.RELEASE_TAG;
@@ -248,7 +259,7 @@ jobs:
 
       - name: Download lane evidence from draft release
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           RELEASE_TAG: ${{ needs.resolve.outputs.tag }}
         run: |
           mkdir -p .release-evidence
@@ -257,7 +268,7 @@ jobs:
 
       - name: Verify the remote Draft contains every manifest-owned Desktop asset
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           RELEASE_TAG: ${{ needs.resolve.outputs.tag }}
           REPOSITORY: ${{ github.repository }}
         shell: bash
@@ -284,7 +295,7 @@ jobs:
 
       - name: Upload canonical manifest and publish
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           RELEASE_TAG: ${{ needs.resolve.outputs.tag }}
         run: |
           gh release upload "$RELEASE_TAG" release-manifest.json --clobber
@@ -307,6 +318,7 @@ jobs:
         env:
           RELEASE_SHA: ${{ needs.resolve.outputs.sha }}
         with:
+          github-token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           script: |
             const sha = process.env.RELEASE_SHA;
             const owner = context.repo.owner;

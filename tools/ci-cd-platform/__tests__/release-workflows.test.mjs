@@ -70,6 +70,37 @@ test('release publish waits for exact candidate publication then resolves the bo
   assert.doesNotMatch(workflow, /needs\.finalize\.result == 'success'/);
 });
 
+test('GitHub Release mutations use the configured operator token instead of the limited Actions integration token', async () => {
+  const [publish, assets, images] = await Promise.all([
+    readRepoFile('.github/workflows/release-publish.yml'),
+    readRepoFile('.github/workflows/release-assets.yml'),
+    readRepoFile('.github/workflows/publish-images.yml'),
+  ]);
+
+  const expectedScriptToken = 'github-token: ${{ secrets.RELEASE_PLEASE_TOKEN }}';
+  const expectedCliToken = 'GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}';
+  assert.match(workflowStep(publish, 'Require dedicated release API credential'), /test -n "\$RELEASE_WRITE_TOKEN"/u);
+  for (const name of ['Create or validate draft release and tag', 'Reconcile release-please labels']) {
+    assert.ok(workflowStep(publish, name).includes(expectedScriptToken), name);
+  }
+  for (const name of [
+    'Download lane evidence from draft release',
+    'Verify the remote Draft contains every manifest-owned Desktop asset',
+    'Upload canonical manifest and publish',
+  ]) {
+    assert.ok(workflowStep(publish, name).includes(expectedCliToken), name);
+  }
+  for (const name of [
+    'Require an existing draft release',
+    'Upload the manifest-owned asset set to the draft GitHub Release',
+  ]) {
+    assert.ok(workflowStep(assets, name).includes(expectedCliToken), name);
+  }
+  assert.ok(workflowStep(images, 'Upload Server evidence to draft release').includes(expectedCliToken));
+  // Registry auth needs the scoped workflow token and remains unchanged.
+  assert.match(images, /password: \$\{\{ github\.token \}\}/u);
+});
+
 test('release validation checkouts retain merge-parent history', async () => {
   const [caller, assets, images] = await Promise.all([
     readRepoFile('.github/workflows/release-publish.yml'),
