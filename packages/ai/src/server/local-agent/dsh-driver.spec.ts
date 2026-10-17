@@ -136,6 +136,7 @@ it('discovers DSH models through ACP without invoking inference', async () => {
     status: 'ready',
     models: [{ id: route, name: 'gpt-oss 20B', provider: 'Ollama' }],
     version: '2.4.1',
+    modelVisibilityContext: expect.stringMatching(/^mvc1:[0-9a-f]{64}$/),
   });
   expect(instances).toHaveLength(1);
   expect(instances[0].options).toMatchObject({ protocol: 'acp', args: ['--profile', 'acp'] });

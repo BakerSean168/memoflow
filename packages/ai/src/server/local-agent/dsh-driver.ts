@@ -10,7 +10,7 @@ import type { NativeAgentEvent, NativeAgentRunInput } from './codex-driver';
 import { NativeRpcTransport, type NativeProcessOptions } from './native-rpc-transport';
 import { NativeEventQueue } from './native-event-queue';
 import { LocalAgentError } from '../../shared/local-agent-error';
-import { nativeIdentity } from './native-identity';
+import { nativeIdentity, nativeModelVisibilityContext } from './native-identity';
 import { nativeVersion } from './native-executable';
 
 const MODEL_CONFIG_ID = 'model';
@@ -168,9 +168,14 @@ export class DshDriver {
 
   async probe(): Promise<LocalAgentStatus> {
     try {
-      const { models, version } = await this.connect();
+      const { models, version, fingerprint } = await this.connect();
       return models.length > 0
-        ? { status: 'ready', models, ...(version ? { version } : {}) }
+        ? {
+            status: 'ready',
+            models,
+            modelVisibilityContext: nativeModelVisibilityContext(this.connection, fingerprint),
+            ...(version ? { version } : {}),
+          }
         : {
             status: 'unavailable',
             message: new LocalAgentError('LOCAL_AGENT_UNAVAILABLE').message,
