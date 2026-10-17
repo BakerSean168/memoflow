@@ -238,7 +238,16 @@ export class DshDriver {
             this.queue.push({ type: 'cancelled' });
           else this.queue.fail(new LocalAgentError('LOCAL_AGENT_UNAVAILABLE'));
         })
-        .catch(() => this.queue.fail(new LocalAgentError('LOCAL_AGENT_UNAVAILABLE')));
+        .catch((error: unknown) =>
+          this.queue.fail(
+            // NativeRpcTransport has already classified provider diagnostics into
+            // public, credential-free LocalAgentError codes. Do not discard 429/
+            // quota/login signals or forward arbitrary native error text.
+            error instanceof LocalAgentError
+              ? error
+              : new LocalAgentError('LOCAL_AGENT_UNAVAILABLE'),
+          ),
+        );
       yield* this.queue;
     } catch (error) {
       if (this.cancelled || input.signal?.aborted) yield { type: 'cancelled' };

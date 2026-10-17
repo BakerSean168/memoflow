@@ -5,6 +5,11 @@ import { LocalAgentStatusSchema } from '@memoflow/contracts/ai';
 import { expect, it } from 'vitest';
 import type { LocalAgentConnection } from '@memoflow/contracts/ai';
 import { DshDriver } from './dsh-driver';
+import {
+  LocalAgentError,
+  LOCAL_AGENT_FAILURES,
+  type LocalAgentFailureCode,
+} from '../../shared/local-agent-error';
 import { type NativeProcessOptions, NativeRpcTransport } from './native-rpc-transport';
 
 const route = JSON.stringify(['ollama', 'gpt-oss:20b']);
@@ -213,6 +218,70 @@ it('sends a per-run MCP grant and can resume the same native DSH session', async
     ]);
     expect(instances[index].closed).toBe(true);
   }
+});
+
+it.each([
+  'LOCAL_AGENT_RATE_LIMITED',
+  'LOCAL_AGENT_QUOTA_EXHAUSTED',
+  'LOCAL_AGENT_LOGIN_REQUIRED',
+  'LOCAL_AGENT_MODEL_UNSUPPORTED',
+] as const)(
+  'preserves a classified ACP prompt failure %s without exposing private diagnostics',
+  async (code) => {
+    const instances: FakeAcp[] = [];
+    const driver = new DshDriver(connection, '/tmp', (options) => {
+      const fake = new FakeAcp(options);
+      const original = fake.request.bind(fake);
+      fake.request = async (method, params) => {
+        if (method === 'session/prompt') {
+          fake.calls.push({ method, params });
+          // The actual JSON-RPC transport performs the sensitive native error
+          // classification; Driver must preserve this sanitized public code.
+          throw new LocalAgentError(code);
+        }
+        return original(method, params);
+      };
+      instances.push(fake);
+      return fake as unknown as NativeRpcTransport;
+    });
+
+    const observed: string[] = [];
+    await expect(
+      (async () => {
+        for await (const event of driver.run({ content: 'A short turn', modelId: route })) {
+          observed.push(event.type);
+        }
+      })(),
+    ).rejects.toMatchObject({ code, message: LOCAL_AGENT_FAILURES[code] });
+
+    expect(observed).toEqual(['session']);
+    expect(instances).toHaveLength(1);
+    expect(instances[0].calls.filter((call) => call.method === 'session/prompt')).toHaveLength(1);
+    expect(instances[0].closed).toBe(true);
+  },
+);
+
+it('sanitizes an unclassified ACP prompt exception without leaking upstream text', async () => {
+  const privateDiagnostic = 'PRIVATE_TOKEN_DO_NOT_EXPOSE account@example.test';
+  const driver = new DshDriver(connection, '/tmp', (options) => {
+    const fake = new FakeAcp(options);
+    const original = fake.request.bind(fake);
+    fake.request = async (method, params) => {
+      if (method === 'session/prompt') throw new Error(privateDiagnostic);
+      return original(method, params);
+    };
+    return fake as unknown as NativeRpcTransport;
+  });
+  await expect(
+    (async () => {
+      for await (const _event of driver.run({ content: 'A short turn', modelId: route })) {
+        // No private errors are emitted as runtime events.
+      }
+    })(),
+  ).rejects.toMatchObject({
+    code: 'LOCAL_AGENT_UNAVAILABLE' satisfies LocalAgentFailureCode,
+    message: LOCAL_AGENT_FAILURES.LOCAL_AGENT_UNAVAILABLE,
+  });
 });
 
 it('refuses a model not present in DSH ACP catalog without submitting a prompt', async () => {
