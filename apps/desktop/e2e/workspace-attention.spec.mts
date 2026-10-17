@@ -14,6 +14,8 @@ interface AttentionQaEnvelope {
     eventId?: string;
     resourceVersion?: number;
     data?: {
+      code?: string;
+      message?: string;
       conversationId?: string;
       runtimeKind?: string;
       attention?: {
@@ -41,10 +43,17 @@ interface AttentionQaWindow {
   __qaAssistant: AttentionQaEnvelope[];
 }
 
-test('Windows Electron publishes owner-backed attention on offline native run failure', async () => {
+const nativeFailureCases = [
+  { mode: 'unavailable', expectedCode: 'LOCAL_AGENT_UNAVAILABLE' },
+  { mode: 'rate_limited', expectedCode: 'LOCAL_AGENT_RATE_LIMITED' },
+  { mode: 'quota_exhausted', expectedCode: 'LOCAL_AGENT_QUOTA_EXHAUSTED' },
+] as const;
+
+async function verifyOfflineNativeFailure(scenario: (typeof nativeFailureCases)[number]) {
   test.skip(process.platform !== 'win32', 'Real Windows Desktop IPC test');
   test.setTimeout(90_000);
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'memoflow-attention-qa-'));
+  const promptLog = path.join(root, 'native-prompts.log');
   const env = createIsolatedNativeAgentEnvironment(root);
   const fixture = path.resolve('e2e/support/attention-acp-fixture.cjs');
   expect(fs.existsSync(fixture)).toBe(true);
@@ -56,6 +65,8 @@ test('Windows Electron publishes owner-backed attention on offline native run fa
       env: {
         ...env,
         MEMOFLOW_ATTENTION_QA_FIXTURE: '1',
+        MEMOFLOW_ATTENTION_QA_FAILURE: scenario.mode,
+        MEMOFLOW_ATTENTION_QA_PROMPT_LOG: promptLog,
         NODE_ENV: 'test',
         MEMOFLOW_DESKTOP_USER_DATA_PATH: path.join(root, 'user-data'),
         MEMOFLOW_DESKTOP_USER_FILES_PATH: path.join(root, 'user-files'),
@@ -239,6 +250,47 @@ test('Windows Electron publishes owner-backed attention on offline native run fa
       streamId,
       { timeout: 15000 },
     );
+    const failures = await probe.evaluate(
+      (id) =>
+        (window as unknown as AttentionQaWindow).__qaAssistant
+          .filter((item) => item.streamId === id && item.event.type === 'assistant.run.failed')
+          .map((item) => item.event.data),
+      runtimeStreamId,
+    );
+    expect(failures).toHaveLength(1);
+    expect(failures[0]?.code).toBe(scenario.expectedCode);
+    expect(JSON.stringify(failures)).not.toContain('PRIVATE_ACP_QA_DIAGNOSTIC');
+    expect(fs.readFileSync(promptLog, 'utf8')).toBe('1'); // No automatic retry.
+
+    const status = await probe.evaluate(
+      ({ channel, id }) =>
+        (window as unknown as AttentionQaWindow).electronAPI.invoke(channel, {
+          action: 'probe_connection',
+          id,
+        }),
+      { channel: AIChannels.LOCAL_AGENT, id: connectionId },
+    );
+    expect(status).toMatchObject({ ok: true, data: { status: 'ready' } });
+    const failure = (status.data as { lastExecutionFailure?: { code: string; modelId: string } })
+      .lastExecutionFailure;
+    if (scenario.mode === 'unavailable') expect(failure).toBeUndefined();
+    else
+      expect(failure).toMatchObject({
+        code: scenario.expectedCode,
+        modelId: 'attention-qa-model',
+      });
+    expect(JSON.stringify(status.data)).not.toContain('PRIVATE_ACP_QA_DIAGNOSTIC');
+
+    const history = await probe.evaluate(
+      ({ channel, conversationId }) =>
+        (window as unknown as AttentionQaWindow).electronAPI.invoke(channel, {
+          runtimeKind: 'local_agent',
+          conversationId,
+        }),
+      { channel: AIChannels.RUNTIME_ASSISTANT_HISTORY, conversationId },
+    );
+    expect(history.ok).toBe(true);
+    expect(JSON.stringify(history.data)).not.toContain('PRIVATE_ACP_QA_DIAGNOSTIC');
     const failed = await probe.evaluate(
       (id) =>
         (window as unknown as AttentionQaWindow).__qaAttention.filter(
@@ -320,6 +372,8 @@ test('Windows Electron publishes owner-backed attention on offline native run fa
           committedFailure: true,
           workspaceAck: true,
           attentionAckIdempotent: true,
+          failureCode: scenario.expectedCode,
+          promptRequests: 1,
           syntheticNativeModel: true,
           upstreamQuotaNotTested: true,
         }),
@@ -328,4 +382,9 @@ test('Windows Electron publishes owner-backed attention on offline native run fa
     if (app) await app.close();
     fs.rmSync(root, { recursive: true, force: true });
   }
-});
+}
+
+for (const scenario of nativeFailureCases) {
+  test(`Windows Electron persists offline native ${scenario.mode} without leaking diagnostics`, async () =>
+    verifyOfflineNativeFailure(scenario));
+}
