@@ -932,6 +932,20 @@
       }
     },
     {
+      "path": "apps/desktop/e2e/workspace-attention.spec.mts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/desktop/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "ai-workspace",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/desktop/playwright.config.ts"
+      }
+    },
+    {
       "path": "apps/desktop/e2e/workspace-ipc.spec.mts",
       "primarySuite": "e2e",
       "collectors": [
@@ -13016,7 +13030,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 4,
+      "fileCount": 5,
       "e2eOwnership": {
         "lane": "desktop",
         "lifecycle": "active",
@@ -14210,7 +14224,7 @@
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 9,
-    "e2e": 52,
+    "e2e": 53,
     "perf": 2,
     "governance": 65
   },
@@ -14218,7 +14232,7 @@
     "version": 2,
     "issues": [],
     "countsByLane": {
-      "desktop": 4,
+      "desktop": 5,
       "local-validation": 6,
       "nightly": 5,
       "reference": 6,
@@ -14231,7 +14245,7 @@
       "artifact": 3,
       "canonical": 26,
       "reference": 6,
-      "supplemental": 17
+      "supplemental": 18
     },
     "automatedCollectorCount": 4,
     "automationBindingCount": 5

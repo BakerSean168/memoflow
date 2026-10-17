@@ -144,3 +144,10 @@ S0 conformance：A01–A04 由原生 owner 与 composable/Shell 测试覆盖；A
 - Windows 本地定向复测：1/1 通过、退出码 0、约 8.6 秒，日志 `GOAL_WORKSPACE_DIAGNOSTIC_EVENT`。首次临时探测因未 ACK 前一事件而阻塞，后按协议重排订阅及 ACK 顺序并复测通过；不算作产品缺陷。
 - 现将断言加入仓库规范回归 `apps/desktop/e2e/workspace-ipc.spec.mts`；其 **GitHub Windows exact-SHA CI 仍待后续独立验证**。本项只证明 Goal Workflow 首个持久事件的 Windows IPC 投递，不涵盖有效模型计划输出、Goal 最终提交或 Attention 状态流。
 - #454/#456/#457 发布门禁仍开放，尤其是 Attention `attention.changed` 和真实非 Codex 上游 429/quota/发送/恢复，不得提前宣称完整交付。
+
+## 2026-10-17 · Attention owner-backed IPC event regression (offline native failure)
+
+- Real Windows 11 Electron / isolated user profile, original compiled Desktop Main + Preload + Renderer: Playwright `workspace-attention.spec.mts` **1/1 passed, exit 0**. The test uses public Desktop Native Connection/Conversation/Assistant IPC and a small in-repo test-only ACP JSON-RPC executable that **never accesses a model, network, or user auth**.
+- Real native runtime publishes `assistant.run.started` then `assistant.run.failed`; `ConversationAttentionObserver` persists `working → failed` to Profile PowerSync; Workspace IPC delivers owner-backed `attention.changed` with increasing resourceVersion. Client ACKs each cursor, reads `RUNTIME_ASSISTANT_ATTENTION_LIST` and acknowledges the attention revision idempotently (first accepted, duplicate rejected).
+- Reusable test fixture: `apps/desktop/e2e/support/attention-acp-fixture.cjs`. Both the spec and fixture must remain test-only. Workflow `Desktop Update Installed E2E` runs this beside Windows Workspace IPC on the exact candidate SHA. **Only GitHub Windows completion is final CI acceptance; the local result is preliminary until that run passes.**
+- **Critical scope distinction:** failure is injected by an **offline ACP fixture**, not produced by a real authorized non-Codex upstream. This validates real application event persistence/delivery/ack, **not** live-provider availability, actual 429/quota classification, billed Send, editable Goal draft under rate limit, or final application release. The outstanding #454/#456/#457 hard gates stay open.
