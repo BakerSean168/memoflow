@@ -136,3 +136,11 @@ S0 conformance：A01–A04 由原生 owner 与 composable/Shell 测试覆盖；A
 - 该测试现作为 `apps/desktop/e2e/workspace-ipc.spec.mts` 进入独立 Windows Workflow `Desktop Update Installed E2E`，其 Workflow 通过结果必须单独按最新 commit SHA 核实；本地成功不自动等于未来 CI 通过。
 - 相关独立证据：[CI #38893771350](https://github.com/BakerSean168/memoflow/actions/runs/38893771350) `main` 20/20；[Installed Update E2E #38899197567](https://github.com/BakerSean168/memoflow/actions/runs/38899197567) Windows NSIS 与 Linux AppImage 更新均通过。Windows Desktop IPC 52/52 与本机真实 Electron Auth/Profile 5/5 已通过，均属不同验收层。
 - **尚缺**：实际产生并核验 `workflow.updated`（Goal AI workflow）及 `attention.changed`（Attention）两条事件流的真实 Windows 端到端场景，以及受控可用 non-Codex 上游真实 429/quota 中断和完整 Agent 发送/恢复。不得用 Conversation 的通过结果替代这些项目，不得因此关闭 #454 或解除发布门禁。
+
+## 2026-10-16 · Goal Workflow Windows IPC 原生状态事件增量验收
+
+- 测试来源：隔离 Windows 11 / Electron 44.4.5、实编译 Desktop Main/Preload/Renderer、全新 Guest + Native Agent Home；基线源码为 `331bdb0f7d549d11b1ad7632cabf1a5a22385886`，未读取生产认证或执行可计费模型推理。
+- 在原先真实 Conversation/游标重放测试后，按协议 **STOP → 新 START → stream.ready ACK → 原生 `RUNTIME_WORKFLOW_START(kind=goal.create)` → `workflow.updated` → ACK**，验证来自 Mastra 持久化状态的 `runId`、`status=running`、`resourceVersion=1`，并保留跨 Guest owner 隔离断言。
+- Windows 本地定向复测：1/1 通过、退出码 0、约 8.6 秒，日志 `GOAL_WORKSPACE_DIAGNOSTIC_EVENT`。首次临时探测因未 ACK 前一事件而阻塞，后按协议重排订阅及 ACK 顺序并复测通过；不算作产品缺陷。
+- 现将断言加入仓库规范回归 `apps/desktop/e2e/workspace-ipc.spec.mts`；其 **GitHub Windows exact-SHA CI 仍待后续独立验证**。本项只证明 Goal Workflow 首个持久事件的 Windows IPC 投递，不涵盖有效模型计划输出、Goal 最终提交或 Attention 状态流。
+- #454/#456/#457 发布门禁仍开放，尤其是 Attention `attention.changed` 和真实非 Codex 上游 429/quota/发送/恢复，不得提前宣称完整交付。
