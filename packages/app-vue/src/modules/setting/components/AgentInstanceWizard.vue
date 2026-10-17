@@ -20,6 +20,7 @@ import {
 } from '@memoflow/contracts/ai';
 import { SettingsPropertyRow } from '../../../components/shared/settings';
 import AgentDriverIcon from '../../ai/components/AgentDriverIcon.vue';
+import AntigravityAcpDownload from './AntigravityAcpDownload.vue';
 
 // T3's Agent -> Identity -> Config flow, expressed with MemoFlow's Vue primitives.
 // Model API vendors and credentials are intentionally not part of instance creation.
@@ -340,6 +341,7 @@ watch(
                 class="h-8 rounded-lg bg-background"
                 :disabled="busy"
             /></SettingsPropertyRow>
+            <AntigravityAcpDownload v-if="driver === 'antigravity'" :disabled="busy" />
             <SettingsPropertyRow
               :label="t('aiAssistant.local.home')"
               :description="

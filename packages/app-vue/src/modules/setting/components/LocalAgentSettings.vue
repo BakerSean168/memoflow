@@ -16,6 +16,7 @@ import { SettingsPropertyRow } from '../../../components/shared/settings';
 import { useNativeModelVisibility } from '../../ai/composables/nativeModelVisibility';
 import { useServerStateIdentityScope } from '../../../platform/server-state';
 import AgentDriverIcon from '../../ai/components/AgentDriverIcon.vue';
+import AntigravityAcpDownload from './AntigravityAcpDownload.vue';
 const props = defineProps<{
   connection: LocalAgentConnection | null;
   identity?: Pick<LocalAgentConnectionInput, 'name' | 'instanceSlug' | 'accentColor'>;
@@ -269,6 +270,7 @@ function save() {
             :disabled="busy"
             class="h-8 rounded-lg text-xs"
         /></SettingsPropertyRow>
+        <AntigravityAcpDownload v-if="driver === 'antigravity'" :disabled="busy" />
         <SettingsPropertyRow
           :label="t('aiAssistant.local.home')"
           :description="

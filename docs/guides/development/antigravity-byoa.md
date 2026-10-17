@@ -11,7 +11,7 @@ Antigravity is a **Desktop native Agent**, alongside Codex, Claude Code, Pi and 
 
 ## Native prerequisites
 
-Install Google's official **Antigravity ACP server** using an ACP-compatible client or the [official ACP registry](https://github.com/agentclientprotocol/registry/tree/main/antigravity-acp). Keep the server and its bundled native harness together. MemoFlow does not redistribute or silently download Google's proprietary binaries.
+Install Google's official **Antigravity ACP server** using an ACP-compatible client or the [official ACP registry](https://github.com/agentclientprotocol/registry/tree/main/antigravity-acp). On Windows, the AGY configuration section in MemoFlow provides a one-click **download link** to Google's versioned x64 ZIP (v1.4.0) and a Registry link for the newest release or other architectures. This opens the system browser; it does not install or run the binary, and does not change any existing native profile. Extract both `agy_acp_server.exe` and `localharness_external.exe` into one directory, then point the connection at the first executable. Keep the server and its bundled native harness together. MemoFlow does not redistribute or silently download Google's proprietary binaries.
 
 The official ACP executable is `agy_acp_server.exe` on Windows and `agy_acp_server.par` on Linux/macOS. It is **different from the `agy` CLI**. An installed or signed-in `agy` CLI does not establish ACP availability.
 

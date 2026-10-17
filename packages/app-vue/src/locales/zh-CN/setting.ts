@@ -1,5 +1,10 @@
 export default {
   agentInstances: {
+    "antigravityDownloadTitle": "官方 Antigravity ACP Server",
+    "antigravityDownloadHint": "下载 Google 官方 ZIP，解压后将两个可执行文件保留在同一目录，再填写上方程序路径。下载不会自动安装或登录；agy CLI 与桌面 IDE 均不是 ACP Server。",
+    "antigravityDownloadWindows": "下载 Windows x64 · v1.4.0",
+    "antigravityDownloadRegistry": "最新版本 / 其他平台",
+    "antigravityDownloadError": "无法打开官方下载链接，请检查浏览器或网络。",
     "antigravityBinaryHint": "使用官方 Antigravity ACP 程序（agy_acp_server），不是 agy CLI。请先在兼容 ACP 的客户端中安装并完成 Google 登录。",
     "antigravityHomeHint": "已登录的官方 ACP 配置所在 GEMINI_HOME。MemoFlow 复用原生登录，不复制凭据。",
     "nameHint": "显示在 Agent 列表和聊天框中。",

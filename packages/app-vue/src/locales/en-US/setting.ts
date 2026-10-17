@@ -1,5 +1,10 @@
 export default {
   agentInstances: {
+    "antigravityDownloadTitle": "Official Antigravity ACP Server",
+    "antigravityDownloadHint": "Download the Google ZIP, extract both executables into the same folder, then set the server path above. Downloading does not install or sign you in. The agy CLI and desktop IDE are separate.",
+    "antigravityDownloadWindows": "Download Windows x64 · v1.4.0",
+    "antigravityDownloadRegistry": "Latest release / other platforms",
+    "antigravityDownloadError": "Could not open the official download link. Check your browser or network.",
     "antigravityBinaryHint": "Use the official Antigravity ACP server (agy_acp_server), not the agy CLI. Install and sign in with an ACP-compatible client first.",
     "antigravityHomeHint": "GEMINI_HOME for the signed-in official ACP profile. Native Google login is reused without copying credentials.",
     "nameHint": "Shown in the Agent list and message composer.",

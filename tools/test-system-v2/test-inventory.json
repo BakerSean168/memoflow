@@ -5773,6 +5773,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/setting/components/AntigravityAcpDownload.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/setting/components/DesktopUpdateSettingsSection.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13496,7 +13504,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 303
+      "fileCount": 304
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -14258,7 +14266,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1229,
+    "unit": 1230,
     "integration": 48,
     "smoke": 3,
     "boundary-ipc": 8,
