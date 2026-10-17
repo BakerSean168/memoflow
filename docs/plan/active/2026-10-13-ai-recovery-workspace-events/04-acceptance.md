@@ -172,3 +172,16 @@ S0 conformance：A01–A04 由原生 owner 与 composable/Shell 测试覆盖；A
 - 本轮 Linux 的 Windows 专用 3 项 Playwright 收集均显示 Skip（符合默认安全要求），**不是 Windows 实机通过**。最新 Windows NSIS E2E、操作员真实账号、Profile 隔离与签名安装候选仍需独立结果。#454/#456/#457 **保持 Open**。
 
 参见 windows-native-provider-operator-qa.md。三个发布工作流必须保持 disabled_manually，任何 CI 或 staging 通过不构成发布授权。
+
+## 2026-10-17 · Windows Native/Workspace installed-only single-pass acceptance preparation
+
+Scope: **test-only PR, unmerged at time of writing**; base is exact main SHA c444ca3937bc3d14dc068cf4bf58ec28e5f386c2, whose independent main CI and Coverage both passed. The prior #473 Windows NSIS/Linux AppImage proof belongs to the **different** feature-branch SHA c7c3f5290aedc59b7ff4bd6686f920446a72b73c; it is not evidence for a later combined candidate.
+
+- Consolidate existing Windows Workspace IPC/Goal/Conversation test and six synthetic Attention failures into the already-installed NSIS candidate run alongside AGY Composer and unconfigured Codex checks; **exactly one Playwright invocation after updater proof**, not two before/after packaging.
+- On Workspace IPC and Attention, verify the running app is actually packaged, its executable path and SHA-256 match the independent updater receipt, and version matches installed candidate; secondary inspector windows use its own installed preload.
+- Cross-Guest cursor/identity checks and model-free Goal workflow event remain real application IPC and durable Profile storage; ACP 429/quota remain **explicitly offline fixture injection**. No credential file or billable model request.
+- Before this test-only PR merges and its **later exact-main SHA** Windows single-pass CI succeeds, the new installed Workspace/Attention coverage is **pending**, not an accepted Windows result. The operator-approved Codex A→empty B→A and separately authorized signed-installed live Send remain external acceptance items.
+- The same workflow retains one seven-day **unsigned QA-only Windows installer**, verified byte-for-byte against the updater's recorded candidate.installerSha256 before upload; a separately authorized Windows operator can use this binary with no second packaging job. **No signed public installer or real account is claimed here.**
+- This work does **not** reopen release workflows or publish v0.20.x. Final DoD also requires #454/#456/#457 product and owner/profile recovery evidence, release signing/assets and a project-wide Go/No-Go.
+
+See docs/guides/development/windows-native-provider-operator-qa.md for the opt-in/native safety boundary.

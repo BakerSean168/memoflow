@@ -5,6 +5,7 @@ import { expect, test } from '@playwright/test';
 import { _electron as electron } from 'playwright';
 import { AIChannels, AIStreamChannels } from '@memoflow/contracts/electron';
 import { createIsolatedNativeAgentEnvironment } from './packaged-runtime/isolated-native-env';
+import { verifyInstalledNativeBinary } from './support/installed-native-provenance';
 
 type WorkspaceQaEnvelope = {
   streamId: string;
@@ -38,10 +39,16 @@ test('real Windows Electron Workspace IPC authenticates start, ack, stop, cursor
   test.setTimeout(90_000);
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'memoflow-workspace-ipc-qa-'));
   const sanitized = createIsolatedNativeAgentEnvironment(root);
+  const installedExecutable = process.env.MEMOFLOW_PACKAGED_EXECUTABLE;
   let app: Awaited<ReturnType<typeof electron.launch>> | null = null;
   try {
     app = await electron.launch({
-      args: ['--disable-gpu', '--disable-dev-shm-usage', path.resolve('dist-electron/main.cjs')],
+      ...(installedExecutable ? { executablePath: installedExecutable } : {}),
+      args: [
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        ...(installedExecutable ? [] : [path.resolve('dist-electron/main.cjs')]),
+      ],
       cwd: process.cwd(),
       env: {
         ...sanitized,
@@ -53,7 +60,27 @@ test('real Windows Electron Workspace IPC authenticates start, ack, stop, cursor
     });
     const main = await app.firstWindow({ timeout: 30000 });
     await expect(main.getByTestId('app-shell')).toBeVisible({ timeout: 30000 });
-    const preload = path.resolve('dist-electron/preload.cjs');
+    let preload = path.resolve('dist-electron/preload.cjs');
+    if (installedExecutable) {
+      const receipt = await verifyInstalledNativeBinary(
+        app,
+        installedExecutable,
+        process.env.MEMOFLOW_QA_EXPECTED_EXE_SHA256!,
+        process.env.MEMOFLOW_QA_EXPECTED_VERSION!,
+      );
+      preload = receipt.preloadPath;
+      await test.info().attach('installed-workspace-provenance', {
+        body: Buffer.from(
+          JSON.stringify({
+            packaged: receipt.packaged,
+            version: receipt.version,
+            executableSha256: receipt.executableSha256,
+            paidRequests: 0,
+          }),
+        ),
+        contentType: 'application/json',
+      });
+    }
     const probeId = await app.evaluate(async ({ BrowserWindow }, preloadPath) => {
       const win = new BrowserWindow({
         show: false,
@@ -68,7 +95,16 @@ test('real Windows Electron Workspace IPC authenticates start, ack, stop, cursor
       return win.id;
     }, preload);
     expect(probeId).toBeGreaterThan(0);
-    await expect.poll(async () => (await app!.windows()).length, { timeout: 12000 }).toBe(2);
+    // Packaged Desktop may own auxiliary windows; require the QA inspector
+    // itself rather than assuming the total BrowserWindow count is exactly 2.
+    await expect
+      .poll(
+        async () => (await app!.windows()).some((win) => win.url().startsWith('data:text/html')),
+        {
+          timeout: 12000,
+        },
+      )
+      .toBe(true);
     const inspector = (await app.windows()).find((p) => p.url().startsWith('data:text/html'));
     expect(inspector, 'test-only Window must exist').toBeDefined();
     const probe = inspector!;
