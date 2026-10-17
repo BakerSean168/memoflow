@@ -1,5 +1,46 @@
 # Changelog
 
+## [0.20.0](https://github.com/BakerSean168/memoflow/compare/v0.19.0...v0.20.0) (2026-10-17)
+
+
+### Features
+
+* **ai:** add official AGY ACP download entry and close Windows QA gaps ([5b42195](https://github.com/BakerSean168/memoflow/commit/5b42195d03ed888bdcf337d3257368e93eaf3f4d))
+* **ai:** add official Antigravity ACP native Agent ([fbe9865](https://github.com/BakerSean168/memoflow/commit/fbe9865e3e89dd09b7abb25f81da14a3792bb7b1))
+* **ai:** complete verified brand glyphs for all agent drivers ([#457](https://github.com/BakerSean168/memoflow/issues/457)) ([25a7b65](https://github.com/BakerSean168/memoflow/commit/25a7b653f849882fc86a2b3de23e2460b703c150))
+* **ai:** Desktop native Provider and settings integration ([#456](https://github.com/BakerSean168/memoflow/issues/456) [#457](https://github.com/BakerSean168/memoflow/issues/457)) ([9ef37fb](https://github.com/BakerSean168/memoflow/commit/9ef37fb64b6009c2f1717e037993e83e79bae67d))
+* **ai:** expose native account and model capability snapshots ([#456](https://github.com/BakerSean168/memoflow/issues/456) [#457](https://github.com/BakerSean168/memoflow/issues/457)) ([64e05cf](https://github.com/BakerSean168/memoflow/commit/64e05cf3b4cb9221d238987b53d46af60f6cc6e6))
+* **ai:** integrate Antigravity ACP with official Server download entry ([e9dec9c](https://github.com/BakerSean168/memoflow/commit/e9dec9c98cab6944a5c121cf7e2037b74babc521))
+* **ai:** persist profile-scoped native model visibility ([#457](https://github.com/BakerSean168/memoflow/issues/457)) ([546d9fc](https://github.com/BakerSean168/memoflow/commit/546d9fcadd7987954699f227e9c1e04dd169e515))
+* **ai:** render verified Codex and Claude brand glyphs in AgentDriverIcon ([#457](https://github.com/BakerSean168/memoflow/issues/457)) ([06997ff](https://github.com/BakerSean168/memoflow/commit/06997ffa53b8c2cd4979cce7937e578c465ffa6b))
+* **ui:** align conversation and settings sidebar controls ([#459](https://github.com/BakerSean168/memoflow/issues/459)) ([d1cc00a](https://github.com/BakerSean168/memoflow/commit/d1cc00ad7520ba379eedb1b73e45d56bac1c9919))
+* **ui:** scope business editors and stabilize validation feedback ([#459](https://github.com/BakerSean168/memoflow/issues/459)) ([4aaaa6b](https://github.com/BakerSean168/memoflow/commit/4aaaa6bd5afbe97a08a207f553057353b517fe98))
+* **ui:** unify pane-scoped editors and compact navigation ([#459](https://github.com/BakerSean168/memoflow/issues/459)) ([331bdb0](https://github.com/BakerSean168/memoflow/commit/331bdb0f7d549d11b1ad7632cabf1a5a22385886))
+
+
+### Bug Fixes
+
+* **ai:** align brand glyph module naming with governance ([#457](https://github.com/BakerSean168/memoflow/issues/457)) ([36b75d2](https://github.com/BakerSean168/memoflow/commit/36b75d22d919b86de785ed130f2d73c1e2895d6d))
+* **ai:** block probes while native profile configuration refreshes ([5f093e8](https://github.com/BakerSean168/memoflow/commit/5f093e89a9fbd4eca4cf22efdc3c1aa9ecd72f65))
+* **ai:** classify native rate-limit and quota failures ([#456](https://github.com/BakerSean168/memoflow/issues/456)) ([7b7d907](https://github.com/BakerSean168/memoflow/commit/7b7d9071e739e093e6d4e2038f15a9cc868a0518))
+* **ai:** invalidate stale native model probes across profile refreshes ([31fb08d](https://github.com/BakerSean168/memoflow/commit/31fb08d44b5d583568446dd8bf63e7aaea9a2ccd))
+* **ai:** keep native provider errors on one subtle line ([#457](https://github.com/BakerSean168/memoflow/issues/457)) ([9e2af7a](https://github.com/BakerSean168/memoflow/commit/9e2af7a9fb5e4928d0d76e0f680c1183f987bf64))
+* **ai:** preserve DSH context for visible quota failures ([35badd5](https://github.com/BakerSean168/memoflow/commit/35badd579c590d9c113f7a83f0460f5babe793d4))
+* **ai:** preserve safe DSH 429 and quota error classification ([7fce957](https://github.com/BakerSean168/memoflow/commit/7fce957261780201cfdd5bf91b5a2b801cec15d9))
+* **ai:** preserve sanitized DSH rate-limit and quota failures ([b1771ef](https://github.com/BakerSean168/memoflow/commit/b1771efbe5ea3c738a1a2f3c9afebe6df4d0fbe0))
+* **ai:** project native request limits without losing drafts ([#456](https://github.com/BakerSean168/memoflow/issues/456)) ([d9c3588](https://github.com/BakerSean168/memoflow/commit/d9c358857ac4e25916a9dbbb3b425ad5d3113310))
+* **ai:** restore native selection and provider status integrity ([#456](https://github.com/BakerSean168/memoflow/issues/456) [#457](https://github.com/BakerSean168/memoflow/issues/457)) ([86b75ee](https://github.com/BakerSean168/memoflow/commit/86b75ee777758a71883d5935e158be16fae5a987))
+* **ai:** retain DSH quota status and validate simulated Windows 429 ([202b130](https://github.com/BakerSean168/memoflow/commit/202b1304fe218cb5d50109460c4d3c2d0099c5b2))
+* **ai:** scope model visibility to native account context ([#457](https://github.com/BakerSean168/memoflow/issues/457)) ([b364c86](https://github.com/BakerSean168/memoflow/commit/b364c86dcfeac8d2b88528631a915f4935d9a8ce))
+* **ai:** stop AGY before spawning after cancelled preflight ([abb597e](https://github.com/BakerSean168/memoflow/commit/abb597e3162503ed207c26e05d96141cc7be664c))
+* **ai:** verify native versions and catalog probe states ([#456](https://github.com/BakerSean168/memoflow/issues/456) [#457](https://github.com/BakerSean168/memoflow/issues/457)) ([77e087f](https://github.com/BakerSean168/memoflow/commit/77e087f382cc40a894dedf2d2455da4841a9c1c3))
+* **desktop:** expose transform-free Knowledge IDs in native MCP tool catalog ([040847b](https://github.com/BakerSean168/memoflow/commit/040847b9cc43ebe843e64f2a3e3718f20c6e7ad9))
+* **desktop:** serialize strict Knowledge IDs for native MCP tool discovery ([e17d1ac](https://github.com/BakerSean168/memoflow/commit/e17d1acb664182b0aaf42fe90577ff8580b63a7a))
+* **qa:** close native wizard typing and notification fixture assumptions ([d81ccb2](https://github.com/BakerSean168/memoflow/commit/d81ccb2da5cecd3e53c82031b1d2ac19b8ba9c5f))
+* **settings:** make provider status tooltips keyboard accessible ([#457](https://github.com/BakerSean168/memoflow/issues/457)) ([f030e3b](https://github.com/BakerSean168/memoflow/commit/f030e3bdee6f4b3b8fa2df8541d7869070c9d750))
+* **ui:** guard resize focus theft and pin explicit pane inert contract ([#459](https://github.com/BakerSean168/memoflow/issues/459)) ([d14c018](https://github.com/BakerSean168/memoflow/commit/d14c018047efccf133739dfab6c3cc2aa9fcc5f1))
+* **ui:** keep filter focus through deferred menu teardown and resize gestures ([#459](https://github.com/BakerSean168/memoflow/issues/459)) ([5a16876](https://github.com/BakerSean168/memoflow/commit/5a1687666345bdd0ea5f4ef20bb21ac5c515f355))
+
 ## [0.19.0](https://github.com/BakerSean168/memoflow/compare/v0.18.0...v0.19.0) (2026-10-14)
 
 
