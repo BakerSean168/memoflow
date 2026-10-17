@@ -15,11 +15,15 @@ import type {
   AssistantRuntimeChoice,
   AssistantRuntimeSelectedEntity,
 } from '@memoflow/contracts/ai';
-import { LocalAgentConversationSchema, LocalAgentActivitySchema } from '@memoflow/contracts/ai';
+import {
+  LocalAgentConversationSchema,
+  LocalAgentActivitySchema,
+  LOCAL_AGENT_DEFAULT_EXECUTABLES,
+} from '@memoflow/contracts/ai';
 import { CodexDriver } from './codex-driver';
 import { ClaudeDriver } from './claude-driver';
 import { PiDriver } from './pi-driver';
-import { DshDriver } from './dsh-driver';
+import { AcpDriver } from './acp-driver';
 import { LocalAgentError } from '../../shared/local-agent-error';
 import { nativeModelVisibilityContext } from './native-identity';
 import type { LocalAgentRepository } from '../infrastructure/adapters/powersync/local-agent.repository';
@@ -105,7 +109,8 @@ export class LocalAgentRuntime {
     if (connection.driver === 'codex') return new CodexDriver(connection, this.options.cwd);
     if (connection.driver === 'claude') return new ClaudeDriver(connection, this.options.cwd);
     if (connection.driver === 'pi') return new PiDriver(connection, this.options.cwd);
-    if (connection.driver === 'dsh') return new DshDriver(connection, this.options.cwd);
+    if (connection.driver === 'dsh' || connection.driver === 'antigravity')
+      return new AcpDriver(connection, this.options.cwd);
     throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
   }
   async listConnections(identityId: string) {
@@ -163,12 +168,7 @@ export class LocalAgentRuntime {
    * The temporary identity cannot start a conversation or grant a business tool scope.
    */
   async probeDefaultDriver(_identityId: string, kind: LocalAgentDriver): Promise<LocalAgentStatus> {
-    const defaults: Record<LocalAgentDriver, string> = {
-      codex: 'codex',
-      claude: 'claude',
-      pi: 'pi',
-      dsh: 'dsh',
-    };
+    const defaults = LOCAL_AGENT_DEFAULT_EXECUTABLES;
     if (!Object.prototype.hasOwnProperty.call(defaults, kind))
       throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
     return this.runProbe(async () => ({

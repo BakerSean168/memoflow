@@ -268,3 +268,24 @@ it('keeps a bound request limit separate from discovery without allowing raw dia
     }).success,
   ).toBe(false);
 });
+
+it('accepts an Antigravity native connection without API credentials or arbitrary arguments', () => {
+  const connection = {
+    driver: 'antigravity',
+    name: 'Antigravity (AGY)',
+    executablePath: 'agy_acp_server',
+    enabled: true,
+    writeScopes: [],
+  };
+  expect(LocalAgentConnectionInputSchema.safeParse(connection).success).toBe(true);
+  expect(
+    LocalAgentClientCommandSchema.safeParse({ action: 'probe_default', driver: 'antigravity' })
+      .success,
+  ).toBe(true);
+  expect(
+    LocalAgentConnectionInputSchema.safeParse({ ...connection, apiKey: 'forbidden' }).success,
+  ).toBe(false);
+  expect(
+    LocalAgentConnectionInputSchema.safeParse({ ...connection, args: ['--unsafe'] }).success,
+  ).toBe(false);
+});

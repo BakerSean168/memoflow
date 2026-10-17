@@ -1,4 +1,7 @@
 import { randomUUID } from 'node:crypto';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { z } from 'zod';
 import type {
   LocalAgentConnection,
@@ -12,6 +15,12 @@ import { NativeEventQueue } from './native-event-queue';
 import { LocalAgentError } from '../../shared/local-agent-error';
 import { nativeIdentity, nativeModelVisibilityContext } from './native-identity';
 import { nativeVersion } from './native-executable';
+import {
+  ANTIGRAVITY_AUTH_PROMPT_PREFIX,
+  antigravityEnvironment,
+  antigravityExecutable,
+  antigravityHasCachedAuth,
+} from './antigravity-native';
 
 const MODEL_CONFIG_ID = 'model';
 const configOption = z.object({
@@ -27,7 +36,15 @@ const optionGroup = z.object({
   options: z.array(optionValue).max(2000),
 });
 const configState = z.object({
-  configOptions: z.array(z.unknown()).max(200),
+  configOptions: z.array(z.unknown()).max(200).optional(),
+  models: z
+    .object({
+      currentModelId: z.string().min(1).max(512),
+      availableModels: z
+        .array(z.object({ modelId: z.string().min(1).max(512), name: z.string().min(1).max(240) }))
+        .max(2000),
+    })
+    .optional(),
 });
 const initSchema = z.object({
   protocolVersion: z.literal(1),
@@ -46,19 +63,53 @@ const sessionUpdate = z.object({
 });
 const permissionPayload = z.object({
   sessionId: z.string().min(1).max(512),
-  toolCall: z.object({ toolCallId: z.string(), title: z.string().optional() }),
-  options: z.array(z.object({ optionId: z.string(), name: z.string(), kind: z.string() })).max(20),
+  toolCall: z.object({
+    toolCallId: z.string().min(1).max(512),
+    title: z.string().max(4000).optional(),
+  }),
+  options: z
+    .array(
+      z.object({
+        optionId: z.string().min(1).max(512),
+        name: z.string().min(1).max(1000),
+        kind: z.string().max(40),
+      }),
+    )
+    .max(20),
 });
 
 type Model = { id: string; name: string; provider?: string };
-function modelsFromOptions(raw: unknown): { models: Model[]; currentValue: string } {
+function modelsFromOptions(raw: unknown): {
+  models: Model[];
+  currentValue: string;
+  selection: 'config' | 'models';
+} {
   const state = configState.parse(raw);
-  const current = state.configOptions
+  const current = (state.configOptions ?? [])
     .map((value) => configOption.safeParse(value))
     .filter((value) => value.success)
     .map((value) => value.data)
     .find((value) => value.id === MODEL_CONFIG_ID);
-  if (!current) throw new LocalAgentError('LOCAL_AGENT_PROTOCOL_ERROR');
+  if (!current) {
+    if (
+      !state.models ||
+      state.configOptions?.some(
+        (option) => z.object({ id: z.literal(MODEL_CONFIG_ID) }).safeParse(option).success,
+      )
+    )
+      throw new LocalAgentError('LOCAL_AGENT_PROTOCOL_ERROR');
+    const models = state.models.availableModels.map((model) => ({
+      id: model.modelId,
+      name: model.name,
+    }));
+    if (
+      !models.length ||
+      !models.some((model) => model.id === state.models!.currentModelId) ||
+      new Set(models.map((model) => model.id)).size !== models.length
+    )
+      throw new LocalAgentError('LOCAL_AGENT_PROTOCOL_ERROR');
+    return { models, currentValue: state.models.currentModelId, selection: 'models' };
+  }
   const models: Model[] = [];
   for (const rawOption of current.options) {
     const group = optionGroup.safeParse(rawOption);
@@ -76,14 +127,17 @@ function modelsFromOptions(raw: unknown): { models: Model[]; currentValue: strin
   }
   if (models.length > 2000 || !models.some((item) => item.id === current.currentValue))
     throw new LocalAgentError('LOCAL_AGENT_PROTOCOL_ERROR');
-  return { models, currentValue: current.currentValue };
+  if (new Set(models.map((model) => model.id)).size !== models.length)
+    throw new LocalAgentError('LOCAL_AGENT_PROTOCOL_ERROR');
+  return { models, currentValue: current.currentValue, selection: 'config' };
 }
 
-/** An ACP v1 Agent transport. DSH owns inference, model routes and persisted sessions. */
-export class DshDriver {
+/** Shared ACP lifecycle. Each official Agent owns inference, routes and native sessions. */
+export class AcpDriver {
   private transport?: NativeRpcTransport;
   private readonly queue = new NativeEventQueue();
   private sessionId?: string;
+  private temporaryDirectory?: string;
   private readonly toolNames = new Map<string, string>();
   private cancelled = false;
   private closing?: Promise<void>;
@@ -91,6 +145,7 @@ export class DshDriver {
     string,
     {
       wireId: string | number;
+      questionId?: string;
       request: LocalAgentRequest;
       options: z.infer<typeof permissionPayload>['options'];
     }
@@ -104,19 +159,32 @@ export class DshDriver {
   ) {}
 
   private async connect(input?: NativeAgentRunInput) {
-    const fingerprint = await nativeIdentity('dsh', this.connection.homePath);
-    if (input?.accountFingerprint && input.accountFingerprint !== fingerprint)
+    const antigravity = this.connection.driver === 'antigravity';
+    if (!antigravity && this.connection.driver !== 'dsh')
+      throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
+    let fingerprint = await nativeIdentity(this.connection.driver, this.connection.homePath);
+    if (!antigravity && input?.accountFingerprint && input.accountFingerprint !== fingerprint)
       throw new LocalAgentError('LOCAL_AGENT_SESSION_UNAVAILABLE');
     if (this.cancelled) throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
+    const executable = antigravity
+      ? antigravityExecutable(this.connection.executablePath)
+      : this.connection.executablePath;
+    if (antigravity && !antigravityHasCachedAuth(this.connection.homePath))
+      throw new LocalAgentError('LOCAL_AGENT_LOGIN_REQUIRED');
+    if (antigravity) this.temporaryDirectory = await mkdtemp(join(tmpdir(), 'mf-agy-'));
     const transport = this.makeTransport({
       protocol: 'acp',
-      executable: this.connection.executablePath,
-      args: ['--profile', 'acp'],
+      driver: this.connection.driver,
+      executable,
+      args: antigravity ? (process.platform === 'linux' ? ['--uid='] : []) : ['--profile', 'acp'],
       cwd: this.cwd,
-      env: {
-        ...process.env,
-        ...(this.connection.homePath ? { DSH_HOME: this.connection.homePath } : {}),
-      },
+      env: antigravity
+        ? antigravityEnvironment(this.connection, executable, this.temporaryDirectory!)
+        : {
+            ...process.env,
+            ...(this.connection.homePath ? { DSH_HOME: this.connection.homePath } : {}),
+          },
+      ...(antigravity ? { authenticationPromptPrefix: ANTIGRAVITY_AUTH_PROMPT_PREFIX } : {}),
       requestTimeoutMs: 30_000,
     });
     this.transport = transport;
@@ -132,7 +200,7 @@ export class DshDriver {
     const init = initSchema.parse(
       await transport.request('initialize', {
         protocolVersion: 1,
-        clientCapabilities: {},
+        clientCapabilities: { fs: { readTextFile: false, writeTextFile: false }, terminal: false },
         clientInfo: { name: 'memoflow', title: 'MemoFlow', version: '1' },
       }),
     );
@@ -140,6 +208,14 @@ export class DshDriver {
       throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
     if (input?.nativeSessionId && !init.agentCapabilities.sessionCapabilities?.resume)
       throw new LocalAgentError('LOCAL_AGENT_SESSION_UNAVAILABLE');
+    if (antigravity) {
+      // Only native cached OAuth is used. Missing/expired login fails closed;
+      // discovery never opens a browser or sends a model prompt.
+      await transport.request('authenticate', { methodId: 'oauth-personal' });
+      fingerprint = await nativeIdentity('antigravity', this.connection.homePath);
+      if (input?.accountFingerprint && input.accountFingerprint !== fingerprint)
+        throw new LocalAgentError('LOCAL_AGENT_SESSION_UNAVAILABLE');
+    }
     const mcpServers = input?.mcp
       ? [
           {
@@ -158,11 +234,28 @@ export class DshDriver {
         })
       : await transport.request('session/new', { cwd: this.cwd, mcpServers });
     const sessionId = input?.nativeSessionId ?? sessionResponse.parse(session).sessionId;
-    const state = modelsFromOptions(session);
-    // ACP initialize.agentInfo is the Agent-reported version; protocol v1 is
-    // not the DSH executable version. Never display the protocol as a CLI build.
-    const version = nativeVersion(init.agentInfo?.version);
     this.sessionId = sessionId;
+    const state = modelsFromOptions(session);
+    if (antigravity) {
+      const modes = z
+        .object({
+          modes: z.object({
+            currentModeId: z.string(),
+            availableModes: z.array(z.object({ id: z.string() })).max(20),
+          }),
+        })
+        .parse(session).modes;
+      if (!modes.availableModes.some((mode) => mode.id === 'default'))
+        throw new LocalAgentError('LOCAL_AGENT_PROTOCOL_ERROR');
+      // Keep the native Agent in per-action approval mode, even when resuming an
+      // externally-created session. MemoFlow alone applies this turn's permission mode.
+      if (modes.currentModeId !== 'default')
+        await transport.request('session/set_mode', { sessionId, modeId: 'default' });
+    }
+    const reportedVersion = init.agentInfo?.version;
+    const version = nativeVersion(
+      antigravity ? reportedVersion?.replace(/^agy_acp_server_/u, '') : reportedVersion,
+    );
     return { sessionId, fingerprint, ...state, ...(version ? { version } : {}) };
   }
 
@@ -205,10 +298,12 @@ export class DshDriver {
         yield { type: 'cancelled' };
         return;
       }
-      const { sessionId, fingerprint, models, currentValue } = await this.connect(input);
+      const { sessionId, fingerprint, models, currentValue, selection } = await this.connect(input);
       if (!models.some((model) => model.id === input.modelId))
         throw new LocalAgentError('LOCAL_AGENT_MODEL_UNSUPPORTED');
-      if (currentValue !== input.modelId) {
+      if (currentValue !== input.modelId && selection === 'models') {
+        await this.transport!.request('session/set_model', { sessionId, modelId: input.modelId });
+      } else if (currentValue !== input.modelId) {
         const updated = modelsFromOptions(
           await this.transport!.request('session/set_config_option', {
             sessionId,
@@ -289,7 +384,7 @@ export class DshDriver {
         .parse(update);
       if (update.sessionUpdate === 'tool_call' && frame.title)
         this.toolNames.set(frame.toolCallId, frame.title);
-      const label = (frame.title ?? this.toolNames.get(frame.toolCallId) ?? 'DSH tool').slice(
+      const label = (frame.title ?? this.toolNames.get(frame.toolCallId) ?? 'ACP tool').slice(
         0,
         240,
       );
@@ -324,24 +419,65 @@ export class DshDriver {
     const title = (
       parsed.data.toolCall.title ??
       this.toolNames.get(parsed.data.toolCall.toolCallId) ??
-      'DSH tool approval'
+      'ACP tool approval'
     ).slice(0, 500);
-    const event: LocalAgentRequest = { type: 'permission', requestId, title };
+    const question =
+      this.connection.driver === 'antigravity' &&
+      parsed.data.toolCall.toolCallId.startsWith('interaction_');
+    if (
+      question &&
+      (!parsed.data.options.length ||
+        new Set(parsed.data.options.map((option) => option.optionId)).size !==
+          parsed.data.options.length ||
+        new Set(parsed.data.options.map((option) => option.name)).size !==
+          parsed.data.options.length)
+    ) {
+      this.transport?.respond(request.id, { outcome: { outcome: 'cancelled' } });
+      this.queue.fail(new LocalAgentError('LOCAL_AGENT_PROTOCOL_ERROR'));
+      return;
+    }
+    const event: LocalAgentRequest = question
+      ? {
+          type: 'user_input',
+          requestId,
+          questions: [
+            {
+              id: parsed.data.toolCall.toolCallId,
+              prompt: title,
+              options: parsed.data.options.map((option) => option.name),
+            },
+          ],
+        }
+      : { type: 'permission', requestId, title };
     this.requests.set(requestId, {
       wireId: request.id,
       request: event,
       options: parsed.data.options,
+      ...(question ? { questionId: parsed.data.toolCall.toolCallId } : {}),
     });
     this.queue.push({ type: 'request', request: event });
   }
 
   respond(requestId: string, response: LocalAgentRequestResponse['response']): boolean {
     const pending = this.requests.get(requestId);
-    if (!pending || this.cancelled || response.type !== 'permission') return false;
+    if (!pending || this.cancelled || response.type !== pending.request.type) return false;
+    let option: (typeof pending.options)[number] | undefined;
+    if (response.type === 'permission') {
+      option = pending.options.find(
+        (entry) =>
+          entry.kind === (response.decision === 'approve_once' ? 'allow_once' : 'reject_once'),
+      );
+    } else {
+      if (
+        response.answers.length !== 1 ||
+        response.answers[0].questionId !== pending.questionId ||
+        response.answers[0].values.length !== 1
+      )
+        return false;
+      option = pending.options.find((entry) => entry.name === response.answers[0].values[0]);
+      if (!option) return false;
+    }
     this.requests.delete(requestId);
-    const option = pending.options.find(
-      (item) => item.kind === (response.decision === 'approve_once' ? 'allow_once' : 'reject_once'),
-    );
     this.transport?.respond(pending.wireId, {
       outcome: option
         ? { outcome: 'selected', optionId: option.optionId }
@@ -368,27 +504,34 @@ export class DshDriver {
 
   close(): Promise<void> {
     this.closing ??= (async () => {
-      const transport = this.transport;
-      if (!transport) return;
-      for (const pending of this.requests.values())
-        transport.respond(pending.wireId, { outcome: { outcome: 'cancelled' } });
-      this.requests.clear();
-      if (this.sessionId && !this.cancelled) {
-        let timer: ReturnType<typeof setTimeout> | undefined;
-        try {
-          await Promise.race([
-            transport
-              .request('session/close', { sessionId: this.sessionId })
-              .catch(() => undefined),
-            new Promise<void>((resolve) => {
-              timer = setTimeout(resolve, 2_000);
-            }),
-          ]);
-        } finally {
-          if (timer) clearTimeout(timer);
+      try {
+        const transport = this.transport;
+        if (!transport) return;
+        for (const pending of this.requests.values())
+          transport.respond(pending.wireId, { outcome: { outcome: 'cancelled' } });
+        this.requests.clear();
+        if (this.sessionId && !this.cancelled) {
+          let timer: ReturnType<typeof setTimeout> | undefined;
+          try {
+            await Promise.race([
+              transport
+                .request('session/close', { sessionId: this.sessionId })
+                .catch(() => undefined),
+              new Promise<void>((resolve) => {
+                timer = setTimeout(resolve, 2_000);
+              }),
+            ]);
+          } finally {
+            if (timer) clearTimeout(timer);
+          }
         }
+        await transport.close();
+      } finally {
+        if (this.temporaryDirectory)
+          await rm(this.temporaryDirectory, { recursive: true, force: true }).catch(
+            () => undefined,
+          );
       }
-      await transport.close();
     })();
     return this.closing;
   }

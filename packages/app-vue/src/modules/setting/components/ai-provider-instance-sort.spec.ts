@@ -24,6 +24,7 @@ describe('AI Settings fixed Provider grouping', () => {
       native('mastra', 'mastra', 0),
       native('codex-second', 'codex', 8, false),
       native('dsh', 'dsh', 0),
+      native('antigravity', 'antigravity', 0),
       native('pi', 'pi', 0),
       native('claude', 'claude', 0),
       native('codex-first', 'codex', 2),
@@ -36,6 +37,7 @@ describe('AI Settings fixed Provider grouping', () => {
       'claude',
       'pi',
       'dsh',
+      'antigravity',
       'mastra',
     ]);
     expect(input[0]?.instanceId).toBe('mastra');

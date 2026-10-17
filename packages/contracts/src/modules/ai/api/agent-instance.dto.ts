@@ -1,7 +1,11 @@
 import { z } from 'zod';
-import { AgentInstanceSlugSchema, LocalAgentConnectionInputSchema } from './local-agent.dto';
+import {
+  AgentInstanceSlugSchema,
+  LocalAgentConnectionInputSchema,
+  LocalAgentDriverSchema,
+} from './local-agent.dto';
 
-export const AgentDriverKindSchema = z.enum(['mastra', 'codex', 'claude', 'pi', 'dsh']);
+export const AgentDriverKindSchema = z.enum(['mastra', ...LocalAgentDriverSchema.options]);
 export type AgentDriverKind = z.infer<typeof AgentDriverKindSchema>;
 export const AgentNativeConfigSchema = LocalAgentConnectionInputSchema.pick({
   executablePath: true,

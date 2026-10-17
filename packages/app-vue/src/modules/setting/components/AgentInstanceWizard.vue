@@ -13,6 +13,7 @@ import {
 import {
   AgentInstanceSlugSchema,
   LocalAgentConnectionInputSchema,
+  LOCAL_AGENT_DEFAULT_EXECUTABLES,
   type AgentDriverKind,
   type CreateAgentInstance,
   type LocalAgentConnectionInput,
@@ -54,6 +55,7 @@ const agents = computed(() => [
         { id: 'claude' as const, name: 'Claude Code' },
         { id: 'pi' as const, name: 'Pi' },
         { id: 'dsh' as const, name: 'DSH' },
+        { id: 'antigravity' as const, name: 'Antigravity (AGY)' },
       ]
     : []),
 ]);
@@ -71,7 +73,9 @@ const nativeInput = computed(() =>
     name: name.value.trim(),
     instanceSlug: slug.value.trim(),
     accentColor: accent.value,
-    executablePath: executablePath.value.trim() || driver.value,
+    executablePath:
+      executablePath.value.trim() ||
+      (driver.value === 'mastra' ? '' : LOCAL_AGENT_DEFAULT_EXECUTABLES[driver.value]),
     homePath: homePath.value.trim() || undefined,
     enabled: true,
     writeScopes: [],
@@ -87,7 +91,7 @@ function choose(id: AgentDriverKind) {
   driver.value = id;
   name.value = agents.value.find((entry) => entry.id === id)!.name;
   slug.value = defaultSlug(id);
-  executablePath.value = id === 'mastra' ? '' : id;
+  executablePath.value = id === 'mastra' ? '' : LOCAL_AGENT_DEFAULT_EXECUTABLES[id];
   homePath.value = '';
   attempted.value = false;
 }
@@ -320,19 +324,31 @@ watch(
           <template v-else>
             <SettingsPropertyRow
               :label="t('aiAssistant.local.executable')"
-              :description="t('setting.agentInstances.binaryHint')"
+              :description="
+                t(
+                  driver === 'antigravity'
+                    ? 'setting.agentInstances.antigravityBinaryHint'
+                    : 'setting.agentInstances.binaryHint',
+                )
+              "
               :html-for="`${uid}-binary`"
               ><Input
                 :id="`${uid}-binary`"
                 v-model="executablePath"
                 data-testid="ai-instance-executable"
-                :placeholder="driver"
+                :placeholder="driver === 'mastra' ? '' : LOCAL_AGENT_DEFAULT_EXECUTABLES[driver]"
                 class="h-8 rounded-lg bg-background"
                 :disabled="busy"
             /></SettingsPropertyRow>
             <SettingsPropertyRow
               :label="t('aiAssistant.local.home')"
-              :description="t('setting.agentInstances.homeHint')"
+              :description="
+                t(
+                  driver === 'antigravity'
+                    ? 'setting.agentInstances.antigravityHomeHint'
+                    : 'setting.agentInstances.homeHint',
+                )
+              "
               :html-for="`${uid}-home`"
               ><Input
                 :id="`${uid}-home`"

@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { Button, Input } from '@memoflow/ui-vue-shadcn';
 import {
   LocalAgentConnectionInputSchema,
+  LOCAL_AGENT_DEFAULT_EXECUTABLES,
   type LocalAgentConnection,
   type LocalAgentConnectionInput,
   type LocalAgentDriver,
@@ -51,7 +52,13 @@ function updateModelVisibility(modelId: string, event: Event) {
   if (!modelVisibility.setVisible(visibilityInstanceId.value, modelId, input.checked))
     input.checked = !input.checked;
 }
-const names = { codex: 'Codex', claude: 'Claude Code', pi: 'Pi', dsh: 'DSH' };
+const names = {
+  codex: 'Codex',
+  claude: 'Claude Code',
+  pi: 'Pi',
+  dsh: 'DSH',
+  antigravity: 'Antigravity (AGY)',
+};
 const scopes = ['goals:write', 'tasks:write'] as const;
 const form = reactive<LocalAgentConnectionInput>({
   driver: props.driver,
@@ -70,7 +77,7 @@ watch(
       name: current?.name ?? props.identity?.name ?? names[props.driver],
       instanceSlug: current?.instanceSlug ?? props.identity?.instanceSlug,
       accentColor: current?.accentColor ?? props.identity?.accentColor,
-      executablePath: current?.executablePath ?? props.driver,
+      executablePath: current?.executablePath ?? LOCAL_AGENT_DEFAULT_EXECUTABLES[props.driver],
       homePath: current?.homePath ?? '',
       enabled: props.enabled ?? current?.enabled ?? true,
       writeScopes: [...(current?.writeScopes ?? [])],
@@ -245,7 +252,13 @@ function save() {
       <div class="rounded-xl border border-[hsl(var(--border-subtle))] bg-muted/10 px-4 py-4">
         <SettingsPropertyRow
           :label="t('aiAssistant.local.executable')"
-          :description="t('setting.agentInstances.binaryHint')"
+          :description="
+            t(
+              driver === 'antigravity'
+                ? 'setting.agentInstances.antigravityBinaryHint'
+                : 'setting.agentInstances.binaryHint',
+            )
+          "
           :html-for="`${uid}-executable`"
           ><Input
             :id="`${uid}-executable`"
@@ -258,7 +271,13 @@ function save() {
         /></SettingsPropertyRow>
         <SettingsPropertyRow
           :label="t('aiAssistant.local.home')"
-          :description="t('setting.agentInstances.homeHint')"
+          :description="
+            t(
+              driver === 'antigravity'
+                ? 'setting.agentInstances.antigravityHomeHint'
+                : 'setting.agentInstances.homeHint',
+            )
+          "
           :html-for="`${uid}-home`"
           ><Input
             :id="`${uid}-home`"

@@ -2,7 +2,7 @@
 
 const fs = require('node:fs');
 
-// Test-only DSH/ACP JSON-RPC peer. Never connects to a model or the network.
+// Test-only DSH/Antigravity ACP JSON-RPC peer. Never connects to a model or the network.
 // Production Desktop does not load this file. A test-owned isolated executable
 // path is passed through the same public Native Connection IPC as user settings.
 if (process.env.MEMOFLOW_ATTENTION_QA_FIXTURE !== '1') process.exit(88);
@@ -29,11 +29,14 @@ process.stdin.on('data', (chunk) => {
       result = {
         protocolVersion: 1,
         agentInfo: { version: '1.0.0' },
-        agentCapabilities: { mcpCapabilities: { http: true } },
+        agentCapabilities: { mcpCapabilities: { http: true }, sessionCapabilities: { resume: {} } },
       };
-    } else if (request.method === 'session/new') {
+    } else if (request.method === 'authenticate' || request.method === 'session/close') {
+      result = {};
+    } else if (request.method === 'session/new' || request.method === 'session/resume') {
       result = {
         sessionId: 'memoflow-attention-qa-session',
+        modes: { currentModeId: 'default', availableModes: [{ id: 'default', name: 'Default' }] },
         configOptions: [
           {
             id: 'model',
@@ -50,6 +53,26 @@ process.stdin.on('data', (chunk) => {
       // Desktop assistant.run.started. These are NOT real upstream responses.
       // A diagnostic marker must NEVER be forwarded to UI events or storage.
       const mode = process.env.MEMOFLOW_ATTENTION_QA_FAILURE;
+      if (mode === 'success') {
+        process.stdout.write(
+          JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'session/update',
+            params: {
+              sessionId: 'memoflow-attention-qa-session',
+              update: {
+                sessionUpdate: 'agent_message_chunk',
+                content: { type: 'text', text: 'Offline AGY response' },
+              },
+            },
+          }) + '\n',
+        );
+        process.stdout.write(
+          JSON.stringify({ jsonrpc: '2.0', id: request.id, result: { stopReason: 'end_turn' } }) +
+            '\n',
+        );
+        continue;
+      }
       const error =
         mode === 'rate_limited'
           ? { code: 429, message: 'Too Many Requests PRIVATE_ACP_QA_DIAGNOSTIC' }

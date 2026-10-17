@@ -8,7 +8,9 @@ export function nativeFailure(diagnostic: unknown): LocalAgentError {
   if (/(?:thread|session|conversation).*not found|no conversation found/i.test(value))
     return new LocalAgentError('LOCAL_AGENT_SESSION_UNAVAILABLE');
   if (
-    /refresh_token_reused|authentication_failed|invalid_api_key|\b401\b|unauthorized/i.test(value)
+    /refresh_token_reused|authentication_failed|authentication required|not authenticated|sign.?in required|invalid_api_key|\b401\b|unauthorized/i.test(
+      value,
+    )
   )
     return new LocalAgentError('LOCAL_AGENT_LOGIN_REQUIRED');
   if (

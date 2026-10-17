@@ -69,3 +69,44 @@ it('fences DSH ACP sessions when their native Profile configuration changes', as
     await rm(home, { recursive: true, force: true });
   }
 });
+
+it('keeps AGY identity stable across native cache rewrites but fences new authorization', async () => {
+  const home = await mkdtemp(join(tmpdir(), 'memoflow-agy-identity-'));
+  try {
+    const dir = join(home, 'antigravity-acp');
+    await mkdir(dir);
+    const cache = join(dir, 'acp_token.json');
+    await writeFile(
+      cache,
+      JSON.stringify({
+        client_id: 'fixture-client',
+        refresh_token: 'fixture-account-a',
+        access_token: 'first',
+      }),
+    );
+    const first = await nativeIdentity('antigravity', home);
+    await writeFile(
+      cache,
+      JSON.stringify(
+        {
+          client_id: 'fixture-client',
+          refresh_token: 'fixture-account-a',
+          access_token: 'refreshed',
+          expiry: 99,
+        },
+        null,
+        2,
+      ),
+    );
+    expect(await nativeIdentity('antigravity', home)).toBe(first);
+    await writeFile(
+      cache,
+      JSON.stringify({ client_id: 'fixture-client', refresh_token: 'fixture-account-b' }),
+    );
+    expect(await nativeIdentity('antigravity', home)).not.toBe(first);
+    expect(first).toMatch(/^[0-9a-f]{64}$/);
+    expect(first).not.toContain('fixture-account');
+  } finally {
+    await rm(home, { recursive: true, force: true });
+  }
+});

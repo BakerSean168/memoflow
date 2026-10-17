@@ -474,6 +474,12 @@
       "role": "artifact",
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.visual-regression.config.ts"
+    },
+    "apps/desktop/e2e/antigravity-composer.spec.mts": {
+      "surface": "ai-workspace",
+      "role": "supplemental",
+      "lifecycle": "active",
+      "primaryCollector": "apps/desktop/playwright.config.ts"
     }
   }
 }

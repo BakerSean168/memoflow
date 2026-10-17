@@ -54,7 +54,7 @@ function provider(id = '11111111-1111-4111-8111-111111111111', name = 'Saved ser
     deletedAt: null,
   });
 }
-function instance(id: string, driver: 'mastra' | 'codex' | 'claude' | 'pi' | 'dsh' = 'mastra') {
+function instance(id: string, driver: AgentInstance['driver'] = 'mastra') {
   return AgentInstanceSchema.parse({
     instanceId: id,
     driver,
@@ -93,7 +93,9 @@ async function setup(
   let instances: AgentInstance[] = [instance('mastra')];
   if (options.native)
     instances.push(
-      ...(['codex', 'claude', 'pi', 'dsh'] as const).map((driver) => instance(driver, driver)),
+      ...(['codex', 'claude', 'pi', 'dsh', 'antigravity'] as const).map((driver) =>
+        instance(driver, driver),
+      ),
     );
   if (options.extra)
     instances.push({ ...instance('mastra-other'), name: 'Other Agent', revision: 1 });
@@ -397,7 +399,7 @@ describe('T3-style Agent settings and direct endpoint configuration', () => {
       }),
     });
     expect(wrapper.find('[data-testid="ai-provider-select-agent:codex"]').exists()).toBe(true);
-    expect(wrapper.findAll('[role="listitem"]')).toHaveLength(6);
+    expect(wrapper.findAll('[role="listitem"]')).toHaveLength(7);
   });
   it('keeps each field label associated with its own wizard input, never the background form', async () => {
     const { wrapper } = await setup({ native: true });
@@ -433,10 +435,10 @@ describe('T3-style Agent settings and direct endpoint configuration', () => {
   });
   it('shows all native defaults, probes without saving, and persists their toggles through the registry', async () => {
     const { wrapper, registry, localClient } = await setup({ native: true });
-    expect(wrapper.findAll('[role="listitem"]')).toHaveLength(5);
-    expect(localClient.probeDefaultDriver).toHaveBeenCalledTimes(4);
+    expect(wrapper.findAll('[role="listitem"]')).toHaveLength(6);
+    expect(localClient.probeDefaultDriver).toHaveBeenCalledTimes(5);
     expect(registry.execute).not.toHaveBeenCalled();
-    for (const id of ['mastra', 'codex', 'claude', 'pi', 'dsh'])
+    for (const id of ['mastra', 'codex', 'claude', 'pi', 'dsh', 'antigravity'])
       expect(wrapper.find(`[data-testid="ai-provider-toggle-${id}"]`).exists()).toBe(true);
     await wrapper.get('[data-testid="ai-provider-toggle-codex"]').trigger('click');
     await flushPromises();
@@ -1040,4 +1042,31 @@ it('uses the renderer fallback when a rejected probe carries a private exception
     expect(document.querySelector('[role="tooltip"]')?.textContent).toBe(message),
   );
   expect(document.body.innerHTML).not.toContain('PRIVATE_');
+});
+
+it('configures AGY as an official native ACP Agent rather than a model API service', async () => {
+  const { wrapper, registry, client } = await setup({ native: true });
+  await openIdentity(wrapper, 'antigravity');
+  await wrapper.get('[data-testid="ai-instance-continue"]').trigger('click');
+  await flushPromises();
+  expect(wrapper.get('[data-testid="ai-instance-executable"]').element).toHaveProperty(
+    'value',
+    'agy_acp_server',
+  );
+  expect(wrapper.text()).toContain('official Antigravity ACP');
+  await wrapper.get('[data-testid="ai-instance-home"]').setValue('/native/agy-profile');
+  await wrapper.get('[data-testid="ai-agent-instance-save"]').trigger('click');
+  await flushPromises();
+  expect(registry.execute).toHaveBeenCalledWith({
+    action: 'create',
+    instance: expect.objectContaining({
+      driver: 'antigravity',
+      nativeConfig: expect.objectContaining({
+        executablePath: 'agy_acp_server',
+        homePath: '/native/agy-profile',
+        writeScopes: [],
+      }),
+    }),
+  });
+  expect(client.probeProviderConnection).not.toHaveBeenCalled();
 });

@@ -4,6 +4,8 @@ import { nativeFailure } from './native-failure';
 it.each([
   ['refresh_token_reused: do not disclose native diagnostic', 'LOCAL_AGENT_LOGIN_REQUIRED'],
   ['authentication_failed', 'LOCAL_AGENT_LOGIN_REQUIRED'],
+  ['Authentication required', 'LOCAL_AGENT_LOGIN_REQUIRED'],
+  ['Not authenticated; private detail', 'LOCAL_AGENT_LOGIN_REQUIRED'],
   ['401 Unauthorized: secret', 'LOCAL_AGENT_LOGIN_REQUIRED'],
   ['unknown provider for model selected', 'LOCAL_AGENT_MODEL_UNSUPPORTED'],
   ['model_not_found', 'LOCAL_AGENT_MODEL_UNSUPPORTED'],

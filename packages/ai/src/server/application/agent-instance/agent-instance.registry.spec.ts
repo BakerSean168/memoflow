@@ -41,6 +41,7 @@ describe('Agent registry with real SQLite persistence', () => {
       'claude',
       'pi',
       'dsh',
+      'antigravity',
     ]);
     await registry.execute('a', {
       action: 'create',
@@ -606,4 +607,49 @@ describe('Agent registry with real SQLite persistence', () => {
     ]);
     expect(await db.getAll('SELECT * FROM ai_agent_conversation_bindings')).toEqual([]);
   });
+});
+
+it('materializes AGY with its canonical ACP executable and preserves owner isolation', async () => {
+  const { db, registry } = setup();
+  const defaults = await registry.list('owner');
+  expect(defaults.instances.find((item) => item.driver === 'antigravity')).toMatchObject({
+    instanceId: 'antigravity',
+    name: 'Antigravity (AGY)',
+    revision: 0,
+  });
+  expect(await new LocalAgentRepository(db).listConnections('owner')).toHaveLength(0);
+  await registry.execute('owner', {
+    action: 'update',
+    instanceId: 'antigravity',
+    expectedRevision: 0,
+    patch: { enabled: true },
+  });
+  const local = new LocalAgentRepository(db);
+  const connections = await local.listConnections('owner');
+  expect(connections).toHaveLength(1);
+  expect(connections[0]).toMatchObject({
+    driver: 'antigravity',
+    executablePath: 'agy_acp_server',
+    enabled: true,
+  });
+  await registry.execute('owner', {
+    action: 'reset',
+    instanceId: 'antigravity',
+    expectedRevision: 1,
+  });
+  expect((await local.listConnections('owner'))[0].id).toBe(connections[0].id);
+  expect(await local.listConnections('other-owner')).toHaveLength(0);
+  const web = setup('web').registry;
+  await expect(
+    web.execute('owner', {
+      action: 'create',
+      instance: {
+        instanceId: 'agy',
+        driver: 'antigravity',
+        name: 'AGY',
+        accentColor: '#6469da',
+        enabled: true,
+      },
+    }),
+  ).rejects.toMatchObject({ code: 'FORBIDDEN' });
 });

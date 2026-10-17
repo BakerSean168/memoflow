@@ -20,8 +20,16 @@ export const AssistantRuntimeChoiceSchema = z.discriminatedUnion('runtimeKind', 
 ]);
 export type AssistantRuntimeChoice = z.infer<typeof AssistantRuntimeChoiceSchema>;
 
-export const LocalAgentDriverSchema = z.enum(['codex', 'claude', 'pi', 'dsh']);
+export const LocalAgentDriverSchema = z.enum(['codex', 'claude', 'pi', 'dsh', 'antigravity']);
 export type LocalAgentDriver = z.infer<typeof LocalAgentDriverSchema>;
+/** Native executables, not model services. The AGY CLI is distinct from its official ACP server. */
+export const LOCAL_AGENT_DEFAULT_EXECUTABLES: Readonly<Record<LocalAgentDriver, string>> = {
+  codex: 'codex',
+  claude: 'claude',
+  pi: 'pi',
+  dsh: 'dsh',
+  antigravity: 'agy_acp_server',
+};
 export const LocalAgentActivitySchema = z
   .object({
     toolCallId: id,

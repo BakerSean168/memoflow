@@ -13,9 +13,10 @@ updated: 2026-10-07T00:00:00Z
 
 ## 当前计划
 
-- [Issue 459 本地 UI 实施与验收](./2026-10-16-ui-459-closure.md)：pane、轻量反馈与浏览器回归见[本地交接](./2026-10-16-ui-459-handoff.md)；Web Flow CI 三个失败已修复且 exact head 全绿，见[CI 修复轮记录](./2026-10-16-ui-459-ci-fix-round.md)；真实 Dev 账户验收、独立审查、合并与发布由 ChatGPT Web 执行。
+- [Antigravity BYOA and release closeout](./2026-10-17-antigravity-byoa-release.md): #468 is merged; add official AGY ACP, deterministic failure recovery, exact-candidate Desktop/installation validation, then the standard release lifecycle.
+- [Issue 459 UI closeout](./2026-10-16-ui-459-closure.md): implementation and real Web owner journeys were accepted; PR #460 merged at `331bdb0f7d549d11b1ad7632cabf1a5a22385886`, and #459 is closed. The current release combines these UI changes with the separately verified native Agent work.
 
-- [AI 失败恢复与 Workspace 事件同步](./2026-10-13-ai-recovery-workspace-events/README.md)：PR #451 后续专项；评审、设计、实施切片和验收文档已形成，Goal 失败后的原生草稿脱离已实现并通过 902 测试及静态检查；轻量中断、事件系统与刷新检查点待后续切片。
+- [AI failure recovery and Workspace events](./2026-10-13-ai-recovery-workspace-events/README.md): S0-S7 implementation is merged; Windows Conversation/Goal/Attention evidence was extended by #461-#468. Deterministic 429/quota injection is valid recovery evidence. Remaining exact-candidate release checks are tracked in #454/#456/#457 and the current AGY closeout plan.
 
 2026-10-13 repository consolidation: these plans also retain pending product acceptance and historical checkpoints; their presence is not evidence of a running implementation task. Useful existing code is consolidated through PR #449 rather than held on idle branches. See the [consolidation audit](../archive/2026-10-13-main-branch-consolidation.md) for verified scope and explicit remaining acceptance limits.
 

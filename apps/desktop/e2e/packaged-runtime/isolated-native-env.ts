@@ -11,7 +11,7 @@ export function createIsolatedNativeAgentEnvironment(runtimeRoot: string): NodeJ
   for (const [name, value] of Object.entries(process.env)) {
     if (
       /(?:TOKEN|SECRET|PASSWORD|CREDENTIAL|AUTH|API[_-]?KEY)/i.test(name) ||
-      (/^(?:OPENAI|ANTHROPIC|KUNYOU|WINDHUB|DEEPSEEK|ZAI|GLM|DSH)_/i.test(name) &&
+      (/^(?:OPENAI|ANTHROPIC|KUNYOU|WINDHUB|DEEPSEEK|ZAI|GLM|DSH|GEMINI|GOOGLE|AGY)_/i.test(name) &&
         /(?:BASE_URL|ENDPOINT|API_BASE)/i.test(name))
     ) {
       continue;
@@ -24,6 +24,7 @@ export function createIsolatedNativeAgentEnvironment(runtimeRoot: string): NodeJ
     CLAUDE_CONFIG_DIR: 'claude',
     PI_CODING_AGENT_DIR: 'pi',
     DSH_HOME: 'dsh',
+    GEMINI_HOME: 'antigravity',
   })) {
     const home = path.join(runtimeRoot, 'native-agents', subdir);
     fs.mkdirSync(home, { recursive: true });
