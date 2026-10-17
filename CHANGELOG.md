@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.20.1](https://github.com/BakerSean168/memoflow/compare/v0.20.0...v0.20.1) (2026-10-17)
+
+
+### Bug Fixes
+
+* **ci:** correct candidate runtime Go-template quoting on image reuse ([80ddf1d](https://github.com/BakerSean168/memoflow/commit/80ddf1d5b8b1bc85be60e798b129a2a4cddb3a35))
+* **ci:** correct OCI revision template in candidate reuse ([f3c2853](https://github.com/BakerSean168/memoflow/commit/f3c28530885cad217440dac4dbf511e35d02c8e8))
+
 ## [0.20.0](https://github.com/BakerSean168/memoflow/compare/v0.19.0...v0.20.0) (2026-10-17)
 
 
