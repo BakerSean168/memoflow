@@ -657,6 +657,17 @@ test('Windows release uses one exact-installed Native and Workspace acceptance p
     /Get-FileHash -LiteralPath \$report\.installedExecutable -Algorithm SHA256/u,
   );
   assert.match(workflow, /desktop-workspace-ipc-windows/u);
+  const installerProof = workflowStep(workflow, 'Verify retained unsigned Windows QA installer');
+  assert.match(installerProof, /report\.candidate\.installerSha256/u);
+  assert.match(installerProof, /Get-FileHash -LiteralPath \$installer -Algorithm SHA256/u);
+  const qaBinary = workflowStep(workflow, 'Upload exact unsigned Windows operator QA installer');
+  assert.match(qaBinary, /desktop-unsigned-windows-operator-qa/u);
+  assert.match(qaBinary, /update-e2e-fixtures\/candidate\/\*Setup\.exe/u);
+  assert.match(qaBinary, /retention-days: 7/u);
+  assert.ok(
+    workflow.indexOf('- name: Run one installed Windows Workspace and Native acceptance suite') <
+      workflow.indexOf('- name: Upload exact unsigned Windows operator QA installer'),
+  );
 
   const specs = [
     'workspace-ipc',

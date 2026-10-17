@@ -181,6 +181,7 @@ Scope: **test-only PR, unmerged at time of writing**; base is exact main SHA c44
 - On Workspace IPC and Attention, verify the running app is actually packaged, its executable path and SHA-256 match the independent updater receipt, and version matches installed candidate; secondary inspector windows use its own installed preload.
 - Cross-Guest cursor/identity checks and model-free Goal workflow event remain real application IPC and durable Profile storage; ACP 429/quota remain **explicitly offline fixture injection**. No credential file or billable model request.
 - Before this test-only PR merges and its **later exact-main SHA** Windows single-pass CI succeeds, the new installed Workspace/Attention coverage is **pending**, not an accepted Windows result. The operator-approved Codex A→empty B→A and separately authorized signed-installed live Send remain external acceptance items.
+- The same workflow retains one seven-day **unsigned QA-only Windows installer**, verified byte-for-byte against the updater's recorded candidate.installerSha256 before upload; a separately authorized Windows operator can use this binary with no second packaging job. **No signed public installer or real account is claimed here.**
 - This work does **not** reopen release workflows or publish v0.20.x. Final DoD also requires #454/#456/#457 product and owner/profile recovery evidence, release signing/assets and a project-wide Go/No-Go.
 
 See docs/guides/development/windows-native-provider-operator-qa.md for the opt-in/native safety boundary.

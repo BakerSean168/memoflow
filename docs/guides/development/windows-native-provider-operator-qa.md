@@ -28,6 +28,8 @@ All cases receive the same independent updater receipt, SHA-256 and installed ve
 
 Do not run the old pre-package Electron Workspace suite as a second release gate. A successful earlier dev-Electron test is background evidence only, not equivalent to this installed test.
 
+The workflow also retains exactly the already-installed **unsigned QA candidate installer**, never rebuilding it solely for later operator checks. The short-lived GitHub Actions artifact is named desktop-unsigned-windows-operator-qa (seven-day retention). Before local installation compare its SHA-256 with the **independent updater report candidate.installerSha256**, the workflow's exact Git commit, and the installed executable SHA-256. It is **not a signed or published release asset** and must not be handed out as a production installer.
+
 ## Explicit, read-only operator Codex acceptance
 
 With operator consent to **read an existing Windows Codex login**, start PowerShell from the trusted source checkout matching that candidate and configure these process-only variables:
