@@ -336,7 +336,7 @@ watch(
                 :id="`${uid}-binary`"
                 v-model="executablePath"
                 data-testid="ai-instance-executable"
-                :placeholder="driver === 'mastra' ? '' : LOCAL_AGENT_DEFAULT_EXECUTABLES[driver]"
+                :placeholder="LOCAL_AGENT_DEFAULT_EXECUTABLES[driver]"
                 class="h-8 rounded-lg bg-background"
                 :disabled="busy"
             /></SettingsPropertyRow>
