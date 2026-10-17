@@ -163,6 +163,18 @@
       "lifecycle": "active",
       "primaryCollector": "apps/desktop/playwright.config.ts"
     },
+    "apps/desktop/e2e/native-codex-account-operator.spec.mts": {
+      "surface": "ai-workspace",
+      "role": "supplemental",
+      "lifecycle": "active",
+      "primaryCollector": "apps/desktop/playwright.config.ts"
+    },
+    "apps/desktop/e2e/native-codex-unconfigured-installed.spec.mts": {
+      "surface": "ai-workspace",
+      "role": "supplemental",
+      "lifecycle": "active",
+      "primaryCollector": "apps/desktop/playwright.config.ts"
+    },
     "apps/desktop/e2e/packaged-runtime/packaged-runtime.spec.ts": {
       "surface": "packaged-runtime",
       "role": "canonical",

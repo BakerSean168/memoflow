@@ -932,6 +932,34 @@
       }
     },
     {
+      "path": "apps/desktop/e2e/native-codex-account-operator.spec.mts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/desktop/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "ai-workspace",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/desktop/playwright.config.ts"
+      }
+    },
+    {
+      "path": "apps/desktop/e2e/native-codex-unconfigured-installed.spec.mts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/desktop/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "ai-workspace",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/desktop/playwright.config.ts"
+      }
+    },
+    {
       "path": "apps/desktop/e2e/packaged-runtime/packaged-runtime.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
@@ -13076,7 +13104,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 7,
+      "fileCount": 9,
       "e2eOwnership": {
         "lane": "desktop",
         "lifecycle": "active",
@@ -14271,7 +14299,7 @@
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 9,
-    "e2e": 55,
+    "e2e": 57,
     "perf": 2,
     "governance": 65
   },
@@ -14279,7 +14307,7 @@
     "version": 2,
     "issues": [],
     "countsByLane": {
-      "desktop": 7,
+      "desktop": 9,
       "local-validation": 6,
       "nightly": 5,
       "reference": 6,
@@ -14292,7 +14320,7 @@
       "artifact": 3,
       "canonical": 26,
       "reference": 6,
-      "supplemental": 20
+      "supplemental": 22
     },
     "automatedCollectorCount": 4,
     "automationBindingCount": 5

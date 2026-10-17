@@ -3,6 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { expect, test } from '@playwright/test';
 import { _electron as electron } from 'playwright';
+import { verifyInstalledNativeBinary } from './support/installed-native-provenance';
 import { AIChannels, AIStreamChannels } from '@memoflow/contracts/electron';
 import { createIsolatedNativeAgentEnvironment } from './packaged-runtime/isolated-native-env';
 
@@ -32,6 +33,12 @@ test('operator-approved Windows DSH Flash Send through Desktop IPC and durable h
   );
   test.skip(process.platform !== 'win32', 'Windows native Desktop acceptance');
   test.setTimeout(115_000);
+  const installedExecutable = process.env.MEMOFLOW_PACKAGED_EXECUTABLE;
+  // A non-dev acceptance must be bound to a verified, unchanged installed exe.
+  if (installedExecutable) {
+    expect(process.env.MEMOFLOW_QA_EXPECTED_EXE_SHA256).toMatch(/^[0-9a-f]{64}$/i);
+    expect(process.env.MEMOFLOW_QA_EXPECTED_VERSION).toMatch(/^\d+\.\d+\.\d+$/);
+  }
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'memoflow-windows-live-dsh-'));
   const executable = process.env.MEMOFLOW_QA_DSH_EXECUTABLE;
   expect(executable, 'Windows npm DSH launcher required').toBeTruthy();
@@ -43,7 +50,12 @@ test('operator-approved Windows DSH Flash Send through Desktop IPC and durable h
   let app: Awaited<ReturnType<typeof electron.launch>> | undefined;
   try {
     app = await electron.launch({
-      args: ['--disable-gpu', '--disable-dev-shm-usage', path.resolve('dist-electron/main.cjs')],
+      ...(installedExecutable ? { executablePath: installedExecutable } : {}),
+      args: [
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        ...(installedExecutable ? [] : [path.resolve('dist-electron/main.cjs')]),
+      ],
       cwd: process.cwd(),
       env: {
         ...qaEnv,
@@ -55,7 +67,26 @@ test('operator-approved Windows DSH Flash Send through Desktop IPC and durable h
     });
     const main = await app.firstWindow({ timeout: 30000 });
     await expect(main.getByTestId('app-shell')).toBeVisible({ timeout: 30000 });
-    const preload = path.resolve('dist-electron/preload.cjs');
+    let preload = path.resolve('dist-electron/preload.cjs');
+    if (installedExecutable) {
+      const proof = await verifyInstalledNativeBinary(
+        app,
+        installedExecutable,
+        process.env.MEMOFLOW_QA_EXPECTED_EXE_SHA256!,
+        process.env.MEMOFLOW_QA_EXPECTED_VERSION!,
+      );
+      preload = proof.preloadPath;
+      await test.info().attach('installed-native-provenance', {
+        body: Buffer.from(
+          JSON.stringify({
+            packaged: proof.packaged,
+            version: proof.version,
+            executableSha256: proof.executableSha256,
+          }),
+        ),
+        contentType: 'application/json',
+      });
+    }
     await app.evaluate(async ({ BrowserWindow }, preloadPath) => {
       const view = new BrowserWindow({
         show: false,

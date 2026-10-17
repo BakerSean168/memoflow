@@ -399,6 +399,7 @@ try {
       metadataSha256 = Get-Sha256 $metadataPath
     }
     installedExecutable = $installedExecutable
+    installedExecutableSha256 = Get-Sha256 $installedExecutable
     manualRelaunchCount = $manualRelaunchCount
     profileRegistrySemanticSha256Before = $registryBefore
     profileRegistrySemanticSha256After = $registryAfter
