@@ -14,7 +14,7 @@ type WorkspaceQaEnvelope = {
     eventId?: string;
     resourceVersion?: number;
     reason?: string;
-    data?: { conversation?: { name: string } | null };
+    data?: { conversation?: { name: string } | null; runId?: string; status?: string };
   };
 };
 
@@ -138,6 +138,10 @@ test('real Windows Electron Workspace IPC authenticates start, ack, stop, cursor
       { channel: AIChannels.CONVERSATION_CREATE },
     );
     expect(create).toMatchObject({ ok: true });
+    const createdConversation = create.data as
+      { id?: string; conversation?: { id?: string } } | undefined;
+    const goalConversationId = createdConversation?.id ?? createdConversation?.conversation?.id;
+    expect(goalConversationId, 'native owner-created Conversation id must exist').toBeTruthy();
     await probe.waitForFunction(
       (id) =>
         (window as unknown as WorkspaceQaWindow).__qaWorkspaceEvents.some(
@@ -286,6 +290,103 @@ test('real Windows Electron Workspace IPC authenticates start, ack, stop, cursor
         }),
       { channel: AIChannels.RUNTIME_WORKSPACE_STOP },
     );
+    // Goal's real Mastra snapshot owner emits workflow.updated, not a synthetic
+    // stream fixture. ACK each preceding event first: Workspace delivery is
+    // intentionally backpressured until the client has accepted its cursor.
+    await expect
+      .poll(
+        async () => {
+          const result = await probe.evaluate(
+            ({ channel, cursor }) =>
+              (window as unknown as WorkspaceQaWindow).electronAPI.invoke(channel, {
+                streamId: 'qa-goal',
+                cursor,
+              }),
+            { channel: AIChannels.RUNTIME_WORKSPACE_START, cursor: replayed.cursor },
+          );
+          return result.ok && (result.data as { accepted?: boolean })?.accepted === true;
+        },
+        { timeout: 12000, intervals: [200, 300, 500] },
+      )
+      .toBe(true);
+    await probe.waitForFunction(
+      () =>
+        (window as unknown as WorkspaceQaWindow).__qaWorkspaceEvents.some(
+          (e: WorkspaceQaEnvelope) => e.streamId === 'qa-goal' && e.event?.type === 'stream.ready',
+        ),
+      undefined,
+      { timeout: 12000 },
+    );
+    const goalReady = await probe.evaluate(
+      () =>
+        (window as unknown as WorkspaceQaWindow).__qaWorkspaceEvents.find(
+          (e: WorkspaceQaEnvelope) => e.streamId === 'qa-goal' && e.event?.type === 'stream.ready',
+        ).event.cursor,
+    );
+    const goalReadyAck = await probe.evaluate(
+      ({ channel, cursor }) =>
+        (window as unknown as WorkspaceQaWindow).electronAPI.invoke(channel, {
+          streamId: 'qa-goal',
+          cursor,
+        }),
+      { channel: AIChannels.RUNTIME_WORKSPACE_ACK, cursor: goalReady },
+    );
+    expect(goalReadyAck).toMatchObject({ ok: true, data: { accepted: true } });
+
+    // The test deliberately uses an empty, isolated Native Agent Home and no
+    // provider secrets. Only the owner's durable workflow start is asserted;
+    // subsequent AI planning/inference is not a prerequisite for this event.
+    const goalStart = await probe.evaluate(
+      ({ channel, conversationId }) =>
+        (window as unknown as WorkspaceQaWindow).electronAPI.invoke(channel, {
+          kind: 'goal.create',
+          conversationId,
+          input: { idea: 'QA Workspace Goal event without a signed-in Native Provider' },
+          locale: 'zh-CN',
+        }),
+      { channel: AIChannels.RUNTIME_WORKFLOW_START, conversationId: goalConversationId! },
+    );
+    expect(goalStart).toMatchObject({ ok: true });
+    const goalRunId = (goalStart.data as { runId?: string } | undefined)?.runId;
+    expect(goalRunId).toBeTruthy();
+    await probe.waitForFunction(
+      () =>
+        (window as unknown as WorkspaceQaWindow).__qaWorkspaceEvents.some(
+          (e: WorkspaceQaEnvelope) =>
+            e.streamId === 'qa-goal' && e.event?.type === 'workflow.updated',
+        ),
+      undefined,
+      { timeout: 15000 },
+    );
+    const goalEvent = await probe.evaluate(
+      () =>
+        (window as unknown as WorkspaceQaWindow).__qaWorkspaceEvents.find(
+          (e: WorkspaceQaEnvelope) =>
+            e.streamId === 'qa-goal' && e.event?.type === 'workflow.updated',
+        ).event,
+    );
+    expect(goalEvent.type).toBe('workflow.updated');
+    expect(goalEvent.resourceVersion).toBeGreaterThan(0);
+    expect(goalEvent.data?.runId).toBe(goalRunId);
+    expect(goalEvent.data?.status).toBe('running');
+    const goalChangeAck = await probe.evaluate(
+      ({ channel, cursor }) =>
+        (window as unknown as WorkspaceQaWindow).electronAPI.invoke(channel, {
+          streamId: 'qa-goal',
+          cursor,
+        }),
+      { channel: AIChannels.RUNTIME_WORKSPACE_ACK, cursor: goalEvent.cursor },
+    );
+    expect(goalChangeAck).toMatchObject({ ok: true, data: { accepted: true } });
+    const goalStop = await probe.evaluate(
+      ({ channel }) =>
+        (window as unknown as WorkspaceQaWindow).electronAPI.invoke(channel, {
+          streamId: 'qa-goal',
+        }),
+      { channel: AIChannels.RUNTIME_WORKSPACE_STOP },
+    );
+    expect(goalStop).toMatchObject({ ok: true, data: { accepted: true } });
+
     // The same Electron instance switches to a new isolated Guest, without copying any app data.
     await main.getByTestId('shell-account-menu').click();
     const pickerPromise = app.waitForEvent('window');
@@ -363,6 +464,7 @@ test('real Windows Electron Workspace IPC authenticates start, ack, stop, cursor
           cancelled: true,
           invalidCursorReset: true,
           cursorReplay: true,
+          nativeGoalWorkflowEvent: true,
           profileIsolation: true,
           foreignCursorRejected: true,
         }),
