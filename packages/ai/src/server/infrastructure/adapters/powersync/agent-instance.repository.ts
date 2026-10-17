@@ -5,6 +5,7 @@ import {
   AgentConversationSelectionSchema,
   type AgentConversationSelection,
   LocalAgentConnectionSchema,
+  LOCAL_AGENT_DEFAULT_EXECUTABLES,
   AgentInstanceSchema,
   AgentInstanceModelBindingSchema,
   type AgentInstance,
@@ -206,7 +207,8 @@ export class AgentInstancePowerSyncRepository implements IAgentInstanceRepositor
         enabled: record.enabled,
         instanceSlug: record.instanceId,
         accentColor: record.accentColor,
-        executablePath: record.nativeConfig?.executablePath ?? record.driver,
+        executablePath:
+          record.nativeConfig?.executablePath ?? LOCAL_AGENT_DEFAULT_EXECUTABLES[record.driver],
         homePath: record.nativeConfig?.homePath,
         writeScopes: record.nativeConfig?.writeScopes ?? [],
       });
@@ -251,6 +253,7 @@ export class AgentInstancePowerSyncRepository implements IAgentInstanceRepositor
       return { ...fromLegacy(next), instanceId: record.instanceId };
     }
     if (record.driver !== 'mastra') {
+      const driver = record.driver;
       return this.db.writeTransaction(async (tx) => {
         const prior = await this.getSaved(tx, owner, record.instanceId);
         if (prior ? prior.revision !== expectedRevision : expectedRevision !== 0)
@@ -276,7 +279,8 @@ export class AgentInstancePowerSyncRepository implements IAgentInstanceRepositor
           enabled: record.enabled,
           instanceSlug: record.instanceId,
           accentColor: record.accentColor,
-          executablePath: record.nativeConfig?.executablePath ?? record.driver,
+          executablePath:
+            record.nativeConfig?.executablePath ?? LOCAL_AGENT_DEFAULT_EXECUTABLES[driver],
           homePath: record.nativeConfig?.homePath,
           writeScopes: record.nativeConfig?.writeScopes ?? [],
           revision: record.revision,

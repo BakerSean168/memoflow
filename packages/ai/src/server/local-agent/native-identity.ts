@@ -13,6 +13,7 @@ const files: Record<LocalAgentDriver, readonly string[]> = {
   pi: ['models.json', 'auth.json'],
   // Hash only the ACP profile's locally owned configuration. Never persist it.
   dsh: ['cordis.patch.yml', 'profiles/acp/cordis.yml', 'profiles/acp/cordis.patch.yml'],
+  antigravity: [],
 };
 async function boundedRead(path: string): Promise<string | null> {
   try {
@@ -86,10 +87,51 @@ export async function nativeIdentity(
       ? (process.env.CODEX_HOME ?? join(homedir(), '.codex'))
       : driver === 'claude'
         ? (process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), '.claude'))
-        : driver === 'dsh'
-          ? (process.env.DSH_HOME ?? join(homedir(), '.dsh'))
-          : (process.env.PI_CODING_AGENT_DIR ?? join(homedir(), '.pi', 'agent')));
+        : driver === 'antigravity'
+          ? (process.env.GEMINI_HOME ?? join(homedir(), '.gemini'))
+          : driver === 'dsh'
+            ? (process.env.DSH_HOME ?? join(homedir(), '.dsh'))
+            : (process.env.PI_CODING_AGENT_DIR ?? join(homedir(), '.pi', 'agent')));
   const hash = createHash('sha256').update(JSON.stringify([driver, directory, account]));
+  if (driver === 'antigravity') {
+    // The official Agent rewrites the cache during authentication. File timestamps
+    // are not account identity. Hash only the stable authorization identity and
+    // native auth configuration, never expose/cache the credential itself.
+    for (const name of ['settings.json', 'acp_token.json']) {
+      const text = await boundedRead(join(directory, 'antigravity-acp', name));
+      if (!text) {
+        hash.update(JSON.stringify([name, null]));
+        continue;
+      }
+      let identity: unknown;
+      try {
+        const value: unknown = JSON.parse(text);
+        identity =
+          name === 'acp_token.json'
+            ? z
+                .object({
+                  client_id: z.string().min(1).max(4096),
+                  refresh_token: z.string().min(1).max(16384),
+                })
+                .parse(value)
+            : z
+                .object({
+                  auth: z.object({ type: z.string().max(80) }).optional(),
+                  gcp: z
+                    .object({
+                      project: z.string().max(512).optional(),
+                      location: z.string().max(512).optional(),
+                    })
+                    .optional(),
+                })
+                .parse(value);
+      } catch {
+        throw new LocalAgentError('LOCAL_AGENT_LOGIN_REQUIRED');
+      }
+      hash.update(JSON.stringify([name, identity]));
+    }
+    return hash.digest('hex');
+  }
   for (const name of files[driver]) {
     const value = await boundedRead(join(directory, name));
     hash.update(

@@ -49,12 +49,23 @@ const nativeFailureCases = [
   { mode: 'quota_exhausted', expectedCode: 'LOCAL_AGENT_QUOTA_EXHAUSTED' },
 ] as const;
 
-async function verifyOfflineNativeFailure(scenario: (typeof nativeFailureCases)[number]) {
+async function verifyOfflineNativeFailure(
+  scenario: (typeof nativeFailureCases)[number],
+  driver: 'dsh' | 'antigravity',
+) {
   test.skip(process.platform !== 'win32', 'Real Windows Desktop IPC test');
   test.setTimeout(90_000);
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'memoflow-attention-qa-'));
   const promptLog = path.join(root, 'native-prompts.log');
   const env = createIsolatedNativeAgentEnvironment(root);
+  if (driver === 'antigravity') {
+    const authDir = path.join(env.GEMINI_HOME!, 'antigravity-acp');
+    fs.mkdirSync(authDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(authDir, 'acp_token.json'),
+      JSON.stringify({ client_id: 'fixture', refresh_token: 'offline-only' }),
+    );
+  }
   const fixture = path.resolve('e2e/support/attention-acp-fixture.cjs');
   expect(fs.existsSync(fixture)).toBe(true);
   let app: Awaited<ReturnType<typeof electron.launch>> | undefined;
@@ -108,18 +119,18 @@ async function verifyOfflineNativeFailure(scenario: (typeof nativeFailureCases)[
     );
 
     const saved = await probe.evaluate(
-      ({ channel, executablePath }) =>
+      ({ channel, executablePath, driver }) =>
         (window as unknown as AttentionQaWindow).electronAPI.invoke(channel, {
           action: 'save_connection',
           connection: {
-            driver: 'dsh',
+            driver,
             name: 'Offline Attention QA Agent',
             executablePath,
             enabled: true,
             writeScopes: [],
           },
         }),
-      { channel: AIChannels.LOCAL_AGENT, executablePath: fixture },
+      { channel: AIChannels.LOCAL_AGENT, executablePath: fixture, driver },
     );
     expect(saved).toMatchObject({ ok: true });
     const connectionId = (saved.data as { id: string }).id;
@@ -368,6 +379,7 @@ async function verifyOfflineNativeFailure(scenario: (typeof nativeFailureCases)[
       'WINDOWS_OWNER_ATTENTION_QA=' +
         JSON.stringify({
           realElectron: true,
+          driver,
           committedWorking: true,
           committedFailure: true,
           workspaceAck: true,
@@ -384,7 +396,9 @@ async function verifyOfflineNativeFailure(scenario: (typeof nativeFailureCases)[
   }
 }
 
-for (const scenario of nativeFailureCases) {
-  test(`Windows Electron persists offline native ${scenario.mode} without leaking diagnostics`, async () =>
-    verifyOfflineNativeFailure(scenario));
+for (const driver of ['dsh', 'antigravity'] as const) {
+  for (const scenario of nativeFailureCases) {
+    test(`Windows Electron persists offline ${driver} ${scenario.mode} without leaking diagnostics`, async () =>
+      verifyOfflineNativeFailure(scenario, driver));
+  }
 }

@@ -890,6 +890,20 @@
       ]
     },
     {
+      "path": "apps/desktop/e2e/antigravity-composer.spec.mts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/desktop/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "ai-workspace",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/desktop/playwright.config.ts"
+      }
+    },
+    {
       "path": "apps/desktop/e2e/authentication/desktop-auth-flow.spec.mts",
       "primarySuite": "e2e",
       "collectors": [
@@ -3943,6 +3957,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/local-agent/antigravity-driver.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/local-agent/claude-driver.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5742,6 +5766,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/setting/components/AccountSettingsSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/setting/components/AntigravityAcpDownload.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -12911,7 +12943,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 117
+      "fileCount": 118
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -13044,7 +13076,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 6,
+      "fileCount": 7,
       "e2eOwnership": {
         "lane": "desktop",
         "lifecycle": "active",
@@ -13465,14 +13497,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 117
+      "fileCount": 118
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 303
+      "fileCount": 304
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -13837,6 +13869,7 @@
       "packages/ai/src/server/infrastructure/security/ai-secret-cipher.spec.ts",
       "packages/ai/src/server/infrastructure/security/provider-endpoint-policy.spec.ts",
       "packages/ai/src/server/infrastructure/security/provider-safe-fetch.spec.ts",
+      "packages/ai/src/server/local-agent/antigravity-driver.spec.ts",
       "packages/ai/src/server/local-agent/claude-driver.spec.ts",
       "packages/ai/src/server/local-agent/codex-app-server-transport.spec.ts",
       "packages/ai/src/server/local-agent/codex-driver.spec.ts",
@@ -14233,12 +14266,12 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1228,
+    "unit": 1230,
     "integration": 48,
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 9,
-    "e2e": 54,
+    "e2e": 55,
     "perf": 2,
     "governance": 65
   },
@@ -14246,7 +14279,7 @@
     "version": 2,
     "issues": [],
     "countsByLane": {
-      "desktop": 6,
+      "desktop": 7,
       "local-validation": 6,
       "nightly": 5,
       "reference": 6,
@@ -14259,7 +14292,7 @@
       "artifact": 3,
       "canonical": 26,
       "reference": 6,
-      "supplemental": 19
+      "supplemental": 20
     },
     "automatedCollectorCount": 4,
     "automationBindingCount": 5

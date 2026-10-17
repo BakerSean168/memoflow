@@ -56,13 +56,13 @@
 
 在无变换的原始 path 上测量（viewBox 单位）：
 
-| 字形 | viewBox | 实测 bbox (x, y, w, h) |
-| --- | --- | --- |
-| codex | 0 0 24 24 | 0, −0.001, 24, 24.001 |
-| claude | 0 0 24 24 | 0, 0, 24, 24 |
-| pi | 0 0 560 560 | 0, 0, 560, 560 |
-| dsh | 0 0 24 24 | 0, 3, 24, 17.66 |
-| mastra | 0 0 24 24 | 0.084, 0.083, 23.811, 23.813 |
+| 字形   | viewBox     | 实测 bbox (x, y, w, h)       |
+| ------ | ----------- | ---------------------------- |
+| codex  | 0 0 24 24   | 0, −0.001, 24, 24.001        |
+| claude | 0 0 24 24   | 0, 0, 24, 24                 |
+| pi     | 0 0 560 560 | 0, 0, 560, 560               |
+| dsh    | 0 0 24 24   | 0, 3, 24, 17.66              |
+| mastra | 0 0 24 24   | 0.084, 0.083, 23.811, 23.813 |
 
 测量方式：把逐字节复制的 path 放入本地临时 HTML（无 transform、无 CSS 缩放），在 T3 Code 协作浏览器中执行 `getBBox()` 读取。测得值作为 `agent-brand-glyphs.ts` 中 `bbox` 常量的来源；`AgentDriverIcon.spec.ts` 回归验证 transform 与 bbox 的数学关系。
 
@@ -70,13 +70,13 @@
 
 归一化后在浏览器中实际渲染并测量（长边/盒尺寸，居中偏移）：
 
-| 字形 | 16px 盒 | 20px 盒 |
-| --- | --- | --- |
-| codex | 13.33×13.33 px，偏移 (0,0) | 16.67×16.67 px，偏移 (0,0) |
-| claude | 13.33×13.33 px，偏移 (0,0) | 16.67×16.67 px，偏移 (0,0) |
-| pi | 13.33×13.33 px，偏移 (0,0) | 16.67×16.67 px，偏移 (0,0) |
-| dsh | 13.33×9.81 px（宽形，长边对齐） | 16.67×12.26 px |
-| mastra | 13.33×13.33 px，偏移 (0,0) | 16.67×16.67 px，偏移 (0,0) |
+| 字形   | 16px 盒                         | 20px 盒                    |
+| ------ | ------------------------------- | -------------------------- |
+| codex  | 13.33×13.33 px，偏移 (0,0)      | 16.67×16.67 px，偏移 (0,0) |
+| claude | 13.33×13.33 px，偏移 (0,0)      | 16.67×16.67 px，偏移 (0,0) |
+| pi     | 13.33×13.33 px，偏移 (0,0)      | 16.67×16.67 px，偏移 (0,0) |
+| dsh    | 13.33×9.81 px（宽形，长边对齐） | 16.67×12.26 px             |
+| mastra | 13.33×13.33 px，偏移 (0,0)      | 16.67×16.67 px，偏移 (0,0) |
 
 五枚字形长边比例全部为 0.8333（= 20/24），与 Lucide 参照（`circle` r10 即 20/24）一致；同一 CSS 尺寸下实际视觉尺寸完全统一。
 
@@ -90,3 +90,10 @@
 - `@lobehub/icons` 的 `Pi` 组件是 Inflection 消费级聊天产品，与本仓 `pi` driver（Pi coding agent，earendil-works/pi）不是同一产品，不得用于本组件。
 - simple-icons（CC0）当前版本（16.35.0）无 openai、mastra slug；OpenAI/Codex 与 Mastra 均经 LobeHub MIT 渠道取得。
 - T3 Code 私有图标不复制、不参考。
+
+## Antigravity (AGY) - 2026-10-17
+
+- Source: `@lobehub/icons@5.23.1`, `es/Antigravity/components/Mono.mjs`.
+- License retrieved from the same pinned package `LICENSE`: MIT, Copyright (c) 2023 LobeHub. The complete MIT notice above also applies to this glyph. Google owns the Antigravity trademark; this UI identifies the integrated Agent and does not imply endorsement.
+- Single SVG path copied verbatim; viewBox `0 0 24 24`. No proprietary Agent executable is redistributed.
+- Chromium `SVGGraphicsElement.getBBox()` on the untransformed source path: `x=0.00014519691467285156, y=1, w=23.999862670898438, h=22.108667373657227`. The existing 20/24 normalization and shared currentColor treatment are unchanged.

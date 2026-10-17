@@ -56,3 +56,30 @@ it('frames ACP v1 requests, notifications, and permission responses as JSON-RPC 
     await rm(cwd, { recursive: true, force: true });
   }
 });
+
+it('turns the official AGY sign-in prompt into a safe login-required error, never an exposed URL', async () => {
+  const cwd = await mkdtemp(join(tmpdir(), 'memoflow-agy-auth-wire-'));
+  const script = join(cwd, 'fake-auth.cjs');
+  const prefix = 'Open the following link to authenticate the ACP server: ';
+  await writeFile(
+    script,
+    `process.stdin.once('data', () => process.stdout.write(${JSON.stringify(prefix + 'https://accounts.example.invalid/?state=PRIVATE_STATE')} + String.fromCharCode(10)));`,
+  );
+  const transport = new NativeRpcTransport({
+    protocol: 'acp',
+    driver: 'antigravity',
+    executable: process.execPath,
+    args: [script],
+    cwd,
+    authenticationPromptPrefix: prefix,
+    requestTimeoutMs: 2000,
+  });
+  try {
+    await expect(
+      transport.request('authenticate', { methodId: 'oauth-personal' }),
+    ).rejects.toMatchObject({ code: 'LOCAL_AGENT_LOGIN_REQUIRED' });
+  } finally {
+    await transport.close();
+    await rm(cwd, { recursive: true, force: true });
+  }
+});

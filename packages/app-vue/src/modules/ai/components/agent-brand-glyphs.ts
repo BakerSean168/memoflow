@@ -83,7 +83,8 @@ export const agentBrandGlyphs: Readonly<Record<string, AgentBrandGlyph>> = {
     ],
     bbox: { x: 0, y: 0, w: 560, h: 560 },
     provenance: {
-      source: 'Pi official press kit (https://pi.dev/press-kit), badge mark https://pi.dev/favicon.svg',
+      source:
+        'Pi official press kit (https://pi.dev/press-kit), badge mark https://pi.dev/favicon.svg',
       license: 'MIT (c) Earendil Inc. & Contributors (Pi press kit)',
       retrievedAt: '2026-10-15',
     },
@@ -100,6 +101,20 @@ export const agentBrandGlyphs: Readonly<Record<string, AgentBrandGlyph>> = {
         '@lobehub/icons@5.23.1 es/DeepSeek/components/Mono.mjs (https://cdn.jsdelivr.net/npm/@lobehub/icons@5.23.1/es/DeepSeek/components/Mono.mjs)',
       license: 'MIT (c) 2023 LobeHub',
       retrievedAt: '2026-10-15',
+    },
+  },
+  antigravity: {
+    viewBox: '0 0 24 24',
+    viewBoxSize: 24,
+    paths: [
+      'M21.751 22.607c1.34 1.005 3.35.335 1.508-1.508C17.73 15.74 18.904 1 12.037 1 5.17 1 6.342 15.74.815 21.1c-2.01 2.009.167 2.511 1.507 1.506 5.192-3.517 4.857-9.714 9.715-9.714 4.857 0 4.522 6.197 9.714 9.715z',
+    ],
+    bbox: { x: 0.00014519691467285156, y: 1, w: 23.999862670898438, h: 22.108667373657227 },
+    provenance: {
+      source:
+        '@lobehub/icons@5.23.1 es/Antigravity/components/Mono.mjs (https://cdn.jsdelivr.net/npm/@lobehub/icons@5.23.1/es/Antigravity/components/Mono.mjs)',
+      license: 'MIT (c) 2023 LobeHub',
+      retrievedAt: '2026-10-17',
     },
   },
   mastra: {

@@ -1,5 +1,6 @@
 import { execFile, spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { z } from 'zod';
+import type { LocalAgentDriver } from '@memoflow/contracts/ai';
 import { LocalAgentError } from '../../shared/local-agent-error';
 import { resolveNativeExecutable } from './native-executable';
 import { nativeFailure } from './native-failure';
@@ -16,6 +17,8 @@ const frameSchema = z.union([
 export type NativeServerRequest = { id: string | number; method: string; params?: unknown };
 export interface NativeProcessOptions {
   protocol?: 'codex' | 'pi' | 'acp';
+  driver?: LocalAgentDriver;
+  authenticationPromptPrefix?: string;
   executable: string;
   args: readonly string[];
   cwd: string;
@@ -47,7 +50,8 @@ export class NativeRpcTransport {
   constructor(private readonly options: NativeProcessOptions) {
     const launch = resolveNativeExecutable(
       options.executable,
-      options.protocol === 'pi' ? 'pi' : options.protocol === 'acp' ? 'dsh' : 'codex',
+      options.driver ??
+        (options.protocol === 'pi' ? 'pi' : options.protocol === 'acp' ? 'dsh' : 'codex'),
       { env: options.env },
     );
     this.child = spawn(launch.executable, [...launch.args, ...options.args], {
@@ -141,6 +145,14 @@ export class NativeRpcTransport {
         const line = this.buffer.slice(0, newline);
         this.buffer = this.buffer.slice(newline + 1);
         if (!line.trim()) continue;
+        if (
+          this.options.authenticationPromptPrefix &&
+          line.trimStart().startsWith(this.options.authenticationPromptPrefix)
+        ) {
+          this.fail(new LocalAgentError('LOCAL_AGENT_LOGIN_REQUIRED'));
+          void this.close();
+          return;
+        }
         if (Buffer.byteLength(line) > MAX_FRAME_BYTES) throw new Error('Frame limit');
         const raw: unknown = JSON.parse(line);
         if (

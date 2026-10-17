@@ -154,3 +154,21 @@ it.each(['2.4.1', 'v1.0.3', '1.2.3-rc.1+build.2'])(
     expect(nativeVersion(value)).toBe(value.replace(/^v/u, ''));
   },
 );
+
+it('resolves the official Windows AGY ACP executable without a shell or npm fallback', () => {
+  const root = 'C:\\Native Agents';
+  const files = new Set([root + '\\agy_acp_server.exe']);
+  const options = {
+    platform: 'win32' as const,
+    env: { PATH: root },
+    isFile: (path: string) => files.has(path),
+  };
+  expect(resolveNativeExecutable('agy_acp_server', 'antigravity', options)).toEqual({
+    executable: root + '\\agy_acp_server.exe',
+    sdkPath: root + '\\agy_acp_server.exe',
+    args: [],
+    env: {},
+  });
+  files.add(root + '\\agy.cmd');
+  expect(() => resolveNativeExecutable('agy', 'antigravity', options)).toThrow();
+});

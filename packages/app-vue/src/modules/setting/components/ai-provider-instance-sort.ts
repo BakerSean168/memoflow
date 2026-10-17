@@ -1,7 +1,14 @@
 import type { AgentDriverKind, AgentInstance } from '@memoflow/contracts/ai';
 
 /** Fixed Desktop grouping, independent of enabled/probe state or display name. */
-const DRIVER_ORDER: readonly AgentDriverKind[] = ['codex', 'claude', 'pi', 'dsh', 'mastra'];
+const DRIVER_ORDER: readonly AgentDriverKind[] = [
+  'codex',
+  'claude',
+  'pi',
+  'dsh',
+  'antigravity',
+  'mastra',
+];
 
 export function sortAgentInstances(instances: readonly AgentInstance[]): AgentInstance[] {
   const rank = (driver: AgentDriverKind) => {

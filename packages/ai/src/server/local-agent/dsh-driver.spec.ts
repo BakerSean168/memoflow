@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { LocalAgentStatusSchema } from '@memoflow/contracts/ai';
 import { expect, it } from 'vitest';
 import type { LocalAgentConnection } from '@memoflow/contracts/ai';
-import { DshDriver } from './dsh-driver';
+import { AcpDriver } from './acp-driver';
 import {
   LocalAgentError,
   LOCAL_AGENT_FAILURES,
@@ -131,7 +131,7 @@ function factory(instances: FakeAcp[]) {
 
 it('discovers DSH models through ACP without invoking inference', async () => {
   const instances: FakeAcp[] = [];
-  const driver = new DshDriver(connection, '/tmp', factory(instances));
+  const driver = new AcpDriver(connection, '/tmp', factory(instances));
   expect(await driver.probe()).toMatchObject({
     status: 'ready',
     models: [{ id: route, name: 'gpt-oss 20B', provider: 'Ollama' }],
@@ -150,7 +150,7 @@ it('discovers DSH models through ACP without invoking inference', async () => {
 
 it('does not present an ACP protocol version as the DSH executable version', async () => {
   const instances: FakeAcp[] = [];
-  const driver = new DshDriver(connection, '/tmp', (options) => {
+  const driver = new AcpDriver(connection, '/tmp', (options) => {
     const fake = new FakeAcp(options);
     fake.agentInfo = undefined;
     instances.push(fake);
@@ -164,7 +164,7 @@ it('does not present an ACP protocol version as the DSH executable version', asy
 
 it('sends a per-run MCP grant and can resume the same native DSH session', async () => {
   const instances: FakeAcp[] = [];
-  const createDriver = () => new DshDriver(connection, '/tmp', factory(instances));
+  const createDriver = () => new AcpDriver(connection, '/tmp', factory(instances));
   let nativeSessionId: string | undefined;
   let accountFingerprint: string | undefined;
   for (const token of ['first-token', 'rotated-token']) {
@@ -230,7 +230,7 @@ it.each([
   'preserves a classified ACP prompt failure %s without exposing private diagnostics',
   async (code) => {
     const instances: FakeAcp[] = [];
-    const driver = new DshDriver(connection, '/tmp', (options) => {
+    const driver = new AcpDriver(connection, '/tmp', (options) => {
       const fake = new FakeAcp(options);
       const original = fake.request.bind(fake);
       fake.request = async (method, params) => {
@@ -264,7 +264,7 @@ it.each([
 
 it('sanitizes an unclassified ACP prompt exception without leaking upstream text', async () => {
   const privateDiagnostic = 'PRIVATE_TOKEN_DO_NOT_EXPOSE account@example.test';
-  const driver = new DshDriver(connection, '/tmp', (options) => {
+  const driver = new AcpDriver(connection, '/tmp', (options) => {
     const fake = new FakeAcp(options);
     const original = fake.request.bind(fake);
     fake.request = async (method, params) => {
@@ -287,7 +287,7 @@ it('sanitizes an unclassified ACP prompt exception without leaking upstream text
 
 it('refuses a model not present in DSH ACP catalog without submitting a prompt', async () => {
   const instances: FakeAcp[] = [];
-  const driver = new DshDriver(connection, '/tmp', factory(instances));
+  const driver = new AcpDriver(connection, '/tmp', factory(instances));
   await expect(
     (async () => {
       for await (const _event of driver.run({ content: 'Hello', modelId: 'anyrouter/unrelated' })) {
@@ -300,7 +300,7 @@ it('refuses a model not present in DSH ACP catalog without submitting a prompt',
 
 it('refuses to resume DSH with a mismatched Profile identity', async () => {
   const instances: FakeAcp[] = [];
-  const driver = new DshDriver(connection, '/tmp', factory(instances));
+  const driver = new AcpDriver(connection, '/tmp', factory(instances));
   await expect(
     (async () => {
       for await (const _event of driver.run({
@@ -319,7 +319,7 @@ it('refuses to resume DSH with a mismatched Profile identity', async () => {
 it('refuses a model route that ACP did not actually select', async () => {
   const instances: FakeAcp[] = [];
   const desired = JSON.stringify(['ollama', 'gpt-oss:120b']);
-  const driver = new DshDriver(connection, '/tmp', (options) => {
+  const driver = new AcpDriver(connection, '/tmp', (options) => {
     const fake = new FakeAcp(options);
     fake.request = async (method, params) => {
       fake.calls.push({ method, params });
@@ -368,7 +368,7 @@ it('refuses a model route that ACP did not actually select', async () => {
 
 it('never turns a rejected ACP permission into a write grant', async () => {
   const instances: FakeAcp[] = [];
-  const driver = new DshDriver(connection, '/tmp', factory(instances));
+  const driver = new AcpDriver(connection, '/tmp', factory(instances));
   let permissionRequestId = '';
   for await (const event of driver.run({
     modelId: route,
@@ -397,7 +397,7 @@ it.each([
   '2.4.1\u2028private diagnostic',
   'x'.repeat(500),
 ])('omits untrusted DSH version metadata %j without losing its catalog', async (version) => {
-  const driver = new DshDriver(connection, '/tmp', (options) => {
+  const driver = new AcpDriver(connection, '/tmp', (options) => {
     const fake = new FakeAcp(options);
     fake.agentInfo = { name: 'DeepSeek Harness', version };
     return fake as unknown as NativeRpcTransport;
@@ -431,7 +431,7 @@ it.each([
       process.stdout.write(JSON.stringify({jsonrpc:'2.0',id:frame.id,error:{code:401,message:diagnostic}}) + '\\n');
     });
   `;
-    const driver = new DshDriver(
+    const driver = new AcpDriver(
       { ...connection, homePath: cwd },
       cwd,
       (options) =>

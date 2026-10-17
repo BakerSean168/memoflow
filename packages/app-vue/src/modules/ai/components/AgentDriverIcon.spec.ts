@@ -16,6 +16,7 @@ const verifiedPathPrefixes: Record<string, string> = {
   pi: 'M420 280H280V140H0V0H420V280Z',
   dsh: 'M23.748 4.482',
   mastra: 'M14.74 9.977',
+  antigravity: 'M21.751 22.607',
 };
 
 /** Where each glyph's verbatim asset must come from. */
@@ -23,6 +24,7 @@ const verifiedSources: Record<string, RegExp> = {
   codex: /@lobehub\/icons@5\.23\.1.*Codex\/components\/Mono\.mjs/,
   claude: /@lobehub\/icons@5\.23\.1.*Claude\/components\/Mono\.mjs/,
   pi: /pi\.dev\/press-kit/,
+  antigravity: /@lobehub\/icons@5\.23\.1.*Antigravity\/components\/Mono\.mjs/,
   dsh: /@lobehub\/icons@5\.23\.1.*DeepSeek\/components\/Mono\.mjs/,
   mastra: /@lobehub\/icons@5\.23\.1.*Mastra\/components\/Mono\.mjs/,
 };

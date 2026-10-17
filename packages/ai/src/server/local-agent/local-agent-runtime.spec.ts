@@ -337,18 +337,24 @@ describe('local Agent conversation execution', () => {
         };
       },
     });
-    for (const driver of ['codex', 'claude', 'pi', 'dsh'] as const) {
+    for (const driver of ['codex', 'claude', 'pi', 'dsh', 'antigravity'] as const) {
       await expect(runtime.probeDefaultDriver('owner', driver)).resolves.toMatchObject({
         status: 'ready',
         models: [{ id: 'model' }],
       });
     }
-    expect(observed.map((item) => item.executablePath)).toEqual(['codex', 'claude', 'pi', 'dsh']);
+    expect(observed.map((item) => item.executablePath)).toEqual([
+      'codex',
+      'claude',
+      'pi',
+      'dsh',
+      'agy_acp_server',
+    ]);
     expect(observed.every((item) => item.writeScopes.length === 0)).toBe(true);
     expect(getConnection).not.toHaveBeenCalled();
     expect(createConnection).not.toHaveBeenCalled();
     expect(await store.listConnections('owner')).toHaveLength(0);
-    expect(close).toHaveBeenCalledTimes(4);
+    expect(close).toHaveBeenCalledTimes(5);
     await runtime.dispose();
   });
 

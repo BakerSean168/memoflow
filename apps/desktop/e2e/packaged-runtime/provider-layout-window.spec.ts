@@ -38,7 +38,7 @@ test('packaged Windows Providers maintain 80px rows and responsive details at 84
     const order = await list
       .locator('[data-testid^="ai-provider-select-agent:"]')
       .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-testid')?.split(':')[1]));
-    expect(order).toEqual(['codex', 'claude', 'pi', 'dsh', 'mastra']);
+    expect(order).toEqual(['codex', 'claude', 'pi', 'dsh', 'antigravity', 'mastra']);
     await settings.getByTestId('ai-provider-select-agent:codex').click();
     await expect(settings.getByTestId('ai-provider-detail')).toBeVisible();
     await expect(settings.getByText(/已认证为|Authenticated as/i)).toHaveCount(0); // Empty native Home must not expose real account metadata.
@@ -67,7 +67,7 @@ test('packaged Windows Providers maintain 80px rows and responsive details at 84
         });
         expect(metrics.innerWidth).toBe(width);
         expect(metrics.scrollWidth).toBeLessThanOrEqual(width + 1);
-        expect(metrics.rowHeights).toHaveLength(5);
+        expect(metrics.rowHeights).toHaveLength(6);
         for (const rowHeight of metrics.rowHeights) {
           expect(Math.abs(rowHeight - 80)).toBeLessThan(1);
         }

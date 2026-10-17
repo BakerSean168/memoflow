@@ -220,7 +220,7 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
     const localSettings = mainWindow.getByTestId('ai-settings-panel');
     await expect(localSettings).toBeVisible({ timeout: SETTINGS_READY_TIMEOUT_MS });
     await expect(mainWindow.getByTestId('ai-provider-add')).toBeVisible();
-    for (const driver of ['codex', 'claude', 'pi', 'dsh']) {
+    for (const driver of ['codex', 'claude', 'pi', 'dsh', 'antigravity']) {
       await mainWindow.getByTestId('ai-provider-add').click();
       const wizard = mainWindow.getByTestId('ai-agent-wizard');
       await wizard.getByTestId(`ai-provider-catalog-${driver}`).click();
@@ -289,7 +289,7 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
       window.location.hash = '#/settings?tab=ai';
     });
     const restoredLocalSettings = restartedWindow.getByTestId('ai-settings-panel');
-    for (const driver of ['codex', 'claude', 'pi', 'dsh']) {
+    for (const driver of ['codex', 'claude', 'pi', 'dsh', 'antigravity']) {
       const row = restoredLocalSettings
         .getByTestId('ai-provider-list')
         .getByRole('listitem')

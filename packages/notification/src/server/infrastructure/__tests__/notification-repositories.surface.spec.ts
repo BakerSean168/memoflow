@@ -80,6 +80,9 @@ describe('notification repository factories surface', () => {
     const prismaInstance = createNotificationPrismaModule(fakePrisma, {
       closureChecker,
       userTimeContextPort: TEST_USER_TIME_CONTEXT_PORT,
+      // This factory-surface fixture only supplies the built-in InApp channel.
+      // Do not implicitly require production Push/Desktop transports from its host.
+      channelCapabilities: [{ channelType: 'InApp', status: 'available' }],
     });
     expect(prismaInstance).toHaveProperty('api');
     expect(typeof prismaInstance.start).toBe('function');

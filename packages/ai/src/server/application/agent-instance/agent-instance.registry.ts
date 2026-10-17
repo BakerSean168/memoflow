@@ -1,5 +1,6 @@
 import {
   AgentRegistryCommandSchema,
+  LOCAL_AGENT_DEFAULT_EXECUTABLES,
   AgentInstanceSchema,
   AgentRegistrySnapshotSchema,
   type AgentConversationSelection,
@@ -10,7 +11,14 @@ import {
 } from '@memoflow/contracts/ai';
 import { AgentRegistryError, type IAgentInstanceRepository } from './agent-instance.repository';
 
-const names = { mastra: 'Mastra', codex: 'Codex', claude: 'Claude Code', pi: 'Pi', dsh: 'DSH' };
+const names = {
+  mastra: 'Mastra',
+  codex: 'Codex',
+  claude: 'Claude Code',
+  pi: 'Pi',
+  dsh: 'DSH',
+  antigravity: 'Antigravity (AGY)',
+};
 export function defaultAgentInstance(driver: AgentDriverKind): AgentInstance {
   return {
     instanceId: driver,
@@ -37,7 +45,7 @@ export class AgentInstanceRegistry {
   async list(owner: string): Promise<AgentRegistrySnapshot> {
     const snapshot = AgentRegistrySnapshotSchema.parse(await this.repository.list(owner));
     const drivers: AgentDriverKind[] =
-      this.host === 'web' ? ['mastra'] : ['mastra', 'codex', 'claude', 'pi', 'dsh'];
+      this.host === 'web' ? ['mastra'] : ['mastra', 'codex', 'claude', 'pi', 'dsh', 'antigravity'];
     // A named instance never suppresses a driver's implicit default.
     for (const driver of drivers) {
       if (!snapshot.instances.some((instance) => instance.instanceId === driver))
@@ -90,7 +98,12 @@ export class AgentInstanceRegistry {
           accentColor: defaults.accentColor,
           enabled: defaults.enabled,
           ...(current.driver !== 'mastra'
-            ? { nativeConfig: { executablePath: current.driver, writeScopes: [] } }
+            ? {
+                nativeConfig: {
+                  executablePath: LOCAL_AGENT_DEFAULT_EXECUTABLES[current.driver],
+                  writeScopes: [],
+                },
+              }
             : {}),
           revision: current.revision + 1,
           createdAt: current.createdAt || Date.now(),

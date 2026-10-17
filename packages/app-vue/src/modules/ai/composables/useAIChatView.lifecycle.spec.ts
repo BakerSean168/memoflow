@@ -49,6 +49,9 @@ const fixture = await vi.hoisted(async () => {
     setSurfaceContextEntity: vi.fn(),
     abortActiveStream: vi.fn(),
     prepareWorkflowTurn: vi.fn(),
+    // Match the real session contract even when a pending component event outlives teardown.
+    // The native integration tests still require real turn/start receipts.
+    handleSendChat: vi.fn(async () => {}),
     stopGenerating: vi.fn(),
     scrollMessagesToBottom: vi.fn(),
     selectConversation: vi.fn(async (item: { id: string }) => {
