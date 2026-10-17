@@ -5,6 +5,7 @@ import { expect, test } from '@playwright/test';
 import { _electron as electron } from 'playwright';
 import { AIChannels, AIStreamChannels } from '@memoflow/contracts/electron';
 import { createIsolatedNativeAgentEnvironment } from './packaged-runtime/isolated-native-env';
+import { verifyInstalledNativeBinary } from './support/installed-native-provenance';
 
 type Rpc = { ok: boolean; data?: unknown; error?: { code: string } };
 type Event = { type: string; conversationId: string; data?: { content?: string; code?: string } };
@@ -54,23 +55,28 @@ test('Windows AGY Composer selects, sends, persists and restores its native conn
     });
   try {
     app = await launch();
-    const provenance = await app.evaluate(({ app: application }) => ({
-      executable: application.getPath('exe'),
-      version: application.getVersion(),
-      packaged: application.isPackaged,
-    }));
-    if (packagedExecutable) {
-      expect(provenance.packaged).toBe(true);
-      expect(path.normalize(provenance.executable).toLowerCase()).toBe(
-        path.normalize(packagedExecutable).toLowerCase(),
-      );
-    }
-    await test
-      .info()
-      .attach('native-runtime-provenance', {
-        body: Buffer.from(JSON.stringify(provenance)),
-        contentType: 'application/json',
-      });
+    const provenance = packagedExecutable
+      ? await verifyInstalledNativeBinary(
+          app,
+          packagedExecutable,
+          process.env.MEMOFLOW_QA_EXPECTED_EXE_SHA256!,
+          process.env.MEMOFLOW_QA_EXPECTED_VERSION!,
+        )
+      : await app.evaluate(({ app: application }) => ({
+          version: application.getVersion(),
+          packaged: application.isPackaged,
+        }));
+    await test.info().attach('native-runtime-provenance', {
+      body: Buffer.from(
+        JSON.stringify({
+          version: provenance.version,
+          packaged: provenance.packaged,
+          executableSha256: 'executableSha256' in provenance ? provenance.executableSha256 : null,
+          paidRequests: 0,
+        }),
+      ),
+      contentType: 'application/json',
+    });
     let page = await app.firstWindow();
     await expect(page.getByTestId('app-shell')).toBeVisible();
     const saved = await page.evaluate(

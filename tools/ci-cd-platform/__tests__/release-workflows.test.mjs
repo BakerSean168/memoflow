@@ -626,6 +626,53 @@ test('Desktop release runtime gates execute before receipts and cannot be bypass
   assert.doesNotMatch(helper, /setUsePlainTextEncryption|password-store=basic/u);
 });
 
+test('Windows release uses one exact-installed Native and Workspace acceptance pass after updater proof', async () => {
+  const workflow = await readRepoFile('.github/workflows/desktop-update-e2e.yml');
+  assert.match(workflow, /workflow_dispatch:/u);
+  assert.match(workflow, /ref: \$\{\{ inputs\.ref \|\| github\.sha \}\}/u);
+  assert.equal((workflow.match(/pnpm exec playwright test e2e\//gu) ?? []).length, 1);
+
+  const packageAt = workflow.indexOf('- name: Package synthetic N and current N+1 NSIS fixtures');
+  const updaterAt = workflow.indexOf('- name: Run installed Windows updater proof');
+  const receiptAt = workflow.indexOf('- name: Verify installed updater evidence');
+  const acceptanceName = 'Run one installed Windows Workspace and Native acceptance suite';
+  const acceptanceAt = workflow.indexOf('- name: ' + acceptanceName);
+  assert.ok(packageAt >= 0 && packageAt < updaterAt && updaterAt < receiptAt);
+  assert.ok(receiptAt < acceptanceAt);
+  const installed = workflowStep(workflow, acceptanceName);
+  assert.match(installed, /MEMOFLOW_PACKAGED_EXECUTABLE = \$report\.installedExecutable/u);
+  assert.match(installed, /MEMOFLOW_QA_EXPECTED_EXE_SHA256 = \$report\.installedExecutableSha256/u);
+  assert.match(installed, /MEMOFLOW_QA_EXPECTED_VERSION = \$report\.expectedVersion/u);
+  for (const spec of [
+    'workspace-ipc',
+    'workspace-attention',
+    'antigravity-composer',
+    'native-codex-unconfigured-installed',
+  ]) {
+    assert.ok(installed.includes('e2e/' + spec + '.spec.mts'), 'missing installed test: ' + spec);
+  }
+  assert.doesNotMatch(installed, /live-dsh-operator\.spec|native-codex-account-operator\.spec/u);
+  assert.match(
+    workflow,
+    /Get-FileHash -LiteralPath \$report\.installedExecutable -Algorithm SHA256/u,
+  );
+  assert.match(workflow, /desktop-workspace-ipc-windows/u);
+
+  const specs = [
+    'workspace-ipc',
+    'workspace-attention',
+    'antigravity-composer',
+    'native-codex-unconfigured-installed',
+  ];
+  for (const spec of specs) {
+    const source = await readRepoFile('apps/desktop/e2e/' + spec + '.spec.mts');
+    assert.match(source, /verifyInstalledNativeBinary/u);
+    assert.match(source, /MEMOFLOW_PACKAGED_EXECUTABLE/u);
+    assert.match(source, /MEMOFLOW_QA_EXPECTED_EXE_SHA256/u);
+    assert.match(source, /MEMOFLOW_QA_EXPECTED_VERSION/u);
+  }
+});
+
 test('Linux release uses actual AppImage plus installed Debian proofs and gates N to N+1 alongside Windows', async () => {
   const [release, workflow, runner, keyring] = await Promise.all([
     readRepoFile('.github/workflows/release-assets.yml'),

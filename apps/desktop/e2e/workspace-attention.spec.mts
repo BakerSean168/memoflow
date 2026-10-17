@@ -5,6 +5,7 @@ import { expect, test } from '@playwright/test';
 import { _electron as electron } from 'playwright';
 import { AIChannels, AIStreamChannels } from '@memoflow/contracts/electron';
 import { createIsolatedNativeAgentEnvironment } from './packaged-runtime/isolated-native-env';
+import { verifyInstalledNativeBinary } from './support/installed-native-provenance';
 
 interface AttentionQaEnvelope {
   streamId: string;
@@ -58,6 +59,7 @@ async function verifyOfflineNativeFailure(
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'memoflow-attention-qa-'));
   const promptLog = path.join(root, 'native-prompts.log');
   const env = createIsolatedNativeAgentEnvironment(root);
+  const installedExecutable = process.env.MEMOFLOW_PACKAGED_EXECUTABLE;
   if (driver === 'antigravity') {
     const authDir = path.join(env.GEMINI_HOME!, 'antigravity-acp');
     fs.mkdirSync(authDir, { recursive: true });
@@ -71,7 +73,12 @@ async function verifyOfflineNativeFailure(
   let app: Awaited<ReturnType<typeof electron.launch>> | undefined;
   try {
     app = await electron.launch({
-      args: ['--disable-gpu', '--disable-dev-shm-usage', path.resolve('dist-electron/main.cjs')],
+      ...(installedExecutable ? { executablePath: installedExecutable } : {}),
+      args: [
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        ...(installedExecutable ? [] : [path.resolve('dist-electron/main.cjs')]),
+      ],
       cwd: process.cwd(),
       env: {
         ...env,
@@ -86,7 +93,27 @@ async function verifyOfflineNativeFailure(
     });
     const main = await app.firstWindow({ timeout: 30000 });
     await expect(main.getByTestId('app-shell')).toBeVisible({ timeout: 30000 });
-    const preload = path.resolve('dist-electron/preload.cjs');
+    let preload = path.resolve('dist-electron/preload.cjs');
+    if (installedExecutable) {
+      const receipt = await verifyInstalledNativeBinary(
+        app,
+        installedExecutable,
+        process.env.MEMOFLOW_QA_EXPECTED_EXE_SHA256!,
+        process.env.MEMOFLOW_QA_EXPECTED_VERSION!,
+      );
+      preload = receipt.preloadPath;
+      await test.info().attach('installed-workspace-provenance', {
+        body: Buffer.from(
+          JSON.stringify({
+            packaged: receipt.packaged,
+            version: receipt.version,
+            executableSha256: receipt.executableSha256,
+            paidRequests: 0,
+          }),
+        ),
+        contentType: 'application/json',
+      });
+    }
     await app.evaluate(async ({ BrowserWindow }, preloadPath) => {
       const view = new BrowserWindow({
         show: false,

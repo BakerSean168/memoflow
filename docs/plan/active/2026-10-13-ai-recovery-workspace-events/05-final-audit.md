@@ -105,3 +105,11 @@ Windows/macOS 实机及真实 provider 推理不在本机 Chromium/受控 workfl
 4. 真实上游 429 不可通过耗尽额度制造；已有注入 429/quota 只能证明应用内部分类、Attention、草稿和重复保存，不能描述为上游 429 实测。
 
 **代码、类型检查、CI 成功**与**Windows 实机、签名安装候选、真实账号验收**分别记账；CI 离线夹具不等同于正式签名客户端。完整证据见 04-acceptance.md 同期增量记录。新分支 Windows CI、操作员证据须逐项核对后才更新完成状态。发版必须等待全部 Issue DoD、精确版本 SHA、Windows/其他平台及项目级 Go/No-Go 验收一致，**保持 #454/#456/#457 Open，禁止发布**。
+
+## 2026-10-17 · Installed Workspace evidence must bind final SHA
+
+The baseline main@c444ca3937bc passed main CI/Coverage, and PR #473 (c7c3f5290ae) completed isolated Windows NSIS/ Linux AppImage N→N+1 checks. However the former is **not itself an installed build receipt**, and the latter is **not** the same SHA as current main. The remaining installed-client evidence must therefore come from the final product candidate **after all implementation is merged**, through exactly one Windows installation/update workflow, not repeated builds on each partial PR.
+
+The new test-only change routes existing Workspace Goal/Conversation and six synthetic DSH/AGY Attention failures through the same already-installed executable used by the AGY Composer and empty Codex tests, checking executable SHA/version/provenance and installed preload in every case. Only a future successful **exact final main SHA** Windows job can justify marking that coverage PASS. Synthetic faults do not prove a real provider-issued 429. Explicit real-account Codex and optional billable signed-installer Send remain separate approvals, and may not be silently claimed as completed from offline testing.
+
+No change to release governance: all three publishing workflows remain disabled, #454/#456/#457 stay open pending full DoD, and no production rollout occurs before Go/No-Go.

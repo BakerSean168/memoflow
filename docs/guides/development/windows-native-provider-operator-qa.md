@@ -15,9 +15,18 @@ MEMOFLOW_PACKAGED_EXECUTABLE must identify an **actually installed** memoflow.ex
 
 Both operator tests fail closed if the expected SHA-256 or version differs from the running executable. Neither test creates a tag nor deploys.
 
-## Default Windows CI: no inference
+## Default Windows CI: one consolidated installed run, no inference
 
-Desktop Update Installed E2E runs the existing installed NSIS AGY offline Composer fixture and the new native-codex-unconfigured-installed.spec.mts. The latter uses a fresh, empty Codex Home and MemoFlow Profile, proving passive Codex discovery cannot fabricate an authenticated account/model catalog or persist a Native Connection. It never sends a model request.
+After the N to N+1 updater has verified the actual installed executable and its SHA-256, Desktop Update Installed E2E runs **one Playwright invocation** against that exact installed executable. The invocation covers these existing suites without any extra packaging:
+
+- workspace-ipc.spec.mts: real Electron Conversation and Goal Workspace events, stream cursor replay/ACK and cross-Guest identity isolation.
+- workspace-attention.spec.mts: six **offline, synthetic** DSH/AGY unavailable/429/quota cases, including persisted Attention and safe diagnostics/ACK, with exactly one native fixture prompt each.
+- antigravity-composer.spec.mts: real installed Composer Send/history/restart through the **offline ACP fixture**, not a Google model request.
+- native-codex-unconfigured-installed.spec.mts: fresh empty Codex Home and MemoFlow Profile, with no fabricated authenticated account/model catalog or persisted Native Connection from passive discovery.
+
+All cases receive the same independent updater receipt, SHA-256 and installed version; Workspace tests use the _installed app's_ preload rather than the source-tree Electron preload. Both artifacts named desktop-workspace-ipc-windows and desktop-installed-native-composer-windows contain results from this **single** run; they do not trigger separate execution or model inference. Existing signed-installer, real account and billable Send requirements stay separate.
+
+Do not run the old pre-package Electron Workspace suite as a second release gate. A successful earlier dev-Electron test is background evidence only, not equivalent to this installed test.
 
 ## Explicit, read-only operator Codex acceptance
 
