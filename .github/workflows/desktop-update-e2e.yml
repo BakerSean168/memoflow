@@ -258,6 +258,28 @@ jobs:
             throw "userData preservation sentinel drifted across update"
           }
 
+      - name: Run AGY Composer against the installed Windows candidate
+        working-directory: apps/desktop
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $report = Get-Content -LiteralPath 'update-e2e-evidence/windows-installed-update-report.json' -Raw | ConvertFrom-Json
+          if ($report.result -ne 'passed' -or -not (Test-Path -LiteralPath $report.installedExecutable)) {
+            throw 'An independently verified installed executable is required'
+          }
+          $env:MEMOFLOW_PACKAGED_EXECUTABLE = $report.installedExecutable
+          pnpm exec playwright test e2e/antigravity-composer.spec.mts --config playwright.config.ts --workers=1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Upload installed Windows Native Composer evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: desktop-installed-native-composer-windows
+          path: apps/desktop/test-results
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: Upload installed updater evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7

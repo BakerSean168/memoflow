@@ -29,10 +29,17 @@ test('Windows AGY Composer selects, sends, persists and restores its native conn
   );
   const promptLog = path.join(root, 'prompt-count');
   const fixture = path.resolve('e2e/support/attention-acp-fixture.cjs');
+  const packagedExecutable = process.env.MEMOFLOW_PACKAGED_EXECUTABLE;
+  if (packagedExecutable) expect(fs.existsSync(packagedExecutable)).toBe(true);
   let app: Awaited<ReturnType<typeof electron.launch>> | undefined;
   const launch = () =>
     electron.launch({
-      args: ['--disable-gpu', '--disable-dev-shm-usage', path.resolve('dist-electron/main.cjs')],
+      ...(packagedExecutable ? { executablePath: packagedExecutable } : {}),
+      args: [
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        ...(packagedExecutable ? [] : [path.resolve('dist-electron/main.cjs')]),
+      ],
       cwd: process.cwd(),
       env: {
         ...env,
@@ -47,6 +54,23 @@ test('Windows AGY Composer selects, sends, persists and restores its native conn
     });
   try {
     app = await launch();
+    const provenance = await app.evaluate(({ app: application }) => ({
+      executable: application.getPath('exe'),
+      version: application.getVersion(),
+      packaged: application.isPackaged,
+    }));
+    if (packagedExecutable) {
+      expect(provenance.packaged).toBe(true);
+      expect(path.normalize(provenance.executable).toLowerCase()).toBe(
+        path.normalize(packagedExecutable).toLowerCase(),
+      );
+    }
+    await test
+      .info()
+      .attach('native-runtime-provenance', {
+        body: Buffer.from(JSON.stringify(provenance)),
+        contentType: 'application/json',
+      });
     let page = await app.firstWindow();
     await expect(page.getByTestId('app-shell')).toBeVisible();
     const saved = await page.evaluate(
