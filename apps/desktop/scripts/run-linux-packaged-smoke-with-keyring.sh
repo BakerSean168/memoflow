@@ -26,9 +26,15 @@ export MEMOFLOW_WORKSPACE_ROOT="$workspace_root"
 # hang must fail closed without stranding a release runner.
 # shellcheck disable=SC2016 # Inner bash must expand HOME/RANDOM/$$, not this outer shell.
 timeout --signal=TERM --kill-after=15s "${MEMOFLOW_CI_KEYRING_TIMEOUT_SECONDS:-210}s" \
-  xvfb-run -a dbus-run-session -- bash -lc '
+  xvfb-run -a -f "$ephemeral_home/.Xauthority" dbus-run-session -- bash -lc '
   set -euo pipefail
   export HOME="$MEMOFLOW_CI_KEYRING_HOME"
+  # The isolated Native Agent scrubber strips XAUTHORITY alongside sensitive
+  # AUTH variables. Xlib can read the Xvfb cookie from HOME/.Xauthority.
+  test -s "$HOME/.Xauthority" || {
+    echo "Xvfb authorization file missing from isolated smoke HOME" >&2
+    exit 2
+  }
   export XDG_RUNTIME_DIR="$HOME/.runtime"
   export XDG_CURRENT_DESKTOP=GNOME
   export DESKTOP_SESSION=gnome

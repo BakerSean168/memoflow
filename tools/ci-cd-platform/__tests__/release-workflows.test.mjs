@@ -79,8 +79,14 @@ test('GitHub Release mutations use the configured operator token instead of the 
 
   const expectedScriptToken = 'github-token: ${{ secrets.RELEASE_PLEASE_TOKEN }}';
   const expectedCliToken = 'GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}';
-  assert.match(workflowStep(publish, 'Require dedicated release API credential'), /test -n "\$RELEASE_WRITE_TOKEN"/u);
-  for (const name of ['Create or validate draft release and tag', 'Reconcile release-please labels']) {
+  assert.match(
+    workflowStep(publish, 'Require dedicated release API credential'),
+    /test -n "\$RELEASE_WRITE_TOKEN"/u,
+  );
+  for (const name of [
+    'Create or validate draft release and tag',
+    'Reconcile release-please labels',
+  ]) {
     assert.ok(workflowStep(publish, name).includes(expectedScriptToken), name);
   }
   for (const name of [
@@ -96,7 +102,9 @@ test('GitHub Release mutations use the configured operator token instead of the 
   ]) {
     assert.ok(workflowStep(assets, name).includes(expectedCliToken), name);
   }
-  assert.ok(workflowStep(images, 'Upload Server evidence to draft release').includes(expectedCliToken));
+  assert.ok(
+    workflowStep(images, 'Upload Server evidence to draft release').includes(expectedCliToken),
+  );
   // Registry auth needs the scoped workflow token and remains unchanged.
   assert.match(images, /password: \$\{\{ github\.token \}\}/u);
 });
@@ -202,6 +210,26 @@ test('desktop release evidence installs its locked tooling dependencies before a
   assert.match(install, /pnpm install --frozen-lockfile --ignore-scripts/u);
   assert.ok(job.indexOf(setup) < job.indexOf(install));
   assert.ok(job.indexOf(install) < job.indexOf('- name: Build desktop release evidence'));
+});
+
+test('targeted Desktop recovery avoids repeat package builds and update gates and preserves Xvfb auth', async () => {
+  const [workflow, wrapper, isolation] = await Promise.all([
+    readRepoFile('.github/workflows/release-assets.yml'),
+    readRepoFile('apps/desktop/scripts/run-linux-packaged-smoke-with-keyring.sh'),
+    readRepoFile('apps/desktop/e2e/packaged-runtime/isolated-native-env.ts'),
+  ]);
+  assert.match(workflow, /recovery_platform:[\s\S]*?default: all/u);
+  assert.match(workflow, /RECOVERY_PLATFORM:.*inputs\.recovery_platform/u);
+  assert.match(workflow, /desktop_matrix:.*steps\.resolve\.outputs\.desktop_matrix/u);
+  assert.match(workflow, /fromJSON\(needs\.prepare-release\.outputs\.desktop_matrix\)/u);
+  assert.match(workflow, /requested === 'all' \? platforms : platforms\.filter/u);
+  for (const jobName of ['windows-installed-update-e2e', 'upload-release-assets']) {
+    const job = workflow.slice(workflow.indexOf('  ' + jobName + ':'));
+    assert.match(job, /if: needs\.prepare-release\.outputs\.recovery_only != 'true'/u);
+  }
+  assert.match(wrapper, /xvfb-run -a -f "\$ephemeral_home\/\.Xauthority"/u);
+  assert.match(wrapper, /test -s "\$HOME\/\.Xauthority"/u);
+  assert.match(isolation, /TOKEN\|SECRET\|PASSWORD\|CREDENTIAL\|AUTH/u);
 });
 
 test('desktop release aggregation selects only platform assets from mixed run artifacts', async () => {
@@ -434,18 +462,18 @@ test('Desktop release matrix covers Windows, Linux, macOS Intel and Apple Silico
     ]);
 
   for (const platform of ['windows-x64', 'linux-x64', 'macos-x64', 'macos-arm64']) {
-    assert.match(workflow, new RegExp(`platform: ${platform}`));
+    assert.match(workflow, new RegExp(`platform: '${platform}'`));
     assert.match(manifest, new RegExp(`['"]${platform}['"]`));
   }
-  assert.match(workflow, /os: macos-15-intel[\s\S]*?builder_args: --mac dmg zip --x64/);
-  assert.match(workflow, /os: macos-15[\s\S]*?builder_args: --mac dmg zip --arm64/);
+  assert.match(workflow, /os: 'macos-15-intel'[\s\S]*?builder_args: '--mac dmg zip --x64'/);
+  assert.match(workflow, /os: 'macos-15'[\s\S]*?builder_args: '--mac dmg zip --arm64'/);
   assert.match(workflow, /macos_signing_mode:[\s\S]*?default: unsigned-pilot/);
   assert.match(
     workflow,
     /Desktop signing policy did not emit explicit signing_state and signed_mode outputs/u,
   );
   assert.match(workflow, /- signed-notarized/);
-  assert.match(workflow, /signing_state: macos-policy/);
+  assert.match(workflow, /signing_state: 'macos-policy'/);
   assert.match(workflow, /Resolve Desktop signing policy/);
   assert.match(workflow, /Prepare protected macOS signing credentials/);
   assert.match(workflow, /MACOS_CSC_LINK: \$\{\{ secrets\.MACOS_CSC_LINK \}\}/);
@@ -610,7 +638,7 @@ test('Desktop release runtime gates execute before receipts and cannot be bypass
   assert.match(helper, /Invalid packaged-smoke workspace root/u);
   assert.match(
     helper,
-    /timeout --signal=TERM --kill-after=15s "\$\{MEMOFLOW_CI_KEYRING_TIMEOUT_SECONDS:-210\}s"[\s\S]*?xvfb-run -a dbus-run-session -- bash -lc/u,
+    /timeout --signal=TERM --kill-after=15s "\$\{MEMOFLOW_CI_KEYRING_TIMEOUT_SECONDS:-210\}s"[\s\S]*?xvfb-run -a -f "[^"]+" dbus-run-session -- bash -lc/u,
   );
   assert.match(
     helper,
@@ -630,7 +658,7 @@ test('Desktop release runtime gates execute before receipts and cannot be bypass
   assert.match(packagedSpec, /getByTestId\('settings-content-scroll'\)/u);
   assert.match(packagedSpec, /close-timeout/u);
   assert.match(packagedSpec, /kill\('SIGKILL'\)/u);
-  assert.match(workflow, /runtime_executable_kind: installed-deb/u);
+  assert.match(workflow, /runtime_executable_kind: 'installed-deb'/u);
   assert.match(workflow, /gnome-keyring/u);
   assert.match(
     workflow,
@@ -642,10 +670,11 @@ test('Desktop release runtime gates execute before receipts and cannot be bypass
   assert.match(manifest, /runtime validation missing or failed/u);
   assert.match(helper, /org\.freedesktop\.secrets/u);
   assert.match(helper, /MEMOFLOW_PACKAGED_USE_GNOME_KEYRING=1/u);
-  assert.match(helper, /xvfb-run -a dbus-run-session -- bash -lc/u);
-  assert.ok(
-    helper.indexOf('xvfb-run -a dbus-run-session') < helper.indexOf('gnome-keyring-daemon --login'),
+  assert.match(
+    helper,
+    /xvfb-run -a -f "\$ephemeral_home\/\.Xauthority" dbus-run-session -- bash -lc/u,
   );
+  assert.ok(helper.indexOf('xvfb-run -a -f') < helper.indexOf('gnome-keyring-daemon --login'));
   assert.ok(
     helper.indexOf('gnome-keyring-daemon --login') < helper.indexOf('gnome-keyring-daemon --start'),
   );
@@ -741,7 +770,7 @@ test('Linux release uses actual AppImage plus installed Debian proofs and gates 
     receipt,
     /runtime_executable_kind[^\n]*\n(?:\s*[^\n]+\n)*?\s*\n\s*"\$\{\{ runner\.os == 'Linux'/u,
   );
-  assert.match(release, /runtime_executable_kind: installed-deb/u);
+  assert.match(release, /runtime_executable_kind: 'installed-deb'/u);
   assert.match(release, /name: Desktop Installed Update Gate/u);
   assert.match(workflow, /windows-installed-update:/u);
   assert.match(workflow, /linux-appimage-update:[\s\S]*runs-on: ubuntu-latest/u);
