@@ -1,0 +1,67 @@
+'use strict';
+
+// Test-only DSH/ACP JSON-RPC peer. Never connects to a model or the network.
+// Production Desktop does not load this file. A test-owned isolated executable
+// path is passed through the same public Native Connection IPC as user settings.
+if (process.env.MEMOFLOW_ATTENTION_QA_FIXTURE !== '1') process.exit(88);
+
+let input = '';
+process.stdin.setEncoding('utf8');
+process.stdin.on('data', (chunk) => {
+  input += chunk;
+  let newline;
+  while ((newline = input.indexOf('\n')) >= 0) {
+    const line = input.slice(0, newline).trim();
+    input = input.slice(newline + 1);
+    if (!line) continue;
+    let request;
+    try {
+      request = JSON.parse(line);
+    } catch {
+      process.exitCode = 1;
+      continue;
+    }
+    if (!Object.prototype.hasOwnProperty.call(request, 'id')) continue;
+    let result;
+    if (request.method === 'initialize') {
+      result = {
+        protocolVersion: 1,
+        agentInfo: { version: '1.0.0' },
+        agentCapabilities: { mcpCapabilities: { http: true } },
+      };
+    } else if (request.method === 'session/new') {
+      result = {
+        sessionId: 'memoflow-attention-qa-session',
+        configOptions: [
+          {
+            id: 'model',
+            type: 'select',
+            currentValue: 'attention-qa-model',
+            options: [{ value: 'attention-qa-model', name: 'Offline Attention Fixture' }],
+          },
+        ],
+      };
+    } else if (request.method === 'session/prompt') {
+      // Deterministic native failure after the real LocalAgent runtime has
+      // emitted assistant.run.started. This is NOT a genuine upstream 429.
+      process.stdout.write(
+        JSON.stringify({
+          jsonrpc: '2.0',
+          id: request.id,
+          error: { code: -32001, message: 'Offline QA fixture: execution unavailable' },
+        }) + '\n',
+      );
+      continue;
+    } else {
+      process.stdout.write(
+        JSON.stringify({
+          jsonrpc: '2.0',
+          id: request.id,
+          error: { code: -32601, message: 'Fixture only: method unsupported' },
+        }) + '\n',
+      );
+      continue;
+    }
+    process.stdout.write(JSON.stringify({ jsonrpc: '2.0', id: request.id, result }) + '\n');
+  }
+});

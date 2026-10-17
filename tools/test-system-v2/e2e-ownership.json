@@ -169,6 +169,12 @@
       "lifecycle": "active",
       "primaryCollector": "apps/desktop/playwright.config.ts"
     },
+    "apps/desktop/e2e/workspace-attention.spec.mts": {
+      "surface": "ai-workspace",
+      "role": "supplemental",
+      "lifecycle": "active",
+      "primaryCollector": "apps/desktop/playwright.config.ts"
+    },
     "apps/desktop/e2e/workspace-ipc.spec.mts": {
       "surface": "ai-workspace",
       "role": "canonical",
