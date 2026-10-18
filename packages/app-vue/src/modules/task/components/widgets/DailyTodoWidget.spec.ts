@@ -1,5 +1,3 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { defineComponent, ref } from 'vue';
 import { createI18n } from 'vue-i18n';
 import { flushPromises, mount } from '@vue/test-utils';
@@ -177,21 +175,4 @@ describe('DailyTodoWidget', () => {
 
     expect(load).toHaveBeenCalledTimes(2);
   });
-});
-
-it('delegates execution presentation and commands to TaskQuickSurface', () => {
-  const source = readFileSync(resolve(__dirname, 'DailyTodoWidget.vue'), 'utf8');
-  expect(source).toContain('<TaskQuickSurface');
-  expect(source).toContain('useTaskToday');
-  expect(source).not.toMatch(
-    /fetchInstancesByDateRange|fetchTemplates|TEMPLATE_FETCH_LIMIT|isTodayMs/,
-  );
-  for (const command of [
-    'completeOccurrence',
-    'uncompleteOccurrence',
-    'markOccurrenceMissed',
-    'skipOccurrence',
-    'setOccurrenceChecklistItem',
-  ])
-    expect(source).not.toContain(`task.${command}`);
 });

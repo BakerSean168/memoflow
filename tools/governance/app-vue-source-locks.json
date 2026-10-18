@@ -1056,6 +1056,174 @@
       ]
     },
     {
+      "id": "desktop-update-service",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/di/__tests__/desktop-update-service.surface.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/di/keys.ts",
+          "require": ["DESKTOP_UPDATE_SERVICE_KEY: InjectionKey<DesktopUpdateService>"]
+        },
+        {
+          "file": "packages/app-vue/src/di/types.ts",
+          "require": [
+            "export interface DesktopUpdateService",
+            "getDiagnostics(): Promise<Result<DesktopUpdateDiagnosticsDTO>>",
+            "getSnapshot(): Promise<Result<DesktopUpdateSnapshotDTO>>",
+            "check(): Promise<Result<DesktopUpdateSnapshotDTO>>",
+            "restartAndInstall(): Promise<Result<DesktopUpdateSnapshotDTO>>",
+            "subscribe(listener: (snapshot: DesktopUpdateSnapshotDTO) => void): () => void"
+          ],
+          "forbid": [
+            "updateServerUrl",
+            "setFeedURL",
+            "autoDownload",
+            "quitAndInstall",
+            {
+              "pattern": "from ['\"]electron['\"]",
+              "flags": "u"
+            },
+            "ElectronBridge",
+            "window.electronAPI"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "service-client-port-facade-keep-boundary",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/di/service-client-port-facade-keep-boundary.surface.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/di/types.ts",
+          "require": [
+            "Residual 927",
+            "CloudAuthClientPort } from '@memoflow/contracts'",
+            "from '@memoflow/goal/client'",
+            "from '@memoflow/ai/client'",
+            "from '@memoflow/repository/client'",
+            "from '@memoflow/relation/client'",
+            "from '@memoflow/reminder/client'",
+            "from '@memoflow/label/client'",
+            "export type IAIClient = AIClientPort;"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/di/keys.ts",
+          "require": [
+            "InjectionKey<IAuthService>",
+            "InjectionKey<IGoalService>",
+            "InjectionKey<IAIClient>",
+            "AUTH_SERVICE_KEY: InjectionKey<IAuthService>",
+            "GOAL_SERVICE_KEY: InjectionKey<IGoalService>"
+          ],
+          "forbid": ["InjectionKey<AuthenticationClientPort>", "InjectionKey<GoalClientPort>"]
+        },
+        {
+          "file": "packages/app-vue/src/di/types.ts",
+          "require": [
+            "export type IAccountService = AccountClientPort",
+            "export type IAuthService = CloudAuthClientPort",
+            "export type IGoalService = GoalClientPort",
+            "export type ILabelService = LabelClientPort",
+            "export type ITaskService = TaskClientPort",
+            "export type IScheduleService = ScheduleClientPort",
+            "export type IRoutineService = RoutineClientPort",
+            "export type IRepositoryService = RepositoryClientPort",
+            "export type INotificationService = NotificationClientPort",
+            "export type IGoalKnowledgeService = GoalKnowledgeClientPort",
+            "export type ISettingService = SettingClientPort",
+            "export type IDataPortabilityService = DataPortabilityClientPort",
+            "export type IAIClient = AIClientPort"
+          ],
+          "forbid": [
+            {
+              "pattern": "export interface IAccountService\\b"
+            },
+            {
+              "pattern": "export interface IAuthService\\b"
+            },
+            {
+              "pattern": "export interface IGoalService\\b"
+            },
+            {
+              "pattern": "export interface ILabelService\\b"
+            },
+            {
+              "pattern": "export interface ITaskService\\b"
+            },
+            {
+              "pattern": "export interface IScheduleService\\b"
+            },
+            {
+              "pattern": "export interface IRoutineService\\b"
+            },
+            {
+              "pattern": "export interface IRepositoryService\\b"
+            },
+            {
+              "pattern": "export interface INotificationService\\b"
+            },
+            {
+              "pattern": "export interface IGoalKnowledgeService\\b"
+            },
+            {
+              "pattern": "export interface ISettingService\\b"
+            },
+            {
+              "pattern": "export interface IDataPortabilityService\\b"
+            },
+            {
+              "pattern": "export interface IAIClient\\b"
+            }
+          ],
+          "count": [
+            {
+              "pattern": "^export type I\\w+Service = \\w+ClientPort;",
+              "flags": "m",
+              "equals": 12
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "clamp-dual",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/layouts/shell/clamp-dual.surface.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/layouts/shell/clamp.ts",
+          "require": [
+            "Residual 1001",
+            {
+              "pattern": "export function clamp\\b"
+            },
+            "if (max < min) return min",
+            "Math.max(min, Math.min(max, value))"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/layouts/shell/panel-geometry.ts",
+          "require": ["Residual 1001", "import { clamp } from './clamp'", "clamp("],
+          "forbid": [
+            {
+              "pattern": "function clamp\\b"
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/layouts/shell/useAppShellStore.ts",
+          "require": ["Residual 1001", "import { clamp } from './clamp'", "clamp("],
+          "forbid": [
+            {
+              "pattern": "function clamp\\b"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "desktop-update-shell-indicator",
       "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
       "origin": "packages/app-vue/src/layouts/shell/desktop-update-shell-indicator.surface.spec.ts",
@@ -1143,6 +1311,441 @@
       ]
     },
     {
+      "id": "TaskCapsulePreview",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/layouts/shell/previews/TaskCapsulePreview.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/layouts/shell/previews/TaskCapsulePreview.vue",
+          "require": ["<TaskQuickSurface", "useTaskToday"],
+          "forbid": [
+            {
+              "pattern": "fetchInstancesByDateRange|fetchTemplates|TEMPLATE_FETCH_LIMIT|isTodayMs"
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/layouts/shell/previews/TaskCapsulePreview.vue",
+          "forbid": [
+            "task.completeOccurrence",
+            "task.uncompleteOccurrence",
+            "task.markOccurrenceMissed",
+            "task.skipOccurrence",
+            "task.setOccurrenceChecklistItem"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "unverified-email-banner",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/layouts/shell/unverified-email-banner.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/layouts/shell/AppShell.vue",
+          "require": [
+            "t('shell.auth.unverifiedBanner')",
+            "t('shell.auth.unverifiedAction')",
+            {
+              "pattern": "bg-amber-100"
+            },
+            {
+              "pattern": "text-amber-950"
+            }
+          ],
+          "forbid": [
+            {
+              "pattern": "t\\(\\s*['\"]shell\\.auth\\.unverifiedBanner['\"]\\s*,\\s*['\"]Verify"
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/layouts/shell/AppShell.vue",
+          "region": {
+            "pattern": "data-testid=\"unverified-email-banner\"[\\s\\S]{0,350}?role=\"status\""
+          },
+          "require": [
+            {
+              "pattern": "bg-amber-100"
+            },
+            {
+              "pattern": "text-amber-950"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "use-ai-chat-host-dispatch",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/ai/composables/use-ai-chat-host-dispatch.surface.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/ai/composables/types.ts",
+          "forbid": [
+            {
+              "pattern": "'\\s*streamMessage\\s*'"
+            },
+            {
+              "pattern": "'\\s*listMessages\\s*'"
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/ai/composables/useAIChatView.ts",
+          "require": [
+            "AI_ASSISTANT_RUNTIME_KEY",
+            "useStrictInject(AI_ASSISTANT_RUNTIME_KEY, 'AIAssistantRuntime')"
+          ]
+        },
+        {
+          "file": "apps/web/src/platform/di-app.ts",
+          "require": ["createAssistantRuntimeHttpClient", "AI_ASSISTANT_RUNTIME_KEY"]
+        },
+        {
+          "file": "apps/desktop/src/renderer/platform/di-app.ts",
+          "require": ["createAssistantRuntimeIpcClient", "AI_ASSISTANT_RUNTIME_KEY"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/ai/components/AIFooterComposer.vue",
+          "forbid": [
+            "ai-chat-execution-profile",
+            "value=\"pi_readonly\"",
+            "value=\"direct_turn\"",
+            "'select-execution-profile'"
+          ],
+          "require": ["ai-chat-stop-generating"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/ai/views/AIChatView.vue",
+          "forbid": [
+            ":execution-profile-id=\"executionProfileId\"",
+            "@select-execution-profile=\"selectExecutionProfile\""
+          ],
+          "require": [
+            "@stop=\"stopGenerating\"",
+            "if (toolMode.value === 'goal-create') void cancelGoalAgentRun();"
+          ]
+        },
+        {
+          "file": "docs/architecture/ai-runtime-path-map.md",
+          "require": [
+            "AssistantRuntimeClient",
+            "/ai/runtime/assistant/sse",
+            "/ai/runtime/assistant/history",
+            "/ai/runtime/assistant/delete",
+            "Mastra",
+            "默认聊天回退 `AIClientService.dispatchAssistant`"
+          ]
+        },
+        {
+          "files": [
+            "packages/app-vue/src/modules/ai/composables/useAIChatSession.ts",
+            "packages/app-vue/src/modules/ai/composables/useAssistantStream.ts",
+            "packages/app-vue/src/modules/ai/composables/useConversationProjection.ts",
+            "packages/app-vue/src/modules/ai/composables/useAIComposerContext.ts"
+          ],
+          "require": [
+            "runtime: AssistantRuntimeClient",
+            "options.runtime.listMessages(conversationId)",
+            "options.runtime.deleteConversation(id)",
+            "options.runtime.streamMessage(",
+            "options.runtime.cancelRun(runId)",
+            "providerId: selectedModel!.providerId",
+            "modelId: selectedModel!.modelId",
+            "runtimeKind: 'local_agent'",
+            "nativeModelOptions",
+            "options.runtime.listMessages(conversationId, kind)",
+            "event.type === 'assistant.message.delta'",
+            "event.type === 'assistant.usage.updated'",
+            "event.type === 'assistant.run.completed'",
+            "activeRuntimeRunId"
+          ],
+          "forbid": [
+            "useAssistantDispatch",
+            {
+              "pattern": "loadService\\.dispatchAssistant\\s*\\("
+            },
+            {
+              "pattern": "loadService\\.streamMessage\\s*\\("
+            },
+            {
+              "pattern": "loadService\\.sendMessage\\s*\\("
+            },
+            "activeHostRunId",
+            "createHostOpenChatRunId",
+            "buildHostOpenChatStopCancelCommand",
+            "dispatchAssistant"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AIChatView",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/ai/views/AIChatView.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/ai/views/AIChatView.vue",
+          "require": [
+            "AIGoalWorkflowPanel",
+            "AITaskWorkflowPanel",
+            "AIKnowledgeCapturePanel",
+            ":goal-workflow-run=\"goalWorkflowRun\"",
+            ":task-workflow-run=\"taskWorkflowRun\"",
+            ":knowledge-capture-run=\"knowledgeCaptureRun\"",
+            "if (started === false) toolMode.value = 'chat'",
+            "if (!resumed) toolMode.value = 'chat'",
+            "inferWorkflowMode(chatMessage.value)",
+            "else if (inferredMode === 'knowledge-qa') await askKnowledgeFromConversation()",
+            ":knowledge-answer=\"knowledgeAnswer\"",
+            "@confirm=\"confirmTaskAgentRun\"",
+            "@cancel=\"cancelTaskAgentRun\"",
+            "@retry=\"retryTaskAgentExecution\"",
+            "@accept-partial=\"acceptPartialTaskExecution\"",
+            "@cancel-remaining=\"cancelRemainingTaskExecution\"",
+            "@open-native-review=\"openKnowledgeNativeReview\"",
+            "taskAgentWaitingForClarification.value",
+            "submitTaskClarificationResponse(prepared.content)",
+            "knowledgeCaptureWaitingForClarification.value",
+            "submitKnowledgeClarificationResponse(prepared.content)",
+            "@cancel=\"cancelKnowledgeCaptureRun\"",
+            "@retry=\"retryKnowledgeCaptureExecution\"",
+            "@cancel-remaining=\"cancelRemainingKnowledgeCaptureExecution\"",
+            "goalWorkflowRun.value?.status !== 'completed'",
+            "route: `/goals/${automatedGoalId.value}`",
+            "intent: 'deeplink'",
+            "class=\"flex h-9 shrink-0 items-center border-b",
+            "data-testid=\"ai-active-intent\"",
+            "toolMode !== 'chat'",
+            "currentToolLabel",
+            "if (available && !wasAvailable && mode !== 'goal-create') requestContextPanel('automatic');",
+            "if (hasWorkflowContext.value && toolMode.value !== 'goal-create') requestContextPanel('explicit');",
+            "if (workflow !== 'goal-create') return;",
+            "requestContextPanel('explicit')",
+            "data-testid=\"ai-context-panel-toggle\"",
+            "data-testid=\"ai-desktop-context-panel-toggle\"",
+            "<Teleport to=\"body\" :disabled=\"true\">",
+            "<AIContextPanel",
+            "<AIGoalWorkflowPanel",
+            "<AITaskWorkflowPanel",
+            "<AIKnowledgeCapturePanel",
+            "getActiveSurface: () =>",
+            "shellStore.panelSurface !== 'business'",
+            "<Teleport :to=\"shellComposerMount ?? 'body'\" :disabled=\"!shellComposerMount\">",
+            "data-testid=\"ai-mobile-sidebar-toggle\"",
+            "data-testid=\"ai-mobile-sidebar-panel\"",
+            "@select=\"selectConversationFromMobile\"",
+            "@select-goal=\"openRecentGoalFromMobile\"",
+            "@select-knowledge-note=\"openRecentKnowledgeNoteFromMobile\"",
+            "knowledgeCaptureWorkflow",
+            "else if (inferredMode === 'knowledge-capture') {",
+            "const started = await startKnowledgeCaptureRun()",
+            "if (!started) toolMode.value = 'chat'",
+            "@open-native-review=\"openTaskNativeReview\"",
+            "@open-native-review=\"openGoalNativeReview\""
+          ],
+          "forbid": [
+            "AIHostProposalPanel",
+            "AIHostExecutionReceiptPanel",
+            "AIHostTimelineArtifactStrip",
+            {
+              "pattern": "\\bAgentRun\\b"
+            },
+            "hostProposal",
+            "pendingActions",
+            "approvedActions",
+            "dependsOn",
+            "data-testid=\"knowledge-qa-ask\"",
+            "@submit-clarification=\"submitKnowledgeClarification\"",
+            "@submit-clarification=\"submitTaskClarification\"",
+            "class=\"flex h-11 shrink-0 items-center border-b",
+            "setWorkflowAvailable(",
+            "closeWorkflowSurface()",
+            "GoalDialog",
+            "TaskPlanDialog",
+            "KnowledgeCaptureReviewDialog",
+            "ai-chat-tool-menu-trigger",
+            "AIWorkflowActionBar",
+            "workflow-status-text",
+            "<Teleport v-if=\"shellComposerMount\"",
+            {
+              "pattern": "<AIFooterComposer[\\s\\S]*?v-else"
+            },
+            "knowledge-capture-agent-start-run",
+            "task-agent-start-run",
+            "goal-agent-start-run",
+            "knowledge-generate",
+            "AIGoalDraftEditor",
+            "AITaskDraftEditor",
+            "showGoalDraftEditor",
+            "showTaskDraftEditor",
+            "toggleGoalDraftEditor"
+          ],
+          "count": [
+            {
+              "pattern": "if \\(!resumed\\) toolMode\\.value = 'chat'",
+              "equals": 4
+            },
+            {
+              "pattern": "<AIFooterComposer",
+              "equals": 1
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/ai/components/AIConversationSidebar.vue",
+          "forbid": [
+            {
+              "pattern": "\\bAgentRun\\b"
+            },
+            "agentRuns",
+            "select-agent-run"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/ai/composables/useAIChatView.ts",
+          "require": [
+            "AI_ASSISTANT_RUNTIME_KEY",
+            "useAIChatSession",
+            "useAIGoalWorkflow",
+            "useAITaskWorkflow",
+            "useAIKnowledgeCapture",
+            "useAIKnowledgeQaWorkflow",
+            "openCreatedTask,",
+            "async function openCreatedTask(taskId: string)",
+            "await router.push(`/tasks/${taskId}`)",
+            "route.name === 'goal-detail'",
+            "entityType: 'goal'",
+            "route.name === 'task-detail'",
+            "entityType: 'task'",
+            "route.name === 'repository'",
+            "entityType: 'knowledge_document'",
+            "item.knowledgeDocumentId === noteRef",
+            "setSurfaceContextEntity",
+            "surfaceDescriptorToContextEntity",
+            "run.status === 'failed' || run.status === 'cancelled'",
+            "persistence.clearWorkflowState(conversationId)",
+            "toolMode.value = 'chat'",
+            "error instanceof AIWorkflowRestoreError &&",
+            "taskWorkflow.taskAgentResuming.value || taskWorkflow.taskOwnerAttemptPending.value",
+            "canLeaveBusinessSurface(t)",
+            "goalWorkflow.goalOwnerAttemptPending.value",
+            "knowledgeCaptureWorkflow.knowledgeCaptureResuming.value"
+          ],
+          "forbid": [
+            "dispatchAssistant",
+            "startAgentRun",
+            "resumeAgentRun",
+            "AIGoalDraftEditor",
+            "AITaskDraftEditor",
+            "showGoalDraftEditor",
+            "showTaskDraftEditor",
+            "toggleGoalDraftEditor"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/ai/components/AIGoalWorkflowPanel.vue",
+          "require": [
+            "data-testid=\"knowledge-answer-panel\"",
+            "suspension?.type === 'goal_draft_review'",
+            "suspension?.type === 'recovery_required'",
+            "data-testid=\"goal-agent-retry-execution\""
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/ai/components/AITaskWorkflowPanel.vue",
+          "require": [
+            "data-testid=\"task-agent-confirm-run\"",
+            "data-testid=\"task-agent-accept-partial\"",
+            "data-testid=\"task-agent-cancel-remaining\"",
+            "suspension?.type === 'clarification_required'"
+          ],
+          "forbid": ["AITaskDraftEditor"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/ai/components/AIKnowledgeCapturePanel.vue",
+          "require": [
+            "data-testid=\"knowledge-capture-agent-cancel-remaining\"",
+            "data-testid=\"knowledge-capture-open-native-review\"",
+            "suspension?.type === 'clarification_required'"
+          ],
+          "forbid": ["data-testid=\"knowledge-capture-agent-confirm-run\""]
+        },
+        {
+          "file": "packages/app-vue/src/modules/ai/components/AIFooterComposer.vue",
+          "require": ["semanticElevationClass('floating')"],
+          "forbid": [
+            "rgba(",
+            {
+              "pattern": "shadow-\\[[^\\]]*rgba"
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/ai/views/AIChatView.vue",
+          "order": [
+            {
+              "tokens": [
+                "inferredMode === 'goal-create'",
+                "await prepareWorkflowTurn()",
+                "await startGoalAgentRun(workflowTurn.content)",
+                "return;",
+                "await handleSendChatBase()"
+              ]
+            },
+            {
+              "tokens": [
+                "if (goalAgentWaitingForClarification.value)",
+                "await prepareWorkflowTurn()",
+                "await submitGoalClarificationResponse(prepared.content)",
+                "return;",
+                "await handleSendChatBase()"
+              ]
+            },
+            {
+              "tokens": [
+                "if (goalAgentWaitingForApproval.value)",
+                "await prepareWorkflowTurn()",
+                "await submitGoalRevisionResponse(prepared.content)",
+                "return;",
+                "await handleSendChatBase()"
+              ]
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/ai/composables/useAIChatView.ts",
+          "order": [
+            {
+              "tokens": [
+                "await goalWorkflow.projectRun(run, false)",
+                "persistence.applyEditorOverlay(persisted.editorOverlay, run)"
+              ],
+              "chained": false
+            },
+            {
+              "tokens": [
+                "await taskWorkflow.projectRun(run, false)",
+                "persistence.persistWorkflowState(conversationId)"
+              ]
+            }
+          ],
+          "require": [
+            {
+              "pattern": "function selectConversation\\([^)]*\\)\\s*\\{\\s*if \\(!canLeaveWorkflowReview\\(\\)\\) return;"
+            },
+            {
+              "pattern": "function startNewConversation\\([^)]*\\)\\s*\\{\\s*if \\(!canLeaveWorkflowReview\\(\\)\\) return;"
+            },
+            {
+              "pattern": "function exitToolMode\\([^)]*\\)\\s*\\{\\s*if \\(!canLeaveWorkflowReview\\(\\)\\) return;"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "GoalKnowledgeMenuItems",
       "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
       "origin": "packages/app-vue/src/modules/goal/components/GoalKnowledgeMenuItems.spec.ts",
@@ -1207,6 +1810,75 @@
       ]
     },
     {
+      "id": "GoalDialog",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue",
+          "require": [
+            "GoalTimeframePicker",
+            "goal-property-chips",
+            "GoalReminderChip",
+            "LabelPicker",
+            "initialKeyResults",
+            "keyResults",
+            "GoalFormFrame",
+            "ProductAutoTextarea",
+            "class=\"flex min-h-full flex-col gap-6\"",
+            "GoalKeyResultDraftEditor",
+            "class=\"mt-auto\"",
+            "GoalStatusPicker",
+            "draft.description"
+          ],
+          "forbid": [
+            "goal.dialog.vNextDescription",
+            "goal.dialog.keyResultsHint",
+            "goal.dialog.krEmptyDesc",
+            "dueDate",
+            "folderId",
+            "parentGoalId",
+            "category",
+            "importance",
+            "draft.motivation",
+            "draft.feasibilityAnalysis"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/dialogs/GoalFormFrame.vue",
+          "require": [
+            "ProductDialogShell",
+            "recipe=\"workspace\"",
+            "PaneScopedDialog",
+            "height-mode=\"workspace\""
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/GoalKeyResultDraftEditor.vue",
+          "require": [
+            "<Transition name=\"kr-editor-reveal\"",
+            "border-[hsl(var(--border-subtle))]",
+            "transform-origin: bottom",
+            "grid-template-rows 220ms",
+            "prefers-reduced-motion",
+            "GoalKeyResultCardEditor"
+          ],
+          "forbid": ["Collapsible"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/GoalKeyResultCardEditor.vue",
+          "require": [
+            "GoalKeyResultTrajectoryPlot",
+            "draft-kr-description-input",
+            "draft-kr-calculation-method",
+            "draft-kr-weight",
+            "draft-kr-target-timeframe"
+          ],
+          "forbid": ["krTrajectoryHint"]
+        }
+      ]
+    },
+    {
       "id": "GoalKeyResultInspectDialog",
       "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
       "origin": "packages/app-vue/src/modules/goal/components/dialogs/GoalKeyResultInspectDialog.spec.ts",
@@ -1216,6 +1888,236 @@
           "forbid": [
             {
               "pattern": "useTask|TASK_SERVICE_KEY|updateKeyResult|createTask|deleteTask|completeTask"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "goal-operations-keep-boundary",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/goal/composables/goal-operations-keep-boundary.surface.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/goal/composables/goalOperations.ts",
+          "require": [
+            "Residual 1065 keep-boundary",
+            {
+              "pattern": "export function createGoalErrorHandler\\b"
+            },
+            {
+              "pattern": "export async function executeGoalOperation\\b"
+            },
+            {
+              "pattern": "export async function executeGoalAction\\b"
+            },
+            "translateResultError",
+            "`[goal] ${scope ?? 'error'}`",
+            "details",
+            "context",
+            "translatedMessage",
+            "scope?: string",
+            "onError?: ErrorHandler"
+          ],
+          "forbid": [
+            {
+              "pattern": "from ['\"].*create-composable-handle-error['\"]"
+            },
+            {
+              "pattern": "export \\{[^}]*createComposableHandleError"
+            },
+            {
+              "pattern": "createComposableHandleError\\s*\\("
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/shared/utils/create-composable-handle-error.ts",
+          "require": [
+            {
+              "pattern": "export function createComposableHandleError\\b"
+            },
+            "Soft residual 1065",
+            "report?: (message: string) => void"
+          ],
+          "forbid": [
+            {
+              "pattern": "export function createGoalErrorHandler\\b"
+            },
+            "[goal]",
+            "translatedMessage",
+            {
+              "pattern": "scope\\?: string"
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/composables/useGoal.ts",
+          "require": ["from './goalOperations'", "createGoalErrorHandler"],
+          "forbid": ["createComposableHandleError", "create-composable-handle-error"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/composables/useKeyResults.ts",
+          "require": ["from './goalOperations'", "createGoalErrorHandler"],
+          "forbid": ["createComposableHandleError", "create-composable-handle-error"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/composables/useGoalRecords.ts",
+          "require": ["from './goalOperations'", "createGoalErrorHandler"],
+          "forbid": ["createComposableHandleError", "create-composable-handle-error"]
+        }
+      ]
+    },
+    {
+      "id": "goal-vnext-ui-convergence",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/goal/goal-vnext-ui-convergence.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue",
+          "require": [
+            "data-testid=\"goal-property-chips\"",
+            "GoalTimeframePicker",
+            "GoalReminderChip",
+            "emit('create-with-ai')",
+            "emit('open-knowledge'"
+          ],
+          "forbid": ["targetDate", "dueDate", "draft.motivation", "draft.feasibilityAnalysis"]
+        },
+        {
+          "file": "packages/app-vue/src/shared/components/ProductTimeframePicker.vue",
+          "require": [
+            "goalTimeframeLabel",
+            "parseExplicitProductDateInput",
+            "ProductTemporalPickerSurface",
+            "goalTimeframeEndBoundary",
+            "goalTimeframeStartBoundary"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/shared/components/ProductTemporalPickerSurface.vue",
+          "require": ["<Calendar"],
+          "forbid": ["goalTimeframeEndBoundary"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/views/GoalDetailView.vue",
+          "require": [
+            "useGoalWorkspace(goalId)",
+            "workspace.value?.taskContext",
+            "workspace.value?.knowledgeContext",
+            "workspace.recentProgress",
+            "workspace.value?.recentReviews",
+            "isPastGoalTarget",
+            "name: 'task-list'",
+            "path: '/repository'"
+          ],
+          "forbid": ["TASK_SERVICE_KEY", "REPOSITORY_SERVICE_KEY"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/views/TaskManagementView.vue",
+          "require": [
+            "route.query.goalId",
+            "route.query.keyResultId",
+            "template.goalBinding?.keyResultId"
+          ]
+        },
+        {
+          "file": "packages/app-react/src/screens/TasksScreen.tsx",
+          "require": ["useLocalSearchParams", "useTaskPlans({ goalId, keyResultId })"]
+        },
+        {
+          "file": "packages/app-react/src/hooks/useTaskPlans.ts",
+          "require": ["options.goalId", "options.keyResultId"]
+        },
+        {
+          "file": "packages/app-react/src/screens/GoalEditorScreen.tsx",
+          "require": ["parseGoalTimeframeInput", "goalTimeframeInputValue"]
+        },
+        {
+          "file": "packages/app-react/src/screens/GoalKeyResultScreen.tsx",
+          "require": ["parseGoalTimeframeInput"]
+        },
+        {
+          "file": "packages/app-react/src/screens/GoalDetailScreen.tsx",
+          "require": [
+            "useGoalWorkspace(goalId)",
+            "workspace.taskContext",
+            "workspace.knowledgeContext",
+            "isPastGoalTarget"
+          ]
+        },
+        {
+          "file": "packages/app-react/src/utils/product-time.ts",
+          "require": ["kind: 'quarter'", "kind: 'halfYear'"],
+          "forbid": ["goalTimeframeEndBoundary"]
+        },
+        {
+          "file": "packages/app-vue/src/shared/components/ProductTemporalPickerSurface.vue",
+          "require": [
+            "value: 'day'",
+            "value: 'month'",
+            "value: 'quarter'",
+            "value: 'halfYear'",
+            "value: 'year'"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "clamp-percentage-keep-boundary",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/goal/utils/clamp-percentage-keep-boundary.surface.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/goal/utils/progress.ts",
+          "require": [
+            "Residual 1083 keep-boundary",
+            {
+              "pattern": "function clampPercentage\\b"
+            },
+            "Number.isFinite(value)",
+            "Math.min(100, Math.max(0, value))",
+            "getKeyResultProgressPercentage",
+            "getGoalOverallProgress"
+          ],
+          "forbid": [
+            "from '../../../layouts/shell/clamp'",
+            "from '../../layouts/shell/clamp'",
+            {
+              "pattern": "import\\s*\\{[^}]*\\bclamp\\b[^}]*\\}"
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/layouts/shell/clamp.ts",
+          "require": [
+            {
+              "pattern": "export function clamp\\b"
+            },
+            "Residual 1001",
+            "Soft residual 1083",
+            "if (max < min) return min",
+            "Math.max(min, Math.min(max, value))"
+          ],
+          "forbid": [
+            {
+              "pattern": "function clampPercentage\\b"
+            },
+            "Number.isFinite",
+            "Math.min(100, Math.max(0, value))"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/utils/progress.ts",
+          "region": {
+            "start": "function clampPercentage",
+            "length": 220
+          },
+          "require": ["Number.isFinite(value)", "Math.min(100, Math.max(0, value))"],
+          "forbid": [
+            "max < min",
+            {
+              "pattern": "function clampPercentage\\([^)]*min"
             }
           ]
         }
@@ -1357,6 +2259,130 @@
       ]
     },
     {
+      "id": "routine-form-ui",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/routine/routine-form-ui.surface.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/routine/components/RoutineEditorDialog.vue",
+          "require": [
+            "recipe=\"workspace\"",
+            "data-testid=\"routine-property-chips\"",
+            "ProductAutoTextarea",
+            "ProductPropertyChip",
+            "<WallClockTriggerEditor",
+            "<ElapsedTriggerEditor",
+            "<ActiveUsageTriggerEditor",
+            "<ProfileScopeControl",
+            "function buildTrigger(): RoutineTriggerDto | null",
+            "timingOwner: 'scheduler'",
+            "timingOwner: 'local-runtime'",
+            "data-testid=\"routine-desktop-runtime-hint\"",
+            "localRuntimeAvailable",
+            ":max-length=\"100\"",
+            ":max-length=\"2000\""
+          ],
+          "forbid": [
+            "ProductDatePicker",
+            "ProductTimePicker",
+            "ProductTimeZoneSelector",
+            "DropdownMenuCheckboxItem",
+            "NumberField",
+            "UniversalRoutineField",
+            "fieldSchema",
+            "<template #description>",
+            "<Label",
+            "schedulerRuntime",
+            "weekdaysText",
+            "1,2,3,4,5"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/routine/components/WallClockTriggerEditor.vue",
+          "require": [
+            "ProductDatePicker",
+            ":allowed-kinds=\"['day']\"",
+            "ProductTimePicker",
+            "ProductTimeZoneSelector",
+            "NumberField",
+            "data-testid=\"routine-frequency-chip\"",
+            "data-testid=\"routine-trigger-configuration\""
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/routine/components/ElapsedTriggerEditor.vue",
+          "require": [
+            "data-testid=\"routine-duration-chip\"",
+            "data-testid=\"routine-anchor-chip\"",
+            "NumberField"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/routine/components/ActiveUsageTriggerEditor.vue",
+          "require": [
+            "data-testid=\"routine-active-duration-chip\"",
+            "data-testid=\"routine-natural-break-chip\"",
+            "data-testid=\"routine-anchor-chip\"",
+            "NumberField"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/routine/components/ProfileScopeControl.vue",
+          "require": [
+            "DropdownMenuCheckboxItem",
+            "data-testid=\"routine-profile-picker\"",
+            "routine-profile-membership-"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/routine/components/RoutineProfileDialog.vue",
+          "require": ["ProductAutoTextarea", ":max-length=\"100\"", ":max-length=\"2000\""],
+          "forbid": [
+            "routine-profile-enabled",
+            "<template #description>",
+            "<Label",
+            "<Input",
+            "<Textarea"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/routine/views/RoutineConfigurationView.vue",
+          "require": [
+            "data-testid=\"routine-profile-scope-control\"",
+            "data-testid=\"routine-global-enabled-switch\"",
+            "data-testid=\"routine-profile-enabled-switch\"",
+            "data-testid=\"routine-global-paused-indicator\"",
+            "data-testid=\"routine-profile-runtime-action\"",
+            "!snapshot.capabilities.localRuntime",
+            "toggleGlobalEnabled",
+            "snapshot.preferences.globalEnabled",
+            "toggleProfileEnabled(selectedProfile, $event)",
+            "await updateProfile(profile.id",
+            "enabled,",
+            "data-testid=\"routine-desktop-runtime-badge\"",
+            ":local-runtime-available=\"snapshot.capabilities.localRuntime\""
+          ],
+          "forbid": ["data-testid=\"routine-global-paused-badge\""]
+        },
+        {
+          "files": [
+            "packages/app-vue/src/modules/routine/components/WallClockTriggerEditor.vue",
+            "packages/app-vue/src/modules/routine/components/ElapsedTriggerEditor.vue",
+            "packages/app-vue/src/modules/routine/components/ActiveUsageTriggerEditor.vue",
+            "packages/app-vue/src/modules/routine/components/ProfileScopeControl.vue"
+          ],
+          "forbid": [
+            "type=\"date\"",
+            "type=\"time\"",
+            "type=\"number\"",
+            "<select",
+            "UniversalRoutineField",
+            "fieldSchema"
+          ]
+        }
+      ]
+    },
+    {
       "id": "PlannerCalendar",
       "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
       "origin": "packages/app-vue/src/modules/schedule/planner/PlannerCalendar.spec.ts",
@@ -1366,6 +2392,147 @@
           "require": [
             "v-if=\"event.extendedProps.projection\"",
             "data-testid=\"schedule-selection-preview\""
+          ]
+        }
+      ]
+    },
+    {
+      "id": "schedulePanelAdaptation",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/schedule/views/schedulePanelAdaptation.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue",
+          "require": [
+            "data-testid=\"schedule-page-toolbar\"",
+            "data-primary-action=\"create-schedule\"",
+            ":aria-selected=\"activeView === tab.value\"",
+            "<PlannerCalendar",
+            "toast.success(t('schedule.toast.scheduleCreated'))",
+            "await refreshAfterScheduleWrite('schedule.toast.scheduleCreatedRefreshFailed')",
+            "async function refreshAfterScheduleWrite(refreshFailureKey: string): Promise<void>",
+            "await fetchForRange(windowStart.value, windowEnd.value)",
+            "toast.warning(t(refreshFailureKey))",
+            "<TaskOccurrenceQuickSurface",
+            "#owner-content",
+            "data-testid=\"schedule-period-navigation\"",
+            "plannerCalendarRef.value?.previous()",
+            "plannerCalendarRef.value?.next()",
+            "plannerCalendarRef.value?.today()"
+          ],
+          "count": [
+            {
+              "pattern": "data-primary-action=",
+              "equals": 1
+            }
+          ],
+          "forbid": [
+            "<DayViewCalendar",
+            "<WeekViewCalendar",
+            "<MonthViewCalendar",
+            "usePanelWidth",
+            "effectiveView",
+            "completeOccurrence",
+            "complete-task",
+            "resolveCalendarWindow",
+            "getWeekStart",
+            "setMonth("
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/schedule/components/PlannerDayDialog.vue",
+          "forbid": ["complete-task"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/schedule/components/PlannerEventDialog.vue",
+          "forbid": ["modules/task"],
+          "require": ["name=\"owner-content\""]
+        },
+        {
+          "file": "packages/app-vue/src/modules/schedule/planner/PlannerCalendar.vue",
+          "require": ["headerToolbar: false", "datesSet(info)"]
+        }
+      ]
+    },
+    {
+      "id": "AISettings.provider-onboarding-v2",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/setting/components/AISettings.provider-onboarding-v2.surface.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/setting/components/AISettings.vue",
+          "forbid": [
+            "AI_PROVIDER_TEMPLATES",
+            "submitQuickProvider",
+            "providerCatalog",
+            "openOnboarding",
+            "onboardingOpen",
+            "OnboardingStep",
+            "instance.instanceId !== 'mastra'"
+          ],
+          "require": [
+            "MastraAgentSettings",
+            "action: 'update'",
+            "expectedRevision: instance.revision",
+            "ai-provider-toggle-"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/setting/components/AgentInstanceWizard.vue",
+          "forbid": [
+            "AI_PROVIDER_TEMPLATES",
+            "submitQuickProvider",
+            "providerCatalog",
+            "openOnboarding",
+            "onboardingOpen",
+            "OnboardingStep"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/setting/components/MastraAgentSettings.vue",
+          "forbid": [
+            "<Dialog",
+            "getProviderCatalog",
+            "localStorage",
+            "apiKey: connection.value",
+            "credentialRef:",
+            "updateProvider(",
+            "ai-provider-detail-toggle"
+          ],
+          "require": [
+            "catalogId: 'custom'",
+            "probeProviderConnection",
+            "testProviderOnboardingModel",
+            "commitProviderOnboarding",
+            "onboardingId: probe.value.onboardingId",
+            "expiresAt",
+            "onBeforeUnmount",
+            "invalidateProbe",
+            "probe.value = null",
+            "ai.probeProviderReplacement(String(currentId), input)",
+            "ai.commitProviderReplacement",
+            "committedConnection"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/setting/components/MastraAgentSettings.vue",
+          "region": {
+            "start": "async function verifyConnection",
+            "end": "async function refreshModels"
+          },
+          "require": ["apiKey.value = ''"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/setting/components/MastraAgentSettings.vue",
+          "region": {
+            "start": "async function verifyConnection",
+            "end": "async function refreshModels"
+          },
+          "order": [
+            {
+              "tokens": ["await ai.probeProviderConnection", "apiKey.value = ''"],
+              "chained": false
+            }
           ]
         }
       ]
@@ -1444,6 +2611,116 @@
       ]
     },
     {
+      "id": "use-data-portability",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/setting/composables/use-data-portability.surface.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/setting/composables/useDataPortability.ts",
+          "require": [
+            "DATA_PORTABILITY_SERVICE_KEY",
+            "DESKTOP_AUTH_API_KEY",
+            "const isServerDisclosureAvailable = ref(service !== undefined && desktopApi === undefined);",
+            "if (!service || desktopApi !== undefined)",
+            "Server-held data disclosure is available from the authenticated Web runtime"
+          ]
+        },
+        {
+          "file": "packages/data-portability/src/infrastructure-client/adapters/ipc/data-portability-ipc.adapter.ts",
+          "require": [
+            "exportServerHeldDataDisclosure",
+            "code: 'NOT_SUPPORTED'",
+            "Server-held data disclosure is available from the authenticated Web runtime"
+          ]
+        },
+        {
+          "file": "packages/data-portability/src/infrastructure-client/adapters/ipc/data-portability-ipc.adapter.ts",
+          "region": {
+            "start": "async exportServerHeldDataDisclosure",
+            "end": "async dryRunPortableDataV3"
+          },
+          "forbid": ["this.ipcClient.invoke"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/setting/components/DataSettingsSection.vue",
+          "require": [
+            "isServerDisclosureAvailable",
+            "exportServerHeldDataDisclosure",
+            ":server-data-disclosure-available=\"isServerDisclosureAvailable\"",
+            "@export-server-data-disclosure=\"exportServerHeldDataDisclosure\""
+          ]
+        }
+      ]
+    },
+    {
+      "id": "UserSettingsView",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/setting/views/UserSettingsView.contract.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/setting/views/UserSettingsView.vue",
+          "region": {
+            "pattern": "const GROUP_DEFINITIONS:[\\s\\S]*?\\]\\s*;\\s*\\nconst GROUP_VALUES",
+            "flags": ""
+          },
+          "require": [
+            "{ value: 'shortcuts'",
+            "{ value: 'appearance'",
+            "{ value: 'repository'",
+            "{ value: 'ai'",
+            "{ value: 'notifications'",
+            "{ value: 'account'",
+            "{ value: 'data'",
+            "{ value: 'updates'"
+          ],
+          "forbid": ["{ value: 'advanced'"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/setting/views/UserSettingsView.vue",
+          "require": [
+            "const GROUP_VALUES: SettingsGroup[] = GROUP_DEFINITIONS.map",
+            "route.query.tab",
+            "SettingsNavigation",
+            "inject(DESKTOP_UPDATE_SERVICE_KEY, null)",
+            "group !== 'updates' || desktopUpdateService !== null",
+            "activeTab === 'updates'",
+            "import('../components/DesktopUpdateSettingsSection.vue')",
+            "defineAsyncComponent(() => import('../components/AISettings.vue'))",
+            "import('../components/KnowledgeRepositorySettings.vue')",
+            "import('../components/NotificationSettings.vue')",
+            "import('../components/AccountSettingsSection.vue')",
+            "import('../components/DataSettingsSection.vue')",
+            "<UserPreferenceSettingsSection v-if=\"activeTab === 'appearance'\" />",
+            "settings-group-sidebar",
+            "settings-navigation-drawer"
+          ],
+          "forbid": [
+            "useUserSetting(",
+            "useUserPreferences(",
+            "useDataPortability(",
+            "loadSettings(",
+            "loadPreferences(",
+            "isPageLoading",
+            "backups",
+            "syncStatus",
+            "settings-group-tabs"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/setting/views/UserSettingsView.vue",
+          "region": {
+            "pattern": "const GROUP_DEFINITIONS:[\\s\\S]*?\\]\\s*;\\s*\\nconst GROUP_VALUES"
+          },
+          "count": [
+            {
+              "pattern": "\\{ value: '[a-z]+'",
+              "equals": 8
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "react-mobile-settings-parity",
       "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
       "origin": "packages/app-vue/src/modules/setting/views/react-mobile-settings-parity.surface.spec.ts",
@@ -1480,6 +2757,93 @@
         {
           "file": "packages/app-react/src/hooks/useNotificationPreferences.ts",
           "require": ["service.getPreferences()", "service.updatePreferences({"]
+        }
+      ]
+    },
+    {
+      "id": "settingsPanelAdaptation",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/setting/views/settingsPanelAdaptation.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/setting/views/UserSettingsView.vue",
+          "require": [
+            "v-if=\"!isNarrow && shellStore.settingsNavigationOpen\"",
+            "data-testid=\"settings-group-sidebar\"",
+            "v-if=\"isNarrow\"",
+            "<ProductSurfaceHeader",
+            "family=\"settings\"",
+            "data-testid=\"settings-compact-header\"",
+            "data-testid=\"settings-compact-back\"",
+            "side=\"left\"",
+            "data-testid=\"settings-navigation-drawer\"",
+            "data-testid=\"settings-content-scroll\"",
+            "min-h-0 flex-1 overflow-y-auto"
+          ],
+          "forbid": ["settings-group-tabs"],
+          "count": [
+            {
+              "pattern": "<SettingsNavigation",
+              "equals": 2
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/setting/components/SettingsNavigation.vue",
+          "require": [
+            "data-testid=\"settings-return-to-app\"",
+            "LinearSidebarItem",
+            "class=\"flex h-11 shrink-0 items-center border-t",
+            "emit('return-to-app')"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/setting/components/SettingsNavigation.vue",
+          "require": ["<nav"],
+          "order": [
+            {
+              "tokens": ["</nav>", "data-testid=\"settings-navigation-footer\""],
+              "chained": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TaskFilterBar.tiers",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/task/components/TaskFilterBar.tiers.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/task/components/TaskPageToolbar.vue",
+          "count": [
+            {
+              "pattern": "data-testid=\"task-page-toolbar\"",
+              "equals": 1
+            }
+          ],
+          "require": [
+            "test-id=\"task-surface-trigger\"",
+            "test-id=\"task-status-filter\"",
+            "test-id=\"task-plan-state-filter\"",
+            "data-testid=\"task-label-filter\"",
+            "data-testid=\"task-compact-view-options\"",
+            "test-id=\"task-occurrence-sort\"",
+            "<ProductSingleSelectFilter",
+            "<LabelFilterPopover",
+            "<ResponsivePrimaryAction",
+            "@2xl/panel:hidden",
+            "hidden shrink-0 @2xl/panel:block",
+            "data-primary-action=\"create-task\""
+          ],
+          "forbid": [
+            "task-goal-filter",
+            "goalFilter",
+            "overflow-x-auto",
+            "task-search-input",
+            "TaskDAG",
+            "usePanelWidth"
+          ]
         }
       ]
     },
@@ -1541,6 +2905,339 @@
       ]
     },
     {
+      "id": "DailyTodoWidget",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/task/components/widgets/DailyTodoWidget.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/task/components/widgets/DailyTodoWidget.vue",
+          "require": ["<TaskQuickSurface", "useTaskToday"],
+          "forbid": [
+            {
+              "pattern": "fetchInstancesByDateRange|fetchTemplates|TEMPLATE_FETCH_LIMIT|isTodayMs"
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/components/widgets/DailyTodoWidget.vue",
+          "forbid": [
+            "task.completeOccurrence",
+            "task.uncompleteOccurrence",
+            "task.markOccurrenceMissed",
+            "task.skipOccurrence",
+            "task.setOccurrenceChecklistItem"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "task-vnext-ui",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/task/task-vnext-ui.surface.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/task/components/types.ts",
+          "region": {
+            "start": "export interface TaskPlanViewModel",
+            "end": "export interface TaskPlanFormProps"
+          },
+          "require": ["schedule: TaskPlanSchedule", "checklist: ChecklistItemDefinitionDTO[]"],
+          "forbid": [
+            {
+              "pattern": "\\btimeConfig\\s*:"
+            },
+            {
+              "pattern": "\\brecurrenceRule\\s*:"
+            },
+            {
+              "pattern": "\\btaskType\\s*:"
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/components/TaskPlanForm/TaskPlanForm.vue",
+          "require": [
+            "task-plan-identity-section",
+            "task-plan-property-chips",
+            "task-schedule-chip",
+            "task-recurrence-chip",
+            "task-goal-chip",
+            "task-reminder-chip",
+            "task-importance-chip",
+            "task-schedule-popover",
+            "task-reminder-popover",
+            "task-description-section",
+            "<ChecklistSection",
+            "class=\"mt-auto shrink-0\"",
+            "task-plan-form-container flex min-h-0 flex-1 flex-col",
+            "task-plan-form flex min-h-0 flex-1 flex-col gap-6",
+            "task-importance-option-",
+            "<ReminderSection"
+          ],
+          "forbid": ["task-plan-property-editor", "task-checklist-chip"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/BasicInfoSection.vue",
+          "require": ["ProductAutoTextarea"],
+          "forbid": ["<Input"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.vue",
+          "require": ["body-class=\"flex flex-col\""]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue",
+          "require": ["task-time-type-menu", "role=\"radio\"", "<Check"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ChecklistSection.vue",
+          "require": ["checklist-editor-reveal", "product-dialog-body"],
+          "forbid": ["task-checklist-empty"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/views/TaskDetailView.vue",
+          "require": [
+            "data-testid=\"task-goal-owner-navigation\"",
+            "data-testid=\"task-plan-workspace\"",
+            "@checklist-change=\"setOccurrenceChecklistItem\""
+          ],
+          "forbid": ["task-reminder-add-menu", "removeReminderTrigger", "UniversalEntityDetail"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/components/TaskOccurrenceRow.vue",
+          "require": ["occurrence.checklistState", "'checklist-change'"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/views/TaskDetailView.vue",
+          "require": [
+            {
+              "pattern": "<ProductPropertyChip[^>]*data-testid=\"task-detail-goal-chip\""
+            },
+            {
+              "pattern": "<ProductPropertyChip[^>]*data-testid=\"task-detail-labels-chip\""
+            },
+            {
+              "pattern": "<ProductPropertyChip[^>]*data-testid=\"task-detail-reminder-chip\""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TaskDetailView",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/task/views/TaskDetailView.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/task/views/TaskDetailView.vue",
+          "require": [
+            "data-testid=\"task-plan-workspace\"",
+            "data-testid=\"task-detail-title\"",
+            "data-testid=\"task-plan-workspace-properties\"",
+            "data-testid=\"task-detail-metadata\"",
+            "data-testid=\"task-properties-row\"",
+            "test-id=\"task-properties-more\"",
+            "v-if=\"viewModel.goalBinding || showGoalEditor\"",
+            "v-if=\"labelIds.length || showLabelsEditor\"",
+            "v-if=\"reminderTriggers.length || showReminderEditor\"",
+            "data-testid=\"task-goal-row\"",
+            "data-testid=\"task-labels-row\"",
+            "data-testid=\"task-reminders-row\"",
+            "data-testid=\"task-detail-description\"",
+            "task-detail-schedule-chip",
+            "task-detail-recurrence-chip",
+            "task-detail-goal-chip",
+            "task-detail-reminder-chip",
+            "task-detail-importance-chip",
+            "<LabelCommandPanel",
+            "reminderTriggerLabel",
+            "formatTaskReminderAbsoluteTime",
+            "hasMorePropertiesMenuItems",
+            "<DropdownMenuSub",
+            "<DropdownMenuCheckboxItem",
+            "<TaskReminderMenuItems",
+            "quickBindGoal",
+            "toggleLabelSelection",
+            "openGoalEditor",
+            "openLabelsEditor",
+            "openReminderEditor",
+            "openCustomReminderPicker",
+            "<ProductDateTimePicker",
+            "<ChecklistSection",
+            "saveInlinePlan",
+            "const req: UpdateTaskPlanReq = {}",
+            "data-testid=\"task-detail-occurrences\"",
+            "<TaskOccurrenceRow",
+            "executionSummary",
+            "linkedNotes",
+            "completeOccurrence",
+            "uncompleteOccurrence",
+            "markOccurrenceMissed",
+            "skipOccurrence",
+            "setOccurrenceChecklistItem",
+            "refetchWorkspace",
+            "useTaskOccurrenceActionCoordinator({",
+            "operations: occurrenceOperations",
+            "resolveGoalBinding: () => currentTemplate.value?.goalBinding",
+            "<TaskCompletionMeasurementDialog :coordinator=\"actionCoordinator\"",
+            "requestComplete",
+            "requestUncomplete",
+            "requestMissed",
+            "requestSkip",
+            "requestChecklistChange",
+            "afterSuccess: () => refetchWorkspace()"
+          ],
+          "forbid": [
+            "<LabelPicker",
+            "data-testid=\"task-detail-goal-context\"",
+            "name: vm.title",
+            "description: vm.description",
+            "<TaskPlanDialog",
+            "saveEdit",
+            "openEdit",
+            "fetchInstances({ page: 1, limit: 500 })",
+            "getTaskOccurrencePosition",
+            "runOccurrenceAction",
+            "TaskDependency",
+            "CriticalPath",
+            "parentTaskId",
+            "dependencyStatus"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TaskManagementView",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/task/views/TaskManagementView.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/task/views/TaskManagementView.vue",
+          "require": [
+            "ref<TaskSurface>('today')",
+            "data-testid=\"task-occurrence-list\"",
+            "data-testid=\"task-plan-list\"",
+            "<TaskPlanRow",
+            "task-plan-list-column-header",
+            "isTaskOccurrenceOnTodaySurface",
+            ":data-testid=\"`task-occurrence-group-${group.key}`\"",
+            "key: 'overdue' as const",
+            "key: 'today' as const",
+            "mode=\"create\"",
+            "<TaskPageToolbar",
+            "templateMatchesFilters",
+            "sortTaskOccurrences",
+            "const occurrenceStatusFilter = ref<'all' | TaskOccurrenceClientDTO['status']>('all')",
+            "const planStateFilter = ref<TaskPlanStateFilter>('all')",
+            "occurrence.status === occurrenceStatusFilter.value",
+            "matchesPlanState(template)",
+            "useTaskToday()",
+            "limit: 100",
+            "{ keyResultId: queryKeyResultId.value }",
+            "goalService.getGoal(goalId)",
+            "goalService.getKeyResults(goalId)",
+            "scopedGoalName.value",
+            "scopedKeyResultTitle.value",
+            "page: planPage.value",
+            "total: planTotal",
+            "data-testid=\"task-plan-pagination\"",
+            "planPage * 100 >= planTotal",
+            "todayDetailsError.value",
+            "identityScope !== resolveIdentityScope()",
+            "route.query.createGoalId",
+            "openBoundTaskCreateDialog",
+            ":initial-goal-binding=\"createInitialGoalBinding\"",
+            "void router.replace({ name: 'task-list' })",
+            "<TaskPlanDialog",
+            "@save=\"handleSubmit\"",
+            "completeOccurrence",
+            "uncompleteOccurrence",
+            "markOccurrenceMissed",
+            "skipOccurrence",
+            "useTaskOccurrenceActionCoordinator({",
+            "operations: occurrenceOperations",
+            "requestComplete",
+            "requestUncomplete",
+            "requestMissed",
+            "requestSkip",
+            "requestChecklistChange",
+            "@inspect=\"openOccurrenceInspect\""
+          ],
+          "forbid": [
+            "data-testid=\"task-open-schedule\"",
+            "name: 'ScheduleCalendar'",
+            "'upcoming'",
+            "emptyUpcoming",
+            "task-plan-card",
+            "openEditDialog",
+            "ref<'create' | 'edit'>",
+            "updatePlanSafe",
+            "<ModuleHeader",
+            "goalFilter",
+            "TaskDAG",
+            "DependencyManager",
+            "CriticalPath",
+            "graph mode",
+            {
+              "pattern": "filteredPlans[\\s\\S]{0,500}occurrenceStatusFilter"
+            },
+            "fetchInstancesByDateRange",
+            "fetchOccurrencesMutation({ page: 1, limit: 500 })",
+            "limit: 500",
+            "`Goal ${queryGoalId.value}",
+            "KR ${queryKeyResultId.value}",
+            ":position=\"occurrencePositions",
+            "runOccurrenceAction",
+            "route.query.occurrence"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/components/TaskPageToolbar.vue",
+          "require": [
+            "test-id=\"task-surface-trigger\"",
+            "task-status-filter",
+            "task-plan-state-filter",
+            "task-label-filter",
+            "task-compact-view-options",
+            "task-occurrence-sort",
+            "data-primary-action=\"create-task\"",
+            "<ResponsivePrimaryAction",
+            "<ProductSingleSelectFilter",
+            "<LabelFilterPopover"
+          ],
+          "forbid": ["task-goal-filter", "goalFilter", "task-search-input"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/views/TaskManagementView.vue",
+          "region": {
+            "start": "const visibleOccurrences",
+            "end": "const occurrenceGroups"
+          },
+          "forbid": ["planStateFilter"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/composables/useTaskToday.ts",
+          "require": ["includeOverdueOpen: true", "startOfDayMs(now)", "endOfDayMs(now)"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/router/index.ts",
+          "count": [
+            {
+              "pattern": "path:",
+              "equals": 3
+            }
+          ],
+          "require": ["name: 'task-detail'"],
+          "forbid": [
+            {
+              "pattern": "occurrence|inspect",
+              "flags": "i"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "taskPanelAdaptation",
       "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
       "origin": "packages/app-vue/src/modules/task/views/taskPanelAdaptation.spec.ts",
@@ -1560,6 +3257,54 @@
             "hidden shrink-0 @2xl/panel:block"
           ],
           "forbid": ["overflow-x-auto", "task-goal-filter", "usePanelWidth", "isNarrow"]
+        }
+      ]
+    },
+    {
+      "id": "core-vnext-presentation-boundary",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/shared/boundaries/core-vnext-presentation-boundary.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/shared/utils/product-time.ts",
+          "require": ["formatProductDate", "toProductDateInputValue"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/GoalProgressRow.vue",
+          "forbid": ["new Intl.DateTimeFormat", "toISOString().slice(0,10)"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/views/GoalDetailView.vue",
+          "forbid": ["new Intl.DateTimeFormat", "toISOString().slice(0,10)"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/dialogs/GoalReviewInspectDialog.vue",
+          "forbid": ["new Intl.DateTimeFormat", "toISOString().slice(0,10)"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue",
+          "forbid": ["new Intl.DateTimeFormat", "toISOString().slice(0,10)"]
+        },
+        {
+          "file": "packages/app-vue/src/layouts/shell/previews/TaskCapsulePreview.vue",
+          "require": ["<TaskQuickSurface"],
+          "forbid": ["'Expired'"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/components/TaskQuickSurface.vue",
+          "require": ["'Missed'"],
+          "forbid": ["'Expired'"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/components/TaskPageToolbar.vue",
+          "require": [
+            "data-testid=\"create-task-plan-button\"",
+            "data-primary-action=\"create-task\""
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/views/TaskManagementView.vue",
+          "forbid": ["TaskDAG", "DependencyManager"]
         }
       ]
     },
@@ -1909,6 +3654,284 @@
       ]
     },
     {
+      "id": "product-surface-polish",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/shared/components/product-surface-polish.surface.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/goal/views/GoalDetailView.vue",
+          "require": [
+            "<ModuleHeader data-testid=\"goal-detail-toolbar\">",
+            "data-testid=\"goal-detail-identity\"",
+            "class=\"space-y-4 border-b border-[hsl(var(--border-subtle))] pb-5\"",
+            "<GoalStatusPicker",
+            "<GoalReminderMenuItems",
+            "<ProductDateTimePicker",
+            "@request-custom-time=\"openCustomReminderPicker\"",
+            "<GoalKnowledgeMenuItems",
+            "data-testid=\"goal-reminders-row\"",
+            "v-for=\"trigger in pendingReminderTriggers\"",
+            "<LabelCommandPanel",
+            "<DropdownMenuSub",
+            "<DropdownMenuCheckboxItem",
+            "v-for=\"option in selectedLabelOptions\"",
+            "variant=\"outline\"",
+            "data-testid=\"goal-properties-row\"",
+            "data-testid=\"goal-labels-row\"",
+            "data-testid=\"goal-tasks-row\"",
+            "data-testid=\"goal-knowledge-row\"",
+            "data-testid=\"goal-reviews-row\"",
+            "v-if=\"pendingReminderTriggers.length === 0\"",
+            "v-if=\"labelIdsDraft.length === 0 && !showLabelsEditor\"",
+            "v-if=\"taskCount === 0\"",
+            "v-if=\"knowledgeCount === 0\"",
+            "v-if=\"reviewCount === 0\""
+          ],
+          "count": [
+            {
+              "pattern": "<GoalTimeframePicker",
+              "min": 2
+            }
+          ],
+          "forbid": [
+            "variant=\"header\"",
+            "goal-reminder-header",
+            "data-testid=\"goal-workspace-tasks\"",
+            "data-testid=\"goal-workspace-knowledge\"",
+            "data-testid=\"goal-workspace-reviews\"",
+            "v-model:open=\"editOpen\"",
+            "data-testid=\"goal-start-action\"",
+            "data-testid=\"goal-abandon-action\""
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/GoalReminderMenuItems.vue",
+          "require": [
+            "ReminderTriggerType.AbsoluteAt",
+            "ReminderTriggerType.RemainingDays",
+            "goal.reminder.inOneHour",
+            "goal.reminder.customTime",
+            "emit('request-custom-time')",
+            "goal.reminder.relativeToTarget",
+            "triggers: [...existing, { type, value, enabled: true }]",
+            "MAX_REMINDERS = 10",
+            "canSetRemainingDays",
+            "goalTimeframeStartBoundary",
+            "remainingDaysInstant"
+          ],
+          "forbid": [
+            "<ProductDatePicker",
+            "type=\"time\"",
+            "formatProductHm",
+            "formatProductDate(next",
+            "TimeProgressPercentage"
+          ],
+          "count": [
+            {
+              "pattern": "formatProductDateTime\\(",
+              "min": 8
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/dialogs/GoalReviewCreateDialog.vue",
+          "require": ["<ProductDialogShell", "<GoalReviewSnapshot"],
+          "forbid": ["min-h-14 items-center gap-2 border-b", "rounded-lg border bg-card"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/dialogs/GoalReviewInspectDialog.vue",
+          "require": ["<ProductDialogShell", "<GoalReviewSnapshot"],
+          "forbid": ["min-h-14 items-center gap-2 border-b", "rounded-lg border bg-card"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/GoalReviewSnapshot.vue",
+          "require": ["surface-raised"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/dialogs/GoalKeyResultInspectDialog.vue",
+          "require": ["<ProductDialogShell", "<GoalKeyResultTrajectoryPlot"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue",
+          "require": ["<GoalKeyResultDraftEditor"],
+          "count": [
+            {
+              "pattern": "GoalTimeframePicker",
+              "min": 2
+            }
+          ],
+          "forbid": ["type=\"date\""]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.vue",
+          "require": [
+            "<GoalKeyResultCardEditor",
+            "v-model:initial-value=\"draft.initialValue\"",
+            "v-model:current-value=\"currentValueModel\"",
+            "v-model:target-value=\"draft.targetValue\"",
+            ":goal-start=\"goalStart\"",
+            ":goal-target=\"goalTarget\""
+          ],
+          "forbid": ["key-result-initial-input", "krAdvanced", "<Collapsible"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/GoalKeyResultCardEditor.vue",
+          "require": [
+            "data-testid=\"draft-kr-weight-popover\"",
+            "data-testid=\"draft-kr-weight-glyph\"",
+            "<Sigma",
+            "<Plus v-if=\"!unit\"",
+            "weightOpen.value = false",
+            "surface-raised"
+          ],
+          "forbid": ["border bg-card"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/GoalKeyResultTrajectoryPlot.vue",
+          "require": [
+            "class=\"relative border-t border-border/45\"",
+            "'mt-4 h-[14.5rem]'",
+            ":data-target-state=\"hasTarget ? 'set' : 'unset'\"",
+            "v-if=\"hasTarget\"",
+            "bg-transparent"
+          ],
+          "forbid": ["rounded-xl bg-background/35", "stroke-dasharray=\"1.2 2.4\""]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/views/TaskDetailView.vue",
+          "require": [
+            "data-testid=\"task-detail-metadata\"",
+            "data-testid=\"task-properties-row\"",
+            "test-id=\"task-properties-more\"",
+            "<DropdownMenuSub",
+            "<DropdownMenuCheckboxItem",
+            "<TaskReminderMenuItems",
+            "<ProductDateTimePicker",
+            "v-if=\"viewModel.goalBinding || showGoalEditor\"",
+            "v-if=\"labelIds.length || showLabelsEditor\"",
+            "v-if=\"reminderTriggers.length || showReminderEditor\"",
+            "data-testid=\"task-goal-row\"",
+            "data-testid=\"task-labels-row\"",
+            "data-testid=\"task-reminders-row\"",
+            "grid-cols-[6.5rem_minmax(0,1fr)]",
+            "<LabelCommandPanel",
+            "variant=\"outline\"",
+            "task-detail-schedule-chip",
+            "task-detail-recurrence-chip",
+            "task-detail-goal-chip",
+            "task-detail-reminder-chip",
+            "<ModuleHeader data-testid=\"task-detail-toolbar\">"
+          ],
+          "forbid": ["<LabelPicker", "@3xl/panel:grid-cols-4"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/GoalKeyResultDraftEditor.vue",
+          "require": ["surface-raised"],
+          "forbid": ["border bg-card", "border border-border/70 bg-background/20"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ChecklistSection.vue",
+          "require": ["surface-raised"],
+          "forbid": ["border bg-card", "border border-border/70 bg-background/20"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue",
+          "require": ["surface-raised"],
+          "forbid": ["border bg-card"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue",
+          "require": ["surface-raised"],
+          "forbid": [
+            "border bg-card",
+            "border border-border/60 bg-muted/[0.08]",
+            "border border-border/60 bg-background/55",
+            "type=\"date\""
+          ],
+          "count": [
+            {
+              "pattern": "ProductDatePicker",
+              "min": 2
+            },
+            {
+              "pattern": "ProductDateTimePicker",
+              "min": 2
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/notification/components/NotificationItem.vue",
+          "require": ["data-density=\"compact\""],
+          "forbid": ["border-l-4", "ring-4 ring-info/12"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/schedule/components/PlannerDayDialog.vue",
+          "require": [
+            "data-testid=\"planner-day-event-list\"",
+            "class=\"divide-y divide-[hsl(var(--border-subtle))] border-y border-[hsl(var(--border-subtle))]\""
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/schedule/components/PlannerEventDialog.vue",
+          "require": ["data-testid=\"event-detail-properties\""]
+        },
+        {
+          "file": "packages/app-vue/src/modules/setting/views/UserSettingsView.vue",
+          "require": [
+            "settings-group-sidebar",
+            "settings-navigation-drawer",
+            "family=\"settings\""
+          ],
+          "forbid": ["settings-group-tabs"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/setting/components/SettingsNavigation.vue",
+          "require": ["LinearSidebarItem", "settings-return-to-app"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue",
+          "require": ["ProductDatePicker"],
+          "forbid": ["type=\"date\""]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/components/TaskPageToolbar.vue",
+          "require": ["<ProductSurfaceHeader family=\"collection\""]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/GoalPageToolbar.vue",
+          "require": ["<ProductSurfaceHeader family=\"collection\""]
+        },
+        {
+          "file": "packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue",
+          "require": [
+            {
+              "pattern": "<ProductSurfaceHeader\\b[^>]*\\bfamily=\"calendar\""
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/repository/components/DocumentWorkspaceToolbar.vue",
+          "require": ["<ProductSurfaceHeader family=\"document\""]
+        },
+        {
+          "file": "packages/app-vue/src/modules/notification/views/SSEMonitorPage.vue",
+          "require": ["<ModuleHeader family=\"diagnostic\">"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/views/GoalDetailView.vue",
+          "order": [
+            {
+              "tokens": [
+                "data-testid=\"goal-workspace-description\"",
+                "data-testid=\"goal-workspace-key-results\""
+              ],
+              "chained": false
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "use-desktop-window-controls",
       "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
       "origin": "packages/app-vue/src/shared/composables/use-desktop-window-controls.surface.spec.ts",
@@ -1971,6 +3994,532 @@
         {
           "file": "packages/app-vue/src/shared/types/electron.d.ts",
           "require": ["electronAPI?: DesktopAuthApi", "Keep-boundary vs host ElectronBridge"]
+        }
+      ]
+    },
+    {
+      "id": "combine-date-and-time-keep-boundary",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/shared/utils/combine-date-and-time-keep-boundary.surface.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-react/src/screens/TaskEditorScreen.tsx",
+          "require": ["TaskPlanScheduleSchema"],
+          "forbid": [
+            {
+              "pattern": "function combineDateAndTime\\b"
+            },
+            "new Date(year, (month || 1) - 1, day || 1",
+            "Residual 1234 keep-boundary"
+          ]
+        },
+        {
+          "file": "packages/app-react/src/screens/ScheduleEventEditorScreen.tsx",
+          "require": [
+            "import { getProductTime } from '../utils/product-time'",
+            {
+              "pattern": "function parseTimestamp\\b"
+            }
+          ],
+          "forbid": ["new Date(year", "Date.parse(`${date}T${time}:00`)"]
+        },
+        {
+          "file": "packages/app-react/src/screens/ScheduleEventEditorScreen.tsx",
+          "region": {
+            "pattern": "function parseTimestamp\\([\\s\\S]*?\\n\\}",
+            "flags": ""
+          },
+          "require": [
+            ".trim()",
+            "getProductTime()",
+            "input.parseDateValue",
+            "input.parseTimeValue",
+            "input.combine",
+            "return date == null || hm == null ? null"
+          ],
+          "forbid": ["Date.parse", "new Date(", "getTime()"]
+        },
+        {
+          "file": "packages/utils/src/index.ts",
+          "forbid": [
+            "from './shared/date'",
+            {
+              "pattern": "updateDateKeepTime"
+            },
+            {
+              "pattern": "updateTimeKeepDate"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "format-date-keep-boundary",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/shared/utils/format-date-keep-boundary.surface.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/goal/views/GoalDetailView.vue",
+          "require": ["goalTimeframeLabel", "formatProductYmd(getProductTodayYmd())"],
+          "forbid": [
+            {
+              "pattern": "function formatDate\\b"
+            },
+            "toISOString",
+            "toLocaleDateString"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/GoalProgressRow.vue",
+          "require": ["goalTimeframeLabel"],
+          "forbid": [
+            "formatProductYmd",
+            {
+              "pattern": "function formatDate\\b"
+            },
+            "toISOString",
+            "toLocaleDateString"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/utils/task-plan-presentation.ts",
+          "require": ["formatProductDate", "formattedCreatedAt", "getTaskPlanScheduleDate"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/views/TaskDetailView.vue",
+          "require": ["getTaskPlanScheduleDate"],
+          "forbid": [
+            {
+              "pattern": "function formatDate\\b"
+            },
+            "formatProductDate",
+            "new Date(",
+            "toLocaleDateString"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/views/GoalDetailView.vue",
+          "forbid": [
+            {
+              "pattern": "\\bformatProductYmd(?!\\(getProductTodayYmd\\(\\)\\))\\s*\\("
+            },
+            {
+              "pattern": "formatProductYmd\\(getProductTodayYmd\\(\\)\\)[\\s\\S]*\\bformatProductYmd\\s*\\("
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "format-datetime-keep-boundary",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/shared/utils/format-datetime-keep-boundary.surface.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-react/src/utils/entity-presentation.ts",
+          "require": ["formatProductDateTime"],
+          "forbid": [
+            {
+              "pattern": "function formatDateTime\\b"
+            },
+            "toLocaleString"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/dialogs/GoalReviewInspectDialog.vue",
+          "require": ["formatProductDate"],
+          "forbid": [
+            {
+              "pattern": "function formatDate\\b"
+            },
+            "toLocaleString"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "format-message-time-keep-boundary",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/shared/utils/format-message-time-keep-boundary.surface.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-react/src/hooks/useAIWorkspace.ts",
+          "require": [
+            "import { getProductTime } from '../utils/product-time'",
+            {
+              "pattern": "function formatMessageTime\\b"
+            },
+            "getProductTime().format.hm(timestamp)"
+          ],
+          "forbid": ["Intl.DateTimeFormat('zh-CN'", "toLocaleTimeString"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/notification/views/SSEMonitorPage.vue",
+          "require": [
+            "getProductTime",
+            {
+              "pattern": "function formatMessageTime\\b"
+            },
+            "getProductTime().format.hm(timestamp)"
+          ],
+          "forbid": ["toLocaleTimeString(locale.value)", "Intl.DateTimeFormat('zh-CN'"]
+        },
+        {
+          "file": "packages/app-react/src/hooks/useAIWorkspace.ts",
+          "region": {
+            "pattern": "function formatMessageTime\\([\\s\\S]*?\\n\\}",
+            "flags": ""
+          },
+          "require": ["getProductTime().format.hm"],
+          "forbid": ["new Date(", "Intl.DateTimeFormat", "toLocaleTimeString"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/notification/views/SSEMonitorPage.vue",
+          "region": {
+            "pattern": "function formatMessageTime\\([\\s\\S]*?\\n\\}",
+            "flags": ""
+          },
+          "require": ["getProductTime().format.hm"],
+          "forbid": ["new Date(", "Intl.DateTimeFormat", "toLocaleTimeString"]
+        }
+      ]
+    },
+    {
+      "id": "format-time-range-keep-boundary",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/shared/utils/format-time-range-keep-boundary.surface.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-react/src/hooks/useScheduleAgenda.ts",
+          "require": [
+            "Canonical Product Time projection",
+            {
+              "pattern": "function formatTimeRange\\b"
+            },
+            "startTime: number, endTime: number",
+            "getProductTime"
+          ]
+        },
+        {
+          "file": "packages/app-react/src/hooks/useScheduleAgenda.ts",
+          "region": {
+            "pattern": "function formatTimeRange\\([\\s\\S]*?\\n\\}",
+            "flags": ""
+          },
+          "require": ["time.format.hm", " - "],
+          "forbid": ["Intl.DateTimeFormat", "zh-CN", "padStart"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/schedule/planner/planner-presentation.ts",
+          "require": [
+            "CalendarEventProjection",
+            "formatPlannerProjectionTimeRange",
+            "time.format.ymdDisplay",
+            "time.format.pattern",
+            "–"
+          ],
+          "forbid": ["CalendarEventItem", "Intl.DateTimeFormat"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/schedule/components/PlannerDayDialog.vue",
+          "require": ["planner-presentation", "formatPlannerProjectionTimeRange"],
+          "forbid": ["CalendarEventItem", "format-calendar-event-time-range"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/schedule/components/PlannerEventDialog.vue",
+          "require": ["planner-presentation", "formatPlannerProjectionTimeRange"],
+          "forbid": ["CalendarEventItem", "format-calendar-event-time-range"]
+        },
+        {
+          "file": "packages/app-vue/src/shared/utils/format-calendar-event-time-range.ts",
+          "require": ["Residual 1273", "displayMode === 'all-day'", "getProductTime", "–"],
+          "forbid": ["Intl.DateTimeFormat"]
+        }
+      ]
+    },
+    {
+      "id": "is-plain-object-keep-boundary",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/shared/utils/ipc/is-plain-object-keep-boundary.surface.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/shared/utils/ipc/sanitize-for-ipc.ts",
+          "require": [
+            "Residual 1139 keep-boundary",
+            {
+              "pattern": "function isPlainObject\\b"
+            },
+            "Object.getPrototypeOf",
+            "Object.prototype",
+            "proto === null"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/shared/utils/ipc/sanitize-for-ipc.ts",
+          "region": {
+            "pattern": "function isPlainObject\\([\\s\\S]*?\\n\\}",
+            "flags": ""
+          },
+          "require": ["Object.getPrototypeOf"],
+          "forbid": [
+            "!Array.isArray",
+            "Boolean(value)",
+            "value !== null && typeof value === 'object'"
+          ]
+        },
+        {
+          "file": "apps/desktop/src/main/utils/http-envelope-guards.ts",
+          "require": [
+            "Soft residual 1139",
+            {
+              "pattern": "export function isRecord\\b"
+            },
+            "value !== null && typeof value === 'object'"
+          ],
+          "forbid": ["Object.getPrototypeOf", "!Array.isArray(value)"]
+        },
+        {
+          "absentPaths": ["packages/app-vue/src/modules/ai/composables/isRecord.ts"]
+        }
+      ]
+    },
+    {
+      "id": "to-date-input-keep-boundary",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/shared/utils/to-date-input-keep-boundary.surface.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue",
+          "count": [
+            {
+              "pattern": "GoalTimeframePicker",
+              "min": 2
+            }
+          ],
+          "forbid": [
+            "toProductYmdInputValue",
+            "fromProductYmdInputValue",
+            "type=\"date\"",
+            "getTimezoneOffset",
+            "toISOString().slice",
+            {
+              "pattern": "function toDateInputValue\\b"
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue",
+          "require": ["TaskPlanScheduleSchema", "ProductDatePicker"],
+          "forbid": ["new Date(", "getTimezoneOffset", "toISOString().slice"]
+        },
+        {
+          "file": "packages/app-vue/src/shared/components/ProductDatePicker.vue",
+          "require": ["parseToCalendarDate", "handleCalendarSelect"]
+        }
+      ]
+    },
+    {
+      "id": "to-time-input-keep-boundary",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/shared/utils/to-time-input-keep-boundary.surface.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-react/src/screens/TaskEditorScreen.tsx",
+          "require": ["TaskPlanScheduleSchema"],
+          "forbid": [
+            {
+              "pattern": "function toTimeInput\\b"
+            },
+            "Residual 1231 keep-boundary",
+            "getHours()",
+            "getMinutes()"
+          ]
+        },
+        {
+          "file": "packages/app-react/src/screens/ScheduleEventEditorScreen.tsx",
+          "require": [
+            {
+              "pattern": "function toTimeInput\\b"
+            }
+          ]
+        },
+        {
+          "file": "packages/app-react/src/screens/ScheduleEventEditorScreen.tsx",
+          "region": {
+            "pattern": "function toTimeInput\\([\\s\\S]*?\\n\\}",
+            "flags": ""
+          },
+          "require": [
+            "return timestamp == null ? ''",
+            "getProductTime().input.timeValue(timestamp)",
+            "getProductTime().input.timeValue"
+          ],
+          "forbid": [
+            "toISOString()",
+            "new Date(",
+            "getHours()",
+            "padStart",
+            "toISOString",
+            "toTimeString"
+          ]
+        },
+        {
+          "file": "packages/utils/src/index.ts",
+          "forbid": [
+            "from './shared/date'",
+            {
+              "pattern": "formatTimeToInput"
+            }
+          ],
+          "require": ["utils product date bridges retired"]
+        }
+      ]
+    },
+    {
+      "id": "dead-surfaces",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/views/dead-surfaces.surface.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/goal/components/index.ts",
+          "forbid": ["GoalRecordCardFromCards"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/components/types.ts",
+          "forbid": ["EditableTaskUI"]
+        },
+        {
+          "absentPaths": [
+            "packages/app-vue/src/modules/task/components/index.ts",
+            "packages/app-vue/src/modules/task/components/TaskAIGenerationDialog.vue",
+            "packages/app-vue/src/shared/utils/format-schedule-duration-minutes.ts"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/account/components/index.ts",
+          "forbid": ["as ProfileCard ", "as ProfileForm "]
+        },
+        {
+          "absentPaths": [
+            "packages/app-vue/src/modules/account/components/ProfileCard.vue",
+            "packages/app-vue/src/modules/account/components/ProfileCard.stories.ts",
+            "packages/app-vue/src/modules/account/components/ProfileForm.vue",
+            "packages/app-vue/src/modules/account/components/ProfileForm.stories.ts"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/schedule/components/index.ts",
+          "forbid": [
+            "as ConflictAlert ",
+            "as ScheduleConflictAlert ",
+            "as ScheduleEventList ",
+            "as ScheduleFormDemo "
+          ]
+        },
+        {
+          "absentPaths": [
+            "packages/app-vue/src/modules/schedule/components/ConflictAlert.vue",
+            "packages/app-vue/src/modules/schedule/components/ConflictAlert.stories.ts",
+            "packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue",
+            "packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.stories.ts",
+            "packages/app-vue/src/modules/schedule/components/ScheduleEventList.vue",
+            "packages/app-vue/src/modules/schedule/components/ScheduleEventList.stories.ts",
+            "packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue",
+            "packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.stories.ts"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "localePresentation",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/locales/localePresentation.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue",
+          "forbid": [
+            {
+              "pattern": "\\.toLocale(?:Date|Time)?String\\(\\s*(?:\\)|undefined\\s*,)"
+            },
+            {
+              "pattern": "^(?![\\s\\S]*locale: locale\\.value\\.startsWith\\('zh'\\) \\? zhCN : enUS)[\\s\\S]*'yyyy\\-MM\\-dd EEEE'"
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue",
+          "forbid": [
+            {
+              "pattern": "\\.toLocale(?:Date|Time)?String\\(\\s*(?:\\)|undefined\\s*,)"
+            },
+            {
+              "pattern": "^(?![\\s\\S]*locale: locale\\.value\\.startsWith\\('zh'\\) \\? zhCN : enUS)[\\s\\S]*'yyyy\\-MM\\-dd EEEE'"
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue",
+          "forbid": [
+            {
+              "pattern": "\\.toLocale(?:Date|Time)?String\\(\\s*(?:\\)|undefined\\s*,)"
+            },
+            {
+              "pattern": "^(?![\\s\\S]*locale: locale\\.value\\.startsWith\\('zh'\\) \\? zhCN : enUS)[\\s\\S]*'yyyy\\-MM\\-dd EEEE'"
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue",
+          "forbid": [
+            {
+              "pattern": "\\.toLocale(?:Date|Time)?String\\(\\s*(?:\\)|undefined\\s*,)"
+            },
+            {
+              "pattern": "^(?![\\s\\S]*locale: locale\\.value\\.startsWith\\('zh'\\) \\? zhCN : enUS)[\\s\\S]*'yyyy\\-MM\\-dd EEEE'"
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/views/GoalDetailView.vue",
+          "forbid": [
+            {
+              "pattern": "\\.toLocale(?:Date|Time)?String\\(\\s*(?:\\)|undefined\\s*,)"
+            },
+            {
+              "pattern": "^(?![\\s\\S]*locale: locale\\.value\\.startsWith\\('zh'\\) \\? zhCN : enUS)[\\s\\S]*'yyyy\\-MM\\-dd EEEE'"
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/notification/views/SSEMonitorPage.vue",
+          "forbid": [
+            {
+              "pattern": "\\.toLocale(?:Date|Time)?String\\(\\s*(?:\\)|undefined\\s*,)"
+            },
+            {
+              "pattern": "^(?![\\s\\S]*locale: locale\\.value\\.startsWith\\('zh'\\) \\? zhCN : enUS)[\\s\\S]*'yyyy\\-MM\\-dd EEEE'"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "key-result-calculation-presentation",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/goal/utils/key-result-calculation-presentation.spec.ts",
+      "locks": [
+        {
+          "scan": {
+            "root": "packages/app-vue/src/modules/task",
+            "extensions": [".vue", ".ts"],
+            "exclude": [".spec.ts", ".test.ts"]
+          },
+          "forbid": [
+            {
+              "pattern": "(?:\\b(?:Sum|Average|Max|Min|Last)|\\[KeyResultCalculationMethod\\.\\w+\\])\\s*:\\s*(?:t\\(|['\"])"
+            },
+            "goal.dialog.krCalculation"
+          ]
         }
       ]
     },

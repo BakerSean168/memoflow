@@ -288,7 +288,7 @@
     },
     {
       "id": "r927",
-      "path": "packages/app-vue/src/di/service-client-port-facade-keep-boundary.surface.spec.ts",
+      "path": "tools/governance/app-vue-source-locks.json#service-client-port-facade-keep-boundary",
       "package": "packages/app-vue",
       "class": "keep_boundary",
       "sole": "types.ts",
@@ -332,7 +332,7 @@
     },
     {
       "id": "r1065",
-      "path": "packages/app-vue/src/modules/goal/composables/goal-operations-keep-boundary.surface.spec.ts",
+      "path": "tools/governance/app-vue-source-locks.json#goal-operations-keep-boundary",
       "package": "packages/app-vue",
       "class": "keep_boundary",
       "sole": "goalOperations.ts",
@@ -343,7 +343,7 @@
     },
     {
       "id": "r1083",
-      "path": "packages/app-vue/src/modules/goal/utils/clamp-percentage-keep-boundary.surface.spec.ts",
+      "path": "tools/governance/app-vue-source-locks.json#clamp-percentage-keep-boundary",
       "package": "packages/app-vue",
       "class": "keep_boundary",
       "sole": "progress.ts",
@@ -387,7 +387,7 @@
     },
     {
       "id": "r1234",
-      "path": "packages/app-vue/src/shared/utils/combine-date-and-time-keep-boundary.surface.spec.ts",
+      "path": "tools/governance/app-vue-source-locks.json#combine-date-and-time-keep-boundary",
       "package": "packages/app-vue",
       "class": "keep_boundary",
       "sole": "../../../../app-react/src/screens/TaskEditorScreen.tsx",
@@ -453,7 +453,7 @@
     },
     {
       "id": "r1207",
-      "path": "packages/app-vue/src/shared/utils/format-message-time-keep-boundary.surface.spec.ts",
+      "path": "tools/governance/app-vue-source-locks.json#format-message-time-keep-boundary",
       "package": "packages/app-vue",
       "class": "keep_boundary",
       "sole": "../../../../app-react/src/hooks/useAIWorkspace.ts",
@@ -530,7 +530,7 @@
     },
     {
       "id": "r1228",
-      "path": "packages/app-vue/src/shared/utils/to-date-input-keep-boundary.surface.spec.ts",
+      "path": "tools/governance/app-vue-source-locks.json#to-date-input-keep-boundary",
       "package": "packages/app-vue",
       "class": "keep_boundary",
       "sole": "../../../../app-react/src/screens/GoalEditorScreen.tsx",
@@ -541,7 +541,7 @@
     },
     {
       "id": "r1231",
-      "path": "packages/app-vue/src/shared/utils/to-time-input-keep-boundary.surface.spec.ts",
+      "path": "tools/governance/app-vue-source-locks.json#to-time-input-keep-boundary",
       "package": "packages/app-vue",
       "class": "keep_boundary",
       "sole": "../../../../app-react/src/screens/TaskEditorScreen.tsx",
