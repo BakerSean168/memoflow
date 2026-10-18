@@ -3,6 +3,7 @@ import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import test from 'node:test';
 import { buildDeliveryManifest } from '../generate-delivery-manifest.mjs';
+import { webFlowCandidateFiles } from '../lib/risk.mjs';
 import { createNxShowProjectsInvocation } from '../lib/scope-detector.mjs';
 
 const scope = {
@@ -66,6 +67,14 @@ test('uses the manifest lane policy for docs-only and root changes', async () =>
 });
 
 test('historical Desktop capability paths do not select Web Flow', async () => {
+  const files = [
+    'apps/desktop/src/main/capabilities/capability-registry.ts',
+    'apps/desktop/src/main/desktop-main-runtime.ts',
+    'packages/repository/src/electron/local-vault-runtime.ts',
+    'packages/repository/src/electron/local-vault-external-editor.spec.ts',
+  ];
+  // The detector computes scope.webFlow from these candidates only.
+  assert.deepEqual(webFlowCandidateFiles(files), []);
   const manifest = await buildDeliveryManifest({
     base: 'base',
     head: 'head',
@@ -76,15 +85,10 @@ test('historical Desktop capability paths do not select Web Flow', async () => {
       unit: ['desktop', 'repository'],
       boundary: ['desktop'],
       integration: [],
-      webFlow: true,
+      webFlow: false,
       desktopFlow: true,
     },
-    files: [
-      'apps/desktop/src/main/capabilities/capability-registry.ts',
-      'apps/desktop/src/main/desktop-main-runtime.ts',
-      'packages/repository/src/electron/local-vault-runtime.ts',
-      'packages/repository/src/electron/local-vault-external-editor.spec.ts',
-    ],
+    files,
   });
   assert.equal(manifest.lanes.validate, true);
   assert.equal(manifest.lanes.web, false);

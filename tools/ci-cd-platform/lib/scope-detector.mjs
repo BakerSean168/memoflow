@@ -2,6 +2,7 @@ import { execFile } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { promisify } from 'node:util';
 import path from 'node:path';
+import { webFlowCandidateFiles } from './risk.mjs';
 
 const exec = promisify(execFile);
 const require = createRequire(import.meta.url);
@@ -51,7 +52,11 @@ export async function detectScope({
   base = process.env.NX_BASE,
   head = process.env.NX_HEAD,
   full = false,
+  files,
 } = {}) {
+  if (!full && !Array.isArray(files)) {
+    throw new Error('detectScope requires the changed file list for non-full scope');
+  }
   const common = full
     ? []
     : ['--affected', ...(base && head ? [`--base=${base}`, `--head=${head}`] : [])];
@@ -65,7 +70,16 @@ export async function detectScope({
     target('test:boundary'),
     target('test:perf'),
   ]);
-  const webFlow = projects.some((project) => ['web', 'api'].includes(project));
+  // Web Flow is decided on its own dimension: the Nx-affected projects of the
+  // changed files that can reach the browser (Desktop-only and docs files are
+  // excluded because the project graph cannot express the renderer/main split).
+  const webFlowFiles = full ? [] : webFlowCandidateFiles(files);
+  const webFlowProjects = full
+    ? projects
+    : webFlowFiles.length === 0
+      ? []
+      : await nxProjects(['--affected', `--files=${webFlowFiles.join(',')}`], root);
+  const webFlow = webFlowProjects.some((project) => ['web', 'api'].includes(project));
   const desktopFlow = projects.includes('desktop');
   return {
     version: SCOPE_VERSION,
@@ -80,6 +94,7 @@ export async function detectScope({
     boundary,
     perf,
     webFlow,
+    webFlowFiles,
     desktopFlow,
   };
 }

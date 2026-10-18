@@ -8,6 +8,38 @@ const RISK_RANK = {
   release: 6,
 };
 
+/**
+ * Non-executable documentation. A file matching this rule is classified as
+ * docs only: free-text words such as "database" or "e2e" inside a Markdown
+ * path must not select runtime or browser lanes. Governance always runs.
+ */
+const DOCS_RULE = {
+  level: 'docs',
+  reason: 'documentation or non-executable metadata changed',
+  test: (file) =>
+    /^(?:docs\/|LICENSE(?:\.[^/]+)?$|[^/]+\.md$|\.github\/(?:prompts\/[^/]+\.md|copilot-instructions\.md)$)/iu.test(
+      file,
+    ),
+};
+
+/**
+ * Files that only execute inside the Desktop (Electron main/preload, packaging,
+ * native scripts). They are excluded from the Web Flow affected query because
+ * the Nx project graph cannot see that `web` only consumes Desktop renderer
+ * styles (visual regression), not the main process.
+ */
+export const DESKTOP_ONLY_PATTERN =
+  /^(?:apps\/desktop\/(?!src\/renderer\/)|packages\/repository\/src\/electron\/)/u;
+
+export function isDesktopOnlyFile(file) {
+  return DESKTOP_ONLY_PATTERN.test(file);
+}
+
+/** Changed files that can influence the Web Flow lane through the Nx graph. */
+export function webFlowCandidateFiles(changedFiles) {
+  return changedFiles.filter((file) => !isDesktopOnlyFile(file) && !DOCS_RULE.test(file));
+}
+
 const RULES = [
   {
     level: 'release',
@@ -42,24 +74,35 @@ const RULES = [
   {
     level: 'web-flow',
     reason: 'Web application or browser flow changed',
-    test: (file) => /(^apps\/web\/|playwright|e2e)/iu.test(file),
+    // Anchored: Desktop e2e scripts (apps/desktop/scripts/*e2e*) and Desktop
+    // Playwright collectors belong to the Desktop surface, not Web Flow.
+    test: (file) => /^apps\/web\//u.test(file),
+  },
+  {
+    level: 'web-flow',
+    reason: 'Web Flow shard timing history changed',
+    test: (file) => file === 'tools/test-system-v2/web-spec-durations.json',
+  },
+  {
+    level: 'package',
+    reason: 'test harness ownership metadata changed',
+    // Inventory / ownership / retirement registries are validated by the
+    // governance lane and the test-system-v2 unit tests (Nx-affected).
+    test: (file) =>
+      /^tools\/test-system-v2\/(?:test-inventory|e2e-ownership|e2e-retirement)\.json$/u.test(file),
   },
   {
     level: 'package',
     reason: 'application or shared package source changed',
     test: (file) => /^(apps|packages)\//u.test(file),
   },
-  {
-    level: 'docs',
-    reason: 'documentation or non-executable metadata changed',
-    test: (file) => /^(docs|README|CHANGELOG|LICENSE)/iu.test(file),
-  },
 ];
 
 export function classifyRisk(changedFiles) {
   const levels = new Map();
   for (const file of changedFiles) {
-    const matching = RULES.filter((rule) => rule.test(file));
+    const matching = DOCS_RULE.test(file) ? [DOCS_RULE] : RULES.filter((rule) => rule.test(file));
+    // Fail closed: an unknown path is treated as a root (full) change.
     const rules =
       matching.length > 0 ? matching : [{ level: 'root', reason: 'unclassified file changed' }];
     for (const rule of rules) {
@@ -85,6 +128,12 @@ export function classifyRisk(changedFiles) {
   };
 }
 
+/**
+ * Each lane is decided on its own dimension. No surface suppresses another:
+ * a mixed Desktop + shared UI change keeps both the Desktop boundary and Web
+ * Flow. `scope.webFlow` already excludes Desktop-only files (see
+ * webFlowCandidateFiles), so Desktop-only diffs do not select Web Flow.
+ */
 export function selectLanes({ risk, scope, event = 'pull_request', full = scope.full === true }) {
   const matched = new Set(risk.matchedLevels ?? [risk.level]);
   const root = matched.has('root') || matched.has('release');
@@ -97,11 +146,7 @@ export function selectLanes({ risk, scope, event = 'pull_request', full = scope.
     validate: fullAudit || risk.level !== 'docs',
     boundary: root || has(scope.boundary) || has(scope.smoke),
     integration: root || has(scope.integration),
-    web:
-      fullAudit ||
-      root ||
-      matched.has('web-flow') ||
-      (Boolean(scope.webFlow) && !matched.has('desktop')),
+    web: fullAudit || root || matched.has('web-flow') || scope.webFlow === true,
     coverage: root || has(scope.coverage),
     performance: root || has(scope.perf),
   };
