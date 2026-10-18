@@ -8,12 +8,15 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import zhCN from '../../../packages/app-vue/src/locales/zh-CN/index.ts';
-import enUS from '../../../packages/app-vue/src/locales/en-US/index.ts';
 
 // Resolve relative to this file so the gate works from any cwd.
 const WORKSPACE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 const PKG_ROOT = resolve(WORKSPACE_ROOT, 'packages/app-vue');
+// Locale catalogs are data owned by app-vue; load them by path (the gate reads them, it does not
+// depend on the app-vue project graph).
+const LOCALES_ROOT = resolve(PKG_ROOT, 'src/locales');
+const { default: zhCN } = await import(resolve(LOCALES_ROOT, 'zh-CN/index.ts'));
+const { default: enUS } = await import(resolve(LOCALES_ROOT, 'en-US/index.ts'));
 const SCAN_ROOTS = [resolve(PKG_ROOT, 'src'), resolve(WORKSPACE_ROOT, 'apps/web/src')];
 const SOURCE_EXTS = new Set(['.vue', '.ts', '.tsx']);
 /** Match t('a.b'), $t("a.b.c"), te(`x.y`) with dotted keys only. */
