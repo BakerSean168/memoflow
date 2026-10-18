@@ -145,6 +145,7 @@ jobs:
     uses: ./.github/workflows/desktop-update-e2e.yml
     with:
       ref: ${{ needs.prepare-release.outputs.release_sha }}
+      qa_overlay_ref: ${{ github.workflow_sha }}
 
   build-release-assets:
     needs: prepare-release

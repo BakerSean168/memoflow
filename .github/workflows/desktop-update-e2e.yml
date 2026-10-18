@@ -7,10 +7,19 @@ on:
         description: Exact source ref/SHA to validate
         required: true
         type: string
+      qa_overlay_ref:
+        description: Optional newer workflow SHA providing test-only QA tooling; product checkout remains immutable
+        required: false
+        type: string
+        default: ''
   workflow_dispatch:
     inputs:
       ref:
         description: Source ref/SHA to validate; defaults to the workflow commit
+        required: false
+        type: string
+      qa_overlay_ref:
+        description: Newer immutable QA workflow SHA to overlay tests only (never product source)
         required: false
         type: string
 
@@ -37,6 +46,16 @@ jobs:
         with:
           ref: ${{ inputs.ref || github.sha }}
           fetch-depth: 0
+
+      # A Release tag may predate hardening of the installed QA harness. The
+      # application and both installer binaries still come solely from ref.
+      - name: Checkout current immutable Windows QA tooling
+        if: inputs.qa_overlay_ref != ''
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.qa_overlay_ref }}
+          fetch-depth: 0
+          path: release-qa-harness
 
       - name: Setup Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
@@ -190,6 +209,40 @@ jobs:
           path: apps/desktop/test-results
           if-no-files-found: warn
           retention-days: 14
+
+      - name: Overlay only acceptance scripts from newer QA tooling
+        if: inputs.qa_overlay_ref != ''
+        shell: pwsh
+        env:
+          RELEASE_SOURCE_SHA: ${{ inputs.ref }}
+          QA_OVERLAY_SHA: ${{ inputs.qa_overlay_ref }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $qaRoot = Join-Path $env:GITHUB_WORKSPACE 'release-qa-harness'
+          # Reject any runtime or package input differences between the QA
+          # commit and the tagged release source.
+          $runtimeDiff = @(git -C $qaRoot diff --name-only $env:RELEASE_SOURCE_SHA $env:QA_OVERLAY_SHA -- apps/desktop/src apps/desktop/package.json apps/desktop/electron-builder.json5 apps/desktop/electron-builder.macos-signed.json5 package.json pnpm-lock.yaml packages apps/api apps/web)
+          if ($LASTEXITCODE -ne 0 -or $runtimeDiff.Count -gt 0) {
+            throw "QA overlay source must not modify released application inputs: $($runtimeDiff -join ', ')"
+          }
+          $qaFiles = @(
+            'apps/desktop/scripts/run-windows-update-e2e.ps1'
+            'apps/desktop/e2e/workspace-ipc.spec.mts'
+            'apps/desktop/e2e/workspace-attention.spec.mts'
+            'apps/desktop/e2e/antigravity-composer.spec.mts'
+            'apps/desktop/e2e/native-codex-unconfigured-installed.spec.mts'
+            'apps/desktop/e2e/support/installed-native-provenance.ts'
+          )
+          foreach ($relativePath in $qaFiles) {
+            $source = Join-Path $qaRoot $relativePath
+            $destination = Join-Path $env:GITHUB_WORKSPACE $relativePath
+            if (-not (Test-Path -LiteralPath $source -PathType Leaf)) {
+              throw "Missing pinned QA-only script: $relativePath"
+            }
+            New-Item -ItemType Directory -Force -Path (Split-Path -Parent $destination) | Out-Null
+            Copy-Item -LiteralPath $source -Destination $destination -Force
+          }
+          Write-Host '[release] Pinned newer test-only QA scripts; tagged product and installers unchanged.'
 
       - name: Run installed Windows updater proof
         shell: pwsh

@@ -232,6 +232,44 @@ test('targeted Desktop recovery avoids repeat package builds and update gates an
   assert.match(isolation, /TOKEN\|SECRET\|PASSWORD\|CREDENTIAL\|AUTH/u);
 });
 
+test('release Windows updater uses exact tagged runtime but may overlay bounded newer tests only', async () => {
+  const [assets, workflow] = await Promise.all([
+    readRepoFile('.github/workflows/release-assets.yml'),
+    readRepoFile('.github/workflows/desktop-update-e2e.yml'),
+  ]);
+  assert.match(assets, /qa_overlay_ref: \$\{\{ github\.workflow_sha \}\}/u);
+  assert.match(assets, /ref: \$\{\{ needs\.prepare-release\.outputs\.release_sha \}\}/u);
+  assert.match(workflow, /qa_overlay_ref:[\s\S]*?type: string/u);
+  assert.match(workflow, /ref: \$\{\{ inputs\.ref \|\| github\.sha \}\}/u);
+  assert.match(workflow, /ref: \$\{\{ inputs\.qa_overlay_ref \}\}/u);
+  const overlay = workflowStep(workflow, 'Overlay only acceptance scripts from newer QA tooling');
+  assert.match(overlay, /git -C \$qaRoot diff --name-only/u);
+  for (const name of [
+    'apps/desktop/src',
+    'apps/desktop/package.json',
+    'pnpm-lock.yaml',
+    'apps/api',
+    'apps/web',
+    'packages',
+  ]) {
+    assert.ok(overlay.includes(name), name);
+  }
+  for (const name of [
+    'run-windows-update-e2e.ps1',
+    'workspace-ipc.spec.mts',
+    'workspace-attention.spec.mts',
+    'antigravity-composer.spec.mts',
+    'native-codex-unconfigured-installed.spec.mts',
+    'installed-native-provenance.ts',
+  ]) {
+    assert.ok(overlay.includes(name), name);
+  }
+  assert.doesNotMatch(overlay, /continue-on-error: true|\|\| true/u);
+  const verify = workflowStep(workflow, 'Verify installed updater evidence');
+  assert.match(verify, /installedExecutableSha256/u);
+  assert.match(workflow, /Run one installed Windows Workspace and Native acceptance suite/u);
+});
+
 test('desktop release aggregation selects only platform assets from mixed run artifacts', async () => {
   const workflow = await readRepoFile('.github/workflows/release-assets.yml');
   const job = workflow.slice(workflow.indexOf('  upload-release-assets:'));
