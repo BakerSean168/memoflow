@@ -462,8 +462,13 @@ test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent comp
   await page.getByTestId('ai-provider-toggle-mastra-parity').click();
   await expect(page.getByTestId('ai-provider-toggle-mastra-parity')).not.toBeChecked();
   await page.getByTestId('settings-return-to-app').first().click();
-  await expect(page.getByTestId('ai-composer-provider-unavailable')).toBeVisible();
-  await expect(page.getByTestId('ai-chat-model-selector')).toHaveCount(0);
+  // The built-in Mastra instance is still enabled but has no bound connection.
+  // Keep the composer browsable so this remains distinct from “all providers disabled”.
+  await expect(page.getByTestId('ai-chat-model-selector')).toBeVisible();
+  await page.getByTestId('ai-chat-model-selector').click();
+  await expect(page.getByTestId('ai-model-picker-empty')).toContainText(
+    /暂无可用模型|No models are available/,
+  );
   await expect(page.getByTestId('ai-chat-permission-selector')).toHaveCount(0);
 });
 

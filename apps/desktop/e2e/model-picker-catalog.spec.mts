@@ -28,6 +28,7 @@ test('native picker browses a different enabled instance, directly selects its d
     path.join(authDir, 'acp_token.json'),
     JSON.stringify({ client_id: 'fixture', refresh_token: 'offline-only' }),
   );
+  if (process.platform !== 'win32') fs.chmodSync(path.resolve('e2e/support/attention-acp-fixture.cjs'), 0o755);
   const promptLog = path.join(root, 'prompts');
   let app: Awaited<ReturnType<typeof electron.launch>> | undefined;
   try {
@@ -35,6 +36,9 @@ test('native picker browses a different enabled instance, directly selects its d
       args: [
         '--disable-gpu',
         '--disable-dev-shm-usage',
+        ...(process.platform === 'linux' && process.env.MEMOFLOW_E2E_USE_GNOME_KEYRING === '1'
+          ? ['-r', path.resolve('e2e/support/real-keyring-playwright-loader.cjs')]
+          : []),
         ...(process.platform === 'linux'
           ? ['--no-sandbox', '--password-store=gnome-libsecret']
           : []),
@@ -54,6 +58,12 @@ test('native picker browses a different enabled instance, directly selects its d
         ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
       },
     });
+    expect(
+      await app.evaluate(async ({ app, safeStorage }) => {
+        await app.whenReady();
+        return safeStorage.isEncryptionAvailable();
+      }),
+    ).toBe(true);
     const page = await app.firstWindow();
     await expect(page.getByTestId('app-shell')).toBeVisible();
     const invoke = async (channel: string, command: unknown) => {

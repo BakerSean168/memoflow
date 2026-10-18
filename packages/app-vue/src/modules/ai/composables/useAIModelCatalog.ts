@@ -29,7 +29,10 @@ export type ModelCatalog = Readonly<Record<string, InstanceModelCatalog>>;
  * Discovery proves current directory membership, never inference/quota readiness. */
 export function listSelectableModels(catalog: ModelCatalog, instanceId?: string): ComposerModel[] {
   return Object.values(catalog)
-    .filter((entry) => entry.status === 'ready' && (!instanceId || entry.instanceId === instanceId))
+    .filter(
+      (entry) =>
+        entry.status === 'ready' && (instanceId === undefined || entry.instanceId === instanceId),
+    )
     .flatMap((entry) => entry.models);
 }
 export function isModelSelectable(
@@ -110,9 +113,17 @@ export function useAIModelCatalog(options: Options) {
     loading.value = true;
     // Keep each instance in Loading during the registry read as well as discovery.
     // Previous display metadata is not catalog eligibility.
-    rawEntries.value = Object.fromEntries(Object.entries(rawEntries.value).map(([id, entry]) => [id, {
-      instanceId: id, agentKey: entry.agentKey, status: 'loading', models: [],
-    }]));
+    rawEntries.value = Object.fromEntries(
+      Object.entries(rawEntries.value).map(([id, entry]) => [
+        id,
+        {
+          instanceId: id,
+          agentKey: entry.agentKey,
+          status: 'loading',
+          models: [],
+        },
+      ]),
+    );
     nativeStatuses.value = {};
     try {
       const next = await options.registry.list();

@@ -76,6 +76,8 @@ describe('identity-scoped read-only model catalog', () => {
     ]);
     expect(isModelSelectable(catalog.entries.value, 'work', 'work-model')).toBe(true);
     expect(isModelSelectable(catalog.entries.value, 'off', 'work-model')).toBe(false);
+    expect(isModelSelectable(catalog.entries.value, '', 'work-model')).toBe(false);
+    expect(isModelSelectable(catalog.entries.value, 'unknown', 'work-model')).toBe(false);
     expect(native.probeDefaultDriver).toHaveBeenCalledExactlyOnceWith('codex');
     expect(native.probeConnection).toHaveBeenCalledExactlyOnceWith('conn-work');
     expect(refreshProviderModels).toHaveBeenCalledExactlyOnceWith('provider');
