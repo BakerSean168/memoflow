@@ -84,7 +84,8 @@ jobs:
   notify-failure:
     name: Report nightly audit failure
     needs: audit
-    if: ${{ always() && needs.audit.result == 'failure' }}
+    # Scheduled and manual workflow_dispatch audits intentionally report the same outcomes.
+    if: ${{ always() && (needs.audit.result == 'failure' || needs.audit.result == 'cancelled') }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -101,4 +102,5 @@ jobs:
       - name: Open or update tracking issue
         env:
           GH_TOKEN: ${{ github.token }}
+          AUDIT_RESULT: ${{ needs.audit.result }}
         run: node tools/ci-cd-platform/nightly-audit-failure.mjs

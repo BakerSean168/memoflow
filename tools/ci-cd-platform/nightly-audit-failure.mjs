@@ -8,13 +8,17 @@ function gh(args) {
 }
 
 /** The workflow serializes callers so two failures cannot create duplicate issues. */
-export function reportNightlyFailure({ repository, runId, summaryPath }, run = gh) {
+export function reportNightlyFailure({ repository, runId, auditResult, summaryPath }, run = gh) {
   if (!/^[\w.-]+\/[\w.-]+$/.test(repository ?? '')) throw new Error('Invalid repository');
   if (!/^\d+$/.test(runId ?? '')) throw new Error('Invalid runId');
+  if (!['failure', 'cancelled'].includes(auditResult)) throw new Error('Invalid auditResult');
   const runUrl = `https://github.com/${repository}/actions/runs/${runId}`;
-  const body = `Nightly Web Flow Audit failed: ${runUrl}`;
+  const body = `Nightly Web Flow Audit ${auditResult}: ${runUrl}`;
   if (summaryPath)
-    appendFileSync(summaryPath, `## Nightly audit failure\n\n[Failed run](${runUrl})\n\n`);
+    appendFileSync(
+      summaryPath,
+      `## Nightly audit ${auditResult}\n\n[Nightly Web Flow Audit ${auditResult}](${runUrl})\n\n`,
+    );
   run([
     'label',
     'create',
@@ -81,6 +85,7 @@ if (import.meta.main) {
   reportNightlyFailure({
     repository: process.env.GITHUB_REPOSITORY,
     runId: process.env.GITHUB_RUN_ID,
+    auditResult: process.env.AUDIT_RESULT,
     summaryPath: process.env.GITHUB_STEP_SUMMARY,
   });
 }
