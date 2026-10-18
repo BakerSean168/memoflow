@@ -25,6 +25,7 @@ import type {
 } from '@memoflow/contracts/electron';
 import { DESKTOP_UPDATE_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
+import ReleaseNotes from '../../../shared/components/ReleaseNotes.vue';
 import { presentDesktopUpdateSettings } from './desktop-update-settings.presentation';
 
 const { t, locale } = useI18n();
@@ -110,12 +111,6 @@ const lastCheckedAt = computed(() => {
   } catch {
     return state.lastCheckedAt;
   }
-});
-
-const boundedReleaseNotes = computed(() => {
-  const notes = presentation.value.release?.releaseNotes?.trim();
-  if (!notes) return null;
-  return notes.length > 2_000 ? `${notes.slice(0, 2_000)}…` : notes;
 });
 
 function formatBytes(bytes: number): string {
@@ -329,11 +324,18 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <div v-if="boundedReleaseNotes" class="rounded-lg border border-border/70 p-4">
+        <div
+          v-if="presentation.release?.releaseNotes?.trim()"
+          class="min-w-0 rounded-lg border border-border/70 p-4"
+        >
           <h3 class="text-sm font-medium">{{ t('setting.updates.releaseNotes') }}</h3>
-          <p class="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
-            {{ boundedReleaseNotes }}
-          </p>
+          <ReleaseNotes
+            class="mt-2"
+            :source="presentation.release.releaseNotes"
+            role="region"
+            :aria-label="t('setting.updates.releaseNotes')"
+            tabindex="0"
+          />
         </div>
 
         <p v-if="lastCheckedAt" class="text-xs text-muted-foreground">

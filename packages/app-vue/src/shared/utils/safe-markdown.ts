@@ -83,7 +83,7 @@ interface VaultReference {
   target: string;
 }
 
-function isAllowedHref(href: string): boolean {
+export function isAllowedHref(href: string): boolean {
   const value = href.trim();
   if (!value) return false;
   if (value.startsWith('#')) return true;

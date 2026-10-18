@@ -6239,6 +6239,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/shared/components/ReleaseNotes.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/shared/components/ResponsivePrimaryAction.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6384,6 +6392,14 @@
     },
     {
       "path": "packages/app-vue/src/shared/utils/product-time.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/shared/utils/release-notes.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -13182,7 +13198,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 243
+      "fileCount": 245
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -13944,7 +13960,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1169,
+    "unit": 1171,
     "integration": 48,
     "smoke": 3,
     "boundary-ipc": 8,
