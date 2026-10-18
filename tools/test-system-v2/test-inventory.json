@@ -4617,14 +4617,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/layouts/shell/desktop-update-shell-indicator.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/app-vue/src/layouts/shell/notificationCapsulePreview.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4634,14 +4626,6 @@
     },
     {
       "path": "packages/app-vue/src/layouts/shell/panel-cache-key.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/layouts/shell/panel-responsive.contract.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -5141,14 +5125,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/modules/goal/components/GoalKnowledgeMenuItems.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/app-vue/src/modules/goal/components/GoalPageToolbar.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5457,14 +5433,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/modules/notification/views/notificationPanelAdaptation.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/app-vue/src/modules/notification/web-live-notification.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5570,14 +5538,6 @@
     },
     {
       "path": "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/repository/views/notePanelAdaptation.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -5859,22 +5819,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/modules/setting/components/notification-settings-preference.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/components/user-files-settings.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/app-vue/src/modules/setting/composables/use-data-portability.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5910,14 +5854,6 @@
     },
     {
       "path": "packages/app-vue/src/modules/setting/views/UserSettingsView.contract.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/views/react-mobile-settings-parity.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -6223,14 +6159,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/modules/task/views/taskPanelAdaptation.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/app-vue/src/platform/server-state/invalidation-dispatcher.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6455,23 +6383,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/shared/components/product-form-language.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/app-vue/src/shared/components/product-surface-polish.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/shared/composables/use-desktop-window-controls.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -13430,7 +13342,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 275
+      "fileCount": 264
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -14192,7 +14104,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1201,
+    "unit": 1190,
     "integration": 48,
     "smoke": 3,
     "boundary-ipc": 8,

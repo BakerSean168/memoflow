@@ -973,6 +973,461 @@
           ]
         }
       ]
+    },
+    {
+      "id": "desktop-update-shell-indicator",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/layouts/shell/desktop-update-shell-indicator.surface.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/layouts/shell/AppShell.vue",
+          "require": [
+            "import DesktopUpdateShellIndicator from './DesktopUpdateShellIndicator.vue'",
+            "<template #status-actions>",
+            "<DesktopUpdateShellIndicator @open-updates=\"openUpdateSettings\" />",
+            "void sync.openSettings('/settings?tab=updates')"
+          ],
+          "forbid": ["restartAndInstall"]
+        },
+        {
+          "file": "packages/app-vue/src/layouts/shell/WindowHeader.vue",
+          "require": ["<slot name=\"status-actions\" />"],
+          "forbid": ["DesktopUpdate", "desktop-update"]
+        }
+      ]
+    },
+    {
+      "id": "panel-responsive",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/layouts/shell/panel-responsive.contract.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/ai/views/AIChatView.vue",
+          "require": ["@container/ai"]
+        },
+        {
+          "file": "packages/app-vue/src/layouts/shell/BusinessPanel.vue",
+          "require": ["@container/panel"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/ai/components/AIGoalWorkflowPanel.vue",
+          "require": [
+            {
+              "pattern": "@(?:sm|md|lg|xl)\\/ai:"
+            }
+          ],
+          "forbid": [
+            {
+              "pattern": "\\b(?:sm|md|lg|xl):grid-cols-"
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/ai/components/AIMessagePanel.vue",
+          "require": [
+            {
+              "pattern": "@(?:sm|md|lg|xl)\\/ai:"
+            }
+          ],
+          "forbid": [
+            {
+              "pattern": "\\b(?:sm|md|lg|xl):grid-cols-"
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/weight/WeightSuggestionPanel.vue",
+          "require": [
+            {
+              "pattern": "@(?:sm|md|lg|xl)\\/panel:"
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/weight-snapshot/WeightComparison.vue",
+          "require": [
+            {
+              "pattern": "@(?:sm|md|lg|xl)\\/panel:"
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue",
+          "require": [
+            {
+              "pattern": "@(?:sm|md|lg|xl)\\/panel:"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "GoalKnowledgeMenuItems",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/goal/components/GoalKnowledgeMenuItems.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/goal/components/GoalKnowledgeMenuItems.vue",
+          "require": [
+            "useReferenceableKnowledgeNotes",
+            "referenceableKnowledge.load({ query: search, limit: 24 })",
+            "GoalKnowledgeLinkReqSchema.parse",
+            "relations.linkGoalKnowledge(request)",
+            "relations.unlinkGoalKnowledge(request)",
+            "useStrictInject(GOAL_KNOWLEDGE_SERVICE_KEY, 'GoalKnowledgeService')",
+            "relations.listGoalKnowledge",
+            "linkedResult.data.map",
+            "watch(query",
+            "}, 180);"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/repository/composables/useReferenceableKnowledgeNotes.ts",
+          "require": ["listReferenceableKnowledgeDocuments", "knowledgeSpaceId"],
+          "forbid": ["referenceableOnly"]
+        },
+        {
+          "file": "apps/web/src/platform/di-app.ts",
+          "require": [
+            "createGoalKnowledgeHttpClient",
+            "app.provide(GOAL_KNOWLEDGE_SERVICE_KEY, goalKnowledgeService)"
+          ]
+        },
+        {
+          "file": "apps/desktop/src/renderer/platform/di-app.ts",
+          "require": [
+            "createGoalKnowledgeIpcClient",
+            "app.provide(GOAL_KNOWLEDGE_SERVICE_KEY, createGoalKnowledgeIpcClient(resultIpcClient))"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "notificationPanelAdaptation",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/notification/views/notificationPanelAdaptation.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/notification/views/NotificationListPage.vue",
+          "require": [
+            "data-testid=\"notification-page-toolbar\"",
+            "<ModuleHeader family=\"collection\" data-testid=\"notification-page-toolbar\">",
+            "data-testid=\"mark-all-read-button\"",
+            "data-testid=\"notifications-list\"",
+            "<ResponsiveSegmentedFilter",
+            "expanded-option-test-id-prefix=\"notification-filter\"",
+            "collapse-mode=\"none\"",
+            "option-role=\"tab\""
+          ],
+          "forbid": ["<header", "FilterBar", "usePanelWidth", "isNarrow"]
+        }
+      ]
+    },
+    {
+      "id": "notePanelAdaptation",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/repository/views/notePanelAdaptation.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/repository/router/index.ts",
+          "require": [
+            "path: '/repository'",
+            "name: 'repository'",
+            "import('../views/RepositoryEntryView.vue')"
+          ],
+          "forbid": ["children:", "path: '/note", "note-edit"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/repository/views/RepositoryEntryView.vue",
+          "require": ["LocalVaultWorkspaceView", "KnowledgeProjectionWorkspaceView"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue",
+          "forbid": [
+            "createConfirmedKnowledgeNote",
+            "knowledge-projection-create",
+            "knowledge-projection-relations-tab",
+            "noteView = ref<'content' | 'links'>",
+            {
+              "pattern": "updateKnowledgeNote|saveKnowledgeNote|writeConfirmedLocalVaultNote|editExistingNote"
+            }
+          ],
+          "require": [
+            "adoptKnowledgeDocument",
+            "data-testid=\"knowledge-projection-workspace\"",
+            "noteQueryId",
+            "route.query.note",
+            "KnowledgeNoteContextPanel",
+            "KnowledgeNoteCatalog",
+            "knowledge-projection-context-toggle"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue",
+          "require": ["openInObsidian", "route.query.note", "applyNoteQuerySelection"],
+          "forbid": [
+            {
+              "pattern": "updateLocalVaultNote|saveLocalVaultNote|editExistingNote|createConfirmedKnowledgeNote"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "notification-settings-preference",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/setting/components/notification-settings-preference.surface.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/setting/components/NotificationSettings.vue",
+          "require": [
+            "test-id=\"notification-delivery-card\"",
+            "<SettingsSection",
+            "<SettingsPropertyRow",
+            "useNotificationPreferences",
+            "loadPreferences",
+            "setGlobalChannel",
+            "void loadPreferences();"
+          ],
+          "forbid": ["<Card"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/notification/composables/useNotificationPreferences.ts",
+          "require": [
+            "await service.getPreferences()",
+            "await service.updatePreferences(request)",
+            "Identity is never passed from the UI"
+          ],
+          "forbid": [
+            {
+              "pattern": "getPreferences\\(\\s*identityId"
+            },
+            {
+              "pattern": "updatePreferences\\([\\s\\S]*identityId"
+            }
+          ]
+        },
+        {
+          "file": "packages/notification/src/application-client/ports/notification-api-client.port.ts",
+          "require": [
+            "getPreferences(): Promise<Result<NotificationPreferenceClientDTO>>;",
+            {
+              "pattern": "updatePreferences\\(\\s*request: UpdateNotificationPreferenceReq,"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "user-files-settings",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/setting/components/user-files-settings.surface.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/setting/components/UserFilesSettings.vue",
+          "require": [
+            "import { isOk, type Result } from '@memoflow/contracts/result'",
+            "isOk(response)",
+            "SystemChannels.USER_FILES_GET_PATH",
+            "SystemChannels.USER_FILES_PICK_DIRECTORY",
+            "<SettingsSection",
+            "<SettingsPropertyRow",
+            "<SettingsStatusBlock"
+          ],
+          "forbid": [
+            {
+              "pattern": "\\) as UserFilesPathResult;"
+            },
+            "<Card",
+            {
+              "pattern": "green-\\d+"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "react-mobile-settings-parity",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/setting/views/react-mobile-settings-parity.surface.spec.ts",
+      "locks": [
+        {
+          "file": "apps/mobile/src/app/explore/settings.tsx",
+          "require": ["export { SettingsScreen as default } from '@memoflow/app-react'"]
+        },
+        {
+          "file": "packages/app-react/src/providers/app-preference-provider.tsx",
+          "require": [
+            "getPreferenceNamespace('presentation')",
+            "getPreferenceNamespace('regional')"
+          ]
+        },
+        {
+          "file": "packages/app-react/src/screens/SettingsScreen.tsx",
+          "forbid": [
+            "useSettings",
+            "patchCategory",
+            "resetCategory",
+            "legacySettings",
+            "Toggle sound",
+            "toggleNotification('sound')",
+            "owner cutover"
+          ],
+          "require": [
+            "useNotificationPreferences",
+            "NotificationChannelType.Email",
+            "NotificationChannelType.Push",
+            "NotificationChannelType.InApp"
+          ]
+        },
+        {
+          "file": "packages/app-react/src/hooks/useNotificationPreferences.ts",
+          "require": ["service.getPreferences()", "service.updatePreferences({"]
+        }
+      ]
+    },
+    {
+      "id": "taskPanelAdaptation",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/task/views/taskPanelAdaptation.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/task/views/TaskManagementView.vue",
+          "require": ["<TaskPageToolbar", "@2xl/panel"],
+          "forbid": ["usePanelWidth", "isNarrow", "TaskDAG", "DependencyManager"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/components/TaskPageToolbar.vue",
+          "require": [
+            "data-primary-action=\"create-task\"",
+            "data-testid=\"create-task-plan-button\"",
+            "<ResponsivePrimaryAction",
+            "@2xl/panel:hidden",
+            "hidden shrink-0 @2xl/panel:block"
+          ],
+          "forbid": ["overflow-x-auto", "task-goal-filter", "usePanelWidth", "isNarrow"]
+        }
+      ]
+    },
+    {
+      "id": "product-form-language",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/shared/components/product-form-language.surface.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue",
+          "require": ["ProductPropertyChip"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/components/TaskPlanForm/TaskPlanForm.vue",
+          "require": ["ProductPropertyChip"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue",
+          "require": [
+            "ProductPropertyChip",
+            "schedule-property-chips",
+            "ProductEditorFrame",
+            "type ScheduleProperty = 'location' | 'attendees'",
+            "schedule-time-panel",
+            "schedule-property-editor",
+            "activeProperty === 'location'",
+            "schedule-conflict-setting",
+            "<ProductDateTimePicker"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/dialogs/GoalFormFrame.vue",
+          "require": ["<ProductDialogShell"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/dialogs/GoalRecordDialog.vue",
+          "require": ["ProductDialogShell"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/components/dialogs/TemplateSelectionDialog.vue",
+          "require": ["ProductDialogShell"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.vue",
+          "require": ["ProductEditorFrame"]
+        },
+        {
+          "file": "packages/app-vue/src/shared/components/ProductEditorFrame.vue",
+          "require": ["<ProductDialogShell", "<PaneScopedDialog"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue",
+          "require": ["test-id=\"knowledge-projection-adopt-dialog\"", "ProductDialogShell"],
+          "forbid": ["test-id=\"knowledge-projection-create-dialog\"", "<DialogContent"]
+        }
+      ]
+    },
+    {
+      "id": "use-desktop-window-controls",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/shared/composables/use-desktop-window-controls.surface.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/shared/composables/useDesktopWindowControls.ts",
+          "require": [
+            "import { isOk, type Result } from '@memoflow/contracts/result'",
+            "function readResultData",
+            "isOk(result)",
+            "Residual 929",
+            "inject(DESKTOP_BRIDGE_KEY, undefined)",
+            "function isElectronBridge",
+            "typeof candidate.invoke === 'function'",
+            "typeof candidate.on === 'function'",
+            "typeof candidate.off === 'function'",
+            "bridge?.on(",
+            "bridge?.off(",
+            "bridge?.invoke("
+          ],
+          "forbid": [
+            {
+              "pattern": "as\\s*\\|\\s*Partial<WindowControlsState>"
+            },
+            {
+              "pattern": "import type \\{[^}]*DesktopAuthApi"
+            },
+            {
+              "pattern": "getDesktopAuthApi\\s*\\("
+            },
+            {
+              "pattern": "hasDesktopAuthApi\\s*\\("
+            },
+            {
+              "pattern": "export type DesktopAuthApi\\b"
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/di/keys.ts",
+          "require": [
+            "export const DESKTOP_BRIDGE_KEY: InjectionKey<ElectronBridge>",
+            "import type { ElectronBridge } from '@memoflow/ipc-client'"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/shared/utils/desktop-auth-recovery.ts",
+          "require": [
+            {
+              "pattern": "export type DesktopAuthApi = \\{"
+            },
+            "invoke?: (channel: string, ...args: unknown[]) => Promise<unknown>"
+          ],
+          "forbid": [
+            {
+              "pattern": "export type DesktopAuthApi[\\s\\S]*\\bon\\?:"
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/shared/types/electron.d.ts",
+          "require": ["electronAPI?: DesktopAuthApi", "Keep-boundary vs host ElectronBridge"]
+        }
+      ]
     }
   ]
 }
