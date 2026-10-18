@@ -156,6 +156,7 @@ reports/local-deploy-validation/
 homeprojectsmemoflow/
 test-results/
 apps/web/test-results*/
+apps/web/playwright-ai-workspace-report/
 
 docs/proto
 
