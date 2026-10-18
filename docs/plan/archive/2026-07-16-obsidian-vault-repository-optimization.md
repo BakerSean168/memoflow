@@ -19,7 +19,7 @@ updated: 2026-07-26T00:00:00
 > **归档结果（2026-07-26）**：§13.2 **15/15** 完成；PR readiness yes；已合 `main`（PR #188）。  
 > 本文件仅保留历史与 DoD 证据；后续优雅化 / dual / Host 实施见  
 > [`./2026-07-26-codebase-elegance-foundation.md`](./2026-07-26-codebase-elegance-foundation.md) 与  
-> [`../active/2026-07-25-nightly-hygiene-and-agent-host.md`](../active/2026-07-25-nightly-hygiene-and-agent-host.md)。  
+> [`../active/2026-07-25-nightly-hygiene-and-agent-host.md`](2026-07-25-nightly-hygiene-and-agent-host.md)。
 > 不在此文件上继续开 residual 小说。
 
 # Obsidian Vault 与 GitHub 知识仓库后续优化方案

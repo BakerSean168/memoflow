@@ -1,32 +1,13 @@
 ---
-tags:
-  - plan
-  - governance
-  - index
-description: 仓库计划目录入口
-created: 2026-04-26T00:00:00
-updated: 2026-04-26T00:00:00
+tags: [history, archive]
+description: 历史执行计划归档指引；当前任务真源为 GitHub Issues
+updated: 2026-10-18
 ---
 
-# 计划目录
+# 历史 Plan 归档
 
-`docs/plan` 是仓库内唯一维护中的任务计划目录。新的实施计划、系统分析、重构路线图和 agent 执行计划统一落在这里。
+**MemoFlow 已退休任务级 Active Plan。当前所有任务需求、技术方案、验收与 Agent 交接仅以 [GitHub Issues](https://github.com/BakerSean168/memoflow/issues) 为真源。**
 
-## 目录约定
+[archive/](./archive/README.md) 仅保留历史冻结资料，不是待办列表，不再新增任务实施计划。旧 Active Plan 已可从 Git 历史追溯；仍有效但未完成的工作应在 Issue 中维护。
 
-- [`active/`](./active/README.md)：当前仍在推进、还会继续更新的计划
-- [`archive/`](./archive/README.md)：已完成、暂停或只保留参考价值的历史计划
-
-## 命名规则
-
-- 推荐格式：`YYYY-MM-DD-topic-slug.md`
-- 文件名使用小写 kebab-case
-- 一个文件只表达一个明确主题，不混合无关任务
-
-## 使用约定
-
-- 新计划默认放 `docs/plan/active`
-- 完成后移动到 `docs/plan/archive`
-- 产品/架构背景说明继续留在各自主题文档中，不把它们当成执行计划目录
-- 旧目录中的计划逐步迁移到这里，不再新增新的分散计划入口
-- 旧辅助工作区里的计划目录已退役，不再作为计划真值目录
+仓库协作规则见根目录 [AGENTS.md](../../AGENTS.md)；操作入口见 [Git 工作流](../guides/development/git-workflow.md)；长期架构决策见 [ADR](../architecture/adr/README.md)。

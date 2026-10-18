@@ -91,4 +91,4 @@ TaskPlan 与 TaskOccurrence 分开；完成事件、KR 贡献与 Routine 定时�
 
 接受多 driver 的协议适配成本、三个本地记录集合与有限的 UI 事件扩充；换取无需完整 T3 fork 或通用运行平台的接入。内置助手与外部 Agent 共存是产品能力，不是同一会话的双状态系统。
 
-源码参考不等于实际互通证据。CLI 版本、Windows shim/PATH、Electron 打包、SDK 资源文件、MCP 注入和 Profile teardown 必须通过[实施方案](../../plan/active/2026-10-09-local-byoa-and-builtin-assistant.md)中的真实验收。没有对应原生版本与平台证据时，不显示“已支持”。
+源码参考不等于实际互通证据。CLI 版本、Windows shim/PATH、Electron 打包、SDK 资源文件、MCP 注入和 Profile teardown 必须通过[实施方案](https://github.com/BakerSean168/memoflow/issues/492)中的真实验收。没有对应原生版本与平台证据时，不显示“已支持”。

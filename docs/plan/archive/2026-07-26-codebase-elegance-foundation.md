@@ -15,7 +15,7 @@ status: done
 
 > **归档结果（2026-07-29）**：E1–E7 硬完成定义已勾选；PR #189 已合 main；E5b bootstrap 死域 follow-up 已合 #190。  
 > Dual Registry / dual 税减负 / AI 路径地图为历史资产。  
-> 后续产品主线：[`../active/2026-07-17-unified-assistant-agent-host.md`](../active/2026-07-17-unified-assistant-agent-host.md)。
+> 后续产品主线：[`../active/2026-07-17-unified-assistant-agent-host.md`](2026-07-17-unified-assistant-agent-host.md)。
 # 代码优雅化与后续实施地基计划
 
 ## 1. 文档地位

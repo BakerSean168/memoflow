@@ -40,7 +40,7 @@ status: completed
 - [`2026-07-15-web-core-product-review.md`](./2026-07-15-web-core-product-review.md)：早期 Web 核心功能审查。
 - [`2026-07-16-web-product-design-review.md`](./2026-07-16-web-product-design-review.md)：历史设计复审。
 - [`2026-07-27-docker-web-pm-journey-findings.md`](./2026-07-27-docker-web-pm-journey-findings.md)：Docker Web 旅程、i18n、邮箱验证和本地部署问题。
-- [`2026-07-17-unified-assistant-agent-host.md`](../active/2026-07-17-unified-assistant-agent-host.md)：统一助手与 Agent Host 主产品能力线。
+- [`2026-07-17-unified-assistant-agent-host.md`](2026-07-17-unified-assistant-agent-host.md)：统一助手与 Agent Host 主产品能力线。
 
 真值顺序遵循 `AGENT.md`：当前代码、配置和测试优先于本文。
 

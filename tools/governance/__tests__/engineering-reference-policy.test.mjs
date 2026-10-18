@@ -17,7 +17,7 @@ describe('ADR-113 real-owner architecture policy', () => {
     const adr = read(
       'docs/architecture/adr/ADR-113-retire-product-governance-runtime-keep-engineering-governance.md',
     );
-    const agent = read('AGENT.md');
+    const agent = read('AGENTS.md');
 
     expect(adr).toContain('**状态：** 已采纳并实施（GOV-7903）');
     expect(

@@ -6,7 +6,7 @@ agent: agent
 
 产品和规格类工作优先参考：
 
-- [`../../AGENT.md`](../../AGENT.md)
+- [`../../AGENTS.md`](../../AGENTS.md)
 - [`../../docs/governance/README.md`](../../docs/governance/README.md)
 - [`../../docs/plan/README.md`](../../docs/plan/README.md)
 - [`../../docs/architecture/README.md`](../../docs/architecture/README.md)

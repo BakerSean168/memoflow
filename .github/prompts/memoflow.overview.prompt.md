@@ -6,7 +6,7 @@ mode: agent
 
 优先参考这些真实入口，不要复述历史目录结构：
 
-- [`../../AGENT.md`](../../AGENT.md)
+- [`../../AGENTS.md`](../../AGENTS.md)
 - [`../../README.md`](../../README.md)
 - [`../../docs/governance/README.md`](../../docs/governance/README.md)
 - [`../../docs/architecture/README.md`](../../docs/architecture/README.md)

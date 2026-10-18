@@ -2,7 +2,7 @@
 
 Implemented and independently reviewed on 2026-09-30. Automated validation results are recorded below; browser visual acceptance was not run. No commit or push.
 
-Scope: PVC-GOAL-1101 only, from the [execution master plan](../active/2026-09-29-product-vnext-execution-master-plan.md#pvc-goal-1101--remove-reminder-from-goal-create).
+Scope: PVC-GOAL-1101 only, from the [execution master plan](https://github.com/BakerSean168/memoflow/blob/bd373a220c6b471fdfa5b64bd54471da49c2f023/docs/plan/active/2026-09-29-product-vnext-execution-master-plan.md#pvc-goal-1101--remove-reminder-from-goal-create).
 
 - Create mode does not mount `GoalReminderChip`. Create requests omit `reminderConfig` unconditionally and bypass reminder-only validation, so even a stale non-null draft cannot leak into the request or block submission.
 - Reset watches mode as well as open/Goal identity. Create drafts ignore a retained edit Goal prop, clear validation/dirty state and start from Planned; reopening edit restores the persisted reminder. The KR draft editor is keyed by mode so its local unsaved edit form also clears when switching to Create while open.

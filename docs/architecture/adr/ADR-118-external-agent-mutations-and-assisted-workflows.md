@@ -69,4 +69,4 @@ MCP Tasks 是可选协议投影：仅对声明支持相应扩展的请求使用�
 
 写工具上线前必须有真实数据库的并发、崩溃窗口、outbox 和 retry 证据。仅增加 Gateway 中间件无法达标，需对两个真实 owner 的事务 seam 做小范围增强。高级 workflow 晚于确定性读写上线，不阻塞首个外部接入版本。
 
-契约与风险测试见 [架构规格](../external-agent-gateway.md)；具体工作项见 [实施总方案](../../plan/active/2026-10-07-external-agent-gateway.md)。
+契约与风险测试见 [架构规格](../external-agent-gateway.md)；具体工作项见 [实施总方案](https://github.com/BakerSean168/memoflow/issues/490)。

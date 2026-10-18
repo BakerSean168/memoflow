@@ -6,7 +6,7 @@ agent: agent
 
 架构相关信息优先参考：
 
-- [`../../AGENT.md`](../../AGENT.md)
+- [`../../AGENTS.md`](../../AGENTS.md)
 - [`../../docs/architecture/README.md`](../../docs/architecture/README.md)
 - [`../../docs/standards/architecture.md`](../../docs/standards/architecture.md)
 - [`../../docs/architecture/adr/README.md`](../../docs/architecture/adr/README.md)

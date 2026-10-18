@@ -15,7 +15,7 @@ updated: 2026-08-09T00:00:00Z
 
 ## 1. 概述与真值依据
 
-本盘点报告为 [`docs/plan/active/2026-08-09-business-p0-elegant-fix-plan.md`](../plan/active/2026-08-09-business-p0-elegant-fix-plan.md) **W0 阶段** 的证据驱动产物。盘点覆盖：
+本盘点报告为 [`docs/plan/active/2026-08-09-business-p0-elegant-fix-plan.md`](../plan/archive/2026-08-09-business-p0-elegant-fix-plan.md) **W0 阶段** 的证据驱动产物。盘点覆盖：
 - 数据库 Schema (`packages/database/prisma/schema/*.prisma`)
 - 事务 Runner 与 Seam 抽象
 - Outbox Dispatcher 与事件投递机制

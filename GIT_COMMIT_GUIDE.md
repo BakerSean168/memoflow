@@ -199,8 +199,8 @@ Knowledge Generation 增强：
 - +16,600 行新增，-965 行删除
 
 ## 文档
-- [实施计划](./docs/plan/active/2026-06-08-ai-agent-master-implementation-plan.md)
-- [最终总结](./docs/plan/active/2026-06-12-ai-agent-implementation-final-summary.md)
+- [实施计划](docs/plan/archive/2026-06-08-ai-agent-master-implementation-plan.md)
+- [最终总结](docs/plan/archive/2026-06-12-ai-agent-implementation-final-summary.md)
 - [Release Notes](./AI_AGENT_RELEASE_NOTES.md)
 
 ## 后续工作

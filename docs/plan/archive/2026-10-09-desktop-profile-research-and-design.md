@@ -10,7 +10,7 @@ updated: 2026-10-09T00:00:00Z
 
 # Desktop Profile 研究与设计文档
 
-**状态：研究与系列文档交付完成，2026-10-09 归档。** [系列入口](../../product/desktop-profiles/README.md)；后续 [功能实施计划](../active/2026-10-09-desktop-independent-profiles.md) 保持未开始。
+**状态：研究与系列文档交付完成，2026-10-09 归档。** [系列入口](../../product/desktop-profiles/README.md)；后续 [功能实施计划](https://github.com/BakerSean168/memoflow/blob/bd373a220c6b471fdfa5b64bd54471da49c2f023/docs/plan/active/2026-10-09-desktop-independent-profiles.md) 保持未开始。
 
 ## 范围
 
@@ -37,4 +37,4 @@ updated: 2026-10-09T00:00:00Z
 
 交付七篇核心文档（含导航）、项目词汇表补充与相关索引；ADR-119 提议中，实施计划包含 28 项验收场景。研究修正了 AccountView 解析、AI 导入重试、笔记/消息覆盖和删除证据等假设，并提出服务端 apply 的候选方案。
 
-文档检查与治理主检查通过；完整治理命令被既有新增测试引起的 inventory stale 阻断，未更改其他工作的生成清单。命令与限制见[验证记录](../active/2026-10-09-desktop-independent-profiles.md#8-本轮文档验证)。
+文档检查与治理主检查通过；完整治理命令被既有新增测试引起的 inventory stale 阻断，未更改其他工作的生成清单。命令与限制见[验证记录](https://github.com/BakerSean168/memoflow/blob/bd373a220c6b471fdfa5b64bd54471da49c2f023/docs/plan/active/2026-10-09-desktop-independent-profiles.md#8-本轮文档验证)。

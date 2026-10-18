@@ -35,7 +35,7 @@ Electron lane 的七个 remaining modules：`account`, `ai`, `data-portability`,
 - 不改变 route prefix、IPC channel、payload schema、auth wrapper、result envelope、OpenAPI registration 或业务规则。
 - 不把 `context.db` 改成 `any`/`unknown` 来假装完成迁移；transport seam 必须真正不再组合数据库。
 - 不新增 layer-named shim、service locator、module-global repository ownership。
-- API AI 不在本批 API lane 清单内；batch 完成时 `createAIApiModule()` 仍在 `register()` 内组合 Prisma（§2.4 已记录），因此本计划不宣称它已完成。该 residual 已由后续计划 [2026-08-14-api-ai-composition-root-externalization](../active/2026-08-14-api-ai-composition-root-externalization.md) 关闭。
+- API AI 不在本批 API lane 清单内；batch 完成时 `createAIApiModule()` 仍在 `register()` 内组合 Prisma（§2.4 已记录），因此本计划不宣称它已完成。该 residual 已由后续计划 [2026-08-14-api-ai-composition-root-externalization](2026-08-14-api-ai-composition-root-externalization.md) 关闭。
 
 ### Hard invariants（所有步骤都必须遵守）
 
@@ -134,7 +134,7 @@ No other accessor consumer may be assumed away: final inventory must rerun `rg -
 
 ### 2.4 AI status (Electron scope only)
 
-- API `AIApiModule` was created as a `const` in `apps/api/src/main.ts:189-210`, but its factory still composed Prisma/concrete checkpoint adapters inside `register()` (`packages/ai/src/api/module.ts:102-159,233-239`) and mounted routes at `:245-306`; it was **not** transport-only. It was outside this API batch and was not marked done. **Closed by** [2026-08-14-api-ai-composition-root-externalization](../active/2026-08-14-api-ai-composition-root-externalization.md) (Step B rewrote the transport; Step C locked the surface).
+- API `AIApiModule` was created as a `const` in `apps/api/src/main.ts:189-210`, but its factory still composed Prisma/concrete checkpoint adapters inside `register()` (`packages/ai/src/api/module.ts:102-159,233-239`) and mounted routes at `:245-306`; it was **not** transport-only. It was outside this API batch and was not marked done. **Closed by** [2026-08-14-api-ai-composition-root-externalization](2026-08-14-api-ai-composition-root-externalization.md) (Step B rewrote the transport; Step C locked the surface).
 - Electron `createAIElectronModule(options)` currently accepts host callbacks (`packages/ai/src/electron/index.ts:75-84`) but still creates the PowerSync module and all service adapters from `ctx.db` inside `register()` (`:90-129`). It also owns all stream/session cleanup (`:518-529`).
 - `createAIPowerSyncModule()` currently creates four PowerSync ingredients plus optional ports (`packages/ai/src/server/infrastructure/powersync.ts:41-88`) and re-exports concrete classes at `:91-96`; `packages/ai/src/server/infrastructure/index.ts:38-62` leaks Prisma/PowerSync classes too.
 - Desktop host callbacks are already explicit for knowledge persistence/source/analytics/automation (`apps/desktop/src/main/main.ts:161-178`); the composer must evaluate them before creating `createAIElectronModule({ instance })`, while service runtime adapters use the host-owned `getAIServiceRuntimeConfig()` capability currently read at `packages/ai/src/electron/index.ts:90-127`.
@@ -366,7 +366,7 @@ interface ComposeAIElectronDependencies {
 function composeAI(deps: ComposeAIElectronDependencies): AIElectronModuleDef;
 ```
 
-Add `createAIPowerSyncRepositories(db)` with conversation/provider/index/execution-log ports; move service adapter construction currently at `packages/ai/src/electron/index.ts:97-127` into the desktop composer; call `createAIModule({ set, host ports, runtimeContributions })`, then `createAIElectronModule({ instance })`. Stream session handling remains in Electron transport. API AI was a separately tracked follow-up because it was not in this batch scope; **closed by** [2026-08-14-api-ai-composition-root-externalization](../active/2026-08-14-api-ai-composition-root-externalization.md).
+Add `createAIPowerSyncRepositories(db)` with conversation/provider/index/execution-log ports; move service adapter construction currently at `packages/ai/src/electron/index.ts:97-127` into the desktop composer; call `createAIModule({ set, host ports, runtimeContributions })`, then `createAIElectronModule({ instance })`. Stream session handling remains in Electron transport. API AI was a separately tracked follow-up because it was not in this batch scope; **closed by** [2026-08-14-api-ai-composition-root-externalization](2026-08-14-api-ai-composition-root-externalization.md).
 
 ### 3.4 Cross-module host wiring decisions
 
@@ -399,14 +399,14 @@ precise:
    `@memoflow/ai` has no `./server` export map entry (infra barrel is
    package-internal) and the residual API-AI module still composed them inside
    `register()`. The residual was **closed by**
-   [2026-08-14-api-ai-composition-root-externalization](../active/2026-08-14-api-ai-composition-root-externalization.md):
+   [2026-08-14-api-ai-composition-root-externalization](2026-08-14-api-ai-composition-root-externalization.md):
    the concrete Prisma re-exports were removed from the infra barrel and the
    transport now consumes the checkpoint pair through the application seam.
 2. **API AI was a follow-up residual.** `createAIApiModule()` in
    `packages/ai/src/api/module.ts` still composed Prisma and concrete service
    adapters inside `register()` and read `context.db`. Not marked done in this
    batch; documented in the file header and in `docs/standards/architecture.md`.
-   **Closed by** [2026-08-14-api-ai-composition-root-externalization](../active/2026-08-14-api-ai-composition-root-externalization.md).
+   **Closed by** [2026-08-14-api-ai-composition-root-externalization](2026-08-14-api-ai-composition-root-externalization.md).
 3. **Repository desktop composer is a host-port composer.** `compose-repository.ts`
    carries the five existing host ports (local vault, remote, reconciliation,
    sync, auto-sync scheduler) and returns `createRepositoryElectronModule`.
@@ -564,7 +564,7 @@ Implement package transport adapters in small vertical groups, but keep the publ
 - `data-portability/src/api/module.ts`: `createDataPortabilityApiModule({ instance, serverHeldDataDisclosureApi })`; preserve `/data-portability` and logging.
 - `notification/src/api/module.ts`: `createNotificationApiModule({ instance })`; `channelCapabilities`, transports and closure checker leave this module entirely.
 - `reminder/src/api/module.ts`: `createReminderApiModule({ instance })`; preserve async `register/destroy` and `/reminders`.
-- `repository/src/api/module.ts`: `createRepositoryApiModule({ instance })`; retain `getApplicationPort()` as an instance-bound closure because API AI consumed it (`apps/api/src/main.ts:189-205`), but it must never compose or return a package-global. The consumer later became an explicit dependency of `composeAI` in [2026-08-14-api-ai-composition-root-externalization](../active/2026-08-14-api-ai-composition-root-externalization.md).
+- `repository/src/api/module.ts`: `createRepositoryApiModule({ instance })`; retain `getApplicationPort()` as an instance-bound closure because API AI consumed it (`apps/api/src/main.ts:189-205`), but it must never compose or return a package-global. The consumer later became an explicit dependency of `composeAI` in [2026-08-14-api-ai-composition-root-externalization](2026-08-14-api-ai-composition-root-externalization.md).
 - `schedule/src/api/module.ts`: `createScheduleApiModule({ instance })`; build both schedule route objects before start, start instance, then mount `/schedules` and `/schedules/events` only after success.
 - `setting/src/api/module.ts`: `createSettingApiModule({ instance })`; preserve `/settings`.
 
@@ -602,12 +602,12 @@ Add `apps/api/src/runtime/compose-account.ts`, `compose-data-portability.ts`, `c
 1. `composeAccount({ db: prisma, cloudAuth, runtimeContributions })` -> account Prisma set -> module instance -> API handle. Pass the exact CloudAuth object created at `main.ts:129-146`.
 2. `composeNotification({ db, closureChecker: accountActiveChecker, channelCapabilities: [{ InApp, requiredInProduction: true }] })` -> return module plus schedule notification port.
 3. `composeReminder({ db, closureChecker })` -> module plus Prisma schedule execution/projection sources.
-4. `composeRepository({ db, storageBaseDir: repositoryStorageBaseDir, closureChecker, githubApp: getGithubAppConfig(), knowledgeRepositoryCloudDataPurger })` -> module; its application port is available to API AI through the existing `getApplicationPort()` handle. API AI later consumed it as an explicit `repositoryApiPort` dependency of `composeAI` in [2026-08-14-api-ai-composition-root-externalization](../active/2026-08-14-api-ai-composition-root-externalization.md).
+4. `composeRepository({ db, storageBaseDir: repositoryStorageBaseDir, closureChecker, githubApp: getGithubAppConfig(), knowledgeRepositoryCloudDataPurger })` -> module; its application port is available to API AI through the existing `getApplicationPort()` handle. API AI later consumed it as an explicit `repositoryApiPort` dependency of `composeAI` in [2026-08-14-api-ai-composition-root-externalization](2026-08-14-api-ai-composition-root-externalization.md).
 5. `composeSchedule` uses the two-phase `createSchedulePrismaRepositories(prisma)` set, passes `scheduleTaskRepository` to `createScheduleOrchestrationModule`, then passes orchestration `sourceExecutor`/projection runtime into the bound schedule instance. Do not create a second schedule set.
 6. `composeSetting({ db })` -> one repo set -> runtime contribution -> module.
 7. `composeDataPortability({ db })` -> complete cross-module export set + Prisma import store + server-held disclosure port -> module.
 
-Keep registration order from `apps/api/src/main.ts:216-244`; replace only the remaining module definitions with bound handles. Schedule orchestration construction must move to the composer/explicit preparation area without changing source wiring. API AI stayed in its current separate path and was listed in the follow-up residual at batch completion; the residual was **closed by** [2026-08-14-api-ai-composition-root-externalization](../active/2026-08-14-api-ai-composition-root-externalization.md).
+Keep registration order from `apps/api/src/main.ts:216-244`; replace only the remaining module definitions with bound handles. Schedule orchestration construction must move to the composer/explicit preparation area without changing source wiring. API AI stayed in its current separate path and was listed in the follow-up residual at batch completion; the residual was **closed by** [2026-08-14-api-ai-composition-root-externalization](2026-08-14-api-ai-composition-root-externalization.md).
 
 **Tests and gates:**
 
@@ -687,7 +687,7 @@ Add behavior tests for every existing IPC channel set, account cloud-close flow,
 
 - Composer and transport module JSDoc is English-first + 中文, explaining deep module, seam, host capability ownership, ordering and failure semantics.
 - Update each touched package README/API/Electron entry comments that currently claim “self-contained Composition Root” (for example notification `packages/notification/src/api/index.ts:5-18`, reminder `packages/reminder/src/api/index.ts:5-20`, AI `packages/ai/src/api/index.ts:5-20`).
-- Document repository's explicit many-port decision and schedule's two-phase assembly; document API AI as a remaining follow-up rather than silently omitting it. The API AI follow-up existed at batch completion and was **closed by** [2026-08-14-api-ai-composition-root-externalization](../active/2026-08-14-api-ai-composition-root-externalization.md).
+- Document repository's explicit many-port decision and schedule's two-phase assembly; document API AI as a remaining follow-up rather than silently omitting it. The API AI follow-up existed at batch completion and was **closed by** [2026-08-14-api-ai-composition-root-externalization](2026-08-14-api-ai-composition-root-externalization.md).
 - Regenerate the repository's test inventory using the normal project tool if required by `governance-check`; attach raw command output and final `rg` inventory to the implementation PR.
 
 **Verification:**
@@ -741,7 +741,7 @@ rg -n "get(Notification|Reminder|Schedule).*Repository|startScheduleRuntime|stop
 rg -n "from ['\"]@memoflow/.*/server|from ['\"]@memoflow/.*/server/infrastructure" apps/api/src apps/desktop/src/main
 ```
 
-Expected result: no migrated transport-side composition, no remaining Electron accessor consumers, and no app `/server` import. The only documented residual was API AI composition in `packages/ai/src/api/module.ts:102-159,233-239`, outside this batch. That residual existed at batch completion and was **closed by** [2026-08-14-api-ai-composition-root-externalization](../active/2026-08-14-api-ai-composition-root-externalization.md).
+Expected result: no migrated transport-side composition, no remaining Electron accessor consumers, and no app `/server` import. The only documented residual was API AI composition in `packages/ai/src/api/module.ts:102-159,233-239`, outside this batch. That residual existed at batch completion and was **closed by** [2026-08-14-api-ai-composition-root-externalization](2026-08-14-api-ai-composition-root-externalization.md).
 
 ## 6. 风险与回滚
 
@@ -756,7 +756,7 @@ Expected result: no migrated transport-side composition, no remaining Electron a
 7. **Partial start leaks**：all non-schedule modules currently set `started=true` only after a forward loop with no partial cleanup. Add failure tests before switching transport factories.
 8. **IPC handler ownership**：Notification custom-renderer channels are installed by another manager but included in current destroy list. Track per-handle installs and add an explicit owner test before removing broad cleanup.
 9. **Accessor consumer race**：dashboard IPC is registered before profile activation (`apps/desktop/src/main/main.ts:91-97,412-421`). Keep lazy auth/repository getters, but the getter must return the current composer result and be nulled before destroy.
-10. **API AI residual confusion**：`const AIApiModule` in main does not mean transport-only. Keep it listed as follow-up so the batch success claim remains precise. This existed at batch completion; the residual was **closed by** [2026-08-14-api-ai-composition-root-externalization](../active/2026-08-14-api-ai-composition-root-externalization.md).
+10. **API AI residual confusion**：`const AIApiModule` in main does not mean transport-only. Keep it listed as follow-up so the batch success claim remains precise. This existed at batch completion; the residual was **closed by** [2026-08-14-api-ai-composition-root-externalization](2026-08-14-api-ai-composition-root-externalization.md).
 
 ### Targeted rollback
 
@@ -779,4 +779,4 @@ Expected result: no migrated transport-side composition, no remaining Electron a
 - [x] Route/channel, OpenAPI, auth, payload, result envelope and registration-order behavior is unchanged.
 - [x] English-first + 中文 JSDoc, package docs, surface specs and test inventory describe the host-composer ownership model.
 - [x] All direct Vitest commands, touched-project typecheck/lint, `pnpm nx run memoflow:governance-check`, and `pnpm nx run memoflow:docs-check` are green.
-- [x] Final residual report explicitly names API AI composition as out of this batch; no other unverified residual remains. That residual existed at batch completion and was **closed by** [2026-08-14-api-ai-composition-root-externalization](../active/2026-08-14-api-ai-composition-root-externalization.md).
+- [x] Final residual report explicitly names API AI composition as out of this batch; no other unverified residual remains. That residual existed at batch completion and was **closed by** [2026-08-14-api-ai-composition-root-externalization](2026-08-14-api-ai-composition-root-externalization.md).

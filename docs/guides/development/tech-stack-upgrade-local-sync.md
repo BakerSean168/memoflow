@@ -14,7 +14,7 @@ updated: 2026-07-14T00:00:00+00:00
 
 远程开发机已经完成 one-shot 升级。你的**本机仓库、其他 worktree、旧容器卷**不会自动变成新环境，需要按本指南同步。
 
-对应总结：[`../../plan/active/2026-07-13-tech-stack-upgrade-execution-summary.md`](../../plan/active/2026-07-13-tech-stack-upgrade-execution-summary.md)
+对应总结：[`../../plan/archive/2026-07-13-tech-stack-upgrade-execution-summary.md`](../../plan/archive/2026-07-13-tech-stack-upgrade-execution-summary.md)
 
 ## 1. 你需要同步什么？
 
@@ -226,7 +226,7 @@ pnpm docker:local:ps
 
 ## 11. 相关入口
 
-- 执行总结：[`../../plan/active/2026-07-13-tech-stack-upgrade-execution-summary.md`](../../plan/active/2026-07-13-tech-stack-upgrade-execution-summary.md)
-- 升级计划：[`../../plan/active/2026-07-12-tech-stack-upgrade-plan.md`](../../plan/active/2026-07-12-tech-stack-upgrade-plan.md)
+- 执行总结：[`../../plan/archive/2026-07-13-tech-stack-upgrade-execution-summary.md`](../../plan/archive/2026-07-13-tech-stack-upgrade-execution-summary.md)
+- 升级计划：[`../../plan/archive/2026-07-12-tech-stack-upgrade-plan.md`](../../plan/archive/2026-07-12-tech-stack-upgrade-plan.md)
 - 本地 Docker：[`local.docker.md`](./local.docker.md)
 - 发布链路：[`release-workflow.md`](./release-workflow.md)

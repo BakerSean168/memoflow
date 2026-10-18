@@ -42,4 +42,4 @@ S5 已接通 Attention 的 PostgreSQL 原生事务触发器与 Desktop PowerSync
 
 S6 Conversation 精确事件同步与 S7 独立人工草稿检查点现已有工作区代码及定向测试。2026-10-14 续跑已验证 Conversation 的 PowerSync 版本事件、独立测试 PostgreSQL 事务/删除和 Workspace 多 owner 游标；Goal 检查点的原生保存回归与 Workflow 已创建 Goal 的字符串 ID 恢复核验也已通过。当前实现已在本地提交 `9f6e9e33237`、尚未推送，完整 Desktop 集成、prod-like 部署与当前候选 CI 尚未全面通过，不能宣称 S0–S7 最终交付；详见验收文档。
 
-这是 [AI Interaction / Goal Workflow Convergence](../../active/2026-10-04-ai-interaction-goal-workflow-convergence.md) 与 [Ask User + Goal Business Surface](../../active/2026-10-12-ask-user-business-surface.md) 的后续专项；旧文档中的阶段性能力和验证记录不能替代本分支现状。
+这是 [AI Interaction / Goal Workflow Convergence](https://github.com/BakerSean168/memoflow/blob/bd373a220c6b471fdfa5b64bd54471da49c2f023/docs/plan/active/2026-10-04-ai-interaction-goal-workflow-convergence.md) 与 [Ask User + Goal Business Surface](https://github.com/BakerSean168/memoflow/blob/bd373a220c6b471fdfa5b64bd54471da49c2f023/docs/plan/active/2026-10-12-ask-user-business-surface.md) 的后续专项；旧文档中的阶段性能力和验证记录不能替代本分支现状。

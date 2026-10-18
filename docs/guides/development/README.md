@@ -26,7 +26,7 @@ updated: 2026-07-29T00:00:00
 | [transactional-email-smtp.md](./transactional-email-smtp.md)                                 | 事务邮件 console / SMTP / Resend、域名 DNS、Redis challenge                  |
 | [runtime-lanes.md](./runtime-lanes.md)                                                       | host-dev / prod-like / staging / prod 四环境与辅助测试 lane 的端口契约       |
 | [powersync-profile-snapshot-rollout.md](./powersync-profile-snapshot-rollout.md)             | PowerSync per-profile snapshot 的部署、验收、观测与手动回补说明              |
-| [release-workflow.md](./release-workflow.md)                                                 | Release Lifecycle V2 当前操作入口；V3 目标见架构与 active plan               |
+| [release-workflow.md](./release-workflow.md)                                                 | Release Lifecycle V2 当前操作入口；发布实施与待办以 GitHub Issues 和实际工作流为准               |
 | [testing.md](./testing.md)                                                                   | 测试快速入口，跳转到 `docs/test`                                             |
 | [tech-stack-upgrade-local-sync.md](./tech-stack-upgrade-local-sync.md)                       | 2026-07 技术栈升级后本机/worktree 依赖与 Docker 卷同步指南                   |
 

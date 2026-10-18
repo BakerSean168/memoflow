@@ -80,7 +80,7 @@ Task 已完成 occurrence 会返回当前投影；另一次带不同 measurement
 | Planner/Routine/Knowledge 的最小权限和宿主可用性  | 各 owner 与 host             | EAG-09     |
 | workflow handle、headless review、Tasks/MRTR 投影 | AI runtime adapter           | EAG-10     |
 
-外部协议事实见 [官方研究](./2026-10-07-external-agent-protocol-research.md)；决策和执行入口见 [架构规格](../architecture/external-agent-gateway.md) 与 [实施总方案](../plan/active/2026-10-07-external-agent-gateway.md)。
+外部协议事实见 [官方研究](./2026-10-07-external-agent-protocol-research.md)；决策和执行入口见 [架构规格](../architecture/external-agent-gateway.md) 与 [实施总方案](https://github.com/BakerSean168/memoflow/blob/bd373a220c6b471fdfa5b64bd54471da49c2f023/docs/plan/active/2026-10-07-external-agent-gateway.md)。
 
 ## EAG-02 实施前源码纠偏
 

@@ -9,7 +9,7 @@ updated: 2026-10-09T00:00:00Z
 
 日期：2026-10-09。性质：源码调研与设计建议，不是已批准的实施规格。
 
-后续目标已在 [ADR-120](../architecture/adr/ADR-120-selectable-assistant-runtimes-and-builtin-mastra.md)、[ADR-121](../architecture/adr/ADR-121-desktop-local-agent-host-and-tool-bridge.md) 与[实施方案](../plan/active/2026-10-09-local-byoa-and-builtin-assistant.md)具体化：用户要求保留现有 Mastra 作为无需外部 Agent 的内置选项。本文的源码事实继续有效；涉及替换/退休内置功能的早期建议以这组新提议为准，功能仍未实施。
+后续目标已在 [ADR-120](../architecture/adr/ADR-120-selectable-assistant-runtimes-and-builtin-mastra.md)、[ADR-121](../architecture/adr/ADR-121-desktop-local-agent-host-and-tool-bridge.md) 与[实施方案](https://github.com/BakerSean168/memoflow/blob/bd373a220c6b471fdfa5b64bd54471da49c2f023/docs/plan/active/2026-10-09-local-byoa-and-builtin-assistant.md)具体化：用户要求保留现有 Mastra 作为无需外部 Agent 的内置选项。本文的源码事实继续有效；涉及替换/退休内置功能的早期建议以这组新提议为准，功能仍未实施。
 
 研究范围：保留 MemoFlow 自身界面，在本机启动用户选择的 Agent，提供模型选择、会话、工具执行及审批体验。
 “本地”指宿主与 Agent 进程运行于本机；模型可以调用云端。它不自动意味着只支持一个账号。
