@@ -16,10 +16,8 @@ export function ensureSharedDirs(resolver: SharedPathResolver): void {
     resolver.downloadsDir,
     resolver.tempDir,
     resolver.logsDir,
-    resolver.userFilesRootDir,
-    resolver.userFilesExportsDir,
-    resolver.userFilesDownloadsDir,
-    resolver.userFilesAttachmentsDir,
+    // User-selected files are created on demand by the file IPC handlers.
+    // Creating empty folders at startup can clutter a user's home/Documents.
   ];
 
   for (const dir of dirs) {

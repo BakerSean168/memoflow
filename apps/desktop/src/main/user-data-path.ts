@@ -78,7 +78,14 @@ export function resolveDesktopUserFilesPath(
     return explicitPath;
   }
 
-  return path.join(app.getPath('documents'), getDesktopUserFilesDirName(channel));
+  const documentsPath = app.getPath('documents');
+  // On headless Linux/WSL, Electron can resolve Documents to the home directory.
+  // Keep exported files out of ~ and co-locate them with the channel-specific app data.
+  if (path.resolve(documentsPath) === path.resolve(app.getPath('home'))) {
+    return path.join(app.getPath('userData'), 'files');
+  }
+
+  return path.join(documentsPath, getDesktopUserFilesDirName(channel));
 }
 
 export function configureDesktopUserDataPath(): string {

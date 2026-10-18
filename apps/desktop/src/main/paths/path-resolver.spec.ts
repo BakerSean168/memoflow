@@ -96,7 +96,7 @@ describe('ensure-dirs', () => {
     expect(fs.existsSync(resolver.profileDir)).toBe(true);
   });
 
-  it('ensureSharedDirs creates all shared directories', () => {
+  it('ensureSharedDirs creates internal dirs but not unused user-file dirs', () => {
     const userFilesRoot = path.join(rootDir, 'user-files');
     const resolver: SharedPathResolver = {
       rootDir,
@@ -107,7 +107,12 @@ describe('ensure-dirs', () => {
       profilesRegistryDir: path.join(rootDir, 'shared', 'profiles'),
       deviceIdPath: path.join(rootDir, 'shared', 'auth', 'device-id'),
       runtimeConfigPath: path.join(rootDir, 'shared', 'config', 'desktop-runtime.json'),
-      profileAccessWindowStatePath: path.join(rootDir, 'shared', 'ui', 'profile-access-window-state.json'),
+      profileAccessWindowStatePath: path.join(
+        rootDir,
+        'shared',
+        'ui',
+        'profile-access-window-state.json',
+      ),
       registryPath: path.join(rootDir, 'shared', 'profiles', 'registry.json'),
       cacheDir: path.join(rootDir, 'cache'),
       snapshotStagingDir: path.join(rootDir, 'cache', 'snapshot-staging'),
@@ -132,10 +137,10 @@ describe('ensure-dirs', () => {
     expect(fs.existsSync(resolver.downloadsDir)).toBe(true);
     expect(fs.existsSync(resolver.tempDir)).toBe(true);
     expect(fs.existsSync(resolver.logsDir)).toBe(true);
-    expect(fs.existsSync(resolver.userFilesRootDir)).toBe(true);
-    expect(fs.existsSync(resolver.userFilesExportsDir)).toBe(true);
-    expect(fs.existsSync(resolver.userFilesDownloadsDir)).toBe(true);
-    expect(fs.existsSync(resolver.userFilesAttachmentsDir)).toBe(true);
+    expect(fs.existsSync(resolver.userFilesRootDir)).toBe(false);
+    expect(fs.existsSync(resolver.userFilesExportsDir)).toBe(false);
+    expect(fs.existsSync(resolver.userFilesDownloadsDir)).toBe(false);
+    expect(fs.existsSync(resolver.userFilesAttachmentsDir)).toBe(false);
   });
 
   it('two profiles create isolated directory trees', () => {
