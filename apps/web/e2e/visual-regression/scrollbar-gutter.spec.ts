@@ -1,3 +1,4 @@
+import { writeFile } from 'node:fs/promises';
 import { expect, test, type Locator } from '@playwright/test';
 import { openVisualCase, waitForVisualLayout } from './environment';
 
@@ -61,6 +62,15 @@ for (const host of ['web', 'desktop'] as const) {
           surface === 'providers'
             ? page.getByTestId('ai-settings-panel').locator('header').first()
             : content;
+        const chrome =
+          surface === 'providers'
+            ? width === 440
+              ? page.getByTestId('settings-compact-back')
+              : page.getByTestId('settings-return-to-app')
+            : surface === 'workspace'
+              ? page.getByTestId('task-page-toolbar')
+              : page.getByTestId('global-composer');
+        const chromeBefore = await chrome.boundingBox();
         const before = {
           scroll: await geometry(scroll),
           content: await geometry(content),
@@ -85,10 +95,6 @@ for (const host of ['web', 'desktop'] as const) {
           scrollHeight: el.scrollHeight,
           gutter: getComputedStyle(el).scrollbarGutter,
         }));
-        await testInfo.attach('scroll-owner.json', {
-          body: JSON.stringify(metrics, null, 2),
-          contentType: 'application/json',
-        });
         expect(metrics.scrollHeight).toBeGreaterThan(metrics.clientHeight);
         // Fail loudly in overlay environments: otherwise this regression is vacuous.
         expect(metrics.offsetWidth - metrics.clientWidth).toBeGreaterThan(0);
@@ -98,13 +104,33 @@ for (const host of ['web', 'desktop'] as const) {
           content: await geometry(content),
           edge: await geometry(edge),
         };
+        expect(await chrome.boundingBox()).toEqual(chromeBefore);
+        await scroll.hover();
+        await page.mouse.wheel(0, 240);
+        await expect.poll(() => scroll.evaluate((el) => el.scrollTop)).toBeGreaterThan(0);
         await scroll.evaluate((el) => el.querySelector('[data-scrollbar-probe]')!.remove());
         const after = {
           scroll: await geometry(scroll),
           content: await geometry(content),
           edge: await geometry(edge),
         };
+        const evidencePath = testInfo.outputPath('scroll-owner.json');
+        await writeFile(
+          evidencePath,
+          JSON.stringify({ metrics, before, overflowing, after }, null, 2),
+        );
+        await testInfo.attach('scroll-owner', {
+          path: evidencePath,
+          contentType: 'application/json',
+        });
+        expect(await chrome.boundingBox()).toEqual(chromeBefore);
         expect(await scroll.evaluate((el) => el.scrollHeight <= el.clientHeight + 1)).toBe(true);
+        expect(
+          await page.evaluate(() => {
+            const root = document.scrollingElement!;
+            return root.scrollHeight <= root.clientHeight + 1;
+          }),
+        ).toBe(true);
         for (const current of [overflowing, after]) {
           for (const key of ['scroll', 'content', 'edge'] as const) {
             expect(Math.abs(current[key].x - before[key].x), `${key} x`).toBeLessThanOrEqual(1);

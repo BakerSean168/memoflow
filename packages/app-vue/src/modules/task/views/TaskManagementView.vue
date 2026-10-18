@@ -24,7 +24,7 @@
 
     <main
       :inert="showDialog || showQuickTaskDialog"
-      class="flex min-h-0 flex-1 flex-col overflow-y-auto px-3 py-3 @md/panel:px-5 @md/panel:py-4"
+      class="flex min-h-0 flex-1 flex-col overflow-y-auto scrollbar-gutter-stable px-3 py-3 @md/panel:px-5 @md/panel:py-4"
       data-scroll-host="task-management"
       data-testid="task-management-scroll-host"
     >

@@ -1,7 +1,7 @@
 <template>
   <div
     ref="viewport"
-    class="min-h-0 flex-1 overflow-y-auto px-4 py-5 @md/ai:px-7 @xl/ai:px-10"
+    class="min-h-0 flex-1 overflow-y-auto scrollbar-gutter-stable px-4 py-5 @md/ai:px-7 @xl/ai:px-10"
     data-testid="ai-message-panel"
   >
     <div
