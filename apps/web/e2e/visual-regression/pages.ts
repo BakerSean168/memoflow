@@ -347,10 +347,32 @@ app.provide(keys.AI_ASSISTANT_RUNTIME_KEY, {
 app.provide(keys.AI_RUNTIME_USAGE_KEY, { get: async () => null } as never);
 app.provide(keys.AI_WORKFLOW_RUNTIME_KEY, { get: async () => nativeRun } as never);
 app.provide(keys.ASSISTANT_SURFACE_KEY, 'web');
+if (params.get('acceptance') === '484') {
+  app.provide(keys.AI_AGENT_REGISTRY_KEY, {
+    list: async () => ({
+      instances: [
+        {
+          instanceId: 'mastra',
+          driver: 'mastra',
+          name: 'Layout acceptance',
+          accentColor: '#6366f1',
+          enabled: true,
+          revision: 0,
+          createdAt: stamp,
+          updatedAt: stamp,
+        },
+      ],
+      bindings: [],
+    }),
+    execute: async () => {
+      throw new Error('Unexpected fixture write');
+    },
+  });
+}
 const route = shell
   ? '/tasks'
   : surface === 'settings'
-    ? '/settings?tab=appearance'
+    ? `/settings?tab=${params.get('tab') ?? 'appearance'}`
     : surface === 'knowledge'
       ? '/repository?note=projection-1'
       : '/routines';
