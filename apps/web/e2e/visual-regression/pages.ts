@@ -23,6 +23,7 @@ import UserSettingsView from '@memoflow/app-vue/modules/setting/views/UserSettin
 import TaskManagementView from '@memoflow/app-vue/modules/task/views/TaskManagementView.vue';
 import GlobalConfirmDialog from '@memoflow/app-vue/shared/components/GlobalConfirmDialog.vue';
 import AppShell from '@memoflow/app-vue/layouts/shell/AppShell.vue';
+import ListPageShell from '@memoflow/app-vue/components/shared/ListPageShell.vue';
 import {
   template,
   instance,
@@ -190,6 +191,18 @@ const components = {
   knowledge: KnowledgeProjectionWorkspaceView,
   settings: UserSettingsView,
 };
+const SharedListFixture = defineComponent({
+  setup() {
+    return () =>
+      h(ListPageShell, { title: 'Shared list shell', description: 'Scrollbar gutter fixture' }, {
+        default: () => h('div', { 'data-testid': 'shared-list-content' },
+          Array.from({ length: 24 }, (_, index) =>
+            h('p', { class: 'py-4', key: index }, `List item ${index + 1}`),
+          ),
+        ),
+      });
+  },
+});
 const shell = surface.startsWith('shell') || surface === 'ai';
 const router = createRouter({
   history: createMemoryHistory(),
@@ -213,7 +226,9 @@ const router = createRouter({
     : [
         {
           path: '/:pathMatch(.*)*',
-          component: components[surface as keyof typeof components] ?? RoutineConfigurationView,
+          component: surface === 'shared-list'
+            ? SharedListFixture
+            : components[surface as keyof typeof components] ?? RoutineConfigurationView,
         },
       ],
 });

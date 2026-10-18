@@ -202,7 +202,10 @@
           </div>
 
           <div v-else-if="selectedNote" class="h-full min-h-0">
-            <div class="h-full min-h-0 overflow-y-auto" data-scroll-host="repository-preview">
+            <div
+              class="h-full min-h-0 overflow-y-auto scrollbar-gutter-stable"
+              data-scroll-host="repository-preview"
+            >
               <KnowledgeMarkdownPreview
                 :markdown="selectedNote.markdownContent"
                 :title="selectedNote.title"

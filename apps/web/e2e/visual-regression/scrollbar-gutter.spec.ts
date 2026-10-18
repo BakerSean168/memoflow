@@ -22,7 +22,7 @@ test.use({
 // constraints identical while only a child's height changes.
 for (const host of ['web', 'desktop'] as const) {
   for (const width of [440, 1280, 1600]) {
-    for (const surface of ['providers', 'workspace', 'chat'] as const) {
+    for (const surface of ['providers', 'workspace', 'chat', 'shared-list'] as const) {
       test(`#484 ${host} ${surface} classic scrollbar geometry ${width}px`, async ({
         page,
       }, testInfo) => {
@@ -31,12 +31,14 @@ for (const host of ['web', 'desktop'] as const) {
           host,
           theme: 'light',
           locale: 'en-US',
-          width: 'wide',
+          width: width === 440 ? 'narrow' : 'wide',
           clock: 'running',
           query:
             surface === 'providers'
               ? 'surface=settings&tab=ai&acceptance=484'
-              : 'surface=shell-split&acceptance=484',
+              : surface === 'shared-list'
+                ? 'surface=shared-list&acceptance=484'
+                : 'surface=shell-split&acceptance=484',
         });
         await page.setViewportSize({ width, height: 1800 });
         const scroll =
@@ -44,7 +46,9 @@ for (const host of ['web', 'desktop'] as const) {
             ? page.getByTestId('settings-content-scroll')
             : surface === 'workspace'
               ? page.getByTestId('task-management-scroll-host')
-              : page.getByTestId('ai-message-panel');
+              : surface === 'shared-list'
+                ? page.getByTestId('list-page-scroll-host')
+                : page.getByTestId('ai-message-panel');
         if (surface === 'chat' && width === 440) {
           // The narrow shell starts in business focus; switch to the chat scene.
           await page.getByTestId('shell-right-panel-toggle').click();
@@ -55,8 +59,10 @@ for (const host of ['web', 'desktop'] as const) {
         await waitForVisualLayout(page);
         expect(await scroll.evaluate((el) => getComputedStyle(el).overflowY)).toBe('auto');
         const content =
-          surface === 'workspace'
-            ? scroll.locator(':scope > *').first()
+          surface === 'shared-list'
+            ? page.getByTestId('shared-list-content')
+            : surface === 'workspace'
+              ? scroll.locator(':scope > *').first()
             : scroll.locator(':scope > div').first();
         const edge =
           surface === 'providers'
@@ -67,9 +73,14 @@ for (const host of ['web', 'desktop'] as const) {
             ? width === 440
               ? page.getByTestId('settings-compact-back')
               : page.getByTestId('settings-return-to-app')
-            : surface === 'workspace'
+              : surface === 'workspace'
               ? page.getByTestId('task-page-toolbar')
+              : surface === 'shared-list'
+                ? page.getByTestId('list-page-toolbar')
               : page.getByTestId('global-composer');
+        expect(
+          await scroll.evaluate((el) => getComputedStyle(el).scrollbarGutter),
+        ).toContain('stable');
         const chromeBefore = await chrome.boundingBox();
         const before = {
           scroll: await geometry(scroll),

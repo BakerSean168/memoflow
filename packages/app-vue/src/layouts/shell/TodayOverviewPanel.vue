@@ -59,7 +59,7 @@ onBeforeUnmount(() => {
 
 <template>
   <section
-    class="h-full min-h-0 overflow-y-auto bg-[hsl(var(--background))]"
+    class="h-full min-h-0 overflow-y-auto scrollbar-gutter-stable bg-[hsl(var(--background))]"
     data-testid="today-overview-panel"
     data-scroll-host="home"
   >
