@@ -80,7 +80,22 @@ defineExpose({
   },
 });
 const enabledAgents = computed(() => props.agents.filter((agent) => agent.enabled));
-const providerUnavailable = computed(() => !props.loading && !enabledAgents.value.length);
+const providerUnavailable = computed(() => {
+  if (props.loading) return false;
+  if (!enabledAgents.value.length) return true;
+  const catalog = props.catalog;
+  if (!catalog) return false;
+  const enabledEntries = Object.values(catalog).filter((entry) =>
+    enabledAgents.value.some((agent) => agent.id === entry.agentKey),
+  );
+  if (enabledEntries.length !== enabledAgents.value.length) return false;
+  if (enabledEntries.some((entry) => entry.status === 'ready' && entry.models.length)) return false;
+  if (enabledEntries.some((entry) => ['idle', 'loading'].includes(entry.status))) return false;
+  if (enabledAgents.value.some((agent) => agent.driver !== 'mastra')) return false;
+  return enabledEntries.every((entry) =>
+    ['ready', 'error', 'unavailable'].includes(entry.status),
+  );
+});
 const browsedCatalog = computed(() =>
   Object.values(props.catalog ?? {}).find((entry) => entry.agentKey === activeSection.value),
 );

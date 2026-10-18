@@ -28,7 +28,6 @@ test('native picker browses a different enabled instance, directly selects its d
     path.join(authDir, 'acp_token.json'),
     JSON.stringify({ client_id: 'fixture', refresh_token: 'offline-only' }),
   );
-  if (process.platform !== 'win32') fs.chmodSync(path.resolve('e2e/support/attention-acp-fixture.cjs'), 0o755);
   const promptLog = path.join(root, 'prompts');
   let app: Awaited<ReturnType<typeof electron.launch>> | undefined;
   try {

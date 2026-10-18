@@ -444,6 +444,17 @@ export function useAIChatView(options: UseAIChatViewOptions) {
         if (!id) {
           if (instance.instanceId !== instance.driver)
             throw new Error('Native instance has no connection');
+          const beforeMaterialization = (await agentRegistryClient.list()).instances.find(
+            (item) => item.instanceId === instance.instanceId,
+          );
+          if (
+            !beforeMaterialization ||
+            !beforeMaterialization.enabled ||
+            beforeMaterialization.driver !== instance.driver ||
+            beforeMaterialization.revision !== instance.revision ||
+            beforeMaterialization.legacyConnectionId
+          )
+            throw new Error('Native Agent changed before connection materialization');
           try {
             const updated = await agentRegistryClient.execute({
               action: 'update',
@@ -498,7 +509,10 @@ export function useAIChatView(options: UseAIChatViewOptions) {
           throw new Error('Native Agent connection is no longer available');
         // Resolve membership for the actual Connection before committing the route:
         // discovery/auth can have changed since this instance was browsed.
-        const discovered = await localAgent.probeConnection(id);
+        const [discovered, beforeCommitSnapshot] = await Promise.all([
+          localAgent.probeConnection(id),
+          agentRegistryClient.list(),
+        ]);
         if (
           disposed ||
           identity !== resolveIdentity() ||
@@ -511,6 +525,16 @@ export function useAIChatView(options: UseAIChatViewOptions) {
           !discovered.models.some((item) => item.id === model.modelId)
         )
           throw new Error('Native model is no longer available; check the instance again');
+        const beforeCommit = beforeCommitSnapshot.instances.find(
+          (item) => item.instanceId === instance.instanceId,
+        );
+        if (
+          !beforeCommit ||
+          !beforeCommit.enabled ||
+          beforeCommit.driver !== instance.driver ||
+          beforeCommit.legacyConnectionId !== id
+        )
+          throw new Error('Native Agent changed before model selection was committed');
         // Do not commit a partial empty-model selection. All failures preserve draft and prior route.
         if (chatSession.chatLoading.value || workflowSelectionLocked.value) return;
         const choice = chatSession.runtimeChoice.value;

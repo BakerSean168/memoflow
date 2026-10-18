@@ -177,6 +177,26 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     wrapper.unmount();
   });
 
+  it('shows provider settings when enabled Mastra catalogs settle empty', () => {
+    const wrapper = setup({
+      agents: [agents[0]],
+      models: [],
+      selectedAgentId: 'agent:mastra',
+      selectedModelKey: '',
+      catalog: {
+        mastra: {
+          instanceId: 'mastra',
+          agentKey: 'agent:mastra',
+          status: 'ready',
+          models: [],
+        },
+      },
+    });
+    expect(wrapper.find('[data-testid="ai-composer-provider-unavailable"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="ai-chat-model-selector"]').exists()).toBe(false);
+    wrapper.unmount();
+  });
+
   it('does not show reasoning for a single fixed effort', () => {
     const model = { ...models[0]!, reasoningEfforts: ['high'] };
     const wrapper = setup({ native: true, models: [model] });

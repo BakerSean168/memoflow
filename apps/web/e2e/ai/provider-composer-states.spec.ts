@@ -9,12 +9,8 @@ test('provider settings load and built-in reset retains identity', async ({ page
   await page.goto('/settings?tab=ai');
   const response = await page.request.get('/api/v1/ai/agent-instances');
   const body = await response.json();
-  console.log(
-    'Registry response',
-    response.status(),
-    body.ok,
-    body.error ?? Object.keys(body.data ?? {}),
-  );
+  expect(response.status()).toBe(200);
+  expect(body.ok).toBe(true);
   await expect(page.getByTestId('ai-provider-list')).toBeVisible();
   await expect(page.getByTestId('ai-agent-delete')).toHaveCount(0);
   await page.getByTestId('ai-provider-toggle-mastra').click();
@@ -54,45 +50,24 @@ test('provider settings load and built-in reset retains identity', async ({ page
   await expect(page.getByTestId('ai-endpoint')).toBeVisible();
 });
 
-test('empty enabled instances remain browsable after initialization with a stable setup state', async ({
+test('accounts without selectable models show provider settings after initialization', async ({
   page,
-}, testInfo) => {
+}) => {
   await registerAndLogin(page, {
     email: `e2e-provider-empty-${Date.now()}@test.com`,
     password: 'Test123456!',
-  });
-  let release!: () => void;
-  const gate = new Promise<void>((resolve) => {
-    release = resolve;
   });
   let requested = false;
   await page.route('**/api/v1/ai/agent-instances', async (route) => {
     if (route.request().method() === 'GET') {
       requested = true;
-      await gate;
     }
     await route.continue();
   });
-  try {
-    await page.goto('/');
-    await expect.poll(() => requested).toBe(true);
-    await expect(page.getByTestId('ai-chat-model-selector')).toBeVisible();
-    await expect(page.getByTestId('ai-composer-provider-unavailable')).toHaveCount(0);
-  } finally {
-    release();
-  }
-  await expect(page.getByTestId('ai-chat-model-selector')).toBeEnabled();
-  await expect(page.getByTestId('ai-chat-permission-selector')).toHaveCount(0);
-  await expect(page.getByTestId('ai-chat-traits-selector')).toHaveCount(0);
-  await page.getByTestId('ai-chat-model-selector').click();
-  await expect(page.getByTestId('ai-model-picker-agent-agent:mastra')).toBeVisible();
-  await expect(page.getByTestId('ai-model-picker-empty')).toContainText(
-    /暂无可用模型|No models are available/,
-  );
-  await expect(page.getByTestId('ai-model-picker-select-agent')).toHaveCount(0);
-  await page
-    .getByTestId('ai-model-picker')
-    .screenshot({ path: testInfo.outputPath('empty-providers.png') });
-  await page.getByTestId('ai-model-picker-empty-settings').click();
+  await page.goto('/');
+  await expect.poll(() => requested).toBe(true);
+  await expect(page.getByTestId('ai-composer-provider-unavailable')).toBeVisible();
+  await expect(page.getByTestId('ai-chat-model-selector')).toHaveCount(0);
+  await page.getByTestId('ai-composer-provider-unavailable').click();
   await expect(page.getByTestId('ai-provider-list')).toBeVisible();
 });
