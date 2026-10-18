@@ -256,7 +256,7 @@ detector 或 manifest 失败为失败。
 | Execution   | `lane-registry.mjs`、`run-command.mjs`                                                         | lane input/result 版本化，NX base/head 从 manifest 注入                                          |
 | Observation | `observe-lane.mjs`、`observe-run.mjs`、`collect-github-run-metrics.mjs`、`compare-timings.mjs` | 多 job 同 lane 聚合、真实墙钟/runner-minutes、缺失证据 fail closed、P50/P95 只能比较同 lane 集合 |
 | Release     | `promote-artifact.mjs`、`release-publish.yml`、`publish-images.yml`                            | production 必须同时具备六种 artifact（含 API runtime closure），禁止 source rebuild promotion    |
-| Governance  | `ruleset-check.mjs`、`.github/rulesets/main.json`、`ci-platform-audit.yml`                     | 稳定 Oracle 必须 active；单人维护者不强制 approving review；故障矩阵定期运行                     |
+| Governance  | `ruleset-check.mjs`、`.github/rulesets/main.json`、`ci-platform-audit.yml`                     | `CI Check` 是唯一 required context；单人维护者不强制 approving review；故障矩阵定期运行          |
 
 新增 lane 或 artifact 类型必须先更新 registry、对应 schema、负向测试和 adapter；workflow 只能消费
 这些注册信息，不能重新声明一套隐含契约。

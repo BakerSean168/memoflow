@@ -14,12 +14,12 @@ job 的执行条件也只消费 manifest 的 lane policy：docs-only PR 只保�
 static-analysis、unit、typecheck、build、verification-children、web-flow-shard），读取 delivery manifest，
 由 `tools/ci-cd-platform/lib/ci-check.mjs` 判定。只有 manifest 关闭的 lane 允许 skipped（unit 另需
 `scope.unit` 为空）；failure、cancelled、意外 skipped、被关闭却运行的 lane，以及 manifest 缺失、digest
-不一致、needs 漂移都判红。它目前与七个 Oracle 和 `Delivery Observation` 并行运行；Ruleset 切换到只
-要求 `CI Check` 是单独的人工步骤，切换后再退役这些 Oracle 的 required 状态。
+不一致、needs 漂移都判红。`main` Ruleset 只要求 `CI Check` 这一个 status check（2026-10-19 切换）；七个 Oracle 和
+`Delivery Observation` 仍然运行并输出诊断，但不再是 required check。
 
 Oracle 使用 `tools/test-system-v2/lib/oracle.mjs` 的同一状态机：未受影响且 child skipped 是成功，
 应执行但 skipped/cancelled/failed 是失败，detector failure 会 fail closed。GitHub ruleset 的 active
-required contexts 由 `.github/rulesets/main.json` 声明，并由 `ruleset-check` 校验名称一致性。
+required context（仅 `CI Check`）由 `.github/rulesets/main.json` 声明，并由 `ruleset-check` 校验名称一致性。
 
 Validate children（static analysis、unit、typecheck、build）并行执行。Desktop IPC 和 main 在一个
 prepared Boundary runner 内分别执行；integration、smoke 和每个 Web shard 使用独立数据库环境。
@@ -73,9 +73,9 @@ node --test tools/ci-cd-platform/__tests__/timing.test.mjs
 pnpm nx run desktop:test:boundary
 ```
 
-仓库只有一名维护者时，`.github/rulesets/main.json` 保留 active Oracle、Delivery Observation 和 required thread resolution，
+仓库只有一名维护者时，`.github/rulesets/main.json` 保留 active 的 `CI Check` required context 和 required thread resolution，
 但 `required_approving_review_count`、code-owner review 和 last-push approval 均为 `0/false`；门禁是
-自动化 Oracle，不是给自己制造一个无法产生第二人的 review 阻塞。
+自动化 `CI Check`，不是给自己制造一个无法产生第二人的 review 阻塞。
 
 ## 2026-08-05 V2 验收测量
 

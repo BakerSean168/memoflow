@@ -270,19 +270,20 @@ Oracle job 使用 `if: always()`，不得因为 dependency skipped 而自身消�
 
 ## 8. GitHub ruleset
 
-`main` 必须启用 ruleset，required contexts 与当前 Oracle 名称完全一致。动态 children 和 matrix shard
-不直接作为 required check。
+`main` 必须启用 ruleset，唯一 required context 是聚合门禁 `CI Check`（`tools/ci-cd-platform/lib/ci-check.mjs`
+按 delivery manifest 判定所有 lane）。Oracle、`Delivery Observation`、动态 children 和 matrix shard
+继续运行用于诊断，但不直接作为 required check。
 
 规则至少包括：
 
 - 禁止删除 `main`。
 - 禁止 non-fast-forward 更新。
 - 合并必须经过 pull request。
-- 当前仓库由单一维护者维护，因此不强制额外 approving review；PR、required Oracle
-  status checks 和 review thread resolution 仍然保留。维护者应在合并前自行完成变更复核，
+- 当前仓库由单一维护者维护，因此不强制额外 approving review；PR、required `CI Check`
+  status check 和 review thread resolution 仍然保留。维护者应在合并前自行完成变更复核，
   并以 CI 结果作为自动化质量门禁。
-- 所有 required Oracle 成功，包括合法未受影响时仍会出现的 `Performance Oracle`；最终
-  `Delivery Observation` 也必须成功，确认所有 enabled lane 的 evidence 已完整收集。
+- `CI Check` 成功：manifest 合同与 digest 有效，所有 enabled lane 成功，只有 manifest 关闭的 lane
+  允许 skipped，failure/cancelled/意外 skip/needs 漂移一律判红。
 - required checks 使用 strict policy，基于最新 `main` 验证。
 - 紧急绕过主体和操作流程单独记录，不把 disabled ruleset 当日常开发状态。
 
