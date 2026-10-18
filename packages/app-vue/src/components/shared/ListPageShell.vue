@@ -18,7 +18,7 @@ defineProps<{
 
 <template>
   <div class="flex h-full min-h-0 flex-col overflow-hidden bg-background">
-    <LinearPageHeader :title="title" :description="description">
+    <LinearPageHeader :title="title" :description="description" data-testid="list-page-toolbar">
       <template #actions>
         <slot name="actions" />
       </template>
@@ -26,7 +26,11 @@ defineProps<{
 
     <slot name="filter" />
 
-    <div class="min-h-0 flex-1 overflow-y-auto">
+    <div
+      class="min-h-0 flex-1 overflow-y-auto scrollbar-gutter-stable"
+      data-scroll-host="list-page"
+      data-testid="list-page-scroll-host"
+    >
       <div class="mx-auto w-full max-w-7xl px-6 py-6">
         <slot />
       </div>

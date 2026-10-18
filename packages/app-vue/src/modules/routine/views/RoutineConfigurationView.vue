@@ -215,7 +215,7 @@
 
     <div
       :inert="routineDialogOpen || profileDialogOpen"
-      class="min-h-0 flex-1 overflow-y-auto"
+      class="min-h-0 flex-1 overflow-y-auto scrollbar-gutter-stable"
       data-testid="routine-scroll-host"
       data-scroll-host="routine"
     >

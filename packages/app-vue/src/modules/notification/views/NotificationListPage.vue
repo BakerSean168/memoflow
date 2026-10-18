@@ -33,7 +33,7 @@
 
     <!-- 信箱保持阅读宽度，略放宽到 5xl 以匹配 Goal / Task 的主内容列。 -->
     <div
-      class="min-h-0 flex-1 overflow-y-auto px-4 py-3 @2xl/panel:px-6"
+      class="min-h-0 flex-1 overflow-y-auto scrollbar-gutter-stable px-4 py-3 @2xl/panel:px-6"
       data-testid="notification-scroll-host"
       data-scroll-host="notification"
     >

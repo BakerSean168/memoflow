@@ -528,6 +528,12 @@
       "role": "artifact",
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.visual-regression.config.ts"
+    },
+    "apps/web/e2e/visual-regression/scrollbar-gutter.spec.ts": {
+      "surface": "visual-regression",
+      "role": "supplemental",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.visual-regression.config.ts"
     }
   }
 }

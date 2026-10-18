@@ -202,7 +202,10 @@
 
         <main class="min-h-0 overflow-hidden">
           <div v-if="activeNote" class="h-full min-h-0">
-            <div class="h-full min-h-0 overflow-y-auto" data-scroll-host="local-vault-preview">
+            <div
+              class="h-full min-h-0 overflow-y-auto scrollbar-gutter-stable"
+              data-scroll-host="local-vault-preview"
+            >
               <KnowledgeMarkdownPreview
                 :markdown="activeNote.contentMarkdown"
                 :title="activeNote.title"

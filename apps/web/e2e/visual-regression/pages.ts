@@ -23,6 +23,7 @@ import UserSettingsView from '@memoflow/app-vue/modules/setting/views/UserSettin
 import TaskManagementView from '@memoflow/app-vue/modules/task/views/TaskManagementView.vue';
 import GlobalConfirmDialog from '@memoflow/app-vue/shared/components/GlobalConfirmDialog.vue';
 import AppShell from '@memoflow/app-vue/layouts/shell/AppShell.vue';
+import ListPageShell from '@memoflow/app-vue/components/shared/ListPageShell.vue';
 import {
   template,
   instance,
@@ -190,6 +191,18 @@ const components = {
   knowledge: KnowledgeProjectionWorkspaceView,
   settings: UserSettingsView,
 };
+const SharedListFixture = defineComponent({
+  setup() {
+    return () =>
+      h(ListPageShell, { title: 'Shared list shell', description: 'Scrollbar gutter fixture' }, {
+        default: () => h('div', { 'data-testid': 'shared-list-content' },
+          Array.from({ length: 24 }, (_, index) =>
+            h('p', { class: 'py-4', key: index }, `List item ${index + 1}`),
+          ),
+        ),
+      });
+  },
+});
 const shell = surface.startsWith('shell') || surface === 'ai';
 const router = createRouter({
   history: createMemoryHistory(),
@@ -213,7 +226,9 @@ const router = createRouter({
     : [
         {
           path: '/:pathMatch(.*)*',
-          component: components[surface as keyof typeof components] ?? RoutineConfigurationView,
+          component: surface === 'shared-list'
+            ? SharedListFixture
+            : components[surface as keyof typeof components] ?? RoutineConfigurationView,
         },
       ],
 });
@@ -347,10 +362,32 @@ app.provide(keys.AI_ASSISTANT_RUNTIME_KEY, {
 app.provide(keys.AI_RUNTIME_USAGE_KEY, { get: async () => null } as never);
 app.provide(keys.AI_WORKFLOW_RUNTIME_KEY, { get: async () => nativeRun } as never);
 app.provide(keys.ASSISTANT_SURFACE_KEY, 'web');
+if (params.get('acceptance') === '484') {
+  app.provide(keys.AI_AGENT_REGISTRY_KEY, {
+    list: async () => ({
+      instances: [
+        {
+          instanceId: 'mastra',
+          driver: 'mastra',
+          name: 'Layout acceptance',
+          accentColor: '#6366f1',
+          enabled: true,
+          revision: 0,
+          createdAt: stamp,
+          updatedAt: stamp,
+        },
+      ],
+      bindings: [],
+    }),
+    execute: async () => {
+      throw new Error('Unexpected fixture write');
+    },
+  });
+}
 const route = shell
   ? '/tasks'
   : surface === 'settings'
-    ? '/settings?tab=appearance'
+    ? `/settings?tab=${params.get('tab') ?? 'appearance'}`
     : surface === 'knowledge'
       ? '/repository?note=projection-1'
       : '/routines';

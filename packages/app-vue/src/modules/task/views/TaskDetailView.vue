@@ -59,7 +59,7 @@
     </ModuleHeader>
 
     <main
-      class="min-h-0 flex-1 overflow-y-auto px-3 py-3 @md/panel:px-5 @md/panel:py-4"
+      class="min-h-0 flex-1 overflow-y-auto scrollbar-gutter-stable px-3 py-3 @md/panel:px-5 @md/panel:py-4"
       data-scroll-host="task-detail"
       data-testid="task-detail-scroll-host"
     >

@@ -2761,6 +2761,20 @@
       }
     },
     {
+      "path": "apps/web/e2e/visual-regression/scrollbar-gutter.spec.ts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.visual-regression.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "visual-regression",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.visual-regression.config.ts"
+      }
+    },
+    {
       "path": "apps/web/src/auth/DeviceAuthorizationView.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12994,7 +13008,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 1,
+      "fileCount": 2,
       "e2eOwnership": {
         "lane": "visual-artifact",
         "lifecycle": "active",
@@ -13965,7 +13979,7 @@
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 9,
-    "e2e": 63,
+    "e2e": 64,
     "perf": 2,
     "governance": 71
   },
@@ -13980,13 +13994,13 @@
       "required": 28,
       "secure-acceptance": 3,
       "specialized": 3,
-      "visual-artifact": 3
+      "visual-artifact": 4
     },
     "countsByRole": {
       "artifact": 3,
       "canonical": 32,
       "reference": 6,
-      "supplemental": 22
+      "supplemental": 23
     },
     "automatedCollectorCount": 4,
     "automationBindingCount": 5

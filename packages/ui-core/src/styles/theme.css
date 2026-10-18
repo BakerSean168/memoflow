@@ -306,3 +306,7 @@
     border-color: hsl(var(--border) / 0.5);
   }
 }
+
+@utility scrollbar-gutter-stable {
+  scrollbar-gutter: stable;
+}
