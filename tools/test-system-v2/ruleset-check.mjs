@@ -5,16 +5,8 @@ const ruleset = JSON.parse(await readFile('.github/rulesets/main.json', 'utf8'))
 const required =
   ruleset.rules.find((rule) => rule.type === 'required_status_checks')?.parameters
     ?.required_status_checks ?? [];
-const expected = [
-  'Governance Oracle',
-  'Validate Oracle',
-  'Boundary Oracle',
-  'Integration Oracle',
-  'Web Flow Oracle',
-  'Coverage Oracle',
-  'Performance Oracle',
-  'Delivery Observation',
-];
+// CI Check is the single aggregate gate (#488); Oracles and Delivery Observation still run but are not required.
+const expected = ['CI Check'];
 const actual = required.map((entry) => entry.context);
 const pullRequestRule = ruleset.rules.find((rule) => rule.type === 'pull_request');
 const reviewPolicy = pullRequestRule?.parameters;
@@ -27,9 +19,11 @@ if (
   actual.join('\n') !== expected.join('\n') ||
   !soloMaintainerPolicy
 ) {
-  console.error('[ruleset-check] enforcement or required Oracle contexts do not match');
+  console.error(
+    '[ruleset-check] enforcement or required status contexts do not match (expected only CI Check)',
+  );
   process.exit(1);
 }
 console.log(
-  `[ruleset-check] active; ${actual.length} Oracle contexts; solo-maintainer review policy enabled`,
+  `[ruleset-check] active; required contexts: ${actual.join(', ')}; solo-maintainer review policy enabled`,
 );

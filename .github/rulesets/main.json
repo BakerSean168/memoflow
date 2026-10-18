@@ -15,16 +15,7 @@
     {
       "type": "required_status_checks",
       "parameters": {
-        "required_status_checks": [
-          { "context": "Governance Oracle", "integration_id": 15368 },
-          { "context": "Validate Oracle", "integration_id": 15368 },
-          { "context": "Boundary Oracle", "integration_id": 15368 },
-          { "context": "Integration Oracle", "integration_id": 15368 },
-          { "context": "Web Flow Oracle", "integration_id": 15368 },
-          { "context": "Coverage Oracle", "integration_id": 15368 },
-          { "context": "Performance Oracle", "integration_id": 15368 },
-          { "context": "Delivery Observation", "integration_id": 15368 }
-        ],
+        "required_status_checks": [{ "context": "CI Check", "integration_id": 15368 }],
         "strict_required_status_checks_policy": true,
         "do_not_enforce_on_create": false
       }
