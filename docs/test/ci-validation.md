@@ -10,6 +10,13 @@ job 的执行条件也只消费 manifest 的 lane policy：docs-only PR 只保�
 最终的 `Delivery Observation` 也属于 required context；它校验 manifest、lane evidence 和 run summary
 完整存在，避免所有 child 通过但观测证据缺失时仍然 false-green。
 
+`CI Check`（#488）是单一聚合 gate：`if: always()`，needs 全部 lane job（scope-detector、governance、
+static-analysis、unit、typecheck、build、verification-children、web-flow-shard），读取 delivery manifest，
+由 `tools/ci-cd-platform/lib/ci-check.mjs` 判定。只有 manifest 关闭的 lane 允许 skipped（unit 另需
+`scope.unit` 为空）；failure、cancelled、意外 skipped、被关闭却运行的 lane，以及 manifest 缺失、digest
+不一致、needs 漂移都判红。它目前与七个 Oracle 和 `Delivery Observation` 并行运行；Ruleset 切换到只
+要求 `CI Check` 是单独的人工步骤，切换后再退役这些 Oracle 的 required 状态。
+
 Oracle 使用 `tools/test-system-v2/lib/oracle.mjs` 的同一状态机：未受影响且 child skipped 是成功，
 应执行但 skipped/cancelled/failed 是失败，detector failure 会 fail closed。GitHub ruleset 的 active
 required contexts 由 `.github/rulesets/main.json` 声明，并由 `ruleset-check` 校验名称一致性。

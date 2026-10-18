@@ -6,7 +6,7 @@ tags:
   - target-state
 description: MemoFlow Test System V2 的当前架构、执行契约、质量门禁与验收指标
 created: 2026-08-04T00:00:00+08:00
-updated: 2026-10-04T19:00:00+08:00
+updated: Sun 2026-10-18 9:50 PM CST (UTC+08:00)
 ---
 
 # Test System V2 当前架构
@@ -57,6 +57,12 @@ Test System V2 将测试文件、执行器、Nx 项目图、CI DAG、GitHub rule
 | 浏览器流程 | `e2e`              | Playwright、API、Web、独立数据库               | 纯函数和组件局部断言                              | 否                   |
 | 性能预算   | `test:perf`        | 固定数据、确定性算法、结构化基线               | 随机模拟 DB、不可控公网、过窄 wall-clock 阈值     | 否                   |
 | 治理       | `test:governance`  | 仓库结构、配置、收集清单、workflow schema      | 产品行为断言                                      | 是                   |
+
+源码文本断言不属于快测试：`readFileSync` 一个 `.vue`/`.ts` 再 `toContain` 的退役锁、边界锁，统一写入
+`tools/governance/app-vue-source-locks.json`（forbid/require token、absent/present path、目录 scan），
+由 `app-vue-source-lock-audit.mjs` 在 `memoflow:governance-check` 中执行；仓库扫描类规则（icon Button
+可访问名称、i18n key 完整性）同样位于 `tools/governance`。模板与 testid 契约应写成 Vue Test Utils
+挂载测试；已有行为测试覆盖时直接删除源码断言。
 
 `test` 继续作为 Nx 和日常 TDD 的默认入口。慢测试不会隐藏在默认 target 中；只有实际跨越边界时，
 才升级到对应专门 target。
@@ -254,6 +260,9 @@ Oracle 名称，而不是让 ruleset 依赖会变化的 child job。
 | disabled         | 非 skipped                | 配置异常，失败 |
 | enabled          | success                   | 成功           |
 | enabled          | skipped/cancelled/failure | 失败           |
+
+`CI Check` 在 job 粒度复用同一规则，并以 delivery manifest 为唯一授权来源（见
+[ci-validation](ci-validation.md)）。
 
 Oracle job 使用 `if: always()`，不得因为 dependency skipped 而自身消失。Oracle 逻辑需要独立的脚本或
 单元测试覆盖上述状态组合，避免在 YAML 中复制多套易漂移 shell 判断。
