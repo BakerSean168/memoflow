@@ -80,3 +80,25 @@ jobs:
             apps/web/playwright-audit-report
           if-no-files-found: ignore
           retention-days: 7
+
+  notify-failure:
+    name: Report nightly audit failure
+    needs: audit
+    if: ${{ always() && needs.audit.result == 'failure' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    concurrency:
+      group: nightly-web-flow-audit-alert
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: '24'
+      - name: Open or update tracking issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node tools/ci-cd-platform/nightly-audit-failure.mjs

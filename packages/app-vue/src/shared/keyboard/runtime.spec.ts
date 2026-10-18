@@ -39,7 +39,9 @@ function host(template: string) {
 describe('one keyboard runtime', () => {
   it('toggles the palette from its focused input while isolating other shortcuts', async () => {
     const preview = vi.fn();
+    const sidebar = vi.fn();
     disposers.push(keyboard.register('module.goal.preview', preview));
+    disposers.push(keyboard.register('layout.sidebar', sidebar));
     const { wrapper } = host('<div><button>Open</button></div>');
     press(wrapper.get('button').element, 'k', { ctrlKey: true });
     expect(_getCommandPaletteState().open).toBe(true);
@@ -50,20 +52,22 @@ describe('one keyboard runtime', () => {
     document.body.append(dialog);
     input.focus();
     press(input, '1');
+    press(input, 'b', { ctrlKey: true });
     press(input, '?', { shiftKey: true });
     press(input, 'k', { ctrlKey: true, repeat: true });
     press(input, 'k', { ctrlKey: true, isComposing: true });
     expect(preview).not.toHaveBeenCalled();
+    expect(sidebar).not.toHaveBeenCalled();
     expect(keyboard.helpOpen.value).toBe(false);
     expect(_getCommandPaletteState().open).toBe(true);
     expect(press(input, 'k', { ctrlKey: true }).defaultPrevented).toBe(true);
     expect(_getCommandPaletteState().open).toBe(false);
     dialog.remove();
     await nextTick();
-    keyboard.applyKeymap({ version: 1, overrides: { 'app.palette': ['Alt+K'] } });
-    press(wrapper.get('button').element, 'k', { altKey: true });
+    keyboard.applyKeymap({ version: 1, overrides: { 'app.palette': ['Ctrl+Shift+K'] } });
+    press(wrapper.get('button').element, 'K', { ctrlKey: true, shiftKey: true });
     expect(_getCommandPaletteState().open).toBe(true);
-    press(wrapper.get('button').element, 'k', { altKey: true });
+    press(wrapper.get('button').element, 'K', { ctrlKey: true, shiftKey: true });
     expect(_getCommandPaletteState().open).toBe(false);
   });
   it('navigates an explicit list, selects, opens and ignores edits and hidden lists', () => {

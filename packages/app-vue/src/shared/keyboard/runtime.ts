@@ -142,6 +142,17 @@ export const keyboard = (() => {
     }
     const target =
       event.composedPath().find((node): node is HTMLElement => node instanceof HTMLElement) ?? null;
+    const editable = Boolean(
+      target?.closest(
+        'input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"], [role="combobox"]',
+      ),
+    );
+    if (helpOpen.value) return;
+    if (_getCommandPaletteState().open) {
+      // Keep the palette's own toggle available without leaking other app/workspace commands.
+      engine.handle(event, { scope: 'palette', editable });
+      return;
+    }
     const modals = [
       ...document.querySelectorAll<HTMLElement>(
         '[role="dialog"], [role="alertdialog"], [role="menu"], [role="listbox"], [data-keyboard-modal]',
@@ -149,15 +160,9 @@ export const keyboard = (() => {
     ].filter(
       (node) => !node.hasAttribute('data-capsule-preview-content') && isKeyboardVisible(node),
     );
-    if (helpOpen.value || _getCommandPaletteState().open) return;
     const topModal = modals[modals.length - 1];
     const modalList = topModal?.contains(target) ? listAdapterFor(target) : null;
     if (topModal && !modalList) return;
-    const editable = Boolean(
-      target?.closest(
-        'input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"], [role="combobox"]',
-      ),
-    );
     const content = preview.value
       ? [...document.querySelectorAll<HTMLElement>('[data-capsule-preview-content]')].find(
           (el) => el.dataset.capsulePreviewContent === preview.value && isKeyboardVisible(el),
