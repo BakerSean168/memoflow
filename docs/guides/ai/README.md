@@ -12,7 +12,7 @@ updated: 2026-04-29T00:00:00
 
 这个目录不再维护活跃实施计划。
 
-- 当前需求、方案和验收以 GitHub Issues 为唯一任务真源，不再维护 Active Plans
+- 当前需求、方案和验收以 GitHub Issues 为唯一任务真源
 - `docs/guides/ai` 只保留索引、学习材料、冻结实现记录和工程参考
 - 当前实现真值优先看代码、配置和 `docs/guides/development`
 

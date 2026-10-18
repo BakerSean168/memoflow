@@ -1,6 +1,6 @@
 # MemoFlow Agent Guide
 
-本文件是仓库内 AI 协作的唯一维护入口。`AGENTS.md`、`CLAUDE.md` 和 GitHub/Copilot 相关入口只允许指向这里或补充平台特有说明，不再维护平行规则。
+本文件是 MemoFlow 的项目级 Agent 协作规范；其他平台入口仅引用本文件或补充平台特有约定。
 
 ## 真值顺序
 
@@ -27,11 +27,10 @@
   `pnpm nx run desktop:serve`。
 - 需要 build、lint、test、e2e 时，优先运行离改动最近的 Nx target。
 - 涉及 Docker、运行时、env 注入、部署链路或生产镜像的改动，默认先用 `docker-compose.local.yml` 做本地 prod-like 验证，再进入 PR。
-- GitHub Issue 是当前任务需求、方案、验收与阻塞的唯一真源；Git Commit 是实现事实；PR/CI 是交付证据。禁止另建任务级 Active Plan、进度 Markdown 或第二套任务状态文件。
-- Agent 可在 Plan Mode 中推演，决定与验收结果直接写入 Issue。接手时先查 Issue、Git 分支、最近 Commit、Diff、PR 和 CI；不以之前会话的自述代替核查。
-- 一个仓库默认严格一个 Worktree、一个 Writer。每个任务从最新 main 创建短期 Feature Branch，经必需 PR CI 合并后才开启下个 Issue 的编码。其他 Agent 可基于固定 SHA 只读评审，但不得并发写同一目录。
-- 切换 Agent、阻塞或中断时，Issue 只记一条短检查点：Branch、Commit、未提交文件、实际测试、剩余工作和下一步。平时不重复同步微观进度。
-- 已退休的历史计划可在 [`docs/plan/archive`](docs/plan/README.md) 或 Git 历史查询，但不是当前任务真源。
+- **任务真源（SSOT）**：GitHub Issue 承载需求、技术方案、关键决策、验收条件与阻塞；Git Commit 记录实现，PR/CI 记录交付证据。
+- **严格串行**：仓库使用一个 Worktree，同一时刻一个 Writer。从最新 main 创建短期任务分支，通过 PR 必需 CI 并合并后，才启动下一条 Issue 的编码。其他 Agent 可基于固定 SHA 只读评审。
+- **接手与规划**：接手前核对 Issue、Git 状态、提交、PR 和 CI；复杂任务先分析，持久化的技术决策写回 Issue。
+- **必要交接**：Agent 切换或出现阻塞时，在 Issue 留一条简短记录，包含分支、Commit、工作区状态、实际测试及下一步。
 
 ## 本地验证与发布主线
 
@@ -81,10 +80,9 @@ Engineering Governance 负责把已经确定的结构约束编码成 determinist
 ## 协作入口约定
 
 - `AGENTS.md`：唯一维护中的协作规范（Codex 自动发现）。
-- `CLAUDE.md`：仅使用原生 @AGENTS.md 导入，不复制协作规则；无其他任务 Plan 入口。
+- `CLAUDE.md`：仅使用原生 @AGENTS.md 导入本文件。
 - `.github/copilot-instructions.md`：只补 GitHub/Copilot 特有约束，不复制仓库规范。
 - `.github/prompts/*.md`：只保留轻量入口，引用 canonical docs，不维护过时项目结构说明。
-- 旧的辅助工作区和历史计划目录已退役，不再作为协作入口。
 
 ## Repository Skills
 
