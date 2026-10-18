@@ -32,10 +32,20 @@ test('native picker browses a different enabled instance, directly selects its d
   let app: Awaited<ReturnType<typeof electron.launch>> | undefined;
   try {
     app = await electron.launch({
-      args: ['--disable-gpu', '--disable-dev-shm-usage', path.resolve('dist-electron/main.cjs')],
+      args: [
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        ...(process.platform === 'linux'
+          ? ['--no-sandbox', '--password-store=gnome-libsecret']
+          : []),
+        path.resolve('dist-electron/main.cjs'),
+      ],
       cwd: process.cwd(),
       env: {
         ...environment,
+        // The native credential scrubber also removes XAUTHORITY; Electron still
+        // needs this test-owned Xvfb cookie path to connect to the display.
+        ...(process.env.XAUTHORITY ? { XAUTHORITY: process.env.XAUTHORITY } : {}),
         NODE_ENV: 'test',
         MEMOFLOW_ATTENTION_QA_FIXTURE: '1',
         MEMOFLOW_ATTENTION_QA_PROMPT_LOG: promptLog,
@@ -95,6 +105,7 @@ test('native picker browses a different enabled instance, directly selects its d
     await page.reload();
     const picker = page.getByTestId('ai-chat-model-selector');
     await expect(picker).toContainText('Offline Attention Fixture');
+    await expect(picker).toHaveAttribute('title', /picker-first/);
     await page.getByTestId('ai-chat-composer').fill('Keep native draft');
     const before = await invoke(AIChannels.LOCAL_AGENT, { action: 'list_connections' });
     await picker.click();
@@ -110,7 +121,9 @@ test('native picker browses a different enabled instance, directly selects its d
     await expect(page.getByTestId('ai-model-picker-select-agent')).toHaveCount(0);
     await page.getByTestId('ai-model-picker-toggle-favorite').click();
     await page.getByTestId('ai-model-picker-option').click();
+    await expect(picker).toHaveAttribute('title', /picker-second/);
     await picker.click();
+    await expect(page.getByTestId('ai-model-picker-option')).toContainText('picker-second');
     await expect(page.getByTestId('ai-model-picker-option')).toHaveAttribute(
       'aria-pressed',
       'true',

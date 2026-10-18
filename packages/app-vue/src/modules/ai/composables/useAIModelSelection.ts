@@ -197,6 +197,12 @@ export function useAIModelSelection(options: UseAIModelSelectionOptions) {
   }
 
   function syncSelectedModel(preferredModelKey?: string) {
+    // Disabling hides eligibility, not the user's explicit preference. Keep the
+    // pending tuple so re-enabling can restore it without choosing another Agent.
+    const selectedInstance = options.agentRegistrySnapshot?.value?.instances.find(
+      (instance) => instance.instanceId === selectedAgentId.value,
+    );
+    if (selectedInstance && !selectedInstance.enabled) return;
     if (!allModelOptions.value.length) {
       selectedModelKey.value = '';
       return;

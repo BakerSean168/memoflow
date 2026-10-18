@@ -113,7 +113,10 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   let explicitRuntimeSelection = 0;
   let disposed = false;
   const composerLoading = computed(
-    () => composerInitializing.value || nativeSelectionPending.value,
+    () =>
+      nativeSelectionPending.value ||
+      composerInitializing.value ||
+      (!agentRegistrySnapshot.value && modelCatalogLoading.value),
   );
   const repository = inject(REPOSITORY_SERVICE_KEY, undefined);
   const knowledgeNativeSurface = useKnowledgeNativeSurfaceRegistration();
@@ -493,6 +496,21 @@ export function useAIChatView(options: UseAIChatViewOptions) {
           )
         )
           throw new Error('Native Agent connection is no longer available');
+        // Resolve membership for the actual Connection before committing the route:
+        // discovery/auth can have changed since this instance was browsed.
+        const discovered = await localAgent.probeConnection(id);
+        if (
+          disposed ||
+          identity !== resolveIdentity() ||
+          request !== explicitRuntimeSelection ||
+          conversationId !== chatSession.chatConversationId.value
+        )
+          return;
+        if (
+          discovered.status !== 'ready' ||
+          !discovered.models.some((item) => item.id === model.modelId)
+        )
+          throw new Error('Native model is no longer available; check the instance again');
         // Do not commit a partial empty-model selection. All failures preserve draft and prior route.
         if (chatSession.chatLoading.value || workflowSelectionLocked.value) return;
         const choice = chatSession.runtimeChoice.value;
@@ -975,7 +993,9 @@ export function useAIChatView(options: UseAIChatViewOptions) {
         // Apply the loaded native default without resetting the Composer again.
         chatSession.runtimeChoice.value = { ...savedDefault };
       }
-      await loadAgentRegistry();
+      // Directory discovery is independent of history/provider initialization.
+      // A slow native instance must not lock models already discovered for another.
+      const directory = loadAgentRegistry();
       await initializeChatView({
         initRepository: loadRecentKnowledgeNotes,
         loadProviders,
@@ -990,6 +1010,8 @@ export function useAIChatView(options: UseAIChatViewOptions) {
         translate: t,
         nextTick,
       });
+      if (!disposed) composerInitializing.value = false;
+      await directory;
     } finally {
       if (!disposed) composerInitializing.value = false;
     }

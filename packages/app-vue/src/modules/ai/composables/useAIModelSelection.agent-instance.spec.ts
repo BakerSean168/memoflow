@@ -157,6 +157,24 @@ describe('model selection bound to explicit Mastra Agent instances', () => {
     wrapper.unmount();
   });
 
+  it('hides a disabled selection without deleting its model preference and restores it on re-enable', async () => {
+    const { wrapper, selection, registry } = mounted({});
+    const key = 'agent:mastra-anyrouter::provider-1::model-custom';
+    expect(selection.selectModel(key)).toBe('selected');
+    const preference = localStorage.getItem('ai:last-model-key');
+    registry.value.instances[1]!.enabled = false;
+    await nextTick();
+    expect(selection.selectedModel.value).toBeNull();
+    expect(selection.canSendMessage.value).toBe(false);
+    expect(selection.allModelOptions.value).toHaveLength(1);
+    expect(localStorage.getItem('ai:last-model-key')).toBe(preference);
+    registry.value.instances[1]!.enabled = true;
+    await nextTick();
+    expect(selection.selectedModelKey.value).toBe(key);
+    expect(selection.canSendMessage.value).toBe(true);
+    wrapper.unmount();
+  });
+
   it('exposes one exact historical provider-only model only for the original conversation', () => {
     localStorage.setItem(
       'ai:conversation-model-map',

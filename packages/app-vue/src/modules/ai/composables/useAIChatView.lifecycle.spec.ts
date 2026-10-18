@@ -472,7 +472,16 @@ describe('AI conversation restoration and business navigation', () => {
     expect(fixture.session.runtimeChoice.value).toEqual({ runtimeKind: 'builtin' });
     expect(fixture.session.chatMessage.value).toBe('Preserve the draft');
     expect(await local.listConnections()).toEqual([]);
+    local.probeConnection.mockRejectedValueOnce(
+      new Error('Native discovery failed during selection'),
+    );
     await wrapper.vm.selectComposerModel('real-codex-model', 'local:codex');
+    expect(fixture.session.runtimeChoice.value).toEqual({ runtimeKind: 'builtin' });
+    expect(fixture.session.chatMessage.value).toBe('Preserve the draft');
+    expect(await local.listConnections()).toEqual([connection]);
+    // Explicit materialization is reusable after a recoverable discovery failure.
+    await wrapper.vm.refreshComposerCatalog();
+    await wrapper.vm.selectComposerModel('real-codex-model', 'local:' + connection.id);
     await flushPromises();
     expect(registry.execute).toHaveBeenCalledTimes(2);
     expect(registry.execute).toHaveBeenCalledWith({

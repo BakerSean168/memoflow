@@ -321,7 +321,13 @@ watch(
           :title="
             blockedMessage(currentAgent) ||
             (selectedModel
-              ? selectedModel.modelName + ' · ' + selectedModel.providerName
+              ? [
+                  selectedModel.modelName,
+                  currentAgent && instanceName(currentAgent),
+                  selectedModel.providerName,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')
               : t('aiAssistant.composer.chooseModel'))
           "
           :aria-label="t('aiAssistant.composer.model')"
