@@ -50,24 +50,40 @@ test('provider settings load and built-in reset retains identity', async ({ page
   await expect(page.getByTestId('ai-endpoint')).toBeVisible();
 });
 
-test('accounts without selectable models show provider settings after initialization', async ({
+test('empty providers wait for initialization, then open setup without dependent controls', async ({
   page,
-}) => {
+}, testInfo) => {
   await registerAndLogin(page, {
     email: `e2e-provider-empty-${Date.now()}@test.com`,
     password: 'Test123456!',
+  });
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
   });
   let requested = false;
   await page.route('**/api/v1/ai/agent-instances', async (route) => {
     if (route.request().method() === 'GET') {
       requested = true;
+      await gate;
     }
     await route.continue();
   });
-  await page.goto('/');
-  await expect.poll(() => requested).toBe(true);
+  try {
+    await page.goto('/');
+    await expect.poll(() => requested).toBe(true);
+    await expect(page.getByTestId('ai-chat-model-selector')).toBeVisible();
+    await expect(page.getByTestId('ai-composer-provider-unavailable')).toHaveCount(0);
+  } finally {
+    release();
+  }
   await expect(page.getByTestId('ai-composer-provider-unavailable')).toBeVisible();
   await expect(page.getByTestId('ai-chat-model-selector')).toHaveCount(0);
+  await expect(page.getByTestId('ai-chat-permission-selector')).toHaveCount(0);
+  await expect(page.getByTestId('ai-chat-traits-selector')).toHaveCount(0);
+  await page
+    .getByTestId('ai-composer-provider-unavailable')
+    .screenshot({ path: testInfo.outputPath('empty-providers.png') });
   await page.getByTestId('ai-composer-provider-unavailable').click();
   await expect(page.getByTestId('ai-provider-list')).toBeVisible();
 });
