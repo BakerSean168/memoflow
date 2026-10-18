@@ -75,6 +75,8 @@ jobs:
           setup-uv: 'false'
           lane: governance
           consume-delivery-manifest: 'true'
+      - name: Nx sync generators are applied
+        run: pnpm exec nx sync:check
       - run: pnpm exec nx run test-system-v2:test:inventory --outputStyle=static
       - run: node ./tools/test/test-target-governance.mjs --check
       - run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run memoflow:governance-check

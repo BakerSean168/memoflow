@@ -12543,6 +12543,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/ci-cd-platform/__tests__/nx-task-contract.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "ci-cd-platform:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/ci-cd-platform/__tests__/observe-lane.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -13358,7 +13366,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "node-test",
-      "fileCount": 34
+      "fileCount": 35
     },
     {
       "id": "memoflow:test:governance",
@@ -14309,7 +14317,7 @@
     "boundary-main": 9,
     "e2e": 57,
     "perf": 2,
-    "governance": 66
+    "governance": 67
   },
   "e2eGovernance": {
     "version": 2,
