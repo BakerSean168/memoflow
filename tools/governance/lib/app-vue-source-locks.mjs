@@ -14,6 +14,20 @@ import path from 'node:path';
  *   A scan lock applies its forbid matchers to every file under `root` whose
  *   extension is listed and whose path contains none of the `exclude` substrings.
  *   Matcher = string (literal substring) | { pattern, flags? } (RegExp)
+ *
+ * A file lock may name `files: string[]` instead of `file`; the matchers then run
+ * against the files' contents joined with '\n' (one lock over a combined surface).
+ *
+ * Optional file-lock refinements (Phase 5 of #488, for locks that used to slice
+ * or count source text):
+ *   region: narrows the checked text before every matcher runs
+ *     { pattern, flags? }  -> first RegExp match, or '' when it does not match
+ *     { start, end }       -> source.slice(source.indexOf(start), source.indexOf(end))
+ *     { start, length }    -> `length` chars from indexOf(start); start must exist
+ *   count: [{ pattern, flags?, equals?, min? }] global match count bounds
+ *   order: [{ tokens: string[], chained? }] every token is present and each
+ *     appears after the previous one. chained (default true) searches each token
+ *     from the previous token's index; chained:false compares first occurrences.
  */
 
 /** Remove block and line comments so prose never trips a token lock. */
@@ -68,7 +82,11 @@ export function validateSourceLockManifest(manifest) {
     }
     entry.locks.forEach((lock, lockIndex) => {
       const lockPrefix = `${prefix}.locks[${lockIndex}]`;
-      const hasFile = typeof lock?.file === 'string';
+      const hasFile =
+        typeof lock?.file === 'string' ||
+        (Array.isArray(lock?.files) &&
+          lock.files.length > 1 &&
+          lock.files.every((file) => typeof file === 'string'));
       const hasPaths = Array.isArray(lock?.absentPaths) || Array.isArray(lock?.presentPaths);
       const hasScan = lock?.scan !== undefined;
       if ([hasFile, hasPaths, hasScan].filter(Boolean).length !== 1)
@@ -90,7 +108,9 @@ export function validateSourceLockManifest(manifest) {
       }
       if (hasFile) {
         const all = [...(lock.forbid ?? []), ...(lock.require ?? [])];
-        if (all.length === 0) errors.push(`${lockPrefix} declares no forbid/require matcher`);
+        if (all.length === 0 && !lock.count?.length && !lock.order?.length)
+          errors.push(`${lockPrefix} declares no forbid/require/count/order matcher`);
+        errors.push(...validateRefinements(lock, lockPrefix));
         all.forEach((matcher) => {
           if (!validMatcher(matcher))
             errors.push(`${lockPrefix} has invalid matcher ${JSON.stringify(matcher)}`);
@@ -99,6 +119,62 @@ export function validateSourceLockManifest(manifest) {
     });
   });
   return errors;
+}
+
+function validateRefinements(lock, lockPrefix) {
+  const errors = [];
+  const region = lock.region;
+  if (region !== undefined) {
+    const byPattern = typeof region?.pattern === 'string' && validMatcher(region);
+    const bySlice =
+      typeof region?.start === 'string' &&
+      region.start.length > 0 &&
+      (typeof region.end === 'string' ? region.end.length > 0 : Number.isInteger(region.length));
+    if (!byPattern && !bySlice)
+      errors.push(`${lockPrefix}.region must be {pattern} or {start,end} or {start,length}`);
+  }
+  for (const [index, count] of (lock.count ?? []).entries()) {
+    if (!validMatcher({ pattern: count?.pattern, flags: count?.flags }))
+      errors.push(`${lockPrefix}.count[${index}] has an invalid pattern`);
+    if (!Number.isInteger(count?.equals) && !Number.isInteger(count?.min))
+      errors.push(`${lockPrefix}.count[${index}] needs equals or min`);
+  }
+  for (const [index, order] of (lock.order ?? []).entries()) {
+    if (
+      !Array.isArray(order?.tokens) ||
+      order.tokens.length < 2 ||
+      !order.tokens.every((token) => typeof token === 'string' && token.length > 0)
+    )
+      errors.push(`${lockPrefix}.order[${index}] needs at least two string tokens`);
+  }
+  return errors;
+}
+
+/** Apply a lock's region; returns null when a {start,length} region has no start. */
+export function applyRegion(source, region) {
+  if (!region) return source;
+  if (typeof region.pattern === 'string')
+    return source.match(new RegExp(region.pattern, region.flags ?? ''))?.[0] ?? '';
+  const start = source.indexOf(region.start);
+  if (typeof region.end === 'string') return source.slice(start, source.indexOf(region.end));
+  if (start < 0) return null;
+  return source.slice(start, start + region.length);
+}
+
+export function countMatches(source, count) {
+  const flags = (count.flags ?? '').replace('g', '') + 'g';
+  return (source.match(new RegExp(count.pattern, flags)) ?? []).length;
+}
+
+export function orderHolds(source, order) {
+  const chained = order.chained !== false;
+  let previous = -1;
+  for (const [index, token] of order.tokens.entries()) {
+    const at = source.indexOf(token, chained && index > 0 ? previous : 0);
+    if (at < 0 || (index > 0 && at <= previous)) return false;
+    previous = at;
+  }
+  return true;
 }
 
 export function findSourceLockViolations(root, manifest) {
@@ -117,27 +193,54 @@ export function findSourceLockViolations(root, manifest) {
         violations.push(...scanViolations(root, entry.id, lock));
         continue;
       }
-      if (typeof lock.file !== 'string') continue;
-      const absolute = path.join(root, lock.file);
-      if (!existsSync(absolute)) {
-        violations.push({ id: entry.id, file: lock.file, detail: 'locked file missing' });
+      const files = typeof lock.file === 'string' ? [lock.file] : lock.files;
+      if (!Array.isArray(files)) continue;
+      const missing = files.filter((file) => !existsSync(path.join(root, file)));
+      if (missing.length > 0) {
+        for (const file of missing)
+          violations.push({ id: entry.id, file, detail: 'locked file missing' });
         continue;
       }
-      const raw = readFileSync(absolute, 'utf8');
-      const source = lock.stripComments ? stripComments(raw) : raw;
+      const lockFile = files.join(' + ');
+      const raw = files.map((file) => readFileSync(path.join(root, file), 'utf8')).join('\n');
+      const source = applyRegion(lock.stripComments ? stripComments(raw) : raw, lock.region);
+      if (source === null) {
+        violations.push({ id: entry.id, file: lockFile, detail: 'region start missing' });
+        continue;
+      }
       for (const matcher of lock.forbid ?? []) {
         if (matches(source, matcher))
           violations.push({
             id: entry.id,
-            file: lock.file,
+            file: lockFile,
             detail: `forbidden ${describeMatcher(matcher)}`,
+          });
+      }
+      for (const count of lock.count ?? []) {
+        const found = countMatches(source, count);
+        const ok = Number.isInteger(count.equals) ? found === count.equals : found >= count.min;
+        if (!ok)
+          violations.push({
+            id: entry.id,
+            file: lockFile,
+            detail: `count /${count.pattern}/ is ${found}, expected ${
+              Number.isInteger(count.equals) ? count.equals : `>= ${count.min}`
+            }`,
+          });
+      }
+      for (const order of lock.order ?? []) {
+        if (!orderHolds(source, order))
+          violations.push({
+            id: entry.id,
+            file: lockFile,
+            detail: `order ${order.tokens.map((token) => JSON.stringify(token)).join(' < ')} broken`,
           });
       }
       for (const matcher of lock.require ?? []) {
         if (!matches(source, matcher))
           violations.push({
             id: entry.id,
-            file: lock.file,
+            file: lockFile,
             detail: `required ${describeMatcher(matcher)} missing`,
           });
       }

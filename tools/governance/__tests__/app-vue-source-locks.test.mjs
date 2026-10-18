@@ -90,6 +90,64 @@ describe('app-vue source locks governance', () => {
     ).toMatch(/root and extensions/);
   });
 
+  it('applies region, count and order refinements and combined file surfaces', () => {
+    const root = fixture({
+      'src/a.ts':
+        'function keep(value) {\n  return Number.isFinite(value);\n}\nfunction other() {\n  return new Date();\n}\nfirst(); second(); first();\n',
+      'src/b.ts': 'export const b = 1;\n',
+    });
+    const run = (lock) => findSourceLockViolations(root, entry([lock])).map((v) => v.detail);
+    expect(
+      run({
+        file: 'src/a.ts',
+        region: { pattern: 'function keep\\([\\s\\S]*?\\n\\}' },
+        require: ['Number.isFinite'],
+        forbid: ['new Date('],
+      }),
+    ).toEqual([]);
+    expect(
+      run({
+        file: 'src/a.ts',
+        region: { start: 'function other', end: 'first()' },
+        forbid: ['new Date('],
+      }),
+    ).toEqual(['forbidden "new Date("']);
+    expect(
+      run({ file: 'src/a.ts', region: { start: 'missing', length: 10 }, forbid: ['x'] }),
+    ).toEqual(['region start missing']);
+    expect(run({ file: 'src/a.ts', region: { pattern: 'nope' }, require: ['keep'] })).toEqual([
+      'required "keep" missing',
+    ]);
+    expect(
+      run({
+        file: 'src/a.ts',
+        count: [
+          { pattern: 'first\\(\\)', equals: 2 },
+          { pattern: 'second', min: 2 },
+        ],
+      }),
+    ).toEqual(['count /second/ is 1, expected >= 2']);
+    expect(run({ file: 'src/a.ts', order: [{ tokens: ['second()', 'first()'] }] })).toEqual([]);
+    expect(
+      run({ file: 'src/a.ts', order: [{ tokens: ['second()', 'first()'], chained: false }] }),
+    ).toEqual(['order "second()" < "first()" broken']);
+    expect(
+      run({ files: ['src/a.ts', 'src/b.ts'], require: ['export const b', 'function keep'] }),
+    ).toEqual([]);
+    expect(run({ files: ['src/a.ts', 'src/gone.ts'], forbid: ['x'] })).toEqual([
+      'locked file missing',
+    ]);
+    expect(
+      validateSourceLockManifest(entry([{ file: 'a.ts', count: [{ pattern: 'x' }] }]))[0],
+    ).toMatch(/needs equals or min/);
+    expect(
+      validateSourceLockManifest(entry([{ file: 'a.ts', order: [{ tokens: ['x'] }] }]))[0],
+    ).toMatch(/at least two string tokens/);
+    expect(
+      validateSourceLockManifest(entry([{ file: 'a.ts', region: {}, require: ['x'] }]))[0],
+    ).toMatch(/region must be/);
+  });
+
   it('fails closed on a locked file that disappeared', () => {
     const root = fixture({});
     expect(
