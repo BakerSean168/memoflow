@@ -2747,6 +2747,20 @@
       }
     },
     {
+      "path": "apps/web/e2e/visual-regression/composer-footer.spec.ts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.visual-regression.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "visual-regression",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.visual-regression.config.ts"
+      }
+    },
+    {
       "path": "apps/web/e2e/visual-regression/matrix.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
@@ -13008,7 +13022,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 2,
+      "fileCount": 3,
       "e2eOwnership": {
         "lane": "visual-artifact",
         "lifecycle": "active",
@@ -13979,7 +13993,7 @@
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 9,
-    "e2e": 64,
+    "e2e": 65,
     "perf": 2,
     "governance": 71
   },
@@ -13994,13 +14008,13 @@
       "required": 28,
       "secure-acceptance": 3,
       "specialized": 3,
-      "visual-artifact": 4
+      "visual-artifact": 5
     },
     "countsByRole": {
       "artifact": 3,
       "canonical": 32,
       "reference": 6,
-      "supplemental": 23
+      "supplemental": 24
     },
     "automatedCollectorCount": 4,
     "automationBindingCount": 5

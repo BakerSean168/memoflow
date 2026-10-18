@@ -15,6 +15,7 @@ import * as keys from '@memoflow/app-vue/di/keys';
 import { productionLocaleMessages } from '@memoflow/app-vue/locales/production-messages';
 import { installServerStateRuntime } from '@memoflow/app-vue/platform/server-state';
 import { providePanelWidth } from '@memoflow/app-vue/layouts/shell/usePanelWidth';
+import { useAuthenticationStore } from '@memoflow/app-vue/modules/authentication/stores/authentication-store';
 import { useAppShellStore } from '@memoflow/app-vue/layouts/shell/useAppShellStore';
 import RoutineConfigurationView from '@memoflow/app-vue/modules/routine/views/RoutineConfigurationView.vue';
 import NotificationListPage from '@memoflow/app-vue/modules/notification/views/NotificationListPage.vue';
@@ -233,6 +234,14 @@ const router = createRouter({
       ],
 });
 const pinia = createPinia();
+if (params.has('accountName')) {
+  useAuthenticationStore(pinia).account = {
+    id: 'visual-account',
+    email: 'visual@example.test',
+    name: params.get('accountName')!,
+    emailVerified: true,
+  };
+}
 const app = createApp(
   defineComponent({
     setup() {

@@ -1,6 +1,6 @@
 <template>
   <footer
-    class="global-composer-footer bg-gradient-to-t from-background via-background/96 to-transparent"
+    class="global-composer-footer"
     :class="footerPaddingClass"
     data-testid="ai-footer-composer"
   >
@@ -8,11 +8,12 @@
       <slot name="action-rail" />
 
       <div
-        class="relative rounded-[24px] border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay)/0.94)] backdrop-blur-xl transition-[border-color,box-shadow,background-color] duration-150 focus-within:border-primary/25 focus-within:bg-[hsl(var(--surface-overlay))]"
+        class="relative rounded-[24px] border bg-[hsl(var(--surface-overlay)/0.94)] backdrop-blur-xl transition-[border-color,background-color] duration-150 focus-within:bg-[hsl(var(--surface-overlay))]"
         :class="[
-          semanticElevationClass('floating'),
           density === 'comfortable' ? 'px-4 pb-3 pt-4' : 'px-3 pb-2.5 pt-3',
-          dragging ? 'border-primary/60 bg-muted/20' : '',
+          dragging
+            ? 'border-primary/60 bg-muted/20'
+            : 'border-[hsl(var(--border-strong))] focus-within:border-ring/50',
         ]"
         data-testid="ai-composer-surface"
         @dragenter.prevent="dragging = true"

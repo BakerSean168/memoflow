@@ -305,7 +305,7 @@ const identityLabel = () => {
           <button
             type="button"
             data-testid="shell-account-menu"
-            class="flex min-w-0 items-center gap-2 rounded-md px-1.5 py-1 transition-colors hover:bg-[hsl(var(--hover))]"
+            class="flex h-8 w-full min-w-0 items-center justify-start gap-2 rounded-md px-1.5 text-left transition-colors hover:bg-[hsl(var(--hover))] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             :title="t('shell.account.menu')"
           >
             <span
@@ -313,7 +313,7 @@ const identityLabel = () => {
             >
               {{ displayName().slice(0, 1).toUpperCase() }}
             </span>
-            <span data-testid="shell-account-name" class="truncate text-[11.5px] font-medium">{{
+            <span data-testid="shell-account-name" class="min-w-0 truncate text-[11.5px] font-medium">{{
               displayName()
             }}</span>
           </button>

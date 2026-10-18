@@ -46,12 +46,12 @@ const { t } = useI18n();
         type="button"
         variant="ghost"
         size="sm"
-        class="h-8 max-w-full justify-start gap-2 rounded-md px-1.5 text-muted-foreground hover:text-foreground"
+        class="h-8 w-full min-w-0 justify-start gap-2 rounded-md px-1.5 text-left text-muted-foreground hover:bg-[hsl(var(--hover))] hover:text-foreground"
         data-testid="settings-return-to-app"
         @click="emit('return-to-app')"
       >
         <ArrowLeft class="h-4 w-4 shrink-0" />
-        <span class="truncate">{{ t('shell.settings.returnToApp') }}</span>
+        <span class="min-w-0 truncate">{{ t('shell.settings.returnToApp') }}</span>
       </Button>
     </div>
   </div>

@@ -1,7 +1,7 @@
 import { defineConfig } from '@playwright/test';
 export default defineConfig({
   testDir: './e2e/visual-regression',
-  testMatch: ['matrix.spec.ts', 'scrollbar-gutter.spec.ts'],
+  testMatch: ['matrix.spec.ts', 'scrollbar-gutter.spec.ts', 'composer-footer.spec.ts'],
   fullyParallel: true,
   workers: 2,
   retries: 0,
