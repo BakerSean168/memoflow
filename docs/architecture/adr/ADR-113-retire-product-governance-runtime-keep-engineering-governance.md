@@ -193,7 +193,7 @@ GOV-7903 的完成条件固定为：
 - `Rule` / `RuleRevision` 产品持久化模型与 PowerSync projection 被移除，并提供 destructive drop migration；
 - legacy Product rule-bundle bridge 被删除；
 - Engineering Governance 的 repository-native source、audits、standards docs 与 CI gate 保留；
-- `AGENT.md` 使用真实 owner vertical-slice policy；
+- `AGENTS.md` 使用真实 owner vertical-slice policy；
 - database/runtime generated assets 已重新生成；
 - governance-check、受 retirement 影响的 typecheck/tests/build 与 repository grep 全部通过；完整测试集结果必须记录，并单独列出与本票无关的既有失败，不把部分通过写成全量通过。
 

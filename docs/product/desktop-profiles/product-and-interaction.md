@@ -121,4 +121,4 @@ Shell 左下角账户菜单展示当前 Profile 和按最近使用排序的其�
 
 使用既有 Dialog/Select/Checkbox/Input primitive；键盘可选择 Profile、解锁、确认与跳过；焦点进入标题后的首个操作，关闭后回到触发入口。后台进度通过非打断式状态文本播报，不靠颜色区别 guest/云端/错误。狭窄窗口正文可滚动，footer 操作持续可达。
 
-需要中英文文案、明暗主题、长 Profile 名称、重名、键盘焦点、PIN 错误和同步离线状态验收。具体场景编号见[实施计划](../../plan/active/2026-10-09-desktop-independent-profiles.md)。
+需要中英文文案、明暗主题、长 Profile 名称、重名、键盘焦点、PIN 错误和同步离线状态验收。具体场景编号见[实施计划](https://github.com/BakerSean168/memoflow/issues/487)。

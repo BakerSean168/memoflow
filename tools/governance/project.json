@@ -37,7 +37,7 @@
       "!{projectRoot}/.tmp-*",
       "!{projectRoot}/**/.tmp-*",
       "!{projectRoot}/**/*.tmp",
-      "{workspaceRoot}/AGENT.md",
+      "{workspaceRoot}/AGENTS.md",
       "{workspaceRoot}/docs/architecture/adr/ADR-113-retire-product-governance-runtime-keep-engineering-governance.md",
       "{workspaceRoot}/docs/architecture/adr/ADR-110-governance-permanent-executable-reference-module.md",
       "{workspaceRoot}/apps/**/src/**/*",

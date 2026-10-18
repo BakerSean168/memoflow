@@ -124,9 +124,9 @@ git push origin feat/ai-agent-master-implementation
 **风险**：可能遇到数据库环境问题
 
 ## 关键文档
-- [实施计划](./docs/plan/active/2026-06-08-ai-agent-master-implementation-plan.md)
-- [实施审查](./docs/plan/active/2026-06-12-implementation-status-audit.md)（本审查的详细版本）
-- [最终总结](./docs/plan/active/2026-06-12-ai-agent-implementation-final-summary.md)
+- [实施计划](docs/plan/archive/2026-06-08-ai-agent-master-implementation-plan.md)
+- [实施审查](docs/plan/archive/2026-06-12-implementation-status-audit.md)（本审查的详细版本）
+- [最终总结](docs/plan/archive/2026-06-12-ai-agent-implementation-final-summary.md)
 
 ---
 

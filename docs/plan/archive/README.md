@@ -9,15 +9,15 @@ updated: 2026-10-10T00:00:00Z
 
 # Archived Plans
 
-本目录存放已完成、暂停或仅保留背景参考价值的历史计划。
+本目录仅用于追溯已完成、暂停或不再维护的历史记录。2026-10-18 起所有当前任务、实施方案、验收与 Agent 交接仅维护在 [GitHub Issues](https://github.com/BakerSean168/memoflow/issues)；归档不是待办，不再新增任务级 Plan。
 
 - [Providers 设置与聊天输入区域整合](./2026-10-10-unified-provider-ui.md)：统一 API/原生 Providers 设置与聊天底栏；72 项测试、Web E2E、类型/lint/治理及 Linux 实际 Electron 持久化验收通过。
 
-- [Desktop Profile 研究与设计](./2026-10-09-desktop-profile-research-and-design.md)：已产出设计、官方资料与实施计划；实施进展见 active 计划。
+- [Desktop Profile 研究与设计](./2026-10-09-desktop-profile-research-and-design.md)：已产出设计、官方资料与实施计划；实际进展以对应 GitHub Issue / PR / main 事实为准。
 
 ## 规则
 
-- 不在这里维护活跃任务
+- 不在这里维护活跃任务，不新建任务级 Plan
 - 归档文件保留原始计划上下文，必要时在文首补充结果或停用原因
 
 ## 季度子索引
@@ -70,7 +70,6 @@ updated: 2026-10-10T00:00:00Z
 | 2026-08-08 | [业务重构 findings 追踪](./2026-08-07-business-loop-findings-tracking.md)                                | 状态全部同步 done；P0-01/P0-04/R2-5 证据回填                                                                                                                                                                                        |
 | 2026-08-05 | [Test System V2](./2026-08-04-test-system-v2-refactor.md)                                                | #204；唯一归属、七 Oracle、active ruleset；全绿 run 30934384004                                                                                                                                                                     |
 | ---------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------                                                                                                                                        |
-| 2026-08-05 | [Test System V2](./2026-08-04-test-system-v2-refactor.md)                                                | #204；唯一归属、七 Oracle、active ruleset；全绿 run 30934384004                                                                                                                                                                     |
 | 2026-08-04 | [CI Feedback Loop Phase Two](./2026-08-04-ci-feedback-loop-phase-two.md)                                 | 动态 pnpm cache、Boundary 并行 Oracle、Web affected gate、clean-source runner；#202 首轮全绿                                                                                                                                        |
 | 2026-08-04 | [CI Feedback Loop Optimization](./2026-08-04-ci-feedback-loop-optimization.md)                           | Required checks 约 8:20；Web E2E 完整 74 tests；Boundary 0:48                                                                                                                                                                       |
 | 2026-08-03 | [Desktop Cloud Connection Boundary Refactor](./2026-08-03-desktop-cloud-connection-boundary-refactor.md) | Profile Access、Cloud Connection Dialog 与可选 PIN 解耦；全仓 prod-like validation 通过                                                                                                                                             |

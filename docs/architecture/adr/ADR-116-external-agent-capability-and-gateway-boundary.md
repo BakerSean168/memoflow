@@ -52,4 +52,4 @@ Native Edit Session 继续服务 MemoFlow 内部 UI；不成为远程写入的�
 - 按权限和宿主条件过滤发现结果，并在调用时重新授权，未知能力默认拒绝。
 - 本决策不修改 ADR-112 的内部 UI 路径，也不恢复已退役的 Reminder 或 Product Governance runtime。
 
-具体工具与包边界见 [架构规格](../external-agent-gateway.md)，顺序与验收见 [实施总方案](../../plan/active/2026-10-07-external-agent-gateway.md)。
+具体工具与包边界见 [架构规格](../external-agent-gateway.md)，顺序与验收见 [实施总方案](https://github.com/BakerSean168/memoflow/issues/490)。

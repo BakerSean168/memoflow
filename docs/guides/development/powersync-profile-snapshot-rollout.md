@@ -16,7 +16,7 @@ updated: 2026-05-19T00:00:00
 
 当前真值来源：
 
-- 桌面端 as-built 状态看 [2026-05-17-desktop-multi-account-local-storage-architecture.md](../../plan/active/2026-05-17-desktop-multi-account-local-storage-architecture.md)
+- 桌面端 as-built 状态看 [2026-05-17-desktop-multi-account-local-storage-architecture.md](../../plan/archive/2026-05-17-desktop-multi-account-local-storage-architecture.md)
 - API snapshot 路由与构建逻辑看 `apps/api/src/modules/powersync/`
 - cron 注册看 `apps/api/src/shared/infrastructure/cron/`
 

@@ -9,7 +9,7 @@ updated: 2026-09-30T00:00:00
 
 # PVC-BASE-002 — Interaction characterization pack
 
-Ticket: [Product vNext master plan](../active/2026-09-29-product-vnext-execution-master-plan.md#pvc-base-002--interaction-characterization-pack).
+Ticket: [Product vNext master plan](https://github.com/BakerSean168/memoflow/blob/bd373a220c6b471fdfa5b64bd54471da49c2f023/docs/plan/active/2026-09-29-product-vnext-execution-master-plan.md#pvc-base-002--interaction-characterization-pack).
 
 Characterization-first scope: tests and documentation only. No production behavior or observability changes were necessary. Existing passing behavior is the baseline, including incomplete missing-entity presentation. No intentionally failing tests were necessary: `/tasks?dialog=quick-task` already works in this checkout.
 

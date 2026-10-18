@@ -5,7 +5,7 @@ agent: agent
 
 程序设计、架构分析和实现规划优先参考：
 
-- [`../../AGENT.md`](../../AGENT.md)
+- [`../../AGENTS.md`](../../AGENTS.md)
 - [`../../docs/architecture/README.md`](../../docs/architecture/README.md)
 - [`../../docs/standards/README.md`](../../docs/standards/README.md)
 - [`../../docs/plan/README.md`](../../docs/plan/README.md)
@@ -14,7 +14,7 @@ agent: agent
 
 - 基于当前仓库代码和正式文档分析问题
 - 不使用从外部复制进来的孤立上下文作为仓库真值
-- 需要计划时，统一写入 `docs/plan/active`
+- 需要持久化的计划直接写入 GitHub Issue
 
 使用值对象
 

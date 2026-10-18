@@ -19,7 +19,7 @@ updated: 2026-07-26T00:00:00
 
 > **用法**：在 Windows 主机上 `git pull` 本分支后，把 **§ 任务提示词（可整段交给 agent）** 整节交给本机 agent 执行。  
 > **主计划**：[`2026-07-16-obsidian-vault-repository-optimization.md`](./2026-07-16-obsidian-vault-repository-optimization.md) §13.2。  
-> **相关计划**：[`2026-07-17-unified-assistant-agent-host.md`](../active/2026-07-17-unified-assistant-agent-host.md)（ADR-035 multi-engine durable）。  
+> **相关计划**：[`2026-07-17-unified-assistant-agent-host.md`](2026-07-17-unified-assistant-agent-host.md)（ADR-035 multi-engine durable）。
 > **远程 tip 基线**：`2db22956d`（residual 1337）及之前 1335–1336；分支 `feat/obsidian-vault-repository-optimization`。
 
 ---

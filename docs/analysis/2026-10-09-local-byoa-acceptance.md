@@ -8,7 +8,7 @@ updated: 2026-10-10T00:00:00Z
 # 本地 BYOA 验收证据
 
 本文件记录可观察证据，不将功能编码、测试通过、合并、发布和生产部署混为一项。
-需求真值见[实施方案](../plan/active/2026-10-09-local-byoa-and-builtin-assistant.md)。
+需求真值见[实施方案](https://github.com/BakerSean168/memoflow/blob/bd373a220c6b471fdfa5b64bd54471da49c2f023/docs/plan/active/2026-10-09-local-byoa-and-builtin-assistant.md)。
 当前候选尚未完成全部验收，不可据此宣称 prod 已交付。
 
 ## 原生支持矩阵

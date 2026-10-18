@@ -11,7 +11,7 @@ status: done
 ---
 
 > **归档结果（2026-07-29）**：内部产品审查材料；P0  backlog 未再作为 active 主叙事。  
-> 后续产品能力以 [`../active/2026-07-17-unified-assistant-agent-host.md`](../active/2026-07-17-unified-assistant-agent-host.md) 为准。
+> 后续产品能力以 [`../active/2026-07-17-unified-assistant-agent-host.md`](2026-07-17-unified-assistant-agent-host.md) 为准。
 # Web 登录后主要功能内部产品审查
 
 ## 摘要

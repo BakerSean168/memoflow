@@ -18,7 +18,7 @@ updated: 2026-09-30T12:45:00+08:00
 **日期：** 2026-09-30
 **关联：** ADR-004、ADR-006、ADR-040、ADR-041、ADR-066、ADR-092、ADR-094
 **研究依据：** [Desktop Auto-Update Reference Study](../../analysis/2026-09-30-desktop-auto-update-reference-study.md)
-**实施计划：** [Desktop Auto-Update Implementation Plan](../../plan/active/2026-09-30-desktop-auto-update-implementation.md)
+**实施计划：** [Desktop Auto-Update Implementation Plan](https://github.com/BakerSean168/memoflow/issues/493)
 
 ---
 

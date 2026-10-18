@@ -9,7 +9,7 @@ updated: 2026-10-07T00:00:00Z
 
 **状态：已授权实施；协议/provider 基线已验证，Goal/Task 的 PAT 六个只读工具已通过真实数据库与官方 SDK 验证；六工具最终 prod-like 验收通过。OAuth consent、连接管理与刷新撤销已完成本地验收，纳入 v0.15.0；生产交付证据在发布后补齐。** 目标是让 Codex、Claude Code 在用户授权后查询并管理 MemoFlow，调用真实 owner application，同时保留内部 Assistant/native UI 的既有流程。
 
-先读 [仓库核验](../analysis/2026-10-07-external-agent-repository-assessment.md) 和 [协议研究](../analysis/2026-10-07-external-agent-protocol-research.md)。长期决策分别是 [ADR-116：能力边界](./adr/ADR-116-external-agent-capability-and-gateway-boundary.md)、[ADR-117：授权](./adr/ADR-117-external-agent-authorization-and-credentials.md)、[ADR-118：写入与工作流](./adr/ADR-118-external-agent-mutations-and-assisted-workflows.md)。执行顺序以 [实施总方案](../plan/active/2026-10-07-external-agent-gateway.md) 为准；[术语表](../../CONTEXT.md) 只定义概念。
+先读 [仓库核验](../analysis/2026-10-07-external-agent-repository-assessment.md) 和 [协议研究](../analysis/2026-10-07-external-agent-protocol-research.md)。长期决策分别是 [ADR-116：能力边界](./adr/ADR-116-external-agent-capability-and-gateway-boundary.md)、[ADR-117：授权](./adr/ADR-117-external-agent-authorization-and-credentials.md)、[ADR-118：写入与工作流](./adr/ADR-118-external-agent-mutations-and-assisted-workflows.md)。执行顺序以 [实施总方案](https://github.com/BakerSean168/memoflow/issues/490) 为准；[术语表](../../CONTEXT.md) 只定义概念。
 
 ## 1. 用户可见结果与边界
 

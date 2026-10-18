@@ -12,14 +12,14 @@ updated: 2026-04-29T00:00:00
 
 这个目录不再维护活跃实施计划。
 
-- 活跃计划统一放在 `docs/plan/active`
+- 当前需求、方案和验收以 GitHub Issues 为唯一任务真源，不再维护 Active Plans
 - `docs/guides/ai` 只保留索引、学习材料、冻结实现记录和工程参考
 - 当前实现真值优先看代码、配置和 `docs/guides/development`
 
-## Canonical Plan
+## 历史方案与现状
 
 - [2026-04-29-ai-goal-agent-workflow-unification.md](../../plan/archive/2026-04-29-ai-goal-agent-workflow-unification.md)
-  - 历史统一方案与冻结实施记录；当前真值以代码、配置和仍留在 `docs/plan/active` 的计划为准
+  - 历史统一方案与冻结实施记录；当前行为以代码、配置、测试为准；未完成需求以 GitHub Issues 为准
 - [ai-goal-creation-current-workflow.md](../development/ai-goal-creation-current-workflow.md)
   - 当前真实主链路说明，帮助区分现状与目标
 
@@ -59,7 +59,7 @@ updated: 2026-04-29T00:00:00
 
 ## Usage Rules
 
-- 新的 AI 实施计划统一写入 `docs/plan/active`
-- 已完成、暂停或仅保留背景价值的 AI 计划移到 `docs/plan/archive`
+- 新的 AI 方案只写入 GitHub Issue，不创建独立 Plan
+- 已有 archive 仅为冻结历史，不代表待实施任务
 - `goal-workflow-v1/` 只记录历史实现，不混入未来方案
 - 具体实现细节以当前代码、配置、测试和 `docs/guides/development` 为准

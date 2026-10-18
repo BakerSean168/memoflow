@@ -38,8 +38,8 @@ AI Agent Master 实施已完成所有核心功能（Phase 1-5）和大部分 Pha
 4. **稳健 Fallback** - Provider 失败时自动降级
 
 ### 📝 文档
-- [实施计划](./docs/plan/active/2026-06-08-ai-agent-master-implementation-plan.md)
-- [最终总结](./docs/plan/active/2026-06-12-ai-agent-implementation-final-summary.md)
+- [实施计划](docs/plan/archive/2026-06-08-ai-agent-master-implementation-plan.md)
+- [最终总结](docs/plan/archive/2026-06-12-ai-agent-implementation-final-summary.md)
 - [Checkpoint 持久化](./docs/plan/active/checkpoint-persistence-completion-report.md)
 
 ### 🚀 部署状态
@@ -53,4 +53,4 @@ AI Agent Master 实施已完成所有核心功能（Phase 1-5）和大部分 Pha
 
 ---
 
-**详细变更**请查看：[2026-06-12-ai-agent-implementation-final-summary.md](./docs/plan/active/2026-06-12-ai-agent-implementation-final-summary.md)
+**详细变更**请查看：[2026-06-12-ai-agent-implementation-final-summary.md](docs/plan/archive/2026-06-12-ai-agent-implementation-final-summary.md)

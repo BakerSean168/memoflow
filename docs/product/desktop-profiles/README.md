@@ -18,7 +18,7 @@ updated: 2026-10-09T00:00:00Z
 3. [ADR-119](../../architecture/adr/ADR-119-independent-desktop-profiles-and-guest-copy-import.md)：独立容器、身份路由和复制导入的取舍。
 4. [产品与交互规格](./product-and-interaction.md)：创建、切换、认证、一次性询问、错误和管理入口。
 5. [导入、核验与清理协议](../../architecture/desktop-profile-import-protocol.md)：数据范围、接口、并发、幂等、状态与删除条件。
-6. [实施与验收计划](../../plan/active/2026-10-09-desktop-independent-profiles.md)：依赖切片、代码落点、验收矩阵、发布条件和未决项。
+6. [实施与验收计划](https://github.com/BakerSean168/memoflow/issues/487)：依赖切片、代码落点、验收矩阵、发布条件和未决项。
 
 ## 相比原讨论进一步明确的内容
 

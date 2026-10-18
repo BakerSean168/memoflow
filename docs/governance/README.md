@@ -20,7 +20,7 @@ Engineering Governance 的机器输入是：
 - `tools/governance/*.mjs`：deterministic audits / adapters；
 - `project.json` 与 CI workflows：执行入口；
 - `docs/standards/**`：人读规则；
-- `AGENT.md`：AI 协作与真实 owner vertical-slice policy。
+- `AGENTS.md`：AI 协作与真实 owner vertical-slice policy。
 
 它不依赖 Product Rule UUID、Rule/RuleRevision 数据库、Product exporter 或 published Product snapshot。
 
@@ -39,7 +39,7 @@ pnpm nx run memoflow:governance-check
 
 ## 架构变化规则
 
-系统性架构变化不使用虚构 reference module。按 ADR-113 / `AGENT.md`：
+系统性架构变化不使用虚构 reference module。按 ADR-113 / `AGENTS.md`：
 
 1. 选择最小真实业务 owner vertical slice；
 2. 先写 characterization / contract tests；
@@ -53,7 +53,7 @@ pnpm nx run memoflow:governance-check
 - `docs/standards`：规则是什么；
 - `docs/guides`：日常开发怎么做；
 - `docs/test`：测试类型与入口；
-- `docs/plan`：实施计划；
+- GitHub Issues：当前任务与方案；`docs/plan/archive` 仅存冻结历史资料；
 - `docs/architecture/adr`：架构决策历史；
 - `docs/governance`：Engineering Governance 的维护、决策与工具入口。
 

@@ -3,7 +3,7 @@
 Date: 2026-09-29  
 Branch: `product/vnext-convergence`  
 Status: second-pass discovery complete; Q1-Q6 product direction resolved; interactive KR record design proposed
-Parent plan: [MemoFlow Product vNext Convergence](../plan/active/2026-09-29-product-vnext-convergence.md)
+Parent plan: [MemoFlow Product vNext Convergence](https://github.com/BakerSean168/memoflow/blob/bd373a220c6b471fdfa5b64bd54471da49c2f023/docs/plan/active/2026-09-29-product-vnext-convergence.md)
 
 ## 1. Executive decision
 

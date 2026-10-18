@@ -110,4 +110,4 @@ Runtime 的 `removeProfile` 会依次删 session、PIN、key、目录、registry
 - 中等：认证目标路由、session commit、旧 adoption 退役、renderer 生命周期。
 - 较大：源快照、全 owner 重试、空账户并发准入、服务端/本地 manifest 核验、崩溃安全删除。
 
-详见[实施计划](../plan/active/2026-10-09-desktop-independent-profiles.md)。这些是风险和依赖判断，不是已估算工时或已通过验收。
+详见[实施计划](https://github.com/BakerSean168/memoflow/blob/bd373a220c6b471fdfa5b64bd54471da49c2f023/docs/plan/active/2026-10-09-desktop-independent-profiles.md)。这些是风险和依赖判断，不是已估算工时或已通过验收。

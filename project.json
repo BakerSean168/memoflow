@@ -10,7 +10,7 @@
       "executor": "nx:run-commands",
       "cache": true,
       "inputs": [
-        "{workspaceRoot}/AGENT.md",
+        "{workspaceRoot}/AGENTS.md",
         "{workspaceRoot}/AGENTS.md",
         "{workspaceRoot}/CLAUDE.md",
         "{workspaceRoot}/README.md",
@@ -57,7 +57,7 @@
         "test-system-v2:ruleset"
       ],
       "inputs": [
-        "{workspaceRoot}/AGENT.md",
+        "{workspaceRoot}/AGENTS.md",
         "{workspaceRoot}/AGENTS.md",
         "{workspaceRoot}/CLAUDE.md",
         "{workspaceRoot}/README.md",

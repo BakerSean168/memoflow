@@ -92,4 +92,4 @@ updated: 2026-10-09T00:00:00Z
 
 用户已批准实施。实现同步更新 `AI_MASTRA_RUNTIME_AUTHORITY` 的适用范围并新增会话路由约束，不能为通过检查删除旧架构保护。
 
-落地顺序、行为验收和完成状态统一记录在[实施方案](../../plan/active/2026-10-09-local-byoa-and-builtin-assistant.md)。本 ADR 没有承诺现有云端会话跨设备完整消息恢复、原生会话迁移或旧版本数据迁移等新增能力。
+落地顺序、行为验收和完成状态统一记录在[实施方案](https://github.com/BakerSean168/memoflow/issues/492)。本 ADR 没有承诺现有云端会话跨设备完整消息恢复、原生会话迁移或旧版本数据迁移等新增能力。

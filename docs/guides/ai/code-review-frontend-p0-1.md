@@ -1,4 +1,4 @@
-# 说明：本文档保留为工程实现参考，不是当前 canonical plan。历史统一方案见 `docs/plan/archive/2026-04-29-ai-goal-agent-workflow-unification.md`；当前真值以代码、配置和仍留在 `docs/plan/active` 的计划为准。
+# 说明：本文档保留为工程实现参考，不是当前 canonical plan。历史统一方案见 `docs/plan/archive/2026-04-29-ai-goal-agent-workflow-unification.md`；当前行为以代码、配置和测试为准；未完成需求以 GitHub Issues 为准。
 
 > **PVC-AI-8121 retirement:** 本文代码片段是迁移前的历史审查记录。AI-owned Goal/Task editors、visibility flags 与 toggle 已退役；当前使用 GoalDialog、完整 TaskPlanDialog 与 Repository native review。支持性 Task/Knowledge overlays、澄清与恢复保留。以 [当前 AI 模块](../../product/modules/ai.md) 为准。
 

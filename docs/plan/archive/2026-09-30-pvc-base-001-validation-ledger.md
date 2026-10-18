@@ -11,7 +11,7 @@ description: PVC-BASE-001 command resolution, clean ancestry baseline and actual
 
 # PVC-BASE-001 — Validation ledger and clean baseline evidence
 
-Scope: documentation and validation only. Source of truth: [current master-plan ticket and validation matrix](../active/2026-09-29-product-vnext-execution-master-plan.md#pvc-base-001--validation-ledger-and-clean-baseline). No runtime/product code, configuration, scripts, commits or pushes are part of this execution. Other PVC tickets retain their inherited status.
+Scope: documentation and validation only. Source of truth: [current master-plan ticket and validation matrix](https://github.com/BakerSean168/memoflow/blob/bd373a220c6b471fdfa5b64bd54471da49c2f023/docs/plan/active/2026-09-29-product-vnext-execution-master-plan.md#pvc-base-001--validation-ledger-and-clean-baseline). No runtime/product code, configuration, scripts, commits or pushes are part of this execution. Other PVC tickets retain their inherited status.
 
 ## Baseline identity and clean-state contract
 

@@ -7,7 +7,7 @@ updated: 2026-10-09T00:00:00Z
 
 # Desktop Profile 导入、核验与清理协议
 
-**状态：V1 已实现并通过 Linux Electron、真实 PostgreSQL 与本地部署验证。** 决策见 [ADR-119](./adr/ADR-119-independent-desktop-profiles-and-guest-copy-import.md)，实际测试和未验证范围见[实施计划](../plan/active/2026-10-09-desktop-independent-profiles.md)。本文描述当前实现，不将测试替身当作生产云端或跨平台验收。
+**状态：V1 已实现并通过 Linux Electron、真实 PostgreSQL 与本地部署验证。** 决策见 [ADR-119](./adr/ADR-119-independent-desktop-profiles-and-guest-copy-import.md)，实际测试和未验证范围见[实施计划](https://github.com/BakerSean168/memoflow/issues/487)。本文描述当前实现，不将测试替身当作生产云端或跨平台验收。
 
 ## 1. 责任与身份边界
 

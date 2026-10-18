@@ -55,5 +55,5 @@ updated: 2026-10-09T00:00:00Z
 
 - [产品与交互规格](../../product/desktop-profiles/product-and-interaction.md)
 - [导入、核验与清理协议](../desktop-profile-import-protocol.md)
-- [实施和验收计划](../../plan/active/2026-10-09-desktop-independent-profiles.md)
+- [实施和验收计划](https://github.com/BakerSean168/memoflow/issues/487)
 - [官方资料与能力限制](../../analysis/2026-10-09-profile-auth-primary-sources.md)

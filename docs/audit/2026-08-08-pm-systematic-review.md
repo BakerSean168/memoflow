@@ -127,4 +127,4 @@ MemoFlow 已经是一个**资产丰富但完成度不均**的个人操作系统�
 - [系统性诊断与大重构蓝图](./2026-08-07-memoflow-systemic-diagnosis-and-rebuild.md)
 - [业务架构深度审查](./2026-08-07-business-architecture-deep-audit.md)
 - [UI 基础与 Shell 系统诊断](./2026-08-06-ui-foundation-shell-system-diagnosis.md)
-- Active Plans：[统一助手与 Agent Host](../plan/active/2026-07-17-unified-assistant-agent-host.md)、[夜间 hygiene 协议](../plan/active/2026-07-25-nightly-hygiene-and-agent-host.md)、[CI/CD Platform V2](../plan/active/2026-08-05-ci-cd-platform-v2-refactor.md)
+- Active Plans：[统一助手与 Agent Host](../plan/archive/2026-07-17-unified-assistant-agent-host.md)、[夜间 hygiene 协议](../plan/archive/2026-07-25-nightly-hygiene-and-agent-host.md)、[CI/CD Platform V2](../plan/archive/2026-08-05-ci-cd-platform-v2-refactor.md)

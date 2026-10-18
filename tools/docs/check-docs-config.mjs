@@ -7,7 +7,7 @@ const ADR_INDEX = path.join(ADR_DIR, 'README.md');
 const RETIRED_LEGACY_WORKSPACE = ['.', 'open', 'code'].join('');
 
 const ENTRY_DOCS = [
-  'AGENT.md',
+  'AGENTS.md',
   'README.md',
   'docs/getting-started/README.md',
   'docs/architecture/README.md',
@@ -19,14 +19,9 @@ const ENTRY_DOCS = [
   'docs/plan/README.md',
 ];
 
-const CONFIG_FILES = [
-  'nx.json',
-  'eslint.config.ts',
-  'package.json',
-  'project.json',
-];
+const CONFIG_FILES = ['nx.json', 'eslint.config.ts', 'package.json', 'project.json'];
 
-const AGENT_SHIMS = ['AGENTS.md', 'CLAUDE.md'];
+const AGENT_SHIMS = ['CLAUDE.md'];
 const CANONICAL_PROMPTS = [
   '.github/prompts/memoflow.architecture.prompt.md',
   '.github/prompts/memoflow.development.prompt.md',
@@ -37,10 +32,7 @@ const CANONICAL_PROMPTS = [
   '.github/prompts/product.prompt.md',
   '.github/prompts/program.prompt.md',
 ];
-const DEPRECATED_GITFLOW_DOCS = [
-  '.github/GITFLOW.md',
-  '.github/GITFLOW_QUICK_REFERENCE.md',
-];
+const DEPRECATED_GITFLOW_DOCS = ['.github/GITFLOW.md', '.github/GITFLOW_QUICK_REFERENCE.md'];
 
 const TEXT_FILE_EXTENSIONS = new Set([
   '.cjs',
@@ -75,7 +67,7 @@ const SKIP_DIRS = new Set([
 const errors = [];
 
 await checkCanonicalAgentFiles();
-await checkPlanWorkspace();
+await checkRetiredPlanWorkspace();
 await checkRetiredLegacyWorkspace();
 await checkLegacyWorkspaceReferences();
 const adrFiles = await checkAdrFiles();
@@ -97,12 +89,12 @@ if (errors.length > 0) {
 console.log('[governance-check] passed.');
 
 async function checkCanonicalAgentFiles() {
-  await expectExists(path.join(ROOT, 'AGENT.md'), '缺少 AGENT.md。');
+  await expectExists(path.join(ROOT, 'AGENTS.md'), '缺少 AGENTS.md。');
 
   for (const shimPath of AGENT_SHIMS) {
     const content = await readFile(path.join(ROOT, shimPath), 'utf8');
-    if (!content.includes('AGENT.md')) {
-      errors.push(`${shimPath} 必须只作为指向 AGENT.md 的 shim。`);
+    if (!content.includes('@AGENTS.md')) {
+      errors.push(`${shimPath} 必须使用 @AGENTS.md 导入仓库协作规范。`);
     }
   }
 
@@ -110,25 +102,28 @@ async function checkCanonicalAgentFiles() {
     path.join(ROOT, '.github/copilot-instructions.md'),
     'utf8',
   );
-  if (!copilotInstructions.includes('AGENT.md')) {
-    errors.push('.github/copilot-instructions.md 必须引用 AGENT.md。');
+  if (!copilotInstructions.includes('AGENTS.md')) {
+    errors.push('.github/copilot-instructions.md 必须引用 AGENTS.md。');
   }
 
   for (const promptPath of CANONICAL_PROMPTS) {
     await expectExists(path.join(ROOT, promptPath), `缺少 prompt 文件 ${promptPath}`);
     const content = await readFile(path.join(ROOT, promptPath), 'utf8');
-    if (!content.includes('AGENT.md')) {
-      errors.push(`${promptPath} 必须引用 AGENT.md。`);
+    if (!content.includes('AGENTS.md')) {
+      errors.push(`${promptPath} 必须引用 AGENTS.md。`);
     }
   }
 }
 
-async function checkPlanWorkspace() {
-  await expectExists(path.join(ROOT, 'docs/plan/README.md'), '缺少 docs/plan/README.md。');
-  await expectDirectory(path.join(ROOT, 'docs/plan/active'), '缺少 docs/plan/active 目录。');
-  await expectDirectory(path.join(ROOT, 'docs/plan/archive'), '缺少 docs/plan/archive 目录。');
-  await expectExists(path.join(ROOT, 'docs/plan/active/README.md'), '缺少 docs/plan/active/README.md。');
-  await expectExists(path.join(ROOT, 'docs/plan/archive/README.md'), '缺少 docs/plan/archive/README.md。');
+async function checkRetiredPlanWorkspace() {
+  await expectExists(path.join(ROOT, 'docs/plan/README.md'), '缺少历史归档指引。');
+  await expectDirectory(path.join(ROOT, 'docs/plan/archive'), '缺少历史归档目录。');
+  try {
+    await stat(path.join(ROOT, 'docs/plan/active'));
+    errors.push('任务级 Active Plan 已退役：不得重新创建 docs/plan/active。');
+  } catch (error) {
+    if (error?.code !== 'ENOENT') throw error;
+  }
 }
 
 async function checkRetiredLegacyWorkspace() {
@@ -191,7 +186,9 @@ async function checkAdrFiles() {
     const fileNumber = filenameMatch[1];
     const titleNumber = titleMatch[1];
     if (fileNumber !== titleNumber) {
-      errors.push(`${relativePath} 的文件编号 ADR-${fileNumber} 与标题编号 ADR-${titleNumber} 不一致。`);
+      errors.push(
+        `${relativePath} 的文件编号 ADR-${fileNumber} 与标题编号 ADR-${titleNumber} 不一致。`,
+      );
     }
 
     const duplicate = seenNumbers.get(fileNumber);
@@ -282,8 +279,13 @@ async function checkDeprecatedGitflowDocs() {
   for (const docPath of DEPRECATED_GITFLOW_DOCS) {
     await expectExists(path.join(ROOT, docPath), `缺少废弃提示文档 ${docPath}`);
     const content = await readFile(path.join(ROOT, docPath), 'utf8');
-    if (!content.includes('已废弃') || !content.includes('docs/guides/development/git-workflow.md')) {
-      errors.push(`${docPath} 必须明确声明已废弃，并指向 docs/guides/development/git-workflow.md。`);
+    if (
+      !content.includes('已废弃') ||
+      !content.includes('docs/guides/development/git-workflow.md')
+    ) {
+      errors.push(
+        `${docPath} 必须明确声明已废弃，并指向 docs/guides/development/git-workflow.md。`,
+      );
     }
   }
 }
