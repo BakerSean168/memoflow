@@ -12,6 +12,11 @@ on:
         required: false
         type: string
         default: ''
+      recovery_platform:
+        description: Select only the failed installed-update gate without repackaging a successful platform
+        required: false
+        type: string
+        default: all
   workflow_dispatch:
     inputs:
       ref:
@@ -22,6 +27,15 @@ on:
         description: Newer immutable QA workflow SHA to overlay tests only (never product source)
         required: false
         type: string
+      recovery_platform:
+        description: Run just a failed platform updater gate, default all
+        required: false
+        default: all
+        type: choice
+        options:
+          - all
+          - windows
+          - linux
 
 permissions:
   contents: read
@@ -37,6 +51,7 @@ env:
 jobs:
   windows-installed-update:
     name: Windows NSIS N to N+1
+    if: inputs.recovery_platform != 'linux'
     runs-on: windows-latest
     timeout-minutes: 30
 
@@ -378,6 +393,7 @@ jobs:
 
   linux-appimage-update:
     name: Linux AppImage N to N+1
+    if: inputs.recovery_platform != 'windows'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:

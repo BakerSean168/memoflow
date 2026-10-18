@@ -240,6 +240,15 @@ test('release Windows updater uses exact tagged runtime but may overlay bounded 
   assert.match(assets, /qa_overlay_ref: \$\{\{ github\.workflow_sha \}\}/u);
   assert.match(assets, /ref: \$\{\{ needs\.prepare-release\.outputs\.release_sha \}\}/u);
   assert.match(workflow, /qa_overlay_ref:[\s\S]*?type: string/u);
+  assert.match(workflow, /recovery_platform:[\s\S]*?default: all/u);
+  assert.match(
+    workflow,
+    /windows-installed-update:[\s\S]*?if: inputs\.recovery_platform != 'linux'/u,
+  );
+  assert.match(
+    workflow,
+    /linux-appimage-update:[\s\S]*?if: inputs\.recovery_platform != 'windows'/u,
+  );
   assert.match(workflow, /ref: \$\{\{ inputs\.ref \|\| github\.sha \}\}/u);
   assert.match(workflow, /ref: \$\{\{ inputs\.qa_overlay_ref \}\}/u);
   const overlay = workflowStep(workflow, 'Overlay only acceptance scripts from newer QA tooling');
