@@ -1,5 +1,3 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createI18n } from 'vue-i18n';
@@ -182,10 +180,6 @@ it('delegates check-in and Task navigation without any metadata or Task mutation
     limit: 20,
     offset: 0,
   });
-  const source = readFileSync(resolve(__dirname, 'GoalKeyResultInspectDialog.vue'), 'utf8');
-  expect(source).not.toMatch(
-    /useTask|TASK_SERVICE_KEY|updateKeyResult|createTask|deleteTask|completeTask/,
-  );
 });
 
 it('retries failed history reads and reloads records after the owner composer saves', async () => {

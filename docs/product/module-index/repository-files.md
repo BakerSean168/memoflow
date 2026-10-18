@@ -17,13 +17,13 @@ updated: 2026-09-11T00:02:00+08:00
 
 ## vNext 建模文档（已采纳并实施）
 
-| 文件                                                                                                                                                      | 说明                                                                          |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| 文件                                                                                                                                                      | 说明                                                                                                    |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | [`docs/product/knowledge-repository-vnext.md`](../knowledge-repository-vnext.md)                                                                          | KnowledgeSpace / Binding / Stable Document / Projection / AI Index current as-built model and rationale |
-| [`docs/analysis/2026-09-08-knowledge-repository-vnext-current-system-map.md`](../../analysis/2026-09-08-knowledge-repository-vnext-current-system-map.md) | 当前代码事实与目标差距                                                        |
-| [`ADR-089`](../../architecture/adr/ADR-089-knowledge-space-source-binding-and-health-boundaries.md)                                                       | Local/Remote Binding、Health/Observation、Sync/Projection cursor 分离         |
-| [`ADR-090`](../../architecture/adr/ADR-090-stable-knowledge-document-identity.md)                                                                         | 稳定 `KnowledgeDocumentId` 与 path-independent durable reference              |
-| [`ADR-091`](../../architecture/adr/ADR-091-knowledge-projection-index-and-operation-boundaries.md)                                                        | 单一 ProjectionEngine、AI Index ownership、可靠 Operation 与 capability ports |
+| [`docs/analysis/2026-09-08-knowledge-repository-vnext-current-system-map.md`](../../analysis/2026-09-08-knowledge-repository-vnext-current-system-map.md) | 当前代码事实与目标差距                                                                                  |
+| [`ADR-089`](../../architecture/adr/ADR-089-knowledge-space-source-binding-and-health-boundaries.md)                                                       | Local/Remote Binding、Health/Observation、Sync/Projection cursor 分离                                   |
+| [`ADR-090`](../../architecture/adr/ADR-090-stable-knowledge-document-identity.md)                                                                         | 稳定 `KnowledgeDocumentId` 与 path-independent durable reference                                        |
+| [`ADR-091`](../../architecture/adr/ADR-091-knowledge-projection-index-and-operation-boundaries.md)                                                        | 单一 ProjectionEngine、AI Index ownership、可靠 Operation 与 capability ports                           |
 
 > 2026-09-19：ADR-089 已完成 Local/Remote 全切换；Remote persistence 为 Binding/Observation/HistoryFence/ProjectionCheckpoint 四轴，普通 list 为纯读。ADR-090/KNOW-2002 与 ADR-091/KNOW-2003 均已实施，`KnowledgeProjectionEngine` 是当前单一 projection owner。
 
@@ -37,7 +37,7 @@ updated: 2026-09-11T00:02:00+08:00
 | [`packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue`](../../../packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue)                             | Desktop：本地 Vault 浏览、预览、Obsidian 打开、确认写入                     |
 | [`packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue`](../../../packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue) | 投影 Link Graph / 关系视图                                                  |
 | [`packages/app-vue/src/modules/repository/components/KnowledgeNoteCatalog.vue`](../../../packages/app-vue/src/modules/repository/components/KnowledgeNoteCatalog.vue)                         | 投影笔记目录与搜索列表                                                      |
-| [`packages/app-vue/src/modules/repository/components/KnowledgeNoteContextPanel.vue`](../../../packages/app-vue/src/modules/repository/components/KnowledgeNoteContextPanel.vue)                   | 当前笔记上下文与稳定引用关系                                                |
+| [`packages/app-vue/src/modules/repository/components/KnowledgeNoteContextPanel.vue`](../../../packages/app-vue/src/modules/repository/components/KnowledgeNoteContextPanel.vue)               | 当前笔记上下文与稳定引用关系                                                |
 
 ## 前端组合函数与设置
 
@@ -93,18 +93,18 @@ updated: 2026-09-11T00:02:00+08:00
 cached bytes 只通过 `memoflow.server-held-data-disclosure` transparency export 披露，
 不可导入。Editor workspace persistence 已由 `EDITOR-1702` 删除。
 
-| 文件                                                                                                                                                                                                          | 说明                                                |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| [`packages/powersync-schema/src/index.ts`](../../../packages/powersync-schema/src/index.ts)                                                                                                                   | PowerSync Repository/resource 相关表；无 `editor_*` |
-| [`packages/data-portability/src/server/application/use-cases/export-server-held-data-disclosure.use-case.ts`](../../../packages/data-portability/src/server/application/use-cases/export-server-held-data-disclosure.use-case.ts) | disclosure-only export |
-| [`packages/contracts/src/modules/data-portability/dtos/server-held-data-disclosure.dto.ts`](../../../packages/contracts/src/modules/data-portability/dtos/server-held-data-disclosure.dto.ts) | disclosure envelope contract |
+| 文件                                                                                                                                                                                                                              | 说明                                                |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| [`packages/powersync-schema/src/index.ts`](../../../packages/powersync-schema/src/index.ts)                                                                                                                                       | PowerSync Repository/resource 相关表；无 `editor_*` |
+| [`packages/data-portability/src/server/application/use-cases/export-server-held-data-disclosure.use-case.ts`](../../../packages/data-portability/src/server/application/use-cases/export-server-held-data-disclosure.use-case.ts) | disclosure-only export                              |
+| [`packages/contracts/src/modules/data-portability/dtos/server-held-data-disclosure.dto.ts`](../../../packages/contracts/src/modules/data-portability/dtos/server-held-data-disclosure.dto.ts)                                     | disclosure envelope contract                        |
 
 ## 测试入口
 
 | 文件                                                                                                                                                                                                                                                        | 说明                                                     |
 | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
 | [`packages/app-vue/src/modules/repository/router/index.spec.ts`](../../../packages/app-vue/src/modules/repository/router/index.spec.ts)                                                                                                                     | 无 `/note/:id` 路由契约                                  |
-| [`packages/app-vue/src/modules/repository/views/notePanelAdaptation.spec.ts`](../../../packages/app-vue/src/modules/repository/views/notePanelAdaptation.spec.ts)                                                                                           | confirmed create 与深链                                  |
+| [`tools/governance/app-vue-source-locks.json` (`notePanelAdaptation`)](../../../tools/governance/app-vue-source-locks.json)                                                                                                                                 | confirmed create 与深链                                  |
 | [`packages/repository/src/server/infrastructure/adapters/prisma/__tests__/controlled-note-write-boundary.surface.spec.ts`](../../../packages/repository/src/server/infrastructure/adapters/prisma/__tests__/controlled-note-write-boundary.surface.spec.ts) | residual 201：controlled create/adoption 边界            |
 | [`packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.spec.ts`](../../../packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.spec.ts)                                                                 | Web 投影工作区                                           |
 | [`packages/app-vue/src/shared/utils/safe-markdown.spec.ts`](../../../packages/app-vue/src/shared/utils/safe-markdown.spec.ts)                                                                                                                               | Markdown 安全边界                                        |

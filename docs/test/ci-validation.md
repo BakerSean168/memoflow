@@ -10,6 +10,13 @@ job 的执行条件也只消费 manifest 的 lane policy：docs-only PR 只保�
 最终的 `Delivery Observation` 也属于 required context；它校验 manifest、lane evidence 和 run summary
 完整存在，避免所有 child 通过但观测证据缺失时仍然 false-green。
 
+`CI Check`（#488）是单一聚合 gate：`if: always()`，needs 全部 lane job（scope-detector、governance、
+static-analysis、unit、typecheck、build、verification-children、web-flow-shard），读取 delivery manifest，
+由 `tools/ci-cd-platform/lib/ci-check.mjs` 判定。只有 manifest 关闭的 lane 允许 skipped（unit 另需
+`scope.unit` 为空）；failure、cancelled、意外 skipped、被关闭却运行的 lane，以及 manifest 缺失、digest
+不一致、needs 漂移都判红。它目前与七个 Oracle 和 `Delivery Observation` 并行运行；Ruleset 切换到只
+要求 `CI Check` 是单独的人工步骤，切换后再退役这些 Oracle 的 required 状态。
+
 Oracle 使用 `tools/test-system-v2/lib/oracle.mjs` 的同一状态机：未受影响且 child skipped 是成功，
 应执行但 skipped/cancelled/failed 是失败，detector failure 会 fail closed。GitHub ruleset 的 active
 required contexts 由 `.github/rulesets/main.json` 声明，并由 `ruleset-check` 校验名称一致性。
@@ -18,9 +25,15 @@ Validate children（static analysis、unit、typecheck、build）并行执行。
 prepared Boundary runner 内分别执行；integration、smoke 和每个 Web shard 使用独立数据库环境。
 真实数据库、浏览器和性能 target 均关闭 Nx cache。
 
-Web Flow 的 21 个核心 spec 由 `apps/web/web-flow-specs.mjs` 唯一列出。
-`tools/test-system-v2/web-spec-durations.json` 保存最近一次完整 V2 run 的逐 spec 测量基线，
-`generate-web-shards.mjs` 据此生成 `web-shards.json`；`web-shards.test.mjs` 校验合集无遗漏、无重复。
+Web Flow 的核心 spec 由 `apps/web/web-flow-specs.mjs` 唯一列出。
+`tools/test-system-v2/web-spec-durations.json`（version 2，含 `generatedAt`、`observedAt` 与 `source`）保存多次 CI
+run 的逐 spec 中位耗时；`run-web-shard.mjs <i>/<n>` 在每个 shard 现场用 `lib/shard-balance.mjs` 的确定性
+LPT 计算分片，缺少历史的 spec 取中位数。`observedAt` 来自报告的 `stats.startTime`，保留各 spec
+及整体最早参与统计的观测时间；刷新时间 `generatedAt` 不会使旧数据变新。观测超过 21 天、日期缺失/
+无效/处于未来或缺项时输出 `::warning::`；刷新工具拒绝无效或未来的报告日期。
+`web-shards.test.mjs` / `shard-balance.test.mjs` 校验无遗漏、无重复、最慢 N 个分布在不同 shard、
+结果与输入顺序无关。刷新：下载 `web-flow-*-results` artifact 后运行
+`node tools/test-system-v2/refresh-web-spec-durations.mjs --source "<runs>" <results.json...>`。
 
 `tools/test-system-v2/run-command.mjs` 输出结构化 timing/report，并使用
 `failure-classification.mjs` 区分 assertion、infrastructure、process-crash、timeout 和 flaky；只有

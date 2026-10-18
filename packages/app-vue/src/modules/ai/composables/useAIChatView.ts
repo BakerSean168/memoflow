@@ -1089,6 +1089,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       conversationList: chatSession.conversationList,
       conversationStatuses: chatSession.conversationStatuses,
       conversationListLoading: chatSession.conversationListLoading,
+      conversationProjectionLive: chatSession.conversationProjectionLive,
       recentGoalList,
       recentTaskList,
       recentKnowledgeNoteList,

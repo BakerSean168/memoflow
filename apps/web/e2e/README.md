@@ -25,9 +25,11 @@ pnpm nx run web:e2e:report
 
 ## 默认回归范围
 
-默认 Web Flow 的唯一清单真值是 [`apps/web/web-flow-specs.mjs`](../web-flow-specs.mjs)，分片派生物由 `tools/test-system-v2/generate-web-shards.mjs` 生成。README 不再复制一份容易过期的 spec 列表。
+默认 Web Flow 的唯一清单真值是 [`apps/web/web-flow-specs.mjs`](../web-flow-specs.mjs)。CI 每个 shard 由 `tools/test-system-v2/run-web-shard.mjs` 用 `web-spec-durations.json` 现场计算确定性的 LPT 分片（没有静态 shard 清单）。README 不再复制一份容易过期的 spec 列表。
 
-`tools/test-system-v2/__tests__/web-shards.test.mjs` 会同时校验：canonical spec 必须真实存在、shard manifest 与 canonical 清单一致、duration history 不得继续保留已经退休的 spec。
+`tools/test-system-v2/__tests__/web-shards.test.mjs` 会同时校验：canonical spec 必须真实存在、按 CI matrix 计算的分片与 canonical 清单一致（无遗漏、无重复）、duration history 不得保留已经退休的 spec。
+
+AI Goal Workflow 旅程拆分在 `ai/goal-workflow/*.spec.ts`，共享路由 mock 与会话引导位于 `ai/goal-workflow/goal-workflow.fixture.ts`；每个测试都自注册用户，彼此独立。
 
 ## 配置入口
 

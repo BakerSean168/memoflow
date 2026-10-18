@@ -9,11 +9,7 @@
       "executor": "nx:run-commands",
       "outputs": ["{projectRoot}/dist"],
       "dependsOn": ["^build", "prisma-generate"],
-      "inputs": [
-        "{projectRoot}/prisma/schema/**/*",
-        "{projectRoot}/prisma/prisma.config.ts",
-        "{projectRoot}/src/**/*.ts"
-      ],
+      "inputs": ["default", "^production", "{workspaceRoot}/tools/build/copy-with-retry.mjs"],
       "cache": true,
       "options": {
         "cwd": "packages/database",
@@ -24,6 +20,7 @@
       "executor": "nx:run-commands",
       "outputs": ["{projectRoot}/dist"],
       "dependsOn": ["prisma-generate"],
+      "inputs": ["default", "^production", "{workspaceRoot}/tools/build/copy-with-retry.mjs"],
       "options": {
         "cwd": "packages/database",
         "command": "tsc --build && node ../../tools/build/copy-with-retry.mjs src/generated/prisma dist/generated/prisma"
@@ -41,7 +38,11 @@
     "prisma-generate": {
       "executor": "nx:run-commands",
       "outputs": ["{projectRoot}/src/generated/prisma"],
-      "inputs": ["{projectRoot}/prisma/schema/**/*", "{projectRoot}/prisma/prisma.config.ts"],
+      "inputs": [
+        "{projectRoot}/prisma/schema/**/*",
+        "{projectRoot}/prisma/prisma.config.ts",
+        "{workspaceRoot}/tools/build/normalize-generated-prisma.mjs"
+      ],
       "cache": true,
       "options": {
         "cwd": "packages/database",

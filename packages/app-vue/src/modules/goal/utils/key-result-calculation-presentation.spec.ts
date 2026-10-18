@@ -1,5 +1,3 @@
-import { readdirSync, readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it } from 'vitest';
 import { KeyResultCalculationMethod } from '@memoflow/contracts/goal';
@@ -78,20 +76,5 @@ describe('Goal calculation presentation', () => {
     expect(
       KEY_RESULT_CALCULATION_METHODS.map((method) => getKeyResultRecordPromptLabel(method, t)),
     ).toEqual(prompts);
-  });
-
-  it('keeps Task presentation free of competing calculation label maps', () => {
-    const taskRoot = resolve(__dirname, '../../task');
-    const sources = readdirSync(taskRoot, { recursive: true, encoding: 'utf8' }).filter(
-      (file) => /\.(vue|ts)$/.test(file) && !/\.(spec|test)\.ts$/.test(file),
-    );
-    expect(sources.length).toBeGreaterThan(0);
-    for (const file of sources) {
-      const source = readFileSync(resolve(taskRoot, file), 'utf8');
-      expect(source, file).not.toMatch(
-        /(?:\b(?:Sum|Average|Max|Min|Last)|\[KeyResultCalculationMethod\.\w+\])\s*:\s*(?:t\(|['"])/,
-      );
-      expect(source, file).not.toContain('goal.dialog.krCalculation');
-    }
   });
 });

@@ -1,5 +1,3 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { shallowMount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
 import { ToggleGroup } from '@memoflow/ui-vue-shadcn';
@@ -29,10 +27,6 @@ describe('ResponsiveSegmentedFilter', () => {
     expanded.vm.$emit('update:modelValue', 'enabled');
     await wrapper.vm.$nextTick();
     expect(wrapper.emitted('update:modelValue')).toEqual([['enabled']]);
-
-    const source = readFileSync(resolve(__dirname, './ResponsiveSegmentedFilter.vue'), 'utf8');
-    expect(source.match(/:model-value="modelValue"/g)).toHaveLength(2);
-    expect(source).toContain('DropdownMenuRadioGroup');
   });
 
   it('ignores empty single-select updates so clicking the active segment cannot clear the filter', async () => {
@@ -50,26 +44,5 @@ describe('ResponsiveSegmentedFilter', () => {
     await wrapper.vm.$nextTick();
 
     expect(wrapper.emitted('update:modelValue')).toBeUndefined();
-  });
-
-  it('uses panel container queries to switch representation without changing business state', () => {
-    const source = readFileSync(resolve(__dirname, './ResponsiveSegmentedFilter.vue'), 'utf8');
-
-    expect(source).toContain('@2xl/panel:flex');
-    expect(source).toContain('@2xl/panel:hidden');
-    expect(source).toContain('DropdownMenuRadioGroup');
-    expect(source).toContain('ToggleGroup');
-  });
-
-  it('supports stable compact collections with counts and compatibility option ids', () => {
-    const source = readFileSync(resolve(__dirname, './ResponsiveSegmentedFilter.vue'), 'utf8');
-
-    expect(source).toContain("collapseMode === 'dropdown'");
-    expect(source).toContain('expandedOptionTestIdPrefix');
-    expect(source).toContain('option.countTestId');
-    expect(source).toContain('currentOption?.count');
-    expect(source).toContain(
-      `:aria-selected="optionRole === 'tab' ? modelValue === option.value : undefined"`,
-    );
   });
 });

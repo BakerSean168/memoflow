@@ -4,17 +4,43 @@
   "projectType": "library",
   "sourceRoot": "tools/ci-cd-platform",
   "tags": ["scope:tools", "type:platform", "layer:ci"],
+  "namedInputs": {
+    "testContracts": [
+      "default",
+      "{workspaceRoot}/nx.json",
+      "{workspaceRoot}/project.json",
+      "{workspaceRoot}/apps/**/project.json",
+      "{workspaceRoot}/packages/**/project.json",
+      "{workspaceRoot}/tools/**/project.json",
+      "{workspaceRoot}/apps/**/*.config.{ts,mts,cts,js,mjs,cjs}",
+      "{workspaceRoot}/packages/**/*.config.{ts,mts,cts,js,mjs,cjs}",
+      "{workspaceRoot}/tools/build/**/*",
+      "{workspaceRoot}/tools/ci/node-process-bootstrap.cjs",
+      "{workspaceRoot}/.github/workflows/**/*",
+      "{workspaceRoot}/.github/actions/**/*",
+      "{workspaceRoot}/apps/desktop/*.mjs",
+      "{workspaceRoot}/apps/desktop/*.json5",
+      "{workspaceRoot}/apps/desktop/package.json",
+      "{workspaceRoot}/apps/desktop/e2e/**/*",
+      "{workspaceRoot}/apps/desktop/scripts/**/*",
+      "{workspaceRoot}/deployment/**/*",
+      "{workspaceRoot}/docker/powersync/Dockerfile.bake",
+      "{workspaceRoot}/docker-compose*.yml",
+      "{workspaceRoot}/.dockerignore",
+      "{workspaceRoot}/release-please-config.json"
+    ]
+  },
   "targets": {
     "test": {
       "executor": "nx:run-commands",
       "cache": true,
-      "inputs": ["{projectRoot}/**/*"],
+      "inputs": ["testContracts"],
       "options": { "command": "node --test tools/ci-cd-platform/__tests__/*.test.mjs" }
     },
     "contract": {
       "executor": "nx:run-commands",
       "cache": true,
-      "inputs": ["{projectRoot}/**/*"],
+      "inputs": ["testContracts"],
       "options": {
         "command": "node --test tools/ci-cd-platform/__tests__/contracts.test.mjs tools/ci-cd-platform/__tests__/risk.test.mjs"
       }
@@ -28,11 +54,7 @@
     "governance": {
       "executor": "nx:run-commands",
       "cache": true,
-      "inputs": [
-        "{projectRoot}/**/*",
-        "{workspaceRoot}/.github/workflows/**/*",
-        "{workspaceRoot}/.github/actions/**/*"
-      ],
+      "inputs": ["testContracts"],
       "options": {
         "command": "node tools/ci-cd-platform/schema-check.mjs && node tools/ci-cd-platform/registry-check.mjs && node --test tools/ci-cd-platform/__tests__/*.test.mjs"
       }

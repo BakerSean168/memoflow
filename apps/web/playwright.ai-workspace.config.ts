@@ -15,7 +15,7 @@ const aiWorkspaceJsonReportFile =
 export default defineConfig({
   testDir: './e2e',
   outputDir: aiWorkspaceOutputDir,
-  testMatch: ['**/ai/goal-workflow.spec.ts'],
+  testMatch: ['**/ai/goal-workflow/*.spec.ts'],
   timeout: 5 * 60 * 1000,
   expect: {
     timeout: 10 * 1000,

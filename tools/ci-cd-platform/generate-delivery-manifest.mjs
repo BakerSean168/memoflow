@@ -15,7 +15,7 @@ async function changedFiles({ root, base, head, full }) {
   if (full || !base || !head) return [];
   const { stdout } = await exec(
     'git',
-    ['diff', '--name-only', '--diff-filter=ACMRTUXB', `${base}...${head}`],
+    ['diff', '--name-only', '--diff-filter=ACDMRTUXB', `${base}...${head}`],
     {
       cwd: root,
       maxBuffer: 4 * 1024 * 1024,
@@ -41,7 +41,7 @@ export async function buildDeliveryManifest({
   files,
 } = {}) {
   const changed = files ?? (await changedFiles({ root, base, head, full }));
-  const resolvedScope = scope ?? (await detectScope({ root, base, head, full }));
+  const resolvedScope = scope ?? (await detectScope({ root, base, head, full, files: changed }));
   const risk = classifyRisk(changed);
   const forcedLanes = (process.env.DELIVERY_FORCE_LANES ?? '')
     .split(',')

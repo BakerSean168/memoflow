@@ -1085,6 +1085,7 @@ onBeforeUnmount(() => {
           :class="isSidebarResizing ? 'transition-none' : ''"
           :style="{ width: effectiveSidebarWidth + 'px' }"
           data-sidebar-presentation="docked"
+          :data-conversation-projection="aiRef?.conversationProjectionLive ? 'live' : 'calibrating'"
           data-testid="shell-sidebar-pane-host"
         >
           <div
@@ -1259,6 +1260,7 @@ onBeforeUnmount(() => {
           maxWidth: 'calc(100vw - 48px)',
         }"
         data-sidebar-presentation="overlay"
+        :data-conversation-projection="aiRef?.conversationProjectionLive ? 'live' : 'calibrating'"
         data-testid="shell-sidebar-pane-host"
       >
         <SheetTitle class="sr-only">{{ t('shell.conversation.navigation') }}</SheetTitle>

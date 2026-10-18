@@ -20,6 +20,12 @@
     ],
     "sharedGlobals": [
       "{workspaceRoot}/tsconfig.base.json",
+      "{workspaceRoot}/tsconfig.workspace-src.json",
+      "{workspaceRoot}/tsconfig.workspace-dist.json",
+      "{workspaceRoot}/vitest.shared.ts",
+      "{workspaceRoot}/vitest.workspace-helpers.ts",
+      "{workspaceRoot}/vite.workspace-aliases.ts",
+      "{workspaceRoot}/tools/build/tsup.base.config.ts",
       "{workspaceRoot}/package.json",
       "{workspaceRoot}/pnpm-workspace.yaml"
     ]
@@ -126,9 +132,10 @@
         "^build"
       ],
       "inputs": [
-        "production",
+        "default",
         "^production"
       ],
+      "outputs": [],
       "cache": true,
       "syncGenerators": [
         "@memoflow/nx-test-system:sync-test-targets"

@@ -1,0 +1,2089 @@
+{
+  "version": 1,
+  "reviewedAt": "2026-10-18",
+  "baseline": "main@69f013b",
+  "description": "Hand-reviewed lane expectations for real merged PR diffs (gh pr view N --json files) plus targeted synthetic counterexamples. scope is refreshed from the Nx graph by refresh-scope-ground-truth.mjs; expected is reviewed by a human.",
+  "cases": [
+    {
+      "id": "pr-499",
+      "source": "https://github.com/BakerSean168/memoflow/pull/499",
+      "title": "docs(agent): add proactive Issue checkpoints for complex tasks",
+      "rationale": "Root AGENTS.md only: docs, governance only (previously unclassified -> root -> full four-shard Web run, Run 39118012774).",
+      "files": ["AGENTS.md"],
+      "scope": {
+        "projects": ["governance-tools", "memoflow"],
+        "unit": ["governance-tools"],
+        "coverage": [],
+        "smoke": [],
+        "integration": [],
+        "boundary": [],
+        "perf": [],
+        "webFlow": false,
+        "desktopFlow": false
+      },
+      "expected": {
+        "risk": "docs",
+        "matchedLevels": ["docs"],
+        "lanes": {
+          "governance": true,
+          "validate": false,
+          "boundary": false,
+          "integration": false,
+          "web": false,
+          "coverage": false,
+          "performance": false
+        }
+      }
+    },
+    {
+      "id": "pr-497",
+      "source": "https://github.com/BakerSean168/memoflow/pull/497",
+      "title": "docs(agent): simplify Issue SSOT and single-worktree rules",
+      "rationale": "Root AGENTS.md plus .github/prompts/*.md: docs, governance only (previously full).",
+      "files": [
+        ".github/prompts/dev.prompt.md",
+        ".github/prompts/memoflow.development.prompt.md",
+        ".github/prompts/memoflow.migration.prompt.md",
+        "AGENTS.md",
+        "docs/guides/ai/README.md",
+        "docs/guides/development/git-workflow.md"
+      ],
+      "scope": {
+        "projects": ["governance-tools", "memoflow"],
+        "unit": ["governance-tools"],
+        "coverage": [],
+        "smoke": [],
+        "integration": [],
+        "boundary": [],
+        "perf": [],
+        "webFlow": false,
+        "desktopFlow": false
+      },
+      "expected": {
+        "risk": "docs",
+        "matchedLevels": ["docs"],
+        "lanes": {
+          "governance": true,
+          "validate": false,
+          "boundary": false,
+          "integration": false,
+          "web": false,
+          "coverage": false,
+          "performance": false
+        }
+      }
+    },
+    {
+      "id": "pr-478",
+      "source": "https://github.com/BakerSean168/memoflow/pull/478",
+      "title": "test(release): stabilize Windows NSIS updater verification handoff",
+      "rationale": "Desktop Windows updater e2e PowerShell script only: Desktop boundary, no Web Flow (previously the unanchored /e2e/ rule selected Web).",
+      "files": ["apps/desktop/scripts/run-windows-update-e2e.ps1"],
+      "scope": {
+        "projects": ["ci-cd-platform", "desktop", "test-system-v2", "web"],
+        "unit": ["ci-cd-platform", "desktop", "test-system-v2", "web"],
+        "coverage": [],
+        "smoke": [],
+        "integration": [],
+        "boundary": ["desktop"],
+        "perf": [],
+        "webFlow": false,
+        "desktopFlow": true
+      },
+      "expected": {
+        "risk": "desktop",
+        "matchedLevels": ["desktop", "package"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": false,
+          "web": false,
+          "coverage": false,
+          "performance": false
+        }
+      }
+    },
+    {
+      "id": "pr-477",
+      "source": "https://github.com/BakerSean168/memoflow/pull/477",
+      "title": "fix(release): recover v0.20.1 Linux and Windows gates without rebuilds",
+      "rationale": "Release workflows plus Desktop scripts: release risk keeps every lane (fail-closed for CI/release edits).",
+      "files": [
+        ".github/workflows/desktop-update-e2e.yml",
+        ".github/workflows/release-assets.yml",
+        "apps/desktop/scripts/run-linux-packaged-smoke-with-keyring.sh",
+        "tools/ci-cd-platform/__tests__/release-workflows.test.mjs"
+      ],
+      "scope": {
+        "projects": ["ci-cd-platform", "desktop", "memoflow", "test-system-v2", "web"],
+        "unit": ["ci-cd-platform", "desktop", "test-system-v2", "web"],
+        "coverage": [],
+        "smoke": [],
+        "integration": [],
+        "boundary": ["desktop"],
+        "perf": [],
+        "webFlow": false,
+        "desktopFlow": true
+      },
+      "expected": {
+        "risk": "release",
+        "matchedLevels": ["release", "root", "runtime", "desktop", "package"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": true,
+          "web": true,
+          "coverage": true,
+          "performance": true
+        }
+      }
+    },
+    {
+      "id": "pr-476",
+      "source": "https://github.com/BakerSean168/memoflow/pull/476",
+      "title": "fix(release): use dedicated token for GitHub Release API writes",
+      "rationale": "Release/publish workflows: release risk, full lanes.",
+      "files": [
+        ".github/workflows/publish-images.yml",
+        ".github/workflows/release-assets.yml",
+        ".github/workflows/release-publish.yml",
+        "tools/ci-cd-platform/__tests__/release-workflows.test.mjs"
+      ],
+      "scope": {
+        "projects": ["ci-cd-platform", "memoflow", "test-system-v2"],
+        "unit": ["ci-cd-platform", "test-system-v2"],
+        "coverage": [],
+        "smoke": [],
+        "integration": [],
+        "boundary": [],
+        "perf": [],
+        "webFlow": false,
+        "desktopFlow": false
+      },
+      "expected": {
+        "risk": "release",
+        "matchedLevels": ["release", "root"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": true,
+          "web": true,
+          "coverage": true,
+          "performance": true
+        }
+      }
+    },
+    {
+      "id": "pr-475",
+      "source": "https://github.com/BakerSean168/memoflow/pull/475",
+      "title": "test(desktop): correct Codex operator selection and archive accepted S0-S7 plan",
+      "rationale": "Desktop e2e spec plus docs: Desktop boundary only; docs add nothing.",
+      "files": [
+        "apps/desktop/e2e/native-codex-account-operator.spec.mts",
+        "docs/plan/active/README.md",
+        "docs/plan/archive/2026-10-13-ai-recovery-workspace-events/01-review.md",
+        "docs/plan/archive/2026-10-13-ai-recovery-workspace-events/02-design.md",
+        "docs/plan/archive/2026-10-13-ai-recovery-workspace-events/03-implementation.md",
+        "docs/plan/archive/2026-10-13-ai-recovery-workspace-events/04-acceptance.md",
+        "docs/plan/archive/2026-10-13-ai-recovery-workspace-events/05-final-audit.md",
+        "docs/plan/archive/2026-10-13-ai-recovery-workspace-events/README.md"
+      ],
+      "scope": {
+        "projects": [
+          "ci-cd-platform",
+          "desktop",
+          "governance-tools",
+          "memoflow",
+          "test-system-v2",
+          "web"
+        ],
+        "unit": ["ci-cd-platform", "desktop", "governance-tools", "test-system-v2", "web"],
+        "coverage": [],
+        "smoke": [],
+        "integration": [],
+        "boundary": ["desktop"],
+        "perf": [],
+        "webFlow": false,
+        "desktopFlow": true
+      },
+      "expected": {
+        "risk": "desktop",
+        "matchedLevels": ["desktop", "package", "docs"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": false,
+          "web": false,
+          "coverage": false,
+          "performance": false
+        }
+      }
+    },
+    {
+      "id": "pr-472",
+      "source": "https://github.com/BakerSean168/memoflow/pull/472",
+      "title": "chore(main): release 0.20.1",
+      "rationale": "release-please bump touching root package.json: root, full lanes.",
+      "files": [
+        ".release-please-manifest.json",
+        "CHANGELOG.md",
+        "apps/desktop/package.json",
+        "package.json"
+      ],
+      "scope": {
+        "projects": [
+          "@memoflow/test-utils",
+          "account",
+          "agent-gateway",
+          "ai",
+          "api",
+          "app-react",
+          "app-vue",
+          "assets",
+          "ci-cd-platform",
+          "cloud-auth",
+          "contracts",
+          "data-portability",
+          "database",
+          "desktop",
+          "domain-shared",
+          "goal",
+          "governance-tools",
+          "http-client",
+          "ipc-client",
+          "label",
+          "memoflow",
+          "migrator",
+          "mobile",
+          "notification",
+          "nx-test-system",
+          "patterns",
+          "powersync-schema",
+          "relation",
+          "reminder",
+          "repository",
+          "schedule",
+          "schedule-orchestration",
+          "scheduler",
+          "setting",
+          "task",
+          "test-system-v2",
+          "time",
+          "ui-core",
+          "ui-react-native",
+          "ui-vue-shadcn",
+          "utils",
+          "web"
+        ],
+        "unit": [
+          "account",
+          "agent-gateway",
+          "ai",
+          "api",
+          "app-vue",
+          "assets",
+          "ci-cd-platform",
+          "cloud-auth",
+          "contracts",
+          "data-portability",
+          "database",
+          "desktop",
+          "domain-shared",
+          "goal",
+          "governance-tools",
+          "http-client",
+          "ipc-client",
+          "label",
+          "migrator",
+          "notification",
+          "patterns",
+          "powersync-schema",
+          "relation",
+          "reminder",
+          "repository",
+          "schedule",
+          "schedule-orchestration",
+          "scheduler",
+          "setting",
+          "task",
+          "test-system-v2",
+          "time",
+          "ui-core",
+          "ui-vue-shadcn",
+          "utils",
+          "web"
+        ],
+        "coverage": [
+          "account",
+          "ai",
+          "api",
+          "app-vue",
+          "data-portability",
+          "domain-shared",
+          "goal",
+          "notification",
+          "reminder",
+          "schedule",
+          "scheduler",
+          "setting",
+          "task"
+        ],
+        "smoke": ["api"],
+        "integration": [
+          "account",
+          "api",
+          "database",
+          "goal",
+          "label",
+          "notification",
+          "relation",
+          "reminder",
+          "repository",
+          "schedule",
+          "scheduler",
+          "task"
+        ],
+        "boundary": ["desktop"],
+        "perf": ["task"],
+        "webFlow": true,
+        "desktopFlow": true
+      },
+      "expected": {
+        "risk": "root",
+        "matchedLevels": ["root", "desktop", "package", "docs"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": true,
+          "web": true,
+          "coverage": true,
+          "performance": true
+        }
+      }
+    },
+    {
+      "id": "pr-471",
+      "source": "https://github.com/BakerSean168/memoflow/pull/471",
+      "title": "fix(ci): correct candidate runtime Go-template quoting on image reuse",
+      "rationale": "Candidate workflow edit: root, full lanes (CI configuration is fail-closed).",
+      "files": [
+        ".github/workflows/candidate-publish.yml",
+        "tools/ci-cd-platform/__tests__/candidate-workflow.test.mjs"
+      ],
+      "scope": {
+        "projects": ["ci-cd-platform", "memoflow", "test-system-v2"],
+        "unit": ["ci-cd-platform", "test-system-v2"],
+        "coverage": [],
+        "smoke": [],
+        "integration": [],
+        "boundary": [],
+        "perf": [],
+        "webFlow": false,
+        "desktopFlow": false
+      },
+      "expected": {
+        "risk": "root",
+        "matchedLevels": ["root"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": true,
+          "web": true,
+          "coverage": true,
+          "performance": true
+        }
+      }
+    },
+    {
+      "id": "pr-468",
+      "source": "https://github.com/BakerSean168/memoflow/pull/468",
+      "title": "fix(ai): retain DSH quota status and validate simulated Windows 429",
+      "rationale": "Desktop e2e fixtures plus packages/ai (reachable from api/web): Desktop boundary AND Web Flow. The old desktop-suppresses-web rule produced web=false here.",
+      "files": [
+        "apps/desktop/e2e/support/attention-acp-fixture.cjs",
+        "apps/desktop/e2e/workspace-attention.spec.mts",
+        "packages/ai/src/server/local-agent/dsh-driver.spec.ts",
+        "packages/ai/src/server/local-agent/dsh-driver.ts"
+      ],
+      "scope": {
+        "projects": [
+          "ai",
+          "api",
+          "app-react",
+          "app-vue",
+          "ci-cd-platform",
+          "desktop",
+          "governance-tools",
+          "memoflow",
+          "mobile",
+          "test-system-v2",
+          "web"
+        ],
+        "unit": [
+          "ai",
+          "api",
+          "app-vue",
+          "ci-cd-platform",
+          "desktop",
+          "governance-tools",
+          "test-system-v2",
+          "web"
+        ],
+        "coverage": ["ai", "api", "app-vue"],
+        "smoke": ["api"],
+        "integration": ["api"],
+        "boundary": ["desktop"],
+        "perf": [],
+        "webFlow": true,
+        "desktopFlow": true
+      },
+      "expected": {
+        "risk": "desktop",
+        "matchedLevels": ["desktop", "package"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": true,
+          "web": true,
+          "coverage": true,
+          "performance": false
+        }
+      }
+    },
+    {
+      "id": "pr-467",
+      "source": "https://github.com/BakerSean168/memoflow/pull/467",
+      "title": "test(desktop): preserve opt-in real Windows DSH Send acceptance",
+      "rationale": "Desktop e2e spec, docs and regenerated inventory/ownership JSON: validate + Desktop boundary, no Web (previously unclassified JSON -> full).",
+      "files": [
+        "apps/desktop/e2e/live-dsh-operator.spec.mts",
+        "docs/plan/active/2026-10-13-ai-recovery-workspace-events/04-acceptance.md",
+        "tools/test-system-v2/e2e-ownership.json",
+        "tools/test-system-v2/test-inventory.json"
+      ],
+      "scope": {
+        "projects": [
+          "ci-cd-platform",
+          "desktop",
+          "governance-tools",
+          "memoflow",
+          "test-system-v2",
+          "web"
+        ],
+        "unit": ["ci-cd-platform", "desktop", "governance-tools", "test-system-v2", "web"],
+        "coverage": [],
+        "smoke": [],
+        "integration": [],
+        "boundary": ["desktop"],
+        "perf": [],
+        "webFlow": false,
+        "desktopFlow": true
+      },
+      "expected": {
+        "risk": "desktop",
+        "matchedLevels": ["desktop", "package", "docs"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": false,
+          "web": false,
+          "coverage": false,
+          "performance": false
+        }
+      }
+    },
+    {
+      "id": "pr-466",
+      "source": "https://github.com/BakerSean168/memoflow/pull/466",
+      "title": "fix(desktop): serialize strict Knowledge IDs for native MCP tool discovery",
+      "rationale": "Desktop main plus packages/contracts (shared by api/web): mixed change keeps Desktop boundary AND Web Flow. Old rule produced web=false.",
+      "files": [
+        "apps/desktop/src/main/modules/ai/local-agent-knowledge.spec.ts",
+        "apps/desktop/src/main/modules/ai/local-agent-tools.ts",
+        "packages/contracts/src/modules/repository/aggregates/knowledge-document-identity.ts",
+        "packages/contracts/src/modules/repository/api/knowledge-document-identity.spec.ts"
+      ],
+      "scope": {
+        "projects": [
+          "@memoflow/test-utils",
+          "account",
+          "agent-gateway",
+          "ai",
+          "api",
+          "app-react",
+          "app-vue",
+          "ci-cd-platform",
+          "cloud-auth",
+          "contracts",
+          "data-portability",
+          "database",
+          "desktop",
+          "domain-shared",
+          "goal",
+          "governance-tools",
+          "http-client",
+          "ipc-client",
+          "label",
+          "memoflow",
+          "migrator",
+          "mobile",
+          "notification",
+          "patterns",
+          "relation",
+          "reminder",
+          "repository",
+          "schedule",
+          "schedule-orchestration",
+          "scheduler",
+          "setting",
+          "task",
+          "test-system-v2",
+          "time",
+          "ui-vue-shadcn",
+          "utils",
+          "web"
+        ],
+        "unit": [
+          "account",
+          "agent-gateway",
+          "ai",
+          "api",
+          "app-vue",
+          "ci-cd-platform",
+          "cloud-auth",
+          "contracts",
+          "data-portability",
+          "database",
+          "desktop",
+          "domain-shared",
+          "goal",
+          "governance-tools",
+          "http-client",
+          "ipc-client",
+          "label",
+          "migrator",
+          "notification",
+          "patterns",
+          "relation",
+          "reminder",
+          "repository",
+          "schedule",
+          "schedule-orchestration",
+          "scheduler",
+          "setting",
+          "task",
+          "test-system-v2",
+          "time",
+          "ui-vue-shadcn",
+          "utils",
+          "web"
+        ],
+        "coverage": [
+          "account",
+          "ai",
+          "api",
+          "app-vue",
+          "data-portability",
+          "domain-shared",
+          "goal",
+          "notification",
+          "reminder",
+          "schedule",
+          "scheduler",
+          "setting",
+          "task"
+        ],
+        "smoke": ["api"],
+        "integration": [
+          "account",
+          "api",
+          "database",
+          "goal",
+          "label",
+          "notification",
+          "relation",
+          "reminder",
+          "repository",
+          "schedule",
+          "scheduler",
+          "task"
+        ],
+        "boundary": ["desktop"],
+        "perf": ["task"],
+        "webFlow": true,
+        "desktopFlow": true
+      },
+      "expected": {
+        "risk": "desktop",
+        "matchedLevels": ["desktop", "package"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": true,
+          "web": true,
+          "coverage": true,
+          "performance": true
+        }
+      }
+    },
+    {
+      "id": "pr-465",
+      "source": "https://github.com/BakerSean168/memoflow/pull/465",
+      "title": "fix(ai): preserve safe DSH 429 and quota error classification",
+      "rationale": "packages/ai only: shared package affecting api/web selects Web Flow and integration.",
+      "files": [
+        "packages/ai/src/server/local-agent/dsh-driver.spec.ts",
+        "packages/ai/src/server/local-agent/dsh-driver.ts"
+      ],
+      "scope": {
+        "projects": [
+          "ai",
+          "api",
+          "app-react",
+          "app-vue",
+          "ci-cd-platform",
+          "desktop",
+          "governance-tools",
+          "memoflow",
+          "mobile",
+          "test-system-v2",
+          "web"
+        ],
+        "unit": [
+          "ai",
+          "api",
+          "app-vue",
+          "ci-cd-platform",
+          "desktop",
+          "governance-tools",
+          "test-system-v2",
+          "web"
+        ],
+        "coverage": ["ai", "api", "app-vue"],
+        "smoke": ["api"],
+        "integration": ["api"],
+        "boundary": ["desktop"],
+        "perf": [],
+        "webFlow": true,
+        "desktopFlow": true
+      },
+      "expected": {
+        "risk": "package",
+        "matchedLevels": ["package"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": true,
+          "web": true,
+          "coverage": true,
+          "performance": false
+        }
+      }
+    },
+    {
+      "id": "pr-463",
+      "source": "https://github.com/BakerSean168/memoflow/pull/463",
+      "title": "test(desktop): verify native Windows Goal workflow Workspace events",
+      "rationale": "Desktop e2e spec plus docs: Desktop boundary only.",
+      "files": [
+        "apps/desktop/e2e/workspace-ipc.spec.mts",
+        "docs/plan/active/2026-10-13-ai-recovery-workspace-events/04-acceptance.md"
+      ],
+      "scope": {
+        "projects": [
+          "ci-cd-platform",
+          "desktop",
+          "governance-tools",
+          "memoflow",
+          "test-system-v2",
+          "web"
+        ],
+        "unit": ["ci-cd-platform", "desktop", "governance-tools", "test-system-v2", "web"],
+        "coverage": [],
+        "smoke": [],
+        "integration": [],
+        "boundary": ["desktop"],
+        "perf": [],
+        "webFlow": false,
+        "desktopFlow": true
+      },
+      "expected": {
+        "risk": "desktop",
+        "matchedLevels": ["desktop", "package", "docs"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": false,
+          "web": false,
+          "coverage": false,
+          "performance": false
+        }
+      }
+    },
+    {
+      "id": "pr-462",
+      "source": "https://github.com/BakerSean168/memoflow/pull/462",
+      "title": "test(desktop): verify packaged Windows Provider layouts and keyboard states",
+      "rationale": "apps/desktop/project.json: Desktop-only Nx config, Desktop boundary, no Web.",
+      "files": ["apps/desktop/project.json"],
+      "scope": {
+        "projects": ["ci-cd-platform", "desktop", "memoflow", "test-system-v2", "web"],
+        "unit": ["ci-cd-platform", "desktop", "test-system-v2", "web"],
+        "coverage": [],
+        "smoke": [],
+        "integration": [],
+        "boundary": ["desktop"],
+        "perf": [],
+        "webFlow": false,
+        "desktopFlow": true
+      },
+      "expected": {
+        "risk": "desktop",
+        "matchedLevels": ["desktop", "package"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": false,
+          "web": false,
+          "coverage": false,
+          "performance": false
+        }
+      }
+    },
+    {
+      "id": "pr-453",
+      "source": "https://github.com/BakerSean168/memoflow/pull/453",
+      "title": "Showcase: real Vue workspace visual-regression screenshot",
+      "rationale": "showcase/ assets are an unknown path: fail-closed to root (full lanes).",
+      "files": ["showcase/assets/workspace-e2e-visual-regression.png", "showcase/index.html"],
+      "scope": {
+        "projects": ["memoflow"],
+        "unit": [],
+        "coverage": [],
+        "smoke": [],
+        "integration": [],
+        "boundary": [],
+        "perf": [],
+        "webFlow": false,
+        "desktopFlow": false
+      },
+      "expected": {
+        "risk": "root",
+        "matchedLevels": ["root"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": true,
+          "web": true,
+          "coverage": true,
+          "performance": true
+        }
+      }
+    },
+    {
+      "id": "pr-452",
+      "source": "https://github.com/BakerSean168/memoflow/pull/452",
+      "title": "docs: refresh MemoFlow product introduction (zh/en)",
+      "rationale": "Root README.md plus docs/: docs, governance only.",
+      "files": ["README.md", "docs/zh-CN/README.md"],
+      "scope": {
+        "projects": ["governance-tools", "memoflow"],
+        "unit": ["governance-tools"],
+        "coverage": [],
+        "smoke": [],
+        "integration": [],
+        "boundary": [],
+        "perf": [],
+        "webFlow": false,
+        "desktopFlow": false
+      },
+      "expected": {
+        "risk": "docs",
+        "matchedLevels": ["docs"],
+        "lanes": {
+          "governance": true,
+          "validate": false,
+          "boundary": false,
+          "integration": false,
+          "web": false,
+          "coverage": false,
+          "performance": false
+        }
+      }
+    },
+    {
+      "id": "pr-448",
+      "source": "https://github.com/BakerSean168/memoflow/pull/448",
+      "title": "fix(ai): stabilize model picker geometry and empty states",
+      "rationale": "apps/web e2e spec plus app-vue: Web Flow.",
+      "files": [
+        "apps/web/e2e/ai/provider-onboarding.spec.ts",
+        "packages/app-vue/src/locales/en-US/aiAssistant.ts",
+        "packages/app-vue/src/locales/zh-CN/aiAssistant.ts",
+        "packages/app-vue/src/modules/ai/components/AIComposerControls.spec.ts",
+        "packages/app-vue/src/modules/ai/components/AIComposerControls.vue"
+      ],
+      "scope": {
+        "projects": [
+          "app-vue",
+          "ci-cd-platform",
+          "desktop",
+          "governance-tools",
+          "memoflow",
+          "test-system-v2",
+          "web"
+        ],
+        "unit": [
+          "app-vue",
+          "ci-cd-platform",
+          "desktop",
+          "governance-tools",
+          "test-system-v2",
+          "web"
+        ],
+        "coverage": ["app-vue"],
+        "smoke": [],
+        "integration": [],
+        "boundary": ["desktop"],
+        "perf": [],
+        "webFlow": true,
+        "desktopFlow": true
+      },
+      "expected": {
+        "risk": "web-flow",
+        "matchedLevels": ["web-flow", "package"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": false,
+          "web": true,
+          "coverage": true,
+          "performance": false
+        }
+      }
+    },
+    {
+      "id": "pr-441",
+      "source": "https://github.com/BakerSean168/memoflow/pull/441",
+      "title": "feat(desktop): first-class DSH Agent via shared ACP runtime",
+      "rationale": "Desktop main, packages/ai and root config: root, full lanes.",
+      "files": [
+        "apps/desktop/src/main/modules/ai/local-agent-tools.spec.ts",
+        "docs/analysis/2026-10-10-local-dsh-acp-integration.md",
+        "packages/ai/src/server/local-agent/dsh-driver.spec.ts",
+        "packages/ai/src/server/local-agent/dsh-driver.ts",
+        "packages/ai/src/server/local-agent/local-agent-runtime.ts",
+        "packages/ai/src/server/local-agent/native-executable.spec.ts",
+        "packages/ai/src/server/local-agent/native-executable.ts",
+        "packages/ai/src/server/local-agent/native-identity.spec.ts",
+        "packages/ai/src/server/local-agent/native-identity.ts",
+        "packages/ai/src/server/local-agent/native-rpc-transport-acp.spec.ts",
+        "packages/ai/src/server/local-agent/native-rpc-transport.ts",
+        "packages/app-vue/src/locales/en-US/aiAssistant.ts",
+        "packages/app-vue/src/locales/zh-CN/aiAssistant.ts",
+        "packages/app-vue/src/modules/setting/components/LocalAgentSettings.vue",
+        "packages/contracts/src/modules/ai/api/local-agent.dto.test.ts",
+        "packages/contracts/src/modules/ai/api/local-agent.dto.ts",
+        "scripts/acceptance/ollama-dsh-mcp.mjs",
+        "tools/test-system-v2/test-inventory.json"
+      ],
+      "scope": {
+        "projects": [
+          "@memoflow/test-utils",
+          "account",
+          "agent-gateway",
+          "ai",
+          "api",
+          "app-react",
+          "app-vue",
+          "ci-cd-platform",
+          "cloud-auth",
+          "contracts",
+          "data-portability",
+          "database",
+          "desktop",
+          "domain-shared",
+          "goal",
+          "governance-tools",
+          "http-client",
+          "ipc-client",
+          "label",
+          "memoflow",
+          "migrator",
+          "mobile",
+          "notification",
+          "patterns",
+          "relation",
+          "reminder",
+          "repository",
+          "schedule",
+          "schedule-orchestration",
+          "scheduler",
+          "setting",
+          "task",
+          "test-system-v2",
+          "time",
+          "ui-vue-shadcn",
+          "utils",
+          "web"
+        ],
+        "unit": [
+          "account",
+          "agent-gateway",
+          "ai",
+          "api",
+          "app-vue",
+          "ci-cd-platform",
+          "cloud-auth",
+          "contracts",
+          "data-portability",
+          "database",
+          "desktop",
+          "domain-shared",
+          "goal",
+          "governance-tools",
+          "http-client",
+          "ipc-client",
+          "label",
+          "migrator",
+          "notification",
+          "patterns",
+          "relation",
+          "reminder",
+          "repository",
+          "schedule",
+          "schedule-orchestration",
+          "scheduler",
+          "setting",
+          "task",
+          "test-system-v2",
+          "time",
+          "ui-vue-shadcn",
+          "utils",
+          "web"
+        ],
+        "coverage": [
+          "account",
+          "ai",
+          "api",
+          "app-vue",
+          "data-portability",
+          "domain-shared",
+          "goal",
+          "notification",
+          "reminder",
+          "schedule",
+          "scheduler",
+          "setting",
+          "task"
+        ],
+        "smoke": ["api"],
+        "integration": [
+          "account",
+          "api",
+          "database",
+          "goal",
+          "label",
+          "notification",
+          "relation",
+          "reminder",
+          "repository",
+          "schedule",
+          "scheduler",
+          "task"
+        ],
+        "boundary": ["desktop"],
+        "perf": ["task"],
+        "webFlow": true,
+        "desktopFlow": true
+      },
+      "expected": {
+        "risk": "root",
+        "matchedLevels": ["root", "desktop", "package", "docs"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": true,
+          "web": true,
+          "coverage": true,
+          "performance": true
+        }
+      }
+    },
+    {
+      "id": "pr-435",
+      "source": "https://github.com/BakerSean168/memoflow/pull/435",
+      "title": "fix(desktop): restore keyboard preferences and shared visual styles",
+      "rationale": "Desktop preload/renderer plus Web and root config: root, full lanes.",
+      "files": [
+        "apps/desktop/e2e/packaged-runtime/packaged-runtime.spec.ts",
+        "apps/desktop/src/preload/allowed-channels.ts",
+        "apps/desktop/src/preload/keyboard-bridge.spec.ts",
+        "apps/desktop/src/renderer/main.ts",
+        "apps/desktop/src/renderer/styles/components.css",
+        "apps/desktop/src/renderer/styles/index.css",
+        "apps/web/e2e/visual-regression/README.md",
+        "apps/web/e2e/visual-regression/environment.ts",
+        "apps/web/e2e/visual-regression/matrix.spec.ts",
+        "apps/web/e2e/visual-regression/vite.config.ts",
+        "apps/web/playwright.visual-regression.config.ts",
+        "apps/web/src/styles/index.css",
+        "docs/plan/active/2026-10-09-desktop-parity-oauth-repair.md",
+        "docs/plan/active/README.md",
+        "packages/app-vue/package.json",
+        "packages/app-vue/src/styles/base-styles.css",
+        "packages/app-vue/src/styles/index.css",
+        "packages/app-vue/src/styles/priority-colors.css",
+        "packages/app-vue/src/styles/settings-animations.css",
+        "tools/governance/package-export-audit.mjs",
+        "tools/test-system-v2/test-inventory.json"
+      ],
+      "scope": {
+        "projects": [
+          "app-vue",
+          "ci-cd-platform",
+          "desktop",
+          "governance-tools",
+          "memoflow",
+          "test-system-v2",
+          "web"
+        ],
+        "unit": [
+          "app-vue",
+          "ci-cd-platform",
+          "desktop",
+          "governance-tools",
+          "test-system-v2",
+          "web"
+        ],
+        "coverage": ["app-vue"],
+        "smoke": [],
+        "integration": [],
+        "boundary": ["desktop"],
+        "perf": [],
+        "webFlow": true,
+        "desktopFlow": true
+      },
+      "expected": {
+        "risk": "root",
+        "matchedLevels": ["root", "web-flow", "desktop", "package", "docs"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": true,
+          "web": true,
+          "coverage": true,
+          "performance": true
+        }
+      }
+    },
+    {
+      "id": "pr-431",
+      "source": "https://github.com/BakerSean168/memoflow/pull/431",
+      "title": "fix(production): wire GitHub OAuth callback override and activation runbook",
+      "rationale": "Production deployment compose plus api: release risk, full lanes.",
+      "files": [
+        "apps/api/src/shared/infrastructure/config/web-origin.spec.ts",
+        "deployment/production/docker-compose.production.yml",
+        "docker-compose.prod.yml",
+        "docs/deployment/README.md"
+      ],
+      "scope": {
+        "projects": ["api", "ci-cd-platform", "governance-tools", "memoflow", "test-system-v2"],
+        "unit": ["api", "ci-cd-platform", "governance-tools", "test-system-v2"],
+        "coverage": ["api"],
+        "smoke": ["api"],
+        "integration": ["api"],
+        "boundary": [],
+        "perf": [],
+        "webFlow": true,
+        "desktopFlow": false
+      },
+      "expected": {
+        "risk": "release",
+        "matchedLevels": ["release", "root", "runtime", "package", "docs"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": true,
+          "web": true,
+          "coverage": true,
+          "performance": true
+        }
+      }
+    },
+    {
+      "id": "pr-430",
+      "source": "https://github.com/BakerSean168/memoflow/pull/430",
+      "title": "feat(desktop): open WSL Vault notes in existing Obsidian",
+      "rationale": "Desktop capability plus apps/web e2e: Desktop boundary AND Web Flow.",
+      "files": [
+        "apps/desktop/src/main/capabilities/electron-factories.ts",
+        "apps/desktop/src/main/capabilities/wsl-obsidian-bridge.spec.ts",
+        "apps/desktop/src/main/capabilities/wsl-obsidian-bridge.ts",
+        "apps/web/e2e/authentication/auth-flow.spec.ts",
+        "apps/web/e2e/authentication/auth-login.spec.ts",
+        "apps/web/e2e/authentication/auth-password.spec.ts",
+        "apps/web/e2e/helpers/testHelpers.ts",
+        "docs/guides/development/windows-wsl-obsidian.md",
+        "tools/test-system-v2/test-inventory.json"
+      ],
+      "scope": {
+        "projects": [
+          "ci-cd-platform",
+          "desktop",
+          "governance-tools",
+          "memoflow",
+          "test-system-v2",
+          "web"
+        ],
+        "unit": ["ci-cd-platform", "desktop", "governance-tools", "test-system-v2", "web"],
+        "coverage": [],
+        "smoke": [],
+        "integration": [],
+        "boundary": ["desktop"],
+        "perf": [],
+        "webFlow": true,
+        "desktopFlow": true
+      },
+      "expected": {
+        "risk": "web-flow",
+        "matchedLevels": ["web-flow", "desktop", "package", "docs"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": false,
+          "web": true,
+          "coverage": false,
+          "performance": false
+        }
+      }
+    },
+    {
+      "id": "pr-425",
+      "source": "https://github.com/BakerSean168/memoflow/pull/425",
+      "title": "fix(database): prepare canonical production schema cutover",
+      "rationale": "Migrator plus database runtime: runtime risk, integration and Web Flow.",
+      "files": [
+        "apps/migrator/src/main.test.ts",
+        "apps/migrator/src/main.ts",
+        "docs/plan/active/2026-10-07-production-schema-cutover-repair.md",
+        "docs/plan/active/README.md",
+        "packages/database/project.json",
+        "packages/database/scripts/prepare-account-setting-cutover.ts",
+        "packages/database/src/schema/account-setting-cutover.integration.test.ts",
+        "packages/database/src/schema/account-setting-cutover.ts",
+        "packages/database/src/schema/vnext-unique-constraints.spec.ts",
+        "packages/database/src/schema/vnext-unique-constraints.ts",
+        "packages/database/tsup.runtime-scripts.config.ts",
+        "packages/database/vitest.integration.config.ts",
+        "tools/test-system-v2/test-inventory.json"
+      ],
+      "scope": {
+        "projects": [
+          "@memoflow/test-utils",
+          "account",
+          "ai",
+          "api",
+          "app-react",
+          "app-vue",
+          "ci-cd-platform",
+          "cloud-auth",
+          "data-portability",
+          "database",
+          "desktop",
+          "goal",
+          "governance-tools",
+          "label",
+          "memoflow",
+          "migrator",
+          "mobile",
+          "notification",
+          "relation",
+          "reminder",
+          "repository",
+          "schedule",
+          "schedule-orchestration",
+          "scheduler",
+          "setting",
+          "task",
+          "test-system-v2",
+          "web"
+        ],
+        "unit": [
+          "account",
+          "ai",
+          "api",
+          "app-vue",
+          "ci-cd-platform",
+          "cloud-auth",
+          "data-portability",
+          "database",
+          "desktop",
+          "goal",
+          "governance-tools",
+          "label",
+          "migrator",
+          "notification",
+          "relation",
+          "reminder",
+          "repository",
+          "schedule",
+          "schedule-orchestration",
+          "scheduler",
+          "setting",
+          "task",
+          "test-system-v2",
+          "web"
+        ],
+        "coverage": [
+          "account",
+          "ai",
+          "api",
+          "app-vue",
+          "data-portability",
+          "goal",
+          "notification",
+          "reminder",
+          "schedule",
+          "scheduler",
+          "setting",
+          "task"
+        ],
+        "smoke": ["api"],
+        "integration": [
+          "account",
+          "api",
+          "database",
+          "goal",
+          "label",
+          "notification",
+          "relation",
+          "reminder",
+          "repository",
+          "schedule",
+          "scheduler",
+          "task"
+        ],
+        "boundary": ["desktop"],
+        "perf": ["task"],
+        "webFlow": true,
+        "desktopFlow": true
+      },
+      "expected": {
+        "risk": "runtime",
+        "matchedLevels": ["runtime", "package", "docs"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": true,
+          "web": true,
+          "coverage": true,
+          "performance": true
+        }
+      }
+    },
+    {
+      "id": "pr-423",
+      "source": "https://github.com/BakerSean168/memoflow/pull/423",
+      "title": "fix(desktop): restore packaged startup and release verification",
+      "rationale": "Desktop packaging scripts, packages/goal and root config: root, full lanes.",
+      "files": [
+        "apps/desktop/scripts/verify-packaged-runtime-deps.mjs",
+        "docs/plan/active/2026-10-07-desktop-release-startup-repair.md",
+        "docs/plan/active/README.md",
+        "packages/goal/src/import-safety.spec.ts",
+        "packages/goal/src/server/infrastructure/adapters/prisma/goal-prisma.repository.ts",
+        "packages/goal/tsconfig.json",
+        "packages/task/src/import-safety.spec.ts",
+        "packages/task/src/server/infrastructure/adapters/prisma/task-page-reader.ts",
+        "tools/test-system-v2/test-inventory.json"
+      ],
+      "scope": {
+        "projects": [
+          "account",
+          "api",
+          "app-react",
+          "app-vue",
+          "ci-cd-platform",
+          "desktop",
+          "goal",
+          "governance-tools",
+          "memoflow",
+          "mobile",
+          "notification",
+          "schedule-orchestration",
+          "task",
+          "test-system-v2",
+          "web"
+        ],
+        "unit": [
+          "account",
+          "api",
+          "app-vue",
+          "ci-cd-platform",
+          "desktop",
+          "goal",
+          "governance-tools",
+          "notification",
+          "schedule-orchestration",
+          "task",
+          "test-system-v2",
+          "web"
+        ],
+        "coverage": ["account", "api", "app-vue", "goal", "notification", "task"],
+        "smoke": ["api"],
+        "integration": ["account", "api", "goal", "notification", "task"],
+        "boundary": ["desktop"],
+        "perf": ["task"],
+        "webFlow": true,
+        "desktopFlow": true
+      },
+      "expected": {
+        "risk": "root",
+        "matchedLevels": ["root", "runtime", "desktop", "package", "docs"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": true,
+          "web": true,
+          "coverage": true,
+          "performance": true
+        }
+      }
+    },
+    {
+      "id": "pr-413",
+      "source": "https://github.com/BakerSean168/memoflow/pull/413",
+      "title": "chore: pin T3 project icon",
+      "rationale": "t3.json at the root is not a known path: fail-closed to root.",
+      "files": ["t3.json"],
+      "scope": {
+        "projects": ["memoflow"],
+        "unit": [],
+        "coverage": [],
+        "smoke": [],
+        "integration": [],
+        "boundary": [],
+        "perf": [],
+        "webFlow": false,
+        "desktopFlow": false
+      },
+      "expected": {
+        "risk": "root",
+        "matchedLevels": ["root"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": true,
+          "web": true,
+          "coverage": true,
+          "performance": true
+        }
+      }
+    },
+    {
+      "id": "pr-412",
+      "source": "https://github.com/BakerSean168/memoflow/pull/412",
+      "title": "fix(ai): attempt unknown model capabilities optimistically",
+      "rationale": "packages/ai model resolver: Web Flow, integration, coverage via Nx affected.",
+      "files": [
+        "packages/ai/src/server/mastra/models/model-resolver.spec.ts",
+        "packages/ai/src/server/mastra/models/model-resolver.ts"
+      ],
+      "scope": {
+        "projects": [
+          "ai",
+          "api",
+          "app-react",
+          "app-vue",
+          "ci-cd-platform",
+          "desktop",
+          "governance-tools",
+          "memoflow",
+          "mobile",
+          "test-system-v2",
+          "web"
+        ],
+        "unit": [
+          "ai",
+          "api",
+          "app-vue",
+          "ci-cd-platform",
+          "desktop",
+          "governance-tools",
+          "test-system-v2",
+          "web"
+        ],
+        "coverage": ["ai", "api", "app-vue"],
+        "smoke": ["api"],
+        "integration": ["api"],
+        "boundary": ["desktop"],
+        "perf": [],
+        "webFlow": true,
+        "desktopFlow": true
+      },
+      "expected": {
+        "risk": "package",
+        "matchedLevels": ["package"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": true,
+          "web": true,
+          "coverage": true,
+          "performance": false
+        }
+      }
+    },
+    {
+      "id": "pr-404",
+      "source": "https://github.com/BakerSean168/memoflow/pull/404",
+      "title": "docs(product): close Product vNext execution plan",
+      "rationale": "docs/plan only: docs, governance only.",
+      "files": [
+        "docs/plan/active/2026-09-29-product-vnext-convergence.md",
+        "docs/plan/active/2026-09-29-product-vnext-execution-master-plan.md"
+      ],
+      "scope": {
+        "projects": ["governance-tools", "memoflow"],
+        "unit": ["governance-tools"],
+        "coverage": [],
+        "smoke": [],
+        "integration": [],
+        "boundary": [],
+        "perf": [],
+        "webFlow": false,
+        "desktopFlow": false
+      },
+      "expected": {
+        "risk": "docs",
+        "matchedLevels": ["docs"],
+        "lanes": {
+          "governance": true,
+          "validate": false,
+          "boundary": false,
+          "integration": false,
+          "web": false,
+          "coverage": false,
+          "performance": false
+        }
+      }
+    },
+    {
+      "id": "pr-402",
+      "source": "https://github.com/BakerSean168/memoflow/pull/402",
+      "title": "feat(ai): refine chat information architecture",
+      "rationale": "app-vue shell plus docs: Web Flow and validate.",
+      "files": [
+        "docs/AI_CHAT_INFORMATION_ARCHITECTURE_V2.md",
+        "packages/app-vue/src/layouts/shell/AppShell.vue",
+        "packages/app-vue/src/layouts/shell/ConversationSidebar.spec.ts",
+        "packages/app-vue/src/layouts/shell/ConversationSidebar.vue",
+        "packages/app-vue/src/locales/en-US/aiAssistant.ts",
+        "packages/app-vue/src/locales/en-US/shell.ts",
+        "packages/app-vue/src/locales/zh-CN/aiAssistant.ts",
+        "packages/app-vue/src/locales/zh-CN/shell.ts",
+        "packages/app-vue/src/modules/ai/components/AIContextPanel.spec.ts",
+        "packages/app-vue/src/modules/ai/components/AIContextPanel.vue",
+        "packages/app-vue/src/modules/ai/components/AIFooterComposer.vue",
+        "packages/app-vue/src/modules/ai/components/AIMessageContent.spec.ts",
+        "packages/app-vue/src/modules/ai/components/AIMessageContent.vue",
+        "packages/app-vue/src/modules/ai/components/AIMessagePanel.spec.ts",
+        "packages/app-vue/src/modules/ai/components/AIMessagePanel.vue",
+        "packages/app-vue/src/modules/ai/views/AIChatView.spec.ts",
+        "packages/app-vue/src/modules/ai/views/AIChatView.vue",
+        "tools/test-system-v2/test-inventory.json"
+      ],
+      "scope": {
+        "projects": [
+          "app-vue",
+          "ci-cd-platform",
+          "desktop",
+          "governance-tools",
+          "memoflow",
+          "test-system-v2",
+          "web"
+        ],
+        "unit": [
+          "app-vue",
+          "ci-cd-platform",
+          "desktop",
+          "governance-tools",
+          "test-system-v2",
+          "web"
+        ],
+        "coverage": ["app-vue"],
+        "smoke": [],
+        "integration": [],
+        "boundary": ["desktop"],
+        "perf": [],
+        "webFlow": true,
+        "desktopFlow": true
+      },
+      "expected": {
+        "risk": "package",
+        "matchedLevels": ["package", "docs"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": false,
+          "web": true,
+          "coverage": true,
+          "performance": false
+        }
+      }
+    },
+    {
+      "id": "pr-401",
+      "source": "https://github.com/BakerSean168/memoflow/pull/401",
+      "title": "chore: add PDS component metadata",
+      "rationale": ".pds.yaml at the root is not a known path: fail-closed to root.",
+      "files": [".pds.yaml"],
+      "scope": {
+        "projects": ["memoflow"],
+        "unit": [],
+        "coverage": [],
+        "smoke": [],
+        "integration": [],
+        "boundary": [],
+        "perf": [],
+        "webFlow": false,
+        "desktopFlow": false
+      },
+      "expected": {
+        "risk": "root",
+        "matchedLevels": ["root"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": true,
+          "web": true,
+          "coverage": true,
+          "performance": true
+        }
+      }
+    },
+    {
+      "id": "pr-396",
+      "source": "https://github.com/BakerSean168/memoflow/pull/396",
+      "title": "perf(dev): enable bundled remote Vite workflow",
+      "rationale": "Vite config, .env.development and docs: root (unknown .env path) keeps full lanes.",
+      "files": [
+        ".env.development",
+        "apps/web/src/vite.config.spec.ts",
+        "apps/web/vite.config.ts",
+        "docs/guides/development/local-development.md",
+        "docs/guides/development/runtime-lanes.md",
+        "package.json",
+        "packages/app-vue/package.json",
+        "packages/assets/package.json",
+        "packages/patterns/package.json",
+        "packages/ui-vue-shadcn/package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml"
+      ],
+      "scope": {
+        "projects": [
+          "@memoflow/test-utils",
+          "account",
+          "agent-gateway",
+          "ai",
+          "api",
+          "app-react",
+          "app-vue",
+          "assets",
+          "ci-cd-platform",
+          "cloud-auth",
+          "contracts",
+          "data-portability",
+          "database",
+          "desktop",
+          "domain-shared",
+          "goal",
+          "governance-tools",
+          "http-client",
+          "ipc-client",
+          "label",
+          "memoflow",
+          "migrator",
+          "mobile",
+          "notification",
+          "nx-test-system",
+          "patterns",
+          "powersync-schema",
+          "relation",
+          "reminder",
+          "repository",
+          "schedule",
+          "schedule-orchestration",
+          "scheduler",
+          "setting",
+          "task",
+          "test-system-v2",
+          "time",
+          "ui-core",
+          "ui-react-native",
+          "ui-vue-shadcn",
+          "utils",
+          "web"
+        ],
+        "unit": [
+          "account",
+          "agent-gateway",
+          "ai",
+          "api",
+          "app-vue",
+          "assets",
+          "ci-cd-platform",
+          "cloud-auth",
+          "contracts",
+          "data-portability",
+          "database",
+          "desktop",
+          "domain-shared",
+          "goal",
+          "governance-tools",
+          "http-client",
+          "ipc-client",
+          "label",
+          "migrator",
+          "notification",
+          "patterns",
+          "powersync-schema",
+          "relation",
+          "reminder",
+          "repository",
+          "schedule",
+          "schedule-orchestration",
+          "scheduler",
+          "setting",
+          "task",
+          "test-system-v2",
+          "time",
+          "ui-core",
+          "ui-vue-shadcn",
+          "utils",
+          "web"
+        ],
+        "coverage": [
+          "account",
+          "ai",
+          "api",
+          "app-vue",
+          "data-portability",
+          "domain-shared",
+          "goal",
+          "notification",
+          "reminder",
+          "schedule",
+          "scheduler",
+          "setting",
+          "task"
+        ],
+        "smoke": ["api"],
+        "integration": [
+          "account",
+          "api",
+          "database",
+          "goal",
+          "label",
+          "notification",
+          "relation",
+          "reminder",
+          "repository",
+          "schedule",
+          "scheduler",
+          "task"
+        ],
+        "boundary": ["desktop"],
+        "perf": ["task"],
+        "webFlow": true,
+        "desktopFlow": true
+      },
+      "expected": {
+        "risk": "root",
+        "matchedLevels": ["root", "web-flow", "package", "docs"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": true,
+          "web": true,
+          "coverage": true,
+          "performance": true
+        }
+      }
+    },
+    {
+      "id": "mixed-desktop-app-vue",
+      "source": "synthetic",
+      "title": "synthetic: Desktop main + shared Vue view",
+      "rationale": "Minimal counterexample from the #488 review: Desktop main + shared Vue view must run BOTH Desktop boundary and Web Flow (old selectLanes gave web=false).",
+      "files": [
+        "apps/desktop/src/main/index.ts",
+        "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
+      ],
+      "scope": {
+        "projects": [
+          "app-vue",
+          "ci-cd-platform",
+          "desktop",
+          "governance-tools",
+          "memoflow",
+          "test-system-v2",
+          "web"
+        ],
+        "unit": [
+          "app-vue",
+          "ci-cd-platform",
+          "desktop",
+          "governance-tools",
+          "test-system-v2",
+          "web"
+        ],
+        "coverage": ["app-vue"],
+        "smoke": [],
+        "integration": [],
+        "boundary": ["desktop"],
+        "perf": [],
+        "webFlow": true,
+        "desktopFlow": true
+      },
+      "expected": {
+        "risk": "desktop",
+        "matchedLevels": ["desktop", "package"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": false,
+          "web": true,
+          "coverage": true,
+          "performance": false
+        }
+      }
+    },
+    {
+      "id": "harness-inventory-only",
+      "source": "synthetic",
+      "title": "synthetic: test inventory regeneration only",
+      "rationale": "Test inventory / ownership regeneration: governance + validate (test-system-v2 unit tests), no E2E.",
+      "files": [
+        "tools/test-system-v2/e2e-ownership.json",
+        "tools/test-system-v2/test-inventory.json"
+      ],
+      "scope": {
+        "projects": ["test-system-v2"],
+        "unit": ["test-system-v2"],
+        "coverage": [],
+        "smoke": [],
+        "integration": [],
+        "boundary": [],
+        "perf": [],
+        "webFlow": false,
+        "desktopFlow": false
+      },
+      "expected": {
+        "risk": "package",
+        "matchedLevels": ["package"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": false,
+          "integration": false,
+          "web": false,
+          "coverage": false,
+          "performance": false
+        }
+      }
+    },
+    {
+      "id": "unknown-path",
+      "source": "synthetic",
+      "title": "synthetic: unknown top-level path",
+      "rationale": "Unknown path: fail-closed to root, every lane.",
+      "files": ["scripts/some-new-tool.sh"],
+      "scope": {
+        "projects": ["memoflow"],
+        "unit": [],
+        "coverage": [],
+        "smoke": [],
+        "integration": [],
+        "boundary": [],
+        "perf": [],
+        "webFlow": false,
+        "desktopFlow": false
+      },
+      "expected": {
+        "risk": "root",
+        "matchedLevels": ["root"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": true,
+          "web": true,
+          "coverage": true,
+          "performance": true
+        }
+      }
+    },
+    {
+      "id": "repository-electron-only",
+      "source": "synthetic",
+      "title": "synthetic: Electron adapter inside shared repository package",
+      "rationale": "Electron adapter inside the shared repository package: Desktop boundary and integration, but no Web Flow (not reachable from the browser).",
+      "files": ["packages/repository/src/electron/local-vault-runtime.ts"],
+      "scope": {
+        "projects": [
+          "account",
+          "api",
+          "app-react",
+          "app-vue",
+          "ci-cd-platform",
+          "desktop",
+          "governance-tools",
+          "memoflow",
+          "mobile",
+          "repository",
+          "test-system-v2",
+          "web"
+        ],
+        "unit": [
+          "account",
+          "api",
+          "app-vue",
+          "ci-cd-platform",
+          "desktop",
+          "governance-tools",
+          "repository",
+          "test-system-v2",
+          "web"
+        ],
+        "coverage": ["account", "api", "app-vue"],
+        "smoke": ["api"],
+        "integration": ["account", "api", "repository"],
+        "boundary": ["desktop"],
+        "perf": [],
+        "webFlow": false,
+        "desktopFlow": true
+      },
+      "expected": {
+        "risk": "desktop",
+        "matchedLevels": ["desktop", "package"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": true,
+          "web": false,
+          "coverage": true,
+          "performance": false
+        }
+      }
+    },
+    {
+      "id": "desktop-renderer-style",
+      "source": "synthetic",
+      "title": "synthetic: Desktop renderer style consumed by Web visual regression",
+      "rationale": "Desktop renderer styles are consumed by the Web visual-regression build: Web Flow stays selected.",
+      "files": ["apps/desktop/src/renderer/styles/index.css"],
+      "scope": {
+        "projects": [
+          "ci-cd-platform",
+          "desktop",
+          "governance-tools",
+          "memoflow",
+          "test-system-v2",
+          "web"
+        ],
+        "unit": ["ci-cd-platform", "desktop", "governance-tools", "test-system-v2", "web"],
+        "coverage": [],
+        "smoke": [],
+        "integration": [],
+        "boundary": ["desktop"],
+        "perf": [],
+        "webFlow": true,
+        "desktopFlow": true
+      },
+      "expected": {
+        "risk": "desktop",
+        "matchedLevels": ["desktop", "package"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": false,
+          "web": true,
+          "coverage": false,
+          "performance": false
+        }
+      }
+    },
+    {
+      "id": "prisma-schema",
+      "source": "synthetic",
+      "title": "synthetic: database schema",
+      "rationale": "Prisma schema: runtime risk with integration, boundary and Web Flow.",
+      "files": ["packages/database/prisma/schema.prisma"],
+      "scope": {
+        "projects": [
+          "@memoflow/test-utils",
+          "account",
+          "ai",
+          "api",
+          "app-react",
+          "app-vue",
+          "ci-cd-platform",
+          "cloud-auth",
+          "data-portability",
+          "database",
+          "desktop",
+          "goal",
+          "label",
+          "memoflow",
+          "migrator",
+          "mobile",
+          "notification",
+          "relation",
+          "reminder",
+          "repository",
+          "schedule",
+          "schedule-orchestration",
+          "scheduler",
+          "setting",
+          "task",
+          "test-system-v2",
+          "web"
+        ],
+        "unit": [
+          "account",
+          "ai",
+          "api",
+          "app-vue",
+          "ci-cd-platform",
+          "cloud-auth",
+          "data-portability",
+          "database",
+          "desktop",
+          "goal",
+          "label",
+          "migrator",
+          "notification",
+          "relation",
+          "reminder",
+          "repository",
+          "schedule",
+          "schedule-orchestration",
+          "scheduler",
+          "setting",
+          "task",
+          "test-system-v2",
+          "web"
+        ],
+        "coverage": [
+          "account",
+          "ai",
+          "api",
+          "app-vue",
+          "data-portability",
+          "goal",
+          "notification",
+          "reminder",
+          "schedule",
+          "scheduler",
+          "setting",
+          "task"
+        ],
+        "smoke": ["api"],
+        "integration": [
+          "account",
+          "api",
+          "database",
+          "goal",
+          "label",
+          "notification",
+          "relation",
+          "reminder",
+          "repository",
+          "schedule",
+          "scheduler",
+          "task"
+        ],
+        "boundary": ["desktop"],
+        "perf": ["task"],
+        "webFlow": true,
+        "desktopFlow": true
+      },
+      "expected": {
+        "risk": "runtime",
+        "matchedLevels": ["runtime", "package"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": true,
+          "integration": true,
+          "web": true,
+          "coverage": true,
+          "performance": true
+        }
+      }
+    },
+    {
+      "id": "web-durations",
+      "source": "synthetic",
+      "title": "synthetic: Web Flow timing refresh",
+      "rationale": "Web Flow timing history changes the shard partition: Web Flow runs to prove it.",
+      "files": ["tools/test-system-v2/web-spec-durations.json"],
+      "scope": {
+        "projects": ["test-system-v2"],
+        "unit": ["test-system-v2"],
+        "coverage": [],
+        "smoke": [],
+        "integration": [],
+        "boundary": [],
+        "perf": [],
+        "webFlow": false,
+        "desktopFlow": false
+      },
+      "expected": {
+        "risk": "web-flow",
+        "matchedLevels": ["web-flow"],
+        "lanes": {
+          "governance": true,
+          "validate": true,
+          "boundary": false,
+          "integration": false,
+          "web": true,
+          "coverage": false,
+          "performance": false
+        }
+      }
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { classifyRisk, selectLanes } from '../lib/risk.mjs';
+import { classifyRisk, selectLanes, webFlowCandidateFiles } from '../lib/risk.mjs';
 
 test('classifies highest-risk root and release changes', () => {
   assert.equal(classifyRisk(['docs/README.md']).level, 'docs');
@@ -65,31 +65,88 @@ test('keeps validation enabled for executable changes', () => {
   );
 });
 
-test('desktop-only changes select Desktop without Web Flow while shared UI can select both', () => {
-  const desktopScope = {
+test('lanes are selected per dimension: Desktop never suppresses Web Flow', () => {
+  const scope = {
     boundary: ['desktop'],
     smoke: [],
     integration: [],
     coverage: [],
     perf: [],
-    webFlow: true,
     desktopFlow: true,
   };
   const desktopOnly = selectLanes({
-    risk: { level: 'runtime', matchedLevels: ['runtime', 'desktop', 'package'] },
-    scope: desktopScope,
-    event: 'pull_request',
+    risk: { level: 'desktop', matchedLevels: ['desktop', 'package'] },
+    scope: { ...scope, webFlow: false },
   });
   assert.equal(desktopOnly.validate, true);
+  assert.equal(desktopOnly.boundary, true);
   assert.equal(desktopOnly.web, false);
 
-  const shared = selectLanes({
-    risk: { level: 'package', matchedLevels: ['package'] },
-    scope: desktopScope,
-    event: 'pull_request',
+  const mixed = selectLanes({
+    risk: { level: 'desktop', matchedLevels: ['desktop', 'package'] },
+    scope: { ...scope, webFlow: true },
   });
-  assert.equal(shared.validate, true);
-  assert.equal(shared.web, true);
+  assert.equal(mixed.boundary, true);
+  assert.equal(mixed.web, true);
+});
+
+test('Web Flow candidate files exclude Desktop-only and docs paths but keep renderer styles', () => {
+  assert.deepEqual(
+    webFlowCandidateFiles([
+      'AGENTS.md',
+      'apps/desktop/scripts/run-windows-update-e2e.ps1',
+      'apps/desktop/src/main/index.ts',
+      'apps/desktop/src/preload/index.ts',
+      'apps/desktop/src/renderer/styles/index.css',
+      'docs/test/ci-validation.md',
+      'packages/app-vue/src/App.vue',
+      'packages/repository/src/electron/local-vault-runtime.ts',
+    ]),
+    ['apps/desktop/src/renderer/styles/index.css', 'packages/app-vue/src/App.vue'],
+  );
+});
+
+test('docs classification is exclusive and covers root Markdown and agent prompts', () => {
+  for (const file of [
+    'AGENTS.md',
+    'CLAUDE.md',
+    'README.md',
+    '.github/prompts/dev.prompt.md',
+    '.github/copilot-instructions.md',
+    'docs/guides/database-integration-smoke-e2e.md',
+  ]) {
+    const risk = classifyRisk([file]);
+    assert.equal(risk.level, 'docs', file);
+    assert.deepEqual(risk.matchedLevels, ['docs'], file);
+  }
+  // Markdown inside executable projects is still project source.
+  assert.equal(classifyRisk(['apps/web/README.md']).level, 'web-flow');
+});
+
+test('e2e / playwright words outside apps/web do not select Web Flow', () => {
+  assert.deepEqual(
+    classifyRisk(['apps/desktop/scripts/run-windows-update-e2e.ps1']).matchedLevels,
+    ['desktop', 'package'],
+  );
+  assert.deepEqual(classifyRisk(['apps/desktop/e2e/workspace-ipc.spec.mts']).matchedLevels, [
+    'desktop',
+    'package',
+  ]);
+  assert.equal(classifyRisk(['apps/web/playwright.config.ts']).level, 'web-flow');
+  // Unknown files with such words still fail closed.
+  assert.equal(classifyRisk(['.e2e-test-credentials.json']).level, 'root');
+});
+
+test('test harness registries select validation, timing history selects Web Flow', () => {
+  assert.deepEqual(classifyRisk(['tools/test-system-v2/test-inventory.json']).matchedLevels, [
+    'package',
+  ]);
+  assert.deepEqual(classifyRisk(['tools/test-system-v2/e2e-ownership.json']).matchedLevels, [
+    'package',
+  ]);
+  assert.equal(classifyRisk(['tools/test-system-v2/web-spec-durations.json']).level, 'web-flow');
+  // Harness code stays fail-closed.
+  assert.equal(classifyRisk(['tools/test-system-v2/run-web-shard.mjs']).level, 'root');
 });
 
 test('full events enable every lane', () => {

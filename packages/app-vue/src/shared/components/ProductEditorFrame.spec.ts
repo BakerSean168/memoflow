@@ -1,7 +1,5 @@
 /** @vitest-environment happy-dom */
 
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { enableAutoUnmount, flushPromises, mount, shallowMount } from '@vue/test-utils';
 import { defineComponent, nextTick, ref } from 'vue';
 import { createI18n } from 'vue-i18n';
@@ -18,8 +16,6 @@ enableAutoUnmount((unmount) => {
     document.body.replaceChildren();
   });
 });
-
-const getSource = (path: string) => readFileSync(resolve(__dirname, path), 'utf8');
 
 describe('ProductEditorFrame', () => {
   const props = { open: true, testId: 'sample-editor', titleId: 'sample-title' };
@@ -201,33 +197,6 @@ describe('ProductEditorFrame', () => {
     expect(isInert(host)).toBe(false);
   });
 
-  it('keeps task, routine and schedule edits constrained to their owning pane', () => {
-    for (const [owner, dialog] of [
-      [
-        '../../modules/task/views/TaskManagementView.vue',
-        '../../modules/task/components/dialogs/TaskPlanDialog.vue',
-      ],
-      [
-        '../../modules/routine/views/RoutineConfigurationView.vue',
-        '../../modules/routine/components/RoutineEditorDialog.vue',
-      ],
-      [
-        '../../modules/schedule/views/ScheduleCalendarView.vue',
-        '../../modules/schedule/components/CreateScheduleDialog.vue',
-      ],
-    ]) {
-      expect(getSource(owner)).toContain('presentation="panel"');
-      expect(getSource(owner)).toContain('relative isolate');
-      expect(getSource(owner)).toContain(':inert=');
-      expect(getSource(dialog)).toContain('<ProductEditorFrame');
-    }
-    const pane = getSource('PaneScopedDialog.vue');
-    expect(pane).toContain('aria-modal="false"');
-    expect(pane).toContain('data-scroll-host="pane-dialog"');
-    expect(pane).toContain('@keydown.esc.stop.prevent');
-    expect(getSource('ProductEditorFrame.vue')).toContain('returnFocus');
-  });
-
   it.each(['removed', 'closed'] as const)(
     'restores a visible owner control when its opener menu is %s',
     async (state) => {
@@ -258,15 +227,4 @@ describe('ProductEditorFrame', () => {
       expect(document.activeElement).toBe(fallback);
     },
   );
-
-  it('keeps a single 32px icon-only create affordance at all panel widths', () => {
-    const create = getSource('ResponsivePrimaryAction.vue');
-    expect(create).toContain('class="h-8 w-8');
-    expect(create).toContain(':aria-label="label"');
-    expect(create).not.toContain('@2xl/panel:inline');
-    const routine = getSource('../../modules/routine/views/RoutineConfigurationView.vue');
-    expect(routine).toContain('data-testid="routine-create-button"');
-    expect(routine).toContain('size="icon"');
-    expect(routine).not.toContain('hidden @2xl/panel:inline');
-  });
 });

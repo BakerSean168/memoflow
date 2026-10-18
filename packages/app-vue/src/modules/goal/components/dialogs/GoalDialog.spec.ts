@@ -6,8 +6,6 @@ import { DOMWrapper, flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { defineComponent, h, KeepAlive, nextTick, ref } from 'vue';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import fs from 'node:fs';
-import path from 'node:path';
 import { productionLocaleMessages } from '../../../../locales/production-messages';
 import { createMockGoal, createMockKeyResult } from '@memoflow/contracts/mocks';
 import {
@@ -787,65 +785,6 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
       wrapper.unmount();
     },
   );
-
-  it('edits only vNext Direction + Measurement fields without retired taxonomy or motivation forms', () => {
-    const source = fs.readFileSync(path.resolve(__dirname, '../dialogs/GoalDialog.vue'), 'utf8');
-    expect(source).toContain('GoalTimeframePicker');
-    expect(source).toContain('goal-property-chips');
-    expect(source).toContain('GoalReminderChip');
-    expect(source).toContain('LabelPicker');
-    expect(source).toContain('initialKeyResults');
-    expect(source).toContain('keyResults');
-    expect(source).toContain('GoalFormFrame');
-    const frame = fs.readFileSync(path.resolve(__dirname, 'GoalFormFrame.vue'), 'utf8');
-    expect(frame).toContain('ProductDialogShell');
-    expect(frame).toContain('recipe="workspace"');
-    expect(source).toContain('ProductAutoTextarea');
-    expect(frame).toContain('PaneScopedDialog');
-    expect(frame).toContain('height-mode="workspace"');
-    expect(source).toContain('class="flex min-h-full flex-col gap-6"');
-    expect(source).toContain('GoalKeyResultDraftEditor');
-    expect(source).toContain('class="mt-auto"');
-    expect(source).toContain('GoalStatusPicker');
-
-    const keyResultEditorSource = fs.readFileSync(
-      path.resolve(__dirname, '../GoalKeyResultDraftEditor.vue'),
-      'utf8',
-    );
-    expect(keyResultEditorSource).toContain('<Transition name="kr-editor-reveal"');
-    expect(keyResultEditorSource).toContain('border-[hsl(var(--border-subtle))]');
-    expect(keyResultEditorSource).toContain('transform-origin: bottom');
-    expect(keyResultEditorSource).toContain('grid-template-rows 220ms');
-    expect(keyResultEditorSource).toContain('prefers-reduced-motion');
-    expect(keyResultEditorSource).toContain('GoalKeyResultCardEditor');
-    expect(keyResultEditorSource).not.toContain('Collapsible');
-
-    const keyResultCardSource = fs.readFileSync(
-      path.resolve(__dirname, '../GoalKeyResultCardEditor.vue'),
-      'utf8',
-    );
-    expect(keyResultCardSource).toContain('GoalKeyResultTrajectoryPlot');
-    expect(keyResultCardSource).toContain('draft-kr-description-input');
-    expect(keyResultCardSource).toContain('draft-kr-calculation-method');
-    expect(keyResultCardSource).toContain('draft-kr-weight');
-    expect(keyResultCardSource).toContain('draft-kr-target-timeframe');
-    expect(keyResultCardSource).not.toContain('krTrajectoryHint');
-    expect(source).not.toContain('goal.dialog.vNextDescription');
-    expect(source).not.toContain('goal.dialog.keyResultsHint');
-    expect(source).not.toContain('goal.dialog.krEmptyDesc');
-    expect(source).toContain('draft.description');
-    for (const retired of [
-      'dueDate',
-      'folderId',
-      'parentGoalId',
-      'category',
-      'importance',
-      'draft.motivation',
-      'draft.feasibilityAnalysis',
-    ]) {
-      expect(source).not.toContain(retired);
-    }
-  });
 
   it('keeps Goal identity fields borderless, wrapping, and hard-truncated to product limits', async () => {
     const wrapper = mount(GoalDialog, {

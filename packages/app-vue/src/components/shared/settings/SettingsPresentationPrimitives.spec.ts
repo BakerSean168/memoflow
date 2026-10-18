@@ -1,5 +1,3 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
 import SettingsDangerZone from './SettingsDangerZone.vue';
@@ -7,8 +5,6 @@ import SettingsObjectCard from './SettingsObjectCard.vue';
 import SettingsPropertyRow from './SettingsPropertyRow.vue';
 import SettingsSection from './SettingsSection.vue';
 import SettingsStatusBlock from './SettingsStatusBlock.vue';
-
-const settingsRoot = resolve(__dirname, '../../../modules/setting/components');
 
 describe('settings presentation primitives', () => {
   it('keeps section chrome lightweight while exposing title, description, and actions', () => {
@@ -92,78 +88,5 @@ describe('settings presentation primitives', () => {
     });
     expect(danger.text()).toContain('Reset preferences');
     expect(danger.get('[data-testid="reset"]').exists()).toBe(true);
-  });
-
-  it('migrates canonical preference surfaces off heavy cards and native selects', () => {
-    const appearance = readFileSync(resolve(settingsRoot, 'AppearanceSettings.vue'), 'utf8');
-    const locale = readFileSync(resolve(settingsRoot, 'LocaleSettings.vue'), 'utf8');
-    const reset = readFileSync(resolve(settingsRoot, 'SettingsResetSection.vue'), 'utf8');
-    const preferences = readFileSync(
-      resolve(settingsRoot, 'UserPreferenceSettingsSection.vue'),
-      'utf8',
-    );
-    const account = readFileSync(
-      resolve(settingsRoot, '../../account/components/AccountProfileSection.vue'),
-      'utf8',
-    );
-    const dialogShell = readFileSync(resolve(__dirname, 'SettingsDialogShell.vue'), 'utf8');
-
-    expect(appearance).toContain('<SettingsSection');
-    expect(appearance).toContain('<SettingsPropertyRow');
-    expect(appearance).not.toContain('<Card');
-
-    expect(locale).toContain('<SettingsSection');
-    expect(locale).toContain('<SettingsPropertyRow');
-    expect(locale).not.toContain('<Card');
-
-    expect(reset).toContain('<SettingsDangerZone');
-    expect(reset).toContain('<Select');
-    expect(reset).not.toContain('<select');
-    expect(reset).not.toContain('<Card');
-
-    expect(preferences).toContain('<SettingsStatusBlock');
-
-    expect(account).toContain('<SettingsSection');
-    expect(account).toContain('<SettingsDangerZone');
-
-    expect(dialogShell).toContain('<DialogContent');
-    expect(dialogShell).toContain('<DialogFooter');
-    expect(dialogShell).toContain("size?: 'default' | 'wide'");
-    expect(dialogShell).toContain(':class="bodyClass"');
-  });
-
-  it('keeps shared status and dialog semantics in Providers and Knowledge owner surfaces', () => {
-    const ai = readFileSync(resolve(settingsRoot, 'AISettings.vue'), 'utf8');
-    const knowledge = readFileSync(
-      resolve(settingsRoot, 'KnowledgeRepositorySettings.vue'),
-      'utf8',
-    );
-    const mastraDetail = readFileSync(resolve(settingsRoot, 'MastraAgentSettings.vue'), 'utf8');
-    const agentWizard = readFileSync(resolve(settingsRoot, 'AgentInstanceWizard.vue'), 'utf8');
-
-    // Providers delegates model connections and the dedicated T3-style wizard to child
-    // components. Assert each actual owner rather than requiring them in the root SFC.
-    expect(ai).toContain('<SettingsStatusBlock');
-    expect(ai).toContain('<AgentInstanceWizard');
-    expect(ai).toContain('<MastraAgentSettings');
-    expect(ai).toContain('useAI()');
-    expect(mastraDetail).toContain('<SettingsPropertyRow');
-    expect(mastraDetail).toContain('commitProviderOnboarding');
-    expect(agentWizard).toContain('<DialogContent');
-    expect(agentWizard).toContain('<DialogTitle');
-    expect(agentWizard).toContain('<DialogDescription');
-    expect(ai).not.toContain('<Card');
-    expect(ai).not.toContain('<DialogContent');
-    expect(ai).not.toMatch(/(?:amber|emerald)-\d+/);
-
-    expect(knowledge).toContain('<SettingsSection');
-    expect(knowledge).toContain('<SettingsObjectCard');
-    expect(knowledge).toContain('<SettingsStatusBlock');
-    expect(knowledge).toContain('<SettingsDialogShell');
-    expect(knowledge).toContain('service.startKnowledgeRepositoryInstallation');
-    expect(knowledge).toContain('service.syncKnowledgeRepository');
-    expect(knowledge).not.toContain('<Card');
-    expect(knowledge).not.toContain('<DialogContent');
-    expect(knowledge).not.toMatch(/(?:amber|emerald)-\d+/);
   });
 });

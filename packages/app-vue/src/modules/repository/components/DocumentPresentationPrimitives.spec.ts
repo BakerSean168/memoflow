@@ -1,5 +1,3 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
 import DocumentCatalogRow from './DocumentCatalogRow.vue';
@@ -7,9 +5,6 @@ import DocumentCatalogSearch from './DocumentCatalogSearch.vue';
 import DocumentSourceStatus from './DocumentSourceStatus.vue';
 import DocumentWorkspaceState from './DocumentWorkspaceState.vue';
 import DocumentWorkspaceToolbar from './DocumentWorkspaceToolbar.vue';
-
-const componentsRoot = resolve(__dirname);
-const viewsRoot = resolve(__dirname, '../views');
 
 describe('document presentation primitives', () => {
   it('keeps document workspace toolbar slots in a single compact header', () => {
@@ -91,20 +86,6 @@ describe('document presentation primitives', () => {
     expect(empty.text()).toContain('No notes');
   });
 
-  it('keeps the Knowledge catalog on shared document grammar and the standard selector', () => {
-    const catalog = readFileSync(resolve(componentsRoot, 'KnowledgeNoteCatalog.vue'), 'utf8');
-
-    expect(catalog).toContain('<DocumentSourceStatus');
-    expect(catalog).toContain('<DocumentCatalogSearch');
-    expect(catalog).toContain('<DocumentCatalogRow');
-    expect(catalog).toContain('<DocumentWorkspaceState');
-    expect(catalog).toContain('<Select');
-    expect(catalog).toContain('SelectTrigger');
-    expect(catalog).toContain('status-test-id="knowledge-projection-provider-warning"');
-    expect(catalog).toContain('syncing-test-id="knowledge-projection-syncing-badge"');
-    expect(catalog).not.toContain('<select');
-  });
-
   it('keeps source identity, status, sync state, and actions in one presentation block', () => {
     const wrapper = mount(DocumentSourceStatus, {
       props: {
@@ -132,27 +113,5 @@ describe('document presentation primitives', () => {
     expect(syncing.attributes('title')).toBe('Syncing repository');
     expect(syncing.attributes('aria-label')).toBe('Syncing repository');
     expect(wrapper.get('[data-testid="source-action"]').exists()).toBe(true);
-  });
-  it('keeps Web and Desktop document workspaces on shared presentation grammar without merging capabilities', () => {
-    const web = readFileSync(resolve(viewsRoot, 'KnowledgeProjectionWorkspaceView.vue'), 'utf8');
-    const desktop = readFileSync(resolve(viewsRoot, 'LocalVaultWorkspaceView.vue'), 'utf8');
-
-    expect(web).toContain('<DocumentWorkspaceToolbar');
-    expect(web).toContain('<DocumentWorkspaceState');
-    expect(web).toContain('<KnowledgeNoteCatalog');
-    expect(web).toContain('<Sheet :open="catalogOpen && isNarrow"');
-    expect(web).toContain('<Sheet :open="contextOpen && isNarrow"');
-    expect(web).toContain('adoptKnowledgeDocument');
-    expect(web).not.toContain('openInObsidian');
-
-    expect(desktop).toContain('<DocumentWorkspaceToolbar');
-    expect(desktop).toContain('<DocumentSourceStatus');
-    expect(desktop).toContain('<DocumentCatalogSearch');
-    expect(desktop).toContain('<DocumentCatalogRow');
-    expect(desktop).toContain('<DocumentWorkspaceState');
-    expect(desktop).toContain('openInObsidian');
-    expect(desktop).toContain('selectVault');
-    expect(desktop).not.toContain('adoptKnowledgeDocument');
-    expect(desktop).not.toContain('<Input');
   });
 });

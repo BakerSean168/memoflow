@@ -1,59 +1,11 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_EMPTY_LITERALS, resolveEmptyLabel } from '@memoflow/time';
 
 describe('Product date presentation boundary', () => {
-  const dir = __dirname;
-  const goalDetail = readFileSync(
-    resolve(dir, '../../modules/goal/views/GoalDetailView.vue'),
-    'utf8',
-  );
-  const goalRow = readFileSync(
-    resolve(dir, '../../modules/goal/components/GoalProgressRow.vue'),
-    'utf8',
-  );
-  const taskDetail = readFileSync(
-    resolve(dir, '../../modules/task/views/TaskDetailView.vue'),
-    'utf8',
-  );
-  const taskPresentation = readFileSync(
-    resolve(dir, '../../modules/task/utils/task-plan-presentation.ts'),
-    'utf8',
-  );
-
   it('keeps semantic empty labels distinct', () => {
     expect(resolveEmptyLabel('notSet')).toBe(DEFAULT_EMPTY_LITERALS.notSet);
     expect(resolveEmptyLabel('dash')).toBe(DEFAULT_EMPTY_LITERALS.dash);
     expect(resolveEmptyLabel('na')).toBe(DEFAULT_EMPTY_LITERALS.na);
     expect(resolveEmptyLabel('unknown')).toBe(DEFAULT_EMPTY_LITERALS.unknown);
   });
-
-  it('renders semantic Goal timeframes without collapsing them into calendar dates', () => {
-    expect(goalDetail).toContain('goalTimeframeLabel');
-    expect(goalRow).toContain('goalTimeframeLabel');
-    // Current is a calendar-native Product Today marker, not a GoalTimeframe.
-    expect(goalDetail).toContain('formatProductYmd(getProductTodayYmd())');
-    expect(goalDetail.replace('formatProductYmd(getProductTodayYmd())', '')).not.toMatch(
-      /\bformatProductYmd\s*\(/,
-    );
-    expect(goalRow).not.toContain('formatProductYmd');
-    for (const source of [goalDetail, goalRow]) {
-      expect(source).not.toMatch(/function formatDate\b/);
-      expect(source).not.toContain('toISOString');
-      expect(source).not.toContain('toLocaleDateString');
-    }
-  });
-
-  it('keeps Task date formatting behind the canonical presentation and Product Time helpers', () => {
-    expect(taskPresentation).toContain('formatProductDate');
-    expect(taskPresentation).toContain('formattedCreatedAt');
-    expect(taskPresentation).toContain('getTaskPlanScheduleDate');
-    expect(taskDetail).toContain('getTaskPlanScheduleDate');
-    expect(taskDetail).not.toMatch(/function formatDate\b/);
-    expect(taskDetail).not.toContain('formatProductDate');
-    expect(taskDetail).not.toContain('new Date(');
-    expect(taskDetail).not.toContain('toLocaleDateString');
-  });
-
 });

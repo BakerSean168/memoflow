@@ -80,7 +80,6 @@ async function prepareAuthPage(page: Page): Promise<void> {
     )
     .first()
     .waitFor({ state: 'visible', timeout: TIMEOUT_CONFIG.AUTH_BOOTSTRAP });
-  await page.waitForTimeout(TIMEOUT_CONFIG.SHORT_WAIT);
 }
 
 async function isVisible(locator: ReturnType<Page['locator']>): Promise<boolean> {
@@ -205,9 +204,10 @@ export async function registerAndLogin(
   console.log(`[Auth] 使用配置 - API: ${API_CONFIG.FULL_URL}, Web: ${WEB_CONFIG.BASE_URL}`);
 
   await prepareAuthPage(page);
+  // registerViaAuth returns once the verified login has left /auth; the
+  // authenticated shell (or the requested landing page) is awaited below.
   await registerViaAuth(page, email, password);
   await page.waitForLoadState('domcontentloaded');
-  await page.waitForTimeout(TIMEOUT_CONFIG.MEDIUM_WAIT);
   await navigateAfterAuth(page, options.landingPath);
 
   console.log('[Auth] 自注册认证成功');
@@ -316,9 +316,7 @@ export async function login(
     throw new Error(serviceErrorText ?? `Login did not leave ${WEB_CONFIG.LOGIN_PATH}`);
   }
 
-  // 等待页面稳定
   await page.waitForLoadState('domcontentloaded');
-  await page.waitForTimeout(TIMEOUT_CONFIG.MEDIUM_WAIT);
   // Residual 1335: main shell cold mount after login (same as registerAndLogin).
   await waitForAuthenticatedShell(page);
 

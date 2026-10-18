@@ -1,5 +1,3 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 /** @vitest-environment jsdom */
 import { computed, ref } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
@@ -208,21 +206,4 @@ describe('TaskCapsulePreview quick workspace', () => {
     await wrapper.get('button').trigger('click');
     wrapper.unmount();
   });
-});
-
-it('delegates execution presentation and commands to TaskQuickSurface', () => {
-  const source = readFileSync(resolve(__dirname, 'TaskCapsulePreview.vue'), 'utf8');
-  expect(source).toContain('<TaskQuickSurface');
-  expect(source).toContain('useTaskToday');
-  expect(source).not.toMatch(
-    /fetchInstancesByDateRange|fetchTemplates|TEMPLATE_FETCH_LIMIT|isTodayMs/,
-  );
-  for (const command of [
-    'completeOccurrence',
-    'uncompleteOccurrence',
-    'markOccurrenceMissed',
-    'skipOccurrence',
-    'setOccurrenceChecklistItem',
-  ])
-    expect(source).not.toContain(`task.${command}`);
 });

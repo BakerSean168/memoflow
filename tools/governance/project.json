@@ -4,32 +4,6 @@
   "projectType": "library",
   "sourceRoot": "tools/governance",
   "tags": ["scope:tools", "type:lib", "layer:testing"],
-  "targets": {
-    "build": {
-      "executor": "nx:noop",
-      "outputs": [],
-      "dependsOn": [],
-      "cache": false
-    },
-    "test": {
-      "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "inputs": ["default", "^production"],
-      "cache": true,
-      "options": {
-        "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
-        "cwd": "tools/governance"
-      }
-    },
-    "test:watch": {
-      "executor": "nx:run-commands",
-      "cache": false,
-      "options": {
-        "command": "node ../../node_modules/vitest/vitest.mjs --config vitest.config.ts",
-        "cwd": "tools/governance"
-      }
-    }
-  },
   "namedInputs": {
     "default": [
       "{projectRoot}/**/*",
@@ -58,7 +32,35 @@
       "{workspaceRoot}/pnpm-lock.yaml",
       "{workspaceRoot}/graph.json",
       "{workspaceRoot}/tools/nx-test-system/src/generators/sync-test-targets/generator.js",
-      "{workspaceRoot}/tools/test/test-target-governance.mjs"
+      "{workspaceRoot}/tools/test/test-target-governance.mjs",
+      "{workspaceRoot}/apps/web/e2e/**/*.ts",
+      "{workspaceRoot}/docs/**/*.md"
     ]
+  },
+  "targets": {
+    "build": {
+      "executor": "nx:noop",
+      "outputs": [],
+      "dependsOn": [],
+      "cache": false
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "inputs": ["default", "^production"],
+      "cache": true,
+      "options": {
+        "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
+        "cwd": "tools/governance"
+      }
+    },
+    "test:watch": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "node ../../node_modules/vitest/vitest.mjs --config vitest.config.ts",
+        "cwd": "tools/governance"
+      }
+    }
   }
 }
