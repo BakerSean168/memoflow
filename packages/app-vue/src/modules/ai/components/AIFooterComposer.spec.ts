@@ -134,7 +134,7 @@ describe('AIFooterComposer (Global Composer input)', () => {
     vi.restoreAllMocks();
   });
 
-  it('uses floating composer elevation and inset context chips while preserving removal events', async () => {
+  it('uses a bordered composer without floating elevation and inset context chips while preserving removal events', async () => {
     const wrapper = mountComposer({
       attachments: [
         { id: 'a1', data: 'data:image/png;base64,AAAA', mediaType: 'image/png', size: 4 },
@@ -142,7 +142,7 @@ describe('AIFooterComposer (Global Composer input)', () => {
       contextEntities: [{ entityType: 'task', id: 't1', label: 'Review', origin: 'explicit' }],
     });
 
-    expect(wrapper.get('[data-testid="ai-composer-surface"]').classes()).toContain(
+    expect(wrapper.get('[data-testid="ai-composer-surface"]').classes()).not.toContain(
       semanticElevationClass('floating'),
     );
     for (const selector of ['ai-composer-attachment-chip', 'ai-composer-entity-chip']) {
