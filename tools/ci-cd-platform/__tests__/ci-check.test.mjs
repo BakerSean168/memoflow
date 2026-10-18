@@ -1,0 +1,149 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { test } from 'node:test';
+import { CI_CHECK_JOBS, evaluateCiCheck } from '../lib/ci-check.mjs';
+
+const lanes = (overrides = {}) => ({
+  governance: true,
+  validate: true,
+  boundary: true,
+  integration: true,
+  web: true,
+  coverage: true,
+  performance: true,
+  ...overrides,
+});
+const manifest = (laneOverrides = {}, unit = ['app-vue']) => ({
+  kind: 'delivery-manifest-v1',
+  digest: 'sha256:abc',
+  lanes: lanes(laneOverrides),
+  scope: { unit },
+});
+const verificationOutputs = (m) =>
+  Object.fromEntries(
+    ['boundary', 'integration', 'coverage', 'performance'].map((lane) => [
+      lane,
+      m.lanes[lane] ? 'success' : 'skipped',
+    ]),
+  );
+/** Needs exactly as GitHub would report them for a healthy run of `m`. */
+function healthyNeeds(m) {
+  const needs = {};
+  for (const [name, isEnabled] of Object.entries(CI_CHECK_JOBS)) {
+    needs[name] = { result: isEnabled(m) ? 'success' : 'skipped', outputs: {} };
+  }
+  needs['scope-detector'].outputs = { manifest_digest: m.digest };
+  if (needs['verification-children'].result === 'success') {
+    needs['verification-children'].outputs = verificationOutputs(m);
+  }
+  return needs;
+}
+
+test('full run with every lane green passes', () => {
+  const m = manifest();
+  assert.deepEqual(evaluateCiCheck({ needs: healthyNeeds(m), manifest: m }).failures, []);
+});
+
+test('docs-only run passes with validate/web/verification skipped by the manifest', () => {
+  const m = manifest(
+    { validate: false, boundary: false, integration: false, web: false, coverage: false, performance: false },
+    [],
+  );
+  const result = evaluateCiCheck({ needs: healthyNeeds(m), manifest: m });
+  assert.equal(result.state, 'success');
+  assert.equal(result.jobs['web-flow-shard'].expected, 'skipped');
+});
+
+test('unit skip is allowed only when the manifest scope has no unit projects', () => {
+  const m = manifest({}, []);
+  assert.equal(evaluateCiCheck({ needs: healthyNeeds(m), manifest: m }).state, 'success');
+  const withUnit = manifest();
+  const needs = healthyNeeds(withUnit);
+  needs.unit.result = 'skipped';
+  assert.deepEqual(evaluateCiCheck({ needs, manifest: withUnit }).failures, ['unit:skipped']);
+});
+
+for (const result of ['failure', 'cancelled', 'skipped']) {
+  test(`enabled lane job ${result} fails the gate`, () => {
+    const m = manifest();
+    const needs = healthyNeeds(m);
+    needs['web-flow-shard'].result = result;
+    assert.deepEqual(evaluateCiCheck({ needs, manifest: m }).failures, [`web-flow-shard:${result}`]);
+  });
+}
+
+test('a lane that ran although the manifest disabled it fails the gate', () => {
+  const m = manifest({ web: false });
+  const needs = healthyNeeds(m);
+  needs['web-flow-shard'].result = 'success';
+  assert.deepEqual(evaluateCiCheck({ needs, manifest: m }).failures, [
+    'web-flow-shard:unexpected-success',
+  ]);
+});
+
+test('verification sub-lane outputs are checked against the manifest', () => {
+  const m = manifest({ performance: false });
+  const needs = healthyNeeds(m);
+  needs['verification-children'].outputs.coverage = 'failure';
+  needs['verification-children'].outputs.performance = 'success';
+  assert.deepEqual(evaluateCiCheck({ needs, manifest: m }).failures, [
+    'verification-children/coverage:failure',
+    'verification-children/performance:unexpected-success',
+  ]);
+});
+
+test('detector failure, missing manifest, digest mismatch and unknown jobs fail closed', () => {
+  const m = manifest();
+  const failedDetector = healthyNeeds(m);
+  failedDetector['scope-detector'].result = 'failure';
+  assert.equal(evaluateCiCheck({ needs: failedDetector, manifest: m }).state, 'failure');
+  assert.deepEqual(evaluateCiCheck({ needs: healthyNeeds(m), manifest: null }).failures, [
+    'manifest:missing',
+  ]);
+  const tampered = { ...m, digest: 'sha256:other' };
+  assert.deepEqual(evaluateCiCheck({ needs: healthyNeeds(m), manifest: tampered }).failures, [
+    'manifest:digest-mismatch',
+  ]);
+  const unknown = { ...healthyNeeds(m), 'new-lane': { result: 'success' } };
+  assert.deepEqual(evaluateCiCheck({ needs: unknown, manifest: m }).failures, [
+    'new-lane:unknown-job',
+  ]);
+  const missing = healthyNeeds(m);
+  delete missing.build;
+  assert.deepEqual(evaluateCiCheck({ needs: missing, manifest: m }).failures, [
+    'build:missing-from-needs',
+  ]);
+  assert.deepEqual(evaluateCiCheck({ needs: null, manifest: m }).failures, ['needs:missing']);
+});
+
+/** Split ci.yml into top-level job blocks without a YAML dependency. */
+function workflowJobs(text) {
+  const body = text.slice(text.indexOf('\njobs:\n'));
+  const jobs = {};
+  const matches = [...body.matchAll(/^  ([a-z0-9-]+):$/gmu)];
+  matches.forEach((match, index) => {
+    jobs[match[1]] = body.slice(match.index, matches[index + 1]?.index ?? body.length);
+  });
+  return jobs;
+}
+
+test('ci.yml wires CI Check to every lane job, always runs, and reads the manifest', async () => {
+  const text = await readFile(new URL('../../../.github/workflows/ci.yml', import.meta.url), 'utf8');
+  const jobs = workflowJobs(text);
+  const job = jobs['ci-check'];
+  assert.ok(job, 'ci-check job exists');
+  assert.match(job, /^    name: CI Check$/mu);
+  assert.match(job, /^    if: always\(\)$/mu);
+  const needsBlock = job.match(/^    needs:\n((?:      - .+\n)+)/mu)?.[1] ?? '';
+  const needs = [...needsBlock.matchAll(/- ([a-z0-9-]+)/gu)].map((m) => m[1]);
+  assert.deepEqual(needs.sort(), Object.keys(CI_CHECK_JOBS).sort());
+  for (const name of Object.keys(CI_CHECK_JOBS)) assert.ok(jobs[name], `${name} exists`);
+  assert.match(job, /name: delivery-manifest-v1/u);
+  assert.match(job, /toJSON\(needs\)/u);
+  assert.match(job, /node \.\/tools\/ci-cd-platform\/ci-check\.mjs/u);
+  const laneJobs = Object.entries(jobs)
+    .filter(([, block]) => block.includes('uses: ./.github/actions/publish-lane-evidence'))
+    .map(([name]) => name);
+  assert.ok(laneJobs.length >= 7);
+  for (const name of laneJobs) assert.ok(name in CI_CHECK_JOBS, `${name} is aggregated by CI Check`);
+});

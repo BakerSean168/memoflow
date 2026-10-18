@@ -597,3 +597,32 @@ jobs:
           path: reports/ci-cd-platform/run-summary-v1.json
           if-no-files-found: error
           retention-days: 30
+
+  ci-check:
+    name: CI Check
+    needs:
+      - scope-detector
+      - governance
+      - static-analysis
+      - unit
+      - typecheck
+      - build
+      - verification-children
+      - web-flow-shard
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          sparse-checkout: tools/ci-cd-platform
+      - name: Download delivery manifest
+        # A missing manifest is reported by the gate itself (fail closed).
+        continue-on-error: true
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: delivery-manifest-v1
+          path: scope
+      - name: Gate on manifest-selected lanes
+        env:
+          CI_CHECK_NEEDS: ${{ toJSON(needs) }}
+        run: node ./tools/ci-cd-platform/ci-check.mjs --manifest scope/delivery-manifest-v1.json
