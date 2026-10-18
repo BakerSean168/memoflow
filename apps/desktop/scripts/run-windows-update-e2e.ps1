@@ -84,6 +84,36 @@ function Wait-ForInstalledExecutable([int]$TimeoutSeconds) {
   throw "MemoFlow installed executable was not found within $TimeoutSeconds seconds"
 }
 
+function Stop-And-Drain-MemoFlowProcesses([int]$TimeoutSeconds = 30) {
+  $deadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
+  $emptyPolls = 0
+
+  while ([DateTime]::UtcNow -lt $deadline) {
+    $running = @(Get-Process -Name 'memoflow' -ErrorAction SilentlyContinue)
+    if ($running.Count -eq 0) {
+      $emptyPolls += 1
+      # Require two quiet samples: NSIS can spawn --updated after the first
+      # process exits. A one-shot Stop-Process does not prove the handoff is idle.
+      if ($emptyPolls -ge 2) { return }
+    }
+    else {
+      $emptyPolls = 0
+      foreach ($process in $running) {
+        try {
+          $process.Kill($true)
+        }
+        catch {
+          # The process may have exited between enumeration and kill.
+          Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+        }
+      }
+    }
+    Start-Sleep -Seconds 1
+  }
+
+  throw "MemoFlow processes did not settle within $TimeoutSeconds seconds"
+}
+
 function Get-E2EStatus([string]$Path) {
   if (-not (Test-Path -LiteralPath $Path)) {
     return $null
@@ -231,9 +261,10 @@ $server = Start-Process -FilePath $python -ArgumentList @(
 $feedUrl = "http://127.0.0.1:$port"
 $baseProcess = $null
 $manualRelaunchCount = 0
-$lastRelaunchAttempt = [DateTime]::MinValue
 $baseExitedAt = $null
 $staleCandidateRecoveryAttempted = $false
+$controlledCandidateProcess = $null
+$controlledCandidateStartedAt = $null
 $successStatus = $null
 
 $managedEnvironment = @(
@@ -260,8 +291,7 @@ try {
   # If the assisted NSIS template launches the app even for a silent install,
   # terminate that uncontrolled first launch before applying the isolated E2E
   # userData/feed environment below.
-  Get-Process -Name 'memoflow' -ErrorAction SilentlyContinue |
-    Stop-Process -Force -ErrorAction SilentlyContinue
+  Stop-And-Drain-MemoFlowProcesses -TimeoutSeconds 30
 
   $installedExecutable = Wait-ForInstalledExecutable -TimeoutSeconds 60
   Write-Host "[update-e2e] Installed executable: $installedExecutable"
@@ -307,38 +337,45 @@ try {
         $installedVersion.StartsWith($ExpectedVersion, [System.StringComparison]::Ordinal)
 
       if ($candidateInstalled) {
-        $runningMemoFlow = Get-Process -Name 'memoflow' -ErrorAction SilentlyContinue |
-          Select-Object -First 1
-
-        # Some NSIS launch modes do not preserve the parent environment when
-        # starting the updated app. Only recover after the on-disk executable is
-        # already N+1, so the runner never races an installer that is still
-        # replacing the base executable.
+        # NSIS's --updated launch does not inherit the PowerShell runner's
+        # isolated E2E environment. Wait for the installer to finish its
+        # handoff, then drain the uncontrolled process tree exactly once.
+        # Do not judge a controlled N+1 launch against the OLD baseExitedAt:
+        # the previous script killed its own N+1 after approximately 2 seconds.
         if (
-          $null -ne $runningMemoFlow -and
           -not $staleCandidateRecoveryAttempted -and
           ($now - $baseExitedAt).TotalSeconds -ge 20
         ) {
-          Write-Host '[update-e2e] Candidate did not report verification; restarting N+1 with runner environment'
-          Get-Process -Name 'memoflow' -ErrorAction SilentlyContinue |
-            Stop-Process -Force -ErrorAction SilentlyContinue
+          Write-Host '[update-e2e] Settling NSIS auto-relaunch before controlled N+1 verification'
+          Stop-And-Drain-MemoFlowProcesses -TimeoutSeconds 30
           $staleCandidateRecoveryAttempted = $true
-          $runningMemoFlow = $null
-        }
 
-        if (
-          $null -eq $runningMemoFlow -and
-          ($now - $lastRelaunchAttempt).TotalSeconds -ge 8
-        ) {
-          try {
-            Write-Host "[update-e2e] Relaunching installed N+1 ($installedVersion) for verification"
-            Start-Process -FilePath $installedExecutable | Out-Null
-            $manualRelaunchCount += 1
-            $lastRelaunchAttempt = $now
+          $candidateEnvironment = @{
+            CI = 'true'
+            MEMOFLOW_DESKTOP_UPDATE_E2E = '1'
+            MEMOFLOW_DESKTOP_UPDATE_E2E_EXPECTED_VERSION = $ExpectedVersion
+            MEMOFLOW_DESKTOP_UPDATE_E2E_STATUS_PATH = $statusPath
+            MEMOFLOW_DESKTOP_UPDATE_E2E_FEED_URL = $feedUrl
+            MEMOFLOW_DESKTOP_USER_DATA_PATH = $userDataPath
+            MEMOFLOW_DESKTOP_USER_FILES_PATH = $userFilesPath
           }
-          catch {
-            Write-Host "[update-e2e] Relaunch attempt deferred: $($_.Exception.Message)"
-            $lastRelaunchAttempt = $now
+          Write-Host "[update-e2e] Launching controlled N+1 ($installedVersion) with isolated userData=$userDataPath"
+          $controlledCandidateProcess = Start-Process -FilePath $installedExecutable -Environment $candidateEnvironment -PassThru
+          $controlledCandidateStartedAt = [DateTime]::UtcNow
+          $manualRelaunchCount += 1
+          Write-Host "[update-e2e] Controlled candidate pid=$($controlledCandidateProcess.Id)"
+        }
+        elseif ($null -ne $controlledCandidateProcess) {
+          $controlledAge = ($now - $controlledCandidateStartedAt).TotalSeconds
+          # A verified candidate writes candidate-verified before quitting;
+          # the status check at the top of this loop wins over this branch.
+          if ($controlledCandidateProcess.HasExited -and $controlledAge -ge 5) {
+            Write-FailureDiagnostics -Path (Join-Path $runtimeRoot 'failure-diagnostics.json') -InstalledExecutable $installedExecutable -BaseProcess $baseProcess -BaseExitedAt $baseExitedAt
+            throw "Controlled N+1 process exited before candidate-verified (pid=$($controlledCandidateProcess.Id))"
+          }
+          if ($controlledAge -ge 120) {
+            Write-FailureDiagnostics -Path (Join-Path $runtimeRoot 'failure-diagnostics.json') -InstalledExecutable $installedExecutable -BaseProcess $baseProcess -BaseExitedAt $baseExitedAt
+            throw "Controlled N+1 process did not verify its update receipt within 120 seconds"
           }
         }
       }
