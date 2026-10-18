@@ -39,7 +39,7 @@ describe('legacy note surface docs and menu dual-track retirement', () => {
     'utf8',
   );
   const goalWorkflowE2e = readFileSync(
-    resolve(repoRoot, 'apps/web/e2e/ai/goal-workflow.spec.ts'),
+    resolve(repoRoot, 'apps/web/e2e/ai/goal-workflow/goal-workflow.fixture.ts'),
     'utf8',
   );
   const redesignBrief = readFileSync(resolve(repoRoot, 'docs/UI_REDESIGN_BRIEF.md'), 'utf8');

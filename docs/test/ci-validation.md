@@ -18,9 +18,13 @@ Validate children（static analysis、unit、typecheck、build）并行执行。
 prepared Boundary runner 内分别执行；integration、smoke 和每个 Web shard 使用独立数据库环境。
 真实数据库、浏览器和性能 target 均关闭 Nx cache。
 
-Web Flow 的 21 个核心 spec 由 `apps/web/web-flow-specs.mjs` 唯一列出。
-`tools/test-system-v2/web-spec-durations.json` 保存最近一次完整 V2 run 的逐 spec 测量基线，
-`generate-web-shards.mjs` 据此生成 `web-shards.json`；`web-shards.test.mjs` 校验合集无遗漏、无重复。
+Web Flow 的核心 spec 由 `apps/web/web-flow-specs.mjs` 唯一列出。
+`tools/test-system-v2/web-spec-durations.json`（version 2，含 `generatedAt` 与 `source`）保存多次 CI
+run 的逐 spec 中位耗时；`run-web-shard.mjs <i>/<n>` 在每个 shard 现场用 `lib/shard-balance.mjs` 的确定性
+LPT 计算分片，缺少历史的 spec 取中位数，历史超过 21 天或缺项时输出 `::warning::`。
+`web-shards.test.mjs` / `shard-balance.test.mjs` 校验无遗漏、无重复、最慢 N 个分布在不同 shard、
+结果与输入顺序无关。刷新：下载 `web-flow-*-results` artifact 后运行
+`node tools/test-system-v2/refresh-web-spec-durations.mjs --source "<runs>" <results.json...>`。
 
 `tools/test-system-v2/run-command.mjs` 输出结构化 timing/report，并使用
 `failure-classification.mjs` 区分 assertion、infrastructure、process-crash、timeout 和 flaky；只有

@@ -2020,7 +2020,97 @@
       }
     },
     {
-      "path": "apps/web/e2e/ai/goal-workflow.spec.ts",
+      "path": "apps/web/e2e/ai/goal-workflow/checkpoint-identity.spec.ts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.ai-workspace.config.ts",
+        "apps/web/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "ai",
+        "role": "canonical",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.config.ts"
+      }
+    },
+    {
+      "path": "apps/web/e2e/ai/goal-workflow/goal-agent-approval.spec.ts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.ai-workspace.config.ts",
+        "apps/web/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "ai",
+        "role": "canonical",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.config.ts"
+      }
+    },
+    {
+      "path": "apps/web/e2e/ai/goal-workflow/knowledge.spec.ts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.ai-workspace.config.ts",
+        "apps/web/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "ai",
+        "role": "canonical",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.config.ts"
+      }
+    },
+    {
+      "path": "apps/web/e2e/ai/goal-workflow/multi-session.spec.ts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.ai-workspace.config.ts",
+        "apps/web/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "ai",
+        "role": "canonical",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.config.ts"
+      }
+    },
+    {
+      "path": "apps/web/e2e/ai/goal-workflow/sse-budget.spec.ts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.ai-workspace.config.ts",
+        "apps/web/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "ai",
+        "role": "canonical",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.config.ts"
+      }
+    },
+    {
+      "path": "apps/web/e2e/ai/goal-workflow/task-create-approval.spec.ts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.ai-workspace.config.ts",
+        "apps/web/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "ai",
+        "role": "canonical",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.config.ts"
+      }
+    },
+    {
+      "path": "apps/web/e2e/ai/goal-workflow/workspace-shell.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
         "apps/web/playwright.ai-workspace.config.ts",
@@ -13163,7 +13253,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 1,
+      "fileCount": 7,
       "e2eOwnership": {
         "lane": "specialized",
         "lifecycle": "active",
@@ -13201,7 +13291,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 22,
+      "fileCount": 28,
       "e2eOwnership": {
         "lane": "required",
         "lifecycle": "active",
@@ -14315,7 +14405,7 @@
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 9,
-    "e2e": 57,
+    "e2e": 63,
     "perf": 2,
     "governance": 67
   },
@@ -14327,14 +14417,14 @@
       "local-validation": 6,
       "nightly": 5,
       "reference": 6,
-      "required": 22,
+      "required": 28,
       "secure-acceptance": 3,
       "specialized": 3,
       "visual-artifact": 3
     },
     "countsByRole": {
       "artifact": 3,
-      "canonical": 26,
+      "canonical": 32,
       "reference": 6,
       "supplemental": 22
     },

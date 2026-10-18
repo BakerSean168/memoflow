@@ -403,6 +403,48 @@ describe('useAIChatSession Mastra-native open chat', () => {
     expect(session.conversationList.value).toEqual([]);
   });
 
+  it('reports the projection live only after a post-watermark snapshot has been applied', async () => {
+    let receive!: WorkspaceEventStreamOptions['onEvent'];
+    const workspaceRuntime: WorkflowRuntimeClient = {
+      streamWorkspaceEvents: vi.fn((options) => {
+        receive = options.onEvent;
+        return new Promise<void>((resolve) =>
+          options.signal.addEventListener('abort', () => resolve(), { once: true }),
+        );
+      }),
+      start: vi.fn(),
+      resume: vi.fn(),
+      get: vi.fn(),
+      list: vi.fn(),
+      cancel: vi.fn(),
+      goalSurfaceLease: vi.fn(),
+    };
+    const service = createServiceStub();
+    const session = mountComposable(service, createRuntimeStub(), 'web', createUsageRuntimeStub(), {
+      workspaceRuntime,
+    });
+    expect(session.conversationProjectionLive.value).toBe(false);
+    let finish!: (value: Awaited<ReturnType<typeof service.listConversations>>) => void;
+    service.listConversations.mockImplementationOnce(
+      () => new Promise((resolve) => (finish = resolve)),
+    );
+    const ready = receive({ type: 'stream.ready', cursor: 'watermark' });
+    await vi.waitFor(() => expect(finish).toBeTypeOf('function'));
+    // The calibration snapshot is still in flight: not live yet.
+    expect(session.conversationProjectionLive.value).toBe(false);
+    finish(ok({ data: [], total: 0, page: 1, pageSize: 24 }));
+    await ready;
+    expect(session.conversationProjectionLive.value).toBe(true);
+
+    service.listConversations.mockRejectedValueOnce(new Error('snapshot unavailable'));
+    await expect(receive({ type: 'stream.ready', cursor: 'reconnect' })).rejects.toThrow();
+    expect(session.conversationProjectionLive.value).toBe(false);
+
+    service.listConversations.mockResolvedValue(ok({ data: [], total: 0, page: 1, pageSize: 24 }));
+    await receive({ type: 'stream.reset_required', cursor: 'reset', reason: 'expired' });
+    expect(session.conversationProjectionLive.value).toBe(true);
+  });
+
   it('shares the Workspace stream, merges titles by server version and never resurrects deletion from a late list', async () => {
     let receive!: WorkspaceEventStreamOptions['onEvent'];
     let streamSignal!: AbortSignal;

@@ -151,6 +151,12 @@
     }
   },
   "specs": {
+    "apps/desktop/e2e/antigravity-composer.spec.mts": {
+      "surface": "ai-workspace",
+      "role": "supplemental",
+      "lifecycle": "active",
+      "primaryCollector": "apps/desktop/playwright.config.ts"
+    },
     "apps/desktop/e2e/authentication/desktop-auth-flow.spec.mts": {
       "surface": "authentication",
       "role": "canonical",
@@ -211,7 +217,43 @@
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.audit.config.ts"
     },
-    "apps/web/e2e/ai/goal-workflow.spec.ts": {
+    "apps/web/e2e/ai/goal-workflow/checkpoint-identity.spec.ts": {
+      "surface": "ai",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
+    "apps/web/e2e/ai/goal-workflow/goal-agent-approval.spec.ts": {
+      "surface": "ai",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
+    "apps/web/e2e/ai/goal-workflow/knowledge.spec.ts": {
+      "surface": "ai",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
+    "apps/web/e2e/ai/goal-workflow/multi-session.spec.ts": {
+      "surface": "ai",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
+    "apps/web/e2e/ai/goal-workflow/sse-budget.spec.ts": {
+      "surface": "ai",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
+    "apps/web/e2e/ai/goal-workflow/task-create-approval.spec.ts": {
+      "surface": "ai",
+      "role": "canonical",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.config.ts"
+    },
+    "apps/web/e2e/ai/goal-workflow/workspace-shell.spec.ts": {
       "surface": "ai",
       "role": "canonical",
       "lifecycle": "active",
@@ -486,12 +528,6 @@
       "role": "artifact",
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.visual-regression.config.ts"
-    },
-    "apps/desktop/e2e/antigravity-composer.spec.mts": {
-      "surface": "ai-workspace",
-      "role": "supplemental",
-      "lifecycle": "active",
-      "primaryCollector": "apps/desktop/playwright.config.ts"
     }
   }
 }

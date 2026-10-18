@@ -42,16 +42,16 @@ test('retired route matching rejects profile navigation while allowing the profi
 test('repository E2E ownership is execution-aware and complete', () => {
   assert.equal(inventory.version, 3);
   assert.deepEqual(inventory.e2eGovernance.issues, []);
-  assert.equal(inventory.e2eGovernance.countsByLane.required, 22);
+  assert.equal(inventory.e2eGovernance.countsByLane.required, 28);
   assert.equal(inventory.e2eGovernance.countsByLane.nightly, 5);
   assert.equal(inventory.e2eGovernance.countsByLane.debug, undefined);
-  assert.equal(inventory.e2eGovernance.countsByRole.canonical, 26);
+  assert.equal(inventory.e2eGovernance.countsByRole.canonical, 32);
   assert.equal(inventory.e2eGovernance.countsByRole.diagnostic, undefined);
   assert.equal(inventory.e2eGovernance.automatedCollectorCount, 4);
   assert.equal(inventory.e2eGovernance.automationBindingCount, 5);
 
   const goalWorkflow = inventory.primary.find(
-    (entry) => entry.path === 'apps/web/e2e/ai/goal-workflow.spec.ts',
+    (entry) => entry.path === 'apps/web/e2e/ai/goal-workflow/multi-session.spec.ts',
   );
   assert.equal(goalWorkflow?.collectors.length, 2);
   assert.equal(goalWorkflow?.e2eOwnership.primaryCollector, 'apps/web/playwright.config.ts');
@@ -120,14 +120,14 @@ test('declared GitHub workflow automation must bind its target', async () => {
 
 test('same-suite E2E overlaps require one explicit primary collector', async () => {
   const contract = structuredClone(ownership);
-  contract.specs['apps/web/e2e/ai/goal-workflow.spec.ts'].primaryCollector =
+  contract.specs['apps/web/e2e/ai/goal-workflow/multi-session.spec.ts'].primaryCollector =
     'apps/web/playwright.audit.config.ts';
 
   const governance = await analyzeE2EOwnership(root, inventory, contract);
   assert.ok(
     governance.issues.some(
       (issue) =>
-        issue.path === 'apps/web/e2e/ai/goal-workflow.spec.ts' &&
+        issue.path === 'apps/web/e2e/ai/goal-workflow/multi-session.spec.ts' &&
         issue.reason === 'primary-collector-does-not-collect-spec',
     ),
   );

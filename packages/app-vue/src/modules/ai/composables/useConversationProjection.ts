@@ -35,6 +35,12 @@ export function useConversationProjection(input: {
   const conversationTitle = ref('');
   const conversationListLoading = ref(false);
   const conversationList = ref<ConversationSummary[]>([]);
+  /**
+   * True once a snapshot started after the live stream watermark (stream.ready
+   * or reset) has been applied. Deltas after this point are folded in without
+   * list refetches; it is the observable "projection is live" boundary.
+   */
+  const conversationProjectionLive = ref(false);
   let listGeneration = 0;
   let mutationRevision = 0;
   const versions = new Map<string, number>();
@@ -95,6 +101,7 @@ export function useConversationProjection(input: {
       onEvent: async (event) => {
         if (streamController.signal.aborted) return;
         if (event.type === 'stream.reset_required') {
+          conversationProjectionLive.value = false;
           versions.clear();
           // Pending native mutations survive reset; drop ordering metadata from the old epoch.
           for (const change of pendingListChanges.values()) {
@@ -106,7 +113,9 @@ export function useConversationProjection(input: {
             item.runtimeKind === 'local_agent' ? item : { ...item, resourceVersion: undefined },
           );
           await loadConversationList(options.service, true, mutationRevision);
+          conversationProjectionLive.value = true;
         } else if (event.type === 'stream.ready') {
+          conversationProjectionLive.value = false;
           // A discovery request may have read before the stream watermark.
           // Only a snapshot started after ready closes that initial race.
           if (listRequest) await listRequest;
@@ -123,6 +132,7 @@ export function useConversationProjection(input: {
             if (item.runtimeKind !== 'local_agent' && item.resourceVersion !== undefined)
               versions.set(item.id, item.resourceVersion);
           }
+          conversationProjectionLive.value = true;
         } else if (event.type === 'conversation.updated') {
           const id = event.data.conversationId;
           if (!versions.has(id) && versions.size >= MAX_TRACKED_CONVERSATIONS) {
@@ -473,6 +483,7 @@ export function useConversationProjection(input: {
     conversationTitle,
     conversationListLoading,
     conversationList,
+    conversationProjectionLive,
     lastActiveConversationId,
     lastRuntimeUsage,
     hasWorkflowMessages,

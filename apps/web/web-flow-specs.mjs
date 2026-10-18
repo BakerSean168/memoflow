@@ -1,5 +1,11 @@
 export const WEB_FLOW_SPECS = Object.freeze([
-  'ai/goal-workflow.spec.ts',
+  'ai/goal-workflow/checkpoint-identity.spec.ts',
+  'ai/goal-workflow/sse-budget.spec.ts',
+  'ai/goal-workflow/multi-session.spec.ts',
+  'ai/goal-workflow/workspace-shell.spec.ts',
+  'ai/goal-workflow/goal-agent-approval.spec.ts',
+  'ai/goal-workflow/task-create-approval.spec.ts',
+  'ai/goal-workflow/knowledge.spec.ts',
   'ai/multi-engine-host.spec.ts',
   'authentication/auth-flow.spec.ts',
   'authentication/auth-login.spec.ts',
