@@ -2,6 +2,32 @@ import { describe, expect, it, vi } from 'vitest';
 import { createShortcutEngine } from './shortcut-engine';
 
 describe('shortcut dispatch', () => {
+  it.each(['linux', 'mac'] as const)(
+    'only toggles the palette in palette scope on %s',
+    (platform) => {
+      const engine = createShortcutEngine({ platform, desktop: false });
+      const toggle = vi.fn();
+      const help = vi.fn();
+      engine.register('app.palette', toggle);
+      engine.register('app.help', help);
+      const context = { scope: 'palette', editable: true } as const;
+      const event = new KeyboardEvent('keydown', {
+        key: 'k',
+        ctrlKey: platform === 'linux',
+        metaKey: platform === 'mac',
+        cancelable: true,
+      });
+      expect(engine.handle(event, context)).toBe(true);
+      expect(toggle).toHaveBeenCalledTimes(1);
+      expect(event.defaultPrevented).toBe(true);
+      engine.handle(new KeyboardEvent('keydown', { key: '?', shiftKey: true }), {
+        scope: 'palette',
+        editable: false,
+      });
+      expect(help).not.toHaveBeenCalled();
+    },
+  );
+
   it('executes once and protects typing, composition, AltGraph and held keys', () => {
     const execute = vi.fn();
     const engine = createShortcutEngine({ platform: 'linux', desktop: false });

@@ -76,7 +76,7 @@ export function createShortcutEngine(
         (event.ctrlKey && event.altKey)
       )
         return false;
-      if (context.scope === 'modal' || context.scope === 'palette') return false;
+      if (context.scope === 'modal') return false;
       const chord = eventChord(event, host);
       if (!chord) return false;
       const candidates = definitions.filter((c) =>
@@ -86,6 +86,7 @@ export function createShortcutEngine(
         (a, b) => Number(b.scope === context.scope) - Number(a.scope === context.scope),
       );
       for (const command of candidates) {
+        if (context.scope === 'palette' && command.id !== 'app.palette') continue;
         if (context.listOnly && command.scope !== 'list') continue;
         const inScope =
           command.scope === context.scope ||
