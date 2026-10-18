@@ -534,6 +534,12 @@
       "role": "supplemental",
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.visual-regression.config.ts"
+    },
+    "apps/web/e2e/visual-regression/composer-footer.spec.ts": {
+      "surface": "visual-regression",
+      "role": "supplemental",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.visual-regression.config.ts"
     }
   }
 }
