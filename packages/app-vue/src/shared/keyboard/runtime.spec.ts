@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils';
 import { defineComponent, nextTick } from 'vue';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { _setOpen } from '@memoflow/ui-vue-shadcn';
+import { _getCommandPaletteState, _setOpen } from '@memoflow/ui-vue-shadcn';
 import { keyboard, useKeyboardRuntime } from './runtime';
 import { vKeyboardList } from './list-adapter';
 
@@ -37,6 +37,35 @@ function host(template: string) {
   return { wrapper, open };
 }
 describe('one keyboard runtime', () => {
+  it('toggles the palette from its focused input while isolating other shortcuts', async () => {
+    const preview = vi.fn();
+    disposers.push(keyboard.register('module.goal.preview', preview));
+    const { wrapper } = host('<div><button>Open</button></div>');
+    press(wrapper.get('button').element, 'k', { ctrlKey: true });
+    expect(_getCommandPaletteState().open).toBe(true);
+    const dialog = document.createElement('div');
+    dialog.setAttribute('role', 'dialog');
+    const input = document.createElement('input');
+    dialog.append(input);
+    document.body.append(dialog);
+    input.focus();
+    press(input, '1');
+    press(input, '?', { shiftKey: true });
+    press(input, 'k', { ctrlKey: true, repeat: true });
+    press(input, 'k', { ctrlKey: true, isComposing: true });
+    expect(preview).not.toHaveBeenCalled();
+    expect(keyboard.helpOpen.value).toBe(false);
+    expect(_getCommandPaletteState().open).toBe(true);
+    expect(press(input, 'k', { ctrlKey: true }).defaultPrevented).toBe(true);
+    expect(_getCommandPaletteState().open).toBe(false);
+    dialog.remove();
+    await nextTick();
+    keyboard.applyKeymap({ version: 1, overrides: { 'app.palette': ['Alt+K'] } });
+    press(wrapper.get('button').element, 'k', { altKey: true });
+    expect(_getCommandPaletteState().open).toBe(true);
+    press(wrapper.get('button').element, 'k', { altKey: true });
+    expect(_getCommandPaletteState().open).toBe(false);
+  });
   it('navigates an explicit list, selects, opens and ignores edits and hidden lists', () => {
     const { wrapper, open } = host(
       '<div><input /><div v-keyboard-list="{ selectable: true }"><button data-keyboard-item="a" @click="open(\'a\')">A</button><button data-keyboard-item="b" @click="open(\'b\')">B</button></div></div>',
