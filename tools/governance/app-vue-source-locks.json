@@ -975,6 +975,87 @@
       ]
     },
     {
+      "id": "SettingsPresentationPrimitives",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/components/shared/settings/SettingsPresentationPrimitives.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/setting/components/AppearanceSettings.vue",
+          "require": ["<SettingsSection", "<SettingsPropertyRow"],
+          "forbid": ["<Card"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/setting/components/LocaleSettings.vue",
+          "require": ["<SettingsSection", "<SettingsPropertyRow"],
+          "forbid": ["<Card"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/setting/components/SettingsResetSection.vue",
+          "require": ["<SettingsDangerZone", "<Select"],
+          "forbid": ["<select", "<Card"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/setting/components/UserPreferenceSettingsSection.vue",
+          "require": ["<SettingsStatusBlock"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/account/components/AccountProfileSection.vue",
+          "require": ["<SettingsSection", "<SettingsDangerZone"]
+        },
+        {
+          "file": "packages/app-vue/src/components/shared/settings/SettingsDialogShell.vue",
+          "require": [
+            "<DialogContent",
+            "<DialogFooter",
+            "size?: 'default' | 'wide'",
+            ":class=\"bodyClass\""
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/setting/components/AISettings.vue",
+          "require": [
+            "<SettingsStatusBlock",
+            "<AgentInstanceWizard",
+            "<MastraAgentSettings",
+            "useAI()"
+          ],
+          "forbid": [
+            "<Card",
+            "<DialogContent",
+            {
+              "pattern": "(?:amber|emerald)-\\d+"
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/setting/components/MastraAgentSettings.vue",
+          "require": ["<SettingsPropertyRow", "commitProviderOnboarding"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/setting/components/AgentInstanceWizard.vue",
+          "require": ["<DialogContent", "<DialogTitle", "<DialogDescription"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue",
+          "require": [
+            "<SettingsSection",
+            "<SettingsObjectCard",
+            "<SettingsStatusBlock",
+            "<SettingsDialogShell",
+            "service.startKnowledgeRepositoryInstallation",
+            "service.syncKnowledgeRepository"
+          ],
+          "forbid": [
+            "<Card",
+            "<DialogContent",
+            {
+              "pattern": "(?:amber|emerald)-\\d+"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "desktop-update-shell-indicator",
       "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
       "origin": "packages/app-vue/src/layouts/shell/desktop-update-shell-indicator.surface.spec.ts",
@@ -1103,6 +1184,62 @@
       ]
     },
     {
+      "id": "GoalRecordCard",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/goal/components/cards/GoalRecordCard.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/goal/components/index.ts",
+          "require": ["export { default as GoalRecordCard } from './cards/GoalRecordCard.vue'"],
+          "forbid": ["GoalRecordCardFromCards"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/cards/GoalRecordCard.vue",
+          "forbid": [
+            {
+              "pattern": "\\bPlus\\b"
+            }
+          ]
+        },
+        {
+          "absentPaths": ["packages/app-vue/src/modules/goal/components/GoalRecordCard.vue"]
+        }
+      ]
+    },
+    {
+      "id": "GoalKeyResultInspectDialog",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/goal/components/dialogs/GoalKeyResultInspectDialog.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/goal/components/dialogs/GoalKeyResultInspectDialog.vue",
+          "forbid": [
+            {
+              "pattern": "useTask|TASK_SERVICE_KEY|updateKeyResult|createTask|deleteTask|completeTask"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "GoalListView",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/goal/views/GoalListView.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/goal/views/GoalListView.vue",
+          "require": [
+            "class=\"w-full py-2\"",
+            "goal-list-column-header",
+            "goal.list.keyResultsColumn",
+            "goal.list.targetColumn",
+            "goal.list.progressColumn"
+          ],
+          "forbid": ["max-w-5xl"]
+        }
+      ]
+    },
+    {
       "id": "notificationPanelAdaptation",
       "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
       "origin": "packages/app-vue/src/modules/notification/views/notificationPanelAdaptation.spec.ts",
@@ -1120,6 +1257,52 @@
             "option-role=\"tab\""
           ],
           "forbid": ["<header", "FilterBar", "usePanelWidth", "isNarrow"]
+        }
+      ]
+    },
+    {
+      "id": "DocumentPresentationPrimitives",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/repository/components/DocumentPresentationPrimitives.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/repository/components/KnowledgeNoteCatalog.vue",
+          "require": [
+            "<DocumentSourceStatus",
+            "<DocumentCatalogSearch",
+            "<DocumentCatalogRow",
+            "<DocumentWorkspaceState",
+            "<Select",
+            "SelectTrigger",
+            "status-test-id=\"knowledge-projection-provider-warning\"",
+            "syncing-test-id=\"knowledge-projection-syncing-badge\""
+          ],
+          "forbid": ["<select"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue",
+          "require": [
+            "<DocumentWorkspaceToolbar",
+            "<DocumentWorkspaceState",
+            "<KnowledgeNoteCatalog",
+            "<Sheet :open=\"catalogOpen && isNarrow\"",
+            "<Sheet :open=\"contextOpen && isNarrow\"",
+            "adoptKnowledgeDocument"
+          ],
+          "forbid": ["openInObsidian"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue",
+          "require": [
+            "<DocumentWorkspaceToolbar",
+            "<DocumentSourceStatus",
+            "<DocumentCatalogSearch",
+            "<DocumentCatalogRow",
+            "<DocumentWorkspaceState",
+            "openInObsidian",
+            "selectVault"
+          ],
+          "forbid": ["adoptKnowledgeDocument", "<Input"]
         }
       ]
     },
@@ -1169,6 +1352,20 @@
             {
               "pattern": "updateLocalVaultNote|saveLocalVaultNote|editExistingNote|createConfirmedKnowledgeNote"
             }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PlannerCalendar",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/schedule/planner/PlannerCalendar.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/schedule/planner/PlannerCalendar.vue",
+          "require": [
+            "v-if=\"event.extendedProps.projection\"",
+            "data-testid=\"schedule-selection-preview\""
           ]
         }
       ]
@@ -1287,6 +1484,63 @@
       ]
     },
     {
+      "id": "TaskPageToolbar",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/task/components/TaskPageToolbar.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/task/components/TaskPageToolbar.vue",
+          "require": [
+            "test-id=\"task-surface-trigger\"",
+            "test-id=\"task-status-filter\"",
+            "test-id=\"task-plan-state-filter\"",
+            "data-testid=\"task-compact-view-options\"",
+            "test-id=\"task-occurrence-sort\"",
+            "const surfaces: TaskSurface[] = ['today', 'plans']",
+            "count: props.visibleItemCount",
+            "<ResponsivePrimaryAction",
+            "v-if=\"activeSurface === 'today'\"",
+            "planStateFilterOptions"
+          ],
+          "forbid": [
+            "'upcoming'",
+            "task-goal-filter",
+            "goalFilter",
+            "overflow-x-auto",
+            "task-search-input"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TaskPlanDialog",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.vue",
+          "require": [
+            "TaskPlanForm",
+            "recipe=\"workspace\"",
+            "props.initialGoalBinding?.goalId",
+            "props.initialGoalBinding.keyResultId ?? 'goal'",
+            "goalBinding: props.initialGoalBinding",
+            "futurePendingOccurrenceCount",
+            "occurrenceCount: 0",
+            "completedOccurrenceCount: 0",
+            "pendingOccurrenceCount: 0"
+          ],
+          "forbid": [
+            "content-class=\"h-[min(88vh,760px)]\"",
+            "DependencyManager",
+            "parentTaskId",
+            "folderId",
+            "TaskForDAG"
+          ]
+        }
+      ]
+    },
+    {
       "id": "taskPanelAdaptation",
       "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
       "origin": "packages/app-vue/src/modules/task/views/taskPanelAdaptation.spec.ts",
@@ -1306,6 +1560,297 @@
             "hidden shrink-0 @2xl/panel:block"
           ],
           "forbid": ["overflow-x-auto", "task-goal-filter", "usePanelWidth", "isNarrow"]
+        }
+      ]
+    },
+    {
+      "id": "ProductDateTimePicker",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/shared/components/ProductDateTimePicker.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/shared/components/ProductDateTimePickerFields.vue",
+          "require": [
+            "<Calendar",
+            "appearance=\"linear\"",
+            "inputmode=\"numeric\"",
+            "hourDraft",
+            "minuteDraft"
+          ],
+          "forbid": ["ToggleGroup"]
+        },
+        {
+          "file": "packages/app-vue/src/shared/components/ProductDateTimePicker.vue",
+          "require": [
+            "<ProductDateTimePickerFields",
+            "<DialogContent",
+            "getProductTime().input.combine",
+            "formatProductDateTime",
+            "draftInstant.value <= effectiveMinValue.value",
+            ":disabled=\"disabled || !canApply\"",
+            "pastTimeText",
+            "emit('update:open', false)",
+            "presentation === 'panel'",
+            "<ProductEditorFrame",
+            "pane-size=\"picker\"",
+            "<Dialog v-else"
+          ],
+          "forbid": ["ProductTemporalPickerSurface"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue",
+          "require": [
+            ":presentation=\"presentation\"",
+            "@lg/panel:grid-cols-",
+            ":picker-width=\"presentation === 'panel' ? 'pane' : 'standard'\""
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ProductEditorFrame",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/shared/components/ProductEditorFrame.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/shared/components/PaneScopedDialog.vue",
+          "require": [
+            "aria-modal=\"false\"",
+            "data-scroll-host=\"pane-dialog\"",
+            "@keydown.esc.stop.prevent"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/shared/components/ProductEditorFrame.vue",
+          "require": ["returnFocus"]
+        },
+        {
+          "file": "packages/app-vue/src/shared/components/ResponsivePrimaryAction.vue",
+          "require": ["class=\"h-8 w-8", ":aria-label=\"label\""],
+          "forbid": ["@2xl/panel:inline"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/routine/views/RoutineConfigurationView.vue",
+          "require": ["data-testid=\"routine-create-button\"", "size=\"icon\""],
+          "forbid": ["hidden @2xl/panel:inline"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/views/TaskManagementView.vue",
+          "require": ["presentation=\"panel\"", "relative isolate", ":inert="]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.vue",
+          "require": ["<ProductEditorFrame"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/routine/views/RoutineConfigurationView.vue",
+          "require": ["presentation=\"panel\"", "relative isolate", ":inert="]
+        },
+        {
+          "file": "packages/app-vue/src/modules/routine/components/RoutineEditorDialog.vue",
+          "require": ["<ProductEditorFrame"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue",
+          "require": ["presentation=\"panel\"", "relative isolate", ":inert="]
+        },
+        {
+          "file": "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue",
+          "require": ["<ProductEditorFrame"]
+        }
+      ]
+    },
+    {
+      "id": "ProductEntityMetadataPrimitives",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/shared/components/ProductEntityMetadataPrimitives.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/goal/views/GoalDetailView.vue",
+          "require": [
+            "<ProductEntityIdentity",
+            "<ProductMetadataRow",
+            "<ProductMoreProperties",
+            "createTaskForGoal"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/views/TaskDetailView.vue",
+          "require": [
+            "<ProductEntityIdentity",
+            "<ProductMetadataRow",
+            "<ProductMoreProperties",
+            "<ProductPropertyChip",
+            "req.goalBinding = nextGoalBinding"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/shared/components/ProductEntityIdentity.vue",
+          "forbid": ["modules/goal", "modules/task"]
+        },
+        {
+          "file": "packages/app-vue/src/shared/components/ProductMetadataRow.vue",
+          "forbid": ["modules/goal", "modules/task"]
+        },
+        {
+          "file": "packages/app-vue/src/shared/components/ProductMoreProperties.vue",
+          "forbid": ["modules/goal", "modules/task"]
+        },
+        {
+          "file": "packages/app-vue/src/shared/components/ProductPropertyChip.vue",
+          "forbid": ["modules/goal", "modules/task"]
+        }
+      ]
+    },
+    {
+      "id": "ProductOverlayStateRecipes",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/shared/components/ProductOverlayStateRecipes.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/shared/components/ProductPopoverSurface.vue",
+          "require": ["'compact-menu': 'w-44 p-1.5'", "property: 'w-56 space-y-2 p-3'"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/GoalKeyResultDirectControls.vue",
+          "require": ["<ProductPopoverSurface recipe=\"compact-menu\">"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/routine/components/ElapsedTriggerEditor.vue",
+          "require": ["<ProductPopoverSurface recipe=\"property\">"],
+          "forbid": ["<PopoverContent"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/routine/components/ActiveUsageTriggerEditor.vue",
+          "count": [
+            {
+              "pattern": "<ProductPopoverSurface recipe=\"property\">",
+              "equals": 2
+            }
+          ],
+          "forbid": ["<PopoverContent"]
+        },
+        {
+          "file": "packages/app-vue/src/shared/components/ProductDialogShell.vue",
+          "require": [
+            "recipe?: 'form' | 'inspect' | 'config' | 'workspace'",
+            ":data-product-dialog-recipe=\"recipe\""
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/components/dialogs/TaskOccurrenceInspectDialog.vue",
+          "require": ["recipe=\"inspect\""]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/dialogs/GoalKeyResultInspectDialog.vue",
+          "require": ["recipe=\"inspect\""]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue",
+          "require": ["<GoalFormFrame"],
+          "forbid": ["<ProductDialogShell"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/dialogs/GoalFormFrame.vue",
+          "require": ["recipe=\"workspace\""]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.vue",
+          "require": ["recipe=\"workspace\""]
+        },
+        {
+          "file": "packages/app-vue/src/modules/routine/components/RoutineEditorDialog.vue",
+          "require": ["recipe=\"workspace\""]
+        },
+        {
+          "file": "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue",
+          "require": ["recipe=\"config\""]
+        },
+        {
+          "file": "packages/app-vue/src/shared/components/ProductSheetSurface.vue",
+          "require": [
+            "data-product-sheet-recipe=\"narrow\"",
+            "<SheetHeader class=\"sr-only\">",
+            "sm: 'w-[min(88vw,22rem)]'",
+            "md: 'w-[min(92vw,24rem)]'"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue",
+          "count": [
+            {
+              "pattern": "<ProductSheetSurface",
+              "equals": 2
+            }
+          ],
+          "require": [
+            "test-id=\"knowledge-projection-catalog-sheet\"",
+            "test-id=\"knowledge-projection-context-sheet\""
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/repository/components/DocumentWorkspaceState.vue",
+          "require": ["family=\"workspace\""]
+        },
+        {
+          "file": "packages/app-vue/src/modules/notification/views/NotificationListPage.vue",
+          "count": [
+            {
+              "pattern": "family=\"collection\"",
+              "min": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ResponsivePrimaryAction",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/shared/components/ResponsivePrimaryAction.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/shared/components/ResponsivePrimaryAction.vue",
+          "require": ["class=\"h-8 w-8"],
+          "forbid": ["@2xl/panel:inline"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/goal/components/GoalPageToolbar.vue",
+          "require": ["<ResponsivePrimaryAction"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/task/components/TaskPageToolbar.vue",
+          "require": ["<ResponsivePrimaryAction"]
+        },
+        {
+          "file": "packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue",
+          "require": ["<ResponsivePrimaryAction"]
+        }
+      ]
+    },
+    {
+      "id": "ResponsiveSegmentedFilter",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/shared/components/ResponsiveSegmentedFilter.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/shared/components/ResponsiveSegmentedFilter.vue",
+          "count": [
+            {
+              "pattern": ":model-value=\"modelValue\"",
+              "equals": 2
+            }
+          ],
+          "require": [
+            "DropdownMenuRadioGroup",
+            "@2xl/panel:flex",
+            "@2xl/panel:hidden",
+            "ToggleGroup",
+            "collapseMode === 'dropdown'",
+            "expandedOptionTestIdPrefix",
+            "option.countTestId",
+            "currentOption?.count",
+            ":aria-selected=\"optionRole === 'tab' ? modelValue === option.value : undefined\""
+          ]
         }
       ]
     },
@@ -1426,6 +1971,139 @@
         {
           "file": "packages/app-vue/src/shared/types/electron.d.ts",
           "require": ["electronAPI?: DesktopAuthApi", "Keep-boundary vs host ElectronBridge"]
+        }
+      ]
+    },
+    {
+      "id": "CapsulePreviewShell",
+      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
+      "origin": "packages/app-vue/src/shared/components/CapsulePreviewShell.spec.ts",
+      "locks": [
+        {
+          "file": "packages/app-vue/src/modules/task/components/TaskQuickSurface.vue",
+          "require": [
+            "<CapsulePreviewShell",
+            "<CapsulePreviewHeader",
+            "<CapsulePreviewFooter",
+            "<CapsulePreviewState"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/layouts/shell/previews/GoalCapsulePreview.vue",
+          "require": [
+            "<CapsulePreviewShell",
+            "<CapsulePreviewHeader",
+            "<CapsulePreviewFooter",
+            "<CapsulePreviewState"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/layouts/shell/previews/ScheduleCapsulePreview.vue",
+          "require": [
+            "<CapsulePreviewShell",
+            "<CapsulePreviewHeader",
+            "<CapsulePreviewFooter",
+            "<CapsulePreviewState"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/routine/components/RoutineCapsulePreview.vue",
+          "require": [
+            "<CapsulePreviewShell",
+            "<CapsulePreviewHeader",
+            "<CapsulePreviewFooter",
+            "<CapsulePreviewState"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/modules/notification/components/NotificationCapsulePreview.vue",
+          "require": [
+            "<CapsulePreviewShell",
+            "<CapsulePreviewHeader",
+            "<CapsulePreviewFooter",
+            "<CapsulePreviewState"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/layouts/shell/previews/NoteCapsulePreview.vue",
+          "require": [
+            "<CapsulePreviewShell",
+            "<CapsulePreviewHeader",
+            "<CapsulePreviewFooter",
+            "<CapsulePreviewState"
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/shared/components/index.ts",
+          "count": [
+            {
+              "pattern": "default as Capsule\\w+",
+              "equals": 4
+            },
+            {
+              "pattern": "default as CapsulePreviewShell\\b",
+              "equals": 1
+            },
+            {
+              "pattern": "default as CapsulePreviewHeader\\b",
+              "equals": 1
+            },
+            {
+              "pattern": "default as CapsulePreviewFooter\\b",
+              "equals": 1
+            },
+            {
+              "pattern": "default as CapsulePreviewState\\b",
+              "equals": 1
+            }
+          ],
+          "order": [
+            {
+              "tokens": [
+                "default as CapsulePreviewShell",
+                "default as CapsulePreviewHeader",
+                "default as CapsulePreviewFooter",
+                "default as CapsulePreviewState"
+              ],
+              "chained": false
+            }
+          ]
+        },
+        {
+          "file": "packages/app-vue/src/shared/components/CapsulePreviewShell.vue",
+          "forbid": [
+            {
+              "pattern": "@memoflow\\/contracts|modules\\/|defineEmits|v-for|<button\\b"
+            }
+          ],
+          "require": ["<slot"]
+        },
+        {
+          "file": "packages/app-vue/src/shared/components/CapsulePreviewHeader.vue",
+          "forbid": [
+            {
+              "pattern": "@memoflow\\/contracts|modules\\/|defineEmits|v-for|<button\\b"
+            }
+          ],
+          "require": ["<slot"]
+        },
+        {
+          "file": "packages/app-vue/src/shared/components/CapsulePreviewFooter.vue",
+          "forbid": [
+            {
+              "pattern": "@memoflow\\/contracts|modules\\/|defineEmits|v-for|<button\\b"
+            }
+          ],
+          "require": ["<slot"]
+        },
+        {
+          "file": "packages/app-vue/src/shared/components/CapsulePreviewState.vue",
+          "forbid": [
+            {
+              "pattern": "@memoflow\\/contracts|modules\\/|defineEmits|v-for|<button\\b"
+            }
+          ],
+          "require": ["<slot"]
         }
       ]
     }

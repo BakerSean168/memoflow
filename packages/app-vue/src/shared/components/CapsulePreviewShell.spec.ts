@@ -1,5 +1,3 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
 
@@ -7,9 +5,6 @@ import CapsulePreviewFooter from './CapsulePreviewFooter.vue';
 import CapsulePreviewHeader from './CapsulePreviewHeader.vue';
 import CapsulePreviewShell from './CapsulePreviewShell.vue';
 import CapsulePreviewState from './CapsulePreviewState.vue';
-
-const appRoot = resolve(import.meta.dirname, '../..');
-const read = (relative: string) => readFileSync(resolve(appRoot, relative), 'utf8');
 
 describe('capsule preview presentation grammar', () => {
   it('provides a bounded host shell while forwarding owner attributes and content', () => {
@@ -77,43 +72,5 @@ describe('capsule preview presentation grammar', () => {
     expect(wrapper.attributes('data-capsule-preview-footer')).toBe('');
     expect(wrapper.get('[data-testid="create"]').exists()).toBe(true);
     expect(wrapper.get('[data-testid="view-all"]').exists()).toBe(true);
-  });
-
-  it('keeps all six capsule owner families on the shared chrome', () => {
-    const owners = [
-      read('modules/task/components/TaskQuickSurface.vue'),
-      read('layouts/shell/previews/GoalCapsulePreview.vue'),
-      read('layouts/shell/previews/ScheduleCapsulePreview.vue'),
-      read('modules/routine/components/RoutineCapsulePreview.vue'),
-      read('modules/notification/components/NotificationCapsulePreview.vue'),
-      read('layouts/shell/previews/NoteCapsulePreview.vue'),
-    ];
-
-    for (const source of owners) {
-      expect(source).toContain('<CapsulePreviewShell');
-      expect(source).toContain('<CapsulePreviewHeader');
-      expect(source).toContain('<CapsulePreviewFooter');
-      expect(source).toContain('<CapsulePreviewState');
-    }
-  });
-
-  it('keeps shared capsule primitives free of universal business rows and owner actions', () => {
-    const primitives = [
-      'CapsulePreviewShell',
-      'CapsulePreviewHeader',
-      'CapsulePreviewFooter',
-      'CapsulePreviewState',
-    ];
-    const exports = read('shared/components/index.ts');
-    expect([...exports.matchAll(/default as (Capsule\w+)/g)].map((match) => match[1])).toEqual(
-      primitives,
-    );
-
-    for (const primitive of primitives) {
-      const source = read(`shared/components/${primitive}.vue`);
-      // Rows, owner data and business actions must stay in each owner's surface.
-      expect(source).not.toMatch(/@memoflow\/contracts|modules\/|defineEmits|v-for|<button\b/);
-      expect(source).toContain('<slot');
-    }
   });
 });

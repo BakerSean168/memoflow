@@ -1,5 +1,3 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import FullCalendar from '@fullcalendar/vue3';
 import type { EventDropInfo } from '@fullcalendar/vue3';
 import { mount } from '@vue/test-utils';
@@ -80,12 +78,6 @@ describe('PlannerCalendar production renderer (PLAN-4304)', () => {
     );
 
     wrapper.unmount();
-  });
-
-  it('guards FullCalendar synthetic selection events before reading Planner projection fields', () => {
-    const source = readFileSync(resolve(__dirname, 'PlannerCalendar.vue'), 'utf8');
-    expect(source).toContain('v-if="event.extendedProps.projection"');
-    expect(source).toContain('data-testid="schedule-selection-preview"');
   });
 
   it('emits one semantic range even when projection updates make FullCalendar refresh its options', async () => {

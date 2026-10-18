@@ -1,7 +1,5 @@
 /** @vitest-environment happy-dom */
 
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { shallowMount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it } from 'vitest';
@@ -65,8 +63,6 @@ const i18n = createI18n({
   },
 });
 
-const source = readFileSync(resolve(__dirname, 'TaskPageToolbar.vue'), 'utf8');
-
 const labelOptions = [
   { id: 'work', name: 'Work', color: '#3366ff' },
   { id: 'ai', name: 'AI', color: null },
@@ -104,29 +100,12 @@ describe('TaskPageToolbar', () => {
     expect(wrapper.findComponent({ name: 'ProductSurfaceHeader' }).exists()).toBe(true);
     expect(wrapper.findAll('[data-testid="task-filter-bar"]')).toHaveLength(1);
     expect(wrapper.findAll('[data-primary-action="create-task"]')).toHaveLength(1);
-    for (const selector of [
-      'test-id="task-surface-trigger"',
-      'test-id="task-status-filter"',
-      'test-id="task-plan-state-filter"',
-      'data-testid="task-compact-view-options"',
-      'test-id="task-occurrence-sort"',
-    ]) {
-      expect(source).toContain(selector);
-    }
-    expect(source).toContain("const surfaces: TaskSurface[] = ['today', 'plans']");
-    expect(source).not.toContain("'upcoming'");
-    expect(source).toContain('count: props.visibleItemCount');
     const sharedFilters = wrapper.findAllComponents(ProductSingleSelectFilter);
     expect(sharedFilters).toHaveLength(3);
     expect(sharedFilters[0]!.props('modelValue')).toBe('today');
     expect(sharedFilters[1]!.props('modelValue')).toBe('all');
     expect(sharedFilters[2]!.props('modelValue')).toBe('time');
     expect(wrapper.findComponent(LabelFilterPopover).exists()).toBe(true);
-    expect(source).toContain('<ResponsivePrimaryAction');
-    expect(source).not.toContain('task-goal-filter');
-    expect(source).not.toContain('goalFilter');
-    expect(source).not.toContain('overflow-x-auto');
-    expect(source).not.toContain('task-search-input');
   });
 
   it('forwards label selection and the primary create action', async () => {
@@ -143,9 +122,6 @@ describe('TaskPageToolbar', () => {
     const wrapper = mountToolbar();
     await wrapper.setProps({ activeSurface: 'plans', planStateFilter: 'failed' });
 
-    expect(source).toContain('v-if="activeSurface === \'today\'"');
-    expect(source).toContain('test-id="task-plan-state-filter"');
-    expect(source).toContain('planStateFilterOptions');
     const planFilter = wrapper
       .findAllComponents(ProductSingleSelectFilter)
       .find((filter) => filter.props('modelValue') === 'failed');
