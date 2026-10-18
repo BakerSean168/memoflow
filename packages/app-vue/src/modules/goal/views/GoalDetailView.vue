@@ -38,7 +38,7 @@
     </div>
     <div
       v-else-if="goal && workspace"
-      class="min-h-0 flex-1 overflow-auto px-3 py-3 @md/panel:px-5 @md/panel:py-4"
+      class="min-h-0 flex-1 overflow-auto scrollbar-gutter-stable px-3 py-3 @md/panel:px-5 @md/panel:py-4"
     >
       <div class="mx-auto max-w-5xl space-y-6">
         <article
