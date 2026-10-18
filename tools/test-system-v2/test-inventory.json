@@ -1832,6 +1832,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/user-data-path.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/utils/__tests__/api-config.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13490,7 +13498,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 104
+      "fileCount": 105
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -14294,7 +14302,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1230,
+    "unit": 1231,
     "integration": 48,
     "smoke": 3,
     "boundary-ipc": 8,
