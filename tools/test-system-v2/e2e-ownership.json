@@ -540,6 +540,12 @@
       "role": "supplemental",
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.visual-regression.config.ts"
+    },
+    "apps/desktop/e2e/model-picker-catalog.spec.mts": {
+      "surface": "ai",
+      "role": "supplemental",
+      "lifecycle": "active",
+      "primaryCollector": "apps/desktop/playwright.config.ts"
     }
   }
 }

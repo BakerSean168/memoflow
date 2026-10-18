@@ -225,6 +225,42 @@ test('[P0] T3 Agent wizard and inline Endpoint/Key configure the persistent comp
   await page.goto('/settings?tab=ai');
   await expect(page.getByTestId('ai-provider-list')).toBeVisible();
   await page.getByTestId('settings-return-to-app').first().click();
+  // #481: browse a second enabled instance without changing selection or sending.
+  await page.getByTestId('ai-chat-composer').fill('Draft survives browsing');
+  await page.getByTestId('ai-chat-model-selector').click();
+  await page.getByTestId('ai-model-picker-agent-agent:mastra').click();
+  await expect(page.getByTestId('ai-model-picker-option')).toHaveCount(2);
+  await expect(page.getByTestId('ai-chat-model-selector')).toContainText('E2E Model Beta');
+  await expect(page.getByTestId('ai-chat-composer')).toHaveValue('Draft survives browsing');
+  await expect(page.getByTestId('ai-model-picker-select-agent')).toHaveCount(0);
+  await page.getByTestId('ai-model-picker-option').filter({ hasText: 'E2E Model Alpha' }).click();
+  await expect(page.getByTestId('ai-chat-model-selector')).toContainText('E2E Model Alpha');
+  // Favorite belongs to mastra-parity. Disable it via the real Settings switch.
+  await page.goto('/settings?tab=ai');
+  await page.getByTestId('ai-provider-toggle-mastra-parity').click();
+  await expect(page.getByTestId('ai-provider-toggle-mastra-parity')).not.toBeChecked();
+  await expect(page.getByTestId('ai-provider-select-agent:mastra-parity')).toBeVisible();
+  await page.getByTestId('settings-return-to-app').first().click();
+  await page.getByTestId('ai-chat-model-selector').click();
+  await expect(page.getByTestId('ai-model-picker-agent-agent:mastra-parity')).toHaveCount(0);
+  await page.getByTestId('ai-model-picker-favorites').click();
+  await expect(page.getByTestId('ai-model-picker-option')).toHaveCount(0);
+  await page.getByTestId('ai-model-picker-search').fill(providerName);
+  await expect(page.getByTestId('ai-model-picker-option')).toHaveCount(0);
+  await page.keyboard.press('ArrowDown');
+  await expect(page.getByTestId('ai-model-picker-option')).toHaveCount(0);
+  await page.keyboard.press('Escape');
+  await page.goto('/settings?tab=ai');
+  await page.getByTestId('ai-provider-toggle-mastra-parity').click();
+  await expect(page.getByTestId('ai-provider-toggle-mastra-parity')).toBeChecked();
+  await page.getByTestId('settings-return-to-app').first().click();
+  await page.getByTestId('ai-chat-model-selector').click();
+  await expect(page.getByTestId('ai-model-picker-agent-agent:mastra-parity')).toBeVisible();
+  await page.getByTestId('ai-model-picker-favorites').click();
+  await expect(page.getByTestId('ai-model-picker-option')).toHaveCount(1);
+  await expect(page.getByTestId('ai-model-picker-option')).toContainText('E2E Model Beta');
+  await page.getByTestId('ai-model-picker-option').click();
+  await expect(page.getByTestId('ai-chat-model-selector')).toContainText('E2E Model Beta');
   const firstTurn = page.waitForRequest(
     (request) => request.method() === 'POST' && request.url().endsWith('/ai/runtime/assistant/sse'),
   );

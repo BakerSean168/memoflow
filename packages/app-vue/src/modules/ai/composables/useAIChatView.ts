@@ -19,9 +19,7 @@ import {
 } from '@memoflow/contracts/repository';
 import type {
   AIWorkflowRunView,
-  AgentRegistrySnapshot,
   AIChatPermissionMode,
-  AIModelInfo,
   LocalAgentModelOptions,
 } from '@memoflow/contracts/ai';
 import { useAI } from './useAI';
@@ -29,6 +27,7 @@ import { useGoal } from '../../goal/composables/useGoal';
 import { useTask } from '../../task/composables/useTask';
 import { useRecentKnowledgeNotes } from '../../repository/composables/useRecentKnowledgeNotes';
 import { useReferenceableKnowledgeNotes } from '../../repository/composables/useReferenceableKnowledgeNotes';
+import { useAIModelCatalog, composerAgentKey } from './useAIModelCatalog';
 import { useLocalAssistantChoices } from './useLocalAssistantChoices';
 import { useServerStateIdentityScope } from '../../../platform/server-state';
 import { getAIErrorMessage, getNativeAgentExecutionFailureMessage } from './error';
@@ -88,99 +87,34 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   const { t } = useI18n();
   const route = useRoute();
   const router = useRouter();
-  const { service, providers, loadProviders, refreshProviderModels, isLoadingProviders } = useAI();
+  const { service, providers, loadProviders, refreshProviderModels } = useAI();
   const assistantRuntime = useStrictInject(AI_ASSISTANT_RUNTIME_KEY, 'AIAssistantRuntime');
   const runtimeUsage = useStrictInject(AI_RUNTIME_USAGE_KEY, 'AIRuntimeUsage');
   const workflowRuntime = useStrictInject(AI_WORKFLOW_RUNTIME_KEY, 'AIWorkflowRuntime');
   const assistantSurface = useStrictInject(ASSISTANT_SURFACE_KEY, 'AIRuntimeSurface');
   const localAgent = inject(AI_LOCAL_AGENT_KEY, undefined);
   const agentRegistryClient = inject(AI_AGENT_REGISTRY_KEY, undefined);
-  const agentRegistrySnapshot = ref<AgentRegistrySnapshot | null>(null);
+  const resolveIdentity = useServerStateIdentityScope();
+  const catalog = useAIModelCatalog({
+    resolveIdentity,
+    registry: agentRegistryClient,
+    native: localAgent,
+    refreshProviderModels,
+  });
+  const agentRegistrySnapshot = catalog.snapshot;
+  const modelCatalogs = catalog.providerCatalogs;
+  const modelCatalogLoading = catalog.loading;
+  const loadAgentRegistry = catalog.refresh;
   const configurationRevision = inject(AI_CONFIGURATION_REVISION_KEY, undefined);
   const permissionMode = ref<AIChatPermissionMode>('supervised');
-  /** Explicit trait choices are scoped to the currently selected native Agent+model. */
   const nativeModelSelections = ref<Record<string, LocalAgentModelOptions>>({});
-  const modelCatalogs = ref<Record<string, AIModelInfo[]>>({});
-  const modelCatalogLoading = ref(false);
   const composerInitializing = ref(true);
-  const registryLoading = ref(false);
   const nativeSelectionPending = ref(false);
-  // A late default-choice read may not override an explicit Composer selection.
   let explicitRuntimeSelection = 0;
-  const composerLoading = computed(
-    () =>
-      composerInitializing.value ||
-      registryLoading.value ||
-      modelCatalogLoading.value ||
-      nativeSelectionPending.value ||
-      isLoadingProviders.value ||
-      localChoices.loading.value,
-  );
-  const catalogRequests = new Map<string, Promise<AIModelInfo[]>>();
-  function requestCatalog(connectionId: string) {
-    let request = catalogRequests.get(connectionId);
-    if (!request) {
-      request = Promise.resolve()
-        .then(() => refreshProviderModels(connectionId))
-        .then((result) => result.models)
-        .catch(() => {
-          catalogRequests.delete(connectionId);
-          return [];
-        });
-      catalogRequests.set(connectionId, request);
-    }
-    return request;
-  }
-  let registryGeneration = 0;
   let disposed = false;
-  async function loadAgentRegistry() {
-    if (!agentRegistryClient) return;
-    const generation = ++registryGeneration;
-    registryLoading.value = true;
-    try {
-      const next = await agentRegistryClient.list();
-      if (disposed || generation !== registryGeneration) return;
-      agentRegistrySnapshot.value = next;
-      modelCatalogLoading.value = true;
-      const connectionIds = [
-        ...new Set(
-          next.bindings
-            .filter((binding) =>
-              next.instances.some(
-                (instance) => instance.instanceId === binding.instanceId && instance.enabled,
-              ),
-            )
-            .map((binding) => binding.connectionId),
-        ),
-      ];
-      const entries: Array<[string, AIModelInfo[]]> = [];
-      for (
-        let i = 0;
-        i < connectionIds.length && !disposed && generation === registryGeneration;
-        i += 2
-      )
-        entries.push(
-          ...(await Promise.all(
-            connectionIds
-              .slice(i, i + 2)
-              .map(async (id): Promise<[string, AIModelInfo[]]> => [id, await requestCatalog(id)]),
-          )),
-        );
-      if (!disposed && generation === registryGeneration)
-        modelCatalogs.value = Object.fromEntries(entries);
-    } catch {
-      // Fail closed: never expose global legacy providers as another Agent's models.
-      if (!disposed && generation === registryGeneration) {
-        agentRegistrySnapshot.value = null;
-        modelCatalogs.value = {};
-      }
-    } finally {
-      if (!disposed && generation === registryGeneration) {
-        modelCatalogLoading.value = false;
-        registryLoading.value = false;
-      }
-    }
-  }
+  const composerLoading = computed(
+    () => composerInitializing.value || nativeSelectionPending.value,
+  );
   const repository = inject(REPOSITORY_SERVICE_KEY, undefined);
   const knowledgeNativeSurface = useKnowledgeNativeSurfaceRegistration();
   async function saveLocalNote(content: string) {
@@ -385,7 +319,8 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   });
 
   const composerAgents = computed(() => {
-    const entries = agentRegistrySnapshot.value?.instances ?? [];
+    const entries =
+      agentRegistrySnapshot.value?.instances.filter((instance) => instance.enabled) ?? [];
     return entries.map((instance) => ({
       id:
         instance.driver === 'mastra'
@@ -421,50 +356,37 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       )?.instanceId;
     return id ? `agent:${id}` : '';
   });
-  // The picker browses all eligible Mastra bindings, not just the currently
-  // selected Agent. Native catalogs are only available for the probed connection.
-  const composerModels = computed(() => {
-    const mastraModels = modelSelection.allModelOptions.value.map((model) => ({
-      ...model,
-      agentKey: model.agentInstanceId
-        ? 'agent:' + model.agentInstanceId
-        : selectedComposerAgent.value,
-      providerName:
-        providerList.value.find((provider) => provider.id === model.providerId)?.name ??
-        model.providerName,
-    }));
-    const choice = chatSession.runtimeChoice.value;
-    const nativeModels =
-      choice.runtimeKind === 'local_agent'
-        ? localChoices.models.value.map((model) => ({
-            key: model.id,
-            agentKey: 'local:' + choice.connectionId,
-            providerId: choice.connectionId,
-            providerName: model.provider ?? 'Native Agent',
-            ...(model.reasoningEfforts ? { reasoningEfforts: model.reasoningEfforts } : {}),
-            ...(model.defaultReasoningEffort
-              ? { defaultReasoningEffort: model.defaultReasoningEffort }
-              : {}),
-            ...(model.serviceTiers ? { serviceTiers: model.serviceTiers } : {}),
-            ...(model.defaultServiceTier ? { defaultServiceTier: model.defaultServiceTier } : {}),
-            modelId: model.id,
-            modelName: model.name,
-          }))
-        : [];
-    return [...mastraModels, ...nativeModels];
-  });
+  const composerCatalog = catalog.entries;
+  const composerModels = computed(() =>
+    Object.values(composerCatalog.value)
+      .flatMap((entry) => entry.models)
+      .map((model) => ({
+        ...model,
+        providerName:
+          providerList.value.find((provider) => provider.id === model.providerId)?.name ??
+          model.providerName,
+      })),
+  );
   const composerModelKey = computed(() =>
     chatSession.runtimeChoice.value.runtimeKind === 'local_agent'
       ? chatSession.runtimeChoice.value.modelId
       : modelSelection.selectedModelKey.value,
   );
   async function refreshConfiguration() {
-    catalogRequests.clear();
     await Promise.allSettled([loadProviders(), loadAgentRegistry(), localChoices.refresh()]);
   }
+  watch(
+    resolveIdentity,
+    () => {
+      ++explicitRuntimeSelection;
+      nativeSelectionPending.value = false;
+      nativeModelSelections.value = {};
+      void refreshConfiguration();
+    },
+    { flush: 'sync' },
+  );
   if (configurationRevision) {
     watch(configurationRevision, () => {
-      catalogRequests.clear();
       void Promise.allSettled([loadAgentRegistry(), localChoices.refresh()]);
     });
   }
@@ -498,112 +420,103 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       return key === `local:${choice.connectionId}` ? undefined : 'incompatible';
     return key.startsWith('agent:') ? undefined : 'incompatible';
   }
-  async function selectComposerAgent(key: string) {
-    if (composerSwitchBlockedReason(key)) return;
-    if (key === selectedComposerAgent.value) return;
-    const selectionRequest = ++explicitRuntimeSelection;
-    const selectedConversationId = chatSession.chatConversationId.value;
-    if (key.startsWith('local:')) {
-      const instance = agentRegistrySnapshot.value?.instances.find(
-        (entry) =>
-          entry.driver !== 'mastra' &&
-          entry.enabled &&
-          `local:${entry.legacyConnectionId ?? entry.instanceId}` === key,
-      );
-      if (!instance || !localAgent) return;
-      let id = instance.legacyConnectionId;
-      if (!id) {
-        // Only an explicit user choice materializes the implicit default. A
-        // Registry read or a probe must never create a persistent connection.
-        if (!agentRegistryClient || instance.instanceId !== instance.driver) return;
-        nativeSelectionPending.value = true;
-        try {
-          let updated;
+  async function selectComposerModel(key: string, agentKey: string) {
+    if (composerSwitchBlockedReason(agentKey)) return;
+    const instance = agentRegistrySnapshot.value?.instances.find(
+      (entry) => entry.enabled && composerAgentKey(entry) === agentKey,
+    );
+    const entry = instance && composerCatalog.value[instance.instanceId];
+    const model =
+      entry?.status === 'ready' ? entry.models.find((item) => item.key === key) : undefined;
+    if (!instance || !model) return;
+    const request = ++explicitRuntimeSelection;
+    const identity = resolveIdentity();
+    const conversationId = chatSession.chatConversationId.value;
+    const previousAgent = selectedComposerAgent.value;
+    if (instance.driver !== 'mastra') {
+      if (!localAgent || !agentRegistryClient) return;
+      nativeSelectionPending.value = true;
+      try {
+        let id = instance.legacyConnectionId;
+        if (!id) {
+          if (instance.instanceId !== instance.driver)
+            throw new Error('Native instance has no connection');
           try {
-            updated = await agentRegistryClient.execute({
+            const updated = await agentRegistryClient.execute({
               action: 'update',
               instanceId: instance.instanceId,
               expectedRevision: instance.revision,
               patch: {},
             });
+            if (
+              !updated ||
+              !('instanceId' in updated) ||
+              updated.instanceId !== instance.instanceId ||
+              !('legacyConnectionId' in updated)
+            )
+              throw new Error('Native Agent connection could not be resolved');
+            id = updated.legacyConnectionId;
           } catch (error) {
-            // Another window may have materialized the same default first.
-            // Reuse its identity only when the fresh Registry confirms it.
+            // Resolve a concurrent idempotent materialization from fresh authority.
             const latest = (await agentRegistryClient.list()).instances.find(
-              (entry) => entry.instanceId === instance.instanceId,
+              (item) => item.instanceId === instance.instanceId,
             );
             if (!latest?.enabled || !latest.legacyConnectionId) throw error;
-            updated = latest;
+            id = latest.legacyConnectionId;
           }
-          if (
-            !updated ||
-            !('instanceId' in updated) ||
-            updated.instanceId !== instance.instanceId ||
-            !('legacyConnectionId' in updated) ||
-            !updated.legacyConnectionId
-          )
-            throw new Error('Native Agent connection could not be resolved');
-          id = updated.legacyConnectionId;
-          await Promise.all([localChoices.refresh(), loadAgentRegistry()]);
-        } catch (error) {
-          toast.error(getAIErrorMessage(error, t, 'aiAssistant.local.actionFailed'));
-          return;
-        } finally {
-          nativeSelectionPending.value = false;
         }
-      }
-      if (
-        disposed ||
-        selectionRequest !== explicitRuntimeSelection ||
-        chatSession.chatConversationId.value !== selectedConversationId ||
-        !id ||
-        !localChoices.connections.value.some(
-          (entry) => entry.id === id && entry.enabled && entry.driver === instance.driver,
+        if (disposed || identity !== resolveIdentity() || request !== explicitRuntimeSelection)
+          return;
+        const [connections, latest] = await Promise.all([
+          localAgent.listConnections(),
+          agentRegistryClient.list(),
+        ]);
+        if (
+          disposed ||
+          identity !== resolveIdentity() ||
+          request !== explicitRuntimeSelection ||
+          conversationId !== chatSession.chatConversationId.value
         )
-      )
-        return;
-      chatSession.runtimeChoice.value = {
-        runtimeKind: 'local_agent',
-        connectionId: id,
-        modelId: '',
-      };
+          return;
+        const active = latest.instances.find(
+          (item) =>
+            item.instanceId === instance.instanceId &&
+            item.enabled &&
+            item.legacyConnectionId === id &&
+            item.driver === instance.driver,
+        );
+        if (
+          !id ||
+          !active ||
+          !connections.some(
+            (item) => item.id === id && item.enabled && item.driver === instance.driver,
+          )
+        )
+          throw new Error('Native Agent connection is no longer available');
+        // Do not commit a partial empty-model selection. All failures preserve draft and prior route.
+        if (chatSession.chatLoading.value || workflowSelectionLocked.value) return;
+        const choice = chatSession.runtimeChoice.value;
+        if (conversationId && (choice.runtimeKind !== 'local_agent' || choice.connectionId !== id))
+          return;
+        chatSession.runtimeChoice.value = {
+          runtimeKind: 'local_agent',
+          connectionId: id,
+          modelId: model.modelId,
+        };
+        if (previousAgent !== agentKey) permissionMode.value = 'supervised';
+        if (!instance.legacyConnectionId) void loadAgentRegistry();
+        await localChoices.refresh();
+      } catch (error) {
+        if (!disposed && identity === resolveIdentity() && request === explicitRuntimeSelection)
+          toast.error(getAIErrorMessage(error, t, 'aiAssistant.local.actionFailed'));
+      } finally {
+        if (request === explicitRuntimeSelection) nativeSelectionPending.value = false;
+      }
     } else {
-      if (modelSelection.selectAgent(key.slice(6)) !== 'selected') return;
+      if (modelSelection.selectModel(key) !== 'selected') return;
       chatSession.runtimeChoice.value = { runtimeKind: 'builtin' };
+      if (previousAgent !== agentKey) permissionMode.value = 'supervised';
     }
-    permissionMode.value = 'supervised';
-  }
-  async function selectComposerModel(key: string, agentKey: string) {
-    if (composerSwitchBlockedReason(agentKey)) return;
-    if (!composerAgents.value.some((item) => item.id === agentKey && item.enabled)) return;
-    ++explicitRuntimeSelection;
-    const previousAgent = selectedComposerAgent.value;
-    if (agentKey.startsWith('local:')) {
-      const connectionId = agentKey.slice(6);
-      const choice = chatSession.runtimeChoice.value;
-      if (choice.runtimeKind !== 'local_agent' || choice.connectionId !== connectionId)
-        await selectComposerAgent(agentKey);
-      const current = chatSession.runtimeChoice.value;
-      if (
-        current.runtimeKind === 'local_agent' &&
-        current.connectionId === connectionId &&
-        localChoices.models.value.some((model) => model.id === key)
-      )
-        chatSession.runtimeChoice.value = { ...current, modelId: key };
-    } else {
-      const instanceId = agentKey.slice(6);
-      const target = modelSelection.allModelOptions.value.find(
-        (model) =>
-          model.key === key &&
-          (model.agentInstanceId === instanceId ||
-            (!model.agentInstanceId &&
-              selectedComposerAgent.value === agentKey &&
-              modelSelection.selectedModelKey.value === key)),
-      );
-      if (!target || modelSelection.selectModel(key) !== 'selected') return;
-      chatSession.runtimeChoice.value = { runtimeKind: 'builtin' };
-    }
-    if (previousAgent !== agentKey) permissionMode.value = 'supervised';
   }
   function selectPermission(mode: AIChatPermissionMode) {
     if (chatSession.chatLoading.value) return;
@@ -938,7 +851,16 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       !goalWorkflow.goalManualHandoff.value &&
       (chatSession.runtimeChoice.value.runtimeKind === 'local_agent'
         ? localChoices.canSend.value
-        : modelSelection.canSendMessage.value && modelSelection.selectedModel.value !== null),
+        : modelSelection.canSendMessage.value &&
+          modelSelection.selectedModel.value !== null &&
+          (!agentRegistryClient ||
+            Boolean(
+              Object.values(composerCatalog.value).some(
+                (entry) =>
+                  entry.status === 'ready' &&
+                  entry.models.some((model) => model.key === modelSelection.selectedModelKey.value),
+              ),
+            ))),
   );
   function canLeaveWorkflowReview(): boolean {
     // The handed-off native draft still coordinates deterministic workflow Save.
@@ -1028,7 +950,6 @@ export function useAIChatView(options: UseAIChatViewOptions) {
 
   onBeforeUnmount(() => {
     disposed = true;
-    registryGeneration++;
     referenceableKnowledgeNotes.cancel();
   });
 
@@ -1174,13 +1095,14 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       composerAgents,
       selectedComposerAgent,
       composerModels,
+      composerCatalog,
+      refreshComposerCatalog: refreshConfiguration,
       composerModelKey,
       modelCatalogLoading,
       composerLoading,
       permissionMode,
       currentNativeModelOptions,
       selectNativeModelOption,
-      selectComposerAgent,
       selectComposerModel,
       selectPermission,
       selectedModelKey: modelSelection.selectedModelKey,

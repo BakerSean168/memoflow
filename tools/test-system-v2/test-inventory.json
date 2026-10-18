@@ -932,6 +932,20 @@
       }
     },
     {
+      "path": "apps/desktop/e2e/model-picker-catalog.spec.mts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/desktop/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "ai",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/desktop/playwright.config.ts"
+      }
+    },
+    {
       "path": "apps/desktop/e2e/native-codex-account-operator.spec.mts",
       "primarySuite": "e2e",
       "collectors": [
@@ -4984,6 +4998,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/useAIKnowledgeCapture.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/ai/composables/useAIModelCatalog.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -12798,7 +12820,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 9,
+      "fileCount": 10,
       "e2eOwnership": {
         "lane": "desktop",
         "lifecycle": "active",
@@ -13226,7 +13248,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 245
+      "fileCount": 246
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -13988,12 +14010,12 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1171,
+    "unit": 1172,
     "integration": 48,
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 9,
-    "e2e": 65,
+    "e2e": 66,
     "perf": 2,
     "governance": 71
   },
@@ -14001,7 +14023,7 @@
     "version": 2,
     "issues": [],
     "countsByLane": {
-      "desktop": 9,
+      "desktop": 10,
       "local-validation": 6,
       "nightly": 5,
       "reference": 6,
@@ -14014,7 +14036,7 @@
       "artifact": 3,
       "canonical": 32,
       "reference": 6,
-      "supplemental": 24
+      "supplemental": 25
     },
     "automatedCollectorCount": 4,
     "automationBindingCount": 5

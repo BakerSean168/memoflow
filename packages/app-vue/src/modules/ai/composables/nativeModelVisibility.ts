@@ -41,10 +41,10 @@ export function useNativeModelVisibility(
       Boolean(resolveIdentity()) &&
       LocalAgentModelVisibilityContextSchema.safeParse(resolveContext()).success,
   );
-  function isVisible(instanceId: string, modelId: string): boolean {
+  function isVisible(instanceId: string, modelId: string, context = resolveContext()): boolean {
     // Reactive dependency shared by all mounted Settings and Composer consumers.
     void revision.value;
-    return !readHidden(storageKey(resolveIdentity(), instanceId, resolveContext())).includes(
+    return !readHidden(storageKey(resolveIdentity(), instanceId, context)).includes(
       modelId,
     );
   }

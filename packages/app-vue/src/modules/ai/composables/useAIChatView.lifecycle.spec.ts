@@ -448,6 +448,10 @@ describe('AI conversation restoration and business navigation', () => {
         status: 'ready',
         models: [{ id: 'real-codex-model', name: 'From Codex model/list' }],
       })),
+      probeDefaultDriver: vi.fn(async () => ({
+        status: 'ready',
+        models: [{ id: 'real-codex-model', name: 'From Codex model/list' }],
+      })),
     };
     const { wrapper } = await mountView({
       [AI_AGENT_REGISTRY_KEY as symbol]: registry,
@@ -459,9 +463,18 @@ describe('AI conversation restoration and business navigation', () => {
       expect.objectContaining({ id: 'local:codex', configured: false }),
     ]);
 
-    await wrapper.vm.selectComposerAgent('local:codex');
+    expect(wrapper.vm.composerModels).toEqual([
+      expect.objectContaining({ modelId: 'real-codex-model', agentKey: 'local:codex' }),
+    ]);
+    fixture.session.chatMessage.value = 'Preserve the draft';
+    registry.execute.mockRejectedValueOnce(new Error('Recoverable materialization failure'));
+    await wrapper.vm.selectComposerModel('real-codex-model', 'local:codex');
+    expect(fixture.session.runtimeChoice.value).toEqual({ runtimeKind: 'builtin' });
+    expect(fixture.session.chatMessage.value).toBe('Preserve the draft');
+    expect(await local.listConnections()).toEqual([]);
+    await wrapper.vm.selectComposerModel('real-codex-model', 'local:codex');
     await flushPromises();
-    expect(registry.execute).toHaveBeenCalledOnce();
+    expect(registry.execute).toHaveBeenCalledTimes(2);
     expect(registry.execute).toHaveBeenCalledWith({
       action: 'update',
       instanceId: 'codex',
@@ -471,8 +484,9 @@ describe('AI conversation restoration and business navigation', () => {
     expect(fixture.session.runtimeChoice.value).toEqual({
       runtimeKind: 'local_agent',
       connectionId: connection.id,
-      modelId: '',
+      modelId: 'real-codex-model',
     });
+    expect(fixture.session.chatMessage.value).toBe('Preserve the draft');
     expect(wrapper.vm.composerModels).toEqual([
       expect.objectContaining({ modelId: 'real-codex-model', agentKey: 'local:' + connection.id }),
     ]);
@@ -481,8 +495,8 @@ describe('AI conversation restoration and business navigation', () => {
       connectionId: connection.id,
       modelId: 'real-codex-model',
     });
-    expect(wrapper.vm.canSendMessage).toBe(true);
-    expect(registry.execute).toHaveBeenCalledOnce();
+    await vi.waitFor(() => expect(wrapper.vm.canSendMessage).toBe(true));
+    expect(registry.execute).toHaveBeenCalledTimes(2);
   });
 
   it('refreshes the persistent composer after settings invalidates the app configuration', async () => {
@@ -882,8 +896,18 @@ it.each(['implicit default', 'saved instance'])(
       const instance = (await flow.registry.list('profile-a')).instances.find(
         (i) => i.instanceId === 'codex',
       )!;
-      await wrapper.vm.selectComposerAgent(`local:${instance.legacyConnectionId ?? 'codex'}`);
-      await vi.waitFor(() => expect(wrapper!.vm.composerModels).toHaveLength(1));
+      await vi.waitFor(() =>
+        expect(
+          wrapper!.vm.composerModels.filter(
+            (model: { agentInstanceId?: string }) => model.agentInstanceId === 'codex',
+          ),
+        ).toHaveLength(1),
+      );
+      expect(flow.requests.filter(([method]) => method === 'turn/start')).toHaveLength(0);
+      await wrapper.vm.selectComposerModel(
+        'fixture-model',
+        `local:${instance.legacyConnectionId ?? 'codex'}`,
+      );
       const [connection] = await flow.store.listConnections('profile-a');
       expect(await flow.store.listConnections('profile-a')).toHaveLength(1);
       expect(connection.instanceSlug).toBe('codex');
@@ -957,8 +981,14 @@ it.each(['implicit default', 'saved instance'])(
       expect(await flow.store.listConnections('profile-b')).toEqual([]);
       expect(await flow.local.listConversations()).toEqual([]);
       await expect(flow.store.getConversation('profile-b', conversationId)).rejects.toThrow();
-      await wrapper.vm.selectComposerAgent('local:codex');
-      await vi.waitFor(() => expect(wrapper!.vm.composerModels).toHaveLength(1));
+      await vi.waitFor(() =>
+        expect(
+          wrapper!.vm.composerModels.filter(
+            (model: { agentInstanceId?: string }) => model.agentInstanceId === 'codex',
+          ),
+        ).toHaveLength(1),
+      );
+      await wrapper.vm.selectComposerModel('fixture-model', 'local:codex');
       const [otherConnection] = await flow.store.listConnections('profile-b');
       expect(otherConnection.id).not.toBe(connection.id);
       await expect(flow.store.getConnection('profile-b', connection.id)).rejects.toThrow();

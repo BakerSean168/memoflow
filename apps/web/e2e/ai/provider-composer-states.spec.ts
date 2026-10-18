@@ -54,7 +54,7 @@ test('provider settings load and built-in reset retains identity', async ({ page
   await expect(page.getByTestId('ai-endpoint')).toBeVisible();
 });
 
-test('empty providers wait for initialization, then open setup without dependent controls', async ({
+test('empty enabled instances remain browsable after initialization with a stable setup state', async ({
   page,
 }, testInfo) => {
   await registerAndLogin(page, {
@@ -81,13 +81,18 @@ test('empty providers wait for initialization, then open setup without dependent
   } finally {
     release();
   }
-  await expect(page.getByTestId('ai-composer-provider-unavailable')).toBeVisible();
-  await expect(page.getByTestId('ai-chat-model-selector')).toHaveCount(0);
+  await expect(page.getByTestId('ai-chat-model-selector')).toBeEnabled();
   await expect(page.getByTestId('ai-chat-permission-selector')).toHaveCount(0);
   await expect(page.getByTestId('ai-chat-traits-selector')).toHaveCount(0);
+  await page.getByTestId('ai-chat-model-selector').click();
+  await expect(page.getByTestId('ai-model-picker-agent-agent:mastra')).toBeVisible();
+  await expect(page.getByTestId('ai-model-picker-empty')).toContainText(
+    /暂无可用模型|No models are available/,
+  );
+  await expect(page.getByTestId('ai-model-picker-select-agent')).toHaveCount(0);
   await page
-    .getByTestId('ai-composer-provider-unavailable')
+    .getByTestId('ai-model-picker')
     .screenshot({ path: testInfo.outputPath('empty-providers.png') });
-  await page.getByTestId('ai-composer-provider-unavailable').click();
+  await page.getByTestId('ai-model-picker-empty-settings').click();
   await expect(page.getByTestId('ai-provider-list')).toBeVisible();
 });

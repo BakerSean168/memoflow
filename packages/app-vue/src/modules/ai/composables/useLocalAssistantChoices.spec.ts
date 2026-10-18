@@ -63,6 +63,29 @@ function clientStub(overrides: Partial<LocalAgentClient> = {}): LocalAgentClient
 afterEach(() => localStorage.clear());
 
 describe('local assistant choices: profile and discovery isolation', () => {
+  it('awaits the selected connection discovery before refresh completes', async () => {
+    const probe = deferred<LocalAgentStatus>();
+    const choice = ref<AssistantRuntimeChoice>({
+      runtimeKind: 'local_agent',
+      connectionId: 'shared-connection',
+      modelId: 'model-a',
+    });
+    const options = useLocalAssistantChoices(
+      clientStub({ probeConnection: vi.fn(() => probe.promise) }),
+      choice,
+    );
+    let completed = false;
+    const refresh = options.refresh().then(() => {
+      completed = true;
+    });
+    await vi.waitFor(() => expect(options.loading.value).toBe(true));
+    expect(completed).toBe(false);
+    expect(options.canSend.value).toBe(false);
+    probe.resolve(ready('model-a'));
+    await refresh;
+    expect(completed).toBe(true);
+    expect(options.canSend.value).toBe(true);
+  });
   it('hiding an Agent model immediately blocks new sends without changing a saved conversation choice', async () => {
     const scope = ref('desktop-profile-a');
     const choice = ref<AssistantRuntimeChoice>({
@@ -117,20 +140,20 @@ describe('local assistant choices: profile and discovery isolation', () => {
       clientStub({ listConnections, probeConnection }),
       choice,
     );
-    await options.refresh();
-    expect(options.loading.value).toBe(true);
+    const firstRefresh = options.refresh();
+    await vi.waitFor(() => expect(options.loading.value).toBe(true));
 
     const secondRefresh = options.refresh();
     expect(options.status.value).toBeNull();
     expect(options.canSend.value).toBe(false);
     previousProbe.resolve(ready('model-a'));
-    await Promise.resolve();
+    await firstRefresh;
     expect(options.status.value).toBeNull();
 
     nextSnapshot.resolve([connection('Profile B')]);
-    await secondRefresh;
+    await vi.waitFor(() => expect(probeConnection).toHaveBeenCalledTimes(2));
     nextProbe.resolve(ready('model-b'));
-    await Promise.resolve();
+    await secondRefresh;
     expect(options.connections.value[0]?.name).toBe('Profile B');
     expect(options.models.value.map((model) => model.id)).toEqual(['model-b']);
     expect(options.canSend.value).toBe(false);
@@ -219,10 +242,11 @@ describe('local assistant choices: profile and discovery isolation', () => {
       }),
       choice,
     );
-    await options.refresh();
+    const firstRefresh = options.refresh();
+    await vi.waitFor(() => expect(options.loading.value).toBe(true));
     await options.refresh();
     staleProbe.resolve(ready('model-a'));
-    await Promise.resolve();
+    await firstRefresh;
     expect(options.error.value).toBe(true);
     expect(options.status.value).toBeNull();
     expect(options.connections.value).toEqual([]);
