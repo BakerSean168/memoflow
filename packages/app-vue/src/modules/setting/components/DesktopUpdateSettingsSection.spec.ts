@@ -191,6 +191,54 @@ function createHarness(initial = snapshot(), locale = 'en-US') {
 }
 
 describe('DesktopUpdateSettingsSection', () => {
+  it('renders GitHub HTML notes as rich text and keeps the full content', async () => {
+    const fullText = 'Complete release detail. '.repeat(120) + 'END OF NOTES';
+    const harness = createHarness(
+      snapshot({
+        type: 'available',
+        intent: 'explicit',
+        autoDownloadEligible: false,
+        release: {
+          version: '0.20.1',
+          channel: 'stable',
+          publishedAt: null,
+          releaseNotes: `<h1>0.20.1</h1><p>Changes</p><ul><li><strong>Fixed</strong> updates</li></ul><p>${fullText}</p>`,
+          releaseNotesUrl: null,
+        },
+      }),
+    );
+    await flushPromises();
+
+    expect(harness.wrapper.find('h1').text()).toBe('0.20.1');
+    expect(harness.wrapper.find('li strong').text()).toBe('Fixed');
+    expect(harness.wrapper.text()).toContain(fullText);
+    expect(harness.wrapper.text()).not.toContain('<h1>');
+    harness.wrapper.unmount();
+  });
+
+  it.each([null, '', '  \n  '])(
+    'omits the notes region when notes are empty (%j)',
+    async (releaseNotes) => {
+      const harness = createHarness(
+        snapshot({
+          type: 'available',
+          intent: 'explicit',
+          autoDownloadEligible: false,
+          release: {
+            version: '0.20.1',
+            channel: 'stable',
+            publishedAt: null,
+            releaseNotes,
+            releaseNotesUrl: null,
+          },
+        }),
+      );
+      await flushPromises();
+      expect(harness.wrapper.find('[role="region"]').exists()).toBe(false);
+      harness.wrapper.unmount();
+    },
+  );
+
   it.each([
     { locale: 'en-US', setting: enSetting },
     { locale: 'zh-CN', setting: zhSetting },
