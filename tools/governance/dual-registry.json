@@ -266,7 +266,7 @@
     },
     {
       "id": "r915",
-      "path": "packages/app-vue/src/di/desktop-auth-api-key-dual.surface.spec.ts",
+      "path": "tools/governance/app-vue-source-locks.json#desktop-auth-api-key-dual",
       "package": "packages/app-vue",
       "class": "retired",
       "sole": "keys.ts",
@@ -277,7 +277,7 @@
     },
     {
       "id": "r270",
-      "path": "packages/app-vue/src/di/desktop-bridge-electron-bridge-dual.surface.spec.ts",
+      "path": "tools/governance/app-vue-source-locks.json#desktop-bridge-electron-bridge-dual",
       "package": "packages/app-vue",
       "class": "retired",
       "sole": "keys.ts",
@@ -321,7 +321,7 @@
     },
     {
       "id": "r1075",
-      "path": "packages/app-vue/src/modules/authentication/composables/password-toast-only-keep-boundary.surface.spec.ts",
+      "path": "tools/governance/app-vue-source-locks.json#password-toast-only-keep-boundary",
       "package": "packages/app-vue",
       "class": "keep_boundary",
       "sole": "usePassword.ts",
@@ -365,7 +365,7 @@
     },
     {
       "id": "r907",
-      "path": "packages/app-vue/src/modules/setting/composables/theme-sync-desktop-api-dual.surface.spec.ts",
+      "path": "tools/governance/app-vue-source-locks.json#theme-sync-desktop-api-dual",
       "package": "packages/app-vue",
       "class": "retired",
       "sole": "useThemeSync.ts",
@@ -376,7 +376,7 @@
     },
     {
       "id": "r1306",
-      "path": "packages/app-vue/src/shared/utils/calendar-event-layout-keep-boundary.surface.spec.ts",
+      "path": "tools/governance/app-vue-source-locks.json#calendar-event-layout-keep-boundary",
       "package": "packages/app-vue",
       "class": "keep_boundary",
       "sole": "../../modules/schedule/components/MonthViewCalendar.vue",
@@ -431,7 +431,7 @@
     },
     {
       "id": "r1243",
-      "path": "packages/app-vue/src/shared/utils/format-duration-keep-boundary.surface.spec.ts",
+      "path": "tools/governance/app-vue-source-locks.json#format-duration-keep-boundary",
       "package": "packages/app-vue",
       "class": "keep_boundary",
       "sole": "../../modules/schedule/utils/schedule-presentation.ts",
@@ -442,7 +442,7 @@
     },
     {
       "id": "r1279",
-      "path": "packages/app-vue/src/shared/utils/format-event-time-keep-boundary.surface.spec.ts",
+      "path": "tools/governance/app-vue-source-locks.json#format-event-time-keep-boundary",
       "package": "packages/app-vue",
       "class": "keep_boundary",
       "sole": "../../modules/schedule/components/DayViewCalendar.vue",
@@ -475,7 +475,7 @@
     },
     {
       "id": "r1216",
-      "path": "packages/app-vue/src/shared/utils/format-timestamp-keep-boundary.surface.spec.ts",
+      "path": "tools/governance/app-vue-source-locks.json#format-timestamp-keep-boundary",
       "package": "packages/app-vue",
       "class": "keep_boundary",
       "sole": "../../modules/schedule/utils/schedule-presentation.ts",
@@ -486,7 +486,7 @@
     },
     {
       "id": "r1219",
-      "path": "packages/app-vue/src/shared/utils/get-importance-label-keep-boundary.surface.spec.ts",
+      "path": "tools/governance/app-vue-source-locks.json#get-importance-label-keep-boundary",
       "package": "packages/app-vue",
       "class": "keep_boundary",
       "sole": "../../modules/goal/views/GoalDetailView.vue",
@@ -497,7 +497,7 @@
     },
     {
       "id": "r1222",
-      "path": "packages/app-vue/src/shared/utils/get-status-label-keep-boundary.surface.spec.ts",
+      "path": "tools/governance/app-vue-source-locks.json#get-status-label-keep-boundary",
       "package": "packages/app-vue",
       "class": "keep_boundary",
       "sole": "../../modules/schedule/utils/schedule-presentation.ts",
@@ -519,7 +519,7 @@
     },
     {
       "id": "r1225",
-      "path": "packages/app-vue/src/shared/utils/parse-date-input-keep-boundary.surface.spec.ts",
+      "path": "tools/governance/app-vue-source-locks.json#parse-date-input-keep-boundary",
       "package": "packages/app-vue",
       "class": "keep_boundary",
       "sole": "../../../../app-react/src/screens/GoalEditorScreen.tsx",

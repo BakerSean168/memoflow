@@ -46,7 +46,14 @@ test('full run with every lane green passes', () => {
 
 test('docs-only run passes with validate/web/verification skipped by the manifest', () => {
   const m = manifest(
-    { validate: false, boundary: false, integration: false, web: false, coverage: false, performance: false },
+    {
+      validate: false,
+      boundary: false,
+      integration: false,
+      web: false,
+      coverage: false,
+      performance: false,
+    },
     [],
   );
   const result = evaluateCiCheck({ needs: healthyNeeds(m), manifest: m });
@@ -68,7 +75,9 @@ for (const result of ['failure', 'cancelled', 'skipped']) {
     const m = manifest();
     const needs = healthyNeeds(m);
     needs['web-flow-shard'].result = result;
-    assert.deepEqual(evaluateCiCheck({ needs, manifest: m }).failures, [`web-flow-shard:${result}`]);
+    assert.deepEqual(evaluateCiCheck({ needs, manifest: m }).failures, [
+      `web-flow-shard:${result}`,
+    ]);
   });
 }
 
@@ -128,7 +137,10 @@ function workflowJobs(text) {
 }
 
 test('ci.yml wires CI Check to every lane job, always runs, and reads the manifest', async () => {
-  const text = await readFile(new URL('../../../.github/workflows/ci.yml', import.meta.url), 'utf8');
+  const text = await readFile(
+    new URL('../../../.github/workflows/ci.yml', import.meta.url),
+    'utf8',
+  );
   const jobs = workflowJobs(text);
   const job = jobs['ci-check'];
   assert.ok(job, 'ci-check job exists');
@@ -145,5 +157,6 @@ test('ci.yml wires CI Check to every lane job, always runs, and reads the manife
     .filter(([, block]) => block.includes('uses: ./.github/actions/publish-lane-evidence'))
     .map(([name]) => name);
   assert.ok(laneJobs.length >= 7);
-  for (const name of laneJobs) assert.ok(name in CI_CHECK_JOBS, `${name} is aggregated by CI Check`);
+  for (const name of laneJobs)
+    assert.ok(name in CI_CHECK_JOBS, `${name} is aggregated by CI Check`);
 });

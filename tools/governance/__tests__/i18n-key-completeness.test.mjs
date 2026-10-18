@@ -1,5 +1,5 @@
 /**
- * CI gate: every statically extractable t()/$t()/te()/tm() key literal in
+ * Governance gate (moved from packages/app-vue/src/locales, #488): every statically extractable t()/$t()/te()/tm() key literal in
  * packages/app-vue and apps/web must resolve in both production locales.
  *
  * Failures mean users would see bare dotted keys (PM-journey P0).
@@ -8,19 +8,19 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import zhCN from './zh-CN';
-import enUS from './en-US';
+import zhCN from '../../../packages/app-vue/src/locales/zh-CN/index.ts';
+import enUS from '../../../packages/app-vue/src/locales/en-US/index.ts';
 
-// Resolve relative to this spec file so the gate works from any cwd.
-const PKG_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-const WORKSPACE_ROOT = resolve(PKG_ROOT, '../..');
+// Resolve relative to this file so the gate works from any cwd.
+const WORKSPACE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
+const PKG_ROOT = resolve(WORKSPACE_ROOT, 'packages/app-vue');
 const SCAN_ROOTS = [resolve(PKG_ROOT, 'src'), resolve(WORKSPACE_ROOT, 'apps/web/src')];
 const SOURCE_EXTS = new Set(['.vue', '.ts', '.tsx']);
 /** Match t('a.b'), $t("a.b.c"), te(`x.y`) with dotted keys only. */
 const KEY_RE = /(?:[^\w$.]|^)(?:\$t|t|te|tm)\(\s*(['"`])((?:[\w-]+\.)+[\w-]+)\1/g;
 
-function walkSources(dir: string, out: string[] = []): string[] {
-  let entries: string[];
+function walkSources(dir, out = []) {
+  let entries;
   try {
     entries = readdirSync(dir);
   } catch {
@@ -49,13 +49,13 @@ function walkSources(dir: string, out: string[] = []): string[] {
   return out;
 }
 
-function extractKeys(): Map<string, string[]> {
-  const keys = new Map<string, string[]>();
+function extractKeys() {
+  const keys = new Map();
   for (const root of SCAN_ROOTS) {
     for (const file of walkSources(root)) {
       const src = readFileSync(file, 'utf8');
       KEY_RE.lastIndex = 0;
-      let match: RegExpExecArray | null;
+      let match;
       while ((match = KEY_RE.exec(src))) {
         const key = match[2];
         const list = keys.get(key) ?? [];
@@ -67,18 +67,18 @@ function extractKeys(): Map<string, string[]> {
   return keys;
 }
 
-function resolveMessage(messages: Record<string, unknown>, key: string): unknown {
-  let cur: unknown = messages;
+function resolveMessage(messages, key) {
+  let cur = messages;
   for (const part of key.split('.')) {
-    if (cur == null || typeof cur !== 'object' || !(part in (cur as object))) {
+    if (cur == null || typeof cur !== 'object' || !(part in cur)) {
       return undefined;
     }
-    cur = (cur as Record<string, unknown>)[part];
+    cur = cur[part];
   }
   return cur;
 }
 
-function isPresent(value: unknown): boolean {
+function isPresent(value) {
   return typeof value === 'string' && value.length > 0;
 }
 
@@ -90,10 +90,10 @@ describe('i18n key completeness (production locales)', () => {
   });
 
   it('resolves every extracted key in zh-CN and en-US production messages', () => {
-    const missing: Array<{ key: string; zh: boolean; en: boolean }> = [];
+    const missing = [];
     for (const key of [...used.keys()].sort()) {
-      const zh = isPresent(resolveMessage(zhCN as Record<string, unknown>, key));
-      const en = isPresent(resolveMessage(enUS as Record<string, unknown>, key));
+      const zh = isPresent(resolveMessage(zhCN, key));
+      const en = isPresent(resolveMessage(enUS, key));
       if (!zh || !en) {
         missing.push({ key, zh, en });
       }
@@ -109,9 +109,9 @@ describe('i18n key completeness (production locales)', () => {
 
   it('fails the gate when a known production key is deleted (negative control)', () => {
     const probe = 'goal.list.noGoalsFound';
-    expect(isPresent(resolveMessage(zhCN as Record<string, unknown>, probe))).toBe(true);
+    expect(isPresent(resolveMessage(zhCN, probe))).toBe(true);
     // Simulate deletion without mutating production objects permanently
-    const broken = structuredClone(zhCN) as { goal: { list: Record<string, unknown> } };
+    const broken = structuredClone(zhCN);
     delete broken.goal.list.noGoalsFound;
     expect(isPresent(resolveMessage(broken, probe))).toBe(false);
   });
@@ -152,14 +152,8 @@ describe('i18n key completeness (production locales)', () => {
       'errors.EMAIL_VERIFICATION_REQUIRED',
     ];
     for (const key of findingsKeys) {
-      expect(
-        isPresent(resolveMessage(zhCN as Record<string, unknown>, key)),
-        `zh-CN missing ${key}`,
-      ).toBe(true);
-      expect(
-        isPresent(resolveMessage(enUS as Record<string, unknown>, key)),
-        `en-US missing ${key}`,
-      ).toBe(true);
+      expect(isPresent(resolveMessage(zhCN, key)), `zh-CN missing ${key}`).toBe(true);
+      expect(isPresent(resolveMessage(enUS, key)), `en-US missing ${key}`).toBe(true);
     }
   });
 });

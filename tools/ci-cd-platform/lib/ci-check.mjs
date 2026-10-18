@@ -62,7 +62,8 @@ export function evaluateCiCheck({ needs, manifest }) {
   failures.push(...manifestProblems);
   if (manifestProblems.length === 0) {
     const expectedDigest = needs['scope-detector']?.outputs?.manifest_digest;
-    if (expectedDigest && manifest.digest !== expectedDigest) failures.push('manifest:digest-mismatch');
+    if (expectedDigest && manifest.digest !== expectedDigest)
+      failures.push('manifest:digest-mismatch');
   }
   for (const name of Object.keys(needs)) {
     if (!(name in CI_CHECK_JOBS)) failures.push(`${name}:unknown-job`);

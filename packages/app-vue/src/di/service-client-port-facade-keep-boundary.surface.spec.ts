@@ -8,9 +8,9 @@ import { describe, expect, it } from 'vitest';
  * the I*Service names so hosts/composables stay DI-oriented without importing
  * every package client port at call sites.
  * Soft residual 915: DESKTOP_AUTH_API_KEY dual retired
- *   (desktop-auth-api-key-dual.surface.spec.ts).
+ *   (app-vue-source-locks.json#desktop-auth-api-key-dual).
  * Soft residual 270: DesktopBridge dual collapsed to ElectronBridge
- *   (desktop-bridge-electron-bridge-dual.surface.spec.ts).
+ *   (app-vue-source-locks.json#desktop-bridge-electron-bridge-dual).
  * Does not flip §13.2 checkboxes.
  */
 describe('DI I*Service ClientPort facade keep-boundary (residual 927)', () => {

@@ -95,7 +95,7 @@ updated: 2026-09-17T10:57:00+08:00
 | [`packages/scheduler/src/server/domain/entities/__tests__/scheduled-invocation.spec.ts`](../../../packages/scheduler/src/server/domain/entities/__tests__/scheduled-invocation.spec.ts) | ScheduledInvocation state machine |
 | [`packages/scheduler/src/server/domain/entities/__tests__/invocation-attempt.spec.ts`](../../../packages/scheduler/src/server/domain/entities/__tests__/invocation-attempt.spec.ts) | InvocationAttempt state |
 | [`packages/scheduler/src/server/infrastructure/adapters/prisma/mappers/prisma-scheduled-invocation.mapper.spec.ts`](../../../packages/scheduler/src/server/infrastructure/adapters/prisma/mappers/prisma-scheduled-invocation.mapper.spec.ts) | canonical persistence mapper |
-| [`packages/app-vue/src/modules/schedule/planner/scheduler-boundary.surface.spec.ts`](../../../packages/app-vue/src/modules/schedule/planner/scheduler-boundary.surface.spec.ts) | Planner 不泄漏 Scheduler internals |
+| [`tools/governance/app-vue-source-locks.json` (`scheduler-boundary`)](../../../tools/governance/app-vue-source-locks.json) | Planner 不泄漏 Scheduler internals |
 
 ## 重点风险锁
 

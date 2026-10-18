@@ -4481,22 +4481,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/components/shared/iconButtonAccessibility.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/components/shared/menu-labels-single-track.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/app-vue/src/components/shared/settings/SettingsPresentationPrimitives.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4506,22 +4490,6 @@
     },
     {
       "path": "packages/app-vue/src/di/__tests__/desktop-update-service.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/di/desktop-auth-api-key-dual.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/di/desktop-bridge-electron-bridge-dual.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -4785,14 +4753,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/locales/i18n-key-completeness.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/app-vue/src/locales/localePresentation.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4955,14 +4915,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/modules/ai/composables/ai-knowledge-note-terminology.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/app-vue/src/modules/ai/composables/chatViewHelpers.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4996,22 +4948,6 @@
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/use-ai-chat-host-dispatch.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/composables/use-ai-chat-knowledge-deeplink.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/composables/use-ai-draft-persistence-dead.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -5156,14 +5092,6 @@
     },
     {
       "path": "packages/app-vue/src/modules/ai/views/AIChatView.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/authentication/composables/password-toast-only-keep-boundary.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -5511,14 +5439,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/modules/notification/notification-authority.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/app-vue/src/modules/notification/stores/notificationStore.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5657,14 +5577,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/modules/repository/views/legacy-note-surface-docs.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/app-vue/src/modules/repository/views/notePanelAdaptation.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5785,23 +5697,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/modules/schedule/planner/normal-planner-scheduler-boundary.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/app-vue/src/modules/schedule/planner/planner-fullcalendar-mutation.adapter.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/schedule/planner/planner-owner-command-boundary.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -5818,22 +5714,6 @@
     },
     {
       "path": "packages/app-vue/src/modules/schedule/planner/planner-presentation.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/schedule/planner/scheduler-boundary.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/schedule/router/schedule-router-single-track.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -5988,14 +5868,6 @@
     },
     {
       "path": "packages/app-vue/src/modules/setting/components/user-files-settings.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/composables/theme-sync-desktop-api-dual.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -6205,14 +6077,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/modules/task/components/task-dag-viewmodel-export.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/app-vue/src/modules/task/components/widgets/DailyTodoWidget.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6301,14 +6165,6 @@
       "measurementCollectors": [
         "packages/app-vue/vitest.store-coverage.config.ts"
       ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/task/task-authority.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
     },
     {
       "path": "packages/app-vue/src/modules/task/task-vnext-ui.surface.spec.ts",
@@ -6400,14 +6256,6 @@
     },
     {
       "path": "packages/app-vue/src/platform/server-state/runtime.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/plugins/i18n-export.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -6607,14 +6455,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/shared/components/global-command-palette-shortcut-owner.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/app-vue/src/shared/components/product-form-language.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6632,14 +6472,6 @@
     },
     {
       "path": "packages/app-vue/src/shared/composables/use-desktop-window-controls.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/shared/composables/use-viewport-breakpoint-dead.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -6719,14 +6551,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/shared/utils/calendar-event-layout-keep-boundary.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/app-vue/src/shared/utils/combine-date-and-time-keep-boundary.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6759,22 +6583,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/shared/utils/format-duration-keep-boundary.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/shared/utils/format-event-time-keep-boundary.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/app-vue/src/shared/utils/format-message-time-keep-boundary.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6784,30 +6592,6 @@
     },
     {
       "path": "packages/app-vue/src/shared/utils/format-time-range-keep-boundary.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/shared/utils/format-timestamp-keep-boundary.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/shared/utils/get-importance-label-keep-boundary.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/shared/utils/get-status-label-keep-boundary.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -6831,14 +6615,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/shared/utils/parse-date-input-keep-boundary.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/app-vue/src/shared/utils/parse-explicit-product-date.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6848,14 +6624,6 @@
     },
     {
       "path": "packages/app-vue/src/shared/utils/product-time.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/shared/utils/result-helpers-dead.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -12825,6 +12593,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/governance/__tests__/app-vue-source-locks.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "tools/governance/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/governance/__tests__/architecture-surface.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -12882,6 +12658,14 @@
     },
     {
       "path": "tools/governance/__tests__/github-action-pinning.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "tools/governance/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "tools/governance/__tests__/i18n-key-completeness.test.mjs",
       "primarySuite": "governance",
       "collectors": [
         "tools/governance/vitest.config.ts"
@@ -13485,7 +13269,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "vitest",
-      "fileCount": 18
+      "fileCount": 20
     },
     {
       "id": "apps/api/vitest.integration.config.ts",
@@ -13646,7 +13430,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 304
+      "fileCount": 275
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -14408,14 +14192,14 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1230,
+    "unit": 1201,
     "integration": 48,
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 9,
     "e2e": 63,
     "perf": 2,
-    "governance": 68
+    "governance": 70
   },
   "e2eGovernance": {
     "version": 2,
