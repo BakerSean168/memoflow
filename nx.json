@@ -25,6 +25,7 @@
       "{workspaceRoot}/vitest.shared.ts",
       "{workspaceRoot}/vitest.workspace-helpers.ts",
       "{workspaceRoot}/vite.workspace-aliases.ts",
+      "{workspaceRoot}/tools/build/tsup.base.config.ts",
       "{workspaceRoot}/package.json",
       "{workspaceRoot}/pnpm-workspace.yaml"
     ]

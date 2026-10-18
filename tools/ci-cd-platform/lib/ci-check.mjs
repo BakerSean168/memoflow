@@ -6,6 +6,7 @@
  * non-success result (failure, cancelled, unexpected skip, unexpected run,
  * missing job) fails the gate. Unknown inputs fail closed.
  */
+import { validateDeliveryManifest } from './contracts.mjs';
 
 /** Lane jobs the gate aggregates, and how the manifest decides each one. */
 export const CI_CHECK_JOBS = Object.freeze({
@@ -34,7 +35,11 @@ export const VERIFICATION_SUBLANES = Object.freeze([
 function validateManifest(manifest) {
   const problems = [];
   if (!manifest || typeof manifest !== 'object') return ['manifest:missing'];
-  if (manifest.kind !== 'delivery-manifest-v1') problems.push('manifest:kind');
+  try {
+    validateDeliveryManifest(manifest);
+  } catch (error) {
+    return [`manifest:invalid: ${error.message}`];
+  }
   const lanes = manifest.lanes;
   if (!lanes || typeof lanes !== 'object') problems.push('manifest:lanes');
   else {
@@ -62,8 +67,9 @@ export function evaluateCiCheck({ needs, manifest }) {
   failures.push(...manifestProblems);
   if (manifestProblems.length === 0) {
     const expectedDigest = needs['scope-detector']?.outputs?.manifest_digest;
-    if (expectedDigest && manifest.digest !== expectedDigest)
-      failures.push('manifest:digest-mismatch');
+    if (typeof expectedDigest !== 'string' || !/^[a-f0-9]{64}$/u.test(expectedDigest))
+      failures.push('manifest:detector-digest-invalid');
+    else if (manifest.digest !== expectedDigest) failures.push('manifest:digest-mismatch');
   }
   for (const name of Object.keys(needs)) {
     if (!(name in CI_CHECK_JOBS)) failures.push(`${name}:unknown-job`);

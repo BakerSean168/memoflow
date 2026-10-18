@@ -244,8 +244,9 @@ Oracle 名称，而不是让 ruleset 依赖会变化的 child job。
 - shard 分配使用历史 spec duration 的确定性 LPT（`lib/shard-balance.mjs`），由
   `run-web-shard.mjs` 在每个 runner 现场计算；缺失历史取中位数，历史过期或缺项输出 warning。
 - 逐 spec 中位耗时保存在 `tools/test-system-v2/web-spec-durations.json`（version 2，带
-  `generatedAt`/`source`），用 `refresh-web-spec-durations.mjs` 从 CI `web-flow-*-results` 刷新；
-  拆分或移动 spec 时按测试标题归属到新文件。
+  `generatedAt`/`observedAt`/`source`），用 `refresh-web-spec-durations.mjs` 从 CI `web-flow-*-results` 刷新；
+  拆分或移动 spec 时按测试标题归属到新文件。新鲜度使用报告 `stats.startTime` 的最早参与观测，
+  不使用刷新时间；各 spec 也保留 `observedAt`。日期缺失、无效或处于未来均告警。
 - 失败证据只在失败时上传，包含 JSON、trace、video、screenshot 和 HTML report。
 - API build artifact 只有在证明节省 runner-minutes 且不增加关键路径后才共享。
 

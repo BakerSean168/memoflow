@@ -736,7 +736,10 @@ if (process.env.RUNNER_TEST_CASE === 'registry') value.activeProfileId = 'change
 fs.writeFileSync(registry, JSON.stringify(value));
 if (process.env.RUNNER_TEST_CASE === 'sentinel') fs.appendFileSync(path.join(userData, 'shared/update-e2e-preservation.txt'), 'changed');
 if (process.env.RUNNER_TEST_CASE !== 'receipt') fs.rmSync(receipt);
-fs.writeFileSync(status, JSON.stringify({phase: 'candidate-verified', currentVersion: '1.2.3', expectedVersion: '1.2.3'}));
+// Match the production harness: readers must never observe partially written JSON.
+const temporaryStatus = status + '.' + process.pid + '.tmp';
+fs.writeFileSync(temporaryStatus, JSON.stringify({phase: 'candidate-verified', currentVersion: '1.2.3', expectedVersion: '1.2.3'}));
+fs.renameSync(temporaryStatus, status);
 setInterval(() => {}, 1000);
 `;
       await writeFile(path.join(feed, 'candidate.AppImage'), candidateBody);
@@ -751,8 +754,11 @@ const userData = process.env.MEMOFLOW_DESKTOP_USER_DATA_PATH;
 const receipt = path.join(userData, 'shared/update/install-receipt.json');
 fs.mkdirSync(path.dirname(receipt), {recursive: true});
 fs.writeFileSync(receipt, '{}');
-fs.writeFileSync(process.env.MEMOFLOW_DESKTOP_UPDATE_E2E_STATUS_PATH,
+const status = process.env.MEMOFLOW_DESKTOP_UPDATE_E2E_STATUS_PATH;
+const temporaryStatus = status + '.' + process.pid + '.tmp';
+fs.writeFileSync(temporaryStatus,
   JSON.stringify({phase: 'install-requested', currentVersion: '1.2.2', expectedVersion: '1.2.3'}));
+fs.renameSync(temporaryStatus, status);
 (async () => {
   if (process.env.RUNNER_TEST_CASE === 'timeout') { setInterval(() => {}, 1000); return; }
   await new Promise(resolve => setTimeout(resolve, 350));

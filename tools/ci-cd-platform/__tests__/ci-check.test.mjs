@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
 import { CI_CHECK_JOBS, evaluateCiCheck } from '../lib/ci-check.mjs';
+import { buildProvenance, digest } from '../lib/contracts.mjs';
 
 const lanes = (overrides = {}) => ({
   governance: true,
@@ -13,12 +14,23 @@ const lanes = (overrides = {}) => ({
   performance: true,
   ...overrides,
 });
-const manifest = (laneOverrides = {}, unit = ['app-vue']) => ({
-  kind: 'delivery-manifest-v1',
-  digest: 'sha256:abc',
-  lanes: lanes(laneOverrides),
-  scope: { unit },
-});
+const manifest = (laneOverrides = {}, unit = ['app-vue']) => {
+  const content = {
+    kind: 'delivery-manifest-v1',
+    version: 1,
+    commit: 'head',
+    base: 'base',
+    head: 'head',
+    event: 'pull_request',
+    full: false,
+    changedFiles: [],
+    risk: { level: 'package', reasons: ['test'] },
+    lanes: lanes(laneOverrides),
+    scope: { version: 1, unit },
+    provenance: buildProvenance({ generator: 'test', input: { laneOverrides, unit } }),
+  };
+  return { ...content, digest: digest(content) };
+};
 const verificationOutputs = (m) =>
   Object.fromEntries(
     ['boundary', 'integration', 'coverage', 'performance'].map((lane) => [
@@ -109,7 +121,7 @@ test('detector failure, missing manifest, digest mismatch and unknown jobs fail 
   assert.deepEqual(evaluateCiCheck({ needs: healthyNeeds(m), manifest: null }).failures, [
     'manifest:missing',
   ]);
-  const tampered = { ...m, digest: 'sha256:other' };
+  const tampered = manifest({ web: false });
   assert.deepEqual(evaluateCiCheck({ needs: healthyNeeds(m), manifest: tampered }).failures, [
     'manifest:digest-mismatch',
   ]);
@@ -123,6 +135,41 @@ test('detector failure, missing manifest, digest mismatch and unknown jobs fail 
     'build:missing-from-needs',
   ]);
   assert.deepEqual(evaluateCiCheck({ needs: null, manifest: m }).failures, ['needs:missing']);
+});
+
+test('tampering with lanes while retaining the original digest fails closed', () => {
+  const m = manifest();
+  const tampered = { ...m, lanes: { ...m.lanes, web: false } };
+  const needs = healthyNeeds(tampered);
+  assert.equal(evaluateCiCheck({ needs, manifest: tampered }).state, 'failure');
+});
+
+test('invalid manifest contracts are failures rather than exceptions', () => {
+  const m = manifest();
+  const invalidContracts = [
+    { version: 99 },
+    { provenance: null },
+    { scope: { version: 1 } },
+    { lanes: { ...m.lanes, web: undefined } },
+  ].map((changes) => {
+    const content = { ...m, ...changes };
+    delete content.digest;
+    return { ...content, digest: digest(content) };
+  });
+  for (const invalid of [...invalidContracts, { ...m, digest: 'sha256:invalid' }]) {
+    const result = evaluateCiCheck({ needs: healthyNeeds(m), manifest: invalid });
+    assert.equal(result.state, 'failure');
+    assert.ok(result.failures.some((failure) => failure.startsWith('manifest:')));
+  }
+});
+
+test('detector manifest digest must exist and be a valid SHA-256 digest', () => {
+  const m = manifest();
+  for (const invalid of [undefined, '', 'sha256:abc', 'g'.repeat(64), 123]) {
+    const needs = healthyNeeds(m);
+    needs['scope-detector'].outputs.manifest_digest = invalid;
+    assert.equal(evaluateCiCheck({ needs, manifest: m }).state, 'failure');
+  }
 });
 
 /** Split ci.yml into top-level job blocks without a YAML dependency. */

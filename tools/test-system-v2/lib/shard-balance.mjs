@@ -49,11 +49,11 @@ export function planShards({ specs, durations = {}, shardCount }) {
   };
 }
 
-/** Days since the timing history was generated, or null when it carries no timestamp. */
+/** Age of the oldest contributing observation, or null for untrusted dates. */
 export function durationAgeDays(history, now = Date.now()) {
-  const generatedAt = Date.parse(history?.generatedAt ?? '');
-  if (!Number.isFinite(generatedAt)) return null;
-  return Math.floor((now - generatedAt) / 86_400_000);
+  const observedAt = typeof history?.observedAt === 'string' ? Date.parse(history.observedAt) : NaN;
+  if (!Number.isFinite(observedAt) || observedAt > now) return null;
+  return Math.floor((now - observedAt) / 86_400_000);
 }
 
 export const DURATION_STALE_AFTER_DAYS = 21;
@@ -64,7 +64,7 @@ export function planWarnings(history, plan, now = Date.now()) {
   const age = durationAgeDays(history, now);
   if (age === null) {
     warnings.push(
-      'Web Flow timing history has no generatedAt timestamp; refresh it from a CI run.',
+      'Web Flow timing history has a missing, invalid or future observedAt timestamp; refresh it from a CI run.',
     );
   } else if (age > DURATION_STALE_AFTER_DAYS) {
     warnings.push(

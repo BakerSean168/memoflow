@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { access, readFile } from 'node:fs/promises';
 import { WEB_FLOW_SPECS } from '../../../apps/web/web-flow-specs.mjs';
-import { planShards } from '../lib/shard-balance.mjs';
+import { planShards, planWarnings } from '../lib/shard-balance.mjs';
 import { parseShardArgument, WEB_SPEC_DURATIONS_PATH } from '../run-web-shard.mjs';
 import {
   buildDurationHistory,
@@ -50,15 +50,24 @@ test('canonical Web Flow specs exist on disk and duration history has no retired
   }
   assert.equal(history.version, 2);
   assert.ok(Number.isFinite(Date.parse(history.generatedAt)), 'generatedAt is required');
+  assert.ok(Number.isFinite(Date.parse(history.observedAt)), 'observedAt is required');
   assert.equal(typeof history.source, 'string');
   const retiredDurationSpecs = Object.keys(history.specs).filter(
     (spec) => !WEB_FLOW_SPECS.includes(spec),
   );
   assert.deepEqual(retiredDurationSpecs, []);
+  for (const entry of Object.values(history.specs)) {
+    assert.ok(
+      Number.isFinite(Date.parse(entry.observedAt)),
+      'each spec needs its observation date',
+    );
+  }
 });
 
 test('timing refresh attributes split-file results to the spec that now owns the title', () => {
+  const observedAt = '2026-10-10T00:00:00.000Z';
   const report = {
+    stats: { startTime: observedAt },
     suites: [
       {
         file: 'ai/old-monolith.spec.ts',
@@ -88,8 +97,8 @@ test('timing refresh attributes split-file results to the spec that now owns the
   };
   const rows = collectTestDurations(report);
   assert.deepEqual(rows, [
-    { file: 'ai/old-monolith.spec.ts', title: 'moved journey', durationMs: 40 },
-    { file: 'kept.spec.ts', title: 'kept', durationMs: 10 },
+    { file: 'ai/old-monolith.spec.ts', title: 'moved journey', durationMs: 40, observedAt },
+    { file: 'kept.spec.ts', title: 'kept', durationMs: 10, observedAt },
   ]);
   const owners = indexTitles({ 'ai/new.spec.ts': "test('moved journey', async () => {});" });
   const built = buildDurationHistory({
@@ -100,9 +109,44 @@ test('timing refresh attributes split-file results to the spec that now owns the
     generatedAt: '2026-10-18T00:00:00.000Z',
   });
   assert.deepEqual(built.specs, {
-    'ai/new.spec.ts': { durationMs: 80, samples: 2 },
-    'kept.spec.ts': { durationMs: 20, samples: 2 },
+    'ai/new.spec.ts': { durationMs: 80, samples: 2, observedAt },
+    'kept.spec.ts': { durationMs: 20, samples: 2, observedAt },
   });
+  assert.equal(built.observedAt, observedAt);
+});
+
+test('refreshing mixed-age reports preserves the oldest contributing observation', () => {
+  const generatedAt = '2026-10-18T00:00:00.000Z';
+  const report = (startTime, file) => ({
+    stats: { startTime },
+    suites: [{ file, specs: [{ title: file, tests: [{ results: [{ duration: 10 }] }] }] }],
+  });
+  const old = '2026-01-01T00:00:00.000Z';
+  const built = buildDurationHistory({
+    runs: [
+      collectTestDurations(report(old, 'old.spec.ts')),
+      collectTestDurations(report(generatedAt, 'fresh.spec.ts')),
+    ],
+    specs: ['old.spec.ts', 'fresh.spec.ts'],
+    titleOwners: new Map(),
+    source: 'test',
+    generatedAt,
+  });
+  assert.equal(built.generatedAt, generatedAt);
+  assert.equal(built.observedAt, old);
+  assert.equal(built.specs['old.spec.ts'].observedAt, old);
+  assert.equal(built.specs['fresh.spec.ts'].observedAt, generatedAt);
+  assert.match(planWarnings(built, { missing: [] }, Date.parse(generatedAt))[0], /290 days old/u);
+});
+
+test('timing reports with missing, invalid or future observation dates are rejected', () => {
+  const now = Date.parse('2026-10-18T00:00:00Z');
+  for (const startTime of [undefined, '', 'invalid', '2027-01-01T00:00:00Z', 123]) {
+    assert.throws(
+      () => collectTestDurations({ stats: { startTime }, suites: [] }, now),
+      /startTime/u,
+    );
+  }
 });
 
 test('Web Flow shard runner allocates a dynamic provider-mock port', async () => {

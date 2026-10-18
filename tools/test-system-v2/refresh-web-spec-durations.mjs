@@ -20,14 +20,25 @@ import { medianDuration } from './lib/shard-balance.mjs';
 
 export const WEB_SPEC_DURATIONS_PATH = 'tools/test-system-v2/web-spec-durations.json';
 
-export function collectTestDurations(report) {
+export function collectTestDurations(report, now = Date.now()) {
+  const startTime = report?.stats?.startTime;
+  const timestamp = typeof startTime === 'string' ? Date.parse(startTime) : NaN;
+  if (!Number.isFinite(timestamp) || timestamp > now) {
+    throw new Error('Playwright report stats.startTime must be a valid, non-future timestamp');
+  }
+  const observedAt = new Date(timestamp).toISOString();
   const rows = [];
   const walk = (suite, file) => {
     const current = suite.file ?? file;
     for (const spec of suite.specs ?? []) {
       for (const result of spec.tests?.flatMap((entry) => entry.results ?? []) ?? []) {
         if ((result.retry ?? 0) === 0) {
-          rows.push({ file: spec.file ?? current, title: spec.title, durationMs: result.duration });
+          rows.push({
+            file: spec.file ?? current,
+            title: spec.title,
+            durationMs: result.duration,
+            observedAt,
+          });
         }
       }
     }
@@ -50,11 +61,15 @@ export function indexTitles(sources) {
 /** @param runs Array of arrays of test rows, one inner array per CI run. */
 export function buildDurationHistory({ runs, specs, titleOwners, source, generatedAt }) {
   const samples = new Map(specs.map((spec) => [spec, []]));
+  const observations = new Map();
   for (const rows of runs) {
     const perRun = new Map();
     for (const row of rows) {
       const owner = specs.includes(row.file) ? row.file : titleOwners.get(row.title);
       if (!owner || !samples.has(owner)) continue;
+      const observed = Date.parse(row.observedAt);
+      if (!Number.isFinite(observed)) throw new Error(`Invalid observedAt for ${owner}`);
+      observations.set(owner, Math.min(observations.get(owner) ?? Infinity, observed));
       perRun.set(owner, (perRun.get(owner) ?? 0) + row.durationMs);
     }
     for (const [spec, total] of perRun) samples.get(spec).push(total);
@@ -64,11 +79,17 @@ export function buildDurationHistory({ runs, specs, titleOwners, source, generat
     .sort(([left], [right]) => left.localeCompare(right))
     .map(([spec, values]) => [
       spec,
-      { durationMs: medianDuration(values), samples: values.length },
+      {
+        durationMs: medianDuration(values),
+        samples: values.length,
+        observedAt: new Date(observations.get(spec)).toISOString(),
+      },
     ]);
   return {
     version: 2,
     generatedAt,
+    // The median still includes the oldest sample; refreshing cannot make it newer.
+    observedAt: entries.length ? new Date(Math.min(...observations.values())).toISOString() : null,
     source,
     statistic: 'median across runs of per-run first-attempt test duration',
     specs: Object.fromEntries(entries),

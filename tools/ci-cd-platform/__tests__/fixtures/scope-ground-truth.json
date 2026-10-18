@@ -192,8 +192,15 @@
         "docs/plan/archive/2026-10-13-ai-recovery-workspace-events/README.md"
       ],
       "scope": {
-        "projects": ["ci-cd-platform", "desktop", "memoflow", "test-system-v2", "web"],
-        "unit": ["ci-cd-platform", "desktop", "test-system-v2", "web"],
+        "projects": [
+          "ci-cd-platform",
+          "desktop",
+          "governance-tools",
+          "memoflow",
+          "test-system-v2",
+          "web"
+        ],
+        "unit": ["ci-cd-platform", "desktop", "governance-tools", "test-system-v2", "web"],
         "coverage": [],
         "smoke": [],
         "integration": [],
@@ -462,8 +469,15 @@
         "tools/test-system-v2/test-inventory.json"
       ],
       "scope": {
-        "projects": ["ci-cd-platform", "desktop", "memoflow", "test-system-v2", "web"],
-        "unit": ["ci-cd-platform", "desktop", "test-system-v2", "web"],
+        "projects": [
+          "ci-cd-platform",
+          "desktop",
+          "governance-tools",
+          "memoflow",
+          "test-system-v2",
+          "web"
+        ],
+        "unit": ["ci-cd-platform", "desktop", "governance-tools", "test-system-v2", "web"],
         "coverage": [],
         "smoke": [],
         "integration": [],
@@ -686,8 +700,15 @@
         "docs/plan/active/2026-10-13-ai-recovery-workspace-events/04-acceptance.md"
       ],
       "scope": {
-        "projects": ["ci-cd-platform", "desktop", "memoflow", "test-system-v2", "web"],
-        "unit": ["ci-cd-platform", "desktop", "test-system-v2", "web"],
+        "projects": [
+          "ci-cd-platform",
+          "desktop",
+          "governance-tools",
+          "memoflow",
+          "test-system-v2",
+          "web"
+        ],
+        "unit": ["ci-cd-platform", "desktop", "governance-tools", "test-system-v2", "web"],
         "coverage": [],
         "smoke": [],
         "integration": [],
@@ -779,8 +800,8 @@
       "rationale": "Root README.md plus docs/: docs, governance only.",
       "files": ["README.md", "docs/zh-CN/README.md"],
       "scope": {
-        "projects": ["memoflow"],
-        "unit": [],
+        "projects": ["governance-tools", "memoflow"],
+        "unit": ["governance-tools"],
         "coverage": [],
         "smoke": [],
         "integration": [],
@@ -1084,8 +1105,8 @@
         "docs/deployment/README.md"
       ],
       "scope": {
-        "projects": ["api", "governance-tools", "memoflow", "test-system-v2"],
-        "unit": ["api", "governance-tools", "test-system-v2"],
+        "projects": ["api", "ci-cd-platform", "governance-tools", "memoflow", "test-system-v2"],
+        "unit": ["api", "ci-cd-platform", "governance-tools", "test-system-v2"],
         "coverage": ["api"],
         "smoke": ["api"],
         "integration": ["api"],
@@ -1447,8 +1468,8 @@
         "docs/plan/active/2026-09-29-product-vnext-execution-master-plan.md"
       ],
       "scope": {
-        "projects": ["memoflow"],
-        "unit": [],
+        "projects": ["governance-tools", "memoflow"],
+        "unit": ["governance-tools"],
         "coverage": [],
         "smoke": [],
         "integration": [],

@@ -91,9 +91,19 @@ test('rejects duplicate specs and invalid shard counts', () => {
 test('warns about stale or incomplete timing history', () => {
   const now = Date.parse('2026-10-18T00:00:00Z');
   const plan = { missing: ['x.spec.ts'], defaultMs: 42 };
-  const stale = planWarnings({ generatedAt: '2026-09-01T00:00:00Z' }, plan, now);
+  const stale = planWarnings({ observedAt: '2026-09-01T00:00:00Z' }, plan, now);
   assert.match(stale[0], new RegExp(`> ${DURATION_STALE_AFTER_DAYS}`, 'u'));
   assert.match(stale[1], /x\.spec\.ts/u);
-  assert.match(planWarnings({}, { missing: [] }, now)[0], /no generatedAt/u);
-  assert.deepEqual(planWarnings({ generatedAt: '2026-10-10T00:00:00Z' }, { missing: [] }, now), []);
+  assert.match(planWarnings({}, { missing: [] }, now)[0], /observedAt/u);
+  assert.deepEqual(planWarnings({ observedAt: '2026-10-10T00:00:00Z' }, { missing: [] }, now), []);
+});
+
+test('fresh generation cannot hide missing, invalid or future observation dates', () => {
+  const generatedAt = '2026-10-18T00:00:00Z';
+  const now = Date.parse(generatedAt);
+  for (const observedAt of [undefined, '', 'invalid', '2027-01-01T00:00:00Z', 123]) {
+    const warnings = planWarnings({ generatedAt, observedAt }, { missing: [] }, now);
+    assert.equal(warnings.length, 1);
+    assert.match(warnings[0], /observedAt/u);
+  }
 });
