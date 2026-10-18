@@ -13,6 +13,10 @@ on:
         required: false
         type: string
         default: unsigned-pilot
+      recovery_platform:
+        required: false
+        type: string
+        default: all
   workflow_dispatch:
     inputs:
       tag:
@@ -31,6 +35,17 @@ on:
         options:
           - unsigned-pilot
           - signed-notarized
+      recovery_platform:
+        description: Rebuild just one platform without repeating successful native assets
+        required: false
+        default: all
+        type: choice
+        options:
+          - all
+          - windows-x64
+          - linux-x64
+          - macos-x64
+          - macos-arm64
 
 concurrency:
   group: release-assets-${{ inputs.tag }}
@@ -51,6 +66,8 @@ jobs:
       release_tag: ${{ steps.resolve.outputs.release_tag }}
       release_sha: ${{ steps.resolve.outputs.release_sha }}
       macos_signing_mode: ${{ steps.resolve.outputs.macos_signing_mode }}
+      desktop_matrix: ${{ steps.resolve.outputs.desktop_matrix }}
+      recovery_only: ${{ steps.resolve.outputs.recovery_only }}
     steps:
       - name: Resolve exact tag and SHA
         id: resolve
@@ -59,6 +76,7 @@ jobs:
           RELEASE_TAG: ${{ inputs.tag }}
           RELEASE_SHA: ${{ inputs.sha }}
           MACOS_SIGNING_MODE: ${{ inputs.macos_signing_mode }}
+          RECOVERY_PLATFORM: ${{ inputs.recovery_platform }}
         with:
           script: |
             const tag = process.env.RELEASE_TAG;
@@ -94,12 +112,40 @@ jobs:
             core.setOutput('release_sha', tagSha);
             core.setOutput('macos_signing_mode', macosSigningMode);
 
+            // Keep normal four-platform matrix; recovery rebuilds one missing
+            // native artifact without rerunning already green other platforms.
+            const platforms = [
+              { os: 'windows-latest', platform: 'windows-x64', platform_os: 'windows',
+                arch: 'x64', signing_state: 'unsigned', runtime_executable_kind: 'packaged-exe',
+                builder_args: '--win nsis zip --x64' },
+              { os: 'ubuntu-latest', platform: 'linux-x64', platform_os: 'linux',
+                arch: 'x64', signing_state: 'unsigned', runtime_executable_kind: 'installed-deb',
+                builder_args: '--linux AppImage deb rpm --x64' },
+              { os: 'macos-15-intel', platform: 'macos-x64', platform_os: 'macos',
+                arch: 'x64', signing_state: 'macos-policy', runtime_executable_kind: 'packaged-app',
+                builder_args: '--mac dmg zip --x64' },
+              { os: 'macos-15', platform: 'macos-arm64', platform_os: 'macos',
+                arch: 'arm64', signing_state: 'macos-policy', runtime_executable_kind: 'packaged-app',
+                builder_args: '--mac dmg zip --arm64' },
+            ];
+            const requested = process.env.RECOVERY_PLATFORM || 'all';
+            if (requested !== 'all' && !platforms.some((item) => item.platform === requested)) {
+              core.setFailed('Unsupported recovery platform: ' + requested);
+              return;
+            }
+            core.setOutput('desktop_matrix', JSON.stringify({
+              include: requested === 'all' ? platforms : platforms.filter((item) => item.platform === requested),
+            }));
+            core.setOutput('recovery_only', String(requested !== 'all'));
+
   windows-installed-update-e2e:
     name: Desktop Installed Update Gate
     needs: prepare-release
+    if: needs.prepare-release.outputs.recovery_only != 'true'
     uses: ./.github/workflows/desktop-update-e2e.yml
     with:
       ref: ${{ needs.prepare-release.outputs.release_sha }}
+      qa_overlay_ref: ${{ github.workflow_sha }}
 
   build-release-assets:
     needs: prepare-release
@@ -107,36 +153,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - os: windows-latest
-            platform: windows-x64
-            platform_os: windows
-            arch: x64
-            signing_state: unsigned
-            runtime_executable_kind: packaged-exe
-            builder_args: --win nsis zip --x64
-          - os: ubuntu-latest
-            platform: linux-x64
-            platform_os: linux
-            arch: x64
-            signing_state: unsigned
-            runtime_executable_kind: installed-deb
-            builder_args: --linux AppImage deb rpm --x64
-          - os: macos-15-intel
-            platform: macos-x64
-            platform_os: macos
-            arch: x64
-            signing_state: macos-policy
-            runtime_executable_kind: packaged-app
-            builder_args: --mac dmg zip --x64
-          - os: macos-15
-            platform: macos-arm64
-            platform_os: macos
-            arch: arm64
-            signing_state: macos-policy
-            runtime_executable_kind: packaged-app
-            builder_args: --mac dmg zip --arm64
+      matrix: ${{ fromJSON(needs.prepare-release.outputs.desktop_matrix) }}
 
     steps:
       - name: Checkout release packaging tooling
@@ -407,6 +424,7 @@ jobs:
       - prepare-release
       - windows-installed-update-e2e
       - build-release-assets
+    if: needs.prepare-release.outputs.recovery_only != 'true'
     runs-on: ubuntu-latest
 
     steps:

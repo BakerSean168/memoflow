@@ -7,12 +7,35 @@ on:
         description: Exact source ref/SHA to validate
         required: true
         type: string
+      qa_overlay_ref:
+        description: Optional newer workflow SHA providing test-only QA tooling; product checkout remains immutable
+        required: false
+        type: string
+        default: ''
+      recovery_platform:
+        description: Select only the failed installed-update gate without repackaging a successful platform
+        required: false
+        type: string
+        default: all
   workflow_dispatch:
     inputs:
       ref:
         description: Source ref/SHA to validate; defaults to the workflow commit
         required: false
         type: string
+      qa_overlay_ref:
+        description: Newer immutable QA workflow SHA to overlay tests only (never product source)
+        required: false
+        type: string
+      recovery_platform:
+        description: Run just a failed platform updater gate, default all
+        required: false
+        default: all
+        type: choice
+        options:
+          - all
+          - windows
+          - linux
 
 permissions:
   contents: read
@@ -28,6 +51,7 @@ env:
 jobs:
   windows-installed-update:
     name: Windows NSIS N to N+1
+    if: inputs.recovery_platform != 'linux'
     runs-on: windows-latest
     timeout-minutes: 30
 
@@ -191,6 +215,44 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
+      - name: Overlay only acceptance scripts from newer QA tooling
+        if: inputs.qa_overlay_ref != ''
+        shell: pwsh
+        env:
+          RELEASE_SOURCE_SHA: ${{ inputs.ref }}
+          QA_OVERLAY_SHA: ${{ inputs.qa_overlay_ref }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          # Do not checkout a second monorepo inside the workspace: Nx would
+          # index every duplicate project and reject the exact-source build.
+          git fetch --no-tags origin $env:QA_OVERLAY_SHA
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to fetch pinned QA-only commit' }
+          $resolved = (git rev-parse FETCH_HEAD).Trim()
+          if ($resolved -ne $env:QA_OVERLAY_SHA) { throw 'QA commit identity mismatch' }
+          # Fail closed if QA-only commit differs in any release product input.
+          $runtimeDiff = @(git diff --name-only $env:RELEASE_SOURCE_SHA $env:QA_OVERLAY_SHA -- apps/desktop/src apps/desktop/package.json apps/desktop/electron-builder.json5 apps/desktop/electron-builder.macos-signed.json5 package.json pnpm-lock.yaml packages apps/api apps/web)
+          if ($LASTEXITCODE -ne 0 -or $runtimeDiff.Count -gt 0) {
+            throw "QA overlay source must not modify released application inputs: $($runtimeDiff -join ', ')"
+          }
+          $qaFiles = @(
+            'apps/desktop/scripts/run-windows-update-e2e.ps1'
+            'apps/desktop/e2e/workspace-ipc.spec.mts'
+            'apps/desktop/e2e/workspace-attention.spec.mts'
+            'apps/desktop/e2e/antigravity-composer.spec.mts'
+            'apps/desktop/e2e/native-codex-unconfigured-installed.spec.mts'
+            'apps/desktop/e2e/support/installed-native-provenance.ts'
+          )
+          foreach ($relativePath in $qaFiles) {
+            $revisionPath = '{0}:{1}' -f $env:QA_OVERLAY_SHA, $relativePath
+            git cat-file -e $revisionPath
+            if ($LASTEXITCODE -ne 0) { throw "QA-only source missing: $relativePath" }
+            $destination = Join-Path $env:GITHUB_WORKSPACE $relativePath
+            New-Item -ItemType Directory -Force -Path (Split-Path -Parent $destination) | Out-Null
+            git show $revisionPath | Set-Content -LiteralPath $destination -Encoding utf8
+            if ($LASTEXITCODE -ne 0) { throw "Unable to materialize QA-only source: $relativePath" }
+          }
+          Write-Host '[release] Pinned QA-only scripts fetched with git show; no second workspace or product changes.'
+
       - name: Run installed Windows updater proof
         shell: pwsh
         run: |
@@ -325,6 +387,7 @@ jobs:
 
   linux-appimage-update:
     name: Linux AppImage N to N+1
+    if: inputs.recovery_platform != 'windows'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
