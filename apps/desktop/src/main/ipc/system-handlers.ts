@@ -12,56 +12,22 @@
 
 import { app, dialog, ipcMain, shell } from 'electron';
 import fs from 'node:fs/promises';
-import path from 'node:path';
-import type { AutoLaunchPort, NotificationPort, ShortcutPort, TrayPort } from '../capabilities/ports';
+import type {
+  AutoLaunchPort,
+  NotificationPort,
+  ShortcutPort,
+  TrayPort,
+} from '../capabilities/ports';
 import { getIpcCache } from '../utils';
-import { getSharedPathResolver, updateUserFilesRootPath } from '../runtime-init';
-import { resolveDesktopUserFilesPath } from '../user-data-path';
+import { getSharedPathResolver } from '../runtime-init';
 import {
-  DesktopFeatureChannels,
-  SystemChannels,
-} from '@memoflow/contracts/electron';
+  NativeFileDialogs,
+  type SaveTextFileRequest,
+  type OpenTextFileRequest,
+} from '../paths/native-file-dialogs';
+import { DesktopFeatureChannels, SystemChannels } from '@memoflow/contracts/electron';
 import { DesktopNotificationPreferencePatchSchema } from '@memoflow/contracts/electron';
 import { fail, ok } from '@memoflow/contracts/result';
-
-type UserFilesSubdirectory = 'exports' | 'downloads' | 'attachments';
-
-interface SaveTextFileRequest {
-  subdirectory?: UserFilesSubdirectory;
-  defaultFileName: string;
-  content: string;
-  filters?: Array<{ name: string; extensions: string[] }>;
-}
-
-interface SaveTextFileResult {
-  canceled: boolean;
-  filePath: string | null;
-}
-
-interface OpenTextFileRequest {
-  subdirectory?: UserFilesSubdirectory;
-  filters?: Array<{ name: string; extensions: string[] }>;
-}
-
-interface OpenTextFileResult {
-  canceled: boolean;
-  filePath: string | null;
-  content: string | null;
-}
-
-function resolveUserFilesDirectory(subdirectory: UserFilesSubdirectory | undefined): string {
-  const sharedResolver = getSharedPathResolver();
-
-  switch (subdirectory) {
-    case 'downloads':
-      return sharedResolver.userFilesDownloadsDir;
-    case 'attachments':
-      return sharedResolver.userFilesAttachmentsDir;
-    case 'exports':
-    default:
-      return sharedResolver.userFilesExportsDir;
-  }
-}
 
 /**
  * @function registerSystemHandlers
@@ -137,93 +103,23 @@ function registerSystemHandlers(): void {
     return ok({ opened: true as const });
   });
 
-  ipcMain.handle(SystemChannels.USER_FILES_SAVE_TEXT, async (_event, request: SaveTextFileRequest) => {
-    const targetDir = resolveUserFilesDirectory(request?.subdirectory);
-    await fs.mkdir(targetDir, { recursive: true });
-
-    const result = await dialog.showSaveDialog({
-      defaultPath: path.join(targetDir, request.defaultFileName),
-      filters: request.filters,
-    });
-
-    if (result.canceled || !result.filePath) {
-      return ok<SaveTextFileResult>({ canceled: true, filePath: null });
+  const files = new NativeFileDialogs(getSharedPathResolver().configDir, dialog, async () => {
+    const downloads = app.getPath('downloads');
+    try {
+      if ((await fs.stat(downloads)).isDirectory()) return downloads;
+    } catch {
+      /* WSL and fresh homes may have no Downloads directory. */
     }
-
-    await fs.mkdir(path.dirname(result.filePath), { recursive: true });
-    await fs.writeFile(result.filePath, request.content, 'utf8');
-    return ok<SaveTextFileResult>({ canceled: false, filePath: result.filePath });
+    return app.getPath('home');
   });
-
+  ipcMain.handle(
+    SystemChannels.USER_FILES_SAVE_TEXT,
+    async (_event, request: SaveTextFileRequest) => ok(await files.save(request)),
+  );
   ipcMain.handle(
     SystemChannels.USER_FILES_OPEN_TEXT,
-    async (_event, request?: OpenTextFileRequest) => {
-      const defaultPath = resolveUserFilesDirectory(request?.subdirectory);
-      await fs.mkdir(defaultPath, { recursive: true });
-
-      const result = await dialog.showOpenDialog({
-        defaultPath,
-        properties: ['openFile'],
-        filters: request?.filters,
-      });
-
-      if (result.canceled || result.filePaths.length === 0) {
-        return ok<OpenTextFileResult>({ canceled: true, filePath: null, content: null });
-      }
-
-      const filePath = result.filePaths[0]!;
-      const content = await fs.readFile(filePath, 'utf8');
-      return ok<OpenTextFileResult>({ canceled: false, filePath, content });
-    },
+    async (_event, request?: OpenTextFileRequest) => ok(await files.open(request)),
   );
-
-  // ========== User Files Directory Management ==========
-
-  ipcMain.handle(SystemChannels.USER_FILES_GET_PATH, async () => {
-    const resolver = getSharedPathResolver();
-    const defaultPath = resolveDesktopUserFilesPath();
-    return ok({
-      currentPath: resolver.userFilesRootDir,
-      defaultPath,
-      isCustom: resolver.userFilesRootDir !== defaultPath,
-    });
-  });
-
-  ipcMain.handle(SystemChannels.USER_FILES_PICK_DIRECTORY, async () => {
-    const result = await dialog.showOpenDialog({
-      properties: ['openDirectory', 'createDirectory'],
-      title: 'Select User Files Directory',
-    });
-
-    if (result.canceled || result.filePaths.length === 0) {
-      return ok({ canceled: true, path: null });
-    }
-
-    const selectedPath = result.filePaths[0]!;
-    updateUserFilesRootPath(selectedPath);
-
-    return ok({ canceled: false, path: selectedPath });
-  });
-
-  ipcMain.handle(SystemChannels.USER_FILES_OPEN_DIRECTORY, async () => {
-    const resolver = getSharedPathResolver();
-    await fs.mkdir(resolver.userFilesRootDir, { recursive: true });
-    const error = await shell.openPath(resolver.userFilesRootDir);
-    if (error) {
-      console.error('[UserFiles] Failed to open directory:', error);
-      return fail({
-        code: 'INTERNAL_ERROR',
-        message: error,
-      });
-    }
-    return ok(null);
-  });
-
-  ipcMain.handle(SystemChannels.USER_FILES_RESET_PATH, async () => {
-    updateUserFilesRootPath(null);
-    const defaultPath = resolveDesktopUserFilesPath();
-    return ok({ path: defaultPath });
-  });
 }
 
 /**
@@ -354,7 +250,10 @@ function registerDesktopFeaturesHandlers(
     if (!notificationPort) return devicePreferenceUnavailable();
     const parsed = DesktopNotificationPreferencePatchSchema.safeParse(patch);
     if (!parsed.success) {
-      return fail({ code: 'VALIDATION_ERROR', message: 'Invalid desktop notification preference patch' });
+      return fail({
+        code: 'VALIDATION_ERROR',
+        message: 'Invalid desktop notification preference patch',
+      });
     }
     try {
       return ok(notificationPort.updateDevicePreference(parsed.data));

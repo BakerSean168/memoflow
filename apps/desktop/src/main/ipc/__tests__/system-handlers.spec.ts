@@ -14,8 +14,6 @@ const mocks = vi.hoisted(() => ({
     getStats: () => ({ size: 0, hits: 0, misses: 0, hitRate: 0 }),
   })),
   getSharedPathResolver: vi.fn(),
-  updateUserFilesRootPath: vi.fn(),
-  resolveDesktopUserFilesPath: vi.fn(),
 }));
 
 vi.mock('electron', () => ({
@@ -41,29 +39,7 @@ vi.mock('../../utils', () => ({
 
 vi.mock('../../runtime-init', () => ({
   getSharedPathResolver: mocks.getSharedPathResolver,
-  updateUserFilesRootPath: mocks.updateUserFilesRootPath,
 }));
-
-vi.mock('../../user-data-path', () => ({
-  resolveDesktopUserFilesPath: mocks.resolveDesktopUserFilesPath,
-}));
-
-function createSharedResolver(overrides?: Partial<ReturnType<typeof buildSharedResolver>>) {
-  return {
-    ...buildSharedResolver(),
-    ...overrides,
-  };
-}
-
-function buildSharedResolver() {
-  const rootDir = path.join(os.tmpdir(), 'memoflow-user-files');
-  return {
-    userFilesRootDir: rootDir,
-    userFilesExportsDir: path.join(rootDir, 'exports'),
-    userFilesDownloadsDir: path.join(rootDir, 'downloads'),
-    userFilesAttachmentsDir: path.join(rootDir, 'attachments'),
-  };
-}
 
 type RegisteredHandler = (event: unknown, payload?: unknown) => Promise<unknown>;
 
@@ -80,10 +56,7 @@ describe('registerSystemIpcHandlers', () => {
     vi.resetModules();
     vi.clearAllMocks();
 
-    mocks.getSharedPathResolver.mockReturnValue(createSharedResolver());
-    mocks.resolveDesktopUserFilesPath.mockReturnValue(
-      path.join(os.tmpdir(), 'MemoFlow Files Default'),
-    );
+    mocks.getSharedPathResolver.mockReturnValue({ configDir: path.join(os.tmpdir(), 'dialog-config') });
     mocks.dialogShowOpenDialog.mockResolvedValue({
       canceled: true,
       filePaths: [],
@@ -119,29 +92,7 @@ describe('registerSystemIpcHandlers', () => {
     );
   });
 
-  it('returns the current user-files path, default path, and custom flag', async () => {
-    const currentPath = path.join(os.tmpdir(), 'MemoFlow Files Custom');
-    const defaultPath = path.join(os.tmpdir(), 'MemoFlow Files Default');
-    mocks.getSharedPathResolver.mockReturnValue(
-      createSharedResolver({ userFilesRootDir: currentPath }),
-    );
-    mocks.resolveDesktopUserFilesPath.mockReturnValue(defaultPath);
 
-    const { registerSystemIpcHandlers } = await import('../system-handlers');
-    registerSystemIpcHandlers(null, null, null);
-
-    const handler = getRegisteredHandler(SystemChannels.USER_FILES_GET_PATH);
-    const result = await handler({});
-
-    expect(result).toEqual({
-      ok: true,
-      data: {
-        currentPath,
-        defaultPath,
-        isCustom: true,
-      },
-    });
-  });
 
   it('fails all device preference calls when notification capability is degraded', async () => {
     const { registerSystemIpcHandlers } = await import('../system-handlers');
@@ -229,83 +180,13 @@ describe('registerSystemIpcHandlers', () => {
     expect(updateDevicePreference).not.toHaveBeenCalled();
   });
 
-  it('updates the runtime user-files root when a new directory is selected', async () => {
-    const selectedPath = path.join(os.tmpdir(), 'MemoFlow Files Picked');
-    mocks.dialogShowOpenDialog.mockResolvedValue({
-      canceled: false,
-      filePaths: [selectedPath],
-    });
 
-    const { registerSystemIpcHandlers } = await import('../system-handlers');
-    registerSystemIpcHandlers(null, null, null);
 
-    const handler = getRegisteredHandler(SystemChannels.USER_FILES_PICK_DIRECTORY);
-    const result = await handler({});
 
-    expect(mocks.updateUserFilesRootPath).toHaveBeenCalledWith(selectedPath);
-    expect(result).toEqual({
-      ok: true,
-      data: {
-        canceled: false,
-        path: selectedPath,
-      },
-    });
-  });
 
-  it('does not update the runtime user-files root when the picker is canceled', async () => {
-    mocks.dialogShowOpenDialog.mockResolvedValue({
-      canceled: true,
-      filePaths: [],
-    });
 
-    const { registerSystemIpcHandlers } = await import('../system-handlers');
-    registerSystemIpcHandlers(null, null, null);
 
-    const handler = getRegisteredHandler(SystemChannels.USER_FILES_PICK_DIRECTORY);
-    const result = await handler({});
 
-    expect(mocks.updateUserFilesRootPath).not.toHaveBeenCalled();
-    expect(result).toEqual({
-      ok: true,
-      data: {
-        canceled: true,
-        path: null,
-      },
-    });
-  });
-
-  it('resets the runtime user-files root back to the default path', async () => {
-    const defaultPath = path.join(os.tmpdir(), 'MemoFlow Files Default');
-    mocks.resolveDesktopUserFilesPath.mockReturnValue(defaultPath);
-
-    const { registerSystemIpcHandlers } = await import('../system-handlers');
-    registerSystemIpcHandlers(null, null, null);
-
-    const handler = getRegisteredHandler(SystemChannels.USER_FILES_RESET_PATH);
-    const result = await handler({});
-
-    expect(mocks.updateUserFilesRootPath).toHaveBeenCalledWith(null);
-    expect(result).toEqual({
-      ok: true,
-      data: { path: defaultPath },
-    });
-  });
-
-  it('opens the active user-files root directory in the shell', async () => {
-    const currentPath = path.join(os.tmpdir(), 'MemoFlow Files Current');
-    mocks.getSharedPathResolver.mockReturnValue(
-      createSharedResolver({ userFilesRootDir: currentPath }),
-    );
-
-    const { registerSystemIpcHandlers } = await import('../system-handlers');
-    registerSystemIpcHandlers(null, null, null);
-
-    const handler = getRegisteredHandler(SystemChannels.USER_FILES_OPEN_DIRECTORY);
-    const result = await handler({});
-
-    expect(mocks.shellOpenPath).toHaveBeenCalledWith(currentPath);
-    expect(result).toEqual({ ok: true, data: null });
-  });
 
   it('opens only HTTP(S) URLs in the external browser', async () => {
     const { registerSystemIpcHandlers } = await import('../system-handlers');
