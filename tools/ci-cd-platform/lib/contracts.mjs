@@ -174,6 +174,11 @@ export function validateDeliveryManifest(manifest) {
       );
       unitTasks.push(task);
     }
+    const splitProjects = shard.tasks.filter((task) => task.shard).map((task) => task.project);
+    assert(
+      new Set(splitProjects).size === splitProjects.length,
+      'split Unit shards of one project must run on different jobs',
+    );
   }
   const expectedTasks = manifest.scope.unit
     .filter((project) => project !== 'memoflow')

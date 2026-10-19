@@ -45,9 +45,12 @@ export function planUnitShards(projects) {
     );
   const bins = UNIT_JOB_IDS.map((id) => ({ id, tasks: [], seconds: 0 }));
   for (const { seconds, ...task } of tasks) {
-    const bin = bins.reduce((lightest, next) =>
-      next.seconds < lightest.seconds ? next : lightest,
-    );
+    // A file-split project only shortens the critical path when its shards run on different jobs.
+    const bin = bins
+      .filter(
+        (candidate) => !task.shard || candidate.tasks.every((t) => t.project !== task.project),
+      )
+      .reduce((lightest, next) => (next.seconds < lightest.seconds ? next : lightest));
     bin.tasks.push(task);
     bin.seconds += seconds;
   }

@@ -140,6 +140,7 @@ test('scope discovery invokes the installed Nx CLI directly instead of racing pn
 });
 
 import { planUnitShards, UNIT_JOB_IDS } from '../lib/unit-shards.mjs';
+import { digest, validateDeliveryManifest } from '../lib/contracts.mjs';
 
 test('Unit LPT is deterministic, complete, fixed at three jobs and only splits app-vue', () => {
   const projects = [
@@ -183,6 +184,54 @@ test('Unit LPT is deterministic, complete, fixed at three jobs and only splits a
   for (const invalid of [null, ['web', 'web'], ['--all'], ['bad,name'], [123]]) {
     assert.throws(() => planUnitShards(invalid), /unique Nx project names/u);
   }
+});
+
+test('Unit LPT keeps app-vue file shards on different jobs for the Full Audit workload', async () => {
+  // Full Audit selects every measured project plus the known unmeasured ones (36 projects in
+  // run 39208602533). With measured heavy projects, plain LPT put both app-vue halves on unit-3.
+  const history = JSON.parse(
+    await readFile(new URL('../unit-test-durations.json', import.meta.url), 'utf8'),
+  );
+  const fullAudit = [
+    ...history.ranking.map(({ project }) => project),
+    ...history.unmeasuredProjects,
+  ];
+  assert.ok(fullAudit.length >= 36);
+  const plan = planUnitShards(fullAudit);
+  const appVueJobs = plan
+    .filter(({ tasks }) => tasks.some((task) => task.project === 'app-vue'))
+    .map(({ id }) => id);
+  assert.equal(appVueJobs.length, 2);
+  for (const { tasks } of plan) assert.ok(tasks.length > 0);
+  assert.equal(
+    plan.flatMap(({ tasks }) => tasks).length,
+    fullAudit.filter((project) => project !== 'memoflow').length + 1,
+  );
+});
+
+test('delivery manifest rejects split Unit shards of one project on the same job', async () => {
+  const manifest = await buildDeliveryManifest({
+    base: 'base',
+    head: 'head',
+    event: 'pull_request',
+    scope: { ...scope, unit: ['app-vue', 'web'] },
+    files: ['apps/web/src/App.vue'],
+  });
+  assert.doesNotThrow(() => validateDeliveryManifest(manifest));
+  const tasks = manifest.unitShards.flatMap((shard) => shard.tasks);
+  const tampered = {
+    ...manifest,
+    unitShards: manifest.unitShards.map((shard, index) => ({
+      ...shard,
+      tasks: index === 0 ? tasks : [],
+    })),
+  };
+  delete tampered.digest;
+  tampered.digest = digest(tampered);
+  assert.throws(
+    () => validateDeliveryManifest(tampered),
+    /split Unit shards of one project must run on different jobs/u,
+  );
 });
 
 import { mkdtemp, writeFile, readFile, chmod, rm } from 'node:fs/promises';
