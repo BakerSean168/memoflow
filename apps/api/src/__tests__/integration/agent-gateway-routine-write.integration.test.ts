@@ -246,6 +246,15 @@ it('authenticates real MCP PAT writes, gates discovery, rejects private claims a
   expect(first.result, JSON.stringify(first)).toHaveProperty('structuredContent');
   const receipt = first.result.structuredContent;
   expect(receipt.replayed).toBe(false);
+  // The production repair seam converges a committed HTTP write even if its event was lost.
+  const source = createRoutinePrismaScheduleProjectionSource(prisma);
+  const plan = await source.buildRoutinePlan(receipt.result.routine.id, f.a);
+  expect(plan.desired).toHaveLength(1);
+  expect(plan.desired[0]).toMatchObject({ runAt: receipt.result.scheduledFor, sourceRevision: 1 });
+  const scheduling = createScheduledInvocationSchedulingPort(
+    createSchedulerPrismaRepositories(prisma).scheduledInvocationRepository,
+  );
+  await scheduling.reconcile(plan.owner, plan.desired);
   await prisma.$disconnect();
   expect(
     (await (await send(f.pa.secret, 'tools/call', future)).json()).result.structuredContent,
@@ -263,6 +272,11 @@ it('authenticates real MCP PAT writes, gates discovery, rejects private claims a
   expect(invalid.result?.isError ?? Boolean(invalid.error)).toBe(true);
   expect(await prisma.routineDefinition.count({ where: { identityId: f.a } })).toBe(1);
   expect(await prisma.routineProfileMembership.count()).toBe(0);
+  expect(
+    await prisma.scheduledInvocation.count({
+      where: { identityId: f.a, ownerId: receipt.result.routine.id },
+    }),
+  ).toBe(1);
   expect(f.audit).toContainEqual(
     expect.objectContaining({
       tool: 'routine_create',
