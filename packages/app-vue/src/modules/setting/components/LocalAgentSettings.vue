@@ -1,20 +1,24 @@
 <script setup lang="ts">
-import { computed, reactive, ref, useId, watch } from 'vue';
+import { computed, inject, onBeforeUnmount, reactive, ref, useId, watch } from 'vue';
 import { RefreshCw, RotateCcw, Trash2 } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import { Button, Input } from '@memoflow/ui-vue-shadcn';
 import {
   LocalAgentConnectionInputSchema,
   LOCAL_AGENT_DEFAULT_EXECUTABLES,
+  type LocalAgentAuthFailure,
+  type LocalAgentAuthState,
   type LocalAgentConnection,
   type LocalAgentConnectionInput,
   type LocalAgentDriver,
   type LocalAgentStatus,
 } from '@memoflow/contracts/ai';
+import { SystemChannels } from '@memoflow/contracts/electron';
 import { getNativeAgentExecutionFailureMessage } from '../../ai/composables/error';
 import { SettingsPropertyRow } from '../../../components/shared/settings';
 import { useNativeModelVisibility } from '../../ai/composables/nativeModelVisibility';
 import { useServerStateIdentityScope } from '../../../platform/server-state';
+import { AI_LOCAL_AGENT_KEY, DESKTOP_BRIDGE_KEY } from '../../../di/keys';
 import AgentDriverIcon from '../../ai/components/AgentDriverIcon.vue';
 import AntigravityAcpDownload from './AntigravityAcpDownload.vue';
 const props = defineProps<{
@@ -119,14 +123,24 @@ const accountPlan = computed(() => {
     return undefined;
   return `ChatGPT ${current.planType[0].toUpperCase()}${current.planType.slice(1)}`;
 });
-const statusLabel = computed(() =>
-  !form.enabled
-    ? t('setting.ai.inactiveProvider')
-    : props.status?.status === 'ready'
-      ? getNativeAgentExecutionFailureMessage(props.status.lastExecutionFailure, t) ||
-        t('setting.agentInstances.discoveredModels', { count: props.status.models.length })
-      : (props.status?.message ?? t('setting.agentInstances.unchecked')),
-);
+const statusLabel = computed(() => {
+  if (!form.enabled) return t('setting.ai.inactiveProvider');
+  if (props.status?.status === 'ready')
+    return (
+      getNativeAgentExecutionFailureMessage(props.status.lastExecutionFailure, t) ||
+      t('setting.agentInstances.discoveredModels', { count: props.status.models.length })
+    );
+  if (props.driver === 'antigravity') {
+    if (props.status?.status === 'login_required')
+      return t('setting.agentInstances.antigravityLoginRequired');
+    if (props.status?.status === 'not_installed')
+      return t('setting.agentInstances.antigravityExecutableMissing');
+    if (props.status?.status === 'unavailable')
+      return t('setting.agentInstances.antigravityUnavailable');
+    return t('setting.agentInstances.unchecked');
+  }
+  return props.status?.message ?? t('setting.agentInstances.unchecked');
+});
 const validated = computed(() =>
   LocalAgentConnectionInputSchema.safeParse({
     ...form,
@@ -136,6 +150,229 @@ const validated = computed(() =>
 function save() {
   if (validated.value.success) emit('save', validated.value.data);
 }
+
+// Explicit Google sign-in is a dedicated main-process flow. It never runs as a
+// side effect of refresh, startup or chat restore.
+const local = inject(AI_LOCAL_AGENT_KEY, undefined);
+const bridge = inject(DESKTOP_BRIDGE_KEY, undefined);
+const auth = ref<LocalAgentAuthState | null>(null);
+const authFailure = ref<LocalAgentAuthFailure | null>(null);
+const authBusy = ref(false);
+const callbackOpen = ref(false);
+const callbackValue = ref('');
+const copied = ref(false);
+const openFailed = ref(false);
+const isAntigravity = computed(() => props.driver === 'antigravity');
+const connectionId = computed(() => props.connection?.id);
+const signingIn = computed(
+  () => authBusy.value || ['starting', 'waiting', 'verifying'].includes(auth.value?.phase ?? ''),
+);
+let pollTimer: ReturnType<typeof setTimeout> | undefined;
+let pollGeneration = 0;
+let openedUrl: string | undefined;
+
+function stopPolling() {
+  pollGeneration++;
+  if (pollTimer) clearTimeout(pollTimer);
+  pollTimer = undefined;
+}
+function failureMessage(failure: LocalAgentAuthFailure) {
+  return t(`setting.agentInstances.antigravityAuthFailure.${failure}`);
+}
+const loginMessage = computed(() => {
+  if (authFailure.value) return failureMessage(authFailure.value);
+  if (isAntigravity.value && draftDirty.value)
+    return t('setting.agentInstances.antigravityLoginSaveFirst');
+  if (isAntigravity.value && props.status?.status === 'not_installed')
+    return t('setting.agentInstances.antigravityExecutableMissing');
+  const state = auth.value;
+  if (state?.phase === 'starting')
+    return t('setting.agentInstances.antigravityLoginStarting');
+  if (state?.phase === 'waiting') {
+    if (openFailed.value) return t('setting.agentInstances.antigravityLoginOpenFailed');
+    return t('setting.agentInstances.antigravityLoginWaiting');
+  }
+  if (state?.phase === 'verifying')
+    return t('setting.agentInstances.antigravityLoginVerifying');
+  if (state?.phase === 'succeeded') return t('setting.agentInstances.antigravityLoginSucceeded');
+  if (state?.phase === 'cancelled') return t('setting.agentInstances.antigravityLoginCancelled');
+  if (!isAntigravity.value) return '';
+  if (props.status?.status === 'login_required')
+    return t('setting.agentInstances.antigravityLoginRequired');
+  if (props.status?.status === 'unavailable')
+    return t('setting.agentInstances.antigravityUnavailable');
+  return '';
+});
+const draftDirty = computed(() => {
+  if (!connectionId.value) return false;
+  const connection = props.connection;
+  if (!connection) return false;
+  return (
+    form.executablePath !== connection.executablePath ||
+    (form.homePath?.trim() ?? '') !== (connection.homePath ?? '')
+  );
+});
+const showLoginAction = computed(
+  () =>
+    isAntigravity.value &&
+    Boolean(local) &&
+    Boolean(connectionId.value) &&
+    form.enabled !== false &&
+    !signingIn.value &&
+    auth.value?.phase !== 'succeeded' &&
+    props.status?.status !== 'not_installed' &&
+    (props.status?.status !== 'ready' ||
+      auth.value?.phase === 'failed' ||
+      auth.value?.phase === 'cancelled'),
+);
+const showSignedInActions = computed(
+  () => isAntigravity.value && Boolean(connectionId.value) && !signingIn.value && (
+    auth.value?.phase === 'succeeded' || props.status?.status === 'ready'
+  ),
+);
+const showLoginLink = computed(
+  () => auth.value?.phase === 'waiting' && Boolean(auth.value.authorizationUrl),
+);
+const authorizationUrl = computed(() => auth.value?.authorizationUrl ?? '');
+async function openAuthorization(url: string) {
+  if (!bridge) {
+    openFailed.value = true;
+    return;
+  }
+  try {
+    const result = await bridge.invoke(SystemChannels.OPEN_EXTERNAL_URL, { url });
+    openFailed.value = !(
+      result &&
+      typeof result === 'object' &&
+      'ok' in result &&
+      (result as { ok?: unknown }).ok === true
+    );
+  } catch {
+    openFailed.value = true;
+  }
+}
+function applyAuth(state: LocalAgentAuthState, options: { keepFailure?: boolean } = {}) {
+  auth.value = state;
+  if (state.failure && !options.keepFailure) authFailure.value = state.failure;
+  if (state.authorizationUrl && state.authorizationUrl !== openedUrl) {
+    openedUrl = state.authorizationUrl;
+    void openAuthorization(state.authorizationUrl);
+  }
+  if (['failed', 'cancelled', 'idle', 'succeeded'].includes(state.phase)) {
+    stopPolling();
+    if (state.phase === 'succeeded' || state.phase === 'idle') emit('check');
+  }
+}
+function schedulePoll() {
+  stopPolling();
+  const generation = pollGeneration;
+  const tick = async () => {
+    const client = local;
+    const id = connectionId.value;
+    if (!client || !id || generation !== pollGeneration) return;
+    try {
+      const state = await client.loginStatus(id);
+      if (generation !== pollGeneration) return;
+      applyAuth(state, { keepFailure: true });
+    } catch {
+      if (generation !== pollGeneration) return;
+    }
+    if (generation === pollGeneration && signingIn.value)
+      pollTimer = setTimeout(tick, 1_000);
+  };
+  pollTimer = setTimeout(tick, 1_000);
+}
+async function startLogin() {
+  const client = local;
+  const id = connectionId.value;
+  if (!client || !id || authBusy.value) return;
+  authBusy.value = true;
+  authFailure.value = null;
+  copied.value = false;
+  openFailed.value = false;
+  callbackOpen.value = false;
+  callbackValue.value = '';
+  openedUrl = undefined;
+  try {
+    applyAuth(await client.startLogin(id));
+    if (signingIn.value) schedulePoll();
+  } catch {
+    authFailure.value = 'unavailable';
+  } finally {
+    authBusy.value = false;
+  }
+}
+async function cancelLogin() {
+  const client = local;
+  const id = connectionId.value;
+  const flowId = auth.value?.flowId;
+  if (!client || !id || !flowId) return;
+  try {
+    applyAuth(await client.cancelLogin(id, flowId));
+  } catch {
+    authFailure.value = 'unavailable';
+  }
+}
+async function signOut() {
+  const client = local;
+  const id = connectionId.value;
+  if (!client || !id || authBusy.value) return;
+  authBusy.value = true;
+  authFailure.value = null;
+  try {
+    applyAuth(await client.signOut(id));
+    auth.value = null;
+  } catch {
+    authFailure.value = 'unavailable';
+  } finally {
+    authBusy.value = false;
+  }
+}
+async function copyAuthorization() {
+  const url = auth.value?.authorizationUrl;
+  if (!url || typeof navigator === 'undefined' || !navigator.clipboard) {
+    copied.value = false;
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(url);
+    copied.value = true;
+  } catch {
+    copied.value = false;
+  }
+}
+function selectAuthorization(event: Event) {
+  const input = event.target as HTMLInputElement;
+  input.select();
+}
+async function submitCallback() {  const client = local;
+  const id = connectionId.value;
+  const flowId = auth.value?.flowId;
+  const value = callbackValue.value.trim();
+  if (!client || !id || !flowId || !value) return;
+  try {
+    const state = await client.completeLogin(id, flowId, value);
+    applyAuth(state, { keepFailure: true });
+    if (state.failure) authFailure.value = state.failure;
+    else callbackValue.value = '';
+  } catch {
+    authFailure.value = 'unavailable';
+  }
+}
+watch(
+  () => [connectionId.value, props.driver],
+  () => {
+    stopPolling();
+    auth.value = null;
+    authFailure.value = null;
+    copied.value = false;
+    openFailed.value = false;
+    callbackOpen.value = false;
+    callbackValue.value = '';
+    openedUrl = undefined;
+  },
+);
+onBeforeUnmount(stopPolling);
 </script>
 
 <template>
@@ -155,8 +392,10 @@ function save() {
           <h3 class="truncate text-base font-semibold">
             {{ connection?.name ?? identity?.name ?? names[driver] }}
           </h3>
-          <div class="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            <span role="status">{{ statusLabel }}</span>
+          <div class="mt-1 flex min-w-0 flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            <span class="min-w-0 truncate whitespace-nowrap" role="status" :title="statusLabel">{{
+              statusLabel
+            }}</span>
           </div>
         </div>
       </div>
@@ -246,6 +485,140 @@ function save() {
         >{{ t(showAccount ? 'setting.ai.hideAccount' : 'setting.ai.revealAccount') }}</Button
       >
     </div>
+    <section v-if="isAntigravity" class="space-y-3" data-testid="ai-agy-account">
+      <h4 class="px-3 text-xs font-medium text-muted-foreground">
+        {{ t('setting.agentInstances.antigravityLoginTitle') }}
+      </h4>
+      <div class="rounded-xl border border-[hsl(var(--border-subtle))] bg-muted/10 px-4 py-4">
+        <p
+          class="min-w-0 truncate text-xs leading-5 text-muted-foreground"
+          role="status"
+          :title="loginMessage"
+          data-testid="ai-agy-login-status"
+        >
+          {{ loginMessage }}
+        </p>
+        <p
+          v-if="showLoginAction && !connectionId"
+          class="mt-1 min-w-0 truncate text-[11px] leading-4 text-muted-foreground"
+          :title="t('setting.agentInstances.antigravityLoginNoConnection')"
+          data-testid="ai-agy-login-no-connection"
+        >
+          {{ t('setting.agentInstances.antigravityLoginNoConnection') }}
+        </p>
+        <div v-if="local" class="mt-2 flex flex-wrap items-center gap-1.5">
+          <Button
+            v-if="showLoginAction"
+            type="button"
+            size="sm"
+            class="h-8"
+            :disabled="busy || authBusy || !connectionId || draftDirty"
+            data-testid="ai-agy-login"
+            @click="startLogin"
+            >{{
+              auth?.phase === 'failed' || auth?.phase === 'cancelled'
+                ? t('setting.agentInstances.antigravityLoginRetry')
+                : t('setting.agentInstances.antigravityLoginAction')
+            }}</Button
+          >
+          <template v-if="showLoginLink">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              class="h-8"
+              data-testid="ai-agy-login-open"
+              @click="openAuthorization(authorizationUrl)"
+              >{{ t('setting.agentInstances.antigravityLoginOpen') }}</Button
+            >
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              class="h-8"
+              data-testid="ai-agy-login-copy"
+              @click="copyAuthorization"
+              >{{
+                copied
+                  ? t('setting.agentInstances.antigravityLoginCopied')
+                  : t('setting.agentInstances.antigravityLoginCopy')
+              }}</Button
+            >
+          </template>
+          <Button
+            v-if="signingIn"
+            type="button"
+            size="sm"
+            variant="ghost"
+            class="h-8"
+            data-testid="ai-agy-login-cancel"
+            @click="cancelLogin"
+            >{{ t('setting.agentInstances.antigravityLoginCancel') }}</Button
+          >
+          <template v-if="showSignedInActions">
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              class="h-8"
+              :disabled="busy || authBusy"
+              data-testid="ai-agy-login-switch"
+              @click="startLogin"
+              >{{ t('setting.agentInstances.antigravityLoginSwitch') }}</Button
+            >
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              class="h-8"
+              :disabled="busy || authBusy"
+              data-testid="ai-agy-sign-out"
+              @click="signOut"
+              >{{ t('setting.agentInstances.antigravityLoginSignOut') }}</Button
+            >
+          </template>
+        </div>
+        <div v-if="showLoginLink" class="mt-2 min-w-0 space-y-2">
+          <Input
+            :model-value="authorizationUrl"
+            readonly
+            class="h-8 min-w-0 text-[11px]"
+            data-testid="ai-agy-login-link"
+            :aria-label="t('setting.agentInstances.antigravityLoginCopy')"
+            @focus="selectAuthorization"
+          />
+          <button
+            type="button"
+            class="text-[11px] leading-4 text-muted-foreground underline-offset-2 hover:underline"
+            data-testid="ai-agy-callback-toggle"
+            @click="callbackOpen = !callbackOpen"
+          >
+            {{ t('setting.agentInstances.antigravityLoginCallbackHint') }}
+          </button>
+          <form
+            v-if="callbackOpen"
+            class="flex min-w-0 items-center gap-2"
+            @submit.prevent="submitCallback"
+          >
+            <Input
+              v-model="callbackValue"
+              class="h-8 min-w-0 flex-1 text-[11px]"
+              :placeholder="t('setting.agentInstances.antigravityLoginCallbackPlaceholder')"
+              data-testid="ai-agy-callback-input"
+            />
+            <Button
+              type="submit"
+              size="sm"
+              variant="outline"
+              class="h-8"
+              :disabled="!callbackValue.trim()"
+              data-testid="ai-agy-callback-submit"
+              >{{ t('setting.agentInstances.antigravityLoginCallbackAction') }}</Button
+            >
+          </form>
+        </div>
+      </div>
+    </section>
     <section class="space-y-3">
       <h4 class="px-3 text-xs font-medium text-muted-foreground">
         {{ t('aiAssistant.local.runtime') }}

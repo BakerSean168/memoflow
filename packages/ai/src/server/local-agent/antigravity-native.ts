@@ -7,6 +7,15 @@ import { resolveNativeExecutable } from './native-executable';
 
 export const ANTIGRAVITY_AUTH_PROMPT_PREFIX =
   'Open the following link to authenticate the ACP server: ';
+/** The BROWSER helper reports the URL on stderr instead of launching an OS browser. */
+export const ANTIGRAVITY_AUTH_URL_MARKER = '__MEMOFLOW_AGY_AUTH_URL__';
+const MAX_AUTHORIZATION_URL_LENGTH = 16_384;
+
+export interface AntigravityAuthorizationUrl {
+  authorizationUrl: string;
+  redirectUri: string;
+  state: string;
+}
 
 /** This is the official ACP profile, not the separate agy CLI account store. */
 export function antigravityHome(home?: string): string {
@@ -48,6 +57,7 @@ export function antigravityEnvironment(
   connection: LocalAgentConnection,
   executable: string,
   temporaryDirectory: string,
+  options: { captureBrowserUrl?: boolean } = {},
 ): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = {};
   const forbidden =
@@ -57,10 +67,14 @@ export function antigravityEnvironment(
   }
   // The native Python browser hook must succeed without opening an external URL.
   // This fixed command contains no user input; auth output is rejected by the transport.
+  // The explicit login flow swaps the no-op body for one that reports the URL on
+  // stderr, so the native process still cannot launch a browser of its own.
   const nodePath = process.execPath.replace(/\\/g, '/');
   if (/[\r\n\0"%]/u.test(nodePath) || nodePath.includes(process.platform === 'win32' ? ';' : ':'))
     throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
-  env.BROWSER = `"${nodePath}" -e "process.exit(0)" -- %s`;
+  env.BROWSER = options.captureBrowserUrl
+    ? `"${nodePath}" -e "process.stderr.on('error',()=>process.exit(0)).write('${ANTIGRAVITY_AUTH_URL_MARKER}'+JSON.stringify(process.argv[1])+'\\n',()=>process.exit(0))" -- %s`
+    : `"${nodePath}" -e "process.exit(0)" -- %s`;
   env.ELECTRON_RUN_AS_NODE = '1';
   env.GEMINI_HOME = antigravityHome(connection.homePath);
   env.AGY_ACP_FORCE_FILE_STORAGE = '1';
@@ -79,3 +93,90 @@ export function antigravityEnvironment(
   } else env.TMPDIR = temporaryDirectory;
   return env;
 }
+
+/**
+ * Accept only the official Google authorization URL. The URL is returned to the
+ * renderer for an explicit open/copy action; it is never logged or persisted.
+ */
+export function parseAntigravityAuthorizationUrl(
+  raw: string,
+): AntigravityAuthorizationUrl | null {
+  if (raw.length > MAX_AUTHORIZATION_URL_LENGTH || /\s/u.test(raw)) return null;
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return null;
+  }
+  const states = url.searchParams.getAll('state');
+  const redirects = url.searchParams.getAll('redirect_uri');
+  const responses = url.searchParams.getAll('response_type');
+  const redirectUri = redirects[0];
+  if (
+    url.origin !== 'https://accounts.google.com' ||
+    url.pathname !== '/o/oauth2/v2/auth' ||
+    url.username !== '' ||
+    url.password !== '' ||
+    url.hash !== '' ||
+    states.length !== 1 ||
+    redirects.length !== 1 ||
+    responses.length !== 1 ||
+    responses[0] !== 'code' ||
+    !states[0] ||
+    states[0].length > 512 ||
+    /\s/u.test(states[0]) ||
+    !/^http:\/\/127\.0\.0\.1:[1-9][0-9]{0,4}\/$/u.test(redirectUri ?? '')
+  )
+    return null;
+  let redirect: URL;
+  try {
+    redirect = new URL(redirectUri);
+  } catch {
+    return null;
+  }
+  if (Number(redirect.port) < 1_024 || Number(redirect.port) > 65_535) return null;
+  return { authorizationUrl: raw, redirectUri, state: states[0] };
+}
+
+/**
+ * A pasted redirect URL must belong to the pending flow before it may be relayed
+ * to the native loopback listener. Origin, path, state and response shape are all
+ * checked; nothing is inferred from a successful HTTP response.
+ */
+export function parseAntigravityCallbackUrl(
+  pending: Pick<AntigravityAuthorizationUrl, 'redirectUri' | 'state'>,
+  raw: string,
+): URL | null {
+  if (raw.length > MAX_AUTHORIZATION_URL_LENGTH) return null;
+  let callback: URL;
+  let expected: URL;
+  try {
+    callback = new URL(raw);
+    expected = new URL(pending.redirectUri);
+  } catch {
+    return null;
+  }
+  if (
+    callback.protocol !== 'http:' ||
+    callback.hostname !== '127.0.0.1' ||
+    callback.origin !== expected.origin ||
+    callback.pathname !== expected.pathname ||
+    callback.username !== '' ||
+    callback.password !== '' ||
+    callback.hash !== ''
+  )
+    return null;
+  const states = callback.searchParams.getAll('state');
+  if (states.length !== 1 || states[0] !== pending.state) return null;
+  const codes = callback.searchParams.getAll('code');
+  const errors = callback.searchParams.getAll('error');
+  const validResponse =
+    (codes.length === 1 && Boolean(codes[0]) && errors.length === 0) ||
+    (errors.length === 1 && Boolean(errors[0]) && codes.length === 0);
+  if (!validResponse) return null;
+  const issuers = callback.searchParams.getAll('iss');
+  if (issuers.length > 1 || (issuers.length === 1 && issuers[0] !== 'https://accounts.google.com'))
+    return null;
+  return callback;
+}
+

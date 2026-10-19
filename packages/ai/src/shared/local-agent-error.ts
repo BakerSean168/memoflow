@@ -4,6 +4,7 @@ export const LOCAL_AGENT_FAILURES = {
   CONFLICT: 'This local Agent resource changed or already has an active turn.',
   LOCAL_AGENT_NOT_INSTALLED: 'The configured Agent executable could not be started.',
   LOCAL_AGENT_LOGIN_REQUIRED: 'Sign in using the Agent’s native login command, then refresh.',
+  LOCAL_AGENT_LOGIN_DENIED: 'The provider account did not approve the sign-in request.',
   LOCAL_AGENT_UNAVAILABLE: 'The local Agent is unavailable. Check its native configuration.',
   LOCAL_AGENT_RATE_LIMITED:
     'The Agent provider is rate limiting requests. Try again later or choose another model.',

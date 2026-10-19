@@ -33,3 +33,14 @@ export function nativeFailure(diagnostic: unknown): LocalAgentError {
     return new LocalAgentError('LOCAL_AGENT_RATE_LIMITED');
   return new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
 }
+
+/** Explicit Antigravity login only: distinguish a declined Google consent from a
+ * transient failure without exposing the diagnostic. */
+export function antigravityLoginFailure(diagnostic: unknown): LocalAgentError {
+  const value = typeof diagnostic === 'string' ? diagnostic.slice(0, 16_384) : '';
+  if (
+    /access_denied|denied access|user (?:denied|cancelled|canceled)|cancelled by user/i.test(value)
+  )
+    return new LocalAgentError('LOCAL_AGENT_LOGIN_DENIED');
+  return nativeFailure(value);
+}
