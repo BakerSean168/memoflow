@@ -648,3 +648,40 @@ it.each(['LOCAL_AGENT_RATE_LIMITED', 'LOCAL_AGENT_QUOTA_EXHAUSTED'] as const)(
     await runtime.dispose();
   },
 );
+
+it('keeps Google sign-in guidance when conversation creation rejects a logged-out AGY connection', async () => {
+  const { store } = await setup();
+  const connection = await store.createConnection('owner', {
+    driver: 'antigravity',
+    name: 'AGY',
+    executablePath: '/fake/agy',
+    enabled: true,
+    writeScopes: [],
+  });
+  const runtime = new LocalAgentRuntime({
+    store,
+    cwd: '/tmp',
+    createDriver: () => ({
+      async *run(): AsyncGenerator<NativeAgentEvent> {
+        yield { type: 'completed' };
+      },
+      respond: () => false,
+      cancel() {},
+      async close() {},
+      async probe() {
+        return { status: 'login_required' as const, message: 'Google sign-in' };
+      },
+    }),
+  });
+  await expect(
+    runtime.createConversation('owner', {
+      connectionId: connection.id,
+      modelId: 'model',
+      name: 'Chat',
+    }),
+  ).rejects.toMatchObject({
+    code: 'LOCAL_AGENT_LOGIN_REQUIRED',
+    message:
+      'Google sign-in is required. Open Settings → AI → Providers → Antigravity and select “Sign in with Google”.',
+  });
+});

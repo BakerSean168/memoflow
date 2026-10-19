@@ -172,6 +172,100 @@ export const LocalAgentStatusSchema = z.discriminatedUnion('status', [
 ]);
 export type LocalAgentStatus = z.infer<typeof LocalAgentStatusSchema>;
 
+/** Explicit Antigravity Google sign-in lifecycle. One flow per Provider instance.
+ * `authorizationUrl` is only published while `waiting` so the renderer can open or
+ * copy it through the existing external-link surface; it is cleared afterwards and
+ * is never part of an error message, a failure state or a persisted record.
+ */
+export const LocalAgentAuthPhaseSchema = z.enum([
+  'idle',
+  'starting',
+  'waiting',
+  'verifying',
+  'succeeded',
+  'failed',
+  'cancelled',
+]);
+export type LocalAgentAuthPhase = z.infer<typeof LocalAgentAuthPhaseSchema>;
+/** Stable, renderer-translatable outcomes; never raw native diagnostics. */
+export const LocalAgentAuthFailureSchema = z.enum([
+  'login_already_active',
+  'executable_missing',
+  'login_failed',
+  'login_denied',
+  'login_timeout',
+  'callback_invalid',
+  'callback_duplicate',
+  'model_unavailable',
+  'not_supported',
+  'unavailable',
+]);
+export type LocalAgentAuthFailure = z.infer<typeof LocalAgentAuthFailureSchema>;
+/** The only URL the explicit Google flow may expose to Desktop open/copy actions. */
+export const AntigravityAuthorizationUrlSchema = z
+  .string()
+  .max(16_384)
+  .refine((raw) => {
+    if (/\s/u.test(raw)) return false;
+    try {
+      const url = new URL(raw);
+      const allowed = new Set([
+        'client_id',
+        'redirect_uri',
+        'response_type',
+        'scope',
+        'state',
+        'access_type',
+        'prompt',
+        'include_granted_scopes',
+        'login_hint',
+        'code_challenge',
+        'code_challenge_method',
+        'hd',
+        'authuser',
+        'approval_prompt',
+      ]);
+      for (const key of url.searchParams.keys()) {
+        if (!allowed.has(key) || url.searchParams.getAll(key).length !== 1) return false;
+      }
+      const state = url.searchParams.get('state');
+      const redirectUri = url.searchParams.get('redirect_uri') ?? '';
+      if (
+        url.origin !== 'https://accounts.google.com' ||
+        url.pathname !== '/o/oauth2/v2/auth' ||
+        url.username !== '' ||
+        url.password !== '' ||
+        url.hash !== '' ||
+        url.searchParams.get('response_type') !== 'code' ||
+        !state ||
+        state.length > 512 ||
+        /\s/u.test(state) ||
+        !/^http:\/\/127\.0\.0\.1:[1-9][0-9]{0,4}\/$/u.test(redirectUri)
+      )
+        return false;
+      const port = Number(new URL(redirectUri).port);
+      return port >= 1_024 && port <= 65_535;
+    } catch {
+      return false;
+    }
+  }, 'Invalid Antigravity authorization URL');
+
+export const LocalAgentAuthStateSchema = z
+  .object({
+    phase: LocalAgentAuthPhaseSchema,
+    flowId: id.nullable(),
+    authorizationUrl: AntigravityAuthorizationUrlSchema.nullable(),
+    expiresAt: z.number().int().nonnegative().nullable(),
+    failure: LocalAgentAuthFailureSchema.nullable(),
+    /** Present once the official ACP probe verified the signed-in account and models. */
+    status: LocalAgentStatusSchema.optional(),
+  })
+  .strict()
+  .refine((value) => value.authorizationUrl === null || value.phase === 'waiting', {
+    message: 'The authorization URL is only visible while waiting for Google',
+  });
+export type LocalAgentAuthState = z.infer<typeof LocalAgentAuthStateSchema>;
+
 export const LocalAgentRequestSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('permission'), requestId: id, title: z.string().max(500) }).strict(),
   z
@@ -247,5 +341,19 @@ export const LocalAgentClientCommandSchema = z.discriminatedUnion('action', [
     })
     .strict(),
   z.object({ action: z.literal('respond'), response: LocalAgentRequestResponseSchema }).strict(),
+  /** Explicit, user-initiated Google OAuth for one saved Antigravity instance. */
+  z.object({ action: z.literal('auth_start'), connectionId: id }).strict(),
+  z.object({ action: z.literal('auth_status'), connectionId: id }).strict(),
+  z.object({ action: z.literal('auth_cancel'), connectionId: id, flowId: id }).strict(),
+  z
+    .object({
+      action: z.literal('auth_complete'),
+      connectionId: id,
+      flowId: id,
+      /** Full loopback redirect URL pasted by a user whose browser runs elsewhere. */
+      callbackUrl: z.string().min(1).max(16_384),
+    })
+    .strict(),
+  z.object({ action: z.literal('auth_sign_out'), connectionId: id }).strict(),
 ]);
 export type LocalAgentClientCommand = z.infer<typeof LocalAgentClientCommandSchema>;

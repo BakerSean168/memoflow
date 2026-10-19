@@ -4,6 +4,7 @@ import {
   AssistantRuntimeChoiceSchema,
   LocalAgentConnectionInputSchema,
   LocalAgentClientCommandSchema,
+  LocalAgentAuthStateSchema,
   LocalAgentRequestResponseSchema,
   LocalAgentStatusSchema,
 } from './local-agent.dto';
@@ -288,4 +289,85 @@ it('accepts an Antigravity native connection without API credentials or arbitrar
   expect(
     LocalAgentConnectionInputSchema.safeParse({ ...connection, args: ['--unsafe'] }).success,
   ).toBe(false);
+});
+
+describe('explicit Antigravity sign-in contracts', () => {
+  it.each([
+    'https://evil.example/o/oauth2/v2/auth?redirect_uri=http%3A%2F%2F127.0.0.1%3A43179%2F&response_type=code&state=x',
+    ...['code', 'access_token', 'refresh_token', 'id_token', 'token', 'error'].map(
+      (parameter) =>
+        `https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=http%3A%2F%2F127.0.0.1%3A43179%2F&response_type=code&state=x&${parameter}=private-value`,
+    ),
+  ])('rejects unsafe authorization URLs at the contract boundary: %s', (authorizationUrl) => {
+    expect(
+      LocalAgentAuthStateSchema.safeParse({
+        phase: 'waiting',
+        flowId: 'flow-1',
+        authorizationUrl,
+        expiresAt: 1,
+        failure: null,
+      }).success,
+    ).toBe(false);
+  });
+
+  it('only exposes the authorization URL while waiting for Google', () => {
+    const waiting = {
+      phase: 'waiting',
+      flowId: 'flow-1',
+      authorizationUrl:
+        'https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=http%3A%2F%2F127.0.0.1%3A43179%2F&response_type=code&state=state-1',
+      expiresAt: 1_800_000_000_000,
+      failure: null,
+    };
+    expect(LocalAgentAuthStateSchema.parse(waiting)).toEqual(waiting);
+    expect(
+      LocalAgentAuthStateSchema.safeParse({
+        ...waiting,
+        phase: 'failed',
+        failure: 'login_timeout',
+      }).success,
+    ).toBe(false);
+    expect(
+      LocalAgentAuthStateSchema.safeParse({
+        ...waiting,
+        phase: 'succeeded',
+        failure: null,
+      }).success,
+    ).toBe(false);
+    expect(
+      LocalAgentAuthStateSchema.safeParse({ ...waiting, failure: 'login_denied' }).success,
+    ).toBe(true);
+  });
+
+  it('requires a connection and a bounded callback for the explicit login commands', () => {
+    expect(
+      LocalAgentClientCommandSchema.safeParse({
+        action: 'auth_start',
+        connectionId: 'agy-connection',
+      }).success,
+    ).toBe(true);
+    expect(LocalAgentClientCommandSchema.safeParse({ action: 'auth_start' }).success).toBe(false);
+    expect(
+      LocalAgentClientCommandSchema.safeParse({
+        action: 'auth_complete',
+        connectionId: 'agy-connection',
+        flowId: 'flow-1',
+        callbackUrl: 'http://127.0.0.1:43179/?code=abc&state=state-1',
+      }).success,
+    ).toBe(true);
+    expect(
+      LocalAgentClientCommandSchema.safeParse({
+        action: 'auth_complete',
+        connectionId: 'agy-connection',
+        flowId: 'flow-1',
+        callbackUrl: 'x'.repeat(16_385),
+      }).success,
+    ).toBe(false);
+    expect(
+      LocalAgentClientCommandSchema.safeParse({
+        action: 'auth_sign_out',
+        connectionId: 'agy-connection',
+      }).success,
+    ).toBe(true);
+  });
 });

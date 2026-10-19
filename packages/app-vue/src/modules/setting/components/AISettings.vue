@@ -70,10 +70,21 @@ function statusLabel(instance: AgentInstance) {
       ? t('setting.agentInstances.connectionReady')
       : t('setting.agentInstances.needsConfig');
   const status = statuses.value[instance.instanceId];
-  return status?.status === 'ready'
-    ? getNativeAgentExecutionFailureMessage(status.lastExecutionFailure, t) ||
-        t('setting.agentInstances.discoveredModels', { count: status.models.length })
-    : (status?.message ?? t('setting.agentInstances.unchecked'));
+  if (status?.status === 'ready')
+    return (
+      getNativeAgentExecutionFailureMessage(status.lastExecutionFailure, t) ||
+      t('setting.agentInstances.discoveredModels', { count: status.models.length })
+    );
+  if (instance.driver === 'antigravity') {
+    if (status?.status === 'login_required')
+      return t('setting.agentInstances.antigravityLoginRequired');
+    if (status?.status === 'not_installed')
+      return t('setting.agentInstances.antigravityExecutableMissing');
+    if (status?.status === 'unavailable')
+      return t('setting.agentInstances.antigravityUnavailable');
+    return t('setting.agentInstances.unchecked');
+  }
+  return status?.message ?? t('setting.agentInstances.unchecked');
 }
 function statusVersion(instanceId: string): string | undefined {
   const status = statuses.value[instanceId];

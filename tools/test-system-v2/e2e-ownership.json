@@ -157,6 +157,12 @@
       "lifecycle": "active",
       "primaryCollector": "apps/desktop/playwright.config.ts"
     },
+    "apps/desktop/e2e/antigravity-login.spec.mts": {
+      "surface": "ai-workspace",
+      "role": "supplemental",
+      "lifecycle": "active",
+      "primaryCollector": "apps/desktop/playwright.config.ts"
+    },
     "apps/desktop/e2e/authentication/desktop-auth-flow.spec.mts": {
       "surface": "authentication",
       "role": "canonical",

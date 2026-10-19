@@ -15,6 +15,7 @@ import {
   type AgentInstance,
   type AgentInstanceModelBinding,
   type AIProviderConfigClientDTO,
+  type LocalAgentAuthState,
   type LocalAgentConnection,
   type LocalAgentStatus,
   type ProbeAIProviderConnectionRes,
@@ -25,6 +26,7 @@ import {
   AI_CLIENT_KEY,
   AI_AGENT_REGISTRY_KEY,
   AI_CONFIGURATION_REVISION_KEY,
+  DESKTOP_BRIDGE_KEY,
 } from '../../../di/keys';
 import { productionLocaleMessages } from '../../../locales/production-messages';
 import AISettings from './AISettings.vue';
@@ -88,6 +90,7 @@ async function setup(
     extra?: boolean;
     noRegistry?: boolean;
     dom?: boolean;
+    configured?: Array<AgentInstance['driver']>;
   } = {},
 ) {
   let instances: AgentInstance[] = [instance('mastra')];
@@ -110,6 +113,26 @@ async function setup(
       ]
     : [];
   let native: LocalAgentConnection[] = [];
+  for (const driver of options.configured ?? []) {
+    const item = instances.find((entry) => entry.instanceId === driver);
+    if (!item) continue;
+    item.legacyConnectionId = `native-${driver}`;
+    native.push(
+      LocalAgentConnectionSchema.parse({
+        id: item.legacyConnectionId,
+        driver,
+        instanceSlug: driver,
+        name: item.name,
+        executablePath:
+          driver === 'antigravity' ? 'C:\\opt\\agy-server\\agy_acp_server.exe' : driver,
+        enabled: true,
+        writeScopes: [],
+        revision: 1,
+        createdAt: 1,
+        updatedAt: 1,
+      }),
+    );
+  }
   const epoch = ref(0);
   const client = {
     listProviders: vi.fn(async () => ok([...providers])),
@@ -154,7 +177,38 @@ async function setup(
       models: [{ id: 'native-model', name: 'Native Model' }],
       version: '1.0',
     })),
+    startLogin: vi.fn(async (): Promise<LocalAgentAuthState> => ({
+      phase: 'waiting',
+      flowId: 'flow-1',
+      authorizationUrl:
+        'https://accounts.google.com/o/oauth2/v2/auth?client_id=fixture&redirect_uri=http%3A%2F%2F127.0.0.1%3A43179%2F&response_type=code&state=state-1',
+      expiresAt: Date.now() + 300_000,
+      failure: null,
+    })),
+    loginStatus: vi.fn(async (): Promise<LocalAgentAuthState> => ({
+      phase: 'waiting',
+      flowId: 'flow-1',
+      authorizationUrl: null,
+      expiresAt: Date.now() + 300_000,
+      failure: null,
+    })),
+    cancelLogin: vi.fn(async (): Promise<LocalAgentAuthState> => ({
+      phase: 'cancelled',
+      flowId: 'flow-1',
+      authorizationUrl: null,
+      expiresAt: null,
+      failure: null,
+    })),
+    completeLogin: vi.fn(),
+    signOut: vi.fn(async (): Promise<LocalAgentAuthState> => ({
+      phase: 'idle',
+      flowId: null,
+      authorizationUrl: null,
+      expiresAt: null,
+      failure: null,
+    })),
   };
+  const bridge = { invoke: vi.fn(async () => ({ ok: true })) };
   const registry = {
     list: vi.fn(async () => ({ instances: [...instances], bindings: [...bindings] })),
     execute: vi.fn(async (raw: unknown) => {
@@ -252,13 +306,14 @@ async function setup(
         [SERVER_STATE_IDENTITY_SCOPE_KEY as symbol]: () => 'desktop-profile-a',
         ...(options.native ? { [AI_LOCAL_AGENT_KEY as symbol]: localClient } : {}),
         ...(!options.noRegistry ? { [AI_AGENT_REGISTRY_KEY as symbol]: registry } : {}),
+        [DESKTOP_BRIDGE_KEY as symbol]: bridge,
       },
     },
   });
   wrappers.push(wrapper);
   await flushPromises();
   await flushPromises();
-  return { wrapper, client, registry, localClient, epoch };
+  return { wrapper, client, registry, localClient, epoch, bridge };
 }
 async function openIdentity(wrapper: VueWrapper, driver = 'mastra') {
   await wrapper.get('[data-testid="ai-provider-add"]').trigger('click');
@@ -1070,3 +1125,111 @@ it('configures AGY as an official native ACP Agent rather than a model API servi
   });
   expect(client.probeProviderConnection).not.toHaveBeenCalled();
 });
+
+it('starts and cancels an explicit Google sign-in from the AGY provider', async () => {
+  const { wrapper, localClient, bridge } = await setup({
+    native: true,
+    configured: ['antigravity'],
+    dom: true,
+  });
+  localClient.probeConnection.mockResolvedValue({
+    status: 'login_required',
+    message: 'Sign in using the Agent’s native login command, then refresh.',
+  });
+  await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
+  await flushPromises();
+  await flushPromises();
+  const provider = wrapper.get('[data-testid="ai-provider-select-agent:antigravity"]');
+  expect(provider.text()).toContain('Not signed in to Google. Sign in to continue.');
+  expect(provider.text()).not.toContain('native login command');
+  await provider.trigger('click');
+  await flushPromises();
+  expect(wrapper.text()).not.toContain('Sign in using the Agent');
+  expect(bridge.invoke).not.toHaveBeenCalled();
+
+  const authorizationUrl =
+    'https://accounts.google.com/o/oauth2/v2/auth?client_id=fixture&redirect_uri=http%3A%2F%2F127.0.0.1%3A43179%2F&response_type=code&state=state-1';
+  const writeText = vi.fn(async () => undefined);
+  Object.defineProperty(navigator, 'clipboard', {
+    value: { writeText },
+    configurable: true,
+  });
+  await wrapper.get('[data-testid="ai-agy-login"]').trigger('click');
+  await flushPromises();
+  expect(localClient.startLogin).toHaveBeenCalledWith('native-antigravity');
+  expect(bridge.invoke).toHaveBeenCalledWith('system:openExternalUrl', { url: authorizationUrl });
+  expect(wrapper.get('[data-testid="ai-agy-login-status"]').text()).toContain(
+    'Google sign-in is open in your browser',
+  );
+  await wrapper.get('[data-testid="ai-agy-login-copy"]').trigger('click');
+  await flushPromises();
+  expect(writeText).toHaveBeenCalledWith(authorizationUrl);
+  expect(wrapper.get('[data-testid="ai-agy-login-copy"]').text()).toBe('Link copied');
+
+  await wrapper.get('[data-testid="ai-agy-login-cancel"]').trigger('click');
+  await flushPromises();
+  expect(localClient.cancelLogin).toHaveBeenCalledWith('native-antigravity', 'flow-1');
+  expect(wrapper.get('[data-testid="ai-agy-login-status"]').text()).toBe(
+    'Google sign-in was cancelled.',
+  );
+});
+
+it('offers sign-out only through the official ACP capability', async () => {
+  const { wrapper, localClient, bridge } = await setup({
+    native: true,
+    configured: ['antigravity'],
+  });
+  localClient.probeConnection.mockResolvedValue({
+    status: 'ready',
+    models: [{ id: 'native-model', name: 'Native Model' }],
+  });
+  await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
+  await flushPromises();
+  await flushPromises();
+  await wrapper.get('[data-testid="ai-provider-select-agent:antigravity"]').trigger('click');
+  await flushPromises();
+  expect(bridge.invoke).not.toHaveBeenCalled();
+  await wrapper.get('[data-testid="ai-agy-sign-out"]').trigger('click');
+  await flushPromises();
+  expect(localClient.signOut).toHaveBeenCalledWith('native-antigravity');
+});
+
+it.each([
+  'https://evil.example/o/oauth2/v2/auth?redirect_uri=http%3A%2F%2F127.0.0.1%3A43179%2F&response_type=code&state=x',
+  ...['code', 'access_token', 'refresh_token', 'id_token', 'token'].map(
+    (parameter) =>
+      `https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=http%3A%2F%2F127.0.0.1%3A43179%2F&response_type=code&state=x&${parameter}=private-value`,
+  ),
+])(
+  'rejects an unsafe login URL before renderer display, browser or clipboard: %s',
+  async (authorizationUrl) => {
+    const { wrapper, localClient, bridge } = await setup({
+      native: true,
+      configured: ['antigravity'],
+      dom: true,
+    });
+    localClient.probeConnection.mockResolvedValue({ status: 'login_required', message: 'Sign in' });
+    await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
+    await flushPromises();
+    await wrapper.get('[data-testid="ai-provider-select-agent:antigravity"]').trigger('click');
+    await flushPromises();
+    localClient.startLogin.mockResolvedValue({
+      phase: 'waiting',
+      flowId: 'unsafe-flow',
+      authorizationUrl,
+      expiresAt: Date.now() + 300_000,
+      failure: null,
+    });
+    const writeText = vi.fn(async () => undefined);
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+    await wrapper.get('[data-testid="ai-agy-login"]').trigger('click');
+    await flushPromises();
+    const copy = wrapper.find('[data-testid="ai-agy-login-copy"]');
+    if (copy.exists()) await copy.trigger('click');
+    expect(bridge.invoke).not.toHaveBeenCalled();
+    expect(writeText).not.toHaveBeenCalled();
+    expect(copy.exists()).toBe(false);
+    expect(wrapper.html()).not.toContain(authorizationUrl);
+    wrapper.unmount();
+  },
+);

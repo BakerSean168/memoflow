@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { LocalAgentClient } from '@memoflow/ai/client';
 import type {
   AssistantRuntimeChoice,
+  LocalAgentAuthState,
   LocalAgentConnection,
   LocalAgentStatus,
 } from '@memoflow/contracts/ai';
@@ -42,6 +43,16 @@ function ready(modelId: string): Extract<LocalAgentStatus, { status: 'ready' }> 
   };
 }
 
+function idleAuth(): LocalAgentAuthState {
+  return {
+    phase: 'idle',
+    flowId: null,
+    authorizationUrl: null,
+    expiresAt: null,
+    failure: null,
+  };
+}
+
 function clientStub(overrides: Partial<LocalAgentClient> = {}): LocalAgentClient {
   return {
     listConnections: vi.fn(async () => [connection('Profile A')]),
@@ -56,6 +67,11 @@ function clientStub(overrides: Partial<LocalAgentClient> = {}): LocalAgentClient
       throw new Error('unused');
     }),
     respond: vi.fn(async () => false),
+    startLogin: vi.fn(async () => idleAuth()),
+    loginStatus: vi.fn(async () => idleAuth()),
+    cancelLogin: vi.fn(async () => idleAuth()),
+    completeLogin: vi.fn(async () => idleAuth()),
+    signOut: vi.fn(async () => idleAuth()),
     ...overrides,
   };
 }
