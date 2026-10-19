@@ -126,3 +126,46 @@ lane execution `1,116,601 ms`、最长 lane `284,047 ms`，manifest digest
 `615b3976e39aefb891d5f0f95083afd18497c91fa6d2b7cc1d64b83e1adce80c`，无 failures、无 missing lanes。
 四个 Web shard 的实际 job 时长为 5:52、5:58、6:08、6:16，极差 24 秒；这证明 shard 平衡和登录
 helper 修复在该 head 上有效，但仍不足以替代至少五次 comparable timing 的 P50/P95 验收。
+
+## Actions cache 预算与清理（#504）
+
+缓存是可丢弃的加速数据，构建产物和交付证据仍使用 artifacts。`setup-nx-affected-job`
+通过 `restore-main-cache` 在所有 ref restore，只有 `refs/heads/main` 且非 PR 事件允许
+`actions/cache` 在整个 job 成功后保存；PR、功能分支和 tag 不保存。uv 的自动缓存也仅 main
+开启（其他 ref 不启用 uv 自动缓存）。禁止在 PR checkout 后授予缓存清理权限。
+
+| 类别          | main 总预算（十进制 GB） | Key / 隔离维度                                                  | 清理                                           |
+| ------------- | -----------------------: | --------------------------------------------------------------- | ---------------------------------------------- |
+| Docker/buildx |                     1.00 | 每个 candidate component 独立 scope；`mode=min`，仅 main export | 超预算按最近访问时间从旧到新删除               |
+| pnpm store    |                     2.00 | OS + arch + lockfile hash（所有 job/分片共享一份）              | 同上；不跨 lockfile fallback                   |
+| Nx            |                     3.00 | OS + job + package/lockfile hash + arch + matrix variant + SHA  | 同上；fallback 仅限相同 job、variant、依赖版本 |
+| Playwright    |                     0.75 | OS + arch + lockfile hash（所有 job/分片共享一份）              | 同上；不跨浏览器版本 fallback                  |
+| uv            |                     0.25 | setup-uv action 自有依赖 key，仅 main 开启                      | 同上                                           |
+| **合计**      |                 **7.00** | 为未管理条目预留 <1 GB；仓库稳态目标 **<8 GB**                  | 每日检查；这是 sweep 后预算，不是上传时硬配额  |
+
+非矩阵 job 的 `cache-variant` 默认为 `single`；Web 使用稳定的 `strategy.job-index`
+（`web-0..N-1`），shadow runner 使用 `matrix.child`，避免各分片的 Nx 快照争用同一个 immutable key。
+pnpm store 与 Playwright 浏览器内容只由 lockfile 决定，所有 job/分片共享同一条目，不按 variant 复制；Nx 按 job + variant 隔离。
+Docker 保留 GHA 后端，避免为小规模 final-stage 缓存增加 GHCR tag/生命周期管理。
+`mode=min` 不保存全部中间构建层；是否影响真实构建时间须按下述计划观测。
+
+`cache-cleanup.yml` 在 PR closed（包括 merge）和每日 03:23 UTC 运行，通过仓库变量
+`ACTIONS_CACHE_CLEANUP_ENABLED=true` 显式启用。**2026-10-19 冲刺期间保持未启用，冲刺结束由编排者启用**。
+workflow 级 permissions 为空，仅 cleanup job 有 `actions: write`、`pull-requests: read`、
+`contents: read`；`pull_request_target` 只 checkout main，禁用 credential persistence，永不执行 PR 代码。
+脚本分页读取全部 cache，查询实际 PR state，只删除确认 closed 的 `refs/pull/<n>/merge`，
+然后按前缀预算删除 main 的最久未访问条目（包含旧 key 格式）；open PR、其他 branch、tag 和未知前缀
+不会推断为可删除。PR closed 触发也执行相同幂等 sweep，定时 sweep 补偿遗漏事件。
+删除/API 失败会使任务失败，不吞错或自动重试。清理前打印计划、清理后打印 usage；没有 all-cache 删除入口。
+
+预算清理可牺牲旧快照和冷门 shard 的命中率。历史实验 branch 等未管理条目仍可能使总量超标，
+以每日 usage 为准，超过预留空间时由 owner 逐 ref 确认处置，不能把预算视为已满足验收。
+本次不手工批量删除既有缓存，也不在冲刺期间触发 workflow 或等待 GitHub CI。
+
+真实 CI 验证待冲刺结束：启用 CI/清理后，连续 7 天每日保存 `gh cache list --limit 1000
+--json key,sizeInBytes,lastAccessedAt,ref` 与 cache usage，要求每天 <8,000,000,000 bytes 且无驱逐压力。
+至少采集变更前后各 5 次可比 PR run（相同 lockfile、affected lanes、runner OS），从
+workspace receipt 按 job/shard 比较 pnpm/Nx/Playwright exact 命中率，并用 cache action 日志区分 fallback 与 cold miss。
+从变更前后各至少 5 次可比 main candidate run 按 component 比较 Docker build step P50/P95，
+分开 cold/warm，记录 Run URL、SHA、耗时和缓存状态；warm Docker P50 回退 >10% 时调查。
+这些命中率、时间和一周稳态证据均延期至冲刺结束，不能用本地工具测试替代。

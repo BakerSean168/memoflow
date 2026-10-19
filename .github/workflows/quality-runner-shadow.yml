@@ -39,6 +39,7 @@ jobs:
         with: { fetch-depth: 0 }
       - uses: ./.github/actions/setup-nx-affected-job
         with:
+          cache-variant: ${{ matrix.child }}
           node-version: '24'
           setup-python: 'true'
           setup-uv: 'true'

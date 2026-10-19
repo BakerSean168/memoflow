@@ -12165,6 +12165,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/ci-cd-platform/__tests__/cache-policy.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "ci-cd-platform:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/ci-cd-platform/__tests__/candidate-manifest.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -13124,7 +13132,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "node-test",
-      "fileCount": 38
+      "fileCount": 39
     },
     {
       "id": "memoflow:test:governance",
@@ -14083,7 +14091,7 @@
     "boundary-main": 9,
     "e2e": 66,
     "perf": 2,
-    "governance": 72
+    "governance": 73
   },
   "e2eGovernance": {
     "version": 2,
