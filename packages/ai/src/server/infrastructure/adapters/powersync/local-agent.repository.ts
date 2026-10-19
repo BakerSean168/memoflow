@@ -18,6 +18,7 @@ import { LocalAgentError } from '../../../../shared/local-agent-error';
 
 const StoredConversationSchema = LocalAgentConversationSchema.extend({
   connectionFingerprint: z.string().min(1),
+  historyOrderVersion: z.literal(1).optional(),
   nativeSessionId: z.string().min(1).nullable(),
   accountFingerprint: z.string().min(1).nullable().default(null),
 });
@@ -227,6 +228,7 @@ export class LocalAgentRepository {
         runtimeKind: 'local_agent',
         driver: connection.driver,
         connectionFingerprint: connectionFingerprint(connection),
+        historyOrderVersion: 1,
         nativeSessionId: null,
         createdAt: now,
         updatedAt: now,
@@ -294,6 +296,37 @@ export class LocalAgentRepository {
       );
     });
   }
+  /** Upgrade old history once, preserving its previous created_at/id order. */
+  private async ensureHistoryOrder(
+    tx: IElectronDatabaseTransaction,
+    owner: string,
+    conversation: StoredLocalConversation,
+  ): Promise<StoredLocalConversation> {
+    if (conversation.historyOrderVersion === 1) return conversation;
+    const rows = await tx.getAll<unknown>(
+      'SELECT record_json FROM ai_local_conversation_items WHERE identity_id = ? AND conversation_id = ? ORDER BY created_at, id',
+      [owner, conversation.id],
+    );
+    let last = -1;
+    for (const row of rows) {
+      const item = decode(row, StoredMessageSchema);
+      const createdAt = Math.max(item.createdAt, last + 1);
+      if (createdAt !== item.createdAt) {
+        await tx.execute(
+          'UPDATE ai_local_conversation_items SET created_at = ?, record_json = ? WHERE id = ? AND identity_id = ? AND conversation_id = ?',
+          [createdAt, JSON.stringify({ ...item, createdAt }), item.id, owner, conversation.id],
+        );
+      }
+      last = createdAt;
+    }
+    const next: StoredLocalConversation = { ...conversation, historyOrderVersion: 1 };
+    await tx.execute(
+      'UPDATE ai_local_conversations SET record_json = ? WHERE id = ? AND identity_id = ?',
+      [JSON.stringify(next), conversation.id, owner],
+    );
+    return next;
+  }
+
   async saveMessage(
     owner: string,
     message: AssistantRuntimeMessageView,
@@ -302,17 +335,45 @@ export class LocalAgentRepository {
     const item = StoredMessageSchema.parse({ ...message, complete });
     if (item.content.length > 200_000) throw new LocalAgentError('LOCAL_AGENT_PROTOCOL_ERROR');
     await this.db.writeTransaction(async (tx) => {
-      const conversation = await this.read(
-        'ai_local_conversations',
-        owner,
-        item.conversationId,
-        StoredConversationSchema,
+      const conversation = await this.ensureHistoryOrder(
         tx,
+        owner,
+        await this.read(
+          'ai_local_conversations',
+          owner,
+          item.conversationId,
+          StoredConversationSchema,
+          tx,
+        ),
       );
+      const existing = await tx.getOptional<{
+        identity_id: string;
+        conversation_id: string;
+        created_at: number;
+      }>(
+        'SELECT identity_id, conversation_id, created_at FROM ai_local_conversation_items WHERE id = ?',
+        [item.id],
+      );
+      if (
+        existing &&
+        (existing.identity_id !== owner || existing.conversation_id !== item.conversationId)
+      )
+        throw new LocalAgentError('CONFLICT');
+      const latest = existing
+        ? null
+        : await tx.getOptional<{ created_at: number }>(
+            'SELECT created_at FROM ai_local_conversation_items WHERE identity_id = ? AND conversation_id = ? ORDER BY created_at DESC LIMIT 1',
+            [owner, item.conversationId],
+          );
+      // The persisted timestamp is a logical clock: allocate only on first insert.
+      // Streaming updates must never move an item or alter the latest-500 window.
+      const createdAt =
+        existing?.created_at ?? Math.max(item.createdAt, (latest?.created_at ?? -1) + 1);
+      const stored = StoredMessageSchema.parse({ ...item, createdAt });
       // Transactional existence check prevents late events resurrecting a deleted conversation.
       await tx.execute(
         'INSERT OR REPLACE INTO ai_local_conversation_items (id, identity_id, conversation_id, created_at, record_json) VALUES (?, ?, ?, ?, ?)',
-        [item.id, owner, item.conversationId, item.createdAt, JSON.stringify(item)],
+        [item.id, owner, item.conversationId, createdAt, JSON.stringify(stored)],
       );
       await tx.execute(
         'UPDATE ai_local_conversations SET record_json = ? WHERE id = ? AND identity_id = ?',
@@ -321,17 +382,29 @@ export class LocalAgentRepository {
     });
   }
   async listMessages(owner: string, conversationId: string) {
-    await this.getConversation(owner, conversationId);
-    const rows = await this.db.getAll<unknown>(
-      'SELECT record_json FROM ai_local_conversation_items WHERE identity_id = ? AND conversation_id = ? ORDER BY created_at DESC, id DESC LIMIT 500',
-      [owner, conversationId],
-    );
-    const items = rows.map((row) => decode(row, StoredMessageSchema)).reverse();
-    return {
-      conversationId,
-      messages: items.map(({ complete: _complete, ...message }) => message),
-      incomplete: rows.length === 500 || items.some((item) => !item.complete),
-    };
+    return this.db.writeTransaction(async (tx) => {
+      await this.ensureHistoryOrder(
+        tx,
+        owner,
+        await this.read(
+          'ai_local_conversations',
+          owner,
+          conversationId,
+          StoredConversationSchema,
+          tx,
+        ),
+      );
+      const rows = await tx.getAll<unknown>(
+        'SELECT record_json FROM ai_local_conversation_items WHERE identity_id = ? AND conversation_id = ? ORDER BY created_at DESC LIMIT 500',
+        [owner, conversationId],
+      );
+      const items = rows.map((row) => decode(row, StoredMessageSchema)).reverse();
+      return {
+        conversationId,
+        messages: items.map(({ complete: _complete, ...message }) => message),
+        incomplete: rows.length === 500 || items.some((item) => !item.complete),
+      };
+    });
   }
   async deleteConversation(owner: string, id: string): Promise<boolean> {
     return this.db.writeTransaction(async (tx) => {

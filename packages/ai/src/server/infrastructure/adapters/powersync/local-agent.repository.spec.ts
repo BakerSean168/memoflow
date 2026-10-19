@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createLocalAgentSqlite } from '../../../../testing/local-agent-sqlite';
 import { LocalAgentRepository } from './local-agent.repository';
 
@@ -8,7 +8,10 @@ function database() {
   databases.push(db);
   return db;
 }
-afterEach(() => databases.splice(0).forEach((db) => db.close()));
+afterEach(() => {
+  vi.restoreAllMocks();
+  databases.splice(0).forEach((db) => db.close());
+});
 
 describe('local Agent persistence with real SQLite', () => {
   const input = {
@@ -18,6 +21,160 @@ describe('local Agent persistence with real SQLite', () => {
     enabled: true,
     writeScopes: [],
   };
+  it('keeps insertion order and the latest 500 items with a frozen or regressing clock after reopening', async () => {
+    const db = database();
+    let store = new LocalAgentRepository(db);
+    const clock = vi.spyOn(Date, 'now').mockReturnValue(1_800_000_000_000);
+    const connection = await store.createConnection('owner', input);
+    const conversation = await store.createConversation('owner', {
+      connectionId: connection.id,
+      modelId: 'model',
+      name: 'Chat',
+    });
+    const message = (index: number) => ({
+      id: String(1000 - index),
+      conversationId: conversation.id,
+      role: 'assistant' as const,
+      content: String(index),
+      attachments: [],
+      createdAt: Date.now(),
+    });
+    for (let index = 0; index < 502; index++) {
+      if (index === 501) clock.mockReturnValue(1_700_000_000_000);
+      await store.saveMessage('owner', message(index), true);
+    }
+    store = new LocalAgentRepository(db);
+    const before = await store.listMessages('owner', conversation.id);
+    expect(before.messages.map((item) => item.content)).toEqual(
+      Array.from({ length: 500 }, (_, index) => String(index + 2)),
+    );
+    expect(before.incomplete).toBe(true);
+    await store.saveMessage(
+      'owner',
+      { ...message(2), content: 'updated', createdAt: Date.now() + 999_999 },
+      false,
+    );
+    const after = await store.listMessages('owner', conversation.id);
+    expect(after.messages.map((item) => item.id)).toEqual(before.messages.map((item) => item.id));
+    expect(after.messages[0]).toMatchObject({
+      content: 'updated',
+      createdAt: before.messages[0]?.createdAt,
+    });
+    expect(
+      after.messages.every(
+        (item, index) => index === 0 || item.createdAt > after.messages[index - 1]!.createdAt,
+      ),
+    ).toBe(true);
+  });
+
+  it.each(['read', 'write'] as const)(
+    'migrates legacy ties before the first %s and preserves the old window across restart',
+    async (trigger) => {
+      const db = database();
+      const store = new LocalAgentRepository(db);
+      const connection = await store.createConnection('owner', input);
+      const conversation = await store.createConversation('owner', {
+        connectionId: connection.id,
+        modelId: 'model',
+        name: 'Legacy',
+      });
+      await db.execute('UPDATE ai_local_conversations SET record_json = ? WHERE id = ?', [
+        JSON.stringify({ ...conversation, historyOrderVersion: undefined }),
+        conversation.id,
+      ]);
+      const timestamp = 1_800_000_000_000;
+      const legacy = (index: number) => ({
+        id: String(index).padStart(4, '0'),
+        conversationId: conversation.id,
+        role: 'assistant' as const,
+        content: String(index),
+        attachments: [],
+        createdAt: timestamp,
+      });
+      // Insert in reverse order: migration must follow the historical timestamp/id order.
+      for (let index = 501; index >= 0; index--) {
+        const item = legacy(index);
+        await db.execute(
+          'INSERT INTO ai_local_conversation_items (id, identity_id, conversation_id, created_at, record_json) VALUES (?, ?, ?, ?, ?)',
+          [
+            item.id,
+            'owner',
+            conversation.id,
+            timestamp,
+            JSON.stringify({ ...item, complete: true }),
+          ],
+        );
+      }
+      if (trigger === 'write')
+        await store.saveMessage('owner', { ...legacy(501), content: 'updated' }, true);
+      const history = await store.listMessages('owner', conversation.id);
+      expect(history.messages.map((item) => item.id)).toEqual(
+        Array.from({ length: 500 }, (_, index) => legacy(index + 2).id),
+      );
+      expect(history.messages.map((item) => item.createdAt)).toEqual(
+        Array.from({ length: 500 }, (_, index) => timestamp + index + 2),
+      );
+      expect((await store.getConversation('owner', conversation.id)).historyOrderVersion).toBe(1);
+      const reopened = new LocalAgentRepository(db);
+      expect(await reopened.listMessages('owner', conversation.id)).toEqual(history);
+      await reopened.saveMessage('owner', { ...legacy(0), id: 'append', createdAt: 1 }, true);
+      expect((await reopened.listMessages('owner', conversation.id)).messages.at(-1)).toMatchObject(
+        { id: 'append', createdAt: timestamp + 502 },
+      );
+    },
+  );
+
+  it('rolls back both legacy normalization and its marker when migration fails', async () => {
+    const db = database();
+    const store = new LocalAgentRepository(db);
+    const connection = await store.createConnection('owner', input);
+    const conversation = await store.createConversation('owner', {
+      connectionId: connection.id,
+      modelId: 'model',
+      name: 'Legacy',
+    });
+    await db.execute('UPDATE ai_local_conversations SET record_json = ? WHERE id = ?', [
+      JSON.stringify({ ...conversation, historyOrderVersion: undefined }),
+      conversation.id,
+    ]);
+    for (const id of ['a', 'b']) {
+      await db.execute(
+        'INSERT INTO ai_local_conversation_items (id, identity_id, conversation_id, created_at, record_json) VALUES (?, ?, ?, ?, ?)',
+        [
+          id,
+          'owner',
+          conversation.id,
+          10,
+          JSON.stringify({
+            id,
+            conversationId: conversation.id,
+            role: 'user',
+            content: id,
+            attachments: [],
+            createdAt: 10,
+            complete: true,
+          }),
+        ],
+      );
+    }
+    const execute = db.execute.bind(db);
+    vi.spyOn(db, 'execute').mockImplementation(async (query, values) => {
+      if (query.startsWith('UPDATE ai_local_conversations')) throw new Error('write failed');
+      return execute(query, values);
+    });
+    await expect(store.listMessages('owner', conversation.id)).rejects.toThrow('write failed');
+    vi.restoreAllMocks();
+    expect(
+      (await store.getConversation('owner', conversation.id)).historyOrderVersion,
+    ).toBeUndefined();
+    expect(
+      await db.getAll('SELECT created_at FROM ai_local_conversation_items ORDER BY id'),
+    ).toEqual([{ created_at: 10 }, { created_at: 10 }]);
+    expect(
+      (await store.listMessages('owner', conversation.id)).messages.map((item) => item.createdAt),
+    ).toEqual([10, 11]);
+  });
+
   it('persists unique immutable slugs per owner and preserves old records', async () => {
     const db = database();
     const store = new LocalAgentRepository(db);
