@@ -93,16 +93,17 @@ export class AgentInstanceRegistry {
     if (!current) throw new AgentRegistryError('NOT_FOUND');
     this.assertDriver(current.driver);
     if (current.revision !== input.expectedRevision) throw new AgentRegistryError('CONFLICT');
-    const nativeConnectionId =
-      current.driver === 'mastra' ? undefined : current.legacyConnectionId;
+    const nativeConnectionId = current.driver === 'mastra' ? undefined : current.legacyConnectionId;
+    // Stop live turns only after the revision-guarded write committed: a rejected
+    // (stale) write must not cancel work on the still-current revision. Between
+    // commit and cancel the tool bridge already rejects the old revision.
+    const stopNativeTurns = () => {
+      if (nativeConnectionId) this.nativeLifecycle?.cancelConnection(owner, nativeConnectionId);
+    };
     if (input.action === 'reset') {
       if (current.instanceId !== current.driver) throw new AgentRegistryError('VALIDATION_ERROR');
       const defaults = defaultAgentInstance(current.driver);
-      // A reset changes executable/home and invalidates the live turn before the
-      // new revision becomes readable by the native tool bridge.
-      if (nativeConnectionId)
-        this.nativeLifecycle?.cancelConnection(owner, nativeConnectionId);
-      return this.repository.replace(
+      const reset = await this.repository.replace(
         owner,
         AgentInstanceSchema.parse({
           ...current,
@@ -123,6 +124,8 @@ export class AgentInstanceRegistry {
         }),
         input.expectedRevision,
       );
+      stopNativeTurns();
+      return reset;
     }
     if (input.action === 'remove') {
       if (
@@ -131,9 +134,8 @@ export class AgentInstanceRegistry {
         (await this.repository.hasConversationBindings(owner, current.instanceId))
       )
         throw new AgentRegistryError('CONFLICT');
-      if (nativeConnectionId)
-        this.nativeLifecycle?.cancelConnection(owner, nativeConnectionId);
       await this.repository.remove(owner, current.instanceId, input.expectedRevision);
+      stopNativeTurns();
       return null;
     }
     const next = AgentInstanceSchema.parse({
@@ -146,11 +148,9 @@ export class AgentInstanceRegistry {
     if (next.driver === 'mastra' && next.nativeConfig !== undefined)
       throw new AgentRegistryError('VALIDATION_ERROR');
     if (input.action === 'update') {
-      // Disable/config changes must stop the old revision before it can accept
-      // another native tool call with stale scopes.
-      if (nativeConnectionId)
-        this.nativeLifecycle?.cancelConnection(owner, nativeConnectionId);
-      return this.repository.replace(owner, next, input.expectedRevision);
+      const updated = await this.repository.replace(owner, next, input.expectedRevision);
+      stopNativeTurns();
+      return updated;
     }
     if (current.driver !== 'mastra') throw new AgentRegistryError('VALIDATION_ERROR');
     const binding = {
