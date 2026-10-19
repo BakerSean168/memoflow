@@ -116,14 +116,15 @@ export class AntigravityLoginManager {
     // A second click joins the active flow instead of spawning another server.
     if (current && !current.settled) return { ...current.state };
     const expiresAt = this.now() + this.timeoutMs;
+    const id = randomUUID();
     const flow: Flow = {
-      id: randomUUID(),
+      id,
       identityId,
       connectionId,
       expiresAt,
       state: {
         phase: 'starting',
-        flowId: '',
+        flowId: id,
         authorizationUrl: null,
         expiresAt,
         failure: null,
@@ -131,7 +132,6 @@ export class AntigravityLoginManager {
       callbackSent: false,
       settled: false,
     };
-    flow.state.flowId = flow.id;
     this.flows.set(key, flow);
     this.trim();
     this.arm(flow);
@@ -160,13 +160,10 @@ export class AntigravityLoginManager {
   ): Promise<LocalAgentAuthState> {
     const flow = this.active(identityId, connectionId, flowId);
     if (!flow) return this.status(identityId, connectionId);
-    if (flow.callbackSent)
-      return { ...flow.state, failure: 'callback_duplicate' satisfies LocalAgentAuthFailure };
-    if (!flow.pending)
-      return { ...flow.state, failure: 'callback_invalid' satisfies LocalAgentAuthFailure };
+    if (flow.callbackSent) return { ...flow.state, failure: 'callback_duplicate' };
+    if (!flow.pending) return { ...flow.state, failure: 'callback_invalid' };
     const callback = parseAntigravityCallbackUrl(flow.pending, callbackUrl);
-    if (!callback)
-      return { ...flow.state, failure: 'callback_invalid' satisfies LocalAgentAuthFailure };
+    if (!callback) return { ...flow.state, failure: 'callback_invalid' };
     flow.callbackSent = true;
     this.publish(flow, {
       phase: 'verifying',
