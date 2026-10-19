@@ -1,22 +1,24 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Ref } from 'vue';
-import type {
-  AgentConversationSelection,
-  AgentRegistrySnapshot,
-  AIModelInfo,
-} from '@memoflow/contracts/ai';
+import type { AgentConversationSelection, AgentRegistrySnapshot } from '@memoflow/contracts/ai';
 import type { ChatModelOption, PersistedConversationModelMap, ProviderListItem } from './types';
+import { isModelSelectable, listSelectableModels, type ModelCatalog } from './useAIModelCatalog';
 
 const LAST_MODEL_STORAGE_KEY = 'ai:last-model-key';
 const CONVERSATION_MODEL_STORAGE_KEY = 'ai:conversation-model-map';
+const MODEL_PREFERENCE_STORAGE_PREFIX = 'ai:model-preference:v1';
 
 export interface UseAIModelSelectionOptions {
   providers: Ref<ProviderListItem[]>;
   /** When available, the Agent Registry is authoritative for new conversation choices. */
   agentRegistrySnapshot?: Ref<AgentRegistrySnapshot | null>;
   /** Ephemeral verified live directory, never persisted as provider configuration. */
-  modelCatalogs?: Ref<Record<string, AIModelInfo[]>>;
+  modelCatalog?: Ref<ModelCatalog>;
+  /** Identity/Profile owner for persisted model preferences. */
+  resolveIdentity?: () => string;
+  /** Existing provider/native default, resolved by the owning runtime. */
+  getDefaultModelKey?: () => string | undefined;
   chatConversationId: Ref<string>;
   readConversationSelection?: (
     conversationId: string,
@@ -31,6 +33,7 @@ export function useAIModelSelection(options: UseAIModelSelectionOptions) {
   const authoritativeSelection = ref<AgentConversationSelection | null>(null);
   const selectionLoading = ref(false);
   let restorationGeneration = 0;
+  let observedIdentity = '';
   onBeforeUnmount(() => {
     restorationGeneration++;
   });
@@ -66,35 +69,43 @@ export function useAIModelSelection(options: UseAIModelSelectionOptions) {
     if (!snapshot) return [];
     const providers = new Map(options.providers.value.map((provider) => [provider.id, provider]));
     const boundGroups = snapshot.instances
-      .filter((instance) => instance.driver === 'mastra' && instance.enabled)
+      .filter((instance) => instance.enabled)
       .flatMap((instance) =>
-        snapshot.bindings
-          .filter((binding) => binding.instanceId === instance.instanceId)
-          .flatMap((binding) => {
-            const provider = providers.get(binding.connectionId);
-            if (!provider) return [];
-            const catalog = options.modelCatalogs?.value[binding.connectionId];
-            const inventory = catalog ?? [];
-            const preferred = inventory.find((model) => model.id === binding.modelId);
-            const models = preferred
-              ? [preferred, ...inventory.filter((model) => model.id !== binding.modelId)]
-              : inventory;
-            const providerName = `${instance.name} · ${provider.name || t('common.unknown')}`;
-            return [
+        (instance.driver === 'mastra'
+          ? snapshot.bindings
+              .filter((binding) => binding.instanceId === instance.instanceId)
+              .map((binding) => ({
+                connectionId: binding.connectionId,
+                preferredModelId: binding.modelId,
+              }))
+          : [
               {
-                providerId: `agent:${instance.instanceId}:${binding.connectionId}`,
-                providerName,
-                models: models.map((model) => ({
-                  key: `agent:${instance.instanceId}::${binding.connectionId}::${model.id}`,
-                  agentInstanceId: instance.instanceId,
-                  providerId: provider.id,
-                  providerName,
-                  modelId: model.id,
-                  modelName: model.name || model.id,
-                })),
+                connectionId: instance.legacyConnectionId ?? instance.instanceId,
+                preferredModelId: undefined,
               },
-            ];
-          }),
+            ]
+        ).flatMap((binding) => {
+          const provider = providers.get(binding.connectionId);
+          if (instance.driver === 'mastra' && !provider) return [];
+          const models = options.modelCatalog?.value[instance.instanceId]?.models ?? [];
+          const orderedModels = [
+            ...models.filter((model) => model.modelId === binding.preferredModelId),
+            ...models.filter((model) => model.modelId !== binding.preferredModelId),
+          ];
+          const providerName =
+            instance.driver === 'mastra'
+              ? `${instance.name} · ${provider?.name || t('common.unknown')}`
+              : instance.name;
+          return [
+            {
+              providerId: `agent:${instance.instanceId}:${binding.connectionId}`,
+              providerName,
+              models: orderedModels
+                .filter((model) => model.providerId === binding.connectionId)
+                .map((model) => ({ ...model, providerName })),
+            },
+          ];
+        }),
       );
     // Historical provider-only choice is exposed only for the exact existing
     // conversation map entry. Never offer global legacy defaults to new chats.
@@ -136,35 +147,87 @@ export function useAIModelSelection(options: UseAIModelSelectionOptions) {
       (!selectedAgentId.value || selectedModel.value.agentInstanceId === selectedAgentId.value),
   );
 
-  function readLastSelectedModelKey(): string {
-    return localStorage.getItem(LAST_MODEL_STORAGE_KEY) || '';
+  function identityScope(): string {
+    return options.resolveIdentity?.() || '';
   }
 
-  function writeLastSelectedModelKey(modelKey: string) {
-    if (!modelKey) {
-      localStorage.removeItem(LAST_MODEL_STORAGE_KEY);
-      return;
+  observedIdentity = identityScope();
+
+  function scopedStorageKey(prefix: string, identity = identityScope()): string {
+    return `${prefix}:${encodeURIComponent(identity || 'default')}`;
+  }
+
+  function readLastSelectedModelKey(identity = identityScope()): string {
+    const scopedKey = `${MODEL_PREFERENCE_STORAGE_PREFIX}:${encodeURIComponent(identity || 'default')}`;
+    if (scopedKey) {
+      const scoped = localStorage.getItem(scopedKey);
+      if (scoped) return scoped;
+      // Adopt the pre-profile global preference once for the current identity.
+      const legacy = localStorage.getItem(LAST_MODEL_STORAGE_KEY);
+      if (legacy) {
+        localStorage.setItem(scopedKey, legacy);
+        localStorage.removeItem(LAST_MODEL_STORAGE_KEY);
+        return legacy;
+      }
+      return '';
     }
-    localStorage.setItem(LAST_MODEL_STORAGE_KEY, modelKey);
+    return '';
+  }
+
+  function writeLastSelectedModelKey(modelKey: string, identity = identityScope()) {
+    const key = `${MODEL_PREFERENCE_STORAGE_PREFIX}:${encodeURIComponent(identity || 'default')}`;
+    if (!modelKey) localStorage.removeItem(key);
+    else localStorage.setItem(key, modelKey);
   }
 
   function readConversationModelStorage(): PersistedConversationModelMap {
     try {
-      const raw = localStorage.getItem(CONVERSATION_MODEL_STORAGE_KEY);
-      if (!raw) return {};
+      const key = scopedStorageKey(CONVERSATION_MODEL_STORAGE_KEY);
+      const legacyKey = CONVERSATION_MODEL_STORAGE_KEY;
+      if (!key) return {};
+      const raw = localStorage.getItem(key);
+      if (!raw) {
+        const legacyRaw = localStorage.getItem(legacyKey);
+        if (!legacyRaw) return {};
+        const migrated = JSON.parse(legacyRaw) as unknown;
+        if (!migrated || typeof migrated !== 'object' || Array.isArray(migrated)) return {};
+        localStorage.setItem(key, JSON.stringify(migrated));
+        localStorage.removeItem(legacyKey);
+        return migrated as PersistedConversationModelMap;
+      }
       const parsed = JSON.parse(raw) as unknown;
-      return parsed && typeof parsed === 'object' ? (parsed as PersistedConversationModelMap) : {};
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+      const legacyRaw = localStorage.getItem(CONVERSATION_MODEL_STORAGE_KEY);
+      if (legacyRaw) {
+        const legacy = JSON.parse(legacyRaw) as unknown;
+        if (legacy && typeof legacy === 'object' && !Array.isArray(legacy)) {
+          const merged = {
+            ...(legacy as PersistedConversationModelMap),
+            ...(parsed as PersistedConversationModelMap),
+          };
+          localStorage.setItem(key, JSON.stringify(merged));
+          localStorage.removeItem(CONVERSATION_MODEL_STORAGE_KEY);
+          return merged;
+        }
+      }
+      return parsed as PersistedConversationModelMap;
     } catch {
       return {};
     }
   }
 
   function writeConversationModelStorage(next: PersistedConversationModelMap) {
-    localStorage.setItem(CONVERSATION_MODEL_STORAGE_KEY, JSON.stringify(next));
+    const key = scopedStorageKey(CONVERSATION_MODEL_STORAGE_KEY);
+    if (key) localStorage.setItem(key, JSON.stringify(next));
   }
 
-  function persistSelectedModel(modelKey: string, conversationId?: string) {
-    writeLastSelectedModelKey(modelKey);
+  function persistSelectedModel(
+    modelKey: string,
+    conversationId?: string,
+    identity = identityScope(),
+  ) {
+    if (identity !== identityScope()) return;
+    writeLastSelectedModelKey(modelKey, identity);
     if (!conversationId) return;
     const stored = readConversationModelStorage();
     if (!modelKey) {
@@ -196,7 +259,7 @@ export function useAIModelSelection(options: UseAIModelSelectionOptions) {
     // A configured binding is not discovered inventory and must not overwrite
     // an explicit model preference while another connection is still loading.
     const snapshot = options.agentRegistrySnapshot?.value;
-    const catalogs = options.modelCatalogs?.value;
+    const catalogs = options.modelCatalog?.value;
     if (
       catalogs &&
       snapshot?.bindings.some(
@@ -206,7 +269,7 @@ export function useAIModelSelection(options: UseAIModelSelectionOptions) {
               instance.instanceId === binding.instanceId &&
               instance.enabled &&
               instance.driver === 'mastra',
-          ) && catalogs[binding.connectionId] === undefined,
+          ) && catalogs[binding.instanceId] === undefined,
       )
     )
       return;
@@ -242,15 +305,37 @@ export function useAIModelSelection(options: UseAIModelSelectionOptions) {
         return;
       }
     }
-    const preferredCandidates = [preferredModelKey, selectedModelKey.value].filter(
-      (item): item is string => Boolean(item),
-    );
+    const defaultProvider =
+      options.providers.value.find((item) => item.isDefault) || options.providers.value[0];
+    const configuredDefault = defaultProvider?.defaultModel
+      ? allModelOptions.value.find(
+          (item) =>
+            item.providerId === defaultProvider.id && item.modelId === defaultProvider.defaultModel,
+        )?.key
+      : undefined;
+    const explicitDefault = options.getDefaultModelKey?.();
+    const newThread = !options.chatConversationId.value;
+    const preferredCandidates = (
+      newThread
+        ? [explicitDefault, preferredModelKey, configuredDefault, selectedModelKey.value]
+        : [preferredModelKey, selectedModelKey.value, explicitDefault, configuredDefault]
+    ).filter((item): item is string => Boolean(item));
 
+    const selectableModels = options.modelCatalog
+      ? listSelectableModels(options.modelCatalog.value, selectedAgentId.value || undefined)
+      : allModelOptions.value;
     for (const candidate of preferredCandidates) {
       const option = allModelOptions.value.find(
         (item) =>
           item.key === candidate &&
-          (!selectedAgentId.value || item.agentInstanceId === selectedAgentId.value),
+          (!options.agentRegistrySnapshot ||
+            item.agentInstanceId !== undefined ||
+            (Boolean(options.chatConversationId.value) &&
+              readConversationModelStorage()[options.chatConversationId.value] === candidate)) &&
+          (!selectedAgentId.value || item.agentInstanceId === selectedAgentId.value) &&
+          (!options.modelCatalog ||
+            !item.agentInstanceId ||
+            isModelSelectable(options.modelCatalog.value, item.agentInstanceId, item.modelId)),
       );
       if (option) {
         selectedAgentId.value = option.agentInstanceId ?? '';
@@ -260,19 +345,10 @@ export function useAIModelSelection(options: UseAIModelSelectionOptions) {
       }
     }
 
-    const defaultProvider =
-      options.providers.value.find((item) => item.isDefault) || options.providers.value[0] || null;
-
-    const defaultOption =
-      (defaultProvider?.defaultModel
-        ? selectedAgentModels.value.find(
-            (item) =>
-              item.providerId === defaultProvider.id &&
-              item.modelId === defaultProvider.defaultModel,
-          )
-        : null) ||
-      selectedAgentModels.value.find((item) => item.providerId === defaultProvider?.id) ||
-      selectedAgentModels.value[0];
+    const configuredOption = preferredCandidates
+      .map((candidate) => selectableModels.find((model) => model.key === candidate))
+      .find((model) => model !== undefined);
+    const defaultOption = configuredOption ?? selectableModels[0];
 
     selectedModelKey.value = defaultOption?.key || '';
     if (defaultOption?.agentInstanceId) selectedAgentId.value = defaultOption.agentInstanceId;
@@ -284,6 +360,8 @@ export function useAIModelSelection(options: UseAIModelSelectionOptions) {
     const next = allModelOptions.value.find((item) => item.key === modelKey);
     if (!next) return 'unavailable';
     const conversationId = options.chatConversationId.value;
+    if (options.agentRegistrySnapshot && !next.agentInstanceId && !conversationId)
+      return 'unavailable';
     selectedAgentId.value = next.agentInstanceId ?? '';
     selectedModelKey.value = modelKey;
     persistSelectedModel(modelKey, conversationId || undefined);
@@ -309,21 +387,22 @@ export function useAIModelSelection(options: UseAIModelSelectionOptions) {
       options.chatConversationId,
       async (conversationId) => {
         const generation = ++restorationGeneration;
+        const identity = identityScope();
         authoritativeSelection.value = null;
         selectionLoading.value = Boolean(conversationId);
         if (!conversationId) return;
         selectedModelKey.value = '';
         try {
           const selection = await options.readConversationSelection!(conversationId);
-          if (generation !== restorationGeneration) return;
+          if (generation !== restorationGeneration || identity !== identityScope()) return;
           authoritativeSelection.value = selection;
-          const saved = readConversationModelStorage()[conversationId];
           // Preserve a pending next-turn choice while its live catalogue loads.
           // A cached model is never enough without an enabled instance and owned binding.
+          const saved = readConversationModelStorage()[conversationId];
           const [agentKey, providerId, modelId] = saved?.split('::') ?? [];
           const instanceId = agentKey?.startsWith('agent:') ? agentKey.slice(6) : undefined;
           const snapshot = options.agentRegistrySnapshot?.value;
-          const catalog = providerId ? options.modelCatalogs?.value[providerId] : undefined;
+          const catalog = instanceId ? options.modelCatalog?.value[instanceId] : undefined;
           const pending =
             instanceId &&
             providerId &&
@@ -337,12 +416,13 @@ export function useAIModelSelection(options: UseAIModelSelectionOptions) {
             snapshot.bindings.some(
               (binding) => binding.instanceId === instanceId && binding.connectionId === providerId,
             ) &&
-            (catalog === undefined || catalog.some((model) => model.id === modelId));
+            (catalog === undefined || catalog.models.some((model) => model.modelId === modelId));
           selectedAgentId.value = pending ? instanceId : (selection?.agentInstanceId ?? '');
           if (!pending && selection?.providerId && selection.modelId) {
             persistSelectedModel(
               `agent:${selection.agentInstanceId}::${selection.providerId}::${selection.modelId}`,
               conversationId,
+              identity,
             );
           }
           syncSelectedModel(getPersistedModelKey(conversationId));
@@ -357,9 +437,26 @@ export function useAIModelSelection(options: UseAIModelSelectionOptions) {
     );
   }
 
+  if (options.resolveIdentity) {
+    watch(
+      options.resolveIdentity,
+      (identity) => {
+        if (identity === observedIdentity) return;
+        observedIdentity = identity;
+        restorationGeneration++;
+        selectedModelKey.value = '';
+        selectedAgentId.value = '';
+        authoritativeSelection.value = null;
+        syncSelectedModel(getPersistedModelKey(options.chatConversationId.value || undefined));
+      },
+      { flush: 'sync' },
+    );
+  }
+
   watch(
     [() => allModelOptions.value.map((item) => item.key).join('|'), options.chatConversationId],
     () => {
+      if (identityScope() !== observedIdentity) return;
       syncSelectedModel(getPersistedModelKey(options.chatConversationId.value || undefined));
     },
     { immediate: true },
