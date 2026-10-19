@@ -102,7 +102,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     refreshProviderModels,
   });
   const agentRegistrySnapshot = catalog.snapshot;
-  const modelCatalogs = catalog.providerCatalogs;
+  const modelCatalog = catalog.entries;
   const modelCatalogLoading = catalog.loading;
   const loadAgentRegistry = catalog.refresh;
   const configurationRevision = inject(AI_CONFIGURATION_REVISION_KEY, undefined);
@@ -312,7 +312,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
 
   const modelSelection = useAIModelSelection({
     providers: providerList,
-    ...(agentRegistryClient ? { agentRegistrySnapshot, modelCatalogs } : {}),
+    ...(agentRegistryClient ? { agentRegistrySnapshot, modelCatalog, resolveIdentity } : {}),
     chatConversationId: chatSession.chatConversationId,
     ...(agentRegistryClient?.conversationSelection
       ? {
