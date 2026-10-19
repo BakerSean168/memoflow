@@ -14,7 +14,7 @@ import { createRoutinePrismaRepositories } from './prisma';
 import { createRoutineCoachCommandService } from '../application/services/routine-coach-command.service';
 import { createInMemoryRoutineRuntimeContextStore } from '../runtime/routine-runtime-context';
 import { createRoutineScheduleChangedNotifier } from './routine-schedule/routine-override-change-notifier';
-import { nextWallClockOccurrence, type WallClockTrigger } from '../domain/routine';
+import { nextWallClockOccurrence, createWallClockTrigger } from '../domain/routine';
 
 /** Hosted owner write: facts and exact result commit together; projection runs after commit. */
 export function createRoutinePrismaAgentMutations(
@@ -40,9 +40,8 @@ export function createRoutinePrismaAgentMutations(
         async (tx) => {
           const at = (options.now ?? Date.now)();
           const { startDate, ...wallClock } = parsed.trigger;
-          const trigger: WallClockTrigger = {
+          const trigger = createWallClockTrigger({
             ...wallClock,
-            timingOwner: 'scheduler',
             recurrence: {
               startDate,
               frequency: 'daily',
@@ -51,7 +50,7 @@ export function createRoutinePrismaAgentMutations(
               count: 1,
               until: null,
             },
-          };
+          });
           const scheduledFor = nextWallClockOccurrence(engine, trigger, asInstant(at));
           if (scheduledFor === null || Number(scheduledFor) > at + 366 * 86400000)
             throw new ExternalMutationError('VALIDATION_ERROR');
@@ -65,14 +64,19 @@ export function createRoutinePrismaAgentMutations(
               changed.push(event);
             },
           });
-          const routine = await owner.createRoutine({
-            identityId: cx.identityId,
-            name: parsed.name,
-            description: parsed.description,
-            trigger,
-            profileIds: [],
-            at,
-          });
+          const routine = await owner
+            .createRoutine({
+              identityId: cx.identityId,
+              name: parsed.name,
+              description: parsed.description,
+              trigger,
+              profileIds: [],
+              at,
+            })
+            .catch((error: unknown) => {
+              if (error instanceof TypeError) throw new ExternalMutationError('VALIDATION_ERROR');
+              throw error;
+            });
           return {
             result: {
               routine: { id: routine.routineId, name: routine.name, version: routine.version },

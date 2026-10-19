@@ -1,4 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
+import type { GatewayWriteAuthority } from '../ports';
+import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { createReadGateway } from './read-gateway';
 
 const context = {
@@ -360,7 +362,7 @@ describe('Routine hosted write capability', () => {
       },
       replayed: false,
     };
-    const routineCreate = vi.fn(async (_input, _cx, authority) => {
+    const routineCreate = vi.fn(async (_input: unknown, _cx: ExecutionContext, authority: GatewayWriteAuthority) => {
       await authority.authorize();
       return receipt;
     });

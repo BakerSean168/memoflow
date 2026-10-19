@@ -157,14 +157,16 @@ export async function isScopedPatAuthorityCurrent(
   tx: Prisma.TransactionClient,
   principal: { identityId: string; credentialId: string; scopes: readonly string[] },
   accountIsActive: (identityId: string) => Promise<boolean>,
+  requiredScope: string,
 ): Promise<boolean> {
   const pat = await tx.externalAgentPat.findUnique({ where: { id: principal.credentialId } });
   if (
     !pat ||
+    !CreateScopedPatSchema.shape.scopes.safeParse(pat.scopes).success ||
     pat.userId !== principal.identityId ||
     pat.revokedAt !== null ||
     pat.expiresAt.getTime() <= Date.now() ||
-    !pat.scopes.includes('routines:write') ||
+    !pat.scopes.includes(requiredScope) ||
     principal.scopes.some((scope) => !pat.scopes.includes(scope))
   )
     return false;

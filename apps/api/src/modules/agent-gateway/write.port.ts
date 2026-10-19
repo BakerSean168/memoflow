@@ -3,7 +3,10 @@ import { createRoutinePrismaAgentMutations } from '@memoflow/reminder';
 import { isScopedPatAuthorityCurrent } from '@memoflow/cloud-auth/server';
 import { createAccountPrismaActiveQuery } from '@memoflow/account';
 import { createTaskPrismaAgentMutations } from '@memoflow/task';
-import { ExternalMutationError } from '@memoflow/database/transaction';
+import {
+  ExternalMutationError,
+  type ExternalMutationAuthority,
+} from '@memoflow/database/transaction';
 import type { PrismaClient } from '@memoflow/database';
 import {
   GatewayReadError,
@@ -21,6 +24,7 @@ import {
   GatewayTaskUpdateSchema,
   GatewayTaskCompleteSchema,
 } from '@memoflow/contracts/agent-gateway';
+import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { UserTimeContextPort } from '@memoflow/time';
 import { ResultErrorException } from '@memoflow/contracts/result';
 import { z } from 'zod';
@@ -34,6 +38,31 @@ export function bindGatewayWrites(
   const tasks = createTaskPrismaAgentMutations(db, time, createGoalPrismaAgentReadPort);
   function scope(authority: GatewayWriteAuthority, required: string) {
     if (!authority.scopes.includes(required)) throw new GatewayReadError('FORBIDDEN');
+  }
+  function currentAuthority(
+    cx: ExecutionContext,
+    authority: GatewayWriteAuthority,
+    requiredScope: string,
+  ): ExternalMutationAuthority {
+    scope(authority, requiredScope);
+    return {
+      ...authority,
+      authorizeInTransaction: async (tx) => {
+        if (
+          !(await isScopedPatAuthorityCurrent(
+            tx,
+            {
+              identityId: cx.identityId,
+              credentialId: authority.connectionId,
+              scopes: authority.scopes,
+            },
+            createAccountPrismaActiveQuery(tx),
+            requiredScope,
+          ))
+        )
+          throw new GatewayReadError('FORBIDDEN');
+      },
+    };
   }
   const bind = <T>(work: () => Promise<T>) =>
     Promise.resolve()
@@ -54,62 +83,66 @@ export function bindGatewayWrites(
   return {
     ...(options.routineWriteEnabled
       ? {
-          routineCreate: (
-            input: unknown,
-            cx: import('@memoflow/contracts/shared').ExecutionContext,
-            authority: GatewayWriteAuthority,
-          ) =>
+          routineCreate: (input: unknown, cx: ExecutionContext, authority: GatewayWriteAuthority) =>
             bind(async () => {
               scope(authority, 'routines:write');
               return createRoutinePrismaAgentMutations(db).create(
                 GatewayRoutineCreateSchema.parse(input),
                 cx,
-                {
-                  ...authority,
-                  authorizeInTransaction: async (tx) => {
-                    if (
-                      !(await isScopedPatAuthorityCurrent(
-                        tx,
-                        {
-                          identityId: cx.identityId,
-                          credentialId: authority.connectionId,
-                          scopes: authority.scopes,
-                        },
-                        createAccountPrismaActiveQuery(tx),
-                      ))
-                    )
-                      throw new GatewayReadError('FORBIDDEN');
-                  },
-                },
+                currentAuthority(cx, authority, 'routines:write'),
               );
             }),
         }
       : {}),
     goalCreate: (input, cx, authority) =>
-      bind(() => goals.create(GatewayGoalCreateSchema.parse(input), cx, authority)),
+      bind(() =>
+        goals.create(
+          GatewayGoalCreateSchema.parse(input),
+          cx,
+          currentAuthority(cx, authority, 'goals:write'),
+        ),
+      ),
     goalUpdate: (input, cx, authority) =>
-      bind(() => goals.update(GatewayGoalUpdateSchema.parse(input), cx, authority)),
+      bind(() =>
+        goals.update(
+          GatewayGoalUpdateSchema.parse(input),
+          cx,
+          currentAuthority(cx, authority, 'goals:write'),
+        ),
+      ),
     keyResultCreate: (input, cx, authority) =>
-      bind(() => goals.createKeyResult(GatewayKeyResultCreateSchema.parse(input), cx, authority)),
+      bind(() =>
+        goals.createKeyResult(
+          GatewayKeyResultCreateSchema.parse(input),
+          cx,
+          currentAuthority(cx, authority, 'goals:write'),
+        ),
+      ),
     keyResultUpdate: (input, cx, authority) =>
-      bind(() => goals.updateKeyResult(GatewayKeyResultUpdateSchema.parse(input), cx, authority)),
+      bind(() =>
+        goals.updateKeyResult(
+          GatewayKeyResultUpdateSchema.parse(input),
+          cx,
+          currentAuthority(cx, authority, 'goals:write'),
+        ),
+      ),
     taskCreate: (input, cx, authority) =>
       bind(async () => {
         const parsed = GatewayTaskCreateSchema.parse(input);
         if (parsed.plan.goalBinding) scope(authority, 'goals:write');
-        return tasks.create(parsed, cx, authority);
+        return tasks.create(parsed, cx, currentAuthority(cx, authority, 'tasks:write'));
       }),
     taskUpdate: (input, cx, authority) =>
       bind(async () => {
         const parsed = GatewayTaskUpdateSchema.parse(input);
         if (parsed.changes.goalBinding !== undefined) scope(authority, 'goals:write');
-        return tasks.update(parsed, cx, authority);
+        return tasks.update(parsed, cx, currentAuthority(cx, authority, 'tasks:write'));
       }),
     taskComplete: (input, cx, authority) =>
       bind(async () => {
         const parsed = GatewayTaskCompleteSchema.parse(input);
         if (parsed.completion.decision === 'record') scope(authority, 'goals:read');
-        return tasks.complete(parsed, cx, authority);
+        return tasks.complete(parsed, cx, currentAuthority(cx, authority, 'tasks:write'));
       }),
   };
 }

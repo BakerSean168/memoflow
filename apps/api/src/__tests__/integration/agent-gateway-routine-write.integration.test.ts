@@ -1,7 +1,8 @@
-import { afterAll, beforeEach, expect, it } from 'vitest';
+import { afterAll, beforeEach, expect, it, vi } from 'vitest';
 import { prisma } from '@memoflow/database';
 import { IdentityId } from '@memoflow/domain-shared';
-import { createRoutinePrismaAgentMutations } from '@memoflow/reminder';
+import { RoutineAgentCreateSchema } from '@memoflow/contracts/routine';
+import { RoutineDefinition, createRoutinePrismaAgentMutations } from '@memoflow/reminder';
 import { createReadGateway } from '@memoflow/agent-gateway/server';
 import { createScopedPatService } from '@memoflow/cloud-auth/server';
 import { createAccountPrismaActiveQuery } from '@memoflow/account';
@@ -37,7 +38,7 @@ const time = {
 };
 const at = Date.parse('2026-10-19T00:00:00Z');
 const due = Date.parse('2026-10-20T01:00:00Z');
-const input = {
+const input = RoutineAgentCreateSchema.parse({
   idempotencyKey: 'once',
   name: 'Review Q4 goals',
   description: 'Private reminder',
@@ -47,7 +48,7 @@ const input = {
     timeZone: 'Asia/Shanghai',
     startDate: '2026-10-20',
   },
-};
+});
 const authority = { connectionId: 'credential-a', authorize: async () => {} };
 beforeEach(cleanAll);
 afterAll(async () => {
@@ -358,8 +359,9 @@ async function projectAndExecute(identityId: string, routineId: string) {
     notificationRequested: true,
   });
   expect(await restarted.executeRoutineOccurrence(payload)).toMatchObject({
-    kind: 'skipped',
-    reason: 'already-finalized',
+    kind: 'succeeded',
+    nextOccurrenceAt: null,
+    notificationRequested: true,
   });
   expect(await prisma.routineOccurrence.count({ where: { identityId, routineId } })).toBe(1);
   const after = await createRoutinePrismaScheduleProjectionSource(prisma, {
@@ -367,7 +369,16 @@ async function projectAndExecute(identityId: string, routineId: string) {
   }).buildRoutinePlan(routineId, identityId);
   expect(after.desired).toEqual([]);
   await scheduler.reconcile(after.owner, after.desired);
-  const outbox = await prisma.sharedOutbox.findMany({ where: { identityId } });
+  expect(
+    await prisma.scheduledInvocation.count({
+      where: {
+        identityId,
+        ownerId: routineId,
+        status: { in: ['pending', 'retry_wait', 'running'] },
+      },
+    }),
+  ).toBe(0);
+  const outbox = await prisma.outboxMessage.findMany({ where: { identityId } });
   expect(outbox).toHaveLength(1);
   return {
     row: await prisma.routineDefinition.findUniqueOrThrow({ where: { id: routineId } }),
@@ -419,3 +430,115 @@ it('repairs a lost post-commit signal after reconnect and fires exactly once wit
   expect(ai.plan.desired[0]!.runAt).toBe(gateway.plan.desired[0]!.runAt);
   expect(ai.plan.desired[0]!.sourceRevision).toBe(gateway.plan.desired[0]!.sourceRevision);
 });
+
+it('#552 denies Goal and Task writes revoked after the pool-safe precheck', async () => {
+  const f = await fixture();
+  const pat = await f.pats.create(f.a, {
+    name: 'Goal Task',
+    scopes: ['goals:write', 'tasks:write'],
+  });
+  const writes = bindGatewayWrites(prisma, time);
+  const authority = {
+    connectionId: pat.id,
+    scopes: ['goals:write', 'tasks:write'],
+    authorize: async () => {
+      await f.pats.revoke(f.a, pat.id);
+    },
+  };
+  await expect(
+    writes.goalCreate({ idempotencyKey: '552-goal', goal: { name: 'Denied' } }, cx(f.a), authority),
+  ).rejects.toMatchObject({ code: 'FORBIDDEN' });
+  await prisma.externalAgentPat.update({ where: { id: pat.id }, data: { revokedAt: null } });
+  await expect(
+    writes.taskCreate(
+      {
+        idempotencyKey: '552-task',
+        plan: {
+          name: 'Denied',
+          importance: 'Moderate',
+          schedule: {
+            kind: 'OneTime',
+            date: new Date().toISOString().slice(0, 10),
+            timing: { kind: 'AllDay' },
+          },
+        },
+      },
+      cx(f.a),
+      authority,
+    ),
+  ).rejects.toMatchObject({ code: 'FORBIDDEN' });
+  expect(await prisma.goal.count()).toBe(0);
+  expect(await prisma.taskPlan.count()).toBe(0);
+  expect(await prisma.externalMutationReceipt.count()).toBe(0);
+});
+
+it('rolls back an owner validation failure and an already-elapsed same-day one-shot', async () => {
+  const a = await identity();
+  const owner = createRoutinePrismaAgentMutations(prisma, { now: () => at });
+  const failure = vi.spyOn(RoutineDefinition, 'create').mockImplementation(() => {
+    throw new TypeError('Owner rejected input');
+  });
+  try {
+    await expect(owner.create(input, cx(a), authority)).rejects.toMatchObject({
+      code: 'VALIDATION_ERROR',
+    });
+  } finally {
+    failure.mockRestore();
+  }
+  await expect(
+    createRoutinePrismaAgentMutations(prisma, { now: () => due + 1 }).create(
+      input,
+      cx(a),
+      authority,
+    ),
+  ).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+  expect(await prisma.routineDefinition.count()).toBe(0);
+  expect(await prisma.externalMutationReceipt.count()).toBe(0);
+  expect(await prisma.scheduledInvocation.count()).toBe(0);
+});
+
+it.each(['scope', 'identity', 'account', 'disabled', 'expiry'] as const)(
+  '#552 rejects durable %s changes after precheck without writing owner facts',
+  async (change) => {
+    const f = await fixture();
+    const pat = await f.pats.create(f.a, { name: 'authority race', scopes: ['goals:write'] });
+    const writes = bindGatewayWrites(prisma, time);
+    const authorize = async () => {
+      switch (change) {
+        case 'scope':
+          await prisma.externalAgentPat.update({
+            where: { id: pat.id },
+            data: { scopes: ['tasks:read'] },
+          });
+          break;
+        case 'identity':
+          await prisma.externalAgentPat.update({ where: { id: pat.id }, data: { userId: f.b } });
+          break;
+        case 'account':
+          await prisma.account.update({ where: { id: f.a }, data: { status: 'Closed' } });
+          break;
+        case 'disabled':
+          await prisma.cloudAuthUser.update({
+            where: { id: f.a },
+            data: { disabledAt: new Date() },
+          });
+          break;
+        case 'expiry':
+          await prisma.externalAgentPat.update({
+            where: { id: pat.id },
+            data: { expiresAt: new Date(0) },
+          });
+          break;
+      }
+    };
+    await expect(
+      writes.goalCreate({ idempotencyKey: '552-authority', goal: { name: 'Denied' } }, cx(f.a), {
+        connectionId: pat.id,
+        scopes: ['goals:write'],
+        authorize,
+      }),
+    ).rejects.toMatchObject({ code: 'FORBIDDEN' });
+    expect(await prisma.goal.count({ where: { identityId: f.a } })).toBe(0);
+    expect(await prisma.externalMutationReceipt.count({ where: { identityId: f.a } })).toBe(0);
+  },
+);

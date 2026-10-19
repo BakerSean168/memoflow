@@ -300,6 +300,7 @@ export function createReadGateway(options: Options) {
                       !current ||
                       current.identityId !== principal.identityId ||
                       current.credentialId !== principal.credentialId ||
+                      current.credentialType !== principal.credentialType ||
                       !required ||
                       !current.scopes.includes(required) ||
                       principal.scopes.some((scope) => !current.scopes.includes(scope))
