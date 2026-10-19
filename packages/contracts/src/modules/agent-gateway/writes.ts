@@ -39,3 +39,9 @@ export const GatewayGoalReceiptSchema = GoalAgentPersistedReceiptSchema.extend({
 export const GatewayTaskReceiptSchema = TaskAgentPersistedReceiptSchema.extend({
   replayed: z.boolean(),
 });
+
+import { RoutineAgentCreateSchema, RoutineAgentPersistedReceiptSchema } from '../routine';
+export const GatewayRoutineCreateSchema = RoutineAgentCreateSchema;
+export const GatewayRoutineReceiptSchema = RoutineAgentPersistedReceiptSchema.extend({
+  replayed: z.boolean(),
+});

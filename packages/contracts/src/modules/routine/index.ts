@@ -276,3 +276,24 @@ export type ClearRoutineTemporaryOverrideRequest = z.infer<
   typeof ClearRoutineTemporaryOverrideRequestSchema
 >;
 export type RoutineMutationReceipt = z.infer<typeof RoutineMutationReceiptSchema>;
+
+/** Finite hosted one-shot creation; owner fields stay canonical here. */
+export const RoutineAgentCreateSchema = CreateRoutineRequestSchema.pick({ name: true })
+  .extend({
+    idempotencyKey: z.string().trim().min(1).max(200),
+    description: RoutineDescriptionSchema.optional(),
+    trigger: RoutineWallClockTriggerSchema.pick({ type: true, localTime: true, timeZone: true })
+      .extend({ startDate: RoutineWallClockTriggerSchema.shape.recurrence.shape.startDate })
+      .strict(),
+  })
+  .strict();
+export const RoutineAgentPersistedReceiptSchema = z.strictObject({
+  receiptId: z.string().regex(/^[a-f0-9]{64}$/),
+  result: z.strictObject({
+    routine: RoutineDefinitionSchema.pick({ id: true, version: true, name: true })
+      .extend({ id: z.uuid() })
+      .strict(),
+    scheduledFor: z.number().int().positive(),
+  }),
+});
+export type RoutineAgentPersistedReceipt = z.infer<typeof RoutineAgentPersistedReceiptSchema>;
