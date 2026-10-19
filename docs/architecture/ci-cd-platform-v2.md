@@ -260,3 +260,87 @@ detector 或 manifest 失败为失败。
 
 新增 lane 或 artifact 类型必须先更新 registry、对应 schema、负向测试和 adapter；workflow 只能消费
 这些注册信息，不能重新声明一套隐含契约。
+
+## 11. PR 证据复用与发布信任链（#508）
+
+日常验证发生在 PR；发布只补发布特有验收。`CI Check` 继续是 PR 唯一 required check，
+不修改 main Ruleset。main push 不再无条件重跑普通验证；无法证明等价时才运行 Full Audit。
+
+### 被测身份与摘要
+
+`pull_request` 的默认 checkout 是 `refs/pull/N/merge`，`GITHUB_SHA` 是 synthetic merge commit；
+workflow run/jobs API 的 `head_sha` 则是 PR head。两者必须分别记录，不能把 API head SHA 当成
+checkout SHA。`prepare-ci-manifest.mjs` 以实际 checkout commit 生成 affected manifest，并输出
+`ci-evidence-v1`，记录 run ID/attempt、PR head/number、实际 commit/tree、配置输入摘要及完整 manifest。
+
+仓库使用两父 MERGE COMMIT。main 上 `lib/ci-evidence.mjs` 按以下顺序证明等价：
+
+1. commit→associated PR API 必须返回且只返回一个 PR；重新读取 PR，核对已合并、main、同仓库且非 fork。
+2. main parents 必须是 push 的 `before` 和 PR 当前 head。查询该 head 的最新 CI run，不能越过失败或取消的
+   新 run 去捡旧绿。API 核对 run ID、attempt、head SHA、event、仓库、非 fork、workflow ID/path、
+   completed/success，以及该 attempt 唯一成功的 `CI Check`。分页不完整也拒绝复用。
+3. 只在上述身份验证之后读取 run 的 evidence artifact。artifact ID/run/head/过期状态和 ZIP SHA-256
+   必须与 GitHub API 一致；API 不提供 digest 也拒绝。证据在 main run 开始时不得早于七天。
+4. API 与本地 Git 均核对 synthetic merge 的两个 parents。使用
+   `git rev-parse <tested-sha>^{tree}` 与 `git rev-parse <main-sha>^{tree}` 重新计算并比较树，
+   同时核对 API tree。被测 base 必须等于 main 第一父提交；base drift、跨多个 merge 的 push 都回退。
+5. 在等价树的工作区，以原 PR base、tested merge SHA、event/ref 重新运行 manifest generator，比较
+   完整 delivery-manifest digest。另对受保护输入的 tracked path、mode、blob ID 排序计算 SHA-256，
+   比较 tested/main/evidence 的 inputsDigest。不能仅验证 JSON 自带摘要。
+
+受保护 CI 输入显式定义在 `isCiInput`：全部 `.github/**`、`tools/**`、根目录文件、
+`deployment/**`、`docker/**`、Dockerfile/compose，以及任意层级的 package/project manifest、
+lockfile、tsconfig、`*.config.*`、Python 配置、requirements 与工具链版本文件。PR 改动这些输入时
+强制 Full Audit，即使 tree 相同。此集合刻意保守；扩展配置能力时同时更新该函数与负向测试。
+
+任一步 API 错误、来源错误、缺失/过期/失败/取消证据、错误 SHA/tree/manifest/配置摘要、direct push、
+多个关联 PR 或不可读取的 synthetic commit，main 都回退全量。首次合并本改动也会全量，因为修改 CI 输入。
+生成 manifest 或执行 full suite 失败则 `CI Check` 失败，不把异常变成绿灯。
+
+### 执行与晋升
+
+复用成功的 main manifest 明确禁用普通测试/治理 lanes，非 docs 仍要求 Build 成功。`CI Check`
+根据经过摘要校验的 execution policy 强制检查 Build，缺失、失败、取消或意外跳过都失败。
+`run-command.mjs` 在 `manifest.full=true` 时将标准 Nx affected 调用变为 run-many，确保 Full Audit
+真跑全部项目。nightly `CI` 在每日 03:00 UTC 的 main HEAD 运行所有 lanes，其 `CI Check`、Actions
+失败状态和 run summary 都可见；独立的扩展 Web Flow Audit（#503）和 nightly Coverage 继续保留。
+Coverage 删除重复的 main push 触发。
+
+发布信任链为：**main tree → API 认证的测试 run ID + head/实际 tested SHA + manifest → main build
+artifact ID/ZIP digest → 内容摘要 + provenance → candidate-set digest → OCI digests → release evidence**。
+main 构建新产物，绑定 main manifest；复用的是测试证明。`verify-ci-promotion.mjs` 在 Candidate/Release
+写入前重新验证 main 的 CI Check、证据 artifact、tree/config、PR proof（或全量 main 证明）与构建
+artifact 身份。晋升时年龄按原 main run 时间判定；artifact 已过期、被删除或 run 后来失效则阻止晋升。
+Candidate 的 build archive 经 API digest 硬校验后才解压，并继续验证六种内容 manifest/runtime closure；
+不能依赖 download-artifact 的 digest warning。canonical candidate-set 的 self-digest 包含 `ciEvidence`。
+Docker release 读取 Candidate artifact 前再次验证其 API run 身份与 archive digest，并重验证完整 source chain。
+Desktop release 同样必须先证明 main 测试链，才进入平台构建和安装验收。
+
+威胁模型包含 fork/其他 workflow 冒充成功、旧绿覆盖新红、篡改 JSON/ZIP/tree、跨 base 复用、缺失产物和
+API 不可用。信任根仍是 GitHub 同仓库 API、受保护 PR gate 与仓库内受审查的 workflow；本机制不声称抵抗
+已控制仓库管理员或 GitHub 本身的攻击者。PR/main 使用只读 contents/actions/pull-requests 权限；只在
+实际发布 job 授予 registry/release 写权限，无 `pull_request_target` 执行不受信代码。
+
+任何 chain 缺口在晋升阶段都直接停止，不能通过重跑普通 unit tests 补成一个新来源。只保留已有安装、
+首次启动、N→N+1 升级、签名、跨平台 packaging 和 migrator/data acceptance。docs-only main 的
+execution.candidate=false，Candidate resolve 成功 no-op，不创建镜像、runtime 或 staging promotion。
+无法读取 push before/range 时仍回退 Full Audit，并阻止 Candidate；缺少 token 的 API client 初始化错误同样回退全量。
+staging mutation 和公开 Release 前再次验证来源链，避免长时间原生验收期间 run/attempt 或证据失效后继续晋升。
+Candidate/Release Publish/Prepare Release 的 GitHub manually-disabled 状态不在本改动中启用；前两者的
+workflow_dispatch 新增默认 true 的 dry_run，执行只读链验证并阻止所有发布 job。
+
+### 合并后运营验收与边界
+
+后续至少五次具有等价 PR/main 树的普通合并收集 run ID、tree、manifest/evidence digest、reuse/full 原因、
+queue/setup、wall-clock、runner-minutes。对照改动前至少五次相同 workload 的 main Full Audit，按 workload
+分组报告 P50/P95（docs 与 runtime 不混算）；不把首次 CI 配置改动的 fallback 当作普通复用样本。
+使用 run/jobs API 与 `collect-github-run-metrics.mjs`、`compare-timings.mjs` 的同 lane 约束，分别比较
+同策略的样本，再报告策略间差值；不能伪造不同 lane 样本符合旧比较器。
+
+禁用状态下先用 mocked API 正负契约和只读 CLI 验证；由 owner 后续恢复调度后执行 Candidate/Release
+端到端 drill，保留 candidate-set、CI chain、双 registry digest、Desktop 安装/升级/签名与 migration receipts，
+并故意注入错误摘要证明阻止晋升。该测量与实际发布 drill 只能在合并后观察，当前 PR 不宣称完成。
+启用 workflow、生产 rollout、Ruleset 修改及 #501/#504/#506/#507 等优化均不属于 #508。
+
+参考：[GitHub pull_request 事件语义](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request)、
+[Artifacts API（含 digest/run identity）](https://docs.github.com/en/rest/actions/artifacts?apiVersion=2022-11-28)。

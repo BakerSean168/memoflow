@@ -7,6 +7,10 @@ on:
     branches: [main]
   workflow_dispatch:
     inputs:
+      dry_run:
+        description: Verify release evidence without publishing (workflow remains disabled manually)
+        type: boolean
+        default: true
       tag:
         description: Existing draft release tag to retry/finalize
         required: true
@@ -17,14 +21,14 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: write
+  contents: read
   actions: read
-  pull-requests: write
-  packages: write
+  pull-requests: read
 
 jobs:
   resolve:
     name: Resolve Release Candidate
+    permissions: { contents: read, actions: read, pull-requests: read }
     if: >-
       github.event_name == 'workflow_dispatch' ||
       github.event.workflow_run.conclusion == 'success'
@@ -95,14 +99,27 @@ jobs:
             if (!run) core.setFailed(`No successful exact-SHA main CI run found for ${sha}`);
             else core.setOutput('run_id', String(run.id));
 
+      - uses: ./.github/actions/setup-nx-affected-job
+        if: steps.contract.outputs.eligible == 'true'
+        with: { node-version: '24', setup-python: 'false', setup-uv: 'false' }
+      - name: Verify release test and artifact provenance before mutation
+        if: steps.contract.outputs.eligible == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          TESTED_SHA: ${{ steps.contract.outputs.sha }}
+          CI_RUN_ID: ${{ steps.ci.outputs.run_id }}
+          CANDIDATE_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: node ./tools/ci-cd-platform/verify-ci-promotion.mjs
+
       - name: No-op summary
         if: steps.contract.outputs.eligible != 'true'
         run: echo "CI completed for a non-release main commit; no release action is required." >> "$GITHUB_STEP_SUMMARY"
 
   prepare:
     name: Create or Resume Draft Release
+    permissions: { contents: write }
     needs: resolve
-    if: needs.resolve.outputs.eligible == 'true'
+    if: needs.resolve.outputs.eligible == 'true' && inputs.dry_run != true
     runs-on: ubuntu-latest
     outputs:
       already_published: ${{ steps.prepare.outputs.already_published }}
@@ -212,6 +229,7 @@ jobs:
 
   release-assets:
     name: Desktop Release Lane
+    permissions: { contents: write, actions: read, pull-requests: read }
     needs:
       - resolve
       - prepare
@@ -225,6 +243,7 @@ jobs:
 
   publish-images:
     name: Docker Release Lane
+    permissions: { contents: write, actions: read, pull-requests: read, packages: write }
     needs:
       - resolve
       - prepare
@@ -238,6 +257,7 @@ jobs:
 
   finalize:
     name: Release Postflight & Publish
+    permissions: { contents: write, actions: read, pull-requests: write }
     needs:
       - resolve
       - prepare
@@ -257,6 +277,10 @@ jobs:
         with:
           ref: ${{ needs.resolve.outputs.sha }}
 
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-nx-affected-job
+        with: { node-version: '24', setup-python: 'false', setup-uv: 'false' }
+
       - name: Download lane evidence from draft release
         env:
           GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
@@ -265,6 +289,14 @@ jobs:
           mkdir -p .release-evidence
           test "$(gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft)" = "true"
           gh release download "$RELEASE_TAG" --pattern desktop-release-manifest.json --pattern docker-release-manifest.json --pattern candidate-set-v1.json --dir .release-evidence
+
+      - name: Revalidate source chain before public release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          TESTED_SHA: ${{ needs.resolve.outputs.sha }}
+          CI_RUN_ID: ${{ needs.resolve.outputs.ci_run_id }}
+          CANDIDATE_MANIFEST: .release-evidence/candidate-set-v1.json
+        run: node ./tools/ci-cd-platform/verify-ci-promotion.mjs
 
       - name: Verify the remote Draft contains every manifest-owned Desktop asset
         env:

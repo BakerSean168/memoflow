@@ -3,16 +3,20 @@ name: CI
 on:
   push:
     branches: [main]
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
   pull_request:
     branches: [main, feat/system-wide-vnext-convergence]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 permissions:
   contents: read
   actions: read
+  pull-requests: read
 
 env:
   NODE_VERSION: '24'
@@ -25,9 +29,11 @@ jobs:
     name: Scope Detector
     runs-on: ubuntu-latest
     outputs:
+      build_required: ${{ steps.scope.outputs.build_required }}
       manifest_path: ${{ steps.scope.outputs.manifest_path }}
       manifest_digest: ${{ steps.scope.outputs.manifest_digest }}
       risk: ${{ steps.scope.outputs.risk }}
+      lane_governance: ${{ steps.scope.outputs.lane_governance }}
       lane_validate: ${{ steps.scope.outputs.lane_validate }}
       lane_boundary: ${{ steps.scope.outputs.lane_boundary }}
       lane_integration: ${{ steps.scope.outputs.lane_integration }}
@@ -51,19 +57,27 @@ jobs:
         id: scope
         env:
           NX_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
-          NX_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+          NX_HEAD: ${{ github.sha }}
+          GITHUB_TOKEN: ${{ github.token }}
           DELIVERY_MANIFEST_OUTPUT: scope/delivery-manifest-v1.json
-        run: node ./tools/ci-cd-platform/generate-delivery-manifest.mjs
+        run: node ./tools/ci-cd-platform/prepare-ci-manifest.mjs
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: delivery-manifest-v1
           path: scope/delivery-manifest-v1.json
-          retention-days: 14
+          retention-days: 90
+      - name: Record actual checkout test identity
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: ci-evidence-v1
+          path: scope/ci-evidence-v1.json
+          if-no-files-found: error
+          retention-days: 90
 
   governance:
     name: Governance
     needs: scope-detector
-    if: always()
+    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.lane_governance == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -94,7 +108,7 @@ jobs:
       - name: Aggregate Governance child
         env:
           ORACLE_INPUT: >-
-            {"detector":"${{ needs.scope-detector.result }}","enabled":["governance"],"children":{"governance":"${{ needs.governance.result }}"}}
+            {"detector":"${{ needs.scope-detector.result }}","enabled":${{ needs.scope-detector.outputs.lane_governance == 'true' && '["governance"]' || '[]' }},"children":{"governance":"${{ needs.governance.result }}"}}
         run: node ./tools/test-system-v2/oracle.mjs
 
   static-analysis:
@@ -160,7 +174,7 @@ jobs:
   build:
     name: Build
     needs: scope-detector
-    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.lane_validate == 'true'
+    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.build_required == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -227,7 +241,7 @@ jobs:
       - name: Aggregate Validate children
         env:
           ORACLE_INPUT: >-
-            {"detector":"${{ needs.scope-detector.result }}","enabled":{"static":"${{ needs.scope-detector.outputs.lane_validate }}","unit":"${{ needs.scope-detector.outputs.lane_validate == 'true' && needs.scope-detector.outputs.has_unit == 'true' && 'true' || 'false' }}","typecheck":"${{ needs.scope-detector.outputs.lane_validate }}","build":"${{ needs.scope-detector.outputs.lane_validate }}"},"children":{"static":"${{ needs.static-analysis.result }}","unit":"${{ needs.unit.result }}","typecheck":"${{ needs.typecheck.result }}","build":"${{ needs.build.result }}"}}
+            {"detector":"${{ needs.scope-detector.result }}","enabled":{"static":"${{ needs.scope-detector.outputs.lane_validate }}","unit":"${{ needs.scope-detector.outputs.lane_validate == 'true' && needs.scope-detector.outputs.has_unit == 'true' && 'true' || 'false' }}","typecheck":"${{ needs.scope-detector.outputs.lane_validate }}","build":"${{ needs.scope-detector.outputs.build_required }}"},"children":{"static":"${{ needs.static-analysis.result }}","unit":"${{ needs.unit.result }}","typecheck":"${{ needs.typecheck.result }}","build":"${{ needs.build.result }}"}}
         run: node ./tools/test-system-v2/oracle.mjs
 
   verification-children:

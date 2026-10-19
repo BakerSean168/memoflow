@@ -42,6 +42,16 @@ function candidate() {
     gitSha: revision,
     ciRunId: '123',
     deliveryManifestDigest: digest('d'),
+    ciEvidence: {
+      kind: 'ci-chain-v1',
+      commit: revision,
+      tree: 'e'.repeat(40),
+      ciRunId: 123,
+      deliveryManifestDigest: digest('d').slice(7),
+      testEvidence: { testRunId: 123, testedCommit: revision, testedTree: 'e'.repeat(40) },
+      buildArtifactId: 123,
+      buildArtifactDigest: `sha256:${'f'.repeat(64)}`,
+    },
     images: {
       web: component('web', '1'),
       api: component('api', '2'),

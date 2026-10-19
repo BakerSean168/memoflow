@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memoflow.dev/schemas/ci-chain-v1.schema.json",
+  "type": "object",
+  "required": [
+    "kind",
+    "repository",
+    "commit",
+    "tree",
+    "ciRunId",
+    "ciRunAttempt",
+    "deliveryManifestDigest",
+    "testEvidence",
+    "buildArtifactId",
+    "buildArtifactDigest"
+  ],
+  "properties": {
+    "kind": {
+      "const": "ci-chain-v1"
+    },
+    "repository": {
+      "type": "string"
+    },
+    "commit": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "tree": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "ciRunId": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "ciRunAttempt": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "deliveryManifestDigest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "testEvidence": {
+      "type": "object",
+      "required": ["testRunId", "testedCommit", "testedTree", "manifestDigest"],
+      "properties": {
+        "testRunId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "testedCommit": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "testedTree": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "manifestDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "buildArtifactId": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "buildArtifactDigest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    }
+  },
+  "additionalProperties": false
+}

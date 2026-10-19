@@ -34,6 +34,7 @@ concurrency:
 permissions:
   contents: write
   actions: read
+  pull-requests: read
   packages: write
 
 env:
@@ -42,6 +43,7 @@ env:
 jobs:
   prepare-release:
     name: Resolve Release Context
+    permissions: { contents: read }
     runs-on: ubuntu-latest
     outputs:
       release_tag: ${{ steps.resolve.outputs.release_tag }}
@@ -84,6 +86,7 @@ jobs:
 
   resolve-candidate:
     name: Resolve Exact Server Candidate
+    permissions: { contents: read, actions: read }
     needs: prepare-release
     runs-on: ubuntu-latest
     outputs:
@@ -147,14 +150,15 @@ jobs:
           RELEASE_TAG: ${{ needs.prepare-release.outputs.release_tag }}
         run: node ./tools/ci-cd-platform/release-tools/release-contract.mjs --require-release --expected-tag "$RELEASE_TAG"
 
-      - name: Download canonical candidate set
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
-        with:
-          name: candidate-set-${{ needs.prepare-release.outputs.release_sha }}
-          path: reports/candidate
-          github-token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          run-id: ${{ needs.resolve-candidate.outputs.run_id }}
+      - uses: ./.github/actions/setup-nx-affected-job
+        with: { node-version: '${{ env.NODE_VERSION }}', setup-python: 'false', setup-uv: 'false' }
+      - name: Verify Candidate API identity, archive digest and source test chain
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          TESTED_SHA: ${{ needs.prepare-release.outputs.release_sha }}
+          CI_RUN_ID: ${{ inputs.ci_run_id }}
+          CANDIDATE_RUN_ID: ${{ needs.resolve-candidate.outputs.run_id }}
+        run: node ./tools/ci-cd-platform/verify-ci-promotion.mjs
 
       - name: Validate candidate and exact successful main CI identity
         env:

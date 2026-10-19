@@ -75,6 +75,23 @@ export function validateCandidateSet(candidate) {
     errors.push('deliveryManifestDigest must be sha256:<64 hex>');
   }
 
+  const chain = candidate.ciEvidence;
+  if (
+    !chain ||
+    chain.kind !== 'ci-chain-v1' ||
+    chain.commit !== candidate.gitSha ||
+    String(chain.ciRunId) !== String(candidate.ciRunId) ||
+    `sha256:${chain.deliveryManifestDigest}` !== candidate.deliveryManifestDigest ||
+    !FULL_SHA.test(chain.tree ?? '') ||
+    !OCI_DIGEST.test(chain.buildArtifactDigest ?? '') ||
+    !Number.isSafeInteger(chain.buildArtifactId) ||
+    !FULL_SHA.test(chain.testEvidence?.testedCommit ?? '') ||
+    chain.testEvidence?.testedTree !== chain.tree ||
+    !/^\d+$/u.test(String(chain.testEvidence?.testRunId ?? ''))
+  ) {
+    errors.push('ciEvidence must bind tree, tests and build artifact to the source CI');
+  }
+
   const imageKeys = Object.keys(candidate.images ?? {}).sort();
   if (JSON.stringify(imageKeys) !== JSON.stringify([...CANDIDATE_COMPONENTS].sort())) {
     errors.push(`images must contain exactly: ${CANDIDATE_COMPONENTS.join(', ')}`);
@@ -95,6 +112,7 @@ export function createCandidateSet(input) {
     ciRunId: String(input.ciRunId),
     candidateTag: `sha-${input.gitSha}`,
     deliveryManifestDigest: input.deliveryManifestDigest,
+    ciEvidence: structuredClone(input.ciEvidence),
     images: structuredClone(input.images),
     generatedAt: input.generatedAt ?? new Date().toISOString(),
   };

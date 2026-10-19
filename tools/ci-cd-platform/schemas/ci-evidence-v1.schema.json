@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memoflow.dev/schemas/ci-evidence-v1.schema.json",
+  "type": "object",
+  "required": [
+    "kind",
+    "repository",
+    "runId",
+    "runAttempt",
+    "testedCommit",
+    "testedTree",
+    "prHead",
+    "prNumber",
+    "pushBefore",
+    "inputsDigest",
+    "manifest"
+  ],
+  "properties": {
+    "kind": {
+      "const": "ci-evidence-v1"
+    },
+    "repository": {
+      "type": "string"
+    },
+    "runId": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "runAttempt": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "testedCommit": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "testedTree": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "prHead": {
+      "type": ["string", "null"]
+    },
+    "prNumber": {
+      "type": ["integer", "null"]
+    },
+    "pushBefore": {
+      "type": ["string", "null"]
+    },
+    "inputsDigest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "manifest": {
+      "$ref": "delivery-manifest-v1.schema.json"
+    }
+  },
+  "additionalProperties": false
+}

@@ -48,6 +48,10 @@ test('release publish waits for exact candidate publication then resolves the bo
   assert.match(workflow, /workflow_id: 'ci\.yml'/);
   assert.match(workflow, /candidateRun\.head_sha !== sha/u);
   assert.match(workflow, /candidateRun\.head_branch !== 'main'/u);
+  assert.match(
+    workflow,
+    /Revalidate source chain before public release[\s\S]*?verify-ci-promotion\.mjs/u,
+  );
   assert.match(workflow, /release-assets\.yml/);
   assert.match(
     workflow,
@@ -415,7 +419,11 @@ test('release image publication carbon-copies one exact candidate to China ACR a
   assert.match(workflow, /packages:\s*write/);
   assert.match(caller, /packages:\s*write/);
   assert.match(workflow, /candidate-publish\.yml/u);
-  assert.match(workflow, /candidate-set-\$\{\{ needs\.prepare-release\.outputs\.release_sha \}\}/u);
+  assert.match(
+    workflow,
+    /CANDIDATE_RUN_ID: \$\{\{ needs\.resolve-candidate\.outputs\.run_id \}\}/u,
+  );
+  assert.match(workflow, /verify-ci-promotion\.mjs/u);
   assert.match(workflow, /candidate-manifest\.mjs --validate/u);
   assert.match(workflow, /name: Login to ACR/u);
   assert.match(workflow, /name: Login to GHCR/u);

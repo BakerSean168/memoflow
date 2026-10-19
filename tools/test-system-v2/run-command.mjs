@@ -12,12 +12,15 @@ import {
   validateLaneInput,
 } from '../ci-cd-platform/lib/contracts.mjs';
 
+// eslint-disable-next-line @nx/enforce-module-boundaries
+import { projectCommand } from '../ci-cd-platform/lib/project-command.mjs';
+
 const separator = process.argv.indexOf('--');
 if (separator < 0 || separator === process.argv.length - 1) {
   console.error('Usage: node run-command.mjs -- <command> [...args]');
   process.exit(2);
 }
-const [command, ...args] = process.argv.slice(separator + 1);
+const [requestedCommand, ...requestedArgs] = process.argv.slice(separator + 1);
 const reportName = process.env.TEST_REPORT_NAME ?? 'command';
 const reportsDir = process.env.TEST_REPORTS_DIR ?? 'reports/test-system-v2';
 const bootstrap = path.resolve('tools/ci/node-process-bootstrap.cjs');
@@ -45,6 +48,11 @@ async function readLaneContext() {
 }
 
 const laneContext = await readLaneContext();
+const { command, args } = projectCommand(
+  requestedCommand,
+  requestedArgs,
+  laneContext?.manifest.full === true,
+);
 
 async function run(attempt) {
   const startedAt = new Date();

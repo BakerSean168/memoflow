@@ -81,13 +81,7 @@ export async function buildDeliveryManifest({
   return result;
 }
 
-async function main() {
-  const output = path.resolve(
-    process.env.DELIVERY_MANIFEST_OUTPUT ?? 'scope/delivery-manifest-v1.json',
-  );
-  const manifest = await buildDeliveryManifest();
-  await mkdir(path.dirname(output), { recursive: true });
-  await writeFile(output, `${JSON.stringify(manifest, null, 2)}\n`);
+export async function writeManifestOutputs(manifest, output) {
   if (process.env.GITHUB_OUTPUT) {
     const lines = [
       `manifest_path=${output}`,
@@ -110,6 +104,16 @@ async function main() {
     ];
     await writeFile(process.env.GITHUB_OUTPUT, `${lines.join('\n')}\n`, { flag: 'a' });
   }
+}
+
+async function main() {
+  const output = path.resolve(
+    process.env.DELIVERY_MANIFEST_OUTPUT ?? 'scope/delivery-manifest-v1.json',
+  );
+  const manifest = await buildDeliveryManifest();
+  await mkdir(path.dirname(output), { recursive: true });
+  await writeFile(output, `${JSON.stringify(manifest, null, 2)}\n`);
+  await writeManifestOutputs(manifest, output);
   console.log(
     JSON.stringify(
       { path: output, digest: manifest.digest, risk: manifest.risk, lanes: manifest.lanes },

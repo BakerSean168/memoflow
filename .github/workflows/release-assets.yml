@@ -52,7 +52,9 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: write
+  contents: read
+  actions: read
+  pull-requests: read
 
 env:
   NODE_VERSION: '24'
@@ -61,6 +63,7 @@ env:
 jobs:
   prepare-release:
     name: Resolve Release Context
+    permissions: { contents: read, actions: read, pull-requests: read }
     runs-on: ubuntu-latest
     outputs:
       release_tag: ${{ steps.resolve.outputs.release_tag }}
@@ -137,6 +140,19 @@ jobs:
               include: requested === 'all' ? platforms : platforms.filter((item) => item.platform === requested),
             }));
             core.setOutput('recovery_only', String(requested !== 'all'));
+
+      - name: Checkout tested release evidence verifier
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ steps.resolve.outputs.release_sha }}
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-nx-affected-job
+        with: { node-version: '${{ env.NODE_VERSION }}', setup-python: 'false', setup-uv: 'false' }
+      - name: Verify main test and artifact chain before native acceptance
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          TESTED_SHA: ${{ steps.resolve.outputs.release_sha }}
+        run: node ./tools/ci-cd-platform/verify-ci-promotion.mjs
 
   windows-installed-update-e2e:
     name: Desktop Installed Update Gate
@@ -419,6 +435,7 @@ jobs:
           compression-level: 9
 
   upload-release-assets:
+    permissions: { contents: write, actions: read }
     name: Upload Draft Release Assets
     needs:
       - prepare-release

@@ -16,16 +16,35 @@
     "digest"
   ],
   "properties": {
-    "kind": { "const": "delivery-manifest-v1" },
-    "version": { "const": 1 },
-    "commit": { "type": "string", "minLength": 1 },
-    "event": { "type": "string", "minLength": 1 },
-    "full": { "type": "boolean" },
-    "base": { "type": ["string", "null"] },
-    "head": { "type": ["string", "null"] },
-    "event": { "type": "string", "minLength": 1 },
-    "full": { "type": "boolean" },
-    "changedFiles": { "type": "array", "items": { "type": "string" } },
+    "kind": {
+      "const": "delivery-manifest-v1"
+    },
+    "version": {
+      "const": 1
+    },
+    "commit": {
+      "type": "string",
+      "minLength": 1
+    },
+    "event": {
+      "type": "string",
+      "minLength": 1
+    },
+    "full": {
+      "type": "boolean"
+    },
+    "base": {
+      "type": ["string", "null"]
+    },
+    "head": {
+      "type": ["string", "null"]
+    },
+    "changedFiles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "risk": {
       "type": "object",
       "required": ["level", "reasons"],
@@ -33,25 +52,94 @@
         "level": {
           "enum": ["docs", "package", "desktop", "runtime", "web-flow", "root", "release"]
         },
-        "reasons": { "type": "array", "items": { "type": "string" } },
-        "matchedLevels": { "type": "array", "items": { "type": "string" } }
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "matchedLevels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
       },
       "additionalProperties": false
     },
     "lanes": {
       "type": "object",
-      "additionalProperties": { "type": "boolean" }
+      "additionalProperties": {
+        "type": "boolean"
+      }
     },
     "provenance": {
       "type": "object",
       "required": ["generator", "inputDigest"],
       "properties": {
-        "generator": { "type": "string", "minLength": 1 },
-        "inputDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        "generator": {
+          "type": "string",
+          "minLength": 1
+        },
+        "inputDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
       },
       "additionalProperties": false
     },
-    "digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+    "digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "execution": {
+      "type": "object",
+      "required": ["mode", "candidate"],
+      "properties": {
+        "mode": {
+          "enum": ["reuse", "full"]
+        },
+        "candidate": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "testRunId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "testRunAttempt": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "testHead": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "testedCommit": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "testedTree": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "manifestDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "inputsDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "prNumber": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    }
   },
   "additionalProperties": true
 }
