@@ -1,3 +1,6 @@
+import { registerWriteTools } from './register-write-tools';
+import { writeToolDescriptors, type GatewayWriteToolName } from '../write-tool-descriptors';
+import type { GatewayWritePort } from '../ports';
 import { registerReadTools } from './register-read-tools';
 import { readToolDescriptors, type GatewayReadToolName } from '../read-tool-descriptors';
 import { createMcpHandler, McpServer } from '@modelcontextprotocol/server';
@@ -14,6 +17,7 @@ import {
 
 interface Options {
   readonly enabled: boolean;
+  readonly writes?: GatewayWritePort;
   readonly audience: string;
   readonly trustedOrigins: readonly string[];
   readonly cursorSecret: string;
@@ -26,10 +30,15 @@ interface Options {
   readonly diagnose?: (event: GatewayDiagnostic) => void;
   readonly consumeOwnerQuota: (identityId: string) => Promise<boolean>;
 }
-const MAX_BYTES = 256 * 1024;
-function isReadToolName(name: string): name is GatewayReadToolName {
-  return Object.prototype.hasOwnProperty.call(readToolDescriptors, name);
+const toolDescriptors = { ...readToolDescriptors, ...writeToolDescriptors };
+type ToolName = GatewayReadToolName | GatewayWriteToolName;
+function isToolName(name: string): name is ToolName {
+  return Object.prototype.hasOwnProperty.call(toolDescriptors, name);
 }
+function isWriteToolName(name: string): name is GatewayWriteToolName {
+  return Object.prototype.hasOwnProperty.call(writeToolDescriptors, name);
+}
+const MAX_BYTES = 256 * 1024;
 class ControlledError extends GatewayReadError {}
 async function boundedBody(
   body: ReadableStream<Uint8Array> | null,
@@ -95,6 +104,8 @@ export function createReadGateway(options: Options) {
       const signal = AbortSignal.any([request.signal, controller.signal]);
       const timer = setTimeout(() => controller.abort(), Math.max(1, deadlineAt - Date.now()));
       const budget = { deadlineAt, signal };
+      let receiptId: string | undefined;
+      let replayed: boolean | undefined;
       let tool: GatewayAuditEvent['tool'] = 'transport';
       let identityId: string | undefined;
       let credentialId: string | undefined;
@@ -110,7 +121,7 @@ export function createReadGateway(options: Options) {
               'Cache-Control': 'no-store',
               ...(options.resourceMetadataUrl && (status === 401 || code === 'INSUFFICIENT_SCOPE')
                 ? {
-                    'WWW-Authenticate': `Bearer resource_metadata="${options.resourceMetadataUrl}"${code === 'INSUFFICIENT_SCOPE' ? ', error="insufficient_scope", scope="' + (tool !== 'transport' && isReadToolName(tool) ? readToolDescriptors[tool].requiredScope : 'goals:read tasks:read') + '"' : ''}`,
+                    'WWW-Authenticate': `Bearer resource_metadata="${options.resourceMetadataUrl}"${code === 'INSUFFICIENT_SCOPE' ? ', error="insufficient_scope", scope="' + (tool !== 'transport' && isToolName(tool) ? toolDescriptors[tool].requiredScope : 'goals:read tasks:read') + '"' : ''}`,
                   }
                 : {}),
               ...(status === 429 ? { 'Retry-After': '60' } : {}),
@@ -142,7 +153,16 @@ export function createReadGateway(options: Options) {
         if (!principal) return reject(401, 'INVALID_CREDENTIAL');
         identityId = principal.identityId;
         credentialId = principal.credentialId;
-        if (!principal.scopes.some((scope) => scope === 'goals:read' || scope === 'tasks:read'))
+        if (
+          !principal.scopes.some(
+            (scope) =>
+              scope === 'goals:read' ||
+              scope === 'tasks:read' ||
+              (options.writes &&
+                principal.credentialType === 'pat' &&
+                (scope === 'goals:write' || scope === 'tasks:write')),
+          )
+        )
           return reject(403, 'INSUFFICIENT_SCOPE');
         scopeDecision = 'allowed';
         if (!(await within(() => options.consumeOwnerQuota(principal.identityId), signal)))
@@ -167,13 +187,17 @@ export function createReadGateway(options: Options) {
           if (probe.success) {
             invocation = true;
             const name = probe.data.params.name;
-            if (isReadToolName(name)) {
+            if (isToolName(name)) {
               tool = name;
-              if (!principal.scopes.includes(readToolDescriptors[name].requiredScope)) {
+              if (!principal.scopes.includes(toolDescriptors[name].requiredScope)) {
                 scopeDecision = 'denied';
                 return reject(403, 'INSUFFICIENT_SCOPE');
               }
-              if (name.startsWith('task_') && !options.tasks) {
+              if (isWriteToolName(name) && (!options.writes || principal.credentialType !== 'pat')) {
+                scopeDecision = 'denied';
+                return reject(404, 'DISABLED');
+              }
+              if (!isWriteToolName(name) && name.startsWith('task_') && !options.tasks) {
                 scopeDecision = 'denied';
                 return reject(404, 'DISABLED');
               }
@@ -185,8 +209,8 @@ export function createReadGateway(options: Options) {
 
         const context: ExecutionContext = { ...requestContext, identityId: principal.identityId };
         async function call<T>(
-          name: GatewayReadToolName,
-          requiredScope: 'goals:read' | 'tasks:read',
+          name: ToolName,
+          requiredScope: 'goals:read' | 'tasks:read' | 'goals:write' | 'tasks:write',
           operation: () => Promise<T>,
         ) {
           tool = name;
@@ -208,13 +232,26 @@ export function createReadGateway(options: Options) {
             const serialized = JSON.stringify(result);
             if (Buffer.byteLength(serialized) > MAX_BYTES)
               throw new ControlledError('RESPONSE_TOO_LARGE');
+            if (isWriteToolName(name) && result && typeof result === 'object') {
+              if ('receiptId' in result && typeof result.receiptId === 'string')
+                receiptId = result.receiptId;
+              if ('replayed' in result && typeof result.replayed === 'boolean')
+                replayed = result.replayed;
+            }
             outcome = 'OK';
             return {
-              content: [{ type: 'text' as const, text: 'Owned read completed.' }],
+              content: [
+                {
+                  type: 'text' as const,
+                  text: isWriteToolName(name) ? 'Owned write completed.' : 'Owned read completed.',
+                },
+              ],
               structuredContent: result as Record<string, unknown>,
             };
           } catch (error) {
             outcome = error instanceof GatewayReadError ? error.code : 'INTERNAL_ERROR';
+            if (outcome === 'FORBIDDEN' || outcome === 'INSUFFICIENT_SCOPE')
+              scopeDecision = 'denied';
             if (!(error instanceof GatewayReadError)) diagnose(error);
             return { isError: true, content: [{ type: 'text' as const, text: outcome }] };
           }
@@ -223,6 +260,33 @@ export function createReadGateway(options: Options) {
           () => {
             const server = new McpServer({ name: 'memoflow-agent-gateway', version: '0.1.0' });
             registerReadTools(server, options, context, budget, principal.scopes, call);
+            if (options.writes && principal.credentialType === 'pat')
+              registerWriteTools(
+                server,
+                options.writes,
+                context,
+                principal.scopes,
+                {
+                  connectionId: principal.credentialId,
+                  scopes: principal.scopes,
+                  authorize: async () => {
+                    const current = await options.credentials.authenticate(auth, requestContext);
+                    const required = isToolName(tool)
+                      ? toolDescriptors[tool].requiredScope
+                      : undefined;
+                    if (
+                      !current ||
+                      current.identityId !== principal.identityId ||
+                      current.credentialId !== principal.credentialId ||
+                      !required ||
+                      !current.scopes.includes(required) ||
+                      principal.scopes.some((scope) => !current.scopes.includes(scope))
+                    )
+                      throw new ControlledError('FORBIDDEN');
+                  },
+                },
+                call,
+              );
 
             return server;
           },
@@ -270,7 +334,9 @@ export function createReadGateway(options: Options) {
         try {
           options.audit({
             version: '1',
-            effect: 'read',
+            effect: isWriteToolName(tool) ? 'write' : 'read',
+            receiptId,
+            replayed,
             scopeDecision,
             requestId: requestContext.requestId,
             traceId: requestContext.traceId,

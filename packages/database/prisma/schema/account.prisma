@@ -16,6 +16,7 @@ model Account {
   cloudUser CloudAuthUser @relation(fields: [id], references: [id], onDelete: Cascade)
 
   // 关联的业务模块
+  externalMutationReceipts         ExternalMutationReceipt[]
   goals                           Goal[]
   profileImportOperations         ProfileImportOperation[]
   labels                          Label[]

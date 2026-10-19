@@ -62,7 +62,9 @@ export class CompleteTaskOccurrenceUseCase {
       );
     } catch (caughtError) {
       this.logger.error('Failed to complete task occurrence', { error: caughtError });
-      return fail(mapTaskWriteErrorToResultError(caughtError, 'Failed to complete task occurrence'));
+      return fail(
+        mapTaskWriteErrorToResultError(caughtError, 'Failed to complete task occurrence'),
+      );
     }
   }
 
@@ -77,6 +79,9 @@ export class CompleteTaskOccurrenceUseCase {
     if (!occurrence) {
       return error('NOT_FOUND', `TaskOccurrence ${id} not found`);
     }
+
+    if (request?.expectedVersion !== undefined && request.expectedVersion !== occurrence.version)
+      return error('CONFLICT', 'TaskOccurrence has been modified by another client');
 
     if (occurrence.status === TaskOccurrenceStatus.Completed) {
       return ok({
