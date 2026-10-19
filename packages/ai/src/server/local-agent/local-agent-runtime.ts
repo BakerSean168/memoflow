@@ -125,6 +125,11 @@ export class LocalAgentRuntime {
     this.assertActive();
     await this.persist(() => this.options.store.setDefaultChoice(identityId, choice));
   }
+  /** Stop every live turn that still holds this native connection revision. */
+  cancelConnection(identityId: string, connectionId: string): void {
+    for (const run of this.runs.values())
+      if (run.identityId === identityId && run.connectionId === connectionId) this.cancel(run);
+  }
   async saveConnection(
     identityId: string,
     input: LocalAgentConnectionInput,
@@ -135,8 +140,7 @@ export class LocalAgentRuntime {
     if (id) {
       if (!revision) throw new LocalAgentError('CONFLICT');
       // Revoke capabilities before changing config; old requests cannot use new scope.
-      for (const run of this.runs.values())
-        if (run.identityId === identityId && run.connectionId === id) this.cancel(run);
+      this.cancelConnection(identityId, id);
       return this.persist(() =>
         this.options.store.updateConnection(identityId, id, revision, input),
       );
@@ -145,8 +149,7 @@ export class LocalAgentRuntime {
   }
   async deleteConnection(identityId: string, id: string) {
     this.assertActive();
-    for (const run of this.runs.values())
-      if (run.identityId === identityId && run.connectionId === id) this.cancel(run);
+    this.cancelConnection(identityId, id);
     await this.persist(() => this.options.store.deleteConnection(identityId, id));
   }
   /** Probe an existing saved instance without mutating its configuration. */

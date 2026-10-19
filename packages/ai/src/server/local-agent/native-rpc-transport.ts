@@ -69,7 +69,15 @@ export class NativeRpcTransport {
         resolve();
       }),
     );
-    this.child.once('error', () => this.fail(new LocalAgentError('LOCAL_AGENT_NOT_INSTALLED')));
+    this.child.once('error', (error: NodeJS.ErrnoException) => {
+      // Only a genuinely missing path is an installation problem. Permission,
+      // resource and format failures are transient/unusable states and must not
+      // send the user to an install guide.
+      const missing = error.code === 'ENOENT' || error.code === 'ENOTDIR';
+      this.fail(
+        new LocalAgentError(missing ? 'LOCAL_AGENT_NOT_INSTALLED' : 'LOCAL_AGENT_UNAVAILABLE'),
+      );
+    });
     this.child.stdin.on('error', () => this.fail(new LocalAgentError('LOCAL_AGENT_UNAVAILABLE')));
     this.child.stdout.setEncoding('utf8');
     this.child.stdout.on('data', (chunk: string) => this.read(chunk));

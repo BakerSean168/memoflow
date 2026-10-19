@@ -2,7 +2,7 @@
 tags: [analysis, ai, desktop, byoa, acceptance]
 description: ADR-120/121 的实现证据、支持矩阵及尚未通过的交付门禁。
 created: 2026-10-09T00:00:00Z
-updated: 2026-10-10T00:00:00Z
+updated: 2026-10-19T00:00:00Z
 ---
 
 # 本地 BYOA 验收证据
@@ -19,8 +19,50 @@ updated: 2026-10-10T00:00:00Z
 | Codex       | app-server，CLI 0.160.1           | 真实 Goal 查询两轮、同 native ID 恢复通过；模型 gpt-6-astra                                   | npm shim/空格 argv fixtures、Windows 安装更新 smoke 通过；真实 Windows CLI 未测    | 账号/config/home 变更校验；不自动跨 Agent 重试               |
 | Claude Code | Agent SDK 0.3.295，用户已安装 CLI | SDK fixtures 通过；Ollama Cloud gpt-oss:20b 真实 MCP Goal 查询两轮、同 native ID 恢复通过；此前 4Router 第二轮超时记录保留 | npm/native executable fixtures、Windows 安装更新 smoke 通过；真实 Windows CLI 未测 | SDK 使用用户 CLI，不打包可选 CLI；恢复前先无 prompt 校验身份 |
 | Pi          | 原生 RPC，CLI 1.0.3               | 真实 Goal 查询两轮、同 session 恢复通过；模型 auto/gpt-6-astra                                | npm shim/空格 argv fixtures、Windows 安装更新 smoke 通过；真实 Windows CLI 未测    | 会话扩展临时注入，退出删除，不改全局 extensions              |
+| DSH         | ACP v1（`dsh --profile acp`）     | ACP fixtures + `local-agent-tools.spec.ts` 的真实 DSH 两轮 Goal MCP 测试（Linux，2026-10-19）；2026-10-10 真实探测 ready/5 models | 打包态缺 CLI smoke 曾覆盖；真实 Windows CLI 未测               | 每 run MCP grant；不假定 account/read；配额/限流错误保留     |
+| Antigravity (AGY) | ACP v1（官方 `agy_acp_server`） | ACP fixtures、缓存 OAuth 身份/probe、取消与资源释放测试（Linux，2026-10-19）；未在本轮重新执行真实 Google 账号 | 提供官方 x64 ZIP 下载入口与可执行文件解析 fixtures；真实 Windows 安装/登录未测 | 必须使用 ACP server，不是 `agy` CLI；无缓存 OAuth 明确 `login_required`；OAuth 闭环归 #480 |
 
-macOS、WSL 跨宿主和任意第三方 wrapper 的私有凭据文件未取得支持证据。身份检查覆盖已知 native home/config/auth 文件与相关宿主环境；不声称能发现外部 wrapper/key helper 内任意来源的账号变化。带稳定账号 ID 的 OAuth 刷新不应无故失效；没有稳定 ID 的 Pi OAuth 保守失效。
+macOS、WSL 跨宿主和任意第三方 wrapper 的私有凭据文件未取得支持证据。DSH/AGY 的 macOS `.par`/原生 Home 路径也未在实机验收。身份检查覆盖已知 native home/config/auth 文件与相关宿主环境；不声称能发现外部 wrapper/key helper 内任意来源的账号变化。带稳定账号 ID 的 OAuth 刷新不应无故失效；没有稳定 ID 的 Pi OAuth 保守失效。
+
+## 2026-10-19 #492 复核（最新 main）
+
+本表以当前代码与已合并 PR 为事实基线。`Accepted` 表示不变量已有实现和可执行证据，不代表 Windows/macOS 实机或真实厂商推理已通过。行号以本 PR head 为准。
+
+| 不变量 | 结论 | 当前代码／测试证据 |
+| --- | --- | --- |
+| Web 仅真实 Mastra Runtime | Accepted | `agent-instance.registry.ts:53-60`、`:227-228`；`ai.module.ts:592-596` 以是否存在 LocalAgentRuntime 决定 host；`agent-instance.registry.spec.ts` 的 Web 默认/`FORBIDDEN` 用例 |
+| Desktop 五种 Driver 与诚实状态 | Accepted | `agent-instance.registry.ts:54` 合成 Mastra/Codex/Claude/Pi/DSH/AGY；`AgentInstanceWizard.vue:55-59`；`LocalAgentRuntime.probeDefaultDriver` 不落库、不推理；各 driver `probe()` 区分 `not_installed`/`login_required`/`unavailable` |
+| Instance/Connection/ModelBinding/SecretVault 边界 | Accepted | `agent-instance.dto.ts` 只含路径/标识；`model-resolver.ts:246-264` 在解析凭据前校验实例绑定；`provider-secret-vault.contract.spec.ts` |
+| Profile 与多实例唯一性 | Accepted | `local-agent.repository.ts:135-153` 同 Owner slug 唯一；`agent-instance.registry.spec.ts` 的跨 Owner、重名、默认槽与 legacy 映射用例 |
+| 首次进入 hydration | Accepted | `agent-instance.registry.ts:45-57` 纯合成默认槽、无写入；`agent-instance.registry.spec.ts:24-45` |
+| 启停与重启恢复 | Accepted | `agent-instance.registry.spec.ts:36-104`（CAS 0 持久化、禁用、重启后仍为同一实例、reset）；`:335-360` 重开 Registry 后 claim 失败 |
+| 原生身份隔离 | Accepted | `native-identity.ts:79-153`；`native-identity.spec.ts` 的 Codex/Claude/Pi/DSH/AGY 账号/配置变更 fence |
+| Home 与 Secret 边界 | Accepted | `local-agent.dto.ts:54-69` 拒绝 secret/任意 argv；`antigravity-native.ts:47-80` 只继承白名单环境；`local-tool-bridge.ts:187-220` 只存 opaque token |
+| 取消与工具权限 | Fixed in this PR | Registry 更新/禁用/reset 原生实例前调用 `AgentInstanceNativeLifecycle.cancelConnection`（`agent-instance.registry.ts:104/135/152`），Runtime 取消对应 live turn（`local-agent-runtime.ts:129-152`）；`agent-instance.registry.spec.ts` 的 `stops a live native turn before disabling its instance through the Registry`；`local-tool-bridge.ts:106-123` 每次读/写重新校验 enabled/revision/scope |
+| 错误分类 | Fixed in this PR | `native-rpc-transport.ts:72-81` 只把 `ENOENT`/`ENOTDIR` 归为 `not_installed`，`EACCES` 等归为 `unavailable`；`pi-driver.spec.ts` 的 POSIX 非可执行文件用例；`native-failure.ts` 保留 401/429/quota/model 分类 |
+| 原生 Session 生命周期 | Accepted | `local-agent.repository.ts:256-290` 同 native ID/账号 fence；`local-agent-runtime.ts` 绑定/恢复/删除路径；`local-agent-runtime.spec.ts` 的取消、重启、旧 Profile 用例 |
+| 同会话模型切换 | Accepted | `local-agent-runtime.spec.ts:171` 同 native session 切模型并逐轮快照；`agent-instance.registry.spec.ts:245` 同会话切换已验证 Mastra 实例并拒绝非法目标 |
+| Driver 本地契约 | Accepted | `local-agent-runtime.ts:31` 的 `probe/run/respond/cancel/close` 结构契约；五个 driver spec；本 PR 新增 ACP `close()` 竞态与资源释放用例 |
+| Provider 资源释放 | Fixed in this PR | `acp-driver.ts:164`、`:209`、`:527` 的 `closed` fence 与 transport 后置关闭；`antigravity-driver.spec.ts` 的 `close during asynchronous native preflight`、`closes a transport that was constructed after cancellation`；`local-agent-runtime.ts:590` dispose 关闭 runs/probes |
+| Mastra fallback 与显式 Native | Accepted | `electron/index.ts:530-533` 按 `runtimeKind` 选择 runtime，缺失即失败；`useAIChatView.ts:1062-1077` 仅恢复已启用连接；`agent-instance.registry.ts:204-223` 已 claim 会话遗漏实例不回退 |
+| 跨平台安装态与真实账号 | Manual acceptance pending | 本机为 Linux；Windows/macOS 安装包、真实 Codex/Claude/Pi/DSH/AGY 账号和 AGY OAuth 未在本轮执行。见下方步骤，不能记为通过。 |
+
+### Manual acceptance pending（不得以本地自动测试冒充）
+
+1. **Windows 10/11 安装态（NSIS，x64）**
+   - 安装路径：用户选择的安装目录（默认 `%LOCALAPPDATA%\Programs\MemoFlow`）；用户数据 `%APPDATA%\MemoFlow`；开发日志 `C:\Users\<user>\AppData\Roaming\MemoFlow-Dev\logs`。
+   - Provider 二进制：Codex `codex.exe` 或 npm shim；Claude `claude.exe`/`cli.js`；Pi `pi.cmd`/`pi.exe`；DSH `dsh`；AGY 官方 `agy_acp_server.exe` 与同目录 `localharness_external.exe`（不是 `agy` CLI）。
+   - 步骤：安装 exact artifact → 新建 Profile → Providers 应显示 Mastra/Codex/Claude/Pi/DSH/AGY 六个槽位 → 对每个原生槽执行“检查”，确认未安装为 `not_installed`、已安装未登录为 `login_required`、已登录为 `ready` 且模型目录来自原生 Agent → 禁用 Codex 后重启，确认状态保留 → 在一个 Codex 会话中执行只读 Goal 查询，取消后再发，确认旧事件不复活。
+   - 通过条件：无自动安装/登录/推理探测；进程退出后无遗留子进程；日志/DevTools 不出现 token 或原生配置内容。
+2. **macOS（Apple Silicon / Intel）**
+   - App 路径 `/Applications/MemoFlow.app`；用户数据 `~/Library/Application Support/MemoFlow`；日志 `~/Library/Logs/MemoFlow`；Provider 二进制在 `/opt/homebrew/bin`、`/usr/local/bin` 或用户自定义路径；AGY 使用官方 `.par`。
+   - 步骤：安装 exact artifact → 新 Profile → 按上表检查五个原生槽位 → 执行一次只读 Goal 查询并重启应用恢复同一 native session → 切换 Profile，确认 A 的连接/状态/会话不出现在 B。
+   - 通过条件：与 Windows 相同；当前仓库没有 macOS 实机证据，不能由 Linux smoke 推断。
+3. **真实账号与 AGY OAuth**
+   - Codex 使用 ChatGPT 登录、Claude 使用订阅或 API Key、Pi/DSH 使用各自原生登录；AGY 使用已存在的 ACP OAuth 缓存。分别验证 `ready`、模型目录、取消、限流/配额错误投影和“不自动切换 Agent”。
+   - AGY 的应用内 OAuth 登录闭环属于 #480；本 Issue 只验证已有缓存登录的读取与失败状态。
+4. **跨平台打包产物**
+   - 使用发布候选的 exact SHA 安装包；记录 OS 版本、安装包类型、Provider 版本、Profile、模型和脱敏结果。没有实机证据时保持 `manual acceptance pending`，不得写成 `delivered`。
 
 ## 可复现行为入口
 

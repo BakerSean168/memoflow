@@ -1,6 +1,6 @@
 import { LocalAgentStatusSchema } from '@memoflow/contracts/ai';
 import { expect, it, vi } from 'vitest';
-import { mkdtemp, readdir, rm } from 'node:fs/promises';
+import { mkdtemp, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { LocalAgentConnection } from '@memoflow/contracts/ai';
@@ -100,6 +100,23 @@ it('explains a missing executable without replacing it with a generic configurat
     await rm(cwd, { recursive: true, force: true });
   }
 });
+it.runIf(process.platform !== 'win32')(
+  'reports an installed but non-executable file as unavailable instead of missing',
+  async () => {
+    const cwd = await mkdtemp(join(tmpdir(), 'memoflow-pi-permission-'));
+    try {
+      const executablePath = join(cwd, 'pi');
+      await writeFile(executablePath, '#!/bin/sh\nexit 0\n', { mode: 0o644 });
+      const driver = new PiDriver({ ...connection, homePath: cwd, executablePath }, cwd);
+      expect(await driver.probe()).toEqual({
+        status: 'unavailable',
+        message: new LocalAgentError('LOCAL_AGENT_UNAVAILABLE').message,
+      });
+    } finally {
+      await rm(cwd, { recursive: true, force: true });
+    }
+  },
+);
 it('reports a nonzero native exit instead of a successful empty turn', async () => {
   const driver = new PiDriver(
     connection,

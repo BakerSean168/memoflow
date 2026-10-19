@@ -3,6 +3,8 @@ import { createLocalAgentSqlite } from '../../../testing/local-agent-sqlite';
 import { AgentInstanceRegistry } from './agent-instance.registry';
 import { AgentInstancePowerSyncRepository } from '../../infrastructure/adapters/powersync/agent-instance.repository';
 import { LocalAgentRepository } from '../../infrastructure/adapters/powersync/local-agent.repository';
+import { LocalAgentRuntime } from '../../local-agent/local-agent-runtime';
+import type { NativeAgentEvent } from '../../local-agent/codex-driver';
 const databases: ReturnType<typeof createLocalAgentSqlite>[] = [];
 afterEach(() => databases.splice(0).forEach((db) => db.close()));
 function setup(host: 'desktop' | 'web' = 'desktop') {
@@ -640,7 +642,7 @@ it('materializes AGY with its canonical ACP executable and preserves owner isola
   expect((await local.listConnections('owner'))[0].id).toBe(connections[0].id);
   expect(await local.listConnections('other-owner')).toHaveLength(0);
   const web = setup('web').registry;
-  await expect(
+  await   expect(
     web.execute('owner', {
       action: 'create',
       instance: {
@@ -652,4 +654,75 @@ it('materializes AGY with its canonical ACP executable and preserves owner isola
       },
     }),
   ).rejects.toMatchObject({ code: 'FORBIDDEN' });
+});
+
+it('stops a live native turn before disabling its instance through the Registry', async () => {
+  const db = createLocalAgentSqlite();
+  databases.push(db);
+  const store = new LocalAgentRepository(db);
+  const connection = await store.createConnection('owner', {
+    driver: 'codex',
+    name: 'Codex',
+    instanceSlug: 'codex',
+    executablePath: '/fake/codex',
+    enabled: true,
+    writeScopes: [],
+  });
+  const conversation = await store.createConversation('owner', {
+    connectionId: connection.id,
+    modelId: 'model',
+    name: 'Chat',
+  });
+  let release!: () => void;
+  const wait = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let cancelled = false;
+  const runtime = new LocalAgentRuntime({
+    store,
+    cwd: '/tmp',
+    createDriver: () => ({
+      async *run(): AsyncGenerator<NativeAgentEvent> {
+        yield { type: 'delta', content: 'partial' };
+        await Promise.race([wait, new Promise((resolve) => setTimeout(resolve, 250))]);
+        yield { type: 'completed' };
+      },
+      cancel() {
+        cancelled = true;
+        release();
+      },
+      async close() {
+        release();
+      },
+      respond: () => false,
+      async probe() {
+        return { status: 'ready' as const, models: [{ id: 'model', name: 'Model' }] };
+      },
+    }),
+  });
+  const registry = new AgentInstanceRegistry(
+    new AgentInstancePowerSyncRepository(db),
+    'desktop',
+    undefined,
+    { cancelConnection: (owner, id) => runtime.cancelConnection(owner, id) },
+  );
+  const stream = runtime.dispatchMessage({
+    identityId: 'owner',
+    conversationId: conversation.id,
+    content: 'Hello',
+  });
+  const events = [];
+  const started = await stream.next();
+  events.push(started.value);
+  await registry.execute('owner', {
+    action: 'update',
+    instanceId: 'codex',
+    expectedRevision: 1,
+    patch: { enabled: false },
+  });
+  for await (const event of stream) events.push(event);
+  expect(cancelled).toBe(true);
+  expect(events.some((event) => event?.type === 'assistant.run.cancelled')).toBe(true);
+  expect(events.some((event) => event?.type === 'assistant.run.completed')).toBe(false);
+  await runtime.dispose();
 });
