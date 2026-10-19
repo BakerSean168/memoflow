@@ -239,6 +239,30 @@ describe('AIFooterComposer (Global Composer input)', () => {
     wrapper.unmount();
   });
 
+  it('mounts context submenu content only after its submenu opens', async () => {
+    const wrapper = mountComposer({
+      recentGoals: [
+        {
+          id: 'g1',
+          title: 'Ship the next release',
+          status: 'active',
+          updatedAt: 1,
+          progress: 0.5,
+        },
+      ],
+    });
+
+    expect(wrapper.findAllComponents({ name: 'DropdownMenuSubContentStub' })).toHaveLength(0);
+
+    const goalSubmenu = wrapper.findComponent({ name: 'DropdownMenuSubStub' });
+    goalSubmenu.vm.$emit('update:open', true);
+    await nextTick();
+
+    expect(wrapper.findAllComponents({ name: 'DropdownMenuSubContentStub' })).toHaveLength(1);
+    expect(wrapper.text()).toContain('Ship the next release');
+    wrapper.unmount();
+  });
+
   it('auto-grows textarea height up to the max cap', async () => {
     const wrapper = mountComposer({ modelValue: '' });
     const el = wrapper.get('[data-testid="ai-chat-composer"]').element as HTMLTextAreaElement;
