@@ -36,6 +36,7 @@ const {
 function initials(name: string): string {
   return name.trim().slice(0, 2).toUpperCase() || 'MF';
 }
+const vFocusPin = { mounted: (element: HTMLElement) => element.focus() };
 </script>
 <template>
   <div class="space-y-3">
@@ -46,7 +47,7 @@ function initials(name: string): string {
         :aria-label="t('auth.profileAccess.name')"
         :placeholder="t('auth.profileAccess.name')"
       />
-      <Button type="submit" :disabled="busyProfileId !== null">{{
+      <Button data-testid="shell-create-profile" type="submit" :disabled="busyProfileId !== null">{{
         t('auth.profileAccess.create')
       }}</Button>
     </form>
@@ -56,11 +57,12 @@ function initials(name: string): string {
         :key="profile.profileId"
         class="overflow-hidden rounded-md border bg-card"
       >
-        <div class="flex items-stretch">
+        <div class="flex flex-wrap items-stretch">
           <button
             type="button"
             :data-testid="`desktop-profile-open-${profile.profileId}`"
             class="flex min-w-0 flex-1 items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+            :class="{ 'basis-full sm:basis-0': management }"
             :disabled="busyProfileId !== null"
             :aria-current="snapshot?.profile?.profileId === profile.profileId ? 'true' : undefined"
             @click="openProfile(profile)"
@@ -145,12 +147,9 @@ function initials(name: string): string {
           @submit.prevent="renameProfile(profile)"
         >
           <Input v-model="editName" maxlength="80" :aria-label="t('auth.profileAccess.name')" />
-          <Button
-            data-testid="shell-create-profile"
-            type="submit"
-            :disabled="!editName.trim() || busyProfileId !== null"
-            >{{ t('auth.profileAccess.save') }}</Button
-          >
+          <Button type="submit" :disabled="!editName.trim() || busyProfileId !== null">{{
+            t('auth.profileAccess.save')
+          }}</Button>
           <Button type="button" variant="ghost" @click="editingProfileId = null">{{
             t('common.cancel')
           }}</Button>
@@ -161,6 +160,7 @@ function initials(name: string): string {
           @submit.prevent="openProfile(profile)"
         >
           <Input
+            v-focus-pin
             v-model="pin"
             :data-testid="`desktop-profile-pin-${profile.profileId}`"
             inputmode="numeric"

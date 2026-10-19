@@ -8,6 +8,7 @@ import {
   type ProfileSummary,
 } from '@memoflow/contracts/electron';
 import { DESKTOP_BRIDGE_KEY } from '../../di/keys';
+import { translateResultError } from '../utils/translate-result-error';
 
 const profileSchema = z.object({
   profileId: z.string(),
@@ -65,13 +66,13 @@ export function useDesktopProfiles(options: { accessWindow?: boolean } = {}) {
         .object({
           ok: z.boolean(),
           data: schema.optional(),
-          error: z.object({ message: z.string() }).optional(),
+          error: z.object({ code: z.string(), message: z.string() }).passthrough().optional(),
         })
         .parse(await bridge.invoke(channel, ...args));
-      if (!result.ok) throw new Error(result.error?.message ?? t('common.operationFailed'));
+      if (!result.ok) throw result.error ?? new Error(t('common.operationFailed'));
       return { data: schema.parse(result.data) };
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('common.operationFailed'));
+      toast.error(translateResultError(error, t, { fallbackKey: 'common.operationFailed' }));
       return null;
     }
   }
