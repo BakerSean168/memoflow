@@ -4,15 +4,17 @@ import test from 'node:test';
 
 const workflowUrl = new URL('../../../.github/workflows/coverage.yml', import.meta.url);
 
-test('coverage docs-only no-target path emits canonical lane evidence', async () => {
+test('coverage is a scheduled/manual full backstop and cannot silently succeed without governed targets', async () => {
   const workflow = await readFile(workflowUrl, 'utf8');
-  const noTargetStep = workflow.match(
-    /- name: Record no coverage targets selected[\s\S]*?(?=\n      - name: Run governed coverage gates)/,
-  )?.[0];
-
-  assert.ok(noTargetStep, 'coverage workflow must define a no-target evidence step');
-  assert.match(noTargetStep, /if: steps\.detect-coverage\.outputs\.has_target != 'true'/);
-  assert.match(noTargetStep, /DELIVERY_LANE: coverage/);
-  assert.match(noTargetStep, /TEST_REPORT_NAME: coverage-no-targets/);
-  assert.match(noTargetStep, /tools\/test-system-v2\/run-command\.mjs/);
+  assert.match(workflow, /schedule:/u);
+  assert.match(workflow, /workflow_dispatch:/u);
+  assert.doesNotMatch(workflow, /^  push:/mu);
+  assert.match(workflow, /GOVERNED_COVERAGE_PROJECTS/u);
+  assert.match(
+    workflow,
+    /Full coverage audit selected no configured targets; refusing a false-green run\.[\s\S]*?exit 1/u,
+  );
+  assert.match(workflow, /nx run-many -t test:coverage/u);
+  assert.match(workflow, /publish-lane-evidence/u);
+  assert.doesNotMatch(workflow, /coverage-no-targets/u);
 });

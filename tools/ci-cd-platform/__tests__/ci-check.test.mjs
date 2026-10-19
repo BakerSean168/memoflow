@@ -207,3 +207,73 @@ test('ci.yml wires CI Check to every lane job, always runs, and reads the manife
   for (const name of laneJobs)
     assert.ok(name in CI_CHECK_JOBS, `${name} is aggregated by CI Check`);
 });
+
+test('reuse requires the build but forbids ordinary lane jobs and rejects missing build evidence', () => {
+  const m = manifest(
+    Object.fromEntries(
+      ['governance', 'validate', 'boundary', 'integration', 'web', 'coverage', 'performance'].map(
+        (lane) => [lane, false],
+      ),
+    ),
+    [],
+  );
+  m.event = 'push';
+  m.execution = {
+    mode: 'reuse',
+    candidate: true,
+    testRunId: 123,
+    testRunAttempt: 1,
+    testHead: 'a'.repeat(40),
+    testedCommit: 'b'.repeat(40),
+    testedTree: 'c'.repeat(40),
+    manifestDigest: 'd'.repeat(64),
+    inputsDigest: 'e'.repeat(64),
+  };
+  delete m.digest;
+  m.digest = digest(m);
+  const needs = healthyNeeds(m);
+  assert.equal(evaluateCiCheck({ needs, manifest: m }).state, 'success');
+  assert.equal(needs.build.result, 'success');
+  needs.build.result = 'skipped';
+  assert.equal(evaluateCiCheck({ needs, manifest: m }).state, 'failure');
+  needs.build.result = 'success';
+  needs.unit.result = 'success';
+  assert.equal(evaluateCiCheck({ needs, manifest: m }).state, 'failure');
+});
+
+test('docs-only reuse has no build or test jobs; malformed reuse/full policy fails closed', () => {
+  const m = manifest(
+    Object.fromEntries(
+      ['governance', 'validate', 'boundary', 'integration', 'web', 'coverage', 'performance'].map(
+        (lane) => [lane, false],
+      ),
+    ),
+    [],
+  );
+  m.event = 'push';
+  m.execution = {
+    mode: 'reuse',
+    candidate: false,
+    testRunId: 123,
+    testRunAttempt: 1,
+    testHead: 'a'.repeat(40),
+    testedCommit: 'b'.repeat(40),
+    testedTree: 'c'.repeat(40),
+    manifestDigest: 'd'.repeat(64),
+    inputsDigest: 'e'.repeat(64),
+  };
+  delete m.digest;
+  m.digest = digest(m);
+  assert.equal(healthyNeeds(m).build.result, 'skipped');
+  assert.equal(evaluateCiCheck({ needs: healthyNeeds(m), manifest: m }).state, 'success');
+  for (const execution of [
+    { mode: 'unknown' },
+    { ...m.execution, testRunId: null },
+    { mode: 'full', candidate: true },
+  ]) {
+    const invalid = { ...m, execution };
+    delete invalid.digest;
+    invalid.digest = digest(invalid);
+    assert.equal(evaluateCiCheck({ needs: healthyNeeds(m), manifest: invalid }).state, 'failure');
+  }
+});

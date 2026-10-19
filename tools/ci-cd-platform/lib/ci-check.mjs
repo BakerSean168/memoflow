@@ -15,7 +15,8 @@ export const CI_CHECK_JOBS = Object.freeze({
   'static-analysis': (m) => m.lanes.validate === true,
   unit: (m) => m.lanes.validate === true && m.scope.unit.length > 0,
   typecheck: (m) => m.lanes.validate === true,
-  build: (m) => m.lanes.validate === true,
+  build: (m) =>
+    m.lanes.validate === true || (m.execution?.mode === 'reuse' && m.execution.candidate === true),
   'verification-children': (m) =>
     m.lanes.boundary === true ||
     m.lanes.integration === true ||

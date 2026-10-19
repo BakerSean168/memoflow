@@ -157,6 +157,16 @@ test('release evidence builders bind Desktop assets to the exact server candidat
     gitSha,
     ciRunId: '42',
     deliveryManifestDigest: digestFor('d'),
+    ciEvidence: {
+      kind: 'ci-chain-v1',
+      commit: gitSha,
+      tree: 'e'.repeat(40),
+      ciRunId: 42,
+      deliveryManifestDigest: digestFor('d').slice(7),
+      testEvidence: { testRunId: 42, testedCommit: gitSha, testedTree: 'e'.repeat(40) },
+      buildArtifactId: 123,
+      buildArtifactDigest: `sha256:${'f'.repeat(64)}`,
+    },
     images: {
       web: component('web', '1'),
       api: component('api', '2'),
@@ -417,6 +427,16 @@ test('canonical release manifest fails closed when promoted Docker evidence drif
     gitSha,
     ciRunId: '77',
     deliveryManifestDigest: digestFor('d'),
+    ciEvidence: {
+      kind: 'ci-chain-v1',
+      commit: gitSha,
+      tree: 'e'.repeat(40),
+      ciRunId: 77,
+      deliveryManifestDigest: digestFor('d').slice(7),
+      testEvidence: { testRunId: 77, testedCommit: gitSha, testedTree: 'e'.repeat(40) },
+      buildArtifactId: 123,
+      buildArtifactDigest: `sha256:${'f'.repeat(64)}`,
+    },
     images: { web: image('web', '1'), api: image('api', '2'), migrator: image('migrator', '3') },
     generatedAt: '2026-09-05T00:00:00.000Z',
   });
@@ -507,6 +527,16 @@ test('Docker release evidence rejects a caller CI identity that differs from can
     gitSha,
     ciRunId: '42',
     deliveryManifestDigest: digestFor('d'),
+    ciEvidence: {
+      kind: 'ci-chain-v1',
+      commit: gitSha,
+      tree: 'e'.repeat(40),
+      ciRunId: 42,
+      deliveryManifestDigest: digestFor('d').slice(7),
+      testEvidence: { testRunId: 42, testedCommit: gitSha, testedTree: 'e'.repeat(40) },
+      buildArtifactId: 123,
+      buildArtifactDigest: `sha256:${'f'.repeat(64)}`,
+    },
     images: { web: image('web', '1'), api: image('api', '2'), migrator: image('migrator', '3') },
   });
   const candidatePath = path.join(cwd, 'candidate.json');

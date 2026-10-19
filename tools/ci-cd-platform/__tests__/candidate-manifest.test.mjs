@@ -36,6 +36,16 @@ function input() {
     gitSha,
     ciRunId: '123456',
     deliveryManifestDigest: oci('d'),
+    ciEvidence: {
+      kind: 'ci-chain-v1',
+      commit: gitSha,
+      tree: 'e'.repeat(40),
+      ciRunId: 123456,
+      deliveryManifestDigest: oci('d').slice(7),
+      testEvidence: { testRunId: 123456, testedCommit: gitSha, testedTree: 'e'.repeat(40) },
+      buildArtifactId: 123,
+      buildArtifactDigest: `sha256:${'f'.repeat(64)}`,
+    },
     images: {
       web: image('web', '1'),
       api: image('api', '2'),
@@ -78,10 +88,14 @@ test('candidate-set fails closed on mixed revision, registry digest drift, and t
 test('candidate-set rejects missing or extra application components', () => {
   const missing = createCandidateSet(input());
   delete missing.images.migrator;
-  assert.ok(validateCandidateSet(missing).some((error) => error.includes('images must contain exactly')));
+  assert.ok(
+    validateCandidateSet(missing).some((error) => error.includes('images must contain exactly')),
+  );
 
   const extraInput = input();
   extraInput.images.runtime = image('runtime', '4');
   const extra = createCandidateSet(extraInput);
-  assert.ok(validateCandidateSet(extra).some((error) => error.includes('images must contain exactly')));
+  assert.ok(
+    validateCandidateSet(extra).some((error) => error.includes('images must contain exactly')),
+  );
 });

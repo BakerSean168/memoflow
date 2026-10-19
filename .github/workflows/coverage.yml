@@ -1,9 +1,6 @@
 name: Coverage
 
 on:
-  push:
-    branches:
-      - main
   schedule:
     - cron: '0 2 * * *'
   workflow_dispatch:
@@ -45,9 +42,8 @@ jobs:
           setup-uv: 'false'
           lane: coverage
 
-      - name: Generate full or affected delivery manifest
+      - name: Generate full coverage audit manifest
         env:
-          NX_BASE: ${{ github.event.before }}
           NX_HEAD: ${{ github.sha }}
           DELIVERY_FORCE_LANES: coverage
           DELIVERY_MANIFEST_OUTPUT: scope/delivery-manifest-v1.json
@@ -75,13 +71,8 @@ jobs:
           allowed=",${GOVERNED_COVERAGE_PROJECTS},"
           selected_projects=""
 
-          if [ "${{ github.event_name }}" = "push" ]; then
-            echo "Using affected project detection for push coverage."
-            project_source="$(node -e "const m=require('./scope/delivery-manifest-v1.json'); console.log((m.scope.projects || []).join('\\n'))")"
-          else
-            echo "Using full configured project lists for scheduled/manual coverage."
-            project_source="$(printf '%s\n' ${GOVERNED_COVERAGE_PROJECTS//,/ })"
-          fi
+          echo "Using full configured project lists for scheduled/manual coverage."
+          project_source="$(printf '%s\n' ${GOVERNED_COVERAGE_PROJECTS//,/ })"
 
           while IFS= read -r project; do
             [ -z "$project" ] && continue
@@ -95,7 +86,7 @@ jobs:
             fi
           done <<< "$project_source"
 
-          if [ "${{ github.event_name }}" != "push" ] && [ -z "$selected_projects" ]; then
+          if [ -z "$selected_projects" ]; then
             echo "Full coverage audit selected no configured targets; refusing a false-green run."
             exit 1
           fi
@@ -103,17 +94,7 @@ jobs:
           echo "has_target=$([ -n "$selected_projects" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
           echo "projects=$selected_projects" >> "$GITHUB_OUTPUT"
 
-      - name: Record no coverage targets selected
-        if: steps.detect-coverage.outputs.has_target != 'true'
-        env:
-          DELIVERY_LANE: coverage
-          TEST_REPORT_NAME: coverage-no-targets
-        run: >-
-          node ./tools/test-system-v2/run-command.mjs -- node -e
-          "console.log('No governed coverage targets selected for this push.')"
-
       - name: Run governed coverage gates
-        if: steps.detect-coverage.outputs.has_target == 'true'
         env:
           NODE_OPTIONS: --require=${{ github.workspace }}/tools/ci/node-process-bootstrap.cjs
           DELIVERY_LANE: coverage

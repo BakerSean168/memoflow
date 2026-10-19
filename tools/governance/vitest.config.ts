@@ -8,6 +8,9 @@ export default defineConfig({
     root: import.meta.dirname,
     environment: 'node',
     globals: true,
+    // These specs launch repository-wide filesystem/AST audits in subprocesses.
+    // Run files sequentially so concurrent scans do not exhaust their fixed budgets.
+    fileParallelism: false,
     include: ['__tests__/**/*.test.mjs'],
   },
 });

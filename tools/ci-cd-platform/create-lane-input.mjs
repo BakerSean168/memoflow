@@ -14,7 +14,11 @@ import { getLaneDefinition } from './lib/registry.mjs';
 export async function createLaneInput({ lane, manifest, output, runId = null }) {
   const definition = getLaneDefinition(lane);
   validateDeliveryManifest(manifest);
-  if (manifest.lanes[lane] !== true) {
+  const buildOnly =
+    lane === 'validate' &&
+    manifest.execution?.mode === 'reuse' &&
+    manifest.execution.candidate === true;
+  if (manifest.lanes[lane] !== true && !buildOnly) {
     throw new Error(`Lane ${lane} is not enabled by delivery manifest ${manifest.digest}`);
   }
   const input = buildLaneInput({
@@ -29,6 +33,7 @@ export async function createLaneInput({ lane, manifest, output, runId = null }) 
       event: manifest.event,
       risk: manifest.risk.level,
       full: manifest.full,
+      execution: buildOnly ? 'build-only' : 'verification',
     },
   });
   input.digest = digest(input);

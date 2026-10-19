@@ -16,6 +16,7 @@
       "{workspaceRoot}/packages/**/*.config.{ts,mts,cts,js,mjs,cjs}",
       "{workspaceRoot}/tools/build/**/*",
       "{workspaceRoot}/tools/ci/node-process-bootstrap.cjs",
+      "{workspaceRoot}/tools/test-system-v2/run-command.mjs",
       "{workspaceRoot}/.github/workflows/**/*",
       "{workspaceRoot}/.github/actions/**/*",
       "{workspaceRoot}/apps/desktop/*.mjs",
@@ -35,7 +36,9 @@
       "executor": "nx:run-commands",
       "cache": true,
       "inputs": ["testContracts"],
-      "options": { "command": "node --test tools/ci-cd-platform/__tests__/*.test.mjs" }
+      "options": {
+        "command": "node --test --test-concurrency=4 tools/ci-cd-platform/__tests__/*.test.mjs"
+      }
     },
     "contract": {
       "executor": "nx:run-commands",
@@ -56,7 +59,7 @@
       "cache": true,
       "inputs": ["testContracts"],
       "options": {
-        "command": "node tools/ci-cd-platform/schema-check.mjs && node tools/ci-cd-platform/registry-check.mjs && node --test tools/ci-cd-platform/__tests__/*.test.mjs"
+        "command": "node tools/ci-cd-platform/schema-check.mjs && node tools/ci-cd-platform/registry-check.mjs && node --test --test-concurrency=4 tools/ci-cd-platform/__tests__/*.test.mjs"
       }
     },
     "manifest": {

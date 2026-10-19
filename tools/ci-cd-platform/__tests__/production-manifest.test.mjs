@@ -34,6 +34,16 @@ const candidate = createCandidateSet({
   gitSha,
   ciRunId: '42',
   deliveryManifestDigest: digest('d'),
+  ciEvidence: {
+    kind: 'ci-chain-v1',
+    commit: gitSha,
+    tree: 'e'.repeat(40),
+    ciRunId: 42,
+    deliveryManifestDigest: digest('d').slice(7),
+    testEvidence: { testRunId: 42, testedCommit: gitSha, testedTree: 'e'.repeat(40) },
+    buildArtifactId: 123,
+    buildArtifactDigest: `sha256:${'f'.repeat(64)}`,
+  },
   images: {
     web: candidateImage('web', '1'),
     api: candidateImage('api', '2'),

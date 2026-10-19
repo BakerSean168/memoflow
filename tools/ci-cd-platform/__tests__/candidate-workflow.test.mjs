@@ -18,7 +18,12 @@ test('candidate publication is a successful-main-CI-only build-once path', async
   assert.match(workflow, /workflow_run\.head_branch == 'main'/u);
   assert.doesNotMatch(workflow, /pull_request:/u);
   assert.match(workflow, /name: Download exact CI build closure/u);
-  assert.match(workflow, /run-id: \$\{\{ needs\.resolve\.outputs\.ci_run_id \}\}/u);
+  assert.match(workflow, /CI_RUN_ID: \$\{\{ needs\.resolve\.outputs\.ci_run_id \}\}/u);
+  assert.match(workflow, /download-ci-build\.mjs/u);
+  assert.match(
+    workflow,
+    /Revalidate source chain before staging mutation[\s\S]*?verify-ci-promotion\.mjs/u,
+  );
   assert.match(workflow, /USE_PREBUILT_ARTIFACT=1/u);
 });
 

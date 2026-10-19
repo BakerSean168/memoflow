@@ -119,6 +119,40 @@ export function validateDeliveryManifest(manifest) {
   assert(manifest.provenance && typeof manifest.provenance === 'object', 'provenance is required');
   assertString(manifest.provenance.generator, 'provenance.generator');
   assertDigest(manifest.provenance.inputDigest, 'provenance.inputDigest');
+  if (manifest.execution !== undefined) {
+    const execution = manifest.execution;
+    assert(
+      manifest.event === 'push' && execution && ['reuse', 'full'].includes(execution.mode),
+      'invalid execution policy',
+    );
+    assert(typeof execution.candidate === 'boolean', 'execution.candidate must be boolean');
+    if (execution.mode === 'reuse') {
+      assert(manifest.full === false, 'reuse must not claim full audit');
+      assert(
+        Object.values(manifest.lanes).every((enabled) => enabled === false),
+        'reuse must disable ordinary lanes',
+      );
+      assert(
+        Number.isSafeInteger(execution.testRunId) && execution.testRunId > 0,
+        'reuse requires test run ID',
+      );
+      assert(
+        Number.isSafeInteger(execution.testRunAttempt) && execution.testRunAttempt > 0,
+        'reuse requires run attempt',
+      );
+      for (const field of ['testHead', 'testedCommit', 'testedTree']) {
+        assert(/^[a-f0-9]{40}$/u.test(execution[field]), `reuse requires ${field}`);
+      }
+      assertDigest(execution.manifestDigest, 'execution.manifestDigest');
+      assertDigest(execution.inputsDigest, 'execution.inputsDigest');
+    } else {
+      assert(manifest.full === true, 'fallback must be full');
+      assert(
+        [...LANE_NAMES].every((lane) => manifest.lanes[lane] === true),
+        'fallback must enable every lane',
+      );
+    }
+  }
   assertSelfDigest(manifest, 'manifest');
   return manifest;
 }

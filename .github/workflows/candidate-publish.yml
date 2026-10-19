@@ -7,6 +7,10 @@ on:
     branches: [main]
   workflow_dispatch:
     inputs:
+      dry_run:
+        description: Verify evidence without publishing (workflow remains disabled manually)
+        type: boolean
+        default: true
       ci_run_id:
         description: Successful main CI run ID to recover/retry
         required: true
@@ -23,7 +27,7 @@ concurrency:
 permissions:
   contents: read
   actions: read
-  packages: write
+  pull-requests: read
 
 env:
   NODE_VERSION: '24'
@@ -39,6 +43,7 @@ jobs:
        github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
     outputs:
+      eligible: ${{ steps.evidence.outputs.eligible }}
       revision: ${{ steps.meta.outputs.revision }}
       candidate_tag: ${{ steps.meta.outputs.candidate_tag }}
       ci_run_id: ${{ steps.meta.outputs.ci_run_id }}
@@ -69,25 +74,29 @@ jobs:
             echo "build_date=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
             echo "global_namespace=${GITHUB_REPOSITORY_OWNER,,}"
           } >> "$GITHUB_OUTPUT"
-      - name: Verify source CI run is a successful exact-SHA main push
+      - uses: ./.github/actions/setup-nx-affected-job
+        with: { node-version: '${{ env.NODE_VERSION }}', setup-python: 'false', setup-uv: 'false' }
+      - name: Verify API-bound tree and test evidence chain
+        id: evidence
         env:
-          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
+          TESTED_SHA: ${{ steps.meta.outputs.revision }}
           CI_RUN_ID: ${{ steps.meta.outputs.ci_run_id }}
-          REVISION: ${{ steps.meta.outputs.revision }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          run_json="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CI_RUN_ID")"
-          test "$(jq -r .name <<<"$run_json")" = 'CI'
-          test "$(jq -r .status <<<"$run_json")" = 'completed'
-          test "$(jq -r .conclusion <<<"$run_json")" = 'success'
-          test "$(jq -r .event <<<"$run_json")" = 'push'
-          test "$(jq -r .head_branch <<<"$run_json")" = 'main'
-          test "$(jq -r .head_sha <<<"$run_json")" = "$REVISION"
+        run: node ./tools/ci-cd-platform/verify-ci-promotion.mjs --allow-docs
+      - name: Upload verified source chain
+        if: steps.evidence.outputs.eligible == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: candidate-ci-chain
+          path: reports/ci-cd-platform/ci-chain-v1.json
+          if-no-files-found: error
+          retention-days: 90
 
   build-candidate:
     name: Build candidate ${{ matrix.component }}
     needs: resolve
+    if: needs.resolve.outputs.eligible == 'true' && inputs.dry_run != true
+    permissions: { contents: read, actions: read, pull-requests: read, packages: write }
     runs-on: ubuntu-latest
     timeout-minutes: 35
     strategy:
@@ -120,14 +129,12 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           package-manager-cache: false
-      - name: Download exact CI build closure
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
-        with:
-          name: ci-build-artifacts
-          path: .
-          github-token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          run-id: ${{ needs.resolve.outputs.ci_run_id }}
+      - name: Download exact CI build closure with hard digest verification
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          TESTED_SHA: ${{ needs.resolve.outputs.revision }}
+          CI_RUN_ID: ${{ needs.resolve.outputs.ci_run_id }}
+        run: node ./tools/ci-cd-platform/download-ci-build.mjs
       - name: Validate and restore exact CI artifacts
         shell: bash
         run: |
@@ -269,6 +276,11 @@ jobs:
           pattern: candidate-component-*
           path: reports/candidate/components
           merge-multiple: true
+      - name: Download verified source chain
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: candidate-ci-chain
+          path: reports/ci-cd-platform
       - name: Create candidate-set/v1
         shell: bash
         run: |
@@ -281,10 +293,11 @@ jobs:
             --arg gitSha "${{ needs.resolve.outputs.revision }}" \
             --arg ciRunId "${{ needs.resolve.outputs.ci_run_id }}" \
             --arg deliveryManifestDigest "$delivery_digest" \
+            --argjson ciEvidence "$(cat reports/ci-cd-platform/ci-chain-v1.json)" \
             --argjson web "$(cat reports/candidate/components/web.json)" \
             --argjson api "$(cat reports/candidate/components/api.json)" \
             --argjson migrator "$(cat reports/candidate/components/migrator.json)" \
-            '{gitSha:$gitSha,ciRunId:$ciRunId,deliveryManifestDigest:$deliveryManifestDigest,images:{web:$web,api:$api,migrator:$migrator}}' \
+            '{gitSha:$gitSha,ciRunId:$ciRunId,deliveryManifestDigest:$deliveryManifestDigest,ciEvidence:$ciEvidence,images:{web:$web,api:$api,migrator:$migrator}}' \
             > reports/candidate/candidate-input.json
           node ./tools/ci-cd-platform/candidate-manifest.mjs --input reports/candidate/candidate-input.json --output reports/candidate/candidate-set-v1.json
           node ./tools/ci-cd-platform/candidate-manifest.mjs --validate reports/candidate/candidate-set-v1.json
@@ -298,6 +311,7 @@ jobs:
 
   runtime-artifact:
     name: Build candidate staging runtime
+    permissions: { contents: read, packages: write }
     needs: [resolve, candidate-manifest]
     runs-on: ubuntu-latest
     outputs:
@@ -391,6 +405,7 @@ jobs:
 
   promote-staging:
     name: Promote coherent staging-latest channel
+    permissions: { contents: read, actions: read, pull-requests: read, packages: write }
     needs: [resolve, candidate-manifest, runtime-artifact]
     runs-on: ubuntu-latest
     steps:
@@ -404,6 +419,15 @@ jobs:
         with:
           name: candidate-set-${{ needs.resolve.outputs.revision }}
           path: reports/candidate
+      - uses: ./.github/actions/setup-nx-affected-job
+        with: { node-version: '${{ env.NODE_VERSION }}', setup-python: 'false', setup-uv: 'false' }
+      - name: Revalidate source chain before staging mutation
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          TESTED_SHA: ${{ needs.resolve.outputs.revision }}
+          CI_RUN_ID: ${{ needs.resolve.outputs.ci_run_id }}
+          CANDIDATE_MANIFEST: reports/candidate/candidate-set-v1.json
+        run: node ./tools/ci-cd-platform/verify-ci-promotion.mjs
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4
       - name: Login to ACR

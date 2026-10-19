@@ -7,7 +7,7 @@ tags:
   - delivery
 description: CI/CD Platform V2 解耦、artifact 晋级与可扩展交付平台决策
 created: 2026-08-05T00:00:00Z
-updated: 2026-08-05T12:45:00Z
+updated: 2026-10-19T00:00:00Z
 ---
 
 # ADR-041: CI/CD Platform V2 解耦与可扩展交付平台
@@ -71,7 +71,7 @@ workflow 只读取 manifest 的 lane policy；它不能根据旧的 scope 输出
 
 ### 5. 稳定 Oracle 与可插拔 child
 
-GitHub ruleset 继续只依赖稳定 Oracle。新增 lane、平台或部署目标只需要注册能力、输入输出和 owner，
+GitHub ruleset 只依赖唯一的 `CI Check` 聚合门禁（#500、#509）；稳定 Oracle 是可观测子结果。新增 lane、平台或部署目标只需要注册能力、输入输出和 owner，
 由对应 Oracle 或聚合器接入，不修改所有 workflow 的隐含分支。
 
 ### 6. 最小权限与 fail closed
@@ -79,6 +79,25 @@ GitHub ruleset 继续只依赖稳定 Oracle。新增 lane、平台或部署目�
 PR 使用只读权限；生产 promotion 使用受保护环境、短期凭据和可审计身份。manifest 缺失、artifact
 mismatch、权限错误或 detector failure 均 fail closed。只有明确 infrastructure/startup failure 才能
 自动重试一次。
+
+### 7. PR 验证、main tree 证明与发布验收（#508，2026-10-19）
+
+采用 PR-first 验证。PR 默认测试 `refs/pull/N/merge`，API run head SHA 是 PR head；证据必须同时
+记录实际 checkout 的 synthetic merge SHA/tree 与 API run ID/attempt/head。仓库实际使用 MERGE
+COMMIT，不能按 squash 假设处理。main 只在唯一同仓库 PR、最新绿色 CI Check、相同 base/parents、
+本地和 API Git tree 等价、重新生成的 delivery manifest digest 与配置 inputsDigest 全部匹配时复用测试。
+CI 配置/工具链变更、base drift、fork/其他 workflow、错误 SHA、过期/失败/取消/缺失证据、多个 PR、
+direct push 或 API 错误都回退 Full Audit；artifact 只在 API 认证 run 后读取，且 archive digest 必须匹配。
+
+复用时 main 只做来源证明与非 docs 构建/产物摘要记录。每日 03:00 UTC 的 main HEAD CI 强制所有 lanes，
+执行适配器把全量 manifest 的 Nx affected 调用转成 run-many，失败由 CI Check 与 Actions 明确暴露。
+扩展 Web Flow Audit 与 nightly Coverage 继续兜底；docs-only main 不创建 Candidate。
+
+Candidate/Release 必须验证 tree → test run ID/SHA/manifest → main build artifact ID/digest → provenance
+链，缺口直接停止晋升。canonical candidate-set 把 chain 纳入自身摘要；只补安装、首次启动、升级、签名、
+跨平台产物与 migration 验收，不重跑普通 unit。保持 workflow 手工禁用，dispatch dry_run 默认只读。
+受保护输入集合、七天 freshness、API/ZIP 信任边界、威胁模型与合并后 ≥5 次 P50/P95 测量及发布 drill
+见 [目标架构第 11 节](../ci-cd-platform-v2.md#11-pr-证据复用与发布信任链508)。
 
 ## Consequences
 
@@ -129,15 +148,15 @@ mismatch、权限错误或 detector failure 均 fail closed。只有明确 infra
   生成器和负向测试。
 - 每个 lane 必须声明 owner、输入、输出、timeout、retry、cache 和 isolation policy。
 - required Oracle 不能直接依赖未聚合的 matrix child。
-- `Delivery Observation` 必须是 required context；它对 enabled lane evidence 缺失使用 fail-closed 语义。
+- `CI Check` 是唯一 required context；`Delivery Observation` 对 enabled lane evidence 缺失使用 fail-closed 语义。
 - 生产发布只能消费已验证 artifact digest；release workflow 不得直接从源码重复构建同一 commit。
 - 每次 run 必须产出 timing、cache、failure classification 和 manifest/artifact provenance。
 - nightly full audit 必须定期验证 risk classifier 没有漏检 root、database、Web 和 release 输入。
 - 新增 lane 或 artifact 类型必须更新本 ADR 关联的 registry、schema 和治理测试。
-- 单人维护仓库的 branch ruleset 不要求 approving review；自动化 required Oracle、Delivery Observation、thread resolution
+- 单人维护仓库的 branch ruleset 不要求 approving review；自动化 required `CI Check`、thread resolution
   和管理员审计仍然保留。该策略由 `ruleset-check` 作为治理契约校验。
 
-## Implementation State
+## Implementation State（以下 #210 数据为历史切换记录）
 
 本分支已落地以下实现：
 
