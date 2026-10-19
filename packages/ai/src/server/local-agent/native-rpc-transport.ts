@@ -19,6 +19,10 @@ export interface NativeProcessOptions {
   protocol?: 'codex' | 'pi' | 'acp';
   driver?: LocalAgentDriver;
   authenticationPromptPrefix?: string;
+  /** Explicit login only: forward bounded stderr lines to `onDiagnosticLine`. */
+  captureStderrLines?: boolean;
+  /** Explicit login only: classify a native error diagnostic instead of the default map. */
+  failureClassifier?: (diagnostic: string) => LocalAgentError;
   executable: string;
   args: readonly string[];
   cwd: string;
@@ -46,6 +50,10 @@ export class NativeRpcTransport {
   onNotification?: (method: string, params: unknown) => void;
   onRequest?: (request: NativeServerRequest) => void;
   onFailure?: (error: LocalAgentError) => void;
+  /** Explicit login only. Without it, an authentication prompt fails closed. */
+  onAuthenticationPrompt?: (value: string) => void;
+  onDiagnosticLine?: (line: string) => void;
+  private diagnosticBuffer = '';
 
   constructor(private readonly options: NativeProcessOptions) {
     const launch = resolveNativeExecutable(
@@ -81,8 +89,13 @@ export class NativeRpcTransport {
     this.child.stdin.on('error', () => this.fail(new LocalAgentError('LOCAL_AGENT_UNAVAILABLE')));
     this.child.stdout.setEncoding('utf8');
     this.child.stdout.on('data', (chunk: string) => this.read(chunk));
-    // Drain diagnostics without retaining or relaying provider secrets to the UI.
-    this.child.stderr.resume();
+    if (this.options.captureStderrLines) {
+      this.child.stderr.setEncoding('utf8');
+      this.child.stderr.on('data', (chunk: string) => this.readDiagnostics(chunk));
+    } else {
+      // Drain diagnostics without retaining or relaying provider secrets to the UI.
+      this.child.stderr.resume();
+    }
   }
 
   request(
@@ -157,6 +170,13 @@ export class NativeRpcTransport {
           this.options.authenticationPromptPrefix &&
           line.trimStart().startsWith(this.options.authenticationPromptPrefix)
         ) {
+          if (this.onAuthenticationPrompt) {
+            // Explicit login captures the URL for a user-authorized open/copy.
+            this.onAuthenticationPrompt(
+              line.trimStart().slice(this.options.authenticationPromptPrefix.length).trim(),
+            );
+            continue;
+          }
           this.fail(new LocalAgentError('LOCAL_AGENT_LOGIN_REQUIRED'));
           void this.close();
           return;
@@ -203,7 +223,7 @@ export class NativeRpcTransport {
             pending.reject(
               frame.error.code >= -32700 && frame.error.code <= -32600
                 ? new LocalAgentError('LOCAL_AGENT_PROTOCOL_ERROR')
-                : nativeFailure(
+                : (this.options.failureClassifier ?? nativeFailure)(
                     frame.error.code === 429 ? `429 ${frame.error.message}` : frame.error.message,
                   ),
             );
@@ -215,6 +235,19 @@ export class NativeRpcTransport {
       this.fail(new LocalAgentError('LOCAL_AGENT_PROTOCOL_ERROR'));
       void this.close();
     }
+  }
+  /** Bounded, line-oriented stderr relay for explicit login URL capture only. */
+  private readDiagnostics(chunk: string) {
+    this.diagnosticBuffer += chunk;
+    for (;;) {
+      const newline = this.diagnosticBuffer.indexOf('\n');
+      if (newline < 0) break;
+      const line = this.diagnosticBuffer.slice(0, newline).replace(/\r$/u, '');
+      this.diagnosticBuffer = this.diagnosticBuffer.slice(newline + 1);
+      if (line) this.onDiagnosticLine?.(line);
+    }
+    // A provider that never terminates a diagnostic line must not grow the buffer.
+    if (this.diagnosticBuffer.length > 16_384) this.diagnosticBuffer = '';
   }
   private fail(error: LocalAgentError) {
     if (this.failure) return;

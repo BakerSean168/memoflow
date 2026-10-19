@@ -4,6 +4,7 @@ import {
   LocalAgentConnectionSchema,
   LocalAgentConversationSchema,
   LocalAgentStatusSchema,
+  LocalAgentAuthStateSchema,
   AssistantRuntimeApprovalResultSchema,
   AssistantRuntimeChoiceSchema,
   type AssistantRuntimeChoice,
@@ -15,6 +16,7 @@ import {
   type LocalAgentConversationCreate,
   type LocalAgentRequestResponse,
   type LocalAgentStatus,
+  type LocalAgentAuthState,
 } from '@memoflow/contracts/ai';
 import { AIChannels } from '@memoflow/contracts/electron';
 import { unwrapOrThrowError } from '@memoflow/contracts/result';
@@ -37,6 +39,16 @@ export interface LocalAgentClient {
   listConversations(): Promise<LocalAgentConversation[]>;
   createConversation(conversation: LocalAgentConversationCreate): Promise<LocalAgentConversation>;
   respond(response: LocalAgentRequestResponse): Promise<boolean>;
+  /** Explicit Google sign-in for one saved Antigravity instance. */
+  startLogin(connectionId: string): Promise<LocalAgentAuthState>;
+  loginStatus(connectionId: string): Promise<LocalAgentAuthState>;
+  cancelLogin(connectionId: string, flowId: string): Promise<LocalAgentAuthState>;
+  completeLogin(
+    connectionId: string,
+    flowId: string,
+    callbackUrl: string,
+  ): Promise<LocalAgentAuthState>;
+  signOut(connectionId: string): Promise<LocalAgentAuthState>;
 }
 
 export function createLocalAgentIpcClient(ipc: IResultIpcClient): LocalAgentClient {
@@ -73,5 +85,18 @@ export function createLocalAgentIpcClient(ipc: IResultIpcClient): LocalAgentClie
       return (await invoke({ action: 'respond', response }, AssistantRuntimeApprovalResultSchema))
         .accepted;
     },
+    startLogin: (connectionId) =>
+      invoke({ action: 'auth_start', connectionId }, LocalAgentAuthStateSchema),
+    loginStatus: (connectionId) =>
+      invoke({ action: 'auth_status', connectionId }, LocalAgentAuthStateSchema),
+    cancelLogin: (connectionId, flowId) =>
+      invoke({ action: 'auth_cancel', connectionId, flowId }, LocalAgentAuthStateSchema),
+    completeLogin: (connectionId, flowId, callbackUrl) =>
+      invoke(
+        { action: 'auth_complete', connectionId, flowId, callbackUrl },
+        LocalAgentAuthStateSchema,
+      ),
+    signOut: (connectionId) =>
+      invoke({ action: 'auth_sign_out', connectionId }, LocalAgentAuthStateSchema),
   };
 }

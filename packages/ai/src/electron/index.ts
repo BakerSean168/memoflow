@@ -486,6 +486,25 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                   return ok(await runtime.createConversation(owner, input.conversation));
                 case 'respond':
                   return ok({ accepted: runtime.respond(owner, input.response) });
+                case 'auth_start':
+                  return ok(await runtime.startLogin(owner, input.connectionId));
+                case 'auth_status':
+                  return ok(runtime.loginStatus(owner, input.connectionId));
+                case 'auth_cancel':
+                  return ok(
+                    await runtime.cancelLogin(owner, input.connectionId, input.flowId),
+                  );
+                case 'auth_complete':
+                  return ok(
+                    await runtime.completeLogin(
+                      owner,
+                      input.connectionId,
+                      input.flowId,
+                      input.callbackUrl,
+                    ),
+                  );
+                case 'auth_sign_out':
+                  return ok(await runtime.signOutLogin(owner, input.connectionId));
               }
             } catch (error) {
               const failure = toAITransportFailure(error, {

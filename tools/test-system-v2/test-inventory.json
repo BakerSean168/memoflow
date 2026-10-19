@@ -920,6 +920,20 @@
       }
     },
     {
+      "path": "apps/desktop/e2e/antigravity-login.spec.mts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/desktop/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "ai-workspace",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/desktop/playwright.config.ts"
+      }
+    },
+    {
       "path": "apps/desktop/e2e/authentication/desktop-auth-flow.spec.mts",
       "primarySuite": "e2e",
       "collectors": [
@@ -4158,6 +4172,26 @@
     },
     {
       "path": "packages/ai/src/server/local-agent/antigravity-driver.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/local-agent/antigravity-login-process.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/local-agent/antigravity-login.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -12825,7 +12859,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 119
+      "fileCount": 121
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -12958,7 +12992,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 10,
+      "fileCount": 11,
       "e2eOwnership": {
         "lane": "desktop",
         "lifecycle": "active",
@@ -13386,7 +13420,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 119
+      "fileCount": 121
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -13759,6 +13793,8 @@
       "packages/ai/src/server/infrastructure/security/provider-endpoint-policy.spec.ts",
       "packages/ai/src/server/infrastructure/security/provider-safe-fetch.spec.ts",
       "packages/ai/src/server/local-agent/antigravity-driver.spec.ts",
+      "packages/ai/src/server/local-agent/antigravity-login-process.spec.ts",
+      "packages/ai/src/server/local-agent/antigravity-login.spec.ts",
       "packages/ai/src/server/local-agent/claude-driver.spec.ts",
       "packages/ai/src/server/local-agent/codex-app-server-transport.spec.ts",
       "packages/ai/src/server/local-agent/codex-driver.spec.ts",
@@ -14156,12 +14192,12 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1182,
+    "unit": 1184,
     "integration": 51,
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 9,
-    "e2e": 66,
+    "e2e": 67,
     "perf": 2,
     "governance": 75
   },
@@ -14169,7 +14205,7 @@
     "version": 2,
     "issues": [],
     "countsByLane": {
-      "desktop": 10,
+      "desktop": 11,
       "local-validation": 6,
       "nightly": 5,
       "reference": 6,
@@ -14182,7 +14218,7 @@
       "artifact": 3,
       "canonical": 32,
       "reference": 6,
-      "supplemental": 25
+      "supplemental": 26
     },
     "automatedCollectorCount": 4,
     "automationBindingCount": 5

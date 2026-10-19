@@ -24,6 +24,7 @@ import { CodexDriver } from './codex-driver';
 import { ClaudeDriver } from './claude-driver';
 import { PiDriver } from './pi-driver';
 import { AcpDriver } from './acp-driver';
+import { AntigravityLoginManager } from './antigravity-login';
 import { LocalAgentError } from '../../shared/local-agent-error';
 import { nativeModelVisibilityContext } from './native-identity';
 import type { LocalAgentRepository } from '../infrastructure/adapters/powersync/local-agent.repository';
@@ -86,8 +87,18 @@ export class LocalAgentRuntime {
   private pendingProbes = 0;
   private stopped = false;
   private readonly storageWork = new Set<Promise<unknown>>();
+  private readonly logins: AntigravityLoginManager;
   private disposing?: Promise<void>;
-  constructor(private readonly options: LocalAgentRuntimeOptions) {}
+  constructor(private readonly options: LocalAgentRuntimeOptions) {
+    this.logins = new AntigravityLoginManager({
+      loadConnection: (identityId, connectionId) =>
+        this.options.store.getConnection(identityId, connectionId),
+      // Verification is the same official ACP probe used by refresh, so the
+      // renderer cannot mark a flow ready without observed models.
+      verify: (identityId, connectionId) => this.probeConnection(identityId, connectionId),
+      stopSessions: (identityId, connectionId) => this.cancelConnection(identityId, connectionId),
+    });
+  }
 
   private assertActive() {
     if (this.stopped || this.options.isActive?.() === false)
@@ -163,6 +174,28 @@ export class LocalAgentRuntime {
       previous.context === status.modelVisibilityContext
       ? { ...status, lastExecutionFailure: previous.failure }
       : status;
+  }
+
+  /** Explicit, user-initiated native Google sign-in for one saved instance. */
+  startLogin(identityId: string, connectionId: string) {
+    this.assertActive();
+    return this.logins.start(identityId, connectionId);
+  }
+  loginStatus(identityId: string, connectionId: string) {
+    this.assertActive();
+    return this.logins.status(identityId, connectionId);
+  }
+  cancelLogin(identityId: string, connectionId: string, flowId: string) {
+    this.assertActive();
+    return this.logins.cancel(identityId, connectionId, flowId);
+  }
+  completeLogin(identityId: string, connectionId: string, flowId: string, callbackUrl: string) {
+    this.assertActive();
+    return this.logins.complete(identityId, connectionId, flowId, callbackUrl);
+  }
+  signOutLogin(identityId: string, connectionId: string) {
+    this.assertActive();
+    return this.logins.signOut(identityId, connectionId);
   }
 
   /**
@@ -250,14 +283,19 @@ export class LocalAgentRuntime {
   }
   async createConversation(identityId: string, input: LocalAgentConversationCreate) {
     const status = await this.probeConnection(identityId, input.connectionId);
-    if (status.status !== 'ready')
+    if (status.status !== 'ready') {
+      const connection = await this.persist(() =>
+        this.options.store.getConnection(identityId, input.connectionId),
+      );
       throw new LocalAgentError(
         status.status === 'login_required'
           ? 'LOCAL_AGENT_LOGIN_REQUIRED'
           : status.status === 'not_installed'
             ? 'LOCAL_AGENT_NOT_INSTALLED'
             : 'LOCAL_AGENT_UNAVAILABLE',
+        connection.driver,
       );
+    }
     if (!status.models.some((model) => model.id === input.modelId))
       throw new LocalAgentError('LOCAL_AGENT_MODEL_UNSUPPORTED');
     this.assertActive();
@@ -594,6 +632,7 @@ export class LocalAgentRuntime {
       const runs = [...this.runs.values()];
       for (const run of runs) this.cancel(run);
       for (const probe of this.probes) probe.cancel();
+      await this.logins.dispose();
       await this.options.bridge?.dispose();
       await Promise.allSettled(
         [...this.probes, ...runs.flatMap((run) => (run.driver ? [run.driver] : []))].map((driver) =>

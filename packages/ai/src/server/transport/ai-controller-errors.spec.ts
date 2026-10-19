@@ -200,3 +200,13 @@ it('uses the fixed Desktop fallback for an unknown private native exception', ()
   expect(failure).toEqual({ code: 'INTERNAL_ERROR', message: 'Local Agent operation failed', statusCode: 500 });
   expect(JSON.stringify(failure)).not.toContain('PRIVATE_');
 });
+
+it('preserves the Google sign-in action at the public boundary while rejecting tainted diagnostics', () => {
+  const error = new LocalAgentError('LOCAL_AGENT_LOGIN_REQUIRED', 'antigravity');
+  error.message = 'PRIVATE_TOKEN';
+  expect(toAITransportFailure(error, fallback)).toMatchObject({
+    code: 'LOCAL_AGENT_LOGIN_REQUIRED',
+    message:
+      'Google sign-in is required. Open Settings → AI → Providers → Antigravity and select “Sign in with Google”.',
+  });
+});

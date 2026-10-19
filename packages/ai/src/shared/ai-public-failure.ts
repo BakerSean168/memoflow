@@ -1,5 +1,5 @@
 import { extractStructuredResultError } from '@memoflow/contracts/result';
-import { LocalAgentError, LOCAL_AGENT_FAILURES } from './local-agent-error';
+import { LocalAgentError, localAgentFailureMessage } from './local-agent-error';
 import { isAIExecutionError, type AIExecutionErrorKind } from './ai-execution-error';
 import type { AIWorkflowTerminalFailure } from '@memoflow/contracts/ai';
 import { readAIProviderRateLimit } from './ai-provider-rate-limit';
@@ -56,7 +56,7 @@ export function toAIPublicFailure(
   options: AIPublicFailureOptions,
 ): AIPublicFailure {
   if (error instanceof LocalAgentError)
-    return { code: error.code, message: LOCAL_AGENT_FAILURES[error.code] };
+    return { code: error.code, message: localAgentFailureMessage(error.code, error.driver) };
   if (isAIExecutionError(error)) {
     const code = mapAIExecutionCategory(error.category);
     return withRateLimitMetadata(createPublicFailure(
