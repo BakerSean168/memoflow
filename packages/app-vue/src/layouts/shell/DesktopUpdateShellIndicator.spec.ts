@@ -1,17 +1,18 @@
 /** @vitest-environment happy-dom */
 
-import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
+import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { fail, ok, ResultCode } from '@memoflow/contracts/result';
 import type { DesktopUpdateSnapshotDTO } from '@memoflow/contracts/electron';
 import { DESKTOP_UPDATE_SERVICE_KEY } from '../../di/keys';
 import type { DesktopUpdateService } from '../../di/types';
 import DesktopUpdateShellIndicator from './DesktopUpdateShellIndicator.vue';
+import { installShellTestCleanup } from '../../test/shell-cleanup';
 import enShell from '../../locales/en-US/shell';
 import zhShell from '../../locales/zh-CN/shell';
 
-enableAutoUnmount(afterEach);
+installShellTestCleanup();
 
 function snapshot(state: DesktopUpdateSnapshotDTO['state']): DesktopUpdateSnapshotDTO {
   return {

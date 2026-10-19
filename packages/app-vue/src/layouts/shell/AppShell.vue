@@ -479,6 +479,12 @@ function maxSidebarWidth(): number {
   return Math.max(SIDEBAR_HARD_MIN, window.innerWidth - reserved - chrome);
 }
 
+const resizeDisposers = new Set<() => void>();
+onBeforeUnmount(() => {
+  resizeDisposers.forEach((dispose) => dispose());
+  resizeDisposers.clear();
+});
+
 function startSidebarResize(e: MouseEvent) {
   e.preventDefault();
   const previousUserSelect = document.body.style.userSelect;
@@ -491,6 +497,7 @@ function startSidebarResize(e: MouseEvent) {
   document.body.style.cursor = 'col-resize';
   isSidebarResizing.value = true;
   const cleanup = () => {
+    resizeDisposers.delete(cleanup);
     isSidebarResizing.value = false;
     window.removeEventListener('mousemove', move);
     window.removeEventListener('mouseup', up);
@@ -517,6 +524,7 @@ function startSidebarResize(e: MouseEvent) {
   const cancel = (ev: KeyboardEvent) => {
     if (ev.key === 'Escape') cleanup();
   };
+  resizeDisposers.add(cleanup);
   window.addEventListener('mousemove', move);
   window.addEventListener('mouseup', up);
   window.addEventListener('keydown', cancel);
@@ -630,6 +638,7 @@ function startPanelResize(e: PointerEvent) {
     const settle = () => {
       if (settled) return;
       settled = true;
+      resizeDisposers.delete(settle);
       document.removeEventListener('focusin', onFocusIn, true);
       document.removeEventListener('pointerdown', settle, true);
       document.removeEventListener('keydown', settle, true);
@@ -645,9 +654,12 @@ function startPanelResize(e: PointerEvent) {
     document.addEventListener('pointerdown', settle, true);
     document.addEventListener('keydown', settle, true);
     const guardDeadline = window.setTimeout(settle, 2000);
+    resizeDisposers.add(settle);
   };
 
+  const dispose = () => cleanup(e.pointerId, false);
   const cleanup = (pointerId?: number, restoreFocusAfterGesture = true) => {
+    resizeDisposers.delete(dispose);
     if (typeof pointerId === 'number') {
       try {
         captureTarget?.releasePointerCapture?.(pointerId);
@@ -666,10 +678,13 @@ function startPanelResize(e: PointerEvent) {
     if (restoreFocusAfterGesture) {
       // Chromium may apply the native pointer/mouse focus default after pointerup listeners.
       // Restore on the next frame so the user's active input wins after the full gesture settles.
-      window.requestAnimationFrame(() => {
+      const frame = window.requestAnimationFrame(() => {
+        resizeDisposers.delete(cancelFrame);
         restoreFocusedElement();
         guardLateFocusTheft();
       });
+      const cancelFrame = () => window.cancelAnimationFrame(frame);
+      resizeDisposers.add(cancelFrame);
     }
   };
 
@@ -692,6 +707,7 @@ function startPanelResize(e: PointerEvent) {
     if (ev.key === 'Escape') cleanup();
   };
   const blur = () => cleanup();
+  resizeDisposers.add(dispose);
   window.addEventListener('pointermove', move);
   window.addEventListener('pointerup', up);
   window.addEventListener('pointercancel', pointerCancel);
@@ -969,6 +985,7 @@ watch(
 );
 onBeforeUnmount(() => {
   keyboardDisposers.forEach((dispose) => dispose());
+  keyboard.setPreviewEntry(() => {});
   keyboard.closePreview();
 });
 </script>
