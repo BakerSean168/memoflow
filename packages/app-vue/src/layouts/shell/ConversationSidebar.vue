@@ -29,13 +29,16 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
   DropdownMenuTrigger,
   Tooltip,
   TooltipTrigger,
   TooltipContent,
   TooltipProvider,
 } from '@memoflow/ui-vue-shadcn';
-import type { ProfileSummary } from '@memoflow/contracts/electron';
+import type { ProfileSummary, ProfileCloudState } from '@memoflow/contracts/electron';
 import type {
   ConversationAttentionStatus,
   ConversationAttentionMap,
@@ -55,6 +58,7 @@ interface ConversationGroup {
 const props = defineProps<{
   profiles?: ProfileSummary[];
   activeProfileId?: string;
+  cloudState?: ProfileCloudState;
   groups: ConversationGroup[];
   conversationStatuses?: ConversationAttentionMap;
   activeConversationId: string | null;
@@ -74,14 +78,11 @@ const emit = defineEmits<{
   (e: 'select-conversation', id: string): void;
   (e: 'delete-conversation', id: string): void;
   (e: 'open-settings'): void;
-  (e: 'open-account'): void;
   (e: 'open-cloud-connection'): void;
   (e: 'logout'): void;
-  (e: 'add-account'): void;
-  (e: 'create-profile'): void;
-  (e: 'manage-profiles'): void;
-  (e: 'import-profile'): void;
+  (e: 'manage-profiles', trigger: HTMLButtonElement | null): void;
   (e: 'switch-profile', profileId: string): void;
+  (e: 'refresh-profiles'): void;
 }>();
 
 const { t } = useI18n();
@@ -104,6 +105,7 @@ function stateOf(id: string): ConversationAttentionStatus | undefined {
   return props.conversationStatuses?.[id];
 }
 
+const accountMenuTrigger = ref<HTMLButtonElement | null>(null);
 const searchOpen = ref(false);
 const searchQuery = ref('');
 const searchInput = ref<HTMLInputElement | null>(null);
@@ -139,6 +141,13 @@ async function closeSearch() {
   searchToggle.value?.focus();
 }
 
+const orderedProfiles = computed(() =>
+  [...(props.profiles ?? [])].sort(
+    (a, b) =>
+      Number(b.profileId === props.activeProfileId) -
+        Number(a.profileId === props.activeProfileId) || b.lastActiveAt - a.lastActiveAt,
+  ),
+);
 const displayName = () => props.userName || t('shell.guest');
 
 const identityLabel = () => {
@@ -300,10 +309,17 @@ const identityLabel = () => {
 
     <!-- 底：账户菜单 -->
     <div class="flex h-11 shrink-0 items-center border-t border-[hsl(var(--border-subtle))] px-2.5">
-      <DropdownMenu>
+      <DropdownMenu
+        @update:open="
+          (open) => {
+            if (open && isDesktop) emit('refresh-profiles');
+          }
+        "
+      >
         <DropdownMenuTrigger as-child>
           <button
             type="button"
+            ref="accountMenuTrigger"
             data-testid="shell-account-menu"
             class="flex h-8 w-full min-w-0 items-center justify-start gap-2 rounded-md px-1.5 text-left transition-colors hover:bg-[hsl(var(--hover))] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             :title="t('shell.account.menu')"
@@ -313,59 +329,100 @@ const identityLabel = () => {
             >
               {{ displayName().slice(0, 1).toUpperCase() }}
             </span>
-            <span data-testid="shell-account-name" class="min-w-0 truncate text-[11.5px] font-medium">{{
-              displayName()
-            }}</span>
+            <span
+              data-testid="shell-account-name"
+              class="min-w-0 truncate text-[11.5px] font-medium"
+              >{{ displayName() }}</span
+            >
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" side="top" class="w-52">
-          <div class="px-2 py-1.5">
-            <p class="truncate text-sm font-medium">{{ displayName() }}</p>
-            <p class="text-[11px] text-muted-foreground">
-              {{ identityLabel() }}
-            </p>
+          <div class="flex items-center gap-2 px-2 py-1.5" data-testid="shell-account-identity">
+            <span
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground"
+              aria-hidden="true"
+              >{{ displayName().slice(0, 2).toUpperCase() }}</span
+            >
+            <div class="min-w-0">
+              <p class="truncate text-sm font-medium">{{ displayName() }}</p>
+              <p class="text-[11px] text-muted-foreground">
+                {{ identityLabel() }}
+              </p>
+            </div>
           </div>
           <DropdownMenuSeparator />
-          <DropdownMenuItem data-testid="shell-open-account" @click="emit('open-account')">
-            {{ t('shell.account.accountAndPrivacy') }}
-          </DropdownMenuItem>
-          <DropdownMenuItem data-testid="shell-open-settings" @click="emit('open-settings')">
+          <DropdownMenuItem data-testid="shell-open-settings" @select="emit('open-settings')">
             {{ t('shell.account.settings') }}
           </DropdownMenuItem>
-          <template v-if="isDesktop">
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              v-for="profile in profiles"
-              :key="profile.profileId"
-              @click="emit('switch-profile', profile.profileId)"
-              ><span class="min-w-0 flex-1"
-                ><span class="block truncate">{{ profile.displayName }}</span
-                ><small class="block truncate text-muted-foreground">{{
-                  profile.identifierHint || t('auth.profileAccess.guest')
-                }}</small></span
-              ><LockKeyhole v-if="profile.hasPin" class="h-3 w-3" /><Check
-                v-if="profile.profileId === activeProfileId"
-                class="h-3 w-3"
-                :aria-label="t('shell.account.currentProfile')"
-            /></DropdownMenuItem>
-            <DropdownMenuItem data-testid="shell-create-profile" @click="emit('create-profile')">{{
-              t('shell.account.createProfile')
-            }}</DropdownMenuItem>
-            <DropdownMenuItem
-              data-testid="shell-manage-profiles"
-              @click="emit('manage-profiles')"
-              >{{ t('shell.account.manageProfiles') }}</DropdownMenuItem
+          <DropdownMenuSub v-if="isDesktop">
+            <DropdownMenuSubTrigger data-testid="shell-switch-account">
+              {{ t('shell.account.switchAccount') }}
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent
+              data-testid="shell-profile-switcher"
+              class="w-72 max-w-[calc(100vw-1rem)]"
+              :collision-padding="8"
+              :avoid-collisions="true"
             >
-            <DropdownMenuItem
-              v-if="identityKind !== 'guest'"
-              data-testid="shell-import-profile"
-              @click="emit('import-profile')"
-              >{{ t('shell.profileImport.title') }}</DropdownMenuItem
-            >
-            <DropdownMenuItem data-testid="shell-add-account" @click="emit('add-account')">{{
-              t('shell.account.addAccount')
-            }}</DropdownMenuItem>
-          </template>
+              <div class="max-h-[min(60vh,24rem)] overflow-y-auto" data-testid="shell-profile-list">
+                <DropdownMenuItem
+                  v-for="profile in orderedProfiles"
+                  :key="profile.profileId"
+                  :data-testid="`shell-switch-profile-${profile.profileId}`"
+                  :aria-label="
+                    profile.displayName + ' — ' + (profile.identifierHint || profile.profileId)
+                  "
+                  :aria-current="profile.profileId === activeProfileId ? 'true' : undefined"
+                  @select="
+                    profile.profileId !== activeProfileId &&
+                    emit('switch-profile', profile.profileId)
+                  "
+                >
+                  <span
+                    class="mr-2 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs"
+                    aria-hidden="true"
+                  >
+                    {{ profile.displayName.slice(0, 2).toUpperCase() }}
+                  </span>
+                  <span class="min-w-0 flex-1">
+                    <span class="block truncate" :title="profile.displayName">{{
+                      profile.displayName
+                    }}</span>
+                    <small class="block truncate text-muted-foreground">
+                      {{
+                        profile.profileKind === 'guest'
+                          ? t('auth.profileAccess.guest')
+                          : t('auth.profileAccess.registered')
+                      }}
+                      · {{ profile.identifierHint || profile.profileId }} ·
+                      {{
+                        profile.profileId === activeProfileId && cloudState
+                          ? t('shell.account.connection.' + cloudState)
+                          : t('shell.account.connection.unknown')
+                      }}
+                    </small>
+                  </span>
+                  <LockKeyhole
+                    v-if="profile.hasPin"
+                    class="ml-1 h-3 w-3 shrink-0"
+                    :aria-label="t('auth.profileAccess.unlock')"
+                  />
+                  <Check
+                    v-if="profile.profileId === activeProfileId"
+                    class="ml-1 h-3 w-3 shrink-0"
+                    :aria-label="t('shell.account.currentProfile')"
+                  />
+                </DropdownMenuItem>
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                data-testid="shell-manage-profiles"
+                @select="emit('manage-profiles', accountMenuTrigger)"
+              >
+                {{ t('shell.account.manageProfiles') }}
+              </DropdownMenuItem>
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             v-if="cloudConnected"

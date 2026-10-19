@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { mount } from '@vue/test-utils';
+import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import ConversationSidebar from './ConversationSidebar.vue';
 
@@ -176,6 +176,111 @@ describe('ConversationSidebar compact toolbar', () => {
       expect(wrapper.findAll('[data-testid="conversation-toolbar"]')).toHaveLength(1);
       await create.trigger('click');
       expect(wrapper.emitted('new-conversation')).toEqual([[]]);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+});
+
+describe('ConversationSidebar account menu', () => {
+  async function openMenu(props = {}) {
+    const wrapper = mount(ConversationSidebar, {
+      attachTo: document.body,
+      props: { groups: [], activeConversationId: null, userName: 'Alice', ...props },
+      global: { plugins: [i18n] },
+    });
+    await wrapper.get('[data-testid="shell-account-menu"]').trigger('keydown', { key: 'Enter' });
+    await flushPromises();
+    return wrapper;
+  }
+  function item(id: string): HTMLElement {
+    const element = document.querySelector<HTMLElement>(`[data-testid="${id}"]`);
+    expect(element, id).not.toBeNull();
+    return element!;
+  }
+
+  it.each([
+    ['cloud', true, 'shell-logout'],
+    ['guest', false, 'shell-open-cloud-connection'],
+    ['registered-local', false, 'shell-open-cloud-connection'],
+  ] as const)(
+    'shows the conditional action for %s and hides desktop actions on web',
+    async (identityKind, cloudConnected, action) => {
+      const wrapper = await openMenu({ identityKind, cloudConnected, isDesktop: false });
+      try {
+        expect(item('shell-account-identity').textContent?.match(/Alice/g)).toHaveLength(1);
+        expect(item('shell-open-settings')).toBeTruthy();
+        expect(item(action)).toBeTruthy();
+        expect(document.querySelector('[data-testid="shell-switch-account"]')).toBeNull();
+        expect(document.querySelector('[data-testid="shell-open-account"]')).toBeNull();
+        expect(document.querySelector('[data-testid="shell-create-profile"]')).toBeNull();
+        expect(document.querySelector('[data-testid="shell-logout"]') !== null).toBe(
+          cloudConnected,
+        );
+      } finally {
+        wrapper.unmount();
+      }
+    },
+  );
+
+  it('opens the flyout by keyboard, sorts exact IDs, bounds many profiles, and switches only on selection', async () => {
+    const profiles = Array.from({ length: 30 }, (_, index) => ({
+      profileId: `id-${index}`,
+      displayName: 'Same very long name '.repeat(4),
+      profileKind: index % 2 ? ('registered' as const) : ('guest' as const),
+      avatarSeed: `${index}`,
+      identifierHint: index % 2 ? `user-${index}@example.com` : null,
+      cloudAccountId: index % 2 ? `cloud-${index}` : null,
+      hasPin: index === 1,
+      lastActiveAt: index,
+    }));
+    const wrapper = await openMenu({ isDesktop: true, profiles, activeProfileId: 'id-2' });
+    try {
+      item('shell-switch-account').focus();
+      item('shell-switch-account').dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }),
+      );
+      await flushPromises();
+      const rows = [...document.querySelectorAll('[data-testid^="shell-switch-profile-"]')];
+      expect(rows).toHaveLength(30);
+      expect(rows[0]?.getAttribute('data-testid')).toBe('shell-switch-profile-id-2');
+      expect(rows[1]?.getAttribute('data-testid')).toBe('shell-switch-profile-id-29');
+      expect(rows[0]?.getAttribute('aria-current')).toBe('true');
+      expect(item('shell-profile-list').classList.contains('overflow-y-auto')).toBe(true);
+      expect(item('shell-switch-profile-id-1').querySelector('svg')).toBeTruthy();
+      expect(wrapper.emitted('switch-profile')).toBeUndefined();
+      expect(document.querySelector('[data-testid="shell-add-account"]')).toBeNull();
+      item('shell-profile-switcher').dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }),
+      );
+      await flushPromises();
+      expect(document.activeElement).toBe(item('shell-switch-account'));
+      item('shell-switch-account').dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }),
+      );
+      await flushPromises();
+      item('shell-switch-profile-id-1').click();
+      await flushPromises();
+      expect(wrapper.emitted('switch-profile')).toEqual([['id-1']]);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('supports touch/click opening and restores the footer trigger on Escape', async () => {
+    const wrapper = await openMenu({ isDesktop: true });
+    try {
+      item('shell-switch-account').click();
+      await flushPromises();
+      expect(item('shell-manage-profiles')).toBeTruthy();
+      item('shell-manage-profiles').dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }),
+      );
+      await flushPromises();
+      expect(document.activeElement).toBe(
+        wrapper.get('[data-testid="shell-account-menu"]').element,
+      );
+      expect(wrapper.emitted('switch-profile')).toBeUndefined();
     } finally {
       wrapper.unmount();
     }
