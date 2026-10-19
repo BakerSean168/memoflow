@@ -23,7 +23,9 @@ describe('ProductPropertyChip', () => {
   });
 
   it('keeps value chips in the quiet neutral visual family', () => {
-    const button = mount(ProductPropertyChip, { slots: { default: '2026年9月12日' } }).get('button');
+    const button = mount(ProductPropertyChip, { slots: { default: '2026年9月12日' } }).get(
+      'button',
+    );
     expect(button.classes()).toContain('bg-[hsl(var(--surface-raised)/0.48)]');
     expect(button.classes()).toContain('text-[hsl(var(--foreground-muted))]');
   });
