@@ -5355,6 +5355,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/modules/goal/utils/progress.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/goal/views/GoalDeepLinks.characterization.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12173,6 +12181,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/ci-cd-platform/__tests__/affected-shadow.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "ci-cd-platform:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/ci-cd-platform/__tests__/artifact-contract.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -12494,6 +12510,14 @@
     },
     {
       "path": "tools/governance/__tests__/app-vue-source-locks.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "tools/governance/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "tools/governance/__tests__/app-vue-structure-rules.test.mjs",
       "primarySuite": "governance",
       "collectors": [
         "tools/governance/vitest.config.ts"
@@ -13148,7 +13172,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "node-test",
-      "fileCount": 39
+      "fileCount": 40
     },
     {
       "id": "memoflow:test:governance",
@@ -13169,7 +13193,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "vitest",
-      "fileCount": 20
+      "fileCount": 21
     },
     {
       "id": "apps/api/vitest.integration.config.ts",
@@ -14107,7 +14131,7 @@
     "boundary-main": 9,
     "e2e": 66,
     "perf": 2,
-    "governance": 73
+    "governance": 75
   },
   "e2eGovernance": {
     "version": 2,

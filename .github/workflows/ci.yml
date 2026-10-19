@@ -80,6 +80,41 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
+  affected-shadow:
+    name: Affected Selector Shadow
+    needs: scope-detector
+    if: github.event_name == 'pull_request' && needs.scope-detector.result == 'success'
+    # Observation only. A comparison crash is preserved in the artifact and the
+    # step summary (status: error) but never gates the PR or feeds CI Check.
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with: { fetch-depth: 0 }
+      - uses: ./.github/actions/setup-nx-affected-job
+        with:
+          node-version: '${{ env.NODE_VERSION }}'
+          setup-python: 'false'
+          setup-uv: 'false'
+          enable-nx-cache: 'false'
+          consume-delivery-manifest: 'true'
+      - name: Compare legacy and task-based affected selection
+        run: >-
+          node ./tools/ci-cd-platform/shadow-affected.mjs
+          --base "$NX_BASE"
+          --head "$NX_HEAD"
+          --json-out reports/ci-cd-platform/affected-shadow-v1.json
+          --markdown-out reports/ci-cd-platform/affected-shadow-v1.md
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: affected-shadow-v1
+          path: |
+            reports/ci-cd-platform/affected-shadow-v1.json
+            reports/ci-cd-platform/affected-shadow-v1.md
+          if-no-files-found: warn
+          retention-days: 14
+
   governance:
     name: Governance
     needs: scope-detector

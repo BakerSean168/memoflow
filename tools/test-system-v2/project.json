@@ -4,6 +4,22 @@
   "projectType": "library",
   "tags": ["scope:tools", "type:plugin", "layer:testing"],
   "sourceRoot": "tools/test-system-v2",
+  "namedInputs": {
+    "repoTestInventory": [
+      "{workspaceRoot}/apps/**/project.json",
+      "{workspaceRoot}/packages/**/project.json",
+      "{workspaceRoot}/tools/**/project.json",
+      "{workspaceRoot}/apps/**/*.{test,spec,bench}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+      "{workspaceRoot}/packages/**/*.{test,spec,bench}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+      "{workspaceRoot}/tools/**/*.{test,spec,bench}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+      "{workspaceRoot}/apps/**/playwright*.config.{js,mjs,ts,mts}",
+      "{workspaceRoot}/apps/**/vitest*.config.{js,mjs,ts,mts,cts}",
+      "{workspaceRoot}/packages/**/vitest*.config.{js,mjs,ts,mts,cts}",
+      "{workspaceRoot}/tools/**/vitest*.config.{js,mjs,ts,mts,cts}",
+      "{workspaceRoot}/apps/**/e2e/**/*",
+      "{workspaceRoot}/.github/workflows/ci.yml"
+    ]
+  },
   "targets": {
     "test": {
       "executor": "nx:run-commands",
@@ -14,7 +30,8 @@
         "{workspaceRoot}/apps/web/web-flow-specs.mjs",
         "{workspaceRoot}/tools/ci-cd-platform/generate-delivery-manifest.mjs",
         "{workspaceRoot}/tools/ci-cd-platform/lib/**/*",
-        "{workspaceRoot}/tools/ci-cd-platform/unit-test-durations.json"
+        "{workspaceRoot}/tools/ci-cd-platform/unit-test-durations.json",
+        "repoTestInventory"
       ],
       "options": { "command": "node --test tools/test-system-v2/__tests__/*.test.mjs" }
     },
