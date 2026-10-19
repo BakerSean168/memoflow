@@ -9,7 +9,13 @@
       "executor": "nx:run-commands",
       "dependsOn": ["contracts:build"],
       "cache": true,
-      "inputs": ["{projectRoot}/**/*"],
+      "inputs": [
+        "{projectRoot}/**/*",
+        "{workspaceRoot}/apps/web/web-flow-specs.mjs",
+        "{workspaceRoot}/tools/ci-cd-platform/generate-delivery-manifest.mjs",
+        "{workspaceRoot}/tools/ci-cd-platform/lib/**/*",
+        "{workspaceRoot}/tools/ci-cd-platform/unit-test-durations.json"
+      ],
       "options": { "command": "node --test tools/test-system-v2/__tests__/*.test.mjs" }
     },
     "test:inventory": {

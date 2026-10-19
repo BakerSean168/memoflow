@@ -38,6 +38,9 @@ jobs:
       lane_boundary: ${{ steps.scope.outputs.lane_boundary }}
       lane_integration: ${{ steps.scope.outputs.lane_integration }}
       lane_web: ${{ steps.scope.outputs.lane_web }}
+      web_matrix: ${{ steps.scope.outputs.web_matrix }}
+      web_specs: ${{ steps.scope.outputs.web_specs }}
+      web_estimated_total_ms: ${{ steps.scope.outputs.web_estimated_total_ms }}
       lane_coverage: ${{ steps.scope.outputs.lane_coverage }}
       lane_performance: ${{ steps.scope.outputs.lane_performance }}
       unit_1: ${{ steps.scope.outputs.unit_1 }}
@@ -463,7 +466,9 @@ jobs:
     needs: [scope-detector, build]
     if: needs.scope-detector.result == 'success' && needs.build.result == 'success' && needs.scope-detector.outputs.lane_web == 'true'
     runs-on: ubuntu-24.04
-    strategy: { fail-fast: false, matrix: { shard: ['1/4', '2/4', '3/4', '4/4'] } }
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.scope-detector.outputs.web_matrix) }}
     env:
       DATABASE_URL: postgresql://test_user:test_pass@127.0.0.1:5433/memoflow_test
       JWT_SECRET: test-jwt-secret-for-e2e-testing-purposes
@@ -548,13 +553,21 @@ jobs:
           TEST_REPORT_NAME: web-flow-${{ strategy.job-index }}
           DELIVERY_LANE: web
           E2E_PREBUILT_ARTIFACT: '1'
+      - name: Upload actual Web shard execution receipt
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: web-shard-receipt-${{ strategy.job-index }}
+          path: reports/web-shards/*.json
+          if-no-files-found: error
+          retention-days: 14
       - name: Product visual matrix (compare only)
         run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run web:e2e:visual-regression -- --shard=${{ matrix.shard }}
         env:
           TEST_REPORT_NAME: web-visual-${{ strategy.job-index }}
           DELIVERY_LANE: web
       - name: Secure AI Provider product acceptance
-        if: matrix.shard == '1/4'
+        if: strategy.job-index == 0
         run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run web:e2e:ai-provider
         env:
           TEST_REPORT_NAME: web-ai-provider
@@ -689,6 +702,12 @@ jobs:
         with:
           name: delivery-manifest-v1
           path: scope
+      - name: Download Web shard execution receipts
+        continue-on-error: true
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          pattern: web-shard-receipt-*
+          path: reports/web-shards
       - name: Gate on manifest-selected lanes
         env:
           CI_CHECK_NEEDS: ${{ toJSON(needs) }}

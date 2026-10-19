@@ -44,6 +44,21 @@ test('observation aggregates command evidence without changing lane semantics', 
     },
     provenance: { generator: 'test', inputDigest: 'a'.repeat(64) },
   };
+  manifest.webShards = {
+    specs: [],
+    shards: [],
+    shardCount: 0,
+    fallback: false,
+    estimatedTotalMs: 0,
+  };
+  if (manifest.lanes.web)
+    manifest.webShards = {
+      specs: ['test.spec.ts'],
+      shards: [{ id: '1/1', specs: ['test.spec.ts'], estimatedMs: 1 }],
+      shardCount: 1,
+      fallback: false,
+      estimatedTotalMs: 1,
+    };
   manifest.unitShards = planUnitShards(manifest.scope.unit);
   manifest.digest = digest(manifest);
   const input = await createLaneInput({
@@ -122,6 +137,21 @@ test('observation fails closed when no command report belongs to the lane', asyn
     },
     provenance: { generator: 'test', inputDigest: 'b'.repeat(64) },
   };
+  manifest.webShards = {
+    specs: [],
+    shards: [],
+    shardCount: 0,
+    fallback: false,
+    estimatedTotalMs: 0,
+  };
+  if (manifest.lanes.web)
+    manifest.webShards = {
+      specs: ['test.spec.ts'],
+      shards: [{ id: '1/1', specs: ['test.spec.ts'], estimatedMs: 1 }],
+      shardCount: 1,
+      fallback: false,
+      estimatedTotalMs: 1,
+    };
   manifest.unitShards = planUnitShards(manifest.scope.unit);
   manifest.digest = digest(manifest);
   const input = await createLaneInput({

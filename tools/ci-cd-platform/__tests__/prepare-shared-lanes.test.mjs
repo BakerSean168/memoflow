@@ -57,6 +57,21 @@ test('prepares independent lane inputs and apportions shared setup timing', asyn
     },
     provenance: { generator: 'test', inputDigest: 'c'.repeat(64) },
   };
+  manifest.webShards = {
+    specs: [],
+    shards: [],
+    shardCount: 0,
+    fallback: false,
+    estimatedTotalMs: 0,
+  };
+  if (manifest.lanes.web)
+    manifest.webShards = {
+      specs: ['test.spec.ts'],
+      shards: [{ id: '1/1', specs: ['test.spec.ts'], estimatedMs: 1 }],
+      shardCount: 1,
+      fallback: false,
+      estimatedTotalMs: 1,
+    };
   manifest.unitShards = planUnitShards(manifest.scope.unit);
   manifest.digest = digest(manifest);
   const enabled = await prepareSharedLanes({
@@ -119,6 +134,21 @@ test('rejects unregistered lanes before producing shared lane evidence', async (
     },
     provenance: { generator: 'test', inputDigest: 'e'.repeat(64) },
   };
+  manifest.webShards = {
+    specs: [],
+    shards: [],
+    shardCount: 0,
+    fallback: false,
+    estimatedTotalMs: 0,
+  };
+  if (manifest.lanes.web)
+    manifest.webShards = {
+      specs: ['test.spec.ts'],
+      shards: [{ id: '1/1', specs: ['test.spec.ts'], estimatedMs: 1 }],
+      shardCount: 1,
+      fallback: false,
+      estimatedTotalMs: 1,
+    };
   manifest.unitShards = planUnitShards(manifest.scope.unit);
   manifest.digest = digest(manifest);
   await assert.rejects(

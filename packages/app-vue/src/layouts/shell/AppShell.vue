@@ -17,12 +17,7 @@
  * - 会话侧栏消费 AIChatView defineExpose 的会话状态（单一 chat session）；
  * - 桌面窗控走 useDesktopWindowControls（Web 端不渲染，V2 决策 #6）。
  */
-import {
-  ProfileAccessChannels,
-  DesktopProfileImportChannels,
-  WindowChannels,
-  type ProfileSummary,
-} from '@memoflow/contracts/electron';
+import { DesktopProfileImportChannels } from '@memoflow/contracts/electron';
 import { DESKTOP_BRIDGE_KEY } from '../../di/keys';
 import { toast } from 'vue-sonner';
 import { computed, inject, onBeforeUnmount, onMounted, provide, ref, shallowRef, watch } from 'vue';
@@ -60,6 +55,8 @@ import { DialogDraftScopeKey } from './dialog-draft-store';
 import GlobalComposer from './GlobalComposer.vue';
 import CloudConnectionDialog from './CloudConnectionDialog.vue';
 import ProfileImportDialog from './ProfileImportDialog.vue';
+import ManageAccountsDialog from './ManageAccountsDialog.vue';
+import { useDesktopProfiles } from '../../shared/composables/useDesktopProfiles';
 import { z } from 'zod';
 import StandaloneSettingsLayout from './StandaloneSettingsLayout.vue';
 import {
@@ -366,7 +363,24 @@ useDeviceKeymap(() => authStore.getIdentityId, desktopAccess);
 const cloudConnectionOpen = ref(false);
 const cloudConnectionIntent = ref<'add_account' | 'reauthenticate'>('add_account');
 const desktopBridge = inject(DESKTOP_BRIDGE_KEY, null);
-const desktopProfiles = ref<ProfileSummary[]>([]);
+const profilePresenter = useDesktopProfiles();
+const { profiles: desktopProfiles, refreshProfiles, switchProfile } = profilePresenter;
+const manageAccountsOpen = ref(false);
+const accountReturnFocus = shallowRef<HTMLElement | null>(null);
+async function manageProfiles(trigger: HTMLButtonElement | null) {
+  accountReturnFocus.value = trigger;
+  // Allow the submenu to restore its trigger before the Dialog takes focus.
+  await nextTick();
+  manageAccountsOpen.value = true;
+}
+function closeManagement() {
+  manageAccountsOpen.value = false;
+}
+function managePinSettings() {
+  closeManagement();
+  openAccount();
+}
+
 const profileImportOpen = ref(false);
 const profileImportSource = ref<string>();
 watch(
@@ -395,55 +409,32 @@ watch(
   },
   { immediate: true },
 );
-onMounted(async () => {
-  if (!desktopBridge) return;
-  const result = (await desktopBridge.invoke(ProfileAccessChannels.LIST)) as {
-    ok: boolean;
-    data: ProfileSummary[];
-  };
-  if (result.ok) desktopProfiles.value = result.data;
+onMounted(() => {
+  if (desktopBridge) void refreshProfiles();
 });
-const creatingProfile = ref(false);
-const createProfileRequestId = ref(crypto.randomUUID());
-async function createLocalProfile() {
-  if (!desktopBridge || creatingProfile.value) return;
-  creatingProfile.value = true;
-  try {
-    const result = (await desktopBridge.invoke(ProfileAccessChannels.CREATE_GUEST, {
-      requestId: createProfileRequestId.value,
-    })) as { ok: boolean; data?: ProfileSummary; error?: { message: string } };
-    if (!result.ok || !result.data) {
-      toast.error(result.error?.message ?? t('common.operationFailed'));
-      return;
-    }
-    createProfileRequestId.value = crypto.randomUUID();
-    await manageProfiles(result.data.profileId);
-  } catch (error) {
-    toast.error(error instanceof Error ? error.message : t('common.operationFailed'));
-  } finally {
-    creatingProfile.value = false;
-  }
-}
-async function manageProfiles(profileId?: string) {
-  closeOverlaySidebar();
-  try {
-    await desktopBridge?.invoke(WindowChannels.TRANSITION_TO_PROFILE_ACCESS, profileId);
-  } catch (error) {
-    toast.error(error instanceof Error ? error.message : t('common.operationFailed'));
-  }
-}
 function addAccount() {
+  closeManagement();
   cloudConnectionIntent.value = 'add_account';
   cloudConnectionOpen.value = true;
 }
 const userName = computed<string | undefined>(
   () =>
+    desktopProfiles.value.find(
+      (profile) => profile.profileId === desktopAccess.value?.profile?.profileId,
+    )?.displayName ??
     desktopAccess.value?.profile?.displayName ??
     accountStore.currentAccount?.profile.nickname ??
     authStore.currentIdentity?.name,
 );
+const shellCloudConnected = computed(
+  () =>
+    isAuthenticated.value &&
+    (!isDesktop ||
+      (desktopAccess.value?.profile?.profileKind === 'registered' &&
+        desktopAccess.value.cloudState !== 'REAUTH_REQUIRED')),
+);
 const shellIdentityKind = computed<'guest' | 'registered-local' | 'cloud'>(() => {
-  if (isAuthenticated.value) return 'cloud';
+  if (shellCloudConnected.value) return 'cloud';
   if (desktopAccess.value?.profile) {
     return desktopAccess.value.profile.profileKind === 'guest' ? 'guest' : 'registered-local';
   }
@@ -1118,20 +1109,18 @@ onBeforeUnmount(() => {
               :active-conversation-id="activeConversationId"
               :user-name="userName"
               :identity-kind="shellIdentityKind"
-              :cloud-connected="isAuthenticated"
+              :cloud-connected="shellCloudConnected"
+              :cloud-state="desktopAccess?.cloudState"
               :loading="Boolean(aiRef?.conversationListLoading)"
               :is-desktop="isDesktop"
               @new-conversation="handleNewConversation"
               @select-conversation="handleSelectConversation"
               @delete-conversation="handleDeleteConversation"
               @open-settings="openSettings"
-              @open-account="openAccount"
               @open-cloud-connection="openCloudConnection"
-              @manage-profiles="manageProfiles()"
-              @import-profile="profileImportOpen = true"
-              @switch-profile="manageProfiles"
-              @add-account="addAccount"
-              @create-profile="createLocalProfile"
+              @manage-profiles="manageProfiles"
+              @switch-profile="switchProfile"
+              @refresh-profiles="refreshProfiles"
               @logout="() => void handleLogout()"
             />
           </div>
@@ -1297,26 +1286,36 @@ onBeforeUnmount(() => {
             :active-conversation-id="activeConversationId"
             :user-name="userName"
             :identity-kind="shellIdentityKind"
-            :cloud-connected="isAuthenticated"
+            :cloud-connected="shellCloudConnected"
+            :cloud-state="desktopAccess?.cloudState"
             :loading="Boolean(aiRef?.conversationListLoading)"
             :is-desktop="isDesktop"
             @new-conversation="handleNewConversation"
             @select-conversation="handleSelectConversation"
             @delete-conversation="handleDeleteConversation"
             @open-settings="openSettings"
-            @open-account="openAccount"
             @open-cloud-connection="openCloudConnection"
-            @manage-profiles="manageProfiles()"
-            @import-profile="profileImportOpen = true"
-            @switch-profile="manageProfiles"
-            @add-account="addAccount"
-            @create-profile="createLocalProfile"
+            @manage-profiles="manageProfiles"
+            @switch-profile="switchProfile"
+            @refresh-profiles="refreshProfiles"
             @logout="() => void handleLogout()"
           />
         </div>
       </SheetContent>
     </Sheet>
   </div>
+  <ManageAccountsDialog
+    v-if="isDesktop"
+    v-model:open="manageAccountsOpen"
+    :presenter="profilePresenter"
+    :return-focus="accountReturnFocus"
+    @add-account="addAccount"
+    @import-profile="
+      closeManagement();
+      profileImportOpen = true;
+    "
+    @pin-settings="managePinSettings"
+  />
   <ProfileImportDialog
     v-if="desktopAccess?.profile?.profileKind === 'registered'"
     v-model:open="profileImportOpen"

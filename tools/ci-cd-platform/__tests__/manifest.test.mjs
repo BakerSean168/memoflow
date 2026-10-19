@@ -439,3 +439,67 @@ if (process.env.FAIL_COMMAND === 'true') process.exit(17);
     await rm(root, { recursive: true, force: true });
   }
 });
+
+test('Web manifest projects narrow/full/zero selections into dynamic outputs', async () => {
+  // eslint-disable-next-line @nx/enforce-module-boundaries -- contract test checks the Web-owned canonical list
+  const { WEB_FLOW_SPECS } = await import('../../../apps/web/web-flow-specs.mjs');
+  const { writeManifestOutputs } = await import('../generate-delivery-manifest.mjs');
+  const { mkdtemp, readFile, rm } = await import('node:fs/promises');
+  const { tmpdir } = await import('node:os');
+  const path = await import('node:path');
+  const previousOutput = process.env.GITHUB_OUTPUT;
+  const root = await mkdtemp(path.join(tmpdir(), 'web-matrix-'));
+  try {
+    for (const entry of [
+      {
+        event: 'pull_request',
+        full: false,
+        files: [`apps/web/e2e/${WEB_FLOW_SPECS[0]}`],
+        count: 1,
+        specs: [WEB_FLOW_SPECS[0]],
+      },
+      {
+        event: 'pull_request',
+        full: false,
+        files: ['apps/web/src/App.vue'],
+        count: 4,
+        specs: WEB_FLOW_SPECS,
+      },
+      { event: 'workflow_dispatch', full: true, files: [], count: 4, specs: WEB_FLOW_SPECS },
+      { event: 'pull_request', full: false, files: ['docs/README.md'], count: 0, specs: [] },
+    ]) {
+      const m = await buildDeliveryManifest({
+        ...entry,
+        base: 'base',
+        head: 'head',
+        scope: { ...scope, full: entry.full, webFlow: entry.count > 0 },
+      });
+      assert.equal(m.webShards.shardCount, entry.count);
+      assert.deepEqual([...m.webShards.specs].sort(), [...entry.specs].sort());
+      assert.deepEqual(
+        m.webShards.shards.flatMap((shard) => shard.specs).sort(),
+        [...entry.specs].sort(),
+      );
+      const output = path.join(root, `${entry.event}-${entry.count}.txt`);
+      process.env.GITHUB_OUTPUT = output;
+      await writeManifestOutputs(m, 'scope/delivery-manifest-v1.json');
+      const lines = Object.fromEntries(
+        (await readFile(output, 'utf8'))
+          .trim()
+          .split('\n')
+          .map((line) => {
+            const i = line.indexOf('=');
+            return [line.slice(0, i), line.slice(i + 1)];
+          }),
+      );
+      assert.deepEqual(JSON.parse(lines.web_matrix), {
+        shard: m.webShards.shards.map((shard) => shard.id),
+      });
+      assert.equal(lines.lane_web, String(entry.count > 0));
+    }
+  } finally {
+    if (previousOutput === undefined) delete process.env.GITHUB_OUTPUT;
+    else process.env.GITHUB_OUTPUT = previousOutput;
+    await rm(root, { recursive: true, force: true });
+  }
+});

@@ -14,7 +14,8 @@
     "lanes",
     "provenance",
     "digest",
-    "unitShards"
+    "unitShards",
+    "webShards"
   ],
   "properties": {
     "kind": {
@@ -172,6 +173,57 @@
         },
         "additionalProperties": false
       }
+    },
+    "webShards": {
+      "type": "object",
+      "required": ["specs", "fallback", "estimatedTotalMs", "shardCount", "shards"],
+      "properties": {
+        "specs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "fallback": {
+          "type": "boolean"
+        },
+        "estimatedTotalMs": {
+          "type": "number",
+          "minimum": 0
+        },
+        "shardCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "shards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "specs", "estimatedMs"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[1-9][0-9]*/[1-9][0-9]*$"
+              },
+              "specs": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string"
+                }
+              },
+              "estimatedMs": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": true

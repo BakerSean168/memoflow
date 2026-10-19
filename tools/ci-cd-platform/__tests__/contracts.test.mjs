@@ -55,6 +55,21 @@ test('validates a delivery manifest and gives deterministic provenance', () => {
     },
     provenance: buildProvenance({ generator: 'test', input }),
   };
+  manifest.webShards = {
+    specs: [],
+    shards: [],
+    shardCount: 0,
+    fallback: false,
+    estimatedTotalMs: 0,
+  };
+  if (manifest.lanes.web)
+    manifest.webShards = {
+      specs: ['test.spec.ts'],
+      shards: [{ id: '1/1', specs: ['test.spec.ts'], estimatedMs: 1 }],
+      shardCount: 1,
+      fallback: false,
+      estimatedTotalMs: 1,
+    };
   manifest.unitShards = planUnitShards(manifest.scope.unit);
   manifest.digest = digest(manifest);
   validateDeliveryManifest(manifest);
@@ -97,6 +112,21 @@ test('rejects a scope that was calculated from a different affected range', () =
     lanes: { governance: true, validate: true },
     provenance: { generator: 'test', inputDigest: 'a'.repeat(64) },
   };
+  manifest.webShards = {
+    specs: [],
+    shards: [],
+    shardCount: 0,
+    fallback: false,
+    estimatedTotalMs: 0,
+  };
+  if (manifest.lanes.web)
+    manifest.webShards = {
+      specs: ['test.spec.ts'],
+      shards: [{ id: '1/1', specs: ['test.spec.ts'], estimatedMs: 1 }],
+      shardCount: 1,
+      fallback: false,
+      estimatedTotalMs: 1,
+    };
   manifest.unitShards = planUnitShards(manifest.scope.unit);
   manifest.digest = digest(manifest);
   assert.throws(() => validateDeliveryManifest(manifest), /scope\.base must match/);

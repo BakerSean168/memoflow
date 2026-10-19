@@ -11,12 +11,20 @@ import {
   indexTitles,
 } from '../refresh-web-spec-durations.mjs';
 
+import {
+  planWebShards,
+  selectWebSpecs,
+  executedWebSpecs,
+  WEB_SHARD_POLICY,
+} from '../lib/web-shards.mjs';
+
 const history = JSON.parse(await readFile(WEB_SPEC_DURATIONS_PATH, 'utf8'));
 
 async function ciShardMatrix() {
   const ci = await readFile('.github/workflows/ci.yml', 'utf8');
-  const matrix = /shard: \[([^\]]+)\]/u.exec(ci)?.[1] ?? '';
-  return matrix.split(',').map((entry) => parseShardArgument(entry.trim().replace(/'/gu, '')));
+  assert.match(ci, /matrix: \$\{\{ fromJSON\(needs.scope-detector.outputs.web_matrix\) \}\}/u);
+  const plan = planWebShards({ specs: WEB_FLOW_SPECS, durations: history.specs });
+  return plan.shards.map(({ id }) => parseShardArgument(id));
 }
 
 test('the CI shard plan covers every canonical Web Flow spec exactly once', async () => {
@@ -154,4 +162,160 @@ test('Web Flow shard runner allocates a dynamic provider-mock port', async () =>
   assert.match(source, /server\.listen\(0, '127\.0\.0\.1'/);
   assert.match(source, /E2E_OPENAI_MOCK_PORT: mockPort/);
   assert.match(source, /'--config',\s*'playwright\.config\.ts'/u);
+});
+
+test('dynamic shard math respects setup budget, bounds, zero and missing durations', () => {
+  const specs = WEB_FLOW_SPECS.slice(0, 3);
+  const durations = Object.fromEntries(specs.map((spec) => [spec, { durationMs: 300_000 }]));
+  assert.equal(planWebShards({ specs, durations }).shardCount, 3);
+  assert.equal(planWebShards({ specs: [specs[0]], durations }).shardCount, 1);
+  assert.equal(planWebShards({ specs: [], durations }).shardCount, 0);
+  assert.equal(
+    planWebShards({
+      specs,
+      durations,
+      policy: { ...WEB_SHARD_POLICY, maxShards: 2, defaultShards: 2 },
+    }).shardCount,
+    2,
+  );
+  const missing = planWebShards({
+    specs,
+    durations: { [specs[0]]: { durationMs: 20 }, [specs[1]]: { durationMs: 40 } },
+  });
+  assert.equal(missing.estimatedTotalMs, 90);
+  assert.equal(
+    planWebShards({ specs, durations: { [specs[0]]: { durationMs: -1 } } }).estimatedTotalMs,
+    3,
+  );
+  assert.throws(
+    () => planWebShards({ specs, policy: { ...WEB_SHARD_POLICY, targetPerShardMs: 1 } }),
+    /budget/u,
+  );
+});
+
+test('scope narrowing proves canonical-only edits; unknown/shared/full scope runs all', () => {
+  const spec = WEB_FLOW_SPECS[0];
+  assert.deepEqual(selectWebSpecs({ enabled: true, files: [`apps/web/e2e/${spec}`] }), {
+    specs: [spec],
+    fallback: false,
+  });
+  for (const files of [undefined, [], ['apps/web/src/App.vue'], ['apps/web/e2e/deleted.spec.ts']]) {
+    const selection = selectWebSpecs({ enabled: true, files });
+    const plan = planWebShards({ ...selection, durations: history.specs });
+    assert.deepEqual(plan.specs, [...WEB_FLOW_SPECS]);
+    assert.equal(plan.shardCount, WEB_SHARD_POLICY.defaultShards);
+    assert.equal(plan.fallback, true);
+  }
+  const full = selectWebSpecs({ enabled: true, full: true, files: [] });
+  assert.equal(full.fallback, false);
+  assert.deepEqual(full.specs, [...WEB_FLOW_SPECS]);
+  assert.deepEqual(selectWebSpecs({ enabled: false }), { specs: [], fallback: false });
+});
+
+test('execution evidence ignores listed/skipped specs and retains unexpected execution', () => {
+  const report = {
+    suites: [
+      {
+        specs: [
+          { file: 'selected.spec.ts', tests: [{ results: [{ status: 'passed' }] }] },
+          { file: 'skipped.spec.ts', tests: [{ results: [{ status: 'skipped' }] }] },
+          { file: 'listed.spec.ts', tests: [] },
+          { file: 'unexpected.spec.ts', tests: [{ results: [{ status: 'passed' }] }] },
+        ],
+      },
+    ],
+  };
+  assert.deepEqual(executedWebSpecs(report), ['selected.spec.ts', 'unexpected.spec.ts']);
+  assert.deepEqual(
+    executedWebSpecs({
+      suites: [
+        {
+          specs: [
+            { file: 'expected-failure.spec.ts', tests: [{ results: [{ status: 'failed' }] }] },
+          ],
+        },
+      ],
+    }),
+    ['expected-failure.spec.ts'],
+  );
+});
+
+test('runner consumes exact manifest assignment and captures results before later suites', async () => {
+  const { mkdtemp, mkdir, writeFile, chmod, rm } = await import('node:fs/promises');
+  const { tmpdir } = await import('node:os');
+  const path = await import('node:path');
+  const { execFileSync } = await import('node:child_process');
+  const { buildDeliveryManifest } =
+    await import('../../ci-cd-platform/generate-delivery-manifest.mjs');
+  const root = await mkdtemp(path.join(tmpdir(), 'web-shard-runner-'));
+  const spec = WEB_FLOW_SPECS[0];
+  const manifest = await buildDeliveryManifest({
+    event: 'pull_request',
+    full: false,
+    base: 'base',
+    head: 'head',
+    files: [`apps/web/e2e/${spec}`],
+    scope: {
+      version: 1,
+      unit: [],
+      coverage: [],
+      smoke: [],
+      integration: [],
+      boundary: [],
+      perf: [],
+      webFlow: true,
+    },
+  });
+  try {
+    await mkdir(path.join(root, 'apps/web/test-results'), { recursive: true });
+    await mkdir(path.join(root, 'scope'));
+    await mkdir(path.join(root, 'tools/test-system-v2'), { recursive: true });
+    await writeFile(path.join(root, WEB_SPEC_DURATIONS_PATH), JSON.stringify(history));
+    await writeFile(path.join(root, 'scope/delivery-manifest-v1.json'), JSON.stringify(manifest));
+    await writeFile(
+      path.join(root, 'pnpm'),
+      `#!/usr/bin/env node
+const fs = require('node:fs');
+fs.writeFileSync('args.json', JSON.stringify(process.argv.slice(2)));
+fs.writeFileSync('test-results/results.json', JSON.stringify({suites:[{specs:[{file:${JSON.stringify(spec)},tests:[{results:[{status:'passed'}]}]}]}]}));
+`,
+    );
+    await chmod(path.join(root, 'pnpm'), 0o755);
+    const runner = path.resolve('tools/test-system-v2/run-web-shard.mjs');
+    const env = {
+      ...process.env,
+      PATH: `${root}:${process.env.PATH}`,
+      E2E_OPENAI_MOCK_PORT: '19999',
+    };
+    execFileSync(process.execPath, [runner, '1/1'], {
+      cwd: root,
+      env,
+      stdio: 'pipe',
+      timeout: 30_000,
+    });
+    assert.deepEqual(JSON.parse(await readFile(path.join(root, 'apps/web/args.json'), 'utf8')), [
+      'exec',
+      'playwright',
+      'test',
+      '--config',
+      'playwright.config.ts',
+      `e2e/${spec}`,
+    ]);
+    assert.deepEqual(
+      JSON.parse(await readFile(path.join(root, 'reports/web-shards/shard-1.json'), 'utf8')),
+      { id: '1/1', manifestDigest: manifest.digest, exitCode: 0, specs: [spec] },
+    );
+    assert.throws(
+      () =>
+        execFileSync(process.execPath, [runner, '1/4'], {
+          cwd: root,
+          env,
+          stdio: 'pipe',
+          timeout: 30_000,
+        }),
+      /Command failed/u,
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });
