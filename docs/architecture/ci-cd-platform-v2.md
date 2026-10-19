@@ -344,3 +344,37 @@ queue/setup、wall-clock、runner-minutes。对照改动前至少五次相同 wo
 
 参考：[GitHub pull_request 事件语义](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request)、
 [Artifacts API（含 digest/run identity）](https://docs.github.com/en/rest/actions/artifacts?apiVersion=2022-11-28)。
+
+### Unit job partitioning
+
+`tools/ci-cd-platform/unit-test-durations.json` records the #501 baseline (12 affected CI
+runs plus the first successful #518 Full Audit, with workload kinds kept separate,
+per-project uncached timings, setup and cache observations). The scope
+producer uses those project P50 weights for deterministic LPT assignment to three
+fixed jobs. `app-vue:test`, the measured dominant task, contributes two Vitest
+file shards; other projects retain their complete Nx `test` target. Unknown
+projects use the median weight. Each runner executes its assigned targets in
+sequence. app-vue shards have an explicit budget of two Vitest workers so CPU
+contention does not consume the native lifecycle tests’ unchanged deadlines.
+Vitest shard/worker arguments participate in the Nx task hash. No primary
+test ownership changes. Dynamic job counts are left to #506.
+
+The signed delivery manifest includes `unitShards`. Its executable contract
+requires all three job IDs and exact, nonduplicated coverage of the selected
+project tasks, including both app-vue halves. `CI Check` directly requires each
+selected physical job; only a manifest-disabled or empty job may be skipped.
+Observation also requires evidence for every assigned command, so lint/build
+success cannot mask a missing Unit shard. Evidence reuse and promotion verify
+physical Unit job identities and conclusions from the authenticated run/attempt
+API, in addition to the existing aggregate check, tree and digest proofs.
+
+The three explicit job IDs give each runner its own existing Nx cache namespace
+and evidence artifact. Cache snapshots include both `.nx/cache` and the matching
+SQLite index (`.nx/workspace-data/*.db*`); artifacts alone are unrecognized by Nx.
+Both directories are pinned and the daemon is disabled so closed-process snapshots
+remain coherent; graph snapshots, locks and daemon state are excluded.
+Unit commands disable automatic infrastructure retries and
+preserve the first failure. Cache restoration and actual Nx task hits are distinct;
+measure both from real logs rather than cached Vitest output. The manual quality
+shadow benchmark follows the same six logical children (static, three Unit jobs,
+typecheck, build), preserving command parity and rejecting incomplete receipts.

@@ -153,6 +153,43 @@ export function validateDeliveryManifest(manifest) {
       );
     }
   }
+  // Keep contracts standalone: runtime bundles import this file without CI planners/history.
+  assertStringArray(manifest.scope.unit, 'scope.unit');
+  assert(new Set(manifest.scope.unit).size === manifest.scope.unit.length, 'scope.unit duplicates');
+  assert(
+    Array.isArray(manifest.unitShards) && manifest.unitShards.length === 3,
+    'unitShards must contain three jobs',
+  );
+  const unitTasks = [];
+  for (const [index, shard] of manifest.unitShards.entries()) {
+    assert(shard?.id === `unit-${index + 1}` && Array.isArray(shard.tasks), 'unitShards IDs/tasks');
+    for (const task of shard.tasks) {
+      assert(
+        task && typeof task.project === 'string' && /^[@\w][\w@/.-]*$/u.test(task.project),
+        'Unit task project',
+      );
+      assert(
+        Object.keys(task).every((key) => ['project', 'shard'].includes(key)),
+        'unknown Unit task field',
+      );
+      unitTasks.push(task);
+    }
+  }
+  const expectedTasks = manifest.scope.unit
+    .filter((project) => project !== 'memoflow')
+    .flatMap((project) =>
+      project === 'app-vue'
+        ? [
+            { project, shard: '1/2' },
+            { project, shard: '2/2' },
+          ]
+        : [{ project }],
+    );
+  assert(
+    stableStringify(unitTasks.map(stableStringify).sort()) ===
+      stableStringify(expectedTasks.map(stableStringify).sort()),
+    'unitShards must cover every Unit task exactly once',
+  );
   assertSelfDigest(manifest, 'manifest');
   return manifest;
 }

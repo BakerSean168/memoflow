@@ -93,22 +93,22 @@ test('quality shadow child commands remain byte-for-byte aligned with required C
   }
 });
 
-test('paired sample preserves four logical children and distinguishes 4 split jobs from 1 consolidated job', () => {
+test('paired sample preserves six logical children and distinguishes 6 split jobs from 1 consolidated job', () => {
   const result = buildQualityShadowSample(pairedReceipts('42'));
   assert.equal(result.status, 'success');
   assert.deepEqual(Object.keys(result.children).sort(), [...QUALITY_CHILD_NAMES].sort());
-  assert.equal(result.split.setupMs, 400);
+  assert.equal(result.split.setupMs, 600);
   assert.equal(result.consolidated.setupMs, 120);
   assert.ok(result.split.runnerMinutes > result.consolidated.runnerMinutes);
 });
 
 test('paired sample records child failure instead of hiding it behind the consolidated boolean', () => {
   const result = buildQualityShadowSample(
-    pairedReceipts('42', { failedProfile: 'consolidated', failedChild: 'unit' }),
+    pairedReceipts('42', { failedProfile: 'consolidated', failedChild: 'unit-1' }),
   );
   assert.equal(result.status, 'failure');
-  assert.equal(result.children.unit.split, 'success');
-  assert.equal(result.children.unit.consolidated, 'failure');
+  assert.equal(result.children['unit-1'].split, 'success');
+  assert.equal(result.children['unit-1'].consolidated, 'failure');
 });
 
 test('paired sample fails closed on command drift and incomplete topology', () => {
@@ -121,7 +121,7 @@ test('paired sample fails closed on command drift and incomplete topology', () =
     command: 'echo drift',
   });
   assert.throws(() => buildQualityShadowSample(drifted), /child command drift/);
-  assert.throws(() => buildQualityShadowSample(pairedReceipts('42').slice(1)), /exactly eight/);
+  assert.throws(() => buildQualityShadowSample(pairedReceipts('42').slice(1)), /exactly twelve/);
 });
 
 test('timing sample comparator reuses the standard P50/P95 timing contract', () => {
@@ -152,7 +152,7 @@ test('P95 wall regression retains split topology', () => {
 
 test('artifact sample validation rejects forged child status even with a recomputed digest', () => {
   const forged = buildQualityShadowSample(pairedReceipts('42'));
-  forged.children.unit.consolidated = 'failure';
+  forged.children['unit-1'].consolidated = 'failure';
   delete forged.digest;
   forged.digest = digest(forged);
   assert.throws(
@@ -162,14 +162,14 @@ test('artifact sample validation rejects forged child status even with a recompu
   );
 });
 
-test('shadow workflow is manual-only and preserves 4 split jobs plus one consolidated job', () => {
+test('shadow workflow is manual-only and preserves 6 split jobs plus one consolidated job', () => {
   const workflow = readFileSync(
     new URL('../../../.github/workflows/quality-runner-shadow.yml', import.meta.url),
     'utf8',
   );
   assert.match(workflow, /workflow_dispatch:/u);
   assert.doesNotMatch(workflow, /^\s{2}(?:push|pull_request):/mu);
-  assert.match(workflow, /child: \[static, unit, typecheck, build\]/u);
+  assert.match(workflow, /child: \[static, unit-1, unit-2, unit-3, typecheck, build\]/u);
   assert.match(workflow, /name: Shadow Consolidated Quality/u);
   assert.match(workflow, /name: Quality Shadow Paired Sample/u);
   assert.match(workflow, /default: ee8472486377c30ecced3ef1ec07012fd8a06f24/u);

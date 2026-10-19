@@ -1,3 +1,4 @@
+import { planUnitShards } from '../lib/unit-shards.mjs';
 import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import os from 'node:os';
@@ -43,6 +44,7 @@ test('observation aggregates command evidence without changing lane semantics', 
     },
     provenance: { generator: 'test', inputDigest: 'a'.repeat(64) },
   };
+  manifest.unitShards = planUnitShards(manifest.scope.unit);
   manifest.digest = digest(manifest);
   const input = await createLaneInput({
     lane: 'governance',
@@ -120,6 +122,7 @@ test('observation fails closed when no command report belongs to the lane', asyn
     },
     provenance: { generator: 'test', inputDigest: 'b'.repeat(64) },
   };
+  manifest.unitShards = planUnitShards(manifest.scope.unit);
   manifest.digest = digest(manifest);
   const input = await createLaneInput({
     lane: 'governance',

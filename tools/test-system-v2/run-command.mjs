@@ -93,7 +93,10 @@ async function run(attempt) {
 }
 
 const attempts = [await run(1)];
-if (['infrastructure', 'process-crash'].includes(attempts[0].classification))
+if (
+  process.env.TEST_RETRY_INFRASTRUCTURE !== 'false' &&
+  ['infrastructure', 'process-crash'].includes(attempts[0].classification)
+)
   attempts.push(await run(2));
 const final = attempts.at(-1);
 const testSummary = await collectTestReportSummaries(

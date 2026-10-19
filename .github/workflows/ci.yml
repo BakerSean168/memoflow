@@ -40,6 +40,9 @@ jobs:
       lane_web: ${{ steps.scope.outputs.lane_web }}
       lane_coverage: ${{ steps.scope.outputs.lane_coverage }}
       lane_performance: ${{ steps.scope.outputs.lane_performance }}
+      unit_1: ${{ steps.scope.outputs.unit_1 }}
+      unit_2: ${{ steps.scope.outputs.unit_2 }}
+      unit_3: ${{ steps.scope.outputs.unit_3 }}
       has_unit: ${{ steps.scope.outputs.has_unit }}
       has_coverage: ${{ steps.scope.outputs.has_coverage }}
       has_smoke: ${{ steps.scope.outputs.has_smoke }}
@@ -131,10 +134,10 @@ jobs:
       - uses: ./.github/actions/publish-lane-evidence
         with: { lane: validate }
 
-  unit:
-    name: Unit Tests
+  unit-1:
+    name: Unit Tests (1/3)
     needs: scope-detector
-    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.lane_validate == 'true' && needs.scope-detector.outputs.has_unit == 'true'
+    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.unit_1 == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -146,9 +149,52 @@ jobs:
           setup-uv: 'true'
           lane: validate
           consume-delivery-manifest: 'true'
-      - run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx affected -t test --parallel=3 --exclude=memoflow --outputStyle=static
-        env: { TEST_REPORT_NAME: unit, DELIVERY_LANE: validate }
+      - run: node ./tools/ci-cd-platform/run-unit-shard.mjs unit-1
+        env: { DELIVERY_LANE: validate }
       - uses: ./.github/actions/publish-lane-evidence
+        if: always()
+        with: { lane: validate }
+
+  unit-2:
+    name: Unit Tests (2/3)
+    needs: scope-detector
+    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.unit_2 == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with: { fetch-depth: 0 }
+      - uses: ./.github/actions/setup-nx-affected-job
+        with:
+          node-version: '${{ env.NODE_VERSION }}'
+          setup-python: 'true'
+          setup-uv: 'true'
+          lane: validate
+          consume-delivery-manifest: 'true'
+      - run: node ./tools/ci-cd-platform/run-unit-shard.mjs unit-2
+        env: { DELIVERY_LANE: validate }
+      - uses: ./.github/actions/publish-lane-evidence
+        if: always()
+        with: { lane: validate }
+
+  unit-3:
+    name: Unit Tests (3/3)
+    needs: scope-detector
+    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.unit_3 == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with: { fetch-depth: 0 }
+      - uses: ./.github/actions/setup-nx-affected-job
+        with:
+          node-version: '${{ env.NODE_VERSION }}'
+          setup-python: 'true'
+          setup-uv: 'true'
+          lane: validate
+          consume-delivery-manifest: 'true'
+      - run: node ./tools/ci-cd-platform/run-unit-shard.mjs unit-3
+        env: { DELIVERY_LANE: validate }
+      - uses: ./.github/actions/publish-lane-evidence
+        if: always()
         with: { lane: validate }
 
   typecheck:
@@ -233,7 +279,7 @@ jobs:
 
   validate-oracle:
     name: Validate Oracle
-    needs: [scope-detector, static-analysis, unit, typecheck, build]
+    needs: [scope-detector, static-analysis, unit-1, unit-2, unit-3, typecheck, build]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -241,7 +287,7 @@ jobs:
       - name: Aggregate Validate children
         env:
           ORACLE_INPUT: >-
-            {"detector":"${{ needs.scope-detector.result }}","enabled":{"static":"${{ needs.scope-detector.outputs.lane_validate }}","unit":"${{ needs.scope-detector.outputs.lane_validate == 'true' && needs.scope-detector.outputs.has_unit == 'true' && 'true' || 'false' }}","typecheck":"${{ needs.scope-detector.outputs.lane_validate }}","build":"${{ needs.scope-detector.outputs.build_required }}"},"children":{"static":"${{ needs.static-analysis.result }}","unit":"${{ needs.unit.result }}","typecheck":"${{ needs.typecheck.result }}","build":"${{ needs.build.result }}"}}
+            {"detector":"${{ needs.scope-detector.result }}","enabled":{"static":"${{ needs.scope-detector.outputs.lane_validate }}","unit-1":"${{ needs.scope-detector.outputs.unit_1 }}","unit-2":"${{ needs.scope-detector.outputs.unit_2 }}","unit-3":"${{ needs.scope-detector.outputs.unit_3 }}","typecheck":"${{ needs.scope-detector.outputs.lane_validate }}","build":"${{ needs.scope-detector.outputs.build_required }}"},"children":{"static":"${{ needs.static-analysis.result }}","unit-1":"${{ needs.unit-1.result }}","unit-2":"${{ needs.unit-2.result }}","unit-3":"${{ needs.unit-3.result }}","typecheck":"${{ needs.typecheck.result }}","build":"${{ needs.build.result }}"}}
         run: node ./tools/test-system-v2/oracle.mjs
 
   verification-children:
@@ -576,7 +622,9 @@ jobs:
       - scope-detector
       - governance
       - static-analysis
-      - unit
+      - unit-1
+      - unit-2
+      - unit-3
       - typecheck
       - build
       - verification-children
@@ -618,7 +666,9 @@ jobs:
       - scope-detector
       - governance
       - static-analysis
-      - unit
+      - unit-1
+      - unit-2
+      - unit-3
       - typecheck
       - build
       - verification-children

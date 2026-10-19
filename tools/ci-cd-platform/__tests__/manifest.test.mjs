@@ -138,3 +138,128 @@ test('scope discovery invokes the installed Nx CLI directly instead of racing pn
   });
   assert.ok(JSON.parse(stdout).includes('api'));
 });
+
+import { planUnitShards, UNIT_JOB_IDS } from '../lib/unit-shards.mjs';
+
+test('Unit LPT is deterministic, complete, fixed at three jobs and only splits app-vue', () => {
+  const projects = [
+    'app-vue',
+    'desktop',
+    'web',
+    'ci-cd-platform',
+    'test-system-v2',
+    'governance-tools',
+    'new-project',
+  ];
+  const plan = planUnitShards(projects);
+  assert.deepEqual(plan, planUnitShards([...projects].reverse()));
+  assert.deepEqual(
+    plan.map(({ id }) => id),
+    UNIT_JOB_IDS,
+  );
+  const tasks = plan.flatMap(({ tasks }) => tasks);
+  assert.deepEqual(
+    tasks
+      .filter(({ project }) => project === 'app-vue')
+      .map(({ shard }) => shard)
+      .sort(),
+    ['1/2', '2/2'],
+  );
+  for (const project of projects.filter((project) => project !== 'app-vue')) {
+    assert.deepEqual(
+      tasks.filter((task) => task.project === project),
+      [{ project }],
+    );
+  }
+  assert.equal(tasks.length, projects.length + 1);
+  assert.notEqual(
+    plan.find(({ tasks }) => tasks.some((task) => task.shard === '1/2')).id,
+    plan.find(({ tasks }) => tasks.some((task) => task.shard === '2/2')).id,
+  );
+  assert.deepEqual(
+    planUnitShards([]),
+    UNIT_JOB_IDS.map((id) => ({ id, tasks: [] })),
+  );
+  for (const invalid of [null, ['web', 'web'], ['--all'], ['bad,name'], [123]]) {
+    assert.throws(() => planUnitShards(invalid), /unique Nx project names/u);
+  }
+});
+
+import { mkdtemp, writeFile, readFile, chmod, rm } from 'node:fs/promises';
+import os from 'node:os';
+import { createLaneInput } from '../create-lane-input.mjs';
+
+test('Unit runner preserves Vitest shard arguments, runs each selected task once and preserves failure without retry', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'memoflow-unit-runner-'));
+  try {
+    const manifest = await buildDeliveryManifest({
+      base: 'base',
+      head: 'head',
+      files: ['nx.json'],
+      scope: { ...scope, unit: ['app-vue', 'desktop', 'web', 'ci-cd-platform', 'test-system-v2'] },
+    });
+    const manifestPath = path.join(root, 'manifest.json');
+    const inputPath = path.join(root, 'input.json');
+    const callsPath = path.join(root, 'calls.jsonl');
+    await writeFile(manifestPath, JSON.stringify(manifest));
+    await createLaneInput({ lane: 'validate', manifest, output: inputPath });
+    const pnpm = path.join(root, 'pnpm');
+    await writeFile(
+      pnpm,
+      `#!/usr/bin/env node
+import { appendFileSync } from 'node:fs';
+appendFileSync(process.env.UNIT_CALLS_PATH, JSON.stringify(process.argv.slice(2)) + '\\n');
+if (process.env.UNIT_FAIL === 'true') { console.error('ECONNREFUSED'); process.exit(17); }
+`,
+    );
+    await chmod(pnpm, 0o755);
+    const env = {
+      ...process.env,
+      PATH: `${root}:${process.env.PATH}`,
+      UNIT_CALLS_PATH: callsPath,
+      DELIVERY_MANIFEST_PATH: manifestPath,
+      LANE_INPUT_PATH: inputPath,
+      DELIVERY_LANE: 'validate',
+      TEST_REPORTS_DIR: path.join(root, 'reports'),
+    };
+    for (const { id } of manifest.unitShards) {
+      execFileSync(process.execPath, ['tools/ci-cd-platform/run-unit-shard.mjs', id], {
+        env,
+        stdio: 'pipe',
+      });
+    }
+    const calls = (await readFile(callsPath, 'utf8'))
+      .trim()
+      .split('\n')
+      .map((line) => JSON.parse(line));
+    const expected = manifest.unitShards.flatMap(({ tasks }) =>
+      tasks.map((task) => [
+        'exec',
+        'nx',
+        'run',
+        `${task.project}:test`,
+        '--outputStyle=static',
+        ...(task.shard ? [`--shard=${task.shard}`, '--maxWorkers=2'] : []),
+      ]),
+    );
+    assert.deepEqual(calls, expected);
+    await writeFile(callsPath, '');
+    assert.throws(
+      () =>
+        execFileSync(process.execPath, ['tools/ci-cd-platform/run-unit-shard.mjs', 'unit-1'], {
+          env: { ...env, UNIT_FAIL: 'true' },
+          stdio: 'pipe',
+        }),
+      (error) => error.status === 17,
+    );
+    assert.equal(
+      (await readFile(callsPath, 'utf8')).trim().split('\n').length,
+      manifest.unitShards[0].tasks.length,
+    );
+    const report = JSON.parse(await readFile(path.join(root, 'reports/unit-1-0.json'), 'utf8'));
+    assert.equal(report.attempts.length, 1);
+    assert.equal(report.result, 'failure');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});

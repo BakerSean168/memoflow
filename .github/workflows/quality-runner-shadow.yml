@@ -19,6 +19,10 @@ on:
 permissions:
   contents: read
 
+env:
+  DELIVERY_MANIFEST_PATH: reports/quality-shadow/manifest.json
+  LANE_INPUT_PATH: reports/quality-shadow/validate-input.json
+
 jobs:
   split:
     name: Shadow Split (${{ matrix.child }})
@@ -27,7 +31,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        child: [static, unit, typecheck, build]
+        child: [static, unit-1, unit-2, unit-3, typecheck, build]
     steps:
       - name: Mark physical job start
         run: echo "QUALITY_JOB_STARTED_AT=$(date +%s%3N)" >> "$GITHUB_ENV"
@@ -48,6 +52,10 @@ jobs:
           git rev-parse --verify "${BENCHMARK_HEAD}^{commit}" >/dev/null
           echo "NX_BASE=$BENCHMARK_BASE" >> "$GITHUB_ENV"
           echo "NX_HEAD=$BENCHMARK_HEAD" >> "$GITHUB_ENV"
+      - name: Prepare the same selected workload as required CI
+        run: |
+          GITHUB_EVENT_NAME=pull_request DELIVERY_MANIFEST_OUTPUT="$DELIVERY_MANIFEST_PATH" node ./tools/ci-cd-platform/generate-delivery-manifest.mjs
+          node ./tools/ci-cd-platform/create-lane-input.mjs --lane validate --manifest "$DELIVERY_MANIFEST_PATH" --output "$LANE_INPUT_PATH"
       - name: Run split logical child
         id: child
         continue-on-error: true
@@ -95,6 +103,10 @@ jobs:
           git rev-parse --verify "${BENCHMARK_HEAD}^{commit}" >/dev/null
           echo "NX_BASE=$BENCHMARK_BASE" >> "$GITHUB_ENV"
           echo "NX_HEAD=$BENCHMARK_HEAD" >> "$GITHUB_ENV"
+      - name: Prepare the same selected workload as required CI
+        run: |
+          GITHUB_EVENT_NAME=pull_request DELIVERY_MANIFEST_OUTPUT="$DELIVERY_MANIFEST_PATH" node ./tools/ci-cd-platform/generate-delivery-manifest.mjs
+          node ./tools/ci-cd-platform/create-lane-input.mjs --lane validate --manifest "$DELIVERY_MANIFEST_PATH" --output "$LANE_INPUT_PATH"
       - name: Run all consolidated logical children
         id: children
         continue-on-error: true
@@ -102,7 +114,7 @@ jobs:
           QUALITY_JOB_KEY: consolidated
         run: |
           status=0
-          for child in static unit typecheck build; do
+          for child in static unit-1 unit-2 unit-3 typecheck build; do
             node ./tools/ci-cd-platform/quality-shadow.mjs run-child \
               --profile consolidated \
               --child "$child" \

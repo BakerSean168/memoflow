@@ -5,11 +5,14 @@ import { spawn } from 'node:child_process';
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { digest } from './lib/contracts.mjs';
+import { UNIT_JOB_IDS, unitJobEnabled } from './lib/unit-shards.mjs';
 
 export const QUALITY_CHILDREN = Object.freeze({
   static:
     'node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx affected -t lint --parallel=3 --exclude=memoflow --outputStyle=static',
-  unit: 'node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx affected -t test --parallel=3 --exclude=memoflow --outputStyle=static',
+  ...Object.fromEntries(
+    UNIT_JOB_IDS.map((id) => [id, `node ./tools/ci-cd-platform/run-unit-shard.mjs ${id}`]),
+  ),
   typecheck:
     'node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx affected -t typecheck --parallel=3 --outputStyle=static',
   build:
@@ -82,7 +85,7 @@ function timingForProfile(receipts, profile) {
   const selected = receipts.filter((receipt) => receipt.profile === profile);
   assert(
     selected.length === QUALITY_CHILD_NAMES.length,
-    `${profile} must contain four child receipts`,
+    `${profile} must contain six child receipts`,
   );
   const byChild = new Map(selected.map((receipt) => [receipt.child, receipt]));
   assert(byChild.size === QUALITY_CHILD_NAMES.length, `${profile} child receipts must be unique`);
@@ -96,7 +99,7 @@ function timingForProfile(receipts, profile) {
     jobGroups.set(receipt.jobKey, existing);
   }
   assert(
-    profile === 'split' ? jobGroups.size === 4 : jobGroups.size === 1,
+    profile === 'split' ? jobGroups.size === QUALITY_CHILD_NAMES.length : jobGroups.size === 1,
     `${profile} physical job topology`,
   );
 
@@ -139,7 +142,7 @@ export function buildQualityShadowSample(receipts) {
   receipts.forEach(validateQualityShadowChild);
   assert(
     receipts.length === QUALITY_CHILD_NAMES.length * 2,
-    'paired sample must contain exactly eight receipts',
+    'paired sample must contain exactly twelve receipts',
   );
   const first = receipts[0];
   assert(
@@ -290,19 +293,24 @@ async function runChild({ profile, child, output, workloadName }) {
     'WORKSPACE_SETUP_ENDED_AT',
   );
   const startedAtMs = Date.now();
-  const exitCode = await new Promise((resolveExit, reject) => {
-    const processChild = spawn('/bin/bash', ['-lc', command], {
-      stdio: 'inherit',
-      env: {
-        ...process.env,
-        DELIVERY_LANE: 'validate',
-        TEST_REPORT_NAME: `quality-shadow-${profile}-${child}`,
-        TEST_REPORTS_DIR: `reports/quality-shadow/test-system/${profile}/${child}`,
-      },
-    });
-    processChild.on('error', reject);
-    processChild.on('exit', (code, signal) => resolveExit(code ?? (signal ? 1 : 0)));
-  });
+  const selected =
+    !UNIT_JOB_IDS.includes(child) ||
+    unitJobEnabled(JSON.parse(await readFile(process.env.DELIVERY_MANIFEST_PATH, 'utf8')), child);
+  const exitCode = !selected
+    ? 0
+    : await new Promise((resolveExit, reject) => {
+        const processChild = spawn('/bin/bash', ['-lc', command], {
+          stdio: 'inherit',
+          env: {
+            ...process.env,
+            DELIVERY_LANE: 'validate',
+            TEST_REPORT_NAME: `quality-shadow-${profile}-${child}`,
+            TEST_REPORTS_DIR: `reports/quality-shadow/test-system/${profile}/${child}`,
+          },
+        });
+        processChild.on('error', reject);
+        processChild.on('exit', (code, signal) => resolveExit(code ?? (signal ? 1 : 0)));
+      });
   const endedAtMs = Date.now();
   const receipt = {
     kind: 'quality-shadow-child-v1',

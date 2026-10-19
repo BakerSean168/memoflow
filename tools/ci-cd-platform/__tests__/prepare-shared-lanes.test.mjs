@@ -1,3 +1,4 @@
+import { planUnitShards } from '../lib/unit-shards.mjs';
 import assert from 'node:assert/strict';
 import { mkdtemp, readFile } from 'node:fs/promises';
 import os from 'node:os';
@@ -56,6 +57,7 @@ test('prepares independent lane inputs and apportions shared setup timing', asyn
     },
     provenance: { generator: 'test', inputDigest: 'c'.repeat(64) },
   };
+  manifest.unitShards = planUnitShards(manifest.scope.unit);
   manifest.digest = digest(manifest);
   const enabled = await prepareSharedLanes({
     manifest,
@@ -117,6 +119,7 @@ test('rejects unregistered lanes before producing shared lane evidence', async (
     },
     provenance: { generator: 'test', inputDigest: 'e'.repeat(64) },
   };
+  manifest.unitShards = planUnitShards(manifest.scope.unit);
   manifest.digest = digest(manifest);
   await assert.rejects(
     prepareSharedLanes({ manifest, receipt: createReceipt(), lanes: ['unknown'], outputDir }),

@@ -13,7 +13,8 @@
     "scope",
     "lanes",
     "provenance",
-    "digest"
+    "digest",
+    "unitShards"
   ],
   "properties": {
     "kind": {
@@ -139,6 +140,38 @@
         }
       },
       "additionalProperties": false
+    },
+    "unitShards": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["id", "tasks"],
+        "properties": {
+          "id": {
+            "enum": ["unit-1", "unit-2", "unit-3"]
+          },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["project"],
+              "properties": {
+                "project": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "shard": {
+                  "enum": ["1/2", "2/2"]
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
     }
   },
   "additionalProperties": true

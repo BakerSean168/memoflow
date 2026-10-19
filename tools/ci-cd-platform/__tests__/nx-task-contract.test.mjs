@@ -48,9 +48,14 @@ async function workspaceProjects() {
 test('Nx cache in CI is written to the same directory the cache action saves', async () => {
   const action = await read('.github/actions/setup-nx-affected-job/action.yml');
   assert.match(action, /NX_CACHE_DIRECTORY=\$GITHUB_WORKSPACE\/\.nx\/cache/u);
+  assert.match(action, /NX_WORKSPACE_DATA_DIRECTORY=\$GITHUB_WORKSPACE\/\.nx\/workspace-data/u);
   const cacheStep = action.slice(action.indexOf('- name: Cache Nx task results'));
-  assert.match(cacheStep, /path: \.nx\/cache\n/u);
-  assert.match(cacheStep, /key: nx-\$\{\{ runner\.os \}\}-\$\{\{ github\.job \}\}-/u);
+  assert.match(cacheStep, /path: \|\n\s+\.nx\/cache\n\s+\.nx\/workspace-data\/\*\.db\*/u);
+  assert.match(action, /NX_DAEMON=false/u);
+  assert.match(
+    cacheStep,
+    /key: nx-\$\{\{ runner\.os \}\}-\$\{\{ github\.job \}\}-\$\{\{ hashFiles\('package\.json', 'pnpm-lock\.yaml'\) \}\}-/u,
+  );
   assert.ok(
     action.indexOf('- name: Pin Nx cache directory') <
       action.indexOf('- name: Cache Nx task results'),
@@ -160,5 +165,69 @@ test('CI contract tests hash the external files they inspect', async () => {
     for (const target of ['test', 'governance', 'contract']) {
       assert.ok(hashesFile(nxJson, project, target, file), `${target} does not hash ${file}`);
     }
+  }
+});
+
+test('restored Nx artifacts require the matching SQLite index to produce a cache hit in a fresh process', async () => {
+  const { mkdtempSync, mkdirSync, readdirSync, cpSync, rmSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const root = mkdtempSync(path.join(tmpdir(), 'memoflow-nx-cache-'));
+  const nativePath = require.resolve('nx/src/native');
+  const program = `
+    const fs = require('node:fs');
+    const path = require('node:path');
+    const { NxCache, TaskDetails, connectToNxDb, closeDbConnection } = require(${JSON.stringify(nativePath)});
+    const [workspace, artifacts, metadata, mode] = process.argv.slice(1);
+    fs.mkdirSync(workspace, { recursive: true });
+    const db = connectToNxDb(metadata, 'unit-cache');
+    const cache = new NxCache(workspace, artifacts, db);
+    if (mode === 'put') {
+      new TaskDetails(db).recordTaskDetails([{ hash: '1234567890123456789', project: 'unit-cache', target: 'test' }]);
+      fs.mkdirSync(path.join(workspace, 'out'), { recursive: true });
+      fs.writeFileSync(path.join(workspace, 'out/result.txt'), 'verified artifact');
+      cache.put('1234567890123456789', 'cached Unit output', ['out'], 0);
+    } else {
+      const result = cache.get('1234567890123456789');
+      if (result) cache.copyFilesFromCache(result, ['out']);
+      process.stdout.write(JSON.stringify({ hit: Boolean(result), code: result?.code,
+        output: result?.terminalOutput,
+        artifact: result ? fs.readFileSync(path.join(workspace, 'out/result.txt'), 'utf8') : null }));
+    }
+    closeDbConnection(db);
+  `;
+  const run = (name, mode) =>
+    execFileSync(
+      process.execPath,
+      [
+        '-e',
+        program,
+        path.join(root, name, 'workspace'),
+        path.join(root, name, 'cache'),
+        path.join(root, name, 'data'),
+        mode,
+      ],
+      { encoding: 'utf8', timeout: 10_000 },
+    );
+  try {
+    run('source', 'put');
+    mkdirSync(path.join(root, 'restored'), { recursive: true });
+    cpSync(path.join(root, 'source/cache'), path.join(root, 'restored/cache'), { recursive: true });
+    assert.equal(JSON.parse(run('restored', 'get')).hit, false, 'artifact-only cache cannot hit');
+    rmSync(path.join(root, 'restored/data'), { recursive: true, force: true });
+    mkdirSync(path.join(root, 'restored/data'));
+    const files = readdirSync(path.join(root, 'source/data')).filter((name) =>
+      name.includes('.db'),
+    );
+    assert.ok(files.length > 0);
+    for (const name of files)
+      cpSync(path.join(root, 'source/data', name), path.join(root, 'restored/data', name));
+    assert.deepEqual(JSON.parse(run('restored', 'get')), {
+      hit: true,
+      code: 0,
+      output: 'cached Unit output',
+      artifact: 'verified artifact',
+    });
+  } finally {
+    rmSync(root, { recursive: true, force: true });
   }
 });

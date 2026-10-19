@@ -7,13 +7,14 @@
  * missing job) fails the gate. Unknown inputs fail closed.
  */
 import { validateDeliveryManifest } from './contracts.mjs';
+import { UNIT_JOB_IDS, unitJobEnabled } from './unit-shards.mjs';
 
 /** Lane jobs the gate aggregates, and how the manifest decides each one. */
 export const CI_CHECK_JOBS = Object.freeze({
   'scope-detector': () => true,
   governance: (m) => m.lanes.governance === true,
   'static-analysis': (m) => m.lanes.validate === true,
-  unit: (m) => m.lanes.validate === true && m.scope.unit.length > 0,
+  ...Object.fromEntries(UNIT_JOB_IDS.map((id) => [id, (m) => unitJobEnabled(m, id)])),
   typecheck: (m) => m.lanes.validate === true,
   build: (m) =>
     m.lanes.validate === true || (m.execution?.mode === 'reuse' && m.execution.candidate === true),
