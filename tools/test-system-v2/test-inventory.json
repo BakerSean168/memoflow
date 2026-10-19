@@ -4395,6 +4395,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/mastra/runtime/ordered-memory.shared.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/mastra/runtime/workflow-run-projection.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12703,7 +12713,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 118
+      "fileCount": 119
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -13264,7 +13274,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 118
+      "fileCount": 119
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -13663,6 +13673,7 @@
       "packages/ai/src/server/mastra/runtime/goal-workflow-events.postgres.spec.ts",
       "packages/ai/src/server/mastra/runtime/mastra-goal-surface-lease.runtime.spec.ts",
       "packages/ai/src/server/mastra/runtime/mastra-workflow.runtime.spec.ts",
+      "packages/ai/src/server/mastra/runtime/ordered-memory.shared.spec.ts",
       "packages/ai/src/server/mastra/runtime/workflow-run-projection.spec.ts",
       "packages/ai/src/server/mastra/tools/owner-contracts.surface.spec.ts",
       "packages/ai/src/server/mastra/tools/product-tools.spec.ts",
@@ -14033,7 +14044,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1172,
+    "unit": 1173,
     "integration": 49,
     "smoke": 3,
     "boundary-ipc": 8,

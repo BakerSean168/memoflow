@@ -1,6 +1,7 @@
 import type { MastraDBMessage } from '@mastra/core/agent';
 import { MemoryPG, type PostgresStore } from '@mastra/pg';
 import { nextHistoryTimestamp } from '../../../shared/history-order';
+import { requestedTimestamp, serializeContent } from './ordered-memory.shared';
 
 export class OrderedMemoryPostgres extends MemoryPG {
   private readonly messagesTable: string;
@@ -59,7 +60,7 @@ export class OrderedMemoryPostgres extends MemoryPG {
         );
         const createdAt =
           existing?.createdAt ??
-          new Date(nextHistoryTimestamp(message.createdAt.getTime(), latest?.getTime() ?? null));
+          new Date(nextHistoryTimestamp(requestedTimestamp(message.createdAt), latest?.getTime() ?? null));
         const persisted = await tx.oneOrNone<{ createdAt: Date }>(
           `INSERT INTO ${this.messagesTable} AS current (id, thread_id, content, role, type, "createdAt", "createdAtZ", "resourceId")
             VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
@@ -69,7 +70,7 @@ export class OrderedMemoryPostgres extends MemoryPG {
           [
             message.id,
             message.threadId,
-            JSON.stringify(message.content),
+            serializeContent(message.content),
             message.role,
             message.type ?? 'v2',
             createdAt.toISOString(),

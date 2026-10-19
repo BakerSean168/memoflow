@@ -1,6 +1,7 @@
 import type { MastraDBMessage } from '@mastra/core/agent';
 import { MemoryLibSQL, type SqliteClient } from '@mastra/libsql';
 import { nextHistoryTimestamp } from '../../../shared/history-order';
+import { requestedTimestamp, serializeContent } from './ordered-memory.shared';
 
 /** All engine and workflow writes enter here, including streaming upserts. */
 export class OrderedMemoryLibSQL extends MemoryLibSQL {
@@ -45,7 +46,7 @@ export class OrderedMemoryLibSQL extends MemoryLibSQL {
           ? new Date(String(existing.createdAt))
           : new Date(
               nextHistoryTimestamp(
-                message.createdAt.getTime(),
+                requestedTimestamp(message.createdAt),
                 latest == null ? null : new Date(String(latest)).getTime(),
               ),
             );
@@ -56,7 +57,7 @@ export class OrderedMemoryLibSQL extends MemoryLibSQL {
           args: [
             message.id,
             message.threadId,
-            JSON.stringify(message.content),
+            serializeContent(message.content),
             message.role,
             message.type ?? 'v2',
             createdAt.toISOString(),
