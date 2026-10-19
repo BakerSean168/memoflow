@@ -6,7 +6,7 @@ tags:
   - desktop
 description: Desktop Keyboard-first 与自动更新的跨平台人工验收步骤（#493 / #494）
 created: 2026-10-19T00:00:00
-updated: 2026-10-19T00:00:00
+updated: 2026-10-20T00:00:00
 ---
 
 # Desktop 跨平台验收（#493 / #494）
@@ -30,7 +30,7 @@ updated: 2026-10-19T00:00:00
 | 会话内 Profile 切换注册清理 | 自动（controller 级 + reload E2E）    | W-3（人工）     | W-3（人工）    |
 | 专注 / 干预窗口键盘可达性   | 自动（本 PR 新增）                    | W-4（人工）     | W-4（人工）    |
 | Windows NSIS N→N+1          | 无（脚本仅 Windows）                  | U-1（人工）     | 无             |
-| Linux AppImage N→N+1        | 可自动（`U-3` 脚本，需 Xvfb）         | 无              | 无             |
+| Linux AppImage N→N+1        | 已实跑 PASS（`U-3`，见记录）          | 无              | 无             |
 | macOS 更新 feed / 可信安装  | 无                                    | 无              | U-4（Blocked） |
 | 安装回执清理 / 失败恢复     | 自动（adapter 与 receipt 单测）       | U-1 内验证      | U-4（Blocked） |
 
@@ -157,26 +157,47 @@ macOS（安装版）：
 
 ### U-3 Linux AppImage N→N+1
 
-前置：Linux x64、Xvfb（`xvfb-run`）、`python3`。
+前置：Linux x64，`xvfb-run`、`dbus-run-session`、`gnome-keyring-daemon`、`gdbus`、`secret-tool`、`node`
+（与 `desktop-update-e2e.yml` 的 `linux-appimage-update` job 相同依赖）。
 
-1. 构建 N 与 N+1（同 U-1，把 `--configuration=windows` 换成 `--configuration=linux`，产物为 `MemoFlow-Linux-<version>.AppImage`）。候选 feed 目录必须恰好包含一个 AppImage 和 `latest-linux.yml`。
-2. 在 Xvfb 下运行脚本：
+1. 构建（与 CI job 同序）：
 
    ```bash
-   xvfb-run -a node apps/desktop/scripts/run-linux-appimage-update-e2e.mjs \
-     /path/to/MemoFlow-Linux-0.20.1.AppImage \
-     /path/to/candidate-feed \
-     0.20.2 \
-     /tmp/memoflow-linux-update-report.json \
-     /tmp/memoflow-linux-update-runtime \
-     300
+   pnpm nx run desktop:build:production --outputStyle=static
+   node apps/desktop/scripts/rebuild-native-dependencies.mjs --workspace-root "$PWD" --platform linux --arch x64
    ```
 
-3. 预期：脚本打印 `PASS`，report 中 `platform = "linux-appimage"`、`result = "passed"`、
-   `installedSha256` 等于候选 AppImage 的 SHA256、`receiptCleared = true`、Profile 语义哈希与
-   sentinel 哈希前后一致。receipt 位于
-   `<runtime>/user-data/state/update/install-receipts/install-receipt.json`，更新前写入、验证后删除。
+   然后把 `apps/desktop/package.json` 的 `version` 临时改为 N（低于当前版本，例如 `0.20.0`），在 `apps/desktop` 下执行
+   `CSC_IDENTITY_AUTO_DISCOVERY=false pnpm exec electron-builder --linux AppImage --x64 --publish never --config electron-builder.json5`，
+   把 `dist-package/MemoFlow-Linux-<N>.AppImage` 复制到 `update-e2e-fixtures/base/`；恢复 `version` 为 N+1 再打一次包，把
+   `MemoFlow-Linux-<N+1>.AppImage` 与 `latest-linux.yml` 复制到 `update-e2e-fixtures/candidate/`（该目录必须恰好一个 AppImage）。
+   注意：CI 内联脚本给每次 electron-builder 设了 600 s 上限；在负载较高的开发机上 asar 打包可能超过 10 分钟，本地请直接运行上面的命令。
+
+2. 通过 keyring 包装脚本运行（不要直接 `xvfb-run node …`：packaged 启动需要 Secret Service 会话）：
+
+   ```bash
+   D=$PWD/apps/desktop
+   APPIMAGE_EXTRACT_AND_RUN=1 MEMOFLOW_CI_KEYRING_TIMEOUT_SECONDS=390 \
+   MEMOFLOW_PACKAGED_EXECUTABLE=$D/update-e2e-fixtures/base/MemoFlow-Linux-0.20.0.AppImage \
+   MEMOFLOW_LINUX_APPIMAGE_UPDATE_E2E_BASE=$D/update-e2e-fixtures/base/MemoFlow-Linux-0.20.0.AppImage \
+   MEMOFLOW_LINUX_APPIMAGE_UPDATE_E2E_FEED=$D/update-e2e-fixtures/candidate \
+   MEMOFLOW_LINUX_APPIMAGE_UPDATE_E2E_VERSION=0.20.1 \
+   MEMOFLOW_LINUX_APPIMAGE_UPDATE_E2E_REPORT=/tmp/u3/desktop-update-installed-e2e.json \
+   MEMOFLOW_LINUX_APPIMAGE_UPDATE_E2E_RUNTIME=/tmp/u3/runtime \
+     apps/desktop/scripts/run-linux-packaged-smoke-with-keyring.sh
+   ```
+
+3. 预期：输出 `phase=checking current=<N>` → `phase=install-requested` → `phase=candidate-verified current=<N+1>` → `PASS`；
+   report 中 `kind = "desktop-update-installed-e2e"`、`platform = "linux-appimage"`、`result = "passed"`、`installedSha256`
+   等于候选 AppImage 的 SHA256、`receiptCleared = true`、`profileRegistrySemanticSha256Before/After` 相等、
+   `preservationSentinelSha256Before/After` 相等。可用 CI job「Verify Linux AppImage updater evidence」中的断言复核。
 4. deb/rpm 不在本项范围：它们由包管理器拥有，不具备 self-install 权限，不应宣称支持自动更新。
+
+**已执行记录（真实运行，Linux）**：2026-10-20 02:54 CST，gcp-dev（Linux x64，Xvfb + GNOME Keyring 会话），commit
+`4887af4589c`（本 PR 分支；updater 代码与合并 main 后一致），N=`0.20.0`（AppImage SHA256 `701d00a1…e878`）→ N+1=`0.20.1`
+（SHA256 `ea8f7acd92b45e072a9ae69d7310cf37a3065920466a8f228db3c30b8f093b28`），本地 HTTP feed。结果 `PASS`：`installedSha256`
+等于候选 SHA256，`receiptCleared = true`，Profile registry 语义哈希 `7960163e…ae2b` 前后一致，sentinel 哈希 `bcdc7986…afbb`
+前后一致；CI 校验断言全部通过。Windows（U-1）与 macOS（U-4）仍需真机。
 
 ### U-4 macOS（当前 Blocked）
 
