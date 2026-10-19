@@ -171,3 +171,4 @@ reports/apps/ai-service/evals/live-history/
 .reasonix/
 reasonix.toml
 .codebuddy/
+.vitest
