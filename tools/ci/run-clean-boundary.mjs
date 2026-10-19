@@ -136,6 +136,8 @@ function startDatabase() {
       'POSTGRES_DB=memoflow_test',
       '-p',
       '5433:5432',
+      '--tmpfs',
+      '/var/lib/postgresql:rw',
       '--health-cmd',
       'pg_isready -U test_user -d memoflow_test',
       '--health-interval',
