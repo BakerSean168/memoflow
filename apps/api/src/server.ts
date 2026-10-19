@@ -410,7 +410,9 @@ async function bootstrap(): Promise<void> {
     admission: createPilotAdmission(createApiRedisClient({ fresh: true, commandTimeout: 5000 })),
     enabled: env.EAG_READ_PILOT_ENABLED,
     writes: env.EAG_WRITE_ENABLED
-      ? bindGatewayWrites(prisma, settingApiModule.userTimeContextPort)
+      ? bindGatewayWrites(prisma, settingApiModule.userTimeContextPort, {
+          routineWriteEnabled: env.EAG_ROUTINE_WRITE_ENABLED,
+        })
       : undefined,
     audience: env.EAG_AUDIENCE ?? 'http://localhost:3000/mcp',
     cursorSecret: env.EAG_CURSOR_SECRET ?? '',

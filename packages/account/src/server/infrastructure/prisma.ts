@@ -12,7 +12,8 @@
  */
 
 import { IsAccountActiveUseCase } from '../application/use-cases/queries/is-account-active.use-case';
-import type { PrismaClient } from '@memoflow/database';
+import { withPrismaTransaction } from '@memoflow/database/transaction';
+import type { Prisma, PrismaClient } from '@memoflow/database';
 import type { Clock, UserTimeContextPort } from '@memoflow/time';
 // Structural cloud-auth shape (boundary: scope:account must not import scope:authentication libs directly)
 export interface CloudAuthLike {
@@ -144,9 +145,10 @@ export function createAccountPrismaModule(
  * @param db - Host-owned PostgreSQL client.
  * @returns The consumer-facing authority capability, without persistence access.
  */
-export function createAccountPrismaActiveQuery(db: PrismaClient) {
+export function createAccountPrismaActiveQuery(db: PrismaClient | Prisma.TransactionClient) {
   return async (identityId: string): Promise<boolean> =>
-    db.$transaction(
+    withPrismaTransaction(
+      db,
       async (tx) => {
         await tx.$executeRaw`SELECT set_config('statement_timeout', '5000', true)`;
         return new IsAccountActiveUseCase({

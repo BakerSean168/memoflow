@@ -1,4 +1,5 @@
 import {
+  GatewayRoutineReceiptSchema,
   GatewayGoalReceiptSchema,
   GatewayTaskReceiptSchema,
 } from '@memoflow/contracts/agent-gateway';
@@ -16,6 +17,16 @@ export function registerWriteTools(
   call: ReadToolCall,
 ) {
   const d = writeToolDescriptors;
+  const routineCreate = writes.routineCreate;
+  if (routineCreate && scopes.includes('routines:write')) {
+    server.registerTool('routine_create', d.routine_create.definition, (input) =>
+      call('routine_create', 'routines:write', () =>
+        routineCreate(input, context, authority).then((result) =>
+          GatewayRoutineReceiptSchema.parse(result),
+        ),
+      ),
+    );
+  }
   if (scopes.includes('goals:write')) {
     server.registerTool('goal_create', d.goal_create.definition, (input) =>
       call('goal_create', 'goals:write', () =>

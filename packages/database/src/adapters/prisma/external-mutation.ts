@@ -19,6 +19,9 @@ export interface ExternalMutationAuthority {
    * this before `$transaction`, so no connection is held while it waits.
    */
   authorize(): Promise<void>;
+  /** Optional owner-host check using this transaction, without another pool connection. */
+  authorizeInTransaction?(tx: Prisma.TransactionClient): Promise<void>;
+  readonly receiptScope?: 'credential';
 }
 function canonical(value: unknown): string {
   if (Array.isArray(value)) return '[' + value.map(canonical).join(',') + ']';
@@ -47,40 +50,43 @@ export async function runExternalMutation<T extends { receiptId: string }>(
   work: (tx: Prisma.TransactionClient) => Promise<Omit<T, 'receiptId'>>,
 ): Promise<T & { replayed: boolean }> {
   if (!identityId || !authority.connectionId) throw new ExternalMutationError('FORBIDDEN');
-  // Identity scope survives PAT rotation: a retry with a replacement credential
-  // of the same owner must replay the committed result, never re-execute.
-  const receiptId = hash([identityId, capability, input.idempotencyKey]);
+  // Existing Goal/Task receipts survive PAT rotation; the Routine capability
+  // explicitly binds its retry key to the issuing credential.
+  const receiptId = hash(
+    authority.receiptScope === 'credential'
+      ? [identityId, authority.connectionId, capability, input.idempotencyKey]
+      : [identityId, capability, input.idempotencyKey],
+  );
   const digest = hash(input);
+  // Revalidate before BEGIN: the host check may use its own pool connection.
   await authority.authorize();
   return db
-    .$transaction(
-      async (tx) => {
-        await tx.$executeRaw`SELECT set_config('statement_timeout', '10000', true)`;
-        await tx.$executeRaw`SELECT set_config('lock_timeout', '5000', true)`;
-        // Advisory lock serializes a not-yet-existing receipt across processes.
-        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${receiptId}, 0))`;
-        const saved = await tx.externalMutationReceipt.findUnique({ where: { id: receiptId } });
-        if (saved) {
-          if (saved.inputDigest !== digest) throw new ExternalMutationError('IDEMPOTENCY_CONFLICT');
-          return { ...schema.parse(JSON.parse(saved.resultJson)), replayed: true };
-        }
-        const result = schema.parse({ receiptId, ...(await work(tx)) });
-        if (Buffer.byteLength(JSON.stringify(result)) > 240 * 1024)
-          throw new ExternalMutationError('RESPONSE_TOO_LARGE');
-        await tx.externalMutationReceipt.create({
-          data: {
-            id: receiptId,
-            identityId,
-            connectionId: authority.connectionId,
-            capability,
-            inputDigest: digest,
-            resultJson: JSON.stringify(result),
-          },
-        });
-        return { ...result, replayed: false };
-      },
-      EXTERNAL_MUTATION_TRANSACTION_OPTIONS,
-    )
+    .$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT set_config('statement_timeout', '10000', true)`;
+      await tx.$executeRaw`SELECT set_config('lock_timeout', '5000', true)`;
+      // Advisory lock serializes a not-yet-existing receipt across processes.
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${receiptId}, 0))`;
+      await authority.authorizeInTransaction?.(tx);
+      const saved = await tx.externalMutationReceipt.findUnique({ where: { id: receiptId } });
+      if (saved) {
+        if (saved.inputDigest !== digest) throw new ExternalMutationError('IDEMPOTENCY_CONFLICT');
+        return { ...schema.parse(JSON.parse(saved.resultJson)), replayed: true };
+      }
+      const result = schema.parse({ receiptId, ...(await work(tx)) });
+      if (Buffer.byteLength(JSON.stringify(result)) > 240 * 1024)
+        throw new ExternalMutationError('RESPONSE_TOO_LARGE');
+      await tx.externalMutationReceipt.create({
+        data: {
+          id: receiptId,
+          identityId,
+          connectionId: authority.connectionId,
+          capability,
+          inputDigest: digest,
+          resultJson: JSON.stringify(result),
+        },
+      });
+      return { ...result, replayed: false };
+    }, EXTERNAL_MUTATION_TRANSACTION_OPTIONS)
     .catch((error: unknown) => {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2010' && error.meta?.code === '55P03')

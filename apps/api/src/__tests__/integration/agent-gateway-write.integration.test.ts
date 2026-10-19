@@ -57,7 +57,10 @@ it('replays the committed Goal receipt projection after disconnect, rejects chan
   const stored = await prisma.externalMutationReceipt.findUniqueOrThrow({
     where: { id: first.receiptId },
   });
-  expect(JSON.parse(stored.resultJson)).toEqual({ receiptId: first.receiptId, result: first.result });
+  expect(JSON.parse(stored.resultJson)).toEqual({
+    receiptId: first.receiptId,
+    result: first.result,
+  });
   expect(await prisma.goal.count({ where: { identityId: a } })).toBe(1);
   const rotated = await createGoalPrismaAgentMutations(prisma).create(input, cx(a), {
     ...authority,
@@ -542,7 +545,12 @@ it('returns the durable result after transport abort at the commit/response boun
 it('rejects foreign Task updates/completions and foreign Goal bindings; Task update replay preserves the snapshot', async () => {
   const f = await gatewayFixture();
   const writes = bindGatewayWrites(prisma, time);
-  const auth = { ...authority, scopes: ['tasks:write', 'goals:write', 'goals:read'] };
+  const auth = {
+    ...authority,
+    connectionId: f.pa.id,
+    scopes: ['tasks:write', 'goals:write', 'goals:read'],
+  };
+  const authB = { ...authority, connectionId: f.pb.id, scopes: ['tasks:write', 'goals:write'] };
   const input = {
     idempotencyKey: 'task',
     plan: {
@@ -567,7 +575,7 @@ it('rejects foreign Task updates/completions and foreign Goal bindings; Task upd
   await expect(
     writes.taskUpdate({ ...update, idempotencyKey: 'stale' }, cx(f.a), auth),
   ).rejects.toMatchObject({ code: 'CONFLICT' });
-  await expect(writes.taskUpdate(update, cx(f.b), auth)).rejects.toMatchObject({
+  await expect(writes.taskUpdate(update, cx(f.b), authB)).rejects.toMatchObject({
     code: 'NOT_FOUND',
   });
   const occurrence = await prisma.taskOccurrence.findFirstOrThrow({
@@ -582,13 +590,16 @@ it('rejects foreign Task updates/completions and foreign Goal bindings; Task upd
         completion: { decision: 'complete_only' },
       },
       cx(f.b),
-      auth,
+      authB,
     ),
   ).rejects.toMatchObject({ code: 'NOT_FOUND' });
   const goal = await writes.goalCreate(
-    { idempotencyKey: 'goal-b', goal: { name: 'B secret', initialKeyResults: [{ title: 'B KR', targetValue: 10 }] } },
+    {
+      idempotencyKey: 'goal-b',
+      goal: { name: 'B secret', initialKeyResults: [{ title: 'B KR', targetValue: 10 }] },
+    },
     cx(f.b),
-    auth,
+    authB,
   );
   await expect(
     writes.taskCreate(
@@ -601,11 +612,28 @@ it('rejects foreign Task updates/completions and foreign Goal bindings; Task upd
       auth,
     ),
   ).rejects.toMatchObject({ code: 'NOT_FOUND' });
-  const ownGoal = await writes.goalCreate({ idempotencyKey: 'goal-a', goal: { name: 'A goal' } }, cx(f.a), auth);
-  await expect(writes.taskCreate({
-    ...input, idempotencyKey: 'foreign-kr-without-rule',
-    plan: { ...input.plan, goalBinding: { goalId: ownGoal.result.goalId, keyResultId: goal.result.affectedEntityIds.keyResultIds[0] } },
-  }, cx(f.a), auth)).rejects.toMatchObject({ code: 'NOT_FOUND' });
+  const ownGoal = await writes.goalCreate(
+    { idempotencyKey: 'goal-a', goal: { name: 'A goal' } },
+    cx(f.a),
+    auth,
+  );
+  await expect(
+    writes.taskCreate(
+      {
+        ...input,
+        idempotencyKey: 'foreign-kr-without-rule',
+        plan: {
+          ...input.plan,
+          goalBinding: {
+            goalId: ownGoal.result.goalId,
+            keyResultId: goal.result.affectedEntityIds.keyResultIds[0],
+          },
+        },
+      },
+      cx(f.a),
+      auth,
+    ),
+  ).rejects.toMatchObject({ code: 'NOT_FOUND' });
   await expect(
     writes.taskCreate(
       {
