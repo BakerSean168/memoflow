@@ -23,7 +23,7 @@ const time = {
 };
 beforeEach(cleanAll);
 afterAll(disconnectPrisma);
-it('replays the committed Goal snapshot after disconnect, rejects changed input and isolates identities', async () => {
+it('replays the committed Goal receipt projection after disconnect, rejects changed input and isolates identities', async () => {
   const a = String(IdentityId.generate());
   const b = String(IdentityId.generate());
   await seedAccount({ id: a });
@@ -45,6 +45,7 @@ it('replays the committed Goal snapshot after disconnect, rejects changed input 
   expect(replay).toEqual({ ...first, replayed: true });
   expect(first.result).not.toHaveProperty('readModel');
   expect(first.result).not.toHaveProperty('recordChanges');
+  // The receipt keeps only the projection; replay never re-reads current state.
   expect(
     (
       await prisma.goal.findUniqueOrThrow({
@@ -52,7 +53,7 @@ it('replays the committed Goal snapshot after disconnect, rejects changed input 
         select: { name: true },
       })
     ).name,
-  ).toBe('Original');
+  ).toBe('Later');
   const stored = await prisma.externalMutationReceipt.findUniqueOrThrow({
     where: { id: first.receiptId },
   });
