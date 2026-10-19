@@ -484,6 +484,7 @@ jobs:
         with: { fetch-depth: 0 }
       - uses: ./.github/actions/setup-nx-affected-job
         with:
+          cache-variant: web-${{ strategy.job-index }}
           node-version: '${{ env.NODE_VERSION }}'
           setup-python: 'false'
           setup-uv: 'false'
