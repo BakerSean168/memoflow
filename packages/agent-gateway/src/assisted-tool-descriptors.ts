@@ -2,6 +2,10 @@ import { z } from 'zod';
 
 const handle = z.strictObject({
   handle: z.string().uuid(),
+  expectedRevision: z.number().int().positive().optional(),
+});
+const mutationHandle = z.strictObject({
+  handle: z.string().uuid(),
   expectedRevision: z.number().int().positive(),
 });
 const start = z.strictObject({
@@ -82,7 +86,7 @@ export const assistedToolDescriptors = {
     requiredScope: 'tasks:write',
     definition: {
       description: 'Cancel remaining work while preserving committed Task facts.',
-      inputSchema: handle.shape,
+      inputSchema: mutationHandle.shape,
       annotations,
     },
   },

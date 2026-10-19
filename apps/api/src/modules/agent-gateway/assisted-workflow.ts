@@ -4,6 +4,7 @@ import { z } from 'zod';
 import {
   AssistedStartSchema,
   AssistedHandleSchema,
+  AssistedMutationHandleSchema,
   AssistedResumeSchema,
   AssistedViewSchema,
   GatewayTaskReceiptSchema,
@@ -109,6 +110,7 @@ export function bindAssistedWorkflow(options: Options): GatewayAssistedPort {
               retryable: false,
             });
           const stepKey = `assisted:${row.runId}:${draft.revision}:task`;
+          assertLock();
           row = await repo.save(row.id, { stepKey });
           const receipt = await options
             .writes({
@@ -151,9 +153,14 @@ export function bindAssistedWorkflow(options: Options): GatewayAssistedPort {
             retryable: false,
           });
         } catch (cause) {
+          if (cause instanceof AiAssistedWorkflowError && cause.code === 'LOCK_LOST') throw cause;
           // Lost owner/projection acknowledgements must retain committed facts.
+          assertLock();
           const committed = await options.recoverStep(row);
-          if (committed) row = await repo.save(row.id, { stepsJson: JSON.stringify([committed]) });
+          if (committed) {
+            assertLock();
+            row = await repo.save(row.id, { stepsJson: JSON.stringify([committed]) });
+          }
           const code = cause instanceof GatewayReadError ? cause.code : 'UNAVAILABLE';
           return TaskPlanExecutionReceiptSchema.parse({
             workflowRunId,
@@ -186,7 +193,10 @@ export function bindAssistedWorkflow(options: Options): GatewayAssistedPort {
   ) {
     if (row.stepKey && StepsSchema.parse(JSON.parse(row.stepsJson)).length === 0) {
       const committed = await options.recoverStep(row);
-      if (committed) row = await repo.save(row.id, { stepsJson: JSON.stringify([committed]) });
+      if (committed) {
+        assertLock();
+        row = await repo.save(row.id, { stepsJson: JSON.stringify([committed]) });
+      }
     }
     if (!row.pendingJson) return row;
     const pending = PendingSchema.parse(JSON.parse(row.pendingJson));
@@ -197,10 +207,38 @@ export function bindAssistedWorkflow(options: Options): GatewayAssistedPort {
       if (run && !terminal(run))
         run = await runtime.cancel({ identityId: cx.identityId, runId: row.runId });
     } else {
-      await authorize(authority);
       // Only planning operations use the provider. Deterministic apply/retry do not infer.
       const inference = pending.type === 'start' || pending.command.type === 'answer';
-      if (inference) await repo.assertConsent(cx.identityId, start.consent);
+      try {
+        await authorize(authority);
+        if (inference) await repo.assertConsent(cx.identityId, start.consent);
+      } catch (cause) {
+        const lostPrecondition =
+          (cause instanceof AiAssistedWorkflowError && cause.code === 'CONSENT_REQUIRED') ||
+          (cause instanceof GatewayReadError && cause.code === 'FORBIDDEN');
+        if (pending.type !== 'resume' || !lostPrecondition || !run) throw cause;
+        assertLock();
+        const projection = terminal(run)
+          ? run
+          : AIWorkflowRunViewSchema.parse({
+              ...run,
+              status: 'suspended',
+              suspension: {
+                type: 'recovery_required',
+                message:
+                  'Workflow consent or grant changed. Cancel or restart with current settings.',
+                retryable: false,
+                failures: [],
+              },
+              updatedAt: Date.now(),
+            });
+        assertLock();
+        return repo.save(row.id, {
+          viewJson: JSON.stringify(projection),
+          pendingJson: null,
+          revision: row.viewJson ? row.revision + 1 : row.revision,
+        });
+      }
       if (!run && pending.type === 'start') {
         run = await runtime.start({
           context: cx,
@@ -240,6 +278,7 @@ export function bindAssistedWorkflow(options: Options): GatewayAssistedPort {
     // Reload committed step evidence written by the callback before publishing the view.
     const current = await repo.find(row.id, cx.identityId, authority.connectionId);
     if (!current) throw new GatewayReadError('NOT_FOUND');
+    assertLock();
     return repo.save(row.id, {
       viewJson: JSON.stringify(AIWorkflowRunViewSchema.parse(run)),
       pendingJson: null,
@@ -261,6 +300,7 @@ export function bindAssistedWorkflow(options: Options): GatewayAssistedPort {
     cx: ExecutionContext,
     authority: GatewayWriteAuthority,
     work: (row: AiAssistedWorkflow, assertLock: () => void) => Promise<AiAssistedWorkflow>,
+    options: { cancelPendingResume?: boolean } = {},
   ) {
     const input = AssistedHandleSchema.parse(raw);
     await authorize(authority);
@@ -268,7 +308,15 @@ export function bindAssistedWorkflow(options: Options): GatewayAssistedPort {
       await authorize(authority);
       let row = await repo.find(input.handle, cx.identityId, authority.connectionId);
       if (!row) throw new GatewayReadError('NOT_FOUND');
-      if (row.revision !== input.expectedRevision) throw new GatewayReadError('CONFLICT');
+      if (input.expectedRevision !== undefined && row.revision !== input.expectedRevision)
+        throw new GatewayReadError('CONFLICT');
+      if (options.cancelPendingResume && row.pendingJson) {
+        const pending = PendingSchema.parse(JSON.parse(row.pendingJson));
+        if (pending.type === 'resume') {
+          assertLock();
+          row = await repo.save(row.id, { pendingJson: JSON.stringify({ type: 'cancel' }) });
+        }
+      }
       row = await settle(row, cx, authority, assertLock);
       // A recovered transition changes the revision. Return its durable outcome;
       // never execute a second command against a stale request.
@@ -333,6 +381,7 @@ export function bindAssistedWorkflow(options: Options): GatewayAssistedPort {
               throw new GatewayReadError('CONFLICT');
             const suspension = run.suspension;
             const command: AIWorkflowResumeCommand = input.command;
+            const start = AssistedStartSchema.parse(JSON.parse(row.requestJson));
             const valid =
               suspension?.type === 'clarification_required'
                 ? command.type === 'answer' &&
@@ -343,6 +392,8 @@ export function bindAssistedWorkflow(options: Options): GatewayAssistedPort {
                     (command.type === 'cancel_remaining' ||
                       (command.type === 'retry' && suspension.retryable));
             if (!valid) throw new GatewayReadError('VALIDATION_ERROR');
+            if (command.type === 'answer') await repo.assertConsent(cx.identityId, start.consent);
+            assertLock();
             row = await repo.save(row.id, {
               pendingJson: JSON.stringify({ type: 'resume', command, beforeDigest: digest(run) }),
             });
@@ -351,12 +402,14 @@ export function bindAssistedWorkflow(options: Options): GatewayAssistedPort {
         );
       }),
     cancel: (raw, cx, authority) =>
-      wrap(() =>
-        access(raw, cx, authority, async (row, assertLock) => {
+      wrap(() => {
+        const input = AssistedMutationHandleSchema.parse(raw);
+        return access(input, cx, authority, async (row, assertLock) => {
           if (terminal(view(row).run)) return row;
+          assertLock();
           row = await repo.save(row.id, { pendingJson: JSON.stringify({ type: 'cancel' }) });
           return settle(row, cx, authority, assertLock);
-        }),
-      ),
+        }, { cancelPendingResume: true });
+      }),
   };
 }

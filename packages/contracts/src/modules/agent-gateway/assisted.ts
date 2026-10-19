@@ -17,9 +17,12 @@ export const AssistedStartSchema = z.strictObject({
 });
 export const AssistedHandleSchema = z.strictObject({
   handle: z.uuid(),
+  expectedRevision: z.number().int().positive().optional(),
+});
+export const AssistedMutationHandleSchema = AssistedHandleSchema.extend({
   expectedRevision: z.number().int().positive(),
 });
-export const AssistedResumeSchema = AssistedHandleSchema.extend({
+export const AssistedResumeSchema = AssistedMutationHandleSchema.extend({
   reviewToken: z.string().length(64),
   command: z.discriminatedUnion('type', [
     z.strictObject({ type: z.literal('answer'), answers: z.array(z.string().trim().min(1)).min(1).max(3) }),

@@ -12,7 +12,11 @@ import {
   ApplyKnowledgeNoteService,
 } from '@memoflow/ai/testing';
 import { createMastraStorage } from '@memoflow/ai';
-import { AiAssistedWorkflowRepository } from '@memoflow/ai/agent-gateway';
+import {
+  AiAssistedWorkflowRepository,
+  AiAssistedWorkflowError,
+  taskWorkflowEntityId,
+} from '@memoflow/ai/agent-gateway';
 import { prisma } from '@memoflow/database';
 import { externalMutationReceiptId } from '@memoflow/database/transaction';
 import { createScopedPatService } from '@memoflow/cloud-auth/server';
@@ -147,7 +151,7 @@ async function fixture(decisions: TaskPlanningDecision[] = [draftDecision]) {
         : null;
     },
   });
-  return { service, runtime, plan, storage, writes };
+  return { service, runtime, plan, storage, writes, repository };
 }
 const startInput = () => ({
   kind: 'task.create',
@@ -275,6 +279,7 @@ it('binds answers and approval to the current typed ask/review, rejects stale re
   );
   expect(review.revision).toBe(ask.revision + 1);
   expect(review.run.suspension?.type).toBe('task_draft_review');
+  expect(await f.service.get({ handle: ask.handle }, cx(owner), authority)).toEqual(review);
   await expect(f.service.get(handleInput(ask), cx(owner), authority)).rejects.toMatchObject({
     code: 'CONFLICT',
   });
@@ -299,6 +304,118 @@ it('binds answers and approval to the current typed ask/review, rejects stale re
     code: 'CONFLICT',
   });
   expect(await f.service.get(handleInput(applied), cx(owner), authority)).toEqual(applied);
+});
+
+it('checks consent before saving an answer and clears a stale pending resume so cancel can proceed', async () => {
+  const f = await fixture([
+    { status: 'needs_clarification', reason: 'Need date', questions: ['When?'] },
+    draftDecision,
+  ]);
+  const ask = await f.service.start(startInput(), cx(owner), authority);
+  const row = await f.repository.find(ask.handle, owner, authority.connectionId);
+  if (!row) throw new Error('Assisted workflow row missing');
+  const answer = {
+    handle: ask.handle,
+    expectedRevision: ask.revision,
+    reviewToken: ask.reviewToken,
+    command: { type: 'answer' as const, answers: ['2026-11-01'] },
+  };
+
+  await prisma.aiProviderConfig.update({
+    where: { id: consent.providerId },
+    data: { isActive: false },
+  });
+  await expect(f.service.resume(answer, cx(owner), authority)).rejects.toMatchObject({
+    code: 'FORBIDDEN',
+  });
+  expect((await f.repository.find(ask.handle, owner, authority.connectionId))?.pendingJson).toBeNull();
+
+  await f.repository.save(row.id, {
+    pendingJson: JSON.stringify({
+      type: 'resume',
+      command: answer.command,
+      beforeDigest: 'stale-after-process-crash',
+    }),
+  });
+  const recovered = await f.service.get(handleInput(ask), cx(owner), authority);
+  expect(recovered.run).toMatchObject({
+    status: 'suspended',
+    suspension: { type: 'recovery_required', retryable: false },
+  });
+  expect((await f.repository.find(ask.handle, owner, authority.connectionId))?.pendingJson).toBeNull();
+  expect(f.plan).toHaveBeenCalledTimes(1);
+  const cancelled = await f.service.cancel(handleInput(recovered), cx(owner), authority);
+  expect(cancelled.run.status).toBe('cancelled');
+  expect(f.plan).toHaveBeenCalledTimes(1);
+});
+
+it('clears a persisted resume intent when the live grant check fails before dispatch', async () => {
+  const f = await fixture();
+  const review = await f.service.start(startInput(), cx(owner), authority);
+  let authorizations = 0;
+  const changingGrant: GatewayWriteAuthority = {
+    ...authority,
+    authorize: async () => {
+      authorizations += 1;
+      if (authorizations === 3) throw new GatewayReadError('FORBIDDEN');
+      await authority.authorize();
+    },
+  };
+
+  const recovered = await f.service.resume(approve(review), cx(owner), changingGrant);
+
+  expect(authorizations).toBe(3);
+  expect(recovered.run).toMatchObject({
+    status: 'suspended',
+    suspension: { type: 'recovery_required', retryable: false },
+  });
+  expect(
+    (await f.repository.find(review.handle, owner, authority.connectionId))?.pendingJson,
+  ).toBeNull();
+  expect(f.plan).toHaveBeenCalledTimes(1);
+  const cancelled = await f.service.cancel(handleInput(recovered), cx(owner), authority);
+  expect(cancelled.run.status).toBe('cancelled');
+  expect(f.plan).toHaveBeenCalledTimes(1);
+});
+
+it('gives cancel precedence over an unacknowledged pending approval', async () => {
+  const f = await fixture();
+  const review = await f.service.start(startInput(), cx(owner), authority);
+  const row = await f.repository.find(review.handle, owner, authority.connectionId);
+  if (!row) throw new Error('Assisted workflow row missing');
+  await f.repository.save(row.id, {
+    pendingJson: JSON.stringify({
+      type: 'resume',
+      command: { type: 'approve' },
+      beforeDigest: 'lost-resume-ack',
+    }),
+  });
+
+  const cancelled = await f.service.cancel(handleInput(review), cx(owner), authority);
+  expect(cancelled.run.status).toBe('cancelled');
+  expect(cancelled.steps).toEqual([]);
+  expect(await prisma.taskPlan.count({ where: { identityId: owner } })).toBe(0);
+  expect(await prisma.externalMutationReceipt.count({ where: { identityId: owner } })).toBe(0);
+});
+
+it('routes an in-flight durable run through recoverTask after API restart', async () => {
+  const f = await fixture();
+  const review = await f.service.start(startInput(), cx(owner), authority);
+  const row = await f.repository.find(review.handle, owner, authority.connectionId);
+  if (!row) throw new Error('Assisted workflow row missing');
+  await f.repository.save(row.id, { pendingJson: JSON.stringify({ type: 'start' }) });
+  const running = { ...review.run, status: 'running' as const, suspension: undefined };
+  vi.spyOn(f.runtime, 'get').mockResolvedValueOnce(running);
+  const recoverTask = vi.spyOn(f.runtime, 'recoverTask').mockResolvedValue(review.run);
+
+  const recovered = await f.service.get(handleInput(review), cx(owner), authority);
+
+  expect(recoverTask).toHaveBeenCalledWith(
+    expect.objectContaining({ runId: row.runId, context: expect.objectContaining({ identityId: owner }) }),
+  );
+  expect(recovered.revision).toBe(review.revision + 1);
+  expect(recovered.run).toEqual(review.run);
+  expect(f.plan).toHaveBeenCalledTimes(1);
 });
 
 it('revokes before resume and immediately before owner apply without creating a Task', async () => {
@@ -333,6 +450,89 @@ it('revokes before resume and immediately before owner apply without creating a 
     suspension: { type: 'recovery_required', retryable: false },
   });
   expect(await prisma.taskPlan.count({ where: { identityId: owner } })).toBe(0);
+});
+
+it('enforces the assisted handle binding and live PAT authority inside the Task owner transaction', async () => {
+  const f = await fixture();
+  const review = await f.service.start(startInput(), cx(owner), authority);
+  const row = await f.repository.find(review.handle, owner, authority.connectionId);
+  if (!row) throw new Error('Assisted workflow row missing');
+  const taskInput = {
+    idempotencyKey: 'transaction-guard-denied',
+    plan: {
+      name: 'Must not be created',
+      schedule: candidateDraft.task.schedule,
+      importance: 'Moderate',
+      labelIds: [],
+    },
+  };
+  const taskId = taskWorkflowEntityId({
+    workflowRunId: row.runId,
+    revision: review.revision,
+    draftRef: 'task:guard',
+    operation: 'task_plan_create',
+  });
+  const attempt = async (
+    guard: { handleId: string; pendingJson: string; taskId: string },
+    identityId = owner,
+    granted = authority,
+  ) =>
+    bindGatewayWrites(prisma, time, { assistedGuard: guard }).taskCreate(
+      taskInput,
+      cx(identityId),
+      granted,
+    );
+
+  await expect(
+    attempt({ handleId: row.id, pendingJson: '{"type":"cancel"}', taskId }),
+  ).rejects.toMatchObject({ code: 'FORBIDDEN' });
+
+  const foreignRow = await f.repository.create({
+    id: randomUUID(),
+    identityId: other,
+    connectionId: foreign.connectionId,
+    kind: 'task.create',
+    runId: randomUUID(),
+    requestKey: 'foreign-guard',
+    requestDigest: 'foreign-guard',
+    requestJson: '{}',
+    pendingJson: null,
+  });
+  await expect(
+    attempt(
+      { handleId: foreignRow.id, pendingJson: 'null', taskId },
+      owner,
+      authority,
+    ),
+  ).rejects.toMatchObject({ code: 'FORBIDDEN' });
+
+  await pats.revoke(owner, authority.connectionId);
+  await expect(
+    attempt({ handleId: row.id, pendingJson: 'null', taskId }),
+  ).rejects.toMatchObject({ code: 'FORBIDDEN' });
+  expect(await prisma.taskPlan.count({ where: { identityId: owner } })).toBe(0);
+  expect(await prisma.externalMutationReceipt.count({ where: { identityId: owner } })).toBe(0);
+});
+
+it('keeps a committed owner receipt recoverable when the connection lock is lost', async () => {
+  const f = await fixture();
+  const review = await f.service.start(startInput(), cx(owner), authority);
+  let lockChecks = 0;
+  vi.spyOn(f.repository, 'locked').mockImplementation(async (_key, work) =>
+    work(() => {
+      lockChecks += 1;
+      if (lockChecks >= 4) throw new AiAssistedWorkflowError('LOCK_LOST');
+    }),
+  );
+  const save = vi.spyOn(f.repository, 'save');
+
+  await expect(f.service.resume(approve(review), cx(owner), authority)).rejects.toMatchObject({
+    code: 'LOCK_LOST',
+  });
+  const savedSteps = save.mock.calls.filter(([, data]) => data.stepsJson !== undefined);
+  expect(savedSteps).toHaveLength(0);
+  expect(await prisma.taskPlan.count({ where: { identityId: owner } })).toBe(1);
+  expect(await prisma.externalMutationReceipt.count({ where: { identityId: owner } })).toBe(1);
 });
 
 it('serializes simultaneous resume/cancel across independent runtimes and applies duplicate commands once', async () => {
