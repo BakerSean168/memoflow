@@ -21,7 +21,8 @@ import path from 'node:path';
  * Optional file-lock refinements (Phase 5 of #488, for locks that used to slice
  * or count source text):
  *   region: narrows the checked text before every matcher runs
- *     { pattern, flags? }  -> first RegExp match, or '' when it does not match
+ *     { pattern, flags? }  -> first RegExp match, or null (a failed lock) when
+ *                             it does not match, even if the lock only forbids
  *     { start, end }       -> source.slice(source.indexOf(start), source.indexOf(end))
  *     { start, length }    -> `length` chars from indexOf(start); start must exist
  *   count: [{ pattern, flags?, equals?, min? }] global match count bounds
@@ -82,6 +83,8 @@ export function validateSourceLockManifest(manifest) {
     }
     entry.locks.forEach((lock, lockIndex) => {
       const lockPrefix = `${prefix}.locks[${lockIndex}]`;
+      if (typeof lock?.reason !== 'string' || lock.reason.trim().length === 0)
+        errors.push(`${lockPrefix}.reason is required`);
       const hasFile =
         typeof lock?.file === 'string' ||
         (Array.isArray(lock?.files) &&
@@ -150,14 +153,18 @@ function validateRefinements(lock, lockPrefix) {
   return errors;
 }
 
-/** Apply a lock's region; returns null when a {start,length} region has no start. */
+/** Apply a lock's region; returns null when the region does not match. */
 export function applyRegion(source, region) {
   if (!region) return source;
-  if (typeof region.pattern === 'string')
-    return source.match(new RegExp(region.pattern, region.flags ?? ''))?.[0] ?? '';
+  if (typeof region.pattern === 'string') {
+    return source.match(new RegExp(region.pattern, region.flags ?? ''))?.[0] ?? null;
+  }
   const start = source.indexOf(region.start);
-  if (typeof region.end === 'string') return source.slice(start, source.indexOf(region.end));
   if (start < 0) return null;
+  if (typeof region.end === 'string') {
+    const end = source.indexOf(region.end, start + region.start.length);
+    return end < 0 ? null : source.slice(start, end);
+  }
   return source.slice(start, start + region.length);
 }
 
@@ -205,7 +212,7 @@ export function findSourceLockViolations(root, manifest) {
       const raw = files.map((file) => readFileSync(path.join(root, file), 'utf8')).join('\n');
       const source = applyRegion(lock.stripComments ? stripComments(raw) : raw, lock.region);
       if (source === null) {
-        violations.push({ id: entry.id, file: lockFile, detail: 'region start missing' });
+        violations.push({ id: entry.id, file: lockFile, detail: 'region did not match' });
         continue;
       }
       for (const matcher of lock.forbid ?? []) {

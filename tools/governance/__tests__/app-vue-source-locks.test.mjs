@@ -22,7 +22,10 @@ function fixture(files) {
   }
   return root;
 }
-const entry = (locks) => ({ version: 1, entries: [{ id: 'x', decision: 'ADR-x', locks }] });
+const entry = (locks) => ({
+  version: 1,
+  entries: [{ id: 'x', decision: 'ADR-x', locks: locks.map((lock) => ({ reason: 'test', ...lock })) }],
+});
 
 describe('app-vue source locks governance', () => {
   it('reports forbidden tokens, missing required tokens and retired paths', () => {
@@ -114,9 +117,9 @@ describe('app-vue source locks governance', () => {
     ).toEqual(['forbidden "new Date("']);
     expect(
       run({ file: 'src/a.ts', region: { start: 'missing', length: 10 }, forbid: ['x'] }),
-    ).toEqual(['region start missing']);
+    ).toEqual(['region did not match']);
     expect(run({ file: 'src/a.ts', region: { pattern: 'nope' }, require: ['keep'] })).toEqual([
-      'required "keep" missing',
+      'region did not match',
     ]);
     expect(
       run({
@@ -146,6 +149,29 @@ describe('app-vue source locks governance', () => {
     expect(
       validateSourceLockManifest(entry([{ file: 'a.ts', region: {}, require: ['x'] }]))[0],
     ).toMatch(/region must be/);
+  });
+
+  it('fails closed when a negative-only region does not match', () => {
+    const root = fixture({ 'src/a.ts': 'export function keep() {\n  return 1;\n}\n' });
+    const run = (lock) => findSourceLockViolations(root, entry([lock])).map((v) => v.detail);
+    expect(
+      run({ file: 'src/a.ts', region: { pattern: 'function retired\\(' }, forbid: ['new Date('] }),
+    ).toEqual(['region did not match']);
+    expect(
+      run({ file: 'src/a.ts', region: { start: 'function retired', end: '}' }, forbid: ['new Date('] }),
+    ).toEqual(['region did not match']);
+    expect(
+      run({ file: 'src/a.ts', region: { start: 'function keep', end: 'function gone' }, forbid: ['new Date('] }),
+    ).toEqual(['region did not match']);
+  });
+
+  it('requires a reason for every lock', () => {
+    expect(
+      validateSourceLockManifest({
+        version: 1,
+        entries: [{ id: 'x', decision: 'ADR-x', locks: [{ file: 'a.ts', forbid: ['x'] }] }],
+      }),
+    ).toContain('entries[0].locks[0].reason is required');
   });
 
   it('fails closed on a locked file that disappeared', () => {
