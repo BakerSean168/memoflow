@@ -50,6 +50,7 @@
   </ProductEditorFrame>
   <Dialog v-else :open="open" @update:open="setOpen">
     <DialogContent
+      v-bind="description ? {} : { 'aria-describedby': undefined }"
       class="w-[23rem] max-w-[calc(100vw-1.25rem)] gap-0 overflow-hidden rounded-xl border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay))] p-0 shadow-[0_24px_64px_-26px_rgba(0,0,0,0.62),0_6px_18px_-12px_rgba(0,0,0,0.44),inset_0_1px_0_hsl(var(--foreground)/0.025)]"
       :data-testid="testId"
     >

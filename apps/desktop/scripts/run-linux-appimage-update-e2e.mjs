@@ -118,6 +118,22 @@ async function ownedProcesses() {
   return processes;
 }
 
+// Sending SIGKILL only queues termination; wait until /proc confirms it completed.
+async function waitForProcessExit(pid) {
+  const deadline = Date.now() + 2000;
+  while (true) {
+    try {
+      const status = await readFile(`/proc/${pid}/stat`, 'utf8');
+      if (/\) Z /u.test(status)) return;
+    } catch (error) {
+      if (['ENOENT', 'ESRCH'].includes(error.code)) return;
+      throw error;
+    }
+    if (Date.now() >= deadline) throw new Error(`Process ${pid} survived AppImage runner cleanup`);
+    await delay(25);
+  }
+}
+
 const candidates = (await readdir(candidateFeedDir, { withFileTypes: true })).filter(
   (entry) => entry.isFile() && entry.name.endsWith('.AppImage'),
 );
@@ -274,7 +290,9 @@ try {
 } finally {
   server.closeAllConnections();
   await new Promise((resolve) => server.close(resolve));
+  const terminatedPids = [];
   if (child?.pid) {
+    terminatedPids.push(child.pid);
     try {
       process.kill(-child.pid, 'SIGKILL');
     } catch (error) {
@@ -282,12 +300,14 @@ try {
     }
   }
   for (const { pid } of await ownedProcesses()) {
+    terminatedPids.push(pid);
     try {
       process.kill(pid, 'SIGKILL');
     } catch (error) {
       if (error.code !== 'ESRCH') throw error;
     }
   }
+  await Promise.all(terminatedPids.map(waitForProcessExit));
   closeSync(log);
   process.removeListener('SIGTERM', onSignal);
   process.removeListener('SIGINT', onSignal);

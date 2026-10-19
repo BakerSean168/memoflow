@@ -44,7 +44,12 @@ function handleSelect(action: () => void) {
 </script>
 
 <template>
-  <CommandDialog :open="state.open" @update:open="_setOpen">
+  <CommandDialog
+    :open="state.open"
+    :title="t('common.commandPaletteTitle')"
+    :description="t('common.commandPaletteDescription')"
+    @update:open="_setOpen"
+  >
     <CommandInput :placeholder="t('common.commandPalettePlaceholder')" />
     <CommandList>
       <CommandEmpty>{{ t('common.noMatchingCommands') }}</CommandEmpty>

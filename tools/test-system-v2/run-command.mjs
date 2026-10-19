@@ -75,10 +75,11 @@ async function run(attempt) {
       chunks.push(chunk);
       process.stderr.write(chunk);
     });
-    child.on('error', (error) => resolve({ exitCode: 1, signal: null, error }));
-    child.on('close', (exitCode, signal) =>
-      resolve({ exitCode: exitCode ?? 1, signal, error: null }),
-    );
+    let spawnError = null;
+    child.on('error', (error) => {
+      spawnError = { code: error.code ?? null, message: error.message };
+    });
+    child.on('close', (exitCode, signal) => resolve({ exitCode, signal, spawnError }));
   });
   const output = Buffer.concat(chunks).toString('utf8');
   return {
@@ -88,17 +89,21 @@ async function run(attempt) {
     durationMs: Date.now() - startedAt.getTime(),
     exitCode: result.exitCode,
     signal: result.signal,
-    classification: classifyFailure({ exitCode: result.exitCode, signal: result.signal, output }),
+    spawnError: result.spawnError,
+    classification: classifyFailure({ ...result, output }),
   };
 }
 
 const attempts = [await run(1)];
 if (
+  (attempts[0].exitCode !== 0 || attempts[0].signal || attempts[0].spawnError) &&
   process.env.TEST_RETRY_INFRASTRUCTURE !== 'false' &&
   ['infrastructure', 'process-crash'].includes(attempts[0].classification)
 )
   attempts.push(await run(2));
 const final = attempts.at(-1);
+const succeeded = final.classification === 'success';
+const executionMs = attempts.reduce((total, attempt) => total + attempt.durationMs, 0);
 const testSummary = await collectTestReportSummaries(
   process.cwd(),
   Date.parse(attempts[0].startedAt),
@@ -107,9 +112,9 @@ const report = {
   version: 1,
   name: reportName,
   lane: process.env.DELIVERY_LANE ?? null,
-  flaky: attempts.length > 1 && final.exitCode === 0,
+  flaky: attempts.length > 1 && succeeded,
   attempts,
-  result: final.exitCode === 0 ? 'success' : 'failure',
+  result: succeeded ? 'success' : 'failure',
   testSummary,
   provenance: {
     runner: process.env.RUNNER_OS ?? process.platform,
@@ -126,7 +131,7 @@ const escapedName = reportName
   .replaceAll('&', '&amp;')
   .replaceAll('<', '&lt;')
   .replaceAll('"', '&quot;');
-const junit = `<testsuite name="${escapedName}" tests="1" failures="${final.exitCode === 0 ? 0 : 1}" time="${(final.durationMs / 1000).toFixed(3)}"><testcase classname="${escapedName}" name="command" time="${(final.durationMs / 1000).toFixed(3)}">${final.exitCode === 0 ? '' : `<failure type="${final.classification}"/>`}</testcase></testsuite>`;
+const junit = `<testsuite name="${escapedName}" tests="1" failures="${succeeded ? 0 : 1}" time="${(executionMs / 1000).toFixed(3)}"><testcase classname="${escapedName}" name="command" time="${(executionMs / 1000).toFixed(3)}">${succeeded ? '' : `<failure type="${final.classification}"/>`}</testcase></testsuite>`;
 await writeFile(path.join(reportsDir, `${reportName}.junit.xml`), `${junit}\n`);
 if (laneContext) {
   const { manifest, laneInput, laneInputPath } = laneContext;
@@ -137,14 +142,14 @@ if (laneContext) {
     commit: manifest.commit,
     manifestDigest: manifest.digest,
     laneInputDigest: laneInput.digest,
-    status: final.exitCode === 0 ? 'success' : 'failure',
+    status: succeeded ? 'success' : 'failure',
     failure: {
-      classification: final.exitCode === 0 ? 'none' : final.classification,
+      classification: succeeded ? 'none' : final.classification,
       attempts: attempts.length,
       retried: attempts.length > 1,
     },
     timing: {
-      executionMs: final.durationMs,
+      executionMs,
       attempts: attempts.map(({ attempt, durationMs, classification }) => ({
         attempt,
         durationMs,
@@ -180,7 +185,7 @@ if (process.env.GITHUB_STEP_SUMMARY) {
       `### ${reportName}`,
       '',
       `- Result: **${report.result}** (${final.classification})`,
-      `- Attempts: ${attempts.length}; duration: ${final.durationMs} ms`,
+      `- Attempts: ${attempts.length}; duration: ${executionMs} ms`,
       `- Test files: ${testSummary.files.total}; tests: ${testSummary.tests.total}; skipped: ${testSummary.tests.skipped}; retries: ${testSummary.tests.retries}`,
       ...(slowest ? ['', '| Slowest test | Duration |', '| --- | ---: |', slowest] : []),
       '',
@@ -188,6 +193,6 @@ if (process.env.GITHUB_STEP_SUMMARY) {
   );
 }
 console.log(
-  `[test-system-v2] ${reportName}: ${report.result}; ${final.classification}; ${final.durationMs}ms`,
+  `[test-system-v2] ${reportName}: ${report.result}; ${final.classification}; ${executionMs}ms`,
 );
-process.exitCode = final.exitCode;
+process.exitCode = succeeded ? 0 : final.exitCode > 0 ? final.exitCode : 1;
