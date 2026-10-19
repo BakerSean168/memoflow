@@ -13,4 +13,4 @@ export {
   runExternalMutation,
   ExternalMutationError,
   type ExternalMutationAuthority,
-} from './adapters/prisma/external-mutation';
+} from './adapters/prisma/external-mutation.js';
