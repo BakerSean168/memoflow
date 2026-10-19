@@ -33,7 +33,7 @@ const i18n = createI18n({
   },
 });
 
-function mountView(hasPin = false) {
+function mountView(hasPin = false, attachTo?: HTMLElement) {
   const profile = {
     profileId: 'profile-1',
     profileKind: 'guest',
@@ -63,6 +63,7 @@ function mountView(hasPin = false) {
     return ok(undefined);
   });
   const wrapper = mount(DesktopProfileAccessView, {
+    attachTo,
     global: {
       plugins: [i18n],
       provide: { [DESKTOP_BRIDGE_KEY as symbol]: { invoke } },
@@ -72,6 +73,22 @@ function mountView(hasPin = false) {
 }
 
 describe('DesktopProfileAccessView', () => {
+  it('preselects and focuses a PIN target passed by the host without opening its data', async () => {
+    const previousHash = window.location.hash;
+    window.location.hash = '#/profile-access?profileId=profile-1';
+    const { wrapper, invoke } = mountView(true, document.body);
+    try {
+      await flushPromises();
+      expect(wrapper.get('[data-testid="desktop-profile-pin-profile-1"]').exists()).toBe(true);
+      expect(document.activeElement).toBe(
+        wrapper.get('[data-testid="desktop-profile-pin-profile-1"]').element,
+      );
+      expect(invoke).not.toHaveBeenCalledWith(ProfileAccessChannels.SELECT, expect.anything());
+    } finally {
+      wrapper.unmount();
+      window.location.hash = previousHash;
+    }
+  });
   it('creates and opens an independent guest', async () => {
     const { wrapper, invoke } = mountView();
     await flushPromises();

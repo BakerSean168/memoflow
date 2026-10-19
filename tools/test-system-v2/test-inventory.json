@@ -4605,6 +4605,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/layouts/shell/ManageAccountsDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/layouts/shell/ModuleCapsule.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13281,7 +13289,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 246
+      "fileCount": 247
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -14044,7 +14052,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1173,
+    "unit": 1174,
     "integration": 49,
     "smoke": 3,
     "boundary-ipc": 8,

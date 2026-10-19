@@ -104,9 +104,22 @@ export default {
     sceneTitle: 'Settings',
   },
   account: {
+    openForPin: 'Open to manage PIN',
+    connection: {
+      UNBOUND: 'Local only',
+      CHECKING: 'Checking connection',
+      ONLINE: 'Online',
+      OFFLINE: 'Offline',
+      REAUTH_REQUIRED: 'Sign-in required',
+      unknown: 'Not checked',
+    },
+    manageDescription:
+      'Profiles keep separate local data. Removing one from this device does not close its cloud account. Manage PIN in Settings → Account & privacy after opening the Profile.',
+    pinSettings: 'PIN settings',
+    switchAccount: 'Switch account',
     createProfile: 'Create local Profile',
     currentProfile: 'Current Profile',
-    manageProfiles: 'Manage Profiles',
+    manageProfiles: 'Manage accounts',
     addAccount: 'Add another account',
     reauthenticate: 'Reauthenticate this account',
 
