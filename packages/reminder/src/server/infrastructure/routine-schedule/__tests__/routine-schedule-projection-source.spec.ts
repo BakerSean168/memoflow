@@ -28,12 +28,18 @@ import {
 } from './test-support';
 
 function createReader(options?: {
-  snapshot?: RoutineScheduleSnapshot | null;
+  snapshot?:
+    | (Omit<RoutineScheduleSnapshot, 'lastWallClockScheduledFor'> & {
+        lastWallClockScheduledFor?: number | null;
+      })
+    | null;
 }): RoutineScheduleStateReader {
-  const snapshot: RoutineScheduleSnapshot | null =
+  const input =
     options?.snapshot === undefined
       ? { definition: buildFixtureFRoutine(), durableProfileGateOpen: true }
-      : (options.snapshot ?? null);
+      : options.snapshot;
+  const snapshot: RoutineScheduleSnapshot | null =
+    input == null ? null : { lastWallClockScheduledFor: null, ...input };
   return {
     async readRoutineScheduleSnapshot() {
       return snapshot;
@@ -56,6 +62,67 @@ function createSource(
 }
 
 describe('createRoutineScheduleProjectionSource (ROUTINE-3401)', () => {
+  it('repairs an overdue one-shot occurrence from the durable cursor', async () => {
+    const source = createSource(
+      createReader({
+        snapshot: {
+          definition: buildFixtureFRoutine({ trigger: fixtureTrigger({ count: 1 }) }),
+          durableProfileGateOpen: true,
+          lastWallClockScheduledFor: null,
+        },
+      }),
+      { now: FIXTURE_F.firstOccurrenceAt + 1 },
+    );
+    const plan = await source.buildRoutinePlan(FIXTURE_F.routineId, FIXTURE_F.identityId);
+    expect(plan.desired).toHaveLength(1);
+    expect(plan.desired[0]?.runAt).toBe(FIXTURE_F.firstOccurrenceAt);
+  });
+
+  it('coalesces a recurring backlog to its latest overdue occurrence', async () => {
+    const repairAt = FIXTURE_F.firstOccurrenceAt + 365 * 24 * 60 * 60_000;
+    const source = createSource(
+      createReader({
+        snapshot: {
+          definition: buildFixtureFRoutine(),
+          durableProfileGateOpen: true,
+          lastWallClockScheduledFor: null,
+        },
+      }),
+      { now: repairAt },
+    );
+    const plan = await source.buildRoutinePlan(FIXTURE_F.routineId, FIXTURE_F.identityId);
+    expect(plan.desired).toHaveLength(1);
+    expect(plan.desired[0]?.runAt).toBe(repairAt);
+
+    const nextPlan = await createSource(
+      createReader({
+        snapshot: {
+          definition: buildFixtureFRoutine(),
+          durableProfileGateOpen: true,
+          lastWallClockScheduledFor: plan.desired[0]!.runAt,
+        },
+      }),
+      { now: repairAt },
+    ).buildRoutinePlan(FIXTURE_F.routineId, FIXTURE_F.identityId);
+    expect(nextPlan.desired[0]?.runAt).toBe(repairAt + 24 * 60 * 60_000);
+  });
+
+  it('does not re-plan an already committed WallClock occurrence', async () => {
+    const source = createSource(
+      createReader({
+        snapshot: {
+          definition: buildFixtureFRoutine({ trigger: fixtureTrigger({ count: 1 }) }),
+          durableProfileGateOpen: true,
+          lastWallClockScheduledFor: FIXTURE_F.firstOccurrenceAt,
+        },
+      }),
+      { now: FIXTURE_F.firstOccurrenceAt - 1 },
+    );
+    expect(
+      (await source.buildRoutinePlan(FIXTURE_F.routineId, FIXTURE_F.identityId)).desired,
+    ).toEqual([]);
+  });
+
   it('projects exactly one durable intent at the canonical 23:30 Asia/Shanghai instant', async () => {
     const source = createSource(createReader());
     const plan = await source.buildRoutinePlan(FIXTURE_F.routineId, FIXTURE_F.identityId);
@@ -299,6 +366,7 @@ describe('createRoutineScheduleProjectionSource (ROUTINE-3401)', () => {
         snapshot: {
           definition: buildFixtureFRoutine({ trigger: fixtureTrigger({ count: 1 }) }),
           durableProfileGateOpen: true,
+          lastWallClockScheduledFor: FIXTURE_F.firstOccurrenceAt,
         },
       }),
       { now: Date.parse('2026-08-26T00:00:00.000Z') },

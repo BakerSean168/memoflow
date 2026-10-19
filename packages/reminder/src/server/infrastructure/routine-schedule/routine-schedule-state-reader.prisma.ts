@@ -30,34 +30,50 @@ export function createPrismaRoutineScheduleStateReader(
 ): RoutineScheduleStateReader {
   return {
     async readRoutineScheduleSnapshot(routineId, identityId) {
-      const [row, preferenceRow, temporaryOverrideRow, membershipRows, elapsedOccurrenceRows] =
-        await Promise.all([
-          prisma.routineDefinition.findUnique({
-            where: { identityId_id: { identityId, id: routineId } },
-          }),
-          prisma.routinePreference.findUnique({
-            where: { identityId },
-            select: { globalEnabled: true },
-          }),
-          prisma.routineTemporaryOverride.findUnique({
-            where: { identityId_routineId: { identityId, routineId } },
-          }),
-          prisma.routineProfileMembership.findMany({
-            where: { identityId, routineId },
-            select: { enabled: true, profile: { select: { enabled: true } } },
-          }),
-          prisma.routineOccurrence.findMany({
-            where: { identityId, routineId, triggerKind: 'Elapsed' },
-            select: {
-              occurrenceKey: true,
-              sourceRevision: true,
-              resolutionState: true,
-              resolvedAt: true,
-            },
-            orderBy: [{ becameDueAt: 'desc' }, { id: 'desc' }],
-            take: 128,
-          }),
-        ]);
+      const [
+        row,
+        preferenceRow,
+        temporaryOverrideRow,
+        membershipRows,
+        elapsedOccurrenceRows,
+        latestWallClockOccurrence,
+      ] = await Promise.all([
+        prisma.routineDefinition.findUnique({
+          where: { identityId_id: { identityId, id: routineId } },
+        }),
+        prisma.routinePreference.findUnique({
+          where: { identityId },
+          select: { globalEnabled: true },
+        }),
+        prisma.routineTemporaryOverride.findUnique({
+          where: { identityId_routineId: { identityId, routineId } },
+        }),
+        prisma.routineProfileMembership.findMany({
+          where: { identityId, routineId },
+          select: { enabled: true, profile: { select: { enabled: true } } },
+        }),
+        prisma.routineOccurrence.findMany({
+          where: { identityId, routineId, triggerKind: 'Elapsed' },
+          select: {
+            occurrenceKey: true,
+            sourceRevision: true,
+            resolutionState: true,
+            resolvedAt: true,
+          },
+          orderBy: [{ becameDueAt: 'desc' }, { id: 'desc' }],
+          take: 128,
+        }),
+        prisma.routineOccurrence.findFirst({
+          where: {
+            identityId,
+            routineId,
+            triggerKind: 'WallClock',
+            scheduledFor: { not: null },
+          },
+          select: { scheduledFor: true },
+          orderBy: [{ scheduledFor: 'desc' }, { id: 'desc' }],
+        }),
+      ]);
       return row
         ? mapRowToSnapshot(
             row,
@@ -65,6 +81,7 @@ export function createPrismaRoutineScheduleStateReader(
             temporaryOverrideRow,
             membershipRows,
             elapsedOccurrenceRows,
+            latestWallClockOccurrence?.scheduledFor ?? null,
           )
         : null;
     },
@@ -93,6 +110,7 @@ function mapRowToSnapshot(
     readonly resolutionState: string;
     readonly resolvedAt: Date | null;
   }>,
+  latestWallClockScheduledFor: Date | null,
 ): RoutineScheduleSnapshot {
   const definition = RoutineDefinition.load({
     id: row.id,
@@ -122,6 +140,8 @@ function mapRowToSnapshot(
       resolutionState: requireElapsedResolutionState(occurrence.resolutionState),
       resolvedAt: occurrence.resolvedAt == null ? null : occurrence.resolvedAt.getTime(),
     })),
+    lastWallClockScheduledFor:
+      latestWallClockScheduledFor == null ? null : latestWallClockScheduledFor.getTime(),
   };
 }
 

@@ -33,6 +33,8 @@ export interface RoutineScheduleSnapshot {
   readonly temporaryOverride?: RoutineTemporaryOverride | null;
   /** Durable Elapsed business facts used to derive the next anchor/generation. */
   readonly elapsedOccurrences?: readonly DurableElapsedOccurrenceSnapshot[];
+  /** Latest durable WallClock claim; occurrence rows are the repair cursor. */
+  readonly lastWallClockScheduledFor: number | null;
 }
 
 /**
@@ -214,13 +216,41 @@ export function createRoutineScheduleProjectionSource(deps: {
         return { owner: canonicalOwner, desired: [intent] };
       }
 
-      const occurrence = computeRoutineNextEligibleOccurrence({
-        routineId: definition.id,
-        engine: deps.recurrenceEngine,
-        trigger,
-        after: asInstant(now()),
-        temporaryOverride: snapshot.temporaryOverride ?? null,
-      });
+      // Repair is anchored to durable owner truth, not process uptime. If
+      // several occurrences elapsed while projection was unavailable, deliver
+      // only the latest overdue occurrence and discard the missed backlog.
+      const cursor = Math.max(
+        snapshot.lastWallClockScheduledFor ?? Number.NEGATIVE_INFINITY,
+        definition.activatedAt?.getTime() ?? Number.NEGATIVE_INFINITY,
+        definition.updatedAt.getTime(),
+      );
+      const repairAt = now();
+      const occurrenceAfter = (afterMs: number) =>
+        computeRoutineNextEligibleOccurrence({
+          routineId: definition.id,
+          engine: deps.recurrenceEngine,
+          trigger,
+          after: asInstant(afterMs),
+          temporaryOverride: snapshot.temporaryOverride ?? null,
+        });
+      let occurrence = occurrenceAfter(cursor);
+      if (occurrence && Number(occurrence.occurrenceAt) <= repairAt) {
+        // Find the latest missed occurrence in logarithmically bounded calls,
+        // even after a long outage. Eligible-after-timestamp is monotonic, so
+        // this skips the old backlog without replaying it one item at a time.
+        let lower = cursor;
+        let upper = Math.floor(repairAt);
+        for (let step = 0; step < 64 && upper - lower > 1; step += 1) {
+          const middle = Math.floor(lower + (upper - lower) / 2);
+          const candidate = occurrenceAfter(middle);
+          if (candidate && Number(candidate.occurrenceAt) <= repairAt) {
+            lower = middle;
+          } else {
+            upper = middle;
+          }
+        }
+        occurrence = occurrenceAfter(lower);
+      }
       if (!occurrence) {
         return { owner: canonicalOwner, desired: [] };
       }
