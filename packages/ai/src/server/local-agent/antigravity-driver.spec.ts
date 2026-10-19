@@ -460,3 +460,26 @@ it('closes a transport that was constructed after cancellation instead of starti
   expect(fixture.transports[0].closed).toBe(true);
   expect(fixture.transports[0].calls).toEqual([]);
 });
+
+it('directs missing Google credentials to the explicit Settings sign-in action for probes and turns', async () => {
+  const fixture = await setup();
+  await rm(join(fixture.home, 'antigravity-acp', 'acp_token.json'));
+  const message =
+    'Google sign-in is required. Open Settings → AI → Providers → Antigravity and select “Sign in with Google”.';
+  expect(await fixture.make().probe()).toMatchObject({ status: 'login_required', message });
+  await expect(collect(fixture.make())).rejects.toMatchObject({
+    code: 'LOCAL_AGENT_LOGIN_REQUIRED',
+    message,
+  });
+});
+
+it('directs expired Google credentials during a turn to the explicit sign-in action', async () => {
+  const fixture = await setup((transport) => {
+    transport.failure = 'LOCAL_AGENT_LOGIN_REQUIRED';
+  });
+  await expect(collect(fixture.make())).rejects.toMatchObject({
+    code: 'LOCAL_AGENT_LOGIN_REQUIRED',
+    message:
+      'Google sign-in is required. Open Settings → AI → Providers → Antigravity and select “Sign in with Google”.',
+  });
+});

@@ -177,7 +177,7 @@ export class AcpDriver {
       ? antigravityExecutable(this.connection.executablePath)
       : this.connection.executablePath;
     if (antigravity && !antigravityHasCachedAuth(this.connection.homePath))
-      throw new LocalAgentError('LOCAL_AGENT_LOGIN_REQUIRED');
+      throw new LocalAgentError('LOCAL_AGENT_LOGIN_REQUIRED', this.connection.driver);
     if (antigravity) {
       this.temporaryDirectory = await mkdtemp(join(tmpdir(), 'mf-agy-'));
       if (this.stopped) {
@@ -297,7 +297,9 @@ export class AcpDriver {
           };
     } catch (error) {
       const failure =
-        error instanceof LocalAgentError ? error : new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
+        error instanceof LocalAgentError
+          ? new LocalAgentError(error.code, this.connection.driver)
+          : new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
       return {
         status:
           failure.code === 'LOCAL_AGENT_NOT_INSTALLED'
@@ -375,7 +377,7 @@ export class AcpDriver {
       if (this.stopped || input.signal?.aborted) yield { type: 'cancelled' };
       else
         throw error instanceof LocalAgentError
-          ? error
+          ? new LocalAgentError(error.code, this.connection.driver)
           : new LocalAgentError('LOCAL_AGENT_PROTOCOL_ERROR');
     } finally {
       input.signal?.removeEventListener('abort', cancel);

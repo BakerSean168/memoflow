@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { Button, Input } from '@memoflow/ui-vue-shadcn';
 import {
   LocalAgentConnectionInputSchema,
+  LocalAgentAuthStateSchema,
   LOCAL_AGENT_DEFAULT_EXECUTABLES,
   type LocalAgentAuthFailure,
   type LocalAgentAuthState,
@@ -251,7 +252,15 @@ async function openAuthorization(url: string) {
     openFailed.value = true;
   }
 }
-function applyAuth(state: LocalAgentAuthState, options: { keepFailure?: boolean } = {}) {
+function applyAuth(raw: unknown, options: { keepFailure?: boolean } = {}) {
+  const parsed = LocalAgentAuthStateSchema.safeParse(raw);
+  if (!parsed.success) {
+    stopPolling();
+    auth.value = null;
+    authFailure.value = 'unavailable';
+    return;
+  }
+  const state = parsed.data;
   auth.value = state;
   if (state.failure && !options.keepFailure) authFailure.value = state.failure;
   if (state.authorizationUrl && state.authorizationUrl !== openedUrl) {

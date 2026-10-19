@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs';
-import { chmod, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import * as http from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -19,9 +19,6 @@ afterEach(async () => {
   await Promise.all(homes.splice(0).map((home) => rm(home, { recursive: true, force: true })));
 });
 
-/** Linux/macOS exec a shebang script; Windows needs the official .exe shape. */
-const posix = process.platform !== 'win32';
-
 function open(url: string): Promise<number> {
   return new Promise((resolve, reject) => {
     const request = http.get(url, (response) => {
@@ -34,20 +31,24 @@ function open(url: string): Promise<number> {
   });
 }
 
+// Node is the launcher on every OS; no shell, executable bit or shebang is required.
+function launchFixture(options: NativeProcessOptions) {
+  return new NativeRpcTransport({
+    ...options,
+    executable: process.execPath,
+    args: [root, ...options.args],
+    env: { ...options.env, ELECTRON_RUN_AS_NODE: '1' },
+  });
+}
+
 async function setup() {
   const home = await mkdtemp(join(tmpdir(), 'memoflow-agy-process-'));
   homes.push(home);
-  const shim = join(home, 'agy_acp_server');
-  await writeFile(
-    shim,
-    `#!/bin/sh\nexec "${process.execPath.replace(/"/g, '\\"')}" "${root}" "$@"\n`,
-  );
-  await chmod(shim, 0o755);
   const connection = LocalAgentConnectionSchema.parse({
     id: 'agy-process',
     driver: 'antigravity',
     name: 'AGY',
-    executablePath: shim,
+    executablePath: root,
     homePath: join(home, 'gemini'),
     enabled: true,
     writeScopes: [],
@@ -55,16 +56,17 @@ async function setup() {
     createdAt: 1,
     updatedAt: 1,
   });
-  const probeStatus = () => new AcpDriver(connection, home).probe();
+  const probeStatus = () => new AcpDriver(connection, home, launchFixture).probe();
   const manager = new AntigravityLoginManager({
     loadConnection: async () => connection,
     verify: probeStatus,
+    makeTransport: launchFixture,
     stopSessions: () => undefined,
   });
   return { home, connection, manager, probeStatus };
 }
 
-describe.skipIf(!posix)('Antigravity login over a real ACP child process', () => {
+describe('Antigravity login over a real ACP child process', () => {
   it('completes the native callback, verifies models, and never opens a browser on refresh', async () => {
     const fixture = await setup();
     const tokenPath = join(fixture.connection.homePath!, 'antigravity-acp', 'acp_token.json');
@@ -106,14 +108,10 @@ describe.skipIf(!posix)('Antigravity login over a real ACP child process', () =>
 
     // Refresh re-uses official ACP with a no-op browser hook, never the login capture.
     const options: NativeProcessOptions[] = [];
-    const driver = new AcpDriver(
-      fixture.connection,
-      fixture.home,
-      (input) => {
-        options.push(input);
-        return new NativeRpcTransport(input);
-      },
-    );
+    const driver = new AcpDriver(fixture.connection, fixture.home, (input) => {
+      options.push(input);
+      return launchFixture(input);
+    });
     expect(await driver.probe()).toMatchObject({
       status: 'ready',
       models: [{ id: 'fixture-google-model' }],

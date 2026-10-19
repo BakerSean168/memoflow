@@ -415,6 +415,15 @@ describe('Antigravity explicit Google sign-in state machine', () => {
 });
 
 describe('Antigravity authorization and callback URL validation', () => {
+  it.each(['code', 'access_token', 'refresh_token', 'id_token', 'token', 'error'])(
+    'rejects authorization URLs carrying %s',
+    (parameter) => {
+      expect(
+        parseAntigravityAuthorizationUrl(`${AUTHORIZATION_URL}&${parameter}=private-value`),
+      ).toBeNull();
+    },
+  );
+
   it('accepts only an official Google authorization URL with a loopback redirect', () => {
     expect(parseAntigravityAuthorizationUrl(AUTHORIZATION_URL)).toEqual({
       authorizationUrl: AUTHORIZATION_URL,

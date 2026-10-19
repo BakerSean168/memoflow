@@ -1,3 +1,5 @@
+import type { LocalAgentDriver } from '@memoflow/contracts/ai';
+
 /** Public failures contain no provider stderr, credentials, configuration or raw protocol data. */
 export const LOCAL_AGENT_FAILURES = {
   NOT_FOUND: 'Local Agent connection or conversation was not found.',
@@ -23,9 +25,21 @@ export const LOCAL_AGENT_FAILURES = {
     'The operation outcome is uncertain. Check its saved receipt before retrying.',
 } as const;
 export type LocalAgentFailureCode = keyof typeof LOCAL_AGENT_FAILURES;
+export function localAgentFailureMessage(
+  code: LocalAgentFailureCode,
+  driver?: LocalAgentDriver,
+): string {
+  return code === 'LOCAL_AGENT_LOGIN_REQUIRED' && driver === 'antigravity'
+    ? 'Google sign-in is required. Open Settings → AI → Providers → Antigravity and select “Sign in with Google”.'
+    : LOCAL_AGENT_FAILURES[code];
+}
+
 export class LocalAgentError extends Error {
-  constructor(readonly code: LocalAgentFailureCode) {
-    super(LOCAL_AGENT_FAILURES[code]);
+  constructor(
+    readonly code: LocalAgentFailureCode,
+    readonly driver?: LocalAgentDriver,
+  ) {
+    super(localAgentFailureMessage(code, driver));
     this.name = 'LocalAgentError';
   }
 }

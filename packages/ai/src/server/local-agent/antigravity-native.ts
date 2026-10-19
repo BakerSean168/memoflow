@@ -1,7 +1,10 @@
 import { realpathSync, statSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { delimiter, dirname, isAbsolute, join } from 'node:path';
-import type { LocalAgentConnection } from '@memoflow/contracts/ai';
+import {
+  AntigravityAuthorizationUrlSchema,
+  type LocalAgentConnection,
+} from '@memoflow/contracts/ai';
 import { LocalAgentError } from '../../shared/local-agent-error';
 import { resolveNativeExecutable } from './native-executable';
 
@@ -98,44 +101,15 @@ export function antigravityEnvironment(
  * Accept only the official Google authorization URL. The URL is returned to the
  * renderer for an explicit open/copy action; it is never logged or persisted.
  */
-export function parseAntigravityAuthorizationUrl(
-  raw: string,
-): AntigravityAuthorizationUrl | null {
-  if (raw.length > MAX_AUTHORIZATION_URL_LENGTH || /\s/u.test(raw)) return null;
-  let url: URL;
-  try {
-    url = new URL(raw);
-  } catch {
-    return null;
-  }
-  const states = url.searchParams.getAll('state');
-  const redirects = url.searchParams.getAll('redirect_uri');
-  const responses = url.searchParams.getAll('response_type');
-  const redirectUri = redirects[0];
-  if (
-    url.origin !== 'https://accounts.google.com' ||
-    url.pathname !== '/o/oauth2/v2/auth' ||
-    url.username !== '' ||
-    url.password !== '' ||
-    url.hash !== '' ||
-    states.length !== 1 ||
-    redirects.length !== 1 ||
-    responses.length !== 1 ||
-    responses[0] !== 'code' ||
-    !states[0] ||
-    states[0].length > 512 ||
-    /\s/u.test(states[0]) ||
-    !/^http:\/\/127\.0\.0\.1:[1-9][0-9]{0,4}\/$/u.test(redirectUri ?? '')
-  )
-    return null;
-  let redirect: URL;
-  try {
-    redirect = new URL(redirectUri);
-  } catch {
-    return null;
-  }
-  if (Number(redirect.port) < 1_024 || Number(redirect.port) > 65_535) return null;
-  return { authorizationUrl: raw, redirectUri, state: states[0] };
+export function parseAntigravityAuthorizationUrl(raw: string): AntigravityAuthorizationUrl | null {
+  const parsed = AntigravityAuthorizationUrlSchema.safeParse(raw);
+  if (!parsed.success) return null;
+  const url = new URL(parsed.data);
+  return {
+    authorizationUrl: parsed.data,
+    redirectUri: url.searchParams.get('redirect_uri')!,
+    state: url.searchParams.get('state')!,
+  };
 }
 
 /**
@@ -179,4 +153,3 @@ export function parseAntigravityCallbackUrl(
     return null;
   return callback;
 }
-

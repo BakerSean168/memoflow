@@ -292,11 +292,30 @@ it('accepts an Antigravity native connection without API credentials or arbitrar
 });
 
 describe('explicit Antigravity sign-in contracts', () => {
+  it.each([
+    'https://evil.example/o/oauth2/v2/auth?redirect_uri=http%3A%2F%2F127.0.0.1%3A43179%2F&response_type=code&state=x',
+    ...['code', 'access_token', 'refresh_token', 'id_token', 'token', 'error'].map(
+      (parameter) =>
+        `https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=http%3A%2F%2F127.0.0.1%3A43179%2F&response_type=code&state=x&${parameter}=private-value`,
+    ),
+  ])('rejects unsafe authorization URLs at the contract boundary: %s', (authorizationUrl) => {
+    expect(
+      LocalAgentAuthStateSchema.safeParse({
+        phase: 'waiting',
+        flowId: 'flow-1',
+        authorizationUrl,
+        expiresAt: 1,
+        failure: null,
+      }).success,
+    ).toBe(false);
+  });
+
   it('only exposes the authorization URL while waiting for Google', () => {
     const waiting = {
       phase: 'waiting',
       flowId: 'flow-1',
-      authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth?state=state-1',
+      authorizationUrl:
+        'https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=http%3A%2F%2F127.0.0.1%3A43179%2F&response_type=code&state=state-1',
       expiresAt: 1_800_000_000_000,
       failure: null,
     };

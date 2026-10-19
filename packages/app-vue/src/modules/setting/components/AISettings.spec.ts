@@ -123,7 +123,8 @@ async function setup(
         driver,
         instanceSlug: driver,
         name: item.name,
-        executablePath: driver === 'antigravity' ? 'C:\\opt\\agy-server\\agy_acp_server.exe' : driver,
+        executablePath:
+          driver === 'antigravity' ? 'C:\\opt\\agy-server\\agy_acp_server.exe' : driver,
         enabled: true,
         writeScopes: [],
         revision: 1,
@@ -1192,3 +1193,43 @@ it('offers sign-out only through the official ACP capability', async () => {
   await flushPromises();
   expect(localClient.signOut).toHaveBeenCalledWith('native-antigravity');
 });
+
+it.each([
+  'https://evil.example/o/oauth2/v2/auth?redirect_uri=http%3A%2F%2F127.0.0.1%3A43179%2F&response_type=code&state=x',
+  ...['code', 'access_token', 'refresh_token', 'id_token', 'token'].map(
+    (parameter) =>
+      `https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=http%3A%2F%2F127.0.0.1%3A43179%2F&response_type=code&state=x&${parameter}=private-value`,
+  ),
+])(
+  'rejects an unsafe login URL before renderer display, browser or clipboard: %s',
+  async (authorizationUrl) => {
+    const { wrapper, localClient, bridge } = await setup({
+      native: true,
+      configured: ['antigravity'],
+      dom: true,
+    });
+    localClient.probeConnection.mockResolvedValue({ status: 'login_required', message: 'Sign in' });
+    await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
+    await flushPromises();
+    await wrapper.get('[data-testid="ai-provider-select-agent:antigravity"]').trigger('click');
+    await flushPromises();
+    localClient.startLogin.mockResolvedValue({
+      phase: 'waiting',
+      flowId: 'unsafe-flow',
+      authorizationUrl,
+      expiresAt: Date.now() + 300_000,
+      failure: null,
+    });
+    const writeText = vi.fn(async () => undefined);
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+    await wrapper.get('[data-testid="ai-agy-login"]').trigger('click');
+    await flushPromises();
+    const copy = wrapper.find('[data-testid="ai-agy-login-copy"]');
+    if (copy.exists()) await copy.trigger('click');
+    expect(bridge.invoke).not.toHaveBeenCalled();
+    expect(writeText).not.toHaveBeenCalled();
+    expect(copy.exists()).toBe(false);
+    expect(wrapper.html()).not.toContain(authorizationUrl);
+    wrapper.unmount();
+  },
+);

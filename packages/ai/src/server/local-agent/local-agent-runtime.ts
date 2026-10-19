@@ -283,14 +283,19 @@ export class LocalAgentRuntime {
   }
   async createConversation(identityId: string, input: LocalAgentConversationCreate) {
     const status = await this.probeConnection(identityId, input.connectionId);
-    if (status.status !== 'ready')
+    if (status.status !== 'ready') {
+      const connection = await this.persist(() =>
+        this.options.store.getConnection(identityId, input.connectionId),
+      );
       throw new LocalAgentError(
         status.status === 'login_required'
           ? 'LOCAL_AGENT_LOGIN_REQUIRED'
           : status.status === 'not_installed'
             ? 'LOCAL_AGENT_NOT_INSTALLED'
             : 'LOCAL_AGENT_UNAVAILABLE',
+        connection.driver,
       );
+    }
     if (!status.models.some((model) => model.id === input.modelId))
       throw new LocalAgentError('LOCAL_AGENT_MODEL_UNSUPPORTED');
     this.assertActive();

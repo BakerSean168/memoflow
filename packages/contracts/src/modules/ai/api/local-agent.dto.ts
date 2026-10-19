@@ -201,11 +201,60 @@ export const LocalAgentAuthFailureSchema = z.enum([
   'unavailable',
 ]);
 export type LocalAgentAuthFailure = z.infer<typeof LocalAgentAuthFailureSchema>;
+/** The only URL the explicit Google flow may expose to Desktop open/copy actions. */
+export const AntigravityAuthorizationUrlSchema = z
+  .string()
+  .max(16_384)
+  .refine((raw) => {
+    if (/\s/u.test(raw)) return false;
+    try {
+      const url = new URL(raw);
+      const allowed = new Set([
+        'client_id',
+        'redirect_uri',
+        'response_type',
+        'scope',
+        'state',
+        'access_type',
+        'prompt',
+        'include_granted_scopes',
+        'login_hint',
+        'code_challenge',
+        'code_challenge_method',
+        'hd',
+        'authuser',
+        'approval_prompt',
+      ]);
+      for (const key of url.searchParams.keys()) {
+        if (!allowed.has(key) || url.searchParams.getAll(key).length !== 1) return false;
+      }
+      const state = url.searchParams.get('state');
+      const redirectUri = url.searchParams.get('redirect_uri') ?? '';
+      if (
+        url.origin !== 'https://accounts.google.com' ||
+        url.pathname !== '/o/oauth2/v2/auth' ||
+        url.username !== '' ||
+        url.password !== '' ||
+        url.hash !== '' ||
+        url.searchParams.get('response_type') !== 'code' ||
+        !state ||
+        state.length > 512 ||
+        /\s/u.test(state) ||
+        !/^http:\/\/127\.0\.0\.1:[1-9][0-9]{0,4}\/$/u.test(redirectUri)
+      )
+        return false;
+      const port = Number(new URL(redirectUri).port);
+      return port >= 1_024 && port <= 65_535;
+    } catch {
+      return false;
+    }
+  }, 'Invalid Antigravity authorization URL');
+
 export const LocalAgentAuthStateSchema = z
   .object({
     phase: LocalAgentAuthPhaseSchema,
     flowId: id.nullable(),
-    authorizationUrl: z.string().max(16_384).nullable(),
+    authorizationUrl: AntigravityAuthorizationUrlSchema.nullable(),
     expiresAt: z.number().int().nonnegative().nullable(),
     failure: LocalAgentAuthFailureSchema.nullable(),
     /** Present once the official ACP probe verified the signed-in account and models. */
