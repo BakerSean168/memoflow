@@ -321,6 +321,33 @@ async function sendMastraMessage(page: Page, message: string): Promise<void> {
 }
 
 test.describe('AI Mastra open-chat product cutover', () => {
+  test('[P1] new Composer threads inherit the selected catalog model after reload', async ({
+    page,
+  }) => {
+    await bootstrapMastraOpenChat(page);
+    const selector = page.getByTestId('ai-chat-model-selector');
+    await expect(selector).toContainText(modelId);
+
+    await selector.click();
+    await expect(page.getByTestId('ai-model-picker')).toBeVisible();
+    await expect(page.getByTestId('ai-model-picker-option')).toHaveCount(1);
+    await page.getByTestId('ai-model-picker-option').click();
+    await expect(selector).toContainText(modelId);
+
+    await page.getByTestId('shell-new-conversation').click();
+    await expect(page.getByTestId('ai-chat-view')).toBeVisible();
+    await expect(selector).toContainText(modelId);
+
+    await page.reload({ waitUntil: 'domcontentloaded', timeout: TIMEOUT_CONFIG.NAVIGATION });
+    await page.getByTestId('ai-chat-view').waitFor({
+      state: 'visible',
+      timeout: TIMEOUT_CONFIG.NAVIGATION,
+    });
+    await expect(page.getByTestId('ai-chat-model-selector')).toContainText(modelId, {
+      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
+    });
+  });
+
   test('[P0] sends through canonical runtime SSE with selected model and no legacy profile/identity', async ({
     page,
   }) => {

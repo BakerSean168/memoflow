@@ -69,17 +69,29 @@ function mounted(input: {
           status: 'ready',
           models: (catalogs.value['provider-1'] ?? [])
             .filter(() =>
-              (input.bindings ?? [
-                { instanceId: 'mastra', connectionId: 'provider-1', modelId: 'model-default' },
-                { instanceId: 'mastra-anyrouter', connectionId: 'provider-1', modelId: 'model-custom' },
-              ]).some((binding) => binding.instanceId === entry.instanceId),
+              (
+                input.bindings ?? [
+                  { instanceId: 'mastra', connectionId: 'provider-1', modelId: 'model-default' },
+                  {
+                    instanceId: 'mastra-anyrouter',
+                    connectionId: 'provider-1',
+                    modelId: 'model-custom',
+                  },
+                ]
+              ).some((binding) => binding.instanceId === entry.instanceId),
             )
             .slice()
             .sort((left, right) => {
-              const binding = (input.bindings ?? [
-                { instanceId: 'mastra', connectionId: 'provider-1', modelId: 'model-default' },
-                { instanceId: 'mastra-anyrouter', connectionId: 'provider-1', modelId: 'model-custom' },
-              ]).find((item) => item.instanceId === entry.instanceId);
+              const binding = (
+                input.bindings ?? [
+                  { instanceId: 'mastra', connectionId: 'provider-1', modelId: 'model-default' },
+                  {
+                    instanceId: 'mastra-anyrouter',
+                    connectionId: 'provider-1',
+                    modelId: 'model-custom',
+                  },
+                ]
+              ).find((item) => item.instanceId === entry.instanceId);
               return Number(left.id !== binding?.modelId) - Number(right.id !== binding?.modelId);
             })
             .map((model) => ({
@@ -156,44 +168,120 @@ describe('model selection bound to explicit Mastra Agent instances', () => {
     wrapper.unmount();
   });
 
+  it('uses configured provider default after an unavailable profile preference', async () => {
+    localStorage.setItem(
+      'ai:model-preference:v1:profile-a',
+      'agent:retired::provider-1::model-custom',
+    );
+    const { wrapper, selection } = mounted({});
+    await nextTick();
+    expect(selection.selectedModelKey.value).toBe('agent:mastra::provider-1::model-default');
+    wrapper.unmount();
+  });
+
+  it('migrates the legacy conversation model map into the active profile', () => {
+    localStorage.setItem(
+      'ai:conversation-model-map',
+      JSON.stringify({ 'old-chat': 'provider-1::model-custom' }),
+    );
+    const { wrapper, selection } = mounted({ currentConversation: 'old-chat' });
+    expect(selection.selectedModelKey.value).toBe('provider-1::model-custom');
+    expect(localStorage.getItem('ai:conversation-model-map:profile-a')).toBe(
+      JSON.stringify({ 'old-chat': 'provider-1::model-custom' }),
+    );
+    expect(localStorage.getItem('ai:conversation-model-map')).toBeNull();
+    wrapper.unmount();
+  });
+
+  it('persists model preference even without registry identity support', () => {
+    const { wrapper, selection } = mounted({ withRegistry: false });
+    expect(selection.selectModel('provider-1::model-custom')).toBe('selected');
+    expect(localStorage.getItem('ai:model-preference:v1:default')).toBe('provider-1::model-custom');
+    wrapper.unmount();
+  });
+
   it('does not carry a selected model preference between profiles', async () => {
     const profile = ref('profile-a');
     const chatConversationId = ref('');
     const providers = ref([provider]);
-    const registry = ref(AgentRegistrySnapshotSchema.parse({
-      instances: [instance('mastra'), instance('mastra-anyrouter')],
-      bindings: [
-        { instanceId: 'mastra', connectionId: 'provider-1', modelId: 'model-default' },
-        { instanceId: 'mastra-anyrouter', connectionId: 'provider-1', modelId: 'model-custom' },
-      ],
-    }));
+    const registry = ref(
+      AgentRegistrySnapshotSchema.parse({
+        instances: [instance('mastra'), instance('mastra-anyrouter')],
+        bindings: [
+          { instanceId: 'mastra', connectionId: 'provider-1', modelId: 'model-default' },
+          { instanceId: 'mastra-anyrouter', connectionId: 'provider-1', modelId: 'model-custom' },
+        ],
+      }),
+    );
     const modelCatalog = computed<ModelCatalog>(() => ({
       mastra: {
-        instanceId: 'mastra', agentKey: 'agent:mastra', status: 'ready',
-        models: [{ key: 'agent:mastra::provider-1::model-default', agentInstanceId: 'mastra', agentKey: 'agent:mastra', providerId: 'provider-1', providerName: 'AnyRouter', modelId: 'model-default', modelName: 'Default' }],
+        instanceId: 'mastra',
+        agentKey: 'agent:mastra',
+        status: 'ready',
+        models: [
+          {
+            key: 'agent:mastra::provider-1::model-default',
+            agentInstanceId: 'mastra',
+            agentKey: 'agent:mastra',
+            providerId: 'provider-1',
+            providerName: 'AnyRouter',
+            modelId: 'model-default',
+            modelName: 'Default',
+          },
+        ],
       },
       'mastra-anyrouter': {
-        instanceId: 'mastra-anyrouter', agentKey: 'agent:mastra-anyrouter', status: 'ready',
-        models: [{ key: 'agent:mastra-anyrouter::provider-1::model-custom', agentInstanceId: 'mastra-anyrouter', agentKey: 'agent:mastra-anyrouter', providerId: 'provider-1', providerName: 'AnyRouter', modelId: 'model-custom', modelName: 'Custom' }],
+        instanceId: 'mastra-anyrouter',
+        agentKey: 'agent:mastra-anyrouter',
+        status: 'ready',
+        models: [
+          {
+            key: 'agent:mastra-anyrouter::provider-1::model-custom',
+            agentInstanceId: 'mastra-anyrouter',
+            agentKey: 'agent:mastra-anyrouter',
+            providerId: 'provider-1',
+            providerName: 'AnyRouter',
+            modelId: 'model-custom',
+            modelName: 'Custom',
+          },
+        ],
       },
     }));
     let selection!: ReturnType<typeof useAIModelSelection>;
-    const wrapper = mount(defineComponent({
-      setup() {
-        selection = useAIModelSelection({
-          providers, chatConversationId, agentRegistrySnapshot: registry, modelCatalog,
-          resolveIdentity: () => profile.value,
-        });
-        return () => h('div');
+    const wrapper = mount(
+      defineComponent({
+        setup() {
+          selection = useAIModelSelection({
+            providers,
+            chatConversationId,
+            agentRegistrySnapshot: registry,
+            modelCatalog,
+            resolveIdentity: () => profile.value,
+          });
+          return () => h('div');
+        },
+      }),
+      {
+        global: {
+          plugins: [
+            createI18n({
+              legacy: false,
+              locale: 'en-US',
+              messages: { 'en-US': { common: { unknown: 'Unknown' } } },
+            }),
+          ],
+        },
       },
-    }), { global: { plugins: [createI18n({ legacy: false, locale: 'en-US', messages: { 'en-US': { common: { unknown: 'Unknown' } } } })] } });
+    );
     const first = 'agent:mastra-anyrouter::provider-1::model-custom';
     expect(selection.selectModel(first)).toBe('selected');
     profile.value = 'profile-b';
     await nextTick();
     expect(selection.selectedModelKey.value).toBe('agent:mastra::provider-1::model-default');
     expect(localStorage.getItem('ai:model-preference:v1:profile-a')).toBe(first);
-    expect(localStorage.getItem('ai:model-preference:v1:profile-b')).toBe('agent:mastra::provider-1::model-default');
+    expect(localStorage.getItem('ai:model-preference:v1:profile-b')).toBe(
+      'agent:mastra::provider-1::model-default',
+    );
     wrapper.unmount();
   });
 
@@ -372,9 +460,9 @@ describe('model selection bound to explicit Mastra Agent instances', () => {
       'selected',
     );
     expect(selection.selectedModel.value?.agentInstanceId).toBe('mastra-anyrouter');
-    expect(JSON.parse(localStorage.getItem('ai:conversation-model-map:profile-a') || '{}').bound).toBe(
-      'agent:mastra-anyrouter::provider-1::model-custom',
-    );
+    expect(
+      JSON.parse(localStorage.getItem('ai:conversation-model-map:profile-a') || '{}').bound,
+    ).toBe('agent:mastra-anyrouter::provider-1::model-custom');
     expect(selection.selectModel('unknown')).toBe('unavailable');
     wrapper.unmount();
   });

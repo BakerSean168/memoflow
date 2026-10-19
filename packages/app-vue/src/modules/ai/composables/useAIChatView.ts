@@ -111,6 +111,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   const composerInitializing = ref(true);
   const nativeSelectionPending = ref(false);
   let explicitRuntimeSelection = 0;
+  let newThreadSelectionEpoch = 0;
   let disposed = false;
   const composerLoading = computed(
     () =>
@@ -312,7 +313,18 @@ export function useAIChatView(options: UseAIChatViewOptions) {
 
   const modelSelection = useAIModelSelection({
     providers: providerList,
-    ...(agentRegistryClient ? { agentRegistrySnapshot, modelCatalog, resolveIdentity } : {}),
+    agentRegistrySnapshot,
+    modelCatalog,
+    resolveIdentity,
+    getDefaultModelKey: () => {
+      const choice = localChoices.defaultChoice.value;
+      if (choice.runtimeKind !== 'local_agent') return undefined;
+      return Object.values(modelCatalog.value)
+        .flatMap((entry) => entry.models)
+        .find(
+          (model) => model.providerId === choice.connectionId && model.modelId === choice.modelId,
+        )?.key;
+    },
     chatConversationId: chatSession.chatConversationId,
     ...(agentRegistryClient?.conversationSelection
       ? {
@@ -388,6 +400,47 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     },
     { flush: 'sync' },
   );
+  watch(
+    [() => modelSelection.selectedModel.value?.key, () => modelCatalog.value, resolveIdentity],
+    () => {
+      const selectionEpoch = newThreadSelectionEpoch;
+      const identity = resolveIdentity();
+      const selected = modelSelection.selectedModel.value;
+      if (
+        disposed ||
+        chatSession.chatConversationId.value ||
+        chatSession.chatTimeline.value.length ||
+        explicitRuntimeSelection ||
+        !selected?.agentInstanceId
+      )
+        return;
+      const instance = agentRegistrySnapshot.value?.instances.find(
+        (entry) => entry.instanceId === selected.agentInstanceId,
+      );
+      if (
+        !instance ||
+        instance.driver === 'mastra' ||
+        !instance.enabled ||
+        !instance.legacyConnectionId ||
+        chatSession.runtimeChoice.value.runtimeKind !== 'builtin'
+      )
+        return;
+      if (
+        selectionEpoch !== newThreadSelectionEpoch ||
+        identity !== resolveIdentity() ||
+        chatSession.chatConversationId.value ||
+        chatSession.chatTimeline.value.length ||
+        explicitRuntimeSelection
+      )
+        return;
+      chatSession.runtimeChoice.value = {
+        runtimeKind: 'local_agent',
+        connectionId: instance.legacyConnectionId,
+        modelId: selected.modelId,
+      };
+    },
+    { flush: 'sync' },
+  );
   if (configurationRevision) {
     watch(configurationRevision, () => {
       void Promise.allSettled([loadAgentRegistry(), localChoices.refresh()]);
@@ -433,6 +486,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       entry?.status === 'ready' ? entry.models.find((item) => item.key === key) : undefined;
     if (!instance || !model) return;
     const request = ++explicitRuntimeSelection;
+    ++newThreadSelectionEpoch;
     const identity = resolveIdentity();
     const conversationId = chatSession.chatConversationId.value;
     const previousAgent = selectedComposerAgent.value;
@@ -963,6 +1017,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
 
   function startNewConversation(mode: WorkflowMode | string = 'chat') {
     if (!canLeaveWorkflowReview()) return;
+    ++newThreadSelectionEpoch;
     const normalizedMode = normalizeWorkflowMode(mode);
     chatSession.startNewConversation(normalizedMode);
     resetWorkflowArtifacts();
@@ -999,6 +1054,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     // Reset before the first await: the composer is already visible and users
     // must be able to type a draft while the Agent Registry is still loading.
     chatSession.resetChatSession('chat', getDefaultConversationName);
+    const selectionEpoch = ++newThreadSelectionEpoch;
     const selectionAtStart = explicitRuntimeSelection;
     try {
       await localChoices.refresh();
@@ -1009,6 +1065,8 @@ export function useAIChatView(options: UseAIChatViewOptions) {
         !chatSession.chatConversationId.value &&
         chatSession.runtimeChoice.value.runtimeKind === 'builtin' &&
         savedDefault.runtimeKind === 'local_agent' &&
+        selectionEpoch === newThreadSelectionEpoch &&
+        !chatSession.chatTimeline.value.length &&
         localChoices.connections.value.some(
           (entry) => entry.id === savedDefault.connectionId && entry.enabled,
         )
