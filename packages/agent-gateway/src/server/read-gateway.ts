@@ -193,8 +193,10 @@ export function createReadGateway(options: Options) {
                 scopeDecision = 'denied';
                 return reject(403, 'INSUFFICIENT_SCOPE');
               }
-              if (isWriteToolName(name) && (!options.writes || principal.credentialType !== 'pat'))
+              if (isWriteToolName(name) && (!options.writes || principal.credentialType !== 'pat')) {
+                scopeDecision = 'denied';
                 return reject(404, 'DISABLED');
+              }
               if (!isWriteToolName(name) && name.startsWith('task_') && !options.tasks) {
                 scopeDecision = 'denied';
                 return reject(404, 'DISABLED');

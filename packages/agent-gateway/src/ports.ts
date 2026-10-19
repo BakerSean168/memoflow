@@ -5,9 +5,16 @@ import type {
   TaskOccurrenceReadQuery,
   TaskReadPage,
   TaskOccurrenceReadPage,
+  TaskAgentReceipt,
 } from '@memoflow/contracts/task';
+import type { GatewayWriteToolName } from './write-tool-descriptors';
 import type { GatewayFailureCode } from '@memoflow/contracts/agent-gateway';
-import type { GoalClientDTO, GoalPage, GoalPageQuery } from '@memoflow/contracts/goal';
+import type {
+  GoalAgentReceipt,
+  GoalClientDTO,
+  GoalPage,
+  GoalPageQuery,
+} from '@memoflow/contracts/goal';
 import type { ExecutionContext, RequestContext } from '@memoflow/contracts/shared';
 
 /** Read cancellation stays separate from the canonical ExecutionContext. */
@@ -58,7 +65,7 @@ export interface GatewayAuditEvent {
   readonly credentialId?: string;
   readonly identityId?: string;
   readonly tool:
-    | import('./write-tool-descriptors').GatewayWriteToolName
+    | GatewayWriteToolName
     | 'goal_get'
     | 'goal_search'
     | 'task_plan_get'
@@ -116,8 +123,8 @@ type WriteCall<T> = (
   context: ExecutionContext,
   authority: GatewayWriteAuthority,
 ) => Promise<T>;
-type GoalWriteReceipt = import('@memoflow/contracts/goal').GoalAgentReceipt & { replayed: boolean };
-type TaskWriteReceipt = import('@memoflow/contracts/task').TaskAgentReceipt & { replayed: boolean };
+type GoalWriteReceipt = GoalAgentReceipt & { replayed: boolean };
+type TaskWriteReceipt = TaskAgentReceipt & { replayed: boolean };
 /** Only owner application operations cross this boundary; never repositories. */
 export interface GatewayWritePort {
   goalCreate: WriteCall<GoalWriteReceipt>;
