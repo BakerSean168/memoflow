@@ -130,6 +130,8 @@ export async function observeLane({ lane, input, reportsDir, receipt = null, out
       generator: 'ci-cd-platform-v2/observe-lane@1',
       runner: process.env.RUNNER_OS ?? process.platform,
       runId: process.env.GITHUB_RUN_ID ?? null,
+      job: process.env.GITHUB_JOB ?? null,
+      ...(process.env.UNIT_SHARD_ID ? { unitShardId: process.env.UNIT_SHARD_ID } : {}),
     },
   };
   summary.digest = digest(summary);

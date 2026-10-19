@@ -344,6 +344,11 @@ export function validateLaneSummary(summary) {
   assert(summary.timing && typeof summary.timing === 'object', 'timing is required');
   assert(Array.isArray(summary.failures), 'failures must be an array');
   assert(summary.provenance && typeof summary.provenance === 'object', 'provenance is required');
+  if (summary.provenance.unitShardId !== undefined) {
+    assert(/^unit-[1-3]$/u.test(summary.provenance.unitShardId), 'invalid unit shard identity');
+    assertString(summary.provenance.job, 'provenance.job');
+    assert(summary.provenance.job === summary.provenance.unitShardId, 'unit shard/job mismatch');
+  }
   assertDigest(summary.laneInputDigest, 'laneInputDigest');
   assertSelfDigest(summary, 'lane summary');
   return summary;

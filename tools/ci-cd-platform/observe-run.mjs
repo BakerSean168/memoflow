@@ -73,22 +73,30 @@ export async function observeRun({
   const missing = enabled.filter((lane) => !byLane.has(lane));
   // Validate summaries must account for every selected Unit command, not merely
   // another validate child (lint/build/typecheck) that happened to publish evidence.
-  const missingUnitShards = manifest.unitShards
-    .filter(
-      ({ id, tasks }) =>
-        unitJobEnabled(manifest, id) &&
-        tasks.some(
-          (_, index) =>
-            !summaries.some(
-              ({ value }) =>
-                value.lane === 'validate' &&
-                value.evidence?.reports?.some(
-                  (file) => path.basename(file) === `${id}-${index}.json`,
-                ),
-            ),
-        ),
-    )
-    .map(({ id }) => id);
+  const missingUnitShards = [];
+  for (const { id, tasks } of manifest.unitShards) {
+    if (!unitJobEnabled(manifest, id)) continue;
+    const owned = summaries.filter(
+      ({ value }) =>
+        value.lane === 'validate' &&
+        value.provenance?.unitShardId === id &&
+        value.provenance?.job === id,
+    );
+    if (owned.length !== 1) {
+      missingUnitShards.push(id);
+      continue;
+    }
+    const reportNames = owned[0].value.evidence?.reports ?? [];
+    const expected = tasks.map((_, index) => `${id}-${index}.json`);
+    const actual = reportNames.map((file) => path.basename(file));
+    if (
+      actual.length !== expected.length ||
+      new Set(actual).size !== actual.length ||
+      actual.some((name) => !expected.includes(name))
+    ) {
+      throw new Error(`Unit shard evidence is not exact for ${id}`);
+    }
+  }
   const failures = summaries.filter(({ value }) => value.status !== 'success');
   const startedAtMs = startedAt ? Date.parse(startedAt) : Number.NaN;
   if (startedAt && !Number.isFinite(startedAtMs)) {

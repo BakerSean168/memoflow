@@ -32,6 +32,7 @@ for (const [index, task] of manifest.unitShards.find((shard) => shard.id === id)
       env: {
         ...process.env,
         TEST_REPORT_NAME: `${id}-${index}`,
+        UNIT_SHARD_ID: id,
         TEST_RETRY_INFRASTRUCTURE: 'false',
       },
       timeout: 30 * 60 * 1000,

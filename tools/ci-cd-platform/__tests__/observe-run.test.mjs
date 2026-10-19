@@ -1,6 +1,6 @@
 import { planUnitShards } from '../lib/unit-shards.mjs';
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -77,7 +77,6 @@ test('run observation detects missing enabled lanes and preserves provenance', a
 });
 
 import { buildDeliveryManifest } from '../generate-delivery-manifest.mjs';
-import { rm } from 'node:fs/promises';
 
 for (const id of ['unit-1', 'unit-2', 'unit-3']) {
   for (const status of ['success', 'missing', 'failure', 'cancelled', 'skipped']) {
@@ -124,7 +123,7 @@ for (const id of ['unit-1', 'unit-2', 'unit-3']) {
             evidence: {
               reports: shard.tasks.map((_, index) => `/reports/${shard.id}-${index}.json`),
             },
-            provenance: { generator: 'test' },
+            provenance: { generator: 'test', unitShardId: shard.id, job: shard.id },
           };
           value.digest = digest(value);
           await writeFile(path.join(evidenceDir, `${shard.id}.json`), JSON.stringify(value));
@@ -147,3 +146,47 @@ for (const id of ['unit-1', 'unit-2', 'unit-3']) {
     });
   }
 }
+
+test('run observation rejects duplicate or cross-shard Unit evidence', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'memoflow-unit-provenance-'));
+  try {
+    const manifest = await buildDeliveryManifest({
+      base: 'base',
+      head: 'head',
+      files: ['nx.json'],
+      scope: {
+        version: 1,
+        unit: ['app-vue', 'desktop', 'web'],
+        coverage: [], smoke: [], integration: [], boundary: [], perf: [], webFlow: false,
+      },
+    });
+    manifest.lanes = Object.fromEntries(
+      Object.keys(manifest.lanes).map((lane) => [lane, lane === 'validate']),
+    );
+    delete manifest.digest;
+    manifest.digest = digest(manifest);
+    const evidenceDir = path.join(root, 'evidence');
+    await mkdir(evidenceDir);
+    for (const shard of manifest.unitShards) {
+      const value = {
+        kind: 'lane-summary-v1', version: 1, lane: 'validate', commit: manifest.commit,
+        manifestDigest: manifest.digest, laneInputDigest: 'a'.repeat(64), status: 'success',
+        timing: { setupMs: 1, executionMs: 2 }, failures: [],
+        evidence: { reports: shard.tasks.map((_, index) => `/reports/${shard.id}-${index}.json`) },
+        provenance: { generator: 'test', unitShardId: shard.id, job: shard.id },
+      };
+      value.digest = digest(value);
+      await writeFile(path.join(evidenceDir, `${shard.id}.json`), JSON.stringify(value));
+    }
+    const duplicate = JSON.parse(await readFile(path.join(evidenceDir, 'unit-1.json'), 'utf8'));
+    duplicate.provenance.job = 'unit-2';
+    duplicate.digest = digest(duplicate);
+    await writeFile(path.join(evidenceDir, 'unit-1-cross-job.json'), JSON.stringify(duplicate));
+    await assert.rejects(
+      observeRun({ manifest, evidenceDir, output: path.join(root, 'summary.json') }),
+      /unit shard\/job mismatch|Unit shard evidence/u,
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});

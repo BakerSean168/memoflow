@@ -139,6 +139,7 @@ jobs:
     needs: scope-detector
     if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.unit_1 == 'true'
     runs-on: ubuntu-latest
+    env: { UNIT_SHARD_ID: unit-1 }
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with: { fetch-depth: 0 }
@@ -160,6 +161,7 @@ jobs:
     needs: scope-detector
     if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.unit_2 == 'true'
     runs-on: ubuntu-latest
+    env: { UNIT_SHARD_ID: unit-2 }
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with: { fetch-depth: 0 }
@@ -181,6 +183,7 @@ jobs:
     needs: scope-detector
     if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.unit_3 == 'true'
     runs-on: ubuntu-latest
+    env: { UNIT_SHARD_ID: unit-3 }
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with: { fetch-depth: 0 }

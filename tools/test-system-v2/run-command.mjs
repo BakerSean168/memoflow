@@ -111,6 +111,11 @@ const report = {
   attempts,
   result: final.exitCode === 0 ? 'success' : 'failure',
   testSummary,
+  provenance: {
+    runner: process.env.RUNNER_OS ?? process.platform,
+    job: process.env.GITHUB_JOB ?? null,
+    ...(process.env.UNIT_SHARD_ID ? { unitShardId: process.env.UNIT_SHARD_ID } : {}),
+  },
 };
 await mkdir(reportsDir, { recursive: true });
 await writeFile(
@@ -151,6 +156,8 @@ if (laneContext) {
       report: path.join(reportsDir, `${reportName}.json`),
       runner: process.env.RUNNER_OS ?? process.platform,
       laneInput: laneInputPath,
+      job: process.env.GITHUB_JOB ?? null,
+      ...(process.env.UNIT_SHARD_ID ? { unitShardId: process.env.UNIT_SHARD_ID } : {}),
     },
   };
   laneResult.digest = digest(laneResult);
