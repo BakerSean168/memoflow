@@ -13361,7 +13361,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 248
+      "fileCount": 249
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -14124,7 +14124,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1178,
+    "unit": 1179,
     "integration": 50,
     "smoke": 3,
     "boundary-ipc": 8,
