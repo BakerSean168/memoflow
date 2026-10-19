@@ -1,4 +1,6 @@
 import {
+  GatewayRoutineCreateSchema,
+  GatewayRoutineReceiptSchema,
   GatewayGoalCreateSchema,
   GatewayGoalUpdateSchema,
   GatewayKeyResultCreateSchema,
@@ -19,6 +21,14 @@ function definition<I, O>(description: string, inputSchema: I, outputSchema: O) 
   return { description, inputSchema, outputSchema, annotations };
 }
 export const writeToolDescriptors = {
+  routine_create: {
+    requiredScope: 'routines:write',
+    definition: definition(
+      'Create one hosted WallClock reminder without profile memberships. Resolve the date/time in the user’s Product Time zone; retry with the same idempotencyKey.',
+      GatewayRoutineCreateSchema,
+      GatewayRoutineReceiptSchema,
+    ),
+  },
   goal_create: {
     requiredScope: 'goals:write',
     definition: definition(

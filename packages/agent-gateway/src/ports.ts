@@ -7,6 +7,7 @@ import type {
   TaskOccurrenceReadPage,
   TaskAgentPersistedReceipt,
 } from '@memoflow/contracts/task';
+import type { RoutineAgentPersistedReceipt } from '@memoflow/contracts/routine';
 import type { GatewayWriteToolName } from './write-tool-descriptors';
 import type { GatewayFailureCode } from '@memoflow/contracts/agent-gateway';
 import type {
@@ -127,6 +128,7 @@ type GoalWriteReceipt = GoalAgentPersistedReceipt & { replayed: boolean };
 type TaskWriteReceipt = TaskAgentPersistedReceipt & { replayed: boolean };
 /** Only owner application operations cross this boundary; never repositories. */
 export interface GatewayWritePort {
+  routineCreate?: WriteCall<RoutineAgentPersistedReceipt & { replayed: boolean }>;
   goalCreate: WriteCall<GoalWriteReceipt>;
   goalUpdate: WriteCall<GoalWriteReceipt>;
   keyResultCreate: WriteCall<GoalWriteReceipt>;

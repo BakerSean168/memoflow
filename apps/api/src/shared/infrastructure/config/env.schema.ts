@@ -50,6 +50,10 @@ export const envSchema = z
       .enum(['0', '1'])
       .default('0')
       .transform((value) => value === '1'),
+    EAG_ROUTINE_WRITE_ENABLED: z
+      .enum(['0', '1'])
+      .default('0')
+      .transform((value) => value === '1'),
     EAG_TASK_READ_ENABLED: z
       .enum(['0', '1'])
       .default('1')

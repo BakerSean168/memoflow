@@ -151,3 +151,26 @@ export function createScopedPatService(options: Options) {
     },
   };
 }
+
+/** Revalidate a verified PAT using the mutation transaction's own connection. */
+export async function isScopedPatAuthorityCurrent(
+  tx: Prisma.TransactionClient,
+  principal: { identityId: string; credentialId: string; scopes: readonly string[] },
+  accountIsActive: (identityId: string) => Promise<boolean>,
+): Promise<boolean> {
+  const pat = await tx.externalAgentPat.findUnique({ where: { id: principal.credentialId } });
+  if (
+    !pat ||
+    pat.userId !== principal.identityId ||
+    pat.revokedAt !== null ||
+    pat.expiresAt.getTime() <= Date.now() ||
+    !pat.scopes.includes('routines:write') ||
+    principal.scopes.some((scope) => !pat.scopes.includes(scope))
+  )
+    return false;
+  const user = await tx.cloudAuthUser.findUnique({
+    where: { id: principal.identityId },
+    select: { disabledAt: true },
+  });
+  return Boolean(user && user.disabledAt === null && (await accountIsActive(principal.identityId)));
+}

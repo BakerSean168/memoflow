@@ -65,3 +65,5 @@ export {
   type RoutineLocalRegistrationsSnapshot,
 } from './routine-vnext/routine-local-registrations.powersync';
 export { RoutineAccountClosedConsumer } from './consumers/routine-account-closed.consumer';
+
+export { createRoutinePrismaAgentMutations } from './routine-agent-mutations';
