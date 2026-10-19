@@ -212,7 +212,7 @@ jobs:
             VERSION=${{ needs.resolve.outputs.candidate_tag }}
             USE_PREBUILT_ARTIFACT=1
           cache-from: type=gha,scope=${{ matrix.cache_scope }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.cache_scope }}
+          cache-to: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && github.event_name != 'pull_request_target' && format('type=gha,mode=min,scope={0}', matrix.cache_scope) || '' }}
           provenance: false
           sbom: false
       - id: identity
