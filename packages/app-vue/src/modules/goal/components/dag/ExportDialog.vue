@@ -1,6 +1,6 @@
 <template>
   <Dialog v-model:open="isOpen">
-    <DialogContent class="sm:max-w-[600px]">
+    <DialogContent class="sm:max-w-[600px]" :aria-describedby="undefined">
       <DialogHeader>
         <DialogTitle class="flex items-center gap-2 font-semibold">
           <Download class="h-5 w-5" />

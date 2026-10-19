@@ -30,6 +30,8 @@ export default {
   unavailable: '不可用',
   untitled: '无标题',
   commandPalettePlaceholder: '输入命令...',
+  commandPaletteTitle: '命令面板',
+  commandPaletteDescription: '搜索并执行命令。使用方向键浏览，按 Enter 选择。',
   noMatchingCommands: '没有匹配的命令',
   unknownError: '未知错误',
   pageError: '页面出错了',

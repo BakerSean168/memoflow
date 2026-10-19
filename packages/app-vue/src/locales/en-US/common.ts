@@ -30,6 +30,9 @@ export default {
   unavailable: 'Unavailable',
   untitled: 'Untitled',
   commandPalettePlaceholder: 'Type a command...',
+  commandPaletteTitle: 'Command palette',
+  commandPaletteDescription:
+    'Search for a command to run. Use the arrow keys to navigate and Enter to select.',
   noMatchingCommands: 'No matching commands',
   unknownError: 'Unknown error',
   pageError: 'Something went wrong',

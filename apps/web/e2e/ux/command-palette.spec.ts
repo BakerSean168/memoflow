@@ -22,6 +22,8 @@ test.describe('Global command palette', () => {
 
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+    await expect(dialog).toHaveAccessibleName(/^(命令面板|Command palette)$/);
+    await expect(dialog).toHaveAccessibleDescription(/搜索并执行命令|Search for a command to run/);
     await expect(dialog.locator('input').first()).toBeFocused();
 
     await page.keyboard.press('Escape');
