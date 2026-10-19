@@ -76,14 +76,9 @@ export function useAIModelSelection(options: UseAIModelSelectionOptions) {
             const catalog = options.modelCatalogs?.value[binding.connectionId];
             const inventory = catalog ?? [];
             const preferred = inventory.find((model) => model.id === binding.modelId);
-            const models = [
-              ...(preferred
-                ? [preferred]
-                : catalog === undefined
-                  ? [{ id: binding.modelId, name: binding.modelId }]
-                  : []),
-              ...inventory.filter((model) => model.id !== binding.modelId),
-            ];
+            const models = preferred
+              ? [preferred, ...inventory.filter((model) => model.id !== binding.modelId)]
+              : inventory;
             const providerName = `${instance.name} · ${provider.name || t('common.unknown')}`;
             return [
               {
@@ -197,6 +192,38 @@ export function useAIModelSelection(options: UseAIModelSelectionOptions) {
   }
 
   function syncSelectedModel(preferredModelKey?: string) {
+    // Restore/fallback only after the enabled Mastra directories have settled.
+    // A configured binding is not discovered inventory and must not overwrite
+    // an explicit model preference while another connection is still loading.
+    const snapshot = options.agentRegistrySnapshot?.value;
+    const catalogs = options.modelCatalogs?.value;
+    if (
+      catalogs &&
+      snapshot?.bindings.some(
+        (binding) =>
+          snapshot.instances.some(
+            (instance) =>
+              instance.instanceId === binding.instanceId &&
+              instance.enabled &&
+              instance.driver === 'mastra',
+          ) && catalogs[binding.connectionId] === undefined,
+      )
+    )
+      return;
+    // Disabling hides eligibility, not the user's explicit preference. Keep the
+    // pending tuple so re-enabling can restore it without choosing another Agent.
+    const selectedInstance = options.agentRegistrySnapshot?.value?.instances.find(
+      (instance) => instance.instanceId === selectedAgentId.value,
+    );
+    if (selectedInstance && !selectedInstance.enabled) return;
+    // Directory eligibility can disappear during browsing, but a refresh is not
+    // a new selection command. Preserve the current tuple; selectedModel/canSend
+    // derive whether that tuple is currently executable from the live catalog.
+    if (
+      selectedModelKey.value &&
+      (!preferredModelKey || preferredModelKey === selectedModelKey.value)
+    )
+      return;
     if (!allModelOptions.value.length) {
       selectedModelKey.value = '';
       return;

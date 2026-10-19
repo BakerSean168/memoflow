@@ -17,10 +17,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@memoflow/ui-vue-shadcn
 import type {
   AgentDriverKind,
   AIChatPermissionMode,
-  LocalAgentModel,
   LocalAgentModelOptions,
 } from '@memoflow/contracts/ai';
-import type { ChatModelOption } from '../composables/types';
+import type { ComposerModel, ModelCatalog } from '../composables/useAIModelCatalog';
 import { useServerStateIdentityScope } from '../../../platform/server-state';
 import AgentDriverIcon from './AgentDriverIcon.vue';
 
@@ -33,18 +32,12 @@ interface ComposerAgentOption {
   accentColor?: string;
   switchBlockedReason?: 'incompatible' | 'busy' | 'loading';
 }
-type ComposerModel = ChatModelOption & { agentKey: string } & Partial<
-    Pick<
-      LocalAgentModel,
-      'reasoningEfforts' | 'defaultReasoningEffort' | 'serviceTiers' | 'defaultServiceTier'
-    >
-  >;
-
 const FAVORITES_KEY = 'ai:composer:model-favorites:v1';
 const props = defineProps<{
   agents: ComposerAgentOption[];
   selectedAgentId: string;
   models: ComposerModel[];
+  catalog?: ModelCatalog;
   selectedModelKey: string;
   permissionMode: AIChatPermissionMode;
   nativeModelOptions?: LocalAgentModelOptions;
@@ -54,7 +47,7 @@ const props = defineProps<{
   supportedPermissionModes?: AIChatPermissionMode[];
 }>();
 const emit = defineEmits<{
-  selectAgent: [id: string];
+  refresh: [];
   selectModel: [modelKey: string, agentId: string];
   permission: [mode: AIChatPermissionMode];
   modelOption: [kind: keyof LocalAgentModelOptions, value?: string];
@@ -83,21 +76,44 @@ const selectedModel = computed(() =>
 );
 defineExpose({
   openModelPicker() {
-    if (!props.disabled) openMenu.value = 'models';
+    if (!props.disabled) setMenu('models', true);
   },
 });
-const providerUnavailable = computed(
-  () =>
-    !props.loading &&
-    !props.models.some((model) =>
-      props.agents.some((agent) => agent.id === model.agentKey && agent.enabled),
-    ) &&
-    // An implicit Desktop Agent has no catalog until explicitly selected.
-    // Do not hide the only route to materializing/probing that Agent.
-    !props.agents.some(
-      (agent) => agent.driver !== 'mastra' && agent.enabled && !agent.switchBlockedReason,
-    ),
+const enabledAgents = computed(() => props.agents.filter((agent) => agent.enabled));
+const providerUnavailable = computed(() => {
+  if (props.loading) return false;
+  if (!enabledAgents.value.length) return true;
+  const catalog = props.catalog;
+  if (!catalog) return false;
+  const enabledEntries = Object.values(catalog).filter((entry) =>
+    enabledAgents.value.some((agent) => agent.id === entry.agentKey),
+  );
+  if (enabledEntries.length !== enabledAgents.value.length) return false;
+  if (enabledEntries.some((entry) => entry.status === 'ready' && entry.models.length)) return false;
+  if (enabledEntries.some((entry) => ['idle', 'loading'].includes(entry.status))) return false;
+  if (enabledAgents.value.some((agent) => agent.driver !== 'mastra')) return false;
+  return enabledEntries.every((entry) =>
+    ['ready', 'error', 'unavailable'].includes(entry.status),
+  );
+});
+const browsedCatalog = computed(() =>
+  Object.values(props.catalog ?? {}).find((entry) => entry.agentKey === activeSection.value),
 );
+const browseLoading = computed(() =>
+  browsedCatalog.value
+    ? ['idle', 'loading'].includes(browsedCatalog.value.status)
+    : Boolean(props.loading),
+);
+const emptyMessage = computed(() => {
+  if (search.value) return t('aiAssistant.composer.noSearchResults');
+  if (browseLoading.value) return t('aiAssistant.composer.loadingModels');
+  if (activeSection.value === 'favorites') return t('aiAssistant.composer.noFavorites');
+  if (browsedAgent.value?.switchBlockedReason) return blockedMessage(browsedAgent.value);
+  const reason = browsedCatalog.value?.reason;
+  return reason
+    ? t('aiAssistant.composer.catalogReason.' + reason)
+    : t('aiAssistant.composer.noAvailableModels');
+});
 const hasReasoningChoices = computed(
   () => (selectedModel.value?.reasoningEfforts?.length ?? 0) > 1,
 );
@@ -143,14 +159,28 @@ const instanceName = (agent: ComposerAgentOption) => {
   const duplicates = props.agents.filter((item) => item.name === agent.name).length;
   return duplicates > 1 ? agent.name + ' · ' + agent.id.replace(/^(agent|local):/, '') : agent.name;
 };
-const modelIdentity = (model: ComposerModel) => model.agentKey + '::' + model.key;
-const isFavorite = (model: ComposerModel) => favorites.value.includes(modelIdentity(model));
+const modelIdentity = (model: ComposerModel) => {
+  // An implicit native instance keeps its favorite when selection materializes
+  // a Connection. Read the previous Connection-based tuple as well.
+  const agent = props.agents.find((entry) => entry.id === model.agentKey);
+  const owner =
+    model.agentInstanceId && agent?.driver !== 'mastra'
+      ? 'local:' + model.agentInstanceId
+      : model.agentKey;
+  return owner + '::' + model.key;
+};
+const favoriteIdentities = (model: ComposerModel) => [
+  modelIdentity(model),
+  model.agentKey + '::' + model.key,
+];
+const isFavorite = (model: ComposerModel) =>
+  favoriteIdentities(model).some((key) => favorites.value.includes(key));
 
 const visibleModels = computed(() => {
   const term = search.value.trim().toLocaleLowerCase();
   return props.models.filter((model) => {
     const agent = props.agents.find((entry) => entry.id === model.agentKey);
-    if (!agent) return false;
+    if (!agent?.enabled) return false;
     if (term) {
       return [model.modelName, model.modelId, model.providerName, agent.name, agent.id].some(
         (value) => value.toLocaleLowerCase().includes(term),
@@ -165,6 +195,13 @@ const browsedAgent = computed(() => props.agents.find((entry) => entry.id === ac
 const canChooseModel = (model: ComposerModel) =>
   !props.disabled &&
   !props.loading &&
+  (!props.catalog ||
+    Object.values(props.catalog).some(
+      (entry) =>
+        entry.agentKey === model.agentKey &&
+        entry.status === 'ready' &&
+        entry.models.some((item) => item.key === model.key),
+    )) &&
   Boolean(
     props.agents.find(
       (agent) => agent.id === model.agentKey && agent.enabled && !agent.switchBlockedReason,
@@ -186,18 +223,16 @@ function setMenu(menu: 'models' | 'traits' | 'permissions', opened: boolean) {
   openMenu.value = opened ? menu : null;
   if (opened && menu === 'models') {
     search.value = '';
-    activeSection.value = props.selectedAgentId || props.agents[0]?.id || 'favorites';
+    activeSection.value = enabledAgents.value.some((agent) => agent.id === props.selectedAgentId)
+      ? props.selectedAgentId
+      : enabledAgents.value[0]?.id || 'favorites';
+    emit('refresh');
     void nextTick(() => searchInput.value?.focus());
   }
 }
 function selectModel(model: ComposerModel) {
   if (!canChooseModel(model)) return;
   emit('selectModel', model.key, model.agentKey);
-  openMenu.value = null;
-}
-function selectAgentWithoutModel(agent: ComposerAgentOption) {
-  if (!agent.enabled || agent.switchBlockedReason || props.disabled || props.loading) return;
-  emit('selectAgent', agent.id);
   openMenu.value = null;
 }
 function storeFavorites() {
@@ -212,8 +247,8 @@ function storeFavorites() {
 }
 function toggleFavorite(model: ComposerModel) {
   const key = modelIdentity(model);
-  favorites.value = favorites.value.includes(key)
-    ? favorites.value.filter((item) => item !== key)
+  favorites.value = isFavorite(model)
+    ? favorites.value.filter((item) => !favoriteIdentities(model).includes(item))
     : [...favorites.value, key].slice(-100);
   storeFavorites();
 }
@@ -233,6 +268,13 @@ function keyboardNavigation(event: KeyboardEvent) {
   event.preventDefault();
   rows[next]?.focus();
 }
+watch(enabledAgents, (agents) => {
+  if (
+    activeSection.value !== 'favorites' &&
+    !agents.some((agent) => agent.id === activeSection.value)
+  )
+    activeSection.value = 'favorites';
+});
 watch(
   () =>
     [
@@ -294,7 +336,13 @@ watch(
           :title="
             blockedMessage(currentAgent) ||
             (selectedModel
-              ? selectedModel.modelName + ' · ' + selectedModel.providerName
+              ? [
+                  selectedModel.modelName,
+                  currentAgent && instanceName(currentAgent),
+                  selectedModel.providerName,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')
               : t('aiAssistant.composer.chooseModel'))
           "
           :aria-label="t('aiAssistant.composer.model')"
@@ -335,10 +383,7 @@ watch(
                 search = '';
               "
             >
-              <Star
-                class="size-4"
-                :class="activeSection === 'favorites' && !search ? 'fill-current' : ''"
-              />
+              <Star class="size-4 fill-current" />
               <span
                 v-if="activeSection === 'favorites' && !search"
                 aria-hidden="true"
@@ -348,7 +393,7 @@ watch(
             </button>
             <div class="mx-auto my-0.5 h-px w-6 shrink-0 bg-border/70" />
             <button
-              v-for="agent in agents"
+              v-for="agent in enabledAgents"
               :key="agent.id"
               type="button"
               class="relative grid size-9 shrink-0 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-35 disabled:hover:bg-transparent"
@@ -427,6 +472,9 @@ watch(
                     type="button"
                     class="flex min-w-0 flex-1 items-start gap-2 rounded-lg px-2 py-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-45"
                     :disabled="!canChooseModel(model)"
+                    :aria-pressed="
+                      selectedAgentId === model.agentKey && selectedModelKey === model.key
+                    "
                     data-model-picker-row
                     data-testid="ai-model-picker-option"
                     :data-model-key="model.key"
@@ -490,17 +538,9 @@ watch(
                 role="status"
               >
                 <p class="text-muted-foreground">
-                  {{
-                    search
-                      ? t('aiAssistant.composer.noSearchResults')
-                      : loading
-                        ? t('aiAssistant.composer.loadingModels')
-                        : activeSection === 'favorites'
-                          ? t('aiAssistant.composer.noFavorites')
-                          : t('aiAssistant.composer.noAvailableModels')
-                  }}
+                  {{ emptyMessage }}
                 </p>
-                <template v-if="browsedAgent && !search && !loading">
+                <template v-if="browsedAgent && !search && !browseLoading">
                   <button
                     type="button"
                     class="mt-1.5 block text-left font-semibold text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
@@ -513,13 +553,12 @@ watch(
                     {{ t('aiAssistant.composer.openAgentSetup') }}
                   </button>
                   <button
-                    v-if="browsedAgent.enabled && browsedAgent.id !== selectedAgentId"
                     type="button"
                     class="mt-2 block text-left text-muted-foreground hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                    data-testid="ai-model-picker-select-agent"
-                    @click="selectAgentWithoutModel(browsedAgent)"
+                    data-testid="ai-model-picker-recheck"
+                    @click="emit('refresh')"
                   >
-                    {{ t('aiAssistant.composer.selectAgent') }}
+                    {{ t('aiAssistant.composer.recheckModels') }}
                   </button>
                 </template>
               </div>

@@ -141,7 +141,7 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     expect(wrapper.emitted('selectModel')).toEqual([[models[0]!.key, 'agent:mastra']]);
   });
 
-  it('replaces all dependent controls with provider settings only after availability settles', async () => {
+  it('keeps enabled empty instances browsable and offers settings when all instances are disabled', async () => {
     const wrapper = setup({
       models: [],
       loading: true,
@@ -149,15 +149,15 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     });
     expect(wrapper.find('[data-testid="ai-composer-provider-unavailable"]').exists()).toBe(false);
     await wrapper.setProps({ loading: false });
-    expect(wrapper.find('[data-testid="ai-chat-model-selector"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="ai-chat-model-selector"]').exists()).toBe(true);
     expect(wrapper.find('[data-testid="ai-chat-permission-selector"]').exists()).toBe(false);
-    await wrapper.get('[data-testid="ai-composer-provider-unavailable"]').trigger('click');
-    expect(wrapper.emitted('settings')).toEqual([[]]);
     await wrapper.setProps({
       models,
       agents: agents.map((agent) => ({ ...agent, enabled: false })),
     });
     expect(wrapper.find('[data-testid="ai-chat-model-selector"]').exists()).toBe(false);
+    await wrapper.get('[data-testid="ai-composer-provider-unavailable"]').trigger('click');
+    expect(wrapper.emitted('settings')).toEqual([[]]);
     wrapper.unmount();
   });
 
@@ -172,8 +172,28 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     expect(wrapper.get('[data-testid="ai-chat-model-selector"]').exists()).toBe(true);
     await openModels(wrapper);
     expect(wrapper.get('[data-testid="ai-model-picker-empty-settings"]').exists()).toBe(true);
-    await wrapper.get('[data-testid="ai-model-picker-select-agent"]').trigger('click');
-    expect(wrapper.emitted('selectAgent')).toEqual([['local:codex']]);
+    expect(wrapper.find('[data-testid="ai-model-picker-select-agent"]').exists()).toBe(false);
+    expect(wrapper.emitted('selectAgent')).toBeUndefined();
+    wrapper.unmount();
+  });
+
+  it('shows provider settings when enabled Mastra catalogs settle empty', () => {
+    const wrapper = setup({
+      agents: [agents[0]],
+      models: [],
+      selectedAgentId: 'agent:mastra',
+      selectedModelKey: '',
+      catalog: {
+        mastra: {
+          instanceId: 'mastra',
+          agentKey: 'agent:mastra',
+          status: 'ready',
+          models: [],
+        },
+      },
+    });
+    expect(wrapper.find('[data-testid="ai-composer-provider-unavailable"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="ai-chat-model-selector"]').exists()).toBe(false);
     wrapper.unmount();
   });
 
@@ -229,6 +249,90 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     restored.unmount();
   });
 
+  it('always fills the Favorites navigation star and fills row stars only when favorited', async () => {
+    const wrapper = setup();
+    await openModels(wrapper);
+    const navigation = wrapper.get('[data-testid="ai-model-picker-favorites"]');
+    expect(navigation.get('svg').classes()).toContain('fill-current');
+    const row = wrapper.get('[data-testid="ai-model-picker-toggle-favorite"]');
+    expect(row.get('svg').classes()).not.toContain('fill-current');
+    await row.trigger('click');
+    expect(row.get('svg').classes()).toContain('fill-current');
+    await row.trigger('click');
+    expect(row.get('svg').classes()).not.toContain('fill-current');
+    await navigation.trigger('click');
+    expect(navigation.get('svg').classes()).toContain('fill-current');
+    wrapper.unmount();
+  });
+
+  it('hides disabled instances everywhere and restores their saved favorites on re-enable', async () => {
+    const wrapper = setup();
+    await openModels(wrapper);
+    await wrapper.get('[data-testid="ai-model-picker-toggle-favorite"]').trigger('click');
+    const saved = localStorage.getItem('ai:composer:model-favorites:v1:profile-a');
+    await wrapper.setProps({
+      agents: agents.map((a) => ({ ...a, enabled: a.id !== 'agent:mastra' })),
+    });
+    expect(wrapper.find('[data-testid="ai-model-picker-agent-agent:mastra"]').exists()).toBe(false);
+    await wrapper.get('[data-testid="ai-model-picker-favorites"]').trigger('click');
+    expect(wrapper.findAll('[data-testid="ai-model-picker-option"]')).toHaveLength(0);
+    await wrapper.get('[data-testid="ai-model-picker-search"]').setValue('Google');
+    expect(wrapper.findAll('[data-testid="ai-model-picker-option"]')).toHaveLength(0);
+    expect(localStorage.getItem('ai:composer:model-favorites:v1:profile-a')).toBe(saved);
+    await wrapper.setProps({ agents });
+    await wrapper.get('[data-testid="ai-model-picker-favorites"]').trigger('click');
+    expect(wrapper.findAll('[data-testid="ai-model-picker-option"]')).toHaveLength(1);
+    wrapper.unmount();
+  });
+
+  it('browses another discovered native catalog and emits exactly one complete model choice', async () => {
+    const native = {
+      key: 'native-model',
+      agentKey: 'local:codex',
+      providerId: 'codex',
+      providerName: 'Codex',
+      modelId: 'native-model',
+      modelName: 'Native Model',
+    };
+    const wrapper = setup({ models: [...models, native] });
+    await openModels(wrapper);
+    await wrapper.get('[data-testid="ai-model-picker-agent-local:codex"]').trigger('click');
+    expect(wrapper.emitted('selectModel')).toBeUndefined();
+    expect(wrapper.emitted('selectAgent')).toBeUndefined();
+    expect(wrapper.props('selectedAgentId')).toBe('agent:mastra');
+    expect(wrapper.get('[data-testid="ai-model-picker-option"]').text()).toContain('Native Model');
+    await wrapper.get('[data-testid="ai-model-picker-option"]').trigger('click');
+    expect(wrapper.emitted('selectModel')).toEqual([['native-model', 'local:codex']]);
+    wrapper.unmount();
+  });
+
+  it('retains a native favorite when its implicit instance materializes a connection', async () => {
+    const native = {
+      key: 'native-model',
+      agentKey: 'local:codex',
+      agentInstanceId: 'codex',
+      providerId: 'codex',
+      providerName: 'Codex',
+      modelId: 'native-model',
+      modelName: 'Native Model',
+    };
+    const wrapper = setup({ selectedAgentId: 'local:codex', models: [native] });
+    await openModels(wrapper);
+    await wrapper.get('[data-testid="ai-model-picker-toggle-favorite"]').trigger('click');
+    await wrapper.setProps({
+      agents: agents.map((agent) =>
+        agent.id === 'local:codex' ? { ...agent, id: 'local:uuid' } : agent,
+      ),
+      models: [{ ...native, agentKey: 'local:uuid' }],
+    });
+    await wrapper.get('[data-testid="ai-model-picker-favorites"]').trigger('click');
+    expect(wrapper.findAll('[data-testid="ai-model-picker-option"]')).toHaveLength(1);
+    expect(
+      wrapper.get('[data-testid="ai-model-picker-toggle-favorite"]').attributes('aria-pressed'),
+    ).toBe('true');
+    wrapper.unmount();
+  });
+
   it('isolates favorites between different identities on the same browser', async () => {
     const first = setup({}, 'profile-a');
     await openModels(first);
@@ -242,7 +346,7 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     second.unmount();
   });
 
-  it('can switch to an enabled native Agent that needs its own model probe', async () => {
+  it('browses an enabled native instance without selecting an empty Agent', async () => {
     const wrapper = setup();
     await openModels(wrapper);
     await wrapper.get('[data-testid="ai-model-picker-agent-local:codex"]').trigger('click');
@@ -252,8 +356,52 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     expect(wrapper.get('[data-testid="ai-model-picker-empty-settings"]').text()).toContain(
       '打开 Provider 设置',
     );
-    await wrapper.get('[data-testid="ai-model-picker-select-agent"]').trigger('click');
-    expect(wrapper.emitted('selectAgent')).toEqual([['local:codex']]);
+    expect(wrapper.find('[data-testid="ai-model-picker-select-agent"]').exists()).toBe(false);
+    expect(wrapper.emitted('selectAgent')).toBeUndefined();
+    wrapper.unmount();
+  });
+
+  it.each([
+    ['loading', undefined, '正在获取模型'],
+    ['error', 'discovery_failed', '模型目录加载失败'],
+    ['unavailable', 'not_installed', '尚未安装'],
+    ['unavailable', 'login_required', '登录此 Agent'],
+    ['unavailable', 'unavailable', '当前环境无法发现'],
+    ['ready', undefined, '暂无可用模型'],
+  ] as const)(
+    'renders an instance catalog in %s / %s state accurately',
+    async (status, reason, message) => {
+      const wrapper = setup({
+        catalog: {
+          codex: { instanceId: 'codex', agentKey: 'local:codex', status, reason, models: [] },
+        },
+      });
+      await openModels(wrapper);
+      await wrapper.get('[data-testid="ai-model-picker-agent-local:codex"]').trigger('click');
+      expect(wrapper.get('[data-testid="ai-model-picker-empty"]').text()).toContain(message);
+      expect(wrapper.emitted('selectModel')).toBeUndefined();
+      expect(wrapper.find('[data-testid="ai-model-picker-recheck"]').exists()).toBe(
+        status !== 'loading',
+      );
+      wrapper.unmount();
+    },
+  );
+
+  it('navigates only enabled instance models by keyboard after filtering search', async () => {
+    const wrapper = setup({
+      agents: agents.map((agent) => ({ ...agent, enabled: agent.id !== 'agent:work' })),
+    });
+    document.body.appendChild(wrapper.element);
+    await openModels(wrapper);
+    const search = wrapper.get('[data-testid="ai-model-picker-search"]');
+    await search.setValue('Model Alpha');
+    (search.element as HTMLInputElement).focus();
+    await search.trigger('keydown', { key: 'ArrowDown' });
+    const row = wrapper.get('[data-testid="ai-model-picker-option"]');
+    expect(document.activeElement).toBe(row.element);
+    expect(row.attributes('data-model-key')).toBe(models[0]!.key);
+    await row.trigger('click');
+    expect(wrapper.emitted('selectModel')).toEqual([[models[0]!.key, 'agent:mastra']]);
     wrapper.unmount();
   });
 

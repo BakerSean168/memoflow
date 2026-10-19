@@ -9,12 +9,8 @@ test('provider settings load and built-in reset retains identity', async ({ page
   await page.goto('/settings?tab=ai');
   const response = await page.request.get('/api/v1/ai/agent-instances');
   const body = await response.json();
-  console.log(
-    'Registry response',
-    response.status(),
-    body.ok,
-    body.error ?? Object.keys(body.data ?? {}),
-  );
+  expect(response.status()).toBe(200);
+  expect(body.ok).toBe(true);
   await expect(page.getByTestId('ai-provider-list')).toBeVisible();
   await expect(page.getByTestId('ai-agent-delete')).toHaveCount(0);
   await page.getByTestId('ai-provider-toggle-mastra').click();

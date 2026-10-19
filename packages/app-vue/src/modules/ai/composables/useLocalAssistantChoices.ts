@@ -49,7 +49,7 @@ export function useLocalAssistantChoices(
         selected.runtimeKind === 'local_agent' &&
         items.some((connection) => connection.id === selected.connectionId && connection.enabled)
       )
-        void probe(selected.connectionId);
+        await probe(selected.connectionId);
     } catch {
       if (request !== refreshGeneration) return;
       // Fail closed instead of advertising a previously usable connection.

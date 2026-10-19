@@ -35,6 +35,7 @@ function mounted(input: {
   instances?: ReturnType<typeof instance>[];
   bindings?: Array<{ instanceId: string; connectionId: string; modelId: string }>;
   withRegistry?: boolean;
+  initialCatalogs?: Record<string, AIModelInfo[]>;
   readConversationSelection?: (id: string) => Promise<AgentConversationSelection | null>;
 }) {
   const chatConversationId = ref(input.currentConversation ?? '');
@@ -48,7 +49,14 @@ function mounted(input: {
       ],
     }),
   );
-  const catalogs = ref<Record<string, AIModelInfo[]>>({});
+  const catalogs = ref<Record<string, AIModelInfo[]>>(
+    input.initialCatalogs ?? {
+      'provider-1': [
+        { id: 'model-default', name: 'Default' },
+        { id: 'model-custom', name: 'Custom' },
+      ],
+    },
+  );
   let selection!: ReturnType<typeof useAIModelSelection>;
   const Root = defineComponent({
     setup() {
@@ -78,6 +86,41 @@ function mounted(input: {
 }
 
 describe('model selection bound to explicit Mastra Agent instances', () => {
+  it('preserves an explicit non-default preference until the live directory arrives', async () => {
+    const key = 'agent:mastra::provider-1::model-custom';
+    localStorage.setItem('ai:last-model-key', key);
+    const { wrapper, selection, catalogs } = mounted({ initialCatalogs: {} });
+    expect(localStorage.getItem('ai:last-model-key')).toBe(key);
+    expect(selection.canSendMessage.value).toBe(false);
+    catalogs.value = {
+      'provider-1': [
+        { id: 'model-default', name: 'Default' },
+        { id: 'model-custom', name: 'Custom' },
+      ],
+    };
+    await nextTick();
+    expect(selection.selectedModelKey.value).toBe(key);
+    expect(selection.canSendMessage.value).toBe(true);
+    wrapper.unmount();
+  });
+
+  it('keeps the selected tuple and preference when a browse refresh loses directory eligibility', async () => {
+    const { wrapper, selection, catalogs } = mounted({});
+    const key = 'agent:mastra::provider-1::model-custom';
+    expect(selection.selectModel(key)).toBe('selected');
+    catalogs.value = { 'provider-1': [] };
+    await nextTick();
+    expect(selection.selectedModelKey.value).toBe(key);
+    expect(localStorage.getItem('ai:last-model-key')).toBe(key);
+    expect(selection.selectedModel.value).toBeNull();
+    expect(selection.canSendMessage.value).toBe(false);
+    catalogs.value = { 'provider-1': [{ id: 'model-custom', name: 'Custom' }] };
+    await nextTick();
+    expect(selection.selectedModelKey.value).toBe(key);
+    expect(selection.canSendMessage.value).toBe(true);
+    wrapper.unmount();
+  });
+
   it('selects an empty Agent independently and never silently switches to a configured one', async () => {
     const { wrapper, selection } = mounted({
       instances: [instance('mastra'), instance('work')],
@@ -132,7 +175,9 @@ describe('model selection bound to explicit Mastra Agent instances', () => {
     const { wrapper, selection, registry } = mounted({});
     expect(selection.allModelOptions.value.map((item) => item.key)).toEqual([
       'agent:mastra::provider-1::model-default',
+      'agent:mastra::provider-1::model-custom',
       'agent:mastra-anyrouter::provider-1::model-custom',
+      'agent:mastra-anyrouter::provider-1::model-default',
     ]);
     expect(selection.modelGroups.value.map((group) => group.providerName)).toEqual([
       'mastra · AnyRouter',
@@ -152,8 +197,26 @@ describe('model selection bound to explicit Mastra Agent instances', () => {
       ],
     });
     await nextTick();
-    expect(selection.allModelOptions.value).toHaveLength(1);
+    expect(selection.allModelOptions.value).toHaveLength(2);
     expect(selection.selectedModel.value?.agentInstanceId).not.toBe('mastra-anyrouter');
+    wrapper.unmount();
+  });
+
+  it('hides a disabled selection without deleting its model preference and restores it on re-enable', async () => {
+    const { wrapper, selection, registry } = mounted({});
+    const key = 'agent:mastra-anyrouter::provider-1::model-custom';
+    expect(selection.selectModel(key)).toBe('selected');
+    const preference = localStorage.getItem('ai:last-model-key');
+    registry.value.instances[1]!.enabled = false;
+    await nextTick();
+    expect(selection.selectedModel.value).toBeNull();
+    expect(selection.canSendMessage.value).toBe(false);
+    expect(selection.allModelOptions.value).toHaveLength(2);
+    expect(localStorage.getItem('ai:last-model-key')).toBe(preference);
+    registry.value.instances[1]!.enabled = true;
+    await nextTick();
+    expect(selection.selectedModelKey.value).toBe(key);
+    expect(selection.canSendMessage.value).toBe(true);
     wrapper.unmount();
   });
 
@@ -193,7 +256,7 @@ describe('model selection bound to explicit Mastra Agent instances', () => {
     const { wrapper, selection } = mounted({ currentConversation: 'old-chat' });
     expect(selection.selectedModel.value).toBeNull();
     expect(selection.selectedModelKey.value).toBe('');
-    expect(selection.allModelOptions.value).toHaveLength(2);
+    expect(selection.allModelOptions.value).toHaveLength(4);
     wrapper.unmount();
   });
 

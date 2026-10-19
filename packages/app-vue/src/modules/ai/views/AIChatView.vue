@@ -282,13 +282,14 @@
               :agents="composerAgents"
               :selected-agent-id="selectedComposerAgent"
               :models="composerModels"
+              :catalog="composerCatalog"
               :selected-model-key="composerModelKey"
               :permission-mode="permissionMode"
               :native-model-options="currentNativeModelOptions"
               :native="runtimeChoice.runtimeKind === 'local_agent'"
               :disabled="chatLoading"
               :loading="composerLoading"
-              @select-agent="selectComposerAgent"
+              @refresh="refreshComposerCatalog"
               @select-model="selectComposerModel"
               @permission="selectPermission"
               @model-option="selectNativeModelOption"
@@ -496,7 +497,8 @@ const {
   permissionMode,
   currentNativeModelOptions,
   selectNativeModelOption,
-  selectComposerAgent,
+  composerCatalog,
+  refreshComposerCatalog,
   selectComposerModel,
   selectPermission,
 } = model;
