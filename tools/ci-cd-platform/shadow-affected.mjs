@@ -58,6 +58,7 @@ const { createTaskPlanningContext } = require('nx/src/hasher/task-planning-conte
 const { selectTasksForProjects } = require('nx/src/tasks-runner/run-command');
 const { projectHasTarget } = require('nx/src/utils/project-graph-utils');
 const { readNxJson } = require('nx/src/config/configuration');
+const { parseFiles } = require('nx/src/utils/command-line-utils');
 
 function parseArgs(argv) {
   const args = new Map();
@@ -230,10 +231,13 @@ async function laneImpact({ changedFiles, expected, legacyProjects, taskBasedTas
 }
 
 async function compareCase({ id, title, files, base, head, targets, graph, nxJson, packageJson, planningContext, expected }) {
+  // Live mode must resolve the base..head file list the way `nx affected` does
+  // (parseFiles → git diff base head); calculateFileChanges only annotates the
+  // paths it is given, so passing [] compared two empty selections.
   const touchedFiles =
     files !== undefined
       ? calculateFileChanges(files, { files }, () => null)
-      : calculateFileChanges([], { base, head });
+      : calculateFileChanges(parseFiles({ base, head }).files, { base, head });
   const fileChangeArgs = files !== undefined ? { files } : { base, head, files: [] };
   const changedFiles = touchedFiles.map((change) => change.file);
 
