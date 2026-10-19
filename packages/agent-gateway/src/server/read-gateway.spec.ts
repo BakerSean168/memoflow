@@ -1,4 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
+import type { GatewayWriteAuthority } from '../ports';
+import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { createReadGateway } from './read-gateway';
 
 const context = {
@@ -304,9 +306,17 @@ it('rechecks Task authority after discovery and rejects unknown tools and inject
     context,
   );
   expect(await invalidRange.json()).toMatchObject({ result: { isError: true } });
-  const invalidInstant = await gateway.fetch(request('tools/call', {
-    startDate: Number.MAX_SAFE_INTEGER, endDate: Number.MAX_SAFE_INTEGER,
-  }, 'task_occurrence_list'), context);
+  const invalidInstant = await gateway.fetch(
+    request(
+      'tools/call',
+      {
+        startDate: Number.MAX_SAFE_INTEGER,
+        endDate: Number.MAX_SAFE_INTEGER,
+      },
+      'task_occurrence_list',
+    ),
+    context,
+  );
   expect(await invalidInstant.json()).toMatchObject({ result: { isError: true } });
   expect(tasks.listTaskOccurrences).not.toHaveBeenCalled();
 });
@@ -316,10 +326,146 @@ it('preserves unknown causes for the private observer and returns only a safe pu
   const cause = new Error('private provider detail');
   f.goals.searchGoalPage.mockRejectedValue(cause);
   const diagnose = vi.fn();
-  const response = await createReadGateway({ ...f.options, diagnose }).fetch(request('tools/call'), { ...context, startedAt: Date.now() });
+  const response = await createReadGateway({ ...f.options, diagnose }).fetch(
+    request('tools/call'),
+    { ...context, startedAt: Date.now() },
+  );
   const body = await response.text();
   expect(body).toContain('INTERNAL_ERROR');
   expect(body).not.toContain(cause.message);
-  expect(diagnose).toHaveBeenCalledWith({ requestId: context.requestId, traceId: context.traceId, cause });
+  expect(diagnose).toHaveBeenCalledWith({
+    requestId: context.requestId,
+    traceId: context.traceId,
+    cause,
+  });
   expect(f.audit.mock.calls[0][0]).not.toHaveProperty('cause');
+});
+
+describe('Routine hosted write capability', () => {
+  function routineFixture(
+    enabled = true,
+    type: 'pat' | 'oauth' = 'pat',
+    scopes = ['routines:write'],
+  ) {
+    const f = fixture();
+    f.authenticate.mockResolvedValue({
+      identityId: 'owner-a',
+      credentialId: 'pat-a',
+      credentialType: type,
+      scopes,
+    });
+    const receipt = {
+      receiptId: 'a'.repeat(64),
+      result: {
+        routine: { id: '5b5d8a2b-9934-4be8-8e07-3f62ed122e15', version: 1, name: 'Review' },
+        scheduledFor: 1792458000000,
+      },
+      replayed: false,
+    };
+    const routineCreate = vi.fn(async (_input: unknown, _cx: ExecutionContext, authority: GatewayWriteAuthority) => {
+      await authority.authorize();
+      return receipt;
+    });
+    const unavailable = vi.fn().mockRejectedValue(new Error('Unexpected owner'));
+    const writes = {
+      goalCreate: unavailable,
+      goalUpdate: unavailable,
+      keyResultCreate: unavailable,
+      keyResultUpdate: unavailable,
+      taskCreate: unavailable,
+      taskUpdate: unavailable,
+      taskComplete: unavailable,
+      ...(enabled ? { routineCreate } : {}),
+    };
+    return { ...f, routineCreate, gateway: createReadGateway({ ...f.options, writes }) };
+  }
+  const input = {
+    idempotencyKey: 'once',
+    name: 'Review',
+    trigger: {
+      type: 'WallClock',
+      localTime: '09:00',
+      timeZone: 'Asia/Shanghai',
+      startDate: '2026-10-20',
+    },
+  };
+  it('discovers exactly routine_create with a routine-only PAT, and keeps the separate gate off', async () => {
+    const f = routineFixture();
+    expect(
+      (await (await f.gateway.fetch(request('tools/list'), context)).json()).result.tools.map(
+        (t) => t.name,
+      ),
+    ).toEqual(['routine_create']);
+    const off = routineFixture(false);
+    expect(
+      (await (await off.gateway.fetch(request('tools/list'), context)).json()).result.tools,
+    ).toEqual([]);
+    expect(
+      (await off.gateway.fetch(request('tools/call', input, 'routine_create'), context)).status,
+    ).toBe(404);
+    expect(off.routineCreate).not.toHaveBeenCalled();
+    for (const scopes of [['goals:write'], ['tasks:read']]) {
+      const other = routineFixture(true, 'pat', scopes);
+      expect(
+        (await (await other.gateway.fetch(request('tools/list'), context)).json()).result.tools.map(
+          (t) => t.name,
+        ),
+      ).not.toContain('routine_create');
+      expect(
+        (await other.gateway.fetch(request('tools/call', input, 'routine_create'), context)).status,
+      ).toBe(403);
+    }
+  });
+  it('denies OAuth even with a fabricated write scope', async () => {
+    const f = routineFixture(true, 'oauth', ['routines:write', 'goals:read']);
+    expect(
+      (await (await f.gateway.fetch(request('tools/list'), context)).json()).result.tools.map(
+        (t) => t.name,
+      ),
+    ).not.toContain('routine_create');
+    expect(
+      (await f.gateway.fetch(request('tools/call', input, 'routine_create'), context)).status,
+    ).toBe(404);
+    expect(f.routineCreate).not.toHaveBeenCalled();
+  });
+  it('revalidates authority, passes verified identity, and audits without private payloads', async () => {
+    const f = routineFixture();
+    expect(
+      (
+        await (
+          await f.gateway.fetch(request('tools/call', input, 'routine_create'), context)
+        ).json()
+      ).result.structuredContent.replayed,
+    ).toBe(false);
+    expect(f.routineCreate).toHaveBeenCalledWith(
+      input,
+      expect.objectContaining({ identityId: 'owner-a' }),
+      expect.objectContaining({ connectionId: 'pat-a' }),
+    );
+    expect(f.audit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tool: 'routine_create',
+        effect: 'write',
+        scopeDecision: 'allowed',
+        receiptId: 'a'.repeat(64),
+        replayed: false,
+        outcome: 'OK',
+      }),
+    );
+    expect(JSON.stringify(f.audit.mock.calls)).not.toMatch(/Review|Asia\/Shanghai|private/);
+    f.authenticate
+      .mockResolvedValueOnce({
+        identityId: 'owner-a',
+        credentialId: 'pat-a',
+        credentialType: 'pat',
+        scopes: ['routines:write'],
+      })
+      .mockResolvedValueOnce(null);
+    expect(
+      await (await f.gateway.fetch(request('tools/call', input, 'routine_create'), context)).json(),
+    ).toMatchObject({ result: { isError: true, content: [{ text: 'FORBIDDEN' }] } });
+    expect(f.audit).toHaveBeenLastCalledWith(
+      expect.objectContaining({ scopeDecision: 'denied', outcome: 'FORBIDDEN' }),
+    );
+  });
 });

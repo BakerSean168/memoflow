@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { RoutineAgentCreateSchema, RoutineAgentPersistedReceiptSchema } from '../routine';
 import {
   GoalAgentCreateSchema,
   GoalAgentUpdateSchema,
@@ -37,5 +38,10 @@ export const GatewayGoalReceiptSchema = GoalAgentPersistedReceiptSchema.extend({
   replayed: z.boolean(),
 });
 export const GatewayTaskReceiptSchema = TaskAgentPersistedReceiptSchema.extend({
+  replayed: z.boolean(),
+});
+
+export const GatewayRoutineCreateSchema = RoutineAgentCreateSchema;
+export const GatewayRoutineReceiptSchema = RoutineAgentPersistedReceiptSchema.extend({
   replayed: z.boolean(),
 });

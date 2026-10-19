@@ -53,9 +53,9 @@ export const CreateScopedPatSchema = z.strictObject({
   name: z.string().trim().min(1).max(80),
   expiresInDays: z.number().int().min(1).max(7).default(7),
   scopes: z
-    .array(z.enum(['goals:read', 'tasks:read', 'goals:write', 'tasks:write']))
+    .array(z.enum(['goals:read', 'tasks:read', 'goals:write', 'tasks:write', 'routines:write']))
     .min(1)
-    .max(4)
+    .max(5)
     .refine((scopes) => new Set(scopes).size === scopes.length, 'Duplicate scopes')
     .default(['goals:read']),
 });
@@ -71,7 +71,9 @@ export const ScopedPatSummarySchema = z.object({
   name: z.string(),
   prefix: z.string(),
   audience: z.url(),
-  scopes: z.array(z.enum(['goals:read', 'tasks:read', 'goals:write', 'tasks:write'])),
+  scopes: z.array(
+    z.enum(['goals:read', 'tasks:read', 'goals:write', 'tasks:write', 'routines:write']),
+  ),
   ...credentialDates,
 });
 export const OAuthConnectionSchema = z.object({

@@ -52,3 +52,48 @@ describe('runExternalMutation authority ordering', () => {
     expect(events).toEqual(['authorize:before', 'begin']);
   });
 });
+
+it('checks transaction-local authority after the receipt lock and before replay', async () => {
+  const events: string[] = [];
+  const tx = {
+    $executeRaw: async () => {
+      events.push('sql');
+      return 0;
+    },
+    externalMutationReceipt: {
+      findUnique: async () => {
+        events.push('replay');
+        return { inputDigest: 'unused' };
+      },
+    },
+  };
+  const db = {
+    $transaction: async (work: (client: unknown) => Promise<unknown>) => work(tx),
+  } as unknown as PrismaClient;
+  await expect(
+    runExternalMutation(
+      db,
+      'identity-a',
+      {
+        connectionId: 'credential-a',
+        receiptScope: 'credential',
+        authorize: async () => {
+          events.push('before');
+        },
+        authorizeInTransaction: async (client) => {
+          expect(client).toBe(tx);
+          events.push('current-authority');
+          throw new Error('revoked');
+        },
+      },
+      'routine.create.v1',
+      { idempotencyKey: 'once' },
+      receipt,
+      async () => {
+        events.push('owner');
+        return { result: { ok: true } };
+      },
+    ),
+  ).rejects.toThrow('revoked');
+  expect(events).toEqual(['before', 'sql', 'sql', 'sql', 'current-authority']);
+});

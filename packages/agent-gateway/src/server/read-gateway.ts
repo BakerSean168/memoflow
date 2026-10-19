@@ -160,7 +160,7 @@ export function createReadGateway(options: Options) {
               scope === 'tasks:read' ||
               (options.writes &&
                 principal.credentialType === 'pat' &&
-                (scope === 'goals:write' || scope === 'tasks:write')),
+                (scope === 'goals:write' || scope === 'tasks:write' || scope === 'routines:write')),
           )
         )
           return reject(403, 'INSUFFICIENT_SCOPE');
@@ -193,7 +193,14 @@ export function createReadGateway(options: Options) {
                 scopeDecision = 'denied';
                 return reject(403, 'INSUFFICIENT_SCOPE');
               }
-              if (isWriteToolName(name) && (!options.writes || principal.credentialType !== 'pat')) {
+              if (
+                isWriteToolName(name) &&
+                (!options.writes || principal.credentialType !== 'pat')
+              ) {
+                scopeDecision = 'denied';
+                return reject(404, 'DISABLED');
+              }
+              if (name === 'routine_create' && !options.writes?.routineCreate) {
                 scopeDecision = 'denied';
                 return reject(404, 'DISABLED');
               }
@@ -210,7 +217,8 @@ export function createReadGateway(options: Options) {
         const context: ExecutionContext = { ...requestContext, identityId: principal.identityId };
         async function call<T>(
           name: ToolName,
-          requiredScope: 'goals:read' | 'tasks:read' | 'goals:write' | 'tasks:write',
+          requiredScope:
+            'goals:read' | 'tasks:read' | 'goals:write' | 'tasks:write' | 'routines:write',
           operation: () => Promise<T>,
         ) {
           tool = name;
@@ -263,7 +271,10 @@ export function createReadGateway(options: Options) {
         }
         const handler = createMcpHandler(
           () => {
-            const server = new McpServer({ name: 'memoflow-agent-gateway', version: '0.1.0' });
+            const server = new McpServer(
+              { name: 'memoflow-agent-gateway', version: '0.1.0' },
+              { capabilities: { tools: {} } },
+            );
             registerReadTools(server, options, context, budget, principal.scopes, call);
             if (options.writes && principal.credentialType === 'pat')
               registerWriteTools(
@@ -289,6 +300,7 @@ export function createReadGateway(options: Options) {
                       !current ||
                       current.identityId !== principal.identityId ||
                       current.credentialId !== principal.credentialId ||
+                      current.credentialType !== principal.credentialType ||
                       !required ||
                       !current.scopes.includes(required) ||
                       principal.scopes.some((scope) => !current.scopes.includes(scope))
