@@ -195,6 +195,9 @@ test('Unit runner preserves Vitest shard arguments, runs each selected task once
     const manifest = await buildDeliveryManifest({
       base: 'base',
       head: 'head',
+      event: 'pull_request',
+      full: false,
+      ref: 'refs/pull/1/merge',
       files: ['nx.json'],
       scope: { ...scope, unit: ['app-vue', 'desktop', 'web', 'ci-cd-platform', 'test-system-v2'] },
     });
