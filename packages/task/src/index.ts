@@ -53,3 +53,5 @@ export {
   createTaskPrismaPortableCapability,
   createTaskPowerSyncPortableCapability,
 } from './server/infrastructure/task-profile-import';
+
+export { createTaskPrismaAgentMutations } from './server/infrastructure/adapters/prisma/task-agent-mutations';

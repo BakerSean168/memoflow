@@ -10,6 +10,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/api/src/__tests__/integration/agent-gateway-write.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "apps/api/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/api/src/__tests__/integration/agent-gateway.integration.test.ts",
       "primarySuite": "integration",
       "collectors": [
@@ -1558,7 +1566,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "apps/desktop/src/main/paths/path-resolver.spec.ts",
+      "path": "apps/desktop/src/main/paths/clear-storage-cache.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -1566,7 +1574,23 @@
       "measurementCollectors": []
     },
     {
-      "path": "apps/desktop/src/main/paths/user-files-config.spec.ts",
+      "path": "apps/desktop/src/main/paths/desktop-storage-roots.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/paths/native-file-dialogs.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/paths/path-resolver.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -1839,6 +1863,14 @@
     },
     {
       "path": "apps/desktop/src/main/services/notification.service.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/storage-bootstrap.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -13144,7 +13176,7 @@
       "type": "primary",
       "suite": "integration",
       "runner": "vitest",
-      "fileCount": 13
+      "fileCount": 14
     },
     {
       "id": "packages/account/vitest.integration.config.ts",
@@ -13263,7 +13295,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 104
+      "fileCount": 107
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -14068,8 +14100,8 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1174,
-    "integration": 49,
+    "unit": 1177,
+    "integration": 50,
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 9,

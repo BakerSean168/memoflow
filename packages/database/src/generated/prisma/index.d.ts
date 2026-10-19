@@ -284,6 +284,11 @@ export type AccountClosureOperation = $Result.DefaultSelection<Prisma.$AccountCl
  */
 export type OperationAuditLog = $Result.DefaultSelection<Prisma.$OperationAuditLogPayload>
 /**
+ * Model ExternalMutationReceipt
+ * External command result and durable audit; never expire uniqueness automatically.
+ */
+export type ExternalMutationReceipt = $Result.DefaultSelection<Prisma.$ExternalMutationReceiptPayload>
+/**
  * Model RoutineDefinition
  *
  */
@@ -1138,6 +1143,16 @@ export class PrismaClient<
     * ```
     */
   get operationAuditLog(): Prisma.OperationAuditLogDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.externalMutationReceipt`: Exposes CRUD operations for the **ExternalMutationReceipt** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ExternalMutationReceipts
+    * const externalMutationReceipts = await prisma.externalMutationReceipt.findMany()
+    * ```
+    */
+  get externalMutationReceipt(): Prisma.ExternalMutationReceiptDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.routineDefinition`: Exposes CRUD operations for the **RoutineDefinition** model.
@@ -2017,6 +2032,7 @@ export namespace Prisma {
     ProjectionCursor: 'ProjectionCursor',
     AccountClosureOperation: 'AccountClosureOperation',
     OperationAuditLog: 'OperationAuditLog',
+    ExternalMutationReceipt: 'ExternalMutationReceipt',
     RoutineDefinition: 'RoutineDefinition',
     RoutinePreference: 'RoutinePreference',
     RoutineProfile: 'RoutineProfile',
@@ -2070,7 +2086,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "account" | "aiConversation" | "aiGoalSurfaceLease" | "aiConversationAttention" | "aiExecutionRecord" | "aiProviderConfig" | "aiAgentInstance" | "aiAgentInstanceBinding" | "aiAgentConversationBinding" | "aiProviderOnboardingSession" | "aiProviderSecret" | "aiKnowledgeIndexEntry" | "aiAgentRegistryMigration" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "externalAgentPat" | "externalAgentConnection" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "jwks" | "oauthClient" | "oauthResource" | "oauthClientResource" | "oauthRefreshToken" | "oauthAccessToken" | "oauthConsent" | "oauthClientAssertion" | "profileImportOperation" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "routineDefinition" | "routinePreference" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
+      modelProps: "account" | "aiConversation" | "aiGoalSurfaceLease" | "aiConversationAttention" | "aiExecutionRecord" | "aiProviderConfig" | "aiAgentInstance" | "aiAgentInstanceBinding" | "aiAgentConversationBinding" | "aiProviderOnboardingSession" | "aiProviderSecret" | "aiKnowledgeIndexEntry" | "aiAgentRegistryMigration" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "externalAgentPat" | "externalAgentConnection" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "jwks" | "oauthClient" | "oauthResource" | "oauthClientResource" | "oauthRefreshToken" | "oauthAccessToken" | "oauthConsent" | "oauthClientAssertion" | "profileImportOperation" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "externalMutationReceipt" | "routineDefinition" | "routinePreference" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -5922,6 +5938,80 @@ export namespace Prisma {
           }
         }
       }
+      ExternalMutationReceipt: {
+        payload: Prisma.$ExternalMutationReceiptPayload<ExtArgs>
+        fields: Prisma.ExternalMutationReceiptFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ExternalMutationReceiptFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalMutationReceiptPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ExternalMutationReceiptFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalMutationReceiptPayload>
+          }
+          findFirst: {
+            args: Prisma.ExternalMutationReceiptFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalMutationReceiptPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ExternalMutationReceiptFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalMutationReceiptPayload>
+          }
+          findMany: {
+            args: Prisma.ExternalMutationReceiptFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalMutationReceiptPayload>[]
+          }
+          create: {
+            args: Prisma.ExternalMutationReceiptCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalMutationReceiptPayload>
+          }
+          createMany: {
+            args: Prisma.ExternalMutationReceiptCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ExternalMutationReceiptCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalMutationReceiptPayload>[]
+          }
+          delete: {
+            args: Prisma.ExternalMutationReceiptDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalMutationReceiptPayload>
+          }
+          update: {
+            args: Prisma.ExternalMutationReceiptUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalMutationReceiptPayload>
+          }
+          deleteMany: {
+            args: Prisma.ExternalMutationReceiptDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ExternalMutationReceiptUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ExternalMutationReceiptUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalMutationReceiptPayload>[]
+          }
+          upsert: {
+            args: Prisma.ExternalMutationReceiptUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ExternalMutationReceiptPayload>
+          }
+          aggregate: {
+            args: Prisma.ExternalMutationReceiptAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateExternalMutationReceipt>
+          }
+          groupBy: {
+            args: Prisma.ExternalMutationReceiptGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ExternalMutationReceiptGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ExternalMutationReceiptCountArgs<ExtArgs>
+            result: $Utils.Optional<ExternalMutationReceiptCountAggregateOutputType> | number
+          }
+        }
+      }
       RoutineDefinition: {
         payload: Prisma.$RoutineDefinitionPayload<ExtArgs>
         fields: Prisma.RoutineDefinitionFieldRefs
@@ -8909,6 +8999,7 @@ export namespace Prisma {
     projectionCursor?: ProjectionCursorOmit
     accountClosureOperation?: AccountClosureOperationOmit
     operationAuditLog?: OperationAuditLogOmit
+    externalMutationReceipt?: ExternalMutationReceiptOmit
     routineDefinition?: RoutineDefinitionOmit
     routinePreference?: RoutinePreferenceOmit
     routineProfile?: RoutineProfileOmit
@@ -9027,6 +9118,7 @@ export namespace Prisma {
    */
 
   export type AccountCountOutputType = {
+    externalMutationReceipts: number
     goals: number
     profileImportOperations: number
     labels: number
@@ -9071,6 +9163,7 @@ export namespace Prisma {
   }
 
   export type AccountCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    externalMutationReceipts?: boolean | AccountCountOutputTypeCountExternalMutationReceiptsArgs
     goals?: boolean | AccountCountOutputTypeCountGoalsArgs
     profileImportOperations?: boolean | AccountCountOutputTypeCountProfileImportOperationsArgs
     labels?: boolean | AccountCountOutputTypeCountLabelsArgs
@@ -9123,6 +9216,13 @@ export namespace Prisma {
      * Select specific fields to fetch from the AccountCountOutputType
      */
     select?: AccountCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * AccountCountOutputType without action
+   */
+  export type AccountCountOutputTypeCountExternalMutationReceiptsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ExternalMutationReceiptWhereInput
   }
 
   /**
@@ -10538,6 +10638,7 @@ export namespace Prisma {
     updatedAt?: boolean
     closedAt?: boolean
     cloudUser?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+    externalMutationReceipts?: boolean | Account$externalMutationReceiptsArgs<ExtArgs>
     goals?: boolean | Account$goalsArgs<ExtArgs>
     profileImportOperations?: boolean | Account$profileImportOperationsArgs<ExtArgs>
     labels?: boolean | Account$labelsArgs<ExtArgs>
@@ -10615,6 +10716,7 @@ export namespace Prisma {
   export type AccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "status" | "profile" | "createdAt" | "updatedAt" | "closedAt", ExtArgs["result"]["account"]>
   export type AccountInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cloudUser?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
+    externalMutationReceipts?: boolean | Account$externalMutationReceiptsArgs<ExtArgs>
     goals?: boolean | Account$goalsArgs<ExtArgs>
     profileImportOperations?: boolean | Account$profileImportOperationsArgs<ExtArgs>
     labels?: boolean | Account$labelsArgs<ExtArgs>
@@ -10670,6 +10772,7 @@ export namespace Prisma {
     name: "Account"
     objects: {
       cloudUser: Prisma.$CloudAuthUserPayload<ExtArgs>
+      externalMutationReceipts: Prisma.$ExternalMutationReceiptPayload<ExtArgs>[]
       goals: Prisma.$GoalPayload<ExtArgs>[]
       profileImportOperations: Prisma.$ProfileImportOperationPayload<ExtArgs>[]
       labels: Prisma.$LabelPayload<ExtArgs>[]
@@ -11115,6 +11218,7 @@ export namespace Prisma {
   export interface Prisma__AccountClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     cloudUser<T extends CloudAuthUserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CloudAuthUserDefaultArgs<ExtArgs>>): Prisma__CloudAuthUserClient<$Result.GetResult<Prisma.$CloudAuthUserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    externalMutationReceipts<T extends Account$externalMutationReceiptsArgs<ExtArgs> = {}>(args?: Subset<T, Account$externalMutationReceiptsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExternalMutationReceiptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     goals<T extends Account$goalsArgs<ExtArgs> = {}>(args?: Subset<T, Account$goalsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GoalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     profileImportOperations<T extends Account$profileImportOperationsArgs<ExtArgs> = {}>(args?: Subset<T, Account$profileImportOperationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProfileImportOperationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     labels<T extends Account$labelsArgs<ExtArgs> = {}>(args?: Subset<T, Account$labelsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LabelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -11590,6 +11694,30 @@ export namespace Prisma {
      * Limit how many Accounts to delete.
      */
     limit?: number
+  }
+
+  /**
+   * Account.externalMutationReceipts
+   */
+  export type Account$externalMutationReceiptsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalMutationReceipt
+     */
+    select?: ExternalMutationReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalMutationReceipt
+     */
+    omit?: ExternalMutationReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalMutationReceiptInclude<ExtArgs> | null
+    where?: ExternalMutationReceiptWhereInput
+    orderBy?: ExternalMutationReceiptOrderByWithRelationInput | ExternalMutationReceiptOrderByWithRelationInput[]
+    cursor?: ExternalMutationReceiptWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ExternalMutationReceiptScalarFieldEnum | ExternalMutationReceiptScalarFieldEnum[]
   }
 
   /**
@@ -72276,6 +72404,1095 @@ export namespace Prisma {
 
 
   /**
+   * Model ExternalMutationReceipt
+   */
+
+  export type AggregateExternalMutationReceipt = {
+    _count: ExternalMutationReceiptCountAggregateOutputType | null
+    _min: ExternalMutationReceiptMinAggregateOutputType | null
+    _max: ExternalMutationReceiptMaxAggregateOutputType | null
+  }
+
+  export type ExternalMutationReceiptMinAggregateOutputType = {
+    id: string | null
+    identityId: string | null
+    connectionId: string | null
+    capability: string | null
+    inputDigest: string | null
+    resultJson: string | null
+    createdAt: Date | null
+  }
+
+  export type ExternalMutationReceiptMaxAggregateOutputType = {
+    id: string | null
+    identityId: string | null
+    connectionId: string | null
+    capability: string | null
+    inputDigest: string | null
+    resultJson: string | null
+    createdAt: Date | null
+  }
+
+  export type ExternalMutationReceiptCountAggregateOutputType = {
+    id: number
+    identityId: number
+    connectionId: number
+    capability: number
+    inputDigest: number
+    resultJson: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type ExternalMutationReceiptMinAggregateInputType = {
+    id?: true
+    identityId?: true
+    connectionId?: true
+    capability?: true
+    inputDigest?: true
+    resultJson?: true
+    createdAt?: true
+  }
+
+  export type ExternalMutationReceiptMaxAggregateInputType = {
+    id?: true
+    identityId?: true
+    connectionId?: true
+    capability?: true
+    inputDigest?: true
+    resultJson?: true
+    createdAt?: true
+  }
+
+  export type ExternalMutationReceiptCountAggregateInputType = {
+    id?: true
+    identityId?: true
+    connectionId?: true
+    capability?: true
+    inputDigest?: true
+    resultJson?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type ExternalMutationReceiptAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ExternalMutationReceipt to aggregate.
+     */
+    where?: ExternalMutationReceiptWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ExternalMutationReceipts to fetch.
+     */
+    orderBy?: ExternalMutationReceiptOrderByWithRelationInput | ExternalMutationReceiptOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: ExternalMutationReceiptWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ExternalMutationReceipts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ExternalMutationReceipts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned ExternalMutationReceipts
+    **/
+    _count?: true | ExternalMutationReceiptCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: ExternalMutationReceiptMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: ExternalMutationReceiptMaxAggregateInputType
+  }
+
+  export type GetExternalMutationReceiptAggregateType<T extends ExternalMutationReceiptAggregateArgs> = {
+        [P in keyof T & keyof AggregateExternalMutationReceipt]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateExternalMutationReceipt[P]>
+      : GetScalarType<T[P], AggregateExternalMutationReceipt[P]>
+  }
+
+
+
+
+  export type ExternalMutationReceiptGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ExternalMutationReceiptWhereInput
+    orderBy?: ExternalMutationReceiptOrderByWithAggregationInput | ExternalMutationReceiptOrderByWithAggregationInput[]
+    by: ExternalMutationReceiptScalarFieldEnum[] | ExternalMutationReceiptScalarFieldEnum
+    having?: ExternalMutationReceiptScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ExternalMutationReceiptCountAggregateInputType | true
+    _min?: ExternalMutationReceiptMinAggregateInputType
+    _max?: ExternalMutationReceiptMaxAggregateInputType
+  }
+
+  export type ExternalMutationReceiptGroupByOutputType = {
+    id: string
+    identityId: string
+    connectionId: string
+    capability: string
+    inputDigest: string
+    resultJson: string
+    createdAt: Date
+    _count: ExternalMutationReceiptCountAggregateOutputType | null
+    _min: ExternalMutationReceiptMinAggregateOutputType | null
+    _max: ExternalMutationReceiptMaxAggregateOutputType | null
+  }
+
+  type GetExternalMutationReceiptGroupByPayload<T extends ExternalMutationReceiptGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ExternalMutationReceiptGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ExternalMutationReceiptGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ExternalMutationReceiptGroupByOutputType[P]>
+            : GetScalarType<T[P], ExternalMutationReceiptGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ExternalMutationReceiptSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    connectionId?: boolean
+    capability?: boolean
+    inputDigest?: boolean
+    resultJson?: boolean
+    createdAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["externalMutationReceipt"]>
+
+  export type ExternalMutationReceiptSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    connectionId?: boolean
+    capability?: boolean
+    inputDigest?: boolean
+    resultJson?: boolean
+    createdAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["externalMutationReceipt"]>
+
+  export type ExternalMutationReceiptSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    connectionId?: boolean
+    capability?: boolean
+    inputDigest?: boolean
+    resultJson?: boolean
+    createdAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["externalMutationReceipt"]>
+
+  export type ExternalMutationReceiptSelectScalar = {
+    id?: boolean
+    identityId?: boolean
+    connectionId?: boolean
+    capability?: boolean
+    inputDigest?: boolean
+    resultJson?: boolean
+    createdAt?: boolean
+  }
+
+  export type ExternalMutationReceiptOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "connectionId" | "capability" | "inputDigest" | "resultJson" | "createdAt", ExtArgs["result"]["externalMutationReceipt"]>
+  export type ExternalMutationReceiptInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+  export type ExternalMutationReceiptIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+  export type ExternalMutationReceiptIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+
+  export type $ExternalMutationReceiptPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ExternalMutationReceipt"
+    objects: {
+      account: Prisma.$AccountPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      identityId: string
+      connectionId: string
+      capability: string
+      inputDigest: string
+      resultJson: string
+      createdAt: Date
+    }, ExtArgs["result"]["externalMutationReceipt"]>
+    composites: {}
+  }
+
+  type ExternalMutationReceiptGetPayload<S extends boolean | null | undefined | ExternalMutationReceiptDefaultArgs> = $Result.GetResult<Prisma.$ExternalMutationReceiptPayload, S>
+
+  type ExternalMutationReceiptCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ExternalMutationReceiptFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ExternalMutationReceiptCountAggregateInputType | true
+    }
+
+  export interface ExternalMutationReceiptDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ExternalMutationReceipt'], meta: { name: 'ExternalMutationReceipt' } }
+    /**
+     * Find zero or one ExternalMutationReceipt that matches the filter.
+     * @param {ExternalMutationReceiptFindUniqueArgs} args - Arguments to find a ExternalMutationReceipt
+     * @example
+     * // Get one ExternalMutationReceipt
+     * const externalMutationReceipt = await prisma.externalMutationReceipt.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ExternalMutationReceiptFindUniqueArgs>(args: SelectSubset<T, ExternalMutationReceiptFindUniqueArgs<ExtArgs>>): Prisma__ExternalMutationReceiptClient<$Result.GetResult<Prisma.$ExternalMutationReceiptPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ExternalMutationReceipt that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ExternalMutationReceiptFindUniqueOrThrowArgs} args - Arguments to find a ExternalMutationReceipt
+     * @example
+     * // Get one ExternalMutationReceipt
+     * const externalMutationReceipt = await prisma.externalMutationReceipt.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ExternalMutationReceiptFindUniqueOrThrowArgs>(args: SelectSubset<T, ExternalMutationReceiptFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ExternalMutationReceiptClient<$Result.GetResult<Prisma.$ExternalMutationReceiptPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ExternalMutationReceipt that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalMutationReceiptFindFirstArgs} args - Arguments to find a ExternalMutationReceipt
+     * @example
+     * // Get one ExternalMutationReceipt
+     * const externalMutationReceipt = await prisma.externalMutationReceipt.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ExternalMutationReceiptFindFirstArgs>(args?: SelectSubset<T, ExternalMutationReceiptFindFirstArgs<ExtArgs>>): Prisma__ExternalMutationReceiptClient<$Result.GetResult<Prisma.$ExternalMutationReceiptPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ExternalMutationReceipt that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalMutationReceiptFindFirstOrThrowArgs} args - Arguments to find a ExternalMutationReceipt
+     * @example
+     * // Get one ExternalMutationReceipt
+     * const externalMutationReceipt = await prisma.externalMutationReceipt.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ExternalMutationReceiptFindFirstOrThrowArgs>(args?: SelectSubset<T, ExternalMutationReceiptFindFirstOrThrowArgs<ExtArgs>>): Prisma__ExternalMutationReceiptClient<$Result.GetResult<Prisma.$ExternalMutationReceiptPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ExternalMutationReceipts that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalMutationReceiptFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ExternalMutationReceipts
+     * const externalMutationReceipts = await prisma.externalMutationReceipt.findMany()
+     *
+     * // Get first 10 ExternalMutationReceipts
+     * const externalMutationReceipts = await prisma.externalMutationReceipt.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const externalMutationReceiptWithIdOnly = await prisma.externalMutationReceipt.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends ExternalMutationReceiptFindManyArgs>(args?: SelectSubset<T, ExternalMutationReceiptFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExternalMutationReceiptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ExternalMutationReceipt.
+     * @param {ExternalMutationReceiptCreateArgs} args - Arguments to create a ExternalMutationReceipt.
+     * @example
+     * // Create one ExternalMutationReceipt
+     * const ExternalMutationReceipt = await prisma.externalMutationReceipt.create({
+     *   data: {
+     *     // ... data to create a ExternalMutationReceipt
+     *   }
+     * })
+     *
+     */
+    create<T extends ExternalMutationReceiptCreateArgs>(args: SelectSubset<T, ExternalMutationReceiptCreateArgs<ExtArgs>>): Prisma__ExternalMutationReceiptClient<$Result.GetResult<Prisma.$ExternalMutationReceiptPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ExternalMutationReceipts.
+     * @param {ExternalMutationReceiptCreateManyArgs} args - Arguments to create many ExternalMutationReceipts.
+     * @example
+     * // Create many ExternalMutationReceipts
+     * const externalMutationReceipt = await prisma.externalMutationReceipt.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends ExternalMutationReceiptCreateManyArgs>(args?: SelectSubset<T, ExternalMutationReceiptCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ExternalMutationReceipts and returns the data saved in the database.
+     * @param {ExternalMutationReceiptCreateManyAndReturnArgs} args - Arguments to create many ExternalMutationReceipts.
+     * @example
+     * // Create many ExternalMutationReceipts
+     * const externalMutationReceipt = await prisma.externalMutationReceipt.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many ExternalMutationReceipts and only return the `id`
+     * const externalMutationReceiptWithIdOnly = await prisma.externalMutationReceipt.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends ExternalMutationReceiptCreateManyAndReturnArgs>(args?: SelectSubset<T, ExternalMutationReceiptCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExternalMutationReceiptPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ExternalMutationReceipt.
+     * @param {ExternalMutationReceiptDeleteArgs} args - Arguments to delete one ExternalMutationReceipt.
+     * @example
+     * // Delete one ExternalMutationReceipt
+     * const ExternalMutationReceipt = await prisma.externalMutationReceipt.delete({
+     *   where: {
+     *     // ... filter to delete one ExternalMutationReceipt
+     *   }
+     * })
+     *
+     */
+    delete<T extends ExternalMutationReceiptDeleteArgs>(args: SelectSubset<T, ExternalMutationReceiptDeleteArgs<ExtArgs>>): Prisma__ExternalMutationReceiptClient<$Result.GetResult<Prisma.$ExternalMutationReceiptPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ExternalMutationReceipt.
+     * @param {ExternalMutationReceiptUpdateArgs} args - Arguments to update one ExternalMutationReceipt.
+     * @example
+     * // Update one ExternalMutationReceipt
+     * const externalMutationReceipt = await prisma.externalMutationReceipt.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends ExternalMutationReceiptUpdateArgs>(args: SelectSubset<T, ExternalMutationReceiptUpdateArgs<ExtArgs>>): Prisma__ExternalMutationReceiptClient<$Result.GetResult<Prisma.$ExternalMutationReceiptPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ExternalMutationReceipts.
+     * @param {ExternalMutationReceiptDeleteManyArgs} args - Arguments to filter ExternalMutationReceipts to delete.
+     * @example
+     * // Delete a few ExternalMutationReceipts
+     * const { count } = await prisma.externalMutationReceipt.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends ExternalMutationReceiptDeleteManyArgs>(args?: SelectSubset<T, ExternalMutationReceiptDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ExternalMutationReceipts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalMutationReceiptUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ExternalMutationReceipts
+     * const externalMutationReceipt = await prisma.externalMutationReceipt.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends ExternalMutationReceiptUpdateManyArgs>(args: SelectSubset<T, ExternalMutationReceiptUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ExternalMutationReceipts and returns the data updated in the database.
+     * @param {ExternalMutationReceiptUpdateManyAndReturnArgs} args - Arguments to update many ExternalMutationReceipts.
+     * @example
+     * // Update many ExternalMutationReceipts
+     * const externalMutationReceipt = await prisma.externalMutationReceipt.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more ExternalMutationReceipts and only return the `id`
+     * const externalMutationReceiptWithIdOnly = await prisma.externalMutationReceipt.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends ExternalMutationReceiptUpdateManyAndReturnArgs>(args: SelectSubset<T, ExternalMutationReceiptUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExternalMutationReceiptPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ExternalMutationReceipt.
+     * @param {ExternalMutationReceiptUpsertArgs} args - Arguments to update or create a ExternalMutationReceipt.
+     * @example
+     * // Update or create a ExternalMutationReceipt
+     * const externalMutationReceipt = await prisma.externalMutationReceipt.upsert({
+     *   create: {
+     *     // ... data to create a ExternalMutationReceipt
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ExternalMutationReceipt we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ExternalMutationReceiptUpsertArgs>(args: SelectSubset<T, ExternalMutationReceiptUpsertArgs<ExtArgs>>): Prisma__ExternalMutationReceiptClient<$Result.GetResult<Prisma.$ExternalMutationReceiptPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ExternalMutationReceipts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalMutationReceiptCountArgs} args - Arguments to filter ExternalMutationReceipts to count.
+     * @example
+     * // Count the number of ExternalMutationReceipts
+     * const count = await prisma.externalMutationReceipt.count({
+     *   where: {
+     *     // ... the filter for the ExternalMutationReceipts we want to count
+     *   }
+     * })
+    **/
+    count<T extends ExternalMutationReceiptCountArgs>(
+      args?: Subset<T, ExternalMutationReceiptCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ExternalMutationReceiptCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ExternalMutationReceipt.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalMutationReceiptAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ExternalMutationReceiptAggregateArgs>(args: Subset<T, ExternalMutationReceiptAggregateArgs>): Prisma.PrismaPromise<GetExternalMutationReceiptAggregateType<T>>
+
+    /**
+     * Group by ExternalMutationReceipt.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ExternalMutationReceiptGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends ExternalMutationReceiptGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ExternalMutationReceiptGroupByArgs['orderBy'] }
+        : { orderBy?: ExternalMutationReceiptGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ExternalMutationReceiptGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetExternalMutationReceiptGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ExternalMutationReceipt model
+   */
+  readonly fields: ExternalMutationReceiptFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ExternalMutationReceipt.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ExternalMutationReceiptClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ExternalMutationReceipt model
+   */
+  interface ExternalMutationReceiptFieldRefs {
+    readonly id: FieldRef<"ExternalMutationReceipt", 'String'>
+    readonly identityId: FieldRef<"ExternalMutationReceipt", 'String'>
+    readonly connectionId: FieldRef<"ExternalMutationReceipt", 'String'>
+    readonly capability: FieldRef<"ExternalMutationReceipt", 'String'>
+    readonly inputDigest: FieldRef<"ExternalMutationReceipt", 'String'>
+    readonly resultJson: FieldRef<"ExternalMutationReceipt", 'String'>
+    readonly createdAt: FieldRef<"ExternalMutationReceipt", 'DateTime'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * ExternalMutationReceipt findUnique
+   */
+  export type ExternalMutationReceiptFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalMutationReceipt
+     */
+    select?: ExternalMutationReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalMutationReceipt
+     */
+    omit?: ExternalMutationReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalMutationReceiptInclude<ExtArgs> | null
+    /**
+     * Filter, which ExternalMutationReceipt to fetch.
+     */
+    where: ExternalMutationReceiptWhereUniqueInput
+  }
+
+  /**
+   * ExternalMutationReceipt findUniqueOrThrow
+   */
+  export type ExternalMutationReceiptFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalMutationReceipt
+     */
+    select?: ExternalMutationReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalMutationReceipt
+     */
+    omit?: ExternalMutationReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalMutationReceiptInclude<ExtArgs> | null
+    /**
+     * Filter, which ExternalMutationReceipt to fetch.
+     */
+    where: ExternalMutationReceiptWhereUniqueInput
+  }
+
+  /**
+   * ExternalMutationReceipt findFirst
+   */
+  export type ExternalMutationReceiptFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalMutationReceipt
+     */
+    select?: ExternalMutationReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalMutationReceipt
+     */
+    omit?: ExternalMutationReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalMutationReceiptInclude<ExtArgs> | null
+    /**
+     * Filter, which ExternalMutationReceipt to fetch.
+     */
+    where?: ExternalMutationReceiptWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ExternalMutationReceipts to fetch.
+     */
+    orderBy?: ExternalMutationReceiptOrderByWithRelationInput | ExternalMutationReceiptOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for ExternalMutationReceipts.
+     */
+    cursor?: ExternalMutationReceiptWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ExternalMutationReceipts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ExternalMutationReceipts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of ExternalMutationReceipts.
+     */
+    distinct?: ExternalMutationReceiptScalarFieldEnum | ExternalMutationReceiptScalarFieldEnum[]
+  }
+
+  /**
+   * ExternalMutationReceipt findFirstOrThrow
+   */
+  export type ExternalMutationReceiptFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalMutationReceipt
+     */
+    select?: ExternalMutationReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalMutationReceipt
+     */
+    omit?: ExternalMutationReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalMutationReceiptInclude<ExtArgs> | null
+    /**
+     * Filter, which ExternalMutationReceipt to fetch.
+     */
+    where?: ExternalMutationReceiptWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ExternalMutationReceipts to fetch.
+     */
+    orderBy?: ExternalMutationReceiptOrderByWithRelationInput | ExternalMutationReceiptOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for ExternalMutationReceipts.
+     */
+    cursor?: ExternalMutationReceiptWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ExternalMutationReceipts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ExternalMutationReceipts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of ExternalMutationReceipts.
+     */
+    distinct?: ExternalMutationReceiptScalarFieldEnum | ExternalMutationReceiptScalarFieldEnum[]
+  }
+
+  /**
+   * ExternalMutationReceipt findMany
+   */
+  export type ExternalMutationReceiptFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalMutationReceipt
+     */
+    select?: ExternalMutationReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalMutationReceipt
+     */
+    omit?: ExternalMutationReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalMutationReceiptInclude<ExtArgs> | null
+    /**
+     * Filter, which ExternalMutationReceipts to fetch.
+     */
+    where?: ExternalMutationReceiptWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ExternalMutationReceipts to fetch.
+     */
+    orderBy?: ExternalMutationReceiptOrderByWithRelationInput | ExternalMutationReceiptOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing ExternalMutationReceipts.
+     */
+    cursor?: ExternalMutationReceiptWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ExternalMutationReceipts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ExternalMutationReceipts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of ExternalMutationReceipts.
+     */
+    distinct?: ExternalMutationReceiptScalarFieldEnum | ExternalMutationReceiptScalarFieldEnum[]
+  }
+
+  /**
+   * ExternalMutationReceipt create
+   */
+  export type ExternalMutationReceiptCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalMutationReceipt
+     */
+    select?: ExternalMutationReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalMutationReceipt
+     */
+    omit?: ExternalMutationReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalMutationReceiptInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ExternalMutationReceipt.
+     */
+    data: XOR<ExternalMutationReceiptCreateInput, ExternalMutationReceiptUncheckedCreateInput>
+  }
+
+  /**
+   * ExternalMutationReceipt createMany
+   */
+  export type ExternalMutationReceiptCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ExternalMutationReceipts.
+     */
+    data: ExternalMutationReceiptCreateManyInput | ExternalMutationReceiptCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ExternalMutationReceipt createManyAndReturn
+   */
+  export type ExternalMutationReceiptCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalMutationReceipt
+     */
+    select?: ExternalMutationReceiptSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalMutationReceipt
+     */
+    omit?: ExternalMutationReceiptOmit<ExtArgs> | null
+    /**
+     * The data used to create many ExternalMutationReceipts.
+     */
+    data: ExternalMutationReceiptCreateManyInput | ExternalMutationReceiptCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalMutationReceiptIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ExternalMutationReceipt update
+   */
+  export type ExternalMutationReceiptUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalMutationReceipt
+     */
+    select?: ExternalMutationReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalMutationReceipt
+     */
+    omit?: ExternalMutationReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalMutationReceiptInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ExternalMutationReceipt.
+     */
+    data: XOR<ExternalMutationReceiptUpdateInput, ExternalMutationReceiptUncheckedUpdateInput>
+    /**
+     * Choose, which ExternalMutationReceipt to update.
+     */
+    where: ExternalMutationReceiptWhereUniqueInput
+  }
+
+  /**
+   * ExternalMutationReceipt updateMany
+   */
+  export type ExternalMutationReceiptUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ExternalMutationReceipts.
+     */
+    data: XOR<ExternalMutationReceiptUpdateManyMutationInput, ExternalMutationReceiptUncheckedUpdateManyInput>
+    /**
+     * Filter which ExternalMutationReceipts to update
+     */
+    where?: ExternalMutationReceiptWhereInput
+    /**
+     * Limit how many ExternalMutationReceipts to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExternalMutationReceipt updateManyAndReturn
+   */
+  export type ExternalMutationReceiptUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalMutationReceipt
+     */
+    select?: ExternalMutationReceiptSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalMutationReceipt
+     */
+    omit?: ExternalMutationReceiptOmit<ExtArgs> | null
+    /**
+     * The data used to update ExternalMutationReceipts.
+     */
+    data: XOR<ExternalMutationReceiptUpdateManyMutationInput, ExternalMutationReceiptUncheckedUpdateManyInput>
+    /**
+     * Filter which ExternalMutationReceipts to update
+     */
+    where?: ExternalMutationReceiptWhereInput
+    /**
+     * Limit how many ExternalMutationReceipts to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalMutationReceiptIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ExternalMutationReceipt upsert
+   */
+  export type ExternalMutationReceiptUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalMutationReceipt
+     */
+    select?: ExternalMutationReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalMutationReceipt
+     */
+    omit?: ExternalMutationReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalMutationReceiptInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ExternalMutationReceipt to update in case it exists.
+     */
+    where: ExternalMutationReceiptWhereUniqueInput
+    /**
+     * In case the ExternalMutationReceipt found by the `where` argument doesn't exist, create a new ExternalMutationReceipt with this data.
+     */
+    create: XOR<ExternalMutationReceiptCreateInput, ExternalMutationReceiptUncheckedCreateInput>
+    /**
+     * In case the ExternalMutationReceipt was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ExternalMutationReceiptUpdateInput, ExternalMutationReceiptUncheckedUpdateInput>
+  }
+
+  /**
+   * ExternalMutationReceipt delete
+   */
+  export type ExternalMutationReceiptDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalMutationReceipt
+     */
+    select?: ExternalMutationReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalMutationReceipt
+     */
+    omit?: ExternalMutationReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalMutationReceiptInclude<ExtArgs> | null
+    /**
+     * Filter which ExternalMutationReceipt to delete.
+     */
+    where: ExternalMutationReceiptWhereUniqueInput
+  }
+
+  /**
+   * ExternalMutationReceipt deleteMany
+   */
+  export type ExternalMutationReceiptDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ExternalMutationReceipts to delete
+     */
+    where?: ExternalMutationReceiptWhereInput
+    /**
+     * Limit how many ExternalMutationReceipts to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ExternalMutationReceipt without action
+   */
+  export type ExternalMutationReceiptDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ExternalMutationReceipt
+     */
+    select?: ExternalMutationReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ExternalMutationReceipt
+     */
+    omit?: ExternalMutationReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ExternalMutationReceiptInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model RoutineDefinition
    */
 
@@ -117891,6 +119108,19 @@ export namespace Prisma {
   export type OperationAuditLogScalarFieldEnum = (typeof OperationAuditLogScalarFieldEnum)[keyof typeof OperationAuditLogScalarFieldEnum]
 
 
+  export const ExternalMutationReceiptScalarFieldEnum: {
+    id: 'id',
+    identityId: 'identityId',
+    connectionId: 'connectionId',
+    capability: 'capability',
+    inputDigest: 'inputDigest',
+    resultJson: 'resultJson',
+    createdAt: 'createdAt'
+  };
+
+  export type ExternalMutationReceiptScalarFieldEnum = (typeof ExternalMutationReceiptScalarFieldEnum)[keyof typeof ExternalMutationReceiptScalarFieldEnum]
+
+
   export const RoutineDefinitionScalarFieldEnum: {
     id: 'id',
     identityId: 'identityId',
@@ -118715,6 +119945,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Account"> | Date | string
     closedAt?: DateTimeNullableFilter<"Account"> | Date | string | null
     cloudUser?: XOR<CloudAuthUserScalarRelationFilter, CloudAuthUserWhereInput>
+    externalMutationReceipts?: ExternalMutationReceiptListRelationFilter
     goals?: GoalListRelationFilter
     profileImportOperations?: ProfileImportOperationListRelationFilter
     labels?: LabelListRelationFilter
@@ -118767,6 +119998,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     closedAt?: SortOrderInput | SortOrder
     cloudUser?: CloudAuthUserOrderByWithRelationInput
+    externalMutationReceipts?: ExternalMutationReceiptOrderByRelationAggregateInput
     goals?: GoalOrderByRelationAggregateInput
     profileImportOperations?: ProfileImportOperationOrderByRelationAggregateInput
     labels?: LabelOrderByRelationAggregateInput
@@ -118822,6 +120054,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Account"> | Date | string
     closedAt?: DateTimeNullableFilter<"Account"> | Date | string | null
     cloudUser?: XOR<CloudAuthUserScalarRelationFilter, CloudAuthUserWhereInput>
+    externalMutationReceipts?: ExternalMutationReceiptListRelationFilter
     goals?: GoalListRelationFilter
     profileImportOperations?: ProfileImportOperationListRelationFilter
     labels?: LabelListRelationFilter
@@ -123466,6 +124699,71 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"OperationAuditLog"> | Date | string
   }
 
+  export type ExternalMutationReceiptWhereInput = {
+    AND?: ExternalMutationReceiptWhereInput | ExternalMutationReceiptWhereInput[]
+    OR?: ExternalMutationReceiptWhereInput[]
+    NOT?: ExternalMutationReceiptWhereInput | ExternalMutationReceiptWhereInput[]
+    id?: StringFilter<"ExternalMutationReceipt"> | string
+    identityId?: StringFilter<"ExternalMutationReceipt"> | string
+    connectionId?: StringFilter<"ExternalMutationReceipt"> | string
+    capability?: StringFilter<"ExternalMutationReceipt"> | string
+    inputDigest?: StringFilter<"ExternalMutationReceipt"> | string
+    resultJson?: StringFilter<"ExternalMutationReceipt"> | string
+    createdAt?: DateTimeFilter<"ExternalMutationReceipt"> | Date | string
+    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+  }
+
+  export type ExternalMutationReceiptOrderByWithRelationInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    connectionId?: SortOrder
+    capability?: SortOrder
+    inputDigest?: SortOrder
+    resultJson?: SortOrder
+    createdAt?: SortOrder
+    account?: AccountOrderByWithRelationInput
+  }
+
+  export type ExternalMutationReceiptWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: ExternalMutationReceiptWhereInput | ExternalMutationReceiptWhereInput[]
+    OR?: ExternalMutationReceiptWhereInput[]
+    NOT?: ExternalMutationReceiptWhereInput | ExternalMutationReceiptWhereInput[]
+    identityId?: StringFilter<"ExternalMutationReceipt"> | string
+    connectionId?: StringFilter<"ExternalMutationReceipt"> | string
+    capability?: StringFilter<"ExternalMutationReceipt"> | string
+    inputDigest?: StringFilter<"ExternalMutationReceipt"> | string
+    resultJson?: StringFilter<"ExternalMutationReceipt"> | string
+    createdAt?: DateTimeFilter<"ExternalMutationReceipt"> | Date | string
+    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+  }, "id">
+
+  export type ExternalMutationReceiptOrderByWithAggregationInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    connectionId?: SortOrder
+    capability?: SortOrder
+    inputDigest?: SortOrder
+    resultJson?: SortOrder
+    createdAt?: SortOrder
+    _count?: ExternalMutationReceiptCountOrderByAggregateInput
+    _max?: ExternalMutationReceiptMaxOrderByAggregateInput
+    _min?: ExternalMutationReceiptMinOrderByAggregateInput
+  }
+
+  export type ExternalMutationReceiptScalarWhereWithAggregatesInput = {
+    AND?: ExternalMutationReceiptScalarWhereWithAggregatesInput | ExternalMutationReceiptScalarWhereWithAggregatesInput[]
+    OR?: ExternalMutationReceiptScalarWhereWithAggregatesInput[]
+    NOT?: ExternalMutationReceiptScalarWhereWithAggregatesInput | ExternalMutationReceiptScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ExternalMutationReceipt"> | string
+    identityId?: StringWithAggregatesFilter<"ExternalMutationReceipt"> | string
+    connectionId?: StringWithAggregatesFilter<"ExternalMutationReceipt"> | string
+    capability?: StringWithAggregatesFilter<"ExternalMutationReceipt"> | string
+    inputDigest?: StringWithAggregatesFilter<"ExternalMutationReceipt"> | string
+    resultJson?: StringWithAggregatesFilter<"ExternalMutationReceipt"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"ExternalMutationReceipt"> | Date | string
+  }
+
   export type RoutineDefinitionWhereInput = {
     AND?: RoutineDefinitionWhereInput | RoutineDefinitionWhereInput[]
     OR?: RoutineDefinitionWhereInput[]
@@ -126887,6 +128185,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -126938,6 +128237,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -126989,6 +128289,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -127040,6 +128341,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -132250,6 +133552,75 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type ExternalMutationReceiptCreateInput = {
+    id: string
+    connectionId: string
+    capability: string
+    inputDigest: string
+    resultJson: string
+    createdAt?: Date | string
+    account: AccountCreateNestedOneWithoutExternalMutationReceiptsInput
+  }
+
+  export type ExternalMutationReceiptUncheckedCreateInput = {
+    id: string
+    identityId: string
+    connectionId: string
+    capability: string
+    inputDigest: string
+    resultJson: string
+    createdAt?: Date | string
+  }
+
+  export type ExternalMutationReceiptUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    connectionId?: StringFieldUpdateOperationsInput | string
+    capability?: StringFieldUpdateOperationsInput | string
+    inputDigest?: StringFieldUpdateOperationsInput | string
+    resultJson?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    account?: AccountUpdateOneRequiredWithoutExternalMutationReceiptsNestedInput
+  }
+
+  export type ExternalMutationReceiptUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    connectionId?: StringFieldUpdateOperationsInput | string
+    capability?: StringFieldUpdateOperationsInput | string
+    inputDigest?: StringFieldUpdateOperationsInput | string
+    resultJson?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExternalMutationReceiptCreateManyInput = {
+    id: string
+    identityId: string
+    connectionId: string
+    capability: string
+    inputDigest: string
+    resultJson: string
+    createdAt?: Date | string
+  }
+
+  export type ExternalMutationReceiptUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    connectionId?: StringFieldUpdateOperationsInput | string
+    capability?: StringFieldUpdateOperationsInput | string
+    inputDigest?: StringFieldUpdateOperationsInput | string
+    resultJson?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExternalMutationReceiptUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    connectionId?: StringFieldUpdateOperationsInput | string
+    capability?: StringFieldUpdateOperationsInput | string
+    inputDigest?: StringFieldUpdateOperationsInput | string
+    resultJson?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type RoutineDefinitionCreateInput = {
     id: string
     name: string
@@ -136122,6 +137493,12 @@ export namespace Prisma {
     isNot?: CloudAuthUserWhereInput
   }
 
+  export type ExternalMutationReceiptListRelationFilter = {
+    every?: ExternalMutationReceiptWhereInput
+    some?: ExternalMutationReceiptWhereInput
+    none?: ExternalMutationReceiptWhereInput
+  }
+
   export type GoalListRelationFilter = {
     every?: GoalWhereInput
     some?: GoalWhereInput
@@ -136376,6 +137753,10 @@ export namespace Prisma {
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
+  }
+
+  export type ExternalMutationReceiptOrderByRelationAggregateInput = {
+    _count?: SortOrder
   }
 
   export type GoalOrderByRelationAggregateInput = {
@@ -139610,6 +140991,36 @@ export namespace Prisma {
     createdAt?: SortOrder
   }
 
+  export type ExternalMutationReceiptCountOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    connectionId?: SortOrder
+    capability?: SortOrder
+    inputDigest?: SortOrder
+    resultJson?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ExternalMutationReceiptMaxOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    connectionId?: SortOrder
+    capability?: SortOrder
+    inputDigest?: SortOrder
+    resultJson?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ExternalMutationReceiptMinOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    connectionId?: SortOrder
+    capability?: SortOrder
+    inputDigest?: SortOrder
+    resultJson?: SortOrder
+    createdAt?: SortOrder
+  }
+
   export type RoutineTemporaryOverrideNullableScalarRelationFilter = {
     is?: RoutineTemporaryOverrideWhereInput | null
     isNot?: RoutineTemporaryOverrideWhereInput | null
@@ -141713,6 +143124,13 @@ export namespace Prisma {
     connect?: CloudAuthUserWhereUniqueInput
   }
 
+  export type ExternalMutationReceiptCreateNestedManyWithoutAccountInput = {
+    create?: XOR<ExternalMutationReceiptCreateWithoutAccountInput, ExternalMutationReceiptUncheckedCreateWithoutAccountInput> | ExternalMutationReceiptCreateWithoutAccountInput[] | ExternalMutationReceiptUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: ExternalMutationReceiptCreateOrConnectWithoutAccountInput | ExternalMutationReceiptCreateOrConnectWithoutAccountInput[]
+    createMany?: ExternalMutationReceiptCreateManyAccountInputEnvelope
+    connect?: ExternalMutationReceiptWhereUniqueInput | ExternalMutationReceiptWhereUniqueInput[]
+  }
+
   export type GoalCreateNestedManyWithoutAccountInput = {
     create?: XOR<GoalCreateWithoutAccountInput, GoalUncheckedCreateWithoutAccountInput> | GoalCreateWithoutAccountInput[] | GoalUncheckedCreateWithoutAccountInput[]
     connectOrCreate?: GoalCreateOrConnectWithoutAccountInput | GoalCreateOrConnectWithoutAccountInput[]
@@ -142004,6 +143422,13 @@ export namespace Prisma {
     connectOrCreate?: KnowledgeWriteRequestCreateOrConnectWithoutAccountInput | KnowledgeWriteRequestCreateOrConnectWithoutAccountInput[]
     createMany?: KnowledgeWriteRequestCreateManyAccountInputEnvelope
     connect?: KnowledgeWriteRequestWhereUniqueInput | KnowledgeWriteRequestWhereUniqueInput[]
+  }
+
+  export type ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput = {
+    create?: XOR<ExternalMutationReceiptCreateWithoutAccountInput, ExternalMutationReceiptUncheckedCreateWithoutAccountInput> | ExternalMutationReceiptCreateWithoutAccountInput[] | ExternalMutationReceiptUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: ExternalMutationReceiptCreateOrConnectWithoutAccountInput | ExternalMutationReceiptCreateOrConnectWithoutAccountInput[]
+    createMany?: ExternalMutationReceiptCreateManyAccountInputEnvelope
+    connect?: ExternalMutationReceiptWhereUniqueInput | ExternalMutationReceiptWhereUniqueInput[]
   }
 
   export type GoalUncheckedCreateNestedManyWithoutAccountInput = {
@@ -142317,6 +143742,20 @@ export namespace Prisma {
     upsert?: CloudAuthUserUpsertWithoutAccountInput
     connect?: CloudAuthUserWhereUniqueInput
     update?: XOR<XOR<CloudAuthUserUpdateToOneWithWhereWithoutAccountInput, CloudAuthUserUpdateWithoutAccountInput>, CloudAuthUserUncheckedUpdateWithoutAccountInput>
+  }
+
+  export type ExternalMutationReceiptUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<ExternalMutationReceiptCreateWithoutAccountInput, ExternalMutationReceiptUncheckedCreateWithoutAccountInput> | ExternalMutationReceiptCreateWithoutAccountInput[] | ExternalMutationReceiptUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: ExternalMutationReceiptCreateOrConnectWithoutAccountInput | ExternalMutationReceiptCreateOrConnectWithoutAccountInput[]
+    upsert?: ExternalMutationReceiptUpsertWithWhereUniqueWithoutAccountInput | ExternalMutationReceiptUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: ExternalMutationReceiptCreateManyAccountInputEnvelope
+    set?: ExternalMutationReceiptWhereUniqueInput | ExternalMutationReceiptWhereUniqueInput[]
+    disconnect?: ExternalMutationReceiptWhereUniqueInput | ExternalMutationReceiptWhereUniqueInput[]
+    delete?: ExternalMutationReceiptWhereUniqueInput | ExternalMutationReceiptWhereUniqueInput[]
+    connect?: ExternalMutationReceiptWhereUniqueInput | ExternalMutationReceiptWhereUniqueInput[]
+    update?: ExternalMutationReceiptUpdateWithWhereUniqueWithoutAccountInput | ExternalMutationReceiptUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: ExternalMutationReceiptUpdateManyWithWhereWithoutAccountInput | ExternalMutationReceiptUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: ExternalMutationReceiptScalarWhereInput | ExternalMutationReceiptScalarWhereInput[]
   }
 
   export type GoalUpdateManyWithoutAccountNestedInput = {
@@ -142901,6 +144340,20 @@ export namespace Prisma {
     update?: KnowledgeWriteRequestUpdateWithWhereUniqueWithoutAccountInput | KnowledgeWriteRequestUpdateWithWhereUniqueWithoutAccountInput[]
     updateMany?: KnowledgeWriteRequestUpdateManyWithWhereWithoutAccountInput | KnowledgeWriteRequestUpdateManyWithWhereWithoutAccountInput[]
     deleteMany?: KnowledgeWriteRequestScalarWhereInput | KnowledgeWriteRequestScalarWhereInput[]
+  }
+
+  export type ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<ExternalMutationReceiptCreateWithoutAccountInput, ExternalMutationReceiptUncheckedCreateWithoutAccountInput> | ExternalMutationReceiptCreateWithoutAccountInput[] | ExternalMutationReceiptUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: ExternalMutationReceiptCreateOrConnectWithoutAccountInput | ExternalMutationReceiptCreateOrConnectWithoutAccountInput[]
+    upsert?: ExternalMutationReceiptUpsertWithWhereUniqueWithoutAccountInput | ExternalMutationReceiptUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: ExternalMutationReceiptCreateManyAccountInputEnvelope
+    set?: ExternalMutationReceiptWhereUniqueInput | ExternalMutationReceiptWhereUniqueInput[]
+    disconnect?: ExternalMutationReceiptWhereUniqueInput | ExternalMutationReceiptWhereUniqueInput[]
+    delete?: ExternalMutationReceiptWhereUniqueInput | ExternalMutationReceiptWhereUniqueInput[]
+    connect?: ExternalMutationReceiptWhereUniqueInput | ExternalMutationReceiptWhereUniqueInput[]
+    update?: ExternalMutationReceiptUpdateWithWhereUniqueWithoutAccountInput | ExternalMutationReceiptUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: ExternalMutationReceiptUpdateManyWithWhereWithoutAccountInput | ExternalMutationReceiptUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: ExternalMutationReceiptScalarWhereInput | ExternalMutationReceiptScalarWhereInput[]
   }
 
   export type GoalUncheckedUpdateManyWithoutAccountNestedInput = {
@@ -146015,6 +147468,20 @@ export namespace Prisma {
     update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutRelationsInput, AccountUpdateWithoutRelationsInput>, AccountUncheckedUpdateWithoutRelationsInput>
   }
 
+  export type AccountCreateNestedOneWithoutExternalMutationReceiptsInput = {
+    create?: XOR<AccountCreateWithoutExternalMutationReceiptsInput, AccountUncheckedCreateWithoutExternalMutationReceiptsInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutExternalMutationReceiptsInput
+    connect?: AccountWhereUniqueInput
+  }
+
+  export type AccountUpdateOneRequiredWithoutExternalMutationReceiptsNestedInput = {
+    create?: XOR<AccountCreateWithoutExternalMutationReceiptsInput, AccountUncheckedCreateWithoutExternalMutationReceiptsInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutExternalMutationReceiptsInput
+    upsert?: AccountUpsertWithoutExternalMutationReceiptsInput
+    connect?: AccountWhereUniqueInput
+    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutExternalMutationReceiptsInput, AccountUpdateWithoutExternalMutationReceiptsInput>, AccountUncheckedUpdateWithoutExternalMutationReceiptsInput>
+  }
+
   export type AccountCreateNestedOneWithoutRoutineDefinitionsInput = {
     create?: XOR<AccountCreateWithoutRoutineDefinitionsInput, AccountUncheckedCreateWithoutRoutineDefinitionsInput>
     connectOrCreate?: AccountCreateOrConnectWithoutRoutineDefinitionsInput
@@ -147912,6 +149379,34 @@ export namespace Prisma {
     create: XOR<CloudAuthUserCreateWithoutAccountInput, CloudAuthUserUncheckedCreateWithoutAccountInput>
   }
 
+  export type ExternalMutationReceiptCreateWithoutAccountInput = {
+    id: string
+    connectionId: string
+    capability: string
+    inputDigest: string
+    resultJson: string
+    createdAt?: Date | string
+  }
+
+  export type ExternalMutationReceiptUncheckedCreateWithoutAccountInput = {
+    id: string
+    connectionId: string
+    capability: string
+    inputDigest: string
+    resultJson: string
+    createdAt?: Date | string
+  }
+
+  export type ExternalMutationReceiptCreateOrConnectWithoutAccountInput = {
+    where: ExternalMutationReceiptWhereUniqueInput
+    create: XOR<ExternalMutationReceiptCreateWithoutAccountInput, ExternalMutationReceiptUncheckedCreateWithoutAccountInput>
+  }
+
+  export type ExternalMutationReceiptCreateManyAccountInputEnvelope = {
+    data: ExternalMutationReceiptCreateManyAccountInput | ExternalMutationReceiptCreateManyAccountInput[]
+    skipDuplicates?: boolean
+  }
+
   export type GoalCreateWithoutAccountInput = {
     id: string
     name: string
@@ -149669,6 +151164,35 @@ export namespace Prisma {
     oauthconsents?: OauthConsentUncheckedUpdateManyWithoutCloudauthuserNestedInput
   }
 
+  export type ExternalMutationReceiptUpsertWithWhereUniqueWithoutAccountInput = {
+    where: ExternalMutationReceiptWhereUniqueInput
+    update: XOR<ExternalMutationReceiptUpdateWithoutAccountInput, ExternalMutationReceiptUncheckedUpdateWithoutAccountInput>
+    create: XOR<ExternalMutationReceiptCreateWithoutAccountInput, ExternalMutationReceiptUncheckedCreateWithoutAccountInput>
+  }
+
+  export type ExternalMutationReceiptUpdateWithWhereUniqueWithoutAccountInput = {
+    where: ExternalMutationReceiptWhereUniqueInput
+    data: XOR<ExternalMutationReceiptUpdateWithoutAccountInput, ExternalMutationReceiptUncheckedUpdateWithoutAccountInput>
+  }
+
+  export type ExternalMutationReceiptUpdateManyWithWhereWithoutAccountInput = {
+    where: ExternalMutationReceiptScalarWhereInput
+    data: XOR<ExternalMutationReceiptUpdateManyMutationInput, ExternalMutationReceiptUncheckedUpdateManyWithoutAccountInput>
+  }
+
+  export type ExternalMutationReceiptScalarWhereInput = {
+    AND?: ExternalMutationReceiptScalarWhereInput | ExternalMutationReceiptScalarWhereInput[]
+    OR?: ExternalMutationReceiptScalarWhereInput[]
+    NOT?: ExternalMutationReceiptScalarWhereInput | ExternalMutationReceiptScalarWhereInput[]
+    id?: StringFilter<"ExternalMutationReceipt"> | string
+    identityId?: StringFilter<"ExternalMutationReceipt"> | string
+    connectionId?: StringFilter<"ExternalMutationReceipt"> | string
+    capability?: StringFilter<"ExternalMutationReceipt"> | string
+    inputDigest?: StringFilter<"ExternalMutationReceipt"> | string
+    resultJson?: StringFilter<"ExternalMutationReceipt"> | string
+    createdAt?: DateTimeFilter<"ExternalMutationReceipt"> | Date | string
+  }
+
   export type GoalUpsertWithWhereUniqueWithoutAccountInput = {
     where: GoalWhereUniqueInput
     update: XOR<GoalUpdateWithoutAccountInput, GoalUncheckedUpdateWithoutAccountInput>
@@ -151126,6 +152650,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -151176,6 +152701,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -151261,6 +152787,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -151311,6 +152838,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -151386,6 +152914,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -151436,6 +152965,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -151502,6 +153032,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -151552,6 +153083,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -151602,6 +153134,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -151652,6 +153185,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -151718,6 +153252,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -151768,6 +153303,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -151818,6 +153354,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -151868,6 +153405,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -151934,6 +153472,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -151984,6 +153523,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -152034,6 +153574,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -152084,6 +153625,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -152173,6 +153715,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -152223,6 +153766,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -152289,6 +153833,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -152339,6 +153884,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -152452,6 +153998,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -152502,6 +154049,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -152596,6 +154144,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -152646,6 +154195,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -152790,6 +154340,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -152840,6 +154391,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -153120,6 +154672,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -153170,6 +154723,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -153236,6 +154790,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -153286,6 +154841,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -153336,6 +154892,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -153386,6 +154943,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -153452,6 +155010,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -153502,6 +155061,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -153552,6 +155112,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -153602,6 +155163,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -153668,6 +155230,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -153718,6 +155281,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -154169,6 +155733,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -154219,6 +155784,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -154614,6 +156180,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -154664,6 +156231,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -155323,6 +156891,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -155373,6 +156942,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -155578,6 +157148,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -155628,6 +157199,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -156538,6 +158110,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -156588,6 +158161,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -156703,6 +158277,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -156753,6 +158328,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -157105,6 +158681,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -157155,6 +158732,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -157259,6 +158837,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -157309,6 +158888,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -157391,6 +158971,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -157441,6 +159022,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -157587,6 +159169,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -157637,6 +159220,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -157779,6 +159363,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -157829,6 +159414,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -157984,6 +159570,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -158034,6 +159621,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -158319,6 +159907,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -158369,6 +159958,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -158499,6 +160089,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -158549,6 +160140,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -158599,6 +160191,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -158649,6 +160242,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -158782,6 +160376,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -158832,6 +160427,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -159162,6 +160758,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -159212,6 +160809,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -159351,6 +160949,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -159401,6 +161000,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -161214,6 +162814,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
@@ -161264,6 +162865,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
     goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
@@ -161330,6 +162932,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
@@ -161380,6 +162983,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
     goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -161430,6 +163034,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -161480,6 +163085,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -161546,6 +163152,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -161596,6 +163203,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -161639,6 +163247,226 @@ export namespace Prisma {
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
   }
 
+  export type AccountCreateWithoutExternalMutationReceiptsInput = {
+    status?: string
+    profile: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedAt?: Date | string | null
+    cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
+    labels?: LabelCreateNestedManyWithoutAccountInput
+    goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
+    taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
+    routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
+    routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
+    routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
+    routineProtocolSessions?: RoutineProtocolSessionCreateNestedManyWithoutAccountInput
+    schedules?: ScheduleCreateNestedManyWithoutAccountInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
+    habits?: HabitCreateNestedManyWithoutAccountInput
+    relations?: RelationCreateNestedManyWithoutAccountInput
+    walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
+    walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
+    taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
+    taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
+    userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
+    notifications?: NotificationCreateNestedManyWithoutAccountInput
+    aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
+    aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
+    aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
+    taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
+    routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
+    routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountUncheckedCreateWithoutExternalMutationReceiptsInput = {
+    id: string
+    status?: string
+    profile: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedAt?: Date | string | null
+    goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
+    labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
+    goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
+    taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
+    routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
+    routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
+    routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routineProtocolSessions?: RoutineProtocolSessionUncheckedCreateNestedManyWithoutAccountInput
+    schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
+    habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
+    relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
+    walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
+    walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
+    taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
+    taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
+    aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
+    taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountCreateOrConnectWithoutExternalMutationReceiptsInput = {
+    where: AccountWhereUniqueInput
+    create: XOR<AccountCreateWithoutExternalMutationReceiptsInput, AccountUncheckedCreateWithoutExternalMutationReceiptsInput>
+  }
+
+  export type AccountUpsertWithoutExternalMutationReceiptsInput = {
+    update: XOR<AccountUpdateWithoutExternalMutationReceiptsInput, AccountUncheckedUpdateWithoutExternalMutationReceiptsInput>
+    create: XOR<AccountCreateWithoutExternalMutationReceiptsInput, AccountUncheckedCreateWithoutExternalMutationReceiptsInput>
+    where?: AccountWhereInput
+  }
+
+  export type AccountUpdateToOneWithWhereWithoutExternalMutationReceiptsInput = {
+    where?: AccountWhereInput
+    data: XOR<AccountUpdateWithoutExternalMutationReceiptsInput, AccountUncheckedUpdateWithoutExternalMutationReceiptsInput>
+  }
+
+  export type AccountUpdateWithoutExternalMutationReceiptsInput = {
+    status?: StringFieldUpdateOperationsInput | string
+    profile?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
+    labels?: LabelUpdateManyWithoutAccountNestedInput
+    goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
+    taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
+    routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
+    routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
+    routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
+    routineProtocolSessions?: RoutineProtocolSessionUpdateManyWithoutAccountNestedInput
+    schedules?: ScheduleUpdateManyWithoutAccountNestedInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
+    habits?: HabitUpdateManyWithoutAccountNestedInput
+    relations?: RelationUpdateManyWithoutAccountNestedInput
+    walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
+    walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
+    taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
+    taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
+    userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
+    notifications?: NotificationUpdateManyWithoutAccountNestedInput
+    aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
+    aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
+    aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
+    taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
+    routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
+    routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
+  }
+
+  export type AccountUncheckedUpdateWithoutExternalMutationReceiptsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    profile?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
+    labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
+    goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
+    taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
+    routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
+    routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
+    routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routineProtocolSessions?: RoutineProtocolSessionUncheckedUpdateManyWithoutAccountNestedInput
+    schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
+    habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
+    relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
+    walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
+    walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
+    taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
+    taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
+    taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
+  }
+
   export type AccountCreateWithoutRoutineDefinitionsInput = {
     status?: string
     profile: JsonNullValueInput | InputJsonValue
@@ -161646,6 +163474,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -161696,6 +163525,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -161919,6 +163749,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -161969,6 +163800,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -162093,6 +163925,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -162143,6 +163976,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -162209,6 +164043,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -162259,6 +164094,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -162309,6 +164145,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -162359,6 +164196,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -162452,6 +164290,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -162502,6 +164341,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -162568,6 +164408,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -162618,6 +164459,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -162748,6 +164590,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -162798,6 +164641,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -162924,6 +164768,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -162974,6 +164819,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -163075,6 +164921,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -163125,6 +164972,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -163191,6 +165039,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -163241,6 +165090,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -163332,6 +165182,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -163382,6 +165233,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -163500,6 +165352,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -163550,6 +165403,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -163693,6 +165547,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -163743,6 +165598,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -163809,6 +165665,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -163859,6 +165716,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -164033,6 +165891,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -164083,6 +165942,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -164290,6 +166150,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -164340,6 +166201,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -164449,6 +166311,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -164499,6 +166362,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -164549,6 +166413,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -164599,6 +166464,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -164665,6 +166531,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -164715,6 +166582,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -164951,6 +166819,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -165001,6 +166870,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -165357,6 +167227,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -165407,6 +167278,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -166365,6 +168237,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -166415,6 +168288,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -166526,6 +168400,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -166576,6 +168451,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -166677,6 +168553,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -166727,6 +168604,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -166793,6 +168671,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -166843,6 +168722,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -166893,6 +168773,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -166943,6 +168824,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -167053,6 +168935,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -167103,6 +168986,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -167169,6 +169053,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -167219,6 +169104,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -167350,6 +169236,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -167400,6 +169287,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -167521,6 +169409,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -167571,6 +169460,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -167637,6 +169527,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -167687,6 +169578,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -167737,6 +169629,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -167787,6 +169680,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -167853,6 +169747,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -167903,6 +169798,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -167953,6 +169849,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -168003,6 +169900,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -168206,6 +170104,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -168256,6 +170155,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -168408,6 +170308,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -168458,6 +170359,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -168586,6 +170488,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -168636,6 +170539,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -168754,6 +170658,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -168804,6 +170709,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -168932,6 +170838,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -168982,6 +170889,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -169100,6 +171008,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -169150,6 +171059,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -169250,6 +171160,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -169300,6 +171211,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -169391,6 +171303,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     closedAt?: Date | string | null
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
     labels?: LabelCreateNestedManyWithoutAccountInput
@@ -169441,6 +171354,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -169538,6 +171452,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
     labels?: LabelUpdateManyWithoutAccountNestedInput
@@ -169588,6 +171503,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -169629,6 +171545,15 @@ export namespace Prisma {
     knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
+  }
+
+  export type ExternalMutationReceiptCreateManyAccountInput = {
+    id: string
+    connectionId: string
+    capability: string
+    inputDigest: string
+    resultJson: string
+    createdAt?: Date | string
   }
 
   export type GoalCreateManyAccountInput = {
@@ -170232,6 +172157,33 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     completedAt?: Date | string | null
+  }
+
+  export type ExternalMutationReceiptUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    connectionId?: StringFieldUpdateOperationsInput | string
+    capability?: StringFieldUpdateOperationsInput | string
+    inputDigest?: StringFieldUpdateOperationsInput | string
+    resultJson?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExternalMutationReceiptUncheckedUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    connectionId?: StringFieldUpdateOperationsInput | string
+    capability?: StringFieldUpdateOperationsInput | string
+    inputDigest?: StringFieldUpdateOperationsInput | string
+    resultJson?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ExternalMutationReceiptUncheckedUpdateManyWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    connectionId?: StringFieldUpdateOperationsInput | string
+    capability?: StringFieldUpdateOperationsInput | string
+    inputDigest?: StringFieldUpdateOperationsInput | string
+    resultJson?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type GoalUpdateWithoutAccountInput = {

@@ -21,14 +21,14 @@ export class UpdateGoalKeyResultUseCase {
     keyResultId: string,
     updates: {
       title?: string;
-      description?: string;
+      description?: string | null;
       weight?: number;
       initialValue?: number;
       target?: GoalTimeframe | null;
       aggregationMethod?: import('@memoflow/contracts/goal').KeyResultCalculationMethod;
       currentValue?: number;
       targetValue?: number;
-      unit?: string;
+      unit?: string | null;
       expectedVersion: number;
     },
   ): Promise<Result<GoalMutationReceipt>> {

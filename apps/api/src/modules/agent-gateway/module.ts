@@ -4,6 +4,7 @@ import type { PilotAdmission } from './pilot-admission';
 import { createReadGateway, toNodeHandler } from '@memoflow/agent-gateway/server';
 import type {
   GoalReadPort,
+  GatewayWritePort,
   TaskReadPort,
   GatewayAuditEvent,
   GatewayDiagnostic,
@@ -15,6 +16,7 @@ import type { RequestContextCarrierRequest } from '../../shared/infrastructure/h
 
 interface Options {
   readonly enabled: boolean;
+  readonly writes?: GatewayWritePort;
   readonly admission: PilotAdmission;
   readonly audience: string;
   readonly cursorSecret: string;
@@ -92,7 +94,9 @@ export function composeAgentGatewayModule(options: Options): IApiModule {
           return;
         }
         try {
-          if (!(await options.admission.consumeIp(req.ip ?? req.socket.remoteAddress ?? 'unknown'))) {
+          if (
+            !(await options.admission.consumeIp(req.ip ?? req.socket.remoteAddress ?? 'unknown'))
+          ) {
             deny(429, 'RATE_LIMITED');
             return;
           }

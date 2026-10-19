@@ -19,15 +19,19 @@ export async function validateTaskGoalProgress(
       caught instanceof Error ? caught.message : 'Invalid Goal progress rule',
     );
   }
-  if (!binding.progressRule) return null;
-  if (!goalReadPort) return error('BAD_REQUEST', 'Goal measurement context is unavailable');
+  if (!binding.keyResultId) return null;
+  // A Key Result reference is identity-scoped even without a progress rule.
+  if (!goalReadPort)
+    return binding.progressRule
+      ? error('BAD_REQUEST', 'Goal measurement context is unavailable')
+      : null;
   const context = await goalReadPort.getKeyResultMeasurementContext(
     binding.goalId,
-    binding.keyResultId!,
+    binding.keyResultId,
     identityId,
   );
   if (!context.ok) return context;
-  if (binding.progressRule.mode === 'Fixed' && context.data.progress.aggregationMethod !== 'Sum') {
+  if (binding.progressRule?.mode === 'Fixed' && context.data.progress.aggregationMethod !== 'Sum') {
     return error('BAD_REQUEST', 'Fixed automatic Goal progress requires a Sum Key Result');
   }
   return null;

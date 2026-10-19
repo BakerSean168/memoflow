@@ -1,4 +1,6 @@
 ---
+
+> 存储布局已被 Issue #487 的 [Desktop storage ownership](../../architecture/desktop-storage.md) 取代；本文仅保留历史背景。
 tags:
   - plan
   - active
@@ -83,7 +85,7 @@ status: active
   - snapshot staging
   - downloads
   - temp
-- `Documents\MemoFlow Files`
+- `用户原生对话框选择的位置`
   - exports
   - downloads
   - attachments
@@ -216,7 +218,7 @@ Snapshot 链路当前已落地为四段：
 
 当前已实现：
 
-- `Documents\MemoFlow Files` 根路径解析
+- `用户原生对话框选择的位置` 根路径解析
 - `exports/downloads/attachments` 子目录
 - 文本导入导出的 system IPC
 - 设置页 JSON 导入导出使用该能力
@@ -237,7 +239,7 @@ Snapshot 链路当前已落地为四段：
 - [shared-path-resolver.ts](/D:/home/projects/memoflow/apps/desktop/src/main/paths/shared-path-resolver.ts:16)
 - [system-handlers.ts](/D:/home/projects/memoflow/apps/desktop/src/main/ipc/system-handlers.ts:118)
 - [UserSettingsView.vue](/D:/home/projects/memoflow/packages/app-vue/src/modules/setting/views/UserSettingsView.vue:109)
-- [UserFilesSettings.vue](/D:/home/projects/memoflow/packages/app-vue/src/modules/setting/components/UserFilesSettings.vue:1)
+- 用户文件目录设置已由 #487 删除，改为原生导入/导出对话框。
 
 #### 2.3 Snapshot 自动化已接入，生产 rollout 仍待验证
 
@@ -328,7 +330,7 @@ Snapshot 链路当前已落地为四段：
   - DesktopProfileRuntimeManager：prepare/activate/deactivate/remove/switch/guest/error
   - desktop-auth-shell：logout / guest / auto-login / remembered-account login 行为链
   - path-resolver：computeProfileId 确定性 / 路径结构 / 目录隔离
-  - user-files-config：读写/自定义路径/清除/损坏恢复
+  - 旧文件根配置已退休；当前使用 CONFIG 对话框偏好
   - ProfileSnapshotService：hydrate/checksum/local-db-exists/missing-token/unavailable/download-error/invalid-header/buffer-too-small（9 用例）
 
 ### 已落地但待验收
@@ -350,7 +352,7 @@ Snapshot 链路当前已落地为四段：
 - 不要重新引入 legacy `sync_rules`
 - 不要再把 “升级最新 PowerSync” 写成默认已锁定决策
 - 不要把 `partition` 隔离误写为“已实现 profile 目录承载 Chromium sessionData”
-- 不要把 `Documents\MemoFlow Files` 误写成 per-profile 文件存储
+- 不要把 `用户原生对话框选择的位置` 误写成 per-profile 文件存储
 - 继续实现剩余缺口时，应以当前代码真值为基线，而不是以本文档的旧版本为基线
 
 ## 最小验收真值

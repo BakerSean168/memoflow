@@ -6,7 +6,7 @@
 const path = require('node:path');
 const os = require('node:os');
 const { safeStorage } = require('electron');
-const profilePath = process.env.MEMOFLOW_DESKTOP_USER_DATA_PATH;
+const profilePath = process.env.MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT;
 if (
   process.platform === 'linux' &&
   process.env.MEMOFLOW_SHELL_EPHEMERAL_STORAGE === '1' &&

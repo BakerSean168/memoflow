@@ -76,3 +76,6 @@ export {
   createGoalPrismaPortableCapability,
   createGoalPowerSyncPortableCapability,
 } from './server/infrastructure/goal-profile-import';
+
+export { createGoalPrismaAgentMutations } from './server/infrastructure/adapters/prisma/goal-agent-mutations';
+export { createGoalPrismaAgentReadPort } from './server/infrastructure/adapters/prisma/goal-agent-mutations';

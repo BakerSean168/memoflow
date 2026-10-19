@@ -43,8 +43,8 @@ export class FileDesktopUpdateInstallReceiptStore implements DesktopUpdateInstal
   readonly directory: string;
   readonly receiptPath: string;
 
-  constructor(rootDir: string) {
-    this.directory = path.join(rootDir, 'shared', 'update');
+  constructor(stateRoot: string) {
+    this.directory = path.join(stateRoot, 'update', 'install-receipts');
     this.receiptPath = path.join(this.directory, RECEIPT_FILE_NAME);
   }
 

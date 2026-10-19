@@ -144,6 +144,7 @@ export function useAIChatSession(options: UseAIChatSessionOptions) {
     if (chatLoading.value) return null;
     const pendingContent = chatMessage.value.trim();
     if (!pendingContent) return null;
+    conversation.invalidateRuntimeHistory();
     chatLoading.value = true;
     try {
       const conversationId = await ensureConversationCreated(loadService, conversationName);

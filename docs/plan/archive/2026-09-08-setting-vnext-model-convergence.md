@@ -513,7 +513,7 @@ legacy shareUsageData=true
 - Desktop notification presentation/sound now persists in one narrow, versioned file at `profiles/<profileId>/ui/notification-preference.json`; the store follows the active Profile path dynamically and clears cached values on scope change.
 - Profile A/B isolation, corrupt-file fallback, inactive-profile rejection and active-profile-only reset are executable; no global device settings JSON was introduced.
 - Production `NotificationService` receives the active Profile path resolver through App Lifecycle -> Desktop Features -> Electron capability factory -> `DesktopNotificationPreferenceStore`.
-- Window state remains separately owned by `main-window-state.json`; UserFiles remains the dedicated Desktop host `user-files-config.json` path and does not enter cloud Setting/Data Portability surfaces.
+- Window state remains separately owned by `main-window-state.json`; native file dialogs keep only their last successful directory in CONFIG (#487) and does not enter cloud Setting/Data Portability surfaces.
 - The future `CommandRegistry` / `DeviceKeymap` boundary remains the ADR-094 design seam only; no fake editable shortcut surface or generic keymap store was created.
 - Focused reviewer gates: Desktop path/store/service/wiring 32 tests PASS; Desktop IPC 14/14 PASS; Vue Notification Settings 5/5 PASS; focused ESLint 0 errors; ownership residue scan and `git diff --check` PASS. Full Desktop typecheck is still blocked by unrelated existing Governance/database declaration baseline, with no reported error in the SETTING-9206 changed paths.
 

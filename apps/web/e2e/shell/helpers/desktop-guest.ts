@@ -65,7 +65,7 @@ export class DesktopGuestShellController {
       ],
       env: {
         ...process.env,
-        MEMOFLOW_DESKTOP_USER_DATA_PATH: this.userDataDir,
+        MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: this.userDataDir,
         MEMOFLOW_SHELL_EPHEMERAL_STORAGE: '1',
         ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
         VITEST: 'true',

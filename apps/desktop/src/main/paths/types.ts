@@ -1,3 +1,4 @@
+import type { DesktopStorageRoots } from './desktop-storage-roots';
 /**
  * Path resolver types for the multi-account desktop architecture.
  *
@@ -6,7 +7,7 @@
  */
 
 export interface SharedPathResolver {
-  readonly rootDir: string;
+  readonly roots: DesktopStorageRoots;
   readonly sharedDir: string;
   readonly authDir: string;
   readonly configDir: string;
@@ -18,13 +19,8 @@ export interface SharedPathResolver {
   readonly registryPath: string;
   readonly cacheDir: string;
   readonly snapshotStagingDir: string;
-  readonly downloadsDir: string;
   readonly tempDir: string;
   readonly logsDir: string;
-  readonly userFilesRootDir: string;
-  readonly userFilesExportsDir: string;
-  readonly userFilesDownloadsDir: string;
-  readonly userFilesAttachmentsDir: string;
 }
 
 export interface ProfilePathResolver {

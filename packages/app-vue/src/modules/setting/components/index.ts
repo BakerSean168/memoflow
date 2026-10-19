@@ -5,4 +5,3 @@ export { default as KnowledgeRepositorySettings } from './KnowledgeRepositorySet
 export { default as NotificationSettings } from './NotificationSettings.vue';
 export { default as SettingAdvancedActions } from './SettingAdvancedActions.vue';
 export { default as SettingsResetSection } from './SettingsResetSection.vue';
-export { default as UserFilesSettings } from './UserFilesSettings.vue';

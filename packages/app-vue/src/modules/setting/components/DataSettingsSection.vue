@@ -1,12 +1,11 @@
 <script setup lang="ts">
-/** Data owner composition: V3 preferences portability + full Data Portability + Desktop UserFiles. */
+/** Data owner composition: V3 preferences portability + full Data Portability + Desktop native file dialogs. */
 import { inject, ref } from 'vue';
 import { SystemChannels } from '@memoflow/contracts/electron';
 import { isOk, type Result } from '@memoflow/contracts/result';
 import { DESKTOP_AUTH_API_KEY } from '../../../di/keys';
 import { usePreferencePortability } from '../composables/usePreferencePortability';
 import { useDataPortability } from '../composables/useDataPortability';
-import UserFilesSettings from './UserFilesSettings.vue';
 import SettingAdvancedActions from './SettingAdvancedActions.vue';
 
 const desktopApi = inject(DESKTOP_AUTH_API_KEY, undefined);
@@ -30,7 +29,6 @@ async function handlePreferenceImport(): Promise<void> {
   if (desktopApi?.invoke) {
     try {
       const response = (await desktopApi.invoke(SystemChannels.USER_FILES_OPEN_TEXT, {
-        subdirectory: 'exports',
         filters: [{ name: 'JSON', extensions: ['json'] }],
       })) as Result<OpenTextResult>;
       if (isOk(response) && !response.data.canceled && response.data.content) {
@@ -51,7 +49,6 @@ async function handlePreferenceExport(): Promise<void> {
   if (desktopApi?.invoke) {
     try {
       const response = (await desktopApi.invoke(SystemChannels.USER_FILES_SAVE_TEXT, {
-        subdirectory: 'exports',
         defaultFileName: exported.fileName,
         content: exported.data,
         filters: [{ name: 'JSON', extensions: ['json'] }],
@@ -102,7 +99,6 @@ function onFileSelected(event: Event): void {
       aria-hidden="true"
       @change="onFileSelected"
     />
-    <UserFilesSettings />
     <SettingAdvancedActions
       :exporting-data="isExportingData"
       :importing-data="isImportingData"

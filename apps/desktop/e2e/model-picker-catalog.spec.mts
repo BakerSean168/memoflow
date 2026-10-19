@@ -52,8 +52,7 @@ test('native picker browses a different enabled instance, directly selects its d
         NODE_ENV: 'test',
         MEMOFLOW_ATTENTION_QA_FIXTURE: '1',
         MEMOFLOW_ATTENTION_QA_PROMPT_LOG: promptLog,
-        MEMOFLOW_DESKTOP_USER_DATA_PATH: path.join(root, 'profile'),
-        MEMOFLOW_DESKTOP_USER_FILES_PATH: path.join(root, 'files'),
+        MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: path.join(root, 'profile'),
         ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
       },
     });

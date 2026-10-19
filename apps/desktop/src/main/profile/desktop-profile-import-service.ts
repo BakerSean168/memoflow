@@ -58,7 +58,7 @@ export class DesktopProfileImportService {
     return {
       profile,
       token: session.token,
-      journal: new ProfileImportJournal(this.runtime.getSharedResolver().rootDir, profileId),
+      journal: new ProfileImportJournal(this.runtime.getSharedResolver().roots.dataRoot, profileId),
     };
   }
   private exclusive<T>(work: () => Promise<T>): Promise<T> {
@@ -310,7 +310,7 @@ export class DesktopProfileImportService {
     return this.exclusive(async () => {
       const { profile, token } = await this.target(targetProfileId);
       const marker = path.join(
-        this.runtime.getSharedResolver().rootDir,
+        this.runtime.getSharedResolver().roots.dataRoot,
         'shared',
         'profiles',
         'import-prompts',

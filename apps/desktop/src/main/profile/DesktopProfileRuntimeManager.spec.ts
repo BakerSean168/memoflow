@@ -1,4 +1,6 @@
+import { createSharedPathResolver, resolveDesktopStorageRoots } from '../paths';
 import fs from 'node:fs';
+import { session } from 'electron';
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -54,32 +56,14 @@ vi.mock('../bootstrap', () => ({
 }));
 
 function sharedResolver(rootDir: string): SharedPathResolver {
-  return {
-    rootDir,
-    sharedDir: path.join(rootDir, 'shared'),
-    authDir: path.join(rootDir, 'shared', 'auth'),
-    configDir: path.join(rootDir, 'shared', 'config'),
-    uiDir: path.join(rootDir, 'shared', 'ui'),
-    profilesRegistryDir: path.join(rootDir, 'shared', 'profiles'),
-    deviceIdPath: path.join(rootDir, 'shared', 'auth', 'device-id'),
-    runtimeConfigPath: path.join(rootDir, 'shared', 'config', 'desktop-runtime.json'),
-    profileAccessWindowStatePath: path.join(
-      rootDir,
-      'shared',
-      'ui',
-      'profile-access-window-state.json',
-    ),
-    registryPath: path.join(rootDir, 'shared', 'profiles', 'registry.json'),
-    cacheDir: path.join(rootDir, 'cache'),
-    snapshotStagingDir: path.join(rootDir, 'cache', 'snapshot-staging'),
-    downloadsDir: path.join(rootDir, 'cache', 'downloads'),
-    tempDir: path.join(rootDir, 'cache', 'temp'),
-    logsDir: path.join(rootDir, 'logs'),
-    userFilesRootDir: path.join(rootDir, 'user-files'),
-    userFilesExportsDir: path.join(rootDir, 'user-files', 'exports'),
-    userFilesDownloadsDir: path.join(rootDir, 'user-files', 'downloads'),
-    userFilesAttachmentsDir: path.join(rootDir, 'user-files', 'attachments'),
-  };
+  return createSharedPathResolver(
+    resolveDesktopStorageRoots({
+      platform: 'linux',
+      channel: 'test',
+      home: rootDir,
+      env: { MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: rootDir },
+    }),
+  );
 }
 
 describe('DesktopProfileRuntimeManager', () => {
@@ -175,7 +159,7 @@ describe('DesktopProfileRuntimeManager', () => {
       await registry.register('IdentityId_cloud_a', 'Same name', 'a@example.com'),
       await registry.register('IdentityId_cloud_b', 'Same name', 'b@example.com'),
     ];
-    const sessions = new CloudSessionStore(rootDir);
+    const sessions = new CloudSessionStore(path.join(rootDir, 'data'));
     for (const profile of profiles.filter((item) => item.cloudBinding)) {
       await sessions.save(profile.profileId, {
         token: 'token-' + profile.profileId,
@@ -495,9 +479,10 @@ describe('DesktopProfileRuntimeManager', () => {
 
   it('removes a non-active Profile with its local data and secure credentials', async () => {
     const descriptor = await registry.register('cloud-1', 'Cloud User', 'user@example.com');
-    const profileDir = path.join(rootDir, 'profiles', descriptor.profileId);
+    const profileDir = path.join(rootDir, 'data', 'profiles', descriptor.profileId);
     const keyPath = path.join(
       rootDir,
+      'data',
       'shared',
       'secure',
       'profile-keys',
@@ -505,6 +490,7 @@ describe('DesktopProfileRuntimeManager', () => {
     );
     const pinPath = path.join(
       rootDir,
+      'data',
       'shared',
       'secure',
       'profile-pins',
@@ -512,6 +498,7 @@ describe('DesktopProfileRuntimeManager', () => {
     );
     const sessionPath = path.join(
       rootDir,
+      'data',
       'shared',
       'secure',
       'cloud-sessions',
@@ -529,12 +516,26 @@ describe('DesktopProfileRuntimeManager', () => {
       fs.promises.writeFile(sessionPath, 'session'),
     ]);
 
+    const staging = path.join(rootDir, 'cache', 'snapshot-staging', descriptor.profileId);
+    await fs.promises.mkdir(staging, { recursive: true });
+    await fs.promises.writeFile(path.join(staging, 'old-snapshot'), 'old account');
     await runtime.removeProfile(descriptor.profileId);
+    expect(session.fromPartition).toHaveBeenLastCalledWith(
+      `persist:profile-${descriptor.profileId}`,
+    );
+    const cleared = vi.mocked(session.fromPartition).mock.results.at(-1)?.value;
+    expect(cleared.clearStorageData).toHaveBeenCalledOnce();
+    expect(cleared.clearCache).toHaveBeenCalledOnce();
+    expect(fs.existsSync(staging)).toBe(false);
 
     expect(await registry.findByCloudAccountId('cloud-1')).toBeNull();
     expect(fs.existsSync(profileDir)).toBe(false);
     expect(fs.existsSync(keyPath)).toBe(false);
     expect(fs.existsSync(pinPath)).toBe(false);
     expect(fs.existsSync(sessionPath)).toBe(false);
+    const readded = await registry.register('cloud-1', 'Cloud User', 'user@example.com');
+    expect(readded.profileId).toBe(descriptor.profileId);
+    expect(fs.existsSync(staging)).toBe(false);
+    expect(fs.existsSync(profileDir)).toBe(false);
   });
 });

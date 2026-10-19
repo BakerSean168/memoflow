@@ -1,49 +1,30 @@
 import path from 'node:path';
 import type { SharedPathResolver } from './types';
-import { resolveDesktopUserFilesPath } from '../user-data-path';
+import type { DesktopStorageRoots } from './desktop-storage-roots';
 
-/**
- * Creates a SharedPathResolver from the application root directory.
- * Pure computation — does not create directories on disk.
- *
- * @param customUserFilesRoot - Optional override for the user-files root directory.
- *   When provided, takes precedence over the default Documents-based path.
- */
-export function createSharedPathResolver(
-  rootDir: string,
-  customUserFilesRoot?: string,
-): SharedPathResolver {
-  const sharedDir = path.join(rootDir, 'shared');
-  const authDir = path.join(sharedDir, 'auth');
-  const configDir = path.join(sharedDir, 'config');
-  const uiDir = path.join(sharedDir, 'ui');
-  const profilesRegistryDir = path.join(sharedDir, 'profiles');
-  const cacheDir = path.join(rootDir, 'cache');
-  const userFilesRootDir = customUserFilesRoot ?? resolveDesktopUserFilesPath();
-
+/** Pure derivation; each directory has exactly one lifecycle owner. */
+export function createSharedPathResolver(roots: DesktopStorageRoots): SharedPathResolver {
+  const p = roots.platform === 'win32' ? path.win32 : path.posix;
+  const sharedDir = p.join(roots.dataRoot, 'shared');
+  const authDir = p.join(sharedDir, 'auth');
+  const configDir = p.join(roots.configRoot, 'shared', 'preferences');
+  const uiDir = p.join(roots.stateRoot, 'shared', 'ui');
+  const profilesRegistryDir = p.join(sharedDir, 'profiles');
+  const cacheDir = roots.cacheRoot;
   return {
-    rootDir,
+    roots,
     sharedDir,
     authDir,
     configDir,
     uiDir,
     profilesRegistryDir,
-
-    deviceIdPath: path.join(authDir, 'device-id'),
-    runtimeConfigPath: path.join(configDir, 'desktop-runtime.json'),
-    profileAccessWindowStatePath: path.join(uiDir, 'profile-access-window-state.json'),
-    registryPath: path.join(profilesRegistryDir, 'registry.json'),
-
+    deviceIdPath: p.join(authDir, 'device-id'),
+    runtimeConfigPath: p.join(configDir, 'desktop-runtime.json'),
+    profileAccessWindowStatePath: p.join(uiDir, 'profile-access-window-state.json'),
+    registryPath: p.join(profilesRegistryDir, 'registry.json'),
     cacheDir,
-    snapshotStagingDir: path.join(cacheDir, 'snapshot-staging'),
-    downloadsDir: path.join(cacheDir, 'downloads'),
-    tempDir: path.join(cacheDir, 'temp'),
-
-    logsDir: path.join(rootDir, 'logs'),
-
-    userFilesRootDir,
-    userFilesExportsDir: path.join(userFilesRootDir, 'exports'),
-    userFilesDownloadsDir: path.join(userFilesRootDir, 'downloads'),
-    userFilesAttachmentsDir: path.join(userFilesRootDir, 'attachments'),
+    snapshotStagingDir: p.join(cacheDir, 'snapshot-staging'),
+    tempDir: p.join(cacheDir, 'temp'),
+    logsDir: roots.logsDir,
   };
 }

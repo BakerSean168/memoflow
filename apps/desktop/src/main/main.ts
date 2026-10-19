@@ -1,3 +1,4 @@
+import './runtime-init';
 import { DesktopProfileImportService } from './profile/desktop-profile-import-service';
 import { registerProfileImportIpc } from './profile/profile-import-ipc';
 /**
@@ -15,10 +16,10 @@ import { registerProfileImportIpc } from './profile/profile-import-ipc';
  *   - Main window and schedule runtime
  */
 
-import './runtime-init';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { app, powerMonitor } from 'electron';
+import { app, powerMonitor, session, BrowserWindow } from 'electron';
+import { clearDesktopStorageCache } from './paths/clear-storage-cache';
 import { initMemoryMonitorForDev, registerCacheIpcHandlers } from './utils';
 import { registerAppLifecycleHandlers } from './lifecycle';
 import { DesktopShutdownCoordinator } from './lifecycle/desktop-shutdown-coordinator';
@@ -709,13 +710,13 @@ async function initializeShellRuntime(): Promise<void> {
   console.log('[Shell] Initializing shell runtime...');
 
   const sharedResolver = getSharedPathResolver();
-  console.log(`[Shell] Root path: ${sharedResolver.rootDir}`);
+  console.log(`[Shell] Root path: ${sharedResolver.roots.dataRoot}`);
 
   // Verify a pending update receipt before any Profile is opened. Update
   // verification is device-local shell state and must never depend on a
   // Profile DB or cloud session.
   const desktopUpdateReceiptStore = new FileDesktopUpdateInstallReceiptStore(
-    sharedResolver.rootDir,
+    sharedResolver.roots.stateRoot,
   );
   await verifyPendingDesktopUpdateInstall(app.getVersion(), desktopUpdateReceiptStore);
 
@@ -729,7 +730,7 @@ async function initializeShellRuntime(): Promise<void> {
     profileRegistry,
     createSystemClock(),
   );
-  const cloudSessionStore = new CloudSessionStore(sharedResolver.rootDir);
+  const cloudSessionStore = new CloudSessionStore(sharedResolver.roots.dataRoot);
   const cloudConnectionManager = new DesktopCloudConnectionManager(
     cloudSessionStore,
     profileRuntimeManager,
@@ -902,7 +903,12 @@ async function initializeShellRuntime(): Promise<void> {
 
   // Ancillary
   initMemoryMonitorForDev();
-  registerCacheIpcHandlers();
+  registerCacheIpcHandlers(() =>
+    clearDesktopStorageCache(sharedResolver.roots, [
+      session.defaultSession,
+      ...BrowserWindow.getAllWindows().map((window) => window.webContents.session),
+    ]),
+  );
 
   const initTime = performance.now() - startTime;
   console.log(`[Shell] Shell runtime initialized in ${initTime.toFixed(2)}ms`);

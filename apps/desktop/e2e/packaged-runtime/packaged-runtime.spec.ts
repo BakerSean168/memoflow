@@ -11,7 +11,7 @@ function appendLog(logs: string[], source: string, value: unknown): void {
 }
 
 function readRuntimeLogs(userDataPath: string): string[] {
-  const logDir = path.join(userDataPath, 'logs');
+  const logDir = path.join(userDataPath, 'state', 'logs');
   if (!fs.existsSync(logDir)) return [];
   return fs
     .readdirSync(logDir)
@@ -20,7 +20,7 @@ function readRuntimeLogs(userDataPath: string): string[] {
     .flatMap((name) => {
       try {
         const content = fs.readFileSync(path.join(logDir, name), 'utf8');
-        return [`[file:user-data/logs/${name}]\n${content.slice(-32_000)}`];
+        return [`[file:storage-test-root/state/logs/${name}]\n${content.slice(-32_000)}`];
       } catch (error) {
         return [`[file-error:${name}] ${String(error)}`];
       }
@@ -72,7 +72,6 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
 
   const runtimeRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'memoflow-packaged-smoke-'));
   const userDataPath = path.join(runtimeRoot, 'user-data');
-  const userFilesPath = path.join(runtimeRoot, 'user-files');
   const logs: string[] = [];
   const rendererPageErrors: string[] = [];
   let electronApp: ElectronApplication | null = null;
@@ -98,8 +97,7 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
       args,
       env: {
         ...createIsolatedNativeAgentEnvironment(runtimeRoot),
-        MEMOFLOW_DESKTOP_USER_DATA_PATH: userDataPath,
-        MEMOFLOW_DESKTOP_USER_FILES_PATH: userFilesPath,
+        MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: userDataPath,
         ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
       },
     };

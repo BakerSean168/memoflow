@@ -17,7 +17,7 @@ export class CloudSessionStore {
   }
 
   async save(profileId: string, session: StoredCloudSession): Promise<void> {
-    await fs.promises.mkdir(this.directory, { recursive: true });
+    await fs.promises.mkdir(this.directory, { recursive: true, mode: 0o700 });
     let encrypted: Buffer;
     try {
       encrypted = await encryptSafeStorageString(JSON.stringify(session));
@@ -26,7 +26,7 @@ export class CloudSessionStore {
     }
     const target = path.join(this.directory, `${profileId}.bin`);
     const temp = `${target}.tmp`;
-    await fs.promises.writeFile(temp, encrypted);
+    await fs.promises.writeFile(temp, encrypted, { mode: 0o600 });
     await fs.promises.rename(temp, target);
   }
 
