@@ -499,7 +499,7 @@ onBeforeUnmount(stopPolling);
           {{ loginMessage }}
         </p>
         <p
-          v-if="showLoginAction && !connectionId"
+          v-if="isAntigravity && !connectionId && !signingIn"
           class="mt-1 min-w-0 truncate text-[11px] leading-4 text-muted-foreground"
           :title="t('setting.agentInstances.antigravityLoginNoConnection')"
           data-testid="ai-agy-login-no-connection"

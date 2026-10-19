@@ -43,10 +43,17 @@ test('Windows AGY signs in to Google from MemoFlow and signs out through the ACP
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'memoflow-agy-login-'));
   const env = createIsolatedNativeAgentEnvironment(root);
   const tokenPath = path.join(env.GEMINI_HOME!, 'antigravity-acp', 'acp_token.json');
+  const packagedExecutable = process.env.MEMOFLOW_PACKAGED_EXECUTABLE;
+  if (packagedExecutable) expect(fs.existsSync(packagedExecutable)).toBe(true);
   let app: Awaited<ReturnType<typeof electron.launch>> | undefined;
   try {
     app = await electron.launch({
-      args: ['--disable-gpu', '--disable-dev-shm-usage', path.resolve('dist-electron/main.cjs')],
+      ...(packagedExecutable ? { executablePath: packagedExecutable } : {}),
+      args: [
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        ...(packagedExecutable ? [] : [path.resolve('dist-electron/main.cjs')]),
+      ],
       cwd: process.cwd(),
       env: {
         ...env,
