@@ -757,6 +757,8 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     const first = await createRuntime(file);
     vi.spyOn(first.runtime.history, 'ensureConversation').mockResolvedValue();
     await first.runtime.init();
+    const snapshots = await first.runtime.mastra.getStorage()!.getStore('workflows');
+    vi.spyOn(snapshots!, 'loadWorkflowSnapshot').mockResolvedValue({ status: 'suspended', requestContext: { permissionMode: 'supervised' } } as never);
     const suspendedAgent = first.runtime.assistant as never as {
       listSuspendedRuns: (input: { threadId: string; resourceId: string }) => Promise<{ runs: { runId: string; toolCalls: { toolCallId: string; toolName: string; suspendPayload: unknown }[] }[] }>;
       resumeStream: (data: unknown, options: unknown) => Promise<unknown>;
@@ -777,6 +779,8 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
   it('scopes persisted ask_user cancellation to the authenticated owner and aborts without resuming', async () => {
     const first = await createRuntime();
     await first.runtime.init();
+    const snapshots = await first.runtime.mastra.getStorage()!.getStore('workflows');
+    vi.spyOn(snapshots!, 'loadWorkflowSnapshot').mockResolvedValue({ status: 'suspended', requestContext: { permissionMode: 'supervised' } } as never);
     const agent = first.runtime.assistant as never as {
       listSuspendedRuns: (query: unknown) => Promise<unknown>;
       resumeStream: (value: unknown, options: unknown) => Promise<unknown>;
@@ -809,12 +813,13 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     const file = process.env['MEMOFLOW_NATIVE_RESTART_FIXTURE']!;
     const { runtime, modelResolver } = await createRuntime(file);
     vi.spyOn(runtime.history, 'ensureConversation').mockResolvedValue();
+    let fixtureCalls = 0;
     const model = {
       specificationVersion: 'v2', provider: 'test', modelId: 'restart-fixture', supportedUrls: {},
       doStream: async () => ({ stream: new ReadableStream({ start(controller) {
         for (const chunk of [
           { type: 'stream-start', warnings: [] },
-          { type: 'tool-call', toolCallId: 'ask-real', toolName: 'ask_user', input: JSON.stringify({ question: 'Pick one', options: [{ label: 'A' }, { label: 'B' }] }) },
+          { type: 'tool-call', toolCallId: fixtureCalls === 0 ? 'ask-real' : 'approval-real', toolName: fixtureCalls === 0 ? 'ask_user' : 'routine_create', input: JSON.stringify(fixtureCalls++ === 0 ? { question: 'Pick one', options: [{ label: 'A' }, { label: 'B' }] } : { name: 'Private routine', trigger: { type: 'Elapsed', timingOwner: 'local-runtime', durationMs: 60000 } }) },
           { type: 'finish', finishReason: 'tool-calls', usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 } },
         ]) controller.enqueue(chunk);
         controller.close();
@@ -822,7 +827,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     };
     vi.spyOn(modelResolver, 'resolve').mockResolvedValue({ providerId: 'p', providerName: 'test', modelId: model.modelId, model, capabilities: {} } as never);
     const events: AssistantRuntimeEvent[] = [];
-    for await (const event of runtime.dispatchMessage({ identityId: 'identity-a', conversationId: 'ask-approval', content: 'ask', context: context('identity-a', 'fixture') })) events.push(event);
+    for await (const event of runtime.dispatchMessage({ identityId: 'identity-a', conversationId: 'ask-approval', content: 'ask', permissionMode: process.env['MEMOFLOW_NATIVE_RESTART_MODE'] === 'read-only' ? 'read-only' : 'supervised', context: context('identity-a', 'fixture') })) events.push(event);
     const required = events.find((event) => event.type === 'assistant.ask_user.required');
     expect(required).toBeDefined();
     const workflows = await runtime.mastra.getStorage()?.getStore('workflows');
@@ -830,10 +835,13 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
       expect((await workflows?.loadWorkflowSnapshot({ workflowName: 'agentic-loop', runId: required!.runId }))?.status).toBe('suspended');
       expect((await workflows?.loadWorkflowSnapshot({ workflowName: 'executionWorkflow', runId: required!.runId }))?.status).toBe('suspended');
     });
+    if (process.env['MEMOFLOW_NATIVE_RESTART_APPROVAL']) {
+      await expect(runtime.answerToolSuspension({ context: context('identity-a', 'fixture-answer'), command: { type: 'tool_answer', action: 'answer', conversationId: required!.conversationId, runId: required!.runId, toolCallId: 'ask-real', answer: 'A' } })).resolves.toBe(true);
+    }
     await writeFile(file + '.json', JSON.stringify(required));
   });
 
-  it.each([[false, 'answer', 'supervised'], [true, 'answer', 'supervised'], [false, 'cancel', 'supervised'], [true, 'cancel', 'supervised'], [false, 'answer', 'read-only']] as const)('settles real ask_user through the session without orphaning the run (restart=%s action=%s mode=%s)', async (restart, action, permissionMode) => {
+  it.each([[false, 'answer', 'supervised'], [true, 'answer', 'supervised'], [false, 'cancel', 'supervised'], [true, 'cancel', 'supervised'], [false, 'answer', 'read-only'], [true, 'answer', 'read-only']] as const)('settles real ask_user through the session without orphaning the run (restart=%s action=%s mode=%s)', async (restart, action, permissionMode) => {
     const first = await createRuntime();
     let { runtime, createRoutine } = first;
     const { modelResolver } = first;
@@ -869,7 +877,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
       await runtime.dispose();
       await promisify(execFile)(process.execPath, [fileURLToPath(new URL('../../../../../../node_modules/vitest/vitest.mjs', import.meta.url)), 'run', '--config', 'vitest.config.ts', 'src/server/mastra/runtime/mastra-workflow.runtime.spec.ts', '--testNamePattern=writes.*native.*restart.*fixture'], {
         cwd: fileURLToPath(new URL('../../../../', import.meta.url)),
-        env: { ...Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.startsWith('NX_'))), NX_DAEMON: 'false', MEMOFLOW_NATIVE_RESTART_FIXTURE: first.file },
+        env: { ...Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.startsWith('NX_'))), NX_DAEMON: 'false', MEMOFLOW_NATIVE_RESTART_FIXTURE: first.file, MEMOFLOW_NATIVE_RESTART_MODE: permissionMode },
         timeout: 90000, maxBuffer: 1024 * 1024,
       }).catch((cause) => { throw new Error(String(cause.stdout) + String(cause.stderr)); });
       events.push(JSON.parse(await readFile(first.file + '.json', 'utf8')) as AssistantRuntimeEvent);
@@ -885,7 +893,38 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     expect(required?.type, JSON.stringify(events)).toBe('assistant.ask_user.required');
     if (required?.type !== 'assistant.ask_user.required') throw new Error('Missing real suspension');
     if (action === 'cancel') {
-      await expect(runtime.answerToolSuspension({ context: context('identity-a', 'cancel'), command: { type: 'tool_answer', action: 'cancel', conversationId: required.conversationId, runId: required.runId, toolCallId: required.data.toolCallId, answer: 'cancelled' } })).resolves.toBe(true);
+      let releaseSnapshot = () => {};
+      let publishing: Promise<void> | undefined;
+      let readingUnpublished: Promise<void> | undefined;
+      if (!restart) {
+        const workflows = (await runtime.mastra.getStorage()!.getStore('workflows'))!;
+        const snapshot = (await workflows.loadWorkflowSnapshot({ workflowName: 'agentic-loop', runId: required.runId }))!;
+        expect(snapshot.status).toBe('suspended');
+        // Keep the already-observed native suspension while its outer snapshot
+        // is being finalized; all publication/deletion still uses real LibSQL.
+        const observed = await runtime.assistant.listSuspendedRuns({ threadId: required.conversationId, resourceId: 'identity-a' });
+        vi.spyOn(runtime.assistant, 'listSuspendedRuns').mockResolvedValueOnce(observed);
+        await workflows.persistWorkflowSnapshot({ workflowName: 'agentic-loop', runId: required.runId, snapshot: { ...snapshot, status: 'running' } });
+        const release = new Promise<void>((resolve) => { releaseSnapshot = resolve; });
+        publishing = release.then(() => workflows.persistWorkflowSnapshot({ workflowName: 'agentic-loop', runId: required.runId, snapshot }));
+        let signalRead!: () => void;
+        readingUnpublished = new Promise<void>((resolve) => { signalRead = resolve; });
+        const load = workflows.loadWorkflowSnapshot.bind(workflows);
+        vi.spyOn(workflows, 'loadWorkflowSnapshot').mockImplementation(async (input) => {
+          const current = await load(input);
+          if (input.workflowName === 'agentic-loop' && current?.status !== 'suspended') signalRead();
+          return current;
+        });
+      }
+      const cancelling = runtime.answerToolSuspension({ context: context('identity-a', 'cancel'), command: { type: 'tool_answer', action: 'cancel', conversationId: required.conversationId, runId: required.runId, toolCallId: required.data.toolCallId, answer: 'cancelled' } });
+      if (publishing) {
+        // Old code ACKs/deletes before the last suspended snapshot lands. The
+        // repaired boundary waits on storage; neither path needs a timed sleep.
+        await Promise.race([cancelling, readingUnpublished!]);
+        releaseSnapshot();
+        await publishing;
+      }
+      await expect(cancelling).resolves.toBe(true);
       expect((await runtime.assistant.listSuspendedRuns({ threadId: required.conversationId, resourceId: 'identity-a' })).runs).toEqual([]);
       expect(createRoutine).not.toHaveBeenCalled();
       expect(calls).toBe(1);
@@ -913,6 +952,45 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     expect(await runtime.listAskUserSuspensions({ identityId: 'identity-a', conversationId: required.conversationId })).toEqual([]);
     const history = await runtime.listMessages({ identityId: 'identity-a', conversationId: required.conversationId });
     expect(history.messages.some((message) => message.content.includes('Finished'))).toBe(true);
+  }, 120000);
+
+  it('recovers an unarmed native approval after a process restart without replaying the write', async () => {
+    const first = await createRuntime();
+    await first.runtime.init();
+    await first.runtime.dispose();
+    await promisify(execFile)(process.execPath, [fileURLToPath(new URL('../../../../../../node_modules/vitest/vitest.mjs', import.meta.url)), 'run', '--config', 'vitest.config.ts', 'src/server/mastra/runtime/mastra-workflow.runtime.spec.ts', '--testNamePattern=writes.*native.*restart.*fixture'], {
+      cwd: fileURLToPath(new URL('../../../../', import.meta.url)),
+      env: { ...Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.startsWith('NX_'))), NX_DAEMON: 'false', MEMOFLOW_NATIVE_RESTART_FIXTURE: first.file, MEMOFLOW_NATIVE_RESTART_APPROVAL: '1' },
+      timeout: 90000, maxBuffer: 1024 * 1024,
+    }).catch((cause) => { throw new Error(String(cause.stdout) + String(cause.stderr)); });
+    const required = JSON.parse(await readFile(first.file + '.json', 'utf8')) as AssistantRuntimeEvent;
+    const recovered = await createRuntime(first.file);
+    const model = {
+      specificationVersion: 'v2', provider: 'test', modelId: 'approval-recovery', supportedUrls: {},
+      doStream: async () => ({ stream: new ReadableStream({ start(controller) {
+        for (const chunk of [
+          { type: 'stream-start', warnings: [] }, { type: 'text-start', id: 'text' },
+          { type: 'text-delta', id: 'text', delta: 'Recovered approval finished' }, { type: 'text-end', id: 'text' },
+          { type: 'finish', finishReason: 'stop', usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 } },
+        ]) controller.enqueue(chunk);
+        controller.close();
+      } }) }),
+    };
+    vi.spyOn(recovered.modelResolver, 'resolve').mockResolvedValue({ providerId: 'p', providerName: 'test', modelId: model.modelId, model, capabilities: {} } as never);
+    const command = { type: 'tool_approval' as const, conversationId: required.conversationId, runId: required.runId, toolCallId: 'approval-real', decision: 'approve' as const };
+    await expect(recovered.runtime.decideToolApproval({ context: context('foreign', 'foreign'), command })).resolves.toBe(false);
+    await expect(recovered.runtime.decideToolApproval({ context: context('identity-a', 'stale'), command: { ...command, toolCallId: 'stale' } })).resolves.toBe(false);
+    const decisions = await Promise.all([
+      recovered.runtime.decideToolApproval({ context: context('identity-a', 'approve-1'), command }),
+      recovered.runtime.decideToolApproval({ context: context('identity-a', 'approve-2'), command }),
+    ]);
+    expect(decisions.sort()).toEqual([false, true]);
+    expect(recovered.createRoutine).toHaveBeenCalledTimes(1);
+    expect(await recovered.runtime.listAskUserSuspensions({ identityId: 'identity-a', conversationId: required.conversationId })).toEqual([]);
+    const history = await recovered.runtime.history.listMessages({ identityId: 'identity-a', conversationId: required.conversationId });
+    expect(history.messages.some((message) => message.content === 'Recovered approval finished')).toBe(true);
+    await expect(recovered.runtime.decideToolApproval({ context: context('identity-a', 'replay'), command })).resolves.toBe(false);
+    expect(recovered.createRoutine).toHaveBeenCalledTimes(1);
   }, 120000);
 
   it('does not start a native turn when the dispatch signal is already aborted', async () => {

@@ -8,3 +8,9 @@ export function withPrismaTransaction<T>(
 ): Promise<T> {
   return '$transaction' in db ? db.$transaction(work, options) : work(db);
 }
+
+export {
+  runExternalMutation,
+  ExternalMutationError,
+  type ExternalMutationAuthority,
+} from './adapters/prisma/external-mutation';

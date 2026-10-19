@@ -1546,6 +1546,81 @@ describe('useAIChatSession Mastra-native open chat', () => {
     expect(runtime.answerToolSuspension).toHaveBeenCalledTimes(1);
   });
 
+  it('rejects a late history snapshot after leaving and re-entering the same conversation', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    let release!: (value: ReturnType<typeof persistedHistory>) => void;
+    runtime.listMessages.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          release = resolve;
+        }),
+    );
+    const session = mountComposable(service, runtime);
+    const select = (id: string) =>
+      session.selectConversation(
+        { id, name: id } as never,
+        service as never,
+        vi.fn(),
+        () => MODEL.key,
+      );
+    const oldRead = select('conv-1');
+    await select('conv-2');
+    runtime.listMessages.mockResolvedValue(persistedHistory('newest after re-entry'));
+    await select('conv-1');
+    release(persistedHistory('obsolete before leaving'));
+    await oldRead;
+    expect(session.chatTimeline.value.at(-1)?.content).toBe('newest after re-entry');
+  });
+
+  it('keeps a new live turn when an Ask User reconciliation returns an older snapshot', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    runtime.listAskUserSuspensions.mockResolvedValueOnce([
+      { runId: 'parked', toolCallId: 'ask-1', question: 'Choose date' },
+    ]);
+    const session = mountComposable(service, runtime);
+    await session.selectConversation(
+      { id: 'conv-1', name: 'Existing' } as never,
+      service as never,
+      vi.fn(),
+      () => MODEL.key,
+    );
+    let releaseHistory!: (value: ReturnType<typeof persistedHistory>) => void;
+    runtime.listMessages.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          releaseHistory = resolve;
+        }),
+    );
+    const request = session.chatTimeline.value.flatMap((item) => item.askUserRequests ?? [])[0]!;
+    const answering = session.answerAskUser(request, 'July');
+    await vi.waitFor(() => expect(runtime.listMessages).toHaveBeenCalledTimes(2));
+    let finishStream!: () => void;
+    runtime.streamMessage.mockImplementation(async (_command, handlers) => {
+      handlers.onEvent(
+        event(1, 'assistant.run.started', { providerId: 'provider-1', modelId: 'model-1' }),
+      );
+      handlers.onEvent(event(2, 'assistant.message.delta', { content: 'new live response' }));
+      await new Promise<void>((resolve) => {
+        finishStream = resolve;
+      });
+    });
+    session.chatMessage.value = 'next user question';
+    const sending = session.handleSendChat(service as never, MODEL, 'New chat', () => {});
+    await vi.waitFor(() => expect(runtime.streamMessage).toHaveBeenCalledTimes(1));
+    releaseHistory(persistedHistory('older answered snapshot'));
+    await answering;
+    finishStream();
+    await sending;
+    expect(session.chatTimeline.value.some((item) => item.content === 'next user question')).toBe(
+      true,
+    );
+    expect(session.chatTimeline.value.at(-1)?.content).toBe('new live response');
+    expect(request.status).toBe('answered');
+    expect(runtime.answerToolSuspension).toHaveBeenCalledTimes(1);
+  });
+
   it('loads conversation history and durable usage from their canonical runtime clients', async () => {
     const service = createServiceStub();
     const runtime = createRuntimeStub();

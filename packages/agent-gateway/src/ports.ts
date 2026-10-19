@@ -5,9 +5,16 @@ import type {
   TaskOccurrenceReadQuery,
   TaskReadPage,
   TaskOccurrenceReadPage,
+  TaskAgentReceipt,
 } from '@memoflow/contracts/task';
+import type { GatewayWriteToolName } from './write-tool-descriptors';
 import type { GatewayFailureCode } from '@memoflow/contracts/agent-gateway';
-import type { GoalClientDTO, GoalPage, GoalPageQuery } from '@memoflow/contracts/goal';
+import type {
+  GoalAgentReceipt,
+  GoalClientDTO,
+  GoalPage,
+  GoalPageQuery,
+} from '@memoflow/contracts/goal';
 import type { ExecutionContext, RequestContext } from '@memoflow/contracts/shared';
 
 /** Read cancellation stays separate from the canonical ExecutionContext. */
@@ -49,13 +56,16 @@ export interface GatewayCredentialPort {
 }
 export interface GatewayAuditEvent {
   readonly version: '1';
-  readonly effect: 'read' | 'credential';
+  readonly effect: 'read' | 'write' | 'credential';
+  readonly receiptId?: string;
+  readonly replayed?: boolean;
   readonly scopeDecision: 'allowed' | 'denied';
   readonly requestId: string;
   readonly traceId: string;
   readonly credentialId?: string;
   readonly identityId?: string;
   readonly tool:
+    | GatewayWriteToolName
     | 'goal_get'
     | 'goal_search'
     | 'task_plan_get'
@@ -101,4 +111,27 @@ export interface GatewayDiagnostic {
   readonly requestId: string;
   readonly traceId: string;
   readonly cause: unknown;
+}
+
+export interface GatewayWriteAuthority {
+  readonly connectionId: string;
+  authorize(): Promise<void>;
+  readonly scopes: readonly string[];
+}
+type WriteCall<T> = (
+  input: unknown,
+  context: ExecutionContext,
+  authority: GatewayWriteAuthority,
+) => Promise<T>;
+type GoalWriteReceipt = GoalAgentReceipt & { replayed: boolean };
+type TaskWriteReceipt = TaskAgentReceipt & { replayed: boolean };
+/** Only owner application operations cross this boundary; never repositories. */
+export interface GatewayWritePort {
+  goalCreate: WriteCall<GoalWriteReceipt>;
+  goalUpdate: WriteCall<GoalWriteReceipt>;
+  keyResultCreate: WriteCall<GoalWriteReceipt>;
+  keyResultUpdate: WriteCall<GoalWriteReceipt>;
+  taskCreate: WriteCall<TaskWriteReceipt>;
+  taskUpdate: WriteCall<TaskWriteReceipt>;
+  taskComplete: WriteCall<TaskWriteReceipt>;
 }

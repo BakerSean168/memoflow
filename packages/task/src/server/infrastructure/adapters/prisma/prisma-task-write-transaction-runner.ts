@@ -1,4 +1,5 @@
-import type { PrismaClient } from '@memoflow/database';
+import { withPrismaTransaction } from '@memoflow/database/transaction';
+import type { Prisma, PrismaClient } from '@memoflow/database';
 import type { IEventBus } from '@memoflow/patterns';
 import type {
   TaskWriteRepositories,
@@ -14,7 +15,7 @@ import { toTaskGoalOutboxRecord, type TaskGoalOutboxWriter } from '../../task-go
 
 export class PrismaTaskWriteTransactionRunner implements TaskWriteTransactionRunner {
   constructor(
-    private readonly prisma: PrismaClient,
+    private readonly prisma: PrismaClient | Prisma.TransactionClient,
     private readonly eventPublisher: IEventBus = committedTaskWriteEventBus,
   ) {}
 
@@ -22,7 +23,7 @@ export class PrismaTaskWriteTransactionRunner implements TaskWriteTransactionRun
     const bufferedEventBus = new BufferedTaskWriteEventBus();
 
     let postCommitEvents: import('@memoflow/contracts/shared').IDomainEvent[] = [];
-    const result = await this.prisma.$transaction(async (tx) => {
+    const result = await withPrismaTransaction(this.prisma, async (tx) => {
       const result = await work({
         planRepository: new TaskPlanPrismaRepository(tx, bufferedEventBus),
         occurrenceRepository: new TaskOccurrencePrismaRepository(tx, bufferedEventBus),
@@ -31,16 +32,18 @@ export class PrismaTaskWriteTransactionRunner implements TaskWriteTransactionRun
       const goalOutbox: TaskGoalOutboxWriter = {
         append: async (record) => {
           await tx.taskGoalOutbox.createMany({
-            data: [{
-              eventId: record.eventId,
-              identityId: record.identityId,
-              taskOccurrenceId: record.taskOccurrenceId,
-              taskPlanId: record.taskPlanId,
-              goalId: record.goalId,
-              keyResultId: record.keyResultId,
-              payload: record.payload,
-              availableAt: record.occurredAt,
-            }],
+            data: [
+              {
+                eventId: record.eventId,
+                identityId: record.identityId,
+                taskOccurrenceId: record.taskOccurrenceId,
+                taskPlanId: record.taskPlanId,
+                goalId: record.goalId,
+                keyResultId: record.keyResultId,
+                payload: record.payload,
+                availableAt: record.occurredAt,
+              },
+            ],
             skipDuplicates: true,
           });
         },

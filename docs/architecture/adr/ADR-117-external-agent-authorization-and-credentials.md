@@ -2,7 +2,7 @@
 tags: [adr, mcp, oauth, security, cloud-auth]
 description: OAuth 委托授权与 scoped PAT 分离于第一方登录 session，并维持 owner 访问控制
 created: 2026-10-07T00:00:00Z
-updated: 2026-10-07T00:00:00Z
+updated: 2026-10-19T00:00:00Z
 ---
 
 # ADR-117: External Agent Authorization 与 Credential 边界
@@ -43,7 +43,7 @@ MCP access token 只被 MCP resource audience 接受；现有 REST session API �
 
 ### Scope 与撤销具有服务端意义
 
-- 首批授权分别为 `goals:read`、`tasks:read`，写 scope 不隐含读 scope。后续按真实 owner 增加 `goals:write`、`tasks:write` 等。
+- OAuth 首批授权仍为 `goals:read`、`tasks:read`。#490 的 PAT 增加 `goals:write`、`tasks:write`，写 scope 不隐含读 scope；写工具另需默认关闭的 `EAG_WRITE_ENABLED`。OAuth 写 consent 尚未发布。
 - 复合查询必须具备其全部数据 scope；不能授权后再依赖 UI 隐藏。业务派生影响及跨 owner scope 见架构规格，不能依赖 Agent 自报 risk。
 - 失效、撤销、账户关闭、scope 缩减都在每次请求入口生效，包括 `tools/list`、长任务查询和恢复。JWT 本地验签不能单独兑现即时撤销；首版增加在线 grant/account 状态检查，存储不可用则拒绝执行，避免跨请求授权缓存。
 - access token TTL 600 秒，provider refresh rotation 的 overlap 显式为 30 秒；相同请求重试必须返回同一轮换结果。refresh TTL 最多 30 天，connection 授权总寿命最多 90 天且不随刷新延长。`offline_access` 明确授权，grant 撤销同时禁止 refresh 及 overlap 重试。当前只读 PAT 默认与上限均为 7 天。
