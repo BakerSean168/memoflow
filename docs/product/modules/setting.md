@@ -108,7 +108,7 @@ profiles/<profileId>/ui/notification-preference.json
         └── soundEnabled: boolean
 ```
 
-它不进入 cloud UserPreference、PowerSync 或 portability payload；`main-window-state.json` 与 UserFiles `user-files-config.json` 也继续由各自 Desktop host owner 管理。
+它不进入 cloud UserPreference、PowerSync 或 portability payload；窗口状态属于 Desktop STATE，原生导入导出的上次成功目录属于 CONFIG 偏好，见 [Desktop storage](../../architecture/desktop-storage.md)。
 
 ## 5. 当前 owner truth
 
