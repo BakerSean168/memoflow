@@ -137,3 +137,12 @@ export interface GatewayWritePort {
   taskUpdate: WriteCall<TaskWriteReceipt>;
   taskComplete: WriteCall<TaskWriteReceipt>;
 }
+
+/** Fully implemented lifecycle is supplied only behind the assisted rollout flag. */
+export interface GatewayAssistedPort {
+  start: WriteCall<import('@memoflow/contracts/agent-gateway').AssistedView>;
+  get: WriteCall<import('@memoflow/contracts/agent-gateway').AssistedView>;
+  review: WriteCall<import('@memoflow/contracts/agent-gateway').AssistedView>;
+  resume: WriteCall<import('@memoflow/contracts/agent-gateway').AssistedView>;
+  cancel: WriteCall<import('@memoflow/contracts/agent-gateway').AssistedView>;
+}

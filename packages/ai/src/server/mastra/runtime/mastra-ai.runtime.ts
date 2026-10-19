@@ -1,3 +1,4 @@
+import type { ExternalWorkflowInvocation } from './workflow-runtime.port';
 import { AgentRegistryError } from '../../application/agent-instance/agent-instance.repository';
 import { MastraDurableWorkflowRuntime } from './mastra-durable-workflow.runtime';
 import {
@@ -299,6 +300,8 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
   async start(input: {
     context: ExecutionContext;
     request: AIWorkflowStartClientRequest;
+    runId?: string;
+    external?: ExternalWorkflowInvocation;
   }): Promise<AIWorkflowRunView> {
     await this.init();
     const run = await this.durableWorkflows.start(input);
@@ -313,6 +316,8 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
   async startDetached(input: {
     context: ExecutionContext;
     request: AIWorkflowStartClientRequest;
+    runId?: string;
+    external?: ExternalWorkflowInvocation;
   }): Promise<AIWorkflowRunView> {
     await this.init();
     const run = await this.durableWorkflows.startDetached(input);
@@ -327,6 +332,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
   async resume(input: {
     context: ExecutionContext;
     request: AIWorkflowResumeClientRequest;
+    external?: ExternalWorkflowInvocation;
   }): Promise<AIWorkflowRunView> {
     await this.init();
     const run = await this.durableWorkflows.resume(input);
@@ -341,9 +347,15 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
   async resumeDetached(input: {
     context: ExecutionContext;
     request: AIWorkflowResumeClientRequest;
+    external?: ExternalWorkflowInvocation;
   }): Promise<AIWorkflowRunView> {
     await this.init();
     return this.durableWorkflows.resumeDetached(input);
+  }
+
+  async recoverTask(input: Parameters<MastraDurableWorkflowRuntime['recoverTask']>[0]): Promise<AIWorkflowRunView> {
+    await this.init();
+    return this.durableWorkflows.recoverTask(input);
   }
 
   async get(input: { identityId: string; runId: string }): Promise<AIWorkflowRunView | null> {

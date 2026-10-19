@@ -21,13 +21,14 @@ datasource db {
 // ==========================================
 
 model Account {
-  id        String    @id // same as CloudAuthUser.id for cloud accounts
-  status    String    @default("Active") // AccountStatus: Active | Closed
+  assistedWorkflows AiAssistedWorkflow[]
+  id                String               @id // same as CloudAuthUser.id for cloud accounts
+  status            String               @default("Active") // AccountStatus: Active | Closed
   // profile
-  profile   Json
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  closedAt  DateTime? @map("closed_at")
+  profile           Json
+  createdAt         DateTime             @default(now()) @map("created_at")
+  updatedAt         DateTime             @updatedAt @map("updated_at")
+  closedAt          DateTime?            @map("closed_at")
 
   // 关联关系
   cloudUser CloudAuthUser @relation(fields: [id], references: [id], onDelete: Cascade)
@@ -354,6 +355,29 @@ model AiAgentRegistryMigration {
   id String @id
 
   @@map("ai_agent_registry_migrations")
+}
+
+/// External lifecycle metadata. Mastra snapshots remain the workflow state authority.
+model AiAssistedWorkflow {
+  id            String   @id
+  identityId    String   @map("identity_id")
+  connectionId  String   @map("connection_id")
+  kind          String
+  runId         String   @unique @map("run_id")
+  requestKey    String   @map("request_key")
+  requestDigest String   @map("request_digest")
+  requestJson   String   @map("request_json") @db.Text
+  revision      Int      @default(1)
+  viewJson      String?  @map("view_json") @db.Text
+  pendingJson   String?  @map("pending_json") @db.Text
+  stepsJson     String   @default("[]") @map("steps_json") @db.Text
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  account       Account  @relation(fields: [identityId], references: [id], onDelete: Cascade)
+
+  @@unique([identityId, connectionId, requestKey])
+  @@index([identityId, connectionId])
+  @@map("ai_assisted_workflows")
 }
 
 // Better Auth cloud identity source.

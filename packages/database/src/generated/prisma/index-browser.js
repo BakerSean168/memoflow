@@ -292,6 +292,23 @@ exports.Prisma.AiAgentRegistryMigrationScalarFieldEnum = {
   id: 'id'
 };
 
+exports.Prisma.AiAssistedWorkflowScalarFieldEnum = {
+  id: 'id',
+  identityId: 'identityId',
+  connectionId: 'connectionId',
+  kind: 'kind',
+  runId: 'runId',
+  requestKey: 'requestKey',
+  requestDigest: 'requestDigest',
+  requestJson: 'requestJson',
+  revision: 'revision',
+  viewJson: 'viewJson',
+  pendingJson: 'pendingJson',
+  stepsJson: 'stepsJson',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.CloudAuthUserScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -1445,6 +1462,7 @@ exports.Prisma.ModelName = {
   AiProviderSecret: 'AiProviderSecret',
   AiKnowledgeIndexEntry: 'AiKnowledgeIndexEntry',
   AiAgentRegistryMigration: 'AiAgentRegistryMigration',
+  AiAssistedWorkflow: 'AiAssistedWorkflow',
   CloudAuthUser: 'CloudAuthUser',
   CloudAuthSession: 'CloudAuthSession',
   CloudAuthProviderAccount: 'CloudAuthProviderAccount',

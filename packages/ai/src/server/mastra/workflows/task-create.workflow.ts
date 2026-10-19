@@ -1,3 +1,4 @@
+import type { ExternalTaskApply } from '../runtime/workflow-runtime.port';
 import { CreateTaskPlanSchema } from '@memoflow/contracts/task';
 import { createStep, createWorkflow } from '@mastra/core/workflows';
 import { z } from 'zod';
@@ -125,6 +126,9 @@ export function createTaskCreateWorkflow(input: {
     resumeSchema: AIWorkflowResumeCommandSchema,
     suspendSchema: AIWorkflowSuspensionSchema,
     execute: async ({ inputData, state, setState, resumeData, suspend, runId, requestContext }) => {
+      // Recovery rebinds the trusted host callback and durable command intent.
+      resumeData = resumeData ?? (requestContext.getRaw('externalResumeCommand')
+        ? AIWorkflowResumeCommandSchema.parse(requestContext.getRaw('externalResumeCommand')) : undefined);
       let current = TaskCreateWorkflowStateSchema.parse(state);
       const workflowInput = TaskCreateWorkflowInputSchema.parse(inputData);
       if (
@@ -227,7 +231,13 @@ export function createTaskCreateWorkflow(input: {
 
       const applyAndResolve = async (priorReceipt = current.priorReceipt) => {
         if (!current.draft) throw new Error('task.create approve requires a persisted draft');
-        const receipt = await input.applyService.apply({
+        const externalApply: unknown = requestContext.getRaw('externalTaskApply');
+        if (current.input.externalConnectionId && typeof externalApply !== 'function')
+          throw new Error('External workflow requires a current owner authority binding');
+        const apply = current.input.externalConnectionId
+          ? externalApply as ExternalTaskApply
+          : input.applyService.apply.bind(input.applyService);
+        const receipt = await apply({
           workflowRunId: runId,
           draft: current.draft,
           context: currentExecutionContext(requestContext, current.input.identityId),
@@ -257,6 +267,9 @@ export function createTaskCreateWorkflow(input: {
           receipt: { kind: 'task.create' as const, receipt },
         });
       };
+
+      if (current.phase === 'completed' && current.priorReceipt)
+        return TaskCreateWorkflowOutputSchema.parse({ outcome: 'completed', receipt: current.priorReceipt });
 
       if (!resumeData) {
         if (current.phase !== 'planning') {
