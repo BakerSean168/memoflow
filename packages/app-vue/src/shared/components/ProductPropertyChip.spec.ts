@@ -63,6 +63,7 @@ describe('ProductPropertyChip', () => {
       expect(activate).toHaveBeenCalledTimes(1);
       wrapper.unmount();
     } finally {
+      keyboard.helpOpen.value = false;
       window.removeEventListener('keydown', keyboard.handle, { capture: true });
     }
   });
