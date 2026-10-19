@@ -14,6 +14,7 @@ import {
   type LocalAgentConnection,
   type LocalAgentConversationCreate,
 } from '@memoflow/contracts/ai';
+import { nextHistoryTimestamp } from '../../../../shared/history-order';
 import { LocalAgentError } from '../../../../shared/local-agent-error';
 
 const StoredConversationSchema = LocalAgentConversationSchema.extend({
@@ -310,7 +311,7 @@ export class LocalAgentRepository {
     let last = -1;
     for (const row of rows) {
       const item = decode(row, StoredMessageSchema);
-      const createdAt = Math.max(item.createdAt, last + 1);
+      const createdAt = nextHistoryTimestamp(item.createdAt, last);
       if (createdAt !== item.createdAt) {
         await tx.execute(
           'UPDATE ai_local_conversation_items SET created_at = ?, record_json = ? WHERE id = ? AND identity_id = ? AND conversation_id = ?',
@@ -368,7 +369,7 @@ export class LocalAgentRepository {
       // The persisted timestamp is a logical clock: allocate only on first insert.
       // Streaming updates must never move an item or alter the latest-500 window.
       const createdAt =
-        existing?.created_at ?? Math.max(item.createdAt, (latest?.created_at ?? -1) + 1);
+        existing?.created_at ?? nextHistoryTimestamp(item.createdAt, latest?.created_at ?? null);
       const stored = StoredMessageSchema.parse({ ...item, createdAt });
       // Transactional existence check prevents late events resurrecting a deleted conversation.
       await tx.execute(

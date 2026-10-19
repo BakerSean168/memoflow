@@ -2,6 +2,11 @@ import type { MastraCompositeStore } from '@mastra/core/storage';
 import { LibSQLStore, type SqliteClient } from '@mastra/libsql';
 import { PostgresStore } from '@mastra/pg';
 import { createClient } from '@libsql/client';
+import { randomUUID } from 'node:crypto';
+import { resolve as resolvePath } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { OrderedMemoryLibSQL } from './ordered-memory.libsql';
+import { OrderedMemoryPostgres } from './ordered-memory.postgres';
 import { GoalWorkflowEventsLibSQL } from './goal-workflow-events.libsql';
 import { registerGoalWorkflowEventSource } from './goal-workflow-events.registry';
 import { GoalWorkflowEventsPostgres } from './goal-workflow-events.postgres';
@@ -11,6 +16,7 @@ class GoalEventPostgresStore extends PostgresStore {
 
   constructor(connectionString: string, schemaName: string) {
     super({ id: 'memoflow-ai', connectionString, schemaName });
+    this.stores!.memory = new OrderedMemoryPostgres(this.db, schemaName);
     this.events = new GoalWorkflowEventsPostgres(this, schemaName);
     registerGoalWorkflowEventSource(this, this.events);
   }
@@ -26,17 +32,38 @@ class GoalEventPostgresStore extends PostgresStore {
   }
 }
 
+// Local SQLite calls can block the Node event loop while waiting on another
+// client's interactive transaction. Share the connection gate across handles.
+const sqliteTails = new Map<string, Promise<void>>();
+
+/**
+ * Identity of the database a libsql URL opens. Equivalent spellings of one local
+ * file share a gate; each in-memory handle is its own database and gets its own.
+ */
+export function sqliteDatabaseKey(url: string): string {
+  const location = url.split('?')[0]!;
+  if (location === ':memory:' || location === 'file::memory:') return `memory:${randomUUID()}`;
+  if (!location.startsWith('file:')) return url;
+  const path = location.startsWith('file://')
+    ? fileURLToPath(location)
+    : decodeURIComponent(location.slice('file:'.length));
+  return `file:${resolvePath(path)}`;
+}
+
 /** Wake readers only after commits; the durable journal remains authoritative. */
-function withCommitWake(client: SqliteClient, wake: () => void): SqliteClient {
+function withCommitWake(client: SqliteClient, wake: () => void, databaseKey: string): SqliteClient {
   // A supplied client bypasses Mastra's single-connection gate. Keep source
   // reads/pruning and engine operations outside any open interactive transaction.
-  let tail = Promise.resolve();
   const acquire = async () => {
-    const previous = tail;
-    let release!: () => void;
-    tail = new Promise<void>((resolve) => { release = resolve; });
+    const previous = sqliteTails.get(databaseKey);
+    let resolve!: () => void;
+    const tail = new Promise<void>((done) => { resolve = done; });
+    sqliteTails.set(databaseKey, tail);
     await previous;
-    return release;
+    return () => {
+      if (sqliteTails.get(databaseKey) === tail) sqliteTails.delete(databaseKey);
+      resolve();
+    };
   };
   return {
     get closed() { return client.closed; },
@@ -91,9 +118,10 @@ class GoalEventLibSQLStore extends LibSQLStore {
 
   constructor(url: string) {
     const rawClient = createClient({ url, ...(url.startsWith('file:') || url.includes(':memory:') ? { timeout: 5000 } : {}) });
-    const client = withCommitWake(rawClient, () => events.notify());
+    const client = withCommitWake(rawClient, () => events.notify(), sqliteDatabaseKey(url));
     const events = new GoalWorkflowEventsLibSQL(client);
     super({ id: 'memoflow-ai', client });
+    this.stores!.memory = new OrderedMemoryLibSQL(client);
     this.events = events;
     registerGoalWorkflowEventSource(this, this.events);
   }

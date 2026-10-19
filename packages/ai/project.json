@@ -51,6 +51,18 @@
         "cwd": "packages/ai"
       }
     },
+    "test:integration": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "inputs": [
+        "default",
+        "^production"
+      ],
+      "options": {
+        "command": "vitest run --config vitest.integration.config.ts",
+        "cwd": "packages/ai"
+      }
+    },
     "test:watch": {
       "executor": "nx:run-commands",
       "cache": false,
