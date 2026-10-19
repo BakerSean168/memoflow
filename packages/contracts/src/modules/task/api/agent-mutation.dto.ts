@@ -35,7 +35,7 @@ export const TaskAgentCompleteSchema = z
       z.object({ decision: z.literal('record'), measurement: TaskGoalMeasurementSchema }).strict(),
     ]),
     details: CompleteTaskOccurrenceSchema.unwrap()
-      .omit({ goalMeasurement: true })
+      .omit({ goalMeasurement: true, expectedVersion: true })
       .extend({
         duration: z.number().nonnegative().max(604800).optional(),
         note: z.string().max(10000).optional(),

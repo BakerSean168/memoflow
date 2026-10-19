@@ -53,9 +53,9 @@ export const CreateScopedPatSchema = z.strictObject({
   name: z.string().trim().min(1).max(80),
   expiresInDays: z.number().int().min(1).max(7).default(7),
   scopes: z
-    .array(z.enum(['goals:read', 'tasks:read']))
+    .array(z.enum(['goals:read', 'tasks:read', 'goals:write', 'tasks:write']))
     .min(1)
-    .max(2)
+    .max(4)
     .refine((scopes) => new Set(scopes).size === scopes.length, 'Duplicate scopes')
     .default(['goals:read']),
 });
@@ -71,7 +71,7 @@ export const ScopedPatSummarySchema = z.object({
   name: z.string(),
   prefix: z.string(),
   audience: z.url(),
-  scopes: z.array(z.enum(['goals:read', 'tasks:read'])),
+  scopes: z.array(z.enum(['goals:read', 'tasks:read', 'goals:write', 'tasks:write'])),
   ...credentialDates,
 });
 export const OAuthConnectionSchema = z.object({
@@ -125,6 +125,10 @@ export const GatewayFailureCodeSchema = z.enum([
   'HOST_DENIED',
   'METHOD_NOT_ALLOWED',
   'INSUFFICIENT_SCOPE',
+  'CONFLICT',
+  'IDEMPOTENCY_CONFLICT',
+  'VALIDATION_ERROR',
+  'OPERATION_IN_PROGRESS',
 ]);
 export type GatewayFailureCode = z.infer<typeof GatewayFailureCodeSchema>;
 
@@ -167,3 +171,5 @@ export const TaskOccurrenceListOutputSchema = z.strictObject({
   timeZone: z.string(),
   asOf: TaskReadInstantSchema,
 });
+
+export * from './writes';

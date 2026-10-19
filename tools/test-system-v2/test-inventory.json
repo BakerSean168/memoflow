@@ -10,6 +10,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/api/src/__tests__/integration/agent-gateway-write.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "apps/api/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/api/src/__tests__/integration/agent-gateway.integration.test.ts",
       "primarySuite": "integration",
       "collectors": [
@@ -13160,7 +13168,7 @@
       "type": "primary",
       "suite": "integration",
       "runner": "vitest",
-      "fileCount": 13
+      "fileCount": 14
     },
     {
       "id": "packages/account/vitest.integration.config.ts",
@@ -14085,7 +14093,7 @@
   "unexpected": [],
   "counts": {
     "unit": 1177,
-    "integration": 49,
+    "integration": 50,
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 9,

@@ -49,13 +49,16 @@ export interface GatewayCredentialPort {
 }
 export interface GatewayAuditEvent {
   readonly version: '1';
-  readonly effect: 'read' | 'credential';
+  readonly effect: 'read' | 'write' | 'credential';
+  readonly receiptId?: string;
+  readonly replayed?: boolean;
   readonly scopeDecision: 'allowed' | 'denied';
   readonly requestId: string;
   readonly traceId: string;
   readonly credentialId?: string;
   readonly identityId?: string;
   readonly tool:
+    | import('./write-tool-descriptors').GatewayWriteToolName
     | 'goal_get'
     | 'goal_search'
     | 'task_plan_get'
@@ -101,4 +104,27 @@ export interface GatewayDiagnostic {
   readonly requestId: string;
   readonly traceId: string;
   readonly cause: unknown;
+}
+
+export interface GatewayWriteAuthority {
+  readonly connectionId: string;
+  authorize(): Promise<void>;
+  readonly scopes: readonly string[];
+}
+type WriteCall<T> = (
+  input: unknown,
+  context: ExecutionContext,
+  authority: GatewayWriteAuthority,
+) => Promise<T>;
+type GoalWriteReceipt = import('@memoflow/contracts/goal').GoalAgentReceipt & { replayed: boolean };
+type TaskWriteReceipt = import('@memoflow/contracts/task').TaskAgentReceipt & { replayed: boolean };
+/** Only owner application operations cross this boundary; never repositories. */
+export interface GatewayWritePort {
+  goalCreate: WriteCall<GoalWriteReceipt>;
+  goalUpdate: WriteCall<GoalWriteReceipt>;
+  keyResultCreate: WriteCall<GoalWriteReceipt>;
+  keyResultUpdate: WriteCall<GoalWriteReceipt>;
+  taskCreate: WriteCall<TaskWriteReceipt>;
+  taskUpdate: WriteCall<TaskWriteReceipt>;
+  taskComplete: WriteCall<TaskWriteReceipt>;
 }
