@@ -153,6 +153,48 @@ export function validateDeliveryManifest(manifest) {
       );
     }
   }
+  // Keep contracts standalone: runtime bundles import this file without CI planners/history.
+  assertStringArray(manifest.scope.unit, 'scope.unit');
+  assert(new Set(manifest.scope.unit).size === manifest.scope.unit.length, 'scope.unit duplicates');
+  assert(
+    Array.isArray(manifest.unitShards) && manifest.unitShards.length === 3,
+    'unitShards must contain three jobs',
+  );
+  const unitTasks = [];
+  for (const [index, shard] of manifest.unitShards.entries()) {
+    assert(shard?.id === `unit-${index + 1}` && Array.isArray(shard.tasks), 'unitShards IDs/tasks');
+    for (const task of shard.tasks) {
+      assert(
+        task && typeof task.project === 'string' && /^[@\w][\w@/.-]*$/u.test(task.project),
+        'Unit task project',
+      );
+      assert(
+        Object.keys(task).every((key) => ['project', 'shard'].includes(key)),
+        'unknown Unit task field',
+      );
+      unitTasks.push(task);
+    }
+    const splitProjects = shard.tasks.filter((task) => task.shard).map((task) => task.project);
+    assert(
+      new Set(splitProjects).size === splitProjects.length,
+      'split Unit shards of one project must run on different jobs',
+    );
+  }
+  const expectedTasks = manifest.scope.unit
+    .filter((project) => project !== 'memoflow')
+    .flatMap((project) =>
+      project === 'app-vue'
+        ? [
+            { project, shard: '1/2' },
+            { project, shard: '2/2' },
+          ]
+        : [{ project }],
+    );
+  assert(
+    stableStringify(unitTasks.map(stableStringify).sort()) ===
+      stableStringify(expectedTasks.map(stableStringify).sort()),
+    'unitShards must cover every Unit task exactly once',
+  );
   assertSelfDigest(manifest, 'manifest');
   return manifest;
 }
@@ -307,6 +349,11 @@ export function validateLaneSummary(summary) {
   assert(summary.timing && typeof summary.timing === 'object', 'timing is required');
   assert(Array.isArray(summary.failures), 'failures must be an array');
   assert(summary.provenance && typeof summary.provenance === 'object', 'provenance is required');
+  if (summary.provenance.unitShardId !== undefined) {
+    assert(/^unit-[1-3]$/u.test(summary.provenance.unitShardId), 'invalid unit shard identity');
+    assertString(summary.provenance.job, 'provenance.job');
+    assert(summary.provenance.job === summary.provenance.unitShardId, 'unit shard/job mismatch');
+  }
   assertDigest(summary.laneInputDigest, 'laneInputDigest');
   assertSelfDigest(summary, 'lane summary');
   return summary;

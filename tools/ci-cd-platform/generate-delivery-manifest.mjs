@@ -9,6 +9,8 @@ import { buildProvenance, digest, validateDeliveryManifest } from './lib/contrac
 import { classifyRisk, selectLanes } from './lib/risk.mjs';
 import { detectScope } from './lib/scope-detector.mjs';
 
+import { planUnitShards, unitJobEnabled } from './lib/unit-shards.mjs';
+
 const exec = promisify(execFile);
 
 async function changedFiles({ root, base, head, full }) {
@@ -70,6 +72,7 @@ export async function buildDeliveryManifest({
     changedFiles: changed,
     risk,
     scope: resolvedScope,
+    unitShards: planUnitShards(resolvedScope.unit),
     lanes: selectedLanes,
     provenance: buildProvenance({
       generator: 'ci-cd-platform-v2/generate-delivery-manifest@1',
@@ -88,6 +91,9 @@ export async function writeManifestOutputs(manifest, output) {
       `manifest_digest=${manifest.digest}`,
       `risk=${manifest.risk.level}`,
       ...Object.entries(manifest.lanes).map(([lane, enabled]) => `lane_${lane}=${enabled}`),
+      ...manifest.unitShards.map(
+        ({ id }) => `${id.replaceAll('-', '_')}=${unitJobEnabled(manifest, id)}`,
+      ),
       `unit=${manifest.scope.unit.join(',')}`,
       `coverage=${manifest.scope.coverage.join(',')}`,
       `smoke=${manifest.scope.smoke.join(',')}`,

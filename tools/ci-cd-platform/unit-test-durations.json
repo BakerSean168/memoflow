@@ -1,0 +1,2857 @@
+{
+  "method": "Nearest-rank percentiles; uncached Vitest Duration and node:test # duration_ms only. Cached replay durations excluded. Vitest setup is summed across workers, not wall time. Nx nested invocations produce multiple cache summaries. Job times from GitHub API; run total createdAt\u2192updatedAt includes queue/orchestration. Runner minutes=sum actual job wall, not rounded billing.",
+  "runs": [
+    {
+      "runId": 39155065796,
+      "event": "pull_request",
+      "unitSeconds": 337.0,
+      "setupSeconds": 50.0,
+      "ciSeconds": 731.0,
+      "runnerMinutes": 44.4,
+      "cacheSummaries": [
+        [
+          0,
+          7
+        ],
+        [
+          7,
+          7
+        ]
+      ],
+      "projects": [
+        "app-vue",
+        "ci-cd-platform",
+        "desktop",
+        "governance-tools",
+        "test-system-v2",
+        "web"
+      ],
+      "workloadKind": "observed-affected"
+    },
+    {
+      "runId": 39156071648,
+      "event": "push",
+      "unitSeconds": 310.0,
+      "setupSeconds": 37.0,
+      "ciSeconds": 684.0,
+      "runnerMinutes": 44.72,
+      "cacheSummaries": [
+        [
+          0,
+          7
+        ],
+        [
+          7,
+          7
+        ]
+      ],
+      "projects": [
+        "app-vue",
+        "ci-cd-platform",
+        "desktop",
+        "governance-tools",
+        "test-system-v2",
+        "web"
+      ],
+      "workloadKind": "observed-affected"
+    },
+    {
+      "runId": 39161754557,
+      "event": "pull_request",
+      "unitSeconds": 269.0,
+      "setupSeconds": 43.0,
+      "ciSeconds": 898.0,
+      "runnerMinutes": 49.02,
+      "cacheSummaries": [
+        [
+          0,
+          8
+        ],
+        [
+          8,
+          9
+        ]
+      ],
+      "projects": [
+        "app-vue",
+        "ci-cd-platform",
+        "desktop",
+        "governance-tools",
+        "test-system-v2",
+        "ui-core",
+        "ui-vue-shadcn",
+        "web"
+      ],
+      "workloadKind": "observed-affected"
+    },
+    {
+      "runId": 39163023903,
+      "event": "push",
+      "unitSeconds": 425.0,
+      "setupSeconds": 44.0,
+      "ciSeconds": 857.0,
+      "runnerMinutes": 50.9,
+      "cacheSummaries": [
+        [
+          0,
+          9
+        ],
+        [
+          9,
+          9
+        ]
+      ],
+      "projects": [
+        "app-vue",
+        "ci-cd-platform",
+        "desktop",
+        "governance-tools",
+        "test-system-v2",
+        "ui-core",
+        "ui-vue-shadcn",
+        "web"
+      ],
+      "workloadKind": "observed-affected"
+    },
+    {
+      "runId": 39165574231,
+      "event": "pull_request",
+      "unitSeconds": 379.0,
+      "setupSeconds": 45.0,
+      "ciSeconds": 887.0,
+      "runnerMinutes": 50.62,
+      "cacheSummaries": [
+        [
+          0,
+          7
+        ],
+        [
+          7,
+          7
+        ]
+      ],
+      "projects": [
+        "app-vue",
+        "ci-cd-platform",
+        "desktop",
+        "governance-tools",
+        "test-system-v2",
+        "web"
+      ],
+      "workloadKind": "observed-affected"
+    },
+    {
+      "runId": 39166760886,
+      "event": "push",
+      "unitSeconds": 412.0,
+      "setupSeconds": 40.0,
+      "ciSeconds": 757.0,
+      "runnerMinutes": 49.93,
+      "cacheSummaries": [
+        [
+          0,
+          7
+        ],
+        [
+          7,
+          7
+        ]
+      ],
+      "projects": [
+        "app-vue",
+        "ci-cd-platform",
+        "desktop",
+        "governance-tools",
+        "test-system-v2",
+        "web"
+      ],
+      "workloadKind": "observed-affected"
+    },
+    {
+      "runId": 39179745683,
+      "event": "pull_request",
+      "unitSeconds": 319.0,
+      "setupSeconds": 41.0,
+      "ciSeconds": 825.0,
+      "runnerMinutes": 49.72,
+      "cacheSummaries": [
+        [
+          0,
+          7
+        ],
+        [
+          7,
+          7
+        ]
+      ],
+      "projects": [
+        "app-vue",
+        "ci-cd-platform",
+        "desktop",
+        "governance-tools",
+        "test-system-v2",
+        "web"
+      ],
+      "workloadKind": "observed-affected"
+    },
+    {
+      "runId": 39180842049,
+      "event": "push",
+      "unitSeconds": 409.0,
+      "setupSeconds": 40.0,
+      "ciSeconds": 880.0,
+      "runnerMinutes": 49.53,
+      "cacheSummaries": [
+        [
+          0,
+          7
+        ],
+        [
+          7,
+          7
+        ]
+      ],
+      "projects": [
+        "app-vue",
+        "ci-cd-platform",
+        "desktop",
+        "governance-tools",
+        "test-system-v2",
+        "web"
+      ],
+      "workloadKind": "observed-affected"
+    },
+    {
+      "runId": 39184675840,
+      "event": "pull_request",
+      "unitSeconds": 395.0,
+      "setupSeconds": 32.0,
+      "ciSeconds": 690.0,
+      "runnerMinutes": 45.57,
+      "cacheSummaries": [
+        [
+          0,
+          7
+        ],
+        [
+          7,
+          7
+        ]
+      ],
+      "projects": [
+        "app-vue",
+        "ci-cd-platform",
+        "desktop",
+        "governance-tools",
+        "test-system-v2",
+        "web"
+      ],
+      "workloadKind": "observed-affected"
+    },
+    {
+      "runId": 39188166299,
+      "event": "pull_request",
+      "unitSeconds": 410.0,
+      "setupSeconds": 34.0,
+      "ciSeconds": 806.0,
+      "runnerMinutes": 49.47,
+      "cacheSummaries": [
+        [
+          0,
+          7
+        ],
+        [
+          7,
+          7
+        ]
+      ],
+      "projects": [
+        "app-vue",
+        "ci-cd-platform",
+        "desktop",
+        "governance-tools",
+        "test-system-v2",
+        "web"
+      ],
+      "workloadKind": "observed-affected"
+    },
+    {
+      "runId": 39189253542,
+      "event": "push",
+      "unitSeconds": 327.0,
+      "setupSeconds": 42.0,
+      "ciSeconds": 878.0,
+      "runnerMinutes": 52.3,
+      "cacheSummaries": [
+        [
+          0,
+          7
+        ],
+        [
+          7,
+          7
+        ]
+      ],
+      "projects": [
+        "app-vue",
+        "ci-cd-platform",
+        "desktop",
+        "governance-tools",
+        "test-system-v2",
+        "web"
+      ],
+      "workloadKind": "observed-affected"
+    },
+    {
+      "runId": 39192471571,
+      "event": "pull_request",
+      "unitSeconds": 105.0,
+      "setupSeconds": 34.0,
+      "ciSeconds": 872.0,
+      "runnerMinutes": 46.38,
+      "cacheSummaries": [
+        [
+          0,
+          4
+        ]
+      ],
+      "projects": [
+        "ci-cd-platform",
+        "governance-tools",
+        "test-system-v2"
+      ],
+      "workloadKind": "observed-affected"
+    },
+    {
+      "runId": 39194294936,
+      "event": "push",
+      "unitSeconds": 700.0,
+      "setupSeconds": 34.0,
+      "ciSeconds": 886.0,
+      "runnerMinutes": 64.95,
+      "cacheSummaries": [
+        [
+          0,
+          40
+        ],
+        [
+          40,
+          40
+        ]
+      ],
+      "projects": [
+        "account",
+        "agent-gateway",
+        "ai",
+        "api",
+        "app-vue",
+        "assets",
+        "ci-cd-platform",
+        "cloud-auth",
+        "contracts",
+        "data-portability",
+        "database",
+        "desktop",
+        "domain-shared",
+        "goal",
+        "governance-tools",
+        "http-client",
+        "ipc-client",
+        "label",
+        "migrator",
+        "notification",
+        "patterns",
+        "powersync-schema",
+        "relation",
+        "reminder",
+        "repository",
+        "schedule",
+        "schedule-orchestration",
+        "scheduler",
+        "setting",
+        "task",
+        "test-system-v2",
+        "time",
+        "ui-core",
+        "ui-vue-shadcn",
+        "utils",
+        "web"
+      ],
+      "workloadKind": "full-audit"
+    }
+  ],
+  "ranking": [
+    {
+      "project": "app-vue",
+      "samples": 12,
+      "p50Seconds": 301.96,
+      "p95Seconds": 373.34
+    },
+    {
+      "project": "goal",
+      "samples": 1,
+      "p50Seconds": 181.99,
+      "p95Seconds": 181.99
+    },
+    {
+      "project": "task",
+      "samples": 1,
+      "p50Seconds": 158.92,
+      "p95Seconds": 158.92
+    },
+    {
+      "project": "desktop",
+      "samples": 12,
+      "p50Seconds": 108.98,
+      "p95Seconds": 121.97
+    },
+    {
+      "project": "ai",
+      "samples": 1,
+      "p50Seconds": 92.4,
+      "p95Seconds": 92.4
+    },
+    {
+      "project": "notification",
+      "samples": 1,
+      "p50Seconds": 65.71,
+      "p95Seconds": 65.71
+    },
+    {
+      "project": "test-system-v2",
+      "samples": 13,
+      "p50Seconds": 53.42,
+      "p95Seconds": 59.62
+    },
+    {
+      "project": "reminder",
+      "samples": 1,
+      "p50Seconds": 50.78,
+      "p95Seconds": 50.78
+    },
+    {
+      "project": "account",
+      "samples": 1,
+      "p50Seconds": 30.59,
+      "p95Seconds": 30.59
+    },
+    {
+      "project": "api",
+      "samples": 1,
+      "p50Seconds": 28.85,
+      "p95Seconds": 28.85
+    },
+    {
+      "project": "ci-cd-platform",
+      "samples": 13,
+      "p50Seconds": 25.1,
+      "p95Seconds": 29.64
+    },
+    {
+      "project": "web",
+      "samples": 12,
+      "p50Seconds": 22.99,
+      "p95Seconds": 30.65
+    },
+    {
+      "project": "contracts",
+      "samples": 1,
+      "p50Seconds": 22.05,
+      "p95Seconds": 22.05
+    },
+    {
+      "project": "repository",
+      "samples": 1,
+      "p50Seconds": 21.43,
+      "p95Seconds": 21.43
+    },
+    {
+      "project": "governance-tools",
+      "samples": 13,
+      "p50Seconds": 15.15,
+      "p95Seconds": 45.43
+    },
+    {
+      "project": "schedule",
+      "samples": 1,
+      "p50Seconds": 14.4,
+      "p95Seconds": 14.4
+    },
+    {
+      "project": "schedule-orchestration",
+      "samples": 1,
+      "p50Seconds": 14.1,
+      "p95Seconds": 14.1
+    },
+    {
+      "project": "time",
+      "samples": 1,
+      "p50Seconds": 13.61,
+      "p95Seconds": 13.61
+    },
+    {
+      "project": "cloud-auth",
+      "samples": 1,
+      "p50Seconds": 10.76,
+      "p95Seconds": 10.76
+    },
+    {
+      "project": "setting",
+      "samples": 1,
+      "p50Seconds": 9.83,
+      "p95Seconds": 9.83
+    },
+    {
+      "project": "ui-vue-shadcn",
+      "samples": 3,
+      "p50Seconds": 8.22,
+      "p95Seconds": 10.23
+    },
+    {
+      "project": "data-portability",
+      "samples": 1,
+      "p50Seconds": 7.34,
+      "p95Seconds": 7.34
+    },
+    {
+      "project": "utils",
+      "samples": 1,
+      "p50Seconds": 4.91,
+      "p95Seconds": 4.91
+    },
+    {
+      "project": "scheduler",
+      "samples": 1,
+      "p50Seconds": 4.36,
+      "p95Seconds": 4.36
+    },
+    {
+      "project": "database",
+      "samples": 1,
+      "p50Seconds": 3.95,
+      "p95Seconds": 3.95
+    },
+    {
+      "project": "relation",
+      "samples": 1,
+      "p50Seconds": 2.85,
+      "p95Seconds": 2.85
+    },
+    {
+      "project": "agent-gateway",
+      "samples": 1,
+      "p50Seconds": 2.78,
+      "p95Seconds": 2.78
+    },
+    {
+      "project": "patterns",
+      "samples": 1,
+      "p50Seconds": 2.64,
+      "p95Seconds": 2.64
+    },
+    {
+      "project": "label",
+      "samples": 1,
+      "p50Seconds": 2.57,
+      "p95Seconds": 2.57
+    },
+    {
+      "project": "http-client",
+      "samples": 1,
+      "p50Seconds": 2.04,
+      "p95Seconds": 2.04
+    },
+    {
+      "project": "domain-shared",
+      "samples": 1,
+      "p50Seconds": 1.28,
+      "p95Seconds": 1.28
+    },
+    {
+      "project": "ipc-client",
+      "samples": 1,
+      "p50Seconds": 1.06,
+      "p95Seconds": 1.06
+    }
+  ],
+  "observations": [
+    {
+      "runId": 39155065796,
+      "project": "ci-cd-platform",
+      "durationSeconds": 19.190765748,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39155065796,
+      "project": "web",
+      "durationSeconds": 22.75,
+      "vitestSetupSeconds": 18.76
+    },
+    {
+      "runId": 39155065796,
+      "project": "governance-tools",
+      "durationSeconds": 12.64,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39155065796,
+      "project": "desktop",
+      "durationSeconds": 91.67,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39155065796,
+      "project": "test-system-v2",
+      "durationSeconds": 44.502821413,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39155065796,
+      "project": "app-vue",
+      "durationSeconds": 258.83,
+      "vitestSetupSeconds": 94.7
+    },
+    {
+      "runId": 39156071648,
+      "project": "ci-cd-platform",
+      "durationSeconds": 17.566850966,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39156071648,
+      "project": "web",
+      "durationSeconds": 21.9,
+      "vitestSetupSeconds": 18.18
+    },
+    {
+      "runId": 39156071648,
+      "project": "governance-tools",
+      "durationSeconds": 11.95,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39156071648,
+      "project": "desktop",
+      "durationSeconds": 91.09,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39156071648,
+      "project": "test-system-v2",
+      "durationSeconds": 43.959793590000004,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39156071648,
+      "project": "app-vue",
+      "durationSeconds": 249.32,
+      "vitestSetupSeconds": 91.35
+    },
+    {
+      "runId": 39161754557,
+      "project": "ui-vue-shadcn",
+      "durationSeconds": 2.72,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39161754557,
+      "project": "web",
+      "durationSeconds": 13.57,
+      "vitestSetupSeconds": 10.05
+    },
+    {
+      "runId": 39161754557,
+      "project": "ci-cd-platform",
+      "durationSeconds": 19.437368171,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39161754557,
+      "project": "governance-tools",
+      "durationSeconds": 9.44,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39161754557,
+      "project": "desktop",
+      "durationSeconds": 82.33,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39161754557,
+      "project": "test-system-v2",
+      "durationSeconds": 39.610863730999995,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39161754557,
+      "project": "app-vue",
+      "durationSeconds": 199.13,
+      "vitestSetupSeconds": 67.49
+    },
+    {
+      "runId": 39163023903,
+      "project": "ui-vue-shadcn",
+      "durationSeconds": 8.22,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39163023903,
+      "project": "web",
+      "durationSeconds": 29.3,
+      "vitestSetupSeconds": 24.25
+    },
+    {
+      "runId": 39163023903,
+      "project": "ci-cd-platform",
+      "durationSeconds": 28.97813623,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39163023903,
+      "project": "governance-tools",
+      "durationSeconds": 16.65,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39163023903,
+      "project": "desktop",
+      "durationSeconds": 119.64,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39163023903,
+      "project": "test-system-v2",
+      "durationSeconds": 59.385292551999996,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39163023903,
+      "project": "app-vue",
+      "durationSeconds": 344.37,
+      "vitestSetupSeconds": 132.72
+    },
+    {
+      "runId": 39165574231,
+      "project": "web",
+      "durationSeconds": 22.56,
+      "vitestSetupSeconds": 17.47
+    },
+    {
+      "runId": 39165574231,
+      "project": "ci-cd-platform",
+      "durationSeconds": 25.098500291,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39165574231,
+      "project": "governance-tools",
+      "durationSeconds": 14.29,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39165574231,
+      "project": "desktop",
+      "durationSeconds": 112.04,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39165574231,
+      "project": "test-system-v2",
+      "durationSeconds": 54.618893699,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39165574231,
+      "project": "app-vue",
+      "durationSeconds": 301.96,
+      "vitestSetupSeconds": 101.79
+    },
+    {
+      "runId": 39166760886,
+      "project": "web",
+      "durationSeconds": 27.7,
+      "vitestSetupSeconds": 24.57
+    },
+    {
+      "runId": 39166760886,
+      "project": "ci-cd-platform",
+      "durationSeconds": 26.788480344,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39166760886,
+      "project": "governance-tools",
+      "durationSeconds": 15.76,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39166760886,
+      "project": "desktop",
+      "durationSeconds": 116.23,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39166760886,
+      "project": "test-system-v2",
+      "durationSeconds": 58.083806816999996,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39166760886,
+      "project": "app-vue",
+      "durationSeconds": 337.08,
+      "vitestSetupSeconds": 128.68
+    },
+    {
+      "runId": 39179745683,
+      "project": "ci-cd-platform",
+      "durationSeconds": 19.014816202000002,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39179745683,
+      "project": "web",
+      "durationSeconds": 22.99,
+      "vitestSetupSeconds": 18.46
+    },
+    {
+      "runId": 39179745683,
+      "project": "governance-tools",
+      "durationSeconds": 10.69,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39179745683,
+      "project": "desktop",
+      "durationSeconds": 92.88,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39179745683,
+      "project": "test-system-v2",
+      "durationSeconds": 44.181676409,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39179745683,
+      "project": "app-vue",
+      "durationSeconds": 253.3,
+      "vitestSetupSeconds": 91.95
+    },
+    {
+      "runId": 39180842049,
+      "project": "ci-cd-platform",
+      "durationSeconds": 23.395944551,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39180842049,
+      "project": "web",
+      "durationSeconds": 29.16,
+      "vitestSetupSeconds": 22.54
+    },
+    {
+      "runId": 39180842049,
+      "project": "governance-tools",
+      "durationSeconds": 15.15,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39180842049,
+      "project": "desktop",
+      "durationSeconds": 116.04,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39180842049,
+      "project": "test-system-v2",
+      "durationSeconds": 57.932441139000005,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39180842049,
+      "project": "app-vue",
+      "durationSeconds": 332.94,
+      "vitestSetupSeconds": 123.73
+    },
+    {
+      "runId": 39184675840,
+      "project": "ci-cd-platform",
+      "durationSeconds": 25.747908662999997,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39184675840,
+      "project": "web",
+      "durationSeconds": 30.62,
+      "vitestSetupSeconds": 25.7
+    },
+    {
+      "runId": 39184675840,
+      "project": "governance-tools",
+      "durationSeconds": 15.75,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39184675840,
+      "project": "desktop",
+      "durationSeconds": 108.98,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39184675840,
+      "project": "test-system-v2",
+      "durationSeconds": 56.271920562,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39184675840,
+      "project": "app-vue",
+      "durationSeconds": 333.63,
+      "vitestSetupSeconds": 126.73
+    },
+    {
+      "runId": 39188166299,
+      "project": "web",
+      "durationSeconds": 28.95,
+      "vitestSetupSeconds": 24.02
+    },
+    {
+      "runId": 39188166299,
+      "project": "ci-cd-platform",
+      "durationSeconds": 27.098287752,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39188166299,
+      "project": "governance-tools",
+      "durationSeconds": 16.51,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39188166299,
+      "project": "desktop",
+      "durationSeconds": 121.97,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39188166299,
+      "project": "test-system-v2",
+      "durationSeconds": 59.616259080000006,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39188166299,
+      "project": "app-vue",
+      "durationSeconds": 346.33,
+      "vitestSetupSeconds": 131.41
+    },
+    {
+      "runId": 39189253542,
+      "project": "web",
+      "durationSeconds": 18.42,
+      "vitestSetupSeconds": 14.42
+    },
+    {
+      "runId": 39189253542,
+      "project": "ci-cd-platform",
+      "durationSeconds": 21.503578508,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39189253542,
+      "project": "governance-tools",
+      "durationSeconds": 11.82,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39189253542,
+      "project": "desktop",
+      "durationSeconds": 99.41,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39189253542,
+      "project": "test-system-v2",
+      "durationSeconds": 48.263363149999996,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39189253542,
+      "project": "app-vue",
+      "durationSeconds": 257.28,
+      "vitestSetupSeconds": 84.5
+    },
+    {
+      "runId": 39192471571,
+      "project": "ci-cd-platform",
+      "durationSeconds": 29.643649878,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39192471571,
+      "project": "governance-tools",
+      "durationSeconds": 45.43,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39192471571,
+      "project": "test-system-v2",
+      "durationSeconds": 40.607901903,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39194294936,
+      "project": "utils",
+      "durationSeconds": 4.91,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39194294936,
+      "project": "database",
+      "durationSeconds": 3.95,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39194294936,
+      "project": "time",
+      "durationSeconds": 13.61,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39194294936,
+      "project": "domain-shared",
+      "durationSeconds": 1.28,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39194294936,
+      "project": "http-client",
+      "durationSeconds": 2.04,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39194294936,
+      "project": "ipc-client",
+      "durationSeconds": 1.06,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39194294936,
+      "project": "scheduler",
+      "durationSeconds": 4.36,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39194294936,
+      "project": "contracts",
+      "durationSeconds": 22.05,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39194294936,
+      "project": "patterns",
+      "durationSeconds": 2.64,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39194294936,
+      "project": "reminder",
+      "durationSeconds": 50.78,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39194294936,
+      "project": "notification",
+      "durationSeconds": 65.71,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39194294936,
+      "project": "repository",
+      "durationSeconds": 21.43,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39194294936,
+      "project": "schedule",
+      "durationSeconds": 14.4,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39194294936,
+      "project": "goal",
+      "durationSeconds": 181.99,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39194294936,
+      "project": "account",
+      "durationSeconds": 30.59,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39194294936,
+      "project": "label",
+      "durationSeconds": 2.57,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39194294936,
+      "project": "setting",
+      "durationSeconds": 9.83,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39194294936,
+      "project": "task",
+      "durationSeconds": 158.92,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39194294936,
+      "project": "data-portability",
+      "durationSeconds": 7.34,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39194294936,
+      "project": "cloud-auth",
+      "durationSeconds": 10.76,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39194294936,
+      "project": "relation",
+      "durationSeconds": 2.85,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39194294936,
+      "project": "ui-vue-shadcn",
+      "durationSeconds": 10.23,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39194294936,
+      "project": "agent-gateway",
+      "durationSeconds": 2.78,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39194294936,
+      "project": "schedule-orchestration",
+      "durationSeconds": 14.1,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39194294936,
+      "project": "ai",
+      "durationSeconds": 92.4,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39194294936,
+      "project": "ci-cd-platform",
+      "durationSeconds": 25.919443609,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39194294936,
+      "project": "desktop",
+      "durationSeconds": 109.76,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39194294936,
+      "project": "web",
+      "durationSeconds": 30.65,
+      "vitestSetupSeconds": 25.41
+    },
+    {
+      "runId": 39194294936,
+      "project": "governance-tools",
+      "durationSeconds": 24.92,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39194294936,
+      "project": "api",
+      "durationSeconds": 28.85,
+      "vitestSetupSeconds": 1.64
+    },
+    {
+      "runId": 39194294936,
+      "project": "test-system-v2",
+      "durationSeconds": 53.416722996999994,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39194294936,
+      "project": "app-vue",
+      "durationSeconds": 373.34,
+      "vitestSetupSeconds": 145.18
+    }
+  ],
+  "projectCacheAndSetup": [
+    {
+      "project": "account",
+      "firstObservations": 1,
+      "firstHits": 0,
+      "laterObservations": 1,
+      "laterHits": 1,
+      "setupSamples": 1,
+      "vitestSetupP50Seconds": 0.0,
+      "vitestSetupP95Seconds": 0.0
+    },
+    {
+      "project": "agent-gateway",
+      "firstObservations": 1,
+      "firstHits": 0,
+      "laterObservations": 1,
+      "laterHits": 1,
+      "setupSamples": 1,
+      "vitestSetupP50Seconds": 0.0,
+      "vitestSetupP95Seconds": 0.0
+    },
+    {
+      "project": "ai",
+      "firstObservations": 1,
+      "firstHits": 0,
+      "laterObservations": 1,
+      "laterHits": 1,
+      "setupSamples": 1,
+      "vitestSetupP50Seconds": 0.0,
+      "vitestSetupP95Seconds": 0.0
+    },
+    {
+      "project": "api",
+      "firstObservations": 1,
+      "firstHits": 0,
+      "laterObservations": 1,
+      "laterHits": 1,
+      "setupSamples": 1,
+      "vitestSetupP50Seconds": 1.64,
+      "vitestSetupP95Seconds": 1.64
+    },
+    {
+      "project": "app-vue",
+      "firstObservations": 12,
+      "firstHits": 0,
+      "laterObservations": 12,
+      "laterHits": 12,
+      "setupSamples": 12,
+      "vitestSetupP50Seconds": 101.79,
+      "vitestSetupP95Seconds": 145.18
+    },
+    {
+      "project": "assets",
+      "firstObservations": 1,
+      "firstHits": 0,
+      "laterObservations": 1,
+      "laterHits": 1,
+      "setupSamples": 0,
+      "vitestSetupP50Seconds": null,
+      "vitestSetupP95Seconds": null
+    },
+    {
+      "project": "ci-cd-platform",
+      "firstObservations": 13,
+      "firstHits": 0,
+      "laterObservations": 12,
+      "laterHits": 12,
+      "setupSamples": 0,
+      "vitestSetupP50Seconds": null,
+      "vitestSetupP95Seconds": null
+    },
+    {
+      "project": "cloud-auth",
+      "firstObservations": 1,
+      "firstHits": 0,
+      "laterObservations": 1,
+      "laterHits": 1,
+      "setupSamples": 1,
+      "vitestSetupP50Seconds": 0.0,
+      "vitestSetupP95Seconds": 0.0
+    },
+    {
+      "project": "contracts",
+      "firstObservations": 1,
+      "firstHits": 0,
+      "laterObservations": 1,
+      "laterHits": 1,
+      "setupSamples": 1,
+      "vitestSetupP50Seconds": 0.0,
+      "vitestSetupP95Seconds": 0.0
+    },
+    {
+      "project": "data-portability",
+      "firstObservations": 1,
+      "firstHits": 0,
+      "laterObservations": 1,
+      "laterHits": 1,
+      "setupSamples": 1,
+      "vitestSetupP50Seconds": 0.0,
+      "vitestSetupP95Seconds": 0.0
+    },
+    {
+      "project": "database",
+      "firstObservations": 1,
+      "firstHits": 0,
+      "laterObservations": 1,
+      "laterHits": 1,
+      "setupSamples": 1,
+      "vitestSetupP50Seconds": 0.0,
+      "vitestSetupP95Seconds": 0.0
+    },
+    {
+      "project": "desktop",
+      "firstObservations": 12,
+      "firstHits": 0,
+      "laterObservations": 12,
+      "laterHits": 12,
+      "setupSamples": 12,
+      "vitestSetupP50Seconds": 0.0,
+      "vitestSetupP95Seconds": 0.0
+    },
+    {
+      "project": "domain-shared",
+      "firstObservations": 1,
+      "firstHits": 0,
+      "laterObservations": 1,
+      "laterHits": 1,
+      "setupSamples": 1,
+      "vitestSetupP50Seconds": 0.0,
+      "vitestSetupP95Seconds": 0.0
+    },
+    {
+      "project": "goal",
+      "firstObservations": 1,
+      "firstHits": 0,
+      "laterObservations": 1,
+      "laterHits": 1,
+      "setupSamples": 1,
+      "vitestSetupP50Seconds": 0.0,
+      "vitestSetupP95Seconds": 0.0
+    },
+    {
+      "project": "governance-tools",
+      "firstObservations": 13,
+      "firstHits": 0,
+      "laterObservations": 12,
+      "laterHits": 12,
+      "setupSamples": 13,
+      "vitestSetupP50Seconds": 0.0,
+      "vitestSetupP95Seconds": 0.0
+    },
+    {
+      "project": "http-client",
+      "firstObservations": 1,
+      "firstHits": 0,
+      "laterObservations": 1,
+      "laterHits": 1,
+      "setupSamples": 1,
+      "vitestSetupP50Seconds": 0.0,
+      "vitestSetupP95Seconds": 0.0
+    },
+    {
+      "project": "ipc-client",
+      "firstObservations": 1,
+      "firstHits": 0,
+      "laterObservations": 1,
+      "laterHits": 1,
+      "setupSamples": 1,
+      "vitestSetupP50Seconds": 0.0,
+      "vitestSetupP95Seconds": 0.0
+    },
+    {
+      "project": "label",
+      "firstObservations": 1,
+      "firstHits": 0,
+      "laterObservations": 1,
+      "laterHits": 1,
+      "setupSamples": 1,
+      "vitestSetupP50Seconds": 0.0,
+      "vitestSetupP95Seconds": 0.0
+    },
+    {
+      "project": "migrator",
+      "firstObservations": 1,
+      "firstHits": 0,
+      "laterObservations": 1,
+      "laterHits": 1,
+      "setupSamples": 0,
+      "vitestSetupP50Seconds": null,
+      "vitestSetupP95Seconds": null
+    },
+    {
+      "project": "notification",
+      "firstObservations": 1,
+      "firstHits": 0,
+      "laterObservations": 1,
+      "laterHits": 1,
+      "setupSamples": 1,
+      "vitestSetupP50Seconds": 0.0,
+      "vitestSetupP95Seconds": 0.0
+    },
+    {
+      "project": "patterns",
+      "firstObservations": 1,
+      "firstHits": 0,
+      "laterObservations": 1,
+      "laterHits": 1,
+      "setupSamples": 1,
+      "vitestSetupP50Seconds": 0.0,
+      "vitestSetupP95Seconds": 0.0
+    },
+    {
+      "project": "powersync-schema",
+      "firstObservations": 1,
+      "firstHits": 0,
+      "laterObservations": 1,
+      "laterHits": 1,
+      "setupSamples": 0,
+      "vitestSetupP50Seconds": null,
+      "vitestSetupP95Seconds": null
+    },
+    {
+      "project": "relation",
+      "firstObservations": 1,
+      "firstHits": 0,
+      "laterObservations": 1,
+      "laterHits": 1,
+      "setupSamples": 1,
+      "vitestSetupP50Seconds": 0.0,
+      "vitestSetupP95Seconds": 0.0
+    },
+    {
+      "project": "reminder",
+      "firstObservations": 1,
+      "firstHits": 0,
+      "laterObservations": 1,
+      "laterHits": 1,
+      "setupSamples": 1,
+      "vitestSetupP50Seconds": 0.0,
+      "vitestSetupP95Seconds": 0.0
+    },
+    {
+      "project": "repository",
+      "firstObservations": 1,
+      "firstHits": 0,
+      "laterObservations": 1,
+      "laterHits": 1,
+      "setupSamples": 1,
+      "vitestSetupP50Seconds": 0.0,
+      "vitestSetupP95Seconds": 0.0
+    },
+    {
+      "project": "schedule",
+      "firstObservations": 1,
+      "firstHits": 0,
+      "laterObservations": 1,
+      "laterHits": 1,
+      "setupSamples": 1,
+      "vitestSetupP50Seconds": 0.0,
+      "vitestSetupP95Seconds": 0.0
+    },
+    {
+      "project": "schedule-orchestration",
+      "firstObservations": 1,
+      "firstHits": 0,
+      "laterObservations": 1,
+      "laterHits": 1,
+      "setupSamples": 1,
+      "vitestSetupP50Seconds": 0.0,
+      "vitestSetupP95Seconds": 0.0
+    },
+    {
+      "project": "scheduler",
+      "firstObservations": 1,
+      "firstHits": 0,
+      "laterObservations": 1,
+      "laterHits": 1,
+      "setupSamples": 1,
+      "vitestSetupP50Seconds": 0.0,
+      "vitestSetupP95Seconds": 0.0
+    },
+    {
+      "project": "setting",
+      "firstObservations": 1,
+      "firstHits": 0,
+      "laterObservations": 1,
+      "laterHits": 1,
+      "setupSamples": 1,
+      "vitestSetupP50Seconds": 0.0,
+      "vitestSetupP95Seconds": 0.0
+    },
+    {
+      "project": "task",
+      "firstObservations": 1,
+      "firstHits": 0,
+      "laterObservations": 1,
+      "laterHits": 1,
+      "setupSamples": 1,
+      "vitestSetupP50Seconds": 0.0,
+      "vitestSetupP95Seconds": 0.0
+    },
+    {
+      "project": "test-system-v2",
+      "firstObservations": 13,
+      "firstHits": 0,
+      "laterObservations": 12,
+      "laterHits": 12,
+      "setupSamples": 0,
+      "vitestSetupP50Seconds": null,
+      "vitestSetupP95Seconds": null
+    },
+    {
+      "project": "time",
+      "firstObservations": 1,
+      "firstHits": 0,
+      "laterObservations": 1,
+      "laterHits": 1,
+      "setupSamples": 1,
+      "vitestSetupP50Seconds": 0.0,
+      "vitestSetupP95Seconds": 0.0
+    },
+    {
+      "project": "ui-core",
+      "firstObservations": 3,
+      "firstHits": 0,
+      "laterObservations": 3,
+      "laterHits": 3,
+      "setupSamples": 0,
+      "vitestSetupP50Seconds": null,
+      "vitestSetupP95Seconds": null
+    },
+    {
+      "project": "ui-vue-shadcn",
+      "firstObservations": 3,
+      "firstHits": 0,
+      "laterObservations": 3,
+      "laterHits": 2,
+      "setupSamples": 3,
+      "vitestSetupP50Seconds": 0.0,
+      "vitestSetupP95Seconds": 0.0
+    },
+    {
+      "project": "utils",
+      "firstObservations": 1,
+      "firstHits": 0,
+      "laterObservations": 1,
+      "laterHits": 1,
+      "setupSamples": 1,
+      "vitestSetupP50Seconds": 0.0,
+      "vitestSetupP95Seconds": 0.0
+    },
+    {
+      "project": "web",
+      "firstObservations": 12,
+      "firstHits": 0,
+      "laterObservations": 12,
+      "laterHits": 12,
+      "setupSamples": 12,
+      "vitestSetupP50Seconds": 18.76,
+      "vitestSetupP95Seconds": 25.7
+    }
+  ],
+  "cacheObservations": [
+    {
+      "project": "account",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "account",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "agent-gateway",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "agent-gateway",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "ai",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "ai",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "api",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "api",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "app-vue",
+      "runId": 39155065796,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "app-vue",
+      "runId": 39155065796,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "app-vue",
+      "runId": 39156071648,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "app-vue",
+      "runId": 39156071648,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "app-vue",
+      "runId": 39161754557,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "app-vue",
+      "runId": 39161754557,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "app-vue",
+      "runId": 39163023903,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "app-vue",
+      "runId": 39163023903,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "app-vue",
+      "runId": 39165574231,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "app-vue",
+      "runId": 39165574231,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "app-vue",
+      "runId": 39166760886,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "app-vue",
+      "runId": 39166760886,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "app-vue",
+      "runId": 39179745683,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "app-vue",
+      "runId": 39179745683,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "app-vue",
+      "runId": 39180842049,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "app-vue",
+      "runId": 39180842049,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "app-vue",
+      "runId": 39184675840,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "app-vue",
+      "runId": 39184675840,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "app-vue",
+      "runId": 39188166299,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "app-vue",
+      "runId": 39188166299,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "app-vue",
+      "runId": 39189253542,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "app-vue",
+      "runId": 39189253542,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "app-vue",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "app-vue",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "assets",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "assets",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "ci-cd-platform",
+      "runId": 39155065796,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "ci-cd-platform",
+      "runId": 39155065796,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "ci-cd-platform",
+      "runId": 39156071648,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "ci-cd-platform",
+      "runId": 39156071648,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "ci-cd-platform",
+      "runId": 39161754557,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "ci-cd-platform",
+      "runId": 39161754557,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "ci-cd-platform",
+      "runId": 39163023903,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "ci-cd-platform",
+      "runId": 39163023903,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "ci-cd-platform",
+      "runId": 39165574231,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "ci-cd-platform",
+      "runId": 39165574231,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "ci-cd-platform",
+      "runId": 39166760886,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "ci-cd-platform",
+      "runId": 39166760886,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "ci-cd-platform",
+      "runId": 39179745683,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "ci-cd-platform",
+      "runId": 39179745683,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "ci-cd-platform",
+      "runId": 39180842049,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "ci-cd-platform",
+      "runId": 39180842049,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "ci-cd-platform",
+      "runId": 39184675840,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "ci-cd-platform",
+      "runId": 39184675840,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "ci-cd-platform",
+      "runId": 39188166299,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "ci-cd-platform",
+      "runId": 39188166299,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "ci-cd-platform",
+      "runId": 39189253542,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "ci-cd-platform",
+      "runId": 39189253542,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "ci-cd-platform",
+      "runId": 39192471571,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "ci-cd-platform",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "ci-cd-platform",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "cloud-auth",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "cloud-auth",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "contracts",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "contracts",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "data-portability",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "data-portability",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "database",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "database",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "desktop",
+      "runId": 39155065796,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "desktop",
+      "runId": 39155065796,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "desktop",
+      "runId": 39156071648,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "desktop",
+      "runId": 39156071648,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "desktop",
+      "runId": 39161754557,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "desktop",
+      "runId": 39161754557,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "desktop",
+      "runId": 39163023903,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "desktop",
+      "runId": 39163023903,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "desktop",
+      "runId": 39165574231,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "desktop",
+      "runId": 39165574231,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "desktop",
+      "runId": 39166760886,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "desktop",
+      "runId": 39166760886,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "desktop",
+      "runId": 39179745683,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "desktop",
+      "runId": 39179745683,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "desktop",
+      "runId": 39180842049,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "desktop",
+      "runId": 39180842049,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "desktop",
+      "runId": 39184675840,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "desktop",
+      "runId": 39184675840,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "desktop",
+      "runId": 39188166299,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "desktop",
+      "runId": 39188166299,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "desktop",
+      "runId": 39189253542,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "desktop",
+      "runId": 39189253542,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "desktop",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "desktop",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "domain-shared",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "domain-shared",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "goal",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "goal",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "governance-tools",
+      "runId": 39155065796,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "governance-tools",
+      "runId": 39155065796,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "governance-tools",
+      "runId": 39156071648,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "governance-tools",
+      "runId": 39156071648,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "governance-tools",
+      "runId": 39161754557,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "governance-tools",
+      "runId": 39161754557,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "governance-tools",
+      "runId": 39163023903,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "governance-tools",
+      "runId": 39163023903,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "governance-tools",
+      "runId": 39165574231,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "governance-tools",
+      "runId": 39165574231,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "governance-tools",
+      "runId": 39166760886,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "governance-tools",
+      "runId": 39166760886,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "governance-tools",
+      "runId": 39179745683,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "governance-tools",
+      "runId": 39179745683,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "governance-tools",
+      "runId": 39180842049,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "governance-tools",
+      "runId": 39180842049,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "governance-tools",
+      "runId": 39184675840,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "governance-tools",
+      "runId": 39184675840,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "governance-tools",
+      "runId": 39188166299,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "governance-tools",
+      "runId": 39188166299,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "governance-tools",
+      "runId": 39189253542,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "governance-tools",
+      "runId": 39189253542,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "governance-tools",
+      "runId": 39192471571,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "governance-tools",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "governance-tools",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "http-client",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "http-client",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "ipc-client",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "ipc-client",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "label",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "label",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "migrator",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "migrator",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "notification",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "notification",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "patterns",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "patterns",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "powersync-schema",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "powersync-schema",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "relation",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "relation",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "reminder",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "reminder",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "repository",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "repository",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "schedule",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "schedule",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "schedule-orchestration",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "schedule-orchestration",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "scheduler",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "scheduler",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "setting",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "setting",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "task",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "task",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "test-system-v2",
+      "runId": 39155065796,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "test-system-v2",
+      "runId": 39155065796,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "test-system-v2",
+      "runId": 39156071648,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "test-system-v2",
+      "runId": 39156071648,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "test-system-v2",
+      "runId": 39161754557,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "test-system-v2",
+      "runId": 39161754557,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "test-system-v2",
+      "runId": 39163023903,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "test-system-v2",
+      "runId": 39163023903,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "test-system-v2",
+      "runId": 39165574231,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "test-system-v2",
+      "runId": 39165574231,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "test-system-v2",
+      "runId": 39166760886,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "test-system-v2",
+      "runId": 39166760886,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "test-system-v2",
+      "runId": 39179745683,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "test-system-v2",
+      "runId": 39179745683,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "test-system-v2",
+      "runId": 39180842049,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "test-system-v2",
+      "runId": 39180842049,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "test-system-v2",
+      "runId": 39184675840,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "test-system-v2",
+      "runId": 39184675840,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "test-system-v2",
+      "runId": 39188166299,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "test-system-v2",
+      "runId": 39188166299,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "test-system-v2",
+      "runId": 39189253542,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "test-system-v2",
+      "runId": 39189253542,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "test-system-v2",
+      "runId": 39192471571,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "test-system-v2",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "test-system-v2",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "time",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "time",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "ui-core",
+      "runId": 39161754557,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "ui-core",
+      "runId": 39161754557,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "ui-core",
+      "runId": 39163023903,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "ui-core",
+      "runId": 39163023903,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "ui-core",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "ui-core",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "ui-vue-shadcn",
+      "runId": 39161754557,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "ui-vue-shadcn",
+      "runId": 39161754557,
+      "firstObservation": false,
+      "hit": false
+    },
+    {
+      "project": "ui-vue-shadcn",
+      "runId": 39163023903,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "ui-vue-shadcn",
+      "runId": 39163023903,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "ui-vue-shadcn",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "ui-vue-shadcn",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "utils",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "utils",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "web",
+      "runId": 39155065796,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "web",
+      "runId": 39155065796,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "web",
+      "runId": 39156071648,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "web",
+      "runId": 39156071648,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "web",
+      "runId": 39161754557,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "web",
+      "runId": 39161754557,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "web",
+      "runId": 39163023903,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "web",
+      "runId": 39163023903,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "web",
+      "runId": 39165574231,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "web",
+      "runId": 39165574231,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "web",
+      "runId": 39166760886,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "web",
+      "runId": 39166760886,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "web",
+      "runId": 39179745683,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "web",
+      "runId": 39179745683,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "web",
+      "runId": 39180842049,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "web",
+      "runId": 39180842049,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "web",
+      "runId": 39184675840,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "web",
+      "runId": 39184675840,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "web",
+      "runId": 39188166299,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "web",
+      "runId": 39188166299,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "web",
+      "runId": 39189253542,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "web",
+      "runId": 39189253542,
+      "firstObservation": false,
+      "hit": true
+    },
+    {
+      "project": "web",
+      "runId": 39194294936,
+      "firstObservation": true,
+      "hit": false
+    },
+    {
+      "project": "web",
+      "runId": 39194294936,
+      "firstObservation": false,
+      "hit": true
+    }
+  ],
+  "unmeasuredProjects": [
+    "assets",
+    "migrator",
+    "powersync-schema",
+    "ui-core"
+  ]
+}

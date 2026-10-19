@@ -93,7 +93,10 @@ async function run(attempt) {
 }
 
 const attempts = [await run(1)];
-if (['infrastructure', 'process-crash'].includes(attempts[0].classification))
+if (
+  process.env.TEST_RETRY_INFRASTRUCTURE !== 'false' &&
+  ['infrastructure', 'process-crash'].includes(attempts[0].classification)
+)
   attempts.push(await run(2));
 const final = attempts.at(-1);
 const testSummary = await collectTestReportSummaries(
@@ -108,6 +111,11 @@ const report = {
   attempts,
   result: final.exitCode === 0 ? 'success' : 'failure',
   testSummary,
+  provenance: {
+    runner: process.env.RUNNER_OS ?? process.platform,
+    job: process.env.GITHUB_JOB ?? null,
+    ...(process.env.UNIT_SHARD_ID ? { unitShardId: process.env.UNIT_SHARD_ID } : {}),
+  },
 };
 await mkdir(reportsDir, { recursive: true });
 await writeFile(
@@ -148,6 +156,8 @@ if (laneContext) {
       report: path.join(reportsDir, `${reportName}.json`),
       runner: process.env.RUNNER_OS ?? process.platform,
       laneInput: laneInputPath,
+      job: process.env.GITHUB_JOB ?? null,
+      ...(process.env.UNIT_SHARD_ID ? { unitShardId: process.env.UNIT_SHARD_ID } : {}),
     },
   };
   laneResult.digest = digest(laneResult);

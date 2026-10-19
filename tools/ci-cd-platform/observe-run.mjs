@@ -3,6 +3,7 @@
 import { pathToFileURL } from 'node:url';
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { unitJobEnabled } from './lib/unit-shards.mjs';
 import {
   digest,
   validateDeliveryManifest,
@@ -70,6 +71,32 @@ export async function observeRun({
     .filter(([, isEnabled]) => isEnabled)
     .map(([lane]) => lane);
   const missing = enabled.filter((lane) => !byLane.has(lane));
+  // Validate summaries must account for every selected Unit command, not merely
+  // another validate child (lint/build/typecheck) that happened to publish evidence.
+  const missingUnitShards = [];
+  for (const { id, tasks } of manifest.unitShards) {
+    if (!unitJobEnabled(manifest, id)) continue;
+    const owned = summaries.filter(
+      ({ value }) =>
+        value.lane === 'validate' &&
+        value.provenance?.unitShardId === id &&
+        value.provenance?.job === id,
+    );
+    if (owned.length !== 1) {
+      missingUnitShards.push(id);
+      continue;
+    }
+    const reportNames = owned[0].value.evidence?.reports ?? [];
+    const expected = tasks.map((_, index) => `${id}-${index}.json`);
+    const actual = reportNames.map((file) => path.basename(file));
+    if (
+      actual.length !== expected.length ||
+      new Set(actual).size !== actual.length ||
+      actual.some((name) => !expected.includes(name))
+    ) {
+      throw new Error(`Unit shard evidence is not exact for ${id}`);
+    }
+  }
   const failures = summaries.filter(({ value }) => value.status !== 'success');
   const startedAtMs = startedAt ? Date.parse(startedAt) : Number.NaN;
   if (startedAt && !Number.isFinite(startedAtMs)) {
@@ -83,7 +110,12 @@ export async function observeRun({
     version: 1,
     commit: manifest.commit,
     manifestDigest: manifest.digest,
-    status: failures.length > 0 ? 'failure' : missing.length > 0 ? 'incomplete' : 'success',
+    status:
+      failures.length > 0
+        ? 'failure'
+        : missing.length > 0 || missingUnitShards.length > 0
+          ? 'incomplete'
+          : 'success',
     lanes: [...byLane.entries()]
       .map(([lane, values]) => ({
         lane,
@@ -100,6 +132,7 @@ export async function observeRun({
       }))
       .sort((left, right) => left.lane.localeCompare(right.lane)),
     missingLanes: missing,
+    missingUnitShards,
     timing: {
       setupMs: summaries.reduce((total, { value }) => total + (value.timing.setupMs ?? 0), 0),
       executionMs: summaries.reduce(

@@ -1,3 +1,4 @@
+import { UNIT_JOB_IDS, unitJobName, unitJobEnabled } from '../lib/unit-shards.mjs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { resolvePrEvidence } from '../lib/ci-evidence.mjs';
@@ -110,8 +111,16 @@ async function fixture() {
     [
       `/repos/${repository}/actions/runs/99/attempts/1/jobs?per_page=100`,
       {
-        total_count: 1,
-        jobs: [{ name: 'CI Check', head_sha: head, status: 'completed', conclusion: 'success' }],
+        total_count: 4,
+        jobs: [
+          { name: 'CI Check', head_sha: head, status: 'completed', conclusion: 'success' },
+          ...UNIT_JOB_IDS.map((id) => ({
+            name: unitJobName(id),
+            head_sha: head,
+            status: 'completed',
+            conclusion: unitJobEnabled(manifest, id) ? 'success' : 'skipped',
+          })),
+        ],
       },
     ],
   ]);
@@ -318,8 +327,16 @@ async function promotionFixture() {
   };
   f.responses.set(`/repos/${repository}/actions/runs/101`, mainRun);
   f.responses.set(`/repos/${repository}/actions/runs/101/attempts/1/jobs?per_page=100`, {
-    total_count: 1,
-    jobs: [{ name: 'CI Check', head_sha: sha, status: 'completed', conclusion: 'success' }],
+    total_count: 4,
+    jobs: [
+      { name: 'CI Check', head_sha: sha, status: 'completed', conclusion: 'success' },
+      ...UNIT_JOB_IDS.map((id) => ({
+        name: unitJobName(id),
+        head_sha: sha,
+        status: 'completed',
+        conclusion: 'skipped',
+      })),
+    ],
   });
   const manifest = structuredClone(f.evidence.manifest);
   Object.assign(manifest, {
@@ -360,6 +377,11 @@ test('promotion accepts exhaustive main fallback evidence without inventing a PR
     full: true,
     execution: { mode: 'full', candidate: true, reason: 'no PR' },
   });
+  for (const job of f.responses.get(
+    `/repos/${repository}/actions/runs/101/attempts/1/jobs?per_page=100`,
+  ).jobs) {
+    if (job.name === 'CI Check' || job.name === unitJobName('unit-1')) job.conclusion = 'success';
+  }
   manifest.scope.full = true;
   manifest.lanes = Object.fromEntries(Object.keys(manifest.lanes).map((lane) => [lane, true]));
   delete manifest.digest;
@@ -551,3 +573,44 @@ test('promotion blocks valid-format build artifact and manifest digest drift fro
     /chain mismatch/u,
   );
 });
+
+for (const status of ['missing', 'failure', 'cancelled', 'skipped', 'duplicate']) {
+  test(`PR reuse rejects a ${status} Unit shard even with a green aggregate check`, async () => {
+    const f = await fixture();
+    const response = f.responses.get(
+      `/repos/${repository}/actions/runs/99/attempts/1/jobs?per_page=100`,
+    );
+    const job = response.jobs.find((job) => job.name === unitJobName('unit-1'));
+    if (status === 'missing') response.jobs = response.jobs.filter((entry) => entry !== job);
+    else if (status === 'duplicate') response.jobs.push(structuredClone(job));
+    else job.conclusion = status;
+    response.total_count = response.jobs.length;
+    const result = await resolvePrEvidence(f.options);
+    assert.equal(result.mode, 'full');
+    assert.match(result.reason, /unit-1 missing, ambiguous or not success/u);
+  });
+
+  test(`promotion rejects a ${status} required Unit shard in main full audit`, async () => {
+    const f = await promotionFixture();
+    const manifest = f.mainEvidence.manifest;
+    manifest.full = true;
+    manifest.scope.full = true;
+    manifest.execution = { mode: 'full', candidate: true };
+    manifest.lanes = Object.fromEntries(Object.keys(manifest.lanes).map((lane) => [lane, true]));
+    delete manifest.digest;
+    manifest.digest = digest(manifest);
+    const response = f.responses.get(
+      `/repos/${repository}/actions/runs/101/attempts/1/jobs?per_page=100`,
+    );
+    const job = response.jobs.find((job) => job.name === unitJobName('unit-1'));
+    job.conclusion = 'success';
+    if (status === 'missing') response.jobs = response.jobs.filter((entry) => entry !== job);
+    else if (status === 'duplicate') response.jobs.push(structuredClone(job));
+    else job.conclusion = status;
+    response.total_count = response.jobs.length;
+    await assert.rejects(
+      verifyPromotionEvidence(f.options),
+      /unit-1 missing, ambiguous or not success/u,
+    );
+  });
+}

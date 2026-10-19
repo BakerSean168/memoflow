@@ -1,5 +1,5 @@
 import { digest, validateDeliveryManifest } from './contracts.mjs';
-import { requireProof, verifyCiRun, verifyPrEvidence } from './ci-evidence.mjs';
+import { requireProof, verifyCiRun, verifyPrEvidence, verifyUnitJobs } from './ci-evidence.mjs';
 
 export async function verifyPromotionEvidence(options) {
   const { api, repository, sha, runId, readEvidence, gitCommit, inputsDigest, artifact } = options;
@@ -14,6 +14,7 @@ export async function verifyPromotionEvidence(options) {
     'wrong main evidence identity',
   );
   const manifest = validateDeliveryManifest(evidence.manifest);
+  verifyUnitJobs(run, manifest);
   requireProof(
     manifest.commit === sha &&
       manifest.head === sha &&

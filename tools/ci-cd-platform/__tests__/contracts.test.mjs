@@ -1,3 +1,4 @@
+import { planUnitShards } from '../lib/unit-shards.mjs';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
@@ -54,6 +55,7 @@ test('validates a delivery manifest and gives deterministic provenance', () => {
     },
     provenance: buildProvenance({ generator: 'test', input }),
   };
+  manifest.unitShards = planUnitShards(manifest.scope.unit);
   manifest.digest = digest(manifest);
   validateDeliveryManifest(manifest);
   assert.equal(digest(input), digest({ files: input.files, head: input.head }));
@@ -95,6 +97,7 @@ test('rejects a scope that was calculated from a different affected range', () =
     lanes: { governance: true, validate: true },
     provenance: { generator: 'test', inputDigest: 'a'.repeat(64) },
   };
+  manifest.unitShards = planUnitShards(manifest.scope.unit);
   manifest.digest = digest(manifest);
   assert.throws(() => validateDeliveryManifest(manifest), /scope\.base must match/);
 });

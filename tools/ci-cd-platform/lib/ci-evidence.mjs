@@ -1,4 +1,5 @@
 import { digest, validateDeliveryManifest } from './contracts.mjs';
+import { UNIT_JOB_IDS, unitJobName, unitJobEnabled } from './unit-shards.mjs';
 import { classifyRisk } from './risk.mjs';
 
 const SHA = /^[a-f0-9]{40}$/u;
@@ -79,7 +80,23 @@ export async function verifyCiRun({ api, repository, runId, head, event }) {
       checks[0].conclusion === 'success',
     'CI Check missing or not green',
   );
-  return run;
+  return { ...run, jobs };
+}
+
+/** Authenticate every physical Unit job, even when an aggregate check claims green. */
+export function verifyUnitJobs(run, manifest) {
+  validateDeliveryManifest(manifest);
+  for (const id of UNIT_JOB_IDS) {
+    const matches = run.jobs.filter((job) => job.name === unitJobName(id));
+    const expected = unitJobEnabled(manifest, id) ? 'success' : 'skipped';
+    requireProof(
+      matches.length === 1 &&
+        matches[0].head_sha === run.head_sha &&
+        matches[0].status === 'completed' &&
+        matches[0].conclusion === expected,
+      `${id} missing, ambiguous or not ${expected}`,
+    );
+  }
 }
 
 export async function resolvePrEvidence(options) {
@@ -199,6 +216,7 @@ export async function verifyPrEvidence({
     'Git tree/parents mismatch',
   );
   validateDeliveryManifest(evidence.manifest);
+  verifyUnitJobs(run, evidence.manifest);
   requireProof(
     evidence.manifest.base === before &&
       evidence.manifest.head === tested.sha &&

@@ -1,3 +1,4 @@
+import { planUnitShards } from '../lib/unit-shards.mjs';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
@@ -27,6 +28,7 @@ const manifest = (laneOverrides = {}, unit = ['app-vue']) => {
     risk: { level: 'package', reasons: ['test'] },
     lanes: lanes(laneOverrides),
     scope: { version: 1, unit },
+    unitShards: planUnitShards(unit),
     provenance: buildProvenance({ generator: 'test', input: { laneOverrides, unit } }),
   };
   return { ...content, digest: digest(content) };
@@ -78,8 +80,8 @@ test('unit skip is allowed only when the manifest scope has no unit projects', (
   assert.equal(evaluateCiCheck({ needs: healthyNeeds(m), manifest: m }).state, 'success');
   const withUnit = manifest();
   const needs = healthyNeeds(withUnit);
-  needs.unit.result = 'skipped';
-  assert.deepEqual(evaluateCiCheck({ needs, manifest: withUnit }).failures, ['unit:skipped']);
+  needs['unit-1'].result = 'skipped';
+  assert.deepEqual(evaluateCiCheck({ needs, manifest: withUnit }).failures, ['unit-1:skipped']);
 });
 
 for (const result of ['failure', 'cancelled', 'skipped']) {
@@ -237,7 +239,7 @@ test('reuse requires the build but forbids ordinary lane jobs and rejects missin
   needs.build.result = 'skipped';
   assert.equal(evaluateCiCheck({ needs, manifest: m }).state, 'failure');
   needs.build.result = 'success';
-  needs.unit.result = 'success';
+  needs['unit-1'].result = 'success';
   assert.equal(evaluateCiCheck({ needs, manifest: m }).state, 'failure');
 });
 
@@ -275,5 +277,54 @@ test('docs-only reuse has no build or test jobs; malformed reuse/full policy fai
     delete invalid.digest;
     invalid.digest = digest(invalid);
     assert.equal(evaluateCiCheck({ needs: healthyNeeds(m), manifest: invalid }).state, 'failure');
+  }
+});
+
+for (const id of ['unit-1', 'unit-2', 'unit-3']) {
+  for (const status of ['missing', 'failure', 'cancelled', 'skipped']) {
+    test(`${id} ${status} cannot pass CI Check while sibling shards are green`, () => {
+      const m = manifest({}, ['app-vue', 'desktop', 'web']);
+      const needs = healthyNeeds(m);
+      if (status === 'missing') delete needs[id];
+      else needs[id].result = status;
+      assert.equal(evaluateCiCheck({ needs, manifest: m }).state, 'failure');
+      assert.ok(
+        evaluateCiCheck({ needs, manifest: m }).failures.some((failure) =>
+          failure.startsWith(`${id}:`),
+        ),
+      );
+    });
+  }
+}
+
+test('a valid self-digest cannot authorize a missing, duplicated or altered Unit plan', () => {
+  const m = manifest({}, ['app-vue', 'desktop', 'web']);
+  for (const change of [
+    (value) => {
+      delete value.unitShards;
+    },
+    (value) => {
+      value.unitShards.pop();
+    },
+    (value) => {
+      value.unitShards[1] = value.unitShards[0];
+    },
+    (value) => {
+      value.unitShards[0].tasks.pop();
+    },
+    (value) => {
+      value.unitShards[0].tasks.push({ project: 'unknown' });
+    },
+    (value) => {
+      value.unitShards[0].tasks[0].shard = '1/3';
+    },
+  ]) {
+    const invalid = structuredClone(m);
+    change(invalid);
+    delete invalid.digest;
+    invalid.digest = digest(invalid);
+    const needs = healthyNeeds(m);
+    needs['scope-detector'].outputs.manifest_digest = invalid.digest;
+    assert.equal(evaluateCiCheck({ needs, manifest: invalid }).state, 'failure');
   }
 });
