@@ -26801,6 +26801,7 @@ export namespace Prisma {
     revision: number | null
     viewJson: string | null
     pendingJson: string | null
+    stepKey: string | null
     stepsJson: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -26818,6 +26819,7 @@ export namespace Prisma {
     revision: number | null
     viewJson: string | null
     pendingJson: string | null
+    stepKey: string | null
     stepsJson: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -26835,6 +26837,7 @@ export namespace Prisma {
     revision: number
     viewJson: number
     pendingJson: number
+    stepKey: number
     stepsJson: number
     createdAt: number
     updatedAt: number
@@ -26862,6 +26865,7 @@ export namespace Prisma {
     revision?: true
     viewJson?: true
     pendingJson?: true
+    stepKey?: true
     stepsJson?: true
     createdAt?: true
     updatedAt?: true
@@ -26879,6 +26883,7 @@ export namespace Prisma {
     revision?: true
     viewJson?: true
     pendingJson?: true
+    stepKey?: true
     stepsJson?: true
     createdAt?: true
     updatedAt?: true
@@ -26896,6 +26901,7 @@ export namespace Prisma {
     revision?: true
     viewJson?: true
     pendingJson?: true
+    stepKey?: true
     stepsJson?: true
     createdAt?: true
     updatedAt?: true
@@ -27000,6 +27006,7 @@ export namespace Prisma {
     revision: number
     viewJson: string | null
     pendingJson: string | null
+    stepKey: string | null
     stepsJson: string
     createdAt: Date
     updatedAt: Date
@@ -27036,6 +27043,7 @@ export namespace Prisma {
     revision?: boolean
     viewJson?: boolean
     pendingJson?: boolean
+    stepKey?: boolean
     stepsJson?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -27054,6 +27062,7 @@ export namespace Prisma {
     revision?: boolean
     viewJson?: boolean
     pendingJson?: boolean
+    stepKey?: boolean
     stepsJson?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -27072,6 +27081,7 @@ export namespace Prisma {
     revision?: boolean
     viewJson?: boolean
     pendingJson?: boolean
+    stepKey?: boolean
     stepsJson?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -27090,12 +27100,13 @@ export namespace Prisma {
     revision?: boolean
     viewJson?: boolean
     pendingJson?: boolean
+    stepKey?: boolean
     stepsJson?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type AiAssistedWorkflowOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "connectionId" | "kind" | "runId" | "requestKey" | "requestDigest" | "requestJson" | "revision" | "viewJson" | "pendingJson" | "stepsJson" | "createdAt" | "updatedAt", ExtArgs["result"]["aiAssistedWorkflow"]>
+  export type AiAssistedWorkflowOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "connectionId" | "kind" | "runId" | "requestKey" | "requestDigest" | "requestJson" | "revision" | "viewJson" | "pendingJson" | "stepKey" | "stepsJson" | "createdAt" | "updatedAt", ExtArgs["result"]["aiAssistedWorkflow"]>
   export type AiAssistedWorkflowInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     account?: boolean | AccountDefaultArgs<ExtArgs>
   }
@@ -27123,6 +27134,7 @@ export namespace Prisma {
       revision: number
       viewJson: string | null
       pendingJson: string | null
+      stepKey: string | null
       stepsJson: string
       createdAt: Date
       updatedAt: Date
@@ -27561,6 +27573,7 @@ export namespace Prisma {
     readonly revision: FieldRef<"AiAssistedWorkflow", 'Int'>
     readonly viewJson: FieldRef<"AiAssistedWorkflow", 'String'>
     readonly pendingJson: FieldRef<"AiAssistedWorkflow", 'String'>
+    readonly stepKey: FieldRef<"AiAssistedWorkflow", 'String'>
     readonly stepsJson: FieldRef<"AiAssistedWorkflow", 'String'>
     readonly createdAt: FieldRef<"AiAssistedWorkflow", 'DateTime'>
     readonly updatedAt: FieldRef<"AiAssistedWorkflow", 'DateTime'>
@@ -119785,6 +119798,7 @@ export namespace Prisma {
     revision: 'revision',
     viewJson: 'viewJson',
     pendingJson: 'pendingJson',
+    stepKey: 'stepKey',
     stepsJson: 'stepsJson',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -122537,6 +122551,7 @@ export namespace Prisma {
     revision?: IntFilter<"AiAssistedWorkflow"> | number
     viewJson?: StringNullableFilter<"AiAssistedWorkflow"> | string | null
     pendingJson?: StringNullableFilter<"AiAssistedWorkflow"> | string | null
+    stepKey?: StringNullableFilter<"AiAssistedWorkflow"> | string | null
     stepsJson?: StringFilter<"AiAssistedWorkflow"> | string
     createdAt?: DateTimeFilter<"AiAssistedWorkflow"> | Date | string
     updatedAt?: DateTimeFilter<"AiAssistedWorkflow"> | Date | string
@@ -122555,6 +122570,7 @@ export namespace Prisma {
     revision?: SortOrder
     viewJson?: SortOrderInput | SortOrder
     pendingJson?: SortOrderInput | SortOrder
+    stepKey?: SortOrderInput | SortOrder
     stepsJson?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -122577,6 +122593,7 @@ export namespace Prisma {
     revision?: IntFilter<"AiAssistedWorkflow"> | number
     viewJson?: StringNullableFilter<"AiAssistedWorkflow"> | string | null
     pendingJson?: StringNullableFilter<"AiAssistedWorkflow"> | string | null
+    stepKey?: StringNullableFilter<"AiAssistedWorkflow"> | string | null
     stepsJson?: StringFilter<"AiAssistedWorkflow"> | string
     createdAt?: DateTimeFilter<"AiAssistedWorkflow"> | Date | string
     updatedAt?: DateTimeFilter<"AiAssistedWorkflow"> | Date | string
@@ -122595,6 +122612,7 @@ export namespace Prisma {
     revision?: SortOrder
     viewJson?: SortOrderInput | SortOrder
     pendingJson?: SortOrderInput | SortOrder
+    stepKey?: SortOrderInput | SortOrder
     stepsJson?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -122620,6 +122638,7 @@ export namespace Prisma {
     revision?: IntWithAggregatesFilter<"AiAssistedWorkflow"> | number
     viewJson?: StringNullableWithAggregatesFilter<"AiAssistedWorkflow"> | string | null
     pendingJson?: StringNullableWithAggregatesFilter<"AiAssistedWorkflow"> | string | null
+    stepKey?: StringNullableWithAggregatesFilter<"AiAssistedWorkflow"> | string | null
     stepsJson?: StringWithAggregatesFilter<"AiAssistedWorkflow"> | string
     createdAt?: DateTimeWithAggregatesFilter<"AiAssistedWorkflow"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"AiAssistedWorkflow"> | Date | string
@@ -131035,6 +131054,7 @@ export namespace Prisma {
     revision?: number
     viewJson?: string | null
     pendingJson?: string | null
+    stepKey?: string | null
     stepsJson?: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -131053,6 +131073,7 @@ export namespace Prisma {
     revision?: number
     viewJson?: string | null
     pendingJson?: string | null
+    stepKey?: string | null
     stepsJson?: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -131069,6 +131090,7 @@ export namespace Prisma {
     revision?: IntFieldUpdateOperationsInput | number
     viewJson?: NullableStringFieldUpdateOperationsInput | string | null
     pendingJson?: NullableStringFieldUpdateOperationsInput | string | null
+    stepKey?: NullableStringFieldUpdateOperationsInput | string | null
     stepsJson?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -131087,6 +131109,7 @@ export namespace Prisma {
     revision?: IntFieldUpdateOperationsInput | number
     viewJson?: NullableStringFieldUpdateOperationsInput | string | null
     pendingJson?: NullableStringFieldUpdateOperationsInput | string | null
+    stepKey?: NullableStringFieldUpdateOperationsInput | string | null
     stepsJson?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -131104,6 +131127,7 @@ export namespace Prisma {
     revision?: number
     viewJson?: string | null
     pendingJson?: string | null
+    stepKey?: string | null
     stepsJson?: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -131120,6 +131144,7 @@ export namespace Prisma {
     revision?: IntFieldUpdateOperationsInput | number
     viewJson?: NullableStringFieldUpdateOperationsInput | string | null
     pendingJson?: NullableStringFieldUpdateOperationsInput | string | null
+    stepKey?: NullableStringFieldUpdateOperationsInput | string | null
     stepsJson?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -131137,6 +131162,7 @@ export namespace Prisma {
     revision?: IntFieldUpdateOperationsInput | number
     viewJson?: NullableStringFieldUpdateOperationsInput | string | null
     pendingJson?: NullableStringFieldUpdateOperationsInput | string | null
+    stepKey?: NullableStringFieldUpdateOperationsInput | string | null
     stepsJson?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -140431,6 +140457,7 @@ export namespace Prisma {
     revision?: SortOrder
     viewJson?: SortOrder
     pendingJson?: SortOrder
+    stepKey?: SortOrder
     stepsJson?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -140452,6 +140479,7 @@ export namespace Prisma {
     revision?: SortOrder
     viewJson?: SortOrder
     pendingJson?: SortOrder
+    stepKey?: SortOrder
     stepsJson?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -140469,6 +140497,7 @@ export namespace Prisma {
     revision?: SortOrder
     viewJson?: SortOrder
     pendingJson?: SortOrder
+    stepKey?: SortOrder
     stepsJson?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -151066,6 +151095,7 @@ export namespace Prisma {
     revision?: number
     viewJson?: string | null
     pendingJson?: string | null
+    stepKey?: string | null
     stepsJson?: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -151082,6 +151112,7 @@ export namespace Prisma {
     revision?: number
     viewJson?: string | null
     pendingJson?: string | null
+    stepKey?: string | null
     stepsJson?: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -152907,6 +152938,7 @@ export namespace Prisma {
     revision?: IntFilter<"AiAssistedWorkflow"> | number
     viewJson?: StringNullableFilter<"AiAssistedWorkflow"> | string | null
     pendingJson?: StringNullableFilter<"AiAssistedWorkflow"> | string | null
+    stepKey?: StringNullableFilter<"AiAssistedWorkflow"> | string | null
     stepsJson?: StringFilter<"AiAssistedWorkflow"> | string
     createdAt?: DateTimeFilter<"AiAssistedWorkflow"> | Date | string
     updatedAt?: DateTimeFilter<"AiAssistedWorkflow"> | Date | string
@@ -173757,6 +173789,7 @@ export namespace Prisma {
     revision?: number
     viewJson?: string | null
     pendingJson?: string | null
+    stepKey?: string | null
     stepsJson?: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -174385,6 +174418,7 @@ export namespace Prisma {
     revision?: IntFieldUpdateOperationsInput | number
     viewJson?: NullableStringFieldUpdateOperationsInput | string | null
     pendingJson?: NullableStringFieldUpdateOperationsInput | string | null
+    stepKey?: NullableStringFieldUpdateOperationsInput | string | null
     stepsJson?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -174401,6 +174435,7 @@ export namespace Prisma {
     revision?: IntFieldUpdateOperationsInput | number
     viewJson?: NullableStringFieldUpdateOperationsInput | string | null
     pendingJson?: NullableStringFieldUpdateOperationsInput | string | null
+    stepKey?: NullableStringFieldUpdateOperationsInput | string | null
     stepsJson?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -174417,6 +174452,7 @@ export namespace Prisma {
     revision?: IntFieldUpdateOperationsInput | number
     viewJson?: NullableStringFieldUpdateOperationsInput | string | null
     pendingJson?: NullableStringFieldUpdateOperationsInput | string | null
+    stepKey?: NullableStringFieldUpdateOperationsInput | string | null
     stepsJson?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string

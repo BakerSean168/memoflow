@@ -9,6 +9,7 @@ import type {
 } from '@memoflow/contracts/task';
 import type { RoutineAgentPersistedReceipt } from '@memoflow/contracts/routine';
 import type { GatewayWriteToolName } from './write-tool-descriptors';
+import type { GatewayAssistedToolName } from './assisted-tool-descriptors';
 import type { GatewayFailureCode } from '@memoflow/contracts/agent-gateway';
 import type {
   GoalAgentPersistedReceipt,
@@ -67,6 +68,7 @@ export interface GatewayAuditEvent {
   readonly identityId?: string;
   readonly tool:
     | GatewayWriteToolName
+    | GatewayAssistedToolName
     | 'goal_get'
     | 'goal_search'
     | 'task_plan_get'

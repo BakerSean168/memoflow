@@ -23,7 +23,10 @@ import {
 const MAX_BYTES = 256 * 1024;
 export interface ReadToolCall {
   <T extends object>(
-    name: GatewayReadToolName | import('../write-tool-descriptors').GatewayWriteToolName,
+    name:
+      | GatewayReadToolName
+      | import('../write-tool-descriptors').GatewayWriteToolName
+      | import('../assisted-tool-descriptors').GatewayAssistedToolName,
     scope: 'goals:read' | 'tasks:read' | 'goals:write' | 'tasks:write' | 'routines:write',
     work: () => Promise<T>,
   ): Promise<{

@@ -32,10 +32,15 @@ import { z } from 'zod';
 export function bindGatewayWrites(
   db: PrismaClient,
   time: UserTimeContextPort,
-  options: { routineWriteEnabled?: boolean; assistedGuard?: { handleId: string; pendingJson: string } } = {},
+  options: {
+    routineWriteEnabled?: boolean;
+    assistedGuard?: { handleId: string; pendingJson: string; taskId: string };
+  } = {},
 ): GatewayWritePort {
   const goals = createGoalPrismaAgentMutations(db);
-  const tasks = createTaskPrismaAgentMutations(db, time, createGoalPrismaAgentReadPort);
+  const tasks = createTaskPrismaAgentMutations(db, time, createGoalPrismaAgentReadPort, undefined, {
+    creationId: options.assistedGuard?.taskId,
+  });
   function scope(authority: GatewayWriteAuthority, required: string) {
     if (!authority.scopes.includes(required)) throw new GatewayReadError('FORBIDDEN');
   }
@@ -51,10 +56,14 @@ export function bindGatewayWrites(
         if (options.assistedGuard) {
           const guard = options.assistedGuard;
           await tx.$queryRaw`SELECT id FROM ai_assisted_workflows WHERE id = ${guard.handleId} FOR SHARE`;
-          const binding = await tx.aiAssistedWorkflow.findFirst({ where: {
-            id: guard.handleId, identityId: cx.identityId, connectionId: authority.connectionId,
-            pendingJson: guard.pendingJson,
-          } });
+          const binding = await tx.aiAssistedWorkflow.findFirst({
+            where: {
+              id: guard.handleId,
+              identityId: cx.identityId,
+              connectionId: authority.connectionId,
+              pendingJson: guard.pendingJson,
+            },
+          });
           if (!binding) throw new GatewayReadError('FORBIDDEN');
         }
         if (

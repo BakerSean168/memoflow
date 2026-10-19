@@ -304,6 +304,7 @@ exports.Prisma.AiAssistedWorkflowScalarFieldEnum = {
   revision: 'revision',
   viewJson: 'viewJson',
   pendingJson: 'pendingJson',
+  stepKey: 'stepKey',
   stepsJson: 'stepsJson',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

@@ -33,6 +33,10 @@ import { createScopedPatService } from '@memoflow/cloud-auth/server';
 import { createGoalPrismaPageQuery } from '@memoflow/goal';
 import { bindGatewayWrites } from './modules/agent-gateway/write.port';
 import { composeAgentGatewayModule } from './modules/agent-gateway/module';
+import { bindAssistedWorkflow } from './modules/agent-gateway/assisted-workflow';
+import { AiAssistedWorkflowRepository } from '@memoflow/ai/agent-gateway';
+import { GatewayTaskReceiptSchema } from '@memoflow/contracts/agent-gateway';
+import { externalMutationReceiptId } from '@memoflow/database/transaction';
 import { createPilotAdmission } from './modules/agent-gateway/pilot-admission';
 import { createApiRedisClient } from './shared/infrastructure/redis/create-redis-client';
 import { createSettingPrismaTimeQuery } from '@memoflow/setting';
@@ -370,6 +374,36 @@ async function bootstrap(): Promise<void> {
     mastraStorage: { kind: 'postgres', connectionString: env.DATABASE_URL },
     workspaceEventsDatabase: { connectionString: env.DATABASE_URL },
   });
+  const assistedWorkflow = env.EAG_ASSISTED_ENABLED
+    ? (() => {
+        if (!aiComposed.workflowRuntime)
+          throw new Error('EAG_ASSISTED_ENABLED requires the durable AI workflow runtime');
+        return bindAssistedWorkflow({
+          repository: new AiAssistedWorkflowRepository(prisma, env.DATABASE_URL!),
+          runtime: aiComposed.workflowRuntime,
+          recoverStep: async (row) => {
+            if (!row.stepKey) return null;
+            const id = externalMutationReceiptId(
+              row.identityId,
+              { connectionId: row.connectionId },
+              'task.plan.create.v1',
+              row.stepKey,
+            );
+            const receipt = await prisma.externalMutationReceipt.findUnique({ where: { id } });
+            return receipt
+              ? GatewayTaskReceiptSchema.parse({
+                  ...JSON.parse(receipt.resultJson),
+                  replayed: true,
+                })
+              : null;
+          },
+          writes: (guard) =>
+            bindGatewayWrites(prisma, settingApiModule.userTimeContextPort, {
+              assistedGuard: guard,
+            }),
+        });
+      })()
+    : undefined;
   const dataPortabilityApiModule = composeDataPortability({
     db: prisma,
     reconcileImportedProfile: scheduleOrchestrationModule.reconcileImportedProfile,
@@ -414,6 +448,7 @@ async function bootstrap(): Promise<void> {
           routineWriteEnabled: env.EAG_ROUTINE_WRITE_ENABLED,
         })
       : undefined,
+    assisted: assistedWorkflow,
     audience: env.EAG_AUDIENCE ?? 'http://localhost:3000/mcp',
     cursorSecret: env.EAG_CURSOR_SECRET ?? '',
     oauth: cloudAuth.externalAgents,

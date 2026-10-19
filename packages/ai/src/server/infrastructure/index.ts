@@ -70,4 +70,7 @@ export { OpenAICompatibleGateway } from './gateways/openai-compatible.gateway';
 export { OpenAICompatibleModelCatalogGateway } from './gateways/openai-compatible-model-catalog.gateway';
 export { ProviderWebResearchAdapter } from './adapters/provider-web-research.adapter';
 
-export { AiAssistedWorkflowRepository } from './adapters/prisma/ai-assisted-workflow.repository';
+export {
+  AiAssistedWorkflowRepository,
+  AiAssistedWorkflowError,
+} from './adapters/prisma/ai-assisted-workflow.repository';
