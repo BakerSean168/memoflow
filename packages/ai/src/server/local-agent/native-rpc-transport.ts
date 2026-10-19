@@ -249,7 +249,8 @@ export class NativeRpcTransport {
     // A provider that never terminates a diagnostic line must not grow the buffer.
     if (this.diagnosticBuffer.length > 16_384) this.diagnosticBuffer = '';
   }
-  private fail(error: LocalAgentError) {    if (this.failure) return;
+  private fail(error: LocalAgentError) {
+    if (this.failure) return;
     this.failure = error;
     this.buffer = '';
     for (const pending of this.pending.values()) {
