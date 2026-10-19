@@ -159,6 +159,10 @@ export async function isScopedPatAuthorityCurrent(
   accountIsActive: (identityId: string) => Promise<boolean>,
   requiredScope: string,
 ): Promise<boolean> {
+  // Hold through the mutation/receipt commit: SHARE blocks revocation and scope updates.
+  await tx.$queryRaw`
+    SELECT id FROM external_agent_pats WHERE id = ${principal.credentialId} FOR SHARE
+  `;
   const pat = await tx.externalAgentPat.findUnique({ where: { id: principal.credentialId } });
   if (
     !pat ||

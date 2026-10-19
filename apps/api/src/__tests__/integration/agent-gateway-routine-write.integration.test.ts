@@ -1,10 +1,11 @@
 import { afterAll, beforeEach, expect, it, vi } from 'vitest';
-import { prisma } from '@memoflow/database';
+import { prisma, type Prisma } from '@memoflow/database';
+import { createGoalPrismaAgentMutations } from '@memoflow/goal';
 import { IdentityId } from '@memoflow/domain-shared';
 import { RoutineAgentCreateSchema } from '@memoflow/contracts/routine';
 import { RoutineDefinition, createRoutinePrismaAgentMutations } from '@memoflow/reminder';
 import { createReadGateway } from '@memoflow/agent-gateway/server';
-import { createScopedPatService } from '@memoflow/cloud-auth/server';
+import { createScopedPatService, isScopedPatAuthorityCurrent } from '@memoflow/cloud-auth/server';
 import { createAccountPrismaActiveQuery } from '@memoflow/account';
 import { createTimeContext } from '@memoflow/time';
 import {
@@ -554,5 +555,108 @@ it.each(['scope', 'identity', 'account', 'disabled', 'expiry'] as const)(
     ).rejects.toMatchObject({ code: 'FORBIDDEN' });
     expect(await prisma.goal.count({ where: { identityId: f.a } })).toBe(0);
     expect(await prisma.externalMutationReceipt.count({ where: { identityId: f.a } })).toBe(0);
+  },
+);
+
+it.each(['revocation', 'scope reduction'] as const)(
+  '#552 serializes concurrent %s behind the authorized mutation commit',
+  async (change) => {
+    const f = await fixture();
+    const pat = await f.pats.create(f.a, { name: 'commit fence', scopes: ['goals:write'] });
+    const principal = { identityId: f.a, credentialId: pat.id, scopes: ['goals:write'] };
+    let resume!: () => void;
+    const release = new Promise<void>((resolve) => {
+      resume = resolve;
+    });
+    let read!: (value: { tx: Prisma.TransactionClient; pid: number }) => void;
+    const credentialRead = new Promise<{ tx: Prisma.TransactionClient; pid: number }>((resolve) => {
+      read = resolve;
+    });
+    const input = {
+      idempotencyKey: '552-commit-fence',
+      goal: { name: 'Authorized before revocation' },
+    };
+    const mutation = createGoalPrismaAgentMutations(prisma).create(input, cx(f.a), {
+      connectionId: pat.id,
+      authorize: async () => {
+        expect(await f.pats.authenticate('Bearer ' + pat.secret)).toMatchObject(principal);
+      },
+      authorizeInTransaction: async (tx) => {
+        const allowed = await isScopedPatAuthorityCurrent(
+          tx,
+          principal,
+          async (identityId) => {
+            // Pause after the real credential read, before owner facts/receipt are written.
+            const [backend] = await tx.$queryRaw<{ pid: number }[]>`SELECT pg_backend_pid() AS pid`;
+            read({ tx, pid: backend!.pid });
+            await release;
+            return createAccountPrismaActiveQuery(tx)(identityId);
+          },
+          'goals:write',
+        );
+        if (!allowed) throw new Error('Authority unexpectedly rejected');
+      },
+    });
+    let revocation: Promise<{ goals: number; receipts: number }> | undefined;
+    try {
+      const writer = await Promise.race([
+        credentialRead,
+        mutation.then(() => {
+          throw new Error('Mutation bypassed the credential barrier');
+        }),
+      ]);
+      let started!: (pid: number) => void;
+      const revokerReady = new Promise<number>((resolve) => {
+        started = resolve;
+      });
+      let committed = false;
+      revocation = prisma
+        .$transaction(async (tx) => {
+          const [backend] = await tx.$queryRaw<{ pid: number }[]>`SELECT pg_backend_pid() AS pid`;
+          started(backend!.pid);
+          await tx.externalAgentPat.update({
+            where: { id: pat.id },
+            data: change === 'revocation' ? { revokedAt: new Date() } : { scopes: ['tasks:read'] },
+          });
+          return {
+            goals: await tx.goal.count({ where: { identityId: f.a } }),
+            receipts: await tx.externalMutationReceipt.count({ where: { identityId: f.a } }),
+          };
+        })
+        .then((result) => {
+          committed = true;
+          return result;
+        });
+      const revokerPid = await revokerReady;
+      expect(revokerPid).not.toBe(writer.pid);
+      // Observe the lock dependency through the paused writer's connection. No third connection or timing guess.
+      await expect
+        .poll(async () => {
+          if (committed) return 'committed-before-mutation';
+          const [state] = await writer.tx.$queryRaw<
+            { blocked: boolean }[]
+          >`SELECT ${writer.pid} = ANY(pg_blocking_pids(${revokerPid})) AS blocked`;
+          return state!.blocked ? 'blocked-by-writer' : 'pending';
+        })
+        .toBe('blocked-by-writer');
+      expect(committed).toBe(false);
+      resume();
+      const receipt = await mutation;
+      expect(await revocation).toEqual({ goals: 1, receipts: 1 });
+      expect(receipt.replayed).toBe(false);
+      // Even a cached authority cannot replay once the waiting revocation has committed.
+      await expect(
+        bindGatewayWrites(prisma, time).goalCreate(input, cx(f.a), {
+          connectionId: pat.id,
+          scopes: principal.scopes,
+          authorize: async () => {},
+        }),
+      ).rejects.toMatchObject({ code: 'FORBIDDEN' });
+      expect(await prisma.goal.count({ where: { identityId: f.a } })).toBe(1);
+      expect(await prisma.externalMutationReceipt.count({ where: { identityId: f.a } })).toBe(1);
+    } finally {
+      resume();
+      await Promise.allSettled([mutation, ...(revocation ? [revocation] : [])]);
+    }
   },
 );
