@@ -28,7 +28,7 @@
 - 需要 build、lint、test、e2e 时，优先运行离改动最近的 Nx target。
 - 涉及 Docker、运行时、env 注入、部署链路或生产镜像的改动，默认先用 `docker-compose.local.yml` 做本地 prod-like 验证，再进入 PR。
 - **任务真源（SSOT）**：GitHub Issue 承载需求、技术方案、关键决策、验收条件与阻塞；Git Commit 记录实现，PR/CI 记录交付证据。
-- **严格串行**：仓库使用一个 Worktree，同一时刻一个 Writer。从最新 main 创建短期任务分支，通过 PR 必需 CI 并合并后，才启动下一条 Issue 的编码。其他 Agent 可基于固定 SHA 只读评审。
+- **多 Lane 并行（最多 3 条）**：每条 Lane 使用独立 Worktree + 短期任务分支 + 唯一 Writer，从最新 main 创建分支。不同 Lane 的 Issue 不得修改相同文件；`.github/`、`tools/ci*`、`nx.json` 等根级配置、lockfile、Playwright/CI 配置只归 CI Lane 修改。合并前分支必须与 main 同步（`gh pr update-branch`，禁止 force-push）且 `CI Check` 通过；合并本身串行进行。其他 Agent 可基于固定 SHA 只读评审。
 - **接手与规划**：接手前读取 Issue 及最新评论，核对真实 Git 状态、提交、PR 和 CI；复杂任务先分析，持久化的技术决策写回 Issue。
 - **阶段性 Checkpoint**：复杂任务每完成一个可验证阶段，先 Commit、Push，再在对应 Issue 评论记录分支、Commit、已完成事项、实际测试、剩余工作和下一步。Agent 切换或阻塞时同样记录；小修改无需逐 Commit 留言。若突然中断来不及记录，接手 Agent 从最新远端提交及实际工作区恢复。
 
