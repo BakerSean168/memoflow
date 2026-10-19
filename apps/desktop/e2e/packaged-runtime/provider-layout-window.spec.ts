@@ -22,8 +22,7 @@ test('packaged Windows Providers maintain 80px rows and responsive details at 84
       args: ['--disable-gpu', '--disable-dev-shm-usage'],
       env: {
         ...sanitizedEnvironment,
-        MEMOFLOW_DESKTOP_USER_DATA_PATH: path.join(fixtureRoot, 'profile'),
-        MEMOFLOW_DESKTOP_USER_FILES_PATH: path.join(fixtureRoot, 'files'),
+        MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: path.join(fixtureRoot, 'profile'),
         ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
       },
     });

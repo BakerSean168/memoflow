@@ -48,8 +48,7 @@ test('Windows AGY Composer selects, sends, persists and restores its native conn
         MEMOFLOW_ATTENTION_QA_FIXTURE: '1',
         MEMOFLOW_ATTENTION_QA_FAILURE: 'success',
         MEMOFLOW_ATTENTION_QA_PROMPT_LOG: promptLog,
-        MEMOFLOW_DESKTOP_USER_DATA_PATH: path.join(root, 'profile'),
-        MEMOFLOW_DESKTOP_USER_FILES_PATH: path.join(root, 'files'),
+        MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: path.join(root, 'profile'),
         ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
       },
     });

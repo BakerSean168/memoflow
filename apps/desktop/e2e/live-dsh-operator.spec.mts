@@ -59,8 +59,7 @@ test('operator-approved Windows DSH Flash Send through Desktop IPC and durable h
       cwd: process.cwd(),
       env: {
         ...qaEnv,
-        MEMOFLOW_DESKTOP_USER_DATA_PATH: path.join(root, 'user-data'),
-        MEMOFLOW_DESKTOP_USER_FILES_PATH: path.join(root, 'user-files'),
+        MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: path.join(root, 'user-data'),
         ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
         NODE_ENV: 'test',
       },

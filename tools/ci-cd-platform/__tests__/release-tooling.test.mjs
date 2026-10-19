@@ -756,15 +756,15 @@ test(
       const candidateBody = `#!/usr/bin/env node
 const fs = require('node:fs');
 const path = require('node:path');
-const userData = process.env.MEMOFLOW_DESKTOP_USER_DATA_PATH;
+const userData = process.env.MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT;
 const status = process.env.MEMOFLOW_DESKTOP_UPDATE_E2E_STATUS_PATH;
-const receipt = path.join(userData, 'shared/update/install-receipt.json');
-const registry = path.join(userData, 'shared/profiles/registry.json');
+const receipt = path.join(userData, 'state/update/install-receipts/install-receipt.json');
+const registry = path.join(userData, 'data/shared/profiles/registry.json');
 const value = JSON.parse(fs.readFileSync(registry, 'utf8'));
 value.updatedAt = 'incidental';
 if (process.env.RUNNER_TEST_CASE === 'registry') value.activeProfileId = 'changed';
 fs.writeFileSync(registry, JSON.stringify(value));
-if (process.env.RUNNER_TEST_CASE === 'sentinel') fs.appendFileSync(path.join(userData, 'shared/update-e2e-preservation.txt'), 'changed');
+if (process.env.RUNNER_TEST_CASE === 'sentinel') fs.appendFileSync(path.join(userData, 'data/shared/update-e2e-preservation.txt'), 'changed');
 if (process.env.RUNNER_TEST_CASE !== 'receipt') fs.rmSync(receipt);
 // Match the production harness: readers must never observe partially written JSON.
 const temporaryStatus = status + '.' + process.pid + '.tmp';
@@ -780,8 +780,8 @@ setInterval(() => {}, 1000);
 const fs = require('node:fs');
 const path = require('node:path');
 const { spawn } = require('node:child_process');
-const userData = process.env.MEMOFLOW_DESKTOP_USER_DATA_PATH;
-const receipt = path.join(userData, 'shared/update/install-receipt.json');
+const userData = process.env.MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT;
+const receipt = path.join(userData, 'state/update/install-receipts/install-receipt.json');
 fs.mkdirSync(path.dirname(receipt), {recursive: true});
 fs.writeFileSync(receipt, '{}');
 const status = process.env.MEMOFLOW_DESKTOP_UPDATE_E2E_STATUS_PATH;

@@ -223,12 +223,12 @@ else {
 }
 New-Item -ItemType Directory -Force -Path $runtimeRoot | Out-Null
 
-$userDataPath = Join-Path $runtimeRoot 'user-data'
-$userFilesPath = Join-Path $runtimeRoot 'user-files'
+$storageTestRoot = Join-Path $runtimeRoot 'user-data'
+$userDataPath = Join-Path $storageTestRoot 'data'
 $statusPath = Join-Path $runtimeRoot 'status.json'
 $registryPath = Join-Path $userDataPath 'shared\profiles\registry.json'
 $sentinelPath = Join-Path $userDataPath 'shared\update-e2e-preservation.txt'
-$receiptPath = Join-Path $userDataPath 'shared\update\install-receipt.json'
+$receiptPath = Join-Path $storageTestRoot 'state\update\install-receipts\install-receipt.json'
 
 New-Item -ItemType Directory -Force -Path (Split-Path -Parent $registryPath) | Out-Null
 New-Item -ItemType Directory -Force -Path (Split-Path -Parent $sentinelPath) | Out-Null
@@ -273,8 +273,7 @@ $managedEnvironment = @(
   'MEMOFLOW_DESKTOP_UPDATE_E2E_EXPECTED_VERSION',
   'MEMOFLOW_DESKTOP_UPDATE_E2E_STATUS_PATH',
   'MEMOFLOW_DESKTOP_UPDATE_E2E_FEED_URL',
-  'MEMOFLOW_DESKTOP_USER_DATA_PATH',
-  'MEMOFLOW_DESKTOP_USER_FILES_PATH'
+  'MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT'
 )
 $previousEnvironment = @{}
 foreach ($name in $managedEnvironment) {
@@ -301,8 +300,7 @@ try {
   $env:MEMOFLOW_DESKTOP_UPDATE_E2E_EXPECTED_VERSION = $ExpectedVersion
   $env:MEMOFLOW_DESKTOP_UPDATE_E2E_STATUS_PATH = $statusPath
   $env:MEMOFLOW_DESKTOP_UPDATE_E2E_FEED_URL = $feedUrl
-  $env:MEMOFLOW_DESKTOP_USER_DATA_PATH = $userDataPath
-  $env:MEMOFLOW_DESKTOP_USER_FILES_PATH = $userFilesPath
+  $env:MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT = $storageTestRoot
 
   Write-Host "[update-e2e] Launching N against $feedUrl"
   $baseProcess = Start-Process -FilePath $installedExecutable -PassThru
@@ -356,8 +354,7 @@ try {
             MEMOFLOW_DESKTOP_UPDATE_E2E_EXPECTED_VERSION = $ExpectedVersion
             MEMOFLOW_DESKTOP_UPDATE_E2E_STATUS_PATH = $statusPath
             MEMOFLOW_DESKTOP_UPDATE_E2E_FEED_URL = $feedUrl
-            MEMOFLOW_DESKTOP_USER_DATA_PATH = $userDataPath
-            MEMOFLOW_DESKTOP_USER_FILES_PATH = $userFilesPath
+            MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT = $storageTestRoot
           }
           Write-Host "[update-e2e] Launching controlled N+1 ($installedVersion) with isolated userData=$userDataPath"
           $controlledCandidateProcess = Start-Process -FilePath $installedExecutable -Environment $candidateEnvironment -PassThru

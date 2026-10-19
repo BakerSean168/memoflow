@@ -63,8 +63,7 @@ test('operator-approved installed Windows Codex A-B-A Home isolation and native 
         CODEX_HOME: home,
         // Resolve the explicitly chosen Windows Codex CLI, not WSL's PATH.
         PATH: path.dirname(codex!) + path.delimiter + (isolated.PATH ?? ''),
-        MEMOFLOW_DESKTOP_USER_DATA_PATH: path.join(root, 'profile'),
-        MEMOFLOW_DESKTOP_USER_FILES_PATH: path.join(root, 'user-files'),
+        MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: path.join(root, 'profile'),
         ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
       },
     });
