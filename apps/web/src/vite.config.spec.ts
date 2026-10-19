@@ -177,4 +177,46 @@ describe('web Vite development configuration', () => {
       else process.env.NODE_ENV = previousNodeEnv;
     }
   });
+
+  it('freezes the module graph for E2E lanes: no HMR full-reloads, no dist watching', async () => {
+    expect(typeof viteConfig).toBe('function');
+    if (typeof viteConfig !== 'function') return;
+
+    const previousNodeEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'test';
+    try {
+      const config = await viteConfig({
+        command: 'serve',
+        mode: 'development',
+        isSsrBuild: false,
+        isPreview: false,
+      });
+
+      // #505: concurrent workspace builds rewrote packages/*/dist and Vite
+      // broadcast full-reloads that navigated test pages mid-flow. E2E must
+      // serve a static snapshot of the graph.
+      expect(config.server?.hmr).toBe(false);
+      expect(config.server?.watch?.ignored).toEqual(['**/packages/*/dist/**']);
+    } finally {
+      if (previousNodeEnv === undefined) delete process.env.NODE_ENV;
+      else process.env.NODE_ENV = previousNodeEnv;
+    }
+
+    process.env.NODE_ENV = 'development';
+    try {
+      const config = await viteConfig({
+        command: 'serve',
+        mode: 'development',
+        isSsrBuild: false,
+        isPreview: false,
+      });
+
+      // Development lanes keep stock HMR and watcher behavior.
+      expect(config.server?.hmr).toBeUndefined();
+      expect(config.server?.watch).toBeUndefined();
+    } finally {
+      if (previousNodeEnv === undefined) delete process.env.NODE_ENV;
+      else process.env.NODE_ENV = previousNodeEnv;
+    }
+  });
 });

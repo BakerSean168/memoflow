@@ -484,7 +484,14 @@ export async function runServer(trace: TraceRuntime): Promise<void> {
 }
 
 // === 优雅关闭 ===
+// Shutdown must run exactly once: overlapping signals or an uncaughtException
+// storm (historically EPIPE from a broken stdio pipe, #505) re-entered
+// `bootstrapper.destroy()` concurrently and hung the process mid-shutdown,
+// leaving a half-destroyed zombie serving traffic.
+let shutdownStarted = false;
 async function gracefulShutdown(signal: string, exitCode = 0): Promise<void> {
+  if (shutdownStarted) return;
+  shutdownStarted = true;
   logger.info(`Received ${signal}, shutting down gracefully...`);
 
   scheduler?.stop();
