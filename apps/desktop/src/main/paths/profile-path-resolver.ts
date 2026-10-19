@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import path from 'node:path';
 import type { ProfilePathResolver } from './types';
+import type { DesktopStorageRoots } from './desktop-storage-roots';
 
 /**
  * Compute a stable profileId from an identityId.
@@ -13,15 +14,19 @@ export function computeProfileId(identityId: string): string {
 }
 
 /**
- * Creates a ProfilePathResolver from the application root directory and profileId.
+ * Creates a ProfilePathResolver from semantic storage roots and a validated profileId.
  * Pure computation — does not create directories on disk.
  */
-export function createProfilePathResolver(rootDir: string, profileId: string): ProfilePathResolver {
-  const profileDir = path.join(rootDir, 'profiles', profileId);
+export function createProfilePathResolver(
+  roots: DesktopStorageRoots,
+  profileId: string,
+): ProfilePathResolver {
+  if (!/^p_[a-zA-Z0-9_-]+$/.test(profileId)) throw new Error('Invalid profileId');
+  const profileDir = path.join(roots.dataRoot, 'profiles', profileId);
   const authDir = path.join(profileDir, 'auth');
   const dbDir = path.join(profileDir, 'db');
   const storageDir = path.join(profileDir, 'storage');
-  const uiDir = path.join(profileDir, 'ui');
+  const uiDir = path.join(roots.stateRoot, 'profiles', profileId, 'ui');
 
   return {
     profileId,

@@ -226,6 +226,8 @@ export const app = createEmitterApi({
   },
   getPath: vi.fn((name: string) => path.join(electronTestRoot, name)),
   setPath: vi.fn(),
+  setAppLogsPath: vi.fn(),
+  isReady: vi.fn(() => false),
   getVersion: vi.fn(() => '1.0.0-test'),
   getName: vi.fn(() => 'MemoFlow-Test'),
   getAppPath: vi.fn(() => electronTestRoot),

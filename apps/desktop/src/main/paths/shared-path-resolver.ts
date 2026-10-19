@@ -1,49 +1,30 @@
 import path from 'node:path';
 import type { SharedPathResolver } from './types';
-import { resolveDesktopUserFilesPath } from '../user-data-path';
+import type { DesktopStorageRoots } from './desktop-storage-roots';
 
-/**
- * Creates a SharedPathResolver from the application root directory.
- * Pure computation — does not create directories on disk.
- *
- * @param customUserFilesRoot - Optional override for the user-files root directory.
- *   When provided, takes precedence over the default Documents-based path.
- */
-export function createSharedPathResolver(
-  rootDir: string,
-  customUserFilesRoot?: string,
-): SharedPathResolver {
-  const sharedDir = path.join(rootDir, 'shared');
+/** Pure derivation; each directory has exactly one lifecycle owner. */
+export function createSharedPathResolver(roots: DesktopStorageRoots): SharedPathResolver {
+  const sharedDir = path.join(roots.dataRoot, 'shared');
   const authDir = path.join(sharedDir, 'auth');
-  const configDir = path.join(sharedDir, 'config');
-  const uiDir = path.join(sharedDir, 'ui');
+  const configDir = path.join(roots.configRoot, 'shared', 'preferences');
+  const uiDir = path.join(roots.stateRoot, 'shared', 'ui');
   const profilesRegistryDir = path.join(sharedDir, 'profiles');
-  const cacheDir = path.join(rootDir, 'cache');
-  const userFilesRootDir = customUserFilesRoot ?? resolveDesktopUserFilesPath();
-
+  const cacheDir = roots.cacheRoot;
   return {
-    rootDir,
+    roots,
     sharedDir,
     authDir,
     configDir,
     uiDir,
     profilesRegistryDir,
-
     deviceIdPath: path.join(authDir, 'device-id'),
     runtimeConfigPath: path.join(configDir, 'desktop-runtime.json'),
     profileAccessWindowStatePath: path.join(uiDir, 'profile-access-window-state.json'),
     registryPath: path.join(profilesRegistryDir, 'registry.json'),
-
     cacheDir,
     snapshotStagingDir: path.join(cacheDir, 'snapshot-staging'),
-    downloadsDir: path.join(cacheDir, 'downloads'),
+    downloadsDir: path.join(cacheDir, 'downloads-internal'),
     tempDir: path.join(cacheDir, 'temp'),
-
-    logsDir: path.join(rootDir, 'logs'),
-
-    userFilesRootDir,
-    userFilesExportsDir: path.join(userFilesRootDir, 'exports'),
-    userFilesDownloadsDir: path.join(userFilesRootDir, 'downloads'),
-    userFilesAttachmentsDir: path.join(userFilesRootDir, 'attachments'),
+    logsDir: roots.logsDir,
   };
 }

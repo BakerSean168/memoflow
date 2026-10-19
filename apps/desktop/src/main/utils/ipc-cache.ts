@@ -487,12 +487,13 @@ export function invalidatesCache<T>(
  * @function registerCacheIpcHandlers
  * @description Registers IPC handlers for managing the cache (stats, clear, invalidate).
  */
-export function registerCacheIpcHandlers(): void {
+export function registerCacheIpcHandlers(clearStorageCache: () => Promise<void>): void {
   ipcMain.handle(CacheChannels.STATS, async () => {
     return ok(getIpcCache().getStats());
   });
 
   ipcMain.handle(CacheChannels.CLEAR, async () => {
+    await clearStorageCache();
     getIpcCache().clear();
     return ok(null);
   });

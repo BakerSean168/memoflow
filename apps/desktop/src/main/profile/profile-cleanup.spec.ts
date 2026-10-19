@@ -1,3 +1,4 @@
+import { resolveDesktopStorageRoots } from '../paths';
 import { mkdtemp, mkdir, writeFile, access, rm, symlink, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -9,6 +10,7 @@ afterEach(() => vi.restoreAllMocks());
 
 it('removes the Profile without following a link into an external vault', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'profile-external-vault-'));
+    const roots = { ...resolveDesktopStorageRoots({ platform: 'linux', channel: 'test', home: root, env: { MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: root } }), dataRoot: root };
   const id = 'p_012345678901234567890123';
   const dir = path.join(root, 'profiles', id);
   const vault = path.join(root, 'external-vault');
@@ -20,7 +22,7 @@ it('removes the Profile without following a link into an external vault', async 
     await writeFile(path.join(imports, 'pending.bin'), 'encrypted snapshot');
     await writeFile(path.join(vault, 'notes.md'), 'keep my notes');
     await symlink(vault, path.join(dir, 'vault'), 'dir');
-    await new ProfileCleanup(root).remove(id, async () => undefined);
+    await new ProfileCleanup(roots).remove(id, async () => undefined);
     await expect(access(imports)).rejects.toThrow();
     expect(await readFile(path.join(vault, 'notes.md'), 'utf8')).toBe('keep my notes');
     await expect(access(dir)).rejects.toThrow();
@@ -31,19 +33,20 @@ it('removes the Profile without following a link into an external vault', async 
 
 it('keeps a durable tombstone across interrupted credential cleanup and resumes without the directory', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'profile-cleanup-'));
+    const roots = { ...resolveDesktopStorageRoots({ platform: 'linux', channel: 'test', home: root, env: { MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: root } }), dataRoot: root };
   const id = 'p_012345678901234567890123';
   const dir = path.join(root, 'profiles', id);
   try {
     await mkdir(dir, { recursive: true });
     await writeFile(path.join(dir, 'facts'), 'data');
-    const cleanup = new ProfileCleanup(root);
+    const cleanup = new ProfileCleanup(roots);
     await expect(
       cleanup.remove(id, async () => {
         await expect(access(dir)).rejects.toThrow();
         throw new Error('credential store unavailable');
       }),
     ).rejects.toThrow('credential store unavailable');
-    const restarted = new ProfileCleanup(root);
+    const restarted = new ProfileCleanup(roots);
     expect(await restarted.pending()).toEqual([id]);
     expect(await restarted.isPending(id)).toBe(true);
     await restarted.remove(id, async () => undefined);
@@ -57,6 +60,7 @@ it.each(['rename', 'directory', 'session', 'pin', 'key', 'registry'] as const)(
   'resumes a failure at %s without losing credentials before directory removal',
   async (fault) => {
     const root = await mkdtemp(path.join(tmpdir(), 'profile-cleanup-fault-'));
+    const roots = { ...resolveDesktopStorageRoots({ platform: 'linux', channel: 'test', home: root, env: { MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: root } }), dataRoot: root };
     const id = 'p_012345678901234567890123';
     const dir = path.join(root, 'profiles', id);
     const trash = path.join(root, 'profiles', `.deleting-${id}`);
@@ -92,12 +96,12 @@ it.each(['rename', 'directory', 'session', 'pin', 'key', 'registry'] as const)(
       }
     };
     try {
-      await expect(new ProfileCleanup(root).remove(id, finalize)).rejects.toThrow('injected');
-      expect(await new ProfileCleanup(root).isPending(id)).toBe(true);
+      await expect(new ProfileCleanup(roots).remove(id, finalize)).rejects.toThrow('injected');
+      expect(await new ProfileCleanup(roots).isPending(id)).toBe(true);
       if (fault === 'rename' || fault === 'directory') expect(finalized).toEqual([]);
-      await new ProfileCleanup(root).remove(id, finalize);
+      await new ProfileCleanup(roots).remove(id, finalize);
       expect(finalized).toEqual(['session', 'pin', 'key', 'registry']);
-      expect(await new ProfileCleanup(root).isPending(id)).toBe(false);
+      expect(await new ProfileCleanup(roots).isPending(id)).toBe(false);
     } finally {
       vi.restoreAllMocks();
       await rm(root, { recursive: true, force: true });

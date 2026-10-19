@@ -8,6 +8,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { app } from 'electron';
+import { getSharedPathResolver } from '../runtime-init';
 
 /**
  * API 配置
@@ -62,7 +63,7 @@ function tryReadRuntimeConfig(configPath: string): DesktopRuntimeConfigFile | nu
 }
 
 function resolveRuntimeConfigBaseUrl(): string | null {
-  const candidatePaths = [path.join(app.getPath('userData'), 'config', 'desktop-runtime.json')];
+  const candidatePaths = [getSharedPathResolver().runtimeConfigPath];
 
   if (typeof process.resourcesPath === 'string' && process.resourcesPath.length > 0) {
     candidatePaths.push(path.join(process.resourcesPath, 'desktop-runtime.json'));

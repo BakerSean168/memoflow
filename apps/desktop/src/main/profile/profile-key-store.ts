@@ -19,7 +19,7 @@ export class ElectronProfileKeyStore implements ProfileKeyStore {
   async ensure(profileId: string): Promise<void> {
     const filePath = this.filePath(profileId);
     if (await this.exists(filePath)) return;
-    await fs.promises.mkdir(this.directory, { recursive: true });
+    await fs.promises.mkdir(this.directory, { recursive: true, mode: 0o700 });
     const key = crypto.randomBytes(32);
     let envelope: Buffer;
     try {

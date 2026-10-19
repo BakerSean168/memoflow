@@ -99,7 +99,7 @@ export class DesktopCloudConnectionService {
       if (isNewTarget && request.intent === 'add_account') {
         try {
           await markProfileImportOpportunity(
-            this.runtime.getSharedResolver().rootDir,
+            this.runtime.getSharedResolver().roots.dataRoot,
             targetProfileId,
             origin?.profileKind === 'guest' ? originProfileId : null,
           );
