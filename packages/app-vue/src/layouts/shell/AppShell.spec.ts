@@ -5,7 +5,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import { createI18n } from 'vue-i18n';
 import { createMemoryHistory, createRouter } from 'vue-router';
 import { defineComponent, h, nextTick, onMounted, ref } from 'vue';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, onTestFinished, vi } from 'vitest';
 import { DESKTOP_UPDATE_SERVICE_KEY } from '../../di/keys';
 import type { DesktopUpdateService } from '../../di/types';
 import { ok } from '@memoflow/contracts/result';
@@ -14,6 +14,9 @@ import AppShell from './AppShell.vue';
 import BusinessPanel from './BusinessPanel.vue';
 import { useAppShellStore } from './useAppShellStore';
 import { keyboard } from '../../shared/keyboard/runtime';
+import { installShellTestCleanup } from '../../test/shell-cleanup';
+
+installShellTestCleanup();
 
 vi.mock('../../modules/notification/composables/useNotificationUnreadQuery', async () => {
   const { ref: vueRef } = await import('vue');
@@ -243,6 +246,125 @@ describe('AppShell right-panel integration', () => {
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1280 });
     goalRouteMountCount = 0;
     activeChatConversationId.value = null;
+  });
+
+  describe.sequential('cleanup after an aborted case', () => {
+    let abandoned: Awaited<ReturnType<typeof mountShell>>;
+    let host: HTMLDivElement;
+    let originalMatchMedia: typeof window.matchMedia;
+    let originalConfirm: typeof window.confirm;
+    let originalHeight: number;
+    const navigation = vi.fn(() => false);
+
+    it.fails('aborts after mounting without reaching manual unmount', async () => {
+      originalMatchMedia = window.matchMedia;
+      originalConfirm = window.confirm;
+      originalHeight = window.innerHeight;
+      host = document.createElement('div');
+      document.body.appendChild(host);
+      onTestFinished(() => host.remove());
+      abandoned = await mountShell('/goals', host);
+      onTestFinished(abandoned.router.beforeEach(navigation));
+      window.confirm = vi.fn(() => false);
+      Object.defineProperty(window, 'innerHeight', { configurable: true, value: 390 });
+      vi.stubGlobal('matchMedia', vi.fn());
+      vi.useFakeTimers();
+      setTimeout(() => window.confirm('leaked timer'), 1000);
+      // Model an assertion failure before the success-path wrapper.unmount().
+      throw new Error('simulated assertion abort');
+    });
+
+    it('mounts the next shell without duplicate shortcut registrations', async () => {
+      const { wrapper } = await mountShell('/goals');
+      expect(abandoned.wrapper.exists()).toBe(false);
+      expect(host.isConnected).toBe(false);
+      expect(window.matchMedia).toBe(originalMatchMedia);
+      expect(window.confirm).toBe(originalConfirm);
+      expect(window.innerHeight).toBe(originalHeight);
+      expect(vi.isFakeTimers()).toBe(false);
+      // Neither the test guard nor the shell's route-sync hook may survive.
+      const abandonedState = JSON.stringify(abandoned.store.$state);
+      await abandoned.router.push('/settings');
+      expect(navigation).not.toHaveBeenCalled();
+      expect(JSON.stringify(abandoned.store.$state)).toBe(abandonedState);
+      expect(keyboard.engine.available('module.goal.preview')).toBe(true);
+      wrapper.unmount();
+      expect(keyboard.engine.available('module.goal.preview')).toBe(false);
+    });
+  });
+
+  it.each(['sidebar', 'panel'] as const)(
+    'releases an interrupted %s resize on unmount',
+    async (pane) => {
+      const originalUserSelect = document.body.style.userSelect;
+      const originalCursor = document.body.style.cursor;
+      const { wrapper, store } = await mountShell('/goals');
+      const sidebar = pane === 'sidebar';
+      await wrapper
+        .get(`[data-testid="${sidebar ? 'conversation-sidebar' : 'business-panel'}-resizer"]`)
+        .trigger(sidebar ? 'mousedown' : 'pointerdown', { pointerId: 31, clientX: 700 });
+
+      wrapper.unmount();
+      expect(document.body.style.userSelect).toBe(originalUserSelect);
+      expect(document.body.style.cursor).toBe(originalCursor);
+      const state = JSON.stringify(store.$state);
+      window.dispatchEvent(
+        sidebar
+          ? new MouseEvent('mousemove', { clientX: 320 })
+          : new PointerEvent('pointermove', { pointerId: 31, clientX: 650 }),
+      );
+      expect(JSON.stringify(store.$state)).toBe(state);
+    },
+  );
+
+  it.each(['frame', 'guard'] as const)(
+    'cancels the resize focus %s on unmount',
+    async (stage) => {
+      const host = document.createElement('div');
+      document.body.appendChild(host);
+      onTestFinished(() => host.remove());
+      const { wrapper } = await mountShell('/goals', host);
+      const input = wrapper.get('[data-testid="shell-resize-focus-probe"]')
+        .element as HTMLInputElement;
+      input.focus();
+      vi.useFakeTimers();
+      const frames: FrameRequestCallback[] = [];
+      vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+        frames.push(callback);
+        return 73;
+      });
+      const cancelFrame = vi.spyOn(window, 'cancelAnimationFrame');
+      await wrapper
+        .get('[data-testid="business-panel-resizer"]')
+        .trigger('pointerdown', { pointerId: 32, clientX: 700 });
+      window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 32 }));
+      expect(frames).toHaveLength(1);
+      if (stage === 'guard') {
+        frames[0](performance.now());
+        expect(vi.getTimerCount()).toBeGreaterThan(0);
+      }
+
+      wrapper.unmount();
+      if (stage === 'frame') expect(cancelFrame).toHaveBeenCalledWith(73);
+      expect(vi.getTimerCount()).toBe(0);
+      // A stale focus guard would focus a replacement matching the old input.
+      const replacement = document.createElement('input');
+      replacement.dataset.testid = 'shell-resize-focus-probe';
+      host.appendChild(replacement);
+      document.body.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+      expect(document.activeElement).not.toBe(replacement);
+    },
+  );
+
+  it('releases its preview-entry callback on unmount', async () => {
+    const { wrapper } = await mountShell('/goals');
+    wrapper.unmount();
+    const activate = vi.fn();
+    onTestFinished(keyboard.register('module.goal.activate', activate));
+    onTestFinished(() => keyboard.closePreview());
+    keyboard.togglePreview('goal');
+    keyboard.engine.execute('preview.open');
+    expect(activate).not.toHaveBeenCalled();
   });
 
   it('routes the update indicator through settings without starting an install', async () => {
@@ -477,6 +599,7 @@ describe('AppShell right-panel integration', () => {
   it('restores the active input after a panel-resize pointer gesture settles', async () => {
     const host = document.createElement('div');
     document.body.appendChild(host);
+    onTestFinished(() => host.remove());
     const { wrapper } = await mountShell('/goals', host);
     const input = wrapper.get('[data-testid="shell-resize-focus-probe"]')
       .element as HTMLInputElement;
@@ -515,6 +638,7 @@ describe('AppShell right-panel integration', () => {
   it('redirects a late native focus steal that lands after the resize restore', async () => {
     const host = document.createElement('div');
     document.body.appendChild(host);
+    onTestFinished(() => host.remove());
     const { wrapper } = await mountShell('/goals', host);
     const input = wrapper.get('[data-testid="shell-resize-focus-probe"]')
       .element as HTMLInputElement;
@@ -581,6 +705,7 @@ describe('AppShell right-panel integration', () => {
       window.confirm = confirm;
       const navigation = vi.fn(() => false);
       const removeGuard = router.beforeEach(navigation);
+      onTestFinished(removeGuard);
 
       const sidebar = wrapper.getComponent(ConversationSidebarStub);
       if (action === 'select') sidebar.vm.$emit('select-conversation', 'conversation-b');
