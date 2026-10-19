@@ -92,4 +92,27 @@ describe('ProductDateTimePicker', () => {
     wrapper.unmount();
     opener.remove();
   });
+
+  it('cycles Tab and Shift+Tab at the modal picker boundaries', async () => {
+    const wrapper = mount(ProductDateTimePicker, {
+      attachTo: document.body,
+      props: { open: true, modelValue: Date.parse('2026-10-16T13:45:00Z'), title: 'Choose time' },
+      global: {
+        plugins: [createI18n({ legacy: false, locale: 'en-US', messages: productionLocaleMessages })],
+      },
+    });
+    await flushPromises();
+    const dialog = document.querySelector<HTMLElement>('[role="dialog"]')!;
+    const first = dialog.querySelector<HTMLElement>('button:not([disabled]):not([tabindex="-1"])')!;
+    const last = [...dialog.querySelectorAll<HTMLButtonElement>('button')].at(-1)!;
+    last.focus();
+    last.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }));
+    expect(document.activeElement).toBe(first);
+    first.dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'Tab', shiftKey: true, bubbles: true, cancelable: true,
+    }));
+    expect(document.activeElement).toBe(last);
+    wrapper.unmount();
+  });
+
 });

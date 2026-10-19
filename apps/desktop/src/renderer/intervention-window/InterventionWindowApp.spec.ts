@@ -120,4 +120,36 @@ describe('InterventionWindowApp (ROUTINE-4104)', () => {
     });
     wrapper.unmount();
   });
+  it('Escape from a focused action uses the existing dismiss command; Tab stays native', async () => {
+    const wrapper = mount(InterventionWindowApp, { attachTo: document.body });
+    await vi.waitFor(() => expect(wrapper.findAll('button').length).toBeGreaterThan(0));
+    const buttons = wrapper.findAll<HTMLButtonElement>('button');
+    for (const button of buttons) {
+      expect(button.element.disabled).toBe(false);
+      expect(button.element.tabIndex).toBe(0);
+      button.element.focus();
+      expect(document.activeElement).toBe(button.element);
+      const tab = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
+      button.element.dispatchEvent(tab);
+      expect(tab.defaultPrevented).toBe(false);
+    }
+    invoke.mockClear();
+    await buttons.at(-1)!.trigger('keydown', { key: 'Escape' });
+    expect(invoke).toHaveBeenCalledExactlyOnceWith(
+      RoutineWindowChannels.INTERVENTION_WINDOW_COMMAND,
+      {
+        action: 'dismiss',
+      },
+    );
+    invoke.mockClear();
+    document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(invoke).toHaveBeenCalledExactlyOnceWith(
+      RoutineWindowChannels.INTERVENTION_WINDOW_COMMAND,
+      { action: 'dismiss' },
+    );
+    wrapper.unmount();
+    invoke.mockClear();
+    document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(invoke).not.toHaveBeenCalled();
+  });
 });
