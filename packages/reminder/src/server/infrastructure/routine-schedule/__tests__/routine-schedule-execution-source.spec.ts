@@ -70,6 +70,7 @@ function createDeployment(options?: {
         definition,
         globalEnabled: options?.globalEnabled ?? true,
         durableProfileGateOpen: options?.durableProfileGateOpen ?? true,
+        lastWallClockScheduledFor: null,
         temporaryOverride: options?.temporaryOverride ?? null,
         elapsedOccurrences: options?.elapsedOccurrences ?? [],
       };

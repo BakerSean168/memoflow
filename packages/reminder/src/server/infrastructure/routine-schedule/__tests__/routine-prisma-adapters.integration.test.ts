@@ -499,6 +499,24 @@ describe('ROUTINE-3401 Prisma durable adapters integration', () => {
     expect(snapshot?.definition.enabled).toBe(true);
     expect(snapshot?.definition.trigger?.type).toBe('WallClock');
     expect(snapshot?.temporaryOverride).toBeNull();
+    expect(snapshot?.lastWallClockScheduledFor).toBeNull();
+
+    await prisma.routineOccurrence.create({
+      data: {
+        id: 'occurrence-wallclock-cursor',
+        identityId,
+        routineId: FIXTURE_F.routineId,
+        occurrenceKey: fixtureOccurrenceKey(),
+        scheduledFor: new Date(FIXTURE_F.firstOccurrenceAt),
+        idempotencyKey: 'routine-cursor-test',
+        status: 'succeeded',
+        triggerKind: 'WallClock',
+      },
+    });
+    expect(
+      (await reader.readRoutineScheduleSnapshot(FIXTURE_F.routineId, identityId))
+        ?.lastWallClockScheduledFor,
+    ).toBe(FIXTURE_F.firstOccurrenceAt);
 
     const refs = await reader.listRoutineRefs();
     expect(refs).toEqual(

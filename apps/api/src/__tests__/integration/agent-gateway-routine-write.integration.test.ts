@@ -347,11 +347,11 @@ it('rechecks durable current authority inside the receipt transaction before fir
   expect(await prisma.externalMutationReceipt.count()).toBe(1);
 });
 
-async function projectAndExecute(identityId: string, routineId: string) {
-  const source = createRoutinePrismaScheduleProjectionSource(prisma, { now: () => at });
+async function projectAndExecute(identityId: string, routineId: string, repairAt = at) {
+  const source = createRoutinePrismaScheduleProjectionSource(prisma, { now: () => repairAt });
   const scheduler = createScheduledInvocationSchedulingPort(
     createSchedulerPrismaRepositories(prisma).scheduledInvocationRepository,
-    { now: () => at },
+    { now: () => repairAt },
   );
   const refs = await source.listRoutineRefs();
   expect(refs).toContainEqual({ identityId, routineId });
@@ -365,7 +365,7 @@ async function projectAndExecute(identityId: string, routineId: string) {
   ).toBe(1);
   await prisma.$disconnect();
   const restarted = createRoutineScheduleExecutionSource(
-    createRoutinePrismaScheduleExecutionDeps(prisma, { now: () => due }),
+    createRoutinePrismaScheduleExecutionDeps(prisma, { now: () => Math.max(repairAt, due) }),
   );
   const payload = parseRoutineWallClockPayload(plan.desired[0]!.payload);
   expect(await restarted.executeRoutineOccurrence(payload)).toMatchObject({
@@ -414,7 +414,7 @@ it('repairs a lost post-commit signal after reconnect and fires exactly once wit
   }).create(input, cx(a), authority);
   expect(events).toBe(1);
   expect(await prisma.scheduledInvocation.count()).toBe(0);
-  const gateway = await projectAndExecute(a, receipt.result.routine.id);
+  const gateway = await projectAndExecute(a, receipt.result.routine.id, due + 1);
   const product = new RoutineAICommandAdapter(composeRoutine({ db: prisma }).routineCommandPort);
   const mastra = await product.createRoutine({
     context: { ...cx(b), startedAt: at },
