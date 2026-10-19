@@ -11,43 +11,33 @@ test.describe('AI Goal Workflow', () => {
     browser,
   }) => {
     const email = generateTestEmail();
+    // Every list GET from the first boot is accounted for: an aborted request
+    // settles through `requestfailed`, never `requestfinished`.
+    const metrics = [0, 1].map(() => ({ lists: 0, completed: 0, failed: [] as string[] }));
+    const isConversationList = (request: Request) =>
+      request.method() === 'GET' &&
+      new URL(request.url()).pathname === '/api/v1/ai/chat/conversations';
+    const observe = (session: Page, entry: (typeof metrics)[number]) => {
+      session.on('request', (request) => {
+        if (isConversationList(request)) entry.lists += 1;
+      });
+      session.on('requestfinished', (request) => {
+        if (isConversationList(request)) entry.completed += 1;
+      });
+      session.on('requestfailed', (request) => {
+        if (isConversationList(request))
+          entry.failed.push(request.failure()?.errorText ?? 'unknown');
+      });
+    };
+    observe(page, metrics[0]!);
     await registerAndLogin(page, { email, password: e2ePassword });
     const secondContext = await browser.newContext({ viewport: { width: 1280, height: 720 } });
     const peer = await secondContext.newPage();
     try {
+      observe(peer, metrics[1]!);
       await login(peer, email, e2ePassword);
       const sessions = [page, peer];
-      // Every list GET is accounted for: a request aborted by the reload below
-      // settles through `requestfailed`, never `requestfinished`.
-      const metrics = sessions.map(() => ({ lists: 0, completed: 0, failed: [] as string[] }));
-      const isConversationList = (request: Request) =>
-        request.method() === 'GET' &&
-        new URL(request.url()).pathname === '/api/v1/ai/chat/conversations';
-      for (const [index, session] of sessions.entries()) {
-        session.on('request', (request) => {
-          if (isConversationList(request)) metrics[index]!.lists += 1;
-        });
-        session.on('requestfinished', (request) => {
-          if (isConversationList(request)) metrics[index]!.completed += 1;
-        });
-        session.on('requestfailed', (request) => {
-          if (isConversationList(request))
-            metrics[index]!.failed.push(request.failure()?.errorText ?? 'unknown');
-        });
-      }
-      // Both Vue projections must establish their own authenticated SSE before the mutation.
-      const ready = sessions.map((session) =>
-        session.waitForResponse(
-          (response) =>
-            new URL(response.url()).pathname === '/api/v1/ai/runtime/workspace/sse' &&
-            response.status() === 200,
-          { timeout: TIMEOUT_CONFIG.NAVIGATION },
-        ),
-      );
-      await Promise.all(
-        sessions.map((session) => session.reload({ waitUntil: 'domcontentloaded' })),
-      );
-      await Promise.all(ready);
+      const sidebar = (session: Page) => session.locator('[data-sidebar-presentation="docked"]');
       for (const session of sessions) {
         await expect(session.getByTestId('app-shell')).toBeVisible();
         // Fresh identities have no providers. This state appears only after
@@ -56,9 +46,12 @@ test.describe('AI Goal Workflow', () => {
           timeout: TIMEOUT_CONFIG.NAVIGATION,
         });
       }
-      const sidebar = (session: Page) => session.locator('[data-sidebar-presentation="docked"]');
-      // App readiness signal: the Conversation projection applied a snapshot
-      // started after its live stream watermark (useConversationProjection).
+      // Readiness is the app's own live/snapshot boundary, not a transport
+      // event: `live` is only published after an authenticated workspace SSE
+      // delivered `stream.ready` and a snapshot started after that watermark
+      // was applied (useConversationProjection). Reloading both documents to
+      // observe the SSE response cold-booted the whole module graph twice and
+      // exceeded the readiness budget under CI CPU contention (#505).
       for (const session of sessions) {
         await expect(sidebar(session)).toHaveAttribute('data-conversation-projection', 'live', {
           timeout: TIMEOUT_CONFIG.NAVIGATION,
