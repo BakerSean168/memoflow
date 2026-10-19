@@ -66,9 +66,25 @@ describe('scoped PAT durable authority', () => {
     await prisma.account.update({ where: { id: String(owner) }, data: { status: 'Closed' } });
     expect(await service().authenticate(`Bearer ${issued.secret}`)).toBeNull();
     await prisma.account.update({ where: { id: String(owner) }, data: { status: 'Active' } });
+    // #490 widened the PAT allowlist to the gateway write scopes; they authenticate as granted.
     await prisma.externalAgentPat.update({
       where: { id: issued.id },
-      data: { scopes: ['goals:write'] },
+      data: { scopes: ['goals:write', 'routines:write'] },
+    });
+    expect(await service().authenticate(`Bearer ${issued.secret}`)).toMatchObject({
+      identityId: String(owner),
+      credentialId: issued.id,
+      scopes: ['goals:write', 'routines:write'],
+    });
+    // A scope outside the allowlist, or a duplicated scope, still fails closed.
+    await prisma.externalAgentPat.update({
+      where: { id: issued.id },
+      data: { scopes: ['goals:admin'] },
+    });
+    expect(await service().authenticate(`Bearer ${issued.secret}`)).toBeNull();
+    await prisma.externalAgentPat.update({
+      where: { id: issued.id },
+      data: { scopes: ['goals:read', 'goals:read'] },
     });
     expect(await service().authenticate(`Bearer ${issued.secret}`)).toBeNull();
     await prisma.externalAgentPat.update({
