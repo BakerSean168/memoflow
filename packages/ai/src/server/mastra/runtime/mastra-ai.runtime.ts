@@ -414,9 +414,30 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     this.sessionModes.set(session, mode);
   }
 
-  private async suspensionSession(context: ExecutionContext, conversationId: string) {
+  private async suspensionSession(
+    context: ExecutionContext,
+    conversationId: string,
+    runId: string,
+  ) {
     await this.init();
+    const workflows = await this.deps.storage.getStore('workflows');
+    if (!workflows) throw new Error('Suspension storage unavailable');
+    // The suspended event can precede publication of the outer snapshot. Wait
+    // for that durable boundary before reading policy or retiring cancellation;
+    // otherwise a late publisher can resurrect the run after it was deleted.
+    const deadline = Date.now() + 10000;
+    let snapshot = await workflows.loadWorkflowSnapshot({ workflowName: 'agentic-loop', runId });
+    while (snapshot?.status !== 'suspended') {
+      if (Date.now() >= deadline) throw new Error('Suspension was not persisted');
+      await new Promise((resolve) => setTimeout(resolve, 25));
+      snapshot = await workflows.loadWorkflowSnapshot({ workflowName: 'agentic-loop', runId });
+    }
+    // Resume the run's durable policy, never a process-local default. Missing
+    // policy (including older snapshots) cannot grant write/execute authority.
+    const mode =
+      snapshot?.requestContext?.permissionMode === 'supervised' ? 'supervised' : 'read-only';
     const requestContext = new RequestContext();
+    requestContext.setRaw('permissionMode', mode);
     requestContext.setRaw('identityId', context.identityId);
     requestContext.setRaw('executionContext', context);
     requestContext.setRaw(MASTRA_RESOURCE_ID_KEY, context.identityId);
@@ -443,7 +464,10 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       threadId: conversationId,
       requestContext,
     });
-    if (!this.sessionModes.has(session)) await this.applySessionPolicy(session);
+    await this.applySessionPolicy(
+      session,
+      this.sessionModes.get(session) === 'read-only' ? 'read-only' : mode,
+    );
     return { session, requestContext };
   }
 
@@ -620,7 +644,11 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     if (!run || !suspension || this.resumedRuns.has(run.runId)) return false;
     this.resumedRuns.add(run.runId);
     try {
-      const { session } = await this.suspensionSession(input.context, input.command.conversationId);
+      const { session } = await this.suspensionSession(
+        input.context,
+        input.command.conversationId,
+        run.runId,
+      );
       if (session.run.isRunning()) return false;
       session.suspensions.register({
         runId: run.runId,
@@ -730,6 +758,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       const { session, requestContext } = await this.suspensionSession(
         input.context,
         input.command.conversationId,
+        run.runId,
       );
       if (session.run.isRunning()) return false;
       session.suspensions.register({
@@ -799,9 +828,34 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       const { session, requestContext } = await this.suspensionSession(
         input.context,
         input.command.conversationId,
+        run.runId,
       );
+      if (!session.approval.isArmed()) {
+        const call = run.toolCalls.find((call) => call.toolCallId === input.command.toolCallId);
+        if (
+          !call?.toolName ||
+          session.resolveToolApproval(call.toolName) === 'deny' ||
+          session.run.isRunning()
+        )
+          return false;
+        // A restarted process has no in-memory approval producer. Rebind the
+        // authenticated durable run to the native Session subscription instead.
+        await session.thread.ensureCurrentSubscription();
+        session.run.setRunId({ runId: run.runId });
+        return await this.driveSuspensionResume(
+          session,
+          input.command.conversationId,
+          run.runId,
+          input.command.toolCallId,
+          async () => {
+            const response = { toolCallId: input.command.toolCallId, requestContext };
+            if (input.command.decision === 'decline') await session.declineToolCall(response);
+            else await session.approveToolCall(response);
+            return true;
+          },
+        );
+      }
       if (
-        !session.approval.isArmed() ||
         session.approval.getToolCallId() !== input.command.toolCallId ||
         session.getCurrentRunId() !== run.runId
       )

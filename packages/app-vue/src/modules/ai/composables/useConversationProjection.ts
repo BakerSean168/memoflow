@@ -5,7 +5,7 @@ import {
   type AssistantRuntimeChoice,
 } from '@memoflow/contracts/ai';
 import { unwrap } from '@memoflow/contracts/result';
-import { computed, ref, onMounted, onUnmounted } from 'vue';
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
 import {
   resetWorkspaceEvents,
   subscribeWorkspaceEvents,
@@ -31,6 +31,14 @@ export function useConversationProjection(input: {
   const chatConversationId = ref('');
   const runtimeChoice = ref<AssistantRuntimeChoice>({ runtimeKind: 'builtin' });
   const historyIncomplete = ref(false);
+  let historyGeneration = 0;
+  let selectionGeneration = 0;
+  function invalidateRuntimeHistory() {
+    historyGeneration++;
+    selectionGeneration++;
+  }
+  // Identity alone cannot reject an old A -> B -> A response.
+  watch([chatConversationId, runtimeChoice], invalidateRuntimeHistory, { flush: 'sync' });
   const chatTimeline = ref<ChatItem[]>([]);
   const conversationTitle = ref('');
   const conversationListLoading = ref(false);
@@ -165,6 +173,7 @@ export function useConversationProjection(input: {
   onUnmounted(() => {
     streamController.abort();
     listGeneration++;
+    invalidateRuntimeHistory();
   });
 
   const lastActiveConversationId = ref('');
@@ -311,6 +320,7 @@ export function useConversationProjection(input: {
   }
 
   async function refreshRuntimeHistory(conversationId: string): Promise<void> {
+    const generation = ++historyGeneration;
     const kind = runtimeChoice.value.runtimeKind;
     const history =
       kind === 'local_agent'
@@ -323,7 +333,11 @@ export function useConversationProjection(input: {
       kind === 'local_agent'
         ? []
         : await options.runtime.listAskUserSuspensions(conversationId).catch(() => []);
-    if (runtimeChoice.value.runtimeKind !== kind || chatConversationId.value !== conversationId)
+    if (
+      generation !== historyGeneration ||
+      runtimeChoice.value.runtimeKind !== kind ||
+      chatConversationId.value !== conversationId
+    )
       return;
     historyIncomplete.value = history.incomplete ?? false;
     const timeline = history.messages.map((message, index) => normalizeChatItem(message, index));
@@ -398,12 +412,14 @@ export function useConversationProjection(input: {
     updateLastActiveConversation(String(item.id));
     if (item.runtimeKind !== 'local_agent') syncModel(getConversationModelKey(String(item.id)));
 
+    const selection = selectionGeneration;
     try {
       await Promise.all([
         refreshRuntimeHistory(String(item.id)),
         refreshRuntimeUsage(String(item.id)),
       ]);
-      if (item.runtimeKind !== 'local_agent') options.restoreWorkflowState?.(String(item.id));
+      if (selection === selectionGeneration && item.runtimeKind !== 'local_agent')
+        options.restoreWorkflowState?.(String(item.id));
     } catch (error) {
       toast.error(getAIErrorMessage(error, t, 'aiAssistant.dialogs.chat.loadFailed'));
     }
@@ -492,6 +508,7 @@ export function useConversationProjection(input: {
     clearLastActiveConversation,
     loadConversationList,
     refreshRuntimeHistory,
+    invalidateRuntimeHistory,
     markConversationActivity,
     syncConversationSummary: upsertConversation,
     refreshRuntimeUsage,
