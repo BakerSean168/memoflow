@@ -12,8 +12,9 @@ async function writeJson(file, value) {
   await writeFile(file, `${JSON.stringify(value, null, 2)}\n`);
 }
 
-test('runtime closure recursively includes workspace package dist and restores it', async () => {
+test('runtime closure recursively includes workspace package dist and restores it', async (t) => {
   const root = await mkdtemp(path.join(tmpdir(), 'ci-cd-runtime-closure-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
   await writeJson(path.join(root, 'apps/api/package.json'), {
     name: '@memoflow/api',
     dependencies: { '@memoflow/alpha': 'workspace:*' },
@@ -72,8 +73,9 @@ test('runtime closure recursively includes workspace package dist and restores i
   );
 });
 
-test('runtime closure rejects a missing transitive package build', async () => {
+test('runtime closure rejects a missing transitive package build', async (t) => {
   const root = await mkdtemp(path.join(tmpdir(), 'ci-cd-runtime-closure-missing-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
   await writeJson(path.join(root, 'apps/api/package.json'), {
     name: '@memoflow/api',
     dependencies: { '@memoflow/alpha': 'workspace:*' },
