@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createSignal, type MastraDBMessage } from '@mastra/core/agent';
 import { Memory } from '@mastra/memory';
-import { createMastraStorage } from './storage';
+import { createMastraStorage, sqliteDatabaseKey } from './storage';
 import { AssistantHistoryService } from './assistant-history.service';
 import type { AssistantConversationShellSource } from './assistant-conversation-shell.port';
 
@@ -220,4 +220,49 @@ it('allocates batches and competing store writers atomically and rolls back scop
       await closeStorage(second);
       await closeStorage(first);
     }
+});
+
+describe('SQLite writer gate database identity', () => {
+  it('shares one gate across equivalent file URL spellings and never across in-memory handles', () => {
+    expect(sqliteDatabaseKey('file:///tmp/memoflow/../memoflow/history.db?mode=rwc')).toBe(
+      sqliteDatabaseKey('file:/tmp/memoflow/history.db'),
+    );
+    expect(sqliteDatabaseKey(':memory:')).not.toBe(sqliteDatabaseKey(':memory:'));
+    expect(sqliteDatabaseKey('libsql://example.turso.io')).toBe('libsql://example.turso.io');
+  });
+
+  it('serializes competing writers that open one database through different URL spellings', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'memoflow-history-gate-'));
+    cleanupDirs.push(directory);
+    const path = join(directory, 'mastra.db');
+    const first = createMastraStorage({ kind: 'libsql', url: `file:${path}` });
+    const second = createMastraStorage({ kind: 'libsql', url: `file://${path}` });
+    await first.init();
+    await second.init();
+    const memory = new Memory({ storage: first });
+    await memory.createThread({ threadId: 'thread', resourceId: 'owner' });
+    const now = 1_800_000_000_000;
+    const message = (id: string): MastraDBMessage => ({
+      id,
+      threadId: 'thread',
+      resourceId: 'owner',
+      role: 'assistant',
+      createdAt: new Date(now),
+      content: { format: 2, parts: [{ type: 'text', text: id }] },
+    });
+    try {
+      const left = (await first.getStore('memory'))!;
+      const right = (await second.getStore('memory'))!;
+      const saved = await Promise.all([
+        left.saveMessages({ messages: [message('left')] }),
+        right.saveMessages({ messages: [message('right')] }),
+      ]);
+      expect(
+        saved.map(({ messages }) => messages[0]!.createdAt.getTime()).sort((a, b) => a - b),
+      ).toEqual([now, now + 1]);
+    } finally {
+      await closeStorage(second);
+      await closeStorage(first);
+    }
+  });
 });
