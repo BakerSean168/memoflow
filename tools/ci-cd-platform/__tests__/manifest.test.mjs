@@ -237,6 +237,7 @@ test('delivery manifest rejects split Unit shards of one project on the same job
 import { mkdtemp, writeFile, readFile, chmod, rm } from 'node:fs/promises';
 import os from 'node:os';
 import { createLaneInput } from '../create-lane-input.mjs';
+import { observeLane } from '../observe-lane.mjs';
 
 test('Unit runner preserves Vitest shard arguments, runs each selected task once and preserves failure without retry', async () => {
   const root = await mkdtemp(path.join(os.tmpdir(), 'memoflow-unit-runner-'));
@@ -261,6 +262,7 @@ test('Unit runner preserves Vitest shard arguments, runs each selected task once
       `#!/usr/bin/env node
 import { appendFileSync } from 'node:fs';
 appendFileSync(process.env.UNIT_CALLS_PATH, JSON.stringify(process.argv.slice(2)) + '\\n');
+console.log('startup spawn ENOENT ECONNREFUSED failed to connect docker daemon cannot find module SIGSEGV SIGABRT SIGBUS segmentation fault native crash flaky unstable flake');
 if (process.env.UNIT_FAIL === 'true') { console.error('ECONNREFUSED'); process.exit(17); }
 `,
     );
@@ -311,6 +313,128 @@ if (process.env.UNIT_FAIL === 'true') { console.error('ECONNREFUSED'); process.e
     const report = JSON.parse(await readFile(path.join(root, 'reports/unit-1-0.json'), 'utf8'));
     assert.equal(report.attempts.length, 1);
     assert.equal(report.result, 'failure');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('shared execution adapter reports actual attempts for every lane and PR/Full Audit command projection', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'memoflow-lane-outcomes-'));
+  try {
+    const pnpm = path.join(root, 'pnpm');
+    const callsPath = path.join(root, 'calls.jsonl');
+    await writeFile(
+      pnpm,
+      `#!/usr/bin/env node
+import { appendFileSync } from 'node:fs';
+appendFileSync(process.env.CALLS_PATH, JSON.stringify(process.argv.slice(2)) + '\\n');
+console.log('startup spawn ENOENT ECONNREFUSED failed to connect docker daemon cannot find module SIGSEGV SIGABRT SIGBUS segmentation fault native crash flaky unstable flake');
+if (process.env.FAIL_COMMAND === 'true') process.exit(17);
+`,
+    );
+    await chmod(pnpm, 0o755);
+    for (const event of ['pull_request', 'workflow_dispatch']) {
+      const manifest = await buildDeliveryManifest({
+        base: 'base',
+        head: 'head',
+        event,
+        ref: 'refs/heads/test',
+        scope: { ...scope, full: event === 'workflow_dispatch' },
+        files: ['nx.json'],
+      });
+      const manifestPath = path.join(root, 'manifest.json');
+      await writeFile(manifestPath, JSON.stringify(manifest));
+      for (const [lane, tasks] of Object.entries({
+        governance: ['memoflow:governance-check'],
+        validate: ['lint', 'typecheck', 'build', 'test'],
+        boundary: ['test:boundary', 'test:smoke'],
+        integration: ['test:integration'],
+        web: ['e2e', 'e2e:visual-regression', 'e2e:ai-provider', 'e2e:audit'],
+        coverage: ['test:coverage'],
+        performance: ['test:perf'],
+      })) {
+        const inputPath = path.join(root, 'input.json');
+        const input = await createLaneInput({ lane, manifest, output: inputPath });
+        for (const task of tasks) {
+          const reportsDir = path.join(root, event, lane, task.replaceAll(':', '-'));
+          const env = {
+            ...process.env,
+            PATH: `${root}:${process.env.PATH}`,
+            CALLS_PATH: callsPath,
+            DELIVERY_MANIFEST_PATH: manifestPath,
+            LANE_INPUT_PATH: inputPath,
+            DELIVERY_LANE: lane,
+            TEST_REPORTS_DIR: reportsDir,
+            TEST_REPORT_NAME: 'command',
+            TEST_RETRY_INFRASTRUCTURE: 'true',
+            GITHUB_STEP_SUMMARY: '',
+          };
+          const args = [
+            'tools/test-system-v2/run-command.mjs',
+            '--',
+            'pnpm',
+            'exec',
+            'nx',
+            'affected',
+            '-t',
+            task,
+          ];
+          for (const failed of [false, true]) {
+            await writeFile(callsPath, '');
+            let status = 0;
+            try {
+              execFileSync(process.execPath, args, {
+                env: { ...env, FAIL_COMMAND: String(failed) },
+                stdio: 'pipe',
+              });
+            } catch (error) {
+              status = error.status;
+            }
+            assert.equal(status, failed ? 17 : 0);
+            const calls = (await readFile(callsPath, 'utf8')).trim().split('\n').map(JSON.parse);
+            const count = failed ? 2 : 1;
+            assert.equal(calls.length, count);
+            assert.ok(
+              calls.every(
+                (call) => call[2] === (event === 'workflow_dispatch' ? 'run-many' : 'affected'),
+              ),
+            );
+            const report = JSON.parse(
+              await readFile(path.join(reportsDir, 'command.json'), 'utf8'),
+            );
+            assert.equal(report.attempts.length, count);
+            assert.equal(report.result, failed ? 'failure' : 'success');
+            assert.ok(
+              report.attempts.every(
+                (attempt) => attempt.classification === (failed ? 'process-crash' : 'success'),
+              ),
+            );
+            const result = JSON.parse(
+              await readFile(path.join(reportsDir, `${lane}.command.lane-result.json`), 'utf8'),
+            );
+            assert.deepEqual(result.failure, {
+              classification: failed ? 'process-crash' : 'none',
+              attempts: count,
+              retried: failed,
+            });
+            const totalMs = report.attempts.reduce(
+              (total, attempt) => total + attempt.durationMs,
+              0,
+            );
+            assert.equal(result.timing.executionMs, totalMs);
+            const summary = await observeLane({
+              lane,
+              input,
+              reportsDir,
+              output: path.join(root, 'summary.json'),
+            });
+            assert.equal(summary.timing.attemptCount, count);
+            assert.equal(summary.timing.executionMs, totalMs);
+            assert.equal(summary.status, failed ? 'failure' : 'success');
+          }
+        }
+      }
+    }
   } finally {
     await rm(root, { recursive: true, force: true });
   }

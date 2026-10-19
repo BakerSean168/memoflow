@@ -334,6 +334,8 @@ Coverage 不追求仓库统一百分比；门禁按业务风险和受治理子�
 | timeout                 | 默认否           | 判断产品等待、死锁还是资源不足            |
 | flaky                   | 不依赖无限 retry | 建立有 owner 和过期时间的隔离记录         |
 
+分类先判断真实进程证据（timeout、signal、spawn error、exit code），只有失败进程才允许用输出模式细分。exit code 为 0 且无异常进程证据时始终为 success，测试名称或 fixture 中的错误词汇不得触发重放。共享执行器保留每次 attempt 的 exit code、signal 与 spawn error；lane result、summary 和 JUnit 的执行耗时包含全部 attempts。Unit shard 显式禁用 infrastructure retry，其他调用者最多重试一次真实 infrastructure/process-crash 失败。
+
 重试成功不能将原始失败完全隐藏。CI summary 应记录首次失败分类、是否重试和最终结果。
 
 ## 12. 可观测性与成本
