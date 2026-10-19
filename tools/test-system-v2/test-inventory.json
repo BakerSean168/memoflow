@@ -4327,6 +4327,14 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/mastra/runtime/assistant-history.postgres.integration.spec.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "packages/ai/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/ai/src/server/mastra/runtime/assistant-history.service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13112,6 +13120,13 @@
       "fileCount": 7
     },
     {
+      "id": "packages/ai/vitest.integration.config.ts",
+      "type": "primary",
+      "suite": "integration",
+      "runner": "vitest",
+      "fileCount": 1
+    },
+    {
       "id": "packages/database/vitest.integration.config.ts",
       "type": "primary",
       "suite": "integration",
@@ -14019,7 +14034,7 @@
   "unexpected": [],
   "counts": {
     "unit": 1172,
-    "integration": 48,
+    "integration": 49,
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 9,

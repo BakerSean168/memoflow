@@ -218,13 +218,13 @@ describe('AssistantHistoryService', () => {
         { type: 'file', data: 'private-file-data', mediaType: 'image/png', filename: 'screen.png' },
       ],
     }).toDBMessage({ threadId: 'conversation-1', resourceId: 'identity-1' });
+    harness.messages.set(signal.id, signal);
     harness.messages.set('z-answer', {
       ...signal,
       id: 'z-answer',
       role: 'assistant',
       content: { format: 2, parts: [{ type: 'text', text: 'answer' }] },
     });
-    harness.messages.set(signal.id, signal);
     const service = new AssistantHistoryService(harness.memory, shellSource());
     const result = await service.listMessages({
       identityId: 'identity-1',
@@ -241,6 +241,28 @@ describe('AssistantHistoryService', () => {
       { id: 'z-answer', role: 'assistant', content: 'answer', createdAt: 20 },
     ]);
     expect(JSON.stringify(result)).not.toContain('private-file-data');
+  });
+
+  it('preserves recalled order for legacy equal timestamps without an ID tiebreak', async () => {
+    const harness = createMemoryHarness();
+    harness.setThread({ id: 'conversation-1', resourceId: 'identity-1' });
+    for (const [id, role] of [
+      ['z-first', 'user'],
+      ['a-second', 'assistant'],
+    ] as const) {
+      harness.messages.set(id, {
+        id,
+        role,
+        createdAt: new Date(20),
+        content: { format: 2, parts: [{ type: 'text', text: id }] },
+      });
+    }
+    const service = new AssistantHistoryService(harness.memory, shellSource());
+    expect(
+      (
+        await service.listMessages({ identityId: 'identity-1', conversationId: 'conversation-1' })
+      ).messages.map(({ id }) => id),
+    ).toEqual(['z-first', 'a-second']);
   });
 
   it.each([
