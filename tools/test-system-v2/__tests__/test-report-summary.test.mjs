@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { spawnSync } from 'node:child_process';
 import {
   aggregateTestSummaries,
   summarizePlaywrightReport,
@@ -38,7 +39,7 @@ test('summarizes Vitest counts, retries and slowest tests', () => {
   assert.equal(summary.slowestTests[0].name, 'slow');
 });
 
-test('summarizes Playwright final statuses and retry attempts', () => {
+test('reports Playwright flaky outcomes as failures and retains retry evidence', () => {
   const summary = summarizePlaywrightReport({
     config: {},
     suites: [
@@ -47,7 +48,16 @@ test('summarizes Playwright final statuses and retry attempts', () => {
           {
             file: 'flow.spec.ts',
             title: 'works',
-            tests: [{ status: 'flaky', results: [{ duration: 5 }, { duration: 9 }] }],
+            tests: [
+              { status: 'expected', results: [{ status: 'passed', retry: 0, duration: 3 }] },
+              {
+                status: 'flaky',
+                results: [
+                  { status: 'failed', retry: 0, duration: 5 },
+                  { status: 'passed', retry: 1, duration: 9 },
+                ],
+              },
+            ],
           },
           {
             file: 'skip.spec.ts',
@@ -58,8 +68,10 @@ test('summarizes Playwright final statuses and retry attempts', () => {
       },
     ],
   });
-  assert.deepEqual(summary.files, { total: 2, passed: 1, failed: 0, skipped: 1 });
-  assert.deepEqual(summary.tests, { total: 2, passed: 1, failed: 0, skipped: 1, retries: 1 });
+  assert.deepEqual(summary.files, { total: 2, passed: 0, failed: 1, skipped: 1 });
+  assert.deepEqual(summary.tests, { total: 3, passed: 1, failed: 1, skipped: 1, retries: 1 });
+  assert.equal(summary.slowestTests[0].status, 'flaky');
+  assert.equal(aggregateTestSummaries([summary]).tests.failed, 1);
   assert.equal(summary.slowestTests[0].durationMs, 9);
 });
 
@@ -82,3 +94,26 @@ test('aggregates framework reports without losing slowest evidence', () => {
   assert.equal(total.tests.total, 1);
   assert.equal(total.slowestSpecs[0].name, 'unit.test.ts');
 });
+
+for (const ci of ['', 'true']) {
+  test(`AI workspace config disables retries and rejects CI flaky outcomes (CI=${ci})`, () => {
+    const result = spawnSync(
+      process.execPath,
+      [
+        '--import',
+        'tsx',
+        '--input-type=module',
+        '-e',
+        `import config from './apps/web/playwright.ai-workspace.config.ts';
+         console.log(JSON.stringify({ retries: config.retries, failOnFlakyTests: config.failOnFlakyTests }));`,
+      ],
+      { env: { ...process.env, CI: ci }, encoding: 'utf8', timeout: 15000 },
+    );
+    assert.equal(result.error, undefined);
+    assert.equal(result.status, 0, result.stderr);
+    assert.deepEqual(JSON.parse(result.stdout.trim().split('\n').at(-1)), {
+      retries: 0,
+      failOnFlakyTests: Boolean(ci),
+    });
+  });
+}

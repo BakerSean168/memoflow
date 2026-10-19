@@ -80,7 +80,7 @@ export function summarizePlaywrightReport(report, source = null) {
       const state =
         status === 'skipped'
           ? 'skipped'
-          : ['expected', 'passed', 'flaky'].includes(status)
+          : ['expected', 'passed'].includes(status)
             ? 'passed'
             : 'failed';
       if (state === 'passed') passed += 1;

@@ -63,6 +63,11 @@ export async function completeEmailVerification(
     waitUntil: 'domcontentloaded',
     timeout: TIMEOUT_CONFIG.AUTH_BOOTSTRAP,
   });
+  // domcontentloaded precedes the lazy auth bundle mounting the login form.
+  await page.getByTestId('login-form').waitFor({
+    state: 'visible',
+    timeout: TIMEOUT_CONFIG.AUTH_BOOTSTRAP,
+  });
   await page.locator('#email').fill(email);
   await page.locator('#password').fill(password);
   await page.getByTestId('login-submit-button').click();
