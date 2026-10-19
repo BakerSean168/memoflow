@@ -642,7 +642,7 @@ it('materializes AGY with its canonical ACP executable and preserves owner isola
   expect((await local.listConnections('owner'))[0].id).toBe(connections[0].id);
   expect(await local.listConnections('other-owner')).toHaveLength(0);
   const web = setup('web').registry;
-  await   expect(
+  await expect(
     web.execute('owner', {
       action: 'create',
       instance: {
