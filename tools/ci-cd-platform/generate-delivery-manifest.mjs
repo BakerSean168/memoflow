@@ -2,7 +2,7 @@
 
 import { pathToFileURL } from 'node:url';
 import { execFile } from 'node:child_process';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import { promisify } from 'node:util';
 import path from 'node:path';
 import { buildProvenance, digest, validateDeliveryManifest } from './lib/contracts.mjs';
@@ -10,6 +10,9 @@ import { classifyRisk, selectLanes } from './lib/risk.mjs';
 import { detectScope } from './lib/scope-detector.mjs';
 
 import { planUnitShards, unitJobEnabled } from './lib/unit-shards.mjs';
+
+// eslint-disable-next-line @nx/enforce-module-boundaries -- CI CLI consumes the source-only test-system planner
+import { planWebShards, selectWebSpecs } from '../test-system-v2/lib/web-shards.mjs';
 
 const exec = promisify(execFile);
 
@@ -51,6 +54,12 @@ export async function buildDeliveryManifest({
     .filter(Boolean);
   const selectedLanes = selectLanes({ risk, scope: resolvedScope, event, full });
   for (const lane of forcedLanes) selectedLanes[lane] = true;
+  const history = JSON.parse(
+    await readFile(path.join(root, 'tools/test-system-v2/web-spec-durations.json'), 'utf8'),
+  );
+  const selection = selectWebSpecs({ enabled: selectedLanes.web, full, files: changed });
+  const webShards = planWebShards({ ...selection, durations: history.specs });
+  selectedLanes.web = webShards.shardCount > 0;
   const input = {
     base,
     head,
@@ -73,6 +82,7 @@ export async function buildDeliveryManifest({
     risk,
     scope: resolvedScope,
     unitShards: planUnitShards(resolvedScope.unit),
+    webShards,
     lanes: selectedLanes,
     provenance: buildProvenance({
       generator: 'ci-cd-platform-v2/generate-delivery-manifest@1',
@@ -87,6 +97,9 @@ export async function buildDeliveryManifest({
 export async function writeManifestOutputs(manifest, output) {
   if (process.env.GITHUB_OUTPUT) {
     const lines = [
+      `web_matrix=${JSON.stringify({ shard: manifest.lanes.web ? manifest.webShards.shards.map(({ id }) => id) : [] })}`,
+      `web_specs=${JSON.stringify(manifest.webShards.specs)}`,
+      `web_estimated_total_ms=${manifest.webShards.estimatedTotalMs}`,
       `manifest_path=${output}`,
       `manifest_digest=${manifest.digest}`,
       `risk=${manifest.risk.level}`,

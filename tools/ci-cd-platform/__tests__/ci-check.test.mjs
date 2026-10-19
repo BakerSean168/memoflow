@@ -29,10 +29,27 @@ const manifest = (laneOverrides = {}, unit = ['app-vue']) => {
     lanes: lanes(laneOverrides),
     scope: { version: 1, unit },
     unitShards: planUnitShards(unit),
+    webShards: {
+      specs: ['test.spec.ts'],
+      shards: [{ id: '1/1', specs: ['test.spec.ts'], estimatedMs: 1 }],
+      shardCount: 1,
+      fallback: false,
+      estimatedTotalMs: 1,
+    },
     provenance: buildProvenance({ generator: 'test', input: { laneOverrides, unit } }),
   };
   return { ...content, digest: digest(content) };
 };
+const receipts = (m) =>
+  m?.lanes?.web && m?.webShards?.shards
+    ? m.webShards.shards.map((shard) => ({
+        id: shard.id,
+        specs: [...shard.specs],
+        exitCode: 0,
+        manifestDigest: m.digest,
+      }))
+    : [];
+const check = (input) => evaluateCiCheck({ webReceipts: receipts(input.manifest), ...input });
 const verificationOutputs = (m) =>
   Object.fromEntries(
     ['boundary', 'integration', 'coverage', 'performance'].map((lane) => [
@@ -55,7 +72,7 @@ function healthyNeeds(m) {
 
 test('full run with every lane green passes', () => {
   const m = manifest();
-  assert.deepEqual(evaluateCiCheck({ needs: healthyNeeds(m), manifest: m }).failures, []);
+  assert.deepEqual(check({ needs: healthyNeeds(m), manifest: m }).failures, []);
 });
 
 test('docs-only run passes with validate/web/verification skipped by the manifest', () => {
@@ -70,18 +87,18 @@ test('docs-only run passes with validate/web/verification skipped by the manifes
     },
     [],
   );
-  const result = evaluateCiCheck({ needs: healthyNeeds(m), manifest: m });
+  const result = check({ needs: healthyNeeds(m), manifest: m });
   assert.equal(result.state, 'success');
   assert.equal(result.jobs['web-flow-shard'].expected, 'skipped');
 });
 
 test('unit skip is allowed only when the manifest scope has no unit projects', () => {
   const m = manifest({}, []);
-  assert.equal(evaluateCiCheck({ needs: healthyNeeds(m), manifest: m }).state, 'success');
+  assert.equal(check({ needs: healthyNeeds(m), manifest: m }).state, 'success');
   const withUnit = manifest();
   const needs = healthyNeeds(withUnit);
   needs['unit-1'].result = 'skipped';
-  assert.deepEqual(evaluateCiCheck({ needs, manifest: withUnit }).failures, ['unit-1:skipped']);
+  assert.deepEqual(check({ needs, manifest: withUnit }).failures, ['unit-1:skipped']);
 });
 
 for (const result of ['failure', 'cancelled', 'skipped']) {
@@ -89,9 +106,7 @@ for (const result of ['failure', 'cancelled', 'skipped']) {
     const m = manifest();
     const needs = healthyNeeds(m);
     needs['web-flow-shard'].result = result;
-    assert.deepEqual(evaluateCiCheck({ needs, manifest: m }).failures, [
-      `web-flow-shard:${result}`,
-    ]);
+    assert.deepEqual(check({ needs, manifest: m }).failures, [`web-flow-shard:${result}`]);
   });
 }
 
@@ -99,9 +114,7 @@ test('a lane that ran although the manifest disabled it fails the gate', () => {
   const m = manifest({ web: false });
   const needs = healthyNeeds(m);
   needs['web-flow-shard'].result = 'success';
-  assert.deepEqual(evaluateCiCheck({ needs, manifest: m }).failures, [
-    'web-flow-shard:unexpected-success',
-  ]);
+  assert.deepEqual(check({ needs, manifest: m }).failures, ['web-flow-shard:unexpected-success']);
 });
 
 test('verification sub-lane outputs are checked against the manifest', () => {
@@ -109,7 +122,7 @@ test('verification sub-lane outputs are checked against the manifest', () => {
   const needs = healthyNeeds(m);
   needs['verification-children'].outputs.coverage = 'failure';
   needs['verification-children'].outputs.performance = 'success';
-  assert.deepEqual(evaluateCiCheck({ needs, manifest: m }).failures, [
+  assert.deepEqual(check({ needs, manifest: m }).failures, [
     'verification-children/coverage:failure',
     'verification-children/performance:unexpected-success',
   ]);
@@ -119,31 +132,27 @@ test('detector failure, missing manifest, digest mismatch and unknown jobs fail 
   const m = manifest();
   const failedDetector = healthyNeeds(m);
   failedDetector['scope-detector'].result = 'failure';
-  assert.equal(evaluateCiCheck({ needs: failedDetector, manifest: m }).state, 'failure');
-  assert.deepEqual(evaluateCiCheck({ needs: healthyNeeds(m), manifest: null }).failures, [
+  assert.equal(check({ needs: failedDetector, manifest: m }).state, 'failure');
+  assert.deepEqual(check({ needs: healthyNeeds(m), manifest: null }).failures, [
     'manifest:missing',
   ]);
   const tampered = manifest({ web: false });
-  assert.deepEqual(evaluateCiCheck({ needs: healthyNeeds(m), manifest: tampered }).failures, [
+  assert.deepEqual(check({ needs: healthyNeeds(m), manifest: tampered }).failures, [
     'manifest:digest-mismatch',
   ]);
   const unknown = { ...healthyNeeds(m), 'new-lane': { result: 'success' } };
-  assert.deepEqual(evaluateCiCheck({ needs: unknown, manifest: m }).failures, [
-    'new-lane:unknown-job',
-  ]);
+  assert.deepEqual(check({ needs: unknown, manifest: m }).failures, ['new-lane:unknown-job']);
   const missing = healthyNeeds(m);
   delete missing.build;
-  assert.deepEqual(evaluateCiCheck({ needs: missing, manifest: m }).failures, [
-    'build:missing-from-needs',
-  ]);
-  assert.deepEqual(evaluateCiCheck({ needs: null, manifest: m }).failures, ['needs:missing']);
+  assert.deepEqual(check({ needs: missing, manifest: m }).failures, ['build:missing-from-needs']);
+  assert.deepEqual(check({ needs: null, manifest: m }).failures, ['needs:missing']);
 });
 
 test('tampering with lanes while retaining the original digest fails closed', () => {
   const m = manifest();
   const tampered = { ...m, lanes: { ...m.lanes, web: false } };
   const needs = healthyNeeds(tampered);
-  assert.equal(evaluateCiCheck({ needs, manifest: tampered }).state, 'failure');
+  assert.equal(check({ needs, manifest: tampered }).state, 'failure');
 });
 
 test('invalid manifest contracts are failures rather than exceptions', () => {
@@ -159,7 +168,7 @@ test('invalid manifest contracts are failures rather than exceptions', () => {
     return { ...content, digest: digest(content) };
   });
   for (const invalid of [...invalidContracts, { ...m, digest: 'sha256:invalid' }]) {
-    const result = evaluateCiCheck({ needs: healthyNeeds(m), manifest: invalid });
+    const result = check({ needs: healthyNeeds(m), manifest: invalid });
     assert.equal(result.state, 'failure');
     assert.ok(result.failures.some((failure) => failure.startsWith('manifest:')));
   }
@@ -170,7 +179,7 @@ test('detector manifest digest must exist and be a valid SHA-256 digest', () => 
   for (const invalid of [undefined, '', 'sha256:abc', 'g'.repeat(64), 123]) {
     const needs = healthyNeeds(m);
     needs['scope-detector'].outputs.manifest_digest = invalid;
-    assert.equal(evaluateCiCheck({ needs, manifest: m }).state, 'failure');
+    assert.equal(check({ needs, manifest: m }).state, 'failure');
   }
 });
 
@@ -234,13 +243,13 @@ test('reuse requires the build but forbids ordinary lane jobs and rejects missin
   delete m.digest;
   m.digest = digest(m);
   const needs = healthyNeeds(m);
-  assert.equal(evaluateCiCheck({ needs, manifest: m }).state, 'success');
+  assert.equal(check({ needs, manifest: m }).state, 'success');
   assert.equal(needs.build.result, 'success');
   needs.build.result = 'skipped';
-  assert.equal(evaluateCiCheck({ needs, manifest: m }).state, 'failure');
+  assert.equal(check({ needs, manifest: m }).state, 'failure');
   needs.build.result = 'success';
   needs['unit-1'].result = 'success';
-  assert.equal(evaluateCiCheck({ needs, manifest: m }).state, 'failure');
+  assert.equal(check({ needs, manifest: m }).state, 'failure');
 });
 
 test('docs-only reuse has no build or test jobs; malformed reuse/full policy fails closed', () => {
@@ -267,7 +276,7 @@ test('docs-only reuse has no build or test jobs; malformed reuse/full policy fai
   delete m.digest;
   m.digest = digest(m);
   assert.equal(healthyNeeds(m).build.result, 'skipped');
-  assert.equal(evaluateCiCheck({ needs: healthyNeeds(m), manifest: m }).state, 'success');
+  assert.equal(check({ needs: healthyNeeds(m), manifest: m }).state, 'success');
   for (const execution of [
     { mode: 'unknown' },
     { ...m.execution, testRunId: null },
@@ -276,7 +285,7 @@ test('docs-only reuse has no build or test jobs; malformed reuse/full policy fai
     const invalid = { ...m, execution };
     delete invalid.digest;
     invalid.digest = digest(invalid);
-    assert.equal(evaluateCiCheck({ needs: healthyNeeds(m), manifest: invalid }).state, 'failure');
+    assert.equal(check({ needs: healthyNeeds(m), manifest: invalid }).state, 'failure');
   }
 });
 
@@ -287,11 +296,9 @@ for (const id of ['unit-1', 'unit-2', 'unit-3']) {
       const needs = healthyNeeds(m);
       if (status === 'missing') delete needs[id];
       else needs[id].result = status;
-      assert.equal(evaluateCiCheck({ needs, manifest: m }).state, 'failure');
+      assert.equal(check({ needs, manifest: m }).state, 'failure');
       assert.ok(
-        evaluateCiCheck({ needs, manifest: m }).failures.some((failure) =>
-          failure.startsWith(`${id}:`),
-        ),
+        check({ needs, manifest: m }).failures.some((failure) => failure.startsWith(`${id}:`)),
       );
     });
   }
@@ -325,6 +332,77 @@ test('a valid self-digest cannot authorize a missing, duplicated or altered Unit
     invalid.digest = digest(invalid);
     const needs = healthyNeeds(m);
     needs['scope-detector'].outputs.manifest_digest = invalid.digest;
-    assert.equal(evaluateCiCheck({ needs, manifest: invalid }).state, 'failure');
+    assert.equal(check({ needs, manifest: invalid }).state, 'failure');
+  }
+});
+
+for (const [name, mutate] of [
+  ['missing shard', (rows) => rows.pop()],
+  ['extra shard', (rows) => rows.push({ ...rows[0], id: '2/1' })],
+  [
+    'spec not executed',
+    (rows) => {
+      rows[0].specs = [];
+    },
+  ],
+  ['duplicate spec', (rows) => rows[0].specs.push(rows[0].specs[0])],
+  ['duplicate shard', (rows) => rows.push(structuredClone(rows[0]))],
+  [
+    'wrong manifest',
+    (rows) => {
+      rows[0].manifestDigest = '0'.repeat(64);
+    },
+  ],
+  [
+    'failed execution',
+    (rows) => {
+      rows[0].exitCode = 1;
+    },
+  ],
+]) {
+  test(`Web evidence fails closed: ${name}`, () => {
+    const m = manifest();
+    const webReceipts = receipts(m);
+    mutate(webReceipts);
+    assert.equal(check({ needs: healthyNeeds(m), manifest: m, webReceipts }).state, 'failure');
+  });
+}
+
+test('zero Web specs skips the matrix and forbids receipts', () => {
+  const m = manifest({ web: false });
+  m.webShards = { specs: [], shards: [], shardCount: 0, estimatedTotalMs: 0, fallback: false };
+  delete m.digest;
+  m.digest = digest(m);
+  const needs = healthyNeeds(m);
+  assert.equal(check({ needs, manifest: m }).state, 'success');
+  assert.equal(check({ needs, manifest: m, webReceipts: [{ id: '1/1' }] }).state, 'failure');
+});
+
+test('a valid self-digest cannot authorize a missing or inconsistent Web plan', () => {
+  const m = manifest();
+  for (const mutate of [
+    (value) => {
+      delete value.webShards;
+    },
+    (value) => {
+      value.webShards.shardCount += 1;
+    },
+    (value) => {
+      value.webShards.shards[0].specs = [];
+    },
+    (value) => {
+      value.webShards.shards[0].specs.push('test.spec.ts');
+    },
+    (value) => {
+      value.webShards.shards[0].id = '2/2';
+    },
+  ]) {
+    const invalid = structuredClone(m);
+    mutate(invalid);
+    delete invalid.digest;
+    invalid.digest = digest(invalid);
+    const needs = healthyNeeds(m);
+    needs['scope-detector'].outputs.manifest_digest = invalid.digest;
+    assert.equal(check({ needs, manifest: invalid, webReceipts: [] }).state, 'failure');
   }
 });

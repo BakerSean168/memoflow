@@ -48,3 +48,15 @@ pnpm nx run desktop:test:watch
 - 共享 `postgres-test` 的 integration suite 必须顺序运行；默认使用 `pnpm test:integration`。
 - 具体实现理由应写在测试配置、setup、fixture 和 helper 注释中。
 - 如果文档与当前 `project.json`、测试配置或目录结构冲突，以代码为准。
+
+### Web Flow 动态分片
+
+Scope Detector 将选中的 canonical Web spec、估计总时长、片数与逐片列表写入 delivery manifest，
+并通过 `web_matrix` job output 驱动矩阵。仅修改 canonical spec 文件时缩小集合；共享代码、
+配置或无法判定的范围保守使用全集和默认片数。完整审计对全集计算动态片数，零 spec 不启动 Web runner。
+
+调参唯一入口为 `tools/test-system-v2/lib/web-shards.mjs` 的 `WEB_SHARD_POLICY`：
+测试预算等于 wall-clock 预算减固定 setup 成本，片数按测试总时长除以测试预算向上取整，
+再限制在配置上限与 spec 数量内。缺失或无效时长使用已知时长中位数。
+runner 只执行 manifest 指定列表，并在其他 Playwright suite 覆盖报告前保存实际执行证据；
+CI Check 校验片数、manifest digest、执行状态及每个 spec 恰好归属一片，缺片、多片、漏执行和重复均失败。

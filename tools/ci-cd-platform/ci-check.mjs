@@ -4,7 +4,7 @@
  *   CI_CHECK_NEEDS='${{ toJSON(needs) }}' node tools/ci-cd-platform/ci-check.mjs --manifest scope/delivery-manifest-v1.json
  * A missing or unreadable manifest fails the gate.
  */
-import { readFile, appendFile } from 'node:fs/promises';
+import { readFile, appendFile, readdir } from 'node:fs/promises';
 import { evaluateCiCheck } from './lib/ci-check.mjs';
 
 const manifestFlag = process.argv.indexOf('--manifest');
@@ -24,7 +24,18 @@ try {
   manifest = null;
 }
 
-const result = evaluateCiCheck({ needs, manifest });
+let webReceipts = [];
+try {
+  const files = await readdir('reports/web-shards', { recursive: true });
+  webReceipts = await Promise.all(
+    files
+      .filter((file) => file.endsWith('.json'))
+      .map(async (file) => JSON.parse(await readFile(`reports/web-shards/${file}`, 'utf8'))),
+  );
+} catch (error) {
+  if (error.code !== 'ENOENT') webReceipts = null;
+}
+const result = evaluateCiCheck({ needs, manifest, webReceipts });
 console.log(JSON.stringify(result, null, 2));
 if (process.env.GITHUB_STEP_SUMMARY) {
   const rows = Object.entries(result.jobs).map(

@@ -195,6 +195,46 @@ export function validateDeliveryManifest(manifest) {
       stableStringify(expectedTasks.map(stableStringify).sort()),
     'unitShards must cover every Unit task exactly once',
   );
+  const web = manifest.webShards;
+  assert(web && Array.isArray(web.specs) && Array.isArray(web.shards), 'webShards required');
+  assertStringArray(web.specs, 'webShards.specs');
+  assert(new Set(web.specs).size === web.specs.length, 'duplicate selected Web spec');
+  assert(
+    web.specs.every((spec) => /^(?!.*\.\.)(?:[\w-]+\/)*[\w-]+\.spec\.ts$/u.test(spec)),
+    'invalid Web spec path',
+  );
+  assert(typeof web.fallback === 'boolean', 'Web fallback required');
+  assert(
+    Number.isFinite(web.estimatedTotalMs) && web.estimatedTotalMs >= 0,
+    'invalid Web duration',
+  );
+  assert(
+    Number.isSafeInteger(web.shardCount) &&
+      web.shardCount >= 0 &&
+      web.shardCount === web.shards.length,
+    'Web shard count mismatch',
+  );
+  assert((web.specs.length === 0) === (web.shardCount === 0), 'empty Web plan mismatch');
+  const assignedWebSpecs = [];
+  for (const [index, shard] of web.shards.entries()) {
+    assert(shard.id === `${index + 1}/${web.shardCount}`, 'invalid Web shard ID');
+    assertStringArray(shard.specs, 'Web shard specs');
+    assert(shard.specs.length > 0, 'empty Web shard');
+    assert(
+      Number.isFinite(shard.estimatedMs) && shard.estimatedMs > 0,
+      'invalid Web shard duration',
+    );
+    assignedWebSpecs.push(...shard.specs);
+  }
+  assert(
+    stableStringify(assignedWebSpecs.sort()) === stableStringify([...web.specs].sort()),
+    'Web plan must cover selected specs exactly once',
+  );
+  assert(
+    web.shards.reduce((sum, shard) => sum + shard.estimatedMs, 0) === web.estimatedTotalMs,
+    'Web duration mismatch',
+  );
+  assert(!manifest.lanes.web || web.shardCount > 0, 'enabled Web lane requires shards');
   assertSelfDigest(manifest, 'manifest');
   return manifest;
 }

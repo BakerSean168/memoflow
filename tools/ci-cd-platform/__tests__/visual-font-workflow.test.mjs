@@ -91,7 +91,7 @@ function runPreflight({
 
 test('every Web Flow shard provisions Noble fonts before functional and visual browser tests', () => {
   assert.match(shard, /runs-on: ubuntu-24\.04/u);
-  assert.match(shard, /shard: \['1\/4', '2\/4', '3\/4', '4\/4'\]/u);
+  assert.match(shard, /matrix: \$\{\{ fromJSON\(needs.scope-detector.outputs.web_matrix\) \}\}/u);
   assert.ok(fontStep, 'font prerequisite must exist in the matrix job');
   assert.match(fontStep, /shell: bash/u);
   assert.match(fontStep, /timeout-minutes: 5/u);
