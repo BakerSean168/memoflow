@@ -1,7 +1,7 @@
 ---
 tags: [guide, development, git, workflow]
 description: 单人多 Agent 严格串行 Issue / PR 工作流
-updated: 2026-10-18
+updated: 2026-10-19
 ---
 
 # Git 工作流：Issue-only / Single Worktree
@@ -14,6 +14,8 @@ updated: 2026-10-18
 - **交接：按需**。换 Agent、额度中断或阻塞时，在 Issue 记简短检查点，包括分支、Commit、未提交文件、测试证据与下一步。新 Agent 必须自己核查工作目录。
 - **分析与决策**：复杂任务的关键技术决策写进 Issue；长期稳定的架构规则放在 ADR / docs/architecture。其他 Agent 可进行只读评审。
 - **安全清理**。只有确认没有未提交/未跟踪成果、独有提交、运行中任务后，才清理旧 Worktree 或任务分支；不用无保护的 reset/clean。
+
+> **临时冲刺规则（2026-10-19）**：当前全部 open Issue 完成前，允许最多 3 条并行 Lane 且以本地快速检查代替 GitHub CI，详见 [AGENTS.md](../../../AGENTS.md)。冲刺结束后恢复本页的严格串行 + Required CI 规则。
 
 ## 日常循环
 

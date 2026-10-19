@@ -1,6 +1,7 @@
 import { createSignal, type MastraDBMessage } from '@mastra/core/agent';
 import { randomUUID } from 'node:crypto';
 import type { AssistantRuntimeHistoryView } from '@memoflow/contracts/ai';
+import { compareHistoryTimestamps } from '../../../shared/history-order';
 import type { AssistantConversationShellSource } from './assistant-conversation-shell.port';
 
 type ThreadView = {
@@ -147,7 +148,7 @@ export class AssistantHistoryService {
           },
         ];
       })
-      .sort((left, right) => left.createdAt - right.createdAt || left.id.localeCompare(right.id));
+      .sort((left, right) => compareHistoryTimestamps(left.createdAt, right.createdAt));
     return { conversationId: input.conversationId, messages };
   }
 

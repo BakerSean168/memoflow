@@ -25,7 +25,11 @@ withDefaults(
 </script>
 
 <template>
-  <DialogContent :class="size === 'wide' ? 'sm:max-w-3xl' : 'sm:max-w-lg'" :data-testid="testId">
+  <DialogContent
+    :class="size === 'wide' ? 'sm:max-w-3xl' : 'sm:max-w-lg'"
+    :data-testid="testId"
+    v-bind="description ? {} : { 'aria-describedby': undefined }"
+  >
     <DialogHeader>
       <DialogTitle>{{ title }}</DialogTitle>
       <DialogDescription v-if="description">{{ description }}</DialogDescription>
