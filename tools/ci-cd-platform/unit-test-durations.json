@@ -1,0 +1,786 @@
+{
+  "method": "Nearest-rank percentiles; uncached Vitest Duration and node:test # duration_ms only. Cached replay durations excluded. Vitest setup is summed across workers, not wall time. Nx nested invocations produce multiple cache summaries. Job times from GitHub API; run total createdAt\u2192updatedAt includes queue/orchestration. Runner minutes=sum actual job wall, not rounded billing.",
+  "runs": [
+    {
+      "runId": 39155065796,
+      "event": "pull_request",
+      "unitSeconds": 337.0,
+      "setupSeconds": 50.0,
+      "ciSeconds": 731.0,
+      "runnerMinutes": 44.4,
+      "cacheSummaries": [
+        [
+          0,
+          7
+        ],
+        [
+          7,
+          7
+        ]
+      ],
+      "projects": [
+        "app-vue",
+        "ci-cd-platform",
+        "desktop",
+        "governance-tools",
+        "test-system-v2",
+        "web"
+      ]
+    },
+    {
+      "runId": 39156071648,
+      "event": "push",
+      "unitSeconds": 310.0,
+      "setupSeconds": 37.0,
+      "ciSeconds": 684.0,
+      "runnerMinutes": 44.72,
+      "cacheSummaries": [
+        [
+          0,
+          7
+        ],
+        [
+          7,
+          7
+        ]
+      ],
+      "projects": [
+        "app-vue",
+        "ci-cd-platform",
+        "desktop",
+        "governance-tools",
+        "test-system-v2",
+        "web"
+      ]
+    },
+    {
+      "runId": 39161754557,
+      "event": "pull_request",
+      "unitSeconds": 269.0,
+      "setupSeconds": 43.0,
+      "ciSeconds": 898.0,
+      "runnerMinutes": 49.02,
+      "cacheSummaries": [
+        [
+          0,
+          8
+        ],
+        [
+          8,
+          9
+        ]
+      ],
+      "projects": [
+        "app-vue",
+        "ci-cd-platform",
+        "desktop",
+        "governance-tools",
+        "test-system-v2",
+        "ui-core",
+        "ui-vue-shadcn",
+        "web"
+      ]
+    },
+    {
+      "runId": 39163023903,
+      "event": "push",
+      "unitSeconds": 425.0,
+      "setupSeconds": 44.0,
+      "ciSeconds": 857.0,
+      "runnerMinutes": 50.9,
+      "cacheSummaries": [
+        [
+          0,
+          9
+        ],
+        [
+          9,
+          9
+        ]
+      ],
+      "projects": [
+        "app-vue",
+        "ci-cd-platform",
+        "desktop",
+        "governance-tools",
+        "test-system-v2",
+        "ui-core",
+        "ui-vue-shadcn",
+        "web"
+      ]
+    },
+    {
+      "runId": 39165574231,
+      "event": "pull_request",
+      "unitSeconds": 379.0,
+      "setupSeconds": 45.0,
+      "ciSeconds": 887.0,
+      "runnerMinutes": 50.62,
+      "cacheSummaries": [
+        [
+          0,
+          7
+        ],
+        [
+          7,
+          7
+        ]
+      ],
+      "projects": [
+        "app-vue",
+        "ci-cd-platform",
+        "desktop",
+        "governance-tools",
+        "test-system-v2",
+        "web"
+      ]
+    },
+    {
+      "runId": 39166760886,
+      "event": "push",
+      "unitSeconds": 412.0,
+      "setupSeconds": 40.0,
+      "ciSeconds": 757.0,
+      "runnerMinutes": 49.93,
+      "cacheSummaries": [
+        [
+          0,
+          7
+        ],
+        [
+          7,
+          7
+        ]
+      ],
+      "projects": [
+        "app-vue",
+        "ci-cd-platform",
+        "desktop",
+        "governance-tools",
+        "test-system-v2",
+        "web"
+      ]
+    },
+    {
+      "runId": 39179745683,
+      "event": "pull_request",
+      "unitSeconds": 319.0,
+      "setupSeconds": 41.0,
+      "ciSeconds": 825.0,
+      "runnerMinutes": 49.72,
+      "cacheSummaries": [
+        [
+          0,
+          7
+        ],
+        [
+          7,
+          7
+        ]
+      ],
+      "projects": [
+        "app-vue",
+        "ci-cd-platform",
+        "desktop",
+        "governance-tools",
+        "test-system-v2",
+        "web"
+      ]
+    },
+    {
+      "runId": 39180842049,
+      "event": "push",
+      "unitSeconds": 409.0,
+      "setupSeconds": 40.0,
+      "ciSeconds": 880.0,
+      "runnerMinutes": 49.53,
+      "cacheSummaries": [
+        [
+          0,
+          7
+        ],
+        [
+          7,
+          7
+        ]
+      ],
+      "projects": [
+        "app-vue",
+        "ci-cd-platform",
+        "desktop",
+        "governance-tools",
+        "test-system-v2",
+        "web"
+      ]
+    },
+    {
+      "runId": 39184675840,
+      "event": "pull_request",
+      "unitSeconds": 395.0,
+      "setupSeconds": 32.0,
+      "ciSeconds": 690.0,
+      "runnerMinutes": 45.57,
+      "cacheSummaries": [
+        [
+          0,
+          7
+        ],
+        [
+          7,
+          7
+        ]
+      ],
+      "projects": [
+        "app-vue",
+        "ci-cd-platform",
+        "desktop",
+        "governance-tools",
+        "test-system-v2",
+        "web"
+      ]
+    },
+    {
+      "runId": 39188166299,
+      "event": "pull_request",
+      "unitSeconds": 410.0,
+      "setupSeconds": 34.0,
+      "ciSeconds": 806.0,
+      "runnerMinutes": 49.47,
+      "cacheSummaries": [
+        [
+          0,
+          7
+        ],
+        [
+          7,
+          7
+        ]
+      ],
+      "projects": [
+        "app-vue",
+        "ci-cd-platform",
+        "desktop",
+        "governance-tools",
+        "test-system-v2",
+        "web"
+      ]
+    },
+    {
+      "runId": 39189253542,
+      "event": "push",
+      "unitSeconds": 327.0,
+      "setupSeconds": 42.0,
+      "ciSeconds": 878.0,
+      "runnerMinutes": 52.3,
+      "cacheSummaries": [
+        [
+          0,
+          7
+        ],
+        [
+          7,
+          7
+        ]
+      ],
+      "projects": [
+        "app-vue",
+        "ci-cd-platform",
+        "desktop",
+        "governance-tools",
+        "test-system-v2",
+        "web"
+      ]
+    },
+    {
+      "runId": 39192471571,
+      "event": "pull_request",
+      "unitSeconds": 105.0,
+      "setupSeconds": 34.0,
+      "ciSeconds": 872.0,
+      "runnerMinutes": 46.38,
+      "cacheSummaries": [
+        [
+          0,
+          4
+        ]
+      ],
+      "projects": [
+        "ci-cd-platform",
+        "governance-tools",
+        "test-system-v2"
+      ]
+    }
+  ],
+  "ranking": [
+    {
+      "project": "app-vue",
+      "samples": 11,
+      "p50Seconds": 301.96,
+      "p95Seconds": 346.33
+    },
+    {
+      "project": "desktop",
+      "samples": 11,
+      "p50Seconds": 108.98,
+      "p95Seconds": 121.97
+    },
+    {
+      "project": "test-system-v2",
+      "samples": 12,
+      "p50Seconds": 48.26,
+      "p95Seconds": 59.62
+    },
+    {
+      "project": "ci-cd-platform",
+      "samples": 12,
+      "p50Seconds": 23.4,
+      "p95Seconds": 29.64
+    },
+    {
+      "project": "web",
+      "samples": 11,
+      "p50Seconds": 22.99,
+      "p95Seconds": 30.62
+    },
+    {
+      "project": "governance-tools",
+      "samples": 12,
+      "p50Seconds": 14.29,
+      "p95Seconds": 45.43
+    },
+    {
+      "project": "ui-vue-shadcn",
+      "samples": 2,
+      "p50Seconds": 2.72,
+      "p95Seconds": 8.22
+    }
+  ],
+  "observations": [
+    {
+      "runId": 39155065796,
+      "project": "ci-cd-platform",
+      "durationSeconds": 19.190765748,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39155065796,
+      "project": "web",
+      "durationSeconds": 22.75,
+      "vitestSetupSeconds": 18.76
+    },
+    {
+      "runId": 39155065796,
+      "project": "governance-tools",
+      "durationSeconds": 12.64,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39155065796,
+      "project": "desktop",
+      "durationSeconds": 91.67,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39155065796,
+      "project": "test-system-v2",
+      "durationSeconds": 44.502821413,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39155065796,
+      "project": "app-vue",
+      "durationSeconds": 258.83,
+      "vitestSetupSeconds": 94.7
+    },
+    {
+      "runId": 39156071648,
+      "project": "ci-cd-platform",
+      "durationSeconds": 17.566850966,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39156071648,
+      "project": "web",
+      "durationSeconds": 21.9,
+      "vitestSetupSeconds": 18.18
+    },
+    {
+      "runId": 39156071648,
+      "project": "governance-tools",
+      "durationSeconds": 11.95,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39156071648,
+      "project": "desktop",
+      "durationSeconds": 91.09,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39156071648,
+      "project": "test-system-v2",
+      "durationSeconds": 43.959793590000004,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39156071648,
+      "project": "app-vue",
+      "durationSeconds": 249.32,
+      "vitestSetupSeconds": 91.35
+    },
+    {
+      "runId": 39161754557,
+      "project": "ui-vue-shadcn",
+      "durationSeconds": 2.72,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39161754557,
+      "project": "web",
+      "durationSeconds": 13.57,
+      "vitestSetupSeconds": 10.05
+    },
+    {
+      "runId": 39161754557,
+      "project": "ci-cd-platform",
+      "durationSeconds": 19.437368171,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39161754557,
+      "project": "governance-tools",
+      "durationSeconds": 9.44,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39161754557,
+      "project": "desktop",
+      "durationSeconds": 82.33,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39161754557,
+      "project": "test-system-v2",
+      "durationSeconds": 39.610863730999995,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39161754557,
+      "project": "app-vue",
+      "durationSeconds": 199.13,
+      "vitestSetupSeconds": 67.49
+    },
+    {
+      "runId": 39163023903,
+      "project": "ui-vue-shadcn",
+      "durationSeconds": 8.22,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39163023903,
+      "project": "web",
+      "durationSeconds": 29.3,
+      "vitestSetupSeconds": 24.25
+    },
+    {
+      "runId": 39163023903,
+      "project": "ci-cd-platform",
+      "durationSeconds": 28.97813623,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39163023903,
+      "project": "governance-tools",
+      "durationSeconds": 16.65,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39163023903,
+      "project": "desktop",
+      "durationSeconds": 119.64,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39163023903,
+      "project": "test-system-v2",
+      "durationSeconds": 59.385292551999996,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39163023903,
+      "project": "app-vue",
+      "durationSeconds": 344.37,
+      "vitestSetupSeconds": 132.72
+    },
+    {
+      "runId": 39165574231,
+      "project": "web",
+      "durationSeconds": 22.56,
+      "vitestSetupSeconds": 17.47
+    },
+    {
+      "runId": 39165574231,
+      "project": "ci-cd-platform",
+      "durationSeconds": 25.098500291,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39165574231,
+      "project": "governance-tools",
+      "durationSeconds": 14.29,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39165574231,
+      "project": "desktop",
+      "durationSeconds": 112.04,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39165574231,
+      "project": "test-system-v2",
+      "durationSeconds": 54.618893699,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39165574231,
+      "project": "app-vue",
+      "durationSeconds": 301.96,
+      "vitestSetupSeconds": 101.79
+    },
+    {
+      "runId": 39166760886,
+      "project": "web",
+      "durationSeconds": 27.7,
+      "vitestSetupSeconds": 24.57
+    },
+    {
+      "runId": 39166760886,
+      "project": "ci-cd-platform",
+      "durationSeconds": 26.788480344,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39166760886,
+      "project": "governance-tools",
+      "durationSeconds": 15.76,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39166760886,
+      "project": "desktop",
+      "durationSeconds": 116.23,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39166760886,
+      "project": "test-system-v2",
+      "durationSeconds": 58.083806816999996,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39166760886,
+      "project": "app-vue",
+      "durationSeconds": 337.08,
+      "vitestSetupSeconds": 128.68
+    },
+    {
+      "runId": 39179745683,
+      "project": "ci-cd-platform",
+      "durationSeconds": 19.014816202000002,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39179745683,
+      "project": "web",
+      "durationSeconds": 22.99,
+      "vitestSetupSeconds": 18.46
+    },
+    {
+      "runId": 39179745683,
+      "project": "governance-tools",
+      "durationSeconds": 10.69,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39179745683,
+      "project": "desktop",
+      "durationSeconds": 92.88,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39179745683,
+      "project": "test-system-v2",
+      "durationSeconds": 44.181676409,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39179745683,
+      "project": "app-vue",
+      "durationSeconds": 253.3,
+      "vitestSetupSeconds": 91.95
+    },
+    {
+      "runId": 39180842049,
+      "project": "ci-cd-platform",
+      "durationSeconds": 23.395944551,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39180842049,
+      "project": "web",
+      "durationSeconds": 29.16,
+      "vitestSetupSeconds": 22.54
+    },
+    {
+      "runId": 39180842049,
+      "project": "governance-tools",
+      "durationSeconds": 15.15,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39180842049,
+      "project": "desktop",
+      "durationSeconds": 116.04,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39180842049,
+      "project": "test-system-v2",
+      "durationSeconds": 57.932441139000005,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39180842049,
+      "project": "app-vue",
+      "durationSeconds": 332.94,
+      "vitestSetupSeconds": 123.73
+    },
+    {
+      "runId": 39184675840,
+      "project": "ci-cd-platform",
+      "durationSeconds": 25.747908662999997,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39184675840,
+      "project": "web",
+      "durationSeconds": 30.62,
+      "vitestSetupSeconds": 25.7
+    },
+    {
+      "runId": 39184675840,
+      "project": "governance-tools",
+      "durationSeconds": 15.75,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39184675840,
+      "project": "desktop",
+      "durationSeconds": 108.98,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39184675840,
+      "project": "test-system-v2",
+      "durationSeconds": 56.271920562,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39184675840,
+      "project": "app-vue",
+      "durationSeconds": 333.63,
+      "vitestSetupSeconds": 126.73
+    },
+    {
+      "runId": 39188166299,
+      "project": "web",
+      "durationSeconds": 28.95,
+      "vitestSetupSeconds": 24.02
+    },
+    {
+      "runId": 39188166299,
+      "project": "ci-cd-platform",
+      "durationSeconds": 27.098287752,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39188166299,
+      "project": "governance-tools",
+      "durationSeconds": 16.51,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39188166299,
+      "project": "desktop",
+      "durationSeconds": 121.97,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39188166299,
+      "project": "test-system-v2",
+      "durationSeconds": 59.616259080000006,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39188166299,
+      "project": "app-vue",
+      "durationSeconds": 346.33,
+      "vitestSetupSeconds": 131.41
+    },
+    {
+      "runId": 39189253542,
+      "project": "web",
+      "durationSeconds": 18.42,
+      "vitestSetupSeconds": 14.42
+    },
+    {
+      "runId": 39189253542,
+      "project": "ci-cd-platform",
+      "durationSeconds": 21.503578508,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39189253542,
+      "project": "governance-tools",
+      "durationSeconds": 11.82,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39189253542,
+      "project": "desktop",
+      "durationSeconds": 99.41,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39189253542,
+      "project": "test-system-v2",
+      "durationSeconds": 48.263363149999996,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39189253542,
+      "project": "app-vue",
+      "durationSeconds": 257.28,
+      "vitestSetupSeconds": 84.5
+    },
+    {
+      "runId": 39192471571,
+      "project": "ci-cd-platform",
+      "durationSeconds": 29.643649878,
+      "vitestSetupSeconds": null
+    },
+    {
+      "runId": 39192471571,
+      "project": "governance-tools",
+      "durationSeconds": 45.43,
+      "vitestSetupSeconds": 0.0
+    },
+    {
+      "runId": 39192471571,
+      "project": "test-system-v2",
+      "durationSeconds": 40.607901903,
+      "vitestSetupSeconds": null
+    }
+  ]
+}
