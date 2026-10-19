@@ -193,7 +193,7 @@
             </slot>
           </div>
           <div class="flex shrink-0 items-center gap-2" data-testid="ai-composer-actions">
-            <DropdownMenu>
+            <DropdownMenu :modal="false">
               <DropdownMenuTrigger as-child>
                 <Button
                   variant="ghost"
@@ -217,12 +217,12 @@
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
 
-                <DropdownMenuSub>
+                <DropdownMenuSub v-model:open="contextSubmenuOpen.goal">
                   <DropdownMenuSubTrigger>
                     <Target class="mr-2 h-4 w-4" />
                     {{ t('aiAssistant.chatPage.context.referenceGoal') }}
                   </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent class="w-64">
+                  <DropdownMenuSubContent v-if="contextSubmenuOpen.goal" class="w-64">
                     <DropdownMenuItem
                       v-for="goal in menuGoals"
                       :key="goal.id"
@@ -241,12 +241,12 @@
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
 
-                <DropdownMenuSub>
+                <DropdownMenuSub v-model:open="contextSubmenuOpen.task">
                   <DropdownMenuSubTrigger>
                     <ListChecks class="mr-2 h-4 w-4" />
                     {{ t('aiAssistant.chatPage.context.referenceTask') }}
                   </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent class="w-64">
+                  <DropdownMenuSubContent v-if="contextSubmenuOpen.task" class="w-64">
                     <DropdownMenuItem
                       v-for="task in menuTasks"
                       :key="task.id"
@@ -265,12 +265,12 @@
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
 
-                <DropdownMenuSub>
+                <DropdownMenuSub v-model:open="contextSubmenuOpen.note">
                   <DropdownMenuSubTrigger>
                     <FileText class="mr-2 h-4 w-4" />
                     {{ t('aiAssistant.chatPage.context.referenceNote') }}
                   </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent class="w-64">
+                  <DropdownMenuSubContent v-if="contextSubmenuOpen.note" class="w-64">
                     <DropdownMenuItem
                       v-for="note in menuKnowledgeNotes"
                       :key="note.contextId"
@@ -432,6 +432,11 @@ const mentionQuery = ref<string | null>(null);
 const mentionStart = ref<number | null>(null);
 const mentionActiveIndex = ref(0);
 const textareaMaxPx = COMPOSER_TEXTAREA_MAX_PX;
+const contextSubmenuOpen = ref({
+  goal: false,
+  task: false,
+  note: false,
+});
 
 const menuGoals = computed(() => props.recentGoals.slice(0, 8));
 const menuTasks = computed(() => props.recentTasks.slice(0, 8));
