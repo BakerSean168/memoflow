@@ -4,11 +4,12 @@ import type { DesktopStorageRoots } from './desktop-storage-roots';
 
 /** Pure derivation; each directory has exactly one lifecycle owner. */
 export function createSharedPathResolver(roots: DesktopStorageRoots): SharedPathResolver {
-  const sharedDir = path.join(roots.dataRoot, 'shared');
-  const authDir = path.join(sharedDir, 'auth');
-  const configDir = path.join(roots.configRoot, 'shared', 'preferences');
-  const uiDir = path.join(roots.stateRoot, 'shared', 'ui');
-  const profilesRegistryDir = path.join(sharedDir, 'profiles');
+  const p = roots.platform === 'win32' ? path.win32 : path.posix;
+  const sharedDir = p.join(roots.dataRoot, 'shared');
+  const authDir = p.join(sharedDir, 'auth');
+  const configDir = p.join(roots.configRoot, 'shared', 'preferences');
+  const uiDir = p.join(roots.stateRoot, 'shared', 'ui');
+  const profilesRegistryDir = p.join(sharedDir, 'profiles');
   const cacheDir = roots.cacheRoot;
   return {
     roots,
@@ -17,14 +18,14 @@ export function createSharedPathResolver(roots: DesktopStorageRoots): SharedPath
     configDir,
     uiDir,
     profilesRegistryDir,
-    deviceIdPath: path.join(authDir, 'device-id'),
-    runtimeConfigPath: path.join(configDir, 'desktop-runtime.json'),
-    profileAccessWindowStatePath: path.join(uiDir, 'profile-access-window-state.json'),
-    registryPath: path.join(profilesRegistryDir, 'registry.json'),
+    deviceIdPath: p.join(authDir, 'device-id'),
+    runtimeConfigPath: p.join(configDir, 'desktop-runtime.json'),
+    profileAccessWindowStatePath: p.join(uiDir, 'profile-access-window-state.json'),
+    registryPath: p.join(profilesRegistryDir, 'registry.json'),
     cacheDir,
-    snapshotStagingDir: path.join(cacheDir, 'snapshot-staging'),
-    downloadsDir: path.join(cacheDir, 'downloads-internal'),
-    tempDir: path.join(cacheDir, 'temp'),
+    snapshotStagingDir: p.join(cacheDir, 'snapshot-staging'),
+    downloadsDir: p.join(cacheDir, 'downloads-internal'),
+    tempDir: p.join(cacheDir, 'temp'),
     logsDir: roots.logsDir,
   };
 }

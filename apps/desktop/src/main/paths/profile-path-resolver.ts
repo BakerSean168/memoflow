@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import path from 'node:path';
+import { win32, posix } from 'node:path';
 import type { ProfilePathResolver } from './types';
 import type { DesktopStorageRoots } from './desktop-storage-roots';
 
@@ -22,6 +22,7 @@ export function createProfilePathResolver(
   profileId: string,
 ): ProfilePathResolver {
   if (!/^p_[a-zA-Z0-9_-]+$/.test(profileId)) throw new Error('Invalid profileId');
+  const path = roots.platform === 'win32' ? win32 : posix;
   const profileDir = path.join(roots.dataRoot, 'profiles', profileId);
   const authDir = path.join(profileDir, 'auth');
   const dbDir = path.join(profileDir, 'db');
@@ -45,10 +46,7 @@ export function createProfilePathResolver(
     attachmentsDir: path.join(storageDir, 'attachments'),
     localVaultBindingPath: path.join(storageDir, 'local-vault-binding.json'),
     localVaultWriteLedgerPath: path.join(storageDir, 'local-vault-write-ledger.json'),
-    knowledgeRepositoryAutoSyncStatePath: path.join(
-      storageDir,
-      'knowledge-repository-auto-sync.json',
-    ),
+    knowledgeRepositoryAutoSyncStatePath: path.join(storageDir, 'knowledge-repository-auto-sync.json'),
 
     uiDir,
     mainWindowStatePath: path.join(uiDir, 'main-window-state.json'),

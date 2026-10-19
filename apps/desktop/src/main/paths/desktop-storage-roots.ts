@@ -2,6 +2,7 @@ import path from 'node:path';
 
 export type DesktopRuntimeChannel = 'production' | 'development' | 'test';
 export interface DesktopStorageRoots {
+  readonly platform: 'win32' | 'linux' | 'darwin';
   readonly channel: DesktopRuntimeChannel;
   readonly configRoot: string;
   readonly dataRoot: string;
@@ -71,6 +72,7 @@ export function resolveDesktopStorageRoots(input: StoragePlatform): DesktopStora
     cacheRoot = p.join(home, 'Library', 'Caches', name);
   }
   return Object.freeze({
+    platform,
     channel,
     configRoot,
     dataRoot,

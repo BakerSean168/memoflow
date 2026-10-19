@@ -42,6 +42,28 @@ describe('storage path derivation', () => {
     expect(shared.logsDir).toBe(roots.logsDir);
     expect(fs.readdirSync(root)).toEqual([]);
   });
+  it('derives redirected Windows paths using the injected platform on any test host', () => {
+    const windows = resolveDesktopStorageRoots({
+      platform: 'win32',
+      channel: 'test',
+      home: 'C:/Users/me',
+      env: { APPDATA: 'R:/Roaming', LOCALAPPDATA: 'L:/Local' },
+    });
+    const shared = createSharedPathResolver(windows);
+    const profile = createProfilePathResolver(windows, 'p_windows');
+    expect(shared.registryPath).toBe(
+      path.win32.join('L:/Local/MemoFlow-Test/data/shared/profiles/registry.json'),
+    );
+    expect(shared.runtimeConfigPath).toBe(
+      path.win32.join('R:/Roaming/MemoFlow-Test/shared/preferences/desktop-runtime.json'),
+    );
+    expect(profile.dbPath).toBe(
+      path.win32.join('L:/Local/MemoFlow-Test/data/profiles/p_windows/db/powersync.sqlite'),
+    );
+    expect(profile.uiDir).toBe(
+      path.win32.join('L:/Local/MemoFlow-Test/state/profiles/p_windows/ui'),
+    );
+  });
   it('derives every Profile path under its semantic owner', () => {
     const profile = createProfilePathResolver(roots, 'p_test123');
     const data = path.join(roots.dataRoot, 'profiles/p_test123');
