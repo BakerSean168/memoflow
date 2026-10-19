@@ -17,6 +17,7 @@
       "{workspaceRoot}/tools/build/**/*",
       "{workspaceRoot}/tools/ci/node-process-bootstrap.cjs",
       "{workspaceRoot}/tools/test-system-v2/run-command.mjs",
+      "{workspaceRoot}/tools/test-system-v2/lib/failure-classification.mjs",
       "{workspaceRoot}/.github/workflows/**/*",
       "{workspaceRoot}/.github/actions/**/*",
       "{workspaceRoot}/apps/desktop/*.mjs",
