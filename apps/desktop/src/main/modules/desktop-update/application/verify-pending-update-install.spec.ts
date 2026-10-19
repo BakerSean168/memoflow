@@ -53,7 +53,7 @@ describe('verifyPendingDesktopUpdateInstall', () => {
 
   it('never blocks startup when the receipt store cannot be read', async () => {
     const store = storeHarness(null);
-    store.read.mockRejectedValueOnce(new Error('/private/shared/update unavailable'));
+    store.read.mockRejectedValueOnce(new Error('/private/state/update unavailable'));
 
     await expect(verifyPendingDesktopUpdateInstall('1.2.2', store)).resolves.toEqual({
       kind: 'none',

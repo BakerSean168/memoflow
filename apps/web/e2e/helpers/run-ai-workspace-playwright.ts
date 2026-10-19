@@ -1,4 +1,5 @@
 import { spawn, type ChildProcess } from 'node:child_process';
+import { chromium } from '@playwright/test';
 import { createServer } from 'node:net';
 import { delay } from '@memoflow/utils/frontend';
 import { dirname, resolve } from 'node:path';
@@ -68,6 +69,30 @@ async function waitForServer(url: string, timeoutMs: number, child?: ChildProces
   }
 
   throw new Error(`Timed out waiting for ${url} after ${timeoutMs}ms`);
+}
+
+/** Warm Vite's finite main-app module graph before browser auth shares its connections. */
+async function waitForWebModuleGraph(): Promise<void> {
+  const browser = await chromium.launch();
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  try {
+    const page = await browser.newPage();
+    await page.goto(`${webBaseUrl}/auth`, { waitUntil: 'domcontentloaded' });
+    await Promise.race([
+      page.evaluate(async () => {
+        const bootstrapPath = '/src/bootstrap/app.ts';
+        await import(bootstrapPath);
+      }),
+      new Promise<never>((_, reject) => {
+        timeout = setTimeout(() => {
+          reject(new Error('Timed out preparing the AI workspace Web module graph'));
+        }, 300_000);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timeout);
+    await browser.close();
+  }
 }
 
 function spawnChild(
@@ -167,6 +192,8 @@ async function main(): Promise<void> {
         RUNTIME_LANE: 'e2e',
         E2E_API_BASE_URL: apiOrigin,
         API_PORT: apiPort,
+        AUTH_BASE_URL: `${apiOrigin}/api/auth`,
+        MEMOFLOW_WEB_URL: webBaseUrl,
         CORS_ORIGIN: [...new Set(corsOrigins)].join(','),
       },
     });
@@ -195,6 +222,7 @@ async function main(): Promise<void> {
     );
 
     await waitForServer(`${webBaseUrl}/`, 30_000, viteServer);
+    await waitForWebModuleGraph();
 
     playwrightProcess = spawnChild(
       process.execPath,
@@ -209,7 +237,7 @@ async function main(): Promise<void> {
         cwd: webRoot,
         env: {
           ...process.env,
-          // Residual 1337: do not force CI=true (that enables retries and github reporter noise).
+          // Residual 1337: preserve the caller’s CI mode and reporter selection.
           PLAYWRIGHT_DISABLE_WEBSERVER: 'true',
           E2E_WEB_BASE_URL: webBaseUrl,
           E2E_API_BASE_URL: apiOrigin,

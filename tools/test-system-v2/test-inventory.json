@@ -6211,6 +6211,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/shared/components/KeyboardHelp.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/shared/components/LabelCommandPanel.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13369,7 +13377,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 248
+      "fileCount": 249
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -14132,7 +14140,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1180,
+    "unit": 1181,
     "integration": 50,
     "smoke": 3,
     "boundary-ipc": 8,

@@ -29,6 +29,18 @@ import { initializeTraceRuntime } from './shared/infrastructure/observability/tr
 // before provider) is visible to readers and to the bundler.
 void env;
 
+// A closed stdio pipe (detached e2e runner, crashed parent terminal) must not
+// become an uncaughtException loop that takes the server down: each log write
+// EPIPEs, the shutdown handler logs again, and the loop degrades or kills a
+// still-serving process (#505). EPIPE on stdout/stderr only means the console
+// sink is gone; file transports keep logging, so the server keeps serving.
+for (const stream of [process.stdout, process.stderr]) {
+  stream?.on('error', (error: NodeJS.ErrnoException) => {
+    if (error.code === 'EPIPE') return;
+    throw error;
+  });
+}
+
 // Register the single provider/configuration BEFORE the feature graph loads.
 initializeLogger();
 

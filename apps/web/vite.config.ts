@@ -102,6 +102,15 @@ export default defineConfig(({ mode, command }) => {
   // host-dev lane can prefer one stable upfront bundle instead.
   const useBundledDevLazy = env.MEMOFLOW_VITE_BUNDLED_DEV_LAZY !== 'false';
 
+  // E2E lanes (web:e2e and web:e2e:ai-workspace) spawn this dev server with
+  // NODE_ENV=test. Workspace packages that are not source-aliased are served
+  // from packages/*/dist, and a concurrent nx build rewriting those files made
+  // Vite broadcast HMR full-reloads — page navigations that interrupted
+  // mid-test flows and aborted in-flight session bootstrap fetches (#505).
+  // A test run needs a static snapshot of the module graph: no HMR channel,
+  // no dist watching. Development lanes keep stock HMR behavior.
+  const isE2eServer = process.env.NODE_ENV === 'test';
+
   const directWorkspaceAliases = createWorkspaceSourceAliasEntries(
     workspaceRoot,
     webDevWorkspaceEntries,
@@ -212,6 +221,10 @@ export default defineConfig(({ mode, command }) => {
       open: false,
       allowedHosts: allowedDevHosts,
       middlewareMode: false,
+      hmr: isE2eServer ? false : undefined,
+      // #505: a concurrent workspace build rewrites packages/*/dist while the
+      // E2E server is live; never invalidate or re-serve those files mid-run.
+      watch: isE2eServer ? { ignored: ['**/packages/*/dist/**'] } : undefined,
       // 完全禁用 Vite 的压缩中间件，避免破坏 SSE 流
       fs: {
         allow: ['..', '../../'],
