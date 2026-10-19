@@ -36,6 +36,7 @@ export type GetTaskOccurrencesByRangeRes = z.infer<typeof GetTaskOccurrencesByRa
 
 export const CompleteTaskOccurrenceSchema = z
   .object({
+    expectedVersion: z.number().int().positive().optional(),
     goalMeasurement: TaskGoalMeasurementSchema.optional(),
     duration: z.number().optional(),
     note: z.string().optional(),

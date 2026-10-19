@@ -109,3 +109,18 @@ model OperationAuditLog {
   @@map("reliable_operation_audit_logs")
 }
 
+
+/// External command result and durable audit; never expire uniqueness automatically.
+model ExternalMutationReceipt {
+  account Account @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  id           String @id
+  identityId   String @map("identity_id")
+  connectionId String @map("connection_id")
+  capability   String
+  inputDigest  String @map("input_digest")
+  resultJson   String @map("result_json")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([identityId, createdAt])
+  @@map("external_mutation_receipts")
+}
