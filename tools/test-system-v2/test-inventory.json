@@ -12173,6 +12173,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/ci-cd-platform/__tests__/affected-shadow.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "ci-cd-platform:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/ci-cd-platform/__tests__/artifact-contract.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -13156,7 +13164,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "node-test",
-      "fileCount": 39
+      "fileCount": 40
     },
     {
       "id": "memoflow:test:governance",
