@@ -6,10 +6,19 @@ export class ExternalMutationError extends Error {
     super(code);
   }
 }
+/** One budget for every transaction that owns an external mutation receipt. */
+export const EXTERNAL_MUTATION_TRANSACTION_OPTIONS = {
+  timeout: 15_000,
+  maxWait: 2_000,
+} as const;
 export interface ExternalMutationAuthority {
   readonly connectionId: string;
-  /** Trusted host revalidates the credential before replay or execution. */
-  authorize(tx: Prisma.TransactionClient): Promise<void>;
+  /**
+   * Trusted host revalidates the credential before the receipt transaction
+   * opens. It must not query through a second pool connection: the caller runs
+   * this before `$transaction`, so no connection is held while it waits.
+   */
+  authorize(): Promise<void>;
 }
 function canonical(value: unknown): string {
   if (Array.isArray(value)) return '[' + value.map(canonical).join(',') + ']';
@@ -38,8 +47,11 @@ export async function runExternalMutation<T extends { receiptId: string }>(
   work: (tx: Prisma.TransactionClient) => Promise<Omit<T, 'receiptId'>>,
 ): Promise<T & { replayed: boolean }> {
   if (!identityId || !authority.connectionId) throw new ExternalMutationError('FORBIDDEN');
-  const receiptId = hash([identityId, authority.connectionId, capability, input.idempotencyKey]);
+  // Identity scope survives PAT rotation: a retry with a replacement credential
+  // of the same owner must replay the committed result, never re-execute.
+  const receiptId = hash([identityId, capability, input.idempotencyKey]);
   const digest = hash(input);
+  await authority.authorize();
   return db
     .$transaction(
       async (tx) => {
@@ -47,7 +59,6 @@ export async function runExternalMutation<T extends { receiptId: string }>(
         await tx.$executeRaw`SELECT set_config('lock_timeout', '5000', true)`;
         // Advisory lock serializes a not-yet-existing receipt across processes.
         await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${receiptId}, 0))`;
-        await authority.authorize(tx);
         const saved = await tx.externalMutationReceipt.findUnique({ where: { id: receiptId } });
         if (saved) {
           if (saved.inputDigest !== digest) throw new ExternalMutationError('IDEMPOTENCY_CONFLICT');
@@ -68,7 +79,7 @@ export async function runExternalMutation<T extends { receiptId: string }>(
         });
         return { ...result, replayed: false };
       },
-      { timeout: 15000, maxWait: 2000 },
+      EXTERNAL_MUTATION_TRANSACTION_OPTIONS,
     )
     .catch((error: unknown) => {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {

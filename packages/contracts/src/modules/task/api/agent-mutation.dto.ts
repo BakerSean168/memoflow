@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { CreateTaskPlanSchema, UpdateTaskPlanSchema } from './task-plan.dto';
 import { TaskPlanReadIdSchema, TaskOccurrenceReadIdSchema } from './read-page.dto';
-import { CompleteTaskOccurrenceSchema } from './task-occurrence.dto';
+import { CompleteTaskOccurrenceBodySchema } from './task-occurrence.dto';
 import { TaskPlanResponseSchema, TaskOccurrenceResponseSchema } from './response-schemas';
 import { TaskGoalMeasurementSchema } from '../value-objects/task-goal-binding';
 const key = z.string().trim().min(1).max(200);
@@ -34,8 +34,10 @@ export const TaskAgentCompleteSchema = z
       z.object({ decision: z.literal('complete_only') }).strict(),
       z.object({ decision: z.literal('record'), measurement: TaskGoalMeasurementSchema }).strict(),
     ]),
-    details: CompleteTaskOccurrenceSchema.unwrap()
-      .omit({ goalMeasurement: true, expectedVersion: true })
+    details: CompleteTaskOccurrenceBodySchema.omit({
+      goalMeasurement: true,
+      expectedVersion: true,
+    })
       .extend({
         duration: z.number().nonnegative().max(604800).optional(),
         note: z.string().max(10000).optional(),
@@ -63,3 +65,34 @@ export const TaskAgentReceiptSchema = z
   })
   .strict();
 export type TaskAgentReceipt = z.infer<typeof TaskAgentReceiptSchema>;
+
+/**
+ * Hosted write retention projection: the exact fields a write response returns.
+ * Parsing an older full receipt strips the read body, so replay stays identical
+ * while `external_mutation_receipts.result_json` never grows a read model.
+ */
+export const TaskAgentPersistedResultSchema = z.discriminatedUnion('kind', [
+  z.object({
+    kind: z.literal('plan'),
+    plan: TaskPlanResponseSchema.pick({ id: true, version: true }),
+    occurrenceCount: z.number().int().nonnegative().optional(),
+    todayOccurrenceCreated: z.boolean().optional(),
+  }),
+  z.object({
+    kind: z.literal('occurrence'),
+    occurrence: TaskOccurrenceResponseSchema.pick({
+      id: true,
+      planId: true,
+      version: true,
+      status: true,
+    }),
+  }),
+]);
+export const TaskAgentPersistedReceiptSchema = z
+  .object({
+    receiptId: z.string().min(1),
+    result: TaskAgentPersistedResultSchema,
+  })
+  .strict();
+export type TaskAgentPersistedResult = z.infer<typeof TaskAgentPersistedResultSchema>;
+export type TaskAgentPersistedReceipt = z.infer<typeof TaskAgentPersistedReceiptSchema>;

@@ -74,7 +74,7 @@ R1 为 **6 个工具**，W1 为 **7 个写工具**，启用后最多 13 个。OA
 
 ### 跨 owner 权限
 
-read scope 与 write scope 不互相隐含。MCP write 结果只返回该写操作自身的最小 receipt（ID、版本、影响的实体 ID、replayed），Owner 内部完整 snapshot 只用于持久重放；后续完整查询仍需 read scope。Goal/Task 详情只返回已有关系引用，不因一个 scope 允许任意扩展其他 owner 内容。
+read scope 与 write scope 不互相隐含。MCP write 结果只返回该写操作自身的最小 receipt（ID、版本、影响的实体 ID、replayed），持久 receipt 也只保存同一投影；Owner 完整 read model 不进入外部写入回执，后续完整查询仍需 read scope。Goal/Task 详情只返回已有关系引用，不因一个 scope 允许任意扩展其他 owner 内容。
 
 Task 的已配置 Goal contribution 是完成动作的一部分，`tasks:write` consent 必须说明它会按既有配置影响目标进度；它不授权直接更新任意 Goal/KR。创建或更改 binding 要求 `tasks:write + goals:write` 及双方归属，不能靠对已有 Task 的写权限引入新 Goal 影响。读取 Goal 名称/测量上下文仍需 `goals:read`；没有时只允许 complete-only，不能偷偷取 protected context。
 
@@ -106,11 +106,11 @@ R1 list/search 默认 20 条、最多 100 条，时间列表默认最多 31 天�
 
 ## 6. 写入与审批
 
-原子性和重试契约以 ADR-118 为准。`packages/database/src/adapters/prisma/external-mutation.ts` 提供两个真实 Owner 共用的 PostgreSQL 事务 receipt runner。身份 + 稳定凭据 + capability version + key 的 SHA-256 标识使用数据库 advisory transaction lock 串行化；schema 归一化后按排序字段计算摘要。同 key 异 body 返回 `IDEMPOTENCY_CONFLICT`，同 body 返回原始结果及 `replayed: true`。回执不自动过期；原结果不会用当前对象替换。账户删除通过 Account 外键级联清理回执。
+原子性和重试契约以 ADR-118 为准。`packages/database/src/adapters/prisma/external-mutation.ts` 提供两个真实 Owner 共用的 PostgreSQL 事务 receipt runner。身份 + capability version + key 的 SHA-256 标识使用数据库 advisory transaction lock 串行化；凭据轮换后同一 owner 的重试仍重放已提交结果，`connection_id` 只作首次执行审计。schema 归一化后按排序字段计算摘要。同 key 异 body 返回 `IDEMPOTENCY_CONFLICT`，同 body 返回原始结果及 `replayed: true`。回执只保存响应实际返回的最小投影，不保存 Owner 完整 read model；回执不自动过期；原结果不会用当前对象替换。账户删除通过 Account 外键级联清理回执。
 
-Goal/Task 各自在自己的 infrastructure factory 中创建 transaction-bound repositories，并调用原有 application commands。Owner facts、receipt、Task→Goal 现有 outbox 一起提交。业务失败或 receipt 写入失败回滚；MCP 超时/断连只停止等待，不能撤销已提交事实，客户端必须用同一 key 重试。事务 15 秒、SQL 10 秒、锁等待 5 秒有界；并发 Task/Goal 的最终 CAS 仍由 Owner repository 执行。Gateway 既不取得 repositories，也不直接写 GoalRecord。
+Goal/Task 各自在自己的 infrastructure factory 中创建 transaction-bound repositories，并调用原有 application commands。Owner facts、receipt、Task→Goal 现有 outbox 一起提交。业务失败或 receipt 写入失败回滚；MCP 超时/断连只停止等待，不能撤销已提交事实，客户端必须用同一 key 重试。事务 15 秒、SQL 10 秒、锁等待 5 秒有界；Task owner 事务加入已有的 receipt 事务而不新开嵌套事务，因此继承同一预算。并发 Task/Goal 的最终 CAS 仍由 Owner repository 执行。Gateway 既不取得 repositories，也不直接写 GoalRecord。
 
-每次请求及执行/重放前重新校验当前凭据；写入只接受 PAT。Task binding 更改另需 `goals:write` 且在 Owner 事务中查双方归属；记录 Prompt measurement 另需 `goals:read`。`complete_only` 不用 suggestedValue 伪造测量；Fixed 贡献沿用 Task 既有语义。成功 receipt 是持久审计事实，传输审计另含 tool/effect/receiptId/replayed，不记录正文或 token。
+每次请求及执行/重放前重新校验当前凭据；写路径在 receipt 事务开始前完成校验，避免事务内等待第二条连接。写入只接受 PAT。Task binding 更改另需 `goals:write` 且在 Owner 事务中查双方归属；记录 Prompt measurement 另需 `goals:read`。`complete_only` 不用 suggestedValue 伪造测量；Fixed 贡献沿用 Task 既有语义。成功 receipt 是持久审计事实，传输审计另含 tool/effect/receiptId/replayed，不记录正文或 token。
 
 首批 `goal_update` 排除会整组替换/删除 KRs 的字段；保留 name/summary/description/timeframe/reminderConfig 等经过 owner 允许的 patch。增加危险操作时重新评估 tool effect 和 server approval，不能因为名叫 update 就自动标记无破坏性。
 

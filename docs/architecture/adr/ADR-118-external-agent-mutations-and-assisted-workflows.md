@@ -21,7 +21,7 @@ Task 完成与 KR 贡献、Goal 生命周期、Workflow cancellation 均有既�
 
 ### 确定性命令直接执行，并保存确定结果
 
-每个外部写工具显式接收 `idempotencyKey`。归一化请求后，以 owner identity + 稳定 connection/credential identity + capability version + key 作为唯一域，保存输入摘要和 operation receipt。OAuth refresh 不改变 connection identity。
+每个外部写工具显式接收 `idempotencyKey`。归一化请求后，以 owner identity + capability version + key 作为唯一域，保存输入摘要和 operation receipt。凭据轮换不改变该唯一域：同一 owner 用新凭据重试必须重放原结果；`connection_id` 只记录首次执行，作为审计事实而不是幂等边界。
 
 - 同 key、同输入：返回原结果和 `replayed: true`，不重复 effect；先重新验证当前权限，不能用旧 receipt 绕过撤销。
 - 同 key、不同输入：返回 `IDEMPOTENCY_CONFLICT`，不执行。
@@ -30,7 +30,7 @@ Task 完成与 KR 贡献、Goal 生命周期、Workflow cancellation 均有既�
 - commit 成功但 HTTP 响应丢失：重试仍得到原 mutation snapshot，即便对象后来更新也不伪装成原响应。
 - 明确未提交的失败可重试；提交结果不确定时先查 durable record，不能换新 key 盲重试。
 
-首版不自动过期删除幂等唯一性记录。回执内容可按明确保留策略精简为 tombstone；若原响应已不可返回，输出 `RESULT_EXPIRED` 且保持禁止重执行。账户删除按既有 owner purge policy 清理。
+首版不自动过期删除幂等唯一性记录。回执只保存该次响应实际返回的最小投影（mutation identity、version、affected IDs），不保存 owner 完整 read model；只持写 scope 的凭据因此不会通过 receipt 保留读模型数据。回执内容可按明确保留策略精简为 tombstone；若原响应已不可返回，输出 `RESULT_EXPIRED` 且保持禁止重执行。账户删除按既有 owner purge policy 清理。
 
 更新遵循 owner 的 expectedVersion/CAS。Gateway 不能通过“先读最新版本再自动填入”消除用户并发冲突。现有 owner 缺少所需并发检查时，在 owner 中补齐并使 HTTP/IPC 消费同一语义。
 

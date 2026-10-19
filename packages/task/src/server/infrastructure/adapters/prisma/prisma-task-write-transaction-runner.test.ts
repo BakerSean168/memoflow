@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaClient } from '@memoflow/database';
+import { EXTERNAL_MUTATION_TRANSACTION_OPTIONS } from '@memoflow/database/transaction';
 import { aTaskOccurrence } from '../../../../testing';
 import { TaskGoalBinding } from '../../../domain/value-objects/task-goal-binding';
 import { PrismaTaskOccurrenceMapper } from './mappers/prisma-task-occurrence-mapper';
@@ -32,6 +33,29 @@ describe('PrismaTaskWriteTransactionRunner Prompt transaction', () => {
     expect(harness.state().outbox).toHaveLength(0);
     expect(harness.publisher.publish).not.toHaveBeenCalled();
   });
+
+  it('uses the shared external mutation budget when it owns the transaction', async () => {
+    const harness = await createHarness();
+    await harness.complete(0);
+    expect(harness.transactionOptions()).toEqual([EXTERNAL_MUTATION_TRANSACTION_OPTIONS]);
+  });
+
+  it('joins a caller-owned transaction instead of opening a second one', async () => {
+    const publisher = { publish: vi.fn(async () => {}) };
+    const nested = vi.fn();
+    const tx = {
+      [Symbol.for('prisma.client.transaction.scope_context')]: { kind: 'nested' },
+      $transaction: nested,
+      taskOccurrence: {},
+      taskGoalOutbox: {},
+    };
+    const runner = new PrismaTaskWriteTransactionRunner(
+      tx as unknown as PrismaClient,
+      publisher,
+    );
+    await expect(runner.run(async () => 'joined')).resolves.toBe('joined');
+    expect(nested).not.toHaveBeenCalled();
+  });
 });
 
 async function createHarness(failOutbox = false) {
@@ -50,8 +74,13 @@ async function createHarness(failOutbox = false) {
     outbox: [] as { payload: string }[],
   };
   const publisher = { publish: vi.fn(async () => {}) };
+  const transactionOptions: unknown[] = [];
   const prisma = {
-    $transaction: async <T>(work: (tx: unknown) => Promise<T>) => {
+    $transaction: async <T>(
+      work: (tx: unknown) => Promise<T>,
+      options?: unknown,
+    ) => {
+      transactionOptions.push(options);
       const staged = structuredClone(committed);
       const tx = {
         taskOccurrence: {
@@ -94,6 +123,7 @@ async function createHarness(failOutbox = false) {
     state: () => committed,
     publisher,
     occurrenceId: String(occurrence.id),
+    transactionOptions: () => transactionOptions,
     complete: (value: number | undefined) =>
       runner.run(async ({ occurrenceRepository }) => {
         const loaded = await occurrenceRepository.findByIdForIdentity(

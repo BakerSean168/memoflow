@@ -43,10 +43,35 @@ it('replays the committed Goal snapshot after disconnect, rejects changed input 
   await prisma.$disconnect();
   const replay = await createGoalPrismaAgentMutations(prisma).create(input, cx(a), authority);
   expect(replay).toEqual({ ...first, replayed: true });
-  expect(replay.result.readModel.name).toBe('Original');
+  expect(first.result).not.toHaveProperty('readModel');
+  expect(first.result).not.toHaveProperty('recordChanges');
+  expect(
+    (
+      await prisma.goal.findUniqueOrThrow({
+        where: { id: first.result.goalId },
+        select: { name: true },
+      })
+    ).name,
+  ).toBe('Original');
+  const stored = await prisma.externalMutationReceipt.findUniqueOrThrow({
+    where: { id: first.receiptId },
+  });
+  expect(JSON.parse(stored.resultJson)).toEqual({ receiptId: first.receiptId, result: first.result });
+  expect(await prisma.goal.count({ where: { identityId: a } })).toBe(1);
+  const rotated = await createGoalPrismaAgentMutations(prisma).create(input, cx(a), {
+    ...authority,
+    connectionId: 'credential-b',
+  });
+  expect(rotated).toEqual({ ...first, replayed: true });
   expect(await prisma.goal.count({ where: { identityId: a } })).toBe(1);
   await expect(
     port.create({ ...input, goal: { name: 'Changed' } }, cx(a), authority),
+  ).rejects.toMatchObject({ code: 'IDEMPOTENCY_CONFLICT' });
+  await expect(
+    port.create({ ...input, goal: { name: 'Changed' } }, cx(a), {
+      ...authority,
+      connectionId: 'credential-b',
+    }),
   ).rejects.toMatchObject({ code: 'IDEMPOTENCY_CONFLICT' });
   await expect(
     port.update(
@@ -92,6 +117,14 @@ it('uses the same receipt mechanism for concurrent TaskPlan creation and complet
   expect(first.receiptId).toBe(duplicate.receiptId);
   expect([first.replayed, duplicate.replayed].sort()).toEqual([false, true]);
   if (first.result.kind !== 'plan') throw new Error('plan');
+  expect(Object.keys(first.result.plan).sort()).toEqual(['id', 'version']);
+  const storedTask = await prisma.externalMutationReceipt.findUniqueOrThrow({
+    where: { id: first.receiptId },
+  });
+  expect(Object.keys(JSON.parse(storedTask.resultJson).result.plan).sort()).toEqual([
+    'id',
+    'version',
+  ]);
   const occurrence = await prisma.taskOccurrence.findFirstOrThrow({
     where: { planId: first.result.plan.id },
   });
@@ -136,6 +169,101 @@ it('rolls back Owner facts when receipt persistence fails', async () => {
   }
 });
 
+it('revalidates the write authority before the receipt transaction opens', async () => {
+  const a = String(IdentityId.generate());
+  await seedAccount({ id: a });
+  type TransactionCall = (...args: unknown[]) => Promise<unknown>;
+  const client = prisma as unknown as { $transaction: TransactionCall };
+  const original = client.$transaction.bind(prisma) as TransactionCall;
+  let active = 0;
+  const observedDuringAuthorize: number[] = [];
+  client.$transaction = async (...args: unknown[]) => {
+    active += 1;
+    try {
+      return await original(...args);
+    } finally {
+      active -= 1;
+    }
+  };
+  try {
+    await createGoalPrismaAgentMutations(prisma).create(
+      { idempotencyKey: 'authorize-first', goal: { name: 'Authority' } },
+      cx(a),
+      {
+        connectionId: 'credential-a',
+        // The old code revalidated inside the open receipt transaction.
+        authorize: async () => {
+          observedDuringAuthorize.push(active);
+        },
+      },
+    );
+  } finally {
+    client.$transaction = original;
+  }
+  expect(observedDuringAuthorize).toEqual([0]);
+});
+
+it('rolls back Task facts when receipt persistence fails', async () => {
+  const a = String(IdentityId.generate());
+  await seedAccount({ id: a });
+  await prisma.$executeRawUnsafe(
+    `CREATE FUNCTION eag542_reject_task_receipt() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'task receipt fault'; END $$`,
+  );
+  await prisma.$executeRawUnsafe(
+    'CREATE TRIGGER eag542_task_receipt_fault BEFORE INSERT ON external_mutation_receipts FOR EACH ROW EXECUTE FUNCTION eag542_reject_task_receipt()',
+  );
+  try {
+    await expect(
+      createTaskPrismaAgentMutations(prisma, time).create(
+        {
+          idempotencyKey: 'task-rollback',
+          plan: {
+            name: 'No partial Task',
+            importance: 'Moderate',
+            schedule: {
+              kind: 'OneTime',
+              date: new Date().toISOString().slice(0, 10),
+              timing: { kind: 'AllDay' },
+            },
+          },
+        },
+        cx(a),
+        authority,
+      ),
+    ).rejects.toThrow();
+    expect(await prisma.taskPlan.count({ where: { identityId: a } })).toBe(0);
+    expect(await prisma.taskOccurrence.count({ where: { identityId: a } })).toBe(0);
+    expect(await prisma.externalMutationReceipt.count({ where: { identityId: a } })).toBe(0);
+  } finally {
+    await prisma.$executeRawUnsafe(
+      'DROP TRIGGER eag542_task_receipt_fault ON external_mutation_receipts',
+    );
+    await prisma.$executeRawUnsafe('DROP FUNCTION eag542_reject_task_receipt()');
+  }
+});
+
+it('rejects a Task retry that reuses an idempotency key with different input', async () => {
+  const a = String(IdentityId.generate());
+  await seedAccount({ id: a });
+  const port = createTaskPrismaAgentMutations(prisma, time);
+  const plan = {
+    name: 'Task once',
+    importance: 'Moderate',
+    schedule: {
+      kind: 'OneTime',
+      date: new Date().toISOString().slice(0, 10),
+      timing: { kind: 'AllDay' },
+    },
+  };
+  const input = { idempotencyKey: 'task-conflict', plan };
+  const first = await port.create(input, cx(a), authority);
+  await expect(
+    port.create({ ...input, plan: { ...plan, name: 'Task twice' } }, cx(a), authority),
+  ).rejects.toMatchObject({ code: 'IDEMPOTENCY_CONFLICT' });
+  expect(await port.create(input, cx(a), authority)).toEqual({ ...first, replayed: true });
+  expect(await prisma.taskPlan.count({ where: { identityId: a } })).toBe(1);
+});
+
 it('adds and updates KRs using Goal CAS and replays each original result', async () => {
   const a = String(IdentityId.generate());
   await seedAccount({ id: a });
@@ -148,14 +276,16 @@ it('adds and updates KRs using Goal CAS and replays each original result', async
     cx(a),
     authority,
   );
-  expect(created.result.readModel.keyResults).toHaveLength(1);
+  expect(created.result.affectedEntityIds.keyResultIds).toHaveLength(1);
+  expect(await prisma.keyResult.count({ where: { goalId: created.result.goalId } })).toBe(1);
   const add = {
     idempotencyKey: 'add-kr',
     goalId: created.result.goalId,
     keyResult: { title: 'Added', targetValue: 20, expectedVersion: created.result.goalVersion },
   };
   const added = await port.createKeyResult(add, cx(a), authority);
-  expect(added.result.readModel.keyResults).toHaveLength(2);
+  expect(added.result.affectedEntityIds.keyResultIds).toHaveLength(1);
+  expect(await prisma.keyResult.count({ where: { goalId: created.result.goalId } })).toBe(2);
   const krId = added.result.affectedEntityIds.keyResultIds[0];
   const update = {
     idempotencyKey: 'update-kr',
@@ -164,7 +294,11 @@ it('adds and updates KRs using Goal CAS and replays each original result', async
     changes: { title: 'Changed', targetValue: 30, expectedVersion: added.result.goalVersion },
   };
   const updated = await port.updateKeyResult(update, cx(a), authority);
-  expect(updated.result.readModel.keyResults.find((kr) => kr.id === krId)?.title).toBe('Changed');
+  expect(
+    (await prisma.keyResult.findUniqueOrThrow({ where: { id: krId }, select: { title: true } }))
+      .title,
+  ).toBe('Changed');
+  expect(updated.result.affectedEntityIds.keyResultIds).toEqual([krId]);
   expect(await port.createKeyResult(add, cx(a), authority)).toEqual({ ...added, replayed: true });
   await expect(
     port.updateKeyResult({ ...update, idempotencyKey: 'stale-kr' }, cx(a), authority),

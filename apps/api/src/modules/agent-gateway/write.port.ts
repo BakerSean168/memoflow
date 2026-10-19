@@ -9,6 +9,10 @@ import {
 } from '@memoflow/agent-gateway';
 import {
   GatewayFailureCodeSchema,
+  GatewayGoalCreateSchema,
+  GatewayGoalUpdateSchema,
+  GatewayKeyResultCreateSchema,
+  GatewayKeyResultUpdateSchema,
   GatewayTaskCreateSchema,
   GatewayTaskUpdateSchema,
   GatewayTaskCompleteSchema,
@@ -38,12 +42,14 @@ export function bindGatewayWrites(db: PrismaClient, time: UserTimeContextPort): 
       throw error;
     });
   return {
-    goalCreate: (input, cx, authority) => bind(() => goals.create(input, cx, authority)),
-    goalUpdate: (input, cx, authority) => bind(() => goals.update(input, cx, authority)),
+    goalCreate: (input, cx, authority) =>
+      bind(() => goals.create(GatewayGoalCreateSchema.parse(input), cx, authority)),
+    goalUpdate: (input, cx, authority) =>
+      bind(() => goals.update(GatewayGoalUpdateSchema.parse(input), cx, authority)),
     keyResultCreate: (input, cx, authority) =>
-      bind(() => goals.createKeyResult(input, cx, authority)),
+      bind(() => goals.createKeyResult(GatewayKeyResultCreateSchema.parse(input), cx, authority)),
     keyResultUpdate: (input, cx, authority) =>
-      bind(() => goals.updateKeyResult(input, cx, authority)),
+      bind(() => goals.updateKeyResult(GatewayKeyResultUpdateSchema.parse(input), cx, authority)),
     taskCreate: (input, cx, authority) =>
       bind(async () => {
         const parsed = GatewayTaskCreateSchema.parse(input);
