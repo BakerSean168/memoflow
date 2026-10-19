@@ -43,6 +43,21 @@ test('run observation detects missing enabled lanes and preserves provenance', a
     },
     provenance: { generator: 'test', inputDigest: 'a'.repeat(64) },
   };
+  manifest.webShards = {
+    specs: [],
+    shards: [],
+    shardCount: 0,
+    fallback: false,
+    estimatedTotalMs: 0,
+  };
+  if (manifest.lanes.web)
+    manifest.webShards = {
+      specs: ['test.spec.ts'],
+      shards: [{ id: '1/1', specs: ['test.spec.ts'], estimatedMs: 1 }],
+      shardCount: 1,
+      fallback: false,
+      estimatedTotalMs: 1,
+    };
   manifest.unitShards = planUnitShards(manifest.scope.unit);
   manifest.digest = digest(manifest);
   const laneInputDigest = 'b'.repeat(64);
@@ -157,7 +172,12 @@ test('run observation rejects duplicate or cross-shard Unit evidence', async () 
       scope: {
         version: 1,
         unit: ['app-vue', 'desktop', 'web'],
-        coverage: [], smoke: [], integration: [], boundary: [], perf: [], webFlow: false,
+        coverage: [],
+        smoke: [],
+        integration: [],
+        boundary: [],
+        perf: [],
+        webFlow: false,
       },
     });
     manifest.lanes = Object.fromEntries(
@@ -169,9 +189,15 @@ test('run observation rejects duplicate or cross-shard Unit evidence', async () 
     await mkdir(evidenceDir);
     for (const shard of manifest.unitShards) {
       const value = {
-        kind: 'lane-summary-v1', version: 1, lane: 'validate', commit: manifest.commit,
-        manifestDigest: manifest.digest, laneInputDigest: 'a'.repeat(64), status: 'success',
-        timing: { setupMs: 1, executionMs: 2 }, failures: [],
+        kind: 'lane-summary-v1',
+        version: 1,
+        lane: 'validate',
+        commit: manifest.commit,
+        manifestDigest: manifest.digest,
+        laneInputDigest: 'a'.repeat(64),
+        status: 'success',
+        timing: { setupMs: 1, executionMs: 2 },
+        failures: [],
         evidence: { reports: shard.tasks.map((_, index) => `/reports/${shard.id}-${index}.json`) },
         provenance: { generator: 'test', unitShardId: shard.id, job: shard.id },
       };

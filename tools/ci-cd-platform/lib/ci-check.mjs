@@ -57,7 +57,7 @@ function validateManifest(manifest) {
  * @param {{ needs: Record<string, {result: string, outputs?: Record<string,string>}>, manifest: object | null }} input
  * @returns {{ state: 'success' | 'failure', failures: string[], jobs: Record<string, {expected: string, actual: string}> }}
  */
-export function evaluateCiCheck({ needs, manifest }) {
+export function evaluateCiCheck({ needs, manifest, webReceipts = [] }) {
   const failures = [];
   const jobs = {};
   if (!needs || typeof needs !== 'object') {
@@ -102,6 +102,31 @@ export function evaluateCiCheck({ needs, manifest }) {
           `verification-children/${lane}:${expected === 'skipped' ? `unexpected-${actual}` : actual}`,
         );
       }
+    }
+  }
+  const expectedShards = manifest.lanes.web ? manifest.webShards.shards : [];
+  if (!Array.isArray(webReceipts)) failures.push('web:invalid-receipts');
+  else {
+    if (webReceipts.length !== expectedShards.length) failures.push('web:shard-count-mismatch');
+    for (const shard of expectedShards) {
+      const matches = webReceipts.filter((receipt) => receipt?.id === shard.id);
+      if (matches.length !== 1) {
+        failures.push(`web:${shard.id}:missing-or-duplicate-shard`);
+        continue;
+      }
+      const receipt = matches[0];
+      if (receipt.manifestDigest !== manifest.digest || receipt.exitCode !== 0)
+        failures.push(`web:${shard.id}:invalid-evidence`);
+      if (
+        !Array.isArray(receipt.specs) ||
+        JSON.stringify([...receipt.specs].sort()) !== JSON.stringify([...shard.specs].sort())
+      ) {
+        failures.push(`web:${shard.id}:spec-coverage`);
+      }
+    }
+    for (const receipt of webReceipts) {
+      if (!expectedShards.some((shard) => shard.id === receipt?.id))
+        failures.push('web:extra-shard');
     }
   }
   return { state: failures.length ? 'failure' : 'success', failures, jobs };
