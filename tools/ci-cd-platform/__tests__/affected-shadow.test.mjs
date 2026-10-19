@@ -285,3 +285,40 @@ test('the CLI records a skipped run instead of inventing a comparison basis', as
     await rm(root, { recursive: true, force: true });
   }
 });
+
+test('live mode compares the files changed between --base and --head', async () => {
+  // e2513366ef2 introduced this tool; its own diff is a fixed, non-empty range.
+  const head = 'e2513366ef2';
+  const expected = spawnSync(
+    'git',
+    ['diff', '--name-only', '--no-renames', '--relative', `${head}^`, head],
+    { cwd: repoRoot, encoding: 'utf8' },
+  );
+  assert.equal(expected.status, 0, expected.stderr);
+  const expectedFiles = expected.stdout.split('\n').filter(Boolean).sort();
+  assert.ok(expectedFiles.includes('tools/ci-cd-platform/shadow-affected.mjs'));
+
+  const root = await mkdtemp(path.join(tmpdir(), 'affected-shadow-live-'));
+  const jsonOut = path.join(root, 'report.json');
+  const markdownOut = path.join(root, 'report.md');
+  try {
+    const result = spawnSync(
+      process.execPath,
+      [cli, '--base', `${head}^`, '--head', head, '--json-out', jsonOut, '--markdown-out', markdownOut],
+      { cwd: repoRoot, encoding: 'utf8' },
+    );
+
+    assert.equal(result.status, 0, result.stderr);
+    const report = JSON.parse(await readFile(jsonOut, 'utf8'));
+    assert.equal(report.mode, 'live');
+    assert.equal(report.status, 'ok');
+    // Same input `nx affected` uses: the git diff minus Nx-ignored paths.
+    const changedFiles = report.cases[0].changedFiles;
+    assert.ok(changedFiles.includes('tools/ci-cd-platform/shadow-affected.mjs'));
+    assert.ok(changedFiles.includes('.github/workflows/ci.yml'));
+    assert.deepEqual(changedFiles.filter((file) => !expectedFiles.includes(file)), []);
+    assert.ok(report.cases[0].legacy.projects.includes('ci-cd-platform'));
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
