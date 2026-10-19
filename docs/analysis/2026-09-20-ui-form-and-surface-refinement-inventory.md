@@ -40,7 +40,7 @@ updated: 2026-09-20T08:58:00+08:00
 | `KnowledgeRepositorySettings.vue`                   | 多 card + connection/disconnect                              | B/D        | 不压成 chips；后续减少 card-in-card、强化连接状态层级                   |
 | `CloudPasswordSection.vue`                          | credential/security                                          | D          | 保持显式传统表单                                                        |
 | `SettingsResetSection.vue`                          | destructive settings                                         | D          | 保持显式危险操作区                                                      |
-| `DataSettingsSection.vue` / `UserFilesSettings.vue` | data/storage settings                                        | D          | 优先可解释性，不追求极限密度                                            |
+| `DataSettingsSection.vue`（原生导入/导出） | data/storage settings                                        | D          | 优先可解释性，不追求极限密度                                            |
 
 ## 3. Page / Workspace inventory
 

@@ -53,8 +53,7 @@ test('real Windows Electron Workspace IPC authenticates start, ack, stop, cursor
       env: {
         ...sanitized,
         NODE_ENV: 'test',
-        MEMOFLOW_DESKTOP_USER_DATA_PATH: path.join(root, 'user-data'),
-        MEMOFLOW_DESKTOP_USER_FILES_PATH: path.join(root, 'user-files'),
+        MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: path.join(root, 'user-data'),
         ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
       },
     });
@@ -425,16 +424,24 @@ test('real Windows Electron Workspace IPC authenticates start, ack, stop, cursor
 
     // The same Electron instance switches to a new isolated Guest, without copying any app data.
     await main.getByTestId('shell-account-menu').click();
-    const pickerPromise = app.waitForEvent('window');
+    await main.getByTestId('shell-switch-account').click();
     await main.getByTestId('shell-manage-profiles').click();
-    const picker = await pickerPromise;
-    await expect(picker.getByTestId('desktop-profile-access')).toBeVisible({ timeout: 12000 });
-    await picker
+    await expect(main.getByTestId('manage-accounts-dialog')).toBeVisible({ timeout: 12000 });
+    await main
       .getByTestId('desktop-profile-create')
       .locator('input')
       .fill('QA Workspace other owner');
-    const secondWindowPromise = app.waitForEvent('window');
-    await picker.getByTestId('desktop-profile-create').getByRole('button').click();
+    const secondWindowPromise = app.waitForEvent('window', {
+      predicate: async (page) => {
+        try {
+          await page.getByTestId('app-shell').waitFor({ state: 'visible', timeout: 18000 });
+          return true;
+        } catch {
+          return false;
+        }
+      },
+    });
+    await main.getByTestId('desktop-profile-create').getByRole('button').click();
     const secondMain = await secondWindowPromise;
     await expect(secondMain.getByTestId('app-shell')).toBeVisible({ timeout: 18000 });
     // Old cursor belongs to Guest A. Guest B must fail closed with reset_required invalid.

@@ -2,48 +2,29 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { resolveLikelyUserDataDirs } from './user-data-paths.mjs';
+import { resolveStorageRoots } from './user-data-paths.mjs';
 
 const VALID_SCOPES = new Set(['all', 'auth', 'db']);
 
-function collectTargets(userDataDir, scope) {
-  const sharedAuthDir = path.join(userDataDir, 'shared', 'auth');
-  const sharedProfilesDir = path.join(userDataDir, 'shared', 'profiles');
-  const sharedUiDir = path.join(userDataDir, 'shared', 'ui');
-  const profilesDir = path.join(userDataDir, 'profiles');
-  const cacheDir = path.join(userDataDir, 'cache');
-
-  const targets = [];
-
-  if (scope === 'all' || scope === 'auth') {
-    targets.push({
-      label: 'shared auth directory',
-      path: sharedAuthDir,
-    });
+function collectTargets(roots, scope) {
+  if (scope === 'all') {
+    return ['configRoot', 'dataRoot', 'stateRoot', 'cacheRoot', 'logsDir'].map((key) => ({ label: key, path: roots[key] }));
   }
-
-  if (scope === 'all' || scope === 'db') {
-    targets.push(
-      {
-        label: 'shared profiles directory',
-        path: sharedProfilesDir,
-      },
-      {
-        label: 'shared ui directory',
-        path: sharedUiDir,
-      },
-      {
-        label: 'profiles directory',
-        path: profilesDir,
-      },
-      {
-        label: 'cache directory',
-        path: cacheDir,
-      },
-    );
+  const data = roots.dataRoot;
+  if (scope === 'auth') {
+    return [{ label: 'shared credentials', path: path.join(data, 'shared', 'secure') },
+      { label: 'device identity', path: path.join(data, 'shared', 'auth') },
+      ...profileTargets(data, 'auth')];
   }
+  return profileTargets(data, 'db');
+}
 
-  return targets;
+function profileTargets(dataRoot, directory) {
+  const profiles = path.join(dataRoot, 'profiles');
+  if (!fs.existsSync(profiles)) return [];
+  return fs.readdirSync(profiles, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && /^p_[a-f0-9]{24}$/.test(entry.name))
+    .map((entry) => ({ label: directory, path: path.join(profiles, entry.name, directory) }));
 }
 
 function removeTarget(target, dryRun) {
@@ -76,14 +57,14 @@ function main() {
   const args = process.argv.slice(2);
   const dryRun = args.includes('--dry-run');
   const scope = parseScope(args);
-  const userDataDirs = resolveLikelyUserDataDirs();
+  const userDataDirs = resolveStorageRoots();
 
   console.log(`[local-data-reset] mode=${dryRun ? 'dry-run' : 'apply'} scope=${scope}`);
 
   let affected = 0;
-  for (const userDataDir of userDataDirs) {
-    console.log(`[local-data-reset] scanning: ${userDataDir}`);
-    const targets = collectTargets(userDataDir, scope);
+  for (const roots of userDataDirs) {
+    console.log(`[local-data-reset] scanning: ${roots.dataRoot}`);
+    const targets = collectTargets(roots, scope);
     const results = targets.map((target) => removeTarget(target, dryRun));
 
     for (const result of results) {

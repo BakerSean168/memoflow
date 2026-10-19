@@ -31,6 +31,7 @@ import {
 } from './shared/infrastructure/config/env.js';
 import { createScopedPatService } from '@memoflow/cloud-auth/server';
 import { createGoalPrismaPageQuery } from '@memoflow/goal';
+import { bindGatewayWrites } from './modules/agent-gateway/write.port';
 import { composeAgentGatewayModule } from './modules/agent-gateway/module';
 import { createPilotAdmission } from './modules/agent-gateway/pilot-admission';
 import { createApiRedisClient } from './shared/infrastructure/redis/create-redis-client';
@@ -408,6 +409,9 @@ async function bootstrap(): Promise<void> {
   const agentGatewayModule = composeAgentGatewayModule({
     admission: createPilotAdmission(createApiRedisClient({ fresh: true, commandTimeout: 5000 })),
     enabled: env.EAG_READ_PILOT_ENABLED,
+    writes: env.EAG_WRITE_ENABLED
+      ? bindGatewayWrites(prisma, settingApiModule.userTimeContextPort)
+      : undefined,
     audience: env.EAG_AUDIENCE ?? 'http://localhost:3000/mcp',
     cursorSecret: env.EAG_CURSOR_SECRET ?? '',
     oauth: cloudAuth.externalAgents,

@@ -1,3 +1,4 @@
+import { createSharedPathResolver, resolveDesktopStorageRoots } from '../paths';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -6,32 +7,10 @@ import type { SharedPathResolver } from '../paths';
 import { ProfileRegistry } from './profile-registry';
 
 function createSharedResolver(rootDir: string): SharedPathResolver {
-  return {
-    rootDir,
-    sharedDir: path.join(rootDir, 'shared'),
-    authDir: path.join(rootDir, 'shared', 'auth'),
-    configDir: path.join(rootDir, 'shared', 'config'),
-    uiDir: path.join(rootDir, 'shared', 'ui'),
-    profilesRegistryDir: path.join(rootDir, 'shared', 'profiles'),
-    deviceIdPath: path.join(rootDir, 'shared', 'auth', 'device-id'),
-    runtimeConfigPath: path.join(rootDir, 'shared', 'config', 'desktop-runtime.json'),
-    profileAccessWindowStatePath: path.join(
-      rootDir,
-      'shared',
-      'ui',
-      'profile-access-window-state.json',
-    ),
-    registryPath: path.join(rootDir, 'shared', 'profiles', 'registry.json'),
-    cacheDir: path.join(rootDir, 'cache'),
-    snapshotStagingDir: path.join(rootDir, 'cache', 'snapshot-staging'),
-    downloadsDir: path.join(rootDir, 'cache', 'downloads'),
-    tempDir: path.join(rootDir, 'cache', 'temp'),
-    logsDir: path.join(rootDir, 'logs'),
-    userFilesRootDir: path.join(rootDir, 'user-files'),
-    userFilesExportsDir: path.join(rootDir, 'user-files', 'exports'),
-    userFilesDownloadsDir: path.join(rootDir, 'user-files', 'downloads'),
-    userFilesAttachmentsDir: path.join(rootDir, 'user-files', 'attachments'),
-  };
+  return createSharedPathResolver(resolveDesktopStorageRoots({
+    platform: 'linux', channel: 'test', home: rootDir,
+    env: { MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: rootDir },
+  }));
 }
 
 describe('ProfileRegistry', () => {

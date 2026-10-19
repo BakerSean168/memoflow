@@ -2,12 +2,12 @@
 tags: [adr, mcp, idempotency, workflow, reliability]
 description: 外部写入的 durable receipt、并发与审批语义，以及 MCP 对现有 workflow 的投影
 created: 2026-10-07T00:00:00Z
-updated: 2026-10-07T00:00:00Z
+updated: 2026-10-19T00:00:00Z
 ---
 
 # ADR-118: External Agent Mutation 与 Assisted Workflow
 
-**状态：** 已采纳可靠性方向；用户已授权实施，写入和 assisted workflow 均尚未实现/验证。
+**状态：** 已采纳；PAT/OAuth 六只读工具保留，#490 实现默认关闭的 PAT Goal/KR、TaskPlan、TaskOccurrence 事务写入；本地验证见 #490/PR。Assisted workflow 未交付（#538），其他 Owner 按需扩展未交付（#539）；公共 rollout 未验收。
 **日期：** 2026-10-07
 **关联：** ADR-038、ADR-042、ADR-049、ADR-071、ADR-073、ADR-099、ADR-112、ADR-116、ADR-117
 

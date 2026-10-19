@@ -1,0 +1,34 @@
+name: Actions Cache Cleanup
+
+on:
+  pull_request_target:
+    types: [closed]
+  schedule:
+    - cron: '23 3 * * *'
+
+permissions: {}
+
+concurrency:
+  group: actions-cache-cleanup
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    # Conductor enables only after the 2026-10-19 sprint; no dispatch or manual bulk deletion.
+    if: vars.ACTIONS_CACHE_CLEANUP_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: read
+      actions: write
+    steps:
+      # Never execute the PR head with the privileged cleanup token.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: main
+          persist-credentials: false
+      - name: Remove closed PR caches and enforce main budgets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node tools/ci-cd-platform/cleanup-actions-cache.mjs

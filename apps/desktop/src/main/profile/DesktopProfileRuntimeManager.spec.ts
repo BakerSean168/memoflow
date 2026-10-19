@@ -1,12 +1,20 @@
+import { createSharedPathResolver, resolveDesktopStorageRoots } from '../paths';
 import fs from 'node:fs';
+import { session } from 'electron';
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SharedPathResolver } from '../paths';
 import { ProfileRegistry } from './profile-registry';
 import { DesktopProfileRuntimeManager } from './desktop-profile-runtime-manager';
+import { CloudSessionStore } from './cloud-session-store';
+import { DesktopCloudConnectionManager } from './desktop-cloud-connection-manager';
 import { createFixedClock } from '@memoflow/time';
-import { openPowerSyncLocalOnly } from '../database/powersync';
+import { ensurePowerSyncSyncMode, openPowerSyncLocalOnly } from '../database/powersync';
+
+vi.mock('../utils/api-config', () => ({
+  getApiBaseUrl: () => 'https://profiles.example.test/api/v1',
+}));
 
 const mocks = vi.hoisted(() => ({
   shutdownPowerSync: vi.fn(),
@@ -25,8 +33,8 @@ vi.mock('../database/powersync', () => ({
     execute: mocks.execute,
     writeTransaction: mocks.writeTransaction,
   })),
-  ensurePowerSyncSyncMode: vi.fn(),
-  disablePowerSyncSyncMode: vi.fn(),
+  ensurePowerSyncSyncMode: vi.fn(async () => undefined),
+  disablePowerSyncSyncMode: vi.fn(async () => undefined),
   shutdownPowerSync: mocks.shutdownPowerSync,
 }));
 
@@ -48,32 +56,14 @@ vi.mock('../bootstrap', () => ({
 }));
 
 function sharedResolver(rootDir: string): SharedPathResolver {
-  return {
-    rootDir,
-    sharedDir: path.join(rootDir, 'shared'),
-    authDir: path.join(rootDir, 'shared', 'auth'),
-    configDir: path.join(rootDir, 'shared', 'config'),
-    uiDir: path.join(rootDir, 'shared', 'ui'),
-    profilesRegistryDir: path.join(rootDir, 'shared', 'profiles'),
-    deviceIdPath: path.join(rootDir, 'shared', 'auth', 'device-id'),
-    runtimeConfigPath: path.join(rootDir, 'shared', 'config', 'desktop-runtime.json'),
-    profileAccessWindowStatePath: path.join(
-      rootDir,
-      'shared',
-      'ui',
-      'profile-access-window-state.json',
-    ),
-    registryPath: path.join(rootDir, 'shared', 'profiles', 'registry.json'),
-    cacheDir: path.join(rootDir, 'cache'),
-    snapshotStagingDir: path.join(rootDir, 'cache', 'snapshot-staging'),
-    downloadsDir: path.join(rootDir, 'cache', 'downloads'),
-    tempDir: path.join(rootDir, 'cache', 'temp'),
-    logsDir: path.join(rootDir, 'logs'),
-    userFilesRootDir: path.join(rootDir, 'user-files'),
-    userFilesExportsDir: path.join(rootDir, 'user-files', 'exports'),
-    userFilesDownloadsDir: path.join(rootDir, 'user-files', 'downloads'),
-    userFilesAttachmentsDir: path.join(rootDir, 'user-files', 'attachments'),
-  };
+  return createSharedPathResolver(
+    resolveDesktopStorageRoots({
+      platform: 'linux',
+      channel: 'test',
+      home: rootDir,
+      env: { MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: rootDir },
+    }),
+  );
 }
 
 describe('DesktopProfileRuntimeManager', () => {
@@ -146,6 +136,100 @@ describe('DesktopProfileRuntimeManager', () => {
     await runtime.openProfile(second.profileId, '123456');
     expect(runtime.getActiveProfileId()).toBe(second.profileId);
   }, 15_000);
+
+  it('never opens or reads a PIN target database on missing or incorrect PIN', async () => {
+    const source = await registry.ensureGuest();
+    const target = await registry.createGuest('protected', 'Same name');
+    await runtime.openProfile(target.profileId);
+    await runtime.setCurrentProfilePin('123456');
+    await runtime.openProfile(source.profileId);
+    vi.clearAllMocks();
+    await expect(runtime.openProfile(target.profileId)).rejects.toThrow('PIN');
+    await expect(runtime.openProfile(target.profileId, '000000')).rejects.toThrow('PIN');
+    expect(openPowerSyncLocalOnly).not.toHaveBeenCalled();
+    expect(mocks.getOptional).not.toHaveBeenCalled();
+    expect(mocks.bootstrapDestroy).not.toHaveBeenCalled();
+    expect(runtime.getActiveProfileId()).toBe(source.profileId);
+  }, 15_000);
+
+  it('isolates two guests and two cloud owners while retiring each previous runtime', async () => {
+    const profiles = [
+      await registry.createGuest('guest-a', 'Same name'),
+      await registry.createGuest('guest-b', 'Same name'),
+      await registry.register('IdentityId_cloud_a', 'Same name', 'a@example.com'),
+      await registry.register('IdentityId_cloud_b', 'Same name', 'b@example.com'),
+    ];
+    const sessions = new CloudSessionStore(path.join(rootDir, 'data'));
+    for (const profile of profiles.filter((item) => item.cloudBinding)) {
+      await sessions.save(profile.profileId, {
+        token: 'token-' + profile.profileId,
+        sessionId: 'session-' + profile.profileId,
+        account: {
+          id: profile.localOwnerId,
+          email: profile.identifier!,
+          name: profile.displayName,
+          emailVerified: true,
+        },
+        expiresAt: '2099-01-01T00:00:00.000Z',
+      });
+    }
+    const cloud = new DesktopCloudConnectionManager(sessions, runtime, async (_url, init) => {
+      const active = runtime.getActiveProfileDescriptorSync()!;
+      expect(init?.headers).toEqual({ authorization: 'Bearer token-' + active.profileId });
+      return new Response(
+        JSON.stringify({
+          session: { id: 'session-' + active.profileId, expiresAt: '2099-01-01T00:00:00.000Z' },
+          user: {
+            id: active.localOwnerId,
+            email: active.identifier,
+            name: active.displayName,
+            emailVerified: true,
+          },
+        }),
+      );
+    });
+    runtime.setBeforeDeactivation(() => cloud.cancel());
+    runtime.setAfterActivation(async (profile) => {
+      await cloud.restore(profile);
+    });
+    const contexts = new Set<unknown>();
+    const retiredCredentials: Array<{ getAccessToken: () => Promise<string | null> }> = [];
+    const paths = new Set<string>();
+    for (const [index, profile] of profiles.entries()) {
+      const prepared = await runtime.openProfile(profile.profileId);
+      expect(runtime.getCurrentIdentityId()).toBe(profile.localOwnerId);
+      expect(prepared.profileResolver.dbPath).toContain(profile.profileId);
+      expect(mocks.bootstrapDestroy).toHaveBeenCalledTimes(index);
+      expect(mocks.shutdownPowerSync).toHaveBeenCalledTimes(index);
+      if (index > 0) {
+        expect(mocks.shutdownPowerSync.mock.invocationCallOrder[index - 1]).toBeLessThan(
+          vi.mocked(openPowerSyncLocalOnly).mock.invocationCallOrder[index]!,
+        );
+      }
+      for (const credentials of retiredCredentials)
+        expect(await credentials.getAccessToken()).toBeNull();
+      if (profile.cloudBinding) {
+        expect(await cloud.getState(profile)).toBe('ONLINE');
+        const credentials = vi.mocked(ensurePowerSyncSyncMode).mock.calls.at(-1)![0];
+        expect(await credentials.getAccessToken()).toBe('token-' + profile.profileId);
+        retiredCredentials.push(credentials);
+      } else {
+        expect(await sessions.load(profile.profileId)).toBeNull();
+        expect(await cloud.getState(profile)).toBe('UNBOUND');
+      }
+      contexts.add(runtime.getActiveProfileAccessContext());
+      paths.add(prepared.profileResolver.dbPath);
+    }
+    await runtime.openProfile(profiles[0]!.profileId);
+    for (const credentials of retiredCredentials)
+      expect(await credentials.getAccessToken()).toBeNull();
+    for (const profile of profiles.filter((item) => item.cloudBinding)) {
+      expect((await sessions.load(profile.profileId))?.account.id).toBe(profile.localOwnerId);
+    }
+    expect(contexts.size).toBe(4);
+    expect(paths.size).toBe(4);
+    expect(new Set(profiles.map((profile) => profile.localOwnerId)).size).toBe(4);
+  });
 
   it('creates and activates a persistent local guest Profile without cloud auth', async () => {
     const prepared = await runtime.activateStartupProfile();
@@ -395,9 +479,10 @@ describe('DesktopProfileRuntimeManager', () => {
 
   it('removes a non-active Profile with its local data and secure credentials', async () => {
     const descriptor = await registry.register('cloud-1', 'Cloud User', 'user@example.com');
-    const profileDir = path.join(rootDir, 'profiles', descriptor.profileId);
+    const profileDir = path.join(rootDir, 'data', 'profiles', descriptor.profileId);
     const keyPath = path.join(
       rootDir,
+      'data',
       'shared',
       'secure',
       'profile-keys',
@@ -405,6 +490,7 @@ describe('DesktopProfileRuntimeManager', () => {
     );
     const pinPath = path.join(
       rootDir,
+      'data',
       'shared',
       'secure',
       'profile-pins',
@@ -412,6 +498,7 @@ describe('DesktopProfileRuntimeManager', () => {
     );
     const sessionPath = path.join(
       rootDir,
+      'data',
       'shared',
       'secure',
       'cloud-sessions',
@@ -429,12 +516,26 @@ describe('DesktopProfileRuntimeManager', () => {
       fs.promises.writeFile(sessionPath, 'session'),
     ]);
 
+    const staging = path.join(rootDir, 'cache', 'snapshot-staging', descriptor.profileId);
+    await fs.promises.mkdir(staging, { recursive: true });
+    await fs.promises.writeFile(path.join(staging, 'old-snapshot'), 'old account');
     await runtime.removeProfile(descriptor.profileId);
+    expect(session.fromPartition).toHaveBeenLastCalledWith(
+      `persist:profile-${descriptor.profileId}`,
+    );
+    const cleared = vi.mocked(session.fromPartition).mock.results.at(-1)?.value;
+    expect(cleared.clearStorageData).toHaveBeenCalledOnce();
+    expect(cleared.clearCache).toHaveBeenCalledOnce();
+    expect(fs.existsSync(staging)).toBe(false);
 
     expect(await registry.findByCloudAccountId('cloud-1')).toBeNull();
     expect(fs.existsSync(profileDir)).toBe(false);
     expect(fs.existsSync(keyPath)).toBe(false);
     expect(fs.existsSync(pinPath)).toBe(false);
     expect(fs.existsSync(sessionPath)).toBe(false);
+    const readded = await registry.register('cloud-1', 'Cloud User', 'user@example.com');
+    expect(readded.profileId).toBe(descriptor.profileId);
+    expect(fs.existsSync(staging)).toBe(false);
+    expect(fs.existsSync(profileDir)).toBe(false);
   });
 });

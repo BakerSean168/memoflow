@@ -1,3 +1,4 @@
+import { resolveDesktopStorageRoots } from '../paths';
 import { mkdtemp, mkdir, rm, readFile, access } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -81,8 +82,17 @@ function writable(db: Database.Database): IElectronDatabase {
 
 async function fixture() {
   const root = await mkdtemp(path.join(tmpdir(), 'profile-copy-'));
-  const source = createProfilePathResolver(root, sourceId);
-  const target = createProfilePathResolver(root, targetId);
+  const roots = {
+    ...resolveDesktopStorageRoots({
+      platform: 'linux',
+      channel: 'test',
+      home: root,
+      env: { MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: root },
+    }),
+    dataRoot: root,
+  };
+  const source = createProfilePathResolver(roots, sourceId);
+  const target = createProfilePathResolver(roots, targetId);
   await mkdir(source.dbDir, { recursive: true });
   await mkdir(target.dbDir, { recursive: true });
   const src = initialize(source.dbPath, 'IdentityId_11111111-1111-4111-8111-111111111111');
@@ -120,7 +130,7 @@ async function fixture() {
     getProfileGeneration: () => 0,
     getActiveProfileDescriptorSync: () => descriptor,
     getActiveProfileResolver: () => target,
-    getSharedResolver: () => ({ rootDir: root }),
+    getSharedResolver: () => ({ roots }),
     listProfiles: async () => [descriptor, sourceDescriptor],
     hasPin: async () => false,
     isProfileCleanupPending: async () => false,

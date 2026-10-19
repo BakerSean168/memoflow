@@ -98,4 +98,4 @@ Engineering Governance 负责把已经确定的结构约束编码成 determinist
 - 代码和配置改动再补离改动最近的 `lint`、`typecheck`、`test` 或其他相关 target。
 
 桌面端在 Windows 开发模式下的日志目录：
-`C:\Users\xx\AppData\Roaming\MemoFlow-Dev\logs`
+`%LOCALAPPDATA%\MemoFlow-Dev\state\logs`

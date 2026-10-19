@@ -33,6 +33,7 @@ export function useAssistantStream(input: {
     | 'ensureConversationCreated'
     | 'refreshRuntimeUsage'
     | 'refreshRuntimeHistory'
+    | 'invalidateRuntimeHistory'
     | 'markConversationActivity'
     | 'loadConversationList'
   >;
@@ -47,6 +48,7 @@ export function useAssistantStream(input: {
     ensureConversationCreated,
     refreshRuntimeUsage,
     refreshRuntimeHistory,
+    invalidateRuntimeHistory,
     markConversationActivity,
     loadConversationList,
   } = input.conversation;
@@ -304,6 +306,7 @@ export function useAssistantStream(input: {
   }
 
   function abortActiveStream() {
+    invalidateRuntimeHistory();
     flushPendingStreamDelta();
     settleVisibleApprovals('cancelled');
     if (!activeStreamAbortController.value) return;
@@ -584,6 +587,7 @@ export function useAssistantStream(input: {
       const pendingUserMessage = chatMessage.value.trim();
       if (!pendingUserMessage && pendingAttachments.length === 0) return;
 
+      invalidateRuntimeHistory();
       chatLoading.value = true;
       stopWatchingDraft = watch(
         chatMessage,

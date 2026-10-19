@@ -226,40 +226,7 @@ LocalPresentationState
 
 ## 7. User files path
 
-当前 `UserFilesSettings` 通过 Desktop IPC：
-
-```text
-USER_FILES_GET_PATH
-USER_FILES_PICK_DIRECTORY
-USER_FILES_RESET_PATH
-```
-
-这是正确方向。
-
-本 ADR 明确：
-
-```text
-local files root path
-```
-
-继续属于 Desktop/local profile host capability。
-
-禁止把绝对路径同步进：
-
-```text
-UserPreferences
-Account
-PowerSync cloud rows
-```
-
-因为：
-
-```text
-C:\Users\A\...
-/home/a/...
-```
-
-在另一设备没有稳定含义。
+Issue #487 已移除统一用户文件根与路径设置 IPC。导入/导出使用原生对话框，上次成功目录仅作为本机 CONFIG 偏好；绝对路径不进入云端 UserPreferences、Account 或 PowerSync。维护契约见 [Desktop storage](../desktop-storage.md)。
 
 ## 8. Experimental settings retirement
 

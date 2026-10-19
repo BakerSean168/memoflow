@@ -102,9 +102,22 @@ export default {
     sceneTitle: '设置',
   },
   account: {
+    openForPin: '打开以管理 PIN',
+    connection: {
+      UNBOUND: '仅本地',
+      CHECKING: '正在检查连接',
+      ONLINE: '在线',
+      OFFLINE: '离线',
+      REAUTH_REQUIRED: '需要重新登录',
+      unknown: '尚未检查',
+    },
+    manageDescription:
+      '各 Profile 的本地资料独立。从本机移除不会关闭云端账号。打开目标 Profile 后，在设置 → 账户与隐私管理 PIN。',
+    pinSettings: 'PIN 设置',
+    switchAccount: '切换账号',
     createProfile: '创建本地 Profile',
     currentProfile: '当前 Profile',
-    manageProfiles: '管理 Profile',
+    manageProfiles: '管理账号',
     addAccount: '添加其他账号',
     reauthenticate: '重新认证此账号',
 

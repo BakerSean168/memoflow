@@ -559,21 +559,5 @@ export default {
     "exportFailed": "导出设置失败",
     "importFailed": "导入设置失败"
   },
-  "userFiles": {
-    "title": "文件存储",
-    "currentDirectory": "当前目录",
-    "defaultDirectory": "默认目录",
-    "customBadge": "自定义",
-    "changeDirectory": "更改目录",
-    "openDirectory": "打开文件夹",
-    "resetToDefault": "恢复默认",
-    "resetConfirm": "确定恢复默认文件存储位置吗？现有文件不会被移动。",
-    "description": "管理 MemoFlow 在本机的文件存储位置。",
-    "loadPathFailed": "无法加载文件存储路径",
-    "directoryChanged": "文件存储位置已更新",
-    "pickDirectoryFailed": "更改目录失败，请重试",
-    "openDirectoryFailed": "无法打开文件夹",
-    "resetSuccess": "已恢复默认文件存储位置",
-    "resetFailed": "恢复默认失败，请重试"
-  },
+
 } as const;

@@ -17,7 +17,6 @@ import { z } from 'zod';
 
 async function launchDesktop(
   userDataPath: string,
-  userFilesPath: string,
   apiOrigin?: string,
 ): Promise<ElectronApplication> {
   const mainEntry = path.resolve('dist-electron/main.cjs');
@@ -32,8 +31,7 @@ async function launchDesktop(
     env: {
       ...process.env,
       NODE_ENV: 'test',
-      MEMOFLOW_DESKTOP_USER_DATA_PATH: userDataPath,
-      MEMOFLOW_DESKTOP_USER_FILES_PATH: userFilesPath,
+      MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: userDataPath,
       ...(apiOrigin ? { MEMOFLOW_API_URL: `${apiOrigin}/api/v1` } : {}),
       ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
     },
@@ -184,7 +182,7 @@ async function startCloudAuthFixture(
 
 function readRegistry(userDataPath: string): ProfileRegistryFile {
   return JSON.parse(
-    fs.readFileSync(path.join(userDataPath, 'shared', 'profiles', 'registry.json'), 'utf8'),
+    fs.readFileSync(path.join(userDataPath, 'data', 'shared', 'profiles', 'registry.json'), 'utf8'),
   ) as ProfileRegistryFile;
 }
 
@@ -197,6 +195,27 @@ function appMainWindow(app: ElectronApplication): Page {
   return page;
 }
 
+async function openManageAccounts(page: Page): Promise<void> {
+  await page.getByTestId('shell-account-menu').click();
+  await page.getByTestId('shell-switch-account').click();
+  await page.getByTestId('shell-manage-profiles').click();
+  await expect(page.getByTestId('manage-accounts-dialog')).toBeVisible();
+  await expect(page.getByTestId('app-shell')).toBeVisible();
+}
+
+async function nextWorkspace(app: ElectronApplication): Promise<Page> {
+  return app.waitForEvent('window', {
+    predicate: async (page) => {
+      try {
+        await page.getByTestId('app-shell').waitFor({ state: 'visible' });
+        return true;
+      } catch {
+        return false;
+      }
+    },
+  });
+}
+
 function captureRendererConsole(page: Page): void {
   page.on('console', (message) => {
     console.log(`[electron-renderer:${message.type()}] ${message.text()}`);
@@ -207,7 +226,7 @@ test('native Goal checkpoint survives an Electron restart and saves once through
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'memoflow-goal-checkpoint-e2e-'));
   let app: ElectronApplication | null = null;
   try {
-    const launch = () => launchDesktop(path.join(root, 'user-data'), path.join(root, 'user-files'));
+    const launch = () => launchDesktop(path.join(root, 'user-data'));
     app = await launch();
     let page = await app.firstWindow();
     const openDraft = async () => {
@@ -264,11 +283,10 @@ test('native Goal checkpoint survives an Electron restart and saves once through
 test('persistent guest works offline, survives lock, and reopens with edited profile data', async () => {
   const runtimeRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'memoflow-desktop-e2e-'));
   const userDataPath = path.join(runtimeRoot, 'user-data');
-  const userFilesPath = path.join(runtimeRoot, 'user-files');
   let electronApp: ElectronApplication | null = null;
 
   try {
-    electronApp = await launchDesktop(userDataPath, userFilesPath);
+    electronApp = await launchDesktop(userDataPath);
     const mainWindow = await electronApp.firstWindow();
     captureRendererConsole(mainWindow);
     await expect(mainWindow.getByTestId('app-shell')).toBeVisible();
@@ -276,7 +294,8 @@ test('persistent guest works offline, survives lock, and reopens with edited pro
     expect(localProfileName).toMatch(/^访客 \d{4}$/);
 
     await mainWindow.getByTestId('shell-account-menu').click();
-    await mainWindow.getByTestId('shell-open-account').click();
+    await mainWindow.getByTestId('shell-open-settings').click();
+    await mainWindow.getByTestId('settings-tab-account').click();
     await expect(mainWindow.getByTestId('account-center-view')).toBeVisible();
     await mainWindow.getByTestId('account-profile-nickname').fill('离线旅程用户');
     await mainWindow.getByTestId('account-profile-save').click();
@@ -284,7 +303,8 @@ test('persistent guest works offline, survives lock, and reopens with edited pro
     await mainWindow.getByTestId('settings-return-to-app').click();
     await expect(mainWindow.getByTestId('shell-account-name')).toHaveText(localProfileName);
     await mainWindow.getByTestId('shell-account-menu').click();
-    await mainWindow.getByTestId('shell-open-account').click();
+    await mainWindow.getByTestId('shell-open-settings').click();
+    await mainWindow.getByTestId('settings-tab-account').click();
     await expect(mainWindow.getByTestId('account-lock-profile-button')).toBeVisible();
 
     const profilePickerPromise = electronApp.waitForEvent('window', {
@@ -323,14 +343,14 @@ test('persistent guest works offline, survives lock, and reopens with edited pro
     const reopenedMainWindow = await reopenedMainWindowPromise;
     await expect(reopenedMainWindow.getByTestId('shell-account-name')).toHaveText(localProfileName);
     const profileDirectories = fs
-      .readdirSync(path.join(userDataPath, 'profiles'), {
+      .readdirSync(path.join(userDataPath, 'data', 'profiles'), {
         withFileTypes: true,
       })
       .filter((entry) => entry.isDirectory() && entry.name.startsWith('p_'));
     expect(profileDirectories).toHaveLength(1);
 
     await electronApp.close();
-    electronApp = await launchDesktop(userDataPath, userFilesPath);
+    electronApp = await launchDesktop(userDataPath);
     const restartedMainWindow = await electronApp.firstWindow();
     captureRendererConsole(restartedMainWindow);
     await expect(restartedMainWindow.getByTestId('app-shell')).toBeVisible();
@@ -346,11 +366,10 @@ test('persistent guest works offline, survives lock, and reopens with edited pro
 test('device authorization opens an independent cloud Profile and preserves the source guest', async () => {
   const runtimeRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'memoflow-profiles-e2e-'));
   const userDataPath = path.join(runtimeRoot, 'user-data');
-  const userFilesPath = path.join(runtimeRoot, 'user-files');
   const cloud = await startCloudAuthFixture();
   let electronApp: ElectronApplication | null = null;
   try {
-    electronApp = await launchDesktop(userDataPath, userFilesPath, cloud.origin);
+    electronApp = await launchDesktop(userDataPath, cloud.origin);
     await electronApp.evaluate(({ shell }) => {
       Object.defineProperty(shell, 'openExternal', {
         configurable: true,
@@ -361,9 +380,9 @@ test('device authorization opens an independent cloud Profile and preserves the 
     await expect(mainWindow.getByTestId('app-shell')).toBeVisible();
     const before = readRegistry(userDataPath);
     const source = before.profiles.find((profile) => profile.profileId === before.activeProfileId)!;
-    const marker = path.join(userDataPath, 'profiles', source.profileId, 'source-marker.txt');
+    const marker = path.join(userDataPath, 'data', 'profiles', source.profileId, 'source-marker.txt');
     fs.writeFileSync(marker, 'source remains independent');
-    await mainWindow.getByTestId('shell-account-menu').click();
+    await openManageAccounts(mainWindow);
     await mainWindow.getByTestId('shell-add-account').click();
     await mainWindow.getByTestId('cloud-connection-continue').click();
     await expect.poll(() => readRegistry(userDataPath).profiles.length).toBe(2);
@@ -380,12 +399,12 @@ test('device authorization opens an independent cloud Profile and preserves the 
     expect(fs.readFileSync(marker, 'utf8')).toBe('source remains independent');
     expect(
       fs.existsSync(
-        path.join(userDataPath, 'shared', 'secure', 'cloud-sessions', `${source.profileId}.bin`),
+        path.join(userDataPath, 'data', 'shared', 'secure', 'cloud-sessions', `${source.profileId}.bin`),
       ),
     ).toBe(false);
     expect(
       fs.existsSync(
-        path.join(userDataPath, 'shared', 'secure', 'cloud-sessions', `${target.profileId}.bin`),
+        path.join(userDataPath, 'data', 'shared', 'secure', 'cloud-sessions', `${target.profileId}.bin`),
       ),
     ).toBe(true);
     expect(cloud.requests).not.toContain('PUT /api/v1/accounts/me');
@@ -408,7 +427,7 @@ test('device authorization opens an independent cloud Profile and preserves the 
     const cloudWindow = appMainWindow(electronApp);
     await expect(cloudWindow.getByTestId('app-shell')).toBeVisible();
     cloud.setIdentity('IdentityId_00000000-0000-4000-8000-0000000000e3');
-    await cloudWindow.getByTestId('shell-account-menu').click();
+    await openManageAccounts(cloudWindow);
     await cloudWindow.getByTestId('shell-add-account').click();
     await cloudWindow.getByTestId('cloud-connection-continue').click();
     await expect.poll(() => readRegistry(userDataPath).profiles.length).toBe(3);
@@ -418,19 +437,19 @@ test('device authorization opens an independent cloud Profile and preserves the 
     await expect.poll(() => readRegistry(userDataPath).activeProfileId).toBe(another.profileId);
     expect(
       fs.existsSync(
-        path.join(userDataPath, 'shared', 'secure', 'cloud-sessions', `${target.profileId}.bin`),
+        path.join(userDataPath, 'data', 'shared', 'secure', 'cloud-sessions', `${target.profileId}.bin`),
       ),
     ).toBe(true);
     expect(
       fs.existsSync(
-        path.join(userDataPath, 'shared', 'secure', 'cloud-sessions', `${another.profileId}.bin`),
+        path.join(userDataPath, 'data', 'shared', 'secure', 'cloud-sessions', `${another.profileId}.bin`),
       ),
     ).toBe(true);
 
     await electronApp.close();
     electronApp = null;
     await cloud.close();
-    electronApp = await launchDesktop(userDataPath, userFilesPath, cloud.origin);
+    electronApp = await launchDesktop(userDataPath, cloud.origin);
     const offlineWindow = await electronApp.firstWindow();
     await expect(offlineWindow.getByTestId('app-shell')).toBeVisible();
     expect(readRegistry(userDataPath).activeProfileId).toBe(another.profileId);
@@ -445,21 +464,26 @@ test('device authorization opens an independent cloud Profile and preserves the 
 test('a second guest keeps an independent Account and its PIN selection across restart', async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'memoflow-multi-guest-e2e-'));
   const userData = path.join(root, 'user-data');
-  const userFiles = path.join(root, 'user-files');
   let app: ElectronApplication | null = null;
   try {
-    app = await launchDesktop(userData, userFiles);
+    app = await launchDesktop(userData);
     const firstWindow = await app.firstWindow();
     await expect(firstWindow.getByTestId('app-shell')).toBeVisible();
     const first = readRegistry(userData).profiles[0]!;
-    await firstWindow.getByTestId('shell-account-menu').click();
-    const pickerPromise = app.waitForEvent('window');
-    await firstWindow.getByTestId('shell-manage-profiles').click();
-    const picker = await pickerPromise;
-    await expect(picker.getByTestId('desktop-profile-access')).toBeVisible();
-    await picker.getByTestId('desktop-profile-create').locator('input').fill('Work');
-    const secondWindowPromise = app.waitForEvent('window');
-    await picker.getByTestId('desktop-profile-create').getByRole('button').click();
+    await openManageAccounts(firstWindow);
+    const windowsBefore = app.windows().length;
+    await firstWindow
+      .getByTestId('manage-accounts-dialog')
+      .getByRole('button', { name: '关闭', exact: true })
+      .click();
+    await expect(firstWindow.getByTestId('manage-accounts-dialog')).toBeHidden();
+    await expect(firstWindow.getByTestId('shell-account-menu')).toBeFocused();
+    expect(app.windows().length).toBe(windowsBefore);
+    expect(readRegistry(userData).activeProfileId).toBe(first.profileId);
+    await openManageAccounts(firstWindow);
+    await firstWindow.getByTestId('desktop-profile-create').locator('input').fill('Work');
+    const secondWindowPromise = nextWorkspace(app);
+    await firstWindow.getByTestId('desktop-profile-create').getByRole('button').click();
     await expect.poll(() => readRegistry(userData).profiles.length).toBe(2);
     const second = readRegistry(userData).profiles.find(
       (profile) => profile.profileId !== first.profileId,
@@ -467,7 +491,19 @@ test('a second guest keeps an independent Account and its PIN selection across r
     expect(second.localOwnerId).not.toBe(first.localOwnerId);
     const secondWindow = await secondWindowPromise;
     await expect(secondWindow.getByTestId('shell-account-name')).toHaveText('Work');
-    const pinResult = await secondWindow.evaluate(async () => {
+    await secondWindow.getByTestId('shell-account-menu').click();
+    await secondWindow.getByTestId('shell-switch-account').click();
+    const firstAgainPromise = nextWorkspace(app);
+    await secondWindow.getByTestId(`shell-switch-profile-${first.profileId}`).click();
+    const firstAgain = await firstAgainPromise;
+    await expect.poll(() => readRegistry(userData).activeProfileId).toBe(first.profileId);
+    await firstAgain.getByTestId('shell-account-menu').click();
+    await firstAgain.getByTestId('shell-switch-account').click();
+    const workAgainPromise = nextWorkspace(app);
+    await firstAgain.getByTestId(`shell-switch-profile-${second.profileId}`).click();
+    const workAgain = await workAgainPromise;
+    await expect(workAgain.getByTestId('shell-account-name')).toHaveText('Work');
+    const pinResult = await workAgain.evaluate(async () => {
       const bridge = (
         window as Window & {
           electronAPI: { invoke(channel: string, ...args: unknown[]): Promise<unknown> };
@@ -477,7 +513,7 @@ test('a second guest keeps an independent Account and its PIN selection across r
     });
     expect(pinResult).toMatchObject({ ok: true });
     await app.close();
-    app = await launchDesktop(userData, userFiles);
+    app = await launchDesktop(userData);
     const locked = await app.firstWindow();
     await expect(locked.getByTestId('desktop-profile-access')).toBeVisible();
     await locked.getByTestId(`desktop-profile-open-${second.profileId}`).click();
@@ -509,7 +545,6 @@ test('guest copy preview persists across restart and waits for local content wit
   );
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'memoflow-copy-e2e-'));
   const userData = path.join(root, 'user-data');
-  const userFiles = path.join(root, 'user-files');
   let plan: ProfileImportPlan | null = null;
   let committed: ProfileImportCommitted | null = null;
   let commitCount = 0;
@@ -589,7 +624,7 @@ test('guest copy preview persists across restart and waits for local content wit
   });
   let app: ElectronApplication | null = null;
   try {
-    app = await launchDesktop(userData, userFiles, cloud.origin);
+    app = await launchDesktop(userData, cloud.origin);
     await app.evaluate(({ shell }) =>
       Object.defineProperty(shell, 'openExternal', {
         configurable: true,
@@ -622,7 +657,7 @@ test('guest copy preview persists across restart and waits for local content wit
       });
     });
     expect(seeded).toMatchObject({ ok: true });
-    await guest.getByTestId('shell-account-menu').click();
+    await openManageAccounts(guest);
     await guest.getByTestId('shell-add-account').click();
     const targetWindowPromise = app.waitForEvent('window', {
       predicate: async (window) => {
@@ -647,14 +682,14 @@ test('guest copy preview persists across restart and waits for local content wit
     await dialog.getByRole('button', { name: '确认复制', exact: true }).click();
     await expect(dialog.getByText('已复制到云端，等待本机核验', { exact: true })).toBeVisible();
     expect(commitCount).toBe(1);
-    expect(fs.existsSync(path.join(userData, 'profiles', source.profileId))).toBe(true);
+    expect(fs.existsSync(path.join(userData, 'data', 'profiles', source.profileId))).toBe(true);
     await dialog.getByRole('button', { name: '关闭', exact: true }).click();
     await app.close();
-    app = await launchDesktop(userData, userFiles, cloud.origin);
+    app = await launchDesktop(userData, cloud.origin);
     const restarted = await app.firstWindow();
     await expect(restarted.getByTestId('app-shell')).toBeVisible();
     await expect(restarted.getByTestId('profile-import-dialog')).not.toBeVisible();
-    await restarted.getByTestId('shell-account-menu').click();
+    await openManageAccounts(restarted);
     await restarted.getByTestId('shell-import-profile').click();
     const recovered = restarted.getByTestId('profile-import-dialog');
     await recovered.locator('summary').click();
@@ -662,7 +697,7 @@ test('guest copy preview persists across restart and waits for local content wit
     await recovered.getByRole('button', { name: '恢复并重新核验', exact: true }).click();
     await expect(recovered.getByText('已复制到云端，等待本机核验', { exact: true })).toBeVisible();
     expect(commitCount).toBe(1);
-    expect(fs.existsSync(path.join(userData, 'profiles', source.profileId))).toBe(true);
+    expect(fs.existsSync(path.join(userData, 'data', 'profiles', source.profileId))).toBe(true);
   } finally {
     await app?.close();
     await cloud.close();

@@ -2,12 +2,12 @@
 tags: [adr, ai, mcp, owner-boundary]
 description: External Agent Gateway 复用真实 owner application capabilities，逐步提取协议无关契约
 created: 2026-10-07T00:00:00Z
-updated: 2026-10-07T00:00:00Z
+updated: 2026-10-19T00:00:00Z
 ---
 
 # ADR-116: External Agent Capability 与 Gateway 边界
 
-**状态：** 已采纳边界；用户已授权实施，Goal 与 TaskPlan/TaskOccurrence 的 PAT 六工具有界只读链路已实现，真实 PostgreSQL/官方 SDK 纵向测试通过；六工具最终 prod-like 验收通过，后续写入与 workflow 未实现。
+**状态：** 已采纳；PAT/OAuth 六只读工具保留，#490 实现默认关闭的 PAT Goal/KR、TaskPlan、TaskOccurrence 事务写入；本地验证见 #490/PR。Assisted workflow 未交付（#538），其他 Owner 按需扩展未交付（#539）；公共 rollout 未验收。
 **日期：** 2026-10-07
 **关联：** ADR-025、ADR-045、ADR-049、ADR-050、ADR-076、ADR-112、ADR-113、ADR-117、ADR-118
 

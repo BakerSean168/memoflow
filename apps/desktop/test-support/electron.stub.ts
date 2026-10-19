@@ -226,6 +226,8 @@ export const app = createEmitterApi({
   },
   getPath: vi.fn((name: string) => path.join(electronTestRoot, name)),
   setPath: vi.fn(),
+  setAppLogsPath: vi.fn(),
+  isReady: vi.fn(() => false),
   getVersion: vi.fn(() => '1.0.0-test'),
   getName: vi.fn(() => 'MemoFlow-Test'),
   getAppPath: vi.fn(() => electronTestRoot),
@@ -351,4 +353,11 @@ export const globalShortcut = {
   unregister: vi.fn(),
   unregisterAll: vi.fn(),
   isRegistered: vi.fn(() => false),
+};
+
+export const session = {
+  fromPartition: vi.fn(() => ({
+    clearStorageData: vi.fn(async () => undefined),
+    clearCache: vi.fn(async () => undefined),
+  })),
 };

@@ -29,12 +29,12 @@ const candidateFeedDir = path.resolve(feedArg);
 const reportPath = path.resolve(reportArg);
 const runtimeRoot = path.resolve(runtimeArg);
 const executable = path.join(runtimeRoot, 'MemoFlow.AppImage');
-const userDataPath = path.join(runtimeRoot, 'user-data');
-const userFilesPath = path.join(runtimeRoot, 'user-files');
+const storageTestRoot = path.join(runtimeRoot, 'user-data');
+const userDataPath = path.join(storageTestRoot, 'data');
 const statusPath = path.join(runtimeRoot, 'status.json');
 const registryPath = path.join(userDataPath, 'shared/profiles/registry.json');
 const sentinelPath = path.join(userDataPath, 'shared/update-e2e-preservation.txt');
-const receiptPath = path.join(userDataPath, 'shared/update/install-receipt.json');
+const receiptPath = path.join(storageTestRoot, 'state/update/install-receipts/install-receipt.json');
 const metadataPath = path.join(candidateFeedDir, 'latest-linux.yml');
 const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const fileHash = async (file) => {
@@ -105,7 +105,7 @@ async function ownedProcesses() {
     if (!/^\d+$/u.test(name) || Number(name) === process.pid) continue;
     try {
       const env = (await readFile(`/proc/${name}/environ`, 'utf8')).split('\0');
-      if (env.includes(`MEMOFLOW_DESKTOP_USER_DATA_PATH=${userDataPath}`)) {
+      if (env.includes(`MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT=${storageTestRoot}`)) {
         processes.push({
           pid: Number(name),
           command: (await readFile(`/proc/${name}/cmdline`, 'utf8')).replaceAll('\0', ' '),
@@ -202,8 +202,7 @@ try {
     MEMOFLOW_DESKTOP_UPDATE_E2E_EXPECTED_VERSION: expectedVersion,
     MEMOFLOW_DESKTOP_UPDATE_E2E_STATUS_PATH: statusPath,
     MEMOFLOW_DESKTOP_UPDATE_E2E_FEED_URL: feedUrl,
-    MEMOFLOW_DESKTOP_USER_DATA_PATH: userDataPath,
-    MEMOFLOW_DESKTOP_USER_FILES_PATH: userFilesPath,
+    MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: storageTestRoot,
   };
   delete env.APPIMAGE;
   child = spawn(executable, [], { env, detached: true, stdio: ['ignore', log, log] });

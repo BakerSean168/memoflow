@@ -119,7 +119,7 @@ export class DesktopAppController {
       env: {
         ...process.env,
         MEMOFLOW_API_URL: this.apiBaseUrl,
-        MEMOFLOW_DESKTOP_USER_DATA_PATH: this.userDataDir,
+        MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: this.userDataDir,
         ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
         VITEST: 'true',
       },

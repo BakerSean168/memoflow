@@ -66,7 +66,7 @@ export default {
     pinPlaceholder: '输入本地 PIN',
     pinRequired: '请输入本地 PIN',
     remove: '删除本地 Profile',
-    removeConfirm: '确定删除“{name}”及其本地数据吗？',
+    removeConfirm: '从本机移除“{name}”及其本地数据？未同步资料将永久丢失，云端账号不会关闭。',
     removed: '本地 Profile 已删除',
   },
   field: {
