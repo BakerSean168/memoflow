@@ -7,7 +7,10 @@ import { nativeModelVisibilityContext } from './native-identity';
 import type { NativeAgentEvent, NativeAgentRunInput } from './codex-driver';
 
 const databases: ReturnType<typeof createLocalAgentSqlite>[] = [];
-afterEach(() => databases.splice(0).forEach((db) => db.close()));
+afterEach(() => {
+  vi.restoreAllMocks();
+  databases.splice(0).forEach((db) => db.close());
+});
 async function setup() {
   const db = createLocalAgentSqlite();
   databases.push(db);
@@ -166,6 +169,7 @@ describe('local Agent conversation execution', () => {
   });
 
   it('changes model within one native conversation and snapshots each turn model', async () => {
+    vi.spyOn(Date, 'now').mockReturnValue(1_800_000_000_000);
     const { store, conversation } = await setup();
     const runs: NativeAgentRunInput[] = [];
     const runtime = new LocalAgentRuntime({
@@ -212,6 +216,12 @@ describe('local Agent conversation execution', () => {
         .filter((m) => m.role === 'assistant')
         .map((m) => m.localAgentSource?.modelId),
     ).toEqual(['model', 'second-model']);
+    expect(history.messages.map((message) => message.role)).toEqual([
+      'user',
+      'assistant',
+      'user',
+      'assistant',
+    ]);
     await runtime.dispose();
   });
   it('keeps text already shown to the user when a running turn is cancelled', async () => {
@@ -469,6 +479,13 @@ describe('local Agent conversation execution', () => {
         },
       }),
     });
+    const created = await runtime.createConversation('owner', {
+      connectionId: conversation.connectionId,
+      modelId: 'model',
+      name: 'New conversation',
+    });
+    expect(created).not.toHaveProperty('historyOrderVersion');
+    expect((await store.getConversation('owner', created.id)).historyOrderVersion).toBe(1);
     const events = [];
     for await (const event of runtime.dispatchMessage({
       identityId: 'owner',

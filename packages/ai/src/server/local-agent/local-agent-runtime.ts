@@ -265,6 +265,7 @@ export class LocalAgentRuntime {
       nativeSessionId: _native,
       connectionFingerprint: _configuration,
       accountFingerprint: _account,
+      historyOrderVersion: _historyOrder,
       ...view
     } = saved;
     return LocalAgentConversationSchema.parse(view);
@@ -376,7 +377,7 @@ export class LocalAgentRuntime {
         content: '',
         attachments: [],
         localAgentSource: { connectionId: connection.id, modelId, runId: run.runId },
-        createdAt: now + 1,
+        createdAt: now,
       };
       await this.persist(() => this.options.store.saveMessage(input.identityId, assistant!, false));
       this.assertActive();
