@@ -5,8 +5,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SharedPathResolver } from '../paths';
 import { ProfileRegistry } from './profile-registry';
 import { DesktopProfileRuntimeManager } from './desktop-profile-runtime-manager';
+import { CloudSessionStore } from './cloud-session-store';
+import { DesktopCloudConnectionManager } from './desktop-cloud-connection-manager';
 import { createFixedClock } from '@memoflow/time';
-import { openPowerSyncLocalOnly } from '../database/powersync';
+import { ensurePowerSyncSyncMode, openPowerSyncLocalOnly } from '../database/powersync';
+
+vi.mock('../utils/api-config', () => ({
+  getApiBaseUrl: () => 'https://profiles.example.test/api/v1',
+}));
 
 const mocks = vi.hoisted(() => ({
   shutdownPowerSync: vi.fn(),
@@ -25,8 +31,8 @@ vi.mock('../database/powersync', () => ({
     execute: mocks.execute,
     writeTransaction: mocks.writeTransaction,
   })),
-  ensurePowerSyncSyncMode: vi.fn(),
-  disablePowerSyncSyncMode: vi.fn(),
+  ensurePowerSyncSyncMode: vi.fn(async () => undefined),
+  disablePowerSyncSyncMode: vi.fn(async () => undefined),
   shutdownPowerSync: mocks.shutdownPowerSync,
 }));
 
@@ -169,7 +175,41 @@ describe('DesktopProfileRuntimeManager', () => {
       await registry.register('IdentityId_cloud_a', 'Same name', 'a@example.com'),
       await registry.register('IdentityId_cloud_b', 'Same name', 'b@example.com'),
     ];
+    const sessions = new CloudSessionStore(rootDir);
+    for (const profile of profiles.filter((item) => item.cloudBinding)) {
+      await sessions.save(profile.profileId, {
+        token: 'token-' + profile.profileId,
+        sessionId: 'session-' + profile.profileId,
+        account: {
+          id: profile.localOwnerId,
+          email: profile.identifier!,
+          name: profile.displayName,
+          emailVerified: true,
+        },
+        expiresAt: '2099-01-01T00:00:00.000Z',
+      });
+    }
+    const cloud = new DesktopCloudConnectionManager(sessions, runtime, async (_url, init) => {
+      const active = runtime.getActiveProfileDescriptorSync()!;
+      expect(init?.headers).toEqual({ authorization: 'Bearer token-' + active.profileId });
+      return new Response(
+        JSON.stringify({
+          session: { id: 'session-' + active.profileId, expiresAt: '2099-01-01T00:00:00.000Z' },
+          user: {
+            id: active.localOwnerId,
+            email: active.identifier,
+            name: active.displayName,
+            emailVerified: true,
+          },
+        }),
+      );
+    });
+    runtime.setBeforeDeactivation(() => cloud.cancel());
+    runtime.setAfterActivation(async (profile) => {
+      await cloud.restore(profile);
+    });
     const contexts = new Set<unknown>();
+    const retiredCredentials: Array<{ getAccessToken: () => Promise<string | null> }> = [];
     const paths = new Set<string>();
     for (const [index, profile] of profiles.entries()) {
       const prepared = await runtime.openProfile(profile.profileId);
@@ -182,8 +222,25 @@ describe('DesktopProfileRuntimeManager', () => {
           vi.mocked(openPowerSyncLocalOnly).mock.invocationCallOrder[index]!,
         );
       }
+      for (const credentials of retiredCredentials)
+        expect(await credentials.getAccessToken()).toBeNull();
+      if (profile.cloudBinding) {
+        expect(await cloud.getState(profile)).toBe('ONLINE');
+        const credentials = vi.mocked(ensurePowerSyncSyncMode).mock.calls.at(-1)![0];
+        expect(await credentials.getAccessToken()).toBe('token-' + profile.profileId);
+        retiredCredentials.push(credentials);
+      } else {
+        expect(await sessions.load(profile.profileId)).toBeNull();
+        expect(await cloud.getState(profile)).toBe('UNBOUND');
+      }
       contexts.add(runtime.getActiveProfileAccessContext());
       paths.add(prepared.profileResolver.dbPath);
+    }
+    await runtime.openProfile(profiles[0]!.profileId);
+    for (const credentials of retiredCredentials)
+      expect(await credentials.getAccessToken()).toBeNull();
+    for (const profile of profiles.filter((item) => item.cloudBinding)) {
+      expect((await sessions.load(profile.profileId))?.account.id).toBe(profile.localOwnerId);
     }
     expect(contexts.size).toBe(4);
     expect(paths.size).toBe(4);

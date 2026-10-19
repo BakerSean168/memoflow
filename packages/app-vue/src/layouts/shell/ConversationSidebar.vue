@@ -150,6 +150,22 @@ const orderedProfiles = computed(() =>
 );
 const displayName = () => props.userName || t('shell.guest');
 
+function profileLabel(profile: ProfileSummary): string {
+  return [
+    profile.displayName,
+    profile.identifierHint || profile.profileId,
+    t(
+      profile.profileKind === 'guest'
+        ? 'auth.profileAccess.guest'
+        : 'auth.profileAccess.registered',
+    ),
+    profile.hasPin ? t('auth.profileAccess.unlock') : '',
+    profile.profileId === props.activeProfileId ? t('shell.account.currentProfile') : '',
+  ]
+    .filter(Boolean)
+    .join(' · ');
+}
+
 const identityLabel = () => {
   if (props.identityKind === 'cloud') return t('shell.account.signedIn');
   if (props.identityKind === 'registered-local') return t('shell.account.localProfile');
@@ -369,9 +385,7 @@ const identityLabel = () => {
                   v-for="profile in orderedProfiles"
                   :key="profile.profileId"
                   :data-testid="`shell-switch-profile-${profile.profileId}`"
-                  :aria-label="
-                    profile.displayName + ' — ' + (profile.identifierHint || profile.profileId)
-                  "
+                  :aria-label="profileLabel(profile)"
                   :aria-current="profile.profileId === activeProfileId ? 'true' : undefined"
                   @select="
                     profile.profileId !== activeProfileId &&

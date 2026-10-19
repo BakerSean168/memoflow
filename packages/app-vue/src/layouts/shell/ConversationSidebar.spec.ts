@@ -2,12 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import ConversationSidebar from './ConversationSidebar.vue';
+import auth from '../../locales/en-US/auth';
 
 const i18n = createI18n({
   legacy: false,
   locale: 'en-US',
   messages: {
     'en-US': {
+      auth,
       common: { loading: 'Loading', more: 'More', delete: 'Delete' },
       aiAssistant: {
         chatPage: {
@@ -44,6 +46,11 @@ const i18n = createI18n({
           settings: 'Settings',
           logout: 'Sign out',
           connectCloud: 'Connect cloud',
+          reauthenticate: 'Sign in again',
+          switchAccount: 'Switch account',
+          manageProfiles: 'Manage accounts',
+          currentProfile: 'Current Profile',
+          connection: { unknown: 'Not checked' },
         },
       },
     },
@@ -200,17 +207,17 @@ describe('ConversationSidebar account menu', () => {
   }
 
   it.each([
-    ['cloud', true, 'shell-logout'],
-    ['guest', false, 'shell-open-cloud-connection'],
-    ['registered-local', false, 'shell-open-cloud-connection'],
+    ['cloud', true, 'shell-logout', 'Sign out'],
+    ['guest', false, 'shell-open-cloud-connection', 'Connect cloud'],
+    ['registered-local', false, 'shell-open-cloud-connection', 'Sign in again'],
   ] as const)(
     'shows the conditional action for %s and hides desktop actions on web',
-    async (identityKind, cloudConnected, action) => {
+    async (identityKind, cloudConnected, action, label) => {
       const wrapper = await openMenu({ identityKind, cloudConnected, isDesktop: false });
       try {
         expect(item('shell-account-identity').textContent?.match(/Alice/g)).toHaveLength(1);
         expect(item('shell-open-settings')).toBeTruthy();
-        expect(item(action)).toBeTruthy();
+        expect(item(action).textContent?.trim()).toBe(label);
         expect(document.querySelector('[data-testid="shell-switch-account"]')).toBeNull();
         expect(document.querySelector('[data-testid="shell-open-account"]')).toBeNull();
         expect(document.querySelector('[data-testid="shell-create-profile"]')).toBeNull();
@@ -246,6 +253,12 @@ describe('ConversationSidebar account menu', () => {
       expect(rows[0]?.getAttribute('data-testid')).toBe('shell-switch-profile-id-2');
       expect(rows[1]?.getAttribute('data-testid')).toBe('shell-switch-profile-id-29');
       expect(rows[0]?.getAttribute('aria-current')).toBe('true');
+      expect(rows[0]?.getAttribute('aria-label')).toContain('Guest Profile');
+      expect(rows[0]?.getAttribute('aria-label')).toContain('Current Profile');
+      expect(item('shell-switch-profile-id-1').getAttribute('aria-label')).toContain(
+        'Cloud connected',
+      );
+      expect(item('shell-switch-profile-id-1').getAttribute('aria-label')).toContain('Unlock');
       expect(item('shell-profile-list').classList.contains('overflow-y-auto')).toBe(true);
       expect(item('shell-switch-profile-id-1').querySelector('svg')).toBeTruthy();
       expect(wrapper.emitted('switch-profile')).toBeUndefined();
