@@ -64,8 +64,43 @@ function createTestLogger(context: string, collecting: CollectingTransport): Win
 }
 
 describe('WinstonLogger (RefArch Phase 6)', () => {
-  afterEach(() => {
+  const tempLogDirs: string[] = [];
+  const openLoggers: WinstonLogger[] = [];
+
+  /** Per-test LOG_DIR, removed in afterEach. / 每个测试独立 LOG_DIR，afterEach 删除。 */
+  function stubTempLogDir(): void {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'mf-logs-'));
+    tempLogDirs.push(dir);
+    vi.stubEnv('LOG_DIR', dir);
+  }
+
+  afterEach(async () => {
     vi.unstubAllEnvs();
+    // Flush and close daily-rotate file streams before deleting LOG_DIR, so the
+    // async file open cannot race the removal.
+    // 删除 LOG_DIR 前先 flush 并关闭 daily-rotate 文件流，避免异步打开与删除竞争。
+    for (const logger of openLoggers.splice(0)) {
+      await Promise.all(
+        logger.getWinstonLogger().transports.map(
+          (transport) =>
+            new Promise<void>((resolve) => {
+              const closable = transport as typeof transport & {
+                close?: () => void;
+                logStream?: unknown;
+              };
+              if (!closable.logStream || typeof closable.close !== 'function') {
+                resolve();
+                return;
+              }
+              closable.once('finish', () => resolve());
+              closable.close();
+            }),
+        ),
+      );
+    }
+    for (const dir of tempLogDirs.splice(0)) {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   it('child() reuses the parent transport instances instead of creating new daily-rotate transports', () => {
@@ -132,11 +167,12 @@ describe('WinstonLogger (RefArch Phase 6)', () => {
 
   it('root context logs are machine-parseable JSON on the console in production', () => {
     vi.stubEnv('NODE_ENV', 'production');
-    vi.stubEnv('LOG_DIR', fs.mkdtempSync(path.join(os.tmpdir(), 'mf-logs-')));
+    stubTempLogDir();
 
     const writeSpy = spyConsoleWrite();
     try {
       const root = new WinstonLogger('API', { level: 'info' });
+      openLoggers.push(root);
       root.info('json console', { route: '/healthz', statusCode: 200 });
 
       const output = writeSpy.mock.calls.map((call) => String(call[0])).join('');
@@ -161,11 +197,12 @@ describe('WinstonLogger (RefArch Phase 6)', () => {
 
   it('keeps the pretty console format outside production (no JSON requirement)', () => {
     vi.stubEnv('NODE_ENV', 'development');
-    vi.stubEnv('LOG_DIR', fs.mkdtempSync(path.join(os.tmpdir(), 'mf-logs-')));
+    stubTempLogDir();
 
     const writeSpy = spyConsoleWrite();
     try {
       const root = new WinstonLogger('API', { level: 'info' });
+      openLoggers.push(root);
       root.info('pretty console');
 
       const output = writeSpy.mock.calls.map((call) => String(call[0])).join('');

@@ -34,15 +34,15 @@ export const GetTaskOccurrencesByRangeResSchema = z.object({
 });
 export type GetTaskOccurrencesByRangeRes = z.infer<typeof GetTaskOccurrencesByRangeResSchema>;
 
-export const CompleteTaskOccurrenceSchema = z
-  .object({
-    expectedVersion: z.number().int().positive().optional(),
-    goalMeasurement: TaskGoalMeasurementSchema.optional(),
-    duration: z.number().optional(),
-    note: z.string().optional(),
-    rating: z.number().int().min(1).max(5).optional(),
-  })
-  .default({});
+/** Complete body before the transport-level `{}` default is applied. */
+export const CompleteTaskOccurrenceBodySchema = z.object({
+  expectedVersion: z.number().int().positive().optional(),
+  goalMeasurement: TaskGoalMeasurementSchema.optional(),
+  duration: z.number().optional(),
+  note: z.string().optional(),
+  rating: z.number().int().min(1).max(5).optional(),
+});
+export const CompleteTaskOccurrenceSchema = CompleteTaskOccurrenceBodySchema.default({});
 
 export type CompleteTaskOccurrenceReq = z.infer<typeof CompleteTaskOccurrenceSchema>;
 

@@ -4,17 +4,19 @@ import {
   type ExternalMutationAuthority,
 } from '@memoflow/database/transaction';
 import type { Prisma, PrismaClient } from '@memoflow/database';
-import {
-  GatewayGoalCreateSchema,
-  GatewayGoalUpdateSchema,
-  GatewayKeyResultCreateSchema,
-  GatewayKeyResultUpdateSchema,
-} from '@memoflow/contracts/agent-gateway';
 import { GetGoalUseCase } from '../../../application/use-cases/queries/get-goal.use-case';
 import { AddGoalKeyResultUseCase } from '../../../application/use-cases/commands/add-goal-key-result.use-case';
 import { UpdateGoalKeyResultUseCase } from '../../../application/use-cases/commands/update-goal-key-result.use-case';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
-import { GoalAgentReceiptSchema, type GoalMutationReceipt } from '@memoflow/contracts/goal';
+import {
+  GoalAgentCreateSchema,
+  GoalAgentUpdateSchema,
+  GoalAgentKeyResultCreateSchema,
+  GoalAgentKeyResultUpdateSchema,
+  GoalAgentPersistedResultSchema,
+  GoalAgentPersistedReceiptSchema,
+  type GoalMutationReceipt,
+} from '@memoflow/contracts/goal';
 import type { Result } from '@memoflow/contracts/result';
 import type { IEventBus } from '@memoflow/patterns';
 import { GoalPolicy } from '../../../domain';
@@ -51,11 +53,13 @@ export function createGoalPrismaAgentMutations(
       authority,
       capability,
       input,
-      GoalAgentReceiptSchema,
+      GoalAgentPersistedReceiptSchema,
       async (tx) => {
         const result = await work(tx, buffered);
         if (!result.ok) throw new ExternalMutationError(result.error.code);
-        return { result: result.data };
+        // Persist only the projection the response returns; the full Goal read
+        // model stays inside the owner and never outlives the write receipt.
+        return { result: GoalAgentPersistedResultSchema.parse(result.data) };
       },
     );
     await buffered.flush(events);
@@ -77,7 +81,7 @@ export function createGoalPrismaAgentMutations(
   }
   return {
     createKeyResult(input: unknown, cx: ExecutionContext, authority: ExternalMutationAuthority) {
-      const parsed = GatewayKeyResultCreateSchema.parse(input);
+      const parsed = GoalAgentKeyResultCreateSchema.parse(input);
       const { calculationMethod, ...keyResult } = parsed.keyResult;
       return mutate(parsed, 'goal.key-result.create.v1', cx, authority, (tx, buffered) =>
         owner(tx, buffered).addKr.execute(parsed.goalId, cx.identityId, {
@@ -87,7 +91,7 @@ export function createGoalPrismaAgentMutations(
       );
     },
     updateKeyResult(input: unknown, cx: ExecutionContext, authority: ExternalMutationAuthority) {
-      const parsed = GatewayKeyResultUpdateSchema.parse(input);
+      const parsed = GoalAgentKeyResultUpdateSchema.parse(input);
       const { calculationMethod, description, unit, ...changes } = parsed.changes;
       return mutate(parsed, 'goal.key-result.update.v1', cx, authority, (tx, buffered) =>
         owner(tx, buffered).updateKr.execute(parsed.goalId, cx.identityId, parsed.keyResultId, {
@@ -99,13 +103,13 @@ export function createGoalPrismaAgentMutations(
       );
     },
     create(input: unknown, cx: ExecutionContext, authority: ExternalMutationAuthority) {
-      const parsed = GatewayGoalCreateSchema.parse(input);
+      const parsed = GoalAgentCreateSchema.parse(input);
       return mutate(parsed, 'goal.create.v1', cx, authority, (tx, buffered) =>
         owner(tx, buffered).create.execute(parsed.goal, cx),
       );
     },
     update(input: unknown, cx: ExecutionContext, authority: ExternalMutationAuthority) {
-      const parsed = GatewayGoalUpdateSchema.parse(input);
+      const parsed = GoalAgentUpdateSchema.parse(input);
       return mutate(parsed, 'goal.update.v1', cx, authority, (tx, buffered) =>
         owner(tx, buffered).update.execute(parsed.goalId, cx.identityId, parsed.changes),
       );

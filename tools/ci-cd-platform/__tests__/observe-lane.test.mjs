@@ -1,6 +1,6 @@
 import { planUnitShards } from '../lib/unit-shards.mjs';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -8,8 +8,9 @@ import { createLaneInput } from '../create-lane-input.mjs';
 import { observeLane } from '../observe-lane.mjs';
 import { digest } from '../lib/contracts.mjs';
 
-test('observation aggregates command evidence without changing lane semantics', async () => {
+test('observation aggregates command evidence without changing lane semantics', async (t) => {
   const root = await mkdtemp(path.join(os.tmpdir(), 'memoflow-observe-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
   const reports = path.join(root, 'reports');
   await mkdir(reports, { recursive: true });
   const manifest = {
@@ -91,8 +92,9 @@ test('observation aggregates command evidence without changing lane semantics', 
   assert.equal(JSON.parse(await readFile(output, 'utf8')).lane, 'governance');
 });
 
-test('observation fails closed when no command report belongs to the lane', async () => {
+test('observation fails closed when no command report belongs to the lane', async (t) => {
   const root = await mkdtemp(path.join(os.tmpdir(), 'memoflow-observe-lane-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
   const reports = path.join(root, 'reports');
   await mkdir(reports, { recursive: true });
   await writeFile(

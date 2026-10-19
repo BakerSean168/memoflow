@@ -10,7 +10,8 @@ import {
   TaskAgentCreateSchema,
   TaskAgentUpdateSchema,
   TaskAgentCompleteSchema,
-  TaskAgentReceiptSchema,
+  TaskAgentPersistedResultSchema,
+  TaskAgentPersistedReceiptSchema,
   type TaskAgentReceipt,
 } from '@memoflow/contracts/task';
 import type { Result } from '@memoflow/contracts/result';
@@ -61,8 +62,14 @@ export function createTaskPrismaAgentMutations(
       authority,
       capability,
       input,
-      TaskAgentReceiptSchema,
-      async (tx) => ({ result: await work(owner(tx, fixedTime, buffered), identityId) }),
+      TaskAgentPersistedReceiptSchema,
+      async (tx) => ({
+        // Persist only the projection the response returns; the full plan or
+        // occurrence read body never enters the durable receipt.
+        result: TaskAgentPersistedResultSchema.parse(
+          await work(owner(tx, fixedTime, buffered), identityId),
+        ),
+      }),
     );
     await buffered.flush(events);
     return receipt;

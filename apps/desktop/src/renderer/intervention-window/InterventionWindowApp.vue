@@ -119,7 +119,17 @@ const onProjection = (value: unknown): void => {
   now.value = Date.now();
 };
 
+// The window may initially focus document.body rather than an action button.
+function onKeydown(event: KeyboardEvent): void {
+  if (event.key !== 'Escape' || event.defaultPrevented || event.isComposing || !projection.value)
+    return;
+  event.preventDefault();
+  event.stopPropagation();
+  void sendCommand({ action: 'dismiss' });
+}
+
 onMounted(async () => {
+  window.addEventListener('keydown', onKeydown);
   const bridge = getElectronBridge();
   if (bridge) {
     projection.value = unwrapProjection(
@@ -133,6 +143,7 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeydown);
   if (timer) clearInterval(timer);
   timer = null;
   getElectronBridge()?.off(RoutineWindowChannels.INTERVENTION_WINDOW_PROJECTION, onProjection);

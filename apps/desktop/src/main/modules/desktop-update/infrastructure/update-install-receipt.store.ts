@@ -36,8 +36,9 @@ function isReceipt(value: unknown): value is DesktopUpdateInstallReceipt {
 
 /**
  * Device-local, Profile-independent receipt store for cross-process update
- * verification. The file intentionally lives under shared/update rather than
- * any Profile database or PowerSync-owned directory.
+ * verification. The file intentionally lives under
+ * stateRoot/update/install-receipts rather than any Profile database or
+ * PowerSync-owned directory.
  */
 export class FileDesktopUpdateInstallReceiptStore implements DesktopUpdateInstallReceiptStore {
   readonly directory: string;

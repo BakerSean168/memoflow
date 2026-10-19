@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { afterEach, beforeEach, describe, it, expect } from 'vitest';
+import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import Database from 'better-sqlite3';
@@ -14,9 +15,25 @@ import { PowerSyncGoalReliableOperationAdapter } from '../powersync-goal-reliabl
 import { PowerSyncGoalWriteTransactionRunner } from '../powersync-goal-write-transaction-runner';
 
 let dbFileCounter = 0;
+let tempDir: string;
+const openDatabases: Database.Database[] = [];
+
+// Per-test temp dir for file-backed SQLite; removed after each test.
+// 每个测试独立的临时目录（文件型 SQLite），测试后删除。
+beforeEach(() => {
+  tempDir = mkdtempSync(join(tmpdir(), 'goal-powersync-test-'));
+});
+
+afterEach(() => {
+  for (const db of openDatabases.splice(0)) {
+    if (db.open) db.close();
+  }
+  rmSync(tempDir, { recursive: true, force: true });
+});
 
 function createTestSqliteDatabase(filePath?: string): IElectronDatabase {
   const sqlite = new Database(filePath ?? ':memory:');
+  openDatabases.push(sqlite);
   const wrapper: IElectronDatabase = {
     async execute(sql: string, parameters?: unknown[]): Promise<IElectronDatabaseQueryResult> {
       const stmt = sqlite.prepare(sql);
@@ -83,7 +100,7 @@ function createReceiptInput(key: string) {
 
 describe('PowerSyncGoalReliableOperationAdapter (real SQLite)', () => {
   it('persists receipt across a REAL close/reopen of the database file (process restart)', async () => {
-    const filePath = join(tmpdir(), `goal-receipt-${Date.now()}-${dbFileCounter++}.sqlite`);
+    const filePath = join(tempDir, `goal-receipt-${Date.now()}-${dbFileCounter++}.sqlite`);
 
     // First process: write the receipt, then close the connection
     const db1 = createTestSqliteDatabase(filePath);
@@ -181,7 +198,7 @@ describe('PowerSyncGoalWriteTransactionRunner receipt rollback (W4 P1-1)', () =>
   )`;
 
   it('rolls back the Goal CAS save when the receipt write fails', async () => {
-    const filePath = join(tmpdir(), `goal-runner-${Date.now()}.sqlite`);
+    const filePath = join(tempDir, `goal-runner-${Date.now()}.sqlite`);
     const db = createTestSqliteDatabase(filePath);
     await db.execute(GOALS_SQL);
     await db.execute(LABELS_SQL);

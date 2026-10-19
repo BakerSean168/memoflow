@@ -215,18 +215,23 @@ export function createReadGateway(options: Options) {
         ) {
           tool = name;
           try {
-            const current = await within(
-              () => options.credentials.authenticate(auth, requestContext),
-              signal,
-            );
-            if (
-              !current ||
-              current.identityId !== context.identityId ||
-              current.credentialId !== principal!.credentialId ||
-              !current.scopes.includes(requiredScope)
-            ) {
-              scopeDecision = 'denied';
-              throw new ControlledError('FORBIDDEN');
+            // Writes revalidate in the write authority immediately before the
+            // receipt transaction; doing it twice would open two pool
+            // connections back-to-back for the same call.
+            if (!isWriteToolName(name)) {
+              const current = await within(
+                () => options.credentials.authenticate(auth, requestContext),
+                signal,
+              );
+              if (
+                !current ||
+                current.identityId !== context.identityId ||
+                current.credentialId !== principal!.credentialId ||
+                !current.scopes.includes(requiredScope)
+              ) {
+                scopeDecision = 'denied';
+                throw new ControlledError('FORBIDDEN');
+              }
             }
             const result = await within(operation, signal);
             const serialized = JSON.stringify(result);
@@ -270,7 +275,13 @@ export function createReadGateway(options: Options) {
                   connectionId: principal.credentialId,
                   scopes: principal.scopes,
                   authorize: async () => {
-                    const current = await options.credentials.authenticate(auth, requestContext);
+                    // runExternalMutation calls this before it opens the
+                    // receipt transaction, so revalidation never waits for a
+                    // second pool connection while a transaction is open.
+                    const current = await within(
+                      () => options.credentials.authenticate(auth, requestContext),
+                      signal,
+                    );
                     const required = isToolName(tool)
                       ? toolDescriptors[tool].requiredScope
                       : undefined;

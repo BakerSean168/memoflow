@@ -145,4 +145,32 @@ describe('FocusWindowApp (ROUTINE-4202)', () => {
     expect(wrapper.classes()).toContain('is-collapsed');
     wrapper.unmount();
   });
+  it('Escape from a focused action uses the existing hide command; Tab stays native', async () => {
+    const wrapper = mount(FocusWindowApp, { attachTo: document.body });
+    await vi.waitFor(() => expect(wrapper.findAll('button').length).toBeGreaterThan(0));
+    const buttons = wrapper.findAll<HTMLButtonElement>('button');
+    for (const button of buttons) {
+      expect(button.element.disabled).toBe(false);
+      expect(button.element.tabIndex).toBe(0);
+      button.element.focus();
+      expect(document.activeElement).toBe(button.element);
+      const tab = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
+      button.element.dispatchEvent(tab);
+      expect(tab.defaultPrevented).toBe(false);
+    }
+    invoke.mockClear();
+    await buttons.at(-1)!.trigger('keydown', { key: 'Escape' });
+    expect(invoke).toHaveBeenCalledExactlyOnceWith(RoutineWindowChannels.FOCUS_WINDOW_COMMAND, {
+      action: 'hide',
+    });
+    invoke.mockClear();
+    document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(invoke).toHaveBeenCalledExactlyOnceWith(RoutineWindowChannels.FOCUS_WINDOW_COMMAND, {
+      action: 'hide',
+    });
+    wrapper.unmount();
+    invoke.mockClear();
+    document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(invoke).not.toHaveBeenCalled();
+  });
 });

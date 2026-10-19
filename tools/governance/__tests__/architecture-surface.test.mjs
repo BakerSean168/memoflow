@@ -41,17 +41,22 @@ const AUDIT_SCRIPT = path.join(
  *  positive real-code run does not pollute the repository).
  *  将 manifest 写入临时文件（绝不写入 root，避免 positive real-code run 污染仓库）。 */
 function runAudit(tempRoot, manifest) {
-  const manifestFile = path.join(mkdtempSync(path.join(os.tmpdir(), 'arch-surface-manifest-')), 'manifest.json');
-  writeFileSync(manifestFile, JSON.stringify(manifest, null, 2));
-  const result = spawnSync(process.execPath, [AUDIT_SCRIPT], {
-    env: {
-      ...process.env,
-      ARCHITECTURE_SURFACE_ROOT: tempRoot,
-      ARCHITECTURE_SURFACE_MANIFEST: manifestFile,
-    },
-    encoding: 'utf8',
-  });
-  return { status: result.status, output: `${result.stdout}\n${result.stderr}` };
+  const manifestDir = mkdtempSync(path.join(os.tmpdir(), 'arch-surface-manifest-'));
+  try {
+    const manifestFile = path.join(manifestDir, 'manifest.json');
+    writeFileSync(manifestFile, JSON.stringify(manifest, null, 2));
+    const result = spawnSync(process.execPath, [AUDIT_SCRIPT], {
+      env: {
+        ...process.env,
+        ARCHITECTURE_SURFACE_ROOT: tempRoot,
+        ARCHITECTURE_SURFACE_MANIFEST: manifestFile,
+      },
+      encoding: 'utf8',
+    });
+    return { status: result.status, output: `${result.stdout}\n${result.stderr}` };
+  } finally {
+    rmSync(manifestDir, { recursive: true, force: true });
+  }
 }
 
 /** Creates a temp root from a set of relative file → content pairs. */
