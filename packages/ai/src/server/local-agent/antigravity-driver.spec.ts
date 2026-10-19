@@ -426,3 +426,37 @@ it('stops during asynchronous native preflight without spawning an Agent or leak
   expect(directory).not.toBe('');
   expect(existsSync(directory)).toBe(false);
 });
+
+it('treats close during asynchronous native preflight as a stop without spawning an Agent', async () => {
+  const fixture = await setup();
+  const driver = fixture.make();
+  let directory = '';
+  temporaryPreflight.onCreated = (created) => {
+    directory = created;
+    void driver.close();
+  };
+  const events = await collect(driver);
+  expect(events).toEqual([{ type: 'cancelled' }]);
+  expect(fixture.transports).toHaveLength(0);
+  expect(directory).not.toBe('');
+  expect(existsSync(directory)).toBe(false);
+});
+
+it('closes a transport that was constructed after cancellation instead of starting a turn', async () => {
+  const fixture = await setup();
+  const holder: { driver?: AcpDriver } = {};
+  const driver = new AcpDriver(fixture.connection, fixture.home, (options) => {
+    const transport = new FakeAntigravity(options);
+    // Cancellation can land between the preflight fence and assignment of the
+    // freshly spawned transport. It must still be closed, not leaked.
+    holder.driver?.cancel();
+    fixture.transports.push(transport);
+    return transport as unknown as NativeRpcTransport;
+  });
+  holder.driver = driver;
+  const events = await collect(driver);
+  expect(events).toEqual([{ type: 'cancelled' }]);
+  expect(fixture.transports).toHaveLength(1);
+  expect(fixture.transports[0].closed).toBe(true);
+  expect(fixture.transports[0].calls).toEqual([]);
+});

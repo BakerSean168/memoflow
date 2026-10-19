@@ -617,6 +617,12 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
           }
           return connection.version;
         },
+        dependencies.localAgentRuntime
+          ? {
+              cancelConnection: (owner: string, connectionId: string) =>
+                dependencies.localAgentRuntime!.cancelConnection(owner, connectionId),
+            }
+          : undefined,
       )
     : null;
   const knowledgeQueryServices: AIKnowledgeQueryServices = hasKnowledgeIndexStack
