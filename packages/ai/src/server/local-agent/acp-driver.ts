@@ -140,6 +140,7 @@ export class AcpDriver {
   private temporaryDirectory?: string;
   private readonly toolNames = new Map<string, string>();
   private cancelled = false;
+  private closed = false;
   private closing?: Promise<void>;
   private readonly requests = new Map<
     string,
@@ -158,6 +159,12 @@ export class AcpDriver {
       new NativeRpcTransport(options),
   ) {}
 
+  /** A close is a consumer stop just like cancel, but it still lets a normal
+   * probe send session/close while cancel skips that round trip. */
+  private get stopped(): boolean {
+    return this.cancelled || this.closed;
+  }
+
   private async connect(input?: NativeAgentRunInput) {
     const antigravity = this.connection.driver === 'antigravity';
     if (!antigravity && this.connection.driver !== 'dsh')
@@ -165,7 +172,7 @@ export class AcpDriver {
     let fingerprint = await nativeIdentity(this.connection.driver, this.connection.homePath);
     if (!antigravity && input?.accountFingerprint && input.accountFingerprint !== fingerprint)
       throw new LocalAgentError('LOCAL_AGENT_SESSION_UNAVAILABLE');
-    if (this.cancelled) throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
+    if (this.stopped) throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
     const executable = antigravity
       ? antigravityExecutable(this.connection.executablePath)
       : this.connection.executablePath;
@@ -173,8 +180,8 @@ export class AcpDriver {
       throw new LocalAgentError('LOCAL_AGENT_LOGIN_REQUIRED');
     if (antigravity) {
       this.temporaryDirectory = await mkdtemp(join(tmpdir(), 'mf-agy-'));
-      if (this.cancelled) {
-        // cancel() may finish close() while filesystem preflight is still pending.
+      if (this.stopped) {
+        // cancel()/close() may finish while filesystem preflight is still pending.
         // Do not spawn or authenticate a native process after the turn is stopped.
         await rm(this.temporaryDirectory, { recursive: true, force: true });
         this.temporaryDirectory = undefined;
@@ -197,6 +204,12 @@ export class AcpDriver {
       requestTimeoutMs: 30_000,
     });
     this.transport = transport;
+    // close() may run while connect() is still resolving its preflight. A
+    // closed driver must never leave the transport it just constructed alive.
+    if (this.stopped) {
+      await transport.close();
+      throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
+    }
     transport.onFailure = (error) => this.queue.fail(error);
     transport.onNotification = (method, params) => {
       try {
@@ -303,7 +316,7 @@ export class AcpDriver {
     const cancel = () => this.cancel();
     input.signal?.addEventListener('abort', cancel, { once: true });
     try {
-      if (input.signal?.aborted || this.cancelled) {
+      if (input.signal?.aborted || this.stopped) {
         yield { type: 'cancelled' };
         return;
       }
@@ -325,7 +338,7 @@ export class AcpDriver {
         if (updated.currentValue !== input.modelId)
           throw new LocalAgentError('LOCAL_AGENT_MODEL_UNSUPPORTED');
       }
-      if (this.cancelled) {
+      if (this.stopped) {
         yield { type: 'cancelled' };
         return;
       }
@@ -359,7 +372,7 @@ export class AcpDriver {
         );
       yield* this.queue;
     } catch (error) {
-      if (this.cancelled || input.signal?.aborted) yield { type: 'cancelled' };
+      if (this.stopped || input.signal?.aborted) yield { type: 'cancelled' };
       else
         throw error instanceof LocalAgentError
           ? error
@@ -372,7 +385,7 @@ export class AcpDriver {
 
   private notification(params: unknown) {
     const parsed = sessionUpdate.parse(params);
-    if (parsed.sessionId !== this.sessionId || this.cancelled) return;
+    if (parsed.sessionId !== this.sessionId || this.stopped) return;
     const update = parsed.update;
     if (update.sessionUpdate === 'agent_message_chunk') {
       const content = z
@@ -415,7 +428,7 @@ export class AcpDriver {
   }
 
   private requestPermission(request: { id: string | number; method: string; params?: unknown }) {
-    if (request.method !== 'session/request_permission' || this.cancelled) {
+    if (request.method !== 'session/request_permission' || this.stopped) {
       this.transport?.rejectRequest(request.id);
       return;
     }
@@ -469,7 +482,7 @@ export class AcpDriver {
 
   respond(requestId: string, response: LocalAgentRequestResponse['response']): boolean {
     const pending = this.requests.get(requestId);
-    if (!pending || this.cancelled || response.type !== pending.request.type) return false;
+    if (!pending || this.stopped || response.type !== pending.request.type) return false;
     let option: (typeof pending.options)[number] | undefined;
     if (response.type === 'permission') {
       option = pending.options.find(
@@ -512,6 +525,9 @@ export class AcpDriver {
   }
 
   close(): Promise<void> {
+    // A closed ACP driver is single-use. This fence also covers close() racing
+    // an asynchronous preflight before this.transport has been assigned.
+    this.closed = true;
     this.closing ??= (async () => {
       try {
         const transport = this.transport;
