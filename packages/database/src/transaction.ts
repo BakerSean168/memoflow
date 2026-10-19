@@ -31,6 +31,7 @@ export function withPrismaTransaction<T>(
 
 export {
   runExternalMutation,
+  externalMutationReceiptId,
   ExternalMutationError,
   EXTERNAL_MUTATION_TRANSACTION_OPTIONS,
   type ExternalMutationAuthority,

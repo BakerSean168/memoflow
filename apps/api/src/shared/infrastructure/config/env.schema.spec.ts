@@ -67,6 +67,26 @@ describe('envSchema LOCAL_VALIDATION', () => {
   });
 });
 
+describe('envSchema assisted Agent Gateway rollout', () => {
+  const required = {
+    JWT_SECRET: 'local-validation-secret-at-least-32-characters',
+    AI_PROVIDER_ENCRYPTION_KEY: 'provider-encryption-secret-at-least-32-chars',
+  };
+
+  it('keeps assisted workflows off independently of the read and write pilot flags', () => {
+    expect(envSchema.parse(required)).toMatchObject({
+      EAG_ASSISTED_ENABLED: false,
+      EAG_READ_PILOT_ENABLED: false,
+      EAG_WRITE_ENABLED: false,
+    });
+    expect(envSchema.parse({ ...required, EAG_ASSISTED_ENABLED: '1' })).toMatchObject({
+      EAG_ASSISTED_ENABLED: true,
+      EAG_READ_PILOT_ENABLED: false,
+      EAG_WRITE_ENABLED: false,
+    });
+  });
+});
+
 describe('envSchema GitHub installation routing', () => {
   const required = {
     JWT_SECRET: 'local-validation-secret-at-least-32-characters',

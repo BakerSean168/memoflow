@@ -39,6 +39,18 @@ function canonical(value: unknown): string {
 }
 const hash = (value: unknown) => createHash('sha256').update(canonical(value)).digest('hex');
 
+/** Canonical receipt identity also permits recovery without repeating a committed mutation. */
+export function externalMutationReceiptId(
+  identityId: string,
+  authority: Pick<ExternalMutationAuthority, 'connectionId' | 'receiptScope'>,
+  capability: string,
+  idempotencyKey: string,
+): string {
+  return hash(authority.receiptScope === 'credential'
+    ? [identityId, authority.connectionId, capability, idempotencyKey]
+    : [identityId, capability, idempotencyKey]);
+}
+
 /** Owner invokes its existing use cases using only this transaction's repositories. */
 export async function runExternalMutation<T extends { receiptId: string }>(
   db: PrismaClient,
@@ -52,11 +64,7 @@ export async function runExternalMutation<T extends { receiptId: string }>(
   if (!identityId || !authority.connectionId) throw new ExternalMutationError('FORBIDDEN');
   // Existing Goal/Task receipts survive PAT rotation; the Routine capability
   // explicitly binds its retry key to the issuing credential.
-  const receiptId = hash(
-    authority.receiptScope === 'credential'
-      ? [identityId, authority.connectionId, capability, input.idempotencyKey]
-      : [identityId, capability, input.idempotencyKey],
-  );
+  const receiptId = externalMutationReceiptId(identityId, authority, capability, input.idempotencyKey);
   const digest = hash(input);
   // Revalidate before BEGIN: the host check may use its own pool connection.
   await authority.authorize();

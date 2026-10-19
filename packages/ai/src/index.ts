@@ -143,3 +143,8 @@ export {
 } from './server/local-agent/local-tool-bridge';
 export { createAiBusinessDataPresence } from './server/infrastructure/business-data-presence';
 export { createAiPrismaPortableCapability } from './server/infrastructure/ai-profile-import';
+
+export type {
+  AIWorkflowRuntimePort,
+  ExternalWorkflowInvocation,
+} from './server/mastra/runtime/workflow-runtime.port';

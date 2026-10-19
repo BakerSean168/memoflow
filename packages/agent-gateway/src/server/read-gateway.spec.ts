@@ -257,6 +257,44 @@ it('discovers six reads only for explicit owner scopes and denies a cached Task 
   ]);
 });
 
+it('discovers assisted lifecycle tools only when the independent assisted port is enabled', async () => {
+  const f = fixture();
+  const assisted = {
+    start: vi.fn(),
+    get: vi.fn(),
+    review: vi.fn(),
+    resume: vi.fn(),
+    cancel: vi.fn(),
+  };
+  f.authenticate.mockResolvedValue({
+    identityId: 'owner-a',
+    credentialId: 'pat-a',
+    credentialType: 'pat',
+    scopes: ['goals:read'],
+  });
+  const base = await f.gateway.fetch(request('tools/list'), context);
+  expect((await base.json()).result.tools.map((tool: { name: string }) => tool.name)).not.toContain(
+    'assisted_workflow_start',
+  );
+  f.authenticate.mockResolvedValue({
+    identityId: 'owner-a',
+    credentialId: 'pat-a',
+    credentialType: 'pat',
+    scopes: ['tasks:write'],
+  });
+  const enabled = createReadGateway({ ...f.options, assisted });
+  const listing = await enabled.fetch(request('tools/list'), context);
+  const listingBody = await listing.json();
+  expect(listingBody, JSON.stringify(listingBody)).toHaveProperty('result.tools');
+  expect(listingBody.result.tools.map((tool: { name: string }) => tool.name)).toEqual([
+    'assisted_workflow_start',
+    'assisted_workflow_get',
+    'assisted_workflow_review',
+    'assisted_workflow_resume',
+    'assisted_workflow_cancel',
+  ]);
+});
+
 it('rechecks Task authority after discovery and rejects unknown tools and injected owner input', async () => {
   const f = fixture();
   const both = {
@@ -362,10 +400,12 @@ describe('Routine hosted write capability', () => {
       },
       replayed: false,
     };
-    const routineCreate = vi.fn(async (_input: unknown, _cx: ExecutionContext, authority: GatewayWriteAuthority) => {
-      await authority.authorize();
-      return receipt;
-    });
+    const routineCreate = vi.fn(
+      async (_input: unknown, _cx: ExecutionContext, authority: GatewayWriteAuthority) => {
+        await authority.authorize();
+        return receipt;
+      },
+    );
     const unavailable = vi.fn().mockRejectedValue(new Error('Unexpected owner'));
     const writes = {
       goalCreate: unavailable,

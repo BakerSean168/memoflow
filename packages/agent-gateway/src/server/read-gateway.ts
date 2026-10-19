@@ -1,6 +1,11 @@
 import { registerWriteTools } from './register-write-tools';
 import { writeToolDescriptors, type GatewayWriteToolName } from '../write-tool-descriptors';
-import type { GatewayWritePort } from '../ports';
+import {
+  assistedToolDescriptors,
+  type GatewayAssistedToolName,
+} from '../assisted-tool-descriptors';
+import { registerAssistedTools } from './register-assisted-tools';
+import type { GatewayAssistedPort, GatewayWritePort } from '../ports';
 import { registerReadTools } from './register-read-tools';
 import { readToolDescriptors, type GatewayReadToolName } from '../read-tool-descriptors';
 import { createMcpHandler, McpServer } from '@modelcontextprotocol/server';
@@ -18,6 +23,7 @@ import {
 interface Options {
   readonly enabled: boolean;
   readonly writes?: GatewayWritePort;
+  readonly assisted?: GatewayAssistedPort;
   readonly audience: string;
   readonly trustedOrigins: readonly string[];
   readonly cursorSecret: string;
@@ -30,13 +36,20 @@ interface Options {
   readonly diagnose?: (event: GatewayDiagnostic) => void;
   readonly consumeOwnerQuota: (identityId: string) => Promise<boolean>;
 }
-const toolDescriptors = { ...readToolDescriptors, ...writeToolDescriptors };
-type ToolName = GatewayReadToolName | GatewayWriteToolName;
+const toolDescriptors = {
+  ...readToolDescriptors,
+  ...writeToolDescriptors,
+  ...assistedToolDescriptors,
+};
+type ToolName = GatewayReadToolName | GatewayWriteToolName | GatewayAssistedToolName;
 function isToolName(name: string): name is ToolName {
   return Object.prototype.hasOwnProperty.call(toolDescriptors, name);
 }
 function isWriteToolName(name: string): name is GatewayWriteToolName {
   return Object.prototype.hasOwnProperty.call(writeToolDescriptors, name);
+}
+function isAssistedToolName(name: string): name is GatewayAssistedToolName {
+  return Object.prototype.hasOwnProperty.call(assistedToolDescriptors, name);
 }
 const MAX_BYTES = 256 * 1024;
 class ControlledError extends GatewayReadError {}
@@ -158,7 +171,7 @@ export function createReadGateway(options: Options) {
             (scope) =>
               scope === 'goals:read' ||
               scope === 'tasks:read' ||
-              (options.writes &&
+              ((options.writes || options.assisted) &&
                 principal.credentialType === 'pat' &&
                 (scope === 'goals:write' || scope === 'tasks:write' || scope === 'routines:write')),
           )
@@ -194,13 +207,22 @@ export function createReadGateway(options: Options) {
                 return reject(403, 'INSUFFICIENT_SCOPE');
               }
               if (
-                isWriteToolName(name) &&
-                (!options.writes || principal.credentialType !== 'pat')
+                (isWriteToolName(name) && !options.writes) ||
+                (isAssistedToolName(name) && !options.assisted) ||
+                ((isWriteToolName(name) || isAssistedToolName(name)) &&
+                  principal.credentialType !== 'pat')
               ) {
                 scopeDecision = 'denied';
                 return reject(404, 'DISABLED');
               }
               if (name === 'routine_create' && !options.writes?.routineCreate) {
+                scopeDecision = 'denied';
+                return reject(404, 'DISABLED');
+              }
+              if (
+                isAssistedToolName(name) &&
+                (!options.assisted || principal.credentialType !== 'pat')
+              ) {
                 scopeDecision = 'denied';
                 return reject(404, 'DISABLED');
               }
@@ -226,7 +248,7 @@ export function createReadGateway(options: Options) {
             // Writes revalidate in the write authority immediately before the
             // receipt transaction; doing it twice would open two pool
             // connections back-to-back for the same call.
-            if (!isWriteToolName(name)) {
+            if (!isWriteToolName(name) && !isAssistedToolName(name)) {
               const current = await within(
                 () => options.credentials.authenticate(auth, requestContext),
                 signal,
@@ -276,40 +298,38 @@ export function createReadGateway(options: Options) {
               { capabilities: { tools: {} } },
             );
             registerReadTools(server, options, context, budget, principal.scopes, call);
+            const authority: import('../ports').GatewayWriteAuthority = {
+              connectionId: principal.credentialId,
+              scopes: principal.scopes,
+              authorize: async () => {
+                const current = await within(
+                  () => options.credentials.authenticate(auth, requestContext),
+                  signal,
+                );
+                const required = isToolName(tool) ? toolDescriptors[tool].requiredScope : undefined;
+                if (
+                  !current ||
+                  current.identityId !== principal.identityId ||
+                  current.credentialId !== principal.credentialId ||
+                  current.credentialType !== principal.credentialType ||
+                  !required ||
+                  !current.scopes.includes(required) ||
+                  principal.scopes.some((scope) => !current.scopes.includes(scope))
+                )
+                  throw new ControlledError('FORBIDDEN');
+              },
+            };
             if (options.writes && principal.credentialType === 'pat')
               registerWriteTools(
                 server,
                 options.writes,
                 context,
                 principal.scopes,
-                {
-                  connectionId: principal.credentialId,
-                  scopes: principal.scopes,
-                  authorize: async () => {
-                    // runExternalMutation calls this before it opens the
-                    // receipt transaction, so revalidation never waits for a
-                    // second pool connection while a transaction is open.
-                    const current = await within(
-                      () => options.credentials.authenticate(auth, requestContext),
-                      signal,
-                    );
-                    const required = isToolName(tool)
-                      ? toolDescriptors[tool].requiredScope
-                      : undefined;
-                    if (
-                      !current ||
-                      current.identityId !== principal.identityId ||
-                      current.credentialId !== principal.credentialId ||
-                      current.credentialType !== principal.credentialType ||
-                      !required ||
-                      !current.scopes.includes(required) ||
-                      principal.scopes.some((scope) => !current.scopes.includes(scope))
-                    )
-                      throw new ControlledError('FORBIDDEN');
-                  },
-                },
+                authority,
                 call,
               );
+            if (options.assisted && principal.credentialType === 'pat')
+              registerAssistedTools(server, options.assisted, context, authority, call);
 
             return server;
           },
@@ -357,7 +377,7 @@ export function createReadGateway(options: Options) {
         try {
           options.audit({
             version: '1',
-            effect: isWriteToolName(tool) ? 'write' : 'read',
+            effect: isWriteToolName(tool) || isAssistedToolName(tool) ? 'write' : 'read',
             receiptId,
             replayed,
             scopeDecision,

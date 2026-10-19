@@ -29,6 +29,8 @@ export type TaskCreateClientInput = z.infer<typeof TaskCreateClientInputSchema>;
 
 export const TaskCreateWorkflowInputSchema = TaskCreateClientInputSchema.extend({
   identityId: z.string().min(1),
+  /** Host-only external binding. Never accepted by TaskCreateClientInputSchema. */
+  externalConnectionId: z.string().min(1).optional(),
   conversationId: z.string().min(1),
   locale: z.enum(['zh-CN', 'en-US']).default('zh-CN'),
   agentInstanceId: AgentInstanceSlugSchema.optional(),

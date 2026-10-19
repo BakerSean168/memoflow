@@ -126,6 +126,14 @@
       ]
     },
     {
+      "path": "apps/api/src/modules/agent-gateway/assisted-workflow.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "apps/api/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/api/src/modules/agent-gateway/audit.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6845,6 +6853,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/agent-gateway/assisted.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/agent-gateway/routine-writes.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13266,7 +13282,7 @@
       "type": "primary",
       "suite": "integration",
       "runner": "vitest",
-      "fileCount": 15
+      "fileCount": 16
     },
     {
       "id": "packages/account/vitest.integration.config.ts",
@@ -13448,7 +13464,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 97
+      "fileCount": 98
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -14192,8 +14208,8 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1184,
-    "integration": 51,
+    "unit": 1185,
+    "integration": 52,
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 9,

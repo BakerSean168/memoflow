@@ -86,6 +86,11 @@ export type AiKnowledgeIndexEntry = $Result.DefaultSelection<Prisma.$AiKnowledge
  */
 export type AiAgentRegistryMigration = $Result.DefaultSelection<Prisma.$AiAgentRegistryMigrationPayload>
 /**
+ * Model AiAssistedWorkflow
+ * External lifecycle metadata. Mastra snapshots remain the workflow state authority.
+ */
+export type AiAssistedWorkflow = $Result.DefaultSelection<Prisma.$AiAssistedWorkflowPayload>
+/**
  * Model CloudAuthUser
  *
  */
@@ -753,6 +758,16 @@ export class PrismaClient<
     * ```
     */
   get aiAgentRegistryMigration(): Prisma.AiAgentRegistryMigrationDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.aiAssistedWorkflow`: Exposes CRUD operations for the **AiAssistedWorkflow** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AiAssistedWorkflows
+    * const aiAssistedWorkflows = await prisma.aiAssistedWorkflow.findMany()
+    * ```
+    */
+  get aiAssistedWorkflow(): Prisma.AiAssistedWorkflowDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.cloudAuthUser`: Exposes CRUD operations for the **CloudAuthUser** model.
@@ -1993,6 +2008,7 @@ export namespace Prisma {
     AiProviderSecret: 'AiProviderSecret',
     AiKnowledgeIndexEntry: 'AiKnowledgeIndexEntry',
     AiAgentRegistryMigration: 'AiAgentRegistryMigration',
+    AiAssistedWorkflow: 'AiAssistedWorkflow',
     CloudAuthUser: 'CloudAuthUser',
     CloudAuthSession: 'CloudAuthSession',
     CloudAuthProviderAccount: 'CloudAuthProviderAccount',
@@ -2086,7 +2102,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "account" | "aiConversation" | "aiGoalSurfaceLease" | "aiConversationAttention" | "aiExecutionRecord" | "aiProviderConfig" | "aiAgentInstance" | "aiAgentInstanceBinding" | "aiAgentConversationBinding" | "aiProviderOnboardingSession" | "aiProviderSecret" | "aiKnowledgeIndexEntry" | "aiAgentRegistryMigration" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "externalAgentPat" | "externalAgentConnection" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "jwks" | "oauthClient" | "oauthResource" | "oauthClientResource" | "oauthRefreshToken" | "oauthAccessToken" | "oauthConsent" | "oauthClientAssertion" | "profileImportOperation" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "externalMutationReceipt" | "routineDefinition" | "routinePreference" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
+      modelProps: "account" | "aiConversation" | "aiGoalSurfaceLease" | "aiConversationAttention" | "aiExecutionRecord" | "aiProviderConfig" | "aiAgentInstance" | "aiAgentInstanceBinding" | "aiAgentConversationBinding" | "aiProviderOnboardingSession" | "aiProviderSecret" | "aiKnowledgeIndexEntry" | "aiAgentRegistryMigration" | "aiAssistedWorkflow" | "cloudAuthUser" | "cloudAuthSession" | "cloudAuthProviderAccount" | "cloudAuthVerification" | "cloudAuthDeviceCode" | "externalAgentPat" | "externalAgentConnection" | "goal" | "keyResult" | "goalRecord" | "goalReview" | "keyResultWeightSnapshot" | "habit" | "habitOccurrence" | "habitCheckIn" | "habitStreakProjection" | "label" | "goalLabel" | "taskLabel" | "notification" | "notificationInteraction" | "notificationDeliveryDecisionRecord" | "notificationPreference" | "notificationDispatchOutbox" | "jwks" | "oauthClient" | "oauthResource" | "oauthClientResource" | "oauthRefreshToken" | "oauthAccessToken" | "oauthConsent" | "oauthClientAssertion" | "profileImportOperation" | "relation" | "outboxMessage" | "inboxReceipt" | "projectionCursor" | "accountClosureOperation" | "operationAuditLog" | "externalMutationReceipt" | "routineDefinition" | "routinePreference" | "routineProfile" | "routineProfileMembership" | "routineProtocolDefinition" | "routineProtocolSession" | "routineOccurrence" | "routineInteraction" | "routineTemporaryOverride" | "knowledgeRepositoryInstallationIntent" | "knowledgeSpace" | "knowledgeDocumentIdentity" | "knowledgeRemoteBinding" | "remoteRepositoryObservation" | "remoteHistoryFence" | "knowledgeProjectionCheckpoint" | "githubWebhookDelivery" | "knowledgeNoteProjection" | "knowledgeAttachmentProjection" | "knowledgeAttachmentContentCache" | "knowledgeWriteRequest" | "knowledgeRepositoryLease" | "schedule" | "scheduledInvocation" | "invocationAttempt" | "schedulingReconcileOperation" | "scheduleLease" | "scheduleRebuildOutbox" | "scheduleDomainEventOutbox" | "scheduleEventConsumerReceipt" | "scheduleEventDeliveryLog" | "userPreferenceRecord" | "taskPlan" | "taskOccurrence" | "taskGoalOutbox" | "taskPlanHistory" | "walletAccount" | "walletTransaction"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3049,6 +3065,80 @@ export namespace Prisma {
           count: {
             args: Prisma.AiAgentRegistryMigrationCountArgs<ExtArgs>
             result: $Utils.Optional<AiAgentRegistryMigrationCountAggregateOutputType> | number
+          }
+        }
+      }
+      AiAssistedWorkflow: {
+        payload: Prisma.$AiAssistedWorkflowPayload<ExtArgs>
+        fields: Prisma.AiAssistedWorkflowFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AiAssistedWorkflowFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAssistedWorkflowPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AiAssistedWorkflowFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAssistedWorkflowPayload>
+          }
+          findFirst: {
+            args: Prisma.AiAssistedWorkflowFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAssistedWorkflowPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AiAssistedWorkflowFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAssistedWorkflowPayload>
+          }
+          findMany: {
+            args: Prisma.AiAssistedWorkflowFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAssistedWorkflowPayload>[]
+          }
+          create: {
+            args: Prisma.AiAssistedWorkflowCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAssistedWorkflowPayload>
+          }
+          createMany: {
+            args: Prisma.AiAssistedWorkflowCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AiAssistedWorkflowCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAssistedWorkflowPayload>[]
+          }
+          delete: {
+            args: Prisma.AiAssistedWorkflowDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAssistedWorkflowPayload>
+          }
+          update: {
+            args: Prisma.AiAssistedWorkflowUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAssistedWorkflowPayload>
+          }
+          deleteMany: {
+            args: Prisma.AiAssistedWorkflowDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AiAssistedWorkflowUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AiAssistedWorkflowUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAssistedWorkflowPayload>[]
+          }
+          upsert: {
+            args: Prisma.AiAssistedWorkflowUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AiAssistedWorkflowPayload>
+          }
+          aggregate: {
+            args: Prisma.AiAssistedWorkflowAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAiAssistedWorkflow>
+          }
+          groupBy: {
+            args: Prisma.AiAssistedWorkflowGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AiAssistedWorkflowGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AiAssistedWorkflowCountArgs<ExtArgs>
+            result: $Utils.Optional<AiAssistedWorkflowCountAggregateOutputType> | number
           }
         }
       }
@@ -8960,6 +9050,7 @@ export namespace Prisma {
     aiProviderSecret?: AiProviderSecretOmit
     aiKnowledgeIndexEntry?: AiKnowledgeIndexEntryOmit
     aiAgentRegistryMigration?: AiAgentRegistryMigrationOmit
+    aiAssistedWorkflow?: AiAssistedWorkflowOmit
     cloudAuthUser?: CloudAuthUserOmit
     cloudAuthSession?: CloudAuthSessionOmit
     cloudAuthProviderAccount?: CloudAuthProviderAccountOmit
@@ -9118,6 +9209,7 @@ export namespace Prisma {
    */
 
   export type AccountCountOutputType = {
+    assistedWorkflows: number
     externalMutationReceipts: number
     goals: number
     profileImportOperations: number
@@ -9163,6 +9255,7 @@ export namespace Prisma {
   }
 
   export type AccountCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    assistedWorkflows?: boolean | AccountCountOutputTypeCountAssistedWorkflowsArgs
     externalMutationReceipts?: boolean | AccountCountOutputTypeCountExternalMutationReceiptsArgs
     goals?: boolean | AccountCountOutputTypeCountGoalsArgs
     profileImportOperations?: boolean | AccountCountOutputTypeCountProfileImportOperationsArgs
@@ -9216,6 +9309,13 @@ export namespace Prisma {
      * Select specific fields to fetch from the AccountCountOutputType
      */
     select?: AccountCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * AccountCountOutputType without action
+   */
+  export type AccountCountOutputTypeCountAssistedWorkflowsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AiAssistedWorkflowWhereInput
   }
 
   /**
@@ -10637,6 +10737,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     closedAt?: boolean
+    assistedWorkflows?: boolean | Account$assistedWorkflowsArgs<ExtArgs>
     cloudUser?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
     externalMutationReceipts?: boolean | Account$externalMutationReceiptsArgs<ExtArgs>
     goals?: boolean | Account$goalsArgs<ExtArgs>
@@ -10715,6 +10816,7 @@ export namespace Prisma {
 
   export type AccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "status" | "profile" | "createdAt" | "updatedAt" | "closedAt", ExtArgs["result"]["account"]>
   export type AccountInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    assistedWorkflows?: boolean | Account$assistedWorkflowsArgs<ExtArgs>
     cloudUser?: boolean | CloudAuthUserDefaultArgs<ExtArgs>
     externalMutationReceipts?: boolean | Account$externalMutationReceiptsArgs<ExtArgs>
     goals?: boolean | Account$goalsArgs<ExtArgs>
@@ -10771,6 +10873,7 @@ export namespace Prisma {
   export type $AccountPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Account"
     objects: {
+      assistedWorkflows: Prisma.$AiAssistedWorkflowPayload<ExtArgs>[]
       cloudUser: Prisma.$CloudAuthUserPayload<ExtArgs>
       externalMutationReceipts: Prisma.$ExternalMutationReceiptPayload<ExtArgs>[]
       goals: Prisma.$GoalPayload<ExtArgs>[]
@@ -11217,6 +11320,7 @@ export namespace Prisma {
    */
   export interface Prisma__AccountClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    assistedWorkflows<T extends Account$assistedWorkflowsArgs<ExtArgs> = {}>(args?: Subset<T, Account$assistedWorkflowsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAssistedWorkflowPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     cloudUser<T extends CloudAuthUserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CloudAuthUserDefaultArgs<ExtArgs>>): Prisma__CloudAuthUserClient<$Result.GetResult<Prisma.$CloudAuthUserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     externalMutationReceipts<T extends Account$externalMutationReceiptsArgs<ExtArgs> = {}>(args?: Subset<T, Account$externalMutationReceiptsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ExternalMutationReceiptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     goals<T extends Account$goalsArgs<ExtArgs> = {}>(args?: Subset<T, Account$goalsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GoalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -11694,6 +11798,30 @@ export namespace Prisma {
      * Limit how many Accounts to delete.
      */
     limit?: number
+  }
+
+  /**
+   * Account.assistedWorkflows
+   */
+  export type Account$assistedWorkflowsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAssistedWorkflow
+     */
+    select?: AiAssistedWorkflowSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAssistedWorkflow
+     */
+    omit?: AiAssistedWorkflowOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAssistedWorkflowInclude<ExtArgs> | null
+    where?: AiAssistedWorkflowWhereInput
+    orderBy?: AiAssistedWorkflowOrderByWithRelationInput | AiAssistedWorkflowOrderByWithRelationInput[]
+    cursor?: AiAssistedWorkflowWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AiAssistedWorkflowScalarFieldEnum | AiAssistedWorkflowScalarFieldEnum[]
   }
 
   /**
@@ -26638,6 +26766,1233 @@ export namespace Prisma {
      * Omit specific fields from the AiAgentRegistryMigration
      */
     omit?: AiAgentRegistryMigrationOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AiAssistedWorkflow
+   */
+
+  export type AggregateAiAssistedWorkflow = {
+    _count: AiAssistedWorkflowCountAggregateOutputType | null
+    _avg: AiAssistedWorkflowAvgAggregateOutputType | null
+    _sum: AiAssistedWorkflowSumAggregateOutputType | null
+    _min: AiAssistedWorkflowMinAggregateOutputType | null
+    _max: AiAssistedWorkflowMaxAggregateOutputType | null
+  }
+
+  export type AiAssistedWorkflowAvgAggregateOutputType = {
+    revision: number | null
+  }
+
+  export type AiAssistedWorkflowSumAggregateOutputType = {
+    revision: number | null
+  }
+
+  export type AiAssistedWorkflowMinAggregateOutputType = {
+    id: string | null
+    identityId: string | null
+    connectionId: string | null
+    kind: string | null
+    runId: string | null
+    requestKey: string | null
+    requestDigest: string | null
+    requestJson: string | null
+    revision: number | null
+    viewJson: string | null
+    pendingJson: string | null
+    stepKey: string | null
+    stepsJson: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AiAssistedWorkflowMaxAggregateOutputType = {
+    id: string | null
+    identityId: string | null
+    connectionId: string | null
+    kind: string | null
+    runId: string | null
+    requestKey: string | null
+    requestDigest: string | null
+    requestJson: string | null
+    revision: number | null
+    viewJson: string | null
+    pendingJson: string | null
+    stepKey: string | null
+    stepsJson: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AiAssistedWorkflowCountAggregateOutputType = {
+    id: number
+    identityId: number
+    connectionId: number
+    kind: number
+    runId: number
+    requestKey: number
+    requestDigest: number
+    requestJson: number
+    revision: number
+    viewJson: number
+    pendingJson: number
+    stepKey: number
+    stepsJson: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type AiAssistedWorkflowAvgAggregateInputType = {
+    revision?: true
+  }
+
+  export type AiAssistedWorkflowSumAggregateInputType = {
+    revision?: true
+  }
+
+  export type AiAssistedWorkflowMinAggregateInputType = {
+    id?: true
+    identityId?: true
+    connectionId?: true
+    kind?: true
+    runId?: true
+    requestKey?: true
+    requestDigest?: true
+    requestJson?: true
+    revision?: true
+    viewJson?: true
+    pendingJson?: true
+    stepKey?: true
+    stepsJson?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AiAssistedWorkflowMaxAggregateInputType = {
+    id?: true
+    identityId?: true
+    connectionId?: true
+    kind?: true
+    runId?: true
+    requestKey?: true
+    requestDigest?: true
+    requestJson?: true
+    revision?: true
+    viewJson?: true
+    pendingJson?: true
+    stepKey?: true
+    stepsJson?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AiAssistedWorkflowCountAggregateInputType = {
+    id?: true
+    identityId?: true
+    connectionId?: true
+    kind?: true
+    runId?: true
+    requestKey?: true
+    requestDigest?: true
+    requestJson?: true
+    revision?: true
+    viewJson?: true
+    pendingJson?: true
+    stepKey?: true
+    stepsJson?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type AiAssistedWorkflowAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiAssistedWorkflow to aggregate.
+     */
+    where?: AiAssistedWorkflowWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiAssistedWorkflows to fetch.
+     */
+    orderBy?: AiAssistedWorkflowOrderByWithRelationInput | AiAssistedWorkflowOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: AiAssistedWorkflowWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiAssistedWorkflows from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiAssistedWorkflows.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned AiAssistedWorkflows
+    **/
+    _count?: true | AiAssistedWorkflowCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to average
+    **/
+    _avg?: AiAssistedWorkflowAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to sum
+    **/
+    _sum?: AiAssistedWorkflowSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: AiAssistedWorkflowMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: AiAssistedWorkflowMaxAggregateInputType
+  }
+
+  export type GetAiAssistedWorkflowAggregateType<T extends AiAssistedWorkflowAggregateArgs> = {
+        [P in keyof T & keyof AggregateAiAssistedWorkflow]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAiAssistedWorkflow[P]>
+      : GetScalarType<T[P], AggregateAiAssistedWorkflow[P]>
+  }
+
+
+
+
+  export type AiAssistedWorkflowGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AiAssistedWorkflowWhereInput
+    orderBy?: AiAssistedWorkflowOrderByWithAggregationInput | AiAssistedWorkflowOrderByWithAggregationInput[]
+    by: AiAssistedWorkflowScalarFieldEnum[] | AiAssistedWorkflowScalarFieldEnum
+    having?: AiAssistedWorkflowScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AiAssistedWorkflowCountAggregateInputType | true
+    _avg?: AiAssistedWorkflowAvgAggregateInputType
+    _sum?: AiAssistedWorkflowSumAggregateInputType
+    _min?: AiAssistedWorkflowMinAggregateInputType
+    _max?: AiAssistedWorkflowMaxAggregateInputType
+  }
+
+  export type AiAssistedWorkflowGroupByOutputType = {
+    id: string
+    identityId: string
+    connectionId: string
+    kind: string
+    runId: string
+    requestKey: string
+    requestDigest: string
+    requestJson: string
+    revision: number
+    viewJson: string | null
+    pendingJson: string | null
+    stepKey: string | null
+    stepsJson: string
+    createdAt: Date
+    updatedAt: Date
+    _count: AiAssistedWorkflowCountAggregateOutputType | null
+    _avg: AiAssistedWorkflowAvgAggregateOutputType | null
+    _sum: AiAssistedWorkflowSumAggregateOutputType | null
+    _min: AiAssistedWorkflowMinAggregateOutputType | null
+    _max: AiAssistedWorkflowMaxAggregateOutputType | null
+  }
+
+  type GetAiAssistedWorkflowGroupByPayload<T extends AiAssistedWorkflowGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AiAssistedWorkflowGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AiAssistedWorkflowGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AiAssistedWorkflowGroupByOutputType[P]>
+            : GetScalarType<T[P], AiAssistedWorkflowGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AiAssistedWorkflowSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    connectionId?: boolean
+    kind?: boolean
+    runId?: boolean
+    requestKey?: boolean
+    requestDigest?: boolean
+    requestJson?: boolean
+    revision?: boolean
+    viewJson?: boolean
+    pendingJson?: boolean
+    stepKey?: boolean
+    stepsJson?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aiAssistedWorkflow"]>
+
+  export type AiAssistedWorkflowSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    connectionId?: boolean
+    kind?: boolean
+    runId?: boolean
+    requestKey?: boolean
+    requestDigest?: boolean
+    requestJson?: boolean
+    revision?: boolean
+    viewJson?: boolean
+    pendingJson?: boolean
+    stepKey?: boolean
+    stepsJson?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aiAssistedWorkflow"]>
+
+  export type AiAssistedWorkflowSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    identityId?: boolean
+    connectionId?: boolean
+    kind?: boolean
+    runId?: boolean
+    requestKey?: boolean
+    requestDigest?: boolean
+    requestJson?: boolean
+    revision?: boolean
+    viewJson?: boolean
+    pendingJson?: boolean
+    stepKey?: boolean
+    stepsJson?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["aiAssistedWorkflow"]>
+
+  export type AiAssistedWorkflowSelectScalar = {
+    id?: boolean
+    identityId?: boolean
+    connectionId?: boolean
+    kind?: boolean
+    runId?: boolean
+    requestKey?: boolean
+    requestDigest?: boolean
+    requestJson?: boolean
+    revision?: boolean
+    viewJson?: boolean
+    pendingJson?: boolean
+    stepKey?: boolean
+    stepsJson?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type AiAssistedWorkflowOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "identityId" | "connectionId" | "kind" | "runId" | "requestKey" | "requestDigest" | "requestJson" | "revision" | "viewJson" | "pendingJson" | "stepKey" | "stepsJson" | "createdAt" | "updatedAt", ExtArgs["result"]["aiAssistedWorkflow"]>
+  export type AiAssistedWorkflowInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+  export type AiAssistedWorkflowIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+  export type AiAssistedWorkflowIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    account?: boolean | AccountDefaultArgs<ExtArgs>
+  }
+
+  export type $AiAssistedWorkflowPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AiAssistedWorkflow"
+    objects: {
+      account: Prisma.$AccountPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      identityId: string
+      connectionId: string
+      kind: string
+      runId: string
+      requestKey: string
+      requestDigest: string
+      requestJson: string
+      revision: number
+      viewJson: string | null
+      pendingJson: string | null
+      stepKey: string | null
+      stepsJson: string
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["aiAssistedWorkflow"]>
+    composites: {}
+  }
+
+  type AiAssistedWorkflowGetPayload<S extends boolean | null | undefined | AiAssistedWorkflowDefaultArgs> = $Result.GetResult<Prisma.$AiAssistedWorkflowPayload, S>
+
+  type AiAssistedWorkflowCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AiAssistedWorkflowFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AiAssistedWorkflowCountAggregateInputType | true
+    }
+
+  export interface AiAssistedWorkflowDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AiAssistedWorkflow'], meta: { name: 'AiAssistedWorkflow' } }
+    /**
+     * Find zero or one AiAssistedWorkflow that matches the filter.
+     * @param {AiAssistedWorkflowFindUniqueArgs} args - Arguments to find a AiAssistedWorkflow
+     * @example
+     * // Get one AiAssistedWorkflow
+     * const aiAssistedWorkflow = await prisma.aiAssistedWorkflow.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AiAssistedWorkflowFindUniqueArgs>(args: SelectSubset<T, AiAssistedWorkflowFindUniqueArgs<ExtArgs>>): Prisma__AiAssistedWorkflowClient<$Result.GetResult<Prisma.$AiAssistedWorkflowPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AiAssistedWorkflow that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AiAssistedWorkflowFindUniqueOrThrowArgs} args - Arguments to find a AiAssistedWorkflow
+     * @example
+     * // Get one AiAssistedWorkflow
+     * const aiAssistedWorkflow = await prisma.aiAssistedWorkflow.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AiAssistedWorkflowFindUniqueOrThrowArgs>(args: SelectSubset<T, AiAssistedWorkflowFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AiAssistedWorkflowClient<$Result.GetResult<Prisma.$AiAssistedWorkflowPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiAssistedWorkflow that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAssistedWorkflowFindFirstArgs} args - Arguments to find a AiAssistedWorkflow
+     * @example
+     * // Get one AiAssistedWorkflow
+     * const aiAssistedWorkflow = await prisma.aiAssistedWorkflow.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AiAssistedWorkflowFindFirstArgs>(args?: SelectSubset<T, AiAssistedWorkflowFindFirstArgs<ExtArgs>>): Prisma__AiAssistedWorkflowClient<$Result.GetResult<Prisma.$AiAssistedWorkflowPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AiAssistedWorkflow that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAssistedWorkflowFindFirstOrThrowArgs} args - Arguments to find a AiAssistedWorkflow
+     * @example
+     * // Get one AiAssistedWorkflow
+     * const aiAssistedWorkflow = await prisma.aiAssistedWorkflow.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AiAssistedWorkflowFindFirstOrThrowArgs>(args?: SelectSubset<T, AiAssistedWorkflowFindFirstOrThrowArgs<ExtArgs>>): Prisma__AiAssistedWorkflowClient<$Result.GetResult<Prisma.$AiAssistedWorkflowPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AiAssistedWorkflows that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAssistedWorkflowFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AiAssistedWorkflows
+     * const aiAssistedWorkflows = await prisma.aiAssistedWorkflow.findMany()
+     *
+     * // Get first 10 AiAssistedWorkflows
+     * const aiAssistedWorkflows = await prisma.aiAssistedWorkflow.findMany({ take: 10 })
+     *
+     * // Only select the `id`
+     * const aiAssistedWorkflowWithIdOnly = await prisma.aiAssistedWorkflow.findMany({ select: { id: true } })
+     *
+     */
+    findMany<T extends AiAssistedWorkflowFindManyArgs>(args?: SelectSubset<T, AiAssistedWorkflowFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAssistedWorkflowPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AiAssistedWorkflow.
+     * @param {AiAssistedWorkflowCreateArgs} args - Arguments to create a AiAssistedWorkflow.
+     * @example
+     * // Create one AiAssistedWorkflow
+     * const AiAssistedWorkflow = await prisma.aiAssistedWorkflow.create({
+     *   data: {
+     *     // ... data to create a AiAssistedWorkflow
+     *   }
+     * })
+     *
+     */
+    create<T extends AiAssistedWorkflowCreateArgs>(args: SelectSubset<T, AiAssistedWorkflowCreateArgs<ExtArgs>>): Prisma__AiAssistedWorkflowClient<$Result.GetResult<Prisma.$AiAssistedWorkflowPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AiAssistedWorkflows.
+     * @param {AiAssistedWorkflowCreateManyArgs} args - Arguments to create many AiAssistedWorkflows.
+     * @example
+     * // Create many AiAssistedWorkflows
+     * const aiAssistedWorkflow = await prisma.aiAssistedWorkflow.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends AiAssistedWorkflowCreateManyArgs>(args?: SelectSubset<T, AiAssistedWorkflowCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AiAssistedWorkflows and returns the data saved in the database.
+     * @param {AiAssistedWorkflowCreateManyAndReturnArgs} args - Arguments to create many AiAssistedWorkflows.
+     * @example
+     * // Create many AiAssistedWorkflows
+     * const aiAssistedWorkflow = await prisma.aiAssistedWorkflow.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many AiAssistedWorkflows and only return the `id`
+     * const aiAssistedWorkflowWithIdOnly = await prisma.aiAssistedWorkflow.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends AiAssistedWorkflowCreateManyAndReturnArgs>(args?: SelectSubset<T, AiAssistedWorkflowCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAssistedWorkflowPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AiAssistedWorkflow.
+     * @param {AiAssistedWorkflowDeleteArgs} args - Arguments to delete one AiAssistedWorkflow.
+     * @example
+     * // Delete one AiAssistedWorkflow
+     * const AiAssistedWorkflow = await prisma.aiAssistedWorkflow.delete({
+     *   where: {
+     *     // ... filter to delete one AiAssistedWorkflow
+     *   }
+     * })
+     *
+     */
+    delete<T extends AiAssistedWorkflowDeleteArgs>(args: SelectSubset<T, AiAssistedWorkflowDeleteArgs<ExtArgs>>): Prisma__AiAssistedWorkflowClient<$Result.GetResult<Prisma.$AiAssistedWorkflowPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AiAssistedWorkflow.
+     * @param {AiAssistedWorkflowUpdateArgs} args - Arguments to update one AiAssistedWorkflow.
+     * @example
+     * // Update one AiAssistedWorkflow
+     * const aiAssistedWorkflow = await prisma.aiAssistedWorkflow.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends AiAssistedWorkflowUpdateArgs>(args: SelectSubset<T, AiAssistedWorkflowUpdateArgs<ExtArgs>>): Prisma__AiAssistedWorkflowClient<$Result.GetResult<Prisma.$AiAssistedWorkflowPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AiAssistedWorkflows.
+     * @param {AiAssistedWorkflowDeleteManyArgs} args - Arguments to filter AiAssistedWorkflows to delete.
+     * @example
+     * // Delete a few AiAssistedWorkflows
+     * const { count } = await prisma.aiAssistedWorkflow.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends AiAssistedWorkflowDeleteManyArgs>(args?: SelectSubset<T, AiAssistedWorkflowDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiAssistedWorkflows.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAssistedWorkflowUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AiAssistedWorkflows
+     * const aiAssistedWorkflow = await prisma.aiAssistedWorkflow.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends AiAssistedWorkflowUpdateManyArgs>(args: SelectSubset<T, AiAssistedWorkflowUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AiAssistedWorkflows and returns the data updated in the database.
+     * @param {AiAssistedWorkflowUpdateManyAndReturnArgs} args - Arguments to update many AiAssistedWorkflows.
+     * @example
+     * // Update many AiAssistedWorkflows
+     * const aiAssistedWorkflow = await prisma.aiAssistedWorkflow.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more AiAssistedWorkflows and only return the `id`
+     * const aiAssistedWorkflowWithIdOnly = await prisma.aiAssistedWorkflow.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends AiAssistedWorkflowUpdateManyAndReturnArgs>(args: SelectSubset<T, AiAssistedWorkflowUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AiAssistedWorkflowPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AiAssistedWorkflow.
+     * @param {AiAssistedWorkflowUpsertArgs} args - Arguments to update or create a AiAssistedWorkflow.
+     * @example
+     * // Update or create a AiAssistedWorkflow
+     * const aiAssistedWorkflow = await prisma.aiAssistedWorkflow.upsert({
+     *   create: {
+     *     // ... data to create a AiAssistedWorkflow
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AiAssistedWorkflow we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AiAssistedWorkflowUpsertArgs>(args: SelectSubset<T, AiAssistedWorkflowUpsertArgs<ExtArgs>>): Prisma__AiAssistedWorkflowClient<$Result.GetResult<Prisma.$AiAssistedWorkflowPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AiAssistedWorkflows.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAssistedWorkflowCountArgs} args - Arguments to filter AiAssistedWorkflows to count.
+     * @example
+     * // Count the number of AiAssistedWorkflows
+     * const count = await prisma.aiAssistedWorkflow.count({
+     *   where: {
+     *     // ... the filter for the AiAssistedWorkflows we want to count
+     *   }
+     * })
+    **/
+    count<T extends AiAssistedWorkflowCountArgs>(
+      args?: Subset<T, AiAssistedWorkflowCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AiAssistedWorkflowCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AiAssistedWorkflow.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAssistedWorkflowAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AiAssistedWorkflowAggregateArgs>(args: Subset<T, AiAssistedWorkflowAggregateArgs>): Prisma.PrismaPromise<GetAiAssistedWorkflowAggregateType<T>>
+
+    /**
+     * Group by AiAssistedWorkflow.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AiAssistedWorkflowGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends AiAssistedWorkflowGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AiAssistedWorkflowGroupByArgs['orderBy'] }
+        : { orderBy?: AiAssistedWorkflowGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AiAssistedWorkflowGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAiAssistedWorkflowGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AiAssistedWorkflow model
+   */
+  readonly fields: AiAssistedWorkflowFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AiAssistedWorkflow.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AiAssistedWorkflowClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    account<T extends AccountDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AccountDefaultArgs<ExtArgs>>): Prisma__AccountClient<$Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AiAssistedWorkflow model
+   */
+  interface AiAssistedWorkflowFieldRefs {
+    readonly id: FieldRef<"AiAssistedWorkflow", 'String'>
+    readonly identityId: FieldRef<"AiAssistedWorkflow", 'String'>
+    readonly connectionId: FieldRef<"AiAssistedWorkflow", 'String'>
+    readonly kind: FieldRef<"AiAssistedWorkflow", 'String'>
+    readonly runId: FieldRef<"AiAssistedWorkflow", 'String'>
+    readonly requestKey: FieldRef<"AiAssistedWorkflow", 'String'>
+    readonly requestDigest: FieldRef<"AiAssistedWorkflow", 'String'>
+    readonly requestJson: FieldRef<"AiAssistedWorkflow", 'String'>
+    readonly revision: FieldRef<"AiAssistedWorkflow", 'Int'>
+    readonly viewJson: FieldRef<"AiAssistedWorkflow", 'String'>
+    readonly pendingJson: FieldRef<"AiAssistedWorkflow", 'String'>
+    readonly stepKey: FieldRef<"AiAssistedWorkflow", 'String'>
+    readonly stepsJson: FieldRef<"AiAssistedWorkflow", 'String'>
+    readonly createdAt: FieldRef<"AiAssistedWorkflow", 'DateTime'>
+    readonly updatedAt: FieldRef<"AiAssistedWorkflow", 'DateTime'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * AiAssistedWorkflow findUnique
+   */
+  export type AiAssistedWorkflowFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAssistedWorkflow
+     */
+    select?: AiAssistedWorkflowSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAssistedWorkflow
+     */
+    omit?: AiAssistedWorkflowOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAssistedWorkflowInclude<ExtArgs> | null
+    /**
+     * Filter, which AiAssistedWorkflow to fetch.
+     */
+    where: AiAssistedWorkflowWhereUniqueInput
+  }
+
+  /**
+   * AiAssistedWorkflow findUniqueOrThrow
+   */
+  export type AiAssistedWorkflowFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAssistedWorkflow
+     */
+    select?: AiAssistedWorkflowSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAssistedWorkflow
+     */
+    omit?: AiAssistedWorkflowOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAssistedWorkflowInclude<ExtArgs> | null
+    /**
+     * Filter, which AiAssistedWorkflow to fetch.
+     */
+    where: AiAssistedWorkflowWhereUniqueInput
+  }
+
+  /**
+   * AiAssistedWorkflow findFirst
+   */
+  export type AiAssistedWorkflowFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAssistedWorkflow
+     */
+    select?: AiAssistedWorkflowSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAssistedWorkflow
+     */
+    omit?: AiAssistedWorkflowOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAssistedWorkflowInclude<ExtArgs> | null
+    /**
+     * Filter, which AiAssistedWorkflow to fetch.
+     */
+    where?: AiAssistedWorkflowWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiAssistedWorkflows to fetch.
+     */
+    orderBy?: AiAssistedWorkflowOrderByWithRelationInput | AiAssistedWorkflowOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for AiAssistedWorkflows.
+     */
+    cursor?: AiAssistedWorkflowWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiAssistedWorkflows from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiAssistedWorkflows.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiAssistedWorkflows.
+     */
+    distinct?: AiAssistedWorkflowScalarFieldEnum | AiAssistedWorkflowScalarFieldEnum[]
+  }
+
+  /**
+   * AiAssistedWorkflow findFirstOrThrow
+   */
+  export type AiAssistedWorkflowFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAssistedWorkflow
+     */
+    select?: AiAssistedWorkflowSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAssistedWorkflow
+     */
+    omit?: AiAssistedWorkflowOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAssistedWorkflowInclude<ExtArgs> | null
+    /**
+     * Filter, which AiAssistedWorkflow to fetch.
+     */
+    where?: AiAssistedWorkflowWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiAssistedWorkflows to fetch.
+     */
+    orderBy?: AiAssistedWorkflowOrderByWithRelationInput | AiAssistedWorkflowOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for AiAssistedWorkflows.
+     */
+    cursor?: AiAssistedWorkflowWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiAssistedWorkflows from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiAssistedWorkflows.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiAssistedWorkflows.
+     */
+    distinct?: AiAssistedWorkflowScalarFieldEnum | AiAssistedWorkflowScalarFieldEnum[]
+  }
+
+  /**
+   * AiAssistedWorkflow findMany
+   */
+  export type AiAssistedWorkflowFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAssistedWorkflow
+     */
+    select?: AiAssistedWorkflowSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAssistedWorkflow
+     */
+    omit?: AiAssistedWorkflowOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAssistedWorkflowInclude<ExtArgs> | null
+    /**
+     * Filter, which AiAssistedWorkflows to fetch.
+     */
+    where?: AiAssistedWorkflowWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of AiAssistedWorkflows to fetch.
+     */
+    orderBy?: AiAssistedWorkflowOrderByWithRelationInput | AiAssistedWorkflowOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing AiAssistedWorkflows.
+     */
+    cursor?: AiAssistedWorkflowWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` AiAssistedWorkflows from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` AiAssistedWorkflows.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of AiAssistedWorkflows.
+     */
+    distinct?: AiAssistedWorkflowScalarFieldEnum | AiAssistedWorkflowScalarFieldEnum[]
+  }
+
+  /**
+   * AiAssistedWorkflow create
+   */
+  export type AiAssistedWorkflowCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAssistedWorkflow
+     */
+    select?: AiAssistedWorkflowSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAssistedWorkflow
+     */
+    omit?: AiAssistedWorkflowOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAssistedWorkflowInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AiAssistedWorkflow.
+     */
+    data: XOR<AiAssistedWorkflowCreateInput, AiAssistedWorkflowUncheckedCreateInput>
+  }
+
+  /**
+   * AiAssistedWorkflow createMany
+   */
+  export type AiAssistedWorkflowCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AiAssistedWorkflows.
+     */
+    data: AiAssistedWorkflowCreateManyInput | AiAssistedWorkflowCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AiAssistedWorkflow createManyAndReturn
+   */
+  export type AiAssistedWorkflowCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAssistedWorkflow
+     */
+    select?: AiAssistedWorkflowSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAssistedWorkflow
+     */
+    omit?: AiAssistedWorkflowOmit<ExtArgs> | null
+    /**
+     * The data used to create many AiAssistedWorkflows.
+     */
+    data: AiAssistedWorkflowCreateManyInput | AiAssistedWorkflowCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAssistedWorkflowIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AiAssistedWorkflow update
+   */
+  export type AiAssistedWorkflowUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAssistedWorkflow
+     */
+    select?: AiAssistedWorkflowSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAssistedWorkflow
+     */
+    omit?: AiAssistedWorkflowOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAssistedWorkflowInclude<ExtArgs> | null
+    /**
+     * The data needed to update a AiAssistedWorkflow.
+     */
+    data: XOR<AiAssistedWorkflowUpdateInput, AiAssistedWorkflowUncheckedUpdateInput>
+    /**
+     * Choose, which AiAssistedWorkflow to update.
+     */
+    where: AiAssistedWorkflowWhereUniqueInput
+  }
+
+  /**
+   * AiAssistedWorkflow updateMany
+   */
+  export type AiAssistedWorkflowUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AiAssistedWorkflows.
+     */
+    data: XOR<AiAssistedWorkflowUpdateManyMutationInput, AiAssistedWorkflowUncheckedUpdateManyInput>
+    /**
+     * Filter which AiAssistedWorkflows to update
+     */
+    where?: AiAssistedWorkflowWhereInput
+    /**
+     * Limit how many AiAssistedWorkflows to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiAssistedWorkflow updateManyAndReturn
+   */
+  export type AiAssistedWorkflowUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAssistedWorkflow
+     */
+    select?: AiAssistedWorkflowSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAssistedWorkflow
+     */
+    omit?: AiAssistedWorkflowOmit<ExtArgs> | null
+    /**
+     * The data used to update AiAssistedWorkflows.
+     */
+    data: XOR<AiAssistedWorkflowUpdateManyMutationInput, AiAssistedWorkflowUncheckedUpdateManyInput>
+    /**
+     * Filter which AiAssistedWorkflows to update
+     */
+    where?: AiAssistedWorkflowWhereInput
+    /**
+     * Limit how many AiAssistedWorkflows to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAssistedWorkflowIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AiAssistedWorkflow upsert
+   */
+  export type AiAssistedWorkflowUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAssistedWorkflow
+     */
+    select?: AiAssistedWorkflowSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAssistedWorkflow
+     */
+    omit?: AiAssistedWorkflowOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAssistedWorkflowInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AiAssistedWorkflow to update in case it exists.
+     */
+    where: AiAssistedWorkflowWhereUniqueInput
+    /**
+     * In case the AiAssistedWorkflow found by the `where` argument doesn't exist, create a new AiAssistedWorkflow with this data.
+     */
+    create: XOR<AiAssistedWorkflowCreateInput, AiAssistedWorkflowUncheckedCreateInput>
+    /**
+     * In case the AiAssistedWorkflow was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AiAssistedWorkflowUpdateInput, AiAssistedWorkflowUncheckedUpdateInput>
+  }
+
+  /**
+   * AiAssistedWorkflow delete
+   */
+  export type AiAssistedWorkflowDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAssistedWorkflow
+     */
+    select?: AiAssistedWorkflowSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAssistedWorkflow
+     */
+    omit?: AiAssistedWorkflowOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAssistedWorkflowInclude<ExtArgs> | null
+    /**
+     * Filter which AiAssistedWorkflow to delete.
+     */
+    where: AiAssistedWorkflowWhereUniqueInput
+  }
+
+  /**
+   * AiAssistedWorkflow deleteMany
+   */
+  export type AiAssistedWorkflowDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AiAssistedWorkflows to delete
+     */
+    where?: AiAssistedWorkflowWhereInput
+    /**
+     * Limit how many AiAssistedWorkflows to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AiAssistedWorkflow without action
+   */
+  export type AiAssistedWorkflowDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AiAssistedWorkflow
+     */
+    select?: AiAssistedWorkflowSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AiAssistedWorkflow
+     */
+    omit?: AiAssistedWorkflowOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AiAssistedWorkflowInclude<ExtArgs> | null
   }
 
 
@@ -118431,6 +119786,27 @@ export namespace Prisma {
   export type AiAgentRegistryMigrationScalarFieldEnum = (typeof AiAgentRegistryMigrationScalarFieldEnum)[keyof typeof AiAgentRegistryMigrationScalarFieldEnum]
 
 
+  export const AiAssistedWorkflowScalarFieldEnum: {
+    id: 'id',
+    identityId: 'identityId',
+    connectionId: 'connectionId',
+    kind: 'kind',
+    runId: 'runId',
+    requestKey: 'requestKey',
+    requestDigest: 'requestDigest',
+    requestJson: 'requestJson',
+    revision: 'revision',
+    viewJson: 'viewJson',
+    pendingJson: 'pendingJson',
+    stepKey: 'stepKey',
+    stepsJson: 'stepsJson',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type AiAssistedWorkflowScalarFieldEnum = (typeof AiAssistedWorkflowScalarFieldEnum)[keyof typeof AiAssistedWorkflowScalarFieldEnum]
+
+
   export const CloudAuthUserScalarFieldEnum: {
     id: 'id',
     name: 'name',
@@ -119944,6 +121320,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Account"> | Date | string
     updatedAt?: DateTimeFilter<"Account"> | Date | string
     closedAt?: DateTimeNullableFilter<"Account"> | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowListRelationFilter
     cloudUser?: XOR<CloudAuthUserScalarRelationFilter, CloudAuthUserWhereInput>
     externalMutationReceipts?: ExternalMutationReceiptListRelationFilter
     goals?: GoalListRelationFilter
@@ -119997,6 +121374,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     closedAt?: SortOrderInput | SortOrder
+    assistedWorkflows?: AiAssistedWorkflowOrderByRelationAggregateInput
     cloudUser?: CloudAuthUserOrderByWithRelationInput
     externalMutationReceipts?: ExternalMutationReceiptOrderByRelationAggregateInput
     goals?: GoalOrderByRelationAggregateInput
@@ -120053,6 +121431,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Account"> | Date | string
     updatedAt?: DateTimeFilter<"Account"> | Date | string
     closedAt?: DateTimeNullableFilter<"Account"> | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowListRelationFilter
     cloudUser?: XOR<CloudAuthUserScalarRelationFilter, CloudAuthUserWhereInput>
     externalMutationReceipts?: ExternalMutationReceiptListRelationFilter
     goals?: GoalListRelationFilter
@@ -121155,6 +122534,114 @@ export namespace Prisma {
     OR?: AiAgentRegistryMigrationScalarWhereWithAggregatesInput[]
     NOT?: AiAgentRegistryMigrationScalarWhereWithAggregatesInput | AiAgentRegistryMigrationScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"AiAgentRegistryMigration"> | string
+  }
+
+  export type AiAssistedWorkflowWhereInput = {
+    AND?: AiAssistedWorkflowWhereInput | AiAssistedWorkflowWhereInput[]
+    OR?: AiAssistedWorkflowWhereInput[]
+    NOT?: AiAssistedWorkflowWhereInput | AiAssistedWorkflowWhereInput[]
+    id?: StringFilter<"AiAssistedWorkflow"> | string
+    identityId?: StringFilter<"AiAssistedWorkflow"> | string
+    connectionId?: StringFilter<"AiAssistedWorkflow"> | string
+    kind?: StringFilter<"AiAssistedWorkflow"> | string
+    runId?: StringFilter<"AiAssistedWorkflow"> | string
+    requestKey?: StringFilter<"AiAssistedWorkflow"> | string
+    requestDigest?: StringFilter<"AiAssistedWorkflow"> | string
+    requestJson?: StringFilter<"AiAssistedWorkflow"> | string
+    revision?: IntFilter<"AiAssistedWorkflow"> | number
+    viewJson?: StringNullableFilter<"AiAssistedWorkflow"> | string | null
+    pendingJson?: StringNullableFilter<"AiAssistedWorkflow"> | string | null
+    stepKey?: StringNullableFilter<"AiAssistedWorkflow"> | string | null
+    stepsJson?: StringFilter<"AiAssistedWorkflow"> | string
+    createdAt?: DateTimeFilter<"AiAssistedWorkflow"> | Date | string
+    updatedAt?: DateTimeFilter<"AiAssistedWorkflow"> | Date | string
+    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+  }
+
+  export type AiAssistedWorkflowOrderByWithRelationInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    connectionId?: SortOrder
+    kind?: SortOrder
+    runId?: SortOrder
+    requestKey?: SortOrder
+    requestDigest?: SortOrder
+    requestJson?: SortOrder
+    revision?: SortOrder
+    viewJson?: SortOrderInput | SortOrder
+    pendingJson?: SortOrderInput | SortOrder
+    stepKey?: SortOrderInput | SortOrder
+    stepsJson?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    account?: AccountOrderByWithRelationInput
+  }
+
+  export type AiAssistedWorkflowWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    runId?: string
+    identityId_connectionId_requestKey?: AiAssistedWorkflowIdentityIdConnectionIdRequestKeyCompoundUniqueInput
+    AND?: AiAssistedWorkflowWhereInput | AiAssistedWorkflowWhereInput[]
+    OR?: AiAssistedWorkflowWhereInput[]
+    NOT?: AiAssistedWorkflowWhereInput | AiAssistedWorkflowWhereInput[]
+    identityId?: StringFilter<"AiAssistedWorkflow"> | string
+    connectionId?: StringFilter<"AiAssistedWorkflow"> | string
+    kind?: StringFilter<"AiAssistedWorkflow"> | string
+    requestKey?: StringFilter<"AiAssistedWorkflow"> | string
+    requestDigest?: StringFilter<"AiAssistedWorkflow"> | string
+    requestJson?: StringFilter<"AiAssistedWorkflow"> | string
+    revision?: IntFilter<"AiAssistedWorkflow"> | number
+    viewJson?: StringNullableFilter<"AiAssistedWorkflow"> | string | null
+    pendingJson?: StringNullableFilter<"AiAssistedWorkflow"> | string | null
+    stepKey?: StringNullableFilter<"AiAssistedWorkflow"> | string | null
+    stepsJson?: StringFilter<"AiAssistedWorkflow"> | string
+    createdAt?: DateTimeFilter<"AiAssistedWorkflow"> | Date | string
+    updatedAt?: DateTimeFilter<"AiAssistedWorkflow"> | Date | string
+    account?: XOR<AccountScalarRelationFilter, AccountWhereInput>
+  }, "id" | "runId" | "identityId_connectionId_requestKey">
+
+  export type AiAssistedWorkflowOrderByWithAggregationInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    connectionId?: SortOrder
+    kind?: SortOrder
+    runId?: SortOrder
+    requestKey?: SortOrder
+    requestDigest?: SortOrder
+    requestJson?: SortOrder
+    revision?: SortOrder
+    viewJson?: SortOrderInput | SortOrder
+    pendingJson?: SortOrderInput | SortOrder
+    stepKey?: SortOrderInput | SortOrder
+    stepsJson?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: AiAssistedWorkflowCountOrderByAggregateInput
+    _avg?: AiAssistedWorkflowAvgOrderByAggregateInput
+    _max?: AiAssistedWorkflowMaxOrderByAggregateInput
+    _min?: AiAssistedWorkflowMinOrderByAggregateInput
+    _sum?: AiAssistedWorkflowSumOrderByAggregateInput
+  }
+
+  export type AiAssistedWorkflowScalarWhereWithAggregatesInput = {
+    AND?: AiAssistedWorkflowScalarWhereWithAggregatesInput | AiAssistedWorkflowScalarWhereWithAggregatesInput[]
+    OR?: AiAssistedWorkflowScalarWhereWithAggregatesInput[]
+    NOT?: AiAssistedWorkflowScalarWhereWithAggregatesInput | AiAssistedWorkflowScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AiAssistedWorkflow"> | string
+    identityId?: StringWithAggregatesFilter<"AiAssistedWorkflow"> | string
+    connectionId?: StringWithAggregatesFilter<"AiAssistedWorkflow"> | string
+    kind?: StringWithAggregatesFilter<"AiAssistedWorkflow"> | string
+    runId?: StringWithAggregatesFilter<"AiAssistedWorkflow"> | string
+    requestKey?: StringWithAggregatesFilter<"AiAssistedWorkflow"> | string
+    requestDigest?: StringWithAggregatesFilter<"AiAssistedWorkflow"> | string
+    requestJson?: StringWithAggregatesFilter<"AiAssistedWorkflow"> | string
+    revision?: IntWithAggregatesFilter<"AiAssistedWorkflow"> | number
+    viewJson?: StringNullableWithAggregatesFilter<"AiAssistedWorkflow"> | string | null
+    pendingJson?: StringNullableWithAggregatesFilter<"AiAssistedWorkflow"> | string | null
+    stepKey?: StringNullableWithAggregatesFilter<"AiAssistedWorkflow"> | string | null
+    stepsJson?: StringWithAggregatesFilter<"AiAssistedWorkflow"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"AiAssistedWorkflow"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"AiAssistedWorkflow"> | Date | string
   }
 
   export type CloudAuthUserWhereInput = {
@@ -128184,6 +129671,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -128237,6 +129725,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -128288,6 +129777,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -128341,6 +129831,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -129550,6 +131041,131 @@ export namespace Prisma {
 
   export type AiAgentRegistryMigrationUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type AiAssistedWorkflowCreateInput = {
+    id: string
+    connectionId: string
+    kind: string
+    runId: string
+    requestKey: string
+    requestDigest: string
+    requestJson: string
+    revision?: number
+    viewJson?: string | null
+    pendingJson?: string | null
+    stepKey?: string | null
+    stepsJson?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    account: AccountCreateNestedOneWithoutAssistedWorkflowsInput
+  }
+
+  export type AiAssistedWorkflowUncheckedCreateInput = {
+    id: string
+    identityId: string
+    connectionId: string
+    kind: string
+    runId: string
+    requestKey: string
+    requestDigest: string
+    requestJson: string
+    revision?: number
+    viewJson?: string | null
+    pendingJson?: string | null
+    stepKey?: string | null
+    stepsJson?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AiAssistedWorkflowUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    connectionId?: StringFieldUpdateOperationsInput | string
+    kind?: StringFieldUpdateOperationsInput | string
+    runId?: StringFieldUpdateOperationsInput | string
+    requestKey?: StringFieldUpdateOperationsInput | string
+    requestDigest?: StringFieldUpdateOperationsInput | string
+    requestJson?: StringFieldUpdateOperationsInput | string
+    revision?: IntFieldUpdateOperationsInput | number
+    viewJson?: NullableStringFieldUpdateOperationsInput | string | null
+    pendingJson?: NullableStringFieldUpdateOperationsInput | string | null
+    stepKey?: NullableStringFieldUpdateOperationsInput | string | null
+    stepsJson?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    account?: AccountUpdateOneRequiredWithoutAssistedWorkflowsNestedInput
+  }
+
+  export type AiAssistedWorkflowUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    connectionId?: StringFieldUpdateOperationsInput | string
+    kind?: StringFieldUpdateOperationsInput | string
+    runId?: StringFieldUpdateOperationsInput | string
+    requestKey?: StringFieldUpdateOperationsInput | string
+    requestDigest?: StringFieldUpdateOperationsInput | string
+    requestJson?: StringFieldUpdateOperationsInput | string
+    revision?: IntFieldUpdateOperationsInput | number
+    viewJson?: NullableStringFieldUpdateOperationsInput | string | null
+    pendingJson?: NullableStringFieldUpdateOperationsInput | string | null
+    stepKey?: NullableStringFieldUpdateOperationsInput | string | null
+    stepsJson?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiAssistedWorkflowCreateManyInput = {
+    id: string
+    identityId: string
+    connectionId: string
+    kind: string
+    runId: string
+    requestKey: string
+    requestDigest: string
+    requestJson: string
+    revision?: number
+    viewJson?: string | null
+    pendingJson?: string | null
+    stepKey?: string | null
+    stepsJson?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AiAssistedWorkflowUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    connectionId?: StringFieldUpdateOperationsInput | string
+    kind?: StringFieldUpdateOperationsInput | string
+    runId?: StringFieldUpdateOperationsInput | string
+    requestKey?: StringFieldUpdateOperationsInput | string
+    requestDigest?: StringFieldUpdateOperationsInput | string
+    requestJson?: StringFieldUpdateOperationsInput | string
+    revision?: IntFieldUpdateOperationsInput | number
+    viewJson?: NullableStringFieldUpdateOperationsInput | string | null
+    pendingJson?: NullableStringFieldUpdateOperationsInput | string | null
+    stepKey?: NullableStringFieldUpdateOperationsInput | string | null
+    stepsJson?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiAssistedWorkflowUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    identityId?: StringFieldUpdateOperationsInput | string
+    connectionId?: StringFieldUpdateOperationsInput | string
+    kind?: StringFieldUpdateOperationsInput | string
+    runId?: StringFieldUpdateOperationsInput | string
+    requestKey?: StringFieldUpdateOperationsInput | string
+    requestDigest?: StringFieldUpdateOperationsInput | string
+    requestJson?: StringFieldUpdateOperationsInput | string
+    revision?: IntFieldUpdateOperationsInput | number
+    viewJson?: NullableStringFieldUpdateOperationsInput | string | null
+    pendingJson?: NullableStringFieldUpdateOperationsInput | string | null
+    stepKey?: NullableStringFieldUpdateOperationsInput | string | null
+    stepsJson?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type CloudAuthUserCreateInput = {
@@ -137488,6 +139104,12 @@ export namespace Prisma {
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
+  export type AiAssistedWorkflowListRelationFilter = {
+    every?: AiAssistedWorkflowWhereInput
+    some?: AiAssistedWorkflowWhereInput
+    none?: AiAssistedWorkflowWhereInput
+  }
+
   export type CloudAuthUserScalarRelationFilter = {
     is?: CloudAuthUserWhereInput
     isNot?: CloudAuthUserWhereInput
@@ -137753,6 +139375,10 @@ export namespace Prisma {
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
+  }
+
+  export type AiAssistedWorkflowOrderByRelationAggregateInput = {
+    _count?: SortOrder
   }
 
   export type ExternalMutationReceiptOrderByRelationAggregateInput = {
@@ -138811,6 +140437,74 @@ export namespace Prisma {
 
   export type AiAgentRegistryMigrationMinOrderByAggregateInput = {
     id?: SortOrder
+  }
+
+  export type AiAssistedWorkflowIdentityIdConnectionIdRequestKeyCompoundUniqueInput = {
+    identityId: string
+    connectionId: string
+    requestKey: string
+  }
+
+  export type AiAssistedWorkflowCountOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    connectionId?: SortOrder
+    kind?: SortOrder
+    runId?: SortOrder
+    requestKey?: SortOrder
+    requestDigest?: SortOrder
+    requestJson?: SortOrder
+    revision?: SortOrder
+    viewJson?: SortOrder
+    pendingJson?: SortOrder
+    stepKey?: SortOrder
+    stepsJson?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AiAssistedWorkflowAvgOrderByAggregateInput = {
+    revision?: SortOrder
+  }
+
+  export type AiAssistedWorkflowMaxOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    connectionId?: SortOrder
+    kind?: SortOrder
+    runId?: SortOrder
+    requestKey?: SortOrder
+    requestDigest?: SortOrder
+    requestJson?: SortOrder
+    revision?: SortOrder
+    viewJson?: SortOrder
+    pendingJson?: SortOrder
+    stepKey?: SortOrder
+    stepsJson?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AiAssistedWorkflowMinOrderByAggregateInput = {
+    id?: SortOrder
+    identityId?: SortOrder
+    connectionId?: SortOrder
+    kind?: SortOrder
+    runId?: SortOrder
+    requestKey?: SortOrder
+    requestDigest?: SortOrder
+    requestJson?: SortOrder
+    revision?: SortOrder
+    viewJson?: SortOrder
+    pendingJson?: SortOrder
+    stepKey?: SortOrder
+    stepsJson?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AiAssistedWorkflowSumOrderByAggregateInput = {
+    revision?: SortOrder
   }
 
   export type CloudAuthSessionListRelationFilter = {
@@ -143118,6 +144812,13 @@ export namespace Prisma {
     amount?: SortOrder
   }
 
+  export type AiAssistedWorkflowCreateNestedManyWithoutAccountInput = {
+    create?: XOR<AiAssistedWorkflowCreateWithoutAccountInput, AiAssistedWorkflowUncheckedCreateWithoutAccountInput> | AiAssistedWorkflowCreateWithoutAccountInput[] | AiAssistedWorkflowUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiAssistedWorkflowCreateOrConnectWithoutAccountInput | AiAssistedWorkflowCreateOrConnectWithoutAccountInput[]
+    createMany?: AiAssistedWorkflowCreateManyAccountInputEnvelope
+    connect?: AiAssistedWorkflowWhereUniqueInput | AiAssistedWorkflowWhereUniqueInput[]
+  }
+
   export type CloudAuthUserCreateNestedOneWithoutAccountInput = {
     create?: XOR<CloudAuthUserCreateWithoutAccountInput, CloudAuthUserUncheckedCreateWithoutAccountInput>
     connectOrCreate?: CloudAuthUserCreateOrConnectWithoutAccountInput
@@ -143422,6 +145123,13 @@ export namespace Prisma {
     connectOrCreate?: KnowledgeWriteRequestCreateOrConnectWithoutAccountInput | KnowledgeWriteRequestCreateOrConnectWithoutAccountInput[]
     createMany?: KnowledgeWriteRequestCreateManyAccountInputEnvelope
     connect?: KnowledgeWriteRequestWhereUniqueInput | KnowledgeWriteRequestWhereUniqueInput[]
+  }
+
+  export type AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput = {
+    create?: XOR<AiAssistedWorkflowCreateWithoutAccountInput, AiAssistedWorkflowUncheckedCreateWithoutAccountInput> | AiAssistedWorkflowCreateWithoutAccountInput[] | AiAssistedWorkflowUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiAssistedWorkflowCreateOrConnectWithoutAccountInput | AiAssistedWorkflowCreateOrConnectWithoutAccountInput[]
+    createMany?: AiAssistedWorkflowCreateManyAccountInputEnvelope
+    connect?: AiAssistedWorkflowWhereUniqueInput | AiAssistedWorkflowWhereUniqueInput[]
   }
 
   export type ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput = {
@@ -143734,6 +145442,20 @@ export namespace Prisma {
 
   export type NullableDateTimeFieldUpdateOperationsInput = {
     set?: Date | string | null
+  }
+
+  export type AiAssistedWorkflowUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<AiAssistedWorkflowCreateWithoutAccountInput, AiAssistedWorkflowUncheckedCreateWithoutAccountInput> | AiAssistedWorkflowCreateWithoutAccountInput[] | AiAssistedWorkflowUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiAssistedWorkflowCreateOrConnectWithoutAccountInput | AiAssistedWorkflowCreateOrConnectWithoutAccountInput[]
+    upsert?: AiAssistedWorkflowUpsertWithWhereUniqueWithoutAccountInput | AiAssistedWorkflowUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: AiAssistedWorkflowCreateManyAccountInputEnvelope
+    set?: AiAssistedWorkflowWhereUniqueInput | AiAssistedWorkflowWhereUniqueInput[]
+    disconnect?: AiAssistedWorkflowWhereUniqueInput | AiAssistedWorkflowWhereUniqueInput[]
+    delete?: AiAssistedWorkflowWhereUniqueInput | AiAssistedWorkflowWhereUniqueInput[]
+    connect?: AiAssistedWorkflowWhereUniqueInput | AiAssistedWorkflowWhereUniqueInput[]
+    update?: AiAssistedWorkflowUpdateWithWhereUniqueWithoutAccountInput | AiAssistedWorkflowUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: AiAssistedWorkflowUpdateManyWithWhereWithoutAccountInput | AiAssistedWorkflowUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: AiAssistedWorkflowScalarWhereInput | AiAssistedWorkflowScalarWhereInput[]
   }
 
   export type CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput = {
@@ -144340,6 +146062,20 @@ export namespace Prisma {
     update?: KnowledgeWriteRequestUpdateWithWhereUniqueWithoutAccountInput | KnowledgeWriteRequestUpdateWithWhereUniqueWithoutAccountInput[]
     updateMany?: KnowledgeWriteRequestUpdateManyWithWhereWithoutAccountInput | KnowledgeWriteRequestUpdateManyWithWhereWithoutAccountInput[]
     deleteMany?: KnowledgeWriteRequestScalarWhereInput | KnowledgeWriteRequestScalarWhereInput[]
+  }
+
+  export type AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput = {
+    create?: XOR<AiAssistedWorkflowCreateWithoutAccountInput, AiAssistedWorkflowUncheckedCreateWithoutAccountInput> | AiAssistedWorkflowCreateWithoutAccountInput[] | AiAssistedWorkflowUncheckedCreateWithoutAccountInput[]
+    connectOrCreate?: AiAssistedWorkflowCreateOrConnectWithoutAccountInput | AiAssistedWorkflowCreateOrConnectWithoutAccountInput[]
+    upsert?: AiAssistedWorkflowUpsertWithWhereUniqueWithoutAccountInput | AiAssistedWorkflowUpsertWithWhereUniqueWithoutAccountInput[]
+    createMany?: AiAssistedWorkflowCreateManyAccountInputEnvelope
+    set?: AiAssistedWorkflowWhereUniqueInput | AiAssistedWorkflowWhereUniqueInput[]
+    disconnect?: AiAssistedWorkflowWhereUniqueInput | AiAssistedWorkflowWhereUniqueInput[]
+    delete?: AiAssistedWorkflowWhereUniqueInput | AiAssistedWorkflowWhereUniqueInput[]
+    connect?: AiAssistedWorkflowWhereUniqueInput | AiAssistedWorkflowWhereUniqueInput[]
+    update?: AiAssistedWorkflowUpdateWithWhereUniqueWithoutAccountInput | AiAssistedWorkflowUpdateWithWhereUniqueWithoutAccountInput[]
+    updateMany?: AiAssistedWorkflowUpdateManyWithWhereWithoutAccountInput | AiAssistedWorkflowUpdateManyWithWhereWithoutAccountInput[]
+    deleteMany?: AiAssistedWorkflowScalarWhereInput | AiAssistedWorkflowScalarWhereInput[]
   }
 
   export type ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput = {
@@ -145324,6 +147060,20 @@ export namespace Prisma {
     upsert?: AccountUpsertWithoutAiKnowledgeIndexEntriesInput
     connect?: AccountWhereUniqueInput
     update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutAiKnowledgeIndexEntriesInput, AccountUpdateWithoutAiKnowledgeIndexEntriesInput>, AccountUncheckedUpdateWithoutAiKnowledgeIndexEntriesInput>
+  }
+
+  export type AccountCreateNestedOneWithoutAssistedWorkflowsInput = {
+    create?: XOR<AccountCreateWithoutAssistedWorkflowsInput, AccountUncheckedCreateWithoutAssistedWorkflowsInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutAssistedWorkflowsInput
+    connect?: AccountWhereUniqueInput
+  }
+
+  export type AccountUpdateOneRequiredWithoutAssistedWorkflowsNestedInput = {
+    create?: XOR<AccountCreateWithoutAssistedWorkflowsInput, AccountUncheckedCreateWithoutAssistedWorkflowsInput>
+    connectOrCreate?: AccountCreateOrConnectWithoutAssistedWorkflowsInput
+    upsert?: AccountUpsertWithoutAssistedWorkflowsInput
+    connect?: AccountWhereUniqueInput
+    update?: XOR<XOR<AccountUpdateToOneWithWhereWithoutAssistedWorkflowsInput, AccountUpdateWithoutAssistedWorkflowsInput>, AccountUncheckedUpdateWithoutAssistedWorkflowsInput>
   }
 
   export type CloudAuthSessionCreateNestedManyWithoutUserInput = {
@@ -149334,6 +151084,50 @@ export namespace Prisma {
     _max?: NestedDecimalFilter<$PrismaModel>
   }
 
+  export type AiAssistedWorkflowCreateWithoutAccountInput = {
+    id: string
+    connectionId: string
+    kind: string
+    runId: string
+    requestKey: string
+    requestDigest: string
+    requestJson: string
+    revision?: number
+    viewJson?: string | null
+    pendingJson?: string | null
+    stepKey?: string | null
+    stepsJson?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AiAssistedWorkflowUncheckedCreateWithoutAccountInput = {
+    id: string
+    connectionId: string
+    kind: string
+    runId: string
+    requestKey: string
+    requestDigest: string
+    requestJson: string
+    revision?: number
+    viewJson?: string | null
+    pendingJson?: string | null
+    stepKey?: string | null
+    stepsJson?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AiAssistedWorkflowCreateOrConnectWithoutAccountInput = {
+    where: AiAssistedWorkflowWhereUniqueInput
+    create: XOR<AiAssistedWorkflowCreateWithoutAccountInput, AiAssistedWorkflowUncheckedCreateWithoutAccountInput>
+  }
+
+  export type AiAssistedWorkflowCreateManyAccountInputEnvelope = {
+    data: AiAssistedWorkflowCreateManyAccountInput | AiAssistedWorkflowCreateManyAccountInput[]
+    skipDuplicates?: boolean
+  }
+
   export type CloudAuthUserCreateWithoutAccountInput = {
     id?: string
     name: string
@@ -151113,6 +152907,43 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type AiAssistedWorkflowUpsertWithWhereUniqueWithoutAccountInput = {
+    where: AiAssistedWorkflowWhereUniqueInput
+    update: XOR<AiAssistedWorkflowUpdateWithoutAccountInput, AiAssistedWorkflowUncheckedUpdateWithoutAccountInput>
+    create: XOR<AiAssistedWorkflowCreateWithoutAccountInput, AiAssistedWorkflowUncheckedCreateWithoutAccountInput>
+  }
+
+  export type AiAssistedWorkflowUpdateWithWhereUniqueWithoutAccountInput = {
+    where: AiAssistedWorkflowWhereUniqueInput
+    data: XOR<AiAssistedWorkflowUpdateWithoutAccountInput, AiAssistedWorkflowUncheckedUpdateWithoutAccountInput>
+  }
+
+  export type AiAssistedWorkflowUpdateManyWithWhereWithoutAccountInput = {
+    where: AiAssistedWorkflowScalarWhereInput
+    data: XOR<AiAssistedWorkflowUpdateManyMutationInput, AiAssistedWorkflowUncheckedUpdateManyWithoutAccountInput>
+  }
+
+  export type AiAssistedWorkflowScalarWhereInput = {
+    AND?: AiAssistedWorkflowScalarWhereInput | AiAssistedWorkflowScalarWhereInput[]
+    OR?: AiAssistedWorkflowScalarWhereInput[]
+    NOT?: AiAssistedWorkflowScalarWhereInput | AiAssistedWorkflowScalarWhereInput[]
+    id?: StringFilter<"AiAssistedWorkflow"> | string
+    identityId?: StringFilter<"AiAssistedWorkflow"> | string
+    connectionId?: StringFilter<"AiAssistedWorkflow"> | string
+    kind?: StringFilter<"AiAssistedWorkflow"> | string
+    runId?: StringFilter<"AiAssistedWorkflow"> | string
+    requestKey?: StringFilter<"AiAssistedWorkflow"> | string
+    requestDigest?: StringFilter<"AiAssistedWorkflow"> | string
+    requestJson?: StringFilter<"AiAssistedWorkflow"> | string
+    revision?: IntFilter<"AiAssistedWorkflow"> | number
+    viewJson?: StringNullableFilter<"AiAssistedWorkflow"> | string | null
+    pendingJson?: StringNullableFilter<"AiAssistedWorkflow"> | string | null
+    stepKey?: StringNullableFilter<"AiAssistedWorkflow"> | string | null
+    stepsJson?: StringFilter<"AiAssistedWorkflow"> | string
+    createdAt?: DateTimeFilter<"AiAssistedWorkflow"> | Date | string
+    updatedAt?: DateTimeFilter<"AiAssistedWorkflow"> | Date | string
+  }
+
   export type CloudAuthUserUpsertWithoutAccountInput = {
     update: XOR<CloudAuthUserUpdateWithoutAccountInput, CloudAuthUserUncheckedUpdateWithoutAccountInput>
     create: XOR<CloudAuthUserCreateWithoutAccountInput, CloudAuthUserUncheckedCreateWithoutAccountInput>
@@ -152649,6 +154480,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -152701,6 +154533,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -152786,6 +154619,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -152838,6 +154672,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -152913,6 +154748,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -152965,6 +154801,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -153031,6 +154868,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -153083,6 +154921,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -153133,6 +154972,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -153185,6 +155025,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -153251,6 +155092,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -153303,6 +155145,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -153353,6 +155196,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -153405,6 +155249,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -153471,6 +155316,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -153523,6 +155369,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -153573,6 +155420,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -153625,6 +155473,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -153714,6 +155563,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -153766,6 +155616,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -153832,6 +155683,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -153884,6 +155736,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -153997,6 +155850,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -154049,6 +155903,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -154143,6 +155998,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -154195,6 +156051,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -154339,6 +156196,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -154391,6 +156249,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -154671,6 +156530,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -154723,6 +156583,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -154789,6 +156650,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -154841,6 +156703,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -154891,6 +156754,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -154943,6 +156807,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -155009,6 +156874,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -155061,6 +156927,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -155111,6 +156978,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -155163,6 +157031,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -155229,6 +157098,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -155281,6 +157151,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -155310,6 +157181,230 @@ export namespace Prisma {
     aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
     aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
     aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedUpdateManyWithoutAccountNestedInput
+    aiProviderSecrets?: AiProviderSecretUncheckedUpdateManyWithoutAccountNestedInput
+    taskPlanHistory?: TaskPlanHistoryUncheckedUpdateManyWithoutIdentityNestedInput
+    routineOccurrences?: RoutineOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    routineInteractions?: RoutineInteractionUncheckedUpdateManyWithoutAccountNestedInput
+    notificationInteractions?: NotificationInteractionUncheckedUpdateManyWithoutIdentityNestedInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
+  }
+
+  export type AccountCreateWithoutAssistedWorkflowsInput = {
+    status?: string
+    profile: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedAt?: Date | string | null
+    cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
+    externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
+    goals?: GoalCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
+    labels?: LabelCreateNestedManyWithoutAccountInput
+    goalLabels?: GoalLabelCreateNestedManyWithoutAccountInput
+    taskLabels?: TaskLabelCreateNestedManyWithoutAccountInput
+    routineDefinitions?: RoutineDefinitionCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceCreateNestedOneWithoutAccountInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideCreateNestedManyWithoutAccountInput
+    routineProfiles?: RoutineProfileCreateNestedManyWithoutAccountInput
+    routineProfileMemberships?: RoutineProfileMembershipCreateNestedManyWithoutAccountInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionCreateNestedManyWithoutAccountInput
+    routineProtocolSessions?: RoutineProtocolSessionCreateNestedManyWithoutAccountInput
+    schedules?: ScheduleCreateNestedManyWithoutAccountInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptCreateNestedManyWithoutAccountInput
+    habits?: HabitCreateNestedManyWithoutAccountInput
+    relations?: RelationCreateNestedManyWithoutAccountInput
+    walletAccounts?: WalletAccountCreateNestedManyWithoutAccountInput
+    walletTransactions?: WalletTransactionCreateNestedManyWithoutAccount_identityInput
+    taskPlans?: TaskPlanCreateNestedManyWithoutAccountInput
+    taskOccurrences?: TaskOccurrenceCreateNestedManyWithoutAccountInput
+    userPreferenceRecords?: UserPreferenceRecordCreateNestedManyWithoutAccountInput
+    notifications?: NotificationCreateNestedManyWithoutAccountInput
+    aiConversations?: AiConversationCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordCreateNestedManyWithoutAccountInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionCreateNestedManyWithoutAccountInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryCreateNestedManyWithoutAccountInput
+    aiProviderConfigs?: AiProviderConfigCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingCreateNestedManyWithoutAccountInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionCreateNestedManyWithoutAccountInput
+    aiProviderSecrets?: AiProviderSecretCreateNestedManyWithoutAccountInput
+    taskPlanHistory?: TaskPlanHistoryCreateNestedManyWithoutIdentityInput
+    routineOccurrences?: RoutineOccurrenceCreateNestedManyWithoutAccountInput
+    routineInteractions?: RoutineInteractionCreateNestedManyWithoutAccountInput
+    notificationInteractions?: NotificationInteractionCreateNestedManyWithoutIdentityInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingCreateNestedManyWithoutAccountInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentCreateNestedManyWithoutAccountInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountUncheckedCreateWithoutAssistedWorkflowsInput = {
+    id: string
+    status?: string
+    profile: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    closedAt?: Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
+    goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
+    profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
+    labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
+    goalLabels?: GoalLabelUncheckedCreateNestedManyWithoutAccountInput
+    taskLabels?: TaskLabelUncheckedCreateNestedManyWithoutAccountInput
+    routineDefinitions?: RoutineDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routinePreference?: RoutinePreferenceUncheckedCreateNestedOneWithoutAccountInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedCreateNestedManyWithoutAccountInput
+    routineProfiles?: RoutineProfileUncheckedCreateNestedManyWithoutAccountInput
+    routineProfileMemberships?: RoutineProfileMembershipUncheckedCreateNestedManyWithoutAccountInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedCreateNestedManyWithoutAccountInput
+    routineProtocolSessions?: RoutineProtocolSessionUncheckedCreateNestedManyWithoutAccountInput
+    schedules?: ScheduleUncheckedCreateNestedManyWithoutAccountInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedCreateNestedManyWithoutAccountInput
+    scheduledInvocations?: ScheduledInvocationUncheckedCreateNestedManyWithoutAccountInput
+    invocationAttempts?: InvocationAttemptUncheckedCreateNestedManyWithoutAccountInput
+    habits?: HabitUncheckedCreateNestedManyWithoutAccountInput
+    relations?: RelationUncheckedCreateNestedManyWithoutAccountInput
+    walletAccounts?: WalletAccountUncheckedCreateNestedManyWithoutAccountInput
+    walletTransactions?: WalletTransactionUncheckedCreateNestedManyWithoutAccount_identityInput
+    taskPlans?: TaskPlanUncheckedCreateNestedManyWithoutAccountInput
+    taskOccurrences?: TaskOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    userPreferenceRecords?: UserPreferenceRecordUncheckedCreateNestedManyWithoutAccountInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutAccountInput
+    aiConversations?: AiConversationUncheckedCreateNestedManyWithoutAccountInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedCreateNestedManyWithoutAccountInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedCreateNestedManyWithoutAccountInput
+    aiConversationAttention?: AiConversationAttentionUncheckedCreateNestedManyWithoutAccountInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderConfigs?: AiProviderConfigUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstances?: AiAgentInstanceUncheckedCreateNestedManyWithoutAccountInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUncheckedCreateNestedManyWithoutAccountInput
+    aiProviderSecrets?: AiProviderSecretUncheckedCreateNestedManyWithoutAccountInput
+    taskPlanHistory?: TaskPlanHistoryUncheckedCreateNestedManyWithoutIdentityInput
+    routineOccurrences?: RoutineOccurrenceUncheckedCreateNestedManyWithoutAccountInput
+    routineInteractions?: RoutineInteractionUncheckedCreateNestedManyWithoutAccountInput
+    notificationInteractions?: NotificationInteractionUncheckedCreateNestedManyWithoutIdentityInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedCreateNestedManyWithoutAccountInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedCreateNestedManyWithoutAccountInput
+  }
+
+  export type AccountCreateOrConnectWithoutAssistedWorkflowsInput = {
+    where: AccountWhereUniqueInput
+    create: XOR<AccountCreateWithoutAssistedWorkflowsInput, AccountUncheckedCreateWithoutAssistedWorkflowsInput>
+  }
+
+  export type AccountUpsertWithoutAssistedWorkflowsInput = {
+    update: XOR<AccountUpdateWithoutAssistedWorkflowsInput, AccountUncheckedUpdateWithoutAssistedWorkflowsInput>
+    create: XOR<AccountCreateWithoutAssistedWorkflowsInput, AccountUncheckedCreateWithoutAssistedWorkflowsInput>
+    where?: AccountWhereInput
+  }
+
+  export type AccountUpdateToOneWithWhereWithoutAssistedWorkflowsInput = {
+    where?: AccountWhereInput
+    data: XOR<AccountUpdateWithoutAssistedWorkflowsInput, AccountUncheckedUpdateWithoutAssistedWorkflowsInput>
+  }
+
+  export type AccountUpdateWithoutAssistedWorkflowsInput = {
+    status?: StringFieldUpdateOperationsInput | string
+    profile?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
+    externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
+    goals?: GoalUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
+    labels?: LabelUpdateManyWithoutAccountNestedInput
+    goalLabels?: GoalLabelUpdateManyWithoutAccountNestedInput
+    taskLabels?: TaskLabelUpdateManyWithoutAccountNestedInput
+    routineDefinitions?: RoutineDefinitionUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUpdateOneWithoutAccountNestedInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUpdateManyWithoutAccountNestedInput
+    routineProfiles?: RoutineProfileUpdateManyWithoutAccountNestedInput
+    routineProfileMemberships?: RoutineProfileMembershipUpdateManyWithoutAccountNestedInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUpdateManyWithoutAccountNestedInput
+    routineProtocolSessions?: RoutineProtocolSessionUpdateManyWithoutAccountNestedInput
+    schedules?: ScheduleUpdateManyWithoutAccountNestedInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUpdateManyWithoutAccountNestedInput
+    habits?: HabitUpdateManyWithoutAccountNestedInput
+    relations?: RelationUpdateManyWithoutAccountNestedInput
+    walletAccounts?: WalletAccountUpdateManyWithoutAccountNestedInput
+    walletTransactions?: WalletTransactionUpdateManyWithoutAccount_identityNestedInput
+    taskPlans?: TaskPlanUpdateManyWithoutAccountNestedInput
+    taskOccurrences?: TaskOccurrenceUpdateManyWithoutAccountNestedInput
+    userPreferenceRecords?: UserPreferenceRecordUpdateManyWithoutAccountNestedInput
+    notifications?: NotificationUpdateManyWithoutAccountNestedInput
+    aiConversations?: AiConversationUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUpdateManyWithoutAccountNestedInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUpdateManyWithoutAccountNestedInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUpdateManyWithoutAccountNestedInput
+    aiProviderConfigs?: AiProviderConfigUpdateManyWithoutAccountNestedInput
+    aiAgentInstances?: AiAgentInstanceUpdateManyWithoutAccountNestedInput
+    aiAgentInstanceBindings?: AiAgentInstanceBindingUpdateManyWithoutAccountNestedInput
+    aiProviderOnboardingSessions?: AiProviderOnboardingSessionUpdateManyWithoutAccountNestedInput
+    aiProviderSecrets?: AiProviderSecretUpdateManyWithoutAccountNestedInput
+    taskPlanHistory?: TaskPlanHistoryUpdateManyWithoutIdentityNestedInput
+    routineOccurrences?: RoutineOccurrenceUpdateManyWithoutAccountNestedInput
+    routineInteractions?: RoutineInteractionUpdateManyWithoutAccountNestedInput
+    notificationInteractions?: NotificationInteractionUpdateManyWithoutIdentityNestedInput
+    notificationDispatchOutboxes?: NotificationDispatchOutboxUpdateManyWithoutAccountNestedInput
+    knowledgeRemoteBindings?: KnowledgeRemoteBindingUpdateManyWithoutAccountNestedInput
+    knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUpdateManyWithoutAccountNestedInput
+    knowledgeWriteRequests?: KnowledgeWriteRequestUpdateManyWithoutAccountNestedInput
+  }
+
+  export type AccountUncheckedUpdateWithoutAssistedWorkflowsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    profile?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
+    goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
+    profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
+    labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
+    goalLabels?: GoalLabelUncheckedUpdateManyWithoutAccountNestedInput
+    taskLabels?: TaskLabelUncheckedUpdateManyWithoutAccountNestedInput
+    routineDefinitions?: RoutineDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routinePreference?: RoutinePreferenceUncheckedUpdateOneWithoutAccountNestedInput
+    routineTemporaryOverrides?: RoutineTemporaryOverrideUncheckedUpdateManyWithoutAccountNestedInput
+    routineProfiles?: RoutineProfileUncheckedUpdateManyWithoutAccountNestedInput
+    routineProfileMemberships?: RoutineProfileMembershipUncheckedUpdateManyWithoutAccountNestedInput
+    routineProtocolDefinitions?: RoutineProtocolDefinitionUncheckedUpdateManyWithoutAccountNestedInput
+    routineProtocolSessions?: RoutineProtocolSessionUncheckedUpdateManyWithoutAccountNestedInput
+    schedules?: ScheduleUncheckedUpdateManyWithoutAccountNestedInput
+    schedulingReconcileOperations?: SchedulingReconcileOperationUncheckedUpdateManyWithoutAccountNestedInput
+    scheduledInvocations?: ScheduledInvocationUncheckedUpdateManyWithoutAccountNestedInput
+    invocationAttempts?: InvocationAttemptUncheckedUpdateManyWithoutAccountNestedInput
+    habits?: HabitUncheckedUpdateManyWithoutAccountNestedInput
+    relations?: RelationUncheckedUpdateManyWithoutAccountNestedInput
+    walletAccounts?: WalletAccountUncheckedUpdateManyWithoutAccountNestedInput
+    walletTransactions?: WalletTransactionUncheckedUpdateManyWithoutAccount_identityNestedInput
+    taskPlans?: TaskPlanUncheckedUpdateManyWithoutAccountNestedInput
+    taskOccurrences?: TaskOccurrenceUncheckedUpdateManyWithoutAccountNestedInput
+    userPreferenceRecords?: UserPreferenceRecordUncheckedUpdateManyWithoutAccountNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversations?: AiConversationUncheckedUpdateManyWithoutAccountNestedInput
+    aiExecutionRecords?: AiExecutionRecordUncheckedUpdateManyWithoutAccountNestedInput
+    aiGoalSurfaceLeases?: AiGoalSurfaceLeaseUncheckedUpdateManyWithoutAccountNestedInput
+    aiConversationAttention?: AiConversationAttentionUncheckedUpdateManyWithoutAccountNestedInput
+    aiKnowledgeIndexEntries?: AiKnowledgeIndexEntryUncheckedUpdateManyWithoutAccountNestedInput
     aiProviderConfigs?: AiProviderConfigUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstances?: AiAgentInstanceUncheckedUpdateManyWithoutAccountNestedInput
     aiAgentInstanceBindings?: AiAgentInstanceBindingUncheckedUpdateManyWithoutAccountNestedInput
@@ -155733,6 +157828,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -155784,6 +157880,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -156180,6 +158277,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -156231,6 +158329,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -156890,6 +158989,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -156942,6 +159042,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -157147,6 +159248,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -157199,6 +159301,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -158109,6 +160212,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -158161,6 +160265,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -158276,6 +160381,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -158328,6 +160434,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -158680,6 +160787,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -158732,6 +160840,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -158836,6 +160945,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -158888,6 +160998,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -158970,6 +161081,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -159022,6 +161134,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -159168,6 +161281,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -159220,6 +161334,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -159362,6 +161477,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -159414,6 +161530,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -159569,6 +161686,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -159621,6 +161739,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -159906,6 +162025,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -159958,6 +162078,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -160088,6 +162209,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -160140,6 +162262,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -160190,6 +162313,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -160242,6 +162366,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -160375,6 +162500,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -160427,6 +162553,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -160757,6 +162884,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -160809,6 +162937,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -160948,6 +163077,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -161000,6 +163130,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -162813,6 +164944,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -162865,6 +164997,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -162931,6 +165064,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -162983,6 +165117,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -163033,6 +165168,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -163085,6 +165221,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -163151,6 +165288,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -163203,6 +165341,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -163253,6 +165392,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationCreateNestedManyWithoutAccountInput
@@ -163305,6 +165445,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
     labels?: LabelUncheckedCreateNestedManyWithoutAccountInput
@@ -163371,6 +165512,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUpdateManyWithoutAccountNestedInput
@@ -163423,6 +165565,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
     labels?: LabelUncheckedUpdateManyWithoutAccountNestedInput
@@ -163473,6 +165616,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -163525,6 +165669,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -163748,6 +165893,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -163800,6 +165946,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -163924,6 +166071,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -163976,6 +166124,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -164042,6 +166191,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -164094,6 +166244,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -164144,6 +166295,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -164196,6 +166348,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -164289,6 +166442,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -164341,6 +166495,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -164407,6 +166562,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -164459,6 +166615,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -164589,6 +166746,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -164641,6 +166799,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -164767,6 +166926,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -164819,6 +166979,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -164920,6 +167081,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -164972,6 +167134,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -165038,6 +167201,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -165090,6 +167254,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -165181,6 +167346,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -165233,6 +167399,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -165351,6 +167518,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -165403,6 +167571,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -165546,6 +167715,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -165598,6 +167768,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -165664,6 +167835,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -165716,6 +167888,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -165890,6 +168063,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -165942,6 +168116,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -166149,6 +168324,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -166201,6 +168377,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -166310,6 +168487,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -166362,6 +168540,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -166412,6 +168591,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -166464,6 +168644,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -166530,6 +168711,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -166582,6 +168764,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -166818,6 +169001,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -166870,6 +169054,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -167226,6 +169411,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -167278,6 +169464,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -168236,6 +170423,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -168288,6 +170476,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -168399,6 +170588,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -168451,6 +170641,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -168552,6 +170743,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -168604,6 +170796,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -168670,6 +170863,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -168722,6 +170916,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -168772,6 +170967,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -168824,6 +171020,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -168934,6 +171131,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -168986,6 +171184,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -169052,6 +171251,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -169104,6 +171304,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -169235,6 +171436,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -169287,6 +171489,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -169408,6 +171611,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -169460,6 +171664,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -169526,6 +171731,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -169578,6 +171784,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -169628,6 +171835,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -169680,6 +171888,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -169746,6 +171955,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -169798,6 +172008,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -169848,6 +172059,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -169900,6 +172112,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -170103,6 +172316,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -170155,6 +172369,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -170307,6 +172522,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -170359,6 +172575,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -170487,6 +172704,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -170539,6 +172757,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -170657,6 +172876,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -170709,6 +172929,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -170837,6 +173058,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -170889,6 +173111,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -171007,6 +173230,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -171059,6 +173283,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -171159,6 +173384,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -171211,6 +173437,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -171302,6 +173529,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowCreateNestedManyWithoutAccountInput
     cloudUser: CloudAuthUserCreateNestedOneWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptCreateNestedManyWithoutAccountInput
     goals?: GoalCreateNestedManyWithoutAccountInput
@@ -171354,6 +173582,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     closedAt?: Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedCreateNestedManyWithoutAccountInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedCreateNestedManyWithoutAccountInput
     goals?: GoalUncheckedCreateNestedManyWithoutAccountInput
     profileImportOperations?: ProfileImportOperationUncheckedCreateNestedManyWithoutAccountInput
@@ -171451,6 +173680,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUpdateManyWithoutAccountNestedInput
     cloudUser?: CloudAuthUserUpdateOneRequiredWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUpdateManyWithoutAccountNestedInput
     goals?: GoalUpdateManyWithoutAccountNestedInput
@@ -171503,6 +173733,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     closedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assistedWorkflows?: AiAssistedWorkflowUncheckedUpdateManyWithoutAccountNestedInput
     externalMutationReceipts?: ExternalMutationReceiptUncheckedUpdateManyWithoutAccountNestedInput
     goals?: GoalUncheckedUpdateManyWithoutAccountNestedInput
     profileImportOperations?: ProfileImportOperationUncheckedUpdateManyWithoutAccountNestedInput
@@ -171545,6 +173776,23 @@ export namespace Prisma {
     knowledgeRemoteBindings?: KnowledgeRemoteBindingUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeRepositoryInstallationIntents?: KnowledgeRepositoryInstallationIntentUncheckedUpdateManyWithoutAccountNestedInput
     knowledgeWriteRequests?: KnowledgeWriteRequestUncheckedUpdateManyWithoutAccountNestedInput
+  }
+
+  export type AiAssistedWorkflowCreateManyAccountInput = {
+    id: string
+    connectionId: string
+    kind: string
+    runId: string
+    requestKey: string
+    requestDigest: string
+    requestJson: string
+    revision?: number
+    viewJson?: string | null
+    pendingJson?: string | null
+    stepKey?: string | null
+    stepsJson?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type ExternalMutationReceiptCreateManyAccountInput = {
@@ -172157,6 +174405,57 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     completedAt?: Date | string | null
+  }
+
+  export type AiAssistedWorkflowUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    connectionId?: StringFieldUpdateOperationsInput | string
+    kind?: StringFieldUpdateOperationsInput | string
+    runId?: StringFieldUpdateOperationsInput | string
+    requestKey?: StringFieldUpdateOperationsInput | string
+    requestDigest?: StringFieldUpdateOperationsInput | string
+    requestJson?: StringFieldUpdateOperationsInput | string
+    revision?: IntFieldUpdateOperationsInput | number
+    viewJson?: NullableStringFieldUpdateOperationsInput | string | null
+    pendingJson?: NullableStringFieldUpdateOperationsInput | string | null
+    stepKey?: NullableStringFieldUpdateOperationsInput | string | null
+    stepsJson?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiAssistedWorkflowUncheckedUpdateWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    connectionId?: StringFieldUpdateOperationsInput | string
+    kind?: StringFieldUpdateOperationsInput | string
+    runId?: StringFieldUpdateOperationsInput | string
+    requestKey?: StringFieldUpdateOperationsInput | string
+    requestDigest?: StringFieldUpdateOperationsInput | string
+    requestJson?: StringFieldUpdateOperationsInput | string
+    revision?: IntFieldUpdateOperationsInput | number
+    viewJson?: NullableStringFieldUpdateOperationsInput | string | null
+    pendingJson?: NullableStringFieldUpdateOperationsInput | string | null
+    stepKey?: NullableStringFieldUpdateOperationsInput | string | null
+    stepsJson?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AiAssistedWorkflowUncheckedUpdateManyWithoutAccountInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    connectionId?: StringFieldUpdateOperationsInput | string
+    kind?: StringFieldUpdateOperationsInput | string
+    runId?: StringFieldUpdateOperationsInput | string
+    requestKey?: StringFieldUpdateOperationsInput | string
+    requestDigest?: StringFieldUpdateOperationsInput | string
+    requestJson?: StringFieldUpdateOperationsInput | string
+    revision?: IntFieldUpdateOperationsInput | number
+    viewJson?: NullableStringFieldUpdateOperationsInput | string | null
+    pendingJson?: NullableStringFieldUpdateOperationsInput | string | null
+    stepKey?: NullableStringFieldUpdateOperationsInput | string | null
+    stepsJson?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ExternalMutationReceiptUpdateWithoutAccountInput = {

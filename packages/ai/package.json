@@ -33,6 +33,10 @@
     "./testing": {
       "types": "./dist/testing/index.d.ts",
       "import": "./dist/testing/index.js"
+    },
+    "./agent-gateway": {
+      "types": "./dist/agent-gateway.d.ts",
+      "import": "./dist/agent-gateway.js"
     }
   },
   "scripts": {},

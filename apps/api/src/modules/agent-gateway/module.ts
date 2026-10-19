@@ -5,6 +5,7 @@ import { createReadGateway, toNodeHandler } from '@memoflow/agent-gateway/server
 import type {
   GoalReadPort,
   GatewayWritePort,
+  GatewayAssistedPort,
   TaskReadPort,
   GatewayAuditEvent,
   GatewayDiagnostic,
@@ -17,6 +18,7 @@ import type { RequestContextCarrierRequest } from '../../shared/infrastructure/h
 interface Options {
   readonly enabled: boolean;
   readonly writes?: GatewayWritePort;
+  readonly assisted?: GatewayAssistedPort;
   readonly admission: PilotAdmission;
   readonly audience: string;
   readonly cursorSecret: string;

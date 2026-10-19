@@ -12,3 +12,7 @@ export { readToolDescriptors, type GatewayReadToolName } from './read-tool-descr
 
 export type { GatewayWritePort, GatewayWriteAuthority } from './ports';
 export { writeToolDescriptors, type GatewayWriteToolName } from './write-tool-descriptors';
+
+export type { GatewayAssistedPort } from './ports';
+export { assistedToolDescriptors } from './assisted-tool-descriptors';
+export type { GatewayAssistedToolName } from './assisted-tool-descriptors';

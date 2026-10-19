@@ -58,6 +58,7 @@ import { SelectedEntityContextAIReadAdapter } from '../modules/ai/selected-entit
 
 export interface ComposedAI {
   readonly module: AIApiModuleDef;
+  readonly workflowRuntime: AIModuleInstance['workflowRuntime'];
   /** AI-owned Conversation shell portability capability for host registration. */
   readonly portableCapability: AIModuleInstance['portableCapability'];
 }
@@ -207,6 +208,7 @@ export function composeAI(dependencies: ComposeAIDependencies): ComposedAI {
 
   return {
     module: createAIApiModule({ instance }),
+    workflowRuntime: instance.workflowRuntime,
     portableCapability: instance.portableCapability,
   };
 }

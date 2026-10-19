@@ -7,6 +7,7 @@ import type { Prisma, PrismaClient } from '@memoflow/database';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { brandedId, ID_PREFIXES, type IdentityId } from '@memoflow/contracts/primitives';
 import {
+  CreateTaskPlanSchema,
   TaskAgentCreateSchema,
   TaskAgentUpdateSchema,
   TaskAgentCompleteSchema,
@@ -41,6 +42,7 @@ export function createTaskPrismaAgentMutations(
     assertGoalOwnership(goalId: string, identityId: string): Promise<boolean>;
   },
   events: IEventBus = committedTaskWriteEventBus,
+  options: { creationId?: string } = {},
 ) {
   async function mutate(
     input: { idempotencyKey: string },
@@ -107,18 +109,32 @@ export function createTaskPrismaAgentMutations(
   return {
     create(input: unknown, cx: ExecutionContext, authority: ExternalMutationAuthority) {
       const parsed = TaskAgentCreateSchema.parse(input);
-      return mutate(parsed, 'task.plan.create.v1', cx, authority, async (owner, identityId) => {
-        if (
-          parsed.plan.goalBinding &&
-          (!owner.goals ||
-            !(await owner.goals.assertGoalOwnership(parsed.plan.goalBinding.goalId, identityId)))
-        )
-          throw new ExternalMutationError('NOT_FOUND');
-        return {
-          kind: 'plan',
-          ...value(await owner.create.execute({ ...parsed.plan, identityId })),
-        };
-      });
+      // Workflow host pins the canonical reviewed identity; external clients still
+      // cannot supply IDs through TaskAgentCreateSchema.
+      const id =
+        options.creationId === undefined
+          ? undefined
+          : CreateTaskPlanSchema.shape.id.unwrap().parse(options.creationId);
+      return mutate(
+        { ...parsed, ...(id ? { ownerPlanId: id } : {}) },
+        'task.plan.create.v1',
+        cx,
+        authority,
+        async (owner, identityId) => {
+          if (
+            parsed.plan.goalBinding &&
+            (!owner.goals ||
+              !(await owner.goals.assertGoalOwnership(parsed.plan.goalBinding.goalId, identityId)))
+          )
+            throw new ExternalMutationError('NOT_FOUND');
+          return {
+            kind: 'plan',
+            ...value(
+              await owner.create.execute({ ...parsed.plan, ...(id ? { id } : {}), identityId }),
+            ),
+          };
+        },
+      );
     },
     update(input: unknown, cx: ExecutionContext, authority: ExternalMutationAuthority) {
       const parsed = TaskAgentUpdateSchema.parse(input);

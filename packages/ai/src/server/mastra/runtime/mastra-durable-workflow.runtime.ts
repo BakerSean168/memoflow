@@ -1,3 +1,4 @@
+import type { ExternalWorkflowInvocation } from './workflow-runtime.port';
 import { randomUUID } from 'node:crypto';
 import { AgentRegistryError } from '../../application/agent-instance/agent-instance.repository';
 import { AIExecutionError } from '../../../shared/ai-execution-error';
@@ -99,14 +100,19 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
   private async workflowRequestContext(
     context: ExecutionContext,
     input: {
+      externalConnectionId?: string;
       conversationId: string;
       locale?: 'zh-CN' | 'en-US';
       agentInstanceId?: string;
       providerId?: string;
       modelId?: string;
     },
+    external?: ExternalWorkflowInvocation,
   ): Promise<RequestContext> {
+    if (input.externalConnectionId && input.externalConnectionId !== external?.connectionId)
+      throw new AIExecutionError('conflict', 'External workflow capability must be rebound');
     const requestContext = new RequestContext();
+    if (external) requestContext.setRaw('externalTaskApply', external.apply);
     requestContext.setRaw('identityId', context.identityId);
     requestContext.setRaw('locale', input.locale ?? 'zh-CN');
     if (input.agentInstanceId) requestContext.setRaw('agentInstanceId', input.agentInstanceId);
@@ -159,6 +165,8 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
   async start(input: {
     context: ExecutionContext;
     request: AIWorkflowStartClientRequest;
+    runId?: string;
+    external?: ExternalWorkflowInvocation;
   }): Promise<AIWorkflowRunView> {
     // Capture the raw runtime kind as a plain string before any control-flow
     // narrowing so the unsupported-kind guard can report it faithfully even
@@ -185,6 +193,7 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
         });
       const run = await this.deps.goalCreateWorkflow.createRun({
         resourceId: input.context.identityId,
+        ...(input.runId ? { runId: input.runId } : {}),
       });
       try {
         await run.start({
@@ -208,12 +217,13 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
       const taskInput = TaskCreateWorkflowInputSchema.parse(workflowInput);
       const run = await this.deps.taskCreateWorkflow.createRun({
         resourceId: input.context.identityId,
+        ...(input.runId ? { runId: input.runId } : {}),
       });
       try {
         await run.start({
           inputData: taskInput,
           initialState: initialTaskCreateWorkflowState(taskInput),
-          requestContext: await this.workflowRequestContext(input.context, taskInput),
+          requestContext: await this.workflowRequestContext(input.context, taskInput, input.external),
         });
       } catch (cause) {
         const persisted = await this.get({
@@ -253,6 +263,8 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
   async startDetached(input: {
     context: ExecutionContext;
     request: AIWorkflowStartClientRequest;
+    runId?: string;
+    external?: ExternalWorkflowInvocation;
   }): Promise<AIWorkflowRunView> {
     const requestedKind: string = input.request.kind as string;
     if (
@@ -277,6 +289,7 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
       }
       const run = await this.deps.goalCreateWorkflow.createRun({
         resourceId: input.context.identityId,
+        ...(input.runId ? { runId: input.runId } : {}),
       });
       await run.startAsync({
         inputData: goalInput,
@@ -295,11 +308,12 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
       const taskInput = TaskCreateWorkflowInputSchema.parse(workflowInput);
       const run = await this.deps.taskCreateWorkflow.createRun({
         resourceId: input.context.identityId,
+        ...(input.runId ? { runId: input.runId } : {}),
       });
       await run.startAsync({
         inputData: taskInput,
         initialState: initialTaskCreateWorkflowState(taskInput),
-        requestContext: await this.workflowRequestContext(input.context, taskInput),
+        requestContext: await this.workflowRequestContext(input.context, taskInput, input.external),
       });
       return this.runningWorkflowView({
         runId: run.runId,
@@ -327,9 +341,12 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
   private workflowInputFromRequest(input: {
     context: ExecutionContext;
     request: AIWorkflowStartClientRequest;
+    runId?: string;
+    external?: ExternalWorkflowInvocation;
   }) {
     const base = {
       ...input.request.input,
+      ...(input.external ? { externalConnectionId: input.external.connectionId } : {}),
       identityId: input.context.identityId,
       conversationId: input.request.conversationId,
       locale: input.request.locale ?? 'zh-CN',
@@ -343,6 +360,7 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
   async resume(input: {
     context: ExecutionContext;
     request: AIWorkflowResumeClientRequest;
+    external?: ExternalWorkflowInvocation;
   }): Promise<AIWorkflowRunView> {
     const before = await this.get({
       identityId: input.context.identityId,
@@ -411,7 +429,7 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
       await run.resume({
         step: lifecycleStepId,
         resumeData: input.request.command,
-        requestContext: await this.workflowRequestContext(input.context, workflowInput),
+        requestContext: await this.workflowRequestContext(input.context, workflowInput, input.external),
       });
     } catch (cause) {
       const persisted = await this.get({
@@ -432,6 +450,7 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
   async resumeDetached(input: {
     context: ExecutionContext;
     request: AIWorkflowResumeClientRequest;
+    external?: ExternalWorkflowInvocation;
   }): Promise<AIWorkflowRunView> {
     const before = await this.get({
       identityId: input.context.identityId,
@@ -497,7 +516,7 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
     await run.resumeAsync({
       step: lifecycleStepId,
       resumeData: input.request.command,
-      requestContext: await this.workflowRequestContext(input.context, workflowInput),
+      requestContext: await this.workflowRequestContext(input.context, workflowInput, input.external),
     });
     return this.runningWorkflowView({
       runId: before.runId,
@@ -506,6 +525,26 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
       createdAt: before.createdAt,
       ...(before.kind === 'goal.create' && before.resourceVersion ? { awaitAfterVersion: before.resourceVersion } : {}),
     });
+  }
+
+  async recoverTask(input: {
+    context: ExecutionContext;
+    runId: string;
+    command?: AIWorkflowResumeClientRequest['command'];
+    external: ExternalWorkflowInvocation;
+  }): Promise<AIWorkflowRunView> {
+    const store = await this.workflowStore();
+    const row = await store.getWorkflowRunById({ workflowName: TASK_CREATE_WORKFLOW_ID, runId: input.runId });
+    if (!row || row.resourceId !== input.context.identityId) throw new Error('AI_WORKFLOW_RUN_NOT_FOUND');
+    const workflowInput = workflowInputFromSnapshot(TASK_CREATE_WORKFLOW_ID, row.snapshot);
+    await this.assertWorkflowSelection(input.context, workflowInput);
+    const requestContext = await this.workflowRequestContext(input.context, workflowInput, input.external);
+    if (input.command) requestContext.setRaw('externalResumeCommand', input.command);
+    const run = await this.deps.taskCreateWorkflow.createRun({ runId: input.runId, resourceId: input.context.identityId });
+    await run.restart({ requestContext });
+    const view = await this.get({ identityId: input.context.identityId, runId: input.runId });
+    if (!view) throw new Error('AI_WORKFLOW_SNAPSHOT_MISSING');
+    return view;
   }
 
   private async attachWorkflowUsage(

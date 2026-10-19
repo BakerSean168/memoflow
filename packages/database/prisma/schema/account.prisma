@@ -4,6 +4,7 @@
 // ==========================================
 
 model Account {
+  assistedWorkflows AiAssistedWorkflow[]
   id               String    @id // same as CloudAuthUser.id for cloud accounts
   status           String    @default("Active") // AccountStatus: Active | Closed
   // profile

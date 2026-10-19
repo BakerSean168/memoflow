@@ -33,7 +33,7 @@ const STRICT_ALLOWED_SUBPATHS = {};
 const PACKAGE_SPECIFIC_SUBPATHS = {
   goal: ['./analytics', './events', './schedule-execution', './schedule-projection'],
   task: ['./analytics', './testing', './schema', './schedule-execution', './schedule-projection'],
-  ai: ['./ports', './schema', './testing'],
+  ai: ['./agent-gateway', './ports', './schema', './testing'],
   repository: ['./schema', './server'],
   'cloud-auth': ['./server'],
   'agent-gateway': ['./server'],
