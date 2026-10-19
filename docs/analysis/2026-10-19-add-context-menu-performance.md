@@ -201,3 +201,35 @@ Local raw artifacts are retained in the ignored UI-lane `.tmp-512/`
 directory: `before-0.json` through `before-5.json`, `before.log`,
 `isolated-spec.log`, `solo-traced-spec.log`, `solo-trace-*.json`, `measure.mts`, `analyze.py`, and `profile.py`.
 Raw auth/browser traces are intentionally not committed.
+
+## 2026-10-20 follow-up: CPU cut on open (conductor)
+
+The ~160ms main-thread CPU on open is the menu mount itself. Two changes in
+`AIFooterComposer.vue`:
+
+- `DropdownMenu :modal="false"`: the modal mode hides every sibling subtree
+  from assistive tech (aria-hidden walk over the whole app shell) and locks
+  body scroll on each open; the Add Context menu is a non-blocking popover, so
+  modal behaviour is not needed. Outside click/Escape still dismiss it.
+- Goal/Task/Note submenu content is mounted only when its submenu opens
+  (`v-model:open` + `v-if`), so opening the root menu no longer renders up to
+  24 hidden items with icons. Unit test:
+  `mounts context submenu content only after its submenu opens`.
+
+Same command as above (`--repeat-each=10 --workers=1`), same shared host,
+run back to back (host load average 30–49 during both runs), latency logged
+temporarily before the unchanged assertion:
+
+| Build | n | Median | Max | >300ms |
+| --- | ---: | ---: | ---: | ---: |
+| Before (main `AIFooterComposer.vue`) | 10 | 166.3ms | 204.5ms | 0 |
+| After (this PR) | 10 | 122.4ms | 331.5ms | 1 |
+
+Raw after: 125.5, 109.8, 113.6, 103.0, 331.5, 219.8, 125.1, 119.8, 110.9, 161.3.
+Raw before: 190.7, 169.1, 163.4, 137.5, 157.3, 156.0, 204.5, 182.0, 176.9, 156.6.
+
+The median open cost drops ~44ms (~26%). The single 331.5ms after-sample came
+at the start of a load spike and is consistent with the off-CPU host
+contention documented above; the tail is not product-attributable on a shared
+host. The 300ms assertion is unchanged; a reserved host/runner window remains
+the CI lanes item for proving the tail.
