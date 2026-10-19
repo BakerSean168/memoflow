@@ -32,6 +32,46 @@ describe('native user file interactions', () => {
       await fs.rm(home, { recursive: true, force: true });
     }
   });
+  it('reports a saved file even when the preference writer fails', async () => {
+    const home = await fs.mkdtemp(path.join(os.tmpdir(), 'native-dialog-preference-'));
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    try {
+      const config = path.join(home, 'config');
+      await fs.mkdir(config);
+      const filePath = path.join(home, 'saved.json');
+      const write = fs.writeFile.bind(fs);
+      const writer = vi.spyOn(fs, 'writeFile').mockImplementation(async (file, ...args) => {
+        if (file === path.join(config, 'file-dialog-directory.json'))
+          throw new Error('preference unavailable');
+        return write(file, ...args);
+      });
+      try {
+        const files = new NativeFileDialogs(
+          config,
+          {
+            showSaveDialog: async () => ({ canceled: false, filePath }),
+            showOpenDialog: async () => ({ canceled: false, filePaths: [filePath] }),
+          },
+          () => home,
+        );
+        await expect(
+          files.save({ defaultFileName: 'saved.json', content: 'saved' }),
+        ).resolves.toEqual({ canceled: false, filePath });
+        expect(await fs.readFile(filePath, 'utf8')).toBe('saved');
+        await expect(files.open()).resolves.toEqual({
+          canceled: false,
+          filePath,
+          content: 'saved',
+        });
+        expect(warning).toHaveBeenCalledTimes(2);
+      } finally {
+        writer.mockRestore();
+      }
+    } finally {
+      warning.mockRestore();
+      await fs.rm(home, { recursive: true, force: true });
+    }
+  });
   it('writes only the chosen destination and a CONFIG preference after successful save/read', async () => {
     const home = await fs.mkdtemp(path.join(os.tmpdir(), 'native-dialog-success-'));
     try {

@@ -18,6 +18,9 @@ export const desktopStorageRoots = resolveDesktopStorageRoots({
         : 'development',
   home: app.getPath('home'),
   env: process.env,
+  knownFolder: (folder) => (folder === 'roamingAppData' ? app.getPath('appData') : undefined),
+  // Electron's getPath typings have no localAppData key. Resolve Local independently
+  // from LOCALAPPDATA through the provider's env fallback; never derive it from Roaming.
 });
 configureDesktopStorage(app, desktopStorageRoots);
 const sharedResolver = createSharedPathResolver(desktopStorageRoots);

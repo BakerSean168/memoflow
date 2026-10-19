@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** Data owner composition: V3 preferences portability + full Data Portability + Desktop UserFiles. */
+/** Data owner composition: V3 preferences portability + full Data Portability + Desktop native file dialogs. */
 import { inject, ref } from 'vue';
 import { SystemChannels } from '@memoflow/contracts/electron';
 import { isOk, type Result } from '@memoflow/contracts/result';

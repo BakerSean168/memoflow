@@ -37,7 +37,6 @@ describe('storage path derivation', () => {
       path.join(roots.stateRoot, 'shared/ui/profile-access-window-state.json'),
     );
     expect(shared.snapshotStagingDir).toBe(path.join(roots.cacheRoot, 'snapshot-staging'));
-    expect(shared.downloadsDir).toBe(path.join(roots.cacheRoot, 'downloads-internal'));
     expect(shared.tempDir).toBe(path.join(roots.cacheRoot, 'temp'));
     expect(shared.logsDir).toBe(roots.logsDir);
     expect(fs.readdirSync(root)).toEqual([]);

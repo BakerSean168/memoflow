@@ -25,7 +25,7 @@ describe('SETTING-9206 desktop device preference ownership', () => {
     );
   });
 
-  it('keeps window presentation state and UserFiles out of the notification preference owner', () => {
+  it('keeps window presentation state and native file dialogs out of the notification preference owner', () => {
     const paths = read('paths/profile-path-resolver.ts');
     const store = read('services/desktop-notification-preference.store.ts');
 

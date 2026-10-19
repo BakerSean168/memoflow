@@ -1,5 +1,6 @@
 import { createSharedPathResolver, resolveDesktopStorageRoots } from '../paths';
 import fs from 'node:fs';
+import { session } from 'electron';
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -55,10 +56,14 @@ vi.mock('../bootstrap', () => ({
 }));
 
 function sharedResolver(rootDir: string): SharedPathResolver {
-  return createSharedPathResolver(resolveDesktopStorageRoots({
-    platform: 'linux', channel: 'test', home: rootDir,
-    env: { MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: rootDir },
-  }));
+  return createSharedPathResolver(
+    resolveDesktopStorageRoots({
+      platform: 'linux',
+      channel: 'test',
+      home: rootDir,
+      env: { MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: rootDir },
+    }),
+  );
 }
 
 describe('DesktopProfileRuntimeManager', () => {
@@ -511,12 +516,26 @@ describe('DesktopProfileRuntimeManager', () => {
       fs.promises.writeFile(sessionPath, 'session'),
     ]);
 
+    const staging = path.join(rootDir, 'cache', 'snapshot-staging', descriptor.profileId);
+    await fs.promises.mkdir(staging, { recursive: true });
+    await fs.promises.writeFile(path.join(staging, 'old-snapshot'), 'old account');
     await runtime.removeProfile(descriptor.profileId);
+    expect(session.fromPartition).toHaveBeenLastCalledWith(
+      `persist:profile-${descriptor.profileId}`,
+    );
+    const cleared = vi.mocked(session.fromPartition).mock.results.at(-1)?.value;
+    expect(cleared.clearStorageData).toHaveBeenCalledOnce();
+    expect(cleared.clearCache).toHaveBeenCalledOnce();
+    expect(fs.existsSync(staging)).toBe(false);
 
     expect(await registry.findByCloudAccountId('cloud-1')).toBeNull();
     expect(fs.existsSync(profileDir)).toBe(false);
     expect(fs.existsSync(keyPath)).toBe(false);
     expect(fs.existsSync(pinPath)).toBe(false);
     expect(fs.existsSync(sessionPath)).toBe(false);
+    const readded = await registry.register('cloud-1', 'Cloud User', 'user@example.com');
+    expect(readded.profileId).toBe(descriptor.profileId);
+    expect(fs.existsSync(staging)).toBe(false);
+    expect(fs.existsSync(profileDir)).toBe(false);
   });
 });

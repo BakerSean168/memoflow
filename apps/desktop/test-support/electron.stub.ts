@@ -354,3 +354,10 @@ export const globalShortcut = {
   unregisterAll: vi.fn(),
   isRegistered: vi.fn(() => false),
 };
+
+export const session = {
+  fromPartition: vi.fn(() => ({
+    clearStorageData: vi.fn(async () => undefined),
+    clearCache: vi.fn(async () => undefined),
+  })),
+};

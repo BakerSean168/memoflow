@@ -1,3 +1,4 @@
+import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -5,6 +6,7 @@ import { DesktopFeatureChannels, SystemChannels } from '@memoflow/contracts/elec
 
 const mocks = vi.hoisted(() => ({
   ipcHandle: vi.fn(),
+  appGetPath: vi.fn(),
   appGetVersion: vi.fn(() => '1.0.0'),
   dialogShowOpenDialog: vi.fn(),
   dialogShowSaveDialog: vi.fn(),
@@ -22,6 +24,7 @@ vi.mock('electron', () => ({
   },
   app: {
     getVersion: mocks.appGetVersion,
+    getPath: mocks.appGetPath,
   },
   dialog: {
     showOpenDialog: mocks.dialogShowOpenDialog,
@@ -56,7 +59,9 @@ describe('registerSystemIpcHandlers', () => {
     vi.resetModules();
     vi.clearAllMocks();
 
-    mocks.getSharedPathResolver.mockReturnValue({ configDir: path.join(os.tmpdir(), 'dialog-config') });
+    mocks.getSharedPathResolver.mockReturnValue({
+      configDir: path.join(os.tmpdir(), 'dialog-config'),
+    });
     mocks.dialogShowOpenDialog.mockResolvedValue({
       canceled: true,
       filePaths: [],
@@ -68,6 +73,74 @@ describe('registerSystemIpcHandlers', () => {
     mocks.shellOpenPath.mockResolvedValue('');
     mocks.shellOpenExternal.mockResolvedValue(undefined);
   });
+
+  it.each([true, false])(
+    'native file IPC uses Downloads when present (%s), cancels without writes, and remembers confirmed files',
+    async (hasDownloads) => {
+      const home = await fs.mkdtemp(path.join(os.tmpdir(), 'system-file-ipc-'));
+      try {
+        const downloads = path.join(home, 'Downloads');
+        const configDir = path.join(home, 'config');
+        if (hasDownloads) await fs.mkdir(downloads);
+        mocks.appGetPath.mockImplementation((key: string) =>
+          key === 'downloads' ? downloads : home,
+        );
+        mocks.getSharedPathResolver.mockReturnValue({ configDir });
+        const { registerSystemIpcHandlers } = await import('../system-handlers');
+        registerSystemIpcHandlers(null, null, null);
+        const save = getRegisteredHandler(SystemChannels.USER_FILES_SAVE_TEXT);
+        const open = getRegisteredHandler(SystemChannels.USER_FILES_OPEN_TEXT);
+        const initial = hasDownloads ? downloads : home;
+        const write = vi.spyOn(fs, 'writeFile');
+        const mkdir = vi.spyOn(fs, 'mkdir');
+        try {
+          await expect(
+            save({}, { defaultFileName: 'export.json', content: 'saved' }),
+          ).resolves.toEqual({ ok: true, data: { canceled: true, filePath: null } });
+          await expect(open({})).resolves.toEqual({
+            ok: true,
+            data: { canceled: true, filePath: null, content: null },
+          });
+          expect(write).not.toHaveBeenCalled();
+          expect(mkdir).not.toHaveBeenCalled();
+          expect(mocks.dialogShowSaveDialog).toHaveBeenLastCalledWith({
+            defaultPath: path.join(initial, 'export.json'),
+            filters: undefined,
+          });
+          expect(mocks.dialogShowOpenDialog).toHaveBeenLastCalledWith({
+            defaultPath: initial,
+            properties: ['openFile'],
+            filters: undefined,
+          });
+          expect(await fs.readdir(home)).toEqual(hasDownloads ? ['Downloads'] : []);
+          const selected = path.join(home, 'selected.json');
+          mocks.dialogShowSaveDialog.mockResolvedValue({ canceled: false, filePath: selected });
+          await expect(
+            save({}, { defaultFileName: 'export.json', content: 'saved' }),
+          ).resolves.toEqual({ ok: true, data: { canceled: false, filePath: selected } });
+          expect(await fs.readFile(selected, 'utf8')).toBe('saved');
+          const preference = path.join(configDir, 'file-dialog-directory.json');
+          expect(JSON.parse(await fs.readFile(preference, 'utf8'))).toBe(home);
+          mocks.dialogShowOpenDialog.mockResolvedValue({ canceled: false, filePaths: [selected] });
+          await expect(open({})).resolves.toEqual({
+            ok: true,
+            data: { canceled: false, filePath: selected, content: 'saved' },
+          });
+          expect(JSON.parse(await fs.readFile(preference, 'utf8'))).toBe(home);
+          expect(mocks.dialogShowOpenDialog).toHaveBeenLastCalledWith({
+            defaultPath: home,
+            properties: ['openFile'],
+            filters: undefined,
+          });
+        } finally {
+          write.mockRestore();
+          mkdir.mockRestore();
+        }
+      } finally {
+        await fs.rm(home, { recursive: true, force: true });
+      }
+    },
+  );
 
   it('registers all shared system and desktop feature handlers', async () => {
     const { registerSystemIpcHandlers } = await import('../system-handlers');
@@ -91,8 +164,6 @@ describe('registerSystemIpcHandlers', () => {
       Object.keys(SystemChannels).length + Object.keys(DesktopFeatureChannels).length,
     );
   });
-
-
 
   it('fails all device preference calls when notification capability is degraded', async () => {
     const { registerSystemIpcHandlers } = await import('../system-handlers');
@@ -150,9 +221,12 @@ describe('registerSystemIpcHandlers', () => {
       getRegisteredHandler(DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_GET)({}),
     ).resolves.toEqual({ ok: true, data: { presentationMode: 'custom', soundEnabled: true } });
     await expect(
-      getRegisteredHandler(DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_UPDATE)({}, {
-        presentationMode: 'native',
-      }),
+      getRegisteredHandler(DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_UPDATE)(
+        {},
+        {
+          presentationMode: 'native',
+        },
+      ),
     ).resolves.toEqual({ ok: true, data: { presentationMode: 'native', soundEnabled: false } });
     await expect(
       getRegisteredHandler(DesktopFeatureChannels.NOTIFICATION_DEVICE_PREFERENCE_RESET)({}),
@@ -179,14 +253,6 @@ describe('registerSystemIpcHandlers', () => {
     });
     expect(updateDevicePreference).not.toHaveBeenCalled();
   });
-
-
-
-
-
-
-
-
 
   it('opens only HTTP(S) URLs in the external browser', async () => {
     const { registerSystemIpcHandlers } = await import('../system-handlers');

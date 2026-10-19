@@ -24,7 +24,6 @@ export function createSharedPathResolver(roots: DesktopStorageRoots): SharedPath
     registryPath: p.join(profilesRegistryDir, 'registry.json'),
     cacheDir,
     snapshotStagingDir: p.join(cacheDir, 'snapshot-staging'),
-    downloadsDir: p.join(cacheDir, 'downloads-internal'),
     tempDir: p.join(cacheDir, 'temp'),
     logsDir: roots.logsDir,
   };

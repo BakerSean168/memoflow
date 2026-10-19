@@ -45,10 +45,14 @@ export class NativeFileDialogs {
     return this.defaultDirectory();
   }
   private async remember(filePath: string): Promise<void> {
-    await fs.mkdir(this.configDir, { recursive: true, mode: 0o700 });
-    await fs.writeFile(this.preferencePath, JSON.stringify(path.dirname(filePath)), {
-      mode: 0o600,
-    });
+    try {
+      await fs.mkdir(this.configDir, { recursive: true, mode: 0o700 });
+      await fs.writeFile(this.preferencePath, JSON.stringify(path.dirname(filePath)), {
+        mode: 0o600,
+      });
+    } catch (error) {
+      console.warn('[NativeFileDialogs] Could not remember the selected directory', error);
+    }
   }
   async save(request: SaveTextFileRequest) {
     const result = await this.dialogs.showSaveDialog({

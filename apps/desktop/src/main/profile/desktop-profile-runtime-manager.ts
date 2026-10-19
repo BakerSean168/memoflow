@@ -1,3 +1,4 @@
+import { session } from 'electron';
 import { ResultErrorException } from '@memoflow/contracts/result';
 import { ProfileCleanup, LocalProfileIdSchema } from './profile-cleanup';
 import { randomUUID } from 'node:crypto';
@@ -85,7 +86,9 @@ export class DesktopProfileRuntimeManager {
     private readonly profileRegistry: ProfileRegistry,
     private readonly accountClock: Clock,
   ) {
-    this.cleanup = new ProfileCleanup(sharedResolver.roots);
+    this.cleanup = new ProfileCleanup(sharedResolver.roots, (partition) =>
+      session.fromPartition(partition),
+    );
     this.keyStore = new ElectronProfileKeyStore(sharedResolver.roots.dataRoot);
     this.pinStore = new ProfilePinStore(sharedResolver.roots.dataRoot);
     this.cloudSessionStore = new CloudSessionStore(sharedResolver.roots.dataRoot);

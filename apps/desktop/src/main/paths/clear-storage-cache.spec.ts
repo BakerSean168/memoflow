@@ -38,3 +38,26 @@ it('clears rebuildable bytes with Electron APIs while preserving session, auth, 
     await fs.rm(home, { recursive: true, force: true });
   }
 });
+
+it('refuses an overlapping roots object before clearing sessions or deleting files', async () => {
+  const home = await fs.mkdtemp(path.join(os.tmpdir(), 'unsafe-cache-'));
+  try {
+    const roots = resolveDesktopStorageRoots({
+      platform: 'linux',
+      channel: 'test',
+      home,
+      env: { MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: home },
+    });
+    await fs.mkdir(roots.dataRoot);
+    const file = path.join(roots.dataRoot, 'keep');
+    await fs.writeFile(file, 'durable');
+    const session = { clearCache: vi.fn(async () => undefined) };
+    await expect(
+      clearDesktopStorageCache({ ...roots, cacheRoot: home }, [session]),
+    ).rejects.toThrow('cache');
+    expect(session.clearCache).not.toHaveBeenCalled();
+    expect(await fs.readFile(file, 'utf8')).toBe('durable');
+  } finally {
+    await fs.rm(home, { recursive: true, force: true });
+  }
+});

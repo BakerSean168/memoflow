@@ -18,7 +18,33 @@ export interface StoragePlatform {
   home: string;
   env: Readonly<Record<string, string | undefined>>;
   /** Independently resolved Known Folders; never infer Local from Roaming. */
-  knownFolder?: (folder: 'roamingAppData' | 'localAppData') => string;
+  knownFolder?: (folder: 'roamingAppData' | 'localAppData') => string | undefined;
+}
+
+/**
+ * CACHE may live inside a durable root, but must never contain a durable root:
+ * removing CACHE must not remove any non-cache owner (including Chromium sessions).
+ */
+export function assertDesktopCacheIsDisposable(roots: DesktopStorageRoots): void {
+  const p = roots.platform === 'win32' ? path.win32 : path.posix;
+  for (const root of [
+    roots.configRoot,
+    roots.dataRoot,
+    roots.stateRoot,
+    roots.logsDir,
+    roots.electronUserData,
+    roots.electronSessionData,
+  ]) {
+    const relative = p.relative(roots.cacheRoot, root);
+    if (
+      relative === '' ||
+      (relative !== '..' && !relative.startsWith(`..${p.sep}`) && !p.isAbsolute(relative))
+    ) {
+      throw new Error(
+        `Unsafe desktop cache root "${roots.cacheRoot}" contains persistent root "${root}"`,
+      );
+    }
+  }
 }
 
 /** Pure: resolving a path never creates it. Invalid explicit test roots fail closed. */
@@ -36,6 +62,9 @@ export function resolveDesktopStorageRoots(input: StoragePlatform): DesktopStora
   const testRoot = env.MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT;
   if (testRoot !== undefined) {
     if (!p.isAbsolute(testRoot)) throw new Error('Desktop storage test root must be absolute');
+    const normalizedTestRoot = p.resolve(testRoot);
+    if (normalizedTestRoot === p.parse(normalizedTestRoot).root)
+      throw new Error('Desktop storage test root must not be a filesystem root');
     configRoot = p.join(testRoot, 'config');
     dataRoot = p.join(testRoot, 'data');
     stateRoot = p.join(testRoot, 'state');
@@ -71,7 +100,7 @@ export function resolveDesktopStorageRoots(input: StoragePlatform): DesktopStora
     stateRoot = p.join(support, 'state');
     cacheRoot = p.join(home, 'Library', 'Caches', name);
   }
-  return Object.freeze({
+  const roots: DesktopStorageRoots = {
     platform,
     channel,
     configRoot,
@@ -84,5 +113,7 @@ export function resolveDesktopStorageRoots(input: StoragePlatform): DesktopStora
         : p.join(stateRoot, 'logs'),
     electronUserData: p.join(configRoot, 'electron'),
     electronSessionData: p.join(dataRoot, 'chromium-session'),
-  });
+  };
+  assertDesktopCacheIsDisposable(roots);
+  return Object.freeze(roots);
 }

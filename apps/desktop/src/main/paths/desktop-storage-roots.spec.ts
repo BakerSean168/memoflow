@@ -2,6 +2,49 @@ import { describe, expect, it } from 'vitest';
 import { resolveDesktopStorageRoots, type DesktopRuntimeChannel } from './desktop-storage-roots';
 
 describe('desktop storage roots', () => {
+  it.each([
+    { XDG_CACHE_HOME: '/shared', XDG_DATA_HOME: '/shared' },
+    { XDG_CACHE_HOME: '/shared', XDG_DATA_HOME: '/shared/memoflow/nested' },
+    { XDG_CACHE_HOME: '/shared', XDG_CONFIG_HOME: '/shared' },
+    { XDG_CACHE_HOME: '/shared', XDG_STATE_HOME: '/shared/memoflow/nested' },
+  ])('rejects cache roots that contain persistent roots: %j', (env) => {
+    expect(() =>
+      resolveDesktopStorageRoots({
+        platform: 'linux',
+        channel: 'production',
+        home: '/home/me',
+        env,
+      }),
+    ).toThrow('cache');
+  });
+  it.each([
+    ['linux', '/'],
+    ['win32', 'C:\\'],
+    ['win32', 'C:/'],
+    ['win32', 'C:/temporary/..'],
+    ['win32', '//server/share'],
+    ['linux', '/tmp/..'],
+  ] as const)('rejects filesystem test root on %s: %s', (platform, testRoot) => {
+    expect(() =>
+      resolveDesktopStorageRoots({
+        platform,
+        channel: 'test',
+        home: '/home/me',
+        env: { MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: testRoot },
+      }),
+    ).toThrow('filesystem root');
+  });
+  it('allows cache nested inside data without deleting the data root', () => {
+    expect(
+      resolveDesktopStorageRoots({
+        platform: 'linux',
+        channel: 'production',
+        home: '/home/me',
+        env: { XDG_DATA_HOME: '/shared', XDG_CACHE_HOME: '/shared/memoflow/cache' },
+      }).cacheRoot,
+    ).toBe('/shared/memoflow/cache/memoflow');
+  });
+
   for (const channel of ['production', 'development', 'test'] satisfies DesktopRuntimeChannel[]) {
     const name =
       channel === 'production'
@@ -18,6 +61,9 @@ describe('desktop storage roots', () => {
       expect(windows.configRoot).toBe(`R:\\OneDrive\\Roaming\\${name}`);
       expect(windows.dataRoot).toBe(`L:\\Local\\${name}\\data`);
       expect(windows.stateRoot).toBe(`L:\\Local\\${name}\\state`);
+      expect(windows.logsDir).toBe(`L:\\Local\\${name}\\state\\logs`);
+      expect(windows.electronUserData).toBe(`R:\\OneDrive\\Roaming\\${name}\\electron`);
+      expect(windows.electronSessionData).toBe(`L:\\Local\\${name}\\data\\chromium-session`);
       expect(windows.cacheRoot).toBe(`L:\\Local\\${name}\\cache`);
       const mac = resolveDesktopStorageRoots({
         platform: 'darwin',
@@ -29,6 +75,12 @@ describe('desktop storage roots', () => {
       expect(mac.dataRoot).toBe(`/Users/me/Library/Application Support/${name}/data`);
       expect(mac.stateRoot).toBe(`/Users/me/Library/Application Support/${name}/state`);
       expect(mac.cacheRoot).toBe(`/Users/me/Library/Caches/${name}`);
+      expect(mac.electronUserData).toBe(
+        `/Users/me/Library/Application Support/${name}/config/electron`,
+      );
+      expect(mac.electronSessionData).toBe(
+        `/Users/me/Library/Application Support/${name}/data/chromium-session`,
+      );
       expect(mac.logsDir).toBe(`/Users/me/Library/Logs/${name}`);
       const linux = resolveDesktopStorageRoots({
         platform: 'linux',
@@ -36,12 +88,13 @@ describe('desktop storage roots', () => {
         home: '/home/me',
         env: {},
       });
+      expect(linux.logsDir).toBe(`/home/me/.local/state/${name.toLowerCase()}/logs`);
       expect(linux.configRoot).toBe(`/home/me/.config/${name.toLowerCase()}`);
       expect(linux.electronUserData).toBe(`${linux.configRoot}/electron`);
       expect(linux.electronSessionData).toBe(`${linux.dataRoot}/chromium-session`);
     });
   }
-  for (const value of [undefined, '', 'relative/path', '/custom']) {
+  for (const value of [undefined, '', 'relative/path']) {
     it(`validates all XDG variables: ${String(value)}`, () => {
       const roots = resolveDesktopStorageRoots({
         platform: 'linux',
@@ -64,6 +117,24 @@ describe('desktop storage roots', () => {
       expect(roots.cacheRoot).toBe(`${value === '/custom' ? value : '/home/me/.cache'}/memoflow`);
     });
   }
+  it.each(['XDG_CONFIG_HOME', 'XDG_DATA_HOME', 'XDG_STATE_HOME', 'XDG_CACHE_HOME'] as const)(
+    'uses absolute %s independently',
+    (key) => {
+      const roots = resolveDesktopStorageRoots({
+        platform: 'linux',
+        channel: 'production',
+        home: '/home/me',
+        env: { [key]: '/custom' },
+      });
+      const field = {
+        XDG_CONFIG_HOME: 'configRoot',
+        XDG_DATA_HOME: 'dataRoot',
+        XDG_STATE_HOME: 'stateRoot',
+        XDG_CACHE_HOME: 'cacheRoot',
+      } as const;
+      expect(roots[field[key]]).toBe('/custom/memoflow');
+    },
+  );
   it('uses one explicit isolated test root and rejects relative overrides', () => {
     const input = {
       platform: 'linux',

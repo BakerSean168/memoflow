@@ -19,7 +19,6 @@ export interface SharedPathResolver {
   readonly registryPath: string;
   readonly cacheDir: string;
   readonly snapshotStagingDir: string;
-  readonly downloadsDir: string;
   readonly tempDir: string;
   readonly logsDir: string;
 }
