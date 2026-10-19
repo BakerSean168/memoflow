@@ -1,6 +1,6 @@
 import { planUnitShards } from '../lib/unit-shards.mjs';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -23,8 +23,9 @@ function createReceipt(setupMs = 101) {
   return receipt;
 }
 
-test('prepares independent lane inputs and apportions shared setup timing', async () => {
+test('prepares independent lane inputs and apportions shared setup timing', async (t) => {
   const outputDir = await mkdtemp(path.join(os.tmpdir(), 'memoflow-shared-lanes-'));
+  t.after(() => rm(outputDir, { recursive: true, force: true }));
   const manifest = {
     kind: 'delivery-manifest-v1',
     version: 1,
@@ -100,8 +101,9 @@ test('prepares independent lane inputs and apportions shared setup timing', asyn
   assert.equal(input.lane, 'integration');
 });
 
-test('rejects unregistered lanes before producing shared lane evidence', async () => {
+test('rejects unregistered lanes before producing shared lane evidence', async (t) => {
   const outputDir = await mkdtemp(path.join(os.tmpdir(), 'memoflow-shared-lanes-'));
+  t.after(() => rm(outputDir, { recursive: true, force: true }));
   const manifest = {
     kind: 'delivery-manifest-v1',
     version: 1,

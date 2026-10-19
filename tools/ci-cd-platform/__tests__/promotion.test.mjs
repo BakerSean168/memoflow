@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
-import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -28,8 +28,9 @@ function artifact(name, artifactDigest = 'a'.repeat(64)) {
   return manifest;
 }
 
-test('promotes only artifacts from the same commit', async () => {
+test('promotes only artifacts from the same commit', async (t) => {
   const directory = await mkdtemp(path.join(tmpdir(), 'ci-cd-promotion-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
   const output = path.join(directory, 'promotion.json');
   const artifacts = [artifact('api'), artifact('web', 'b'.repeat(64))];
   const promotion = await buildPromotionManifest({
@@ -67,8 +68,9 @@ test('promotes only artifacts from the same commit', async () => {
   );
 });
 
-test('production promotion fails closed unless the complete artifact closure is present', async () => {
+test('production promotion fails closed unless the complete artifact closure is present', async (t) => {
   const directory = await mkdtemp(path.join(tmpdir(), 'ci-cd-production-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
   const output = path.join(directory, 'promotion.json');
   const complete = [
     'api',
@@ -102,8 +104,9 @@ test('production promotion fails closed unless the complete artifact closure is 
   );
 });
 
-test('promotion CLI reads manifests and writes a validated production receipt', async () => {
+test('promotion CLI reads manifests and writes a validated production receipt', async (t) => {
   const directory = await mkdtemp(path.join(tmpdir(), 'ci-cd-promotion-cli-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
   const output = path.join(directory, 'promotion.json');
   const sourceManifestDigest = 'a'.repeat(64);
   const manifests = [

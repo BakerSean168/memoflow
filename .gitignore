@@ -51,6 +51,10 @@ coverage
 # Code quality reports
 jscpd-report
 
+# Affected-selector shadow artifacts are uploaded by CI, not committed
+reports/ci-cd-platform/affected-shadow-*.json
+reports/ci-cd-platform/affected-shadow-*.md
+
 # Build cache
 tsconfig.tsbuildinfo
 *.tsbuildinfo
@@ -171,3 +175,4 @@ reports/apps/ai-service/evals/live-history/
 .reasonix/
 reasonix.toml
 .codebuddy/
+.vitest
