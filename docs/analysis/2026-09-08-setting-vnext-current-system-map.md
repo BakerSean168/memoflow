@@ -329,7 +329,7 @@ account
   -> PrivacySettings
 
 data
-  -> UserFilesSettings
+  -> 原生导入/导出对话框
   -> SettingAdvancedActions / DataPortability
 
 advanced
@@ -571,20 +571,9 @@ replace/delete provider
 
 这是已经正确完成 ownership 外移的例子。
 
-## 15. User files path 已是正确的 local capability
+## 15. Native file dialogs
 
-`UserFilesSettings.vue` 通过 Electron IPC：
-
-```text
-USER_FILES_GET_PATH
-USER_FILES_PICK_DIRECTORY
-USER_FILES_OPEN_DIRECTORY
-USER_FILES_RESET_PATH
-```
-
-读取/修改当前设备文件目录。
-
-它没有被塞入 `UserSetting.preferences`，这与 vNext 目标一致，应保护。
+Issue #487 已删除统一用户文件根与对应设置/IPC；导入导出使用原生对话框，路径不进入云端偏好。见 [Desktop storage](../architecture/desktop-storage.md)。
 
 ## 16. Presentation bootstrap
 

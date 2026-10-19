@@ -86,8 +86,7 @@ async function verifyOfflineNativeFailure(
         MEMOFLOW_ATTENTION_QA_FAILURE: scenario.mode,
         MEMOFLOW_ATTENTION_QA_PROMPT_LOG: promptLog,
         NODE_ENV: 'test',
-        MEMOFLOW_DESKTOP_USER_DATA_PATH: path.join(root, 'user-data'),
-        MEMOFLOW_DESKTOP_USER_FILES_PATH: path.join(root, 'user-files'),
+        MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: path.join(root, 'user-data'),
         ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
       },
     });

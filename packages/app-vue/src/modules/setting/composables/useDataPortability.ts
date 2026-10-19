@@ -30,7 +30,6 @@ export function useDataPortability() {
   async function saveJsonFile(fileName: string, content: string): Promise<void> {
     if (desktopApi?.invoke) {
       const response = (await desktopApi.invoke(SystemChannels.USER_FILES_SAVE_TEXT, {
-        subdirectory: 'exports',
         defaultFileName: fileName,
         content,
         filters: [{ name: 'JSON', extensions: ['json'] }],
@@ -134,7 +133,6 @@ export function useDataPortability() {
 
       if (desktopApi?.invoke) {
         const response = (await desktopApi.invoke(SystemChannels.USER_FILES_OPEN_TEXT, {
-          subdirectory: 'exports',
           filters: [{ name: 'JSON', extensions: ['json'] }],
         })) as Result<{ canceled: boolean; content: string | null }>;
         if (!isOk(response) || response.data.canceled || !response.data.content) {

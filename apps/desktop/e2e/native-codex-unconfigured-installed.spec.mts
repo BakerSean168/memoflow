@@ -34,8 +34,7 @@ test('installed Windows defaults never expose an unconfigured Codex account or c
       cwd: process.cwd(),
       env: {
         ...isolated,
-        MEMOFLOW_DESKTOP_USER_DATA_PATH: path.join(root, 'profile'),
-        MEMOFLOW_DESKTOP_USER_FILES_PATH: path.join(root, 'files'),
+        MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: path.join(root, 'profile'),
         ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
       },
     });

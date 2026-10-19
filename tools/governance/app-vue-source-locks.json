@@ -2583,34 +2583,6 @@
       ]
     },
     {
-      "id": "user-files-settings",
-      "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
-      "origin": "packages/app-vue/src/modules/setting/components/user-files-settings.surface.spec.ts",
-      "locks": [
-        {
-          "file": "packages/app-vue/src/modules/setting/components/UserFilesSettings.vue",
-          "require": [
-            "import { isOk, type Result } from '@memoflow/contracts/result'",
-            "isOk(response)",
-            "SystemChannels.USER_FILES_GET_PATH",
-            "SystemChannels.USER_FILES_PICK_DIRECTORY",
-            "<SettingsSection",
-            "<SettingsPropertyRow",
-            "<SettingsStatusBlock"
-          ],
-          "forbid": [
-            {
-              "pattern": "\\) as UserFilesPathResult;"
-            },
-            "<Card",
-            {
-              "pattern": "green-\\d+"
-            }
-          ]
-        }
-      ]
-    },
-    {
       "id": "use-data-portability",
       "decision": "#488 migrated from app-vue source-text spec (Phase 5)",
       "origin": "packages/app-vue/src/modules/setting/composables/use-data-portability.surface.spec.ts",

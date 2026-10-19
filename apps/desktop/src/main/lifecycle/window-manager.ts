@@ -12,6 +12,7 @@
  * 4. 云端 session 在本地 Profile 打开后独立恢复
  */
 
+import { getProfilePartition } from '../profile/profile-partition';
 import { BrowserWindow, ipcMain, app } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -245,7 +246,7 @@ export class WindowManager {
         contextIsolation: true,
         nodeIntegration: false,
         sandbox: false,
-        partition: this.getProfilePartition(profileId),
+        partition: getProfilePartition(profileId),
       },
       icon: resolveWindowIconPath(),
       show: false,
@@ -663,9 +664,5 @@ export class WindowManager {
 
   private getShellPartition(): string {
     return 'persist:desktop-shell';
-  }
-
-  private getProfilePartition(profileId: string): string {
-    return `persist:profile-${profileId}`;
   }
 }

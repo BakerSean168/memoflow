@@ -6,6 +6,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 let isPackaged = false;
 let userDataPath = '';
 
+vi.mock('../../runtime-init', () => ({
+  getSharedPathResolver: () => ({ runtimeConfigPath: path.join(userDataPath, 'config', 'desktop-runtime.json') }),
+}));
+
 vi.mock('electron', () => ({
   app: {
     getPath: vi.fn(() => userDataPath),

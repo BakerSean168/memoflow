@@ -53,8 +53,7 @@ test('real Windows Electron Workspace IPC authenticates start, ack, stop, cursor
       env: {
         ...sanitized,
         NODE_ENV: 'test',
-        MEMOFLOW_DESKTOP_USER_DATA_PATH: path.join(root, 'user-data'),
-        MEMOFLOW_DESKTOP_USER_FILES_PATH: path.join(root, 'user-files'),
+        MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: path.join(root, 'user-data'),
         ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
       },
     });

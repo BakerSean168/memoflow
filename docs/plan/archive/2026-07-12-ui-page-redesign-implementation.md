@@ -84,7 +84,7 @@ updated: 2026-07-12T00:00:00
   - 10 平铺 Tab → 6 组（外观与语言 / AI / 通知与提醒 / 账户与隐私 / 数据 / 高级），左侧垂直分组导航 w-48 + 内容 max-w-3xl；<md 导航转顶部横向滚动条。
   - `AccountProfileSection` 从 `AccountCenterView` 原样抽出（表单 + 登出确认逻辑不动）并入「账户与隐私」；`AccountCenterView` 删除；`/account/center` → `redirect: /settings?tab=account`（`?tab=` 为新增分组深链契约，双向同步 route query）。
   - e2e 契约保留：`settings-tab-appearance/notifications`（分组导航按钮沿用 testid 规则）、`account-center-view` + `account-logout-button` 随组件迁入设置页。
-  - 数据组 = UserFilesSettings + SettingAdvancedActions（导入导出/备份本就是该组件主体）；高级组 = 快捷键（只读现状）+ 实验性。
+  - 数据组 = 原生文件对话框 + SettingAdvancedActions（导入导出/备份本就是该组件主体）；高级组 = 快捷键（只读现状）+ 实验性。
   - i18n：`setting.groups.*` zh/en 补齐。验证：web vue-tsc + 179 tests 全绿。
 - 2026-07-12：P3 笔记收缩第一轮（分支 `refactor/ui-redesign-p3-notes-reduction`，基于 P2 分支）：
   - §10 `/note/:id`：**预览优先**（`useEditorScenePane` 增 `initialViewMode` 选项，linear scene 传 `'preview'`，工作区默认 `'live'` 不变）；右栏改 `NoteContextPanel`（反链/图谱 Tabs，图谱点击才挂载——link-index 全量遍历延迟；<lg 图谱不渲染）；加载失败改 `AppEmptyState`「笔记不存在」+「回到笔记库」（AI 深链死端出口）；未保存守卫/LinkSuggestion 原样。

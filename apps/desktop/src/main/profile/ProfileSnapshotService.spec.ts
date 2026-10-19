@@ -1,3 +1,8 @@
+import {
+  createSharedPathResolver,
+  createProfilePathResolver,
+  resolveDesktopStorageRoots,
+} from '../paths';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -11,53 +16,26 @@ function createSqliteBuffer(): Buffer {
 }
 
 function createSharedResolver(rootDir: string): SharedPathResolver {
-  return {
-    rootDir,
-    sharedDir: path.join(rootDir, 'shared'),
-    authDir: path.join(rootDir, 'shared', 'auth'),
-    configDir: path.join(rootDir, 'shared', 'config'),
-    uiDir: path.join(rootDir, 'shared', 'ui'),
-    profilesRegistryDir: path.join(rootDir, 'shared', 'profiles'),
-    deviceIdPath: path.join(rootDir, 'shared', 'auth', 'device-id'),
-    runtimeConfigPath: path.join(rootDir, 'shared', 'config', 'desktop-runtime.json'),
-    profileAccessWindowStatePath: path.join(rootDir, 'shared', 'ui', 'profile-access-window-state.json'),
-    registryPath: path.join(rootDir, 'shared', 'profiles', 'registry.json'),
-    cacheDir: path.join(rootDir, 'cache'),
-    snapshotStagingDir: path.join(rootDir, 'cache', 'snapshot-staging'),
-    downloadsDir: path.join(rootDir, 'cache', 'downloads'),
-    tempDir: path.join(rootDir, 'cache', 'temp'),
-    logsDir: path.join(rootDir, 'logs'),
-    userFilesRootDir: path.join(rootDir, 'user-files'),
-    userFilesExportsDir: path.join(rootDir, 'user-files', 'exports'),
-    userFilesDownloadsDir: path.join(rootDir, 'user-files', 'downloads'),
-    userFilesAttachmentsDir: path.join(rootDir, 'user-files', 'attachments'),
-  };
+  return createSharedPathResolver(
+    resolveDesktopStorageRoots({
+      platform: 'linux',
+      channel: 'test',
+      home: rootDir,
+      env: { MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: rootDir },
+    }),
+  );
 }
 
 function createProfileResolver(rootDir: string, profileId: string): ProfilePathResolver {
-  const profileDir = path.join(rootDir, 'profiles', profileId);
-  return {
+  return createProfilePathResolver(
+    resolveDesktopStorageRoots({
+      platform: 'linux',
+      channel: 'test',
+      home: rootDir,
+      env: { MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: rootDir },
+    }),
     profileId,
-    profileDir,
-    authDir: path.join(profileDir, 'auth'),
-    tokensPath: path.join(profileDir, 'auth', 'tokens.enc'),
-    dbDir: path.join(profileDir, 'db'),
-    dbPath: path.join(profileDir, 'db', 'powersync.sqlite'),
-    snapshotMetaPath: path.join(profileDir, 'db', 'snapshot-meta.json'),
-    storageDir: path.join(profileDir, 'storage'),
-    repositoryStorageDir: path.join(profileDir, 'storage', 'repository-storage'),
-    knowledgeNotesDir: path.join(profileDir, 'storage', 'knowledge-notes'),
-    attachmentsDir: path.join(profileDir, 'storage', 'attachments'),
-    localVaultBindingPath: path.join(profileDir, 'storage', 'local-vault-binding.json'),
-    localVaultWriteLedgerPath: path.join(profileDir, 'storage', 'local-vault-write-ledger.json'),
-    knowledgeRepositoryAutoSyncStatePath: path.join(
-      profileDir,
-      'storage',
-      'knowledge-repository-auto-sync.json',
-    ),
-    uiDir: path.join(profileDir, 'ui'),
-    mainWindowStatePath: path.join(profileDir, 'ui', 'main-window-state.json'),
-  };
+  );
 }
 
 describe('ProfileSnapshotService', () => {

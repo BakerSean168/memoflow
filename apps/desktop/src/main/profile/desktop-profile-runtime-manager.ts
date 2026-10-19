@@ -1,3 +1,4 @@
+import { session } from 'electron';
 import { ResultErrorException } from '@memoflow/contracts/result';
 import { ProfileCleanup, LocalProfileIdSchema } from './profile-cleanup';
 import { randomUUID } from 'node:crypto';
@@ -85,10 +86,12 @@ export class DesktopProfileRuntimeManager {
     private readonly profileRegistry: ProfileRegistry,
     private readonly accountClock: Clock,
   ) {
-    this.cleanup = new ProfileCleanup(sharedResolver.rootDir);
-    this.keyStore = new ElectronProfileKeyStore(sharedResolver.rootDir);
-    this.pinStore = new ProfilePinStore(sharedResolver.rootDir);
-    this.cloudSessionStore = new CloudSessionStore(sharedResolver.rootDir);
+    this.cleanup = new ProfileCleanup(sharedResolver.roots, (partition) =>
+      session.fromPartition(partition),
+    );
+    this.keyStore = new ElectronProfileKeyStore(sharedResolver.roots.dataRoot);
+    this.pinStore = new ProfilePinStore(sharedResolver.roots.dataRoot);
+    this.cloudSessionStore = new CloudSessionStore(sharedResolver.roots.dataRoot);
   }
 
   setModuleRegistration(fn: ProfileModuleRegistration): void {
@@ -490,7 +493,7 @@ export class DesktopProfileRuntimeManager {
       ? await this.pinStore.unlock(profileId, pin!)
       : await this.keyStore.unlock(profileId);
     try {
-      const paths = createProfilePathResolver(this.sharedResolver.rootDir, profileId);
+      const paths = createProfilePathResolver(this.sharedResolver.roots, profileId);
       if ((await fs.promises.lstat(paths.profileDir)).isSymbolicLink())
         throw new ResultErrorException('SOURCE_PATH_UNSAFE', 'SOURCE_PATH_UNSAFE');
       return await read(profile, paths);
@@ -534,7 +537,7 @@ export class DesktopProfileRuntimeManager {
       this.preparedUnlockProfileId = null;
     }
     const profileResolver = createProfilePathResolver(
-      this.sharedResolver.rootDir,
+      this.sharedResolver.roots,
       descriptor.profileId,
     );
     ensureProfileDirs(profileResolver);

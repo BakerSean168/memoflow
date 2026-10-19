@@ -559,21 +559,5 @@ export default {
     "exportFailed": "Failed to export settings",
     "importFailed": "Failed to import settings"
   },
-  "userFiles": {
-    "title": "File Storage",
-    "currentDirectory": "Current Directory",
-    "defaultDirectory": "Default Directory",
-    "customBadge": "Custom",
-    "changeDirectory": "Change Directory",
-    "openDirectory": "Open Folder",
-    "resetToDefault": "Reset to Default",
-    "resetConfirm": "Reset file storage location to default?",
-    "description": "Choose where MemoFlow stores your exported files, downloads, and attachments.",
-    "loadPathFailed": "Failed to load file storage path",
-    "directoryChanged": "File storage location updated",
-    "pickDirectoryFailed": "Failed to change directory, please try again",
-    "openDirectoryFailed": "Unable to open folder",
-    "resetSuccess": "File storage location reset to default",
-    "resetFailed": "Failed to reset, please try again"
-  },
+
 } as const;

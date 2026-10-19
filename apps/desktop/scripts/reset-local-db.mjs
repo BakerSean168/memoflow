@@ -2,13 +2,13 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { resolveLikelyUserDataDirs } from './user-data-paths.mjs';
+import { resolveStorageRoots } from './user-data-paths.mjs';
 
 const DB_FILE = 'powersync.sqlite';
 const PROFILES_DIR_NAME = 'profiles';
 
 function collectDbCandidates() {
-  const dirs = resolveLikelyUserDataDirs();
+  const dirs = resolveStorageRoots().map((roots) => roots.dataRoot);
   const files = [];
 
   for (const userDataDir of dirs) {
