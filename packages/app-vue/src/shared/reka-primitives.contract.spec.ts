@@ -1,7 +1,8 @@
 import { mount } from '@vue/test-utils';
 import { defineComponent, nextTick, ref } from 'vue';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
+  CommandDialog,
   Checkbox,
   Dialog,
   DialogContent,
@@ -212,4 +213,43 @@ it('names the Sheet close control, preserves its target and dismisses the contro
   await nextTick();
   expect(wrapper.vm.open).toBe(false);
   wrapper.unmount();
+});
+
+describe('CommandDialog accessibility', () => {
+  it.each([
+    { props: {}, title: 'Command palette', description: 'Search for a command to run.' },
+    {
+      props: { title: '命令面板', description: '搜索并执行命令。' },
+      title: '命令面板',
+      description: '搜索并执行命令。',
+    },
+  ])(
+    'connects its accessible name and description without Reka warnings: $title',
+    async ({ props, title, description }) => {
+      const warn = vi.spyOn(console, 'warn');
+      const wrapper = mount(CommandDialog, {
+        props: { open: true, ...props },
+        slots: { default: '<button>Run command</button>' },
+        attachTo: document.body,
+      });
+
+      try {
+        await nextTick();
+        const dialog = document.querySelector('[role=dialog]');
+        expect(dialog).not.toBeNull();
+        const titleId = dialog?.getAttribute('aria-labelledby');
+        const descriptionId = dialog?.getAttribute('aria-describedby');
+        expect(titleId).toBeTruthy();
+        expect(descriptionId).toBeTruthy();
+        expect(document.getElementById(titleId!)?.textContent).toBe(title);
+        expect(document.getElementById(descriptionId!)?.textContent).toBe(description);
+        expect(
+          warn.mock.calls.filter((args) => /DialogTitle|Description/.test(args.join(' '))),
+        ).toEqual([]);
+      } finally {
+        wrapper.unmount();
+        warn.mockRestore();
+      }
+    },
+  );
 });
