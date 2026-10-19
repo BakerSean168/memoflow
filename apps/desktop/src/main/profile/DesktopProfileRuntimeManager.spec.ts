@@ -147,6 +147,49 @@ describe('DesktopProfileRuntimeManager', () => {
     expect(runtime.getActiveProfileId()).toBe(second.profileId);
   }, 15_000);
 
+  it('never opens or reads a PIN target database on missing or incorrect PIN', async () => {
+    const source = await registry.ensureGuest();
+    const target = await registry.createGuest('protected', 'Same name');
+    await runtime.openProfile(target.profileId);
+    await runtime.setCurrentProfilePin('123456');
+    await runtime.openProfile(source.profileId);
+    vi.clearAllMocks();
+    await expect(runtime.openProfile(target.profileId)).rejects.toThrow('PIN');
+    await expect(runtime.openProfile(target.profileId, '000000')).rejects.toThrow('PIN');
+    expect(openPowerSyncLocalOnly).not.toHaveBeenCalled();
+    expect(mocks.getOptional).not.toHaveBeenCalled();
+    expect(mocks.bootstrapDestroy).not.toHaveBeenCalled();
+    expect(runtime.getActiveProfileId()).toBe(source.profileId);
+  }, 15_000);
+
+  it('isolates two guests and two cloud owners while retiring each previous runtime', async () => {
+    const profiles = [
+      await registry.createGuest('guest-a', 'Same name'),
+      await registry.createGuest('guest-b', 'Same name'),
+      await registry.register('IdentityId_cloud_a', 'Same name', 'a@example.com'),
+      await registry.register('IdentityId_cloud_b', 'Same name', 'b@example.com'),
+    ];
+    const contexts = new Set<unknown>();
+    const paths = new Set<string>();
+    for (const [index, profile] of profiles.entries()) {
+      const prepared = await runtime.openProfile(profile.profileId);
+      expect(runtime.getCurrentIdentityId()).toBe(profile.localOwnerId);
+      expect(prepared.profileResolver.dbPath).toContain(profile.profileId);
+      expect(mocks.bootstrapDestroy).toHaveBeenCalledTimes(index);
+      expect(mocks.shutdownPowerSync).toHaveBeenCalledTimes(index);
+      if (index > 0) {
+        expect(mocks.shutdownPowerSync.mock.invocationCallOrder[index - 1]).toBeLessThan(
+          vi.mocked(openPowerSyncLocalOnly).mock.invocationCallOrder[index]!,
+        );
+      }
+      contexts.add(runtime.getActiveProfileAccessContext());
+      paths.add(prepared.profileResolver.dbPath);
+    }
+    expect(contexts.size).toBe(4);
+    expect(paths.size).toBe(4);
+    expect(new Set(profiles.map((profile) => profile.localOwnerId)).size).toBe(4);
+  });
+
   it('creates and activates a persistent local guest Profile without cloud auth', async () => {
     const prepared = await runtime.activateStartupProfile();
 
