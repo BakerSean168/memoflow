@@ -32,7 +32,7 @@ import { sortAgentInstances } from '../agent-instance-order';
 import {
   antigravityEffortVariant,
   presentAntigravityModels,
-} from './antigravity-model-presentation';
+} from './antigravityModelPresentation';
 import { useLocalAssistantChoices } from './useLocalAssistantChoices';
 import { useServerStateIdentityScope } from '../../../platform/server-state';
 import { getAIErrorMessage, getNativeAgentExecutionFailureMessage } from './error';

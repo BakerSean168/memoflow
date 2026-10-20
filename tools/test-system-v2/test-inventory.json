@@ -5049,7 +5049,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/app-vue/src/modules/ai/composables/antigravity-model-presentation.spec.ts",
+      "path": "packages/app-vue/src/modules/ai/composables/antigravityModelPresentation.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"

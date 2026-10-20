@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   antigravityEffortVariant,
   presentAntigravityModels,
-} from './antigravity-model-presentation';
+} from './antigravityModelPresentation';
 import type { ComposerModel } from './useAIModelCatalog';
 
 const variants = (['high', 'medium', 'low'] as const).map((effort) => ({
