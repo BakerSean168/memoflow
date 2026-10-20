@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.1](https://github.com/BakerSean168/memoflow/compare/v0.21.0...v0.21.1) (2026-10-20)
+
+
+### Bug Fixes
+
+* **release:** stabilize packaged native status and provider registry checks ([02dd9a0](https://github.com/BakerSean168/memoflow/commit/02dd9a049e6a396f138f99f7dd312809dfeadd9f))
+
 ## [0.21.0](https://github.com/BakerSean168/memoflow/compare/v0.20.1...v0.21.0) (2026-10-20)
 
 
