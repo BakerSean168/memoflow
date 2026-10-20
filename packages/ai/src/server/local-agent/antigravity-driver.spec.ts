@@ -43,6 +43,8 @@ class FakeAntigravity {
   closed = false;
   mode = 'default';
   legacyModels = false;
+  thinkingLevel = false;
+  thought = 'medium';
   rejectsSelection = false;
   current = 'flash-high';
   failure?: LocalAgentFailureCode;
@@ -70,11 +72,28 @@ class FakeAntigravity {
                 category: 'model',
                 type: 'select',
                 currentValue: this.current,
-                options: [
-                  { value: 'flash-high', name: 'Flash High' },
-                  { value: 'flash-low', name: 'Flash Low' },
-                ],
+                options: this.thinkingLevel
+                  ? [{ value: 'gemini-3.8-flash', name: 'Gemini 3.8 Flash' }]
+                  : [
+                      { value: 'flash-high', name: 'Flash High' },
+                      { value: 'flash-low', name: 'Flash Low' },
+                    ],
               },
+              ...(this.thinkingLevel
+                ? [
+                    {
+                      id: 'thinking_level',
+                      category: 'thought_level',
+                      type: 'select',
+                      currentValue: this.thought,
+                      options: [
+                        { value: 'low', name: 'Low' },
+                        { value: 'medium', name: 'Medium' },
+                        { value: 'high', name: 'High' },
+                      ],
+                    },
+                  ]
+                : []),
             ],
           }),
     };
@@ -94,7 +113,11 @@ class FakeAntigravity {
       return {};
     }
     if (method === 'session/set_config_option') {
-      if (!this.rejectsSelection) this.current = (params as { value: string }).value;
+      const input = params as { configId: string; value: string };
+      if (!this.rejectsSelection) {
+        if (input.configId === 'thinking_level') this.thought = input.value;
+        else this.current = input.value;
+      }
       return this.state();
     }
     if (method === 'session/set_model') {
@@ -223,6 +246,48 @@ it('loads cached native OAuth before discovering actual models without inference
   expect(transport.options.driver).toBe('antigravity');
   expect(transport.closed).toBe(true);
   expect(existsSync((transport.options.env?.TMPDIR ?? transport.options.env?.TEMP)!)).toBe(false);
+});
+
+it('maps ACP v1.4 thinking_level into a real selectable reasoning effort without fabricated model IDs', async () => {
+  const fixture = await setup((transport) => {
+    transport.thinkingLevel = true;
+    transport.current = 'gemini-3.8-flash';
+  });
+  const status = LocalAgentStatusSchema.parse(await fixture.make().probe());
+  expect(status).toMatchObject({
+    status: 'ready',
+    models: [
+      {
+        id: 'gemini-3.8-flash',
+        name: 'Gemini 3.8 Flash',
+        reasoningEfforts: ['low', 'medium', 'high'],
+        defaultReasoningEffort: 'medium',
+      },
+    ],
+  });
+  const probeTransport = fixture.transports[0];
+  expect((probeTransport.calls[0]?.params as { protocolVersion: number }).protocolVersion).toBe(2);
+
+  const events = await collect(fixture.make(), 'gemini-3.8-flash', {
+    modelOptions: { reasoningEffort: 'high' },
+  });
+  expect(events.at(-1)).toEqual({ type: 'completed' });
+  const run = fixture.transports[1];
+  expect(
+    run?.calls.find(
+      (call) =>
+        call.method === 'session/set_config_option' &&
+        (call.params as { configId?: string }).configId === 'thinking_level',
+    )?.params,
+  ).toMatchObject({ configId: 'thinking_level', value: 'high' });
+  expect(run?.calls.filter((call) => call.method === 'session/prompt')).toHaveLength(1);
+
+  await expect(
+    collect(fixture.make(), 'gemini-3.8-flash', {
+      modelOptions: { reasoningEffort: 'not-advertised' },
+    }),
+  ).rejects.toMatchObject({ code: 'LOCAL_AGENT_MODEL_UNSUPPORTED' });
+  expect(fixture.transports[2].calls.some((call) => call.method === 'session/prompt')).toBe(false);
 });
 
 it('does not inherit alternative API credentials or route selection into cached OAuth discovery', async () => {

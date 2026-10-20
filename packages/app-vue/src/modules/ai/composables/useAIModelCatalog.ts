@@ -114,20 +114,11 @@ export function useAIModelCatalog(options: Options) {
     }
     if (!options.registry) return;
     loading.value = true;
-    // Keep each instance in Loading during the registry read as well as discovery.
-    // Previous display metadata is not catalog eligibility.
-    rawEntries.value = Object.fromEntries(
-      Object.entries(rawEntries.value).map(([id, entry]) => [
-        id,
-        {
-          instanceId: id,
-          agentKey: entry.agentKey,
-          status: 'loading',
-          models: [],
-        },
-      ]),
-    );
-    nativeStatuses.value = {};
+    // T3-style stale-while-refresh: retain the exact Profile's previous
+    // verified view while the new Registry is read. A changed instance
+    // revision/connection will be invalidated below, never sent to ACP blindly.
+    const previousSnapshot = snapshot.value;
+    const previousEntries = rawEntries.value;
     try {
       const next = await options.registry.list();
       if (!current(request, identity)) return;
@@ -146,15 +137,29 @@ export function useAIModelCatalog(options: Options) {
       snapshot.value = next;
       const enabled = next.instances.filter((instance) => instance.enabled);
       rawEntries.value = Object.fromEntries(
-        enabled.map((instance) => [
-          instance.instanceId,
-          {
-            instanceId: instance.instanceId,
-            agentKey: composerAgentKey(instance),
-            status: 'loading',
-            models: [],
-          },
-        ]),
+        enabled.map((instance) => {
+          const previousInstance = previousSnapshot?.instances.find(
+            (entry) => entry.instanceId === instance.instanceId,
+          );
+          const previous = previousEntries[instance.instanceId];
+          const stable =
+            previous?.status === 'ready' &&
+            previous.agentKey === composerAgentKey(instance) &&
+            previousInstance?.driver === instance.driver &&
+            previousInstance.revision === instance.revision &&
+            previousInstance.legacyConnectionId === instance.legacyConnectionId;
+          return [
+            instance.instanceId,
+            stable
+              ? previous
+              : {
+                  instanceId: instance.instanceId,
+                  agentKey: composerAgentKey(instance),
+                  status: 'loading',
+                  models: [],
+                },
+          ];
+        }),
       );
       const requests = new Map<string, Promise<AIModelInfo[]>>();
       const requestProvider = (id: string) => {

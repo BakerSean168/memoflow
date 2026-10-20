@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createLocalAgentSqlite } from '../../testing/local-agent-sqlite';
@@ -94,6 +94,32 @@ describe('AGY verified catalog reuse between Settings and Workspace', () => {
     expect(probes).toBe(1);
     expect(await runtime.cachedCatalogConnection('owner', connection.id)).toEqual(live);
     expect(await runtime.cachedCatalogConnection('different-owner', connection.id)).toBeNull();
+    expect(probes).toBe(1);
+
+    // T3-style snapshot survives an Electron process restart with zero new
+    // PyInstaller launches, but never stores Google secrets or identity text.
+    const files = await readdir(join(home, 'model-catalog'));
+    expect(files).toHaveLength(1);
+    const stored = await readFile(join(home, 'model-catalog', files[0]!), 'utf8');
+    expect(stored).toContain('gemini-3.8-flash');
+    expect(stored).not.toContain('fixture-refresh-A');
+    expect(stored).not.toContain('fixture-client');
+    const restarted = new LocalAgentRuntime({
+      store,
+      cwd: home,
+      createDriver: () => {
+        throw new Error('Snapshot read must not start ACP');
+      },
+    });
+    expect(await restarted.cachedCatalogConnection('owner', connection.id)).toEqual(live);
+    const conversation = await restarted.createConversation('owner', {
+      connectionId: connection.id,
+      modelId: 'gemini-3.8-flash',
+      name: 'Hello',
+    });
+    expect(conversation.modelId).toBe('gemini-3.8-flash');
+    await restarted.deleteConversation({ identityId: 'owner', conversationId: conversation.id });
+    await restarted.dispose();
     expect(probes).toBe(1);
 
     // A native token/account rotation instantly invalidates the proof.

@@ -29,7 +29,7 @@ import AgentInstanceWizard from './AgentInstanceWizard.vue';
 import LocalAgentSettings from './LocalAgentSettings.vue';
 import MastraAgentSettings from './MastraAgentSettings.vue';
 import { SettingsStatusBlock } from '../../../components/shared/settings';
-import { sortAgentInstances } from './ai-provider-instance-sort';
+import { sortAgentInstances } from '../../ai/agent-instance-order';
 
 const { t } = useI18n();
 const registry = inject(AI_AGENT_REGISTRY_KEY, undefined);
@@ -83,8 +83,7 @@ function statusLabel(instance: AgentInstance) {
       return t('setting.agentInstances.antigravityLoginRequired');
     if (status?.status === 'not_installed')
       return t('setting.agentInstances.antigravityExecutableMissing');
-    if (status?.status === 'unavailable')
-      return t('setting.agentInstances.antigravityUnavailable');
+    if (status?.status === 'unavailable') return t('setting.agentInstances.antigravityUnavailable');
     return t('setting.agentInstances.unchecked');
   }
   return status?.message ?? t('setting.agentInstances.unchecked');
@@ -251,7 +250,7 @@ function applyVerifiedModels(instanceId: string, status: LocalAgentStatus) {
   statuses.value[instanceId] = status;
   checking.value[instanceId] = false;
 }
-async function probe(instance: AgentInstance) {
+async function probe(instance: AgentInstance, fresh = false) {
   if (
     !local ||
     instance.driver === 'mastra' ||
@@ -267,9 +266,18 @@ async function probe(instance: AgentInstance) {
   const isCurrent = () =>
     !disposed && epoch === generation && probeEpochs.get(instance.instanceId) === probeId;
   try {
-    const result = instance.legacyConnectionId
-      ? await local.probeConnection(instance.legacyConnectionId)
-      : await local.probeDefaultDriver(instance.driver);
+    // T3-style health/read path: a previously verified, Profile-owned AGY
+    // snapshot must be instant. Only explicit Refresh forces a costly ACP launch.
+    const verified =
+      !fresh && instance.driver === 'antigravity' && instance.legacyConnectionId
+        ? await local.cachedCatalogConnection(instance.legacyConnectionId)
+        : null;
+    if (!isCurrent()) return;
+    const result =
+      verified ??
+      (instance.legacyConnectionId
+        ? await local.probeConnection(instance.legacyConnectionId)
+        : await local.probeDefaultDriver(instance.driver));
     if (isCurrent()) statuses.value[instance.instanceId] = result;
   } catch {
     if (isCurrent())
@@ -281,9 +289,12 @@ async function probe(instance: AgentInstance) {
     if (isCurrent()) checking.value[instance.instanceId] = false;
   }
 }
-async function recheck() {
+async function recheck(fresh = false) {
   await refresh();
-  const candidates = instances.value.filter((item) => item.driver !== 'mastra' && item.enabled);
+  const candidates = instances.value
+    .filter((item) => item.driver !== 'mastra' && item.enabled)
+    // Let the cheap AGY snapshot hydrate before unrelated CLI checks.
+    .sort((a, b) => Number(b.driver === 'antigravity') - Number(a.driver === 'antigravity'));
   for (let index = 0; index < candidates.length && !disposed; index += 2)
     await Promise.allSettled(
       candidates.slice(index, index + 2).map((instance) =>
@@ -291,7 +302,7 @@ async function recheck() {
         // earlier provider checks were running. Do not probe AGY twice.
         instance.driver === 'antigravity' && statuses.value[instance.instanceId]?.status === 'ready'
           ? Promise.resolve()
-          : probe(instance),
+          : probe(instance, fresh),
       ),
     );
 }
@@ -333,7 +344,7 @@ onBeforeUnmount(() => {
         class="h-7 gap-1.5 px-2 text-xs text-muted-foreground"
         :disabled="busy || loading"
         data-testid="ai-provider-recheck"
-        @click="recheck"
+        @click="recheck(true)"
         ><RefreshCw class="size-3.5" :class="{ 'animate-spin': loading }" />{{
           t('setting.ai.recheckProviders')
         }}</Button
@@ -453,7 +464,7 @@ onBeforeUnmount(() => {
           :error="Boolean(failure)"
           @save="saveNative"
           @toggle="toggle(selected, $event)"
-          @check="probe(selected)"
+          @check="probe(selected, true)"
           @verified="applyVerifiedModels(selected.instanceId, $event)"
           @remove="removeSelected"
           @reset="resetSelected"

@@ -25,6 +25,7 @@ import {
 const MODEL_CONFIG_ID = 'model';
 const configOption = z.object({
   id: z.string(),
+  category: z.string().optional(),
   type: z.literal('select'),
   currentValue: z.string(),
   options: z.array(z.unknown()).max(2000),
@@ -47,7 +48,7 @@ const configState = z.object({
     .optional(),
 });
 const initSchema = z.object({
-  protocolVersion: z.literal(1),
+  protocolVersion: z.union([z.literal(1), z.literal(2)]),
   agentInfo: z.object({ version: z.string().optional() }).passthrough().optional(),
   agentCapabilities: z.object({
     mcpCapabilities: z.object({ http: z.boolean().optional() }).optional(),
@@ -78,29 +79,65 @@ const permissionPayload = z.object({
     .max(20),
 });
 
-type Model = { id: string; name: string; provider?: string };
+type Model = {
+  id: string;
+  name: string;
+  provider?: string;
+  reasoningEfforts?: string[];
+  defaultReasoningEffort?: string;
+};
 function modelsFromOptions(raw: unknown): {
   models: Model[];
   currentValue: string;
   selection: 'config' | 'models';
+  modelConfigId?: string;
+  thinkingConfigId?: string;
+  currentReasoningEffort?: string;
 } {
   const state = configState.parse(raw);
-  const current = (state.configOptions ?? [])
+  const options = (state.configOptions ?? [])
     .map((value) => configOption.safeParse(value))
     .filter((value) => value.success)
-    .map((value) => value.data)
-    .find((value) => value.id === MODEL_CONFIG_ID);
+    .map((value) => value.data);
+  const current = options.find(
+    (value) => value.id === MODEL_CONFIG_ID || value.category === 'model',
+  );
+  // Official AGY ACP v1.4 exposes one model plus a separate select option:
+  // { id: 'thinking_level', category: 'thought_level',
+  //   options: ['low','medium','high'] }. Older builds expose effort in slugs.
+  const thinking = options.find(
+    (value) => value.id === 'thinking_level' || value.category === 'thought_level',
+  );
+  const efforts =
+    thinking?.options.flatMap((rawEntry) => {
+      const group = optionGroup.safeParse(rawEntry);
+      const values = group.success ? group.data.options : [rawEntry];
+      return values.flatMap((entry) => {
+        const parsed = optionValue.safeParse(entry);
+        return parsed.success ? [parsed.data.value] : [];
+      });
+    }) ?? [];
+  const validThinking =
+    thinking &&
+    efforts.length &&
+    new Set(efforts).size === efforts.length &&
+    efforts.includes(thinking.currentValue);
+  const modelCapabilities = validThinking
+    ? { reasoningEfforts: efforts, defaultReasoningEffort: thinking.currentValue }
+    : {};
+  const thinkingState = validThinking
+    ? { thinkingConfigId: thinking.id, currentReasoningEffort: thinking.currentValue }
+    : {};
   if (!current) {
     if (
       !state.models ||
-      state.configOptions?.some(
-        (option) => z.object({ id: z.literal(MODEL_CONFIG_ID) }).safeParse(option).success,
-      )
+      options.some((option) => option.id === MODEL_CONFIG_ID || option.category === 'model')
     )
       throw new LocalAgentError('LOCAL_AGENT_PROTOCOL_ERROR');
     const models = state.models.availableModels.map((model) => ({
       id: model.modelId,
       name: model.name,
+      ...modelCapabilities,
     }));
     if (
       !models.length ||
@@ -108,7 +145,12 @@ function modelsFromOptions(raw: unknown): {
       new Set(models.map((model) => model.id)).size !== models.length
     )
       throw new LocalAgentError('LOCAL_AGENT_PROTOCOL_ERROR');
-    return { models, currentValue: state.models.currentModelId, selection: 'models' };
+    return {
+      models,
+      currentValue: state.models.currentModelId,
+      selection: 'models',
+      ...thinkingState,
+    };
   }
   const models: Model[] = [];
   for (const rawOption of current.options) {
@@ -121,6 +163,7 @@ function modelsFromOptions(raw: unknown): {
       models.push({
         id: item.value,
         name: item.name,
+        ...modelCapabilities,
         ...(group.success ? { provider: group.data.name } : {}),
       });
     }
@@ -129,7 +172,13 @@ function modelsFromOptions(raw: unknown): {
     throw new LocalAgentError('LOCAL_AGENT_PROTOCOL_ERROR');
   if (new Set(models.map((model) => model.id)).size !== models.length)
     throw new LocalAgentError('LOCAL_AGENT_PROTOCOL_ERROR');
-  return { models, currentValue: current.currentValue, selection: 'config' };
+  return {
+    models,
+    currentValue: current.currentValue,
+    selection: 'config',
+    modelConfigId: current.id,
+    ...thinkingState,
+  };
 }
 
 /** Shared ACP lifecycle. Each official Agent owns inference, routes and native sessions. */
@@ -201,7 +250,9 @@ export class AcpDriver {
             ...(this.connection.homePath ? { DSH_HOME: this.connection.homePath } : {}),
           },
       ...(antigravity ? { authenticationPromptPrefix: ANTIGRAVITY_AUTH_PROMPT_PREFIX } : {}),
-      requestTimeoutMs: 30_000,
+      // T3 uses a bounded 90s ceiling for this large PyInstaller runtime.
+      // Warm cached metadata avoids the process entirely on normal UI reads.
+      requestTimeoutMs: antigravity ? 90_000 : 30_000,
     });
     this.transport = transport;
     // close() may run while connect() is still resolving its preflight. A
@@ -221,7 +272,7 @@ export class AcpDriver {
     transport.onRequest = (request) => this.requestPermission(request);
     const init = initSchema.parse(
       await transport.request('initialize', {
-        protocolVersion: 1,
+        protocolVersion: antigravity ? 2 : 1,
         clientCapabilities: { fs: { readTextFile: false, writeTextFile: false }, terminal: false },
         clientInfo: { name: 'memoflow', title: 'MemoFlow', version: '1' },
       }),
@@ -322,8 +373,18 @@ export class AcpDriver {
         yield { type: 'cancelled' };
         return;
       }
-      const { sessionId, fingerprint, models, currentValue, selection } = await this.connect(input);
-      if (!models.some((model) => model.id === input.modelId))
+      const {
+        sessionId,
+        fingerprint,
+        models,
+        currentValue,
+        selection,
+        modelConfigId,
+        thinkingConfigId,
+        currentReasoningEffort,
+      } = await this.connect(input);
+      const selectedModel = models.find((model) => model.id === input.modelId);
+      if (!selectedModel || input.modelOptions?.serviceTier)
         throw new LocalAgentError('LOCAL_AGENT_MODEL_UNSUPPORTED');
       if (currentValue !== input.modelId && selection === 'models') {
         await this.transport!.request('session/set_model', { sessionId, modelId: input.modelId });
@@ -331,7 +392,7 @@ export class AcpDriver {
         const updated = modelsFromOptions(
           await this.transport!.request('session/set_config_option', {
             sessionId,
-            configId: MODEL_CONFIG_ID,
+            configId: modelConfigId ?? MODEL_CONFIG_ID,
             value: input.modelId,
           }),
         );
@@ -339,6 +400,27 @@ export class AcpDriver {
         // Do not silently prompt using a different (possibly paid) model.
         if (updated.currentValue !== input.modelId)
           throw new LocalAgentError('LOCAL_AGENT_MODEL_UNSUPPORTED');
+      }
+      const effort = input.modelOptions?.reasoningEffort;
+      if (effort) {
+        if (!thinkingConfigId || !selectedModel.reasoningEfforts?.includes(effort))
+          throw new LocalAgentError('LOCAL_AGENT_MODEL_UNSUPPORTED');
+        if (effort !== currentReasoningEffort) {
+          const updated = configState.parse(
+            await this.transport!.request('session/set_config_option', {
+              sessionId,
+              configId: thinkingConfigId,
+              value: effort,
+            }),
+          );
+          const thinkingUpdate = updated.configOptions
+            ?.map((value) => configOption.safeParse(value))
+            .filter((value) => value.success)
+            .map((value) => value.data)
+            .find((option) => option.id === thinkingConfigId);
+          if (thinkingUpdate?.currentValue !== effort)
+            throw new LocalAgentError('LOCAL_AGENT_MODEL_UNSUPPORTED');
+        }
       }
       if (this.stopped) {
         yield { type: 'cancelled' };

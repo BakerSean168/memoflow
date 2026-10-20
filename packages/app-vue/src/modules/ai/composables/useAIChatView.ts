@@ -28,6 +28,11 @@ import { useTask } from '../../task/composables/useTask';
 import { useRecentKnowledgeNotes } from '../../repository/composables/useRecentKnowledgeNotes';
 import { useReferenceableKnowledgeNotes } from '../../repository/composables/useReferenceableKnowledgeNotes';
 import { useAIModelCatalog, composerAgentKey } from './useAIModelCatalog';
+import { sortAgentInstances } from '../agent-instance-order';
+import {
+  antigravityEffortVariant,
+  presentAntigravityModels,
+} from './antigravity-model-presentation';
 import { useLocalAssistantChoices } from './useLocalAssistantChoices';
 import { useServerStateIdentityScope } from '../../../platform/server-state';
 import { getAIErrorMessage, getNativeAgentExecutionFailureMessage } from './error';
@@ -252,8 +257,15 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     localAgent,
     onNativeRunSettled: (connectionId) => {
       const selected = chatSession.runtimeChoice.value;
-      if (selected.runtimeKind === 'local_agent' && selected.connectionId === connectionId)
-        void localChoices.probe(connectionId, { fresh: true });
+      if (selected.runtimeKind === 'local_agent' && selected.connectionId === connectionId) {
+        // Re-reading the cached AGY status after each turn must not unpack and
+        // spawn another ~1GB PyInstaller process. Other drivers keep the
+        // existing native validation behavior.
+        const connection = localChoices.connections.value.find(
+          (entry) => entry.id === connectionId,
+        );
+        void localChoices.probe(connectionId, { fresh: connection?.driver !== 'antigravity' });
+      }
     },
     getPermissionMode: () => permissionMode.value,
     getNativeModelOptions: () => currentNativeModelOptions.value,
@@ -297,6 +309,27 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     const choice = chatSession.runtimeChoice.value;
     const model = selectedNativeModel.value;
     if (choice.runtimeKind !== 'local_agent' || !model) return;
+    // AGY's thinking levels are native model IDs, not a modelOptions field.
+    // Switch to a verified exact slug rather than sending unsupported RPC params.
+    if (kind === 'reasoningEffort' && value) {
+      const variant = antigravityEffortVariant(model.id);
+      const target =
+        variant &&
+        Object.values(catalog.entries.value)
+          .flatMap((entry) => entry.models)
+          .find(
+            (item) =>
+              item.providerId === choice.connectionId &&
+              item.modelId === variant.family + '-' + value,
+          );
+      const instance = agentRegistrySnapshot.value?.instances.find(
+        (item) => item.legacyConnectionId === choice.connectionId && item.driver === 'antigravity',
+      );
+      if (target && instance && ['high', 'medium', 'low'].includes(value)) {
+        void selectComposerModel(target.key, target.agentKey);
+        return;
+      }
+    }
     const allowed =
       kind === 'reasoningEffort'
         ? value === undefined || Boolean(model.reasoningEfforts?.includes(value))
@@ -334,8 +367,9 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   });
 
   const composerAgents = computed(() => {
-    const entries =
-      agentRegistrySnapshot.value?.instances.filter((instance) => instance.enabled) ?? [];
+    const entries = sortAgentInstances(
+      agentRegistrySnapshot.value?.instances.filter((instance) => instance.enabled) ?? [],
+    );
     return entries.map((instance) => ({
       id:
         instance.driver === 'mastra'
@@ -372,16 +406,22 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     return id ? `agent:${id}` : '';
   });
   const composerCatalog = catalog.entries;
-  const composerModels = computed(() =>
-    Object.values(composerCatalog.value)
-      .flatMap((entry) => entry.models)
-      .map((model) => ({
-        ...model,
-        providerName:
-          providerList.value.find((provider) => provider.id === model.providerId)?.name ??
-          model.providerName,
-      })),
-  );
+  const composerModels = computed(() => {
+    const choice = chatSession.runtimeChoice.value;
+    return presentAntigravityModels(
+      Object.values(composerCatalog.value)
+        .flatMap((entry) => entry.models)
+        .map((model) => ({
+          ...model,
+          providerName:
+            providerList.value.find((provider) => provider.id === model.providerId)?.name ??
+            model.providerName,
+        })),
+      composerAgents.value,
+      choice.runtimeKind === 'local_agent' ? choice.modelId : '',
+      selectedComposerAgent.value,
+    );
+  });
   const composerModelKey = computed(() =>
     chatSession.runtimeChoice.value.runtimeKind === 'local_agent'
       ? chatSession.runtimeChoice.value.modelId

@@ -197,6 +197,42 @@ describe('T3 model picker / conditional traits / enforced permissions', () => {
     wrapper.unmount();
   });
 
+  it('shows one Gemini 3.8 Flash model with genuine ACP v1.4 thought_level choices', async () => {
+    const nativeModel = {
+      key: 'gemini-3.8-flash',
+      agentKey: 'local:agy',
+      providerId: 'agy-connection',
+      providerName: 'Antigravity',
+      modelId: 'gemini-3.8-flash',
+      modelName: 'Gemini 3.8 Flash',
+      reasoningEfforts: ['low', 'medium', 'high'],
+      defaultReasoningEffort: 'medium',
+    };
+    const wrapper = setup({
+      native: true,
+      agents: [
+        {
+          id: 'local:agy',
+          name: 'Antigravity (AGY)',
+          driver: 'antigravity',
+          enabled: true,
+          configured: true,
+        },
+      ],
+      selectedAgentId: 'local:agy',
+      selectedModelKey: nativeModel.key,
+      models: [nativeModel],
+    });
+    expect(wrapper.get('[data-testid="ai-chat-model-selector"]').text()).toContain(
+      'Gemini 3.8 Flash',
+    );
+    expect(wrapper.get('[data-testid="ai-chat-traits-selector"]').text()).toContain('medium');
+    expect(wrapper.findAll('[data-testid^="ai-traits-effort-"]')).toHaveLength(3);
+    await wrapper.get('[data-testid="ai-traits-effort-high"]').trigger('click');
+    expect(wrapper.emitted('modelOption')).toEqual([['reasoningEffort', 'high']]);
+    wrapper.unmount();
+  });
+
   it('does not show reasoning for a single fixed effort', () => {
     const model = { ...models[0]!, reasoningEfforts: ['high'] };
     const wrapper = setup({ native: true, models: [model] });
