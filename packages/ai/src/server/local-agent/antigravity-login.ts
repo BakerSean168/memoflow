@@ -84,10 +84,10 @@ const initializeResult = z
 /** Single active Google sign-in per Provider instance.
  *
  * The official ACP server owns the loopback listener, token exchange and token
- * storage. MemoFlow only starts it on an explicit user action, relays the
- * authorization URL to the renderer for a user-authorized open/copy, and treats
- * "browser opened" or "callback delivered" as pending until the official ACP
- * probe verifies the account and its models.
+ * storage. MemoFlow only starts it on an explicit user action. On Windows the
+ * official ACP opens the OS browser; on other platforms the URL is forwarded
+ * to the renderer for an explicit open/copy action. Browser or callback
+ * delivery alone is not proof of login: an official ACP probe must verify models.
  */
 export class AntigravityLoginManager {
   private readonly flows = new Map<string, Flow>();
@@ -203,7 +203,8 @@ export class AntigravityLoginManager {
     const directory = await this.createDirectory();
     let transport: AntigravityAuthTransport | undefined;
     try {
-      transport = this.makeTransport(executable, directory, connection);
+      // Signing out must never open an authentication browser.
+      transport = this.makeTransport(executable, directory, connection, false);
       const initialized = initializeResult.parse(
         await transport.request('initialize', initializeRequest()),
       );
@@ -351,6 +352,7 @@ export class AntigravityLoginManager {
     executable: string,
     temporaryDirectory: string,
     connection: LocalAgentConnection,
+    captureBrowserUrl = true,
   ) {
     const make =
       this.options.makeTransport ??
@@ -362,7 +364,7 @@ export class AntigravityLoginManager {
       args: process.platform === 'linux' ? ['--uid='] : [],
       cwd: temporaryDirectory,
       env: antigravityEnvironment(connection, executable, temporaryDirectory, {
-        captureBrowserUrl: true,
+        captureBrowserUrl,
       }),
       authenticationPromptPrefix: ANTIGRAVITY_AUTH_PROMPT_PREFIX,
       captureStderrLines: true,

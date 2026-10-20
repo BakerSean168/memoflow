@@ -252,7 +252,7 @@ async function openAuthorization(url: string) {
     openFailed.value = true;
   }
 }
-function applyAuth(raw: unknown, options: { keepFailure?: boolean } = {}) {
+function applyAuth(raw: unknown, options: { keepFailure?: boolean; restore?: boolean } = {}) {
   const parsed = LocalAgentAuthStateSchema.safeParse(raw);
   if (!parsed.success) {
     stopPolling();
@@ -265,7 +265,9 @@ function applyAuth(raw: unknown, options: { keepFailure?: boolean } = {}) {
   if (state.failure && !options.keepFailure) authFailure.value = state.failure;
   if (state.authorizationUrl && state.authorizationUrl !== openedUrl) {
     openedUrl = state.authorizationUrl;
-    void openAuthorization(state.authorizationUrl);
+    // Returning to settings restores a pending flow without reopening the browser.
+    // The user can explicitly reopen the existing link instead.
+    if (!options.restore) void openAuthorization(state.authorizationUrl);
   }
   if (['failed', 'cancelled', 'idle', 'succeeded'].includes(state.phase)) {
     stopPolling();
@@ -291,10 +293,26 @@ function schedulePoll() {
   };
   pollTimer = setTimeout(tick, 1_000);
 }
+async function restoreLogin() {
+  const client = local;
+  const id = connectionId.value;
+  const generation = pollGeneration;
+  if (!isAntigravity.value || !client || !id) return;
+  try {
+    const state = await client.loginStatus(id);
+    if (generation !== pollGeneration || id !== connectionId.value) return;
+    applyAuth(state, { restore: true });
+    if (signingIn.value) schedulePoll();
+  } catch {
+    // A transient status failure must not start an authorization flow.
+  }
+}
 async function startLogin() {
   const client = local;
   const id = connectionId.value;
   if (!client || !id || authBusy.value) return;
+  // Ignore any in-flight restoration when the user explicitly starts a new flow.
+  stopPolling();
   authBusy.value = true;
   authFailure.value = null;
   copied.value = false;
@@ -379,7 +397,9 @@ watch(
     callbackOpen.value = false;
     callbackValue.value = '';
     openedUrl = undefined;
+    void restoreLogin();
   },
+  { immediate: true },
 );
 onBeforeUnmount(stopPolling);
 </script>

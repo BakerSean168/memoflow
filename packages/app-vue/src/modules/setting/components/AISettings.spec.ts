@@ -186,10 +186,10 @@ async function setup(
       failure: null,
     })),
     loginStatus: vi.fn(async (): Promise<LocalAgentAuthState> => ({
-      phase: 'waiting',
-      flowId: 'flow-1',
+      phase: 'idle',
+      flowId: null,
       authorizationUrl: null,
-      expiresAt: Date.now() + 300_000,
+      expiresAt: null,
       failure: null,
     })),
     cancelLogin: vi.fn(async (): Promise<LocalAgentAuthState> => ({
@@ -1172,6 +1172,71 @@ it('starts and cancels an explicit Google sign-in from the AGY provider', async 
   expect(wrapper.get('[data-testid="ai-agy-login-status"]').text()).toBe(
     'Google sign-in was cancelled.',
   );
+});
+
+it('restores a pending AGY authorization after changing provider tabs without restarting it', async () => {
+  const { wrapper, localClient, bridge } = await setup({
+    native: true,
+    configured: ['antigravity'],
+    dom: true,
+  });
+  const authorizationUrl =
+    'https://accounts.google.com/o/oauth2/v2/auth?client_id=fixture&redirect_uri=http%3A%2F%2F127.0.0.1%3A43179%2F&response_type=code&state=pending-flow';
+  localClient.loginStatus.mockResolvedValue({
+    phase: 'waiting',
+    flowId: 'pending-flow',
+    authorizationUrl,
+    expiresAt: Date.now() + 300_000,
+    failure: null,
+  });
+  await wrapper.get('[data-testid="ai-provider-select-agent:antigravity"]').trigger('click');
+  await flushPromises();
+  expect(wrapper.get('[data-testid="ai-agy-login-status"]').text()).toContain(
+    'Google sign-in is open in your browser',
+  );
+  expect(wrapper.get('[data-testid="ai-agy-login-open"]').exists()).toBe(true);
+  expect(bridge.invoke).not.toHaveBeenCalled();
+  expect(localClient.startLogin).not.toHaveBeenCalled();
+
+  await wrapper.get('[data-testid="ai-provider-select-agent:codex"]').trigger('click');
+  await flushPromises();
+  await wrapper.get('[data-testid="ai-provider-select-agent:antigravity"]').trigger('click');
+  await flushPromises();
+
+  expect(localClient.loginStatus).toHaveBeenCalledTimes(2);
+  expect(wrapper.get('[data-testid="ai-agy-login-cancel"]').exists()).toBe(true);
+  expect(wrapper.get('[data-testid="ai-agy-login-open"]').exists()).toBe(true);
+  expect(bridge.invoke).not.toHaveBeenCalled();
+  await wrapper.get('[data-testid="ai-agy-login-cancel"]').trigger('click');
+  await flushPromises();
+  expect(localClient.cancelLogin).toHaveBeenCalledWith('native-antigravity', 'pending-flow');
+});
+
+it('restores the ACP starting phase on remount instead of offering another login', async () => {
+  const { wrapper, localClient } = await setup({
+    native: true,
+    configured: ['antigravity'],
+  });
+  localClient.loginStatus.mockResolvedValue({
+    phase: 'starting',
+    flowId: 'startup-flow',
+    authorizationUrl: null,
+    expiresAt: Date.now() + 300_000,
+    failure: null,
+  });
+  await wrapper.get('[data-testid="ai-provider-select-agent:antigravity"]').trigger('click');
+  await flushPromises();
+  expect(wrapper.get('[data-testid="ai-agy-login-status"]').text()).toContain(
+    'Starting the official ACP server',
+  );
+  expect(wrapper.find('[data-testid="ai-agy-login"]').exists()).toBe(false);
+  await wrapper.get('[data-testid="ai-provider-select-agent:claude"]').trigger('click');
+  await flushPromises();
+  await wrapper.get('[data-testid="ai-provider-select-agent:antigravity"]').trigger('click');
+  await flushPromises();
+  expect(localClient.loginStatus).toHaveBeenCalledTimes(2);
+  expect(wrapper.find('[data-testid="ai-agy-login"]').exists()).toBe(false);
+  expect(wrapper.get('[data-testid="ai-agy-login-cancel"]').exists()).toBe(true);
 });
 
 it('offers sign-out only through the official ACP capability', async () => {

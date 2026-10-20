@@ -68,16 +68,18 @@ export function antigravityEnvironment(
   for (const [key, value] of Object.entries(process.env)) {
     if (!forbidden.test(key)) env[key] = value;
   }
-  // The native Python browser hook must succeed without opening an external URL.
-  // This fixed command contains no user input; auth output is rejected by the transport.
-  // The explicit login flow swaps the no-op body for one that reports the URL on
-  // stderr, so the native process still cannot launch a browser of its own.
-  const nodePath = process.execPath.replace(/\\/g, '/');
-  if (/[\r\n\0"%]/u.test(nodePath) || nodePath.includes(process.platform === 'win32' ? ';' : ':'))
-    throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
-  env.BROWSER = options.captureBrowserUrl
-    ? `"${nodePath}" -e "process.stderr.on('error',()=>process.exit(0)).write('${ANTIGRAVITY_AUTH_URL_MARKER}'+JSON.stringify(process.argv[1])+'\\n',()=>process.exit(0))" -- %s`
-    : `"${nodePath}" -e "process.exit(0)" -- %s`;
+  // Windows' Python webbrowser can launch a browser helper while discarding
+  // its stderr. A user-initiated login must therefore let the official ACP
+  // open the OS browser; its OAuth callback and credentials remain native-owned.
+  // Noninteractive probes still install a no-op browser hook.
+  if (!(process.platform === 'win32' && options.captureBrowserUrl)) {
+    const nodePath = process.execPath.replace(/\\/g, '/');
+    if (/[\r\n\0"%]/u.test(nodePath) || nodePath.includes(process.platform === 'win32' ? ';' : ':'))
+      throw new LocalAgentError('LOCAL_AGENT_UNAVAILABLE');
+    env.BROWSER = options.captureBrowserUrl
+      ? `"${nodePath}" -e "process.stderr.on('error',()=>process.exit(0)).write('${ANTIGRAVITY_AUTH_URL_MARKER}'+JSON.stringify(process.argv[1])+'\\n',()=>process.exit(0))" -- %s`
+      : `"${nodePath}" -e "process.exit(0)" -- %s`;
+  }
   env.ELECTRON_RUN_AS_NODE = '1';
   env.GEMINI_HOME = antigravityHome(connection.homePath);
   env.AGY_ACP_FORCE_FILE_STORAGE = '1';

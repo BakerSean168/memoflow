@@ -150,7 +150,12 @@ describe('Antigravity explicit Google sign-in state machine', () => {
     expect(transport.options.args).toEqual(process.platform === 'linux' ? ['--uid='] : []);
     expect(transport.env().GEMINI_HOME).toBe(fixture.home);
     expect(transport.env().AGY_ACP_FORCE_FILE_STORAGE).toBe('1');
-    expect(transport.env().BROWSER).toContain('__MEMOFLOW_AGY_AUTH_URL__');
+    if (process.platform === 'win32') {
+      // The official Windows ACP opens the browser after explicit user action.
+      expect(transport.env().BROWSER).toBeUndefined();
+    } else {
+      expect(transport.env().BROWSER).toContain('__MEMOFLOW_AGY_AUTH_URL__');
+    }
     expect(fixture.stopped).toEqual(['agy-connection']);
     expect(existsSync(tempDirectory(transport))).toBe(true);
     await waitFor(() =>
@@ -377,6 +382,7 @@ describe('Antigravity explicit Google sign-in state machine', () => {
       'initialize',
       'logout',
     ]);
+    expect(fixture.transports[0].env().BROWSER).toContain('process.exit(0)');
     expect(fixture.transports[0].closed).toBe(true);
     expect(existsSync(fixture.home)).toBe(true);
   });
