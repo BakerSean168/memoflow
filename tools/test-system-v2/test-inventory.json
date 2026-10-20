@@ -4937,6 +4937,14 @@
       ]
     },
     {
+      "path": "packages/app-vue/src/modules/ai/agent-instance-order.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/modules/ai/components/AIComposerControls.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5034,6 +5042,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/ai/components/MemoFlowAiIcon.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/ai/composables/antigravity-model-presentation.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -5890,14 +5906,6 @@
     },
     {
       "path": "packages/app-vue/src/modules/setting/components/ai-provider-default-policy.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/components/ai-provider-instance-sort.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -13443,7 +13451,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 249
+      "fileCount": 250
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -14208,7 +14216,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1185,
+    "unit": 1186,
     "integration": 52,
     "smoke": 3,
     "boundary-ipc": 8,
