@@ -432,6 +432,14 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
         ).toBe(true);
       await finished;
       expect(createRoutine).toHaveBeenCalledTimes(decision === 'approve' ? 1 : 0);
+      const persisted = await runtime.history.listMessages({
+        identityId: turnContext.identityId, conversationId: required.conversationId,
+      });
+      if (decision === 'cancel') {
+        expect(persisted.messages.some((message) => message.runOutcome?.status === 'cancelled')).toBe(true);
+      } else {
+        expect(persisted.messages.some((message) => message.approvalReceipt?.decision === decision && message.approvalReceipt.toolCallId === 'real-call')).toBe(true);
+      }
       if (decision === 'approve')
         expect(createRoutine.mock.calls[0][0]).toMatchObject({ context: turnContext });
       expect(events.at(-1)?.type).toBe(
@@ -623,6 +631,9 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
         data: { code: 'SERVICE_UNAVAILABLE', message: 'AI service is unavailable' },
       });
       expect(JSON.stringify(events)).not.toContain('PRIVATE_RESPONSE_BODY');
+      const persisted = await runtime.history.listMessages({ identityId: 'owner', conversationId: 'retryable-chat' });
+      expect(persisted.messages.some((message) => message.runOutcome?.status === 'failed' && message.runOutcome.runId === events.at(-1)?.runId)).toBe(true);
+      expect(JSON.stringify(persisted)).not.toContain('PRIVATE_RESPONSE_BODY');
     }
     expect(
       recordExecution.mock.calls
