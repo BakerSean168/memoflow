@@ -18,6 +18,21 @@ MemoFlow 正在实施 **Release Lifecycle V3**。当前已落地的 Phase 1 把�
 
 Prepare Release 不由 push 或 CI 完成事件自动触发，避免日常合并后反复创建发布分支。手动入口仍要求 verified current main；Release Publish 继续独立维护 exact-SHA 发布门禁，不降低验证要求。
 
+## 2026-10-20 Final release operator handoff
+
+- The operator has waived outstanding **manual feature-level acceptance** for the
+  current sprint. This waiver does not assert that unrun tests passed.
+- A public release **still requires** exact-main-SHA push CI, a reviewed
+  release-please version commit, verified Desktop release assets and immutable
+  Docker release images, and successful postflight publication.
+- Production migration is a separate subsequent stage under
+  [Oracle2 migration Issue #543](https://github.com/BakerSean168/memoflow/issues/543).
+  A published release never authorizes DNS cutover, dual-writer operation, or
+  skipping a fresh final PostgreSQL/Redis/filesystem backup.
+- macOS real-device manual checks are waived for this sprint; signed/notarized
+  trust and the actual desktop release manifests must still state their true
+  status and follow the configured release policy.
+
 ## 标准顺序
 
 ### 1. 本地 prod-like 验证
