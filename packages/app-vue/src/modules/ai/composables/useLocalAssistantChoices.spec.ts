@@ -61,6 +61,7 @@ function clientStub(overrides: Partial<LocalAgentClient> = {}): LocalAgentClient
     saveConnection: vi.fn(async () => connection('Profile A')),
     deleteConnection: vi.fn(async () => undefined),
     probeConnection: vi.fn(async () => ready('model-a')),
+    cachedCatalogConnection: vi.fn(async () => null),
     probeDefaultDriver: vi.fn(async () => ready('model-a')),
     listConversations: vi.fn(async () => []),
     createConversation: vi.fn(async () => {
@@ -102,6 +103,64 @@ describe('local assistant choices: profile and discovery isolation', () => {
     expect(completed).toBe(true);
     expect(options.canSend.value).toBe(true);
   });
+  it('reuses a verified AGY account for selected Workspace Agent without repeating the ACP scan', async () => {
+    const saved: LocalAgentConnection = {
+      ...connection('AGY'),
+      driver: 'antigravity',
+      executablePath: 'agy_acp_server',
+    };
+    const choice = ref<AssistantRuntimeChoice>({
+      runtimeKind: 'local_agent',
+      connectionId: saved.id,
+      modelId: 'gemini-3.8-flash',
+    });
+    const cached = vi.fn(async () => ready('gemini-3.8-flash'));
+    const probe = vi.fn(async () => ready('fresh-gemini-model'));
+    const client = clientStub({
+      listConnections: vi.fn(async () => [saved]),
+      getDefaultChoice: vi.fn(async () => choice.value),
+      cachedCatalogConnection: cached,
+      probeConnection: probe,
+    });
+    const options = useLocalAssistantChoices(client, choice);
+    await options.refresh();
+    expect(cached).toHaveBeenCalledExactlyOnceWith(saved.id);
+    expect(probe).not.toHaveBeenCalled();
+    expect(options.canSend.value).toBe(true);
+    expect(options.models.value.map((model) => model.id)).toEqual(['gemini-3.8-flash']);
+
+    // A finished native turn must still refresh the underlying status/limits.
+    await options.probe(saved.id, { fresh: true });
+    expect(probe).toHaveBeenCalledExactlyOnceWith(saved.id);
+    expect(options.models.value.map((model) => model.id)).toEqual(['fresh-gemini-model']);
+  });
+
+  it('falls back to a live AGY probe when no verified model observation exists', async () => {
+    const saved: LocalAgentConnection = {
+      ...connection('AGY'),
+      driver: 'antigravity',
+      executablePath: 'agy_acp_server',
+    };
+    const choice = ref<AssistantRuntimeChoice>({
+      runtimeKind: 'local_agent',
+      connectionId: saved.id,
+      modelId: 'gemini-3.8-flash',
+    });
+    const probe = vi.fn(async () => ready('gemini-3.8-flash'));
+    const options = useLocalAssistantChoices(
+      clientStub({
+        listConnections: vi.fn(async () => [saved]),
+        getDefaultChoice: vi.fn(async () => choice.value),
+        cachedCatalogConnection: vi.fn(async () => null),
+        probeConnection: probe,
+      }),
+      choice,
+    );
+    await options.refresh();
+    expect(probe).toHaveBeenCalledExactlyOnceWith(saved.id);
+    expect(options.canSend.value).toBe(true);
+  });
+
   it('hiding an Agent model immediately blocks new sends without changing a saved conversation choice', async () => {
     const scope = ref('desktop-profile-a');
     const choice = ref<AssistantRuntimeChoice>({

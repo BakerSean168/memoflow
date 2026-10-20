@@ -291,6 +291,34 @@ it('accepts an Antigravity native connection without API credentials or arbitrar
   ).toBe(false);
 });
 
+describe('read-only cached model directory contract', () => {
+  it('allows only an existing owner-scoped connection ID without identity, token or executable', () => {
+    expect(
+      LocalAgentClientCommandSchema.parse({
+        action: 'catalog_cached_connection',
+        id: 'native-antigravity',
+      }),
+    ).toEqual({ action: 'catalog_cached_connection', id: 'native-antigravity' });
+    expect(
+      LocalAgentClientCommandSchema.safeParse({ action: 'catalog_cached_connection' }).success,
+    ).toBe(false);
+    for (const injected of [
+      { identityId: 'other-profile' },
+      { executablePath: 'fake' },
+      { token: 'secret' },
+      { modelId: 'injected' },
+    ]) {
+      expect(
+        LocalAgentClientCommandSchema.safeParse({
+          action: 'catalog_cached_connection',
+          id: 'native-antigravity',
+          ...injected,
+        }).success,
+      ).toBe(false);
+    }
+  });
+});
+
 describe('explicit Antigravity sign-in contracts', () => {
   it.each([
     'https://evil.example/o/oauth2/v2/auth?redirect_uri=http%3A%2F%2F127.0.0.1%3A43179%2F&response_type=code&state=x',

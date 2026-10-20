@@ -34,6 +34,8 @@ export interface LocalAgentClient {
   ): Promise<LocalAgentConnection>;
   deleteConnection(id: string): Promise<void>;
   probeConnection(id: string): Promise<LocalAgentStatus>;
+  /** Reuse recent, account-bound verified catalog data without starting ACP again. */
+  cachedCatalogConnection(id: string): Promise<LocalAgentStatus | null>;
   /** Read-only, unsaved default driver check; available only on Desktop. */
   probeDefaultDriver(driver: LocalAgentDriver): Promise<LocalAgentStatus>;
   listConversations(): Promise<LocalAgentConversation[]>;
@@ -75,6 +77,8 @@ export function createLocalAgentIpcClient(ipc: IResultIpcClient): LocalAgentClie
       await invoke({ action: 'delete_connection', id }, z.null());
     },
     probeConnection: (id) => invoke({ action: 'probe_connection', id }, LocalAgentStatusSchema),
+    cachedCatalogConnection: (id) =>
+      invoke({ action: 'catalog_cached_connection', id }, LocalAgentStatusSchema.nullable()),
     probeDefaultDriver: (driver) =>
       invoke({ action: 'probe_default', driver }, LocalAgentStatusSchema),
     listConversations: () =>

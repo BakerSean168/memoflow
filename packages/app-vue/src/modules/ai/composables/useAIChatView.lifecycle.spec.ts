@@ -410,6 +410,66 @@ describe('AI conversation restoration and business navigation', () => {
     expect(wrapper.vm.canSendMessage).toBe(true);
   });
 
+  it('shows Provider-verified AGY Gemini models in Workspace without starting a second ACP scan', async () => {
+    const connection = {
+      id: 'native-antigravity',
+      driver: 'antigravity' as const,
+      name: 'Antigravity (AGY)',
+      executablePath: 'agy_acp_server',
+      enabled: true,
+      revision: 2,
+      createdAt: 1,
+      updatedAt: 2,
+      writeScopes: [],
+    };
+    const instance = {
+      instanceId: 'antigravity',
+      driver: 'antigravity' as const,
+      name: 'Antigravity (AGY)',
+      enabled: true,
+      revision: 2,
+      createdAt: 1,
+      updatedAt: 2,
+      legacyConnectionId: connection.id,
+    };
+    const registry = {
+      list: vi.fn(async () => ({ instances: [instance], bindings: [] })),
+    };
+    const local = {
+      listConnections: vi.fn(async () => [connection]),
+      getDefaultChoice: vi.fn(async () => ({ runtimeKind: 'builtin' as const })),
+      cachedCatalogConnection: vi.fn(async () => ({
+        status: 'ready' as const,
+        models: [{ id: 'gemini-3.8-flash', name: 'Gemini 3.8 Flash' }],
+        modelVisibilityContext: 'mvc1:' + 'f'.repeat(64),
+      })),
+      // This deliberately fails if Workspace opens a second ACP process.
+      probeConnection: vi.fn(async () => {
+        throw new Error('Unexpected redundant ACP scan');
+      }),
+      probeDefaultDriver: vi.fn(async () => {
+        throw new Error('Unexpected implicit ACP scan');
+      }),
+    };
+    const { wrapper } = await mountView({
+      [AI_AGENT_REGISTRY_KEY as symbol]: registry,
+      [AI_LOCAL_AGENT_KEY as symbol]: local,
+    });
+    await vi.waitFor(() =>
+      expect(wrapper.vm.composerModels).toEqual([
+        expect.objectContaining({
+          agentKey: 'local:native-antigravity',
+          agentInstanceId: 'antigravity',
+          modelId: 'gemini-3.8-flash',
+          modelName: 'Gemini 3.8 Flash',
+        }),
+      ]),
+    );
+    expect(local.cachedCatalogConnection).toHaveBeenCalledWith(connection.id);
+    expect(local.probeConnection).not.toHaveBeenCalled();
+    expect(local.probeDefaultDriver).not.toHaveBeenCalled();
+  });
+
   it('materializes a default Codex only on explicit selection and maps its real model to a sendable Connection', async () => {
     const implicit = {
       instanceId: 'codex',

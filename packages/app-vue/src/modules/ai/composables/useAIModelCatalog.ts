@@ -51,7 +51,10 @@ export function composerAgentKey(instance: AgentInstance): string {
 interface Options {
   resolveIdentity: () => string;
   registry?: Pick<AgentRegistryClient, 'list'>;
-  native?: Pick<LocalAgentClient, 'probeConnection' | 'probeDefaultDriver'>;
+  native?: Pick<
+    LocalAgentClient,
+    'probeConnection' | 'probeDefaultDriver' | 'cachedCatalogConnection'
+  >;
   refreshProviderModels: (id: string) => Promise<{ models: AIModelInfo[] }>;
 }
 /** One ephemeral directory for all enabled instances in this identity/profile.
@@ -205,9 +208,19 @@ export function useAIModelCatalog(options: Options) {
               );
               result.models = groups.flat();
             } else if (options.native) {
-              const status = instance.legacyConnectionId
-                ? await options.native.probeConnection(instance.legacyConnectionId)
-                : await options.native.probeDefaultDriver(instance.driver);
+              // Provider settings has already verified this exact AGY account
+              // and config. Use its profile-owned observation for browsing;
+              // only fall back to a new ACP process when no proof is available.
+              const verified =
+                instance.driver === 'antigravity' && instance.legacyConnectionId
+                  ? await options.native.cachedCatalogConnection(instance.legacyConnectionId)
+                  : null;
+              if (!current(request, identity)) return;
+              const status =
+                verified ??
+                (instance.legacyConnectionId
+                  ? await options.native.probeConnection(instance.legacyConnectionId)
+                  : await options.native.probeDefaultDriver(instance.driver));
               if (!current(request, identity)) return;
               nativeStatuses.value = { ...nativeStatuses.value, [instance.instanceId]: status };
               if (status.status === 'ready')

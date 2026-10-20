@@ -60,7 +60,7 @@ export function useLocalAssistantChoices(
       if (request === refreshGeneration) refreshingConfiguration = false;
     }
   }
-  async function probe(connectionId: string) {
+  async function probe(connectionId: string, options: { fresh?: boolean } = {}) {
     // An explicit check or selection watch during a Profile refresh must not
     // resurrect an old Profile's catalog before its new registry is loaded.
     if (!client || refreshingConfiguration) return;
@@ -68,7 +68,15 @@ export function useLocalAssistantChoices(
     loading.value = true;
     status.value = null;
     try {
-      const result = await client.probeConnection(connectionId);
+      const connection = connections.value.find((item) => item.id === connectionId);
+      // Workspace can reuse the same Profile-owned verified catalog as Settings.
+      // The native source and OAuth identity are checked by Desktop on every read.
+      const cached =
+        !options.fresh && connection?.driver === 'antigravity'
+          ? await client.cachedCatalogConnection(connectionId)
+          : null;
+      if (request !== generation) return;
+      const result = cached ?? (await client.probeConnection(connectionId));
       if (request === generation) {
         status.value = result;
         error.value = false;

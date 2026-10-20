@@ -331,6 +331,8 @@ export const LocalAgentClientCommandSchema = z.discriminatedUnion('action', [
     .strict(),
   z.object({ action: z.literal('delete_connection'), id }).strict(),
   z.object({ action: z.literal('probe_connection'), id }).strict(),
+  /** Read-only, account-bound, recently verified model directory; null means probe needed. */
+  z.object({ action: z.literal('catalog_cached_connection'), id }).strict(),
   /** Desktop-only implicit driver probe. No connection ID or untrusted executable arguments. */
   z.object({ action: z.literal('probe_default'), driver: LocalAgentDriverSchema }).strict(),
   z.object({ action: z.literal('list_conversations') }).strict(),

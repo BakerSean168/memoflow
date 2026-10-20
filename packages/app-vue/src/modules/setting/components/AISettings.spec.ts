@@ -172,6 +172,7 @@ async function setup(
       status: 'not_installed',
       message: 'Not installed',
     })),
+    cachedCatalogConnection: vi.fn(async (): Promise<LocalAgentStatus | null> => null),
     probeConnection: vi.fn(async (): Promise<LocalAgentStatus> => ({
       status: 'ready',
       models: [{ id: 'native-model', name: 'Native Model' }],

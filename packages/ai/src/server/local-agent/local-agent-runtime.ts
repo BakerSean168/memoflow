@@ -26,7 +26,8 @@ import { PiDriver } from './pi-driver';
 import { AcpDriver } from './acp-driver';
 import { AntigravityLoginManager } from './antigravity-login';
 import { LocalAgentError } from '../../shared/local-agent-error';
-import { nativeModelVisibilityContext } from './native-identity';
+import { nativeIdentity, nativeModelVisibilityContext } from './native-identity';
+import { antigravityHasCachedAuth } from './antigravity-native';
 import type { LocalAgentRepository } from '../infrastructure/adapters/powersync/local-agent.repository';
 
 type Driver = Pick<CodexDriver, 'probe' | 'run' | 'respond' | 'cancel' | 'close'>;
@@ -75,6 +76,16 @@ type MessageInput = {
 };
 type ConversationInput = { identityId: string; conversationId: string };
 
+// Ephemeral read-only discovery evidence. A fresh native probe remains mandatory
+// to create or run a conversation; this observation is only for model pickers.
+const CATALOG_OBSERVATION_MAX_AGE_MS = 10 * 60_000;
+interface ObservedNativeCatalog {
+  revision: number;
+  visibilityContext: string;
+  checkedAt: number;
+  status: LocalAgentStatus & { status: 'ready' };
+}
+
 /** One Desktop Profile's native resources; no inference, retry or checkpoint authority. */
 export class LocalAgentRuntime {
   private readonly runs = new Map<string, ActiveRun>();
@@ -83,6 +94,7 @@ export class LocalAgentRuntime {
     string,
     { context: string; failure: LocalAgentExecutionFailure }
   >();
+  private readonly nativeCatalogObservations = new Map<string, ObservedNativeCatalog>();
   private readonly probes = new Set<Driver>();
   private pendingProbes = 0;
   private stopped = false;
@@ -152,9 +164,11 @@ export class LocalAgentRuntime {
       if (!revision) throw new LocalAgentError('CONFLICT');
       // Revoke capabilities before changing config; old requests cannot use new scope.
       this.cancelConnection(identityId, id);
-      return this.persist(() =>
+      const updated = await this.persist(() =>
         this.options.store.updateConnection(identityId, id, revision, input),
       );
+      this.nativeCatalogObservations.delete(JSON.stringify([identityId, id]));
+      return updated;
     }
     return this.persist(() => this.options.store.createConnection(identityId, input));
   }
@@ -162,23 +176,95 @@ export class LocalAgentRuntime {
     this.assertActive();
     this.cancelConnection(identityId, id);
     await this.persist(() => this.options.store.deleteConnection(identityId, id));
+    this.nativeCatalogObservations.delete(JSON.stringify([identityId, id]));
   }
   /** Probe an existing saved instance without mutating its configuration. */
   async probeConnection(identityId: string, id: string): Promise<LocalAgentStatus> {
-    const status = await this.runProbe(() =>
-      this.persist(() => this.options.store.getConnection(identityId, id)),
-    );
+    let probedConnection: LocalAgentConnection | undefined;
+    const status = await this.runProbe(async () => {
+      const connection = await this.persist(() => this.options.store.getConnection(identityId, id));
+      probedConnection = connection;
+      return connection;
+    });
     const previous = this.executionFailures.get(JSON.stringify([identityId, id]));
-    return status.status === 'ready' &&
-      previous &&
-      previous.context === status.modelVisibilityContext
-      ? { ...status, lastExecutionFailure: previous.failure }
-      : status;
+    const result =
+      status.status === 'ready' && previous && previous.context === status.modelVisibilityContext
+        ? { ...status, lastExecutionFailure: previous.failure }
+        : status;
+    if (probedConnection?.driver === 'antigravity' && result.status === 'ready') {
+      // A verified ACP probe is reusable for read-only model browsing. Bind
+      // the observation to this exact saved revision and native OAuth identity.
+      try {
+        const latest = await this.persist(() => this.options.store.getConnection(identityId, id));
+        if (
+          latest.revision === probedConnection.revision &&
+          latest.executablePath === probedConnection.executablePath &&
+          latest.homePath === probedConnection.homePath
+        ) {
+          const context = nativeModelVisibilityContext(
+            latest,
+            await nativeIdentity('antigravity', latest.homePath),
+          );
+          if (result.modelVisibilityContext === context && result.models.length) {
+            const key = JSON.stringify([identityId, id]);
+            this.nativeCatalogObservations.set(key, {
+              revision: latest.revision,
+              visibilityContext: context,
+              checkedAt: Date.now(),
+              status: result,
+            });
+            // Small, bounded in-memory cache; never persisted or shared across profiles.
+            if (this.nativeCatalogObservations.size > 100)
+              this.nativeCatalogObservations.delete(
+                this.nativeCatalogObservations.keys().next().value!,
+              );
+          }
+        }
+      } catch {
+        // Model discovery still succeeded. Cache invalidation is best effort.
+      }
+    }
+    return result;
+  }
+
+  /** Recent verified native models for read-only selection UI only.
+   * Never used by createConversation(), dispatchMessage() or native permissions.
+   * Cache keys are profile/connection-scoped; revision and OAuth account are
+   * checked against the native store on every read. */
+  async cachedCatalogConnection(identityId: string, id: string): Promise<LocalAgentStatus | null> {
+    this.assertActive();
+    const key = JSON.stringify([identityId, id]);
+    const proof = this.nativeCatalogObservations.get(key);
+    if (!proof) return null;
+    const connection = await this.persist(() => this.options.store.getConnection(identityId, id));
+    if (
+      connection.driver !== 'antigravity' ||
+      !connection.enabled ||
+      connection.revision !== proof.revision ||
+      Date.now() - proof.checkedAt >= CATALOG_OBSERVATION_MAX_AGE_MS ||
+      !antigravityHasCachedAuth(connection.homePath)
+    ) {
+      this.nativeCatalogObservations.delete(key);
+      return null;
+    }
+    try {
+      const context = nativeModelVisibilityContext(
+        connection,
+        await nativeIdentity('antigravity', connection.homePath),
+      );
+      this.assertActive();
+      if (context === proof.visibilityContext) return proof.status;
+    } catch {
+      // Missing, rotated or malformed native credentials never reuse old models.
+    }
+    this.nativeCatalogObservations.delete(key);
+    return null;
   }
 
   /** Explicit, user-initiated native Google sign-in for one saved instance. */
   startLogin(identityId: string, connectionId: string) {
     this.assertActive();
+    this.nativeCatalogObservations.delete(JSON.stringify([identityId, connectionId]));
     return this.logins.start(identityId, connectionId);
   }
   loginStatus(identityId: string, connectionId: string) {
@@ -195,6 +281,7 @@ export class LocalAgentRuntime {
   }
   signOutLogin(identityId: string, connectionId: string) {
     this.assertActive();
+    this.nativeCatalogObservations.delete(JSON.stringify([identityId, connectionId]));
     return this.logins.signOut(identityId, connectionId);
   }
 
@@ -628,6 +715,7 @@ export class LocalAgentRuntime {
   dispose(): Promise<void> {
     this.stopped = true;
     this.executionFailures.clear();
+    this.nativeCatalogObservations.clear();
     this.disposing ??= (async () => {
       const runs = [...this.runs.values()];
       for (const run of runs) this.cancel(run);

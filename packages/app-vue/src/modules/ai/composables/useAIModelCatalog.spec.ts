@@ -45,6 +45,7 @@ function setup() {
   const native = {
     probeDefaultDriver: vi.fn(async () => ready('default-model')),
     probeConnection: vi.fn(async () => ready('work-model')),
+    cachedCatalogConnection: vi.fn(async (): Promise<LocalAgentStatus | null> => null),
   };
   const refreshProviderModels = vi.fn(async () => ({
     models: [
@@ -130,6 +131,64 @@ describe('identity-scoped read-only model catalog', () => {
     expect(catalog.entries.value.codex?.models.map((m) => m.modelId)).toEqual(['default-model']);
     scope.stop();
   });
+  it('reuses profile-owned verified AGY models for Workspace without launching another ACP', async () => {
+    const { snapshot, catalog, native, scope } = setup();
+    snapshot.instances.push(instance('antigravity', 'antigravity', true, 'conn-agy'));
+    native.cachedCatalogConnection.mockResolvedValueOnce(ready('gemini-3.8-flash'));
+    const probeCount = native.probeConnection.mock.calls.length;
+    await catalog.refresh();
+    expect(native.cachedCatalogConnection).toHaveBeenCalledExactlyOnceWith('conn-agy');
+    expect(native.probeConnection.mock.calls.length).toBe(probeCount + 1);
+    // The normal saved Codex connection is still freshly probed.
+    expect(native.probeConnection).toHaveBeenCalledWith('conn-work');
+    expect(native.probeConnection).not.toHaveBeenCalledWith('conn-agy');
+    expect(catalog.entries.value.antigravity).toMatchObject({
+      status: 'ready',
+      models: [
+        {
+          modelId: 'gemini-3.8-flash',
+          providerId: 'conn-agy',
+          agentKey: 'local:conn-agy',
+        },
+      ],
+    });
+    expect(isModelSelectable(catalog.entries.value, 'antigravity', 'gemini-3.8-flash')).toBe(true);
+    scope.stop();
+  });
+
+  it('falls back to a fresh official ACP probe when its scoped model observation is absent', async () => {
+    const { snapshot, catalog, native, scope } = setup();
+    snapshot.instances.push(instance('antigravity', 'antigravity', true, 'conn-agy'));
+    native.probeConnection.mockImplementation(async (id) =>
+      id === 'conn-agy' ? ready('fresh-agy-model') : ready('work-model'),
+    );
+    await catalog.refresh();
+    expect(native.cachedCatalogConnection).toHaveBeenCalledExactlyOnceWith('conn-agy');
+    expect(native.probeConnection).toHaveBeenCalledWith('conn-agy');
+    expect(catalog.entries.value.antigravity?.models[0]?.modelId).toBe('fresh-agy-model');
+    scope.stop();
+  });
+
+  it('ignores cached AGY models returned after a Profile switch or superseded refresh', async () => {
+    const { snapshot, catalog, native, identity, scope } = setup();
+    snapshot.instances.push(instance('antigravity', 'antigravity', true, 'conn-agy'));
+    const old = deferred<LocalAgentStatus | null>();
+    native.cachedCatalogConnection.mockImplementationOnce(() => old.promise);
+    const first = catalog.refresh();
+    await vi.waitFor(() => expect(native.cachedCatalogConnection).toHaveBeenCalledTimes(1));
+    identity.value = 'profile-b';
+    expect(catalog.entries.value).toEqual({});
+    native.cachedCatalogConnection.mockResolvedValueOnce(ready('new-owner-model'));
+    await catalog.refresh();
+    old.resolve(ready('old-owner-model'));
+    await first;
+    expect(catalog.entries.value.antigravity?.models.map((m) => m.modelId)).toEqual([
+      'new-owner-model',
+    ]);
+    expect(native.probeConnection).not.toHaveBeenCalledWith('conn-agy');
+    scope.stop();
+  });
+
   it('filters disabled instances after refresh without deleting user preferences', async () => {
     const { catalog, snapshot, scope } = setup();
     await catalog.refresh();

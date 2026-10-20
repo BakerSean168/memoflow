@@ -1,15 +1,22 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { createLocalAgentSqlite } from '../../testing/local-agent-sqlite';
 import { LocalAgentRepository } from '../infrastructure/adapters/powersync/local-agent.repository';
 import { LocalAgentRuntime } from './local-agent-runtime';
 import { LocalAgentError } from '../../shared/local-agent-error';
-import { nativeModelVisibilityContext } from './native-identity';
+import { nativeIdentity, nativeModelVisibilityContext } from './native-identity';
 import type { NativeAgentEvent, NativeAgentRunInput } from './codex-driver';
 
+const ephemeralHomes: string[] = [];
 const databases: ReturnType<typeof createLocalAgentSqlite>[] = [];
-afterEach(() => {
+afterEach(async () => {
   vi.restoreAllMocks();
   databases.splice(0).forEach((db) => db.close());
+  await Promise.all(
+    ephemeralHomes.splice(0).map((home) => rm(home, { recursive: true, force: true })),
+  );
 });
 async function setup() {
   const db = createLocalAgentSqlite();
@@ -29,6 +36,99 @@ async function setup() {
   });
   return { store, conversation };
 }
+
+describe('AGY verified catalog reuse between Settings and Workspace', () => {
+  it('reuses only the exact owner, revision and native OAuth identity without new ACP calls', async () => {
+    const db = createLocalAgentSqlite();
+    databases.push(db);
+    const store = new LocalAgentRepository(db);
+    const home = await mkdtemp(join(tmpdir(), 'mf-agy-catalog-proof-'));
+    ephemeralHomes.push(home);
+    const authDir = join(home, 'antigravity-acp');
+    await mkdir(authDir, { recursive: true });
+    await writeFile(
+      join(authDir, 'settings.json'),
+      JSON.stringify({ auth: { type: 'oauth-personal' } }),
+    );
+    const writeToken = (refresh: string) =>
+      writeFile(
+        join(authDir, 'acp_token.json'),
+        JSON.stringify({ client_id: 'fixture-client', refresh_token: refresh }),
+      );
+    await writeToken('fixture-refresh-A');
+    const connection = await store.createConnection('owner', {
+      driver: 'antigravity',
+      name: 'AGY',
+      executablePath: '/fixture/agy_acp_server',
+      homePath: home,
+      enabled: true,
+      writeScopes: [],
+    });
+    let probes = 0;
+    const runtime = new LocalAgentRuntime({
+      store,
+      cwd: home,
+      createDriver: (active) => ({
+        async probe() {
+          probes++;
+          return {
+            status: 'ready' as const,
+            models: [{ id: 'gemini-3.8-flash', name: 'Gemini 3.8 Flash' }],
+            modelVisibilityContext: nativeModelVisibilityContext(
+              active,
+              await nativeIdentity('antigravity', active.homePath),
+            ),
+          };
+        },
+        async *run(): AsyncGenerator<NativeAgentEvent> {
+          throw new Error('Model listing must not send prompts');
+        },
+        respond: () => false,
+        cancel() {},
+        async close() {},
+      }),
+    });
+    expect(await runtime.cachedCatalogConnection('owner', connection.id)).toBeNull();
+    const live = await runtime.probeConnection('owner', connection.id);
+    expect(live).toMatchObject({ status: 'ready', models: [{ id: 'gemini-3.8-flash' }] });
+    expect(probes).toBe(1);
+    expect(await runtime.cachedCatalogConnection('owner', connection.id)).toEqual(live);
+    expect(await runtime.cachedCatalogConnection('different-owner', connection.id)).toBeNull();
+    expect(probes).toBe(1);
+
+    // A native token/account rotation instantly invalidates the proof.
+    await writeToken('fixture-refresh-B');
+    expect(await runtime.cachedCatalogConnection('owner', connection.id)).toBeNull();
+    await runtime.probeConnection('owner', connection.id);
+    expect(probes).toBe(2);
+    expect(await runtime.cachedCatalogConnection('owner', connection.id)).toMatchObject({
+      status: 'ready',
+      models: [{ id: 'gemini-3.8-flash' }],
+    });
+
+    // A saved configuration revision is a different authority even on the same Home.
+    await runtime.saveConnection(
+      'owner',
+      {
+        driver: 'antigravity',
+        name: 'AGY edited',
+        executablePath: '/fixture/agy_acp_server',
+        homePath: home,
+        enabled: true,
+        writeScopes: [],
+      },
+      connection.id,
+      connection.revision,
+    );
+    expect(await runtime.cachedCatalogConnection('owner', connection.id)).toBeNull();
+    // Commands creating a native conversation still invoke a *fresh* probe.
+    await runtime.probeConnection('owner', connection.id);
+    expect(probes).toBe(3);
+    await runtime.deleteConnection('owner', connection.id);
+    expect(await runtime.cachedCatalogConnection('owner', connection.id)).toBeNull();
+    await runtime.dispose();
+  });
+});
 
 describe('local Agent conversation execution', () => {
   it.each(['supervised', 'auto-approve'] as const)(

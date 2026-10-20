@@ -253,7 +253,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
     onNativeRunSettled: (connectionId) => {
       const selected = chatSession.runtimeChoice.value;
       if (selected.runtimeKind === 'local_agent' && selected.connectionId === connectionId)
-        void localChoices.probe(connectionId);
+        void localChoices.probe(connectionId, { fresh: true });
     },
     getPermissionMode: () => permissionMode.value,
     getNativeModelOptions: () => currentNativeModelOptions.value,

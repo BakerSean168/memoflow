@@ -478,6 +478,8 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                   return ok(null);
                 case 'probe_connection':
                   return ok(await runtime.probeConnection(owner, input.id));
+                case 'catalog_cached_connection':
+                  return ok(await runtime.cachedCatalogConnection(owner, input.id));
                 case 'probe_default':
                   return ok(await runtime.probeDefaultDriver(owner, input.driver));
                 case 'list_conversations':
