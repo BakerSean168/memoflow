@@ -29,6 +29,7 @@ import { useAppShellStore, MAX_BUSINESS_TABS } from './useAppShellStore';
 import { provideTaskNativeSurface } from './useTaskNativeSurface';
 import { provideGoalNativeSurface } from './useGoalNativeSurface';
 import { provideKnowledgeNativeSurface } from './useKnowledgeNativeSurface';
+import { useNativeBusinessPanelBridge } from './useNativeBusinessPanelBridge';
 import { useShellRouterSync, AUTO_FOCUS_VIEWPORT, moduleForPath } from './useShellRouterSync';
 import { useDesktopWindowControls } from '../../shared/composables/useDesktopWindowControls';
 import { hasDesktopAuthApi } from '../../shared/utils/desktop-auth-recovery';
@@ -110,6 +111,7 @@ const sync = useShellRouterSync();
 provideGoalNativeSurface();
 provideTaskNativeSurface();
 provideKnowledgeNativeSurface();
+useNativeBusinessPanelBridge();
 
 // ── 宿主环境（沿 isDesktopEnvironment 分支模式，V2 决策 #6） ──
 // Residual 913: detect via hasDesktopAuthApi (no electronAPI unknown cast dual).

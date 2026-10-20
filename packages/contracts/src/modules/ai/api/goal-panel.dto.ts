@@ -22,6 +22,7 @@ export type GoalPanelAction = z.infer<typeof GoalPanelActionSchema>;
 
 export const GoalPanelKeyResultDraftSchema = z
   .object({
+    index: z.number().int().nonnegative().optional(),
     id: z.string().optional(),
     title: z.string().max(80),
     description: z.string().max(500).optional(),

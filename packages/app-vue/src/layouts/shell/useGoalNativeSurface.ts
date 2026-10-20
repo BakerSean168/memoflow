@@ -19,6 +19,9 @@ export interface GoalAIEditSurface extends OwnerNativeEditSurface<GoalNativeEdit
   openControlledCreate(ownerId: string): Promise<GoalNativeEditSession>;
   /** Explicit restart intent may reclaim this exact mounted user draft without reopening it. */
   reclaimControlledCreate(ownerId: string, session: GoalNativeEditSession, snapshot: GoalNativeDraftState): GoalNativeEditSession;
+  openControlled(ownerId: string, options?: { mode?: 'create' | 'edit'; goalId?: string }): Promise<GoalNativeEditSession>;
+  getControlledSession(ownerId: string): GoalNativeEditSession | null;
+  releaseControlledSession(ownerId: string): void;
 }
 interface GoalNativeSurfaceHost extends GoalAIEditSurface {
   register(fullPath: string, session: GoalNativeEditSession): () => void;
@@ -33,6 +36,8 @@ export function provideGoalNativeSurface(): GoalNativeSurfaceHost {
   const live = shallowRef<{ fullPath: string; session: GoalNativeEditSession } | null>(null);
   const disposed = shallowRef(false);
   let releaseControl: (() => void) | null = null;
+  let activeControlledSession: GoalNativeEditSession | null = null;
+  let activeControlledOwnerId: string | null = null;
   const removeGuard = router.beforeEach(
     (to) => !store.businessControl || to.fullPath === store.businessControl.route,
   );
@@ -143,6 +148,7 @@ export function provideGoalNativeSurface(): GoalNativeSurfaceHost {
         store.releaseBusinessControl(ownerId, version);
         throw error;
       }
+      activeControlledOwnerId = ownerId;
       const release = () => {
         try {
           controlled.releaseControl();
@@ -151,9 +157,11 @@ export function provideGoalNativeSurface(): GoalNativeSurfaceHost {
         }
         store.releaseBusinessControl(ownerId, version);
         if (releaseControl === release) releaseControl = null;
+        if (activeControlledSession === wrapped) activeControlledSession = null;
+        if (activeControlledOwnerId === ownerId) activeControlledOwnerId = null;
       };
       releaseControl = release;
-      return {
+      const wrapped: GoalNativeEditSession = {
         ...controlled,
         releaseControl() {
           controlled.releaseControl();
@@ -168,6 +176,8 @@ export function provideGoalNativeSurface(): GoalNativeSurfaceHost {
           release();
         },
       };
+      activeControlledSession = wrapped;
+      return wrapped;
   }
 
   const host: GoalNativeSurfaceHost = {
@@ -193,6 +203,40 @@ export function provideGoalNativeSurface(): GoalNativeSurfaceHost {
     openExisting: (id) => {
       if (!id.trim()) return Promise.reject(new Error('Goal identity is required'));
       return open(id);
+    },
+    async openControlled(ownerId, options) {
+      await nextTick();
+      const mode = options?.mode ?? 'create';
+      const goalId = options?.goalId;
+      if (mode === 'edit' && (!goalId || !goalId.trim())) {
+        throw new Error('Goal ID is required for edit mode');
+      }
+      if (activeControlledOwnerId === ownerId && activeControlledSession) {
+        const current = activeControlledSession.readDraftState();
+        if (current.mode === mode && (!goalId || current.goalId === goalId)) {
+          return activeControlledSession;
+        }
+      }
+      if (!isAvailable()) throw new Error('Business surface conflict');
+      const session = await open(mode === 'edit' ? goalId : undefined, true);
+      const state = session.readDraftState();
+      if (state.dirty || state.busy) throw new Error('Business surface changed while opening');
+      return claimSession(ownerId, session);
+    },
+    getControlledSession(ownerId) {
+      if (activeControlledOwnerId === ownerId && activeControlledSession) {
+        return activeControlledSession;
+      }
+      return null;
+    },
+    releaseControlledSession(ownerId) {
+      if (activeControlledOwnerId === ownerId && activeControlledSession) {
+        try {
+          activeControlledSession.releaseControl();
+        } catch {
+          /* ignore */
+        }
+      }
     },
     locate,
     register(fullPath, session) {
@@ -221,6 +265,9 @@ export function useGoalNativeSurface(): GoalAIEditSurface {
     isAvailable: host.isAvailable,
     openControlledCreate: host.openControlledCreate,
     reclaimControlledCreate: host.reclaimControlledCreate,
+    openControlled: host.openControlled,
+    getControlledSession: host.getControlledSession,
+    releaseControlledSession: host.releaseControlledSession,
   };
 }
 
