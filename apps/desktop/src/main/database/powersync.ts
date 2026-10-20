@@ -33,6 +33,7 @@ import { Worker } from 'node:worker_threads';
 import { PowerSyncAppSchema } from '@memoflow/powersync-schema';
 import { getApiBaseUrl } from '../utils/api-config';
 import { serializeCrudTransaction } from './powersync-crud';
+import { recoverPreferenceCanonicalId } from './powersync-preference-recovery';
 import { normalizePowerSyncTableName, POWER_SYNC_CHANGE_TABLES } from './powersync-table-changes';
 import { resolvePackagedWorkerPath } from './packaged-worker-path';
 
@@ -145,7 +146,7 @@ async function purgeNonSyncableLocalCrud(
 // Backend Connector
 // ──────────────────────────────────────────────
 
-class DesktopPowerSyncConnector implements PowerSyncBackendConnector {
+export class DesktopPowerSyncConnector implements PowerSyncBackendConnector {
   private readonly apiBaseUrl: string;
   private readonly credentialProvider: CloudCredentialProvider;
 
@@ -268,6 +269,15 @@ class DesktopPowerSyncConnector implements PowerSyncBackendConnector {
           }),
         });
 
+        if (response.status === 409) {
+          const conflict: unknown = await response.json().catch(() => null);
+          if (await recoverPreferenceCanonicalId(database, ops, conflict)) {
+            // Migration retains every queued operation. Reacquire the SDK
+            // transaction and upload its canonical IDs; never complete a 409.
+            continue;
+          }
+          throw new Error('[PowerSync] CRUD conflict requires resolution; queued edits retained');
+        }
         if (!response.ok) {
           const body = await response.text().catch(() => '');
           throw new Error(`[PowerSync] CRUD upload failed: ${response.status} ${body}`);

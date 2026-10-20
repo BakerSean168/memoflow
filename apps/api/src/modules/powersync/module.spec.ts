@@ -112,6 +112,7 @@ describe('PowerSyncApiModule profile snapshot routes', () => {
         context: {
           code: 'preference_revision_conflict',
           reason: 'canonical_id_mismatch',
+          identityId: TEST_IDENTITY_ID,
           canonicalId: 'canonical',
           namespace: 'presentation',
           expectedRevision: 0,

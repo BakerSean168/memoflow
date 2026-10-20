@@ -256,6 +256,7 @@ export function composePowerSyncApiModule(options: ComposePowerSyncApiModuleOpti
               responseBuilder.error(ResultCode.CONFLICT, error.message, undefined, {
                 code: error.code,
                 reason: error.reason,
+                identityId: authenticatedReq.user?.identityId,
                 namespace: error.namespace,
                 expectedRevision: error.expectedRevision,
                 canonicalId: error.canonicalId,
