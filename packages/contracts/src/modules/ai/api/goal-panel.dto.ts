@@ -44,7 +44,7 @@ export const GoalPanelFieldsSchema = z
     status: GoalPanelStatusSchema,
     start: GoalTimeframeSchema.nullable().optional(),
     target: GoalTimeframeSchema.nullable().optional(),
-    labelIds: z.array(z.string()).default([]),
+    labelIds: z.array(z.string()).optional(),
   })
   .strict();
 export type GoalPanelFields = z.infer<typeof GoalPanelFieldsSchema>;
@@ -79,7 +79,7 @@ export const GoalPanelSnapshotCommandSchema = z
 export const GoalPanelOpenCommandSchema = z
   .object({
     action: z.literal('open'),
-    mode: z.enum(['create', 'edit']).default('create'),
+    mode: z.enum(['create', 'edit']).optional(),
     goalId: z.string().optional(),
   })
   .strict();

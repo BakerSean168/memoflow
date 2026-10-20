@@ -47,6 +47,7 @@ import {
 } from '@memoflow/ai';
 import { createAIElectronModule, type AIElectronModuleDef } from '@memoflow/ai/electron';
 import { createDesktopLocalAgentTools } from '../modules/ai/local-agent-tools';
+import type { IDesktopNativePanelBridge } from '../modules/ai/desktop-native-panel-bridge';
 import { DesktopGoalPlanMutationAdapter } from '../modules/ai/goal-plan-mutation.adapter';
 import { DesktopTaskPlanMutationAdapter } from '../modules/ai/task-plan-mutation.adapter';
 import { DesktopRoutineAICommandAdapter } from '../modules/ai/routine-command.adapter';
@@ -72,6 +73,7 @@ export interface ComposeAIElectronDependencies {
   readonly userTimeContextPort: UserTimeContextPort;
   readonly mastraStorage: MastraStorageConfig;
   readonly localAgent: { cwd: string; isActive: () => boolean };
+  readonly panelBridge?: IDesktopNativePanelBridge;
 }
 
 /**
@@ -162,6 +164,7 @@ export function composeAI(dependencies: ComposeAIElectronDependencies): Composed
       dependencies.localAgent.isActive,
       dependencies.userTimeContextPort,
       dependencies.knowledgeSourcePort,
+      dependencies.panelBridge,
     ),
     ...dependencies.localAgent,
   });
