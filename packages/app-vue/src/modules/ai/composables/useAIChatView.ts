@@ -561,12 +561,23 @@ export function useAIChatView(options: UseAIChatViewOptions) {
           )
         )
           throw new Error('Native Agent connection is no longer available');
-        // Resolve membership for the actual Connection before committing the route:
-        // discovery/auth can have changed since this instance was browsed.
-        const [discovered, beforeCommitSnapshot] = await Promise.all([
-          localAgent.probeConnection(id),
+        // Explicit selection needs an identity-bound membership check, but not
+        // another slow ACP spawn if Desktop has recently verified this exact
+        // saved AGY account/configuration. Sending still performs fresh native checks.
+        const [verified, beforeCommitSnapshot] = await Promise.all([
+          instance.driver === 'antigravity'
+            ? localAgent.cachedCatalogConnection(id)
+            : Promise.resolve(null),
           agentRegistryClient.list(),
         ]);
+        if (
+          disposed ||
+          identity !== resolveIdentity() ||
+          request !== explicitRuntimeSelection ||
+          conversationId !== chatSession.chatConversationId.value
+        )
+          return;
+        const discovered = verified ?? (await localAgent.probeConnection(id));
         if (
           disposed ||
           identity !== resolveIdentity() ||

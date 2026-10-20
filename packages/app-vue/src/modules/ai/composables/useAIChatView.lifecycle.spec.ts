@@ -468,6 +468,21 @@ describe('AI conversation restoration and business navigation', () => {
     expect(local.cachedCatalogConnection).toHaveBeenCalledWith(connection.id);
     expect(local.probeConnection).not.toHaveBeenCalled();
     expect(local.probeDefaultDriver).not.toHaveBeenCalled();
+
+    // User chooses a model displayed in Workspace. Rechecking the native
+    // membership must be instant: the host independently validated the
+    // identity and revision of this catalog observation.
+    fixture.session.chatMessage.value = 'Keep this draft while selecting Gemini';
+    await wrapper.vm.selectComposerModel('gemini-3.8-flash', 'local:native-antigravity');
+    await flushPromises();
+    expect(local.probeConnection).not.toHaveBeenCalled();
+    expect(fixture.session.runtimeChoice.value).toEqual({
+      runtimeKind: 'local_agent',
+      connectionId: connection.id,
+      modelId: 'gemini-3.8-flash',
+    });
+    expect(fixture.session.chatMessage.value).toBe('Keep this draft while selecting Gemini');
+    expect(wrapper.vm.canSendMessage).toBe(true);
   });
 
   it('materializes a default Codex only on explicit selection and maps its real model to a sendable Connection', async () => {
