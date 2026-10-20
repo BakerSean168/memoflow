@@ -89,7 +89,7 @@ async function setup(
 ) {
   const home = await mkdtemp(join(tmpdir(), 'memoflow-agy-login-test-'));
   homes.push(home);
-  const executable = join(home, 'agy-fixture');
+  const executable = join(home, process.platform === 'win32' ? 'agy-fixture.exe' : 'agy-fixture');
   await writeFile(executable, '#!/bin/sh\nexit 0\n');
   const connection = LocalAgentConnectionSchema.parse({
     id: 'agy-connection',
@@ -185,6 +185,26 @@ describe('Antigravity explicit Google sign-in state machine', () => {
     expect(JSON.stringify(done)).not.toContain('fixture-refresh-token');
     expect(JSON.stringify(done)).not.toContain('secret-authorization-code');
   });
+
+  it.skipIf(process.platform !== 'win32')(
+    'waits for the official Windows browser callback without a captured URL',
+    async () => {
+      const fixture = await setup();
+      await fixture.manager.start('owner', 'agy-connection');
+      await waitFor(() => fixture.transports.length === 1);
+      await waitFor(() => fixture.manager.status('owner', 'agy-connection').phase === 'waiting');
+      const pending = stateOf(fixture.manager);
+      expect(pending).toMatchObject({
+        phase: 'waiting',
+        authorizationUrl: null,
+        failure: null,
+      });
+      expect(fixture.transports[0].env().BROWSER).toBeUndefined();
+      expect(fixture.transports[0].calls.some((call) => call.method === 'authenticate')).toBe(true);
+      await fixture.manager.cancel('owner', 'agy-connection', pending.flowId!);
+      expect(fixture.transports[0].closed).toBe(true);
+    },
+  );
 
   it('accepts the URL reported through the native browser hook', async () => {
     const fixture = await setup();
@@ -390,7 +410,7 @@ describe('Antigravity explicit Google sign-in state machine', () => {
   it('reports versions without official logout support instead of deleting anything', async () => {
     const home = await mkdtemp(join(tmpdir(), 'memoflow-agy-login-test-'));
     homes.push(home);
-    const executable = join(home, 'agy-fixture');
+    const executable = join(home, process.platform === 'win32' ? 'agy-fixture.exe' : 'agy-fixture');
     await writeFile(executable, '#!/bin/sh\nexit 0\n');
     const connection = LocalAgentConnectionSchema.parse({
       id: 'agy-connection',

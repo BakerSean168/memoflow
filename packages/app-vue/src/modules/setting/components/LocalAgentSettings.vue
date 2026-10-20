@@ -190,6 +190,8 @@ const loginMessage = computed(() => {
   if (state?.phase === 'starting')
     return t('setting.agentInstances.antigravityLoginStarting');
   if (state?.phase === 'waiting') {
+    if (!state.authorizationUrl)
+      return t('setting.agentInstances.antigravityLoginBrowserPending');
     if (openFailed.value) return t('setting.agentInstances.antigravityLoginOpenFailed');
     return t('setting.agentInstances.antigravityLoginWaiting');
   }

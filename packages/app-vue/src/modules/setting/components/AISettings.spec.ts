@@ -1212,6 +1212,29 @@ it('restores a pending AGY authorization after changing provider tabs without re
   expect(localClient.cancelLogin).toHaveBeenCalledWith('native-antigravity', 'pending-flow');
 });
 
+it('shows a native Windows browser waiting state without exposing an authorization link', async () => {
+  const { wrapper, localClient, bridge } = await setup({
+    native: true,
+    configured: ['antigravity'],
+    dom: true,
+  });
+  localClient.loginStatus.mockResolvedValue({
+    phase: 'waiting',
+    flowId: 'browser-flow',
+    authorizationUrl: null,
+    expiresAt: Date.now() + 300_000,
+    failure: null,
+  });
+  await wrapper.get('[data-testid="ai-provider-select-agent:antigravity"]').trigger('click');
+  await flushPromises();
+  expect(wrapper.get('[data-testid="ai-agy-login-status"]').text()).toContain(
+    'Complete Google sign-in in your system browser',
+  );
+  expect(wrapper.get('[data-testid="ai-agy-login-cancel"]').exists()).toBe(true);
+  expect(wrapper.find('[data-testid="ai-agy-login-link"]').exists()).toBe(false);
+  expect(bridge.invoke).not.toHaveBeenCalled();
+});
+
 it('restores the ACP starting phase on remount instead of offering another login', async () => {
   const { wrapper, localClient } = await setup({
     native: true,

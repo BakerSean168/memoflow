@@ -18,6 +18,7 @@ export default {
     "antigravityLoginCopy": "Copy sign-in link",
     "antigravityLoginCopied": "Link copied",
     "antigravityLoginStarting": "Starting the official ACP server and opening Google sign-in…",
+    "antigravityLoginBrowserPending": "Complete Google sign-in in your system browser. MemoFlow will verify your account and models afterwards. If no browser opened, cancel and retry.",
     "antigravityLoginWaiting": "Google sign-in is open in your browser. MemoFlow verifies the account and models when you finish.",
     "antigravityLoginOpenFailed": "Could not open the browser. Copy the link below and open it manually.",
     "antigravityLoginVerifying": "Verifying the Google account and available models…",

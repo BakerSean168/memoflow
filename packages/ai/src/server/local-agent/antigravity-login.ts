@@ -400,11 +400,16 @@ export class AntigravityLoginManager {
       if (flow.settled) return;
       await transport.request('initialize', initializeRequest());
       if (flow.settled) return;
-      await transport.request(
+      const authentication = transport.request(
         'authenticate',
         { methodId: 'oauth-personal' },
         Math.max(1_000, Math.min(AUTH_TIMEOUT_MS, this.timeoutMs, this.remaining(flow))),
       );
+      // The Windows ACP opens its browser directly. Its URL isn't returned
+      // through the IPC-safe auth state, but the user is now waiting for Google.
+      if (process.platform === 'win32' && !flow.settled)
+        this.publish(flow, { phase: 'waiting', authorizationUrl: null, failure: null });
+      await authentication;
       if (flow.settled) return;
       this.publish(flow, { phase: 'verifying', authorizationUrl: null, failure: null });
       const status = await this.options.verify(flow.identityId, flow.connectionId);

@@ -18,6 +18,7 @@ export default {
     "antigravityLoginCopy": "复制登录链接",
     "antigravityLoginCopied": "链接已复制",
     "antigravityLoginStarting": "正在启动官方 ACP，并准备打开 Google 登录页…",
+    "antigravityLoginBrowserPending": "请在系统浏览器中完成 Google 授权。完成后会自动验证账号与模型；如果浏览器未打开，请取消后重试。",
     "antigravityLoginWaiting": "已在浏览器中打开 Google 登录页。完成授权后，MemoFlow 会验证账号与模型。",
     "antigravityLoginOpenFailed": "无法自动打开浏览器，请复制下方链接手动打开。",
     "antigravityLoginVerifying": "正在验证 Google 账号与可用模型…",
