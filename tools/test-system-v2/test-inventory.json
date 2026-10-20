@@ -10141,6 +10141,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/repository/src/electron/local-vault-error-ipc.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/repository/src/electron/local-vault-external-editor.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13563,7 +13571,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 40
+      "fileCount": 41
     },
     {
       "id": "packages/schedule-orchestration/vitest.config.ts",
@@ -14216,7 +14224,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1186,
+    "unit": 1187,
     "integration": 52,
     "smoke": 3,
     "boundary-ipc": 8,

@@ -230,6 +230,19 @@ for (const asarPath of packagedAsars) {
     throw new Error(`Packaged app has no valid main entry in ${asarPath}`);
   verifiedEntry(appPackage.main);
   verifiedEntry('dist-renderer/index.html');
+  // gray-matter@4 depends on js-yaml@3's safeLoad/safeDump API. electron-builder
+  // can incorrectly hoist js-yaml@4 underneath gray-matter, breaking Local Vault.
+  // The main entry and every split chunk must bundle gray-matter with its own
+  // compatible dependency tree rather than loading an external hoisted copy.
+  for (const entry of files) {
+    if (!entry.startsWith('dist-electron/') || !entry.endsWith('.cjs')) continue;
+    const source = verifiedEntry(entry).toString('utf8');
+    if (/\b(?:require|import)\s*\(\s*['"]gray-matter['"]\s*\)/u.test(source)) {
+      throw new Error(
+        `Packaged Desktop must bundle gray-matter (js-yaml compatibility): ${entry} in ${asarPath}`,
+      );
+    }
+  }
   const unpackedRoot = `${asarPath}.unpacked`;
   const unpackedFiles = collectPackedFiles(unpackedRoot);
   const missingPackages = [...seenPackages]
