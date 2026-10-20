@@ -694,7 +694,7 @@ async function handleComposerSend() {
   }
   const inferredMode = workflowInProgress.value
     ? toolMode.value
-    : inferWorkflowMode(chatMessage.value);
+    : inferWorkflowMode(chatMessage.value, chatTimeline.value.at(-1)?.content ?? '');
 
   if (!workflowInProgress.value && inferredMode !== toolMode.value) {
     if (toolMode.value !== 'chat') exitToolMode();
