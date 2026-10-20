@@ -34,6 +34,9 @@ test('packaged Windows Providers maintain 80px rows and responsive details at 84
     const settings = page.getByTestId('ai-settings-panel');
     await expect(settings).toBeVisible({ timeout: 45_000 });
     const list = settings.getByTestId('ai-provider-list');
+    // The settings panel mounts before its async native Registry query finishes.
+    // Prove all six rows arrived before taking the ordered DOM snapshot.
+    await expect(list.getByRole('listitem')).toHaveCount(6, { timeout: 30_000 });
     const order = await list
       .locator('[data-testid^="ai-provider-select-agent:"]')
       .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-testid')?.split(':')[1]));

@@ -247,9 +247,16 @@ test('packaged MemoFlow boots through renderer readiness', async ({}, testInfo) 
         localSettings.getByLabel('创建、修改和完成任务', { exact: true }),
       ).not.toBeChecked();
       await localSettings.getByRole('button', { name: '检查登录与模型', exact: true }).click();
-      await expect(localSettings.getByRole('status')).toContainText('could not be started', {
-        timeout: 30_000,
-      });
+      // The AGY detail renders both a native status and a Google sign-in
+      // status. Target the connection status only, and verify the native
+      // missing-executable result rather than racing an unrelated login label.
+      const nativeStatus = localSettings
+        .getByTestId('ai-provider-detail')
+        .locator('span[role="status"]');
+      await expect(nativeStatus).toContainText(
+        driver === 'antigravity' ? 'Antigravity ACP Server' : 'could not be started',
+        { timeout: 30_000 },
+      );
       await expect(mainWindow.getByTestId('ai-provider-add')).toBeEnabled();
     }
     await testInfo.attach('packaged-local-agent-settings.png', {
