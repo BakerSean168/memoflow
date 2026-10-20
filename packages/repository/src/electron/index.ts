@@ -165,7 +165,8 @@ async function invokeLocalVault<T>(operation: () => Promise<T>): Promise<Result<
     if (error instanceof LocalVaultRuntimeError) {
       return fail({ code: error.code, message: error.message });
     }
-    logger.error('Local Vault operation failed', { error });
+    // Pass the Error itself so Winston preserves name, message and stack.
+    logger.error('Local Vault operation failed', error);
     return fail({ code: 'INTERNAL_ERROR', message: 'Local Vault operation failed' });
   }
 }

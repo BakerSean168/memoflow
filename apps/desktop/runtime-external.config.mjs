@@ -7,7 +7,8 @@ export const electronJsExternalPackages = [
   '@powersync/node',
   '@powersync/common',
   'date-fns',
-  'gray-matter',
+  // Bundle gray-matter and its js-yaml 3 dependency into main.cjs.
+  // electron-builder's hoister otherwise substitutes js-yaml 4 at runtime.
   'winston',
   'winston-daily-rotate-file',
 ];
