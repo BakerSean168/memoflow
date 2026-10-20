@@ -128,6 +128,7 @@ export type ChatItem = {
     Extract<AssistantRuntimeEvent, { type: 'assistant.activity' }>['data'],
     { activityType: 'tool' }
   >;
+  toolActivities?: NonNullable<AssistantRuntimeMessageView['toolActivities']>;
   approvals?: ChatToolApproval[];
   nativeActivity?: { toolCallId: string; label: string };
   nativeActivities?: LocalAgentActivity[];

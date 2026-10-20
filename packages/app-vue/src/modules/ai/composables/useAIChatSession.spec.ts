@@ -1424,6 +1424,26 @@ describe('useAIChatSession Mastra-native open chat', () => {
     expect(scrollTo).toHaveBeenCalledWith({ top: 1_000, behavior: 'smooth' });
   });
 
+  it('preserves accepted decisions when suspension refresh fails', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    runtime.listAskUserSuspensions.mockResolvedValue([{
+      runId: 'parked', toolCallId: 'write', question: 'routine_create',
+      approval: { toolName: 'routine_create', category: 'edit', risk: 'high' },
+    }]);
+    const composable = mountComposable(service, runtime);
+    await composable.selectConversation(
+      { id: 'conv-1', name: 'Existing' } as never, service as never, vi.fn(), () => MODEL.key,
+    );
+    const current = composable.chatTimeline.value;
+    const approval = current.flatMap((item) => item.approvals ?? [])[0]!;
+    runtime.listAskUserSuspensions.mockRejectedValue(new Error('offline'));
+    await composable.decideToolApproval(approval, 'approve');
+    expect(composable.chatTimeline.value).toBe(current);
+    expect(approval.status).toBe('approved');
+    expect(toastMocks.error).toHaveBeenCalledWith('Load failed');
+  });
+
   it('restores a parked approval and drains its decision before refreshing history', async () => {
     const service = createServiceStub();
     const runtime = createRuntimeStub();

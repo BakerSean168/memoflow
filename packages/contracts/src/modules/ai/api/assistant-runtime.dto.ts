@@ -232,6 +232,16 @@ export type AssistantRuntimeMessageAttachmentView = z.infer<
   typeof AssistantRuntimeMessageAttachmentViewSchema
 >;
 
+/** Safe tool lifecycle projection; provider arguments/results stay in the runtime. */
+export const AssistantToolActivityViewSchema = z
+  .object({
+    toolCallId: z.string().min(1).max(512),
+    toolName: AssistantToolNameSchema,
+    state: z.enum(['running', 'completed', 'failed', 'denied']),
+  })
+  .strict();
+export type AssistantToolActivityView = z.infer<typeof AssistantToolActivityViewSchema>;
+
 export const AssistantRuntimeMessageViewSchema = z
   .object({
     id: z.string().min(1),
@@ -239,6 +249,7 @@ export const AssistantRuntimeMessageViewSchema = z
     role: z.enum(['user', 'assistant', 'system']),
     content: z.string(),
     attachments: z.array(AssistantRuntimeMessageAttachmentViewSchema).max(4).default([]),
+    toolActivities: z.array(AssistantToolActivityViewSchema).max(256).optional(),
     nativeActivities: z.array(LocalAgentActivitySchema).max(256).optional(),
     localAgentSource: z
       .object({

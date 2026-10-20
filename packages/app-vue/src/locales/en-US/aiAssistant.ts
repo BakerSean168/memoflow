@@ -162,6 +162,7 @@ export default {
       impact: 'This action can change workspace data. Approve only if you want to continue.',
       approve: 'Approve',
       decline: 'Decline',
+      execution: { completed: 'Completed', failed: 'Failed', denied: 'Denied' },
       transportError: 'Could not send the decision. Try again.',
       capabilities: {
         knowledge_search: 'Searching knowledge',

@@ -135,6 +135,24 @@ function pendingRequest(timeline: Ref<ChatItem[]>): ChatAskUserRequest | undefin
 describe('useAssistantStream ask_user lifecycle', () => {
   beforeEach(() => vi.clearAllMocks());
 
+  it('keeps completed tool activity after the live turn releases', async () => {
+    const { timeline, runtime, stream } = createHarness();
+    runtime.streamMessage.mockImplementation(async (_command, handlers) => {
+      handlers.onEvent?.(assistantRunStarted());
+      for (const [index, state] of (['running', 'failed'] as const).entries()) {
+        handlers.onEvent?.({
+          ...assistantRunStarted(), type: 'assistant.activity', sequence: index + 1,
+          eventId: `activity-${index}`, data: { activityType: 'tool', toolCallId: 'call',
+            toolName: 'routine_create', category: 'edit', risk: 'high', state },
+        });
+      }
+    });
+    await stream.handleSendChat({} as never, MODEL, 'New chat', () => undefined);
+    const records = timeline.value.flatMap((item) => item.toolActivities ?? []);
+    expect(records).toEqual([{ toolCallId: 'call', toolName: 'routine_create', state: 'failed' }]);
+    expect(timeline.value.some((item) => item.toolActivity)).toBe(false);
+  });
+
   it('keeps a recovered approval pending when the composer releases and rejects retained foreign cards', async () => {
     const { timeline, runtime, stream, conversation } = createHarness();
     timeline.value.push({

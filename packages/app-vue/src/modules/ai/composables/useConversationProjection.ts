@@ -197,6 +197,7 @@ export function useConversationProjection(input: {
       content?: unknown;
       attachments?: unknown;
       nativeActivities?: unknown;
+      toolActivities?: unknown;
       localAgentSource?: unknown;
     },
     index: number,
@@ -216,6 +217,9 @@ export function useConversationProjection(input: {
           ];
         })
       : [];
+    const toolActivities = AssistantRuntimeMessageViewSchema.shape.toolActivities.safeParse(
+      item.toolActivities,
+    ).data;
     return {
       id: item.id ? String(item.id) : `message-${index}`,
       role: normalizeChatRole(item.role),
@@ -226,7 +230,8 @@ export function useConversationProjection(input: {
       localAgentSource: AssistantRuntimeMessageViewSchema.shape.localAgentSource.safeParse(
         item.localAgentSource,
       ).data,
-      status: 'success',
+      toolActivities,
+      status: toolActivities?.some((call) => call.state === 'failed') ? 'error' : 'success',
     };
   }
 
@@ -330,9 +335,7 @@ export function useConversationProjection(input: {
     // ordinary text history. Restore them even if the turn never wrote a text
     // message before pausing, so a reload does not strand the pending answer.
     const pendingAskUser =
-      kind === 'local_agent'
-        ? []
-        : await options.runtime.listAskUserSuspensions(conversationId).catch(() => []);
+      kind === 'local_agent' ? [] : await options.runtime.listAskUserSuspensions(conversationId);
     if (
       generation !== historyGeneration ||
       runtimeChoice.value.runtimeKind !== kind ||

@@ -1,6 +1,10 @@
 import { createSignal, type MastraDBMessage } from '@mastra/core/agent';
 import { randomUUID } from 'node:crypto';
-import type { AssistantRuntimeHistoryView } from '@memoflow/contracts/ai';
+import {
+  AssistantToolActivityViewSchema,
+  type AssistantToolActivityView,
+  type AssistantRuntimeHistoryView,
+} from '@memoflow/contracts/ai';
 import { compareHistoryTimestamps } from '../../../shared/history-order';
 import type { AssistantConversationShellSource } from './assistant-conversation-shell.port';
 
@@ -61,6 +65,31 @@ function messageText(message: MastraDBMessage): string {
     )
     .map((part) => part.text)
     .join('');
+}
+
+function messageToolActivities(message: MastraDBMessage): AssistantToolActivityView[] {
+  const calls = new Map<string, AssistantToolActivityView>();
+  for (const part of message.content.parts) {
+    if (part.type !== 'tool-invocation') continue;
+    const call = part.toolInvocation;
+    // Only persisted results prove a terminal outcome. Never infer success
+    // from a call that has no result (it may have been interrupted).
+    if (call.state !== 'result' && call.state !== 'output-error' && call.state !== 'output-denied')
+      continue;
+    const result: unknown = 'result' in call ? call.result : undefined;
+    const failed =
+      call.state === 'output-error' ||
+      ('isError' in call && call.isError === true) ||
+      (result !== null && typeof result === 'object' && 'error' in result);
+    const denied = call.state === 'output-denied' || call.approval?.approved === false;
+    const activity = AssistantToolActivityViewSchema.safeParse({
+      toolCallId: call.toolCallId,
+      toolName: call.toolName,
+      state: denied ? 'denied' : failed ? 'failed' : 'completed',
+    });
+    if (activity.success) calls.set(activity.data.toolCallId, activity.data);
+  }
+  return [...calls.values()].slice(-256);
 }
 
 function messageAttachments(message: MastraDBMessage) {
@@ -137,8 +166,10 @@ export class AssistantHistoryService {
       .flatMap((message) => {
         const role = productRole(message);
         if (!role) return [];
+        const toolActivities = messageToolActivities(message);
         return [
           {
+            ...(toolActivities.length ? { toolActivities } : {}),
             id: message.id,
             conversationId: input.conversationId,
             role,

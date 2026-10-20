@@ -59,6 +59,86 @@ function shellSource(): AssistantConversationShellSource & { loadShell: ReturnTy
 }
 
 describe('AssistantHistoryService', () => {
+  it('projects persisted tool results without leaking provider arguments or errors', async () => {
+    const harness = createMemoryHarness();
+    harness.messages.set('tool-message', {
+      id: 'tool-message',
+      role: 'assistant',
+      createdAt: new Date(20),
+      threadId: 'c',
+      resourceId: 'u',
+      type: 'tool',
+      content: {
+        format: 2,
+        parts: [
+          {
+            type: 'tool-invocation',
+            toolInvocation: {
+              state: 'result',
+              toolCallId: 'routine-call',
+              toolName: 'routine_create',
+              args: { name: 'PRIVATE' },
+              result: { error: 'PRIVATE_STACK' },
+            },
+          },
+        ],
+      },
+    });
+    const result = await new AssistantHistoryService(harness.memory, shellSource()).listMessages({
+      identityId: 'u',
+      conversationId: 'c',
+    });
+    expect(result.messages[0].toolActivities).toEqual([
+      { toolCallId: 'routine-call', toolName: 'routine_create', state: 'failed' },
+    ]);
+    expect(JSON.stringify(result)).not.toContain('PRIVATE');
+  });
+  it('preserves native output errors and denied approvals as distinct outcomes', async () => {
+    const harness = createMemoryHarness();
+    harness.messages.set('tool-message', {
+      id: 'tool-message',
+      role: 'assistant',
+      createdAt: new Date(20),
+      threadId: 'c',
+      resourceId: 'u',
+      type: 'tool',
+      content: {
+        format: 2,
+        parts: [
+          {
+            type: 'tool-invocation',
+            toolInvocation: {
+              state: 'output-error',
+              toolCallId: 'error',
+              toolName: 'routine_create',
+              args: {},
+              errorText: 'PRIVATE_ERROR',
+            },
+          },
+          {
+            type: 'tool-invocation',
+            toolInvocation: {
+              state: 'output-denied',
+              toolCallId: 'denied',
+              toolName: 'routine_create',
+              args: {},
+              approval: { id: 'denied', approved: false, reason: 'PRIVATE_REASON' },
+            },
+          },
+        ],
+      },
+    });
+    const result = await new AssistantHistoryService(harness.memory, shellSource()).listMessages({
+      identityId: 'u',
+      conversationId: 'c',
+    });
+    expect(result.messages[0].toolActivities).toEqual([
+      { toolCallId: 'error', toolName: 'routine_create', state: 'failed' },
+      { toolCallId: 'denied', toolName: 'routine_create', state: 'denied' },
+    ]);
+    expect(JSON.stringify(result)).not.toContain('PRIVATE');
+  });
+
   it('creates an empty Mastra thread only after validating the product shell', async () => {
     const harness = createMemoryHarness();
     const source = shellSource();

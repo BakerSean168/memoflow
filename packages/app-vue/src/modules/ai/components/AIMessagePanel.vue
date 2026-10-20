@@ -13,7 +13,7 @@
       <!-- Message timeline -->
       <template v-if="timeline.length">
         <article
-          v-for="item in timeline"
+          v-for="item in visibleTimeline"
           :key="item.id"
           class="flex w-full"
           :class="item.role === 'user' ? 'justify-end' : 'justify-start'"
@@ -66,6 +66,15 @@
                 data-testid="ai-tool-activity"
               >
                 {{ t(`aiAssistant.chatPage.tools.capabilities.${item.toolActivity.toolName}`) }}
+              </p>
+              <p
+                v-for="activity in item.toolActivities?.filter((call) => call.state !== 'running') ?? []"
+                :key="activity.toolCallId"
+                class="mb-2 text-xs text-muted-foreground"
+                data-testid="ai-tool-history"
+              >
+                {{ t(`aiAssistant.chatPage.tools.capabilities.${activity.toolName}`) }}
+                · {{ t(`aiAssistant.chatPage.tools.execution.${activity.state}`) }}
               </p>
               <section
                 v-for="approval in item.approvals ?? []"
@@ -168,7 +177,7 @@
                 v-bind="item.status === 'interrupted' ? { role: 'status', 'data-testid': 'ai-workflow-interruption' } : {}"
                 :generating="item.status === 'generating'"
               />
-              <p v-else class="text-sm leading-7 text-muted-foreground">
+              <p v-else-if="item.status === 'generating'" class="text-sm leading-7 text-muted-foreground">
                 {{ typingPlaceholder(item) }}
               </p>
               <p
@@ -369,7 +378,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, reactive, ref } from 'vue';
+import { computed, onBeforeUnmount, reactive, ref } from 'vue';
 import {
   Check,
   Copy,
@@ -401,7 +410,7 @@ import { semanticElevationClass } from '../../../shared/constants/semantic-eleva
 import { useAIFormatters } from '../composables/useAIFormatters';
 import { getGoalWorkflowInterruptionMessage } from '../composables/error';
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     timeline: ChatItem[];
     toolMode: WorkflowMode;
@@ -464,4 +473,10 @@ defineExpose({ viewport });
 const askUserAnswers = reactive<Record<string, string | string[]>>({});
 const { t } = useI18n();
 const { typingPlaceholder, getMessageStatusLabel } = useAIFormatters();
+const visibleTimeline = computed(() => props.timeline.filter((item) =>
+  item.role === 'user' || item.content.trim() || item.status !== 'success' ||
+  item.attachments?.length || item.toolActivity || item.toolActivities?.length ||
+  item.approvals?.length || item.nativeActivity || item.nativeActivities?.length ||
+  item.nativeRequests?.length || item.askUserRequests?.length || item.workflowInterruption,
+));
 </script>

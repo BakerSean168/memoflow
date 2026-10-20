@@ -153,6 +153,7 @@ export default {
       impact: '此操作可能更改工作区数据，请确认后继续。',
       approve: '批准',
       decline: '拒绝',
+      execution: { completed: '已完成', failed: '失败', denied: '已拒绝' },
       transportError: '无法发送决定，请重试。',
       capabilities: {
         knowledge_search: '正在搜索知识库',
