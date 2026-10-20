@@ -106,6 +106,15 @@ function stateOf(id: string): ConversationAttentionStatus | undefined {
 }
 
 const accountMenuTrigger = ref<HTMLButtonElement | null>(null);
+// In a nested dropdown Reka can defer focus restoration until after the
+// submenu has unmounted. Own the return-to-trigger on the root close event.
+async function restoreAccountMenuFocus(event: Event): Promise<void> {
+  if (!accountMenuTrigger.value?.isConnected) return;
+  event.preventDefault();
+  await nextTick();
+  accountMenuTrigger.value?.focus({ preventScroll: true });
+}
+
 const searchOpen = ref(false);
 const searchQuery = ref('');
 const searchInput = ref<HTMLInputElement | null>(null);
@@ -352,7 +361,12 @@ const identityLabel = () => {
             >
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" side="top" class="w-52">
+        <DropdownMenuContent
+          align="start"
+          side="top"
+          class="w-52"
+          @close-auto-focus="restoreAccountMenuFocus"
+        >
           <div class="flex items-center gap-2 px-2 py-1.5" data-testid="shell-account-identity">
             <span
               class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground"

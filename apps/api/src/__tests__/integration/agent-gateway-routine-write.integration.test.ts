@@ -365,7 +365,12 @@ async function projectAndExecute(identityId: string, routineId: string, repairAt
   ).toBe(1);
   await prisma.$disconnect();
   const restarted = createRoutineScheduleExecutionSource(
-    createRoutinePrismaScheduleExecutionDeps(prisma, { now: () => Math.max(repairAt, due) }),
+    // The durable occurrence fence compares the lease expiry to PostgreSQL's
+    // real clock. The historical dueAt fixture can now be in the past; do not
+    // claim an already-expired lease by injecting an old synthetic now.
+    createRoutinePrismaScheduleExecutionDeps(prisma, {
+      now: () => Math.max(Date.now(), repairAt, due),
+    }),
   );
   const payload = parseRoutineWallClockPayload(plan.desired[0]!.payload);
   expect(await restarted.executeRoutineOccurrence(payload)).toMatchObject({

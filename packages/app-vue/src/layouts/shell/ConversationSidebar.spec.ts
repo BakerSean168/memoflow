@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import ConversationSidebar from './ConversationSidebar.vue';
@@ -290,8 +290,12 @@ describe('ConversationSidebar account menu', () => {
         new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }),
       );
       await flushPromises();
-      expect(document.activeElement).toBe(
-        wrapper.get('[data-testid="shell-account-menu"]').element,
+      // Focus restoration occurs after the nested menu's close-auto-focus
+      // lifecycle; asserting synchronously races the portal unmount on CI.
+      await vi.waitFor(() =>
+        expect(document.activeElement).toBe(
+          wrapper.get('[data-testid="shell-account-menu"]').element,
+        ),
       );
       expect(wrapper.emitted('switch-profile')).toBeUndefined();
     } finally {
