@@ -21,7 +21,7 @@ function createTx() {
   return {
     userPreferenceRecord: {
       findUnique: vi.fn(),
-      create: vi.fn(),
+      createMany: vi.fn().mockResolvedValue({ count: 1 }),
       updateMany: vi.fn(),
     },
   };
@@ -43,11 +43,11 @@ const put = {
 describe('canonical preference PowerSync upload CAS', () => {
   it('creates revision 1 with authenticated identity and decoded strict payload', async () => {
     const tx = createTx();
-    tx.userPreferenceRecord.create.mockResolvedValue(preferenceRow());
 
     await executeUserPreferenceCrudOperation(tx, 'identity-1', put);
 
-    expect(tx.userPreferenceRecord.create).toHaveBeenCalledWith({
+    expect(tx.userPreferenceRecord.createMany).toHaveBeenCalledWith({
+      skipDuplicates: true,
       data: {
         id: 'pref-1',
         identityId: 'identity-1',
@@ -68,14 +68,12 @@ describe('canonical preference PowerSync upload CAS', () => {
         data: { ...put.data, revision: 2 },
       }),
     ).rejects.toThrow(/start at revision 1/);
-    expect(tx.userPreferenceRecord.create).not.toHaveBeenCalled();
+    expect(tx.userPreferenceRecord.createMany).not.toHaveBeenCalled();
   });
 
   it('turns a concurrent unique create into an explicit revision conflict', async () => {
     const tx = createTx();
-    tx.userPreferenceRecord.create.mockRejectedValue(
-      Object.assign(new Error('unique constraint'), { code: 'P2002' }),
-    );
+    tx.userPreferenceRecord.createMany.mockResolvedValue({ count: 0 });
     tx.userPreferenceRecord.findUnique.mockResolvedValue(
       preferenceRow({ id: 'winner', payload: { theme: 'light', language: 'zh-CN' } }),
     );
@@ -84,6 +82,40 @@ describe('canonical preference PowerSync upload CAS', () => {
       name: 'PowerSyncPreferenceConflictError',
       expectedRevision: 0,
       latest: { revision: 1, preferences: { theme: 'light', language: 'zh-CN' } },
+    });
+  });
+
+  it('accepts an identical canonical-ID replay without increasing revision', async () => {
+    const tx = createTx();
+    tx.userPreferenceRecord.createMany.mockResolvedValue({ count: 0 });
+    tx.userPreferenceRecord.findUnique.mockResolvedValue(preferenceRow());
+    await expect(
+      executeUserPreferenceCrudOperation(tx, 'identity-1', put),
+    ).resolves.toBeUndefined();
+    expect(tx.userPreferenceRecord.updateMany).not.toHaveBeenCalled();
+  });
+
+  it('keeps a same-value different-ID replay explicit until the client can canonicalize', async () => {
+    const tx = createTx();
+    tx.userPreferenceRecord.createMany.mockResolvedValue({ count: 0 });
+    tx.userPreferenceRecord.findUnique.mockResolvedValue(preferenceRow({ id: 'winner' }));
+    await expect(executeUserPreferenceCrudOperation(tx, 'identity-1', put)).rejects.toMatchObject({
+      code: 'preference_revision_conflict',
+      canonicalId: 'winner',
+      reason: 'canonical_id_mismatch',
+      latest: { revision: 1 },
+    });
+  });
+
+  it('does not read a foreign-owned ID when a primary-key collision skips insertion', async () => {
+    const tx = createTx();
+    tx.userPreferenceRecord.createMany.mockResolvedValue({ count: 0 });
+    tx.userPreferenceRecord.findUnique.mockResolvedValue(null);
+    await expect(executeUserPreferenceCrudOperation(tx, 'identity-1', put)).rejects.toThrow(
+      /no canonical row exists/,
+    );
+    expect(tx.userPreferenceRecord.findUnique).toHaveBeenCalledExactlyOnceWith({
+      where: { identityId_namespace: { identityId: 'identity-1', namespace: 'presentation' } },
     });
   });
 

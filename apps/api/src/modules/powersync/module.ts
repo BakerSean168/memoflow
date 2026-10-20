@@ -252,7 +252,16 @@ export function composePowerSyncApiModule(options: ComposePowerSyncApiModuleOpti
               expectedRevision: error.expectedRevision,
               latestRevision: error.latest.revision,
             });
-            return res.status(409).json(responseBuilder.conflict(error.message));
+            return res.status(409).json(
+              responseBuilder.error(ResultCode.CONFLICT, error.message, undefined, {
+                code: error.code,
+                reason: error.reason,
+                namespace: error.namespace,
+                expectedRevision: error.expectedRevision,
+                canonicalId: error.canonicalId,
+                latest: error.latest,
+              }),
+            );
           }
           logger.error('PowerSync CRUD processing failed', {
             error,

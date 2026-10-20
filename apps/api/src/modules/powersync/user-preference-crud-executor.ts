@@ -3,7 +3,7 @@ import {
   parsePreferenceNamespace,
   parsePreferenceNamespacePayload,
 } from '@memoflow/contracts/setting';
-import { mapPrismaError } from '@memoflow/utils/errors';
+import { isDeepStrictEqual } from 'node:util';
 import { normalizeCrudData } from './crud-normalization.js';
 import type { CrudDelegateContainer } from './table-mapping.js';
 
@@ -19,7 +19,10 @@ interface UserPreferenceRow {
 
 interface UserPreferenceCrudDelegate {
   findUnique(args: { where: Record<string, unknown> }): Promise<UserPreferenceRow | null>;
-  create(args: { data: Record<string, unknown> }): Promise<unknown>;
+  createMany(args: {
+    data: Record<string, unknown>;
+    skipDuplicates: true;
+  }): Promise<{ count: number }>;
   updateMany(args: {
     where: Record<string, unknown>;
     data: Record<string, unknown>;
@@ -39,6 +42,8 @@ export class PowerSyncPreferenceConflictError extends Error {
     readonly namespace: PreferenceNamespace,
     readonly expectedRevision: number,
     readonly latest: PreferenceNamespaceResponse,
+    readonly canonicalId?: string,
+    readonly reason: 'revision_conflict' | 'canonical_id_mismatch' = 'revision_conflict',
   ) {
     super(
       `Preference revision conflict for ${namespace}: expected ${String(expectedRevision)}, latest ${String(latest.revision)}`,
@@ -54,8 +59,8 @@ function getPreferenceDelegate(tx: CrudDelegateContainer): UserPreferenceCrudDel
     typeof value !== 'object' ||
     !('findUnique' in value) ||
     typeof value.findUnique !== 'function' ||
-    !('create' in value) ||
-    typeof value.create !== 'function' ||
+    !('createMany' in value) ||
+    typeof value.createMany !== 'function' ||
     !('updateMany' in value) ||
     typeof value.updateMany !== 'function'
   ) {
@@ -87,10 +92,6 @@ function toResponse(row: UserPreferenceRow): PreferenceNamespaceResponse {
   } as PreferenceNamespaceResponse;
 }
 
-function isCreateConflict(error: unknown): boolean {
-  return mapPrismaError(error)?.resultCode === 'CONFLICT';
-}
-
 async function readNamespaceWinner(
   delegate: UserPreferenceCrudDelegate,
   identityId: string,
@@ -114,7 +115,12 @@ async function throwConflict(
       `Preference CAS failed but no canonical row exists for ${identityId}/${namespace}`,
     );
   }
-  throw new PowerSyncPreferenceConflictError(namespace, expectedRevision, toResponse(latest));
+  throw new PowerSyncPreferenceConflictError(
+    namespace,
+    expectedRevision,
+    toResponse(latest),
+    latest.id,
+  );
 }
 
 async function executeCreate(
@@ -130,22 +136,40 @@ async function executeCreate(
   }
   const payload = requirePayload(namespace, normalized.payload);
 
-  try {
-    await delegate.create({
-      data: {
-        id: operation.id,
-        identityId,
-        namespace,
-        payload,
-        revision,
-        createdAt: normalized.createdAt,
-        updatedAt: normalized.updatedAt,
-      },
-    });
-  } catch (error) {
-    if (!isCreateConflict(error)) throw error;
-    await throwConflict(delegate, identityId, namespace, 0);
+  // PostgreSQL ON CONFLICT DO NOTHING keeps the enclosing batch transaction
+  // healthy, including concurrent inserts. Never catch P2002 and query that tx.
+  const inserted = await delegate.createMany({
+    skipDuplicates: true,
+    data: {
+      id: operation.id,
+      identityId,
+      namespace,
+      payload,
+      revision,
+      createdAt: normalized.createdAt,
+      updatedAt: normalized.updatedAt,
+    },
+  });
+  if (inserted.count === 1) return;
+
+  const latest = await readNamespaceWinner(delegate, identityId, namespace);
+  if (latest) {
+    const identical =
+      latest.revision === revision && isDeepStrictEqual(toResponse(latest).preferences, payload);
+    if (identical && latest.id === operation.id) return;
+    // Old clients complete uploads on any 2xx. A different ID must remain an
+    // explicit conflict until a client can durably reconcile its optimistic row.
+    throw new PowerSyncPreferenceConflictError(
+      namespace,
+      0,
+      toResponse(latest),
+      latest.id,
+      identical ? 'canonical_id_mismatch' : 'revision_conflict',
+    );
   }
+  throw new Error(
+    'Preference insert skipped but no canonical row exists for this identity/namespace',
+  );
 }
 
 async function executePatch(
@@ -167,7 +191,12 @@ async function executePatch(
   const incomingRevision = requireRevision(normalized.revision, 2);
   const expectedRevision = incomingRevision - 1;
   if (current.revision !== expectedRevision) {
-    throw new PowerSyncPreferenceConflictError(namespace, expectedRevision, toResponse(current));
+    throw new PowerSyncPreferenceConflictError(
+      namespace,
+      expectedRevision,
+      toResponse(current),
+      current.id,
+    );
   }
   const payload = requirePayload(namespace, normalized.payload);
 
