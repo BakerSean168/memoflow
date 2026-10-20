@@ -1,7 +1,11 @@
 import { createSignal, type MastraDBMessage } from '@mastra/core/agent';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import {
   AssistantToolActivityViewSchema,
+  AssistantApprovalReceiptSchema,
+  AssistantRunOutcomeSchema,
+  type AssistantApprovalReceipt,
+  type AssistantRunOutcome,
   type AssistantToolActivityView,
   type AssistantRuntimeHistoryView,
 } from '@memoflow/contracts/ai';
@@ -156,6 +160,55 @@ export class AssistantHistoryService {
     return messageId;
   }
 
+  /** Runtime receipts live in the same canonical Memory, never in a second ledger. */
+  async appendRuntimeRecord(input: {
+    identityId: string;
+    conversationId: string;
+    approvalReceipt?: AssistantApprovalReceipt;
+    runOutcome?: AssistantRunOutcome;
+    toolActivities?: AssistantToolActivityView[];
+  }): Promise<void> {
+    await this.ensureConversation(input);
+    const approvalReceipt =
+      input.approvalReceipt && AssistantApprovalReceiptSchema.parse(input.approvalReceipt);
+    const runOutcome = input.runOutcome && AssistantRunOutcomeSchema.parse(input.runOutcome);
+    if (!approvalReceipt && !runOutcome) throw new Error('Runtime record has no outcome');
+    const toolActivities = input.toolActivities?.map((item) =>
+      AssistantToolActivityViewSchema.parse(item),
+    );
+    const key = createHash('sha256')
+      .update(
+        JSON.stringify([
+          input.identityId,
+          input.conversationId,
+          approvalReceipt
+            ? ['approval', approvalReceipt.runId, approvalReceipt.toolCallId]
+            : ['run', runOutcome!.runId],
+        ]),
+      )
+      .digest('hex');
+    await this.memory.saveMessages({
+      messages: [
+        {
+          id: `runtime-receipt-${key}`,
+          role: 'assistant',
+          type: 'text',
+          threadId: input.conversationId,
+          resourceId: input.identityId,
+          createdAt: new Date(),
+          content: {
+            format: 2,
+            parts: [{ type: 'data-memoflow-runtime', data: {} }],
+            metadata: {
+              memoFlowRuntime: { approvalReceipt, runOutcome, toolActivities },
+            },
+          },
+        },
+      ],
+    });
+    await this.memory.settled();
+  }
+
   async listMessages(input: {
     identityId: string;
     conversationId: string;
@@ -166,9 +219,22 @@ export class AssistantHistoryService {
       .flatMap((message) => {
         const role = productRole(message);
         if (!role) return [];
-        const toolActivities = messageToolActivities(message);
+        const record = message.content.metadata?.memoFlowRuntime;
+        const metadata = record && typeof record === 'object' ? record : {};
+        const approvalReceipt = AssistantApprovalReceiptSchema.safeParse(
+          'approvalReceipt' in metadata ? metadata.approvalReceipt : undefined,
+        ).data;
+        const runOutcome = AssistantRunOutcomeSchema.safeParse(
+          'runOutcome' in metadata ? metadata.runOutcome : undefined,
+        ).data;
+        const recordedTools = AssistantToolActivityViewSchema.array()
+          .max(256)
+          .safeParse('toolActivities' in metadata ? metadata.toolActivities : undefined).data;
+        const toolActivities = recordedTools ?? messageToolActivities(message);
         return [
           {
+            ...(approvalReceipt ? { approvalReceipt } : {}),
+            ...(runOutcome ? { runOutcome } : {}),
             ...(toolActivities.length ? { toolActivities } : {}),
             id: message.id,
             conversationId: input.conversationId,

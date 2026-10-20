@@ -104,7 +104,7 @@ export type ChatToolApproval = Extract<
 >['data'] & {
   conversationId: string;
   runId: string;
-  status: 'pending' | 'sending' | 'approved' | 'declined' | 'cancelled' | 'failed' | 'stale';
+  status: 'pending' | 'sending' | 'approved' | 'declined' | 'cancelled' | 'failed' | 'stale' | 'unknown';
   errorMessage?: string;
   parked?: boolean;
 };

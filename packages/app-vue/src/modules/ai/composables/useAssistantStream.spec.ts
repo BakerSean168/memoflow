@@ -178,8 +178,10 @@ describe('useAssistantStream ask_user lifecycle', () => {
     expect(approval.status).toBe('pending');
     runtime.decideToolApproval.mockRejectedValueOnce(new Error('transport'));
     await stream.decideToolApproval(approval, 'approve');
-    expect(approval.status).toBe('pending');
+    expect(approval.status).toBe('unknown');
     expect(approval.errorMessage).toBeTruthy();
+    await stream.decideToolApproval(approval, 'approve');
+    expect(runtime.decideToolApproval).toHaveBeenCalledTimes(1);
     conversation.chatConversationId.value = 'other';
     await stream.decideToolApproval(approval, 'approve');
     expect(runtime.decideToolApproval).toHaveBeenCalledTimes(1);

@@ -198,6 +198,8 @@ export function useConversationProjection(input: {
       attachments?: unknown;
       nativeActivities?: unknown;
       toolActivities?: unknown;
+      approvalReceipt?: unknown;
+      runOutcome?: unknown;
       localAgentSource?: unknown;
     },
     index: number,
@@ -217,6 +219,12 @@ export function useConversationProjection(input: {
           ];
         })
       : [];
+    const approvalReceipt = AssistantRuntimeMessageViewSchema.shape.approvalReceipt.safeParse(
+      item.approvalReceipt,
+    ).data;
+    const runOutcome = AssistantRuntimeMessageViewSchema.shape.runOutcome.safeParse(
+      item.runOutcome,
+    ).data;
     const toolActivities = AssistantRuntimeMessageViewSchema.shape.toolActivities.safeParse(
       item.toolActivities,
     ).data;
@@ -231,7 +239,34 @@ export function useConversationProjection(input: {
         item.localAgentSource,
       ).data,
       toolActivities,
-      status: toolActivities?.some((call) => call.state === 'failed') ? 'error' : 'success',
+      ...(approvalReceipt
+        ? {
+            approvals: [
+              {
+                ...approvalReceipt,
+                conversationId: chatConversationId.value,
+                status:
+                  approvalReceipt.decision === 'approve'
+                    ? ('approved' as const)
+                    : ('declined' as const),
+              },
+            ],
+          }
+        : {}),
+      ...(runOutcome
+        ? {
+            errorMessage: t(
+              `aiAssistant.chatPage.tools.run${runOutcome.status === 'failed' ? 'Failed' : 'Cancelled'}`,
+            ),
+          }
+        : {}),
+      status:
+        runOutcome?.status === 'cancelled'
+          ? 'aborted'
+          : runOutcome?.status === 'failed' ||
+              toolActivities?.some((call) => call.state === 'failed')
+            ? 'error'
+            : 'success',
     };
   }
 

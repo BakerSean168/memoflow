@@ -155,8 +155,8 @@ export function useAssistantStream(input: {
       }
     } catch {
       if (stillWaiting()) {
-        approval.status = 'pending';
-        approval.errorMessage = t('aiAssistant.chatPage.tools.transportError');
+        approval.status = 'unknown';
+        approval.errorMessage = t('aiAssistant.chatPage.tools.decisionUnknown');
       }
     }
   }

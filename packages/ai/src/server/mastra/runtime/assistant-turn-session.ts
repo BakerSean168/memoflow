@@ -18,6 +18,7 @@ import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { ResolvedAIModel } from '../models';
 import type { IAIExecutionRecordPort } from '../../application/ports';
 import { memoFlowToolPolicy } from '../tools/product-tool-policy';
+import type { AssistantHistoryService } from './assistant-history.service';
 import { AsyncEventQueue } from './async-event-queue';
 import { projectAssistantUsage, type AssistantUsageSnapshot } from './assistant-observability';
 import { AssistantTurnObservability } from './assistant-turn-observability';
@@ -52,7 +53,7 @@ export type ActiveAssistantTurn = {
   readonly identityId: string;
   readonly abort: () => boolean;
   readonly conversationId: string;
-  readonly decide: (command: AssistantRuntimeApprovalCommand, context: ExecutionContext) => boolean;
+  readonly decide: (command: AssistantRuntimeApprovalCommand, context: ExecutionContext) => Promise<boolean>;
   readonly answer: (command: AssistantRuntimeToolAnswerCommand, context: ExecutionContext) => boolean;
 };
 
@@ -82,6 +83,7 @@ export class AssistantTurnSession {
       model: ResolvedAIModel;
       startedAt: number;
       executionRecordPort?: IAIExecutionRecordPort;
+      history: Pick<AssistantHistoryService, 'appendRuntimeRecord'>;
     },
   ) {}
 
@@ -106,6 +108,7 @@ export class AssistantTurnSession {
       });
     };
     let lastUsage: AssistantUsageSnapshot | undefined;
+    let terminalHistory = Promise.resolve();
     let settled = false;
     let stopping = false;
     const bindingGeneration = session.run.bindingGeneration();
@@ -160,6 +163,15 @@ export class AssistantTurnSession {
       type: 'assistant.run.completed' | 'assistant.run.failed' | 'assistant.run.cancelled',
     ): void => {
       if (settled) return;
+      if (type !== 'assistant.run.completed') {
+        terminalHistory = this.deps.history.appendRuntimeRecord({
+          identityId: input.identityId, conversationId: input.conversationId,
+          runOutcome: { runId: currentRunId(), status: type === 'assistant.run.failed' ? 'failed' : 'cancelled' },
+        });
+        // Observe immediately; the generator's finally owns the awaited write,
+        // including when the HTTP/IPC reader disconnects before the final event.
+        terminalHistory.catch(() => {});
+      }
       telemetry.finishPhases(type, lastRuntimeError?.code);
       for (const toolCallId of pending) {
         emit('assistant.approval.resolved', {
@@ -203,10 +215,10 @@ export class AssistantTurnSession {
     const onAbort = (): void => {
       if (!abort() && !stopping) settle('assistant.run.cancelled');
     };
-    const decide = (
+    const decide = async (
       command: AssistantRuntimeApprovalCommand,
       context: ExecutionContext,
-    ): boolean => {
+    ): Promise<boolean> => {
       if (
         !ownsNativeRun() ||
         stopping ||
@@ -216,6 +228,8 @@ export class AssistantTurnSession {
         session.approval.getToolCallId() !== command.toolCallId
       )
         return false;
+      const tool = tools.get(command.toolCallId);
+      if (!tool) return false;
       pending.delete(command.toolCallId);
       const decisionContext = new RequestContext(requestContext.entries());
       decisionContext.setRaw('identityId', input.identityId);
@@ -231,11 +245,17 @@ export class AssistantTurnSession {
         pending.add(command.toolCallId);
         return false;
       }
+      const approvalHistory = this.deps.history.appendRuntimeRecord({
+        identityId: input.identityId, conversationId: input.conversationId,
+        approvalReceipt: { runId: currentRunId(), toolCallId: command.toolCallId,
+          toolName: tool.toolName, category: tool.category, risk: 'high', decision: command.decision },
+      });
       telemetry.approvalResolved(command.toolCallId, command.decision);
       emit('assistant.approval.resolved', {
         toolCallId: command.toolCallId,
         resolution: command.decision === 'approve' ? 'approved' : 'declined',
       });
+      await approvalHistory;
       return true;
     };
     const answer = (command: AssistantRuntimeToolAnswerCommand, context: ExecutionContext): boolean => {
@@ -463,6 +483,7 @@ export class AssistantTurnSession {
       unsubscribe();
       if (activeRuns.get(currentRunId()) === activeRun) activeRuns.delete(currentRunId());
       await telemetry.flush();
+      await terminalHistory;
     }
   }
 }

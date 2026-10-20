@@ -162,6 +162,10 @@ export default {
       impact: 'This action can change workspace data. Approve only if you want to continue.',
       approve: 'Approve',
       decline: 'Decline',
+      unknown: 'Approval result unconfirmed',
+      decisionUnknown: 'Decision delivery is unconfirmed. Refresh the conversation to check its status before continuing.',
+      runFailed: 'The run failed. Previously accepted approval decisions remain valid.',
+      runCancelled: 'The run was cancelled.',
       execution: { completed: 'Completed', failed: 'Failed', denied: 'Denied' },
       transportError: 'Could not send the decision. Try again.',
       capabilities: {

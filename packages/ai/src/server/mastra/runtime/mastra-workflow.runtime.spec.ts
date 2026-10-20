@@ -497,7 +497,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     expect(turn.decline).not.toHaveBeenCalled();
     expect(
       await turn.runtime.decideToolApproval({ context: executionContext, command: turn.command }),
-    ).toBe(false);
+    ).toBe(true);
     expect(turn.events.filter((event) => event.type === 'assistant.run.started')).toHaveLength(1);
     expect(turn.events.at(-1)?.type).toBe('assistant.run.completed');
     expect(JSON.stringify(turn.events)).not.toContain('PRIVATE_ARGS');
@@ -948,10 +948,9 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     await expect(runtime.decideToolApproval({ context: context('identity-a', 'stale'), command: { ...approvalCommand, toolCallId: 'other' } })).resolves.toBe(false);
     expect(await Promise.all([0, 1].map(() => runtime.decideToolApproval({ context: context('identity-a', 'approve'), command: approvalCommand })))).toEqual([true, false]);
     expect(createRoutine).toHaveBeenCalledTimes(1);
-    expect((await runtime.assistant.listSuspendedRuns({ threadId: required.conversationId, resourceId: 'identity-a' })).runs).toEqual([]);
+    await vi.waitFor(async () => expect((await runtime.assistant.listSuspendedRuns({ threadId: required.conversationId, resourceId: 'identity-a' })).runs).toEqual([]));
     expect(await runtime.listAskUserSuspensions({ identityId: 'identity-a', conversationId: required.conversationId })).toEqual([]);
-    const history = await runtime.listMessages({ identityId: 'identity-a', conversationId: required.conversationId });
-    expect(history.messages.some((message) => message.content.includes('Finished'))).toBe(true);
+    await vi.waitFor(async () => expect((await runtime.listMessages({ identityId: 'identity-a', conversationId: required.conversationId })).messages.some((message) => message.content.includes('Finished'))).toBe(true));
   }, 120000);
 
   it('recovers an unarmed native approval after a process restart without replaying the write', async () => {
@@ -987,9 +986,8 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     expect(decisions.sort()).toEqual([false, true]);
     expect(recovered.createRoutine).toHaveBeenCalledTimes(1);
     expect(await recovered.runtime.listAskUserSuspensions({ identityId: 'identity-a', conversationId: required.conversationId })).toEqual([]);
-    const history = await recovered.runtime.history.listMessages({ identityId: 'identity-a', conversationId: required.conversationId });
-    expect(history.messages.some((message) => message.content === 'Recovered approval finished')).toBe(true);
-    await expect(recovered.runtime.decideToolApproval({ context: context('identity-a', 'replay'), command })).resolves.toBe(false);
+    await vi.waitFor(async () => expect((await recovered.runtime.history.listMessages({ identityId: 'identity-a', conversationId: required.conversationId })).messages.some((message) => message.content === 'Recovered approval finished')).toBe(true));
+    await expect(recovered.runtime.decideToolApproval({ context: context('identity-a', 'replay'), command })).resolves.toBe(true);
     expect(recovered.createRoutine).toHaveBeenCalledTimes(1);
   }, 120000);
 

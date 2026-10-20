@@ -19,6 +19,7 @@ import { Memory } from '@mastra/memory';
 import {
   AssistantToolNameSchema,
   type AssistantRuntimeAskUserSuspension,
+  type AssistantApprovalReceipt,
   type AssistantRuntimeApprovalCommand,
   type AIWorkflowResumeClientRequest,
   type AIWorkflowRunView,
@@ -73,7 +74,10 @@ import {
   type ActiveAssistantTurn,
   type AssistantTurnInput,
 } from './assistant-turn-session';
-import { AssistantHistoryService } from './assistant-history.service';
+import {
+  AssistantHistoryService,
+  AssistantConversationUnavailableError,
+} from './assistant-history.service';
 import type { AssistantConversationShellSource } from './assistant-conversation-shell.port';
 import type { AIWorkflowRuntimePort } from './workflow-runtime.port';
 import { getGoalWorkflowEventSource } from './goal-workflow-events.registry';
@@ -136,6 +140,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
   private readonly reservedConversations = new Set<string>();
   private readonly activeRuns = new Map<string, ActiveAssistantTurn>();
   private readonly resumedRuns = new Set<string>();
+  private readonly approvalContinuations = new Map<string, { session: Session; done: Promise<boolean> }>();
   private readonly sessionModes = new WeakMap<Session, 'supervised' | 'read-only'>();
   private readonly selectedContextHydrator: AssistantSelectedContextHydrator;
 
@@ -268,6 +273,9 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       this.disposePromise = (async () => {
         for (const run of this.activeRuns.values()) run.abort();
         this.activeRuns.clear();
+        const continuations = [...this.approvalContinuations.values()];
+        for (const { session } of continuations) session.abortRun();
+        await Promise.allSettled(continuations.map(({ done }) => done));
         await this.memory.settled();
         const close = (this.deps.storage as { close?: () => Promise<void> }).close;
         if (close) await close.call(this.deps.storage);
@@ -414,8 +422,17 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
    */
   cancelRun(input: { identityId: string; runId: string }): boolean {
     const active = this.activeRuns.get(input.runId);
-    if (!active || active.identityId !== input.identityId) return false;
-    return active.abort();
+    if (active) return active.identityId === input.identityId && active.abort();
+    const continuation = this.approvalContinuations.get(input.runId);
+    if (
+      !continuation ||
+      continuation.session.identity.getResourceId() !== input.identityId ||
+      continuation.session.identity.getOwnerId() !== input.identityId ||
+      continuation.session.getCurrentRunId() !== input.runId
+    )
+      return false;
+    continuation.session.abortRun();
+    return true;
   }
 
   private async applySessionPolicy(
@@ -561,6 +578,117 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     }
   }
 
+  /** The command ends at a durable tool receipt; native continuation keeps its
+   * existing successor-gate/snapshot boundary and remains owned until disposal. */
+  private async driveApprovalResume(
+    session: Session,
+    input: Omit<AssistantApprovalReceipt, 'category' | 'risk'> & {
+      identityId: string;
+      conversationId: string;
+    },
+    respond: () => boolean | Promise<boolean>,
+  ): Promise<boolean> {
+    const category = memoFlowToolPolicy(input.toolName)?.category;
+    if (category !== 'read' && category !== 'edit' && category !== 'execute')
+      throw new Error('Unsupported approval category');
+    let consumed = false;
+    let responseFailed = false;
+    let writes = Promise.resolve();
+    let acknowledge!: (value: boolean) => void;
+    let rejectAcknowledgement!: (cause: unknown) => void;
+    const acknowledged = new Promise<boolean>((resolve, reject) => {
+      acknowledge = resolve;
+      rejectAcknowledgement = reject;
+    });
+    const generation = session.run.bindingGeneration();
+    const unsubscribe = session.subscribe((event) => {
+      if (
+        session.run.bindingGeneration() !== generation ||
+        session.thread.getId() !== input.conversationId
+      )
+        return;
+      if ('threadId' in event && event.threadId && event.threadId !== input.conversationId) return;
+      if (event.type === 'tool_end' && event.toolCallId === input.toolCallId && !consumed) {
+        consumed = true;
+        const { runId, toolCallId, toolName, decision } = input;
+        writes = writes.then(() =>
+          this.history.appendRuntimeRecord({
+            identityId: input.identityId,
+            conversationId: input.conversationId,
+            approvalReceipt: { runId, toolCallId, toolName, decision, category, risk: 'high' },
+            toolActivities: [
+              {
+                toolCallId,
+                toolName,
+                state:
+                  decision === 'decline' || event.denied
+                    ? 'denied'
+                    : event.isError
+                      ? 'failed'
+                      : 'completed',
+              },
+            ],
+          }),
+        );
+        writes.then(() => acknowledge(true), rejectAcknowledgement);
+      }
+      if (event.type === 'agent_end' && (event.reason === 'error' || event.reason === 'aborted')) {
+        writes = writes.then(() =>
+          this.history.appendRuntimeRecord({
+            identityId: input.identityId,
+            conversationId: input.conversationId,
+            runOutcome: {
+              runId: input.runId,
+              status: event.reason === 'aborted' ? 'cancelled' : 'failed',
+            },
+          }),
+        );
+        // The completion path observes the same write; handle rejection immediately.
+        writes.catch(rejectAcknowledgement);
+      }
+    });
+    const done = this.driveSuspensionResume(
+      session,
+      input.conversationId,
+      input.runId,
+      input.toolCallId,
+      async () => {
+        try {
+          return await respond();
+        } catch (cause) {
+          responseFailed = true;
+          throw cause;
+        }
+      },
+    )
+      .then(async (accepted) => {
+        await writes;
+        // A later model failure cannot undo a decision consumed by the tool.
+        return consumed || accepted;
+      })
+      .catch(async () => {
+        logger.warn('Approval continuation boundary failed', {
+          conversationId: input.conversationId,
+          runId: input.runId,
+        });
+        await writes;
+        if (responseFailed)
+          await this.history.appendRuntimeRecord({
+            identityId: input.identityId,
+            conversationId: input.conversationId,
+            runOutcome: { runId: input.runId, status: 'failed' },
+          });
+        // A snapshot read failure is not proof the native run failed.
+        return consumed;
+      })
+      .finally(() => {
+        unsubscribe();
+        this.approvalContinuations.delete(input.runId);
+      });
+    this.approvalContinuations.set(input.runId, { session, done });
+    return Promise.race([acknowledged, done]);
+  }
+
   async listAskUserSuspensions(input: {
     identityId: string;
     conversationId: string;
@@ -570,11 +698,15 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       threadId: input.conversationId,
       resourceId: input.identityId,
     });
+    const history = await this.history.listMessages(input);
+    const consumed = new Set(history.messages.flatMap((message) => message.approvalReceipt
+      ? [JSON.stringify([message.approvalReceipt.runId, message.approvalReceipt.toolCallId])] : []));
+    const ended = new Set(history.messages.flatMap((message) => message.runOutcome ? [message.runOutcome.runId] : []));
     return suspended.runs
       .filter((run) => run.threadId === input.conversationId && run.resourceId === input.identityId)
       .flatMap((run) =>
         run.toolCalls.flatMap((call): AssistantRuntimeAskUserSuspension[] => {
-          if (!call.toolName) return [];
+          if (!call.toolName || ended.has(run.runId) || consumed.has(JSON.stringify([run.runId, call.toolCallId]))) return [];
           const policy = memoFlowToolPolicy(call.toolName);
           const toolName = AssistantToolNameSchema.safeParse(call.toolName);
           if (
@@ -701,6 +833,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
           runId: run.runId,
           workflowName: 'executionWorkflow',
         });
+        await this.history.appendRuntimeRecord({ identityId: input.context.identityId, conversationId: input.command.conversationId, runOutcome: { runId: run.runId, status: 'cancelled' } });
         return true;
       } finally {
         clearTimeout(settlementTimeout);
@@ -815,6 +948,26 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         return false;
       return active.decide(input.command, input.context);
     }
+    await this.init();
+    const history = await this.history
+      .listMessages({
+        identityId: input.context.identityId,
+        conversationId: input.command.conversationId,
+      })
+      .catch((cause: unknown) => {
+        if (cause instanceof AssistantConversationUnavailableError) return null;
+        throw cause;
+      });
+    if (!history) return false;
+    const receipt = history.messages.find(
+      (message) =>
+        message.approvalReceipt?.runId === input.command.runId &&
+        message.approvalReceipt.toolCallId === input.command.toolCallId,
+    )?.approvalReceipt;
+    if (receipt) return receipt.decision === input.command.decision;
+    if (history.messages.some((message) => message.runOutcome?.runId === input.command.runId))
+      return false;
+    if (this.approvalContinuations.has(input.command.runId)) return false;
     const runs = await this.assistant.listSuspendedRuns({
       threadId: input.command.conversationId,
       resourceId: input.context.identityId,
@@ -835,6 +988,17 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       this.resumedRuns.has(run.runId)
     )
       return false;
+    const toolName = AssistantToolNameSchema.parse(
+      run.toolCalls.find((call) => call.toolCallId === input.command.toolCallId)!.toolName,
+    );
+    const receiptInput = {
+      identityId: input.context.identityId,
+      conversationId: input.command.conversationId,
+      runId: run.runId,
+      toolCallId: input.command.toolCallId,
+      toolName,
+      decision: input.command.decision,
+    };
     this.resumedRuns.add(run.runId);
     try {
       const { session, requestContext } = await this.suspensionSession(
@@ -854,38 +1018,26 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
         // authenticated durable run to the native Session subscription instead.
         await session.thread.ensureCurrentSubscription();
         session.run.setRunId({ runId: run.runId });
-        return await this.driveSuspensionResume(
-          session,
-          input.command.conversationId,
-          run.runId,
-          input.command.toolCallId,
-          async () => {
-            const response = { toolCallId: input.command.toolCallId, requestContext };
-            if (input.command.decision === 'decline') await session.declineToolCall(response);
-            else await session.approveToolCall(response);
-            return true;
-          },
-        );
+        return await this.driveApprovalResume(session, receiptInput, async () => {
+          const response = { toolCallId: input.command.toolCallId, requestContext };
+          if (input.command.decision === 'decline') await session.declineToolCall(response);
+          else await session.approveToolCall(response);
+          return true;
+        });
       }
       if (
         session.approval.getToolCallId() !== input.command.toolCallId ||
         session.getCurrentRunId() !== run.runId
       )
         return false;
-      return await this.driveSuspensionResume(
-        session,
-        input.command.conversationId,
-        run.runId,
-        input.command.toolCallId,
-        () => {
-          session.respondToToolApproval({
-            decision: input.command.decision,
-            toolCallId: input.command.toolCallId,
-            requestContext,
-          });
-          return !session.approval.isArmed();
-        },
-      );
+      return await this.driveApprovalResume(session, receiptInput, () => {
+        session.respondToToolApproval({
+          decision: input.command.decision,
+          toolCallId: input.command.toolCallId,
+          requestContext,
+        });
+        return !session.approval.isArmed();
+      });
     } catch {
       return false;
     } finally {
@@ -1039,6 +1191,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       model: resolvedModel,
       startedAt,
       executionRecordPort: this.deps.executionRecordPort,
+      history: this.history,
     }).run(input);
   }
 }
