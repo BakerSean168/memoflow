@@ -30,7 +30,7 @@ export function useAIKnowledgeQaWorkflow(options: UseAIKnowledgeQaWorkflowOption
     const latestUserMessage = [...options.chatTimeline.value]
       .reverse()
       .find((item) => item.role === 'user' && item.content.trim().length > 0);
-    return latestUserMessage?.content.trim().slice(0, 2000) ?? '';
+    return latestUserMessage?.content.trim().slice(-2000) ?? '';
   }
 
   function resetKnowledgeAnswer() {
