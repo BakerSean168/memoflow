@@ -1,6 +1,5 @@
 import { unwrapOrThrowError } from '@memoflow/contracts/result';
 import type {
-  PreferenceMutationReceipt,
   PreferenceNamespaceResponse,
   UserPreferenceProfile,
 } from '@memoflow/contracts/setting';
@@ -48,31 +47,23 @@ export function usePresentationBootstrap() {
           await settingService.getPreferenceNamespace('regional'),
         );
 
-        if (regional.namespace === 'regional' && regional.revision === 0) {
-          const deviceTimeZone = createSystemTimeZoneSource().currentTimeZoneId();
-          try {
-            unwrapOrThrowError<PreferenceMutationReceipt>(
-              await settingService.patchPreferenceNamespace(
-                'regional',
-                { timeZone: deviceTimeZone },
-                0,
-              ),
-            );
-          } catch {
-            const latest = unwrapOrThrowError<PreferenceNamespaceResponse>(
-              await settingService.getPreferenceNamespace('regional'),
-            );
-            if (latest.namespace !== 'regional' || latest.revision === 0) {
-              throw new Error('Could not initialize canonical device timezone');
-            }
-          }
-        }
-
         const profile = unwrapOrThrowError<UserPreferenceProfile>(
           await settingService.getPreferenceProfile(),
         );
-        presentationStore.syncFromUserPreferenceProfile(profile);
-        setProductTimePreferences(profile);
+        // Revision zero means only "not present locally", not "absent on the
+        // server". Device defaults are session-only, never bootstrap writes.
+        const sessionProfile =
+          regional.namespace === 'regional' && regional.revision === 0
+            ? {
+                ...profile,
+                regional: {
+                  ...profile.regional,
+                  timeZone: createSystemTimeZoneSource().currentTimeZoneId(),
+                },
+              }
+            : profile;
+        presentationStore.syncFromUserPreferenceProfile(sessionProfile);
+        setProductTimePreferences(sessionProfile);
       } catch (error) {
         // Presentation bootstrap is best-effort. The local browser/device
         // defaults remain active until a canonical profile can be loaded.

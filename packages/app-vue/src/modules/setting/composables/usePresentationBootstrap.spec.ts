@@ -106,7 +106,7 @@ describe('usePresentationBootstrap canonical preferences', () => {
     });
   });
 
-  it('materializes the first authenticated regional profile from the device IANA timezone', async () => {
+  it('uses device time only in memory while regional is a virtual revision-zero default', async () => {
     const deviceTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const initializedProfile: UserPreferenceProfile = {
       ...profile,
@@ -117,21 +117,19 @@ describe('usePresentationBootstrap canonical preferences', () => {
     };
     const { composable, service } = mountComposable({
       regionalResults: [regionalResponse(0, 'UTC')],
-      profileResult: ok(initializedProfile),
+      profileResult: ok({
+        ...initializedProfile,
+        regional: { ...profile.regional, timeZone: 'UTC' },
+      }),
     });
 
     await composable.loadUserPreferences();
 
-    expect(service.patchPreferenceNamespace).toHaveBeenCalledWith(
-      'regional',
-      { timeZone: deviceTimeZone },
-      0,
-    );
+    expect(service.patchPreferenceNamespace).not.toHaveBeenCalled();
     expect(getProductTime().context.timeZone).toBe(deviceTimeZone);
   });
 
-  it('accepts a concurrent first-profile winner instead of overwriting it', async () => {
-    const deviceTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  it('adopts the canonical timezone on a later load after hydration without ever writing', async () => {
     const winnerProfile: UserPreferenceProfile = {
       ...profile,
       regional: { ...profile.regional, timeZone: 'Asia/Tokyo' },
@@ -140,17 +138,11 @@ describe('usePresentationBootstrap canonical preferences', () => {
       regionalResults: [regionalResponse(0, 'UTC'), regionalResponse(1, 'Asia/Tokyo')],
       profileResult: ok(winnerProfile),
     });
-    service.patchPreferenceNamespace.mockResolvedValueOnce(
-      fail({ code: 'CONFLICT', message: 'another client initialized first' }),
-    );
-
+    await composable.loadUserPreferences();
+    expect(service.patchPreferenceNamespace).not.toHaveBeenCalled();
     await composable.loadUserPreferences();
 
-    expect(service.patchPreferenceNamespace).toHaveBeenCalledWith(
-      'regional',
-      { timeZone: deviceTimeZone },
-      0,
-    );
+    expect(service.patchPreferenceNamespace).not.toHaveBeenCalled();
     expect(service.getPreferenceNamespace).toHaveBeenCalledTimes(2);
     expect(getProductTime().context.timeZone).toBe('Asia/Tokyo');
   });
