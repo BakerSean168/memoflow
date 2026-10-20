@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.21.2](https://github.com/BakerSean168/memoflow/compare/v0.21.1...v0.21.2) (2026-10-20)
+
+
+### Bug Fixes
+
+* **desktop:** bundle gray-matter to restore packaged Local Vault scans ([a585071](https://github.com/BakerSean168/memoflow/commit/a58507181ae33a01ef0e87b738cd6a174e132fe4))
+* **desktop:** bundle gray-matter with compatible YAML runtime ([7b4eb94](https://github.com/BakerSean168/memoflow/commit/7b4eb94768be7396fc58d1455bf059867fd20d7b))
+
 ## [0.21.1](https://github.com/BakerSean168/memoflow/compare/v0.21.0...v0.21.1) (2026-10-20)
 
 
