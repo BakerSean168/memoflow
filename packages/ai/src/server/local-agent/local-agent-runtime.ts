@@ -32,6 +32,7 @@ import { LocalAgentError } from '../../shared/local-agent-error';
 import { nativeIdentity, nativeModelVisibilityContext } from './native-identity';
 import { antigravityHasCachedAuth } from './antigravity-native';
 import type { LocalAgentRepository } from '../infrastructure/adapters/powersync/local-agent.repository';
+import { verifyLocalAgentMcpConnectivity } from './local-tool-bridge';
 
 type Driver = Pick<CodexDriver, 'probe' | 'run' | 'respond' | 'cancel' | 'close'>;
 export interface LocalAgentToolGrant {
@@ -620,6 +621,17 @@ export class LocalAgentRuntime {
         type: 'assistant.run.started',
         data: { modelId, providerId: connection.id },
       };
+      if (
+        run.grant &&
+        (run.grant.url.startsWith('http://') || run.grant.url.startsWith('https://'))
+      ) {
+        const check = await verifyLocalAgentMcpConnectivity(run.grant, {
+          requiredWriteScopes: connection.writeScopes,
+        });
+        if (!check.ok) {
+          throw new LocalAgentError('LOCAL_AGENT_TOOLS_UNAVAILABLE');
+        }
+      }
       if (this.stopped || run.abort.signal.aborted || this.options.isActive?.() === false) {
         yield { ...envelope(), type: 'assistant.run.cancelled', data: {} };
         return;

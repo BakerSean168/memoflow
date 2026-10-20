@@ -811,3 +811,59 @@ it('keeps Google sign-in guidance when conversation creation rejects a logged-ou
       'Google sign-in is required. Open Settings → AI → Providers → Antigravity and select “Sign in with Google”.',
   });
 });
+
+it('fails with LOCAL_AGENT_TOOLS_UNAVAILABLE when business tools are missing on verified bridge', async () => {
+  const { store } = await setup();
+  const connection = await store.createConnection('owner', {
+    driver: 'codex',
+    name: 'Codex',
+    executablePath: '/fake/codex',
+    enabled: true,
+    writeScopes: ['goals:write'],
+  });
+  const runtime = new LocalAgentRuntime({
+    store,
+    cwd: '/tmp',
+    bridge: {
+      async open() {
+        return {
+          url: 'http://127.0.0.1:9999/mcp',
+          token: 'token',
+          revoke: () => {},
+        };
+      },
+      async dispose() {},
+    },
+    createDriver: () => ({
+      async *run(): AsyncGenerator<NativeAgentEvent> {
+        yield { type: 'completed' };
+      },
+      respond: () => false,
+      cancel() {},
+      async close() {},
+      async probe() {
+        return { status: 'ready' as const, models: [{ id: 'model', name: 'Model' }] };
+      },
+    }),
+  });
+
+  const conversation = await runtime.createConversation('owner', {
+    connectionId: connection.id,
+    modelId: 'model',
+    name: 'Chat',
+  });
+
+  const events: any[] = [];
+  for await (const event of runtime.dispatchMessage({
+    identityId: 'owner',
+    conversationId: conversation.id,
+    content: 'Hello',
+  })) {
+    events.push(event);
+  }
+
+  const failed = events.find((e) => e.type === 'assistant.run.failed');
+  expect(failed).toBeDefined();
+  expect(failed.data.code).toBe('LOCAL_AGENT_TOOLS_UNAVAILABLE');
+  await runtime.dispose();
+});
