@@ -4,3 +4,4 @@ export * from './assistant-events.dto';
 export * from './workflow-runtime.dto';
 export * from './runtime-usage.dto';
 export * from './local-agent.dto';
+export * from './goal-panel.dto';
