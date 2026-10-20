@@ -21,11 +21,14 @@ vi.mock('../../utils/api-config', () => ({
 
 function database() {
   const transaction = {
-    get: async () => ({ count: 0 }),
-    getOptional: async () => null,
+    get: vi.fn(async () => ({ count: 0 })),
+    getOptional: vi.fn(
+      async (): Promise<{ name: string; last_op: number; last_applied_op: number } | null> => null,
+    ),
     execute: vi.fn(),
   };
   return {
+    transaction,
     waitForReady: vi.fn(async () => undefined),
     close: vi.fn(async () => undefined),
     disconnect: vi.fn(async () => undefined),
@@ -191,6 +194,24 @@ describe('PowerSync Profile database lifecycle', () => {
     expect(db.close).not.toHaveBeenCalled();
     expect(api.getPowerSyncDatabase()).toBe(opened);
   });
+
+  it.each([false, true])(
+    'preserves preference CRUD regardless of pre-hydration bucket presence (%s)',
+    async (hasBucket) => {
+      db.transaction.getOptional.mockResolvedValue(
+        hasBucket ? { name: '1#user_data[owner]', last_op: 1, last_applied_op: 0 } : null,
+      );
+      await api.openPowerSyncLocalOnly(path.join(root, 'a.db'));
+      await api.ensurePowerSyncSyncMode({ getAccessToken: async () => 'test-token' });
+      // No bucket heuristic can prove whether a preference write was automatic or
+      // a real offline edit. Neither absent nor pending buckets authorize deletion.
+      expect(db.transaction.getOptional).not.toHaveBeenCalled();
+      expect(JSON.stringify(db.transaction.get.mock.calls)).not.toContain(
+        'user_preference_records',
+      );
+      expect(db.transaction.execute).not.toHaveBeenCalled();
+    },
+  );
 
   it('waits for an in-flight sync promotion without publishing it after shutdown', async () => {
     await api.openPowerSyncLocalOnly(path.join(root, 'a.db'));

@@ -50,8 +50,6 @@ const NON_SYNCABLE_LOCAL_TABLES = [
   'ai_local_conversation_items',
 ] as const;
 
-const PRE_HYDRATION_BOOTSTRAP_SYNC_TABLES = ['user_preference_records'] as const;
-
 // ──────────────────────────────────────────────
 // Module state
 // ──────────────────────────────────────────────
@@ -139,71 +137,6 @@ async function purgeNonSyncableLocalCrud(
       `DELETE FROM ps_updated_rows
        WHERE row_type IN (${placeholders})`,
       [...NON_SYNCABLE_LOCAL_TABLES],
-    );
-  });
-}
-
-async function purgePreHydrationBootstrapCrud(
-  db: Pick<PowerSyncDatabase, 'writeTransaction'>,
-): Promise<void> {
-  const placeholders = PRE_HYDRATION_BOOTSTRAP_SYNC_TABLES.map(() => '?').join(', ');
-
-  await db.writeTransaction(async (tx) => {
-    const pendingUserBucket = await tx.getOptional<{
-      name: string;
-      last_op: number;
-      last_applied_op: number;
-    }>(
-      `SELECT name, last_op, last_applied_op
-       FROM ps_buckets
-       WHERE name LIKE '1#user_data[%]'
-         AND last_op > 0
-         AND last_applied_op = 0
-       ORDER BY id DESC
-       LIMIT 1`,
-    );
-
-    if (!pendingUserBucket) {
-      return;
-    }
-
-    const queuedCrud = await tx.get<{ count: number }>(
-      `SELECT COUNT(*) as count
-       FROM ps_crud
-       WHERE json_extract(data, '$.type') IN (${placeholders})`,
-      [...PRE_HYDRATION_BOOTSTRAP_SYNC_TABLES],
-    );
-
-    const queuedRows = await tx.get<{ count: number }>(
-      `SELECT COUNT(*) as count
-       FROM ps_updated_rows
-       WHERE row_type IN (${placeholders})`,
-      [...PRE_HYDRATION_BOOTSTRAP_SYNC_TABLES],
-    );
-
-    if (queuedCrud.count === 0 && queuedRows.count === 0) {
-      return;
-    }
-
-    console.log('[PowerSync] Purging pre-hydration bootstrap CRUD rows', {
-      bucket: pendingUserBucket.name,
-      lastOp: pendingUserBucket.last_op,
-      lastAppliedOp: pendingUserBucket.last_applied_op,
-      queuedCrud: queuedCrud.count,
-      queuedRows: queuedRows.count,
-      tables: PRE_HYDRATION_BOOTSTRAP_SYNC_TABLES,
-    });
-
-    await tx.execute(
-      `DELETE FROM ps_crud
-       WHERE json_extract(data, '$.type') IN (${placeholders})`,
-      [...PRE_HYDRATION_BOOTSTRAP_SYNC_TABLES],
-    );
-
-    await tx.execute(
-      `DELETE FROM ps_updated_rows
-       WHERE row_type IN (${placeholders})`,
-      [...PRE_HYDRATION_BOOTSTRAP_SYNC_TABLES],
     );
   });
 }
@@ -499,7 +432,8 @@ export async function ensurePowerSyncSyncMode(
     assertSyncCurrent();
     if (instance.syncConnected) return instance.db;
     await purgeNonSyncableLocalCrud(instance.db);
-    await purgePreHydrationBootstrapCrud(instance.db);
+    // Canonical preference CRUD must be reconciled with server authority, not
+    // deleted using bucket metadata: it may contain real offline user edits.
     assertSyncCurrent();
     const controller = new AbortController();
     instance.syncController = controller;

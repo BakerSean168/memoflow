@@ -56,14 +56,13 @@ describe('canonical preference PowerSync control-plane surface', () => {
     ).toMatchObject({ payload: { timeZone: 'UTC', weekStartsOn: 1 } });
   });
 
-  it('includes canonical preferences in desktop pre-hydration readiness', () => {
+  it('does not purge canonical preferences based on pre-hydration bucket metadata', () => {
     const desktopPowerSync = readFileSync(
       resolve(repoRoot, 'apps/desktop/src/main/database/powersync.ts'),
       'utf8',
     );
-    expect(desktopPowerSync).toMatch(
-      /PRE_HYDRATION_BOOTSTRAP_SYNC_TABLES\s*=\s*\[[\s\S]*'user_preference_records'/,
-    );
+    expect(desktopPowerSync).not.toContain('purgePreHydrationBootstrapCrud');
+    expect(desktopPowerSync).not.toContain('FROM ps_buckets');
   });
 
   it('routes canonical preference CRUD around the generic last-write-wins path', () => {
