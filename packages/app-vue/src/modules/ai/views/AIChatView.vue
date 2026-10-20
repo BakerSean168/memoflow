@@ -84,26 +84,6 @@
           </div>
           <div class="flex items-center gap-2">
             <AIRuntimeUsageBadge :usage="lastRuntimeUsage" />
-            <Button
-              v-if="hasWorkflowContext"
-              variant="ghost"
-              size="icon"
-              class="hidden h-8 w-8 md:inline-flex"
-              :aria-label="
-                contextPanelOpen
-                  ? t('aiAssistant.chatPage.workbench.hide')
-                  : t('aiAssistant.chatPage.workbench.show')
-              "
-              :title="
-                contextPanelOpen
-                  ? t('aiAssistant.chatPage.workbench.hide')
-                  : t('aiAssistant.chatPage.workbench.show')
-              "
-              data-testid="ai-desktop-context-panel-toggle"
-              @click="toggleContextPanel"
-            >
-              <PanelRightOpen class="h-4 w-4" />
-            </Button>
             <div class="flex items-center gap-1 md:hidden">
               <Button
                 variant="ghost"
@@ -115,26 +95,6 @@
                 @click="openMobileSidebar"
               >
                 <Menu class="h-4 w-4" />
-              </Button>
-              <Button
-                v-if="hasWorkflowContext"
-                variant="ghost"
-                size="icon"
-                :aria-label="
-                  contextPanelOpen
-                    ? t('aiAssistant.chatPage.workbench.hide')
-                    : t('aiAssistant.chatPage.workbench.show')
-                "
-                class="h-8 w-8"
-                :title="
-                  contextPanelOpen
-                    ? t('aiAssistant.chatPage.workbench.hide')
-                    : t('aiAssistant.chatPage.workbench.show')
-                "
-                data-testid="ai-context-panel-toggle"
-                @click="toggleContextPanel"
-              >
-                <PanelRightOpen class="h-4 w-4" />
               </Button>
               <Button
                 variant="ghost"
@@ -241,6 +201,56 @@
             </div>
           </section>
         </template>
+        <template #workflow-context>
+        <AIGoalWorkflowPanel
+          :tool-mode="toolMode"
+          :goal-clarification="goalClarification"
+          :goal-workflow-run="goalWorkflowRun"
+          :editable-goal="editableGoal"
+          :editable-key-results="editableKeyResults"
+          :editable-tasks="editableTasks"
+          :editable-knowledge="editableKnowledge"
+          :goal-owner-submitted="goalOwnerSubmitted"
+          :busy="goalAgentResuming"
+          :can-retry-execution="canRetryGoalAgentExecution"
+          :can-accept-partial-execution="canAcceptGoalPartialExecution"
+          :can-cancel-remaining-execution="canCancelRemainingGoalExecution"
+          :knowledge-answer="knowledgeAnswer"
+          :format-execution-outcome="formatExecutionOutcome"
+          @open-native-review="openGoalNativeReview"
+          @open-knowledge-citation="openKnowledgeCitation"
+          @retry="retryGoalAgentExecution"
+          @accept-partial="acceptPartialGoalExecution"
+          @cancel-remaining="cancelRemainingGoalExecution"
+        />
+        <AITaskWorkflowPanel
+          :tool-mode="toolMode"
+          :task-workflow-run="taskWorkflowRun"
+          :busy="taskAgentResuming"
+          :owner-attempt-pending="taskOwnerAttemptPending"
+          :owner-submitted="taskOwnerSubmitted"
+          :can-retry-execution="canRetryTaskAgentExecution"
+          :can-accept-partial-execution="canAcceptTaskPartialExecution"
+          :can-cancel-remaining-execution="canCancelRemainingTaskExecution"
+          @confirm="confirmTaskAgentRun"
+          @cancel="cancelTaskAgentRun"
+          @retry="retryTaskAgentExecution"
+          @accept-partial="acceptPartialTaskExecution"
+          @cancel-remaining="cancelRemainingTaskExecution"
+          @open-native-review="openTaskNativeReview"
+        />
+        <AIKnowledgeCapturePanel
+          :tool-mode="toolMode"
+          :knowledge-capture-run="knowledgeCaptureRun"
+          :busy="knowledgeCaptureResuming"
+          :can-retry-execution="canRetryKnowledgeCaptureExecution"
+          :can-cancel-remaining-execution="canCancelRemainingKnowledgeCaptureExecution"
+          @cancel="cancelKnowledgeCaptureRun"
+          @retry="retryKnowledgeCaptureExecution"
+          @cancel-remaining="cancelRemainingKnowledgeCaptureExecution"
+          @open-native-review="openKnowledgeNativeReview"
+        />
+        </template>
       </AIMessagePanel>
 
       <p
@@ -300,71 +310,6 @@
       </Teleport>
     </section>
 
-    <Teleport to="body" :disabled="true">
-      <AIContextPanel
-        v-show="!composerOnly"
-        :has-workflow-context="hasWorkflowContext"
-        :open="contextPanelOpen"
-        :tool-label="currentToolLabel"
-        @close="closeContextPanel"
-      >
-        <AIGoalWorkflowPanel
-          :tool-mode="toolMode"
-          :goal-clarification="goalClarification"
-          :goal-workflow-run="goalWorkflowRun"
-          :editable-goal="editableGoal"
-          :editable-key-results="editableKeyResults"
-          :editable-tasks="editableTasks"
-          :editable-knowledge="editableKnowledge"
-          :goal-owner-submitted="goalOwnerSubmitted"
-          :busy="goalAgentResuming"
-          :can-retry-execution="canRetryGoalAgentExecution"
-          :can-accept-partial-execution="canAcceptGoalPartialExecution"
-          :can-cancel-remaining-execution="canCancelRemainingGoalExecution"
-          :knowledge-answer="knowledgeAnswer"
-          :format-execution-outcome="formatExecutionOutcome"
-          @open-native-review="openGoalNativeReview"
-          @open-knowledge-citation="openKnowledgeCitation"
-          @retry="retryGoalAgentExecution"
-          @accept-partial="acceptPartialGoalExecution"
-          @cancel-remaining="cancelRemainingGoalExecution"
-        />
-        <AITaskWorkflowPanel
-          :tool-mode="toolMode"
-          :task-workflow-run="taskWorkflowRun"
-          :busy="taskAgentResuming"
-          :owner-attempt-pending="taskOwnerAttemptPending"
-          :owner-submitted="taskOwnerSubmitted"
-          :can-retry-execution="canRetryTaskAgentExecution"
-          :can-accept-partial-execution="canAcceptTaskPartialExecution"
-          :can-cancel-remaining-execution="canCancelRemainingTaskExecution"
-          @confirm="confirmTaskAgentRun"
-          @cancel="cancelTaskAgentRun"
-          @retry="retryTaskAgentExecution"
-          @accept-partial="acceptPartialTaskExecution"
-          @cancel-remaining="cancelRemainingTaskExecution"
-          @open-native-review="openTaskNativeReview"
-        />
-        <AIKnowledgeCapturePanel
-          :tool-mode="toolMode"
-          :knowledge-capture-run="knowledgeCaptureRun"
-          :busy="knowledgeCaptureResuming"
-          :can-retry-execution="canRetryKnowledgeCaptureExecution"
-          :can-cancel-remaining-execution="canCancelRemainingKnowledgeCaptureExecution"
-          @cancel="cancelKnowledgeCaptureRun"
-          @retry="retryKnowledgeCaptureExecution"
-          @cancel-remaining="cancelRemainingKnowledgeCaptureExecution"
-          @open-native-review="openKnowledgeNativeReview"
-        />
-        <div
-          v-if="!hasWorkflowArtifact"
-          class="rounded-lg border bg-muted/20 p-4 text-sm leading-6 text-muted-foreground"
-          data-testid="ai-context-empty-state"
-        >
-          {{ t('aiAssistant.chatPage.workbench.empty') }}
-        </div>
-      </AIContextPanel>
-    </Teleport>
   </div>
 </template>
 
@@ -372,7 +317,7 @@
 import { computed, inject, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { Menu, PanelRightOpen, Plus } from '@lucide/vue';
+import { Menu, Plus } from '@lucide/vue';
 import { Button } from '@memoflow/ui-vue-shadcn';
 import AIConversationSidebar from '../components/AIConversationSidebar.vue';
 import AIMessagePanel from '../components/AIMessagePanel.vue';
@@ -381,7 +326,6 @@ import AIFooterComposer from '../components/AIFooterComposer.vue';
 import AIGoalWorkflowPanel from '../components/AIGoalWorkflowPanel.vue';
 import AITaskWorkflowPanel from '../components/AITaskWorkflowPanel.vue';
 import AIKnowledgeCapturePanel from '../components/AIKnowledgeCapturePanel.vue';
-import AIContextPanel from '../components/AIContextPanel.vue';
 import AIRuntimeUsageBadge from '../components/AIRuntimeUsageBadge.vue';
 import { useAppShellStore } from '../../../layouts/shell/useAppShellStore';
 import { SHELL_COMPOSER_DENSITY_KEY, SHELL_COMPOSER_MOUNT_KEY } from '../../../di/keys';
@@ -582,40 +526,14 @@ const {
 const { formatExecutionOutcome } = formatters;
 const { toolMode, currentConversationLabel, currentToolLabel, exitToolMode, openSettings } = common;
 
-const contextPanelOpen = ref(false);
 const mobileSidebarOpen = ref(false);
 const lastOpenedGoalId = ref<string | null>(null);
-
-const hasWorkflowArtifact = computed(() => {
-  if (toolMode.value === 'goal-create') return Boolean(goalWorkflowRun.value);
-  if (toolMode.value === 'task-create') return Boolean(taskWorkflowRun.value);
-  if (toolMode.value === 'knowledge-capture') return Boolean(knowledgeCaptureRun.value);
-  if (toolMode.value === 'knowledge-qa') return Boolean(knowledgeAnswer.value);
-  return false;
-});
-const hasWorkflowContext = computed(() => toolMode.value !== 'chat' || hasWorkflowArtifact.value);
-
-function requestContextPanel(intent: 'automatic' | 'explicit') {
-  contextPanelOpen.value = true;
-  void intent;
-}
-
-watch(
-  [hasWorkflowContext, toolMode],
-  ([available, mode], [wasAvailable]) => {
-    // Goal creation is owner-first: keep the native Goal surface primary and
-    // expose the retained workflow context only when the user asks for it.
-    if (available && !wasAvailable && mode !== 'goal-create') requestContextPanel('automatic');
-  },
-  { immediate: true },
-);
 
 watch(
   () => route.query.workflow,
   (workflow) => {
     if (workflow !== 'goal-create') return;
     startNewConversation('goal-create');
-    requestContextPanel('explicit');
     const query = { ...route.query };
     delete query.workflow;
     void router.replace({ path: route.path, query });
@@ -694,7 +612,7 @@ async function handleComposerSend() {
   }
   const inferredMode = workflowInProgress.value
     ? toolMode.value
-    : inferWorkflowMode(chatMessage.value, chatTimeline.value.at(-1)?.content ?? '');
+    : inferWorkflowMode(chatMessage.value, chatTimeline.value[chatTimeline.value.length - 1]?.content ?? '');
 
   if (!workflowInProgress.value && inferredMode !== toolMode.value) {
     if (toolMode.value !== 'chat') exitToolMode();
@@ -761,13 +679,6 @@ async function handleComposerSend() {
   } else if (inferredMode === 'knowledge-qa') await askKnowledgeFromConversation();
 }
 
-function toggleContextPanel() {
-  contextPanelOpen.value = !contextPanelOpen.value;
-}
-
-function closeContextPanel() {
-  contextPanelOpen.value = false;
-}
 function openMobileSidebar() {
   mobileSidebarOpen.value = true;
 }
@@ -785,7 +696,6 @@ function startNewConversationFromMobile() {
 }
 async function selectConversation(item: ConversationSummary) {
   await selectConversationBase(item);
-  if (hasWorkflowContext.value && toolMode.value !== 'goal-create') requestContextPanel('explicit');
 }
 async function selectConversationFromMobile(item: ConversationSummary) {
   closeMobileSidebar();

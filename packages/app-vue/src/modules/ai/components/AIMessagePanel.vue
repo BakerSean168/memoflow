@@ -363,6 +363,7 @@
           <slot name="workflow-surface" />
         </div>
       </div>
+      <slot name="workflow-context" />
     </div>
   </div>
 </template>
