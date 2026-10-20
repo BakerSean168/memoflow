@@ -40,6 +40,7 @@ const emit = defineEmits<{
   remove: [];
   reset: [];
   cancel: [];
+  verified: [status: LocalAgentStatus];
 }>();
 const { t } = useI18n();
 const uid = `ai-native-${useId()}`;
@@ -273,7 +274,12 @@ function applyAuth(raw: unknown, options: { keepFailure?: boolean; restore?: boo
   }
   if (['failed', 'cancelled', 'idle', 'succeeded'].includes(state.phase)) {
     stopPolling();
-    if (state.phase === 'succeeded' || state.phase === 'idle') emit('check');
+    // Login already performed a full native ACP probe. Reuse its verified
+    // model catalogue instead of spawning a second expensive probe.
+    if (state.phase === 'succeeded') {
+      if (state.status?.status === 'ready') emit('verified', state.status);
+      else emit('check');
+    } else if (state.phase === 'idle') emit('check');
   }
 }
 function schedulePoll() {

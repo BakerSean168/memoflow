@@ -46,6 +46,9 @@ const loading = ref(false);
 const failure = ref('');
 let generation = 0;
 let disposed = false;
+// The authorization flow may finish while a previously started catalogue
+// probe is still pending. Older replies must not overwrite verified models.
+const probeEpochs = new Map<string, number>();
 const instances = computed(() => sortAgentInstances(snapshot.value?.instances ?? []));
 const selected = computed(
   () => instances.value.find((item) => item.instanceId === selectedId.value) ?? null,
@@ -240,6 +243,14 @@ async function removeSelected() {
     }),
   );
 }
+function applyVerifiedModels(instanceId: string, status: LocalAgentStatus) {
+  if (disposed || status.status !== 'ready') return;
+  const instance = instances.value.find((item) => item.instanceId === instanceId);
+  if (!instance || !instance.enabled || instance.driver !== 'antigravity') return;
+  probeEpochs.set(instanceId, (probeEpochs.get(instanceId) ?? 0) + 1);
+  statuses.value[instanceId] = status;
+  checking.value[instanceId] = false;
+}
 async function probe(instance: AgentInstance) {
   if (
     !local ||
@@ -250,27 +261,39 @@ async function probe(instance: AgentInstance) {
   )
     return;
   const epoch = generation;
+  const probeId = (probeEpochs.get(instance.instanceId) ?? 0) + 1;
+  probeEpochs.set(instance.instanceId, probeId);
   checking.value[instance.instanceId] = true;
+  const isCurrent = () =>
+    !disposed && epoch === generation && probeEpochs.get(instance.instanceId) === probeId;
   try {
     const result = instance.legacyConnectionId
       ? await local.probeConnection(instance.legacyConnectionId)
       : await local.probeDefaultDriver(instance.driver);
-    if (!disposed && epoch === generation) statuses.value[instance.instanceId] = result;
+    if (isCurrent()) statuses.value[instance.instanceId] = result;
   } catch {
-    if (!disposed && epoch === generation)
+    if (isCurrent())
       statuses.value[instance.instanceId] = {
         status: 'unavailable',
         message: t('aiAssistant.local.actionFailed'),
       };
   } finally {
-    if (!disposed && epoch === generation) checking.value[instance.instanceId] = false;
+    if (isCurrent()) checking.value[instance.instanceId] = false;
   }
 }
 async function recheck() {
   await refresh();
   const candidates = instances.value.filter((item) => item.driver !== 'mastra' && item.enabled);
   for (let index = 0; index < candidates.length && !disposed; index += 2)
-    await Promise.allSettled(candidates.slice(index, index + 2).map(probe));
+    await Promise.allSettled(
+      candidates.slice(index, index + 2).map((instance) =>
+        // A Google login may have completed and verified its models while
+        // earlier provider checks were running. Do not probe AGY twice.
+        instance.driver === 'antigravity' && statuses.value[instance.instanceId]?.status === 'ready'
+          ? Promise.resolve()
+          : probe(instance),
+      ),
+    );
 }
 function select(instance: AgentInstance) {
   selectedId.value = instance.instanceId;
@@ -431,6 +454,7 @@ onBeforeUnmount(() => {
           @save="saveNative"
           @toggle="toggle(selected, $event)"
           @check="probe(selected)"
+          @verified="applyVerifiedModels(selected.instanceId, $event)"
           @remove="removeSelected"
           @reset="resetSelected"
           @cancel="selectedId = instances[0]?.instanceId ?? ''"

@@ -1262,6 +1262,140 @@ it('restores the ACP starting phase on remount instead of offering another login
   expect(wrapper.get('[data-testid="ai-agy-login-cancel"]').exists()).toBe(true);
 });
 
+it('uses the models already verified by an AGY login without a second native probe', async () => {
+  const { wrapper, localClient } = await setup({
+    native: true,
+    configured: ['antigravity'],
+  });
+  localClient.probeConnection.mockResolvedValue({
+    status: 'login_required',
+    message: 'Sign in to Google',
+  });
+  localClient.loginStatus.mockResolvedValue({
+    phase: 'idle',
+    flowId: null,
+    authorizationUrl: null,
+    expiresAt: null,
+    failure: null,
+  });
+  await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
+  await flushPromises();
+  await wrapper.get('[data-testid="ai-provider-select-agent:antigravity"]').trigger('click');
+  await flushPromises();
+  const checkedBeforeLogin = localClient.probeConnection.mock.calls.length;
+  localClient.startLogin.mockResolvedValueOnce({
+    phase: 'succeeded',
+    flowId: 'verified-flow',
+    authorizationUrl: null,
+    expiresAt: null,
+    failure: null,
+    status: {
+      status: 'ready',
+      models: [{ id: 'google-verified-model', name: 'Google Verified Model' }],
+      modelVisibilityContext: 'mvc1:' + 'a'.repeat(64),
+    },
+  });
+  await wrapper.get('[data-testid="ai-agy-login"]').trigger('click');
+  await flushPromises();
+  expect(wrapper.get('[data-testid="ai-agy-login-status"]').text()).toContain('Google account connected');
+  expect(wrapper.get('[data-testid="ai-provider-select-agent:antigravity"]').text()).toContain(
+    '1 model',
+  );
+  expect(wrapper.get('[data-testid="ai-native-model-id"]').text()).toBe('google-verified-model');
+  expect(localClient.probeConnection).toHaveBeenCalledTimes(checkedBeforeLogin);
+});
+
+it('keeps verified AGY models when an earlier native probe times out afterwards', async () => {
+  const { wrapper, localClient } = await setup({
+    native: true,
+    configured: ['antigravity'],
+  });
+  let rejectPending!: (error: Error) => void;
+  localClient.probeConnection.mockImplementation(
+    () =>
+      new Promise<LocalAgentStatus>((_resolve, reject) => {
+        rejectPending = reject;
+      }),
+  );
+  const baseline = localClient.probeConnection.mock.calls.length;
+  await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
+  await vi.waitFor(() => {
+    expect(localClient.probeConnection.mock.calls.length).toBeGreaterThan(baseline);
+  });
+  localClient.loginStatus.mockResolvedValue({
+    phase: 'succeeded',
+    flowId: 'verified-flow',
+    authorizationUrl: null,
+    expiresAt: null,
+    failure: null,
+    status: {
+      status: 'ready',
+      models: [{ id: 'verified-after-login', name: 'Verified After Login' }],
+      modelVisibilityContext: 'mvc1:' + 'b'.repeat(64),
+    },
+  });
+  await wrapper.get('[data-testid="ai-provider-select-agent:antigravity"]').trigger('click');
+  await flushPromises();
+  expect(wrapper.get('[data-testid="ai-native-model-id"]').text()).toBe('verified-after-login');
+  expect(wrapper.get('[data-testid="ai-provider-select-agent:antigravity"]').text()).toContain(
+    '1 model',
+  );
+
+  // The old probe belongs to an earlier snapshot. An error cannot replace
+  // a newer verified catalog with a misleading unavailable status.
+  rejectPending(new Error('old probe timed out'));
+  await flushPromises();
+  expect(wrapper.get('[data-testid="ai-native-model-id"]').text()).toBe('verified-after-login');
+  expect(wrapper.get('[data-testid="ai-provider-select-agent:antigravity"]').text()).toContain(
+    '1 model',
+  );
+});
+
+it('skips the redundant AGY scan if Google verified models while earlier providers were checked', async () => {
+  const { wrapper, localClient } = await setup({
+    native: true,
+    configured: ['antigravity'],
+  });
+  let finishCodex!: (value: LocalAgentStatus) => void;
+  const beforeCodex = localClient.probeDefaultDriver.mock.calls.length;
+  localClient.probeDefaultDriver.mockImplementation((driver) =>
+    driver === 'codex'
+      ? new Promise<LocalAgentStatus>((resolve) => {
+          finishCodex = resolve;
+        })
+      : Promise.resolve({ status: 'not_installed', message: 'Not installed' }),
+  );
+  await wrapper.get('[data-testid="ai-provider-recheck"]').trigger('click');
+  await vi.waitFor(() => {
+    expect(localClient.probeDefaultDriver.mock.calls.length).toBeGreaterThan(beforeCodex);
+  });
+  localClient.loginStatus.mockResolvedValue({
+    phase: 'succeeded',
+    flowId: 'already-verified',
+    authorizationUrl: null,
+    expiresAt: null,
+    failure: null,
+    status: {
+      status: 'ready',
+      models: [{ id: 'ready-while-scanning', name: 'Ready While Scanning' }],
+    },
+  });
+  await wrapper.get('[data-testid="ai-provider-select-agent:antigravity"]').trigger('click');
+  await flushPromises();
+  expect(wrapper.get('[data-testid="ai-native-model-id"]').text()).toBe('ready-while-scanning');
+  // Selecting an unchecked Agent can start a probe before its restored login
+  // is read; the completed login supersedes it and no *later* recheck is allowed.
+  const callsAfterVerification = localClient.probeConnection.mock.calls.length;
+
+  finishCodex({ status: 'not_installed', message: 'Not installed' });
+  await vi.waitFor(() =>
+    expect(localClient.probeDefaultDriver).toHaveBeenCalledWith('dsh'),
+  );
+  await flushPromises();
+  expect(localClient.probeConnection).toHaveBeenCalledTimes(callsAfterVerification);
+  expect(wrapper.get('[data-testid="ai-native-model-id"]').text()).toBe('ready-while-scanning');
+});
+
 it('offers sign-out only through the official ACP capability', async () => {
   const { wrapper, localClient, bridge } = await setup({
     native: true,
