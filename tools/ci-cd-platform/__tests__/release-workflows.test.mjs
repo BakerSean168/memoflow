@@ -1,5 +1,9 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFile, mkdtemp, writeFile, rm } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
+import os from 'node:os';
+import path from 'node:path';
 import { matchesGlob } from 'node:path';
 import test from 'node:test';
 
@@ -895,5 +899,62 @@ test('all China registry delivery lanes share transient-only ACR login retry', a
       assert.match(block, /uses: \.\/\.github\/actions\/docker-registry-login-retry/u);
       assert.doesNotMatch(block, /docker\/login-action/u);
     }
+  }
+});
+
+test('registry digest lookup never hashes a failed response or treats an unknown failure as a missing tag', async () => {
+  const workflow = await readRepoFile('.github/workflows/mirror-runtime-images.yml');
+  const source = workflow
+    .match(/          manifest_digest\(\) \{[\s\S]*?\n          \}/u)[0]
+    .split('\n')
+    .map((line) => line.slice(10))
+    .join('\n');
+  const directory = await mkdtemp(path.join(os.tmpdir(), 'memoflow-registry-digest-'));
+  try {
+    await writeFile(
+      path.join(directory, 'skopeo'),
+      '#!/bin/sh\nprintf "%s" "$FAKE_BODY"\nprintf "%s" "$FAKE_ERROR" >&2\nexit "$FAKE_STATUS"\n',
+      { mode: 0o755 },
+    );
+    const inspect = (body, status, error = '') =>
+      spawnSync(
+        'bash',
+        [
+          '-c',
+          'set -euo pipefail\n' + source + '\nmanifest_digest example.test/runtime:immutable true',
+        ],
+        {
+          encoding: 'utf8',
+          env: {
+            ...process.env,
+            PATH: directory + path.delimiter + process.env.PATH,
+            AUTH_FILE: '/dev/null',
+            FAKE_BODY: body,
+            FAKE_STATUS: String(status),
+            FAKE_ERROR: error,
+          },
+        },
+      );
+    const missing = inspect('', 1, 'reading manifest immutable: manifest unknown');
+    assert.equal(missing.stdout, '', 'missing tags must not emit the hash of empty input');
+    assert.equal(missing.status, 0);
+    const denied = inspect('partial response', 1, 'unauthorized: authentication required');
+    assert.equal(denied.stdout, '', 'failed partial responses must not emit a digest');
+    assert.notEqual(denied.status, 0, 'authentication/network failures must abort before any copy');
+    assert.match(denied.stderr, /unauthorized/u);
+    const bytes = '{"schemaVersion":2}\n';
+    const valid = inspect(bytes, 0);
+    assert.equal(valid.status, 0);
+    assert.equal(
+      valid.stdout.trim(),
+      'sha256:' + createHash('sha256').update(bytes).digest('hex'),
+      'hash the exact original bytes, including a terminal newline',
+    );
+    const empty = inspect('', 0);
+    assert.equal(empty.stdout, '');
+    assert.notEqual(empty.status, 0, 'an empty successful response is invalid');
+    assert.doesNotMatch(workflow, /existing="\$\(manifest_digest[^\n]*\|\| true/u);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
   }
 });

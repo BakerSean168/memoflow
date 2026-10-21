@@ -57,9 +57,36 @@ jobs:
           AUTH_FILE="$HOME/.docker/config.json"
 
           manifest_digest() {
-            skopeo inspect --raw --authfile "$AUTH_FILE" "docker://$1" \
-              | sha256sum \
-              | awk '{print "sha256:" $1}'
+            local raw_file error_file status error_text
+            raw_file="$(mktemp)"
+            error_file="$(mktemp)"
+            if skopeo inspect --raw --authfile "$AUTH_FILE" "docker://$1" >"$raw_file" 2>"$error_file"; then
+              if [[ ! -s "$raw_file" ]]; then
+                rm -f -- "$raw_file" "$error_file"
+                echo '::error::Registry returned an empty manifest' >&2
+                return 1
+              fi
+              status=0
+              sha256sum "$raw_file" | awk '{print "sha256:" $1}' || status=$?
+            else
+              status=$?
+              error_text="$(cat "$error_file")"
+              # Only explicit registry absence permits creation. Auth, network and
+              # partial-response failures must not authorize an immutable-tag write.
+              if [[ "${2:-false}" == true ]]; then
+                case "${error_text,,}" in
+                  *'manifest unknown'*|*'manifest_unknown'*|*'name unknown'*|*'name_unknown'*|*'statuscode: 404'*)
+                    rm -f -- "$raw_file" "$error_file"
+                    return 0
+                    ;;
+                esac
+              fi
+              cat "$error_file" >&2
+              rm -f -- "$raw_file" "$error_file"
+              return "$status"
+            fi
+            rm -f -- "$raw_file" "$error_file"
+            return "$status"
           }
 
           while IFS=$'\t' read -r name source tag platforms curated_digest; do
@@ -81,8 +108,8 @@ jobs:
             fi
             expected_prefix="${expected_digest#sha256:}"
             test "${tag##*-}" = "${expected_prefix:0:12}"
-            china_existing="$(manifest_digest "$china_ref" 2>/dev/null || true)"
-            global_existing="$(manifest_digest "$global_ref" 2>/dev/null || true)"
+            china_existing="$(manifest_digest "$china_ref" true)"
+            global_existing="$(manifest_digest "$global_ref" true)"
             if [[ "$china_existing" == "$expected_digest" && "$global_existing" == "$expected_digest" ]]; then
               echo "$name: immutable mirror already matches both registries"
             else
