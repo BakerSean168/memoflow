@@ -246,6 +246,86 @@ it('reconciles a committed workflow receipt by its string Goal ID without creati
   }
 });
 
+describe('restored transient BYOA ownership', () => {
+  it.each(['editing', 'pending-missing', 'pending-found', 'pending-offline'] as const)(
+    'reconciles %s without querying a transient local run as a Mastra workflow',
+    async (scenario) => {
+      const record = GoalDraftCheckpointContentSchema.parse({
+        createId: crypto.randomUUID(),
+        workflowRunId: 'local-agent:conversation:terminated-run',
+        phase: scenario === 'editing' ? 'editing' : 'submit_pending',
+        draft: {
+          name: 'Recovered BYOA draft',
+          summary: '',
+          description: '',
+          status: GoalStatus.Planned,
+          start: null,
+          target: null,
+          reminderConfig: null,
+          labelIds: [],
+          keyResults: [],
+        },
+      });
+      let current: GoalDraftCheckpointSnapshot = { scope: 'identity', version: 1, content: record };
+      const store: GoalDraftCheckpointStore = {
+        scope: () => 'identity',
+        load: async () => current,
+        write: async (scope, version, content) => {
+          if (version !== current.version) throw new GoalDraftCheckpointConflict(current);
+          current = { scope, version: version + 1, content };
+          return current;
+        },
+      };
+      const saved = createMockGoal({ id: record.createId, name: record.draft.name });
+      const getGoal = vi.fn(async () =>
+        scenario === 'pending-found'
+          ? { ok: true, data: { toDTO: () => saved } }
+          : {
+              ok: false,
+              error: { code: scenario === 'pending-offline' ? 'UNAVAILABLE' : 'NOT_FOUND' },
+            },
+      );
+      const get = vi.fn(async () => {
+        throw new Error('No durable workflow exists for a transient BYOA run');
+      });
+      const wrapper = mount(GoalDialog, {
+        props: { open: true, presentation: 'panel' },
+        attachTo: document.body,
+        global: {
+          plugins: [i18n],
+          provide: {
+            [GOAL_DRAFT_CHECKPOINT_KEY]: store,
+            [GOAL_SERVICE_KEY]: { getGoal },
+            [AI_WORKFLOW_RUNTIME_KEY]: { get, streamWorkspaceEvents: () => Promise.resolve() },
+          },
+        },
+      });
+      try {
+        await flushPromises();
+        expect(get).not.toHaveBeenCalled();
+        expect(mocks.createGoal).not.toHaveBeenCalled();
+        if (scenario === 'pending-found') {
+          expect(current.content).toBeNull();
+          expect(wrapper.emitted('created')?.at(-1)?.[0]).toMatchObject({ id: record.createId });
+        } else {
+          expect(current.content?.createId).toBe(record.createId);
+          expect(current.content?.draft.name).toBe(record.draft.name);
+          expect(current.content?.phase).toBe(record.phase);
+          expect(current.content?.workflowRunId).toBe(
+            scenario === 'pending-offline' ? record.workflowRunId : null,
+          );
+          if (scenario === 'editing')
+            expect(dom('goal-name-input').attributes('disabled')).toBeUndefined();
+          else expect(dom('goal-name-input').attributes('disabled')).toBeDefined();
+        }
+      } finally {
+        wrapper.unmount();
+        vi.clearAllMocks();
+      }
+    },
+  );
+});
+
 describe('restored workflow checkpoint calibration', () => {
   it.each(['workflow.updated', 'stream.ready', 'stream.reset_required'] as const)(
     'reconciles %s after an older running snapshot without freezing the draft',

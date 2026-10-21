@@ -30,6 +30,35 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
   // Only one Electron IPC handler may own this channel at a time. Each Profile
   // creates a new bridge; a stale Profile must never consume its responses.
   private static activeBridge: DesktopNativePanelBridge | null = null;
+  private rendererGeneration = 0;
+  private observedWindow: BrowserWindow | null = null;
+  private stopObservingWindow: (() => void) | null = null;
+  private readonly runBindings = new WeakMap<
+    AbortSignal,
+    { sender: BrowserWindow['webContents']; generation: number }
+  >();
+
+  private observeWindow(window: BrowserWindow): void {
+    if (this.observedWindow === window) return;
+    this.stopObservingWindow?.();
+    this.observedWindow = window;
+    this.rendererGeneration++;
+    const invalidate = () => {
+      this.rendererGeneration++;
+    };
+    const onNavigation = (details: { isMainFrame: boolean; isSameDocument: boolean }) => {
+      if (details.isMainFrame && !details.isSameDocument) invalidate();
+    };
+    window.webContents.on('destroyed', invalidate);
+    window.webContents.on('render-process-gone', invalidate);
+    window.webContents.on('did-start-navigation', onNavigation);
+    this.stopObservingWindow = () => {
+      window.webContents.removeListener('destroyed', invalidate);
+      window.webContents.removeListener('render-process-gone', invalidate);
+      window.webContents.removeListener('did-start-navigation', onNavigation);
+    };
+  }
+
   private pendingRequests = new Map<
     string,
     {
@@ -85,6 +114,22 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
     const win = this.options.getMainWindow();
     if (!win || win.isDestroyed()) {
       throw new Error('No active window available to execute panel command');
+    }
+
+    this.observeWindow(win);
+    if (context.signal) {
+      const binding = this.runBindings.get(context.signal);
+      if (
+        binding &&
+        (binding.sender !== win.webContents || binding.generation !== this.rendererGeneration)
+      ) {
+        throw new Error('Panel run belongs to a closed renderer');
+      }
+      if (!binding)
+        this.runBindings.set(context.signal, {
+          sender: win.webContents,
+          generation: this.rendererGeneration,
+        });
     }
 
     const requestId = randomUUID();
@@ -173,6 +218,10 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
   }
 
   dispose() {
+    this.stopObservingWindow?.();
+    this.stopObservingWindow = null;
+    this.observedWindow = null;
+    this.rendererGeneration++;
     if (DesktopNativePanelBridge.activeBridge === this) {
       ipcMain.removeHandler(AIChannels.LOCAL_AGENT_PANEL_RESPONSE);
       DesktopNativePanelBridge.activeBridge = null;

@@ -227,7 +227,9 @@ describe('DesktopNativePanelBridge', () => {
         const pending = bridge.executeCommand(createMockContext(), { action: 'open' });
         webContents.emit(event, { isMainFrame: true, isSameDocument: false });
         await expect(pending).rejects.toThrow(/renderer|window/i);
-        expect(webContents.listenerCount(event)).toBe(0);
+        expect(webContents.listenerCount(event)).toBe(1);
+        bridge.dispose();
+        expect(webContents.eventNames()).toEqual([]);
       } finally {
         bridge.dispose();
       }
@@ -251,7 +253,36 @@ describe('DesktopNativePanelBridge', () => {
         { requestId: request.requestId, ok: true },
       );
       await expect(pending).resolves.toMatchObject({ ok: true });
+      bridge.dispose();
       expect(webContents.eventNames()).toEqual([]);
+    } finally {
+      bridge.dispose();
+    }
+  });
+
+  it('rejects a previous run after a full renderer reload even when no request was pending', async () => {
+    const webContents = Object.assign(new EventEmitter(), { send: vi.fn() });
+    const window = { isDestroyed: () => false, webContents };
+    const bridge = new DesktopNativePanelBridge({
+      getMainWindow: () => window as any,
+      isActive: () => true,
+      commandTimeoutMs: 20,
+    });
+    try {
+      const context = createMockContext();
+      const initial = bridge.executeCommand(context, { action: 'snapshot' });
+      const first = webContents.send.mock.calls[0][1];
+      electronMock.handle.mock.calls.at(-1)![1](
+        { sender: webContents },
+        { requestId: first.requestId, ok: true },
+      );
+      await initial;
+      webContents.emit('did-start-navigation', { isMainFrame: true, isSameDocument: false });
+      webContents.send.mockClear();
+      await expect(bridge.executeCommand(context, { action: 'open' })).rejects.toThrow(
+        'closed renderer',
+      );
+      expect(webContents.send).not.toHaveBeenCalled();
     } finally {
       bridge.dispose();
     }
