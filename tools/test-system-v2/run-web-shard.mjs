@@ -90,6 +90,8 @@ async function main() {
     JSON.stringify(
       {
         id: `${index}/${count}`,
+        runId: process.env.GITHUB_RUN_ID ?? 'local',
+        runAttempt: Number(process.env.GITHUB_RUN_ATTEMPT ?? 1),
         manifestDigest: manifest.digest,
         exitCode,
         specs: executedWebSpecs(report),

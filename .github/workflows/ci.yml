@@ -593,7 +593,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: web-shard-receipt-${{ strategy.job-index }}
+          # Re-running failed jobs must not overwrite or shadow a prior attempt.
+          name: web-shard-receipt-${{ github.run_attempt }}-${{ strategy.job-index }}
           path: reports/web-shards/*.json
           if-no-files-found: error
           retention-days: 14
