@@ -372,14 +372,12 @@
       ]
     },
     {
-      "path": "apps/api/src/modules/powersync/user-preference-crud-executor.postgres.spec.ts",
-      "primarySuite": "unit",
+      "path": "apps/api/src/modules/powersync/user-preference-crud-executor.postgres.integration.spec.ts",
+      "primarySuite": "integration",
       "collectors": [
-        "apps/api/vitest.config.ts"
+        "apps/api/vitest.integration.config.ts"
       ],
-      "measurementCollectors": [
-        "apps/api/vitest.config.ts"
-      ]
+      "measurementCollectors": []
     },
     {
       "path": "apps/api/src/modules/powersync/user-preference-crud-executor.spec.ts",
@@ -12937,7 +12935,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 77
+      "fileCount": 76
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -13358,7 +13356,7 @@
       "type": "primary",
       "suite": "integration",
       "runner": "vitest",
-      "fileCount": 16
+      "fileCount": 17
     },
     {
       "id": "packages/account/vitest.integration.config.ts",
@@ -13470,7 +13468,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 77
+      "fileCount": 76
     },
     {
       "id": "apps/desktop/vitest.config.ts",
@@ -13724,7 +13722,6 @@
       "apps/api/src/modules/powersync/routine-compound-crud-executor.spec.ts",
       "apps/api/src/modules/powersync/snapshot-builder.spec.ts",
       "apps/api/src/modules/powersync/snapshot-storage.spec.ts",
-      "apps/api/src/modules/powersync/user-preference-crud-executor.postgres.spec.ts",
       "apps/api/src/modules/powersync/user-preference-crud-executor.spec.ts",
       "apps/api/src/modules/powersync/user-preference-sync.surface.spec.ts",
       "apps/api/src/modules/relation/module.spec.ts",
@@ -14286,8 +14283,8 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1193,
-    "integration": 52,
+    "unit": 1192,
+    "integration": 53,
     "smoke": 3,
     "boundary-ipc": 8,
     "boundary-main": 10,

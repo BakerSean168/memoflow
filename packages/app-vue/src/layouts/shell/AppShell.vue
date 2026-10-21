@@ -108,10 +108,12 @@ const {
 provide(DialogDraftScopeKey, activeTabId);
 
 const sync = useShellRouterSync();
-provideGoalNativeSurface();
+// Vue's inject() cannot read a provide() created in the same component.
+// Pass the shell-owned native surface directly to its IPC bridge.
+const goalNativeSurface = provideGoalNativeSurface();
 provideTaskNativeSurface();
 provideKnowledgeNativeSurface();
-useNativeBusinessPanelBridge();
+useNativeBusinessPanelBridge(goalNativeSurface);
 
 // ── 宿主环境（沿 isDesktopEnvironment 分支模式，V2 决策 #6） ──
 // Residual 913: detect via hasDesktopAuthApi (no electronAPI unknown cast dual).

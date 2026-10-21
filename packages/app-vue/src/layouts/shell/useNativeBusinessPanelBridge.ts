@@ -9,11 +9,12 @@ import {
 import { getCurrentInstance, onBeforeUnmount, onMounted } from 'vue';
 import { useAppShellStore } from './useAppShellStore';
 import { moduleForPath } from './useShellRouterSync';
-import { useGoalNativeSurface } from './useGoalNativeSurface';
+import { useGoalNativeSurface, type GoalAIEditSurface } from './useGoalNativeSurface';
 
-export function useNativeBusinessPanelBridge() {
+export function useNativeBusinessPanelBridge(
+  goalSurface: GoalAIEditSurface = useGoalNativeSurface(),
+) {
   const store = useAppShellStore();
-  const goalSurface = useGoalNativeSurface();
 
   function buildSnapshot(ownerId: string): GoalPanelSnapshot {
     const controlled = goalSurface.getControlledSession(ownerId);

@@ -242,16 +242,16 @@ export async function verifyLocalAgentMcpConnectivity(
 ): Promise<{ ok: boolean; tools: string[]; error?: string }> {
   try {
     const res = await fetch(grant.url, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "content-type": "application/json",
-        accept: "application/json, text/event-stream",
+        'content-type': 'application/json',
+        accept: 'application/json, text/event-stream',
         authorization: `Bearer ${grant.token}`,
       },
       body: JSON.stringify({
-        jsonrpc: "2.0",
-        id: "connectivity-check",
-        method: "tools/list",
+        jsonrpc: '2.0',
+        id: 'connectivity-check',
+        method: 'tools/list',
         params: {},
       }),
       signal: AbortSignal.timeout(5000),
@@ -260,19 +260,32 @@ export async function verifyLocalAgentMcpConnectivity(
       return { ok: false, tools: [], error: `HTTP status ${res.status}` };
     }
     const raw = await res.text();
-    const dataLine = raw.split("\n").find((l) => l.startsWith("data: "));
+    const dataLine = raw.split('\n').find((l) => l.startsWith('data: '));
     const data = dataLine ? JSON.parse(dataLine.slice(6)) : JSON.parse(raw);
     if (data.error) {
-      return { ok: false, tools: [], error: data.error.message || "JSON-RPC error" };
+      return { ok: false, tools: [], error: data.error.message || 'JSON-RPC error' };
     }
-    const tools = (data?.result?.tools ?? []).map((t: any) => t.name as string);
-    if (options?.requiredWriteScopes?.includes("goals:write")) {
-      if (!tools.includes("goal_panel_open")) {
-        return { ok: false, tools, error: "Business tools missing: goal_panel_open not discovered" };
+    const discoveredTools: unknown[] = Array.isArray(data?.result?.tools) ? data.result.tools : [];
+    const tools = discoveredTools
+      .map((entry) =>
+        typeof entry === 'object' && entry !== null && 'name' in entry ? entry.name : undefined,
+      )
+      .filter((name): name is string => typeof name === 'string');
+    if (options?.requiredWriteScopes?.includes('goals:write')) {
+      if (!tools.includes('goal_panel_open')) {
+        return {
+          ok: false,
+          tools,
+          error: 'Business tools missing: goal_panel_open not discovered',
+        };
       }
     }
     return { ok: true, tools };
-  } catch (err: any) {
-    return { ok: false, tools: [], error: err?.message ?? "Failed to reach local MCP endpoint" };
+  } catch (err: unknown) {
+    return {
+      ok: false,
+      tools: [],
+      error: err instanceof Error ? err.message : 'Failed to reach local MCP endpoint',
+    };
   }
 }

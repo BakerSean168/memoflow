@@ -43,14 +43,18 @@ const canonicalWorkflowContextFiles = [
   {
     relPath: 'packages/app-vue/src/modules/ai/views/AIChatView.vue',
     content: `
-      <AIContextPanel>
-        <AIGoalWorkflowPanel/>
-        <AITaskWorkflowPanel/>
-        <AIKnowledgeCapturePanel/>
-      </AIContextPanel>
-      <button data-testid="ai-desktop-context-panel-toggle"></button>
-      <button data-testid="ai-context-panel-toggle"></button>
+      <AIMessagePanel>
+        <template #workflow-context>
+          <AIGoalWorkflowPanel/>
+          <AITaskWorkflowPanel/>
+          <AIKnowledgeCapturePanel/>
+        </template>
+      </AIMessagePanel>
     `,
+  },
+  {
+    relPath: 'packages/app-vue/src/modules/ai/components/AIMessagePanel.vue',
+    content: '<div data-testid="ai-message-panel"><slot name="workflow-context" /></div>',
   },
 ];
 
@@ -350,14 +354,28 @@ describe('AI workflow diagnostics boundary', () => {
     },
   );
 
-  it('requires explicit desktop and mobile conversation diagnostics after shell workflow retirement', () => {
+  it('requires inline Goal, Task and Knowledge diagnostics on both chat widths', () => {
     const brokenWorkflowFiles = canonicalWorkflowContextFiles.map((file) =>
       file.relPath === 'packages/app-vue/src/modules/ai/views/AIChatView.vue'
         ? {
             ...file,
             content:
-              '<AIContextPanel><AIGoalWorkflowPanel/><AITaskWorkflowPanel/><AIKnowledgeCapturePanel/></AIContextPanel>',
+              '<AIMessagePanel><AIGoalWorkflowPanel/><AITaskWorkflowPanel/></AIMessagePanel>',
           }
+        : file,
+    );
+    const { violations } = findCoreVnextArchitectureLockViolations([
+      ...canonicalNotificationFiles,
+      ...canonicalTaskGoalFiles,
+      ...brokenWorkflowFiles,
+    ]);
+    expect(violations.some(({ kind }) => kind === 'ai-workflow-diagnostics-missing')).toBe(true);
+  });
+
+  it('rejects dropping the workflow context outlet from the chat timeline', () => {
+    const brokenWorkflowFiles = canonicalWorkflowContextFiles.map((file) =>
+      file.relPath === 'packages/app-vue/src/modules/ai/components/AIMessagePanel.vue'
+        ? { ...file, content: '<div data-testid="ai-message-panel"></div>' }
         : file,
     );
     const { violations } = findCoreVnextArchitectureLockViolations([

@@ -491,20 +491,27 @@ export function findCoreVnextArchitectureLockViolations(files) {
     }
   }
 
-  // AIC-3003 retires the shell-owned workflow surface after Chat/native replacements land.
-  // Diagnostic detail remains explicitly user-controlled inside the AI conversation surface.
+  // AIC-3003 retires the shell-owned workflow surface. #569 now projects the
+  // three workflow diagnostics directly below the chat timeline, on both
+  // mobile and desktop; do not resurrect the retired context-sidebar toggle.
   requireTokens(
     violations,
     fileMap,
     'packages/app-vue/src/modules/ai/views/AIChatView.vue',
     [
-      '<AIContextPanel',
+      '<AIMessagePanel',
+      '<template #workflow-context>',
       '<AIGoalWorkflowPanel',
       '<AITaskWorkflowPanel',
       '<AIKnowledgeCapturePanel',
-      'data-testid="ai-desktop-context-panel-toggle"',
-      'data-testid="ai-context-panel-toggle"',
     ],
+    'ai-workflow-diagnostics-missing',
+  );
+  requireTokens(
+    violations,
+    fileMap,
+    'packages/app-vue/src/modules/ai/components/AIMessagePanel.vue',
+    ['data-testid="ai-message-panel"', '<slot name="workflow-context" />'],
     'ai-workflow-diagnostics-missing',
   );
 

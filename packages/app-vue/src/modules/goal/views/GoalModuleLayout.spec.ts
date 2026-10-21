@@ -450,12 +450,15 @@ async function mountNativeHost(initial = '/tasks', realDialog = false) {
     setup() {
       const surface = useGoalNativeSurface();
       expect(Object.keys(surface).sort()).toEqual([
+        'getControlledSession',
         'isAvailable',
         'locate',
+        'openControlled',
         'openControlledCreate',
         'openCreate',
         'openExisting',
         'reclaimControlledCreate',
+        'releaseControlledSession',
       ]);
       return () => null;
     },
