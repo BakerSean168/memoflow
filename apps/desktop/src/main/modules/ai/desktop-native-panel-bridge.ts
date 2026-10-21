@@ -107,7 +107,7 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
       throw new Error('Active profile is locked, switched, or inactive');
     }
 
-    if (context.signal?.aborted) {
+    if (context.signal.aborted || context.grantSignal.aborted) {
       throw new Error('Panel command was aborted');
     }
 
@@ -117,8 +117,8 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
     }
 
     this.observeWindow(win);
-    if (context.signal) {
-      const binding = this.runBindings.get(context.signal);
+    if (context.grantSignal) {
+      const binding = this.runBindings.get(context.grantSignal);
       if (
         binding &&
         (binding.sender !== win.webContents || binding.generation !== this.rendererGeneration)
@@ -126,7 +126,7 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
         throw new Error('Panel run belongs to a closed renderer');
       }
       if (!binding)
-        this.runBindings.set(context.signal, {
+        this.runBindings.set(context.grantSignal, {
           sender: win.webContents,
           generation: this.rendererGeneration,
         });

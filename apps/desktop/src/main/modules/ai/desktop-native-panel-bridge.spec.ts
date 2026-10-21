@@ -35,6 +35,7 @@ describe('DesktopNativePanelBridge', () => {
       startedAt: Date.now(),
       deadlineAt: Date.now() + 30000,
       signal: signal ?? new AbortController().signal,
+      grantSignal: signal ?? new AbortController().signal,
       writeScopes: ['goals:write'],
       authorize: vi.fn(async () => {}),
       track: vi.fn(async (work) => work()),
@@ -279,7 +280,8 @@ describe('DesktopNativePanelBridge', () => {
       await initial;
       webContents.emit('did-start-navigation', { isMainFrame: true, isSameDocument: false });
       webContents.send.mockClear();
-      await expect(bridge.executeCommand(context, { action: 'open' })).rejects.toThrow(
+      const nextHttpRequest = { ...context, signal: new AbortController().signal };
+      await expect(bridge.executeCommand(nextHttpRequest, { action: 'open' })).rejects.toThrow(
         'closed renderer',
       );
       expect(webContents.send).not.toHaveBeenCalled();
