@@ -48,18 +48,17 @@ test.describe('AI Goal Workflow', () => {
       'Ask my knowledge base how knowledge answers stay grounded in citations.',
     );
 
-    // Workflow diagnostics now stay inside the AI conversation on mobile instead of
-    // reopening the retired BusinessPanel.workflow surface.
-    const contextPanel = page.getByTestId('ai-context-panel');
-    await expect(contextPanel).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
-    await expect(page.getByTestId('knowledge-answer-panel')).toBeVisible({
-      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
-    });
-
-    // The diagnostic sheet remains explicitly user-controlled after automatic projection.
-    await page.getByTestId('ai-context-panel-close').click();
-    await expect(contextPanel).toBeHidden();
-    await page.getByTestId('ai-context-panel-toggle').click();
-    await expect(contextPanel).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+    // #569 retired the context sheet: grounded knowledge answers are now
+    // directly readable inline with the mobile conversation.
+    const answer = page.getByTestId('knowledge-answer-panel');
+    await expect(answer).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
+    await expect(answer).toContainText('MemoFlow grounding policy');
+    await expect(page.getByTestId('ai-context-panel')).toHaveCount(0);
+    // Workspace navigation must not erase the conversation or its citations.
+    await panelToggle.click();
+    await expect(shell).toHaveAttribute('data-shell-state', 'focus');
+    await panelToggle.click();
+    await expect(shell).toHaveAttribute('data-shell-state', 'chat');
+    await expect(answer).toBeVisible();
   });
 });

@@ -72,11 +72,20 @@ test.describe('AI Goal Workflow', () => {
     expect(telemetry.legacyEndpointCallCount).toBe(0);
   });
 
-  test('[P0] cancels task.create at approval and closes native review without creating Task', async ({
+  test('[P0] cancels a suspended task.create at approval without creating Task', async ({
     page,
   }) => {
-    const telemetry = await bootstrapGoalWorkflowSession(page);
-    await sendComposerMessage(page, 'Draft a task but do not create it until I approve.');
+    const telemetry = await bootstrapGoalWorkflowSession(page, {
+      conversationId: e2eConversationId,
+      modelKey:
+        'agent:mastra::AiProviderConfigId_550e8400-e29b-41d4-a716-446655440801::gpt-4.1-mini',
+      workflowEntry: createPendingTaskApprovalWorkflowEntry(),
+      seedConversation: true,
+    });
+    await expect(page.getByTestId('task-open-native-review')).toBeVisible({
+      timeout: TIMEOUT_CONFIG.NAVIGATION,
+    });
+    await page.getByTestId('task-open-native-review').click();
     const dialog = page.getByTestId('task-plan-dialog');
     await expect(dialog).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
     await dialog.getByRole('button', { name: 'Cancel', exact: true }).click();
@@ -86,6 +95,19 @@ test.describe('AI Goal Workflow', () => {
     await expect.poll(() => telemetry.taskWorkflowCancelCount).toBe(1);
     expect(telemetry.ownerTaskCreateCount).toBe(0);
     expect(telemetry.taskWorkflowApproveCount).toBe(0);
+    expect(telemetry.taskWorkflowStartCount).toBe(0);
     expect(telemetry.legacyEndpointCallCount).toBe(0);
+  });
+
+  test('[P0] honors an explicit no-create intent without starting task.create', async ({
+    page,
+  }) => {
+    const telemetry = await bootstrapGoalWorkflowSession(page);
+    await sendComposerMessage(page, 'Draft a task but do not create it until I approve.');
+    await expect(page.getByTestId('task-plan-dialog')).toHaveCount(0);
+    await expect(page.getByTestId('task-open-native-review')).toHaveCount(0);
+    expect(telemetry.taskWorkflowStartCount).toBe(0);
+    expect(telemetry.ownerTaskCreateCount).toBe(0);
+    expect(telemetry.taskWorkflowApproveCount).toBe(0);
   });
 });

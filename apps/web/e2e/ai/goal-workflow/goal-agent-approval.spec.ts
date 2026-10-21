@@ -37,7 +37,8 @@ test.describe('AI Goal Workflow', () => {
     await expect(goalForm).toHaveCount(0);
     await expect(page.getByTestId('goal-dialog')).toBeHidden();
     await expect(page).toHaveURL(/\/$/);
-    await page.getByTestId('ai-desktop-context-panel-toggle').click();
+    // #569 removed the context toggle: durable diagnostics are inline with Chat.
+    await expect(page.getByTestId('goal-open-native-review')).toBeVisible();
     await page.getByTestId('goal-open-native-review').click();
     await expect(goalForm).toBeVisible({ timeout: TIMEOUT_CONFIG.NAVIGATION });
     await expect(page.getByTestId('goal-dialog')).toHaveCount(0);
@@ -99,14 +100,9 @@ test.describe('AI Goal Workflow', () => {
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });
 
-    // Native Goal creation returns to Goals. Open Chat-local diagnostics explicitly
-    // to inspect recovery; the shell-owned Workflow surface is retired.
-    const contextToggle = page.getByTestId('ai-desktop-context-panel-toggle');
-    await expect(contextToggle).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
-    await contextToggle.click();
-    await expect(page.getByTestId('ai-context-panel')).toBeVisible({
-      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
-    });
+    // Native Goal creation returns to Goals. Recovery is visible in the inline
+    // Chat diagnostics without resurrecting the retired context sidebar.
+    await expect(page.getByTestId('ai-context-panel')).toHaveCount(0);
 
     // Controlled executor: the first approved execution is partial, so the
     // durable runtime suspends with a recovery_required suspension.
@@ -128,8 +124,8 @@ test.describe('AI Goal Workflow', () => {
     expect(telemetry.goalAgentApprovalResumeCount).toBe(1);
     expect(telemetry.goalAgentExecuteRequestCount).toBe(1);
 
-    // Recovery controls now live only in the optional Chat context panel; the retired
-    // Composer-top action bar no longer duplicates them.
+    // Recovery controls remain in Chat's inline workflow diagnostics; the
+    // retired Composer-top action bar does not duplicate them.
     const retryButton = page.getByTestId('goal-agent-retry-execution');
     await expect(retryButton).toBeEnabled({
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
@@ -171,16 +167,12 @@ test.describe('AI Goal Workflow', () => {
     );
 
     const workflowPanel = page.getByTestId('goal-workflow-panel');
-    // AIC-2101/3003 demote workflow diagnostics from the default Goal path.
-    // The durable run is suspended, but the optional context panel stays closed
-    // until the user explicitly asks for diagnostics.
-    await expect(workflowPanel).toBeHidden({
+    // #569 projects workflow diagnostics inline. The native Goal editor
+    // remains the sole owner of saving/cancelling the draft.
+    await expect(workflowPanel).toBeVisible({
       timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
     });
-    // The owner-native review is already open; its secondary reopen control lives
-    // inside the intentionally hidden diagnostics panel. The retired Composer-top
-    // action bar exposes no parallel cancel path.
-    await expect(page.getByTestId('goal-open-native-review')).toBeHidden();
+    await expect(page.getByTestId('goal-open-native-review')).toBeVisible();
     await expect(page.getByTestId('goal-agent-confirm-run')).toHaveCount(0);
     await expect(page.getByTestId('goal-agent-cancel-run')).toHaveCount(0);
     await expect(page.getByTestId('goal-agent-panel')).toHaveCount(0);
@@ -203,11 +195,8 @@ test.describe('AI Goal Workflow', () => {
 
     await expect(page.getByTestId('goal-agent-confirm-run')).toHaveCount(0);
     await expect(page.getByTestId('goal-agent-cancel-run')).toHaveCount(0);
-    // Cancellation is confirmed by durable runtime telemetry below. Keep diagnostics
-    // closed so the primary Goal path remains owner-native and uncluttered.
-    await expect(workflowPanel).toBeHidden({
-      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
-    });
+    // Cancellation is confirmed by durable runtime telemetry, independently
+    // of the visible inline diagnostic panel and the native owner form.
     expect(telemetry.goalAgentStartCount).toBe(1);
     expect(telemetry.lastGoalAgentStart?.idea ?? '').toMatch(/Agent runtime/i);
     expect(telemetry.lastGoalAgentStart?.providerId).toBe(

@@ -202,7 +202,7 @@ export function useAssistantStream(input: {
   async function reconcileAskUserHistory(conversationId: string) {
     if (conversationId !== chatConversationId.value) return;
     try {
-      await refreshRuntimeHistory(conversationId);
+      await refreshRuntimeHistory(conversationId, { preserveAcceptedDecision: true });
     } catch {
       // The server already accepted the answer; a history read failure must not
       // re-enable the answered card and permit duplicate resume requests.

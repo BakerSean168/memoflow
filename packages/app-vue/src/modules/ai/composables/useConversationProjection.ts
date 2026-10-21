@@ -359,7 +359,10 @@ export function useConversationProjection(input: {
     }
   }
 
-  async function refreshRuntimeHistory(conversationId: string): Promise<void> {
+  async function refreshRuntimeHistory(
+    conversationId: string,
+    refreshOptions?: { preserveAcceptedDecision?: boolean },
+  ): Promise<void> {
     const generation = ++historyGeneration;
     const kind = runtimeChoice.value.runtimeKind;
     const history =
@@ -369,17 +372,28 @@ export function useConversationProjection(input: {
     // Ask-user suspensions live in Mastra's durable run store rather than
     // ordinary text history. Restore them even if the turn never wrote a text
     // message before pausing, so a reload does not strand the pending answer.
+    // Pending approvals are a separate runtime projection. A transient failure
+    // must not discard successfully loaded canonical conversation history.
     const pendingAskUser =
-      kind === 'local_agent' ? [] : await options.runtime.listAskUserSuspensions(conversationId);
+      kind === 'local_agent'
+        ? []
+        : await options.runtime.listAskUserSuspensions(conversationId).catch(() => null);
     if (
       generation !== historyGeneration ||
       runtimeChoice.value.runtimeKind !== kind ||
       chatConversationId.value !== conversationId
     )
       return;
-    historyIncomplete.value = history.incomplete ?? false;
+    // A user-approved tool decision must stay settled if its follow-up
+    // suspension reconciliation fails. An initial reload, however, should
+    // still recover canonical text history even without pending metadata.
+    if (pendingAskUser === null && refreshOptions?.preserveAcceptedDecision) {
+      historyIncomplete.value = true;
+      throw new Error('Pending approval state unavailable');
+    }
+    historyIncomplete.value = Boolean(history.incomplete || pendingAskUser === null);
     const timeline = history.messages.map((message, index) => normalizeChatItem(message, index));
-    for (const suspension of pendingAskUser) {
+    for (const suspension of pendingAskUser ?? []) {
       const id = `${suspension.approval ? 'approval' : 'ask-user'}-${suspension.runId}`;
       let item = timeline.find((candidate) => candidate.id === id);
       if (!item) {

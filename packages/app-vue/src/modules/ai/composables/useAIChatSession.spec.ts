@@ -1427,16 +1427,49 @@ describe('useAIChatSession Mastra-native open chat', () => {
   it('restores terminal approval and run outcomes from canonical history', async () => {
     const service = createServiceStub();
     const runtime = createRuntimeStub();
-    runtime.listMessages.mockResolvedValue({ conversationId: 'conv-1', messages: [{
-      id: 'receipt', role: 'assistant', content: '', createdAt: 1, conversationId: 'conv-1',
-      approvalReceipt: { runId: 'r', toolCallId: 'call', toolName: 'routine_create', category: 'edit', risk: 'high', decision: 'approve' },
-    }, { id: 'cancel', role: 'assistant', content: '', createdAt: 2, conversationId: 'conv-1',
-      runOutcome: { runId: 'r', status: 'cancelled' },
-    }, { id: 'error', role: 'assistant', content: '', createdAt: 3, conversationId: 'conv-1',
-      runOutcome: { runId: 'r2', status: 'failed' },
-    }] });
+    runtime.listMessages.mockResolvedValue({
+      conversationId: 'conv-1',
+      messages: [
+        {
+          id: 'receipt',
+          role: 'assistant',
+          content: '',
+          createdAt: 1,
+          conversationId: 'conv-1',
+          approvalReceipt: {
+            runId: 'r',
+            toolCallId: 'call',
+            toolName: 'routine_create',
+            category: 'edit',
+            risk: 'high',
+            decision: 'approve',
+          },
+        },
+        {
+          id: 'cancel',
+          role: 'assistant',
+          content: '',
+          createdAt: 2,
+          conversationId: 'conv-1',
+          runOutcome: { runId: 'r', status: 'cancelled' },
+        },
+        {
+          id: 'error',
+          role: 'assistant',
+          content: '',
+          createdAt: 3,
+          conversationId: 'conv-1',
+          runOutcome: { runId: 'r2', status: 'failed' },
+        },
+      ],
+    });
     const session = mountComposable(service, runtime);
-    await session.selectConversation({ id: 'conv-1', name: 'Existing' } as never, service as never, vi.fn(), () => MODEL.key);
+    await session.selectConversation(
+      { id: 'conv-1', name: 'Existing' } as never,
+      service as never,
+      vi.fn(),
+      () => MODEL.key,
+    );
     expect(session.chatTimeline.value[0].approvals?.[0].status).toBe('approved');
     expect(session.chatTimeline.value[1].status).toBe('aborted');
     expect(session.chatTimeline.value[2].status).toBe('error');
@@ -1445,13 +1478,20 @@ describe('useAIChatSession Mastra-native open chat', () => {
   it('preserves accepted decisions when suspension refresh fails', async () => {
     const service = createServiceStub();
     const runtime = createRuntimeStub();
-    runtime.listAskUserSuspensions.mockResolvedValue([{
-      runId: 'parked', toolCallId: 'write', question: 'routine_create',
-      approval: { toolName: 'routine_create', category: 'edit', risk: 'high' },
-    }]);
+    runtime.listAskUserSuspensions.mockResolvedValue([
+      {
+        runId: 'parked',
+        toolCallId: 'write',
+        question: 'routine_create',
+        approval: { toolName: 'routine_create', category: 'edit', risk: 'high' },
+      },
+    ]);
     const composable = mountComposable(service, runtime);
     await composable.selectConversation(
-      { id: 'conv-1', name: 'Existing' } as never, service as never, vi.fn(), () => MODEL.key,
+      { id: 'conv-1', name: 'Existing' } as never,
+      service as never,
+      vi.fn(),
+      () => MODEL.key,
     );
     const current = composable.chatTimeline.value;
     const approval = current.flatMap((item) => item.approvals ?? [])[0]!;
@@ -1460,6 +1500,32 @@ describe('useAIChatSession Mastra-native open chat', () => {
     expect(composable.chatTimeline.value).toBe(current);
     expect(approval.status).toBe('approved');
     expect(toastMocks.error).toHaveBeenCalledWith('Load failed');
+  });
+
+  it('restores canonical messages even when pending approval discovery is unavailable', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    runtime.listAskUserSuspensions.mockRejectedValueOnce(new Error('HTTP 500'));
+    const composable = mountComposable(service, runtime);
+    await composable.selectConversation(
+      { id: 'conv-1', name: 'Existing' } as never,
+      service as never,
+      vi.fn(),
+      () => MODEL.key,
+    );
+    expect(composable.chatTimeline.value.map(({ content }) => content)).toEqual([
+      'hello',
+      'final content',
+    ]);
+    expect(composable.historyIncomplete.value).toBe(true);
+    // On a later selection, recovered pending operations clear the warning.
+    await composable.selectConversation(
+      { id: 'conv-1', name: 'Existing' } as never,
+      service as never,
+      vi.fn(),
+      () => MODEL.key,
+    );
+    expect(composable.historyIncomplete.value).toBe(false);
   });
 
   it('restores a parked approval and drains its decision before refreshing history', async () => {
