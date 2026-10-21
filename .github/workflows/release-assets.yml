@@ -225,7 +225,7 @@ jobs:
         shell: bash
         env:
           RELEASE_TAG: ${{ needs.prepare-release.outputs.release_tag }}
-        run: node ./tools/ci-cd-platform/release-tools/release-contract.mjs --require-release --expected-tag "$RELEASE_TAG"
+        run: node ../release-tooling/tools/ci-cd-platform/release-tools/release-contract.mjs --require-release --expected-tag "$RELEASE_TAG"
 
       - name: Build desktop application
         working-directory: release-source

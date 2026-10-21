@@ -12,8 +12,12 @@ on:
         type: boolean
         default: true
       tag:
-        description: Existing draft release tag to retry/finalize
+        description: Existing draft tag or intended tag for a verified release-SHA recovery
         required: true
+        type: string
+      release_sha:
+        description: Exact successful-main-CI release merge SHA to recover if the tag was not created
+        required: false
         type: string
 
 concurrency:
@@ -43,20 +47,50 @@ jobs:
       - name: Checkout candidate
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || inputs.tag }}
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || inputs.release_sha || inputs.tag }}
           fetch-depth: 0
+
+      - name: Checkout current release recovery verifier
+        if: github.event_name == 'workflow_dispatch' && inputs.release_sha != ''
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.sha }}
+          path: .release-recovery-control
+          fetch-depth: 1
+
+      - name: Require exact replay SHA and current main control plane
+        if: github.event_name == 'workflow_dispatch' && inputs.release_sha != ''
+        env:
+          REQUESTED_SHA: ${{ inputs.release_sha }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/main
+          [[ "$REQUESTED_SHA" =~ ^[0-9a-f]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$REQUESTED_SHA"
+          test "$(git -C .release-recovery-control rev-parse HEAD)" = "$GITHUB_SHA"
+          git fetch origin main --no-tags
+          test "$(git rev-parse origin/main)" = "$GITHUB_SHA"
+          test "$(git show "$GITHUB_SHA:package.json" | jq -r .version)" = "${RELEASE_TAG#v}"
+          test "$(git show "$GITHUB_SHA:.release-please-manifest.json" | jq -r '."."')" = "${RELEASE_TAG#v}"
 
       - name: Resolve release contract
         id: contract
         env:
           RELEASE_TAG: ${{ inputs.tag }}
+          RELEASE_SHA_REPLAY: ${{ inputs.release_sha }}
         shell: bash
         run: |
           args=(--github-output)
+          contract=./tools/ci-cd-platform/release-tools/release-contract.mjs
           if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
             args+=(--require-release --expected-tag "$RELEASE_TAG")
+            if [ -n "$RELEASE_SHA_REPLAY" ]; then
+              contract=./.release-recovery-control/tools/ci-cd-platform/release-tools/release-contract.mjs
+            fi
           fi
-          node ./tools/ci-cd-platform/release-tools/release-contract.mjs "${args[@]}"
+          node "$contract" "${args[@]}"
 
       - name: Require release SHA to remain on main
         if: steps.contract.outputs.eligible == 'true'
@@ -130,10 +164,33 @@ jobs:
           ref: ${{ needs.resolve.outputs.sha }}
           fetch-depth: 0
 
+      - name: Checkout current release recovery verifier for notes
+        if: github.event_name == 'workflow_dispatch' && inputs.release_sha != ''
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.sha }}
+          path: .release-recovery-control
+          fetch-depth: 1
+
+      - name: Recheck replay control plane before creating the Draft
+        if: github.event_name == 'workflow_dispatch' && inputs.release_sha != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --no-tags
+          test "$(git rev-parse origin/main)" = "$GITHUB_SHA"
+
       - name: Extract release notes
         env:
           RELEASE_TAG: ${{ needs.resolve.outputs.tag }}
-        run: node ./tools/ci-cd-platform/release-tools/release-contract.mjs --require-release --expected-tag "$RELEASE_TAG" --write-notes release-notes.md
+          RELEASE_SHA_REPLAY: ${{ inputs.release_sha }}
+        shell: bash
+        run: |
+          contract=./tools/ci-cd-platform/release-tools/release-contract.mjs
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && [ -n "$RELEASE_SHA_REPLAY" ]; then
+            contract=./.release-recovery-control/tools/ci-cd-platform/release-tools/release-contract.mjs
+          fi
+          node "$contract" --require-release --expected-tag "$RELEASE_TAG" --write-notes release-notes.md
 
       - name: Require dedicated release API credential
         env:
