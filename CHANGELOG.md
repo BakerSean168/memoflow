@@ -1,5 +1,41 @@
 # Changelog
 
+## [0.22.0](https://github.com/BakerSean168/memoflow/compare/v0.21.2...v0.22.0) (2026-10-21)
+
+
+### Features
+
+* **ai:** [#570](https://github.com/BakerSean168/memoflow/issues/570) slice 4 - register goal panel mcp tools and lifecycle hooks ([56ef08a](https://github.com/BakerSean168/memoflow/commit/56ef08aea6fad09259a10925b1a57c3b2649bfcb))
+* **ai:** [#570](https://github.com/BakerSean168/memoflow/issues/570) slice 5 - local agent mcp connectivity verification and diagnostics ([a04aa15](https://github.com/BakerSean168/memoflow/commit/a04aa158fa2658fc4753292694c03343e4d341e6))
+* **app-vue:** [#570](https://github.com/BakerSean168/memoflow/issues/570) slice 2 - controlled Goal business panel bridge and exclusivity ([259462c](https://github.com/BakerSean168/memoflow/commit/259462c0d9342479d6487953a91526bef33627f9))
+* **contracts:** [#570](https://github.com/BakerSean168/memoflow/issues/570) slice 1 - define Goal panel DTO and IPC schemas ([960e6ad](https://github.com/BakerSean168/memoflow/commit/960e6ad615a842c23cdf4ffe07961c155afece19))
+* **desktop:** [#570](https://github.com/BakerSean168/memoflow/issues/570) slice native-panel-bridge - main process native panel IPC bridge ([8d1d992](https://github.com/BakerSean168/memoflow/commit/8d1d992f8727c01121d6f9819616daf1533b3a78))
+
+
+### Bug Fixes
+
+* **#567:** slice 1 keep preference insert conflicts transaction-safe ([67def6b](https://github.com/BakerSean168/memoflow/commit/67def6b00678bda0925259b995821fa32bcf3c84))
+* **#567:** slice 2 keep pre-hydration regional defaults in memory ([30a6930](https://github.com/BakerSean168/memoflow/commit/30a69307c11cc7d32f5a388abfb37c066b0e3157))
+* **#567:** slice 3 migrate queued preference IDs without dropping offline edits ([4313d01](https://github.com/BakerSean168/memoflow/commit/4313d01f61c8cfc3c3ec741d479233f3f0b89b51))
+* **#567:** slice 3 preserve queued offline preferences during sync startup ([e593fd5](https://github.com/BakerSean168/memoflow/commit/e593fd511f998a1d734d89dd1933b61a02796818))
+* **ai:** [#569](https://github.com/BakerSean168/memoflow/issues/569) slice 1 route final instructions independently of pasted plans ([6ab96da](https://github.com/BakerSean168/memoflow/commit/6ab96da9b34f8b2c4c3a676760e9fa2649eceb19))
+* **ai:** [#569](https://github.com/BakerSean168/memoflow/issues/569) slice 2 retire chat workbench and retain inline recovery ([6ef1ad7](https://github.com/BakerSean168/memoflow/commit/6ef1ad756e69b4a3fc8cae4180e2d9139bc21439))
+* **ai:** [#569](https://github.com/BakerSean168/memoflow/issues/569) slice 3 retain question tail after pasted context ([c60f804](https://github.com/BakerSean168/memoflow/commit/c60f804486f74f189fdf6dd6995cdccffe838320))
+* **ai:** [#569](https://github.com/BakerSean168/memoflow/issues/569) slice 4 preserve safe tool history and surface recovery read failures ([93a488d](https://github.com/BakerSean168/memoflow/commit/93a488dc8a53e3eb08c06086f404fd3671b462d0))
+* **ai:** [#569](https://github.com/BakerSean168/memoflow/issues/569) slice 4 separate durable approval receipts from native continuation ([eb63c3e](https://github.com/BakerSean168/memoflow/commit/eb63c3e1a87496a54baf0cb0232d462eac9197ec))
+* **ai:** apply native Goal commands and release durable draft ownership ([#572](https://github.com/BakerSean168/memoflow/issues/572)) ([394b999](https://github.com/BakerSean168/memoflow/commit/394b999cf5682adb9ae4406ac5c767cb2337e725))
+* **ai:** complete Goal native panel contract and Profile IPC ownership ([2bc496f](https://github.com/BakerSean168/memoflow/commit/2bc496fb887c56d3515066dd6edf0b4f6d93bc8a))
+* **ai:** preserve history when pending approvals fail and align workflow web acceptance ([b0e992e](https://github.com/BakerSean168/memoflow/commit/b0e992e31f2f88441d125db957a0aeb2c8e424ad))
+* **ai:** release BYOA panel ownership across cancellation and renderer reload ([#574](https://github.com/BakerSean168/memoflow/issues/574)) ([59395bd](https://github.com/BakerSean168/memoflow/commit/59395bd0af4bb33440ed8ec25591ca93b31e97f1))
+* **ci:** verify native Goal shell and run PowerSync PG regression in integration lane ([f421ecb](https://github.com/BakerSean168/memoflow/commit/f421ecb6122b1a7e50ad9c14bb0afb4e06e1a46d))
+* **governance:** classify native panel errors without leaking owner details ([2fd0cdd](https://github.com/BakerSean168/memoflow/commit/2fd0cddcb0da342d8f6c284fdc503320274eed61))
+* **release:** curate PowerSync ARM64 OCI mirrors and guard Oracle2 adoption ([d67da1a](https://github.com/BakerSean168/memoflow/commit/d67da1a53561cf0ccc083f618ef136f5c1bb60be))
+* **release:** distinguish absent mirror tags from registry failures ([#573](https://github.com/BakerSean168/memoflow/issues/573)) ([7e352e8](https://github.com/BakerSean168/memoflow/commit/7e352e8b7798d496a1a5b0279bf4e9f6e79c3276))
+* **release:** preserve curated OCI bytes and refresh governance inventory ([#571](https://github.com/BakerSean168/memoflow/issues/571)) ([bde72ac](https://github.com/BakerSean168/memoflow/commit/bde72ac7a16655d8bd6222e076b283d7202901c7))
+* **release:** reject Oracle2 compose image drift before adoption ([32abcf2](https://github.com/BakerSean168/memoflow/commit/32abcf2ca10cdc764ae1bf8abc40cf77f69fc5a5))
+* **release:** reject Oracle2 Compose image drift before adoption ([f149ca3](https://github.com/BakerSean168/memoflow/commit/f149ca3feb1ce6c524e0da6b2ba5662fdea23684))
+* **staging:** retain executable permission for deploy watcher ([548ad5c](https://github.com/BakerSean168/memoflow/commit/548ad5c71652fee7de8a86f182aa46e07f61c47c))
+
 ## [0.21.2](https://github.com/BakerSean168/memoflow/compare/v0.21.1...v0.21.2) (2026-10-20)
 
 
