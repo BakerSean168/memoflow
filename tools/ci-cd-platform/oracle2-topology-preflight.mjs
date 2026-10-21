@@ -143,6 +143,18 @@ export function validateOracle2Topology({ compose, containers, caddy, arch = 'ar
   for (const name of SERVICES) {
     const container = found.get(name);
     if (!container) continue;
+    // A topology match alone is insufficient: the on-disk Compose can still
+    // point at a retired image while a newer image is running. Adopting that
+    // Compose would silently downgrade the running application on the next up.
+    const configuredImage = compose.services?.[name]?.image;
+    const runningImage = container.Config?.Image;
+    if (typeof configuredImage !== 'string' || !configuredImage) {
+      errors.push(`${name} Compose image identity is missing`);
+    } else if (typeof runningImage !== 'string' || !runningImage) {
+      errors.push(`${name} live image identity is missing`);
+    } else if (runningImage !== configuredImage) {
+      errors.push(`${name} live image differs from Compose; reconcile before adoption`);
+    }
     const health = container.State?.Health?.Status;
     if (health !== 'healthy') errors.push(`${name} is not healthy`);
     const wanted = VOLUMES[name] ?? {};

@@ -26,6 +26,7 @@ function fixture() {
       serviceNames.map((name) => [
         name,
         {
+          image: `fixture/${name}:pinned`,
           ports: ports[name]
             ? [{ host_ip: '172.18.0.1', published: ports[name][0], target: ports[name][1] }]
             : [],
@@ -58,6 +59,7 @@ function fixture() {
     .filter((name) => name !== 'migrator')
     .map((name) => ({
       Config: {
+        Image: `fixture/${name}:pinned`,
         Labels: {
           'com.docker.compose.project': project,
           'com.docker.compose.service': name,
@@ -130,4 +132,24 @@ test('Oracle2 preflight rejects wrong bind hosts, stopped services, and unsuppor
   assert.match(result, /native linux\/arm64/u);
   assert.match(result, /powersync must publish only/u);
   assert.match(result, /web is not healthy/u);
+});
+
+test('Oracle2 preflight blocks stale Compose images even while new live containers are healthy', () => {
+  const site = fixture();
+  site.compose.services.api.image = 'memoflow-oracle2-api:v0.16.0';
+  site.containers.find(
+    (c) => c.Config.Labels['com.docker.compose.service'] === 'api',
+  ).Config.Image = 'memoflow-oracle2-api:rc-0.21.1-8c84330cc974';
+  const result = validateOracle2Topology(site).join('; ');
+  assert.match(result, /api live image differs from Compose; reconcile before adoption/u);
+});
+
+test('Oracle2 preflight fails closed for missing Compose and running image identities', () => {
+  const site = fixture();
+  delete site.compose.services.web.image;
+  delete site.containers.find((c) => c.Config.Labels['com.docker.compose.service'] === 'redis')
+    .Config.Image;
+  const result = validateOracle2Topology(site).join('; ');
+  assert.match(result, /web Compose image identity is missing/u);
+  assert.match(result, /redis live image identity is missing/u);
 });
