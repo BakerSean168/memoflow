@@ -14,6 +14,33 @@
 >
 > It fails closed on architecture, port, data-volume, service-health or shared-CPA-Caddy drift. A successful preflight **does not** authorize installation of the old watcher or a database migration.
 
+**Oracle2 release preview (non-deploying, immutable artifact input):** the selected
+production control artifact now also includes `oracle2-release-preview.mjs` and
+`oracle2-compose-candidate.mjs`. After the official Published-release selection
+has produced an OCI control artifact and its `production-set-v1.json` has been
+extracted and verified against the OCI labels, run the following **read-only
+configuration check** on Oracle2 (the four expected identities must be read
+from that verified control image, not typed from an unrelated release):
+
+```bash
+sudo node /path/to/verified-control/oracle2-release-preview.mjs \
+  --production-set /path/to/verified-control/production-set-v1.json \
+  --compose /opt/memoflow-oracle2/compose.yaml \
+  --env-file /opt/memoflow-oracle2/production.env \
+  --set-sha256 "sha256:<OCI io.memoflow.production-set.sha256>" \
+  --set-digest "sha256:<OCI io.memoflow.production-set.digest>" \
+  --release-sha "<OCI io.memoflow.release.revision>"
+```
+
+This compares **fully resolved** Docker Compose configs and permits changes only
+to API, Web and Migrator exact-digest images and the API `APP_VERSION`. It
+rejects all port, network, volume, secret, mount, service, and shared-Caddy
+changes. It generates no rollout command, starts/stops no container, and does
+not validate that the selected images can actually run on ARM64; that is a
+separate OCI-platform and runtime acceptance gate. **There is still no
+Oracle2 auto-deploy watcher or timer. Do not use the historical Alibaba
+installer on Oracle2.**
+
 This directory is the runtime authority for Delivery Platform V3 production deployment. It replaces the historical model where application containers could be changed independently through mutable image tags or Watchtower.
 
 ## Authority chain
