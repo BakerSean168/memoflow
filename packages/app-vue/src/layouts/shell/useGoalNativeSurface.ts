@@ -232,7 +232,8 @@ export function provideGoalNativeSurface(): GoalNativeSurfaceHost {
     releaseControlledSession(ownerId) {
       if (activeControlledOwnerId === ownerId && activeControlledSession) {
         try {
-          activeControlledSession.releaseControl();
+          // A finished BYOA run must not leave durable workflow ownership on its draft.
+          activeControlledSession.detachWorkflow();
         } catch {
           /* ignore */
         }

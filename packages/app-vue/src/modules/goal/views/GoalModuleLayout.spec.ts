@@ -20,6 +20,9 @@ import GoalDialog from '../components/dialogs/GoalDialog.vue';
 import { productionLocaleMessages } from '../../../locales/production-messages';
 import { useGoal } from '../composables/useGoal';
 import { createMockGoal } from '@memoflow/contracts/mocks';
+import { GOAL_DRAFT_CHECKPOINT_KEY } from '../../../di/keys';
+import type { GoalDraftCheckpointStore } from '../infrastructure/goal-draft-checkpoint.indexeddb';
+import type { GoalDraftCheckpointSnapshot } from '@memoflow/contracts/goal';
 import type { GetGoalAggregateRes } from '@memoflow/contracts/goal';
 import type { GoalNativeEditSession } from '../composables/goalNativeEditSession';
 import {
@@ -427,7 +430,11 @@ const SessionDialogProbe = defineComponent({
   },
 });
 
-async function mountNativeHost(initial = '/tasks', realDialog = false) {
+async function mountNativeHost(
+  initial = '/tasks',
+  realDialog = false,
+  checkpointStore?: GoalDraftCheckpointStore,
+) {
   const pinia = createPinia();
   setActivePinia(pinia);
   const router = createRouter({
@@ -487,6 +494,7 @@ async function mountNativeHost(initial = '/tasks', realDialog = false) {
   const wrapper = mount(Host, {
     attachTo: document.body,
     global: {
+      provide: checkpointStore ? { [GOAL_DRAFT_CHECKPOINT_KEY]: checkpointStore } : {},
       plugins: [
         pinia,
         router,
@@ -505,6 +513,57 @@ async function mountNativeHost(initial = '/tasks', realDialog = false) {
 }
 
 describe('Goal native surface host (PVC-AI-8001)', () => {
+  it('releases BYOA checkpoint ownership so its retained draft reopens as an editable manual draft', async () => {
+    let checkpoint: GoalDraftCheckpointSnapshot = { scope: 'owner', version: 0, content: null };
+    const store: GoalDraftCheckpointStore = {
+      scope: () => 'owner',
+      load: async () => checkpoint,
+      write: async (scope, expectedVersion, content) => {
+        if (checkpoint.version !== expectedVersion) throw new Error('Checkpoint conflict');
+        checkpoint = { scope, version: expectedVersion + 1, content };
+        return checkpoint;
+      },
+    };
+    const { wrapper, host } = await mountNativeHost('/tasks', true, store);
+    const request = {
+      requestId: 'release-checkpoint',
+      identityId: 'owner',
+      conversationId: 'checkpoint-conversation',
+      runId: 'checkpoint-run',
+    };
+    try {
+      const bridge = useNativeBusinessPanelBridge(host);
+      const opened = await bridge.handleCommand({ ...request, command: { action: 'open' } });
+      expect(opened.ok).toBe(true);
+      const patched = await bridge.handleCommand({
+        ...request,
+        command: { action: 'patch', name: 'Keep after cancellation' },
+      });
+      expect(patched.ok).toBe(true);
+      await flushPromises();
+      expect(checkpoint.content!.workflowRunId).toBe(
+        'local-agent:checkpoint-conversation:checkpoint-run',
+      );
+      const released = await bridge.handleCommand({ ...request, command: { action: 'release' } });
+      expect(released.ok).toBe(true);
+      await flushPromises();
+      expect(checkpoint.content!.workflowRunId).toBeNull();
+      expect(checkpoint.content!.draft.name).toBe('Keep after cancellation');
+    } finally {
+      wrapper.unmount();
+    }
+    const restored = await mountNativeHost('/goals?goalForm=create', true, store);
+    try {
+      expect(restored.host.locate()!.readDraftState().draft.name).toBe('Keep after cancellation');
+      restored.host.locate()!.patch({ summary: 'Manual edit after restart' });
+      expect(restored.host.locate()!.readDraftState().draft.summary).toBe(
+        'Manual edit after restart',
+      );
+    } finally {
+      restored.wrapper.unmount();
+    }
+  });
+
   it('applies a BYOA command through the real owner form without leaking transport fields', async () => {
     const { wrapper, host } = await mountNativeHost('/tasks', true);
     try {
