@@ -141,9 +141,18 @@ describe('useAssistantStream ask_user lifecycle', () => {
       handlers.onEvent?.(assistantRunStarted());
       for (const [index, state] of (['running', 'failed'] as const).entries()) {
         handlers.onEvent?.({
-          ...assistantRunStarted(), type: 'assistant.activity', sequence: index + 1,
-          eventId: `activity-${index}`, data: { activityType: 'tool', toolCallId: 'call',
-            toolName: 'routine_create', category: 'edit', risk: 'high', state },
+          ...assistantRunStarted(),
+          type: 'assistant.activity',
+          sequence: index + 1,
+          eventId: `activity-${index}`,
+          data: {
+            activityType: 'tool',
+            toolCallId: 'call',
+            toolName: 'routine_create',
+            category: 'edit',
+            risk: 'high',
+            state,
+          },
         });
       }
     });
@@ -231,7 +240,9 @@ describe('useAssistantStream ask_user lifecycle', () => {
     expect(conversation.refreshRuntimeHistory).not.toHaveBeenCalled();
     release();
     await sending;
-    expect(conversation.refreshRuntimeHistory).toHaveBeenCalledWith(CONVERSATION_ID);
+    expect(conversation.refreshRuntimeHistory).toHaveBeenCalledWith(CONVERSATION_ID, {
+      preserveAcceptedDecision: true,
+    });
   });
 
   it('forwards an answer for a pending question after the suspended turn released the composer', async () => {
@@ -256,7 +267,9 @@ describe('useAssistantStream ask_user lifecycle', () => {
       toolCallId: TOOL_CALL_ID,
       answer: 'A',
     });
-    expect(conversation.refreshRuntimeHistory).toHaveBeenCalledWith(CONVERSATION_ID);
+    expect(conversation.refreshRuntimeHistory).toHaveBeenCalledWith(CONVERSATION_ID, {
+      preserveAcceptedDecision: true,
+    });
     expect(request!.status).toBe('answered');
   });
 
@@ -282,6 +295,8 @@ describe('useAssistantStream ask_user lifecycle', () => {
     await stream.answerAskUser(request, 'A');
     expect(runtime.answerToolSuspension).toHaveBeenCalledTimes(1);
     expect(request.status).toBe('answered');
-    expect(conversation.refreshRuntimeHistory).toHaveBeenCalledWith(CONVERSATION_ID);
+    expect(conversation.refreshRuntimeHistory).toHaveBeenCalledWith(CONVERSATION_ID, {
+      preserveAcceptedDecision: true,
+    });
   });
 });
