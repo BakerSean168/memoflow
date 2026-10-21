@@ -26,6 +26,7 @@ import {
   provideGoalNativeSurface,
   useGoalNativeSurface,
 } from '../../../layouts/shell/useGoalNativeSurface';
+import { useNativeBusinessPanelBridge } from '../../../layouts/shell/useNativeBusinessPanelBridge';
 import { useShellRouterSync } from '../../../layouts/shell/useShellRouterSync';
 import { useAppShellStore, MAX_BUSINESS_TABS } from '../../../layouts/shell/useAppShellStore';
 import { canLeaveBusinessSurface } from '../../../layouts/shell/surface-leave-protocol';
@@ -504,6 +505,129 @@ async function mountNativeHost(initial = '/tasks', realDialog = false) {
 }
 
 describe('Goal native surface host (PVC-AI-8001)', () => {
+  it('applies a BYOA command through the real owner form without leaking transport fields', async () => {
+    const { wrapper, host } = await mountNativeHost('/tasks', true);
+    try {
+      const bridge = useNativeBusinessPanelBridge(host);
+      const request = {
+        requestId: 'native-panel-request',
+        identityId: 'owner',
+        conversationId: 'native-conversation',
+        runId: 'native-run',
+      };
+      const opened = await bridge.handleCommand({
+        ...request,
+        command: { action: 'open', mode: 'create' },
+      });
+      expect(opened.ok).toBe(true);
+      const revision = opened.snapshot!.revision!;
+      const patched = await bridge.handleCommand({
+        ...request,
+        command: {
+          action: 'patch',
+          expectedRevision: revision,
+          name: 'Windows Codex panel acceptance',
+          summary: 'Real owner form',
+          description: 'A transport envelope is not a Goal field',
+          start: { kind: 'day', date: '2026-10-21' },
+          target: { kind: 'day', date: '2026-11-21' },
+        },
+      });
+      expect(patched.ok).toBe(true);
+      expect(patched.snapshot!.fields).toMatchObject({
+        name: 'Windows Codex panel acceptance',
+        start: { kind: 'day', date: '2026-10-21' },
+        target: { kind: 'day', date: '2026-11-21' },
+      });
+      const inputs = wrapper.findAll(
+        '[data-testid="goal-panel-form"] input, [data-testid="goal-panel-form"] textarea',
+      );
+      expect(inputs.map((input) => (input.element as HTMLInputElement).value)).toContain(
+        'Windows Codex panel acceptance',
+      );
+      expect(inputs.every((input) => (input.element as HTMLInputElement).disabled)).toBe(true);
+      const rejected = await bridge.handleCommand({
+        ...request,
+        command: { action: 'patch', expectedRevision: revision, name: 'Stale overwrite' },
+      });
+      expect(rejected.ok).toBe(false);
+      expect(rejected.error?.code).toBe('REVISION_CONFLICT');
+      for (const title of ['Read documents', 'Complete exercises']) {
+        const current = host
+          .getControlledSession('local-agent:native-conversation:native-run')!
+          .readDraftState();
+        const added = await bridge.handleCommand({
+          ...request,
+          command: {
+            action: 'add_key_result',
+            expectedRevision: current.revision,
+            keyResult: {
+              title,
+              calculationMethod: 'Sum',
+              initialValue: 0,
+              targetValue: 10,
+              weight: 3,
+            },
+          },
+        });
+        expect(added.ok).toBe(true);
+      }
+      const snapshot = await bridge.handleCommand({ ...request, command: { action: 'snapshot' } });
+      expect(snapshot.snapshot!.keyResults!.map((kr) => kr.title)).toEqual([
+        'Read documents',
+        'Complete exercises',
+      ]);
+      await bridge.handleCommand({ ...request, command: { action: 'release' } });
+      await flushPromises();
+      expect(useAppShellStore().businessControl).toBeNull();
+      expect(host.locate()!.readDraftState().draft.name).toBe('Windows Codex panel acceptance');
+      expect(inputs.every((input) => !(input.element as HTMLInputElement).disabled)).toBe(true);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it('submits the real BYOA owner form once and returns its saved Goal receipt', async () => {
+    const saved = createMockGoal({ name: 'Saved through native panel', keyResults: [] });
+    goalMocks.createGoal.mockResolvedValueOnce(saved);
+    const { wrapper, host } = await mountNativeHost('/tasks', true);
+    try {
+      const bridge = useNativeBusinessPanelBridge(host);
+      const request = {
+        requestId: 'submit-request',
+        identityId: 'owner',
+        conversationId: 'submit-conversation',
+        runId: 'submit-run',
+      };
+      const opened = await bridge.handleCommand({ ...request, command: { action: 'open' } });
+      const patched = await bridge.handleCommand({
+        ...request,
+        command: { action: 'patch', expectedRevision: opened.snapshot!.revision, name: saved.name },
+      });
+      expect(patched.ok).toBe(true);
+      const result = await bridge.handleCommand({
+        ...request,
+        command: { action: 'submit', expectedRevision: patched.snapshot!.revision },
+      });
+      expect(result.ok).toBe(true);
+      expect(result.submitResult).toMatchObject({
+        success: true,
+        goalId: String(saved.id),
+        name: saved.name,
+        version: saved.version,
+      });
+      expect(goalMocks.createGoal).toHaveBeenCalledOnce();
+      await flushPromises();
+      expect(useAppShellStore().businessControl).toBeNull();
+      expect(host.locate()).toBeNull();
+      const replay = await bridge.handleCommand({ ...request, command: { action: 'submit' } });
+      expect(replay.ok).toBe(false);
+      expect(goalMocks.createGoal).toHaveBeenCalledOnce();
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
   it.each([
     '/goals?goalForm=create',
     '/goals?dialog=goal',

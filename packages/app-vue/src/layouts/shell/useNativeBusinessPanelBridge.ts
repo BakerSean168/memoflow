@@ -193,7 +193,9 @@ export function useNativeBusinessPanelBridge(
               snapshot: buildSnapshot(ownerId),
             };
           }
-          session.patch(cmd);
+          // Transport metadata belongs to the bridge; the owner accepts only draft fields.
+          const { action: _action, expectedRevision: _expectedRevision, ...changes } = cmd;
+          session.patch(changes);
           return {
             requestId: request.requestId,
             ok: true,
