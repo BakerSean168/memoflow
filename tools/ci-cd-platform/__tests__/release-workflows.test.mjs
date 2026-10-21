@@ -958,3 +958,80 @@ test('registry digest lookup never hashes a failed response or treats an unknown
     await rm(directory, { recursive: true, force: true });
   }
 });
+
+test(
+  'Windows NSIS handoff waits for the installer before draining the delayed application',
+  {
+    skip: process.platform !== 'win32',
+  },
+  async () => {
+    const source = await readRepoFile('apps/desktop/scripts/run-windows-update-e2e.ps1');
+    const start = source.indexOf('function Get-MemoFlowUpdateInstallers');
+    const end = source.indexOf('function Get-E2EStatus', start);
+    assert.ok(start >= 0 && end > start);
+    const directory = await mkdtemp(path.join(os.tmpdir(), 'memoflow-nsis-handoff-test-'));
+    try {
+      const scriptPath = path.join(directory, 'handoff.ps1');
+      await writeFile(
+        scriptPath,
+        String.raw`
+$ErrorActionPreference = 'Stop'
+${source.slice(start, end)}
+$script:tick = 0
+$script:drained = $false
+function Get-CimInstance {
+  [CmdletBinding()] param([string]$ClassName)
+  if ($script:tick -lt 3) {
+    [pscustomobject]@{Name='installer.exe';ExecutablePath=(Join-Path $env:LOCALAPPDATA '@memoflowdesktop-updater\installer.exe');CommandLine='installer.exe /S --updated'}
+  }
+}
+function Get-Process {
+  [CmdletBinding()] param([string]$Name)
+  if ($script:tick -eq 3 -and -not $script:drained) {
+    $p = New-Object psobject
+    $p | Add-Member ScriptMethod Kill {param($tree) $script:drained=$true}
+    $p
+  }
+}
+function Start-Sleep {
+  param([int]$Seconds)
+  $script:tick += 1
+  if ($script:tick -gt 15) { throw 'The drain did not become quiescent' }
+}
+Stop-And-Drain-MemoFlowProcesses -TimeoutSeconds 5
+if (-not $script:drained -or $script:tick -lt 5) { throw 'Late installer launch was not drained' }
+
+# A different updater is not part of this test process tree.
+function Get-CimInstance {
+  [CmdletBinding()] param([string]$ClassName)
+  [pscustomobject]@{Name='installer.exe';ExecutablePath='C:\OtherProduct\installer.exe';CommandLine='installer.exe /S'}
+}
+if (@(Get-MemoFlowUpdateInstallers).Count -ne 0) { throw 'Unrelated installer was included' }
+
+# A denied process snapshot is not evidence of a quiet handoff.
+function Get-CimInstance {
+  [CmdletBinding()] param([string]$ClassName)
+  throw 'CIM denied'
+}
+$rejected = $false
+try { Stop-And-Drain-MemoFlowProcesses -TimeoutSeconds 5 }
+catch { $rejected = $_.Exception.Message -eq 'CIM denied' }
+if (-not $rejected) { throw 'Unavailable process snapshot did not fail closed' }
+Write-Output 'LATE_NSIS_HANDOFF=PASS'
+`,
+      );
+      const result = spawnSync(
+        'powershell.exe',
+        ['-NoProfile', '-NonInteractive', '-File', scriptPath],
+        {
+          encoding: 'utf8',
+          timeout: 15000,
+        },
+      );
+      assert.equal(result.status, 0, result.stderr || result.stdout);
+      assert.match(result.stdout, /LATE_NSIS_HANDOFF=PASS/u);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  },
+);
