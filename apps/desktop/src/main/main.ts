@@ -83,6 +83,7 @@ import { composeSchedule } from './runtime/compose-schedule';
 import { composeSetting } from './runtime/compose-setting';
 import { composeDataPortability } from './runtime/compose-data-portability';
 import { composeAI } from './runtime/compose-ai';
+import { DesktopNativePanelBridge } from './modules/ai/desktop-native-panel-bridge';
 import { composeRepository } from './runtime/compose-repository';
 import { DesktopAnalyticsReadAdapter } from './modules/ai/desktop-analytics-read.adapter';
 import { DesktopActivityAIReadAdapter } from './modules/ai/desktop-activity-read.adapter';
@@ -575,6 +576,11 @@ async function registerBusinessModules(
       isActive: () =>
         mainRuntime?.profileRuntimeManager.getActiveProfileId() === profilePaths.profileId,
     },
+    panelBridge: new DesktopNativePanelBridge({
+      getMainWindow: () => windowManager.getMainWindow(),
+      isActive: () =>
+        mainRuntime?.profileRuntimeManager.getActiveProfileId() === profilePaths.profileId,
+    }),
     knowledgeNotePersistence: new DesktopKnowledgeNotePersistenceAdapter(localVaultRuntime),
     knowledgeSourcePort: new DesktopKnowledgeSourceAdapter(localVaultRuntime),
     analyticsReadPort: analyticsReadAdapter,

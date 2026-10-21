@@ -30,6 +30,7 @@ interface Options {
   store: LocalAgentRepository;
   isActive: () => boolean;
   registerTools(server: McpServer, context: LocalToolContext): void;
+  onRevokeGrant?(input: GrantInput): void;
 }
 /** A loopback transport for native session tools, owned by the existing Profile lifecycle. */
 export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
@@ -215,12 +216,16 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
       revoke: () => {
         grant.controller.abort();
         this.grants.delete(token);
+        this.options.onRevokeGrant?.(input);
       },
     };
   }
   async dispose(): Promise<void> {
     this.stopped = true;
-    for (const grant of this.grants.values()) grant.controller.abort();
+    for (const grant of this.grants.values()) {
+      grant.controller.abort();
+      this.options.onRevokeGrant?.(grant.input);
+    }
     this.grants.clear();
     await this.listening?.catch(() => undefined);
     if (this.server) {
@@ -228,5 +233,46 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
       await new Promise<void>((resolve) => this.server!.close(() => resolve()));
     }
     await Promise.allSettled([...this.inFlight]);
+  }
+}
+
+export async function verifyLocalAgentMcpConnectivity(
+  grant: LocalAgentToolGrant,
+  options?: { requiredWriteScopes?: readonly string[] },
+): Promise<{ ok: boolean; tools: string[]; error?: string }> {
+  try {
+    const res = await fetch(grant.url, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        accept: "application/json, text/event-stream",
+        authorization: `Bearer ${grant.token}`,
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: "connectivity-check",
+        method: "tools/list",
+        params: {},
+      }),
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!res.ok) {
+      return { ok: false, tools: [], error: `HTTP status ${res.status}` };
+    }
+    const raw = await res.text();
+    const dataLine = raw.split("\n").find((l) => l.startsWith("data: "));
+    const data = dataLine ? JSON.parse(dataLine.slice(6)) : JSON.parse(raw);
+    if (data.error) {
+      return { ok: false, tools: [], error: data.error.message || "JSON-RPC error" };
+    }
+    const tools = (data?.result?.tools ?? []).map((t: any) => t.name as string);
+    if (options?.requiredWriteScopes?.includes("goals:write")) {
+      if (!tools.includes("goal_panel_open")) {
+        return { ok: false, tools, error: "Business tools missing: goal_panel_open not discovered" };
+      }
+    }
+    return { ok: true, tools };
+  } catch (err: any) {
+    return { ok: false, tools: [], error: err?.message ?? "Failed to reach local MCP endpoint" };
   }
 }

@@ -23,6 +23,8 @@ export const LOCAL_AGENT_FAILURES = {
   LOCAL_AGENT_PERMISSION_DENIED: 'This local Agent operation is not authorized.',
   LOCAL_AGENT_RESULT_UNCERTAIN:
     'The operation outcome is uncertain. Check its saved receipt before retrying.',
+  LOCAL_AGENT_TOOLS_UNAVAILABLE:
+    'MemoFlow business tools are unavailable on this local Agent session. The model can chat, but Goal panel tools could not be connected.',
 } as const;
 export type LocalAgentFailureCode = keyof typeof LOCAL_AGENT_FAILURES;
 export function localAgentFailureMessage(

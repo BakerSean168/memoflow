@@ -150,6 +150,8 @@ export const AIChannels = {
   /** AI vNext canonical Mastra Assistant stream start/cancel. */
   RUNTIME_ASSISTANT_START: 'ai:runtime:assistant:start',
   LOCAL_AGENT: 'ai:local-agent',
+  LOCAL_AGENT_PANEL_COMMAND: 'ai:local-agent:panel:command',
+  LOCAL_AGENT_PANEL_RESPONSE: 'ai:local-agent:panel:response',
   AGENT_INSTANCE: 'ai:agent-instance',
   RUNTIME_ASSISTANT_APPROVAL: 'ai:runtime:assistant:approval',
   RUNTIME_ASSISTANT_ANSWER: 'ai:runtime:assistant:answer',

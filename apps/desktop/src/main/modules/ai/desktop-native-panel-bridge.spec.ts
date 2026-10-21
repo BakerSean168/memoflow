@@ -1,0 +1,143 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { AIChannels } from '@memoflow/contracts/electron';
+import type { LocalToolContext } from '@memoflow/ai';
+
+const electronMock = vi.hoisted(() => ({
+  handle: vi.fn(),
+  removeHandler: vi.fn(),
+}));
+
+vi.mock('electron', () => ({
+  ipcMain: {
+    handle: electronMock.handle,
+    removeHandler: electronMock.removeHandler,
+  },
+}));
+
+import { DesktopNativePanelBridge } from './desktop-native-panel-bridge';
+
+describe('DesktopNativePanelBridge', () => {
+  beforeEach(() => {
+    electronMock.handle.mockReset();
+    electronMock.removeHandler.mockReset();
+  });
+
+  function createMockContext(signal?: AbortSignal): LocalToolContext {
+    return {
+      identityId: 'id-1',
+      connectionId: 'conn-1',
+      conversationId: 'conv-1',
+      runId: 'run-1',
+      requestId: 'req-1',
+      traceId: 'trace-1',
+      source: 'test',
+      startedAt: Date.now(),
+      deadlineAt: Date.now() + 30000,
+      signal: signal ?? new AbortController().signal,
+      writeScopes: ['goals:write'],
+      authorize: vi.fn(async () => {}),
+      track: vi.fn(async (work) => work()),
+    };
+  }
+
+  it('sends command to window webContents and resolves when response arrives', async () => {
+    let capturedRequest: any = null;
+
+    const mockWindow = {
+      isDestroyed: () => false,
+      webContents: {
+        send: vi.fn((channel, req) => {
+          if (channel === AIChannels.LOCAL_AGENT_PANEL_COMMAND) {
+            capturedRequest = req;
+            const call = electronMock.handle.mock.calls.find(
+              ([c]) => c === AIChannels.LOCAL_AGENT_PANEL_RESPONSE,
+            );
+            if (call) {
+              const handler = call[1];
+              setTimeout(() => {
+                handler({}, {
+                  requestId: req.requestId,
+                  ok: true,
+                  snapshot: {
+                    panelSurface: 'business',
+                    activeModule: 'goal',
+                    activeTabRoute: '/goals',
+                    formOpen: true,
+                    mode: 'create',
+                    goalId: null,
+                    revision: 1,
+                    dirty: false,
+                    busy: false,
+                    error: null,
+                    isControlled: true,
+                    controlledByMe: true,
+                    allowedActions: ['patch', 'submit', 'release'],
+                  },
+                });
+              }, 10);
+            }
+          }
+        }),
+      },
+    };
+
+    const bridge = new DesktopNativePanelBridge({
+      getMainWindow: () => mockWindow as any,
+      isActive: () => true,
+    });
+
+    const context = createMockContext();
+    const result = await bridge.executeCommand(context, { action: 'snapshot' });
+
+    expect(result.ok).toBe(true);
+    expect(result.snapshot?.formOpen).toBe(true);
+    expect(capturedRequest.command.action).toBe('snapshot');
+    expect(capturedRequest.runId).toBe('run-1');
+  });
+
+  it('rejects when active check fails', async () => {
+    const bridge = new DesktopNativePanelBridge({
+      getMainWindow: () => ({} as any),
+      isActive: () => false,
+    });
+
+    const context = createMockContext();
+    await expect(bridge.executeCommand(context, { action: 'snapshot' })).rejects.toThrow(
+      'Active profile is locked, switched, or inactive',
+    );
+  });
+
+  it('rejects when window is not available', async () => {
+    const bridge = new DesktopNativePanelBridge({
+      getMainWindow: () => null,
+      isActive: () => true,
+    });
+
+    const context = createMockContext();
+    await expect(bridge.executeCommand(context, { action: 'snapshot' })).rejects.toThrow(
+      'No active window available',
+    );
+  });
+
+  it('rejects when aborted', async () => {
+    const controller = new AbortController();
+    const mockWindow = {
+      isDestroyed: () => false,
+      webContents: {
+        send: vi.fn(),
+      },
+    };
+
+    const bridge = new DesktopNativePanelBridge({
+      getMainWindow: () => mockWindow as any,
+      isActive: () => true,
+      commandTimeoutMs: 5000,
+    });
+
+    const context = createMockContext(controller.signal);
+    const promise = bridge.executeCommand(context, { action: 'snapshot' });
+    controller.abort();
+
+    await expect(promise).rejects.toThrow('Panel command was aborted');
+  });
+});

@@ -34,6 +34,17 @@ import {
 } from '@memoflow/contracts/task';
 import type { Result } from '@memoflow/contracts/result';
 import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
+import {
+  GoalPanelSnapshotSchema,
+  GoalPanelPatchCommandSchema,
+  GoalPanelAddKeyResultCommandSchema,
+  GoalPanelRemoveKeyResultCommandSchema,
+  GoalPanelFocusCommandSchema,
+  GoalPanelSubmitCommandSchema,
+  GoalPanelSubmitResultSchema,
+  type GoalPanelCommand,
+} from '@memoflow/contracts/ai';
+import type { IDesktopNativePanelBridge } from './desktop-native-panel-bridge';
 
 function ownerResult<T>(result: Result<T>): T {
   if (result.ok) return result.data;
@@ -47,6 +58,7 @@ export function createDesktopLocalAgentTools(
   isActive: () => boolean,
   time: UserTimeContextPort,
   knowledge?: IKnowledgeSourcePort,
+  panelBridge?: IDesktopNativePanelBridge,
 ) {
   const tasks = createTaskPowerSyncReadQueries(db, time);
   const goals = createGoalPowerSyncPageQuery(db);
@@ -60,6 +72,9 @@ export function createDesktopLocalAgentTools(
   return new LocalAgentToolBridge({
     store,
     isActive,
+    onRevokeGrant(grantInput) {
+      panelBridge?.releaseAllForRun?.(grantInput.conversationId, grantInput.runId);
+    },
     registerTools(server, context: LocalToolContext) {
       if (knowledge) {
         const reference = z.object({
@@ -203,7 +218,6 @@ export function createDesktopLocalAgentTools(
             description:
               'Create an owned TaskPlan and its occurrences atomically. Reuse the exact input and idempotencyKey on retries.',
             inputSchema: TaskAgentCreateSchema,
-            outputSchema: TaskAgentReceiptSchema,
             annotations,
           },
           (input) => write(() => taskWrites.create(input, context, authority)),
@@ -214,7 +228,6 @@ export function createDesktopLocalAgentTools(
             description:
               'Update an owned TaskPlan using its explicit expectedVersion. A conflict requires a new user decision, never an automatic version replacement.',
             inputSchema: TaskAgentUpdateSchema,
-            outputSchema: TaskAgentReceiptSchema,
             annotations,
           },
           (input) => write(() => taskWrites.update(input, context, authority)),
@@ -225,7 +238,6 @@ export function createDesktopLocalAgentTools(
             description:
               'Complete one occurrence with expectedVersion. Prompt contribution must explicitly choose complete_only or record with a measurement; suggestedValue is never a user decision. Fixed contributions follow the existing Task binding.',
             inputSchema: TaskAgentCompleteSchema,
-            outputSchema: TaskAgentReceiptSchema,
             annotations,
           },
           (input) => write(() => taskWrites.complete(input, context, authority)),
@@ -242,7 +254,6 @@ export function createDesktopLocalAgentTools(
             description:
               'Create an owned Goal atomically. A stable idempotencyKey is required for all retries.',
             inputSchema: GoalAgentCreateSchema,
-            outputSchema: GoalAgentReceiptSchema,
             annotations: {
               readOnlyHint: false,
               destructiveHint: false,
@@ -258,7 +269,6 @@ export function createDesktopLocalAgentTools(
             description:
               'Update an owned Goal with its explicit expectedVersion. Never automatically fetch a newer version to override a conflict.',
             inputSchema: GoalAgentUpdateSchema,
-            outputSchema: GoalAgentReceiptSchema,
             annotations: {
               readOnlyHint: false,
               destructiveHint: false,
@@ -268,6 +278,171 @@ export function createDesktopLocalAgentTools(
           },
           (input) => write(() => goalWrites.update(input, context, authority)),
         );
+      }
+      if (panelBridge) {
+        async function runPanelAction(command: GoalPanelCommand) {
+          try {
+            const scope = command.action === 'snapshot' ? 'read' : 'goals:write';
+            await context.authorize(scope);
+            const response = await context.track(() => panelBridge!.executeCommand(context, command));
+            if (!response.ok) {
+              return {
+                isError: true,
+                content: [{ type: 'text' as const, text: response.error?.message ?? 'Panel command failed' }],
+                structuredContent: { error: response.error, snapshot: response.snapshot },
+              };
+            }
+            const structured = response.submitResult
+              ? { submitResult: response.submitResult, snapshot: response.snapshot }
+              : { snapshot: response.snapshot };
+            return {
+              content: [{ type: 'text' as const, text: JSON.stringify(structured) }],
+              structuredContent: structured,
+            };
+          } catch (error) {
+            return {
+              isError: true,
+              content: [
+                {
+                  type: 'text' as const,
+                  text: error instanceof Error ? error.message : 'INTERNAL_ERROR',
+                },
+              ],
+            };
+          }
+        }
+
+        server.registerTool(
+          'goal_panel_snapshot',
+          {
+            description:
+              'Get a bounded snapshot of the current Goal business panel, including draft state, key results, dirty/busy status, and allowed actions.',
+            inputSchema: z.object({}).strict(),
+            annotations: {
+              readOnlyHint: true,
+              destructiveHint: false,
+              idempotentHint: true,
+              openWorldHint: false,
+            },
+          },
+          () => runPanelAction({ action: 'snapshot' }),
+        );
+
+        if (context.writeScopes.includes('goals:write')) {
+          server.registerTool(
+            'goal_panel_open',
+            {
+              description:
+                'Open the Goal editor panel in create or edit mode and claim exclusive control for this run.',
+              inputSchema: z
+                .object({
+                  mode: z.enum(['create', 'edit']).optional(),
+                  goalId: z.string().optional(),
+                })
+                .strict(),
+              annotations: {
+                readOnlyHint: false,
+                destructiveHint: false,
+                idempotentHint: true,
+                openWorldHint: false,
+              },
+            },
+            (input) => runPanelAction({ action: 'open', mode: input.mode, goalId: input.goalId }),
+          );
+
+          server.registerTool(
+            'goal_panel_patch',
+            {
+              description:
+                'Patch fields of the controlled Goal draft. Changes are reflected in the Vue form immediately.',
+              inputSchema: GoalPanelPatchCommandSchema.omit({ action: true }),
+              annotations: {
+                readOnlyHint: false,
+                destructiveHint: false,
+                idempotentHint: true,
+                openWorldHint: false,
+              },
+            },
+            (input) => runPanelAction({ action: 'patch', ...input }),
+          );
+
+          server.registerTool(
+            'goal_panel_add_key_result',
+            {
+              description: 'Add a new Key Result to the controlled Goal draft.',
+              inputSchema: GoalPanelAddKeyResultCommandSchema.omit({ action: true }),
+              annotations: {
+                readOnlyHint: false,
+                destructiveHint: false,
+                idempotentHint: false,
+                openWorldHint: false,
+              },
+            },
+            (input) => runPanelAction({ action: 'add_key_result', ...input }),
+          );
+
+          server.registerTool(
+            'goal_panel_remove_key_result',
+            {
+              description: 'Remove a Key Result by index from the controlled Goal draft.',
+              inputSchema: GoalPanelRemoveKeyResultCommandSchema.omit({ action: true }),
+              annotations: {
+                readOnlyHint: false,
+                destructiveHint: true,
+                idempotentHint: false,
+                openWorldHint: false,
+              },
+            },
+            (input) => runPanelAction({ action: 'remove_key_result', ...input }),
+          );
+
+          server.registerTool(
+            'goal_panel_focus',
+            {
+              description:
+                'Focus a specific field in the controlled Goal form (name, summary, or description).',
+              inputSchema: GoalPanelFocusCommandSchema.omit({ action: true }),
+              annotations: {
+                readOnlyHint: false,
+                destructiveHint: false,
+                idempotentHint: true,
+                openWorldHint: false,
+              },
+            },
+            (input) => runPanelAction({ action: 'focus', ...input }),
+          );
+
+          server.registerTool(
+            'goal_panel_submit',
+            {
+              description:
+                'Validate and persist the controlled Goal draft through the real owner form. Returns saved goal information and releases panel.',
+              inputSchema: GoalPanelSubmitCommandSchema.omit({ action: true }),
+              annotations: {
+                readOnlyHint: false,
+                destructiveHint: false,
+                idempotentHint: false,
+                openWorldHint: false,
+              },
+            },
+            (input) => runPanelAction({ action: 'submit', ...input }),
+          );
+
+          server.registerTool(
+            'goal_panel_release',
+            {
+              description: 'Release exclusive control of the Goal panel.',
+              inputSchema: z.object({}).strict(),
+              annotations: {
+                readOnlyHint: false,
+                destructiveHint: false,
+                idempotentHint: true,
+                openWorldHint: false,
+              },
+            },
+            () => runPanelAction({ action: 'release' }),
+          );
+        }
       }
       registerReadTools(
         server,
