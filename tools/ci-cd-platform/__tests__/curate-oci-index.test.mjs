@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { curatedIndexDigest, curatedLinuxIndex } from '../curate-oci-index.mjs';
+import { createHash } from 'node:crypto';
+import { mkdtemp, mkdir, readFile, writeFile, rm } from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import { curatedIndexDigest, curatedLinuxIndex, writeCuratedLayout } from '../curate-oci-index.mjs';
 
 const dig = (v) => 'sha256:' + v.repeat(64);
 const make = (arch, digest, size = 2898) => ({
@@ -63,4 +67,34 @@ test('OCI curating never substitutes or duplicates an executable platform', () =
       }),
     /exactly one linux\/arm64/u,
   );
+});
+
+test('OCI layout publishes exact index bytes and rejects a corrupt copied child', async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), 'memoflow-oci-test-'));
+  try {
+    const blobDirectory = path.join(directory, 'blobs', 'sha256');
+    await mkdir(blobDirectory, { recursive: true });
+    const manifests = [];
+    for (const arch of ['arm64', 'amd64']) {
+      const bytes = JSON.stringify({ schemaVersion: 2, architecture: arch });
+      const hash = createHash('sha256').update(bytes).digest('hex');
+      await writeFile(path.join(blobDirectory, hash), bytes);
+      manifests.push(make(arch, `sha256:${hash}`, Buffer.byteLength(bytes)));
+    }
+    const input = { ...upstream, manifests: [...manifests, upstream.manifests[2]] };
+    const digest = await writeCuratedLayout(input, directory);
+    const root = JSON.parse(await readFile(path.join(directory, 'index.json'), 'utf8'));
+    assert.equal(root.manifests[0].digest, digest);
+    const bytes = await readFile(path.join(blobDirectory, digest.slice(7)));
+    assert.equal(`sha256:${createHash('sha256').update(bytes).digest('hex')}`, digest);
+    assert.equal(root.manifests[0].size, bytes.length);
+    assert.deepEqual(JSON.parse(bytes), curatedLinuxIndex(input));
+    assert.equal(JSON.parse(bytes).manifests.length, 2);
+    await writeFile(path.join(blobDirectory, manifests[0].digest.slice(7)), 'corrupt');
+    await assert.rejects(writeCuratedLayout(input, directory), /pinned descriptor/u);
+    // A rejected conversion must leave the last valid root intact.
+    assert.deepEqual(JSON.parse(await readFile(path.join(directory, 'index.json'), 'utf8')), root);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
 });
