@@ -44,6 +44,9 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends skopeo
 
+      - name: Set up Docker Buildx for curated OCI indexes
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4
+
       - name: Mirror exact manifests and verify digest parity
         env:
           CHINA_REGISTRY: ${{ secrets.ACR_REGISTRY }}
@@ -60,29 +63,70 @@ jobs:
               | awk '{print "sha256:" $1}'
           }
 
-          while IFS=$'\t' read -r name source tag platforms; do
+          while IFS=$'\t' read -r name source tag platforms curated_digest; do
             test -n "$name"
             test -n "$source"
             test -n "$tag"
             test "$platforms" = "linux/amd64,linux/arm64"
-            skopeo inspect --raw --authfile "$AUTH_FILE" "docker://$source" | node ./tools/ci-cd-platform/verify-oci-platforms.mjs
+            upstream_digest="${source##*@}"
+            source_raw="$(skopeo inspect --raw --authfile "$AUTH_FILE" "docker://$source")"
+            printf '%s' "$source_raw" | node ./tools/ci-cd-platform/verify-oci-platforms.mjs
+            source_digest="$(manifest_digest "$source")"
+            test "$source_digest" = "$upstream_digest"
             china_ref="$CHINA_REGISTRY/$CHINA_NAMESPACE/$name:$tag"
             global_ref="ghcr.io/$GLOBAL_NAMESPACE/$name:$tag"
+            expected_digest="$upstream_digest"
+            if [[ "$curated_digest" != "-" ]]; then
+              test "$(printf '%s' "$source_raw" | node ./tools/ci-cd-platform/curate-oci-index.mjs)" = "$curated_digest"
+              expected_digest="$curated_digest"
+            fi
+            expected_prefix="${expected_digest#sha256:}"
+            test "${tag##*-}" = "${expected_prefix:0:12}"
+            china_existing="$(manifest_digest "$china_ref" 2>/dev/null || true)"
+            global_existing="$(manifest_digest "$global_ref" 2>/dev/null || true)"
+            if [[ "$china_existing" == "$expected_digest" && "$global_existing" == "$expected_digest" ]]; then
+              echo "$name: immutable mirror already matches both registries"
+            else
+              if [[ -n "$china_existing" && "$china_existing" != "$expected_digest" ]] ||
+                 [[ -n "$global_existing" && "$global_existing" != "$expected_digest" ]]; then
+                echo "::error::Immutable mirror tag digest drifted: $name" >&2
+                exit 1
+              fi
+              if [[ "$curated_digest" == "-" ]]; then
+                skopeo copy --all --preserve-digests --authfile "$AUTH_FILE" \
+                  "docker://$source" "docker://$china_ref"
+                skopeo copy --all --preserve-digests --authfile "$AUTH_FILE" \
+                  "docker://$source" "docker://$global_ref"
+              else
+                # ACR rejects PowerSync's optional unknown/unknown attestation images.
+                # Copy the two pinned executable child manifests without rewriting
+                # their digests, then create the same two-platform OCI index in
+                # both registries. No registry-specific mutable manifest fallback.
+                upstream_repo="${source%@*}"
+                for arch in amd64 arm64; do
+                  child="$(printf '%s' "$source_raw" | jq -r --arg arch "$arch" '.manifests[] | select(.platform.os == "linux" and .platform.architecture == $arch) | .digest')"
+                  [[ "$child" =~ ^sha256:[0-9a-f]{64}$ ]]
+                  skopeo copy --preserve-digests --authfile "$AUTH_FILE" \
+                    "docker://$upstream_repo@$child" "docker://$china_ref-$arch"
+                  skopeo copy --preserve-digests --authfile "$AUTH_FILE" \
+                    "docker://$upstream_repo@$child" "docker://$global_ref-$arch"
+                done
+                docker buildx imagetools create --tag "$china_ref" \
+                  "$china_ref-amd64" "$china_ref-arm64"
+                docker buildx imagetools create --tag "$global_ref" \
+                  "$global_ref-amd64" "$global_ref-arm64"
+              fi
+            fi
 
-            skopeo copy --all --preserve-digests --authfile "$AUTH_FILE" \
-              "docker://$source" "docker://$china_ref"
-            skopeo copy --all --preserve-digests --authfile "$AUTH_FILE" \
-              "docker://$source" "docker://$global_ref"
-
-            source_digest="$(manifest_digest "$source")"
             china_digest="$(manifest_digest "$china_ref")"
             global_digest="$(manifest_digest "$global_ref")"
-            expected_digest="${source##*@}"
-
-            test "$source_digest" = "$expected_digest"
-            test "$china_digest" = "$source_digest"
-            test "$global_digest" = "$source_digest"
-            echo "$name: $source_digest" >> "$GITHUB_STEP_SUMMARY"
+            test "$china_digest" = "$expected_digest"
+            test "$global_digest" = "$expected_digest"
+            for ref in "$china_ref" "$global_ref"; do
+              skopeo inspect --raw --authfile "$AUTH_FILE" "docker://$ref" \
+                | node ./tools/ci-cd-platform/verify-oci-platforms.mjs
+            done
+            echo "$name: $expected_digest (upstream=$upstream_digest)" >> "$GITHUB_STEP_SUMMARY"
           done < <(
-            node -e "const c=require('./tools/ci-cd-platform/runtime-image-mirrors.json'); for (const i of c.images) console.log([i.name,i.source,i.tag,i.platforms.join(',')].join('\\t'))"
+            node -e "const c=require('./tools/ci-cd-platform/runtime-image-mirrors.json'); for (const i of c.images) console.log([i.name,i.source,i.tag,i.platforms.join(','),i.mirrorDigest || '-'].join('\\t'))"
           )

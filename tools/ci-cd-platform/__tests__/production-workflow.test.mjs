@@ -108,6 +108,7 @@ test('production selector binds runtime dependencies to exact release source, no
     runtimeDockerfile,
     /COPY deployment\/production\/install-production-deploy-watch\.sh \/runtime\/production\/install-production-deploy-watch\.sh/u,
   );
+  assert.match(runtimeDockerfile, /COPY tools\/ci-cd-platform\/oracle2-topology-preflight\.mjs/u);
   assert.doesNotMatch(runtimeDockerfile, /^COPY docker\/powersync/mu);
   const installer = await readRepoFile('deployment/production/install-production-deploy-watch.sh');
   assert.match(installer, /SOURCE_DIR=\$\(cd .*dirname/u);

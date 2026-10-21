@@ -5,6 +5,14 @@
 > **Oracle2 operator gate:** The current watcher/Compose below were built for the retired Alibaba host. They own an independent Caddy container and ports 80/443, which would conflict with Oracle2's shared CPA Caddy. Do **not** run the bootstrap/install commands below on Oracle2. The existing Oracle2 stack remains manually managed until a host-compatible watcher is implemented and verified.
 >
 > Release inputs must now use immutable OCI indexes containing both `linux/amd64` and `linux/arm64`; a single-architecture release or mirror is rejected before the `production-selected` pointer can move.
+>
+> **Read-only Oracle2 baseline:** `oracle2-topology-preflight.mjs`, included in the release control artifact, can inspect the current production Compose without restarting services. On the existing Oracle2 host run (as an authorized host operator):
+>
+> ```bash
+> sudo node oracle2-topology-preflight.mjs --compose /opt/memoflow-oracle2/compose.yaml --env-file /opt/memoflow-oracle2/production.env
+> ```
+>
+> It fails closed on architecture, port, data-volume, service-health or shared-CPA-Caddy drift. A successful preflight **does not** authorize installation of the old watcher or a database migration.
 
 This directory is the runtime authority for Delivery Platform V3 production deployment. It replaces the historical model where application containers could be changed independently through mutable image tags or Watchtower.
 

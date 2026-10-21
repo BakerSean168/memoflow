@@ -14,6 +14,7 @@ LABEL io.memoflow.production-set.sha256=$PRODUCTION_SET_SHA256
 COPY deployment/production/docker-compose.production.yml /runtime/production/docker-compose.production.yml
 COPY deployment/production/production-deploy-watch.sh /runtime/production/production-deploy-watch.sh
 COPY deployment/production/install-production-deploy-watch.sh /runtime/production/install-production-deploy-watch.sh
+COPY tools/ci-cd-platform/oracle2-topology-preflight.mjs /runtime/production/oracle2-topology-preflight.mjs
 COPY deployment/production/systemd /runtime/production/systemd
 COPY Caddyfile /runtime/production/Caddyfile
 COPY reports/production/release-runtime/docker/powersync /runtime/production/docker/powersync

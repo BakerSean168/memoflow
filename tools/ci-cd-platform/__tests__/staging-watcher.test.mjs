@@ -17,7 +17,7 @@ const runtimeMirrorConfig = JSON.parse(
 const runtimeMirrorDigest = (name) => {
   const entry = runtimeMirrorConfig.images.find((image) => image.name === name);
   assert.ok(entry, `missing runtime mirror fixture for ${name}`);
-  return entry.source.split('@')[1];
+  return entry.mirrorDigest ?? entry.source.split('@')[1];
 };
 
 function candidate() {

@@ -12409,6 +12409,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/ci-cd-platform/__tests__/curate-oci-index.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "ci-cd-platform:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/ci-cd-platform/__tests__/desktop-update-feed-publication.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -12498,6 +12506,14 @@
     },
     {
       "path": "tools/ci-cd-platform/__tests__/observe-run.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "ci-cd-platform:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "tools/ci-cd-platform/__tests__/oracle2-topology-preflight.test.mjs",
       "primarySuite": "governance",
       "collectors": [
         "ci-cd-platform:test"

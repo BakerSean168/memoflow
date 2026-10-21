@@ -116,11 +116,13 @@ mirror_field_for() {
   node -e "const c=require('$stage/tools/ci-cd-platform/runtime-image-mirrors.json');const x=c.images.find((i)=>i.name===process.argv[1]);if(!x)process.exit(2);const v=x[process.argv[2]];if(typeof v!=='string'||!v)process.exit(3);process.stdout.write(v)" "$name" "$field"
 }
 runtime_mirror_ref() {
-  local name="$1" source tag expected_digest digest_hex tag_ref actual_digest
+  local name="$1" source tag expected_digest digest_hex tag_ref actual_digest curated_digest
   source=$(mirror_field_for "$name" source) || fail "missing runtime mirror source for $name"
   tag=$(mirror_field_for "$name" tag) || fail "missing runtime mirror tag for $name"
-  expected_digest="${source##*@}"
-  [[ "$expected_digest" =~ ^sha256:[0-9a-f]{64}$ ]] || fail "$name runtime mirror source is not digest-pinned"
+  [[ "${source##*@}" =~ ^sha256:[0-9a-f]{64}$ ]] || fail "$name runtime mirror source is not digest-pinned"
+  curated_digest=$(mirror_field_for "$name" mirrorDigest || true)
+  expected_digest="${curated_digest:-${source##*@}}"
+  [[ "$expected_digest" =~ ^sha256:[0-9a-f]{64}$ ]] || fail "$name runtime mirror digest is not pinned"
   digest_hex="${expected_digest#sha256:}"
   [[ "$tag" == *"${digest_hex:0:12}" ]] || fail "$name runtime mirror tag does not bind digest prefix"
   tag_ref="$REGISTRY/$NAMESPACE/$name:$tag"

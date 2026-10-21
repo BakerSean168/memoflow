@@ -63,8 +63,10 @@ function runtimeImageMap(mirrorConfig, registry, namespace, errors) {
       errors.push(`missing runtime mirror: ${name}`);
       continue;
     }
-    const digest = String(mirror.source ?? '').split('@')[1] ?? '';
-    if (!OCI_DIGEST.test(digest)) errors.push(`${name} source must be digest-pinned`);
+    const sourceDigest = String(mirror.source ?? '').split('@')[1] ?? '';
+    if (!OCI_DIGEST.test(sourceDigest)) errors.push(`${name} source must be digest-pinned`);
+    const digest = mirror.mirrorDigest ?? sourceDigest;
+    if (!OCI_DIGEST.test(digest)) errors.push(`${name} mirror digest must be valid`);
     if (JSON.stringify(mirror.platforms) !== JSON.stringify(['linux/amd64', 'linux/arm64'])) {
       errors.push(`${name} must pin linux/amd64 and linux/arm64`);
     }
