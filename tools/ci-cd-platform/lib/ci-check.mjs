@@ -54,10 +54,32 @@ function validateManifest(manifest) {
 }
 
 /**
+ * The GitHub Artifact directory encodes the attempt and zero-based matrix
+ * index. Never accept a receipt copied beneath a different attempt/shard.
+ */
+export function validWebReceiptArtifactPath(relativePath, receipt) {
+  const match = /^web-shard-receipt-(\d+)-(\d+)\/shard-(\d+)\.json$/u.exec(relativePath);
+  const shard = /^(\d+)\/(\d+)$/u.exec(receipt?.id ?? '');
+  return Boolean(
+    match &&
+    shard &&
+    Number(match[1]) === receipt.runAttempt &&
+    Number(match[2]) + 1 === Number(shard[1]) &&
+    Number(match[3]) === Number(shard[1]),
+  );
+}
+
+/**
  * @param {{ needs: Record<string, {result: string, outputs?: Record<string,string>}>, manifest: object | null }} input
  * @returns {{ state: 'success' | 'failure', failures: string[], jobs: Record<string, {expected: string, actual: string}> }}
  */
-export function evaluateCiCheck({ needs, manifest, webReceipts = [] }) {
+export function evaluateCiCheck({
+  needs,
+  manifest,
+  webReceipts = [],
+  runId = null,
+  runAttempt = null,
+}) {
   const failures = [];
   const jobs = {};
   if (!needs || typeof needs !== 'object') {
@@ -107,26 +129,57 @@ export function evaluateCiCheck({ needs, manifest, webReceipts = [] }) {
   const expectedShards = manifest.lanes.web ? manifest.webShards.shards : [];
   if (!Array.isArray(webReceipts)) failures.push('web:invalid-receipts');
   else {
-    if (webReceipts.length !== expectedShards.length) failures.push('web:shard-count-mismatch');
-    for (const shard of expectedShards) {
-      const matches = webReceipts.filter((receipt) => receipt?.id === shard.id);
-      if (matches.length !== 1) {
-        failures.push(`web:${shard.id}:missing-or-duplicate-shard`);
+    const latestByShard = new Map();
+    const observedAttempts = new Set();
+    const validRunIdentity =
+      typeof runId === 'string' &&
+      runId.length > 0 &&
+      Number.isSafeInteger(runAttempt) &&
+      runAttempt > 0;
+    if (expectedShards.length > 0 && !validRunIdentity) failures.push('web:invalid-run-identity');
+    for (const receipt of webReceipts) {
+      if (!expectedShards.some((shard) => shard.id === receipt?.id)) {
+        failures.push('web:extra-shard');
         continue;
       }
-      const receipt = matches[0];
-      if (receipt.manifestDigest !== manifest.digest || receipt.exitCode !== 0)
-        failures.push(`web:${shard.id}:invalid-evidence`);
+      const key = `${receipt.id}:${receipt.runAttempt}`;
+      if (observedAttempts.has(key)) {
+        failures.push(`web:${receipt.id}:duplicate-attempt`);
+        continue;
+      }
+      observedAttempts.add(key);
+      // Older failed attempts are audit evidence only. The most recent
+      // execution is authoritative, even if it failed after an earlier pass.
+      if (
+        !validRunIdentity ||
+        receipt.runId !== runId ||
+        !Number.isSafeInteger(receipt.runAttempt) ||
+        receipt.runAttempt < 1 ||
+        receipt.runAttempt > runAttempt ||
+        receipt.manifestDigest !== manifest.digest
+      ) {
+        failures.push(`web:${receipt.id}:invalid-provenance`);
+        continue;
+      }
+      const previous = latestByShard.get(receipt.id);
+      if (!previous || receipt.runAttempt > previous.runAttempt) {
+        latestByShard.set(receipt.id, receipt);
+      }
+    }
+    if (latestByShard.size !== expectedShards.length) failures.push('web:shard-count-mismatch');
+    for (const shard of expectedShards) {
+      const receipt = latestByShard.get(shard.id);
+      if (!receipt) {
+        failures.push(`web:${shard.id}:missing-shard`);
+        continue;
+      }
+      if (receipt.exitCode !== 0) failures.push(`web:${shard.id}:invalid-evidence`);
       if (
         !Array.isArray(receipt.specs) ||
         JSON.stringify([...receipt.specs].sort()) !== JSON.stringify([...shard.specs].sort())
       ) {
         failures.push(`web:${shard.id}:spec-coverage`);
       }
-    }
-    for (const receipt of webReceipts) {
-      if (!expectedShards.some((shard) => shard.id === receipt?.id))
-        failures.push('web:extra-shard');
     }
   }
   return { state: failures.length ? 'failure' : 'success', failures, jobs };

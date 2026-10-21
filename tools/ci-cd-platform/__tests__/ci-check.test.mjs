@@ -1,8 +1,11 @@
 import { planUnitShards } from '../lib/unit-shards.mjs';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFile, mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
+import { execFileSync } from 'node:child_process';
 import { test } from 'node:test';
-import { CI_CHECK_JOBS, evaluateCiCheck } from '../lib/ci-check.mjs';
+import { CI_CHECK_JOBS, evaluateCiCheck, validWebReceiptArtifactPath } from '../lib/ci-check.mjs';
 import { buildProvenance, digest } from '../lib/contracts.mjs';
 
 const lanes = (overrides = {}) => ({
@@ -44,12 +47,20 @@ const receipts = (m) =>
   m?.lanes?.web && m?.webShards?.shards
     ? m.webShards.shards.map((shard) => ({
         id: shard.id,
+        runId: 'test-run',
+        runAttempt: 1,
         specs: [...shard.specs],
         exitCode: 0,
         manifestDigest: m.digest,
       }))
     : [];
-const check = (input) => evaluateCiCheck({ webReceipts: receipts(input.manifest), ...input });
+const check = (input) =>
+  evaluateCiCheck({
+    webReceipts: receipts(input.manifest),
+    runId: 'test-run',
+    runAttempt: 1,
+    ...input,
+  });
 const verificationOutputs = (m) =>
   Object.fromEntries(
     ['boundary', 'integration', 'coverage', 'performance'].map((lane) => [
@@ -368,6 +379,74 @@ for (const [name, mutate] of [
   });
 }
 
+test('Web shard retry selects the latest receipt per shard without rerunning healthy siblings', () => {
+  const m = manifest();
+  const firstFailure = { ...receipts(m)[0], exitCode: 1 };
+  const laterSuccess = { ...receipts(m)[0], runAttempt: 2 };
+  const result = check({
+    needs: healthyNeeds(m),
+    manifest: m,
+    runAttempt: 2,
+    webReceipts: [firstFailure, laterSuccess],
+  });
+  assert.deepEqual(result.failures, []);
+});
+
+test('Web shard retry never falls back to a previous success after a later failure', () => {
+  const m = manifest();
+  const laterFailure = { ...receipts(m)[0], runAttempt: 2, exitCode: 1 };
+  const result = check({
+    needs: healthyNeeds(m),
+    manifest: m,
+    runAttempt: 2,
+    webReceipts: [...receipts(m), laterFailure],
+  });
+  assert.deepEqual(result.failures, ['web:1/1:invalid-evidence']);
+});
+
+test('Web shard receipts fail closed on duplicate attempts, future attempts and wrong run identity', () => {
+  const m = manifest();
+  const receipt = receipts(m)[0];
+  for (const replacement of [
+    [receipt, { ...receipt }],
+    [{ ...receipt, runAttempt: 2 }],
+    [{ ...receipt, runId: 'another-run' }],
+    [{ ...receipt, runAttempt: 0 }],
+    [{ ...receipt, runAttempt: '2' }],
+  ]) {
+    const result = check({ needs: healthyNeeds(m), manifest: m, webReceipts: replacement });
+    assert.equal(result.state, 'failure', JSON.stringify(replacement));
+  }
+  assert.equal(check({ needs: healthyNeeds(m), manifest: m, runId: null }).state, 'failure');
+});
+
+test('Web shard receipt artifact directory must match its attempt and matrix index', () => {
+  const receipt = receipts(manifest())[0];
+  assert.equal(validWebReceiptArtifactPath('web-shard-receipt-1-0/shard-1.json', receipt), true);
+  for (const file of [
+    'web-shard-receipt-2-0/shard-1.json',
+    'web-shard-receipt-1-1/shard-1.json',
+    'web-shard-receipt-1-0/shard-2.json',
+    'web-shard-receipt-1-0/../shard-1.json',
+    'web-shard-receipt-0/shard-1.json',
+  ]) {
+    assert.equal(validWebReceiptArtifactPath(file, receipt), false, file);
+  }
+});
+
+test('CI upload keeps Web receipts from different run attempts distinct', async () => {
+  const workflow = await readFile(
+    new URL('../../../.github/workflows/ci.yml', import.meta.url),
+    'utf8',
+  );
+  const jobs = workflowJobs(workflow);
+  assert.match(
+    jobs['web-flow-shard'],
+    /name: web-shard-receipt-\$\{\{ github\.run_attempt \}\}-\$\{\{ strategy\.job-index \}\}/u,
+  );
+  assert.match(jobs['ci-check'], /pattern: web-shard-receipt-\*/u);
+});
+
 test('zero Web specs skips the matrix and forbids receipts', () => {
   const m = manifest({ web: false });
   m.webShards = { specs: [], shards: [], shardCount: 0, estimatedTotalMs: 0, fallback: false };
@@ -404,5 +483,44 @@ test('a valid self-digest cannot authorize a missing or inconsistent Web plan', 
     const needs = healthyNeeds(m);
     needs['scope-detector'].outputs.manifest_digest = invalid.digest;
     assert.equal(check({ needs, manifest: invalid, webReceipts: [] }).state, 'failure');
+  }
+});
+
+test('CI Check CLI consumes newest shard artifact on retry and rejects a latest failure', async () => {
+  const m = manifest();
+  const cwd = await mkdtemp(join(tmpdir(), 'memoflow-web-retry-'));
+  try {
+    const oldDir = join(cwd, 'reports/web-shards/web-shard-receipt-1-0');
+    const newDir = join(cwd, 'reports/web-shards/web-shard-receipt-2-0');
+    await mkdir(join(cwd, 'scope'), { recursive: true });
+    await mkdir(oldDir, { recursive: true });
+    await mkdir(newDir, { recursive: true });
+    await writeFile(join(cwd, 'scope/delivery-manifest-v1.json'), JSON.stringify(m));
+    const oldFailed = { ...receipts(m)[0], exitCode: 1 };
+    const currentSucceeded = { ...receipts(m)[0], runAttempt: 2 };
+    await writeFile(join(oldDir, 'shard-1.json'), JSON.stringify(oldFailed));
+    const newestFile = join(newDir, 'shard-1.json');
+    await writeFile(newestFile, JSON.stringify(currentSucceeded));
+    const env = {
+      ...process.env,
+      GITHUB_RUN_ID: 'test-run',
+      GITHUB_RUN_ATTEMPT: '2',
+      CI_CHECK_NEEDS: JSON.stringify(healthyNeeds(m)),
+    };
+    const command = resolve('tools/ci-cd-platform/ci-check.mjs');
+    const execute = () =>
+      execFileSync(process.execPath, [command, '--manifest', 'scope/delivery-manifest-v1.json'], {
+        cwd,
+        env,
+        stdio: 'pipe',
+      });
+    assert.equal(JSON.parse(execute().toString()).state, 'success');
+
+    await writeFile(newestFile, JSON.stringify({ ...currentSucceeded, exitCode: 1 }));
+    assert.throws(execute, /Command failed/u);
+    await writeFile(newestFile, JSON.stringify(oldFailed));
+    assert.throws(execute, /Command failed/u);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
   }
 });

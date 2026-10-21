@@ -286,6 +286,8 @@ fs.writeFileSync('test-results/results.json', JSON.stringify({suites:[{specs:[{f
       ...process.env,
       PATH: `${root}:${process.env.PATH}`,
       E2E_OPENAI_MOCK_PORT: '19999',
+      GITHUB_RUN_ID: '90210',
+      GITHUB_RUN_ATTEMPT: '2',
     };
     execFileSync(process.execPath, [runner, '1/1'], {
       cwd: root,
@@ -303,7 +305,14 @@ fs.writeFileSync('test-results/results.json', JSON.stringify({suites:[{specs:[{f
     ]);
     assert.deepEqual(
       JSON.parse(await readFile(path.join(root, 'reports/web-shards/shard-1.json'), 'utf8')),
-      { id: '1/1', manifestDigest: manifest.digest, exitCode: 0, specs: [spec] },
+      {
+        id: '1/1',
+        runId: '90210',
+        runAttempt: 2,
+        manifestDigest: manifest.digest,
+        exitCode: 0,
+        specs: [spec],
+      },
     );
     assert.throws(
       () =>
