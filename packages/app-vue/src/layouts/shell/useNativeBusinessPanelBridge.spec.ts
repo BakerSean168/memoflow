@@ -214,6 +214,23 @@ describe('useNativeBusinessPanelBridge', () => {
     expect(patchResp.error?.code).toBe('REVISION_CONFLICT');
   });
 
+  it('classifies a dirty surface conflict without leaking native error details', async () => {
+    mockGoalSurface.openControlled.mockRejectedValueOnce(
+      new Error('Business surface conflict: internal private details'),
+    );
+    const bridge = useNativeBusinessPanelBridge();
+    const response = await bridge.handleCommand({
+      requestId: 'secret-conflict',
+      identityId: 'id-1',
+      conversationId: 'conv-1',
+      runId: 'run-1',
+      command: { action: 'open', mode: 'create' },
+    });
+    expect(response.ok).toBe(false);
+    expect(response.error?.code).toBe('BUSINESS_SURFACE_CONFLICT');
+    expect(response.error?.message).not.toContain('private details');
+  });
+
   it('rejects patch when not controlled', async () => {
     const bridge = useNativeBusinessPanelBridge();
     const patchResp = await bridge.handleCommand({

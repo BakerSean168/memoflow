@@ -147,7 +147,20 @@ export function useNativeBusinessPanelBridge() {
           };
         }
         case 'open': {
-          await goalSurface.openControlled(ownerId, { mode: cmd.mode, goalId: cmd.goalId });
+          try {
+            await goalSurface.openControlled(ownerId, { mode: cmd.mode, goalId: cmd.goalId });
+          } catch {
+            return {
+              requestId: request.requestId,
+              ok: false,
+              error: {
+                code: 'BUSINESS_SURFACE_CONFLICT',
+                message:
+                  'Goal form is unavailable or has conflicting edits; inspect the current panel first.',
+              },
+              snapshot: buildSnapshot(ownerId),
+            };
+          }
           return {
             requestId: request.requestId,
             ok: true,
@@ -331,13 +344,14 @@ export function useNativeBusinessPanelBridge() {
           };
         }
       }
-    } catch (error: any) {
+    } catch {
+      // Internal owner errors must not cross the agent-facing IPC boundary.
       return {
         requestId: request.requestId,
         ok: false,
         error: {
-          code: error.code || 'PANEL_OPERATION_FAILED',
-          message: error.message || 'Operation on Goal panel failed',
+          code: 'PANEL_OPERATION_FAILED',
+          message: 'Goal panel operation failed; inspect the current snapshot before retrying.',
         },
         snapshot: buildSnapshot(ownerId),
       };
