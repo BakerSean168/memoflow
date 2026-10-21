@@ -37,7 +37,7 @@ describe('GoalPanel DTO and IPC schemas', () => {
           targetValue: 100,
           currentValue: 0,
           unit: '%',
-          weight: 50,
+          weight: 3,
         },
       ],
       allowedActions: ['patch', 'add_key_result', 'submit', 'release'],
@@ -61,6 +61,26 @@ describe('GoalPanel DTO and IPC schemas', () => {
       },
     };
     expect(GoalPanelCommandSchema.safeParse(patchCmd).success).toBe(true);
+
+    const createKr = GoalPanelCommandSchema.safeParse({
+      action: 'add_key_result',
+      keyResult: { title: 'First milestone', targetValue: 10 },
+    });
+    expect(createKr.success).toBe(true);
+    if (createKr.success && createKr.data.action === 'add_key_result') {
+      expect(createKr.data.keyResult).toMatchObject({
+        initialValue: 0,
+        calculationMethod: 'Sum',
+        targetValue: 10,
+        weight: 3,
+      });
+    }
+    expect(
+      GoalPanelCommandSchema.safeParse({
+        action: 'add_key_result',
+        keyResult: { title: 'Missing target' },
+      }).success,
+    ).toBe(false);
 
     const submitCmd = { action: 'submit', expectedRevision: 2 };
     expect(GoalPanelCommandSchema.safeParse(submitCmd).success).toBe(true);

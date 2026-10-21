@@ -2,7 +2,10 @@ import { createPinia, setActivePinia } from 'pinia';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAppShellStore } from './useAppShellStore';
 import { useNativeBusinessPanelBridge } from './useNativeBusinessPanelBridge';
-import type { GoalNativeDraftState, GoalNativeEditSession } from '../../modules/goal/composables/goalNativeEditSession';
+import type {
+  GoalNativeDraftState,
+  GoalNativeEditSession,
+} from '../../modules/goal/composables/goalNativeEditSession';
 import { GoalStatus } from '@memoflow/contracts/goal';
 
 // Mock useGoalNativeSurface
@@ -159,7 +162,8 @@ describe('useNativeBusinessPanelBridge', () => {
           targetValue: 100,
           currentValue: 0,
           unit: '%',
-          weight: 50,
+          weight: 3,
+          calculationMethod: 'Sum',
         },
       },
     });

@@ -27,6 +27,9 @@ export interface IDesktopNativePanelBridge {
 }
 
 export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
+  // Only one Electron IPC handler may own this channel at a time. Each Profile
+  // creates a new bridge; a stale Profile must never consume its responses.
+  private static activeBridge: DesktopNativePanelBridge | null = null;
   private pendingRequests = new Map<
     string,
     {
@@ -37,33 +40,39 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
   >();
 
   constructor(private readonly options: DesktopNativePanelBridgeOptions) {
+    DesktopNativePanelBridge.activeBridge?.dispose();
     this.setupIpcListener();
+    DesktopNativePanelBridge.activeBridge = this;
   }
 
   private setupIpcListener() {
-    try {
-      ipcMain.handle(AIChannels.LOCAL_AGENT_PANEL_RESPONSE, (_event, payload: unknown) => {
-        const parsed = NativePanelIpcResponseSchema.safeParse(payload);
-        if (!parsed.success) return { ok: false };
+    ipcMain.removeHandler(AIChannels.LOCAL_AGENT_PANEL_RESPONSE);
+    ipcMain.handle(AIChannels.LOCAL_AGENT_PANEL_RESPONSE, (event, payload: unknown) => {
+      const window = this.options.getMainWindow();
+      if (
+        !this.options.isActive() ||
+        !window ||
+        window.isDestroyed() ||
+        event.sender !== window.webContents
+      )
+        return { ok: false };
+      const parsed = NativePanelIpcResponseSchema.safeParse(payload);
+      if (!parsed.success) return { ok: false };
 
-        const pending = this.pendingRequests.get(parsed.data.requestId);
-        if (pending) {
-          clearTimeout(pending.timer);
-          this.pendingRequests.delete(parsed.data.requestId);
-          pending.resolve(parsed.data);
-        }
-        return { ok: true };
-      });
-    } catch {
-      // In testing environments where ipcMain is mocked or already initialized
-    }
+      const pending = this.pendingRequests.get(parsed.data.requestId);
+      if (!pending) return { ok: false };
+      clearTimeout(pending.timer);
+      this.pendingRequests.delete(parsed.data.requestId);
+      pending.resolve(parsed.data);
+      return { ok: true };
+    });
   }
 
   async executeCommand(
     context: LocalToolContext,
     command: GoalPanelCommand,
   ): Promise<NativePanelIpcResponse> {
-    if (!this.options.isActive()) {
+    if (DesktopNativePanelBridge.activeBridge !== this || !this.options.isActive()) {
       throw new Error('Active profile is locked, switched, or inactive');
     }
 
@@ -115,7 +124,13 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
 
   async releaseAllForRun(conversationId: string, runId: string): Promise<void> {
     const win = this.options.getMainWindow();
-    if (!win || win.isDestroyed() || !this.options.isActive()) return;
+    if (
+      !win ||
+      win.isDestroyed() ||
+      !this.options.isActive() ||
+      DesktopNativePanelBridge.activeBridge !== this
+    )
+      return;
 
     try {
       const requestId = randomUUID();
@@ -133,6 +148,10 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
   }
 
   dispose() {
+    if (DesktopNativePanelBridge.activeBridge === this) {
+      ipcMain.removeHandler(AIChannels.LOCAL_AGENT_PANEL_RESPONSE);
+      DesktopNativePanelBridge.activeBridge = null;
+    }
     for (const [, req] of this.pendingRequests) {
       clearTimeout(req.timer);
       req.reject(new Error('DesktopNativePanelBridge was disposed'));

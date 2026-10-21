@@ -1,9 +1,5 @@
 import { z } from 'zod';
-import {
-  KeyResultCalculationMethod,
-  GoalStatus,
-  GoalTimeframeSchema,
-} from '../../goal';
+import { KeyResultCalculationMethod, GoalStatus, GoalTimeframeSchema } from '../../goal';
 
 export const GoalPanelStatusSchema = z.enum(GoalStatus);
 export type GoalPanelStatus = z.infer<typeof GoalPanelStatusSchema>;
@@ -15,7 +11,6 @@ export const GoalPanelActionSchema = z.enum([
   'remove_key_result',
   'focus',
   'submit',
-  'cancel',
   'release',
 ]);
 export type GoalPanelAction = z.infer<typeof GoalPanelActionSchema>;
@@ -26,12 +21,12 @@ export const GoalPanelKeyResultDraftSchema = z
     id: z.string().optional(),
     title: z.string().max(80),
     description: z.string().max(500).optional(),
-    calculationMethod: z.enum(KeyResultCalculationMethod).optional(),
-    initialValue: z.number().optional(),
+    calculationMethod: z.enum(KeyResultCalculationMethod).default(KeyResultCalculationMethod.Sum),
+    initialValue: z.number().default(0),
     currentValue: z.number().optional(),
-    targetValue: z.number().optional(),
+    targetValue: z.number(),
     unit: z.string().max(20).optional(),
-    weight: z.number().min(0).max(100).optional(),
+    weight: z.number().int().min(1).max(5).default(3),
   })
   .strict();
 export type GoalPanelKeyResultDraft = z.infer<typeof GoalPanelKeyResultDraftSchema>;

@@ -2041,7 +2041,7 @@
     {
       "id": "rule-aichatview-106",
       "contract": "AIChatView",
-      "reason": "AIChatView: AST/type structural rules replacing source-text locks (#502).",
+      "reason": "AIChatView: native Goal workflow structure; old context panel retired in #569, other structural guards retained (#502).",
       "file": "packages/app-vue/src/modules/ai/views/AIChatView.vue",
       "forbidElements": [
         "AIHostProposalPanel",
@@ -2114,17 +2114,6 @@
         "AIGoalWorkflowPanel",
         "AITaskWorkflowPanel",
         "AIKnowledgeCapturePanel",
-        {
-          "name": "Teleport",
-          "attrs": {
-            "to": "body",
-            ":disabled": "true"
-          }
-        },
-        {
-          "name": "AIContextPanel",
-          "attrs": {}
-        },
         {
           "name": "AIGoalWorkflowPanel",
           "attrs": {}
@@ -2204,14 +2193,6 @@
         },
         {
           "name": "data-testid",
-          "value": "ai-context-panel-toggle"
-        },
-        {
-          "name": "data-testid",
-          "value": "ai-desktop-context-panel-toggle"
-        },
-        {
-          "name": "data-testid",
           "value": "ai-mobile-sidebar-toggle"
         },
         {
@@ -2242,19 +2223,15 @@
       "requireStatements": [
         "if (started === false) toolMode.value = 'chat'",
         "if (!resumed) toolMode.value = 'chat'",
-        "if (available && !wasAvailable && mode !== 'goal-create') requestContextPanel('automatic');",
-        "if (hasWorkflowContext.value && toolMode.value !== 'goal-create') requestContextPanel('explicit');",
         "if (workflow !== 'goal-create') return;",
         "const started = await startKnowledgeCaptureRun()",
         "if (!started) toolMode.value = 'chat'"
       ],
       "requireExpressions": [
-        "inferWorkflowMode(chatMessage.value)",
         "submitTaskClarificationResponse(prepared.content)",
         "submitKnowledgeClarificationResponse(prepared.content)",
         "goalWorkflowRun.value?.status !== 'completed'",
         "toolMode !== 'chat'",
-        "requestContextPanel('explicit')",
         "shellStore.panelSurface !== 'business'"
       ],
       "requireStatementPatterns": [
@@ -2286,9 +2263,6 @@
           "items-center",
           "border-b"
         ]
-      ],
-      "requireClassTokens": [
-        "currentToolLabel"
       ],
       "requirePropertyNames": [
         "getActiveSurface"

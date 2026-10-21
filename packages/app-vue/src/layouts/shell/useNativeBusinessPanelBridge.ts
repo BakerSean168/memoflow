@@ -59,7 +59,6 @@ export function useNativeBusinessPanelBridge() {
           'remove_key_result',
           'focus',
           'submit',
-          'cancel',
           'release',
         ],
       });
@@ -71,9 +70,9 @@ export function useNativeBusinessPanelBridge() {
       const isControlled = Boolean(store.businessControl);
       const controlledByMe = store.businessControl?.ownerId === ownerId;
       const allowedActions = isControlled
-        ? (controlledByMe
-            ? ['patch', 'add_key_result', 'remove_key_result', 'focus', 'submit', 'cancel', 'release']
-            : [])
+        ? controlledByMe
+          ? ['patch', 'add_key_result', 'remove_key_result', 'focus', 'submit', 'release']
+          : []
         : state.busy || state.dirty
           ? []
           : ['open'];
@@ -161,7 +160,10 @@ export function useNativeBusinessPanelBridge() {
             return {
               requestId: request.requestId,
               ok: false,
-              error: { code: 'PANEL_NOT_CONTROLLED', message: 'Goal panel is not under agent control' },
+              error: {
+                code: 'PANEL_NOT_CONTROLLED',
+                message: 'Goal panel is not under agent control',
+              },
               snapshot: buildSnapshot(ownerId),
             };
           }
@@ -190,7 +192,10 @@ export function useNativeBusinessPanelBridge() {
             return {
               requestId: request.requestId,
               ok: false,
-              error: { code: 'PANEL_NOT_CONTROLLED', message: 'Goal panel is not under agent control' },
+              error: {
+                code: 'PANEL_NOT_CONTROLLED',
+                message: 'Goal panel is not under agent control',
+              },
               snapshot: buildSnapshot(ownerId),
             };
           }
@@ -219,7 +224,10 @@ export function useNativeBusinessPanelBridge() {
             return {
               requestId: request.requestId,
               ok: false,
-              error: { code: 'PANEL_NOT_CONTROLLED', message: 'Goal panel is not under agent control' },
+              error: {
+                code: 'PANEL_NOT_CONTROLLED',
+                message: 'Goal panel is not under agent control',
+              },
               snapshot: buildSnapshot(ownerId),
             };
           }
@@ -248,7 +256,10 @@ export function useNativeBusinessPanelBridge() {
             return {
               requestId: request.requestId,
               ok: false,
-              error: { code: 'PANEL_NOT_CONTROLLED', message: 'Goal panel is not under agent control' },
+              error: {
+                code: 'PANEL_NOT_CONTROLLED',
+                message: 'Goal panel is not under agent control',
+              },
               snapshot: buildSnapshot(ownerId),
             };
           }
@@ -265,7 +276,10 @@ export function useNativeBusinessPanelBridge() {
             return {
               requestId: request.requestId,
               ok: false,
-              error: { code: 'PANEL_NOT_CONTROLLED', message: 'Goal panel is not under agent control' },
+              error: {
+                code: 'PANEL_NOT_CONTROLLED',
+                message: 'Goal panel is not under agent control',
+              },
               snapshot: buildSnapshot(ownerId),
             };
           }
