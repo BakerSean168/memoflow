@@ -8,6 +8,7 @@ import type { DatabaseClient, IApiModuleContext } from '../../shared/contracts/a
 import { env } from '../../shared/infrastructure/config/env.js';
 import { composePowerSyncApiModule } from './module.js';
 import { computeProfileSnapshotKey } from './snapshot-storage.js';
+import { PowerSyncPreferenceConflictError } from './user-preference-crud-executor.js';
 
 const TEST_IDENTITY_ID = '7e92ca52-b331-4cbb-9ecc-2b1f1471c370';
 
@@ -31,16 +32,18 @@ function createSqliteBuffer(): Buffer {
   return Buffer.concat([Buffer.from('SQLite format 3\u0000', 'utf8'), Buffer.alloc(512)]);
 }
 
-async function createTestApp(): Promise<ReturnType<typeof express>> {
+async function createTestApp(database?: DatabaseClient): Promise<ReturnType<typeof express>> {
   const app = express();
   app.use(express.json());
 
   const router = Router();
   app.use('/api/v1', router);
-  const db = {
-    $transaction: async (callback: (tx: Record<string, never>) => Promise<void>) =>
-      await callback({}),
-  } as unknown as DatabaseClient;
+  const db =
+    database ??
+    ({
+      $transaction: async (callback: (tx: Record<string, never>) => Promise<void>) =>
+        await callback({}),
+    } as unknown as DatabaseClient);
 
   const context: IApiModuleContext = {
     app,
@@ -77,6 +80,46 @@ describe('PowerSyncApiModule profile snapshot routes', () => {
   afterEach(async () => {
     env.POWERSYNC_SNAPSHOT_DIR = previousSnapshotDir;
     await fs.promises.rm(snapshotRootDir, { recursive: true, force: true });
+  });
+
+  it('returns a machine-readable 409 without acknowledging a different canonical ID', async () => {
+    const db = {
+      $transaction: async () => {
+        throw new PowerSyncPreferenceConflictError(
+          'presentation',
+          0,
+          {
+            namespace: 'presentation',
+            revision: 1,
+            preferences: { theme: 'dark', language: 'zh-CN' },
+          },
+          'canonical',
+          'canonical_id_mismatch',
+        );
+      },
+    } as unknown as DatabaseClient;
+    const app = await createTestApp(db);
+    const response = await request(app)
+      .put('/api/v1/powersync/crud')
+      .send({
+        transactions: [{ ops: [] }],
+      });
+    expect(response.status).toBe(409);
+    expect(response.body).toMatchObject({
+      ok: false,
+      error: {
+        code: 'CONFLICT',
+        context: {
+          code: 'preference_revision_conflict',
+          reason: 'canonical_id_mismatch',
+          identityId: TEST_IDENTITY_ID,
+          canonicalId: 'canonical',
+          namespace: 'presentation',
+          expectedRevision: 0,
+          latest: { revision: 1, preferences: { theme: 'dark', language: 'zh-CN' } },
+        },
+      },
+    });
   });
 
   it('returns available=false when no snapshot exists for the current identity', async () => {
