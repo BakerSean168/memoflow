@@ -153,6 +153,11 @@ export default {
       impact: '此操作可能更改工作区数据，请确认后继续。',
       approve: '批准',
       decline: '拒绝',
+      unknown: '审批结果待核对',
+      decisionUnknown: '尚未确认决定是否送达。请刷新会话核对状态，再决定下一步。',
+      runFailed: '本次运行失败；已接受的审批决定仍然有效。',
+      runCancelled: '本次运行已取消。',
+      execution: { completed: '已完成', failed: '失败', denied: '已拒绝' },
       transportError: '无法发送决定，请重试。',
       capabilities: {
         knowledge_search: '正在搜索知识库',

@@ -8,7 +8,31 @@ import type { WorkflowMode } from './types';
  * prompts stay in normal chat. The runtime remains the authority for workflow
  * validation and all persistent writes still stop at their HITL approval gate.
  */
-export function inferWorkflowMode(message: string): WorkflowMode {
+export function inferWorkflowMode(message: string, previousMessage = ''): WorkflowMode {
+  // Quoted plans describe source material, not commands for this turn. Scan
+  // unquoted instruction paragraphs from the end so a pasted plan cannot win
+  // over the user's final request.
+  const unquoted = message.replace(/```[\s\S]*?```|~~~[\s\S]*?~~~/gu, '')
+    .split('\n').filter((line) => !/^\s*>/u.test(line)).join('\n');
+  const segments = unquoted.split(/[\n。！？!?；;]/u).map((part) => part.trim()).filter(Boolean);
+  for (const segment of segments.reverse()) {
+    if (/(?:不要|别|暂不|先不|不必|无需).*(?:创建|新建|写入|保存|添加|规划)|(?:do not|don't)\s+(?:create|save|add|plan)/iu.test(segment)) {
+      return 'chat';
+    }
+    const mode = inferInstructionMode(segment);
+    if (mode !== 'chat') return mode;
+    if (/(确认写入|确认创建|按.{0,12}方案.{0,6}(?:写入|创建))/u.test(segment)) {
+      const context = `${unquoted}\n${previousMessage}`;
+      if (/(目标|goal)/iu.test(context)) return 'goal-create';
+      return 'chat';
+    }
+    // A final discussion request must not revive an earlier creation request.
+    if (/(先讨论|只讨论|先聊聊|先分析)/u.test(segment)) return 'chat';
+  }
+  return 'chat';
+}
+
+function inferInstructionMode(message: string): WorkflowMode {
   const text = message.trim().toLowerCase();
   if (!text) return 'chat';
 
@@ -17,7 +41,7 @@ export function inferWorkflowMode(message: string): WorkflowMode {
   const knowledgeNoun = /(知识库|知识|笔记|note|notes|knowledge base)/iu.test(text);
 
   const createVerb =
-    /(创建|新建|添加|制定|设定|规划|拆解|起草|帮我做|create|add|plan|draft|set up)/iu;
+    /(创建|新建|直接建|添加|制定|设定|规划|拆解|起草|帮我做|create|add|plan|draft|set up)/iu;
   const captureVerb =
     /(整理|记录|保存|沉淀|捕获|写成|写一|生成.*笔记|整理成.*笔记|capture|save|turn.*into.*note|write.*note)/iu;
   const queryVerb =

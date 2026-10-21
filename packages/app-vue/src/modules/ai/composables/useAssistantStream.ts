@@ -155,8 +155,8 @@ export function useAssistantStream(input: {
       }
     } catch {
       if (stillWaiting()) {
-        approval.status = 'pending';
-        approval.errorMessage = t('aiAssistant.chatPage.tools.transportError');
+        approval.status = 'unknown';
+        approval.errorMessage = t('aiAssistant.chatPage.tools.decisionUnknown');
       }
     }
   }
@@ -428,6 +428,12 @@ export function useAssistantStream(input: {
           delete item.nativeActivity;
       }
       if (event.data.activityType === 'tool') {
+        const { toolCallId, toolName, state } = event.data;
+        item.toolActivities ??= [];
+        const existing = item.toolActivities.findIndex((call) => call.toolCallId === toolCallId);
+        const activity = { toolCallId, toolName, state };
+        if (existing >= 0) item.toolActivities[existing] = activity;
+        else if (item.toolActivities.length < 256) item.toolActivities.push(activity);
         if (event.data.state === 'running') item.toolActivity = event.data;
         else if (item.toolActivity?.toolCallId === event.data.toolCallId) delete item.toolActivity;
       }

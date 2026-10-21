@@ -77,6 +77,26 @@ const i18n = createI18n({
 });
 
 describe('AIMessagePanel (V2 §6.0 welcome)', () => {
+  it('renders failed tool history and omits empty internal assistant bubbles', () => {
+    const wrapper = mount(AIMessagePanel, {
+      props: { toolMode: 'chat', timeline: [
+        { id: 'empty', role: 'assistant', status: 'success', content: '' },
+        { id: 'tool', role: 'assistant', status: 'error', content: '', toolActivities: [
+          { toolCallId: 'call', toolName: 'routine_create', state: 'failed' },
+        ] },
+      ] }, global: { plugins: [i18n] },
+    });
+    expect(wrapper.findAll('article')).toHaveLength(1);
+    expect(wrapper.get('[data-testid="ai-tool-history"]').text()).toContain('Create a routine');
+  });
+  it('keeps workflow recovery reachable inside the conversation', () => {
+    const wrapper = mount(AIMessagePanel, {
+      props: { toolMode: 'knowledge-qa', timeline: [] },
+      slots: { 'workflow-context': '<button data-testid="recover-workflow">Retry</button>' },
+      global: { plugins: [i18n] },
+    });
+    expect(wrapper.get('[data-testid="ai-message-panel"] button[data-testid="recover-workflow"]').text()).toBe('Retry');
+  });
   it('renders a localized interruption once with muted status and no send-failure alert', async () => {
     const locale = createI18n({ legacy: false, locale: 'en-US', messages: {
       'en-US': { aiAssistant: enAI }, 'zh-CN': { aiAssistant: zhAI },

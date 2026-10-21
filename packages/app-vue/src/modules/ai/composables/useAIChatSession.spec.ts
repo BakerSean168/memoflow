@@ -1424,6 +1424,44 @@ describe('useAIChatSession Mastra-native open chat', () => {
     expect(scrollTo).toHaveBeenCalledWith({ top: 1_000, behavior: 'smooth' });
   });
 
+  it('restores terminal approval and run outcomes from canonical history', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    runtime.listMessages.mockResolvedValue({ conversationId: 'conv-1', messages: [{
+      id: 'receipt', role: 'assistant', content: '', createdAt: 1, conversationId: 'conv-1',
+      approvalReceipt: { runId: 'r', toolCallId: 'call', toolName: 'routine_create', category: 'edit', risk: 'high', decision: 'approve' },
+    }, { id: 'cancel', role: 'assistant', content: '', createdAt: 2, conversationId: 'conv-1',
+      runOutcome: { runId: 'r', status: 'cancelled' },
+    }, { id: 'error', role: 'assistant', content: '', createdAt: 3, conversationId: 'conv-1',
+      runOutcome: { runId: 'r2', status: 'failed' },
+    }] });
+    const session = mountComposable(service, runtime);
+    await session.selectConversation({ id: 'conv-1', name: 'Existing' } as never, service as never, vi.fn(), () => MODEL.key);
+    expect(session.chatTimeline.value[0].approvals?.[0].status).toBe('approved');
+    expect(session.chatTimeline.value[1].status).toBe('aborted');
+    expect(session.chatTimeline.value[2].status).toBe('error');
+  });
+
+  it('preserves accepted decisions when suspension refresh fails', async () => {
+    const service = createServiceStub();
+    const runtime = createRuntimeStub();
+    runtime.listAskUserSuspensions.mockResolvedValue([{
+      runId: 'parked', toolCallId: 'write', question: 'routine_create',
+      approval: { toolName: 'routine_create', category: 'edit', risk: 'high' },
+    }]);
+    const composable = mountComposable(service, runtime);
+    await composable.selectConversation(
+      { id: 'conv-1', name: 'Existing' } as never, service as never, vi.fn(), () => MODEL.key,
+    );
+    const current = composable.chatTimeline.value;
+    const approval = current.flatMap((item) => item.approvals ?? [])[0]!;
+    runtime.listAskUserSuspensions.mockRejectedValue(new Error('offline'));
+    await composable.decideToolApproval(approval, 'approve');
+    expect(composable.chatTimeline.value).toBe(current);
+    expect(approval.status).toBe('approved');
+    expect(toastMocks.error).toHaveBeenCalledWith('Load failed');
+  });
+
   it('restores a parked approval and drains its decision before refreshing history', async () => {
     const service = createServiceStub();
     const runtime = createRuntimeStub();
@@ -1738,8 +1776,12 @@ describe('Assistant inline approval projection', () => {
     const approval = item.approvals![0];
     runtime.decideToolApproval.mockRejectedValueOnce(new Error('private transport detail'));
     await session.decideToolApproval(approval, 'approve');
-    expect(approval.status).toBe('pending');
+    expect(approval.status).toBe('unknown');
     expect(approval.errorMessage).toBeTruthy();
+    await session.decideToolApproval(approval, 'approve');
+    expect(runtime.decideToolApproval).toHaveBeenCalledTimes(1);
+    // A fresh authoritative pending projection is required before another decision.
+    approval.status = 'pending';
     expect(approval.errorMessage).not.toContain('private');
     let reject!: (error: unknown) => void;
     runtime.decideToolApproval.mockImplementationOnce(

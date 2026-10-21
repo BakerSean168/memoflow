@@ -1,5 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { RoutineDefinition, RoutineProfileStore } from '@memoflow/reminder/server';
+import {
+  createRoutineCoachCommandService,
+  createInMemoryProtocolSessionStore,
+  createInMemoryRoutineRuntimeContextStore,
+} from '@memoflow/reminder/routine-runtime';
 import { DesktopRoutineAICommandAdapter } from './routine-command.adapter';
 
 const context: ExecutionContext = {
@@ -26,6 +32,72 @@ const wallClockTrigger = {
 };
 
 describe('DesktopRoutineAICommandAdapter', () => {
+  it('writes and rereads a Routine for the conversation owner through the real service (#569)', async () => {
+    const definitions = new Map<string, RoutineDefinition>();
+    const profiles = {
+      findProfilesByIds: async () => [],
+      findDefinition: async ({
+        identityId,
+        routineId,
+      }: {
+        identityId: string;
+        routineId: string;
+      }) => {
+        const definition = definitions.get(routineId);
+        return definition?.identityId === identityId ? definition : null;
+      },
+      createDefinitionWithMemberships: vi.fn(
+        async ({
+          definition,
+        }: Parameters<RoutineProfileStore['createDefinitionWithMemberships']>[0]) => {
+          definitions.set(definition.id, definition);
+        },
+      ),
+    } satisfies Pick<
+      RoutineProfileStore,
+      'findProfilesByIds' | 'findDefinition' | 'createDefinitionWithMemberships'
+    >;
+    const owner = createRoutineCoachCommandService({
+      routineProfileStore: profiles as RoutineProfileStore,
+      runtimeContextStore: createInMemoryRoutineRuntimeContextStore(),
+      protocolSessionStore: createInMemoryProtocolSessionStore(),
+      // These ports belong to other commands; creating a definition must not touch them.
+      temporaryOverrideStore: {} as never,
+      occurrenceTruthStore: {} as never,
+    });
+    const adapter = new DesktopRoutineAICommandAdapter(owner);
+    const request = {
+      context,
+      routineId: 'confirmed-routine',
+      name: 'Study',
+      trigger: wallClockTrigger,
+      profileIds: [],
+    };
+    const receipt = await adapter.createRoutine(request);
+    expect(receipt).toMatchObject({ kind: 'routine', status: 'created', id: 'confirmed-routine' });
+    const persisted = await profiles.findDefinition({
+      identityId: context.identityId,
+      routineId: receipt.id,
+    });
+    expect(persisted).toMatchObject({
+      id: receipt.id,
+      identityId: context.identityId,
+      name: 'Study',
+      version: 1,
+    });
+    expect(persisted?.trigger).toMatchObject({
+      type: 'WallClock',
+      localTime: '22:30',
+      timeZone: 'Asia/Tokyo',
+    });
+    expect(
+      await profiles.findDefinition({ identityId: 'foreign', routineId: receipt.id }),
+    ).toBeNull();
+    await expect(adapter.createRoutine(request)).resolves.toEqual(receipt);
+    expect(profiles.createDefinitionWithMemberships).toHaveBeenCalledTimes(1);
+    expect(definitions.size).toBe(1);
+  });
+
   it('passes the canonical WallClock trigger to the Routine owner', async () => {
     const createRoutine = vi.fn(async () => ({
       routineId: 'r-1',

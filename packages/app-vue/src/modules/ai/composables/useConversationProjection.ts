@@ -197,6 +197,9 @@ export function useConversationProjection(input: {
       content?: unknown;
       attachments?: unknown;
       nativeActivities?: unknown;
+      toolActivities?: unknown;
+      approvalReceipt?: unknown;
+      runOutcome?: unknown;
       localAgentSource?: unknown;
     },
     index: number,
@@ -216,6 +219,15 @@ export function useConversationProjection(input: {
           ];
         })
       : [];
+    const approvalReceipt = AssistantRuntimeMessageViewSchema.shape.approvalReceipt.safeParse(
+      item.approvalReceipt,
+    ).data;
+    const runOutcome = AssistantRuntimeMessageViewSchema.shape.runOutcome.safeParse(
+      item.runOutcome,
+    ).data;
+    const toolActivities = AssistantRuntimeMessageViewSchema.shape.toolActivities.safeParse(
+      item.toolActivities,
+    ).data;
     return {
       id: item.id ? String(item.id) : `message-${index}`,
       role: normalizeChatRole(item.role),
@@ -226,7 +238,35 @@ export function useConversationProjection(input: {
       localAgentSource: AssistantRuntimeMessageViewSchema.shape.localAgentSource.safeParse(
         item.localAgentSource,
       ).data,
-      status: 'success',
+      toolActivities,
+      ...(approvalReceipt
+        ? {
+            approvals: [
+              {
+                ...approvalReceipt,
+                conversationId: chatConversationId.value,
+                status:
+                  approvalReceipt.decision === 'approve'
+                    ? ('approved' as const)
+                    : ('declined' as const),
+              },
+            ],
+          }
+        : {}),
+      ...(runOutcome
+        ? {
+            errorMessage: t(
+              `aiAssistant.chatPage.tools.run${runOutcome.status === 'failed' ? 'Failed' : 'Cancelled'}`,
+            ),
+          }
+        : {}),
+      status:
+        runOutcome?.status === 'cancelled'
+          ? 'aborted'
+          : runOutcome?.status === 'failed' ||
+              toolActivities?.some((call) => call.state === 'failed')
+            ? 'error'
+            : 'success',
     };
   }
 
@@ -330,9 +370,7 @@ export function useConversationProjection(input: {
     // ordinary text history. Restore them even if the turn never wrote a text
     // message before pausing, so a reload does not strand the pending answer.
     const pendingAskUser =
-      kind === 'local_agent'
-        ? []
-        : await options.runtime.listAskUserSuspensions(conversationId).catch(() => []);
+      kind === 'local_agent' ? [] : await options.runtime.listAskUserSuspensions(conversationId);
     if (
       generation !== historyGeneration ||
       runtimeChoice.value.runtimeKind !== kind ||

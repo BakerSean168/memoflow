@@ -432,6 +432,14 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
         ).toBe(true);
       await finished;
       expect(createRoutine).toHaveBeenCalledTimes(decision === 'approve' ? 1 : 0);
+      const persisted = await runtime.history.listMessages({
+        identityId: turnContext.identityId, conversationId: required.conversationId,
+      });
+      if (decision === 'cancel') {
+        expect(persisted.messages.some((message) => message.runOutcome?.status === 'cancelled')).toBe(true);
+      } else {
+        expect(persisted.messages.some((message) => message.approvalReceipt?.decision === decision && message.approvalReceipt.toolCallId === 'real-call')).toBe(true);
+      }
       if (decision === 'approve')
         expect(createRoutine.mock.calls[0][0]).toMatchObject({ context: turnContext });
       expect(events.at(-1)?.type).toBe(
@@ -497,7 +505,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     expect(turn.decline).not.toHaveBeenCalled();
     expect(
       await turn.runtime.decideToolApproval({ context: executionContext, command: turn.command }),
-    ).toBe(false);
+    ).toBe(true);
     expect(turn.events.filter((event) => event.type === 'assistant.run.started')).toHaveLength(1);
     expect(turn.events.at(-1)?.type).toBe('assistant.run.completed');
     expect(JSON.stringify(turn.events)).not.toContain('PRIVATE_ARGS');
@@ -623,6 +631,9 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
         data: { code: 'SERVICE_UNAVAILABLE', message: 'AI service is unavailable' },
       });
       expect(JSON.stringify(events)).not.toContain('PRIVATE_RESPONSE_BODY');
+      const persisted = await runtime.history.listMessages({ identityId: 'owner', conversationId: 'retryable-chat' });
+      expect(persisted.messages.some((message) => message.runOutcome?.status === 'failed' && message.runOutcome.runId === events.at(-1)?.runId)).toBe(true);
+      expect(JSON.stringify(persisted)).not.toContain('PRIVATE_RESPONSE_BODY');
     }
     expect(
       recordExecution.mock.calls
@@ -948,10 +959,9 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     await expect(runtime.decideToolApproval({ context: context('identity-a', 'stale'), command: { ...approvalCommand, toolCallId: 'other' } })).resolves.toBe(false);
     expect(await Promise.all([0, 1].map(() => runtime.decideToolApproval({ context: context('identity-a', 'approve'), command: approvalCommand })))).toEqual([true, false]);
     expect(createRoutine).toHaveBeenCalledTimes(1);
-    expect((await runtime.assistant.listSuspendedRuns({ threadId: required.conversationId, resourceId: 'identity-a' })).runs).toEqual([]);
+    await vi.waitFor(async () => expect((await runtime.assistant.listSuspendedRuns({ threadId: required.conversationId, resourceId: 'identity-a' })).runs).toEqual([]));
     expect(await runtime.listAskUserSuspensions({ identityId: 'identity-a', conversationId: required.conversationId })).toEqual([]);
-    const history = await runtime.listMessages({ identityId: 'identity-a', conversationId: required.conversationId });
-    expect(history.messages.some((message) => message.content.includes('Finished'))).toBe(true);
+    await vi.waitFor(async () => expect((await runtime.listMessages({ identityId: 'identity-a', conversationId: required.conversationId })).messages.some((message) => message.content.includes('Finished'))).toBe(true));
   }, 120000);
 
   it('recovers an unarmed native approval after a process restart without replaying the write', async () => {
@@ -987,9 +997,8 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
     expect(decisions.sort()).toEqual([false, true]);
     expect(recovered.createRoutine).toHaveBeenCalledTimes(1);
     expect(await recovered.runtime.listAskUserSuspensions({ identityId: 'identity-a', conversationId: required.conversationId })).toEqual([]);
-    const history = await recovered.runtime.history.listMessages({ identityId: 'identity-a', conversationId: required.conversationId });
-    expect(history.messages.some((message) => message.content === 'Recovered approval finished')).toBe(true);
-    await expect(recovered.runtime.decideToolApproval({ context: context('identity-a', 'replay'), command })).resolves.toBe(false);
+    await vi.waitFor(async () => expect((await recovered.runtime.history.listMessages({ identityId: 'identity-a', conversationId: required.conversationId })).messages.some((message) => message.content === 'Recovered approval finished')).toBe(true));
+    await expect(recovered.runtime.decideToolApproval({ context: context('identity-a', 'replay'), command })).resolves.toBe(true);
     expect(recovered.createRoutine).toHaveBeenCalledTimes(1);
   }, 120000);
 

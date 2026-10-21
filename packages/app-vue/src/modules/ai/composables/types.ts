@@ -104,7 +104,7 @@ export type ChatToolApproval = Extract<
 >['data'] & {
   conversationId: string;
   runId: string;
-  status: 'pending' | 'sending' | 'approved' | 'declined' | 'cancelled' | 'failed' | 'stale';
+  status: 'pending' | 'sending' | 'approved' | 'declined' | 'cancelled' | 'failed' | 'stale' | 'unknown';
   errorMessage?: string;
   parked?: boolean;
 };
@@ -128,6 +128,7 @@ export type ChatItem = {
     Extract<AssistantRuntimeEvent, { type: 'assistant.activity' }>['data'],
     { activityType: 'tool' }
   >;
+  toolActivities?: NonNullable<AssistantRuntimeMessageView['toolActivities']>;
   approvals?: ChatToolApproval[];
   nativeActivity?: { toolCallId: string; label: string };
   nativeActivities?: LocalAgentActivity[];
