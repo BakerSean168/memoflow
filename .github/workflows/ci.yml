@@ -139,14 +139,6 @@ jobs:
       - uses: ./.github/actions/publish-lane-evidence
         with: { lane: governance }
 
-  steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-      - name: Aggregate Governance child
-        env:
-          ORACLE_INPUT: >-
-            {"detector":"${{ needs.scope-detector.result }}","enabled":${{ needs.scope-detector.outputs.lane_governance == 'true' && '["governance"]' || '[]' }},"children":{"governance":"${{ needs.governance.result }}"}}
-        run: node ./tools/test-system-v2/oracle.mjs
-
   static-analysis:
     name: Static Analysis
     needs: scope-detector
@@ -313,14 +305,6 @@ jobs:
       - uses: ./.github/actions/publish-lane-evidence
         with: { lane: validate }
 
-  steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-      - name: Aggregate Validate children
-        env:
-          ORACLE_INPUT: >-
-            {"detector":"${{ needs.scope-detector.result }}","enabled":{"static":"${{ needs.scope-detector.outputs.lane_validate }}","unit-1":"${{ needs.scope-detector.outputs.unit_1 }}","unit-2":"${{ needs.scope-detector.outputs.unit_2 }}","unit-3":"${{ needs.scope-detector.outputs.unit_3 }}","typecheck":"${{ needs.scope-detector.outputs.lane_validate }}","build":"${{ needs.scope-detector.outputs.build_required }}"},"children":{"static":"${{ needs.static-analysis.result }}","unit-1":"${{ needs.unit-1.result }}","unit-2":"${{ needs.unit-2.result }}","unit-3":"${{ needs.unit-3.result }}","typecheck":"${{ needs.typecheck.result }}","build":"${{ needs.build.result }}"}}
-        run: node ./tools/test-system-v2/oracle.mjs
-
   verification-children:
     name: Verification Children
     needs: scope-detector
@@ -460,22 +444,6 @@ jobs:
            (needs.scope-detector.outputs.lane_performance == 'true' && steps.lane_status.outputs.performance != 'success'))
         run: exit 1
 
-  steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-      - name: Aggregate Boundary children
-        env:
-          ORACLE_INPUT: >-
-            {"detector":"${{ needs.scope-detector.result }}","enabled":${{ needs.scope-detector.outputs.lane_boundary == 'true' && '["boundary"]' || '[]' }},"children":{"boundary":"${{ needs.verification-children.outputs.boundary || needs.verification-children.result }}"}}
-        run: node ./tools/test-system-v2/oracle.mjs
-
-  steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-      - name: Aggregate Integration children
-        env:
-          ORACLE_INPUT: >-
-            {"detector":"${{ needs.scope-detector.result }}","enabled":${{ needs.scope-detector.outputs.lane_integration == 'true' && '["integration"]' || '[]' }},"children":{"integration":"${{ needs.verification-children.outputs.integration || needs.verification-children.result }}"}}
-        run: node ./tools/test-system-v2/oracle.mjs
-
   web-flow-shard:
     name: Web Flow Shard (${{ matrix.shard }})
     needs: [scope-detector, build]
@@ -609,30 +577,6 @@ jobs:
         with:
           lane: web
           artifact-suffix: shard-${{ strategy.job-index }}
-
-  steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-      - name: Aggregate Web Flow shards
-        env:
-          ORACLE_INPUT: >-
-            {"detector":"${{ needs.scope-detector.result }}","enabled":${{ needs.scope-detector.outputs.lane_web == 'true' && '["web"]' || '[]' }},"children":{"web":"${{ needs.web-flow-shard.result }}"}}
-        run: node ./tools/test-system-v2/oracle.mjs
-
-  steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-      - name: Aggregate Coverage children
-        env:
-          ORACLE_INPUT: >-
-            {"detector":"${{ needs.scope-detector.result }}","enabled":${{ needs.scope-detector.outputs.lane_coverage == 'true' && '["coverage"]' || '[]' }},"children":{"coverage":"${{ needs.verification-children.outputs.coverage || needs.verification-children.result }}"}}
-        run: node ./tools/test-system-v2/oracle.mjs
-
-  steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-      - name: Aggregate Performance children
-        env:
-          ORACLE_INPUT: >-
-            {"detector":"${{ needs.scope-detector.result }}","enabled":${{ needs.scope-detector.outputs.lane_performance == 'true' && '["performance"]' || '[]' }},"children":{"performance":"${{ needs.verification-children.outputs.performance || needs.verification-children.result }}"}}
-        run: node ./tools/test-system-v2/oracle.mjs
 
   delivery-observation:
     name: Delivery Observation
