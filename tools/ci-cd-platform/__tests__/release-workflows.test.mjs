@@ -78,6 +78,83 @@ test('release publish waits for exact candidate publication then resolves the bo
   assert.doesNotMatch(workflow, /needs\.finalize\.result == 'success'/);
 });
 
+test('release retry can recover an already-tested release SHA without manually creating a tag', async () => {
+  const workflow = await readRepoFile('.github/workflows/release-publish.yml');
+  const checkout = workflowStep(workflow, 'Checkout candidate');
+  const verifier = workflowStep(workflow, 'Checkout current release recovery verifier');
+  const sourceGuard = workflowStep(
+    workflow,
+    'Require exact replay SHA and current main control plane',
+  );
+  const contract = workflowStep(workflow, 'Resolve release contract');
+  const notes = workflowStep(workflow, 'Extract release notes');
+
+  assert.match(workflow, /release_sha:\s*\n\s*description:/u);
+  assert.match(workflow, /dry_run:[\s\S]*?default: true/u);
+  assert.match(checkout, /inputs\.release_sha \|\| inputs\.tag/u);
+  assert.match(checkout, /fetch-depth:\s*0/u);
+  assert.match(verifier, /github\.event_name == 'workflow_dispatch' && inputs\.release_sha != ''/u);
+  assert.match(verifier, /ref: \$\{\{ github\.sha \}\}/u);
+  assert.match(verifier, /path: \.release-recovery-control/u);
+  assert.match(sourceGuard, /test "\$GITHUB_REF" = refs\/heads\/main/u);
+  assert.match(sourceGuard, /test "\$\(git rev-parse HEAD\)" = "\$REQUESTED_SHA"/u);
+  assert.match(
+    sourceGuard,
+    /test "\$\(git -C \.release-recovery-control rev-parse HEAD\)" = "\$GITHUB_SHA"/u,
+  );
+  assert.match(sourceGuard, /test "\$\(git rev-parse origin\/main\)" = "\$GITHUB_SHA"/u);
+  assert.match(sourceGuard, /git show "\$GITHUB_SHA:package\.json"/u);
+  assert.match(sourceGuard, /git show "\$GITHUB_SHA:\.release-please-manifest\.json"/u);
+  assert.match(
+    workflowStep(workflow, 'Recheck replay control plane before creating the Draft'),
+    /test "\$\(git rev-parse origin\/main\)" = "\$GITHUB_SHA"/u,
+  );
+  assert.match(contract, /RELEASE_SHA_REPLAY:/u);
+  assert.match(contract, /--require-release --expected-tag/u);
+  assert.match(
+    contract,
+    /contract=\.\/\.release-recovery-control\/tools\/ci-cd-platform\/release-tools\/release-contract\.mjs/u,
+  );
+  assert.match(workflow, /name: Checkout current release recovery verifier for notes/u);
+  assert.match(notes, /RELEASE_SHA_REPLAY:/u);
+  assert.match(
+    notes,
+    /node "\$contract" --require-release --expected-tag "\$RELEASE_TAG" --write-notes release-notes\.md/u,
+  );
+  assert.match(workflow, /git merge-base --is-ancestor HEAD origin\/main/u);
+  assert.match(workflow, /No successful exact-SHA main CI run found/u);
+  assert.match(workflow, /Verify release test and artifact provenance before mutation/u);
+});
+
+test('desktop and Docker release lanes validate source identity through the pinned caller verifier', async () => {
+  const [assets, images] = await Promise.all([
+    readRepoFile('.github/workflows/release-assets.yml'),
+    readRepoFile('.github/workflows/publish-images.yml'),
+  ]);
+
+  const desktopControl = workflowStep(assets, 'Checkout release packaging tooling');
+  const desktopSource = workflowStep(assets, 'Checkout exact release source');
+  const desktopContract = workflowStep(assets, 'Validate release contract');
+  assert.match(desktopControl, /ref: \$\{\{ github\.workflow_sha \}\}/u);
+  assert.match(desktopSource, /ref: \$\{\{ needs\.prepare-release\.outputs\.release_sha \}\}/u);
+  assert.match(
+    desktopContract,
+    /node \.\.\/release-tooling\/tools\/ci-cd-platform\/release-tools\/release-contract\.mjs/u,
+  );
+
+  const dockerSource = workflowStep(images, 'Checkout exact release tooling');
+  const dockerControl = workflowStep(images, 'Checkout pinned release promotion verifier');
+  const dockerContract = workflowStep(images, 'Validate release contract');
+  assert.match(dockerSource, /ref: \$\{\{ needs\.prepare-release\.outputs\.release_sha \}\}/u);
+  assert.match(dockerControl, /ref: \$\{\{ github\.workflow_sha \}\}/u);
+  assert.match(dockerControl, /path: \.release-promotion-control/u);
+  assert.match(
+    dockerContract,
+    /node \.\/\.release-promotion-control\/tools\/ci-cd-platform\/release-tools\/release-contract\.mjs/u,
+  );
+  assert.match(dockerContract, /--require-release --expected-tag "\$RELEASE_TAG"/u);
+});
+
 test('GitHub Release mutations use the configured operator token instead of the limited Actions integration token', async () => {
   const [publish, assets, images] = await Promise.all([
     readRepoFile('.github/workflows/release-publish.yml'),

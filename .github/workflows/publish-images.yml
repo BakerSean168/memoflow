@@ -145,10 +145,17 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           package-manager-cache: false
 
+      - name: Checkout pinned release promotion verifier
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: .release-promotion-control
+          fetch-depth: 1
+
       - name: Validate release contract
         env:
           RELEASE_TAG: ${{ needs.prepare-release.outputs.release_tag }}
-        run: node ./tools/ci-cd-platform/release-tools/release-contract.mjs --require-release --expected-tag "$RELEASE_TAG"
+        run: node ./.release-promotion-control/tools/ci-cd-platform/release-tools/release-contract.mjs --require-release --expected-tag "$RELEASE_TAG"
 
       - uses: ./.github/actions/setup-nx-affected-job
         with: { node-version: '${{ env.NODE_VERSION }}', setup-python: 'false', setup-uv: 'false' }

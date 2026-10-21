@@ -42,7 +42,10 @@ async function createReleaseRepo({ desktopVersion = '1.2.3', manifestVersion = '
   return cwd;
 }
 
-async function createMergedReleaseRepo() {
+async function createMergedReleaseRepo({
+  mainSyncCount = 0,
+  syncSubject = "Merge branch 'main' into release-please--branches--main--components--memoflow",
+} = {}) {
   const cwd = await mkdtemp(path.join(os.tmpdir(), 'memoflow-release-merge-contract-'));
   await mkdir(path.join(cwd, 'apps/desktop'), { recursive: true });
   git(cwd, ['init', '-q', '-b', 'main']);
@@ -66,6 +69,15 @@ async function createMergedReleaseRepo() {
   );
   git(cwd, ['add', '.']);
   git(cwd, ['commit', '-q', '-m', 'chore(main): release 1.2.3 (#999)']);
+
+  for (let index = 0; index < mainSyncCount; index += 1) {
+    git(cwd, ['checkout', '-q', 'main']);
+    await writeFile(path.join(cwd, `unrelated-main-${index}.txt`), 'Independent main change\n');
+    git(cwd, ['add', '.']);
+    git(cwd, ['commit', '-q', '-m', `fix: advance main while release is open ${index}`]);
+    git(cwd, ['checkout', '-q', 'release']);
+    git(cwd, ['merge', '-q', '--no-ff', 'main', '-m', syncSubject]);
+  }
 
   git(cwd, ['checkout', '-q', 'main']);
   git(cwd, [
@@ -105,6 +117,42 @@ test('release contract recognizes the merged release PR head while binding the m
     assert.match(contract.notes, /merged release lifecycle/);
   } finally {
     await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test('release contract recognizes the release commit after main was merged into an open release PR', async () => {
+  const cwd = await createMergedReleaseRepo({ mainSyncCount: 1 });
+  try {
+    const contract = await readReleaseContract({ cwd });
+    assert.equal(contract.eligible, true);
+    assert.equal(contract.version, '1.2.3');
+    assert.equal(contract.sha, git(cwd, ['rev-parse', 'HEAD']));
+    assert.equal(
+      git(cwd, ['log', '-1', '--pretty=%s', 'HEAD^2']),
+      "Merge branch 'main' into release-please--branches--main--components--memoflow",
+    );
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test('release contract permits repeated legitimate main syncs but never arbitrary merge ancestry', async () => {
+  const good = await createMergedReleaseRepo({ mainSyncCount: 2 });
+  const unrelated = await createMergedReleaseRepo({
+    mainSyncCount: 1,
+    syncSubject: 'Merge a feature branch into the release candidate',
+  });
+  try {
+    const contract = await readReleaseContract({ cwd: good });
+    assert.equal(contract.eligible, true);
+    assert.equal(contract.tag, 'v1.2.3');
+    const rejected = await readReleaseContract({ cwd: unrelated });
+    assert.equal(rejected.eligible, false);
+  } finally {
+    await Promise.all([
+      rm(good, { recursive: true, force: true }),
+      rm(unrelated, { recursive: true, force: true }),
+    ]);
   }
 });
 

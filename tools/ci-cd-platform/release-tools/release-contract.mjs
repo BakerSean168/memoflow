@@ -1,9 +1,12 @@
 import { pathToFileURL } from 'node:url';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 const RELEASE_SUBJECT = /^chore\(main\): release (\d+\.\d+\.\d+)(?: \(#\d+\))?$/u;
+
+const RELEASE_MAIN_SYNC_SUBJECT =
+  /^Merge branch 'main' into release-please--branches--main--components--[a-z0-9-]+$/u;
 
 function git(cwd, args) {
   return execFileSync('git', args, { cwd, encoding: 'utf8' }).trim();
@@ -13,18 +16,43 @@ function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&');
 }
 
+function commitParents(cwd, ref) {
+  return git(cwd, ['rev-list', '--parents', '-n', '1', ref]).split(/\s+/u).slice(1);
+}
+
 function resolveReleaseSubject(cwd) {
   const headSubject = git(cwd, ['log', '-1', '--pretty=%s']);
   if (RELEASE_SUBJECT.test(headSubject)) return headSubject;
 
-  const parents = git(cwd, ['rev-list', '--parents', '-n', '1', 'HEAD']).split(/\s+/u).slice(1);
+  const parents = commitParents(cwd, 'HEAD');
   if (parents.length !== 2) return headSubject;
 
-  // Release PRs are intentionally merged with a merge commit so the release SHA
-  // is the main-branch integration point. The second parent is the PR head and
-  // retains release-please's conventional release subject.
-  const mergedHeadSubject = git(cwd, ['log', '-1', '--pretty=%s', parents[1]]);
-  return RELEASE_SUBJECT.test(mergedHeadSubject) ? mergedHeadSubject : headSubject;
+  // A Release PR is merged as a real merge commit, which is the immutable
+  // release SHA. When the PR was updated with main before merging, its second
+  // parent is another merge commit rather than the release-please commit.
+  // Follow ONLY recognized release-branch main-sync merges; never search
+  // arbitrary ancestors for a release-looking subject.
+  const mainParent = parents[0];
+  let branchHead = parents[1];
+  for (let depth = 0; depth < 8; depth += 1) {
+    const subject = git(cwd, ['log', '-1', '--pretty=%s', branchHead]);
+    if (RELEASE_SUBJECT.test(subject)) return subject;
+    if (!RELEASE_MAIN_SYNC_SUBJECT.test(subject)) return headSubject;
+
+    const syncParents = commitParents(cwd, branchHead);
+    if (syncParents.length !== 2) return headSubject;
+    const [releaseParent, syncedMain] = syncParents;
+
+    // A forged or unrelated merge must not qualify. The main commit merged
+    // into the release branch must be an ancestor of the release integration.
+    const ancestry = spawnSync('git', ['merge-base', '--is-ancestor', syncedMain, mainParent], {
+      cwd,
+      encoding: 'utf8',
+    });
+    if (ancestry.status !== 0) return headSubject;
+    branchHead = releaseParent;
+  }
+  return headSubject;
 }
 
 export async function readReleaseContract({ cwd = process.cwd() } = {}) {
