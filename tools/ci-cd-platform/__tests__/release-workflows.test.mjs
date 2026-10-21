@@ -483,7 +483,7 @@ test('runtime dependencies are digest-pinned and mirrored to both China and glob
     powersync.source,
     'docker.io/journeyapps/powersync-service@sha256:bf46f66e5dcc8f6a084de02ab51155dfa655bc610aa95009fff1c36f949c0acf',
   );
-  assert.equal(powersync.tag, '1.25.0-43465dad45e6');
+  assert.equal(powersync.tag, '1.25.0-oci-43465dad45e6');
   assert.equal(
     powersync.mirrorDigest,
     'sha256:43465dad45e663cbf968494c0eaded002d4ad7ac1af9359dee6df06c8821715a',
@@ -506,10 +506,11 @@ test('runtime dependencies are digest-pinned and mirrored to both China and glob
   assert.match(workflow, /Login to ACR/);
   assert.match(workflow, /Login to GHCR/);
   assert.match(workflow, /skopeo copy --all --preserve-digests/);
-  assert.equal((workflow.match(/skopeo copy --all --preserve-digests/g) ?? []).length, 2);
+  assert.equal((workflow.match(/skopeo copy --all --preserve-digests/g) ?? []).length, 5);
   assert.match(workflow, /verify-oci-platforms\.mjs/u);
-  assert.match(workflow, /docker buildx imagetools create --tag/u);
-  assert.match(workflow, /skopeo copy --preserve-digests/u);
+  assert.doesNotMatch(workflow, /docker buildx imagetools create/u);
+  assert.match(workflow, /oci:\$layout:curated/u);
+  assert.match(workflow, /--layout/u);
   assert.match(workflow, /curate-oci-index\.mjs/u);
   assert.match(workflow, /china_digest/);
   assert.match(workflow, /global_digest/);

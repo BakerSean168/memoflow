@@ -13344,7 +13344,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "node-test",
-      "fileCount": 40
+      "fileCount": 42
     },
     {
       "id": "memoflow:test:governance",
@@ -14306,7 +14306,7 @@
     "boundary-main": 10,
     "e2e": 67,
     "perf": 2,
-    "governance": 75
+    "governance": 77
   },
   "e2eGovernance": {
     "version": 2,

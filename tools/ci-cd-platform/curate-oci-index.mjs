@@ -6,6 +6,8 @@
  * child manifest digests and original media types are unchanged.
  */
 import { createHash } from 'node:crypto';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import process from 'node:process';
 import { validateOciPlatforms } from './verify-oci-platforms.mjs';
@@ -29,11 +31,51 @@ export function curatedIndexDigest(upstream) {
   const bytes = JSON.stringify(curatedLinuxIndex(upstream));
   return `sha256:${createHash('sha256').update(bytes).digest('hex')}`;
 }
+export async function writeCuratedLayout(upstream, directory) {
+  const index = curatedLinuxIndex(upstream);
+  // Verify copied executable manifests against the pinned descriptors.
+  for (const child of index.manifests) {
+    const bytes = await readFile(path.join(directory, 'blobs', 'sha256', child.digest.slice(7)));
+    const digest = 'sha256:' + createHash('sha256').update(bytes).digest('hex');
+    if (digest !== child.digest || bytes.length !== child.size) {
+      throw new Error('OCI child content does not match its pinned descriptor');
+    }
+  }
+  const bytes = JSON.stringify(index);
+  const digest = curatedIndexDigest(upstream);
+  await mkdir(path.join(directory, 'blobs', 'sha256'), { recursive: true });
+  await writeFile(path.join(directory, 'blobs', 'sha256', digest.slice(7)), bytes);
+  await writeFile(
+    path.join(directory, 'oci-layout'),
+    JSON.stringify({ imageLayoutVersion: '1.0.0' }),
+  );
+  await writeFile(
+    path.join(directory, 'index.json'),
+    JSON.stringify({
+      schemaVersion: 2,
+      manifests: [
+        {
+          mediaType: index.mediaType,
+          digest,
+          size: Buffer.byteLength(bytes),
+          annotations: { 'org.opencontainers.image.ref.name': 'curated' },
+        },
+      ],
+    }),
+  );
+  return digest;
+}
 async function main() {
-  if (process.argv.length !== 2) throw new Error('reads one source OCI index from stdin');
+  const args = process.argv.slice(2);
+  if (args.length && (args.length !== 2 || args[0] !== '--layout')) {
+    throw new Error('reads one source OCI index from stdin; optional --layout <directory>');
+  }
   let raw = '';
   for await (const chunk of process.stdin) raw += chunk.toString('utf8');
-  console.log(curatedIndexDigest(JSON.parse(raw)));
+  const upstream = JSON.parse(raw);
+  console.log(
+    args.length ? await writeCuratedLayout(upstream, args[1]) : curatedIndexDigest(upstream),
+  );
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   main().catch((error) => {

@@ -6,6 +6,8 @@ on:
     paths:
       - tools/ci-cd-platform/runtime-image-mirrors.json
       - .github/workflows/mirror-runtime-images.yml
+      - tools/ci-cd-platform/curate-oci-index.mjs
+      - tools/ci-cd-platform/verify-oci-platforms.mjs
   workflow_dispatch:
 
 permissions:
@@ -43,9 +45,6 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends skopeo
-
-      - name: Set up Docker Buildx for curated OCI indexes
-        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4
 
       - name: Mirror exact manifests and verify digest parity
         env:
@@ -98,23 +97,17 @@ jobs:
                 skopeo copy --all --preserve-digests --authfile "$AUTH_FILE" \
                   "docker://$source" "docker://$global_ref"
               else
-                # ACR rejects PowerSync's optional unknown/unknown attestation images.
-                # Copy the two pinned executable child manifests without rewriting
-                # their digests, then create the same two-platform OCI index in
-                # both registries. No registry-specific mutable manifest fallback.
-                upstream_repo="${source%@*}"
-                for arch in amd64 arm64; do
-                  child="$(printf '%s' "$source_raw" | jq -r --arg arch "$arch" '.manifests[] | select(.platform.os == "linux" and .platform.architecture == $arch) | .digest')"
-                  [[ "$child" =~ ^sha256:[0-9a-f]{64}$ ]]
-                  skopeo copy --preserve-digests --authfile "$AUTH_FILE" \
-                    "docker://$upstream_repo@$child" "docker://$china_ref-$arch"
-                  skopeo copy --preserve-digests --authfile "$AUTH_FILE" \
-                    "docker://$upstream_repo@$child" "docker://$global_ref-$arch"
-                done
-                docker buildx imagetools create --tag "$china_ref" \
-                  "$china_ref-amd64" "$china_ref-arm64"
-                docker buildx imagetools create --tag "$global_ref" \
-                  "$global_ref-amd64" "$global_ref-arm64"
+                # Copy the exact pinned children into a local OCI layout, then
+                # publish deterministic index bytes without referrer discovery.
+                layout="$(mktemp -d)"
+                skopeo copy --all --preserve-digests --authfile "$AUTH_FILE" \
+                  "docker://$source" "oci:$layout:upstream"
+                test "$(printf '%s' "$source_raw" | node ./tools/ci-cd-platform/curate-oci-index.mjs --layout "$layout")" = "$curated_digest"
+                skopeo copy --all --preserve-digests --authfile "$AUTH_FILE" \
+                  "oci:$layout:curated" "docker://$china_ref"
+                skopeo copy --all --preserve-digests --authfile "$AUTH_FILE" \
+                  "oci:$layout:curated" "docker://$global_ref"
+                rm -rf -- "$layout"
               fi
             fi
 
