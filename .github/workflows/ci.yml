@@ -132,8 +132,8 @@ jobs:
           consume-delivery-manifest: 'true'
       - name: Nx sync generators are applied
         run: pnpm exec nx sync:check
-      - run: pnpm exec nx run test-system-v2:test:inventory --outputStyle=static
-      - run: node ./tools/test/test-target-governance.mjs --check
+      # governance-check depends on test-system-v2:test:governance, which owns
+      # the single inventory + target-governance execution.
       - run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run memoflow:governance-check
         env: { TEST_REPORT_NAME: governance, DELIVERY_LANE: governance }
       - uses: ./.github/actions/publish-lane-evidence
@@ -498,12 +498,13 @@ jobs:
         env: { TEST_REPORT_NAME: web-database, DELIVERY_LANE: web }
       - run: pnpm exec playwright install chromium
       - name: Provision visual regression fonts
+        if: github.event_name != 'pull_request' || strategy.job-index == 0
         shell: bash
         timeout-minutes: 5
         run: |
           set -euo pipefail
           # Match the Ubuntu Noble CJK fallback used to generate the tracked PNG baselines.
-          # Browser caching does not provision host fonts; every shard needs this prerequisite.
+          # Only shards executing visual comparisons need this prerequisite.
           # Avoid the runner mirror list repeatedly retrying an unreachable Azure mirror.
           fonts_sources="$RUNNER_TEMP/visual-fonts.list"
           printf '%s\n' 'deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://archive.ubuntu.com/ubuntu noble main universe' > "$fonts_sources"
@@ -546,7 +547,18 @@ jobs:
           path: reports/web-shards/*.json
           if-no-files-found: error
           retention-days: 14
-      - name: Product visual matrix (compare only)
+      # Keep the existing algorithms and baselines. PRs exercise wide/light,
+      # narrow/dark, long text, every canonical Web surface and Desktop shell.
+      # Schedule/dispatch retain the complete existing target, without a grep.
+      - name: Product visual representatives (compare only)
+        if: github.event_name == 'pull_request' && strategy.job-index == 0
+        run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run web:e2e:visual-regression -- --grep "$VISUAL_PR_GREP"
+        env:
+          VISUAL_PR_GREP: '1280px light$|440px dark$|840px light$|web: |desktop: (shell\.|foundation\.)|#484 (web .*1280px|desktop .*440px)$|UI-9002|post-vNext|preserve the active Task draft \(light\)'
+          TEST_REPORT_NAME: web-visual-representatives
+          DELIVERY_LANE: web
+      - name: Product visual full audit (compare only)
+        if: github.event_name != 'pull_request'
         run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run web:e2e:visual-regression -- --shard=${{ matrix.shard }}
         env:
           TEST_REPORT_NAME: web-visual-${{ strategy.job-index }}
@@ -603,6 +615,7 @@ jobs:
       - name: Download lane evidence
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
+          pattern: delivery-*-*-*-${{ github.run_id }}
           path: reports/run-evidence
       - name: Collect GitHub run metrics
         id: run_metrics

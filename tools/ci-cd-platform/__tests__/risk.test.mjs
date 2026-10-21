@@ -149,6 +149,24 @@ test('test harness registries select validation, timing history selects Web Flow
   assert.equal(classifyRisk(['tools/test-system-v2/run-web-shard.mjs']).level, 'root');
 });
 
+test('PR measurement lanes stay off even for root scope or an explicit full PR', () => {
+  for (const files of [['nx.json'], ['packages/task/src/domain.ts']]) {
+    for (const full of [false, true]) {
+      const lanes = selectLanes({
+        risk: classifyRisk(files),
+        scope: { coverage: ['task'], perf: ['task'], boundary: ['desktop'], integration: ['api'] },
+        event: 'pull_request',
+        full,
+      });
+      assert.equal(lanes.coverage, false);
+      assert.equal(lanes.performance, false);
+      assert.equal(lanes.validate, true);
+      assert.equal(lanes.boundary, true);
+      assert.equal(lanes.integration, true);
+    }
+  }
+});
+
 test('full events enable every lane', () => {
   const lanes = selectLanes({
     risk: { level: 'docs' },
