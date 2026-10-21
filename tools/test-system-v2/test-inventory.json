@@ -372,6 +372,16 @@
       ]
     },
     {
+      "path": "apps/api/src/modules/powersync/user-preference-crud-executor.postgres.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
       "path": "apps/api/src/modules/powersync/user-preference-crud-executor.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -1108,6 +1118,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/database/__tests__/powersync-preference-recovery.spec.ts",
+      "primarySuite": "boundary-main",
+      "collectors": [
+        "apps/desktop/vitest.main.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/database/__tests__/powersync-public-surface.spec.ts",
       "primarySuite": "boundary-main",
       "collectors": [
@@ -1236,6 +1254,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/modules/ai/desktop-native-panel-bridge.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/modules/ai/goal-plan-mutation.adapter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -1245,6 +1271,14 @@
     },
     {
       "path": "apps/desktop/src/main/modules/ai/local-agent-knowledge.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/modules/ai/local-agent-panel-tools.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -4399,6 +4433,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/mastra/runtime/assistant-approval-boundary.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/mastra/runtime/assistant-history.persistence.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4855,6 +4899,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/app-vue/src/layouts/shell/useNativeBusinessPanelBridge.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/app-vue/src/layouts/shell/usePanelWidth.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -4946,14 +4998,6 @@
     },
     {
       "path": "packages/app-vue/src/modules/ai/components/AIComposerControls.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/app-vue/src/modules/ai/components/AIContextPanel.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -5122,6 +5166,14 @@
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/useAIKnowledgeCapture.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/app-vue/src/modules/ai/composables/useAIKnowledgeQaWorkflow.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -6958,6 +7010,14 @@
     },
     {
       "path": "packages/contracts/src/modules/ai/api/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/modules/ai/api/goal-panel.dto.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -12877,7 +12937,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 76
+      "fileCount": 77
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -12891,7 +12951,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 121
+      "fileCount": 122
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -13017,7 +13077,7 @@
       "type": "primary",
       "suite": "boundary-main",
       "runner": "vitest",
-      "fileCount": 9
+      "fileCount": 10
     },
     {
       "id": "apps/desktop/playwright.config.ts",
@@ -13410,14 +13470,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 76
+      "fileCount": 77
     },
     {
       "id": "apps/desktop/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 107
+      "fileCount": 109
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -13452,14 +13512,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 121
+      "fileCount": 122
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 250
+      "fileCount": 251
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -13480,7 +13540,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 98
+      "fileCount": 99
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -13664,6 +13724,7 @@
       "apps/api/src/modules/powersync/routine-compound-crud-executor.spec.ts",
       "apps/api/src/modules/powersync/snapshot-builder.spec.ts",
       "apps/api/src/modules/powersync/snapshot-storage.spec.ts",
+      "apps/api/src/modules/powersync/user-preference-crud-executor.postgres.spec.ts",
       "apps/api/src/modules/powersync/user-preference-crud-executor.spec.ts",
       "apps/api/src/modules/powersync/user-preference-sync.surface.spec.ts",
       "apps/api/src/modules/relation/module.spec.ts",
@@ -13846,6 +13907,7 @@
       "packages/ai/src/server/mastra/context/assistant-selected-context-hydrator.spec.ts",
       "packages/ai/src/server/mastra/mastra-vnext-architecture.surface.spec.ts",
       "packages/ai/src/server/mastra/models/model-resolver.spec.ts",
+      "packages/ai/src/server/mastra/runtime/assistant-approval-boundary.spec.ts",
       "packages/ai/src/server/mastra/runtime/assistant-history.persistence.spec.ts",
       "packages/ai/src/server/mastra/runtime/assistant-history.service.spec.ts",
       "packages/ai/src/server/mastra/runtime/assistant-observability.spec.ts",
@@ -14224,11 +14286,11 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1187,
+    "unit": 1193,
     "integration": 52,
     "smoke": 3,
     "boundary-ipc": 8,
-    "boundary-main": 9,
+    "boundary-main": 10,
     "e2e": 67,
     "perf": 2,
     "governance": 75
