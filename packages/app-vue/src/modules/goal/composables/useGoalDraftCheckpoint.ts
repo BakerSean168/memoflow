@@ -152,6 +152,22 @@ export function useGoalDraftCheckpoint(store?: GoalDraftCheckpointStore) {
     return drain();
   }
 
+  async function detachTransientWorkflow(runId: string): Promise<boolean> {
+    // A recreated renderer cannot inherit a local Agent's capability. Preserve
+    // pending submission identity and phase: only the owner receipt can settle it.
+    if (!runId.startsWith('local-agent:')) return false;
+    if (writing && !(await writing)) return false;
+    const saved = content.value;
+    if (
+      !saved ||
+      saved.workflowRunId !== runId ||
+      ['conflict', 'unavailable'].includes(status.value)
+    )
+      return false;
+    pending = GoalDraftCheckpointContentSchema.parse({ ...saved, workflowRunId: null });
+    return drain();
+  }
+
   function adoptWorkflow(runId: string): boolean {
     if (!['workflow', 'pending'].includes(status.value) || content.value?.workflowRunId !== runId)
       return false;
@@ -189,6 +205,7 @@ export function useGoalDraftCheckpoint(store?: GoalDraftCheckpointStore) {
     capture,
     prepare,
     allowEditing,
+    detachTransientWorkflow,
     adoptWorkflow,
     discard,
     complete,

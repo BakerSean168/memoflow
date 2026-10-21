@@ -56,7 +56,11 @@ describe('Desktop Local Agent Goal Panel Tools', () => {
       writeScopes: ['goals:write'],
     };
 
-    async function callMcp(grant: { url: string; token: string }, method: string, params: unknown = {}) {
+    async function callMcp(
+      grant: { url: string; token: string },
+      method: string,
+      params: unknown = {},
+    ) {
       return fetch(grant.url, {
         method: 'POST',
         headers: {
@@ -99,8 +103,29 @@ describe('Desktop Local Agent Goal Panel Tools', () => {
       expect(openText).toContain('"isControlled":true');
       expect(mockBridge.executeCommand).toHaveBeenCalledTimes(1);
 
-      // 3. Revoke triggers release
+      const first = vi.mocked(mockBridge.executeCommand).mock.calls[0]![0];
+      const snapshotRes = await callMcp(grant, 'tools/call', {
+        name: 'goal_panel_snapshot',
+        arguments: {},
+      });
+      await snapshotRes.text();
+      expect(snapshotRes.status).toBe(200);
+      const second = vi.mocked(mockBridge.executeCommand).mock.calls[1]![0];
+      expect(first.signal).not.toBe(second.signal);
+      expect(first.grantSignal).toBeDefined();
+      expect(first.grantSignal).toBe(second.grantSignal);
+      expect(first.grantSignal.aborted).toBe(false);
+
+      // 3. Revoke triggers release and invalidates every request's shared grant.
       grant.revoke();
+      expect(first.grantSignal.aborted).toBe(true);
+      const denied = await callMcp(grant, 'tools/call', {
+        name: 'goal_panel_snapshot',
+        arguments: {},
+      });
+      await denied.text();
+      expect(denied.status).toBe(401);
+      expect(mockBridge.executeCommand).toHaveBeenCalledTimes(2);
       expect(mockBridge.releaseAllForRun).toHaveBeenCalledWith('conv-test', 'run-test');
     } finally {
       await bridge.dispose();

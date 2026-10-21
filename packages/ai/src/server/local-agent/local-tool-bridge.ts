@@ -14,6 +14,8 @@ export interface LocalToolContext extends ExecutionContext {
   readonly conversationId: string;
   readonly runId: string;
   readonly signal: AbortSignal;
+  /** Stable for the grant; request signal above is recreated for every HTTP call. */
+  readonly grantSignal: AbortSignal;
   readonly deadlineAt: number;
   readonly writeScopes: readonly string[];
   authorize(scope: string, tx?: IElectronDatabaseTransaction): Promise<void>;
@@ -136,6 +138,7 @@ export class LocalAgentToolBridge implements LocalAgentToolBridgePort {
                 startedAt: Date.now(),
                 deadlineAt,
                 signal,
+                grantSignal: grant.controller.signal,
                 authorize,
                 track: <T>(work: () => Promise<T>) => this.track(work),
               });

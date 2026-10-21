@@ -860,6 +860,19 @@ async function checkCheckpoint(
       // never a new create intention or an automatic replacement of the draft.
       if (!record.workflowRunId) return;
     }
+    if (
+      record.workflowRunId?.startsWith('local-agent:') &&
+      restoredWorkflowRunId.value === record.workflowRunId &&
+      controlOwnerId.value === null
+    ) {
+      // Local Agent ownership is renderer-local, not a resumable Mastra run.
+      // Any submit_pending receipt has already been checked above. A missing
+      // receipt stays pending with its original ID/payload for explicit retry.
+      if (await checkpoint.detachTransientWorkflow(record.workflowRunId)) {
+        if (active()) restoredWorkflowRunId.value = null;
+      }
+      return;
+    }
     if (!record.workflowRunId || !workflowRuntime) return;
     const snapshot = run ?? (await workflowRuntime.get({ runId: record.workflowRunId }));
     if (!active()) return;

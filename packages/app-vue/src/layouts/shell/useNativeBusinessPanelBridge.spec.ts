@@ -96,6 +96,35 @@ describe('useNativeBusinessPanelBridge', () => {
     };
   });
 
+  it('does not reacquire control when a delayed open finishes after run release', async () => {
+    const store = useAppShellStore();
+    store.openTab({ module: 'goal', route: '/goals', title: 'Goal', intent: 'deeplink' });
+    let finishOpen!: () => void;
+    mockGoalSurface.openControlled.mockImplementationOnce(async (ownerId: string) => {
+      await new Promise<void>((resolve) => {
+        finishOpen = resolve;
+      });
+      store.claimBusinessControl(ownerId, '/goals');
+      controlledSession = mockSession;
+      return mockSession;
+    });
+    const bridge = useNativeBusinessPanelBridge();
+    const request = {
+      requestId: 'late-open',
+      identityId: 'id-1',
+      conversationId: 'conv-1',
+      runId: 'run-1',
+    };
+    const opening = bridge.handleCommand({ ...request, command: { action: 'open' } });
+    await bridge.handleCommand({ ...request, command: { action: 'release' } });
+    finishOpen();
+    const response = await opening;
+    expect(response.ok).toBe(false);
+    expect(response.error?.code).toBe('PANEL_OPERATION_CANCELLED');
+    expect(store.businessControl).toBeNull();
+    expect(controlledSession).toBeNull();
+  });
+
   it('returns clean snapshot when form is not open', async () => {
     const store = useAppShellStore();
     mockSession = null;
