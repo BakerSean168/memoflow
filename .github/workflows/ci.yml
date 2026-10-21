@@ -139,12 +139,7 @@ jobs:
       - uses: ./.github/actions/publish-lane-evidence
         with: { lane: governance }
 
-  governance-oracle:
-    name: Governance Oracle
-    needs: [scope-detector, governance]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
+  steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Aggregate Governance child
         env:
@@ -318,12 +313,7 @@ jobs:
       - uses: ./.github/actions/publish-lane-evidence
         with: { lane: validate }
 
-  validate-oracle:
-    name: Validate Oracle
-    needs: [scope-detector, static-analysis, unit-1, unit-2, unit-3, typecheck, build]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
+  steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Aggregate Validate children
         env:
@@ -470,12 +460,7 @@ jobs:
            (needs.scope-detector.outputs.lane_performance == 'true' && steps.lane_status.outputs.performance != 'success'))
         run: exit 1
 
-  boundary-oracle:
-    name: Boundary Oracle
-    needs: [scope-detector, verification-children]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
+  steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Aggregate Boundary children
         env:
@@ -483,12 +468,7 @@ jobs:
             {"detector":"${{ needs.scope-detector.result }}","enabled":${{ needs.scope-detector.outputs.lane_boundary == 'true' && '["boundary"]' || '[]' }},"children":{"boundary":"${{ needs.verification-children.outputs.boundary || needs.verification-children.result }}"}}
         run: node ./tools/test-system-v2/oracle.mjs
 
-  integration-oracle:
-    name: Integration Oracle
-    needs: [scope-detector, verification-children]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
+  steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Aggregate Integration children
         env:
@@ -630,12 +610,7 @@ jobs:
           lane: web
           artifact-suffix: shard-${{ strategy.job-index }}
 
-  web-flow-oracle:
-    name: Web Flow Oracle
-    needs: [scope-detector, web-flow-shard]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
+  steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Aggregate Web Flow shards
         env:
@@ -643,12 +618,7 @@ jobs:
             {"detector":"${{ needs.scope-detector.result }}","enabled":${{ needs.scope-detector.outputs.lane_web == 'true' && '["web"]' || '[]' }},"children":{"web":"${{ needs.web-flow-shard.result }}"}}
         run: node ./tools/test-system-v2/oracle.mjs
 
-  coverage-oracle:
-    name: Coverage Oracle
-    needs: [scope-detector, verification-children]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
+  steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Aggregate Coverage children
         env:
@@ -656,12 +626,7 @@ jobs:
             {"detector":"${{ needs.scope-detector.result }}","enabled":${{ needs.scope-detector.outputs.lane_coverage == 'true' && '["coverage"]' || '[]' }},"children":{"coverage":"${{ needs.verification-children.outputs.coverage || needs.verification-children.result }}"}}
         run: node ./tools/test-system-v2/oracle.mjs
 
-  performance-oracle:
-    name: Performance Oracle
-    needs: [scope-detector, verification-children]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
+  steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Aggregate Performance children
         env:
