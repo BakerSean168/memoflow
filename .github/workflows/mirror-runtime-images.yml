@@ -60,17 +60,18 @@ jobs:
               | awk '{print "sha256:" $1}'
           }
 
-          while IFS=$'\t' read -r name source tag platform; do
+          while IFS=$'\t' read -r name source tag platforms; do
             test -n "$name"
             test -n "$source"
             test -n "$tag"
-            test "$platform" = "linux/amd64"
+            test "$platforms" = "linux/amd64,linux/arm64"
+            skopeo inspect --raw --authfile "$AUTH_FILE" "docker://$source" | node ./tools/ci-cd-platform/verify-oci-platforms.mjs
             china_ref="$CHINA_REGISTRY/$CHINA_NAMESPACE/$name:$tag"
             global_ref="ghcr.io/$GLOBAL_NAMESPACE/$name:$tag"
 
-            skopeo copy --preserve-digests --authfile "$AUTH_FILE" \
+            skopeo copy --all --preserve-digests --authfile "$AUTH_FILE" \
               "docker://$source" "docker://$china_ref"
-            skopeo copy --preserve-digests --authfile "$AUTH_FILE" \
+            skopeo copy --all --preserve-digests --authfile "$AUTH_FILE" \
               "docker://$source" "docker://$global_ref"
 
             source_digest="$(manifest_digest "$source")"
@@ -83,5 +84,5 @@ jobs:
             test "$global_digest" = "$source_digest"
             echo "$name: $source_digest" >> "$GITHUB_STEP_SUMMARY"
           done < <(
-            node -e "const c=require('./tools/ci-cd-platform/runtime-image-mirrors.json'); for (const i of c.images) console.log([i.name,i.source,i.tag,i.platform].join('\\t'))"
+            node -e "const c=require('./tools/ci-cd-platform/runtime-image-mirrors.json'); for (const i of c.images) console.log([i.name,i.source,i.tag,i.platforms.join(',')].join('\\t'))"
           )

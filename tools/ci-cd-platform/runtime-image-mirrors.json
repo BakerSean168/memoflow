@@ -1,35 +1,29 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "images": [
     {
       "name": "memoflow-postgres",
-      "source": "docker.io/pgvector/pgvector@sha256:766437bbab40c7d0b080d380e2976f9ca2e880ce8fe7544c60e832eceaf43c1c",
-      "tag": "0.8.5-pg18-766437bbab40",
-      "platform": "linux/amd64"
+      "source": "docker.io/pgvector/pgvector@sha256:12a379b47ad65289572ea0756efc11b7c241a6662833e8af7038cd3b73d647e0",
+      "tag": "0.8.5-pg18-12a379b47ad6",
+      "platforms": ["linux/amd64", "linux/arm64"]
     },
     {
       "name": "memoflow-redis",
-      "source": "docker.io/library/redis@sha256:9c3ecc609a8087c0f11c494fefaf37a8f7bf9a967631d4a0da8967a9810be354",
-      "tag": "8-alpine-9c3ecc609a80",
-      "platform": "linux/amd64"
+      "source": "docker.io/library/redis@sha256:3811787313eba226a2ef38658c6ccb91cd5e110edc89c37767de373120a0e5a0",
+      "tag": "8-alpine-3811787313eb",
+      "platforms": ["linux/amd64", "linux/arm64"]
     },
     {
       "name": "memoflow-caddy",
-      "source": "docker.io/library/caddy@sha256:4679412ccd2114dca9f3017e2c460f76c9d8eb9e1850e72fb9ecda672e05c629",
-      "tag": "2-alpine-4679412ccd21",
-      "platform": "linux/amd64"
+      "source": "docker.io/library/caddy@sha256:d8542f48d34a9cf4e4c11a478865229840e87e4c96ea3f439101f31a5d35f75f",
+      "tag": "2-alpine-d8542f48d34a",
+      "platforms": ["linux/amd64", "linux/arm64"]
     },
     {
       "name": "memoflow-powersync",
-      "source": "docker.io/journeyapps/powersync-service@sha256:58003bcf4897a36bec948a10d2f37753a1188270330d43757caa2aa8dfe2d0b8",
-      "tag": "1.25.0-58003bcf4897",
-      "platform": "linux/amd64"
-    },
-    {
-      "name": "memoflow-watchtower",
-      "source": "docker.io/containrrr/watchtower@sha256:f9086bfda061100361fc2bacf069585678d760d705cf390918ccdbda8a00980b",
-      "tag": "snapshot-f9086bfda061",
-      "platform": "linux/amd64"
+      "source": "docker.io/journeyapps/powersync-service@sha256:bf46f66e5dcc8f6a084de02ab51155dfa655bc610aa95009fff1c36f949c0acf",
+      "tag": "1.25.0-bf46f66e5dcc",
+      "platforms": ["linux/amd64", "linux/arm64"]
     }
   ]
 }

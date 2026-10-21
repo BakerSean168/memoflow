@@ -1,6 +1,10 @@
 # MemoFlow canonical production delivery
 
-> Status: IMPLEMENTED / live Alibaba acceptance pending.
+> Status: OCI multi-architecture release contract implemented. Oracle2 watcher migration is **not yet enabled**.
+>
+> **Oracle2 operator gate:** The current watcher/Compose below were built for the retired Alibaba host. They own an independent Caddy container and ports 80/443, which would conflict with Oracle2's shared CPA Caddy. Do **not** run the bootstrap/install commands below on Oracle2. The existing Oracle2 stack remains manually managed until a host-compatible watcher is implemented and verified.
+>
+> Release inputs must now use immutable OCI indexes containing both `linux/amd64` and `linux/arm64`; a single-architecture release or mirror is rejected before the `production-selected` pointer can move.
 
 This directory is the runtime authority for Delivery Platform V3 production deployment. It replaces the historical model where application containers could be changed independently through mutable image tags or Watchtower.
 

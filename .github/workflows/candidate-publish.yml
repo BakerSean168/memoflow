@@ -148,6 +148,8 @@ jobs:
           node ./tools/ci-cd-platform/verify-artifact.mjs reports/ci-cd-platform/migrator-artifact-manifest.json apps/migrator/dist "$delivery_digest"
           node ./tools/ci-cd-platform/verify-artifact.mjs reports/ci-cd-platform/database-artifact-manifest.json packages/database/dist "$delivery_digest"
           node ./tools/ci-cd-platform/verify-artifact.mjs reports/ci-cd-platform/database-runtime-artifact-manifest.json packages/database/dist/runtime-scripts "$delivery_digest"
+      - name: Set up QEMU for ARM64 candidate images
+        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4
       - name: Login to ACR
@@ -201,7 +203,7 @@ jobs:
           context: .
           file: ${{ matrix.dockerfile }}
           target: ${{ matrix.target }}
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: |
             ${{ secrets.ACR_REGISTRY }}/${{ secrets.ACR_NAMESPACE }}/${{ matrix.image }}:${{ needs.resolve.outputs.candidate_tag }}
@@ -236,6 +238,10 @@ jobs:
           global_digest="$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$global_repo:$TAG" --format '{{.Manifest.Digest}}')"
           test "$china_digest" = "$expected"
           test "$global_digest" = "$expected"
+          for repo in "$china_repo" "$global_repo"; do
+            bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$repo:$TAG" --raw \
+              | node ./tools/ci-cd-platform/verify-oci-platforms.mjs
+          done
           bash ./tools/ci-cd-platform/registry-operation-retry.sh docker pull "$china_repo:$TAG" >/dev/null
           test "$(docker image inspect "$china_repo:$TAG" --format '{{index .Config.Labels "org.opencontainers.image.revision"}}')" = "${{ needs.resolve.outputs.revision }}"
           echo "digest=$expected" >> "$GITHUB_OUTPUT"

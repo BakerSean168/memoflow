@@ -81,14 +81,15 @@ const release = {
   },
 };
 const mirrorConfig = {
-  images: ['postgres', 'redis', 'caddy', 'powersync', 'watchtower'].map((name, index) => {
-    const hex = ['4', '5', '6', '7', '8'][index];
+  schemaVersion: 2,
+  images: ['postgres', 'redis', 'caddy', 'powersync'].map((name, index) => {
+    const hex = ['4', '5', '6', '7'][index];
     const fullDigest = digest(hex);
     return {
       name: `memoflow-${name}`,
       source: `docker.io/example/${name}@${fullDigest}`,
       tag: `fixture-${fullDigest.slice(7, 19)}`,
-      platform: 'linux/amd64',
+      platforms: ['linux/amd64', 'linux/arm64'],
     };
   }),
 };
@@ -180,6 +181,28 @@ test('production selection fails closed on release/candidate drift and tampering
   assert.match(
     validateProductionSet(runtimeTamper).join('; '),
     /runtime\.powersync\.tag must bind digest prefix/u,
+  );
+});
+
+test('production selection rejects legacy single-platform runtime mirror inputs', () => {
+  const legacy = {
+    schemaVersion: 1,
+    images: mirrorConfig.images.map(({ platforms: _platforms, ...image }) => ({
+      ...image,
+      platform: 'linux/amd64',
+    })),
+  };
+  assert.throws(
+    () =>
+      createProductionSet({
+        release,
+        candidate,
+        mirrorConfig: legacy,
+        registry,
+        namespace,
+        controlPlaneSha,
+      }),
+    /multi-arch schemaVersion 2/u,
   );
 });
 

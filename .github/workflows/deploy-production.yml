@@ -221,6 +221,10 @@ jobs:
             test "$china_repo" = "$CHINA_REGISTRY/$CHINA_NAMESPACE/memoflow-$component"
             test "$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$china_repo:$RELEASE_TAG" --format '{{.Manifest.Digest}}')" = "$expected"
             test "$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$global_repo:$RELEASE_TAG" --format '{{.Manifest.Digest}}')" = "$expected"
+            for repo in "$china_repo" "$global_repo"; do
+              bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$repo:$RELEASE_TAG" --raw \
+                | node ./tools/ci-cd-platform/verify-oci-platforms.mjs
+            done
           done
           global_namespace="${GITHUB_REPOSITORY_OWNER,,}"
           for component in postgres redis powersync caddy; do
@@ -229,6 +233,10 @@ jobs:
             global_repo="ghcr.io/$global_namespace/memoflow-$component"
             test "$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$china_repo@$expected" --format '{{.Manifest.Digest}}')" = "$expected"
             test "$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$global_repo@$expected" --format '{{.Manifest.Digest}}')" = "$expected"
+            for repo in "$china_repo" "$global_repo"; do
+              bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$repo@$expected" --raw \
+                | node ./tools/ci-cd-platform/verify-oci-platforms.mjs
+            done
           done
 
       - name: Recheck release remains Published immediately before mutation
@@ -309,7 +317,7 @@ jobs:
         with:
           context: .
           file: deployment/production/Dockerfile.runtime
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: |
             ${{ secrets.ACR_REGISTRY }}/${{ secrets.ACR_NAMESPACE }}/memoflow-production-runtime:${{ steps.tag.outputs.immutable_tag }}
@@ -345,6 +353,10 @@ jobs:
           [[ "$control_digest" =~ ^sha256:[0-9a-f]{64}$ ]]
           test "$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$china_ref" --format '{{.Manifest.Digest}}')" = "$control_digest"
           test "$(bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$global_ref" --format '{{.Manifest.Digest}}')" = "$control_digest"
+          for ref in "$china_ref" "$global_ref"; do
+            bash ./tools/ci-cd-platform/registry-operation-retry.sh docker buildx imagetools inspect "$ref" --raw \
+              | node ./tools/ci-cd-platform/verify-oci-platforms.mjs
+          done
           bash ./tools/ci-cd-platform/registry-operation-retry.sh docker pull "$china_ref" >/dev/null
           test "$(docker image inspect "$china_ref" --format '{{index .Config.Labels "org.opencontainers.image.revision"}}')" = "$CONTROL_PLANE_SHA"
           test "$(docker image inspect "$china_ref" --format '{{index .Config.Labels "io.memoflow.release.revision"}}')" = "$RELEASE_SHA"

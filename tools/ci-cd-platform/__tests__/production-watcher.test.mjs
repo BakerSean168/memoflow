@@ -91,17 +91,17 @@ function fixtureProductionSet() {
     },
   };
   const mirrorConfig = {
+    schemaVersion: 2,
     images: [
       ['postgres', '4'],
       ['redis', '5'],
       ['caddy', '6'],
       ['powersync', '7'],
-      ['watchtower', '8'],
     ].map(([name, char]) => ({
       name: `memoflow-${name}`,
       source: `docker.io/example/${name}@${digest(char)}`,
       tag: `fixture-${char.repeat(12)}`,
-      platform: 'linux/amd64',
+      platforms: ['linux/amd64', 'linux/arm64'],
     })),
   };
   return createProductionSet({

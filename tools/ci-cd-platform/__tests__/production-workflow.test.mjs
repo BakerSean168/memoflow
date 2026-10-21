@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
+import { validateOciPlatforms } from '../verify-oci-platforms.mjs';
 
 const readRepoFile = (path) => readFile(new URL(`../../../${path}`, import.meta.url), 'utf8');
 
@@ -11,6 +12,50 @@ function workflowStep(workflow, name) {
   const next = workflow.indexOf('\n      - name:', start + marker.length);
   return workflow.slice(start, next < 0 ? workflow.length : next);
 }
+
+test('OCI platform guard rejects legacy amd64-only digests and malformed indexes', () => {
+  const digest = (value) => `sha256:${value.repeat(64)}`;
+  const image = (architecture, value) => ({
+    mediaType: 'application/vnd.oci.image.manifest.v1+json',
+    size: 100,
+    digest: digest(value),
+    platform: { os: 'linux', architecture },
+  });
+  const valid = {
+    mediaType: 'application/vnd.oci.image.index.v1+json',
+    manifests: [
+      image('amd64', '1'),
+      image('arm64', '2'),
+      { ...image('unknown', '3'), platform: { os: 'unknown', architecture: 'unknown' } },
+    ],
+  };
+  assert.deepEqual(validateOciPlatforms(valid), []);
+  assert.match(
+    validateOciPlatforms({ ...valid, manifests: [image('amd64', '1')] }).join('; '),
+    /linux\/arm64/u,
+  );
+  assert.match(
+    validateOciPlatforms({
+      ...valid,
+      mediaType: 'application\/vnd.oci.image.manifest.v1+json',
+    }).join('; '),
+    /multi-platform index/u,
+  );
+  assert.match(
+    validateOciPlatforms({
+      ...valid,
+      manifests: [image('amd64', '1'), image('arm64', '2'), image('arm64', '4')],
+    }).join('; '),
+    /exactly one linux\/arm64/u,
+  );
+  assert.match(
+    validateOciPlatforms({
+      ...valid,
+      manifests: [{ ...image('amd64', '1'), digest: 'sha256:bad' }, image('arm64', '2')],
+    }).join('; '),
+    /invalid child digest/u,
+  );
+});
 
 test('production selector is explicit, Published-release-only, main-bound, and environment-gated', async () => {
   const workflow = await readRepoFile('.github/workflows/deploy-production.yml');
@@ -103,6 +148,7 @@ test('production selector verifies release and runtime digest parity before cont
   assert.match(verify, /distributions\.global\.repository/u);
   assert.match(verify, /imagetools inspect/u);
   assert.match(verify, /postgres redis powersync caddy/u);
+  assert.match(verify, /verify-oci-platforms\.mjs/u);
   assert.match(mutate, /memoflow-production-runtime/u);
   assert.match(mutate, /registry-operation-retry\.sh docker buildx imagetools create/u);
   assert.match(mutate, /registry-operation-retry\.sh docker buildx imagetools inspect/u);

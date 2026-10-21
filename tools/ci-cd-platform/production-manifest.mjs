@@ -54,6 +54,8 @@ function requireReleaseIdentity(release, candidate) {
 
 function runtimeImageMap(mirrorConfig, registry, namespace, errors) {
   const result = {};
+  if (mirrorConfig?.schemaVersion !== 2)
+    errors.push('runtime mirrors must use multi-arch schemaVersion 2');
   for (const runtime of PRODUCTION_RUNTIME_IMAGES) {
     const name = `memoflow-${runtime}`;
     const mirror = mirrorConfig?.images?.find((entry) => entry.name === name);
@@ -63,7 +65,9 @@ function runtimeImageMap(mirrorConfig, registry, namespace, errors) {
     }
     const digest = String(mirror.source ?? '').split('@')[1] ?? '';
     if (!OCI_DIGEST.test(digest)) errors.push(`${name} source must be digest-pinned`);
-    if (mirror.platform !== 'linux/amd64') errors.push(`${name} must target linux/amd64`);
+    if (JSON.stringify(mirror.platforms) !== JSON.stringify(['linux/amd64', 'linux/arm64'])) {
+      errors.push(`${name} must pin linux/amd64 and linux/arm64`);
+    }
     if (!String(mirror.tag ?? '').endsWith(digest.replace('sha256:', '').slice(0, 12))) {
       errors.push(`${name} tag must bind digest prefix`);
     }

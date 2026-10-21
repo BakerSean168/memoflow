@@ -467,11 +467,11 @@ test('runtime dependencies are digest-pinned and mirrored to both China and glob
     'memoflow-postgres',
     'memoflow-powersync',
     'memoflow-redis',
-    'memoflow-watchtower',
   ]);
+  assert.equal(config.schemaVersion, 2);
   for (const entry of config.images) {
     assert.match(entry.source, /@sha256:[a-f0-9]{64}$/);
-    assert.equal(entry.platform, 'linux/amd64');
+    assert.deepEqual(entry.platforms, ['linux/amd64', 'linux/arm64']);
     assert.match(entry.tag, /^[a-z0-9][a-z0-9._-]+$/);
     const digest = entry.source.split('@sha256:')[1];
     assert.equal(entry.tag.endsWith(digest.slice(0, 12)), true);
@@ -479,9 +479,9 @@ test('runtime dependencies are digest-pinned and mirrored to both China and glob
   const powersync = config.images.find((entry) => entry.name === 'memoflow-powersync');
   assert.equal(
     powersync.source,
-    'docker.io/journeyapps/powersync-service@sha256:58003bcf4897a36bec948a10d2f37753a1188270330d43757caa2aa8dfe2d0b8',
+    'docker.io/journeyapps/powersync-service@sha256:bf46f66e5dcc8f6a084de02ab51155dfa655bc610aa95009fff1c36f949c0acf',
   );
-  assert.equal(powersync.tag, '1.25.0-58003bcf4897');
+  assert.equal(powersync.tag, '1.25.0-bf46f66e5dcc');
   const [powersyncBake, developmentCompose] = await Promise.all([
     readRepoFile('docker/powersync/Dockerfile.bake'),
     readRepoFile('docker-compose.yml'),
@@ -499,11 +499,22 @@ test('runtime dependencies are digest-pinned and mirrored to both China and glob
   assert.match(workflow, /packages:\s*write/);
   assert.match(workflow, /Login to ACR/);
   assert.match(workflow, /Login to GHCR/);
-  assert.match(workflow, /skopeo copy --preserve-digests/);
-  assert.doesNotMatch(workflow, /skopeo copy --all/);
+  assert.match(workflow, /skopeo copy --all --preserve-digests/);
+  assert.equal((workflow.match(/skopeo copy --all --preserve-digests/g) ?? []).length, 2);
+  assert.match(workflow, /verify-oci-platforms\.mjs/u);
   assert.match(workflow, /china_digest/);
   assert.match(workflow, /global_digest/);
   assert.match(workflow, /source_digest/);
+});
+
+test('release candidate images and production controls require exact OCI amd64+arm64 indexes', async () => {
+  const candidate = await readRepoFile('.github/workflows/candidate-publish.yml');
+  const selector = await readRepoFile('.github/workflows/deploy-production.yml');
+  assert.match(candidate, /setup-qemu-action@[0-9a-f]{40}/u);
+  assert.match(candidate, /platforms: linux\/amd64,linux\/arm64/u);
+  assert.match(candidate, /verify-oci-platforms\.mjs/u);
+  assert.match(selector, /platforms: linux\/amd64,linux\/arm64/u);
+  assert.match(selector, /verify-oci-platforms\.mjs/u);
 });
 
 test('Desktop release matrix covers Windows, Linux, macOS Intel and Apple Silicon with fail-closed receipts', async () => {
