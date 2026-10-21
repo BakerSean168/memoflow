@@ -1,3 +1,4 @@
+import { EventEmitter } from 'node:events';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AIChannels } from '@memoflow/contracts/electron';
 import type { LocalToolContext } from '@memoflow/ai';
@@ -46,6 +47,8 @@ describe('DesktopNativePanelBridge', () => {
     const mockWindow = {
       isDestroyed: () => false,
       webContents: {
+        on: vi.fn(),
+        removeListener: vi.fn(),
         send: vi.fn((channel, req) => {
           if (channel === AIChannels.LOCAL_AGENT_PANEL_COMMAND) {
             capturedRequest = req;
@@ -106,14 +109,20 @@ describe('DesktopNativePanelBridge', () => {
     });
     electronMock.removeHandler.mockImplementation((channel) => handlers.delete(channel));
 
-    const firstWindow = { isDestroyed: () => false, webContents: { send: vi.fn() } };
+    const firstWindow = {
+      isDestroyed: () => false,
+      webContents: { on: vi.fn(), removeListener: vi.fn(), send: vi.fn() },
+    };
     const first = new DesktopNativePanelBridge({
       getMainWindow: () => firstWindow as any,
       isActive: () => true,
       commandTimeoutMs: 1000,
     });
     const firstPending = first.executeCommand(createMockContext(), { action: 'snapshot' });
-    const secondWindow = { isDestroyed: () => false, webContents: { send: vi.fn() } };
+    const secondWindow = {
+      isDestroyed: () => false,
+      webContents: { on: vi.fn(), removeListener: vi.fn(), send: vi.fn() },
+    };
     const second = new DesktopNativePanelBridge({
       getMainWindow: () => secondWindow as any,
       isActive: () => true,
@@ -161,11 +170,100 @@ describe('DesktopNativePanelBridge', () => {
     );
   });
 
+  it('rejects an already-aborted run before sending any panel command', async () => {
+    const controller = new AbortController();
+    controller.abort();
+    const webContents = { on: vi.fn(), removeListener: vi.fn(), send: vi.fn() };
+    const bridge = new DesktopNativePanelBridge({
+      getMainWindow: () => ({ isDestroyed: () => false, webContents }) as any,
+      isActive: () => true,
+      commandTimeoutMs: 20,
+    });
+    try {
+      await expect(
+        bridge.executeCommand(createMockContext(controller.signal), { action: 'open' }),
+      ).rejects.toThrow('aborted');
+      expect(webContents.send).not.toHaveBeenCalled();
+    } finally {
+      bridge.dispose();
+    }
+  });
+
+  it('removes a settled request abort listener instead of retaining stale callbacks', async () => {
+    const controller = new AbortController();
+    const remove = vi.spyOn(controller.signal, 'removeEventListener');
+    const webContents = { on: vi.fn(), removeListener: vi.fn(), send: vi.fn() };
+    const bridge = new DesktopNativePanelBridge({
+      getMainWindow: () => ({ isDestroyed: () => false, webContents }) as any,
+      isActive: () => true,
+    });
+    try {
+      const pending = bridge.executeCommand(createMockContext(controller.signal), {
+        action: 'snapshot',
+      });
+      const request = webContents.send.mock.calls[0][1];
+      const handler = electronMock.handle.mock.calls.at(-1)![1];
+      expect(handler({ sender: webContents }, { requestId: request.requestId, ok: true })).toEqual({
+        ok: true,
+      });
+      await expect(pending).resolves.toMatchObject({ ok: true });
+      expect(remove).toHaveBeenCalledWith('abort', expect.any(Function));
+    } finally {
+      bridge.dispose();
+    }
+  });
+
+  it.each(['destroyed', 'render-process-gone', 'did-start-navigation'])(
+    'rejects pending commands on %s and removes window event listeners',
+    async (event) => {
+      const webContents = Object.assign(new EventEmitter(), { send: vi.fn() });
+      const window = { isDestroyed: () => false, webContents };
+      const bridge = new DesktopNativePanelBridge({
+        getMainWindow: () => window as any,
+        isActive: () => true,
+        commandTimeoutMs: 25,
+      });
+      try {
+        const pending = bridge.executeCommand(createMockContext(), { action: 'open' });
+        webContents.emit(event, { isMainFrame: true, isSameDocument: false });
+        await expect(pending).rejects.toThrow(/renderer|window/i);
+        expect(webContents.listenerCount(event)).toBe(0);
+      } finally {
+        bridge.dispose();
+      }
+    },
+  );
+
+  it('keeps a panel request alive for in-page navigation and iframe navigation', async () => {
+    const webContents = Object.assign(new EventEmitter(), { send: vi.fn() });
+    const window = { isDestroyed: () => false, webContents };
+    const bridge = new DesktopNativePanelBridge({
+      getMainWindow: () => window as any,
+      isActive: () => true,
+    });
+    try {
+      const pending = bridge.executeCommand(createMockContext(), { action: 'open' });
+      const request = webContents.send.mock.calls[0][1];
+      webContents.emit('did-start-navigation', { isMainFrame: true, isSameDocument: true });
+      webContents.emit('did-start-navigation', { isMainFrame: false, isSameDocument: false });
+      electronMock.handle.mock.calls.at(-1)![1](
+        { sender: webContents },
+        { requestId: request.requestId, ok: true },
+      );
+      await expect(pending).resolves.toMatchObject({ ok: true });
+      expect(webContents.eventNames()).toEqual([]);
+    } finally {
+      bridge.dispose();
+    }
+  });
+
   it('rejects when aborted', async () => {
     const controller = new AbortController();
     const mockWindow = {
       isDestroyed: () => false,
       webContents: {
+        on: vi.fn(),
+        removeListener: vi.fn(),
         send: vi.fn(),
       },
     };

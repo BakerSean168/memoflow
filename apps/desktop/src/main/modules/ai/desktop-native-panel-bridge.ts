@@ -36,6 +36,8 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
       resolve: (value: NativePanelIpcResponse) => void;
       reject: (reason: any) => void;
       timer: NodeJS.Timeout;
+      cleanup: () => void;
+      sender: BrowserWindow['webContents'];
     }
   >();
 
@@ -60,8 +62,8 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
       if (!parsed.success) return { ok: false };
 
       const pending = this.pendingRequests.get(parsed.data.requestId);
-      if (!pending) return { ok: false };
-      clearTimeout(pending.timer);
+      if (!pending || event.sender !== pending.sender) return { ok: false };
+      pending.cleanup();
       this.pendingRequests.delete(parsed.data.requestId);
       pending.resolve(parsed.data);
       return { ok: true };
@@ -76,6 +78,10 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
       throw new Error('Active profile is locked, switched, or inactive');
     }
 
+    if (context.signal?.aborted) {
+      throw new Error('Panel command was aborted');
+    }
+
     const win = this.options.getMainWindow();
     if (!win || win.isDestroyed()) {
       throw new Error('No active window available to execute panel command');
@@ -85,24 +91,43 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
     const timeoutMs = this.options.commandTimeoutMs ?? 15000;
 
     return new Promise<NativePanelIpcResponse>((resolve, reject) => {
-      const timer = setTimeout(() => {
+      const fail = (error: Error) => {
+        if (!this.pendingRequests.has(requestId)) return;
+        cleanup();
         this.pendingRequests.delete(requestId);
-        reject(new Error(`Panel command timed out after ${timeoutMs}ms`));
-      }, timeoutMs);
-
-      this.pendingRequests.set(requestId, { resolve, reject, timer });
-
-      if (context.signal) {
-        context.signal.addEventListener(
-          'abort',
-          () => {
-            clearTimeout(timer);
-            this.pendingRequests.delete(requestId);
-            reject(new Error('Panel command was aborted'));
-          },
-          { once: true },
-        );
-      }
+        // Also invalidate a renderer open that is still awaiting owner registration.
+        if (this.options.getMainWindow() === win) {
+          void this.releaseAllForRun(context.conversationId, context.runId);
+        }
+        reject(error);
+      };
+      const onAbort = () => fail(new Error('Panel command was aborted'));
+      const onRendererGone = () => fail(new Error('Panel renderer or window was closed'));
+      const onNavigation = (details: { isMainFrame: boolean; isSameDocument: boolean }) => {
+        if (details.isMainFrame && !details.isSameDocument) onRendererGone();
+      };
+      const timer = setTimeout(
+        () => fail(new Error(`Panel command timed out after ${timeoutMs}ms`)),
+        timeoutMs,
+      );
+      const cleanup = () => {
+        clearTimeout(timer);
+        context.signal?.removeEventListener('abort', onAbort);
+        win.webContents.removeListener('destroyed', onRendererGone);
+        win.webContents.removeListener('render-process-gone', onRendererGone);
+        win.webContents.removeListener('did-start-navigation', onNavigation);
+      };
+      this.pendingRequests.set(requestId, {
+        resolve,
+        reject,
+        timer,
+        cleanup,
+        sender: win.webContents,
+      });
+      context.signal?.addEventListener('abort', onAbort, { once: true });
+      win.webContents.on('destroyed', onRendererGone);
+      win.webContents.on('render-process-gone', onRendererGone);
+      win.webContents.on('did-start-navigation', onNavigation);
 
       const request: NativePanelIpcRequest = {
         requestId,
@@ -115,7 +140,7 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
       try {
         win.webContents.send(AIChannels.LOCAL_AGENT_PANEL_COMMAND, request);
       } catch (err) {
-        clearTimeout(timer);
+        cleanup();
         this.pendingRequests.delete(requestId);
         reject(err);
       }
@@ -153,7 +178,7 @@ export class DesktopNativePanelBridge implements IDesktopNativePanelBridge {
       DesktopNativePanelBridge.activeBridge = null;
     }
     for (const [, req] of this.pendingRequests) {
-      clearTimeout(req.timer);
+      req.cleanup();
       req.reject(new Error('DesktopNativePanelBridge was disposed'));
     }
     this.pendingRequests.clear();

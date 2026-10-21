@@ -9,7 +9,10 @@ import {
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import type { GoalNativeDraftState, GoalNativeEditSession } from '../../modules/goal/composables/goalNativeEditSession';
+import type {
+  GoalNativeDraftState,
+  GoalNativeEditSession,
+} from '../../modules/goal/composables/goalNativeEditSession';
 import type { OwnerNativeEditSurface } from '../../shared/composables/ownerNativeEditSession';
 import { navigateBusinessSurface } from './surface-leave-protocol';
 import { useAppShellStore } from './useAppShellStore';
@@ -18,8 +21,15 @@ export interface GoalAIEditSurface extends OwnerNativeEditSurface<GoalNativeEdit
   isAvailable(): boolean;
   openControlledCreate(ownerId: string): Promise<GoalNativeEditSession>;
   /** Explicit restart intent may reclaim this exact mounted user draft without reopening it. */
-  reclaimControlledCreate(ownerId: string, session: GoalNativeEditSession, snapshot: GoalNativeDraftState): GoalNativeEditSession;
-  openControlled(ownerId: string, options?: { mode?: 'create' | 'edit'; goalId?: string }): Promise<GoalNativeEditSession>;
+  reclaimControlledCreate(
+    ownerId: string,
+    session: GoalNativeEditSession,
+    snapshot: GoalNativeDraftState,
+  ): GoalNativeEditSession;
+  openControlled(
+    ownerId: string,
+    options?: { mode?: 'create' | 'edit'; goalId?: string },
+  ): Promise<GoalNativeEditSession>;
   getControlledSession(ownerId: string): GoalNativeEditSession | null;
   releaseControlledSession(ownerId: string): void;
 }
@@ -41,8 +51,21 @@ export function provideGoalNativeSurface(): GoalNativeSurfaceHost {
   const removeGuard = router.beforeEach(
     (to) => !store.businessControl || to.fullPath === store.businessControl.route,
   );
+  function releaseHostControl() {
+    // A BYOA run cannot resume after this renderer/host is disposed. Unlike a
+    // durable Mastra workflow, its run marker must not strand the saved draft.
+    try {
+      if (activeControlledOwnerId?.startsWith('local-agent:')) {
+        activeControlledSession?.detachWorkflow();
+      }
+    } catch {
+      /* The owner may already have disposed its capability. */
+    } finally {
+      releaseControl?.();
+    }
+  }
   onScopeDispose(() => {
-    releaseControl?.();
+    releaseHostControl();
     removeGuard();
     disposed.value = true;
     live.value = null;
@@ -140,44 +163,48 @@ export function provideGoalNativeSurface(): GoalNativeSurfaceHost {
   }
 
   function claimSession(ownerId: string, session: GoalNativeEditSession, allowDirty = false) {
-      const version = store.claimBusinessControl(ownerId, router.currentRoute.value.fullPath, allowDirty);
-      let controlled: GoalNativeEditSession;
+    const version = store.claimBusinessControl(
+      ownerId,
+      router.currentRoute.value.fullPath,
+      allowDirty,
+    );
+    let controlled: GoalNativeEditSession;
+    try {
+      controlled = session.claimControl(ownerId);
+    } catch (error) {
+      store.releaseBusinessControl(ownerId, version);
+      throw error;
+    }
+    activeControlledOwnerId = ownerId;
+    const release = () => {
       try {
-        controlled = session.claimControl(ownerId);
-      } catch (error) {
-        store.releaseBusinessControl(ownerId, version);
-        throw error;
+        controlled.releaseControl();
+      } catch {
+        /* Owner may already have closed the handle. */
       }
-      activeControlledOwnerId = ownerId;
-      const release = () => {
-        try {
-          controlled.releaseControl();
-        } catch {
-          /* Owner may already have closed the handle. */
-        }
-        store.releaseBusinessControl(ownerId, version);
-        if (releaseControl === release) releaseControl = null;
-        if (activeControlledSession === wrapped) activeControlledSession = null;
-        if (activeControlledOwnerId === ownerId) activeControlledOwnerId = null;
-      };
-      releaseControl = release;
-      const wrapped: GoalNativeEditSession = {
-        ...controlled,
-        releaseControl() {
-          controlled.releaseControl();
-          release();
-        },
-        detachWorkflow() {
-          controlled.detachWorkflow();
-          release();
-        },
-        requestCancel() {
-          controlled.requestCancel();
-          release();
-        },
-      };
-      activeControlledSession = wrapped;
-      return wrapped;
+      store.releaseBusinessControl(ownerId, version);
+      if (releaseControl === release) releaseControl = null;
+      if (activeControlledSession === wrapped) activeControlledSession = null;
+      if (activeControlledOwnerId === ownerId) activeControlledOwnerId = null;
+    };
+    releaseControl = release;
+    const wrapped: GoalNativeEditSession = {
+      ...controlled,
+      releaseControl() {
+        controlled.releaseControl();
+        release();
+      },
+      detachWorkflow() {
+        controlled.detachWorkflow();
+        release();
+      },
+      requestCancel() {
+        controlled.requestCancel();
+        release();
+      },
+    };
+    activeControlledSession = wrapped;
+    return wrapped;
   }
 
   const host: GoalNativeSurfaceHost = {
@@ -192,8 +219,14 @@ export function provideGoalNativeSurface(): GoalNativeSurfaceHost {
     },
     reclaimControlledCreate(ownerId, session, snapshot) {
       const current = session.readDraftState();
-      if (disposed.value || locate() !== session || current.mode !== 'create' || current.busy ||
-          current.revision !== snapshot.revision || JSON.stringify(current.draft) !== JSON.stringify(snapshot.draft))
+      if (
+        disposed.value ||
+        locate() !== session ||
+        current.mode !== 'create' ||
+        current.busy ||
+        current.revision !== snapshot.revision ||
+        JSON.stringify(current.draft) !== JSON.stringify(snapshot.draft)
+      )
         throw new Error('Goal surface changed before restart');
       // The native snapshot is authoritative; its busy/dirty publication may still be queued.
       store.setSurfaceStatus(current.dirty ? 'dirty' : 'clean');
@@ -245,7 +278,7 @@ export function provideGoalNativeSurface(): GoalNativeSurfaceHost {
       live.value = entry;
       return () => {
         if (live.value === entry) {
-          releaseControl?.();
+          releaseHostControl();
           live.value = null;
         }
       };

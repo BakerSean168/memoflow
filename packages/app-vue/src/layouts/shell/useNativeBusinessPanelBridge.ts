@@ -15,6 +15,8 @@ export function useNativeBusinessPanelBridge(
   goalSurface: GoalAIEditSurface = useGoalNativeSurface(),
 ) {
   const store = useAppShellStore();
+  // Owner registration may finish after cancellation; release must win that race.
+  const pendingOpens = new Map<string, { cancelled: boolean }>();
 
   function buildSnapshot(ownerId: string): GoalPanelSnapshot {
     const controlled = goalSurface.getControlledSession(ownerId);
@@ -148,8 +150,32 @@ export function useNativeBusinessPanelBridge(
           };
         }
         case 'open': {
+          if (pendingOpens.has(ownerId)) {
+            return {
+              requestId: request.requestId,
+              ok: false,
+              error: {
+                code: 'PANEL_OPERATION_BUSY',
+                message: 'Goal panel is already opening for this run.',
+              },
+            };
+          }
+          const opening = { cancelled: false };
+          pendingOpens.set(ownerId, opening);
           try {
             await goalSurface.openControlled(ownerId, { mode: cmd.mode, goalId: cmd.goalId });
+            if (opening.cancelled) {
+              goalSurface.releaseControlledSession(ownerId);
+              return {
+                requestId: request.requestId,
+                ok: false,
+                error: {
+                  code: 'PANEL_OPERATION_CANCELLED',
+                  message: 'Goal panel opening was cancelled.',
+                },
+                snapshot: buildSnapshot(ownerId),
+              };
+            }
           } catch {
             return {
               requestId: request.requestId,
@@ -161,6 +187,8 @@ export function useNativeBusinessPanelBridge(
               },
               snapshot: buildSnapshot(ownerId),
             };
+          } finally {
+            pendingOpens.delete(ownerId);
           }
           return {
             requestId: request.requestId,
@@ -339,6 +367,8 @@ export function useNativeBusinessPanelBridge(
           };
         }
         case 'release': {
+          const opening = pendingOpens.get(ownerId);
+          if (opening) opening.cancelled = true;
           goalSurface.releaseControlledSession(ownerId);
           return {
             requestId: request.requestId,
@@ -395,6 +425,9 @@ export function useNativeBusinessPanelBridge(
     });
 
     onBeforeUnmount(() => {
+      for (const opening of pendingOpens.values()) opening.cancelled = true;
+      const ownerId = store.businessControl?.ownerId;
+      if (ownerId?.startsWith('local-agent:')) goalSurface.releaseControlledSession(ownerId);
       cleanup?.();
     });
   } else {
