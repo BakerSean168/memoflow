@@ -141,6 +141,12 @@
       "lifecycle": "active",
       "primaryCollector": "apps/desktop/playwright.config.ts"
     },
+    "apps/desktop/e2e/native-goal-panel-installed.spec.mts": {
+      "surface": "goal-native-owner",
+      "role": "supplemental",
+      "lifecycle": "active",
+      "primaryCollector": "apps/desktop/playwright.config.ts"
+    },
     "apps/desktop/e2e/packaged-runtime/packaged-runtime.spec.ts": {
       "surface": "packaged-runtime",
       "role": "canonical",

@@ -867,6 +867,7 @@ test('Windows release uses one exact-installed Native and Workspace acceptance p
     'workspace-attention',
     'antigravity-composer',
     'native-codex-unconfigured-installed',
+    'native-goal-panel-installed',
   ]) {
     assert.ok(installed.includes('e2e/' + spec + '.spec.mts'), 'missing installed test: ' + spec);
   }
@@ -893,6 +894,7 @@ test('Windows release uses one exact-installed Native and Workspace acceptance p
     'workspace-attention',
     'antigravity-composer',
     'native-codex-unconfigured-installed',
+    'native-goal-panel-installed',
   ];
   for (const spec of specs) {
     const source = await readRepoFile('apps/desktop/e2e/' + spec + '.spec.mts');
