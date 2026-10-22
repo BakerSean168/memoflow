@@ -312,6 +312,35 @@ jobs:
             throw "userData preservation sentinel drifted across update"
           }
 
+      # Once the installed-updater proof and both hashes are verified, retain a
+      # short-lived diagnostic-only copy of this exact unsigned candidate.
+      # Native Provider/UI acceptance remains a separate required gate below.
+      - name: Verify retained unsigned Windows QA installer
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $report = Get-Content -LiteralPath 'apps/desktop/update-e2e-evidence/desktop-update-installed-e2e.json' -Raw | ConvertFrom-Json
+          $candidateDir = Join-Path $env:GITHUB_WORKSPACE 'apps/desktop/update-e2e-fixtures/candidate'
+          $installer = Join-Path $candidateDir $report.candidate.installer
+          if (-not (Test-Path -LiteralPath $installer -PathType Leaf)) {
+            throw 'Exact candidate installer from updater receipt is missing'
+          }
+          $sha = (Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($sha -ne $report.candidate.installerSha256) {
+            throw 'Retained installer differs from successful installed-updater proof'
+          }
+          Write-Host '[qa-only] Unsigned candidate matches updater proof; not a Release asset.'
+
+      # This artifact intentionally makes no claim about passing the full UI
+      # acceptance suite. It is only for isolated, read-only diagnosis.
+      - name: Upload unsigned Windows sync diagnostic installer
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: desktop-unsigned-windows-sync-diagnostic
+          path: apps/desktop/update-e2e-fixtures/candidate/*Setup.exe
+          if-no-files-found: error
+          retention-days: 3
+
       - name: Run one installed Windows Workspace and Native acceptance suite
         working-directory: apps/desktop
         shell: pwsh
@@ -330,22 +359,6 @@ jobs:
           # Live-account and paid DSH/AGY Send remain separate operator-gated runs.
           pnpm exec playwright test e2e/workspace-ipc.spec.mts e2e/workspace-attention.spec.mts e2e/antigravity-composer.spec.mts e2e/native-codex-unconfigured-installed.spec.mts --config playwright.config.ts --workers=1
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-      - name: Verify retained unsigned Windows QA installer
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $report = Get-Content -LiteralPath 'apps/desktop/update-e2e-evidence/desktop-update-installed-e2e.json' -Raw | ConvertFrom-Json
-          $candidateDir = Join-Path $env:GITHUB_WORKSPACE 'apps/desktop/update-e2e-fixtures/candidate'
-          $installer = Join-Path $candidateDir $report.candidate.installer
-          if (-not (Test-Path -LiteralPath $installer -PathType Leaf)) {
-            throw 'Exact candidate installer from updater receipt is missing'
-          }
-          $sha = (Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash.ToLowerInvariant()
-          if ($sha -ne $report.candidate.installerSha256) {
-            throw 'Retained installer differs from successful installed-updater proof'
-          }
-          Write-Host '[qa-only] Unsigned candidate matches the updater receipt; not a Release asset.'
 
       # Retain the already-tested installer for separately authorized local
       # account/Provider acceptance; never rebuild solely to retrieve this binary.
