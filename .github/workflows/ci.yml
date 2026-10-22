@@ -3,15 +3,13 @@ name: CI
 on:
   push:
     branches: [main]
-  schedule:
-    - cron: '0 3 * * *'
   workflow_dispatch:
   pull_request:
     branches: [main, feat/system-wide-vnext-convergence]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -23,6 +21,7 @@ env:
   CI: 'true'
   PRISMA_HIDE_UPDATE_MESSAGE: 'true'
   DELIVERY_MANIFEST_PATH: scope/delivery-manifest-v1.json
+  NX_LEGACY_AFFECTED: 'false'
 
 jobs:
   scope-detector:
@@ -81,12 +80,9 @@ jobs:
           retention-days: 90
 
   affected-shadow:
-    name: Affected Selector Shadow
+    name: Affected Selector Validation
     needs: scope-detector
     if: github.event_name == 'pull_request' && needs.scope-detector.result == 'success'
-    # Observation only. A comparison crash is preserved in the artifact and the
-    # step summary (status: error) but never gates the PR or feeds CI Check.
-    continue-on-error: true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -98,7 +94,7 @@ jobs:
           setup-uv: 'false'
           enable-nx-cache: 'false'
           consume-delivery-manifest: 'true'
-      - name: Compare legacy and task-based affected selection
+      - name: Validate task-based affected selection
         run: >-
           node ./tools/ci-cd-platform/shadow-affected.mjs
           --base "$NX_BASE"
@@ -132,25 +128,12 @@ jobs:
           consume-delivery-manifest: 'true'
       - name: Nx sync generators are applied
         run: pnpm exec nx sync:check
-      - run: pnpm exec nx run test-system-v2:test:inventory --outputStyle=static
-      - run: node ./tools/test/test-target-governance.mjs --check
+      # governance-check depends on test-system-v2:test:governance, which owns
+      # the single inventory + target-governance execution.
       - run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run memoflow:governance-check
         env: { TEST_REPORT_NAME: governance, DELIVERY_LANE: governance }
       - uses: ./.github/actions/publish-lane-evidence
         with: { lane: governance }
-
-  governance-oracle:
-    name: Governance Oracle
-    needs: [scope-detector, governance]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-      - name: Aggregate Governance child
-        env:
-          ORACLE_INPUT: >-
-            {"detector":"${{ needs.scope-detector.result }}","enabled":${{ needs.scope-detector.outputs.lane_governance == 'true' && '["governance"]' || '[]' }},"children":{"governance":"${{ needs.governance.result }}"}}
-        run: node ./tools/test-system-v2/oracle.mjs
 
   static-analysis:
     name: Static Analysis
@@ -318,19 +301,6 @@ jobs:
       - uses: ./.github/actions/publish-lane-evidence
         with: { lane: validate }
 
-  validate-oracle:
-    name: Validate Oracle
-    needs: [scope-detector, static-analysis, unit-1, unit-2, unit-3, typecheck, build]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-      - name: Aggregate Validate children
-        env:
-          ORACLE_INPUT: >-
-            {"detector":"${{ needs.scope-detector.result }}","enabled":{"static":"${{ needs.scope-detector.outputs.lane_validate }}","unit-1":"${{ needs.scope-detector.outputs.unit_1 }}","unit-2":"${{ needs.scope-detector.outputs.unit_2 }}","unit-3":"${{ needs.scope-detector.outputs.unit_3 }}","typecheck":"${{ needs.scope-detector.outputs.lane_validate }}","build":"${{ needs.scope-detector.outputs.build_required }}"},"children":{"static":"${{ needs.static-analysis.result }}","unit-1":"${{ needs.unit-1.result }}","unit-2":"${{ needs.unit-2.result }}","unit-3":"${{ needs.unit-3.result }}","typecheck":"${{ needs.typecheck.result }}","build":"${{ needs.build.result }}"}}
-        run: node ./tools/test-system-v2/oracle.mjs
-
   verification-children:
     name: Verification Children
     needs: scope-detector
@@ -470,32 +440,6 @@ jobs:
            (needs.scope-detector.outputs.lane_performance == 'true' && steps.lane_status.outputs.performance != 'success'))
         run: exit 1
 
-  boundary-oracle:
-    name: Boundary Oracle
-    needs: [scope-detector, verification-children]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-      - name: Aggregate Boundary children
-        env:
-          ORACLE_INPUT: >-
-            {"detector":"${{ needs.scope-detector.result }}","enabled":${{ needs.scope-detector.outputs.lane_boundary == 'true' && '["boundary"]' || '[]' }},"children":{"boundary":"${{ needs.verification-children.outputs.boundary || needs.verification-children.result }}"}}
-        run: node ./tools/test-system-v2/oracle.mjs
-
-  integration-oracle:
-    name: Integration Oracle
-    needs: [scope-detector, verification-children]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-      - name: Aggregate Integration children
-        env:
-          ORACLE_INPUT: >-
-            {"detector":"${{ needs.scope-detector.result }}","enabled":${{ needs.scope-detector.outputs.lane_integration == 'true' && '["integration"]' || '[]' }},"children":{"integration":"${{ needs.verification-children.outputs.integration || needs.verification-children.result }}"}}
-        run: node ./tools/test-system-v2/oracle.mjs
-
   web-flow-shard:
     name: Web Flow Shard (${{ matrix.shard }})
     needs: [scope-detector, build]
@@ -550,12 +494,13 @@ jobs:
         env: { TEST_REPORT_NAME: web-database, DELIVERY_LANE: web }
       - run: pnpm exec playwright install chromium
       - name: Provision visual regression fonts
+        if: github.event_name != 'pull_request' || strategy.job-index == 0
         shell: bash
         timeout-minutes: 5
         run: |
           set -euo pipefail
           # Match the Ubuntu Noble CJK fallback used to generate the tracked PNG baselines.
-          # Browser caching does not provision host fonts; every shard needs this prerequisite.
+          # Only shards executing visual comparisons need this prerequisite.
           # Avoid the runner mirror list repeatedly retrying an unreachable Azure mirror.
           fonts_sources="$RUNNER_TEMP/visual-fonts.list"
           printf '%s\n' 'deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://archive.ubuntu.com/ubuntu noble main universe' > "$fonts_sources"
@@ -598,11 +543,48 @@ jobs:
           path: reports/web-shards/*.json
           if-no-files-found: error
           retention-days: 14
-      - name: Product visual matrix (compare only)
+      # Keep the existing algorithms and baselines. PRs exercise wide/light,
+      # narrow/dark, long text, every canonical Web surface and Desktop shell.
+      # Schedule/dispatch retain the complete existing target, without a grep.
+      - name: Product visual representatives (compare only)
+        if: github.event_name == 'pull_request' && strategy.job-index == 0
+        run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run web:e2e:visual-regression -- --grep "$VISUAL_PR_GREP"
+        env:
+          VISUAL_PR_GREP: '1280px light$|440px dark$|840px light$|web: |desktop: (shell\.|foundation\.)|#484 (web .*1280px|desktop .*440px)$|UI-9002|post-vNext|preserve the active Task draft \(light\)'
+          TEST_REPORT_NAME: web-visual-representatives
+          DELIVERY_LANE: web
+      - name: Product visual full audit (compare only)
+        if: github.event_name != 'pull_request'
         run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run web:e2e:visual-regression -- --shard=${{ matrix.shard }}
         env:
           TEST_REPORT_NAME: web-visual-${{ strategy.job-index }}
           DELIVERY_LANE: web
+      - name: Goal and Task Storybook interactions (single build, no API)
+        if: strategy.job-index == 0
+        shell: bash
+        run: |
+          pnpm exec nx run ui-storybook:build
+          setsid pnpm exec nx run ui-storybook:preview > "$RUNNER_TEMP/storybook-preview.log" 2>&1 &
+          server=$!
+          trap 'kill -- -"$server" 2>/dev/null || true' EXIT
+          for attempt in {1..30}; do
+            curl --fail --silent http://127.0.0.1:4402/index.json > /dev/null && break
+            kill -0 "$server"
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:4402/index.json > /dev/null
+          node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run ui-storybook:test:interaction
+        env:
+          TEST_REPORT_NAME: storybook-interactions
+          DELIVERY_LANE: web
+      - name: Upload Storybook interaction evidence
+        if: always() && strategy.job-index == 0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: storybook-interactions-${{ github.run_attempt }}
+          path: test-results/storybook-results.json
+          if-no-files-found: error
+          retention-days: 14
       - name: Secure AI Provider product acceptance
         if: strategy.job-index == 0
         run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run web:e2e:ai-provider
@@ -630,45 +612,6 @@ jobs:
           lane: web
           artifact-suffix: shard-${{ strategy.job-index }}
 
-  web-flow-oracle:
-    name: Web Flow Oracle
-    needs: [scope-detector, web-flow-shard]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-      - name: Aggregate Web Flow shards
-        env:
-          ORACLE_INPUT: >-
-            {"detector":"${{ needs.scope-detector.result }}","enabled":${{ needs.scope-detector.outputs.lane_web == 'true' && '["web"]' || '[]' }},"children":{"web":"${{ needs.web-flow-shard.result }}"}}
-        run: node ./tools/test-system-v2/oracle.mjs
-
-  coverage-oracle:
-    name: Coverage Oracle
-    needs: [scope-detector, verification-children]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-      - name: Aggregate Coverage children
-        env:
-          ORACLE_INPUT: >-
-            {"detector":"${{ needs.scope-detector.result }}","enabled":${{ needs.scope-detector.outputs.lane_coverage == 'true' && '["coverage"]' || '[]' }},"children":{"coverage":"${{ needs.verification-children.outputs.coverage || needs.verification-children.result }}"}}
-        run: node ./tools/test-system-v2/oracle.mjs
-
-  performance-oracle:
-    name: Performance Oracle
-    needs: [scope-detector, verification-children]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-      - name: Aggregate Performance children
-        env:
-          ORACLE_INPUT: >-
-            {"detector":"${{ needs.scope-detector.result }}","enabled":${{ needs.scope-detector.outputs.lane_performance == 'true' && '["performance"]' || '[]' }},"children":{"performance":"${{ needs.verification-children.outputs.performance || needs.verification-children.result }}"}}
-        run: node ./tools/test-system-v2/oracle.mjs
-
   delivery-observation:
     name: Delivery Observation
     needs:
@@ -694,6 +637,7 @@ jobs:
       - name: Download lane evidence
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
+          pattern: delivery-*-*-*-${{ github.run_id }}
           path: reports/run-evidence
       - name: Collect GitHub run metrics
         id: run_metrics

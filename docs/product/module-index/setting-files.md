@@ -67,7 +67,6 @@ updated: 2026-09-14T11:48:17+08:00
 
 | 文件 | 说明 |
 | --- | --- |
-| [`packages/contracts/src/modules/setting/legacy-deletion.surface.spec.ts`](../../../packages/contracts/src/modules/setting/legacy-deletion.surface.spec.ts) | legacy schema/protocol/storage must-be-zero lock |
 | [`packages/setting/src/api/routes.spec.ts`](../../../packages/setting/src/api/routes.spec.ts) | canonical HTTP route contract |
 | [`packages/setting/src/electron/index-lifecycle.spec.ts`](../../../packages/setting/src/electron/index-lifecycle.spec.ts) | canonical IPC + lifecycle |
 | [`packages/setting/src/server/preferences/user-preference-service.spec.ts`](../../../packages/setting/src/server/preferences/user-preference-service.spec.ts) | CAS/default/reset behavior |

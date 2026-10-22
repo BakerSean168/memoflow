@@ -42,18 +42,18 @@ test('retired route matching rejects profile navigation while allowing the profi
 test('repository E2E ownership is execution-aware and complete', () => {
   assert.equal(inventory.version, 3);
   assert.deepEqual(inventory.e2eGovernance.issues, []);
-  assert.equal(inventory.e2eGovernance.countsByLane.required, 28);
-  assert.equal(inventory.e2eGovernance.countsByLane.nightly, 5);
+  assert.equal(inventory.e2eGovernance.countsByLane.required, 35);
+  assert.equal(inventory.e2eGovernance.countsByLane.nightly, undefined);
   assert.equal(inventory.e2eGovernance.countsByLane.debug, undefined);
   assert.equal(inventory.e2eGovernance.countsByRole.canonical, 32);
   assert.equal(inventory.e2eGovernance.countsByRole.diagnostic, undefined);
-  assert.equal(inventory.e2eGovernance.automatedCollectorCount, 4);
+  assert.equal(inventory.e2eGovernance.automatedCollectorCount, 2);
   assert.equal(inventory.e2eGovernance.automationBindingCount, 5);
 
   const goalWorkflow = inventory.primary.find(
     (entry) => entry.path === 'apps/web/e2e/ai/goal-workflow/multi-session.spec.ts',
   );
-  assert.equal(goalWorkflow?.collectors.length, 2);
+  assert.equal(goalWorkflow?.collectors.length, 1);
   assert.equal(goalWorkflow?.e2eOwnership.primaryCollector, 'apps/web/playwright.config.ts');
 
   const workspaceIpc = inventory.primary.find(
@@ -105,14 +105,15 @@ test('required and nightly collectors fail closed without automation ownership',
 
 test('declared GitHub workflow automation must bind its target', async () => {
   const contract = structuredClone(ownership);
-  contract.collectors['apps/web/playwright.audit.config.ts'].automation[0].target =
-    'web:e2e:missing-audit';
+  contract.collectors['apps/web/playwright.config.ts'].automation[0] = {
+    kind: 'github-workflow', workflow: '.github/workflows/nightly-audit.yml', target:
+    'web:e2e:missing-audit' };
 
   const governance = await analyzeE2EOwnership(root, inventory, contract);
   assert.ok(
     governance.issues.some(
       (issue) =>
-        issue.collector === 'apps/web/playwright.audit.config.ts' &&
+        issue.collector === 'apps/web/playwright.config.ts' &&
         issue.reason === 'workflow-does-not-bind-target',
     ),
   );
@@ -121,7 +122,7 @@ test('declared GitHub workflow automation must bind its target', async () => {
 test('same-suite E2E overlaps require one explicit primary collector', async () => {
   const contract = structuredClone(ownership);
   contract.specs['apps/web/e2e/ai/goal-workflow/multi-session.spec.ts'].primaryCollector =
-    'apps/web/playwright.audit.config.ts';
+    'apps/web/playwright.sync.config.ts';
 
   const governance = await analyzeE2EOwnership(root, inventory, contract);
   assert.ok(
@@ -135,13 +136,13 @@ test('same-suite E2E overlaps require one explicit primary collector', async () 
 
 test('Nx execution contracts must bind the declared Playwright collector', async () => {
   const contract = structuredClone(ownership);
-  contract.collectors['apps/web/playwright.audit.config.ts'].execution.target = 'web:e2e:sync';
+  contract.collectors['apps/web/playwright.config.ts'].execution.target = 'web:e2e:sync';
 
   const governance = await analyzeE2EOwnership(root, inventory, contract);
   assert.ok(
     governance.issues.some(
       (issue) =>
-        issue.collector === 'apps/web/playwright.audit.config.ts' &&
+        issue.collector === 'apps/web/playwright.config.ts' &&
         issue.reason === 'nx-target-does-not-bind-collector',
     ),
   );
@@ -193,10 +194,4 @@ test('one-off browser debugging stays on the canonical Web Flow instead of a deb
 
   assert.equal(webProject.targets['e2e:debug'], undefined);
   assert.equal(packageJson.scripts['e2e:debug'], 'pnpm nx run web:e2e --configuration=debug');
-});
-
-test('Nightly audit collects the full failure map without enabling parallel workers', async () => {
-  const source = await readFile('apps/web/playwright.audit.config.ts', 'utf8');
-  assert.match(source, /maxFailures:\s*0/u);
-  assert.doesNotMatch(source, /workers:\s*[2-9]/u);
 });

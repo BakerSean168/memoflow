@@ -1,4 +1,5 @@
 import { planUnitShards } from '../lib/unit-shards.mjs';
+import YAML from 'yaml';
 import assert from 'node:assert/strict';
 import { readFile, mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -80,6 +81,24 @@ function healthyNeeds(m) {
   }
   return needs;
 }
+
+test('CI job graph has one authoritative gate and no dangling dependencies', async () => {
+  const workflow = YAML.parse(await readFile('.github/workflows/ci.yml', 'utf8'));
+  const jobs = workflow.jobs;
+  assert.ok(Object.keys(jobs).every((id) => !id.endsWith('-oracle')));
+  for (const [id, job] of Object.entries(jobs)) {
+    assert.ok(job['runs-on'] || job.uses, `${id} must be an executable job`);
+    for (const dependency of [job.needs ?? []].flat()) {
+      assert.ok(jobs[dependency], `${id} needs missing ${dependency}`);
+    }
+  }
+  assert.deepEqual(
+    [...jobs['ci-check'].needs].sort(),
+    Object.keys(CI_CHECK_JOBS).filter((id) => id !== 'scope-detector')
+      .concat('scope-detector').sort(),
+  );
+  assert.equal(jobs['ci-check'].if, 'always()');
+});
 
 test('full run with every lane green passes', () => {
   const m = manifest();

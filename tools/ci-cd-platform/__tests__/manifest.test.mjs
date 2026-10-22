@@ -62,8 +62,8 @@ test('uses the manifest lane policy for docs-only and root changes', async () =>
   assert.equal(rootManifest.lanes.boundary, true);
   assert.equal(rootManifest.lanes.integration, true);
   assert.equal(rootManifest.lanes.web, true);
-  assert.equal(rootManifest.lanes.coverage, true);
-  assert.equal(rootManifest.lanes.performance, true);
+  assert.equal(rootManifest.lanes.coverage, false);
+  assert.equal(rootManifest.lanes.performance, false);
 });
 
 test('historical Desktop capability paths do not select Web Flow', async () => {
@@ -354,6 +354,10 @@ if (process.env.FAIL_COMMAND === 'true') process.exit(17);
         performance: ['test:perf'],
       })) {
         const inputPath = path.join(root, 'input.json');
+        if (!manifest.lanes[lane]) {
+          await assert.rejects(createLaneInput({ lane, manifest, output: inputPath }), /not enabled/u);
+          continue;
+        }
         const input = await createLaneInput({ lane, manifest, output: inputPath });
         for (const task of tasks) {
           const reportsDir = path.join(root, event, lane, task.replaceAll(':', '-'));

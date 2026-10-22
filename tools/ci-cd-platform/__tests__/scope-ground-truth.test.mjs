@@ -72,10 +72,13 @@ test('negative cases: Desktop-only e2e scripts, docs and harness metadata never 
   }
 });
 
-test('unknown paths fail closed to every lane', () => {
+test('unknown paths retain every correctness lane; measurements use the audit backstop', () => {
   for (const id of ['unknown-path', 'pr-413', 'pr-401', 'pr-453']) {
     const entry = byId.get(id);
     assert.equal(entry.expected.risk, 'root', id);
-    assert.ok(Object.values(entry.expected.lanes).every(Boolean), id);
+    const { coverage, performance, ...correctness } = entry.expected.lanes;
+    assert.ok(Object.values(correctness).every(Boolean), id);
+    assert.equal(coverage, false, id);
+    assert.equal(performance, false, id);
   }
 });

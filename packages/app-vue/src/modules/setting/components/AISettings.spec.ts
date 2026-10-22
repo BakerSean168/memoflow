@@ -1000,22 +1000,10 @@ it('keeps disabled row status focusable, selectable and its switch keyboard-oper
 
 // Source-side normalization is the privacy authority. The real IPC client parses
 // the DTO but that schema only bounds/validates shape; it is not a text scrubber.
+// Keep one full Runtime → DTO → UI connection test. The remaining failure
+// classes are asserted at their runtime owner in codex-driver.spec.ts.
 it.each([
-  ['spawn', 'not_installed', 'The configured Agent executable could not be started.', undefined],
-  [
-    'stderr',
-    'unavailable',
-    'The local Agent is unavailable. Check its native configuration.',
-    undefined,
-  ],
   ['rpc', 'login_required', 'Sign in using the Agent’s native login command, then refresh.', 401],
-  ['rpc', 'unavailable', 'The local Agent is unavailable. Check its native configuration.', 503],
-  [
-    'rpc',
-    'unavailable',
-    'The local Agent returned an unsupported or invalid protocol message.',
-    -32603,
-  ],
 ] as const)(
   'keeps %s/%s probe diagnostics private through Runtime, DTO, Tooltip and detail',
   async (kind, status, message, code) => {

@@ -6,81 +6,59 @@ import {
   getE2EWebOrigin,
 } from './playwright.server';
 import { WEB_FLOW_SPECS } from './web-flow-specs.mjs';
+import { WEB_AUDIT_SPECS } from './web-audit-specs.mjs';
 
-/**
- * Playwright 配置
- * @see https://playwright.dev/docs/test-configuration
- */
+// One Web collector; explicit modes preserve server ownership and report identity.
+const mode = process.env.WEB_E2E_MODE ?? 'flow';
+if (!['flow', 'audit', 'workspace', 'provider'].includes(mode)) {
+  throw new Error(`Unknown WEB_E2E_MODE: ${mode}`);
+}
+const providerSpecs = ['ai/provider-onboarding.spec.ts', 'ai/provider-composer-states.spec.ts'];
+const inventory = process.env.TEST_INVENTORY_LIST === '1';
+const specs = inventory
+  ? [...WEB_FLOW_SPECS, ...WEB_AUDIT_SPECS, ...providerSpecs]
+  : mode === 'audit'
+    ? [...WEB_FLOW_SPECS, ...WEB_AUDIT_SPECS]
+    : mode === 'workspace'
+      ? WEB_FLOW_SPECS.filter((spec) => spec.startsWith('ai/goal-workflow/'))
+      : mode === 'provider' ? providerSpecs : WEB_FLOW_SPECS;
+const suffix = mode === 'flow' ? '' : `-${mode === 'workspace' ? 'ai-workspace' : mode === 'provider' ? 'ai-provider' : mode}`;
+const result = mode === 'flow' ? 'results' : mode === 'workspace' ? 'ai-workspace-results' : `${mode}-results`;
+const external = process.env.PLAYWRIGHT_DISABLE_WEBSERVER === 'true' || mode === 'provider';
+
 export default defineConfig({
-  // 默认 E2E 只覆盖纯 Web 流程；desktop-web 同步回归单独放到 sync 配置里，
-  // 避免日常回归被跨进程准备成本拖慢。
   testDir: './e2e',
-  // 默认入口进一步收口成 AI 可依赖的核心业务回归集合。
-  testMatch: WEB_FLOW_SPECS.map((spec) => `**/${spec}`),
-  testIgnore: ['sync/**', 'desktop-screenshots/**', 'performance/**'],
-
-  // 单个测试最大执行时间 (5分钟，因为需要等待 Reminder 触发)
+  testMatch: specs.map((spec) => `**/${spec}`),
+  outputDir: mode === 'workspace'
+    ? process.env.AI_WORKSPACE_E2E_OUTPUT_DIR ?? 'test-results/ai-workspace'
+    : mode === 'provider' ? 'test-results/ai-provider' : `test-results/${mode}`,
   timeout: 5 * 60 * 1000,
-
-  // 全局设置超时
-  expect: {
-    timeout: 10 * 1000, // 断言超时 10 秒
-  },
-
-  // 主流程用例会共享账号与后端状态，保持串行比追求并发更稳定。
+  expect: { timeout: mode === 'provider' ? 15_000 : 10_000 },
   fullyParallel: false,
-  // PR 中优先快速暴露确定性契约错误；完整覆盖由四个独立 CI shard 汇总。
-  maxFailures: process.env.CI ? 5 : 0,
+  maxFailures: process.env.CI && mode === 'flow' ? 5 : 0,
   retries: 0,
-
-  // 单 worker 可以避免数据污染，也让失败更容易复现。
+  failOnFlakyTests: Boolean(process.env.CI),
   workers: 1,
-
-  // 报告配置
-  reporter:
-    process.env.TEST_INVENTORY_LIST === '1'
-      ? [['list']]
-      : process.env.CI
-        ? [
-            ['html', { outputFolder: 'playwright-report', open: 'always' }],
-            ['json', { outputFile: 'test-results/results.json' }],
-            ['junit', { outputFile: 'test-results/results.junit.xml' }],
-            ['list'],
-            ['github'], // GitHub Actions 集成
-          ]
-        : [
-            ['html', { outputFolder: 'playwright-report' }],
-            ['list'],
-            ['json', { outputFile: 'test-results/results.json' }],
-            ['junit', { outputFile: 'test-results/results.junit.xml' }],
-          ],
-
-  // 全局配置
-  use: {
-    // 基础 URL
-    baseURL: getE2EWebOrigin(),
-
-    // 追踪配置
-    trace: 'retain-on-failure',
-
-    // 截图配置
-    screenshot: 'only-on-failure',
-
-    video: 'retain-on-failure',
-
-    // 浏览器上下文选项
-    viewport: { width: 1280, height: 720 },
-    actionTimeout: 15 * 1000, // 操作超时 15 秒
-  },
-
-  // 项目配置
-  projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
+  reporter: inventory ? [['list']] : [
+    ['html', { outputFolder: process.env.AI_WORKSPACE_E2E_HTML_REPORT_DIR && mode === 'workspace'
+      ? process.env.AI_WORKSPACE_E2E_HTML_REPORT_DIR : `playwright${suffix}-report`, open: 'never' }],
+    ['json', { outputFile: mode === 'workspace'
+      ? process.env.AI_WORKSPACE_E2E_JSON_REPORT_FILE ?? `test-results/${result}.json`
+      : `test-results/${result}.json` }],
+    ['junit', { outputFile: `test-results/${result}.junit.xml` }],
+    ['list'],
+    ...(process.env.CI ? [['github'] as const] : []),
   ],
-
-  // 默认业务回归依赖真实登录和 CRUD，必须同时托管 API + Web。
-  webServer: [createOpenAICompatibleMockServer(), createApiServer(), createWebServer()],
+  use: {
+    baseURL: getE2EWebOrigin(),
+    trace: 'retain-on-failure',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+    viewport: { width: 1280, height: mode === 'provider' ? 800 : 720 },
+    actionTimeout: 15_000,
+  },
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  webServer: external ? undefined : [
+    createOpenAICompatibleMockServer(), createApiServer(), createWebServer(),
+  ],
 });

@@ -153,7 +153,7 @@ describe('legacy editor/repository runtime surface', () => {
 
   it('coverage workflow does not target deleted editor Nx project (residual 183)', () => {
     const coverageWorkflow = readFileSync(
-      resolve(repoRoot, '.github/workflows/coverage.yml'),
+      resolve(repoRoot, '.github/workflows/nightly-audit.yml'),
       'utf8',
     );
     expect(coverageWorkflow).toContain('GOVERNED_COVERAGE_PROJECTS:');

@@ -212,6 +212,29 @@ test('scope narrowing proves canonical-only edits; unknown/shared/full scope run
   assert.deepEqual(selectWebSpecs({ enabled: false }), { specs: [], fallback: false });
 });
 
+test('owner-scoped selection keeps the core floor and security/consumer extensions', () => {
+  const notification = selectWebSpecs({ enabled: true, files: ['packages/notification/src/api/index.ts'] });
+  assert.equal(notification.fallback, false);
+  assert.equal(notification.specs.length, 11);
+  assert.ok(notification.specs.includes('notification/notification-center.spec.ts'));
+  assert.equal(planWebShards({ ...notification, durations: history.specs }).shardCount, 2);
+  for (const owner of ['account', 'cloud-auth']) {
+    const selected = selectWebSpecs({ enabled: true, files: [`packages/${owner}/src/index.ts`] });
+    for (const spec of WEB_FLOW_SPECS.filter((spec) => spec.startsWith('authentication/'))) {
+      assert.ok(selected.specs.includes(spec), `${owner}: ${spec}`);
+    }
+  }
+  for (const owner of ['task', 'goal', 'repository']) {
+    const selected = selectWebSpecs({ enabled: true, files: [`packages/app-vue/src/modules/${owner}/view.vue`] });
+    for (const spec of WEB_FLOW_SPECS.filter((spec) => spec.startsWith('ai/') || spec.startsWith('schedule/'))) {
+      assert.ok(selected.specs.includes(spec), `${owner}: ${spec}`);
+    }
+  }
+  for (const file of ['nx.json', 'packages/contracts/src/index.ts', 'packages/app-vue/src/shared/Button.vue']) {
+    assert.equal(selectWebSpecs({ enabled: true, files: ['packages/goal/src/index.ts', file] }).fallback, true);
+  }
+});
+
 test('execution evidence ignores listed/skipped specs and retains unexpected execution', () => {
   const report = {
     suites: [

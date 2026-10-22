@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
-const workflowUrl = new URL('../../../.github/workflows/coverage.yml', import.meta.url);
+const workflowUrl = new URL('../../../.github/workflows/nightly-audit.yml', import.meta.url);
 
 test('coverage is a scheduled/manual full backstop and cannot silently succeed without governed targets', async () => {
   const workflow = await readFile(workflowUrl, 'utf8');
