@@ -1,0 +1,13 @@
+[Unit]
+Description=Poll MemoFlow production-selected safely on Oracle2
+
+[Timer]
+OnBootSec=3min
+OnUnitInactiveSec=3min
+AccuracySec=20s
+RandomizedDelaySec=20s
+Persistent=true
+Unit=memoflow-oracle2-deploy-watch.service
+
+[Install]
+WantedBy=timers.target
