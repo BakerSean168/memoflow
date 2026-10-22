@@ -167,3 +167,109 @@ it('allocates batches and competing store writers atomically and rolls back scop
     await closeStorage(first);
   }
 });
+
+it('#569 persists tool failure, approval receipt and terminal run state in PostgreSQL across restart', async () => {
+  const schemaName = `mf_approval_${randomUUID().replace(/-/g, '')}`;
+  const config = {
+    kind: 'postgres' as const,
+    connectionString: getTestDatabaseUrl(),
+    schemaName,
+  };
+  const first = createMastraStorage(config);
+  if (!(first instanceof PostgresStore)) throw new Error('Postgres storage required');
+  let reopened: PostgresStore | null = null;
+  let firstClosed = false;
+  await first.init();
+  try {
+    const scope = { identityId: 'owner-qa', conversationId: 'conversation-qa' };
+    const memory = new Memory({ storage: first });
+    const history = new AssistantHistoryService(memory, {
+      loadShell: async () => ({ title: 'Private QA conversation' }),
+    });
+    await history.ensureConversation(scope);
+    await memory.saveMessages({
+      messages: [
+        {
+          id: 'tool-result',
+          threadId: scope.conversationId,
+          resourceId: scope.identityId,
+          role: 'assistant',
+          createdAt: new Date(),
+          type: 'tool',
+          content: {
+            format: 2,
+            parts: [
+              {
+                type: 'tool-invocation',
+                toolInvocation: {
+                  toolCallId: 'routine-tool-call',
+                  toolName: 'routine_create',
+                  state: 'result',
+                  args: { name: 'PRIVATE_ROUTINE_NAME' },
+                  result: { error: 'PRIVATE_PROVIDER_STACK' },
+                },
+              },
+            ],
+          },
+        },
+      ],
+    });
+    const approvalReceipt = {
+      runId: 'run-qa',
+      toolCallId: 'routine-tool-call',
+      toolName: 'routine_create' as const,
+      decision: 'approve' as const,
+      category: 'edit' as const,
+      risk: 'high' as const,
+    };
+    await history.appendRuntimeRecord({
+      ...scope,
+      approvalReceipt,
+      toolActivities: [
+        { toolCallId: 'routine-tool-call', toolName: 'routine_create', state: 'failed' },
+      ],
+    });
+    // Durable receipt keys must be idempotent when clients retry an accepted decision.
+    await history.appendRuntimeRecord({ ...scope, approvalReceipt });
+    await history.appendRuntimeRecord({
+      ...scope,
+      runOutcome: { runId: 'run-qa', status: 'failed' },
+    });
+    await closeStorage(first);
+    firstClosed = true;
+
+    const again = createMastraStorage(config);
+    if (!(again instanceof PostgresStore)) throw new Error('Postgres storage required');
+    reopened = again;
+    await reopened.init();
+    const recovered = await new AssistantHistoryService(new Memory({ storage: reopened }), {
+      loadShell: async () => {
+        throw new Error('Restart must use persisted Mastra thread');
+      },
+    }).listMessages(scope);
+
+    expect(recovered.messages.flatMap((message) => message.toolActivities ?? [])).toContainEqual({
+      toolCallId: 'routine-tool-call',
+      toolName: 'routine_create',
+      state: 'failed',
+    });
+    expect(recovered.messages.filter((message) => message.approvalReceipt)).toHaveLength(1);
+    expect(recovered.messages.find((message) => message.approvalReceipt)?.approvalReceipt).toEqual(
+      approvalReceipt,
+    );
+    expect(recovered.messages.find((message) => message.runOutcome)?.runOutcome).toEqual({
+      runId: 'run-qa',
+      status: 'failed',
+    });
+    expect(JSON.stringify(recovered)).not.toContain('PRIVATE_ROUTINE_NAME');
+    expect(JSON.stringify(recovered)).not.toContain('PRIVATE_PROVIDER_STACK');
+  } finally {
+    const cleanupStorage = reopened ?? first;
+    try {
+      await cleanupStorage.db.none(`DROP SCHEMA "${schemaName}" CASCADE`);
+    } finally {
+      if (reopened) await closeStorage(reopened);
+      if (!firstClosed) await closeStorage(first);
+    }
+  }
+});
