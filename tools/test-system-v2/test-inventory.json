@@ -1180,6 +1180,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/modules/ai/native-codex-panel-mcp-operator.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/modules/ai/routine-command.adapter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12681,7 +12689,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 98
+      "fileCount": 99
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -13444,7 +13452,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1114,
+    "unit": 1115,
     "integration": 53,
     "smoke": 3,
     "boundary-ipc": 6,
