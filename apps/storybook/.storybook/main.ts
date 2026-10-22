@@ -1,3 +1,4 @@
+/* eslint-disable @nx/enforce-module-boundaries -- Storybook config imports workspace helpers and packages */
 import type { StorybookConfig } from '@storybook/vue3-vite';
 import path from 'node:path';
 import tailwindcss from '@tailwindcss/vite';

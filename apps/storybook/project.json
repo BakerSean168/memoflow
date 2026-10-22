@@ -5,7 +5,8 @@
   "sourceRoot": "apps/storybook",
   "tags": [
     "scope:ui",
-    "type:app"
+    "type:app",
+    "layer:app"
   ],
   "targets": {
     "typecheck": {
