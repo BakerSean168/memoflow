@@ -154,6 +154,12 @@
       "target": "build",
       "type": "permanent",
       "reason": "CI/CD orchestration scripts are executed directly by Node and do not produce a build artifact"
+    },
+    {
+      "project": "ui-storybook",
+      "target": "test",
+      "type": "permanent",
+      "reason": "Storybook interaction tests require preview server and run in Web Flow via test:interaction; not a standalone unit test"
     }
   ]
 }

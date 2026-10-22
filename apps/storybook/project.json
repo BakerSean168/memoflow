@@ -49,7 +49,7 @@
         "cwd": "."
       }
     },
-    "test": {
+    "test:interaction": {
       "executor": "nx:run-commands",
       "cache": false,
       "options": {

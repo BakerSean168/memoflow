@@ -573,7 +573,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:4402/index.json > /dev/null
-          node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run ui-storybook:test
+          node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run ui-storybook:test:interaction
         env:
           TEST_REPORT_NAME: storybook-interactions
           DELIVERY_LANE: web

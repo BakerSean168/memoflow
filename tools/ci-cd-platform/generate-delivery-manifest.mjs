@@ -52,12 +52,13 @@ export async function buildDeliveryManifest({
     .split(',')
     .map((lane) => lane.trim())
     .filter(Boolean);
-  const selectedLanes = selectLanes({ risk, scope: resolvedScope, event, full });
+  const effectiveFull = full || resolvedScope.full === true;
+  const selectedLanes = selectLanes({ risk, scope: resolvedScope, event, full: effectiveFull });
   for (const lane of forcedLanes) selectedLanes[lane] = true;
   const history = JSON.parse(
     await readFile(path.join(root, 'tools/test-system-v2/web-spec-durations.json'), 'utf8'),
   );
-  const selection = selectWebSpecs({ enabled: selectedLanes.web, full, files: changed });
+  const selection = selectWebSpecs({ enabled: selectedLanes.web, full: effectiveFull, files: changed });
   const webShards = planWebShards({ ...selection, durations: history.specs });
   selectedLanes.web = webShards.shardCount > 0;
   const input = {
