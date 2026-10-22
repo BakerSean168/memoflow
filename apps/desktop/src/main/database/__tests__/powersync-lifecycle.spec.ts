@@ -87,6 +87,10 @@ describe('PowerSync Profile database lifecycle', () => {
   it('closes the local database and its subscription when its Profile is destroyed', async () => {
     const opened = await api.openPowerSyncLocalOnly(path.join(root, 'profile.db'));
     expect(api.getPowerSyncDatabase()).toBe(opened);
+    const sdkOptions = sdk.create.mock.calls[0]?.[0] as {
+      remoteOptions?: { customFetch?: typeof fetch };
+    };
+    expect(typeof sdkOptions.remoteOptions?.customFetch).toBe('function');
 
     await api.shutdownPowerSync();
 
