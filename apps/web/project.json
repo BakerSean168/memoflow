@@ -3,7 +3,11 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "apps/web/src",
-  "tags": ["scope:web", "type:app", "layer:app"],
+  "tags": [
+    "scope:web",
+    "type:app",
+    "layer:app"
+  ],
   "targets": {
     "serve": {
       "configurations": {
@@ -27,8 +31,13 @@
     },
     "test": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "inputs": ["default", "^production"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
+      "inputs": [
+        "default",
+        "^production"
+      ],
       "cache": true,
       "options": {
         "command": "node ./node_modules/vitest/vitest.mjs run --config apps/web/vitest.config.ts"
@@ -43,12 +52,16 @@
     },
     "lint": {
       "options": {
-        "args": ["**/*.{ts,tsx,js,jsx,vue}"]
+        "args": [
+          "**/*.{ts,tsx,js,jsx,vue}"
+        ]
       }
     },
     "typecheck": {
       "executor": "nx:run-commands",
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build"
+      ],
       "options": {
         "command": "node ../../node_modules/vue-tsc/bin/vue-tsc.js --noEmit -p tsconfig.typecheck.json",
         "cwd": "apps/web"
@@ -84,7 +97,10 @@
         "{workspaceRoot}/apps/web/playwright-audit-report"
       ],
       "options": {
-        "command": "playwright test --config playwright.audit.config.ts",
+        "command": "playwright test --config playwright.config.ts",
+        "env": {
+          "WEB_E2E_MODE": "audit"
+        },
         "cwd": "apps/web"
       }
     },
@@ -155,15 +171,18 @@
         "{workspaceRoot}/apps/web/test-results"
       ],
       "options": {
-        "command": "playwright test --config playwright.shell.config.ts",
-        "cwd": "apps/web"
+        "command": "playwright test --config playwright.sync.config.ts",
+        "cwd": "apps/web",
+        "env": {
+          "NATIVE_E2E_MODE": "shell"
+        }
       },
       "configurations": {
         "headed": {
-          "command": "playwright test --config playwright.shell.config.ts --headed"
+          "command": "playwright test --config playwright.sync.config.ts --headed"
         },
         "debug": {
-          "command": "playwright test --config playwright.shell.config.ts --debug"
+          "command": "playwright test --config playwright.sync.config.ts --debug"
         }
       }
     },
@@ -174,15 +193,18 @@
         "{workspaceRoot}/docs/thesis/assets/desktop-e2e"
       ],
       "options": {
-        "command": "playwright test --config playwright.desktop-screenshot.config.ts",
-        "cwd": "apps/web"
+        "command": "playwright test --config playwright.sync.config.ts",
+        "cwd": "apps/web",
+        "env": {
+          "NATIVE_E2E_MODE": "capture"
+        }
       },
       "configurations": {
         "headed": {
-          "command": "playwright test --config playwright.desktop-screenshot.config.ts --headed"
+          "command": "playwright test --config playwright.sync.config.ts --headed"
         },
         "debug": {
-          "command": "playwright test --config playwright.desktop-screenshot.config.ts --debug"
+          "command": "playwright test --config playwright.sync.config.ts --debug"
         }
       }
     },
@@ -208,7 +230,9 @@
     "e2e:visual-regression": {
       "executor": "nx:run-commands",
       "cache": false,
-      "outputs": ["{workspaceRoot}/apps/web/test-results/visual-regression"],
+      "outputs": [
+        "{workspaceRoot}/apps/web/test-results/visual-regression"
+      ],
       "options": {
         "command": "playwright test --config playwright.visual-regression.config.ts",
         "cwd": "apps/web"
@@ -221,7 +245,9 @@
     },
     "typecheck:visual-regression": {
       "executor": "nx:run-commands",
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build"
+      ],
       "options": {
         "command": "node ../../node_modules/vue-tsc/bin/vue-tsc.js --noEmit -p e2e/visual-regression/tsconfig.json",
         "cwd": "apps/web"

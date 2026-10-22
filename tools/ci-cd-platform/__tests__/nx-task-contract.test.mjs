@@ -65,7 +65,7 @@ test('Nx cache in CI is written to the same directory the cache action saves', a
 
 test('CI verifies Nx sync generators before affected selection is trusted', async () => {
   const ci = await read('.github/workflows/ci.yml');
-  const governance = ci.slice(ci.indexOf('  governance:\n'), ci.indexOf('  governance-oracle:\n'));
+  const governance = ci.slice(ci.indexOf('  governance:\n'), ci.indexOf('  static-analysis:\n'));
   assert.match(governance, /pnpm exec nx sync:check/u);
 });
 

@@ -1,0 +1,326 @@
+name: Nightly Audit
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: nightly-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '24'
+  CI: 'true'
+  PRISMA_HIDE_UPDATE_MESSAGE: 'true'
+  DELIVERY_MANIFEST_PATH: scope/delivery-manifest-v1.json
+
+jobs:
+  coverage:
+    name: Coverage Gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://test_user:test_pass@127.0.0.1:5433/memoflow_test
+      GOVERNED_COVERAGE_PROJECTS: 'account,ai,app-vue,domain-shared,goal,notification,reminder,schedule,setting,task'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+
+      - name: Prepare workspace
+        uses: ./.github/actions/setup-nx-affected-job
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          setup-python: 'false'
+          setup-uv: 'false'
+          lane: coverage
+
+      - name: Generate full coverage audit manifest
+        env:
+          NX_HEAD: ${{ github.sha }}
+          DELIVERY_FORCE_LANES: coverage
+          DELIVERY_MANIFEST_OUTPUT: scope/delivery-manifest-v1.json
+        run: node ./tools/ci-cd-platform/generate-delivery-manifest.mjs
+      - name: Validate delivery manifest
+        run: node ./tools/ci-cd-platform/validate-manifest.mjs scope/delivery-manifest-v1.json delivery
+      - name: Create coverage lane input contract
+        env:
+          DELIVERY_LANE: coverage
+          DELIVERY_MANIFEST_PATH: scope/delivery-manifest-v1.json
+          LANE_INPUT_OUTPUT: reports/ci-cd-platform/coverage-input-v1.json
+        run: |
+          node ./tools/ci-cd-platform/create-lane-input.mjs \
+            --lane "$DELIVERY_LANE" \
+            --manifest "$DELIVERY_MANIFEST_PATH" \
+            --output "$LANE_INPUT_OUTPUT"
+          echo "LANE_INPUT_PATH=$LANE_INPUT_OUTPUT" >> "$GITHUB_ENV"
+
+      - name: Detect coverage targets
+        id: detect-coverage
+        shell: bash
+        run: |
+          set -euo pipefail
+          target_projects="$(pnpm exec nx show projects --with-target=test:coverage)"
+          allowed=",${GOVERNED_COVERAGE_PROJECTS},"
+          selected_projects=""
+
+          echo "Using full configured project lists for scheduled/manual coverage."
+          project_source="$(printf '%s\n' ${GOVERNED_COVERAGE_PROJECTS//,/ })"
+
+          while IFS= read -r project; do
+            [ -z "$project" ] && continue
+            [[ "$allowed" == *",$project,"* ]] || continue
+            grep -Fxq "$project" <<< "$target_projects" || continue
+            echo "Selected $project for test:coverage"
+            if [ -z "$selected_projects" ]; then
+              selected_projects="$project"
+            else
+              selected_projects="$selected_projects,$project"
+            fi
+          done <<< "$project_source"
+
+          if [ -z "$selected_projects" ]; then
+            echo "Full coverage audit selected no configured targets; refusing a false-green run."
+            exit 1
+          fi
+
+          echo "has_target=$([ -n "$selected_projects" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "projects=$selected_projects" >> "$GITHUB_OUTPUT"
+
+      - name: Run governed coverage gates
+        env:
+          NODE_OPTIONS: --require=${{ github.workspace }}/tools/ci/node-process-bootstrap.cjs
+          DELIVERY_LANE: coverage
+          TEST_REPORT_NAME: coverage
+        run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run-many -t test:coverage --projects="${{ steps.detect-coverage.outputs.projects }}" --parallel=2 --outputStyle=static
+      - uses: ./.github/actions/publish-lane-evidence
+        with: { lane: coverage }
+
+  audit:
+    name: Web Flow Full Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.5-pg18
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_pass
+          POSTGRES_DB: memoflow_test
+        ports: ['5433:5432']
+        options: >-
+          --health-cmd "pg_isready -U test_user -d memoflow_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://test_user:test_pass@127.0.0.1:5433/memoflow_test
+      JWT_SECRET: test-jwt-secret-for-e2e-testing-purposes
+      TZ: UTC
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 2
+      - uses: ./.github/actions/setup-nx-affected-job
+        with:
+          node-version: '24'
+          setup-python: 'false'
+          setup-uv: 'false'
+          capabilities: node,pnpm,playwright,postgres
+      - name: Prepare database
+        run: pnpm exec nx run database:prisma-push
+      - name: Install Chromium
+        run: pnpm exec playwright install chromium
+      - name: Run extended Web Flow audit
+        env:
+          NODE_OPTIONS: --require=${{ github.workspace }}/tools/ci/node-process-bootstrap.cjs
+          DELIVERY_LANE: web
+          TEST_REPORT_NAME: web-flow-audit
+        run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run web:e2e:audit
+      - name: Run secure AI Provider acceptance
+        if: ${{ !cancelled() }}
+        env:
+          DELIVERY_LANE: web
+          TEST_REPORT_NAME: web-ai-provider-audit
+          E2E_OPENROUTER_API_KEY: ${{ secrets.E2E_OPENROUTER_API_KEY }}
+        run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run web:e2e:ai-provider
+      - name: Upload audit reports
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: web-flow-audit-${{ github.run_id }}
+          path: |
+            apps/web/test-results/audit-results.json
+            reports/test-system-v2
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload failure evidence
+        if: failure()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: web-flow-audit-failure-${{ github.run_id }}
+          path: |
+            apps/web/test-results
+            apps/web/playwright-audit-report
+          if-no-files-found: ignore
+          retention-days: 7
+
+  notify-failure:
+    name: Report nightly audit failure
+    needs: audit
+    if: ${{ always() && (needs.audit.result == 'failure' || needs.audit.result == 'cancelled') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    concurrency:
+      group: nightly-web-flow-audit-alert
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: '24'
+      - name: Open or update tracking issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          AUDIT_RESULT: ${{ needs.audit.result }}
+        run: node tools/ci-cd-platform/nightly-audit-failure.mjs
+
+  fault-injection:
+    name: CI Platform Fault Matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: '24'
+      - name: Run fail-closed fault matrix
+        run: node tools/ci-cd-platform/run-fault-injection.mjs reports/ci-cd-platform/fault-injection-report-v1.json
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: ci-platform-fault-injection-${{ github.run_id }}
+          path: reports/ci-cd-platform/fault-injection-report-v1.json
+          if-no-files-found: error
+          retention-days: 30
+
+  experiment:
+    name: Performance Experiment
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 2
+      - uses: ./.github/actions/setup-nx-affected-job
+        with:
+          node-version: '24'
+          setup-python: 'false'
+          setup-uv: 'false'
+          capabilities: node,pnpm,performance
+          lane: performance
+      - name: Generate full delivery manifest
+        env:
+          DELIVERY_FORCE_LANES: performance
+          DELIVERY_MANIFEST_OUTPUT: scope/delivery-manifest-v1.json
+          NX_HEAD: ${{ github.sha }}
+        run: node ./tools/ci-cd-platform/generate-delivery-manifest.mjs
+      - name: Validate delivery manifest
+        run: node ./tools/ci-cd-platform/validate-manifest.mjs scope/delivery-manifest-v1.json delivery
+      - name: Create performance lane input contract
+        env:
+          DELIVERY_LANE: performance
+          DELIVERY_MANIFEST_PATH: scope/delivery-manifest-v1.json
+          LANE_INPUT_OUTPUT: reports/ci-cd-platform/performance-input-v1.json
+        run: |
+          node ./tools/ci-cd-platform/create-lane-input.mjs \
+            --lane "$DELIVERY_LANE" \
+            --manifest "$DELIVERY_MANIFEST_PATH" \
+            --output "$LANE_INPUT_OUTPUT"
+          echo "LANE_INPUT_PATH=$LANE_INPUT_OUTPUT" >> "$GITHUB_ENV"
+      - name: Run memory and stability experiment with explicit GC
+        env:
+          NODE_OPTIONS: '--require=${{ github.workspace }}/tools/ci/node-process-bootstrap.cjs'
+          DELIVERY_LANE: performance
+          TEST_REPORT_NAME: performance-experiment
+        run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run task:test:perf:experiment
+      - uses: ./.github/actions/publish-lane-evidence
+        with: { lane: performance }
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: performance-experiment
+          path: reports/test-system-v2
+          if-no-files-found: ignore
+          retention-days: 14
+
+  release-health:
+    name: Release Backlog Audit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Summarize release backlog without blocking CI
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const releases = await github.rest.repos.listReleases({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 30,
+            });
+            const latest = releases.data.find((release) => !release.draft && !release.prerelease);
+            if (!latest) {
+              core.warning('No published release exists yet.');
+              return;
+            }
+            const comparison = await github.rest.repos.compareCommitsWithBasehead({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              basehead: `${latest.tag_name}...main`,
+              per_page: 1,
+            });
+            const pulls = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100,
+            });
+            const pending = pulls.data.filter((pull) =>
+              pull.labels.some((label) => label.name === 'autorelease: pending'),
+            );
+            const now = Date.now();
+            const releaseAgeDays = Math.floor((now - Date.parse(latest.published_at ?? latest.created_at)) / 86400000);
+            const pendingAgeDays = pending.length
+              ? Math.max(...pending.map((pull) => Math.floor((now - Date.parse(pull.created_at)) / 86400000)))
+              : 0;
+            const commits = comparison.data.ahead_by;
+
+            core.summary
+              .addHeading('Release health')
+              .addTable([
+                [{ data: 'Metric', header: true }, { data: 'Value', header: true }],
+                ['Latest published release', latest.tag_name],
+                ['Release age (days)', String(releaseAgeDays)],
+                ['Commits since release', String(commits)],
+                ['Pending release PRs', String(pending.length)],
+                ['Oldest pending release PR (days)', String(pendingAgeDays)],
+              ]);
+            await core.summary.write();
+
+            if (releaseAgeDays > 14 || commits > 150 || pendingAgeDays > 14) {
+              core.warning(
+                `Release backlog is above the soft threshold: age=${releaseAgeDays}d commits=${commits} pendingAge=${pendingAgeDays}d`,
+              );
+            }

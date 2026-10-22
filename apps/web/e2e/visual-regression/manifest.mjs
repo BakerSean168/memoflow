@@ -186,7 +186,7 @@ export const matrix = cases.map(([surface, owner, query, ready, theme, locale, w
 }));
 export const desktopRunner = {
   target: 'web:e2e:desktop-screenshots',
-  config: 'apps/web/playwright.desktop-screenshot.config.ts',
+  config: 'apps/web/playwright.sync.config.ts',
   acceptance: false,
   reason:
     'Electron/backend host capture; debug/thesis artifacts are separate from deterministic Web acceptance.',

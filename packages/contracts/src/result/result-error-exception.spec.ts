@@ -46,6 +46,13 @@ describe('ResultErrorException', () => {
     });
   });
 
+  it('accepts plain structured failures but not arrays', () => {
+    expect(extractStructuredResultError([])).toBeNull();
+    expect(extractStructuredResultError({ code: 'X', message: 'y', statusCode: 400 })).toMatchObject({
+      code: 'X', message: 'y', statusCode: 400,
+    });
+  });
+
   it('does not treat arbitrary node-style errors as structured result errors', () => {
     const error = new Error('missing file') as Error & { code: string };
     error.code = 'ENOENT';

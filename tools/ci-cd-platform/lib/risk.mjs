@@ -147,7 +147,9 @@ export function selectLanes({ risk, scope, event = 'pull_request', full = scope.
     boundary: root || has(scope.boundary) || has(scope.smoke),
     integration: root || has(scope.integration),
     web: fullAudit || root || matched.has('web-flow') || scope.webFlow === true,
-    coverage: root || has(scope.coverage),
-    performance: root || has(scope.perf),
+    // Measurement backstops run on main/full audits, not ordinary PRs.
+    // Select them in the manifest (not just step `if`s) so CI Check expects skips.
+    coverage: event !== 'pull_request' && (root || has(scope.coverage)),
+    performance: event !== 'pull_request' && (root || has(scope.perf)),
   };
 }

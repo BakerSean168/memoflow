@@ -4,6 +4,7 @@ import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
+import YAML from 'yaml';
 
 const workflow = readFileSync(
   new URL('../../../.github/workflows/ci.yml', import.meta.url),
@@ -89,13 +90,14 @@ function runPreflight({
   }
 }
 
-test('every Web Flow shard provisions Noble fonts before functional and visual browser tests', () => {
+test('visual shards provision Noble fonts before comparisons; PR representatives run once', () => {
   assert.match(shard, /runs-on: ubuntu-24\.04/u);
   assert.match(shard, /matrix: \$\{\{ fromJSON\(needs.scope-detector.outputs.web_matrix\) \}\}/u);
   assert.ok(fontStep, 'font prerequisite must exist in the matrix job');
   assert.match(fontStep, /shell: bash/u);
   assert.match(fontStep, /timeout-minutes: 5/u);
-  assert.doesNotMatch(fontStep, /(?:if:|continue-on-error:)/u);
+  assert.match(fontStep, /if: github\.event_name != 'pull_request' \|\| strategy\.job-index == 0/u);
+  assert.doesNotMatch(fontStep, /continue-on-error:/u);
   assert.match(script, /set -euo pipefail/u);
   assert.match(
     script,
@@ -106,6 +108,41 @@ test('every Web Flow shard provisions Noble fonts before functional and visual b
   assert.ok(provisionIndex < shard.indexOf('run-web-shard.mjs'));
   assert.ok(provisionIndex < shard.indexOf('nx run web:e2e:visual-regression'));
   assert.equal((workflow.match(/name: Provision visual regression fonts/gu) ?? []).length, 1);
+});
+
+test('PR visual selection is nonempty and smaller; nightly/manual retain the full collector', () => {
+  const config = YAML.parse(workflow);
+  const nightly = YAML.parse(readFileSync(new URL("../../../.github/workflows/nightly-audit.yml", import.meta.url), "utf8"));
+  assert.ok(nightly.on.schedule.length > 0);
+  assert.ok(Object.hasOwn(config.on, 'workflow_dispatch'));
+  const steps = config.jobs['web-flow-shard'].steps;
+  const representative = steps.find((step) => step.name === 'Product visual representatives (compare only)');
+  const audit = steps.find((step) => step.name === 'Product visual full audit (compare only)');
+  assert.equal(representative.if, "github.event_name == 'pull_request' && strategy.job-index == 0");
+  assert.equal(audit.if, "github.event_name != 'pull_request'");
+  assert.doesNotMatch(audit.run, /--grep|update-snapshots/u);
+  assert.doesNotMatch(representative.run, /--shard|update-snapshots/u);
+  const list = (args) => {
+    const result = spawnSync('pnpm', ['exec', 'playwright', 'test', '--config',
+      'playwright.visual-regression.config.ts', '--list', '--reporter=json', ...args], {
+      cwd: new URL('../../../apps/web', import.meta.url), encoding: 'utf8', timeout: 30000,
+    });
+    assert.equal(result.status, 0, result.stderr);
+    const collect = (suite) => [...(suite.specs ?? []), ...(suite.suites ?? []).flatMap(collect)];
+    return collect(JSON.parse(result.stdout));
+  };
+  const full = list([]);
+  const selected = list(['--grep', representative.env.VISUAL_PR_GREP]);
+  assert.ok(selected.length > 0 && selected.length < full.length);
+  const titles = new Set(selected.map((spec) => spec.title));
+  // All canonical Web surfaces survive; the removed host/width/theme cross
+  // product remains reachable through the unfiltered scheduled/manual target.
+  for (const spec of full.filter((spec) => spec.title.startsWith('web: '))) {
+    assert.ok(titles.has(spec.title), `missing canonical representative: ${spec.title}`);
+  }
+  for (const file of ['matrix.spec.ts', 'composer-footer.spec.ts', 'scrollbar-gutter.spec.ts']) {
+    assert.ok(selected.some((spec) => spec.file.endsWith(file)), `empty visual owner ${file}`);
+  }
 });
 
 test('font preflight provisions both pinned packages before checking both CJK fallbacks', () => {

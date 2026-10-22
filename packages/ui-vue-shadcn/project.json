@@ -30,13 +30,6 @@
         "cwd": "packages/ui-vue-shadcn"
       }
     },
-    "storybook": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "storybook dev -p 4402 -c packages/ui-vue-shadcn/.storybook",
-        "cwd": "."
-      }
-    },
     "lint": {
       "options": {
         "args": [
