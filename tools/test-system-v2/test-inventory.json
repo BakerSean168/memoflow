@@ -900,6 +900,20 @@
       }
     },
     {
+      "path": "apps/desktop/e2e/native-goal-panel-installed.spec.mts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/desktop/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "goal-native-owner",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/desktop/playwright.config.ts"
+      }
+    },
+    {
       "path": "apps/desktop/e2e/packaged-runtime/packaged-runtime.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
@@ -12377,7 +12391,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 11,
+      "fileCount": 12,
       "e2eOwnership": {
         "lane": "desktop",
         "lifecycle": "active",
@@ -13457,7 +13471,7 @@
     "smoke": 3,
     "boundary-ipc": 6,
     "boundary-main": 12,
-    "e2e": 67,
+    "e2e": 68,
     "perf": 2,
     "governance": 76
   },
@@ -13465,7 +13479,7 @@
     "version": 2,
     "issues": [],
     "countsByLane": {
-      "desktop": 11,
+      "desktop": 12,
       "local-validation": 6,
       "reference": 6,
       "required": 35,
@@ -13477,7 +13491,7 @@
       "artifact": 3,
       "canonical": 32,
       "reference": 6,
-      "supplemental": 26
+      "supplemental": 27
     },
     "automatedCollectorCount": 2,
     "automationBindingCount": 5

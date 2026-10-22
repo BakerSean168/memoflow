@@ -354,10 +354,12 @@ jobs:
           $env:MEMOFLOW_QA_EXPECTED_EXE_SHA256 = $report.installedExecutableSha256
           $env:MEMOFLOW_QA_EXPECTED_VERSION = $report.expectedVersion
           # One independent installed-executable receipt covers Workspace IPC,
-          # Goal/Conversation events, six synthetic Native ACP Attention failures,
-          # AGY Composer/history, and empty Codex Home. No real accounts or billing.
+          # Goal/Conversation events, the actual Goal Vue owner panel and local
+          # save/reopen via a test-only IPC command adapter, six synthetic Native
+          # ACP Attention failures, AGY Composer/history, and empty Codex Home.
+          # No real accounts, model turns or billing.
           # Live-account and paid DSH/AGY Send remain separate operator-gated runs.
-          pnpm exec playwright test e2e/workspace-ipc.spec.mts e2e/workspace-attention.spec.mts e2e/antigravity-composer.spec.mts e2e/native-codex-unconfigured-installed.spec.mts --config playwright.config.ts --workers=1
+          pnpm exec playwright test e2e/workspace-ipc.spec.mts e2e/workspace-attention.spec.mts e2e/antigravity-composer.spec.mts e2e/native-codex-unconfigured-installed.spec.mts e2e/native-goal-panel-installed.spec.mts --config playwright.config.ts --workers=1
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       # Retain the already-tested installer for separately authorized local
