@@ -125,6 +125,7 @@ runs:
           echo "NX_CACHE_DIRECTORY=$GITHUB_WORKSPACE/.nx/cache"
           echo "NX_WORKSPACE_DATA_DIRECTORY=$GITHUB_WORKSPACE/.nx/workspace-data"
           echo "NX_DAEMON=false"
+          echo "NX_LEGACY_AFFECTED=false"
         } >> "$GITHUB_ENV"
 
     - name: Cache Nx task results

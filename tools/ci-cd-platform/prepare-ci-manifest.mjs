@@ -17,7 +17,11 @@ async function main() {
   const head = (await git(['rev-parse', 'HEAD'])).trim();
   requireProof(head === process.env.GITHUB_SHA, 'checkout HEAD does not match event SHA');
   const checkout = await gitCommit(head);
-  const base = event.pull_request?.base.sha ?? checkout.parents[0]?.sha;
+  const base =
+    event.pull_request?.base.sha ??
+    (event.before && event.before !== '0000000000000000000000000000000000000000'
+      ? event.before
+      : checkout.parents[0]?.sha);
   const isMainPush = eventName === 'push' && process.env.GITHUB_REF === 'refs/heads/main';
   const candidate =
     isMainPush && (await candidateRequired({ before: event.before, sha: head, changedFiles }));

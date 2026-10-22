@@ -21,6 +21,7 @@ env:
   CI: 'true'
   PRISMA_HIDE_UPDATE_MESSAGE: 'true'
   DELIVERY_MANIFEST_PATH: scope/delivery-manifest-v1.json
+  NX_LEGACY_AFFECTED: 'false'
 
 jobs:
   scope-detector:
@@ -79,12 +80,9 @@ jobs:
           retention-days: 90
 
   affected-shadow:
-    name: Affected Selector Shadow
+    name: Affected Selector Validation
     needs: scope-detector
     if: github.event_name == 'pull_request' && needs.scope-detector.result == 'success'
-    # Observation only. A comparison crash is preserved in the artifact and the
-    # step summary (status: error) but never gates the PR or feeds CI Check.
-    continue-on-error: true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -96,7 +94,7 @@ jobs:
           setup-uv: 'false'
           enable-nx-cache: 'false'
           consume-delivery-manifest: 'true'
-      - name: Compare legacy and task-based affected selection
+      - name: Validate task-based affected selection
         run: >-
           node ./tools/ci-cd-platform/shadow-affected.mjs
           --base "$NX_BASE"
