@@ -1,8 +1,8 @@
 # MemoFlow canonical production delivery
 
-> Status: OCI multi-architecture release contract implemented. Oracle2 watcher migration is **not yet enabled**.
+> Status: OCI multi-architecture release contract implemented. The **Oracle2-native, app-only production-selected watcher** is maintained under [oracle2/](oracle2/README.md), separate from the Alibaba watcher. Check Issue #543 for actual host activation evidence.
 >
-> **Oracle2 operator gate:** The current watcher/Compose below were built for the retired Alibaba host. They own an independent Caddy container and ports 80/443, which would conflict with Oracle2's shared CPA Caddy. Do **not** run the bootstrap/install commands below on Oracle2. The existing Oracle2 stack remains manually managed until a host-compatible watcher is implemented and verified.
+> **Oracle2 operator gate:** The Alibaba watcher/Compose below own a separate Caddy and ports 80/443. **Never install them on Oracle2.** Only [the new Oracle2-native installer](oracle2/README.md) can adopt the existing app-only Compose after checks, and it does not enable the timer automatically.
 >
 > Release inputs must now use immutable OCI indexes containing both `linux/amd64` and `linux/arm64`; a single-architecture release or mirror is rejected before the `production-selected` pointer can move.
 >
@@ -37,9 +37,9 @@ to API, Web and Migrator exact-digest images and the API `APP_VERSION`. It
 rejects all port, network, volume, secret, mount, service, and shared-Caddy
 changes. It generates no rollout command, starts/stops no container, and does
 not validate that the selected images can actually run on ARM64; that is a
-separate OCI-platform and runtime acceptance gate. **There is still no
-Oracle2 auto-deploy watcher or timer. Do not use the historical Alibaba
-installer on Oracle2.**
+separate OCI-platform and runtime acceptance gate. **The Oracle2-native watcher and timer source lives in
+[oracle2/](oracle2/README.md). Do not use the historical Alibaba installer
+on Oracle2. Timer activation requires explicit host acceptance.**
 
 This directory is the runtime authority for Delivery Platform V3 production deployment. It replaces the historical model where application containers could be changed independently through mutable image tags or Watchtower.
 
@@ -52,8 +52,8 @@ Published GitHub Release
   -> memoflow.production-set/v1
   -> memoflow-production-runtime:set-<production-set-digest>
   -> production-selected control pointer
-  -> Alibaba production watcher
-  -> exact repository@sha256 runtime
+  -> Oracle2-native app-only watcher (legacy Alibaba watcher is retired)
+  -> exact API/Web/Migrator repository@sha256 (shared Caddy remains external)
 ```
 
 `Deploy Production` does not SSH into Alibaba ECS and does not move Web/API/Migrator independently. It verifies the Published release, exact tag SHA, successful source main CI, candidate-set identity, ACR/GHCR application digest parity, and release-owned runtime mirror digests. Only then does it move the single `memoflow-production-runtime:production-selected` pointer.
