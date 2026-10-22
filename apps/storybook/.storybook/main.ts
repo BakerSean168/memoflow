@@ -32,13 +32,16 @@ const config: StorybookConfig = {
           ...createUiVueSourceAliasEntries(workspace),
           ...createContractsAliasEntries(workspace),
           ...createWorkspaceSourceAliasEntries(workspace, [
+            ['@memoflow/http-client', 'packages/http-client/src/index.ts'],
             ['@memoflow/goal/client', 'packages/goal/src/client/index.ts'],
             ['@memoflow/task/client', 'packages/task/src/client/index.ts'],
             ['@memoflow/time', 'packages/time/src/index.ts'],
             ['@memoflow/utils/logger', 'packages/utils/src/logger/index.ts'],
             ['@memoflow/utils/shared', 'packages/utils/src/shared/index.ts'],
           ]),
-          ...(Array.isArray(aliases) ? aliases : Object.entries(aliases).map(([find, replacement]) => ({ find, replacement }))),
+          ...(Array.isArray(aliases)
+            ? aliases
+            : Object.entries(aliases).map(([find, replacement]) => ({ find, replacement }))),
         ],
       },
       build: { ...config.build, chunkSizeWarningLimit: 1500 },
