@@ -1,0 +1,18 @@
+[Unit]
+Description=MemoFlow Oracle2 app-only production-selected deployment watcher
+After=docker.service network-online.target
+Wants=network-online.target
+Requires=docker.service
+ConditionPathExists=/opt/memoflow-oracle2/compose.yaml
+ConditionPathExists=/opt/memoflow-oracle2/production.env
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+ExecStart=/usr/local/bin/memoflow-oracle2-watch --run-once
+TimeoutStartSec=20min
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/opt/memoflow-oracle2 /var/lib/memoflow-oracle2-delivery

@@ -2,6 +2,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ProfileDescriptor } from './profile-registry';
 import { DesktopCloudConnectionManager } from './desktop-cloud-connection-manager';
 
+const cloudLogs = vi.hoisted(() => ({ info: vi.fn(), warn: vi.fn() }));
+vi.mock('@memoflow/utils/logger', () => ({ createLogger: () => cloudLogs }));
+
 vi.mock('../utils/api-config', () => ({ getApiBaseUrl: () => 'https://memo.test/api/v1' }));
 
 function profile(cloudAccountId: string | null): ProfileDescriptor {
@@ -58,7 +61,27 @@ function deferredResponse() {
 }
 
 describe('DesktopCloudConnectionManager', () => {
-  afterEach(() => vi.useRealTimers());
+  afterEach(() => {
+    vi.useRealTimers();
+    cloudLogs.warn.mockClear();
+  });
+
+  it('records only safe stage/type when activation fails with a secret-bearing error', async () => {
+    const sessions = { load: vi.fn().mockResolvedValue(stored), save: vi.fn() };
+    const runtime = runtimeFixture();
+    runtime.enableCloudSync.mockRejectedValueOnce(new Error('Bearer hidden-session-jwt'));
+    const manager = new DesktopCloudConnectionManager(
+      sessions as never,
+      runtime as never,
+      vi.fn(async () => remoteSession()),
+    );
+    await expect(manager.restore(profile('account-1'))).resolves.toBe('OFFLINE');
+    expect(cloudLogs.warn).toHaveBeenCalledWith('Cloud connection restore unsuccessful', {
+      stage: 'power_sync_activation',
+      errorType: 'Error',
+    });
+    expect(JSON.stringify(cloudLogs.warn.mock.calls)).not.toContain('hidden-session-jwt');
+  });
   it('interrupts pending sync startup before waiting for the cloud check to stop', async () => {
     let finishConnect!: () => void;
     const runtime = runtimeFixture();

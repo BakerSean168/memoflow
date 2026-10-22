@@ -4,6 +4,10 @@ import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const sdk = vi.hoisted(() => ({ create: vi.fn() }));
+const safeLogs = vi.hoisted(() => ({ info: vi.fn(), warn: vi.fn() }));
+vi.mock('@memoflow/utils/logger', () => ({
+  createLogger: () => safeLogs,
+}));
 vi.mock('@powersync/node', () => ({
   PowerSyncDatabase: class {
     constructor(options: unknown) {
@@ -33,7 +37,12 @@ function database() {
     close: vi.fn(async () => undefined),
     disconnect: vi.fn(async () => undefined),
     connect: vi.fn(async () => undefined),
+    currentStatus: { connected: false, connecting: false, hasSynced: false },
     unsubscribe: vi.fn(),
+    disposeStatus: vi.fn(),
+    registerListener: vi.fn(
+      (_listener: { statusChanged: (status: unknown) => void }) => () => undefined,
+    ),
     onChange: vi.fn(),
     writeTransaction: vi.fn(async (work: (tx: typeof transaction) => Promise<void>) =>
       work(transaction),
@@ -59,9 +68,12 @@ describe('PowerSync Profile database lifecycle', () => {
   beforeEach(async () => {
     vi.resetModules();
     sdk.create.mockReset();
+    safeLogs.info.mockReset();
+    safeLogs.warn.mockReset();
     root = await fs.mkdtemp(path.join(os.tmpdir(), 'powersync-lifecycle-test-'));
     db = database();
     db.onChange.mockReturnValue(db.unsubscribe);
+    db.registerListener.mockReturnValue(db.disposeStatus);
     sdk.create.mockReturnValue(db);
     api = await import('../powersync');
   });
@@ -75,11 +87,16 @@ describe('PowerSync Profile database lifecycle', () => {
   it('closes the local database and its subscription when its Profile is destroyed', async () => {
     const opened = await api.openPowerSyncLocalOnly(path.join(root, 'profile.db'));
     expect(api.getPowerSyncDatabase()).toBe(opened);
+    const sdkOptions = sdk.create.mock.calls[0]?.[0] as {
+      remoteOptions?: { customFetch?: typeof fetch };
+    };
+    expect(typeof sdkOptions.remoteOptions?.customFetch).toBe('function');
 
     await api.shutdownPowerSync();
 
     expect(db.close).toHaveBeenCalledOnce();
     expect(db.unsubscribe).toHaveBeenCalledOnce();
+    expect(db.disposeStatus).toHaveBeenCalledOnce();
     expect(api.getPowerSyncDatabase()).toBeNull();
     await api.shutdownPowerSync();
     expect(db.close).toHaveBeenCalledOnce();
@@ -178,6 +195,59 @@ describe('PowerSync Profile database lifecycle', () => {
     await closing;
     await next;
     expect(sdk.create).toHaveBeenCalledTimes(2);
+  });
+
+  it('records SDK initial download error safely when connect resolves without a checkpoint', async () => {
+    await api.openPowerSyncLocalOnly(path.join(root, 'a.db'));
+    const onStatusChanged = db.registerListener.mock.calls[0]?.[0]?.statusChanged;
+    expect(typeof onStatusChanged).toBe('function');
+    const error = Object.assign(new Error('Bearer should-not-leak'), {
+      name: 'FetchError',
+      status: 503,
+    });
+    db.connect.mockImplementationOnce(async () => {
+      onStatusChanged({
+        connected: false,
+        connecting: true,
+        hasSynced: false,
+        dataFlowStatus: { downloadError: error },
+      });
+    });
+    await api.ensurePowerSyncSyncMode({ getAccessToken: async () => 'test-token' });
+    expect(safeLogs.warn).toHaveBeenCalledWith(
+      'PowerSync download failed; SDK may retry',
+      expect.objectContaining({ phase: 'download_error', httpStatus: 503, hasSynced: false }),
+    );
+    expect(JSON.stringify(safeLogs.warn.mock.calls)).not.toContain('should-not-leak');
+    expect(db.connect).toHaveBeenCalledOnce();
+    // The SDK remains attached to its own retry loop; do not delete local CRUD.
+    expect(db.transaction.execute).not.toHaveBeenCalled();
+    await api.shutdownPowerSync();
+    expect(db.disposeStatus).toHaveBeenCalledOnce();
+  });
+
+  it('reports first-download completion only after SDK status confirms hasSynced', async () => {
+    await api.openPowerSyncLocalOnly(path.join(root, 'a.db'));
+    const onStatusChanged = db.registerListener.mock.calls[0]?.[0]?.statusChanged;
+    expect(typeof onStatusChanged).toBe('function');
+    onStatusChanged({
+      connected: true,
+      connecting: false,
+      hasSynced: false,
+    });
+    expect(safeLogs.info).toHaveBeenCalledWith(
+      'PowerSync download state changed',
+      expect.objectContaining({ phase: 'connected', hasSynced: false }),
+    );
+    onStatusChanged({
+      connected: true,
+      connecting: false,
+      hasSynced: true,
+    });
+    expect(safeLogs.info).toHaveBeenCalledWith(
+      'PowerSync download state changed',
+      expect.objectContaining({ phase: 'synced', hasSynced: true }),
+    );
   });
 
   it('serializes sync promotion and keeps the local database open on disconnect', async () => {
