@@ -36,8 +36,12 @@ const config: StorybookConfig = {
             ['@memoflow/goal/client', 'packages/goal/src/client/index.ts'],
             ['@memoflow/task/client', 'packages/task/src/client/index.ts'],
             ['@memoflow/time', 'packages/time/src/index.ts'],
+            ['@memoflow/utils/domain', 'packages/utils/src/domain/index.ts'],
+            ['@memoflow/utils/errors', 'packages/utils/src/errors/index.ts'],
             ['@memoflow/utils/logger', 'packages/utils/src/logger/index.ts'],
+            ['@memoflow/utils/result', 'packages/utils/src/result/index.ts'],
             ['@memoflow/utils/shared', 'packages/utils/src/shared/index.ts'],
+            ['@memoflow/utils', 'packages/utils/src/index.ts'],
           ]),
           ...(Array.isArray(aliases)
             ? aliases
