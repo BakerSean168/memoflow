@@ -112,7 +112,8 @@ test('visual shards provision Noble fonts before comparisons; PR representatives
 
 test('PR visual selection is nonempty and smaller; nightly/manual retain the full collector', () => {
   const config = YAML.parse(workflow);
-  assert.ok(config.on.schedule.length > 0);
+  const nightly = YAML.parse(readFileSync(new URL("../../../.github/workflows/nightly-audit.yml", import.meta.url), "utf8"));
+  assert.ok(nightly.on.schedule.length > 0);
   assert.ok(Object.hasOwn(config.on, 'workflow_dispatch'));
   const steps = config.jobs['web-flow-shard'].steps;
   const representative = steps.find((step) => step.name === 'Product visual representatives (compare only)');

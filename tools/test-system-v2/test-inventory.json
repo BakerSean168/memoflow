@@ -12384,7 +12384,7 @@
           },
           {
             "kind": "github-workflow",
-            "workflow": ".github/workflows/web-flow-audit.yml",
+            "workflow": ".github/workflows/nightly-audit.yml",
             "target": "web:e2e:audit"
           },
           {
@@ -12394,7 +12394,7 @@
           },
           {
             "kind": "github-workflow",
-            "workflow": ".github/workflows/web-flow-audit.yml",
+            "workflow": ".github/workflows/nightly-audit.yml",
             "target": "web:e2e:ai-provider"
           }
         ]

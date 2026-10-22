@@ -106,7 +106,7 @@ test('required and nightly collectors fail closed without automation ownership',
 test('declared GitHub workflow automation must bind its target', async () => {
   const contract = structuredClone(ownership);
   contract.collectors['apps/web/playwright.config.ts'].automation[0] = {
-    kind: 'github-workflow', workflow: '.github/workflows/web-flow-audit.yml', target:
+    kind: 'github-workflow', workflow: '.github/workflows/nightly-audit.yml', target:
     'web:e2e:missing-audit' };
 
   const governance = await analyzeE2EOwnership(root, inventory, contract);

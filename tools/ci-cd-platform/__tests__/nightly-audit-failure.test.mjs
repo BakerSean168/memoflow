@@ -79,7 +79,7 @@ test('rejects results outside failure/cancelled before calling GitHub', () => {
 });
 
 test('only the serialized failure notification job has issue write permission', () => {
-  const workflow = parse(readFileSync('.github/workflows/web-flow-audit.yml', 'utf8'));
+  const workflow = parse(readFileSync('.github/workflows/nightly-audit.yml', 'utf8'));
   assert.deepEqual(workflow.permissions, { contents: 'read' });
   assert.equal(workflow.jobs.audit.permissions, undefined);
   const notify = workflow.jobs['notify-failure'];

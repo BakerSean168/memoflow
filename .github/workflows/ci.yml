@@ -3,15 +3,13 @@ name: CI
 on:
   push:
     branches: [main]
-  schedule:
-    - cron: '0 3 * * *'
   workflow_dispatch:
   pull_request:
     branches: [main, feat/system-wide-vnext-convergence]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read

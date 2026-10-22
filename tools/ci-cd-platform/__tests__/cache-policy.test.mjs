@@ -58,10 +58,6 @@ test('workspace cache keys bind lockfile and architecture; only Nx binds job, ma
     ci.slice(ci.indexOf('  web-flow-shard:')),
     /cache-variant: web-\$\{\{ strategy.job-index \}\}/u,
   );
-  assert.match(
-    await read('.github/workflows/quality-runner-shadow.yml'),
-    /cache-variant: \$\{\{ matrix.child \}\}/u,
-  );
 });
 
 test('Docker GHA exports use explicit component scope, min mode and main-only authority', async () => {
