@@ -341,6 +341,31 @@ jobs:
           if-no-files-found: error
           retention-days: 3
 
+      - name: Install isolated pinned native Codex for Goal MCP acceptance
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $qaRoot = Join-Path $env:RUNNER_TEMP 'memoflow-570-codex-01630'
+          New-Item -ItemType Directory -Force -Path $qaRoot | Out-Null
+          Push-Location $qaRoot
+          try {
+            npm install --no-save --ignore-scripts --no-audit --no-fund '@openai/codex@0.163.0'
+            if ($LASTEXITCODE -ne 0) { throw 'Pinned native Codex package install failed' }
+          }
+          finally {
+            Pop-Location
+          }
+          $codex = Join-Path $qaRoot 'node_modules\@openai\codex-win32-x64\vendor\x86_64-pc-windows-msvc\bin\codex.exe'
+          if (-not (Test-Path -LiteralPath $codex -PathType Leaf)) {
+            throw 'Pinned native Windows Codex executable missing'
+          }
+          $version = (& $codex --version | Out-String).Trim()
+          if ($version -ne 'codex-cli 0.163.0') {
+            throw "Native Codex version mismatch: $version"
+          }
+          "MEMOFLOW_QA_NATIVE_CODEX_EXE=$codex" >> $env:GITHUB_ENV
+          Write-Host "Installed native Codex $version in isolated runner-owned directory"
+
       - name: Run one installed Windows Workspace and Native acceptance suite
         working-directory: apps/desktop
         shell: pwsh
@@ -357,9 +382,11 @@ jobs:
           # Goal/Conversation events, the actual Goal Vue owner panel and local
           # save/reopen via a test-only IPC command adapter, six synthetic Native
           # ACP Attention failures, AGY Composer/history, and empty Codex Home.
-          # No real accounts, model turns or billing.
-          # Live-account and paid DSH/AGY Send remain separate operator-gated runs.
-          pnpm exec playwright test e2e/workspace-ipc.spec.mts e2e/workspace-attention.spec.mts e2e/antigravity-composer.spec.mts e2e/native-codex-unconfigured-installed.spec.mts e2e/native-goal-panel-installed.spec.mts --config playwright.config.ts --workers=1
+          # The integrated native Codex MCP test uses deterministic app-server
+          # tool/call RPC and a test-only IPC relay into the real Goal owner.
+          # No real accounts, Codex model turns, paid inference or cloud writes.
+          # Full natural-language Codex planning remains separately gated.
+          pnpm exec playwright test e2e/workspace-ipc.spec.mts e2e/workspace-attention.spec.mts e2e/antigravity-composer.spec.mts e2e/native-codex-unconfigured-installed.spec.mts e2e/native-goal-panel-installed.spec.mts e2e/native-codex-goal-integrated-installed.spec.mts --config playwright.config.ts --workers=1
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       # Retain the already-tested installer for separately authorized local
