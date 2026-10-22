@@ -602,16 +602,6 @@
       ]
     },
     {
-      "path": "apps/api/src/shared/infrastructure/config/get-cors-origins-keep-boundary.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "apps/api/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "apps/api/vitest.config.ts"
-      ]
-    },
-    {
       "path": "apps/api/src/shared/infrastructure/config/get-github-oauth-config.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -2756,15 +2746,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "apps/web/src/e2e-helpers/desktop-build-global-setup-dual.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "apps/web/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "apps/web/src/e2e-helpers/normalize-origin-dual.surface.spec.ts",
+      "path": "apps/web/src/e2e-helpers/normalize-origin.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/web/vitest.config.ts"
@@ -7150,14 +7132,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/result/is-record-keep-boundary.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/contracts/src/result/public-failure.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -8544,16 +8518,6 @@
         "packages/goal/vitest.integration.config.ts"
       ],
       "measurementCollectors": []
-    },
-    {
-      "path": "packages/goal/src/server/infrastructure/build-task-name-keep-boundary.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/goal/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/goal/vitest.config.ts"
-      ]
     },
     {
       "path": "packages/goal/src/server/infrastructure/goal-profile-import.integration.test.ts",
@@ -11548,15 +11512,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/utils/src/frontend/delay-dual.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/utils/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/utils/src/frontend/format-file-size-keep-boundary.surface.spec.ts",
+      "path": "packages/utils/src/frontend/api-utils.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/utils/vitest.config.ts"
@@ -11588,14 +11544,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/utils/src/result/format-zod-errors-dual.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/utils/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/utils/src/result/ipc-adapter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11604,7 +11552,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/utils/src/result/openapi-response-helpers-dual.surface.spec.ts",
+      "path": "packages/utils/src/result/openapi-helpers.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/utils/vitest.config.ts"
@@ -11628,23 +11576,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/utils/src/shared/format-date-to-input-keep-boundary.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/utils/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/utils/src/shared/generate-uuid-keep-boundary.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/utils/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/utils/src/shared/new-id-keep-boundary.surface.spec.ts",
+      "path": "packages/utils/src/shared/uuid.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/utils/vitest.config.ts"
@@ -12274,7 +12206,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 65
+      "fileCount": 64
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -12316,7 +12248,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 103
+      "fileCount": 102
     },
     {
       "id": "packages/goal/vitest.mappers.config.ts",
@@ -12726,7 +12658,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 65
+      "fileCount": 64
     },
     {
       "id": "apps/desktop/vitest.config.ts",
@@ -12747,7 +12679,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 20
+      "fileCount": 19
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -12796,7 +12728,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 94
+      "fileCount": 93
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -12824,7 +12756,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 103
+      "fileCount": 102
     },
     {
       "id": "packages/http-client/vitest.config.ts",
@@ -12950,7 +12882,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 17
+      "fileCount": 13
     }
   ],
   "measurementSuites": {
@@ -12999,7 +12931,6 @@
       "apps/api/src/runtime/compose-task.spec.ts",
       "apps/api/src/scripts/database-startup-chain.test.ts",
       "apps/api/src/shared/infrastructure/config/env.schema.spec.ts",
-      "apps/api/src/shared/infrastructure/config/get-cors-origins-keep-boundary.surface.spec.ts",
       "apps/api/src/shared/infrastructure/config/get-github-oauth-config.surface.spec.ts",
       "apps/api/src/shared/infrastructure/config/logger-bootstrap.spec.ts",
       "apps/api/src/shared/infrastructure/config/web-origin.spec.ts",
@@ -13281,7 +13212,6 @@
       "packages/goal/src/server/infrastructure/adapters/prisma/mappers/prisma-wallet.mapper.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/mappers/prisma-weight-snapshot-mapper.additional.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/mappers/prisma-weight-snapshot-mapper.spec.ts",
-      "packages/goal/src/server/infrastructure/build-task-name-keep-boundary.surface.spec.ts",
       "packages/goal/src/server/infrastructure/goal-reminder-fire.handler.spec.ts",
       "packages/goal/src/server/infrastructure/schedule-projection-source.spec.ts",
       "packages/goal/src/server/transport/__tests__/goal-transport-mapper.spec.ts",
@@ -13498,7 +13428,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1122,
+    "unit": 1114,
     "integration": 53,
     "smoke": 3,
     "boundary-ipc": 6,
