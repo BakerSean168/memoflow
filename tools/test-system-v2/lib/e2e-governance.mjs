@@ -185,6 +185,7 @@ async function validateExecution(root, collectorId, ownership, projects) {
   const defaultConfigBound =
     configBase === 'playwright.config.ts' &&
     targetCwd === collectorDir &&
+    !/(?:^|\s)--config(?:=|\s)/u.test(commandText) &&
     /\bplaywright\b/u.test(commandText) &&
     /\btest\b/u.test(commandText);
 

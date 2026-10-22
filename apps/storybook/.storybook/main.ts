@@ -1,6 +1,7 @@
 import type { StorybookConfig } from '@storybook/vue3-vite';
 import path from 'node:path';
 import tailwindcss from '@tailwindcss/vite';
+import vue from '@vitejs/plugin-vue';
 import {
   createAppVueSourceAliasEntries,
   createAssetsAliasEntries,
@@ -12,8 +13,8 @@ import {
 const workspace = path.resolve(import.meta.dirname, '../../..');
 const config: StorybookConfig = {
   stories: [
-    '../src/**/*.stories.@(js|jsx|ts|tsx|vue)',
-    '../../app-vue/src/**/*.stories.@(js|jsx|ts|tsx|vue)',
+    '../../../packages/ui-vue-shadcn/src/**/*.stories.@(js|jsx|ts|tsx|vue)',
+    '../../../packages/app-vue/src/**/*.stories.@(js|jsx|ts|tsx|vue)',
   ],
   addons: ['@storybook/addon-docs'],
   framework: { name: '@storybook/vue3-vite', options: {} },
@@ -21,7 +22,7 @@ const config: StorybookConfig = {
     const aliases = config.resolve?.alias ?? [];
     return {
       ...config,
-      plugins: [...(config.plugins ?? []), tailwindcss()],
+      plugins: [vue(), ...(config.plugins ?? []), tailwindcss()],
       resolve: {
         ...config.resolve,
         alias: [

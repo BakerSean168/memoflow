@@ -2,9 +2,9 @@ import { setup, type Preview } from '@storybook/vue3-vite';
 import { createPinia } from 'pinia';
 import { createI18n } from 'vue-i18n';
 import { createMemoryHistory, createRouter } from 'vue-router';
-import { productionLocaleMessages } from '../../app-vue/src/locales/production-messages';
-import { installServerStateRuntime } from '../../app-vue/src/platform/server-state';
-import '../src/styles/globals.css';
+import { productionLocaleMessages } from '../../../packages/app-vue/src/locales/production-messages';
+import { installServerStateRuntime } from '../../../packages/app-vue/src/platform/server-state';
+import '../../../packages/ui-vue-shadcn/src/styles/globals.css';
 
 setup((app) => {
   app.use(createPinia());

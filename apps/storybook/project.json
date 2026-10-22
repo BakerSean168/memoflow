@@ -1,0 +1,62 @@
+{
+  "name": "ui-storybook",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/storybook",
+  "tags": [
+    "scope:ui",
+    "type:app"
+  ],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": { "command": "vue-tsc --noEmit -p apps/storybook/tsconfig.json", "cwd": "." }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "storybook dev -p 4402 -c apps/storybook/.storybook",
+        "cwd": "."
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "dependsOn": [],
+      "cache": true,
+      "inputs": [
+        "default",
+        "{workspaceRoot}/packages/*/src/**/*",
+        "{workspaceRoot}/vite.workspace-aliases.ts",
+        "{workspaceRoot}/pnpm-lock.yaml"
+      ],
+      "outputs": [
+        "{workspaceRoot}/dist/storybook"
+      ],
+      "options": {
+        "command": "storybook build -c apps/storybook/.storybook -o dist/storybook --disable-telemetry",
+        "cwd": "."
+      }
+    },
+    "preview": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "vite preview --outDir dist/storybook --host 127.0.0.1 --port 4402 --strictPort",
+        "cwd": "."
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "commands": [
+          "node -e \"require('node:fs').mkdirSync('test-results',{recursive:true})\"",
+          "test-storybook -c apps/storybook/.storybook --url http://127.0.0.1:4402 --maxWorkers=1 --ci --includeTags ci-interaction --index-json --json --outputFile test-results/storybook-results.json",
+          "node --input-type=module -e \"import {readFileSync} from 'node:fs'; import assert from 'node:assert/strict'; const r=JSON.parse(readFileSync('test-results/storybook-results.json','utf8')); assert.equal(r.success,true); assert.equal(r.numPassedTests,6); assert.equal(r.numTotalTests,6); assert.equal(r.numTotalTestSuites,2);\""
+        ],
+        "parallel": false,
+        "cwd": "."
+      }
+    }
+  }
+}

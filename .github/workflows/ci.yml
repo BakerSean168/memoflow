@@ -567,8 +567,8 @@ jobs:
         if: strategy.job-index == 0
         shell: bash
         run: |
-          pnpm exec nx run ui-vue-shadcn:storybook:build
-          setsid pnpm exec nx run ui-vue-shadcn:storybook:preview > "$RUNNER_TEMP/storybook-preview.log" 2>&1 &
+          pnpm exec nx run ui-storybook:build
+          setsid pnpm exec nx run ui-storybook:preview > "$RUNNER_TEMP/storybook-preview.log" 2>&1 &
           server=$!
           trap 'kill -- -"$server" 2>/dev/null || true' EXIT
           for attempt in {1..30}; do
@@ -577,7 +577,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:4402/index.json > /dev/null
-          node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run ui-vue-shadcn:storybook:test
+          node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run ui-storybook:test
         env:
           TEST_REPORT_NAME: storybook-interactions
           DELIVERY_LANE: web
