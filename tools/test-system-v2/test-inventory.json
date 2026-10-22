@@ -1020,6 +1020,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/database/powersync-first-download.spec.ts",
+      "primarySuite": "boundary-main",
+      "collectors": [
+        "apps/desktop/vitest.main.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/database/powersync-health.spec.ts",
       "primarySuite": "boundary-main",
       "collectors": [
@@ -12354,7 +12362,7 @@
       "type": "primary",
       "suite": "boundary-main",
       "runner": "vitest",
-      "fileCount": 11
+      "fileCount": 12
     },
     {
       "id": "apps/desktop/playwright.config.ts",
@@ -13440,7 +13448,7 @@
     "integration": 53,
     "smoke": 3,
     "boundary-ipc": 6,
-    "boundary-main": 11,
+    "boundary-main": 12,
     "e2e": 67,
     "perf": 2,
     "governance": 76
