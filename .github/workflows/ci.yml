@@ -563,6 +563,32 @@ jobs:
         env:
           TEST_REPORT_NAME: web-visual-${{ strategy.job-index }}
           DELIVERY_LANE: web
+      - name: Goal and Task Storybook interactions (single build, no API)
+        if: strategy.job-index == 0
+        shell: bash
+        run: |
+          pnpm exec nx run ui-vue-shadcn:storybook:build
+          setsid pnpm exec nx run ui-vue-shadcn:storybook:preview > "$RUNNER_TEMP/storybook-preview.log" 2>&1 &
+          server=$!
+          trap 'kill -- -"$server" 2>/dev/null || true' EXIT
+          for attempt in {1..30}; do
+            curl --fail --silent http://127.0.0.1:4402/index.json > /dev/null && break
+            kill -0 "$server"
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:4402/index.json > /dev/null
+          node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run ui-vue-shadcn:storybook:test
+        env:
+          TEST_REPORT_NAME: storybook-interactions
+          DELIVERY_LANE: web
+      - name: Upload Storybook interaction evidence
+        if: always() && strategy.job-index == 0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: storybook-interactions-${{ github.run_attempt }}
+          path: test-results/storybook-results.json
+          if-no-files-found: error
+          retention-days: 14
       - name: Secure AI Provider product acceptance
         if: strategy.job-index == 0
         run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run web:e2e:ai-provider

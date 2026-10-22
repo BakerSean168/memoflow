@@ -528,27 +528,6 @@ describe('GoalDialog vNext surface (GOAL-5101)', () => {
     wrapper.unmount();
   });
 
-  it('announces an empty title after blur and clears the reserved error line after correction', async () => {
-    const wrapper = mount(GoalDialog, {
-      props: { open: true, mode: 'create', presentation: 'panel' },
-      attachTo: document.body,
-      global: { plugins: [i18n] },
-    });
-    await nextTick();
-    const name = dom('goal-name-input');
-    const slot = name.element.nextElementSibling;
-    expect(name.attributes('aria-describedby')).toBeUndefined();
-    await name.trigger('blur');
-    expect(name.attributes('aria-invalid')).toBe('true');
-    expect(dom('goal-name-limit-error').text()).toBe('Goal name is required');
-    expect(name.classes()).toContain('focus-visible:ring-2');
-    await name.setValue('Corrected goal');
-    expect(document.querySelector('[data-testid="goal-name-limit-error"]')).toBeNull();
-    expect(name.element.nextElementSibling).toBe(slot);
-    expect(name.attributes('aria-describedby')).toBeUndefined();
-    wrapper.unmount();
-  });
-
   it('saves through the scoped owner capability once and rejects a concurrent save', async () => {
     const created = createMockGoal({ name: 'Scoped Goal' });
     let complete!: () => void;
