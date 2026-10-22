@@ -1,5 +1,6 @@
 /* eslint-disable @nx/enforce-module-boundaries -- planner consumes the Web-owned canonical spec list */
 import { WEB_FLOW_SPECS } from '../../../apps/web/web-flow-specs.mjs';
+import { WEB_CORE_SPECS, WEB_OWNER_EXTENSIONS } from '../../../apps/web/web-core-specs.mjs';
 import { medianDuration, planShards } from './shard-balance.mjs';
 
 // Wall budget includes the measured fixed setup cost. Keep all tuning here.
@@ -14,15 +15,35 @@ export function selectWebSpecs({ enabled, full, files }) {
   if (!enabled) return { specs: [], fallback: false };
   if (full) return { specs: [...WEB_FLOW_SPECS], fallback: false };
   const canonical = new Set(WEB_FLOW_SPECS.map((spec) => `apps/web/e2e/${spec}`));
-  // Only exact canonical spec edits prove a narrower scope. Shared imports,
-  // helpers, deleted/renamed specs and unknown input conservatively run all.
-  if (!Array.isArray(files) || files.length === 0 || files.some((file) => !canonical.has(file))) {
+  if (!Array.isArray(files) || files.length === 0) {
     return { specs: [...WEB_FLOW_SPECS], fallback: true };
   }
-  return {
-    specs: [...new Set(files.map((file) => file.slice('apps/web/e2e/'.length)))].sort(),
-    fallback: false,
-  };
+  if (files.every((file) => canonical.has(file))) {
+    return { specs: [...new Set(files.map((file) => file.slice('apps/web/e2e/'.length)))].sort(), fallback: false };
+  }
+  const selected = new Set(WEB_CORE_SPECS);
+  for (const file of files) {
+    if (canonical.has(file)) {
+      selected.add(file.slice('apps/web/e2e/'.length));
+      continue;
+    }
+    const owner = /^packages\/app-vue\/src\/modules\/([^/]+)\//u.exec(file)?.[1]
+      ?? /^packages\/([^/]+)\/src\//u.exec(file)?.[1];
+    const prefixes = WEB_OWNER_EXTENSIONS[owner];
+    // No guessed dependency graph: shared contracts, global styles, helpers,
+    // root/config and unrecognized owners retain the full four-shard fallback.
+    if (!prefixes) return { specs: [...WEB_FLOW_SPECS], fallback: true };
+    for (const spec of WEB_FLOW_SPECS) {
+      if (prefixes.some((prefix) => spec.startsWith(prefix))) selected.add(spec);
+    }
+    // Goal/Task feed AI tools and planner writes; do not silently omit those consumers.
+    if (['goal', 'task', 'repository'].includes(owner)) {
+      for (const spec of WEB_FLOW_SPECS) {
+        if (spec.startsWith('ai/') || spec.startsWith('schedule/')) selected.add(spec);
+      }
+    }
+  }
+  return { specs: [...selected].sort(), fallback: false };
 }
 
 export function planWebShards({
