@@ -84,11 +84,27 @@ function Wait-ForInstalledExecutable([int]$TimeoutSeconds) {
   throw "MemoFlow installed executable was not found within $TimeoutSeconds seconds"
 }
 
+function Get-MemoFlowUpdateInstallers {
+  $updaterRoot = Join-Path $env:LOCALAPPDATA '@memoflowdesktop-updater'
+  @(Get-CimInstance Win32_Process -ErrorAction Stop | Where-Object {
+    $_.Name -like 'MemoFlow-Windows-*-Setup.exe' -or
+    ($_.ExecutablePath -and $_.ExecutablePath.StartsWith($updaterRoot + '\', [StringComparison]::OrdinalIgnoreCase))
+  })
+}
+
 function Stop-And-Drain-MemoFlowProcesses([int]$TimeoutSeconds = 30) {
   $deadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
   $emptyPolls = 0
 
   while ([DateTime]::UtcNow -lt $deadline) {
+    # An installer still copying files can launch --updated after two quiet
+    # application samples. Wait for it to finish; never kill it mid-install.
+    $installers = @(Get-MemoFlowUpdateInstallers)
+    if ($installers.Count -gt 0) {
+      $emptyPolls = 0
+      Start-Sleep -Seconds 1
+      continue
+    }
     $running = @(Get-Process -Name 'memoflow' -ErrorAction SilentlyContinue)
     if ($running.Count -eq 0) {
       $emptyPolls += 1
@@ -111,7 +127,7 @@ function Stop-And-Drain-MemoFlowProcesses([int]$TimeoutSeconds = 30) {
     Start-Sleep -Seconds 1
   }
 
-  throw "MemoFlow processes did not settle within $TimeoutSeconds seconds"
+  throw "MemoFlow installer/app processes did not settle within $TimeoutSeconds seconds"
 }
 
 function Get-E2EStatus([string]$Path) {

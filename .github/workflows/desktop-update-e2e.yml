@@ -236,6 +236,7 @@ jobs:
           }
           $qaFiles = @(
             'apps/desktop/scripts/run-windows-update-e2e.ps1'
+            'tools/ci-cd-platform/__tests__/release-workflows.test.mjs'
             'apps/desktop/e2e/workspace-ipc.spec.mts'
             'apps/desktop/e2e/workspace-attention.spec.mts'
             'apps/desktop/e2e/antigravity-composer.spec.mts'
@@ -252,6 +253,12 @@ jobs:
             if ($LASTEXITCODE -ne 0) { throw "Unable to materialize QA-only source: $relativePath" }
           }
           Write-Host '[release] Pinned QA-only scripts fetched with git show; no second workspace or product changes.'
+
+      - name: Verify NSIS handoff harness behavior
+        shell: pwsh
+        run: |
+          node --test --test-name-pattern="Windows NSIS handoff" tools/ci-cd-platform/__tests__/release-workflows.test.mjs
+          if ($LASTEXITCODE -ne 0) { throw 'NSIS handoff regression failed' }
 
       - name: Run installed Windows updater proof
         shell: pwsh
