@@ -38,6 +38,7 @@ import { recoverPreferenceCanonicalId } from './powersync-preference-recovery';
 import { normalizePowerSyncTableName, POWER_SYNC_CHANGE_TABLES } from './powersync-table-changes';
 import { resolvePackagedWorkerPath } from './packaged-worker-path';
 import { describePowerSyncStatus } from './powersync-health';
+import { closePowerSyncHttpTransport, powerSyncHttpFetch } from './powersync-http-transport';
 
 const syncLogger = createLogger('DesktopPowerSync');
 
@@ -89,6 +90,8 @@ function ensureDbDirectory(dbPath: string): string {
 function createPowerSyncDatabase(dbPath: string): PowerSyncDatabase {
   return new PowerSyncDatabase({
     schema: PowerSyncAppSchema,
+    // Avoid mixing Electron's native fetch with the SDK's separate undici agent.
+    remoteOptions: { customFetch: powerSyncHttpFetch },
     database: {
       dbFilename: dbPath,
       openWorker: (filename, options) => {
@@ -401,6 +404,9 @@ function closeProfileDatabase(instance: ProfileDatabaseInstance): Promise<void> 
           stopSyncStatusLogging();
         } finally {
           await instance.db.close();
+          await closePowerSyncHttpTransport().catch(() => {
+            syncLogger.warn('PowerSync HTTP transport cleanup failed after database close');
+          });
         }
       }
       if (powerSyncInstance === instance) powerSyncInstance = null;
