@@ -12,6 +12,8 @@ vi.mock('@powersync/node', () => ({
   PowerSyncDatabase: class {
     waitForReady = async () => undefined;
     onChange = () => () => undefined;
+    registerListener = () => () => undefined;
+    currentStatus = { connected: false, connecting: false, hasSynced: false };
     disconnect = handles.disconnect;
     close = handles.close;
   },

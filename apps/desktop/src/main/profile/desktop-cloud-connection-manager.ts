@@ -1,11 +1,14 @@
 import { BetterAuthSessionResponseSchema } from '@memoflow/contracts';
+import { createLogger } from '@memoflow/utils/logger';
 import type { ProfileCloudState } from '@memoflow/contracts/electron';
 import { getApiBaseUrl } from '../utils/api-config';
+import { safeSyncErrorType } from '../database/powersync-health';
 import type { DesktopProfileRuntimeManager } from './desktop-profile-runtime-manager';
 import type { ProfileDescriptor } from './profile-registry';
 import type { CloudSessionStore, StoredCloudSession } from './cloud-session-store';
 
 const SESSION_CHECK_TIMEOUT_MS = 5_000;
+const cloudLogger = createLogger('DesktopCloudConnectionManager');
 interface CloudCheck {
   profileId: string;
   accountId: string;
@@ -187,6 +190,7 @@ export class DesktopCloudConnectionManager {
 
   private async checkAndConnect(check: CloudCheck): Promise<ProfileCloudState> {
     let state: ProfileCloudState = 'OFFLINE';
+    let stage = 'local_session';
     try {
       const stored = await this.sessions.load(check.profileId);
       if (!this.isCurrent(check)) return 'OFFLINE';
@@ -194,6 +198,7 @@ export class DesktopCloudConnectionManager {
         state = 'REAUTH_REQUIRED';
       } else {
         check.token = stored.token;
+        stage = 'remote_session';
         const remote = await this.checkRemoteSession(check, stored.token);
         if (!this.isCurrent(check)) return 'OFFLINE';
         if (typeof remote === 'string') {
@@ -201,6 +206,7 @@ export class DesktopCloudConnectionManager {
         } else {
           await this.sessions.save(check.profileId, remote);
           if (!this.isCurrent(check)) return 'OFFLINE';
+          stage = 'power_sync_activation';
           await this.runtime.enableCloudSync({
             getAccessToken: async () => {
               if (!this.isCurrent(check)) return null;
@@ -211,7 +217,13 @@ export class DesktopCloudConnectionManager {
           state = 'ONLINE';
         }
       }
-    } catch {
+    } catch (error) {
+      // The SDK may swallow lower-level errors. Log only categorical metadata:
+      // Error.message/stack can contain URLs or bearer credentials.
+      cloudLogger.warn('Cloud connection restore unsuccessful', {
+        stage,
+        errorType: safeSyncErrorType(error),
+      });
       state = 'OFFLINE';
     }
     if (!this.isCurrent(check)) return 'OFFLINE';

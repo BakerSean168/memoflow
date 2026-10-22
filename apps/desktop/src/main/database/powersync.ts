@@ -31,11 +31,15 @@ import fs from 'fs';
 import { Worker } from 'node:worker_threads';
 
 import { PowerSyncAppSchema } from '@memoflow/powersync-schema';
+import { createLogger } from '@memoflow/utils/logger';
 import { getApiBaseUrl } from '../utils/api-config';
 import { serializeCrudTransaction } from './powersync-crud';
 import { recoverPreferenceCanonicalId } from './powersync-preference-recovery';
 import { normalizePowerSyncTableName, POWER_SYNC_CHANGE_TABLES } from './powersync-table-changes';
 import { resolvePackagedWorkerPath } from './packaged-worker-path';
+import { describePowerSyncStatus } from './powersync-health';
+
+const syncLogger = createLogger('DesktopPowerSync');
 
 export interface CloudCredentialProvider {
   getAccessToken(): Promise<string | null>;
@@ -183,8 +187,8 @@ export class DesktopPowerSyncConnector implements PowerSyncBackendConnector {
     });
 
     if (!response.ok) {
-      const body = await response.text().catch(() => '');
-      throw new Error(`[PowerSync] Failed to fetch credentials: ${response.status} ${body}`);
+      // Do not include response bodies: upstream errors can contain credentials.
+      throw new Error(`[PowerSync] Credential request rejected (HTTP ${response.status})`);
     }
 
     const payload = (await response.json()) as {
@@ -203,17 +207,11 @@ export class DesktopPowerSyncConnector implements PowerSyncBackendConnector {
       !payload.data?.endpoint ||
       !payload.data?.expiresIn
     ) {
-      throw new Error(
-        `[PowerSync] Invalid credentials response contract from API: ${JSON.stringify(payload)}`,
-      );
+      throw new Error('[PowerSync] Invalid credentials response contract from API');
     }
 
     const expiresAt = new Date(Date.now() + payload.data.expiresIn * 1000);
-    console.log('[PowerSync] Credentials fetched', {
-      endpoint: payload.data.endpoint,
-      expiresAt: expiresAt.toISOString(),
-      tokenPrefix: `${payload.data.token.slice(0, 10)}...`,
-    });
+    syncLogger.info('Sync credentials received', { expiresInSeconds: payload.data.expiresIn });
 
     return {
       endpoint: payload.data.endpoint,
@@ -350,6 +348,7 @@ export async function openPowerSyncLocalOnly(dbPath: string): Promise<PowerSyncD
     }
     if (instance.phase === 'opening') {
       startChangeBroadcast(instance.db);
+      startSyncStatusLogging(instance.db);
       instance.phase = 'open';
       console.log('[PowerSync] Local-only Profile database ready');
     }
@@ -399,6 +398,7 @@ function closeProfileDatabase(instance: ProfileDatabaseInstance): Promise<void> 
       } finally {
         try {
           stopChangeBroadcast();
+          stopSyncStatusLogging();
         } finally {
           await instance.db.close();
         }
@@ -449,7 +449,11 @@ export async function ensurePowerSyncSyncMode(
     instance.syncController = controller;
     await instance.db.connect(new DesktopPowerSyncConnector(credentialProvider, controller.signal));
     assertSyncCurrent();
+    // SDK connect() may resolve after an initial download error. This only
+    // records that the connector was attached, NOT that the cloud is hydrated.
     instance.syncConnected = true;
+    const health = describePowerSyncStatus(instance.db.currentStatus);
+    syncLogger.info('Sync connector attached; first-download status', health);
     console.log('[PowerSync] Promoted to sync mode');
     return instance.db;
   });
@@ -499,6 +503,37 @@ export function getPowerSyncDatabase(): PowerSyncDatabase | null {
 
 /** Unsubscribe handle returned by onChange; stored so we can tear it down. */
 let onChangeDispose: (() => void) | null = null;
+let onSyncStatusDispose: (() => void) | null = null;
+
+function startSyncStatusLogging(db: PowerSyncDatabase): void {
+  if (onSyncStatusDispose) return;
+  let previous: string | null = null;
+  const inspect = (status: typeof db.currentStatus) => {
+    const health = describePowerSyncStatus(status);
+    const key = [
+      health.phase,
+      health.hasSynced,
+      health.errorType,
+      health.errorCode,
+      health.httpStatus,
+    ].join(':');
+    if (key === previous) return;
+    previous = key;
+    if (health.phase === 'download_error') {
+      syncLogger.warn('PowerSync download failed; SDK may retry', health);
+    } else {
+      syncLogger.info('PowerSync download state changed', health);
+    }
+  };
+  onSyncStatusDispose = db.registerListener({ statusChanged: inspect });
+  inspect(db.currentStatus);
+}
+
+function stopSyncStatusLogging(): void {
+  const dispose = onSyncStatusDispose;
+  onSyncStatusDispose = null;
+  dispose?.();
+}
 
 /**
  * Starts listening for table changes on the PowerSync database and
