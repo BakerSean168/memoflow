@@ -17,3 +17,5 @@ export { PowerSyncRelationRepository } from './infrastructure/powersync/powersyn
 export { PrismaGoalRelationCleanupCapability } from './infrastructure/prisma/prisma-goal-relation-cleanup';
 export { PowerSyncGoalRelationCleanupCapability } from './infrastructure/powersync/powersync-goal-relation-cleanup';
 export { createRelationBusinessDataPresence } from './infrastructure/business-data-presence';
+
+// CI probe: comment-only change to measure Nx affected selection (2026-10-22). No behavior change.
