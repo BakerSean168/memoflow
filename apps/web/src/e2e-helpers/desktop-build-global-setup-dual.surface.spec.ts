@@ -14,7 +14,7 @@ describe('desktop-build globalSetup dual retired (residual 1041)', () => {
   const sole = readFileSync(resolve(root, 'e2e/helpers/desktop-build-global-setup.ts'), 'utf8');
   const syncConfig = readFileSync(resolve(root, 'playwright.sync.config.ts'), 'utf8');
   const screenshotConfig = readFileSync(
-    resolve(root, 'playwright.desktop-screenshot.config.ts'),
+    resolve(root, 'playwright.sync.config.ts'),
     'utf8',
   );
   const shellSetup = readFileSync(resolve(root, 'e2e/shell/global-setup.ts'), 'utf8');

@@ -1881,35 +1881,34 @@
       "path": "apps/web/e2e/account/account-management.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
-        "apps/web/playwright.audit.config.ts"
+        "apps/web/playwright.config.ts"
       ],
       "measurementCollectors": [],
       "e2eOwnership": {
         "surface": "account",
         "role": "supplemental",
         "lifecycle": "active",
-        "primaryCollector": "apps/web/playwright.audit.config.ts"
+        "primaryCollector": "apps/web/playwright.config.ts"
       }
     },
     {
       "path": "apps/web/e2e/account/account-profile.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
-        "apps/web/playwright.audit.config.ts"
+        "apps/web/playwright.config.ts"
       ],
       "measurementCollectors": [],
       "e2eOwnership": {
         "surface": "account",
         "role": "supplemental",
         "lifecycle": "active",
-        "primaryCollector": "apps/web/playwright.audit.config.ts"
+        "primaryCollector": "apps/web/playwright.config.ts"
       }
     },
     {
       "path": "apps/web/e2e/ai/goal-workflow/checkpoint-identity.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
-        "apps/web/playwright.ai-workspace.config.ts",
         "apps/web/playwright.config.ts"
       ],
       "measurementCollectors": [],
@@ -1924,7 +1923,6 @@
       "path": "apps/web/e2e/ai/goal-workflow/goal-agent-approval.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
-        "apps/web/playwright.ai-workspace.config.ts",
         "apps/web/playwright.config.ts"
       ],
       "measurementCollectors": [],
@@ -1939,7 +1937,6 @@
       "path": "apps/web/e2e/ai/goal-workflow/knowledge.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
-        "apps/web/playwright.ai-workspace.config.ts",
         "apps/web/playwright.config.ts"
       ],
       "measurementCollectors": [],
@@ -1954,7 +1951,6 @@
       "path": "apps/web/e2e/ai/goal-workflow/multi-session.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
-        "apps/web/playwright.ai-workspace.config.ts",
         "apps/web/playwright.config.ts"
       ],
       "measurementCollectors": [],
@@ -1969,7 +1965,6 @@
       "path": "apps/web/e2e/ai/goal-workflow/sse-budget.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
-        "apps/web/playwright.ai-workspace.config.ts",
         "apps/web/playwright.config.ts"
       ],
       "measurementCollectors": [],
@@ -1984,7 +1979,6 @@
       "path": "apps/web/e2e/ai/goal-workflow/task-create-approval.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
-        "apps/web/playwright.ai-workspace.config.ts",
         "apps/web/playwright.config.ts"
       ],
       "measurementCollectors": [],
@@ -1999,7 +1993,6 @@
       "path": "apps/web/e2e/ai/goal-workflow/workspace-shell.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
-        "apps/web/playwright.ai-workspace.config.ts",
         "apps/web/playwright.config.ts"
       ],
       "measurementCollectors": [],
@@ -2028,28 +2021,28 @@
       "path": "apps/web/e2e/ai/provider-composer-states.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
-        "apps/web/playwright.ai-provider.config.ts"
+        "apps/web/playwright.config.ts"
       ],
       "measurementCollectors": [],
       "e2eOwnership": {
         "surface": "ai",
         "role": "supplemental",
         "lifecycle": "active",
-        "primaryCollector": "apps/web/playwright.ai-provider.config.ts"
+        "primaryCollector": "apps/web/playwright.config.ts"
       }
     },
     {
       "path": "apps/web/e2e/ai/provider-onboarding.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
-        "apps/web/playwright.ai-provider.config.ts"
+        "apps/web/playwright.config.ts"
       ],
       "measurementCollectors": [],
       "e2eOwnership": {
         "surface": "ai",
         "role": "supplemental",
         "lifecycle": "active",
-        "primaryCollector": "apps/web/playwright.ai-provider.config.ts"
+        "primaryCollector": "apps/web/playwright.config.ts"
       }
     },
     {
@@ -2158,28 +2151,28 @@
       "path": "apps/web/e2e/desktop-screenshots/thesis-capture.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
-        "apps/web/playwright.desktop-screenshot.config.ts"
+        "apps/web/playwright.sync.config.ts"
       ],
       "measurementCollectors": [],
       "e2eOwnership": {
         "surface": "desktop-screenshots",
         "role": "artifact",
         "lifecycle": "active",
-        "primaryCollector": "apps/web/playwright.desktop-screenshot.config.ts"
+        "primaryCollector": "apps/web/playwright.sync.config.ts"
       }
     },
     {
       "path": "apps/web/e2e/desktop-screenshots/workspace-layout-matrix.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
-        "apps/web/playwright.desktop-screenshot.config.ts"
+        "apps/web/playwright.sync.config.ts"
       ],
       "measurementCollectors": [],
       "e2eOwnership": {
         "surface": "desktop-screenshots",
         "role": "artifact",
         "lifecycle": "active",
-        "primaryCollector": "apps/web/playwright.desktop-screenshot.config.ts"
+        "primaryCollector": "apps/web/playwright.sync.config.ts"
       }
     },
     {
@@ -2369,14 +2362,14 @@
       "path": "apps/web/e2e/performance/ai-workspace-performance.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
-        "apps/web/playwright.audit.config.ts"
+        "apps/web/playwright.config.ts"
       ],
       "measurementCollectors": [],
       "e2eOwnership": {
         "surface": "performance",
         "role": "supplemental",
         "lifecycle": "active",
-        "primaryCollector": "apps/web/playwright.audit.config.ts"
+        "primaryCollector": "apps/web/playwright.config.ts"
       }
     },
     {
@@ -2467,28 +2460,28 @@
       "path": "apps/web/e2e/setting/setting-appearance.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
-        "apps/web/playwright.audit.config.ts"
+        "apps/web/playwright.config.ts"
       ],
       "measurementCollectors": [],
       "e2eOwnership": {
         "surface": "setting",
         "role": "supplemental",
         "lifecycle": "active",
-        "primaryCollector": "apps/web/playwright.audit.config.ts"
+        "primaryCollector": "apps/web/playwright.config.ts"
       }
     },
     {
       "path": "apps/web/e2e/shell/keyboard-first-desktop.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
-        "apps/web/playwright.shell.config.ts"
+        "apps/web/playwright.sync.config.ts"
       ],
       "measurementCollectors": [],
       "e2eOwnership": {
         "surface": "shell",
         "role": "supplemental",
         "lifecycle": "active",
-        "primaryCollector": "apps/web/playwright.shell.config.ts"
+        "primaryCollector": "apps/web/playwright.sync.config.ts"
       }
     },
     {
@@ -2496,7 +2489,7 @@
       "primarySuite": "e2e",
       "collectors": [
         "apps/web/playwright.config.ts",
-        "apps/web/playwright.shell.config.ts"
+        "apps/web/playwright.sync.config.ts"
       ],
       "measurementCollectors": [],
       "e2eOwnership": {
@@ -2510,14 +2503,14 @@
       "path": "apps/web/e2e/shell/shell-geometry.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
-        "apps/web/playwright.shell.config.ts"
+        "apps/web/playwright.sync.config.ts"
       ],
       "measurementCollectors": [],
       "e2eOwnership": {
         "surface": "shell",
         "role": "supplemental",
         "lifecycle": "active",
-        "primaryCollector": "apps/web/playwright.shell.config.ts"
+        "primaryCollector": "apps/web/playwright.sync.config.ts"
       }
     },
     {
@@ -2622,14 +2615,14 @@
       "path": "apps/web/e2e/ux/command-palette.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
-        "apps/web/playwright.audit.config.ts"
+        "apps/web/playwright.config.ts"
       ],
       "measurementCollectors": [],
       "e2eOwnership": {
         "surface": "ux",
         "role": "supplemental",
         "lifecycle": "active",
-        "primaryCollector": "apps/web/playwright.audit.config.ts"
+        "primaryCollector": "apps/web/playwright.config.ts"
       }
     },
     {
@@ -12439,77 +12432,11 @@
       }
     },
     {
-      "id": "apps/web/playwright.ai-provider.config.ts",
-      "type": "primary",
-      "suite": "e2e",
-      "runner": "playwright",
-      "fileCount": 2,
-      "e2eOwnership": {
-        "lane": "secure-acceptance",
-        "lifecycle": "active",
-        "execution": {
-          "kind": "nx",
-          "target": "web:e2e:ai-provider",
-          "entrypoint": "apps/web/e2e/helpers/run-ai-provider-playwright.ts"
-        },
-        "automation": [
-          {
-            "kind": "github-workflow",
-            "workflow": ".github/workflows/ci.yml",
-            "target": "web:e2e:ai-provider"
-          },
-          {
-            "kind": "github-workflow",
-            "workflow": ".github/workflows/web-flow-audit.yml",
-            "target": "web:e2e:ai-provider"
-          }
-        ]
-      }
-    },
-    {
-      "id": "apps/web/playwright.ai-workspace.config.ts",
-      "type": "primary",
-      "suite": "e2e",
-      "runner": "playwright",
-      "fileCount": 7,
-      "e2eOwnership": {
-        "lane": "specialized",
-        "lifecycle": "active",
-        "execution": {
-          "kind": "nx",
-          "target": "web:e2e:ai-workspace",
-          "entrypoint": "apps/web/e2e/helpers/run-ai-workspace-playwright.ts"
-        }
-      }
-    },
-    {
-      "id": "apps/web/playwright.audit.config.ts",
-      "type": "primary",
-      "suite": "e2e",
-      "runner": "playwright",
-      "fileCount": 5,
-      "e2eOwnership": {
-        "lane": "nightly",
-        "lifecycle": "active",
-        "execution": {
-          "kind": "nx",
-          "target": "web:e2e:audit"
-        },
-        "automation": [
-          {
-            "kind": "github-workflow",
-            "workflow": ".github/workflows/web-flow-audit.yml",
-            "target": "web:e2e:audit"
-          }
-        ]
-      }
-    },
-    {
       "id": "apps/web/playwright.config.ts",
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 28,
+      "fileCount": 35,
       "e2eOwnership": {
         "lane": "required",
         "lifecycle": "active",
@@ -12522,23 +12449,23 @@
             "kind": "github-workflow",
             "workflow": ".github/workflows/ci.yml",
             "entrypoint": "tools/test-system-v2/run-web-shard.mjs"
+          },
+          {
+            "kind": "github-workflow",
+            "workflow": ".github/workflows/web-flow-audit.yml",
+            "target": "web:e2e:audit"
+          },
+          {
+            "kind": "github-workflow",
+            "workflow": ".github/workflows/ci.yml",
+            "target": "web:e2e:ai-provider"
+          },
+          {
+            "kind": "github-workflow",
+            "workflow": ".github/workflows/web-flow-audit.yml",
+            "target": "web:e2e:ai-provider"
           }
         ]
-      }
-    },
-    {
-      "id": "apps/web/playwright.desktop-screenshot.config.ts",
-      "type": "primary",
-      "suite": "e2e",
-      "runner": "playwright",
-      "fileCount": 2,
-      "e2eOwnership": {
-        "lane": "visual-artifact",
-        "lifecycle": "active",
-        "execution": {
-          "kind": "nx",
-          "target": "web:e2e:desktop-screenshots"
-        }
       }
     },
     {
@@ -12603,26 +12530,11 @@
       }
     },
     {
-      "id": "apps/web/playwright.shell.config.ts",
-      "type": "primary",
-      "suite": "e2e",
-      "runner": "playwright",
-      "fileCount": 3,
-      "e2eOwnership": {
-        "lane": "specialized",
-        "lifecycle": "active",
-        "execution": {
-          "kind": "nx",
-          "target": "web:e2e:shell"
-        }
-      }
-    },
-    {
       "id": "apps/web/playwright.sync.config.ts",
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 1,
+      "fileCount": 6,
       "e2eOwnership": {
         "lane": "specialized",
         "lifecycle": "active",
@@ -13601,12 +13513,11 @@
     "countsByLane": {
       "desktop": 11,
       "local-validation": 6,
-      "nightly": 5,
       "reference": 6,
-      "required": 28,
-      "secure-acceptance": 3,
-      "specialized": 3,
-      "visual-artifact": 5
+      "required": 35,
+      "secure-acceptance": 1,
+      "specialized": 5,
+      "visual-artifact": 3
     },
     "countsByRole": {
       "artifact": 3,
@@ -13614,7 +13525,7 @@
       "reference": 6,
       "supplemental": 26
     },
-    "automatedCollectorCount": 4,
+    "automatedCollectorCount": 2,
     "automationBindingCount": 5
   },
   "e2eRetirement": {

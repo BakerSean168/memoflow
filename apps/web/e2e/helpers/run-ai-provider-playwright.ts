@@ -108,6 +108,8 @@ async function main(): Promise<void> {
     const sharedEnv = {
       ...process.env,
       NODE_ENV: 'test',
+      WEB_E2E_MODE: 'provider',
+      PLAYWRIGHT_DISABLE_WEBSERVER: 'true',
       E2E_API_BASE_URL: apiOrigin,
       E2E_WEB_BASE_URL: webOrigin,
       AUTH_BASE_URL: `${apiOrigin}/api/auth`,
@@ -134,7 +136,7 @@ async function main(): Promise<void> {
     web = spawnChild(process.execPath, [viteBin, '--config', 'vite.config.ts', '--host', '127.0.0.1', '--port', String(webPort), '--strictPort'], webRoot, { ...sharedEnv, PROXY_TARGET_URL: apiOrigin });
     await waitHttp(`${webOrigin}/auth`, 60_000);
 
-    playwright = spawnChild(process.execPath, [playwrightCli, 'test', '--config', 'playwright.ai-provider.config.ts', ...process.argv.slice(2)], webRoot, sharedEnv);
+    playwright = spawnChild(process.execPath, [playwrightCli, 'test', '--config', 'playwright.config.ts', ...process.argv.slice(2)], webRoot, sharedEnv);
     const code = await new Promise<number>((resolveExit, reject) => {
       playwright!.once('error', reject);
       playwright!.once('exit', (exitCode, signal) => signal ? reject(new Error(`Playwright exited with ${signal}`)) : resolveExit(exitCode ?? 1));

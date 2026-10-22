@@ -230,7 +230,7 @@ async function main(): Promise<void> {
         playwrightCliPath,
         'test',
         '--config',
-        'playwright.ai-workspace.config.ts',
+        'playwright.config.ts',
         ...process.argv.slice(2),
       ],
       {
@@ -239,6 +239,7 @@ async function main(): Promise<void> {
           ...process.env,
           // Residual 1337: preserve the caller’s CI mode and reporter selection.
           PLAYWRIGHT_DISABLE_WEBSERVER: 'true',
+          WEB_E2E_MODE: 'workspace',
           E2E_WEB_BASE_URL: webBaseUrl,
           E2E_API_BASE_URL: apiOrigin,
         },
