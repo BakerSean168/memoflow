@@ -11,7 +11,10 @@
   "targets": {
     "typecheck": {
       "executor": "nx:run-commands",
-      "options": { "command": "vue-tsc --noEmit -p apps/storybook/tsconfig.json", "cwd": "." }
+      "options": {
+        "command": "vue-tsc --noEmit -p apps/storybook/tsconfig.json",
+        "cwd": "."
+      }
     },
     "serve": {
       "executor": "nx:run-commands",
@@ -57,6 +60,13 @@
         ],
         "parallel": false,
         "cwd": "."
+      }
+    },
+    "lint": {
+      "options": {
+        "args": [
+          "**/*.{ts,tsx,js,jsx,vue}"
+        ]
       }
     }
   }
