@@ -129,6 +129,12 @@
       "lifecycle": "active",
       "primaryCollector": "apps/desktop/playwright.config.ts"
     },
+    "apps/desktop/e2e/native-codex-goal-integrated-installed.spec.mts": {
+      "surface": "goal-native-owner",
+      "role": "supplemental",
+      "lifecycle": "active",
+      "primaryCollector": "apps/desktop/playwright.config.ts"
+    },
     "apps/desktop/e2e/native-codex-account-operator.spec.mts": {
       "surface": "ai-workspace",
       "role": "supplemental",

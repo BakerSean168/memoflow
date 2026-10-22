@@ -71,7 +71,10 @@ test('installed Windows defaults never expose an unconfigured Codex account or c
         }),
       AIChannels.LOCAL_AGENT,
     );
-    expect(probe.ok).toBe(true);
+    // Keep the fail-closed assertion, but expose the bounded IPC error code
+    // so installed Windows QA distinguishes a test setup failure from a
+    // local-Agent runtime/probe regression without logging account details.
+    expect(probe.ok, `Codex default probe failed: ${probe.error?.code ?? 'UNKNOWN'}`).toBe(true);
     const status = probe.data as Exclude<Rpc['data'], unknown[]>;
     expect(['not_installed', 'login_required', 'unavailable']).toContain(status.status);
     expect(status.account).toBeUndefined();

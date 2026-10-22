@@ -859,6 +859,13 @@ test('Windows release uses one exact-installed Native and Workspace acceptance p
   assert.ok(packageAt >= 0 && packageAt < updaterAt && updaterAt < receiptAt);
   assert.ok(receiptAt < acceptanceAt);
   const installed = workflowStep(workflow, acceptanceName);
+  const nativeCodex = workflowStep(
+    workflow,
+    'Install isolated pinned native Codex for Goal MCP acceptance',
+  );
+  assert.match(nativeCodex, /@openai\/codex@0\.163\.0/u);
+  assert.match(nativeCodex, /codex-cli 0\.163\.0/u);
+  assert.match(nativeCodex, /MEMOFLOW_QA_NATIVE_CODEX_EXE/u);
   assert.match(installed, /MEMOFLOW_PACKAGED_EXECUTABLE = \$report\.installedExecutable/u);
   assert.match(installed, /MEMOFLOW_QA_EXPECTED_EXE_SHA256 = \$report\.installedExecutableSha256/u);
   assert.match(installed, /MEMOFLOW_QA_EXPECTED_VERSION = \$report\.expectedVersion/u);
@@ -868,6 +875,7 @@ test('Windows release uses one exact-installed Native and Workspace acceptance p
     'antigravity-composer',
     'native-codex-unconfigured-installed',
     'native-goal-panel-installed',
+    'native-codex-goal-integrated-installed',
   ]) {
     assert.ok(installed.includes('e2e/' + spec + '.spec.mts'), 'missing installed test: ' + spec);
   }
@@ -895,6 +903,7 @@ test('Windows release uses one exact-installed Native and Workspace acceptance p
     'antigravity-composer',
     'native-codex-unconfigured-installed',
     'native-goal-panel-installed',
+    'native-codex-goal-integrated-installed',
   ];
   for (const spec of specs) {
     const source = await readRepoFile('apps/desktop/e2e/' + spec + '.spec.mts');

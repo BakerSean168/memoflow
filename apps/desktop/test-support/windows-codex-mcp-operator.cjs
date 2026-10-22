@@ -3,7 +3,9 @@
  * #570 operator-only Windows Codex App Server acceptance.
  * Receives an ephemeral local MemoFlow MCP grant, never calls turn/start,
  * and uses no personal Codex Home / user account / production Goal owner.
- * Calls only bounded synthetic Goal panel capabilities from a test-only bridge.
+ * Supports an opt-in full installed Windows Goal owner route via a test-only
+ * Electron IPC relay. The native Codex App Server genuinely issues each MCP
+ * tool/call; no Codex language-model turns are started.
  */
 const fs = require('node:fs');
 const os = require('node:os');
@@ -14,6 +16,7 @@ const { createInterface } = require('node:readline');
 const url = process.env.MF570_MCP_URL;
 const token = process.env.MF570_MCP_TOKEN;
 const codex = process.env.MF570_CODEX_WIN_EXE;
+const runIntegratedOwner = process.env.MF570_INTEGRATED_GOAL === 'CONFIRM_REAL_RENDERER_NO_TURN';
 // The temporary grant is scoped to the injected thread; do not propagate it as
 // an ambient environment variable to the native Codex child process.
 delete process.env.MF570_MCP_URL;
@@ -161,6 +164,78 @@ async function main() {
   const openOk = !open?.isError && open?.structuredContent?.snapshot;
   console.log('CODEX_GOAL_OPEN_CALL=' + Boolean(openOk));
   if (!openOk) throw new Error('NATIVE_OPEN_TOOL_FAILED');
+
+  if (runIntegratedOwner) {
+    const goalName = 'QA 570 Windows Codex MCP to real Goal owner';
+    const utcDay = (daysFromNow) =>
+      new Date(Date.now() + daysFromNow * 86400_000).toISOString().slice(0, 10);
+    async function callTool(name, args, shouldFail = false) {
+      const response = await request(
+        'mcpServer/tool/call',
+        { server: 'memoflow', threadId, tool: name, arguments: args },
+        19_000,
+      );
+      if (shouldFail) {
+        if (!response?.isError) throw new Error('EXPECTED_PANEL_ERROR_MISSING');
+      } else if (response?.isError || !response?.structuredContent) {
+        throw new Error('REAL_GOAL_PANEL_TOOL_FAILED_' + name);
+      }
+      return response?.structuredContent || {};
+    }
+
+    const patch = await callTool('goal_panel_patch', {
+      expectedRevision: open.structuredContent.snapshot.revision,
+      name: goalName,
+      summary: 'Real Codex native MCP tool call, actual Windows Goal form',
+      description: 'Written only into an isolated test Profile using real native tool RPC.',
+      start: { kind: 'day', date: utcDay(3) },
+      target: { kind: 'day', date: utcDay(45) },
+    });
+    const filled = patch.snapshot;
+    if (filled?.fields?.name !== goalName || !filled.isControlled || !filled.dirty)
+      throw new Error('REAL_GOAL_PATCH_NOT_APPLIED');
+    const stale = await callTool(
+      'goal_panel_patch',
+      { expectedRevision: open.structuredContent.snapshot.revision, name: 'stale-overwrite' },
+      true,
+    );
+    if (stale?.error?.code !== 'REVISION_CONFLICT')
+      throw new Error('REAL_GOAL_REVISION_FENCE_BROKEN');
+
+    let revision = filled.revision;
+    const titles = ['Read 12 technical papers', 'Complete 24 coding exercises'];
+    for (const title of titles) {
+      const result = await callTool('goal_panel_add_key_result', {
+        expectedRevision: revision,
+        keyResult: {
+          title,
+          calculationMethod: 'Sum',
+          initialValue: 0,
+          targetValue: 12,
+          weight: 3,
+        },
+      });
+      revision = result.snapshot?.revision;
+    }
+    const before = await callTool('goal_panel_snapshot', {});
+    if (
+      before.snapshot?.keyResults?.length !== 2 ||
+      !before.snapshot.isControlled ||
+      before.snapshot.fields?.name !== goalName
+    ) {
+      throw new Error('REAL_GOAL_SNAPSHOT_MISMATCH');
+    }
+    const saved = await callTool('goal_panel_submit', { expectedRevision: revision });
+    const goalId = saved.submitResult?.goalId;
+    if (!goalId || saved.submitResult?.name !== goalName)
+      throw new Error('REAL_GOAL_OWNER_RECEIPT_INVALID');
+    await callTool('goal_panel_submit', {}, true);
+    console.log(
+      'NATIVE_OWNER_PROOF_JSON=' +
+        JSON.stringify({ goalId, goalName, keyResultTitles: titles, modelTurns: 0 }),
+    );
+    console.log('REAL_CODEX_TO_GOAL_OWNER_RPC=PASS');
+  }
 
   console.log('NATIVE_MODEL_TURNS=0');
   console.log('WIN_REAL_CODEX_MEMOFLOW_MCP=PASS');
