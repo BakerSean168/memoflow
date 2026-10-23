@@ -54,6 +54,13 @@ test.describe('AI Goal Workflow', () => {
     await expect(answer).toBeVisible({ timeout: TIMEOUT_CONFIG.ELEMENT_WAIT });
     await expect(answer).toContainText('MemoFlow grounding policy');
     await expect(page.getByTestId('ai-context-panel')).toHaveCount(0);
+    // A transient success toast can cover the mobile header toggle. Move the
+    // pointer away so Sonner can dismiss it, then use a normal pointer click.
+    await page.mouse.move(0, 0);
+    await expect(page.locator('[data-sonner-toast]')).toHaveCount(0, {
+      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
+    });
+
     // Workspace navigation must not erase the conversation or its citations.
     await panelToggle.click();
     await expect(shell).toHaveAttribute('data-shell-state', 'focus');
