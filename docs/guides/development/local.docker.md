@@ -4,14 +4,14 @@ tags:
   - development
   - docker
   - local
-description: 使用 docker-compose.local.yml 做 prod-like 本地验证的统一入口
+description: docker-compose.local.yml 的定位：容器专属问题的定向复现入口（非常规开发默认路径）
 created: 2026-05-19T00:00:00
 updated: 2026-07-31T00:00:00
 ---
 
 # Local Docker 验证
 
-`docker-compose.local.yml` 是当前仓库做容器化改动、本地联调和发布前验收的默认入口。它固定使用 Compose project `memoflow-prod-like`，与 host-dev 的 `memoflow-host-dev` 隔离。
+`docker-compose.local.yml` 是容器专属问题的定向复现入口，不是日常开发或进入 PR 前的默认验证路径（日常验证见 AGENTS.md「最小验证」：单文件测试 + `pnpm check:changed`，镜像正确性由 PR CI 的 build lane 证明）。它固定使用 Compose project `memoflow-prod-like`，与 host-dev 的 `memoflow-host-dev` 隔离。用完须 `pnpm docker:local:down` 并清理本地镜像，开发机上不常驻这套 compose。
 
 它的定位不是“随便起一下服务”，而是：
 
@@ -22,7 +22,7 @@ updated: 2026-07-31T00:00:00
 
 ## 适用场景
 
-以下变更默认先走本地 Docker 验证：
+以下问题才走本地 Docker 定向复现（其余变更不走）：
 
 - Dockerfile
 - `docker-compose.local.yml`

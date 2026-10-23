@@ -31,6 +31,8 @@
     "// ========== Testing ==========": "",
     "test": "pnpm nx run-many -t test --all",
     "test:affected": "pnpm nx affected -t test",
+    "test:file": "vitest run",
+    "check:changed": "pnpm nx affected -t lint,typecheck,test --parallel=3",
     "test:unit": "pnpm nx run task:test",
     "test:smoke": "pnpm nx run api:test:smoke",
     "test:integration": "pnpm nx run-many -t test:integration --projects=task,goal,schedule,scheduler,reminder --parallel=1",
