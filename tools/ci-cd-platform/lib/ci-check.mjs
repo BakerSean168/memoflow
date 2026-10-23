@@ -56,10 +56,17 @@ function validateManifest(manifest) {
 /**
  * The GitHub Artifact directory encodes the attempt and zero-based matrix
  * index. Never accept a receipt copied beneath a different attempt/shard.
+ * `actions/download-artifact` extracts a lone pattern match directly into
+ * the target directory, so a single-shard run produces a flat
+ * `shard-<n>.json` path; for that layout only the file name can be bound
+ * here and the run/attempt/digest identity is enforced by the content
+ * checks in evaluateCiCheck.
  */
 export function validWebReceiptArtifactPath(relativePath, receipt) {
   const match = /^web-shard-receipt-(\d+)-(\d+)\/shard-(\d+)\.json$/u.exec(relativePath);
+  const flat = /^shard-(\d+)\.json$/u.exec(relativePath);
   const shard = /^(\d+)\/(\d+)$/u.exec(receipt?.id ?? '');
+  if (flat) return Boolean(shard && Number(flat[1]) === Number(shard[1]));
   return Boolean(
     match &&
     shard &&
