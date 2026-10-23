@@ -16,7 +16,6 @@ env:
   NODE_VERSION: '24'
   CI: 'true'
   PRISMA_HIDE_UPDATE_MESSAGE: 'true'
-  DELIVERY_MANIFEST_PATH: scope/delivery-manifest-v1.json
 
 jobs:
   coverage:
