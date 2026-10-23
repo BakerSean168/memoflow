@@ -442,6 +442,11 @@ test('Web shard receipts fail closed on duplicate attempts, future attempts and 
 test('Web shard receipt artifact directory must match its attempt and matrix index', () => {
   const receipt = receipts(manifest())[0];
   assert.equal(validWebReceiptArtifactPath('web-shard-receipt-1-0/shard-1.json', receipt), true);
+  // download-artifact extracts a lone pattern match directly into the target
+  // directory, so a single-shard run produces a flat receipt path whose
+  // identity is bound by the receipt content checks.
+  assert.equal(validWebReceiptArtifactPath('shard-1.json', receipt), true);
+  assert.equal(validWebReceiptArtifactPath('shard-2.json', receipt), false);
   for (const file of [
     'web-shard-receipt-2-0/shard-1.json',
     'web-shard-receipt-1-1/shard-1.json',
@@ -538,6 +543,38 @@ test('CI Check CLI consumes newest shard artifact on retry and rejects a latest 
     await writeFile(newestFile, JSON.stringify({ ...currentSucceeded, exitCode: 1 }));
     assert.throws(execute, /Command failed/u);
     await writeFile(newestFile, JSON.stringify(oldFailed));
+    assert.throws(execute, /Command failed/u);
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
+});
+
+test('CI Check CLI accepts the flat single-artifact receipt layout', async () => {
+  const m = manifest();
+  const cwd = await mkdtemp(join(tmpdir(), 'memoflow-web-flat-'));
+  try {
+    const flatDir = join(cwd, 'reports/web-shards');
+    await mkdir(join(cwd, 'scope'), { recursive: true });
+    await mkdir(flatDir, { recursive: true });
+    await writeFile(join(cwd, 'scope/delivery-manifest-v1.json'), JSON.stringify(m));
+    await writeFile(join(flatDir, 'shard-1.json'), JSON.stringify(receipts(m)[0]));
+    const env = {
+      ...process.env,
+      GITHUB_RUN_ID: 'test-run',
+      GITHUB_RUN_ATTEMPT: '1',
+      CI_CHECK_NEEDS: JSON.stringify(healthyNeeds(m)),
+    };
+    const command = resolve('tools/ci-cd-platform/ci-check.mjs');
+    const execute = () =>
+      execFileSync(process.execPath, [command, '--manifest', 'scope/delivery-manifest-v1.json'], {
+        cwd,
+        env,
+        stdio: 'pipe',
+      });
+    assert.equal(JSON.parse(execute().toString()).state, 'success');
+
+    // A flat file whose name disagrees with the claimed shard id fails closed.
+    await writeFile(join(flatDir, 'shard-2.json'), JSON.stringify(receipts(m)[0]));
     assert.throws(execute, /Command failed/u);
   } finally {
     await rm(cwd, { recursive: true, force: true });
