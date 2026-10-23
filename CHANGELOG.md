@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.22.1](https://github.com/BakerSean168/memoflow/compare/v0.22.0...v0.22.1) (2026-10-23)
+
+
+### Bug Fixes
+
+* **ci:** accept flat web shard receipts from lone artifact downloads ([#543](https://github.com/BakerSean168/memoflow/issues/543)) ([24188ff](https://github.com/BakerSean168/memoflow/commit/24188ffbe9eecd99f7a4e3494045e1fda249dbe1))
+* **ci:** bind Web shard receipts to rerun attempts ([5bc516e](https://github.com/BakerSean168/memoflow/commit/5bc516e0228a399b1d6e56ffa4947d0b6b608212))
+* **ci:** bind Web shard receipts to rerun attempts ([3478af4](https://github.com/BakerSean168/memoflow/commit/3478af486d71b77a687fdca95f9d924781473947))
+* **ci:** contain affected scope by layer and fix unit runner regression ([7a2ff0f](https://github.com/BakerSean168/memoflow/commit/7a2ff0f9f183990a1c4432c7b23100e650ffc4b3))
+* **ci:** write effectiveFull back to delivery manifest top level ([32b862b](https://github.com/BakerSean168/memoflow/commit/32b862be1668f14423ff767042227e5ae73bc3c0))
+* **desktop:** diagnose first PowerSync download without logging credentials ([fc2eb52](https://github.com/BakerSean168/memoflow/commit/fc2eb52e987ae822e1cf12142cb2592e8430a05a))
+* **desktop:** keep PowerSync fetch and dispatcher on matching Undici ([e90218e](https://github.com/BakerSean168/memoflow/commit/e90218e3928109e10bd002ed51a1192eeb919c32))
+* **desktop:** keep PowerSync HTTP fetch and dispatcher on matching undici ([b0556e2](https://github.com/BakerSean168/memoflow/commit/b0556e2aa9a363243a9728c7c686125ac937a348))
+* **desktop:** surface PowerSync download failures without leaking credentials ([328ed96](https://github.com/BakerSean168/memoflow/commit/328ed96ebaa554898585bb4bc455df102abedc0d))
+* **docker:** patch Node 24.22.1 security runtime ([#592](https://github.com/BakerSean168/memoflow/issues/592)) ([4b0c764](https://github.com/BakerSean168/memoflow/commit/4b0c764bffc24de21b8eb0fb0ea73b6cada8ce75))
+* **docker:** pin Node 24.22.1 security base (refs [#592](https://github.com/BakerSean168/memoflow/issues/592)) ([a391adf](https://github.com/BakerSean168/memoflow/commit/a391adfb7ab122dfdb6f5d86215380649e0cc553))
+* **release:** authenticate original CI evidence after safe reruns ([#543](https://github.com/BakerSean168/memoflow/issues/543)) ([76632b8](https://github.com/BakerSean168/memoflow/commit/76632b8a1403626993d7d2dd560f8b24c9016d2a))
+* **release:** recognize release PR after main sync merges ([f4a5f73](https://github.com/BakerSean168/memoflow/commit/f4a5f73f724b1e9cdbea897b9339b52ef6aae989))
+* **release:** recover missed v0.22.0 from exact tested SHA ([46cd0d3](https://github.com/BakerSean168/memoflow/commit/46cd0d3ec1a1403d9b6da70e40cceb7b4fa97bb9))
+* **release:** replay proven release SHA through current control plane ([7de1b99](https://github.com/BakerSean168/memoflow/commit/7de1b99ab05f2646dd649216fc39083e8acfde88))
+* **release:** safely authenticate CI evidence after reruns ([#543](https://github.com/BakerSean168/memoflow/issues/543)) ([7c440cb](https://github.com/BakerSean168/memoflow/commit/7c440cb365dbd7fb798ae9dc50dc8afec866f345))
+* **storybook:** isolate the UI composition project from primitive dependencies ([5561cdd](https://github.com/BakerSean168/memoflow/commit/5561cdd5bb861df878cd3387aa496be33263a661))
+* **storybook:** resolve HTTP client from source in clean builds ([#569](https://github.com/BakerSean168/memoflow/issues/569)) ([4cfd08f](https://github.com/BakerSean168/memoflow/commit/4cfd08fc83cf7e2e9f168d8b619f3fdd4ad0e064))
+* **storybook:** resolve shared utils from source in clean CI ([#569](https://github.com/BakerSean168/memoflow/issues/569)) ([530b27f](https://github.com/BakerSean168/memoflow/commit/530b27f020e397a385a6d6720ef4a209caaff00f))
+
 ## [0.22.0](https://github.com/BakerSean168/memoflow/compare/v0.21.2...v0.22.0) (2026-10-21)
 
 
