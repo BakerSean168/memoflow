@@ -356,6 +356,94 @@ async function promotionFixture() {
   f.options.artifact = async () => ({ id: 123, digest: `sha256:${'f'.repeat(64)}` });
   return { ...f, mainEvidence, mainRun };
 }
+async function promotionRerunFixture() {
+  const f = await promotionFixture();
+  f.mainRun.run_attempt = 2;
+  const source = f.responses.get(
+    `/repos/${repository}/actions/runs/101/attempts/1/jobs?per_page=100`,
+  );
+  source.jobs.push({
+    name: 'Scope Detector',
+    run_id: 101,
+    run_attempt: 1,
+    head_sha: sha,
+    status: 'completed',
+    conclusion: 'success',
+  });
+  source.total_count = source.jobs.length;
+  // The current attempt is authoritative for CI Check and every Unit job.
+  const current = structuredClone(source);
+  current.jobs.find((job) => job.name === 'Scope Detector').run_attempt = 2;
+  f.responses.set(`/repos/${repository}/actions/runs/101/attempts/2/jobs?per_page=100`, current);
+  // The immutable ci-evidence-v1 artifact retains runAttempt=1 even though
+  // GitHub reran the CI jobs and CI Check turned green in attempt 2.
+  assert.equal(f.mainEvidence.runAttempt, 1);
+  return { ...f, source, current };
+}
+
+test('promotion authenticates a successful original scope attempt after CI rerun', async () => {
+  const f = await promotionRerunFixture();
+  const chain = await verifyPromotionEvidence(f.options);
+  assert.equal(chain.ciRunId, 101);
+  assert.equal(chain.ciRunAttempt, 2);
+  assert.equal(chain.commit, sha);
+  assert.equal(chain.testEvidence.testRunId, 99);
+});
+
+for (const mutation of [
+  'source Scope Detector missing',
+  'source Scope Detector duplicated',
+  'source Scope Detector failed',
+  'source Scope Detector cancelled',
+  'source Scope Detector incomplete',
+  'source Scope Detector wrong run',
+  'source Scope Detector wrong attempt',
+  'source Scope Detector wrong SHA',
+  'current CI Check failed',
+  'current Unit shard failed',
+  'future evidence attempt',
+  'invalid evidence attempt',
+  'different evidence run ID',
+  'different evidence SHA',
+]) {
+  test(`promotion rejects rerun evidence with ${mutation}`, async () => {
+    const f = await promotionRerunFixture();
+    const producer = f.source.jobs.find((job) => job.name === 'Scope Detector');
+    if (mutation === 'source Scope Detector missing') {
+      f.source.jobs = f.source.jobs.filter((job) => job !== producer);
+      f.source.total_count = f.source.jobs.length;
+    } else if (mutation === 'source Scope Detector duplicated') {
+      f.source.jobs.push(structuredClone(producer));
+      f.source.total_count = f.source.jobs.length;
+    } else if (mutation === 'source Scope Detector failed') {
+      producer.conclusion = 'failure';
+    } else if (mutation === 'source Scope Detector cancelled') {
+      producer.conclusion = 'cancelled';
+    } else if (mutation === 'source Scope Detector incomplete') {
+      f.source.total_count += 1;
+    } else if (mutation === 'source Scope Detector wrong run') {
+      producer.run_id = 100;
+    } else if (mutation === 'source Scope Detector wrong attempt') {
+      producer.run_attempt = 2;
+    } else if (mutation === 'source Scope Detector wrong SHA') {
+      producer.head_sha = head;
+    } else if (mutation === 'current CI Check failed') {
+      f.current.jobs.find((job) => job.name === 'CI Check').conclusion = 'failure';
+    } else if (mutation === 'current Unit shard failed') {
+      f.current.jobs.find((job) => job.name === unitJobName('unit-1')).conclusion = 'failure';
+    } else if (mutation === 'future evidence attempt') {
+      f.mainEvidence.runAttempt = 3;
+    } else if (mutation === 'invalid evidence attempt') {
+      f.mainEvidence.runAttempt = '1';
+    } else if (mutation === 'different evidence run ID') {
+      f.mainEvidence.runId = 99;
+    } else if (mutation === 'different evidence SHA') {
+      f.mainEvidence.testedCommit = head;
+    }
+    await assert.rejects(verifyPromotionEvidence(f.options));
+  });
+}
+
 test('promotion verifies PR test evidence and binds the exact main build archive digest', async () => {
   const f = await promotionFixture();
   const result = await verifyPromotionEvidence(f.options);

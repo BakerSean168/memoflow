@@ -1,6 +1,44 @@
 import { digest, validateDeliveryManifest } from './contracts.mjs';
 import { requireProof, verifyCiRun, verifyPrEvidence, verifyUnitJobs } from './ci-evidence.mjs';
 
+/**
+ * GitHub reruns keep immutable named artifacts from the original scope job.
+ * Do not pretend the artifact was produced by the latest attempt: prove its
+ * recorded attempt belongs to this same, exact-SHA CI run and that the sole
+ * source Scope Detector completed successfully. The latest CI Check and all
+ * required Unit shards remain independently required by verifyCiRun /
+ * verifyUnitJobs; neither can be satisfied with an older failed attempt.
+ */
+async function verifyEvidenceSourceAttempt({ api, repository, run, evidence }) {
+  const recordedAttempt = evidence.runAttempt;
+  requireProof(
+    Number.isSafeInteger(recordedAttempt) &&
+      recordedAttempt > 0 &&
+      recordedAttempt <= run.run_attempt,
+    'wrong main evidence identity',
+  );
+  if (recordedAttempt === run.run_attempt) return;
+  const source = await api(
+    `/repos/${repository}/actions/runs/${run.id}/attempts/${recordedAttempt}/jobs?per_page=100`,
+  );
+  requireProof(
+    Number.isSafeInteger(source?.total_count) &&
+      Array.isArray(source.jobs) &&
+      source.total_count === source.jobs.length,
+    'incomplete source-attempt jobs',
+  );
+  const producers = source.jobs.filter((job) => job.name === 'Scope Detector');
+  requireProof(
+    producers.length === 1 &&
+      producers[0].run_id === run.id &&
+      producers[0].run_attempt === recordedAttempt &&
+      producers[0].head_sha === run.head_sha &&
+      producers[0].status === 'completed' &&
+      producers[0].conclusion === 'success',
+    'untrusted source-attempt evidence producer',
+  );
+}
+
 export async function verifyPromotionEvidence(options) {
   const { api, repository, sha, runId, readEvidence, gitCommit, inputsDigest, artifact } = options;
   const run = await verifyCiRun({ api, repository, runId, head: sha, event: 'push' });
@@ -9,10 +47,10 @@ export async function verifyPromotionEvidence(options) {
     evidence?.kind === 'ci-evidence-v1' &&
       evidence.repository === repository &&
       evidence.runId === run.id &&
-      evidence.runAttempt === run.run_attempt &&
       evidence.testedCommit === sha,
     'wrong main evidence identity',
   );
+  await verifyEvidenceSourceAttempt({ api, repository, run, evidence });
   const manifest = validateDeliveryManifest(evidence.manifest);
   verifyUnitJobs(run, manifest);
   requireProof(
