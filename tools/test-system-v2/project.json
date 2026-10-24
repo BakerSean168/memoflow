@@ -31,6 +31,7 @@
         "{workspaceRoot}/tools/ci-cd-platform/generate-delivery-manifest.mjs",
         "{workspaceRoot}/tools/ci-cd-platform/lib/**/*",
         "{workspaceRoot}/tools/ci-cd-platform/unit-test-durations.json",
+        "{workspaceRoot}/tools/test/storybook-process.mjs",
         "repoTestInventory"
       ],
       "options": { "command": "node --test tools/test-system-v2/__tests__/*.test.mjs" }
