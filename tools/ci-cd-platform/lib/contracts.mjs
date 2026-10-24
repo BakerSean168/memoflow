@@ -29,6 +29,21 @@ const LANE_NAMES = new Set([
   'coverage',
   'performance',
 ]);
+const CAPABILITY_NAMES = new Set([
+  'governance',
+  'fmt',
+  'lint',
+  'typecheck',
+  'unit',
+  'componentBrowser',
+  'contract',
+  'boundary',
+  'integration',
+  'validate',
+  'web',
+  'coverage',
+  'performance',
+]);
 const FAILURE_CLASSIFICATIONS = new Set([
   'none',
   'assertion',
@@ -115,6 +130,37 @@ export function validateDeliveryManifest(manifest) {
   for (const [lane, enabled] of Object.entries(manifest.lanes)) {
     assert(LANE_NAMES.has(lane), `unsupported lane ${lane}`);
     assert(typeof enabled === 'boolean', `lane ${lane} must be boolean`);
+  }
+  if (manifest.laneDetails !== undefined) {
+    assert(
+      manifest.laneDetails && typeof manifest.laneDetails === 'object',
+      'laneDetails must be an object',
+    );
+    for (const [capability, detail] of Object.entries(manifest.laneDetails)) {
+      assert(CAPABILITY_NAMES.has(capability), `unsupported capability ${capability}`);
+      assert(detail && typeof detail === 'object', `laneDetails.${capability} must be an object`);
+      assert(
+        typeof detail.required === 'boolean',
+        `laneDetails.${capability}.required must be boolean`,
+      );
+      assertStringArray(detail.files, `laneDetails.${capability}.files`);
+      assertStringArray(detail.targets, `laneDetails.${capability}.targets`);
+      if (detail.required) {
+        assert(
+          detail.skipReason === null,
+          `laneDetails.${capability}.skipReason must be null when required`,
+        );
+      } else {
+        assert(
+          typeof detail.skipReason === 'string' && detail.skipReason.length > 0,
+          `laneDetails.${capability}.skipReason is required when not required`,
+        );
+      }
+      // Note: detail.required is the generator-time plan. Lane relaxation
+      // (PR-evidence reuse, build-only contracts) legitimately disables
+      // lanes afterwards and relaxes details with them, so cross-field
+      // equality with `lanes` is a generator property, not a contract rule.
+    }
   }
   assert(manifest.provenance && typeof manifest.provenance === 'object', 'provenance is required');
   assertString(manifest.provenance.generator, 'provenance.generator');
@@ -301,6 +347,37 @@ export function validateArtifactManifest(manifest) {
   assertString(manifest.path, 'path');
   assertString(manifest.createdBy, 'createdBy');
   assert(manifest.toolchain && typeof manifest.toolchain === 'object', 'toolchain is required');
+  if (manifest.laneDetails !== undefined) {
+    assert(
+      manifest.laneDetails && typeof manifest.laneDetails === 'object',
+      'laneDetails must be an object',
+    );
+    for (const [capability, detail] of Object.entries(manifest.laneDetails)) {
+      assert(CAPABILITY_NAMES.has(capability), `unsupported capability ${capability}`);
+      assert(detail && typeof detail === 'object', `laneDetails.${capability} must be an object`);
+      assert(
+        typeof detail.required === 'boolean',
+        `laneDetails.${capability}.required must be boolean`,
+      );
+      assertStringArray(detail.files, `laneDetails.${capability}.files`);
+      assertStringArray(detail.targets, `laneDetails.${capability}.targets`);
+      if (detail.required) {
+        assert(
+          detail.skipReason === null,
+          `laneDetails.${capability}.skipReason must be null when required`,
+        );
+      } else {
+        assert(
+          typeof detail.skipReason === 'string' && detail.skipReason.length > 0,
+          `laneDetails.${capability}.skipReason is required when not required`,
+        );
+      }
+      // Note: detail.required is the generator-time plan. Lane relaxation
+      // (PR-evidence reuse, build-only contracts) legitimately disables
+      // lanes afterwards and relaxes details with them, so cross-field
+      // equality with `lanes` is a generator property, not a contract rule.
+    }
+  }
   assert(manifest.provenance && typeof manifest.provenance === 'object', 'provenance is required');
   if (manifest.name === 'api-runtime-closure') {
     assert(

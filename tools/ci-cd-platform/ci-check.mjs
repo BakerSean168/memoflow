@@ -41,10 +41,17 @@ try {
 } catch (error) {
   if (error.code !== 'ENOENT') webReceipts = null;
 }
+const capabilityResults = {};
+if (manifest?.laneDetails?.componentBrowser) {
+  // Until Q4 gives Component Browser its own job, its producer is the
+  // web-flow-shard job (which runs the Storybook interaction target).
+  capabilityResults.componentBrowser = needs?.['web-flow-shard']?.result ?? 'missing';
+}
 const result = evaluateCiCheck({
   needs,
   manifest,
   webReceipts,
+  capabilityResults,
   runId: process.env.GITHUB_RUN_ID,
   runAttempt: Number(process.env.GITHUB_RUN_ATTEMPT),
 });

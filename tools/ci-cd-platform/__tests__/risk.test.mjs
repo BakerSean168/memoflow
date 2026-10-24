@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { classifyRisk, selectLanes, webFlowCandidateFiles } from '../lib/risk.mjs';
+import { classifyCapabilities, classifyRisk, selectLanes, webFlowCandidateFiles } from '../lib/risk.mjs';
 
 test('classifies highest-risk root and release changes', () => {
   assert.equal(classifyRisk(['docs/README.md']).level, 'docs');
@@ -217,4 +217,25 @@ test('explicit full main policy enables every lane even for docs risk', () => {
     coverage: true,
     performance: true,
   });
+});
+
+test('classifyCapabilities maps stories to componentBrowser only', () => {
+  const caps = classifyCapabilities({
+    changedFiles: ['packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.stories.ts'],
+    scope: { unit: [], integration: [], boundary: [], coverage: [], perf: [], webFlowFiles: [] },
+  });
+  assert.equal(caps.componentBrowser.files.length, 1);
+  assert.equal(caps.fmt.files.length, 1);
+  assert.equal(caps.contract.files.length, 0);
+});
+
+test('classifyCapabilities maps contract package changes to contract', () => {
+  const caps = classifyCapabilities({
+    changedFiles: ['packages/contracts/src/modules/goal.ts', 'docs/guide.md'],
+    scope: { unit: ['contracts'], integration: [], boundary: [], coverage: [], perf: [], webFlowFiles: [] },
+  });
+  assert.deepEqual(caps.contract.files, ['packages/contracts/src/modules/goal.ts']);
+  assert.deepEqual(caps.unit.projects, ['contracts']);
+  assert.ok(caps.fmt.files.includes('docs/guide.md'));
+  assert.equal(caps.lint.files.includes('docs/guide.md'), false);
 });

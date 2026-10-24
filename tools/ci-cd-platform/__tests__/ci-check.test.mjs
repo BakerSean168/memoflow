@@ -582,3 +582,32 @@ test('CI Check CLI accepts the flat single-artifact receipt layout', async () =>
     await rm(cwd, { recursive: true, force: true });
   }
 });
+
+test('capability gate fails when a required capability producer is skipped (VNext Q2)', () => {
+  const baseManifest = manifest();
+  const { digest: _staleDigest, ...manifestContent } = baseManifest;
+  const m = {
+    ...manifestContent,
+    laneDetails: {
+      componentBrowser: {
+        required: true,
+        files: ['packages/app-vue/src/x.stories.ts'],
+        targets: ['ui-storybook:test:interaction'],
+        skipReason: null,
+      },
+    },
+  };
+  m.digest = digest(m);
+  const skipped = check({
+    needs: healthyNeeds(m),
+    manifest: m,
+    capabilityResults: { componentBrowser: 'skipped' },
+  });
+  assert.ok(skipped.failures.includes('capability:componentBrowser:skipped'));
+  const green = check({
+    needs: healthyNeeds(m),
+    manifest: m,
+    capabilityResults: { componentBrowser: 'success' },
+  });
+  assert.deepEqual(green.failures, []);
+});

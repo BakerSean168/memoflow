@@ -7,6 +7,7 @@ import { promisify } from 'node:util';
 import path from 'node:path';
 import { buildProvenance, digest, validateDeliveryManifest } from './lib/contracts.mjs';
 import { classifyRisk, selectLanes } from './lib/risk.mjs';
+import { buildLaneDetails } from './lib/lane-details.mjs';
 import { detectScope } from './lib/scope-detector.mjs';
 
 import { planUnitShards, unitJobEnabled } from './lib/unit-shards.mjs';
@@ -86,6 +87,12 @@ export async function buildDeliveryManifest({
     changedFiles: changed,
     risk,
     scope: resolvedScope,
+    laneDetails: buildLaneDetails({
+      lanes: selectedLanes,
+      changedFiles: changed,
+      scope: resolvedScope,
+      full: effectiveFull,
+    }),
     unitShards: planUnitShards(resolvedScope.unit),
     webShards,
     lanes: selectedLanes,

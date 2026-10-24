@@ -510,3 +510,29 @@ test('Web manifest projects narrow/full/zero selections into dynamic outputs', a
     await rm(root, { recursive: true, force: true });
   }
 });
+
+test('manifest carries laneDetails with skip reasons (VNext Q2)', async () => {
+  const m = await buildDeliveryManifest({
+    base: 'base',
+    head: 'head',
+    scope,
+    files: ['packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.stories.ts'],
+  });
+  assert.equal(m.laneDetails.componentBrowser.required, true);
+  assert.deepEqual(m.laneDetails.componentBrowser.targets, ['ui-storybook:test:interaction']);
+  assert.equal(m.laneDetails.contract.required, false);
+  assert.ok(m.laneDetails.contract.skipReason.length > 0);
+  assert.equal(m.laneDetails.fmt.required, true);
+  assert.equal(m.laneDetails.web.required, m.lanes.web);
+});
+
+test('manifest laneDetails marks contract changes as required', async () => {
+  const m = await buildDeliveryManifest({
+    base: 'base',
+    head: 'head',
+    scope,
+    files: ['packages/contracts/src/index.ts'],
+  });
+  assert.equal(m.laneDetails.contract.required, true);
+  assert.equal(m.laneDetails.contract.skipReason, null);
+});
