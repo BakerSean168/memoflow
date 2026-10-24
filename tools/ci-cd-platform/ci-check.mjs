@@ -43,9 +43,15 @@ try {
 }
 const capabilityResults = {};
 if (manifest?.laneDetails?.componentBrowser) {
-  // Until Q4 gives Component Browser its own job, its producer is the
-  // web-flow-shard job (which runs the Storybook interaction target).
-  capabilityResults.componentBrowser = needs?.['web-flow-shard']?.result ?? 'missing';
+  // Q4: Component Browser is an independent job (producer of record).
+  capabilityResults.componentBrowser = needs?.['component-browser']?.result ?? 'missing';
+}
+if (manifest?.laneDetails?.contract) {
+  capabilityResults.contract = needs?.['contract']?.result ?? 'missing';
+}
+if (manifest?.laneDetails?.fmt) {
+  // Fmt shares the lightweight Static Checks runner (governance job).
+  capabilityResults.fmt = needs?.['governance']?.result ?? 'missing';
 }
 const result = evaluateCiCheck({
   needs,

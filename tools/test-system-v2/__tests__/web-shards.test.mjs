@@ -366,3 +366,24 @@ fs.writeFileSync('test-results/results.json', JSON.stringify({suites:[{specs:[{f
     await rm(root, { recursive: true, force: true });
   }
 });
+
+test('storybook-only changes select no Web specs (Q4 Component Browser lane owns them)', async () => {
+  const { selectWebSpecs } = await import('../lib/web-shards.mjs');
+  assert.deepEqual(
+    selectWebSpecs({
+      enabled: true,
+      full: false,
+      files: ['packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.stories.ts'],
+    }),
+    { specs: [], fallback: false },
+  );
+  const mixed = selectWebSpecs({
+    enabled: true,
+    full: false,
+    files: [
+      'packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.stories.ts',
+      'apps/web/e2e/goal/goal-crud.spec.ts',
+    ],
+  });
+  assert.deepEqual(mixed.specs, ['goal/goal-crud.spec.ts']);
+});

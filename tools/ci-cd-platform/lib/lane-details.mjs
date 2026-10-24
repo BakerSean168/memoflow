@@ -40,8 +40,7 @@ export function buildLaneDetails({ lanes, changedFiles, scope, full = false }) {
     (caps[cap].projects ?? []).length > 0 || full
       ? detail(true, [], targets, null)
       : detail(false, [], targets, reason);
-  const byLane = (lane, targets, reason) =>
-    detail(lanes[lane] === true, [], targets, reason);
+  const byLane = (lane, targets, reason) => detail(lanes[lane] === true, [], targets, reason);
   return {
     governance: detail(true, [], ['governance'], null),
     fmt: byFiles('fmt', ['quality:fmt'], 'no formattable files changed'),

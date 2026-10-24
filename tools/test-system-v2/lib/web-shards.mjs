@@ -11,9 +11,21 @@ export const WEB_SHARD_POLICY = Object.freeze({
   defaultShards: 4,
 });
 
+// Storybook-only files (stories and the Storybook app itself) never change
+// product behavior; they are verified by the Component Browser lane (Q4)
+// and must not select Web E2E specs.
+const STORYBOOK_ONLY = /(^|\/)[^/]+\.stories\.[^/]+$/u;
+export const isStorybookOnlyFile = (file) =>
+  STORYBOOK_ONLY.test(file) || file.startsWith('apps/storybook/');
+
 export function selectWebSpecs({ enabled, full, files }) {
   if (!enabled) return { specs: [], fallback: false };
   if (full) return { specs: [...WEB_FLOW_SPECS], fallback: false };
+  if (Array.isArray(files)) {
+    const productFiles = files.filter((file) => !isStorybookOnlyFile(file));
+    if (files.length > 0 && productFiles.length === 0) return { specs: [], fallback: false };
+    files = productFiles;
+  }
   const canonical = new Set(WEB_FLOW_SPECS.map((spec) => `apps/web/e2e/${spec}`));
   if (!Array.isArray(files) || files.length === 0) {
     return { specs: [...WEB_FLOW_SPECS], fallback: true };

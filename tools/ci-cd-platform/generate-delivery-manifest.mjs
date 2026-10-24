@@ -5,7 +5,7 @@ import { execFile } from 'node:child_process';
 import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import { promisify } from 'node:util';
 import path from 'node:path';
-import { buildProvenance, digest, validateDeliveryManifest } from './lib/contracts.mjs';
+import { buildProvenance, digest, validateDeliveryManifest, contractRoutedProjects } from './lib/contracts.mjs';
 import { classifyRisk, selectLanes } from './lib/risk.mjs';
 import { buildLaneDetails } from './lib/lane-details.mjs';
 import { detectScope } from './lib/scope-detector.mjs';
@@ -76,6 +76,19 @@ export async function buildDeliveryManifest({
     scope: resolvedScope,
     risk,
   };
+  const laneDetails = buildLaneDetails({
+    lanes: selectedLanes,
+    changedFiles: changed,
+    scope: resolvedScope,
+    full: effectiveFull,
+  });
+  // Q4/T2: contract-routed projects leave the Unit shards (see
+  // contractRoutedProjects in lib/lane-details.mjs).
+  const routed = contractRoutedProjects({ scope: resolvedScope, laneDetails });
+  const shardUnitProjects =
+    routed.length > 0
+      ? resolvedScope.unit.filter((project) => !routed.includes(project))
+      : resolvedScope.unit;
   const manifest = {
     kind: 'delivery-manifest-v1',
     version: 1,
@@ -87,13 +100,8 @@ export async function buildDeliveryManifest({
     changedFiles: changed,
     risk,
     scope: resolvedScope,
-    laneDetails: buildLaneDetails({
-      lanes: selectedLanes,
-      changedFiles: changed,
-      scope: resolvedScope,
-      full: effectiveFull,
-    }),
-    unitShards: planUnitShards(resolvedScope.unit),
+    laneDetails,
+    unitShards: planUnitShards(shardUnitProjects),
     webShards,
     lanes: selectedLanes,
     provenance: buildProvenance({
@@ -115,6 +123,9 @@ export async function writeManifestOutputs(manifest, output) {
       `manifest_path=${output}`,
       `manifest_digest=${manifest.digest}`,
       `risk=${manifest.risk.level}`,
+      `capability_fmt=${manifest.laneDetails?.fmt?.required ?? false}`,
+      `capability_component_browser=${manifest.laneDetails?.componentBrowser?.required ?? false}`,
+      `capability_contract=${manifest.laneDetails?.contract?.required ?? false}`,
       ...Object.entries(manifest.lanes).map(([lane, enabled]) => `lane_${lane}=${enabled}`),
       ...manifest.unitShards.map(
         ({ id }) => `${id.replaceAll('-', '_')}=${unitJobEnabled(manifest, id)}`,

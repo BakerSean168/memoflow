@@ -50,6 +50,15 @@
         "command": "node ../../node_modules/vitest/vitest.mjs --config vitest.config.ts",
         "cwd": "packages/contracts"
       }
+    },
+    "test:contract": {
+      "executor": "nx:run-commands",
+      "inputs": ["default", "^production"],
+      "cache": true,
+      "options": {
+        "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
+        "cwd": "packages/contracts"
+      }
     }
   }
 }

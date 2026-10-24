@@ -226,8 +226,11 @@ export function validateDeliveryManifest(manifest) {
       'split Unit shards of one project must run on different jobs',
     );
   }
+  const routedProjects = new Set(
+    contractRoutedProjects({ scope: manifest.scope, laneDetails: manifest.laneDetails }),
+  );
   const expectedTasks = manifest.scope.unit
-    .filter((project) => project !== 'memoflow')
+    .filter((project) => project !== 'memoflow' && !routedProjects.has(project))
     .flatMap((project) =>
       project === 'app-vue'
         ? [
@@ -622,4 +625,22 @@ export function buildProvenance({ generator, input }) {
     generator,
     inputDigest: digest(input),
   };
+}
+
+/**
+ * Q4/T2 contract routing: when the Contract lane is required, unit projects
+ * that own a test:contract target run there as their single primary
+ * execution and leave the Unit shards — unless that would empty the shards
+ * entirely, in which case routing is void and the shards keep everything.
+ * Shared by the manifest generator and the contract validator so both sides
+ * always agree on the routed set.
+ */
+export function contractRoutedProjects({ scope, laneDetails }) {
+  if (laneDetails?.contract?.required !== true) return [];
+  const unit = scope?.unit ?? [];
+  // Today `contracts` is the only project owning a test:contract target;
+  // extend this list when another project gains one.
+  const routed = unit.filter((project) => project === 'contracts');
+  if (routed.length === 0 || routed.length >= unit.length) return [];
+  return routed;
 }
