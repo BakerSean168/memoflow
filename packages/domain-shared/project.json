@@ -31,7 +31,8 @@
       "options": {
         "command": "tsc --noEmit -p tsconfig.typecheck.json",
         "cwd": "packages/domain-shared"
-      }
+      },
+      "dependsOn": ["^build"]
     },
     "test": {
       "executor": "nx:run-commands",

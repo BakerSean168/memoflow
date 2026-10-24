@@ -57,7 +57,7 @@
     "typecheck": {
       "executor": "nx:run-commands",
       "cache": true,
-      "dependsOn": ["prisma-generate", "^build"],
+      "dependsOn": ["prisma-generate"],
       "options": {
         "command": "tsc --noEmit -p tsconfig.json",
         "cwd": "packages/database"

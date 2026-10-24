@@ -24,7 +24,8 @@
       "options": {
         "command": "tsc --noEmit -p tsconfig.json",
         "cwd": "packages/notification"
-      }
+      },
+      "dependsOn": ["^build"]
     },
     "test": {
       "executor": "nx:run-commands",

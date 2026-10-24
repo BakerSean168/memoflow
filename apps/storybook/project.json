@@ -10,7 +10,8 @@
       "options": {
         "command": "vue-tsc --noEmit -p apps/storybook/tsconfig.json",
         "cwd": "."
-      }
+      },
+      "dependsOn": ["^build"]
     },
     "serve": {
       "executor": "nx:run-commands",

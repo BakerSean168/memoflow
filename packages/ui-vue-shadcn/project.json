@@ -31,7 +31,8 @@
       "options": {
         "command": "node ../../node_modules/vue-tsc/bin/vue-tsc.js --noEmit -p tsconfig.typecheck.json",
         "cwd": "packages/ui-vue-shadcn"
-      }
+      },
+      "dependsOn": ["^build"]
     },
     "test": {
       "executor": "nx:run-commands",

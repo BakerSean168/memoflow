@@ -25,7 +25,8 @@
       "options": {
         "command": "tsc --noEmit -p tsconfig.json",
         "cwd": "packages/patterns"
-      }
+      },
+      "dependsOn": ["^build"]
     },
     "test": {
       "executor": "nx:run-commands",

@@ -21,7 +21,8 @@
       "options": {
         "command": "tsc --noEmit -p tsconfig.json",
         "cwd": "packages/test-utils"
-      }
+      },
+      "dependsOn": ["^build"]
     }
   }
 }

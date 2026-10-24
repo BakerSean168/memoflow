@@ -91,7 +91,7 @@
       "inputs": ["production", "^production"]
     },
     "typecheck": {
-      "dependsOn": ["^build"],
+      "dependsOn": [],
       "inputs": ["default", "^production"],
       "outputs": [],
       "cache": true,

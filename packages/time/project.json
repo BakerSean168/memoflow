@@ -32,7 +32,8 @@
       "options": {
         "command": "tsc --noEmit -p tsconfig.json",
         "cwd": "packages/time"
-      }
+      },
+      "dependsOn": ["^build"]
     },
     "test": {
       "executor": "nx:run-commands",

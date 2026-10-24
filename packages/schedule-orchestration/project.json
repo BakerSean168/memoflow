@@ -20,7 +20,8 @@
       "options": {
         "command": "tsc --noEmit -p tsconfig.json",
         "cwd": "packages/schedule-orchestration"
-      }
+      },
+      "dependsOn": ["^build"]
     },
     "lint": {
       "options": {
