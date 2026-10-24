@@ -79,16 +79,14 @@ export function createMockInstanceRepo(): ITaskOccurrenceRepository {
     countFutureOccurrences: vi.fn().mockResolvedValue(0),
     findByPlanIdAndDateRange: vi.fn().mockResolvedValue([]),
     getPlanStats: vi.fn().mockResolvedValue({}),
-    getStatusCountsForPlan: vi
-      .fn()
-      .mockResolvedValue({
-        total: 0,
-        completed: 0,
-        missed: 0,
-        skipped: 0,
-        pending: 0,
-        inProgress: 0,
-      }),
+    getStatusCountsForPlan: vi.fn().mockResolvedValue({
+      total: 0,
+      completed: 0,
+      missed: 0,
+      skipped: 0,
+      pending: 0,
+      inProgress: 0,
+    }),
     findRecentByPlan: vi.fn().mockResolvedValue([]),
     deleteIncompleteOccurrencesFrom: vi.fn().mockResolvedValue(0),
   };
