@@ -68,18 +68,21 @@ describe('GOAL-7204 canonical KR Measurement V3 calculator', () => {
     ['Max', [7, 8, 9], 9],
     ['Min', [7, 8, 9], 7],
     ['Last', [7, 8, 9], 9],
-  ] as const)('aggregates %s records and falls back to trackingBaseValue when empty', (method, records, expected) => {
-    const input: KeyResultMeasurement = {
-      initialValue: 0,
-      currentValue: 6,
-      targetValue: 10,
-      trackingBaseValue: 6,
-      aggregationMethod: method,
-      unit: null,
-    };
-    expect(calculateKeyResultProgress(input, [...records]).currentValue).toBe(expected);
-    expect(calculateKeyResultProgress(input, []).currentValue).toBe(6);
-  });
+  ] as const)(
+    'aggregates %s records and falls back to trackingBaseValue when empty',
+    (method, records, expected) => {
+      const input: KeyResultMeasurement = {
+        initialValue: 0,
+        currentValue: 6,
+        targetValue: 10,
+        trackingBaseValue: 6,
+        aggregationMethod: method,
+        unit: null,
+      };
+      expect(calculateKeyResultProgress(input, [...records]).currentValue).toBe(expected);
+      expect(calculateKeyResultProgress(input, []).currentValue).toBe(6);
+    },
+  );
 
   it('changing Initial changes visible percentage without rebasing record aggregation', () => {
     const before: KeyResultMeasurement = {

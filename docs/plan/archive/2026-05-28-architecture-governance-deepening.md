@@ -48,21 +48,21 @@ updated: 2026-05-29T00:00:00
 
 以下命令和状态已在 2026-05-28 当前工作树上重新验证：
 
-| 项目 | 状态 | 证据 |
-|---|---|---|
-| `pnpm nx run memoflow:governance-check` | 通过 | `governance-module-docs-audit`、`singleton-audit`、`desktop-runtime-locator-audit`、`server-feature-shape-audit` 均通过 |
-| `pnpm nx run contracts:typecheck` | 通过 | 当前通过 |
-| `pnpm nx run governance:typecheck` | 通过 | 当前通过 |
-| `pnpm nx run desktop:lint` | 通过但未收绿 | 66 个 warning（从 71 降至 66），当前输出全部位于测试/测试辅助文件 |
-| `pnpm nx run task:lint` | 通过 | 当前通过 |
-| `pnpm nx run task:typecheck` | 通过 | 当前通过 |
-| `pnpm nx run task:test` | 通过 | 42 个 test file，654 个测试通过 |
-| `pnpm nx run app-vue:lint` | 通过但未收绿 | 294 个 warning（从 298 降至 294） |
-| `pnpm nx run app-vue:typecheck` | 通过 | 当前通过 |
-| `pnpm nx run app-vue:test` | 通过 | 46 个 test file，136 个测试通过 |
-| `pnpm nx run ai-service:lint` | 通过 | 当前通过（从 14 个问题降至 0） |
-| `pnpm nx run ai-service:typecheck` | 通过 | `pyright` 0 errors |
-| `pnpm nx run ai-service:test` | 通过 | 77 个测试通过 |
+| 项目                                    | 状态         | 证据                                                                                                                    |
+| --------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| `pnpm nx run memoflow:governance-check` | 通过         | `governance-module-docs-audit`、`singleton-audit`、`desktop-runtime-locator-audit`、`server-feature-shape-audit` 均通过 |
+| `pnpm nx run contracts:typecheck`       | 通过         | 当前通过                                                                                                                |
+| `pnpm nx run governance:typecheck`      | 通过         | 当前通过                                                                                                                |
+| `pnpm nx run desktop:lint`              | 通过但未收绿 | 66 个 warning（从 71 降至 66），当前输出全部位于测试/测试辅助文件                                                       |
+| `pnpm nx run task:lint`                 | 通过         | 当前通过                                                                                                                |
+| `pnpm nx run task:typecheck`            | 通过         | 当前通过                                                                                                                |
+| `pnpm nx run task:test`                 | 通过         | 42 个 test file，654 个测试通过                                                                                         |
+| `pnpm nx run app-vue:lint`              | 通过但未收绿 | 294 个 warning（从 298 降至 294）                                                                                       |
+| `pnpm nx run app-vue:typecheck`         | 通过         | 当前通过                                                                                                                |
+| `pnpm nx run app-vue:test`              | 通过         | 46 个 test file，136 个测试通过                                                                                         |
+| `pnpm nx run ai-service:lint`           | 通过         | 当前通过（从 14 个问题降至 0）                                                                                          |
+| `pnpm nx run ai-service:typecheck`      | 通过         | `pyright` 0 errors                                                                                                      |
+| `pnpm nx run ai-service:test`           | 通过         | 77 个测试通过                                                                                                           |
 
 结论：
 
@@ -164,7 +164,7 @@ updated: 2026-05-29T00:00:00
    - token snapshot persistence
    - refresh decision policy
    - token rotation side effects
-   下沉
+     下沉
 
 ### 新完成条件
 
@@ -440,12 +440,14 @@ ownership、public seam 和文档示例都已经对齐，这条轨道可从 acti
 ### Phase A: Desktop Authentication Test Fixture Ratchet — 部分完成 ✅
 
 **已完成：**
+
 1. 创建 `__fixtures__/auth-test-fixtures.ts`，包含 `createMockLogger`、`createMockTokenManager`、`createMockSessionManager`、`createMockSessionRepository`、`createMockNetworkStateManager`、`createAuthResponseDTO`
 2. 重构 5 个测试文件使用共享 fixtures：`SessionManager.spec.ts`、`DesktopAuthLifecycleCoordinator.spec.ts`、`DesktopCredentialAuthCoordinator.spec.ts`、`DesktopAuthSecurityAdminService.spec.ts`、`AuthDesktopApplicationService.spec.ts`、`DesktopRememberedAccountService.spec.ts`
 3. `desktop:lint` warning 从 71 降至 66
 4. 210 测试全部通过
 
 **剩余：**
+
 - 测试中仍有 `(manager as any).tokenManager` 等 private field 访问模式（13 处）
 - `as never` 构造函数注入模式仍在（46 处）
 - 需要进一步引入小接口 adapter 来替代 `as never`
@@ -453,6 +455,7 @@ ownership、public seam 和文档示例都已经对齐，这条轨道可从 acti
 ### Phase B: Shared Vue Final Orchestration Split — 完成 ✅
 
 **已完成：**
+
 1. 提取 `adjustComposerHeight` 到 `chatViewHelpers.ts`
 2. 重构 `maybeRenameCurrentConversation` 委托给 helper
 3. 清除 `useAIGoalWorkflow.ts` 中 4 个未使用 import（AIChatService、ChatItem、ChatModelOption、GoalDraftState）
@@ -465,6 +468,7 @@ ownership、public seam 和文档示例都已经对齐，这条轨道可从 acti
 ### Phase C: ai-service Governance Finish — 完成 ✅
 
 **已完成：**
+
 1. `eval_cli.py`：import 排序修复
 2. `eval_workflow_checks.py`：import 排序 + 7 处函数签名换行
 3. `runner.py`：移除未使用 `create_chat_service` import + 3 处长行修复
@@ -473,12 +477,14 @@ ownership、public seam 和文档示例都已经对齐，这条轨道可从 acti
 ### Phase D: Task Aggregate Seam Hardening — 部分完成 ✅
 
 **已完成：**
+
 1. `task-template-history.ts`：6 处 `any` → `unknown`
 2. `task-template.ts`：`addHistory(action: string, changes?: any)` → `changes?: unknown`
 3. `instance-generation.policy.ts`：`getDay() as any` → `getDay() as DayOfWeek`
 4. `task:lint` ✅、`task:typecheck` ✅、`task:test` ✅（654 tests）
 
 **剩余：**
+
 - `TaskTemplate.props` getter 仍然存在（policy modules 依赖 mutable access）
 - 需要进一步收窄 policy context interfaces，用显式 setter 替代 bulk props 暴露
 

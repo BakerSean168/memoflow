@@ -13,12 +13,15 @@ updated: 2026-06-12
 # AI Agent Master 实施状况审查
 
 ## 审查日期
+
 2026-06-12
 
 ## 审查目的
+
 系统性验证所有声称的功能是否真正实现，并纠正任何不准确的描述。
 
 ## 审查方法
+
 1. 运行所有测试并记录实际结果
 2. 检查关键代码文件是否存在并包含声称的功能
 3. 验证 git 状态和文件变更
@@ -27,41 +30,49 @@ updated: 2026-06-12
 ## 测试验证结果
 
 ### ✅ Python 单元测试
+
 ```bash
 cd apps/ai-service
 uv run pytest tests/unit/ -v --tb=no
 ```
 
 **实际结果**：
+
 - ✅ **68 个测试全部通过**（不是之前声称的 43 个）
 - ✅ 包括 6 个新增的 Knowledge Generation Enhancement 测试
 - ✅ Ruff 代码风格检查通过
 - ✅ Pyright 类型检查通过（0 errors, 0 warnings）
 
 **测试分布**：
+
 - `test_agent_runtime.py`: 37 个测试
 - `test_knowledge_generate_enhancements.py`: 6 个测试（新增）
 - 其他单元测试: 25 个测试
 
 ### ✅ TypeScript 类型检查
+
 ```bash
 pnpm nx run ai:typecheck
 ```
 
 **实际结果**：
+
 - ✅ Successfully ran target typecheck for project ai and 8 tasks it depends on
 - ✅ 所有依赖项类型检查通过
 
 ### ✅ E2E 测试
+
 ```bash
 pnpm nx run web:e2e:ai-workspace
 ```
 
 **实际结果**：
+
 - ✅ **8 个测试全部通过**
 - ✅ 总耗时: 1.9 分钟
 
 **测试覆盖**：
+
 1. ✅ AI Agent Workspace 从根路由加载
 2. ✅ 移动端保持可用
 3. ✅ 刷新后恢复 pending Goal Agent approval run
@@ -76,6 +87,7 @@ pnpm nx run web:e2e:ai-workspace
 ### ✅ Knowledge Generation 真实服务集成
 
 #### retrieve_context 节点（行 316-391）
+
 ```python
 # ✅ 确认：调用真实的 knowledge_citation_selector
 if (
@@ -92,6 +104,7 @@ if (
 ```
 
 #### draft_note 节点（行 393-492）
+
 ```python
 # ✅ 确认：调用真实的 knowledge_note_generator
 if knowledge_note_generator is not None:
@@ -110,6 +123,7 @@ if knowledge_note_generator is not None:
 ```
 
 #### Duplicate Risk 评估（行 441-475）
+
 ```python
 # ✅ 确认：基于真实搜索结果评估
 if match_count == 0:
@@ -124,6 +138,7 @@ elif match_count >= 2:
 ```
 
 #### Related Notes 填充（行 466-474）
+
 ```python
 # ✅ 确认：填充前 5 条相似笔记
 related_notes = [
@@ -140,11 +155,13 @@ related_notes = [
 ### ✅ Checkpoint 持久化架构
 
 #### Git 状态检查
+
 ```bash
 git status --short | grep checkpoint
 ```
 
 **实际结果**：
+
 ```
 ?? docs/architecture/ai-agent-checkpoint-persistence.md
 ?? docs/plan/active/checkpoint-persistence-completion-report.md
@@ -157,28 +174,33 @@ git status --short | grep checkpoint
 ```
 
 **状态**：
+
 - ✅ **所有 checkpoint 文件已创建并存在**
 - ⚠️ **这些是新文件（`??`），尚未被 git add**
 - ✅ 文件大小正常（不是空文件）
 
 #### Python 侧 Checkpoint 文件
+
 ```bash
 find apps/ai-service -name "*checkpoint*" -o -name "*ts_checkpoint*"
 ```
 
 **实际结果**：
+
 - ✅ `checkpoints.py` - 文件 checkpoint 实现
 - ✅ `checkpoint_factory.py` - 策略工厂
 - ✅ `ts_checkpoint_adapter.py` - TS HTTP adapter
 - ✅ `ts_checkpoint_client.py` - HTTP client
 
 #### TypeScript 侧 Checkpoint 文件
+
 - ✅ `agent-checkpoint.port.ts` - Port 接口定义（1.5 KB）
 - ✅ `agent-checkpoint-prisma.adapter.ts` - Prisma adapter（5.3 KB）
 - ✅ `ai-agent-checkpoint.routes.ts` - Express routes
 - ✅ `ai-agent-checkpoint.controller.ts` - Controller
 
 ### ✅ AgentRunCheckpoint Schema
+
 检查 `packages/database/prisma/schema/ai.prisma` 行 183-209：
 
 ```prisma
@@ -220,6 +242,7 @@ git diff --stat HEAD
 ```
 
 **实际结果**：
+
 ```
 107 files changed, 16600 insertions(+), 965 deletions(-)
 ```
@@ -229,6 +252,7 @@ git diff --stat HEAD
 ## 核心功能实现确认
 
 ### ✅ Goal Agent
+
 - [x] 完整 workflow: intake → clarify → draft → plan → approval → execution
 - [x] Goal/KR/Task template/Reminder 编辑闭环
 - [x] TS controlled executor 负责所有写入
@@ -236,20 +260,24 @@ git diff --stat HEAD
 - [x] Reminder `timeOfDay` 字段传递
 
 **证据**：
+
 - 测试：`test_agent_runtime.py` 中的 Goal Agent 测试
 - E2E：测试 3、4 覆盖 approval 和 execution
 - 代码：`apps/ai-service/src/ai_service/agent_runtime/graphs/goal_create.py`
 
 ### ✅ Knowledge Q&A
+
 - [x] 问答 + Citations + Related Notes
 - [x] 证据不足状态
 - [x] 可进入笔记生成
 
 **证据**：
+
 - 测试：E2E 测试 5、7
 - 代码：`apps/ai-service/src/ai_service/agent_runtime/graphs/knowledge_qa.py`
 
 ### ✅ Knowledge Generation（本次重点）
+
 - [x] **Provider-backed 内容生成**
 - [x] **真实知识库搜索集成**
 - [x] **Duplicate risk 评估（none/low/medium/high）**
@@ -258,11 +286,13 @@ git diff --stat HEAD
 - [x] **Fallback 到模板**
 
 **证据**：
+
 - 测试：`test_knowledge_generate_enhancements.py` 6 个测试全部通过
 - E2E：测试 6 覆盖生成和保存
 - 代码：验证了 `knowledge_generate.py` 的 `retrieve_context` 和 `draft_note` 节点
 
 ### ✅ Checkpoint 持久化架构
+
 - [x] **代码已完成**（TS 和 Python 两侧）
 - [x] **Schema 已定义**（`AgentRunCheckpoint` model）
 - [x] **架构文档已完成**
@@ -271,6 +301,7 @@ git diff --stat HEAD
 - [ ] **待更新 app.py 使用新 factory**
 
 **证据**：
+
 - 文件存在：所有 checkpoint 相关文件已验证
 - 文档：`checkpoint-persistence-completion-report.md`
 - Schema：`ai.prisma` 中的 `AgentRunCheckpoint` model
@@ -278,11 +309,13 @@ git diff --stat HEAD
 ## 不准确描述的纠正
 
 ### 测试数量
+
 - ❌ **之前声称**：43 个 Agent Runtime 测试（37 个既有 + 6 个新增）
 - ✅ **实际情况**：68 个单元测试（包括 6 个新增的 knowledge generate enhancement）
 - 📝 **原因**：只计算了 `test_agent_runtime.py` 的数量，漏算了其他单元测试文件
 
 ### Checkpoint 持久化状态
+
 - ⚠️ **之前描述**：代码已完成，待部署
 - ✅ **实际情况**：
   - 代码已完成 ✅
@@ -294,6 +327,7 @@ git diff --stat HEAD
 ## 准确的完成度评估
 
 ### Phase 1-5: 核心功能
+
 **完成度**: 100% ✅
 
 - ✅ Goal Agent 完整 workflow
@@ -303,9 +337,11 @@ git diff --stat HEAD
 - ✅ LangGraph runtime 基础设施
 
 ### Phase 6: Durability、Observability、Eval
+
 **完成度**: 75% ⚠️
 
 **已完成**：
+
 - ✅ File-backed checkpoint（可用）
 - ✅ Event stream
 - ✅ Token usage 跟踪
@@ -313,14 +349,17 @@ git diff --stat HEAD
 - ✅ 前端刷新恢复
 
 **部分完成**：
+
 - ⚠️ Database checkpoint（代码完成，待 git add、migration、测试）
 
 ## 最终结论
 
 ### 系统可用性
+
 **✅ 系统核心功能已完成，可以投入使用**
 
 **依据**：
+
 1. ✅ 68 个单元测试全部通过
 2. ✅ 8 个 E2E 测试全部通过
 3. ✅ TypeScript 类型检查通过
@@ -330,7 +369,9 @@ git diff --stat HEAD
 ### 待办事项（不影响核心功能）
 
 #### 高优先级
+
 1. **Git add checkpoint 文件**
+
    ```bash
    git add docs/architecture/ai-agent-checkpoint-persistence.md
    git add docs/plan/active/checkpoint-persistence-*.md
@@ -348,6 +389,7 @@ git diff --stat HEAD
    ```
 
 #### 中优先级
+
 3. **补充 checkpoint 单元测试**
    - Python: `test_ts_checkpoint_client.py`, `test_ts_checkpoint_adapter.py`
    - TS: `agent-checkpoint-prisma.adapter.spec.ts`
@@ -355,6 +397,7 @@ git diff --stat HEAD
 4. **更新 app.py 使用新 checkpoint factory**（保持向后兼容）
 
 #### 低优先级
+
 5. **增强 approval 编辑面**（产品功能）
 6. **补充完整 E2E 验证**（质量保证）
 
@@ -363,6 +406,7 @@ git diff --stat HEAD
 基于审查结果，建议分两次提交：
 
 ### Commit 1: 核心 Agent 功能（当前可用）
+
 ```bash
 git add .
 git commit -m "feat(ai): complete AI Agent Master core implementation
@@ -406,6 +450,7 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
 
 ### Commit 2: Checkpoint Database Persistence（可选，生产多实例需要）
+
 **时机**：运行 migration 并补充测试后
 
 ```bash

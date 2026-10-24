@@ -10,8 +10,8 @@
 ## 背景
 
 ## Implementation note (Residual 619 / 2026-07-22)
-Historical route samples used the removed `@memoflow/contracts/response` package. Use `@memoflow/contracts/result` `createHttpResponseBuilder` / `Result` + `expressAdapter` / `RouteRegistrar` instead.
 
+Historical route samples used the removed `@memoflow/contracts/response` package. Use `@memoflow/contracts/result` `createHttpResponseBuilder` / `Result` + `expressAdapter` / `RouteRegistrar` instead.
 
 在 API 项目的早期阶段，我们采用了**单文件路由**的架构模式：每个模块的所有路由都放在一个单一的文件中。
 

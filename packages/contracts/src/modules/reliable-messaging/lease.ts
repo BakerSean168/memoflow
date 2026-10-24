@@ -3,7 +3,9 @@ import { z } from 'zod';
 export const RELIABLE_MESSAGING_SCHEMA_VERSION = 1;
 
 /** Standard ISO 8601 datetime validator */
-export const IsoDatetimeSchema = z.string().datetime({ message: 'Must be a valid ISO 8601 datetime string' });
+export const IsoDatetimeSchema = z
+  .string()
+  .datetime({ message: 'Must be a valid ISO 8601 datetime string' });
 
 /**
  * 契约 Schema 版本号 (SchemaVersion)。
@@ -51,7 +53,7 @@ export class LeaseFencingException extends Error {
     public readonly resourceKey: string,
     public readonly reason: string,
     public readonly activeFencingToken?: number,
-    public readonly incomingFencingToken?: number
+    public readonly incomingFencingToken?: number,
   ) {
     super(`[LEASE-FENCING] Claim rejected for resource '${resourceKey}': ${reason}`);
     this.name = 'LeaseFencingException';
@@ -86,11 +88,17 @@ export function validateLeaseFencing(params: {
 
   const parsedExpiresAt = IsoDatetimeSchema.safeParse(activeLease.expiresAt);
   if (!parsedExpiresAt.success) {
-    return { valid: false, reason: `Invalid activeLease.expiresAt ISO datetime format: '${activeLease.expiresAt}'` };
+    return {
+      valid: false,
+      reason: `Invalid activeLease.expiresAt ISO datetime format: '${activeLease.expiresAt}'`,
+    };
   }
 
   if (activeLease.resourceKey !== incomingResourceKey) {
-    return { valid: false, reason: `Resource key mismatch: expected '${activeLease.resourceKey}', got '${incomingResourceKey}'` };
+    return {
+      valid: false,
+      reason: `Resource key mismatch: expected '${activeLease.resourceKey}', got '${incomingResourceKey}'`,
+    };
   }
 
   if (incomingFencingToken < activeLease.fencingToken) {
@@ -132,7 +140,7 @@ export function assertValidLeaseFencing(params: Parameters<typeof validateLeaseF
       params.activeLease.resourceKey,
       result.reason ?? 'Fencing validation failed',
       params.activeLease.fencingToken,
-      params.incomingFencingToken
+      params.incomingFencingToken,
     );
   }
 }

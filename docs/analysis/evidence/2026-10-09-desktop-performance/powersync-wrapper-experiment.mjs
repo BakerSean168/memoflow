@@ -11,9 +11,17 @@ import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
 const require = createRequire(import.meta.url);
-const sourcePath = fileURLToPath(new URL('../../../../apps/desktop/src/main/database/powersync.ts', import.meta.url));
+const sourcePath = fileURLToPath(
+  new URL('../../../../apps/desktop/src/main/database/powersync.ts', import.meta.url),
+);
 const source = await fs.promises.readFile(sourcePath, 'utf8');
-const compiled = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, esModuleInterop: true } }).outputText;
+const compiled = ts.transpileModule(source, {
+  compilerOptions: {
+    target: ts.ScriptTarget.ES2022,
+    module: ts.ModuleKind.CommonJS,
+    esModuleInterop: true,
+  },
+}).outputText;
 const root = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'memoflow-powersync-wrapper-'));
 
 function loadWrapper() {
@@ -23,30 +31,46 @@ function loadWrapper() {
       this.path = options.database.dbFilename;
       this.disconnectCalls = 0;
       this.closeCalls = 0;
-      this.ready = new Promise(resolve => { this.finishOpening = resolve; });
+      this.ready = new Promise((resolve) => {
+        this.finishOpening = resolve;
+      });
       databases.push(this);
     }
-    waitForReady() { return this.ready; }
-    onChange() { return () => undefined; }
-    async disconnect() { this.disconnectCalls++; }
-    async close() { this.closeCalls++; }
+    waitForReady() {
+      return this.ready;
+    }
+    onChange() {
+      return () => undefined;
+    }
+    async disconnect() {
+      this.disconnectCalls++;
+    }
+    async close() {
+      this.closeCalls++;
+    }
   }
   const exports = {};
-  vm.runInNewContext(compiled, {
-    exports,
-    console: { log() {}, error() {}, warn() {} },
-    require(id) {
-      if (id === '@powersync/node') return { PowerSyncDatabase: FakeDatabase };
-      if (id === 'electron') return { app: { isPackaged: false }, BrowserWindow: { getAllWindows: () => [] } };
-      if (id === '@memoflow/powersync-schema') return { PowerSyncAppSchema: {} };
-      if (id === '../utils/api-config') return { getApiBaseUrl: () => 'http://127.0.0.1:1' };
-      if (id === './powersync-crud') return { serializeCrudTransaction: () => [] };
-      if (id === './powersync-table-changes') return { POWER_SYNC_CHANGE_TABLES: [], normalizePowerSyncTableName: x => x };
-      if (id === './packaged-worker-path') return { resolvePackagedWorkerPath: x => x };
-      if (['path', 'fs', 'node:worker_threads'].includes(id)) return require(id);
-      throw new Error(`Unexpected import: ${id}`);
+  vm.runInNewContext(
+    compiled,
+    {
+      exports,
+      console: { log() {}, error() {}, warn() {} },
+      require(id) {
+        if (id === '@powersync/node') return { PowerSyncDatabase: FakeDatabase };
+        if (id === 'electron')
+          return { app: { isPackaged: false }, BrowserWindow: { getAllWindows: () => [] } };
+        if (id === '@memoflow/powersync-schema') return { PowerSyncAppSchema: {} };
+        if (id === '../utils/api-config') return { getApiBaseUrl: () => 'http://127.0.0.1:1' };
+        if (id === './powersync-crud') return { serializeCrudTransaction: () => [] };
+        if (id === './powersync-table-changes')
+          return { POWER_SYNC_CHANGE_TABLES: [], normalizePowerSyncTableName: (x) => x };
+        if (id === './packaged-worker-path') return { resolvePackagedWorkerPath: (x) => x };
+        if (['path', 'fs', 'node:worker_threads'].includes(id)) return require(id);
+        throw new Error(`Unexpected import: ${id}`);
+      },
     },
-  }, { filename: sourcePath });
+    { filename: sourcePath },
+  );
   return { api: exports, databases };
 }
 
@@ -80,7 +104,8 @@ try {
     node: process.version,
     source: 'apps/desktop/src/main/database/powersync.ts',
     sourceSha256: createHash('sha256').update(source).digest('hex'),
-    scope: 'Unmodified production wrapper, fake DB and Electron; protocol counterexamples, not an end-to-end incident or performance measurement.',
+    scope:
+      'Unmodified production wrapper, fake DB and Electron; protocol counterexamples, not an end-to-end incident or performance measurement.',
     shutdownDuringOpen,
     differentPathsDuringOpen,
   };

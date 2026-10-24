@@ -493,7 +493,13 @@ describe('notification mutation routes run the real validation adapter (Phase 4)
 
     const badRes = createRes();
     await handler(
-      createReq({ quietHours: { enabled: true, timeZone: 'Asia/Tokyo', weeklyWindows: [{ daysOfWeek: [9], start: '22:00', end: '08:00' }] } }),
+      createReq({
+        quietHours: {
+          enabled: true,
+          timeZone: 'Asia/Tokyo',
+          weeklyWindows: [{ daysOfWeek: [9], start: '22:00', end: '08:00' }],
+        },
+      }),
       badRes,
     );
     expect(badRes.statusCode).toBe(400);

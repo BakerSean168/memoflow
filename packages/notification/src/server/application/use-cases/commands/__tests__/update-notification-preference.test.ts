@@ -32,7 +32,9 @@ describe('UpdateNotificationPreferenceUseCase', () => {
     expect(result.ok).toBe(true);
     expect(preference.getGlobalChannel(NotificationChannelType.InApp)).toBe(true);
     expect(preference.getGlobalChannel(NotificationChannelType.Email)).toBe(false);
-    expect(preference.getWorkflowChannelOverride('task.deadline', NotificationChannelType.Desktop)).toBe(true);
+    expect(
+      preference.getWorkflowChannelOverride('task.deadline', NotificationChannelType.Desktop),
+    ).toBe(true);
     expect(preferenceRepo.save).toHaveBeenCalledWith(preference);
   });
 

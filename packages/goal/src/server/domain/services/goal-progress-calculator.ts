@@ -25,7 +25,10 @@
  */
 
 import type { Goal } from '../aggregates/goal';
-import type { IGoalRecordRepository, GoalRecordQueryOptions } from '../repositories/i-goal-record-repository';
+import type {
+  IGoalRecordRepository,
+  GoalRecordQueryOptions,
+} from '../repositories/i-goal-record-repository';
 import { KeyResultProgress } from '../value-objects/key-result-progress';
 import type {
   ProgressCalculationResultDTO,
@@ -43,9 +46,7 @@ import type { KeyResultId } from '@memoflow/contracts/primitives';
  * 3. 服务会自动重新计算相关 KR 的进度
  */
 export class GoalProgressCalculator {
-  constructor(
-    private readonly goalRecordRepository: IGoalRecordRepository,
-  ) {}
+  constructor(private readonly goalRecordRepository: IGoalRecordRepository) {}
 
   // ================== 核心方法 ==================
 
@@ -204,11 +205,10 @@ export class GoalProgressCalculator {
     keyResultId: KeyResultId,
     options?: GoalRecordQueryOptions,
   ): Promise<number[]> {
-    const records = await this.goalRecordRepository.findByKeyResultId(
-      identityId,
-      keyResultId,
-      { orderBy: 'asc', ...options },
-    );
+    const records = await this.goalRecordRepository.findByKeyResultId(identityId, keyResultId, {
+      orderBy: 'asc',
+      ...options,
+    });
     return records.map((r) => r.value);
   }
 
@@ -267,10 +267,7 @@ export class GoalProgressCalculator {
    * @param keyResultId KeyResult ID
    * @returns 是否需要重新计算
    */
-  public async needsRecalculation(
-    goal: Goal,
-    keyResultId: KeyResultId,
-  ): Promise<boolean> {
+  public async needsRecalculation(goal: Goal, keyResultId: KeyResultId): Promise<boolean> {
     const keyResult = goal.getKeyResult(keyResultId);
     if (!keyResult) {
       return false;

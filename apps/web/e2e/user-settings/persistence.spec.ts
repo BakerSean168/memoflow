@@ -29,7 +29,9 @@ test.describe('Settings owner persistence', () => {
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   });
 
-  test('[P1] should persist NotificationPreference delivery choice after page reload', async ({ page }) => {
+  test('[P1] should persist NotificationPreference delivery choice after page reload', async ({
+    page,
+  }) => {
     await openNotificationsSettings(page);
 
     const notificationToggle = page.getByTestId('notification-global-inApp');
@@ -49,7 +51,10 @@ test.describe('Settings owner persistence', () => {
     );
   });
 
-  test('[P2] should expose the same NotificationPreference across tabs', async ({ page, context }) => {
+  test('[P2] should expose the same NotificationPreference across tabs', async ({
+    page,
+    context,
+  }) => {
     await openNotificationsSettings(page);
 
     const notificationToggle = page.getByTestId('notification-global-inApp');

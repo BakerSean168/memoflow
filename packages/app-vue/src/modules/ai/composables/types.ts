@@ -104,7 +104,8 @@ export type ChatToolApproval = Extract<
 >['data'] & {
   conversationId: string;
   runId: string;
-  status: 'pending' | 'sending' | 'approved' | 'declined' | 'cancelled' | 'failed' | 'stale' | 'unknown';
+  status:
+    'pending' | 'sending' | 'approved' | 'declined' | 'cancelled' | 'failed' | 'stale' | 'unknown';
   errorMessage?: string;
   parked?: boolean;
 };
@@ -123,7 +124,11 @@ export type ChatItem = {
     requestedModel?: { name: string; provider: string };
   };
   /** Local receipt emitted only after the native owner successfully applies a command. */
-  businessOperation?: { runId: string; revision: number; operation: 'goal.patch' | GoalWorkflowLiveAction['operation'] };
+  businessOperation?: {
+    runId: string;
+    revision: number;
+    operation: 'goal.patch' | GoalWorkflowLiveAction['operation'];
+  };
   toolActivity?: Extract<
     Extract<AssistantRuntimeEvent, { type: 'assistant.activity' }>['data'],
     { activityType: 'tool' }

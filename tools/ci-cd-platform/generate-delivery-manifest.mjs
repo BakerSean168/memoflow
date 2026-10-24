@@ -58,7 +58,11 @@ export async function buildDeliveryManifest({
   const history = JSON.parse(
     await readFile(path.join(root, 'tools/test-system-v2/web-spec-durations.json'), 'utf8'),
   );
-  const selection = selectWebSpecs({ enabled: selectedLanes.web, full: effectiveFull, files: changed });
+  const selection = selectWebSpecs({
+    enabled: selectedLanes.web,
+    full: effectiveFull,
+    files: changed,
+  });
   const webShards = planWebShards({ ...selection, durations: history.specs });
   selectedLanes.web = webShards.shardCount > 0;
   const input = {

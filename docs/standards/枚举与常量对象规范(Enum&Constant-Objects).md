@@ -8,9 +8,9 @@ tags: [standard, enum]
 
 ## 1. 核心原则 (Core Principles)
 
-* **命名风格**：Key 和 Value 必须统一使用 **PascalCase** (大驼峰命名)。
-* **不可变性**：必须使用 `as const` 断言，确保类型收窄为字面量 (Literal Types)。
-* **类型导出**：必须导出对应的联合类型 (Union Type)。
+- **命名风格**：Key 和 Value 必须统一使用 **PascalCase** (大驼峰命名)。
+- **不可变性**：必须使用 `as const` 断言，确保类型收窄为字面量 (Literal Types)。
+- **类型导出**：必须导出对应的联合类型 (Union Type)。
 
 ## 2. 标准模板 (Standard Template)
 
@@ -22,15 +22,15 @@ tags: [standard, enum]
  * 必须添加 `as const` 以锁定字面量类型
  */
 export const ImportanceLevels = {
-  Vital: "Vital",
-  Important: "Important",
-  Moderate: "Moderate",
-  Minor: "Minor",
-  Trivial: "Trivial",
+  Vital: 'Vital',
+  Important: 'Important',
+  Moderate: 'Moderate',
+  Minor: 'Minor',
+  Trivial: 'Trivial',
 } as const;
 
 // 提取 Value 类型 (推荐) - 结果: "Vital" | "Important" | ...
-export type ImportanceLevel = typeof ImportanceLevels[keyof typeof ImportanceLevels];
+export type ImportanceLevel = (typeof ImportanceLevels)[keyof typeof ImportanceLevels];
 
 // 或者提取 Key 类型 (仅当 Key 与 Value 完全一致时使用)
 // export type ImportanceLevel = keyof typeof ImportanceLevels;

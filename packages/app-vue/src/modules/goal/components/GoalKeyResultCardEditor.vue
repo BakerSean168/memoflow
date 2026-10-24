@@ -94,11 +94,7 @@
               </span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent
-            align="end"
-            class="w-44 p-1.5"
-            data-testid="draft-kr-weight-popover"
-          >
+          <PopoverContent align="end" class="w-44 p-1.5" data-testid="draft-kr-weight-popover">
             <div class="px-2 py-1.5 text-xs text-muted-foreground">
               {{ t('goal.dialog.krWeightLabel') }}
             </div>

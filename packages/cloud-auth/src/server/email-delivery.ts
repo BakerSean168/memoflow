@@ -190,8 +190,7 @@ export function createCloudAuthEmailLinkCapture(
   delegate: CloudAuthEmailDelivery,
 ): CloudAuthEmailLinkCapture {
   const links = new Map<string, CapturedCloudAuthEmailLink>();
-  const key = (email: string, kind: CloudAuthEmailKind) =>
-    `${kind}:${email.trim().toLowerCase()}`;
+  const key = (email: string, kind: CloudAuthEmailKind) => `${kind}:${email.trim().toLowerCase()}`;
 
   return {
     delivery: {

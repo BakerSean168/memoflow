@@ -124,7 +124,9 @@ describe('InterventionRuntime (ROUTINE-4103)', () => {
       at: t0,
     });
 
-    expect(runtime.listActive()).toEqual([expect.objectContaining({ occurrenceKey: key, state: 'Snoozed' })]);
+    expect(runtime.listActive()).toEqual([
+      expect.objectContaining({ occurrenceKey: key, state: 'Snoozed' }),
+    ]);
     expect(runtime.advance(key, Number(t0) + minute - 1)).toMatchObject({
       applied: false,
       state: 'Snoozed',

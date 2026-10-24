@@ -38,16 +38,30 @@ export class NotificationPreference extends AggregateRoot<NotificationPreference
     };
   }
 
-  get identityId(): IdentityId { return this._props.identityId; }
-  get globalChannels(): Map<NotificationChannelType, boolean> { return new Map(this._props.globalChannels); }
+  get identityId(): IdentityId {
+    return this._props.identityId;
+  }
+  get globalChannels(): Map<NotificationChannelType, boolean> {
+    return new Map(this._props.globalChannels);
+  }
   get workflowOverrides(): Map<string, Map<NotificationChannelType, boolean>> {
     return new Map([...this._props.workflowOverrides].map(([key, value]) => [key, new Map(value)]));
   }
-  get quietHours(): QuietHours | null { return this._props.quietHours ?? null; }
-  get version(): number { return this._props.version; }
-  get deletedAt(): Date | null { return this._props.deletedAt; }
-  get createdAt(): Date { return this._props.createdAt; }
-  get updatedAt(): Date { return this._props.updatedAt; }
+  get quietHours(): QuietHours | null {
+    return this._props.quietHours ?? null;
+  }
+  get version(): number {
+    return this._props.version;
+  }
+  get deletedAt(): Date | null {
+    return this._props.deletedAt;
+  }
+  get createdAt(): Date {
+    return this._props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this._props.updatedAt;
+  }
 
   getGlobalChannel(channel: NotificationChannelType): boolean | undefined {
     return this._props.globalChannels.get(channel);
@@ -133,5 +147,7 @@ export class NotificationPreference extends AggregateRoot<NotificationPreference
     });
   }
 
-  private touch(): void { this._props.updatedAt = new Date(); }
+  private touch(): void {
+    this._props.updatedAt = new Date();
+  }
 }

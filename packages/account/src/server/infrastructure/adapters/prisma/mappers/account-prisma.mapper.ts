@@ -9,11 +9,7 @@ import type { AccountProfileDTO } from '@memoflow/contracts/account';
 function requiredInstant(value: Date | string | number | null | undefined): number {
   if (value == null) throw new Error('Account timestamp is required');
   const n =
-    value instanceof Date
-      ? value.getTime()
-      : typeof value === 'number'
-        ? value
-        : Date.parse(value);
+    value instanceof Date ? value.getTime() : typeof value === 'number' ? value : Date.parse(value);
   if (!Number.isFinite(n)) throw new Error('Account timestamp must be a finite Instant');
   return n;
 }

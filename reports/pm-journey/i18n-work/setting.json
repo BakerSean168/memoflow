@@ -1,1461 +1,977 @@
 [
- {
-  "key": "setting.advanced.cloudSync",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"
-  ]
- },
- {
-  "key": "setting.advanced.createBackup",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"
-  ]
- },
- {
-  "key": "setting.advanced.exportCSV",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"
-  ]
- },
- {
-  "key": "setting.advanced.exportJSON",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"
-  ]
- },
- {
-  "key": "setting.advanced.exportPortableData",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"
-  ]
- },
- {
-  "key": "setting.advanced.exportServerDataDisclosure",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"
-  ]
- },
- {
-  "key": "setting.advanced.exportSettings",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"
-  ]
- },
- {
-  "key": "setting.advanced.exportingPortableData",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"
-  ]
- },
- {
-  "key": "setting.advanced.exportingServerDataDisclosure",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"
-  ]
- },
- {
-  "key": "setting.advanced.importPortableData",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"
-  ]
- },
- {
-  "key": "setting.advanced.importSettings",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"
-  ]
- },
- {
-  "key": "setting.advanced.importingPortableData",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"
-  ]
- },
- {
-  "key": "setting.advanced.lastSynced",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"
-  ]
- },
- {
-  "key": "setting.advanced.portableDataDescription",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"
-  ]
- },
- {
-  "key": "setting.advanced.restoreBackup",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"
-  ]
- },
- {
-  "key": "setting.advanced.restoreBackupNoBackups",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"
-  ]
- },
- {
-  "key": "setting.advanced.serverDataDisclosureDescription",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"
-  ]
- },
- {
-  "key": "setting.advanced.syncAllDevices",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"
-  ]
- },
- {
-  "key": "setting.advanced.syncing",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"
-  ]
- },
- {
-  "key": "setting.advanced.title",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"
-  ]
- },
- {
-  "key": "setting.advanced.version",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"
-  ]
- },
- {
-  "key": "setting.advanced.viewVersionHistory",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"
-  ]
- },
- {
-  "key": "setting.ai.advancedProviderSectionDescription",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.advancedProviderSectionTitle",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.createProvider",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.defaultProvider",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.deleteProvider",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.description",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.getApiKey",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.inactiveProvider",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.loadIntoForm",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.manageAdvancedConfig",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.markAsDefault",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.markAsDefaultDescription",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.noProviders",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.providerApiKeyPlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.providerBaseUrlPlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.providerCreated",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.providerDefaultUpdated",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.providerDeleted",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.providerModelPlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.providerModelsRefreshed",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.providerModelsSummary",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.providerNamePlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.providerSectionDescription",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.providerSectionTitle",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.providerTestFailed",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.providerTestPassed",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.providerUpdated",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.quickProviderApiKeyPlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.quickProviderConfigured",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.quickProviderConfiguredSummary",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.quickProviderConnect",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.quickProviderConnecting",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.quickProviderCurrentDefault",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.quickProviderDefaultHint",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.quickProviderNotConfigured",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.quickProviderSectionDescription",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.quickProviderSectionTitle",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.quickProviderUpdate",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.quickProviderUpdating",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.refreshModels",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.refreshProviders",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.refreshingModels",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.resetProviderForm",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.setDefaultProvider",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.testProvider",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.testingProvider",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.title",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.ai.updateProvider",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AISettings.vue"
-  ]
- },
- {
-  "key": "setting.appearance.theme",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AppearanceSettings.vue"
-  ]
- },
- {
-  "key": "setting.appearance.themeAuto",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AppearanceSettings.vue"
-  ]
- },
- {
-  "key": "setting.appearance.themeDark",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AppearanceSettings.vue"
-  ]
- },
- {
-  "key": "setting.appearance.themeDescription",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AppearanceSettings.vue"
-  ]
- },
- {
-  "key": "setting.appearance.themeLight",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AppearanceSettings.vue"
-  ]
- },
- {
-  "key": "setting.appearance.themePlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AppearanceSettings.vue"
-  ]
- },
- {
-  "key": "setting.appearance.title",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/AppearanceSettings.vue"
-  ]
- },
- {
-  "key": "setting.experimental.advancedAnalytics",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"
-  ]
- },
- {
-  "key": "setting.experimental.advancedAnalyticsDesc",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"
-  ]
- },
- {
-  "key": "setting.experimental.aiAssistant",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"
-  ]
- },
- {
-  "key": "setting.experimental.aiAssistantDesc",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"
-  ]
- },
- {
-  "key": "setting.experimental.availableFeatures",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"
-  ]
- },
- {
-  "key": "setting.experimental.collaboration",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"
-  ]
- },
- {
-  "key": "setting.experimental.collaborationDesc",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"
-  ]
- },
- {
-  "key": "setting.experimental.enableExperimental",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"
-  ]
- },
- {
-  "key": "setting.experimental.enableExperimentalDescription",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"
-  ]
- },
- {
-  "key": "setting.experimental.new",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"
-  ]
- },
- {
-  "key": "setting.experimental.noFeatures",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"
-  ]
- },
- {
-  "key": "setting.experimental.reset",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"
-  ]
- },
- {
-  "key": "setting.experimental.saveChanges",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"
-  ]
- },
- {
-  "key": "setting.experimental.title",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"
-  ]
- },
- {
-  "key": "setting.experimental.voiceInput",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"
-  ]
- },
- {
-  "key": "setting.experimental.voiceInputDesc",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"
-  ]
- },
- {
-  "key": "setting.experimental.warning",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"
-  ]
- },
- {
-  "key": "setting.experimental.warningDescription",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"
-  ]
- },
- {
-  "key": "setting.groups.account",
-  "files": [
-   "packages/app-vue/src/modules/setting/views/UserSettingsView.vue"
-  ]
- },
- {
-  "key": "setting.groups.advanced",
-  "files": [
-   "packages/app-vue/src/modules/setting/views/UserSettingsView.vue"
-  ]
- },
- {
-  "key": "setting.groups.ai",
-  "files": [
-   "packages/app-vue/src/modules/setting/views/UserSettingsView.vue"
-  ]
- },
- {
-  "key": "setting.groups.appearance",
-  "files": [
-   "packages/app-vue/src/modules/setting/views/UserSettingsView.vue"
-  ]
- },
- {
-  "key": "setting.groups.data",
-  "files": [
-   "packages/app-vue/src/modules/setting/views/UserSettingsView.vue"
-  ]
- },
- {
-  "key": "setting.groups.notifications",
-  "files": [
-   "packages/app-vue/src/modules/setting/views/UserSettingsView.vue"
-  ]
- },
- {
-  "key": "setting.groups.repository",
-  "files": [
-   "packages/app-vue/src/modules/setting/views/UserSettingsView.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.chooseDescription",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.chooseTitle",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.completeFailed",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.connect",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.connectAnother",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.connectFailed",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.createOpenFailed",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.createPrivate",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.defaultBranch",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.desktopConnectHint",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.disconnect",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.disconnectDescription",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.disconnectFailed",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.disconnectTitle",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.errorTitle",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.githubDescription",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.githubTitle",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.guestCloudBlocked",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.lastSyncedCommit",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.lifecycle.unknown",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.loadFailed",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.localChange",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.localDescription",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.localDesktopOnly",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.localDetach",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.localDetachDescription",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.localDetachFailed",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.localDetachTitle",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.localNotSelected",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.localNotSelectedHint",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.localSelect",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.localSelectFailed",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.localTitle",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.notConnected",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.offlineCloudBlocked",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.permissionDescription",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.permissionTitle",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.private",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.public",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.purgeCloudData",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.purgeCloudDataDescription",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.purgeLocalAndGithubPreserved",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.reconciliation.completed",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.reconciliation.execute",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.reconciliation.executeDescription",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.reconciliation.executeFailed",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.reconciliation.executeTitle",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.reconciliation.preview",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.reconciliation.previewFailed",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.retainCloudDataDescription",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.startConnect",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.startFailed",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.sync.conflictDescription",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.sync.conflictLocalHead",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.sync.conflictRemoteHead",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.sync.conflictTitle",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.sync.execute",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.sync.failed",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.sync.openInObsidian",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.sync.openInObsidianFailed",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.sync.pendingDescription",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.sync.pendingTitle",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.sync.retry",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.knowledgeRepository.webConnectHint",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.currency",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.currencyCNY",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.currencyEUR",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.currencyGBP",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.currencyJPY",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.currencyPlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.currencyUSD",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.dateChinese",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.dateDMY",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.dateFormat",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.dateFormatPlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.dateISO",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.dateMDY",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.language",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.languagePlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.time12h",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.time24h",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.timeFormat",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.timeFormatPlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.timezone",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.timezonePlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.title",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.tzBeijing",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.tzLondon",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.tzNewYork",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.tzSydney",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.tzTokyo",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.weekMonday",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.weekSaturday",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.weekStartsOn",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.weekStartsOnPlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.locale.weekSunday",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/LocaleSettings.vue"
-  ]
- },
- {
-  "key": "setting.privacy.allowSearchByEmail",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/PrivacySettings.vue"
-  ]
- },
- {
-  "key": "setting.privacy.allowSearchByPhone",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/PrivacySettings.vue"
-  ]
- },
- {
-  "key": "setting.privacy.clearCache",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/PrivacySettings.vue"
-  ]
- },
- {
-  "key": "setting.privacy.dataManagement",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/PrivacySettings.vue"
-  ]
- },
- {
-  "key": "setting.privacy.dataSharing",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/PrivacySettings.vue"
-  ]
- },
- {
-  "key": "setting.privacy.deleteAccount",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/PrivacySettings.vue"
-  ]
- },
- {
-  "key": "setting.privacy.exportData",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/PrivacySettings.vue"
-  ]
- },
- {
-  "key": "setting.privacy.privacyPolicyLink",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/PrivacySettings.vue"
-  ]
- },
- {
-  "key": "setting.privacy.privacyPolicyNotice",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/PrivacySettings.vue"
-  ]
- },
- {
-  "key": "setting.privacy.privacyPolicyNoticeEnd",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/PrivacySettings.vue"
-  ]
- },
- {
-  "key": "setting.privacy.profileVisibility",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/PrivacySettings.vue"
-  ]
- },
- {
-  "key": "setting.privacy.profileVisibilityPlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/PrivacySettings.vue"
-  ]
- },
- {
-  "key": "setting.privacy.searchPermissions",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/PrivacySettings.vue"
-  ]
- },
- {
-  "key": "setting.privacy.searchPermissionsDescription",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/PrivacySettings.vue"
-  ]
- },
- {
-  "key": "setting.privacy.shareUsageData",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/PrivacySettings.vue"
-  ]
- },
- {
-  "key": "setting.privacy.shareUsageDataDescription",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/PrivacySettings.vue"
-  ]
- },
- {
-  "key": "setting.privacy.showOnlineStatus",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/PrivacySettings.vue"
-  ]
- },
- {
-  "key": "setting.privacy.showOnlineStatusDescription",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/PrivacySettings.vue"
-  ]
- },
- {
-  "key": "setting.privacy.title",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/PrivacySettings.vue"
-  ]
- },
- {
-  "key": "setting.privacy.visibilityFriends",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/PrivacySettings.vue"
-  ]
- },
- {
-  "key": "setting.privacy.visibilityFriendsDesc",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/PrivacySettings.vue"
-  ]
- },
- {
-  "key": "setting.privacy.visibilityPrivate",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/PrivacySettings.vue"
-  ]
- },
- {
-  "key": "setting.privacy.visibilityPrivateDesc",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/PrivacySettings.vue"
-  ]
- },
- {
-  "key": "setting.privacy.visibilityPublic",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/PrivacySettings.vue"
-  ]
- },
- {
-  "key": "setting.privacy.visibilityPublicDesc",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/PrivacySettings.vue"
-  ]
- },
- {
-  "key": "setting.shortcuts.pressKey",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/ShortcutSettings.vue"
-  ]
- },
- {
-  "key": "setting.shortcuts.resetAll",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/ShortcutSettings.vue"
-  ]
- },
- {
-  "key": "setting.shortcuts.searchPlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/ShortcutSettings.vue"
-  ]
- },
- {
-  "key": "setting.shortcuts.title",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/ShortcutSettings.vue"
-  ]
- },
- {
-  "key": "setting.title",
-  "files": [
-   "packages/app-vue/src/layouts/shell/StandaloneSettingsLayout.vue",
-   "packages/app-vue/src/modules/setting/views/UserSettingsView.vue"
-  ]
- },
- {
-  "key": "setting.userFiles.changeDirectory",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"
-  ]
- },
- {
-  "key": "setting.userFiles.currentDirectory",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"
-  ]
- },
- {
-  "key": "setting.userFiles.customBadge",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"
-  ]
- },
- {
-  "key": "setting.userFiles.defaultDirectory",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"
-  ]
- },
- {
-  "key": "setting.userFiles.description",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"
-  ]
- },
- {
-  "key": "setting.userFiles.directoryChanged",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"
-  ]
- },
- {
-  "key": "setting.userFiles.loadPathFailed",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"
-  ]
- },
- {
-  "key": "setting.userFiles.openDirectory",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"
-  ]
- },
- {
-  "key": "setting.userFiles.openDirectoryFailed",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"
-  ]
- },
- {
-  "key": "setting.userFiles.pickDirectoryFailed",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"
-  ]
- },
- {
-  "key": "setting.userFiles.resetConfirm",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"
-  ]
- },
- {
-  "key": "setting.userFiles.resetFailed",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"
-  ]
- },
- {
-  "key": "setting.userFiles.resetSuccess",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"
-  ]
- },
- {
-  "key": "setting.userFiles.resetToDefault",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"
-  ]
- },
- {
-  "key": "setting.userFiles.title",
-  "files": [
-   "packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"
-  ]
- }
+  {
+    "key": "setting.advanced.cloudSync",
+    "files": ["packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"]
+  },
+  {
+    "key": "setting.advanced.createBackup",
+    "files": ["packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"]
+  },
+  {
+    "key": "setting.advanced.exportCSV",
+    "files": ["packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"]
+  },
+  {
+    "key": "setting.advanced.exportJSON",
+    "files": ["packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"]
+  },
+  {
+    "key": "setting.advanced.exportPortableData",
+    "files": ["packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"]
+  },
+  {
+    "key": "setting.advanced.exportServerDataDisclosure",
+    "files": ["packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"]
+  },
+  {
+    "key": "setting.advanced.exportSettings",
+    "files": ["packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"]
+  },
+  {
+    "key": "setting.advanced.exportingPortableData",
+    "files": ["packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"]
+  },
+  {
+    "key": "setting.advanced.exportingServerDataDisclosure",
+    "files": ["packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"]
+  },
+  {
+    "key": "setting.advanced.importPortableData",
+    "files": ["packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"]
+  },
+  {
+    "key": "setting.advanced.importSettings",
+    "files": ["packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"]
+  },
+  {
+    "key": "setting.advanced.importingPortableData",
+    "files": ["packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"]
+  },
+  {
+    "key": "setting.advanced.lastSynced",
+    "files": ["packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"]
+  },
+  {
+    "key": "setting.advanced.portableDataDescription",
+    "files": ["packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"]
+  },
+  {
+    "key": "setting.advanced.restoreBackup",
+    "files": ["packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"]
+  },
+  {
+    "key": "setting.advanced.restoreBackupNoBackups",
+    "files": ["packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"]
+  },
+  {
+    "key": "setting.advanced.serverDataDisclosureDescription",
+    "files": ["packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"]
+  },
+  {
+    "key": "setting.advanced.syncAllDevices",
+    "files": ["packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"]
+  },
+  {
+    "key": "setting.advanced.syncing",
+    "files": ["packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"]
+  },
+  {
+    "key": "setting.advanced.title",
+    "files": ["packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"]
+  },
+  {
+    "key": "setting.advanced.version",
+    "files": ["packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"]
+  },
+  {
+    "key": "setting.advanced.viewVersionHistory",
+    "files": ["packages/app-vue/src/modules/setting/components/SettingAdvancedActions.vue"]
+  },
+  {
+    "key": "setting.ai.advancedProviderSectionDescription",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.advancedProviderSectionTitle",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.createProvider",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.defaultProvider",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.deleteProvider",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.description",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.getApiKey",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.inactiveProvider",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.loadIntoForm",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.manageAdvancedConfig",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.markAsDefault",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.markAsDefaultDescription",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.noProviders",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.providerApiKeyPlaceholder",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.providerBaseUrlPlaceholder",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.providerCreated",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.providerDefaultUpdated",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.providerDeleted",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.providerModelPlaceholder",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.providerModelsRefreshed",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.providerModelsSummary",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.providerNamePlaceholder",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.providerSectionDescription",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.providerSectionTitle",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.providerTestFailed",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.providerTestPassed",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.providerUpdated",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.quickProviderApiKeyPlaceholder",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.quickProviderConfigured",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.quickProviderConfiguredSummary",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.quickProviderConnect",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.quickProviderConnecting",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.quickProviderCurrentDefault",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.quickProviderDefaultHint",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.quickProviderNotConfigured",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.quickProviderSectionDescription",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.quickProviderSectionTitle",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.quickProviderUpdate",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.quickProviderUpdating",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.refreshModels",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.refreshProviders",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.refreshingModels",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.resetProviderForm",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.setDefaultProvider",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.testProvider",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.testingProvider",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.title",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.ai.updateProvider",
+    "files": ["packages/app-vue/src/modules/setting/components/AISettings.vue"]
+  },
+  {
+    "key": "setting.appearance.theme",
+    "files": ["packages/app-vue/src/modules/setting/components/AppearanceSettings.vue"]
+  },
+  {
+    "key": "setting.appearance.themeAuto",
+    "files": ["packages/app-vue/src/modules/setting/components/AppearanceSettings.vue"]
+  },
+  {
+    "key": "setting.appearance.themeDark",
+    "files": ["packages/app-vue/src/modules/setting/components/AppearanceSettings.vue"]
+  },
+  {
+    "key": "setting.appearance.themeDescription",
+    "files": ["packages/app-vue/src/modules/setting/components/AppearanceSettings.vue"]
+  },
+  {
+    "key": "setting.appearance.themeLight",
+    "files": ["packages/app-vue/src/modules/setting/components/AppearanceSettings.vue"]
+  },
+  {
+    "key": "setting.appearance.themePlaceholder",
+    "files": ["packages/app-vue/src/modules/setting/components/AppearanceSettings.vue"]
+  },
+  {
+    "key": "setting.appearance.title",
+    "files": ["packages/app-vue/src/modules/setting/components/AppearanceSettings.vue"]
+  },
+  {
+    "key": "setting.experimental.advancedAnalytics",
+    "files": ["packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"]
+  },
+  {
+    "key": "setting.experimental.advancedAnalyticsDesc",
+    "files": ["packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"]
+  },
+  {
+    "key": "setting.experimental.aiAssistant",
+    "files": ["packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"]
+  },
+  {
+    "key": "setting.experimental.aiAssistantDesc",
+    "files": ["packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"]
+  },
+  {
+    "key": "setting.experimental.availableFeatures",
+    "files": ["packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"]
+  },
+  {
+    "key": "setting.experimental.collaboration",
+    "files": ["packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"]
+  },
+  {
+    "key": "setting.experimental.collaborationDesc",
+    "files": ["packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"]
+  },
+  {
+    "key": "setting.experimental.enableExperimental",
+    "files": ["packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"]
+  },
+  {
+    "key": "setting.experimental.enableExperimentalDescription",
+    "files": ["packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"]
+  },
+  {
+    "key": "setting.experimental.new",
+    "files": ["packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"]
+  },
+  {
+    "key": "setting.experimental.noFeatures",
+    "files": ["packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"]
+  },
+  {
+    "key": "setting.experimental.reset",
+    "files": ["packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"]
+  },
+  {
+    "key": "setting.experimental.saveChanges",
+    "files": ["packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"]
+  },
+  {
+    "key": "setting.experimental.title",
+    "files": ["packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"]
+  },
+  {
+    "key": "setting.experimental.voiceInput",
+    "files": ["packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"]
+  },
+  {
+    "key": "setting.experimental.voiceInputDesc",
+    "files": ["packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"]
+  },
+  {
+    "key": "setting.experimental.warning",
+    "files": ["packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"]
+  },
+  {
+    "key": "setting.experimental.warningDescription",
+    "files": ["packages/app-vue/src/modules/setting/components/ExperimentalSettings.vue"]
+  },
+  {
+    "key": "setting.groups.account",
+    "files": ["packages/app-vue/src/modules/setting/views/UserSettingsView.vue"]
+  },
+  {
+    "key": "setting.groups.advanced",
+    "files": ["packages/app-vue/src/modules/setting/views/UserSettingsView.vue"]
+  },
+  {
+    "key": "setting.groups.ai",
+    "files": ["packages/app-vue/src/modules/setting/views/UserSettingsView.vue"]
+  },
+  {
+    "key": "setting.groups.appearance",
+    "files": ["packages/app-vue/src/modules/setting/views/UserSettingsView.vue"]
+  },
+  {
+    "key": "setting.groups.data",
+    "files": ["packages/app-vue/src/modules/setting/views/UserSettingsView.vue"]
+  },
+  {
+    "key": "setting.groups.notifications",
+    "files": ["packages/app-vue/src/modules/setting/views/UserSettingsView.vue"]
+  },
+  {
+    "key": "setting.groups.repository",
+    "files": ["packages/app-vue/src/modules/setting/views/UserSettingsView.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.chooseDescription",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.chooseTitle",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.completeFailed",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.connect",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.connectAnother",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.connectFailed",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.createOpenFailed",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.createPrivate",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.defaultBranch",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.desktopConnectHint",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.disconnect",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.disconnectDescription",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.disconnectFailed",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.disconnectTitle",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.errorTitle",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.githubDescription",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.githubTitle",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.guestCloudBlocked",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.lastSyncedCommit",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.lifecycle.unknown",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.loadFailed",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.localChange",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.localDescription",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.localDesktopOnly",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.localDetach",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.localDetachDescription",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.localDetachFailed",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.localDetachTitle",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.localNotSelected",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.localNotSelectedHint",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.localSelect",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.localSelectFailed",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.localTitle",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.notConnected",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.offlineCloudBlocked",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.permissionDescription",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.permissionTitle",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.private",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.public",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.purgeCloudData",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.purgeCloudDataDescription",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.purgeLocalAndGithubPreserved",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.reconciliation.completed",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.reconciliation.execute",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.reconciliation.executeDescription",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.reconciliation.executeFailed",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.reconciliation.executeTitle",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.reconciliation.preview",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.reconciliation.previewFailed",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.retainCloudDataDescription",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.startConnect",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.startFailed",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.sync.conflictDescription",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.sync.conflictLocalHead",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.sync.conflictRemoteHead",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.sync.conflictTitle",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.sync.execute",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.sync.failed",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.sync.openInObsidian",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.sync.openInObsidianFailed",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.sync.pendingDescription",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.sync.pendingTitle",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.sync.retry",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.knowledgeRepository.webConnectHint",
+    "files": ["packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.vue"]
+  },
+  {
+    "key": "setting.locale.currency",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.currencyCNY",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.currencyEUR",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.currencyGBP",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.currencyJPY",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.currencyPlaceholder",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.currencyUSD",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.dateChinese",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.dateDMY",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.dateFormat",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.dateFormatPlaceholder",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.dateISO",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.dateMDY",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.language",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.languagePlaceholder",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.time12h",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.time24h",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.timeFormat",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.timeFormatPlaceholder",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.timezone",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.timezonePlaceholder",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.title",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.tzBeijing",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.tzLondon",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.tzNewYork",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.tzSydney",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.tzTokyo",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.weekMonday",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.weekSaturday",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.weekStartsOn",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.weekStartsOnPlaceholder",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.locale.weekSunday",
+    "files": ["packages/app-vue/src/modules/setting/components/LocaleSettings.vue"]
+  },
+  {
+    "key": "setting.privacy.allowSearchByEmail",
+    "files": ["packages/app-vue/src/modules/setting/components/PrivacySettings.vue"]
+  },
+  {
+    "key": "setting.privacy.allowSearchByPhone",
+    "files": ["packages/app-vue/src/modules/setting/components/PrivacySettings.vue"]
+  },
+  {
+    "key": "setting.privacy.clearCache",
+    "files": ["packages/app-vue/src/modules/setting/components/PrivacySettings.vue"]
+  },
+  {
+    "key": "setting.privacy.dataManagement",
+    "files": ["packages/app-vue/src/modules/setting/components/PrivacySettings.vue"]
+  },
+  {
+    "key": "setting.privacy.dataSharing",
+    "files": ["packages/app-vue/src/modules/setting/components/PrivacySettings.vue"]
+  },
+  {
+    "key": "setting.privacy.deleteAccount",
+    "files": ["packages/app-vue/src/modules/setting/components/PrivacySettings.vue"]
+  },
+  {
+    "key": "setting.privacy.exportData",
+    "files": ["packages/app-vue/src/modules/setting/components/PrivacySettings.vue"]
+  },
+  {
+    "key": "setting.privacy.privacyPolicyLink",
+    "files": ["packages/app-vue/src/modules/setting/components/PrivacySettings.vue"]
+  },
+  {
+    "key": "setting.privacy.privacyPolicyNotice",
+    "files": ["packages/app-vue/src/modules/setting/components/PrivacySettings.vue"]
+  },
+  {
+    "key": "setting.privacy.privacyPolicyNoticeEnd",
+    "files": ["packages/app-vue/src/modules/setting/components/PrivacySettings.vue"]
+  },
+  {
+    "key": "setting.privacy.profileVisibility",
+    "files": ["packages/app-vue/src/modules/setting/components/PrivacySettings.vue"]
+  },
+  {
+    "key": "setting.privacy.profileVisibilityPlaceholder",
+    "files": ["packages/app-vue/src/modules/setting/components/PrivacySettings.vue"]
+  },
+  {
+    "key": "setting.privacy.searchPermissions",
+    "files": ["packages/app-vue/src/modules/setting/components/PrivacySettings.vue"]
+  },
+  {
+    "key": "setting.privacy.searchPermissionsDescription",
+    "files": ["packages/app-vue/src/modules/setting/components/PrivacySettings.vue"]
+  },
+  {
+    "key": "setting.privacy.shareUsageData",
+    "files": ["packages/app-vue/src/modules/setting/components/PrivacySettings.vue"]
+  },
+  {
+    "key": "setting.privacy.shareUsageDataDescription",
+    "files": ["packages/app-vue/src/modules/setting/components/PrivacySettings.vue"]
+  },
+  {
+    "key": "setting.privacy.showOnlineStatus",
+    "files": ["packages/app-vue/src/modules/setting/components/PrivacySettings.vue"]
+  },
+  {
+    "key": "setting.privacy.showOnlineStatusDescription",
+    "files": ["packages/app-vue/src/modules/setting/components/PrivacySettings.vue"]
+  },
+  {
+    "key": "setting.privacy.title",
+    "files": ["packages/app-vue/src/modules/setting/components/PrivacySettings.vue"]
+  },
+  {
+    "key": "setting.privacy.visibilityFriends",
+    "files": ["packages/app-vue/src/modules/setting/components/PrivacySettings.vue"]
+  },
+  {
+    "key": "setting.privacy.visibilityFriendsDesc",
+    "files": ["packages/app-vue/src/modules/setting/components/PrivacySettings.vue"]
+  },
+  {
+    "key": "setting.privacy.visibilityPrivate",
+    "files": ["packages/app-vue/src/modules/setting/components/PrivacySettings.vue"]
+  },
+  {
+    "key": "setting.privacy.visibilityPrivateDesc",
+    "files": ["packages/app-vue/src/modules/setting/components/PrivacySettings.vue"]
+  },
+  {
+    "key": "setting.privacy.visibilityPublic",
+    "files": ["packages/app-vue/src/modules/setting/components/PrivacySettings.vue"]
+  },
+  {
+    "key": "setting.privacy.visibilityPublicDesc",
+    "files": ["packages/app-vue/src/modules/setting/components/PrivacySettings.vue"]
+  },
+  {
+    "key": "setting.shortcuts.pressKey",
+    "files": ["packages/app-vue/src/modules/setting/components/ShortcutSettings.vue"]
+  },
+  {
+    "key": "setting.shortcuts.resetAll",
+    "files": ["packages/app-vue/src/modules/setting/components/ShortcutSettings.vue"]
+  },
+  {
+    "key": "setting.shortcuts.searchPlaceholder",
+    "files": ["packages/app-vue/src/modules/setting/components/ShortcutSettings.vue"]
+  },
+  {
+    "key": "setting.shortcuts.title",
+    "files": ["packages/app-vue/src/modules/setting/components/ShortcutSettings.vue"]
+  },
+  {
+    "key": "setting.title",
+    "files": [
+      "packages/app-vue/src/layouts/shell/StandaloneSettingsLayout.vue",
+      "packages/app-vue/src/modules/setting/views/UserSettingsView.vue"
+    ]
+  },
+  {
+    "key": "setting.userFiles.changeDirectory",
+    "files": ["packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"]
+  },
+  {
+    "key": "setting.userFiles.currentDirectory",
+    "files": ["packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"]
+  },
+  {
+    "key": "setting.userFiles.customBadge",
+    "files": ["packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"]
+  },
+  {
+    "key": "setting.userFiles.defaultDirectory",
+    "files": ["packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"]
+  },
+  {
+    "key": "setting.userFiles.description",
+    "files": ["packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"]
+  },
+  {
+    "key": "setting.userFiles.directoryChanged",
+    "files": ["packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"]
+  },
+  {
+    "key": "setting.userFiles.loadPathFailed",
+    "files": ["packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"]
+  },
+  {
+    "key": "setting.userFiles.openDirectory",
+    "files": ["packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"]
+  },
+  {
+    "key": "setting.userFiles.openDirectoryFailed",
+    "files": ["packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"]
+  },
+  {
+    "key": "setting.userFiles.pickDirectoryFailed",
+    "files": ["packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"]
+  },
+  {
+    "key": "setting.userFiles.resetConfirm",
+    "files": ["packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"]
+  },
+  {
+    "key": "setting.userFiles.resetFailed",
+    "files": ["packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"]
+  },
+  {
+    "key": "setting.userFiles.resetSuccess",
+    "files": ["packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"]
+  },
+  {
+    "key": "setting.userFiles.resetToDefault",
+    "files": ["packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"]
+  },
+  {
+    "key": "setting.userFiles.title",
+    "files": ["packages/app-vue/src/modules/setting/components/UserFilesSettings.vue"]
+  }
 ]

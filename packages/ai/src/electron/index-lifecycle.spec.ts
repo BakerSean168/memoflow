@@ -177,24 +177,44 @@ describe('createAIElectronModule lifecycle', () => {
   it('bounds Workspace IPC delivery with sender-owned acknowledgements and releases subscriptions on stop', async () => {
     const unsubscribe = vi.fn();
     const source: GoalWorkflowEventSource = {
-      epoch: '11111111-1111-4111-8111-111111111111', init: vi.fn(async () => {}),
-      head: vi.fn(async () => ({ first: 1, last: 0 })), read: vi.fn(async () => []),
-      snapshot: vi.fn(async () => null), subscribe: vi.fn(() => unsubscribe), dispose: vi.fn(async () => {}),
+      epoch: '11111111-1111-4111-8111-111111111111',
+      init: vi.fn(async () => {}),
+      head: vi.fn(async () => ({ first: 1, last: 0 })),
+      read: vi.fn(async () => []),
+      snapshot: vi.fn(async () => null),
+      subscribe: vi.fn(() => unsubscribe),
+      dispose: vi.fn(async () => {}),
     };
     Object.assign(fake.instance, { workflowRuntime: { goalEvents: async () => source } });
     await moduleDef.register(createFakeContext());
-    const sender = Object.assign(new EventEmitter(), { id: 7, send: vi.fn(), isDestroyed: () => false });
+    const sender = Object.assign(new EventEmitter(), {
+      id: 7,
+      send: vi.fn(),
+      isDestroyed: () => false,
+    });
     const start = mocks.handlers.get(AIChannels.RUNTIME_WORKSPACE_START)!;
     const ack = mocks.handlers.get(AIChannels.RUNTIME_WORKSPACE_ACK)!;
     const stop = mocks.handlers.get(AIChannels.RUNTIME_WORKSPACE_STOP)!;
-    expect(await start({ sender }, { streamId: 'workspace-1', identityId: 'other' })).toMatchObject({ ok: false, error: { code: 'VALIDATION_ERROR' } });
+    expect(await start({ sender }, { streamId: 'workspace-1', identityId: 'other' })).toMatchObject(
+      { ok: false, error: { code: 'VALIDATION_ERROR' } },
+    );
     expect(await start({ sender }, { streamId: 'workspace-1' })).toMatchObject({ ok: true });
     await vi.waitFor(() => expect(sender.send).toHaveBeenCalled());
     const payload = sender.send.mock.calls[0]![1] as { event: { cursor: string } };
-    expect(await ack({ sender: { id: 8 } }, { streamId: 'workspace-1', cursor: payload.event.cursor })).toMatchObject({ ok: false, error: { code: 'FORBIDDEN' } });
-    expect(await ack({ sender }, { streamId: 'workspace-1', cursor: 'wrong' })).toMatchObject({ ok: true, data: { accepted: false } });
-    expect(await ack({ sender }, { streamId: 'workspace-1', cursor: payload.event.cursor })).toMatchObject({ ok: true, data: { accepted: true } });
-    expect(await stop({ sender: { id: 8 } }, { streamId: 'workspace-1' })).toMatchObject({ ok: false, error: { code: 'FORBIDDEN' } });
+    expect(
+      await ack({ sender: { id: 8 } }, { streamId: 'workspace-1', cursor: payload.event.cursor }),
+    ).toMatchObject({ ok: false, error: { code: 'FORBIDDEN' } });
+    expect(await ack({ sender }, { streamId: 'workspace-1', cursor: 'wrong' })).toMatchObject({
+      ok: true,
+      data: { accepted: false },
+    });
+    expect(
+      await ack({ sender }, { streamId: 'workspace-1', cursor: payload.event.cursor }),
+    ).toMatchObject({ ok: true, data: { accepted: true } });
+    expect(await stop({ sender: { id: 8 } }, { streamId: 'workspace-1' })).toMatchObject({
+      ok: false,
+      error: { code: 'FORBIDDEN' },
+    });
     expect(await stop({ sender }, { streamId: 'workspace-1' })).toMatchObject({ ok: true });
     await vi.waitFor(() => expect(unsubscribe).toHaveBeenCalledOnce());
     expect(sender.listenerCount('destroyed')).toBe(0);
@@ -202,8 +222,10 @@ describe('createAIElectronModule lifecycle', () => {
 
   it('routes Goal surface lease IPC through authenticated identity and rejects identity injection', async () => {
     const grant = {
-      status: 'claimed', token: '11111111-1111-4111-8111-111111111111',
-      fence: 2, expiresAt: Date.now() + 30_000,
+      status: 'claimed',
+      token: '11111111-1111-4111-8111-111111111111',
+      fence: 2,
+      expiresAt: Date.now() + 30_000,
     };
     const goalSurfaceLease = vi.fn(async () => grant);
     Object.assign(fake.instance, {
@@ -214,10 +236,13 @@ describe('createAIElectronModule lifecycle', () => {
     const request = { action: 'claim', runId: 'goal-run-1' };
     expect(await handler(undefined, request)).toMatchObject({ ok: true, data: grant });
     expect(goalSurfaceLease).toHaveBeenCalledExactlyOnceWith({
-      identityId: 'identity-1', request,
+      identityId: 'identity-1',
+      request,
     });
     const rejected = await handler(undefined, {
-      action: 'claim', runId: 'goal-run-1', identityId: 'other',
+      action: 'claim',
+      runId: 'goal-run-1',
+      identityId: 'other',
     });
     expect(rejected).toMatchObject({ ok: false, error: { code: 'VALIDATION_ERROR' } });
     expect(goalSurfaceLease).toHaveBeenCalledTimes(1);
@@ -234,12 +259,24 @@ describe('createAIElectronModule lifecycle', () => {
 
   it('awaits native ask_user reply over Desktop IPC before serializing accepted', async () => {
     await moduleDef.register(createFakeContext());
-    const command = { type: 'tool_answer', action: 'answer', conversationId: 'conversation-1', runId: 'run-1', toolCallId: 'tool-1', answer: 'A' };
-    const result = await mocks.handlers.get(AIChannels.RUNTIME_ASSISTANT_ANSWER)!(undefined, command);
-    expect(fake.answerToolSuspension).toHaveBeenCalledWith(expect.objectContaining({
-      context: expect.objectContaining({ identityId: 'identity-1' }),
+    const command = {
+      type: 'tool_answer',
+      action: 'answer',
+      conversationId: 'conversation-1',
+      runId: 'run-1',
+      toolCallId: 'tool-1',
+      answer: 'A',
+    };
+    const result = await mocks.handlers.get(AIChannels.RUNTIME_ASSISTANT_ANSWER)!(
+      undefined,
       command,
-    }));
+    );
+    expect(fake.answerToolSuspension).toHaveBeenCalledWith(
+      expect.objectContaining({
+        context: expect.objectContaining({ identityId: 'identity-1' }),
+        command,
+      }),
+    );
     expect(result).toEqual(ok({ accepted: true }));
   });
 

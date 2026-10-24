@@ -2,7 +2,7 @@ import { AIModel as AIModelContract, type AIModel as IAIModel } from '@memoflow/
 
 /**
  * AIModel 枚举类型
- * 
+ *
  * 【规范说明：枚举与常量对象规范】
  */
 

@@ -150,7 +150,6 @@ DesktopNotificationPreferenceStore
 
 不再通过 cloud Setting domain event 驱动本地窗口样式。
 
-
 ### 4.2 SETTING-9206 implementation checkpoint
 
 2026-09-10 起，Desktop notification device preference 已从 9204 的 in-memory owner 收敛为 local Profile-scoped persistence：

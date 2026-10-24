@@ -16,12 +16,12 @@ so this is a deterministic code→stable-message mapper rather than the vue-i18n
 
 Inventory moves **138 → 76**:
 
-| Rule                         | Before | After | Delta |
-| ---------------------------- | -----: | ----: | ----: |
-| `UI_RAW_RESULT_MESSAGE`      |     63 |     1 |   -62 |
-| `RAW_RESULT_MESSAGE_RETHROW` |     20 |    20 |     0 |
-| `DOMAIN_ERROR_SUBCLASS`      |     47 |    47 |     0 |
-| `FAILURE_MESSAGE_BRANCH`     |      8 |     8 |     0 |
+| Rule                         |  Before |  After |   Delta |
+| ---------------------------- | ------: | -----: | ------: |
+| `UI_RAW_RESULT_MESSAGE`      |      63 |      1 |     -62 |
+| `RAW_RESULT_MESSAGE_RETHROW` |      20 |     20 |       0 |
+| `DOMAIN_ERROR_SUBCLASS`      |      47 |     47 |       0 |
+| `FAILURE_MESSAGE_BRANCH`     |       8 |      8 |       0 |
 | **Total**                    | **138** | **76** | **-62** |
 
 Scanner: `passed (no new or expired production findings)`. 87 stale baseline entries await the
@@ -30,6 +30,7 @@ next baseline rewrite.
 ## 2. Shared helper
 
 `presentErrorMessage(error, fallbackMessage?)` in `packages/http-client/src/result-error.ts`:
+
 - `normalizeResultError` → code → `getDefaultResultErrorMessage(code)` (stable zh-CN for
   BAD_REQUEST/UNAUTHORIZED/FORBIDDEN/NOT_FOUND/CONFLICT/VALIDATION_ERROR/RATE_LIMITED/
   INTERNAL_ERROR/SERVICE_UNAVAILABLE/TIMEOUT/CANCELED/UNKNOWN).

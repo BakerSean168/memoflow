@@ -17,10 +17,7 @@ test.describe('Legacy database note mutation boundary', () => {
 
     const request = page.request;
 
-    await expectNotMounted(
-      request.get(`${API_CONFIG.FULL_URL}/repositories/current`, {
-      }),
-    );
+    await expectNotMounted(request.get(`${API_CONFIG.FULL_URL}/repositories/current`, {}));
     await expectNotMounted(
       request.post(`${API_CONFIG.FULL_URL}/repositories/legacy-repository/resources`, {
         data: { name: 'legacy.md', type: 'File', content: '# legacy' },
@@ -44,9 +41,7 @@ test.describe('Legacy database note mutation boundary', () => {
   });
 });
 
-async function expectNotMounted(
-  responsePromise: Promise<{ status(): number }>,
-): Promise<void> {
+async function expectNotMounted(responsePromise: Promise<{ status(): number }>): Promise<void> {
   const response = await responsePromise;
   expect(response.status()).toBe(404);
 }

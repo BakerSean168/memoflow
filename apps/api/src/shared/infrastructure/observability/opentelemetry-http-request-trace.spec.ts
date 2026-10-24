@@ -114,10 +114,12 @@ describe('OpenTelemetryHttpRequestTrace (opt-in)', () => {
       body: { catalogId: 'openrouter', apiKey: 'sk-provider-onboarding-secret' },
     } as unknown as Request;
     const span = new OpenTelemetryHttpRequestTrace().startSpan(request);
-    span.complete(observation({
-      method: 'POST',
-      routeTemplate: '/api/v1/ai/provider-connections/probe',
-    }));
+    span.complete(
+      observation({
+        method: 'POST',
+        routeTemplate: '/api/v1/ai/provider-connections/probe',
+      }),
+    );
 
     await flush();
     const serialized = JSON.stringify(exporter.getFinishedSpans()[0]!.attributes);

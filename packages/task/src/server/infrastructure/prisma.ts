@@ -19,10 +19,7 @@ import {
   TaskPlanPrismaRepository,
 } from './adapters/prisma';
 import { PrismaTaskGoalOutboxDispatchStore } from './adapters/prisma/prisma-task-goal-outbox-dispatch-store';
-import {
-  TaskGoalOutboxDispatcher,
-  type TaskGoalProgressHandler,
-} from '../application/outbox';
+import { TaskGoalOutboxDispatcher, type TaskGoalProgressHandler } from '../application/outbox';
 import { createTaskGoalOutboxRuntime } from './task-goal-outbox-runtime';
 import { createTaskScheduleProjectionSource } from './schedule-projection-source';
 import type { TaskScheduleProjectionSource } from '../../schedule-projection';
@@ -32,10 +29,9 @@ import type { TaskWriteTransactionRunner } from '../application/use-cases/comman
 
 export interface CreateTaskPrismaModuleOptions {
   readonly userTimeContextPort: UserTimeContextPort;
-    readonly goalReadPort?: TaskGoalMeasurementReadPort;
+  readonly goalReadPort?: TaskGoalMeasurementReadPort;
   readonly runtimeContributions?:
-    | TaskModuleRuntimeContribution
-    | readonly TaskModuleRuntimeContribution[];
+    TaskModuleRuntimeContribution | readonly TaskModuleRuntimeContribution[];
 }
 
 /**
@@ -75,11 +71,8 @@ export function createTaskPrismaModule(
   db: PrismaClient,
   options: CreateTaskPrismaModuleOptions,
 ): TaskModuleInstance {
-  const {
-    taskPlanRepository,
-    taskOccurrenceRepository,
-    taskWriteTransactionRunner,
-  } = createTaskPrismaRepositories(db);
+  const { taskPlanRepository, taskOccurrenceRepository, taskWriteTransactionRunner } =
+    createTaskPrismaRepositories(db);
 
   return createTaskModule({
     taskPlanRepository,
@@ -133,10 +126,7 @@ export function createTaskPrismaGoalOutboxRuntime(
   goalProgressHandler: TaskGoalProgressHandler,
 ): TaskModuleRuntimeContribution {
   return createTaskGoalOutboxRuntime(
-    new TaskGoalOutboxDispatcher(
-      new PrismaTaskGoalOutboxDispatchStore(db),
-      goalProgressHandler,
-    ),
+    new TaskGoalOutboxDispatcher(new PrismaTaskGoalOutboxDispatchStore(db), goalProgressHandler),
   );
 }
 

@@ -134,7 +134,10 @@ export const domainResolveAliases = [
   },
   {
     find: '@memoflow/database/prisma',
-    replacement: path.resolve(import.meta.dirname, './packages/database/src/generated/prisma/client.js'),
+    replacement: path.resolve(
+      import.meta.dirname,
+      './packages/database/src/generated/prisma/client.js',
+    ),
   },
   {
     find: '@memoflow/powersync-schema',
@@ -286,7 +289,10 @@ export const domainResolveAliases = [
   },
   {
     find: '@memoflow/schedule-orchestration',
-    replacement: path.resolve(import.meta.dirname, './packages/schedule-orchestration/src/index.ts'),
+    replacement: path.resolve(
+      import.meta.dirname,
+      './packages/schedule-orchestration/src/index.ts',
+    ),
   },
   {
     find: /^@memoflow\/cloud-auth\/(.+)/,

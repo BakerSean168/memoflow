@@ -1,6 +1,6 @@
 /**
  * @memoflow/ui-core
- * 
+ *
  * Framework-agnostic headless UI logic.
  * This package contains pure TypeScript logic with zero framework dependencies.
  * It can be used by Vue, React, or any other framework through adapter packages.
@@ -24,11 +24,7 @@ export {
 } from './form/password';
 
 // Loading state
-export {
-  createLoadingStore,
-  type LoadingState,
-  type LoadingStore,
-} from './loading/create-loading';
+export { createLoadingStore, type LoadingState, type LoadingStore } from './loading/create-loading';
 
 // Message/Snackbar
 export {
@@ -40,11 +36,7 @@ export {
 } from './message/create-message';
 
 // Dialog
-export {
-  createDialogStore,
-  type DialogState,
-  type DialogStore,
-} from './dialog/create-dialog';
+export { createDialogStore, type DialogState, type DialogStore } from './dialog/create-dialog';
 
 // Color picker
 export {

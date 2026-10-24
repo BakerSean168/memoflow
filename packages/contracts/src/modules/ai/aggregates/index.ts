@@ -4,9 +4,7 @@
 
 export type { AIConversationClientDTO } from './ai-conversation-client';
 
-export type {
-  AIConversationServerDTO,
-} from './ai-conversation-server';
+export type { AIConversationServerDTO } from './ai-conversation-server';
 
 export type {
   AIProviderConfigClientDTO,

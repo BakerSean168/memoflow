@@ -7,7 +7,7 @@ const meta = {
   component: Textarea,
   tags: ['autodocs'],
   argTypes: {
-    /* @ts-ignore */ placeholder: { control: "text" },
+    /* @ts-ignore */ placeholder: { control: 'text' },
     disabled: { control: 'boolean' },
   },
   args: { ...({} as any), placeholder: 'Type your message here.' },
@@ -16,9 +16,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = { ...({} as any), };
+export const Default: Story = { ...({} as any) };
 
-export const WithLabel: Story = { ...({} as any),
+export const WithLabel: Story = {
+  ...({} as any),
   render: () => ({
     components: { Textarea, Label },
     template: `
@@ -30,10 +31,12 @@ export const WithLabel: Story = { ...({} as any),
   }),
 };
 
-export const Disabled: Story = { ...({} as any),
-  args: { ...({} as any),  placeholder: 'Disabled textarea' },
+export const Disabled: Story = {
+  ...({} as any),
+  args: { ...({} as any), placeholder: 'Disabled textarea' },
 };
 
-export const WithValue: Story = { ...({} as any),
+export const WithValue: Story = {
+  ...({} as any),
   args: { ...({} as any), modelValue: 'This is some pre-filled content in the textarea.' },
 };

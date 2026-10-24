@@ -329,7 +329,9 @@ describe('GoalPortableCapability', () => {
   });
 
   it('dry-run resolves label references already bound by labels portability', async () => {
-    const api = { getGoal: vi.fn().mockResolvedValue(error('NOT_FOUND', 'missing')) } as unknown as GoalApplicationPort;
+    const api = {
+      getGoal: vi.fn().mockResolvedValue(error('NOT_FOUND', 'missing')),
+    } as unknown as GoalApplicationPort;
     const { context } = referenceContext();
     const capability = new GoalPortableCapability(api, portabilityFromApi(api));
 
@@ -419,7 +421,9 @@ describe('GoalPortableCapability', () => {
   });
 
   it('dry-run keeps predicted Goal and Key Result bindings operation-local', async () => {
-    const api = { getGoal: vi.fn().mockResolvedValue(error('NOT_FOUND', 'missing')) } as unknown as GoalApplicationPort;
+    const api = {
+      getGoal: vi.fn().mockResolvedValue(error('NOT_FOUND', 'missing')),
+    } as unknown as GoalApplicationPort;
     const capability = new GoalPortableCapability(api, portabilityFromApi(api));
 
     const first = referenceContext();

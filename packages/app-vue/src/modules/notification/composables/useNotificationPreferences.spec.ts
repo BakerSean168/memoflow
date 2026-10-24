@@ -108,7 +108,10 @@ describe('useNotificationPreferences vNext hierarchy', () => {
   it('reads and writes global delivery channels through globalChannels only', async () => {
     service.getPreferences.mockResolvedValue(ok(basePreference as never));
     service.updatePreferences.mockResolvedValue(
-      ok({ ...basePreference, globalChannels: { InApp: true, Push: false, Email: false } } as never),
+      ok({
+        ...basePreference,
+        globalChannels: { InApp: true, Push: false, Email: false },
+      } as never),
     );
 
     const api = mountComposable();

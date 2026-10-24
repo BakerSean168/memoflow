@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
-import { DataPortabilityController, ServerHeldDataDisclosureController } from './data-portability.controller';
+import {
+  DataPortabilityController,
+  ServerHeldDataDisclosureController,
+} from './data-portability.controller';
 
 const context: ExecutionContext = {
   requestId: 'req-data-portability-1',
@@ -67,11 +70,19 @@ describe('DataPortabilityController V3 surface', () => {
     const controller = new DataPortabilityController(api);
     const content = '{"format":"memoflow.user-data-export","schemaVersion":3}';
 
-    await expect(controller.exportPortableDataV3({ capabilities: ['preferences'] }, context)).resolves.toMatchObject({ ok: true });
-    await expect(controller.dryRunPortableDataV3({ content }, context)).resolves.toMatchObject({ ok: true });
-    await expect(controller.applyPortableDataV3({ content }, context)).resolves.toMatchObject({ ok: true });
+    await expect(
+      controller.exportPortableDataV3({ capabilities: ['preferences'] }, context),
+    ).resolves.toMatchObject({ ok: true });
+    await expect(controller.dryRunPortableDataV3({ content }, context)).resolves.toMatchObject({
+      ok: true,
+    });
+    await expect(controller.applyPortableDataV3({ content }, context)).resolves.toMatchObject({
+      ok: true,
+    });
 
-    expect(api.exportPortableDataV3).toHaveBeenCalledWith('identity-1', { capabilities: ['preferences'] });
+    expect(api.exportPortableDataV3).toHaveBeenCalledWith('identity-1', {
+      capabilities: ['preferences'],
+    });
     expect(api.dryRunPortableDataV3).toHaveBeenCalledWith('identity-1', { content });
     expect(api.applyPortableDataV3).toHaveBeenCalledWith('identity-1', { content });
   });
@@ -84,7 +95,9 @@ describe('DataPortabilityController V3 surface', () => {
     };
     const controller = new DataPortabilityController(api);
 
-    await expect(controller.exportPortableDataV3({ include: ['settings'] }, context)).resolves.toMatchObject({
+    await expect(
+      controller.exportPortableDataV3({ include: ['settings'] }, context),
+    ).resolves.toMatchObject({
       ok: false,
       error: { code: 'VALIDATION_ERROR' },
     });

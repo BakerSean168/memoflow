@@ -37,7 +37,6 @@ describe('CloudSessionStore', () => {
     await expect(store.getValidToken('profile-1')).resolves.toBe('token-1');
   });
 
-
   it('persists sessions through async safeStorage when synchronous encryption is unavailable', async () => {
     isEncryptionAvailable.mockReturnValue(false);
     const store = new CloudSessionStore(rootDir);

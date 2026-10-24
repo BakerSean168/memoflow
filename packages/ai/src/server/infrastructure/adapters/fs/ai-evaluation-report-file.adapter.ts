@@ -3,10 +3,7 @@ import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import {
-  AIEvaluationReportSchema,
-  type GetAIEvaluationOverviewRes,
-} from '@memoflow/contracts/ai';
+import { AIEvaluationReportSchema, type GetAIEvaluationOverviewRes } from '@memoflow/contracts/ai';
 
 import type {
   AIEvaluationHistoryRecord,
@@ -74,9 +71,7 @@ export class AIEvaluationReportFileAdapter implements IAIEvaluationReportPort {
     this.defaultHistoryLimit = options.defaultHistoryLimit ?? DEFAULT_HISTORY_LIMIT;
   }
 
-  async getOverview(
-    input: GetAIEvaluationOverviewInput = {},
-  ): Promise<GetAIEvaluationOverviewRes> {
+  async getOverview(input: GetAIEvaluationOverviewInput = {}): Promise<GetAIEvaluationOverviewRes> {
     const historyLimit = input.historyLimit ?? this.defaultHistoryLimit;
     const [deterministicLatest, liveLatest, deterministicHistory, liveHistory] = await Promise.all([
       this.readOptionalReport(path.join(this.reportsRoot, 'latest.json')),

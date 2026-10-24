@@ -17,7 +17,8 @@ function makeSourceRoot({ semanticCore = 'domain', omit = [] } = {}) {
     for (const dir of ['application', 'transport', 'infrastructure', semanticCore]) {
       if (!omit.includes(`server/${dir}`)) mkdirSync(join(src, 'server', dir), { recursive: true });
     }
-    if (!omit.includes('server/index.ts')) writeFileSync(join(src, 'server', 'index.ts'), 'export {};\n');
+    if (!omit.includes('server/index.ts'))
+      writeFileSync(join(src, 'server', 'index.ts'), 'export {};\n');
   }
   return src;
 }

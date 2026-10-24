@@ -594,11 +594,11 @@ product facts. The owner payloads and capabilities are registered by both API
 and Desktop with identical semantic keys, empty dependency sets, and stable
 operation-local reference ordering:
 
-| Owner capability | Portable product truth | Explicitly non-portable |
-| --- | --- | --- |
-| `routines@3` | Definition/Profile/Membership, Trigger, TemporaryOverride, durable Occurrence resolution facts, and typed Interaction action/timing facts | RuntimeContext, scheduler reliability/source revision, and arbitrary interaction metadata |
-| `schedules@3` | canonical CalendarEntry Timed/AllDay range, title/description/location/attendees | occupancy/conflict projections, ScheduledInvocation/InvocationAttempt, rebuild/outbox/audit operations |
-| `notifications@3` | Notification Fact/Inbox lifecycle, typed Interaction, and safe presentation hints (`icon`/`image`/`color`) | delivery outbox/decision/receipt/dead-letter/audit state, sound/badge/data, and device-only state |
+| Owner capability  | Portable product truth                                                                                                                    | Explicitly non-portable                                                                                |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `routines@3`      | Definition/Profile/Membership, Trigger, TemporaryOverride, durable Occurrence resolution facts, and typed Interaction action/timing facts | RuntimeContext, scheduler reliability/source revision, and arbitrary interaction metadata              |
+| `schedules@3`     | canonical CalendarEntry Timed/AllDay range, title/description/location/attendees                                                          | occupancy/conflict projections, ScheduledInvocation/InvocationAttempt, rebuild/outbox/audit operations |
+| `notifications@3` | Notification Fact/Inbox lifecycle, typed Interaction, and safe presentation hints (`icon`/`image`/`color`)                                | delivery outbox/decision/receipt/dead-letter/audit state, sound/badge/data, and device-only state      |
 
 The capabilities validate owner schemas, bind `PortableCapabilityExecutionContext`
 references, use owner/application read seams, and provide deterministic dry-run

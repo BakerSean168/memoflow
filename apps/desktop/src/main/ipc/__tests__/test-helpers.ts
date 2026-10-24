@@ -13,41 +13,43 @@ import { expect } from 'vitest';
  */
 export function createHandlerCapture() {
   const handlers = new Map<string, (...args: unknown[]) => Promise<unknown>>();
-  
+
   return {
     handlers,
-    
+
     /**
      * 设置 ipcMain.handle 的 mock 实现来捕获注册
      */
     setup() {
       const { ipcMain } = require('electron');
-      ipcMain.handle.mockImplementation((channel: string, handler: (...args: unknown[]) => Promise<unknown>) => {
-        handlers.set(channel, handler);
-      });
+      ipcMain.handle.mockImplementation(
+        (channel: string, handler: (...args: unknown[]) => Promise<unknown>) => {
+          handlers.set(channel, handler);
+        },
+      );
     },
-    
+
     /**
      * 获取已注册的处理器
      */
     get(channel: string) {
       return handlers.get(channel);
     },
-    
+
     /**
      * 检查通道是否已注册
      */
     has(channel: string) {
       return handlers.has(channel);
     },
-    
+
     /**
      * 获取所有已注册的通道
      */
     channels() {
       return Array.from(handlers.keys());
     },
-    
+
     /**
      * 清除所有注册
      */
@@ -62,7 +64,7 @@ export function createHandlerCapture() {
  */
 export async function expectAsyncError(
   fn: () => Promise<unknown>,
-  errorMessage?: string | RegExp
+  errorMessage?: string | RegExp,
 ): Promise<void> {
   let error: Error | null = null;
   try {
@@ -70,7 +72,7 @@ export async function expectAsyncError(
   } catch (e) {
     error = e as Error;
   }
-  
+
   expect(error).not.toBeNull();
   if (errorMessage) {
     if (typeof errorMessage === 'string') {
@@ -122,7 +124,7 @@ export { delay } from '@memoflow/utils/frontend';
  */
 export function createCallOrderTracker() {
   const calls: string[] = [];
-  
+
   return {
     track(name: string) {
       return (..._args: unknown[]) => {

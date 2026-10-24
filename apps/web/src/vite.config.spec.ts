@@ -133,13 +133,16 @@ describe('web Vite development configuration', () => {
       expect(typeof hotUpdate).toBe('function');
       if (typeof hotUpdate !== 'function') return;
 
-      const result = hotUpdate.call({} as never, {
-        type: 'update',
-        file: '/tmp/memoflow-bundled-dev-probe.vue',
-        modules: [],
-        timestamp: Date.now(),
-        read: async () => '',
-      } as never);
+      const result = hotUpdate.call(
+        {} as never,
+        {
+          type: 'update',
+          file: '/tmp/memoflow-bundled-dev-probe.vue',
+          modules: [],
+          timestamp: Date.now(),
+          read: async () => '',
+        } as never,
+      );
 
       expect(result).toBeUndefined();
     } finally {

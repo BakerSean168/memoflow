@@ -30,7 +30,10 @@ export class GetConversationUseCase {
       return ok(conversation);
     } catch (err) {
       logger.error('Failed to get conversation', { error: err, conversationId });
-      return error('INTERNAL_ERROR', err instanceof Error ? err.message : 'Failed to get conversation');
+      return error(
+        'INTERNAL_ERROR',
+        err instanceof Error ? err.message : 'Failed to get conversation',
+      );
     }
   }
 }

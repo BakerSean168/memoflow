@@ -20,6 +20,7 @@ updated: 2025-12-03
 
 > 更新说明（2026-05-19）：本文档保留历史演进上下文，不再反映当前 desktop 的本地存储真值。
 > 当前实现请优先查看：
+>
 > - `apps/desktop/src/main/profile/`
 > - `apps/desktop/src/main/paths/`
 > - [ADR-039: Cloud Auth 与 Local Profile Access 分离](./ADR-039-cloud-auth-and-local-profile-access.md)

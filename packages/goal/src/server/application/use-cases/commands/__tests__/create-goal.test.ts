@@ -36,7 +36,9 @@ describe('CreateGoalUseCase', () => {
   it('refuses a fenced native AI create without a transaction-capable repository', async () => {
     const input = aCreateInput({
       nativeAiLease: {
-        runId: 'goal-run-1', token: '11111111-1111-4111-8111-111111111111', fence: 1,
+        runId: 'goal-run-1',
+        token: '11111111-1111-4111-8111-111111111111',
+        fence: 1,
       },
     });
     const outcome = await useCase.execute(input, aContext());
@@ -48,17 +50,21 @@ describe('CreateGoalUseCase', () => {
   it('rejects a stale fence inside the Goal write transaction, before any owner mutation', async () => {
     const check = vi.fn().mockResolvedValue(false);
     const runner = {
-      run: vi.fn(async (work: (context: unknown) => Promise<unknown>) => work({
-        goalRepository: goalRepo,
-        goalRecordRepository: {},
-        assertNativeAiLease: check,
-      })),
+      run: vi.fn(async (work: (context: unknown) => Promise<unknown>) =>
+        work({
+          goalRepository: goalRepo,
+          goalRecordRepository: {},
+          assertNativeAiLease: check,
+        }),
+      ),
     };
     useCase = new CreateGoalUseCase(goalRepo, new GoalPolicy(), runner as never);
     const input = aCreateInput({
       id: 'IGoalId_550e8400-e29b-41d4-a716-446655440011',
       nativeAiLease: {
-        runId: 'goal-run-1', token: '11111111-1111-4111-8111-111111111111', fence: 7,
+        runId: 'goal-run-1',
+        token: '11111111-1111-4111-8111-111111111111',
+        fence: 7,
       },
     });
     const outcome = await useCase.execute(input, aContext());
@@ -71,17 +77,21 @@ describe('CreateGoalUseCase', () => {
   it('saves under the same valid fenced transaction and retains deterministic idempotency', async () => {
     const check = vi.fn().mockResolvedValue(true);
     const runner = {
-      run: vi.fn(async (work: (context: unknown) => Promise<unknown>) => work({
-        goalRepository: goalRepo,
-        goalRecordRepository: {},
-        assertNativeAiLease: check,
-      })),
+      run: vi.fn(async (work: (context: unknown) => Promise<unknown>) =>
+        work({
+          goalRepository: goalRepo,
+          goalRecordRepository: {},
+          assertNativeAiLease: check,
+        }),
+      ),
     };
     useCase = new CreateGoalUseCase(goalRepo, new GoalPolicy(), runner as never);
     const input = aCreateInput({
       id: 'IGoalId_550e8400-e29b-41d4-a716-446655440011',
       nativeAiLease: {
-        runId: 'goal-run-1', token: '11111111-1111-4111-8111-111111111111', fence: 7,
+        runId: 'goal-run-1',
+        token: '11111111-1111-4111-8111-111111111111',
+        fence: 7,
       },
     });
     const first = await useCase.execute(input, aContext());

@@ -26,10 +26,7 @@ export class GetTaskPlanUseCase {
     private readonly now: () => number = Date.now,
   ) {}
 
-  async execute(
-    id: string,
-    identityId: string,
-  ): Promise<Result<GetTaskPlanRes>> {
+  async execute(id: string, identityId: string): Promise<Result<GetTaskPlanRes>> {
     const plan = await this.planRepository.findByIdForIdentity(identityId, id);
     if (!plan) {
       return ok(null);

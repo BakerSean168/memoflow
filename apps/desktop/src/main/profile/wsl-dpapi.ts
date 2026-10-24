@@ -91,7 +91,13 @@ export class WindowsUserDpapiProvider {
     return new Promise<Buffer>((resolve, reject) => {
       const child = spawn(
         powershellPath,
-        ['-NoLogo', '-NoProfile', '-NonInteractive', '-EncodedCommand', createPowerShellEncodedCommand(mode)],
+        [
+          '-NoLogo',
+          '-NoProfile',
+          '-NonInteractive',
+          '-EncodedCommand',
+          createPowerShellEncodedCommand(mode),
+        ],
         { windowsHide: true },
       );
       const stdout: Buffer[] = [];

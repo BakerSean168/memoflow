@@ -9,11 +9,7 @@
 
 import type { Result } from '@memoflow/contracts/result';
 import { error, ok } from '@memoflow/contracts/result';
-import type {
-  IWalletRepository,
-  WalletAccountDTO,
-  WalletTransactionDTO,
-} from '../../../domain';
+import type { IWalletRepository, WalletAccountDTO, WalletTransactionDTO } from '../../../domain';
 import { WalletAccountNotFoundError } from '../../../domain/errors/wallet-account-not-found-error';
 
 export class CreateWalletAccountUseCase {
@@ -63,10 +59,12 @@ export class RecordWalletTransactionUseCase {
 export class ListWalletUseCase {
   constructor(private readonly repository: IWalletRepository) {}
 
-  async execute(identityId: string): Promise<Result<{
-    accounts: WalletAccountDTO[];
-    transactions: WalletTransactionDTO[];
-  }>> {
+  async execute(identityId: string): Promise<
+    Result<{
+      accounts: WalletAccountDTO[];
+      transactions: WalletTransactionDTO[];
+    }>
+  > {
     const [accounts, transactions] = await Promise.all([
       this.repository.listAccounts(identityId),
       this.repository.listTransactions(identityId, 50),

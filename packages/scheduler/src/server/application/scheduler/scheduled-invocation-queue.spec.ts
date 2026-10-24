@@ -88,7 +88,11 @@ describe('ScheduledInvocationQueue canonical runtime', () => {
     const item = invocation();
     const repo = repository([item]);
     const handler = { execute: vi.fn().mockResolvedValue({ status: 'succeeded' as const }) };
-    const queue = new ScheduledInvocationQueue({ repository: repo, handlerRegistry: handler, timer });
+    const queue = new ScheduledInvocationQueue({
+      repository: repo,
+      handlerRegistry: handler,
+      timer,
+    });
 
     await queue.start();
     expect(repo.recoverExpiredClaims).toHaveBeenCalledWith(1_000, 1_000);
@@ -130,7 +134,11 @@ describe('ScheduledInvocationQueue canonical runtime', () => {
         })
         .mockResolvedValueOnce({ status: 'succeeded' as const }),
     };
-    const queue = new ScheduledInvocationQueue({ repository: repo, handlerRegistry: handler, timer });
+    const queue = new ScheduledInvocationQueue({
+      repository: repo,
+      handlerRegistry: handler,
+      timer,
+    });
 
     await queue.start();
     timer.tick(0);

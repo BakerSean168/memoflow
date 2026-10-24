@@ -147,16 +147,16 @@ packages/app-vue/src/modules/setting/composables/useDataPortability.ts
 
 推荐边界：
 
-| 层 | 责任 |
-| --- | --- |
-| `contracts` | 请求/响应 DTO、portable schema、envelope validation |
-| `application-server` | export/import use case、projection、refMap、import ordering |
-| `application-server/import-store` | 中立写入 port 和 Prisma implementation |
-| `infrastructure-server/powersync` | Desktop PowerSync read/write adapters |
-| `api` | API composition root，只组装 Prisma |
-| `electron-entry` | Electron composition root，只组装 PowerSync |
-| `infrastructure-client/http` | Web/API client adapter |
-| `infrastructure-client/ipc` | Desktop renderer IPC client adapter |
+| 层                                | 责任                                                        |
+| --------------------------------- | ----------------------------------------------------------- |
+| `contracts`                       | 请求/响应 DTO、portable schema、envelope validation         |
+| `application-server`              | export/import use case、projection、refMap、import ordering |
+| `application-server/import-store` | 中立写入 port 和 Prisma implementation                      |
+| `infrastructure-server/powersync` | Desktop PowerSync read/write adapters                       |
+| `api`                             | API composition root，只组装 Prisma                         |
+| `electron-entry`                  | Electron composition root，只组装 PowerSync                 |
+| `infrastructure-client/http`      | Web/API client adapter                                      |
+| `infrastructure-client/ipc`       | Desktop renderer IPC client adapter                         |
 
 核心原则：
 
@@ -183,17 +183,17 @@ export function createPowerSyncDataPortabilityDependencies(
 
 可以优先复用现有 PowerSync repositories：
 
-| 模块 | 可复用来源 | 说明 |
-| --- | --- | --- |
-| goal | `@memoflow/goal/api` 暴露的 PowerSync repositories | `findByIdentityId(..., { includeChildren })` 已存在 |
-| task | `@memoflow/task/api` 暴露的 PowerSync repositories | 需确认 dependency repository 是否完整导出 |
-| reminder | `@memoflow/reminder/api` PowerSync repositories | 已有 template/group/response/preference |
-| repository | `@memoflow/repository/api` PowerSync repositories | repository/folder/resource 可复用 |
-| notification | `@memoflow/notification/api` PowerSync repositories | preference 可复用 |
-| setting | `@memoflow/setting/api` 或 infrastructure export | user setting 可复用 |
-| editor | `@memoflow/editor/api` 或 direct infrastructure export | workspace/session/group/tab 可复用 |
-| schedule | `@memoflow/schedule/api` PowerSync repositories | schedule 和 schedule task 可复用 |
-| ai | 若没有完整 PowerSync repository，则写最小 SQL read adapter | 只读 conversation + messages |
+| 模块         | 可复用来源                                                 | 说明                                                |
+| ------------ | ---------------------------------------------------------- | --------------------------------------------------- |
+| goal         | `@memoflow/goal/api` 暴露的 PowerSync repositories         | `findByIdentityId(..., { includeChildren })` 已存在 |
+| task         | `@memoflow/task/api` 暴露的 PowerSync repositories         | 需确认 dependency repository 是否完整导出           |
+| reminder     | `@memoflow/reminder/api` PowerSync repositories            | 已有 template/group/response/preference             |
+| repository   | `@memoflow/repository/api` PowerSync repositories          | repository/folder/resource 可复用                   |
+| notification | `@memoflow/notification/api` PowerSync repositories        | preference 可复用                                   |
+| setting      | `@memoflow/setting/api` 或 infrastructure export           | user setting 可复用                                 |
+| editor       | `@memoflow/editor/api` 或 direct infrastructure export     | workspace/session/group/tab 可复用                  |
+| schedule     | `@memoflow/schedule/api` PowerSync repositories            | schedule 和 schedule task 可复用                    |
+| ai           | 若没有完整 PowerSync repository，则写最小 SQL read adapter | 只读 conversation + messages                        |
 
 如果某个模块的 PowerSync repository 没有被 public API 暴露，不要从 package internal path import。应优先让对应 package 的 `api` entry 明确导出该 PowerSync repository，或者在 `data-portability` 内写基于 `IElectronDatabase` 的最小 SQL adapter。
 
@@ -236,13 +236,13 @@ renderer 继续由 `useDataPortability()` 调用 `system:userFiles:saveText` 保
 当前 `ImportUserDataUseCase` 构造函数接收 `PrismaClient`：
 
 ```ts
-new ImportUserDataUseCase(prisma)
+new ImportUserDataUseCase(prisma);
 ```
 
 建议改为：
 
 ```ts
-new ImportUserDataUseCase(importStore)
+new ImportUserDataUseCase(importStore);
 ```
 
 新增 port：
@@ -331,9 +331,7 @@ application-server/import-store/prisma-data-portability-import-store.ts
 这一步完成后，API 端行为应完全不变：
 
 ```ts
-const importUseCase = new ImportUserDataUseCase(
-  new PrismaDataPortabilityImportStore(db),
-);
+const importUseCase = new ImportUserDataUseCase(new PrismaDataPortabilityImportStore(db));
 ```
 
 ### 7.5 PowerSync implementation
@@ -382,16 +380,16 @@ await tx.execute(
 
 ### 7.6 PowerSync 写入字段映射原则
 
-| portable/application 字段 | PowerSync 写入 |
-| --- | --- |
-| `identityId` | `identity_id` |
+| portable/application 字段 | PowerSync 写入                   |
+| ------------------------- | -------------------------------- |
+| `identityId`              | `identity_id`                    |
 | `createdAt` / `updatedAt` | `created_at` / `updated_at` text |
-| `deletedAt` | 通常写 `null` |
-| object/array JSON | `JSON.stringify(value)` |
-| boolean | `1` / `0` |
-| missing version | `1` |
-| text nullable | `null` |
-| focused goal ids | `focused_goal_ids` JSON string |
+| `deletedAt`               | 通常写 `null`                    |
+| object/array JSON         | `JSON.stringify(value)`          |
+| boolean                   | `1` / `0`                        |
+| missing version           | `1`                              |
+| text nullable             | `null`                           |
+| focused goal ids          | `focused_goal_ids` JSON string   |
 
 不要导入或写入：
 
@@ -470,7 +468,7 @@ export const DataPortabilityElectronModule: IElectronModule = {
 `tsup.config.ts` 增加：
 
 ```ts
-'src/electron-entry/index.ts'
+'src/electron-entry/index.ts';
 ```
 
 ### 8.3 desktop main 注册
@@ -701,15 +699,15 @@ Desktop 手工验证清单：
 
 ## 12. 风险与缓解
 
-| 风险 | 说明 | 缓解 |
-| --- | --- | --- |
-| Prisma 字段名和 PowerSync 列名不同 | API importer 现在用 camelCase，PowerSync 需要 snake_case | 通过 import store 分层映射 |
-| 半导入 | 多表写入过程中失败 | PowerSync `writeTransaction()` 包裹整次导入 |
-| 同步副作用 | 本地导入后可能同步到服务端 | 只写当前 identity，保持 append-create-like |
-| 字段缺省不一致 | PowerSync 表可能需要 version/stats 等字段 | store 统一默认值：version=1、stats=`{}` |
-| public surface 假能力 | IPC handler 注册但不可用 | 阶段 2/3 必须真实执行 use case |
-| package boundary 违规 | 从其他包 internal path import PowerSync repository | 优先使用 public `api` entry，必要时补对应 package export |
-| 恶意导入 | JSON 中嵌套身份和凭据字段 | 已有 recursive banned-key validation，继续保留 |
+| 风险                               | 说明                                                     | 缓解                                                     |
+| ---------------------------------- | -------------------------------------------------------- | -------------------------------------------------------- |
+| Prisma 字段名和 PowerSync 列名不同 | API importer 现在用 camelCase，PowerSync 需要 snake_case | 通过 import store 分层映射                               |
+| 半导入                             | 多表写入过程中失败                                       | PowerSync `writeTransaction()` 包裹整次导入              |
+| 同步副作用                         | 本地导入后可能同步到服务端                               | 只写当前 identity，保持 append-create-like               |
+| 字段缺省不一致                     | PowerSync 表可能需要 version/stats 等字段                | store 统一默认值：version=1、stats=`{}`                  |
+| public surface 假能力              | IPC handler 注册但不可用                                 | 阶段 2/3 必须真实执行 use case                           |
+| package boundary 违规              | 从其他包 internal path import PowerSync repository       | 优先使用 public `api` entry，必要时补对应 package export |
+| 恶意导入                           | JSON 中嵌套身份和凭据字段                                | 已有 recursive banned-key validation，继续保留           |
 
 ## 13. 推荐提交切分
 

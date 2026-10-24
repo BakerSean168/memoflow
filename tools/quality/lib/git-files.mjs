@@ -4,13 +4,36 @@ import path from 'node:path';
 
 /** File extensions Prettier can format in this repository. */
 export const PRETTIER_EXTENSIONS = new Set([
-  '.ts', '.tsx', '.mts', '.cts', '.js', '.mjs', '.cjs', '.jsx',
-  '.vue', '.json', '.md', '.css', '.scss', '.less', '.html', '.yml', '.yaml',
+  '.ts',
+  '.tsx',
+  '.mts',
+  '.cts',
+  '.js',
+  '.mjs',
+  '.cjs',
+  '.jsx',
+  '.vue',
+  '.json',
+  '.md',
+  '.css',
+  '.scss',
+  '.less',
+  '.html',
+  '.yml',
+  '.yaml',
 ]);
 
 /** File extensions ESLint can lint in this repository. */
 export const ESLINT_EXTENSIONS = new Set([
-  '.ts', '.tsx', '.mts', '.cts', '.js', '.mjs', '.cjs', '.jsx', '.vue',
+  '.ts',
+  '.tsx',
+  '.mts',
+  '.cts',
+  '.js',
+  '.mjs',
+  '.cjs',
+  '.jsx',
+  '.vue',
 ]);
 
 function git(root, args) {
@@ -64,7 +87,8 @@ export function listChangedFiles(root, base, head = 'HEAD') {
   for (const change of listWorkingTreeChanges(root)) {
     if (change.status === 'D') byPath.set(change.path, change);
     else if (!byPath.has(change.path)) byPath.set(change.path, change);
-    else if (change.oldPath) byPath.set(change.path, { ...byPath.get(change.path), oldPath: change.oldPath });
+    else if (change.oldPath)
+      byPath.set(change.path, { ...byPath.get(change.path), oldPath: change.oldPath });
   }
   return [...byPath.values()];
 }

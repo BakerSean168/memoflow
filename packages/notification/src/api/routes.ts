@@ -265,7 +265,9 @@ export function registerNotificationRoutes(
       method: 'post',
       path: '/actions',
       summary: '执行类型化通知动作',
-      request: { body: { content: { 'application/json': { schema: ExecuteNotificationActionSchema } } } },
+      request: {
+        body: { content: { 'application/json': { schema: ExecuteNotificationActionSchema } } },
+      },
       responses: {
         200: successResponse(ExecuteNotificationActionResponseSchema, '动作已记录'),
         404: errorResponse('通知或动作不存在'),
@@ -532,8 +534,14 @@ export function registerNotificationRoutes(
       path: '/:id/unread',
       summary: '标记通知为未读',
       request: { params: MarkNotificationUnreadInvocationSchema.shape.params },
-      responses: { 200: successResponse(NotificationResponseSchema, '操作成功'), 404: errorResponse('通知不存在') },
-      validation: { schema: MarkNotificationUnreadInvocationSchema, projectInput: (req) => ({ params: req.params }) },
+      responses: {
+        200: successResponse(NotificationResponseSchema, '操作成功'),
+        404: errorResponse('通知不存在'),
+      },
+      validation: {
+        schema: MarkNotificationUnreadInvocationSchema,
+        projectInput: (req) => ({ params: req.params }),
+      },
     },
     [auth],
     (data, ctx) => controller.markAsUnread(data.params.id, ctx),
@@ -546,8 +554,14 @@ export function registerNotificationRoutes(
       path: '/:id/archive',
       summary: '归档通知',
       request: { params: ArchiveNotificationInvocationSchema.shape.params },
-      responses: { 200: successResponse(NotificationResponseSchema, '操作成功'), 404: errorResponse('通知不存在') },
-      validation: { schema: ArchiveNotificationInvocationSchema, projectInput: (req) => ({ params: req.params }) },
+      responses: {
+        200: successResponse(NotificationResponseSchema, '操作成功'),
+        404: errorResponse('通知不存在'),
+      },
+      validation: {
+        schema: ArchiveNotificationInvocationSchema,
+        projectInput: (req) => ({ params: req.params }),
+      },
     },
     [auth],
     (data, ctx) => controller.archive(data.params.id, ctx),
@@ -560,8 +574,14 @@ export function registerNotificationRoutes(
       path: '/:id/restore',
       summary: '恢复通知',
       request: { params: RestoreNotificationInvocationSchema.shape.params },
-      responses: { 200: successResponse(NotificationResponseSchema, '操作成功'), 404: errorResponse('通知不存在') },
-      validation: { schema: RestoreNotificationInvocationSchema, projectInput: (req) => ({ params: req.params }) },
+      responses: {
+        200: successResponse(NotificationResponseSchema, '操作成功'),
+        404: errorResponse('通知不存在'),
+      },
+      validation: {
+        schema: RestoreNotificationInvocationSchema,
+        projectInput: (req) => ({ params: req.params }),
+      },
     },
     [auth],
     (data, ctx) => controller.restore(data.params.id, ctx),

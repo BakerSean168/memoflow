@@ -3,14 +3,13 @@
 > **2026-10-03 GOV-7903 / ADR-113:** Product Governance package、Rule/RuleRevision、UI 与 `/governance/**` 已退休；本文相关内容仅为历史设计记录，不再作为实施输入，也不得并入 Knowledge。当前 Governance 仅指 repository-native Engineering Governance。
 
 > **⚠️ Core vNext Goal/Task 边界更新（2026-09-07）**：GoalFolder、Goal Focus/Comparison、TaskFolder、Task Dependency/DAG/CriticalPath 已按 ADR-053/054 与 Core vNext 从运行时、公开契约和产品 UI 退役。本文中仍出现这些名称的页面清单、数据字段、组件或交互描述均是 **vNext 之前的历史快照，不得作为当前实施依据**；当前产品真值以 `docs/product/modules/goal.md`、`docs/product/modules/task.md` 与相关 ADR 为准；Core vNext 的完整实施证据已归档至 `docs/plan/archive/2026-08-25-core-vnext-orchestration.md`。
->
-
 
 > **📌 更新（2026-07-12）**：重构方向已改为 ChatGPT 桌面式壳（AI 优先三态布局），见 `docs/UI_REDESIGN_V2_PLAN.md`。本文 §9（新信息架构）与 §10（新页面布局）的建议**已被 V2 取代**；§1–§8（现状/用户/页面分析/操作路径/问题清单）、§11（保留资产）、§12（风险）、§13（Obsidian vault 专项）继续有效。
 >
 > **📌 决策固化（2026-07-16）**：§13 的 Obsidian Vault 方向已由 [ADR-034](./architecture/adr/ADR-034-obsidian-vault-repository.md) 正式采纳并在后续讨论中调整为“本地 Vault + 可选 GitHub private repository”。涉及登录、事实源、同步、Web 创建和 AI 写入路径时以 ADR-034 为准；本文 §13 的 Desktop 自定义上传、Web 永久只读和固定 `00-inbox` 只保留为历史调研方案。
 >
 > **⚠️ 知识模块现状 supersede（2026-07-21；残留 301 澄清）**：ADR-034 实施后，下列 Brief 现状描述**已退役，不得当作当前架构**：
+>
 > - `ResourceClientDTO` / `RepositoryClientDTO` 与 DB Resource CRUD（contracts 已删除；创建面为 `KnowledgeNotePersistedRef`）
 > - `/note/:id`、`EditorLinearView`、`@memoflow/editor`、旧 `RepositoryServiceLike` / `useRepository` CRUD 端口形态
 > - “在 Web/App 内编辑已有笔记”路径（首期关闭；Desktop 主编辑在 Obsidian）
@@ -31,13 +30,13 @@
 
 **知行 (MemoFlow)**（`packages/assets/src/brand.ts`）是一个 **AI 优先的个人效能操作系统**，覆盖五个能力域：
 
-| 能力域 | 模块                                 | 核心模型                                                                          |
-| ------ | ------------------------------------ | --------------------------------------------------------------------------------- |
-| 意图   | Goal（目标）                         | OKR：Goal → KeyResult → 进度记录 → 复盘（`packages/contracts/src/modules/goal/`） |
-| 执行   | Task（任务）                         | 模板/实例二元模型 + DAG 依赖 + 目标绑定（`packages/contracts/src/modules/task/`） |
-| 时间   | Schedule（日程）+ Reminder（提醒）   | 日历事件聚合（含任务实例投影）；提醒模板/分组/策略                                |
-| 知识   | Repository（仓储）+ Desktop Local Vault | GitHub projection / Local Vault（`/note/:id` 与 DB Resource 编辑已退役） |
-| 智能   | AI（助手）                           | 对话 + 三种 Agent 工作流（目标创建 / 知识笔记生成 / 知识问答 RAG）                |
+| 能力域 | 模块                                    | 核心模型                                                                          |
+| ------ | --------------------------------------- | --------------------------------------------------------------------------------- |
+| 意图   | Goal（目标）                            | OKR：Goal → KeyResult → 进度记录 → 复盘（`packages/contracts/src/modules/goal/`） |
+| 执行   | Task（任务）                            | 模板/实例二元模型 + DAG 依赖 + 目标绑定（`packages/contracts/src/modules/task/`） |
+| 时间   | Schedule（日程）+ Reminder（提醒）      | 日历事件聚合（含任务实例投影）；提醒模板/分组/策略                                |
+| 知识   | Repository（仓储）+ Desktop Local Vault | GitHub projection / Local Vault（`/note/:id` 与 DB Resource 编辑已退役）          |
+| 智能   | AI（助手）                              | 对话 + 三种 Agent 工作流（目标创建 / 知识笔记生成 / 知识问答 RAG）                |
 
 技术形态：Nx monorepo；Web（`apps/web`）与 Desktop（`apps/desktop`，Electron）**共用同一套 `packages/app-vue` 页面与路由**（见 `apps/desktop/src/renderer/bootstrap/app.ts:44` 直接调用 `createAppRouter`）；数据经 DI 端口走 HTTP（Web）或 IPC（Desktop）；离线同步使用 PowerSync（`packages/powersync-schema/src/index.ts` 定义了 `documents`、`document_links`、`resources` 等全量业务表）。
 
@@ -62,31 +61,31 @@
 
 汇总自 `packages/app-vue/src/router/index.ts` 与各模块 `router/index.ts`：
 
-| 路由                                                         | 视图组件                                               | 导航可见性       | 备注                                                |
-| ------------------------------------------------------------ | ------------------------------------------------------ | ---------------- | --------------------------------------------------- |
-| `/auth`                                                      | `views/AuthView.vue`                                   | —                | 登录/注册（Desktop 用 `DesktopAuthView` 覆写）      |
-| `/`                                                          | `modules/ai/views/AIChatView.vue`                      | 主导航「首页」   | **AI 工作台即首页**                                 |
-| `/ai/chat`                                                   | 同上 `AIChatView.vue`                                  | 主导航「AI对话」 | **与 `/` 完全同一组件，重复入口**                   |
-| `/goals`                                                     | `goal/views/GoalModuleLayout.vue` + `GoalListView.vue` | 主导航「目标」   | 模块内含第二侧边栏（文件夹/系统视图/专注模式入口）  |
-| `/goals/focus`                                               | `goal/views/GoalFocusView.vue`                         | 目标侧边栏入口   | 专注模式状态页                                      |
-| `/goals/compare`                                             | `goal/views/MultiGoalComparisonView.vue`               | 列表页按钮       | 多目标对比                                          |
-| `/goals/rules-demo`                                          | `goal/views/StatusRulesDemoView.vue`                   | 无入口           | **演示页混在生产路由**                              |
-| `/goals/:id`                                                 | `goal/views/GoalDetailView.vue`                        | —                | 目标详情（KR/记录/复盘）                            |
-| `/goals/:goalId/review/create`                               | `GoalReviewCreationView.vue`                           | —                | 创建复盘                                            |
-| `/goals/:goalId/review/:reviewId`                            | `GoalReviewDetailView.vue`                             | —                | 复盘详情                                            |
-| `/goals/:goalId/key-results/:keyResultId`                    | `KeyResultDetailView.vue`                              | —                | KR 详情                                             |
-| `/tasks`                                                     | `task/views/TaskManagementView.vue`                    | 主导航「任务」   | 任务模板管理（卡片网格）                            |
-| `/tasks/dependency-validation-demo`                          | `DependencyValidationDemoView.vue`                     | 仅 DEV           | 演示页                                              |
-| `/tasks/:id`                                                 | `task/views/TaskDetailView.vue`                        | —                | 模板详情（含依赖/父子关系）                         |
+| 路由                                                         | 视图组件                                               | 导航可见性       | 备注                                                   |
+| ------------------------------------------------------------ | ------------------------------------------------------ | ---------------- | ------------------------------------------------------ |
+| `/auth`                                                      | `views/AuthView.vue`                                   | —                | 登录/注册（Desktop 用 `DesktopAuthView` 覆写）         |
+| `/`                                                          | `modules/ai/views/AIChatView.vue`                      | 主导航「首页」   | **AI 工作台即首页**                                    |
+| `/ai/chat`                                                   | 同上 `AIChatView.vue`                                  | 主导航「AI对话」 | **与 `/` 完全同一组件，重复入口**                      |
+| `/goals`                                                     | `goal/views/GoalModuleLayout.vue` + `GoalListView.vue` | 主导航「目标」   | 模块内含第二侧边栏（文件夹/系统视图/专注模式入口）     |
+| `/goals/focus`                                               | `goal/views/GoalFocusView.vue`                         | 目标侧边栏入口   | 专注模式状态页                                         |
+| `/goals/compare`                                             | `goal/views/MultiGoalComparisonView.vue`               | 列表页按钮       | 多目标对比                                             |
+| `/goals/rules-demo`                                          | `goal/views/StatusRulesDemoView.vue`                   | 无入口           | **演示页混在生产路由**                                 |
+| `/goals/:id`                                                 | `goal/views/GoalDetailView.vue`                        | —                | 目标详情（KR/记录/复盘）                               |
+| `/goals/:goalId/review/create`                               | `GoalReviewCreationView.vue`                           | —                | 创建复盘                                               |
+| `/goals/:goalId/review/:reviewId`                            | `GoalReviewDetailView.vue`                             | —                | 复盘详情                                               |
+| `/goals/:goalId/key-results/:keyResultId`                    | `KeyResultDetailView.vue`                              | —                | KR 详情                                                |
+| `/tasks`                                                     | `task/views/TaskManagementView.vue`                    | 主导航「任务」   | 任务模板管理（卡片网格）                               |
+| `/tasks/dependency-validation-demo`                          | `DependencyValidationDemoView.vue`                     | 仅 DEV           | 演示页                                                 |
+| `/tasks/:id`                                                 | `task/views/TaskDetailView.vue`                        | —                | 模板详情（含依赖/父子关系）                            |
 | `/schedule` → `/schedule/calendar`                           | `schedule/views/ScheduleCalendarView.vue`              | 主导航「日程」   | 日/周/月三视图统一入口（无 week/legacy 双轨 redirect） |
-| `/reminders`                                                 | `reminder/views/ReminderLinearView.vue`                | 主导航「提醒」   | 分组侧边栏 + 模板列表 + 全局总开关                  |
-| `/repository`                                                | `repository/views/RepositoryWorkspaceView.vue`         | 主导航「仓库」   | Obsidian 风格工作区                                 |
-| `/note/:id`                                                  | `editor/views/EditorLinearView.vue`                    | —                | 单笔记编辑页（AI 知识笔记落点），meta `hideSidebar` |
-| `/notifications`                                             | `notification/views/NotificationListPage.vue`          | 主导航「通知」   | 通知中心                                            |
-| `/sse-monitor`                                               | `notification/views/SSEMonitorPage.vue`                | 仅 DEV           | SSE 调试工具                                        |
-| `/governance` (+`/new`、`/:id`、`/:id/edit`、`/:id/history`) | `governance/views/*`                                   | 主导航「治理」   | 个人编码规则库（5 个子页）                          |
-| `/settings`                                                  | `setting/views/UserSettingsView.vue`                   | 底部导航         | 单页 10 个 Tab                                      |
-| `/account/center`                                            | `account/views/AccountCenterView.vue`                  | 底部导航         | 个人资料 + 登出                                     |
+| `/reminders`                                                 | `reminder/views/ReminderLinearView.vue`                | 主导航「提醒」   | 分组侧边栏 + 模板列表 + 全局总开关                     |
+| `/repository`                                                | `repository/views/RepositoryWorkspaceView.vue`         | 主导航「仓库」   | Obsidian 风格工作区                                    |
+| `/note/:id`                                                  | `editor/views/EditorLinearView.vue`                    | —                | 单笔记编辑页（AI 知识笔记落点），meta `hideSidebar`    |
+| `/notifications`                                             | `notification/views/NotificationListPage.vue`          | 主导航「通知」   | 通知中心                                               |
+| `/sse-monitor`                                               | `notification/views/SSEMonitorPage.vue`                | 仅 DEV           | SSE 调试工具                                           |
+| `/governance` (+`/new`、`/:id`、`/:id/edit`、`/:id/history`) | `governance/views/*`                                   | 主导航「治理」   | 个人编码规则库（5 个子页）                             |
+| `/settings`                                                  | `setting/views/UserSettingsView.vue`                   | 底部导航         | 单页 10 个 Tab                                         |
+| `/account/center`                                            | `account/views/AccountCenterView.vue`                  | 底部导航         | 个人资料 + 登出                                        |
 
 **孤儿视图（存在于磁盘但无路由/无引用）**：`goal/views/FocusModeView.vue`、`goal/views/FocusCycle.vue`、`goal/views/WeightSnapshotView.vue`、`schedule/views/ScheduleWeekView.vue`（已删除；Vue 日程仅统一 `/schedule/calendar` 入口）。重构时应先删除或明确归宿。
 
@@ -187,12 +186,12 @@ Task 今日列表、Routine upcoming、Goal-owned progress 和其他明确 owner
 **业务目标**：以日/周/月日历查看**日程事件 + 任务实例投影**（`useCalendarView.events` 中 `event.source === 'task'`，可直接在日历完成任务实例 `handleCompleteTask` → `task.completeInstance`，`ScheduleCalendarView.vue`），并创建日程。
 **数据**：`useCalendarView()`（窗口范围拉取）、`useSchedule()`、`useTask()`。
 
-| 分类               | 内容                                                                                                                                                                                                       |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 必须展示           | 日/周/月视图切换；日历主体（事件块）；「创建日程」                                                                                                                                                         |
-| 可弱化             | —                                                                                                                                                                                                          |
-| 可隐藏             | `DevScheduleDebugPanel`（仅 DEV 渲染，保持）                                                                                                                                                               |
-| 可移入详情         | 月视图点击某天 → `DayDetailSheet`（右滑抽屉）已是正确模式；任务事件 → `TaskEventActionPanel` 底部面板保留                                                                                                  |
+| 分类               | 内容                                                                                                                                                                |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 必须展示           | 日/周/月视图切换；日历主体（事件块）；「创建日程」                                                                                                                  |
+| 可弱化             | —                                                                                                                                                                   |
+| 可隐藏             | `DevScheduleDebugPanel`（仅 DEV 渲染，保持）                                                                                                                        |
+| 可移入详情         | 月视图点击某天 → `DayDetailSheet`（右滑抽屉）已是正确模式；任务事件 → `TaskEventActionPanel` 底部面板保留                                                           |
 | 不可删除的交互状态 | 视图窗口换页时的范围拉取（day/week/month change）；任务事件的"完成"动作及完成后窗口刷新；非任务事件详情见 `EventDetailSheet`（历史 toast 断层已在 redesign 中补位） |
 
 ### 4.6 提醒（`/reminders` → `ReminderLinearView.vue`）
@@ -211,10 +210,10 @@ Task 今日列表、Routine upcoming、Goal-owned progress 和其他明确 owner
 ### 4.7 仓储 + 编辑器（`/repository`、`/note/:id`）— **历史快照（已 supersede）**
 
 > **历史快照**：本节描述 2026-07-11 前后的自建编辑器 + DB Resource 架构。当前运行时以 ADR-034 / product 文档为准：
+>
 > - 路由：`/repository`（`RepositoryEntryView` → `KnowledgeProjectionWorkspaceView` / `LocalVaultWorkspaceView`）
 > - 无 `/note/:id`、无 `EditorLinearView`、无 `RepositoryWorkspaceView`
 > - AI 打开笔记：`openRecentKnowledgeNote` → `/repository?note=`
-
 
 **业务目标**：个人 markdown 知识库——文件树/搜索/书签三模式侧栏、多标签页、CodeMirror6 编辑（源码/分屏/预览）、`[[wikilink]]` 双链与反链、链接图谱、图片/附件引用、失效引用修复、自包含导出、批量导入。
 **数据/模型**：Resource 是 **DB 实体**（`content: string | null`、`version`、`ResourceClientDTO`，`packages/contracts/src/modules/repository/aggregates/resource-client.ts:23-49`）；前端经 DI 端口 `REPOSITORY_SERVICE_KEY` 访问（接口 `RepositoryServiceLike`，`useRepository.ts:32-71`）；Web 注 HTTP 实现、Desktop 注 IPC 实现（`apps/web/src/platform/di-app.ts:116`、`apps/desktop/src/renderer/platform/di-app.ts:67`）。链接索引/反链/图谱**全部在客户端**由资源全文即时计算（`editor/utils/link-index.ts`、`wiki-links.ts:17` `\[\[([^\]]+)\]\]`，支持 `[[目标|别名]]` 与 `#小节`）。知识笔记有服务端 RAG 索引（`indexStatus: 'pending'|'indexed'|'failed'`）。
@@ -358,7 +357,7 @@ Task 今日列表、Routine upcoming、Goal-owned progress 和其他明确 owner
 | 页面                 | 现状                                                  | 建议布局                                                                                                                                    |
 | -------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | AI 首页              | 左会话栏 + 中对话 + 右产物栏；工作流按钮挤在 composer | 保持三栏骨架；**工作流生命周期按钮整体移入右栏顶部**（与产物同屏）；composer 只留发送/停止/模式切换/模型；右栏空闲态显示"今日概览"三 widget |
-| 首页概览               | owner reads + 3 widget              | 组合待办/提醒/目标；不创建跨域统计 DTO或配置模型                                   |
+| 首页概览             | owner reads + 3 widget                                | 组合待办/提醒/目标；不创建跨域统计 DTO或配置模型                                                                                            |
 | 目标列表             | 第二侧栏 + 卡片网格                                   | 保留；侧栏专注模式卡在未激活时缩为按钮；「对比」入 ⋯ 菜单                                                                                   |
 | 目标详情             | 概览卡 + KR 卡 + Tabs                                 | 保留结构；四宫格元数据压成单行；进度环缩小与 KR 完成数并排                                                                                  |
 | 任务                 | 双排过滤 + 卡片网格 + 图谱弹窗                        | 顶部一排：状态 Tab + 过滤下拉 + 视图切换（卡片 / 图谱——图谱从 Dialog 升为视图模式）；「全部删除」移入 ⋯ 危险区                              |

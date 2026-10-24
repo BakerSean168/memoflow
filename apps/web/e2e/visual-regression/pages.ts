@@ -195,13 +195,20 @@ const components = {
 const SharedListFixture = defineComponent({
   setup() {
     return () =>
-      h(ListPageShell, { title: 'Shared list shell', description: 'Scrollbar gutter fixture' }, {
-        default: () => h('div', { 'data-testid': 'shared-list-content' },
-          Array.from({ length: 24 }, (_, index) =>
-            h('p', { class: 'py-4', key: index }, `List item ${index + 1}`),
-          ),
-        ),
-      });
+      h(
+        ListPageShell,
+        { title: 'Shared list shell', description: 'Scrollbar gutter fixture' },
+        {
+          default: () =>
+            h(
+              'div',
+              { 'data-testid': 'shared-list-content' },
+              Array.from({ length: 24 }, (_, index) =>
+                h('p', { class: 'py-4', key: index }, `List item ${index + 1}`),
+              ),
+            ),
+        },
+      );
   },
 });
 const shell = surface.startsWith('shell') || surface === 'ai';
@@ -227,9 +234,10 @@ const router = createRouter({
     : [
         {
           path: '/:pathMatch(.*)*',
-          component: surface === 'shared-list'
-            ? SharedListFixture
-            : components[surface as keyof typeof components] ?? RoutineConfigurationView,
+          component:
+            surface === 'shared-list'
+              ? SharedListFixture
+              : (components[surface as keyof typeof components] ?? RoutineConfigurationView),
         },
       ],
 });

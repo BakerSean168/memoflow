@@ -1,6 +1,6 @@
 /**
  * NotificationMetadata 值对象
- * 
+ *
  * 通知元数据：图标、图片、颜色、声音、徽章等
  * 不可变性（所有修改返回新实例）
  */
@@ -14,14 +14,16 @@ import type {
 /**
  * NotificationMetadata 值对象实现
  */
-export class NotificationMetadata extends ValueObject<NotificationMetadataDTO> implements INotificationMetadata {
-
+export class NotificationMetadata
+  extends ValueObject<NotificationMetadataDTO>
+  implements INotificationMetadata
+{
   private constructor(props: NotificationMetadataDTO) {
     super(props);
   }
 
   // ================= 工厂方法 =================
-  
+
   public static create(props: NotificationMetadataDTO): NotificationMetadata {
     return new NotificationMetadata(props);
   }

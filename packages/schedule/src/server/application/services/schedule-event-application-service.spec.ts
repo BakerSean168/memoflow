@@ -163,7 +163,9 @@ describe('Schedule services ADR-080', () => {
       CalendarEntry.create({ identityId, title: 'Existing', range: timed(hour(9), hour(10)) }),
     );
 
-    const result = await new ScheduleConflictDetectionService(repository).detectConflictsForTimeRange({
+    const result = await new ScheduleConflictDetectionService(
+      repository,
+    ).detectConflictsForTimeRange({
       identityId,
       startTime: hour(9.5),
       endTime: hour(10.5),
@@ -191,7 +193,9 @@ describe('Schedule services ADR-080', () => {
 
     expect(first).not.toHaveProperty('hasConflict');
     expect(second).not.toHaveProperty('conflictingEntries');
-    const conflicts = await new ScheduleConflictDetectionService(repository).detectConflictsForTimeRange({
+    const conflicts = await new ScheduleConflictDetectionService(
+      repository,
+    ).detectConflictsForTimeRange({
       identityId,
       startTime: hour(9),
       endTime: hour(11),
@@ -220,8 +224,16 @@ describe('Schedule services ADR-080', () => {
     const repository = new InMemoryScheduleRepository();
     const identityId = IdentityId.generate();
     const service = new ScheduleEventApplicationService(repository);
-    const first = await service.createSchedule({ identityId, title: 'First', range: timed(hour(9), hour(10)) });
-    await service.createSchedule({ identityId, title: 'Second', range: timed(hour(9.5), hour(10.5)) });
+    const first = await service.createSchedule({
+      identityId,
+      title: 'First',
+      range: timed(hour(9), hour(10)),
+    });
+    await service.createSchedule({
+      identityId,
+      title: 'Second',
+      range: timed(hour(9.5), hour(10.5)),
+    });
 
     const updated = await service.updateSchedule(first.id, identityId, {
       range: timed(hour(12), hour(13)),
@@ -236,7 +248,9 @@ describe('Schedule services ADR-080', () => {
     const remaining = (await repository.findByIdentityId(identityId)).find(
       (entry) => entry.id !== first.id,
     )!;
-    const after = await new ScheduleConflictDetectionService(repository).detectConflictsForEntry(remaining);
+    const after = await new ScheduleConflictDetectionService(repository).detectConflictsForEntry(
+      remaining,
+    );
     expect(after.hasConflict).toBe(false);
     expect(repository.outbox.at(-1)).toMatchObject({
       scheduleId: first.id,
@@ -248,10 +262,20 @@ describe('Schedule services ADR-080', () => {
     const repository = new InMemoryScheduleRepository();
     const identityId = IdentityId.generate();
     const service = new ScheduleEventApplicationService(repository);
-    const first = await service.createSchedule({ identityId, title: 'First', range: timed(hour(9), hour(10)) });
-    await service.createSchedule({ identityId, title: 'Second', range: timed(hour(9.5), hour(10.5)) });
+    const first = await service.createSchedule({
+      identityId,
+      title: 'First',
+      range: timed(hour(9), hour(10)),
+    });
+    await service.createSchedule({
+      identityId,
+      title: 'Second',
+      range: timed(hour(9.5), hour(10.5)),
+    });
 
-    const before = await new ScheduleConflictDetectionService(repository).detectConflictsForTimeRange({
+    const before = await new ScheduleConflictDetectionService(
+      repository,
+    ).detectConflictsForTimeRange({
       identityId,
       startTime: hour(9),
       endTime: hour(11),
@@ -266,7 +290,9 @@ describe('Schedule services ADR-080', () => {
     const remaining = (await repository.findByIdentityId(identityId)).find(
       (entry) => entry.id !== first.id,
     )!;
-    const after = await new ScheduleConflictDetectionService(repository).detectConflictsForEntry(remaining);
+    const after = await new ScheduleConflictDetectionService(repository).detectConflictsForEntry(
+      remaining,
+    );
     expect(after.hasConflict).toBe(false);
     expect(repository.outbox).toHaveLength(3);
   });
@@ -275,15 +301,25 @@ describe('Schedule services ADR-080', () => {
     const repository = new InMemoryScheduleRepository();
     const identityId = IdentityId.generate();
     const service = new ScheduleEventApplicationService(repository);
-    const first = await service.createSchedule({ identityId, title: 'First', range: timed(hour(9), hour(10)) });
-    await service.createSchedule({ identityId, title: 'Second', range: timed(hour(9.5), hour(10.5)) });
+    const first = await service.createSchedule({
+      identityId,
+      title: 'First',
+      range: timed(hour(9), hour(10)),
+    });
+    await service.createSchedule({
+      identityId,
+      title: 'Second',
+      range: timed(hour(9.5), hour(10.5)),
+    });
 
     await service.deleteSchedule(first.id, identityId, first.version);
     expect(await service.getSchedule(first.id, identityId)).toBeNull();
     const remaining = (await repository.findByIdentityId(identityId)).find(
       (entry) => entry.id !== first.id,
     )!;
-    const after = await new ScheduleConflictDetectionService(repository).detectConflictsForEntry(remaining);
+    const after = await new ScheduleConflictDetectionService(repository).detectConflictsForEntry(
+      remaining,
+    );
     expect(after.hasConflict).toBe(false);
     expect(repository.outbox.at(-1)?.idempotencyKey).toContain(':delete');
   });
@@ -293,11 +329,19 @@ describe('Schedule services ADR-080', () => {
     const service = new ScheduleEventApplicationService(repository);
     const ownerId = IdentityId.generate();
     const otherId = IdentityId.generate();
-    const created = await service.createSchedule({ identityId: ownerId, title: 'Owned', range: timed(hour(9), hour(10)) });
+    const created = await service.createSchedule({
+      identityId: ownerId,
+      title: 'Owned',
+      range: timed(hour(9), hour(10)),
+    });
 
     await expect(service.getSchedule(created.id, otherId)).resolves.toBeNull();
-    await expect(service.updateSchedule(created.id, otherId, { title: 'Hijacked', expectedVersion: 1 })).rejects.toMatchObject({ code: 'NOT_FOUND' });
-    await expect(service.deleteSchedule(created.id, otherId, 1)).rejects.toMatchObject({ code: 'NOT_FOUND' });
+    await expect(
+      service.updateSchedule(created.id, otherId, { title: 'Hijacked', expectedVersion: 1 }),
+    ).rejects.toMatchObject({ code: 'NOT_FOUND' });
+    await expect(service.deleteSchedule(created.id, otherId, 1)).rejects.toMatchObject({
+      code: 'NOT_FOUND',
+    });
     expect((await service.getSchedule(created.id, ownerId))?.title).toBe('Owned');
   });
 });

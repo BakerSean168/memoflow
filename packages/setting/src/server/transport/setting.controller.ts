@@ -21,9 +21,9 @@ export class SettingController {
   private preferenceConflict(result: unknown): result is PreferenceRevisionConflict {
     return Boolean(
       result &&
-        typeof result === 'object' &&
-        'code' in result &&
-        result.code === 'preference_revision_conflict',
+      typeof result === 'object' &&
+      'code' in result &&
+      result.code === 'preference_revision_conflict',
     );
   }
 

@@ -1,3 +1,1 @@
-export {
-  createSettingRuntimeContribution,
-} from './setting.runtime';
+export { createSettingRuntimeContribution } from './setting.runtime';

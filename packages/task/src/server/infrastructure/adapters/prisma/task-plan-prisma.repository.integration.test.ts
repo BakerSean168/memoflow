@@ -9,7 +9,11 @@ import {
 } from '../../../../testing';
 import { IdentityId } from '@memoflow/domain-shared';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
-import { TaskPlanScheduleKind, type TaskRecurrence, type TaskTiming } from '@memoflow/contracts/task';
+import {
+  TaskPlanScheduleKind,
+  type TaskRecurrence,
+  type TaskTiming,
+} from '@memoflow/contracts/task';
 import { TaskPlan } from '../../../domain/aggregates/task-plan';
 import { TaskPlanPrismaRepository } from './task-plan-prisma.repository';
 import { TaskLabelOwnershipError } from '../../../domain/repositories/i-task-plan-repository';

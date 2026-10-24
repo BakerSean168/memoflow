@@ -23,7 +23,7 @@ describe('account close receipt envelope surface', () => {
   );
 
   it('OpenAPI close returns AccountClosureReceiptDTO (structured receipt)', () => {
-    expect(routes).toContain("/me/close");
+    expect(routes).toContain('/me/close');
     expect(routes).not.toContain("successResponse(z.null(), '注销成功')");
     expect(lifecycle).toContain('export type CloseAccountRes = AccountClosureReceiptDTO');
     expect(lifecycle).not.toContain('ImportAccountData');

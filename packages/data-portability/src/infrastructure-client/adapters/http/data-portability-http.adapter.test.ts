@@ -12,16 +12,8 @@ describe('DataPortabilityHttpAdapter', () => {
     await adapter.dryRunPortableDataV3(importRequest);
     await adapter.applyPortableDataV3(importRequest);
 
-    expect(httpClient.post).toHaveBeenNthCalledWith(
-      1,
-      '/data-portability/export',
-      exportRequest,
-    );
-    expect(httpClient.post).toHaveBeenNthCalledWith(
-      2,
-      '/data-portability/dry-run',
-      importRequest,
-    );
+    expect(httpClient.post).toHaveBeenNthCalledWith(1, '/data-portability/export', exportRequest);
+    expect(httpClient.post).toHaveBeenNthCalledWith(2, '/data-portability/dry-run', importRequest);
     expect(httpClient.post).toHaveBeenNthCalledWith(3, '/data-portability/apply', importRequest);
   });
 

@@ -52,11 +52,17 @@ export function createAIPowerSyncRepositories(db: IElectronDatabase): AIPowerSyn
   const providerSecretVault = new PowerSyncAIProviderSecretVault(db);
   return {
     agentInstanceRepository: new AgentInstancePowerSyncRepository(db),
-    conversationRepository: new PowerSyncAIConversationRepository(db, db.watch ? new ConversationEventsPowerSync(db) : undefined),
+    conversationRepository: new PowerSyncAIConversationRepository(
+      db,
+      db.watch ? new ConversationEventsPowerSync(db) : undefined,
+    ),
     providerConfigRepository: new PowerSyncAIProviderConfigRepository(db),
     knowledgeIndexRepository: new AIKnowledgeIndexPowerSyncRepository(db),
     executionRecordPort: new AIExecutionRecordPowerSyncAdapter(db),
-    conversationAttentionPort: new ConversationAttentionPowerSyncAdapter(db, db.watch ? new AttentionEventsPowerSync(db) : undefined),
+    conversationAttentionPort: new ConversationAttentionPowerSyncAdapter(
+      db,
+      db.watch ? new AttentionEventsPowerSync(db) : undefined,
+    ),
     providerOnboardingSessionRepository,
     providerOnboardingCommitPort: new PowerSyncAIProviderOnboardingCommitAdapter(db),
     providerSecretVault,

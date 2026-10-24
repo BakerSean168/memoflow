@@ -62,20 +62,20 @@ The previously open PR #337 was reviewed patch-by-patch and closed as **supersed
 
 A fresh final regression matrix was run after the focused repairs. All twelve project test suites passed in one sequence:
 
-| Project | Result | Test files |
-| --- | --- | ---: |
-| Contracts | PASS | 68 |
-| Label | PASS | 3 |
-| Goal | PASS | 79 |
-| Task | PASS | 71 |
-| Reminder | PASS | 75 |
-| Notification | PASS | 45 |
-| Schedule | PASS | 20 |
-| Scheduler | PASS | 31 |
-| AI | PASS | 76 |
-| App Vue | PASS | 201 |
-| API | PASS | 65 |
-| Desktop | PASS | 61 |
+| Project      | Result | Test files |
+| ------------ | ------ | ---------: |
+| Contracts    | PASS   |         68 |
+| Label        | PASS   |          3 |
+| Goal         | PASS   |         79 |
+| Task         | PASS   |         71 |
+| Reminder     | PASS   |         75 |
+| Notification | PASS   |         45 |
+| Schedule     | PASS   |         20 |
+| Scheduler    | PASS   |         31 |
+| AI           | PASS   |         76 |
+| App Vue      | PASS   |        201 |
+| API          | PASS   |         65 |
+| Desktop      | PASS   |         61 |
 
 Notable executable totals observed in the same final run include Goal `440/440`, Task `717/717`, Scheduler `273/273`, App Vue `774/774`, API `329/329`, and Desktop `322/322`.
 

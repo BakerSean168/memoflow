@@ -42,8 +42,16 @@ const ALLOWLIST = new Set([
 ]);
 
 const SKIP_DIRS = new Set([
-  'node_modules', 'dist', 'build', '.git', '.nx',
-  '__tests__', '__mocks__', 'test', 'tests', 'e2e',
+  'node_modules',
+  'dist',
+  'build',
+  '.git',
+  '.nx',
+  '__tests__',
+  '__mocks__',
+  'test',
+  'tests',
+  'e2e',
 ]);
 
 const SOURCE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.vue']);

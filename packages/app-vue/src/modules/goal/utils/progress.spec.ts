@@ -11,9 +11,9 @@ describe('goal progress percentage clamp', () => {
     expect(getGoalOverallProgress({ overallProgress: 140 } as GoalClientDTO)).toBe(100);
     expect(getGoalOverallProgress({ overallProgress: -5 } as GoalClientDTO)).toBe(0);
     expect(getGoalOverallProgress({ overallProgress: Number.NaN } as GoalClientDTO)).toBe(0);
-    expect(getGoalOverallProgress({ overallProgress: Number.POSITIVE_INFINITY } as GoalClientDTO)).toBe(
-      0,
-    );
+    expect(
+      getGoalOverallProgress({ overallProgress: Number.POSITIVE_INFINITY } as GoalClientDTO),
+    ).toBe(0);
     expect(getGoalOverallProgress(null)).toBe(0);
   });
 

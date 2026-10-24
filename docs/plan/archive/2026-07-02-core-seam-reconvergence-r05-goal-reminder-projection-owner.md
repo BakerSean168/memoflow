@@ -192,4 +192,3 @@ packages/schedule-orchestration
 - Old path deleted: `packages/goal/src/api/schedule-runtime.ts`、`packages/reminder/src/api/schedule-runtime.ts`
 - Verification: `.\node_modules\.bin\nx.cmd run goal:typecheck`、`.\node_modules\.bin\nx.cmd run goal:build`、`.\node_modules\.bin\nx.cmd run goal:test`、`.\node_modules\.bin\nx.cmd run reminder:typecheck`、`.\node_modules\.bin\nx.cmd run reminder:test`、`.\node_modules\.bin\nx.cmd run schedule-orchestration:typecheck`、`.\node_modules\.bin\nx.cmd run schedule-orchestration:test`、`.\node_modules\.bin\nx.cmd run schedule-orchestration:build`、`.\node_modules\.bin\nx.cmd run schedule:test`、`.\node_modules\.bin\nx.cmd run api:typecheck`、`.\node_modules\.bin\nx.cmd run api:test:smoke` 通过。
 - Remaining follow-up: 进入 `R06`，删除 `createSharedSourceExecutor(...)` 和 `createDesktopSourceExecutor(...)` 继续留下的 execution owner，彻底压薄 host。
-

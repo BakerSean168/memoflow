@@ -47,13 +47,21 @@ function stateWithGoalOnlyLink(): TaskPlanState {
 }
 
 describe('TaskPlan domain-client Goal link serialization', () => {
-  it.each([0, -2, null])('round-trips Prompt configuration %s through client serialization', (suggestedValue) => {
-    const state = stateWithGoalOnlyLink();
-    state.goalBinding = { ...state.goalBinding!, keyResultId: 'KeyResultId_550e8400-e29b-41d4-a716-446655440003', progressRule: { mode: 'Prompt', trigger: 'EachCompletion', suggestedValue }, contribution: null };
-    const dto = TaskPlan.load(state).toDTO();
-    expect(dto.goalBinding?.progressRule).toEqual(state.goalBinding.progressRule);
-    expect(dto.goalBinding?.contribution).toBeNull();
-  });
+  it.each([0, -2, null])(
+    'round-trips Prompt configuration %s through client serialization',
+    (suggestedValue) => {
+      const state = stateWithGoalOnlyLink();
+      state.goalBinding = {
+        ...state.goalBinding!,
+        keyResultId: 'KeyResultId_550e8400-e29b-41d4-a716-446655440003',
+        progressRule: { mode: 'Prompt', trigger: 'EachCompletion', suggestedValue },
+        contribution: null,
+      };
+      const dto = TaskPlan.load(state).toDTO();
+      expect(dto.goalBinding?.progressRule).toEqual(state.goalBinding.progressRule);
+      expect(dto.goalBinding?.contribution).toBeNull();
+    },
+  );
 
   it('preserves a Goal-only Key Result id as null instead of the string "null"', () => {
     const dto = TaskPlan.load(stateWithGoalOnlyLink()).toDTO();

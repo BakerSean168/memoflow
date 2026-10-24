@@ -227,12 +227,7 @@ describe('W7 cross-module operation gate (real DB)', () => {
     const accountTimeline = await account.api.queryClosureTimeline(ctx);
     const knowledgeTimeline = await repository.api.queryKnowledgeTimeline(ctx);
 
-    for (const res of [
-      notifTimeline,
-      scheduleTimeline,
-      accountTimeline,
-      knowledgeTimeline,
-    ]) {
+    for (const res of [notifTimeline, scheduleTimeline, accountTimeline, knowledgeTimeline]) {
       expect(res.ok).toBe(true);
     }
     const all = [
@@ -258,7 +253,9 @@ describe('W7 cross-module operation gate (real DB)', () => {
     // ── Fault recovery: unauthorized identity rejected for every module ──
     const otherIdentity = randomUUID();
     const otherCtx = { identityId: otherIdentity } as never;
-    expect((await notifModule.operations.replayDeadLetter(notificationOp, otherIdentity)).ok).toBe(false);
+    expect((await notifModule.operations.replayDeadLetter(notificationOp, otherIdentity)).ok).toBe(
+      false,
+    );
     expect((await schedule.api.replayRebuildOutbox(scheduleOp, otherCtx)).ok).toBe(false);
     expect((await account.api.replayClosure(accountOp, otherCtx)).ok).toBe(false);
     expect(

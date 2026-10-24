@@ -1,8 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel,
-  AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
-  AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from '.';
 import { Button } from '../button';
 
@@ -18,9 +24,16 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: () => ({
     components: {
-      AlertDialog, AlertDialogAction, AlertDialogCancel,
-      AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
-      AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, Button,
+      AlertDialog,
+      AlertDialogAction,
+      AlertDialogCancel,
+      AlertDialogContent,
+      AlertDialogDescription,
+      AlertDialogFooter,
+      AlertDialogHeader,
+      AlertDialogTitle,
+      AlertDialogTrigger,
+      Button,
     },
     template: `
       <AlertDialog>

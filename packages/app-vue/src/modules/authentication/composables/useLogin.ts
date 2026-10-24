@@ -1,15 +1,20 @@
 import type { CloudSignInRequest } from '@memoflow/contracts';
 import type { AuthContext } from './useAuthContext';
-import {
-  reportAuthCatchFailure,
-  reportAuthResultFailure,
-} from './reportAuthOperationFailure';
+import { reportAuthCatchFailure, reportAuthResultFailure } from './reportAuthOperationFailure';
 
 // Residual 923: isDesktopEnvironment name dual retired — use hasDesktopAuthApi detect.
 // Residual 1049: auth result/catch failure duals retired onto reportAuthOperationFailure sole.
 
 export function useLogin(ctx: AuthContext) {
-  const { store, service, t, lastResultError, redirectWithReload, handleAuthSuccess, getLocalizedAuthError } = ctx;
+  const {
+    store,
+    service,
+    t,
+    lastResultError,
+    redirectWithReload,
+    handleAuthSuccess,
+    getLocalizedAuthError,
+  } = ctx;
   const failureDeps = { store, t, lastResultError, getLocalizedAuthError };
 
   async function loginByEmail(req: CloudSignInRequest): Promise<boolean> {

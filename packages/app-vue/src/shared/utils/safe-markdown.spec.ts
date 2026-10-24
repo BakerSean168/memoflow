@@ -1,6 +1,10 @@
 /** @vitest-environment node */
 import { describe, expect, it } from 'vitest';
-import { renderSafeMarkdown, renderSafeMarkdownExcerpt, stripMarkdownFrontmatter } from './safe-markdown';
+import {
+  renderSafeMarkdown,
+  renderSafeMarkdownExcerpt,
+  stripMarkdownFrontmatter,
+} from './safe-markdown';
 
 describe('renderSafeMarkdown', () => {
   it('removes YAML frontmatter from reading-mode output', () => {

@@ -11,7 +11,7 @@ import type { GoalId, KeyResultId } from '../../../primitives';
 
 /**
  * 单个 KeyResult 的计算结果 DTO
- * 
+ *
  * 用于前端展示变更详情，如：
  * "进度从 50% 变更为 60%"
  */
@@ -32,7 +32,7 @@ export interface ProgressCalculationResultDTO {
 
 /**
  * 整个 Goal 的计算结果 DTO
- * 
+ *
  * 用于批量重新计算后的结果展示
  */
 export interface GoalProgressCalculationResultDTO {
@@ -50,7 +50,7 @@ export interface GoalProgressCalculationResultDTO {
 
 /**
  * 进度预览结果 DTO
- * 
+ *
  * 用于用户添加记录前预览最终进度
  * 前端可以显示："如果保存，进度将从 50% 变为 60%"
  */

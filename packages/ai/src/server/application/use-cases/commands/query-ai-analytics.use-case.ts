@@ -50,7 +50,11 @@ export class QueryAIAnalyticsUseCase {
         cx.identityId,
         request.providerId,
       );
-      const credential = await resolveProviderCredential(this.requireSecretVault(), cx.identityId, provider);
+      const credential = await resolveProviderCredential(
+        this.requireSecretVault(),
+        cx.identityId,
+        provider,
+      );
       const executionProviderConfig = toChatExecutionProviderConfig(provider, credential, {
         temperature: 0.2,
       });

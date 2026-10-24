@@ -8,9 +8,17 @@ import type { TaskPlanViewModel } from '../types';
 import TaskPlanForm from './TaskPlanForm.vue';
 
 const plan: TaskPlanViewModel = {
-  id: 'story-plan', title: 'Review practice', status: 'Active', importance: 'Moderate',
-  checklist: [], labels: [],
-  schedule: { kind: 'OneTime', date: TaskYmdSchema.parse('2026-10-22'), timing: { kind: 'AllDay' } },
+  id: 'story-plan',
+  title: 'Review practice',
+  status: 'Active',
+  importance: 'Moderate',
+  checklist: [],
+  labels: [],
+  schedule: {
+    kind: 'OneTime',
+    date: TaskYmdSchema.parse('2026-10-22'),
+    timing: { kind: 'AllDay' },
+  },
 };
 const meta = {
   title: 'Business/Task/TaskPlanForm/TaskPlanForm',
@@ -20,7 +28,9 @@ const meta = {
   render: (args) => ({
     components: { TaskPlanForm },
     setup() {
-      provide(LABEL_SERVICE_KEY, { listLabels: async () => ({ ok: true, data: [] }) } as unknown as ILabelService);
+      provide(LABEL_SERVICE_KEY, {
+        listLabels: async () => ({ ok: true, data: [] }),
+      } as unknown as ILabelService);
       const model = ref(structuredClone(toRaw(args.modelValue)));
       return { args, model };
     },
@@ -39,7 +49,9 @@ export const Default: Story = {
     await userEvent.type(title, 'Updated practice');
     await expect(title).toHaveValue('Updated practice');
     await userEvent.click(canvas.getByTestId('task-schedule-chip'));
-    await expect(await within(canvasElement.ownerDocument.body).findByTestId('task-schedule-popover')).toBeVisible();
+    await expect(
+      await within(canvasElement.ownerDocument.body).findByTestId('task-schedule-popover'),
+    ).toBeVisible();
     await userEvent.keyboard('{Escape}');
     await expect(canvas.getByTestId('task-schedule-chip')).toHaveFocus();
   },

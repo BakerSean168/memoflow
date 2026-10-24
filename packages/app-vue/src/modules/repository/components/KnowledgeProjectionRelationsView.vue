@@ -78,14 +78,8 @@
       </div>
     </div>
     <div v-else-if="graph" class="min-h-0 flex-1 overflow-auto">
-      <div
-        class="grid min-h-full grid-cols-1"
-        :class="compact ? '' : '@3xl/panel:grid-cols-2'"
-      >
-        <section
-          class="border-b"
-          :class="compact ? 'px-3 py-3' : 'p-4 @3xl/panel:border-r'"
-        >
+      <div class="grid min-h-full grid-cols-1" :class="compact ? '' : '@3xl/panel:grid-cols-2'">
+        <section class="border-b" :class="compact ? 'px-3 py-3' : 'p-4 @3xl/panel:border-r'">
           <RelationHeading
             :icon="ArrowUpRight"
             :title="t('repository.projection.outgoingLinks')"
@@ -137,10 +131,7 @@
           </div>
         </section>
 
-        <section
-          class="border-b"
-          :class="compact ? 'px-3 py-3' : 'p-4 @3xl/panel:border-r'"
-        >
+        <section class="border-b" :class="compact ? 'px-3 py-3' : 'p-4 @3xl/panel:border-r'">
           <RelationHeading
             :icon="Network"
             :title="t('repository.projection.relatedNotes')"
@@ -173,11 +164,7 @@
             :count="centerUnresolvedLinks.length"
           />
           <div class="mt-3 space-y-1">
-            <div
-              v-for="link in centerUnresolvedLinks"
-              :key="link.id"
-              class="rounded-md px-2 py-2"
-            >
+            <div v-for="link in centerUnresolvedLinks" :key="link.id" class="rounded-md px-2 py-2">
               <p class="truncate text-sm font-medium">{{ link.displayText }}</p>
               <p class="mt-0.5 truncate text-xs text-muted-foreground">
                 {{

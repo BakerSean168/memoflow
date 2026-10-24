@@ -15,7 +15,6 @@
 
 // Residual 1039: sole MinHeap lives in patterns; schedule dual file deleted.
 
-
 /**
  * 堆元素接口
  */
@@ -187,10 +186,7 @@ export class MinHeap<T extends HeapItem> {
         break;
       }
       // 交换
-      [this.heap[parentIndex], this.heap[index]] = [
-        this.heap[index],
-        this.heap[parentIndex],
-      ];
+      [this.heap[parentIndex], this.heap[index]] = [this.heap[index], this.heap[parentIndex]];
       index = parentIndex;
     }
   }
@@ -206,27 +202,18 @@ export class MinHeap<T extends HeapItem> {
       const left = 2 * index + 1;
       const right = 2 * index + 2;
 
-      if (
-        left < length &&
-        this.heap[left].nextRunAt < this.heap[smallest].nextRunAt
-      ) {
+      if (left < length && this.heap[left].nextRunAt < this.heap[smallest].nextRunAt) {
         smallest = left;
       }
 
-      if (
-        right < length &&
-        this.heap[right].nextRunAt < this.heap[smallest].nextRunAt
-      ) {
+      if (right < length && this.heap[right].nextRunAt < this.heap[smallest].nextRunAt) {
         smallest = right;
       }
 
       if (smallest === index) break;
 
       // 交换
-      [this.heap[index], this.heap[smallest]] = [
-        this.heap[smallest],
-        this.heap[index],
-      ];
+      [this.heap[index], this.heap[smallest]] = [this.heap[smallest], this.heap[index]];
       index = smallest;
     }
   }

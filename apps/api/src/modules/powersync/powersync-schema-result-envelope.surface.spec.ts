@@ -20,9 +20,7 @@ describe('PowerSync /schema Result envelope (residual 629)', () => {
     expect(source).toContain('createApiResponseBuilder');
     expect(source).toContain("psRouter.get('/schema'");
     expect(source).toContain('responseBuilder.success');
-    expect(source).not.toMatch(
-      /psRouter\.get\('\/schema'[\s\S]*?res\.json\(\s*\{\s*ok:\s*true/,
-    );
+    expect(source).not.toMatch(/psRouter\.get\('\/schema'[\s\S]*?res\.json\(\s*\{\s*ok:\s*true/);
   });
 
   it('unit suite locks schema HttpResponse envelope', () => {

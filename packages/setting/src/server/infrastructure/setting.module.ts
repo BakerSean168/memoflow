@@ -21,8 +21,7 @@ export interface SettingModuleRuntimeContribution {
 }
 
 export type SettingRuntimeContributionsInput =
-  | SettingModuleRuntimeContribution
-  | readonly SettingModuleRuntimeContribution[];
+  SettingModuleRuntimeContribution | readonly SettingModuleRuntimeContribution[];
 
 /** Canonical Setting dependencies: namespace preference persistence only. */
 export interface SettingModuleDependencies {

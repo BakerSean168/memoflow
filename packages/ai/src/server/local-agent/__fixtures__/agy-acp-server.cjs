@@ -156,7 +156,9 @@ async function handle(frame) {
       return;
     case 'session/new':
       if (!hasToken()) {
-        process.stdout.write(`${AUTH_PREFIX}https://accounts.google.com/o/oauth2/v2/auth?state=missing\n`);
+        process.stdout.write(
+          `${AUTH_PREFIX}https://accounts.google.com/o/oauth2/v2/auth?state=missing\n`,
+        );
         process.exit(0);
       }
       reply(frame.id, session());

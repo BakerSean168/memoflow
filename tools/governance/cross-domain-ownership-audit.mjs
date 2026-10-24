@@ -13,7 +13,9 @@ const manifest = JSON.parse(
 );
 const manifestErrors = validateCrossDomainOwnershipManifest(manifest);
 if (manifestErrors.length > 0) {
-  console.error(`[cross-domain-ownership-audit] invalid manifest (${manifestErrors.length} issue(s)):`);
+  console.error(
+    `[cross-domain-ownership-audit] invalid manifest (${manifestErrors.length} issue(s)):`,
+  );
   for (const error of manifestErrors) console.error(`  ${error}`);
   process.exit(1);
 }

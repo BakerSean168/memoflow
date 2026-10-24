@@ -31,7 +31,12 @@ export class ListConversationsUseCase {
         await events.init();
         const snapshots = [];
         for (let index = 0; index < conversations.length; index += 100)
-          snapshots.push(...await events.snapshot(cx.identityId, conversations.slice(index, index + 100).map((item) => String(item.id))));
+          snapshots.push(
+            ...(await events.snapshot(
+              cx.identityId,
+              conversations.slice(index, index + 100).map((item) => String(item.id)),
+            )),
+          );
         // A deletion between discovery and snapshot must not revive a shell.
         conversations = snapshots;
       }
@@ -51,8 +56,16 @@ export class ListConversationsUseCase {
         pageSize: limit,
       });
     } catch (err) {
-      logger.error('Failed to list conversations', { error: err, identityId: cx.identityId, page, limit });
-      return error('INTERNAL_ERROR', err instanceof Error ? err.message : 'Failed to list conversations');
+      logger.error('Failed to list conversations', {
+        error: err,
+        identityId: cx.identityId,
+        page,
+        limit,
+      });
+      return error(
+        'INTERNAL_ERROR',
+        err instanceof Error ? err.message : 'Failed to list conversations',
+      );
     }
   }
 }

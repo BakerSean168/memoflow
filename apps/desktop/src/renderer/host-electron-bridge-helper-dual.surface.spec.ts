@@ -59,9 +59,7 @@ describe('host ElectronBridge helper duals retired (residual 941)', () => {
 
   it('CustomNotificationView imports host getElectronBridge sole helper', () => {
     expect(view).toContain('Residual 941');
-    expect(view).toContain(
-      "import { getElectronBridge } from './platform/electron-bridge'",
-    );
+    expect(view).toContain("import { getElectronBridge } from './platform/electron-bridge'");
     expect(view).not.toMatch(/function getElectronBridge\b/);
     expect(view).not.toContain('window.electronAPI');
   });

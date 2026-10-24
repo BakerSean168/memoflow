@@ -1,8 +1,11 @@
-import { AIProvider as AIProviderContract, type AIProvider as IAIProvider } from '@memoflow/contracts/ai';
+import {
+  AIProvider as AIProviderContract,
+  type AIProvider as IAIProvider,
+} from '@memoflow/contracts/ai';
 
 /**
  * AIProvider 枚举类型
- * 
+ *
  * 【规范说明：枚举与常量对象规范】
  */
 

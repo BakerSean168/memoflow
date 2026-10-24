@@ -41,10 +41,15 @@ export function toAITransportFailure(
     message: failure.message,
     ...(failure.context ? { context: { requestId: failure.context.requestId } } : {}),
     statusCode: errorCodeToHttpStatus(failure.code),
-    ...(failure.code === 'RATE_LIMITED' ? { failure: {
-      code: 'RATE_LIMITED', category: 'rate_limited' as const,
-      ...(failure.details ? { details: failure.details } : {}),
-      ...(failure.retryHint ? { retryHint: failure.retryHint } : {}),
-    } } : {}),
+    ...(failure.code === 'RATE_LIMITED'
+      ? {
+          failure: {
+            code: 'RATE_LIMITED',
+            category: 'rate_limited' as const,
+            ...(failure.details ? { details: failure.details } : {}),
+            ...(failure.retryHint ? { retryHint: failure.retryHint } : {}),
+          },
+        }
+      : {}),
   };
 }

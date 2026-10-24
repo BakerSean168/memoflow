@@ -74,7 +74,10 @@ describe('DeleteAIProviderUseCase', () => {
       ok: false,
       error: { code: 'CONFLICT' },
     });
-    expect(agentInstances.hasConnectionBindings).toHaveBeenCalledWith('identity-1', String(provider.id));
+    expect(agentInstances.hasConnectionBindings).toHaveBeenCalledWith(
+      'identity-1',
+      String(provider.id),
+    );
     expect(repository.delete).not.toHaveBeenCalled();
     expect(secretVault.revoke).not.toHaveBeenCalled();
   });

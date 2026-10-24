@@ -64,8 +64,14 @@ export type AIRpcMap = {
     { streamId: string; command: AssistantRuntimeClientCommand },
     void,
   ];
-  'ai:runtime:assistant:answer': [AssistantRuntimeToolAnswerCommand, AssistantRuntimeToolAnswerResult];
-  'ai:runtime:assistant:ask-user-pending': [AssistantRuntimeHistoryClientRequest, AssistantRuntimeAskUserSuspension[]];
+  'ai:runtime:assistant:answer': [
+    AssistantRuntimeToolAnswerCommand,
+    AssistantRuntimeToolAnswerResult,
+  ];
+  'ai:runtime:assistant:ask-user-pending': [
+    AssistantRuntimeHistoryClientRequest,
+    AssistantRuntimeAskUserSuspension[],
+  ];
   'ai:runtime:assistant:approval': [
     AssistantRuntimeApprovalCommand,
     AssistantRuntimeApprovalResult,

@@ -15,30 +15,36 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = { ...({} as any),
+export const Default: Story = {
+  ...({} as any),
   args: {
     label: 'My Issues',
   },
 };
 
-export const Active: Story = { ...({} as any),
+export const Active: Story = {
+  ...({} as any),
   args: {
     label: 'My Issues',
     active: true,
   },
 };
 
-export const WithCount: Story = { ...({} as any),
+export const WithCount: Story = {
+  ...({} as any),
   args: {
     label: 'Inbox',
     count: 12,
   },
 };
 
-export const WithIcon: Story = { ...({} as any),
+export const WithIcon: Story = {
+  ...({} as any),
   render: (args: any) => ({
     components: { LinearSidebarItem },
-    setup() { return { args }; },
+    setup() {
+      return { args };
+    },
     template: `
       <LinearSidebarItem v-bind="args">
         <template #icon>📋</template>
@@ -52,7 +58,8 @@ export const WithIcon: Story = { ...({} as any),
   },
 };
 
-export const SidebarExample: Story = { ...({} as any),
+export const SidebarExample: Story = {
+  ...({} as any),
   render: (args: any) => ({
     components: { LinearSidebarItem },
     template: `

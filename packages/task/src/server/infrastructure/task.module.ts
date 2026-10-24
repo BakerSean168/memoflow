@@ -257,7 +257,11 @@ export function createTaskUseCases(dependencies: TaskModuleDependencies): TaskMo
       taskWriteTransactionRunner,
       dependencies.userTimeContextPort,
     ),
-    bindTaskToGoal: new BindTaskToGoalUseCase(taskPlanRepository, dependencies.userTimeContextPort, dependencies.goalReadPort),
+    bindTaskToGoal: new BindTaskToGoalUseCase(
+      taskPlanRepository,
+      dependencies.userTimeContextPort,
+      dependencies.goalReadPort,
+    ),
     unbindTaskFromGoal: new UnbindTaskFromGoalUseCase(
       taskPlanRepository,
       dependencies.userTimeContextPort,

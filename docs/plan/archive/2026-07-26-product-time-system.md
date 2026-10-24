@@ -249,13 +249,14 @@ status: done
 
 > **归档结果（2026-07-29）**：ADR-037 已采纳；W0–W8 + T10 与第二阶段 P1–P11 已实施（PR #191/#192）。  
 > 宪法仍为 ADR-037 + `docs/architecture/product-time-system.md`；本文件为实施历史。
+
 ### 10.4 下一刀详设 — **P1：Empty Catalog + 组件 format 命名归零**
 
 #### 问题
 
-- app-vue 仍有 **~35** 处「`function formatDate` → `formatProductDate`」薄封装。  
-- 差异几乎全在 **empty 字符串**：`t('goal.detail.notSet')` / `'-'` / `'—'` / `'N/A'` / `'Not set'` / `t('common.unknown')`。  
-- dual residual **1240** 等锁的是这些 empty，不是第二套 format 算法。  
+- app-vue 仍有 **~35** 处「`function formatDate` → `formatProductDate`」薄封装。
+- 差异几乎全在 **empty 字符串**：`t('goal.detail.notSet')` / `'-'` / `'—'` / `'N/A'` / `'Not set'` / `t('common.unknown')`。
+- dual residual **1240** 等锁的是这些 empty，不是第二套 format 算法。
 - ADR 成功图像要求：**apps 无产品私有 formatDate/formatTime**（测试除外）。
 
 #### 架构决策
@@ -263,43 +264,45 @@ status: done
 1. **Empty 是产品词，不是第二套 Format。**  
    引入 **Empty Catalog**（建议放 `app-vue` i18n/常量 + react 对称英文表，或 contracts 极薄 `TimeEmptyKind` 枚举）：
 
-   | kind | 语义 | 示例解析 |
-   |------|------|----------|
-   | `emdash` | 列表默认空 | `—` / Style 默认 |
-   | `dash` | 紧凑空 | `-` |
-   | `notSet` | 表单/详情「未设置」 | i18n `*.notSet` / EN `Not set` |
-   | `na` | 调度/不可用 | `N/A` |
-   | `unknown` | 损坏/未知 | i18n `common.unknown` / EN `Unknown` |
-   | `blank` | 输入空 | `''` |
+   | kind      | 语义                | 示例解析                             |
+   | --------- | ------------------- | ------------------------------------ |
+   | `emdash`  | 列表默认空          | `—` / Style 默认                     |
+   | `dash`    | 紧凑空              | `-`                                  |
+   | `notSet`  | 表单/详情「未设置」 | i18n `*.notSet` / EN `Not set`       |
+   | `na`      | 调度/不可用         | `N/A`                                |
+   | `unknown` | 损坏/未知           | i18n `common.unknown` / EN `Unknown` |
+   | `blank`   | 输入空              | `''`                                 |
 
 2. **调用约定（L5）：**
 
    ```ts
    // 禁止
-   function formatDate(v) { return v == null ? t('…') : formatProductDate(v) }
+   function formatDate(v) {
+     return v == null ? t('…') : formatProductDate(v);
+   }
 
    // 允许
-   formatProductDate(v, emptyNotSet(t))           // 或
-   getProductTime().format.date(v, { empty: { display: t('…') } })
+   formatProductDate(v, emptyNotSet(t)); // 或
+   getProductTime().format.date(v, { empty: { display: t('…') } });
    ```
 
 3. **L4 仅在「业务句子」时保留本地函数**（例如 `formatSuggestion` 拼 moveEarlier 整句）——内部时钟片段必须 facade，且 **不**再叫 `formatDate`。
 
-4. **Surface：**  
-   - residual 1240 从「多 body 形状 dual」改为 **Empty Catalog 契约锁**（kinds 集合 + 解析结果）。  
+4. **Surface：**
+   - residual 1240 从「多 body 形状 dual」改为 **Empty Catalog 契约锁**（kinds 集合 + 解析结果）。
    - 组件内 `function formatDate` **期望归零**（spec 改断言「不存在 local formatDate」）。
 
 #### 完成定义（P1 DoD）
 
-- [x] app-vue modules/layouts 中 **零** `function formatDate|formatTime|formatDateTime|formatTimestamp`（presentation L4 业务句与 duration 除外，清单进 Registry `boundary`）。  
-- [x] Empty Catalog 有单一模块 + 单测；Style.empty 为默认 kind。  
-- [x] residual 1240/1204/1216 文档与 surface 改为 catalog 锁，不再锁组件本地 body。  
+- [x] app-vue modules/layouts 中 **零** `function formatDate|formatTime|formatDateTime|formatTimestamp`（presentation L4 业务句与 duration 除外，清单进 Registry `boundary`）。
+- [x] Empty Catalog 有单一模块 + 单测；Style.empty 为默认 kind。
+- [x] residual 1240/1204/1216 文档与 surface 改为 catalog 锁，不再锁组件本地 body。
 - [x] 最近 nx test（app-vue surfaces + 触及模块）绿。
 
 #### 非目标（P1）
 
-- 不合并 dashboard **相对时间**（→ P3）。  
-- 不合并 SSE 1207（→ P3/P9 exemption 或产品统一后再收）。  
+- 不合并 dashboard **相对时间**（→ P3）。
+- 不合并 SSE 1207（→ P3/P9 exemption 或产品统一后再收）。
 - 不改 Goal aggregate `Date` getter（→ P7）。
 
 #### 预估触点
@@ -310,23 +313,23 @@ GoalDetail / TaskDetail / ScheduleTaskDetail / RuleCard / ReminderTemplateCard /
 
 ### 10.5 第 2 刀 — **P2：跨端 Session Facade 对称**
 
-| 项 | 内容 |
-|----|------|
-| **现状** | vue：`getProductTime` session；react：GoalCard/TaskDetail/… **各自** `createTimeFacade({ locale, empty })` |
-| **目标** | `packages/app-react` 提供 `getProductTime` / `setProductTimeStyle`（与 vue 同语义）；Screen 只消费 session |
-| **收益** | 改 empty/locale 一处；FixedClock 测试可注入 |
-| **DoD** | react 业务文件 `createTimeFacade` 仅 bootstrap + test；utils soles 改用 session |
-| **可与 P1 并行** | 是（接口先落地再迁调用） |
+| 项               | 内容                                                                                                       |
+| ---------------- | ---------------------------------------------------------------------------------------------------------- |
+| **现状**         | vue：`getProductTime` session；react：GoalCard/TaskDetail/… **各自** `createTimeFacade({ locale, empty })` |
+| **目标**         | `packages/app-react` 提供 `getProductTime` / `setProductTimeStyle`（与 vue 同语义）；Screen 只消费 session |
+| **收益**         | 改 empty/locale 一处；FixedClock 测试可注入                                                                |
+| **DoD**          | react 业务文件 `createTimeFacade` 仅 bootstrap + test；utils soles 改用 session                            |
+| **可与 P1 并行** | 是（接口先落地再迁调用）                                                                                   |
 
 ---
 
 ### 10.6 第 3 刀 — **P3：Relative 与「真异」展示边界**
 
-| 路径 | 策略 |
-|------|------|
-| **DashboardActivityTimeline**（1237 相对波段） | 迁入 `format.relative`；Style.relative.maxAgeMs / 文案 key 表（L4 只提供 t） |
-| **SSE formatMessageTime（1207）** | **产品二选一**：① 统一 `format.hm`/`dateTime` → 删 keep-boundary；② 登记 exemption「monitor raw locale clock」长期 boundary |
-| **Weight / Focus 等已 product-time 的 soft 1237** | P1 后仅剩命名，随 P1 消失 |
+| 路径                                              | 策略                                                                                                                        |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **DashboardActivityTimeline**（1237 相对波段）    | 迁入 `format.relative`；Style.relative.maxAgeMs / 文案 key 表（L4 只提供 t）                                                |
+| **SSE formatMessageTime（1207）**                 | **产品二选一**：① 统一 `format.hm`/`dateTime` → 删 keep-boundary；② 登记 exemption「monitor raw locale clock」长期 boundary |
+| **Weight / Focus 等已 product-time 的 soft 1237** | P1 后仅剩命名，随 P1 消失                                                                                                   |
 
 **DoD：** 相对时间无组件内手写 `Date.now()-ts` 分桶（或仅经 facade 钩子）；1207 有明确 Registry 终态。
 
@@ -334,8 +337,8 @@ GoalDetail / TaskDetail / ScheduleTaskDetail / RuleCard / ReminderTemplateCard /
 
 ### 10.7 第 4 刀 — **P4：Duration 类型谱**
 
-| 现状 | 目标 |
-|------|------|
+| 现状                                                                                                                                   | 目标                                                                                                                                                                            |
+| -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `formatScheduleDurationMinutes`、`formatTaskDuration`、ConflictAlert ms floor、TaskDependencyGraph minutes、AI `formatDurationMs` 多套 | **`DurationMs` / `DurationMin` brand**（contracts）+ `format.duration`（Style.duration）+ **至多一个** L4 i18n 适配器（`schedule.duration.*` vs `task.*` 用字典而非第二套算术） |
 
 **DoD：** 时长算术/拆 h+m 只在 time；模块只选 dictionary。Registry 标 duration boundary 若键集永久分叉。
@@ -344,8 +347,8 @@ GoalDetail / TaskDetail / ScheduleTaskDetail / RuleCard / ReminderTemplateCard /
 
 ### 10.8 第 5 刀 — **P5：Input 接缝（表单）**
 
-| 现状 | 目标 |
-|------|------|
+| 现状                                                                                                                                  | 目标                                                                                                            |
+| ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | `to-date-input` / `to-time-input` / `parse-date-input` / `combine-date-and-time` keep-boundary；TimeConfigSection `formatDateToInput` | 全部 **`time.input.*`**：`dateValue` / `timeValue` / `parseDate` / `combineYmdHm`；表单空用 `Style.empty.input` |
 
 **DoD：** 上述 keep-boundary 或改为 input 契约锁，或 dual-retired 到 input sole；TaskTemplateForm / CreateSchedule 无本地 combine。
@@ -354,8 +357,8 @@ GoalDetail / TaskDetail / ScheduleTaskDetail / RuleCard / ReminderTemplateCard /
 
 ### 10.9 第 6 刀 — **P6：日历 chrome（标题/轴）**
 
-| 现状 | 目标 |
-|------|------|
+| 现状                                                                                              | 目标                                                                                                                                          |
+| ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | ScheduleCalendarView / DayDetailSheet 用 `formatProductPattern('EEEE, yyyy MMMM d')` 等裸 pattern | Style.display 增加 **named slots**：`periodDay` / `periodMonth` / `periodWeekDay` / `chartMonthDay`；调用 `format.slot('periodDay', instant)` |
 
 **DoD：** 产品日历标题无散落 token 字符串（chart 可保留 pattern API 但进 Registry）。
@@ -366,16 +369,16 @@ GoalDetail / TaskDetail / ScheduleTaskDetail / RuleCard / ReminderTemplateCard /
 
 **库存（抽样，实施前全量 CodeGraph/rg）：**
 
-- `goal` aggregate：`startDate` / `targetDate` / `completedAt` / `archivedAt` / `createdAt`… 仍 `Date`  
-- `account`：`createdAt` / `updatedAt` / `deletedAt`  
-- `key-result` / `goal-folder` / `focus-session` 等审计与会话时间  
+- `goal` aggregate：`startDate` / `targetDate` / `completedAt` / `archivedAt` / `createdAt`… 仍 `Date`
+- `account`：`createdAt` / `updatedAt` / `deletedAt`
+- `key-result` / `goal-folder` / `focus-session` 等审计与会话时间
 
-| 策略 | 说明 |
-|------|------|
-| **产品时刻字段** | getter → `Instant`；内部 props 已是 ms 则删 `new Date` 包装 |
-| **日历日字段** | 已 Ymd 的保持；误用 Instant 午夜的改 Ymd |
-| **运算** | `extendTargetDate` 等改 `calendar.addDays` + clock，禁止 `getTime()+DAY_MS` 裸加（注意 DST，应用 calendar） |
-| **分期** | 先 goal 主路径 → task → account 审计字段 |
+| 策略             | 说明                                                                                                        |
+| ---------------- | ----------------------------------------------------------------------------------------------------------- |
+| **产品时刻字段** | getter → `Instant`；内部 props 已是 ms 则删 `new Date` 包装                                                 |
+| **日历日字段**   | 已 Ymd 的保持；误用 Instant 午夜的改 Ymd                                                                    |
+| **运算**         | `extendTargetDate` 等改 `calendar.addDays` + clock，禁止 `getTime()+DAY_MS` 裸加（注意 DST，应用 calendar） |
+| **分期**         | 先 goal 主路径 → task → account 审计字段                                                                    |
 
 **DoD：** 核心产品 VO/Aggregate 对外无 `Date` 时间 getter；mapper 仅 codec；领域测试 FixedClock。
 
@@ -383,10 +386,10 @@ GoalDetail / TaskDetail / ScheduleTaskDetail / RuleCard / ReminderTemplateCard /
 
 ### 10.11 第 8 刀 — **P8：Contracts residual 859 收敛**
 
-| 现状 | 目标 |
-|------|------|
+| 现状                                                                            | 目标                                                                |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
 | GoalTimeRange 等 domain `Instant` + DTO `TransferDate` **双 interface**（同构） | 真同构 → `export type GoalTimeRangeDTO = GoalTimeRange`（或反过来） |
-| 仍语义不同（Ymd vs Instant） | **保持**双 shape，字段名诚实（`startDay` vs `startAt`） |
+| 仍语义不同（Ymd vs Instant）                                                    | **保持**双 shape，字段名诚实（`startDay` vs `startAt`）             |
 
 **DoD：** 859 surface 只锁「真异语义」对；同构 dual 退休并记 dual-registry。
 
@@ -394,12 +397,12 @@ GoalDetail / TaskDetail / ScheduleTaskDetail / RuleCard / ReminderTemplateCard /
 
 ### 10.12 第 9 刀 — **P9：Lint / Registry 终态门禁**
 
-| 规则 | 作用 |
-|------|------|
-| 已有 | ban `date-fns` outside engine |
-| **新增** | ban 产品路径 `toLocaleDateString` / `toLocaleString` / `toLocaleTimeString`（allowlist：测试、stories、P3 exemption） |
-| **新增** | ban `function formatDate|formatTime|formatDateTime|formatTimestamp` 于 `packages/app-vue/src/modules/**`、`app-react/src/**`（allowlist：L4 presentation 清单、`**/__tests__`） |
-| **Registry** | `boundary` = 1207/duration 字典等；`canonical` = facade + product-time session；**legacy → 0** |
+| 规则         | 作用                                                                                                                  |
+| ------------ | --------------------------------------------------------------------------------------------------------------------- |
+| 已有         | ban `date-fns` outside engine                                                                                         |
+| **新增**     | ban 产品路径 `toLocaleDateString` / `toLocaleString` / `toLocaleTimeString`（allowlist：测试、stories、P3 exemption） |
+| **新增**     | ban `function formatDate                                                                                              | formatTime | formatDateTime | formatTimestamp`于`packages/app-vue/src/modules/**`、`app-react/src/**`（allowlist：L4 presentation 清单、`**/**tests**`） |
+| **Registry** | `boundary` = 1207/duration 字典等；`canonical` = facade + product-time session；**legacy → 0**                        |
 
 **DoD：** CI 红于新增散落；存量 allowlist 有 `retire_by` 或永久 reason。
 
@@ -409,8 +412,8 @@ GoalDetail / TaskDetail / ScheduleTaskDetail / RuleCard / ReminderTemplateCard /
 
 在 P1–P9 语义合并后：
 
-1. 重写 surface：从「双 body 文本 diff」→「catalog / facade 契约」。  
-2. 删除已无意义的 soft residual 注释噪声。  
+1. 重写 surface：从「双 body 文本 diff」→「catalog / facade 契约」。
+2. 删除已无意义的 soft residual 注释噪声。
 3. **禁止**为降文件数合并仍保护真旁路的锁（与 elegance plan 一致）。
 
 **DoD：** 时间相关 keep-boundary 文件数显著下降；剩余每条在 Time Registry 有 kind=boundary。
@@ -419,44 +422,44 @@ GoalDetail / TaskDetail / ScheduleTaskDetail / RuleCard / ReminderTemplateCard /
 
 ### 10.14 远期 — **P11（不排进当前里程碑）**
 
-- 多用户 **IANA timeZone** 写入 Style + Codec combine。  
-- 可选 **TemporalEngine** 替换 date-fns（调用方 0 改）。  
+- 多用户 **IANA timeZone** 写入 Style + Codec combine。
+- 可选 **TemporalEngine** 替换 date-fns（调用方 0 改）。
 - 与 agent-host 展示无关，独立里程碑。
 
 ---
 
 ### 10.15 与第一阶段成功图像的映射
 
-| 详设 §12 | 第一阶段 | 第二阶段刀 |
-|----------|----------|------------|
-| date-fns ⊆ engine | ✅ | — |
-| apps 无私有 formatDate/Time | ✅ | **P1 + P9** |
-| 改 empty.display 全局变 | ✅ 双端 session | **P2** |
-| FixedClock 文案可测 | ✅ | **P2 + P3** |
-| 无 DomainDate | ✅ | — |
-| 全天/生日 Ymd | 部分 ✅ | 字段扫尾随 **P7** |
-| Registry legacy→0 | ✅ canonical + documented boundaries | **P9** |
+| 详设 §12                    | 第一阶段                             | 第二阶段刀        |
+| --------------------------- | ------------------------------------ | ----------------- |
+| date-fns ⊆ engine           | ✅                                   | —                 |
+| apps 无私有 formatDate/Time | ✅                                   | **P1 + P9**       |
+| 改 empty.display 全局变     | ✅ 双端 session                      | **P2**            |
+| FixedClock 文案可测         | ✅                                   | **P2 + P3**       |
+| 无 DomainDate               | ✅                                   | —                 |
+| 全天/生日 Ymd               | 部分 ✅                              | 字段扫尾随 **P7** |
+| Registry legacy→0           | ✅ canonical + documented boundaries | **P9**            |
 
 ---
 
 ### 10.16 建议落地顺序（执行日历）
 
-| 迭代 | 刀 | 建议验证 |
-|------|-----|----------|
-| **立即下一迭代** | **P1** | app-vue surfaces + goal/task/schedule 抽测 |
-| 同迭代或 +1 | **P2** | app-react 目视 + 单测 session |
-| +1 | **P3**（含 1207 产品决议） | dashboard / notification |
-| +1 | **P4 + P5** | schedule/task form |
-| +1 | **P6** | calendar chrome |
-| 独立大 PR | **P7 → P8** | goal/account domain tests |
-| 收尾 | **P9 → P10** | governance-check + eslint |
+| 迭代             | 刀                         | 建议验证                                   |
+| ---------------- | -------------------------- | ------------------------------------------ |
+| **立即下一迭代** | **P1**                     | app-vue surfaces + goal/task/schedule 抽测 |
+| 同迭代或 +1      | **P2**                     | app-react 目视 + 单测 session              |
+| +1               | **P3**（含 1207 产品决议） | dashboard / notification                   |
+| +1               | **P4 + P5**                | schedule/task form                         |
+| +1               | **P6**                     | calendar chrome                            |
+| 独立大 PR        | **P7 → P8**                | goal/account domain tests                  |
+| 收尾             | **P9 → P10**               | governance-check + eslint                  |
 
 每刀：更新本 plan §7 residual 行；触及治理则 `memoflow:governance-check`。
 
 ### 10.17 决策摘要（第二阶段不可弱化）
 
-1. **薄封装不是完成态**——P1 必须打掉组件级 `formatDate*` 名。  
-2. **Empty 进 Catalog / Style，不进第二套 Format 实现。**  
-3. **真异语义（相对 vs 绝对、monitor locale、duration 字典）进 Registry boundary，不 force-merge。**  
-4. **领域 Date getter 是下一类根因债（P7），与 UI 命名归零分开排期，避免大爆炸 PR。**  
+1. **薄封装不是完成态**——P1 必须打掉组件级 `formatDate*` 名。
+2. **Empty 进 Catalog / Style，不进第二套 Format 实现。**
+3. **真异语义（相对 vs 绝对、monitor locale、duration 字典）进 Registry boundary，不 force-merge。**
+4. **领域 Date getter 是下一类根因债（P7），与 UI 命名归零分开排期，避免大爆炸 PR。**
 5. **Lint 终态（P9）在调用层干净之后再收紧，避免先红一片。**

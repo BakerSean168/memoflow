@@ -84,8 +84,8 @@ describe('Notification Module Lane Ownership Bootstrap (P0-1)', () => {
   });
 
   it('4. factory fails closed when options.instance is missing', () => {
-    expect(() =>
-      createNotificationApiModule({ instance: undefined as never }),
-    ).toThrow('[FAIL-CLOSED] createNotificationApiModule requires options.instance');
+    expect(() => createNotificationApiModule({ instance: undefined as never })).toThrow(
+      '[FAIL-CLOSED] createNotificationApiModule requires options.instance',
+    );
   });
 });

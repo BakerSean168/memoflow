@@ -156,16 +156,10 @@ const calendarMaxDate = computed(() =>
 );
 
 function isCandidateAllowed(value: GoalTimeframe): boolean {
-  if (
-    props.minEndBoundary &&
-    goalTimeframeEndBoundary(value) < props.minEndBoundary
-  ) {
+  if (props.minEndBoundary && goalTimeframeEndBoundary(value) < props.minEndBoundary) {
     return false;
   }
-  if (
-    props.maxStartBoundary &&
-    goalTimeframeStartBoundary(value) > props.maxStartBoundary
-  ) {
+  if (props.maxStartBoundary && goalTimeframeStartBoundary(value) > props.maxStartBoundary) {
     return false;
   }
   return true;
@@ -188,9 +182,7 @@ const disabledQuarters = computed(() => {
 const disabledHalves = computed(() => {
   const year = validYear();
   if (!year) return [];
-  return ([1, 2] as const).filter(
-    (half) => !isCandidateAllowed({ kind: 'halfYear', year, half }),
-  );
+  return ([1, 2] as const).filter((half) => !isCandidateAllowed({ kind: 'halfYear', year, half }));
 });
 
 function validYear(): number | null {

@@ -642,26 +642,78 @@ const ai_conversation_attention = new Table({
 
 // Profile-local committed Attention projection and replay log; never sync transport cursors.
 const ai_conversation_event_metadata = new Table({ epoch: column.text }, { localOnly: true });
-const ai_conversation_event_heads = new Table({ identity_id: column.text, sequence: column.integer, pruned_through: column.integer, last_pruned_at: column.integer }, { localOnly: true });
-const ai_conversation_event_states = new Table({ identity_id: column.text, conversation_id: column.text, resource_version: column.integer, payload_json: column.text, source_json: column.text, deleted: column.integer }, { localOnly: true });
-const ai_conversation_event_log = new Table({ identity_id: column.text, sequence: column.integer, resource_version: column.integer, payload_json: column.text, deleted: column.integer, captured_at: column.integer }, { localOnly: true });
+const ai_conversation_event_heads = new Table(
+  {
+    identity_id: column.text,
+    sequence: column.integer,
+    pruned_through: column.integer,
+    last_pruned_at: column.integer,
+  },
+  { localOnly: true },
+);
+const ai_conversation_event_states = new Table(
+  {
+    identity_id: column.text,
+    conversation_id: column.text,
+    resource_version: column.integer,
+    payload_json: column.text,
+    source_json: column.text,
+    deleted: column.integer,
+  },
+  { localOnly: true },
+);
+const ai_conversation_event_log = new Table(
+  {
+    identity_id: column.text,
+    sequence: column.integer,
+    resource_version: column.integer,
+    payload_json: column.text,
+    deleted: column.integer,
+    captured_at: column.integer,
+  },
+  { localOnly: true },
+);
 
 const ai_attention_event_metadata = new Table({ epoch: column.text }, { localOnly: true });
-const ai_attention_event_heads = new Table({
-  identity_id: column.text, sequence: column.integer, pruned_through: column.integer,
-  last_pruned_at: column.integer,
-}, { localOnly: true });
-const ai_attention_event_states = new Table({
-  identity_id: column.text, runtime_kind: column.text, conversation_id: column.text,
-  owner_row_id: column.text, resource_version: column.integer,
-  source_state: column.text, source_revision: column.integer, seen_revision: column.integer,
-  run_id: column.text, updated_at: column.integer, expires_at: column.integer,
-  expired: column.integer, deleted: column.integer, payload_json: column.text,
-}, { localOnly: true });
-const ai_attention_event_log = new Table({
-  identity_id: column.text, sequence: column.integer, resource_version: column.integer,
-  payload_json: column.text, deleted: column.integer, captured_at: column.integer,
-}, { localOnly: true });
+const ai_attention_event_heads = new Table(
+  {
+    identity_id: column.text,
+    sequence: column.integer,
+    pruned_through: column.integer,
+    last_pruned_at: column.integer,
+  },
+  { localOnly: true },
+);
+const ai_attention_event_states = new Table(
+  {
+    identity_id: column.text,
+    runtime_kind: column.text,
+    conversation_id: column.text,
+    owner_row_id: column.text,
+    resource_version: column.integer,
+    source_state: column.text,
+    source_revision: column.integer,
+    seen_revision: column.integer,
+    run_id: column.text,
+    updated_at: column.integer,
+    expires_at: column.integer,
+    expired: column.integer,
+    deleted: column.integer,
+    payload_json: column.text,
+  },
+  { localOnly: true },
+);
+const ai_attention_event_log = new Table(
+  {
+    identity_id: column.text,
+    sequence: column.integer,
+    resource_version: column.integer,
+    payload_json: column.text,
+    deleted: column.integer,
+    captured_at: column.integer,
+  },
+  { localOnly: true },
+);
 
 const ai_execution_records = new Table({
   identity_id: column.text,

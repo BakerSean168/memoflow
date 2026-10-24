@@ -60,7 +60,8 @@ describe('composeSchedule physical Scheduler/Calendar boundary', () => {
   it('builds the canonical invocation runtime before Scheduler and then binds both transports', () => {
     composeSchedule({ calendarRepositories, schedulerRepositories, handlerRegistry });
 
-    const runtimeOrder = vi.mocked(createScheduledInvocationRuntimeContribution).mock.invocationCallOrder[0];
+    const runtimeOrder = vi.mocked(createScheduledInvocationRuntimeContribution).mock
+      .invocationCallOrder[0];
     const schedulerOrder = vi.mocked(createSchedulerModule).mock.invocationCallOrder[0];
     const schedulerApiOrder = vi.mocked(createSchedulerApiModule).mock.invocationCallOrder[0];
     const calendarOrder = vi.mocked(createScheduleModule).mock.invocationCallOrder[0];
@@ -91,7 +92,10 @@ describe('composeSchedule physical Scheduler/Calendar boundary', () => {
       eventDeliveryLogConsumer: calendarRepositories.eventDeliveryLogConsumer,
       auditRepository: calendarRepositories.auditRepository,
     });
-    const schedulerCall = vi.mocked(createSchedulerModule).mock.calls[0][0] as Record<string, unknown>;
+    const schedulerCall = vi.mocked(createSchedulerModule).mock.calls[0][0] as Record<
+      string,
+      unknown
+    >;
     expect(schedulerCall).not.toHaveProperty('scheduleTaskRepository');
     expect(schedulerCall).not.toHaveProperty('scheduleExecutionRepository');
   });
@@ -111,7 +115,11 @@ describe('composeSchedule physical Scheduler/Calendar boundary', () => {
   });
 
   it('returns sibling Calendar and Scheduler handles without exposing worker persistence', () => {
-    const result = composeSchedule({ calendarRepositories, schedulerRepositories, handlerRegistry });
+    const result = composeSchedule({
+      calendarRepositories,
+      schedulerRepositories,
+      handlerRegistry,
+    });
     expect(result.calendarModule.name).toBe('Schedule');
     expect(result.schedulerModule.name).toBe('Scheduler');
     expect(result.repositories.scheduleRepository).toBe(calendarRepositories.scheduleRepository);

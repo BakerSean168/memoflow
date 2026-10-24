@@ -163,17 +163,17 @@
 
 **第一轮：基础 branded ID + 类型分层**
 
-| 步骤 | 范围 | 操作 |
-|------|------|------|
-| 1.1 | aggregates/*.ts (6 files) | 裸 `id: string` → branded primitive（`TaskTemplateId`, `TaskInstanceId`, `TaskDependencyId`, `IdentityId`, `TaskFolderId` 等）|
-| 1.2 | entities/*.ts (2 files) | `SubtaskServerDTO.id` → `SubtaskId` |
-| 1.3 | api/task-dependency.dto.ts | **新建**：将 `CreateTaskDependencyRequest` 等 transport 类型从 `aggregates/` 搬入 |
-| 1.4 | aggregates/index.ts | 删除已搬迁的 transport 类型导出，解决 TS2308 重复导出 |
-| 1.5 | domain/events/*.ts (14 files) | 事件 payload 的 `identityId`, `templateId`, `goalId` 等切 branded |
-| 1.6 | value-objects/task-goal-binding.ts | `goalId: string` → `GoalId`, `keyResultId` → `KeyResultId` |
-| 1.7 | api/response-schemas.ts | `TaskDependencyResponseSchema` 用 `brandedId<T>()` 替换 `z.string()` |
-| 1.8 | api/task-template.dto.ts | `templateId: z.string().optional()` → `brandedId<TaskTemplateId>().optional()` |
-| 1.9 | task-dependency.routes.ts | 删除所有 inline schema，改为从 contracts 导入 |
+| 步骤 | 范围                               | 操作                                                                                                                           |
+| ---- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| 1.1  | aggregates/*.ts (6 files)          | 裸 `id: string` → branded primitive（`TaskTemplateId`, `TaskInstanceId`, `TaskDependencyId`, `IdentityId`, `TaskFolderId` 等） |
+| 1.2  | entities/*.ts (2 files)            | `SubtaskServerDTO.id` → `SubtaskId`                                                                                            |
+| 1.3  | api/task-dependency.dto.ts         | **新建**：将 `CreateTaskDependencyRequest` 等 transport 类型从 `aggregates/` 搬入                                              |
+| 1.4  | aggregates/index.ts                | 删除已搬迁的 transport 类型导出，解决 TS2308 重复导出                                                                          |
+| 1.5  | domain/events/*.ts (14 files)      | 事件 payload 的 `identityId`, `templateId`, `goalId` 等切 branded                                                              |
+| 1.6  | value-objects/task-goal-binding.ts | `goalId: string` → `GoalId`, `keyResultId` → `KeyResultId`                                                                     |
+| 1.7  | api/response-schemas.ts            | `TaskDependencyResponseSchema` 用 `brandedId<T>()` 替换 `z.string()`                                                           |
+| 1.8  | api/task-template.dto.ts           | `templateId: z.string().optional()` → `brandedId<TaskTemplateId>().optional()`                                                 |
+| 1.9  | task-dependency.routes.ts          | 删除所有 inline schema，改为从 contracts 导入                                                                                  |
 
 **消费者修复**：约 27 个编译错误通过 `as BrandType` cast 修复，涉及 domain-server aggregates、mappers、stores、mocks。
 
@@ -181,37 +181,37 @@
 
 用户反馈第一轮结果"方向对了，但不能算完成"，指出 5 类残留问题：
 
-| # | 问题 | 修复 |
-|---|------|------|
-| 9 | Response schema 是影子结构 | 重写 `TaskTemplateResponseSchema` / `TaskInstanceResponseSchema` 为完整 DTO 对齐 |
-| 10 | `CreateTaskDependencyRequest` 混合 transport/internal | 拆分为 `CreateTaskDependencyBody`（transport）与 `CreateTaskDependencyRequest`（internal with identityId）|
-| 11 | Dependency 返回类型三套不一致 | controller 返回 ServerDTO → ClientDTO；use case 加 `dependencyServerToClientDTO()` 转换；response schema 对齐 |
-| 12 | `readonly` 不统一 | 从 dependency client DTO 移除所有 `readonly`，对齐 template/instance DTO |
-| 13 | 路由层仍有 inline schema | controller 导入 contracts schemas 替代本地定义；route query `folderId/goalId/templateId` 切 branded |
+| #   | 问题                                                  | 修复                                                                                                          |
+| --- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| 9   | Response schema 是影子结构                            | 重写 `TaskTemplateResponseSchema` / `TaskInstanceResponseSchema` 为完整 DTO 对齐                              |
+| 10  | `CreateTaskDependencyRequest` 混合 transport/internal | 拆分为 `CreateTaskDependencyBody`（transport）与 `CreateTaskDependencyRequest`（internal with identityId）    |
+| 11  | Dependency 返回类型三套不一致                         | controller 返回 ServerDTO → ClientDTO；use case 加 `dependencyServerToClientDTO()` 转换；response schema 对齐 |
+| 12  | `readonly` 不统一                                     | 从 dependency client DTO 移除所有 `readonly`，对齐 template/instance DTO                                      |
+| 13  | 路由层仍有 inline schema                              | controller 导入 contracts schemas 替代本地定义；route query `folderId/goalId/templateId` 切 branded           |
 
 **第三轮：深层 contract 一致性修复**
 
 用户反馈第二轮"明显进步，但公开 contract 仍不一致"，指出 4 个残留问题：
 
-| # | 问题 | 修复 |
-|---|------|------|
-| 15 | by-date-range 的 contracts/client/runtime 三层不一致 | 最终统一为"时间戳 number"：`GetTaskInstancesByRangeSchema`、client port、HTTP/IPC adapter、controller 全部对齐 |
-| 16 | `TaskDependencyClientDTO` 的 `version`/`deletedAt` 是硬编码假值 | 从 DTO、converter、response schema 中彻底移除这俩字段（server DTO 根本没有） |
-| 17 | Response schema 嵌套值对象 shape 错误 | `TaskTimeConfigSchema` → 匹配 `TaskTimeConfigDTO`（timeType/startDate/timePoint/timeRange）；`RecurrenceRuleSchema` → 匹配 `RecurrenceRuleDTO`（daysOfWeek 替代 byWeekDay/byMonthDay）；`TaskReminderConfigSchema` → 匹配 `TaskReminderConfigDTO`（triggers 替代 offsets/channels）|
-| 18 | Template list/graph query 与 `ListTaskTemplateFiltersSchema` 不一致 | route query schema 改为导入 `ListTaskTemplateFiltersSchema`（status/tags 为数组）；`parseTemplateFilters` 不再逗号拆分 |
+| #   | 问题                                                                | 修复                                                                                                                                                                                                                                                                                |
+| --- | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 15  | by-date-range 的 contracts/client/runtime 三层不一致                | 最终统一为"时间戳 number"：`GetTaskInstancesByRangeSchema`、client port、HTTP/IPC adapter、controller 全部对齐                                                                                                                                                                      |
+| 16  | `TaskDependencyClientDTO` 的 `version`/`deletedAt` 是硬编码假值     | 从 DTO、converter、response schema 中彻底移除这俩字段（server DTO 根本没有）                                                                                                                                                                                                        |
+| 17  | Response schema 嵌套值对象 shape 错误                               | `TaskTimeConfigSchema` → 匹配 `TaskTimeConfigDTO`（timeType/startDate/timePoint/timeRange）；`RecurrenceRuleSchema` → 匹配 `RecurrenceRuleDTO`（daysOfWeek 替代 byWeekDay/byMonthDay）；`TaskReminderConfigSchema` → 匹配 `TaskReminderConfigDTO`（triggers 替代 offsets/channels） |
+| 18  | Template list/graph query 与 `ListTaskTemplateFiltersSchema` 不一致 | route query schema 改为导入 `ListTaskTemplateFiltersSchema`（status/tags 为数组）；`parseTemplateFilters` 不再逗号拆分                                                                                                                                                              |
 
 **第四轮：传输面收口 + client port / adapter 一致性修复**
 
 第三轮之后，又暴露出一类更隐蔽的问题：contracts、route、controller 已经对齐，但 application-client port、HTTP adapter、IPC adapter、前端调用点仍然保留旧 shape。
 
-| # | 问题 | 修复 |
-|---|------|------|
-| 19 | `check-expired` 在 route/controller 返回数组，但 client port / adapter / service 期望 `{ count, instances }` | 把该接口统一为命名 object response；HTTP、IPC、controller、response schema 同步对齐 |
-| 20 | `templateApi.getInstancesByDateRange()` 方法名和真实路由语义不一致 | 给 `GET /task-templates/:id/instances` 补上 `from/to` query 过滤，并让 HTTP/IPC/controller 都复用同一语义 |
-| 21 | `TaskTemplateListParams` 仍是本地影子接口 | 让其以 `ListTaskTemplateFilters` 为核心对齐，前端调用点同步改为传 `status[]` |
-| 22 | request 值对象 schema 用 `z.custom()` 伪校验 | 改为真实字段级 Zod schema，并作为 request/response 共用真值 |
-| 23 | `ValidateDependencyResponse` 只在 contracts 层存在，application 仍自定义 `ValidateDependencyResult` | use case / controller 改为直接复用 contracts 类型，消除影子返回类型 |
-| 24 | 路由 contract 没有专项测试，编译通过也抓不住 shape 漂移 | 将 route contract 级测试纳入每波固定任务，作为与 typecheck / build 并列的必做项 |
+| #   | 问题                                                                                                         | 修复                                                                                                      |
+| --- | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| 19  | `check-expired` 在 route/controller 返回数组，但 client port / adapter / service 期望 `{ count, instances }` | 把该接口统一为命名 object response；HTTP、IPC、controller、response schema 同步对齐                       |
+| 20  | `templateApi.getInstancesByDateRange()` 方法名和真实路由语义不一致                                           | 给 `GET /task-templates/:id/instances` 补上 `from/to` query 过滤，并让 HTTP/IPC/controller 都复用同一语义 |
+| 21  | `TaskTemplateListParams` 仍是本地影子接口                                                                    | 让其以 `ListTaskTemplateFilters` 为核心对齐，前端调用点同步改为传 `status[]`                              |
+| 22  | request 值对象 schema 用 `z.custom()` 伪校验                                                                 | 改为真实字段级 Zod schema，并作为 request/response 共用真值                                               |
+| 23  | `ValidateDependencyResponse` 只在 contracts 层存在，application 仍自定义 `ValidateDependencyResult`          | use case / controller 改为直接复用 contracts 类型，消除影子返回类型                                       |
+| 24  | 路由 contract 没有专项测试，编译通过也抓不住 shape 漂移                                                      | 将 route contract 级测试纳入每波固定任务，作为与 typecheck / build 并列的必做项                           |
 
 #### Wave 1 关键经验教训
 
@@ -456,13 +456,13 @@ branded ID 扩散到 aggregate DTO 后，下游 ~27 个文件出现编译错误�
 以下字段在本轮后仍保留为 `unknown` 或 JSON record，这属于有意识设计，而不是遗漏：
 
 1. 错误详情与动态 metadata。
-说明：如 [shared.ts](D:/home/projects/memoflow/packages/contracts/src/shared/shared.ts:27)、`notification` / `repository` / `editor` / `ai` 的 metadata 字段，需要承载跨模块或外部来源的开放 JSON。
+   说明：如 [shared.ts](D:/home/projects/memoflow/packages/contracts/src/shared/shared.ts:27)、`notification` / `repository` / `editor` / `ai` 的 metadata 字段，需要承载跨模块或外部来源的开放 JSON。
 
 2. 调度任务 payload / result。
-说明：`schedule` 模块需要承载来源模块自定义载荷，强行结构化会把模块边界重新耦合起来。
+   说明：`schedule` 模块需要承载来源模块自定义载荷，强行结构化会把模块边界重新耦合起来。
 
 3. 用户偏好 patch 与通知分类细分配置。
-说明：`setting` 的 patch 请求和 `notification` 的分类偏好本质上是可扩展配置面，使用 `unknown`/JSON record 是刻意保留扩展能力。
+   说明：`setting` 的 patch 请求和 `notification` 的分类偏好本质上是可扩展配置面，使用 `unknown`/JSON record 是刻意保留扩展能力。
 
 ## 最终验收结论
 

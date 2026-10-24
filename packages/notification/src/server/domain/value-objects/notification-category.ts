@@ -1,8 +1,11 @@
-import { NotificationCategory as NotificationCategoryContract, type NotificationCategory as INotificationCategory } from '@memoflow/contracts/notification';
+import {
+  NotificationCategory as NotificationCategoryContract,
+  type NotificationCategory as INotificationCategory,
+} from '@memoflow/contracts/notification';
 
 /**
  * 📝 通知分类 - 通知所属的业务分类
- * 
+ *
  * Branded Type：运行时为 string，编译时具有类型安全性
  * 零序列化成本，内存开销极小
  */
@@ -21,7 +24,7 @@ const VALUES: INotificationCategory[] = Object.values(NotificationCategoryContra
  */
 export const NotificationCategory = {
   // ================= 常量定义 =================
-  
+
   Task: 'Task' as NotificationCategory,
   Goal: 'Goal' as NotificationCategory,
   Schedule: 'Schedule' as NotificationCategory,

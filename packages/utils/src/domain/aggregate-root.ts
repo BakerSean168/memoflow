@@ -8,7 +8,6 @@ export abstract class AggregateRoot<TId extends string | number | Equatable> ext
     return [...this._domainEvents];
   }
 
-
   /**
    * ✅ 优化点 2：自动封装元数据
    * 接收 type 和 payload，自动生成 aggregateId 和 occurredAt
@@ -20,10 +19,10 @@ export abstract class AggregateRoot<TId extends string | number | Equatable> ext
       eventType,
       payload,
       // 自动处理 ID 转字符串 (假设你的 ID 有 toString 方法或本身就是 string)
-      aggregateId: this.getIdAsString(), 
-      occurredAt: new Date()
+      aggregateId: this.getIdAsString(),
+      occurredAt: new Date(),
     };
-    
+
     this._domainEvents.push(event);
   }
 
@@ -44,6 +43,6 @@ export abstract class AggregateRoot<TId extends string | number | Equatable> ext
     if (typeof this.id === 'string') return this.id;
     if (typeof this.id === 'number') return this.id.toString();
     // 如果是值对象，调用 toString()
-    return String(this.id); 
+    return String(this.id);
   }
 }

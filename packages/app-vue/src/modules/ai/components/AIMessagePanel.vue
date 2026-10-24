@@ -68,7 +68,9 @@
                 {{ t(`aiAssistant.chatPage.tools.capabilities.${item.toolActivity.toolName}`) }}
               </p>
               <p
-                v-for="activity in item.toolActivities?.filter((call) => call.state !== 'running') ?? []"
+                v-for="activity in item.toolActivities?.filter(
+                  (call) => call.state !== 'running',
+                ) ?? []"
                 :key="activity.toolCallId"
                 class="mb-2 text-xs text-muted-foreground"
                 data-testid="ai-tool-history"
@@ -136,27 +138,85 @@
                 :request="request"
                 @respond="$emit('native-response', request, $event)"
               />
-              <section v-for="request in item.askUserRequests ?? []" :key="`${request.runId}:${request.toolCallId}`" class="mb-3 space-y-3 rounded-xl border p-3" data-testid="ai-ask-user-request">
+              <section
+                v-for="request in item.askUserRequests ?? []"
+                :key="`${request.runId}:${request.toolCallId}`"
+                class="mb-3 space-y-3 rounded-xl border p-3"
+                data-testid="ai-ask-user-request"
+              >
                 <p class="text-sm font-medium">{{ request.question }}</p>
-                <p class="text-xs text-muted-foreground" role="status">{{ t(`aiAssistant.local.${request.status}`) }}</p>
+                <p class="text-xs text-muted-foreground" role="status">
+                  {{ t(`aiAssistant.local.${request.status}`) }}
+                </p>
                 <p v-if="request.errorMessage" role="alert">{{ request.errorMessage }}</p>
-                <form v-if="request.status === 'pending' || request.status === 'sending'" class="space-y-2" @submit.prevent="$emit('ask-user-answer', request, askUserAnswers[request.toolCallId] ?? '')">
-                  <label v-if="request.options && request.selectionMode !== 'multi_select'" class="block space-y-1 text-sm">
+                <form
+                  v-if="request.status === 'pending' || request.status === 'sending'"
+                  class="space-y-2"
+                  @submit.prevent="
+                    $emit('ask-user-answer', request, askUserAnswers[request.toolCallId] ?? '')
+                  "
+                >
+                  <label
+                    v-if="request.options && request.selectionMode !== 'multi_select'"
+                    class="block space-y-1 text-sm"
+                  >
                     <span>{{ t('aiAssistant.local.chooseAnswer') }}</span>
-                    <select v-model="askUserAnswers[request.toolCallId]" class="block w-full rounded border bg-background p-2" required :disabled="request.status !== 'pending'">
+                    <select
+                      v-model="askUserAnswers[request.toolCallId]"
+                      class="block w-full rounded border bg-background p-2"
+                      required
+                      :disabled="request.status !== 'pending'"
+                    >
                       <option disabled value="">{{ t('aiAssistant.local.chooseAnswer') }}</option>
-                      <option v-for="option in request.options" :key="option.label" :value="option.label">{{ option.label }}</option>
+                      <option
+                        v-for="option in request.options"
+                        :key="option.label"
+                        :value="option.label"
+                      >
+                        {{ option.label }}
+                      </option>
                     </select>
                   </label>
                   <template v-else-if="request.options && request.selectionMode === 'multi_select'">
-                    <label v-for="option in request.options" :key="option.label" class="flex items-center gap-2 text-sm">
-                      <input v-model="askUserAnswers[request.toolCallId]" type="checkbox" :value="option.label" :disabled="request.status !== 'pending'" />
+                    <label
+                      v-for="option in request.options"
+                      :key="option.label"
+                      class="flex items-center gap-2 text-sm"
+                    >
+                      <input
+                        v-model="askUserAnswers[request.toolCallId]"
+                        type="checkbox"
+                        :value="option.label"
+                        :disabled="request.status !== 'pending'"
+                      />
                       {{ option.label }}
                     </label>
                   </template>
-                  <input v-else v-model="askUserAnswers[request.toolCallId]" class="w-full rounded border bg-background p-2" :maxlength="4000" required :disabled="request.status !== 'pending'" />
-                  <button type="submit" class="rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground disabled:opacity-50" :disabled="request.status !== 'pending'" data-testid="ai-ask-user-submit">{{ t('aiAssistant.local.answer') }}</button>
-                  <button type="button" class="rounded-md border px-3 py-2 text-sm disabled:opacity-50" :disabled="request.status !== 'pending'" data-testid="ai-ask-user-cancel" @click="$emit('ask-user-cancel', request)">{{ t('aiAssistant.local.cancel') }}</button>
+                  <input
+                    v-else
+                    v-model="askUserAnswers[request.toolCallId]"
+                    class="w-full rounded border bg-background p-2"
+                    :maxlength="4000"
+                    required
+                    :disabled="request.status !== 'pending'"
+                  />
+                  <button
+                    type="submit"
+                    class="rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground disabled:opacity-50"
+                    :disabled="request.status !== 'pending'"
+                    data-testid="ai-ask-user-submit"
+                  >
+                    {{ t('aiAssistant.local.answer') }}
+                  </button>
+                  <button
+                    type="button"
+                    class="rounded-md border px-3 py-2 text-sm disabled:opacity-50"
+                    :disabled="request.status !== 'pending'"
+                    data-testid="ai-ask-user-cancel"
+                    @click="$emit('ask-user-cancel', request)"
+                  >
+                    {{ t('aiAssistant.local.cancel') }}
+                  </button>
                 </form>
               </section>
               <details
@@ -172,12 +232,23 @@
               </details>
               <AIMessageContent
                 v-if="item.content.trim()"
-                :content="item.workflowInterruption ? getGoalWorkflowInterruptionMessage(item.workflowInterruption, t) : item.content"
+                :content="
+                  item.workflowInterruption
+                    ? getGoalWorkflowInterruptionMessage(item.workflowInterruption, t)
+                    : item.content
+                "
                 :muted="item.status === 'interrupted'"
-                v-bind="item.status === 'interrupted' ? { role: 'status', 'data-testid': 'ai-workflow-interruption' } : {}"
+                v-bind="
+                  item.status === 'interrupted'
+                    ? { role: 'status', 'data-testid': 'ai-workflow-interruption' }
+                    : {}
+                "
                 :generating="item.status === 'generating'"
               />
-              <p v-else-if="item.status === 'generating'" class="text-sm leading-7 text-muted-foreground">
+              <p
+                v-else-if="item.status === 'generating'"
+                class="text-sm leading-7 text-muted-foreground"
+              >
                 {{ typingPlaceholder(item) }}
               </p>
               <p
@@ -473,10 +544,21 @@ defineExpose({ viewport });
 const askUserAnswers = reactive<Record<string, string | string[]>>({});
 const { t } = useI18n();
 const { typingPlaceholder, getMessageStatusLabel } = useAIFormatters();
-const visibleTimeline = computed(() => props.timeline.filter((item) =>
-  item.role === 'user' || item.content.trim() || item.status !== 'success' ||
-  item.attachments?.length || item.toolActivity || item.toolActivities?.length ||
-  item.approvals?.length || item.nativeActivity || item.nativeActivities?.length ||
-  item.nativeRequests?.length || item.askUserRequests?.length || item.workflowInterruption,
-));
+const visibleTimeline = computed(() =>
+  props.timeline.filter(
+    (item) =>
+      item.role === 'user' ||
+      item.content.trim() ||
+      item.status !== 'success' ||
+      item.attachments?.length ||
+      item.toolActivity ||
+      item.toolActivities?.length ||
+      item.approvals?.length ||
+      item.nativeActivity ||
+      item.nativeActivities?.length ||
+      item.nativeRequests?.length ||
+      item.askUserRequests?.length ||
+      item.workflowInterruption,
+  ),
+);
 </script>

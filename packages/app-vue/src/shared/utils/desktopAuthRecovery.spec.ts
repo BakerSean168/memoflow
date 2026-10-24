@@ -29,11 +29,7 @@ describe('desktopAuthRecovery', () => {
     const invoke = vi.fn();
 
     await expect(
-      recoverDesktopAuthIfNeeded(
-        { code: 'INTERNAL_ERROR' },
-        { invoke },
-        'DesktopAuthRecoveryTest',
-      ),
+      recoverDesktopAuthIfNeeded({ code: 'INTERNAL_ERROR' }, { invoke }, 'DesktopAuthRecoveryTest'),
     ).resolves.toBe(false);
     expect(invoke).not.toHaveBeenCalled();
   });

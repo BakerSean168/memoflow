@@ -37,10 +37,7 @@ import {
   createSettingPrismaRepositories,
   createSettingRuntimeContribution,
 } from '@memoflow/setting';
-import {
-  createSettingApiModule,
-  type SettingApiModuleDef,
-} from '@memoflow/setting/api';
+import { createSettingApiModule, type SettingApiModuleDef } from '@memoflow/setting/api';
 
 /**
  * Dependencies the setting composer needs from the API host runtime.
@@ -81,9 +78,7 @@ export interface ComposeSettingDependencies {
  * @param dependencies - ComposeSettingDependencies with the runtime Prisma client.
  * @returns SettingApiModuleDef — an already-bound IApiModule-compatible handle.
  */
-export function composeSetting(
-  dependencies: ComposeSettingDependencies,
-): SettingApiModuleDef {
+export function composeSetting(dependencies: ComposeSettingDependencies): SettingApiModuleDef {
   const { userPreferenceRepository } = createSettingPrismaRepositories(dependencies.db);
 
   const instance = createSettingModule({

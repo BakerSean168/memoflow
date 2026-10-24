@@ -1,8 +1,11 @@
-import { TaskOccurrenceStatus as TaskOccurrenceStatusContract, type TaskOccurrenceStatus as ITaskOccurrenceStatus } from '@memoflow/contracts/task';
+import {
+  TaskOccurrenceStatus as TaskOccurrenceStatusContract,
+  type TaskOccurrenceStatus as ITaskOccurrenceStatus,
+} from '@memoflow/contracts/task';
 
 /**
  * 📝 任务实例状态 - 循环任务实例的生命周期状态
- * 
+ *
  * Branded Type：运行时为 string，编译时具有类型安全性
  * 零序列化成本，内存开销极小
  */
@@ -21,7 +24,7 @@ const VALUES: ITaskOccurrenceStatus[] = Object.values(TaskOccurrenceStatusContra
  */
 export const TaskOccurrenceStatus = {
   // ================= 常量定义 =================
-  
+
   Pending: 'Pending' as TaskOccurrenceStatus,
   InProgress: 'InProgress' as TaskOccurrenceStatus,
   Completed: 'Completed' as TaskOccurrenceStatus,

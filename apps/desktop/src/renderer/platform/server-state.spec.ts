@@ -14,8 +14,6 @@ describe('mapTablesToInvalidationIntents (plan §3.3 pilot table mapping)', () =
     ]);
   });
 
-
-
   it('emits one intent per pilot table for a mixed batch (deduped)', () => {
     const intents = mapTablesToInvalidationIntents(
       ['notifications', 'task_plans', 'notifications'],

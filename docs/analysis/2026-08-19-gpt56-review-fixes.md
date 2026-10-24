@@ -16,6 +16,7 @@ fixed here.
 ## 2. Fixes
 
 ### P1a — extractErrorInfo loses structured codes (AI controller regression)
+
 `packages/utils/src/errors/extract-error-info.ts` returned UNKNOWN_ERROR/500 for every Error
 (including ResultErrorException), so `ai-controller-errors.toAIControllerFailure` flattened
 validation/conflict/not-found → INTERNAL_ERROR.
@@ -24,6 +25,7 @@ validation/conflict/not-found → INTERNAL_ERROR.
 **ai transport 25/25 pass.**
 
 ### P1b — HTTP status default 400 → 500 for feature-specific codes
+
 DomainError default httpStatus was 400; ResultErrorException leaves statusCode undefined, so
 feature-specific codes (not in ResultCodeToHttpStatus) fell to 500.
 → Added explicit `statusCode: 400` to every migrated feature-specific error class that relied on
@@ -32,17 +34,20 @@ Classes already passing explicit status (reminder 404/400/500, PriorityCalculati
 ResultCode-mapped classes (VALIDATION_ERROR etc.) left as-is (ResultCodeToHttpStatus handles).
 
 ### P1c — hostProposalLifecycle stores raw string as cause
+
 `packages/app-vue/.../hostProposalLifecycle.ts` passed `errorEvent.message` (raw string) as cause.
 → Wrapped the event message as an Error for cause (cause is now an Error/structured object), kept
 the thrown message stable. **app-vue hostProposalLifecycle.spec 122/122 pass.**
 
 ### P2 — scanner bare `errorMessage` identifier false positive
+
 `failure-contract-inventory.mjs` flagged any bare `errorMessage`/`errorMsg`/`errMessage`/`errMsg`.
 → Removed the bare-identifier branch in `containsResultErrorMessage`; only property-access
 `.message` on result/error receivers flags now. Scanner unit test updated (`throw new Error(errorMessage)`
 now NOT flagged; `.error.message` / `.failure.message` still flagged).
 
 ## 3. Validation
+
 - utils 8 files/63, ai transport 25/25, app-vue hostProposal 122/122 pass (orchestrator re-run).
 - Inventory: `{UI_RAW_RESULT_MESSAGE:1}`, `passed`, 0 stale.
 - HTTP statuses for feature-specific errors restored to 400.

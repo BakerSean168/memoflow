@@ -43,11 +43,11 @@ export abstract class ValueObject<T extends ValueObjectProps> {
     // 策略 B (手动实现): 简单的 JSON 序列化比较 (有属性顺序问题的风险，但在大多数简单 VO 场景够用)
     // return JSON.stringify(this.props) === JSON.stringify(vo.props);
   }
-  
+
   /**
    * 获取原始属性副本 (用于序列化或持久化)
    */
   public getRawProps(): T {
-      return { ...this.props };
+    return { ...this.props };
   }
 }

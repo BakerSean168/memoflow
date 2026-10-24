@@ -310,11 +310,14 @@ export class AntigravityLoginManager {
   }
 
   private arm(flow: Flow) {
-    flow.timer = setTimeout(() => {
-      if (flow.settled) return;
-      this.settle(flow, { phase: 'failed', failure: 'login_timeout' });
-      void this.cleanup(flow);
-    }, Math.max(0, flow.expiresAt - this.now()));
+    flow.timer = setTimeout(
+      () => {
+        if (flow.settled) return;
+        this.settle(flow, { phase: 'failed', failure: 'login_timeout' });
+        void this.cleanup(flow);
+      },
+      Math.max(0, flow.expiresAt - this.now()),
+    );
     flow.timer.unref?.();
   }
 
@@ -336,8 +339,7 @@ export class AntigravityLoginManager {
 
   private createDirectory(): Promise<string> {
     return (
-      this.options.createTemporaryDirectory ??
-      (() => mkdtemp(join(tmpdir(), 'mf-agy-login-')))
+      this.options.createTemporaryDirectory ?? (() => mkdtemp(join(tmpdir(), 'mf-agy-login-')))
     )();
   }
 

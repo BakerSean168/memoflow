@@ -6,12 +6,14 @@ import { NotificationCategory } from '@memoflow/contracts/notification';
 
 const IDENTITY_ID = 'IdentityId_550e8400-e29b-41d4-a716-446655440001';
 
-function createNotificationRecord(overrides: Partial<{
-  id: string;
-  identityId: string;
-  category: NotificationCategory;
-  expiresAt: number | null;
-}> = {}) {
+function createNotificationRecord(
+  overrides: Partial<{
+    id: string;
+    identityId: string;
+    category: NotificationCategory;
+    expiresAt: number | null;
+  }> = {},
+) {
   const dto = {
     id: 'INotificationId_550e8400-e29b-41d4-a716-446655440000',
     identityId: IDENTITY_ID,
@@ -68,7 +70,9 @@ describe('NotificationMaintenanceApplicationService', () => {
     ['restore', 'restore'],
   ] as const)('%s mutates and saves the identity-owned notification', async (method, mutation) => {
     const notification = createNotificationRecord();
-    (notificationRepository.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(notification);
+    (notificationRepository.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(
+      notification,
+    );
 
     const result = await service[method](notification.id, IDENTITY_ID);
 
@@ -77,19 +81,24 @@ describe('NotificationMaintenanceApplicationService', () => {
     expect(result.ok).toBe(true);
   });
 
-  it.each(['markAsUnread', 'archive', 'restore'] as const)('%s fails closed when the notification is not identity-owned', async (method) => {
-    const result = await service[method]('missing', IDENTITY_ID);
+  it.each(['markAsUnread', 'archive', 'restore'] as const)(
+    '%s fails closed when the notification is not identity-owned',
+    async (method) => {
+      const result = await service[method]('missing', IDENTITY_ID);
 
-    expect(result).toEqual({
-      ok: false,
-      error: { code: 'NOT_FOUND', message: 'notification not found' },
-    });
-    expect(notificationRepository.save).not.toHaveBeenCalled();
-  });
+      expect(result).toEqual({
+        ok: false,
+        error: { code: 'NOT_FOUND', message: 'notification not found' },
+      });
+      expect(notificationRepository.save).not.toHaveBeenCalled();
+    },
+  );
 
   it('soft deletes a single notification through the application service', async () => {
     const notification = createNotificationRecord();
-    (notificationRepository.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(notification);
+    (notificationRepository.findByIdForIdentity as ReturnType<typeof vi.fn>).mockResolvedValue(
+      notification,
+    );
 
     const result = await service.deleteNotification(notification.id, IDENTITY_ID);
 
@@ -109,8 +118,12 @@ describe('NotificationMaintenanceApplicationService', () => {
   });
 
   it('soft deletes found notifications in a batch and returns deletedCount', async () => {
-    const first = createNotificationRecord({ id: 'INotificationId_550e8400-e29b-41d4-a716-446655440001' });
-    const second = createNotificationRecord({ id: 'INotificationId_550e8400-e29b-41d4-a716-446655440002' });
+    const first = createNotificationRecord({
+      id: 'INotificationId_550e8400-e29b-41d4-a716-446655440001',
+    });
+    const second = createNotificationRecord({
+      id: 'INotificationId_550e8400-e29b-41d4-a716-446655440002',
+    });
     (notificationRepository.findByIdForIdentity as ReturnType<typeof vi.fn>)
       .mockResolvedValueOnce(first)
       .mockResolvedValueOnce(second);
@@ -180,12 +193,9 @@ describe('NotificationMaintenanceApplicationService', () => {
       includeDeleted: false,
       includeRead: true,
     });
-    expect(notificationRepository.deleteMany).toHaveBeenCalledWith(
-      IDENTITY_ID,
-      [
-        'INotificationId_550e8400-e29b-41d4-a716-446655440010',
-      ],
-    );
+    expect(notificationRepository.deleteMany).toHaveBeenCalledWith(IDENTITY_ID, [
+      'INotificationId_550e8400-e29b-41d4-a716-446655440010',
+    ]);
     expect(result).toEqual({
       ok: true,
       data: { deletedCount: 1 },
@@ -215,10 +225,9 @@ describe('NotificationMaintenanceApplicationService', () => {
       beforeDays: 30,
     });
 
-    expect(notificationRepository.deleteMany).toHaveBeenCalledWith(
-      IDENTITY_ID,
-      ['INotificationId_550e8400-e29b-41d4-a716-446655440020'],
-    );
+    expect(notificationRepository.deleteMany).toHaveBeenCalledWith(IDENTITY_ID, [
+      'INotificationId_550e8400-e29b-41d4-a716-446655440020',
+    ]);
     expect(result).toEqual({ ok: true, data: { deletedCount: 1 } });
     vi.useRealTimers();
   });

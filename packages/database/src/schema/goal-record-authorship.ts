@@ -28,7 +28,9 @@ ALTER TABLE "goal_records" ADD CONSTRAINT "goal_records_authorship_source_check"
 COMMIT;
 `;
 
-export async function prepareGoalRecordAuthorship(client: GoalRecordSchemaQueryClient): Promise<boolean> {
+export async function prepareGoalRecordAuthorship(
+  client: GoalRecordSchemaQueryClient,
+): Promise<boolean> {
   const table = await client.query("SELECT to_regclass('public.goal_records') AS regclass");
   if (!table.rows[0]?.regclass) return false;
   try {

@@ -35,7 +35,10 @@ export class MarkTaskOccurrenceMissedUseCase {
     try {
       const timeContext = await this.projection.getTimeContext(identityId);
       return await this.transactionRunner.run(async (repositories) => {
-        const occurrence = await repositories.occurrenceRepository.findByIdForIdentity(identityId, id);
+        const occurrence = await repositories.occurrenceRepository.findByIdForIdentity(
+          identityId,
+          id,
+        );
         if (!occurrence) return error('NOT_FOUND', `TaskOccurrence ${id} not found`);
         if (!occurrence.canMarkMissed())
           return error('VALIDATION_ERROR', 'Cannot mark this task occurrence missed');

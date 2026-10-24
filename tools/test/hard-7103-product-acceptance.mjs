@@ -11,15 +11,96 @@ const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
 const fixtureIds = [...'ABCDEFGHIJ'];
 
 const focusedRunners = {
-  'task-unit': { cwd: 'packages/task', command: ['node', '../../node_modules/vitest/vitest.mjs', 'run', '--config', 'vitest.config.ts'] },
-  'task-integration': { cwd: 'packages/task', command: ['node', '../../node_modules/vitest/vitest.mjs', 'run', '--config', 'vitest.integration.config.ts'] },
-  'goal-unit': { cwd: 'packages/goal', command: ['node', '../../node_modules/vitest/vitest.mjs', 'run', '--config', 'vitest.config.ts'] },
-  'goal-integration': { cwd: 'packages/goal', command: ['node', '../../node_modules/vitest/vitest.mjs', 'run', '--config', 'vitest.integration.config.ts'] },
-  'orchestration-unit': { cwd: 'packages/schedule-orchestration', command: ['node', '../../node_modules/vitest/vitest.mjs', 'run', '--config', 'vitest.config.ts'] },
-  'reminder-unit': { cwd: 'packages/reminder', command: ['node', '../../node_modules/vitest/vitest.mjs', 'run', '--config', 'vitest.config.ts'] },
-  'reminder-integration': { cwd: 'packages/reminder', command: ['node', '../../node_modules/vitest/vitest.mjs', 'run', '--config', 'vitest.integration.config.ts'] },
-  'notification-unit': { cwd: 'packages/notification', command: ['node', '../../node_modules/vitest/vitest.mjs', 'run', '--config', 'vitest.config.ts'] },
-  'app-vue-unit': { cwd: 'packages/app-vue', command: ['node', '../../node_modules/vitest/vitest.mjs', 'run', '--config', 'vitest.config.ts'] },
+  'task-unit': {
+    cwd: 'packages/task',
+    command: [
+      'node',
+      '../../node_modules/vitest/vitest.mjs',
+      'run',
+      '--config',
+      'vitest.config.ts',
+    ],
+  },
+  'task-integration': {
+    cwd: 'packages/task',
+    command: [
+      'node',
+      '../../node_modules/vitest/vitest.mjs',
+      'run',
+      '--config',
+      'vitest.integration.config.ts',
+    ],
+  },
+  'goal-unit': {
+    cwd: 'packages/goal',
+    command: [
+      'node',
+      '../../node_modules/vitest/vitest.mjs',
+      'run',
+      '--config',
+      'vitest.config.ts',
+    ],
+  },
+  'goal-integration': {
+    cwd: 'packages/goal',
+    command: [
+      'node',
+      '../../node_modules/vitest/vitest.mjs',
+      'run',
+      '--config',
+      'vitest.integration.config.ts',
+    ],
+  },
+  'orchestration-unit': {
+    cwd: 'packages/schedule-orchestration',
+    command: [
+      'node',
+      '../../node_modules/vitest/vitest.mjs',
+      'run',
+      '--config',
+      'vitest.config.ts',
+    ],
+  },
+  'reminder-unit': {
+    cwd: 'packages/reminder',
+    command: [
+      'node',
+      '../../node_modules/vitest/vitest.mjs',
+      'run',
+      '--config',
+      'vitest.config.ts',
+    ],
+  },
+  'reminder-integration': {
+    cwd: 'packages/reminder',
+    command: [
+      'node',
+      '../../node_modules/vitest/vitest.mjs',
+      'run',
+      '--config',
+      'vitest.integration.config.ts',
+    ],
+  },
+  'notification-unit': {
+    cwd: 'packages/notification',
+    command: [
+      'node',
+      '../../node_modules/vitest/vitest.mjs',
+      'run',
+      '--config',
+      'vitest.config.ts',
+    ],
+  },
+  'app-vue-unit': {
+    cwd: 'packages/app-vue',
+    command: [
+      'node',
+      '../../node_modules/vitest/vitest.mjs',
+      'run',
+      '--config',
+      'vitest.config.ts',
+    ],
+  },
 };
 
 function fail(message) {
@@ -58,7 +139,8 @@ function checkManifest() {
       continue;
     }
     for (const evidence of fixture.focused) {
-      if (!focusedRunners[evidence.runner]) fail(`Fixture ${fixture.id}: unknown focused runner ${evidence.runner}`);
+      if (!focusedRunners[evidence.runner])
+        fail(`Fixture ${fixture.id}: unknown focused runner ${evidence.runner}`);
       sourceContains(evidence, `Fixture ${fixture.id}`);
     }
   }
@@ -72,7 +154,8 @@ function checkManifest() {
     }
     const covered = new Set(layer.covered ?? []);
     if (covered.size === 0) fail(`${layerName}: no covered fixture`);
-    for (const id of covered) if (!fixtureIds.includes(id)) fail(`${layerName}: unknown covered fixture ${id}`);
+    for (const id of covered)
+      if (!fixtureIds.includes(id)) fail(`${layerName}: unknown covered fixture ${id}`);
     for (const id of fixtureIds) {
       if (covered.has(id)) continue;
       const reason = layer.notApplicable?.[id];
@@ -89,7 +172,9 @@ function checkManifest() {
   }
 
   if (!process.exitCode) {
-    console.log('[hard-7103] check passed: fixtures A-J have focused evidence and all five host layers have explicit covered/N/A truth.');
+    console.log(
+      '[hard-7103] check passed: fixtures A-J have focused evidence and all five host layers have explicit covered/N/A truth.',
+    );
     return true;
   }
   return false;
@@ -104,7 +189,8 @@ function runCommand(command, cwd = '.') {
     stdio: 'inherit',
   });
   if (result.error) throw result.error;
-  if (result.status !== 0) throw new Error(`runner failed with exit ${result.status}: ${[bin, ...args].join(' ')}`);
+  if (result.status !== 0)
+    throw new Error(`runner failed with exit ${result.status}: ${[bin, ...args].join(' ')}`);
 }
 
 function runFocused() {
@@ -113,7 +199,9 @@ function runFocused() {
     for (const evidence of fixture.focused) {
       const config = focusedRunners[evidence.runner];
       const files = grouped.get(evidence.runner) ?? new Set();
-      files.add(relative(resolve(root, config.cwd), resolve(root, evidence.file)).replaceAll('\\', '/'));
+      files.add(
+        relative(resolve(root, config.cwd), resolve(root, evidence.file)).replaceAll('\\', '/'),
+      );
       grouped.set(evidence.runner, files);
     }
   }
@@ -125,41 +213,68 @@ function runFocused() {
 }
 
 function runApi() {
-  runCommand([
-    'node', '../../node_modules/vitest/vitest.mjs', 'run', '--config', 'vitest.integration.config.ts',
-    'src/__tests__/integration/task-goal-host-restart.integration.test.ts',
-  ], 'apps/api');
+  runCommand(
+    [
+      'node',
+      '../../node_modules/vitest/vitest.mjs',
+      'run',
+      '--config',
+      'vitest.integration.config.ts',
+      'src/__tests__/integration/task-goal-host-restart.integration.test.ts',
+    ],
+    'apps/api',
+  );
   console.log('\n[hard-7103] api passed: Fixture B host-restart journey executed.');
 }
 
 function runDesktop() {
-  runCommand([
-    'node', '../../node_modules/vitest/vitest.mjs', 'run', '--config', 'vitest.config.ts',
-    'src/main/modules/routine/windows-idle-sensor.adapter.spec.ts',
-    'src/main/modules/routine/focus-window-controller.spec.ts',
-  ], 'apps/desktop');
+  runCommand(
+    [
+      'node',
+      '../../node_modules/vitest/vitest.mjs',
+      'run',
+      '--config',
+      'vitest.config.ts',
+      'src/main/modules/routine/windows-idle-sensor.adapter.spec.ts',
+      'src/main/modules/routine/focus-window-controller.spec.ts',
+    ],
+    'apps/desktop',
+  );
   console.log('\n[hard-7103] desktop passed: Fixtures G/H host seams executed.');
 }
 
 function runWeb() {
-  runCommand([
-    'node', '../../node_modules/@playwright/test/cli.js', 'test', '--config', 'playwright.config.ts',
-    'e2e/task/task-completion-loop.spec.ts',
-    'e2e/schedule/planner-task-revert.spec.ts',
-  ], 'apps/web');
+  runCommand(
+    [
+      'node',
+      '../../node_modules/@playwright/test/cli.js',
+      'test',
+      '--config',
+      'playwright.config.ts',
+      'e2e/task/task-completion-loop.spec.ts',
+      'e2e/schedule/planner-task-revert.spec.ts',
+    ],
+    'apps/web',
+  );
   console.log('\n[hard-7103] web passed: Fixtures B/J browser journeys executed.');
 }
 
 function runLocalDocker() {
-  runCommand([
-    'node', 'e2e/helpers/run-local-docker-playwright.mjs',
-    'e2e/local-docker/core-product-phase-a.spec.ts',
-    'e2e/local-docker/core-product-phase-b.spec.ts',
-    'e2e/local-docker/core-product-phase-c.spec.ts',
-    'e2e/local-docker/core-product-phase-d.spec.ts',
-    'e2e/local-docker/core-product-phase-e.spec.ts',
-  ], 'apps/web');
-  console.log('\n[hard-7103] local Docker passed: current-revision product phases A-E executed with browser/container evidence.');
+  runCommand(
+    [
+      'node',
+      'e2e/helpers/run-local-docker-playwright.mjs',
+      'e2e/local-docker/core-product-phase-a.spec.ts',
+      'e2e/local-docker/core-product-phase-b.spec.ts',
+      'e2e/local-docker/core-product-phase-c.spec.ts',
+      'e2e/local-docker/core-product-phase-d.spec.ts',
+      'e2e/local-docker/core-product-phase-e.spec.ts',
+    ],
+    'apps/web',
+  );
+  console.log(
+    '\n[hard-7103] local Docker passed: current-revision product phases A-E executed with browser/container evidence.',
+  );
 }
 
 function runSchemaBoot() {
@@ -177,7 +292,14 @@ for (const arg of args) {
 }
 if (args.has('--run')) layers.push('focused', 'api', 'desktop', 'web', 'localDocker', 'schemaBoot');
 
-const actions = { focused: runFocused, api: runApi, desktop: runDesktop, web: runWeb, localDocker: runLocalDocker, schemaBoot: runSchemaBoot };
+const actions = {
+  focused: runFocused,
+  api: runApi,
+  desktop: runDesktop,
+  web: runWeb,
+  localDocker: runLocalDocker,
+  schemaBoot: runSchemaBoot,
+};
 try {
   for (const layer of [...new Set(layers)]) {
     const action = actions[layer];

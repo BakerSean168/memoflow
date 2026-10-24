@@ -8,21 +8,20 @@ const meta = {
   tags: ['autodocs'],
   argTypes: {
     modelValue: { control: 'text' },
-    /* @ts-ignore */ placeholder: { control: "text" },
+    /* @ts-ignore */ placeholder: { control: 'text' },
     disabled: { control: 'boolean' },
     type: { control: 'select', options: ['text', 'email', 'password', 'number', 'tel', 'url'] },
   },
-  args: { ...({} as any),
-
-  },
+  args: { ...({} as any) },
 } as Meta<typeof Input>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = { ...({} as any), };
+export const Default: Story = { ...({} as any) };
 
-export const WithLabel: Story = { ...({} as any),
+export const WithLabel: Story = {
+  ...({} as any),
   render: () => ({
     components: { Input, Label },
     template: `
@@ -34,15 +33,18 @@ export const WithLabel: Story = { ...({} as any),
   }),
 };
 
-export const Disabled: Story = { ...({} as any),
-  args: { ...({} as any),  placeholder: 'Disabled input' },
+export const Disabled: Story = {
+  ...({} as any),
+  args: { ...({} as any), placeholder: 'Disabled input' },
 };
 
-export const WithValue: Story = { ...({} as any),
+export const WithValue: Story = {
+  ...({} as any),
   args: { ...({} as any), modelValue: 'Hello World' },
 };
 
-export const Password: Story = { ...({} as any),
+export const Password: Story = {
+  ...({} as any),
   render: () => ({
     components: { Input },
     template: '<Input type="password" placeholder="Enter password" />',

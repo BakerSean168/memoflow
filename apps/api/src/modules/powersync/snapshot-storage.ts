@@ -53,14 +53,11 @@ export function resolveProfileSnapshotPaths(
 export async function readStoredProfileSnapshotManifest(
   snapshotRootDir: string | undefined,
   identityId: string,
-): Promise<
-  | {
-      snapshotKey: string;
-      manifest: StoredProfileSnapshotManifest;
-      databasePath: string;
-    }
-  | null
-> {
+): Promise<{
+  snapshotKey: string;
+  manifest: StoredProfileSnapshotManifest;
+  databasePath: string;
+} | null> {
   if (!snapshotRootDir) {
     return null;
   }

@@ -3,11 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "apps/api/src",
-  "tags": [
-    "scope:api",
-    "type:app",
-    "layer:app"
-  ],
+  "tags": ["scope:api", "type:app", "layer:app"],
   "targets": {
     "serve": {
       "executor": "nx:run-commands",
@@ -19,12 +15,8 @@
     },
     "build": {
       "executor": "nx:run-commands",
-      "outputs": [
-        "{workspaceRoot}/apps/api/dist"
-      ],
-      "dependsOn": [
-        "^build"
-      ],
+      "outputs": ["{workspaceRoot}/apps/api/dist"],
+      "dependsOn": ["^build"],
       "options": {
         "command": "node ../../node_modules/tsup/dist/cli-default.js",
         "cwd": "apps/api"
@@ -32,9 +24,7 @@
     },
     "start": {
       "executor": "nx:run-commands",
-      "dependsOn": [
-        "build"
-      ],
+      "dependsOn": ["build"],
       "options": {
         "command": "node ./dist/main.js",
         "cwd": "apps/api"
@@ -42,13 +32,8 @@
     },
     "test": {
       "executor": "nx:run-commands",
-      "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
-      ],
-      "inputs": [
-        "default",
-        "^production"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "inputs": ["default", "^production"],
       "cache": true,
       "options": {
         "command": "node ./node_modules/vitest/vitest.mjs run --config apps/api/vitest.config.ts"
@@ -63,13 +48,8 @@
     },
     "test:smoke": {
       "executor": "nx:run-commands",
-      "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}-smoke"
-      ],
-      "inputs": [
-        "default",
-        "^production"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}-smoke"],
+      "inputs": ["default", "^production"],
       "cache": true,
       "options": {
         "command": "node ./node_modules/vitest/vitest.mjs run --config apps/api/vitest.smoke.config.ts"
@@ -81,9 +61,7 @@
       "dependsOn": [
         {
           "target": "build",
-          "projects": [
-            "relation"
-          ]
+          "projects": ["relation"]
         }
       ],
       "options": {
@@ -92,9 +70,7 @@
     },
     "lint": {
       "options": {
-        "args": [
-          "**/*.{ts,js}"
-        ]
+        "args": ["**/*.{ts,js}"]
       }
     },
     "typecheck": {
@@ -102,9 +78,7 @@
       "dependsOn": [
         {
           "target": "prisma-generate",
-          "projects": [
-            "database"
-          ]
+          "projects": ["database"]
         },
         "^build"
       ],
@@ -163,13 +137,8 @@
     },
     "test:coverage": {
       "executor": "nx:run-commands",
-      "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
-      ],
-      "inputs": [
-        "default",
-        "^production"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "inputs": ["default", "^production"],
       "cache": true,
       "options": {
         "command": "vitest run --coverage --config apps/api/vitest.config.ts"

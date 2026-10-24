@@ -70,10 +70,7 @@ describe('knowledge write-request ledger client/server contract surface (W6-A)',
   });
 
   it('electron main registers list/replay IPC handlers over the remote connection port', () => {
-    const electron = readFileSync(
-      resolve(__dirname, '../electron/index.ts'),
-      'utf8',
-    );
+    const electron = readFileSync(resolve(__dirname, '../electron/index.ts'), 'utf8');
     expect(electron).toContain('RepositoryChannels.KNOWLEDGE_WRITE_REQUEST_LIST');
     expect(electron).toContain('RepositoryChannels.KNOWLEDGE_WRITE_REQUEST_REPLAY');
     expect(electron).toContain('port.listKnowledgeWriteRequests(');

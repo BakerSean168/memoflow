@@ -80,7 +80,9 @@ describe('AISecretCipher', () => {
 
   it('rejects legacy enc_v1 XOR ciphertext', () => {
     const cipher = new AISecretCipher('a-strong-test-secret');
-    expect(() => cipher.decrypt('enc_v1:c29tZS1sZWdhY3ktdmFsdWU=')).toThrow(/unsupported ciphertext format/);
+    expect(() => cipher.decrypt('enc_v1:c29tZS1sZWdhY3ktdmFsdWU=')).toThrow(
+      /unsupported ciphertext format/,
+    );
   });
 
   it('round-trips Unicode values', () => {

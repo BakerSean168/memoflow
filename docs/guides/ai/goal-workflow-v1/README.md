@@ -26,13 +26,13 @@ updated: 2026-04-29T14:40:00
 
 ## 阅读顺序
 
-| 文档 | 用途 |
-| --- | --- |
-| [01-overview-and-boundaries.md](./01-overview-and-boundaries.md) | 先看整体图，分清两条链路、职责边界和真实落库点 |
-| [02-chat-goal-draft-flow.md](./02-chat-goal-draft-flow.md) | 详细拆解聊天页生成 goal draft 的完整链路 |
-| [03-goal-automation-flow.md](./03-goal-automation-flow.md) | 详细拆解 automation 的 plan / confirm / execute 链路 |
-| [04-runtime-ports-and-adapters.md](./04-runtime-ports-and-adapters.md) | 解释 runtime、port、adapter、capability 的实际接线 |
-| [05-state-contracts-and-debugging.md](./05-state-contracts-and-debugging.md) | 汇总 DTO、本地状态、v1 限制、测试与调试入口 |
+| 文档                                                                         | 用途                                                 |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------- |
+| [01-overview-and-boundaries.md](./01-overview-and-boundaries.md)             | 先看整体图，分清两条链路、职责边界和真实落库点       |
+| [02-chat-goal-draft-flow.md](./02-chat-goal-draft-flow.md)                   | 详细拆解聊天页生成 goal draft 的完整链路             |
+| [03-goal-automation-flow.md](./03-goal-automation-flow.md)                   | 详细拆解 automation 的 plan / confirm / execute 链路 |
+| [04-runtime-ports-and-adapters.md](./04-runtime-ports-and-adapters.md)       | 解释 runtime、port、adapter、capability 的实际接线   |
+| [05-state-contracts-and-debugging.md](./05-state-contracts-and-debugging.md) | 汇总 DTO、本地状态、v1 限制、测试与调试入口          |
 
 ## 当前版本先记住三句话
 

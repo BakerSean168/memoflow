@@ -14,15 +14,15 @@ updated: 2026-09-17T17:28:00+08:00
 
 ## 2026-09-08 vNext 设计入口
 
-| 文件                                                                                                                          | 说明                                                                                       |
-| ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| 文件                                                                                                                          | 说明                                                                                   |
+| ----------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
 | [`docs/product/notification-vnext.md`](../notification-vnext.md)                                                              | Notification current Fact / Workflow / Delivery / Interaction / Preference / Ops model |
-| [`docs/analysis/2026-09-08-notification-current-system-map.md`](../../analysis/2026-09-08-notification-current-system-map.md) | 当前代码真值、legacy residue 与 current-to-target matrix                                   |
-| [`ADR-084`](../../architecture/adr/ADR-084-notification-fact-and-inbox-lifecycle.md)                                          | NotificationFact 与 Inbox lifecycle                                                        |
-| [`ADR-085`](../../architecture/adr/ADR-085-notification-workflow-semantics-and-template-retirement.md)                        | Workflow semantic registry 与 Template 退役                                                |
-| [`ADR-086`](../../architecture/adr/ADR-086-notification-delivery-plan-projection-and-channel-retirement.md)                   | DeliveryPlan / Projection 与 NotificationChannel 退役                                      |
-| [`ADR-087`](../../architecture/adr/ADR-087-notification-interaction-and-typed-action-intents.md)                              | NotificationInteraction 与 typed actions                                                   |
-| [`ADR-088`](../../architecture/adr/ADR-088-notification-preference-quiet-hours-realtime-and-operations-boundary.md)           | Preference / QuietHours / realtime / ops boundary                                          |
+| [`docs/analysis/2026-09-08-notification-current-system-map.md`](../../analysis/2026-09-08-notification-current-system-map.md) | 当前代码真值、legacy residue 与 current-to-target matrix                               |
+| [`ADR-084`](../../architecture/adr/ADR-084-notification-fact-and-inbox-lifecycle.md)                                          | NotificationFact 与 Inbox lifecycle                                                    |
+| [`ADR-085`](../../architecture/adr/ADR-085-notification-workflow-semantics-and-template-retirement.md)                        | Workflow semantic registry 与 Template 退役                                            |
+| [`ADR-086`](../../architecture/adr/ADR-086-notification-delivery-plan-projection-and-channel-retirement.md)                   | DeliveryPlan / Projection 与 NotificationChannel 退役                                  |
+| [`ADR-087`](../../architecture/adr/ADR-087-notification-interaction-and-typed-action-intents.md)                              | NotificationInteraction 与 typed actions                                               |
+| [`ADR-088`](../../architecture/adr/ADR-088-notification-preference-quiet-hours-realtime-and-operations-boundary.md)           | Preference / QuietHours / realtime / ops boundary                                      |
 
 > ADR-084~088 已进入 canonical implementation：Notification Fact/Inbox、WorkflowDefinition、DeliveryDecision + DispatchOutbox/Receipt、typed Interaction、QuietHours 与 Product/Operations port split 已成为当前真值；`NotificationTemplate`、`NotificationChannel` 与 `NotificationHistory` legacy authority 已退役。
 

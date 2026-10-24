@@ -1,5 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
-import { TagsInput, TagsInputInput, TagsInputItem, TagsInputItemDelete, TagsInputItemText } from '.';
+import {
+  TagsInput,
+  TagsInputInput,
+  TagsInputItem,
+  TagsInputItemDelete,
+  TagsInputItemText,
+} from '.';
 import { ref } from 'vue';
 
 const meta = {
@@ -13,7 +19,13 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => ({
-    components: { TagsInput, TagsInputInput, TagsInputItem, TagsInputItemDelete, TagsInputItemText },
+    components: {
+      TagsInput,
+      TagsInputInput,
+      TagsInputItem,
+      TagsInputItemDelete,
+      TagsInputItemText,
+    },
     setup() {
       const modelValue = ref(['Vue', 'React']);
       return { modelValue };
@@ -32,7 +44,13 @@ export const Default: Story = {
 
 export const Empty: Story = {
   render: () => ({
-    components: { TagsInput, TagsInputInput, TagsInputItem, TagsInputItemDelete, TagsInputItemText },
+    components: {
+      TagsInput,
+      TagsInputInput,
+      TagsInputItem,
+      TagsInputItemDelete,
+      TagsInputItemText,
+    },
     setup() {
       const modelValue = ref<string[]>([]);
       return { modelValue };

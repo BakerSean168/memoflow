@@ -7,7 +7,9 @@ import { registerSchedulerRoutes } from './routes';
 type Route = { method: string; path: string };
 class Registry implements OpenApiRegistryLike {
   paths: Route[] = [];
-  registerPath(route: Record<string, unknown>): void { this.paths.push(route as Route); }
+  registerPath(route: Record<string, unknown>): void {
+    this.paths.push(route as Route);
+  }
   register(): void {}
 }
 const auth = ((_, __, next) => next()) as RequestHandler;

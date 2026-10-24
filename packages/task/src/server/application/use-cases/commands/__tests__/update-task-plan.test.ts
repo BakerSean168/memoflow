@@ -17,14 +17,23 @@ import type { ITaskPlanRepository } from '../../../../domain/repositories/i-task
 import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
 import { UpdateTaskPlanUseCase } from '../update-task-plan.use-case';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
-import { TaskGoalBindingTrigger, TaskPlanScheduleKind, TaskTimingKind } from '@memoflow/contracts/task';
+import {
+  TaskGoalBindingTrigger,
+  TaskPlanScheduleKind,
+  TaskTimingKind,
+} from '@memoflow/contracts/task';
 import {
   createInlineTaskWriteTransactionRunner,
   type TaskWriteTransactionRunner,
 } from '../task-write-support';
 
 const goalReadPort = { getKeyResultMeasurementContext: vi.fn() };
-const testBinding = (progressRule: unknown) => TaskGoalLinkSchema.parse({ goalId: 'GoalId_11111111-1111-4111-8111-111111111111', keyResultId: 'KeyResultId_22222222-2222-4222-8222-222222222222', progressRule });
+const testBinding = (progressRule: unknown) =>
+  TaskGoalLinkSchema.parse({
+    goalId: 'GoalId_11111111-1111-4111-8111-111111111111',
+    keyResultId: 'KeyResultId_22222222-2222-4222-8222-222222222222',
+    progressRule,
+  });
 
 const userTimeContextPort = {
   getUserTimeContext: vi.fn().mockResolvedValue(TASK_TEST_TIME_CONTEXT),
@@ -36,7 +45,9 @@ describe('UpdateTaskPlanUseCase', () => {
   let useCase: UpdateTaskPlanUseCase;
 
   beforeEach(() => {
-    goalReadPort.getKeyResultMeasurementContext.mockResolvedValue(ok({ progress: { aggregationMethod: 'Sum' } }));
+    goalReadPort.getKeyResultMeasurementContext.mockResolvedValue(
+      ok({ progress: { aggregationMethod: 'Sum' } }),
+    );
     templateRepo = createMockRepo<ITaskPlanRepository>({
       findByIdForIdentity: vi.fn(),
       save: vi.fn().mockResolvedValue(undefined),
@@ -59,17 +70,26 @@ describe('UpdateTaskPlanUseCase', () => {
     );
   });
 
-  it.each(Object.values(KeyResultCalculationMethod))('validates Fixed and Prompt against %s before updating', async (method) => {
-    const plan = aOneTimeTask();
-    templateRepo.findByIdForIdentity.mockResolvedValue(plan);
-    goalReadPort.getKeyResultMeasurementContext.mockResolvedValue(ok({ progress: { aggregationMethod: method } }));
-    const fixed = await useCase.execute(plan.id, plan.identityId, { goalBinding: testBinding({ mode: 'Fixed', trigger: 'EachCompletion', value: -2 }) });
-    expect(fixed.ok).toBe(method === 'Sum');
-    if (method !== 'Sum') expect(templateRepo.save).not.toHaveBeenCalled();
-    const prompt = await useCase.execute(plan.id, plan.identityId, { goalBinding: testBinding({ mode: 'Prompt', trigger: 'EachCompletion', suggestedValue: -3 }) });
-    expect(prompt.ok).toBe(true);
-    expect(plan.goalBinding?.contribution).toBeNull();
-  });
+  it.each(Object.values(KeyResultCalculationMethod))(
+    'validates Fixed and Prompt against %s before updating',
+    async (method) => {
+      const plan = aOneTimeTask();
+      templateRepo.findByIdForIdentity.mockResolvedValue(plan);
+      goalReadPort.getKeyResultMeasurementContext.mockResolvedValue(
+        ok({ progress: { aggregationMethod: method } }),
+      );
+      const fixed = await useCase.execute(plan.id, plan.identityId, {
+        goalBinding: testBinding({ mode: 'Fixed', trigger: 'EachCompletion', value: -2 }),
+      });
+      expect(fixed.ok).toBe(method === 'Sum');
+      if (method !== 'Sum') expect(templateRepo.save).not.toHaveBeenCalled();
+      const prompt = await useCase.execute(plan.id, plan.identityId, {
+        goalBinding: testBinding({ mode: 'Prompt', trigger: 'EachCompletion', suggestedValue: -3 }),
+      });
+      expect(prompt.ok).toBe(true);
+      expect(plan.goalBinding?.contribution).toBeNull();
+    },
+  );
 
   it('throws an error if transactionRunner is missing', () => {
     expect(() => new UpdateTaskPlanUseCase(templateRepo, instanceRepo, undefined as any)).toThrow(
@@ -329,7 +349,12 @@ describe('UpdateTaskPlanUseCase', () => {
     const timing = aTimePointTiming(540);
     const recurrence = aDailyRecurrence();
     const plan = aLoadedTaskPlan({
-      schedule: canonicalTaskPlanScheduleForTest(TaskPlanScheduleKind.Recurring, effectiveFrom - 86400000, timing, recurrence),
+      schedule: canonicalTaskPlanScheduleForTest(
+        TaskPlanScheduleKind.Recurring,
+        effectiveFrom - 86400000,
+        timing,
+        recurrence,
+      ),
     });
     vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
     useCase = new UpdateTaskPlanUseCase(
@@ -345,7 +370,12 @@ describe('UpdateTaskPlanUseCase', () => {
 
     const result = await useCase.execute(plan.id, plan.identityId, {
       name: 'Only the title changed',
-      schedule: canonicalTaskPlanScheduleForTest(TaskPlanScheduleKind.Recurring, effectiveFrom - 86400000, timing, recurrence).toDTO(),
+      schedule: canonicalTaskPlanScheduleForTest(
+        TaskPlanScheduleKind.Recurring,
+        effectiveFrom - 86400000,
+        timing,
+        recurrence,
+      ).toDTO(),
       importance: plan.importance,
     });
 
@@ -359,7 +389,12 @@ describe('UpdateTaskPlanUseCase', () => {
     const effectiveFrom = Date.UTC(2026, 6, 30, 12);
     const oldTiming = aTimePointTiming(540);
     const plan = aLoadedTaskPlan({
-      schedule: canonicalTaskPlanScheduleForTest(TaskPlanScheduleKind.Recurring, effectiveFrom - day, oldTiming, aDailyRecurrence()),
+      schedule: canonicalTaskPlanScheduleForTest(
+        TaskPlanScheduleKind.Recurring,
+        effectiveFrom - day,
+        oldTiming,
+        aDailyRecurrence(),
+      ),
       importance: ImportanceLevel.Moderate,
     });
     const futurePending = await aTaskOccurrence({
@@ -422,7 +457,12 @@ describe('UpdateTaskPlanUseCase', () => {
     const effectiveFrom = Date.UTC(2026, 6, 30, 12);
     const oldTiming = aTimePointTiming(540);
     const plan = aLoadedTaskPlan({
-      schedule: canonicalTaskPlanScheduleForTest(TaskPlanScheduleKind.Recurring, effectiveFrom - day, oldTiming, aDailyRecurrence()),
+      schedule: canonicalTaskPlanScheduleForTest(
+        TaskPlanScheduleKind.Recurring,
+        effectiveFrom - day,
+        oldTiming,
+        aDailyRecurrence(),
+      ),
     });
     vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
     vi.mocked(instanceRepo.findByPlanId).mockResolvedValue([]);

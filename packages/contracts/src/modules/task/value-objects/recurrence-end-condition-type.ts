@@ -7,4 +7,5 @@ export const RecurrenceEndConditionType = {
   Occurrences: 'Occurrences', // 指定次数结束
 } as const;
 
-export type RecurrenceEndConditionType = (typeof RecurrenceEndConditionType)[keyof typeof RecurrenceEndConditionType];
+export type RecurrenceEndConditionType =
+  (typeof RecurrenceEndConditionType)[keyof typeof RecurrenceEndConditionType];

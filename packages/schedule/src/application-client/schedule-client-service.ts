@@ -27,10 +27,7 @@ export class ScheduleClientService implements ScheduleClientPort {
   ): Promise<Result<CalendarEntryClientDTO[]>> {
     return this.eventApi.getSchedulesByTimeRange(params);
   }
-  updateSchedule(
-    id: string,
-    data: UpdateScheduleRequest,
-  ): Promise<Result<CalendarEntryClientDTO>> {
+  updateSchedule(id: string, data: UpdateScheduleRequest): Promise<Result<CalendarEntryClientDTO>> {
     return this.eventApi.updateSchedule(id, data);
   }
   deleteSchedule(id: string, expectedVersion: number): Promise<Result<void>> {

@@ -26,11 +26,17 @@ const mainWorkspaceAliasEntries = [
   },
   {
     find: '@memoflow/goal/schedule-execution',
-    replacement: resolve(import.meta.dirname, '../../packages/goal/src/schedule-execution/index.ts'),
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/goal/src/schedule-execution/index.ts',
+    ),
   },
   {
     find: '@memoflow/goal/schedule-projection',
-    replacement: resolve(import.meta.dirname, '../../packages/goal/src/schedule-projection/index.ts'),
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/goal/src/schedule-projection/index.ts',
+    ),
   },
   {
     find: '@memoflow/goal/events',
@@ -46,7 +52,10 @@ const mainWorkspaceAliasEntries = [
   },
   {
     find: '@memoflow/data-portability/electron',
-    replacement: resolve(import.meta.dirname, '../../packages/data-portability/src/electron/index.ts'),
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/data-portability/src/electron/index.ts',
+    ),
   },
   {
     find: '@memoflow/schedule-orchestration',

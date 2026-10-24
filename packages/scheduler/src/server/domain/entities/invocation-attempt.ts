@@ -1,4 +1,7 @@
-import type { InvocationAttempt as InvocationAttemptContract, InvocationAttemptOutcome } from '@memoflow/contracts/schedule';
+import type {
+  InvocationAttempt as InvocationAttemptContract,
+  InvocationAttemptOutcome,
+} from '@memoflow/contracts/schedule';
 import { generateUUID } from '@memoflow/utils/shared';
 
 export type InvocationAttemptState = InvocationAttemptContract;
@@ -21,12 +24,21 @@ export class InvocationAttempt {
       throw new TypeError('attemptNumber must be a positive safe integer.');
     }
     return new InvocationAttempt({
-      id: input.id ?? generateUUID(), identityId: input.identityId,
-      invocationId: input.invocationId, attemptNumber: input.attemptNumber,
-      startedAt, finishedAt: null, outcome: 'timeout', result: null,
-      failureCode: null, failureMessage: null, failureRetryable: null,
-      workerId: input.workerId ?? null, claimToken: input.claimToken ?? null,
-      fencingToken: input.fencingToken ?? null, createdAt: startedAt,
+      id: input.id ?? generateUUID(),
+      identityId: input.identityId,
+      invocationId: input.invocationId,
+      attemptNumber: input.attemptNumber,
+      startedAt,
+      finishedAt: null,
+      outcome: 'timeout',
+      result: null,
+      failureCode: null,
+      failureMessage: null,
+      failureRetryable: null,
+      workerId: input.workerId ?? null,
+      claimToken: input.claimToken ?? null,
+      fencingToken: input.fencingToken ?? null,
+      createdAt: startedAt,
     });
   }
 
@@ -40,11 +52,17 @@ export class InvocationAttempt {
   }): InvocationAttempt {
     if (this.state.finishedAt !== null) throw new Error('Invocation attempt is already finished.');
     return new InvocationAttempt({
-      ...this.state, finishedAt: input.finishedAt ?? Date.now(), outcome: input.outcome,
-      result: input.result ?? null, failureCode: input.failureCode ?? null,
-      failureMessage: input.failureMessage ?? null, failureRetryable: input.failureRetryable ?? null,
+      ...this.state,
+      finishedAt: input.finishedAt ?? Date.now(),
+      outcome: input.outcome,
+      result: input.result ?? null,
+      failureCode: input.failureCode ?? null,
+      failureMessage: input.failureMessage ?? null,
+      failureRetryable: input.failureRetryable ?? null,
     });
   }
 
-  toState(): InvocationAttemptState { return { ...this.state }; }
+  toState(): InvocationAttemptState {
+    return { ...this.state };
+  }
 }

@@ -1,29 +1,32 @@
 <script setup lang="ts">
-import { computed, useId } from 'vue'
-import { Input } from '../../../ui/input'
-import { Label } from '../../../ui/label'
+import { computed, useId } from 'vue';
+import { Input } from '../../../ui/input';
+import { Label } from '../../../ui/label';
 
-const props = withDefaults(defineProps<{
-  modelValue?: number | null
-  id?: string
-  label?: string
-  suffix?: string
-  disabled?: boolean
-  error?: string | null
-}>(), {
-  modelValue: null,
-  label: 'Reminder',
-  suffix: 'min before',
-  disabled: false,
-  error: null,
-})
-const emit = defineEmits<{ (event: 'update:modelValue', value: number | null): void }>()
-const generatedId = useId()
-const fieldId = computed(() => props.id ?? `reminder-offset-field-${generatedId}`)
-const errorId = computed(() => `${fieldId.value}-error`)
+const props = withDefaults(
+  defineProps<{
+    modelValue?: number | null;
+    id?: string;
+    label?: string;
+    suffix?: string;
+    disabled?: boolean;
+    error?: string | null;
+  }>(),
+  {
+    modelValue: null,
+    label: 'Reminder',
+    suffix: 'min before',
+    disabled: false,
+    error: null,
+  },
+);
+const emit = defineEmits<{ (event: 'update:modelValue', value: number | null): void }>();
+const generatedId = useId();
+const fieldId = computed(() => props.id ?? `reminder-offset-field-${generatedId}`);
+const errorId = computed(() => `${fieldId.value}-error`);
 function update(value: string | number) {
-  const raw = String(value)
-  emit('update:modelValue', raw === '' ? null : Math.max(0, Math.round(Number(raw))))
+  const raw = String(value);
+  emit('update:modelValue', raw === '' ? null : Math.max(0, Math.round(Number(raw))));
 }
 </script>
 
@@ -43,7 +46,9 @@ function update(value: string | number) {
         :aria-describedby="error ? errorId : undefined"
         @update:model-value="update"
       />
-      <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-muted-foreground">
+      <span
+        class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-muted-foreground"
+      >
         {{ suffix }}
       </span>
     </div>

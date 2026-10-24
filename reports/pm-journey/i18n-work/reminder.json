@@ -1,1148 +1,766 @@
 [
- {
-  "key": "reminder.action.createGroup",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.action.createReminder",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.action.enableGroup",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.action.pauseGroup",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.action.switchToGroup",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.action.switchToIndividual",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.empty",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.emptyDescription",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.group.confirmDelete",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.group.confirmDeleteTitle",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.groupDialog.btnCancel",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/GroupDialog.vue"
-  ]
- },
- {
-  "key": "reminder.groupDialog.btnDone",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/GroupDialog.vue"
-  ]
- },
- {
-  "key": "reminder.groupDialog.btnPick",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/GroupDialog.vue"
-  ]
- },
- {
-  "key": "reminder.groupDialog.controlGroup",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/GroupDialog.vue"
-  ]
- },
- {
-  "key": "reminder.groupDialog.controlGroupDesc",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/GroupDialog.vue"
-  ]
- },
- {
-  "key": "reminder.groupDialog.controlIndividual",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/GroupDialog.vue"
-  ]
- },
- {
-  "key": "reminder.groupDialog.controlIndividualDesc",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/GroupDialog.vue"
-  ]
- },
- {
-  "key": "reminder.groupDialog.currentIcon",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/GroupDialog.vue"
-  ]
- },
- {
-  "key": "reminder.groupDialog.descCreate",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/GroupDialog.vue"
-  ]
- },
- {
-  "key": "reminder.groupDialog.descEdit",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/GroupDialog.vue"
-  ]
- },
- {
-  "key": "reminder.groupDialog.hintSortOrder",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/GroupDialog.vue"
-  ]
- },
- {
-  "key": "reminder.groupDialog.labelDescription",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/GroupDialog.vue"
-  ]
- },
- {
-  "key": "reminder.groupDialog.labelIcon",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/GroupDialog.vue"
-  ]
- },
- {
-  "key": "reminder.groupDialog.labelName",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/GroupDialog.vue"
-  ]
- },
- {
-  "key": "reminder.groupDialog.labelSortOrder",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/GroupDialog.vue"
-  ]
- },
- {
-  "key": "reminder.groupDialog.placeholderDescription",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/GroupDialog.vue"
-  ]
- },
- {
-  "key": "reminder.groupDialog.placeholderName",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/GroupDialog.vue"
-  ]
- },
- {
-  "key": "reminder.groupDialog.sectionAppearance",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/GroupDialog.vue"
-  ]
- },
- {
-  "key": "reminder.groupDialog.sectionBasicInfo",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/GroupDialog.vue"
-  ]
- },
- {
-  "key": "reminder.groupDialog.sectionControlMode",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/GroupDialog.vue"
-  ]
- },
- {
-  "key": "reminder.groupDialog.selectIcon",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/GroupDialog.vue"
-  ]
- },
- {
-  "key": "reminder.groupDialog.titleCreate",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/GroupDialog.vue"
-  ]
- },
- {
-  "key": "reminder.groupDialog.titleEdit",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/GroupDialog.vue"
-  ]
- },
- {
-  "key": "reminder.lifecycle.enabledShort",
-  "files": [
-   "packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"
-  ]
- },
- {
-  "key": "reminder.lifecycle.globalPausedAll",
-  "files": [
-   "packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"
-  ]
- },
- {
-  "key": "reminder.lifecycle.groupControlModeGroup",
-  "files": [
-   "packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"
-  ]
- },
- {
-  "key": "reminder.lifecycle.groupControlModeIndividual",
-  "files": [
-   "packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"
-  ]
- },
- {
-  "key": "reminder.lifecycle.groupEnabled",
-  "files": [
-   "packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"
-  ]
- },
- {
-  "key": "reminder.lifecycle.groupPaused",
-  "files": [
-   "packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"
-  ]
- },
- {
-  "key": "reminder.lifecycle.groupPolicyGroupEnabled",
-  "files": [
-   "packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"
-  ]
- },
- {
-  "key": "reminder.lifecycle.groupPolicyGroupPaused",
-  "files": [
-   "packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"
-  ]
- },
- {
-  "key": "reminder.lifecycle.groupPolicyIndividual",
-  "files": [
-   "packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"
-  ]
- },
- {
-  "key": "reminder.lifecycle.noGroup",
-  "files": [
-   "packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"
-  ]
- },
- {
-  "key": "reminder.lifecycle.pausedShort",
-  "files": [
-   "packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"
-  ]
- },
- {
-  "key": "reminder.lifecycle.resultPausedNow",
-  "files": [
-   "packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"
-  ]
- },
- {
-  "key": "reminder.lifecycle.resultRunningNow",
-  "files": [
-   "packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"
-  ]
- },
- {
-  "key": "reminder.lifecycle.selfEnabledVerbose",
-  "files": [
-   "packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"
-  ]
- },
- {
-  "key": "reminder.lifecycle.selfPausedVerbose",
-  "files": [
-   "packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"
-  ]
- },
- {
-  "key": "reminder.lifecycle.sourceGlobal",
-  "files": [
-   "packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"
-  ]
- },
- {
-  "key": "reminder.lifecycle.sourceGroup",
-  "files": [
-   "packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"
-  ]
- },
- {
-  "key": "reminder.lifecycle.sourceTemplateAtRoot",
-  "files": [
-   "packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"
-  ]
- },
- {
-  "key": "reminder.lifecycle.sourceTemplateInGroup",
-  "files": [
-   "packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"
-  ]
- },
- {
-  "key": "reminder.linear.allReminders",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.linear.currentStatusValue",
-  "files": [
-   "packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"
-  ]
- },
- {
-  "key": "reminder.linear.globalPausedDescription",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.linear.globalPausedTitle",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.linear.groupEnabled",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.linear.groupPaused",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.linear.masterSwitch",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.linear.reEnableGlobal",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.linear.searchPlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.linear.sidebarGlobalPaused",
-  "files": [
-   "packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"
-  ]
- },
- {
-  "key": "reminder.linear.sidebarGroupPaused",
-  "files": [
-   "packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"
-  ]
- },
- {
-  "key": "reminder.linear.templateCountValue",
-  "files": [
-   "packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"
-  ]
- },
- {
-  "key": "reminder.status.loading",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.template.confirmDelete",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.template.confirmDeleteTitle",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.templateDetail.actionEdit",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"
-  ]
- },
- {
-  "key": "reminder.templateDetail.actionViewInstances",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"
-  ]
- },
- {
-  "key": "reminder.templateDetail.badgeGlobalPaused",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"
-  ]
- },
- {
-  "key": "reminder.templateDetail.badgeGroupControlled",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"
-  ]
- },
- {
-  "key": "reminder.templateDetail.description",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"
-  ]
- },
- {
-  "key": "reminder.templateDetail.effectiveStatusLine",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"
-  ]
- },
- {
-  "key": "reminder.templateDetail.fallbackTitle",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"
-  ]
- },
- {
-  "key": "reminder.templateDetail.fieldCreatedAt",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"
-  ]
- },
- {
-  "key": "reminder.templateDetail.fieldDescription",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"
-  ]
- },
- {
-  "key": "reminder.templateDetail.fieldEffectiveResult",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"
-  ]
- },
- {
-  "key": "reminder.templateDetail.fieldGlobalSwitch",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"
-  ]
- },
- {
-  "key": "reminder.templateDetail.fieldGroupControlMode",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"
-  ]
- },
- {
-  "key": "reminder.templateDetail.fieldGroupSwitch",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"
-  ]
- },
- {
-  "key": "reminder.templateDetail.fieldTitle",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"
-  ]
- },
- {
-  "key": "reminder.templateDetail.fieldUpdatedAt",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"
-  ]
- },
- {
-  "key": "reminder.templateDetail.groupedFallback",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"
-  ]
- },
- {
-  "key": "reminder.templateDetail.overrideControllerGlobal",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"
-  ]
- },
- {
-  "key": "reminder.templateDetail.overrideControllerGroup",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"
-  ]
- },
- {
-  "key": "reminder.templateDetail.overrideDescription",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"
-  ]
- },
- {
-  "key": "reminder.templateDetail.overrideTitle",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"
-  ]
- },
- {
-  "key": "reminder.templateDetail.sectionBasicInfo",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"
-  ]
- },
- {
-  "key": "reminder.templateDetail.sectionLifecycle",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"
-  ]
- },
- {
-  "key": "reminder.templateDetail.sectionStats",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"
-  ]
- },
- {
-  "key": "reminder.templateDetail.sectionTimeInfo",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"
-  ]
- },
- {
-  "key": "reminder.templateDetail.selfSwitchTitle",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"
-  ]
- },
- {
-  "key": "reminder.templateDetail.statCompleted",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"
-  ]
- },
- {
-  "key": "reminder.templateDetail.statPending",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"
-  ]
- },
- {
-  "key": "reminder.templateDetail.statTotal",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.badgeOptional",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.btnCancel",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.btnDone",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.btnPick",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.clearColor",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.currentGroupHintNamed",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.currentGroupHintRoot",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.currentGroupHintSelected",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.currentIcon",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.descCreate",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.descEdit",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.hintActiveHours",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.hintAdvanced",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.hintFixedTime",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.hintInterval",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.hintLongLived",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.iconPickerComingSoon",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.importanceImportant",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.importanceMinor",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.importanceModerate",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.importanceTrivial",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.importanceVital",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.labelDescription",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.labelEndHour",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.labelFixedTime",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.labelGroup",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.labelIcon",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.labelImportance",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.labelInterval",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.labelNotificationBody",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.labelNotificationTitle",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.labelStartHour",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.labelTags",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.labelTitle",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.labelTriggerType",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.placeholderDescription",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.placeholderGroup",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.placeholderNotificationBody",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.placeholderNotificationTitle",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.placeholderTags",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.placeholderTitle",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.rootOption",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.sectionActiveHours",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.sectionAdvanced",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.sectionAppearance",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.sectionBasicInfo",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.sectionTimeConfig",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.titleCreate",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.titleEdit",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.triggerFixedTime",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateDialog.triggerInterval",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.cancel",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.controlMode",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.controlModeGroup",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.controlModeIndividual",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.current",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.currentGroup",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.currentTemplate",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.defaultPolicyText",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.description",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.disabled",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.enabled",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.move",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.name",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.none",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.previewGroupEnabled",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.previewGroupPaused",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.previewIndividual",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.previewRoot",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.previewTitle",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.removeFromAllGroups",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.selectTargetGroup",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.status",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.targetGroup",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.targetGroupInfo",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.templates",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.title",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.unknown",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.unknownGroup",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.warning",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.templateMove.warningDescription",
-  "files": [
-   "packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"
-  ]
- },
- {
-  "key": "reminder.toast.globalReminderEnabled",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.toast.globalReminderPaused",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.toast.groupControlModeUpdated",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.toast.groupCreated",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.toast.groupDeleted",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.toast.groupEnabled",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.toast.groupPaused",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.toast.groupUpdated",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.toast.templateCreated",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.toast.templateDeleted",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.toast.templateEnabled",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.toast.templateMoved",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.toast.templateMovedToRoot",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.toast.templatePaused",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- },
- {
-  "key": "reminder.toast.templateUpdated",
-  "files": [
-   "packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"
-  ]
- }
+  {
+    "key": "reminder.action.createGroup",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.action.createReminder",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.action.enableGroup",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.action.pauseGroup",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.action.switchToGroup",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.action.switchToIndividual",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.empty",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.emptyDescription",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.group.confirmDelete",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.group.confirmDeleteTitle",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.groupDialog.btnCancel",
+    "files": ["packages/app-vue/src/modules/reminder/components/GroupDialog.vue"]
+  },
+  {
+    "key": "reminder.groupDialog.btnDone",
+    "files": ["packages/app-vue/src/modules/reminder/components/GroupDialog.vue"]
+  },
+  {
+    "key": "reminder.groupDialog.btnPick",
+    "files": ["packages/app-vue/src/modules/reminder/components/GroupDialog.vue"]
+  },
+  {
+    "key": "reminder.groupDialog.controlGroup",
+    "files": ["packages/app-vue/src/modules/reminder/components/GroupDialog.vue"]
+  },
+  {
+    "key": "reminder.groupDialog.controlGroupDesc",
+    "files": ["packages/app-vue/src/modules/reminder/components/GroupDialog.vue"]
+  },
+  {
+    "key": "reminder.groupDialog.controlIndividual",
+    "files": ["packages/app-vue/src/modules/reminder/components/GroupDialog.vue"]
+  },
+  {
+    "key": "reminder.groupDialog.controlIndividualDesc",
+    "files": ["packages/app-vue/src/modules/reminder/components/GroupDialog.vue"]
+  },
+  {
+    "key": "reminder.groupDialog.currentIcon",
+    "files": ["packages/app-vue/src/modules/reminder/components/GroupDialog.vue"]
+  },
+  {
+    "key": "reminder.groupDialog.descCreate",
+    "files": ["packages/app-vue/src/modules/reminder/components/GroupDialog.vue"]
+  },
+  {
+    "key": "reminder.groupDialog.descEdit",
+    "files": ["packages/app-vue/src/modules/reminder/components/GroupDialog.vue"]
+  },
+  {
+    "key": "reminder.groupDialog.hintSortOrder",
+    "files": ["packages/app-vue/src/modules/reminder/components/GroupDialog.vue"]
+  },
+  {
+    "key": "reminder.groupDialog.labelDescription",
+    "files": ["packages/app-vue/src/modules/reminder/components/GroupDialog.vue"]
+  },
+  {
+    "key": "reminder.groupDialog.labelIcon",
+    "files": ["packages/app-vue/src/modules/reminder/components/GroupDialog.vue"]
+  },
+  {
+    "key": "reminder.groupDialog.labelName",
+    "files": ["packages/app-vue/src/modules/reminder/components/GroupDialog.vue"]
+  },
+  {
+    "key": "reminder.groupDialog.labelSortOrder",
+    "files": ["packages/app-vue/src/modules/reminder/components/GroupDialog.vue"]
+  },
+  {
+    "key": "reminder.groupDialog.placeholderDescription",
+    "files": ["packages/app-vue/src/modules/reminder/components/GroupDialog.vue"]
+  },
+  {
+    "key": "reminder.groupDialog.placeholderName",
+    "files": ["packages/app-vue/src/modules/reminder/components/GroupDialog.vue"]
+  },
+  {
+    "key": "reminder.groupDialog.sectionAppearance",
+    "files": ["packages/app-vue/src/modules/reminder/components/GroupDialog.vue"]
+  },
+  {
+    "key": "reminder.groupDialog.sectionBasicInfo",
+    "files": ["packages/app-vue/src/modules/reminder/components/GroupDialog.vue"]
+  },
+  {
+    "key": "reminder.groupDialog.sectionControlMode",
+    "files": ["packages/app-vue/src/modules/reminder/components/GroupDialog.vue"]
+  },
+  {
+    "key": "reminder.groupDialog.selectIcon",
+    "files": ["packages/app-vue/src/modules/reminder/components/GroupDialog.vue"]
+  },
+  {
+    "key": "reminder.groupDialog.titleCreate",
+    "files": ["packages/app-vue/src/modules/reminder/components/GroupDialog.vue"]
+  },
+  {
+    "key": "reminder.groupDialog.titleEdit",
+    "files": ["packages/app-vue/src/modules/reminder/components/GroupDialog.vue"]
+  },
+  {
+    "key": "reminder.lifecycle.enabledShort",
+    "files": ["packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"]
+  },
+  {
+    "key": "reminder.lifecycle.globalPausedAll",
+    "files": ["packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"]
+  },
+  {
+    "key": "reminder.lifecycle.groupControlModeGroup",
+    "files": ["packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"]
+  },
+  {
+    "key": "reminder.lifecycle.groupControlModeIndividual",
+    "files": ["packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"]
+  },
+  {
+    "key": "reminder.lifecycle.groupEnabled",
+    "files": ["packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"]
+  },
+  {
+    "key": "reminder.lifecycle.groupPaused",
+    "files": ["packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"]
+  },
+  {
+    "key": "reminder.lifecycle.groupPolicyGroupEnabled",
+    "files": ["packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"]
+  },
+  {
+    "key": "reminder.lifecycle.groupPolicyGroupPaused",
+    "files": ["packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"]
+  },
+  {
+    "key": "reminder.lifecycle.groupPolicyIndividual",
+    "files": ["packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"]
+  },
+  {
+    "key": "reminder.lifecycle.noGroup",
+    "files": ["packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"]
+  },
+  {
+    "key": "reminder.lifecycle.pausedShort",
+    "files": ["packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"]
+  },
+  {
+    "key": "reminder.lifecycle.resultPausedNow",
+    "files": ["packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"]
+  },
+  {
+    "key": "reminder.lifecycle.resultRunningNow",
+    "files": ["packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"]
+  },
+  {
+    "key": "reminder.lifecycle.selfEnabledVerbose",
+    "files": ["packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"]
+  },
+  {
+    "key": "reminder.lifecycle.selfPausedVerbose",
+    "files": ["packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"]
+  },
+  {
+    "key": "reminder.lifecycle.sourceGlobal",
+    "files": ["packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"]
+  },
+  {
+    "key": "reminder.lifecycle.sourceGroup",
+    "files": ["packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"]
+  },
+  {
+    "key": "reminder.lifecycle.sourceTemplateAtRoot",
+    "files": ["packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"]
+  },
+  {
+    "key": "reminder.lifecycle.sourceTemplateInGroup",
+    "files": ["packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"]
+  },
+  {
+    "key": "reminder.linear.allReminders",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.linear.currentStatusValue",
+    "files": ["packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"]
+  },
+  {
+    "key": "reminder.linear.globalPausedDescription",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.linear.globalPausedTitle",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.linear.groupEnabled",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.linear.groupPaused",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.linear.masterSwitch",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.linear.reEnableGlobal",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.linear.searchPlaceholder",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.linear.sidebarGlobalPaused",
+    "files": ["packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"]
+  },
+  {
+    "key": "reminder.linear.sidebarGroupPaused",
+    "files": ["packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"]
+  },
+  {
+    "key": "reminder.linear.templateCountValue",
+    "files": ["packages/app-vue/src/modules/reminder/presentation/lifecycle-presentation.ts"]
+  },
+  {
+    "key": "reminder.status.loading",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.template.confirmDelete",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.template.confirmDeleteTitle",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.templateDetail.actionEdit",
+    "files": ["packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"]
+  },
+  {
+    "key": "reminder.templateDetail.actionViewInstances",
+    "files": ["packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"]
+  },
+  {
+    "key": "reminder.templateDetail.badgeGlobalPaused",
+    "files": ["packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"]
+  },
+  {
+    "key": "reminder.templateDetail.badgeGroupControlled",
+    "files": ["packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"]
+  },
+  {
+    "key": "reminder.templateDetail.description",
+    "files": ["packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"]
+  },
+  {
+    "key": "reminder.templateDetail.effectiveStatusLine",
+    "files": ["packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"]
+  },
+  {
+    "key": "reminder.templateDetail.fallbackTitle",
+    "files": ["packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"]
+  },
+  {
+    "key": "reminder.templateDetail.fieldCreatedAt",
+    "files": ["packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"]
+  },
+  {
+    "key": "reminder.templateDetail.fieldDescription",
+    "files": ["packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"]
+  },
+  {
+    "key": "reminder.templateDetail.fieldEffectiveResult",
+    "files": ["packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"]
+  },
+  {
+    "key": "reminder.templateDetail.fieldGlobalSwitch",
+    "files": ["packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"]
+  },
+  {
+    "key": "reminder.templateDetail.fieldGroupControlMode",
+    "files": ["packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"]
+  },
+  {
+    "key": "reminder.templateDetail.fieldGroupSwitch",
+    "files": ["packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"]
+  },
+  {
+    "key": "reminder.templateDetail.fieldTitle",
+    "files": ["packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"]
+  },
+  {
+    "key": "reminder.templateDetail.fieldUpdatedAt",
+    "files": ["packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"]
+  },
+  {
+    "key": "reminder.templateDetail.groupedFallback",
+    "files": ["packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"]
+  },
+  {
+    "key": "reminder.templateDetail.overrideControllerGlobal",
+    "files": ["packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"]
+  },
+  {
+    "key": "reminder.templateDetail.overrideControllerGroup",
+    "files": ["packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"]
+  },
+  {
+    "key": "reminder.templateDetail.overrideDescription",
+    "files": ["packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"]
+  },
+  {
+    "key": "reminder.templateDetail.overrideTitle",
+    "files": ["packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"]
+  },
+  {
+    "key": "reminder.templateDetail.sectionBasicInfo",
+    "files": ["packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"]
+  },
+  {
+    "key": "reminder.templateDetail.sectionLifecycle",
+    "files": ["packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"]
+  },
+  {
+    "key": "reminder.templateDetail.sectionStats",
+    "files": ["packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"]
+  },
+  {
+    "key": "reminder.templateDetail.sectionTimeInfo",
+    "files": ["packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"]
+  },
+  {
+    "key": "reminder.templateDetail.selfSwitchTitle",
+    "files": ["packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"]
+  },
+  {
+    "key": "reminder.templateDetail.statCompleted",
+    "files": ["packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"]
+  },
+  {
+    "key": "reminder.templateDetail.statPending",
+    "files": ["packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"]
+  },
+  {
+    "key": "reminder.templateDetail.statTotal",
+    "files": ["packages/app-vue/src/modules/reminder/components/ReminderTemplateCard.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.badgeOptional",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.btnCancel",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.btnDone",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.btnPick",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.clearColor",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.currentGroupHintNamed",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.currentGroupHintRoot",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.currentGroupHintSelected",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.currentIcon",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.descCreate",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.descEdit",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.hintActiveHours",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.hintAdvanced",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.hintFixedTime",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.hintInterval",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.hintLongLived",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.iconPickerComingSoon",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.importanceImportant",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.importanceMinor",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.importanceModerate",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.importanceTrivial",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.importanceVital",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.labelDescription",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.labelEndHour",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.labelFixedTime",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.labelGroup",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.labelIcon",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.labelImportance",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.labelInterval",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.labelNotificationBody",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.labelNotificationTitle",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.labelStartHour",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.labelTags",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.labelTitle",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.labelTriggerType",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.placeholderDescription",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.placeholderGroup",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.placeholderNotificationBody",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.placeholderNotificationTitle",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.placeholderTags",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.placeholderTitle",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.rootOption",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.sectionActiveHours",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.sectionAdvanced",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.sectionAppearance",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.sectionBasicInfo",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.sectionTimeConfig",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.titleCreate",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.titleEdit",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.triggerFixedTime",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateDialog.triggerInterval",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.cancel",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.controlMode",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.controlModeGroup",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.controlModeIndividual",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.current",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.currentGroup",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.currentTemplate",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.defaultPolicyText",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.description",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.disabled",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.enabled",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.move",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.name",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.none",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.previewGroupEnabled",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.previewGroupPaused",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.previewIndividual",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.previewRoot",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.previewTitle",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.removeFromAllGroups",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.selectTargetGroup",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.status",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.targetGroup",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.targetGroupInfo",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.templates",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.title",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.unknown",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.unknownGroup",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.warning",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.templateMove.warningDescription",
+    "files": ["packages/app-vue/src/modules/reminder/components/TemplateMoveDialog.vue"]
+  },
+  {
+    "key": "reminder.toast.globalReminderEnabled",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.toast.globalReminderPaused",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.toast.groupControlModeUpdated",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.toast.groupCreated",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.toast.groupDeleted",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.toast.groupEnabled",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.toast.groupPaused",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.toast.groupUpdated",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.toast.templateCreated",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.toast.templateDeleted",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.toast.templateEnabled",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.toast.templateMoved",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.toast.templateMovedToRoot",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.toast.templatePaused",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  },
+  {
+    "key": "reminder.toast.templateUpdated",
+    "files": ["packages/app-vue/src/modules/reminder/views/ReminderLinearView.vue"]
+  }
 ]

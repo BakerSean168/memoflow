@@ -8,9 +8,9 @@
 
 在 TypeScript 中，`undefined` (由 `?` 产生) 和 `null` 虽然都代表“无值”，但在架构分层中有着明确的语义区别。
 
-* **Persistence (持久层)**: 数据库只有 `NULL`，没有 `undefined`。
-* **Domain (领域层)**: 实体应保持 **Stable Shape (稳定形状)**，属性应始终存在。
-* **Transfer (传输层)**: 允许为了带宽优化使用 `?`，但严禁与 `null` 混用。
+- **Persistence (持久层)**: 数据库只有 `NULL`，没有 `undefined`。
+- **Domain (领域层)**: 实体应保持 **Stable Shape (稳定形状)**，属性应始终存在。
+- **Transfer (传输层)**: 允许为了带宽优化使用 `?`，但严禁与 `null` 混用。
 
 **黄金法则**:
 
@@ -35,15 +35,14 @@ export interface DeviceInfoPersistenceDTO {
   deviceId: string;
   // ✅ 对应 SQL: VARCHAR NOT NULL
   deviceType: string;
-  
+
   // ✅ 对应 SQL: VARCHAR NULL
   // 明确表示字段存在，但值为 NULL
   os: string | null;
   ipAddress: string | null;
-  
+
   firstSeenAt: Date;
 }
-
 ```
 
 ❌ **错误示例**:
@@ -51,12 +50,11 @@ export interface DeviceInfoPersistenceDTO {
 ```typescript
 export interface DeviceInfoPersistenceDTO {
   // ❌ 错误：ORM 读取时 os 字段一定存在，不会是 undefined
-  os?: string; 
-  
-  // ❌ 错误：混合写法，增加了类型判断负担
-  ipAddress?: string | null; 
-}
+  os?: string;
 
+  // ❌ 错误：混合写法，增加了类型判断负担
+  ipAddress?: string | null;
+}
 ```
 
 ---
@@ -75,14 +73,13 @@ export interface DeviceInfo {
   deviceId: string;
   // ✅ 明确表达：我们尝试获取了 OS 信息，但没有获取到 (Unknown)
   os: string | null;
-  
+
   // ✅ 复杂对象如果整体缺失，也是 null
   location: {
     country: string | null;
     city: string | null;
   } | null;
 }
-
 ```
 
 ---
@@ -99,9 +96,8 @@ export interface DeviceInfo {
 // API 返回给前端的数据
 export interface DeviceInfoDTO {
   // ✅ 显式契约：前端可以直接用 if (dto.os) 判断
-  os: string | null; 
+  os: string | null;
 }
-
 ```
 
 #### B. API Request (写模型 / PATCH)
@@ -115,12 +111,11 @@ export interface UpdateDeviceReq {
   deviceId: string;
   // ✅ 可选：如果没传，表示不更新此字段
   // 如果传了 null，表示将字段清空 (如移除备注)
-  deviceName?: string | null; 
-  
+  deviceName?: string | null;
+
   // ✅ 可选：如果不传，不更新 tags
   tags?: string[];
 }
-
 ```
 
 ---
@@ -133,14 +128,14 @@ export interface UpdateDeviceReq {
 // 1. Persistence (DB) - 严格映射 SQL
 export interface DeviceInfoPersistenceDTO {
   id: string;
-  os: string | null;       // SQL: NULL
-  browser: string | null;  // SQL: NULL
+  os: string | null; // SQL: NULL
+  browser: string | null; // SQL: NULL
 }
 
 // 2. Domain (Logic) - 稳定结构
 export interface DeviceInfo {
   id: string;
-  os: string | null;       // 逻辑中明确知道 os 为空
+  os: string | null; // 逻辑中明确知道 os 为空
   browser: string | null;
 }
 
@@ -154,10 +149,9 @@ export interface DeviceInfoDTO {
 // 4. API Request (Patch) - 仅此处允许 Optional
 export interface UpdateDeviceProfileReq {
   id: string;
-  os?: string;        // 仅在不得不更新 OS 时才传
-  browser?: string;   // undefined = 不修改
+  os?: string; // 仅在不得不更新 OS 时才传
+  browser?: string; // undefined = 不修改
 }
-
 ```
 
 ---
@@ -166,17 +160,17 @@ export interface UpdateDeviceProfileReq {
 
 在 Review 代码或编写 `contracts` 时，请检查：
 
-* [ ] **PersistenceDTO 中是否出现了 `?**`？ -> **修正**：改为 `| null`。
-* [ ] **是否出现了 `?: Type | null` 的混合写法**？ -> **修正**：选一个，不要混用。
-* [ ] **领域对象 (Entity/VO) 属性是否使用了 `?**`？ -> **建议**：改为 `| null` 以保持 Shape 稳定。
-* [ ] **API 响应是否明确？** -> 推荐返回 `null` 而不是省略字段，除非为了极致的带宽优化。
+- [ ] **PersistenceDTO 中是否出现了 `?**`？ -> **修正**：改为 `| null`。
+- [ ] **是否出现了 `?: Type | null` 的混合写法**？ -> **修正**：选一个，不要混用。
+- [ ] **领域对象 (Entity/VO) 属性是否使用了 `?**`？ -> **建议**：改为 `| null` 以保持 Shape 稳定。
+- [ ] **API 响应是否明确？** -> 推荐返回 `null` 而不是省略字段，除非为了极致的带宽优化。
 
 ## 5. 为什么这么规定？(Reasoning)
 
 1. **数据库对齐**: SQL 中 `NULL` 是通过特殊标记位存储的，而 `undefined` 在 JS 中通常意味着 key 都不存在。使用 `| null` 能让 DTO 完美映射数据库行为。
 2. **减少类型体操**:
-* 混合写法需要判断：`if (val !== undefined && val !== null)`。
-* 单一写法只需判断：`if (val)` 或 `if (val != null)`。
 
+- 混合写法需要判断：`if (val !== undefined && val !== null)`。
+- 单一写法只需判断：`if (val)` 或 `if (val != null)`。
 
 3. **性能优化**: JS 引擎（如 V8）喜欢“形状稳定”的对象（Hidden Classes）。如果一个对象一会儿有 `os` 属性，一会儿没有，引擎无法有效优化。初始为 `null` 的属性比不存在的属性性能更好。

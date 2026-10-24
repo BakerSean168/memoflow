@@ -34,11 +34,11 @@ The acceptance measurement is exactly the existing browser-side
 `requestAnimationFrame` polling. No threshold, retries, sleeps, timeout,
 or assertions were changed.
 
-| Condition | Samples | Median (ms) | Maximum (ms) | Above 300ms |
-| --- | ---: | ---: | ---: | ---: |
-| Overlapping browser workload, CDP trace harness | 6 | 219.1 | 615.2 | 2 |
-| Single-browser focused spec, no deliberate overlap (shared host) | 8 | 179.6 | 1724.6 | 1 |
-| Subsequent actual-spec cohort with Chromium CPU tracing, shared host | 3 | 331.3 | 735.7 | 2 |
+| Condition                                                            | Samples | Median (ms) | Maximum (ms) | Above 300ms |
+| -------------------------------------------------------------------- | ------: | ----------: | -----------: | ----------: |
+| Overlapping browser workload, CDP trace harness                      |       6 |       219.1 |        615.2 |           2 |
+| Single-browser focused spec, no deliberate overlap (shared host)     |       8 |       179.6 |       1724.6 |           1 |
+| Subsequent actual-spec cohort with Chromium CPU tracing, shared host |       3 |       331.3 |        735.7 |           2 |
 
 The single-browser raw samples were
 `186.6, 114.1, 172.5, 134.7, 273.0, 206.6, 121.6, 1724.6` ms.
@@ -84,13 +84,13 @@ in the loaded samples); contract values in the tables use the returned
 latency, while attribution uses trace event durations.
 
 | Loaded sample | Click→geometry (ms) | Main mount microtask wall (ms) | Thread CPU (ms) | Wall minus CPU (ms) |
-| --- | ---: | ---: | ---: | ---: |
-| 0 | 212.4 | 207.6 | 152.6 | 55.0 |
-| 1 | 154.4 | 150.6 | 135.5 | 15.1 |
-| 2 | 225.8 | 220.7 | 175.4 | 45.3 |
-| 3 | 615.2 | 603.8 | 152.4 | 451.4 |
-| 4 | 140.2 | 136.2 | 123.3 | 12.9 |
-| 5 | 325.7 | 315.2 | 162.3 | 152.9 |
+| ------------- | ------------------: | -----------------------------: | --------------: | ------------------: |
+| 0             |               212.4 |                          207.6 |           152.6 |                55.0 |
+| 1             |               154.4 |                          150.6 |           135.5 |                15.1 |
+| 2             |               225.8 |                          220.7 |           175.4 |                45.3 |
+| 3             |               615.2 |                          603.8 |           152.4 |               451.4 |
+| 4             |               140.2 |                          136.2 |           123.3 |                12.9 |
+| 5             |               325.7 |                          315.2 |           162.3 |               152.9 |
 
 These are the longest `RunMicrotasks` events within each window, not a sum
 of nested events. In the worst sample, the mount task used nearly the same
@@ -163,8 +163,7 @@ before evaluating the unchanged measurement:
 ```ts
 const client = await context.newCDPSession(page);
 await client.send('Tracing.start', {
-  categories:
-    'devtools.timeline,v8.execute,blink.user_timing,disabled-by-default-v8.cpu_profiler',
+  categories: 'devtools.timeline,v8.execute,blink.user_timing,disabled-by-default-v8.cpu_profiler',
   transferMode: 'ReturnAsStream',
 });
 // Add performance.mark('add-context-start') immediately before startedAt,
@@ -220,10 +219,10 @@ Same command as above (`--repeat-each=10 --workers=1`), same shared host,
 run back to back (host load average 30–49 during both runs), latency logged
 temporarily before the unchanged assertion:
 
-| Build | n | Median | Max | >300ms |
-| --- | ---: | ---: | ---: | ---: |
-| Before (main `AIFooterComposer.vue`) | 10 | 166.3ms | 204.5ms | 0 |
-| After (this PR) | 10 | 122.4ms | 331.5ms | 1 |
+| Build                                |   n |  Median |     Max | >300ms |
+| ------------------------------------ | --: | ------: | ------: | -----: |
+| Before (main `AIFooterComposer.vue`) |  10 | 166.3ms | 204.5ms |      0 |
+| After (this PR)                      |  10 | 122.4ms | 331.5ms |      1 |
 
 Raw after: 125.5, 109.8, 113.6, 103.0, 331.5, 219.8, 125.1, 119.8, 110.9, 161.3.
 Raw before: 190.7, 169.1, 163.4, 137.5, 157.3, 156.0, 204.5, 182.0, 176.9, 156.6.

@@ -16,7 +16,21 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => ({
-    components: { Tabs, TabsContent, TabsList, TabsTrigger, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Button, Input, Label },
+    components: {
+      Tabs,
+      TabsContent,
+      TabsList,
+      TabsTrigger,
+      Card,
+      CardContent,
+      CardDescription,
+      CardFooter,
+      CardHeader,
+      CardTitle,
+      Button,
+      Input,
+      Label,
+    },
     template: `
       <Tabs default-value="account" class="w-[400px]">
         <TabsList class="grid w-full grid-cols-2">

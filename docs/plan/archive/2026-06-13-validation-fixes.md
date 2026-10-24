@@ -13,10 +13,12 @@ Fixed all blocking issues identified by local deployment validation to prepare t
 ### 1. Lint Errors (ai-service) ✅
 
 **Files Modified**:
+
 - `apps/ai-service/tests/test_resume_missing_checkpoint.py`
 - `apps/ai-service/tests/unit/test_knowledge_generate_enhancements.py`
 
 **Changes**:
+
 - Removed unused import: `patch` from `unittest.mock`
 - Removed unused import: `pytest`
 - Fixed import ordering issues (auto-fixed by ruff)
@@ -34,6 +36,7 @@ Fixed all blocking issues identified by local deployment validation to prepare t
 **Root Cause**: `EditableGoalTaskTemplate` type missing `timeOfDay` field, but template tried to access it.
 
 **Files Modified**:
+
 1. `packages/app-vue/src/modules/ai/composables/types.ts` (2 changes)
    - Added `timeOfDay: string` to `EditableGoalTaskTemplate` type definition
    - Updated `createEmptyGoalTaskTemplateDraft()` to include `timeOfDay: '09:00'` default
@@ -50,9 +53,11 @@ Fixed all blocking issues identified by local deployment validation to prepare t
 **Root Cause**: Docker build context tried to access `.pytest-temp/cache` directory, resulting in "Access is denied" error.
 
 **Files Modified**:
+
 - `.dockerignore`
 
 **Changes**:
+
 - Added `**/.pytest-temp` to exclusion list
 
 **Impact**: Prevents pytest temporary directories from being included in Docker build context
@@ -64,9 +69,11 @@ Fixed all blocking issues identified by local deployment validation to prepare t
 **Root Cause**: Dynamic import in test took longer than default 5000ms timeout.
 
 **Files Modified**:
+
 - `packages/app-vue/src/modules/editor/services/editorClientGateway.spec.ts`
 
 **Changes**:
+
 - Increased timeout to 10000ms for test: "creates and resolves a workspace via the injected editor service"
 
 **Rationale**: Dynamic imports can be slower on Windows with virus scanners

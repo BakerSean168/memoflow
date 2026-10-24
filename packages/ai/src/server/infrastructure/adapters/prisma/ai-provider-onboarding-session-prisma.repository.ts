@@ -46,7 +46,12 @@ export class AIProviderOnboardingSessionPrismaRepository implements IAIProviderO
     );
   }
 
-  async markModelVerified(input: { identityId: string; onboardingId: string; modelId: string; now: number }) {
+  async markModelVerified(input: {
+    identityId: string;
+    onboardingId: string;
+    modelId: string;
+    now: number;
+  }) {
     const current = await this.db.aiProviderOnboardingSession.findFirst({
       where: {
         id: input.onboardingId,
@@ -56,7 +61,9 @@ export class AIProviderOnboardingSessionPrismaRepository implements IAIProviderO
       },
     });
     if (!current) return null;
-    const verified = Array.from(new Set([...parseStringArray(current.verifiedModelIds), input.modelId]));
+    const verified = Array.from(
+      new Set([...parseStringArray(current.verifiedModelIds), input.modelId]),
+    );
     const updated = await this.db.aiProviderOnboardingSession.updateMany({
       where: {
         id: input.onboardingId,
@@ -76,7 +83,11 @@ export class AIProviderOnboardingSessionPrismaRepository implements IAIProviderO
     );
   }
 
-  async markConsumed(input: { identityId: string; onboardingId: string; now: number }): Promise<boolean> {
+  async markConsumed(input: {
+    identityId: string;
+    onboardingId: string;
+    now: number;
+  }): Promise<boolean> {
     const updated = await this.db.aiProviderOnboardingSession.updateMany({
       where: {
         id: input.onboardingId,
@@ -98,7 +109,8 @@ export class AIProviderOnboardingSessionPrismaRepository implements IAIProviderO
       baseUrl: row.baseUrl,
       targetProviderId: row.targetProviderId,
       credentialRef: row.credentialRef as AIProviderCredentialRef,
-      credentialStatus: row.credentialStatus as AIProviderOnboardingSessionRecord['credentialStatus'],
+      credentialStatus:
+        row.credentialStatus as AIProviderOnboardingSessionRecord['credentialStatus'],
       discoveryStatus: row.discoveryStatus as AIProviderOnboardingSessionRecord['discoveryStatus'],
       models: parseModels(row.modelsJson),
       verifiedModelIds: parseStringArray(row.verifiedModelIds),
@@ -122,7 +134,9 @@ function parseModels(value: string): AIModelInfo[] {
 function parseStringArray(value: string): string[] {
   try {
     const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === 'string') : [];
+    return Array.isArray(parsed)
+      ? parsed.filter((item): item is string => typeof item === 'string')
+      : [];
   } catch {
     return [];
   }

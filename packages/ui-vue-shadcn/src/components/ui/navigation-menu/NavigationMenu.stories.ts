@@ -1,7 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import {
-  NavigationMenu, NavigationMenuContent, NavigationMenuItem,
-  NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, NavigationMenuViewport,
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  NavigationMenuViewport,
 } from '.';
 
 const meta = {
@@ -16,8 +21,13 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: () => ({
     components: {
-      NavigationMenu, NavigationMenuContent, NavigationMenuItem,
-      NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, NavigationMenuViewport,
+      NavigationMenu,
+      NavigationMenuContent,
+      NavigationMenuItem,
+      NavigationMenuLink,
+      NavigationMenuList,
+      NavigationMenuTrigger,
+      NavigationMenuViewport,
     },
     template: `
       <NavigationMenu>

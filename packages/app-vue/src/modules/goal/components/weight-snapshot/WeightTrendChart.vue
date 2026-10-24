@@ -105,7 +105,6 @@ const {
 
 const { t } = useI18n();
 
-
 const selectedRange = ref<'7d' | '30d' | '90d' | '180d'>('30d');
 
 // 时间范围选项
@@ -210,8 +209,7 @@ const chartOption = computed(() => {
       type: 'time',
       boundaryGap: false,
       axisLabel: {
-        formatter: (value: number) =>
-          formatProductPattern(value, 'MM-dd'),
+        formatter: (value: number) => formatProductPattern(value, 'MM-dd'),
       },
     },
     yAxis: {

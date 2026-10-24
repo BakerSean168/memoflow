@@ -97,7 +97,7 @@ export function calculateOffset(page: number, pageSize: number): number {
 export function createPaginatedResult<T>(
   data: T[],
   total: number,
-  params: Required<PaginationParams>
+  params: Required<PaginationParams>,
 ): PaginatedResult<T> {
   const totalPages = Math.ceil(total / params.pageSize);
 
@@ -123,10 +123,7 @@ export function createPaginatedResult<T>(
  * @param {PaginationParams} [params] - The pagination parameters.
  * @returns {PaginatedResult<T>} The paginated subset of the array wrapped in a result object.
  */
-export function paginateArray<T>(
-  items: T[],
-  params?: PaginationParams
-): PaginatedResult<T> {
+export function paginateArray<T>(items: T[], params?: PaginationParams): PaginatedResult<T> {
   const normalized = normalizePaginationParams(params);
   const offset = calculateOffset(normalized.page, normalized.pageSize);
   const data = items.slice(offset, offset + normalized.pageSize);
@@ -168,7 +165,9 @@ export interface CursorPaginatedResult<T> {
  * @param {CursorPaginationParams} [params] - The input cursor parameters.
  * @returns {Required<CursorPaginationParams>} The normalized parameters.
  */
-export function normalizeCursorParams(params?: CursorPaginationParams): Required<CursorPaginationParams> {
+export function normalizeCursorParams(
+  params?: CursorPaginationParams,
+): Required<CursorPaginationParams> {
   return {
     cursor: params?.cursor ?? '',
     limit: Math.min(MAX_PAGE_SIZE, Math.max(1, params?.limit ?? DEFAULT_PAGE_SIZE)),

@@ -11,9 +11,6 @@ export interface SchedulerApplicationPort {
     query: ScheduledInvocationDiagnosticQuery,
     ctx: Context,
   ): Promise<Result<ScheduledInvocationDiagnostic[]>>;
-  getInvocation(
-    id: string,
-    ctx: Context,
-  ): Promise<Result<ScheduledInvocationDiagnostic | null>>;
+  getInvocation(id: string, ctx: Context): Promise<Result<ScheduledInvocationDiagnostic | null>>;
   listDueInvocations(ctx: Context): Promise<Result<ScheduledInvocationDiagnostic[]>>;
 }

@@ -50,7 +50,7 @@ backend-automation-tool-executor (API)
   │         或 { state: "draft", goal: {...} }
   │
   └─→ 返回前端
-  
+
 前端根据 state 分叉：
   - state="clarification" → 显示澄清问题 UI
   - state="draft" → 显示 goal draft 卡片
@@ -64,13 +64,13 @@ Python (ai-service) 底层
   ├─ 扩展 GoalPlanningResponse：支持 state="clarification" | "draft"
   ├─ 新增方法：clarify() - 判断是否需要澄清
   └─ 新增方法：plan_with_clarification() - 两阶段流程
-  
+
 API 路由（apps/api）
   └─ 修改 generateGoalDraft 处理器，路由澄清逻辑
-  
+
 TS 应用层（packages/ai）
   └─ 扩展 AIClientService.generateGoal() 签名
-  
+
 Vue 前端（packages/app-vue）
   ├─ 新增澄清问题 UI 卡片
   ├─ 扩展状态管理（澄清问题、回答、阶段）
@@ -86,6 +86,7 @@ Vue 前端（packages/app-vue）
 **目标**：验证澄清逻辑和提示词效果
 
 **改动文件**：
+
 - `apps/ai-service/src/ai_service/schemas/goals.py`
 - `apps/ai-service/src/ai_service/services/goal_planning_service.py`
 
@@ -106,6 +107,7 @@ Vue 前端（packages/app-vue）
 **参考**：详见 `p0-1-python-implementation-guide.md`
 
 **完成标准**：
+
 - 提示词可靠（澄清判断准确率 >90%）
 - schema 验证通过
 - Python 测试全部绿灯
@@ -117,6 +119,7 @@ Vue 前端（packages/app-vue）
 **目标**：前后端通信通畅
 
 **改动文件**：
+
 - `apps/api/src/modules/ai/backend-automation-tool-executor.adapter.ts`
 - `packages/ai/src/application-client/ai-client-service.ts`
 
@@ -135,6 +138,7 @@ Vue 前端（packages/app-vue）
 - [ ] 测试 API 端点（curl 或 Postman）
 
 **完成标准**：
+
 - API 端点兼容两种请求
 - 响应格式清晰（state 字段有效）
 - curl 测试通过
@@ -146,6 +150,7 @@ Vue 前端（packages/app-vue）
 **目标**：完整的用户工作流
 
 **改动文件**：
+
 - `packages/app-vue/src/modules/ai/views/AIChatView.vue`
 
 **具体任务**：
@@ -178,6 +183,7 @@ Vue 前端（packages/app-vue）
 - [ ] 手动测试工作流完整性
 
 **完成标准**：
+
 - 模糊 idea 触发澄清问题显示
 - 填写答案后继续生成 draft
 - 刷新页面澄清状态恢复
@@ -214,6 +220,7 @@ Vue 前端（packages/app-vue）
   - [ ] 单元测试
 
 **完成标准**：
+
 - 全部测试用例通过
 - 可以提交 PR
 
@@ -224,6 +231,7 @@ Vue 前端（packages/app-vue）
 ### Python 后端
 
 **文件**: `apps/ai-service/src/ai_service/schemas/goals.py`
+
 ```python
 # 新增
 class ClarificationQuestion(BaseModel): ...
@@ -241,6 +249,7 @@ class GoalPlanningRequest:
 ```
 
 **文件**: `apps/ai-service/src/ai_service/services/goal_planning_service.py`
+
 ```python
 # 新增方法
 async def clarify(...) -> GoalPlanningResponse: ...
@@ -255,6 +264,7 @@ def parse_clarification_payload(content: str) -> GoalClarificationLLMResponse: .
 ### 前端 Vue
 
 **文件**: `packages/app-vue/src/modules/ai/views/AIChatView.vue`
+
 ```typescript
 // 新增状态
 const goalClarificationRequired = ref(false)
@@ -280,29 +290,32 @@ type PersistedWorkflowEntry = {
 
 ## 实现时间估算
 
-| 阶段 | 任务 | 估计 | 备注 |
-|-----|------|------|------|
-| 1 | Python 澄清逻辑 | 2-3h | 包括提示词测试 |
-| 2 | API 路由 | 1-2h | 路由逻辑相对简单 |
-| 3 | 前端集成 | 2-3h | UI + 状态管理 |
-| 4 | 测试优化 | 1-2h | E2E 和手工测试 |
-| **总计** | | **6-10h** | 可中断，分天完成 |
+| 阶段     | 任务            | 估计      | 备注             |
+| -------- | --------------- | --------- | ---------------- |
+| 1        | Python 澄清逻辑 | 2-3h      | 包括提示词测试   |
+| 2        | API 路由        | 1-2h      | 路由逻辑相对简单 |
+| 3        | 前端集成        | 2-3h      | UI + 状态管理    |
+| 4        | 测试优化        | 1-2h      | E2E 和手工测试   |
+| **总计** |                 | **6-10h** | 可中断，分天完成 |
 
 ---
 
 ## 风险评估
 
 ### 低风险
+
 - 澄清逻辑隔离，不影响现有 plan() 方法
 - API 层只是新增端点，不改现有接口
 - localStorage 扩展向后兼容
 
 ### 中风险
+
 - 前端状态管理复杂，需要仔细测试状态转换
 - 澄清提示词可能需要多次迭代优化
 - 两阶段 LLM 调用增加 token 成本
 
 ### 缓解措施
+
 - 新增方法与现有代码隔离（不改现有逻辑）
 - 澄清检查可选（enableClarification 参数）
 - 提示词有明确的输出 schema（JSON 格式）
@@ -314,7 +327,7 @@ type PersistedWorkflowEntry = {
 - **深度分析**：
   - `code-review-python.md` - Python 层详细审查
   - `code-review-frontend.md` - 前端详细审查
-  
+
 - **实现指南**：
   - `p0-1-python-implementation-guide.md` - Python 逐步编码指南
   - `p0-1-frontend-implementation-guide.md` - 前端逐步编码指南（待生成）
@@ -360,16 +373,19 @@ P0-1 完成 ✅
 选择下面其中一条路径：
 
 ### 路径 A：立即编码
+
 1. 打开 `p0-1-python-implementation-guide.md`
 2. 按 5 个步骤逐步执行 Python 改动
 3. 运行测试验证
 
 ### 路径 B：先深入理解
+
 1. 阅读 `code-review-python.md` 和 `code-review-frontend.md`
 2. 理解完整的数据流和状态管理
 3. 再开始编码
 
 ### 路径 C：分块并行
+
 1. 一人做 Python（阶段 1）
 2. 另一人做前端设计（阶段 3 的 UI）
 3. 整合 API 层（阶段 2）

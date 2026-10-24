@@ -3,21 +3,12 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "sourceRoot": "packages/ui-vue-shadcn/src",
-  "tags": [
-    "scope:ui",
-    "type:vue",
-    "type:shadcn",
-    "layer:ui"
-  ],
+  "tags": ["scope:ui", "type:vue", "type:shadcn", "layer:ui"],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "outputs": [
-        "{workspaceRoot}/packages/ui-vue-shadcn/dist"
-      ],
-      "dependsOn": [
-        "^build"
-      ],
+      "outputs": ["{workspaceRoot}/packages/ui-vue-shadcn/dist"],
+      "dependsOn": ["^build"],
       "options": {
         "command": "node ../../node_modules/vite/bin/vite.js build",
         "cwd": "packages/ui-vue-shadcn"
@@ -32,9 +23,7 @@
     },
     "lint": {
       "options": {
-        "args": [
-          "**/*.{ts,tsx}"
-        ]
+        "args": ["**/*.{ts,tsx}"]
       }
     },
     "typecheck": {
@@ -46,13 +35,8 @@
     },
     "test": {
       "executor": "nx:run-commands",
-      "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
-      ],
-      "inputs": [
-        "default",
-        "^production"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "inputs": ["default", "^production"],
       "cache": true,
       "options": {
         "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",

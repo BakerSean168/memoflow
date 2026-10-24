@@ -41,9 +41,7 @@ export function assertSchedulingKey(schedulingKey: string): void {
 export function assertHandlerKey(handlerKey: string): void {
   assertStableText(handlerKey, 'handlerKey', 160);
   if (!HANDLER_KEY.test(handlerKey)) {
-    throw new TypeError(
-      'handlerKey must be a stable lowercase key such as "task.reminder.fire".',
-    );
+    throw new TypeError('handlerKey must be a stable lowercase key such as "task.reminder.fire".');
   }
 }
 

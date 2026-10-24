@@ -17,7 +17,8 @@ export class RoutineAccountClosedConsumer {
 
   async handleAccountClosed(event: unknown, eventId: string): Promise<void> {
     const payload = event as RoutineAccountClosedPayload;
-    if (!payload?.identityId) throw new TypeError('Routine account-closed event requires identityId');
+    if (!payload?.identityId)
+      throw new TypeError('Routine account-closed event requires identityId');
     const consumer = 'routine-account-closed';
     const existing = await this.prisma.inboxReceipt.findUnique({
       where: { id_consumer: { id: eventId, consumer } },

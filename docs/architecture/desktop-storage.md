@@ -6,13 +6,13 @@ Issue #487 replaces the previous single-root layout. Existing local development 
 
 The pure provider is `apps/desktop/src/main/paths/desktop-storage-roots.ts`. Shared/Profile resolvers derive from its result without filesystem effects.
 
-| Category | Windows | Linux | macOS |
-| --- | --- | --- | --- |
-| CONFIG | APPDATA/Name | XDG_CONFIG_HOME/name (default ~/.config/name) | ~/Library/Application Support/Name/config |
-| DATA | LOCALAPPDATA/Name/data | XDG_DATA_HOME/name (default ~/.local/share/name) | ~/Library/Application Support/Name/data |
-| STATE | LOCALAPPDATA/Name/state | XDG_STATE_HOME/name (default ~/.local/state/name) | ~/Library/Application Support/Name/state |
-| CACHE | LOCALAPPDATA/Name/cache | XDG_CACHE_HOME/name (default ~/.cache/name) | ~/Library/Caches/Name |
-| Logs | STATE/logs | STATE/logs | ~/Library/Logs/Name |
+| Category | Windows                 | Linux                                             | macOS                                     |
+| -------- | ----------------------- | ------------------------------------------------- | ----------------------------------------- |
+| CONFIG   | APPDATA/Name            | XDG_CONFIG_HOME/name (default ~/.config/name)     | ~/Library/Application Support/Name/config |
+| DATA     | LOCALAPPDATA/Name/data  | XDG_DATA_HOME/name (default ~/.local/share/name)  | ~/Library/Application Support/Name/data   |
+| STATE    | LOCALAPPDATA/Name/state | XDG_STATE_HOME/name (default ~/.local/state/name) | ~/Library/Application Support/Name/state  |
+| CACHE    | LOCALAPPDATA/Name/cache | XDG_CACHE_HOME/name (default ~/.cache/name)       | ~/Library/Caches/Name                     |
+| Logs     | STATE/logs              | STATE/logs                                        | ~/Library/Logs/Name                       |
 
 Name is MemoFlow, MemoFlow-Dev or MemoFlow-Test; Linux uses lowercase. Windows validates independent absolute Roaming and Local AppData values, including redirected folders. Production resolves Roaming through Electron app.getPath('appData'); Electron has no typed localAppData key, so Local uses LOCALAPPDATA. The pure provider also accepts injected Known Folders and environment values for tests. Local is never derived from Roaming's parent. Linux accepts only absolute nonempty XDG values; relative, empty and unset values use the specification defaults.
 

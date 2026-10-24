@@ -1,6 +1,6 @@
 /**
  * Notification Module - Domain Events
- * 
+ *
  * All domain event types for the Notification module
  */
 

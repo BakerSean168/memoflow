@@ -42,9 +42,7 @@ describe('OpenAICompatibleGateway', () => {
     });
 
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(url).toBe(
-      'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
-    );
+    expect(url).toBe('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions');
     expect(JSON.parse(String(init.body))).toMatchObject({
       model: 'gemini-2.5-flash',
       max_tokens: OPENAI_COMPATIBLE_MIN_MAX_TOKENS,

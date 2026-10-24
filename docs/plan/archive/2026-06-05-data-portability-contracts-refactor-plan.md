@@ -457,8 +457,7 @@ export type DataPortabilityEventMap = {
 
 ```ts
 type ParseUserDataExportEnvelopeResult =
-  | { ok: true; envelope: UserDataExportEnvelopeV1 }
-  | { ok: false; error: string };
+  { ok: true; envelope: UserDataExportEnvelopeV1 } | { ok: false; error: string };
 ```
 
 这样 `ImportUserDataUseCase` 可以直接消费 typed envelope，而不是重新 cast 原始对象。

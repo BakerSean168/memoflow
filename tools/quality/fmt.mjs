@@ -59,7 +59,10 @@ function runPrettier(root, prettierBin, action, files) {
     });
     if (result.error) throw result.error;
     if (result.status !== 0 && action === 'write') status = result.status;
-    const lines = (result.stdout ?? '').split('\n').map((l) => l.trim()).filter(Boolean);
+    const lines = (result.stdout ?? '')
+      .split('\n')
+      .map((l) => l.trim())
+      .filter(Boolean);
     listed.push(...lines);
     if (result.status !== 0 && action === 'check' && lines.length === 0 && result.stderr) {
       process.stderr.write(result.stderr);
@@ -73,7 +76,13 @@ function main() {
   const args = parseArgs(process.argv.slice(2));
   const root = path.resolve(args.root ?? process.cwd());
   const started = Date.now();
-  const plan = planFiles({ root, mode: args.mode, base: args.base, head: args.head, files: args.files });
+  const plan = planFiles({
+    root,
+    mode: args.mode,
+    base: args.base,
+    head: args.head,
+    files: args.files,
+  });
   const prettierBin =
     process.env.QUALITY_PRETTIER_BIN ??
     path.join(workspaceRoot, 'node_modules', 'prettier', 'bin', 'prettier.cjs');

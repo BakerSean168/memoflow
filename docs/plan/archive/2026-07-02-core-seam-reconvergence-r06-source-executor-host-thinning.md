@@ -200,4 +200,3 @@ host 不需要再做：
 - Old path deleted: `packages/schedule/src/application-server/source-executors/shared-source-executor.ts`、`packages/schedule/src/application-server/source-executors/types.ts`、`apps/desktop/src/main/modules/schedule/source-executors.ts`；`apps/api/src/main.ts` 与 `apps/desktop/src/main/main.ts` 中旧的 host-local execution assembly 已移除。
 - Verification: `.\node_modules\.bin\nx.cmd run schedule-orchestration:build`、`schedule-orchestration:test`、`api:typecheck`、`api:test`、`api:test:smoke`、`schedule:test`、`.\node_modules\.bin\tsc.cmd --noEmit -p apps/desktop/tsconfig.typecheck.json` 通过。
 - Remaining follow-up: 进入 `R07`，统一 controller seam 与 route registration seam。
-

@@ -29,10 +29,7 @@ const UUID_PATTERN = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{1
  * - IGoalId_550e8400-e29b-41d4-a716-446655440000
  * - 7e92ca52-b331-4cbb-9ecc-2b1f1471c370 (纯 UUID，向后兼容)
  */
-const GENERIC_PREFIXED_ID_REGEX = new RegExp(
-  `^(?:[A-Za-z][A-Za-z0-9]*_)?${UUID_PATTERN}$`,
-  'i',
-);
+const GENERIC_PREFIXED_ID_REGEX = new RegExp(`^(?:[A-Za-z][A-Za-z0-9]*_)?${UUID_PATTERN}$`, 'i');
 
 /**
  * 构建特定前缀的 ID 正则
@@ -68,11 +65,16 @@ export const brandedId = <T extends string>(prefixOrMessage?: string) => {
 
   if (isPrefix) {
     const regex = buildPrefixedIdRegex(prefixOrMessage!);
-    return z.string().regex(regex, `Invalid ${prefixOrMessage} ID format`) as unknown as z.ZodType<T>;
+    return z
+      .string()
+      .regex(regex, `Invalid ${prefixOrMessage} ID format`) as unknown as z.ZodType<T>;
   }
 
   // 默认：接受任意前缀式 ID 或纯 UUID
   return z
     .string()
-    .regex(GENERIC_PREFIXED_ID_REGEX, prefixOrMessage ?? 'Invalid ID format') as unknown as z.ZodType<T>;
+    .regex(
+      GENERIC_PREFIXED_ID_REGEX,
+      prefixOrMessage ?? 'Invalid ID format',
+    ) as unknown as z.ZodType<T>;
 };

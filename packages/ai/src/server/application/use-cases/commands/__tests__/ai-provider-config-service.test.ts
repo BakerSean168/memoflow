@@ -91,9 +91,12 @@ describe('TestAIProviderConnectionUseCase', () => {
       createAIProviderSecretVaultStub(),
     );
 
-    const result = await useCase.execute({
-      providerId: 'provider-1' as TestAIProviderReq['providerId'],
-    }, { identityId: 'identity-1' });
+    const result = await useCase.execute(
+      {
+        providerId: 'provider-1' as TestAIProviderReq['providerId'],
+      },
+      { identityId: 'identity-1' },
+    );
 
     expect(executionPort.complete).toHaveBeenCalledWith({
       identityId: 'identity-1',
@@ -140,9 +143,12 @@ describe('TestAIProviderConnectionUseCase', () => {
       createAIProviderSecretVaultStub(),
     );
 
-    const result = await useCase.execute({
-      providerId: 'provider-1' as TestAIProviderReq['providerId'],
-    }, { identityId: 'identity-1' });
+    const result = await useCase.execute(
+      {
+        providerId: 'provider-1' as TestAIProviderReq['providerId'],
+      },
+      { identityId: 'identity-1' },
+    );
 
     expect(result.ok).toBe(true);
     if (result.ok) {

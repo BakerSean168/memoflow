@@ -17,19 +17,19 @@ Upgrade the supported stable engineering stack across Web, Desktop, API, shared 
 
 ## Current version decisions
 
-| Area | Chosen version | Reason |
-| --- | --- | --- |
-| Node / pnpm | Node 24 / pnpm 11.20.0 | CI and host baseline. |
-| Nx family / Vite / Rolldown | 23.2.1 / 8.3.1 / 1.2.9 | Matching Nx family versions; Rolldown pin preserves Web Bundled Dev protocol behavior. |
-| Vue / Router / Pinia / persisted state / VueUse | 3.5.43 / 5.3.1 / 4.0.3 / 4.7.1 / 15.0.0 | Current stable Vue stack. |
-| Electron / electron-builder | 44.4.5 / 26.16.1 | Current stable desktop stack. |
-| Playwright / Prisma | 1.63.0 / 7.10.0 | Prisma 8 is only RC in the current audit; generated client is regenerated. |
-| Tailwind CSS / Vite plugin | 4.3.3 / 4.3.3 | Matching stable releases. |
-| Better Auth / Mastra core | 1.7.6 / 1.70.0 | Current stable releases; Mastra libsql 1.23.2, memory 1.32.0, pg 1.27.0. |
-| PowerSync common / node | 2.3.0 / 1.1.0 | Current stable releases. |
+| Area                                             | Chosen version                            | Reason                                                                                       |
+| ------------------------------------------------ | ----------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Node / pnpm                                      | Node 24 / pnpm 11.20.0                    | CI and host baseline.                                                                        |
+| Nx family / Vite / Rolldown                      | 23.2.1 / 8.3.1 / 1.2.9                    | Matching Nx family versions; Rolldown pin preserves Web Bundled Dev protocol behavior.       |
+| Vue / Router / Pinia / persisted state / VueUse  | 3.5.43 / 5.3.1 / 4.0.3 / 4.7.1 / 15.0.0   | Current stable Vue stack.                                                                    |
+| Electron / electron-builder                      | 44.4.5 / 26.16.1                          | Current stable desktop stack.                                                                |
+| Playwright / Prisma                              | 1.63.0 / 7.10.0                           | Prisma 8 is only RC in the current audit; generated client is regenerated.                   |
+| Tailwind CSS / Vite plugin                       | 4.3.3 / 4.3.3                             | Matching stable releases.                                                                    |
+| Better Auth / Mastra core                        | 1.7.6 / 1.70.0                            | Current stable releases; Mastra libsql 1.23.2, memory 1.32.0, pg 1.27.0.                     |
+| PowerSync common / node                          | 2.3.0 / 1.1.0                             | Current stable releases.                                                                     |
 | Axios / ioredis / Nodemailer / Markdown-It / Zod | 1.20.0 / 6.0.0 / 10.0.10 / 15.0.2 / 4.6.5 | Stable direct dependencies. Markdown-It owns its types; removed its DefinitelyTyped package. |
-| ESLint / typescript-eslint | 10.11.0 / 8.70.1 | Latest stable; remaining third-party peer declarations are audited below. |
-| Vitest / TS native CLI / TS compiler API | 4.1.11 / 7.0.2 / 6.0.2 | Nx peer-compatible Vitest and side-by-side TS transition. |
+| ESLint / typescript-eslint                       | 10.11.0 / 8.70.1                          | Latest stable; remaining third-party peer declarations are audited below.                    |
+| Vitest / TS native CLI / TS compiler API         | 4.1.11 / 7.0.2 / 6.0.2                    | Nx peer-compatible Vitest and side-by-side TS transition.                                    |
 
 ### Compatibility boundaries
 

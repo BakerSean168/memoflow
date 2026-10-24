@@ -1,9 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createCloudAuth, type CloudPrincipal } from './cloud-auth.js';
 
-function createFixture(options: {
-  github?: { clientId: string; clientSecret: string; redirectURI?: string };
-} = {}) {
+function createFixture(
+  options: {
+    github?: { clientId: string; clientSecret: string; redirectURI?: string };
+  } = {},
+) {
   const createDeviceCode = vi.fn(async ({ data }: { data: Record<string, unknown> }) => ({
     id: 'device-record-1',
     ...data,

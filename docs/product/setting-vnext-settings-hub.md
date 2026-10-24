@@ -393,7 +393,6 @@ Web/Mobile 不渲染 unsupported control。
 
 `SETTING-9207` 已删除 Advanced 空壳。以下内容只是 future capability 条件，不是当前 UI。
 
-
 ### 12.1 Keyboard shortcuts
 
 当前 shortcut shell 不作为稳定功能展示，直到：

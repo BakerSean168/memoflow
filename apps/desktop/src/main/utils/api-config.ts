@@ -154,15 +154,13 @@ export function getApiBaseUrl(): string {
 
 /** Public Web origin used for browser-completed authentication journeys. */
 export function getWebAppUrl(): string {
-  const configured = process.env.MEMOFLOW_WEB_URL
-    || process.env.WEB_APP_URL
-    || process.env.VITE_WEB_URL;
+  const configured =
+    process.env.MEMOFLOW_WEB_URL || process.env.WEB_APP_URL || process.env.VITE_WEB_URL;
   if (configured && isAbsoluteHttpUrl(configured)) {
     return trimTrailingSlash(configured);
   }
 
-  const corsOrigin = process.env.CORS_ORIGIN
-    ?.split(',')
+  const corsOrigin = process.env.CORS_ORIGIN?.split(',')
     .map((origin) => origin.trim())
     .find((origin) => isAbsoluteHttpUrl(origin));
   if (corsOrigin) return trimTrailingSlash(corsOrigin);

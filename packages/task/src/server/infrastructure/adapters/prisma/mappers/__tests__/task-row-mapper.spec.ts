@@ -13,7 +13,6 @@ import { toImportanceLevel } from '../task-row.mapper';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 
 describe('task row mappers', () => {
-
   it('toImportanceLevel preserves known values', () => {
     expect(toImportanceLevel('Important')).toBe(ImportanceLevel.Important);
     expect(toImportanceLevel('Minor')).toBe(ImportanceLevel.Minor);

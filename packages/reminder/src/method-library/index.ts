@@ -73,7 +73,9 @@ function ambient(input: Omit<RoutineMethodRecord, 'methodType'>): RoutineMethodR
   return Object.freeze({ ...input, methodType: 'ambient-routine' });
 }
 
-function protocol(input: Omit<RoutineMethodRecord, 'methodType' | 'runtimeRequirement' | 'templatePreset'>): RoutineMethodRecord {
+function protocol(
+  input: Omit<RoutineMethodRecord, 'methodType' | 'runtimeRequirement' | 'templatePreset'>,
+): RoutineMethodRecord {
   return Object.freeze({
     ...input,
     methodType: 'focus-protocol',
@@ -91,7 +93,8 @@ export const ROUTINE_METHOD_CATALOG: readonly RoutineMethodRecord[] = Object.fre
     interventionDefault: 'Gentle',
     recommendedParameters: { intervalMinutes: 50 },
     editableParameters: ['intervalMinutes', 'activeHours'],
-    sourceNote: 'Work-break pattern inspired by mature break-reminder products; not medical advice.',
+    sourceNote:
+      'Work-break pattern inspired by mature break-reminder products; not medical advice.',
     templatePreset: {
       title: 'Stand & Move',
       description: 'Stand up, change posture, and move briefly before returning to work.',
@@ -162,7 +165,8 @@ export const ROUTINE_METHOD_CATALOG: readonly RoutineMethodRecord[] = Object.fre
     interventionDefault: 'Guided',
     recommendedParameters: { focusMinutes: 50, breakMinutes: 10, cycles: 4 },
     editableParameters: ['focusMinutes', 'breakMinutes', 'cycles'],
-    sourceNote: 'Generic work/break protocol; deterministic timing is owned by ProtocolSession runtime.',
+    sourceNote:
+      'Generic work/break protocol; deterministic timing is owned by ProtocolSession runtime.',
   }),
   protocol({
     id: 'pomodoro',
@@ -183,7 +187,8 @@ export const ROUTINE_METHOD_CATALOG: readonly RoutineMethodRecord[] = Object.fre
       'longBreakEveryCycles',
       'longBreakMinutes',
     ],
-    sourceNote: 'Pomodoro-style focus protocol; MemoFlow owns the implementation and runtime state machine.',
+    sourceNote:
+      'Pomodoro-style focus protocol; MemoFlow owns the implementation and runtime state machine.',
   }),
 ]);
 

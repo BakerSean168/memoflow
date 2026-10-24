@@ -63,7 +63,7 @@ for (const host of ['web', 'desktop'] as const) {
             ? page.getByTestId('shared-list-content')
             : surface === 'workspace'
               ? scroll.locator(':scope > *').first()
-            : scroll.locator(':scope > div').first();
+              : scroll.locator(':scope > div').first();
         const edge =
           surface === 'providers'
             ? page.getByTestId('ai-settings-panel').locator('header').first()
@@ -73,14 +73,14 @@ for (const host of ['web', 'desktop'] as const) {
             ? width === 440
               ? page.getByTestId('settings-compact-back')
               : page.getByTestId('settings-return-to-app')
-              : surface === 'workspace'
+            : surface === 'workspace'
               ? page.getByTestId('task-page-toolbar')
               : surface === 'shared-list'
                 ? page.getByTestId('list-page-toolbar')
-              : page.getByTestId('global-composer');
-        expect(
-          await scroll.evaluate((el) => getComputedStyle(el).scrollbarGutter),
-        ).toContain('stable');
+                : page.getByTestId('global-composer');
+        expect(await scroll.evaluate((el) => getComputedStyle(el).scrollbarGutter)).toContain(
+          'stable',
+        );
         const chromeBefore = await chrome.boundingBox();
         const before = {
           scroll: await geometry(scroll),

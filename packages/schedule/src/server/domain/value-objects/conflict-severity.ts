@@ -1,8 +1,11 @@
-import { ConflictSeverity as ConflictSeverityContract, type ConflictSeverity as IConflictSeverity } from '@memoflow/contracts/schedule';
+import {
+  ConflictSeverity as ConflictSeverityContract,
+  type ConflictSeverity as IConflictSeverity,
+} from '@memoflow/contracts/schedule';
 
 /**
  * 📝 冲突严重程度 - 日程冲突的严重程度分类
- * 
+ *
  * Branded Type：运行时为 string，编译时具有类型安全性
  * 零序列化成本，内存开销极小
  */
@@ -21,7 +24,7 @@ const VALUES: IConflictSeverity[] = Object.values(ConflictSeverityContract);
  */
 export const ConflictSeverity = {
   // ================= 常量定义 =================
-  
+
   Minor: 'Minor' as ConflictSeverity,
   Moderate: 'Moderate' as ConflictSeverity,
   Severe: 'Severe' as ConflictSeverity,

@@ -6,4 +6,3 @@ export * from './list-task-occurrences-by-account.use-case';
 export * from './list-task-occurrences-by-status.use-case';
 export * from './list-task-occurrences-by-plan.use-case';
 export * from './list-task-plans.use-case';
-

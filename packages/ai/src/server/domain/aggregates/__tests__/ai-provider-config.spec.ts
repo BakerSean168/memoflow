@@ -38,8 +38,8 @@ describe('AIProviderConfig aggregate', () => {
     expect(config.domainEvents[0]).toMatchObject({
       payload: expect.objectContaining({
         providerConnection: expect.objectContaining({
-        providerDefinitionId: 'openai',
-        credentialRef: 'credential-test',
+          providerDefinitionId: 'openai',
+          credentialRef: 'credential-test',
         }),
       }),
     });

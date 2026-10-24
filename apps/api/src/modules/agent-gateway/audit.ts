@@ -20,9 +20,27 @@ export function createGatewayAudit(logger: ILogger): (event: GatewayAuditEvent) 
 export function createGatewayDiagnostics(logger: ILogger): (event: GatewayDiagnostic) => void {
   return ({ requestId, traceId, cause }) => {
     const error = cause instanceof Error ? cause : new Error('Non-Error failure');
-    const causeRef = createHash('sha256').update(error.name + ':' + error.message + ':' + (error.stack ?? '')).digest('hex');
-    const classification = error instanceof TypeError ? 'TypeError' : error instanceof RangeError ? 'RangeError' : 'Error';
-    const frames = (error.stack ?? '').split('\n').filter((line) => /^\s+at /.test(line)).map((line) => line.match(/(?:\/[^\s()]+\.[cm]?[jt]s:\d+:\d+)/)?.[0]).filter((line): line is string => Boolean(line)).slice(0, 8);
-    logger.error('External agent internal failure', { causeRef, classification, frames, requestId, traceId });
+    const causeRef = createHash('sha256')
+      .update(error.name + ':' + error.message + ':' + (error.stack ?? ''))
+      .digest('hex');
+    const classification =
+      error instanceof TypeError
+        ? 'TypeError'
+        : error instanceof RangeError
+          ? 'RangeError'
+          : 'Error';
+    const frames = (error.stack ?? '')
+      .split('\n')
+      .filter((line) => /^\s+at /.test(line))
+      .map((line) => line.match(/(?:\/[^\s()]+\.[cm]?[jt]s:\d+:\d+)/)?.[0])
+      .filter((line): line is string => Boolean(line))
+      .slice(0, 8);
+    logger.error('External agent internal failure', {
+      causeRef,
+      classification,
+      frames,
+      requestId,
+      traceId,
+    });
   };
 }

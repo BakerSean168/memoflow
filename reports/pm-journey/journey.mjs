@@ -45,8 +45,9 @@ async function shot(name) {
 
 async function grabTimes(pageName) {
   const text = await page.evaluate(() => document.body.innerText);
-  const patterns = /(\d{4}[-/年.]\d{1,2}[-/月.]\d{1,2}日?|\d{1,2}:\d{2}(:\d{2})?|Invalid Date|NaN|1970)/g;
-  const found = [...new Set((text.match(patterns) ?? []))].slice(0, 40);
+  const patterns =
+    /(\d{4}[-/年.]\d{1,2}[-/月.]\d{1,2}日?|\d{1,2}:\d{2}(:\d{2})?|Invalid Date|NaN|1970)/g;
+  const found = [...new Set(text.match(patterns) ?? [])].slice(0, 40);
   record(`time-strings@${pageName}`, 'INFO', JSON.stringify(found));
   return found;
 }
@@ -79,7 +80,10 @@ await step('02-probe-wrong-login', async () => {
 
 // 3. Probe: weak password on register
 await step('03-register-scene-weak-password', async () => {
-  const regLink = page.locator('button, a').filter({ hasText: /注册|Sign up|Register|创建/i }).first();
+  const regLink = page
+    .locator('button, a')
+    .filter({ hasText: /注册|Sign up|Register|创建/i })
+    .first();
   await regLink.click();
   await page.waitForSelector('#reg-email', { timeout: 5000 });
   await page.fill('#reg-email', email);
@@ -180,7 +184,22 @@ await step('14-reload-session-persists', async () => {
 
 fs.writeFileSync(
   path.join(OUT, 'journey-log.json'),
-  JSON.stringify({ email, base: BASE, log, consoleErrors: consoleErrors.slice(0, 50), failedRequests: failedRequests.slice(0, 50) }, null, 2),
+  JSON.stringify(
+    {
+      email,
+      base: BASE,
+      log,
+      consoleErrors: consoleErrors.slice(0, 50),
+      failedRequests: failedRequests.slice(0, 50),
+    },
+    null,
+    2,
+  ),
 );
-console.log('\n=== console errors:', consoleErrors.length, '| failed/4xx requests:', failedRequests.length);
+console.log(
+  '\n=== console errors:',
+  consoleErrors.length,
+  '| failed/4xx requests:',
+  failedRequests.length,
+);
 await browser.close();

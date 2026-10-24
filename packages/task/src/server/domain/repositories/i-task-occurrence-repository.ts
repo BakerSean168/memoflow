@@ -124,16 +124,9 @@ export interface ITaskOccurrenceRepository {
     window: TaskPlanStatsWindow,
   ): Promise<Record<string, TaskPlanOccurrenceStats>>;
 
-  getStatusCountsForPlan(
-    planId: string,
-    identityId: string,
-  ): Promise<TaskOccurrenceStatusCounts>;
+  getStatusCountsForPlan(planId: string, identityId: string): Promise<TaskOccurrenceStatusCounts>;
 
-  findRecentByPlan(
-    planId: string,
-    identityId: string,
-    limit: number,
-  ): Promise<TaskOccurrence[]>;
+  findRecentByPlan(planId: string, identityId: string, limit: number): Promise<TaskOccurrence[]>;
 
   /**
    * 删除模板从指定时点开始的未完成实例

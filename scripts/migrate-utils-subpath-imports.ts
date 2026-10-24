@@ -29,90 +29,221 @@ function map(subpath: string, symbols: string[]) {
 
 // Logger
 map('@memoflow/utils/logger', [
-  'createLogger', 'ILogger', 'LoggerFactory', 'Logger',
-  'ConsoleTransport', 'HttpTransport',
-  'LogLevel', 'LogLevelString', 'LogMetadata', 'LogEntry', 'LogTransport', 'LoggerConfig',
+  'createLogger',
+  'ILogger',
+  'LoggerFactory',
+  'Logger',
+  'ConsoleTransport',
+  'HttpTransport',
+  'LogLevel',
+  'LogLevelString',
+  'LogMetadata',
+  'LogEntry',
+  'LogTransport',
+  'LoggerConfig',
 ]);
 
 // Domain
 map('@memoflow/utils/domain', [
-  'Entity', 'AggregateRoot', 'ValueObject', 'eventBus', 'createIdType',
+  'Entity',
+  'AggregateRoot',
+  'ValueObject',
+  'eventBus',
+  'createIdType',
 ]);
 
 // Errors
 map('@memoflow/utils/errors', [
-  'DomainError', 'BusinessRuleViolationError', 'NotFoundError', 'ValidationError',
-  'UnauthorizedError', 'ForbiddenError', 'ConflictError', 'InternalServerError',
-  'isDomainError', 'extractErrorInfo',
-  'mapPrismaError', 'PrismaErrorMapping', 'isPrismaError',
+  'DomainError',
+  'BusinessRuleViolationError',
+  'NotFoundError',
+  'ValidationError',
+  'UnauthorizedError',
+  'ForbiddenError',
+  'ConflictError',
+  'InternalServerError',
+  'isDomainError',
+  'extractErrorInfo',
+  'mapPrismaError',
+  'PrismaErrorMapping',
+  'isPrismaError',
   'mapInfraErrorToResultError',
 ]);
 
 // Shared
 map('@memoflow/utils/shared', [
-  'generateUUID', 'newId', 'isValidUUID', 'generateShortId',
-  'ensureDate', 'toDayStart', 'toDayEnd', 'formatDateToInput', 'formatTimeToInput',
-  'updateDateKeepTime', 'updateTimeKeepDate',
-  'nowIso', 'toIso',
-  'IEnvConfig', 'EnvConfig', 'envConfig',
-  'extractErrorMessage', 'withCause', 'fromDbDate', 'toDate', 'toDateOrNull',
-  'parseJson', 'parseStringArray', 'parseRecord', 'escapeSqlLike',
+  'generateUUID',
+  'newId',
+  'isValidUUID',
+  'generateShortId',
+  'ensureDate',
+  'toDayStart',
+  'toDayEnd',
+  'formatDateToInput',
+  'formatTimeToInput',
+  'updateDateKeepTime',
+  'updateTimeKeepDate',
+  'nowIso',
+  'toIso',
+  'IEnvConfig',
+  'EnvConfig',
+  'envConfig',
+  'extractErrorMessage',
+  'withCause',
+  'fromDbDate',
+  'toDate',
+  'toDateOrNull',
+  'parseJson',
+  'parseStringArray',
+  'parseRecord',
+  'escapeSqlLike',
 ]);
 
 // Result
 map('@memoflow/utils/result', [
   // Core Result
-  'ok', 'fail', 'error', 'isOk', 'isFail', 'unwrap', 'unwrapOrThrowError', 'unwrapOr',
-  'toResultErrorException', 'map', 'mapError', 'flatMap', 'tryCatch', 'tryCatchSync',
-  'extractStructuredResultError', 'ResultCode', 'ResultErrors', 'ResultErrorException',
-  'okPaged', 'okBatch',
+  'ok',
+  'fail',
+  'error',
+  'isOk',
+  'isFail',
+  'unwrap',
+  'unwrapOrThrowError',
+  'unwrapOr',
+  'toResultErrorException',
+  'map',
+  'mapError',
+  'flatMap',
+  'tryCatch',
+  'tryCatchSync',
+  'extractStructuredResultError',
+  'ResultCode',
+  'ResultErrors',
+  'ResultErrorException',
+  'okPaged',
+  'okBatch',
   // HTTP
-  'toHttpResponse', 'fromHttpResponse', 'getHttpStatusCode', 'errorCodeToHttpStatus',
-  'HttpResponseBuilder', 'createHttpResponseBuilder', 'ResultCodeToHttpStatus',
-  'isClientError', 'isServerError',
+  'toHttpResponse',
+  'fromHttpResponse',
+  'getHttpStatusCode',
+  'errorCodeToHttpStatus',
+  'HttpResponseBuilder',
+  'createHttpResponseBuilder',
+  'ResultCodeToHttpStatus',
+  'isClientError',
+  'isServerError',
   // IPC
-  'toIpcResult', 'fromIpcResult',
+  'toIpcResult',
+  'fromIpcResult',
   // Types
-  'Result', 'SuccessResult', 'FailureResult', 'ResultError', 'ResultErrorDetail',
-  'ResultMeta', 'StructuredResultError', 'AsyncResult', 'PageInfo', 'PagedList',
-  'BatchResult', 'IpcResult', 'HttpResponse', 'HttpResponseOptions',
+  'Result',
+  'SuccessResult',
+  'FailureResult',
+  'ResultError',
+  'ResultErrorDetail',
+  'ResultMeta',
+  'StructuredResultError',
+  'AsyncResult',
+  'PageInfo',
+  'PagedList',
+  'BatchResult',
+  'IpcResult',
+  'HttpResponse',
+  'HttpResponseOptions',
   // Local adapters
-  'expressAdapter', 'formatZodErrors', 'ExpressAdapterOptions',
-  'ipcAdapter', 'IpcAdapterOptions',
+  'expressAdapter',
+  'formatZodErrors',
+  'ExpressAdapterOptions',
+  'ipcAdapter',
+  'IpcAdapterOptions',
   'resultify',
-  'RouteRegistrar', 'OpenApiRegistryLike', 'HttpMethod', 'ApiRouteDefinition', 'RouteRegistrarConfig',
-  'successResponse', 'errorResponse', 'OpenApiErrorResponseSchema',
+  'RouteRegistrar',
+  'OpenApiRegistryLike',
+  'HttpMethod',
+  'ApiRouteDefinition',
+  'RouteRegistrarConfig',
+  'successResponse',
+  'errorResponse',
+  'OpenApiErrorResponseSchema',
 ]);
 
 // Frontend
 map('@memoflow/utils/frontend', [
-  'EnvironmentConfig', 'getEnvironmentConfig', 'createAuthHeader',
-  'isDevelopment', 'isProduction', 'safeParseJSON', 'formatFileSize',
-  'validateFileType', 'validateFileSize', 'generateRequestId',
-  'createQueryString', 'delay', 'exponentialBackoff',
-  'isNetworkError', 'shouldRetry', 'createCacheKey', 'isCacheExpired',
-  'cleanExpiredCache', 'deepClone',
-  'createDebounce', 'createDebouncePromise', 'createBatchDebounce', 'debounceDecorator',
-  'createThrottle', 'createWindowThrottle', 'createRAFThrottle', 'createThrottleDebounce', 'throttleDecorator',
-  'LoadingState', 'LoadingStateSnapshot', 'createLoadingWrapper',
-  'combineLoadingStates', 'createPollingLoader', 'createCachedLoader',
-  'CacheEntry', 'CacheInfo',
+  'EnvironmentConfig',
+  'getEnvironmentConfig',
+  'createAuthHeader',
+  'isDevelopment',
+  'isProduction',
+  'safeParseJSON',
+  'formatFileSize',
+  'validateFileType',
+  'validateFileSize',
+  'generateRequestId',
+  'createQueryString',
+  'delay',
+  'exponentialBackoff',
+  'isNetworkError',
+  'shouldRetry',
+  'createCacheKey',
+  'isCacheExpired',
+  'cleanExpiredCache',
+  'deepClone',
+  'createDebounce',
+  'createDebouncePromise',
+  'createBatchDebounce',
+  'debounceDecorator',
+  'createThrottle',
+  'createWindowThrottle',
+  'createRAFThrottle',
+  'createThrottleDebounce',
+  'throttleDecorator',
+  'LoadingState',
+  'LoadingStateSnapshot',
+  'createLoadingWrapper',
+  'combineLoadingStates',
+  'createPollingLoader',
+  'createCachedLoader',
+  'CacheEntry',
+  'CacheInfo',
 ]);
 
 // Validation
 map('@memoflow/utils/validation', [
-  'FormValidator', 'BuiltinValidators', 'createSimpleValidator',
-  'validators', 'defaultConfig', 'version',
-  'ValidationRule', 'RequiredRule', 'LengthRule', 'PatternRule', 'NumberRule', 'RangeRule',
-  'ValidationResult', 'FieldValidationResult', 'FormValidationResult',
-  'ValidationTrigger', 'ValidationSeverity', 'FieldConfig', 'FormConfig',
-  'IFormValidator', 'ValidationEventType', 'ValidationEvent', 'ValidationEventListener',
+  'FormValidator',
+  'BuiltinValidators',
+  'createSimpleValidator',
+  'validators',
+  'defaultConfig',
+  'version',
+  'ValidationRule',
+  'RequiredRule',
+  'LengthRule',
+  'PatternRule',
+  'NumberRule',
+  'RangeRule',
+  'ValidationResult',
+  'FieldValidationResult',
+  'FormValidationResult',
+  'ValidationTrigger',
+  'ValidationSeverity',
+  'FieldConfig',
+  'FormConfig',
+  'IFormValidator',
+  'ValidationEventType',
+  'ValidationEvent',
+  'ValidationEventListener',
 ]);
 
 // Lifecycle (initialization managers)
 map('@memoflow/utils/lifecycle', [
-  'InitializationPhase', 'InitializationTask', 'InitializationManager',
-  'ModuleLoader', 'ModuleDefinition', 'LoadingProgress', 'ModuleGroup', 'WebInitializationManager',
+  'InitializationPhase',
+  'InitializationTask',
+  'InitializationManager',
+  'ModuleLoader',
+  'ModuleDefinition',
+  'LoadingProgress',
+  'ModuleGroup',
+  'WebInitializationManager',
 ]);
 
 // ═══════════════════════════════════════════════════════════════
@@ -121,22 +252,25 @@ map('@memoflow/utils/lifecycle', [
 
 interface ImportClause {
   isType: boolean;
-  name: string;        // local name
-  alias?: string;      // imported name (for `import { X as Y }`)
+  name: string; // local name
+  alias?: string; // imported name (for `import { X as Y }`)
 }
 
 interface ImportStatement {
   fullMatch: string;
   startIndex: number;
   endIndex: number;
-  isTypeOnly: boolean;  // `import type { ... }`
+  isTypeOnly: boolean; // `import type { ... }`
   clauses: ImportClause[];
 }
 
 function parseImportClauses(clauseStr: string): ImportClause[] {
   const clauses: ImportClause[] = [];
   // Split by comma, handling nested braces (shouldn't appear in imports but be safe)
-  const parts = clauseStr.split(',').map(s => s.trim()).filter(Boolean);
+  const parts = clauseStr
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
 
   for (const part of parts) {
     const typeMatch = part.match(/^type\s+/);
@@ -162,7 +296,7 @@ function findImportStatements(source: string, moduleName: string): ImportStateme
   const escaped = moduleName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const regex = new RegExp(
     `(?:import\\s+(type\\s+)?\\{([^}]+)\\}\\s+from\\s+['"]${escaped}['"];?` +
-    `|export\\s+\\{([^}]+)\\}\\s+from\\s+['"]${escaped}['"];?)`,
+      `|export\\s+\\{([^}]+)\\}\\s+from\\s+['"]${escaped}['"];?)`,
     'g',
   );
 
@@ -186,7 +320,7 @@ function findImportStatements(source: string, moduleName: string): ImportStateme
 
 function buildImportLine(symbols: ImportClause[], subpath: string, isTypeOnly: boolean): string {
   const typePrefix = isTypeOnly ? 'import type' : 'import';
-  const parts = symbols.map(s => {
+  const parts = symbols.map((s) => {
     if (s.alias) return `${s.name} as ${s.alias}`;
     return s.name;
   });
@@ -199,7 +333,7 @@ function buildImportLine(symbols: ImportClause[], subpath: string, isTypeOnly: b
 }
 
 function buildExportLine(symbols: ImportClause[], subpath: string): string {
-  const parts = symbols.map(s => {
+  const parts = symbols.map((s) => {
     if (s.alias) return `${s.name} as ${s.alias}`;
     return s.name;
   });
@@ -211,7 +345,11 @@ function buildExportLine(symbols: ImportClause[], subpath: string): string {
   return `export { ${parts.join(', ')} } from '${subpath}';`;
 }
 
-function transformFile(source: string): { transformed: string; changed: boolean; stats: { total: number; migrated: number; unmapped: string[] } } {
+function transformFile(source: string): {
+  transformed: string;
+  changed: boolean;
+  stats: { total: number; migrated: number; unmapped: string[] };
+} {
   const statements = findImportStatements(source, '@memoflow/utils');
   if (statements.length === 0) {
     return { transformed: source, changed: false, stats: { total: 0, migrated: 0, unmapped: [] } };
@@ -277,7 +415,10 @@ function transformFile(source: string): { transformed: string; changed: boolean;
     }
 
     const replacement = lines.join('\n');
-    result = result.slice(0, stmt.startIndex + offset) + replacement + result.slice(stmt.endIndex + offset);
+    result =
+      result.slice(0, stmt.startIndex + offset) +
+      replacement +
+      result.slice(stmt.endIndex + offset);
     offset += replacement.length - stmt.fullMatch.length;
   }
 
@@ -325,17 +466,21 @@ async function main() {
       totalFiles++;
       totalImports += stats.total;
       migratedImports += stats.migrated;
-      stats.unmapped.forEach(s => allUnmapped.add(s));
+      stats.unmapped.forEach((s) => allUnmapped.add(s));
 
       if (DRY_RUN) {
-        console.log(`[DRY RUN] Would modify: ${filePath} (${stats.migrated}/${stats.total} symbols migrated)`);
+        console.log(
+          `[DRY RUN] Would modify: ${filePath} (${stats.migrated}/${stats.total} symbols migrated)`,
+        );
         if (stats.unmapped.length > 0) {
           console.log(`  Unmapped: ${stats.unmapped.join(', ')}`);
         }
       } else {
         fs.writeFileSync(filePath, transformed, 'utf-8');
         modifiedFiles++;
-        console.log(`Modified: ${path.relative('D:\\home\\projects\\memoflow', filePath)} (${stats.migrated}/${stats.total})`);
+        console.log(
+          `Modified: ${path.relative('D:\\home\\projects\\memoflow', filePath)} (${stats.migrated}/${stats.total})`,
+        );
       }
     }
   }

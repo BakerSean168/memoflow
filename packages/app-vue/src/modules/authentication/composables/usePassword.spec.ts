@@ -113,7 +113,12 @@ describe('usePassword structured error persistence (W6-C)', () => {
       ),
     });
     store.handleCloudAuthResponse({
-      account: { id: 'cloud-user-1', email: 'person@example.com', name: 'Person', emailVerified: true },
+      account: {
+        id: 'cloud-user-1',
+        email: 'person@example.com',
+        name: 'Person',
+        emailVerified: true,
+      },
       session: { id: 'session-1', expiresAt: '2030-01-01T00:00:00.000Z' },
       requiresEmailVerification: false,
     });
@@ -147,7 +152,12 @@ describe('usePassword structured error persistence (W6-C)', () => {
       ),
     });
     store.handleCloudAuthResponse({
-      account: { id: 'cloud-user-1', email: 'person@example.com', name: 'Person', emailVerified: true },
+      account: {
+        id: 'cloud-user-1',
+        email: 'person@example.com',
+        name: 'Person',
+        emailVerified: true,
+      },
       session: { id: 'session-1', expiresAt: '2030-01-01T00:00:00.000Z' },
       requiresEmailVerification: false,
     });
@@ -174,7 +184,12 @@ describe('usePassword structured error persistence (W6-C)', () => {
       forgotPassword: vi.fn().mockResolvedValue(fail({ code: 'TIMEOUT', message: 'Timed out' })),
     });
     store.handleCloudAuthResponse({
-      account: { id: 'cloud-user-1', email: 'person@example.com', name: 'Person', emailVerified: true },
+      account: {
+        id: 'cloud-user-1',
+        email: 'person@example.com',
+        name: 'Person',
+        emailVerified: true,
+      },
       session: { id: 'session-1', expiresAt: '2030-01-01T00:00:00.000Z' },
       requiresEmailVerification: false,
     });
@@ -187,7 +202,12 @@ describe('usePassword structured error persistence (W6-C)', () => {
       forgotPassword: vi.fn().mockResolvedValue(ok(undefined)),
     });
     secondStore.handleCloudAuthResponse({
-      account: { id: 'cloud-user-1', email: 'person@example.com', name: 'Person', emailVerified: true },
+      account: {
+        id: 'cloud-user-1',
+        email: 'person@example.com',
+        name: 'Person',
+        emailVerified: true,
+      },
       session: { id: 'session-1', expiresAt: '2030-01-01T00:00:00.000Z' },
       requiresEmailVerification: false,
     });
@@ -207,7 +227,12 @@ describe('usePassword structured error persistence (W6-C)', () => {
       ),
     });
     store.handleCloudAuthResponse({
-      account: { id: 'cloud-user-1', email: 'person@example.com', name: 'Person', emailVerified: true },
+      account: {
+        id: 'cloud-user-1',
+        email: 'person@example.com',
+        name: 'Person',
+        emailVerified: true,
+      },
       session: { id: 'session-1', expiresAt: '2030-01-01T00:00:00.000Z' },
       requiresEmailVerification: false,
     });
@@ -236,7 +261,12 @@ describe('usePassword structured error persistence (W6-C)', () => {
       ),
     });
     store.handleCloudAuthResponse({
-      account: { id: 'cloud-user-1', email: 'person@example.com', name: 'Person', emailVerified: true },
+      account: {
+        id: 'cloud-user-1',
+        email: 'person@example.com',
+        name: 'Person',
+        emailVerified: true,
+      },
       session: { id: 'session-1', expiresAt: '2030-01-01T00:00:00.000Z' },
       requiresEmailVerification: false,
     });
@@ -259,7 +289,9 @@ describe('usePassword structured error persistence (W6-C)', () => {
     expect(allPersisted).not.toContain(secretEmail);
     // No raw server message/context field may survive into the receipt or storage.
     expect(allPersisted).not.toContain('Reset failed for');
-    expect(allPersisted).not.toMatch(/currentPassword|newPassword|token|accessToken|victim@example\.com/i);
+    expect(allPersisted).not.toMatch(
+      /currentPassword|newPassword|token|accessToken|victim@example\.com/i,
+    );
 
     // Reload still yields only the safe allowlisted message.
     const reloadPinia = createTestPinia();
@@ -279,7 +311,12 @@ describe('usePassword structured error persistence (W6-C)', () => {
       ),
     });
     store.handleCloudAuthResponse({
-      account: { id: 'cloud-user-1', email: 'person@example.com', name: 'Person', emailVerified: true },
+      account: {
+        id: 'cloud-user-1',
+        email: 'person@example.com',
+        name: 'Person',
+        emailVerified: true,
+      },
       session: { id: 'session-1', expiresAt: '2030-01-01T00:00:00.000Z' },
       requiresEmailVerification: false,
     });

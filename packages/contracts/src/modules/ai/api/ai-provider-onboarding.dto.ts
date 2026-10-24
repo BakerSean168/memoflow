@@ -65,7 +65,9 @@ export const TestAIProviderOnboardingModelResSchema = z.object({
   modelId: z.string(),
   latencyMs: z.number().nonnegative(),
 });
-export type TestAIProviderOnboardingModelRes = z.infer<typeof TestAIProviderOnboardingModelResSchema>;
+export type TestAIProviderOnboardingModelRes = z.infer<
+  typeof TestAIProviderOnboardingModelResSchema
+>;
 
 export const CommitAIProviderOnboardingSchema = z
   .object({

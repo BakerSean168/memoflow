@@ -2071,7 +2071,6 @@ old translations/routes/stories
 
 `CLEAN-6301` is complete. Goal and Task now expose only their vNext owner-domain/product contracts; retired Folder/Focus/Comparison/Dependency/DAG/CriticalPath paths have no ordinary runtime surface.
 
-
 ## CLEAN-6302 — Retire legacy Reminder naming/control paths
 
 After compatibility consumers are gone:
@@ -2085,7 +2084,6 @@ After compatibility consumers are gone:
 
 Physical package rename `reminder -> routine` is a separate final decision; do not mix with behavior migration if it adds churn.
 
-
 **Implementation evidence — tranche A (2026-09-07): `ControlMode` + legacy scanner retired**
 
 - removed legacy `ControlMode` from Reminder contracts, group DTOs, response schemas, domain/server/client aggregates, events, HTTP route, Electron IPC channel, RPC map, client ports/adapters/composables, Prisma and PowerSync persistence, data-portability import/export, and the React/Mobile detail surface;
@@ -2096,7 +2094,6 @@ Physical package rename `reminder -> routine` is a separate final decision; do n
 - verification: Reminder **71/71 files, 509/509 tests**; Contracts **67/67 files, 482/482 tests**; Schedule Orchestration **32/32 files, 139/139 tests**; Data Portability **9/9 files, 34/34 tests**; App-Vue Reminder **11 files / 31 tests**; contracts/reminder/app-vue/data-portability/api/desktop/app-react typechecks green; seven-project lint plus App-React lint have **0 errors**; full `governance:check` and `git diff --check` green.
 
 `CLEAN-6302` remains open for the membership, smart-frequency, snooze-response, and final obsolete-surface tranches; physical `reminder -> routine` rename remains out of scope here.
-
 
 **Implementation evidence — tranche B1 (2026-09-07): canonical Routine/Profile/M:N membership persistence made live**
 
@@ -2164,8 +2161,6 @@ Physical package rename `reminder -> routine` is a separate final decision; do n
 - verification: Reminder **73/73 files, 469/469 tests**; Contracts **68/68 files, 483/483 tests**; App-Vue **201/201 files, 773/773 tests**; API **62/62 files, 327/327 tests**; Desktop **61/61 files, 322/322 tests**; six-project typecheck green; six-project lint **0 errors** (pre-existing warnings remain); `governance:check`, `docs:check`, `target-baseline-check`, governance tests **29/29**, `test:targets:check`, `test:inventory:check` (**1172 files**), and `git diff --check` green.
 
 `CLEAN-6302` is complete. No Reminder compatibility shim or physical package rename is required for closure; the ordered scheduling-convergence lane now advances to `CLEAN-6304`.
-
-
 
 ## CLEAN-6303 — Internalize raw ScheduleTask product surfaces
 

@@ -158,7 +158,9 @@ describe('KnowledgeNoteCatalog', () => {
 
     expect(wrapper.get('[data-testid="knowledge-file-tree"]').text()).toContain('assets');
     expect(wrapper.get('[data-testid="knowledge-file-tree"]').text()).toContain('92');
-    expect(wrapper.get('[data-testid="knowledge-tree-note-projection-root"]').text()).toBe('AGENTS');
+    expect(wrapper.get('[data-testid="knowledge-tree-note-projection-root"]').text()).toBe(
+      'AGENTS',
+    );
     expect(wrapper.get('[data-testid="knowledge-file-tree"]').text()).not.toContain('AGENTS.md');
     expect(wrapper.get('[data-testid="knowledge-tree-hidden-menu"]')).toBeDefined();
 

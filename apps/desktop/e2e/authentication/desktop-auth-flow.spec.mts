@@ -380,7 +380,13 @@ test('device authorization opens an independent cloud Profile and preserves the 
     await expect(mainWindow.getByTestId('app-shell')).toBeVisible();
     const before = readRegistry(userDataPath);
     const source = before.profiles.find((profile) => profile.profileId === before.activeProfileId)!;
-    const marker = path.join(userDataPath, 'data', 'profiles', source.profileId, 'source-marker.txt');
+    const marker = path.join(
+      userDataPath,
+      'data',
+      'profiles',
+      source.profileId,
+      'source-marker.txt',
+    );
     fs.writeFileSync(marker, 'source remains independent');
     await openManageAccounts(mainWindow);
     await mainWindow.getByTestId('shell-add-account').click();
@@ -399,12 +405,26 @@ test('device authorization opens an independent cloud Profile and preserves the 
     expect(fs.readFileSync(marker, 'utf8')).toBe('source remains independent');
     expect(
       fs.existsSync(
-        path.join(userDataPath, 'data', 'shared', 'secure', 'cloud-sessions', `${source.profileId}.bin`),
+        path.join(
+          userDataPath,
+          'data',
+          'shared',
+          'secure',
+          'cloud-sessions',
+          `${source.profileId}.bin`,
+        ),
       ),
     ).toBe(false);
     expect(
       fs.existsSync(
-        path.join(userDataPath, 'data', 'shared', 'secure', 'cloud-sessions', `${target.profileId}.bin`),
+        path.join(
+          userDataPath,
+          'data',
+          'shared',
+          'secure',
+          'cloud-sessions',
+          `${target.profileId}.bin`,
+        ),
       ),
     ).toBe(true);
     expect(cloud.requests).not.toContain('PUT /api/v1/accounts/me');
@@ -437,12 +457,26 @@ test('device authorization opens an independent cloud Profile and preserves the 
     await expect.poll(() => readRegistry(userDataPath).activeProfileId).toBe(another.profileId);
     expect(
       fs.existsSync(
-        path.join(userDataPath, 'data', 'shared', 'secure', 'cloud-sessions', `${target.profileId}.bin`),
+        path.join(
+          userDataPath,
+          'data',
+          'shared',
+          'secure',
+          'cloud-sessions',
+          `${target.profileId}.bin`,
+        ),
       ),
     ).toBe(true);
     expect(
       fs.existsSync(
-        path.join(userDataPath, 'data', 'shared', 'secure', 'cloud-sessions', `${another.profileId}.bin`),
+        path.join(
+          userDataPath,
+          'data',
+          'shared',
+          'secure',
+          'cloud-sessions',
+          `${another.profileId}.bin`,
+        ),
       ),
     ).toBe(true);
 

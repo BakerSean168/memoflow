@@ -18,7 +18,10 @@ export const NotificationQuerySchema = z.object({
   keyword: z.string().optional(),
   page: z.number().int().min(1).default(1).optional(),
   limit: z.number().int().min(1).max(100).default(20).optional(),
-  sortBy: z.enum(['createdAt', 'updatedAt', 'importance', 'urgency']).default('createdAt').optional(),
+  sortBy: z
+    .enum(['createdAt', 'updatedAt', 'importance', 'urgency'])
+    .default('createdAt')
+    .optional(),
   sortOrder: z.enum(['asc', 'desc']).default('desc').optional(),
 });
 export type NotificationQuery = z.infer<typeof NotificationQuerySchema>;

@@ -9,11 +9,7 @@
 
 import { ipcMain } from 'electron';
 import type { IpcMainInvokeEvent } from 'electron';
-import {
-  CacheChannels,
-  GoalChannels,
-  TaskChannels,
-} from '@memoflow/contracts/electron';
+import { CacheChannels, GoalChannels, TaskChannels } from '@memoflow/contracts/electron';
 import { ok } from '@memoflow/contracts/result';
 import { isDesktopDevelopmentRuntime } from './dev-runtime';
 
@@ -194,11 +190,7 @@ export class IpcCache {
    * @param {CacheOptions} [options={}] - Configuration options.
    */
   constructor(options: CacheOptions = {}) {
-    const {
-      maxSize = 100,
-      defaultTTL = 5000,
-      debug = isDesktopDevelopmentRuntime(),
-    } = options;
+    const { maxSize = 100, defaultTTL = 5000, debug = isDesktopDevelopmentRuntime() } = options;
 
     this.cache = new LRUCache(maxSize);
     this.defaultTTL = defaultTTL;

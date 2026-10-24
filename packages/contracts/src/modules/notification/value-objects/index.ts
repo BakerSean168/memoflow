@@ -13,10 +13,7 @@ export type {
 } from './notification-action';
 
 // ============ NotificationMetadata ============
-export type {
-  NotificationMetadata,
-  NotificationMetadataDTO,
-} from './notification-metadata';
+export type { NotificationMetadata, NotificationMetadataDTO } from './notification-metadata';
 
 // ============ CategoryPreference ============
 export type {
@@ -58,12 +55,8 @@ export {
   NotificationDeliveryReason,
   NotificationPreferenceDecisionSource,
 } from './delivery-plan';
-export type {
-  NotificationDeliveryDecisionDTO,
-  NotificationDeliveryPlanDTO,
-} from './delivery-plan';
+export type { NotificationDeliveryDecisionDTO, NotificationDeliveryPlanDTO } from './delivery-plan';
 
 export { NotificationChannelType } from './notification-channel-type';
-
 
 export { ContentType } from './content-type';

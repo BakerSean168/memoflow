@@ -49,9 +49,7 @@ export function createSchedulePrismaModule(
     scheduleRepository: repositories.scheduleRepository,
     leaseCoordinator: options.leaseCoordinator,
     eventDeliveryLogConsumer:
-      (options.wireDeliveryLogConsumer ?? true)
-        ? repositories.eventDeliveryLogConsumer
-        : undefined,
+      (options.wireDeliveryLogConsumer ?? true) ? repositories.eventDeliveryLogConsumer : undefined,
     runtimeContributions: options.runtimeContributions,
     auditRepository: repositories.auditRepository,
   });

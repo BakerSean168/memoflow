@@ -355,7 +355,10 @@ if (process.env.FAIL_COMMAND === 'true') process.exit(17);
       })) {
         const inputPath = path.join(root, 'input.json');
         if (!manifest.lanes[lane]) {
-          await assert.rejects(createLaneInput({ lane, manifest, output: inputPath }), /not enabled/u);
+          await assert.rejects(
+            createLaneInput({ lane, manifest, output: inputPath }),
+            /not enabled/u,
+          );
           continue;
         }
         const input = await createLaneInput({ lane, manifest, output: inputPath });

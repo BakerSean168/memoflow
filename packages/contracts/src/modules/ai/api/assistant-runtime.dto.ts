@@ -108,23 +108,44 @@ export type AssistantRuntimeApprovalCommand = z.infer<typeof AssistantRuntimeApp
 export const AssistantRuntimeApprovalResultSchema = z.object({ accepted: z.boolean() }).strict();
 export type AssistantRuntimeApprovalResult = z.infer<typeof AssistantRuntimeApprovalResultSchema>;
 
-export const AssistantRuntimeAskUserSuspensionSchema = z.object({
-  approval: z.object({
-    toolName: AssistantToolNameSchema,
-    category: z.enum(['read', 'edit', 'execute']),
-    risk: z.enum(['low', 'high']),
-  }).strict().optional(),
-  runId: z.string().min(1).max(512),
-  toolCallId: z.string().min(1).max(512),
-  question: z.string().trim().min(1).max(2000),
-  options: z.array(z.object({ label: z.string().min(1).max(500), description: z.string().max(1000).optional() }).strict()).max(20).optional(),
-  selectionMode: z.enum(['single_select', 'multi_select']).optional(),
-}).strict();
-export type AssistantRuntimeAskUserSuspension = z.infer<typeof AssistantRuntimeAskUserSuspensionSchema>;
-export const AssistantRuntimeAskUserSuspensionsSchema = z.array(AssistantRuntimeAskUserSuspensionSchema).max(100);
+export const AssistantRuntimeAskUserSuspensionSchema = z
+  .object({
+    approval: z
+      .object({
+        toolName: AssistantToolNameSchema,
+        category: z.enum(['read', 'edit', 'execute']),
+        risk: z.enum(['low', 'high']),
+      })
+      .strict()
+      .optional(),
+    runId: z.string().min(1).max(512),
+    toolCallId: z.string().min(1).max(512),
+    question: z.string().trim().min(1).max(2000),
+    options: z
+      .array(
+        z
+          .object({
+            label: z.string().min(1).max(500),
+            description: z.string().max(1000).optional(),
+          })
+          .strict(),
+      )
+      .max(20)
+      .optional(),
+    selectionMode: z.enum(['single_select', 'multi_select']).optional(),
+  })
+  .strict();
+export type AssistantRuntimeAskUserSuspension = z.infer<
+  typeof AssistantRuntimeAskUserSuspensionSchema
+>;
+export const AssistantRuntimeAskUserSuspensionsSchema = z
+  .array(AssistantRuntimeAskUserSuspensionSchema)
+  .max(100);
 
 export const AssistantRuntimeToolAnswerResultSchema = z.object({ accepted: z.boolean() }).strict();
-export type AssistantRuntimeToolAnswerResult = z.infer<typeof AssistantRuntimeToolAnswerResultSchema>;
+export type AssistantRuntimeToolAnswerResult = z.infer<
+  typeof AssistantRuntimeToolAnswerResultSchema
+>;
 
 export const AssistantRuntimeToolAnswerCommandSchema = z
   .object({
@@ -137,7 +158,9 @@ export const AssistantRuntimeToolAnswerCommandSchema = z
     identityId: z.never().optional(),
   })
   .strict();
-export type AssistantRuntimeToolAnswerCommand = z.infer<typeof AssistantRuntimeToolAnswerCommandSchema>;
+export type AssistantRuntimeToolAnswerCommand = z.infer<
+  typeof AssistantRuntimeToolAnswerCommandSchema
+>;
 
 export const AssistantRuntimeClientCommandSchema = z
   .discriminatedUnion('type', [
@@ -242,20 +265,24 @@ export const AssistantToolActivityViewSchema = z
   .strict();
 export type AssistantToolActivityView = z.infer<typeof AssistantToolActivityViewSchema>;
 
-export const AssistantApprovalReceiptSchema = z.object({
-  runId: z.string().min(1).max(512),
-  toolCallId: z.string().min(1).max(512),
-  toolName: AssistantToolNameSchema,
-  decision: z.enum(['approve', 'decline']),
-  category: z.enum(['read', 'edit', 'execute']),
-  risk: z.literal('high'),
-}).strict();
+export const AssistantApprovalReceiptSchema = z
+  .object({
+    runId: z.string().min(1).max(512),
+    toolCallId: z.string().min(1).max(512),
+    toolName: AssistantToolNameSchema,
+    decision: z.enum(['approve', 'decline']),
+    category: z.enum(['read', 'edit', 'execute']),
+    risk: z.literal('high'),
+  })
+  .strict();
 export type AssistantApprovalReceipt = z.infer<typeof AssistantApprovalReceiptSchema>;
 
-export const AssistantRunOutcomeSchema = z.object({
-  runId: z.string().min(1).max(512),
-  status: z.enum(['failed', 'cancelled']),
-}).strict();
+export const AssistantRunOutcomeSchema = z
+  .object({
+    runId: z.string().min(1).max(512),
+    status: z.enum(['failed', 'cancelled']),
+  })
+  .strict();
 export type AssistantRunOutcome = z.infer<typeof AssistantRunOutcomeSchema>;
 
 export const AssistantRuntimeMessageViewSchema = z

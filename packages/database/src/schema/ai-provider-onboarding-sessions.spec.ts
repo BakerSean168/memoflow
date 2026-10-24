@@ -11,7 +11,10 @@ function clientWithTable(tablePresent = true) {
   const query = vi.fn(async (sql: string) => {
     queries.push(sql);
     if (sql.includes("to_regclass('public.ai_provider_onboarding_sessions')")) {
-      return { rows: [{ regclass: tablePresent ? 'ai_provider_onboarding_sessions' : null }], rowCount: 1 };
+      return {
+        rows: [{ regclass: tablePresent ? 'ai_provider_onboarding_sessions' : null }],
+        rowCount: 1,
+      };
     }
     if (sql.includes(`to_regclass('public.${AI_PROVIDER_ONBOARDING_IDENTITY_EXPIRY_INDEX}')`)) {
       return { rows: [{ regclass: AI_PROVIDER_ONBOARDING_IDENTITY_EXPIRY_INDEX }], rowCount: 1 };
@@ -22,7 +25,7 @@ function clientWithTable(tablePresent = true) {
     if (sql.includes(`to_regclass('public.${AI_PROVIDER_ONBOARDING_EXPIRY_INDEX}')`)) {
       return { rows: [{ regclass: AI_PROVIDER_ONBOARDING_EXPIRY_INDEX }], rowCount: 1 };
     }
-    if (sql.includes('information_schema.columns') && sql.includes("target_provider_id")) {
+    if (sql.includes('information_schema.columns') && sql.includes('target_provider_id')) {
       return { rows: [{ present: 1 }], rowCount: 1 };
     }
     if (sql.includes('FROM pg_constraint') && sql.includes('LIMIT 1')) {
@@ -59,9 +62,15 @@ describe('prepareAIProviderOnboardingSessions', () => {
     });
     const executed = client.queries.join('\n');
     expect(executed).toContain('ADD COLUMN IF NOT EXISTS "target_provider_id" TEXT');
-    expect(executed).toContain(`CREATE INDEX IF NOT EXISTS "${AI_PROVIDER_ONBOARDING_IDENTITY_EXPIRY_INDEX}"`);
-    expect(executed).toContain(`CREATE INDEX IF NOT EXISTS "${AI_PROVIDER_ONBOARDING_TARGET_EXPIRY_INDEX}"`);
-    expect(executed).toContain(`CREATE INDEX IF NOT EXISTS "${AI_PROVIDER_ONBOARDING_EXPIRY_INDEX}"`);
+    expect(executed).toContain(
+      `CREATE INDEX IF NOT EXISTS "${AI_PROVIDER_ONBOARDING_IDENTITY_EXPIRY_INDEX}"`,
+    );
+    expect(executed).toContain(
+      `CREATE INDEX IF NOT EXISTS "${AI_PROVIDER_ONBOARDING_TARGET_EXPIRY_INDEX}"`,
+    );
+    expect(executed).toContain(
+      `CREATE INDEX IF NOT EXISTS "${AI_PROVIDER_ONBOARDING_EXPIRY_INDEX}"`,
+    );
     expect(executed).toContain(`ADD CONSTRAINT "${AI_PROVIDER_ONBOARDING_IDENTITY_FK}"`);
     expect(executed).toContain('ON DELETE CASCADE ON UPDATE CASCADE');
   });

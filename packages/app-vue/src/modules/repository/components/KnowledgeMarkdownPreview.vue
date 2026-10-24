@@ -9,10 +9,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import {
-  renderSafeMarkdown,
-  stripMarkdownFrontmatter,
-} from '../../../shared/utils/safe-markdown';
+import { renderSafeMarkdown, stripMarkdownFrontmatter } from '../../../shared/utils/safe-markdown';
 
 const props = defineProps<{ markdown: string; title?: string }>();
 const emit = defineEmits<{ vaultLink: [target: string] }>();

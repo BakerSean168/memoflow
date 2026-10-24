@@ -106,18 +106,18 @@ import { AccountDTO } from '@memoflow/contracts/account';
 
 ### 子路径列表
 
-| 子路径                               | 说明           |
-| ------------------------------------ | -------------- |
-| `@memoflow/contracts/task`           | 任务模块契约   |
-| `@memoflow/contracts/goal`           | 目标模块契约   |
-| `@memoflow/contracts/repository`     | 仓库模块契约   |
-| `@memoflow/contracts/account`        | 账户模块契约   |
-| `@memoflow/contracts/schedule`       | 调度模块契约   |
-| `@memoflow/contracts/setting`        | 设置模块契约   |
-| `@memoflow/contracts/notification`   | 通知模块契约   |
-| `@memoflow/contracts/ai`             | AI 模块契约    |
+| 子路径                                 | 说明             |
+| -------------------------------------- | ---------------- |
+| `@memoflow/contracts/task`             | 任务模块契约     |
+| `@memoflow/contracts/goal`             | 目标模块契约     |
+| `@memoflow/contracts/repository`       | 仓库模块契约     |
+| `@memoflow/contracts/account`          | 账户模块契约     |
+| `@memoflow/contracts/schedule`         | 调度模块契约     |
+| `@memoflow/contracts/setting`          | 设置模块契约     |
+| `@memoflow/contracts/notification`     | 通知模块契约     |
+| `@memoflow/contracts/ai`               | AI 模块契约      |
 | `@memoflow/contracts/data-portability` | 数据可移植性契约 |
-| `@memoflow/contracts/shared`         | 共享基础类型   |
+| `@memoflow/contracts/shared`           | 共享基础类型     |
 
 ## 根入口导出内容
 

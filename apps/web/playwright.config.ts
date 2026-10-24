@@ -21,17 +21,26 @@ const specs = inventory
     ? [...WEB_FLOW_SPECS, ...WEB_AUDIT_SPECS]
     : mode === 'workspace'
       ? WEB_FLOW_SPECS.filter((spec) => spec.startsWith('ai/goal-workflow/'))
-      : mode === 'provider' ? providerSpecs : WEB_FLOW_SPECS;
-const suffix = mode === 'flow' ? '' : `-${mode === 'workspace' ? 'ai-workspace' : mode === 'provider' ? 'ai-provider' : mode}`;
-const result = mode === 'flow' ? 'results' : mode === 'workspace' ? 'ai-workspace-results' : `${mode}-results`;
+      : mode === 'provider'
+        ? providerSpecs
+        : WEB_FLOW_SPECS;
+const suffix =
+  mode === 'flow'
+    ? ''
+    : `-${mode === 'workspace' ? 'ai-workspace' : mode === 'provider' ? 'ai-provider' : mode}`;
+const result =
+  mode === 'flow' ? 'results' : mode === 'workspace' ? 'ai-workspace-results' : `${mode}-results`;
 const external = process.env.PLAYWRIGHT_DISABLE_WEBSERVER === 'true' || mode === 'provider';
 
 export default defineConfig({
   testDir: './e2e',
   testMatch: specs.map((spec) => `**/${spec}`),
-  outputDir: mode === 'workspace'
-    ? process.env.AI_WORKSPACE_E2E_OUTPUT_DIR ?? 'test-results/ai-workspace'
-    : mode === 'provider' ? 'test-results/ai-provider' : `test-results/${mode}`,
+  outputDir:
+    mode === 'workspace'
+      ? (process.env.AI_WORKSPACE_E2E_OUTPUT_DIR ?? 'test-results/ai-workspace')
+      : mode === 'provider'
+        ? 'test-results/ai-provider'
+        : `test-results/${mode}`,
   timeout: 5 * 60 * 1000,
   expect: { timeout: mode === 'provider' ? 15_000 : 10_000 },
   fullyParallel: false,
@@ -39,16 +48,32 @@ export default defineConfig({
   retries: 0,
   failOnFlakyTests: Boolean(process.env.CI),
   workers: 1,
-  reporter: inventory ? [['list']] : [
-    ['html', { outputFolder: process.env.AI_WORKSPACE_E2E_HTML_REPORT_DIR && mode === 'workspace'
-      ? process.env.AI_WORKSPACE_E2E_HTML_REPORT_DIR : `playwright${suffix}-report`, open: 'never' }],
-    ['json', { outputFile: mode === 'workspace'
-      ? process.env.AI_WORKSPACE_E2E_JSON_REPORT_FILE ?? `test-results/${result}.json`
-      : `test-results/${result}.json` }],
-    ['junit', { outputFile: `test-results/${result}.junit.xml` }],
-    ['list'],
-    ...(process.env.CI ? [['github'] as const] : []),
-  ],
+  reporter: inventory
+    ? [['list']]
+    : [
+        [
+          'html',
+          {
+            outputFolder:
+              process.env.AI_WORKSPACE_E2E_HTML_REPORT_DIR && mode === 'workspace'
+                ? process.env.AI_WORKSPACE_E2E_HTML_REPORT_DIR
+                : `playwright${suffix}-report`,
+            open: 'never',
+          },
+        ],
+        [
+          'json',
+          {
+            outputFile:
+              mode === 'workspace'
+                ? (process.env.AI_WORKSPACE_E2E_JSON_REPORT_FILE ?? `test-results/${result}.json`)
+                : `test-results/${result}.json`,
+          },
+        ],
+        ['junit', { outputFile: `test-results/${result}.junit.xml` }],
+        ['list'],
+        ...(process.env.CI ? [['github'] as const] : []),
+      ],
   use: {
     baseURL: getE2EWebOrigin(),
     trace: 'retain-on-failure',
@@ -58,7 +83,7 @@ export default defineConfig({
     actionTimeout: 15_000,
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
-  webServer: external ? undefined : [
-    createOpenAICompatibleMockServer(), createApiServer(), createWebServer(),
-  ],
+  webServer: external
+    ? undefined
+    : [createOpenAICompatibleMockServer(), createApiServer(), createWebServer()],
 });

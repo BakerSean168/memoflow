@@ -8,7 +8,10 @@ import {
 
 /** PowerSync/local counterpart of the Prisma Routine temporary override store. */
 export class PowerSyncRoutineTemporaryOverrideStore implements RoutineTemporaryOverrideStore {
-  constructor(private readonly db: IElectronDatabase, private readonly now: () => Date = () => new Date()) {}
+  constructor(
+    private readonly db: IElectronDatabase,
+    private readonly now: () => Date = () => new Date(),
+  ) {}
 
   async findRoutineTemporaryOverride(input: {
     readonly identityId: string;

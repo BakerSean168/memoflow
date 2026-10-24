@@ -151,11 +151,7 @@ export class TaskOccurrencePrismaRepository
     await this.db.taskOccurrence.deleteMany({ where: { planId: planId, identityId } });
   }
 
-  async countFutureOccurrences(
-    planId: string,
-    identityId: string,
-    fromDate: Ymd,
-  ): Promise<number> {
+  async countFutureOccurrences(planId: string, identityId: string, fromDate: Ymd): Promise<number> {
     return this.db.taskOccurrence.count({
       where: { planId: planId, identityId, scheduleDate: { gte: fromDate }, deletedAt: null },
     });
@@ -253,8 +249,8 @@ export class TaskOccurrencePrismaRepository
     for (const stat of Object.values(stats)) {
       if (stat.occurrenceCount === 1) {
         stat.singleOccurrenceStatus =
-          (grouped.find((row) => row.planId === stat.planId && row._count._all === 1)
-            ?.status as TaskOccurrenceStatus | undefined) ?? null;
+          (grouped.find((row) => row.planId === stat.planId && row._count._all === 1)?.status as
+            TaskOccurrenceStatus | undefined) ?? null;
       }
       stat.completionRate =
         stat.dueOccurrenceCount > 0
@@ -264,13 +260,23 @@ export class TaskOccurrencePrismaRepository
     return stats;
   }
 
-  async getStatusCountsForPlan(planId: string, identityId: string): Promise<TaskOccurrenceStatusCounts> {
+  async getStatusCountsForPlan(
+    planId: string,
+    identityId: string,
+  ): Promise<TaskOccurrenceStatusCounts> {
     const grouped = await this.db.taskOccurrence.groupBy({
       by: ['status'],
       where: { planId, identityId, deletedAt: null },
       _count: { _all: true },
     });
-    const counts: TaskOccurrenceStatusCounts = { total: 0, completed: 0, missed: 0, skipped: 0, pending: 0, inProgress: 0 };
+    const counts: TaskOccurrenceStatusCounts = {
+      total: 0,
+      completed: 0,
+      missed: 0,
+      skipped: 0,
+      pending: 0,
+      inProgress: 0,
+    };
     for (const row of grouped) {
       const count = row._count._all;
       counts.total += count;
@@ -283,7 +289,11 @@ export class TaskOccurrencePrismaRepository
     return counts;
   }
 
-  async findRecentByPlan(planId: string, identityId: string, limit: number): Promise<TaskOccurrence[]> {
+  async findRecentByPlan(
+    planId: string,
+    identityId: string,
+    limit: number,
+  ): Promise<TaskOccurrence[]> {
     const rows = await this.db.taskOccurrence.findMany({
       where: { planId, identityId, deletedAt: null },
       orderBy: [{ scheduleDate: 'desc' }, { updatedAt: 'desc' }],

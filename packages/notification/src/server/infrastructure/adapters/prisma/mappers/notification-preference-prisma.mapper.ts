@@ -19,17 +19,20 @@ export type NotificationPreferenceRowLike = PrismaNotificationPreferenceRow;
 
 export class NotificationPreferencePrismaMapper {
   static toDomain(row: NotificationPreferenceRowLike): NotificationPreference {
-    const globalChannels = parseJsonSafe<Record<NotificationChannelType, boolean>>(
-      row.globalChannels,
-    ) ?? {} as Record<NotificationChannelType, boolean>;
-    const workflowOverrides = parseJsonSafe<
-      Record<string, Partial<Record<NotificationChannelType, boolean>>>
-    >(row.workflowOverrides) ?? {};
+    const globalChannels =
+      parseJsonSafe<Record<NotificationChannelType, boolean>>(row.globalChannels) ??
+      ({} as Record<NotificationChannelType, boolean>);
+    const workflowOverrides =
+      parseJsonSafe<Record<string, Partial<Record<NotificationChannelType, boolean>>>>(
+        row.workflowOverrides,
+      ) ?? {};
 
     return NotificationPreference.load({
       id: row.id as never,
       identityId: row.identityId as never,
-      globalChannels: new Map(Object.entries(globalChannels) as [NotificationChannelType, boolean][]),
+      globalChannels: new Map(
+        Object.entries(globalChannels) as [NotificationChannelType, boolean][],
+      ),
       workflowOverrides: new Map(
         Object.entries(workflowOverrides).map(([workflowKey, channels]) => [
           workflowKey,

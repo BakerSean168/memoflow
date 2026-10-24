@@ -14,10 +14,10 @@ evidence window pending". baseline-v1.json already had 7 same-scope comparable r
 
 ## 2. Measured operational evidence (baseline-v1.json)
 
-| Metric | P50 (7 runs) | DoD target | Deviation |
-| ------ | -----------: | ---------: | --------: |
-| wallClock | 10.66 min | 7–8 min | -26% (not met) |
-| runner-min | 49.88 | 42.3 | -15% (not met) |
+| Metric     | P50 (7 runs) | DoD target |      Deviation |
+| ---------- | -----------: | ---------: | -------------: |
+| wallClock  |    10.66 min |    7–8 min | -26% (not met) |
+| runner-min |        49.88 |       42.3 | -15% (not met) |
 
 Bottleneck (PR #245 run 32213541128 job wall-clock): total ~10.6 min bounded by the serial chain
 `Scope → Unit Tests(6.3m) → Verification Children(6.5m) → Web Flow 4×shard(6.4m each) → Oracle`.
@@ -33,10 +33,12 @@ closure are fully verified. W8/W11 main scheduled audits archived as evidence-su
 be a separate backlog if needed.
 
 ## 4. Changes
+
 - `docs/plan/archive/2026-08-05-ci-cd-platform-v2-refactor.md` (moved from active)
 - status → **Archived (2026-08-19)**; added "运营证据窗口偏差记录" section with the measured
   table + bottleneck analysis + archive rationale.
 - `docs/plan/active/README.md` — row updated to archived reference.
 
 ## 5. Gate
+
 Document/archive only — no production code changed. No CI required beyond docs-check.

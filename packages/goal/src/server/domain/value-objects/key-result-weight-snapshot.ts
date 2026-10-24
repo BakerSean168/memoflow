@@ -14,10 +14,7 @@
  */
 
 import { ValueObject } from '@memoflow/utils/domain';
-import type {
-  KeyResultWeightSnapshotDTO,
-  SnapshotTrigger,
-} from '@memoflow/contracts/goal';
+import type { KeyResultWeightSnapshotDTO, SnapshotTrigger } from '@memoflow/contracts/goal';
 import type {
   GoalId,
   KeyResultId,
@@ -314,5 +311,4 @@ export class KeyResultWeightSnapshot extends ValueObject<KeyResultWeightSnapshot
       createdAt: this.props.createdAt,
     };
   }
-
 }

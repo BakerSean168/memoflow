@@ -7,9 +7,7 @@
       "contract": "task-authority",
       "reason": "task-authority: AST/type structural rules replacing source-text locks (#502).",
       "file": "packages/app-vue/src/modules/task/stores/task-store.ts",
-      "forbidElements": [
-        "TaskPlanClientDTO"
-      ],
+      "forbidElements": ["TaskPlanClientDTO"],
       "forbidObjectProperties": [
         {
           "name": "templates"
@@ -21,19 +19,14 @@
           "name": "pagination"
         }
       ],
-      "forbidPropertyNames": [
-        "currentTemplate"
-      ]
+      "forbidPropertyNames": ["currentTemplate"]
     },
     {
       "id": "rule-task-authority-50",
       "contract": "task-authority",
       "reason": "task-authority: AST/type structural rules replacing source-text locks (#502).",
       "file": "packages/app-vue/src/modules/task/views/TaskManagementView.vue",
-      "forbidIdentifiers": [
-        "fetchTaskGraph",
-        "refreshTaskManagement"
-      ],
+      "forbidIdentifiers": ["fetchTaskGraph", "refreshTaskManagement"],
       "forbidExpressionPatterns": [
         {
           "pattern": "\\.setTemplates\\("
@@ -45,11 +38,7 @@
       "contract": "task-authority",
       "reason": "task-authority: AST/type structural rules replacing source-text locks (#502).",
       "file": "packages/app-vue/src/modules/task/views/TaskDetailView.vue",
-      "forbidIdentifiers": [
-        "fetchTaskGraph",
-        "fetchTemplate",
-        "loadDetailPage"
-      ],
+      "forbidIdentifiers": ["fetchTaskGraph", "fetchTemplate", "loadDetailPage"],
       "forbidExpressionPatterns": [
         {
           "pattern": "\\.setTemplates\\("
@@ -61,15 +50,9 @@
       "contract": "normal-planner-scheduler-boundary",
       "reason": "normal-planner-scheduler-boundary: AST/type structural rules replacing source-text locks (#502).",
       "file": "packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue",
-      "forbidElements": [
-        "DevScheduleDebugPanel"
-      ],
-      "forbidIdentifiers": [
-        "scheduleTasks"
-      ],
-      "requireExpressions": [
-        "useStrictInject(GOAL_SERVICE_KEY, 'GoalService')"
-      ],
+      "forbidElements": ["DevScheduleDebugPanel"],
+      "forbidIdentifiers": ["scheduleTasks"],
+      "requireExpressions": ["useStrictInject(GOAL_SERVICE_KEY, 'GoalService')"],
       "requireExpressionPatterns": [
         {
           "pattern": "goal: \\{ updateGoal: goal\\.updateGoal\\.bind\\(goal\\) \\}"
@@ -86,9 +69,7 @@
           "name": "scheduleTasks"
         }
       ],
-      "forbidElements": [
-        "ScheduleTaskClientDTO"
-      ],
+      "forbidElements": ["ScheduleTaskClientDTO"],
       "forbidExpressionPatterns": [
         {
           "pattern": "plannerRoutineOccurrences\\.value = \\[\\];"
@@ -97,13 +78,8 @@
           "pattern": "Phase 5 will"
         }
       ],
-      "requireIdentifiers": [
-        "projections",
-        "fetchRoutineUpcomingCached"
-      ],
-      "requireExpressions": [
-        "useStrictInject(ROUTINE_SERVICE_KEY, 'RoutineService')"
-      ],
+      "requireIdentifiers": ["projections", "fetchRoutineUpcomingCached"],
+      "requireExpressions": ["useStrictInject(ROUTINE_SERVICE_KEY, 'RoutineService')"],
       "requireObjectProperties": [
         {
           "name": "service",
@@ -122,24 +98,15 @@
           "flags": "s"
         }
       ],
-      "forbidCalls": [
-        "readonly"
-      ],
-      "requireIdentifiers": [
-        "calendarEntries",
-        "taskOccurrences",
-        "goals",
-        "routineOccurrences"
-      ]
+      "forbidCalls": ["readonly"],
+      "requireIdentifiers": ["calendarEntries", "taskOccurrences", "goals", "routineOccurrences"]
     },
     {
       "id": "rule-scheduler-boundary-55",
       "contract": "scheduler-boundary",
       "reason": "scheduler-boundary: AST/type structural rules replacing source-text locks (#502).",
       "file": "packages/contracts/src/modules/schedule/planner.ts",
-      "forbidCalls": [
-        "readonly"
-      ]
+      "forbidCalls": ["readonly"]
     },
     {
       "id": "rule-planner-owner-command-boundary-56",
@@ -151,17 +118,9 @@
           "pattern": "from ['\"]@memoflow\\/schedule-orchestration"
         }
       ],
-      "forbidElements": [
-        "ScheduleTaskClientDTO",
-        "SchedulingPort",
-        "ScheduledInvocationContext"
-      ],
-      "forbidIdentifiers": [
-        "updateTaskMetadata"
-      ],
-      "forbidCalls": [
-        "createTask"
-      ],
+      "forbidElements": ["ScheduleTaskClientDTO", "SchedulingPort", "ScheduledInvocationContext"],
+      "forbidIdentifiers": ["updateTaskMetadata"],
+      "forbidCalls": ["createTask"],
       "requireTypeNodes": [
         "Pick<ScheduleClientPort, 'updateSchedule'>",
         "Pick<TaskClientPort, 'rescheduleOccurrence'>",
@@ -178,21 +137,15 @@
           "from": "@memoflow/ipc-client"
         }
       ],
-      "requireExports": [
-        "ElectronBridge"
-      ],
-      "requireTypeNodes": [
-        "InjectionKey<ElectronBridge>"
-      ]
+      "requireExports": ["ElectronBridge"],
+      "requireTypeNodes": ["InjectionKey<ElectronBridge>"]
     },
     {
       "id": "rule-desktop-bridge-electron-bridge-dual-62",
       "contract": "desktop-bridge-electron-bridge-dual",
       "reason": "desktop-bridge-electron-bridge-dual: AST/type structural rules replacing source-text locks (#502).",
       "file": "packages/app-vue/src/index.ts",
-      "forbidTypeReferences": [
-        "DesktopBridge"
-      ],
+      "forbidTypeReferences": ["DesktopBridge"],
       "requireStatementPatterns": [
         {
           "pattern": "type ElectronBridge"
@@ -204,12 +157,8 @@
       "contract": "desktop-bridge-electron-bridge-dual",
       "reason": "desktop-bridge-electron-bridge-dual: AST/type structural rules replacing source-text locks (#502).",
       "file": "packages/app-vue/src/shared/composables/useDesktopWindowControls.ts",
-      "forbidElements": [
-        "DesktopBridge"
-      ],
-      "requireIdentifiers": [
-        "ElectronBridge"
-      ]
+      "forbidElements": ["DesktopBridge"],
+      "requireIdentifiers": ["ElectronBridge"]
     },
     {
       "id": "rule-desktop-auth-api-key-dual-64",
@@ -224,43 +173,29 @@
       "requireImports": [
         {
           "from": "../shared/utils/desktop-auth-recovery",
-          "names": [
-            "DesktopAuthApi"
-          ]
+          "names": ["DesktopAuthApi"]
         },
         {
           "from": "@memoflow/ipc-client",
-          "names": [
-            "ElectronBridge"
-          ]
+          "names": ["ElectronBridge"]
         }
       ],
-      "requireExports": [
-        "DESKTOP_AUTH_API_KEY",
-        "DESKTOP_BRIDGE_KEY"
-      ],
-      "requireExpressions": [
-        "Symbol('DesktopBridge')",
-        "Symbol('DesktopAuthApi')"
-      ]
+      "requireExports": ["DESKTOP_AUTH_API_KEY", "DESKTOP_BRIDGE_KEY"],
+      "requireExpressions": ["Symbol('DesktopBridge')", "Symbol('DesktopAuthApi')"]
     },
     {
       "id": "rule-desktop-auth-api-key-dual-65",
       "contract": "desktop-auth-api-key-dual",
       "reason": "desktop-auth-api-key-dual: AST/type structural rules replacing source-text locks (#502).",
       "file": "packages/app-vue/src/shared/utils/desktop-auth-recovery.ts",
-      "requireTypeMembers": [
-        "invoke?: (channel: string, ...args: unknown[]) => Promise<unknown>"
-      ]
+      "requireTypeMembers": ["invoke?: (channel: string, ...args: unknown[]) => Promise<unknown>"]
     },
     {
       "id": "rule-notification-authority-66",
       "contract": "notification-authority",
       "reason": "notification-authority: AST/type structural rules replacing source-text locks (#502).",
       "file": "packages/app-vue/src/modules/notification/stores/notification-store.ts",
-      "forbidElements": [
-        "NotificationClientDTO"
-      ],
+      "forbidElements": ["NotificationClientDTO"],
       "forbidObjectProperties": [
         {
           "name": "notifications"
@@ -269,11 +204,7 @@
           "name": "error"
         }
       ],
-      "forbidPropertyNames": [
-        "unreadCount",
-        "isLoading",
-        "isInitialized"
-      ]
+      "forbidPropertyNames": ["unreadCount", "isLoading", "isInitialized"]
     },
     {
       "id": "rule-notification-authority-67",
@@ -288,15 +219,8 @@
           "pattern": "\\.addNotification\\("
         }
       ],
-      "forbidElements": [
-        "NotificationClientDTO"
-      ],
-      "forbidIdentifiers": [
-        "incrementUnread",
-        "setQueryData",
-        "invalidateQueries",
-        "getQueryData"
-      ],
+      "forbidElements": ["NotificationClientDTO"],
+      "forbidIdentifiers": ["incrementUnread", "setQueryData", "invalidateQueries", "getQueryData"],
       "requireExpressionPatterns": [
         {
           "pattern": "dispatcher\\.invalidate"
@@ -308,11 +232,7 @@
       "contract": "notification-authority",
       "reason": "notification-authority: AST/type structural rules replacing source-text locks (#502).",
       "file": "packages/app-vue/src/modules/notification/initialization/notification-sse-invalidation-source.ts",
-      "forbidIdentifiers": [
-        "setQueryData",
-        "invalidateQueries",
-        "getQueryData"
-      ]
+      "forbidIdentifiers": ["setQueryData", "invalidateQueries", "getQueryData"]
     },
     {
       "id": "rule-notification-authority-69",
@@ -320,19 +240,10 @@
       "reason": "notification-authority: AST/type structural rules replacing source-text locks (#502).",
       "scan": {
         "root": "packages/app-vue/src/modules/notification",
-        "extensions": [
-          ".ts",
-          ".vue"
-        ],
-        "exclude": [
-          ".spec.",
-          "notificationCache.ts"
-        ]
+        "extensions": [".ts", ".vue"],
+        "exclude": [".spec.", "notificationCache.ts"]
       },
-      "forbidCalls": [
-        "invalidateQueries",
-        "setQueryData"
-      ]
+      "forbidCalls": ["invalidateQueries", "setQueryData"]
     },
     {
       "id": "rule-service-client-port-facade-keep-boundary-84",
@@ -342,9 +253,7 @@
       "requireImports": [
         {
           "from": "@memoflow/contracts",
-          "names": [
-            "CloudAuthClientPort"
-          ]
+          "names": ["CloudAuthClientPort"]
         },
         {
           "from": "@memoflow/goal/client"
@@ -436,52 +345,36 @@
       "contract": "use-ai-chat-host-dispatch",
       "reason": "use-ai-chat-host-dispatch: AST/type structural rules replacing source-text locks (#502).",
       "file": "packages/app-vue/src/modules/ai/composables/types.ts",
-      "forbidStringLiterals": [
-        "streamMessage",
-        "listMessages"
-      ]
+      "forbidStringLiterals": ["streamMessage", "listMessages"]
     },
     {
       "id": "rule-use-ai-chat-host-dispatch-100",
       "contract": "use-ai-chat-host-dispatch",
       "reason": "use-ai-chat-host-dispatch: AST/type structural rules replacing source-text locks (#502).",
       "file": "packages/app-vue/src/modules/ai/composables/useAIChatView.ts",
-      "requireIdentifiers": [
-        "AI_ASSISTANT_RUNTIME_KEY"
-      ],
-      "requireExpressions": [
-        "useStrictInject(AI_ASSISTANT_RUNTIME_KEY, 'AIAssistantRuntime')"
-      ]
+      "requireIdentifiers": ["AI_ASSISTANT_RUNTIME_KEY"],
+      "requireExpressions": ["useStrictInject(AI_ASSISTANT_RUNTIME_KEY, 'AIAssistantRuntime')"]
     },
     {
       "id": "rule-use-ai-chat-host-dispatch-101",
       "contract": "use-ai-chat-host-dispatch",
       "reason": "use-ai-chat-host-dispatch: AST/type structural rules replacing source-text locks (#502).",
       "file": "apps/web/src/platform/di-app.ts",
-      "requireIdentifiers": [
-        "createAssistantRuntimeHttpClient",
-        "AI_ASSISTANT_RUNTIME_KEY"
-      ]
+      "requireIdentifiers": ["createAssistantRuntimeHttpClient", "AI_ASSISTANT_RUNTIME_KEY"]
     },
     {
       "id": "rule-use-ai-chat-host-dispatch-102",
       "contract": "use-ai-chat-host-dispatch",
       "reason": "use-ai-chat-host-dispatch: AST/type structural rules replacing source-text locks (#502).",
       "file": "apps/desktop/src/renderer/platform/di-app.ts",
-      "requireIdentifiers": [
-        "createAssistantRuntimeIpcClient",
-        "AI_ASSISTANT_RUNTIME_KEY"
-      ]
+      "requireIdentifiers": ["createAssistantRuntimeIpcClient", "AI_ASSISTANT_RUNTIME_KEY"]
     },
     {
       "id": "rule-use-ai-chat-host-dispatch-103",
       "contract": "use-ai-chat-host-dispatch",
       "reason": "use-ai-chat-host-dispatch: AST/type structural rules replacing source-text locks (#502).",
       "file": "packages/app-vue/src/modules/ai/components/AIFooterComposer.vue",
-      "forbidClassTokens": [
-        "ai-chat-execution-profile",
-        "select-execution-profile"
-      ],
+      "forbidClassTokens": ["ai-chat-execution-profile", "select-execution-profile"],
       "forbidAttributes": [
         {
           "name": "value",
@@ -492,9 +385,7 @@
           "value": "direct_turn"
         }
       ],
-      "requireStringLiterals": [
-        "ai-chat-stop-generating"
-      ]
+      "requireStringLiterals": ["ai-chat-stop-generating"]
     },
     {
       "id": "rule-use-ai-chat-host-dispatch-104",
@@ -545,9 +436,7 @@
         "loadService.streamMessage",
         "loadService.sendMessage"
       ],
-      "requireTypeMembers": [
-        "runtime:AssistantRuntimeClient"
-      ],
+      "requireTypeMembers": ["runtime:AssistantRuntimeClient"],
       "requireExpressions": [
         "options.runtime.listMessages(conversationId)",
         "options.runtime.deleteConversation(id)",
@@ -557,9 +446,7 @@
         "event.type === 'assistant.usage.updated'",
         "event.type === 'assistant.run.completed'"
       ],
-      "requireCalls": [
-        "options.runtime.streamMessage"
-      ],
+      "requireCalls": ["options.runtime.streamMessage"],
       "requireObjectPropertyTexts": [
         "providerId: selectedModel!.providerId",
         "modelId: selectedModel!.modelId"
@@ -570,20 +457,14 @@
           "value": "local_agent"
         }
       ],
-      "requireIdentifiers": [
-        "nativeModelOptions",
-        "activeRuntimeRunId"
-      ]
+      "requireIdentifiers": ["nativeModelOptions", "activeRuntimeRunId"]
     },
     {
       "id": "rule-aisettings-provider-onboarding-v2-165",
       "contract": "AISettings.provider-onboarding-v2",
       "reason": "AISettings.provider-onboarding-v2: AST/type structural rules replacing source-text locks (#502).",
       "file": "packages/app-vue/src/modules/setting/components/AISettings.vue",
-      "forbidElements": [
-        "AI_PROVIDER_TEMPLATES",
-        "OnboardingStep"
-      ],
+      "forbidElements": ["AI_PROVIDER_TEMPLATES", "OnboardingStep"],
       "forbidIdentifiers": [
         "submitQuickProvider",
         "providerCatalog",
@@ -595,31 +476,22 @@
           "pattern": "instance\\.instanceId !== 'mastra'"
         }
       ],
-      "requireElements": [
-        "MastraAgentSettings"
-      ],
+      "requireElements": ["MastraAgentSettings"],
       "requireObjectProperties": [
         {
           "name": "action",
           "value": "update"
         }
       ],
-      "requireObjectPropertyTexts": [
-        "expectedRevision: instance.revision"
-      ],
-      "requireStringFragments": [
-        "ai-provider-toggle-"
-      ]
+      "requireObjectPropertyTexts": ["expectedRevision: instance.revision"],
+      "requireStringFragments": ["ai-provider-toggle-"]
     },
     {
       "id": "rule-aisettings-provider-onboarding-v2-166",
       "contract": "AISettings.provider-onboarding-v2",
       "reason": "AISettings.provider-onboarding-v2: AST/type structural rules replacing source-text locks (#502).",
       "file": "packages/app-vue/src/modules/setting/components/AgentInstanceWizard.vue",
-      "forbidElements": [
-        "AI_PROVIDER_TEMPLATES",
-        "OnboardingStep"
-      ],
+      "forbidElements": ["AI_PROVIDER_TEMPLATES", "OnboardingStep"],
       "forbidIdentifiers": [
         "submitQuickProvider",
         "providerCatalog",
@@ -638,10 +510,7 @@
           "attrs": {}
         }
       ],
-      "forbidIdentifiers": [
-        "getProviderCatalog",
-        "localStorage"
-      ],
+      "forbidIdentifiers": ["getProviderCatalog", "localStorage"],
       "forbidExpressionPatterns": [
         {
           "pattern": "apiKey: connection\\.value"
@@ -652,12 +521,8 @@
           "name": "credentialRef"
         }
       ],
-      "forbidCalls": [
-        "updateProvider"
-      ],
-      "forbidClassTokens": [
-        "ai-provider-detail-toggle"
-      ],
+      "forbidCalls": ["updateProvider"],
+      "forbidClassTokens": ["ai-provider-detail-toggle"],
       "requireExpressionPatterns": [
         {
           "pattern": "catalogId: 'custom'"
@@ -672,26 +537,19 @@
         "invalidateProbe",
         "committedConnection"
       ],
-      "requireObjectPropertyTexts": [
-        "onboardingId: probe.value.onboardingId"
-      ],
+      "requireObjectPropertyTexts": ["onboardingId: probe.value.onboardingId"],
       "requireExpressions": [
         "probe.value = null",
         "ai.probeProviderReplacement(String(currentId), input)"
       ],
-      "requireMemberPaths": [
-        "ai.commitProviderReplacement"
-      ]
+      "requireMemberPaths": ["ai.commitProviderReplacement"]
     },
     {
       "id": "rule-use-data-portability-171",
       "contract": "use-data-portability",
       "reason": "use-data-portability: AST/type structural rules replacing source-text locks (#502).",
       "file": "packages/app-vue/src/modules/setting/composables/useDataPortability.ts",
-      "requireIdentifiers": [
-        "DATA_PORTABILITY_SERVICE_KEY",
-        "DESKTOP_AUTH_API_KEY"
-      ],
+      "requireIdentifiers": ["DATA_PORTABILITY_SERVICE_KEY", "DESKTOP_AUTH_API_KEY"],
       "requireStatements": [
         "const isServerDisclosureAvailable = ref(service !== undefined && desktopApi === undefined);"
       ],
@@ -709,9 +567,7 @@
       "contract": "use-data-portability",
       "reason": "use-data-portability: AST/type structural rules replacing source-text locks (#502).",
       "file": "packages/data-portability/src/infrastructure-client/adapters/ipc/data-portability-ipc.adapter.ts",
-      "requireIdentifiers": [
-        "exportServerHeldDataDisclosure"
-      ],
+      "requireIdentifiers": ["exportServerHeldDataDisclosure"],
       "requireObjectProperties": [
         {
           "name": "code",
@@ -727,10 +583,7 @@
       "contract": "use-data-portability",
       "reason": "use-data-portability: AST/type structural rules replacing source-text locks (#502).",
       "file": "packages/app-vue/src/modules/setting/components/DataSettingsSection.vue",
-      "requireClassTokens": [
-        "isServerDisclosureAvailable",
-        "exportServerHeldDataDisclosure"
-      ],
+      "requireClassTokens": ["isServerDisclosureAvailable", "exportServerHeldDataDisclosure"],
       "requireAttributes": [
         {
           "name": ":server-data-disclosure-available",

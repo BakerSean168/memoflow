@@ -45,11 +45,13 @@ pnpm install
 ### 3️⃣ 启动开发服务器 (2分钟)
 
 **终端 1 - 启动 API 服务器**:
+
 ```bash
 pnpm exec nx run api:dev
 ```
 
 **终端 2 - 启动 Web 前端**:
+
 ```bash
 pnpm exec nx run web:dev
 ```
@@ -57,6 +59,7 @@ pnpm exec nx run web:dev
 ### 4️⃣ 访问应用
 
 Codespaces 会自动转发端口，点击弹出的通知即可访问：
+
 - **API**: http://localhost:3001
 - **Web**: http://localhost:5173
 
@@ -119,6 +122,7 @@ pnpm exec nx format:check
 ### 1. Nx MCP Server (Nx 工作区管理)
 
 在 Copilot Chat 中尝试：
+
 ```
 @workspace 显示项目结构
 @workspace 运行 api 的 dev 任务
@@ -128,6 +132,7 @@ pnpm exec nx format:check
 ### 2. Playwright MCP (浏览器自动化)
 
 在 Copilot Chat 中尝试：
+
 ```
 帮我打开浏览器并访问 http://localhost:5173
 帮我测试登录功能
@@ -137,6 +142,7 @@ pnpm exec nx format:check
 ### 3. Chrome DevTools MCP
 
 在 Copilot Chat 中尝试：
+
 ```
 分析当前页面的网络请求
 查看 Console 日志
@@ -251,7 +257,7 @@ git config --global --add safe.directory /workspaces/MemoFlow
 ## 💡 小贴士
 
 1. **使用 Nx Console**: 点击左侧 Nx 图标，可视化管理项目
-2. **快捷键**: 
+2. **快捷键**:
    - `Ctrl+Shift+P` (F1): 命令面板
    - `Ctrl+` `: 打开终端
    - `Ctrl+B`: 切换侧边栏
@@ -274,6 +280,7 @@ git config --global --add safe.directory /workspaces/MemoFlow
 ## 🎉 开始开发吧！
 
 有问题随时在 Copilot Chat 中问我：
+
 ```
 @workspace 我该如何开始？
 帮我创建一个新的 API 端点

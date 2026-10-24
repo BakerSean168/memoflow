@@ -1,11 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {
-  classifyPath,
-  globToRegExp,
-  isIgnored,
-  parseNameStatusZ,
-} from '../lib/git-files.mjs';
+import { classifyPath, globToRegExp, isIgnored, parseNameStatusZ } from '../lib/git-files.mjs';
 
 test('parseNameStatusZ parses modify/add/delete', () => {
   const text = 'M\0src/a.ts\0A\0src/b.ts\0D\0src/c.ts\0';
@@ -34,8 +29,17 @@ test('globToRegExp honors ** segments and bare basenames', () => {
   assert.equal(isIgnored(['**/.pytest-temp'], 'apps/ai-service/.pytest-temp/x'), true);
   assert.equal(isIgnored(['pnpm-lock.yaml'], 'pnpm-lock.yaml'), true);
   assert.equal(isIgnored(['pnpm-lock.yaml'], 'packages/a/pnpm-lock.yaml'), true);
-  assert.equal(isIgnored(['packages/database/src/generated'], 'packages/database/src/generated/prisma/index.js'), true);
-  assert.equal(isIgnored(['packages/database/src/generated'], 'packages/database/src/other.ts'), false);
+  assert.equal(
+    isIgnored(
+      ['packages/database/src/generated'],
+      'packages/database/src/generated/prisma/index.js',
+    ),
+    true,
+  );
+  assert.equal(
+    isIgnored(['packages/database/src/generated'], 'packages/database/src/other.ts'),
+    false,
+  );
 });
 
 test('classifyPath: ignored wins, then extension support', () => {

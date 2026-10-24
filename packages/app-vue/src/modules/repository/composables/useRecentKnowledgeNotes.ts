@@ -61,8 +61,7 @@ export function useRecentKnowledgeNotes() {
   async function read(limit: number, force: boolean): Promise<void> {
     const source = desktopBridge ? 'local-vault' : 'projection';
     const queryKey = recentKnowledgeQueryKeys.recent(resolveIdentityScope(), source, limit);
-    const cachedSnapshot =
-      runtime.queryClient.getQueryData<RecentKnowledgeSnapshot>(queryKey);
+    const cachedSnapshot = runtime.queryClient.getQueryData<RecentKnowledgeSnapshot>(queryKey);
     if (cachedSnapshot) applySnapshot(cachedSnapshot);
     isLoading.value = cachedSnapshot === undefined;
     if (!cachedSnapshot) {

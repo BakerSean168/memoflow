@@ -19,12 +19,7 @@ import {
 } from '../infrastructure-client/adapters/ipc';
 import type { IScheduleEventApiClient } from '../infrastructure-client/adapters/types';
 
-export type {
-  IResultHttpClient,
-  IResultIpcClient,
-  IScheduleEventApiClient,
-  ScheduleClientPort,
-};
+export type { IResultHttpClient, IResultIpcClient, IScheduleEventApiClient, ScheduleClientPort };
 
 export function createScheduleHttpClient(httpClient: IResultHttpClient): ScheduleClientPort {
   return createScheduleServiceFromHttpClient(httpClient);

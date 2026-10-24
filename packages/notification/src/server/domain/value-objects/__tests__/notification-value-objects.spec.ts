@@ -64,7 +64,10 @@ describe('notification shared value objects', () => {
   });
 
   it('serializes metadata and typed actions without generic ApiCall/Custom payloads', () => {
-    const metadata = NotificationMetadata.createDefault().setIcon('bell').setColor('#fff').setBadge(3);
+    const metadata = NotificationMetadata.createDefault()
+      .setIcon('bell')
+      .setColor('#fff')
+      .setBadge(3);
     expect(NotificationMetadata.fromDTO(metadata.toDTO()).toDTO()).toEqual(metadata.toDTO());
 
     const navigate = NotificationAction.create({
@@ -85,14 +88,16 @@ describe('notification shared value objects', () => {
     });
     expect(owner.kind).toBe('owner-command');
 
-    expect(() => NotificationAction.create({
-      kind: 'owner-command',
-      actionKey: 'bad',
-      labelKey: 'bad',
-      owner: { type: 'routine-occurrence', id: 'occ-1' },
-      commandKey: 'routine.complete',
-      input: (() => undefined) as never,
-    })).toThrow('Owner command input must be a JSON value');
+    expect(() =>
+      NotificationAction.create({
+        kind: 'owner-command',
+        actionKey: 'bad',
+        labelKey: 'bad',
+        owner: { type: 'routine-occurrence', id: 'occ-1' },
+        commandKey: 'routine.complete',
+        input: (() => undefined) as never,
+      }),
+    ).toThrow('Owner command input must be a JSON value');
   });
 
   it('covers category preference validation, immutability, and effectiveness helpers', () => {
@@ -106,11 +111,13 @@ describe('notification shared value objects', () => {
     expect(disabled.channels).toEqual({ inApp: false, email: false, push: false, sms: false });
     expect(disabled.importance).toEqual(['Important', 'Moderate']);
     expect(CategoryPreference.createDefault().isEffective).toBe(true);
-    expect(() => CategoryPreference.create({
-      enabled: true,
-      channels: null as never,
-      importance: [],
-    })).toThrow('Channels configuration is required');
+    expect(() =>
+      CategoryPreference.create({
+        enabled: true,
+        channels: null as never,
+        importance: [],
+      }),
+    ).toThrow('Channels configuration is required');
   });
 
   it('covers enum helper validation and semantic classifiers', () => {
@@ -164,7 +171,6 @@ describe('notification shared value objects', () => {
     expect(NotificationType.isError(NotificationType.Error)).toBe(true);
     expect(NotificationType.isError(NotificationType.Info)).toBe(false);
     expect(() => NotificationType.of('nope')).toThrow('Invalid NotificationType');
-
   });
 
   it('covers NotificationMetadata getters, derived flags, and immutable setters', () => {
@@ -200,36 +206,46 @@ describe('notification shared value objects', () => {
   });
 
   it('rejects malformed typed notification actions and covers archive/navigate cloning', () => {
-    expect(() => NotificationAction.create({
-      kind: 'archive',
-      actionKey: ' ',
-      labelKey: 'archive',
-    })).toThrow('Action actionKey is required');
-    expect(() => NotificationAction.create({
-      kind: 'archive',
-      actionKey: 'archive',
-      labelKey: ' ',
-    })).toThrow('Action labelKey is required');
-    expect(() => NotificationAction.create({
-      kind: 'navigate',
-      actionKey: 'open',
-      labelKey: 'open',
-      destination: { route: ' ' },
-    })).toThrow('Navigate destination.route is required');
-    expect(() => NotificationAction.create({
-      kind: 'owner-command',
-      actionKey: 'run',
-      labelKey: 'run',
-      owner: { type: '', id: 'owner-1' },
-      commandKey: 'run',
-    })).toThrow('Owner command owner reference is required');
-    expect(() => NotificationAction.create({
-      kind: 'owner-command',
-      actionKey: 'run',
-      labelKey: 'run',
-      owner: { type: 'routine', id: 'owner-1' },
-      commandKey: ' ',
-    })).toThrow('Owner command commandKey is required');
+    expect(() =>
+      NotificationAction.create({
+        kind: 'archive',
+        actionKey: ' ',
+        labelKey: 'archive',
+      }),
+    ).toThrow('Action actionKey is required');
+    expect(() =>
+      NotificationAction.create({
+        kind: 'archive',
+        actionKey: 'archive',
+        labelKey: ' ',
+      }),
+    ).toThrow('Action labelKey is required');
+    expect(() =>
+      NotificationAction.create({
+        kind: 'navigate',
+        actionKey: 'open',
+        labelKey: 'open',
+        destination: { route: ' ' },
+      }),
+    ).toThrow('Navigate destination.route is required');
+    expect(() =>
+      NotificationAction.create({
+        kind: 'owner-command',
+        actionKey: 'run',
+        labelKey: 'run',
+        owner: { type: '', id: 'owner-1' },
+        commandKey: 'run',
+      }),
+    ).toThrow('Owner command owner reference is required');
+    expect(() =>
+      NotificationAction.create({
+        kind: 'owner-command',
+        actionKey: 'run',
+        labelKey: 'run',
+        owner: { type: 'routine', id: 'owner-1' },
+        commandKey: ' ',
+      }),
+    ).toThrow('Owner command commandKey is required');
 
     const archive = NotificationAction.create({
       kind: 'archive',
@@ -264,35 +280,46 @@ describe('notification shared value objects', () => {
       weeklyWindows: [{ daysOfWeek: [4], start: asHm('09:00'), end: asHm('17:00') }],
     });
     expect(daytime.isActiveAt(new Date('2026-09-17T10:00:00.000Z'))).toBe(true);
-    expect(daytime.nextInactiveAt(new Date('2026-09-17T10:00:00.000Z'))?.toISOString())
-      .toBe('2026-09-17T17:00:00.000Z');
+    expect(daytime.nextInactiveAt(new Date('2026-09-17T10:00:00.000Z'))?.toISOString()).toBe(
+      '2026-09-17T17:00:00.000Z',
+    );
     expect(daytime.isActiveAt(new Date('2026-09-17T18:00:00.000Z'))).toBe(false);
     expect(daytime.nextInactiveAt(new Date('2026-09-17T18:00:00.000Z'))).toBeNull();
 
-    expect(() => QuietHours.create({
-      enabled: true,
-      timeZone: 'Not/AZone' as never,
-      weeklyWindows: [],
-    })).toThrow('Invalid QuietHours timeZone');
-    expect(() => QuietHours.create({
-      enabled: true,
-      timeZone: utc,
-      weeklyWindows: [{ daysOfWeek: [], start: asHm('09:00'), end: asHm('10:00') }],
-    })).toThrow('requires at least one weekday');
-    expect(() => QuietHours.create({
-      enabled: true,
-      timeZone: utc,
-      weeklyWindows: [{ daysOfWeek: [4], start: '9:00' as never, end: asHm('10:00') }],
-    })).toThrow('must use HH:mm');
-    expect(() => QuietHours.create({
-      enabled: true,
-      timeZone: utc,
-      weeklyWindows: [{ daysOfWeek: [4], start: asHm('09:00'), end: asHm('09:00') }],
-    })).toThrow('must differ');
-    expect(() => QuietHours.create({
-      enabled: true,
-      timeZone: utc,
-      weeklyWindows: [{ daysOfWeek: [7 as never], start: asHm('09:00'), end: asHm('10:00') }],
-    })).toThrow('weekday must be 0-6');
+    expect(() =>
+      QuietHours.create({
+        enabled: true,
+        timeZone: 'Not/AZone' as never,
+        weeklyWindows: [],
+      }),
+    ).toThrow('Invalid QuietHours timeZone');
+    expect(() =>
+      QuietHours.create({
+        enabled: true,
+        timeZone: utc,
+        weeklyWindows: [{ daysOfWeek: [], start: asHm('09:00'), end: asHm('10:00') }],
+      }),
+    ).toThrow('requires at least one weekday');
+    expect(() =>
+      QuietHours.create({
+        enabled: true,
+        timeZone: utc,
+        weeklyWindows: [{ daysOfWeek: [4], start: '9:00' as never, end: asHm('10:00') }],
+      }),
+    ).toThrow('must use HH:mm');
+    expect(() =>
+      QuietHours.create({
+        enabled: true,
+        timeZone: utc,
+        weeklyWindows: [{ daysOfWeek: [4], start: asHm('09:00'), end: asHm('09:00') }],
+      }),
+    ).toThrow('must differ');
+    expect(() =>
+      QuietHours.create({
+        enabled: true,
+        timeZone: utc,
+        weeklyWindows: [{ daysOfWeek: [7 as never], start: asHm('09:00'), end: asHm('10:00') }],
+      }),
+    ).toThrow('weekday must be 0-6');
   });
 });

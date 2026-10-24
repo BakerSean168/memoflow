@@ -38,11 +38,15 @@ export const OpenApiErrorResponseSchema = z.object({
   error: z.object({
     code: z.string(),
     message: z.string(),
-    details: z.array(z.object({
-      field: z.string().optional(),
-      code: z.string(),
-      message: z.string(),
-    })).optional(),
+    details: z
+      .array(
+        z.object({
+          field: z.string().optional(),
+          code: z.string(),
+          message: z.string(),
+        }),
+      )
+      .optional(),
     context: z.record(z.string(), z.unknown()).optional(),
   }),
   timestamp: z.number(),

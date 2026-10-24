@@ -52,21 +52,42 @@ function row(snapshot: unknown, resourceId: string | undefined = 'owner') {
 describe('goal.create live model tool action projection', () => {
   it('retains a committed Goal receipt when subsequent workflow execution fails', () => {
     const committed = { ...receipt, referenceMap: { goal: 'already-created-goal' } };
-    const view = projectGoalCreateRun(row({ status: 'failed',
-      context: { input: { idea: 'Plan', identityId: 'owner', conversationId: 'thread' } },
-      value: { priorReceipt: committed }, error: { code: 'RATE_LIMITED' },
-    }), 'owner');
-    expect(view).toMatchObject({ status: 'failed', result: { referenceMap: { goal: 'already-created-goal' } } });
+    const view = projectGoalCreateRun(
+      row({
+        status: 'failed',
+        context: { input: { idea: 'Plan', identityId: 'owner', conversationId: 'thread' } },
+        value: { priorReceipt: committed },
+        error: { code: 'RATE_LIMITED' },
+      }),
+      'owner',
+    );
+    expect(view).toMatchObject({
+      status: 'failed',
+      result: { referenceMap: { goal: 'already-created-goal' } },
+    });
   });
   it('preserves safe quota classification and delay from a durable failed snapshot', () => {
-    const run = projectGoalCreateRun(row({ status: 'failed',
-      context: { input: { idea: 'Plan', identityId: 'owner', conversationId: 'thread' } },
-      error: { statusCode: 429, responseBody: JSON.stringify({ error: {
-        code: 'insufficient_quota', message: 'PRIVATE_KEY',
-      } }), responseHeaders: { 'retry-after': '30' } },
-    }), 'owner');
-    expect(run?.failure).toMatchObject({ code: 'RATE_LIMITED',
-      details: { limitKind: 'quota_exhausted' }, retryHint: { kind: 'after', afterMs: 30000 },
+    const run = projectGoalCreateRun(
+      row({
+        status: 'failed',
+        context: { input: { idea: 'Plan', identityId: 'owner', conversationId: 'thread' } },
+        error: {
+          statusCode: 429,
+          responseBody: JSON.stringify({
+            error: {
+              code: 'insufficient_quota',
+              message: 'PRIVATE_KEY',
+            },
+          }),
+          responseHeaders: { 'retry-after': '30' },
+        },
+      }),
+      'owner',
+    );
+    expect(run?.failure).toMatchObject({
+      code: 'RATE_LIMITED',
+      details: { limitKind: 'quota_exhausted' },
+      retryHint: { kind: 'after', afterMs: 30000 },
     });
     expect(JSON.stringify(run)).not.toContain('PRIVATE_KEY');
   });
@@ -89,21 +110,34 @@ describe('goal.create live model tool action projection', () => {
   });
 
   it('rejects corrupt action payloads and never exposes them to another user', () => {
-    const unsafe = row(snapshot([{ sequence: 1, command: { ...action.command, operation: 'goal.persist' } }]));
+    const unsafe = row(
+      snapshot([{ sequence: 1, command: { ...action.command, operation: 'goal.persist' } }]),
+    );
     expect(() => projectGoalCreateRun(unsafe, 'owner')).toThrow();
     expect(projectGoalCreateRun(unsafe, 'foreign')).toBeNull();
   });
 
   it('rejects replay snapshots with duplicate revision-scoped ids or sequence gaps', () => {
-    expect(() => projectGoalCreateRun(row(snapshot([action, { ...action, sequence: 2 }])), 'owner')).toThrow();
-    expect(() => projectGoalCreateRun(row(snapshot([{ ...action, sequence: 5 }])), 'owner')).toThrow();
+    expect(() =>
+      projectGoalCreateRun(row(snapshot([action, { ...action, sequence: 2 }])), 'owner'),
+    ).toThrow();
+    expect(() =>
+      projectGoalCreateRun(row(snapshot([{ ...action, sequence: 5 }])), 'owner'),
+    ).toThrow();
   });
 
   it('does not fabricate actions for legacy workflow snapshots', () => {
-    expect(projectGoalCreateRun(row({
-      status: 'running',
-      context: { input: { idea: 'Plan a goal', identityId: 'owner', conversationId: 'thread' } },
-    }), 'owner')).not.toHaveProperty('liveActions');
+    expect(
+      projectGoalCreateRun(
+        row({
+          status: 'running',
+          context: {
+            input: { idea: 'Plan a goal', identityId: 'owner', conversationId: 'thread' },
+          },
+        }),
+        'owner',
+      ),
+    ).not.toHaveProperty('liveActions');
   });
 });
 

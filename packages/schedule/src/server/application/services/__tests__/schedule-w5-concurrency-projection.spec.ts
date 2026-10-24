@@ -45,13 +45,24 @@ class InMemoryScheduleRepository implements IScheduleRepository {
   }
 
   async findByIdentityId(identityId: string): Promise<CalendarEntry[]> {
-    return Array.from(this.schedules.values()).filter((entry) => entry.identityId === identityId).map(cloneEntry);
+    return Array.from(this.schedules.values())
+      .filter((entry) => entry.identityId === identityId)
+      .map(cloneEntry);
   }
 
   async deleteById(identityId: string, id: string, expectedVersion: number): Promise<void> {
     const entry = this.schedules.get(id);
-    if (!entry || entry.identityId !== identityId) throw Object.assign(new Error(`Schedule event ${id} not found`), { code: 'NOT_FOUND', statusCode: 404 });
-    if (entry.version !== expectedVersion) throw Object.assign(new Error('version conflict'), { code: 'CONFLICT', statusCode: 409, context: { currentVersion: entry.version, expectedVersion } });
+    if (!entry || entry.identityId !== identityId)
+      throw Object.assign(new Error(`Schedule event ${id} not found`), {
+        code: 'NOT_FOUND',
+        statusCode: 404,
+      });
+    if (entry.version !== expectedVersion)
+      throw Object.assign(new Error('version conflict'), {
+        code: 'CONFLICT',
+        statusCode: 409,
+        context: { currentVersion: entry.version, expectedVersion },
+      });
     this.schedules.delete(id);
   }
 
@@ -59,14 +70,30 @@ class InMemoryScheduleRepository implements IScheduleRepository {
     await this.deleteById(entry.identityId, entry.id, expectedVersion);
   }
 
-  async findByTimeRange(identityId: string, startTime: number, endTime: number, excludeId?: string): Promise<CalendarEntry[]> {
-    return Array.from(this.schedules.values()).filter((entry) => {
-      if (entry.identityId !== identityId || entry.id === excludeId) return false;
-      return entry.range.kind === 'Timed' && entry.range.start < endTime && entry.range.end > startTime;
-    }).map(cloneEntry);
+  async findByTimeRange(
+    identityId: string,
+    startTime: number,
+    endTime: number,
+    excludeId?: string,
+  ): Promise<CalendarEntry[]> {
+    return Array.from(this.schedules.values())
+      .filter((entry) => {
+        if (entry.identityId !== identityId || entry.id === excludeId) return false;
+        return (
+          entry.range.kind === 'Timed' && entry.range.start < endTime && entry.range.end > startTime
+        );
+      })
+      .map(cloneEntry);
   }
 
-  async createRebuildOutbox(item: { identityId: string; scheduleId?: string; startTime: number; endTime: number; sourceRevision: number; idempotencyKey?: string }): Promise<void> {
+  async createRebuildOutbox(item: {
+    identityId: string;
+    scheduleId?: string;
+    startTime: number;
+    endTime: number;
+    sourceRevision: number;
+    idempotencyKey?: string;
+  }): Promise<void> {
     const key = item.idempotencyKey ?? `rebuild:${item.identityId}:${item.sourceRevision}`;
     const existing = this.outbox.find((entry) => entry.idempotencyKey === key);
     const dto: ScheduleRebuildOutboxDTO = {
@@ -77,46 +104,91 @@ class InMemoryScheduleRepository implements IScheduleRepository {
       endTime: new Date(item.endTime),
       sourceRevision: item.sourceRevision,
       idempotencyKey: key,
-      status: 'pending', attempts: 0, lastError: null, processedAt: null,
+      status: 'pending',
+      attempts: 0,
+      lastError: null,
+      processedAt: null,
       createdAt: existing?.createdAt ?? new Date(),
     };
-    if (existing) Object.assign(existing, dto); else this.outbox.push(dto);
+    if (existing) Object.assign(existing, dto);
+    else this.outbox.push(dto);
   }
 
   async fetchPendingRebuildOutbox(identityId?: string): Promise<ScheduleRebuildOutboxDTO[]> {
-    return this.outbox.filter((entry) => entry.status === 'pending' && (!identityId || entry.identityId === identityId));
+    return this.outbox.filter(
+      (entry) => entry.status === 'pending' && (!identityId || entry.identityId === identityId),
+    );
   }
   async fetchRebuildTimeline(identityId: string): Promise<ScheduleRebuildOutboxDTO[]> {
     return this.outbox.filter((entry) => entry.identityId === identityId);
   }
-  async replayRebuildOutbox(): Promise<ScheduleRebuildOutboxDTO> { throw new Error('unused'); }
-  async claimRebuildOutboxItems(claimToken: string, limit = 50): Promise<ScheduleRebuildOutboxDTO[]> {
-    const pending = this.outbox.filter((entry) => entry.status === 'pending' || entry.status === 'retry').slice(0, limit);
-    for (const entry of pending) { entry.status = 'processing'; entry.claimToken = claimToken; entry.claimedAt = new Date(); }
+  async replayRebuildOutbox(): Promise<ScheduleRebuildOutboxDTO> {
+    throw new Error('unused');
+  }
+  async claimRebuildOutboxItems(
+    claimToken: string,
+    limit = 50,
+  ): Promise<ScheduleRebuildOutboxDTO[]> {
+    const pending = this.outbox
+      .filter((entry) => entry.status === 'pending' || entry.status === 'retry')
+      .slice(0, limit);
+    for (const entry of pending) {
+      entry.status = 'processing';
+      entry.claimToken = claimToken;
+      entry.claimedAt = new Date();
+    }
     return pending;
   }
-  async markRebuildOutboxProcessed(id: string, claimToken: string, error?: string, maxAttempts = 5): Promise<void> {
+  async markRebuildOutboxProcessed(
+    id: string,
+    claimToken: string,
+    error?: string,
+    maxAttempts = 5,
+  ): Promise<void> {
     const entry = this.outbox.find((item) => item.id === id);
     if (!entry || entry.claimToken !== claimToken) return;
     entry.claimToken = null;
-    if (!error) { entry.status = 'completed'; entry.processedAt = new Date(); entry.lastError = null; return; }
-    entry.attempts += 1; entry.lastError = error; entry.status = entry.attempts >= maxAttempts ? 'failed' : 'retry';
+    if (!error) {
+      entry.status = 'completed';
+      entry.processedAt = new Date();
+      entry.lastError = null;
+      return;
+    }
+    entry.attempts += 1;
+    entry.lastError = error;
+    entry.status = entry.attempts >= maxAttempts ? 'failed' : 'retry';
   }
   async createDomainEventOutbox(): Promise<void> {}
-  async fetchPendingDomainEventOutbox(): Promise<never[]> { return []; }
-  async claimDomainEventOutboxItems(): Promise<never[]> { return []; }
+  async fetchPendingDomainEventOutbox(): Promise<never[]> {
+    return [];
+  }
+  async claimDomainEventOutboxItems(): Promise<never[]> {
+    return [];
+  }
   async markDomainEventOutboxProcessed(): Promise<void> {}
 
   async withTransaction<T>(fn: (repo: IScheduleRepository) => Promise<T>): Promise<T> {
-    const schedules = new Map(Array.from(this.schedules.entries(), ([id, entry]) => [id, cloneEntry(entry)]));
+    const schedules = new Map(
+      Array.from(this.schedules.entries(), ([id, entry]) => [id, cloneEntry(entry)]),
+    );
     const outbox = this.outbox.map((entry) => ({ ...entry }));
-    try { return await fn(this); }
-    catch (error) { this.schedules = schedules; this.outbox = outbox; throw error; }
+    try {
+      return await fn(this);
+    } catch (error) {
+      this.schedules = schedules;
+      this.outbox = outbox;
+      throw error;
+    }
   }
 }
 
 const timed = (start: number, end: number) => ({ kind: 'Timed' as const, start, end });
-const lease = { execute: async <T>(_key: string, task: (guard: { ensureHeld(): Promise<void> }) => Promise<T>) => ({ acquired: true, value: await task({ ensureHeld: async () => undefined }) }) };
+const lease = {
+  execute: async <T>(
+    _key: string,
+    task: (guard: { ensureHeld(): Promise<void> }) => Promise<T>,
+  ) => ({ acquired: true, value: await task({ ensureHeld: async () => undefined }) }),
+};
 
 describe('W5 reliability on ADR-080 derived Planner truth', () => {
   const identityId = 'acc_user_w5_test';
@@ -124,11 +196,26 @@ describe('W5 reliability on ADR-080 derived Planner truth', () => {
   it('preserves expectedVersion optimistic locking and conflict receipts', async () => {
     const repo = new InMemoryScheduleRepository();
     const service = new ScheduleEventApplicationService(repo);
-    const created = await service.createSchedule({ identityId, title: 'Initial Event', range: timed(1000, 2000) });
-    const updatedA = await service.updateSchedule(created.id, identityId, { title: 'Updated by A', expectedVersion: 1 });
+    const created = await service.createSchedule({
+      identityId,
+      title: 'Initial Event',
+      range: timed(1000, 2000),
+    });
+    const updatedA = await service.updateSchedule(created.id, identityId, {
+      title: 'Updated by A',
+      expectedVersion: 1,
+    });
     expect(updatedA).toMatchObject({ title: 'Updated by A', version: 2 });
-    await expect(service.updateSchedule(created.id, identityId, { title: 'Updated by B', expectedVersion: 1 })).rejects.toMatchObject({ code: 'CONFLICT', context: { currentVersion: 2, expectedVersion: 1 } });
-    await expect(service.deleteSchedule(created.id, identityId, 1)).rejects.toMatchObject({ code: 'CONFLICT', context: { currentVersion: 2, expectedVersion: 1 } });
+    await expect(
+      service.updateSchedule(created.id, identityId, { title: 'Updated by B', expectedVersion: 1 }),
+    ).rejects.toMatchObject({
+      code: 'CONFLICT',
+      context: { currentVersion: 2, expectedVersion: 1 },
+    });
+    await expect(service.deleteSchedule(created.id, identityId, 1)).rejects.toMatchObject({
+      code: 'CONFLICT',
+      context: { currentVersion: 2, expectedVersion: 1 },
+    });
     await service.deleteSchedule(created.id, identityId, 2);
     expect(await repo.findByIdForIdentity(identityId, created.id)).toBeNull();
   });
@@ -136,21 +223,51 @@ describe('W5 reliability on ADR-080 derived Planner truth', () => {
   it('rolls aggregate and rebuild-outbox work back as one transaction on outbox write failure', async () => {
     const repo = new InMemoryScheduleRepository();
     const service = new ScheduleEventApplicationService(repo);
-    const created = await service.createSchedule({ identityId, title: 'Event To Rollback', range: timed(1000, 2000) });
-    vi.spyOn(repo, 'createRebuildOutbox').mockImplementationOnce(async () => { throw new Error('Database transaction fault injected: outbox write error'); });
-    await expect(service.updateSchedule(created.id, identityId, { title: 'Should Rollback Title', expectedVersion: 1 })).rejects.toThrow('Database transaction fault injected');
-    expect(await service.getSchedule(created.id, identityId)).toMatchObject({ title: 'Event To Rollback', version: 1 });
+    const created = await service.createSchedule({
+      identityId,
+      title: 'Event To Rollback',
+      range: timed(1000, 2000),
+    });
+    vi.spyOn(repo, 'createRebuildOutbox').mockImplementationOnce(async () => {
+      throw new Error('Database transaction fault injected: outbox write error');
+    });
+    await expect(
+      service.updateSchedule(created.id, identityId, {
+        title: 'Should Rollback Title',
+        expectedVersion: 1,
+      }),
+    ).rejects.toThrow('Database transaction fault injected');
+    expect(await service.getSchedule(created.id, identityId)).toMatchObject({
+      title: 'Event To Rollback',
+      version: 1,
+    });
   });
 
   it('keeps versioned rebuild invalidation restart-safe and duplicate processing idempotent', async () => {
     const repo = new InMemoryScheduleRepository();
     const service = new ScheduleEventApplicationService(repo);
     const worker = new ScheduleRebuildWorkerService(repo, lease);
-    const e1 = await service.createSchedule({ identityId, title: 'Event 1', range: timed(1000, 2000) });
-    const e2 = await service.createSchedule({ identityId, title: 'Event 2', range: timed(1200, 1800) });
-    const e3 = await service.createSchedule({ identityId, title: 'Event 3', range: timed(1500, 2500) });
+    const e1 = await service.createSchedule({
+      identityId,
+      title: 'Event 1',
+      range: timed(1000, 2000),
+    });
+    const e2 = await service.createSchedule({
+      identityId,
+      title: 'Event 2',
+      range: timed(1200, 1800),
+    });
+    const e3 = await service.createSchedule({
+      identityId,
+      title: 'Event 3',
+      range: timed(1500, 2500),
+    });
 
-    const derived = await new ScheduleConflictDetectionService(repo).detectConflictsForTimeRange({ identityId, startTime: 0, endTime: 3000 });
+    const derived = await new ScheduleConflictDetectionService(repo).detectConflictsForTimeRange({
+      identityId,
+      startTime: 0,
+      endTime: 3000,
+    });
     expect(derived.hasConflict).toBe(true);
     expect(derived.conflicts.length).toBeGreaterThan(0);
 
@@ -165,7 +282,9 @@ describe('W5 reliability on ADR-080 derived Planner truth', () => {
     await worker.processOutbox(identityId);
     const remainingE1 = await repo.findByIdForIdentity(identityId, e1.id);
     expect(remainingE1).not.toBeNull();
-    const after = await new ScheduleConflictDetectionService(repo).detectConflictsForEntry(remainingE1!);
+    const after = await new ScheduleConflictDetectionService(repo).detectConflictsForEntry(
+      remainingE1!,
+    );
     expect(after.hasConflict).toBe(false);
   });
 
@@ -178,7 +297,9 @@ describe('W5 reliability on ADR-080 derived Planner truth', () => {
 
     const entries = await repo.findByIdentityId(identityId);
     const detection = new ScheduleConflictDetectionService(repo);
-    const results = await Promise.all(entries.map((entry) => detection.detectConflictsForEntry(entry)));
+    const results = await Promise.all(
+      entries.map((entry) => detection.detectConflictsForEntry(entry)),
+    );
     expect(results.map((result) => result.hasConflict).sort()).toEqual([false, true, true]);
     expect(results.flatMap((result) => result.conflicts)).toHaveLength(2);
     expect(entries.every((entry) => !('hasConflict' in entry.toClientDTO()))).toBe(true);

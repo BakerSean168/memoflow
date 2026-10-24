@@ -3,8 +3,16 @@ import { findWindowsPowerShellPath, isWslRuntime, WindowsUserDpapiProvider } fro
 
 describe('WSL Windows DPAPI bridge', () => {
   it('detects Microsoft WSL kernels without relying on PATH', () => {
-    expect(isWslRuntime({ platform: 'linux', osRelease: '6.6.87.2-microsoft-standard-WSL2', wslInterop: '' })).toBe(true);
-    expect(isWslRuntime({ platform: 'linux', osRelease: '6.8.0-generic', wslInterop: '' })).toBe(false);
+    expect(
+      isWslRuntime({
+        platform: 'linux',
+        osRelease: '6.6.87.2-microsoft-standard-WSL2',
+        wslInterop: '',
+      }),
+    ).toBe(true);
+    expect(isWslRuntime({ platform: 'linux', osRelease: '6.8.0-generic', wslInterop: '' })).toBe(
+      false,
+    );
   });
 
   it('prefers the canonical Windows PowerShell path exposed through /mnt/c', () => {
@@ -13,7 +21,10 @@ describe('WSL Windows DPAPI bridge', () => {
   });
 
   it('does not advertise DPAPI outside WSL', () => {
-    const provider = new WindowsUserDpapiProvider({ isWsl: false, powershellPath: '/powershell.exe' });
+    const provider = new WindowsUserDpapiProvider({
+      isWsl: false,
+      powershellPath: '/powershell.exe',
+    });
     expect(provider.isAvailable()).toBe(false);
   });
 

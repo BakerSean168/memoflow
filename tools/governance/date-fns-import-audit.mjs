@@ -50,9 +50,13 @@ for (const scanRoot of [join(root, 'packages'), join(root, 'apps')]) {
 }
 
 if (offenders.length) {
-  console.error('[date-fns-import-audit] FAIL: date-fns imports outside packages/time/src/engine/**:');
+  console.error(
+    '[date-fns-import-audit] FAIL: date-fns imports outside packages/time/src/engine/**:',
+  );
   for (const offender of offenders) console.error('  -', offender);
-  console.error('Fix: migrate the product behavior to @memoflow/time; legacy exemptions are retired.');
+  console.error(
+    'Fix: migrate the product behavior to @memoflow/time; legacy exemptions are retired.',
+  );
   process.exit(1);
 }
 

@@ -29,7 +29,8 @@ function publicRuntimeError(error?: unknown): NonNullable<AIWorkflowRunView['fai
     fallbackMessage: 'AI runtime request failed',
   });
   return {
-    code: failure.code, message: failure.message,
+    code: failure.code,
+    message: failure.message,
     ...(failure.details ? { details: failure.details } : {}),
     ...(failure.retryHint ? { retryHint: failure.retryHint } : {}),
   };
@@ -55,14 +56,16 @@ export function projectGoalCreateRun(
   // transactionally published preview is stored separately and never used
   // as execution authority. On step completion, state.value is canonical.
   const value = snapshot.value;
-  const authoritative = value && typeof value === 'object' && !Array.isArray(value)
-    ? (value as Record<string, unknown>).liveActions
-    : undefined;
+  const authoritative =
+    value && typeof value === 'object' && !Array.isArray(value)
+      ? (value as Record<string, unknown>).liveActions
+      : undefined;
   const durableActions = GoalWorkflowLiveActionJournalSchema.parse(authoritative ?? []);
   const runningActions = GoalWorkflowLiveActionJournalSchema.parse(snapshot.goalLiveActions ?? []);
-  const liveActions = lowLevelStatus === 'running' && runningActions.length > durableActions.length
-    ? runningActions
-    : durableActions;
+  const liveActions =
+    lowLevelStatus === 'running' && runningActions.length > durableActions.length
+      ? runningActions
+      : durableActions;
   const lifecycle = context[GOAL_CREATE_LIFECYCLE_STEP_ID];
   const lifecycleRecord =
     lifecycle && typeof lifecycle === 'object' && !Array.isArray(lifecycle)
@@ -70,22 +73,40 @@ export function projectGoalCreateRun(
       : undefined;
 
   return projectGoalWorkflowPublicState({
-    runId: row.runId, conversationId: workflowInput.conversationId,
+    runId: row.runId,
+    conversationId: workflowInput.conversationId,
     startRequestId: workflowInput.sourceDraft?.attemptId,
-    status: lowLevelStatus, suspension: lifecycleRecord?.suspendPayload,
-    result: snapshot.result, liveActions,
-    receipt: value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>).priorReceipt : undefined,
-    failure: lowLevelStatus === 'failed' || lowLevelStatus === 'tripwire' ? publicRuntimeError(snapshot.error) : undefined,
-    createdAt: new Date(row.createdAt).getTime(), updatedAt: new Date(row.updatedAt).getTime(),
+    status: lowLevelStatus,
+    suspension: lifecycleRecord?.suspendPayload,
+    result: snapshot.result,
+    liveActions,
+    receipt:
+      value && typeof value === 'object' && !Array.isArray(value)
+        ? (value as Record<string, unknown>).priorReceipt
+        : undefined,
+    failure:
+      lowLevelStatus === 'failed' || lowLevelStatus === 'tripwire'
+        ? publicRuntimeError(snapshot.error)
+        : undefined,
+    createdAt: new Date(row.createdAt).getTime(),
+    updatedAt: new Date(row.updatedAt).getTime(),
   });
 }
 
 /** Shared read projection for the engine row and its transactionally derived event read model. */
 export function projectGoalWorkflowPublicState(input: {
-  runId: string; conversationId: string; startRequestId?: string;
-  status: unknown; suspension?: unknown; result?: unknown; liveActions?: unknown; receipt?: unknown;
-  failure?: AIWorkflowRunView['failure']; resourceVersion?: number;
-  createdAt: number; updatedAt: number;
+  runId: string;
+  conversationId: string;
+  startRequestId?: string;
+  status: unknown;
+  suspension?: unknown;
+  result?: unknown;
+  liveActions?: unknown;
+  receipt?: unknown;
+  failure?: AIWorkflowRunView['failure'];
+  resourceVersion?: number;
+  createdAt: number;
+  updatedAt: number;
 }): Extract<AIWorkflowRunView, { kind: 'goal.create' }> {
   const lowLevelStatus = input.status;
   const liveActions = GoalWorkflowLiveActionJournalSchema.parse(input.liveActions ?? []);

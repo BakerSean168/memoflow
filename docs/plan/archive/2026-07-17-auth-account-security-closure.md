@@ -16,6 +16,7 @@ status: done
 > **归档结果（2026-07-29）**：ADR-036 已采纳；Phase A–E 源码闭环（challenge、邮箱验证、会话、OAuth、访客升级）。  
 > 投递通道 A–D 见 [`./2026-07-28-transactional-email-smtp.md`](./2026-07-28-transactional-email-smtp.md)（SMTP/Resend/Redis challenge）。  
 > 残余运维：生产域名 SPF/DKIM、全量 e2e 真跑——不阻塞本 plan 归档。
+
 # Auth + Account 收敛与安全闭环实施方案
 
 ## 1. 文档地位
@@ -30,13 +31,13 @@ status: done
 
 ### 1.1 与现有计划的关系
 
-| 计划 | 关系 |
-| --- | --- |
-| ~~密码找回独立计划~~ | **已归档**：[`archive/2026-07-16-password-recovery.md`](../archive/2026-07-16-password-recovery.md)；能力并入本文 Phase A/B，契约以现网 `/password/forgot|reset` 为准 |
-| [Web 登录与注册页面后续优化](./2026-07-15-web-auth-page-optimization.md) | 前端入口整理；邮箱验证场景与错误码与本文契约对齐 |
-| [Obsidian Vault 与 GitHub 知识仓库](./2026-07-16-obsidian-vault-repository-optimization.md) | GitHub **登录**与 **仓库授权**分离；OAuth 登录完整流在本文 Phase D，仓库连接仍归 Repository |
-| [authentication 产品说明](../../product/modules/authentication.md) | 目标态与差距的产品真源 |
-| [account 产品说明](../../product/modules/account.md) | 资料与状态职责 |
+| 计划                                                                                        | 关系                                                                                                                                                      |
+| ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ~~密码找回独立计划~~                                                                        | **已归档**：[`archive/2026-07-16-password-recovery.md`](../archive/2026-07-16-password-recovery.md)；能力并入本文 Phase A/B，契约以现网 `/password/forgot | reset` 为准 |
+| [Web 登录与注册页面后续优化](./2026-07-15-web-auth-page-optimization.md)                    | 前端入口整理；邮箱验证场景与错误码与本文契约对齐                                                                                                          |
+| [Obsidian Vault 与 GitHub 知识仓库](./2026-07-16-obsidian-vault-repository-optimization.md) | GitHub **登录**与 **仓库授权**分离；OAuth 登录完整流在本文 Phase D，仓库连接仍归 Repository                                                               |
+| [authentication 产品说明](../../product/modules/authentication.md)                          | 目标态与差距的产品真源                                                                                                                                    |
+| [account 产品说明](../../product/modules/account.md)                                        | 资料与状态职责                                                                                                                                            |
 
 ### 1.2 配套 ADR
 
@@ -60,18 +61,18 @@ status: done
 
 ### 2.2 主要缺口
 
-| 缺口 | 表现 |
-| --- | --- |
-| 邮箱验证未闭环 | 注册即发 token；无 send/verify API；Unverified 不门禁 |
-| 双邮箱 / 双验证状态 | Auth Identifier 与 Account `ContactEmail` 可漂移 |
-| 注销不完整 | `closeAccount` 只改 Account，不禁登录、不撤 session |
-| 邮件与限流 | `ConsoleEmailSender`；无系统化限流 |
-| OTP 存储偏弱 | 内存、明文码、`Math.random`；多实例不可用 |
-| OAuth 产品流 | callback 骨架有；授权发起、state/PKCE、UI、绑定页未齐 |
-| 账号链接 | 同邮箱多 identity 风险未产品化处理 |
-| 访客升级 | Desktop 有访客；升级在线账号未闭环 |
-| 会话安全增强 | ~~缺 reuse detection 与设备元数据~~ **已补齐**（reuse 全撤 + device 元数据 + 会话 UI） |
-| AccountSettings vs Setting | 偏好双源风险 |
+| 缺口                       | 表现                                                                                   |
+| -------------------------- | -------------------------------------------------------------------------------------- |
+| 邮箱验证未闭环             | 注册即发 token；无 send/verify API；Unverified 不门禁                                  |
+| 双邮箱 / 双验证状态        | Auth Identifier 与 Account `ContactEmail` 可漂移                                       |
+| 注销不完整                 | `closeAccount` 只改 Account，不禁登录、不撤 session                                    |
+| 邮件与限流                 | `ConsoleEmailSender`；无系统化限流                                                     |
+| OTP 存储偏弱               | 内存、明文码、`Math.random`；多实例不可用                                              |
+| OAuth 产品流               | callback 骨架有；授权发起、state/PKCE、UI、绑定页未齐                                  |
+| 账号链接                   | 同邮箱多 identity 风险未产品化处理                                                     |
+| 访客升级                   | Desktop 有访客；升级在线账号未闭环                                                     |
+| 会话安全增强               | ~~缺 reuse detection 与设备元数据~~ **已补齐**（reuse 全撤 + device 元数据 + 会话 UI） |
+| AccountSettings vs Setting | 偏好双源风险                                                                           |
 
 ### 2.3 明确不做（本计划范围外）
 
@@ -106,12 +107,12 @@ Setting（扩展配置）
 
 ### 3.2 状态主从
 
-| 问题 | 权威 |
-| --- | --- |
-| 能否通过密码/OAuth 拿到 session | `AuthIdentity.status` + lock 字段 |
-| 业务上是否视为正常用户资料 | `Account.status` |
-| 登录邮箱是否已验证 | `AuthIdentifier(Email).isVerified` |
-| 资料卡上显示的邮箱 | Account 投影；默认跟随 Auth 主邮箱 |
+| 问题                            | 权威                               |
+| ------------------------------- | ---------------------------------- |
+| 能否通过密码/OAuth 拿到 session | `AuthIdentity.status` + lock 字段  |
+| 业务上是否视为正常用户资料      | `Account.status`                   |
+| 登录邮箱是否已验证              | `AuthIdentifier(Email).isVerified` |
+| 资料卡上显示的邮箱              | Account 投影；默认跟随 Auth 主邮箱 |
 
 规则：
 
@@ -141,11 +142,11 @@ IVerificationChallengeStore
   // 存储：hash(challenge), expiresAt, attempts, lastIssuedAt
 ```
 
-| purpose | 用途 |
-| --- | --- |
-| `EmailVerify` | 注册后验证主邮箱 |
-| `EmailBind` | 已登录绑定新邮箱 |
-| `EmailChange` | 换绑（可要求 old+new 两次） |
+| purpose         | 用途                          |
+| --------------- | ----------------------------- |
+| `EmailVerify`   | 注册后验证主邮箱              |
+| `EmailBind`     | 已登录绑定新邮箱              |
+| `EmailChange`   | 换绑（可要求 old+new 两次）   |
 | `PasswordReset` | 密码找回（现网 forgot/reset） |
 
 约束：
@@ -170,7 +171,6 @@ IVerificationChallengeStore
 - **投递 SSOT**：[`2026-07-28-transactional-email-smtp.md`](./2026-07-28-transactional-email-smtp.md)；运维指南：[`docs/guides/development/transactional-email-smtp.md`](../../guides/development/transactional-email-smtp.md)
 - Challenge 多副本：`AUTH_CHALLENGE_STORE=redis` + `RedisVerificationChallengeStore`（默认仍 memory）
 
-
 ### 3.7 密码找回（并入本计划，非独立文档）
 
 - API：**现网** `POST /api/v1/auth/password/forgot`、`POST /api/v1/auth/password/reset`（`ForgotPasswordSchema` / `ResetPasswordSchema`）。
@@ -178,14 +178,15 @@ IVerificationChallengeStore
 - purpose = `PasswordReset` 的 challenge；重置成功撤销全部 session（use case 已有，迁移 store 后保持）。
 - 前端入口在 B1 完成验收前保持隐藏（与 web-auth 优化计划一致）。
 - 可选增强：邮件内同时附带带 token 的链接，解码后仍走同一 `consume` 语义。
+
 ### 3.6 领域事件（跨模块同步）
 
-| 事件 | 消费方 | 行为 |
-| --- | --- | --- |
-| `auth:identity-created` | Account（已有） | 创建 Account |
-| `auth:email-verified` | Account（新增） | `ContactEmail.verify()` / 对齐 address |
-| `auth:email-changed` | Account（新增） | 更新投影邮箱 |
-| `auth:identity-disabled` | Account（新增） | 关闭/停用 Account |
+| 事件                      | 消费方           | 行为                                                                   |
+| ------------------------- | ---------------- | ---------------------------------------------------------------------- |
+| `auth:identity-created`   | Account（已有）  | 创建 Account                                                           |
+| `auth:email-verified`     | Account（新增）  | `ContactEmail.verify()` / 对齐 address                                 |
+| `auth:email-changed`      | Account（新增）  | 更新投影邮箱                                                           |
+| `auth:identity-disabled`  | Account（新增）  | 关闭/停用 Account                                                      |
 | `account:close-requested` | Auth（新增编排） | disable identity + revoke sessions（或由应用服务同步调用，不必纯事件） |
 
 实施可选 **应用服务同步编排**（注销）+ **事件投影**（邮箱），避免分布式事务复杂度。
@@ -199,10 +200,10 @@ Base：`/api/v1/auth`（与现网一致）。
 
 ### 4.1 邮箱验证
 
-| 方法 | 路径 | 鉴权 | Body（要点） | 成功 |
-| --- | --- | --- | --- | --- |
+| 方法 | 路径               | 鉴权 | Body（要点）                                               | 成功                                            |
+| ---- | ------------------ | ---- | ---------------------------------------------------------- | ----------------------------------------------- |
 | POST | `/email/send-code` | 可选 | `{ email?, purpose: EmailVerify\|EmailBind\|EmailChange }` | 统一 200，防枚举（Verify 场景对未知邮箱也 200） |
-| POST | `/email/verify` | 可选 | `{ email, code, purpose }` | 200；已登录可刷新 identity DTO |
+| POST | `/email/verify`    | 可选 | `{ email, code, purpose }`                                 | 200；已登录可刷新 identity DTO                  |
 
 规则摘要：
 
@@ -237,12 +238,12 @@ Account `GET /api/v1/accounts/me` 继续只返回资料；前端「账户安全�
 
 ### 4.4 OAuth（Phase C，与产品文档对齐）
 
-| 能力 | 说明 |
-| --- | --- |
-| 授权发起 | 生成 authorize URL + state/PKCE 存储 |
-| callback | 已有路径完善校验 |
-| 已登录 bind/unbind | 账户安全页；禁止静默按邮箱合并 |
-| 冲突 | 返回 `ACCOUNT_LINK_REQUIRED`，引导登录后链接 |
+| 能力               | 说明                                         |
+| ------------------ | -------------------------------------------- |
+| 授权发起           | 生成 authorize URL + state/PKCE 存储         |
+| callback           | 已有路径完善校验                             |
+| 已登录 bind/unbind | 账户安全页；禁止静默按邮箱合并               |
+| 冲突               | 返回 `ACCOUNT_LINK_REQUIRED`，引导登录后链接 |
 
 ---
 
@@ -344,12 +345,12 @@ Account `GET /api/v1/accounts/me` 继续只返回资料；前端「账户安全�
 
 ## 6. 前端与跨端要点
 
-| 端 | 要求 |
-| --- | --- |
-| Web | 无访客入口（见 web-auth 计划）；注册后验证场景；忘记密码入口等后端就绪再开 |
-| Desktop | 保留访客；OAuth 走系统浏览器；升级路径 Phase E |
-| Mobile | 跟随 contracts；不单独发明验证协议 |
-| i18n | 所有新错误码双语 |
+| 端      | 要求                                                                       |
+| ------- | -------------------------------------------------------------------------- |
+| Web     | 无访客入口（见 web-auth 计划）；注册后验证场景；忘记密码入口等后端就绪再开 |
+| Desktop | 保留访客；OAuth 走系统浏览器；升级路径 Phase E                             |
+| Mobile  | 跟随 contracts；不单独发明验证协议                                         |
+| i18n    | 所有新错误码双语                                                           |
 
 ---
 
@@ -393,13 +394,13 @@ E 访客升级
 
 ## 10. 风险与缓解
 
-| 风险 | 缓解 |
-| --- | --- |
-| 双邮箱历史数据不一致 | 以 Auth 为准做一次对齐脚本或启动校验日志（项目不要求迁移兼容时可直接校正） |
-| 注册后强制验证影响 e2e | 白名单 + 测试环境可配置跳过或固定码 |
-| 邮件进垃圾箱 | 域名认证；dev 用 console/mailpit |
-| 静默合并导致账号劫持 | ADR 禁止；冲突必须显式确认 |
-| 码与链接两种交付形态 | 统一 challenge 抽象，禁止平行 API |
+| 风险                   | 缓解                                                                       |
+| ---------------------- | -------------------------------------------------------------------------- |
+| 双邮箱历史数据不一致   | 以 Auth 为准做一次对齐脚本或启动校验日志（项目不要求迁移兼容时可直接校正） |
+| 注册后强制验证影响 e2e | 白名单 + 测试环境可配置跳过或固定码                                        |
+| 邮件进垃圾箱           | 域名认证；dev 用 console/mailpit                                           |
+| 静默合并导致账号劫持   | ADR 禁止；冲突必须显式确认                                                 |
+| 码与链接两种交付形态   | 统一 challenge 抽象，禁止平行 API                                          |
 
 ---
 
@@ -442,15 +443,15 @@ E 访客升级
 
 ## 实施进度（滚动）
 
-| 日期 | 进度 |
-| --- | --- |
-| 2026-07-17 | **Phase A** challenge store + email port + forgot/reset 迁移完成；单测已写 |
-| 2026-07-17 | **Phase A6** `challenge-ip-rate-limit` 挂到 `/password/forgot` 与 `/email/send-code` |
-| 2026-07-17 | **Phase B2 后端** Send/VerifyEmail 契约、use case、路由、client、`auth:email-verified`、Account 投影 |
-| 2026-07-17 | **Web B1/B2** `WebAuthView` forgot/reset/verify-email；service/composable/i18n/MSW |
-| 2026-07-17 | **B2 门禁** `require-email-verified` + API/Account 挂载 |
+| 日期       | 进度                                                                                                                  |
+| ---------- | --------------------------------------------------------------------------------------------------------------------- |
+| 2026-07-17 | **Phase A** challenge store + email port + forgot/reset 迁移完成；单测已写                                            |
+| 2026-07-17 | **Phase A6** `challenge-ip-rate-limit` 挂到 `/password/forgot` 与 `/email/send-code`                                  |
+| 2026-07-17 | **Phase B2 后端** Send/VerifyEmail 契约、use case、路由、client、`auth:email-verified`、Account 投影                  |
+| 2026-07-17 | **Web B1/B2** `WebAuthView` forgot/reset/verify-email；service/composable/i18n/MSW                                    |
+| 2026-07-17 | **B2 门禁** `require-email-verified` + API/Account 挂载                                                               |
 | 2026-07-17 | **验收加固** 重建 contracts/authentication dist；gate import 与 `Result.data` 断言修复；auth 聚焦 25 测 + web 11 测绿 |
-| 2026-07-17 | **仍待** e2e；主应用 Unverified banner；Desktop 真实现；Phase C 注销级联；Phase D OAuth 产品流；生产发信 |
+| 2026-07-17 | **仍待** e2e；主应用 Unverified banner；Desktop 真实现；Phase C 注销级联；Phase D OAuth 产品流；生产发信              |
 
 | 2026-07-18 | **e2e 规格** register/password 用例 + `/auth/test/last-email-code`（仅 test/e2e lane）|
 | 2026-07-18 | **Desktop** FORGOT/RESET/CHANGE/SEND/VERIFY_EMAIL_CODE 走 AuthRemoteGateway 现网契约 |

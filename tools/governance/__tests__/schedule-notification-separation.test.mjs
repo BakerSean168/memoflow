@@ -17,7 +17,9 @@ describe('NOTIFICATION_IMPORT_PATTERN', () => {
     expect(`const x = require('@memoflow/notification/schedule-execution');`).toMatch(
       NOTIFICATION_IMPORT_PATTERN,
     );
-    expect(`const x = await import('@memoflow/notification');`).toMatch(NOTIFICATION_IMPORT_PATTERN);
+    expect(`const x = await import('@memoflow/notification');`).toMatch(
+      NOTIFICATION_IMPORT_PATTERN,
+    );
   });
 
   it('catches the anti-resurrection bypass forms: side-effect import, deep subpath, multiline from', () => {
@@ -27,11 +29,13 @@ describe('NOTIFICATION_IMPORT_PATTERN', () => {
     expect(`import { x } from '@memoflow/notification/server/infrastructure';`).toMatch(
       NOTIFICATION_IMPORT_PATTERN,
     );
-    expect(`import { deliverer } from '@memoflow/notification/server/infrastructure/deliverers';`).toMatch(
+    expect(
+      `import { deliverer } from '@memoflow/notification/server/infrastructure/deliverers';`,
+    ).toMatch(NOTIFICATION_IMPORT_PATTERN);
+    // `from` on one line, specifier on the next.
+    expect(`  '@memoflow/notification/server/infrastructure';`).toMatch(
       NOTIFICATION_IMPORT_PATTERN,
     );
-    // `from` on one line, specifier on the next.
-    expect(`  '@memoflow/notification/server/infrastructure';`).toMatch(NOTIFICATION_IMPORT_PATTERN);
     // Double-quoted and template-literal specifiers.
     expect(`import "@memoflow/notification/server/infrastructure";`).toMatch(
       NOTIFICATION_IMPORT_PATTERN,
@@ -50,9 +54,9 @@ describe('NOTIFICATION_IMPORT_PATTERN', () => {
 
 describe('LEGACY_NOTIFICATION_PORT_PATTERN', () => {
   it('matches the removed legacy delivery symbols', () => {
-    expect(`import { ScheduleNotificationPort } from '@memoflow/notification/schedule-execution';`).toMatch(
-      LEGACY_NOTIFICATION_PORT_PATTERN,
-    );
+    expect(
+      `import { ScheduleNotificationPort } from '@memoflow/notification/schedule-execution';`,
+    ).toMatch(LEGACY_NOTIFICATION_PORT_PATTERN);
     expect(`scheduleNotificationPort:`).toMatch(LEGACY_NOTIFICATION_PORT_PATTERN);
     expect(`createNotificationPrismaScheduleNotificationPort(`).toMatch(
       LEGACY_NOTIFICATION_PORT_PATTERN,
@@ -82,10 +86,12 @@ describe('SOURCE_MODULE_EXECUTION_SWITCH_PATTERN', () => {
 
 describe('isSchedulerScanRoot', () => {
   it('accepts only the scheduler orchestration + scheduling roots', () => {
-    expect(isSchedulerScanRoot('packages/schedule-orchestration/src/execution/router.ts')).toBe(true);
-    expect(
-      isSchedulerScanRoot('packages/schedule/src/server/infrastructure/scheduling/x.ts'),
-    ).toBe(true);
+    expect(isSchedulerScanRoot('packages/schedule-orchestration/src/execution/router.ts')).toBe(
+      true,
+    );
+    expect(isSchedulerScanRoot('packages/schedule/src/server/infrastructure/scheduling/x.ts')).toBe(
+      true,
+    );
     expect(isSchedulerScanRoot('packages/task/src/server/infrastructure/x.ts')).toBe(false);
     expect(isSchedulerScanRoot('packages/notification/src/server/runtime.ts')).toBe(false);
   });

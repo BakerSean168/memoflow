@@ -7,5 +7,6 @@ it('removes trailing slashes without changing the origin or path', () => {
     ['http://localhost:3000/', 'http://localhost:3000'],
     ['http://localhost:3000///', 'http://localhost:3000'],
     ['https://example.com/api/', 'https://example.com/api'],
-  ]) expect(normalizeOrigin(input)).toBe(expected);
+  ])
+    expect(normalizeOrigin(input)).toBe(expected);
 });

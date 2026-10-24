@@ -267,9 +267,13 @@ export class CreateGoalUseCase implements GoalPortabilityApplicationPort {
               return;
             }
             if (input.id) {
-              const existing = await ctx.goalRepository.findByIdForIdentity(cx.identityId, input.id, {
-                includeChildren: true,
-              });
+              const existing = await ctx.goalRepository.findByIdForIdentity(
+                cx.identityId,
+                input.id,
+                {
+                  includeChildren: true,
+                },
+              );
               if (existing) {
                 result.replay = createGoalMutationReceipt(existing, {
                   keyResultIds: existing.keyResults.map((keyResult) => keyResult.id),
@@ -283,7 +287,8 @@ export class CreateGoalUseCase implements GoalPortabilityApplicationPort {
       } else {
         await persist(this.goalRepository);
       }
-      if (result.leaseLost) return error('CONFLICT', 'Goal native AI control lease expired or was superseded');
+      if (result.leaseLost)
+        return error('CONFLICT', 'Goal native AI control lease expired or was superseded');
       if (result.replay) return ok(result.replay);
       return ok(
         createGoalMutationReceipt(goal, {

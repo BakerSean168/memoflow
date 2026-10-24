@@ -117,7 +117,9 @@ it('cancelling and immediately reopening the same occurrence resets the composer
   await flushPromises();
   expect(w.get<HTMLInputElement>('#change-amount').element.value).toBe('0');
   expect(w.get<HTMLTextAreaElement>('#record-note').element.value).toBe('');
-  expect(w.get<HTMLButtonElement>('[data-testid="task-record-and-complete"]').element.disabled).toBe(false);
+  expect(
+    w.get<HTMLButtonElement>('[data-testid="task-record-and-complete"]').element.disabled,
+  ).toBe(false);
   expect(o.completeOccurrence).not.toHaveBeenCalled();
   w.unmount();
 });

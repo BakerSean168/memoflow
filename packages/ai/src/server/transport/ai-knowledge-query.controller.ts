@@ -14,9 +14,18 @@ import {
 import { formatZodErrors } from '@memoflow/utils/result';
 
 interface AIKnowledgeQueryControllerService {
-  expandKnowledge(request: ExpandKnowledgeReq, cx: ExecutionContext): Promise<Result<ExpandKnowledgeRes>>;
-  queryKnowledge(request: QueryKnowledgeReq, cx: ExecutionContext): Promise<Result<QueryKnowledgeRes>>;
-  reindexKnowledge(request: ReindexKnowledgeReq, cx: ExecutionContext): Promise<Result<ReindexKnowledgeRes>>;
+  expandKnowledge(
+    request: ExpandKnowledgeReq,
+    cx: ExecutionContext,
+  ): Promise<Result<ExpandKnowledgeRes>>;
+  queryKnowledge(
+    request: QueryKnowledgeReq,
+    cx: ExecutionContext,
+  ): Promise<Result<QueryKnowledgeRes>>;
+  reindexKnowledge(
+    request: ReindexKnowledgeReq,
+    cx: ExecutionContext,
+  ): Promise<Result<ReindexKnowledgeRes>>;
 }
 
 export class AIKnowledgeQueryController {

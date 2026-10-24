@@ -12,8 +12,7 @@ import {
 import type { BusinessOperationReceipt } from '@memoflow/contracts/reliable-messaging';
 
 export type NotificationSseDeliveryEvent =
-  | NotificationDispatchInAppEvent
-  | NotificationDispatchDesktopEvent;
+  NotificationDispatchInAppEvent | NotificationDispatchDesktopEvent;
 
 export type NotificationSseDeliveryEventHandler = (payload: NotificationSseDeliveryEvent) => void;
 
@@ -24,13 +23,15 @@ export interface ReliableReceiptQueryProvider {
   ): Promise<BusinessOperationReceipt[]>;
 }
 
-const notificationDispatchEvents = createTypedEventPublisher<
-  Pick<NotificationEventMap, 'notification:dispatch_in_app' | 'notification:dispatch_desktop'>
->(eventBus);
+const notificationDispatchEvents =
+  createTypedEventPublisher<
+    Pick<NotificationEventMap, 'notification:dispatch_in_app' | 'notification:dispatch_desktop'>
+  >(eventBus);
 
-const notificationDispatchSubscriber = createTypedEventSubscriber<
-  Pick<NotificationEventMap, 'notification:dispatch_in_app' | 'notification:dispatch_desktop'>
->(eventBus);
+const notificationDispatchSubscriber =
+  createTypedEventSubscriber<
+    Pick<NotificationEventMap, 'notification:dispatch_in_app' | 'notification:dispatch_desktop'>
+  >(eventBus);
 
 export class NotificationSseAdapter {
   private readonly perIdentityCursors = new Map<string, string>();
@@ -119,19 +120,24 @@ export class NotificationSseAdapter {
       this.perIdentityCursors.set(identityId, `${receipt.updatedAt}|${receipt.operationId}`);
     }
 
-    const isInApp = payload.outboxChannel === ChannelTypeEnum.InApp || payload.outboxChannel === 'InApp';
-    const isPush = payload.outboxChannel === ChannelTypeEnum.Push || payload.outboxChannel === 'Push';
+    const isInApp =
+      payload.outboxChannel === ChannelTypeEnum.InApp || payload.outboxChannel === 'InApp';
+    const isPush =
+      payload.outboxChannel === ChannelTypeEnum.Push || payload.outboxChannel === 'Push';
 
     if (isInApp) {
       notificationDispatchEvents.send('notification:dispatch_in_app', {
         id: payload.notificationId as NotificationEventMap['notification:dispatch_in_app']['id'],
         operationId: receipt.operationId,
         updatedAt: receipt.updatedAt,
-        identityId: identityId as NotificationEventMap['notification:dispatch_in_app']['identityId'],
+        identityId:
+          identityId as NotificationEventMap['notification:dispatch_in_app']['identityId'],
         title: payload.title ?? 'Notification',
         body: payload.content ?? '',
-        category: (payload.category ?? 'System') as NotificationEventMap['notification:dispatch_in_app']['category'],
-        type: (payload.type ?? 'Info') as NotificationEventMap['notification:dispatch_in_app']['type'],
+        category: (payload.category ??
+          'System') as NotificationEventMap['notification:dispatch_in_app']['category'],
+        type: (payload.type ??
+          'Info') as NotificationEventMap['notification:dispatch_in_app']['type'],
         importance: 'Normal' as NotificationEventMap['notification:dispatch_in_app']['importance'],
         data: payload.data ?? {},
       });
@@ -140,11 +146,14 @@ export class NotificationSseAdapter {
         id: payload.notificationId as NotificationEventMap['notification:dispatch_desktop']['id'],
         operationId: receipt.operationId,
         updatedAt: receipt.updatedAt,
-        identityId: identityId as NotificationEventMap['notification:dispatch_desktop']['identityId'],
+        identityId:
+          identityId as NotificationEventMap['notification:dispatch_desktop']['identityId'],
         title: payload.title ?? 'Notification',
         body: payload.content ?? '',
-        category: (payload.category ?? 'System') as NotificationEventMap['notification:dispatch_desktop']['category'],
-        type: (payload.type ?? 'Info') as NotificationEventMap['notification:dispatch_desktop']['type'],
+        category: (payload.category ??
+          'System') as NotificationEventMap['notification:dispatch_desktop']['category'],
+        type: (payload.type ??
+          'Info') as NotificationEventMap['notification:dispatch_desktop']['type'],
         importance: 'Normal' as NotificationEventMap['notification:dispatch_desktop']['importance'],
         data: payload.data ?? {},
         sound: { enabled: true, name: null },

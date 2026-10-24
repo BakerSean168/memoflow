@@ -135,18 +135,18 @@ Oracle2 `.env.local` 使用：
 
 ## 4. 验证矩阵
 
-| 层级                 | 命令 / 证据                                                  | Gate                    |
-| -------------------- | ------------------------------------------------------------ | ----------------------- |
-| Failure governance   | `pnpm nx run memoflow:governance-check --skip-nx-cache`      | PASS                    |
-| Auth unit            | `pnpm nx run cloud-auth:test --skip-nx-cache`                | PASS                    |
-| Web unit             | `pnpm nx run web:test --skip-nx-cache`                       | PASS                    |
+| 层级                 | 命令 / 证据                                                  | Gate                     |
+| -------------------- | ------------------------------------------------------------ | ------------------------ |
+| Failure governance   | `pnpm nx run memoflow:governance-check --skip-nx-cache`      | PASS                     |
+| Auth unit            | `pnpm nx run cloud-auth:test --skip-nx-cache`                | PASS                     |
+| Web unit             | `pnpm nx run web:test --skip-nx-cache`                       | PASS                     |
 | Required Web Flow    | CI Web Flow shards                                           | PASS on final repair PRs |
 | Local compose tests  | `node --test tools/docker/local-compose.env-shadow.spec.mjs` | PASS                     |
 | Local Docker runtime | `pnpm docker:local:ps`                                       | all healthy on GCP Dev   |
 | Docker product/Auth  | `pnpm nx run web:e2e:local-docker`                           | 15/15 on final main      |
 | Deployment evidence  | validate-local-deploy skill runner                           | PASS                     |
-| MagicDNS             | browser + host/WSL probes to `gcp-dev-01.taile92a8e.ts.net` | PASS                     |
-| Hermes2              | historical machine-parity target                            | SUPERSEDED by GCP Dev    |
+| MagicDNS             | browser + host/WSL probes to `gcp-dev-01.taile92a8e.ts.net`  | PASS                     |
+| Hermes2              | historical machine-parity target                             | SUPERSEDED by GCP Dev    |
 
 ## 5. 回滚
 

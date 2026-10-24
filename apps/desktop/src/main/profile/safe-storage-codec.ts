@@ -65,10 +65,14 @@ export async function encryptSafeStorageString(value: string): Promise<Buffer> {
   throw new Error('Electron safeStorage encryption is unavailable');
 }
 
-export async function decryptSafeStorageString(encrypted: Buffer): Promise<SafeStorageDecodedValue> {
+export async function decryptSafeStorageString(
+  encrypted: Buffer,
+): Promise<SafeStorageDecodedValue> {
   if (hasPrefix(encrypted, WSL_DPAPI_ENVELOPE_PREFIX)) {
     if (!windowsUserDpapiProvider.isAvailable()) {
-      throw new Error('Windows DPAPI bridge is unavailable for this MemoFlow secure-storage envelope');
+      throw new Error(
+        'Windows DPAPI bridge is unavailable for this MemoFlow secure-storage envelope',
+      );
     }
     const decoded = await windowsUserDpapiProvider.unprotect(
       encrypted.subarray(WSL_DPAPI_ENVELOPE_PREFIX.length),
@@ -96,7 +100,9 @@ export async function decryptSafeStorageString(encrypted: Buffer): Promise<SafeS
     if (syncError) {
       const syncMessage = syncError instanceof Error ? syncError.message : String(syncError);
       const asyncMessage = asyncError instanceof Error ? asyncError.message : String(asyncError);
-      throw new Error(`Electron safeStorage decryption failed: sync=${syncMessage}; async=${asyncMessage}`);
+      throw new Error(
+        `Electron safeStorage decryption failed: sync=${syncMessage}; async=${asyncMessage}`,
+      );
     }
     throw asyncError;
   }

@@ -79,16 +79,23 @@ export function GoalReviewScreen() {
 
       {error ? (
         <SectionCard title="Review load failed" description="Unable to load reviews.">
-          <ThemedText type="small" themeColor="warning">{error}</ThemedText>
+          <ThemedText type="small" themeColor="warning">
+            {error}
+          </ThemedText>
         </SectionCard>
       ) : null}
       {submitError ? (
         <SectionCard title="Review save failed" description="Fix the review and try again.">
-          <ThemedText type="small" themeColor="warning">{submitError}</ThemedText>
+          <ThemedText type="small" themeColor="warning">
+            {submitError}
+          </ThemedText>
         </SectionCard>
       ) : null}
 
-      <SectionCard title="New review" description="Capture reflection; MemoFlow captures measurement context.">
+      <SectionCard
+        title="New review"
+        description="Capture reflection; MemoFlow captures measurement context."
+      >
         <PrimaryTextField
           label="Reflection"
           value={reflection}
@@ -120,7 +127,10 @@ export function GoalReviewScreen() {
         />
       </SectionCard>
 
-      <SectionCard title="Review history" description="Progress context is system-generated, reflection is user-authored.">
+      <SectionCard
+        title="Review history"
+        description="Progress context is system-generated, reflection is user-authored."
+      >
         <View style={styles.listColumn}>
           {reviews.length > 0 ? (
             reviews.map((review) => (
@@ -131,26 +141,39 @@ export function GoalReviewScreen() {
                   </ThemedText>
                   <StatusPill
                     label={`${review.systemContext.overallProgress.deltaPercentage >= 0 ? '+' : ''}${Math.round(review.systemContext.overallProgress.deltaPercentage)}%`}
-                    tone={review.systemContext.overallProgress.deltaPercentage >= 0 ? 'success' : 'warning'}
+                    tone={
+                      review.systemContext.overallProgress.deltaPercentage >= 0
+                        ? 'success'
+                        : 'warning'
+                    }
                   />
                 </View>
                 <ThemedText type="small">{review.reflection}</ThemedText>
-                {review.challenges ? <ThemedText type="small">Challenges: {review.challenges}</ThemedText> : null}
-                {review.adjustments ? <ThemedText type="small">Adjustments: {review.adjustments}</ThemedText> : null}
+                {review.challenges ? (
+                  <ThemedText type="small">Challenges: {review.challenges}</ThemedText>
+                ) : null}
+                {review.adjustments ? (
+                  <ThemedText type="small">Adjustments: {review.adjustments}</ThemedText>
+                ) : null}
                 <ThemedText type="small" themeColor="textSecondary">
-                  {review.systemContext.summary.recordCount} records · {review.systemContext.summary.taskContributionCount} task contributions
+                  {review.systemContext.summary.recordCount} records ·{' '}
+                  {review.systemContext.summary.taskContributionCount} task contributions
                 </ThemedText>
                 {goalId ? (
                   <PrimaryButton
                     label="Open review detail"
-                    onPress={() => router.push(`./review-detail?id=${goalId}&reviewId=${review.id}`)}
+                    onPress={() =>
+                      router.push(`./review-detail?id=${goalId}&reviewId=${review.id}`)
+                    }
                     variant="ghost"
                   />
                 ) : null}
               </ThemedView>
             ))
           ) : (
-            <ThemedText type="small" themeColor="textSecondary">No reviews yet.</ThemedText>
+            <ThemedText type="small" themeColor="textSecondary">
+              No reviews yet.
+            </ThemedText>
           )}
         </View>
       </SectionCard>

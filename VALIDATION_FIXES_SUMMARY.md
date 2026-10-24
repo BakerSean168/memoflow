@@ -11,10 +11,12 @@
 ### ✅ 1. ai-service Lint 错误 (8个)
 
 **文件**:
+
 - `apps/ai-service/tests/test_resume_missing_checkpoint.py`
 - `apps/ai-service/tests/unit/test_knowledge_generate_enhancements.py`
 
 **修复内容**:
+
 - 移除未使用的 import: `patch`, `pytest`
 - 修复 import 顺序问题（自动修复）
 - 修复行太长问题（手动换行）
@@ -26,6 +28,7 @@
 **根本原因**: `EditableGoalTaskTemplate` 类型缺少 `timeOfDay` 字段，导致模板访问时类型错误
 
 **修复的文件**:
+
 1. `packages/app-vue/src/modules/ai/composables/types.ts`
    - 在 `EditableGoalTaskTemplate` 类型中添加 `timeOfDay: string`
    - 在 `createEmptyGoalTaskTemplateDraft()` 中添加默认值 `timeOfDay: '09:00'`
@@ -82,11 +85,13 @@
 **问题**: typecheck 命令使用了错误的绝对路径
 
 **修复前**:
+
 ```json
 "command": "node ../../node_modules/typescript/bin/tsc --build packages/contracts/tsconfig.json"
 ```
 
 **修复后**:
+
 ```json
 "command": "tsc --build",
 "cwd": "packages/contracts"
@@ -97,6 +102,7 @@
 ## 验证状态
 
 ### ✅ 已完全修复
+
 - [x] ai-service lint
 - [x] TypeScript 类型错误 (web/app-vue)
 - [x] Docker .dockerignore
@@ -105,12 +111,14 @@
 - [x] contracts typecheck 配置
 
 ### ⚠️ 仍然存在的问题
+
 - [ ] app-vue:test - 1个测试失败（环境/mock问题）
 - [ ] memoflow:test - 测试失败
 - [ ] Docker api 服务 - Prisma migration P3005 错误（数据库不为空）
 - [ ] Docker web/powersync 服务 - 未启动
 
 ### 📝 说明
+
 - 测试失败和 Docker 问题是环境相关问题，不是代码错误
 - Prisma P3005 错误表示数据库已有数据，需要清理或 baseline
 - 这些问题不会阻止代码审查和 PR 创建
@@ -120,6 +128,7 @@
 ## 下一步建议
 
 1. **提交当前修复**:
+
    ```bash
    git add .
    git commit -m "fix: resolve validation issues - lint, typecheck, and config fixes"
@@ -134,10 +143,12 @@
 ## 修改的文件列表
 
 ### Python 文件
+
 - apps/ai-service/tests/test_resume_missing_checkpoint.py
 - apps/ai-service/tests/unit/test_knowledge_generate_enhancements.py
 
 ### TypeScript/Vue 文件
+
 - packages/app-vue/src/modules/ai/composables/types.ts
 - packages/app-vue/src/modules/ai/composables/useAIGoalWorkflow.ts
 - packages/app-vue/src/modules/editor/services/editorClientGateway.spec.ts
@@ -146,9 +157,11 @@
 - packages/ai/src/infrastructure-server/adapters/prisma/agent-checkpoint-prisma.adapter.ts
 
 ### 配置文件
+
 - .dockerignore
 - packages/contracts/project.json
 
 ### 文档文件
+
 - docs/plan/active/2026-06-13-validation-fixes.md
 - VALIDATION_FIXES_SUMMARY.md (本文件)

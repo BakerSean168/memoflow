@@ -59,14 +59,16 @@ function stableJson(value: unknown, seen = new Set<object>()): string {
   if (value === null) return 'null';
   if (typeof value === 'string') return JSON.stringify(value);
   if (typeof value === 'number') {
-    if (!Number.isFinite(value)) throw new TypeError('Scheduled payload contains a non-finite number.');
+    if (!Number.isFinite(value))
+      throw new TypeError('Scheduled payload contains a non-finite number.');
     return JSON.stringify(value);
   }
   if (typeof value === 'boolean') return value ? 'true' : 'false';
   if (typeof value === 'undefined' || typeof value === 'function' || typeof value === 'symbol') {
     throw new TypeError(`Scheduled payload contains unsupported ${typeof value} value.`);
   }
-  if (typeof value === 'bigint') throw new TypeError('Scheduled payload must not contain bigint values.');
+  if (typeof value === 'bigint')
+    throw new TypeError('Scheduled payload must not contain bigint values.');
   if (Array.isArray(value)) {
     if (seen.has(value)) throw new TypeError('Scheduled payload must not contain cycles.');
     seen.add(value);
@@ -107,10 +109,14 @@ export function translateRetryPolicy(policy: SchedulingRetryPolicy): RetryTransl
   const enabled = policy.enabled ?? true;
   const gaps: string[] = [];
   if (policy.initialDelayMs % 1_000 !== 0 || policy.maxDelayMs % 1_000 !== 0) {
-    gaps.push('pg-boss retry delay precision is seconds while MemoFlow retry precision is milliseconds');
+    gaps.push(
+      'pg-boss retry delay precision is seconds while MemoFlow retry precision is milliseconds',
+    );
   }
   if (policy.backoffMultiplier !== 1 && policy.backoffMultiplier !== 2) {
-    gaps.push('pg-boss exposes exponential backoff as a boolean and cannot preserve an arbitrary multiplier');
+    gaps.push(
+      'pg-boss exposes exponential backoff as a boolean and cannot preserve an arbitrary multiplier',
+    );
   }
   return {
     retryLimit: enabled ? policy.maxRetries : 0,
@@ -159,10 +165,14 @@ function deterministicJobId(owner: SchedulingOwner, schedulingKey: string): stri
 
 function mapPriority(priority: ScheduledIntent['priority']): number {
   switch (priority) {
-    case 'urgent': return 30;
-    case 'high': return 20;
-    case 'low': return -10;
-    default: return 0;
+    case 'urgent':
+      return 30;
+    case 'high':
+      return 20;
+    case 'low':
+      return -10;
+    default:
+      return 0;
   }
 }
 
@@ -180,7 +190,11 @@ function makePayload(owner: SchedulingOwner, intent: ScheduledIntent): PgBossPoc
   };
 }
 
-function toSendOptions(owner: SchedulingOwner, intent: ScheduledIntent, db: IDatabase): SendOptions {
+function toSendOptions(
+  owner: SchedulingOwner,
+  intent: ScheduledIntent,
+  db: IDatabase,
+): SendOptions {
   const retry = translateRetryPolicy(normalizedRetryPolicy(intent));
   return {
     id: deterministicJobId(owner, intent.schedulingKey),
@@ -282,7 +296,9 @@ export class PgBossSchedulingPocAdapter implements SchedulingPort {
         startedAt,
         operationId,
         this.now,
-        error instanceof DuplicateSchedulingKeyError ? 'DUPLICATE_SCHEDULING_KEY' : 'INVALID_INTENT',
+        error instanceof DuplicateSchedulingKeyError
+          ? 'DUPLICATE_SCHEDULING_KEY'
+          : 'INVALID_INTENT',
         error instanceof Error ? error.message : String(error),
         false,
       );

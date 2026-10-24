@@ -194,17 +194,30 @@ describe('AssistantRuntimeHttpClient', () => {
   it('answers native Ask User suspensions through the authenticated runtime endpoint', async () => {
     const post = vi.fn().mockResolvedValue(ok({ accepted: true }));
     const client = new AssistantRuntimeHttpClient(httpStub({ post }));
-    const command = { type: 'tool_answer' as const, conversationId: 'c', runId: 'r', toolCallId: 't', answer: 'choice-a' };
+    const command = {
+      type: 'tool_answer' as const,
+      conversationId: 'c',
+      runId: 'r',
+      toolCallId: 't',
+      answer: 'choice-a',
+    };
     await expect(client.answerToolSuspension(command)).resolves.toBe(true);
-    expect(post).toHaveBeenCalledWith('/ai/runtime/assistant/answer', { ...command, action: 'answer' });
+    expect(post).toHaveBeenCalledWith('/ai/runtime/assistant/answer', {
+      ...command,
+      action: 'answer',
+    });
   });
 
   it('loads persisted pending Ask User prompts for an owned conversation', async () => {
-    const pending = [{ runId: 'r', toolCallId: 't', question: 'Choose', options: [{ label: 'A' }] }];
+    const pending = [
+      { runId: 'r', toolCallId: 't', question: 'Choose', options: [{ label: 'A' }] },
+    ];
     const post = vi.fn().mockResolvedValue(ok(pending));
     const client = new AssistantRuntimeHttpClient(httpStub({ post }));
     await expect(client.listAskUserSuspensions('c')).resolves.toEqual(pending);
-    expect(post).toHaveBeenCalledWith('/ai/runtime/assistant/ask-user/pending', { conversationId: 'c' });
+    expect(post).toHaveBeenCalledWith('/ai/runtime/assistant/ask-user/pending', {
+      conversationId: 'c',
+    });
   });
 
   it('uses the canonical cancel command and returns the owner-scoped cancellation result', async () => {

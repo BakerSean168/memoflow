@@ -38,9 +38,7 @@ describe('AIProviderConfigPrismaRepository', () => {
       $transaction: vi.fn(async (callback) => callback(transactionClient)),
     };
 
-    const repository = new AIProviderConfigPrismaRepository(
-      prisma as unknown as PrismaClient,
-    );
+    const repository = new AIProviderConfigPrismaRepository(prisma as unknown as PrismaClient);
 
     const provider = await repository.findByIdForIdentity('identity-1', 'provider-1');
 
@@ -105,7 +103,8 @@ describe('AIProviderConfigPrismaRepository', () => {
       const repository = new AIProviderConfigPrismaRepository(prisma as unknown as PrismaClient);
       await expect(repository.findByIdForIdentity('identity-1', 'provider-1')).resolves.toBeNull();
 
-      await expect(repository.save({
+      await expect(
+        repository.save({
           id: 'provider-1' as AIProviderConfigServerDTO['id'],
           identityId: 'identity-1' as AIProviderConfigServerDTO['identityId'],
           name: 'Main provider',
@@ -120,7 +119,8 @@ describe('AIProviderConfigPrismaRepository', () => {
           createdAt: Date.now(),
           updatedAt: Date.now(),
           deletedAt: null,
-        })).resolves.toBe('SAVED');
+        }),
+      ).resolves.toBe('SAVED');
     } finally {
       if (originalKey === undefined) {
         delete process.env.AI_PROVIDER_ENCRYPTION_KEY;

@@ -54,16 +54,16 @@ See [`docs/product/workspace-ui.md`](./docs/product/workspace-ui.md) for the cur
 
 ## Engineering highlights
 
-| Concern | MemoFlow approach |
-| --- | --- |
-| Cross-surface consistency | centralized `@memoflow/contracts` + transport parity |
-| AI runtime | TypeScript + Mastra, hosted inside the product runtime |
-| Durable AI workflows | typed workflow state, recovery/cancel paths, product-owned projections |
-| Modular business domains | Goal / Task / Schedule / Reminder / Notification / Repository packages |
-| Multi-client data | PostgreSQL + PowerSync + explicit offline/query-cache policy |
-| Delivery semantics | operation, occurrence, delivery intent/attempt/receipt contracts |
-| Auditability | unified operation timeline, replay and execution context |
-| Quality gates | Nx-governed lint/typecheck/test, browser flows, coverage/performance/delivery oracles |
+| Concern                   | MemoFlow approach                                                                     |
+| ------------------------- | ------------------------------------------------------------------------------------- |
+| Cross-surface consistency | centralized `@memoflow/contracts` + transport parity                                  |
+| AI runtime                | TypeScript + Mastra, hosted inside the product runtime                                |
+| Durable AI workflows      | typed workflow state, recovery/cancel paths, product-owned projections                |
+| Modular business domains  | Goal / Task / Schedule / Reminder / Notification / Repository packages                |
+| Multi-client data         | PostgreSQL + PowerSync + explicit offline/query-cache policy                          |
+| Delivery semantics        | operation, occurrence, delivery intent/attempt/receipt contracts                      |
+| Auditability              | unified operation timeline, replay and execution context                              |
+| Quality gates             | Nx-governed lint/typecheck/test, browser flows, coverage/performance/delivery oracles |
 
 ## Architecture
 

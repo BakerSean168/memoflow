@@ -65,10 +65,7 @@ describe('app-vue structure rules governance', () => {
         rule([
           {
             file: 'src/Comp.vue',
-            requireElements: [
-              'Root',
-              { name: 'Child', attrs: { family: 'calendar' } },
-            ],
+            requireElements: ['Root', { name: 'Child', attrs: { family: 'calendar' } }],
             forbidElements: ['LegacyRoot'],
             requireAttributes: [
               { name: 'data-testid', value: 'root' },
@@ -156,8 +153,10 @@ describe('app-vue structure rules governance', () => {
   it('fails closed on missing files and invalid targets', () => {
     const root = fixture({});
     expect(
-      findStructureRuleViolations(root, rule([{ file: 'src/gone.vue', requireElements: ['Root'] }]))[0]
-        .detail,
+      findStructureRuleViolations(
+        root,
+        rule([{ file: 'src/gone.vue', requireElements: ['Root'] }]),
+      )[0].detail,
     ).toBe('rule file missing');
     expect(
       validateStructureRuleManifest(
@@ -176,7 +175,15 @@ describe('app-vue structure rules governance', () => {
     expect(
       validateStructureRuleManifest({
         version: 1,
-        rules: [{ id: 'x', reason: 'r', file: 'a.ts', requireIdentifiers: ['x'], scan: { root: 'a', extensions: ['.ts'] } }],
+        rules: [
+          {
+            id: 'x',
+            reason: 'r',
+            file: 'a.ts',
+            requireIdentifiers: ['x'],
+            scan: { root: 'a', extensions: ['.ts'] },
+          },
+        ],
       })[0],
     ).toMatch(/exactly one of file/);
     expect(
@@ -185,7 +192,9 @@ describe('app-vue structure rules governance', () => {
       )[0],
     ).toMatch(/valid pattern/);
     expect(
-      validateStructureRuleManifest(rule([{ file: 'a.ts', counts: [{ kind: 'nope', name: 'x' }] }]))[0],
+      validateStructureRuleManifest(
+        rule([{ file: 'a.ts', counts: [{ kind: 'nope', name: 'x' }] }]),
+      )[0],
     ).toMatch(/invalid kind/);
   });
 

@@ -136,7 +136,9 @@ it('routes list actions through the coordinator and emits completed only on succ
 it('passes the active occurrence identity while guarding concurrent surface actions', async () => {
   let resolve!: (value: ReturnType<typeof instance>) => void;
   operations.completeOccurrence.mockReturnValueOnce(
-    new Promise<ReturnType<typeof instance>>((done) => { resolve = done; }),
+    new Promise<ReturnType<typeof instance>>((done) => {
+      resolve = done;
+    }),
   );
   const w = surface({
     occurrences: [instance(), instance({ id: 'second' as ReturnType<typeof instance>['id'] })],
@@ -155,21 +157,39 @@ it('passes the active occurrence identity while guarding concurrent surface acti
 });
 
 it('Quick Surface resolves Prompt from its current Plan and routes measured/complete-only success', async () => {
-  const plan = { ...template, goalBinding: { goalId: 'goal' as never, keyResultId: 'kr' as never, contribution: null,
-    progressRule: { mode: 'Prompt' as const, trigger: 'EachCompletion' as const, suggestedValue: -2 } } };
+  const plan = {
+    ...template,
+    goalBinding: {
+      goalId: 'goal' as never,
+      keyResultId: 'kr' as never,
+      contribution: null,
+      progressRule: {
+        mode: 'Prompt' as const,
+        trigger: 'EachCompletion' as const,
+        suggestedValue: -2,
+      },
+    },
+  };
   const w = surface({ templates: [plan] });
   const list = w.getComponent(TaskOccurrenceCompactList);
   list.vm.$emit('complete', 'occurrence-1');
   await flushPromises();
   const dialog = w.getComponent(TaskCompletionMeasurementDialog);
   const coordinator = dialog.props('coordinator');
-  expect(coordinator.pendingMeasurement.value).toEqual({ occurrenceId: 'occurrence-1', goalId: 'goal', keyResultId: 'kr', suggestedValue: -2 });
+  expect(coordinator.pendingMeasurement.value).toEqual({
+    occurrenceId: 'occurrence-1',
+    goalId: 'goal',
+    keyResultId: 'kr',
+    suggestedValue: -2,
+  });
   expect(operations.completeOccurrence).not.toHaveBeenCalled();
   const result = instance({ status: 'Completed' });
   operations.completeOccurrence.mockResolvedValue(result);
   await coordinator.submitMeasurement(0, 'actual');
   dialog.vm.$emit('completed', result);
-  expect(operations.completeOccurrence).toHaveBeenLastCalledWith('occurrence-1', { goalMeasurement: { value: 0, note: 'actual' } });
+  expect(operations.completeOccurrence).toHaveBeenLastCalledWith('occurrence-1', {
+    goalMeasurement: { value: 0, note: 'actual' },
+  });
   expect(w.emitted('completed')).toEqual([[result]]);
   list.vm.$emit('uncomplete', 'occurrence-1');
   await flushPromises();

@@ -12,20 +12,35 @@ import {
 function createRepository(initial: NotificationPreference | null = null) {
   let current = initial;
   const repository: INotificationPreferenceRepository = {
-    save: vi.fn(async (preference) => { current = preference; }),
+    save: vi.fn(async (preference) => {
+      current = preference;
+    }),
     findByIdForIdentity: vi.fn(async (identityId, id) =>
-      current && current.identityId === identityId && current.id === id ? current : null),
+      current && current.identityId === identityId && current.id === id ? current : null,
+    ),
     findByIdentityId: vi.fn(async (identityId) =>
-      current && current.identityId === identityId ? current : null),
-    delete: vi.fn(async () => { current = null; }),
-    exists: vi.fn(async (identityId, id) => Boolean(current && current.identityId === identityId && current.id === id)),
-    existsForIdentity: vi.fn(async (identityId) => Boolean(current && current.identityId === identityId)),
+      current && current.identityId === identityId ? current : null,
+    ),
+    delete: vi.fn(async () => {
+      current = null;
+    }),
+    exists: vi.fn(async (identityId, id) =>
+      Boolean(current && current.identityId === identityId && current.id === id),
+    ),
+    existsForIdentity: vi.fn(async (identityId) =>
+      Boolean(current && current.identityId === identityId),
+    ),
     getOrCreate: vi.fn(async (identityId) => {
       current ??= NotificationPreference.create({ identityId: identityId as never });
       return current;
     }),
   };
-  return { repository, get current() { return current; } };
+  return {
+    repository,
+    get current() {
+      return current;
+    },
+  };
 }
 
 const target = {
@@ -49,7 +64,9 @@ describe('Notification delivery preference portability', () => {
     preference.setQuietHours(quietHours());
     const state = createRepository(preference);
 
-    const payload = await new NotificationDeliveryPreferencePortableService(state.repository).export('identity-a');
+    const payload = await new NotificationDeliveryPreferencePortableService(
+      state.repository,
+    ).export('identity-a');
     expect(payload).toEqual({
       globalChannels: { Email: false },
       workflowOverrides: { 'task.deadline': { Desktop: true } },
@@ -70,7 +87,10 @@ describe('Notification delivery preference portability', () => {
     const state = createRepository();
     const service = new NotificationDeliveryPreferencePortableService(state.repository);
     await expect(service.dryRun('identity-target', target)).resolves.toEqual({
-      created: 1, updated: 0, skipped: 0, warnings: [],
+      created: 1,
+      updated: 0,
+      skipped: 0,
+      warnings: [],
     });
     expect(state.current).toBeNull();
   });
@@ -85,12 +105,19 @@ describe('Notification delivery preference portability', () => {
     const service = new NotificationDeliveryPreferencePortableService(state.repository);
 
     await expect(service.apply('identity-target', target)).resolves.toEqual({
-      created: 0, updated: 1, skipped: 0, warnings: [],
+      created: 0,
+      updated: 1,
+      skipped: 0,
+      warnings: [],
     });
     expect(state.current?.getGlobalChannel(NotificationChannelType.Webhook)).toBeUndefined();
     expect(state.current?.getGlobalChannel(NotificationChannelType.Email)).toBe(false);
-    expect(state.current?.getWorkflowChannelOverride('legacy.workflow', NotificationChannelType.Sms)).toBeUndefined();
-    expect(state.current?.getWorkflowChannelOverride('task.deadline', NotificationChannelType.Desktop)).toBe(true);
+    expect(
+      state.current?.getWorkflowChannelOverride('legacy.workflow', NotificationChannelType.Sms),
+    ).toBeUndefined();
+    expect(
+      state.current?.getWorkflowChannelOverride('task.deadline', NotificationChannelType.Desktop),
+    ).toBe(true);
     expect(state.current?.quietHours?.toDTO()).toEqual(quiet.toDTO());
   });
 
@@ -110,7 +137,10 @@ describe('Notification delivery preference portability', () => {
     await service.apply('identity-target', target);
     vi.mocked(state.repository.save).mockClear();
     await expect(service.apply('identity-target', target)).resolves.toEqual({
-      created: 0, updated: 0, skipped: 1, warnings: [],
+      created: 0,
+      updated: 0,
+      skipped: 1,
+      warnings: [],
     });
     expect(state.repository.save).not.toHaveBeenCalled();
   });

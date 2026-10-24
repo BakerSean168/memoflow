@@ -9,18 +9,8 @@
  * - floating：相对业务工作区宿主居中（STATE C），底边稳定、宽度封顶
  * - settings：壳不渲染本组件
  */
-import {
-  computed,
-  inject,
-  nextTick,
-  onBeforeUnmount,
-  onMounted,
-  ref,
-  watch,
-} from 'vue';
-import {
-  SHELL_COMPOSER_MOUNT_KEY,
-} from '../../di/keys';
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { SHELL_COMPOSER_MOUNT_KEY } from '../../di/keys';
 import {
   COMPOSER_BOTTOM_GAP,
   computeComposerLayout,

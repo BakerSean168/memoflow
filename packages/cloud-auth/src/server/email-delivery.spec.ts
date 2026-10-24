@@ -1,8 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import {
-  createCloudAuthEmailDelivery,
-  createCloudAuthEmailLinkCapture,
-} from './email-delivery.js';
+import { createCloudAuthEmailDelivery, createCloudAuthEmailLinkCapture } from './email-delivery.js';
 
 describe('cloud auth email delivery', () => {
   it('keeps console delivery free of plaintext email addresses and links', async () => {
@@ -87,11 +84,13 @@ describe('cloud auth email delivery', () => {
     );
 
     send.mockRejectedValueOnce(new Error('delivery failed'));
-    await expect(capture.delivery.send({
-      kind: 'password-reset',
-      email: 'alice@example.com',
-      url: 'https://api.example.com/api/auth/reset-password/token',
-    })).rejects.toThrow('delivery failed');
+    await expect(
+      capture.delivery.send({
+        kind: 'password-reset',
+        email: 'alice@example.com',
+        url: 'https://api.example.com/api/auth/reset-password/token',
+      }),
+    ).rejects.toThrow('delivery failed');
     expect(capture.findLatest('alice@example.com', 'password-reset')).toBeNull();
   });
 });

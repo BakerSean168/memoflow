@@ -1,9 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { ScheduledInvocationContext } from '../contracts';
-import {
-  DuplicateScheduledHandlerError,
-  ScheduledHandlerRegistry,
-} from '../handler-registry';
+import { DuplicateScheduledHandlerError, ScheduledHandlerRegistry } from '../handler-registry';
 
 const invocation: ScheduledInvocationContext = {
   identityId: 'identity-1',

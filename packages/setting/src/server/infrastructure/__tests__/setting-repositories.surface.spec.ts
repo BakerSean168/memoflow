@@ -19,7 +19,9 @@ describe('canonical setting repository factories', () => {
   const fakeElectronDb = {
     getOptional: async () => null,
     getAll: async () => [],
-    get: async () => { throw new Error('not found'); },
+    get: async () => {
+      throw new Error('not found');
+    },
     execute: async () => ({ rowsAffected: 0 }),
   };
 

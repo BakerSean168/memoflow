@@ -18,12 +18,14 @@
 ### 当前（90% 完成）
 
 **Snapshot Persistence** ✅:
+
 - `AgentRunCheckpoint` 表存储 run metadata + projected state
 - Events/interrupts 完整持久化
 - 可查看历史 runs
 - 可在同会话内 interrupt/resume
 
 **限制** ⚠️:
+
 - LangGraph 使用 `InMemorySaver`（内存中）
 - 服务重启后内存 checkpoint 丢失
 - Resume 返回 409 `runtime_checkpoint_missing`
@@ -31,6 +33,7 @@
 ### 目标（100% 完成）
 
 **Durable LangGraph Checkpoint** 🎯:
+
 - LangGraph execution state 持久化到数据库
 - 服务重启后可继续 resume
 - 多实例间可恢复彼此的 interrupted runs
@@ -52,16 +55,16 @@ model LangGraphCheckpoint {
   checkpointNs  String   @default("") @map("checkpoint_ns")
   checkpointId  String   @map("checkpoint_id")
   parentCheckpointId String? @map("parent_checkpoint_id")
-  
+
   // Serialized checkpoint data
   checkpointData Bytes    @map("checkpoint_data")
   metadataData   Json     @map("metadata_data")
-  
+
   // Channel versions
   channelVersions Json    @map("channel_versions")
-  
+
   createdAt     DateTime @default(now()) @map("created_at")
-  
+
   @@unique([threadId, checkpointNs, checkpointId])
   @@index([threadId])
   @@index([checkpointId])
@@ -73,17 +76,17 @@ model LangGraphCheckpointWrite {
   threadId      String   @map("thread_id")
   checkpointNs  String   @default("") @map("checkpoint_ns")
   checkpointId  String   @map("checkpoint_id")
-  
+
   taskId        String   @map("task_id")
   taskPath      String   @default("") @map("task_path")
   idx           Int
-  
+
   // Serialized write data
   channel       String
   value         Bytes
-  
+
   createdAt     DateTime @default(now()) @map("created_at")
-  
+
   @@unique([threadId, checkpointNs, checkpointId, taskId, idx])
   @@index([threadId])
   @@map("langgraph_checkpoint_writes")
@@ -105,21 +108,21 @@ from .ts_checkpoint_client import TSCheckpointClient
 
 class DatabaseCheckpointSaver(BaseCheckpointSaver):
     """LangGraph checkpointer that persists to database via TS API.
-    
+
     This enables durable resume across process restarts and multi-instance
     deployments.
     """
-    
+
     def __init__(self, client: TSCheckpointClient):
         super().__init__()
         self.client = client
-    
+
     def get_tuple(self, config: RunnableConfig) -> CheckpointTuple | None:
         """Fetch checkpoint tuple from database."""
         thread_id = config["configurable"]["thread_id"]
         checkpoint_ns = config["configurable"].get("checkpoint_ns", "")
         checkpoint_id = config["configurable"].get("checkpoint_id")
-        
+
         # Call TS API to fetch checkpoint
         checkpoint_data = asyncio.run(
             self.client.get_langgraph_checkpoint(
@@ -128,21 +131,21 @@ class DatabaseCheckpointSaver(BaseCheckpointSaver):
                 checkpoint_id=checkpoint_id,
             )
         )
-        
+
         if not checkpoint_data:
             return None
-        
+
         # Deserialize checkpoint
         checkpoint = self.serde.loads(checkpoint_data["checkpointData"])
         metadata = checkpoint_data["metadataData"]
-        
+
         return CheckpointTuple(
             config=config,
             checkpoint=checkpoint,
             metadata=metadata,
             parent_config=self._build_parent_config(checkpoint_data),
         )
-    
+
     def put(
         self,
         config: RunnableConfig,
@@ -153,10 +156,10 @@ class DatabaseCheckpointSaver(BaseCheckpointSaver):
         """Store checkpoint to database."""
         thread_id = config["configurable"]["thread_id"]
         checkpoint_ns = config["configurable"].get("checkpoint_ns", "")
-        
+
         # Serialize checkpoint
         checkpoint_data = self.serde.dumps(checkpoint)
-        
+
         # Call TS API to store
         asyncio.run(
             self.client.put_langgraph_checkpoint(
@@ -169,7 +172,7 @@ class DatabaseCheckpointSaver(BaseCheckpointSaver):
                 channel_versions=new_versions,
             )
         )
-        
+
         return {
             "configurable": {
                 "thread_id": thread_id,
@@ -177,7 +180,7 @@ class DatabaseCheckpointSaver(BaseCheckpointSaver):
                 "checkpoint_id": checkpoint["id"],
             }
         }
-    
+
     def put_writes(
         self,
         config: RunnableConfig,
@@ -189,7 +192,7 @@ class DatabaseCheckpointSaver(BaseCheckpointSaver):
         thread_id = config["configurable"]["thread_id"]
         checkpoint_ns = config["configurable"].get("checkpoint_ns", "")
         checkpoint_id = config["configurable"]["checkpoint_id"]
-        
+
         # Serialize writes
         serialized_writes = [
             {
@@ -199,7 +202,7 @@ class DatabaseCheckpointSaver(BaseCheckpointSaver):
             }
             for idx, (channel, value) in enumerate(writes)
         ]
-        
+
         # Call TS API
         asyncio.run(
             self.client.put_langgraph_writes(
@@ -211,7 +214,7 @@ class DatabaseCheckpointSaver(BaseCheckpointSaver):
                 writes=serialized_writes,
             )
         )
-    
+
     def list(
         self,
         config: RunnableConfig | None,
@@ -231,9 +234,7 @@ class DatabaseCheckpointSaver(BaseCheckpointSaver):
 // packages/ai/src/controllers/langgraph-checkpoint.controller.ts
 
 export class LangGraphCheckpointController {
-  constructor(
-    private readonly checkpointPort: ILangGraphCheckpointPort
-  ) {}
+  constructor(private readonly checkpointPort: ILangGraphCheckpointPort) {}
 
   async getCheckpoint(input: GetLangGraphCheckpointInput): Promise<LangGraphCheckpointData | null> {
     return this.checkpointPort.get(input);
@@ -261,14 +262,14 @@ export class LangGraphCheckpointPrismaAdapter implements ILangGraphCheckpointPor
       where: {
         threadId_checkpointNs_checkpointId: {
           threadId: input.threadId,
-          checkpointNs: input.checkpointNs || "",
+          checkpointNs: input.checkpointNs || '',
           checkpointId: input.checkpointId,
         },
       },
     });
-    
+
     if (!checkpoint) return null;
-    
+
     return {
       checkpointId: checkpoint.checkpointId,
       parentCheckpointId: checkpoint.parentCheckpointId,
@@ -283,13 +284,13 @@ export class LangGraphCheckpointPrismaAdapter implements ILangGraphCheckpointPor
       where: {
         threadId_checkpointNs_checkpointId: {
           threadId: input.threadId,
-          checkpointNs: input.checkpointNs || "",
+          checkpointNs: input.checkpointNs || '',
           checkpointId: input.checkpointId,
         },
       },
       create: {
         threadId: input.threadId,
-        checkpointNs: input.checkpointNs || "",
+        checkpointNs: input.checkpointNs || '',
         checkpointId: input.checkpointId,
         parentCheckpointId: input.parentCheckpointId,
         checkpointData: input.checkpointData,
@@ -319,13 +320,13 @@ def build_checkpointer(
     name: str,
 ) -> BaseCheckpointSaver:
     """Create the configured LangGraph checkpointer.
-    
+
     Strategy:
     - "local": InMemorySaver (for local development)
     - "ts": DatabaseCheckpointSaver (for production)
     """
     strategy = settings.agent_checkpoint_strategy.lower()
-    
+
     if strategy == "ts":
         # Use database checkpointer for durable resume
         client = TSCheckpointClient(
@@ -333,7 +334,7 @@ def build_checkpointer(
             service_secret=settings.service_secret,
         )
         return DatabaseCheckpointSaver(client)
-    
+
     # Default: InMemorySaver for local development
     return InMemorySaver()
 ```
@@ -389,11 +390,13 @@ def build_checkpointer(
 ## 风险与依赖
 
 **风险**:
+
 - LangGraph checkpoint 序列化可能遇到边缘情况
 - 数据库 schema 需要支持复杂的 checkpoint 结构
 - 性能：每次 graph 执行可能产生多个 checkpoint
 
 **依赖**:
+
 - Prisma migration 能力
 - TS API 可用性
 - LangGraph 版本兼容性
@@ -405,21 +408,25 @@ def build_checkpointer(
 ### 选项 A: 使用 LangGraph 官方 PostgresSaver
 
 **优点**:
+
 - 官方维护，稳定性高
 - 文档完善
 
 **缺点**:
+
 - 需要直接数据库连接（绕过 TS API）
 - 不符合当前架构（Python 不直接写库）
 
 ### 选项 B: 当前方案（推荐）
 
 **优点**:
+
 - 符合当前架构（TS controlled boundary）
 - 灵活性高
 - 可与现有 checkpoint 表共存
 
 **缺点**:
+
 - 需要自己实现和维护
 
 ---
@@ -427,6 +434,7 @@ def build_checkpointer(
 ## 后续工作
 
 完成后可考虑：
+
 1. PowerSync adapter（离线支持）
 2. Checkpoint 压缩/归档策略
 3. 跨 thread 迁移工具

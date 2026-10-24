@@ -3,7 +3,13 @@ import { createTemporaryOverride } from '../../domain/routine';
 import { PowerSyncRoutineTemporaryOverrideStore } from './routine-temporary-override-store.powersync';
 
 class FakeDb {
-  row: { identity_id: string; routine_id: string; override_json: string; created_at: string; updated_at: string } | null = null;
+  row: {
+    identity_id: string;
+    routine_id: string;
+    override_json: string;
+    created_at: string;
+    updated_at: string;
+  } | null = null;
   async getOptional<T>(_sql: string, params: unknown[]): Promise<T | null> {
     if (this.row && this.row.identity_id === params[0] && this.row.routine_id === params[1]) {
       return { routine_id: this.row.routine_id } as T;
@@ -32,7 +38,10 @@ class FakeDb {
 describe('PowerSyncRoutineTemporaryOverrideStore', () => {
   it('upserts one override row and can clear it', async () => {
     const db = new FakeDb();
-    const store = new PowerSyncRoutineTemporaryOverrideStore(db as never, () => new Date('2026-09-08T00:00:00Z'));
+    const store = new PowerSyncRoutineTemporaryOverrideStore(
+      db as never,
+      () => new Date('2026-09-08T00:00:00Z'),
+    );
     await store.setRoutineTemporaryOverride({
       identityId: 'i-1',
       routineId: 'r-1',

@@ -20,7 +20,10 @@ export default defineConfig({
     passWithNoTests: false,
     env: createIntegrationTestEnv(),
     globalSetup: [
-      path.resolve(import.meta.dirname, '../../packages/test-utils/src/setup/integration-global-setup.ts'),
+      path.resolve(
+        import.meta.dirname,
+        '../../packages/test-utils/src/setup/integration-global-setup.ts',
+      ),
     ],
     fileParallelism: false,
     pool: 'forks',

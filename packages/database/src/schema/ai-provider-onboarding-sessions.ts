@@ -3,8 +3,7 @@ export const AI_PROVIDER_ONBOARDING_IDENTITY_EXPIRY_INDEX =
   'ai_provider_onboarding_sessions_identity_id_expires_at_idx';
 export const AI_PROVIDER_ONBOARDING_TARGET_EXPIRY_INDEX =
   'ai_provider_onboarding_sessions_identity_id_target_provider_id_expires_at_idx';
-export const AI_PROVIDER_ONBOARDING_EXPIRY_INDEX =
-  'ai_provider_onboarding_sessions_expires_at_idx';
+export const AI_PROVIDER_ONBOARDING_EXPIRY_INDEX = 'ai_provider_onboarding_sessions_expires_at_idx';
 export const AI_PROVIDER_ONBOARDING_IDENTITY_FK =
   'ai_provider_onboarding_sessions_identity_id_fkey';
 

@@ -1,12 +1,17 @@
-import { NotificationChannelType as NotificationChannelTypeContract, type NotificationChannelType as INotificationChannelType } from '@memoflow/contracts/notification';
+import {
+  NotificationChannelType as NotificationChannelTypeContract,
+  type NotificationChannelType as INotificationChannelType,
+} from '@memoflow/contracts/notification';
 
 /**
  * 📝 通知渠道类型 - 通知的投递渠道
- * 
+ *
  * Branded Type：运行时为 string，编译时具有类型安全性
  * 零序列化成本，内存开销极小
  */
-export type NotificationChannelType = INotificationChannelType & { readonly __brand: unique symbol };
+export type NotificationChannelType = INotificationChannelType & {
+  readonly __brand: unique symbol;
+};
 
 /**
  * 合法值集合 - Single Source of Truth
@@ -21,7 +26,7 @@ const VALUES: INotificationChannelType[] = Object.values(NotificationChannelType
  */
 export const NotificationChannelType = {
   // ================= 常量定义 =================
-  
+
   InApp: 'InApp' as NotificationChannelType,
   Email: 'Email' as NotificationChannelType,
   Push: 'Push' as NotificationChannelType,

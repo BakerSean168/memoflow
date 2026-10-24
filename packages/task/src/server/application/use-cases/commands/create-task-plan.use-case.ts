@@ -81,88 +81,94 @@ export class CreateTaskPlanUseCase {
         request.identityId,
       );
       timeContext = resolvedTimeContext;
-      return await this.transactionRunner.run(
-        async ({ planRepository, occurrenceRepository }) => {
-          if (request.id) {
-            const replay = await this.replayExisting(
-              request.identityId,
-              request.id,
-              planRepository!,
-              occurrenceRepository,
-              resolvedTimeContext,
-            );
-            if (replay) return replay;
-          }
+      return await this.transactionRunner.run(async ({ planRepository, occurrenceRepository }) => {
+        if (request.id) {
+          const replay = await this.replayExisting(
+            request.identityId,
+            request.id,
+            planRepository!,
+            occurrenceRepository,
+            resolvedTimeContext,
+          );
+          if (replay) return replay;
+        }
 
-          const invalidProgress = await validateTaskGoalProgress(request.identityId, request.goalBinding, this.goalReadPort);
-          if (invalidProgress) return invalidProgress;
-          const binding = request.goalBinding ? TaskGoalBinding.create(request.goalBinding).toDTO() : null;
-          const schedule = TaskPlanSchedule.create(request.schedule);
-          const reminderConfig = request.reminderConfig
-            ? TaskReminderConfig.fromDTO(request.reminderConfig)
-            : undefined;
+        const invalidProgress = await validateTaskGoalProgress(
+          request.identityId,
+          request.goalBinding,
+          this.goalReadPort,
+        );
+        if (invalidProgress) return invalidProgress;
+        const binding = request.goalBinding
+          ? TaskGoalBinding.create(request.goalBinding).toDTO()
+          : null;
+        const schedule = TaskPlanSchedule.create(request.schedule);
+        const reminderConfig = request.reminderConfig
+          ? TaskReminderConfig.fromDTO(request.reminderConfig)
+          : undefined;
 
-          const isFinitePlan =
-            schedule.kind === TaskPlanScheduleKind.OneTime ||
-            (schedule.recurrence != null &&
-              schedule.recurrence.end.kind !== TaskRecurrenceEndKind.Never);
-          if (
-            binding?.progressRule?.trigger === TaskGoalBindingTrigger.PlanCompletion &&
-            !isFinitePlan
-          ) {
-            return error(
-              'BAD_REQUEST',
-              'Whole-plan goal progress requires an end date or maximum occurrence count',
-            );
-          }
+        const isFinitePlan =
+          schedule.kind === TaskPlanScheduleKind.OneTime ||
+          (schedule.recurrence != null &&
+            schedule.recurrence.end.kind !== TaskRecurrenceEndKind.Never);
+        if (
+          binding?.progressRule?.trigger === TaskGoalBindingTrigger.PlanCompletion &&
+          !isFinitePlan
+        ) {
+          return error(
+            'BAD_REQUEST',
+            'Whole-plan goal progress requires an end date or maximum occurrence count',
+          );
+        }
 
-          const plan = TaskPlan.create({
-            id: request.id ? TaskPlanId.of(request.id) : undefined,
-            identityId: request.identityId,
-            title: request.name,
-            description: request.description ?? undefined,
-            schedule,
-            reminderConfig,
-            importance: request.importance,
-            completionPolicy: request.completionPolicy,
-            checklist: request.checklist,
-            goalBinding: binding,
-          });
+        const plan = TaskPlan.create({
+          id: request.id ? TaskPlanId.of(request.id) : undefined,
+          identityId: request.identityId,
+          title: request.name,
+          description: request.description ?? undefined,
+          schedule,
+          reminderConfig,
+          importance: request.importance,
+          completionPolicy: request.completionPolicy,
+          checklist: request.checklist,
+          goalBinding: binding,
+        });
 
-          // Materialize from canonical schedule before persistence. TaskPlan carries no
-          // generation cursor; save is still required before occurrences for the FK and
-          // to flush the generated domain event after the transaction commits.
-          const occurrences =
-            plan.status === TaskPlanStatus.Active
-              ? this.generationService.generateOccurrences(plan, resolvedTimeContext)
-              : [];
+        // Materialize from canonical schedule before persistence. TaskPlan carries no
+        // generation cursor; save is still required before occurrences for the FK and
+        // to flush the generated domain event after the transaction commits.
+        const occurrences =
+          plan.status === TaskPlanStatus.Active
+            ? this.generationService.generateOccurrences(plan, resolvedTimeContext)
+            : [];
 
-          await planRepository!.save(plan);
-          if (request.labelIds !== undefined) {
-            const labels = await planRepository!.replaceLabels(
-              request.identityId,
-              String(plan.id),
-              request.labelIds,
-            );
-            plan.hydrateLabels(labels);
-          }
-          if (occurrences.length > 0) {
-            await occurrenceRepository.saveMany(occurrences);
-          }
+        await planRepository!.save(plan);
+        if (request.labelIds !== undefined) {
+          const labels = await planRepository!.replaceLabels(
+            request.identityId,
+            String(plan.id),
+            request.labelIds,
+          );
+          plan.hydrateLabels(labels);
+        }
+        if (occurrences.length > 0) {
+          await occurrenceRepository.saveMany(occurrences);
+        }
 
-          const time = createTimeFacade({ context: resolvedTimeContext });
-          const today = time.calendar.toYmd(Date.now());
-          const generation = {
-            occurrenceCount: occurrences.length,
-            todayOccurrenceCreated: occurrences.some((occurrence) => occurrence.scheduleDate === today),
-          };
+        const time = createTimeFacade({ context: resolvedTimeContext });
+        const today = time.calendar.toYmd(Date.now());
+        const generation = {
+          occurrenceCount: occurrences.length,
+          todayOccurrenceCreated: occurrences.some(
+            (occurrence) => occurrence.scheduleDate === today,
+          ),
+        };
 
-          return ok({
-            plan: plan.toClientDTOAt(resolvedTimeContext),
-            ...generation,
-          });
-        },
-      );
+        return ok({
+          plan: plan.toClientDTOAt(resolvedTimeContext),
+          ...generation,
+        });
+      });
     } catch (caughtError) {
       // The concurrent-create window is closed outside the failed transaction:
       // if another worker committed the same deterministic aggregate ID first,

@@ -138,9 +138,7 @@ interface ZodLikeSchema<TInput> {
 const logger = createLogger('TaskElectron');
 const allChannels = Object.values(TaskChannels);
 
-function normalizeTemplateListParams(
-  params: Record<string, unknown> | undefined,
-) {
+function normalizeTemplateListParams(params: Record<string, unknown> | undefined) {
   const status = params?.status;
 
   return {
@@ -283,8 +281,7 @@ export function createTaskElectronModule(
           ctx,
           TaskChannels.PLAN_ARCHIVE,
           TaskPlanIdCommandInvocationSchema,
-          (data, requestContext) =>
-            templateController.archivePlan(data.params.id, requestContext),
+          (data, requestContext) => templateController.archivePlan(data.params.id, requestContext),
           (args) => ({ params: { id: (args as { id?: string }).id ?? (args as string) } }),
         );
         installed.push(TaskChannels.PLAN_ARCHIVE);
@@ -292,8 +289,7 @@ export function createTaskElectronModule(
           ctx,
           TaskChannels.PLAN_ACTIVATE,
           TaskPlanIdCommandInvocationSchema,
-          (data, requestContext) =>
-            templateController.activatePlan(data.params.id, requestContext),
+          (data, requestContext) => templateController.activatePlan(data.params.id, requestContext),
           (args) => ({ params: { id: (args as { id?: string }).id ?? (args as string) } }),
         );
         installed.push(TaskChannels.PLAN_ACTIVATE);
@@ -313,8 +309,7 @@ export function createTaskElectronModule(
           ctx,
           TaskChannels.PLAN_PAUSE,
           TaskPlanIdCommandInvocationSchema,
-          (data, requestContext) =>
-            templateController.pausePlan(data.params.id, requestContext),
+          (data, requestContext) => templateController.pausePlan(data.params.id, requestContext),
           (args) => ({ params: { id: (args as { id?: string }).id ?? (args as string) } }),
         );
         installed.push(TaskChannels.PLAN_PAUSE);
@@ -413,7 +408,10 @@ export function createTaskElectronModule(
           TaskChannels.OCCURRENCE_DELETE,
           TaskOccurrenceIdCommandInvocationSchema,
           async (data, requestContext) => {
-            const result = await instanceController.deleteOccurrence(data.params.id, requestContext);
+            const result = await instanceController.deleteOccurrence(
+              data.params.id,
+              requestContext,
+            );
             if (!result.ok) return result;
             return ok(null);
           },
@@ -470,7 +468,11 @@ export function createTaskElectronModule(
           TaskChannels.OCCURRENCE_CHECKLIST_SET,
           SetTaskOccurrenceChecklistItemInvocationSchema,
           (data, requestContext) =>
-            instanceController.setOccurrenceChecklistItem(data.params.id, data.body, requestContext),
+            instanceController.setOccurrenceChecklistItem(
+              data.params.id,
+              data.body,
+              requestContext,
+            ),
           (args) => ({
             params: { id: (args as { id?: string }).id ?? (args as string) },
             body: (args as { request?: unknown }).request,

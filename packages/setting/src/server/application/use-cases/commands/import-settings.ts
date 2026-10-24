@@ -9,10 +9,7 @@ import type { PreferencePortableService } from '../../../preferences/preference-
 export class ImportSettings {
   constructor(private readonly portableService: PreferencePortableService) {}
 
-  async execute(
-    identityId: string,
-    data: unknown,
-  ): Promise<PreferencePortableImportReceiptV3> {
+  async execute(identityId: string, data: unknown): Promise<PreferencePortableImportReceiptV3> {
     if (data && typeof data === 'object' && !Array.isArray(data)) {
       const raw = data as Record<string, unknown>;
       if (raw.schemaVersion !== undefined && raw.schemaVersion !== 3) {
@@ -28,9 +25,7 @@ export class ImportSettings {
     const parsed = PreferencePortableDocumentV3Schema.safeParse(data);
     if (!parsed.success) {
       const issue = parsed.error.issues[0];
-      throw new Error(
-        `Invalid preference V3 import: ${issue.path.join('.')} — ${issue.message}`,
-      );
+      throw new Error(`Invalid preference V3 import: ${issue.path.join('.')} — ${issue.message}`);
     }
 
     const receipt = await this.portableService.apply(identityId, parsed.data.preferences);

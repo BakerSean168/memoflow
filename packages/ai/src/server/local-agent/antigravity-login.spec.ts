@@ -158,9 +158,7 @@ describe('Antigravity explicit Google sign-in state machine', () => {
     }
     expect(fixture.stopped).toEqual(['agy-connection']);
     expect(existsSync(tempDirectory(transport))).toBe(true);
-    await waitFor(() =>
-      transport.calls.some((call) => call.method === 'authenticate'),
-    );
+    await waitFor(() => transport.calls.some((call) => call.method === 'authenticate'));
     expect(transport.calls.find((call) => call.method === 'authenticate')?.params).toEqual({
       methodId: 'oauth-personal',
     });
@@ -241,11 +239,7 @@ describe('Antigravity explicit Google sign-in state machine', () => {
     const directory = tempDirectory(fixture.transports[0]);
     expect(existsSync(directory)).toBe(true);
 
-    const cancelled = await fixture.manager.cancel(
-      'owner',
-      'agy-connection',
-      started.flowId!,
-    );
+    const cancelled = await fixture.manager.cancel('owner', 'agy-connection', started.flowId!);
     expect(cancelled).toMatchObject({ phase: 'cancelled', failure: null, authorizationUrl: null });
     expect(fixture.transports[0].closed).toBe(true);
     expect(existsSync(directory)).toBe(false);
@@ -255,9 +249,7 @@ describe('Antigravity explicit Google sign-in state machine', () => {
     const fixture = await setup();
     await fixture.manager.start('owner', 'agy-connection');
     await waitFor(() => fixture.transports.length === 1);
-    await waitFor(() =>
-      fixture.transports[0].calls.some((call) => call.method === 'authenticate'),
-    );
+    await waitFor(() => fixture.transports[0].calls.some((call) => call.method === 'authenticate'));
     fixture.transports[0].deny();
     await waitFor(() => fixture.manager.status('owner', 'agy-connection').phase === 'failed');
     expect(stateOf(fixture.manager)).toMatchObject({
@@ -280,7 +272,7 @@ describe('Antigravity explicit Google sign-in state machine', () => {
     const started = await fixture.manager.start('owner', 'agy-connection');
     await waitFor(() => fixture.transports.length === 1);
     fixture.transports[0].emit();
-    await waitFor(() => fixture.manager.status('owner', 'agy-connection').phase === 'failed',);
+    await waitFor(() => fixture.manager.status('owner', 'agy-connection').phase === 'failed');
     expect(stateOf(fixture.manager)).toMatchObject({
       phase: 'failed',
       failure: 'login_timeout',
@@ -479,7 +471,9 @@ describe('Antigravity authorization and callback URL validation', () => {
     expect(parseAntigravityCallbackUrl(pending, CALLBACK_URL)?.searchParams.get('code')).toBe(
       'secret-authorization-code',
     );
-    expect(parseAntigravityCallbackUrl(pending, `${REDIRECT}?error=access_denied&state=${STATE}`)).not.toBeNull();
+    expect(
+      parseAntigravityCallbackUrl(pending, `${REDIRECT}?error=access_denied&state=${STATE}`),
+    ).not.toBeNull();
     expect(
       parseAntigravityCallbackUrl(pending, `${REDIRECT}?code=a&error=b&state=${STATE}`),
     ).toBeNull();

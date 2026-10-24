@@ -19,7 +19,9 @@ export class SettingHttpAdapter implements ISettingApiClient {
   getPreferenceProfile(): Promise<Result<UserPreferenceProfile>> {
     return this.httpClient.get(`${this.baseUrl}/preferences`);
   }
-  getPreferenceNamespace(namespace: PreferenceNamespace): Promise<Result<PreferenceNamespaceResponse>> {
+  getPreferenceNamespace(
+    namespace: PreferenceNamespace,
+  ): Promise<Result<PreferenceNamespaceResponse>> {
     return this.httpClient.get(`${this.baseUrl}/preferences/${namespace}`);
   }
   patchPreferenceNamespace<N extends PreferenceNamespace>(
@@ -27,13 +29,18 @@ export class SettingHttpAdapter implements ISettingApiClient {
     patch: PreferenceNamespacePatch<N>,
     expectedRevision?: number,
   ): Promise<Result<PreferenceMutationReceipt>> {
-    return this.httpClient.patch(`${this.baseUrl}/preferences/${namespace}`, { patch, expectedRevision });
+    return this.httpClient.patch(`${this.baseUrl}/preferences/${namespace}`, {
+      patch,
+      expectedRevision,
+    });
   }
   resetPreferenceNamespace(
     namespace: PreferenceNamespace,
     expectedRevision?: number,
   ): Promise<Result<PreferenceMutationReceipt>> {
-    return this.httpClient.post(`${this.baseUrl}/preferences/${namespace}/reset`, { expectedRevision });
+    return this.httpClient.post(`${this.baseUrl}/preferences/${namespace}/reset`, {
+      expectedRevision,
+    });
   }
   resetUserPreferences(
     expectedRevisions?: Partial<Record<PreferenceNamespace, number>>,

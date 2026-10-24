@@ -100,11 +100,7 @@ describe('canonicalizeNotificationListQuery', () => {
 describe('taskPlanQueryKeys (plan §3.2 frozen shape)', () => {
   it('builds the frozen key hierarchy', () => {
     expect(taskPlanQueryKeys.all).toEqual(['server-state', 'task-plan']);
-    expect(taskPlanQueryKeys.identity('id-1')).toEqual([
-      'server-state',
-      'task-plan',
-      'id-1',
-    ]);
+    expect(taskPlanQueryKeys.identity('id-1')).toEqual(['server-state', 'task-plan', 'id-1']);
     expect(taskPlanQueryKeys.list('id-1', { page: 1, limit: 20 })).toEqual([
       'server-state',
       'task-plan',
@@ -173,21 +169,24 @@ describe('canonicalizeTaskPlanListQuery', () => {
     expect(a).toEqual(b);
     expect(a.outcome).toEqual(['Failed', 'Succeeded']);
     expect(outcome).toEqual(['Succeeded', 'Failed', 'Succeeded']);
-    expect(canonicalizeTaskPlanListQuery({ outcome: [], archiveState: 'all' }))
-      .toEqual(canonicalizeTaskPlanListQuery());
+    expect(canonicalizeTaskPlanListQuery({ outcome: [], archiveState: 'all' })).toEqual(
+      canonicalizeTaskPlanListQuery(),
+    );
   });
 
   it('isolates every outcome and archive filter within identity-scoped list keys', () => {
     const queries = [
       canonicalizeTaskPlanListQuery(),
-      ...(['Open', 'Succeeded', 'Failed', 'Abandoned'] as const)
-        .map((outcome) => canonicalizeTaskPlanListQuery({ outcome: [outcome] })),
-      ...(['active', 'archived'] as const)
-        .map((archiveState) => canonicalizeTaskPlanListQuery({ archiveState })),
+      ...(['Open', 'Succeeded', 'Failed', 'Abandoned'] as const).map((outcome) =>
+        canonicalizeTaskPlanListQuery({ outcome: [outcome] }),
+      ),
+      ...(['active', 'archived'] as const).map((archiveState) =>
+        canonicalizeTaskPlanListQuery({ archiveState }),
+      ),
     ];
-    const keys = queries.flatMap((query) => ['owner-a', 'owner-b'].map((owner) =>
-      JSON.stringify(taskPlanQueryKeys.list(owner, query)),
-    ));
+    const keys = queries.flatMap((query) =>
+      ['owner-a', 'owner-b'].map((owner) => JSON.stringify(taskPlanQueryKeys.list(owner, query))),
+    );
     expect(new Set(keys).size).toBe(keys.length);
   });
 

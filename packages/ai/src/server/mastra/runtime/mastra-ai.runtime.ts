@@ -140,7 +140,10 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
   private readonly reservedConversations = new Set<string>();
   private readonly activeRuns = new Map<string, ActiveAssistantTurn>();
   private readonly resumedRuns = new Set<string>();
-  private readonly approvalContinuations = new Map<string, { session: Session; done: Promise<boolean> }>();
+  private readonly approvalContinuations = new Map<
+    string,
+    { session: Session; done: Promise<boolean> }
+  >();
   private readonly sessionModes = new WeakMap<Session, 'supervised' | 'read-only'>();
   private readonly selectedContextHydrator: AssistantSelectedContextHydrator;
 
@@ -361,7 +364,9 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
     return this.durableWorkflows.resumeDetached(input);
   }
 
-  async recoverTask(input: Parameters<MastraDurableWorkflowRuntime['recoverTask']>[0]): Promise<AIWorkflowRunView> {
+  async recoverTask(
+    input: Parameters<MastraDurableWorkflowRuntime['recoverTask']>[0],
+  ): Promise<AIWorkflowRunView> {
     await this.init();
     return this.durableWorkflows.recoverTask(input);
   }
@@ -699,14 +704,26 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
       resourceId: input.identityId,
     });
     const history = await this.history.listMessages(input);
-    const consumed = new Set(history.messages.flatMap((message) => message.approvalReceipt
-      ? [JSON.stringify([message.approvalReceipt.runId, message.approvalReceipt.toolCallId])] : []));
-    const ended = new Set(history.messages.flatMap((message) => message.runOutcome ? [message.runOutcome.runId] : []));
+    const consumed = new Set(
+      history.messages.flatMap((message) =>
+        message.approvalReceipt
+          ? [JSON.stringify([message.approvalReceipt.runId, message.approvalReceipt.toolCallId])]
+          : [],
+      ),
+    );
+    const ended = new Set(
+      history.messages.flatMap((message) => (message.runOutcome ? [message.runOutcome.runId] : [])),
+    );
     return suspended.runs
       .filter((run) => run.threadId === input.conversationId && run.resourceId === input.identityId)
       .flatMap((run) =>
         run.toolCalls.flatMap((call): AssistantRuntimeAskUserSuspension[] => {
-          if (!call.toolName || ended.has(run.runId) || consumed.has(JSON.stringify([run.runId, call.toolCallId]))) return [];
+          if (
+            !call.toolName ||
+            ended.has(run.runId) ||
+            consumed.has(JSON.stringify([run.runId, call.toolCallId]))
+          )
+            return [];
           const policy = memoFlowToolPolicy(call.toolName);
           const toolName = AssistantToolNameSchema.safeParse(call.toolName);
           if (
@@ -833,7 +850,11 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
           runId: run.runId,
           workflowName: 'executionWorkflow',
         });
-        await this.history.appendRuntimeRecord({ identityId: input.context.identityId, conversationId: input.command.conversationId, runOutcome: { runId: run.runId, status: 'cancelled' } });
+        await this.history.appendRuntimeRecord({
+          identityId: input.context.identityId,
+          conversationId: input.command.conversationId,
+          runOutcome: { runId: run.runId, status: 'cancelled' },
+        });
         return true;
       } finally {
         clearTimeout(settlementTimeout);

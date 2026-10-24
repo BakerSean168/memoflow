@@ -226,13 +226,7 @@ async function main(): Promise<void> {
 
     playwrightProcess = spawnChild(
       process.execPath,
-      [
-        playwrightCliPath,
-        'test',
-        '--config',
-        'playwright.config.ts',
-        ...process.argv.slice(2),
-      ],
+      [playwrightCliPath, 'test', '--config', 'playwright.config.ts', ...process.argv.slice(2)],
       {
         cwd: webRoot,
         env: {

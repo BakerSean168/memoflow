@@ -12,10 +12,7 @@ import {
   getPrisma,
   seedAccount,
 } from '../../../../__tests__/integration-helpers';
-import {
-  aOneTimeTask,
-  canonicalTaskOccurrenceScheduleForTest,
-} from '../../../../testing';
+import { aOneTimeTask, canonicalTaskOccurrenceScheduleForTest } from '../../../../testing';
 
 function createOccurrence(params: {
   planId: Parameters<typeof TaskOccurrence.create>[0]['planId'];
@@ -25,11 +22,11 @@ function createOccurrence(params: {
   checklistDefinition?: Array<{ id: string; title: string; order: number }>;
 }) {
   return TaskOccurrence.create({
-      planId: params.planId,
-      identityId: params.identityId,
-      scheduleSnapshot: canonicalTaskOccurrenceScheduleForTest(
-        Date.parse(`${params.date}T00:00:00.000Z`),
-        { kind: TaskTimingKind.AllDay },
+    planId: params.planId,
+    identityId: params.identityId,
+    scheduleSnapshot: canonicalTaskOccurrenceScheduleForTest(
+      Date.parse(`${params.date}T00:00:00.000Z`),
+      { kind: TaskTimingKind.AllDay },
     ),
     importanceSnapshot: params.importance ?? ImportanceLevel.Moderate,
     checklistDefinition: params.checklistDefinition ?? [],

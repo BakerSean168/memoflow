@@ -129,9 +129,19 @@ class InMemoryDomainEventOutboxRepository implements IScheduleRepository {
 
 function createPublishingEventBusSpy(): {
   bus: IEventBus;
-  published: { eventType: string; payload: unknown; aggregateId: string; idempotencyKey?: string }[];
+  published: {
+    eventType: string;
+    payload: unknown;
+    aggregateId: string;
+    idempotencyKey?: string;
+  }[];
 } {
-  const published: { eventType: string; payload: unknown; aggregateId: string; idempotencyKey?: string }[] = [];
+  const published: {
+    eventType: string;
+    payload: unknown;
+    aggregateId: string;
+    idempotencyKey?: string;
+  }[] = [];
   const bus: IEventBus = {
     async publish(event) {
       published.push({
@@ -152,7 +162,10 @@ const passThroughLease = {
   }),
 };
 
-function seedEvent(repo: InMemoryDomainEventOutboxRepository, overrides: Partial<ScheduleDomainEventOutboxDTO> = {}) {
+function seedEvent(
+  repo: InMemoryDomainEventOutboxRepository,
+  overrides: Partial<ScheduleDomainEventOutboxDTO> = {},
+) {
   return repo.createDomainEventOutbox([
     {
       identityId: 'identity-1',

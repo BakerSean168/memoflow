@@ -695,4 +695,3 @@ export class GetGoalHandler implements IQueryHandler<GetGoalQuery> {
 ---
 
 **教训**: DDD 不是银弹，但对于复杂业务系统是正确选择。关键是找到合适的应用边界，不要过度设计简单模块。Container 属于 Infrastructure 层，Domain 和 Application 层应通过构造函数注入依赖，保持对 DI 实现的无知。
-

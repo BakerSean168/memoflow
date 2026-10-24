@@ -2,11 +2,7 @@
 import { z } from 'zod';
 import { Router } from 'express';
 import type { RequestHandler } from 'express';
-import {
-  RouteRegistrar,
-  type OpenApiRegistryLike,
-  successResponse,
-} from '@memoflow/utils/result';
+import { RouteRegistrar, type OpenApiRegistryLike, successResponse } from '@memoflow/utils/result';
 import {
   ScheduledInvocationDiagnosticQuerySchema,
   ScheduledInvocationDiagnosticSchema,
@@ -57,7 +53,10 @@ export function registerSchedulerRoutes(
     },
     [middleware.auth],
     (req, ctx) =>
-      controller.listInvocations(ScheduledInvocationDiagnosticQuerySchema.parse(req.query ?? {}), ctx),
+      controller.listInvocations(
+        ScheduledInvocationDiagnosticQuerySchema.parse(req.query ?? {}),
+        ctx,
+      ),
   );
 
   r.route(

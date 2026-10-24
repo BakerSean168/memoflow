@@ -97,7 +97,10 @@ function createDb(): IElectronDatabase & { close(): void; exec(sql: string): voi
       }
     },
   };
-  return Object.assign(wrapper, { close: () => sqlite.close(), exec: (sql: string) => sqlite.exec(sql) });
+  return Object.assign(wrapper, {
+    close: () => sqlite.close(),
+    exec: (sql: string) => sqlite.exec(sql),
+  });
 }
 
 describe('PowerSyncRoutineOccurrenceTruthStore', () => {
@@ -158,19 +161,23 @@ describe('PowerSyncRoutineOccurrenceTruthStore', () => {
       });
       expect(replay.replayed).toBe(true);
       expect(replay.interaction.id).toBe(completed.interaction.id);
-      expect(await store.listInteractions({
-        identityId: 'identity-1',
-        routineId: 'routine-1',
-        occurrenceKey: first.occurrenceKey,
-      })).toHaveLength(1);
+      expect(
+        await store.listInteractions({
+          identityId: 'identity-1',
+          routineId: 'routine-1',
+          occurrenceKey: first.occurrenceKey,
+        }),
+      ).toHaveLength(1);
 
       // New adapter instance proves this is durable truth, not runtime memory.
       const afterRestart = new PowerSyncRoutineOccurrenceTruthStore(db);
-      await expect(afterRestart.findOccurrence({
-        identityId: 'identity-1',
-        routineId: 'routine-1',
-        occurrenceKey: first.occurrenceKey,
-      })).resolves.toMatchObject({ resolutionState: 'Satisfied' });
+      await expect(
+        afterRestart.findOccurrence({
+          identityId: 'identity-1',
+          routineId: 'routine-1',
+          occurrenceKey: first.occurrenceKey,
+        }),
+      ).resolves.toMatchObject({ resolutionState: 'Satisfied' });
     } finally {
       db.close();
     }
@@ -230,11 +237,13 @@ describe('PowerSyncRoutineOccurrenceTruthStore', () => {
       expect(replayed.interaction.id).toBe(snoozed.interaction.id);
       expect(JSON.parse(persistedOverride.override_json)).toMatchObject({ snoozeUntil: 302_000 });
       expect(persistedOverride.version).toBe(1);
-      expect(await store.listInteractions({
-        identityId: 'identity-1',
-        routineId: 'routine-1',
-        occurrenceKey: occurrence.occurrenceKey,
-      })).toHaveLength(1);
+      expect(
+        await store.listInteractions({
+          identityId: 'identity-1',
+          routineId: 'routine-1',
+          occurrenceKey: occurrence.occurrenceKey,
+        }),
+      ).toHaveLength(1);
     } finally {
       db.close();
     }
@@ -259,31 +268,37 @@ describe('PowerSyncRoutineOccurrenceTruthStore', () => {
         END;
       `);
 
-      await expect(store.applyInteraction({
-        idempotencyKey: `${occurrence.occurrenceKey}:v1:snooze:300000`,
-        identityId: 'identity-1',
-        routineId: 'routine-1',
-        occurrenceKey: occurrence.occurrenceKey,
-        action: 'Snoozed',
-        actedAt: asInstant(2_000),
-        snoozeDurationMs: 300_000,
-        temporaryOverride: createSnoozeOverride({
-          now: 2_000,
-          durationMs: 300_000,
-          reason: 'atomic rollback',
+      await expect(
+        store.applyInteraction({
+          idempotencyKey: `${occurrence.occurrenceKey}:v1:snooze:300000`,
+          identityId: 'identity-1',
+          routineId: 'routine-1',
+          occurrenceKey: occurrence.occurrenceKey,
+          action: 'Snoozed',
+          actedAt: asInstant(2_000),
+          snoozeDurationMs: 300_000,
+          temporaryOverride: createSnoozeOverride({
+            now: 2_000,
+            durationMs: 300_000,
+            reason: 'atomic rollback',
+          }),
         }),
-      })).rejects.toThrow(/forced interaction failure/);
+      ).rejects.toThrow(/forced interaction failure/);
 
-      expect(await db.getOptional(
-        `SELECT override_json FROM routine_temporary_overrides
+      expect(
+        await db.getOptional(
+          `SELECT override_json FROM routine_temporary_overrides
           WHERE identity_id = ? AND routine_id = ?`,
-        ['identity-1', 'routine-1'],
-      )).toBeNull();
-      expect(await store.listInteractions({
-        identityId: 'identity-1',
-        routineId: 'routine-1',
-        occurrenceKey: occurrence.occurrenceKey,
-      })).toEqual([]);
+          ['identity-1', 'routine-1'],
+        ),
+      ).toBeNull();
+      expect(
+        await store.listInteractions({
+          identityId: 'identity-1',
+          routineId: 'routine-1',
+          occurrenceKey: occurrence.occurrenceKey,
+        }),
+      ).toEqual([]);
     } finally {
       db.close();
     }

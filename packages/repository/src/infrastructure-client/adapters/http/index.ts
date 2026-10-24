@@ -11,6 +11,8 @@ export interface RepositoryHttpAdapters {
   repository: RepositoryHttpAdapter;
 }
 
-export function createRepositoryHttpAdapters(httpClient: IResultHttpClient): RepositoryHttpAdapters {
+export function createRepositoryHttpAdapters(
+  httpClient: IResultHttpClient,
+): RepositoryHttpAdapters {
   return { repository: new RepositoryHttpAdapter(httpClient) };
 }

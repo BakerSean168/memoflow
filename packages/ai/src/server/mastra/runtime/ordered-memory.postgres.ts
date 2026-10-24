@@ -60,7 +60,9 @@ export class OrderedMemoryPostgres extends MemoryPG {
         );
         const createdAt =
           existing?.createdAt ??
-          new Date(nextHistoryTimestamp(requestedTimestamp(message.createdAt), latest?.getTime() ?? null));
+          new Date(
+            nextHistoryTimestamp(requestedTimestamp(message.createdAt), latest?.getTime() ?? null),
+          );
         const persisted = await tx.oneOrNone<{ createdAt: Date }>(
           `INSERT INTO ${this.messagesTable} AS current (id, thread_id, content, role, type, "createdAt", "createdAtZ", "resourceId")
             VALUES ($1,$2,$3,$4,$5,$6,$7,$8)

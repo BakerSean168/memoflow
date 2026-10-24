@@ -7,10 +7,14 @@ import type { SharedPathResolver } from '../paths';
 import { ProfileRegistry } from './profile-registry';
 
 function createSharedResolver(rootDir: string): SharedPathResolver {
-  return createSharedPathResolver(resolveDesktopStorageRoots({
-    platform: 'linux', channel: 'test', home: rootDir,
-    env: { MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: rootDir },
-  }));
+  return createSharedPathResolver(
+    resolveDesktopStorageRoots({
+      platform: 'linux',
+      channel: 'test',
+      home: rootDir,
+      env: { MEMOFLOW_DESKTOP_STORAGE_TEST_ROOT: rootDir },
+    }),
+  );
 }
 
 describe('ProfileRegistry', () => {

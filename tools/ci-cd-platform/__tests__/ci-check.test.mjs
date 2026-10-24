@@ -94,8 +94,10 @@ test('CI job graph has one authoritative gate and no dangling dependencies', asy
   }
   assert.deepEqual(
     [...jobs['ci-check'].needs].sort(),
-    Object.keys(CI_CHECK_JOBS).filter((id) => id !== 'scope-detector')
-      .concat('scope-detector').sort(),
+    Object.keys(CI_CHECK_JOBS)
+      .filter((id) => id !== 'scope-detector')
+      .concat('scope-detector')
+      .sort(),
   );
   assert.equal(jobs['ci-check'].if, 'always()');
 });

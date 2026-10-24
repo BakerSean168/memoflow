@@ -138,7 +138,9 @@ test('report rendering names under- and over-selected tasks with their evidence'
         overDetails: [
           {
             task: 'c:lint',
-            reasons: [{ kind: 'input-file', file: 'packages/lib/src/index.ts', pattern: 'default' }],
+            reasons: [
+              { kind: 'input-file', file: 'packages/lib/src/index.ts', pattern: 'default' },
+            ],
           },
         ],
         laneImpact: { droppedLanes: [], gainedLanes: [], legacyLaneDrift: [] },
@@ -304,7 +306,17 @@ test('live mode compares the files changed between --base and --head', async () 
   try {
     const result = spawnSync(
       process.execPath,
-      [cli, '--base', `${head}^`, '--head', head, '--json-out', jsonOut, '--markdown-out', markdownOut],
+      [
+        cli,
+        '--base',
+        `${head}^`,
+        '--head',
+        head,
+        '--json-out',
+        jsonOut,
+        '--markdown-out',
+        markdownOut,
+      ],
       { cwd: repoRoot, encoding: 'utf8' },
     );
 
@@ -316,7 +328,10 @@ test('live mode compares the files changed between --base and --head', async () 
     const changedFiles = report.cases[0].changedFiles;
     assert.ok(changedFiles.includes('tools/ci-cd-platform/shadow-affected.mjs'));
     assert.ok(changedFiles.includes('.github/workflows/ci.yml'));
-    assert.deepEqual(changedFiles.filter((file) => !expectedFiles.includes(file)), []);
+    assert.deepEqual(
+      changedFiles.filter((file) => !expectedFiles.includes(file)),
+      [],
+    );
     assert.ok(report.cases[0].legacy.projects.includes('ci-cd-platform'));
   } finally {
     await rm(root, { recursive: true, force: true });

@@ -1,7 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import {
-  Dialog, DialogContent, DialogDescription,
-  DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
 } from '.';
 import { Button } from '../button';
 import { Input } from '../input';
@@ -19,8 +25,15 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: () => ({
     components: {
-      Dialog, DialogContent, DialogDescription,
-      DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose, Button,
+      Dialog,
+      DialogContent,
+      DialogDescription,
+      DialogFooter,
+      DialogHeader,
+      DialogTitle,
+      DialogTrigger,
+      DialogClose,
+      Button,
     },
     template: `
       <Dialog>
@@ -52,8 +65,16 @@ export const Default: Story = {
 export const WithForm: Story = {
   render: () => ({
     components: {
-      Dialog, DialogContent, DialogDescription,
-      DialogFooter, DialogHeader, DialogTitle, DialogTrigger, Button, Input, Label,
+      Dialog,
+      DialogContent,
+      DialogDescription,
+      DialogFooter,
+      DialogHeader,
+      DialogTitle,
+      DialogTrigger,
+      Button,
+      Input,
+      Label,
     },
     template: `
       <Dialog>

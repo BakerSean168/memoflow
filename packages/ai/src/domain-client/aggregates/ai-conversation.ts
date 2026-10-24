@@ -24,13 +24,27 @@ export class AIConversation extends AggregateRoot<AiConversationId> {
     this._props = props;
   }
 
-  public get identityId(): IdentityId { return this._props.identityId; }
-  public get name(): string { return this._props.name; }
-  public get status(): ConversationStatus { return this._props.status; }
-  public get version(): number { return this._props.version; }
-  public get createdAt(): Date { return this._props.createdAt; }
-  public get updatedAt(): Date { return this._props.updatedAt; }
-  public get deletedAt(): Date | null { return this._props.deletedAt; }
+  public get identityId(): IdentityId {
+    return this._props.identityId;
+  }
+  public get name(): string {
+    return this._props.name;
+  }
+  public get status(): ConversationStatus {
+    return this._props.status;
+  }
+  public get version(): number {
+    return this._props.version;
+  }
+  public get createdAt(): Date {
+    return this._props.createdAt;
+  }
+  public get updatedAt(): Date {
+    return this._props.updatedAt;
+  }
+  public get deletedAt(): Date | null {
+    return this._props.deletedAt;
+  }
 
   public static create(params: { identityId: string; name: string }): AIConversation {
     const now = new Date();
@@ -46,7 +60,9 @@ export class AIConversation extends AggregateRoot<AiConversationId> {
     });
   }
 
-  public static load(state: AIConversationState): AIConversation { return new AIConversation(state); }
+  public static load(state: AIConversationState): AIConversation {
+    return new AIConversation(state);
+  }
 
   public toDTO(): AIConversationClientDTO {
     return {

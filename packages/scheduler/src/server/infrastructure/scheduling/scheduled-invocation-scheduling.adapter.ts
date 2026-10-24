@@ -107,9 +107,7 @@ function stateFingerprint(invocation: ScheduledInvocationState): string {
     priority: invocation.priority,
     timeoutMs: invocation.timeoutMs,
     observability: {
-      ...(invocation.observability.name === null
-        ? {}
-        : { name: invocation.observability.name }),
+      ...(invocation.observability.name === null ? {} : { name: invocation.observability.name }),
       tags: invocation.observability.tags,
     },
   });
@@ -191,10 +189,14 @@ export class ScheduledInvocationSchedulingAdapter implements SchedulingPort {
     options: ScheduledInvocationSchedulingAdapterOptions = {},
   ) {
     this.now = options.now ?? Date.now;
-    this.operationIdFactory = options.operationIdFactory ?? (() => `scheduling-reconcile:${randomUUID()}`);
+    this.operationIdFactory =
+      options.operationIdFactory ?? (() => `scheduling-reconcile:${randomUUID()}`);
   }
 
-  reconcile(owner: SchedulingOwner, desired: readonly ScheduledIntent[]): Promise<SchedulingReconcileReceipt> {
+  reconcile(
+    owner: SchedulingOwner,
+    desired: readonly ScheduledIntent[],
+  ): Promise<SchedulingReconcileReceipt> {
     return this.reconcileInternal(owner, desired);
   }
 
@@ -238,7 +240,9 @@ export class ScheduledInvocationSchedulingAdapter implements SchedulingPort {
       try {
         const receipt = await this.repository.withTransaction(async (repository) => {
           const existing = await repository.findByOwner(owner);
-          const existingByKey = new Map(existing.map((invocation) => [invocation.schedulingKey, invocation]));
+          const existingByKey = new Map(
+            existing.map((invocation) => [invocation.schedulingKey, invocation]),
+          );
           let createdCount = 0;
           let updatedCount = 0;
           let unchangedCount = 0;

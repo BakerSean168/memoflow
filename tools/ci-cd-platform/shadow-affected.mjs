@@ -62,7 +62,7 @@ const { parseFiles } = require('nx/src/utils/command-line-utils');
 
 function parseArgs(argv) {
   const args = new Map();
-  for (let index = 2; index < argv.length; ) {
+  for (let index = 2; index < argv.length;) {
     const token = argv[index];
     if (!token.startsWith('--')) {
       index += 1;
@@ -133,7 +133,18 @@ const LANE_TARGETS = {
  * metric of the replay: a task may be dropped from a lane without harm, a
  * whole lane must never go dark for a case that needs it.
  */
-async function laneImpact({ changedFiles, expected, legacyProjects, taskBasedTasks, taskGraph, targets, graph, nxJson, packageJson, planningContext }) {
+async function laneImpact({
+  changedFiles,
+  expected,
+  legacyProjects,
+  taskBasedTasks,
+  taskGraph,
+  targets,
+  graph,
+  nxJson,
+  packageJson,
+  planningContext,
+}) {
   const risk = classifyRisk(changedFiles);
   const laneArgs = { event: 'pull_request', full: false };
   const legacyLists = Object.fromEntries(
@@ -164,7 +175,9 @@ async function laneImpact({ changedFiles, expected, legacyProjects, taskBasedTas
   if (webFlowFiles.length > 0) {
     const webFlowChanges = calculateFileChanges(webFlowFiles, { files: webFlowFiles }, () => null);
     const webFlowAffected = await filterAffected(graph, webFlowChanges, nxJson, packageJson, true);
-    legacyWebFlow = Object.keys(webFlowAffected.nodes).some((project) => ['web', 'api'].includes(project));
+    legacyWebFlow = Object.keys(webFlowAffected.nodes).some((project) =>
+      ['web', 'api'].includes(project),
+    );
     const webFlowSelection = await selectAffectedTasks(
       graph,
       nxJson,
@@ -181,9 +194,8 @@ async function laneImpact({ changedFiles, expected, legacyProjects, taskBasedTas
       },
       { touchedFiles: webFlowChanges, packageJson },
     );
-    taskBasedWebFlow = webFlowSelection.taskSelection.initiatingTaskIds.some(
-      (id) =>
-        ['web', 'api'].includes(webFlowSelection.taskSelection.taskGraph.tasks[id]?.target.project),
+    taskBasedWebFlow = webFlowSelection.taskSelection.initiatingTaskIds.some((id) =>
+      ['web', 'api'].includes(webFlowSelection.taskSelection.taskGraph.tasks[id]?.target.project),
     );
   }
 
@@ -230,7 +242,19 @@ async function laneImpact({ changedFiles, expected, legacyProjects, taskBasedTas
   };
 }
 
-async function compareCase({ id, title, files, base, head, targets, graph, nxJson, packageJson, planningContext, expected }) {
+async function compareCase({
+  id,
+  title,
+  files,
+  base,
+  head,
+  targets,
+  graph,
+  nxJson,
+  packageJson,
+  planningContext,
+  expected,
+}) {
   // Live mode must resolve the base..head file list the way `nx affected` does
   // (parseFiles → git diff base head); calculateFileChanges only annotates the
   // paths it is given, so passing [] compared two empty selections.
@@ -277,7 +301,9 @@ async function compareCase({ id, title, files, base, head, targets, graph, nxJso
     { touchedFiles, packageJson },
   );
   const taskBasedTasks = [...taskSelection.taskSelection.initiatingTaskIds].sort();
-  const explanation = taskSelection.explanation ? hydrateExplanation(taskSelection.explanation) : undefined;
+  const explanation = taskSelection.explanation
+    ? hydrateExplanation(taskSelection.explanation)
+    : undefined;
 
   const diff = diffSelection(legacyTasks, taskBasedTasks);
   const taskGraph = taskSelection.taskGraph;
@@ -355,8 +381,12 @@ async function main() {
   const args = parseArgs(process.argv);
   const targets = parseList(args.get('targets'));
   if (targets.length === 0) targets.push(...DEFAULT_SHADOW_TARGETS);
-  const jsonOut = path.resolve(args.get('json-out') ?? 'reports/ci-cd-platform/affected-shadow-v1.json');
-  const markdownOut = path.resolve(args.get('markdown-out') ?? 'reports/ci-cd-platform/affected-shadow-v1.md');
+  const jsonOut = path.resolve(
+    args.get('json-out') ?? 'reports/ci-cd-platform/affected-shadow-v1.json',
+  );
+  const markdownOut = path.resolve(
+    args.get('markdown-out') ?? 'reports/ci-cd-platform/affected-shadow-v1.md',
+  );
   const fixturePath = args.get('fixture');
   const files = args.get('files') !== undefined ? parseList(args.get('files')) : undefined;
   const only = new Set(parseList(args.get('only')));
@@ -391,10 +421,15 @@ async function main() {
   let caseInputs = [];
   if (fixturePath !== undefined) {
     const fixture = JSON.parse(await readFile(path.resolve(fixturePath), 'utf8'));
-    const cases = only.size > 0 ? fixture.cases.filter((entry) => only.has(entry.id)) : fixture.cases;
+    const cases =
+      only.size > 0 ? fixture.cases.filter((entry) => only.has(entry.id)) : fixture.cases;
     if (cases.length === 0) throw new Error(`no fixture cases selected from ${fixturePath}`);
     mode = 'replay';
-    source = { fixture: fixturePath, baseline: fixture.baseline ?? null, reviewedAt: fixture.reviewedAt ?? null };
+    source = {
+      fixture: fixturePath,
+      baseline: fixture.baseline ?? null,
+      reviewedAt: fixture.reviewedAt ?? null,
+    };
     caseInputs = cases.map((entry) => ({
       id: entry.id,
       title: entry.title,
@@ -437,7 +472,10 @@ async function main() {
         status: 'error',
         error: {
           message: error instanceof Error ? error.message : String(error),
-          stack: String(error?.stack ?? '').split('\n').slice(0, 10).join('\n'),
+          stack: String(error?.stack ?? '')
+            .split('\n')
+            .slice(0, 10)
+            .join('\n'),
         },
       });
       console.error(`[shadow-affected] case ${input.id} failed: ${error?.message}`);
@@ -451,7 +489,9 @@ async function main() {
     targets,
     source,
     status: failed ? 'error' : 'ok',
-    ...(failed ? { error: { message: `${summary.errors} of ${summary.cases} comparison case(s) failed` } } : {}),
+    ...(failed
+      ? { error: { message: `${summary.errors} of ${summary.cases} comparison case(s) failed` } }
+      : {}),
     summary,
     cases: caseResults,
   });
@@ -491,7 +531,10 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
           buildErrorReport(
             {
               mode: args.get('fixture') !== undefined ? 'replay' : 'live',
-              targets: parseList(args.get('targets')).length > 0 ? parseList(args.get('targets')) : DEFAULT_SHADOW_TARGETS,
+              targets:
+                parseList(args.get('targets')).length > 0
+                  ? parseList(args.get('targets'))
+                  : DEFAULT_SHADOW_TARGETS,
               source: {
                 ...(args.get('fixture') !== undefined ? { fixture: args.get('fixture') } : {}),
                 base: args.get('base') ?? process.env.NX_BASE ?? null,

@@ -33,22 +33,22 @@ Candidate version: `pg-boss@12.30.0` (devDependency only). The GCP Dev Node runt
 
 ## Evidence matrix
 
-| Requirement | Result | Evidence |
-| --- | --- | --- |
-| SchedulingPort adapter without feature changes | PASS | PoC class implements `SchedulingPort`; no feature package is modified or wired to pg-boss |
-| owner complete-set reconcile | PASS with wrapper | `findJobs(data.ownerKey)` + deterministic ids + upsert/delete inside one Prisma transaction |
-| same-owner concurrent reconcile | PASS with wrapper | PostgreSQL transaction advisory lock serializes two concurrent complete-set reconciles; final state is one complete set, never a union |
-| transaction crash / rollback | PASS | injected failure after pg-boss upsert rolls back both updates and inserts |
-| transaction-aware enqueue | PASS | pg-boss per-call `db` adapter participates in caller-owned Prisma transaction; rolled-back enqueue is absent, committed enqueue is durable |
-| claim correctness / multi-worker | PASS | two pg-boss instances concurrently fetch one ready job; exactly one claims it |
-| retry / backoff | PASS with semantic gap | failed active job becomes deferred retry and retry count advances when re-claimed |
-| DLQ / redrive | PASS | terminal failure reaches DLQ with source provenance; `redrive()` recreates work on source queue |
-| heartbeat | PASS | active job exposes heartbeat metadata and `touch()` refresh succeeds |
-| expiration | PASS | one-second active job is failed by explicit supervision after expiry |
-| startup / recovery | PASS | deferred job created by one pg-boss instance is fetched after that instance stops and a new instance starts |
-| terminal schedulingKey invariant | PASS with wrapper | changed semantics for an existing terminal key fail closed as `PERSISTED_KEY_COLLISION` |
-| strict TypeScript | PASS | dedicated PoC tsconfig passes |
-| PowerSync/Desktop | FAIL as single-engine replacement | current desktop DB contract is PowerSync/SQLite-like and is not a PostgreSQL pg-boss backend |
+| Requirement                                    | Result                            | Evidence                                                                                                                                   |
+| ---------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| SchedulingPort adapter without feature changes | PASS                              | PoC class implements `SchedulingPort`; no feature package is modified or wired to pg-boss                                                  |
+| owner complete-set reconcile                   | PASS with wrapper                 | `findJobs(data.ownerKey)` + deterministic ids + upsert/delete inside one Prisma transaction                                                |
+| same-owner concurrent reconcile                | PASS with wrapper                 | PostgreSQL transaction advisory lock serializes two concurrent complete-set reconciles; final state is one complete set, never a union     |
+| transaction crash / rollback                   | PASS                              | injected failure after pg-boss upsert rolls back both updates and inserts                                                                  |
+| transaction-aware enqueue                      | PASS                              | pg-boss per-call `db` adapter participates in caller-owned Prisma transaction; rolled-back enqueue is absent, committed enqueue is durable |
+| claim correctness / multi-worker               | PASS                              | two pg-boss instances concurrently fetch one ready job; exactly one claims it                                                              |
+| retry / backoff                                | PASS with semantic gap            | failed active job becomes deferred retry and retry count advances when re-claimed                                                          |
+| DLQ / redrive                                  | PASS                              | terminal failure reaches DLQ with source provenance; `redrive()` recreates work on source queue                                            |
+| heartbeat                                      | PASS                              | active job exposes heartbeat metadata and `touch()` refresh succeeds                                                                       |
+| expiration                                     | PASS                              | one-second active job is failed by explicit supervision after expiry                                                                       |
+| startup / recovery                             | PASS                              | deferred job created by one pg-boss instance is fetched after that instance stops and a new instance starts                                |
+| terminal schedulingKey invariant               | PASS with wrapper                 | changed semantics for an existing terminal key fail closed as `PERSISTED_KEY_COLLISION`                                                    |
+| strict TypeScript                              | PASS                              | dedicated PoC tsconfig passes                                                                                                              |
+| PowerSync/Desktop                              | FAIL as single-engine replacement | current desktop DB contract is PowerSync/SQLite-like and is not a PostgreSQL pg-boss backend                                               |
 
 Final real-PostgreSQL PoC: **1 file, 10/10 tests passed**.
 

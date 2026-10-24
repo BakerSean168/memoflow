@@ -129,14 +129,14 @@ Host 的 API/Desktop runtime composer 选择 Prisma/PowerSync concrete adapter�
 
 ## 3. 命名规范
 
-| 元素 | 规范 | 示例 |
-| --- | --- | --- |
-| 仓储接口 | `I{Name}Repository` | `IGoalRepository` |
-| Prisma 实现 | `{Name}PrismaRepository` | `GoalPrismaRepository` |
-| PowerSync 实现 | `{Name}PowerSyncRepository` | `GoalPowerSyncRepository` |
-| Prisma Mapper | `Prisma{Name}Mapper` | `PrismaGoalMapper` |
-| PowerSync Mapper | `PowerSync{Name}Mapper` | `PowerSyncGoalMapper` |
-| 文件名 | kebab-case | `goal-prisma.repository.ts` |
+| 元素             | 规范                        | 示例                        |
+| ---------------- | --------------------------- | --------------------------- |
+| 仓储接口         | `I{Name}Repository`         | `IGoalRepository`           |
+| Prisma 实现      | `{Name}PrismaRepository`    | `GoalPrismaRepository`      |
+| PowerSync 实现   | `{Name}PowerSyncRepository` | `GoalPowerSyncRepository`   |
+| Prisma Mapper    | `Prisma{Name}Mapper`        | `PrismaGoalMapper`          |
+| PowerSync Mapper | `PowerSync{Name}Mapper`     | `PowerSyncGoalMapper`       |
+| 文件名           | kebab-case                  | `goal-prisma.repository.ts` |
 
 以当前 owner package 的既有命名为准；不要只为形式统一做无收益 rename。
 

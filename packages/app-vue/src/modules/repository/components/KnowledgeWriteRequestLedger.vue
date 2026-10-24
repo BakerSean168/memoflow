@@ -9,13 +9,7 @@
  */
 import { onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-  Badge,
-  Button,
-} from '@memoflow/ui-vue-shadcn';
+import { Alert, AlertDescription, AlertTitle, Badge, Button } from '@memoflow/ui-vue-shadcn';
 import { AlertCircle, Loader2, RefreshCw, RotateCcw } from '@lucide/vue';
 import type { KnowledgeWriteRequestClientDTO } from '@memoflow/contracts/repository';
 import { useKnowledgeWriteRequestLedger } from '../composables/useKnowledgeWriteRequestLedger';
@@ -26,14 +20,8 @@ const props = defineProps<{
   connectionId?: string;
 }>();
 
-const {
-  writeRequests,
-  isLoading,
-  replayingId,
-  error,
-  load,
-  replay,
-} = useKnowledgeWriteRequestLedger();
+const { writeRequests, isLoading, replayingId, error, load, replay } =
+  useKnowledgeWriteRequestLedger();
 
 const replayMessage = ref<string | null>(null);
 
@@ -41,7 +29,9 @@ function shortSha(sha: string | null): string {
   return sha ? sha.slice(0, 7) : '';
 }
 
-function commitBadgeVariant(status: KnowledgeWriteRequestClientDTO['status']): 'secondary' | 'outline' | 'destructive' {
+function commitBadgeVariant(
+  status: KnowledgeWriteRequestClientDTO['status'],
+): 'secondary' | 'outline' | 'destructive' {
   if (status === 'Committed') return 'secondary';
   if (status === 'Failed') return 'destructive';
   return 'outline';
@@ -122,11 +112,18 @@ defineExpose({ refresh });
       <AlertDescription>{{ error }}</AlertDescription>
     </Alert>
 
-    <p v-if="replayMessage" class="text-xs text-muted-foreground" data-testid="ledger-replay-message">
+    <p
+      v-if="replayMessage"
+      class="text-xs text-muted-foreground"
+      data-testid="ledger-replay-message"
+    >
       {{ replayMessage }}
     </p>
 
-    <div v-if="isLoading && writeRequests.length === 0" class="flex items-center gap-2 py-4 text-sm text-muted-foreground">
+    <div
+      v-if="isLoading && writeRequests.length === 0"
+      class="flex items-center gap-2 py-4 text-sm text-muted-foreground"
+    >
       <Loader2 class="h-4 w-4 animate-spin" />
       {{ t('common.loading') }}
     </div>
@@ -147,12 +144,11 @@ defineExpose({ refresh });
         :data-testid="`ledger-row-${row.id}`"
       >
         <div class="min-w-0 flex-1">
-          <p class="truncate text-sm font-medium" :title="row.relativePath">{{ row.relativePath }}</p>
+          <p class="truncate text-sm font-medium" :title="row.relativePath">
+            {{ row.relativePath }}
+          </p>
           <div class="mt-1 flex flex-wrap items-center gap-2">
-            <Badge
-              :variant="commitBadgeVariant(row.status)"
-              data-testid="ledger-commit-status"
-            >
+            <Badge :variant="commitBadgeVariant(row.status)" data-testid="ledger-commit-status">
               {{ t('repository.writeRequestLedger.commitStatus', { status: row.status }) }}
             </Badge>
             <span v-if="row.commitSha" class="text-xs text-muted-foreground">
@@ -169,7 +165,11 @@ defineExpose({ refresh });
               }}
             </Badge>
             <span class="text-xs text-muted-foreground">
-              {{ t('repository.writeRequestLedger.projectionAttempts', { count: row.projectionAttempts }) }}
+              {{
+                t('repository.writeRequestLedger.projectionAttempts', {
+                  count: row.projectionAttempts,
+                })
+              }}
             </span>
           </div>
           <p

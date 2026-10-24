@@ -62,13 +62,13 @@ data
 
 对应：
 
-| Group         | 当前主要 capability/owner |
-| ------------- | ------------------------- |
-| Appearance    | canonical `presentation` / `regional` User Preferences |
-| Repository    | Repository/Knowledge |
-| AI            | AI provider/onboarding |
+| Group         | 当前主要 capability/owner                                            |
+| ------------- | -------------------------------------------------------------------- |
+| Appearance    | canonical `presentation` / `regional` User Preferences               |
+| Repository    | Repository/Knowledge                                                 |
+| AI            | AI provider/onboarding                                               |
 | Notifications | NotificationPreference + Profile-scoped Desktop notification surface |
-| Account       | Account/Profile + capability-gated Cloud Auth/Password |
+| Account       | Account/Profile + capability-gated Cloud Auth/Password               |
 | Data          | `preferences@3` import/export + Data Portability + Desktop UserFiles |
 
 页面 root 只负责导航、响应式布局、`?tab=` 深链与 lazy section composition，不再持有跨 owner form shadow、backup/sync fake state 或全局 owner loading。

@@ -18,9 +18,11 @@ created: 2026-04-26T22:16:00
 ## 📦 已生成的文档体系
 
 ### 1. 完整实现报告
+
 **文件：** `2026-04-26-domain-test-system-implementation-report.md` (13.5 KB)
 
 **内容：**
+
 - 执行摘要与当前进度（67% 完成）
 - 12 个核心模块的优先级与基线
 - 第一阶段：基线摸底（方法论、关键发现、产出物）
@@ -45,9 +47,11 @@ created: 2026-04-26T22:16:00
 ---
 
 ### 2. 快速参考卡
+
 **文件：** `2026-04-26-domain-test-quick-reference.md` (6.7 KB)
 
 **内容：**
+
 - 当前进度表（可视化 67%/17%/17%）
 - 常用命令速查（开发/全局/CI）
 - 12 个模块的优先级与状态表
@@ -62,9 +66,11 @@ created: 2026-04-26T22:16:00
 ---
 
 ### 3. 基线扫描报告
+
 **文件：** `baseline-report.md` (11.5 KB)
 
 **内容：**
+
 - 全景总览（覆盖率分布表）
 - 优先级划分策略
 - 详细数据（每个模块深度分析）
@@ -84,30 +90,30 @@ created: 2026-04-26T22:16:00
 
 ### 代码产出（128 个新测试）
 
-| 模块 | 文件 | 新增测试 | 覆盖率 | 状态 |
-|------|------|--------|--------|------|
-| AI | 3 files | 68 | 84.72% | ✅ |
-| Authentication | 2 files | 32 | 84.01% | ✅ |
-| Schedule | 1 file | 28 | 77.93% | ⏳ 差 2% |
-| **合计** | **6 files** | **128** | **平均 82%** | |
+| 模块           | 文件        | 新增测试 | 覆盖率       | 状态     |
+| -------------- | ----------- | -------- | ------------ | -------- |
+| AI             | 3 files     | 68       | 84.72%       | ✅       |
+| Authentication | 2 files     | 32       | 84.01%       | ✅       |
+| Schedule       | 1 file      | 28       | 77.93%       | ⏳ 差 2% |
+| **合计**       | **6 files** | **128**  | **平均 82%** |          |
 
 ### 配置优化
 
-| 项目 | 改动 | 效果 |
-|------|------|------|
+| 项目             | 改动               | 效果               |
+| ---------------- | ------------------ | ------------------ |
 | vitest.shared.ts | 添加 entities 路径 | 52% → 75% 跳跃 23% |
 | vitest.shared.ts | 添加 enum 排除规则 | 更精准的覆盖率统计 |
-| vitest.shared.ts | 设置覆盖率阈值 | 80% 硬门禁 |
+| vitest.shared.ts | 设置覆盖率阈值     | 80% 硬门禁         |
 
 ### 技术积累
 
-| 方面 | 发现 |
-|------|------|
-| 时间戳精度 | Date.now() 快速创建时可能相同，需 2ms 延迟 |
-| ID 格式验证 | Message.create() 严格验证前缀格式 |
-| 异步工厂 | PasswordCredential.create() 可依赖注入 mock |
-| 约束验证 | OAuth 绑定移除需检查"至少保留一种登录方式" |
-| 事件发射 | DomainEvent 需验证 aggregateId 与 payload 一致 |
+| 方面        | 发现                                           |
+| ----------- | ---------------------------------------------- |
+| 时间戳精度  | Date.now() 快速创建时可能相同，需 2ms 延迟     |
+| ID 格式验证 | Message.create() 严格验证前缀格式              |
+| 异步工厂    | PasswordCredential.create() 可依赖注入 mock    |
+| 约束验证    | OAuth 绑定移除需检查"至少保留一种登录方式"     |
+| 事件发射    | DomainEvent 需验证 aggregateId 与 payload 一致 |
 
 ---
 
@@ -126,7 +132,7 @@ authentication
 goal (92%)
 notification (89%)
 domain-shared (100%)
-task (86%)         
+task (86%)
 
 总体：67% 达成 | 17% 进行中 | 17% 待启动
 ```
@@ -158,20 +164,21 @@ Reminder 需补：Services + entities (缺 20%)
 
 ## 🎯 关键指标
 
-| 指标 | 数值 | 备注 |
-|------|------|------|
-| 完成度 | 67% | 8/12 模块达成 80%+ |
-| 进行中 | 17% | 2 个模块接近目标 |
-| 文档体系 | 3 份 | 共 31.7 KB |
-| 新增测试 | 128 个 | 已通过验证 |
-| 配置优化 | 3 处 | vitest.shared.ts |
-| 技术模式 | 已建立 | 三层 TDD 结构 |
+| 指标     | 数值   | 备注               |
+| -------- | ------ | ------------------ |
+| 完成度   | 67%    | 8/12 模块达成 80%+ |
+| 进行中   | 17%    | 2 个模块接近目标   |
+| 文档体系 | 3 份   | 共 31.7 KB         |
+| 新增测试 | 128 个 | 已通过验证         |
+| 配置优化 | 3 处   | vitest.shared.ts   |
+| 技术模式 | 已建立 | 三层 TDD 结构      |
 
 ---
 
 ## 📋 待办事项
 
 ### 本周内
+
 ```
 [ ] Schedule 模块：补 CalendarEntry 15-20 测试 → 80%+
     Command: pnpm nx run schedule:test:coverage
@@ -183,6 +190,7 @@ Reminder 需补：Services + entities (缺 20%)
 ```
 
 ### 下周
+
 ```
 [ ] 验证全量 pnpm test:coverage:domain 通过
 [ ] 更新 CI 配置添加覆盖率门禁
@@ -195,11 +203,13 @@ Reminder 需补：Services + entities (缺 20%)
 ## 📚 文档导航
 
 ### 新手入门
+
 1. 先读 **2026-04-26-domain-test-quick-reference.md**（10 分钟）
 2. 再看 **baseline-report.md** 中的模块分析（20 分钟）
 3. 动手参考 `packages/ai/src/domain-server/__tests__/**` 的测试代码
 
 ### 深度理解
+
 1. **2026-04-26-domain-test-system-implementation-report.md**（30 分钟）
    - 了解完整的实施路径
    - 学习技术决策理由
@@ -214,6 +224,7 @@ Reminder 需补：Services + entities (缺 20%)
    - `packages/authentication/src/domain-server/entities/__tests__/password-credential.spec.ts`
 
 ### 快速排障
+
 1. 覆盖率不达标？→ 查看 **快速参考卡** 的"常见坑位"
 2. 找不到某模块的基线？→ 查看 **baseline-report.md**
 3. 想了解测试模式？→ 看 **快速参考卡** 的"TDD 模式"
@@ -234,17 +245,20 @@ Reminder 需补：Services + entities (缺 20%)
 ## ✅ 验收清单
 
 文档体系完整性：
+
 - [x] 完整实现报告（13.5 KB）
 - [x] 快速参考卡（6.7 KB）
 - [x] 基线扫描报告（11.5 KB）
 - [x] 本检查点总结（当前文件）
 
 代码质量：
+
 - [x] 128 个新测试全部通过
 - [x] 无 linting 错误
 - [x] 无 TypeScript 类型错误
 
 知识转移：
+
 - [x] 建立 TDD 测试模式
 - [x] 记录技术决策与理由
 - [x] 提供快速参考与排障指南
@@ -279,6 +293,7 @@ pnpm nx run schedule:test:coverage
 ---
 
 **快速导航：**
+
 - 📖 [完整实现报告](2026-04-26-domain-test-system-implementation-report.md)
 - 🚀 [快速参考卡](2026-04-26-domain-test-quick-reference.md)
 - 📊 [基线扫描报告](baseline-report.md)

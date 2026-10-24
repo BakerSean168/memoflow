@@ -36,7 +36,10 @@ export function createTaskPrismaReadQueries(db: PrismaClient, timePort: UserTime
     if (budget?.signal.aborted || Date.now() >= deadlineAt)
       return error('TIMEOUT', 'Task read cancelled');
     try {
-      const time = await timePort.getUserTimeContext(identityId, { deadlineAt, signal: budget?.signal ?? new AbortController().signal });
+      const time = await timePort.getUserTimeContext(identityId, {
+        deadlineAt,
+        signal: budget?.signal ?? new AbortController().signal,
+      });
       if (budget?.signal.aborted || Date.now() >= deadlineAt)
         return error('TIMEOUT', 'Task read cancelled');
       const remaining = Math.min(30000, Math.max(1, deadlineAt - Date.now()));

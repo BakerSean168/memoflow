@@ -53,9 +53,7 @@ describe('task plan ownership surface', () => {
   it('prisma filters by id + identityId', () => {
     expect(prisma).toContain('where: { id, identityId }');
     expect(prisma).toContain('deleteMany({');
-    expect(prisma).toContain(
-      "throw new Error('Task plan not found for the current identity.');",
-    );
+    expect(prisma).toContain("throw new Error('Task plan not found for the current identity.');");
   });
 
   it('get/delete use cases load via findByIdForIdentity', () => {
@@ -82,9 +80,7 @@ describe('task plan ownership surface', () => {
     expect(routes).toMatch(/controller\.deletePlan\(data\.params\.id, ctx\)/);
     expect(routes).toMatch(/controller\.activatePlan\(data\.params\.id, ctx\)/);
     expect(electron).toContain('registerValidatedChannel');
-    expect(electron).toMatch(
-      /PLAN_GET[\s\S]*templateController\.getPlan\([\s\S]*requestContext/,
-    );
+    expect(electron).toMatch(/PLAN_GET[\s\S]*templateController\.getPlan\([\s\S]*requestContext/);
     expect(electron).toMatch(
       /PLAN_DELETE[\s\S]*templateController\.deletePlan\(data\.params\.id,[\s\S]*requestContext/,
     );
@@ -145,9 +141,7 @@ describe('task plan ownership surface', () => {
     expect(prisma).toContain('async softDelete(identityId: string, id: string)');
     expect(prisma).toContain('async restore(identityId: string, id: string)');
     expect(prisma).toContain('where: { id, identityId }');
-    expect(prisma).toContain(
-      "throw new Error('Task plan not found for the current identity.');",
-    );
+    expect(prisma).toContain("throw new Error('Task plan not found for the current identity.');");
     expect(powersync).toContain(
       'UPDATE task_plans SET deleted_at = ?, updated_at = ? WHERE id = ? AND identity_id = ?',
     );

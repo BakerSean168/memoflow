@@ -27,12 +27,12 @@ async function submitWebLogin(page: Page, credentials: SyncCredentials): Promise
   }
 
   // Residual 1337: prefer #email/#password (stable); fall back to legacy testids.
-  const emailField = page.locator('#email').or(
-    page.getByTestId('login-username-input').locator('input'),
-  );
-  const passwordField = page.locator('#password').or(
-    page.getByTestId('login-password-input').locator('input'),
-  );
+  const emailField = page
+    .locator('#email')
+    .or(page.getByTestId('login-username-input').locator('input'));
+  const passwordField = page
+    .locator('#password')
+    .or(page.getByTestId('login-password-input').locator('input'));
   await emailField.fill(credentials.email);
   await passwordField.fill(credentials.password);
   await page.getByTestId('login-submit-button').click();

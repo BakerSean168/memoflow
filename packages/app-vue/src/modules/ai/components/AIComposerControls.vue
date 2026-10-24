@@ -92,9 +92,7 @@ const providerUnavailable = computed(() => {
   if (enabledEntries.some((entry) => entry.status === 'ready' && entry.models.length)) return false;
   if (enabledEntries.some((entry) => ['idle', 'loading'].includes(entry.status))) return false;
   if (enabledAgents.value.some((agent) => agent.driver !== 'mastra')) return false;
-  return enabledEntries.every((entry) =>
-    ['ready', 'error', 'unavailable'].includes(entry.status),
-  );
+  return enabledEntries.every((entry) => ['ready', 'error', 'unavailable'].includes(entry.status));
 });
 const browsedCatalog = computed(() =>
   Object.values(props.catalog ?? {}).find((entry) => entry.agentKey === activeSection.value),

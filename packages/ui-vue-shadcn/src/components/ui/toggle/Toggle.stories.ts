@@ -19,7 +19,9 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: (args) => ({
     components: { Toggle },
-    setup() { return { args }; },
+    setup() {
+      return { args };
+    },
     template: '<Toggle v-bind="args">B</Toggle>',
   }),
 };

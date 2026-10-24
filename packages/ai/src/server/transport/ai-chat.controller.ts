@@ -17,10 +17,7 @@ interface AIConversationControllerService {
     page?: number,
     pageSize?: number,
   ): Promise<Result<ConversationListRes>>;
-  getConversation(
-    id: string,
-    cx: ExecutionContext,
-  ): Promise<Result<GetConversationRes | null>>;
+  getConversation(id: string, cx: ExecutionContext): Promise<Result<GetConversationRes | null>>;
   updateConversation(
     id: string,
     input: UpdateConversationReq,

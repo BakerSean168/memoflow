@@ -1,6 +1,4 @@
-export {
-  createGoalRuntimeContribution,
-} from './goal.runtime';
+export { createGoalRuntimeContribution } from './goal.runtime';
 export {
   createGoalEventListenersRuntime,
   type GoalEventListenersRuntime,

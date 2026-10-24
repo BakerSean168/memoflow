@@ -14,19 +14,19 @@ updated: 2026-07-29T00:00:00
 
 本指南说明 **产品验证码与密码重置邮件如何发出**。业务 challenge（发码 / 冷却 / 只存 hash）见认证安全闭环；本文件只覆盖 **投递通道与运维配置**。
 
-| 角色 | 路径 |
-|------|------|
-| 实施 plan（SSOT 决策） | [`docs/plan/archive/2026-07-28-transactional-email-smtp.md`](../../plan/archive/2026-07-28-transactional-email-smtp.md) |
-| 业务与安全清单 | [`docs/plan/archive/2026-07-17-auth-account-security-closure.md`](../../plan/archive/2026-07-17-auth-account-security-closure.md) §3.5 |
-| 本地容器 | [local.docker.md](./local.docker.md) |
+| 角色                   | 路径                                                                                                                                   |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| 实施 plan（SSOT 决策） | [`docs/plan/archive/2026-07-28-transactional-email-smtp.md`](../../plan/archive/2026-07-28-transactional-email-smtp.md)                |
+| 业务与安全清单         | [`docs/plan/archive/2026-07-17-auth-account-security-closure.md`](../../plan/archive/2026-07-17-auth-account-security-closure.md) §3.5 |
+| 本地容器               | [local.docker.md](./local.docker.md)                                                                                                   |
 
 ## 提供者选择
 
-| `EMAIL_PROVIDER` | 行为 | 典型场景 |
-|------------------|------|----------|
-| `console`（**默认**） | 日志掩码邮箱 + 内存 capture；**不**外发 | 本地、CI、local-docker、e2e |
-| `smtp` | 通用 SMTP（`nodemailer`），任意合规中继 | Brevo / 企业中继 / 国内 SMTP |
-| `resend` | Resend HTTP API（`fetch`，无厂商 SDK） | 已用 Resend 域名的团队 |
+| `EMAIL_PROVIDER`      | 行为                                    | 典型场景                     |
+| --------------------- | --------------------------------------- | ---------------------------- |
+| `console`（**默认**） | 日志掩码邮箱 + 内存 capture；**不**外发 | 本地、CI、local-docker、e2e  |
+| `smtp`                | 通用 SMTP（`nodemailer`），任意合规中继 | Brevo / 企业中继 / 国内 SMTP |
+| `resend`              | Resend HTTP API（`fetch`，无厂商 SDK）  | 已用 Resend 域名的团队       |
 
 **禁止**仅用 `NODE_ENV=production` 推断 provider：local-docker 也是 production，默认仍应是 console。
 
@@ -84,10 +84,10 @@ AUTH_CHALLENGE_STORE=memory   # 或 redis（需 REDIS_URL / REDIS_*）
 
 ## Challenge 存储
 
-| `AUTH_CHALLENGE_STORE` | 说明 |
-|------------------------|------|
-| `memory`（默认） | 单进程内存；local-docker / 单副本足够 |
-| `redis` | 多 API 副本共享；apps/api 在启动时注入 ioredis；仍只存 **hash** |
+| `AUTH_CHALLENGE_STORE` | 说明                                                            |
+| ---------------------- | --------------------------------------------------------------- |
+| `memory`（默认）       | 单进程内存；local-docker / 单副本足够                           |
+| `redis`                | 多 API 副本共享；apps/api 在启动时注入 ioredis；仍只存 **hash** |
 
 生产多副本务必 `AUTH_CHALLENGE_STORE=redis` 且 Redis 可达，否则发码与校验可能打到不同实例导致失败。
 

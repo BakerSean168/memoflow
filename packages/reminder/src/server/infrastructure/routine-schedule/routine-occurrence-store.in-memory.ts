@@ -44,9 +44,8 @@ function leaseFor(record: StoredRoutineOccurrence): RoutineOccurrenceLease {
     ownerToken: record.ownerToken ?? '',
     leaseExpiresAt: record.leaseExpiresAt ?? 0,
     alreadyFinalized: record.status === 'succeeded' || record.status === 'skipped',
-    terminalStatus: record.status === 'succeeded' || record.status === 'skipped'
-      ? record.status
-      : null,
+    terminalStatus:
+      record.status === 'succeeded' || record.status === 'skipped' ? record.status : null,
   };
 }
 
@@ -113,7 +112,8 @@ export function createInMemoryRoutineOccurrenceStore(options?: {
           return leaseFor(existing);
         }
 
-        const leaseAlive = existing.leaseExpiresAt != null && existing.leaseExpiresAt > input.claimedAt;
+        const leaseAlive =
+          existing.leaseExpiresAt != null && existing.leaseExpiresAt > input.claimedAt;
         if (leaseAlive) {
           return leaseFor(existing);
         }

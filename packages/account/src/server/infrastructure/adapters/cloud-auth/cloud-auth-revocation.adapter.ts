@@ -52,7 +52,10 @@ export class PrismaCloudAuthRevocationAdapter implements CloudAuthRevocationPort
       return {
         piiCleanupStatus: res.deletedRecords > 0 ? 'completed' : 'retained_by_policy',
         deletedAt: res.deletedRecords > 0 ? Date.now() : null,
-        reason: res.deletedRecords > 0 ? undefined : 'No records eligible for deletion under retention policy',
+        reason:
+          res.deletedRecords > 0
+            ? undefined
+            : 'No records eligible for deletion under retention policy',
       };
     }
     return {

@@ -61,10 +61,7 @@ import {
   type TaskGoalMeasurementReadPort,
   type TaskRuntimeContributionsInput,
 } from '@memoflow/task';
-import {
-  createTaskApiModule,
-  type TaskApiModuleDef,
-} from '@memoflow/task/api';
+import { createTaskApiModule, type TaskApiModuleDef } from '@memoflow/task/api';
 import type { TaskGoalProgressHandler } from '@memoflow/goal';
 import type { UserTimeContextPort } from '@memoflow/time';
 
@@ -138,24 +135,14 @@ export interface ComposedTask {
  * @param dependencies - ComposeTaskDependencies with the runtime Prisma client.
  * @returns ComposedTask — the bound module handle and the shared application port.
  */
-export function composeTask(
-  dependencies: ComposeTaskDependencies,
-): ComposedTask {
-  const {
-    taskPlanRepository,
-    taskOccurrenceRepository,
-    taskWriteTransactionRunner,
-  } = createTaskPrismaRepositories(dependencies.db);
+export function composeTask(dependencies: ComposeTaskDependencies): ComposedTask {
+  const { taskPlanRepository, taskOccurrenceRepository, taskWriteTransactionRunner } =
+    createTaskPrismaRepositories(dependencies.db);
 
   const runtimeContributions = [
     createTaskRuntimeContribution(),
     ...(dependencies.goalProgressHandler
-      ? [
-          createTaskPrismaGoalOutboxRuntime(
-            dependencies.db,
-            dependencies.goalProgressHandler,
-          ),
-        ]
+      ? [createTaskPrismaGoalOutboxRuntime(dependencies.db, dependencies.goalProgressHandler)]
       : []),
     ...normalizeTaskRuntimeContributions(dependencies.runtimeContributions),
   ];

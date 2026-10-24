@@ -46,9 +46,11 @@ export function externalMutationReceiptId(
   capability: string,
   idempotencyKey: string,
 ): string {
-  return hash(authority.receiptScope === 'credential'
-    ? [identityId, authority.connectionId, capability, idempotencyKey]
-    : [identityId, capability, idempotencyKey]);
+  return hash(
+    authority.receiptScope === 'credential'
+      ? [identityId, authority.connectionId, capability, idempotencyKey]
+      : [identityId, capability, idempotencyKey],
+  );
 }
 
 /** Owner invokes its existing use cases using only this transaction's repositories. */
@@ -64,7 +66,12 @@ export async function runExternalMutation<T extends { receiptId: string }>(
   if (!identityId || !authority.connectionId) throw new ExternalMutationError('FORBIDDEN');
   // Existing Goal/Task receipts survive PAT rotation; the Routine capability
   // explicitly binds its retry key to the issuing credential.
-  const receiptId = externalMutationReceiptId(identityId, authority, capability, input.idempotencyKey);
+  const receiptId = externalMutationReceiptId(
+    identityId,
+    authority,
+    capability,
+    input.idempotencyKey,
+  );
   const digest = hash(input);
   // Revalidate before BEGIN: the host check may use its own pool connection.
   await authority.authorize();

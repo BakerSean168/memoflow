@@ -3,11 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "apps/storybook",
-  "tags": [
-    "scope:ui",
-    "type:app",
-    "layer:app"
-  ],
+  "tags": ["scope:ui", "type:app", "layer:app"],
   "targets": {
     "typecheck": {
       "executor": "nx:run-commands",
@@ -33,9 +29,7 @@
         "{workspaceRoot}/vite.workspace-aliases.ts",
         "{workspaceRoot}/pnpm-lock.yaml"
       ],
-      "outputs": [
-        "{workspaceRoot}/dist/storybook"
-      ],
+      "outputs": ["{workspaceRoot}/dist/storybook"],
       "options": {
         "command": "storybook build -c apps/storybook/.storybook -o dist/storybook --disable-telemetry",
         "cwd": "."
@@ -64,9 +58,7 @@
     },
     "lint": {
       "options": {
-        "args": [
-          "**/*.{ts,tsx,js,jsx,vue}"
-        ]
+        "args": ["**/*.{ts,tsx,js,jsx,vue}"]
       }
     }
   }

@@ -19,7 +19,10 @@ export function selectWebSpecs({ enabled, full, files }) {
     return { specs: [...WEB_FLOW_SPECS], fallback: true };
   }
   if (files.every((file) => canonical.has(file))) {
-    return { specs: [...new Set(files.map((file) => file.slice('apps/web/e2e/'.length)))].sort(), fallback: false };
+    return {
+      specs: [...new Set(files.map((file) => file.slice('apps/web/e2e/'.length)))].sort(),
+      fallback: false,
+    };
   }
   const selected = new Set(WEB_CORE_SPECS);
   for (const file of files) {
@@ -27,8 +30,9 @@ export function selectWebSpecs({ enabled, full, files }) {
       selected.add(file.slice('apps/web/e2e/'.length));
       continue;
     }
-    const owner = /^packages\/app-vue\/src\/modules\/([^/]+)\//u.exec(file)?.[1]
-      ?? /^packages\/([^/]+)\/src\//u.exec(file)?.[1];
+    const owner =
+      /^packages\/app-vue\/src\/modules\/([^/]+)\//u.exec(file)?.[1] ??
+      /^packages\/([^/]+)\/src\//u.exec(file)?.[1];
     const prefixes = WEB_OWNER_EXTENSIONS[owner];
     // No guessed dependency graph: shared contracts, global styles, helpers,
     // root/config and unrecognized owners retain the full four-shard fallback.

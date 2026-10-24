@@ -2,9 +2,9 @@
   <div class="relative inline-block">
     <Button
       data-testid="notification-bell-icon"
-    variant="ghost"
-    size="icon"
-    :aria-label="t('nav.notifications')"
+      variant="ghost"
+      size="icon"
+      :aria-label="t('nav.notifications')"
       :disabled="loading"
       @click="$emit('click')"
     >

@@ -10,7 +10,12 @@ import '../../../packages/ui-vue-shadcn/src/styles/globals.css';
 setup((app) => {
   app.use(createPinia());
   app.use(createI18n({ legacy: false, locale: 'en-US', messages: productionLocaleMessages }));
-  app.use(createRouter({ history: createMemoryHistory(), routes: [{ path: '/:pathMatch(.*)*', component: { template: '<div />' } }] }));
+  app.use(
+    createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: '/:pathMatch(.*)*', component: { template: '<div />' } }],
+    }),
+  );
   installServerStateRuntime(app, 'web', { identityScope: 'storybook' });
 });
 

@@ -22,7 +22,16 @@ type ReadFilter = 'all' | 'unread' | 'read';
 export function NotificationsScreen() {
   const router = useRouter();
   const { signOut } = useAppSession();
-  const { error, isLoading, isRemoteAuthenticated, markAllAsRead, markAsRead, notifications, refresh, unreadCount } = useNotifications();
+  const {
+    error,
+    isLoading,
+    isRemoteAuthenticated,
+    markAllAsRead,
+    markAsRead,
+    notifications,
+    refresh,
+    unreadCount,
+  } = useNotifications();
   const [isMutating, setIsMutating] = useState(false);
   const [readFilter, setReadFilter] = useState<ReadFilter>('all');
   const [keyword, setKeyword] = useState('');
@@ -56,7 +65,14 @@ export function NotificationsScreen() {
         return true;
       }
 
-      const haystack = [notification.title, notification.content, notification.category, notification.type].join(' ').toLowerCase();
+      const haystack = [
+        notification.title,
+        notification.content,
+        notification.category,
+        notification.type,
+      ]
+        .join(' ')
+        .toLowerCase();
       return haystack.includes(normalizedKeyword);
     });
   }, [keyword, notifications, readFilter]);
@@ -80,7 +96,8 @@ export function NotificationsScreen() {
       eyebrow="More"
       title="Notifications"
       subtitle="消息收件箱和未读处理。"
-      refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refresh} />}>
+      refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refresh} />}
+    >
       {!isRemoteAuthenticated ? (
         <SectionCard title="Sign in required" description="登录后可查看通知。">
           <ThemedText type="small" themeColor="textSecondary">
@@ -93,7 +110,10 @@ export function NotificationsScreen() {
           <SectionCard title="Summary" description="通知总量、未读数和当前筛选结果。">
             <View style={styles.pillRow}>
               <StatusPill label={`${notifications.length} notifications`} tone="tint" />
-              <StatusPill label={`${unreadCount} unread`} tone={unreadCount > 0 ? 'warning' : 'success'} />
+              <StatusPill
+                label={`${unreadCount} unread`}
+                tone={unreadCount > 0 ? 'warning' : 'success'}
+              />
               <StatusPill label={`${filteredNotifications.length} visible`} tone="textSecondary" />
             </View>
             <PrimaryButton
@@ -105,23 +125,46 @@ export function NotificationsScreen() {
           </SectionCard>
 
           <SectionCard title="Filters" description="按关键词和已读状态筛选。">
-            <PrimaryTextField value={keyword} onChangeText={setKeyword} placeholder="Search notifications" />
+            <PrimaryTextField
+              value={keyword}
+              onChangeText={setKeyword}
+              placeholder="Search notifications"
+            />
             <View style={styles.actionRow}>
-              <PrimaryButton label="All" onPress={() => setReadFilter('all')} variant={readFilter === 'all' ? 'solid' : 'ghost'} />
-              <PrimaryButton label="Unread" onPress={() => setReadFilter('unread')} variant={readFilter === 'unread' ? 'solid' : 'ghost'} />
-              <PrimaryButton label="Read" onPress={() => setReadFilter('read')} variant={readFilter === 'read' ? 'solid' : 'ghost'} />
+              <PrimaryButton
+                label="All"
+                onPress={() => setReadFilter('all')}
+                variant={readFilter === 'all' ? 'solid' : 'ghost'}
+              />
+              <PrimaryButton
+                label="Unread"
+                onPress={() => setReadFilter('unread')}
+                variant={readFilter === 'unread' ? 'solid' : 'ghost'}
+              />
+              <PrimaryButton
+                label="Read"
+                onPress={() => setReadFilter('read')}
+                variant={readFilter === 'read' ? 'solid' : 'ghost'}
+              />
             </View>
           </SectionCard>
 
           {error ? (
-            <SectionCard title="Notification load failed" description="Unable to load notifications.">
-              <ThemedText type="small" themeColor="warning">{error}</ThemedText>
+            <SectionCard
+              title="Notification load failed"
+              description="Unable to load notifications."
+            >
+              <ThemedText type="small" themeColor="warning">
+                {error}
+              </ThemedText>
             </SectionCard>
           ) : null}
 
           {!isLoading && filteredNotifications.length === 0 ? (
             <SectionCard title="No notifications matched" description="当前筛选条件下没有通知。">
-              <ThemedText type="small" themeColor="textSecondary">调整关键词或已读筛选后再试。</ThemedText>
+              <ThemedText type="small" themeColor="textSecondary">
+                调整关键词或已读筛选后再试。
+              </ThemedText>
             </SectionCard>
           ) : null}
 
@@ -130,7 +173,9 @@ export function NotificationsScreen() {
               <View key={notification.id} style={styles.listColumn}>
                 <NotificationCard
                   notification={notification}
-                  onMarkAsRead={!notification.isRead ? () => handleMarkAsRead(notification.id) : undefined}
+                  onMarkAsRead={
+                    !notification.isRead ? () => handleMarkAsRead(notification.id) : undefined
+                  }
                 />
                 <View style={styles.actionRow}>
                   <PrimaryButton
