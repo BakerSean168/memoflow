@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { CreateGoalSchema, GoalDraftCheckpointSnapshotSchema } from '@memoflow/contracts/goal';
 import { expect, test } from '@playwright/test';
 import { TIMEOUT_CONFIG, WEB_CONFIG } from '../../config';
-import { login, registerAndLogin } from '../../helpers/testHelpers';
+import { registerAndLogin, loginViaApi } from '../../helpers/auth-api';
 import {
   bootstrapGoalWorkflowSession,
   e2ePassword,
@@ -67,7 +67,7 @@ test.describe('AI Goal Workflow', () => {
       /Draft preserved|草稿已在此设备保留/,
     );
     await logout();
-    await login(page, firstEmail, e2ePassword);
+    await loginViaApi(page, { email: firstEmail, password: e2ePassword });
     await openDraft();
     await expect(page.getByTestId('goal-name-input')).toHaveValue('Identity A private checkpoint');
     await expect(page.getByTestId('goal-description-input')).toHaveValue(

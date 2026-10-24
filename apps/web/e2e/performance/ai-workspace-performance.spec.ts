@@ -7,7 +7,7 @@
  */
 
 import { expect, test, type Page } from '@playwright/test';
-import { registerAndLogin } from '../helpers/testHelpers';
+import { registerAndLogin } from '../helpers/auth-api';
 import { TIMEOUT_CONFIG, WEB_CONFIG } from '../config';
 
 type LargestContentfulPaintLike = PerformanceEntry & {

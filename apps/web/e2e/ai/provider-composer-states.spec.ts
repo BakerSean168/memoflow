@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { registerAndLogin } from '../helpers/testHelpers';
+import { registerAndLogin } from '../helpers/auth-api';
 
 test('provider settings load and built-in reset retains identity', async ({ page }) => {
   await registerAndLogin(page, {

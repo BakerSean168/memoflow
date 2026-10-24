@@ -1,6 +1,6 @@
 import { test, expect, type Locator } from '@playwright/test';
 import { TIMEOUT_CONFIG } from '../config';
-import { registerAndLogin } from '../helpers/testHelpers';
+import { registerAndLogin } from '../helpers/auth-api';
 import { dragBusinessPanel } from '../helpers/business-panel';
 
 const generateTestEmail = () =>

@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
 import { expect, test, type Page, type Request } from '@playwright/test';
 import { TIMEOUT_CONFIG } from '../../config';
-import { login, registerAndLogin } from '../../helpers/testHelpers';
+import { registerAndLogin, loginViaApi } from '../../helpers/auth-api';
 import { e2ePassword, generateTestEmail } from './goal-workflow.fixture';
 
 test.describe('AI Goal Workflow', () => {
@@ -35,7 +35,7 @@ test.describe('AI Goal Workflow', () => {
     const peer = await secondContext.newPage();
     try {
       observe(peer, metrics[1]!);
-      await login(peer, email, e2ePassword);
+      await loginViaApi(peer, { email, password: e2ePassword });
       const sessions = [page, peer];
       const sidebar = (session: Page) => session.locator('[data-sidebar-presentation="docked"]');
       for (const session of sessions) {

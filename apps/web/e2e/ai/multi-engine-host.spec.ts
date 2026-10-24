@@ -11,7 +11,7 @@
 import { expect, test, type Page, type Route } from '@playwright/test';
 import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
 import { TIMEOUT_CONFIG, WEB_CONFIG } from '../config';
-import { registerAndLogin } from '../helpers/testHelpers';
+import { registerAndLogin } from '../helpers/auth-api';
 import { installMastraRegistryMock } from '../helpers/agent-registry-mock';
 
 const e2ePassword = 'Test123456!';
