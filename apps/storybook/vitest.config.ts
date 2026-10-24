@@ -48,7 +48,23 @@ export default defineConfig({
           // Never turn off the optimizer, which breaks browser ESM interop.
           deps: {
             optimizer: {
-              web: { enabled: true, include: ['storybook/test', '@testing-library/dom'] },
+              web: {
+                enabled: true,
+                include: [
+                  'storybook/test',
+                  '@testing-library/dom',
+                  // Singleton runtime graph: if Vite prebundles these in two
+                  // passes, the preview's Pinia instance and the components'
+                  // instance split and getActivePinia() fails (clean-checkout
+                  // CI reproduction, VNext Q4).
+                  'vue',
+                  'pinia',
+                  'vue-i18n',
+                  'vue-router',
+                  '@tanstack/vue-query',
+                  'zod',
+                ],
+              },
             },
           },
           maxWorkers: 1,

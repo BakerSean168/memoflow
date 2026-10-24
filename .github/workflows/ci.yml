@@ -261,11 +261,13 @@ jobs:
           setup-uv: 'false'
           consume-delivery-manifest: 'true'
       - run: pnpm exec playwright install chromium
-      # The Browser Mode dev server resolves workspace deps through their
-      # package exports (dist); build the Storybook dependency chain first
-      # (this is what the old in-Web-job step relied on the Build job for).
-      - name: Build Storybook and its dependency chain
-        run: pnpm exec nx run ui-storybook:build
+      # The story import graph reaches workspace packages whose subpath
+      # exports resolve to dist (e.g. @memoflow/domain-shared/shared) and
+      # which the Storybook alias lists intentionally do not cover; a clean
+      # checkout must build the workspace first (the old in-Web-job step
+      # got this for free from the Build job).
+      - name: Build workspace packages
+        run: pnpm exec nx run-many -t build --all --parallel=3
       - name: Storybook interaction tests (Vitest Browser Mode)
         run: pnpm exec nx run ui-storybook:test:interaction
       - name: Upload Storybook interaction evidence

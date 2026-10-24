@@ -167,8 +167,10 @@ import { describe, expect, it } from 'vitest';
         'export type ListKnowledgeNoteProjectionsReq = z.infer<typeof ListKnowledgeNoteProjectionsSchema>',
       );
       expect(attachmentDto).toContain('Residual 675');
-      expect(attachmentDto).toContain(
-        'export type ListKnowledgeAttachmentProjectionsReq = z.infer<\n  typeof ListKnowledgeProjectionsSchema\n>',
+      // Whitespace-tolerant: the Q1 Prettier baseline legitimately collapses
+      // this export to one line; the contract is the reuse, not the layout.
+      expect(attachmentDto).toMatch(
+        /export type ListKnowledgeAttachmentProjectionsReq = z\.infer<\s*typeof ListKnowledgeProjectionsSchema\s*>/u,
       );
       expect(attachmentDto).not.toMatch(/export const ListKnowledgeAttachmentProjectionsSchema\b/);
       expect(attachmentDto).toContain(
