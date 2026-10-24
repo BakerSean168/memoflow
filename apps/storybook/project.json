@@ -16,7 +16,7 @@
     "serve": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "storybook dev -p 4402 -c apps/storybook/.storybook",
+        "command": "node tools/test/storybook-wsl-dev.mjs",
         "cwd": "."
       }
     },
@@ -48,12 +48,7 @@
       "executor": "nx:run-commands",
       "cache": false,
       "options": {
-        "commands": [
-          "node -e \"require('node:fs').mkdirSync('test-results',{recursive:true})\"",
-          "test-storybook -c apps/storybook/.storybook --url http://127.0.0.1:4402 --maxWorkers=1 --ci --includeTags ci-interaction --index-json --json --outputFile test-results/storybook-results.json",
-          "node --input-type=module -e \"import {readFileSync} from 'node:fs'; import assert from 'node:assert/strict'; const r=JSON.parse(readFileSync('test-results/storybook-results.json','utf8')); assert.equal(r.success,true); assert.equal(r.numPassedTests,6); assert.equal(r.numTotalTests,6); assert.equal(r.numTotalTestSuites,2);\""
-        ],
-        "parallel": false,
+        "command": "node tools/test/run-storybook-browser.mjs",
         "cwd": "."
       }
     },
