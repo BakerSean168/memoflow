@@ -1,8 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ScheduledInvocationContext } from '@memoflow/contracts/schedule';
-import {
-  createRoutineWallClockScheduledHandler,
-} from '../routine-wall-clock-scheduled-handler';
+import { createRoutineWallClockScheduledHandler } from '../routine-wall-clock-scheduled-handler';
 import type {
   RoutineScheduleExecutionOutcome,
   RoutineScheduleExecutionSource,
@@ -20,7 +18,11 @@ function createContext(
 ): ScheduledInvocationContext {
   return {
     identityId: FIXTURE_F.identityId,
-    owner: { identityId: FIXTURE_F.identityId, type: ROUTINE_SCHEDULING_OWNER_TYPE, id: FIXTURE_F.routineId },
+    owner: {
+      identityId: FIXTURE_F.identityId,
+      type: ROUTINE_SCHEDULING_OWNER_TYPE,
+      id: FIXTURE_F.routineId,
+    },
     schedulingKey: buildRoutineWallClockSchedulingKey(FIXTURE_F.routineId, fixtureOccurrenceKey()),
     handlerKey: ROUTINE_WALLCLOCK_HANDLER_KEY,
     runAt: FIXTURE_F.firstOccurrenceAt,
@@ -49,12 +51,19 @@ function createScriptedSource(
 describe('createRoutineWallClockScheduledHandler (ROUTINE-3401)', () => {
   it('registers the neutral handler key with strict payload validation', () => {
     const registration = createRoutineWallClockScheduledHandler({
-      executionSource: createScriptedSource({ kind: 'succeeded', occurrenceId: 'oc-1', nextOccurrenceAt: null, notificationRequested: true }),
+      executionSource: createScriptedSource({
+        kind: 'succeeded',
+        occurrenceId: 'oc-1',
+        nextOccurrenceAt: null,
+        notificationRequested: true,
+      }),
     });
     expect(registration.handlerKey).toBe(ROUTINE_WALLCLOCK_HANDLER_KEY);
     expect(registration.payloadVersion).toBe(ROUTINE_WALLCLOCK_PAYLOAD_VERSION);
     expect(registration.validatePayload(createContext().payload)).toEqual(createContext().payload);
-    expect(() => registration.validatePayload({ ...createContext().payload, scheduledFor: undefined })).toThrow(TypeError);
+    expect(() =>
+      registration.validatePayload({ ...createContext().payload, scheduledFor: undefined }),
+    ).toThrow(TypeError);
   });
 
   it('maps a fulfilled occurrence to a succeeded result', async () => {
@@ -69,16 +78,28 @@ describe('createRoutineWallClockScheduledHandler (ROUTINE-3401)', () => {
     const result = await registration.handler.execute(createContext());
     expect(result).toEqual({
       status: 'succeeded',
-      result: { occurrenceId: 'oc-1', nextOccurrenceAt: FIXTURE_F.nextOccurrenceAt, notificationRequested: true },
+      result: {
+        occurrenceId: 'oc-1',
+        nextOccurrenceAt: FIXTURE_F.nextOccurrenceAt,
+        notificationRequested: true,
+      },
     });
   });
 
   it('maps a skip to a skipped result without retry semantics', async () => {
     const registration = createRoutineWallClockScheduledHandler({
-      executionSource: createScriptedSource({ kind: 'skipped', reason: 'revision-drifted', occurrenceId: null }),
+      executionSource: createScriptedSource({
+        kind: 'skipped',
+        reason: 'revision-drifted',
+        occurrenceId: null,
+      }),
     });
     const result = await registration.handler.execute(createContext());
-    expect(result).toEqual({ status: 'skipped', reason: 'revision-drifted', result: { occurrenceId: null } });
+    expect(result).toEqual({
+      status: 'skipped',
+      reason: 'revision-drifted',
+      result: { occurrenceId: null },
+    });
   });
 
   it('maps a transient failure to a retryable HANDLER_EXECUTION_FAILED', async () => {
@@ -94,12 +115,20 @@ describe('createRoutineWallClockScheduledHandler (ROUTINE-3401)', () => {
 
   it('maps a fencing rejection to a non-retryable dead-letter', async () => {
     const registration = createRoutineWallClockScheduledHandler({
-      executionSource: createScriptedSource({ kind: 'dead-letter', reason: 'fencing-rejected', error: 'Stale fencing token' }),
+      executionSource: createScriptedSource({
+        kind: 'dead-letter',
+        reason: 'fencing-rejected',
+        error: 'Stale fencing token',
+      }),
     });
     const result = await registration.handler.execute(createContext());
     expect(result).toEqual({
       status: 'dead_letter',
-      failure: { code: 'DISPATCH_STATE_CONFLICT', message: 'Stale fencing token', retryable: false },
+      failure: {
+        code: 'DISPATCH_STATE_CONFLICT',
+        message: 'Stale fencing token',
+        retryable: false,
+      },
       result: { reason: 'fencing-rejected' },
     });
   });

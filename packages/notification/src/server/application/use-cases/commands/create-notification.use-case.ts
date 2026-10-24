@@ -23,7 +23,10 @@ import type {
   NotificationOutboxDispatchPlan,
 } from '../../../domain/repositories';
 import { Notification } from '../../../domain/aggregates/notification';
-import { NotificationPolicy, type NotificationDeliveryDecision } from '../../../domain/services/notification-policy';
+import {
+  NotificationPolicy,
+  type NotificationDeliveryDecision,
+} from '../../../domain/services/notification-policy';
 import { NotificationWorkflowCatalog } from '../../../domain/services/notification-workflow-catalog';
 import {
   SystemDeliveryGuard,
@@ -77,7 +80,10 @@ export class CreateNotificationUseCase {
 
     const workflowKey = params.workflowKey?.trim();
     if (!workflowKey) {
-      return error('VALIDATION_ERROR', 'workflowKey is required; category-based workflow inference is retired');
+      return error(
+        'VALIDATION_ERROR',
+        'workflowKey is required; category-based workflow inference is retired',
+      );
     }
     const workflow = this.workflowCatalog.resolve(workflowKey, params.topic);
     const idempotencyKey = params.idempotencyKey?.trim() || `notification:${randomUUID()}`;
@@ -131,8 +137,8 @@ export class CreateNotificationUseCase {
       });
 
       if (
-        decision.outcome === NotificationDeliveryPlanOutcome.Enqueued
-        || decision.outcome === NotificationDeliveryPlanOutcome.Deferred
+        decision.outcome === NotificationDeliveryPlanOutcome.Enqueued ||
+        decision.outcome === NotificationDeliveryPlanOutcome.Deferred
       ) {
         const usage = await this.notificationRepository.getDeliveryUsage(
           params.identityId,
@@ -157,10 +163,10 @@ export class CreateNotificationUseCase {
       deliveryDecisions.push(decision);
 
       if (
-        decision.outcome === NotificationDeliveryPlanOutcome.Suppressed
-        || decision.outcome === NotificationDeliveryPlanOutcome.RateLimited
-        || decision.outcome === NotificationDeliveryPlanOutcome.Disabled
-        || decision.outcome === NotificationDeliveryPlanOutcome.Unsupported
+        decision.outcome === NotificationDeliveryPlanOutcome.Suppressed ||
+        decision.outcome === NotificationDeliveryPlanOutcome.RateLimited ||
+        decision.outcome === NotificationDeliveryPlanOutcome.Disabled ||
+        decision.outcome === NotificationDeliveryPlanOutcome.Unsupported
       ) {
         continue;
       }

@@ -15,15 +15,15 @@ tags: [standard, domain/shared]
 
 **优势**:
 
-* **Runtime**: 运行时就是原生 `string` 或 `number`，序列化/反序列化成本为 0。
-* **Compile-time**: 具有严格的类型区分（`UserId` 不能赋值给 `AccountId`）。
-* **Behavior**: 通过同名对象提供类似 Class 的静态方法和行为。
+- **Runtime**: 运行时就是原生 `string` 或 `number`，序列化/反序列化成本为 0。
+- **Compile-time**: 具有严格的类型区分（`UserId` 不能赋值给 `AccountId`）。
+- **Behavior**: 通过同名对象提供类似 Class 的静态方法和行为。
 
 **ID 命名与语义约束**:
 
-* 标识符类型命名必须使用 `xxId`（如 `IdentityId`, `GoalId`），禁止 `xxUuid` 命名。
-* DTO 与实体中的标识符字段命名必须使用 `*Id` 后缀，禁止 `*Uuid` 字段。
-* 当前项目中 `account` 与 `identity` 聚合根的主标识均应为 `identityId`。
+- 标识符类型命名必须使用 `xxId`（如 `IdentityId`, `GoalId`），禁止 `xxUuid` 命名。
+- DTO 与实体中的标识符字段命名必须使用 `*Id` 后缀，禁止 `*Uuid` 字段。
+- 当前项目中 `account` 与 `identity` 聚合根的主标识均应为 `identityId`。
 
 ---
 
@@ -31,22 +31,21 @@ tags: [standard, domain/shared]
 
 ### 2.1 类型定义 (The Type)
 
-* 使用 `type` 关键字。
-* 必须交叉合并 `readonly __brand: unique symbol`。
-* 原始类型应来自 `contracts` 包。
+- 使用 `type` 关键字。
+- 必须交叉合并 `readonly __brand: unique symbol`。
+- 原始类型应来自 `contracts` 包。
 
 ```typescript
 import type { OrderStatusDTO } from '@memoflow/contracts/order';
 
 // 定义
 export type OrderStatus = OrderStatusDTO & { readonly __brand: unique symbol };
-
 ```
 
 ### 2.2 伴生对象 (The Companion Object)
 
-* 必须定义一个与 type **同名**的 `const` 对象。
-* 充当该类型的“静态类”。
+- 必须定义一个与 type **同名**的 `const` 对象。
+- 充当该类型的“静态类”。
 
 ### 2.3 必须包含的方法
 
@@ -57,9 +56,9 @@ export type OrderStatus = OrderStatusDTO & { readonly __brand: unique symbol };
 
 ### 2.4 行为方法
 
-* 由于 Type 不是 Class，没有 `this`。
-* **约定**: 所有行为方法的**第一个参数**必须是该 Type 的实例。
-* *示例*: `isFinished(status: OrderStatus): boolean`
+- 由于 Type 不是 Class，没有 `this`。
+- **约定**: 所有行为方法的**第一个参数**必须是该 Type 的实例。
+- _示例_: `isFinished(status: OrderStatus): boolean`
 
 ---
 
@@ -109,7 +108,7 @@ export const ThemeMode = {
   },
 
   // ================= 行为方法 (State Logic) =================
-  
+
   /**
    * 是否需要根据系统设置自动切换
    */
@@ -122,13 +121,15 @@ export const ThemeMode = {
    */
   getLabel(mode: ThemeMode): string {
     switch (mode) {
-      case this.LIGHT: return '浅色模式';
-      case this.DARK: return '深色模式';
-      case this.SYSTEM: return '跟随系统';
+      case this.LIGHT:
+        return '浅色模式';
+      case this.DARK:
+        return '深色模式';
+      case this.SYSTEM:
+        return '跟随系统';
     }
-  }
+  },
 };
-
 ```
 
 ---
@@ -137,20 +138,20 @@ export const ThemeMode = {
 
 在 `domain-shared` 中，什么时候用 `class`，什么时候用 `type`？
 
-| 特性 | Class Value Object (e.g., Email, Money) | Type Value Object (e.g., Status, ID, Enum) |
-| --- | --- | --- |
-| **内部结构** | 复杂对象，有多个属性 | 简单原始值 (string, number) |
-| **校验逻辑** | 复杂 (Regex, 组合校验) | 简单 (枚举值检查, 长度检查) |
-| **序列化** | 需要 `toDTO()` | **不需要** (自身就是 DTO) |
-| **内存开销** | 有实例化开销 | **零开销** |
-| **使用场景** | **Email, Address, Money, Profile** | **Gender, Status, CurrencyCode, UserId** |
+| 特性         | Class Value Object (e.g., Email, Money) | Type Value Object (e.g., Status, ID, Enum) |
+| ------------ | --------------------------------------- | ------------------------------------------ |
+| **内部结构** | 复杂对象，有多个属性                    | 简单原始值 (string, number)                |
+| **校验逻辑** | 复杂 (Regex, 组合校验)                  | 简单 (枚举值检查, 长度检查)                |
+| **序列化**   | 需要 `toDTO()`                          | **不需要** (自身就是 DTO)                  |
+| **内存开销** | 有实例化开销                            | **零开销**                                 |
+| **使用场景** | **Email, Address, Money, Profile**      | **Gender, Status, CurrencyCode, UserId**   |
 
 ---
 
 ## 5. 常见误区检查清单
 
-* [ ] **是否忘记了 `__brand`？** (没有 brand 就失去了类型安全)。
-* [ ] **是否实现了 `isValid` 类型守卫？** (用于 API 输入验证)。
-* [ ] **行为方法的第一个参数是否是实例？** (不能用 `this` 访问数据)。
-* [ ] **是否硬编码了字符串？** (应尽量复用 Contract 或内部常量)。
-* [ ] **ID 是否全部采用 `xxId` 命名？** (禁止出现 `xxUuid` 类型或字段命名)。
+- [ ] **是否忘记了 `__brand`？** (没有 brand 就失去了类型安全)。
+- [ ] **是否实现了 `isValid` 类型守卫？** (用于 API 输入验证)。
+- [ ] **行为方法的第一个参数是否是实例？** (不能用 `this` 访问数据)。
+- [ ] **是否硬编码了字符串？** (应尽量复用 Contract 或内部常量)。
+- [ ] **ID 是否全部采用 `xxId` 命名？** (禁止出现 `xxUuid` 类型或字段命名)。

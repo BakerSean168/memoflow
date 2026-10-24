@@ -7,7 +7,9 @@
 
       <CardContent class="px-0 pb-0">
         <!-- 时间点选择器 -->
-        <div class="mb-4 rounded-xl bg-[hsl(var(--surface-raised)/0.34)] p-4 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.46)]">
+        <div
+          class="mb-4 rounded-xl bg-[hsl(var(--surface-raised)/0.34)] p-4 shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.46)]"
+        >
           <Alert class="mb-3">
             <Info class="h-4 w-4" />
             <AlertDescription>{{ t('goal.weightComparison.maxPoints') }}</AlertDescription>
@@ -79,10 +81,14 @@
           <v-chart class="mt-4 h-[400px] w-full" :option="radarChartOption" autoresize />
 
           <!-- 数据表格 -->
-          <div class="mt-4 overflow-x-auto rounded-xl bg-[hsl(var(--surface-raised)/0.2)] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.46)]">
+          <div
+            class="mt-4 overflow-x-auto rounded-xl bg-[hsl(var(--surface-raised)/0.2)] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.46)]"
+          >
             <table class="w-full text-sm">
               <thead>
-                <tr class="border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.42)]">
+                <tr
+                  class="border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-raised)/0.42)]"
+                >
                   <th class="px-4 py-2 text-left font-medium">
                     {{ t('goal.weightComparison.tableKeyResult') }}
                   </th>

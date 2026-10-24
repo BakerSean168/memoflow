@@ -25,9 +25,7 @@ interface PowerSyncProviderOnboardingRow {
   updated_at: number;
 }
 
-export class PowerSyncAIProviderOnboardingSessionRepository
-  implements IAIProviderOnboardingSessionRepository
-{
+export class PowerSyncAIProviderOnboardingSessionRepository implements IAIProviderOnboardingSessionRepository {
   constructor(private readonly db: IElectronDatabase) {}
 
   async create(input: CreateAIProviderOnboardingSessionInput): Promise<void> {
@@ -84,7 +82,9 @@ export class PowerSyncAIProviderOnboardingSessionRepository
       );
       if (!row) return null;
 
-      const verified = Array.from(new Set([...parseStringArray(row.verified_model_ids_json), input.modelId]));
+      const verified = Array.from(
+        new Set([...parseStringArray(row.verified_model_ids_json), input.modelId]),
+      );
       const updated = await tx.execute(
         `UPDATE ai_provider_onboarding_sessions
          SET credential_status = 'valid', verified_model_ids_json = ?, updated_at = ?
@@ -149,7 +149,9 @@ function parseStringArray(value: string | null): string[] {
   if (!value) return [];
   try {
     const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === 'string') : [];
+    return Array.isArray(parsed)
+      ? parsed.filter((item): item is string => typeof item === 'string')
+      : [];
   } catch {
     return [];
   }

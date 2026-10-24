@@ -58,18 +58,21 @@ interface AIProviderConfigControllerService {
   listProviders(cx: ExecutionContext): Promise<Result<AIProviderConfigClientDTO[]>>;
   getProvider(id: string, cx: ExecutionContext): Promise<Result<AIProviderConfigClientDTO>>;
   deleteProvider(id: string, cx: ExecutionContext): Promise<Result<void>>;
-  testConnection(request: TestAIProviderReq, cx: ExecutionContext): Promise<Result<TestAIProviderRes>>;
+  testConnection(
+    request: TestAIProviderReq,
+    cx: ExecutionContext,
+  ): Promise<Result<TestAIProviderRes>>;
   setDefaultProvider(id: string, cx: ExecutionContext): Promise<Result<void>>;
-  refreshProviderModels(providerId: string, cx: ExecutionContext): Promise<Result<AIProviderModelCatalogSnapshot>>;
+  refreshProviderModels(
+    providerId: string,
+    cx: ExecutionContext,
+  ): Promise<Result<AIProviderModelCatalogSnapshot>>;
 }
 
 export class AIProviderConfigController {
   constructor(private readonly service: AIProviderConfigControllerService) {}
 
-  async create(
-    input: unknown,
-    cx: ExecutionContext,
-  ): Promise<Result<AIProviderConfigClientDTO>> {
+  async create(input: unknown, cx: ExecutionContext): Promise<Result<AIProviderConfigClientDTO>> {
     const parsed = CommitAIProviderOnboardingSchema.safeParse(input);
     if (!parsed.success) {
       return fail({
@@ -119,7 +122,11 @@ export class AIProviderConfigController {
   ): Promise<Result<ProbeAIProviderConnectionRes>> {
     const parsed = ProbeAIProviderReplacementSchema.safeParse(input);
     if (!parsed.success) {
-      return fail({ code: 'VALIDATION_ERROR', message: '参数验证失败', details: formatZodErrors(parsed.error.issues) });
+      return fail({
+        code: 'VALIDATION_ERROR',
+        message: '参数验证失败',
+        details: formatZodErrors(parsed.error.issues),
+      });
     }
     return this.service.probeProviderReplacement(id, parsed.data, cx);
   }
@@ -131,7 +138,11 @@ export class AIProviderConfigController {
   ): Promise<Result<AIProviderConfigClientDTO>> {
     const parsed = CommitAIProviderReplacementSchema.safeParse(input);
     if (!parsed.success) {
-      return fail({ code: 'VALIDATION_ERROR', message: '参数验证失败', details: formatZodErrors(parsed.error.issues) });
+      return fail({
+        code: 'VALIDATION_ERROR',
+        message: '参数验证失败',
+        details: formatZodErrors(parsed.error.issues),
+      });
     }
     return this.service.commitProviderReplacement(id, parsed.data, cx);
   }
@@ -190,7 +201,10 @@ export class AIProviderConfigController {
     return ok(null);
   }
 
-  async refreshModels(id: string, cx: ExecutionContext): Promise<Result<AIProviderModelCatalogSnapshot>> {
+  async refreshModels(
+    id: string,
+    cx: ExecutionContext,
+  ): Promise<Result<AIProviderModelCatalogSnapshot>> {
     return this.service.refreshProviderModels(id, cx);
   }
 }

@@ -1,4 +1,8 @@
-import { AIRateLimitPublicFailureSchema, type AIWorkflowExecutionFailure, type AIWorkflowTerminalFailure } from '@memoflow/contracts/ai';
+import {
+  AIRateLimitPublicFailureSchema,
+  type AIWorkflowExecutionFailure,
+  type AIWorkflowTerminalFailure,
+} from '@memoflow/contracts/ai';
 import { extractStructuredResultError } from '@memoflow/contracts/result';
 import { translateResultError } from '../../../shared/utils/translate-result-error';
 import type { LocalAgentExecutionFailure } from '@memoflow/contracts/ai';
@@ -15,7 +19,9 @@ export function workflowInterruptionFailure(error: unknown): AIWorkflowTerminalF
     code: structured?.code ?? 'AI_WORKFLOW_RUNTIME_ERROR',
     message: 'Workflow request interrupted',
     ...(rateLimit.success && rateLimit.data.details ? { details: rateLimit.data.details } : {}),
-    ...(rateLimit.success && rateLimit.data.retryHint ? { retryHint: rateLimit.data.retryHint } : {}),
+    ...(rateLimit.success && rateLimit.data.retryHint
+      ? { retryHint: rateLimit.data.retryHint }
+      : {}),
   };
 }
 
@@ -26,7 +32,9 @@ export function getAIWorkflowTerminalFailureMessage(
 ): string {
   if (failure?.code === 'RATE_LIMITED') {
     const kind = failure.details?.limitKind ?? 'unknown';
-    const message = t(`aiAssistant.businessSurface.${kind === 'quota_exhausted' ? 'quotaExhausted' : kind === 'rate_limit' ? 'rateLimited' : 'limitUnknown'}`);
+    const message = t(
+      `aiAssistant.businessSurface.${kind === 'quota_exhausted' ? 'quotaExhausted' : kind === 'rate_limit' ? 'rateLimited' : 'limitUnknown'}`,
+    );
     return failure.retryHint?.kind === 'after'
       ? `${message} ${t('aiAssistant.businessSurface.retryAfter', { seconds: Math.ceil(failure.retryHint.afterMs / 1000) })}`
       : message;
@@ -43,8 +51,17 @@ export function getGoalWorkflowInterruptionMessage(
   t: (key: string, params?: Record<string, unknown>) => string,
 ): string {
   return [
-    t(`aiAssistant.businessSurface.${interruption.confirmation === 'unconfirmed' ? 'interruptionUnconfirmed' : 'interrupted'}`),
-    ...(interruption.requestedModel ? [t('aiAssistant.businessSurface.selectedModelContext', { model: interruption.requestedModel.name, provider: interruption.requestedModel.provider })] : []),
+    t(
+      `aiAssistant.businessSurface.${interruption.confirmation === 'unconfirmed' ? 'interruptionUnconfirmed' : 'interrupted'}`,
+    ),
+    ...(interruption.requestedModel
+      ? [
+          t('aiAssistant.businessSurface.selectedModelContext', {
+            model: interruption.requestedModel.name,
+            provider: interruption.requestedModel.provider,
+          }),
+        ]
+      : []),
     getAIWorkflowTerminalFailureMessage(interruption.failure, t),
     ...(interruption.draftPreserved ? [t('aiAssistant.businessSurface.draftPreserved')] : []),
   ].join('\n\n');

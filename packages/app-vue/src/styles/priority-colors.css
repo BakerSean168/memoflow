@@ -23,21 +23,21 @@
 
 :root {
   /* High Priority (>= 80) - RED */
-  --priority-high-bg-light: #FEE2E2;      /* Light red background */
-  --priority-high-border-light: #DC2626;  /* Red-600 border (better contrast) */
-  --priority-high-text-light: #7F1D1D;    /* Dark red text */
+  --priority-high-bg-light: #fee2e2; /* Light red background */
+  --priority-high-border-light: #dc2626; /* Red-600 border (better contrast) */
+  --priority-high-text-light: #7f1d1d; /* Dark red text */
   --priority-high-shadow-light: rgba(220, 38, 38, 0.1);
-  
+
   /* Medium Priority (60-79) - AMBER */
-  --priority-medium-bg-light: #FFFBEB;    /* Light amber background */
-  --priority-medium-border-light: #F59E0B; /* Amber-500 border */
-  --priority-medium-text-light: #78350F;  /* Dark amber text */
+  --priority-medium-bg-light: #fffbeb; /* Light amber background */
+  --priority-medium-border-light: #f59e0b; /* Amber-500 border */
+  --priority-medium-text-light: #78350f; /* Dark amber text */
   --priority-medium-shadow-light: rgba(245, 158, 11, 0.1);
-  
+
   /* Low Priority (< 60) - GRAY */
-  --priority-low-bg-light: #F3F4F6;       /* Light gray background */
-  --priority-low-border-light: #9CA3AF;   /* Gray-400 border */
-  --priority-low-text-light: #374151;     /* Dark gray text */
+  --priority-low-bg-light: #f3f4f6; /* Light gray background */
+  --priority-low-border-light: #9ca3af; /* Gray-400 border */
+  --priority-low-text-light: #374151; /* Dark gray text */
   --priority-low-shadow-light: rgba(0, 0, 0, 0.05);
 }
 
@@ -45,23 +45,23 @@
    Dark Theme Color Variables
    ============================================================================ */
 
-[data-theme="dark"] {
+[data-theme='dark'] {
   /* High Priority (>= 80) - RED */
-  --priority-high-bg-dark: #7F1D1D;       /* Dark red background */
-  --priority-high-border-dark: #FCA5A5;   /* Red-300 border */
-  --priority-high-text-dark: #FECACA;     /* Light red text */
+  --priority-high-bg-dark: #7f1d1d; /* Dark red background */
+  --priority-high-border-dark: #fca5a5; /* Red-300 border */
+  --priority-high-text-dark: #fecaca; /* Light red text */
   --priority-high-shadow-dark: rgba(252, 165, 165, 0.1);
-  
+
   /* Medium Priority (60-79) - AMBER */
-  --priority-medium-bg-dark: #78350F;     /* Dark amber background */
-  --priority-medium-border-dark: #FBBF24; /* Amber-400 border */
-  --priority-medium-text-dark: #FCD34D;   /* Light amber text */
+  --priority-medium-bg-dark: #78350f; /* Dark amber background */
+  --priority-medium-border-dark: #fbbf24; /* Amber-400 border */
+  --priority-medium-text-dark: #fcd34d; /* Light amber text */
   --priority-medium-shadow-dark: rgba(251, 191, 36, 0.1);
-  
+
   /* Low Priority (< 60) - GRAY */
-  --priority-low-bg-dark: #374151;        /* Dark gray background */
-  --priority-low-border-dark: #9CA3AF;    /* Gray-400 border */
-  --priority-low-text-dark: #D1D5DB;      /* Light gray text */
+  --priority-low-bg-dark: #374151; /* Dark gray background */
+  --priority-low-border-dark: #9ca3af; /* Gray-400 border */
+  --priority-low-text-dark: #d1d5db; /* Light gray text */
   --priority-low-shadow-dark: rgba(0, 0, 0, 0.3);
 }
 
@@ -94,21 +94,21 @@
    Utility Classes - Dark Theme
    ============================================================================ */
 
-[data-theme="dark"] .priority-high-dark {
+[data-theme='dark'] .priority-high-dark {
   background-color: var(--priority-high-bg-dark);
   border-color: var(--priority-high-border-dark);
   color: var(--priority-high-text-dark);
   box-shadow: 0 2px 4px var(--priority-high-shadow-dark);
 }
 
-[data-theme="dark"] .priority-medium-dark {
+[data-theme='dark'] .priority-medium-dark {
   background-color: var(--priority-medium-bg-dark);
   border-color: var(--priority-medium-border-dark);
   color: var(--priority-medium-text-dark);
   box-shadow: 0 2px 4px var(--priority-medium-shadow-dark);
 }
 
-[data-theme="dark"] .priority-low-dark {
+[data-theme='dark'] .priority-low-dark {
   background-color: var(--priority-low-bg-dark);
   border-color: var(--priority-low-border-dark);
   color: var(--priority-low-text-dark);

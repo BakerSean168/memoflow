@@ -1,7 +1,10 @@
 import { z } from 'zod';
 import { brandedId } from '../../../primitives';
 import type { AiProviderConfigId } from '../../../primitives';
-import { AIModelInfoSchema, type AIProviderConfigClientDTO } from '../aggregates/ai-provider-config-client';
+import {
+  AIModelInfoSchema,
+  type AIProviderConfigClientDTO,
+} from '../aggregates/ai-provider-config-client';
 import type { TestAIProviderResultDTO } from '../dtos/provider-test-result.dto';
 import { ListAIProviderConfigsResSchema } from './response-schemas';
 

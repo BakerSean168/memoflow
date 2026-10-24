@@ -499,27 +499,27 @@ interface ModuleManifest {
 
 ## 15. 验收矩阵
 
-| 场景 | 通过条件 |
-| --- | --- |
-| 两个 API/worker 同时 claim occurrence | 只有一个成功，另一个可安全重试 |
-| Scheduler 在 source mutation 后崩溃 | 重启最终完成一次 source mutation 和一次 delivery intent |
-| Notification channel 失败 | durable retry、退避、dead-letter 和 receipt 可查询 |
-| Projection 首次启动/中断重建 | 自动 reconcile，旧读模型不会变成半成品 |
-| 两客户端编辑 Task | 一个成功，一个 CONFLICT，不静默覆盖 |
-| Task 完成后撤销 | Contribution apply/revert 后 Goal 与 Task 一致 |
-| 任务列表并发打开 | 查询无写副作用，不产生重复 occurrence |
-| DST/时区切换 | 本地日期和时间点保持正确 |
-| Reminder snooze/complete/dismiss | 源状态、响应、通知回执形成可追踪链路 |
-| Goal review 提交 | 可生成带状态和 relation 的下一行动 |
-| Habit check-in | streak、跳过、补签、暂停和 Goal contribution 可重放 |
-| AI execute 重试 | 同 plan hash/action id 不重复创建实体 |
-| Knowledge 全量对账 | 只索引内容变化的 Note，不全库重置 pending |
-| PowerSync 离线冲突 | 与 Prisma 使用同一版本和 relation policy，无悬空关系 |
-| Export -> Import -> Export | 关系、时间、状态和 Review 字段等价 |
-| Settings 导航 | dirty/busy 可拦截，Workspace/AI 不被销毁 |
-| Tab 超出缓存上限 | 有明确限制或持久草稿，不静默驱逐实例 |
-| 各模块滚动 | 每个 surface 一个主 scroll host，sticky 行为一致 |
-| 新增 Wallet | 只改 Wallet、manifest、migration 和测试，不改中央核心清单 |
+| 场景                                  | 通过条件                                                  |
+| ------------------------------------- | --------------------------------------------------------- |
+| 两个 API/worker 同时 claim occurrence | 只有一个成功，另一个可安全重试                            |
+| Scheduler 在 source mutation 后崩溃   | 重启最终完成一次 source mutation 和一次 delivery intent   |
+| Notification channel 失败             | durable retry、退避、dead-letter 和 receipt 可查询        |
+| Projection 首次启动/中断重建          | 自动 reconcile，旧读模型不会变成半成品                    |
+| 两客户端编辑 Task                     | 一个成功，一个 CONFLICT，不静默覆盖                       |
+| Task 完成后撤销                       | Contribution apply/revert 后 Goal 与 Task 一致            |
+| 任务列表并发打开                      | 查询无写副作用，不产生重复 occurrence                     |
+| DST/时区切换                          | 本地日期和时间点保持正确                                  |
+| Reminder snooze/complete/dismiss      | 源状态、响应、通知回执形成可追踪链路                      |
+| Goal review 提交                      | 可生成带状态和 relation 的下一行动                        |
+| Habit check-in                        | streak、跳过、补签、暂停和 Goal contribution 可重放       |
+| AI execute 重试                       | 同 plan hash/action id 不重复创建实体                     |
+| Knowledge 全量对账                    | 只索引内容变化的 Note，不全库重置 pending                 |
+| PowerSync 离线冲突                    | 与 Prisma 使用同一版本和 relation policy，无悬空关系      |
+| Export -> Import -> Export            | 关系、时间、状态和 Review 字段等价                        |
+| Settings 导航                         | dirty/busy 可拦截，Workspace/AI 不被销毁                  |
+| Tab 超出缓存上限                      | 有明确限制或持久草稿，不静默驱逐实例                      |
+| 各模块滚动                            | 每个 surface 一个主 scroll host，sticky 行为一致          |
+| 新增 Wallet                           | 只改 Wallet、manifest、migration 和测试，不改中央核心清单 |
 
 ## 16. 完成定义
 

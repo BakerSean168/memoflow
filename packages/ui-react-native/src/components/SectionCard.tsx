@@ -11,7 +11,14 @@ export type SectionCardProps = ViewProps & {
   footer?: ReactNode;
 };
 
-export function SectionCard({ children, description, footer, style, title, ...props }: SectionCardProps) {
+export function SectionCard({
+  children,
+  description,
+  footer,
+  style,
+  title,
+  ...props
+}: SectionCardProps) {
   return (
     <ThemedView type="backgroundElement" style={[styles.card, style]} {...props}>
       <ThemedView style={styles.header}>

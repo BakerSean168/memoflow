@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import type { CalendarRootEmits, CalendarRootProps } from 'reka-ui'
-import type { HTMLAttributes } from 'vue'
-import type { DateValue } from '@internationalized/date'
-import { cn } from '../../../lib/utils'
-import { getDayOfWeek } from '@internationalized/date'
-import { CalendarRoot, useForwardPropsEmits } from 'reka-ui'
-import { computed } from 'vue'
+import type { CalendarRootEmits, CalendarRootProps } from 'reka-ui';
+import type { HTMLAttributes } from 'vue';
+import type { DateValue } from '@internationalized/date';
+import { cn } from '../../../lib/utils';
+import { getDayOfWeek } from '@internationalized/date';
+import { CalendarRoot, useForwardPropsEmits } from 'reka-ui';
+import { computed } from 'vue';
 import {
   CalendarCell,
   CalendarCellTrigger,
@@ -19,17 +19,17 @@ import {
   CalendarNextButton,
   CalendarPrevButton,
   CalendarReturnButton,
-} from '.'
+} from '.';
 
-type CalendarAppearance = 'default' | 'linear'
+type CalendarAppearance = 'default' | 'linear';
 
 const props = withDefaults(
   defineProps<
     CalendarRootProps & {
-      class?: HTMLAttributes['class']
-      appearance?: CalendarAppearance
-      returnDate?: DateValue
-      returnToSelectedLabel?: string
+      class?: HTMLAttributes['class'];
+      appearance?: CalendarAppearance;
+      returnDate?: DateValue;
+      returnToSelectedLabel?: string;
     }
   >(),
   {
@@ -37,9 +37,9 @@ const props = withDefaults(
     returnDate: undefined,
     returnToSelectedLabel: 'Return to today',
   },
-)
+);
 
-const emits = defineEmits<CalendarRootEmits>()
+const emits = defineEmits<CalendarRootEmits>();
 
 const delegatedProps = computed(() => {
   const {
@@ -48,31 +48,31 @@ const delegatedProps = computed(() => {
     returnDate: ___,
     returnToSelectedLabel: ____,
     ...delegated
-  } = props
+  } = props;
 
-  return delegated
-})
+  return delegated;
+});
 
-const forwarded = useForwardPropsEmits(delegatedProps, emits)
-const isLinear = computed(() => props.appearance === 'linear')
+const forwarded = useForwardPropsEmits(delegatedProps, emits);
+const isLinear = computed(() => props.appearance === 'linear');
 
 function isWeekend(date: DateValue): boolean {
-  const weekday = getDayOfWeek(date, 'en-US', 'sun')
-  return weekday === 0 || weekday === 6
+  const weekday = getDayOfWeek(date, 'en-US', 'sun');
+  return weekday === 0 || weekday === 6;
 }
 
 function isWeekendColumn(index: number): boolean {
-  if (typeof props.weekStartsOn !== 'number') return false
-  const weekday = (props.weekStartsOn + index) % 7
-  return weekday === 0 || weekday === 6
+  if (typeof props.weekStartsOn !== 'number') return false;
+  const weekday = (props.weekStartsOn + index) % 7;
+  return weekday === 0 || weekday === 6;
 }
 
 function isWeekendBlockStart(index: number): boolean {
-  return isWeekendColumn(index) && (index === 0 || !isWeekendColumn(index - 1))
+  return isWeekendColumn(index) && (index === 0 || !isWeekendColumn(index - 1));
 }
 
 function isWeekendBlockEnd(index: number): boolean {
-  return isWeekendColumn(index) && (index === 6 || !isWeekendColumn(index + 1))
+  return isWeekendColumn(index) && (index === 6 || !isWeekendColumn(index + 1));
 }
 </script>
 
@@ -84,7 +84,9 @@ function isWeekendBlockEnd(index: number): boolean {
   >
     <CalendarHeader :class="isLinear ? 'justify-start pt-0' : undefined">
       <template v-if="isLinear">
-        <CalendarHeading class="mr-auto text-[13px] font-semibold tracking-[-0.01em] text-foreground/90" />
+        <CalendarHeading
+          class="mr-auto text-[13px] font-semibold tracking-[-0.01em] text-foreground/90"
+        />
         <CalendarReturnButton :date="returnDate" :label="returnToSelectedLabel" />
         <CalendarPrevButton
           class="h-6 w-6 border-0 bg-transparent p-0 shadow-none opacity-55 hover:bg-accent/70 hover:opacity-100"
@@ -120,7 +122,8 @@ function isWeekendBlockEnd(index: number): boolean {
                 isLinear
                   ? cn(
                       'h-7 flex-1 text-[11px] font-normal text-muted-foreground/70',
-                      isWeekendColumn(dayIndex) && 'bg-[hsl(var(--selected))] text-muted-foreground',
+                      isWeekendColumn(dayIndex) &&
+                        'bg-[hsl(var(--selected))] text-muted-foreground',
                       isWeekendBlockStart(dayIndex) && 'rounded-tl-lg',
                       isWeekendBlockEnd(dayIndex) && 'rounded-tr-lg',
                     )

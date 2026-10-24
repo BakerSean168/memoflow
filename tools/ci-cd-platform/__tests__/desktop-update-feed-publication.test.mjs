@@ -121,7 +121,9 @@ async function createFixture({ windowsPrimary = 'MemoFlow-Windows-1.2.3-Setup.ex
 async function tree(root) {
   const entries = [];
   async function visit(dir, prefix = '') {
-    for (const entry of (await readdir(dir, { withFileTypes: true })).sort((a, b) => a.name.localeCompare(b.name))) {
+    for (const entry of (await readdir(dir, { withFileTypes: true })).sort((a, b) =>
+      a.name.localeCompare(b.name),
+    )) {
       const relative = path.posix.join(prefix, entry.name);
       const absolute = path.join(dir, entry.name);
       if (entry.isDirectory()) await visit(absolute, relative);
@@ -142,15 +144,21 @@ test('materializes only eligible lanes and preserves canonical artifact identity
       outputRoot,
     });
 
-    assert.deepEqual(receipt.lanes.map((lane) => `${lane.platform}/${lane.arch}`), ['windows/x64']);
-    assert.deepEqual(receipt.skippedLanes.map((lane) => ({
-      coordinate: `${lane.platform}/${lane.arch}`,
-      reason: lane.reason,
-    })), [
-      { coordinate: 'darwin/arm64', reason: 'Desktop update feed signing state is ineligible' },
-      { coordinate: 'darwin/x64', reason: 'Desktop update feed signing state is ineligible' },
-      { coordinate: 'linux/x64', reason: 'Desktop update feed runtime evidence is ineligible' },
-    ]);
+    assert.deepEqual(
+      receipt.lanes.map((lane) => `${lane.platform}/${lane.arch}`),
+      ['windows/x64'],
+    );
+    assert.deepEqual(
+      receipt.skippedLanes.map((lane) => ({
+        coordinate: `${lane.platform}/${lane.arch}`,
+        reason: lane.reason,
+      })),
+      [
+        { coordinate: 'darwin/arm64', reason: 'Desktop update feed signing state is ineligible' },
+        { coordinate: 'darwin/x64', reason: 'Desktop update feed signing state is ineligible' },
+        { coordinate: 'linux/x64', reason: 'Desktop update feed runtime evidence is ineligible' },
+      ],
+    );
     assert.match(receipt.versionedPrefix, /^versions\/v1\.2\.3\//u);
     const lane = receipt.lanes[0];
     assert.ok(lane.files.some((file) => file.role === 'blockmap'));
@@ -179,8 +187,16 @@ test('feed materialization is deterministic across output directories', async ()
   try {
     const first = path.join(fixture.cwd, 'feed-a');
     const second = path.join(fixture.cwd, 'feed-b');
-    await materializeDesktopUpdateFeed({ manifestPath: fixture.manifestPath, artifactRoot: fixture.artifactRoot, outputRoot: first });
-    await materializeDesktopUpdateFeed({ manifestPath: fixture.manifestPath, artifactRoot: fixture.artifactRoot, outputRoot: second });
+    await materializeDesktopUpdateFeed({
+      manifestPath: fixture.manifestPath,
+      artifactRoot: fixture.artifactRoot,
+      outputRoot: first,
+    });
+    await materializeDesktopUpdateFeed({
+      manifestPath: fixture.manifestPath,
+      artifactRoot: fixture.artifactRoot,
+      outputRoot: second,
+    });
     assert.deepEqual(await tree(first), await tree(second));
   } finally {
     await rm(fixture.cwd, { recursive: true, force: true });
@@ -224,8 +240,13 @@ test('rejects path traversal and ambiguous canonical artifact resolution', async
 });
 
 test('release workflow materializes and retains feed evidence after metadata closure', async () => {
-  const workflow = await readFile(path.join(repoRoot, '.github/workflows/release-assets.yml'), 'utf8');
-  const verify = workflow.indexOf('verify-desktop-update-metadata.mjs desktop-release-manifest.json artifacts');
+  const workflow = await readFile(
+    path.join(repoRoot, '.github/workflows/release-assets.yml'),
+    'utf8',
+  );
+  const verify = workflow.indexOf(
+    'verify-desktop-update-metadata.mjs desktop-release-manifest.json artifacts',
+  );
   const materialize = workflow.indexOf('materialize-desktop-update-feed.mjs');
   const retain = workflow.indexOf('desktop-update-feed-evidence');
   const releaseUpload = workflow.indexOf('gh release upload');
@@ -234,7 +255,9 @@ test('release workflow materializes and retains feed evidence after metadata clo
   assert.ok(materialize > verify);
   assert.ok(retain > materialize);
   assert.ok(releaseUpload > materialize);
-  assert.doesNotMatch(workflow, /publication_class|publicationClass|extraMetadata\.memoflowUpdate/u);
+  assert.doesNotMatch(
+    workflow,
+    /publication_class|publicationClass|extraMetadata\.memoflowUpdate/u,
+  );
   assert.match(workflow, /desktop-release-manifest\.json artifacts desktop-update-feed stable/u);
-
 });

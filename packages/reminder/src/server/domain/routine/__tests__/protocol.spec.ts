@@ -30,7 +30,11 @@ function create5010(options: { afterFinalCycle?: 'include' | 'skip' } = {}) {
 describe('ProtocolDefinition', () => {
   it('owns the phase vocabulary and keeps protocol truth independent from Electron', () => {
     expect(PROTOCOL_PHASE_KINDS).toEqual([
-      'Prepare', 'Focus', 'ShortBreak', 'LongBreak', 'Recovery',
+      'Prepare',
+      'Focus',
+      'ShortBreak',
+      'LongBreak',
+      'Recovery',
     ]);
     const source = ProtocolDefinition.toString();
     expect(source).not.toContain('BrowserWindow');
@@ -38,13 +42,16 @@ describe('ProtocolDefinition', () => {
   });
 
   it('expands 50/10 x2 into Focus -> Break -> Focus -> Break', () => {
-    expect(create5010().buildPhasePlan().map((phase) => [phase.kind, phase.cycle, phase.durationMs]))
-      .toEqual([
-        ['Focus', 1, 50 * minute],
-        ['ShortBreak', 1, 10 * minute],
-        ['Focus', 2, 50 * minute],
-        ['ShortBreak', 2, 10 * minute],
-      ]);
+    expect(
+      create5010()
+        .buildPhasePlan()
+        .map((phase) => [phase.kind, phase.cycle, phase.durationMs]),
+    ).toEqual([
+      ['Focus', 1, 50 * minute],
+      ['ShortBreak', 1, 10 * minute],
+      ['Focus', 2, 50 * minute],
+      ['ShortBreak', 2, 10 * minute],
+    ]);
   });
 
   it('applies deterministic final-break and long-break policies', () => {
@@ -68,8 +75,9 @@ describe('ProtocolDefinition', () => {
     const plan = protocol.buildPhasePlan();
 
     expect(plan[0]).toMatchObject({ kind: 'Prepare', cycle: null });
-    expect(plan.filter((phase) => phase.kind === 'LongBreak').map((phase) => phase.cycle))
-      .toEqual([2]);
+    expect(plan.filter((phase) => phase.kind === 'LongBreak').map((phase) => phase.cycle)).toEqual([
+      2,
+    ]);
     expect(plan.at(-1)).toMatchObject({ kind: 'Recovery', cycle: null });
     expect(plan.some((phase) => phase.cycle === 4 && phase.kind.includes('Break'))).toBe(false);
   });
@@ -77,7 +85,9 @@ describe('ProtocolDefinition', () => {
 
 describe('ProtocolSession deterministic state machine', () => {
   it('declares the transition table explicitly', () => {
-    const cases: Array<[ProtocolSessionState, ProtocolSessionAction, readonly ProtocolSessionState[] | undefined]> = [
+    const cases: Array<
+      [ProtocolSessionState, ProtocolSessionAction, readonly ProtocolSessionState[] | undefined]
+    > = [
       ['Idle', 'start', ['Running']],
       ['Running', 'pause', ['Paused']],
       ['Paused', 'resume', ['Running']],
@@ -88,8 +98,13 @@ describe('ProtocolSession deterministic state machine', () => {
       ['Cancelled', 'resume', undefined],
     ];
     for (const [state, action, target] of cases) {
-      expect((PROTOCOL_SESSION_TRANSITIONS[state] as Partial<Record<ProtocolSessionAction, readonly ProtocolSessionState[]>>)[action])
-        .toEqual(target);
+      expect(
+        (
+          PROTOCOL_SESSION_TRANSITIONS[state] as Partial<
+            Record<ProtocolSessionAction, readonly ProtocolSessionState[]>
+          >
+        )[action],
+      ).toEqual(target);
     }
   });
 
@@ -102,7 +117,11 @@ describe('ProtocolSession deterministic state machine', () => {
     });
 
     session.start(t0);
-    expect([session.status, session.currentPhase?.kind, session.currentCycle]).toEqual(['Running', 'Focus', 1]);
+    expect([session.status, session.currentPhase?.kind, session.currentCycle]).toEqual([
+      'Running',
+      'Focus',
+      1,
+    ]);
 
     session.advanceDuePhases(asInstant(Number(t0) + 50 * minute));
     expect([session.currentPhase?.kind, session.currentCycle]).toEqual(['ShortBreak', 1]);
@@ -119,7 +138,11 @@ describe('ProtocolSession deterministic state machine', () => {
   });
 
   it('pause/resume preserves remaining phase time and accumulated pause', () => {
-    const session = ProtocolSession.create({ identityId: 'identity-1', protocol: create5010(), now: t0 });
+    const session = ProtocolSession.create({
+      identityId: 'identity-1',
+      protocol: create5010(),
+      now: t0,
+    });
     session.start(t0);
     session.pause(asInstant(Number(t0) + 20 * minute));
 
@@ -134,7 +157,11 @@ describe('ProtocolSession deterministic state machine', () => {
   });
 
   it('can restore a persistent session snapshot and catch up from deadlines after restart', () => {
-    const session = ProtocolSession.create({ identityId: 'identity-1', protocol: create5010(), now: t0 });
+    const session = ProtocolSession.create({
+      identityId: 'identity-1',
+      protocol: create5010(),
+      now: t0,
+    });
     session.start(t0);
     const snapshot = session.snapshot();
     const restored = ProtocolSession.load(snapshot);
@@ -146,26 +173,36 @@ describe('ProtocolSession deterministic state machine', () => {
   });
 
   it('rejects cross-field inconsistent persistent snapshots during restore', () => {
-    const session = ProtocolSession.create({ identityId: 'identity-1', protocol: create5010(), now: t0 });
+    const session = ProtocolSession.create({
+      identityId: 'identity-1',
+      protocol: create5010(),
+      now: t0,
+    });
     session.start(t0);
     const running = session.snapshot();
 
-    expect(() => ProtocolSession.load({
-      ...running,
-      protocolVersion: running.protocolVersion + 1,
-    })).toThrow('protocol snapshot version mismatch');
-    expect(() => ProtocolSession.load({
-      ...running,
-      state: 'Paused',
-      pausedAt: null,
-    })).toThrow('Paused ProtocolSession snapshot is inconsistent');
-    expect(() => ProtocolSession.load({
-      ...running,
-      state: 'Completed',
-      endedAt: asInstant(Number(t0) + minute),
-      terminationReason: 'user-cancelled',
-      phaseDeadline: null,
-    })).toThrow('invalid termination reason');
+    expect(() =>
+      ProtocolSession.load({
+        ...running,
+        protocolVersion: running.protocolVersion + 1,
+      }),
+    ).toThrow('protocol snapshot version mismatch');
+    expect(() =>
+      ProtocolSession.load({
+        ...running,
+        state: 'Paused',
+        pausedAt: null,
+      }),
+    ).toThrow('Paused ProtocolSession snapshot is inconsistent');
+    expect(() =>
+      ProtocolSession.load({
+        ...running,
+        state: 'Completed',
+        endedAt: asInstant(Number(t0) + minute),
+        terminationReason: 'user-cancelled',
+        phaseDeadline: null,
+      }),
+    ).toThrow('invalid termination reason');
   });
 
   it('captures the expanded plan so an active session is insulated from later definition revisions', () => {
@@ -173,17 +210,23 @@ describe('ProtocolSession deterministic state machine', () => {
     const session = ProtocolSession.create({ identityId: 'identity-1', protocol, now: t0 });
     const original = session.snapshot();
 
-    protocol.revise({
-      phases: [
-        { id: 'focus', kind: 'Focus', role: 'cycle', durationMs: 40 * minute },
-        { id: 'break', kind: 'ShortBreak', role: 'cycle', durationMs: 10 * minute },
-      ],
-    }, asInstant(Number(t0) + minute));
+    protocol.revise(
+      {
+        phases: [
+          { id: 'focus', kind: 'Focus', role: 'cycle', durationMs: 40 * minute },
+          { id: 'break', kind: 'ShortBreak', role: 'cycle', durationMs: 10 * minute },
+        ],
+      },
+      asInstant(Number(t0) + minute),
+    );
 
     expect(protocol.version).toBe(2);
     expect(original.protocolVersion).toBe(1);
     expect(original.phasePlan.map((phase) => phase.durationMs)).toEqual([
-      50 * minute, 10 * minute, 50 * minute, 10 * minute,
+      50 * minute,
+      10 * minute,
+      50 * minute,
+      10 * minute,
     ]);
     expect(session.snapshot()).toEqual(original);
   });
@@ -199,7 +242,11 @@ describe('ProtocolSession deterministic state machine', () => {
       cyclePolicy: { mode: 'fixed', cycles: 1 },
       now: t0,
     });
-    const session = ProtocolSession.create({ identityId: 'identity-1', protocol: flowtime, now: t0 });
+    const session = ProtocolSession.create({
+      identityId: 'identity-1',
+      protocol: flowtime,
+      now: t0,
+    });
     session.start(t0);
 
     expect(session.snapshot().phaseDeadline).toBeNull();
@@ -209,7 +256,11 @@ describe('ProtocolSession deterministic state machine', () => {
   });
 
   it('catches up an expired phase before pausing and counts pause time when ending while paused', () => {
-    const session = ProtocolSession.create({ identityId: 'identity-1', protocol: create5010(), now: t0 });
+    const session = ProtocolSession.create({
+      identityId: 'identity-1',
+      protocol: create5010(),
+      now: t0,
+    });
     session.start(t0);
     session.pause(asInstant(Number(t0) + 55 * minute));
 
@@ -223,7 +274,11 @@ describe('ProtocolSession deterministic state machine', () => {
     ['end', 'Completed', 'user-ended'],
     ['cancel', 'Cancelled', 'user-cancelled'],
   ] as const)('%s records an explicit termination reason', (action, status, reason) => {
-    const session = ProtocolSession.create({ identityId: 'identity-1', protocol: create5010(), now: t0 });
+    const session = ProtocolSession.create({
+      identityId: 'identity-1',
+      protocol: create5010(),
+      now: t0,
+    });
     session.start(t0);
     const at = asInstant(Number(t0) + minute);
     if (action === 'end') session.end(at);
@@ -235,7 +290,11 @@ describe('ProtocolSession deterministic state machine', () => {
   });
 
   it('rejects invalid transitions rather than silently mutating terminal state', () => {
-    const session = ProtocolSession.create({ identityId: 'identity-1', protocol: create5010(), now: t0 });
+    const session = ProtocolSession.create({
+      identityId: 'identity-1',
+      protocol: create5010(),
+      now: t0,
+    });
     expect(() => session.pause(t0)).toThrow('Idle -> pause');
     session.start(t0);
     session.cancel(asInstant(Number(t0) + minute));

@@ -1,5 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
-import { NumberField, NumberFieldContent, NumberFieldDecrement, NumberFieldIncrement, NumberFieldInput } from '.';
+import {
+  NumberField,
+  NumberFieldContent,
+  NumberFieldDecrement,
+  NumberFieldIncrement,
+  NumberFieldInput,
+} from '.';
 import { Label } from '../label';
 import { ref } from 'vue';
 
@@ -14,7 +20,14 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => ({
-    components: { NumberField, NumberFieldContent, NumberFieldDecrement, NumberFieldIncrement, NumberFieldInput, Label },
+    components: {
+      NumberField,
+      NumberFieldContent,
+      NumberFieldDecrement,
+      NumberFieldIncrement,
+      NumberFieldInput,
+      Label,
+    },
     setup() {
       const value = ref(5);
       return { value };
@@ -34,7 +47,13 @@ export const Default: Story = {
 
 export const WithStep: Story = {
   render: () => ({
-    components: { NumberField, NumberFieldContent, NumberFieldDecrement, NumberFieldIncrement, NumberFieldInput },
+    components: {
+      NumberField,
+      NumberFieldContent,
+      NumberFieldDecrement,
+      NumberFieldIncrement,
+      NumberFieldInput,
+    },
     setup() {
       const value = ref(0);
       return { value };
@@ -53,7 +72,13 @@ export const WithStep: Story = {
 
 export const Disabled: Story = {
   render: () => ({
-    components: { NumberField, NumberFieldContent, NumberFieldDecrement, NumberFieldIncrement, NumberFieldInput },
+    components: {
+      NumberField,
+      NumberFieldContent,
+      NumberFieldDecrement,
+      NumberFieldIncrement,
+      NumberFieldInput,
+    },
     template: `
       <NumberField :default-value="10" disabled>
         <NumberFieldContent>

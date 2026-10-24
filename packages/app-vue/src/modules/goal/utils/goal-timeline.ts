@@ -25,5 +25,4 @@ export interface TimelineData {
 }
 
 /** Soft residual 1216: timeline timestamp via product-time (empty '-'). */
-export const formatTimelineTimestamp = (timestamp: number) =>
-  formatProductDateTime(timestamp, '-');
+export const formatTimelineTimestamp = (timestamp: number) => formatProductDateTime(timestamp, '-');

@@ -36,9 +36,7 @@ export function isYmdShape(value: string): boolean {
   const probe = new Date(0);
   probe.setUTCFullYear(y, mo - 1, d);
   probe.setUTCHours(0, 0, 0, 0);
-  return (
-    probe.getUTCFullYear() === y && probe.getUTCMonth() === mo - 1 && probe.getUTCDate() === d
-  );
+  return probe.getUTCFullYear() === y && probe.getUTCMonth() === mo - 1 && probe.getUTCDate() === d;
 }
 
 export function isHmShape(value: string): boolean {

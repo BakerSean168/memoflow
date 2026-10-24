@@ -26,7 +26,11 @@ describe('ai value objects', () => {
     expect(AIProviderType.of('openai_compatible')).toBe(AIProviderType.OpenAICompatible);
     expect(AIProviderType.isOpenAICompatible(AIProviderType.OpenAICompatible)).toBe(true);
 
-    expect(AIProvider.getAll()).toEqual([AIProvider.OpenAI, AIProvider.Anthropic, AIProvider.Custom]);
+    expect(AIProvider.getAll()).toEqual([
+      AIProvider.OpenAI,
+      AIProvider.Anthropic,
+      AIProvider.Custom,
+    ]);
     expect(AIProvider.of('Anthropic')).toBe(AIProvider.Anthropic);
     expect(AIProvider.isOpenAI(AIProvider.OpenAI)).toBe(true);
     expect(AIProvider.isAnthropic(AIProvider.Anthropic)).toBe(true);

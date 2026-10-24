@@ -3,10 +3,12 @@ import { inferWorkflowMode } from './workflowIntent';
 
 describe('inferWorkflowMode', () => {
   it('routes the issue #569 pasted plan by its final instruction', () => {
-    expect(inferWorkflowMode(`目标名称：掌握前端、全栈与 AI Agent 应用开发，独立交付完整产品
+    expect(
+      inferWorkflowMode(`目标名称：掌握前端、全栈与 AI Agent 应用开发，独立交付完整产品
 建议贯穿开发一个「个人知识与任务助手」
 完成知识条目管理页面，具备搜索、本地存储、错误处理和关键逻辑测试
-我复制了，另一个会话的信息，帮我创建一下目标`)).toBe('goal-create');
+我复制了，另一个会话的信息，帮我创建一下目标`),
+    ).toBe('goal-create');
   });
 
   it.each([

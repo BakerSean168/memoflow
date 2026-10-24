@@ -1,12 +1,15 @@
 # ADR-011: Standard - Naming Conventions
 
 ## Status
+
 Accepted
 
 ## Date
+
 2026-01-15
 
 ## Context
+
 仓库内同时存在 TypeScript、Vue、React、Expo Router 和 Python。此前 ADR-011 把“所有文件统一 kebab-case”作为单一规则，但实际工程中：
 
 - 普通 TS 模块多数已经是 `kebab-case`
@@ -17,6 +20,7 @@ Accepted
 继续强推单一文件命名规则，只会制造无意义 churn，并让规范与真实代码结构长期背离。
 
 ## Decision
+
 命名规范改为按文件职责分层，而不是按“所有文件一刀切”。
 
 ### 1. File & Directory Naming

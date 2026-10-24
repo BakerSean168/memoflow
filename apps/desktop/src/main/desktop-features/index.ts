@@ -100,13 +100,22 @@ export class DesktopFeaturesRuntime {
 export async function initializeDesktopFeatures(
   options: DesktopFeaturesOptions,
 ): Promise<DesktopFeaturesRuntime> {
-  const { mainWindow, windowManager, resolveDeviceNotificationPreferencePath, autoLaunch } = options;
+  const { mainWindow, windowManager, resolveDeviceNotificationPreferencePath, autoLaunch } =
+    options;
   console.log('[Desktop Features] Initializing via CapabilityRegistry...');
 
   const registry = new CapabilityRegistry();
 
-  await registry.register('tray', () => createElectronTrayPort(mainWindow), (port) => port.destroy());
-  await registry.register('shortcut', () => createElectronShortcutPort(mainWindow), (port) => port.destroy());
+  await registry.register(
+    'tray',
+    () => createElectronTrayPort(mainWindow),
+    (port) => port.destroy(),
+  );
+  await registry.register(
+    'shortcut',
+    () => createElectronShortcutPort(mainWindow),
+    (port) => port.destroy(),
+  );
   await registry.register('autolaunch', async () => {
     const port = createElectronAutoLaunchPort(autoLaunch ?? { name: 'MemoFlow', isHidden: true });
     await port.init();

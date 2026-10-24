@@ -1,7 +1,4 @@
-import type {
-  CalendarEntryClientDTO,
-  ConflictDetectionResult,
-} from '@memoflow/contracts/schedule';
+import type { CalendarEntryClientDTO, ConflictDetectionResult } from '@memoflow/contracts/schedule';
 import type { CalendarEventItem } from '../composables/useCalendarView';
 
 const asScheduleId = (value: string) => value as CalendarEntryClientDTO['id'];
@@ -11,7 +8,6 @@ type ScheduleEventStoryOverrides = Omit<Partial<CalendarEntryClientDTO>, 'id' | 
   id?: string;
   identityId?: string;
 };
-
 
 export function createScheduleStoryEvent(
   overrides: ScheduleEventStoryOverrides = {},

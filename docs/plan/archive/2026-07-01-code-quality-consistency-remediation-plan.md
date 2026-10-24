@@ -50,6 +50,7 @@ updated: 2026-07-04T19:20:00+08:00
    - 全仓高价值 raw `eventBus.on/send` seam 继续 typed 化
 
 后续应以 `docs/plan/archive/2026-07-04-post-core-seam-elegant-refactor-plan.md` 为新的执行真值，而不是继续在本文件上滚动追加。
+
 ## 1. 背景
 
 `docs/audit/code-quality-consistency-audit.md` 已经给出一版覆盖全仓的自动化审查结果。该报告方向总体正确，尤其是对以下主题的判断具有较高价值：
@@ -561,6 +562,3 @@ updated: 2026-07-04T19:20:00+08:00
 5. `Phase 5`
 6. `Phase 6`
 7. `Phase 7`
-
-
-

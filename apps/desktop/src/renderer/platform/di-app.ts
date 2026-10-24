@@ -142,7 +142,15 @@ export function installDesktopAppServices(
     snapshotGeneration++;
   });
   app.provide(DESKTOP_ACCESS_SNAPSHOT_KEY, desktopAccessSnapshot);
-  app.provide(GOAL_DRAFT_CHECKPOINT_KEY, createGoalDraftCheckpointStore(() => { const snapshot=desktopAccessSnapshot.value;return snapshot?.unlockState==='UNLOCKED' && snapshot.profile ? `desktop:${snapshot.profile.profileId}` : null; }));
+  app.provide(
+    GOAL_DRAFT_CHECKPOINT_KEY,
+    createGoalDraftCheckpointStore(() => {
+      const snapshot = desktopAccessSnapshot.value;
+      return snapshot?.unlockState === 'UNLOCKED' && snapshot.profile
+        ? `desktop:${snapshot.profile.profileId}`
+        : null;
+    }),
+  );
   void readDesktopAccessSnapshot(bridge, { refreshCloud: true })
     .then((snapshot) => {
       if (refreshGeneration === snapshotGeneration) desktopAccessSnapshot.value = snapshot;

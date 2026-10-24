@@ -108,7 +108,8 @@ export function SettingsScreen() {
       eyebrow="More"
       title="Settings"
       subtitle="主题、语言、区域时间和通知。"
-      refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refresh} />}>
+      refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refresh} />}
+    >
       {!isRemoteAuthenticated ? (
         <SectionCard title="Sign in required" description="登录后可同步设置。">
           <ThemedText type="small" themeColor="textSecondary">
@@ -119,7 +120,10 @@ export function SettingsScreen() {
       ) : (
         <>
           {preferenceError ? (
-            <SectionCard title="Preferences load failed" description="Unable to load canonical preferences.">
+            <SectionCard
+              title="Preferences load failed"
+              description="Unable to load canonical preferences."
+            >
               <ThemedText type="small" themeColor="warning">
                 {preferenceError}
               </ThemedText>
@@ -131,7 +135,10 @@ export function SettingsScreen() {
               <SectionCard title="Summary" description="Canonical preference namespace revisions.">
                 <View style={styles.pillRow}>
                   <StatusPill label="2 canonical namespaces" tone="tint" />
-                  <StatusPill label={`Presentation r${presentationRevision ?? 0}`} tone="textSecondary" />
+                  <StatusPill
+                    label={`Presentation r${presentationRevision ?? 0}`}
+                    tone="textSecondary"
+                  />
                   <StatusPill label={`Regional r${regionalRevision ?? 0}`} tone="textSecondary" />
                   <StatusPill
                     label={isPreferenceMutating ? 'Saving changes' : 'Ready'}
@@ -146,7 +153,10 @@ export function SettingsScreen() {
                 />
               </SectionCard>
 
-              <SectionCard title="Presentation" description="主题与语言由 canonical presentation namespace 管理。">
+              <SectionCard
+                title="Presentation"
+                description="主题与语言由 canonical presentation namespace 管理。"
+              >
                 <View style={styles.pillRow}>
                   <StatusPill label={`Theme ${presentation?.theme ?? 'auto'}`} tone="tint" />
                   <StatusPill label={presentation?.language ?? '—'} tone="textSecondary" />
@@ -177,7 +187,10 @@ export function SettingsScreen() {
                   <StatusPill label={regional?.timeZone ?? '—'} tone="tint" />
                   <StatusPill label={`Date ${regional?.dateStyle ?? '—'}`} tone="textSecondary" />
                   <StatusPill label={regional?.timeStyle ?? '—'} tone="textSecondary" />
-                  <StatusPill label={`Week starts ${regional?.weekStartsOn ?? '—'}`} tone="textSecondary" />
+                  <StatusPill
+                    label={`Week starts ${regional?.weekStartsOn ?? '—'}`}
+                    tone="textSecondary"
+                  />
                 </View>
                 <View style={styles.actionRow}>
                   <PrimaryButton
@@ -199,7 +212,8 @@ export function SettingsScreen() {
           {notificationError ? (
             <SectionCard
               title="Notification settings unavailable"
-              description="Notification preferences are owned by the Notification module.">
+              description="Notification preferences are owned by the Notification module."
+            >
               <ThemedText type="small" themeColor="warning">
                 {notificationError}
               </ThemedText>
@@ -209,19 +223,26 @@ export function SettingsScreen() {
           {notificationPreference ? (
             <SectionCard
               title="Notifications"
-              description="User-level delivery channels are owned by NotificationPreference. Device sound and presentation remain Desktop-local.">
+              description="User-level delivery channels are owned by NotificationPreference. Device sound and presentation remain Desktop-local."
+            >
               <View style={styles.pillRow}>
                 <StatusPill
                   label={`Email ${notificationEnabled(NotificationChannelType.Email) ? 'on' : 'off'}`}
-                  tone={notificationEnabled(NotificationChannelType.Email) ? 'success' : 'textSecondary'}
+                  tone={
+                    notificationEnabled(NotificationChannelType.Email) ? 'success' : 'textSecondary'
+                  }
                 />
                 <StatusPill
                   label={`Push ${notificationEnabled(NotificationChannelType.Push) ? 'on' : 'off'}`}
-                  tone={notificationEnabled(NotificationChannelType.Push) ? 'success' : 'textSecondary'}
+                  tone={
+                    notificationEnabled(NotificationChannelType.Push) ? 'success' : 'textSecondary'
+                  }
                 />
                 <StatusPill
                   label={`In-app ${notificationEnabled(NotificationChannelType.InApp) ? 'on' : 'off'}`}
-                  tone={notificationEnabled(NotificationChannelType.InApp) ? 'success' : 'textSecondary'}
+                  tone={
+                    notificationEnabled(NotificationChannelType.InApp) ? 'success' : 'textSecondary'
+                  }
                 />
               </View>
               <View style={styles.actionRow}>

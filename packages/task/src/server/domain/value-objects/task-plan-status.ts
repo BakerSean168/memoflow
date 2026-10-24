@@ -1,8 +1,11 @@
-import { TaskPlanStatus as TaskPlanStatusContract, type TaskPlanStatus as ITaskPlanStatus } from '@memoflow/contracts/task';
+import {
+  TaskPlanStatus as TaskPlanStatusContract,
+  type TaskPlanStatus as ITaskPlanStatus,
+} from '@memoflow/contracts/task';
 
 /**
  * 📝 任务模板状态 - 任务模板的生命周期状态
- * 
+ *
  * Branded Type：运行时为 string，编译时具有类型安全性
  * 零序列化成本，内存开销极小
  */
@@ -21,7 +24,7 @@ const VALUES: ITaskPlanStatus[] = Object.values(TaskPlanStatusContract);
  */
 export const TaskPlanStatus = {
   // ================= 常量定义 =================
-  
+
   Active: 'Active' as TaskPlanStatus,
   Paused: 'Paused' as TaskPlanStatus,
   Closed: 'Closed' as TaskPlanStatus,

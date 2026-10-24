@@ -19,10 +19,14 @@ export interface IElectronDatabaseTransaction {
  */
 export interface IElectronDatabase extends IElectronDatabaseTransaction {
   /** Public reactive query capability supplied by the live Profile's PowerSync database. */
-  watch?(sql: string, parameters?: unknown[], options?: {
-    signal?: AbortSignal;
-    comparator?: { checkEquality(current: unknown, previous: unknown): boolean };
-  }): AsyncIterable<{ rows?: { _array?: readonly Record<string, unknown>[] } }>;
+  watch?(
+    sql: string,
+    parameters?: unknown[],
+    options?: {
+      signal?: AbortSignal;
+      comparator?: { checkEquality(current: unknown, previous: unknown): boolean };
+    },
+  ): AsyncIterable<{ rows?: { _array?: readonly Record<string, unknown>[] } }>;
   writeTransaction<T>(callback: (tx: IElectronDatabaseTransaction) => Promise<T>): Promise<T>;
   readTransaction?<T>(callback: (tx: IElectronDatabaseTransaction) => Promise<T>): Promise<T>;
 }

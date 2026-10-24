@@ -1,4 +1,7 @@
-import { AIProviderType as AIProviderTypeContract, type AIProviderType as IAIProviderType } from '@memoflow/contracts/ai';
+import {
+  AIProviderType as AIProviderTypeContract,
+  type AIProviderType as IAIProviderType,
+} from '@memoflow/contracts/ai';
 
 export type AIProviderType = IAIProviderType & { readonly __brand: unique symbol };
 

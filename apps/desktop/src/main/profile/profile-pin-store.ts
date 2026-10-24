@@ -63,7 +63,10 @@ export class ProfilePinStore {
       await fs.promises.mkdir(this.directory, { recursive: true, mode: 0o700 });
       const target = this.filePath(profileId);
       const temp = `${target}.tmp`;
-      await fs.promises.writeFile(temp, JSON.stringify(envelope), { encoding: 'utf8', mode: 0o600 });
+      await fs.promises.writeFile(temp, JSON.stringify(envelope), {
+        encoding: 'utf8',
+        mode: 0o600,
+      });
       await fs.promises.rename(temp, target);
       this.failures.delete(profileId);
     } finally {

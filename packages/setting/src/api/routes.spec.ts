@@ -13,7 +13,9 @@ type RegisteredRoute = {
 
 class TestOpenApiRegistry implements OpenApiRegistryLike {
   readonly paths: RegisteredRoute[] = [];
-  registerPath(route: Record<string, unknown>): void { this.paths.push(route as RegisteredRoute); }
+  registerPath(route: Record<string, unknown>): void {
+    this.paths.push(route as RegisteredRoute);
+  }
   register(): void {}
 }
 
@@ -38,15 +40,21 @@ function register() {
 }
 
 function route(registry: TestOpenApiRegistry, method: string, path: string): RegisteredRoute {
-  const found = registry.paths.find((candidate) => candidate.method === method && candidate.path === path);
+  const found = registry.paths.find(
+    (candidate) => candidate.method === method && candidate.path === path,
+  );
   expect(found, `${method.toUpperCase()} ${path}`).toBeDefined();
   return found!;
 }
 
-function bodySchema(registered: RegisteredRoute): { safeParse(value: unknown): { success: boolean } } {
-  return (((registered.request?.body as Record<string, unknown>)?.content as Record<string, unknown>)?.[
-    'application/json'
-  ] as { schema: { safeParse(value: unknown): { success: boolean } } }).schema;
+function bodySchema(registered: RegisteredRoute): {
+  safeParse(value: unknown): { success: boolean };
+} {
+  return (
+    ((registered.request?.body as Record<string, unknown>)?.content as Record<string, unknown>)?.[
+      'application/json'
+    ] as { schema: { safeParse(value: unknown): { success: boolean } } }
+  ).schema;
 }
 
 const BASE = '/api/v1/settings';
@@ -54,17 +62,21 @@ const BASE = '/api/v1/settings';
 describe('canonical Setting HTTP routes', () => {
   it('registers only namespace preferences plus V3 import/export', () => {
     const registry = register();
-    const surfaces = registry.paths.map(({ method, path }) => `${method.toUpperCase()} ${path}`).sort();
+    const surfaces = registry.paths
+      .map(({ method, path }) => `${method.toUpperCase()} ${path}`)
+      .sort();
 
-    expect(surfaces).toEqual([
-      `GET ${BASE}/preferences`,
-      `GET ${BASE}/preferences/{namespace}`,
-      `PATCH ${BASE}/preferences/{namespace}`,
-      `POST ${BASE}/export`,
-      `POST ${BASE}/import`,
-      `POST ${BASE}/preferences/reset-all`,
-      `POST ${BASE}/preferences/{namespace}/reset`,
-    ].sort());
+    expect(surfaces).toEqual(
+      [
+        `GET ${BASE}/preferences`,
+        `GET ${BASE}/preferences/{namespace}`,
+        `PATCH ${BASE}/preferences/{namespace}`,
+        `POST ${BASE}/export`,
+        `POST ${BASE}/import`,
+        `POST ${BASE}/preferences/reset-all`,
+        `POST ${BASE}/preferences/{namespace}/reset`,
+      ].sort(),
+    );
     expect(surfaces).not.toContain(`GET ${BASE}`);
     expect(surfaces).not.toContain(`POST ${BASE}/reset`);
     expect(surfaces.some((entry) => entry.includes('{category}'))).toBe(false);
@@ -81,7 +93,9 @@ describe('canonical Setting HTTP routes', () => {
   it('keeps reset-all on canonical namespace revisions', () => {
     const registered = route(register(), 'post', `${BASE}/preferences/reset-all`);
     const body = bodySchema(registered);
-    expect(body.safeParse({ expectedRevisions: { presentation: 2, regional: 5 } }).success).toBe(true);
+    expect(body.safeParse({ expectedRevisions: { presentation: 2, regional: 5 } }).success).toBe(
+      true,
+    );
     expect(body.safeParse({ category: 'appearance' }).success).toBe(false);
   });
 

@@ -121,18 +121,27 @@ export class WorkflowRuntimeHttpClient implements WorkflowRuntimeClient {
 
   async streamWorkspaceEvents(options: WorkspaceEventStreamOptions): Promise<void> {
     const response = await this.httpClient.stream('/ai/runtime/workspace/sse', {
-      method: 'GET', signal: options.signal,
+      method: 'GET',
+      signal: options.signal,
       ...(options.cursor ? { headers: { 'Last-Event-ID': options.cursor } } : {}),
     });
-    if (!response.ok) throw await createResultClientErrorFromResponse(response, 'Workspace events unavailable');
+    if (!response.ok)
+      throw await createResultClientErrorFromResponse(response, 'Workspace events unavailable');
     for await (const frame of parseSSE(response)) {
       if (options.signal.aborted) return;
       if (frame.event !== 'workspace') continue;
       let value: unknown;
-      try { value = JSON.parse(frame.data); }
-      catch { throw createResultClientError('Invalid Workspace event JSON', 'AI_RUNTIME_PROTOCOL_ERROR'); }
+      try {
+        value = JSON.parse(frame.data);
+      } catch {
+        throw createResultClientError('Invalid Workspace event JSON', 'AI_RUNTIME_PROTOCOL_ERROR');
+      }
       const parsed = WorkspaceEventSchema.safeParse(value);
-      if (!parsed.success) throw createResultClientError('Invalid Workspace event contract', 'AI_RUNTIME_PROTOCOL_ERROR');
+      if (!parsed.success)
+        throw createResultClientError(
+          'Invalid Workspace event contract',
+          'AI_RUNTIME_PROTOCOL_ERROR',
+        );
       await options.onEvent(parsed.data);
     }
   }
@@ -150,11 +159,7 @@ export class WorkflowRuntimeHttpClient implements WorkflowRuntimeClient {
     const result = await this.httpClient.post<unknown>('/ai/runtime/workflow/resume', parsed.data);
     const run = parseRun(unwrapOrThrowError(result));
     if (run.kind === 'goal.create') return run;
-    return awaitStableWorkflowRun(
-      run,
-      (runId) => this.get({ runId }),
-      this.polling,
-    );
+    return awaitStableWorkflowRun(run, (runId) => this.get({ runId }), this.polling);
   }
 
   async get(request: AIWorkflowGetClientRequest): Promise<AIWorkflowRunView | null> {
@@ -175,7 +180,8 @@ export class WorkflowRuntimeHttpClient implements WorkflowRuntimeClient {
     const parsed = AIGoalSurfaceLeaseRequestSchema.safeParse(request);
     if (!parsed.success) invalidRequest('Goal surface lease');
     const result = await this.httpClient.post<unknown>(
-      '/ai/runtime/workflow/goal-surface-lease', parsed.data,
+      '/ai/runtime/workflow/goal-surface-lease',
+      parsed.data,
     );
     return AIGoalSurfaceLeaseResponseSchema.parse(unwrapOrThrowError(result));
   }
@@ -196,13 +202,17 @@ export class WorkflowRuntimeIpcClient implements WorkflowRuntimeClient {
 
   async streamWorkspaceEvents(options: WorkspaceEventStreamOptions): Promise<void> {
     const bridge = this.ipcClient.getBridge?.();
-    if (!bridge) throw createResultClientError('Workspace events require Desktop IPC', 'NOT_SUPPORTED');
+    if (!bridge)
+      throw createResultClientError('Workspace events require Desktop IPC', 'NOT_SUPPORTED');
     if (options.signal.aborted) return;
     const streamId = createStreamId();
     let finish!: () => void;
     let reject!: (error: unknown) => void;
     let ended = false;
-    const completion = new Promise<void>((resolve, fail) => { finish = resolve; reject = fail; });
+    const completion = new Promise<void>((resolve, fail) => {
+      finish = resolve;
+      reject = fail;
+    });
     const stop = () => {
       if (ended) return;
       ended = true;
@@ -219,10 +229,18 @@ export class WorkflowRuntimeIpcClient implements WorkflowRuntimeClient {
         try {
           const event = WorkspaceEventSchema.parse(value.event);
           await options.onEvent(event);
-          if (!ended) unwrapOrThrowError(await this.ipcClient.invoke(AIChannels.RUNTIME_WORKSPACE_ACK, { streamId, cursor: event.cursor }));
+          if (!ended)
+            unwrapOrThrowError(
+              await this.ipcClient.invoke(AIChannels.RUNTIME_WORKSPACE_ACK, {
+                streamId,
+                cursor: event.cursor,
+              }),
+            );
         } catch {
           ended = true;
-          reject(createResultClientError('Workspace event delivery failed', 'AI_RUNTIME_PROTOCOL_ERROR'));
+          reject(
+            createResultClientError('Workspace event delivery failed', 'AI_RUNTIME_PROTOCOL_ERROR'),
+          );
         }
       })();
     };
@@ -232,7 +250,12 @@ export class WorkflowRuntimeIpcClient implements WorkflowRuntimeClient {
     try {
       // Start can fail before completion is awaited; attach a handler immediately.
       void completion.catch(() => undefined);
-      unwrapOrThrowError(await this.ipcClient.invoke(AIChannels.RUNTIME_WORKSPACE_START, { streamId, ...(options.cursor ? { cursor: options.cursor } : {}) }));
+      unwrapOrThrowError(
+        await this.ipcClient.invoke(AIChannels.RUNTIME_WORKSPACE_START, {
+          streamId,
+          ...(options.cursor ? { cursor: options.cursor } : {}),
+        }),
+      );
       if (options.signal.aborted) stop();
       await completion;
     } finally {
@@ -240,7 +263,9 @@ export class WorkflowRuntimeIpcClient implements WorkflowRuntimeClient {
       bridge.off(AIStreamChannels.RUNTIME_WORKSPACE_EVENT, onEvent);
       bridge.off(AIStreamChannels.RUNTIME_WORKSPACE_END, onEnd);
       options.signal.removeEventListener('abort', stop);
-      await this.ipcClient.invoke(AIChannels.RUNTIME_WORKSPACE_STOP, { streamId }).catch(() => undefined);
+      await this.ipcClient
+        .invoke(AIChannels.RUNTIME_WORKSPACE_STOP, { streamId })
+        .catch(() => undefined);
     }
   }
 
@@ -263,11 +288,7 @@ export class WorkflowRuntimeIpcClient implements WorkflowRuntimeClient {
     );
     const run = parseRun(unwrapOrThrowError(result));
     if (run.kind === 'goal.create') return run;
-    return awaitStableWorkflowRun(
-      run,
-      (runId) => this.get({ runId }),
-      this.polling,
-    );
+    return awaitStableWorkflowRun(run, (runId) => this.get({ runId }), this.polling);
   }
 
   async get(request: AIWorkflowGetClientRequest): Promise<AIWorkflowRunView | null> {
@@ -294,7 +315,8 @@ export class WorkflowRuntimeIpcClient implements WorkflowRuntimeClient {
     const parsed = AIGoalSurfaceLeaseRequestSchema.safeParse(request);
     if (!parsed.success) invalidRequest('Goal surface lease');
     const result = await this.ipcClient.invoke<unknown>(
-      AIChannels.RUNTIME_WORKFLOW_GOAL_SURFACE_LEASE, parsed.data,
+      AIChannels.RUNTIME_WORKFLOW_GOAL_SURFACE_LEASE,
+      parsed.data,
     );
     return AIGoalSurfaceLeaseResponseSchema.parse(unwrapOrThrowError(result));
   }

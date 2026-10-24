@@ -9,4 +9,5 @@ export const KeyResultCalculationMethod = {
   Last: 'Last', // 取最后一次（适合绝对值型）
 } as const;
 
-export type KeyResultCalculationMethod = (typeof KeyResultCalculationMethod)[keyof typeof KeyResultCalculationMethod];
+export type KeyResultCalculationMethod =
+  (typeof KeyResultCalculationMethod)[keyof typeof KeyResultCalculationMethod];

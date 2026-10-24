@@ -56,8 +56,7 @@ function buildApiBaseUrl(raw: RawCredentialsFile): string {
       : `${envFullApiUrl.replace(/\/+$/, '')}/api/v1`;
   }
 
-  const envApiOrigin =
-    process.env.E2E_API_BASE_URL?.trim() || process.env.PROXY_TARGET_URL?.trim();
+  const envApiOrigin = process.env.E2E_API_BASE_URL?.trim() || process.env.PROXY_TARGET_URL?.trim();
   if (envApiOrigin) {
     const apiPrefix = (raw.api_config?.api_prefix?.trim() || '/api/v1').replace(/^\/?/, '/');
     return `${envApiOrigin.replace(/\/+$/, '')}${apiPrefix}`;
@@ -145,7 +144,9 @@ async function verifyLatestEmailLink(
   capturedUrl.searchParams.delete('callbackURL');
   const response = await request.get(capturedUrl.toString());
   if (!response.ok()) {
-    throw new Error(`Email verification failed with HTTP ${response.status()}: ${await response.text()}`);
+    throw new Error(
+      `Email verification failed with HTTP ${response.status()}: ${await response.text()}`,
+    );
   }
 }
 

@@ -31,7 +31,9 @@ export const TitleOnly: Story = {
 export const WithActions: Story = {
   render: (args) => ({
     components: { LinearPageHeader, Button },
-    setup() { return { args }; },
+    setup() {
+      return { args };
+    },
     template: `
       <LinearPageHeader v-bind="args">
         <template #actions>

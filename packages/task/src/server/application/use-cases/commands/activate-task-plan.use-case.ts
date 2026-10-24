@@ -49,36 +49,34 @@ export class ActivateTaskPlanUseCase {
   ): Promise<Result<{ plan: TaskPlanClientDTO; occurrencesGenerated: number }>> {
     try {
       const timeContext = await this.userTimeContextPort.getUserTimeContext(identityId);
-      return await this.transactionRunner.run(
-        async ({ planRepository, occurrenceRepository }) => {
-          const plan = await planRepository!.findByIdForIdentity(identityId, id);
-          if (!plan) {
-            return error('NOT_FOUND', `TaskPlan ${id} not found`);
-          }
+      return await this.transactionRunner.run(async ({ planRepository, occurrenceRepository }) => {
+        const plan = await planRepository!.findByIdForIdentity(identityId, id);
+        if (!plan) {
+          return error('NOT_FOUND', `TaskPlan ${id} not found`);
+        }
 
-          plan.activate();
+        plan.activate();
 
-          // Existing occurrences are independent facts; pass them explicitly to materialization.
-          const existingOccurrences = await occurrenceRepository.findByPlanId(id, identityId);
-          const occurrences = this.generationService.generateOccurrences(plan, timeContext, {
-            fromDate: Date.now(),
-            existingOccurrences,
-          });
-          let occurrencesGenerated = 0;
+        // Existing occurrences are independent facts; pass them explicitly to materialization.
+        const existingOccurrences = await occurrenceRepository.findByPlanId(id, identityId);
+        const occurrences = this.generationService.generateOccurrences(plan, timeContext, {
+          fromDate: Date.now(),
+          existingOccurrences,
+        });
+        let occurrencesGenerated = 0;
 
-          if (occurrences.length > 0) {
-            await occurrenceRepository.saveMany(occurrences);
-            occurrencesGenerated = occurrences.length;
-          }
+        if (occurrences.length > 0) {
+          await occurrenceRepository.saveMany(occurrences);
+          occurrencesGenerated = occurrences.length;
+        }
 
-          await planRepository!.save(plan);
+        await planRepository!.save(plan);
 
-          return ok({
-            plan: plan.toClientDTOAt(timeContext),
-            occurrencesGenerated,
-          });
-        },
-      );
+        return ok({
+          plan: plan.toClientDTOAt(timeContext),
+          occurrencesGenerated,
+        });
+      });
     } catch (caughtError) {
       this.logger.error('Failed to activate task plan', { error: caughtError });
       return fail(mapTaskWriteErrorToResultError(caughtError, 'Failed to activate task plan'));

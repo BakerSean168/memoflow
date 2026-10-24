@@ -24,17 +24,17 @@ PR #167 引入 `unflushed-events-audit` 时，仓库仍使用 `domain-server` / 
 
 让扫描器同时识别旧目录和 `server/domain` / `server/infrastructure` 后，共得到 9 个迁移候选：
 
-| 模块 | 仓储 | 迁移前状态 |
-| --- | --- | --- |
-| account | PowerSyncAccountRepository | 已手写 `pullDomainEvents + eventBus.send`，不是漏发，但属于分裂 seam |
-| authentication | PowerSyncAuthSessionRepository | 漏发 |
-| governance | PowerSyncRuleRepository | 漏发 |
-| governance | RulePrismaRepository | 漏发 |
-| notification | PowerSyncNotificationTemplateRepository | 漏发 |
-| notification | NotificationTemplatePrismaRepository | 漏发 |
-| reminder | ReminderGroupPowerSyncRepository | 漏发 |
-| repository | PowerSyncRepositoryRepository | 漏发 |
-| repository | RepositoryPrismaRepository | 漏发 |
+| 模块           | 仓储                                    | 迁移前状态                                                           |
+| -------------- | --------------------------------------- | -------------------------------------------------------------------- |
+| account        | PowerSyncAccountRepository              | 已手写 `pullDomainEvents + eventBus.send`，不是漏发，但属于分裂 seam |
+| authentication | PowerSyncAuthSessionRepository          | 漏发                                                                 |
+| governance     | PowerSyncRuleRepository                 | 漏发                                                                 |
+| governance     | RulePrismaRepository                    | 漏发                                                                 |
+| notification   | PowerSyncNotificationTemplateRepository | 漏发                                                                 |
+| notification   | NotificationTemplatePrismaRepository    | 漏发                                                                 |
+| reminder       | ReminderGroupPowerSyncRepository        | 漏发                                                                 |
+| repository     | PowerSyncRepositoryRepository           | 漏发                                                                 |
+| repository     | RepositoryPrismaRepository              | 漏发                                                                 |
 
 因此准确口径是：**9 个 seam 收敛候选，其中 8 个真实漏发，1 个手写发布变体**。
 

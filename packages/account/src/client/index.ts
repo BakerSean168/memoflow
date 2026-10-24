@@ -7,10 +7,7 @@
  */
 
 import type { IResultHttpClient } from '@memoflow/http-client';
-import {
-  createAccountClientService,
-  type AccountClientPort,
-} from '../application-client';
+import { createAccountClientService, type AccountClientPort } from '../application-client';
 import {
   AccountHttpAdapter,
   createAccountHttpAdapters,
@@ -21,10 +18,7 @@ import {
   createAccountIpcAdapters,
   type AccountIpcAdapters,
 } from '../infrastructure-client/adapters/ipc';
-import type {
-  IAccountApiClient,
-  IResultIpcClient,
-} from '../infrastructure-client/adapters/types';
+import type { IAccountApiClient, IResultIpcClient } from '../infrastructure-client/adapters/types';
 
 export type {
   AccountClientPort,
@@ -38,18 +32,14 @@ export type {
 /**
  * Creates the account HTTP client seam.
  */
-export function createAccountHttpClient(
-  httpClient: IResultHttpClient,
-): AccountClientPort {
+export function createAccountHttpClient(httpClient: IResultHttpClient): AccountClientPort {
   return createAccountClientService(new AccountHttpAdapter(httpClient));
 }
 
 /**
  * Creates the account IPC client seam.
  */
-export function createAccountIpcClient(
-  ipcClient: IResultIpcClient,
-): AccountClientPort {
+export function createAccountIpcClient(ipcClient: IResultIpcClient): AccountClientPort {
   return createAccountClientService(new AccountIpcAdapter(ipcClient));
 }
 

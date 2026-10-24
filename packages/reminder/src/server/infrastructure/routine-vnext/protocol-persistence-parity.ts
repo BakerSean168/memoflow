@@ -11,7 +11,10 @@ import {
 
 const PhaseKindSchema = z.enum(PROTOCOL_PHASE_KINDS);
 const PhaseRoleSchema = z.enum(['session-start', 'cycle', 'session-end']);
-const InstantSchema = z.number().finite().transform((value) => asInstant(value));
+const InstantSchema = z
+  .number()
+  .finite()
+  .transform((value) => asInstant(value));
 const NullableInstantSchema = InstantSchema.nullable();
 const PhaseSchema = z.object({
   id: z.string().trim().min(1),

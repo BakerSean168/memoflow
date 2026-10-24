@@ -10,4 +10,5 @@ export const NotificationChannelType = {
   Webhook: 'Webhook',
 } as const;
 
-export type NotificationChannelType = (typeof NotificationChannelType)[keyof typeof NotificationChannelType];
+export type NotificationChannelType =
+  (typeof NotificationChannelType)[keyof typeof NotificationChannelType];

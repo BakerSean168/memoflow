@@ -38,9 +38,9 @@ describe('DeleteTaskPlanUseCase', () => {
   });
 
   it('throws an error if transactionRunner is missing', () => {
-    expect(
-      () => new DeleteTaskPlanUseCase(templateRepo, instanceRepo, undefined as any),
-    ).toThrow('TaskWriteTransactionRunner must be explicitly provided to DeleteTaskPlanUseCase');
+    expect(() => new DeleteTaskPlanUseCase(templateRepo, instanceRepo, undefined as any)).toThrow(
+      'TaskWriteTransactionRunner must be explicitly provided to DeleteTaskPlanUseCase',
+    );
   });
 
   it('should return ok(void) when plan not found (idempotent)', async () => {
@@ -90,7 +90,9 @@ describe('DeleteTaskPlanUseCase', () => {
   it('should return INTERNAL_ERROR when deleting generated occurrences fails', async () => {
     const plan = aOneTimeTask();
     vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
-    vi.mocked(instanceRepo.deleteByPlanId).mockRejectedValue(new Error('delete occurrences failed'));
+    vi.mocked(instanceRepo.deleteByPlanId).mockRejectedValue(
+      new Error('delete occurrences failed'),
+    );
 
     const result = await useCase.execute(plan.id, plan.identityId);
 

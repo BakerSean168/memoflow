@@ -49,10 +49,7 @@ export interface RoutineProfileStore {
     readonly expectedVersion?: number;
   }): Promise<void>;
 
-  upsertMembership(
-    membership: ProfileMembership,
-    expectedVersion?: number,
-  ): Promise<void>;
+  upsertMembership(membership: ProfileMembership, expectedVersion?: number): Promise<void>;
   listMembershipsForRoutine(input: {
     readonly identityId: string;
     readonly routineId: string;

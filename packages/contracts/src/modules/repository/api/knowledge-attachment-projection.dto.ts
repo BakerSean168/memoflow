@@ -15,7 +15,10 @@ export const VaultRelativeAttachmentPathSchema = z
       ctx.addIssue({ code: 'custom', message: 'Attachment path must be repository-relative' });
     }
     if (segments.some((segment) => segment === '.' || segment === '..')) {
-      ctx.addIssue({ code: 'custom', message: 'Attachment path cannot contain traversal segments' });
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Attachment path cannot contain traversal segments',
+      });
     }
     if (segments.some((segment) => /[\u0000<>:"|?*]/.test(segment))) {
       ctx.addIssue({ code: 'custom', message: 'Attachment path contains invalid characters' });
@@ -48,9 +51,7 @@ export type KnowledgeAttachmentProjectionClientDTO = z.infer<
 >;
 
 // Residual 675: attachment list reuses shared list-knowledge projections filter.
-export type ListKnowledgeAttachmentProjectionsReq = z.infer<
-  typeof ListKnowledgeProjectionsSchema
->;
+export type ListKnowledgeAttachmentProjectionsReq = z.infer<typeof ListKnowledgeProjectionsSchema>;
 
 export const KnowledgeAttachmentProjectionListResponseSchema = z.object({
   attachments: z.array(KnowledgeAttachmentProjectionClientSchema),

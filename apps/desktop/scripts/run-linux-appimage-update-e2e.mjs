@@ -34,7 +34,10 @@ const userDataPath = path.join(storageTestRoot, 'data');
 const statusPath = path.join(runtimeRoot, 'status.json');
 const registryPath = path.join(userDataPath, 'shared/profiles/registry.json');
 const sentinelPath = path.join(userDataPath, 'shared/update-e2e-preservation.txt');
-const receiptPath = path.join(storageTestRoot, 'state/update/install-receipts/install-receipt.json');
+const receiptPath = path.join(
+  storageTestRoot,
+  'state/update/install-receipts/install-receipt.json',
+);
 const metadataPath = path.join(candidateFeedDir, 'latest-linux.yml');
 const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const fileHash = async (file) => {

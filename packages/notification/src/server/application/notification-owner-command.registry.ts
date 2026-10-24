@@ -64,7 +64,9 @@ export class NotificationOwnerCommandRegistry implements NotificationOwnerComman
       registration.commandKey,
     );
     if (this.registrations.has(key)) {
-      throw new Error(`Notification owner command already registered: ${registration.workflowKey}/${registration.ownerType}/${registration.commandKey}`);
+      throw new Error(
+        `Notification owner command already registered: ${registration.workflowKey}/${registration.ownerType}/${registration.commandKey}`,
+      );
     }
     this.registrations.set(key, registration as NotificationOwnerCommandRegistration<unknown>);
     return () => {
@@ -89,7 +91,8 @@ export class NotificationOwnerCommandRegistry implements NotificationOwnerComman
 
     let parsedInput: unknown = input.action.input;
     try {
-      if (registration.inputSchema) parsedInput = registration.inputSchema.parse(input.action.input);
+      if (registration.inputSchema)
+        parsedInput = registration.inputSchema.parse(input.action.input);
     } catch {
       return { outcome: 'rejected', reason: 'owner-command-input-invalid' };
     }

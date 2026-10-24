@@ -33,7 +33,10 @@ import {
   type NotificationRuntimeContributionsInput,
 } from './notification.module';
 
-import { NotificationMetricsService, globalNotificationMetrics } from '../domain/services/notification-metrics-service';
+import {
+  NotificationMetricsService,
+  globalNotificationMetrics,
+} from '../domain/services/notification-metrics-service';
 
 import {
   RealInAppChannelDeliverer,
@@ -54,7 +57,10 @@ export interface CreateNotificationPrismaModuleOptions {
   readonly runtimeContributions?: NotificationRuntimeContributionsInput;
   readonly durableRuntime?: import('./runtime/notification.runtime').NotificationDurableRuntimePort;
   readonly channelDeliverer?: import('./runtime/notification.runtime').NotificationChannelDeliverer;
-  readonly channelDeliverers?: Record<string, import('./runtime/notification.runtime').NotificationChannelDeliverer>;
+  readonly channelDeliverers?: Record<
+    string,
+    import('./runtime/notification.runtime').NotificationChannelDeliverer
+  >;
   readonly channelCapabilities?: import('./runtime/notification.runtime').ChannelCapabilitySpec[];
   readonly desktopTransport?: unknown;
   readonly pushTransport?: unknown;
@@ -120,7 +126,9 @@ export function createNotificationPrismaModule(
     throw new Error('[FAIL-CLOSED] createNotificationPrismaModule requires options.closureChecker');
   }
   if (!options.userTimeContextPort) {
-    throw new Error('[FAIL-CLOSED] createNotificationPrismaModule requires options.userTimeContextPort');
+    throw new Error(
+      '[FAIL-CLOSED] createNotificationPrismaModule requires options.userTimeContextPort',
+    );
   }
 
   const metricsService = options.metricsService ?? globalNotificationMetrics;
@@ -128,7 +136,10 @@ export function createNotificationPrismaModule(
   const notificationRepository = repositories.notificationRepository;
   const reliableAdapter = repositories.reliableAdapter;
 
-  const defaultDeliverers: Record<string, import('./runtime/notification.runtime').NotificationChannelDeliverer> = {
+  const defaultDeliverers: Record<
+    string,
+    import('./runtime/notification.runtime').NotificationChannelDeliverer
+  > = {
     InApp: new RealInAppChannelDeliverer(),
     'in-app': new RealInAppChannelDeliverer(),
     Desktop: new RealDesktopChannelDeliverer(options.desktopTransport),

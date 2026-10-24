@@ -10,49 +10,52 @@ export default {
   ...config,
   entry: ['src/index.ts'],
   tsconfig: 'tsconfig.build.json',
-  dts: createLocalOnlyDtsPaths({
-    '@memoflow/contracts': ['../../packages/contracts/src/index.ts'],
-    '@memoflow/contracts/*': [
-      '../../packages/contracts/src/modules/*/index.ts',
-      '../../packages/contracts/src/*/index.ts',
-    ],
-    '@memoflow/goal': ['../../packages/goal/dist/index.d.ts'],
-    '@memoflow/goal/schedule-execution': [
-      '../../packages/goal/dist/schedule-execution/index.d.ts',
-    ],
-    '@memoflow/goal/schedule-projection': [
-      '../../packages/goal/dist/schedule-projection/index.d.ts',
-    ],
-    '@memoflow/goal/*': [
-      '../../packages/goal/dist/*/index.d.ts',
-      '../../packages/goal/dist/*.d.ts',
-    ],
-    '@memoflow/reminder': ['../../packages/reminder/dist/index.d.ts'],
-    '@memoflow/reminder/schedule-execution': [
-      '../../packages/reminder/dist/schedule-execution/index.d.ts',
-    ],
-    '@memoflow/reminder/schedule-projection': [
-      '../../packages/reminder/dist/schedule-projection/index.d.ts',
-    ],
-    '@memoflow/reminder/*': [
-      '../../packages/reminder/dist/*/index.d.ts',
-      '../../packages/reminder/dist/*.d.ts',
-    ],
-    '@memoflow/task': ['../../packages/task/dist/index.d.ts'],
-    '@memoflow/task/schedule-execution': [
-      '../../packages/task/dist/schedule-execution/index.d.ts',
-    ],
-    '@memoflow/task/schedule-projection': [
-      '../../packages/task/dist/schedule-projection/index.d.ts',
-    ],
-    '@memoflow/task/*': [
-      '../../packages/task/dist/*/index.d.ts',
-      '../../packages/task/dist/*.d.ts',
-    ],
-    '@memoflow/utils': ['../../packages/utils/dist/index.d.ts'],
-    '@memoflow/utils/*': [
-      '../../packages/utils/dist/*/index.d.ts',
-      '../../packages/utils/dist/*.d.ts',
-    ],
-  }, { baseUrl: packageRoot }),
+  dts: createLocalOnlyDtsPaths(
+    {
+      '@memoflow/contracts': ['../../packages/contracts/src/index.ts'],
+      '@memoflow/contracts/*': [
+        '../../packages/contracts/src/modules/*/index.ts',
+        '../../packages/contracts/src/*/index.ts',
+      ],
+      '@memoflow/goal': ['../../packages/goal/dist/index.d.ts'],
+      '@memoflow/goal/schedule-execution': [
+        '../../packages/goal/dist/schedule-execution/index.d.ts',
+      ],
+      '@memoflow/goal/schedule-projection': [
+        '../../packages/goal/dist/schedule-projection/index.d.ts',
+      ],
+      '@memoflow/goal/*': [
+        '../../packages/goal/dist/*/index.d.ts',
+        '../../packages/goal/dist/*.d.ts',
+      ],
+      '@memoflow/reminder': ['../../packages/reminder/dist/index.d.ts'],
+      '@memoflow/reminder/schedule-execution': [
+        '../../packages/reminder/dist/schedule-execution/index.d.ts',
+      ],
+      '@memoflow/reminder/schedule-projection': [
+        '../../packages/reminder/dist/schedule-projection/index.d.ts',
+      ],
+      '@memoflow/reminder/*': [
+        '../../packages/reminder/dist/*/index.d.ts',
+        '../../packages/reminder/dist/*.d.ts',
+      ],
+      '@memoflow/task': ['../../packages/task/dist/index.d.ts'],
+      '@memoflow/task/schedule-execution': [
+        '../../packages/task/dist/schedule-execution/index.d.ts',
+      ],
+      '@memoflow/task/schedule-projection': [
+        '../../packages/task/dist/schedule-projection/index.d.ts',
+      ],
+      '@memoflow/task/*': [
+        '../../packages/task/dist/*/index.d.ts',
+        '../../packages/task/dist/*.d.ts',
+      ],
+      '@memoflow/utils': ['../../packages/utils/dist/index.d.ts'],
+      '@memoflow/utils/*': [
+        '../../packages/utils/dist/*/index.d.ts',
+        '../../packages/utils/dist/*.d.ts',
+      ],
+    },
+    { baseUrl: packageRoot },
+  ),
 };

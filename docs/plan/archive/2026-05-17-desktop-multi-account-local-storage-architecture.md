@@ -270,7 +270,6 @@ Snapshot 链路当前已落地为四段：
 
 - [powersync-profile-snapshot-rollout.md](../../guides/development/powersync-profile-snapshot-rollout.md)
 
-
 #### 2.4 文档与实现表面仍需继续对齐
 
 当前 `DesktopProfileRuntimeManager` 已经收口到：

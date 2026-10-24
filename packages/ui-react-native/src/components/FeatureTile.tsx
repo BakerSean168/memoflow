@@ -1,4 +1,11 @@
-import { Pressable, StyleSheet, View, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
+import {
+  Pressable,
+  StyleSheet,
+  View,
+  type PressableProps,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 
 import { Spacing } from '../constants/theme';
 import { useTheme } from '../hooks/useTheme';
@@ -26,7 +33,8 @@ export function FeatureTile({ description, eyebrow, style, title, ...props }: Fe
         },
         style,
       ]}
-      {...props}>
+      {...props}
+    >
       <ThemedView style={styles.inner}>
         {eyebrow ? (
           <ThemedText type="smallBold" themeColor="tint" style={styles.eyebrow}>

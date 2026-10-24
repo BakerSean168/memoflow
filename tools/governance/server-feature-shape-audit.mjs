@@ -32,9 +32,7 @@ const SERVER_REQUIRED_FILES = ['server/index.ts'];
  * use `server/domain`; Setting intentionally uses `server/preferences` after
  * ADR-095 retired the empty UserSetting aggregate/DDD ceremony.
  */
-const SERVER_SEMANTIC_CORE_DIRS = new Map([
-  ['setting', ['preferences']],
-]);
+const SERVER_SEMANTIC_CORE_DIRS = new Map([['setting', ['preferences']]]);
 
 const EXCEPTIONS = new Set([
   'powersync-schema',
@@ -92,9 +90,9 @@ export function auditPackageShape(pkg, srcDir) {
 
   const serverDir = join(srcDir, 'server');
   const serverContents = readdirSync(serverDir);
-  const missingServerDirs = SERVER_REQUIRED_SUBDIRS
-    .filter((dir) => !serverContents.includes(dir))
-    .map((dir) => `server/${dir}`);
+  const missingServerDirs = SERVER_REQUIRED_SUBDIRS.filter(
+    (dir) => !serverContents.includes(dir),
+  ).map((dir) => `server/${dir}`);
 
   const allowedSemanticCores = semanticCoreDirsFor(pkg);
   if (!allowedSemanticCores.some((dir) => serverContents.includes(dir))) {
@@ -105,7 +103,9 @@ export function auditPackageShape(pkg, srcDir) {
     );
   }
 
-  const missingServerFiles = SERVER_REQUIRED_FILES.filter((file) => !existsSync(join(srcDir, file)));
+  const missingServerFiles = SERVER_REQUIRED_FILES.filter(
+    (file) => !existsSync(join(srcDir, file)),
+  );
   const missingServerEntries = [...missingServerDirs, ...missingServerFiles];
   if (missingServerEntries.length > 0) {
     return { package: pkg, missing: missingServerEntries };
@@ -136,7 +136,9 @@ export function main() {
         console.error(`  ${violation.package}: missing ${violation.missing.join(', ')}`);
       }
       if (violation.forbidden?.length > 0) {
-        console.error(`  ${violation.package}: forbidden legacy root ${violation.forbidden.join(', ')}`);
+        console.error(
+          `  ${violation.package}: forbidden legacy root ${violation.forbidden.join(', ')}`,
+        );
       }
     }
     process.exitCode = 1;

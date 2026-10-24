@@ -88,9 +88,9 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
       };
 
       // 1. BusinessOperationReceiptSchema
-      expect(() => BusinessOperationReceiptSchema.parse({ ...baseReceipt, schemaVersion: 2 })).toThrow(
-        /Unknown or unsupported schemaVersion/
-      );
+      expect(() =>
+        BusinessOperationReceiptSchema.parse({ ...baseReceipt, schemaVersion: 2 }),
+      ).toThrow(/Unknown or unsupported schemaVersion/);
 
       // 2. LeaseClaimSchema (P2-5)
       expect(() =>
@@ -101,7 +101,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
           fencingToken: 1,
           ownerToken: 'w_1',
           expiresAt: '2026-08-09T06:00:00.000Z',
-        })
+        }),
       ).toThrow(/Unknown or unsupported schemaVersion/);
 
       // 3. DeliveryAttemptSchema (P2-5)
@@ -111,7 +111,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
           attempt: 1,
           attemptedAt: '2026-08-09T05:00:00.000Z',
           result: 'succeeded',
-        })
+        }),
       ).toThrow(/Unknown or unsupported schemaVersion/);
 
       // 4. CapabilityRequirementContractSchema (P2-5)
@@ -121,7 +121,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
           capabilityName: 'cap_1',
           moduleName: 'mod_1',
           status: 'available',
-        })
+        }),
       ).toThrow(/Unknown or unsupported schemaVersion/);
 
       // 5. ProjectionOperationSchema (P2-5)
@@ -130,16 +130,20 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
         identityId: 'usr_123',
         source: 'schedule',
         occurrenceKey: 'occ_100',
-        idempotencyKey: buildIdempotencyKeyString({ identityId: 'usr_123', source: 'schedule', occurrenceKey: 'occ_100' }),
+        idempotencyKey: buildIdempotencyKeyString({
+          identityId: 'usr_123',
+          source: 'schedule',
+          occurrenceKey: 'occ_100',
+        }),
         projector: 'schedule-builder',
         sourceRevision: 1,
         status: 'pending' as const,
         createdAt: '2026-08-09T05:00:00.000Z',
         updatedAt: '2026-08-09T05:00:00.000Z',
       };
-      expect(() => ProjectionOperationSchema.parse({ ...baseProjection, schemaVersion: 2 })).toThrow(
-        /Unknown or unsupported schemaVersion/
-      );
+      expect(() =>
+        ProjectionOperationSchema.parse({ ...baseProjection, schemaVersion: 2 }),
+      ).toThrow(/Unknown or unsupported schemaVersion/);
 
       // 6. Nested unknown version inside receipt lease (P2-5)
       expect(() =>
@@ -154,7 +158,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
             ownerToken: 'w_1',
             expiresAt: '2026-08-09T06:00:00.000Z',
           },
-        })
+        }),
       ).toThrow(/Unknown or unsupported schemaVersion/);
     });
 
@@ -172,16 +176,27 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
       };
 
       // Negative version
-      expect(() => BusinessOperationReceiptSchema.parse({ ...baseReceipt, schemaVersion: -1 })).toThrow();
+      expect(() =>
+        BusinessOperationReceiptSchema.parse({ ...baseReceipt, schemaVersion: -1 }),
+      ).toThrow();
 
       // Zero version
-      expect(() => BusinessOperationReceiptSchema.parse({ ...baseReceipt, schemaVersion: 0 })).toThrow();
+      expect(() =>
+        BusinessOperationReceiptSchema.parse({ ...baseReceipt, schemaVersion: 0 }),
+      ).toThrow();
 
       // Float version
-      expect(() => BusinessOperationReceiptSchema.parse({ ...baseReceipt, schemaVersion: 1.5 })).toThrow();
+      expect(() =>
+        BusinessOperationReceiptSchema.parse({ ...baseReceipt, schemaVersion: 1.5 }),
+      ).toThrow();
 
       // String version
-      expect(() => BusinessOperationReceiptSchema.parse({ ...baseReceipt, schemaVersion: '1' as unknown as number })).toThrow();
+      expect(() =>
+        BusinessOperationReceiptSchema.parse({
+          ...baseReceipt,
+          schemaVersion: '1' as unknown as number,
+        }),
+      ).toThrow();
     });
   });
 
@@ -192,7 +207,11 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
       identityId: 'usr_123',
       source: 'reminder',
       occurrenceKey: 'occ_100',
-      idempotencyKey: buildIdempotencyKeyString({ identityId: 'usr_123', source: 'reminder', occurrenceKey: 'occ_100' }),
+      idempotencyKey: buildIdempotencyKeyString({
+        identityId: 'usr_123',
+        source: 'reminder',
+        occurrenceKey: 'occ_100',
+      }),
       attempt: 0,
       createdAt: '2026-08-09T05:00:00.000Z',
       updatedAt: '2026-08-09T05:00:00.000Z',
@@ -204,7 +223,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
           ...baseReceipt,
           status: 'pending',
           createdAt: 'not-a-date',
-        })
+        }),
       ).toThrow();
 
       expect(() =>
@@ -212,7 +231,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
           ...baseReceipt,
           status: 'pending',
           createdAt: '2026-08-09',
-        })
+        }),
       ).toThrow();
     });
 
@@ -230,22 +249,38 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
 
       // Negative: pending carrying a lease
       expect(() =>
-        BusinessOperationReceiptSchema.parse({ ...baseReceipt, status: 'pending', lease: validLease })
+        BusinessOperationReceiptSchema.parse({
+          ...baseReceipt,
+          status: 'pending',
+          lease: validLease,
+        }),
       ).toThrow(/Status 'pending' MUST NOT carry a lease claim/);
 
       // Negative: pending carrying deadLetterAt
       expect(() =>
-        BusinessOperationReceiptSchema.parse({ ...baseReceipt, status: 'pending', deadLetterAt: '2026-08-09T05:10:00.000Z' })
+        BusinessOperationReceiptSchema.parse({
+          ...baseReceipt,
+          status: 'pending',
+          deadLetterAt: '2026-08-09T05:10:00.000Z',
+        }),
       ).toThrow(/MUST NOT specify deadLetterAt/);
 
       // Negative: pending carrying nextRetryAt
       expect(() =>
-        BusinessOperationReceiptSchema.parse({ ...baseReceipt, status: 'pending', nextRetryAt: '2026-08-09T05:10:00.000Z' })
+        BusinessOperationReceiptSchema.parse({
+          ...baseReceipt,
+          status: 'pending',
+          nextRetryAt: '2026-08-09T05:10:00.000Z',
+        }),
       ).toThrow(/MUST NOT specify nextRetryAt/);
 
       // Negative: pending carrying finishedAt
       expect(() =>
-        BusinessOperationReceiptSchema.parse({ ...baseReceipt, status: 'pending', finishedAt: '2026-08-09T05:10:00.000Z' })
+        BusinessOperationReceiptSchema.parse({
+          ...baseReceipt,
+          status: 'pending',
+          finishedAt: '2026-08-09T05:10:00.000Z',
+        }),
       ).toThrow(/Non-terminal status 'pending' MUST NOT specify finishedAt/);
     });
 
@@ -263,12 +298,17 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
 
       // Negative: running without lease
       expect(() =>
-        BusinessOperationReceiptSchema.parse({ ...baseReceipt, status: 'running', lease: null })
+        BusinessOperationReceiptSchema.parse({ ...baseReceipt, status: 'running', lease: null }),
       ).toThrow(/Status 'running' MUST carry a valid non-null lease claim/);
 
       // Negative: running carrying nextRetryAt
       expect(() =>
-        BusinessOperationReceiptSchema.parse({ ...baseReceipt, status: 'running', lease: validLease, nextRetryAt: '2026-08-09T05:10:00.000Z' })
+        BusinessOperationReceiptSchema.parse({
+          ...baseReceipt,
+          status: 'running',
+          lease: validLease,
+          nextRetryAt: '2026-08-09T05:10:00.000Z',
+        }),
       ).toThrow(/MUST NOT specify nextRetryAt/);
     });
 
@@ -286,7 +326,11 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
 
       // Negative: succeeded without finishedAt
       expect(() =>
-        BusinessOperationReceiptSchema.parse({ ...baseReceipt, status: 'succeeded', finishedAt: null })
+        BusinessOperationReceiptSchema.parse({
+          ...baseReceipt,
+          status: 'succeeded',
+          finishedAt: null,
+        }),
       ).toThrow(/Terminal status 'succeeded' MUST specify a non-null finishedAt datetime/);
 
       // Negative: succeeded carrying lastError
@@ -296,7 +340,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
           status: 'succeeded',
           finishedAt: '2026-08-09T05:05:00.000Z',
           lastError: 'Some error',
-        })
+        }),
       ).toThrow(/Successful status 'succeeded' MUST NOT carry an error/);
     });
 
@@ -317,7 +361,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
           status: 'skipped',
           finishedAt: '2026-08-09T05:05:00.000Z',
           lastError: 'Error',
-        })
+        }),
       ).toThrow(/Successful status 'skipped' MUST NOT carry an error/);
     });
 
@@ -338,7 +382,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
           status: 'failed',
           finishedAt: '2026-08-09T05:05:00.000Z',
           nextRetryAt: '2026-08-09T05:10:00.000Z',
-        })
+        }),
       ).toThrow(/MUST NOT specify nextRetryAt/);
     });
 
@@ -354,12 +398,22 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
 
       // Negative: retryable without nextRetryAt
       expect(() =>
-        BusinessOperationReceiptSchema.parse({ ...baseReceipt, status: 'retryable', nextRetryAt: null, lastError: 'Err' })
+        BusinessOperationReceiptSchema.parse({
+          ...baseReceipt,
+          status: 'retryable',
+          nextRetryAt: null,
+          lastError: 'Err',
+        }),
       ).toThrow(/MUST specify a non-null nextRetryAt datetime/);
 
       // Negative: retryable without lastError
       expect(() =>
-        BusinessOperationReceiptSchema.parse({ ...baseReceipt, status: 'retryable', nextRetryAt: '2026-08-09T05:10:00.000Z', lastError: null })
+        BusinessOperationReceiptSchema.parse({
+          ...baseReceipt,
+          status: 'retryable',
+          nextRetryAt: '2026-08-09T05:10:00.000Z',
+          lastError: null,
+        }),
       ).toThrow(/MUST specify a non-null lastError description/);
 
       // Negative: retryable carrying deadLetterAt
@@ -370,7 +424,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
           nextRetryAt: '2026-08-09T05:10:00.000Z',
           lastError: 'Err',
           deadLetterAt: '2026-08-09T05:10:00.000Z',
-        })
+        }),
       ).toThrow(/MUST NOT specify deadLetterAt/);
     });
 
@@ -386,7 +440,11 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
 
       // Negative: dead_letter without deadLetterAt
       expect(() =>
-        BusinessOperationReceiptSchema.parse({ ...baseReceipt, status: 'dead_letter', deadLetterAt: null })
+        BusinessOperationReceiptSchema.parse({
+          ...baseReceipt,
+          status: 'dead_letter',
+          deadLetterAt: null,
+        }),
       ).toThrow(/MUST specify a non-null deadLetterAt datetime/);
 
       // Negative: dead_letter carrying nextRetryAt
@@ -396,7 +454,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
           status: 'dead_letter',
           deadLetterAt: '2026-08-09T05:05:00.000Z',
           nextRetryAt: '2026-08-09T05:10:00.000Z',
-        })
+        }),
       ).toThrow(/MUST NOT specify nextRetryAt/);
     });
 
@@ -411,7 +469,11 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
 
       // Negative: cancelled without finishedAt
       expect(() =>
-        BusinessOperationReceiptSchema.parse({ ...baseReceipt, status: 'cancelled', finishedAt: null })
+        BusinessOperationReceiptSchema.parse({
+          ...baseReceipt,
+          status: 'cancelled',
+          finishedAt: null,
+        }),
       ).toThrow(/Terminal status 'cancelled' MUST specify a non-null finishedAt datetime/);
     });
 
@@ -423,7 +485,11 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
         identityId: 'usr_123',
         source: 'schedule',
         occurrenceKey: 'occ_100',
-        idempotencyKey: buildIdempotencyKeyString({ identityId: 'usr_123', source: 'schedule', occurrenceKey: 'occ_100' }),
+        idempotencyKey: buildIdempotencyKeyString({
+          identityId: 'usr_123',
+          source: 'schedule',
+          occurrenceKey: 'occ_100',
+        }),
         projector: 'schedule-conflict-builder',
         sourceRevision: 42,
         attempt: 0,
@@ -437,7 +503,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
           ...baseProjection,
           status: 'pending',
           lease: validLease,
-        })
+        }),
       ).toThrow(/Status 'pending' MUST NOT carry a lease claim/);
 
       // Negative: Projection pending carrying deadLetterAt (must be rejected!)
@@ -446,7 +512,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
           ...baseProjection,
           status: 'pending',
           deadLetterAt: '2026-08-09T05:05:00.000Z',
-        })
+        }),
       ).toThrow(/MUST NOT specify deadLetterAt/);
 
       // Negative: Projection retryable without nextRetryAt (must be rejected!)
@@ -456,7 +522,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
           status: 'retryable',
           lastError: 'Conflict rebuild error',
           nextRetryAt: null,
-        })
+        }),
       ).toThrow(/MUST specify a non-null nextRetryAt datetime/);
 
       // Valid Projection -> convert to Receipt -> ALWAYS passes ReceiptSchema parse!
@@ -477,7 +543,11 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
         identityId: 'usr_123',
         source: 'schedule',
         occurrenceKey: 'occ_888',
-        idempotencyKey: buildIdempotencyKeyString({ identityId: 'usr_123', source: 'schedule', occurrenceKey: 'occ_888' }),
+        idempotencyKey: buildIdempotencyKeyString({
+          identityId: 'usr_123',
+          source: 'schedule',
+          occurrenceKey: 'occ_888',
+        }),
         projector: 'schedule-builder',
         sourceRevision: 1,
         attempt: 0,
@@ -486,14 +556,43 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
       };
 
       const statuses: Array<{ status: any; extra: Record<string, unknown> }> = [
-        { status: 'pending', extra: { lease: null, finishedAt: null, nextRetryAt: null, deadLetterAt: null } },
-        { status: 'running', extra: { lease: validLease, finishedAt: null, nextRetryAt: null, deadLetterAt: null } },
-        { status: 'succeeded', extra: { finishedAt: '2026-08-09T05:01:00.000Z', lease: null, lastError: null } },
-        { status: 'skipped', extra: { finishedAt: '2026-08-09T05:01:00.000Z', lease: null, lastError: null } },
-        { status: 'failed', extra: { finishedAt: '2026-08-09T05:01:00.000Z', lease: null, lastError: 'Fatal' } },
+        {
+          status: 'pending',
+          extra: { lease: null, finishedAt: null, nextRetryAt: null, deadLetterAt: null },
+        },
+        {
+          status: 'running',
+          extra: { lease: validLease, finishedAt: null, nextRetryAt: null, deadLetterAt: null },
+        },
+        {
+          status: 'succeeded',
+          extra: { finishedAt: '2026-08-09T05:01:00.000Z', lease: null, lastError: null },
+        },
+        {
+          status: 'skipped',
+          extra: { finishedAt: '2026-08-09T05:01:00.000Z', lease: null, lastError: null },
+        },
+        {
+          status: 'failed',
+          extra: { finishedAt: '2026-08-09T05:01:00.000Z', lease: null, lastError: 'Fatal' },
+        },
         { status: 'cancelled', extra: { finishedAt: '2026-08-09T05:01:00.000Z', lease: null } },
-        { status: 'retryable', extra: { nextRetryAt: '2026-08-09T05:10:00.000Z', lastError: 'Retry err', finishedAt: null } },
-        { status: 'dead_letter', extra: { deadLetterAt: '2026-08-09T05:01:00.000Z', lastError: 'Dead err', finishedAt: null } },
+        {
+          status: 'retryable',
+          extra: {
+            nextRetryAt: '2026-08-09T05:10:00.000Z',
+            lastError: 'Retry err',
+            finishedAt: null,
+          },
+        },
+        {
+          status: 'dead_letter',
+          extra: {
+            deadLetterAt: '2026-08-09T05:01:00.000Z',
+            lastError: 'Dead err',
+            finishedAt: null,
+          },
+        },
       ];
 
       for (const item of statuses) {
@@ -515,7 +614,11 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
         identityId: 'usr_123',
         source: 'schedule',
         occurrenceKey: 'occ_bad',
-        idempotencyKey: buildIdempotencyKeyString({ identityId: 'usr_123', source: 'schedule', occurrenceKey: 'occ_bad' }),
+        idempotencyKey: buildIdempotencyKeyString({
+          identityId: 'usr_123',
+          source: 'schedule',
+          occurrenceKey: 'occ_bad',
+        }),
         projector: 'schedule-builder',
         sourceRevision: 1,
         status: 'pending',
@@ -527,7 +630,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
       };
 
       expect(() => projectionOperationToReceipt(invalidProjObj as any)).toThrow(
-        /Status 'pending' MUST NOT carry a lease claim/
+        /Status 'pending' MUST NOT carry a lease claim/,
       );
     });
   });
@@ -588,7 +691,8 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
       expect(parseIdempotencyKeyString('v1:10:usr_123:8:reminder:7:occ_100')).toBeNull();
 
       // 5. Trailing extra characters
-      const keyWithExtra = buildIdempotencyKeyString({ identityId: 'u', source: 's', occurrenceKey: 'o' }) + ':extra';
+      const keyWithExtra =
+        buildIdempotencyKeyString({ identityId: 'u', source: 's', occurrenceKey: 'o' }) + ':extra';
       expect(parseIdempotencyKeyString(keyWithExtra)).toBeNull();
 
       // 6. Missing prefix
@@ -621,9 +725,13 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
     it('accepts valid non-negative integers, Git commit SHAs (7-40 hex chars), and UUID strings', () => {
       expect(SourceRevisionSchema.parse(0)).toBe(0);
       expect(SourceRevisionSchema.parse(100)).toBe(100);
-      expect(SourceRevisionSchema.parse('e3b0c44298fc1c149afbf4c8996fb92427ae41e4')).toBe('e3b0c44298fc1c149afbf4c8996fb92427ae41e4');
+      expect(SourceRevisionSchema.parse('e3b0c44298fc1c149afbf4c8996fb92427ae41e4')).toBe(
+        'e3b0c44298fc1c149afbf4c8996fb92427ae41e4',
+      );
       expect(SourceRevisionSchema.parse('a1b2c3d')).toBe('a1b2c3d');
-      expect(SourceRevisionSchema.parse('f47ac10b-58cc-4372-a567-0e02b2c3d479')).toBe('f47ac10b-58cc-4372-a567-0e02b2c3d479');
+      expect(SourceRevisionSchema.parse('f47ac10b-58cc-4372-a567-0e02b2c3d479')).toBe(
+        'f47ac10b-58cc-4372-a567-0e02b2c3d479',
+      );
     });
 
     it('rejects negative numbers, floats, NaN, string NaN, empty string, and non-hex garbage strings', () => {
@@ -693,7 +801,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
           incomingFencingToken: 9,
           incomingOwnerToken: 'stale-worker',
           nowIso: '2026-08-09T05:05:00.000Z',
-        })
+        }),
       ).toThrow(LeaseFencingException);
     });
 
@@ -736,7 +844,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
       });
 
       expect(() => assertProductionCapabilityOrFailFast(contract, 'production')).toThrow(
-        CapabilityMissingStartupException
+        CapabilityMissingStartupException,
       );
     });
 
@@ -760,7 +868,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
       });
 
       expect(() => assertProductionCapabilityOrFailFast(contract, 'production')).toThrow(
-        CapabilityMissingStartupException
+        CapabilityMissingStartupException,
       );
     });
 
@@ -773,7 +881,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
       });
 
       expect(() => assertProductionCapabilityOrFailFast(contract, 'test')).toThrow(
-        CapabilityTestDoubleForbiddenException
+        CapabilityTestDoubleForbiddenException,
       );
     });
 
@@ -791,7 +899,11 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
 
   describe('8. P1-2 Application Port Schemas & Receipt Verification Closed Loop', () => {
     it('validates port input schemas and enforces required canonical idempotencyKey matching across all 7 live ports (P1-2)', () => {
-      const notificationKey = buildIdempotencyKeyString({ identityId: 'usr_1', source: 'notification', occurrenceKey: 'occ_99' });
+      const notificationKey = buildIdempotencyKeyString({
+        identityId: 'usr_1',
+        source: 'notification',
+        occurrenceKey: 'occ_99',
+      });
       const notificationInput = NotificationOutboxDispatchInputSchema.parse({
         operationId: 'op_1',
         identityId: 'usr_1',
@@ -803,7 +915,11 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
       });
       expect(notificationInput.idempotencyKey).toBe(notificationKey);
 
-      const accountKey = buildIdempotencyKeyString({ identityId: 'usr_1', source: 'account', occurrenceKey: 'occ_acc' });
+      const accountKey = buildIdempotencyKeyString({
+        identityId: 'usr_1',
+        source: 'account',
+        occurrenceKey: 'occ_acc',
+      });
       const accountInput = AccountClosureSagaInputSchema.parse({
         identityId: 'usr_1',
         source: 'account',
@@ -812,7 +928,11 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
       });
       expect(accountInput.idempotencyKey).toBe(accountKey);
 
-      const goalKey = buildIdempotencyKeyString({ identityId: 'usr_1', source: 'goal', occurrenceKey: 'occ_g1' });
+      const goalKey = buildIdempotencyKeyString({
+        identityId: 'usr_1',
+        source: 'goal',
+        occurrenceKey: 'occ_g1',
+      });
       const goalInput = GoalRecordReceiptInputSchema.parse({
         identityId: 'usr_1',
         goalId: 'g_1',
@@ -822,7 +942,11 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
       expect(goalInput.source).toBe('goal');
       expect(goalInput.idempotencyKey).toBe(goalKey);
 
-      const taskKey = buildIdempotencyKeyString({ identityId: 'usr_1', source: 'task', occurrenceKey: 'occ_t1' });
+      const taskKey = buildIdempotencyKeyString({
+        identityId: 'usr_1',
+        source: 'task',
+        occurrenceKey: 'occ_t1',
+      });
       const taskInput = TaskRecordOutboxInputSchema.parse({
         identityId: 'usr_1',
         taskId: 't_1',
@@ -832,7 +956,11 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
       expect(taskInput.source).toBe('task');
       expect(taskInput.idempotencyKey).toBe(taskKey);
 
-      const scheduleKey = buildIdempotencyKeyString({ identityId: 'usr_1', source: 'schedule', occurrenceKey: 'occ_e1' });
+      const scheduleKey = buildIdempotencyKeyString({
+        identityId: 'usr_1',
+        source: 'schedule',
+        occurrenceKey: 'occ_e1',
+      });
       const scheduleInput = ScheduleConditionalUpdateInputSchema.parse({
         identityId: 'usr_1',
         entryId: 'e_1',
@@ -844,7 +972,11 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
       expect(scheduleInput.expectedVersion).toBe(3);
       expect(scheduleInput.idempotencyKey).toBe(scheduleKey);
 
-      const rebuildKey = buildIdempotencyKeyString({ identityId: 'usr_1', source: 'schedule', occurrenceKey: 'rebuild_001' });
+      const rebuildKey = buildIdempotencyKeyString({
+        identityId: 'usr_1',
+        source: 'schedule',
+        occurrenceKey: 'rebuild_001',
+      });
       const scheduleRebuildInput = ScheduleConflictRebuildInputSchema.parse({
         identityId: 'usr_1',
         occurrenceKey: 'rebuild_001',
@@ -855,7 +987,11 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
       expect(scheduleRebuildInput.source).toBe('schedule');
       expect(scheduleRebuildInput.idempotencyKey).toBe(rebuildKey);
 
-      const knowledgeKey = buildIdempotencyKeyString({ identityId: 'usr_1', source: 'repository', occurrenceKey: 'occ_k1' });
+      const knowledgeKey = buildIdempotencyKeyString({
+        identityId: 'usr_1',
+        source: 'repository',
+        occurrenceKey: 'occ_k1',
+      });
       const knowledgeInput = KnowledgeCommitProjectionInputSchema.parse({
         identityId: 'usr_1',
         commitSha: 'a1b2c3d',
@@ -876,7 +1012,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
           occurrenceKey: 'occ_99',
           channel: 'in-app',
           payloadJson: '{}',
-        })
+        }),
       ).toThrow();
 
       // 2. Account
@@ -884,7 +1020,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
         AccountClosureSagaInputSchema.parse({
           identityId: 'usr_1',
           occurrenceKey: 'occ_acc',
-        })
+        }),
       ).toThrow();
 
       // 3. Goal
@@ -893,7 +1029,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
           identityId: 'usr_1',
           goalId: 'g_1',
           occurrenceKey: 'occ_g1',
-        })
+        }),
       ).toThrow();
 
       // 4. Task
@@ -902,7 +1038,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
           identityId: 'usr_1',
           taskId: 't_1',
           occurrenceKey: 'occ_t1',
-        })
+        }),
       ).toThrow();
 
       // 5. Schedule update
@@ -913,7 +1049,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
           occurrenceKey: 'occ_e1',
           expectedVersion: 1,
           updatePayload: {},
-        })
+        }),
       ).toThrow();
 
       // 6. Schedule rebuild
@@ -923,7 +1059,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
           occurrenceKey: 'rebuild_1',
           startIso: '2026-08-09T00:00:00.000Z',
           endIso: '2026-08-09T23:59:59.000Z',
-        })
+        }),
       ).toThrow();
 
       // 7. Knowledge
@@ -933,7 +1069,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
           commitSha: 'a1b2c3d',
           occurrenceKey: 'occ_k1',
           files: [],
-        })
+        }),
       ).toThrow();
     });
 
@@ -947,7 +1083,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
           channel: 'in-app',
           payloadJson: '{}',
           idempotencyKey: 'v1:5:wrong:4:path:3:key',
-        })
+        }),
       ).toThrow(/Idempotency key mismatch/);
 
       expect(() =>
@@ -956,7 +1092,7 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
           source: 'account',
           occurrenceKey: 'occ_100',
           idempotencyKey: 'invalid-unparseable-string',
-        })
+        }),
       ).toThrow(/Invalid idempotencyKey format/);
     });
 
@@ -967,7 +1103,11 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
         identityId: 'usr_1',
         source: 'goal',
         occurrenceKey: 'occ_1',
-        idempotencyKey: buildIdempotencyKeyString({ identityId: 'usr_1', source: 'goal', occurrenceKey: 'occ_1' }),
+        idempotencyKey: buildIdempotencyKeyString({
+          identityId: 'usr_1',
+          source: 'goal',
+          occurrenceKey: 'occ_1',
+        }),
         status: 'succeeded',
         attempt: 1,
         createdAt: '2026-08-09T05:00:00.000Z',
@@ -986,7 +1126,11 @@ describe('Reliable Messaging Contracts (W0 - Iteration 3 Fixes)', () => {
         identityId: 'usr_1',
         source: 'schedule',
         occurrenceKey: 'occ_s1',
-        idempotencyKey: buildIdempotencyKeyString({ identityId: 'usr_1', source: 'schedule', occurrenceKey: 'occ_s1' }),
+        idempotencyKey: buildIdempotencyKeyString({
+          identityId: 'usr_1',
+          source: 'schedule',
+          occurrenceKey: 'occ_s1',
+        }),
         projector: 'schedule-conflict-builder',
         sourceRevision: 1,
         status: 'succeeded',

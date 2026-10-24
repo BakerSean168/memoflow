@@ -71,4 +71,3 @@ export interface KeyResultWeightSnapshotDTO {
   operatorId: IdentityId;
   createdAt: TransferDate;
 }
-

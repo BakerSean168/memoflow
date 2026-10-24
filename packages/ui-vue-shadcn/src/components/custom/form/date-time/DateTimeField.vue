@@ -1,48 +1,57 @@
 <script setup lang="ts">
-import type { Hm, Ymd } from '@memoflow/time'
-import { computed, useId } from 'vue'
-import { Label } from '../../../ui/label'
-import { Switch } from '../../../ui/switch'
-import DateField from './DateField.vue'
-import TimeField from './TimeField.vue'
-import type { DateTimeFieldValue } from './types'
+import type { Hm, Ymd } from '@memoflow/time';
+import { computed, useId } from 'vue';
+import { Label } from '../../../ui/label';
+import { Switch } from '../../../ui/switch';
+import DateField from './DateField.vue';
+import TimeField from './TimeField.vue';
+import type { DateTimeFieldValue } from './types';
 
-const props = withDefaults(defineProps<{
-  modelValue?: DateTimeFieldValue
-  id?: string
-  dateLabel?: string
-  timeLabel?: string
-  allDayLabel?: string
-  locale?: string
-  disabled?: boolean
-  allowAllDay?: boolean
-  dateError?: string | null
-  timeError?: string | null
-}>(), {
-  modelValue: () => ({ date: null, time: null, allDay: false }),
-  dateLabel: 'Date',
-  timeLabel: 'Time',
-  allDayLabel: 'All day',
-  locale: 'en-US',
-  disabled: false,
-  allowAllDay: true,
-  dateError: null,
-  timeError: null,
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue?: DateTimeFieldValue;
+    id?: string;
+    dateLabel?: string;
+    timeLabel?: string;
+    allDayLabel?: string;
+    locale?: string;
+    disabled?: boolean;
+    allowAllDay?: boolean;
+    dateError?: string | null;
+    timeError?: string | null;
+  }>(),
+  {
+    modelValue: () => ({ date: null, time: null, allDay: false }),
+    dateLabel: 'Date',
+    timeLabel: 'Time',
+    allDayLabel: 'All day',
+    locale: 'en-US',
+    disabled: false,
+    allowAllDay: true,
+    dateError: null,
+    timeError: null,
+  },
+);
 
 const emit = defineEmits<{
-  (event: 'update:modelValue', value: DateTimeFieldValue): void
-}>()
+  (event: 'update:modelValue', value: DateTimeFieldValue): void;
+}>();
 
-const generatedId = useId()
-const baseId = computed(() => props.id ?? `date-time-field-${generatedId}`)
+const generatedId = useId();
+const baseId = computed(() => props.id ?? `date-time-field-${generatedId}`);
 
 function patch(next: Partial<DateTimeFieldValue>) {
-  emit('update:modelValue', { ...props.modelValue, ...next })
+  emit('update:modelValue', { ...props.modelValue, ...next });
 }
-function updateDate(date: Ymd | null) { patch({ date }) }
-function updateTime(time: Hm | null) { patch({ time }) }
-function updateAllDay(allDay: boolean) { patch({ allDay, ...(allDay ? { time: null } : {}) }) }
+function updateDate(date: Ymd | null) {
+  patch({ date });
+}
+function updateTime(time: Hm | null) {
+  patch({ time });
+}
+function updateAllDay(allDay: boolean) {
+  patch({ allDay, ...(allDay ? { time: null } : {}) });
+}
 </script>
 
 <template>

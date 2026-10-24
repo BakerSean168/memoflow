@@ -26,54 +26,54 @@ updated: 2026-07-12T00:00:00+08:00
 
 ### 2.1 核心组件版本表
 
-| 组件 | 当前 | 目标 | 跨度 | 风险 |
-| --- | --- | --- | --- | --- |
-| Vite | 7.3.1 | **8.1.4**（Rolldown，2026-03-12 GA） | 1 major | 高（desktop 配置面） |
-| Nx / @nx/* | 22.5.3 | **23.0.2**（2026-06-16） | 1 major | 中（自动迁移覆盖大部分） |
-| Electron | 39.2.6（已 EOL） | **43.1.0**（勿用 43.0.x） | 4 major | 中（ABI 148 原生模块） |
-| vite-plugin-electron | 0.29.0 | **1.1.0** | 1 major | 中 |
-| vite-plugin-electron-renderer | 0.14.6 | **1.0.0** | 1 major | 低 |
-| vite-plugin-dts | 4.5.4（已停更） | **5.0.3**（unplugin-dts 薄包装） | 1 major | 中 |
-| TypeScript | 5.9.3 | **6.0.x**（过渡桥；7.x 观望） | 1 major | 中（tsconfig 默认值变更） |
-| vue-tsc | 3.1.8 / 2.2.12（漂移） | **3.3.7**（支持 TS 6） | minor/major | 低 |
-| Vue | 3.5.25 | **3.5.39**（3.6 仍 beta，观望） | patch | 低 |
-| vue-router | 4.6.3 | **5.1.0**（官方声明零 breaking） | 1 major | 低 |
-| Vitest | 4.0.18 / 4.0.15 / 1.6.1（漂移） | **4.1.10**（day-1 支持 Vite 8） | minor | 低 |
-| Storybook | 10.2.8 | **10.5.0**（10.3 起支持 Vite 8） | minor | 低 |
-| Tailwind CSS | 4.1.18 | **4.3.2**（向后兼容） | minor | 低 |
-| ESLint | 9.39.1 / 8.57.1（漂移） | **10.7.x** | 1 major | 中（flat config 已就位） |
-| eslint-plugin-vue | 9.33.0 | **10.9.2** | 1 major | 低 |
-| typescript-eslint | 8.49.0 / 6.21（漂移） | **8.63.0**（peer 支持 ESLint 10、TS <6.1） | minor | 低 |
-| Prisma 套件 | 7.4.2 | **7.8.0**（7.4 的 query plan cache 有已知 bug） | minor | 低 |
-| pg | 8.18.0 | **8.22.0** | minor | 低 |
-| ioredis | 5.8.2 | **5.11.1**（支持 Redis 8.8 新命令） | minor | 低 |
-| better-sqlite3 | 12.6.2 | **≥12.11.2**（Electron 43 prebuild 门槛） | minor | 中 |
-| @electron/rebuild | 4.0.3 | **4.2.0**（node-abi ≥4.31 认识 ABI 148） | minor | 低 |
-| electron-builder | 26.8.1 | **26.15.6**（27 是 alpha，勿升） | minor | 低 |
-| electron-updater | 6.6.2 | **6.8.9** | minor | 低 |
-| @powersync/common / node | 1.47.0 / 0.17.1 | **1.57.2 / 0.19.4** | minor | 中（同步链路回归） |
-| PostgreSQL（Docker） | pgvector:pg16 ×3 + **pg15（test！）** | **pgvector/pgvector:0.8.5-pg18**（PG 18.4） | 2~3 major | 高（数据迁移+PowerSync slot） |
-| Redis（Docker） | redis:7-alpine | **redis:8-alpine**（8.8，AGPL 三重许可） | 1 major | 低 |
-| pnpm | 10.32.1 | **11.12.0**（择机，见观望区条件） | 1 major | 中（配置体系迁移） |
-| Node.js | 本机 24.12 / CI+Docker **22** / engines >=22 | 运行时统一 **24 LTS**；Node 26 等 10 月转 LTS | — | 低 |
-| Expo / RN（mobile） | 55.0.9 / 0.83.4 | **57.x / 0.86** | 2 SDK | 中 |
-| Vercel AI SDK | 5.0.110（**全仓库零使用**） | **直接移除** | — | 零 |
+| 组件                          | 当前                                         | 目标                                            | 跨度        | 风险                          |
+| ----------------------------- | -------------------------------------------- | ----------------------------------------------- | ----------- | ----------------------------- |
+| Vite                          | 7.3.1                                        | **8.1.4**（Rolldown，2026-03-12 GA）            | 1 major     | 高（desktop 配置面）          |
+| Nx / @nx/*                    | 22.5.3                                       | **23.0.2**（2026-06-16）                        | 1 major     | 中（自动迁移覆盖大部分）      |
+| Electron                      | 39.2.6（已 EOL）                             | **43.1.0**（勿用 43.0.x）                       | 4 major     | 中（ABI 148 原生模块）        |
+| vite-plugin-electron          | 0.29.0                                       | **1.1.0**                                       | 1 major     | 中                            |
+| vite-plugin-electron-renderer | 0.14.6                                       | **1.0.0**                                       | 1 major     | 低                            |
+| vite-plugin-dts               | 4.5.4（已停更）                              | **5.0.3**（unplugin-dts 薄包装）                | 1 major     | 中                            |
+| TypeScript                    | 5.9.3                                        | **6.0.x**（过渡桥；7.x 观望）                   | 1 major     | 中（tsconfig 默认值变更）     |
+| vue-tsc                       | 3.1.8 / 2.2.12（漂移）                       | **3.3.7**（支持 TS 6）                          | minor/major | 低                            |
+| Vue                           | 3.5.25                                       | **3.5.39**（3.6 仍 beta，观望）                 | patch       | 低                            |
+| vue-router                    | 4.6.3                                        | **5.1.0**（官方声明零 breaking）                | 1 major     | 低                            |
+| Vitest                        | 4.0.18 / 4.0.15 / 1.6.1（漂移）              | **4.1.10**（day-1 支持 Vite 8）                 | minor       | 低                            |
+| Storybook                     | 10.2.8                                       | **10.5.0**（10.3 起支持 Vite 8）                | minor       | 低                            |
+| Tailwind CSS                  | 4.1.18                                       | **4.3.2**（向后兼容）                           | minor       | 低                            |
+| ESLint                        | 9.39.1 / 8.57.1（漂移）                      | **10.7.x**                                      | 1 major     | 中（flat config 已就位）      |
+| eslint-plugin-vue             | 9.33.0                                       | **10.9.2**                                      | 1 major     | 低                            |
+| typescript-eslint             | 8.49.0 / 6.21（漂移）                        | **8.63.0**（peer 支持 ESLint 10、TS <6.1）      | minor       | 低                            |
+| Prisma 套件                   | 7.4.2                                        | **7.8.0**（7.4 的 query plan cache 有已知 bug） | minor       | 低                            |
+| pg                            | 8.18.0                                       | **8.22.0**                                      | minor       | 低                            |
+| ioredis                       | 5.8.2                                        | **5.11.1**（支持 Redis 8.8 新命令）             | minor       | 低                            |
+| better-sqlite3                | 12.6.2                                       | **≥12.11.2**（Electron 43 prebuild 门槛）       | minor       | 中                            |
+| @electron/rebuild             | 4.0.3                                        | **4.2.0**（node-abi ≥4.31 认识 ABI 148）        | minor       | 低                            |
+| electron-builder              | 26.8.1                                       | **26.15.6**（27 是 alpha，勿升）                | minor       | 低                            |
+| electron-updater              | 6.6.2                                        | **6.8.9**                                       | minor       | 低                            |
+| @powersync/common / node      | 1.47.0 / 0.17.1                              | **1.57.2 / 0.19.4**                             | minor       | 中（同步链路回归）            |
+| PostgreSQL（Docker）          | pgvector:pg16 ×3 + **pg15（test！）**        | **pgvector/pgvector:0.8.5-pg18**（PG 18.4）     | 2~3 major   | 高（数据迁移+PowerSync slot） |
+| Redis（Docker）               | redis:7-alpine                               | **redis:8-alpine**（8.8，AGPL 三重许可）        | 1 major     | 低                            |
+| pnpm                          | 10.32.1                                      | **11.12.0**（择机，见观望区条件）               | 1 major     | 中（配置体系迁移）            |
+| Node.js                       | 本机 24.12 / CI+Docker **22** / engines >=22 | 运行时统一 **24 LTS**；Node 26 等 10 月转 LTS   | —           | 低                            |
+| Expo / RN（mobile）           | 55.0.9 / 0.83.4                              | **57.x / 0.86**                                 | 2 SDK       | 中                            |
+| Vercel AI SDK                 | 5.0.110（**全仓库零使用**）                  | **直接移除**                                    | —           | 零                            |
 
 ### 2.2 仓库内部版本漂移清单（对齐即收益，多数不用跨 major）
 
-| 依赖 | 漂移现状 | 对齐目标 |
-| --- | --- | --- |
-| zod | 根 4.3.6，`ui-vue-shadcn` **3.24.0** | 4.4.3 统一 |
-| vue-tsc | 根 3.1.8，`web` **2.2.12** | 3.3.7 统一 |
-| @vitejs/plugin-vue | 根 6.0.4，`desktop` **^5.0.0（5.2.4）** | 6.0.7 统一 |
-| express | 11 个包 ^5.1.0，`account`/`governance` **^4.21.0** | ^5.x 统一（4/5 混用会重复安装两份且语义不同） |
-| vitest | 根 4.0.18，`test-utils`/`ui-core` 4.0.15，`scheduler-server` **1.6.1** | 4.1.10 统一 |
-| eslint | 根 9.39.1，`scheduler-server` **8.57.1** | 随 ESLint 10 批次统一 |
-| argon2 | 根 0.44.0，`authentication` **0.43.1** | 0.44.0 统一 |
-| lucide-vue-next | 0.460 / 0.511 / 0.542 三个版本 | 统一迁移到 **@lucide/vue 1.x**（原包已弃用） |
-| shadcn-vue | 根 2.4.3，`ui-vue-shadcn` **0.11.4** | 2.7.4 统一 |
-| tsup | 根 8.5，`scheduler-server` **7.3** | 随退役处理 |
-| PG 镜像 | local/prod/dev pg16，**test 竟是 pg15** | 0.8.5-pg18 四套统一 |
+| 依赖               | 漂移现状                                                               | 对齐目标                                      |
+| ------------------ | ---------------------------------------------------------------------- | --------------------------------------------- |
+| zod                | 根 4.3.6，`ui-vue-shadcn` **3.24.0**                                   | 4.4.3 统一                                    |
+| vue-tsc            | 根 3.1.8，`web` **2.2.12**                                             | 3.3.7 统一                                    |
+| @vitejs/plugin-vue | 根 6.0.4，`desktop` **^5.0.0（5.2.4）**                                | 6.0.7 统一                                    |
+| express            | 11 个包 ^5.1.0，`account`/`governance` **^4.21.0**                     | ^5.x 统一（4/5 混用会重复安装两份且语义不同） |
+| vitest             | 根 4.0.18，`test-utils`/`ui-core` 4.0.15，`scheduler-server` **1.6.1** | 4.1.10 统一                                   |
+| eslint             | 根 9.39.1，`scheduler-server` **8.57.1**                               | 随 ESLint 10 批次统一                         |
+| argon2             | 根 0.44.0，`authentication` **0.43.1**                                 | 0.44.0 统一                                   |
+| lucide-vue-next    | 0.460 / 0.511 / 0.542 三个版本                                         | 统一迁移到 **@lucide/vue 1.x**（原包已弃用）  |
+| shadcn-vue         | 根 2.4.3，`ui-vue-shadcn` **0.11.4**                                   | 2.7.4 统一                                    |
+| tsup               | 根 8.5，`scheduler-server` **7.3**                                     | 随退役处理                                    |
+| PG 镜像            | local/prod/dev pg16，**test 竟是 pg15**                                | 0.8.5-pg18 四套统一                           |
 
 ### 2.3 死代码与孤儿
 
@@ -83,18 +83,18 @@ updated: 2026-07-12T00:00:00+08:00
 
 ### 2.4 基础设施钉住点（升级时必须联动的位置）
 
-| 位置 | 内容 | 关联批次 |
-| --- | --- | --- |
-| `package.json` `packageManager` | pnpm@10.32.1+sha512 | pnpm 11 批 |
-| `package.json` `pnpm.overrides` | `vite ^7.3.1`、`@types/node 22.13.14`、`@electron/rebuild 4.0.3`、`jiti 2.4.2` | Vite 8 / Electron / Node 各批 |
-| `package.json` `pnpm.onlyBuiltDependencies/ignoredBuiltDependencies` | pnpm 11 起**不再被读取**（配置全面迁入 workspace.yaml） | pnpm 11 批 |
-| `pnpm-workspace.yaml` | `allowBuilds`（新）与 `onlyBuiltDependencies`（旧）混存 | pnpm 11 批清理 |
-| `.github/workflows/*` | `NODE_VERSION: '22'`、corepack enable | Node 统一批 |
-| `Dockerfile.api` | `node:22-bookworm-slim` ×2 | Node 统一批 |
-| `docker-compose{,.local,.prod}.yml` | pgvector:pg16/pg15、redis:7、powersync `latest` | 数据层批 |
-| `.npmrc` | electron 镜像被注释、`save-exact=true`、`prefer-frozen-lockfile=true` | Electron 批（42+ 安装流变化） |
-| `packages/patterns/vite.config.ts` | `nxViteTsPaths()`（Nx 23 弃用、24 移除） | Nx 23 批 |
-| `packages/{assets,ui-vue-shadcn,app-vue}/vite.config.ts` | `vite-plugin-dts` 4.x | Vite 8 批 |
+| 位置                                                                 | 内容                                                                           | 关联批次                      |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ----------------------------- |
+| `package.json` `packageManager`                                      | pnpm@10.32.1+sha512                                                            | pnpm 11 批                    |
+| `package.json` `pnpm.overrides`                                      | `vite ^7.3.1`、`@types/node 22.13.14`、`@electron/rebuild 4.0.3`、`jiti 2.4.2` | Vite 8 / Electron / Node 各批 |
+| `package.json` `pnpm.onlyBuiltDependencies/ignoredBuiltDependencies` | pnpm 11 起**不再被读取**（配置全面迁入 workspace.yaml）                        | pnpm 11 批                    |
+| `pnpm-workspace.yaml`                                                | `allowBuilds`（新）与 `onlyBuiltDependencies`（旧）混存                        | pnpm 11 批清理                |
+| `.github/workflows/*`                                                | `NODE_VERSION: '22'`、corepack enable                                          | Node 统一批                   |
+| `Dockerfile.api`                                                     | `node:22-bookworm-slim` ×2                                                     | Node 统一批                   |
+| `docker-compose{,.local,.prod}.yml`                                  | pgvector:pg16/pg15、redis:7、powersync `latest`                                | 数据层批                      |
+| `.npmrc`                                                             | electron 镜像被注释、`save-exact=true`、`prefer-frozen-lockfile=true`          | Electron 批（42+ 安装流变化） |
+| `packages/patterns/vite.config.ts`                                   | `nxViteTsPaths()`（Nx 23 弃用、24 移除）                                       | Nx 23 批                      |
+| `packages/{assets,ui-vue-shadcn,app-vue}/vite.config.ts`             | `vite-plugin-dts` 4.x                                                          | Vite 8 批                     |
 
 ## 3. 升级总原则
 
@@ -119,6 +119,7 @@ B0 → B1 → B2(ESLint,деadline 8/6) → B3(Electron,安全) → B4(TS6) → 
 ### Batch 0 — 卫生批：漂移对齐 + 死代码清理（0.5~1 天，零 major 风险）
 
 **内容**：
+
 1. 提交本次 `pnpm-workspace.yaml` 的 `allowBuilds` 修复（已完成待提交）。
 2. 移除死依赖：根 `ai`、`@ai-sdk/openai`；三个 Deprecated 的 `@types/*`。
 3. `scheduler-server` 退役决策：`git rm -r packages/scheduler-server`（历史在 git；若想保守，先移出 `pnpm-workspace.yaml` 的 packages 列表）。
@@ -141,6 +142,7 @@ B0 → B1 → B2(ESLint,деadline 8/6) → B3(Electron,安全) → B4(TS6) → 
 - 桌面：`electron-log@5.4.4`、`simple-git@3.36.0`、`tailwind-merge@3.6.0`。
 
 **注意**：
+
 - zod 4.4.3 的错误信息措辞有变化，**快照测试可能碎**——属预期内更新快照，不是回归。
 - `@powersync/*` minor 跨度较大（1.47→1.57），桌面端同步链路单独冒烟。
 - desktop 手动钉住的 `pg-types`/`postgres-*` 传递依赖**不动**（等 pg 主链需要时再说，跨 major 无收益）。
@@ -154,6 +156,7 @@ B0 → B1 → B2(ESLint,деadline 8/6) → B3(Electron,安全) → B4(TS6) → 
 **内容**：`eslint@10.7.x`、`@eslint/js@10`、`eslint-plugin-vue@10.9.2`、`@eslint/markdown@8.0.3`、`globals@17`、`jsonc-eslint-parser@3.1.0`；`eslint-config-prettier`/`eslint-plugin-prettier`/`eslint-plugin-storybook` 按 peer 提示跟进。
 
 **要点**（对本仓库）：
+
 - 仓库已是 flat config（`eslint.config.ts`），主迁移成本已付。
 - **新 config 查找算法**：从被 lint 文件所在目录向上查找（不再从 cwd）——monorepo 下 `apps/desktop` 有独立 eslint 配置，确认其与根配置的边界行为（可能正是收益：子目录配置天然生效）。
 - eslintrc 兼容层彻底删除：检查 lint 脚本无 `--no-eslintrc`/`--env` 等旧参数；`/* eslint-env */` 注释会报错，全仓 grep 清理。
@@ -169,16 +172,19 @@ B0 → B1 → B2(ESLint,деadline 8/6) → B3(Electron,安全) → B4(TS6) → 
 **内容**：`electron@43.1.0`（**必须 43.1+**：43.0.x 有 updater 替换 app.asar 崩溃与 preload ENOENT，43.1 修复）。
 
 **跨 4 个 major 的代码扫描点**（本应用命中面小，已核对四份官方 breaking changes）：
+
 - 40：renderer 直接用 `clipboard` 废弃 → 全仓 grep，确保剪贴板走 preload/contextBridge；
 - 41：PDF 不再生成独立 guest WebContents（若有 PDF 预览逻辑需改 WebFrameMain）；
 - 42：`session.clearStorageData` 移除 `quotas` 选项；
 - 43：**`dialog.showOpen/SaveDialog` 不再记住上次目录**（`defaultPath` 默认下载目录）——repository/editor 模块的文件对话框如依赖"记住上次位置"，需自行持久化并显式传 `defaultPath`。
 
 **安装流变化（42+，与本仓库 allowBuilds 事故直接相关）**：
+
 - Electron 42 起 **postinstall 不再下载二进制**，改为首次运行时下载；`ELECTRON_SKIP_BINARY_DOWNLOAD` 移除，新增 `install-electron` 脚本与 `ELECTRON_INSTALL_ARCH/PLATFORM`。
 - 影响：`allowBuilds.electron` 的作用变化；CI/离线环境需显式跑 `install-electron` 或预热缓存；建议同时启用 `.npmrc` 里被注释的 `electron_mirror`（国内网络下首次运行下载更易失败）。
 
 **原生模块（ABI 148 / Node 24 / Chromium 150）**：
+
 - better-sqlite3 ≥12.11.2（B1 已就位）有官方 prebuild；`desktop:native-rebuild` 全流程跑通；
 - @electron/rebuild 4.2.0 + 刷新 lockfile（node-abi ≥4.31），兜底 `--force-abi=148`；
 - argon2（N-API）理论免重建，主进程实测加载一次。
@@ -194,6 +200,7 @@ B0 → B1 → B2(ESLint,деadline 8/6) → B3(Electron,安全) → B4(TS6) → 
 **内容**：`typescript@6.0.x`（root + 全部子包 devDep 统一）。
 
 **tsconfig 默认值变更排查**（对本仓库的实际影响面）：
+
 - `strict` 默认 true（仓库应已显式开启，确认即可）；
 - `module` 默认 esnext、`moduleResolution` 弃用 `node`/`classic`（各包 tsconfig 显式声明的不受影响，грep 无声明处）;
 - `baseUrl` 废弃（检查是否有包用 baseUrl+paths，改相对 paths）；
@@ -211,6 +218,7 @@ B0 → B1 → B2(ESLint,деadline 8/6) → B3(Electron,安全) → B4(TS6) → 
 **内容**：`pnpm nx migrate latest` → 审阅 migrations.json → `pnpm nx migrate --run-migrations`。
 
 **要点**：
+
 - 最低 Node 22 ✓（B0 后 CI 已是 24）；
 - **@nx/vitest 从 @nx/vite 拆分**：自动迁移处理，但本仓库大量 test target 是 `nx:run-commands` 直调 vitest CLI，受影响面小，核对 `@nx/vitest` 包被正确加入；
 - `nxViteTsPaths()` 弃用（v24 移除）：`packages/patterns/vite.config.ts` 一处，换 `vite-tsconfig-paths`；
@@ -230,6 +238,7 @@ B0 → B1 → B2(ESLint,деadline 8/6) → B3(Electron,安全) → B4(TS6) → 
 **内容**：`vite@8.1.4`（同步改 `pnpm.overrides` 的 `^7.3.1`→`^8.1.4`）、`vite-plugin-electron@1.1.0`、`vite-plugin-electron-renderer@1.0.0`、`vite-plugin-dts@5.0.3`（3 个包）。
 
 **desktop `vite.config.ts` 改造清单**（主要风险面）：
+
 1. `build.rollupOptions`→`build.rolldownOptions`（兼容层可过渡，一次性改名干净）；
 2. preload 配置里的 `manualChunks: undefined`：对象形式的 manualChunks 已移除、函数形式弃用——`undefined` 等价未设置可直接删；如需控制分块改 `advancedChunks`；
 3. 函数式 `external: isElectronMainExternal` 仍支持但有 Rust→JS 回调开销，建议改为字符串/正则数组（`electronExternalWorkspacePackages` 本就是静态列表，可编译为正则）；
@@ -249,6 +258,7 @@ B0 → B1 → B2(ESLint,деadline 8/6) → B3(Electron,安全) → B4(TS6) → 
 **顺序**：Node 侧库已在 B1 就位 → Redis → PostgreSQL。
 
 **Redis 7→8**（低风险）：
+
 - `redis:8-alpine`（8.8，AGPLv3 三重许可，自部署无合规负担）；
 - 纯 KV/缓存用法基本零破坏；如用了 ACL，注意 @read/@write 类别已扩容（含 FT./JSON. 命令）；
 - ioredis 5.11.1 已就位 ✓。
@@ -258,6 +268,7 @@ B0 → B1 → B2(ESLint,деadline 8/6) → B3(Electron,安全) → B4(TS6) → 
 方案选型：**pg_dumpall → 新卷导入**（该规模最优；pg_upgrade 容器方案要求两侧 pgvector .so 齐备，扩展场景更繁琐；逻辑复制双实例对单机 Compose 不划算）。
 
 执行序（四套 compose 一并统一到 pg18，含 test 的 pg15）：
+
 1. 停 PowerSync service → `pg_dumpall` 导出到宿主；
 2. 新数据卷 + 新镜像启动——**⚠️ 最大的坑：postgres:18 系镜像卷布局变更**，VOLUME 改为 `/var/lib/postgresql`（PGDATA 版本化为 `/var/lib/postgresql/18/docker`），compose 挂载路径必须改，否则起不来；
 3. 导入 dump → 应用侧连接验证（Prisma 7.8 官方支持 PG 17/18 ✓）；
@@ -274,6 +285,7 @@ B0 → B1 → B2(ESLint,деadline 8/6) → B3(Electron,安全) → B4(TS6) → 
 ### Batch 8 — 生态收尾 major 小包（1 天，任意时点，仅依赖 B0）
 
 逐项独立小 PR（互不相关，坏了哪个 revert 哪个）：
+
 - `vue-router@5.1.0`：官方零 breaking（未用 unplugin-vue-router ✓），iife 构建变化与本仓库无关；
 - `lucide-vue-next` → **`@lucide/vue@1.x`**：三处版本统一 + import 全局替换（API 相同）；⚠️ v1 移除品牌图标，迁移前 grep 是否用到（Github/Twitter 等图标名）；shadcn-vue 生成器仍引用旧包，新生成组件注意手工替换；
 - `uuid@14`、`undici@8`、`bson@7`、`js-yaml@5`、`dotenv-expand@13`、`jsdom@29`、`concurrently@10`、`jscpd@5`、`marked@18`：逐个过 changelog，多为 Node 版本门槛提升型 major；
@@ -303,38 +315,38 @@ pnpm 11 把本次事故涉及的构建审批机制正式化，升级本身是收
 
 ## 5. 观望区（明确不动，含复查触发条件）
 
-| 项 | 现状 | 触发条件 | 预期时点 |
-| --- | --- | --- | --- |
-| **TypeScript 7（tsgo）** | 7.0.2 GA 但无编程 API | 7.1 发布 API + vue-tsc 官方支持（vuejs/language-tools#5381）+ typescript-eslint 放开 <7.x | 2026 Q4 |
-| **Vue 3.6（Vapor/alien-signals）** | beta.17，npm latest 仍 3.5 | 3.6 stable GA | 2026 H2 |
-| **Vitest 5** | 5.0.0-beta.6，无稳定时间表 | stable + Vite 8 生态磨合 | 观察 |
-| **electron-builder 27** | alpha（ESM/签名配置 breaking） | stable + electron-updater 7 stable | 观察 |
-| **Node 26** | Current（Temporal 默认开启） | 2026-10-28 转 LTS 后 | 2026 Q4（连动 CI/Docker/engines/@types/node） |
-| **PostgreSQL 19** | Beta 1（2026-06-04） | GA（预期 9~10 月）+ 一个 patch 周期 | 2027 |
-| **eslint 相关 Rust 化（oxlint 等）** | 生态迁移潮 | 有明确收益诉求时专项评估 | 不设时点 |
+| 项                                   | 现状                           | 触发条件                                                                                  | 预期时点                                      |
+| ------------------------------------ | ------------------------------ | ----------------------------------------------------------------------------------------- | --------------------------------------------- |
+| **TypeScript 7（tsgo）**             | 7.0.2 GA 但无编程 API          | 7.1 发布 API + vue-tsc 官方支持（vuejs/language-tools#5381）+ typescript-eslint 放开 <7.x | 2026 Q4                                       |
+| **Vue 3.6（Vapor/alien-signals）**   | beta.17，npm latest 仍 3.5     | 3.6 stable GA                                                                             | 2026 H2                                       |
+| **Vitest 5**                         | 5.0.0-beta.6，无稳定时间表     | stable + Vite 8 生态磨合                                                                  | 观察                                          |
+| **electron-builder 27**              | alpha（ESM/签名配置 breaking） | stable + electron-updater 7 stable                                                        | 观察                                          |
+| **Node 26**                          | Current（Temporal 默认开启）   | 2026-10-28 转 LTS 后                                                                      | 2026 Q4（连动 CI/Docker/engines/@types/node） |
+| **PostgreSQL 19**                    | Beta 1（2026-06-04）           | GA（预期 9~10 月）+ 一个 patch 周期                                                       | 2027                                          |
+| **eslint 相关 Rust 化（oxlint 等）** | 生态迁移潮                     | 有明确收益诉求时专项评估                                                                  | 不设时点                                      |
 
 ## 6. 关键兼容矩阵（交叉约束速查）
 
-| 约束 | 说明 |
-| --- | --- |
-| @nx/vite 22 ✗ vite 8 | peer ERESOLVE，**Nx 23 必须先于 Vite 8** |
-| vitest 4.0 ✗ vite 8 | 4.1 起 day-1 支持且复用项目 vite |
-| vue-tsc（所有版本）✗ TS 7 | Volar 依赖 TS API；**TS 6 是当前上限**（vue-tsc ≥3.3） |
-| typescript-eslint 8.63 | eslint ^8.57‖^9‖^10 ✓；TS <6.1 ✓ |
-| better-sqlite3 <12.11.2 ✗ Electron 43 | 无 ABI 148 prebuild，会触发本地编译或直接报错 |
-| Electron 43 = Node 24 / ABI 148 / Chromium 150 | 每个 Electron major ABI 都变，原生模块随动 |
-| Vite 8 = Node ≥20.19/22.12 + ESM-only | engines 建议随 B6 升为 `>=22.12`（实际统一 24） |
-| pnpm 11 = Node ≥22 + 配置全面迁 workspace.yaml | package.json 的 pnpm.* 失效 |
-| PG 18 官方镜像 | VOLUME 变更为 `/var/lib/postgresql`，compose 挂载必改 |
-| PowerSync | PG 11+ 无上限 ✓；16→18 slot 必丢 → 自动全量 re-replicate |
+| 约束                                           | 说明                                                     |
+| ---------------------------------------------- | -------------------------------------------------------- |
+| @nx/vite 22 ✗ vite 8                           | peer ERESOLVE，**Nx 23 必须先于 Vite 8**                 |
+| vitest 4.0 ✗ vite 8                            | 4.1 起 day-1 支持且复用项目 vite                         |
+| vue-tsc（所有版本）✗ TS 7                      | Volar 依赖 TS API；**TS 6 是当前上限**（vue-tsc ≥3.3）   |
+| typescript-eslint 8.63                         | eslint ^8.57‖^9‖^10 ✓；TS <6.1 ✓                         |
+| better-sqlite3 <12.11.2 ✗ Electron 43          | 无 ABI 148 prebuild，会触发本地编译或直接报错            |
+| Electron 43 = Node 24 / ABI 148 / Chromium 150 | 每个 Electron major ABI 都变，原生模块随动               |
+| Vite 8 = Node ≥20.19/22.12 + ESM-only          | engines 建议随 B6 升为 `>=22.12`（实际统一 24）          |
+| pnpm 11 = Node ≥22 + 配置全面迁 workspace.yaml | package.json 的 pnpm.* 失效                              |
+| PG 18 官方镜像                                 | VOLUME 变更为 `/var/lib/postgresql`，compose 挂载必改    |
+| PowerSync                                      | PG 11+ 无上限 ✓；16→18 slot 必丢 → 自动全量 re-replicate |
 
 ## 7. 建议时间线（滚动 3~4 周）
 
-| 周 | 批次 |
-| --- | --- |
-| 第 1 周 | B0 卫生批 → B1 minor 批量 → B2 ESLint 10（赶 8/6 EOL） |
-| 第 2 周 | B3 Electron 43.1（安全）；并行启动 B7 数据层演练（test 环境先行） |
-| 第 3 周 | B4 TS 6.0 → B5 Nx 23；B7 生产维护窗口执行 |
+| 周      | 批次                                                                  |
+| ------- | --------------------------------------------------------------------- |
+| 第 1 周 | B0 卫生批 → B1 minor 批量 → B2 ESLint 10（赶 8/6 EOL）                |
+| 第 2 周 | B3 Electron 43.1（安全）；并行启动 B7 数据层演练（test 环境先行）     |
+| 第 3 周 | B4 TS 6.0 → B5 Nx 23；B7 生产维护窗口执行                             |
 | 第 4 周 | B6 Vite 8（含 rolldown-vite 预演可提前到第 3 周）；B8/B9/B10 见缝插针 |
 
 ## 8. 长效防漂移机制（升级完成后落地）
@@ -367,14 +379,14 @@ pnpm 11 把本次事故涉及的构建审批机制正式化，升级本身是收
 
 **框架收尾**：[vue-router v4→v5 迁移](https://router.vuejs.org/guide/migration/v4-to-v5) ｜ [lucide 迁移指南](https://lucide.dev/guide/vue/migration) ｜ [AI SDK 7 迁移](https://ai-sdk.dev/docs/migration-guides/migration-guide-7-0)（已确认本仓库未使用，仅存档） ｜ [Expo SDK 57](https://expo.dev/changelog/sdk-57) ｜ [Expo 升级指引](https://docs.expo.dev/workflow/upgrading-expo-sdk-walkthrough/)
 
---- 
+---
+
 ## 补充更新
 
 ### 需求
 
 docs\plan\active\2026-07-12-tech-stack-upgrade-plan.md 分析一下这篇文档，看一下有没有可能先尝试一次性升级所有的依赖版本到目标版本，然后同时修改相关需要更改的代码（比如使用新的 API 之类的），然后再统一进行一次测试，完成本次的依赖版本更新。
 否则，如果分批次、每次都重新进行验证部署的话，会消耗比较多的时间。希望能尽可能快速。
-
 
 ### 分析
 
@@ -390,13 +402,13 @@ docs\plan\active\2026-07-12-tech-stack-upgrade-plan.md 分析一下这篇文档�
 普通 PR 不会生产部署。[docker-deploy.yml (line 3)](D:/home/projects/memoflow/.github/workflows/docker-deploy.yml:3) 只监听正式 v* tag；[发布说明 (line 51)](D:/home/projects/memoflow/docs/guides/development/release-workflow.md:51) 也明确 main 推进不会直接发生产镜像。
 目标依赖闭包没有发现硬 peer 冲突：Nx 23 支持 Vite 8，typescript-eslint 8.63 支持 ESLint 10 + TS 6，vue-tsc 3.3.7 支持 TS 6，@nxlv/python@22.2.1 也没有排除 Nx 23。
 推荐合并边界
-范围	建议
-B0–B6	全部放进同一个主 PR，一次性写入最终目标版本并生成最终 lockfile
-B3 Electron	可留在同一 PR 以避免重复桌面打包，但必须是可单独撤销的 commit，并保留桌面专项验收
-B10 pnpm 11	作为主 PR 最后一个可拔插 commit；若 clean install 阻塞，再单独后置
-B8 生态小 major	可一起尝试，但保持独立 commit；Lucide 替换实际命中约 168 个文件，若成为唯一阻塞项就摘出
-B7 PG18/Redis8	不纳入普通统一测试；PG18 保留独立迁移演练和维护窗口
-B9 Mobile	独立并行处理；现有 mobile 没有 build/test/e2e target，官方也建议 Expo SDK 逐级升级验证，见 Expo 指南
+范围 建议
+B0–B6 全部放进同一个主 PR，一次性写入最终目标版本并生成最终 lockfile
+B3 Electron 可留在同一 PR 以避免重复桌面打包，但必须是可单独撤销的 commit，并保留桌面专项验收
+B10 pnpm 11 作为主 PR 最后一个可拔插 commit；若 clean install 阻塞，再单独后置
+B8 生态小 major 可一起尝试，但保持独立 commit；Lucide 替换实际命中约 168 个文件，若成为唯一阻塞项就摘出
+B7 PG18/Redis8 不纳入普通统一测试；PG18 保留独立迁移演练和维护窗口
+B9 Mobile 独立并行处理；现有 mobile 没有 build/test/e2e target，官方也建议 Expo SDK 逐级升级验证，见 Expo 指南
 
 最快执行方式
 如果 main 最新 CI 已绿，直接把它作为基线，不再额外做一次完整部署。
@@ -418,49 +430,53 @@ pnpm 11 不只是移动 package.json#pnpm：.npmrc 中除 registry/auth 外的�
 Redis 目前只有服务、配置和 external 声明，没有找到真实 ioredis 调用。按最小化原则，应先确认能否直接移除，而不是为了版本表升级。
 所以，我建议采用“一次性核心升级”的方案，但保留 PG18 和 Mobile 的独立验收边界。这能消除绝大多数重复 CI/部署成本，同时避免把数据迁移和原生产物验证压缩成一次普通测试。此次仅做了分析，没有修改文件。
 
-
 ## 9. 执行进度（one-shot）
 
 > 更新于 2026-07-13 18:02 UTC，分支 `chore/tech-stack-upgrade-2026-07`。  
 > **状态：代码侧 one-shot 升级完成并通过本地最终验证矩阵。**
 
 ### 策略与范围
+
 - one-shot 落地 B0–B6 / B8 + B9 + B10
 - B7：镜像与卷路径钉住 + 本地用**新空卷**验收；**生产 dump/restore 属环境维护窗口，不在本代码升级范围内**（计划原文即独立验收边界）
 
 ### 已落地目标版本（实测）
-| 组件 | 版本 |
-| --- | --- |
-| pnpm | 11.12.0 |
-| Vite / Nx / Electron / TS / ESLint / Vitest | 8.1.4 / 23.0.2 / 43.1.0 / 6.0.3 / 10.7.0 / 4.1.10 |
-| vue-router / @lucide/vue / Prisma / better-sqlite3 | 5.1.0 / 1.24.0 / 7.8.0 / 12.11.1 |
-| Storybook / Tailwind / node-abi | 10.5.0 / 4.3.2 / 4.33.0 |
-| Expo / RN / reanimated / worklets | 57.0.4 / 0.86.0 / 4.5.0 / 0.10.0 |
-| Docker PG / Redis | `pgvector/pgvector:0.8.5-pg18` / `redis:8-alpine`（`/var/lib/postgresql`） |
-| CI/Node | `NODE_VERSION=24` |
+
+| 组件                                               | 版本                                                                       |
+| -------------------------------------------------- | -------------------------------------------------------------------------- |
+| pnpm                                               | 11.12.0                                                                    |
+| Vite / Nx / Electron / TS / ESLint / Vitest        | 8.1.4 / 23.0.2 / 43.1.0 / 6.0.3 / 10.7.0 / 4.1.10                          |
+| vue-router / @lucide/vue / Prisma / better-sqlite3 | 5.1.0 / 1.24.0 / 7.8.0 / 12.11.1                                           |
+| Storybook / Tailwind / node-abi                    | 10.5.0 / 4.3.2 / 4.33.0                                                    |
+| Expo / RN / reanimated / worklets                  | 57.0.4 / 0.86.0 / 4.5.0 / 0.10.0                                           |
+| Docker PG / Redis                                  | `pgvector/pgvector:0.8.5-pg18` / `redis:8-alpine`（`/var/lib/postgresql`） |
+| CI/Node                                            | `NODE_VERSION=24`                                                          |
 
 ### 最终验证矩阵（2026-07-13，pnpm 11.12.0，`/tmp/ultimate-matrix.log`）
-| Gate | Exit |
-| --- | --- |
-| core typecheck（utils,contracts,patterns,domain-shared,http-client,account,authentication,task,goal,api） | 0 |
-| api:build / web:build / desktop:build | 0 / 0 / 0 |
-| utils:test / contracts:test / desktop:test | 0 / 0 / 0 |
-| memoflow:governance-check | 0 |
-| apps/mobile `expo install --check` | 0（Dependencies are up to date） |
-| local docker health + HTTP | postgres/redis/api/web/ai/powersync healthy；api/web 200 |
+
+| Gate                                                                                                      | Exit                                                     |
+| --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| core typecheck（utils,contracts,patterns,domain-shared,http-client,account,authentication,task,goal,api） | 0                                                        |
+| api:build / web:build / desktop:build                                                                     | 0 / 0 / 0                                                |
+| utils:test / contracts:test / desktop:test                                                                | 0 / 0 / 0                                                |
+| memoflow:governance-check                                                                                 | 0                                                        |
+| apps/mobile `expo install --check`                                                                        | 0（Dependencies are up to date）                         |
+| local docker health + HTTP                                                                                | postgres/redis/api/web/ai/powersync healthy；api/web 200 |
 
 ### 适配要点
+
 - 死依赖/`scheduler-server` 退役；lucide→@lucide/vue；Vite rolldownOptions；TS6 ignoreDeprecations
 - pnpm 配置迁入 `pnpm-workspace.yaml`；Electron 43 + native rebuild ABI 148
 - Mobile Expo57 peers；RN absoluteFill；ESLint10 下 mobile lint 基线
 - 本地 PG18 需新卷（旧 PG16 卷不兼容）
 
 ### 环境维护（非代码阻塞）
+
 生产/共享库若仍有旧 PG 数据：按 B7 步骤做 dump → 新卷 pg18 → restore → REINDEX → PowerSync resync。
 
 ### 后续（流程，非升级实现缺口）
+
 - 执行总结：[`2026-07-13-tech-stack-upgrade-execution-summary.md`](./2026-07-13-tech-stack-upgrade-execution-summary.md)
 - 本地同步指南：[`../guides/development/tech-stack-upgrade-local-sync.md`](../guides/development/tech-stack-upgrade-local-sync.md)
 - 开 PR，由 GitHub Actions 干净环境复核
 - 可选：§8 pnpm catalog / Renovate 长效防漂移（升级后机制，非版本升级本体）
-

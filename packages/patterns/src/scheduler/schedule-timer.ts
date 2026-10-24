@@ -10,7 +10,6 @@
 
 // Residual 1039: sole schedule timer lives in patterns; schedule dual file deleted.
 
-
 /**
  * Timer 抽象接口
  */
@@ -58,10 +57,7 @@ export class NodeTimer implements IScheduleTimer {
  */
 export class FakeTimer implements IScheduleTimer {
   private currentTime: number;
-  private timers: Map<
-    number,
-    { callback: () => void; triggerAt: number }
-  > = new Map();
+  private timers: Map<number, { callback: () => void; triggerAt: number }> = new Map();
   private nextId = 1;
 
   constructor(initialTime: number = Date.now()) {

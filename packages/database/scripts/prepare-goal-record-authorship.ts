@@ -10,7 +10,7 @@ async function main(): Promise<void> {
   const client = new Client({ connectionString: databaseUrl });
   await client.connect();
   try {
-    if (!await prepareGoalRecordAuthorship(client)) return;
+    if (!(await prepareGoalRecordAuthorship(client))) return;
     console.log('GoalRecord authorship backfill and constraint applied');
   } finally {
     await client.end();

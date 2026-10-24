@@ -11,7 +11,10 @@
  */
 
 import type { UnifiedOperationMetricsRecorder } from '@memoflow/patterns/operations';
-import { createUnifiedOperationMetricsRecorder, globalUnifiedOperationMetrics } from '@memoflow/patterns/operations';
+import {
+  createUnifiedOperationMetricsRecorder,
+  globalUnifiedOperationMetrics,
+} from '@memoflow/patterns/operations';
 
 export interface NotificationMetricsSnapshot {
   readonly persistedTotal: number;

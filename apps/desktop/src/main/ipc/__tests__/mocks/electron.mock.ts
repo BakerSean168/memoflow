@@ -106,13 +106,15 @@ export function createMockIpcMain() {
 /**
  * 创建模拟的 IpcMainInvokeEvent
  */
-export function createMockEvent(options: {
-  sender?: { id: number };
-  frameId?: number;
-  processId?: number;
-} = {}): IpcMainInvokeEvent {
+export function createMockEvent(
+  options: {
+    sender?: { id: number };
+    frameId?: number;
+    processId?: number;
+  } = {},
+): IpcMainInvokeEvent {
   return {
-    sender: options.sender ?? { id: 1 } as unknown as Electron.WebContents,
+    sender: options.sender ?? ({ id: 1 } as unknown as Electron.WebContents),
     frameId: options.frameId ?? 1,
     processId: options.processId ?? 1,
   } as IpcMainInvokeEvent;

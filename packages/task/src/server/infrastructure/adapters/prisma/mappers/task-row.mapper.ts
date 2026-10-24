@@ -16,7 +16,6 @@ import { ImportanceLevel } from '@memoflow/contracts/shared';
 
 const IMPORTANCE_LEVEL_VALUES = Object.values(ImportanceLevel);
 
-
 /**
  * Narrow a raw Prisma/PowerSync importance string into the contract
  * `ImportanceLevel`. Falls back to `'Moderate'` for unknown/absent values.

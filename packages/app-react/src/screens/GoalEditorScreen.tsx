@@ -7,10 +7,7 @@ import type { CreateGoalReq, UpdateGoalReq } from '@memoflow/contracts/goal';
 
 import { useGoalDetail } from '../hooks/useGoalDetail';
 import { useGoalService } from '../hooks/useGoalService';
-import {
-  goalTimeframeInputValue,
-  parseGoalTimeframeInput,
-} from '../utils/product-time';
+import { goalTimeframeInputValue, parseGoalTimeframeInput } from '../utils/product-time';
 import {
   PageShell,
   PrimaryButton,

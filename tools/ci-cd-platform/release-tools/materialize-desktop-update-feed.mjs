@@ -7,7 +7,10 @@ import {
 } from './desktop-release-asset-resolution.mjs';
 // DU-1401/1402 intentionally share this dependency-free Desktop-owned projection with release tooling.
 // eslint-disable-next-line @nx/enforce-module-boundaries
-import { DESKTOP_UPDATE_FEED_CONTRACT, validateDesktopUpdateFeedContract } from '../../../apps/desktop/desktop-update-feed-projection.mjs';
+import {
+  DESKTOP_UPDATE_FEED_CONTRACT,
+  validateDesktopUpdateFeedContract,
+} from '../../../apps/desktop/desktop-update-feed-projection.mjs';
 import { validateDesktopUpdateFeedEligibility } from './validate-desktop-update-feed-eligibility.mjs';
 import { parseElectronBuilderUpdateMetadata } from './verify-desktop-update-metadata.mjs';
 
@@ -17,7 +20,12 @@ const EXPECTED_INELIGIBLE = new Set([
 ]);
 
 function safeSegment(value, label) {
-  if (typeof value !== 'string' || !/^[A-Za-z0-9._-]+$/u.test(value) || value === '.' || value === '..') {
+  if (
+    typeof value !== 'string' ||
+    !/^[A-Za-z0-9._-]+$/u.test(value) ||
+    value === '.' ||
+    value === '..'
+  ) {
     throw new Error(`unsafe Desktop update feed ${label}`);
   }
   return value;
@@ -29,10 +37,23 @@ function validateLocalReferences(source) {
     ...[...source.matchAll(/^\s*-\s+url:\s*(.+?)\s*$/gmu)].map((match) => match[1]),
   ];
   for (const raw of values) {
-    const trimmed = raw.trim().replace(/^(['"])(.*)\1$/u, '$2').split(/[?#]/u, 1)[0];
+    const trimmed = raw
+      .trim()
+      .replace(/^(['"])(.*)\1$/u, '$2')
+      .split(/[?#]/u, 1)[0];
     let decoded;
-    try { decoded = decodeURIComponent(trimmed); } catch { decoded = ''; }
-    if (!decoded || decoded === '.' || decoded === '..' || decoded.includes('/') || decoded.includes('\\')) {
+    try {
+      decoded = decodeURIComponent(trimmed);
+    } catch {
+      decoded = '';
+    }
+    if (
+      !decoded ||
+      decoded === '.' ||
+      decoded === '..' ||
+      decoded.includes('/') ||
+      decoded.includes('\\')
+    ) {
       throw new Error(`unsafe Desktop update metadata reference: ${raw.trim()}`);
     }
   }
@@ -42,14 +63,21 @@ async function buildAssetIndex(manifest, artifactRoot) {
   const files = await walkDesktopArtifactFiles(artifactRoot);
   const assets = new Map();
   for (const asset of manifest.assets) {
-    if (!asset || typeof asset.platform !== 'string' || typeof asset.name !== 'string' ||
-        typeof asset.sha256 !== 'string' || !/^[a-f0-9]{64}$/u.test(asset.sha256) ||
-        !Number.isInteger(asset.size) || asset.size <= 0) {
+    if (
+      !asset ||
+      typeof asset.platform !== 'string' ||
+      typeof asset.name !== 'string' ||
+      typeof asset.sha256 !== 'string' ||
+      !/^[a-f0-9]{64}$/u.test(asset.sha256) ||
+      !Number.isInteger(asset.size) ||
+      asset.size <= 0
+    ) {
       throw new Error('invalid canonical Desktop release asset evidence');
     }
     safeSegment(asset.name, 'asset name');
     const key = `${asset.platform}\0${asset.name}`;
-    if (assets.has(key)) throw new Error(`ambiguous canonical Desktop release asset: ${asset.platform}/${asset.name}`);
+    if (assets.has(key))
+      throw new Error(`ambiguous canonical Desktop release asset: ${asset.platform}/${asset.name}`);
     const file = resolveDesktopPlatformAssetFile({
       artifactRoot,
       files,
@@ -57,8 +85,10 @@ async function buildAssetIndex(manifest, artifactRoot) {
       name: asset.name,
     });
     const body = await readFile(file);
-    if ((await stat(file)).size !== asset.size ||
-        createHash('sha256').update(body).digest('hex') !== asset.sha256) {
+    if (
+      (await stat(file)).size !== asset.size ||
+      createHash('sha256').update(body).digest('hex') !== asset.sha256
+    ) {
       throw new Error(`Desktop update feed canonical asset identity mismatch: ${asset.name}`);
     }
     assets.set(key, { ...asset, file });
@@ -68,7 +98,8 @@ async function buildAssetIndex(manifest, artifactRoot) {
 
 function requireAsset(assets, platform, name) {
   const asset = assets.get(`${platform}\0${name}`);
-  if (!asset) throw new Error(`Desktop update feed reference is not canonical: ${platform}/${name}`);
+  if (!asset)
+    throw new Error(`Desktop update feed reference is not canonical: ${platform}/${name}`);
   return asset;
 }
 
@@ -92,15 +123,22 @@ export async function materializeDesktopUpdateFeed({
 }) {
   validateDesktopUpdateFeedContract(contract);
   const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
-  if (manifest?.kind !== 'desktop-release' || manifest.schemaVersion !== 2 ||
-      typeof manifest.version !== 'string' || typeof manifest.tag !== 'string' ||
-      typeof manifest.gitSha !== 'string' || !manifest.platforms || !Array.isArray(manifest.assets)) {
+  if (
+    manifest?.kind !== 'desktop-release' ||
+    manifest.schemaVersion !== 2 ||
+    typeof manifest.version !== 'string' ||
+    typeof manifest.tag !== 'string' ||
+    typeof manifest.gitSha !== 'string' ||
+    !manifest.platforms ||
+    !Array.isArray(manifest.assets)
+  ) {
     throw new Error('invalid canonical Desktop release manifest');
   }
   if (manifest.tag.replace(/^v/u, '') !== manifest.version) {
     throw new Error('Desktop update feed release identity drift');
   }
-  if (!contract.channels.includes(channel)) throw new Error(`unsupported Desktop update feed channel: ${channel}`);
+  if (!contract.channels.includes(channel))
+    throw new Error(`unsupported Desktop update feed channel: ${channel}`);
   const tag = safeSegment(manifest.tag, 'release tag');
   const gitSha = safeSegment(manifest.gitSha, 'git SHA');
   const versionedPrefix = `versions/${tag}/${gitSha}`;
@@ -110,23 +148,39 @@ export async function materializeDesktopUpdateFeed({
   const skippedLanes = [];
 
   for (const lane of contract.lanes) {
-    const coordinates = { channel, platform: lane.platform, arch: lane.arch, installationKind: lane.installationKind };
+    const coordinates = {
+      channel,
+      platform: lane.platform,
+      arch: lane.arch,
+      installationKind: lane.installationKind,
+    };
     let projection;
     try {
       projection = validateDesktopUpdateFeedEligibility({ coordinates, manifest, contract });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       if (!EXPECTED_INELIGIBLE.has(message)) throw error;
-      skippedLanes.push({ platform: lane.platform, arch: lane.arch, installationKind: lane.installationKind, reason: message });
+      skippedLanes.push({
+        platform: lane.platform,
+        arch: lane.arch,
+        installationKind: lane.installationKind,
+        reason: message,
+      });
       continue;
     }
 
-    const metadataAsset = requireAsset(assets, projection.sourceReleasePlatform, projection.sourceMetadataAsset);
+    const metadataAsset = requireAsset(
+      assets,
+      projection.sourceReleasePlatform,
+      projection.sourceMetadataAsset,
+    );
     const metadataSource = await readFile(metadataAsset.file, 'utf8');
     validateLocalReferences(metadataSource);
     const parsed = parseElectronBuilderUpdateMetadata(metadataSource);
     if (parsed.version !== manifest.version) {
-      throw new Error(`Desktop update feed metadata version mismatch: ${parsed.version} != ${manifest.version}`);
+      throw new Error(
+        `Desktop update feed metadata version mismatch: ${parsed.version} != ${manifest.version}`,
+      );
     }
 
     const directory = `${versionedPrefix}/${projection.targetRelativeDirectory}`;
@@ -144,9 +198,12 @@ export async function materializeDesktopUpdateFeed({
       const asset = requireAsset(assets, projection.sourceReleasePlatform, reference);
       const target = `${directory}/${reference}`;
       const existing = targets.get(target);
-      if (existing && existing.asset.name !== asset.name) throw new Error(`conflicting Desktop update feed target: ${target}`);
+      if (existing && existing.asset.name !== asset.name)
+        throw new Error(`conflicting Desktop update feed target: ${target}`);
       targets.set(target, { source: asset.file, asset });
-      files.push(fileEvidence(target, asset, reference.endsWith('.blockmap') ? 'blockmap' : 'artifact'));
+      files.push(
+        fileEvidence(target, asset, reference.endsWith('.blockmap') ? 'blockmap' : 'artifact'),
+      );
     }
 
     lanes.push({
@@ -167,7 +224,8 @@ export async function materializeDesktopUpdateFeed({
   for (const [relative, planned] of [...targets.entries()].sort(([a], [b]) => a.localeCompare(b))) {
     const destination = path.resolve(outputRoot, ...relative.split('/'));
     const root = path.resolve(outputRoot);
-    if (!destination.startsWith(`${root}${path.sep}`)) throw new Error(`Desktop update feed target escaped output root: ${relative}`);
+    if (!destination.startsWith(`${root}${path.sep}`))
+      throw new Error(`Desktop update feed target escaped output root: ${relative}`);
     await mkdir(path.dirname(destination), { recursive: true });
     await copyFile(planned.source, destination);
   }
@@ -181,7 +239,9 @@ export async function materializeDesktopUpdateFeed({
     versionedPrefix,
     pointer: { name: channel, targetPrefix: `${versionedPrefix}/${channel}` },
     lanes: lanes.sort((a, b) => `${a.platform}/${a.arch}`.localeCompare(`${b.platform}/${b.arch}`)),
-    skippedLanes: skippedLanes.sort((a, b) => `${a.platform}/${a.arch}`.localeCompare(`${b.platform}/${b.arch}`)),
+    skippedLanes: skippedLanes.sort((a, b) =>
+      `${a.platform}/${a.arch}`.localeCompare(`${b.platform}/${b.arch}`),
+    ),
   };
   await mkdir(outputRoot, { recursive: true });
   const receiptPath = path.join(outputRoot, 'desktop-update-feed-publication.json');
@@ -192,7 +252,9 @@ export async function materializeDesktopUpdateFeed({
 async function main() {
   const [manifestPath, artifactRoot, outputRoot, channel = 'stable'] = process.argv.slice(2);
   if (!manifestPath || !artifactRoot || !outputRoot) {
-    throw new Error('usage: materialize-desktop-update-feed.mjs <desktop-manifest> <artifact-root> <output-root> [channel]');
+    throw new Error(
+      'usage: materialize-desktop-update-feed.mjs <desktop-manifest> <artifact-root> <output-root> [channel]',
+    );
   }
   const { receipt } = await materializeDesktopUpdateFeed({
     manifestPath,
@@ -200,9 +262,14 @@ async function main() {
     outputRoot,
     channel,
   });
-  process.stdout.write(`DESKTOP_UPDATE_FEED=PASS channel=${receipt.channel} lanes=${receipt.lanes.length} prefix=${receipt.versionedPrefix}\n`);
+  process.stdout.write(
+    `DESKTOP_UPDATE_FEED=PASS channel=${receipt.channel} lanes=${receipt.lanes.length} prefix=${receipt.versionedPrefix}\n`,
+  );
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(new URL(import.meta.url).pathname)) {
+if (
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === path.resolve(new URL(import.meta.url).pathname)
+) {
   await main();
 }

@@ -1,1 +1,4 @@
-export { ScheduleEventHttpAdapter, createScheduleEventHttpAdapter } from './schedule-event-http.adapter';
+export {
+  ScheduleEventHttpAdapter,
+  createScheduleEventHttpAdapter,
+} from './schedule-event-http.adapter';

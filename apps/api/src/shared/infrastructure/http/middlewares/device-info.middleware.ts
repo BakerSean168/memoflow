@@ -35,7 +35,7 @@ export function deviceInfoMiddleware(req: Request, _res: Response, next: NextFun
   const userAgent = req.headers['user-agent'] || 'Unknown';
   const platform = extractPlatform(userAgent);
   const browser = extractBrowser(userAgent);
-  
+
   const deviceInfo = {
     deviceId: generateDeviceId(userAgent, ipAddress),
     deviceName: `${platform} - ${browser}`,

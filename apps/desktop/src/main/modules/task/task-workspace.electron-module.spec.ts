@@ -22,7 +22,10 @@ describe('Task Workspace Electron module', () => {
   it('owns only TaskWorkspaceChannels and forwards authenticated validated reads', async () => {
     const port = { getWorkspace: vi.fn().mockResolvedValue(ok({ kind: 'workspace' })) };
     const module = createTaskWorkspaceElectronModule({ port: port as never });
-    module.register({ db: {} as never, auth: { requireRequestContext: vi.fn().mockResolvedValue({ identityId: IDENTITY_ID }) } });
+    module.register({
+      db: {} as never,
+      auth: { requireRequestContext: vi.fn().mockResolvedValue({ identityId: IDENTITY_ID }) },
+    });
 
     await handlers.get(TaskWorkspaceChannels.GET)?.({}, { planId: PLAN_ID, recentLimit: 3 });
     expect(port.getWorkspace).toHaveBeenCalledWith(IDENTITY_ID, PLAN_ID, { recentLimit: 3 });
@@ -34,8 +37,13 @@ describe('Task Workspace Electron module', () => {
   it('rejects invalid input without calling the port', async () => {
     const port = { getWorkspace: vi.fn() };
     const module = createTaskWorkspaceElectronModule({ port: port as never });
-    module.register({ db: {} as never, auth: { requireRequestContext: vi.fn().mockResolvedValue({ identityId: IDENTITY_ID }) } });
-    await expect(handlers.get(TaskWorkspaceChannels.GET)?.({}, { planId: 'bad' })).resolves.toMatchObject({ ok: false, error: { code: 'VALIDATION_ERROR' } });
+    module.register({
+      db: {} as never,
+      auth: { requireRequestContext: vi.fn().mockResolvedValue({ identityId: IDENTITY_ID }) },
+    });
+    await expect(
+      handlers.get(TaskWorkspaceChannels.GET)?.({}, { planId: 'bad' }),
+    ).resolves.toMatchObject({ ok: false, error: { code: 'VALIDATION_ERROR' } });
     expect(port.getWorkspace).not.toHaveBeenCalled();
   });
 });

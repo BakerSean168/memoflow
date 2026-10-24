@@ -7,10 +7,7 @@ import { describe, expect, it } from 'vitest';
  * Desktop icons use string here; branded AssetImageKey lives in @memoflow/assets only.
  */
 describe('notification AssetImageKey dual single-track surface', () => {
-  const dispatch = readFileSync(
-    resolve(__dirname, 'notification-dispatch-events.ts'),
-    'utf8',
-  );
+  const dispatch = readFileSync(resolve(__dirname, 'notification-dispatch-events.ts'), 'utf8');
   const protocolIndex = readFileSync(resolve(__dirname, 'index.ts'), 'utf8');
 
   it('does not define AssetImageKey identity dual in contracts', () => {

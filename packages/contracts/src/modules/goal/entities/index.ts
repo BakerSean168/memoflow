@@ -5,25 +5,21 @@
  * Client record DTO lives under aggregates only.
  */
 
-export { GoalRecordSourceType, GoalRecordAuthorship, GoalRecordAuthorshipSchema } from './goal-record-server';
+export {
+  GoalRecordSourceType,
+  GoalRecordAuthorship,
+  GoalRecordAuthorshipSchema,
+} from './goal-record-server';
 export type {
   GoalRecordServerDTO,
   GoalRecordSource,
   GoalRecordSourceType as GoalRecordSourceTypeValue,
 } from './goal-record-server';
 
-export type {
-  GoalReviewServerDTO,
-} from './goal-review-server';
+export type { GoalReviewServerDTO } from './goal-review-server';
 
-export type {
-  GoalReviewClientDTO,
-} from './goal-review-client';
+export type { GoalReviewClientDTO } from './goal-review-client';
 
-export type {
-  KeyResultServerDTO,
-} from './key-result-server';
+export type { KeyResultServerDTO } from './key-result-server';
 
-export type {
-  KeyResultClientDTO,
-} from './key-result-client';
+export type { KeyResultClientDTO } from './key-result-client';

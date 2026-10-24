@@ -40,7 +40,10 @@ describe('snapshot-storage', () => {
     expect(fs.existsSync(result.databasePath)).toBe(true);
     expect(fs.existsSync(result.manifestPath)).toBe(true);
 
-    const manifest = await readStoredProfileSnapshotManifest(path.join(tmpDir, 'snapshots'), identityId);
+    const manifest = await readStoredProfileSnapshotManifest(
+      path.join(tmpDir, 'snapshots'),
+      identityId,
+    );
     expect(manifest).not.toBeNull();
     expect(manifest?.manifest.version).toBe('2026-05-18T00:00:00Z');
     expect(manifest?.manifest.generatedAt).toBe('2026-05-18T00:00:00Z');

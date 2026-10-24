@@ -8,5 +8,8 @@ export interface IInvocationAttemptRepository {
     invocationId: string,
     options?: { readonly limit?: number; readonly before?: number },
   ): Promise<InvocationAttempt[]>;
-  findLatestForInvocation(identityId: string, invocationId: string): Promise<InvocationAttempt | null>;
+  findLatestForInvocation(
+    identityId: string,
+    invocationId: string,
+  ): Promise<InvocationAttempt | null>;
 }

@@ -22,7 +22,9 @@ export const Open: Story = {
   },
   render: (args) => ({
     components: { NotificationDrawer },
-    setup() { return { args }; },
+    setup() {
+      return { args };
+    },
     template: `
       <NotificationDrawer v-bind="args">
         <div class="space-y-3 px-2">
@@ -63,7 +65,9 @@ export const EmptyDrawer: Story = {
   },
   render: (args) => ({
     components: { NotificationDrawer },
-    setup() { return { args }; },
+    setup() {
+      return { args };
+    },
     template: `
       <NotificationDrawer v-bind="args">
         <div class="flex flex-col items-center justify-center py-12 text-center">

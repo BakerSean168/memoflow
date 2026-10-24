@@ -9,14 +9,19 @@ export class AIWorkflowPublicError extends Error {
 
   constructor(error: unknown) {
     const publicError = toAIPublicFailure(error, {
-      fallbackCode: 'AI_RUNTIME_TRANSPORT_ERROR', fallbackMessage: 'AI runtime request failed',
+      fallbackCode: 'AI_RUNTIME_TRANSPORT_ERROR',
+      fallbackMessage: 'AI runtime request failed',
     });
     super(publicError.message);
     this.name = 'AIWorkflowPublicError';
     this.code = publicError.code;
-    if (this.code === 'RATE_LIMITED') this.failure = AIRateLimitPublicFailureSchema.parse({
-      code: this.code, category: 'rate_limited', details: publicError.details, retryHint: publicError.retryHint,
-    });
+    if (this.code === 'RATE_LIMITED')
+      this.failure = AIRateLimitPublicFailureSchema.parse({
+        code: this.code,
+        category: 'rate_limited',
+        details: publicError.details,
+        retryHint: publicError.retryHint,
+      });
     // No raw cause: Mastra serializes enumerable errors into durable snapshots.
   }
 }

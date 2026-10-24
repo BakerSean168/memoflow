@@ -102,8 +102,8 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
     const dispatchSpy = vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
     const plan = TaskPlan.create({
       identityId,
-    title: 'Daily Review',
-    schedule: canonicalTaskPlanScheduleForTest(
+      title: 'Daily Review',
+      schedule: canonicalTaskPlanScheduleForTest(
         TaskPlanScheduleKind.Recurring,
         Date.now(),
         anAllDayTiming(),
@@ -153,8 +153,8 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
 
     const result = await module.api.createTaskPlan({
       identityId,
-    name: 'Daily Review',
-    schedule: canonicalTaskPlanScheduleForTest(
+      name: 'Daily Review',
+      schedule: canonicalTaskPlanScheduleForTest(
         TaskPlanScheduleKind.Recurring,
         Date.now(),
         anAllDayTiming(),
@@ -190,7 +190,9 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
       String(plan.id),
       String(identityId),
     );
-    const savedById = new Map(savedInstances.map((occurrence) => [String(occurrence.id), occurrence]));
+    const savedById = new Map(
+      savedInstances.map((occurrence) => [String(occurrence.id), occurrence]),
+    );
 
     expect(savedTemplate).toMatchObject({
       name: 'Updated propagation plan',
@@ -239,127 +241,134 @@ describe('PrismaTaskWriteTransactionRunner integration', () => {
     module.dispose();
   });
 
-  it.each(['Fixed', 'Prompt'] as const)('rolls back %s occurrence and outbox together when append fails', async (mode) => {
-    const identityId = IdentityId.generate();
-    await seedAccount({ id: identityId });
-    const prisma = await getPrisma();
+  it.each(['Fixed', 'Prompt'] as const)(
+    'rolls back %s occurrence and outbox together when append fails',
+    async (mode) => {
+      const identityId = IdentityId.generate();
+      await seedAccount({ id: identityId });
+      const prisma = await getPrisma();
 
-    // Seed the Goal + KeyResult rows required by the goal-binding FK.
-    const goalId = `IGoalId_${randomUUID()}`;
-    const keyResultId = `IKeyResultId_${randomUUID()}`;
-    await prisma.goal.create({
-      data: {
-        id: goalId,
-        identityId,
-        name: 'Outbox Rollback Goal',
-        status: 'InProgress',
-      },
-    });
-    await prisma.keyResult.create({
-      data: {
-        id: keyResultId,
-        identityId,
-        goalId,
-        title: 'KR',
-        aggregationMethod: 'Sum',
-        initialValue: 0,
-        trackingBaseValue: 0,
-        currentValue: 0,
-        targetValue: 10,
-        weight: 1,
-      },
-    });
-    const module = createTaskPrismaModule(prisma, {
-      userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
-      goalReadPort: {
-        getKeyResultMeasurementContext: vi
-          .fn()
-          .mockResolvedValue(ok({ progress: { aggregationMethod: 'Sum' } })),
-      },
-    });
-    const dispatchSpy = vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
-
-  const createSchedule = canonicalTaskPlanScheduleForTest(
-      TaskPlanScheduleKind.Recurring,
-      Date.now(),
-      anAllDayTiming(),
-      aDailyRecurrence(),
-      TASK_TEST_TIME_CONTEXT,
-    );
-    const createRes = await module.api.createTaskPlan({
-      identityId,
-      name: 'Goal Task',
-      schedule: createSchedule.toDTO(),
-      importance: ImportanceLevel.Moderate,
-      goalBinding: {
-        goalId,
-        keyResultId,
-        progressRule: mode === 'Prompt'
-          ? { mode: 'Prompt', trigger: 'EachCompletion', suggestedValue: 99 }
-          : { mode: 'Fixed', value: 1, trigger: TaskGoalBindingTrigger.EachCompletion },
-      },
-    });
-    expect(createRes.ok).toBe(true);
-    if (!createRes.ok) return;
-
-    const occurrences = await module.taskOccurrenceRepository.findByPlanId(
-      createRes.data.plan.id,
-      identityId,
-    );
-    expect(occurrences.length).toBeGreaterThan(0);
-    const occurrenceId = String(occurrences[0].id);
-
-    dispatchSpy.mockClear();
-
-    // Fail the outbox write INSIDE the transaction: the runner uses the tx-bound
-    // client (not the top-level prisma), so wrap $transaction with a Proxy tx.
-    const realTransaction = prisma.$transaction.bind(prisma);
-    let injected = false;
-    vi.spyOn(prisma, '$transaction').mockImplementation((async (fn: unknown, opts?: unknown) => {
-      return realTransaction(async (tx: any) => {
-        if (!injected) {
-          injected = true;
-          const failingTx = new Proxy(tx, {
-            get(target, prop) {
-              if (prop === 'taskGoalOutbox') {
-                const outbox = target.taskGoalOutbox;
-                return new Proxy(outbox, {
-                  get(t, p) {
-                    if (p === 'createMany') {
-                      return () => Promise.reject(new Error('Outbox write failure simulation'));
-                    }
-                    return (t as Record<string, unknown>)[p];
-                  },
-                });
-              }
-              return (target as Record<string, unknown>)[prop];
-            },
-          });
-          return (fn as (t: unknown) => Promise<unknown>)(failingTx);
-        }
-        return (fn as (t: unknown) => Promise<unknown>)(tx);
+      // Seed the Goal + KeyResult rows required by the goal-binding FK.
+      const goalId = `IGoalId_${randomUUID()}`;
+      const keyResultId = `IKeyResultId_${randomUUID()}`;
+      await prisma.goal.create({
+        data: {
+          id: goalId,
+          identityId,
+          name: 'Outbox Rollback Goal',
+          status: 'InProgress',
+        },
       });
-    }) as never);
+      await prisma.keyResult.create({
+        data: {
+          id: keyResultId,
+          identityId,
+          goalId,
+          title: 'KR',
+          aggregationMethod: 'Sum',
+          initialValue: 0,
+          trackingBaseValue: 0,
+          currentValue: 0,
+          targetValue: 10,
+          weight: 1,
+        },
+      });
+      const module = createTaskPrismaModule(prisma, {
+        userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
+        goalReadPort: {
+          getKeyResultMeasurementContext: vi
+            .fn()
+            .mockResolvedValue(ok({ progress: { aggregationMethod: 'Sum' } })),
+        },
+      });
+      const dispatchSpy = vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
 
-    const result = await module.api.completeTaskOccurrence(occurrenceId, identityId,
-      mode === 'Prompt' ? { goalMeasurement: { value: -2, note: 'Measured' } } : undefined);
+      const createSchedule = canonicalTaskPlanScheduleForTest(
+        TaskPlanScheduleKind.Recurring,
+        Date.now(),
+        anAllDayTiming(),
+        aDailyRecurrence(),
+        TASK_TEST_TIME_CONTEXT,
+      );
+      const createRes = await module.api.createTaskPlan({
+        identityId,
+        name: 'Goal Task',
+        schedule: createSchedule.toDTO(),
+        importance: ImportanceLevel.Moderate,
+        goalBinding: {
+          goalId,
+          keyResultId,
+          progressRule:
+            mode === 'Prompt'
+              ? { mode: 'Prompt', trigger: 'EachCompletion', suggestedValue: 99 }
+              : { mode: 'Fixed', value: 1, trigger: TaskGoalBindingTrigger.EachCompletion },
+        },
+      });
+      expect(createRes.ok).toBe(true);
+      if (!createRes.ok) return;
 
-    expect(result).toBeErrorWithCode('INTERNAL_ERROR');
+      const occurrences = await module.taskOccurrenceRepository.findByPlanId(
+        createRes.data.plan.id,
+        identityId,
+      );
+      expect(occurrences.length).toBeGreaterThan(0);
+      const occurrenceId = String(occurrences[0].id);
 
-    const instanceInDb = await prisma.taskOccurrence.findUnique({
-      where: { id: occurrenceId },
-    });
-    expect(instanceInDb?.status).toBe('Pending');
+      dispatchSpy.mockClear();
 
-    const outboxCount = await prisma.taskGoalOutbox.count({
-      where: { taskOccurrenceId: occurrenceId },
-    });
-    expect(outboxCount).toBe(0);
+      // Fail the outbox write INSIDE the transaction: the runner uses the tx-bound
+      // client (not the top-level prisma), so wrap $transaction with a Proxy tx.
+      const realTransaction = prisma.$transaction.bind(prisma);
+      let injected = false;
+      vi.spyOn(prisma, '$transaction').mockImplementation((async (fn: unknown, opts?: unknown) => {
+        return realTransaction(async (tx: any) => {
+          if (!injected) {
+            injected = true;
+            const failingTx = new Proxy(tx, {
+              get(target, prop) {
+                if (prop === 'taskGoalOutbox') {
+                  const outbox = target.taskGoalOutbox;
+                  return new Proxy(outbox, {
+                    get(t, p) {
+                      if (p === 'createMany') {
+                        return () => Promise.reject(new Error('Outbox write failure simulation'));
+                      }
+                      return (t as Record<string, unknown>)[p];
+                    },
+                  });
+                }
+                return (target as Record<string, unknown>)[prop];
+              },
+            });
+            return (fn as (t: unknown) => Promise<unknown>)(failingTx);
+          }
+          return (fn as (t: unknown) => Promise<unknown>)(tx);
+        });
+      }) as never);
 
-    expect(dispatchSpy).not.toHaveBeenCalled();
+      const result = await module.api.completeTaskOccurrence(
+        occurrenceId,
+        identityId,
+        mode === 'Prompt' ? { goalMeasurement: { value: -2, note: 'Measured' } } : undefined,
+      );
 
-    module.dispose();
-  });
+      expect(result).toBeErrorWithCode('INTERNAL_ERROR');
+
+      const instanceInDb = await prisma.taskOccurrence.findUnique({
+        where: { id: occurrenceId },
+      });
+      expect(instanceInDb?.status).toBe('Pending');
+
+      const outboxCount = await prisma.taskGoalOutbox.count({
+        where: { taskOccurrenceId: occurrenceId },
+      });
+      expect(outboxCount).toBe(0);
+
+      expect(dispatchSpy).not.toHaveBeenCalled();
+
+      module.dispose();
+    },
+  );
   it.each([0, -2, undefined])(
     'commits Prompt completion and optional fact %s atomically',
     async (value) => {

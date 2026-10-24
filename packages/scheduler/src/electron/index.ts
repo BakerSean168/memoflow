@@ -17,7 +17,9 @@ export interface SchedulerElectronModuleDef {
   destroy?(): Promise<void> | void;
   readonly runtime: { start(): Promise<void>; stop(): Promise<void> };
 }
-export interface SchedulerElectronModuleOptions { readonly instance: SchedulerModuleInstance; }
+export interface SchedulerElectronModuleOptions {
+  readonly instance: SchedulerModuleInstance;
+}
 
 export function createSchedulerElectronModule(
   options: SchedulerElectronModuleOptions,
@@ -54,24 +56,37 @@ export function createSchedulerElectronModule(
       const installed: string[] = [];
       try {
         const controller = new SchedulerController(options.instance.api);
-        ipcMain.handle(SchedulerChannels.INVOCATION_LIST, async (_event, query?: ScheduledInvocationDiagnosticQuery) =>
-          withAuthenticatedValue(ctx, (requestContext) =>
-            controller.listInvocations(query ?? {}, requestContext)));
+        ipcMain.handle(
+          SchedulerChannels.INVOCATION_LIST,
+          async (_event, query?: ScheduledInvocationDiagnosticQuery) =>
+            withAuthenticatedValue(ctx, (requestContext) =>
+              controller.listInvocations(query ?? {}, requestContext),
+            ),
+        );
         installed.push(SchedulerChannels.INVOCATION_LIST);
-        ipcMain.handle(SchedulerChannels.INVOCATION_GET_BY_ID, async (_event, invocationId: string) =>
-          withAuthenticatedValue(ctx, (requestContext) =>
-            controller.getInvocation(invocationId, requestContext)));
+        ipcMain.handle(
+          SchedulerChannels.INVOCATION_GET_BY_ID,
+          async (_event, invocationId: string) =>
+            withAuthenticatedValue(ctx, (requestContext) =>
+              controller.getInvocation(invocationId, requestContext),
+            ),
+        );
         installed.push(SchedulerChannels.INVOCATION_GET_BY_ID);
         ipcMain.handle(SchedulerChannels.INVOCATION_GET_DUE, async () =>
           withAuthenticatedValue(ctx, (requestContext) =>
-            controller.listDueInvocations(requestContext)));
+            controller.listDueInvocations(requestContext),
+          ),
+        );
         installed.push(SchedulerChannels.INVOCATION_GET_DUE);
         state = 'registered';
       } catch (error) {
         state = 'failed';
         for (const channel of installed.reverse()) ipcMain.removeHandler(channel);
-        void options.instance.dispose().catch((disposeError) =>
-          logger.error('Scheduler dispose failed after IPC registration failure', disposeError));
+        void options.instance
+          .dispose()
+          .catch((disposeError) =>
+            logger.error('Scheduler dispose failed after IPC registration failure', disposeError),
+          );
         throw error;
       }
     },

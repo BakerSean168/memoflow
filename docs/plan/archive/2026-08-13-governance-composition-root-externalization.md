@@ -281,25 +281,25 @@ apps 不能深导入 `@memoflow/governance/server/infrastructure`：`tools/gover
 
 ### 5.1 每步门禁与期望结果
 
-| 阶段 | 命令 | 期望结果 |
-| --- | --- | --- |
-| Step 0 基线 | `pnpm nx run governance:typecheck` | 治理源码无 TypeScript 错误 |
-| Step 0 基线 | `pnpm nx run governance:lint` | governance lint 通过，无新增 warning/error |
-| Step 0 基线 | `pnpm nx run governance:test` | 现有 domain/application/API route/surface tests 全部通过 |
-| Step 0 基线 | `pnpm nx run api:test` | `bootstrap.spec.ts` 与 API tests 通过 |
-| Step 1 repository seam | `pnpm nx run governance:test` | Prisma/PowerSync factory 与旧 convenience factory 行为一致 |
-| Step 2 API module | `pnpm nx run governance:test` | route registration、fake instance lifecycle、dispose 幂等通过 |
-| Step 3 API runtime | `pnpm nx run api:typecheck` | composer、module factory、公开 exports 类型闭合 |
-| Step 3 API runtime | `pnpm nx run api:lint` | `apps/api/src/runtime` 与 main 注释/导入符合 lint |
-| Step 3 API runtime | `pnpm nx run api:test` | bootstrap 双前缀、模块注册、destroy 顺序无回归 |
-| Step 3 API runtime | `pnpm nx run api:test:smoke` | API smoke 可启动并访问治理健康/路由链路 |
-| Step 4 Electron | `pnpm nx run governance:typecheck` | governance PowerSync composer、Electron module factory 与共享 instance 类型闭合；desktop app 当前没有独立 typecheck target |
-| Step 4 Electron | `pnpm nx run desktop:lint` | desktop runtime/module 代码通过 lint |
-| Step 4 Electron | `pnpm nx run desktop:test:main` | desktop main bootstrap 与治理 module lifecycle 通过 |
-| Step 4 Electron | `pnpm nx run desktop:test:ipc` | IPC channels 注册、调用和移除通过 |
-| Step 5 surface | `pnpm nx run memoflow:governance-check` | JSDoc、package export、public surface、server shape 等审计全部通过 |
-| Step 5 docs | `pnpm nx run memoflow:docs-check` | 计划 frontmatter、文档入口和目录规则通过 |
-| 最终组合 | `pnpm nx run governance:test && pnpm nx run api:test && pnpm nx run desktop:test:main && pnpm nx run desktop:test:ipc` | governance、API、desktop main/IPC 四条测试车道均绿 |
+| 阶段                   | 命令                                                                                                                   | 期望结果                                                                                                                   |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Step 0 基线            | `pnpm nx run governance:typecheck`                                                                                     | 治理源码无 TypeScript 错误                                                                                                 |
+| Step 0 基线            | `pnpm nx run governance:lint`                                                                                          | governance lint 通过，无新增 warning/error                                                                                 |
+| Step 0 基线            | `pnpm nx run governance:test`                                                                                          | 现有 domain/application/API route/surface tests 全部通过                                                                   |
+| Step 0 基线            | `pnpm nx run api:test`                                                                                                 | `bootstrap.spec.ts` 与 API tests 通过                                                                                      |
+| Step 1 repository seam | `pnpm nx run governance:test`                                                                                          | Prisma/PowerSync factory 与旧 convenience factory 行为一致                                                                 |
+| Step 2 API module      | `pnpm nx run governance:test`                                                                                          | route registration、fake instance lifecycle、dispose 幂等通过                                                              |
+| Step 3 API runtime     | `pnpm nx run api:typecheck`                                                                                            | composer、module factory、公开 exports 类型闭合                                                                            |
+| Step 3 API runtime     | `pnpm nx run api:lint`                                                                                                 | `apps/api/src/runtime` 与 main 注释/导入符合 lint                                                                          |
+| Step 3 API runtime     | `pnpm nx run api:test`                                                                                                 | bootstrap 双前缀、模块注册、destroy 顺序无回归                                                                             |
+| Step 3 API runtime     | `pnpm nx run api:test:smoke`                                                                                           | API smoke 可启动并访问治理健康/路由链路                                                                                    |
+| Step 4 Electron        | `pnpm nx run governance:typecheck`                                                                                     | governance PowerSync composer、Electron module factory 与共享 instance 类型闭合；desktop app 当前没有独立 typecheck target |
+| Step 4 Electron        | `pnpm nx run desktop:lint`                                                                                             | desktop runtime/module 代码通过 lint                                                                                       |
+| Step 4 Electron        | `pnpm nx run desktop:test:main`                                                                                        | desktop main bootstrap 与治理 module lifecycle 通过                                                                        |
+| Step 4 Electron        | `pnpm nx run desktop:test:ipc`                                                                                         | IPC channels 注册、调用和移除通过                                                                                          |
+| Step 5 surface         | `pnpm nx run memoflow:governance-check`                                                                                | JSDoc、package export、public surface、server shape 等审计全部通过                                                         |
+| Step 5 docs            | `pnpm nx run memoflow:docs-check`                                                                                      | 计划 frontmatter、文档入口和目录规则通过                                                                                   |
+| 最终组合               | `pnpm nx run governance:test && pnpm nx run api:test && pnpm nx run desktop:test:main && pnpm nx run desktop:test:ipc` | governance、API、desktop main/IPC 四条测试车道均绿                                                                         |
 
 ### 5.2 行为不变检查
 

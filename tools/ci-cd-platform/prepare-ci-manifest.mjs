@@ -47,6 +47,14 @@ async function main() {
   if (execution) {
     if (execution.mode === 'reuse') {
       manifest.lanes = Object.fromEntries(Object.keys(manifest.lanes).map((lane) => [lane, false]));
+      if (manifest.laneDetails) {
+        manifest.laneDetails = Object.fromEntries(
+          Object.entries(manifest.laneDetails).map(([capability, detail]) => [
+            capability,
+            { ...detail, required: false, skipReason: 'reused pull request evidence' },
+          ]),
+        );
+      }
     }
     manifest.execution = execution;
     const { digest: _digest, ...content } = manifest;

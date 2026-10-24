@@ -178,11 +178,11 @@ describe('TokenUsage Value Object', () => {
     it('低于限制返回 false', () => {
       const usage = TokenUsage.create({
         promptTokens: 40,
-        completionTokens: 20,  // totalTokens = 60
+        completionTokens: 20, // totalTokens = 60
       });
 
-      expect(usage.exceedsLimit(60)).toBe(false);  // 60 == 60，不超过
-      expect(usage.exceedsLimit(70)).toBe(false);  // 60 < 70，不超过
+      expect(usage.exceedsLimit(60)).toBe(false); // 60 == 60，不超过
+      expect(usage.exceedsLimit(70)).toBe(false); // 60 < 70，不超过
       expect(usage.exceedsLimit(100)).toBe(false);
     });
 
@@ -280,4 +280,3 @@ describe('TokenUsage Value Object', () => {
     });
   });
 });
-

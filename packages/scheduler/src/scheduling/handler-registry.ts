@@ -27,10 +27,7 @@ export class ScheduledHandlerRegistry {
     if (this.registrations.has(registration.handlerKey)) {
       throw new DuplicateScheduledHandlerError(registration.handlerKey);
     }
-    this.registrations.set(
-      registration.handlerKey,
-      registration as unknown as AnyRegistration,
-    );
+    this.registrations.set(registration.handlerKey, registration as unknown as AnyRegistration);
   }
 
   has(handlerKey: string): boolean {

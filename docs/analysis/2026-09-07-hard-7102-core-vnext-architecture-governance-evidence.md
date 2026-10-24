@@ -108,32 +108,32 @@ Governance fixtures: `5/5` passed, including negative fixtures for every require
 
 ### Full unit / package suites
 
-| Lane | Result |
-| --- | --- |
-| Contracts | 68/68 files, 483/483 tests |
-| Goal | 79/79 files, 438/438 tests |
-| Task | 71/71 files, 730/730 tests |
-| Reminder | 72/72 files, 461/461 tests |
-| Notification | 45/45 files, 242/242 tests |
-| Scheduler | 31/31 files, 273/273 tests |
-| Schedule Orchestration | 9/9 files, 34/34 tests |
-| Schedule / Calendar | 20/20 files, 129/129 tests |
-| App Vue | 201/201 files, 773/773 tests |
-| API | 62/62 files, 323/323 tests |
-| Desktop | 61/61 files, 322/322 tests |
-| Web | 17/17 files, 71/71 tests |
+| Lane                   | Result                       |
+| ---------------------- | ---------------------------- |
+| Contracts              | 68/68 files, 483/483 tests   |
+| Goal                   | 79/79 files, 438/438 tests   |
+| Task                   | 71/71 files, 730/730 tests   |
+| Reminder               | 72/72 files, 461/461 tests   |
+| Notification           | 45/45 files, 242/242 tests   |
+| Scheduler              | 31/31 files, 273/273 tests   |
+| Schedule Orchestration | 9/9 files, 34/34 tests       |
+| Schedule / Calendar    | 20/20 files, 129/129 tests   |
+| App Vue                | 201/201 files, 773/773 tests |
+| API                    | 62/62 files, 323/323 tests   |
+| Desktop                | 61/61 files, 322/322 tests   |
+| Web                    | 17/17 files, 71/71 tests     |
 
 App React has no project test target; its typecheck and lint gates are green.
 
 ### Real PostgreSQL integration
 
-| Lane | Result |
-| --- | --- |
-| Goal integration | 4/4 files, 21/21 tests |
-| Task integration | 6/6 files, 31/31 tests |
-| Reminder integration | 7/7 files, 28/28 tests |
+| Lane                     | Result                 |
+| ------------------------ | ---------------------- |
+| Goal integration         | 4/4 files, 21/21 tests |
+| Task integration         | 6/6 files, 31/31 tests |
+| Reminder integration     | 7/7 files, 28/28 tests |
 | Notification integration | 3/3 files, 35/35 tests |
-| Scheduler integration | 1/1 file, 5/5 tests |
+| Scheduler integration    | 1/1 file, 5/5 tests    |
 
 Notification's first parallel integration attempt hit a PostgreSQL `40P01` while multiple test files concurrently executed the shared `TRUNCATE ... CASCADE` setup. Re-running the same integration config with file parallelism disabled passed `35/35`; there was no Notification business assertion failure.
 

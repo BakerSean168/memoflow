@@ -35,7 +35,8 @@ function findProjectJsonFiles(dir) {
       return;
     }
     for (const entry of entries) {
-      if (entry === 'node_modules' || entry === '.git' || entry === 'dist' || entry === '.nx') continue;
+      if (entry === 'node_modules' || entry === '.git' || entry === 'dist' || entry === '.nx')
+        continue;
       const full = join(current, entry);
       let stat;
       try {
@@ -91,12 +92,16 @@ function main() {
   const exemptionMap = new Map();
   for (const entry of exemptions) {
     if (!entry.project || !entry.target || !entry.reason) {
-      console.error(`[target-baseline-audit] ERROR: Exemption entry missing required fields (project, target, reason): ${JSON.stringify(entry)}`);
+      console.error(
+        `[target-baseline-audit] ERROR: Exemption entry missing required fields (project, target, reason): ${JSON.stringify(entry)}`,
+      );
       process.exit(2);
     }
     // Temporary exemptions must have owner and targetDate
     if (entry.type === 'temporary' && (!entry.owner || !entry.targetDate)) {
-      console.error(`[target-baseline-audit] ERROR: Temporary exemption ${entry.project}:${entry.target} must have owner and targetDate fields`);
+      console.error(
+        `[target-baseline-audit] ERROR: Temporary exemption ${entry.project}:${entry.target} must have owner and targetDate fields`,
+      );
       process.exit(2);
     }
     exemptionMap.set(`${entry.project}:${entry.target}`, entry);
@@ -132,7 +137,9 @@ function main() {
 
     const categoryDef = projectCategories[category];
     if (!categoryDef) {
-      console.error(`[target-baseline-audit] ERROR: Project "${name}" references unknown category "${category}"`);
+      console.error(
+        `[target-baseline-audit] ERROR: Project "${name}" references unknown category "${category}"`,
+      );
       process.exit(2);
     }
 
@@ -194,7 +201,9 @@ function main() {
     }
     console.warn('');
     // Unclassified projects are a manifest error
-    console.error('[target-baseline-audit] FAIL: Unclassified projects found. Add them to projectRules in the manifest.');
+    console.error(
+      '[target-baseline-audit] FAIL: Unclassified projects found. Add them to projectRules in the manifest.',
+    );
     process.exit(2);
   }
 
@@ -204,7 +213,9 @@ function main() {
       console.error(`  ${project}`);
     }
     console.error('');
-    console.error('[target-baseline-audit] FAIL: projectRules contains project(s) outside the repo-owned audit scope.');
+    console.error(
+      '[target-baseline-audit] FAIL: projectRules contains project(s) outside the repo-owned audit scope.',
+    );
     process.exit(2);
   }
 
@@ -214,7 +225,9 @@ function main() {
       console.error(`  ${exemption.project}: "${exemption.target}" — ${exemption.reason}`);
     }
     console.error('');
-    console.error('[target-baseline-audit] FAIL: exemptions must reference an existing repo-owned project and one of that category\'s required targets.');
+    console.error(
+      "[target-baseline-audit] FAIL: exemptions must reference an existing repo-owned project and one of that category's required targets.",
+    );
     process.exit(2);
   }
 
@@ -229,15 +242,21 @@ function main() {
   if (gaps.length > 0) {
     console.error('--- Undocumented Gaps ---');
     for (const g of gaps) {
-      console.error(`  ${g.project} [${g.category}]: missing required target "${g.target}" (${g.path})`);
+      console.error(
+        `  ${g.project} [${g.category}]: missing required target "${g.target}" (${g.path})`,
+      );
     }
     console.error('');
     console.error(`[target-baseline-audit] FAIL: ${gaps.length} undocumented gap(s) found.`);
-    console.error('Either add the target or register an exemption in tools/governance/target-baseline-manifest.json');
+    console.error(
+      'Either add the target or register an exemption in tools/governance/target-baseline-manifest.json',
+    );
     process.exit(1);
   }
 
-  console.log(`[target-baseline-audit] passed. ${documentedExemptions.length} documented exemption(s).`);
+  console.log(
+    `[target-baseline-audit] passed. ${documentedExemptions.length} documented exemption(s).`,
+  );
   process.exit(0);
 }
 

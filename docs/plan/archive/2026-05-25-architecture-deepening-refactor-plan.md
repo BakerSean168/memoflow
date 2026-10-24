@@ -138,22 +138,23 @@
    - 同样地，[`packages/app-vue/project.json`](../../../packages/app-vue/project.json) 整体被标为 `layer:ui`，但内部又包含 runtime-aware shared utils 与 platform-sensitive code；这说明当前 tag 模型无法精确约束包内 layering，只能粗略约束包与包之间的 import。
 
 10. 热点区域已经出现可见的重复实现，说明抽象边界没有形成
-   - `jscpd` 在本次热点目录扫描中发现 `25` 个 clone，约 `1.32%` 重复行。
-   - Desktop auth 测试与 coordinator 测试中有多段大块重复，集中在：
-     - `apps/desktop/src/main/modules/authentication/application/__tests__/*`
-   - `schedule` 视图卡片出现明显 triplicate UI：
-     - [`TaskModuleTasksCard.vue`](../../../packages/app-vue/src/modules/schedule/components/TaskModuleTasksCard.vue)
-     - [`GoalTasksCard.vue`](../../../packages/app-vue/src/modules/schedule/components/GoalTasksCard.vue)
-     - [`ReminderTasksCard.vue`](../../../packages/app-vue/src/modules/schedule/components/ReminderTasksCard.vue)
-   - `editor` 索引工具存在逻辑重复：
-     - [`link-index.ts`](../../../packages/app-vue/src/modules/editor/utils/link-index.ts)
-     - [`resource-reference-index.ts`](../../../packages/app-vue/src/modules/editor/utils/resource-reference-index.ts)
-   - `authentication` 表单与测试也存在镜像重复：
-     - [`LoginForm.vue`](../../../packages/app-vue/src/modules/authentication/components/LoginForm.vue)
-     - [`RegisterForm.vue`](../../../packages/app-vue/src/modules/authentication/components/RegisterForm.vue)
-   - `task` 目录里还出现了疑似平行副本：
-     - [`packages/app-vue/src/modules/task/components/TaskInstanceCard.vue`](../../../packages/app-vue/src/modules/task/components/TaskInstanceCard.vue)
-     - [`packages/app-vue/src/modules/task/components/cards/TaskInstanceCard.vue`](../../../packages/app-vue/src/modules/task/components/cards/TaskInstanceCard.vue)
+
+- `jscpd` 在本次热点目录扫描中发现 `25` 个 clone，约 `1.32%` 重复行。
+- Desktop auth 测试与 coordinator 测试中有多段大块重复，集中在：
+  - `apps/desktop/src/main/modules/authentication/application/__tests__/*`
+- `schedule` 视图卡片出现明显 triplicate UI：
+  - [`TaskModuleTasksCard.vue`](../../../packages/app-vue/src/modules/schedule/components/TaskModuleTasksCard.vue)
+  - [`GoalTasksCard.vue`](../../../packages/app-vue/src/modules/schedule/components/GoalTasksCard.vue)
+  - [`ReminderTasksCard.vue`](../../../packages/app-vue/src/modules/schedule/components/ReminderTasksCard.vue)
+- `editor` 索引工具存在逻辑重复：
+  - [`link-index.ts`](../../../packages/app-vue/src/modules/editor/utils/link-index.ts)
+  - [`resource-reference-index.ts`](../../../packages/app-vue/src/modules/editor/utils/resource-reference-index.ts)
+- `authentication` 表单与测试也存在镜像重复：
+  - [`LoginForm.vue`](../../../packages/app-vue/src/modules/authentication/components/LoginForm.vue)
+  - [`RegisterForm.vue`](../../../packages/app-vue/src/modules/authentication/components/RegisterForm.vue)
+- `task` 目录里还出现了疑似平行副本：
+  - [`packages/app-vue/src/modules/task/components/TaskInstanceCard.vue`](../../../packages/app-vue/src/modules/task/components/TaskInstanceCard.vue)
+  - [`packages/app-vue/src/modules/task/components/cards/TaskInstanceCard.vue`](../../../packages/app-vue/src/modules/task/components/cards/TaskInstanceCard.vue)
 
 ### 全仓热点 inventory
 

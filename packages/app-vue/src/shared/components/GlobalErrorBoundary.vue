@@ -111,8 +111,7 @@ function handleGoHome() {
         </summary>
         <pre
           class="mt-2 max-h-40 overflow-auto rounded-lg bg-[hsl(var(--surface-raised)/0.34)] p-3 text-xs text-[hsl(var(--foreground-muted))] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.42)]"
-          >{{ errorStack }}</pre
-        >
+          >{{ errorStack }}</pre>
       </details>
     </div>
   </div>

@@ -9,6 +9,7 @@ description: Windows 本机收尾 vault-repo active plan 的 agent 任务提示�
 created: 2026-07-25T00:00:00
 updated: 2026-07-26T00:00:00
 ---
+
 ---
 
 > **归档结果（2026-07-26）**：Windows 本机收尾完成（§13.2 15/15 + multi-engine Host E2E）；handoff 历史材料。  
@@ -195,11 +196,11 @@ pnpm nx run web:e2e:shell
 
 （本机 agent 追加；远程创建时为空。）
 
-| 日期 | tip | 摘要 | §13.2 | PR readiness |
-|------|-----|------|-------|--------------|
-| — | — | 尚未在 Windows 开始 | 12/15 | no |
-| 2026-07-25 | `a1b59fb35` (residual 1338) | Windows: `desktop:e2e` 1/1 EXIT:0；governance GOV_EXIT:0；open-items 3/3；ADR-035 multi-engine 4/33；真实交互式 OAuth **外部阻塞**（缺 `GITHUB_OAUTH_CLIENT_SECRET`；e2e-mock 不计入）；Docker Desktop 不可用→沿用远程 prod-like 1333/1335；**不改 checkbox**；诚实 handoff B | 12/15 | no |
-| 2026-07-25 | residual 1339 | 冲 A：入库 `web:e2e:oauth-real` host-dev 真 provider；ADR-035 6/51；docker:local:up npipe 失败；仍缺 CLIENT_SECRET；**不改 checkbox** | 12/15 | no |
-| 2026-07-25 | residual 1340 | `web:e2e:oauth-real` **1/1** 真 GitHub 同意 `hasOAuth`；翻勾 §13.2 入口项；Agent/门禁仍 open | **13/15** | no |
-| 2026-07-25 | residual 1341 | prod-like 六服务 healthy + 探针 200；governance GOV_EXIT:0；desktop:e2e 1/1；翻勾门禁项；仅剩 Agent | **14/15** | no |
-| 2026-07-25 | residual 1342 | Web multi-engine Host e2e **2/2**；翻勾 Agent；§13.2 **15/15** | **15/15** | **yes** |
+| 日期       | tip                         | 摘要                                                                                                                                                                                                                                                                          | §13.2     | PR readiness |
+| ---------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------ |
+| —          | —                           | 尚未在 Windows 开始                                                                                                                                                                                                                                                           | 12/15     | no           |
+| 2026-07-25 | `a1b59fb35` (residual 1338) | Windows: `desktop:e2e` 1/1 EXIT:0；governance GOV_EXIT:0；open-items 3/3；ADR-035 multi-engine 4/33；真实交互式 OAuth **外部阻塞**（缺 `GITHUB_OAUTH_CLIENT_SECRET`；e2e-mock 不计入）；Docker Desktop 不可用→沿用远程 prod-like 1333/1335；**不改 checkbox**；诚实 handoff B | 12/15     | no           |
+| 2026-07-25 | residual 1339               | 冲 A：入库 `web:e2e:oauth-real` host-dev 真 provider；ADR-035 6/51；docker:local:up npipe 失败；仍缺 CLIENT_SECRET；**不改 checkbox**                                                                                                                                         | 12/15     | no           |
+| 2026-07-25 | residual 1340               | `web:e2e:oauth-real` **1/1** 真 GitHub 同意 `hasOAuth`；翻勾 §13.2 入口项；Agent/门禁仍 open                                                                                                                                                                                  | **13/15** | no           |
+| 2026-07-25 | residual 1341               | prod-like 六服务 healthy + 探针 200；governance GOV_EXIT:0；desktop:e2e 1/1；翻勾门禁项；仅剩 Agent                                                                                                                                                                           | **14/15** | no           |
+| 2026-07-25 | residual 1342               | Web multi-engine Host e2e **2/2**；翻勾 Agent；§13.2 **15/15**                                                                                                                                                                                                                | **15/15** | **yes**      |

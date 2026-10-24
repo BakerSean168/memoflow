@@ -46,34 +46,34 @@ updated: 2026-07-18T06:50:00
 
 ### 基线记录
 
-| 基线面 | 当前可追溯事实 |
-| --- | --- |
-| 本地 Git | 分支 `refactor/app-vue-p0-reliability`，工作区已整理为可审查提交；最终 head 与远程 PR 分支保持一致 |
-| 远程 Git | `origin/main` 为 `552471a41ac662601f005d5f4616313cd5496c02`；远程功能分支与 PR #187 已创建，等待 CI 与合并 |
-| prod-like runtime | Web `58080`、API `53080`、AI Service `58100`、PowerSync `58081`；最终验证由 clean PR head 构建三个本地应用镜像，必需服务 healthy |
-| E2E runtime | 标准 Playwright lane 使用 Web `5173`、API `3000`、PostgreSQL `5433`；认证态同步另用隔离 PowerSync `58082` 与 `postgres-test` logical replication |
-| 测试身份 | Web/业务 E2E 按用例创建隔离账号；Desktop sync profile 在成功时清理、失败时保留诊断，不依赖共享长期测试账号 |
+| 基线面            | 当前可追溯事实                                                                                                                                   |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 本地 Git          | 分支 `refactor/app-vue-p0-reliability`，工作区已整理为可审查提交；最终 head 与远程 PR 分支保持一致                                               |
+| 远程 Git          | `origin/main` 为 `552471a41ac662601f005d5f4616313cd5496c02`；远程功能分支与 PR #187 已创建，等待 CI 与合并                                       |
+| prod-like runtime | Web `58080`、API `53080`、AI Service `58100`、PowerSync `58081`；最终验证由 clean PR head 构建三个本地应用镜像，必需服务 healthy                 |
+| E2E runtime       | 标准 Playwright lane 使用 Web `5173`、API `3000`、PostgreSQL `5433`；认证态同步另用隔离 PowerSync `58082` 与 `postgres-test` logical replication |
+| 测试身份          | Web/业务 E2E 按用例创建隔离账号；Desktop sync profile 在成功时清理、失败时保留诊断，不依赖共享长期测试账号                                       |
 
-| 历史 P0 / 产品观察 | 原始失败签名 | 当前区分证据 |
-| --- | --- | --- |
-| Task 完成闭环 | 无 body 完成请求与输入 Schema 不一致，实例无法完成 | HTTP/IPC 共享控制器与 Schema 回归；真实 E2E 验证 `0/1 → 1/1` 和 Goal `0% → 10%` |
-| Notification 读取 | mapper 将 Notification ID 当作 Channel ID，未读数存在但列表读取失败 | 不同 ID 前缀 mapper 回归；真实提醒触发、列表读取、单条/全部已读和徽标归零闭环 |
-| Knowledge 索引 | 容器数据库缺少 pgvector、`retrieval_vector` 或索引，查询在用户请求时失败 | 启动链 bootstrap + 强制 smoke；新笔记 `indexed`，知识查询返回路径与原文引用 |
-| Editor 初始化 | query-then-create 并发触发 `project_path` 唯一约束，调用方得到不一致 ID | PostgreSQL 与 Desktop IPC/PowerSync 各 12 路 create-or-get 回归，所有调用方得到同一持久化 ID |
-| Dashboard / Reminder | Dashboard 已退役但旧测试仍锁定不存在页面；提醒信息优先级与过期规则需重新确认 | `/dashboard → /` 保留，性能测试转为 AI 工作区；Reminder 展示触发、下一次触发、重复和状态 |
-| Goal Agent | 长度启发式可能跳过澄清，问题固定，语言可能与 UI 不一致 | 生产 graph 使用 Provider clarification；deterministic workflow 7/7、runtime 4/4，Google AI Studio live gate 2/2 |
+| 历史 P0 / 产品观察   | 原始失败签名                                                                 | 当前区分证据                                                                                                    |
+| -------------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Task 完成闭环        | 无 body 完成请求与输入 Schema 不一致，实例无法完成                           | HTTP/IPC 共享控制器与 Schema 回归；真实 E2E 验证 `0/1 → 1/1` 和 Goal `0% → 10%`                                 |
+| Notification 读取    | mapper 将 Notification ID 当作 Channel ID，未读数存在但列表读取失败          | 不同 ID 前缀 mapper 回归；真实提醒触发、列表读取、单条/全部已读和徽标归零闭环                                   |
+| Knowledge 索引       | 容器数据库缺少 pgvector、`retrieval_vector` 或索引，查询在用户请求时失败     | 启动链 bootstrap + 强制 smoke；新笔记 `indexed`，知识查询返回路径与原文引用                                     |
+| Editor 初始化        | query-then-create 并发触发 `project_path` 唯一约束，调用方得到不一致 ID      | PostgreSQL 与 Desktop IPC/PowerSync 各 12 路 create-or-get 回归，所有调用方得到同一持久化 ID                    |
+| Dashboard / Reminder | Dashboard 已退役但旧测试仍锁定不存在页面；提醒信息优先级与过期规则需重新确认 | `/dashboard → /` 保留，性能测试转为 AI 工作区；Reminder 展示触发、下一次触发、重复和状态                        |
+| Goal Agent           | 长度启发式可能跳过澄清，问题固定，语言可能与 UI 不一致                       | 生产 graph 使用 Provider clarification；deterministic workflow 7/7、runtime 4/4，Google AI Studio live gate 2/2 |
 
 ### 阶段状态
 
-| 阶段 | 当前事实 | 状态 |
-| --- | --- | --- |
-| 阶段 0：基线 | 本地/远程 Git、运行时车道、镜像 revision、测试身份策略和历史故障签名均已形成可追溯记录 | 完成 |
-| 阶段 1：四个 P0 | 四个根因均已实现正式修复；Task、Notification、Knowledge 和 Editor 都已有真实闭环自动化证据 | 完成 |
-| 阶段 2：Goal 参考切片 | 单工具栏、唯一创建入口、同一页面 DOM、容器响应式和状态保持测试已落地 | 完成 |
-| 阶段 3：业务模块推广 | Task、Note、Reminder、Notification、Schedule 已采用单页面 DOM 和容器响应式；Web、Shell 与 Desktop 回归已通过 | 完成 |
-| 阶段 4：Web 认证 | 固定品牌主题、真实表单、字段反馈、首错聚焦、稳定错误对象、语言即时切换和共享注册 Schema 已落地；密码找回已有独立承接计划 | 完成 |
-| 阶段 5：AI 与产品完成度 | 产品完成度项目、生产 Provider clarification、deterministic eval 与 Google AI Studio live eval 2/2 均已收口 | 完成 |
-| 阶段 6：部署与验收 | 本地与跨端验收完成，分支已推送并创建 PR #187；等待 CI、合并与标准发布 | 部分完成 |
+| 阶段                    | 当前事实                                                                                                                 | 状态     |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 阶段 0：基线            | 本地/远程 Git、运行时车道、镜像 revision、测试身份策略和历史故障签名均已形成可追溯记录                                   | 完成     |
+| 阶段 1：四个 P0         | 四个根因均已实现正式修复；Task、Notification、Knowledge 和 Editor 都已有真实闭环自动化证据                               | 完成     |
+| 阶段 2：Goal 参考切片   | 单工具栏、唯一创建入口、同一页面 DOM、容器响应式和状态保持测试已落地                                                     | 完成     |
+| 阶段 3：业务模块推广    | Task、Note、Reminder、Notification、Schedule 已采用单页面 DOM 和容器响应式；Web、Shell 与 Desktop 回归已通过             | 完成     |
+| 阶段 4：Web 认证        | 固定品牌主题、真实表单、字段反馈、首错聚焦、稳定错误对象、语言即时切换和共享注册 Schema 已落地；密码找回已有独立承接计划 | 完成     |
+| 阶段 5：AI 与产品完成度 | 产品完成度项目、生产 Provider clarification、deterministic eval 与 Google AI Studio live eval 2/2 均已收口               | 完成     |
+| 阶段 6：部署与验收      | 本地与跨端验收完成，分支已推送并创建 PR #187；等待 CI、合并与标准发布                                                    | 部分完成 |
 
 ### 已确认落地
 
@@ -178,21 +178,21 @@ Goal 是当前最清晰的例子：面板窄时出现视图切换栏和列表标
 
 ## 已确认决策
 
-| 主题 | 决策 |
-| --- | --- |
-| 前端范围 | 主要重构 `packages/app-vue`，Web 与 Desktop 一起受益并一起回归；Mobile 不纳入本轮 |
-| 测试宿主 | 以 Web 作为主要自动化和远程验收宿主，同时补 Desktop 关键壳层与窗口行为回归 |
-| UI 模型 | Goal、Task、Note、Reminder、Notification、Schedule 全部采用统一单页面模型 |
-| 响应式 | 依据 BusinessPanel 内容容器宽度调整同一页面的布局和密度，不切换两套页面架构 |
-| 壳层状态 | 模块不感知 split、focus、narrow、wide 等产品状态；这些只属于壳层布局或 CSS 实现细节 |
-| 标题所有权 | BusinessPanel Tab 条是唯一模块标题层；页面内部只表达当前视图、对象、过滤、统计和操作 |
-| 主操作所有权 | 每个页面只能有一个主要创建入口，固定由页面工具栏持有 |
-| 空状态 | 空状态不重复主要创建按钮，只提供说明和必要的次级方向 |
-| 实施顺序 | 先修四个 P0 并建立回归，再开始全量 UI 铺开 |
-| 参考切片 | Goal 先落地，验证单页面模型后推广其他业务模块 |
-| 认证入口 | 纳入统一文档；密码找回完整流程作为后续独立阶段 |
-| Goal Agent | 先强化输入约束和中英文评测；评测仍失败时才增加输出校验和自动重试 |
-| 兼容策略 | 项目处于活跃开发期，不保留旧 UI 双轨、shim 或长期 feature flag |
+| 主题         | 决策                                                                                 |
+| ------------ | ------------------------------------------------------------------------------------ |
+| 前端范围     | 主要重构 `packages/app-vue`，Web 与 Desktop 一起受益并一起回归；Mobile 不纳入本轮    |
+| 测试宿主     | 以 Web 作为主要自动化和远程验收宿主，同时补 Desktop 关键壳层与窗口行为回归           |
+| UI 模型      | Goal、Task、Note、Reminder、Notification、Schedule 全部采用统一单页面模型            |
+| 响应式       | 依据 BusinessPanel 内容容器宽度调整同一页面的布局和密度，不切换两套页面架构          |
+| 壳层状态     | 模块不感知 split、focus、narrow、wide 等产品状态；这些只属于壳层布局或 CSS 实现细节  |
+| 标题所有权   | BusinessPanel Tab 条是唯一模块标题层；页面内部只表达当前视图、对象、过滤、统计和操作 |
+| 主操作所有权 | 每个页面只能有一个主要创建入口，固定由页面工具栏持有                                 |
+| 空状态       | 空状态不重复主要创建按钮，只提供说明和必要的次级方向                                 |
+| 实施顺序     | 先修四个 P0 并建立回归，再开始全量 UI 铺开                                           |
+| 参考切片     | Goal 先落地，验证单页面模型后推广其他业务模块                                        |
+| 认证入口     | 纳入统一文档；密码找回完整流程作为后续独立阶段                                       |
+| Goal Agent   | 先强化输入约束和中英文评测；评测仍失败时才增加输出校验和自动重试                     |
+| 兼容策略     | 项目处于活跃开发期，不保留旧 UI 双轨、shim 或长期 feature flag                       |
 
 ## 目标
 
@@ -273,14 +273,14 @@ Goal 先完成以下收敛：
 
 ### 其他模块推广方向
 
-| 模块 | 当前重点 | 目标 |
-| --- | --- | --- |
-| Task | 页面壳、过滤栏和任务模板概念拥挤 | 单工具栏；模板库、今日实例和过滤关系清晰；极窄宽度不裁切 |
-| Note | 多个新建入口、树与编辑器层级复杂 | 唯一新建入口；新建后立即进入编辑；树、搜索和编辑器连续响应 |
-| Reminder | 列表优先级错误、创建入口与过滤可能重复 | 唯一工具栏；优先展示触发时间、下一次触发、重复和状态 |
-| Notification | Tab、列表页壳、未读工具栏语义重叠 | 保留收件箱工具栏；数量、列表和已读状态一致 |
-| Schedule | 日历工具栏与 BusinessPanel 上下文重复 | 单日历工具栏；视图切换、日期导航和创建日程连续响应 |
-| Governance | 已并入 Note 的规范上下文 | 不恢复独立模块壳；作为 Note 内部视图遵循相同规则 |
+| 模块         | 当前重点                               | 目标                                                       |
+| ------------ | -------------------------------------- | ---------------------------------------------------------- |
+| Task         | 页面壳、过滤栏和任务模板概念拥挤       | 单工具栏；模板库、今日实例和过滤关系清晰；极窄宽度不裁切   |
+| Note         | 多个新建入口、树与编辑器层级复杂       | 唯一新建入口；新建后立即进入编辑；树、搜索和编辑器连续响应 |
+| Reminder     | 列表优先级错误、创建入口与过滤可能重复 | 唯一工具栏；优先展示触发时间、下一次触发、重复和状态       |
+| Notification | Tab、列表页壳、未读工具栏语义重叠      | 保留收件箱工具栏；数量、列表和已读状态一致                 |
+| Schedule     | 日历工具栏与 BusinessPanel 上下文重复  | 单日历工具栏；视图切换、日期导航和创建日程连续响应         |
+| Governance   | 已并入 Note 的规范上下文               | 不恢复独立模块壳；作为 Note 内部视图遵循相同规则           |
 
 ## 功能性重构方向
 
@@ -596,4 +596,3 @@ Goal 先完成以下收敛：
 - [x] 本地 prod-like 容器验证通过。
 - [x] 当前 `/opt/memoflow` 主机的 `58080` Web E2E 通过，并记录了可追溯 revision。
 - [x] Dashboard 退役、提醒规则、知识索引和旧测试已完成收口。
-

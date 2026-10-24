@@ -13,22 +13,23 @@
 
 本报告初稿为只读审查。随后按 Repair Plan 逐项完成修复，状态如下。每项均遵循「先补/改测试 → 改实现 → targeted verification」流程，工作树在修复前为干净状态。
 
-| 问题 ID | 级别 | 状态 | 修复要点 | 验证 |
-| --- | --- | --- | --- | --- |
-| Q-101 | High | ✅ Fixed | `createSyncTaskListener` 的 `void syncTaskHandler(event)` 增加 `.catch(logger.error)`，与队列 `onExecuteError` 对齐；`apps/api/src/main.ts` 补 `uncaughtException`/`unhandledRejection` 兜底 | `schedule:test` 260 通过（含新增拒绝路径测试） |
-| Q-102 | High | ✅ Fixed | `AISecretCipher` 改 aes-256-gcm（随机 IV + auth tag），`fromEnv()` 缺 key 时 fail-fast；统一到已接线的 `AI_PROVIDER_ENCRYPTION_KEY`（原 `AI_SECRET_CIPHER_KEY` 从未被部署接线），schema 描述更新，`.env.example` 说明改为必填 | `ai:test` 290 通过（新增 8 个 cipher 测试）、`ai/api:typecheck` |
-| Q-103 | High | ✅ Fixed | `AuthenticationApiModule` 改为 `createAuthenticationApiModule(options)` 工厂，密钥由 `apps/api` 从已校验 env（`getJwtConfig()`）注入，模块不再直读 `process.env`、不再绕过 32 字符校验 | `authentication:test` 268 通过（新增 3 个测试）、`api:typecheck` |
-| Q-104 | Medium | ✅ Fixed | 删除孤立的 `dtos/account-settings.dto.ts`（v2，零消费者），消除 `AccountSettingsDTO` 同名双定义 | `contracts`/`account` typecheck + test |
-| Q-105 | Medium | ✅ Fixed | 77 个 feature 值对象的手抄 `VALUES` 改为 `Object.values(XContract)`，从 contracts 派生单一真值源；改前逐个校验值集与顺序一致 | 12 个包各自 test target 全绿 |
-| Q-106 | Medium | ✅ Fixed | `analyzeTemplate` 改用已注入的 `responseRepository.getResponseStats()`（原总是传空数组），并修掉 `calculateMetrics` 大小写动作匹配的潜在 bug、移除死 `this.prisma` 引用 | `reminder:test` 320 通过 |
-| Q-107 | Medium | ⚠️ 部分完成（4/5） | 4 个单包内部 DTO 迁入 contracts 并 re-export：`CodeSnippetPersistenceDTO`、`UpcomingReminderDTO`、`TaskTemplateHistory{Server,Client}DTO`、`NotificationHistoryServerDTO`。第 5 项 repository `Folder{Server,Client}DTO` **有意留待独立 pass**：contracts 已存在**形状不同**的 `FolderClientDTO`，收敛需跨 ~30 个消费者调和两个已在用类型（现存 `as unknown as` 强转即症状），属计划禁止的单轮大重构 | governance/reminder/task/notification 各自 typecheck + test |
-| Q-108 | Low | ✅ 无需改码 | ADR-031 lines 14-20 已显式将 `schedule-orchestration` 的 `infrastructure-server/` 记为编排包例外；governance 通过。报告「未收敛」前提不成立 | `governance-check` 通过 |
-| Q-109 | Low | ✅ Fixed（建立约定） | `reminder-errors.ts` 4 个类由裸 `extends Error` 改为 `extends DomainError`（`@memoflow/utils/errors`），对齐 `setting-errors.ts` 既有约定；未做 92 处调用点的全量重写（符合 Low + 渐进替换指引） | `reminder:test` 320 通过 |
-| Q-110 | Low | ✅ Fixed | 删除 `reminder-domain-service.ts:118` 陈旧 TODO（实现已存在）；移除 deprecated `schedule-job` 聚合别名（contracts server/client + domain-client 共 3 文件 + barrel），先把 3 个 app-vue story 消费者迁到 `CalendarEntryClientDTO` | `contracts`/`schedule`/`app-vue` typecheck |
+| 问题 ID | 级别   | 状态                 | 修复要点                                                                                                                                                                                                                                                                                                                                                                                             | 验证                                                             |
+| ------- | ------ | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Q-101   | High   | ✅ Fixed             | `createSyncTaskListener` 的 `void syncTaskHandler(event)` 增加 `.catch(logger.error)`，与队列 `onExecuteError` 对齐；`apps/api/src/main.ts` 补 `uncaughtException`/`unhandledRejection` 兜底                                                                                                                                                                                                         | `schedule:test` 260 通过（含新增拒绝路径测试）                   |
+| Q-102   | High   | ✅ Fixed             | `AISecretCipher` 改 aes-256-gcm（随机 IV + auth tag），`fromEnv()` 缺 key 时 fail-fast；统一到已接线的 `AI_PROVIDER_ENCRYPTION_KEY`（原 `AI_SECRET_CIPHER_KEY` 从未被部署接线），schema 描述更新，`.env.example` 说明改为必填                                                                                                                                                                        | `ai:test` 290 通过（新增 8 个 cipher 测试）、`ai/api:typecheck`  |
+| Q-103   | High   | ✅ Fixed             | `AuthenticationApiModule` 改为 `createAuthenticationApiModule(options)` 工厂，密钥由 `apps/api` 从已校验 env（`getJwtConfig()`）注入，模块不再直读 `process.env`、不再绕过 32 字符校验                                                                                                                                                                                                               | `authentication:test` 268 通过（新增 3 个测试）、`api:typecheck` |
+| Q-104   | Medium | ✅ Fixed             | 删除孤立的 `dtos/account-settings.dto.ts`（v2，零消费者），消除 `AccountSettingsDTO` 同名双定义                                                                                                                                                                                                                                                                                                      | `contracts`/`account` typecheck + test                           |
+| Q-105   | Medium | ✅ Fixed             | 77 个 feature 值对象的手抄 `VALUES` 改为 `Object.values(XContract)`，从 contracts 派生单一真值源；改前逐个校验值集与顺序一致                                                                                                                                                                                                                                                                         | 12 个包各自 test target 全绿                                     |
+| Q-106   | Medium | ✅ Fixed             | `analyzeTemplate` 改用已注入的 `responseRepository.getResponseStats()`（原总是传空数组），并修掉 `calculateMetrics` 大小写动作匹配的潜在 bug、移除死 `this.prisma` 引用                                                                                                                                                                                                                              | `reminder:test` 320 通过                                         |
+| Q-107   | Medium | ⚠️ 部分完成（4/5）   | 4 个单包内部 DTO 迁入 contracts 并 re-export：`CodeSnippetPersistenceDTO`、`UpcomingReminderDTO`、`TaskTemplateHistory{Server,Client}DTO`、`NotificationHistoryServerDTO`。第 5 项 repository `Folder{Server,Client}DTO` **有意留待独立 pass**：contracts 已存在**形状不同**的 `FolderClientDTO`，收敛需跨 ~30 个消费者调和两个已在用类型（现存 `as unknown as` 强转即症状），属计划禁止的单轮大重构 | governance/reminder/task/notification 各自 typecheck + test      |
+| Q-108   | Low    | ✅ 无需改码          | ADR-031 lines 14-20 已显式将 `schedule-orchestration` 的 `infrastructure-server/` 记为编排包例外；governance 通过。报告「未收敛」前提不成立                                                                                                                                                                                                                                                          | `governance-check` 通过                                          |
+| Q-109   | Low    | ✅ Fixed（建立约定） | `reminder-errors.ts` 4 个类由裸 `extends Error` 改为 `extends DomainError`（`@memoflow/utils/errors`），对齐 `setting-errors.ts` 既有约定；未做 92 处调用点的全量重写（符合 Low + 渐进替换指引）                                                                                                                                                                                                     | `reminder:test` 320 通过                                         |
+| Q-110   | Low    | ✅ Fixed             | 删除 `reminder-domain-service.ts:118` 陈旧 TODO（实现已存在）；移除 deprecated `schedule-job` 聚合别名（contracts server/client + domain-client 共 3 文件 + barrel），先把 3 个 app-vue story 消费者迁到 `CalendarEntryClientDTO`                                                                                                                                                                    | `contracts`/`schedule`/`app-vue` typecheck                       |
 
 跨包整体验证：14 个包 `typecheck` 全绿；`memoflow:governance-check` 全部审计通过。
 
 遗留项（建议后续独立 pass）：
+
 - **Q-107 Folder DTO 调和**：需先确定 canonical 形状（分支/合并 `identityId`、branded id、`updatedAtText` 等差异），再分批迁移 repository/app-react/goal/task 消费者，每步单独验证。
 - **Q-109 全量替换**：将其余 ~88 处裸 `throw new Error` 按包渐进迁移到 `DomainError` 子类。
 
@@ -51,23 +52,23 @@
 ### 严重级别统计（本轮新问题）
 
 | 严重级别 | 数量 |
-| --- | ---: |
-| Blocker | 0 |
-| High | 3 |
-| Medium | 4 |
-| Low | 3 |
+| -------- | ---: |
+| Blocker  |    0 |
+| High     |    3 |
+| Medium   |    4 |
+| Low      |    3 |
 
 ### 上一轮问题回归状态
 
-| 问题 ID | 上轮结论 | 本轮回归验证 | 证据 |
-| --- | --- | --- | --- |
-| Q-001 | Fixed | **仍 Fixed** | `schedule.runtime.ts:316` `start(): Promise<void>`，`await queue.start()`，失败时 `unregisterListeners()` 后 rethrow；`schedule:test` 21 files/259 tests 通过 |
-| Q-002 | Fixed | **仍 Fixed** | `schedule-orchestration/vitest.config.ts:32-37` 已接入 `@/server/*` importer-aware alias |
-| Q-003 | Fixed | **部分回退/未完全收敛**，见 Q-108 | 13 个包已有 `src/server/index.ts`；但 `schedule-orchestration/src/index.ts:8` 仍导出 `./infrastructure-server` |
-| Q-004 | Fixed | **仍 Fixed** | 36 个 route 文件无 `[auth]` + `requireAuth` 冲突；`authentication/api/routes.ts` 中 `requireAuth:false` 均配空中间件 `[]` |
-| Q-005 | Fixed | **仍 Fixed** | `resolveRepositoryStorageBaseDir()` 为唯一 env 读取点（`storage-config.ts:27`），全 repo 仅 1 处 `process.env.REPOSITORY_STORAGE_PATH` |
-| Q-006 | Fixed | 未重新验证文档文本（低优先，见 Q-110 说明） | — |
-| Q-007 | Fixed | **仍 Fixed** | `schedule/electron/index.ts` 直接 `createSchedulePowerSyncRepositories(ctx.db)`，无 throwaway `seedModule` |
+| 问题 ID | 上轮结论 | 本轮回归验证                                | 证据                                                                                                                                                          |
+| ------- | -------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Q-001   | Fixed    | **仍 Fixed**                                | `schedule.runtime.ts:316` `start(): Promise<void>`，`await queue.start()`，失败时 `unregisterListeners()` 后 rethrow；`schedule:test` 21 files/259 tests 通过 |
+| Q-002   | Fixed    | **仍 Fixed**                                | `schedule-orchestration/vitest.config.ts:32-37` 已接入 `@/server/*` importer-aware alias                                                                      |
+| Q-003   | Fixed    | **部分回退/未完全收敛**，见 Q-108           | 13 个包已有 `src/server/index.ts`；但 `schedule-orchestration/src/index.ts:8` 仍导出 `./infrastructure-server`                                                |
+| Q-004   | Fixed    | **仍 Fixed**                                | 36 个 route 文件无 `[auth]` + `requireAuth` 冲突；`authentication/api/routes.ts` 中 `requireAuth:false` 均配空中间件 `[]`                                     |
+| Q-005   | Fixed    | **仍 Fixed**                                | `resolveRepositoryStorageBaseDir()` 为唯一 env 读取点（`storage-config.ts:27`），全 repo 仅 1 处 `process.env.REPOSITORY_STORAGE_PATH`                        |
+| Q-006   | Fixed    | 未重新验证文档文本（低优先，见 Q-110 说明） | —                                                                                                                                                             |
+| Q-007   | Fixed    | **仍 Fixed**                                | `schedule/electron/index.ts` 直接 `createSchedulePowerSyncRepositories(ctx.db)`，无 throwaway `seedModule`                                                    |
 
 ---
 
@@ -77,37 +78,37 @@ Nx monorepo，真值顺序遵循 `AGENT.md`：当前代码/配置/测试优先�
 
 ### 主要应用
 
-| 目录 | 职责 |
-| --- | --- |
-| `apps/api` | Express API bootstrap、模块注册、HTTP middleware、OpenAPI 装配、cron |
-| `apps/web` | Vue/Vite Web 客户端与 mock handlers |
-| `apps/desktop` | Electron main/preload/renderer，profile runtime、IPC、PowerSync |
-| `apps/mobile` | 移动端应用配置 |
-| `apps/ai-service` | Python FastAPI AI service |
+| 目录              | 职责                                                                 |
+| ----------------- | -------------------------------------------------------------------- |
+| `apps/api`        | Express API bootstrap、模块注册、HTTP middleware、OpenAPI 装配、cron |
+| `apps/web`        | Vue/Vite Web 客户端与 mock handlers                                  |
+| `apps/desktop`    | Electron main/preload/renderer，profile runtime、IPC、PowerSync      |
+| `apps/mobile`     | 移动端应用配置                                                       |
+| `apps/ai-service` | Python FastAPI AI service                                            |
 
 ### 主要包
 
-| 目录 | 职责 |
-| --- | --- |
+| 目录                                                                                                                                  | 职责                                                                 |
+| ------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
 | `packages/{account,ai,authentication,data-portability,editor,goal,governance,notification,reminder,repository,schedule,setting,task}` | 业务 feature packages，目标形态 `src/{api,client,electron,server/*}` |
-| `packages/contracts` | 跨端 DTO、协议、值对象接口（"单一真值源"） |
-| `packages/domain-shared` | 跨 feature 共享类型/值对象 |
-| `packages/utils` | Result、route-registrar、express-adapter、事件总线等基础设施 |
-| `packages/database` | Prisma schema/client |
-| `packages/schedule-orchestration` | 跨 feature 调度投影/执行编排 |
-| `packages/{app-vue,app-react,ui-*}` | 前端应用/UI 共享层 |
+| `packages/contracts`                                                                                                                  | 跨端 DTO、协议、值对象接口（"单一真值源"）                           |
+| `packages/domain-shared`                                                                                                              | 跨 feature 共享类型/值对象                                           |
+| `packages/utils`                                                                                                                      | Result、route-registrar、express-adapter、事件总线等基础设施         |
+| `packages/database`                                                                                                                   | Prisma schema/client                                                 |
+| `packages/schedule-orchestration`                                                                                                     | 跨 feature 调度投影/执行编排                                         |
+| `packages/{app-vue,app-react,ui-*}`                                                                                                   | 前端应用/UI 共享层                                                   |
 
 ### 重点审查文件清单（本轮）
 
-| 文件 | 审查原因 |
-| --- | --- |
-| `packages/schedule/src/server/infrastructure/runtime/schedule.runtime.ts` | 异步生命周期 + 事件监听器错误处理 |
-| `packages/ai/src/server/infrastructure/security/ai-secret-cipher.ts` | 密钥默认回退 + 加密强度 |
-| `packages/contracts/src/modules/account/{value-objects,dtos}/account-settings*.ts` | 同名 DTO 分裂 |
-| `packages/contracts/src/modules/*/value-objects/*.ts` 与各 feature `server/domain/value-objects/*.ts` | 状态值对象重复 |
-| `packages/authentication/src/api/module.ts` | env 直读绕过 schema |
-| `packages/reminder/src/server/application/use-cases/queries/analyze-reminder-frequency.use-case.ts` | 未接入实现 |
-| `packages/schedule-orchestration/src/index.ts` | server-first 命名收敛残留 |
+| 文件                                                                                                  | 审查原因                          |
+| ----------------------------------------------------------------------------------------------------- | --------------------------------- |
+| `packages/schedule/src/server/infrastructure/runtime/schedule.runtime.ts`                             | 异步生命周期 + 事件监听器错误处理 |
+| `packages/ai/src/server/infrastructure/security/ai-secret-cipher.ts`                                  | 密钥默认回退 + 加密强度           |
+| `packages/contracts/src/modules/account/{value-objects,dtos}/account-settings*.ts`                    | 同名 DTO 分裂                     |
+| `packages/contracts/src/modules/*/value-objects/*.ts` 与各 feature `server/domain/value-objects/*.ts` | 状态值对象重复                    |
+| `packages/authentication/src/api/module.ts`                                                           | env 直读绕过 schema               |
+| `packages/reminder/src/server/application/use-cases/queries/analyze-reminder-frequency.use-case.ts`   | 未接入实现                        |
+| `packages/schedule-orchestration/src/index.ts`                                                        | server-first 命名收敛残留         |
 
 ### 高风险区域
 
@@ -135,11 +136,11 @@ ApiBootstrapper.registerModules() → 各 feature module.register(context)
 Express routes / runtime contribution / OpenAPI 输出
 ```
 
-| 阶段 | Owner | 输入 | 输出 | 风险点 |
-| --- | --- | --- | --- | --- |
-| API bootstrap | `apps/api` | env、Prisma client、module list | Express app | storage 已收敛（Q-005 Fixed）；**API 进程无 `unhandledRejection` handler**（Q-101 放大项） |
-| Auth module register | `authentication/api/module.ts` | db、env | token provider + routes | **直读 `process.env.JWT_SECRET` 绕过 env.schema**（Q-103） |
-| Schedule module register | `schedule/api/module.ts:69` | db、sourceExecutor | `activeScheduleModule` + routes | `await scheduleModule.start()`（Q-001 已修好） |
+| 阶段                     | Owner                          | 输入                            | 输出                            | 风险点                                                                                     |
+| ------------------------ | ------------------------------ | ------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------ |
+| API bootstrap            | `apps/api`                     | env、Prisma client、module list | Express app                     | storage 已收敛（Q-005 Fixed）；**API 进程无 `unhandledRejection` handler**（Q-101 放大项） |
+| Auth module register     | `authentication/api/module.ts` | db、env                         | token provider + routes         | **直读 `process.env.JWT_SECRET` 绕过 env.schema**（Q-103）                                 |
+| Schedule module register | `schedule/api/module.ts:69`    | db、sourceExecutor              | `activeScheduleModule` + routes | `await scheduleModule.start()`（Q-001 已修好）                                             |
 
 ### 流程 2：Schedule projection 与执行（含事件同步）
 
@@ -157,11 +158,11 @@ syncTask() → repository.findById / queue.scheduleNext / repository.save
 （若 repository 抛错 → 未处理 promise 拒绝，无日志、无兜底）
 ```
 
-| 阶段 | Owner | 输入 | 输出 | 风险点 |
-| --- | --- | --- | --- | --- |
-| 事件监听 | `schedule.runtime.ts:255-265` | `ScheduleEventMap[K]` | fire-and-forget | **`void syncTaskHandler()` 吞掉拒绝**（Q-101） |
-| queue 执行 | `ScheduleTaskQueue` | enabled tasks | scheduled execution | 有 `onExecuteError` 兜底（对比之下监听器没有） |
-| source 执行 | `schedule-orchestration` | source module/type/id | execution | 已有测试保护（Q-002 Fixed） |
+| 阶段        | Owner                         | 输入                  | 输出                | 风险点                                         |
+| ----------- | ----------------------------- | --------------------- | ------------------- | ---------------------------------------------- |
+| 事件监听    | `schedule.runtime.ts:255-265` | `ScheduleEventMap[K]` | fire-and-forget     | **`void syncTaskHandler()` 吞掉拒绝**（Q-101） |
+| queue 执行  | `ScheduleTaskQueue`           | enabled tasks         | scheduled execution | 有 `onExecuteError` 兜底（对比之下监听器没有） |
+| source 执行 | `schedule-orchestration`      | source module/type/id | execution           | 已有测试保护（Q-002 Fixed）                    |
 
 ### 流程 3：AI provider secret 加解密
 
@@ -177,10 +178,10 @@ secret = process.env.AI_SECRET_CIPHER_KEY || 'memoflow-ai-secret'
 XOR + base64（非真正加密）→ 存库
 ```
 
-| 阶段 | Owner | 输入 | 输出 | 风险点 |
-| --- | --- | --- | --- | --- |
-| Cipher 构造 | `ai-secret-cipher.ts:7` | env（可选） | key | **漏配 env 静默用公开固定密钥**（Q-102） |
-| 加密 | `ai-secret-cipher.ts:11-20` | plaintext | `enc_v1:` + base64 | **XOR 不是加密**，仅混淆（Q-102） |
+| 阶段        | Owner                       | 输入        | 输出               | 风险点                                   |
+| ----------- | --------------------------- | ----------- | ------------------ | ---------------------------------------- |
+| Cipher 构造 | `ai-secret-cipher.ts:7`     | env（可选） | key                | **漏配 env 静默用公开固定密钥**（Q-102） |
+| 加密        | `ai-secret-cipher.ts:11-20` | plaintext   | `enc_v1:` + base64 | **XOR 不是加密**，仅混淆（Q-102）        |
 
 ---
 
@@ -257,7 +258,7 @@ XOR + base64（非真正加密）→ 存库
 - 现象：`@memoflow/contracts`（项目自称的“单一真值源”）内部有**两个同名 `AccountSettingsDTO`，形状完全不同**：
   - v1：`{ theme: ThemeType, language, timezone, notificationEnabled }`
   - v2：`{ emailNotifications, pushNotifications, twoFactorEnabled, theme: AccountTheme, privacyLevel, dataRetention }`
-  连 `theme` 类型都冲突（`ThemeType` vs 本地 `AccountTheme` = 'light'|'dark'|'auto'）。聚合与 API DTO 都 import v1；v2（及其 `AccountTheme`/`AccountPrivacyLevel` const）无任何业务 importer。
+    连 `theme` 类型都冲突（`ThemeType` vs 本地 `AccountTheme` = 'light'|'dark'|'auto'）。聚合与 API DTO 都 import v1；v2（及其 `AccountTheme`/`AccountPrivacyLevel` const）无任何业务 importer。
 - 影响：同一导出名两个定义经不同 barrel 汇入同一命名空间，`export *` 下取决于解析顺序，读者/工具极易误用；v2 疑似孤立死代码但仍被公开导出，扩大公共面。
 - 证据：
   - `value-objects/account-settings.ts:14-19` 与 `dtos/account-settings.dto.ts:22-29` 两处定义。
@@ -368,56 +369,56 @@ XOR + base64（非真正加密）→ 存库
 
 摘要：
 
-| ID | 级别 | 一句话 | 关键验证 |
-| --- | --- | --- | --- |
-| Q-101 | High | schedule 事件监听器 `void syncTaskHandler()` 吞掉异步拒绝，API 无 unhandledRejection 兜底 | `pnpm nx run schedule:test --skipSync` |
-| Q-102 | High | `AISecretCipher` 硬编码回退密钥 + XOR 非真加密，env 未入 schema | `pnpm nx run ai:test --skipSync` |
-| Q-103 | High | auth module 直读 `process.env.JWT_SECRET` 绕过 schema 长度校验 | `pnpm nx run authentication:test --skipSync` |
+| ID    | 级别 | 一句话                                                                                    | 关键验证                                     |
+| ----- | ---- | ----------------------------------------------------------------------------------------- | -------------------------------------------- |
+| Q-101 | High | schedule 事件监听器 `void syncTaskHandler()` 吞掉异步拒绝，API 无 unhandledRejection 兜底 | `pnpm nx run schedule:test --skipSync`       |
+| Q-102 | High | `AISecretCipher` 硬编码回退密钥 + XOR 非真加密，env 未入 schema                           | `pnpm nx run ai:test --skipSync`             |
+| Q-103 | High | auth module 直读 `process.env.JWT_SECRET` 绕过 schema 长度校验                            | `pnpm nx run authentication:test --skipSync` |
 
 ---
 
 ## 5. Full Findings（按严重级别排序）
 
-| ID | 级别 | 类型 | 位置（首要） | 需要测试 |
-| --- | --- | --- | --- | --- |
-| Q-101 | High | 异步生命周期/一致性 | `schedule.runtime.ts:255-259` | 是 |
-| Q-102 | High | 安全/配置 | `ai-secret-cipher.ts:7` | 是 |
-| Q-103 | High | 配置/一致性 | `authentication/api/module.ts:49-53` | 是 |
-| Q-104 | Medium | 契约/一致性 | `contracts account-settings*.ts`（双定义） | typecheck |
-| Q-105 | Medium | 契约/一致性 | 17 组值对象 contracts↔feature | 是 |
-| Q-106 | Medium | 未接入实现 | `analyze-reminder-frequency.use-case.ts:100` | 是 |
-| Q-107 | Medium | 契约边界 | 5 处 feature 内 DTO | typecheck |
-| Q-108 | Low | 架构收敛残留 | `schedule-orchestration/src/index.ts:8` | 治理 |
-| Q-109 | Low | 错误处理一致性 | 各 feature server 层 `throw new Error` | 随迁移 |
-| Q-110 | Low | 文档/死代码 | `reminder-domain-service.ts:118` 等 | typecheck |
+| ID    | 级别   | 类型                | 位置（首要）                                 | 需要测试  |
+| ----- | ------ | ------------------- | -------------------------------------------- | --------- |
+| Q-101 | High   | 异步生命周期/一致性 | `schedule.runtime.ts:255-259`                | 是        |
+| Q-102 | High   | 安全/配置           | `ai-secret-cipher.ts:7`                      | 是        |
+| Q-103 | High   | 配置/一致性         | `authentication/api/module.ts:49-53`         | 是        |
+| Q-104 | Medium | 契约/一致性         | `contracts account-settings*.ts`（双定义）   | typecheck |
+| Q-105 | Medium | 契约/一致性         | 17 组值对象 contracts↔feature                | 是        |
+| Q-106 | Medium | 未接入实现          | `analyze-reminder-frequency.use-case.ts:100` | 是        |
+| Q-107 | Medium | 契约边界            | 5 处 feature 内 DTO                          | typecheck |
+| Q-108 | Low    | 架构收敛残留        | `schedule-orchestration/src/index.ts:8`      | 治理      |
+| Q-109 | Low    | 错误处理一致性      | 各 feature server 层 `throw new Error`       | 随迁移    |
+| Q-110 | Low    | 文档/死代码         | `reminder-domain-service.ts:118` 等          | typecheck |
 
 ---
 
 ## 6. Consistency Matrix
 
-| 概念 / 规则 / 数据 | 位置 A | 位置 B | 位置 C | 不一致表现 | 风险 | 建议统一方式 |
-| --- | --- | --- | --- | --- | --- | --- |
-| 异步失败处理 | `schedule.runtime.ts:230-232`（queue 有 `onExecuteError`） | `schedule.runtime.ts:257`（监听器裸 `void`） | `window-manager.ts:503`（`void ...catch`） | 队列/桌面有兜底，事件监听器没有 | 静默失败 + 可能崩进程 | 监听器统一 `.catch(log)` | 
-| `AccountSettingsDTO` | `value-objects/account-settings.ts:14` | `dtos/account-settings.dto.ts:22` | 两 barrel 汇入 account root | 同名两形状 | 误用/死代码 | 保留 v1，删/改名 v2 |
-| 状态值对象值集 | `contracts/.../*-status.ts` | `feature/server/domain/value-objects/*.ts` | — | 字符串清单手工重复 | 新值需改两处 | feature 从 contracts 派生 VALUES |
-| Secret env 解析 | `env.ts:164-167`（canonical） | `authentication/api/module.ts:49-53`（直读） | `env.schema.ts:72`（min 32） | 两真值源，直读绕过校验 | 弱密钥漏过 | 统一走 config/context |
-| Secret 加密 | `ai-secret-cipher.ts`（XOR+base64） | — | — | 非真正加密 + 硬编码回退 | 明文等价泄露 | aes-256-gcm + fail-fast |
-| Server DTO 归属 | `@memoflow/contracts/*` | `notification/repository/task/reminder/governance` feature 内 | — | 少数 DTO 落 feature | client 触达不到 | 迁入 contracts |
-| Server feature shape | ADR-031 / 13 包 `server/index.ts` | `schedule-orchestration/src/index.ts:8` `infrastructure-server` | — | 一个 legacy 例外 | 结构漂移 | 纳入或文档化例外 |
-| 领域错误 | `reminder/.../errors/reminder-errors.ts` | 其余 feature 裸 `throw new Error` | — | 错误表达不统一 | 难分类/映射 | 统一错误基类/错误码 |
+| 概念 / 规则 / 数据   | 位置 A                                                     | 位置 B                                                          | 位置 C                                     | 不一致表现                      | 风险                  | 建议统一方式                     |
+| -------------------- | ---------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------ | ------------------------------- | --------------------- | -------------------------------- |
+| 异步失败处理         | `schedule.runtime.ts:230-232`（queue 有 `onExecuteError`） | `schedule.runtime.ts:257`（监听器裸 `void`）                    | `window-manager.ts:503`（`void ...catch`） | 队列/桌面有兜底，事件监听器没有 | 静默失败 + 可能崩进程 | 监听器统一 `.catch(log)`         |
+| `AccountSettingsDTO` | `value-objects/account-settings.ts:14`                     | `dtos/account-settings.dto.ts:22`                               | 两 barrel 汇入 account root                | 同名两形状                      | 误用/死代码           | 保留 v1，删/改名 v2              |
+| 状态值对象值集       | `contracts/.../*-status.ts`                                | `feature/server/domain/value-objects/*.ts`                      | —                                          | 字符串清单手工重复              | 新值需改两处          | feature 从 contracts 派生 VALUES |
+| Secret env 解析      | `env.ts:164-167`（canonical）                              | `authentication/api/module.ts:49-53`（直读）                    | `env.schema.ts:72`（min 32）               | 两真值源，直读绕过校验          | 弱密钥漏过            | 统一走 config/context            |
+| Secret 加密          | `ai-secret-cipher.ts`（XOR+base64）                        | —                                                               | —                                          | 非真正加密 + 硬编码回退         | 明文等价泄露          | aes-256-gcm + fail-fast          |
+| Server DTO 归属      | `@memoflow/contracts/*`                                    | `notification/repository/task/reminder/governance` feature 内   | —                                          | 少数 DTO 落 feature             | client 触达不到       | 迁入 contracts                   |
+| Server feature shape | ADR-031 / 13 包 `server/index.ts`                          | `schedule-orchestration/src/index.ts:8` `infrastructure-server` | —                                          | 一个 legacy 例外                | 结构漂移              | 纳入或文档化例外                 |
+| 领域错误             | `reminder/.../errors/reminder-errors.ts`                   | 其余 feature 裸 `throw new Error`                               | —                                          | 错误表达不统一                  | 难分类/映射           | 统一错误基类/错误码              |
 
 ---
 
 ## 7. Testing Gaps
 
-| 测试缺口 | 风险 | 建议测试类型 | 推荐测试位置 | 优先级 | 验证命令 |
-| --- | --- | --- | --- | --- | --- |
-| schedule 事件监听器异步失败路径 | 静默失败 + 潜在崩进程，且当前 12 tests 无覆盖 | 单元（reject 注入） | `schedule.runtime.spec.ts` | High | `pnpm nx run schedule:test --skipSync` |
-| AISecretCipher 缺 env / round-trip / 强度 | 密钥回退 + 弱加密无测试 | 单元 | `ai-secret-cipher.spec.ts`（新增） | High | `pnpm nx run ai:test --skipSync` |
-| auth secret 校验一致性 | 弱 secret 绕过 schema | 单元 | `authentication/api/module.spec.ts` | High | `pnpm nx run authentication:test --skipSync` |
-| 值对象 VALUES 与 contracts 一致 | 新状态值静默拒绝 | 单元断言 | 各 feature value-objects `__tests__` | Medium | `pnpm nx run goal:test --skipSync` |
-| reminder frequency 未接入 | 空洞结果伪装正常 | 单元（接入后） | `analyze-reminder-frequency.use-case.spec.ts` | Medium | `pnpm nx run reminder:test --skipSync` |
-| 多个 feature 无 integration config | account/auth/notification/editor/ai/repository/setting 无 `vitest.integration.config.ts`，跨模块路径可能仅单测覆盖 | 集成 | 各包 integration config | Medium | 对应 `test:integration` target |
+| 测试缺口                                  | 风险                                                                                                               | 建议测试类型        | 推荐测试位置                                  | 优先级 | 验证命令                                     |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------------- | --------------------------------------------- | ------ | -------------------------------------------- |
+| schedule 事件监听器异步失败路径           | 静默失败 + 潜在崩进程，且当前 12 tests 无覆盖                                                                      | 单元（reject 注入） | `schedule.runtime.spec.ts`                    | High   | `pnpm nx run schedule:test --skipSync`       |
+| AISecretCipher 缺 env / round-trip / 强度 | 密钥回退 + 弱加密无测试                                                                                            | 单元                | `ai-secret-cipher.spec.ts`（新增）            | High   | `pnpm nx run ai:test --skipSync`             |
+| auth secret 校验一致性                    | 弱 secret 绕过 schema                                                                                              | 单元                | `authentication/api/module.spec.ts`           | High   | `pnpm nx run authentication:test --skipSync` |
+| 值对象 VALUES 与 contracts 一致           | 新状态值静默拒绝                                                                                                   | 单元断言            | 各 feature value-objects `__tests__`          | Medium | `pnpm nx run goal:test --skipSync`           |
+| reminder frequency 未接入                 | 空洞结果伪装正常                                                                                                   | 单元（接入后）      | `analyze-reminder-frequency.use-case.spec.ts` | Medium | `pnpm nx run reminder:test --skipSync`       |
+| 多个 feature 无 integration config        | account/auth/notification/editor/ai/repository/setting 无 `vitest.integration.config.ts`，跨模块路径可能仅单测覆盖 | 集成                | 各包 integration config                       | Medium | 对应 `test:integration` target               |
 
 （说明：本轮未重新核对 Q-006 文档文本，如仍需可运行 `pnpm nx run memoflow:docs-check --skipSync` 复核。）
 
@@ -522,21 +523,21 @@ XOR + base64（非真正加密）→ 存库
 
 本轮执行过的关键命令与只读检查：
 
-| 命令 / 检查 | 结果 |
-| --- | --- |
-| `git status` | 工作区干净，基于 HEAD `00d43fa` |
-| `find packages -path '*/src/server/index.ts'` | 13 个包已有 server barrel（Q-003 收敛证据） |
-| `grep process.env.REPOSITORY_STORAGE_PATH`（非 dist） | 仅 1 处（`storage-config.ts:27`），Q-005 仍 Fixed |
-| `pnpm nx run schedule:test`（cache 命中） | 21 files / 259 tests 通过，Q-001 仍 Fixed |
-| 读 `schedule.runtime.ts` start/listener | Q-001 Fixed；发现 Q-101 |
-| 读 `schedule/electron/index.ts` | 无 seedModule，Q-007 仍 Fixed |
-| 读 `authentication/api/routes.ts` + agent 全量 route 扫描 | 无 auth 冲突，Q-004 仍 Fixed |
-| 读 `ai-secret-cipher.ts` + 两 repository 实例化 | 发现 Q-102 |
-| 读 `authentication/api/module.ts` + `env.ts`/`env.schema.ts` | 发现 Q-103 |
-| 读 `contracts account-settings*.ts` + barrel | 发现 Q-104 |
-| agent：contracts drift 扫描 | 发现 Q-104/Q-105/Q-107 |
-| 读 `analyze-reminder-frequency.use-case.ts` | 发现 Q-106 |
-| 读 `schedule-orchestration/src/index.ts` | 发现 Q-108（Q-003 残留） |
-| `grep unhandledRejection apps/api/src` | 无结果（Q-101 放大依据） |
+| 命令 / 检查                                                  | 结果                                              |
+| ------------------------------------------------------------ | ------------------------------------------------- |
+| `git status`                                                 | 工作区干净，基于 HEAD `00d43fa`                   |
+| `find packages -path '*/src/server/index.ts'`                | 13 个包已有 server barrel（Q-003 收敛证据）       |
+| `grep process.env.REPOSITORY_STORAGE_PATH`（非 dist）        | 仅 1 处（`storage-config.ts:27`），Q-005 仍 Fixed |
+| `pnpm nx run schedule:test`（cache 命中）                    | 21 files / 259 tests 通过，Q-001 仍 Fixed         |
+| 读 `schedule.runtime.ts` start/listener                      | Q-001 Fixed；发现 Q-101                           |
+| 读 `schedule/electron/index.ts`                              | 无 seedModule，Q-007 仍 Fixed                     |
+| 读 `authentication/api/routes.ts` + agent 全量 route 扫描    | 无 auth 冲突，Q-004 仍 Fixed                      |
+| 读 `ai-secret-cipher.ts` + 两 repository 实例化              | 发现 Q-102                                        |
+| 读 `authentication/api/module.ts` + `env.ts`/`env.schema.ts` | 发现 Q-103                                        |
+| 读 `contracts account-settings*.ts` + barrel                 | 发现 Q-104                                        |
+| agent：contracts drift 扫描                                  | 发现 Q-104/Q-105/Q-107                            |
+| 读 `analyze-reminder-frequency.use-case.ts`                  | 发现 Q-106                                        |
+| 读 `schedule-orchestration/src/index.ts`                     | 发现 Q-108（Q-003 残留）                          |
+| `grep unhandledRejection apps/api/src`                       | 无结果（Q-101 放大依据）                          |
 
 注意：`schedule:test` 结果来自 Nx cache（`Nx read the output from the cache`）；如需强制重跑可加 `--skip-nx-cache`。全量 test/typecheck 未在本轮运行，以避免长耗时；上表命令为后续 focused repair 的 targeted verification 入口。

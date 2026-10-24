@@ -38,11 +38,13 @@ function everyNight(): QuietHours {
   return QuietHours.create({
     enabled: true,
     timeZone: requireTimeZoneId('UTC'),
-    weeklyWindows: [{
-      daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
-      start: asHm('22:00'),
-      end: asHm('08:00'),
-    }],
+    weeklyWindows: [
+      {
+        daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+        start: asHm('22:00'),
+        end: asHm('08:00'),
+      },
+    ],
   });
 }
 
@@ -87,7 +89,9 @@ describe('Notification user/workflow policy', () => {
       );
     }
 
-    expect(policy.evaluate({ workflow, channel: NotificationChannelType.Email, preference })).toEqual({
+    expect(
+      policy.evaluate({ workflow, channel: NotificationChannelType.Email, preference }),
+    ).toEqual({
       channel: NotificationChannelType.Email,
       outcome,
       reason,
@@ -98,13 +102,19 @@ describe('Notification user/workflow policy', () => {
   it('keeps the explicit read-only allowlist authoritative over user channel choices', () => {
     const preference = NotificationPreference.create({ identityId });
     preference.setGlobalChannel(NotificationChannelType.Desktop, false);
-    preference.setWorkflowChannelOverride('system.account-security', NotificationChannelType.Desktop, false);
+    preference.setWorkflowChannelOverride(
+      'system.account-security',
+      NotificationChannelType.Desktop,
+      false,
+    );
 
-    expect(policy.evaluate({
-      workflow: catalog.resolve('system.account-security'),
-      channel: NotificationChannelType.Desktop,
-      preference,
-    })).toEqual({
+    expect(
+      policy.evaluate({
+        workflow: catalog.resolve('system.account-security'),
+        channel: NotificationChannelType.Desktop,
+        preference,
+      }),
+    ).toEqual({
       channel: NotificationChannelType.Desktop,
       outcome: NotificationDeliveryPlanOutcome.Enqueued,
       reason: NotificationDeliveryReason.ReadOnlyAllowlist,
@@ -115,11 +125,13 @@ describe('Notification user/workflow policy', () => {
   it('returns unsupported before user preference evaluation', () => {
     const preference = NotificationPreference.create({ identityId });
     preference.setGlobalChannel(NotificationChannelType.Email, true);
-    expect(policy.evaluate({
-      workflow: { workflowKey: 'task.local-only', topic: 'task.local-only', channels: {} },
-      channel: NotificationChannelType.Email,
-      preference,
-    })).toMatchObject({
+    expect(
+      policy.evaluate({
+        workflow: { workflowKey: 'task.local-only', topic: 'task.local-only', channels: {} },
+        channel: NotificationChannelType.Email,
+        preference,
+      }),
+    ).toMatchObject({
       outcome: NotificationDeliveryPlanOutcome.Unsupported,
       reason: NotificationDeliveryReason.UnsupportedChannel,
     });
@@ -152,17 +164,23 @@ describe('NotificationWorkflowCatalog boundaries', () => {
     const customCatalog = new NotificationWorkflowCatalog();
     const base = customCatalog.resolve('system.general');
 
-    expect(() => customCatalog.register({ ...base, workflowKey: ' ' })).toThrow('workflowKey is required');
-    expect(() => customCatalog.register({
-      ...base,
-      workflowKey: 'missing.presentation',
-      presentationDefaults: null as never,
-    })).toThrow('workflow presentationDefaults are required');
-    expect(() => customCatalog.register({
-      ...base,
-      workflowKey: 'missing.legacy',
-      legacyProjection: null as never,
-    })).toThrow('workflow legacyProjection is required');
+    expect(() => customCatalog.register({ ...base, workflowKey: ' ' })).toThrow(
+      'workflowKey is required',
+    );
+    expect(() =>
+      customCatalog.register({
+        ...base,
+        workflowKey: 'missing.presentation',
+        presentationDefaults: null as never,
+      }),
+    ).toThrow('workflow presentationDefaults are required');
+    expect(() =>
+      customCatalog.register({
+        ...base,
+        workflowKey: 'missing.legacy',
+        legacyProjection: null as never,
+      }),
+    ).toThrow('workflow legacyProjection is required');
     expect(() => customCatalog.resolve(' ')).toThrow('workflowKey is required');
   });
 });
@@ -172,12 +190,14 @@ describe('QuietHours and SystemDeliveryGuard boundaries', () => {
 
   it('suppresses Desktop and defers InApp during QuietHours', () => {
     const quietHours = everyNight();
-    expect(policy.evaluate({
-      workflow: catalog.resolve('system.general'),
-      channel: NotificationChannelType.Desktop,
-      quietHours,
-      now: activeAt,
-    })).toMatchObject({
+    expect(
+      policy.evaluate({
+        workflow: catalog.resolve('system.general'),
+        channel: NotificationChannelType.Desktop,
+        quietHours,
+        now: activeAt,
+      }),
+    ).toMatchObject({
       outcome: NotificationDeliveryPlanOutcome.Suppressed,
       reason: NotificationDeliveryReason.DndActive,
     });
@@ -196,12 +216,14 @@ describe('QuietHours and SystemDeliveryGuard boundaries', () => {
   });
 
   it('bypasses QuietHours only for the explicitly allowlisted channel', () => {
-    expect(policy.evaluate({
-      workflow: catalog.resolve('system.account-security'),
-      channel: NotificationChannelType.Desktop,
-      quietHours: everyNight(),
-      now: activeAt,
-    })).toMatchObject({
+    expect(
+      policy.evaluate({
+        workflow: catalog.resolve('system.account-security'),
+        channel: NotificationChannelType.Desktop,
+        quietHours: everyNight(),
+        now: activeAt,
+      }),
+    ).toMatchObject({
       outcome: NotificationDeliveryPlanOutcome.Enqueued,
       reason: NotificationDeliveryReason.ReadOnlyAllowlist,
     });
@@ -210,33 +232,44 @@ describe('QuietHours and SystemDeliveryGuard boundaries', () => {
   it.each([
     [{ hourCount: 2, dayCount: 3 }, NotificationDeliveryReason.RateLimitHour],
     [{ hourCount: 0, dayCount: 5 }, NotificationDeliveryReason.RateLimitDay],
-  ] as const)('applies platform limits outside NotificationPreference for usage %o', (usage, reason) => {
-    const guard = new SystemDeliveryGuard(() => ({ maxPerHour: 2, maxPerDay: 5 }));
-    expect(guard.evaluate({
-      workflowKey: 'system.general',
-      channel: NotificationChannelType.InApp,
-      usage,
-    })).toEqual({ outcome: NotificationDeliveryPlanOutcome.RateLimited, reason });
-  });
+  ] as const)(
+    'applies platform limits outside NotificationPreference for usage %o',
+    (usage, reason) => {
+      const guard = new SystemDeliveryGuard(() => ({ maxPerHour: 2, maxPerDay: 5 }));
+      expect(
+        guard.evaluate({
+          workflowKey: 'system.general',
+          channel: NotificationChannelType.InApp,
+          usage,
+        }),
+      ).toEqual({ outcome: NotificationDeliveryPlanOutcome.RateLimited, reason });
+    },
+  );
 
   it('allows usage below limits and validates platform guard configuration', () => {
     const guard = new SystemDeliveryGuard(() => ({ maxPerHour: 2, maxPerDay: 5 }));
-    expect(guard.evaluate({
-      workflowKey: 'system.general',
-      channel: NotificationChannelType.InApp,
-      usage: { hourCount: 1, dayCount: 4 },
-    })).toBeNull();
+    expect(
+      guard.evaluate({
+        workflowKey: 'system.general',
+        channel: NotificationChannelType.InApp,
+        usage: { hourCount: 1, dayCount: 4 },
+      }),
+    ).toBeNull();
 
-    expect(() => new SystemDeliveryGuard(() => ({ maxPerHour: 0, maxPerDay: 5 })).evaluate({
-      workflowKey: 'system.general',
-      channel: NotificationChannelType.InApp,
-      usage: { hourCount: 0, dayCount: 0 },
-    })).toThrow('maxPerHour must be a positive integer');
+    expect(() =>
+      new SystemDeliveryGuard(() => ({ maxPerHour: 0, maxPerDay: 5 })).evaluate({
+        workflowKey: 'system.general',
+        channel: NotificationChannelType.InApp,
+        usage: { hourCount: 0, dayCount: 0 },
+      }),
+    ).toThrow('maxPerHour must be a positive integer');
 
-    expect(() => new SystemDeliveryGuard(() => ({ maxPerHour: 5, maxPerDay: 4 })).evaluate({
-      workflowKey: 'system.general',
-      channel: NotificationChannelType.InApp,
-      usage: { hourCount: 0, dayCount: 0 },
-    })).toThrow('maxPerDay must be an integer >= maxPerHour');
+    expect(() =>
+      new SystemDeliveryGuard(() => ({ maxPerHour: 5, maxPerDay: 4 })).evaluate({
+        workflowKey: 'system.general',
+        channel: NotificationChannelType.InApp,
+        usage: { hourCount: 0, dayCount: 0 },
+      }),
+    ).toThrow('maxPerDay must be an integer >= maxPerHour');
   });
 });

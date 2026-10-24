@@ -25,13 +25,8 @@ import {
   PowerSyncTaskGoalOutboxDispatchStore,
 } from './adapters/powersync';
 import { createTaskGoalOutboxRuntime } from './task-goal-outbox-runtime';
-import {
-  TaskGoalOutboxDispatcher,
-  type TaskGoalProgressHandler,
-} from '../application/outbox';
-import {
-  createTaskScheduleProjectionSource,
-} from './schedule-projection-source';
+import { TaskGoalOutboxDispatcher, type TaskGoalProgressHandler } from '../application/outbox';
+import { createTaskScheduleProjectionSource } from './schedule-projection-source';
 import type { TaskScheduleProjectionSource } from '../../schedule-projection';
 import type { TaskRepositorySet } from './prisma';
 
@@ -61,11 +56,8 @@ export function createTaskPowerSyncModule(
     readonly runtimeContributions?: TaskRuntimeContributionsInput;
   },
 ): TaskModuleInstance {
-  const {
-    taskPlanRepository,
-    taskOccurrenceRepository,
-    taskWriteTransactionRunner,
-  } = createTaskPowerSyncRepositories(db);
+  const { taskPlanRepository, taskOccurrenceRepository, taskWriteTransactionRunner } =
+    createTaskPowerSyncRepositories(db);
 
   return createTaskModule({
     taskPlanRepository,
@@ -122,10 +114,7 @@ export function createTaskPowerSyncGoalOutboxRuntime(
   goalProgressHandler: TaskGoalProgressHandler,
 ): TaskModuleRuntimeContribution {
   return createTaskGoalOutboxRuntime(
-    new TaskGoalOutboxDispatcher(
-      new PowerSyncTaskGoalOutboxDispatchStore(db),
-      goalProgressHandler,
-    ),
+    new TaskGoalOutboxDispatcher(new PowerSyncTaskGoalOutboxDispatchStore(db), goalProgressHandler),
   );
 }
 
@@ -140,7 +129,4 @@ export function createTaskPowerSyncScheduleProjectionSource(
   });
 }
 
-export {
-  PowerSyncTaskPlanRepository,
-  PowerSyncTaskOccurrenceRepository,
-};
+export { PowerSyncTaskPlanRepository, PowerSyncTaskOccurrenceRepository };

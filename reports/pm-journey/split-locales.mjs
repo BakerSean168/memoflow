@@ -22,9 +22,6 @@ for (const [tag, messages] of [
   }
   const imports = namespaces.map((ns) => `import ${ns} from './${ns}';`).join('\n');
   const body = namespaces.map((ns) => `  ${ns},`).join('\n');
-  writeFileSync(
-    `${dir}/index.ts`,
-    `${imports}\n\nexport default {\n${body}\n} as const;\n`,
-  );
+  writeFileSync(`${dir}/index.ts`, `${imports}\n\nexport default {\n${body}\n} as const;\n`);
 }
 console.log('done');

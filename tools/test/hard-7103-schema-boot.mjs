@@ -115,14 +115,16 @@ try {
   await db.connect();
   try {
     const extension = await db.query(`SELECT extname FROM pg_extension WHERE extname = 'vector'`);
-    if (extension.rowCount !== 1) throw new Error('pgvector extension is missing after production-like boot');
+    if (extension.rowCount !== 1)
+      throw new Error('pgvector extension is missing after production-like boot');
 
     const tables = await db.query(
       `SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename`,
     );
     const names = new Set(tables.rows.map((row) => row.tablename));
     const missing = requiredTables.filter((table) => !names.has(table));
-    if (missing.length > 0) throw new Error(`production-like boot missing tables: ${missing.join(', ')}`);
+    if (missing.length > 0)
+      throw new Error(`production-like boot missing tables: ${missing.join(', ')}`);
     const forbidden = forbiddenTables.filter((table) => names.has(table));
     if (forbidden.length > 0) {
       throw new Error(`production-like boot retained retired tables: ${forbidden.join(', ')}`);
@@ -152,7 +154,9 @@ try {
       LIMIT 1
     `);
     if (routineMembershipUnique.rowCount !== 1) {
-      throw new Error('routine_profile_memberships has no routine/profile uniqueness fence after boot');
+      throw new Error(
+        'routine_profile_memberships has no routine/profile uniqueness fence after boot',
+      );
     }
 
     const taskGoalBinding = await db.query(`

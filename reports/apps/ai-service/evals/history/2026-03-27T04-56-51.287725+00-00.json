@@ -142,9 +142,7 @@
       ],
       "metadata": {
         "citation_count": 1,
-        "cited_paths": [
-          "docs/retrieval.md"
-        ],
+        "cited_paths": ["docs/retrieval.md"],
         "answer_preview": "Retrieval first chunks repository content and then answers from those excerpts, citing the repository path that supplied the evidence."
       }
     },

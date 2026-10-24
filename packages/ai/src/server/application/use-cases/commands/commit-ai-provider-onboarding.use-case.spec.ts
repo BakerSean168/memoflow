@@ -30,7 +30,11 @@ describe('CommitAIProviderOnboardingUseCase', () => {
   it('persists only after an explicit discovered model selection', async () => {
     const sessions = await sessionFixture();
     const commit = vi.fn(async () => 'COMMITTED' as const);
-    const useCase = new CommitAIProviderOnboardingUseCase(sessions, { commit, replace: vi.fn() }, () => 2_000);
+    const useCase = new CommitAIProviderOnboardingUseCase(
+      sessions,
+      { commit, replace: vi.fn() },
+      () => 2_000,
+    );
 
     const result = await useCase.execute(
       {
@@ -51,7 +55,7 @@ describe('CommitAIProviderOnboardingUseCase', () => {
           name: 'My Provider',
           credentialRef: 'credential-test',
           defaultModel: 'model-a',
-              }),
+        }),
       }),
     );
   });
@@ -59,10 +63,18 @@ describe('CommitAIProviderOnboardingUseCase', () => {
   it('requires a successful model probe when discovery was unsupported', async () => {
     const sessions = await sessionFixture({ unsupported: true });
     const commit = vi.fn(async () => 'COMMITTED' as const);
-    const useCase = new CommitAIProviderOnboardingUseCase(sessions, { commit, replace: vi.fn() }, () => 2_000);
+    const useCase = new CommitAIProviderOnboardingUseCase(
+      sessions,
+      { commit, replace: vi.fn() },
+      () => 2_000,
+    );
 
     const rejected = await useCase.execute(
-      { onboardingId: 'onboarding_0123456789abcdef', name: 'Custom', defaultModelId: 'manual-model' },
+      {
+        onboardingId: 'onboarding_0123456789abcdef',
+        name: 'Custom',
+        defaultModelId: 'manual-model',
+      },
       cx as never,
     );
     expect(rejected.ok).toBe(false);
@@ -75,7 +87,11 @@ describe('CommitAIProviderOnboardingUseCase', () => {
       now: 2_001,
     });
     const accepted = await useCase.execute(
-      { onboardingId: 'onboarding_0123456789abcdef', name: 'Custom', defaultModelId: 'manual-model' },
+      {
+        onboardingId: 'onboarding_0123456789abcdef',
+        name: 'Custom',
+        defaultModelId: 'manual-model',
+      },
       cx as never,
     );
     expect(accepted.ok).toBe(true);
@@ -128,5 +144,4 @@ describe('CommitAIProviderOnboardingUseCase', () => {
     expect(result).toMatchObject({ ok: false, error: { code: 'CONFLICT' } });
     expect(commit).not.toHaveBeenCalled();
   });
-
 });

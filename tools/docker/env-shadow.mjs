@@ -20,11 +20,7 @@ export const HOST_SHADOW_WARN_KEYS = [
  * @param {string[]} [keys]
  * @returns {string[]}
  */
-export function detectHostEnvShadowing(
-  processEnv,
-  envFileMap,
-  keys = HOST_SHADOW_WARN_KEYS,
-) {
+export function detectHostEnvShadowing(processEnv, envFileMap, keys = HOST_SHADOW_WARN_KEYS) {
   const warnings = [];
   for (const key of keys) {
     if (!envFileMap.has(key)) continue;

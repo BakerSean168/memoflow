@@ -38,7 +38,10 @@ export function useGoalSurfaceLease(
     if (previous) {
       try {
         await runtime.goalSurfaceLease({
-          action: 'release', runId: previous.runId, token: previous.token, fence: previous.fence,
+          action: 'release',
+          runId: previous.runId,
+          token: previous.token,
+          fence: previous.fence,
         });
       } catch {
         // TTL is the fallback when network teardown or window unload interrupts release.
@@ -66,7 +69,10 @@ export function useGoalSurfaceLease(
     const promise = (async () => {
       try {
         const result = await runtime.goalSurfaceLease({
-          action: 'renew', runId, token: current.token, fence: current.fence,
+          action: 'renew',
+          runId,
+          token: current.token,
+          fence: current.fence,
         });
         if (stamp !== generation || grant !== current) return false;
         if (result.status !== 'renewed') {
@@ -101,9 +107,14 @@ export function useGoalSurfaceLease(
       if (result.status !== 'claimed') return false;
       if (stamp !== generation) {
         // This component retired while the async claim was in transit.
-        void runtime.goalSurfaceLease({
-          action: 'release', runId, token: result.token, fence: result.fence,
-        }).catch(() => undefined);
+        void runtime
+          .goalSurfaceLease({
+            action: 'release',
+            runId,
+            token: result.token,
+            fence: result.fence,
+          })
+          .catch(() => undefined);
         return false;
       }
       grant = { runId, token: result.token, fence: result.fence, expiresAt: result.expiresAt };
@@ -125,7 +136,15 @@ export function useGoalSurfaceLease(
     return { runId: active.runId, token: active.token, fence: active.fence };
   }
 
-  onScopeDispose(() => { void release(); });
+  onScopeDispose(() => {
+    void release();
+  });
 
-  return { claim, verify, release, currentGrant, isHeld: (runId: string) => grant?.runId === runId };
+  return {
+    claim,
+    verify,
+    release,
+    currentGrant,
+    isHeld: (runId: string) => grant?.runId === runId,
+  };
 }

@@ -55,7 +55,10 @@ export class AttentionEventsPostgres implements AttentionEventSource {
   }
 
   constructor(input: { connectionString: string; businessSchema?: string; eventSchema?: string }) {
-    const business = input.businessSchema ?? new URL(input.connectionString).searchParams.get('schema') ?? 'public';
+    const business =
+      input.businessSchema ??
+      new URL(input.connectionString).searchParams.get('schema') ??
+      'public';
     const suffix = createHash('sha256').update(business).digest('hex').slice(0, 16);
     const eventSchema = input.eventSchema ?? `mf_attention_events_${suffix}`;
     for (const name of [business, eventSchema])

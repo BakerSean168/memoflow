@@ -201,11 +201,7 @@ describe('createTaskReminderScheduledHandlerRegistration', () => {
   it('skips a deleted occurrence', async () => {
     const writer = createWriter();
     const registration = createTaskReminderScheduledHandlerRegistration(
-      createDeps(
-        writer,
-        createInstance({ deletedAt: '2030-01-10T09:00:00.000Z' }),
-        createPlan(),
-      ),
+      createDeps(writer, createInstance({ deletedAt: '2030-01-10T09:00:00.000Z' }), createPlan()),
     );
     const result = await registration.handler.execute(createContext());
     expect(result).toMatchObject({ status: 'skipped', reason: 'TASK_OCCURRENCE_UNAVAILABLE' });
@@ -253,11 +249,7 @@ describe('createTaskReminderScheduledHandlerRegistration', () => {
   it('skips when the plan is deleted', async () => {
     const writer = createWriter();
     const registration = createTaskReminderScheduledHandlerRegistration(
-      createDeps(
-        writer,
-        createInstance(),
-        createPlan({ deletedAt: '2030-01-09T00:00:00.000Z' }),
-      ),
+      createDeps(writer, createInstance(), createPlan({ deletedAt: '2030-01-09T00:00:00.000Z' })),
     );
     const result = await registration.handler.execute(createContext());
     expect(result).toMatchObject({ status: 'skipped', reason: 'TASK_PLAN_UNAVAILABLE' });
@@ -269,15 +261,18 @@ describe('createTaskReminderScheduledHandlerRegistration', () => {
     { status: 'Closed', outcome: 'Succeeded' },
     { status: 'Closed', outcome: 'Failed' },
     { status: 'Closed', outcome: 'Abandoned' },
-  ])('fails closed for plan $status/$outcome even with a pending occurrence', async ({ status, outcome }) => {
-    const writer = createWriter();
-    const registration = createTaskReminderScheduledHandlerRegistration(
-      createDeps(writer, createInstance(), createPlan({ status, outcome })),
-    );
-    const result = await registration.handler.execute(createContext());
-    expect(result).toMatchObject({ status: 'skipped', reason: 'TASK_PLAN_UNAVAILABLE' });
-    expect(writer.enqueueNotificationRequested).not.toHaveBeenCalled();
-  });
+  ])(
+    'fails closed for plan $status/$outcome even with a pending occurrence',
+    async ({ status, outcome }) => {
+      const writer = createWriter();
+      const registration = createTaskReminderScheduledHandlerRegistration(
+        createDeps(writer, createInstance(), createPlan({ status, outcome })),
+      );
+      const result = await registration.handler.execute(createContext());
+      expect(result).toMatchObject({ status: 'skipped', reason: 'TASK_PLAN_UNAVAILABLE' });
+      expect(writer.enqueueNotificationRequested).not.toHaveBeenCalled();
+    },
+  );
 
   it('skips when the plan reminders are disabled or empty', async () => {
     for (const reminderConfig of [{ enabled: false }, { enabled: true, triggers: [] }]) {

@@ -28,7 +28,9 @@ describe('GetGoalReviewContextUseCase Product Time window', () => {
     const result = await useCase.execute('goal-id-1', 'identity-1', 1);
 
     expect(result).toBeOk();
-    const expectedStart = Number(createTimeFacade({ context: timeContext }).calendar.addDays(now, -1));
+    const expectedStart = Number(
+      createTimeFacade({ context: timeContext }).calendar.addDays(now, -1),
+    );
     expect(now - expectedStart).toBe(23 * 60 * 60 * 1000);
     expect(contextBuilder.build).toHaveBeenCalledWith(goal, {
       windowStartAt: expectedStart,

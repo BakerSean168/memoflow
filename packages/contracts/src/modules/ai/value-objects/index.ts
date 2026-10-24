@@ -5,9 +5,7 @@
 // ============ DTOs ============
 
 export { TokenUsageSchema } from './token-usage';
-export type {
-  TokenUsageDTO,
-} from './token-usage';
+export type { TokenUsageDTO } from './token-usage';
 
 // ============ Enums (不需要 type 前缀) ============
 

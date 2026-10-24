@@ -3,21 +3,12 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "sourceRoot": "packages/app-vue/src",
-  "tags": [
-    "scope:app-vue",
-    "type:lib",
-    "type:vue",
-    "layer:ui"
-  ],
+  "tags": ["scope:app-vue", "type:lib", "type:vue", "layer:ui"],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "outputs": [
-        "{workspaceRoot}/packages/app-vue/dist"
-      ],
-      "dependsOn": [
-        "^build"
-      ],
+      "outputs": ["{workspaceRoot}/packages/app-vue/dist"],
+      "dependsOn": ["^build"],
       "options": {
         "command": "node ../../node_modules/vite/bin/vite.js build",
         "cwd": "packages/app-vue"
@@ -25,16 +16,12 @@
     },
     "lint": {
       "options": {
-        "args": [
-          "**/*.{ts,tsx,vue}"
-        ]
+        "args": ["**/*.{ts,tsx,vue}"]
       }
     },
     "typecheck": {
       "executor": "nx:run-commands",
-      "dependsOn": [
-        "^build"
-      ],
+      "dependsOn": ["^build"],
       "options": {
         "command": "node ../../node_modules/vue-tsc/bin/vue-tsc.js --noEmit --declaration false --declarationMap false -p tsconfig.json",
         "cwd": "packages/app-vue"
@@ -42,13 +29,8 @@
     },
     "test": {
       "executor": "nx:run-commands",
-      "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
-      ],
-      "inputs": [
-        "default",
-        "^production"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "inputs": ["default", "^production"],
       "cache": true,
       "options": {
         "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
@@ -57,9 +39,7 @@
     },
     "test:package-exports": {
       "executor": "nx:run-commands",
-      "dependsOn": [
-        "build"
-      ],
+      "dependsOn": ["build"],
       "options": {
         "command": "node scripts/verify-package-exports.mjs",
         "cwd": "packages/app-vue"
@@ -75,13 +55,8 @@
     },
     "test:coverage": {
       "executor": "nx:run-commands",
-      "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
-      ],
-      "inputs": [
-        "default",
-        "^production"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "inputs": ["default", "^production"],
       "cache": true,
       "options": {
         "command": "vitest run --config vitest.store-coverage.config.ts --coverage",

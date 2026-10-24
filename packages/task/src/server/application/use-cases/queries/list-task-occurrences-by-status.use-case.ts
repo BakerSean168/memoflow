@@ -14,7 +14,10 @@ export class ListTaskOccurrencesByStatusUseCase {
     private readonly projection: TaskOccurrenceProjectionService,
   ) {}
 
-  async execute(identityId: string, status: TaskOccurrenceStatus): Promise<Result<TaskOccurrenceClientDTO[]>> {
+  async execute(
+    identityId: string,
+    status: TaskOccurrenceStatus,
+  ): Promise<Result<TaskOccurrenceClientDTO[]>> {
     const occurrences = await this.occurrenceRepository.findByStatus(identityId, status);
     return ok(await this.projection.projectMany(identityId, occurrences));
   }

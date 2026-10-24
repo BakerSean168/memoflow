@@ -1,8 +1,17 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import {
-  SidebarProvider, Sidebar, SidebarContent, SidebarFooter, SidebarGroup,
-  SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu,
-  SidebarMenuButton, SidebarMenuItem, SidebarTrigger,
+  SidebarProvider,
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarTrigger,
 } from '.';
 
 const meta = {
@@ -17,9 +26,18 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: () => ({
     components: {
-      SidebarProvider, Sidebar, SidebarContent, SidebarFooter, SidebarGroup,
-      SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu,
-      SidebarMenuButton, SidebarMenuItem, SidebarTrigger,
+      SidebarProvider,
+      Sidebar,
+      SidebarContent,
+      SidebarFooter,
+      SidebarGroup,
+      SidebarGroupContent,
+      SidebarGroupLabel,
+      SidebarHeader,
+      SidebarMenu,
+      SidebarMenuButton,
+      SidebarMenuItem,
+      SidebarTrigger,
     },
     template: `
       <SidebarProvider>

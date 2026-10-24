@@ -2,10 +2,7 @@ import { defineComponent, h, type PropType } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fail, ok } from '@memoflow/contracts/result';
-import type {
-  PreferenceNamespace,
-  UserPreferenceProfile,
-} from '@memoflow/contracts/setting';
+import type { PreferenceNamespace, UserPreferenceProfile } from '@memoflow/contracts/setting';
 import { createTestPinia } from '@memoflow/test-utils';
 import { SETTING_SERVICE_KEY } from '../../../di/keys';
 import { createI18nPlugin } from '../../../plugins/i18n';

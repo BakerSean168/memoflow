@@ -15,8 +15,7 @@ export interface SchedulerModuleRuntimeContribution {
 }
 
 export type SchedulerRuntimeContributionsInput =
-  | SchedulerModuleRuntimeContribution
-  | readonly SchedulerModuleRuntimeContribution[];
+  SchedulerModuleRuntimeContribution | readonly SchedulerModuleRuntimeContribution[];
 
 export interface SchedulerModuleDependencies {
   readonly scheduledInvocationRepository: IScheduledInvocationRepository;
@@ -44,10 +43,7 @@ async function projectInvocation(
   invocation: ScheduledInvocation,
   attempts: IInvocationAttemptRepository,
 ): Promise<ScheduledInvocationDiagnostic> {
-  const lastAttempt = await attempts.findLatestForInvocation(
-    invocation.identityId,
-    invocation.id,
-  );
+  const lastAttempt = await attempts.findLatestForInvocation(invocation.identityId, invocation.id);
   return toScheduledInvocationDiagnostic(invocation, lastAttempt);
 }
 
@@ -63,13 +59,16 @@ export function createSchedulerModule(
     identityId: string,
     query: ScheduledInvocationDiagnosticQuery,
   ): Promise<ScheduledInvocationDiagnostic[]> => {
-    const invocations = await dependencies.scheduledInvocationRepository.listForIdentity(identityId, {
-      ...(query.ownerType === undefined ? {} : { ownerType: query.ownerType }),
-      ...(query.ownerId === undefined ? {} : { ownerId: query.ownerId }),
-      ...(query.status === undefined ? {} : { status: query.status }),
-      ...(query.dueOnly ? { dueBefore: now() } : {}),
-      limit: query.limit ?? 100,
-    });
+    const invocations = await dependencies.scheduledInvocationRepository.listForIdentity(
+      identityId,
+      {
+        ...(query.ownerType === undefined ? {} : { ownerType: query.ownerType }),
+        ...(query.ownerId === undefined ? {} : { ownerId: query.ownerId }),
+        ...(query.status === undefined ? {} : { status: query.status }),
+        ...(query.dueOnly ? { dueBefore: now() } : {}),
+        limit: query.limit ?? 100,
+      },
+    );
     return Promise.all(
       invocations.map((invocation) =>
         projectInvocation(invocation, dependencies.invocationAttemptRepository),

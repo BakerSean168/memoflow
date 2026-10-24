@@ -91,4 +91,3 @@ updated: 2026-07-02T20:45:00+08:00
 - Old path deleted: 上述 task 运行时和 use-case 中原有的 `eventBus as unknown as ...` 路径。
 - Verification: `.\node_modules\.bin\nx.cmd run task:typecheck` 通过；`.\node_modules\.bin\nx.cmd run task:test` 通过。
 - Remaining follow-up: 进入 `R03`，继续把 schedule projection 里的系统级 ownership 从 task 包中挪出去。
-

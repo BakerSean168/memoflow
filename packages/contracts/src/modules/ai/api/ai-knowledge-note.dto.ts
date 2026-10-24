@@ -1,10 +1,7 @@
 import { z } from 'zod';
 import { brandedId } from '../../../primitives';
 import type { AiProviderConfigId } from '../../../primitives';
-import {
-  CreateKnowledgeNoteResSchema,
-  KnowledgeNotePersistedRefSchema,
-} from './response-schemas';
+import { CreateKnowledgeNoteResSchema, KnowledgeNotePersistedRefSchema } from './response-schemas';
 
 function normalizeKnowledgeNoteTargetSubpath(value: string): string {
   return value

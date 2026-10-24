@@ -29,11 +29,7 @@ function readProjectJson(filePath) {
 
 function collectProjects() {
   const projects = [];
-  const roots = [
-    path.join(ROOT, 'packages'),
-    path.join(ROOT, 'apps'),
-    path.join(ROOT, 'tools'),
-  ];
+  const roots = [path.join(ROOT, 'packages'), path.join(ROOT, 'apps'), path.join(ROOT, 'tools')];
 
   for (const root of roots) {
     if (!existsSync(root)) continue;

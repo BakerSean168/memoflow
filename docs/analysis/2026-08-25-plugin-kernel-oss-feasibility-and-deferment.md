@@ -79,8 +79,8 @@ transport registration
 
 ```ts
 interface RuntimeContribution {
-  start(): Promise<void>
-  stop(): Promise<void>
+  start(): Promise<void>;
+  stop(): Promise<void>;
 }
 ```
 
@@ -151,7 +151,7 @@ Loader ecosystem
 即使有：
 
 ```ts
-ctx.plugin(walletPlugin)
+ctx.plugin(walletPlugin);
 ```
 
 MemoFlow 仍然必须回答：

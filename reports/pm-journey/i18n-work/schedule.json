@@ -1,979 +1,675 @@
 [
- {
-  "key": "schedule.calendar.allDay",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/DayDetailSheet.vue",
-   "packages/app-vue/src/modules/schedule/components/DayViewCalendar.vue",
-   "packages/app-vue/src/modules/schedule/components/TaskEventActionPanel.vue",
-   "packages/app-vue/src/modules/schedule/components/WeekViewCalendar.vue"
-  ]
- },
- {
-  "key": "schedule.calendar.nextPeriod",
-  "files": [
-   "packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue"
-  ]
- },
- {
-  "key": "schedule.calendar.previousPeriod",
-  "files": [
-   "packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue"
-  ]
- },
- {
-  "key": "schedule.calendar.today",
-  "files": [
-   "packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue"
-  ]
- },
- {
-  "key": "schedule.calendar.weekRange",
-  "files": [
-   "packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue"
-  ]
- },
- {
-  "key": "schedule.confirm.endBeforeStart",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.conflictAlert.adjustTime",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"
-  ]
- },
- {
-  "key": "schedule.conflictAlert.advanceTo",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ConflictAlert.vue"
-  ]
- },
- {
-  "key": "schedule.conflictAlert.conflictWith",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ConflictAlert.vue",
-   "packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"
-  ]
- },
- {
-  "key": "schedule.conflictAlert.conflictsDetected",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ConflictAlert.vue",
-   "packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"
-  ]
- },
- {
-  "key": "schedule.conflictAlert.delayTo",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ConflictAlert.vue"
-  ]
- },
- {
-  "key": "schedule.conflictAlert.detecting",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"
-  ]
- },
- {
-  "key": "schedule.conflictAlert.error",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"
-  ]
- },
- {
-  "key": "schedule.conflictAlert.ignoreConflict",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"
-  ]
- },
- {
-  "key": "schedule.conflictAlert.moveEarlier",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"
-  ]
- },
- {
-  "key": "schedule.conflictAlert.moveLater",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"
-  ]
- },
- {
-  "key": "schedule.conflictAlert.noConflict",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"
-  ]
- },
- {
-  "key": "schedule.conflictAlert.overlap",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ConflictAlert.vue",
-   "packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"
-  ]
- },
- {
-  "key": "schedule.conflictAlert.shortenDuration",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"
-  ]
- },
- {
-  "key": "schedule.conflictAlert.shortenTo",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ConflictAlert.vue"
-  ]
- },
- {
-  "key": "schedule.conflictAlert.suggestion",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ConflictAlert.vue",
-   "packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.addAttendee",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.autoDetectConflicts",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.autoDetectConflictsDescription",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.description",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.fieldAttendeePlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.fieldAttendees",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.fieldDescription",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.fieldDescriptionPlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.fieldEndDate",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.fieldEndTime",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.fieldLocation",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.fieldLocationPlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.fieldPriority",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.fieldPriorityPlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.fieldStartDate",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.fieldStartTime",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.fieldTitle",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.fieldTitlePlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.priorityAboveMedium",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.priorityBelowMedium",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.priorityExtreme",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.priorityHigh",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.priorityHighest",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.priorityLow",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.priorityLowest",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.priorityMedium",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.priorityNone",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.priorityVeryHigh",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.priorityVeryLow",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.titleCreate",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.createDialog.titleEdit",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"
-  ]
- },
- {
-  "key": "schedule.dashboard.createSchedule",
-  "files": [
-   "packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue"
-  ]
- },
- {
-  "key": "schedule.dayDetail.noEvents",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/DayDetailSheet.vue"
-  ]
- },
- {
-  "key": "schedule.dayDetail.subtitle",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/DayDetailSheet.vue"
-  ]
- },
- {
-  "key": "schedule.dayDetail.viewInDayView",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/DayDetailSheet.vue"
-  ]
- },
- {
-  "key": "schedule.detailDialog.basicInfo",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"
-  ]
- },
- {
-  "key": "schedule.detailDialog.consecutiveFailures",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"
-  ]
- },
- {
-  "key": "schedule.detailDialog.consecutiveFailuresValue",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"
-  ]
- },
- {
-  "key": "schedule.detailDialog.cronExpression",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"
-  ]
- },
- {
-  "key": "schedule.detailDialog.description",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"
-  ]
- },
- {
-  "key": "schedule.detailDialog.disabled",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue",
-   "packages/app-vue/src/modules/schedule/utils/schedule-presentation.ts"
-  ]
- },
- {
-  "key": "schedule.detailDialog.enabled",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue",
-   "packages/app-vue/src/modules/schedule/utils/schedule-presentation.ts"
-  ]
- },
- {
-  "key": "schedule.detailDialog.enabledStatus",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"
-  ]
- },
- {
-  "key": "schedule.detailDialog.endDate",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"
-  ]
- },
- {
-  "key": "schedule.detailDialog.executionCount",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"
-  ]
- },
- {
-  "key": "schedule.detailDialog.executionCountValue",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"
-  ]
- },
- {
-  "key": "schedule.detailDialog.executionDuration",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"
-  ]
- },
- {
-  "key": "schedule.detailDialog.executionHistory",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"
-  ]
- },
- {
-  "key": "schedule.detailDialog.executionInfo",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"
-  ]
- },
- {
-  "key": "schedule.detailDialog.lastExecution",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"
-  ]
- },
- {
-  "key": "schedule.detailDialog.nextExecution",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"
-  ]
- },
- {
-  "key": "schedule.detailDialog.noExecutionRecords",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"
-  ]
- },
- {
-  "key": "schedule.detailDialog.scheduleConfig",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"
-  ]
- },
- {
-  "key": "schedule.detailDialog.sourceModule",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"
-  ]
- },
- {
-  "key": "schedule.detailDialog.startDate",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"
-  ]
- },
- {
-  "key": "schedule.detailDialog.subtitle",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"
-  ]
- },
- {
-  "key": "schedule.detailDialog.taskName",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"
-  ]
- },
- {
-  "key": "schedule.detailDialog.taskStatus",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"
-  ]
- },
- {
-  "key": "schedule.detailDialog.timezone",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"
-  ]
- },
- {
-  "key": "schedule.detailDialog.title",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"
-  ]
- },
- {
-  "key": "schedule.dev.enabled",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/DevScheduleDebugPanel.vue"
-  ]
- },
- {
-  "key": "schedule.dev.executions",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/DevScheduleDebugPanel.vue"
-  ]
- },
- {
-  "key": "schedule.dev.health",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/DevScheduleDebugPanel.vue"
-  ]
- },
- {
-  "key": "schedule.dev.nextRun",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/DevScheduleDebugPanel.vue"
-  ]
- },
- {
-  "key": "schedule.dev.noTasks",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/DevScheduleDebugPanel.vue"
-  ]
- },
- {
-  "key": "schedule.dev.source",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/DevScheduleDebugPanel.vue"
-  ]
- },
- {
-  "key": "schedule.dev.subtitle",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/DevScheduleDebugPanel.vue"
-  ]
- },
- {
-  "key": "schedule.dev.title",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/DevScheduleDebugPanel.vue"
-  ]
- },
- {
-  "key": "schedule.duration.hours",
-  "files": [
-   "packages/app-vue/src/shared/utils/format-schedule-duration-minutes.ts"
-  ]
- },
- {
-  "key": "schedule.duration.hoursMinutes",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ConflictAlert.vue",
-   "packages/app-vue/src/shared/utils/format-schedule-duration-minutes.ts"
-  ]
- },
- {
-  "key": "schedule.duration.minutes",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ConflictAlert.vue",
-   "packages/app-vue/src/shared/utils/format-schedule-duration-minutes.ts"
-  ]
- },
- {
-  "key": "schedule.eventDetail.allDay",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/EventDetailSheet.vue"
-  ]
- },
- {
-  "key": "schedule.eventDetail.conflictHint",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/EventDetailSheet.vue"
-  ]
- },
- {
-  "key": "schedule.eventDetail.readOnlyHint",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/EventDetailSheet.vue"
-  ]
- },
- {
-  "key": "schedule.eventDetail.source",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/EventDetailSheet.vue"
-  ]
- },
- {
-  "key": "schedule.eventDetail.subtitle",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/EventDetailSheet.vue"
-  ]
- },
- {
-  "key": "schedule.eventDetail.time",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/EventDetailSheet.vue"
-  ]
- },
- {
-  "key": "schedule.eventList.conflict",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleEventList.vue"
-  ]
- },
- {
-  "key": "schedule.eventList.createSchedule",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleEventList.vue"
-  ]
- },
- {
-  "key": "schedule.eventList.durationMinutes",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleEventList.vue"
-  ]
- },
- {
-  "key": "schedule.eventList.emptyDescription",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleEventList.vue"
-  ]
- },
- {
-  "key": "schedule.eventList.emptyTitle",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleEventList.vue"
-  ]
- },
- {
-  "key": "schedule.eventList.error",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleEventList.vue"
-  ]
- },
- {
-  "key": "schedule.eventList.title",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleEventList.vue"
-  ]
- },
- {
-  "key": "schedule.formDemo.createSchedule",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"
-  ]
- },
- {
-  "key": "schedule.formDemo.durationLabel",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"
-  ]
- },
- {
-  "key": "schedule.formDemo.fieldDescription",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"
-  ]
- },
- {
-  "key": "schedule.formDemo.fieldDescriptionPlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"
-  ]
- },
- {
-  "key": "schedule.formDemo.fieldEndTime",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"
-  ]
- },
- {
-  "key": "schedule.formDemo.fieldLocation",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"
-  ]
- },
- {
-  "key": "schedule.formDemo.fieldLocationPlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"
-  ]
- },
- {
-  "key": "schedule.formDemo.fieldPriority",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"
-  ]
- },
- {
-  "key": "schedule.formDemo.fieldPriorityPlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"
-  ]
- },
- {
-  "key": "schedule.formDemo.fieldStartTime",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"
-  ]
- },
- {
-  "key": "schedule.formDemo.fieldTitle",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"
-  ]
- },
- {
-  "key": "schedule.formDemo.fieldTitlePlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"
-  ]
- },
- {
-  "key": "schedule.formDemo.priorityHigh",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"
-  ]
- },
- {
-  "key": "schedule.formDemo.priorityHighest",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"
-  ]
- },
- {
-  "key": "schedule.formDemo.priorityLow",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"
-  ]
- },
- {
-  "key": "schedule.formDemo.priorityLowest",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"
-  ]
- },
- {
-  "key": "schedule.formDemo.priorityMedium",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"
-  ]
- },
- {
-  "key": "schedule.formDemo.reset",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"
-  ]
- },
- {
-  "key": "schedule.formDemo.title",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"
-  ]
- },
- {
-  "key": "schedule.presentation.durationMs",
-  "files": [
-   "packages/app-vue/src/modules/schedule/utils/schedule-presentation.ts"
-  ]
- },
- {
-  "key": "schedule.presentation.durationSec",
-  "files": [
-   "packages/app-vue/src/modules/schedule/utils/schedule-presentation.ts"
-  ]
- },
- {
-  "key": "schedule.presentation.executionSummary",
-  "files": [
-   "packages/app-vue/src/modules/schedule/utils/schedule-presentation.ts"
-  ]
- },
- {
-  "key": "schedule.route.calendar",
-  "files": [
-   "packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue"
-  ]
- },
- {
-  "key": "schedule.severity.minor",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"
-  ]
- },
- {
-  "key": "schedule.severity.moderate",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"
-  ]
- },
- {
-  "key": "schedule.severity.severe",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"
-  ]
- },
- {
-  "key": "schedule.statistics.activeTasks",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"
-  ]
- },
- {
-  "key": "schedule.statistics.emptyTitle",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"
-  ]
- },
- {
-  "key": "schedule.statistics.error",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"
-  ]
- },
- {
-  "key": "schedule.statistics.executionOverview",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"
-  ]
- },
- {
-  "key": "schedule.statistics.failCount",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"
-  ]
- },
- {
-  "key": "schedule.statistics.failedTasks",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"
-  ]
- },
- {
-  "key": "schedule.statistics.moduleActive",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"
-  ]
- },
- {
-  "key": "schedule.statistics.moduleDistribution",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"
-  ]
- },
- {
-  "key": "schedule.statistics.moduleExecutions",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"
-  ]
- },
- {
-  "key": "schedule.statistics.moduleNames.goal",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"
-  ]
- },
- {
-  "key": "schedule.statistics.moduleNames.notification",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"
-  ]
- },
- {
-  "key": "schedule.statistics.moduleNames.reminder",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"
-  ]
- },
- {
-  "key": "schedule.statistics.moduleNames.task",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"
-  ]
- },
- {
-  "key": "schedule.statistics.moduleSuccessRate",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"
-  ]
- },
- {
-  "key": "schedule.statistics.moduleTasks",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"
-  ]
- },
- {
-  "key": "schedule.statistics.overallOverview",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"
-  ]
- },
- {
-  "key": "schedule.statistics.pausedTasks",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"
-  ]
- },
- {
-  "key": "schedule.statistics.retry",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"
-  ]
- },
- {
-  "key": "schedule.statistics.subtitle",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"
-  ]
- },
- {
-  "key": "schedule.statistics.successCount",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"
-  ]
- },
- {
-  "key": "schedule.statistics.successRate",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"
-  ]
- },
- {
-  "key": "schedule.statistics.title",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"
-  ]
- },
- {
-  "key": "schedule.statistics.totalExecutions",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"
-  ]
- },
- {
-  "key": "schedule.statistics.totalTasks",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"
-  ]
- },
- {
-  "key": "schedule.taskCard.noDescription",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleTasksCard.vue"
-  ]
- },
- {
-  "key": "schedule.taskCard.taskCount",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/ScheduleTasksCard.vue"
-  ]
- },
- {
-  "key": "schedule.toast.scheduleCreated",
-  "files": [
-   "packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue"
-  ]
- },
- {
-  "key": "schedule.viewTabs.day",
-  "files": [
-   "packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue"
-  ]
- },
- {
-  "key": "schedule.viewTabs.month",
-  "files": [
-   "packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue"
-  ]
- },
- {
-  "key": "schedule.viewTabs.week",
-  "files": [
-   "packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue"
-  ]
- }
+  {
+    "key": "schedule.calendar.allDay",
+    "files": [
+      "packages/app-vue/src/modules/schedule/components/DayDetailSheet.vue",
+      "packages/app-vue/src/modules/schedule/components/DayViewCalendar.vue",
+      "packages/app-vue/src/modules/schedule/components/TaskEventActionPanel.vue",
+      "packages/app-vue/src/modules/schedule/components/WeekViewCalendar.vue"
+    ]
+  },
+  {
+    "key": "schedule.calendar.nextPeriod",
+    "files": ["packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue"]
+  },
+  {
+    "key": "schedule.calendar.previousPeriod",
+    "files": ["packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue"]
+  },
+  {
+    "key": "schedule.calendar.today",
+    "files": ["packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue"]
+  },
+  {
+    "key": "schedule.calendar.weekRange",
+    "files": ["packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue"]
+  },
+  {
+    "key": "schedule.confirm.endBeforeStart",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.conflictAlert.adjustTime",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"]
+  },
+  {
+    "key": "schedule.conflictAlert.advanceTo",
+    "files": ["packages/app-vue/src/modules/schedule/components/ConflictAlert.vue"]
+  },
+  {
+    "key": "schedule.conflictAlert.conflictWith",
+    "files": [
+      "packages/app-vue/src/modules/schedule/components/ConflictAlert.vue",
+      "packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"
+    ]
+  },
+  {
+    "key": "schedule.conflictAlert.conflictsDetected",
+    "files": [
+      "packages/app-vue/src/modules/schedule/components/ConflictAlert.vue",
+      "packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"
+    ]
+  },
+  {
+    "key": "schedule.conflictAlert.delayTo",
+    "files": ["packages/app-vue/src/modules/schedule/components/ConflictAlert.vue"]
+  },
+  {
+    "key": "schedule.conflictAlert.detecting",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"]
+  },
+  {
+    "key": "schedule.conflictAlert.error",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"]
+  },
+  {
+    "key": "schedule.conflictAlert.ignoreConflict",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"]
+  },
+  {
+    "key": "schedule.conflictAlert.moveEarlier",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"]
+  },
+  {
+    "key": "schedule.conflictAlert.moveLater",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"]
+  },
+  {
+    "key": "schedule.conflictAlert.noConflict",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"]
+  },
+  {
+    "key": "schedule.conflictAlert.overlap",
+    "files": [
+      "packages/app-vue/src/modules/schedule/components/ConflictAlert.vue",
+      "packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"
+    ]
+  },
+  {
+    "key": "schedule.conflictAlert.shortenDuration",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"]
+  },
+  {
+    "key": "schedule.conflictAlert.shortenTo",
+    "files": ["packages/app-vue/src/modules/schedule/components/ConflictAlert.vue"]
+  },
+  {
+    "key": "schedule.conflictAlert.suggestion",
+    "files": [
+      "packages/app-vue/src/modules/schedule/components/ConflictAlert.vue",
+      "packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"
+    ]
+  },
+  {
+    "key": "schedule.createDialog.addAttendee",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.autoDetectConflicts",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.autoDetectConflictsDescription",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.description",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.fieldAttendeePlaceholder",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.fieldAttendees",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.fieldDescription",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.fieldDescriptionPlaceholder",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.fieldEndDate",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.fieldEndTime",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.fieldLocation",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.fieldLocationPlaceholder",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.fieldPriority",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.fieldPriorityPlaceholder",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.fieldStartDate",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.fieldStartTime",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.fieldTitle",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.fieldTitlePlaceholder",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.priorityAboveMedium",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.priorityBelowMedium",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.priorityExtreme",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.priorityHigh",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.priorityHighest",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.priorityLow",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.priorityLowest",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.priorityMedium",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.priorityNone",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.priorityVeryHigh",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.priorityVeryLow",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.titleCreate",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.createDialog.titleEdit",
+    "files": ["packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.vue"]
+  },
+  {
+    "key": "schedule.dashboard.createSchedule",
+    "files": ["packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue"]
+  },
+  {
+    "key": "schedule.dayDetail.noEvents",
+    "files": ["packages/app-vue/src/modules/schedule/components/DayDetailSheet.vue"]
+  },
+  {
+    "key": "schedule.dayDetail.subtitle",
+    "files": ["packages/app-vue/src/modules/schedule/components/DayDetailSheet.vue"]
+  },
+  {
+    "key": "schedule.dayDetail.viewInDayView",
+    "files": ["packages/app-vue/src/modules/schedule/components/DayDetailSheet.vue"]
+  },
+  {
+    "key": "schedule.detailDialog.basicInfo",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"]
+  },
+  {
+    "key": "schedule.detailDialog.consecutiveFailures",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"]
+  },
+  {
+    "key": "schedule.detailDialog.consecutiveFailuresValue",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"]
+  },
+  {
+    "key": "schedule.detailDialog.cronExpression",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"]
+  },
+  {
+    "key": "schedule.detailDialog.description",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"]
+  },
+  {
+    "key": "schedule.detailDialog.disabled",
+    "files": [
+      "packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue",
+      "packages/app-vue/src/modules/schedule/utils/schedule-presentation.ts"
+    ]
+  },
+  {
+    "key": "schedule.detailDialog.enabled",
+    "files": [
+      "packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue",
+      "packages/app-vue/src/modules/schedule/utils/schedule-presentation.ts"
+    ]
+  },
+  {
+    "key": "schedule.detailDialog.enabledStatus",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"]
+  },
+  {
+    "key": "schedule.detailDialog.endDate",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"]
+  },
+  {
+    "key": "schedule.detailDialog.executionCount",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"]
+  },
+  {
+    "key": "schedule.detailDialog.executionCountValue",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"]
+  },
+  {
+    "key": "schedule.detailDialog.executionDuration",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"]
+  },
+  {
+    "key": "schedule.detailDialog.executionHistory",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"]
+  },
+  {
+    "key": "schedule.detailDialog.executionInfo",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"]
+  },
+  {
+    "key": "schedule.detailDialog.lastExecution",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"]
+  },
+  {
+    "key": "schedule.detailDialog.nextExecution",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"]
+  },
+  {
+    "key": "schedule.detailDialog.noExecutionRecords",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"]
+  },
+  {
+    "key": "schedule.detailDialog.scheduleConfig",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"]
+  },
+  {
+    "key": "schedule.detailDialog.sourceModule",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"]
+  },
+  {
+    "key": "schedule.detailDialog.startDate",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"]
+  },
+  {
+    "key": "schedule.detailDialog.subtitle",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"]
+  },
+  {
+    "key": "schedule.detailDialog.taskName",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"]
+  },
+  {
+    "key": "schedule.detailDialog.taskStatus",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"]
+  },
+  {
+    "key": "schedule.detailDialog.timezone",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"]
+  },
+  {
+    "key": "schedule.detailDialog.title",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleTaskDetailDialog.vue"]
+  },
+  {
+    "key": "schedule.dev.enabled",
+    "files": ["packages/app-vue/src/modules/schedule/components/DevScheduleDebugPanel.vue"]
+  },
+  {
+    "key": "schedule.dev.executions",
+    "files": ["packages/app-vue/src/modules/schedule/components/DevScheduleDebugPanel.vue"]
+  },
+  {
+    "key": "schedule.dev.health",
+    "files": ["packages/app-vue/src/modules/schedule/components/DevScheduleDebugPanel.vue"]
+  },
+  {
+    "key": "schedule.dev.nextRun",
+    "files": ["packages/app-vue/src/modules/schedule/components/DevScheduleDebugPanel.vue"]
+  },
+  {
+    "key": "schedule.dev.noTasks",
+    "files": ["packages/app-vue/src/modules/schedule/components/DevScheduleDebugPanel.vue"]
+  },
+  {
+    "key": "schedule.dev.source",
+    "files": ["packages/app-vue/src/modules/schedule/components/DevScheduleDebugPanel.vue"]
+  },
+  {
+    "key": "schedule.dev.subtitle",
+    "files": ["packages/app-vue/src/modules/schedule/components/DevScheduleDebugPanel.vue"]
+  },
+  {
+    "key": "schedule.dev.title",
+    "files": ["packages/app-vue/src/modules/schedule/components/DevScheduleDebugPanel.vue"]
+  },
+  {
+    "key": "schedule.duration.hours",
+    "files": ["packages/app-vue/src/shared/utils/format-schedule-duration-minutes.ts"]
+  },
+  {
+    "key": "schedule.duration.hoursMinutes",
+    "files": [
+      "packages/app-vue/src/modules/schedule/components/ConflictAlert.vue",
+      "packages/app-vue/src/shared/utils/format-schedule-duration-minutes.ts"
+    ]
+  },
+  {
+    "key": "schedule.duration.minutes",
+    "files": [
+      "packages/app-vue/src/modules/schedule/components/ConflictAlert.vue",
+      "packages/app-vue/src/shared/utils/format-schedule-duration-minutes.ts"
+    ]
+  },
+  {
+    "key": "schedule.eventDetail.allDay",
+    "files": ["packages/app-vue/src/modules/schedule/components/EventDetailSheet.vue"]
+  },
+  {
+    "key": "schedule.eventDetail.conflictHint",
+    "files": ["packages/app-vue/src/modules/schedule/components/EventDetailSheet.vue"]
+  },
+  {
+    "key": "schedule.eventDetail.readOnlyHint",
+    "files": ["packages/app-vue/src/modules/schedule/components/EventDetailSheet.vue"]
+  },
+  {
+    "key": "schedule.eventDetail.source",
+    "files": ["packages/app-vue/src/modules/schedule/components/EventDetailSheet.vue"]
+  },
+  {
+    "key": "schedule.eventDetail.subtitle",
+    "files": ["packages/app-vue/src/modules/schedule/components/EventDetailSheet.vue"]
+  },
+  {
+    "key": "schedule.eventDetail.time",
+    "files": ["packages/app-vue/src/modules/schedule/components/EventDetailSheet.vue"]
+  },
+  {
+    "key": "schedule.eventList.conflict",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleEventList.vue"]
+  },
+  {
+    "key": "schedule.eventList.createSchedule",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleEventList.vue"]
+  },
+  {
+    "key": "schedule.eventList.durationMinutes",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleEventList.vue"]
+  },
+  {
+    "key": "schedule.eventList.emptyDescription",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleEventList.vue"]
+  },
+  {
+    "key": "schedule.eventList.emptyTitle",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleEventList.vue"]
+  },
+  {
+    "key": "schedule.eventList.error",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleEventList.vue"]
+  },
+  {
+    "key": "schedule.eventList.title",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleEventList.vue"]
+  },
+  {
+    "key": "schedule.formDemo.createSchedule",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"]
+  },
+  {
+    "key": "schedule.formDemo.durationLabel",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"]
+  },
+  {
+    "key": "schedule.formDemo.fieldDescription",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"]
+  },
+  {
+    "key": "schedule.formDemo.fieldDescriptionPlaceholder",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"]
+  },
+  {
+    "key": "schedule.formDemo.fieldEndTime",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"]
+  },
+  {
+    "key": "schedule.formDemo.fieldLocation",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"]
+  },
+  {
+    "key": "schedule.formDemo.fieldLocationPlaceholder",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"]
+  },
+  {
+    "key": "schedule.formDemo.fieldPriority",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"]
+  },
+  {
+    "key": "schedule.formDemo.fieldPriorityPlaceholder",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"]
+  },
+  {
+    "key": "schedule.formDemo.fieldStartTime",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"]
+  },
+  {
+    "key": "schedule.formDemo.fieldTitle",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"]
+  },
+  {
+    "key": "schedule.formDemo.fieldTitlePlaceholder",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"]
+  },
+  {
+    "key": "schedule.formDemo.priorityHigh",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"]
+  },
+  {
+    "key": "schedule.formDemo.priorityHighest",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"]
+  },
+  {
+    "key": "schedule.formDemo.priorityLow",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"]
+  },
+  {
+    "key": "schedule.formDemo.priorityLowest",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"]
+  },
+  {
+    "key": "schedule.formDemo.priorityMedium",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"]
+  },
+  {
+    "key": "schedule.formDemo.reset",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"]
+  },
+  {
+    "key": "schedule.formDemo.title",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleFormDemo.vue"]
+  },
+  {
+    "key": "schedule.presentation.durationMs",
+    "files": ["packages/app-vue/src/modules/schedule/utils/schedule-presentation.ts"]
+  },
+  {
+    "key": "schedule.presentation.durationSec",
+    "files": ["packages/app-vue/src/modules/schedule/utils/schedule-presentation.ts"]
+  },
+  {
+    "key": "schedule.presentation.executionSummary",
+    "files": ["packages/app-vue/src/modules/schedule/utils/schedule-presentation.ts"]
+  },
+  {
+    "key": "schedule.route.calendar",
+    "files": ["packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue"]
+  },
+  {
+    "key": "schedule.severity.minor",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"]
+  },
+  {
+    "key": "schedule.severity.moderate",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"]
+  },
+  {
+    "key": "schedule.severity.severe",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleConflictAlert.vue"]
+  },
+  {
+    "key": "schedule.statistics.activeTasks",
+    "files": ["packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"]
+  },
+  {
+    "key": "schedule.statistics.emptyTitle",
+    "files": ["packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"]
+  },
+  {
+    "key": "schedule.statistics.error",
+    "files": ["packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"]
+  },
+  {
+    "key": "schedule.statistics.executionOverview",
+    "files": ["packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"]
+  },
+  {
+    "key": "schedule.statistics.failCount",
+    "files": ["packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"]
+  },
+  {
+    "key": "schedule.statistics.failedTasks",
+    "files": ["packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"]
+  },
+  {
+    "key": "schedule.statistics.moduleActive",
+    "files": ["packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"]
+  },
+  {
+    "key": "schedule.statistics.moduleDistribution",
+    "files": ["packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"]
+  },
+  {
+    "key": "schedule.statistics.moduleExecutions",
+    "files": ["packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"]
+  },
+  {
+    "key": "schedule.statistics.moduleNames.goal",
+    "files": ["packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"]
+  },
+  {
+    "key": "schedule.statistics.moduleNames.notification",
+    "files": ["packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"]
+  },
+  {
+    "key": "schedule.statistics.moduleNames.reminder",
+    "files": ["packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"]
+  },
+  {
+    "key": "schedule.statistics.moduleNames.task",
+    "files": ["packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"]
+  },
+  {
+    "key": "schedule.statistics.moduleSuccessRate",
+    "files": ["packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"]
+  },
+  {
+    "key": "schedule.statistics.moduleTasks",
+    "files": ["packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"]
+  },
+  {
+    "key": "schedule.statistics.overallOverview",
+    "files": ["packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"]
+  },
+  {
+    "key": "schedule.statistics.pausedTasks",
+    "files": ["packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"]
+  },
+  {
+    "key": "schedule.statistics.retry",
+    "files": ["packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"]
+  },
+  {
+    "key": "schedule.statistics.subtitle",
+    "files": ["packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"]
+  },
+  {
+    "key": "schedule.statistics.successCount",
+    "files": ["packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"]
+  },
+  {
+    "key": "schedule.statistics.successRate",
+    "files": ["packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"]
+  },
+  {
+    "key": "schedule.statistics.title",
+    "files": ["packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"]
+  },
+  {
+    "key": "schedule.statistics.totalExecutions",
+    "files": ["packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"]
+  },
+  {
+    "key": "schedule.statistics.totalTasks",
+    "files": ["packages/app-vue/src/modules/schedule/components/StatisticsCard.vue"]
+  },
+  {
+    "key": "schedule.taskCard.noDescription",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleTasksCard.vue"]
+  },
+  {
+    "key": "schedule.taskCard.taskCount",
+    "files": ["packages/app-vue/src/modules/schedule/components/ScheduleTasksCard.vue"]
+  },
+  {
+    "key": "schedule.toast.scheduleCreated",
+    "files": ["packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue"]
+  },
+  {
+    "key": "schedule.viewTabs.day",
+    "files": ["packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue"]
+  },
+  {
+    "key": "schedule.viewTabs.month",
+    "files": ["packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue"]
+  },
+  {
+    "key": "schedule.viewTabs.week",
+    "files": ["packages/app-vue/src/modules/schedule/views/ScheduleCalendarView.vue"]
+  }
 ]

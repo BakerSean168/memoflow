@@ -1,7 +1,4 @@
-import {
-  ImportanceLevel,
-  UrgencyLevel,
-} from '@memoflow/contracts/shared';
+import { ImportanceLevel, UrgencyLevel } from '@memoflow/contracts/shared';
 import {
   NotificationCategory,
   NotificationChannelType,
@@ -175,7 +172,8 @@ export class NotificationWorkflowCatalog {
     const workflowKey = item.workflowKey.trim();
     if (!workflowKey) throw new Error('workflowKey is required');
     if (!item.presentationDefaults) throw new Error('workflow presentationDefaults are required');
-    if (!item.legacyProjection) throw new Error('workflow legacyProjection is required during DTO cutover');
+    if (!item.legacyProjection)
+      throw new Error('workflow legacyProjection is required during DTO cutover');
     this.definitions.set(workflowKey, { ...item, workflowKey });
   }
 
@@ -190,6 +188,8 @@ export class NotificationWorkflowCatalog {
   }
 
   list(): readonly NotificationWorkflowDefinitionDTO[] {
-    return [...this.definitions.values()].sort((a, b) => a.workflowKey.localeCompare(b.workflowKey));
+    return [...this.definitions.values()].sort((a, b) =>
+      a.workflowKey.localeCompare(b.workflowKey),
+    );
   }
 }

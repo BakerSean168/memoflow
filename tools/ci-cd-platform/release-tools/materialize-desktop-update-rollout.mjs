@@ -16,7 +16,12 @@ function digest(value) {
 }
 
 function safeSegment(value, label) {
-  if (typeof value !== 'string' || !/^[A-Za-z0-9._-]+$/u.test(value) || value === '.' || value === '..') {
+  if (
+    typeof value !== 'string' ||
+    !/^[A-Za-z0-9._-]+$/u.test(value) ||
+    value === '.' ||
+    value === '..'
+  ) {
     throw new Error(`unsafe Desktop update rollout ${label}`);
   }
   return value;
@@ -251,10 +256,15 @@ export async function materializeDesktopUpdateRollout({
     }
     const metadataFiles = lane.files.filter((file) => file?.role === 'metadata');
     if (metadataFiles.length !== 1) {
-      throw new Error('Desktop update rollout requires exactly one publication metadata file per lane');
+      throw new Error(
+        'Desktop update rollout requires exactly one publication metadata file per lane',
+      );
     }
     const metadata = metadataFiles[0];
-    const sourceRelativePath = safeRelativePath(metadata.targetRelativePath, 'source metadata path');
+    const sourceRelativePath = safeRelativePath(
+      metadata.targetRelativePath,
+      'source metadata path',
+    );
     if (!sourceRelativePath.startsWith(`${publication.versionedPrefix}/`)) {
       throw new Error('Desktop update rollout metadata is outside the bound publication prefix');
     }
@@ -298,8 +308,7 @@ export async function materializeDesktopUpdateRollout({
       controlMetadataSha256: digest(projected),
       controlMetadataSize: Buffer.byteLength(projected),
       liveTargetRelativePath: `${publication.channel}/${platform}/${arch}/${targetMetadata}`,
-      artifactSourcePrefix:
-        `${publication.versionedPrefix}/${publication.channel}/${platform}/${arch}`,
+      artifactSourcePrefix: `${publication.versionedPrefix}/${publication.channel}/${platform}/${arch}`,
     });
   }
 
@@ -318,7 +327,8 @@ export async function materializeDesktopUpdateRollout({
     strategy: 'immutable-control-metadata-plus-atomic-channel-pointer',
     controlPrefix,
     lanes: lanes.sort((left, right) =>
-      `${left.platform}/${left.arch}`.localeCompare(`${right.platform}/${right.arch}`)),
+      `${left.platform}/${left.arch}`.localeCompare(`${right.platform}/${right.arch}`),
+    ),
   };
 
   await mkdir(outputRoot, { recursive: true });
@@ -333,13 +343,8 @@ function parseControlArgument(value) {
 }
 
 async function main() {
-  const [
-    publicationReceiptPath,
-    feedRoot,
-    outputRoot,
-    controlArgument,
-    previousControlArgument,
-  ] = process.argv.slice(2);
+  const [publicationReceiptPath, feedRoot, outputRoot, controlArgument, previousControlArgument] =
+    process.argv.slice(2);
   if (!publicationReceiptPath || !feedRoot || !outputRoot || !controlArgument) {
     throw new Error(
       'usage: materialize-desktop-update-rollout.mjs <publication-receipt> <feed-root> <output-root> <pause|10|30|50|100> [previous:pause|10|30|50|100]',
@@ -351,15 +356,16 @@ async function main() {
     feedRoot,
     outputRoot,
     control: parseControlArgument(controlArgument),
-    previousControl: previousControlArgument
-      ? parseControlArgument(previousControlArgument)
-      : null,
+    previousControl: previousControlArgument ? parseControlArgument(previousControlArgument) : null,
   });
   process.stdout.write(
     `DESKTOP_UPDATE_ROLLOUT=PASS control=${receipt.control.controlName} action=${receipt.transition.action} lanes=${receipt.lanes.length} release=${receipt.release.version}\n`,
   );
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(new URL(import.meta.url).pathname)) {
+if (
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === path.resolve(new URL(import.meta.url).pathname)
+) {
   await main();
 }

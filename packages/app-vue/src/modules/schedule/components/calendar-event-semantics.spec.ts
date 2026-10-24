@@ -36,7 +36,9 @@ describe('Planner calendar semantic controls', () => {
       },
     });
 
-    const action = await vi.waitFor(() => wrapper.get('[data-testid="schedule-event-schedule-schedule-1"]'));
+    const action = await vi.waitFor(() =>
+      wrapper.get('[data-testid="schedule-event-schedule-schedule-1"]'),
+    );
     expect(action.attributes('role')).toBe('button');
     expect(action.attributes('tabindex')).toBe('0');
     expect(action.attributes('aria-label')).toBe('Design review');

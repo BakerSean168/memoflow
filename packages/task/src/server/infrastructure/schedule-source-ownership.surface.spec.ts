@@ -30,7 +30,9 @@ describe('task schedule source ownership surface', () => {
   });
 
   it('does not resurrect the legacy ScheduleTask execution source', () => {
-    expect(() => readFileSync(resolve(__dirname, './schedule-execution-source.ts'), 'utf8')).toThrow();
+    expect(() =>
+      readFileSync(resolve(__dirname, './schedule-execution-source.ts'), 'utf8'),
+    ).toThrow();
     expect(projection).not.toContain('@memoflow/scheduler');
   });
 });

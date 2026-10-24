@@ -19,12 +19,12 @@ updated: 2026-09-08T09:00:00+08:00
 
 ## Implementation revisions covered
 
-| Revision | Closure |
-| --- | --- |
-| `14b08b92955` | HARD-7103 A-J / host / local-Docker / schema acceptance evidence |
-| `4a7b8f154e8` | Task classification converged on first-class Shared Label; AI-6101 and Mobile Task label parity closed |
-| `e3e5ae29aef` | ROUTINE-5302 six-method curated Method Library |
-| `2abcbd5591eb` | AI-6102 Routine command tools and AI-6103 Planner/Notification read tools |
+| Revision       | Closure                                                                                                |
+| -------------- | ------------------------------------------------------------------------------------------------------ |
+| `14b08b92955`  | HARD-7103 A-J / host / local-Docker / schema acceptance evidence                                       |
+| `4a7b8f154e8`  | Task classification converged on first-class Shared Label; AI-6101 and Mobile Task label parity closed |
+| `e3e5ae29aef`  | ROUTINE-5302 six-method curated Method Library                                                         |
+| `2abcbd5591eb` | AI-6102 Routine command tools and AI-6103 Planner/Notification read tools                              |
 
 ## Truth corrections
 

@@ -37,10 +37,10 @@ updated: 2026-04-19T00:00:00
 
 ## 2. 当前有两种 runtime mode
 
-| runtime | 目标草稿 | 目标自动化 | 特征 |
-| --- | --- | --- | --- |
-| `direct-provider` | 支持 | 默认不支持 | AI 模块自己直接调兼容 OpenAI provider |
-| `remote-ai-service` | 支持 | 支持，但前提是同时注入 planner 和 executor | AI 模块把复杂能力转发给独立 Python 服务 |
+| runtime             | 目标草稿 | 目标自动化                                 | 特征                                    |
+| ------------------- | -------- | ------------------------------------------ | --------------------------------------- |
+| `direct-provider`   | 支持     | 默认不支持                                 | AI 模块自己直接调兼容 OpenAI provider   |
+| `remote-ai-service` | 支持     | 支持，但前提是同时注入 planner 和 executor | AI 模块把复杂能力转发给独立 Python 服务 |
 
 `runtimeMode` 的推导规则很直接：
 

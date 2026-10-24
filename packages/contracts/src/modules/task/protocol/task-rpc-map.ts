@@ -46,7 +46,10 @@ export type TaskRpcMap = {
   'task:occurrence:uncomplete': [TaskOccurrenceIdCommandInvocation, TaskOccurrenceResponse];
   'task:occurrence:skip': [SkipTaskOccurrenceInvocation, TaskOccurrenceResponse];
   'task:occurrence:mark-missed': [MarkTaskOccurrenceMissedInvocation, TaskOccurrenceResponse];
-  'task:occurrence:checklist-set': [SetTaskOccurrenceChecklistItemInvocation, TaskOccurrenceResponse];
+  'task:occurrence:checklist-set': [
+    SetTaskOccurrenceChecklistItemInvocation,
+    TaskOccurrenceResponse,
+  ];
   'task:occurrence:get-by-date-range': [GetTaskOccurrencesByRangeReq, GetTaskOccurrencesByRangeRes];
 
   'task:reschedule-occurrence': [RescheduleTaskReq, RescheduleTaskRes];

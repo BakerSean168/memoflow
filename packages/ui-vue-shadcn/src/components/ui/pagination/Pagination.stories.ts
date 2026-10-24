@@ -1,7 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import {
-  Pagination, PaginationEllipsis, PaginationFirst, PaginationLast,
-  PaginationNext, PaginationPrev, PaginationList, PaginationListItem,
+  Pagination,
+  PaginationEllipsis,
+  PaginationFirst,
+  PaginationLast,
+  PaginationNext,
+  PaginationPrev,
+  PaginationList,
+  PaginationListItem,
 } from '.';
 import { Button } from '../button';
 
@@ -18,8 +24,15 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: () => ({
     components: {
-      Pagination, PaginationEllipsis, PaginationFirst, PaginationLast,
-      PaginationNext, PaginationPrev, PaginationList, PaginationListItem, Button,
+      Pagination,
+      PaginationEllipsis,
+      PaginationFirst,
+      PaginationLast,
+      PaginationNext,
+      PaginationPrev,
+      PaginationList,
+      PaginationListItem,
+      Button,
     },
     template: `
       <Pagination :total="100" :sibling-count="1" show-edges :default-page="1">
@@ -43,7 +56,12 @@ export const Default: Story = {
 export const Simple: Story = {
   render: () => ({
     components: {
-      Pagination, PaginationNext, PaginationPrev, PaginationList, PaginationListItem, Button,
+      Pagination,
+      PaginationNext,
+      PaginationPrev,
+      PaginationList,
+      PaginationListItem,
+      Button,
     },
     template: `
       <Pagination :total="30" :default-page="2">

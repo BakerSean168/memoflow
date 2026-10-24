@@ -18,7 +18,9 @@ describe('FileDesktopUpdateInstallReceiptStore', () => {
   });
 
   it('stores update state outside every Profile directory', () => {
-    expect(store.receiptPath).toBe(path.join(rootDir, 'update', 'install-receipts', 'install-receipt.json'));
+    expect(store.receiptPath).toBe(
+      path.join(rootDir, 'update', 'install-receipts', 'install-receipt.json'),
+    );
     expect(store.receiptPath).not.toContain(path.sep + 'profiles' + path.sep);
   });
 

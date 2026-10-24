@@ -110,7 +110,9 @@ export interface DesktopTransportAckRecord {
 }
 
 export interface DesktopTransportAckStore {
-  getAck(idempotencyKey: string): Promise<DesktopTransportAckRecord | null> | DesktopTransportAckRecord | null;
+  getAck(
+    idempotencyKey: string,
+  ): Promise<DesktopTransportAckRecord | null> | DesktopTransportAckRecord | null;
   saveAck(idempotencyKey: string, record: DesktopTransportAckRecord): Promise<void> | void;
 }
 
@@ -226,7 +228,9 @@ export class PowerSyncDesktopTransportAckStore implements DesktopTransportAckSto
     );
 
     if (result.rowsAffected !== 1) {
-      throw new Error(`Failed to save desktop delivery ack for idempotencyKey '${idempotencyKey}': expected one row affected`);
+      throw new Error(
+        `Failed to save desktop delivery ack for idempotencyKey '${idempotencyKey}': expected one row affected`,
+      );
     }
   }
 }
@@ -272,7 +276,8 @@ export function createDefaultElectronDesktopTransport(optionsOrDb?: unknown): un
       return ackStore.getAck(idempotencyKey);
     },
     async deliver(dto: unknown, context?: unknown) {
-      const deliveryCtx = context as { idempotencyKey?: string; deliveryId?: string; identityId?: string } | undefined;
+      const deliveryCtx = context as
+        { idempotencyKey?: string; deliveryId?: string; identityId?: string } | undefined;
       const idempotencyKey = deliveryCtx?.idempotencyKey;
 
       if (idempotencyKey) {
@@ -381,7 +386,9 @@ export function createDefaultElectronDesktopTransport(optionsOrDb?: unknown): un
  * Fails closed when the local Account row is missing/not Active or a local
  * closure-request marker exists (requested/revoking window).
  */
-export function createPowerSyncClosureChecker(db: IElectronDatabase): (identityId: string) => Promise<boolean> {
+export function createPowerSyncClosureChecker(
+  db: IElectronDatabase,
+): (identityId: string) => Promise<boolean> {
   return async (identityId: string): Promise<boolean> => {
     try {
       const row = await db.getOptional<{ status: string }>(

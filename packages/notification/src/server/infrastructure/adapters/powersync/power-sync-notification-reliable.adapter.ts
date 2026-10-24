@@ -97,9 +97,11 @@ export function encodeReceiptCursor(updatedAtIso: string, operationId: string): 
   return `${updatedAtIso}|${operationId}`;
 }
 
-export function decodeReceiptCursor(
-  cursor: string | null | undefined,
-): { cursorTs: Date; cursorId: string; valid: boolean } {
+export function decodeReceiptCursor(cursor: string | null | undefined): {
+  cursorTs: Date;
+  cursorId: string;
+  valid: boolean;
+} {
   const raw = cursor ?? '';
   if (!raw) {
     return { cursorTs: new Date(0), cursorId: '', valid: false };
@@ -300,9 +302,7 @@ export class PowerSyncNotificationReliableAdapter implements NotificationReliabl
     await this.db.execute(
       `CREATE INDEX IF NOT EXISTS idx_om_message_type ON outbox_messages(message_type);`,
     );
-    await this.db.execute(
-      `CREATE INDEX IF NOT EXISTS idx_om_status ON outbox_messages(status);`,
-    );
+    await this.db.execute(`CREATE INDEX IF NOT EXISTS idx_om_status ON outbox_messages(status);`);
     this.tableInitialized = true;
   }
 
@@ -643,8 +643,9 @@ export class PowerSyncNotificationReliableAdapter implements NotificationReliabl
     if (!identityId) {
       throw new Error('identityId is required');
     }
-    const limit = typeof options === 'number' ? options : options?.limit ?? 50;
-    const lastCursor = typeof options === 'object' ? (options?.lastCursor ?? options?.since) : undefined;
+    const limit = typeof options === 'number' ? options : (options?.limit ?? 50);
+    const lastCursor =
+      typeof options === 'object' ? (options?.lastCursor ?? options?.since) : undefined;
     const status = typeof options === 'object' ? options?.status : undefined;
 
     const whereClauses: string[] = ['identity_id = ?'];
@@ -690,7 +691,10 @@ export class PowerSyncNotificationReliableAdapter implements NotificationReliabl
     return rows.map(mapPowerSyncOutboxToReceipt);
   }
 
-  async replayDeadLetter(params: { identityId: string; operationId: string }): Promise<BusinessOperationReceipt> {
+  async replayDeadLetter(params: {
+    identityId: string;
+    operationId: string;
+  }): Promise<BusinessOperationReceipt> {
     await this.ensureTablesExist();
     const { identityId, operationId } = params;
     const now = new Date();

@@ -67,8 +67,16 @@ describe('GetGoalAggregateUseCase', () => {
         },
       ],
       clientKeyResults: [
-        { id: 'kr-1', title: 'KR1', progress: { currentValue: 8, targetValue: 10, initialValue: 0 } },
-        { id: 'kr-2', title: 'KR2', progress: { currentValue: 10, targetValue: 10, initialValue: 0 } },
+        {
+          id: 'kr-1',
+          title: 'KR1',
+          progress: { currentValue: 8, targetValue: 10, initialValue: 0 },
+        },
+        {
+          id: 'kr-2',
+          title: 'KR2',
+          progress: { currentValue: 10, targetValue: 10, initialValue: 0 },
+        },
       ],
       clientReviews: [{ id: 'rev-1', title: 'Review 1' }],
     });
@@ -122,7 +130,9 @@ describe('GetGoalAggregateUseCase', () => {
     const useCase = new GetGoalAggregateUseCase(goalRepo, recordRepo);
     await useCase.execute('goal-id-1', 'identity-1');
 
-    expect(findByIdForIdentity).toHaveBeenCalledWith('identity-1', 'goal-id-1', { includeChildren: true });
+    expect(findByIdForIdentity).toHaveBeenCalledWith('identity-1', 'goal-id-1', {
+      includeChildren: true,
+    });
   });
 
   it('returns empty arrays when goal has no children', async () => {

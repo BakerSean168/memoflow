@@ -1,5 +1,8 @@
 import type { ScheduleId } from '../../../primitives';
-import type { CreateScheduleRequest, UpdateScheduleRequest } from '../api/requests/schedule-requests';
+import type {
+  CreateScheduleRequest,
+  UpdateScheduleRequest,
+} from '../api/requests/schedule-requests';
 import type { CalendarEntryClientDTO } from '../aggregates/calendar-entry-client';
 import type { ConflictDetectionResult } from '../value-objects/conflict-detection-result';
 

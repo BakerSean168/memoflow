@@ -8,9 +8,7 @@ export const DEFAULT_REMINDER_TIME_OF_DAY = '09:00';
 export const REMINDER_TIME_OF_DAY_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 export function normalizeReminderTimeOfDay(value: string | undefined): string {
-  return value && REMINDER_TIME_OF_DAY_PATTERN.test(value)
-    ? value
-    : DEFAULT_REMINDER_TIME_OF_DAY;
+  return value && REMINDER_TIME_OF_DAY_PATTERN.test(value) ? value : DEFAULT_REMINDER_TIME_OF_DAY;
 }
 
 /** Next occurrence of HH:mm from `now` (rolls to tomorrow when already passed). */

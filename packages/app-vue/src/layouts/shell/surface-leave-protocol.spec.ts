@@ -4,10 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { createI18nPlugin } from '../../plugins/i18n';
 import { useAppShellStore } from './useAppShellStore';
-import {
-  canLeaveBusinessSurface,
-  createSettingsSceneGuard,
-} from './surface-leave-protocol';
+import { canLeaveBusinessSurface, createSettingsSceneGuard } from './surface-leave-protocol';
 import { toast } from 'vue-sonner';
 
 vi.mock('vue-sonner', () => ({

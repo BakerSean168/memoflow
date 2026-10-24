@@ -7,4 +7,8 @@
  * @module modules/window
  */
 
-export { WindowStateManager, type WindowState, type WindowStateManagerOptions } from './window-state-manager';
+export {
+  WindowStateManager,
+  type WindowState,
+  type WindowStateManagerOptions,
+} from './window-state-manager';

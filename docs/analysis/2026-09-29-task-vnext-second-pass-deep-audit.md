@@ -265,23 +265,23 @@ However, the standalone QuickTask route integration is currently broken; see T2-
 
 # 5. Finding ledger
 
-| ID | Severity | Finding | Root cause |
-| --- | --- | --- | --- |
-| T2-01 | P1 | Quick Task deep link is disconnected | half-retired route/dialog integration |
-| T2-02 | P1 | Hidden occurrence status filter controls Plans result | filter state reused across different owner semantics |
-| T2-03 | **P0** | “End plan” calls Archive and does not end the plan | UI lifecycle semantics diverged from canonical domain |
-| T2-04 | P1 | Plan outcome is dropped from presentation; Abandon exists backend-only | UI still models old status-only Task |
-| T2-05 | P1 | Configurable completion policy is a product-model residue and the default can leave finite missed plans Open | domain generalized beyond final product semantics |
-| T2-06 | P1 | UI permits Task contribution to non-Sum KR that Goal rejects later | binding projection strips KR measurement semantics |
-| T2-07 | P2 | Main Task occurrence surface reads full history | older list path bypasses bounded date-range query |
-| T2-08 | P2 | Plan page/limit are phantom client semantics | client/server query contract drift |
-| T2-09 | P2 | KR-scoped Task filter underuses server query and exposes raw IDs | incomplete cross-owner query projection |
-| T2-10 | P2 | DailyTodoWidget remains legacy UI/behavior | older widget bypasses canonical occurrence surface |
-| T2-11 | P2 | Direct-manipulation metadata grammar is only partially converged | Goal/Task copied local presentation recipes |
-| T2-12 | Resolved | Task Home IA converges to Today / Plans; Upcoming moves to Schedule | historical product-doc drift |
-| T2-13 | P2 | Archive is exposed in normal lifecycle UX even though it is only visibility metadata | visibility lifecycle leaked into business actions |
-| T2-14 | P3 | Task workspace labels bounded history as generic “Occurrences” | read-model semantics not reflected in copy |
-| T2-15 | P1 | Task → KR recording is fixed-delta/Sum-biased and cannot represent user-entered measurements across KR methods | contribution contract models only automatic positive fixed values |
+| ID    | Severity | Finding                                                                                                        | Root cause                                                        |
+| ----- | -------- | -------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| T2-01 | P1       | Quick Task deep link is disconnected                                                                           | half-retired route/dialog integration                             |
+| T2-02 | P1       | Hidden occurrence status filter controls Plans result                                                          | filter state reused across different owner semantics              |
+| T2-03 | **P0**   | “End plan” calls Archive and does not end the plan                                                             | UI lifecycle semantics diverged from canonical domain             |
+| T2-04 | P1       | Plan outcome is dropped from presentation; Abandon exists backend-only                                         | UI still models old status-only Task                              |
+| T2-05 | P1       | Configurable completion policy is a product-model residue and the default can leave finite missed plans Open   | domain generalized beyond final product semantics                 |
+| T2-06 | P1       | UI permits Task contribution to non-Sum KR that Goal rejects later                                             | binding projection strips KR measurement semantics                |
+| T2-07 | P2       | Main Task occurrence surface reads full history                                                                | older list path bypasses bounded date-range query                 |
+| T2-08 | P2       | Plan page/limit are phantom client semantics                                                                   | client/server query contract drift                                |
+| T2-09 | P2       | KR-scoped Task filter underuses server query and exposes raw IDs                                               | incomplete cross-owner query projection                           |
+| T2-10 | P2       | DailyTodoWidget remains legacy UI/behavior                                                                     | older widget bypasses canonical occurrence surface                |
+| T2-11 | P2       | Direct-manipulation metadata grammar is only partially converged                                               | Goal/Task copied local presentation recipes                       |
+| T2-12 | Resolved | Task Home IA converges to Today / Plans; Upcoming moves to Schedule                                            | historical product-doc drift                                      |
+| T2-13 | P2       | Archive is exposed in normal lifecycle UX even though it is only visibility metadata                           | visibility lifecycle leaked into business actions                 |
+| T2-14 | P3       | Task workspace labels bounded history as generic “Occurrences”                                                 | read-model semantics not reflected in copy                        |
+| T2-15 | P1       | Task → KR recording is fixed-delta/Sum-biased and cannot represent user-entered measurements across KR methods | contribution contract models only automatic positive fixed values |
 
 ---
 
@@ -364,8 +364,7 @@ Do not patch the query watcher until Q1 is settled.
 `TaskManagementView` owns one state:
 
 ```ts
-statusFilter:
-  'all' | TaskOccurrenceStatus
+statusFilter: 'all' | TaskOccurrenceStatus;
 ```
 
 The status filter is hidden when:

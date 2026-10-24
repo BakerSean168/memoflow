@@ -14,10 +14,7 @@ export interface GoalWriteRepositories {
 export interface GoalWriteTransactionContext extends GoalWriteRepositories {
   /** Executes while holding the same DB transaction lock as the Goal create.
    * Absent in test/inline runners: a fenced AI create MUST fail closed. */
-  readonly assertNativeAiLease?: (
-    identityId: string,
-    lease: GoalNativeAiLease,
-  ) => Promise<boolean>;
+  readonly assertNativeAiLease?: (identityId: string, lease: GoalNativeAiLease) => Promise<boolean>;
   readonly recordGoalCompletionReceipt: (
     input: GoalRecordReceiptInput,
   ) => Promise<BusinessOperationReceipt>;

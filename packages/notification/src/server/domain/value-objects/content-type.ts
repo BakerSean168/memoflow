@@ -1,4 +1,7 @@
-import { ContentType as ContentTypeContract, type ContentType as IContentType } from '@memoflow/contracts/notification';
+import {
+  ContentType as ContentTypeContract,
+  type ContentType as IContentType,
+} from '@memoflow/contracts/notification';
 
 /**
  * 📝 内容类型 - 通知内容的类型

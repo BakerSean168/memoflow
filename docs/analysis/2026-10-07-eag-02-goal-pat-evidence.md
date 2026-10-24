@@ -27,10 +27,10 @@ Goal ID 使用现有 prefixed ID schema，不能误用纯 UUID；真实数据库
 
 ## 当前工具契约
 
-| 工具 | Scope | 严格输入 | 最小输出 / 时间语义 |
-| --- | --- | --- | --- |
-| `goal_get` | `goals:read` | `{ id: GoalId }` | `goal`，含 id/name/summary/status/version/createdAt/updatedAt/overallProgress 与有限 KR 投影；只读 owned 非 deleted Goal，允许 owned archived Goal |
-| `goal_search` | `goals:read` | `{ query?: string, limit?: 1..100, cursor?: string }` | `items/hasMore/nextCursor`；缩页时增加 `truncated: response-budget`；过滤 deleted/archived，按 createdAt/id 降序 |
+| 工具          | Scope        | 严格输入                                              | 最小输出 / 时间语义                                                                                                                                |
+| ------------- | ------------ | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `goal_get`    | `goals:read` | `{ id: GoalId }`                                      | `goal`，含 id/name/summary/status/version/createdAt/updatedAt/overallProgress 与有限 KR 投影；只读 owned 非 deleted Goal，允许 owned archived Goal |
+| `goal_search` | `goals:read` | `{ query?: string, limit?: 1..100, cursor?: string }` | `items/hasMore/nextCursor`；缩页时增加 `truncated: response-budget`；过滤 deleted/archived，按 createdAt/id 降序                                   |
 
 `createdAt/updatedAt` 是现有 owner Instant 的 UTC epoch 毫秒；`version` 是聚合版本，不是 requestId、cursor 或 workflowRunId。KR 只含 id/title/progress/progressPercentage/isCompleted，测量值来自 owner 的真实当前 progress；不附 review/description 或跨 owner 正文。输入不接受 identity、scope、approved 或客户端版本替代授权。
 
@@ -40,11 +40,11 @@ Goal ID 使用现有 prefixed ID schema，不能误用纯 UUID；真实数据库
 
 | 命令/测试                                                                         | 观察结果                                              | 证据范围                                                                                                                                                                           |
 | --------------------------------------------------------------------------------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pnpm nx run goal:test:integration -- goal-prisma.repository.integration.test.ts` | 1 file / 10 tests 通过                                 | 真实 PostgreSQL；多身份、字面 query、相同 sort timestamp、分页与 reviews 排除                                                                                                      |
+| `pnpm nx run goal:test:integration -- goal-prisma.repository.integration.test.ts` | 1 file / 10 tests 通过                                | 真实 PostgreSQL；多身份、字面 query、相同 sort timestamp、分页与 reviews 排除                                                                                                      |
 | `pnpm nx run api:test:integration -- scoped-pat.integration.test.ts`              | 初始并发 quota 测试失败，修复后 1 file / 2 tests 通过 | 真实 PostgreSQL；摘要、audience、跨 owner revoke、disabled、撤销重建 service；70 并发恰好 60 放行                                                                                  |
 | `pnpm nx run api:test:integration -- agent-gateway.integration.test.ts`           | 1 file / 1 test 通过                                  | 官方 MCP Client + Node/Express + 独立 PAT + 真实 Goal application + PostgreSQL，A/B 隔离、三 Goal 两页、相同 timestamp、跨 owner cursor、第一方 application 查询一致、撤销即时失效 |
 | `pnpm nx run api:test:integration -- pilot-admission.integration.test.ts`         | 1 file / 1 test 通过（独立 Redis 容器）               | 两个独立 Redis 连接，每种 bucket 130 并发恰好 120 放行；无全库 flush                                                                                                               |
-| Gateway fixture                                                                   | 6 tests 通过；最终复跑见下方补充证据                                          | 关闭/撤销/call-time scope/strict identity/input、Origin、篡改 cursor、请求 budget、owner timeout、response budget、失败 audit 脱敏                                                 |
+| Gateway fixture                                                                   | 6 tests 通过；最终复跑见下方补充证据                  | 关闭/撤销/call-time scope/strict identity/input、Origin、篡改 cursor、请求 budget、owner timeout、response budget、失败 audit 脱敏                                                 |
 | API host fixture                                                                  | 2 tests 通过                                          | 第一方管理入口 session/Origin/strict input，root 路由与 Host gate、canonical request ID                                                                                            |
 
 Closed Account/current scope/expiry 和 credential 自身 60 秒窗口已通过三组 integration（3 files / 4 tests），70 并发恰好 60 放行。审查后又补了 Account closure 的真实数据库断言，最终复跑已通过，见下方补充证据。

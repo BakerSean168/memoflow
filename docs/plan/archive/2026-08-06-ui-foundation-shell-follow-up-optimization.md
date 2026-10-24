@@ -13,7 +13,6 @@ updated: 2026-08-06T00:00:00Z
 
 > ✅ 已归档 2026-08-08：场景生命周期、导航意图、滚动宿主、模块骨架全部落地（commit 784fb9f6）。
 
-
 # 基础 UI 与桌面 Shell 后续优化方案
 
 ## 1. 目标
@@ -88,11 +87,11 @@ Coordinator 统一负责：
 
 BusinessPanel content wrapper 只负责尺寸和裁剪，使用 `overflow-hidden`。每个 surface 必须声明一个 `data-scroll-host`：
 
-| Surface | 主 scroll host |
-| --- | --- |
-| Home | TodayOverviewPanel 根内容 |
+| Surface  | 主 scroll host                        |
+| -------- | ------------------------------------- |
+| Home     | TodayOverviewPanel 根内容             |
 | Business | 当前模块的 ModuleFrame ContentSurface |
-| Workflow | AIContextPanel 内部工作区 |
+| Workflow | AIContextPanel 内部工作区             |
 
 模块内部的双列列表可以有局部 scroll host，但不能让无语义的外层 wrapper 再创建滚动层。
 
@@ -150,17 +149,17 @@ Goal system view、Note/治理分区、Schedule day/week/month、Notification al
 
 建议的入口映射：
 
-| 入口 | 意图 | 目标 |
-| --- | --- | --- |
-| Goal 主按钮 | landing | `/goals` |
-| Goal preview 项目 | deep-link | `/goals/:id` |
-| Task 主按钮 | landing | `/tasks` |
-| Task preview 项目 | deep-link | `/tasks/:id` |
-| Note 主按钮/查看全部 | landing | `/repository` |
-| Note preview 项目 | deep-link | `/repository?note=:id` |
-| Reminder 主按钮/查看全部 | landing | `/reminders` |
-| Schedule 主按钮/查看全部 | landing | `/schedule` |
-| Notification 主按钮/查看全部 | landing | `/notifications` |
+| 入口                         | 意图      | 目标                   |
+| ---------------------------- | --------- | ---------------------- |
+| Goal 主按钮                  | landing   | `/goals`               |
+| Goal preview 项目            | deep-link | `/goals/:id`           |
+| Task 主按钮                  | landing   | `/tasks`               |
+| Task preview 项目            | deep-link | `/tasks/:id`           |
+| Note 主按钮/查看全部         | landing   | `/repository`          |
+| Note preview 项目            | deep-link | `/repository?note=:id` |
+| Reminder 主按钮/查看全部     | landing   | `/reminders`           |
+| Schedule 主按钮/查看全部     | landing   | `/schedule`            |
+| Notification 主按钮/查看全部 | landing   | `/notifications`       |
 
 验收：
 
@@ -248,17 +247,17 @@ Goal system view、Note/治理分区、Schedule day/week/month、Notification al
 
 ## 5. 代码边界与建议文件
 
-| 责任 | 主要文件 |
-| --- | --- |
-| Scene persistence | `AppShell.vue`、`StandaloneSettingsLayout.vue`、新增 scene host/composable |
-| Navigation coordinator | `useShellRouterSync.ts`、新增 shell navigation intent/coordinator |
-| Tab contract | `useAppShellStore.ts`、`BusinessPanel.vue`、panel cache key |
-| Geometry/resize | `panel-geometry.ts`、`AppShell.vue`；本阶段不扩展移动端手势 |
-| Scroll contract | `BusinessPanel.vue`、各模块根 view、`ModuleFrame` |
-| Settings IA | `UserSettingsView.vue`、`StandaloneSettingsLayout.vue`、settings specs |
-| Module structure | Goal/Task/Reminder/Schedule/Notification/Repository/Governance views |
-| AI workflow surface | `AIChatView.vue`、`AIMessagePanel.vue`、`AIWorkflowActionBar.vue`、`AIContextPanel.vue` |
-| Summary/badge | capsule preview components、`navigation.ts`、notification store/composable |
+| 责任                   | 主要文件                                                                                |
+| ---------------------- | --------------------------------------------------------------------------------------- |
+| Scene persistence      | `AppShell.vue`、`StandaloneSettingsLayout.vue`、新增 scene host/composable              |
+| Navigation coordinator | `useShellRouterSync.ts`、新增 shell navigation intent/coordinator                       |
+| Tab contract           | `useAppShellStore.ts`、`BusinessPanel.vue`、panel cache key                             |
+| Geometry/resize        | `panel-geometry.ts`、`AppShell.vue`；本阶段不扩展移动端手势                             |
+| Scroll contract        | `BusinessPanel.vue`、各模块根 view、`ModuleFrame`                                       |
+| Settings IA            | `UserSettingsView.vue`、`StandaloneSettingsLayout.vue`、settings specs                  |
+| Module structure       | Goal/Task/Reminder/Schedule/Notification/Repository/Governance views                    |
+| AI workflow surface    | `AIChatView.vue`、`AIMessagePanel.vue`、`AIWorkflowActionBar.vue`、`AIContextPanel.vue` |
+| Summary/badge          | capsule preview components、`navigation.ts`、notification store/composable              |
 
 不应在本轮修改移动端专属组件、移动端断点策略或移动端 E2E；桌面组件的通用语义可以保持跨端，但验收只要求桌面和宽屏窗口。
 
@@ -281,17 +280,17 @@ Goal system view、Note/治理分区、Schedule day/week/month、Notification al
 
 桌面验证建议使用 1440x900、1280x720 两个视口，暂不增加移动视口：
 
-| 场景 | 关键断言 |
-| --- | --- |
-| dirty 编辑进入设置 | 取消后仍在原页；确认后返回 origin；草稿策略明确 |
-| AI 流式中进入设置 | stream 不被卸载；返回后消息和 composer 状态仍在 |
-| 胶囊 landing | 已有 detail Tab 时仍进入 landing route |
-| preview deep-link | Goal/Task/Note 项目点击后对象和 URL 一致 |
-| Tab 上限 | 不出现 Tab 可见但内容实例已被静默驱逐 |
-| 面板 resize | 超过最小宽度后进入收缩；关闭守卫拒绝时回到最小宽度 |
-| scroll host | 每个 surface 只有一个主滚动条；sticky header 参照正确 |
-| settings desktop | 宽屏分类 nav sticky；7 组名称和 active state 一致 |
-| notification badge | 未读数在顶栏、preview、列表一致更新 |
+| 场景               | 关键断言                                              |
+| ------------------ | ----------------------------------------------------- |
+| dirty 编辑进入设置 | 取消后仍在原页；确认后返回 origin；草稿策略明确       |
+| AI 流式中进入设置  | stream 不被卸载；返回后消息和 composer 状态仍在       |
+| 胶囊 landing       | 已有 detail Tab 时仍进入 landing route                |
+| preview deep-link  | Goal/Task/Note 项目点击后对象和 URL 一致              |
+| Tab 上限           | 不出现 Tab 可见但内容实例已被静默驱逐                 |
+| 面板 resize        | 超过最小宽度后进入收缩；关闭守卫拒绝时回到最小宽度    |
+| scroll host        | 每个 surface 只有一个主滚动条；sticky header 参照正确 |
+| settings desktop   | 宽屏分类 nav sticky；7 组名称和 active state 一致     |
+| notification badge | 未读数在顶栏、preview、列表一致更新                   |
 
 ### 6.3 质量门禁
 
@@ -304,14 +303,14 @@ Goal system view、Note/治理分区、Schedule day/week/month、Notification al
 
 ## 7. 风险与回滚
 
-| 风险 | 控制措施 |
-| --- | --- |
-| Settings scene 持久挂载导致两个 router-view 冲突 | 先建立 scene outlet contract 和组件数量断言，再迁移模板 |
-| 导航 coordinator 改变历史行为 | landing 使用 push，Tab 激活使用 replace；补 browser history 测试 |
-| Scroll host 收敛导致现有页面无法滚动 | 逐模块迁移，每次增加 `scrollTop`/overflow E2E 断言 |
-| Tab 上限处理误关 dirty Tab | 候选 Tab 只允许用户显式确认关闭，dirty Tab 永不自动淘汰 |
-| Workflow 重排造成状态机回归 | 保持业务状态机不变，只调整承载位置和 presentation contract |
-| 旧持久化状态含旧 Tab/scene 字段 | hydrate 只清理无效字段，保留有效 route、Tab 和用户宽度偏好 |
+| 风险                                             | 控制措施                                                         |
+| ------------------------------------------------ | ---------------------------------------------------------------- |
+| Settings scene 持久挂载导致两个 router-view 冲突 | 先建立 scene outlet contract 和组件数量断言，再迁移模板          |
+| 导航 coordinator 改变历史行为                    | landing 使用 push，Tab 激活使用 replace；补 browser history 测试 |
+| Scroll host 收敛导致现有页面无法滚动             | 逐模块迁移，每次增加 `scrollTop`/overflow E2E 断言               |
+| Tab 上限处理误关 dirty Tab                       | 候选 Tab 只允许用户显式确认关闭，dirty Tab 永不自动淘汰          |
+| Workflow 重排造成状态机回归                      | 保持业务状态机不变，只调整承载位置和 presentation contract       |
+| 旧持久化状态含旧 Tab/scene 字段                  | hydrate 只清理无效字段，保留有效 route、Tab 和用户宽度偏好       |
 
 ## 8. 完成标准
 
@@ -357,4 +356,3 @@ Goal system view、Note/治理分区、Schedule day/week/month、Notification al
 - [x] Phase 5：摘要、Workflow、Help 和可访问性
   - Notification unread 经 `badgeSource` token 接入顶栏 capsule badge（UI-008 关闭）；Schedule preview 显示当前/下一个 + 后续 2 条 + 剩余数量；
   - Help 菜单只显示已实现入口（快捷键 → 设置「高级」组），移除 disabled+soon 项；ContextPanel 空态不再重复渲染 workflowStatusText；搜索/帮助 icon-only 按钮补 aria-label。
-

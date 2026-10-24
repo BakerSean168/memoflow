@@ -89,16 +89,16 @@ Reused UI composable suites:
 
 All runs use this checkout's checked-in Nx/Vitest configuration. The initial UI harness failures (lazy compilation timeout, missing Sheet primitive injection, implicit Product Time timezone) were fixed in tests only.
 
-| Check | Result |
-| --- | --- |
-| New Goal/Schedule mounted pack + extended PlannerCalendar | 3 files / 17 tests passed |
-| Referenced app-vue suites | 10 files / 86 tests passed |
-| AI workflow/runtime suites, including new Task retry | 3 files / 15 tests passed |
-| Task lifecycle/use-case suites | 3 files / 105 tests passed |
-| `pnpm nx run app-vue:typecheck` | Passed, including dependency builds |
-| Focused ESLint on all four changed/new test files | Passed |
-| `git diff --check` | Passed |
-| `pnpm nx run memoflow:governance-check` | Passed; rerun after documentation closure |
+| Check                                                     | Result                                    |
+| --------------------------------------------------------- | ----------------------------------------- |
+| New Goal/Schedule mounted pack + extended PlannerCalendar | 3 files / 17 tests passed                 |
+| Referenced app-vue suites                                 | 10 files / 86 tests passed                |
+| AI workflow/runtime suites, including new Task retry      | 3 files / 15 tests passed                 |
+| Task lifecycle/use-case suites                            | 3 files / 105 tests passed                |
+| `pnpm nx run app-vue:typecheck`                           | Passed, including dependency builds       |
+| Focused ESLint on all four changed/new test files         | Passed                                    |
+| `git diff --check`                                        | Passed                                    |
+| `pnpm nx run memoflow:governance-check`                   | Passed; rerun after documentation closure |
 
 Reproduction commands (repository root):
 

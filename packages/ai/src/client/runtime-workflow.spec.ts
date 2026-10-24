@@ -44,16 +44,37 @@ const resumeRequest = {
 
 describe('WorkflowRuntimeHttpClient', () => {
   it('reads authenticated Workspace events with a recovery cursor and validates every frame', async () => {
-    const event = { type: 'workflow.updated', eventId: 'workflow-1:1', cursor: 'next', resourceVersion: 1,
-      data: { ...run, resourceVersion: 1 }, actions: [], baseActionSequence: 0, lastActionSequence: 0 };
-    const stream = vi.fn(async () => new Response(`event: workspace\ndata: ${JSON.stringify(event)}\n\n`));
+    const event = {
+      type: 'workflow.updated',
+      eventId: 'workflow-1:1',
+      cursor: 'next',
+      resourceVersion: 1,
+      data: { ...run, resourceVersion: 1 },
+      actions: [],
+      baseActionSequence: 0,
+      lastActionSequence: 0,
+    };
+    const stream = vi.fn(
+      async () => new Response(`event: workspace\ndata: ${JSON.stringify(event)}\n\n`),
+    );
     const received = vi.fn();
     const client = new WorkflowRuntimeHttpClient(httpStub({ stream }));
-    await client.streamWorkspaceEvents!({ cursor: 'previous', onEvent: received, signal: new AbortController().signal });
+    await client.streamWorkspaceEvents!({
+      cursor: 'previous',
+      onEvent: received,
+      signal: new AbortController().signal,
+    });
     expect(received).toHaveBeenCalledWith(event);
-    expect(stream).toHaveBeenCalledWith('/ai/runtime/workspace/sse', expect.objectContaining({ method: 'GET', headers: { 'Last-Event-ID': 'previous' } }));
-    stream.mockResolvedValueOnce(new Response('event: workspace\ndata: {"type":"workflow.updated","secret":"private"}\n\n'));
-    await expect(client.streamWorkspaceEvents!({ onEvent: received, signal: new AbortController().signal })).rejects.toMatchObject({ code: 'AI_RUNTIME_PROTOCOL_ERROR' });
+    expect(stream).toHaveBeenCalledWith(
+      '/ai/runtime/workspace/sse',
+      expect.objectContaining({ method: 'GET', headers: { 'Last-Event-ID': 'previous' } }),
+    );
+    stream.mockResolvedValueOnce(
+      new Response('event: workspace\ndata: {"type":"workflow.updated","secret":"private"}\n\n'),
+    );
+    await expect(
+      client.streamWorkspaceEvents!({ onEvent: received, signal: new AbortController().signal }),
+    ).rejects.toMatchObject({ code: 'AI_RUNTIME_PROTOCOL_ERROR' });
     expect(received).toHaveBeenCalledTimes(1);
   });
   it('uses the canonical workflow request paths and validates returned run views', async () => {
@@ -93,7 +114,12 @@ describe('WorkflowRuntimeHttpClient', () => {
   });
 
   it('returns a detached Goal resume without polling for progress', async () => {
-    const running = { ...run, status: 'running' as const, suspension: undefined, awaitAfterVersion: 2 };
+    const running = {
+      ...run,
+      status: 'running' as const,
+      suspension: undefined,
+      awaitAfterVersion: 2,
+    };
     const post = vi.fn().mockResolvedValue(ok(running));
     const client = new WorkflowRuntimeHttpClient(httpStub({ post }));
     await expect(client.resume(resumeRequest)).resolves.toEqual(running);
@@ -104,9 +130,15 @@ describe('WorkflowRuntimeHttpClient', () => {
     const stable = { ...run, kind: 'task.create' as const };
     const running = { ...stable, status: 'running' as const, suspension: undefined };
     const post = vi.fn().mockResolvedValueOnce(ok(running)).mockResolvedValueOnce(ok(stable));
-    const client = new WorkflowRuntimeHttpClient(httpStub({ post }), { intervalMs: 0, timeoutMs: 1000 });
+    const client = new WorkflowRuntimeHttpClient(httpStub({ post }), {
+      intervalMs: 0,
+      timeoutMs: 1000,
+    });
     await expect(client.resume(resumeRequest)).resolves.toEqual(stable);
-    expect(post.mock.calls.map(([url]) => url)).toEqual(['/ai/runtime/workflow/resume', '/ai/runtime/workflow/get']);
+    expect(post.mock.calls.map(([url]) => url)).toEqual([
+      '/ai/runtime/workflow/resume',
+      '/ai/runtime/workflow/get',
+    ]);
   });
 
   it('rejects identity injection and malformed runtime projections', async () => {
@@ -128,24 +160,46 @@ describe('WorkflowRuntimeIpcClient', () => {
   it('acknowledges a Workspace event only after projection and removes bridge listeners on abort', async () => {
     const events = new EventEmitter();
     const invoke = vi.fn(async (_channel: string, _request?: unknown) => ok({ accepted: true }));
-    const bridge: ElectronBridge = { invoke, on: (channel, callback) => { events.on(channel, callback); }, off: (channel, callback) => { events.off(channel, callback); } };
+    const bridge: ElectronBridge = {
+      invoke,
+      on: (channel, callback) => {
+        events.on(channel, callback);
+      },
+      off: (channel, callback) => {
+        events.off(channel, callback);
+      },
+    };
     const client = new WorkflowRuntimeIpcClient({ invoke, getBridge: () => bridge } as never);
     const controller = new AbortController();
     let project!: () => void;
-    const projected = new Promise<void>((resolve) => { project = resolve; });
+    const projected = new Promise<void>((resolve) => {
+      project = resolve;
+    });
     const onEvent = vi.fn(() => projected);
     const stream = client.streamWorkspaceEvents({ signal: controller.signal, onEvent });
-    await vi.waitFor(() => expect(invoke).toHaveBeenCalledWith(AIChannels.RUNTIME_WORKSPACE_START, expect.anything()));
+    await vi.waitFor(() =>
+      expect(invoke).toHaveBeenCalledWith(AIChannels.RUNTIME_WORKSPACE_START, expect.anything()),
+    );
     const command = invoke.mock.calls[0]![1] as { streamId: string };
-    events.emit(AIStreamChannels.RUNTIME_WORKSPACE_EVENT, { streamId: command.streamId, event: { type: 'stream.ready', cursor: 'ready' } });
+    events.emit(AIStreamChannels.RUNTIME_WORKSPACE_EVENT, {
+      streamId: command.streamId,
+      event: { type: 'stream.ready', cursor: 'ready' },
+    });
     expect(onEvent).toHaveBeenCalledOnce();
     expect(invoke).not.toHaveBeenCalledWith(AIChannels.RUNTIME_WORKSPACE_ACK, expect.anything());
     project();
-    await vi.waitFor(() => expect(invoke).toHaveBeenCalledWith(AIChannels.RUNTIME_WORKSPACE_ACK, { streamId: command.streamId, cursor: 'ready' }));
+    await vi.waitFor(() =>
+      expect(invoke).toHaveBeenCalledWith(AIChannels.RUNTIME_WORKSPACE_ACK, {
+        streamId: command.streamId,
+        cursor: 'ready',
+      }),
+    );
     controller.abort();
     await stream;
     expect(events.listenerCount(AIStreamChannels.RUNTIME_WORKSPACE_EVENT)).toBe(0);
-    expect(invoke).toHaveBeenCalledWith(AIChannels.RUNTIME_WORKSPACE_STOP, { streamId: command.streamId });
+    expect(invoke).toHaveBeenCalledWith(AIChannels.RUNTIME_WORKSPACE_STOP, {
+      streamId: command.streamId,
+    });
   });
   it('mirrors HTTP semantics over the canonical workflow IPC channels', async () => {
     const invoke = vi.fn(async (channel: string) => {
@@ -227,7 +281,6 @@ describe('unsupported workflow snapshot transport parity', () => {
   );
 });
 
-
 describe('Goal native surface lease contract over HTTP/IPC', () => {
   const claimed = {
     status: 'claimed' as const,
@@ -243,17 +296,34 @@ describe('Goal native surface lease contract over HTTP/IPC', () => {
       new WorkflowRuntimeHttpClient(httpStub({ post })),
       new WorkflowRuntimeIpcClient({ invoke } as never),
     ]) {
-      await expect(client.goalSurfaceLease({ action: 'claim', runId: 'goal-run-1' }))
-        .resolves.toEqual(claimed);
-      await expect(client.goalSurfaceLease({
-        action: 'renew', runId: 'goal-run-1', token: claimed.token, fence: claimed.fence,
-      })).resolves.toEqual(claimed);
-      await expect(client.goalSurfaceLease({
-        action: 'release', runId: 'goal-run-1', token: claimed.token, fence: claimed.fence,
-      })).resolves.toEqual(claimed);
+      await expect(
+        client.goalSurfaceLease({ action: 'claim', runId: 'goal-run-1' }),
+      ).resolves.toEqual(claimed);
+      await expect(
+        client.goalSurfaceLease({
+          action: 'renew',
+          runId: 'goal-run-1',
+          token: claimed.token,
+          fence: claimed.fence,
+        }),
+      ).resolves.toEqual(claimed);
+      await expect(
+        client.goalSurfaceLease({
+          action: 'release',
+          runId: 'goal-run-1',
+          token: claimed.token,
+          fence: claimed.fence,
+        }),
+      ).resolves.toEqual(claimed);
     }
-    expect(post).toHaveBeenCalledWith('/ai/runtime/workflow/goal-surface-lease', expect.any(Object));
-    expect(invoke).toHaveBeenCalledWith(AIChannels.RUNTIME_WORKFLOW_GOAL_SURFACE_LEASE, expect.any(Object));
+    expect(post).toHaveBeenCalledWith(
+      '/ai/runtime/workflow/goal-surface-lease',
+      expect.any(Object),
+    );
+    expect(invoke).toHaveBeenCalledWith(
+      AIChannels.RUNTIME_WORKFLOW_GOAL_SURFACE_LEASE,
+      expect.any(Object),
+    );
     expect(JSON.stringify([...post.mock.calls, ...invoke.mock.calls])).not.toContain('identityId');
   });
 
@@ -264,12 +334,20 @@ describe('Goal native surface lease contract over HTTP/IPC', () => {
       new WorkflowRuntimeHttpClient(httpStub({ post })),
       new WorkflowRuntimeIpcClient({ invoke } as never),
     ]) {
-      await expect(client.goalSurfaceLease({
-        action: 'claim', runId: 'goal-run-1', identityId: 'foreign',
-      } as never)).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
-      await expect(client.goalSurfaceLease({
-        action: 'renew', runId: 'goal-run-1', token: claimed.token,
-      } as never)).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+      await expect(
+        client.goalSurfaceLease({
+          action: 'claim',
+          runId: 'goal-run-1',
+          identityId: 'foreign',
+        } as never),
+      ).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+      await expect(
+        client.goalSurfaceLease({
+          action: 'renew',
+          runId: 'goal-run-1',
+          token: claimed.token,
+        } as never),
+      ).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
     }
     expect(post).not.toHaveBeenCalled();
     expect(invoke).not.toHaveBeenCalled();
@@ -278,6 +356,8 @@ describe('Goal native surface lease contract over HTTP/IPC', () => {
   it('rejects malformed provider responses instead of silently granting control', async () => {
     const post = vi.fn().mockResolvedValue(ok({ status: 'claimed', fence: 4 }));
     const client = new WorkflowRuntimeHttpClient(httpStub({ post }));
-    await expect(client.goalSurfaceLease({ action: 'claim', runId: 'goal-run-1' })).rejects.toThrow();
+    await expect(
+      client.goalSurfaceLease({ action: 'claim', runId: 'goal-run-1' }),
+    ).rejects.toThrow();
   });
 });

@@ -27,19 +27,13 @@ function copyAssetsPlugin() {
     name: 'copy-assets',
     closeBundle() {
       // 复制 logos
-      copyDir(
-        resolve(configDir, 'src/images/logos'),
-        resolve(configDir, 'dist/images/logos')
-      );
+      copyDir(resolve(configDir, 'src/images/logos'), resolve(configDir, 'dist/images/logos'));
       // 复制 avatars
-      copyDir(
-        resolve(configDir, 'src/images/avatars'),
-        resolve(configDir, 'dist/images/avatars')
-      );
+      copyDir(resolve(configDir, 'src/images/avatars'), resolve(configDir, 'dist/images/avatars'));
       // 复制 audio notifications
       copyDir(
         resolve(configDir, 'src/audio/notifications'),
-        resolve(configDir, 'dist/audio/notifications')
+        resolve(configDir, 'dist/audio/notifications'),
       );
       console.log('✅ Static assets copied to dist');
     },
@@ -49,9 +43,9 @@ function copyAssetsPlugin() {
 export default defineConfig({
   assetsInclude: ['**/*.icns'],
   resolve: {
-    alias: process.env.VITEST ? [
-      { find: /\.icns$/, replacement: resolve(configDir, 'src/images/logos/MemoFlow.svg') }
-    ] : []
+    alias: process.env.VITEST
+      ? [{ find: /\.icns$/, replacement: resolve(configDir, 'src/images/logos/MemoFlow.svg') }]
+      : [],
   },
   plugins: [
     {
@@ -61,7 +55,7 @@ export default defineConfig({
         if (id.includes('.icns')) {
           return `export default "/mock.icns";`;
         }
-      }
+      },
     },
     dts({
       include: ['src/**/*.ts'],

@@ -10,7 +10,6 @@ import { ScheduleEventApplicationService } from './schedule-event-application-se
 class InMemoryScheduleRepository implements IScheduleRepository {
   private readonly schedules = new Map<string, CalendarEntry>();
 
-
   async save(schedule: CalendarEntry): Promise<void> {
     this.schedules.set(schedule.id, schedule);
   }

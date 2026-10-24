@@ -355,7 +355,10 @@ if (process.env.FAIL_COMMAND === 'true') process.exit(17);
       })) {
         const inputPath = path.join(root, 'input.json');
         if (!manifest.lanes[lane]) {
-          await assert.rejects(createLaneInput({ lane, manifest, output: inputPath }), /not enabled/u);
+          await assert.rejects(
+            createLaneInput({ lane, manifest, output: inputPath }),
+            /not enabled/u,
+          );
           continue;
         }
         const input = await createLaneInput({ lane, manifest, output: inputPath });
@@ -506,4 +509,30 @@ test('Web manifest projects narrow/full/zero selections into dynamic outputs', a
     else process.env.GITHUB_OUTPUT = previousOutput;
     await rm(root, { recursive: true, force: true });
   }
+});
+
+test('manifest carries laneDetails with skip reasons (VNext Q2)', async () => {
+  const m = await buildDeliveryManifest({
+    base: 'base',
+    head: 'head',
+    scope,
+    files: ['packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.stories.ts'],
+  });
+  assert.equal(m.laneDetails.componentBrowser.required, true);
+  assert.deepEqual(m.laneDetails.componentBrowser.targets, ['ui-storybook:test:interaction']);
+  assert.equal(m.laneDetails.contract.required, false);
+  assert.ok(m.laneDetails.contract.skipReason.length > 0);
+  assert.equal(m.laneDetails.fmt.required, true);
+  assert.equal(m.laneDetails.web.required, m.lanes.web);
+});
+
+test('manifest laneDetails marks contract changes as required', async () => {
+  const m = await buildDeliveryManifest({
+    base: 'base',
+    head: 'head',
+    scope,
+    files: ['packages/contracts/src/index.ts'],
+  });
+  assert.equal(m.laneDetails.contract.required, true);
+  assert.equal(m.laneDetails.contract.skipReason, null);
 });

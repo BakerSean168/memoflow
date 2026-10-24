@@ -18,9 +18,13 @@ const oldActions = `COALESCE((SELECT current_actions FROM ${STATES} WHERE identi
 const currentActions = `CASE WHEN json_array_length(${rawActions}) >= json_array_length(${oldActions}) THEN json(${rawActions}) ELSE ${oldActions} END`;
 const oldCount = `json_array_length(${oldActions})`;
 const baseVersion = `COALESCE((SELECT resource_version FROM ${STATES} WHERE identity_id=NEW.resourceId AND run_id=NEW.run_id),0)`;
-const previousField = (field: string) => `(SELECT json_extract(payload,'$.${field}') FROM ${STATES} WHERE identity_id=NEW.resourceId AND run_id=NEW.run_id)`;
+const previousField = (field: string) =>
+  `(SELECT json_extract(payload,'$.${field}') FROM ${STATES} WHERE identity_id=NEW.resourceId AND run_id=NEW.run_id)`;
 // SQLite JSON text preserves object key order; that order is not a business change.
-const sameJsonValue = (left: string, right: string) => `CASE WHEN json(${left})=json(${right}) THEN 1 ELSE
+const sameJsonValue = (
+  left: string,
+  right: string,
+) => `CASE WHEN json(${left})=json(${right}) THEN 1 ELSE
   (SELECT COUNT(*) FROM json_tree(${left}))=(SELECT COUNT(*) FROM json_tree(${right})) AND NOT EXISTS(
     SELECT fullkey,CASE WHEN type IN ('integer','real') THEN 'number' ELSE type END,atom FROM json_tree(${left})
     EXCEPT SELECT fullkey,CASE WHEN type IN ('integer','real') THEN 'number' ELSE type END,atom FROM json_tree(${right})) END`;
@@ -88,10 +92,10 @@ export class GoalWorkflowEventsLibSQL implements GoalWorkflowEventSource {
           `CREATE TABLE IF NOT EXISTS ${STATES}(identity_id TEXT NOT NULL,run_id TEXT NOT NULL,resource_version INTEGER NOT NULL,payload TEXT NOT NULL,current_actions TEXT NOT NULL,PRIMARY KEY(identity_id,run_id))`,
           `CREATE TABLE IF NOT EXISTS ${EVENTS}(sequence INTEGER PRIMARY KEY AUTOINCREMENT,event_id TEXT NOT NULL UNIQUE,identity_id TEXT NOT NULL,run_id TEXT NOT NULL,resource_version INTEGER NOT NULL,payload TEXT NOT NULL,actions TEXT NOT NULL,base_action_sequence INTEGER NOT NULL,last_action_sequence INTEGER NOT NULL,captured_at INTEGER NOT NULL)`,
           `CREATE INDEX IF NOT EXISTS memoflow_goal_events_owner_sequence ON ${EVENTS}(identity_id,sequence)`,
-        'DROP TRIGGER IF EXISTS memoflow_goal_events_insert',
-        'DROP TRIGGER IF EXISTS memoflow_goal_events_update',
-        trigger('INSERT'),
-        trigger('UPDATE'),
+          'DROP TRIGGER IF EXISTS memoflow_goal_events_insert',
+          'DROP TRIGGER IF EXISTS memoflow_goal_events_update',
+          trigger('INSERT'),
+          trigger('UPDATE'),
         ],
         'write',
       );

@@ -41,16 +41,16 @@ The changed-spec set from the GOAL-1201 baseline `7b0c4c015ce` through `9e769415
 
 57 / 58 files were executed and passed, totaling 745 tests:
 
-| Layer | Files | Tests | Result |
-| --- | ---: | ---: | --- |
-| app-vue changed specs | 14 | 197 | PASS |
-| Goal unit / characterization changed specs | 15 | 171 | PASS |
-| Goal PostgreSQL integration | 1 | 1 | PASS |
-| Task changed specs excluding protected Prisma transaction integration | 17 | 305 | PASS |
-| Contracts changed specs | 6 | 46 | PASS |
-| Database schema specs | 2 | 10 | PASS |
-| PowerSync schema specs | 1 | 12 | PASS |
-| Migrator spec | 1 | 3 | PASS |
+| Layer                                                                 | Files | Tests | Result |
+| --------------------------------------------------------------------- | ----: | ----: | ------ |
+| app-vue changed specs                                                 |    14 |   197 | PASS   |
+| Goal unit / characterization changed specs                            |    15 |   171 | PASS   |
+| Goal PostgreSQL integration                                           |     1 |     1 | PASS   |
+| Task changed specs excluding protected Prisma transaction integration |    17 |   305 | PASS   |
+| Contracts changed specs                                               |     6 |    46 | PASS   |
+| Database schema specs                                                 |     2 |    10 | PASS   |
+| PowerSync schema specs                                                |     1 |    12 | PASS   |
+| Migrator spec                                                         |     1 |     3 | PASS   |
 
 The Goal integration test `register-goal-event-listeners.integration.test.ts` passed against `memoflow_test` after safe schema sync.
 

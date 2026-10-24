@@ -85,8 +85,18 @@ describe('WalletPrismaRepository integration (R7)', () => {
     const identityId = await seedIdentity();
     const account = await repository.createAccount({ identityId, name: 'A' });
 
-    await repository.recordTransaction({ identityId, accountId: account.id, type: 'income', amount: '100' });
-    await repository.recordTransaction({ identityId, accountId: account.id, type: 'expense', amount: '40.5' });
+    await repository.recordTransaction({
+      identityId,
+      accountId: account.id,
+      type: 'income',
+      amount: '100',
+    });
+    await repository.recordTransaction({
+      identityId,
+      accountId: account.id,
+      type: 'expense',
+      amount: '40.5',
+    });
 
     const reloaded = await repository.listAccounts(identityId);
     expect(reloaded[0]?.balance).toBe('59.5');

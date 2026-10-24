@@ -8,7 +8,8 @@ import type { Result } from '@memoflow/contracts/result';
 import { ok } from '@memoflow/contracts/result';
 import { createTypedEventPublisher, eventBus } from '@memoflow/utils/domain';
 
-const taskEvents = createTypedEventPublisher<Pick<TaskEventMap, 'task:occurrence-deleted'>>(eventBus);
+const taskEvents =
+  createTypedEventPublisher<Pick<TaskEventMap, 'task:occurrence-deleted'>>(eventBus);
 
 export class DeleteTaskOccurrenceUseCase {
   constructor(private readonly occurrenceRepository: ITaskOccurrenceRepository) {}

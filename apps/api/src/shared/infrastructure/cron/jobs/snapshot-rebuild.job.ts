@@ -7,9 +7,7 @@ const logger = createLogger('SnapshotRebuildJob');
 
 const MAX_CONCURRENT_BUILDS = 2;
 
-export async function rebuildAllProfileSnapshots(
-  snapshotRootDir: string,
-): Promise<void> {
+export async function rebuildAllProfileSnapshots(snapshotRootDir: string): Promise<void> {
   const config = getPowerSyncConfig();
 
   if (!config.url || !config.privateKey) {

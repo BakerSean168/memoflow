@@ -29,7 +29,9 @@ const contentBindings = computed(() => ({
 
 <template>
   <DialogPortal>
-    <DialogOverlay :class="cn('fixed inset-0 z-50 bg-black/60 backdrop-blur-[2px]', dialogOverlayMotionClass)" />
+    <DialogOverlay
+      :class="cn('fixed inset-0 z-50 bg-black/60 backdrop-blur-[2px]', dialogOverlayMotionClass)"
+    />
     <DialogContent
       v-bind="contentBindings"
       :class="

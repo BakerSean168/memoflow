@@ -50,7 +50,9 @@ export class TrayManager {
    */
   private init(): void {
     try {
-      this.tray = this.trayGuid ? new Tray(this.iconImage, this.trayGuid) : new Tray(this.iconImage);
+      this.tray = this.trayGuid
+        ? new Tray(this.iconImage, this.trayGuid)
+        : new Tray(this.iconImage);
       this.tray.setToolTip(APP_DISPLAY_NAME);
       this.updateContextMenu();
 

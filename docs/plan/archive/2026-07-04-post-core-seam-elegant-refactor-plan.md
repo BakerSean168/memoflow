@@ -242,6 +242,7 @@ updated: 2026-07-05T10:37:17.8247222+08:00
 
 1. `packages/app-vue` 独立 typecheck 仍存在既有测试类型错误，集中在 `src/modules/task/composables/useTaskTemplates.spec.ts` 的 `Mock<Procedure | Constructable>` 约束，不属于本轮引入
 2. 后续如继续演进 `reminder`，优先补 typed request schema，而不是重新引入新的 orchestration 层
+
 ## Phase 2: Notification Orchestration Downshift
 
 目标：在已经清掉 direct SQL 的基础上，把剩余 facade orchestration 继续下沉。

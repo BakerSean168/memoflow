@@ -12,7 +12,13 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { APP_NAME } from '../constants/app';
 import { ExternalLink } from './ExternalLink';
 
-import { MaxContentWidth, Spacing, ThemedText, ThemedView, useTheme } from '@memoflow/ui-react-native';
+import {
+  MaxContentWidth,
+  Spacing,
+  ThemedText,
+  ThemedView,
+  useTheme,
+} from '@memoflow/ui-react-native';
 
 export default function AppTabs() {
   return (
@@ -46,7 +52,8 @@ function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps) {
     <Pressable {...props} style={({ pressed }) => pressed && styles.pressed}>
       <ThemedView
         type={isFocused ? 'backgroundSelected' : 'backgroundElement'}
-        style={styles.tabButtonView}>
+        style={styles.tabButtonView}
+      >
         <ThemedText type="small" themeColor={isFocused ? 'text' : 'textSecondary'}>
           {children}
         </ThemedText>

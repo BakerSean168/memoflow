@@ -263,7 +263,10 @@ export function createSettingElectronModule(
           const payload = (dto && typeof dto === 'object' ? dto : {}) as Record<string, unknown>;
           if (typeof payload.data !== 'string') {
             return Promise.resolve(
-              fail({ code: 'VALIDATION_ERROR', message: 'Preference import data must be JSON text' }),
+              fail({
+                code: 'VALIDATION_ERROR',
+                message: 'Preference import data must be JSON text',
+              }),
             );
           }
           let data: unknown;
@@ -271,10 +274,15 @@ export function createSettingElectronModule(
             data = JSON.parse(payload.data) as unknown;
           } catch {
             return Promise.resolve(
-              fail({ code: 'VALIDATION_ERROR', message: 'Preference import data is not valid JSON' }),
+              fail({
+                code: 'VALIDATION_ERROR',
+                message: 'Preference import data is not valid JSON',
+              }),
             );
           }
-          return withAuthenticatedIdentity(ctx, (identityId) => mod.api.importSettings(identityId, data));
+          return withAuthenticatedIdentity(ctx, (identityId) =>
+            mod.api.importSettings(identityId, data),
+          );
         });
         installed.push(SettingChannels.IMPORT);
 

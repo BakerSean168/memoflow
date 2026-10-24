@@ -43,6 +43,7 @@ export interface IDomainEvent<P = any> {
 - **禁止**使用三冒号 `domain:entity:action` 形态
 
 示例:
+
 ```
 schedule:task-created        ✅
 schedule:task-paused         ✅
@@ -57,6 +58,7 @@ schedule:task:created        ❌ (旧形态，已废弃)
 **命名**: `{Entity}{Action}Event`
 
 **规则**:
+
 - 只包含下游消费所需的最小业务数据
 - 字段使用 `readonly`
 - 不包含信封字段
@@ -131,11 +133,11 @@ IPC channel 命名（如 `schedule:task:create`）遵循**不同的约定** — 
 
 ## 总结
 
-| 要素 | 规范 |
-|---|---|
-| Payload 接口位置 | `packages/contracts/src/modules/{module}/domain/events/` |
-| Payload 接口命名 | `{Entity}{Action}Event` |
-| Payload 字段 | 只含业务数据，`readonly`，不含信封字段 |
-| Event Map 位置 | `packages/contracts/src/modules/{module}/protocol/{module}-event-map.ts` |
-| Event Key 格式 | `domain:action` 或 `domain:entity-action`（最多两个冒号） |
-| 信封字段 | `aggregateId`、`occurredAt` 由 `addDomainEvent()` 自动生成 |
+| 要素             | 规范                                                                     |
+| ---------------- | ------------------------------------------------------------------------ |
+| Payload 接口位置 | `packages/contracts/src/modules/{module}/domain/events/`                 |
+| Payload 接口命名 | `{Entity}{Action}Event`                                                  |
+| Payload 字段     | 只含业务数据，`readonly`，不含信封字段                                   |
+| Event Map 位置   | `packages/contracts/src/modules/{module}/protocol/{module}-event-map.ts` |
+| Event Key 格式   | `domain:action` 或 `domain:entity-action`（最多两个冒号）                |
+| 信封字段         | `aggregateId`、`occurredAt` 由 `addDomainEvent()` 自动生成               |

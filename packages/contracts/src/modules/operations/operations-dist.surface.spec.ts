@@ -8,9 +8,7 @@ describe('P1-1 @memoflow/contracts/operations 发布产物存在性门禁', () =
   const distDir = resolve(PACKAGE_ROOT, 'dist/modules/operations');
 
   it('package.json 的 ./operations export 指向 dist/modules/operations/index.js', () => {
-    const pkg = JSON.parse(
-      readFileSync(resolve(PACKAGE_ROOT, 'package.json'), 'utf8'),
-    ) as {
+    const pkg = JSON.parse(readFileSync(resolve(PACKAGE_ROOT, 'package.json'), 'utf8')) as {
       exports: Record<string, { import?: string; types?: string }>;
     };
     expect(pkg.exports['./operations'].import).toBe('./dist/modules/operations/index.js');

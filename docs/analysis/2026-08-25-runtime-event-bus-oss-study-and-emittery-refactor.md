@@ -317,7 +317,7 @@ bus.send(type, payload, metadata?)
 因此：
 
 ```ts
-bus.send('x', payload)
+bus.send('x', payload);
 // 这里不能假定 listener side effect 已经完成
 ```
 
@@ -387,18 +387,18 @@ Emittery emit Promise for THIS delivery
 
 本次明确保持：
 
-| Contract | 处理 |
-| --- | --- |
-| `AppEventRegistry` / feature event maps | 保留 |
-| `CrossPlatformEventBus` class | 保留 |
-| `GlobalEventBus` / `eventBus` export | 保留 |
-| `eventBus.send()` fire-and-forget caller API | 保留 |
-| `on()` / `off()` payload-first handler | 保留 |
-| `EventDeliveryMetadata` | 保留 |
-| `IEventBus.publish(): Promise<void>` | 保留 |
-| Repository publish failure → outbox fallback | 保留 |
-| ADR-033 Port / Event / IPC-HTTP 分类 | 保留 |
-| durable outbox、SSE、IPC、PowerSync | 不迁移、不替换 |
+| Contract                                     | 处理           |
+| -------------------------------------------- | -------------- |
+| `AppEventRegistry` / feature event maps      | 保留           |
+| `CrossPlatformEventBus` class                | 保留           |
+| `GlobalEventBus` / `eventBus` export         | 保留           |
+| `eventBus.send()` fire-and-forget caller API | 保留           |
+| `on()` / `off()` payload-first handler       | 保留           |
+| `EventDeliveryMetadata`                      | 保留           |
+| `IEventBus.publish(): Promise<void>`         | 保留           |
+| Repository publish failure → outbox fallback | 保留           |
+| ADR-033 Port / Event / IPC-HTTP 分类         | 保留           |
+| durable outbox、SSE、IPC、PowerSync          | 不迁移、不替换 |
 
 真正 retire 的只是内部实现 seam：
 

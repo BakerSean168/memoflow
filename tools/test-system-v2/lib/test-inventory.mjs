@@ -107,7 +107,7 @@ function resolveConfig(root, cwd, config) {
 
 function suiteForTarget(projectName, targetName) {
   if (targetName === 'test') {
-    return ['governance-tools', 'test-system-v2', 'ci-cd-platform'].includes(projectName)
+    return ['governance-tools', 'test-system-v2', 'ci-cd-platform', 'quality'].includes(projectName)
       ? 'governance'
       : 'unit';
   }

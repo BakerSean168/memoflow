@@ -20,7 +20,9 @@ export const CreateNotificationSchema = z.object({
   urgency: z.enum(UrgencyLevel).optional(),
   relatedEntityType: z.string().trim().min(1).max(120).optional(),
   relatedEntityId: brandedId<string>().optional(),
-  navigationIntent: z.object({ route: z.string(), params: z.record(z.string(), z.string()).optional() }).optional(),
+  navigationIntent: z
+    .object({ route: z.string(), params: z.record(z.string(), z.string()).optional() })
+    .optional(),
   correlationId: z.string().optional(),
   causationId: z.string().optional(),
   actions: z.array(NotificationActionIntentSchema).optional(),

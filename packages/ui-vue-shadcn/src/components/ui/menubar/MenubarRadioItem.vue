@@ -1,35 +1,32 @@
 <script setup lang="ts">
-import type { MenubarRadioItemEmits, MenubarRadioItemProps } from 'reka-ui'
-import type { HTMLAttributes } from 'vue'
-import { cn } from '../../../lib/utils'
-import { DotFilledIcon } from '@radix-icons/vue'
-import {
-  MenubarItemIndicator,
-  MenubarRadioItem,
+import type { MenubarRadioItemEmits, MenubarRadioItemProps } from 'reka-ui';
+import type { HTMLAttributes } from 'vue';
+import { cn } from '../../../lib/utils';
+import { DotFilledIcon } from '@radix-icons/vue';
+import { MenubarItemIndicator, MenubarRadioItem, useForwardPropsEmits } from 'reka-ui';
+import { computed } from 'vue';
 
-  useForwardPropsEmits,
-} from 'reka-ui'
-import { computed } from 'vue'
-
-const props = defineProps<MenubarRadioItemProps & { class?: HTMLAttributes['class'] }>()
-const emits = defineEmits<MenubarRadioItemEmits>()
+const props = defineProps<MenubarRadioItemProps & { class?: HTMLAttributes['class'] }>();
+const emits = defineEmits<MenubarRadioItemEmits>();
 
 const delegatedProps = computed(() => {
-  const { class: _, ...delegated } = props
+  const { class: _, ...delegated } = props;
 
-  return delegated
-})
+  return delegated;
+});
 
-const forwarded = useForwardPropsEmits(delegatedProps, emits)
+const forwarded = useForwardPropsEmits(delegatedProps, emits);
 </script>
 
 <template>
   <MenubarRadioItem
     v-bind="forwarded"
-    :class="cn(
-      'relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
-      props.class,
-    )"
+    :class="
+      cn(
+        'relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+        props.class,
+      )
+    "
   >
     <span class="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
       <MenubarItemIndicator>

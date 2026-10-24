@@ -12,7 +12,16 @@
  * 阈值 900px：略高于 split 上限 750，确保分栏态永远判定为 narrow，
  * 只有进入 focus（满屏）才升 wide。
  */
-import { computed, inject, provide, readonly, ref, type ComputedRef, type InjectionKey, type Ref } from 'vue';
+import {
+  computed,
+  inject,
+  provide,
+  readonly,
+  ref,
+  type ComputedRef,
+  type InjectionKey,
+  type Ref,
+} from 'vue';
 
 export type PanelWidthTier = 'narrow' | 'wide';
 

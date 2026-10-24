@@ -33,18 +33,18 @@ Canonical runner and manifest:
 
 ## Frozen A-J fixture coverage
 
-| Fixture | Frozen behavior | Primary executable evidence |
-| --- | --- | --- |
-| A | finite 15-day PlanCompletion lifecycle | Task real-PostgreSQL settlement integration: success, correction/revert/re-settlement, strict missed failure |
-| B | `EachCompletion` apply/replay/uncomplete/reapply | Task outbox + Goal integration; API host restart; Web product loop; current-revision local Docker product loop |
-| C | 75 -> 70 decreasing `Last` measurement | Goal record edit/delete use cases recalculate from authoritative history through `KeyResultProgress` |
-| D | one-time Task 14:00, -30m reminder | Task projection emits one stable 13:30 intent; Orchestration emits one durable `NotificationRequested` and skips stale/deleted truth |
-| E | Goal due -7d reminder | Goal neutral projection produces one stable -7d intent and removes it for terminal Goal truth |
-| F | Routine 23:30 IANA wall-clock + snooze | Routine recurrence unit fixture + real-PostgreSQL persisted snooze projection |
-| G | ActiveUsage 40m + natural idle break | ActiveUsage runtime fixture + Desktop Electron idle-sensor seam |
-| H | 50/10 protocol + restart | protocol break-credit fixture + protocol persistence/recovery + Desktop focus-window restart projection |
-| I | DND mixed-channel Notification | Notification Fact remains independent from per-channel suppress/defer decisions |
-| J | Planner Task 14:00 -> 16:00 + failed command rollback | owner-command unit fixture + real Chromium FullCalendar drag, real Task owner request and forced 409 rollback |
+| Fixture | Frozen behavior                                       | Primary executable evidence                                                                                                          |
+| ------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| A       | finite 15-day PlanCompletion lifecycle                | Task real-PostgreSQL settlement integration: success, correction/revert/re-settlement, strict missed failure                         |
+| B       | `EachCompletion` apply/replay/uncomplete/reapply      | Task outbox + Goal integration; API host restart; Web product loop; current-revision local Docker product loop                       |
+| C       | 75 -> 70 decreasing `Last` measurement                | Goal record edit/delete use cases recalculate from authoritative history through `KeyResultProgress`                                 |
+| D       | one-time Task 14:00, -30m reminder                    | Task projection emits one stable 13:30 intent; Orchestration emits one durable `NotificationRequested` and skips stale/deleted truth |
+| E       | Goal due -7d reminder                                 | Goal neutral projection produces one stable -7d intent and removes it for terminal Goal truth                                        |
+| F       | Routine 23:30 IANA wall-clock + snooze                | Routine recurrence unit fixture + real-PostgreSQL persisted snooze projection                                                        |
+| G       | ActiveUsage 40m + natural idle break                  | ActiveUsage runtime fixture + Desktop Electron idle-sensor seam                                                                      |
+| H       | 50/10 protocol + restart                              | protocol break-credit fixture + protocol persistence/recovery + Desktop focus-window restart projection                              |
+| I       | DND mixed-channel Notification                        | Notification Fact remains independent from per-channel suppress/defer decisions                                                      |
+| J       | Planner Task 14:00 -> 16:00 + failed command rollback | owner-command unit fixture + real Chromium FullCalendar drag, real Task owner request and forced 409 rollback                        |
 
 The grouped focused runner passed **15 files / 81 tests** and printed:
 

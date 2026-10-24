@@ -27,7 +27,10 @@ describe('External agent audit visibility', () => {
 
 it('logs a correlated cause reference without provider details or credential contents', () => {
   const log = vi.fn();
-  const logger = new Logger('ExternalAgentDiagnostics', { level: 'error', transports: [{ name: 'capture', level: LogLevel.ERROR, log }] });
+  const logger = new Logger('ExternalAgentDiagnostics', {
+    level: 'error',
+    transports: [{ name: 'capture', level: LogLevel.ERROR, log }],
+  });
   const cause = new Error('Bearer private-credential and private query');
   createGatewayDiagnostics(logger)({ requestId: 'request-a', traceId: 'trace-a', cause });
   expect(log).toHaveBeenCalledTimes(1);

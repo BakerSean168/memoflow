@@ -11,7 +11,9 @@ import type { AssistantConversationShellSource } from './assistant-conversation-
 const cleanupDirs: string[] = [];
 
 afterEach(async () => {
-  await Promise.all(cleanupDirs.splice(0).map((directory) => rm(directory, { recursive: true, force: true })));
+  await Promise.all(
+    cleanupDirs.splice(0).map((directory) => rm(directory, { recursive: true, force: true })),
+  );
 });
 
 async function closeStorage(storage: unknown): Promise<void> {
@@ -32,7 +34,10 @@ describe('AssistantHistoryService persistent restart authority', () => {
     await firstStorage.init();
     const firstMemory = new Memory({ storage: firstStorage, options: { lastMessages: 40 } });
     const firstService = new AssistantHistoryService(firstMemory, firstSource);
-    await firstService.ensureConversation({ identityId: 'identity-1', conversationId: 'conversation-1' });
+    await firstService.ensureConversation({
+      identityId: 'identity-1',
+      conversationId: 'conversation-1',
+    });
     expect(firstSource.loadShell).toHaveBeenCalledTimes(1);
 
     await firstMemory.saveMessages({
@@ -64,11 +69,16 @@ describe('AssistantHistoryService persistent restart authority', () => {
     await closeStorage(firstStorage);
 
     const restartedSource: AssistantConversationShellSource = {
-      loadShell: vi.fn(async () => { throw new Error('existing Mastra thread must not reread shell'); }),
+      loadShell: vi.fn(async () => {
+        throw new Error('existing Mastra thread must not reread shell');
+      }),
     };
     const restartedStorage = createMastraStorage({ kind: 'libsql', url });
     await restartedStorage.init();
-    const restartedMemory = new Memory({ storage: restartedStorage, options: { lastMessages: 40 } });
+    const restartedMemory = new Memory({
+      storage: restartedStorage,
+      options: { lastMessages: 40 },
+    });
     const restartedService = new AssistantHistoryService(restartedMemory, restartedSource);
 
     await expect(
@@ -169,57 +179,73 @@ describe('Assistant history persisted logical clock', () => {
 });
 
 it('allocates batches and competing store writers atomically and rolls back scope collisions', async () => {
-    const directory = await mkdtemp(join(tmpdir(), 'memoflow-history-transactions-'));
-    cleanupDirs.push(directory);
-    const config = { kind: 'libsql' as const, url: `file:${join(directory, 'mastra.db')}` };
-    const first = createMastraStorage(config);
-    const second = createMastraStorage(config);
+  const directory = await mkdtemp(join(tmpdir(), 'memoflow-history-transactions-'));
+  cleanupDirs.push(directory);
+  const config = { kind: 'libsql' as const, url: `file:${join(directory, 'mastra.db')}` };
+  const first = createMastraStorage(config);
+  const second = createMastraStorage(config);
 
-    await first.init();
-    await second.init();
-    const memory = new Memory({ storage: first });
-    await memory.createThread({ threadId: 'thread', resourceId: 'owner' });
-    await memory.createThread({ threadId: 'other', resourceId: 'owner' });
-    const left = (await first.getStore('memory'))!;
-    const right = (await second.getStore('memory'))!;
-    const now = 1_800_000_000_000;
-    const message = (id: string): MastraDBMessage => ({
-      id, threadId: 'thread', resourceId: 'owner', role: 'assistant', createdAt: new Date(now),
-      content: { format: 2, parts: [{ type: 'text', text: id }] },
-    });
-    try {
-      await memory.createThread({ threadId: 'empty', resourceId: 'owner' });
-      const empty = await Promise.all([
-        left.saveMessages({ messages: [{ ...message('empty-z'), threadId: 'empty' }] }),
-        right.saveMessages({ messages: [{ ...message('empty-a'), threadId: 'empty' }] }),
-      ]);
-      expect(empty.map(({ messages }) => messages[0]!.createdAt.getTime()).sort((a, b) => a-b))
-        .toEqual([now, now + 1]);
-      const batch = Array.from({ length: 64 }, (_, index) => message(`batch-${64-index}`));
-      const result = await left.saveMessages({ messages: batch });
-      expect(result.messages.map(({ createdAt }) => createdAt.getTime())).toEqual(
-        Array.from({ length: 64 }, (_, index) => now + index),
-      );
-      const concurrent = await Promise.all([
-        left.saveMessages({ messages: [message('writer-z')] }),
-        right.saveMessages({ messages: [message('writer-a')] }),
-      ]);
-      expect(concurrent.map(({ messages }) => messages[0]!.createdAt.getTime()).sort((a,b) => a-b))
-        .toEqual([now + 64, now + 65]);
-      await expect(left.saveMessages({ messages: [message('rolled-back'), {
-        ...message(batch[0]!.id), threadId: 'other',
-      }] })).rejects.toThrow('Message scope cannot change');
-      const recalled = await memory.recall({ threadId: 'thread', perPage: false });
-      expect(recalled.messages).toHaveLength(66);
-      expect(recalled.messages.slice(0, 64).map(({ id }) => id)).toEqual(batch.map(({ id }) => id));
-      expect(recalled.messages.some(({ id }) => id === 'rolled-back')).toBe(false);
-      expect((await left.saveMessages({ messages: [message('after-rollback')] })).messages[0]?.createdAt.getTime())
-        .toBe(now + 66);
-    } finally {
-
-      await closeStorage(second);
-      await closeStorage(first);
-    }
+  await first.init();
+  await second.init();
+  const memory = new Memory({ storage: first });
+  await memory.createThread({ threadId: 'thread', resourceId: 'owner' });
+  await memory.createThread({ threadId: 'other', resourceId: 'owner' });
+  const left = (await first.getStore('memory'))!;
+  const right = (await second.getStore('memory'))!;
+  const now = 1_800_000_000_000;
+  const message = (id: string): MastraDBMessage => ({
+    id,
+    threadId: 'thread',
+    resourceId: 'owner',
+    role: 'assistant',
+    createdAt: new Date(now),
+    content: { format: 2, parts: [{ type: 'text', text: id }] },
+  });
+  try {
+    await memory.createThread({ threadId: 'empty', resourceId: 'owner' });
+    const empty = await Promise.all([
+      left.saveMessages({ messages: [{ ...message('empty-z'), threadId: 'empty' }] }),
+      right.saveMessages({ messages: [{ ...message('empty-a'), threadId: 'empty' }] }),
+    ]);
+    expect(
+      empty.map(({ messages }) => messages[0]!.createdAt.getTime()).sort((a, b) => a - b),
+    ).toEqual([now, now + 1]);
+    const batch = Array.from({ length: 64 }, (_, index) => message(`batch-${64 - index}`));
+    const result = await left.saveMessages({ messages: batch });
+    expect(result.messages.map(({ createdAt }) => createdAt.getTime())).toEqual(
+      Array.from({ length: 64 }, (_, index) => now + index),
+    );
+    const concurrent = await Promise.all([
+      left.saveMessages({ messages: [message('writer-z')] }),
+      right.saveMessages({ messages: [message('writer-a')] }),
+    ]);
+    expect(
+      concurrent.map(({ messages }) => messages[0]!.createdAt.getTime()).sort((a, b) => a - b),
+    ).toEqual([now + 64, now + 65]);
+    await expect(
+      left.saveMessages({
+        messages: [
+          message('rolled-back'),
+          {
+            ...message(batch[0]!.id),
+            threadId: 'other',
+          },
+        ],
+      }),
+    ).rejects.toThrow('Message scope cannot change');
+    const recalled = await memory.recall({ threadId: 'thread', perPage: false });
+    expect(recalled.messages).toHaveLength(66);
+    expect(recalled.messages.slice(0, 64).map(({ id }) => id)).toEqual(batch.map(({ id }) => id));
+    expect(recalled.messages.some(({ id }) => id === 'rolled-back')).toBe(false);
+    expect(
+      (
+        await left.saveMessages({ messages: [message('after-rollback')] })
+      ).messages[0]?.createdAt.getTime(),
+    ).toBe(now + 66);
+  } finally {
+    await closeStorage(second);
+    await closeStorage(first);
+  }
 });
 
 describe('SQLite writer gate database identity', () => {

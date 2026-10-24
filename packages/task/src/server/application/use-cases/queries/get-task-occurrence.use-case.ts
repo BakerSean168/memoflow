@@ -14,10 +14,7 @@ export class GetTaskOccurrenceUseCase {
     private readonly projection: TaskOccurrenceProjectionService,
   ) {}
 
-  async execute(
-    id: string,
-    identityId: string,
-  ): Promise<Result<TaskOccurrenceClientDTO | null>> {
+  async execute(id: string, identityId: string): Promise<Result<TaskOccurrenceClientDTO | null>> {
     const occurrence = await this.occurrenceRepository.findByIdForIdentity(identityId, id);
     return ok(occurrence ? await this.projection.project(identityId, occurrence) : null);
   }

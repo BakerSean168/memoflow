@@ -34,7 +34,7 @@ describe('account PowerSync parseJson keep-boundary (residual 1081)', () => {
     // required string signature (not null/undefined + fallback)
     expect(mapper).toMatch(/private static parseJson<T>\(value: string\): T/);
     // Soft keep-boundary docs may name utils symbols; assert no import/call
-    expect(mapper).not.toContain("@memoflow/utils/shared");
+    expect(mapper).not.toContain('@memoflow/utils/shared');
     expect(mapper).not.toMatch(/import\s*\{[^}]*parseJsonSafe[^}]*\}/);
     expect(mapper).not.toMatch(/import\s*\{[^}]*\bparseJson\b[^}]*\}/);
     expect(mapper).not.toMatch(/parseJsonSafe\s*\(/);

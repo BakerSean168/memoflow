@@ -118,18 +118,22 @@ export const TaskKnowledgeEdgeListReqSchema = GoalKnowledgeEdgePageRequestSchema
 });
 export type TaskKnowledgeEdgeListReq = z.input<typeof TaskKnowledgeEdgeListReqSchema>;
 
-export const TaskKnowledgeEdgeRefSchema = z.object({
-  relationId: z.string().min(1),
-  taskPlanId: brandedId<TaskPlanId>(),
-  documentId: KnowledgeDocumentIdSchema,
-  createdAt: z.number().finite(),
-}).strict();
+export const TaskKnowledgeEdgeRefSchema = z
+  .object({
+    relationId: z.string().min(1),
+    taskPlanId: brandedId<TaskPlanId>(),
+    documentId: KnowledgeDocumentIdSchema,
+    createdAt: z.number().finite(),
+  })
+  .strict();
 export type TaskKnowledgeEdgeRef = z.infer<typeof TaskKnowledgeEdgeRefSchema>;
 
-export const TaskKnowledgeEdgePageSchema = z.object({
-  items: z.array(TaskKnowledgeEdgeRefSchema),
-  total: z.number().int().min(0),
-  limit: z.number().int().min(1).max(100),
-  offset: z.number().int().min(0),
-}).strict();
+export const TaskKnowledgeEdgePageSchema = z
+  .object({
+    items: z.array(TaskKnowledgeEdgeRefSchema),
+    total: z.number().int().min(0),
+    limit: z.number().int().min(1).max(100),
+    offset: z.number().int().min(0),
+  })
+  .strict();
 export type TaskKnowledgeEdgePage = z.infer<typeof TaskKnowledgeEdgePageSchema>;

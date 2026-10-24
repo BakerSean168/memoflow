@@ -23,9 +23,7 @@ export interface TaskClientPort {
   createPlan(
     request: CreateTaskPlanReq,
   ): Promise<Result<{ plan: TaskPlan; occurrenceCount: number; todayOccurrenceCreated: boolean }>>;
-  listPlans(
-    params?: TaskPlanListParams,
-  ): Promise<Result<{ plans: TaskPlan[]; total: number }>>;
+  listPlans(params?: TaskPlanListParams): Promise<Result<{ plans: TaskPlan[]; total: number }>>;
   getPlan(id: string): Promise<Result<TaskPlan>>;
   updatePlan(id: string, request: UpdateTaskPlanReq): Promise<Result<TaskPlan>>;
   deletePlan(id: string): Promise<Result<void>>;

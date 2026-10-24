@@ -65,8 +65,7 @@ async function createPublicationFixture() {
     versionedPrefix: 'versions/v1.2.3/0123456789abcdef0123456789abcdef01234567',
     pointer: {
       name: 'stable',
-      targetPrefix:
-        'versions/v1.2.3/0123456789abcdef0123456789abcdef01234567/stable',
+      targetPrefix: 'versions/v1.2.3/0123456789abcdef0123456789abcdef01234567/stable',
     },
     lanes: [
       {
@@ -163,20 +162,24 @@ test('rollout increases are monotonic, decrease is explicit, and pause admits no
     sets.set(
       percentage,
       Object.entries(installations)
-        .filter(([, id]) =>
-          isDesktopUpdateRolloutEligible(id, { state: 'active', percentage }))
+        .filter(([, id]) => isDesktopUpdateRolloutEligible(id, { state: 'active', percentage }))
         .map(([name]) => name),
     );
   }
 
-  for (const [lower, higher] of [[10, 30], [30, 50], [50, 100]]) {
+  for (const [lower, higher] of [
+    [10, 30],
+    [30, 50],
+    [50, 100],
+  ]) {
     assert.ok(sets.get(lower).every((name) => sets.get(higher).includes(name)));
   }
 
   assert.ok(sets.get(30).length >= sets.get(10).length);
   assert.equal(
     Object.values(installations).some((id) =>
-      isDesktopUpdateRolloutEligible(id, { state: 'paused' })),
+      isDesktopUpdateRolloutEligible(id, { state: 'paused' }),
+    ),
     false,
   );
 });
@@ -202,10 +205,11 @@ test('rollout metadata projection uses native stagingPercentage without changing
   assert.match(projected, /^version: 1\.2\.3\nstagingPercentage: 30$/mu);
   assert.match(projected, /sha512: canonical-checksum/u);
   assert.throws(
-    () => projectDesktopUpdateRolloutMetadata(projected, {
-      state: 'active',
-      percentage: 50,
-    }),
+    () =>
+      projectDesktopUpdateRolloutMetadata(projected, {
+        state: 'active',
+        percentage: 50,
+      }),
     /canonical Desktop update metadata must not contain stagingPercentage/u,
   );
 });
@@ -278,15 +282,20 @@ test('rollout materialization is deterministic across output directories', async
     });
 
     assert.deepEqual(second.receipt, first.receipt);
-    assert.deepEqual(
-      await readFile(first.receiptPath),
-      await readFile(second.receiptPath),
-    );
+    assert.deepEqual(await readFile(first.receiptPath), await readFile(second.receiptPath));
     const firstMetadata = await readFile(
-      path.join(fixture.root, 'first', ...first.receipt.lanes[0].controlMetadataRelativePath.split('/')),
+      path.join(
+        fixture.root,
+        'first',
+        ...first.receipt.lanes[0].controlMetadataRelativePath.split('/'),
+      ),
     );
     const secondMetadata = await readFile(
-      path.join(fixture.root, 'second', ...second.receipt.lanes[0].controlMetadataRelativePath.split('/')),
+      path.join(
+        fixture.root,
+        'second',
+        ...second.receipt.lanes[0].controlMetadataRelativePath.split('/'),
+      ),
     );
     assert.deepEqual(secondMetadata, firstMetadata);
   } finally {
@@ -337,7 +346,9 @@ test('release workflow prepares initial p10 rollout evidence only after immutabl
   const feedIndex = workflow.indexOf('materialize-desktop-update-feed.mjs');
   const rolloutIndex = workflow.indexOf('materialize-desktop-update-rollout.mjs');
   const rolloutEvidenceIndex = workflow.indexOf('name: desktop-update-rollout-evidence');
-  const releaseUploadIndex = workflow.indexOf('Upload the manifest-owned asset set to the draft GitHub Release');
+  const releaseUploadIndex = workflow.indexOf(
+    'Upload the manifest-owned asset set to the draft GitHub Release',
+  );
 
   assert.ok(feedIndex >= 0);
   assert.ok(rolloutIndex > feedIndex);

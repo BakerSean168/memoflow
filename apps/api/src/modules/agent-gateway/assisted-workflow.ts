@@ -23,10 +23,7 @@ import {
   type GatewayWriteAuthority,
   type GatewayAssistedPort,
 } from '@memoflow/agent-gateway';
-import type {
-  AIWorkflowRuntimePort,
-  ExternalWorkflowInvocation,
-} from '@memoflow/ai';
+import type { AIWorkflowRuntimePort, ExternalWorkflowInvocation } from '@memoflow/ai';
 import type { AiAssistedWorkflowRepository } from '@memoflow/ai/agent-gateway';
 import type { AiAssistedWorkflow } from '@memoflow/database';
 import type { GatewayWritePort } from '@memoflow/agent-gateway';
@@ -404,12 +401,18 @@ export function bindAssistedWorkflow(options: Options): GatewayAssistedPort {
     cancel: (raw, cx, authority) =>
       wrap(() => {
         const input = AssistedMutationHandleSchema.parse(raw);
-        return access(input, cx, authority, async (row, assertLock) => {
-          if (terminal(view(row).run)) return row;
-          assertLock();
-          row = await repo.save(row.id, { pendingJson: JSON.stringify({ type: 'cancel' }) });
-          return settle(row, cx, authority, assertLock);
-        }, { cancelPendingResume: true });
+        return access(
+          input,
+          cx,
+          authority,
+          async (row, assertLock) => {
+            if (terminal(view(row).run)) return row;
+            assertLock();
+            row = await repo.save(row.id, { pendingJson: JSON.stringify({ type: 'cancel' }) });
+            return settle(row, cx, authority, assertLock);
+          },
+          { cancelPendingResume: true },
+        );
       }),
   };
 }

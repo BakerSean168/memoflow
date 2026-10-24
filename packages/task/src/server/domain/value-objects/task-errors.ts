@@ -18,15 +18,14 @@ export class TaskPlanNotFoundError extends ResultErrorException {
  * 任务模板状态无效错误
  */
 export class InvalidTaskPlanStateError extends ResultErrorException {
-  constructor(message: string, context?: { planId?: string; currentStatus?: string; attemptedAction?: string }) {
-    const contextStr = context ? ` (planId: ${context.planId}, status: ${context.currentStatus}, action: ${context.attemptedAction})` : '';
-    super(
-      `${message}${contextStr}`,
-      'invalid_task_plan_state',
-      undefined,
-      undefined,
-      400,
-    );
+  constructor(
+    message: string,
+    context?: { planId?: string; currentStatus?: string; attemptedAction?: string },
+  ) {
+    const contextStr = context
+      ? ` (planId: ${context.planId}, status: ${context.currentStatus}, action: ${context.attemptedAction})`
+      : '';
+    super(`${message}${contextStr}`, 'invalid_task_plan_state', undefined, undefined, 400);
   }
 }
 
@@ -100,7 +99,13 @@ export class OccurrenceGenerationFailedError extends ResultErrorException {
  */
 export class TaskOccurrenceNotFoundError extends ResultErrorException {
   constructor(occurrenceId: string) {
-    super(`任务实例未找到：${occurrenceId}`, 'task_occurrence_not_found', undefined, undefined, 400);
+    super(
+      `任务实例未找到：${occurrenceId}`,
+      'task_occurrence_not_found',
+      undefined,
+      undefined,
+      400,
+    );
   }
 }
 

@@ -55,8 +55,6 @@ describe('W7 unified metric naming (B): notification collector', () => {
   });
 
   it('worker outcome keys follow memoflow.notification.worker.<outcome>', () => {
-    expect(workerMetricKey('notification', 'failed')).toBe(
-      'memoflow.notification.worker.failed',
-    );
+    expect(workerMetricKey('notification', 'failed')).toBe('memoflow.notification.worker.failed');
   });
 });

@@ -1,6 +1,6 @@
 /**
  * E2E 测试配置
- * 
+ *
  * 这个文件定义了 E2E 测试的所有环境配置
  * 包括 API URL、端口、超时等
  */
@@ -14,13 +14,13 @@ export const API_CONFIG = {
    * 默认: http://localhost:3000
    */
   BASE_URL: process.env.E2E_API_BASE_URL || 'http://localhost:3000',
-  
+
   /**
    * API 版本前缀
    * 默认: /api/v1
    */
   API_PREFIX: '/api/v1',
-  
+
   /**
    * 完整 API URL
    */
@@ -32,7 +32,7 @@ export const API_CONFIG = {
   get AUTH_URL() {
     return `${this.BASE_URL}/api/auth`;
   },
-  
+
   /**
    * 健康检查端点
    */
@@ -48,12 +48,12 @@ export const WEB_CONFIG = {
    * 默认: http://127.0.0.1:5173
    */
   BASE_URL: process.env.E2E_WEB_BASE_URL || 'http://127.0.0.1:5173',
-  
+
   /**
    * 登录页面路径
    */
   LOGIN_PATH: '/auth',
-  
+
   /**
    * 首页路径
    */
@@ -68,12 +68,12 @@ export const WEB_CONFIG = {
    * Tasks 页面路径
    */
   TASKS_PATH: '/tasks',
-  
+
   /**
    * Goals 页面路径
    */
   GOALS_PATH: '/goals',
-  
+
   /**
    * 获取完整 URL
    */
@@ -96,17 +96,17 @@ export const TIMEOUT_CONFIG = {
    * 可能明显慢于普通页面导航；这不是业务交互超时。
    */
   AUTH_BOOTSTRAP: 60000,
-  
+
   /**
    * 元素等待超时
    */
   ELEMENT_WAIT: 10000,
-  
+
   /**
    * API 请求超时
    */
   API_REQUEST: 10000,
-  
+
   /**
    * Auth mutation timeout. The first Better Auth write in a serial audit can
    * include cold server/module/DB initialization, so it gets a wider budget
@@ -118,17 +118,17 @@ export const TIMEOUT_CONFIG = {
    * 登录操作超时
    */
   LOGIN: 15000,
-  
+
   /**
    * 短暂等待（用于 UI 动画等）
    */
   SHORT_WAIT: 500,
-  
+
   /**
    * 中等等待
    */
   MEDIUM_WAIT: 1000,
-  
+
   /**
    * 长时间等待
    */
@@ -147,7 +147,7 @@ export const TEST_USERS = {
     password: 'Test123456!',
     email: 'testuser@example.com',
   },
-  
+
   /**
    * 第二个测试用户
    */
@@ -156,7 +156,7 @@ export const TEST_USERS = {
     password: 'Test123456!',
     email: 'testuser2@example.com',
   },
-  
+
   /**
    * 管理员测试用户
    */
@@ -175,12 +175,12 @@ export const DEBUG_CONFIG = {
    * 是否启用详细日志
    */
   VERBOSE: process.env.E2E_VERBOSE === 'true',
-  
+
   /**
    * 是否在失败时截图
    */
   SCREENSHOT_ON_FAILURE: process.env.E2E_SCREENSHOT !== 'false',
-  
+
   /**
    * 是否录制视频
    */

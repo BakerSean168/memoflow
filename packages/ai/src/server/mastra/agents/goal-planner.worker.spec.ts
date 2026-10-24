@@ -46,12 +46,14 @@ describe('GoalPlannerWorker GoalPlanDraft V2 knowledge evidence', () => {
       if (doGenerate.mock.calls.length === 1) {
         expect(options.tools?.some((tool) => tool.name === 'goal_set_name')).toBe(true);
         return {
-          content: [{
-            type: 'tool-call' as const,
-            toolCallId: 'model-tool-1',
-            toolName: 'goal_set_name',
-            input: JSON.stringify({ actionId: 'model-1', value: 'Native Goal Preview' }),
-          }],
+          content: [
+            {
+              type: 'tool-call' as const,
+              toolCallId: 'model-tool-1',
+              toolName: 'goal_set_name',
+              input: JSON.stringify({ actionId: 'model-1', value: 'Native Goal Preview' }),
+            },
+          ],
           finishReason: 'tool-calls' as const,
           usage: { inputTokens: 10, outputTokens: 12, totalTokens: 22 },
           warnings: [],
@@ -70,7 +72,9 @@ describe('GoalPlannerWorker GoalPlanDraft V2 knowledge evidence', () => {
       modelId: 'goal-model',
       supportedUrls: {},
       doGenerate,
-      doStream: vi.fn(async () => { throw new Error('Unexpected streaming request'); }),
+      doStream: vi.fn(async () => {
+        throw new Error('Unexpected streaming request');
+      }),
     };
     const resolver = {
       resolve: vi.fn(async () => ({
@@ -78,8 +82,11 @@ describe('GoalPlannerWorker GoalPlanDraft V2 knowledge evidence', () => {
         providerName: 'Mock Provider',
         modelId: 'goal-model',
         capabilities: {
-          chat: 'verified', streaming: 'unknown',
-          structuredOutput: 'verified', toolCalling: 'verified', vision: 'unknown',
+          chat: 'verified',
+          streaming: 'unknown',
+          structuredOutput: 'verified',
+          toolCalling: 'verified',
+          vision: 'unknown',
         },
         model,
       })),
@@ -97,13 +104,19 @@ describe('GoalPlannerWorker GoalPlanDraft V2 knowledge evidence', () => {
       return { sequence: staged.length, command };
     });
     ctx.setRaw(GOAL_WORKFLOW_LIVE_ACTION_SINK_KEY, {
-      identityId: 'identity-1', runId: 'run-1', revision: 1, append,
+      identityId: 'identity-1',
+      runId: 'run-1',
+      revision: 1,
+      append,
     });
     const worker = new GoalPlannerWorker(resolver as never, knowledge, undefined, contextAssembler);
     await expect(worker.plan(request(), ctx)).resolves.toEqual(decision());
     expect(doGenerate).toHaveBeenCalledTimes(2);
     expect(append).toHaveBeenCalledWith({
-      actionId: 'model-1', revision: 1, operation: 'goal.setName', value: 'Native Goal Preview',
+      actionId: 'model-1',
+      revision: 1,
+      operation: 'goal.setName',
+      value: 'Native Goal Preview',
     });
   });
 
@@ -114,7 +127,9 @@ describe('GoalPlannerWorker GoalPlanDraft V2 knowledge evidence', () => {
       getNoteById: vi.fn(async () => null),
     };
     const worker = new GoalPlannerWorker({} as never, knowledge, undefined, contextAssembler);
-    const generate = vi.spyOn(worker.agent, 'generate').mockResolvedValue({ object: decision() } as never);
+    const generate = vi
+      .spyOn(worker.agent, 'generate')
+      .mockResolvedValue({ object: decision() } as never);
     const regular = new RequestContext();
     await worker.plan(request(), regular);
     expect(generate.mock.calls[0]?.[1]).not.toHaveProperty('maxSteps');

@@ -47,6 +47,7 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ### 选项 2: 分步提交（推荐用于细致审查）
 
 #### 步骤 1: 核心 Agent Runtime 基础设施
+
 ```bash
 git add apps/ai-service/src/ai_service/agent_runtime/
 git add apps/ai-service/src/ai_service/api/routes/agents.py
@@ -62,6 +63,7 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
 
 #### 步骤 2: TS 侧 Agent 集成
+
 ```bash
 git add packages/ai/src/
 git add packages/contracts/src/modules/ai/api/ai-agent.dto.ts
@@ -77,6 +79,7 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
 
 #### 步骤 3: 前端 AI Workspace
+
 ```bash
 git add packages/app-vue/src/modules/ai/
 git add packages/app-vue/src/router/
@@ -92,6 +95,7 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
 
 #### 步骤 4: Knowledge Generation 增强（本次会话核心）
+
 ```bash
 git add apps/ai-service/src/ai_service/agent_runtime/graphs/knowledge_generate.py
 git add apps/ai-service/src/ai_service/agent_runtime/runtime.py
@@ -111,6 +115,7 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
 
 #### 步骤 5: 测试和文档
+
 ```bash
 git add apps/ai-service/tests/
 git add apps/web/e2e/ai/
@@ -128,6 +133,7 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
 
 #### 步骤 6: 配置和工具链
+
 ```bash
 git add package.json
 git add apps/ai-service/pyproject.toml
@@ -169,41 +175,50 @@ pnpm nx run web:e2e:ai-workspace
 # AI Agent Master Implementation
 
 ## 概述
+
 完成 AI Agent Master 实施的所有核心功能（Phase 1-5）和大部分 Phase 6。
 
 ## 主要特性
+
 - ✅ Goal Agent：完整的目标创建 workflow
 - ✅ Knowledge Q&A：基于个人知识库的问答
 - ✅ Knowledge Generation：高质量内容生成 + 智能重复检测
 
 ## 本次重点（2026-06-12）
+
 Knowledge Generation 增强：
+
 - 接入真实 KnowledgeNoteService（provider-backed 生成）
 - 接入真实知识库搜索（duplicate detection）
 - 评估 duplicate risk（none/low/medium/high）
 - 填充 relatedNotes（前 5 条相似笔记）
 
 ## 架构
+
 - LangGraph runtime + interrupt/resume + checkpoint
 - 受控执行边界（Python runtime, TS executors）
 - File-backed checkpoint（当前可用）
 - Database checkpoint（代码已完成，待 migration）
 
 ## 测试
+
 - ✅ 43 个 Agent Runtime 测试通过
 - ✅ 8 个 E2E 测试通过
 - ✅ 完整的 typecheck 和 lint 覆盖
 
 ## 变更统计
+
 - 107 个文件修改
 - +16,600 行新增，-965 行删除
 
 ## 文档
+
 - [实施计划](docs/plan/archive/2026-06-08-ai-agent-master-implementation-plan.md)
 - [最终总结](docs/plan/archive/2026-06-12-ai-agent-implementation-final-summary.md)
 - [Release Notes](./AI_AGENT_RELEASE_NOTES.md)
 
 ## 后续工作
+
 - [ ] 运行 checkpoint database migration（生产需要）
 - [ ] 增强 approval 编辑面（可选）
 - [ ] 补充完整 E2E 验证（可选）
@@ -227,6 +242,7 @@ Knowledge Generation 增强：
 ## 合并建议
 
 **推荐**：使用选项 1（单次提交），因为：
+
 - 所有功能已经过完整测试
 - 各部分紧密关联，难以独立部署
 - 107 个文件的改动已经是一个逻辑完整的单元

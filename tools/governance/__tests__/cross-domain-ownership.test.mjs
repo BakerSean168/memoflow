@@ -78,9 +78,9 @@ describe('cross-domain ownership governance', () => {
       'production-import',
       'retired-vocabulary',
     ]);
-    expect(violations.every((violation) => violation.relativePath.includes('src/__tests__') === false)).toBe(
-      true,
-    );
+    expect(
+      violations.every((violation) => violation.relativePath.includes('src/__tests__') === false),
+    ).toBe(true);
   });
 
   it('requires ownership metadata and permanent architecture justification for exceptions', () => {

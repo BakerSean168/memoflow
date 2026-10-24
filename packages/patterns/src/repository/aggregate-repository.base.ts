@@ -101,8 +101,7 @@ export async function publishAggregateEvents(
             eventType: event.eventType,
             aggregateId: aggregate.id,
             error: errorText,
-            outboxError:
-              outboxError instanceof Error ? outboxError.message : String(outboxError),
+            outboxError: outboxError instanceof Error ? outboxError.message : String(outboxError),
           });
           metrics?.increment('outbox.fallback.failed');
         }
@@ -127,9 +126,9 @@ export async function publishAggregateEvents(
  * 2. Handle event publish failures gracefully
  * 3. Provide a unified error handling pattern
  */
-export abstract class AggregateRepositoryBase<T extends AggregateRoot<string | number | Equatable>>
-  implements IAggregateRepository<T>
-{
+export abstract class AggregateRepositoryBase<
+  T extends AggregateRoot<string | number | Equatable>,
+> implements IAggregateRepository<T> {
   /**
    * @param eventBus 低延迟事件总线（首选投递目标）。
    * @param outboxWriter 可选 durable outbox 兜底（R1-2）：总线失败时事件入队，

@@ -85,11 +85,7 @@ export function AuthScreen() {
   }
 
   const activeTitle =
-    scene === 'sign-in'
-      ? 'Sign in'
-      : scene === 'register'
-        ? 'Create account'
-        : 'Recover password';
+    scene === 'sign-in' ? 'Sign in' : scene === 'register' ? 'Create account' : 'Recover password';
 
   return (
     <ThemedView type="background" style={styles.page}>
@@ -97,7 +93,8 @@ export function AuthScreen() {
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}>
+          showsVerticalScrollIndicator={false}
+        >
           <ThemedView style={styles.hero}>
             <AnimatedIcon />
             <ThemedText type="title" style={styles.centerText}>
@@ -235,7 +232,10 @@ export function AuthScreen() {
                   <ThemedText type="small" themeColor="textSecondary">
                     {' | '}
                   </ThemedText>
-                  <SceneLink label="Forgot password" onPress={() => switchScene('forgot-password')} />
+                  <SceneLink
+                    label="Forgot password"
+                    onPress={() => switchScene('forgot-password')}
+                  />
                   <ThemedText type="small" themeColor="textSecondary">
                     {' | '}
                   </ThemedText>

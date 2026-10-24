@@ -35,15 +35,23 @@ function walk(dir, out = []) {
   }
   for (const entry of entries) {
     if (
-      ['node_modules', 'dist', 'build', 'coverage', '.git', '.nx', 'dist-electron', 'dist-renderer'].includes(
-        entry.name,
-      )
+      [
+        'node_modules',
+        'dist',
+        'build',
+        'coverage',
+        '.git',
+        '.nx',
+        'dist-electron',
+        'dist-renderer',
+      ].includes(entry.name)
     ) {
       continue;
     }
     const full = join(dir, entry.name);
     if (entry.isDirectory()) walk(full, out);
-    else if (/\.(ts|tsx|js|mjs|cjs|vue)$/.test(entry.name) && !entry.name.endsWith('.d.ts')) out.push(full);
+    else if (/\.(ts|tsx|js|mjs|cjs|vue)$/.test(entry.name) && !entry.name.endsWith('.d.ts'))
+      out.push(full);
   }
   return out;
 }
@@ -80,8 +88,12 @@ for (const scanRoot of scanRoots) {
 if (violations.length) {
   console.error('[product-time-surface-audit] FAIL: retired Product Time surface resurrected:');
   for (const violation of violations) console.error('  -', violation);
-  console.error('Fix: resolve a canonical TimeContext at the boundary and use @memoflow/time explicitly.');
+  console.error(
+    'Fix: resolve a canonical TimeContext at the boundary and use @memoflow/time explicitly.',
+  );
   process.exit(1);
 }
 
-console.log('[product-time-surface-audit] OK: no retired ambient/mixed Product Time surface in production.');
+console.log(
+  '[product-time-surface-audit] OK: no retired ambient/mixed Product Time surface in production.',
+);

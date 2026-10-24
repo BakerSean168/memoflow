@@ -47,33 +47,31 @@ export class PauseTaskPlanUseCase {
   ): Promise<Result<{ plan: TaskPlanClientDTO; instancesDeleted: number }>> {
     try {
       const timeContext = await this.userTimeContextPort.getUserTimeContext(identityId);
-      return await this.transactionRunner.run(
-        async ({ planRepository, occurrenceRepository }) => {
-          const plan = await planRepository!.findByIdForIdentity(identityId, id);
-          if (!plan) {
-            return error('NOT_FOUND', `TaskPlan ${id} not found`);
-          }
+      return await this.transactionRunner.run(async ({ planRepository, occurrenceRepository }) => {
+        const plan = await planRepository!.findByIdForIdentity(identityId, id);
+        if (!plan) {
+          return error('NOT_FOUND', `TaskPlan ${id} not found`);
+        }
 
-          const effectiveFrom = Date.now();
-          const effectiveFromDate = createTimeFacade({ context: timeContext }).calendar.toYmd(
-            effectiveFrom,
-          );
+        const effectiveFrom = Date.now();
+        const effectiveFromDate = createTimeFacade({ context: timeContext }).calendar.toYmd(
+          effectiveFrom,
+        );
 
-          plan.pause();
-          await planRepository!.save(plan);
+        plan.pause();
+        await planRepository!.save(plan);
 
-          const instancesDeleted = await occurrenceRepository.deleteIncompleteOccurrencesFrom(
-            id,
-            identityId,
-            effectiveFromDate,
-          );
+        const instancesDeleted = await occurrenceRepository.deleteIncompleteOccurrencesFrom(
+          id,
+          identityId,
+          effectiveFromDate,
+        );
 
-          return ok({
-            plan: plan.toClientDTOAt(timeContext, false, effectiveFrom),
-            instancesDeleted,
-          });
-        },
-      );
+        return ok({
+          plan: plan.toClientDTOAt(timeContext, false, effectiveFrom),
+          instancesDeleted,
+        });
+      });
     } catch (caughtError) {
       this.logger.error('Failed to pause task plan', { error: caughtError });
       return fail(mapTaskWriteErrorToResultError(caughtError, 'Failed to pause task plan'));

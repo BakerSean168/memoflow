@@ -13,14 +13,14 @@
 [failure-contract-inventory] passed (no new or expired production findings).
 ```
 
-| Rule                        | Baseline | Final |
-| --------------------------- | -------: | ----: |
-| `DOMAIN_ERROR_SUBCLASS`     |       51 |     0 |
-| `FAILURE_MESSAGE_BRANCH`    |       54 |     0 |
-| `PROVIDER_CODE_LEAKAGE`     |        6 |     0 |
-| `RAW_RESULT_MESSAGE_RETHROW`|       26 |     0 |
-| `UI_RAW_RESULT_MESSAGE`     |       82 |     1* |
-| **Total**                   |   **219** | **1** |
+| Rule                         | Baseline | Final |
+| ---------------------------- | -------: | ----: |
+| `DOMAIN_ERROR_SUBCLASS`      |       51 |     0 |
+| `FAILURE_MESSAGE_BRANCH`     |       54 |     0 |
+| `PROVIDER_CODE_LEAKAGE`      |        6 |     0 |
+| `RAW_RESULT_MESSAGE_RETHROW` |       26 |     0 |
+| `UI_RAW_RESULT_MESSAGE`      |       82 |    1* |
+| **Total**                    |  **219** | **1** |
 
 \* = `apps/desktop/src/renderer/main.ts:17` — startup-crash `formatError()` (error
 boundary / programmer crash). Deliberately retained as the documented **internal developer
@@ -28,16 +28,16 @@ surface** (translating would hide the crash cause; NOT a public operation failur
 
 ## 2. Batch ledger (all merged, CI-green)
 
-| PR   | Scope | Inventory delta | Merge commit |
-| ---- | ----- | --------------- | ------------ |
-| #234 | app-vue surface-spec sync to typed error (fix #234 CI) | — | `a244cb2` |
-| #235 | ACR-032 Batch A: app-vue + desktop renderer presentation | UI_RAW 82→63 | `961a1cf` |
-| #236 | ACR-032 Batch B: mobile (app-react) presentation + `presentErrorMessage` | UI_RAW 63→1 | `fcb499d` |
-| #237 | message-text control flow → typed (8 findings) | MSG_BRANCH 8→0 | `c48f8e4` |
-| #238 | Goal DomainError → ResultErrorException pilot (16) | DOMAIN 47→31 | `df68c76` |
-| #239 | task/schedule/reminder/setting DomainError → ResultErrorException (24) | DOMAIN 31→7 | `386c228` |
-| #240 | **ACR-080**: retire DomainError base + isDomainError + 6 dead classes | DOMAIN 7→0 | `98151ca` |
-| #241 | **RAW_RETHROW** 20→0 + scanner precision (3 false positives) | RETHROW 20→0 | `0f0e5b0` |
+| PR   | Scope                                                                    | Inventory delta | Merge commit |
+| ---- | ------------------------------------------------------------------------ | --------------- | ------------ |
+| #234 | app-vue surface-spec sync to typed error (fix #234 CI)                   | —               | `a244cb2`    |
+| #235 | ACR-032 Batch A: app-vue + desktop renderer presentation                 | UI_RAW 82→63    | `961a1cf`    |
+| #236 | ACR-032 Batch B: mobile (app-react) presentation + `presentErrorMessage` | UI_RAW 63→1     | `fcb499d`    |
+| #237 | message-text control flow → typed (8 findings)                           | MSG_BRANCH 8→0  | `c48f8e4`    |
+| #238 | Goal DomainError → ResultErrorException pilot (16)                       | DOMAIN 47→31    | `df68c76`    |
+| #239 | task/schedule/reminder/setting DomainError → ResultErrorException (24)   | DOMAIN 31→7     | `386c228`    |
+| #240 | **ACR-080**: retire DomainError base + isDomainError + 6 dead classes    | DOMAIN 7→0      | `98151ca`    |
+| #241 | **RAW_RETHROW** 20→0 + scanner precision (3 false positives)             | RETHROW 20→0    | `0f0e5b0`    |
 
 ## 3. Architecture outcome (ACR-080)
 

@@ -334,12 +334,7 @@ describe('TaskOccurrence canonical aggregate (TASK-7303)', () => {
       dueAt: Date.parse('2026-03-09T09:30:00.000Z'),
       isOverdue: false,
     });
-    for (const retired of [
-      'occurrenceDate',
-      'timeConfig',
-      'actualEndTime',
-      'comment',
-    ]) {
+    for (const retired of ['occurrenceDate', 'timeConfig', 'actualEndTime', 'comment']) {
       expect(dto).not.toHaveProperty(retired);
     }
   });

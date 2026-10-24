@@ -193,7 +193,9 @@ describe('controlled note-write boundary surface', () => {
 
   it('legacy Editor runtime and persistence stay deleted', () => {
     expect(existsSync(resolve(repoRoot, 'packages/editor'))).toBe(false);
-    expect(existsSync(resolve(repoRoot, 'packages/database/prisma/schema/editor.prisma'))).toBe(false);
+    expect(existsSync(resolve(repoRoot, 'packages/database/prisma/schema/editor.prisma'))).toBe(
+      false,
+    );
     expect(
       existsSync(
         resolve(repoRoot, 'packages/database/scripts/prepare-editor-workspace-natural-key.ts'),

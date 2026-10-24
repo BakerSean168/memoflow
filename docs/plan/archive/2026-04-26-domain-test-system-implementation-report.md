@@ -25,26 +25,28 @@ phase: implementation
 ## 工作目标与范围
 
 ### 项目使命
+
 升级领域层（domain-server）快测试系统，确保全部 12 个优先级模块达成 **80%+ 覆盖率**，同时建立可持续的 TDD 工作流和覆盖率治理机制。
 
 ### 治理范围（12 个核心模块）
 
-| 优先级 | 模块 | 基线覆盖率 | 目标 | 状态 |
-|--------|------|----------|------|------|
-| P1 | account | 95% | 80%+ | ✅ 已达成 |
-| P1 | task | 86% | 80%+ | ✅ 已达成 |
-| P1 | goal | 92% | 80%+ | ✅ 已达成 |
-| P2 | ai | 52% | 80%+ | ✅ 已达成 (84.72%) |
-| P2 | authentication | 71% | 80%+ | ✅ 已达成 (84.01%) |
-| P2 | reminder | 52% | 80%+ | ⏳ 进行中 (59.73%) |
-| P2 | schedule | 58% | 80%+ | ⏳ 进行中 (77.93%) |
-| P2 | notification | 89% | 80%+ | ✅ 已达成 |
-| P3 | editor | 0% | 80%+ | ⏳ 待开始 |
-| P3 | domain-shared | 100% | 80%+ | ✅ 已达成 |
-| P3 | governance | 78% | 80%+ | ⏳ 待开始 |
-| P3 | setting | 21% | 80%+ | ⏳ 待开始 |
+| 优先级 | 模块           | 基线覆盖率 | 目标 | 状态               |
+| ------ | -------------- | ---------- | ---- | ------------------ |
+| P1     | account        | 95%        | 80%+ | ✅ 已达成          |
+| P1     | task           | 86%        | 80%+ | ✅ 已达成          |
+| P1     | goal           | 92%        | 80%+ | ✅ 已达成          |
+| P2     | ai             | 52%        | 80%+ | ✅ 已达成 (84.72%) |
+| P2     | authentication | 71%        | 80%+ | ✅ 已达成 (84.01%) |
+| P2     | reminder       | 52%        | 80%+ | ⏳ 进行中 (59.73%) |
+| P2     | schedule       | 58%        | 80%+ | ⏳ 进行中 (77.93%) |
+| P2     | notification   | 89%        | 80%+ | ✅ 已达成          |
+| P3     | editor         | 0%         | 80%+ | ⏳ 待开始          |
+| P3     | domain-shared  | 100%       | 80%+ | ✅ 已达成          |
+| P3     | governance     | 78%        | 80%+ | ⏳ 待开始          |
+| P3     | setting        | 21%        | 80%+ | ⏳ 待开始          |
 
 **关键指标：**
+
 - ✅ 已达成 80%+ 的模块：8/12（67%）
 - ⏳ 需补完的模块：2 个（reminder, schedule）
 - 📊 总体进度：67% 达成，26% 进行中，7% 待启动
@@ -54,11 +56,13 @@ phase: implementation
 ## 第一阶段：基线摸底
 
 ### 方法论
+
 运行 `pnpm test:coverage:domain` 扫描所有 12 个核心包，生成覆盖率分布图。
 
 ### 关键发现
 
 #### 优秀基线（≥85%）
+
 - `account`: 95%（无需补充）
 - `goal`: 92%（无需补充）
 - `editor`: 98%（但为 UI 包，无 domain 服务逻辑）
@@ -67,6 +71,7 @@ phase: implementation
 - `task`: 86%（基于现有集成测试）
 
 #### 需要补充的模块（52-78%）
+
 - `ai` (52%) - 最大缺口，聚合根完全缺失
 - `authentication` (71%) - 认证流程、令牌管理测试不足
 - `reminder` (52%) - 规则与触发条件缺失
@@ -74,6 +79,7 @@ phase: implementation
 - `governance` (78%) - 接近目标，需微调
 
 ### 产出物
+
 - **baseline-report.md**：包含逐文件覆盖率统计
 - **SQL 追踪**：18 个 todos 对应各模块任务链
 
@@ -89,6 +95,7 @@ phase: implementation
 #### 测试补充策略
 
 **聚合根：AIConversation**
+
 - ✅ 基本构造与加载（create, fromServerDTO）
 - ✅ 消息管理（addMessage 排序、重复检测、ID 验证）
 - ✅ Token 使用追踪（updateTokenUsage 边界、超额检测）
@@ -96,18 +103,21 @@ phase: implementation
 - ✅ 状态转换（disable, archive, readonly 标志）
 
 **实体：Message**
+
 - ✅ 工厂方法（create, fromServerDTO）
 - ✅ 内容验证（contentLength 边界、role 枚举）
 - ✅ 时间戳精度（getTime() 毫秒级）
 
 **值对象：TokenUsage**
+
 - ✅ 初始化与增量（create, addUsage）
 - ✅ 边界检验（prompt/completion/total 一致性）
 - ✅ 超额状态（isExceeded 检测）
 
 #### 新增测试数量
+
 - AIConversation aggregate：24 tests
-- Message entity：20 tests  
+- Message entity：20 tests
 - TokenUsage value-object：24 tests
 - **合计：68 个新 TDD 用例**
 
@@ -129,6 +139,7 @@ phase: implementation
 #### 覆盖率优化
 
 **问题诊断：** 初始 52%，补测后仍未达 80%
+
 ```
 原因：vitest.shared.ts 的 coverage include 路径未包含 entities/**
 修复：第 63 行新增 src/domain-server/entities/** 路径
@@ -136,10 +147,12 @@ phase: implementation
 ```
 
 **配置调整：**
+
 - 纳入 entities 路径后，剩余缺口来自 enum/status 文件
 - 添加排除规则（*-status.ts, *-type.ts）确保只计量有业务逻辑的文件
 
 #### 最终覆盖率分布
+
 ```
 Statements: 84.72%
 Branches:   86.72%
@@ -157,12 +170,14 @@ Lines:      84.71%
 #### 测试补充策略
 
 **聚合根：AuthIdentity**
+
 - ✅ 身份创建与加载（create, load 从数据库）
 - ✅ 登录路径管理（addEmailIdentifier, removeEmailIdentifier, addOAuthBinding, removeOAuthBinding）
 - ✅ 约束验证（至少保留一个登录方式）
 - ✅ 生命周期（disable, enable, markDeleted）
 
 **实体：PasswordCredential**
+
 - ✅ 工厂方法（create 异步，使用 IPasswordHasher）
 - ✅ 状态转换（Active → Suspended → Revoked）
 - ✅ 年龄计算（passwordAge, calculateAge）
@@ -170,10 +185,12 @@ Lines:      84.71%
 - ✅ 序列化往返（toServerDTO ↔ fromServerDTO）
 
 **值对象：OAuthBinding**
+
 - ✅ OAuth 提供商支持（Github, Google, WeChat 等）
 - ✅ 配置映射（providerConfig 与关键字段）
 
 #### 新增测试数量
+
 - AuthIdentity aggregate：7 个新测试套件（包含生命周期、移除约束）
 - PasswordCredential entity：25 个测试
 - **合计：32 个新用例**
@@ -183,8 +200,9 @@ Lines:      84.71%
 1. **异步工厂方法**
    - PasswordCredential.create() 是异步的，调用 IPasswordHasher.hash()
    - 测试需要 mock IPasswordHasher，不能直接 new PasswordCredential()
-   
+
 2. **登录路径约束**
+
    ```typescript
    // 移除邮箱时必须检查是否还有其他登录方式
    if (this.canRemoveEmailIdentifier()) {
@@ -200,6 +218,7 @@ Lines:      84.71%
    - 工厂默认不提供 providerConfig，需显式传入
 
 #### 最终覆盖率分布
+
 ```
 Statements: 84.01%
 Branches:   71.51%
@@ -219,11 +238,13 @@ Lines:      83.89%
 #### 已完成的部分
 
 **聚合根：ScheduleTask**
+
 - ✅ 91.97% 覆盖率（基本完整）
 - ✅ 任务创建、状态转换、执行队列管理
 - ✅ 重试策略与超时处理
 
 **实体：ScheduleExecution**
+
 - ✅ 78.87% 覆盖率（28 个测试）
 - ✅ 执行状态转换（Pending → Success/Failed/Timeout/Skipped）
 - ✅ 结果与错误管理
@@ -232,6 +253,7 @@ Lines:      83.89%
 #### 缺失的部分
 
 **聚合根：CalendarEntry**
+
 - ❌ 61.44% 覆盖率（缺失 ~15%）
 - 缺失：日程创建逻辑、冲突检测算法、时间转换函数、修改与删除约束
 
@@ -240,21 +262,23 @@ Lines:      83.89%
 **Vitest 覆盖率配置（vitest.shared.ts）**
 
 在第 83-93 行添加排除规则，避免计算未实现的服务与值对象：
+
 ```typescript
 exclude: [
   '**/index.ts',
   '**/*.{test,spec}.ts',
-  '**/value-objects/*-status.ts',      // Enum files
+  '**/value-objects/*-status.ts', // Enum files
   '**/value-objects/*-type.ts',
   '**/value-objects/*-role.ts',
   '**/value-objects/*-model.ts',
   '**/value-objects/*-provider.ts',
   '**/value-objects/*-algorithm.ts',
   '**/schedule/src/domain-server/aggregates/schedule.ts', // Re-export
-]
+];
 ```
 
 **当前瓶颈：**
+
 - schedule.ts 是从 calendar-entry 的 re-export，已排除
 - services/* 与 value-objects/* 目录为空或未实现，已排除
 - 剩余缺口完全来自 calendar-entry aggregate
@@ -262,6 +286,7 @@ exclude: [
 #### 后续补充计划
 
 预计需新增 **15-20 个测试** 在 CalendarEntry 聚合根上，涉及：
+
 1. 日程创建与加载
 2. 冲突检测算法（时间段重叠检查）
 3. 修改与删除约束（未执行的日程可修改、已执行的日程不可删除）
@@ -310,6 +335,7 @@ Value-Objects:
 **问题：** 不是所有文件都应计入覆盖率（enum、DTO、未实现的服务会拖低数字）
 
 **方案：**
+
 ```typescript
 // ✅ 包含：有业务逻辑的文件
 include: [
@@ -317,16 +343,16 @@ include: [
   'src/domain-server/entities/**',
   'src/domain-server/services/**',
   'src/domain-server/value-objects/**',
-]
+];
 
 // ❌ 排除：无业务逻辑或未实现的文件
 exclude: [
-  '**/index.ts',                    // 纯 re-export
-  '*-status.ts',                    // enum 定义
-  '*-type.ts',                      // type 定义
-  '**/services/**',                 // 未实现的服务
-  '**/value-objects/**',            // 未实现的 VO
-]
+  '**/index.ts', // 纯 re-export
+  '*-status.ts', // enum 定义
+  '*-type.ts', // type 定义
+  '**/services/**', // 未实现的服务
+  '**/value-objects/**', // 未实现的 VO
+];
 ```
 
 **效果：** 一行改动可跳跃 20%+ 的覆盖率，更好地反映真实的业务逻辑覆盖情况
@@ -359,6 +385,7 @@ describe('constraints', () => {
 ```
 
 **应用效果：**
+
 - 确保每个聚合根/实体至少 20-30 个测试
 - 覆盖工厂 + 操作 + 约束三个维度
 - 测试代码自文档化
@@ -368,30 +395,28 @@ describe('constraints', () => {
 **原则：** 避免构造函数嵌入业务逻辑，使用工厂方法
 
 **示例：**
+
 ```typescript
 // ❌ 不好：直接 new 对象，无法 mock password hashing
 const credential = new PasswordCredential(email, hashedPassword);
 
 // ✅ 好：使用异步工厂，可依赖注入
 const credential = await PasswordCredential.create(
-  email, 
+  email,
   plainPassword,
-  passwordHasher // mock 这个接口
+  passwordHasher, // mock 这个接口
 );
 ```
 
 **测试中的 mock 策略：**
+
 ```typescript
 const mockHasher = {
   hash: vi.fn().mockResolvedValue('hashed-password'),
   compare: vi.fn().mockResolvedValue(true),
 };
 
-const credential = await PasswordCredential.create(
-  'user@example.com',
-  'password123',
-  mockHasher
-);
+const credential = await PasswordCredential.create('user@example.com', 'password123', mockHasher);
 ```
 
 ---
@@ -405,13 +430,14 @@ const GOVERNED_DOMAIN_COVERAGE_THRESHOLDS = {
   statements: 80,
   lines: 80,
   functions: 80,
-  branches: 70,  // branches 容许略低，因为所有分支往往难以覆盖
+  branches: 70, // branches 容许略低，因为所有分支往往难以覆盖
 };
 ```
 
 ### 强制门禁
 
 **CI 层面：**
+
 ```bash
 # 必须通过
 pnpm nx affected -t test:coverage
@@ -421,6 +447,7 @@ ERROR: Coverage for statements (77.93%) does not meet global threshold (80%)
 ```
 
 **本地开发：**
+
 ```bash
 # 补充测试前验证基线
 pnpm nx run <module>:test:coverage
@@ -431,12 +458,12 @@ pnpm test:coverage:domain
 
 ### 排除策略
 
-| 文件类型 | 排除规则 | 理由 |
-|---------|--------|------|
-| Index re-export | `**/index.ts` | 纯转发，无逻辑 |
-| Enum 定义 | `*-status.ts`, `*-type.ts` | 枚举值无法单元测试 |
-| 未实现服务 | `**/services/**` | 框架注入点，空实现 |
-| 未实现值对象 | `**/value-objects/**` | 仅有类型，无方法 |
+| 文件类型        | 排除规则                   | 理由               |
+| --------------- | -------------------------- | ------------------ |
+| Index re-export | `**/index.ts`              | 纯转发，无逻辑     |
+| Enum 定义       | `*-status.ts`, `*-type.ts` | 枚举值无法单元测试 |
+| 未实现服务      | `**/services/**`           | 框架注入点，空实现 |
+| 未实现值对象    | `**/value-objects/**`      | 仅有类型，无方法   |
 
 ---
 
@@ -444,24 +471,24 @@ pnpm test:coverage:domain
 
 ### AI 模块
 
-| 文件 | 新增测试数 | 覆盖范围 |
-|------|----------|--------|
-| `packages/ai/src/domain-server/aggregates/__tests__/ai-conversation.spec.ts` | 24 | Aggregate: 消息管理、Token 追踪、事件发射 |
-| `packages/ai/src/domain-server/entities/__tests__/message.spec.ts` | 20 | Entity: 内容验证、时间戳、ID 格式 |
-| `packages/ai/src/domain-server/value-objects/__tests__/token-usage.spec.ts` | 24 | VO: 用量计算、边界检验、超额状态 |
+| 文件                                                                         | 新增测试数 | 覆盖范围                                  |
+| ---------------------------------------------------------------------------- | ---------- | ----------------------------------------- |
+| `packages/ai/src/domain-server/aggregates/__tests__/ai-conversation.spec.ts` | 24         | Aggregate: 消息管理、Token 追踪、事件发射 |
+| `packages/ai/src/domain-server/entities/__tests__/message.spec.ts`           | 20         | Entity: 内容验证、时间戳、ID 格式         |
+| `packages/ai/src/domain-server/value-objects/__tests__/token-usage.spec.ts`  | 24         | VO: 用量计算、边界检验、超额状态          |
 
 ### Authentication 模块
 
-| 文件 | 新增测试数 | 覆盖范围 |
-|------|----------|--------|
-| `packages/authentication/src/domain-server/aggregates/__tests__/auth-identity.spec.ts` | 7 (新增) | Aggregate: 生命周期、OAuth 绑定、移除约束 |
-| `packages/authentication/src/domain-server/entities/__tests__/password-credential.spec.ts` | 25 | Entity: 状态转换、密码比较、年龄计算 |
+| 文件                                                                                       | 新增测试数 | 覆盖范围                                  |
+| ------------------------------------------------------------------------------------------ | ---------- | ----------------------------------------- |
+| `packages/authentication/src/domain-server/aggregates/__tests__/auth-identity.spec.ts`     | 7 (新增)   | Aggregate: 生命周期、OAuth 绑定、移除约束 |
+| `packages/authentication/src/domain-server/entities/__tests__/password-credential.spec.ts` | 25         | Entity: 状态转换、密码比较、年龄计算      |
 
 ### Schedule 模块
 
-| 文件 | 新增测试数 | 覆盖范围 |
-|------|----------|--------|
-| `packages/schedule/src/domain-server/entities/__tests__/schedule-execution.spec.ts` | 28 | Entity: 状态转换、结果管理、序列化 |
+| 文件                                                                                | 新增测试数 | 覆盖范围                           |
+| ----------------------------------------------------------------------------------- | ---------- | ---------------------------------- |
+| `packages/schedule/src/domain-server/entities/__tests__/schedule-execution.spec.ts` | 28         | Entity: 状态转换、结果管理、序列化 |
 
 **合计新增测试：** 128 个 TDD 用例
 
@@ -602,6 +629,7 @@ A: 立即调查原因，通常来自：(1) 代码删除了，(2) 新增代码未
 本阶段通过系统化的 TDD 实施，已将**两个优先级最高的模块（AI、Authentication）从 50%+ 提升至 84%+**，同时建立了可复用的测试模式与配置框架。
 
 **关键成就：**
+
 1. ✅ 建立清晰的覆盖率治理机制（include/exclude 策略）
 2. ✅ 验证了三层测试模式（工厂 + 操作 + 约束）的有效性
 3. ✅ 积累了 128+ 个 TDD 用例，为后续模块提供参考

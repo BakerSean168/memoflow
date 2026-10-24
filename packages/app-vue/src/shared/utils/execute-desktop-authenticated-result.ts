@@ -1,17 +1,17 @@
 import type { Result } from '@memoflow/contracts/result';
 
-import {
-  type DesktopAuthApi,
-  recoverDesktopAuthIfNeeded,
-} from './desktop-auth-recovery';
+import { type DesktopAuthApi, recoverDesktopAuthIfNeeded } from './desktop-auth-recovery';
 import { translateResultError } from './translate-result-error';
 
 type TranslateFn = (key: string) => string;
 
-type ResultErrorLike = {
-  code?: string;
-  message?: string;
-} | null | undefined;
+type ResultErrorLike =
+  | {
+      code?: string;
+      message?: string;
+    }
+  | null
+  | undefined;
 
 export interface ExecuteDesktopAuthenticatedResultOptions<T> {
   operation: () => Promise<Result<T>>;
@@ -55,11 +55,7 @@ export async function executeDesktopAuthenticatedResult<T>({
     let result = await operation();
 
     if (!result.ok && result.error && desktopApi) {
-      const recovered = await recoverDesktopAuthIfNeeded(
-        result.error,
-        desktopApi,
-        logScope,
-      );
+      const recovered = await recoverDesktopAuthIfNeeded(result.error, desktopApi, logScope);
 
       if (recovered) {
         result = await operation();
@@ -69,10 +65,7 @@ export async function executeDesktopAuthenticatedResult<T>({
     if (result.ok) {
       await onSuccess?.(result.data);
     } else {
-      await onError?.(
-        result.error,
-        getTranslatedErrorMessage(result.error, t, fallbackKey),
-      );
+      await onError?.(result.error, getTranslatedErrorMessage(result.error, t, fallbackKey));
     }
 
     return result;

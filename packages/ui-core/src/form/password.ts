@@ -135,8 +135,8 @@ function getSecureRandomInt(max: number): number {
     typeof globalThis !== 'undefined' && globalThis.crypto
       ? globalThis.crypto
       : typeof crypto !== 'undefined'
-      ? crypto
-      : null;
+        ? crypto
+        : null;
 
   if (cryptoObj?.getRandomValues) {
     const randomBuffer = new Uint32Array(1);
@@ -155,9 +155,7 @@ function getSecureRandomInt(max: number): number {
   }
 
   // Fallback
-  console.warn(
-    'Crypto.getRandomValues is not available, falling back to insecure Math.random()'
-  );
+  console.warn('Crypto.getRandomValues is not available, falling back to insecure Math.random()');
   return Math.floor(Math.random() * max);
 }
 
@@ -205,14 +203,54 @@ export function generatePassword(length = 16): string {
  */
 export function generatePassphrase(wordCount = 4, separator = '-'): string {
   const words = [
-    'apple', 'banana', 'cherry', 'dragon', 'eagle', 'forest',
-    'garden', 'harbor', 'island', 'jungle', 'knight', 'lemon',
-    'mango', 'noble', 'orange', 'palace', 'quest', 'river',
-    'sunset', 'tiger', 'unicorn', 'voyage', 'wizard', 'zenith',
-    'anchor', 'bridge', 'castle', 'diamond', 'ember', 'falcon',
-    'glacier', 'horizon', 'ivory', 'jasmine', 'kindle', 'lunar',
-    'meadow', 'nebula', 'orchid', 'phoenix', 'quartz', 'rainbow',
-    'silver', 'thunder', 'umbrella', 'velvet', 'willow', 'crystal',
+    'apple',
+    'banana',
+    'cherry',
+    'dragon',
+    'eagle',
+    'forest',
+    'garden',
+    'harbor',
+    'island',
+    'jungle',
+    'knight',
+    'lemon',
+    'mango',
+    'noble',
+    'orange',
+    'palace',
+    'quest',
+    'river',
+    'sunset',
+    'tiger',
+    'unicorn',
+    'voyage',
+    'wizard',
+    'zenith',
+    'anchor',
+    'bridge',
+    'castle',
+    'diamond',
+    'ember',
+    'falcon',
+    'glacier',
+    'horizon',
+    'ivory',
+    'jasmine',
+    'kindle',
+    'lunar',
+    'meadow',
+    'nebula',
+    'orchid',
+    'phoenix',
+    'quartz',
+    'rainbow',
+    'silver',
+    'thunder',
+    'umbrella',
+    'velvet',
+    'willow',
+    'crystal',
   ];
 
   const passphrase: string[] = [];

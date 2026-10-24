@@ -469,18 +469,18 @@ Preference-only V3 import 的失败 containment 为：
 
 必须至少有：
 
-| Invariant                                  | Evidence                                      |
-| ------------------------------------------ | --------------------------------------------- |
-| theme 不覆盖 timezone                      | concurrent namespace fixture                  |
-| stale revision 不静默覆盖                  | Prisma CAS integration                        |
-| Prisma/PowerSync payload 等价              | round-trip fixture                            |
-| unknown namespace/key 被拒绝               | contract tests                                |
-| V3 preference import/export strict         | V3 contract + use-case fixtures               |
-| V1/V2 preference backup 被拒绝             | destructive-cutover regression                |
-| import 不信任 identityId                   | security/portability test                     |
-| device/Notification/AI/Knowledge 不混入    | strict owner payload schema tests             |
-| Account.settings 完全退出                  | source/schema surface lock                    |
-| old `user_settings` 完全退出               | SETTING-9209 canonical-only architecture lock |
+| Invariant                               | Evidence                                      |
+| --------------------------------------- | --------------------------------------------- |
+| theme 不覆盖 timezone                   | concurrent namespace fixture                  |
+| stale revision 不静默覆盖               | Prisma CAS integration                        |
+| Prisma/PowerSync payload 等价           | round-trip fixture                            |
+| unknown namespace/key 被拒绝            | contract tests                                |
+| V3 preference import/export strict      | V3 contract + use-case fixtures               |
+| V1/V2 preference backup 被拒绝          | destructive-cutover regression                |
+| import 不信任 identityId                | security/portability test                     |
+| device/Notification/AI/Knowledge 不混入 | strict owner payload schema tests             |
+| Account.settings 完全退出               | source/schema surface lock                    |
+| old `user_settings` 完全退出            | SETTING-9209 canonical-only architecture lock |
 
 ## 20. Final state
 

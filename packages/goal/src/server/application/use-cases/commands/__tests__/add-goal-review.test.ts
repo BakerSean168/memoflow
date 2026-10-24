@@ -19,14 +19,25 @@ const context = {
 
 function createGoalFixture(overrides?: Record<string, any>) {
   const reviewDto = {
-    id: 'review-id-1', goalId: 'goal-id-1', reflection: 'Good progress',
-    challenges: null, adjustments: null, systemContext: context,
-    reviewedAt: NOW, createdAt: NOW, updatedAt: NOW,
+    id: 'review-id-1',
+    goalId: 'goal-id-1',
+    reflection: 'Good progress',
+    challenges: null,
+    adjustments: null,
+    systemContext: context,
+    reviewedAt: NOW,
+    createdAt: NOW,
+    updatedAt: NOW,
   };
   const createdReview = { id: 'review-id-1', toClientDTO: vi.fn().mockReturnValue(reviewDto) };
   return {
-    id: 'goal-id-1', version: 1, keyResults: [], goalReviews: [],
-    advanceVersion: vi.fn(function (this: { version: number }) { this.version += 1; }),
+    id: 'goal-id-1',
+    version: 1,
+    keyResults: [],
+    goalReviews: [],
+    advanceVersion: vi.fn(function (this: { version: number }) {
+      this.version += 1;
+    }),
     createAndAddReview: vi.fn().mockReturnValue(createdReview),
     toClientDTO: vi.fn().mockReturnValue({ id: 'goal-id-1', version: 2, reviews: [reviewDto] }),
     ...overrides,
@@ -44,7 +55,13 @@ function createUseCase(goal: any, contextBuilder = { build: vi.fn().mockResolved
     saveRootWithExpectedVersion: vi.fn().mockResolvedValue(undefined),
   });
   return {
-    useCase: new AddGoalReviewUseCase(goalRepo, goalPolicy, contextBuilder as any, UTC_TIME_PORT, () => NOW),
+    useCase: new AddGoalReviewUseCase(
+      goalRepo,
+      goalPolicy,
+      contextBuilder as any,
+      UTC_TIME_PORT,
+      () => NOW,
+    ),
     goalRepo,
     goalPolicy,
     contextBuilder,
@@ -55,9 +72,15 @@ describe('AddGoalReviewUseCase', () => {
   it('freezes server-generated facts and persists only user reflection', async () => {
     const goal = createGoalFixture();
     const { useCase, goalRepo, contextBuilder } = createUseCase(goal);
-    const result = await useCase.execute('goal-id-1', 'identity-1', aReviewInput({
-      challenges: 'Resource constraints', adjustments: 'Change the next sprint', windowDays: 7,
-    }));
+    const result = await useCase.execute(
+      'goal-id-1',
+      'identity-1',
+      aReviewInput({
+        challenges: 'Resource constraints',
+        adjustments: 'Change the next sprint',
+        windowDays: 7,
+      }),
+    );
 
     expect(result).toBeOk();
     expect(contextBuilder.build).toHaveBeenCalledWith(goal, {
@@ -94,7 +117,9 @@ describe('AddGoalReviewUseCase', () => {
 
     await useCase.execute('goal-id-1', 'identity-1', aReviewInput({ windowDays: 1 }));
 
-    const expectedStart = Number(createTimeFacade({ context: nyContext }).calendar.addDays(now, -1));
+    const expectedStart = Number(
+      createTimeFacade({ context: nyContext }).calendar.addDays(now, -1),
+    );
     expect(now - expectedStart).toBe(23 * 60 * 60 * 1000);
     expect(contextBuilder.build).toHaveBeenCalledWith(goal, {
       windowStartAt: expectedStart,
@@ -129,9 +154,17 @@ describe('AddGoalReviewUseCase', () => {
       findByIdForIdentity: vi.fn().mockResolvedValue(goal),
       saveRootWithExpectedVersion: vi.fn(),
     });
-    const useCase = new AddGoalReviewUseCase(goalRepo, {
-      ensureGoalCanBeModified: vi.fn(() => { throw new Error('Goal cannot be modified'); }),
-    } as any, contextBuilder as any, UTC_TIME_PORT, () => NOW);
+    const useCase = new AddGoalReviewUseCase(
+      goalRepo,
+      {
+        ensureGoalCanBeModified: vi.fn(() => {
+          throw new Error('Goal cannot be modified');
+        }),
+      } as any,
+      contextBuilder as any,
+      UTC_TIME_PORT,
+      () => NOW,
+    );
     await expect(useCase.execute('goal-id-1', 'identity-1', aReviewInput())).rejects.toThrow(
       'Goal cannot be modified',
     );
@@ -141,7 +174,11 @@ describe('AddGoalReviewUseCase', () => {
   it('rejects a stale goal version before calculating facts', async () => {
     const goal = createGoalFixture();
     const { useCase, goalRepo, contextBuilder } = createUseCase(goal);
-    const result = await useCase.execute('goal-id-1', 'identity-1', aReviewInput({ expectedVersion: 2 }));
+    const result = await useCase.execute(
+      'goal-id-1',
+      'identity-1',
+      aReviewInput({ expectedVersion: 2 }),
+    );
     expect(result).toBeErrorWithCode('CONFLICT');
     expect(contextBuilder.build).not.toHaveBeenCalled();
     expect(goalRepo.saveRootWithExpectedVersion).not.toHaveBeenCalled();

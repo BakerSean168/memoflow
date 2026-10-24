@@ -256,7 +256,9 @@ function auditAiRuntimeAuthority(manifest) {
     } else {
       for (const method of rule.runtime.requiredMethods) {
         if (!findClassMethod(classDecl, method)) {
-          violations.push(`${rule.ruleId}: required runtime method ${method} missing in ${rule.runtime.file}`);
+          violations.push(
+            `${rule.ruleId}: required runtime method ${method} missing in ${rule.runtime.file}`,
+          );
         }
       }
     }

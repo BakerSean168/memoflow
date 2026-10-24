@@ -20,8 +20,7 @@ export const ROUTINE_OCCURRENCE_RESOLUTION_KINDS = [
   'UserSkipped',
   'Expired',
 ] as const;
-export type RoutineOccurrenceResolutionKind =
-  (typeof ROUTINE_OCCURRENCE_RESOLUTION_KINDS)[number];
+export type RoutineOccurrenceResolutionKind = (typeof ROUTINE_OCCURRENCE_RESOLUTION_KINDS)[number];
 
 export const ROUTINE_INTERACTION_ACTIONS = [
   'Acknowledged',

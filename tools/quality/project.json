@@ -1,0 +1,15 @@
+{
+  "name": "quality",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "tags": ["scope:tools", "type:plugin", "layer:quality"],
+  "sourceRoot": "tools/quality",
+  "targets": {
+    "test": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["{projectRoot}/**/*"],
+      "options": { "command": "node --test tools/quality/__tests__/*.test.mjs" }
+    }
+  }
+}

@@ -17,6 +17,7 @@ updated: 2026-08-25T21:25:00+08:00
 > **RESOLVED IN WAVE 1 INTEGRATION.** The sections below preserve the original Worker handoff request for traceability; they are no longer pending work.
 >
 > Closed by the integration train:
+>
 > - canonical types -> `packages/contracts/src/modules/schedule/scheduling.ts`;
 > - first-class `scheduling_key / owner / handler / payload_version / source_revision` -> Prisma + PowerSync;
 > - durable `SchedulingReconcileOperation` appended inside the successful owner transaction;
@@ -167,17 +168,17 @@ The lane deliberately did not edit the current Goal/Task/Reminder orchestration 
 Use the lane-owned factories:
 
 ```ts
-createScheduleTaskSchedulingPort(scheduleTaskRepository)
+createScheduleTaskSchedulingPort(scheduleTaskRepository);
 createHandlerRegistryScheduleTaskSourceExecutor({
   registry,
   legacyFallback,
-})
+});
 ```
 
 and the neutral registry:
 
 ```ts
-new ScheduledHandlerRegistry()
+new ScheduledHandlerRegistry();
 ```
 
 Suggested orchestration assembly:

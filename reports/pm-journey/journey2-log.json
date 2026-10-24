@@ -36,7 +36,5 @@
       "detail": ""
     }
   ],
-  "apiErrors": [
-    "403 http://localhost:58080/api/v1/repositories/knowledge-notes?limit=20"
-  ]
+  "apiErrors": ["403 http://localhost:58080/api/v1/repositories/knowledge-notes?limit=20"]
 }

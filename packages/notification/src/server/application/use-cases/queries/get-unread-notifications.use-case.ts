@@ -7,18 +7,14 @@
 import type { NotificationClientDTO } from '@memoflow/contracts/notification';
 import type { Result } from '@memoflow/contracts/result';
 import { ok } from '@memoflow/contracts/result';
-import type {
-  INotificationRepository,
-} from '../../../domain/repositories';
+import type { INotificationRepository } from '../../../domain/repositories';
 import { toNotificationClientDTO } from '../commands/notification-dto-converters';
 
 /**
  * Get Unread Notifications Use Case
  */
 export class GetUnreadNotificationsUseCase {
-  constructor(
-    private readonly notificationRepository: INotificationRepository,
-  ) {}
+  constructor(private readonly notificationRepository: INotificationRepository) {}
 
   async execute(
     identityId: string,

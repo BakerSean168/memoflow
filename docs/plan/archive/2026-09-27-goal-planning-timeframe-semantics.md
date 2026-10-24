@@ -24,8 +24,8 @@ Examples:
 Retire Goal-level `startDate` from contracts/domain/UI and use:
 
 ```ts
-start: GoalTimeframe | null
-target: GoalTimeframe | null
+start: GoalTimeframe | null;
+target: GoalTimeframe | null;
 ```
 
 Task/Routine schedule `startDate` fields are unrelated and remain exact calendar dates.

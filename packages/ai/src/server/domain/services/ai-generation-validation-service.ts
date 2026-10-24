@@ -85,7 +85,10 @@ export class AIGenerationValidationService {
    * - 每个文档：title (max 60 chars), content (1000-1500 words Markdown), order
    * - 顺序：1 到 N 连续
    */
-  validateKnowledgeSeriesOutput(documents: KnowledgeDocumentCandidate[], expectedCount: number): void {
+  validateKnowledgeSeriesOutput(
+    documents: KnowledgeDocumentCandidate[],
+    expectedCount: number,
+  ): void {
     const errors: string[] = [];
 
     // 验证是否为数组

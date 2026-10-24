@@ -106,7 +106,7 @@ export class CronSchedulerManager {
     const task = cron.schedule(config.schedule, wrappedTask, {
       timezone: config.timezone || 'Asia/Shanghai',
     });
-    
+
     // 立即停止,等待统一启动
     task.stop();
 

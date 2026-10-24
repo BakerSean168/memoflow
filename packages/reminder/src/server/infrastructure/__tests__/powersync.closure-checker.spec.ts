@@ -1,9 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import Database from 'better-sqlite3';
-import type {
-  IElectronDatabase,
-  IElectronDatabaseQueryResult,
-} from '@memoflow/contracts/electron';
+import type { IElectronDatabase, IElectronDatabaseQueryResult } from '@memoflow/contracts/electron';
 import { createPowerSyncClosureChecker } from '../powersync';
 
 function createTestSqliteDatabase(): IElectronDatabase {
@@ -59,10 +56,10 @@ describe('Reminder PowerSync closureChecker (Desktop local new-work gate)', () =
   });
 
   it('blocks new work during the requested/revoking window (local marker set, account still Active)', async () => {
-    await db.execute('INSERT INTO account_closure_requested (identity_id, requested_at) VALUES (?, ?)', [
-      identityId,
-      Date.now(),
-    ]);
+    await db.execute(
+      'INSERT INTO account_closure_requested (identity_id, requested_at) VALUES (?, ?)',
+      [identityId, Date.now()],
+    );
     const blocked = await createPowerSyncClosureChecker(db)(identityId);
     expect(blocked).toBe(true);
   });

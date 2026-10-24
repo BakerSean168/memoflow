@@ -49,7 +49,8 @@ export const EXTERNAL_AGENT_SERVICE_KEY: InjectionKey<ExternalAgentClientPort> =
 export const DESKTOP_CLOUD_AUTH_SERVICE_KEY: InjectionKey<CloudAuthDesktopClientPort> =
   Symbol('DesktopCloudAuthService');
 export const GOAL_SERVICE_KEY: InjectionKey<IGoalService> = Symbol('GoalService');
-export const GOAL_DRAFT_CHECKPOINT_KEY: InjectionKey<GoalDraftCheckpointStore> = Symbol('GoalDraftCheckpoint');
+export const GOAL_DRAFT_CHECKPOINT_KEY: InjectionKey<GoalDraftCheckpointStore> =
+  Symbol('GoalDraftCheckpoint');
 export const LABEL_SERVICE_KEY: InjectionKey<ILabelService> = Symbol('LabelService');
 export const TASK_SERVICE_KEY: InjectionKey<ITaskService> = Symbol('TaskService');
 export const SCHEDULE_SERVICE_KEY: InjectionKey<IScheduleService> = Symbol('ScheduleService');

@@ -168,7 +168,11 @@ const validPreferences = {
   workflowOverrides: { 'task.deadline': { Desktop: true } },
 };
 const malformedPreferences = {
-  quietHours: { enabled: true, timeZone: 'Asia/Tokyo', weeklyWindows: [{ daysOfWeek: [9], start: '22:00', end: '08:00' }] },
+  quietHours: {
+    enabled: true,
+    timeZone: 'Asia/Tokyo',
+    weeklyWindows: [{ daysOfWeek: [9], start: '22:00', end: '08:00' }],
+  },
 };
 
 describe('notification transport parity (Phase 4) — production registrations', () => {

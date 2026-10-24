@@ -19,16 +19,43 @@ describe('Goal committed event journal over real LibSQL', () => {
       const workflows = await storage.getStore('workflows');
       if (!workflows) throw new Error('Workflow storage unavailable');
       const ids = Array.from({ length: 8 }, (_, index) => `concurrent-${index}`);
-      await Promise.all(ids.map((runId) => workflows.persistWorkflowSnapshot({ workflowName: 'goal-create', runId, resourceId: 'owner',
-        snapshot: { status: 'running', context: { input: { idea: 'Plan', identityId: 'owner', conversationId: 'thread' } }, value: { liveActions: [] } } as unknown as WorkflowRunState })));
-      await Promise.all(ids.flatMap((runId) => [
-        publishRunningGoalActions({ storage, identityId: 'owner', runId,
-          journal: [{ sequence: 1, command: { actionId: 'name', revision: 1, operation: 'goal.setName', value: runId } }] }),
-        source.head('owner'),
-      ]));
+      await Promise.all(
+        ids.map((runId) =>
+          workflows.persistWorkflowSnapshot({
+            workflowName: 'goal-create',
+            runId,
+            resourceId: 'owner',
+            snapshot: {
+              status: 'running',
+              context: { input: { idea: 'Plan', identityId: 'owner', conversationId: 'thread' } },
+              value: { liveActions: [] },
+            } as unknown as WorkflowRunState,
+          }),
+        ),
+      );
+      await Promise.all(
+        ids.flatMap((runId) => [
+          publishRunningGoalActions({
+            storage,
+            identityId: 'owner',
+            runId,
+            journal: [
+              {
+                sequence: 1,
+                command: { actionId: 'name', revision: 1, operation: 'goal.setName', value: runId },
+              },
+            ],
+          }),
+          source.head('owner'),
+        ]),
+      );
       const changes = await source.read('owner', 0);
       expect(changes).toHaveLength(16);
-      for (const runId of ids) expect(await source.snapshot('owner', runId)).toMatchObject({ resourceVersion: 2, liveActions: [{ command: { value: runId } }] });
+      for (const runId of ids)
+        expect(await source.snapshot('owner', runId)).toMatchObject({
+          resourceVersion: 2,
+          liveActions: [{ command: { value: runId } }],
+        });
     } finally {
       const close = (storage as { close?: () => Promise<void> }).close;
       await close?.call(storage);
@@ -68,8 +95,13 @@ describe('Goal committed event journal over real LibSQL', () => {
         throw new Error('Broken transport wake');
       });
       await workflows.persistWorkflowSnapshot({
-        workflowName: 'goal-create', runId: 'other-run', resourceId: 'other-owner',
-        snapshot: { ...snapshot, context: { input: { ...snapshot.context.input, identityId: 'other-owner' } } } as unknown as WorkflowRunState,
+        workflowName: 'goal-create',
+        runId: 'other-run',
+        resourceId: 'other-owner',
+        snapshot: {
+          ...snapshot,
+          context: { input: { ...snapshot.context.input, identityId: 'other-owner' } },
+        } as unknown as WorkflowRunState,
       });
       await workflows.persistWorkflowSnapshot({
         workflowName: 'goal-create',
@@ -117,8 +149,23 @@ describe('Goal committed event journal over real LibSQL', () => {
         baseActionSequence: 0,
         lastActionSequence: 1,
       });
-      await observer.execute({ sql: "UPDATE mastra_workflow_snapshot SET snapshot=json_set(snapshot,'$.goalLiveActions',json(?)) WHERE run_id=?",
-        args: [JSON.stringify([{ command: { value: 'Native Goal', operation: 'goal.setName', revision: 1, actionId: 'name' }, sequence: 1 }]), 'run-1'] });
+      await observer.execute({
+        sql: "UPDATE mastra_workflow_snapshot SET snapshot=json_set(snapshot,'$.goalLiveActions',json(?)) WHERE run_id=?",
+        args: [
+          JSON.stringify([
+            {
+              command: {
+                value: 'Native Goal',
+                operation: 'goal.setName',
+                revision: 1,
+                actionId: 'name',
+              },
+              sequence: 1,
+            },
+          ]),
+          'run-1',
+        ],
+      });
       expect(await source.read('owner', 0)).toHaveLength(changes.length);
       const transaction = await observer.transaction('write');
       await transaction.execute({
@@ -135,7 +182,16 @@ describe('Goal committed event journal over real LibSQL', () => {
         snapshot: {
           ...snapshot,
           status: 'failed',
-          value: { liveActions: [], priorReceipt: { workflowRunId: 'run-1', revision: 1, status: 'success', retryable: false, referenceMap: { goal: 'saved-goal' } } },
+          value: {
+            liveActions: [],
+            priorReceipt: {
+              workflowRunId: 'run-1',
+              revision: 1,
+              status: 'success',
+              retryable: false,
+              referenceMap: { goal: 'saved-goal' },
+            },
+          },
           error: new AIWorkflowPublicError({
             statusCode: 429,
             responseBody: JSON.stringify({
@@ -191,11 +247,22 @@ describe('Goal committed event journal over real LibSQL', () => {
         const restored = getGoalWorkflowEventSource(restarted)!;
         expect(restored.epoch).toBe(source.epoch);
         expect(await restored.read('owner', changes.at(-1)!.sequence)).toHaveLength(1);
-        await observer.execute({ sql: 'UPDATE memoflow_goal_events SET captured_at=? WHERE identity_id=? AND resource_version=1', args: [Date.now() - 8 * 86_400_000, 'owner'] });
+        await observer.execute({
+          sql: 'UPDATE memoflow_goal_events SET captured_at=? WHERE identity_id=? AND resource_version=1',
+          args: [Date.now() - 8 * 86_400_000, 'owner'],
+        });
         const retained = await restored.head('owner');
         expect(retained.first).toBeGreaterThan(1);
-        const expired = workspaceEventStream({ source: restored, identityId: 'owner', cursor: initialCursor, signal: new AbortController().signal });
-        expect((await expired.next()).value).toMatchObject({ type: 'stream.reset_required', reason: 'expired' });
+        const expired = workspaceEventStream({
+          source: restored,
+          identityId: 'owner',
+          cursor: initialCursor,
+          signal: new AbortController().signal,
+        });
+        expect((await expired.next()).value).toMatchObject({
+          type: 'stream.reset_required',
+          reason: 'expired',
+        });
         await expired.return(undefined);
       } finally {
         const close = (restarted as { close?: () => Promise<void> }).close;

@@ -8,7 +8,15 @@
 export type { ISettingApiClient, IResultHttpClient, IResultIpcClient } from './adapters/types';
 
 // HTTP Adapters
-export { SettingHttpAdapter, createSettingHttpAdapters, type SettingHttpAdapters } from './adapters/http';
+export {
+  SettingHttpAdapter,
+  createSettingHttpAdapters,
+  type SettingHttpAdapters,
+} from './adapters/http';
 
 // IPC Adapters
-export { SettingIpcAdapter, createSettingIpcAdapters, type SettingIpcAdapters } from './adapters/ipc';
+export {
+  SettingIpcAdapter,
+  createSettingIpcAdapters,
+  type SettingIpcAdapters,
+} from './adapters/ipc';

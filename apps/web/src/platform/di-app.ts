@@ -135,7 +135,13 @@ export function installAppServices(app: App): void {
   app.provide(AUTH_SERVICE_KEY, authService);
   app.provide(EXTERNAL_AGENT_SERVICE_KEY, createExternalAgentHttpClient(window.location.origin));
   app.provide(GOAL_SERVICE_KEY, goalService);
-  app.provide(GOAL_DRAFT_CHECKPOINT_KEY, createGoalDraftCheckpointStore(() => { const identity=useAuthenticationStore().getIdentityId;return identity ? `web:${identity}` : null; }));
+  app.provide(
+    GOAL_DRAFT_CHECKPOINT_KEY,
+    createGoalDraftCheckpointStore(() => {
+      const identity = useAuthenticationStore().getIdentityId;
+      return identity ? `web:${identity}` : null;
+    }),
+  );
   app.provide(GOAL_KNOWLEDGE_SERVICE_KEY, goalKnowledgeService);
   app.provide(LABEL_SERVICE_KEY, labelService);
   app.provide(NOTIFICATION_SERVICE_KEY, notificationService);

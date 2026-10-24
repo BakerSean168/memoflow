@@ -9,16 +9,20 @@ import type {
 export class AiGoalSurfaceLeasePrismaRepository implements IGoalSurfaceLeaseRepository {
   constructor(private readonly db: PrismaClient) {}
 
-  async claim(input: GoalSurfaceLeaseRequest & { token: string }): Promise<GoalSurfaceLeaseGrant | null> {
+  async claim(
+    input: GoalSurfaceLeaseRequest & { token: string },
+  ): Promise<GoalSurfaceLeaseGrant | null> {
     return this.db.$transaction(async (tx) => {
       const inserted = await tx.aiGoalSurfaceLease.createMany({
-        data: [{
-          identityId: input.identityId,
-          runId: input.runId,
-          ownerToken: input.token,
-          expiresAt: new Date(input.expiresAt),
-          fence: 1,
-        }],
+        data: [
+          {
+            identityId: input.identityId,
+            runId: input.runId,
+            ownerToken: input.token,
+            expiresAt: new Date(input.expiresAt),
+            fence: 1,
+          },
+        ],
         skipDuplicates: true,
       });
       if (inserted.count === 0) {
@@ -61,7 +65,11 @@ export class AiGoalSurfaceLeasePrismaRepository implements IGoalSurfaceLeaseRepo
   }
 
   async release(input: {
-    identityId: string; runId: string; token: string; fence: number; now: number;
+    identityId: string;
+    runId: string;
+    token: string;
+    fence: number;
+    now: number;
   }): Promise<boolean> {
     const updated = await this.db.aiGoalSurfaceLease.updateMany({
       where: {

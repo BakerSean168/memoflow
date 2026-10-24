@@ -107,7 +107,11 @@ for (const ci of ['', 'true']) {
         `import config from './apps/web/playwright.config.ts';
          console.log(JSON.stringify({ retries: config.retries, failOnFlakyTests: config.failOnFlakyTests }));`,
       ],
-      { env: { ...process.env, CI: ci, WEB_E2E_MODE: 'workspace' }, encoding: 'utf8', timeout: 15000 },
+      {
+        env: { ...process.env, CI: ci, WEB_E2E_MODE: 'workspace' },
+        encoding: 'utf8',
+        timeout: 15000,
+      },
     );
     assert.equal(result.error, undefined);
     assert.equal(result.status, 0, result.stderr);

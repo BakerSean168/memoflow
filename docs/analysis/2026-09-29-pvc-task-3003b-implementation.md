@@ -15,16 +15,16 @@
 
 These final repair results supersede earlier runs. The direct Vue typecheck and full Nx dependency pipeline are recorded separately.
 
-| Check | Recorded result |
-| --- | --- |
-| Focused task tests | PASS — 11 files / 162 tests in the final repair pass. |
-| Focused app-vue tests | PASS — 5 files / 50 tests in the final repair pass. |
-| `task:typecheck` | PASS. |
-| Direct app-vue `vue-tsc` | PASS — exit 0. |
+| Check                       | Recorded result                                                                                                                                                                                              |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Focused task tests          | PASS — 11 files / 162 tests in the final repair pass.                                                                                                                                                        |
+| Focused app-vue tests       | PASS — 5 files / 50 tests in the final repair pass.                                                                                                                                                          |
+| `task:typecheck`            | PASS.                                                                                                                                                                                                        |
+| Direct app-vue `vue-tsc`    | PASS — exit 0.                                                                                                                                                                                               |
 | Full Nx `app-vue:typecheck` | PASS on the final rerun. An earlier attempt hit a flaky `ui-vue-shadcn:build` `ENOTEMPTY` while clearing `dist/components`; the clean rerun completed all dependencies and `app-vue:typecheck` successfully. |
-| Changed-file ESLint | PASS — 0 errors, 7 `@typescript-eslint/no-explicit-any` warnings in tests. |
-| `memoflow:governance-check` | PASS. |
-| `git diff --check` | PASS. |
+| Changed-file ESLint         | PASS — 0 errors, 7 `@typescript-eslint/no-explicit-any` warnings in tests.                                                                                                                                   |
+| `memoflow:governance-check` | PASS.                                                                                                                                                                                                        |
+| `git diff --check`          | PASS.                                                                                                                                                                                                        |
 
 Evidence: `/tmp/memoflow-task-3003b-review-repair-astra-low.log` records the task test summary at line 8687, app-vue summary at line 8725 and successful `git diff --check` at line 8744. Supporting logs are `/tmp/3003b-task-typecheck.log` (Task typecheck), `/tmp/3003b-app-typecheck-final.log` (Nx dependency-build failure), `/tmp/3003b-eslint.log` (lint) and `/tmp/3003b-governance.log` (governance).
 

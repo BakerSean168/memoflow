@@ -46,7 +46,9 @@ describe('SkipTaskOccurrenceUseCase', () => {
     const occurrence = await aTaskOccurrence();
     vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(occurrence);
 
-    const result = await useCase.execute(occurrence.id, occurrence.identityId, { reason: 'Not today' });
+    const result = await useCase.execute(occurrence.id, occurrence.identityId, {
+      reason: 'Not today',
+    });
 
     expect(result).toBeOk();
     expect(occurrence.status).toBe('Skipped');
@@ -57,7 +59,9 @@ describe('SkipTaskOccurrenceUseCase', () => {
     occurrence.start();
     vi.mocked(instanceRepo.findByIdForIdentity).mockResolvedValue(occurrence);
 
-    const result = await useCase.execute(occurrence.id, occurrence.identityId, { reason: 'Changed plans' });
+    const result = await useCase.execute(occurrence.id, occurrence.identityId, {
+      reason: 'Changed plans',
+    });
 
     expect(result).toBeOk();
     expect(occurrence.status).toBe('Skipped');

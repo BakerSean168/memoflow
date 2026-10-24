@@ -35,7 +35,6 @@ afterEach(() => {
 // Lightweight globals keep older IPC specs readable without importing helpers
 // into every file. Prefer explicit imports for new non-trivial helpers.
 declare global {
-
   var testHelpers: {
     createMockAccountId: () => string;
     delay: (ms: number) => Promise<void>;

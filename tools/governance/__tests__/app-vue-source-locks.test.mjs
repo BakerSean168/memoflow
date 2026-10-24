@@ -24,7 +24,9 @@ function fixture(files) {
 }
 const entry = (locks) => ({
   version: 1,
-  entries: [{ id: 'x', decision: 'ADR-x', locks: locks.map((lock) => ({ reason: 'test', ...lock })) }],
+  entries: [
+    { id: 'x', decision: 'ADR-x', locks: locks.map((lock) => ({ reason: 'test', ...lock })) },
+  ],
 });
 
 describe('app-vue source locks governance', () => {
@@ -158,10 +160,18 @@ describe('app-vue source locks governance', () => {
       run({ file: 'src/a.ts', region: { pattern: 'function retired\\(' }, forbid: ['new Date('] }),
     ).toEqual(['region did not match']);
     expect(
-      run({ file: 'src/a.ts', region: { start: 'function retired', end: '}' }, forbid: ['new Date('] }),
+      run({
+        file: 'src/a.ts',
+        region: { start: 'function retired', end: '}' },
+        forbid: ['new Date('],
+      }),
     ).toEqual(['region did not match']);
     expect(
-      run({ file: 'src/a.ts', region: { start: 'function keep', end: 'function gone' }, forbid: ['new Date('] }),
+      run({
+        file: 'src/a.ts',
+        region: { start: 'function keep', end: 'function gone' },
+        forbid: ['new Date('],
+      }),
     ).toEqual(['region did not match']);
   });
 

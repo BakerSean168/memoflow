@@ -16,7 +16,10 @@ export interface GoalWorkflowEventSource {
   readonly epoch: string;
   head(identityId: string): Promise<{ first: number; last: number }>;
   read(identityId: string, after: number): Promise<GoalWorkflowChange[]>;
-  snapshot(identityId: string, runId: string): Promise<Extract<AIWorkflowRunView, { kind: 'goal.create' }> | null>;
+  snapshot(
+    identityId: string,
+    runId: string,
+  ): Promise<Extract<AIWorkflowRunView, { kind: 'goal.create' }> | null>;
   subscribe(wake: () => void): () => void;
   dispose(): Promise<void>;
 }

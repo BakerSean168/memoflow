@@ -1,7 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
-import { aTaskOccurrence, anIdentityId, TASK_TEST_OCCURRENCE_PROJECTION } from '../../../../../testing';
+import {
+  aTaskOccurrence,
+  anIdentityId,
+  TASK_TEST_OCCURRENCE_PROJECTION,
+} from '../../../../../testing';
 import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
 import { ListTaskOccurrencesByStatusUseCase } from '../list-task-occurrences-by-status.use-case';
 

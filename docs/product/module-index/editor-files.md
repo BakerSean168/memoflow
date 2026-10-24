@@ -48,10 +48,10 @@ Desktop Obsidian 打开入口落在 repository 工作区与共享 Markdown 工�
 projection/importer/adapters/import-store seam 均已删除。旧备份中的 `data.editor` 会严格校验失败，
 不提供兼容 warning、数据恢复或隐藏写回路径。
 
-| 文件                                                                                                                                                                                                                                                | 说明                                                              |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| [`packages/powersync-schema/src/index.spec.ts`](../../../packages/powersync-schema/src/index.spec.ts)                                                                                                                                               | 显式断言四张 `editor_*` 表不存在                                  |
-| [`apps/migrator/src/main.test.ts`](../../../apps/migrator/src/main.test.ts)                                                                                                                                                                         | 迁移启动序列不再执行 Editor natural-key bootstrap                 |
+| 文件                                                                                                  | 说明                                              |
+| ----------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| [`packages/powersync-schema/src/index.spec.ts`](../../../packages/powersync-schema/src/index.spec.ts) | 显式断言四张 `editor_*` 表不存在                  |
+| [`apps/migrator/src/main.test.ts`](../../../apps/migrator/src/main.test.ts)                           | 迁移启动序列不再执行 Editor natural-key bootstrap |
 
 ## 测试入口
 

@@ -83,13 +83,7 @@ describe('TIME-1204 locale/timezone-aware presentation', () => {
       context: createTimeContext({ timeZone: 'Asia/Tokyo', weekStartsOn: 1 }),
       presentation: { locale: 'en-US', timeStyle: '24h' },
     });
-    const patterns = [
-      'yyyy-MM-dd HH:mm',
-      'MM-dd',
-      'MM-dd HH:mm',
-      "yyyy-MM-dd'T'HH:mm",
-      'MMM d',
-    ];
+    const patterns = ['yyyy-MM-dd HH:mm', 'MM-dd', 'MM-dd HH:mm', "yyyy-MM-dd'T'HH:mm", 'MMM d'];
 
     process.env.TZ = 'UTC';
     const fromUtcHost = {

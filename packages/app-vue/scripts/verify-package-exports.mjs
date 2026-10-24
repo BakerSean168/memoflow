@@ -15,7 +15,10 @@ const packageJson = JSON.parse(readFileSync(new URL('package.json', packageRoot)
 for (const [subpath, conditions] of Object.entries(packageJson.exports)) {
   for (const target of Object.values(conditions)) {
     assert.match(target, /^\.\/dist\//, `${subpath} must resolve from dist`);
-    assert.ok(existsSync(new URL(target.slice(2), packageRoot)), `${subpath} target is missing: ${target}`);
+    assert.ok(
+      existsSync(new URL(target.slice(2), packageRoot)),
+      `${subpath} target is missing: ${target}`,
+    );
   }
 }
 

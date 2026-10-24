@@ -7,36 +7,19 @@
   "projectCategories": {
     "app": {
       "description": "Deployable applications",
-      "requiredTargets": [
-        "build",
-        "lint",
-        "typecheck",
-        "test"
-      ]
+      "requiredTargets": ["build", "lint", "typecheck", "test"]
     },
     "runtime-lib": {
       "description": "Libraries with runtime code consumed by apps or other business libraries",
-      "requiredTargets": [
-        "build",
-        "lint",
-        "typecheck",
-        "test"
-      ]
+      "requiredTargets": ["build", "lint", "typecheck", "test"]
     },
     "ui-lib": {
       "description": "UI component and presentation libraries",
-      "requiredTargets": [
-        "build",
-        "lint",
-        "typecheck",
-        "test"
-      ]
+      "requiredTargets": ["build", "lint", "typecheck", "test"]
     },
     "tooling-lib": {
       "description": "Tooling, scaffolding, test helpers, config projects",
-      "requiredTargets": [
-        "build"
-      ]
+      "requiredTargets": ["build"]
     },
     "meta-project": {
       "description": "Root/workspace-level governance project",
@@ -83,6 +66,7 @@
     "nx-test-system": "tooling-lib",
     "test-system-v2": "tooling-lib",
     "ci-cd-platform": "tooling-lib",
+    "quality": "tooling-lib",
     "governance-tools": "tooling-lib",
     "time": "runtime-lib",
     "agent-gateway": "runtime-lib",
@@ -160,6 +144,12 @@
       "target": "test",
       "type": "permanent",
       "reason": "Storybook interaction tests require preview server and run in Web Flow via test:interaction; not a standalone unit test"
+    },
+    {
+      "project": "quality",
+      "target": "build",
+      "type": "permanent",
+      "reason": "Quality tools are executed directly by Node and do not produce a build artifact"
     }
   ]
 }

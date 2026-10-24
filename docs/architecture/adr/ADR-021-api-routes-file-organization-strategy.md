@@ -10,8 +10,8 @@
 ## Context
 
 ## Implementation note (Residual 619 / 2026-07-22)
-Historical route samples used the removed `@memoflow/contracts/response` package. Use `@memoflow/contracts/result` `createHttpResponseBuilder` / `Result` + `expressAdapter` / `RouteRegistrar` instead.
 
+Historical route samples used the removed `@memoflow/contracts/response` package. Use `@memoflow/contracts/result` `createHttpResponseBuilder` / `Result` + `expressAdapter` / `RouteRegistrar` instead.
 
 在 ADR-020 中，我们决定将所有业务逻辑从 API 项目迁移到 packages。随之而来的是如何组织 API 中剩余的路由文件的问题。
 

@@ -24,7 +24,7 @@ import type { GoalRecordSourceTypeValue } from '@memoflow/contracts/goal';
 
 /**
  * GoalRecord 查询选项（领域层扩展）
- * 
+ *
  * 继承 Contracts 中的 DTO 定义，但使用 Date 类型以便领域层操作
  */
 export interface GoalRecordQueryOptions {

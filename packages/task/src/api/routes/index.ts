@@ -1,6 +1,6 @@
 /**
  * Task Routes Index
- * 
+ *
  * Aggregates all task-related route registration functions.
  * Follows ADR-021/022 split-route pattern.
  */
@@ -51,7 +51,6 @@ export function registerTaskRoutes(
     openApiRegistry,
   );
   router.use('/task-occurrences', instanceRouter);
-
 
   return router;
 }

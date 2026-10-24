@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { CreateNotificationSchema } from './notification-crud.dto';
 import { NotificationQuerySchema } from './notification-query.dto';
-import { NotificationActionIntentSchema, NotificationEntityRefSchema } from './notification-action.dto';
+import {
+  NotificationActionIntentSchema,
+  NotificationEntityRefSchema,
+} from './notification-action.dto';
 
 describe('Notification open EntityRef contract (ADR-087)', () => {
   it('accepts owner types without a central RelatedEntityType registry', () => {
@@ -9,9 +12,12 @@ describe('Notification open EntityRef contract (ADR-087)', () => {
       type: 'routine',
       id: 'routine-1',
     });
-    expect(NotificationEntityRefSchema.parse({ type: 'plugin.custom', id: 'Entity_550e8400-e29b-41d4-a716-446655440009' }).type).toBe(
-      'plugin.custom',
-    );
+    expect(
+      NotificationEntityRefSchema.parse({
+        type: 'plugin.custom',
+        id: 'Entity_550e8400-e29b-41d4-a716-446655440009',
+      }).type,
+    ).toBe('plugin.custom');
   });
 
   it('uses the same open subject vocabulary across Fact create/query and owner actions', () => {

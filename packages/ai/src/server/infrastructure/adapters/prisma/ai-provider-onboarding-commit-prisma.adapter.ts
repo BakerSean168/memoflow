@@ -43,7 +43,11 @@ export class AIProviderOnboardingCommitPrismaAdapter implements IAIProviderOnboa
         }
 
         const credential = await tx.aiProviderSecret.updateMany({
-          where: { id: input.provider.credentialRef, identityId: input.identityId, revokedAt: null },
+          where: {
+            id: input.provider.credentialRef,
+            identityId: input.identityId,
+            revokedAt: null,
+          },
           data: { expiresAt: null, updatedAt: new Date(input.now) },
         });
         if (credential.count !== 1) throw new Error('AI provider credential is unavailable');
@@ -129,7 +133,11 @@ export class AIProviderOnboardingCommitPrismaAdapter implements IAIProviderOnboa
           throw new ReplacementRollback('CONFLICT');
         }
         const credential = await tx.aiProviderSecret.updateMany({
-          where: { id: input.replacement.credentialRef, identityId: input.identityId, revokedAt: null },
+          where: {
+            id: input.replacement.credentialRef,
+            identityId: input.identityId,
+            revokedAt: null,
+          },
           data: { expiresAt: null, updatedAt: new Date(input.now) },
         });
         if (credential.count !== 1) throw new Error('AI provider credential is unavailable');
@@ -155,8 +163,8 @@ export class AIProviderOnboardingCommitPrismaAdapter implements IAIProviderOnboa
 function isUniqueConstraintError(error: unknown): boolean {
   return Boolean(
     error &&
-      typeof error === 'object' &&
-      'code' in error &&
-      (error as { code?: unknown }).code === 'P2002',
+    typeof error === 'object' &&
+    'code' in error &&
+    (error as { code?: unknown }).code === 'P2002',
   );
 }

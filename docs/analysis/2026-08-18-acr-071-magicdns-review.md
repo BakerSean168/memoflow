@@ -9,6 +9,7 @@
 ## 1. Change
 
 `apps/api/src/shared/infrastructure/config/env.schema.ts`:
+
 - New module-scope helper `isControlledMagicDnsHost(hostname)` → true for `.ts.net` suffix
   (Tailscale MagicDNS reserved domain).
 - `trustedHttp = loopbackHttp || (env.LOCAL_VALIDATION && isControlledMagicDnsHost(url.hostname))`

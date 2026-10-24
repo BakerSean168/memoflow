@@ -5,10 +5,7 @@ import type {
   PreferenceNamespaceResponse,
   UserPreferenceProfile,
 } from '@memoflow/contracts/setting';
-import {
-  PreferencePortableCapability,
-  PreferencePortableService,
-} from './preference-portability';
+import { PreferencePortableCapability, PreferencePortableService } from './preference-portability';
 import type { UserPreferenceService } from './user-preference-service';
 
 const target: UserPreferenceProfile = {
@@ -33,10 +30,18 @@ function context(identityId = 'target-user'): PortableCapabilityExecutionContext
   return {
     identityId,
     references: {
-      declareExportReference: () => { throw new Error('not used'); },
-      resolveExportReference: () => { throw new Error('not used'); },
-      bindImportedReference: () => { throw new Error('not used'); },
-      resolveImportedReference: () => { throw new Error('not used'); },
+      declareExportReference: () => {
+        throw new Error('not used');
+      },
+      resolveExportReference: () => {
+        throw new Error('not used');
+      },
+      bindImportedReference: () => {
+        throw new Error('not used');
+      },
+      resolveImportedReference: () => {
+        throw new Error('not used');
+      },
     },
   };
 }
@@ -75,15 +80,21 @@ describe('PreferencePortableService', () => {
       getPreferenceNamespace: vi
         .fn()
         .mockResolvedValueOnce(response('presentation', 2, { theme: 'auto', language: 'zh-CN' }))
-        .mockResolvedValueOnce(response('regional', 0, {
-          timeZone: 'UTC',
-          dateStyle: 'medium',
-          timeStyle: '24h',
-          weekStartsOn: 1,
-        })),
+        .mockResolvedValueOnce(
+          response('regional', 0, {
+            timeZone: 'UTC',
+            dateStyle: 'medium',
+            timeStyle: '24h',
+            weekStartsOn: 1,
+          }),
+        ),
       patchPreferenceNamespace: vi
         .fn()
-        .mockResolvedValueOnce({ namespace: 'presentation', revision: 3, changedKeys: ['theme', 'language'] })
+        .mockResolvedValueOnce({
+          namespace: 'presentation',
+          revision: 3,
+          changedKeys: ['theme', 'language'],
+        })
         .mockResolvedValueOnce({ namespace: 'regional', revision: 1, changedKeys: ['timeZone'] }),
     } as unknown as UserPreferenceService;
     const service = new PreferencePortableService(preferenceService);
@@ -125,11 +136,18 @@ describe('PreferencePortableService', () => {
           expectedRevision: 1,
           latest: response('presentation', 2, { theme: 'light', language: 'zh-CN' }),
         })
-        .mockResolvedValueOnce({ namespace: 'presentation', revision: 3, changedKeys: ['theme', 'language'] }),
+        .mockResolvedValueOnce({
+          namespace: 'presentation',
+          revision: 3,
+          changedKeys: ['theme', 'language'],
+        }),
     } as unknown as UserPreferenceService;
     const service = new PreferencePortableService(preferenceService);
 
-    await expect(service.apply('destination-user', target)).resolves.toMatchObject({ updated: 1, skipped: 1 });
+    await expect(service.apply('destination-user', target)).resolves.toMatchObject({
+      updated: 1,
+      skipped: 1,
+    });
     expect(preferenceService.patchPreferenceNamespace).toHaveBeenNthCalledWith(
       2,
       'destination-user',
@@ -151,7 +169,9 @@ describe('PreferencePortableCapability', () => {
 
     expect(capability.key).toBe('preferences');
     expect(capability.schemaVersion).toBe(3);
-    expect(capability.payloadSchema.safeParse({ ...target, identityId: 'source-user' }).success).toBe(false);
+    expect(
+      capability.payloadSchema.safeParse({ ...target, identityId: 'source-user' }).success,
+    ).toBe(false);
     await capability.export(context('destination-user'));
     await capability.dryRun(target, context('destination-user'));
     await capability.apply(target, context('destination-user'));

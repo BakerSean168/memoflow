@@ -9,10 +9,7 @@ import {
   type SchedulingOwner,
 } from '@memoflow/contracts/schedule';
 import { buildIdempotencyKeyString } from '@memoflow/contracts/reliable-messaging';
-import {
-  NotificationCategory,
-  NotificationType,
-} from '@memoflow/contracts/notification';
+import { NotificationCategory, NotificationType } from '@memoflow/contracts/notification';
 import {
   ReminderTimeUnit,
   TaskOccurrenceStatus,
@@ -79,11 +76,7 @@ const FIXTURE_D = {
   occurrenceId: 'TaskOccurrenceId_wave3-d',
   occurrenceKey: FIXTURE_D_OCCURRENCE_KEY,
   runAt: Date.parse('2026-08-10T08:45:00.000Z'),
-  schedulingKey: buildSchedulingKey(
-    'task.reminder',
-    FIXTURE_D_OCCURRENCE_KEY,
-    'relative:1:Days',
-  ),
+  schedulingKey: buildSchedulingKey('task.reminder', FIXTURE_D_OCCURRENCE_KEY, 'relative:1:Days'),
   anchorTime: 1_704_000_000_000,
 } as const;
 

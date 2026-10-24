@@ -36,18 +36,18 @@ V3 parser 对旧 `schemaVersion` 只返回 unsupported，不保留旧格式 DTO 
 
 生产 API/Desktop registry 当前注册相同的十个 capability，schema version 均为 3：
 
-| key | owner | dependency |
-| --- | --- | --- |
-| `account-profile` | Account | `preferences` |
-| `preferences` | Setting | — |
-| `notification-delivery-preferences` | Notification | — |
-| `routines` | Reminder/Routine | — |
-| `schedules` | Schedule | — |
-| `notifications` | Notification | — |
-| `labels` | Label | — |
-| `goals` | Goal | `labels` |
-| `tasks` | Task | `labels`, `goals` |
-| `ai-conversations` | AI | — |
+| key                                 | owner            | dependency        |
+| ----------------------------------- | ---------------- | ----------------- |
+| `account-profile`                   | Account          | `preferences`     |
+| `preferences`                       | Setting          | —                 |
+| `notification-delivery-preferences` | Notification     | —                 |
+| `routines`                          | Reminder/Routine | —                 |
+| `schedules`                         | Schedule         | —                 |
+| `notifications`                     | Notification     | —                 |
+| `labels`                            | Label            | —                 |
+| `goals`                             | Goal             | `labels`          |
+| `tasks`                             | Task             | `labels`, `goals` |
+| `ai-conversations`                  | AI               | —                 |
 
 Data Portability 只负责 registry、确定性 dependency/reference ordering、envelope
 版本检查、host-owned identity、安全 blacklist、dry-run/conflict receipt 和 warnings。

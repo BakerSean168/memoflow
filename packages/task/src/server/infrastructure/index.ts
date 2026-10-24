@@ -25,10 +25,7 @@ export {
 export type { TaskApplicationPort } from '../application';
 
 // ============ Repository Ports referenced by TaskRepositorySet ============
-export type {
-  ITaskOccurrenceRepository,
-  ITaskPlanRepository,
-} from '../domain/repositories';
+export type { ITaskOccurrenceRepository, ITaskPlanRepository } from '../domain/repositories';
 export type { TaskWriteTransactionRunner } from '../application/use-cases/commands/task-write-support';
 
 export { PrismaTaskBindingReadPort } from './adapters/prisma/prisma-task-binding-read-port';
@@ -48,9 +45,7 @@ export {
   type TaskRepositorySet,
 } from './prisma';
 export { createTaskRuntimeContribution } from './runtime';
-export {
-  normalizeTaskRuntimeContributions,
-} from './normalize-runtime-contributions';
+export { normalizeTaskRuntimeContributions } from './normalize-runtime-contributions';
 export {
   createTaskGoalOutboxRuntime,
   type TaskGoalOutboxRuntimeOptions,

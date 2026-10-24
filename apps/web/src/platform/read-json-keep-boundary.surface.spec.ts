@@ -66,7 +66,9 @@ describe('readJson keep-boundary (residual 1198)', () => {
     }
     return Promise.all([
       e2eReadJson('{"model":"x"}').then((v) => expect(v).toEqual({ model: 'x' })),
-      Promise.resolve().then(() => expect(desktopReadJson('{"name":"pkg"}')).toEqual({ name: 'pkg' })),
+      Promise.resolve().then(() =>
+        expect(desktopReadJson('{"name":"pkg"}')).toEqual({ name: 'pkg' }),
+      ),
     ]);
   });
 

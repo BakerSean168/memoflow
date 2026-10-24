@@ -14,17 +14,18 @@ documented desktop startup-crash internal developer surface).
 
 | Rule                         | Before | After |
 | ---------------------------- | -----: | ----: |
-| `RAW_RESULT_MESSAGE_RETHROW` |     20 |    0 |
-| `DOMAIN_ERROR_SUBCLASS`      |      0 |    0 |
-| `FAILURE_MESSAGE_BRANCH`     |      0 |    0 |
-| `PROVIDER_CODE_LEAKAGE`      |      0 |    0 |
-| `UI_RAW_RESULT_MESSAGE`      |      1 |    1 |
+| `RAW_RESULT_MESSAGE_RETHROW` |     20 |     0 |
+| `DOMAIN_ERROR_SUBCLASS`      |      0 |     0 |
+| `FAILURE_MESSAGE_BRANCH`     |      0 |     0 |
+| `PROVIDER_CODE_LEAKAGE`      |      0 |     0 |
+| `UI_RAW_RESULT_MESSAGE`      |      1 |     1 |
 | **Total**                    | **21** | **1** |
 
 ## 2. Code changes (12 files) — rethrow to ResultErrorException
 
 17 genuine rethrows converted to `ResultErrorException` (raw message carried via `failure`/`cause`,
 NOT embedded in the thrown message text):
+
 - governance mappers ×4 (powersync + prisma rule mappers) — stable prefix + ResultErrorException
 - goal task-goal-progress.handler ×2, repository module ×1
 - apps/api ai repository adapters ×3
@@ -38,12 +39,14 @@ Behavior preserved (same Error family, callers/observers unchanged; raw reason n
 `tools/governance/lib/failure-contract-inventory.mjs`: `isRawMessageRethrow` previously flagged
 ANY `throw new Error(...)` containing any `.message`/`message`. Now
 `containsResultErrorMessage` only fires for a **result-failure context**:
+
 - `.message` whose receiver chain contains a result/failure accessor (`result.error.message`,
   `envelope.error.message`, `x.failure.message`, `err.error.message`)
 - bare identifiers `errorMessage`/`errorMsg`/`errMessage`/`errMsg`
-NOT flagged: bare `message` (generic param/label), plain `err.message`/`e.message` (non-Result Error).
+  NOT flagged: bare `message` (generic param/label), plain `err.message`/`e.message` (non-Result Error).
 
 This removes 3 false positives:
+
 - `contracts/result/core.ts:167` `assertNever` (message is a generic label param)
 - `test-utils/wait-for.ts:49` (message is a caller label)
 - `utils/web-initialization-manager.ts:259` (`err` is a module-load Error diag, not a Result)
@@ -53,6 +56,7 @@ no longer flag AND genuine rethrows (`result.error.message`, `envelope.error.mes
 `x.failure.message`, bare `errorMessage`) still flag.
 
 ## 4. Validation
+
 - Inventory audit: `passed (no new/expired production findings)`; items = 1.
 - touched packages' vitest + typecheck clean (rethrow conversions verified per package).
 - scanner unit test added for precision (genuine vs false-positive).

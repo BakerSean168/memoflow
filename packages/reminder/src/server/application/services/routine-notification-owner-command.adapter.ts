@@ -1,7 +1,10 @@
 import type { JsonValue } from '@memoflow/contracts/result';
 import type { RoutineCoachCommandPort } from './routine-coach-command.service';
 
-interface OwnerRef { readonly type: string; readonly id: string }
+interface OwnerRef {
+  readonly type: string;
+  readonly id: string;
+}
 interface Invocation<TInput> {
   readonly identityId: string;
   readonly notificationId: string;
@@ -46,8 +49,8 @@ function parseRoutineOccurrenceInput(value: unknown): RoutineOccurrenceActionInp
     throw new TypeError('occurrenceKey is required');
   }
   if (
-    input.durationMs !== undefined
-    && (!Number.isInteger(input.durationMs) || (input.durationMs as number) <= 0)
+    input.durationMs !== undefined &&
+    (!Number.isInteger(input.durationMs) || (input.durationMs as number) <= 0)
   ) {
     throw new TypeError('durationMs must be a positive integer');
   }
@@ -88,7 +91,9 @@ export function registerRoutineNotificationOwnerCommands(
         routineId: invocation.input.routineId,
         occurrenceKey: invocation.input.occurrenceKey,
         action: 'complete',
-        metadata: { surface: 'Notification', actionKey: invocation.actionKey } as Readonly<Record<string, JsonValue>>,
+        metadata: { surface: 'Notification', actionKey: invocation.actionKey } as Readonly<
+          Record<string, JsonValue>
+        >,
       });
       return { outcome: 'accepted', commandReceiptId: receipt.interaction.id };
     },
@@ -111,7 +116,9 @@ export function registerRoutineNotificationOwnerCommands(
         occurrenceKey: invocation.input.occurrenceKey,
         action: 'snooze',
         snoozeDurationMs: invocation.input.durationMs,
-        metadata: { surface: 'Notification', actionKey: invocation.actionKey } as Readonly<Record<string, JsonValue>>,
+        metadata: { surface: 'Notification', actionKey: invocation.actionKey } as Readonly<
+          Record<string, JsonValue>
+        >,
       });
       return { outcome: 'accepted', commandReceiptId: receipt.interaction.id };
     },

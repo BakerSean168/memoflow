@@ -9,10 +9,7 @@ import type {
   PowerSyncCredentials,
 } from '@powersync/common';
 import { PowerSyncAppSchema } from '@memoflow/powersync-schema';
-import {
-  publishProfileSnapshot,
-  type PublishProfileSnapshotResult,
-} from './snapshot-storage.js';
+import { publishProfileSnapshot, type PublishProfileSnapshotResult } from './snapshot-storage.js';
 
 const DEFAULT_POWERSYNC_AUDIENCE = 'powersync-dev';
 const DEFAULT_SYNC_WAIT_TIMEOUT_MS = 2 * 60 * 1000;
@@ -32,8 +29,7 @@ export interface BuildProfileSnapshotInput {
   audience?: string;
 }
 
-export interface BuildProfileSnapshotResult extends PublishProfileSnapshotResult {
-}
+export interface BuildProfileSnapshotResult extends PublishProfileSnapshotResult {}
 
 class StaticPowerSyncConnector implements PowerSyncBackendConnector {
   constructor(private readonly fetcher: () => Promise<PowerSyncCredentials>) {}

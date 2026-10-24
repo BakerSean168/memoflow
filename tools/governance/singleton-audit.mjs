@@ -19,9 +19,18 @@ import path from 'node:path';
 const ROOT = path.join(import.meta.dirname, '..', '..');
 
 const SKIP_DIRS = new Set([
-  'node_modules', 'dist', 'build', '.git', '.nx',
-  '__tests__', '__mocks__', 'test', 'tests', 'e2e',
-  'generated', 'locales',
+  'node_modules',
+  'dist',
+  'build',
+  '.git',
+  '.nx',
+  '__tests__',
+  '__mocks__',
+  'test',
+  'tests',
+  'e2e',
+  'generated',
+  'locales',
 ]);
 
 const SOURCE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx']);
@@ -38,7 +47,6 @@ const ALLOWLIST = new Set([
   'packages/app-vue/src/modules/notification/initialization/index.ts',
   'packages/app-vue/src/modules/goal/initialization/index.ts',
   'packages/goal/src/api/initialization.ts',
-
 ]);
 
 const errors = [];

@@ -22,6 +22,7 @@
   public origin).
 
 ## 2. Validation (orchestrator re-run)
+
 - keep-boundary `get-cors-origins-keep-boundary.surface.spec.ts`: 4/4 pass (getCorsOrigins untouched).
 - api full suite: 61 files / 312 tests pass; direct tsc typecheck clean (nx database:build EPERM
   is pre-existing environment permission noise in copy-with-retry.mjs, unrelated).
@@ -29,10 +30,12 @@
 - failure-contract-inventory: `{UI_RAW_RESULT_MESSAGE:1}` / passed (no new findings).
 
 ## 3. Behavior
+
 When `.env.local` sets `MEMOFLOW_WEB_URL=http://oracle.taile92a8e.ts.net:58080`, the browser
 hitting that public origin is CORS-accepted by the API (trusted origins + CORS) and the AI
 service, with no need to duplicate the origin into CORS_ORIGIN. Loopback/default behavior
 unchanged when MEMOFLOW_WEB_URL unset.
 
 ## 4. Gate
+
 Review passes. Proceeds toward the O2V-04 Oracle2 MagicDNS deployment acceptance.

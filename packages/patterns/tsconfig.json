@@ -24,9 +24,7 @@
     "paths": {
       "@/*": ["./src/*"],
       "@memoflow/database": ["../../packages/database/src/index.ts"],
-      "@memoflow/database/prisma": [
-        "../../packages/database/src/generated/prisma/client.js"
-      ],
+      "@memoflow/database/prisma": ["../../packages/database/src/generated/prisma/client.js"],
       "@memoflow/utils": ["../../packages/utils/src/index.ts"],
       "@memoflow/utils/*": ["../../packages/utils/src/*/index.ts"],
       "@memoflow/contracts": ["../../packages/contracts/src/index.ts"],

@@ -5,8 +5,10 @@ import type {
 } from '@memoflow/contracts/ai';
 import type { AIProviderCredentialRef } from '@memoflow/contracts/primitives';
 
-export type AIProviderOnboardingCredentialStatus = ProbeAIProviderConnectionRes['credential']['status'];
-export type AIProviderOnboardingDiscoveryStatus = ProbeAIProviderConnectionRes['discovery']['status'];
+export type AIProviderOnboardingCredentialStatus =
+  ProbeAIProviderConnectionRes['credential']['status'];
+export type AIProviderOnboardingDiscoveryStatus =
+  ProbeAIProviderConnectionRes['discovery']['status'];
 
 export interface AIProviderOnboardingSessionRecord {
   readonly id: string;
@@ -43,16 +45,16 @@ export interface CreateAIProviderOnboardingSessionInput {
 
 export interface IAIProviderOnboardingSessionRepository {
   create(input: CreateAIProviderOnboardingSessionInput): Promise<void>;
-  findUsable(identityId: string, onboardingId: string, now: number): Promise<AIProviderOnboardingSessionRecord | null>;
+  findUsable(
+    identityId: string,
+    onboardingId: string,
+    now: number,
+  ): Promise<AIProviderOnboardingSessionRecord | null>;
   markModelVerified(input: {
     identityId: string;
     onboardingId: string;
     modelId: string;
     now: number;
   }): Promise<AIProviderOnboardingSessionRecord | null>;
-  markConsumed(input: {
-    identityId: string;
-    onboardingId: string;
-    now: number;
-  }): Promise<boolean>;
+  markConsumed(input: { identityId: string; onboardingId: string; now: number }): Promise<boolean>;
 }

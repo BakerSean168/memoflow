@@ -1,6 +1,4 @@
-import type {
-  AIProviderConfigServerDTO,
-} from '@memoflow/contracts/ai';
+import type { AIProviderConfigServerDTO } from '@memoflow/contracts/ai';
 
 export interface PowerSyncAIProviderConfigRow {
   id: string;
@@ -37,11 +35,8 @@ export interface PowerSyncAIProviderConfigWriteRow {
   deleted_at: string | null;
 }
 
-
 export class PowerSyncAIProviderConfigMapper {
-  static toDTO(
-    row: PowerSyncAIProviderConfigRow,
-  ): AIProviderConfigServerDTO {
+  static toDTO(row: PowerSyncAIProviderConfigRow): AIProviderConfigServerDTO {
     const createdAt = new Date(row.created_at).getTime();
     const updatedAt = new Date(row.updated_at).getTime();
     const deletedAt = row.deleted_at ? new Date(row.deleted_at).getTime() : null;
@@ -50,7 +45,8 @@ export class PowerSyncAIProviderConfigMapper {
       id: row.id as AIProviderConfigServerDTO['id'],
       identityId: row.identity_id as AIProviderConfigServerDTO['identityId'],
       name: row.name,
-      providerDefinitionId: row.provider_definition_id as AIProviderConfigServerDTO['providerDefinitionId'],
+      providerDefinitionId:
+        row.provider_definition_id as AIProviderConfigServerDTO['providerDefinitionId'],
       baseUrl: row.base_url,
       credentialRef: row.credential_ref as AIProviderConfigServerDTO['credentialRef'],
       defaultModel: row.default_model,
@@ -64,9 +60,7 @@ export class PowerSyncAIProviderConfigMapper {
     };
   }
 
-  static toPersistence(
-    config: AIProviderConfigServerDTO,
-  ): PowerSyncAIProviderConfigWriteRow {
+  static toPersistence(config: AIProviderConfigServerDTO): PowerSyncAIProviderConfigWriteRow {
     return {
       id: String(config.id),
       identity_id: String(config.identityId),

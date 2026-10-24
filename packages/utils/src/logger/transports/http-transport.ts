@@ -25,7 +25,7 @@ export class HttpTransport implements LogTransport {
   private batchSize: number;
   private flushInterval: number;
   private headers: Record<string, string>;
-  
+
   private buffer: LogEntry[] = [];
   private timer: ReturnType<typeof setTimeout> | null = null;
 
@@ -54,7 +54,7 @@ export class HttpTransport implements LogTransport {
 
     const logsToSend = [...this.buffer];
     this.buffer = [];
-    
+
     if (this.timer) {
       clearTimeout(this.timer);
       this.timer = null;
@@ -74,9 +74,9 @@ export class HttpTransport implements LogTransport {
     } catch (err) {
       // 防止无限循环：不要在 HttpTransport 错误处理中调用 logger.error
       console.error('[HttpTransport] Failed to send logs:', err);
-      
+
       // 可选：如果发送失败，可以将日志放回缓冲区（需谨慎处理以防内存泄漏）
-      // this.buffer = [...logsToSend, ...this.buffer]; 
+      // this.buffer = [...logsToSend, ...this.buffer];
     }
   }
 

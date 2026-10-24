@@ -12,13 +12,22 @@ describe('desktop notification preference schemas', () => {
         soundEnabled: true,
       }).success,
     ).toBe(true);
-    expect(DesktopNotificationPreferencePatchSchema.safeParse({ presentationMode: 'native' }).success).toBe(true);
+    expect(
+      DesktopNotificationPreferencePatchSchema.safeParse({ presentationMode: 'native' }).success,
+    ).toBe(true);
     expect(DesktopNotificationPreferencePatchSchema.safeParse({}).success).toBe(true);
   });
 
   it('rejects invalid values and unknown keys', () => {
-    expect(DesktopNotificationPreferenceSchema.safeParse({ presentationMode: 'system', soundEnabled: true }).success).toBe(false);
-    expect(DesktopNotificationPreferencePatchSchema.safeParse({ soundEnabled: 'yes' }).success).toBe(false);
+    expect(
+      DesktopNotificationPreferenceSchema.safeParse({
+        presentationMode: 'system',
+        soundEnabled: true,
+      }).success,
+    ).toBe(false);
+    expect(
+      DesktopNotificationPreferencePatchSchema.safeParse({ soundEnabled: 'yes' }).success,
+    ).toBe(false);
     expect(DesktopNotificationPreferencePatchSchema.safeParse({ typo: true }).success).toBe(false);
   });
 });

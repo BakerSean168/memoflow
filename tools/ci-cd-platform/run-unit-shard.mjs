@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { readFile } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
-import { validateDeliveryManifest } from './lib/contracts.mjs';
+import { contractRoutedProjects, validateDeliveryManifest } from './lib/contracts.mjs';
 import { UNIT_JOB_IDS, unitJobEnabled } from './lib/unit-shards.mjs';
 
 const id = process.argv[2];
@@ -12,6 +12,30 @@ const manifest = validateDeliveryManifest(
   JSON.parse(await readFile(process.env.DELIVERY_MANIFEST_PATH, 'utf8')),
 );
 if (!unitJobEnabled(manifest, id)) throw new Error(`Manifest disabled ${id}`);
+// Q4 routing moves the contracts TESTS to the Contract lane, but sibling
+// suites in this shard resolve @memoflow/contracts/* subpaths to dist at
+// runtime (previously an ambient side effect of contracts:test's build
+// dependency in the same job). Build the artifact explicitly; do not run
+// the tests here.
+const shardProjects = manifest.unitShards
+  .find((shard) => shard.id === id)
+  .tasks.map((t) => t.project);
+if (
+  contractRoutedProjects({ scope: manifest.scope, laneDetails: manifest.laneDetails }).length > 0 &&
+  !shardProjects.includes('contracts')
+) {
+  const build = spawnSync(
+    'pnpm',
+    ['exec', 'nx', 'run', 'contracts:build', '--outputStyle=static'],
+    {
+      stdio: 'inherit',
+      env: { ...process.env },
+      timeout: 10 * 60 * 1000,
+    },
+  );
+  if (build.error) throw build.error;
+  if (build.status !== 0) process.exit(build.status ?? 1);
+}
 for (const [index, task] of manifest.unitShards.find((shard) => shard.id === id).tasks.entries()) {
   const result = spawnSync(
     process.execPath,

@@ -16,16 +16,16 @@
 
 ## 0. 拍板记录（2026-07-12，全部已确认）
 
-| # | 决策 |
-|---|---|
-| 1 | 新范式**取代** V1 页面级方案；V1 内容级结论迁移为面板内容设计 |
-| 2 | 保留 vue-router，**URL ↔ 面板状态双向映射**；深链契约、AI 硬跳转、Playwright 路由锚定全部无损 |
-| 3 | 顶部胶囊 **5 个**：Goal / Task / Note / Reminder / Notification；Dashboard 由 AI 空闲态承接后退役、Governance 并入 Note、Settings 走侧栏底部头像 |
-| 4 | 左侧栏 = **纯 AI 会话列表**（不做 Projects 树、不放业务对象） |
-| 5 | 日程 = 头部右侧**"当前时段"实时胶囊**（窗口控制按钮左侧），常态显示当前时间段与要做的事，点击进入日程面板——第 6 个模块面板，入口形态特殊 |
-| 6 | Web 端**同壳去窗饰**：同一套三态壳，仅隐藏窗口控制/拖拽区（沿用 `isDesktopEnvironment` 分支模式） |
-| 7 | 实施策略：**原地一次性切换**（重写 MainLayout 为新壳，模块视图先原样入面板，内容改造随后逐模块做） |
-| 8 | 业务面板**多 Tab**（参照 Codex 桌面端右侧面板）：多个业务上下文以 Tab 并存，深链/AI 产物新开 Tab 不抢占（§2.3） |
+| #   | 决策                                                                                                                                             |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | 新范式**取代** V1 页面级方案；V1 内容级结论迁移为面板内容设计                                                                                    |
+| 2   | 保留 vue-router，**URL ↔ 面板状态双向映射**；深链契约、AI 硬跳转、Playwright 路由锚定全部无损                                                    |
+| 3   | 顶部胶囊 **5 个**：Goal / Task / Note / Reminder / Notification；Dashboard 由 AI 空闲态承接后退役、Governance 并入 Note、Settings 走侧栏底部头像 |
+| 4   | 左侧栏 = **纯 AI 会话列表**（不做 Projects 树、不放业务对象）                                                                                    |
+| 5   | 日程 = 头部右侧**"当前时段"实时胶囊**（窗口控制按钮左侧），常态显示当前时间段与要做的事，点击进入日程面板——第 6 个模块面板，入口形态特殊         |
+| 6   | Web 端**同壳去窗饰**：同一套三态壳，仅隐藏窗口控制/拖拽区（沿用 `isDesktopEnvironment` 分支模式）                                                |
+| 7   | 实施策略：**原地一次性切换**（重写 MainLayout 为新壳，模块视图先原样入面板，内容改造随后逐模块做）                                               |
+| 8   | 业务面板**多 Tab**（参照 Codex 桌面端右侧面板）：多个业务上下文以 Tab 并存，深链/AI 产物新开 Tab 不抢占（§2.3）                                  |
 
 ---
 
@@ -69,16 +69,16 @@ STATE C 业务专注态（focus）
 
 ### 1.2 与 V1 的关系
 
-| V1 资产 | V2 处置 |
-|---|---|
-| §0.1 三种页面壳（List/Detail/Workspace） | **作废**。面板内部用轻量的"面板头 + 内容"结构，不再有页面壳 |
-| §0.2 导航分组重构（工作台/计划/执行/知识） | **作废**。导航 = 5 胶囊 + 日程胶囊 + 侧栏底部 |
-| §0.3 状态设计基线（空/加载/错误、AppEmptyState、skeleton） | **保留**，面板内容同样适用 |
-| §0.4 响应式基线（xl/lg/md/sm 四档） | **作废**，换为 §7 的面板两档宽度模型 |
-| §0.5 共享组件清单 | ListPageShell/DetailPageShell/ModuleSidebar 不再建；AppEmptyState/FilterBar 保留计划 |
-| §0.6 不可破坏契约 | **全部继承**（见本文 §8） |
-| §1–§14 各页"主/次操作、删减清单、拆分/退役、空态设计" | **保留**，作为对应面板的内容设计输入（本文 §6 逐条映射） |
-| §15.3 实施顺序 P0–P3 | **作废**，换为本文 §10 |
+| V1 资产                                                    | V2 处置                                                                              |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| §0.1 三种页面壳（List/Detail/Workspace）                   | **作废**。面板内部用轻量的"面板头 + 内容"结构，不再有页面壳                          |
+| §0.2 导航分组重构（工作台/计划/执行/知识）                 | **作废**。导航 = 5 胶囊 + 日程胶囊 + 侧栏底部                                        |
+| §0.3 状态设计基线（空/加载/错误、AppEmptyState、skeleton） | **保留**，面板内容同样适用                                                           |
+| §0.4 响应式基线（xl/lg/md/sm 四档）                        | **作废**，换为 §7 的面板两档宽度模型                                                 |
+| §0.5 共享组件清单                                          | ListPageShell/DetailPageShell/ModuleSidebar 不再建；AppEmptyState/FilterBar 保留计划 |
+| §0.6 不可破坏契约                                          | **全部继承**（见本文 §8）                                                            |
+| §1–§14 各页"主/次操作、删减清单、拆分/退役、空态设计"      | **保留**，作为对应面板的内容设计输入（本文 §6 逐条映射）                             |
+| §15.3 实施顺序 P0–P3                                       | **作废**，换为本文 §10                                                               |
 
 ---
 
@@ -149,20 +149,20 @@ AppShell
 
 ## 3. 模块矩阵
 
-| 模块 | 入口 | 面板内容（一次性切换时先原样嵌入的现视图） | 路由 |
-|---|---|---|---|
-| Goal 目标 | 胶囊 1 | `GoalModuleLayout` 全子树（列表/详情/KR/复盘/专注/对比） | `/goals/**` 不变 |
-| Task 任务 | 胶囊 2 | `TaskManagementView` / `TaskDetailView` | `/tasks/**` 不变 |
-| Note 笔记 | 胶囊 3 | Knowledge projection / Local Vault 工作区 + **Governance 并入为"规范"区**（`/note/:id` 已退役） | `/repository`（`?note=` 深链）、`/governance/**` |
-| Reminder 提醒 | 胶囊 4 | `ReminderLinearView` | `/reminders` 不变 |
-| Notification 通知 | 胶囊 5（未读角标） | `NotificationListPage`（预览浮层承担 V1 的"铃铛弹层"职责） | `/notifications` 不变 |
-| Schedule 日程 | 当前时段胶囊 | `ScheduleCalendarView`（日/周/月日历） | `/schedule` → `/schedule/calendar` 单入口 |
-| Settings 设置 | 侧栏底部头像 | `UserSettingsView`（含账户中心迁入，沿 V1 §13 分组方案）——**默认以 STATE C 打开**（配置页不需要与 AI 并排） | `/settings` 不变 |
-| Dashboard 仪表盘 | **退役** | 今日概览职责由 Home/AI owner read models 承接（§6.0）；趋势图/活动时间线随页退役 | 无 `/dashboard` 路由或兼容 redirect |
-| Account 账户 | 并入 Settings | — | `/account/center` → `redirect: '/settings?tab=account'` |
-| AI 对话 | 就是地面本身 | — | `/ai/chat` → `redirect: '/'` |
-| Auth 登录 | 壳外 | `AuthLayout` 不变（V1 §14：流程勿动） | `/auth` 不变 |
-| 桌面通知弹窗 | 壳外 | `CustomNotificationView` 独立窗口，不进壳 | `/custom-notification` 不变 |
+| 模块              | 入口               | 面板内容（一次性切换时先原样嵌入的现视图）                                                                  | 路由                                                    |
+| ----------------- | ------------------ | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| Goal 目标         | 胶囊 1             | `GoalModuleLayout` 全子树（列表/详情/KR/复盘/专注/对比）                                                    | `/goals/**` 不变                                        |
+| Task 任务         | 胶囊 2             | `TaskManagementView` / `TaskDetailView`                                                                     | `/tasks/**` 不变                                        |
+| Note 笔记         | 胶囊 3             | Knowledge projection / Local Vault 工作区 + **Governance 并入为"规范"区**（`/note/:id` 已退役）             | `/repository`（`?note=` 深链）、`/governance/**`        |
+| Reminder 提醒     | 胶囊 4             | `ReminderLinearView`                                                                                        | `/reminders` 不变                                       |
+| Notification 通知 | 胶囊 5（未读角标） | `NotificationListPage`（预览浮层承担 V1 的"铃铛弹层"职责）                                                  | `/notifications` 不变                                   |
+| Schedule 日程     | 当前时段胶囊       | `ScheduleCalendarView`（日/周/月日历）                                                                      | `/schedule` → `/schedule/calendar` 单入口               |
+| Settings 设置     | 侧栏底部头像       | `UserSettingsView`（含账户中心迁入，沿 V1 §13 分组方案）——**默认以 STATE C 打开**（配置页不需要与 AI 并排） | `/settings` 不变                                        |
+| Dashboard 仪表盘  | **退役**           | 今日概览职责由 Home/AI owner read models 承接（§6.0）；趋势图/活动时间线随页退役                            | 无 `/dashboard` 路由或兼容 redirect                     |
+| Account 账户      | 并入 Settings      | —                                                                                                           | `/account/center` → `redirect: '/settings?tab=account'` |
+| AI 对话           | 就是地面本身       | —                                                                                                           | `/ai/chat` → `redirect: '/'`                            |
+| Auth 登录         | 壳外               | `AuthLayout` 不变（V1 §14：流程勿动）                                                                       | `/auth` 不变                                            |
+| 桌面通知弹窗      | 壳外               | `CustomNotificationView` 独立窗口，不进壳                                                                   | `/custom-notification` 不变                             |
 
 ---
 
@@ -207,15 +207,15 @@ AppShell
 
 ### 6.1–6.7 业务面板
 
-| 面板 | 沿用 V1 章节 | 面板化差异 |
-|---|---|---|
-| Goal | §3 §4 §5 | 模块内第二侧栏（系统视图/文件夹）在 split 窄档收为顶部下拉，focus 档恢复侧栏；专注模式缩为一行按钮的拍板不变 |
-| Task | §6 | 「任务库」更名、FilterBar、图谱视图模式、全部删除入危险区——全部照做；拖拽建依赖仅 focus 档启用（split 档 450px 内拖拽误操作率高） |
-| Schedule | §7 | 日历天然要宽度：**进入即建议 focus 档**（split 档只渲染日视图）；`EventDetailSheet` 补位照做；主视图为 `ScheduleCalendarView`（已更名） |
-| Reminder | §8 | 分组侧栏在 split 窄档收为下拉；全局开关任何档位保持面板头可达 |
-| Note | §9 §10 + §12 | 阶段 0 收缩（退役多标签/分屏/导出/批量导入）照做；**Governance 以"规范"分区并入**：面板内顶部切换 [笔记 \| 规范]，`/governance/**` 路由渲染到规范分区，V1 §12 的 FilterBar 收敛照做 |
-| Notification | §11 | 胶囊预览浮层 = V1 的铃铛弹层（最近 N 条 + 全部已读 + 查看全部）；完整面板 = 信箱归档页 |
-| Settings | §13 | 默认 focus 打开；6 分组方案、账户中心迁入、`?tab=` 契约照做 |
+| 面板         | 沿用 V1 章节 | 面板化差异                                                                                                                                                                          |
+| ------------ | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Goal         | §3 §4 §5     | 模块内第二侧栏（系统视图/文件夹）在 split 窄档收为顶部下拉，focus 档恢复侧栏；专注模式缩为一行按钮的拍板不变                                                                        |
+| Task         | §6           | 「任务库」更名、FilterBar、图谱视图模式、全部删除入危险区——全部照做；拖拽建依赖仅 focus 档启用（split 档 450px 内拖拽误操作率高）                                                   |
+| Schedule     | §7           | 日历天然要宽度：**进入即建议 focus 档**（split 档只渲染日视图）；`EventDetailSheet` 补位照做；主视图为 `ScheduleCalendarView`（已更名）                                             |
+| Reminder     | §8           | 分组侧栏在 split 窄档收为下拉；全局开关任何档位保持面板头可达                                                                                                                       |
+| Note         | §9 §10 + §12 | 阶段 0 收缩（退役多标签/分屏/导出/批量导入）照做；**Governance 以"规范"分区并入**：面板内顶部切换 [笔记 \| 规范]，`/governance/**` 路由渲染到规范分区，V1 §12 的 FilterBar 收敛照做 |
+| Notification | §11          | 胶囊预览浮层 = V1 的铃铛弹层（最近 N 条 + 全部已读 + 查看全部）；完整面板 = 信箱归档页                                                                                              |
+| Settings     | §13          | 默认 focus 打开；6 分组方案、账户中心迁入、`?tab=` 契约照做                                                                                                                         |
 
 ### 6.8 空/加载/错误基线
 
@@ -227,10 +227,10 @@ V1 §0.3 原文适用（AppEmptyState / skeleton 镜像布局 / 区块级 inline
 
 V1 §0.4 的 xl/lg/md/sm 页面断点作废。V2 的宽度适配对象是**面板本身**：
 
-| 档位 | 触发 | 行为 |
-|---|---|---|
+| 档位 | 触发                  | 行为                                                                                      |
+| ---- | --------------------- | ----------------------------------------------------------------------------------------- |
 | 窄档 | split 态（320–750px） | 模块第二侧栏收为下拉/Sheet；网格降为 1–2 列；重交互（拖拽、图谱）禁用并提示"最大化后可用" |
-| 宽档 | focus 态（满屏） | 完整布局，等价于 V1 里该页的桌面形态 |
+| 宽档 | focus 态（满屏）      | 完整布局，等价于 V1 里该页的桌面形态                                                      |
 
 窗口级断点只剩两条：<1024px 分栏自动升 focus（B→C）；<768px 侧栏转 overlay、日程胶囊缩为图标。真正的移动端仍归 `apps/mobile`（RN 独立 UI），不变。
 
@@ -267,13 +267,13 @@ V1 §0.4 的 xl/lg/md/sm 页面断点作废。V2 的宽度适配对象是**面�
 
 "一次性"指**壳的切换不留双轨**——不做 feature flag、不保留旧 MainLayout；但切换 PR 之前的准备和之后的内容改造仍分步。
 
-| 步骤 | 内容 | 说明 |
-|---|---|---|
-| S0 准备 | 桌面宿主无边框窗口 + 窗口控制 IPC（§9）；壳组件在独立分支开发（WindowHeader / ConversationSidebar / BusinessPanel / GlobalComposer / 三态布局容器）；AIChatView → 常驻层拆解设计 | 不影响主干 |
-| S1 **切换 PR** | 一次合入：新 AppShell 替换 MainLayout；router-view 移入 BusinessPanel；AI 常驻层接线；redirect（/ai/chat、/account/center）；导航 DI 接口重定义；模块视图**原样**进面板（允许窄档难看）；E2E 全量修复 | 单个大 PR，合入后中间态即可用：所有当前模块可达、深链全通 |
-| S2 面板内容改造 | 按 §6.1–6.7 逐模块执行（每模块一个独立 PR），含 V1 的删减/退役/更名清单 | 顺序建议：Goal → Task → Schedule → Reminder → Notification → Settings |
-| S3 AI 工作区精修 | §6.0：欢迎态 + 今日概览 + 工作流按钮内嵌消息卡 + 产物自动开面板 + 孤儿视图/legacy 分支删除 | 状态机回归重点 |
-| S4 Note 阶段 0 | V1 §9/§10 收缩 + Governance 并入，与 Brief §13 vault 专项并行不阻塞 | — |
+| 步骤             | 内容                                                                                                                                                                                                  | 说明                                                                  |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| S0 准备          | 桌面宿主无边框窗口 + 窗口控制 IPC（§9）；壳组件在独立分支开发（WindowHeader / ConversationSidebar / BusinessPanel / GlobalComposer / 三态布局容器）；AIChatView → 常驻层拆解设计                      | 不影响主干                                                            |
+| S1 **切换 PR**   | 一次合入：新 AppShell 替换 MainLayout；router-view 移入 BusinessPanel；AI 常驻层接线；redirect（/ai/chat、/account/center）；导航 DI 接口重定义；模块视图**原样**进面板（允许窄档难看）；E2E 全量修复 | 单个大 PR，合入后中间态即可用：所有当前模块可达、深链全通             |
+| S2 面板内容改造  | 按 §6.1–6.7 逐模块执行（每模块一个独立 PR），含 V1 的删减/退役/更名清单                                                                                                                               | 顺序建议：Goal → Task → Schedule → Reminder → Notification → Settings |
+| S3 AI 工作区精修 | §6.0：欢迎态 + 今日概览 + 工作流按钮内嵌消息卡 + 产物自动开面板 + 孤儿视图/legacy 分支删除                                                                                                            | 状态机回归重点                                                        |
+| S4 Note 阶段 0   | V1 §9/§10 收缩 + Governance 并入，与 Brief §13 vault 专项并行不阻塞                                                                                                                                   | —                                                                     |
 
 ### 验收清单（S1 切换 PR 的门槛）
 

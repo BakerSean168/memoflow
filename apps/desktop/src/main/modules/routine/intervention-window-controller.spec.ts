@@ -128,7 +128,9 @@ describe('InterventionWindowController (ROUTINE-4104)', () => {
     });
     controller.restoreIdentity('identity-1');
 
-    await expect(controller.execute({ action: 'complete' })).rejects.toThrow(/local db unavailable/);
+    await expect(controller.execute({ action: 'complete' })).rejects.toThrow(
+      /local db unavailable/,
+    );
     expect(runtime.getSnapshot('routine:eyes:durable')?.state).toBe('Gentle');
     expect(controller.getProjection()?.occurrenceKey).toBe('routine:eyes:durable');
     expect(onCommand).toHaveBeenCalledWith(

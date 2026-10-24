@@ -235,11 +235,7 @@ export class WindowStateManager {
    * @returns {boolean} True if the window would be visible, false otherwise.
    */
   private validateState(state: WindowState): boolean {
-    if (
-      !state ||
-      typeof state.width !== 'number' ||
-      typeof state.height !== 'number'
-    ) {
+    if (!state || typeof state.width !== 'number' || typeof state.height !== 'number') {
       return false;
     }
 

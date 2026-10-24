@@ -213,7 +213,10 @@ test('scope narrowing proves canonical-only edits; unknown/shared/full scope run
 });
 
 test('owner-scoped selection keeps the core floor and security/consumer extensions', () => {
-  const notification = selectWebSpecs({ enabled: true, files: ['packages/notification/src/api/index.ts'] });
+  const notification = selectWebSpecs({
+    enabled: true,
+    files: ['packages/notification/src/api/index.ts'],
+  });
   assert.equal(notification.fallback, false);
   assert.equal(notification.specs.length, 11);
   assert.ok(notification.specs.includes('notification/notification-center.spec.ts'));
@@ -225,13 +228,25 @@ test('owner-scoped selection keeps the core floor and security/consumer extensio
     }
   }
   for (const owner of ['task', 'goal', 'repository']) {
-    const selected = selectWebSpecs({ enabled: true, files: [`packages/app-vue/src/modules/${owner}/view.vue`] });
-    for (const spec of WEB_FLOW_SPECS.filter((spec) => spec.startsWith('ai/') || spec.startsWith('schedule/'))) {
+    const selected = selectWebSpecs({
+      enabled: true,
+      files: [`packages/app-vue/src/modules/${owner}/view.vue`],
+    });
+    for (const spec of WEB_FLOW_SPECS.filter(
+      (spec) => spec.startsWith('ai/') || spec.startsWith('schedule/'),
+    )) {
       assert.ok(selected.specs.includes(spec), `${owner}: ${spec}`);
     }
   }
-  for (const file of ['nx.json', 'packages/contracts/src/index.ts', 'packages/app-vue/src/shared/Button.vue']) {
-    assert.equal(selectWebSpecs({ enabled: true, files: ['packages/goal/src/index.ts', file] }).fallback, true);
+  for (const file of [
+    'nx.json',
+    'packages/contracts/src/index.ts',
+    'packages/app-vue/src/shared/Button.vue',
+  ]) {
+    assert.equal(
+      selectWebSpecs({ enabled: true, files: ['packages/goal/src/index.ts', file] }).fallback,
+      true,
+    );
   }
 });
 
@@ -350,4 +365,25 @@ fs.writeFileSync('test-results/results.json', JSON.stringify({suites:[{specs:[{f
   } finally {
     await rm(root, { recursive: true, force: true });
   }
+});
+
+test('storybook-only changes select no Web specs (Q4 Component Browser lane owns them)', async () => {
+  const { selectWebSpecs } = await import('../lib/web-shards.mjs');
+  assert.deepEqual(
+    selectWebSpecs({
+      enabled: true,
+      full: false,
+      files: ['packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.stories.ts'],
+    }),
+    { specs: [], fallback: false },
+  );
+  const mixed = selectWebSpecs({
+    enabled: true,
+    full: false,
+    files: [
+      'packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.stories.ts',
+      'apps/web/e2e/goal/goal-crud.spec.ts',
+    ],
+  });
+  assert.deepEqual(mixed.specs, ['goal/goal-crud.spec.ts']);
 });

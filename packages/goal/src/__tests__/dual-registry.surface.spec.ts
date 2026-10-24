@@ -38,9 +38,7 @@ import { describe, expect, it } from 'vitest';
           'utf8',
         );
         expect(source, pkg).toContain('Residual 1037');
-        expect(source, pkg).toContain(
-          "from '@memoflow/test-utils/setup/integration-global-setup'",
-        );
+        expect(source, pkg).toContain("from '@memoflow/test-utils/setup/integration-global-setup'");
         expect(source, pkg).toContain('setup');
         expect(source, pkg).toContain('teardown');
         expect(source, pkg).not.toMatch(/export async function setup\b/);
@@ -56,17 +54,15 @@ import { describe, expect, it } from 'vitest';
           'utf8',
         );
         expect(source, pkg).toContain('Residual 1037');
-        expect(source, pkg).toContain(
-          '../test-utils/src/setup/integration-global-setup.ts',
-        );
-        expect(source, pkg).not.toContain(
-          "./src/__tests__/integration-global-setup.ts",
-        );
+        expect(source, pkg).toContain('../test-utils/src/setup/integration-global-setup.ts');
+        expect(source, pkg).not.toContain('./src/__tests__/integration-global-setup.ts');
       }
     });
 
     it('sole setup is a thin ensureTestDatabase bootstrap without disconnect teardown', () => {
-      expect(sole).toMatch(/export async function setup\(\)\s*\{\s*await ensureTestDatabase\(\);\s*\}/);
+      expect(sole).toMatch(
+        /export async function setup\(\)\s*\{\s*await ensureTestDatabase\(\);\s*\}/,
+      );
       expect(sole).toMatch(/export async function teardown\(\)\s*\{\s*\}/);
       expect(sole).not.toContain('disconnect');
     });
@@ -106,9 +102,7 @@ import { describe, expect, it } from 'vitest';
           resolve(__dirname, `../../../${pkg}/src/__tests__/integration-helpers.ts`),
           'utf8',
         );
-        expect(source, pkg).toContain(
-          "from '@memoflow/test-utils/setup/integration-helpers'",
-        );
+        expect(source, pkg).toContain("from '@memoflow/test-utils/setup/integration-helpers'");
         expect(source, pkg).toContain('getPrisma');
         expect(source, pkg).toContain('disconnectPrisma');
         expect(source, pkg).toContain('cleanAll');

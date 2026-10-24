@@ -21,7 +21,9 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     env: createIntegrationTestEnv(),
-    globalSetup: [path.resolve(import.meta.dirname, '../test-utils/src/setup/integration-global-setup.ts')],
+    globalSetup: [
+      path.resolve(import.meta.dirname, '../test-utils/src/setup/integration-global-setup.ts'),
+    ],
     include: ['src/**/*.integration.test.ts', 'src/**/*.integration.spec.ts'],
     testTimeout: 30_000,
     hookTimeout: 30_000,

@@ -1,8 +1,5 @@
 import { z } from 'zod';
-import {
-  ExportSettingsResponseSchema,
-  ImportSettingsResponseSchema,
-} from './response-schemas';
+import { ExportSettingsResponseSchema, ImportSettingsResponseSchema } from './response-schemas';
 
 export const SyncSettingsSchema = z.object({
   force: z.boolean().optional(),

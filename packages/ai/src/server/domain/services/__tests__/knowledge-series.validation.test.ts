@@ -83,9 +83,7 @@ Key takeaways from this document.`,
     it('should reject non-array input', () => {
       expect(() =>
         service.validateKnowledgeSeriesOutput({} as unknown as KnowledgeSeriesTestDocument[], 5),
-      ).toThrow(
-        'Invalid knowledge series structure',
-      );
+      ).toThrow('Invalid knowledge series structure');
     });
 
     it('should reject wrong document count', () => {

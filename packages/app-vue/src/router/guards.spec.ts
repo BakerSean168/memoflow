@@ -6,10 +6,7 @@ import type {
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createAppAccessGuard } from './guards';
 
-const createTo = (
-  fullPath: string,
-  requiresAuth: boolean,
-): RouteLocationNormalized =>
+const createTo = (fullPath: string, requiresAuth: boolean): RouteLocationNormalized =>
   ({
     fullPath,
     matched: [{ meta: { requiresAuth } }],

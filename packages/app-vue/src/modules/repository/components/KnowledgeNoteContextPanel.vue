@@ -1,5 +1,8 @@
 <template>
-  <div class="flex h-full min-h-0 flex-col bg-background" data-testid="knowledge-note-context-panel">
+  <div
+    class="flex h-full min-h-0 flex-col bg-background"
+    data-testid="knowledge-note-context-panel"
+  >
     <div class="flex h-11 shrink-0 items-center gap-2 border-b px-3">
       <PanelRight class="h-4 w-4 text-muted-foreground" />
       <span class="text-sm font-medium">{{ t('repository.projection.contextTitle') }}</span>
@@ -74,7 +77,9 @@
             </div>
           </div>
           <div>
-            <dt class="text-muted-foreground">{{ t('repository.projection.stableReferenceLabel') }}</dt>
+            <dt class="text-muted-foreground">
+              {{ t('repository.projection.stableReferenceLabel') }}
+            </dt>
             <dd class="mt-0.5 text-[11px]">
               {{
                 note.knowledgeDocumentId

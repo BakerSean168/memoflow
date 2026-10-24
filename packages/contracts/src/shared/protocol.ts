@@ -55,5 +55,3 @@ type CoreAppRpcRegistry = AccountRpcMap &
   TaskRpcMap;
 
 export type AppRpcRegistry = CoreAppRpcRegistry & AppRpcRegistryExtensions;
-
-

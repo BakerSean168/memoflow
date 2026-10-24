@@ -8,7 +8,9 @@ describe('DesktopNotificationPreferenceStore', () => {
   const tempRoots: string[] = [];
 
   afterEach(async () => {
-    await Promise.all(tempRoots.splice(0).map((root) => fs.promises.rm(root, { recursive: true, force: true })));
+    await Promise.all(
+      tempRoots.splice(0).map((root) => fs.promises.rm(root, { recursive: true, force: true })),
+    );
   });
 
   async function tempPreferencePath(name = 'notification-preference.json') {
@@ -80,7 +82,9 @@ describe('DesktopNotificationPreferenceStore', () => {
     expect(() => store.update({ soundEnabled: false })).toThrow(
       'Desktop notification preference requires an active Profile',
     );
-    expect(() => store.reset()).toThrow('Desktop notification preference requires an active Profile');
+    expect(() => store.reset()).toThrow(
+      'Desktop notification preference requires an active Profile',
+    );
   });
 
   it('fail-closes corrupt/unknown persisted values to canonical defaults', async () => {
@@ -88,7 +92,10 @@ describe('DesktopNotificationPreferenceStore', () => {
     await fs.promises.mkdir(path.dirname(preferencePath), { recursive: true });
     await fs.promises.writeFile(
       preferencePath,
-      JSON.stringify({ schemaVersion: 1, preference: { presentationMode: 'system', soundEnabled: true } }),
+      JSON.stringify({
+        schemaVersion: 1,
+        preference: { presentationMode: 'system', soundEnabled: true },
+      }),
       'utf8',
     );
     const store = new DesktopNotificationPreferenceStore(() => preferencePath);

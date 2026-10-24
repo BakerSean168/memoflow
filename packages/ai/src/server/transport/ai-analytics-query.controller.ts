@@ -8,7 +8,10 @@ import {
 import { formatZodErrors } from '@memoflow/utils/result';
 
 interface AIAnalyticsQueryControllerService {
-  queryAnalytics(request: QueryAnalyticsReq, cx: ExecutionContext): Promise<Result<QueryAnalyticsRes>>;
+  queryAnalytics(
+    request: QueryAnalyticsReq,
+    cx: ExecutionContext,
+  ): Promise<Result<QueryAnalyticsRes>>;
 }
 
 export class AIAnalyticsQueryController {

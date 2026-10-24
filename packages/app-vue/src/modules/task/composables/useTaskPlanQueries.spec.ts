@@ -62,10 +62,20 @@ describe('useTaskPlanListQuery', () => {
     service.listPlans.mockResolvedValue(ok({ plans: [], total: 123 }));
     const surface = ref('today');
     const page = ref(1);
-    const { api } = mountTaskComposable(() => useTaskPlanListQuery({
-      params: () => ({ page: page.value, limit: 100, outcome: ['Open'], archiveState: 'active', labelIdsAll: ['b', 'a'] }),
-      enabled: () => surface.value === 'plans',
-    }), { service });
+    const { api } = mountTaskComposable(
+      () =>
+        useTaskPlanListQuery({
+          params: () => ({
+            page: page.value,
+            limit: 100,
+            outcome: ['Open'],
+            archiveState: 'active',
+            labelIdsAll: ['b', 'a'],
+          }),
+          enabled: () => surface.value === 'plans',
+        }),
+      { service },
+    );
     await flushPromises();
     page.value = 2;
     await flushPromises();
@@ -75,7 +85,11 @@ describe('useTaskPlanListQuery', () => {
     surface.value = 'plans';
     await vi.waitFor(() => expect(api.isLoading.value).toBe(false));
     expect(service.listPlans).toHaveBeenCalledExactlyOnceWith({
-      page: 2, limit: 100, outcome: ['Open'], archiveState: 'active', labelIdsAll: ['a', 'b'],
+      page: 2,
+      limit: 100,
+      outcome: ['Open'],
+      archiveState: 'active',
+      labelIdsAll: ['a', 'b'],
     });
     expect(api.total.value).toBe(123);
 
@@ -125,7 +139,9 @@ describe('useTaskPlanDetailQuery', () => {
   it('fetches detail once for a stable id and isolates a different id', async () => {
     const service = makeService();
     service.getPlan.mockResolvedValue(ok(entity(template())));
-    const first = mountTaskComposable(() => useTaskPlanDetailQuery(() => 'template-1'), { service });
+    const first = mountTaskComposable(() => useTaskPlanDetailQuery(() => 'template-1'), {
+      service,
+    });
     await vi.waitFor(() => expect(first.api.isLoading.value).toBe(false));
     expect(service.getPlan).toHaveBeenCalledTimes(1);
     expect(first.api.currentTemplate.value?.id).toBe('template-1');

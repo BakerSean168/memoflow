@@ -141,7 +141,7 @@ describe('task occurrence ownership surface', () => {
 
   it('get/delete use cases load via findByIdForIdentity', () => {
     expect(getUseCase).toContain('findByIdForIdentity(identityId, id)');
-    expect(getUseCase).toMatch(/execute\(\s*id: string,\s*identityId: string,/);
+    expect(getUseCase).toMatch(/execute\(\s*id: string,\s*identityId: string,?\s*[):]/);
     expect(deleteUseCase).toContain('findByIdForIdentity(identityId, id)');
     expect(deleteUseCase).toContain('delete(identityId, id)');
   });
@@ -167,7 +167,7 @@ describe('task occurrence ownership surface', () => {
       /OCCURRENCE_GET[\s\S]*instanceController\.getOccurrence\([\s\S]*requestContext/,
     );
     expect(electron).toMatch(
-      /OCCURRENCE_DELETE[\s\S]*instanceController\.deleteOccurrence\(data\.params\.id,[\s\S]*requestContext/,
+      /OCCURRENCE_DELETE[\s\S]*instanceController\.deleteOccurrence\(\s*data\.params\.id,[\s\S]*requestContext/,
     );
     expect(electron).not.toContain('instanceController.getOccurrence(payload?.id ?? payload),');
   });

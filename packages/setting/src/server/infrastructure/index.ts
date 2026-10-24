@@ -32,6 +32,4 @@ export {
   createSettingPowerSyncRepositories,
   type SettingPowerSyncRepositorySet,
 } from './powersync';
-export {
-  createSettingRuntimeContribution,
-} from './runtime';
+export { createSettingRuntimeContribution } from './runtime';

@@ -42,31 +42,40 @@ it('pushes all label AND predicates and scope into both bounded Prisma queries',
   });
 });
 
-
 it.each<{ filter: Partial<TaskPlanPageQuery>; where: object }>([
   { filter: {}, where: {} },
   { filter: { outcome: [], archiveState: 'all' }, where: {} },
   { filter: { outcome: ['Succeeded'] }, where: { outcome: { in: ['Succeeded'] } } },
-  { filter: { outcome: ['Failed', 'Abandoned'] }, where: { outcome: { in: ['Failed', 'Abandoned'] } } },
+  {
+    filter: { outcome: ['Failed', 'Abandoned'] },
+    where: { outcome: { in: ['Failed', 'Abandoned'] } },
+  },
   { filter: { archiveState: 'archived' }, where: { archivedAt: { not: null } } },
-  { filter: { status: ['Paused'], outcome: ['Open'], archiveState: 'active' },
-    where: { status: { in: ['Paused'] }, outcome: { in: ['Open'] }, archivedAt: null } },
-])('uses the same state predicates for Prisma count and page: $filter', async ({ filter, where }) => {
-  const taskPlan = {
-    count: vi.fn().mockResolvedValue(7),
-    findMany: vi.fn().mockResolvedValue([]),
-  };
-  const repo = new TaskPlanPrismaRepository({ taskPlan } as unknown as PrismaClient, {
-    publish: vi.fn(),
-  });
-  expect(await repo.findPage('owner', { ...filter, limit: 2, offset: 8 }))
-    .toEqual({ plans: [], total: 7 });
-  const scopedWhere = { identityId: 'owner', deletedAt: null, ...where };
-  expect(taskPlan.count).toHaveBeenCalledWith({ where: scopedWhere });
-  expect(taskPlan.findMany).toHaveBeenCalledWith({
-    where: scopedWhere,
-    orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
-    take: 2,
-    skip: 8,
-  });
-});
+  {
+    filter: { status: ['Paused'], outcome: ['Open'], archiveState: 'active' },
+    where: { status: { in: ['Paused'] }, outcome: { in: ['Open'] }, archivedAt: null },
+  },
+])(
+  'uses the same state predicates for Prisma count and page: $filter',
+  async ({ filter, where }) => {
+    const taskPlan = {
+      count: vi.fn().mockResolvedValue(7),
+      findMany: vi.fn().mockResolvedValue([]),
+    };
+    const repo = new TaskPlanPrismaRepository({ taskPlan } as unknown as PrismaClient, {
+      publish: vi.fn(),
+    });
+    expect(await repo.findPage('owner', { ...filter, limit: 2, offset: 8 })).toEqual({
+      plans: [],
+      total: 7,
+    });
+    const scopedWhere = { identityId: 'owner', deletedAt: null, ...where };
+    expect(taskPlan.count).toHaveBeenCalledWith({ where: scopedWhere });
+    expect(taskPlan.findMany).toHaveBeenCalledWith({
+      where: scopedWhere,
+      orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
+      take: 2,
+      skip: 8,
+    });
+  },
+);

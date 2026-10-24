@@ -263,10 +263,10 @@ export class PowerSyncTaskPlanRepository
       if (!label) throw new TaskLabelOwnershipError();
     }
 
-    await this.db.execute(
-      'DELETE FROM task_labels WHERE identity_id = ? AND task_plan_id = ?',
-      [identityId, taskPlanId],
-    );
+    await this.db.execute('DELETE FROM task_labels WHERE identity_id = ? AND task_plan_id = ?', [
+      identityId,
+      taskPlanId,
+    ]);
     for (const labelId of uniqueIds) {
       await this.db.execute(
         'INSERT INTO task_labels (id, identity_id, task_plan_id, label_id) VALUES (?, ?, ?, ?)',

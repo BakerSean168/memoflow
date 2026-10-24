@@ -12,10 +12,7 @@
  * @module @memoflow/http-client
  */
 
-import axios, {
-  type AxiosInstance,
-  type InternalAxiosRequestConfig,
-} from 'axios';
+import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
 import { DEFAULT_HTTP_CLIENT_CONFIG, type HttpClientConfig } from './types';
 
 /**

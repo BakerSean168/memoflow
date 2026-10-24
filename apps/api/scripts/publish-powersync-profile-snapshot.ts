@@ -103,7 +103,9 @@ async function main(): Promise<void> {
 
   const snapshotRootDir = options.snapshotRootDir ?? env.POWERSYNC_SNAPSHOT_DIR;
   if (!snapshotRootDir) {
-    throw new Error('POWERSYNC_SNAPSHOT_DIR is not configured. Pass --snapshot-root-dir or set the env var.');
+    throw new Error(
+      'POWERSYNC_SNAPSHOT_DIR is not configured. Pass --snapshot-root-dir or set the env var.',
+    );
   }
 
   const result = await publishProfileSnapshot({

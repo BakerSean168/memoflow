@@ -95,11 +95,7 @@
       ],
       "depends_on": [],
       "conflicts_with": [],
-      "mutation_keys": [
-        "domain:routine",
-        "contract:routine-command",
-        "composition:routine-hosts"
-      ],
+      "mutation_keys": ["domain:routine", "contract:routine-command", "composition:routine-hosts"],
       "preferred_implementation_route_id": "openswe-current"
     },
     {
@@ -150,15 +146,9 @@
         "pnpm nx run desktop:test:main",
         "pnpm test:inventory:check"
       ],
-      "depends_on": [
-        "R4-2201A"
-      ],
+      "depends_on": ["R4-2201A"],
       "conflicts_with": [],
-      "mutation_keys": [
-        "domain:routine",
-        "schema:routine-runtime",
-        "contract:routine-interaction"
-      ]
+      "mutation_keys": ["domain:routine", "schema:routine-runtime", "contract:routine-interaction"]
     },
     {
       "id": "S4-2302A",
@@ -377,9 +367,7 @@
         "pnpm nx run app-vue:test",
         "pnpm governance:check"
       ],
-      "depends_on": [
-        "S4-2302A"
-      ],
+      "depends_on": ["S4-2302A"],
       "conflicts_with": [],
       "mutation_keys": [
         "domain:planner-calendar",
@@ -432,9 +420,7 @@
         "pnpm nx run desktop:typecheck",
         "pnpm test:inventory:check"
       ],
-      "depends_on": [
-        "P4-2301A"
-      ],
+      "depends_on": ["P4-2301A"],
       "conflicts_with": [],
       "mutation_keys": [
         "domain:planner-calendar",
@@ -488,10 +474,7 @@
         "pnpm nx run desktop:db:reset:dry",
         "pnpm governance:check"
       ],
-      "depends_on": [
-        "S4-2302A",
-        "P4-2301B"
-      ],
+      "depends_on": ["S4-2302A", "P4-2301B"],
       "conflicts_with": [],
       "mutation_keys": [
         "domain:scheduler-runtime",
@@ -545,9 +528,7 @@
         "pnpm nx run desktop:typecheck",
         "pnpm governance:check"
       ],
-      "depends_on": [
-        "N4-2401A"
-      ],
+      "depends_on": ["N4-2401A"],
       "conflicts_with": [],
       "mutation_keys": [
         "domain:notification-fact",
@@ -601,9 +582,7 @@
         "pnpm nx run desktop:test:ipc",
         "pnpm governance:check"
       ],
-      "depends_on": [
-        "N4-2401B"
-      ],
+      "depends_on": ["N4-2401B"],
       "conflicts_with": [],
       "mutation_keys": [
         "domain:notification-delivery",
@@ -658,10 +637,7 @@
         "pnpm nx run api:typecheck",
         "pnpm nx run desktop:typecheck"
       ],
-      "depends_on": [
-        "N4-2402A",
-        "R4-2201B"
-      ],
+      "depends_on": ["N4-2402A", "R4-2201B"],
       "conflicts_with": [],
       "mutation_keys": [
         "domain:notification-interaction",
@@ -714,11 +690,7 @@
         "pnpm test:inventory",
         "pnpm governance:check"
       ],
-      "depends_on": [
-        "R4-2201B",
-        "S4-2302B",
-        "N4-2402B"
-      ],
+      "depends_on": ["R4-2201B", "S4-2302B", "N4-2402B"],
       "conflicts_with": [],
       "mutation_keys": [
         "domain:routine",
@@ -755,9 +727,7 @@
         "Repair only verified Phase 4 integration findings and reconcile generated inventory/artifacts.",
         "Update system-wide plan Phase 4 evidence and run the required integrated gates."
       ],
-      "integration_notes": [
-        "Phase 5 and Phase 4-owner portability tasks depend on this closure."
-      ],
+      "integration_notes": ["Phase 5 and Phase 4-owner portability tasks depend on this closure."],
       "acceptance_criteria": [
         "Phase 4 integrated review has no P0/P1/P2 findings.",
         "Retired legacy owner vocabulary is absent except documented non-authoritative history/tests.",
@@ -771,18 +741,9 @@
         "pnpm nx affected -t test",
         "pnpm nx affected -t build"
       ],
-      "depends_on": [
-        "R4-2201C",
-        "P4-2301B",
-        "S4-2302B",
-        "N4-2402B"
-      ],
+      "depends_on": ["R4-2201C", "P4-2301B", "S4-2302B", "N4-2402B"],
       "conflicts_with": [],
-      "mutation_keys": [
-        "integration:phase4",
-        "docs:system-vnext-plan",
-        "governance:phase4"
-      ]
+      "mutation_keys": ["integration:phase4", "docs:system-vnext-plan", "governance:phase4"]
     },
     {
       "id": "PORT-1610B",
@@ -829,10 +790,7 @@
         "pnpm nx run schedule:test",
         "pnpm nx run notification:test"
       ],
-      "depends_on": [
-        "PORT-1610A",
-        "P4-CLOSE"
-      ],
+      "depends_on": ["PORT-1610A", "P4-CLOSE"],
       "conflicts_with": [],
       "mutation_keys": [
         "domain:data-portability",
@@ -879,14 +837,9 @@
         "pnpm nx run app-vue:test",
         "pnpm nx run app-vue:typecheck"
       ],
-      "depends_on": [
-        "P4-CLOSE"
-      ],
+      "depends_on": ["P4-CLOSE"],
       "conflicts_with": [],
-      "mutation_keys": [
-        "readmodel:goal-home",
-        "ui:home"
-      ]
+      "mutation_keys": ["readmodel:goal-home", "ui:home"]
     },
     {
       "id": "HOME-1802",
@@ -898,16 +851,11 @@
         "Home/TodayOverview/Goal capsule owner-read composition.",
         "Removal of useDashboard from those product paths."
       ],
-      "out_of_scope": [
-        "AI ControlledAnalyticsReadAdapter.",
-        "Dashboard package/schema deletion."
-      ],
+      "out_of_scope": ["AI ControlledAnalyticsReadAdapter.", "Dashboard package/schema deletion."],
       "context_refs": [
         "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md"
       ],
-      "protected_contracts": [
-        "Home is a composition surface, not a new owner domain."
-      ],
+      "protected_contracts": ["Home is a composition surface, not a new owner domain."],
       "implementation_steps": [
         "Map each remaining Home Dashboard field to its authoritative owner read.",
         "Replace useDashboard consumption with owner services and preserve loading/error degradation.",
@@ -925,14 +873,9 @@
         "pnpm nx run app-vue:typecheck",
         "pnpm nx run web:typecheck"
       ],
-      "depends_on": [
-        "HOME-1801"
-      ],
+      "depends_on": ["HOME-1801"],
       "conflicts_with": [],
-      "mutation_keys": [
-        "ui:home",
-        "consumer:dashboard-home"
-      ]
+      "mutation_keys": ["ui:home", "consumer:dashboard-home"]
     },
     {
       "id": "AI-9602",
@@ -962,9 +905,7 @@
         "Add fixtures proving authoritative state recovery and classify legacy AiMessage consumers.",
         "Record deletion prerequisites for AI-9610 without implementing deletion."
       ],
-      "integration_notes": [
-        "AI-9603 consumes this characterization."
-      ],
+      "integration_notes": ["AI-9603 consumes this characterization."],
       "acceptance_criteria": [
         "Runtime authority is proven by tests for restart/reconnect/HITL state.",
         "Every legacy AiMessage consumer is classified as required or deletable with evidence."
@@ -975,14 +916,9 @@
         "pnpm nx run api:typecheck",
         "pnpm nx run desktop:typecheck"
       ],
-      "depends_on": [
-        "P4-CLOSE"
-      ],
+      "depends_on": ["P4-CLOSE"],
       "conflicts_with": [],
-      "mutation_keys": [
-        "domain:ai-conversation-runtime",
-        "runtime:mastra-authority"
-      ]
+      "mutation_keys": ["domain:ai-conversation-runtime", "runtime:mastra-authority"]
     },
     {
       "id": "AI-9603",
@@ -994,10 +930,7 @@
         "Conversation shell session/thread/workflow state and UI hydration.",
         "Removal of durable UI workflow shadow state proven redundant."
       ],
-      "out_of_scope": [
-        "Provider/model resolution.",
-        "Owner-domain workflow semantics."
-      ],
+      "out_of_scope": ["Provider/model resolution.", "Owner-domain workflow semantics."],
       "context_refs": [
         "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md",
         "docs/architecture/adr/ADR-096-assistant-conversation-shell-and-mastra-runtime-state-boundary.md"
@@ -1024,14 +957,9 @@
         "pnpm nx run api:typecheck",
         "pnpm nx run desktop:typecheck"
       ],
-      "depends_on": [
-        "AI-9602"
-      ],
+      "depends_on": ["AI-9602"],
       "conflicts_with": [],
-      "mutation_keys": [
-        "domain:ai-conversation-runtime",
-        "ui:ai-conversation-shell"
-      ]
+      "mutation_keys": ["domain:ai-conversation-runtime", "ui:ai-conversation-shell"]
     },
     {
       "id": "AI-9604",
@@ -1043,13 +971,8 @@
         "AI provider definition/connection/secret contracts and host adapters.",
         "API/Desktop provider configuration ownership."
       ],
-      "out_of_scope": [
-        "Model capability resolution.",
-        "Legacy execution/message table deletion."
-      ],
-      "context_refs": [
-        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"
-      ],
+      "out_of_scope": ["Model capability resolution.", "Legacy execution/message table deletion."],
+      "context_refs": ["docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"],
       "protected_contracts": [
         "Secrets are never stored in portable/provider definition payloads.",
         "API/Desktop expose the same provider semantics with host-appropriate SecretVault adapters."
@@ -1059,9 +982,7 @@
         "Introduce explicit ProviderDefinition/Connection/SecretVault contracts and adapters.",
         "Cut provider onboarding/configuration consumers to the new seam and remove duplicated ownership."
       ],
-      "integration_notes": [
-        "AI-9605 builds model capability resolution on this seam."
-      ],
+      "integration_notes": ["AI-9605 builds model capability resolution on this seam."],
       "acceptance_criteria": [
         "Provider metadata, connection state and secrets have distinct owners and storage contracts.",
         "No secret leaks into portable/public provider payloads."
@@ -1072,14 +993,9 @@
         "pnpm nx run api:typecheck",
         "pnpm nx run desktop:typecheck"
       ],
-      "depends_on": [
-        "P4-CLOSE"
-      ],
+      "depends_on": ["P4-CLOSE"],
       "conflicts_with": [],
-      "mutation_keys": [
-        "domain:ai-provider",
-        "contract:ai-provider-secret"
-      ]
+      "mutation_keys": ["domain:ai-provider", "contract:ai-provider-secret"]
     },
     {
       "id": "AI-9605",
@@ -1091,13 +1007,8 @@
         "ModelCatalog/capability/ExecutionRequirement contracts and resolver.",
         "Runtime model selection call sites."
       ],
-      "out_of_scope": [
-        "Changing provider secret ownership.",
-        "Owner workflow DTOs."
-      ],
-      "context_refs": [
-        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"
-      ],
+      "out_of_scope": ["Changing provider secret ownership.", "Owner workflow DTOs."],
+      "context_refs": ["docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"],
       "protected_contracts": [
         "Provider secrets/connections remain behind AI-9604 seams.",
         "Model resolution fails closed when required capability is unavailable."
@@ -1119,14 +1030,9 @@
         "pnpm nx run ai:typecheck",
         "pnpm nx run ai:eval:replay"
       ],
-      "depends_on": [
-        "AI-9604"
-      ],
+      "depends_on": ["AI-9604"],
       "conflicts_with": [],
-      "mutation_keys": [
-        "domain:ai-model-resolution",
-        "contract:ai-model-capability"
-      ]
+      "mutation_keys": ["domain:ai-model-resolution", "contract:ai-model-capability"]
     },
     {
       "id": "AI-9606",
@@ -1138,10 +1044,7 @@
         "AIContextAssembler contracts and runtime composition.",
         "UserTimeContext/Product Time, trust/provenance and token-budget inputs."
       ],
-      "out_of_scope": [
-        "Goal/Task/Routine tool DTO changes.",
-        "Knowledge index identity cutover."
-      ],
+      "out_of_scope": ["Goal/Task/Routine tool DTO changes.", "Knowledge index identity cutover."],
       "context_refs": [
         "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md",
         "docs/architecture/adr/ADR-098-ai-context-knowledge-index-and-owner-contract-boundary.md"
@@ -1155,9 +1058,7 @@
         "Implement AIContextAssembler with explicit bounded inputs and budgets.",
         "Cut runtime/workflows to the assembler without broadening owner read capabilities."
       ],
-      "integration_notes": [
-        "AI-9607, AI-9608 and AI-9609 depend on this boundary."
-      ],
+      "integration_notes": ["AI-9607, AI-9608 and AI-9609 depend on this boundary."],
       "acceptance_criteria": [
         "AI workflows receive Product Time/trust/budget context through one tested assembler.",
         "No host-local time fallback or owner bypass is introduced."
@@ -1168,14 +1069,9 @@
         "pnpm nx run api:typecheck",
         "pnpm nx run desktop:typecheck"
       ],
-      "depends_on": [
-        "P4-CLOSE"
-      ],
+      "depends_on": ["P4-CLOSE"],
       "conflicts_with": [],
-      "mutation_keys": [
-        "domain:ai-context",
-        "contract:ai-context-assembler"
-      ]
+      "mutation_keys": ["domain:ai-context", "contract:ai-context-assembler"]
     },
     {
       "id": "AI-9607",
@@ -1204,9 +1100,7 @@
         "Cut index/citation persistence and adapters to stable KnowledgeDocumentId.",
         "Delete duplicated index-status truth and path-derived identity branches."
       ],
-      "integration_notes": [
-        "AI-9611 waits for this stable capability boundary."
-      ],
+      "integration_notes": ["AI-9611 waits for this stable capability boundary."],
       "acceptance_criteria": [
         "All AI index/citation paths use stable KnowledgeDocumentId.",
         "No second durable index-status authority remains."
@@ -1216,14 +1110,9 @@
         "pnpm nx run ai:typecheck",
         "pnpm nx run repository:test"
       ],
-      "depends_on": [
-        "AI-9606"
-      ],
+      "depends_on": ["AI-9606"],
       "conflicts_with": [],
-      "mutation_keys": [
-        "domain:ai-knowledge-index",
-        "contract:knowledge-document-id"
-      ]
+      "mutation_keys": ["domain:ai-knowledge-index", "contract:knowledge-document-id"]
     },
     {
       "id": "AI-9608",
@@ -1239,9 +1128,7 @@
         "Routine/Planner/Notification AI tools.",
         "Changing Goal/Task/Knowledge owner semantics."
       ],
-      "context_refs": [
-        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"
-      ],
+      "context_refs": ["docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"],
       "protected_contracts": [
         "Goal, Task and Knowledge owners validate and execute mutations; AI does not become a persistence owner.",
         "GoalPlanDraft V2 deterministic/resumable semantics remain intact."
@@ -1265,14 +1152,9 @@
         "pnpm nx run api:typecheck",
         "pnpm nx run desktop:typecheck"
       ],
-      "depends_on": [
-        "AI-9606"
-      ],
+      "depends_on": ["AI-9606"],
       "conflicts_with": [],
-      "mutation_keys": [
-        "domain:ai-owner-workflows",
-        "contract:goal-task-knowledge-ai"
-      ]
+      "mutation_keys": ["domain:ai-owner-workflows", "contract:goal-task-knowledge-ai"]
     },
     {
       "id": "AI-9609",
@@ -1284,13 +1166,8 @@
         "AI Routine commands, Planner reads and Notification reads/actions.",
         "API/Desktop owner adapters for Phase 4 domains."
       ],
-      "out_of_scope": [
-        "Changing Phase 4 owner contracts.",
-        "AI provider/model redesign."
-      ],
-      "context_refs": [
-        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"
-      ],
+      "out_of_scope": ["Changing Phase 4 owner contracts.", "AI provider/model redesign."],
+      "context_refs": ["docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"],
       "protected_contracts": [
         "AI invokes owner commands/reads and never writes owner persistence directly.",
         "Product Time and AIContextAssembler are used consistently."
@@ -1314,15 +1191,9 @@
         "pnpm nx run notification:test",
         "pnpm nx run ai:eval:replay"
       ],
-      "depends_on": [
-        "P4-CLOSE",
-        "AI-9606"
-      ],
+      "depends_on": ["P4-CLOSE", "AI-9606"],
       "conflicts_with": [],
-      "mutation_keys": [
-        "domain:ai-owner-workflows",
-        "contract:routine-planner-notification-ai"
-      ]
+      "mutation_keys": ["domain:ai-owner-workflows", "contract:routine-planner-notification-ai"]
     },
     {
       "id": "HOME-1803",
@@ -1365,15 +1236,9 @@
         "pnpm nx run desktop:typecheck",
         "pnpm nx run dashboard:test"
       ],
-      "depends_on": [
-        "HOME-1801",
-        "AI-9606"
-      ],
+      "depends_on": ["HOME-1801", "AI-9606"],
       "conflicts_with": [],
-      "mutation_keys": [
-        "consumer:dashboard-ai",
-        "domain:ai-analytics-read"
-      ]
+      "mutation_keys": ["consumer:dashboard-ai", "domain:ai-analytics-read"]
     },
     {
       "id": "HOME-1804",
@@ -1401,9 +1266,7 @@
         "Choose narrow ActivityFeed only if a current product path requires it; otherwise delete recorder/table/contracts.",
         "Implement the selected bounded path and add governance preventing generic Dashboard resurrection."
       ],
-      "integration_notes": [
-        "HOME-1805 uses the resolved result to hard-delete Dashboard."
-      ],
+      "integration_notes": ["HOME-1805 uses the resolved result to hard-delete Dashboard."],
       "acceptance_criteria": [
         "ActivityLedger is either deleted or replaced by a narrow, evidenced owner capability.",
         "No generic Dashboard analytics authority remains."
@@ -1414,15 +1277,9 @@
         "pnpm nx run ai:test",
         "pnpm governance:check"
       ],
-      "depends_on": [
-        "HOME-1802",
-        "HOME-1803"
-      ],
+      "depends_on": ["HOME-1802", "HOME-1803"],
       "conflicts_with": [],
-      "mutation_keys": [
-        "domain:dashboard-legacy",
-        "schema:activity-ledger"
-      ]
+      "mutation_keys": ["domain:dashboard-legacy", "schema:activity-ledger"]
     },
     {
       "id": "HOME-1805",
@@ -1466,15 +1323,9 @@
         "pnpm test:inventory",
         "pnpm governance:check"
       ],
-      "depends_on": [
-        "HOME-1804"
-      ],
+      "depends_on": ["HOME-1804"],
       "conflicts_with": [],
-      "mutation_keys": [
-        "domain:dashboard-legacy",
-        "schema:dashboard",
-        "ui:dashboard"
-      ]
+      "mutation_keys": ["domain:dashboard-legacy", "schema:dashboard", "ui:dashboard"]
     },
     {
       "id": "AI-9610",
@@ -1520,16 +1371,9 @@
         "pnpm nx run desktop:typecheck",
         "pnpm governance:check"
       ],
-      "depends_on": [
-        "AI-9605",
-        "AI-9608",
-        "AI-9609"
-      ],
+      "depends_on": ["AI-9605", "AI-9608", "AI-9609"],
       "conflicts_with": [],
-      "mutation_keys": [
-        "domain:ai-execution-record",
-        "schema:ai-legacy"
-      ]
+      "mutation_keys": ["domain:ai-execution-record", "schema:ai-legacy"]
     },
     {
       "id": "AI-9611",
@@ -1545,9 +1389,7 @@
         "Speculative micro-interfaces with no consumer evidence.",
         "Changing owner-domain contracts."
       ],
-      "context_refs": [
-        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"
-      ],
+      "context_refs": ["docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"],
       "protected_contracts": [
         "Capability splits follow real consumer boundaries and do not duplicate runtime ownership."
       ],
@@ -1556,9 +1398,7 @@
         "Split only proven seams and update API/Desktop composition.",
         "Delete obsolete broad interfaces and add boundary/governance tests."
       ],
-      "integration_notes": [
-        "AI-9612 reviews the final AI surface after this cleanup."
-      ],
+      "integration_notes": ["AI-9612 reviews the final AI surface after this cleanup."],
       "acceptance_criteria": [
         "AI application capabilities match real consumer boundaries without duplicated orchestration.",
         "No speculative or legacy broad facade remains where a narrower seam is proven."
@@ -1570,17 +1410,9 @@
         "pnpm nx run desktop:typecheck",
         "pnpm governance:check"
       ],
-      "depends_on": [
-        "AI-9603",
-        "AI-9604",
-        "AI-9607",
-        "AI-9610"
-      ],
+      "depends_on": ["AI-9603", "AI-9604", "AI-9607", "AI-9610"],
       "conflicts_with": [],
-      "mutation_keys": [
-        "domain:ai-application-boundary",
-        "composition:ai-hosts"
-      ]
+      "mutation_keys": ["domain:ai-application-boundary", "composition:ai-hosts"]
     },
     {
       "id": "AI-9612",
@@ -1592,13 +1424,8 @@
         "AI five-layer review, failure/retry/HITL/restart hardening, eval replay and docs truth.",
         "Focused repair of verified AI findings."
       ],
-      "out_of_scope": [
-        "New AI product features.",
-        "Unrelated model/provider experimentation."
-      ],
-      "context_refs": [
-        "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"
-      ],
+      "out_of_scope": ["New AI product features.", "Unrelated model/provider experimentation."],
+      "context_refs": ["docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"],
       "protected_contracts": [
         "P0/P1/P2 findings must be repaired before closure.",
         "Exact-head review and required CI are mandatory."
@@ -1609,9 +1436,7 @@
         "Repair verified findings and rerun focused then full AI gates.",
         "Update AI convergence plan evidence only after exact-head closure."
       ],
-      "integration_notes": [
-        "PORT-1611 and CLEAN-2601 depend on final AI closure."
-      ],
+      "integration_notes": ["PORT-1611 and CLEAN-2601 depend on final AI closure."],
       "acceptance_criteria": [
         "AI five-layer review has no P0/P1/P2 findings.",
         "AI eval replay and runtime failure-path tests pass.",
@@ -1625,20 +1450,9 @@
         "pnpm docs:check",
         "pnpm governance:check"
       ],
-      "depends_on": [
-        "AI-9603",
-        "AI-9605",
-        "AI-9607",
-        "AI-9608",
-        "AI-9609",
-        "AI-9611"
-      ],
+      "depends_on": ["AI-9603", "AI-9605", "AI-9607", "AI-9608", "AI-9609", "AI-9611"],
       "conflicts_with": [],
-      "mutation_keys": [
-        "integration:ai-vnext",
-        "docs:ai-vnext-plan",
-        "governance:ai"
-      ]
+      "mutation_keys": ["integration:ai-vnext", "docs:ai-vnext-plan", "governance:ai"]
     },
     {
       "id": "PORT-1611",
@@ -1684,11 +1498,7 @@
         "pnpm nx run desktop:typecheck",
         "pnpm governance:check"
       ],
-      "depends_on": [
-        "PORT-1610B",
-        "HOME-1805",
-        "AI-9612"
-      ],
+      "depends_on": ["PORT-1610B", "HOME-1805", "AI-9612"],
       "conflicts_with": [],
       "mutation_keys": [
         "domain:data-portability",
@@ -1745,9 +1555,7 @@
         "pnpm build",
         "pnpm nx run desktop:db:reset:dry"
       ],
-      "depends_on": [
-        "PORT-1611"
-      ],
+      "depends_on": ["PORT-1611"],
       "conflicts_with": [],
       "mutation_keys": [
         "schema:whole-system-legacy",
@@ -1787,19 +1595,10 @@
         "Ownership/residue ledger has no unresolved P0/P1/P2 issue.",
         "All remaining exceptions are explicit and justified."
       ],
-      "verification_commands": [
-        "pnpm governance:check",
-        "pnpm docs:check",
-        "pnpm typecheck"
-      ],
-      "depends_on": [
-        "CLEAN-2601"
-      ],
+      "verification_commands": ["pnpm governance:check", "pnpm docs:check", "pnpm typecheck"],
+      "depends_on": ["CLEAN-2601"],
       "conflicts_with": [],
-      "mutation_keys": [
-        "review:cross-domain-ownership",
-        "governance:system"
-      ]
+      "mutation_keys": ["review:cross-domain-ownership", "governance:system"]
     },
     {
       "id": "SYS-3002",
@@ -1811,9 +1610,7 @@
         "Five-layer review across affected product/runtime paths.",
         "Focused repair passes for verified findings."
       ],
-      "out_of_scope": [
-        "Feature expansion or unrelated polish."
-      ],
+      "out_of_scope": ["Feature expansion or unrelated polish."],
       "context_refs": [
         "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md"
       ],
@@ -1827,9 +1624,7 @@
         "Review typing/validation/observability/diff hygiene and documentation truth.",
         "Execute focused repair passes and re-review adjacent paths."
       ],
-      "integration_notes": [
-        "SYS-3003 runs final full validation only after findings are closed."
-      ],
+      "integration_notes": ["SYS-3003 runs final full validation only after findings are closed."],
       "acceptance_criteria": [
         "Five-layer review ledger has no unresolved P0/P1/P2 findings.",
         "Every repair has regression evidence and adjacent-path re-review."
@@ -1841,14 +1636,9 @@
         "pnpm nx affected -t test",
         "pnpm nx affected -t build"
       ],
-      "depends_on": [
-        "SYS-3001"
-      ],
+      "depends_on": ["SYS-3001"],
       "conflicts_with": [],
-      "mutation_keys": [
-        "review:whole-system",
-        "repair:whole-system"
-      ]
+      "mutation_keys": ["review:whole-system", "repair:whole-system"]
     },
     {
       "id": "SYS-3003",
@@ -1893,13 +1683,9 @@
         "pnpm build",
         "pnpm nx run ai:eval:replay"
       ],
-      "depends_on": [
-        "SYS-3002"
-      ],
+      "depends_on": ["SYS-3002"],
       "conflicts_with": [],
-      "mutation_keys": [
-        "validation:whole-system"
-      ]
+      "mutation_keys": ["validation:whole-system"]
     },
     {
       "id": "SYS-3004",
@@ -1911,10 +1697,7 @@
         "Current product/module docs, ADR status references, active-plan archive and final PR evidence.",
         "Removal of obsolete target/compatibility notices whose code is already gone."
       ],
-      "out_of_scope": [
-        "Changing validated product behavior.",
-        "New roadmap work."
-      ],
+      "out_of_scope": ["Changing validated product behavior.", "New roadmap work."],
       "context_refs": [
         "docs/plan/archive/2026-09-09-system-wide-vnext-model-convergence-implementation.md",
         "docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md"
@@ -1929,27 +1712,16 @@
         "Record exact-head validation/review evidence and archive the system-wide/AI active plans.",
         "Run final docs/governance checks and ensure PR #340 diff is release-reviewable."
       ],
-      "integration_notes": [
-        "This is the terminal TaskGraph task."
-      ],
+      "integration_notes": ["This is the terminal TaskGraph task."],
       "acceptance_criteria": [
         "Current docs match implemented code and no active plan falsely describes completed target work.",
         "System-wide and AI convergence plans are archived with exact-head evidence.",
         "PR #340 is ready for final merge decision to main."
       ],
-      "verification_commands": [
-        "pnpm docs:check",
-        "pnpm governance:check",
-        "git diff --check"
-      ],
-      "depends_on": [
-        "SYS-3003"
-      ],
+      "verification_commands": ["pnpm docs:check", "pnpm governance:check", "git diff --check"],
+      "depends_on": ["SYS-3003"],
       "conflicts_with": [],
-      "mutation_keys": [
-        "docs:system-vnext-final",
-        "plan:archive-vnext"
-      ]
+      "mutation_keys": ["docs:system-vnext-final", "plan:archive-vnext"]
     }
   ]
 }

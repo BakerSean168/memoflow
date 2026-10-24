@@ -26,22 +26,22 @@ updated: 2026-08-09T00:00:00Z
 
 ## 根因判定表
 
-| 问题 | 复核定性 | 根因类型 | 重构或修复 |
-| --- | --- | --- | --- |
-| Reminder cron 未接入，默认 runtime `start/stop` 为空 | P0 定性准确；cron factory 已存在但未进入 API composition root | 根本基础设施：运行时组合与调度 ownership 缺失 | 重构为显式 scheduler capability，生产无 runtime 时 fail-fast |
-| Reminder 多实例扫描/先写历史后推进模板 | P1 准确；崩溃窗口和并发重复均可发生 | 根本基础设施：claim/lease 与投递意图持久化缺失 | 重构为 durable reminder occurrence + atomic claim/状态机 |
-| Notification no-op deliverer 被视为成功 | P0 准确；当前注释明确默认成功 | 根本基础设施：channel capability 与 fail-closed 启动策略缺失 | 重构 deliverer registry/capability，生产未配置即拒绝启动 |
-| Notification 创建依赖进程内 dispatch | P1 准确；保存后事件丢失不会重放 | 根本基础设施：跨进程消息未使用事务 outbox | 重构为 notification dispatch outbox + 幂等 worker |
-| Account close 只关闭业务 Account | P0 准确；桌面端 cloud-close 是客户端补偿，不覆盖 Web/Bearer/其他 session | 根本基础设施：Account 与 Cloud Auth 生命周期未编排 | 重构为服务端 account-closure saga，先禁用/撤销认证，再完成业务关闭 |
-| Goal 删除依赖固定为 `false` | P1 准确；Task binding 不在 Goal aggregate children | 根本基础设施：跨领域查询边界错误 | 重构为 identity-scoped dependency read port，并在删除策略中 fail-closed |
-| Goal 已完成但未归档可重复进入写路径 | P1 定性准确 | 局部代码：终态幂等条件不完整 | 简单修复状态机终态判断并返回同一 receipt |
-| Task 模板/实例分步保存 | P1 需以适配器证据确认，但事务能力是可选的，风险真实 | 根本基础设施：持久化事务契约未强制 | 重构为 mandatory transaction runner，模板、实例、outbox 同一提交 |
-| Schedule update 无 expected version | P1 准确 | 根本基础设施：并发控制契约不统一 | 重构 CalendarEntry conditional update/version receipt |
-| Schedule delete 后冲突重算失败留下旧投影 | P1 准确；`withTransaction` 只能覆盖支持该能力的适配器 | 根本基础设施：派生投影没有可重建可靠任务 | 重构为事务内变更 + conflict-rebuild outbox/lease worker |
-| Knowledge commit 后 projection 延迟/失败不可恢复 | P1 准确；立即 upsert 已是优化，不是可靠保证 | 根本基础设施：外部 commit 与本地 projection 状态没有统一 operation ledger | 重构为 projection operation 状态机、重放和用户可见 receipt |
-| Settings `loadDefaults` 未实现、无记录 reset 抛错 | P1 定性准确；分类参数丢失属于诊断中的 P2，本计划不处理 | 局部代码/契约缺口 | 简单修复 defaults 查询、空记录 materialize |
-| Web 密码失败只 toast | P1 准确，属于短生命周期 UI 状态丢失 | 局部代码：错误状态未写入共享 store | 简单修复结构化 auth error receipt 与表单恢复状态 |
-| 跨模块状态语义不一致（Pending/Failed/Success） | P1 横切遗漏 | 根本基础设施：没有统一 operation/delivery projection | 重构共享状态词典、receipt schema、查询/指标/replay 入口 |
+| 问题                                                 | 复核定性                                                                 | 根因类型                                                                  | 重构或修复                                                              |
+| ---------------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Reminder cron 未接入，默认 runtime `start/stop` 为空 | P0 定性准确；cron factory 已存在但未进入 API composition root            | 根本基础设施：运行时组合与调度 ownership 缺失                             | 重构为显式 scheduler capability，生产无 runtime 时 fail-fast            |
+| Reminder 多实例扫描/先写历史后推进模板               | P1 准确；崩溃窗口和并发重复均可发生                                      | 根本基础设施：claim/lease 与投递意图持久化缺失                            | 重构为 durable reminder occurrence + atomic claim/状态机                |
+| Notification no-op deliverer 被视为成功              | P0 准确；当前注释明确默认成功                                            | 根本基础设施：channel capability 与 fail-closed 启动策略缺失              | 重构 deliverer registry/capability，生产未配置即拒绝启动                |
+| Notification 创建依赖进程内 dispatch                 | P1 准确；保存后事件丢失不会重放                                          | 根本基础设施：跨进程消息未使用事务 outbox                                 | 重构为 notification dispatch outbox + 幂等 worker                       |
+| Account close 只关闭业务 Account                     | P0 准确；桌面端 cloud-close 是客户端补偿，不覆盖 Web/Bearer/其他 session | 根本基础设施：Account 与 Cloud Auth 生命周期未编排                        | 重构为服务端 account-closure saga，先禁用/撤销认证，再完成业务关闭      |
+| Goal 删除依赖固定为 `false`                          | P1 准确；Task binding 不在 Goal aggregate children                       | 根本基础设施：跨领域查询边界错误                                          | 重构为 identity-scoped dependency read port，并在删除策略中 fail-closed |
+| Goal 已完成但未归档可重复进入写路径                  | P1 定性准确                                                              | 局部代码：终态幂等条件不完整                                              | 简单修复状态机终态判断并返回同一 receipt                                |
+| Task 模板/实例分步保存                               | P1 需以适配器证据确认，但事务能力是可选的，风险真实                      | 根本基础设施：持久化事务契约未强制                                        | 重构为 mandatory transaction runner，模板、实例、outbox 同一提交        |
+| Schedule update 无 expected version                  | P1 准确                                                                  | 根本基础设施：并发控制契约不统一                                          | 重构 CalendarEntry conditional update/version receipt                   |
+| Schedule delete 后冲突重算失败留下旧投影             | P1 准确；`withTransaction` 只能覆盖支持该能力的适配器                    | 根本基础设施：派生投影没有可重建可靠任务                                  | 重构为事务内变更 + conflict-rebuild outbox/lease worker                 |
+| Knowledge commit 后 projection 延迟/失败不可恢复     | P1 准确；立即 upsert 已是优化，不是可靠保证                              | 根本基础设施：外部 commit 与本地 projection 状态没有统一 operation ledger | 重构为 projection operation 状态机、重放和用户可见 receipt              |
+| Settings `loadDefaults` 未实现、无记录 reset 抛错    | P1 定性准确；分类参数丢失属于诊断中的 P2，本计划不处理                   | 局部代码/契约缺口                                                         | 简单修复 defaults 查询、空记录 materialize                              |
+| Web 密码失败只 toast                                 | P1 准确，属于短生命周期 UI 状态丢失                                      | 局部代码：错误状态未写入共享 store                                        | 简单修复结构化 auth error receipt 与表单恢复状态                        |
+| 跨模块状态语义不一致（Pending/Failed/Success）       | P1 横切遗漏                                                              | 根本基础设施：没有统一 operation/delivery projection                      | 重构共享状态词典、receipt schema、查询/指标/replay 入口                 |
 
 ## 分步实施方案
 
@@ -120,14 +120,14 @@ updated: 2026-08-09T00:00:00Z
 
 ## 风险与回滚
 
-| 风险 | 预防/监测 | 回滚策略 |
-| --- | --- | --- |
-| cron/worker 多实例重复处理 | lease fencing、唯一 occurrence、owner/expiry 指标 | 停 scheduler lane，保留已落库 intent，由单实例 replay；不回退到无 lease 扫描 |
-| 渠道 adapter 上线导致投递量下降 | capability startup check、delivery latency/dead-letter 告警、灰度 adapter | 禁用有问题渠道并保留 Pending/Failed；切换到人工 replay，不把 no-op 标为成功 |
-| 账号关闭中途失败 | closure receipt、阶段性审计事件、重试限流 | 暂停新登录并重试未完成阶段；不得恢复已撤销 session，必要时人工完成数据清理 |
-| 新版本/事务 schema 不兼容 | 先扩展后切换、唯一键和状态迁移前校验 | 停写入口，worker 继续消费旧 receipt；按 operation 状态恢复，不删除历史记录 |
-| projection 重算积压或版本倒退 | source revision、队列深度、lag、幂等 upsert | 停止实时 consumer，按 source revision 批量重建；读模型回退基础查询 |
-| expectedVersion 引入客户端冲突增多 | 冲突率、重试成功率、用户可见冲突文案 | 保留条件更新；临时提高客户端重载/合并辅助，不恢复静默 last-write-wins |
+| 风险                               | 预防/监测                                                                 | 回滚策略                                                                     |
+| ---------------------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| cron/worker 多实例重复处理         | lease fencing、唯一 occurrence、owner/expiry 指标                         | 停 scheduler lane，保留已落库 intent，由单实例 replay；不回退到无 lease 扫描 |
+| 渠道 adapter 上线导致投递量下降    | capability startup check、delivery latency/dead-letter 告警、灰度 adapter | 禁用有问题渠道并保留 Pending/Failed；切换到人工 replay，不把 no-op 标为成功  |
+| 账号关闭中途失败                   | closure receipt、阶段性审计事件、重试限流                                 | 暂停新登录并重试未完成阶段；不得恢复已撤销 session，必要时人工完成数据清理   |
+| 新版本/事务 schema 不兼容          | 先扩展后切换、唯一键和状态迁移前校验                                      | 停写入口，worker 继续消费旧 receipt；按 operation 状态恢复，不删除历史记录   |
+| projection 重算积压或版本倒退      | source revision、队列深度、lag、幂等 upsert                               | 停止实时 consumer，按 source revision 批量重建；读模型回退基础查询           |
+| expectedVersion 引入客户端冲突增多 | 冲突率、重试成功率、用户可见冲突文案                                      | 保留条件更新；临时提高客户端重载/合并辅助，不恢复静默 last-write-wins        |
 
 ## 完成定义
 

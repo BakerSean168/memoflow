@@ -1,9 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { Project } from 'ts-morph';
-import {
-  auditUnflushedEvents,
-  findEventEmittingAggregates,
-} from '../lib/unflushed-events.mjs';
+import { auditUnflushedEvents, findEventEmittingAggregates } from '../lib/unflushed-events.mjs';
 
 function projectWith(files) {
   const project = new Project({ useInMemoryFileSystem: true });

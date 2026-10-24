@@ -36,10 +36,7 @@ export {
   AUTO_FOCUS_VIEWPORT,
 } from './useShellRouterSync';
 
-export {
-  canLeaveBusinessSurface,
-  createSettingsSceneGuard,
-} from './surface-leave-protocol';
+export { canLeaveBusinessSurface, createSettingsSceneGuard } from './surface-leave-protocol';
 
 export {
   computePanelGeometry,

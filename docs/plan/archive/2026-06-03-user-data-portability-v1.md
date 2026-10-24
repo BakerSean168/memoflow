@@ -152,33 +152,33 @@ interface UserDataExportEnvelopeV1 {
 
 V1 覆盖用户真实创建或配置的核心数据：
 
-| 模块 | 包含内容 |
-| --- | --- |
-| `setting` | `UserSetting.preferences` |
-| `goal` | 目标文件夹、目标、关键结果、目标记录、目标复盘、专注会话、专注模式 |
-| `task` | 任务文件夹、任务模板、任务实例、任务依赖 |
-| `schedule` | 手工日程、调度任务配置 |
-| `reminder` | 提醒分组、提醒模板、提醒实例、提醒响应、用户提醒偏好 |
-| `repository` | 仓库、文件夹、文本资源、资源元数据、资源引用 |
-| `editor` | 编辑器工作区、会话、分组、标签页 |
-| `ai` | AI 对话和消息，不包含 provider API key |
-| `notification` | 通知偏好，不包含通知历史和发送记录 |
+| 模块           | 包含内容                                                           |
+| -------------- | ------------------------------------------------------------------ |
+| `setting`      | `UserSetting.preferences`                                          |
+| `goal`         | 目标文件夹、目标、关键结果、目标记录、目标复盘、专注会话、专注模式 |
+| `task`         | 任务文件夹、任务模板、任务实例、任务依赖                           |
+| `schedule`     | 手工日程、调度任务配置                                             |
+| `reminder`     | 提醒分组、提醒模板、提醒实例、提醒响应、用户提醒偏好               |
+| `repository`   | 仓库、文件夹、文本资源、资源元数据、资源引用                       |
+| `editor`       | 编辑器工作区、会话、分组、标签页                                   |
+| `ai`           | AI 对话和消息，不包含 provider API key                             |
+| `notification` | 通知偏好，不包含通知历史和发送记录                                 |
 
 ### 6.2 排除
 
 V1 排除以下数据：
 
-| 类型 | 排除原因 |
-| --- | --- |
-| 认证和账号数据 | 涉及身份、安全、登录状态，不适合作为普通数据文件导入 |
-| `apiKeyEncrypted` | 敏感凭据，不导出 |
-| 二进制资源 | V1 只做单 JSON 文件，避免 ZIP 和文件流复杂度 |
-| 统计表 | 可重新计算或属于派生状态 |
-| 执行日志 | 包含运行时历史，不适合按新增语义恢复 |
-| 通知历史 | 属于触达运行记录，不是用户要迁移的核心数据 |
-| AI 知识索引 | 属于派生索引，可重建 |
-| PowerSync 状态 | 属于同步内部状态，不是用户业务数据 |
-| 软删除数据 | V1 只导出当前有效数据，避免恢复用户已删除内容 |
+| 类型              | 排除原因                                             |
+| ----------------- | ---------------------------------------------------- |
+| 认证和账号数据    | 涉及身份、安全、登录状态，不适合作为普通数据文件导入 |
+| `apiKeyEncrypted` | 敏感凭据，不导出                                     |
+| 二进制资源        | V1 只做单 JSON 文件，避免 ZIP 和文件流复杂度         |
+| 统计表            | 可重新计算或属于派生状态                             |
+| 执行日志          | 包含运行时历史，不适合按新增语义恢复                 |
+| 通知历史          | 属于触达运行记录，不是用户要迁移的核心数据           |
+| AI 知识索引       | 属于派生索引，可重建                                 |
+| PowerSync 状态    | 属于同步内部状态，不是用户业务数据                   |
+| 软删除数据        | V1 只导出当前有效数据，避免恢复用户已删除内容        |
 
 ## 7. Portable Ref 规则
 
@@ -242,12 +242,12 @@ keyResult:1 -> new generated key result id
 
 单例导入策略：
 
-| 数据 | 策略 |
-| --- | --- |
-| `UserSetting` | patch 或 replace 当前用户 preferences，V1 默认 replace preferences |
-| `NotificationPreference` | upsert 当前用户偏好 |
-| `UserReminderPreference` | upsert 当前用户偏好 |
-| `DashboardConfig` | upsert 当前用户配置，若 V1 纳入则覆盖当前配置 |
+| 数据                     | 策略                                                               |
+| ------------------------ | ------------------------------------------------------------------ |
+| `UserSetting`            | patch 或 replace 当前用户 preferences，V1 默认 replace preferences |
+| `NotificationPreference` | upsert 当前用户偏好                                                |
+| `UserReminderPreference` | upsert 当前用户偏好                                                |
+| `DashboardConfig`        | upsert 当前用户配置，若 V1 纳入则覆盖当前配置                      |
 
 ## 9. 冲突策略
 
@@ -321,7 +321,17 @@ POST /api/v1/data-portability/import
 
 ```ts
 interface ExportUserDataReq {
-  include?: Array<'settings' | 'goals' | 'tasks' | 'schedule' | 'reminders' | 'repository' | 'editor' | 'ai' | 'notifications'>;
+  include?: Array<
+    | 'settings'
+    | 'goals'
+    | 'tasks'
+    | 'schedule'
+    | 'reminders'
+    | 'repository'
+    | 'editor'
+    | 'ai'
+    | 'notifications'
+  >;
 }
 ```
 
@@ -650,16 +660,16 @@ feat/user-data-portability-v1
 
 已验证结果：
 
-| 检查项 | 结果 | 说明 |
-| --- | --- | --- |
-| `pnpm nx run data-portability:typecheck` | 通过 | 类型检查可通过，但导入实现中存在 `any`，会掩盖 Prisma 字段映射问题 |
-| `pnpm nx run data-portability:lint` | 通过但有 warning | 存在未使用 import、`any` 等清洁度问题 |
-| `pnpm nx run data-portability:test` | 通过 | 目前只覆盖 envelope/ref allocator/schema 浅层测试 |
-| `pnpm nx run data-portability:build` | 通过 | 新包自身可以打包 |
-| `pnpm nx build api` | 通过 | API 入口接入后可以构建 |
-| `pnpm nx build desktop` | 失败 | `@memoflow/data-portability/electron-entry` 无法解析 |
-| `pnpm nx run memoflow:governance-check` | 失败 | `data-portability` 未加入 target baseline manifest |
-| `package-export-audit` | 失败 | root barrel 暴露 `application-server`，且 package exports 暴露未白名单入口 |
+| 检查项                                   | 结果             | 说明                                                                       |
+| ---------------------------------------- | ---------------- | -------------------------------------------------------------------------- |
+| `pnpm nx run data-portability:typecheck` | 通过             | 类型检查可通过，但导入实现中存在 `any`，会掩盖 Prisma 字段映射问题         |
+| `pnpm nx run data-portability:lint`      | 通过但有 warning | 存在未使用 import、`any` 等清洁度问题                                      |
+| `pnpm nx run data-portability:test`      | 通过             | 目前只覆盖 envelope/ref allocator/schema 浅层测试                          |
+| `pnpm nx run data-portability:build`     | 通过             | 新包自身可以打包                                                           |
+| `pnpm nx build api`                      | 通过             | API 入口接入后可以构建                                                     |
+| `pnpm nx build desktop`                  | 失败             | `@memoflow/data-portability/electron-entry` 无法解析                       |
+| `pnpm nx run memoflow:governance-check`  | 失败             | `data-portability` 未加入 target baseline manifest                         |
+| `package-export-audit`                   | 失败             | root barrel 暴露 `application-server`，且 package exports 暴露未白名单入口 |
 
 主要缺口：
 
@@ -781,12 +791,14 @@ src/
 ```ts
 const PortableRefSchema = z.string().regex(/^[a-z][a-zA-Z0-9]*:\d+$/);
 
-const NoPersistentIdentityFieldsSchema = z.object({
-  id: z.never().optional(),
-  identityId: z.never().optional(),
-  accountId: z.never().optional(),
-  apiKeyEncrypted: z.never().optional(),
-}).passthrough();
+const NoPersistentIdentityFieldsSchema = z
+  .object({
+    id: z.never().optional(),
+    identityId: z.never().optional(),
+    accountId: z.never().optional(),
+    apiKeyEncrypted: z.never().optional(),
+  })
+  .passthrough();
 ```
 
 实际实现时不要真的用 passthrough 放开全部字段；更推荐每个实体 schema 显式列字段。上面只表达禁止字段的规则。
@@ -884,7 +896,8 @@ V1 推荐策略：
 推荐实现：
 
 ```ts
-const SENSITIVE_KEY_PATTERN = /(token|password|secret|apiKey|api_key|sshKey|privateKey|credential|auth)/i;
+const SENSITIVE_KEY_PATTERN =
+  /(token|password|secret|apiKey|api_key|sshKey|privateKey|credential|auth)/i;
 ```
 
 规则：
@@ -929,15 +942,15 @@ V1 推荐：
 
 优雅实现的最低测试集：
 
-| 层级 | 测试 |
-| --- | --- |
-| schema | 拒绝 `id`、`identityId`、未知 `schemaVersion`、重复 `_ref`、无法解析 ref |
-| export projection | 导出结果不含持久化 ID 和敏感字段 |
-| import use case | dry-run 不写库；非法 JSON 不写库；失败事务回滚 |
-| round-trip | goals/tasks/repository/reminder/ai 至少各 1 个核心关系能导出再导入 |
-| cross-user | A 导出，B 导入后所有业务数据归属 B |
-| UI/composable | 导出调用 service 并触发文件保存；导入读取文件并展示 summary |
-| adapter | HTTP adapter path/method 正确；如果保留 IPC，IPC contract 正确 |
+| 层级              | 测试                                                                     |
+| ----------------- | ------------------------------------------------------------------------ |
+| schema            | 拒绝 `id`、`identityId`、未知 `schemaVersion`、重复 `_ref`、无法解析 ref |
+| export projection | 导出结果不含持久化 ID 和敏感字段                                         |
+| import use case   | dry-run 不写库；非法 JSON 不写库；失败事务回滚                           |
+| round-trip        | goals/tasks/repository/reminder/ai 至少各 1 个核心关系能导出再导入       |
+| cross-user        | A 导出，B 导入后所有业务数据归属 B                                       |
+| UI/composable     | 导出调用 service 并触发文件保存；导入读取文件并展示 summary              |
+| adapter           | HTTP adapter path/method 正确；如果保留 IPC，IPC contract 正确           |
 
 先不要追求覆盖每个字段。优先覆盖：
 
@@ -1003,21 +1016,21 @@ pnpm nx run app-vue:typecheck
 
 ### 23.1 当前验证结果
 
-| 命令 | 结果 | 说明 |
-| --- | --- | --- |
-| `pnpm nx run data-portability:lint` | 通过 | 新包 lint 无 error/warning |
-| `pnpm nx run data-portability:typecheck` | 通过 | 依赖 build 后通过 |
-| `pnpm nx run data-portability:test` | 通过 | 3 个测试文件，52 个测试 |
-| `pnpm nx run data-portability:build` | 通过 | package exports 对应产物可生成 |
-| `pnpm nx build api` | 通过 | API 注册新模块后可构建 |
-| `pnpm nx build desktop` | 通过 | 之前的 `electron-entry` 解析失败已恢复 |
-| `pnpm nx run app-vue:lint` | 通过但有既有 warning | warning 位于 `GoalDAGVisualization.vue`、`plugins/i18n.ts`，不在本次 data portability 改动文件 |
-| `pnpm nx run app-vue:typecheck` | 通过 | 设置页和 DI 类型通过 |
-| `pnpm nx run web:typecheck` | 通过 | 初次失败已通过 web-core export、web dependency、TS alias 修复 |
-| `pnpm nx build web` | 通过 | data-portability lazy import 可被 web production build 解析 |
-| `pnpm nx run memoflow:governance-check` | 通过 | target baseline、package export、internal boundary、public surface 等全部通过 |
-| `node ./tools/governance/package-export-audit.mjs` | 通过 | public package exports 当前符合治理 |
-| `node ./tools/governance/package-internal-boundary-audit.mjs` | 通过 | 未发现 package internal boundary 违规 |
+| 命令                                                          | 结果                 | 说明                                                                                           |
+| ------------------------------------------------------------- | -------------------- | ---------------------------------------------------------------------------------------------- |
+| `pnpm nx run data-portability:lint`                           | 通过                 | 新包 lint 无 error/warning                                                                     |
+| `pnpm nx run data-portability:typecheck`                      | 通过                 | 依赖 build 后通过                                                                              |
+| `pnpm nx run data-portability:test`                           | 通过                 | 3 个测试文件，52 个测试                                                                        |
+| `pnpm nx run data-portability:build`                          | 通过                 | package exports 对应产物可生成                                                                 |
+| `pnpm nx build api`                                           | 通过                 | API 注册新模块后可构建                                                                         |
+| `pnpm nx build desktop`                                       | 通过                 | 之前的 `electron-entry` 解析失败已恢复                                                         |
+| `pnpm nx run app-vue:lint`                                    | 通过但有既有 warning | warning 位于 `GoalDAGVisualization.vue`、`plugins/i18n.ts`，不在本次 data portability 改动文件 |
+| `pnpm nx run app-vue:typecheck`                               | 通过                 | 设置页和 DI 类型通过                                                                           |
+| `pnpm nx run web:typecheck`                                   | 通过                 | 初次失败已通过 web-core export、web dependency、TS alias 修复                                  |
+| `pnpm nx build web`                                           | 通过                 | data-portability lazy import 可被 web production build 解析                                    |
+| `pnpm nx run memoflow:governance-check`                       | 通过                 | target baseline、package export、internal boundary、public surface 等全部通过                  |
+| `node ./tools/governance/package-export-audit.mjs`            | 通过                 | public package exports 当前符合治理                                                            |
+| `node ./tools/governance/package-internal-boundary-audit.mjs` | 通过                 | 未发现 package internal boundary 违规                                                          |
 
 构建过程中仍会打印 ui-vue/app-vue 的 Vite DTS 诊断，例如 radix-vue 相关 TS2742 和 goal DAG 相关 TS4082，但对应 Nx target 最终成功。这些属于当前仓库已有声明生成噪音，不是 data-portability 新增的阻塞错误。
 
@@ -1065,7 +1078,7 @@ pnpm nx run app-vue:typecheck
 1. 清理 public API 假能力。
    - 如果桌面端确定走 HTTP adapter，就删除 `DataPortabilityIpcAdapter` 和 `DataPortabilityElectronModule` 中的 data-portability IPC handler。
    - 如果必须保留 IPC adapter，就实现真实 handler，而不是注册后抛错。
-   应该实现IPC能力，从本地数据库导出
+     应该实现IPC能力，从本地数据库导出
 
 2. 把 contracts 从 server layer 移出来。
    - 新建 `src/contracts` 或放入 `@memoflow/contracts/data-portability`。
@@ -1172,20 +1185,20 @@ pnpm nx run app-vue:typecheck
 
 ### 24.4 本轮验证结果
 
-| 命令 | 结果 | 说明 |
-| --- | --- | --- |
-| `pnpm install --ignore-scripts` | 通过 | 移除 desktop 直接依赖后更新 lockfile |
-| `pnpm nx run data-portability:lint` | 通过 | 新包 lint 无 error/warning |
-| `pnpm nx run data-portability:typecheck` | 通过 | contracts 移动后类型通过 |
-| `pnpm nx run data-portability:test` | 通过 | 4 个测试文件，62 个测试 |
-| `pnpm nx run data-portability:build` | 通过 | build 输出不再包含独立 `dist/application-server/index.js` entry |
-| `pnpm nx run app-vue:typecheck` | 通过 | 设置页可选注入和 UI props 类型通过 |
-| `pnpm nx run app-vue:lint` | 通过但有既有 warning | 3 个 warning 仍位于 `GoalDAGVisualization.vue` 和 `plugins/i18n.ts`，不在本次改动文件 |
-| `pnpm nx build api` | 通过 | API module 和 contracts path 通过构建 |
-| `pnpm nx build desktop` | 通过 | 移除 `data-portability/electron-entry` 后 desktop 构建通过 |
-| `pnpm nx run web:typecheck` | 通过 | Web 对 data-portability dist contracts 类型解析通过 |
-| `pnpm nx build web --configuration=production` | 通过 | Web production build 通过 |
-| `pnpm nx run memoflow:governance-check` | 通过 | 本轮最终 governance 门禁通过 |
+| 命令                                           | 结果                 | 说明                                                                                  |
+| ---------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------- |
+| `pnpm install --ignore-scripts`                | 通过                 | 移除 desktop 直接依赖后更新 lockfile                                                  |
+| `pnpm nx run data-portability:lint`            | 通过                 | 新包 lint 无 error/warning                                                            |
+| `pnpm nx run data-portability:typecheck`       | 通过                 | contracts 移动后类型通过                                                              |
+| `pnpm nx run data-portability:test`            | 通过                 | 4 个测试文件，62 个测试                                                               |
+| `pnpm nx run data-portability:build`           | 通过                 | build 输出不再包含独立 `dist/application-server/index.js` entry                       |
+| `pnpm nx run app-vue:typecheck`                | 通过                 | 设置页可选注入和 UI props 类型通过                                                    |
+| `pnpm nx run app-vue:lint`                     | 通过但有既有 warning | 3 个 warning 仍位于 `GoalDAGVisualization.vue` 和 `plugins/i18n.ts`，不在本次改动文件 |
+| `pnpm nx build api`                            | 通过                 | API module 和 contracts path 通过构建                                                 |
+| `pnpm nx build desktop`                        | 通过                 | 移除 `data-portability/electron-entry` 后 desktop 构建通过                            |
+| `pnpm nx run web:typecheck`                    | 通过                 | Web 对 data-portability dist contracts 类型解析通过                                   |
+| `pnpm nx build web --configuration=production` | 通过                 | Web production build 通过                                                             |
+| `pnpm nx run memoflow:governance-check`        | 通过                 | 本轮最终 governance 门禁通过                                                          |
 
 构建仍会提示 `database:build` 被 Nx 判定为 flaky task；这与此前并发 Prisma 生成文件占用有关，本轮失败项已串行重跑并通过。desktop/web build 仍有现有 chunk size 提示和 app-vue DTS 诊断噪音，Nx target 最终成功。
 

@@ -73,15 +73,24 @@ export function buildEditedGoalDraftContent(input: {
   return GoalPlanDraftContentSchema.parse(editedGoalDraftContent(input));
 }
 
-export function buildGoalPlanningSeed(input: Omit<Parameters<typeof buildEditedGoalDraftContent>[0], 'draft'>) {
+export function buildGoalPlanningSeed(
+  input: Omit<Parameters<typeof buildEditedGoalDraftContent>[0], 'draft'>,
+) {
   const status = GoalPlanGoalSchema.shape.status.parse(input.native.status);
-  return GoalPlanningSeedSchema.parse(editedGoalDraftContent({
-    ...input,
-    draft: {
-      revision: 1, goal: { draftRef: 'goal', name: input.native.name, status, labels: [] },
-      keyResults: [], tasks: [], knowledge: [], rationale: '', warnings: [],
-    },
-  }));
+  return GoalPlanningSeedSchema.parse(
+    editedGoalDraftContent({
+      ...input,
+      draft: {
+        revision: 1,
+        goal: { draftRef: 'goal', name: input.native.name, status, labels: [] },
+        keyResults: [],
+        tasks: [],
+        knowledge: [],
+        rationale: '',
+        warnings: [],
+      },
+    }),
+  );
 }
 
 function editedGoalDraftContent(input: Parameters<typeof buildEditedGoalDraftContent>[0]) {
@@ -106,7 +115,10 @@ function editedGoalDraftContent(input: Parameters<typeof buildEditedGoalDraftCon
       ]),
     ],
   };
-  const used = new Set([...draft.keyResults.map((item) => item.draftRef), ...keyResultRefs.values()]);
+  const used = new Set([
+    ...draft.keyResults.map((item) => item.draftRef),
+    ...keyResultRefs.values(),
+  ]);
   const keyResults = native.keyResults.map((item) => {
     let draftRef = item.id ? keyResultRefs.get(item.id) : undefined;
     if (!draftRef) {

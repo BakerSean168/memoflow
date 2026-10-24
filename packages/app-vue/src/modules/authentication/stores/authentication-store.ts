@@ -37,7 +37,10 @@ const PASSWORD_MUTATION_ERROR_STORAGE_KEY = 'memoflow:auth:password-mutation-err
 
 function readStoredPasswordMutationError(): PasswordMutationErrorReceipt | null {
   try {
-    const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(PASSWORD_MUTATION_ERROR_STORAGE_KEY) : null;
+    const raw =
+      typeof localStorage !== 'undefined'
+        ? localStorage.getItem(PASSWORD_MUTATION_ERROR_STORAGE_KEY)
+        : null;
     if (!raw) return null;
     const parsed = JSON.parse(raw) as PasswordMutationErrorReceipt;
     if (typeof parsed.code !== 'string' || typeof parsed.message !== 'string') return null;

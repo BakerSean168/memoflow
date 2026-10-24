@@ -10,55 +10,133 @@ const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
 const runnerConfig = {
   'schedule-integration': {
     cwd: 'packages/schedule',
-    command: ['node', '../../node_modules/vitest/vitest.mjs', 'run', '--config', 'vitest.integration.config.ts'],
+    command: [
+      'node',
+      '../../node_modules/vitest/vitest.mjs',
+      'run',
+      '--config',
+      'vitest.integration.config.ts',
+    ],
   },
   'scheduler-integration': {
     cwd: 'packages/scheduler',
-    command: ['node', '../../node_modules/vitest/vitest.mjs', 'run', '--config', 'vitest.integration.config.ts'],
+    command: [
+      'node',
+      '../../node_modules/vitest/vitest.mjs',
+      'run',
+      '--config',
+      'vitest.integration.config.ts',
+    ],
   },
   'scheduler-unit': {
     cwd: 'packages/scheduler',
-    command: ['node', '../../node_modules/vitest/vitest.mjs', 'run', '--config', 'vitest.config.ts'],
+    command: [
+      'node',
+      '../../node_modules/vitest/vitest.mjs',
+      'run',
+      '--config',
+      'vitest.config.ts',
+    ],
   },
   'schedule-orchestration-unit': {
     cwd: 'packages/schedule-orchestration',
-    command: ['node', '../../node_modules/vitest/vitest.mjs', 'run', '--config', 'vitest.config.ts'],
+    command: [
+      'node',
+      '../../node_modules/vitest/vitest.mjs',
+      'run',
+      '--config',
+      'vitest.config.ts',
+    ],
   },
   'reminder-unit': {
     cwd: 'packages/reminder',
-    command: ['node', '../../node_modules/vitest/vitest.mjs', 'run', '--config', 'vitest.config.ts'],
+    command: [
+      'node',
+      '../../node_modules/vitest/vitest.mjs',
+      'run',
+      '--config',
+      'vitest.config.ts',
+    ],
   },
   'notification-unit': {
     cwd: 'packages/notification',
-    command: ['node', '../../node_modules/vitest/vitest.mjs', 'run', '--config', 'vitest.config.ts'],
+    command: [
+      'node',
+      '../../node_modules/vitest/vitest.mjs',
+      'run',
+      '--config',
+      'vitest.config.ts',
+    ],
   },
   'notification-integration': {
     cwd: 'packages/notification',
-    command: ['node', '../../node_modules/vitest/vitest.mjs', 'run', '--config', 'vitest.integration.config.ts'],
+    command: [
+      'node',
+      '../../node_modules/vitest/vitest.mjs',
+      'run',
+      '--config',
+      'vitest.integration.config.ts',
+    ],
   },
   'api-integration': {
     cwd: 'apps/api',
-    command: ['node', '../../node_modules/vitest/vitest.mjs', 'run', '--config', 'vitest.integration.config.ts'],
+    command: [
+      'node',
+      '../../node_modules/vitest/vitest.mjs',
+      'run',
+      '--config',
+      'vitest.integration.config.ts',
+    ],
   },
   'time-unit': {
     cwd: 'packages/time',
-    command: ['node', '../../node_modules/vitest/vitest.mjs', 'run', '--config', 'vitest.config.ts'],
+    command: [
+      'node',
+      '../../node_modules/vitest/vitest.mjs',
+      'run',
+      '--config',
+      'vitest.config.ts',
+    ],
   },
   'task-integration': {
     cwd: 'packages/task',
-    command: ['node', '../../node_modules/vitest/vitest.mjs', 'run', '--config', 'vitest.integration.config.ts'],
+    command: [
+      'node',
+      '../../node_modules/vitest/vitest.mjs',
+      'run',
+      '--config',
+      'vitest.integration.config.ts',
+    ],
   },
   'task-unit': {
     cwd: 'packages/task',
-    command: ['node', '../../node_modules/vitest/vitest.mjs', 'run', '--config', 'vitest.config.ts'],
+    command: [
+      'node',
+      '../../node_modules/vitest/vitest.mjs',
+      'run',
+      '--config',
+      'vitest.config.ts',
+    ],
   },
   'goal-integration': {
     cwd: 'packages/goal',
-    command: ['node', '../../node_modules/vitest/vitest.mjs', 'run', '--config', 'vitest.integration.config.ts'],
+    command: [
+      'node',
+      '../../node_modules/vitest/vitest.mjs',
+      'run',
+      '--config',
+      'vitest.integration.config.ts',
+    ],
   },
   'app-vue-unit': {
     cwd: 'packages/app-vue',
-    command: ['node', '../../node_modules/vitest/vitest.mjs', 'run', '--config', 'vitest.config.ts'],
+    command: [
+      'node',
+      '../../node_modules/vitest/vitest.mjs',
+      'run',
+      '--config',
+      'vitest.config.ts',
+    ],
   },
 };
 
@@ -79,7 +157,8 @@ function checkManifest() {
   for (const row of manifest.scenarios) {
     if (!row.id || ids.has(row.id)) fail(`duplicate or missing scenario id: ${row.id}`);
     ids.add(row.id);
-    if (!row.scenario || names.has(row.scenario)) fail(`duplicate or missing scenario name: ${row.scenario}`);
+    if (!row.scenario || names.has(row.scenario))
+      fail(`duplicate or missing scenario name: ${row.scenario}`);
     names.add(row.scenario);
     if (!Array.isArray(row.evidence) || row.evidence.length === 0) {
       fail(`${row.id} has no behavior-test evidence`);
@@ -104,7 +183,9 @@ function checkManifest() {
   }
 
   if (process.exitCode) return false;
-  console.log(`[hard-7101] check passed: ${manifest.scenarios.length}/22 scenarios bound to behavior tests.`);
+  console.log(
+    `[hard-7101] check passed: ${manifest.scenarios.length}/22 scenarios bound to behavior tests.`,
+  );
   return true;
 }
 
@@ -128,7 +209,9 @@ function runMatrix({ skipE2e }) {
       if (evidence.runner === 'desktop-e2e') continue;
       const config = runnerConfig[evidence.runner];
       const files = grouped.get(evidence.runner) ?? new Set();
-      files.add(relative(resolve(root, config.cwd), resolve(root, evidence.file)).replaceAll('\\', '/'));
+      files.add(
+        relative(resolve(root, config.cwd), resolve(root, evidence.file)).replaceAll('\\', '/'),
+      );
       grouped.set(evidence.runner, files);
     }
   }
@@ -169,7 +252,9 @@ function runMatrix({ skipE2e }) {
   }
 
   const passedScenarios = skipE2e ? manifest.scenarios.length - 1 : manifest.scenarios.length;
-  console.log(`\n[hard-7101] run passed: ${passedScenarios}/22 failure scenarios${skipE2e ? ' (Desktop E2E skipped)' : ''}.`);
+  console.log(
+    `\n[hard-7101] run passed: ${passedScenarios}/22 failure scenarios${skipE2e ? ' (Desktop E2E skipped)' : ''}.`,
+  );
 }
 
 const args = new Set(process.argv.slice(2));

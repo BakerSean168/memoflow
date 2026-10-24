@@ -112,4 +112,3 @@ export async function setI18nLocale(locale: AppLocale): Promise<void> {
   i18n.global.setLocaleMessage(locale, messages);
   i18n.global.locale.value = locale;
 }
-

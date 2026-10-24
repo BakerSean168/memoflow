@@ -24,7 +24,11 @@
 
 import { Entity } from '@memoflow/utils/domain';
 import { GoalRecordId, KeyResultId } from '../../domain';
-import { GoalRecordAuthorship, GoalRecordAuthorshipSchema, GoalRecordSourceType } from '@memoflow/contracts/goal';
+import {
+  GoalRecordAuthorship,
+  GoalRecordAuthorshipSchema,
+  GoalRecordSourceType,
+} from '@memoflow/contracts/goal';
 import type {
   GoalRecordServerDTO,
   GoalRecordSource,
@@ -57,7 +61,11 @@ export class GoalRecord extends Entity<GoalRecordId> {
   // ================= 2. 构造函数 (Private) =================
   private constructor(state: GoalRecordState) {
     super(state.id);
-    GoalRecord.validateProvenance(state.authorship, state.sourceType ?? null, state.sourceId ?? null);
+    GoalRecord.validateProvenance(
+      state.authorship,
+      state.sourceType ?? null,
+      state.sourceId ?? null,
+    );
     this._props = {
       id: state.id,
       keyResultId: state.keyResultId,
@@ -111,8 +119,10 @@ export class GoalRecord extends Entity<GoalRecordId> {
     if ((sourceType === null) !== (sourceId === null)) {
       throw new Error('Goal record source type and ID are required together');
     }
-    if (sourceType !== null &&
-        (!Object.values(GoalRecordSourceType).includes(sourceType) || !sourceId?.trim())) {
+    if (
+      sourceType !== null &&
+      (!Object.values(GoalRecordSourceType).includes(sourceType) || !sourceId?.trim())
+    ) {
       throw new Error('Goal record source is invalid');
     }
     if (authorship === GoalRecordAuthorship.Manual && sourceType !== null) {
@@ -121,8 +131,10 @@ export class GoalRecord extends Entity<GoalRecordId> {
     if (authorship !== GoalRecordAuthorship.Manual && sourceType === null) {
       throw new Error('Task Goal records require a source');
     }
-    if (authorship === GoalRecordAuthorship.TaskUserMeasurement &&
-        sourceType !== GoalRecordSourceType.TaskOccurrence) {
+    if (
+      authorship === GoalRecordAuthorship.TaskUserMeasurement &&
+      sourceType !== GoalRecordSourceType.TaskOccurrence
+    ) {
       throw new Error('Task user measurements require a Task occurrence source');
     }
   }
@@ -258,7 +270,8 @@ export class GoalRecord extends Entity<GoalRecordId> {
       valueAfter,
       comment: this._props.note,
       authorship: this.authorship,
-      source: this.sourceType && this.sourceId ? { type: this.sourceType, id: this.sourceId } : null,
+      source:
+        this.sourceType && this.sourceId ? { type: this.sourceType, id: this.sourceId } : null,
       recordedAt: this.recordedAt,
       createdAt: this._props.createdAt,
       updatedAt: this._props.updatedAt,

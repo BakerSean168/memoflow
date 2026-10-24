@@ -4,14 +4,29 @@ import enErrors from '../../../locales/en-US/errors';
 import zhErrors from '../../../locales/zh-CN/errors';
 import zhAI from '../../../locales/zh-CN/aiAssistant';
 import enAI from '../../../locales/en-US/aiAssistant';
-import { getNativeAgentExecutionFailureMessage, getAIErrorMessage, getAIWorkflowTerminalFailureMessage, getGoalWorkflowInterruptionMessage } from './error';
+import {
+  getNativeAgentExecutionFailureMessage,
+  getAIErrorMessage,
+  getAIWorkflowTerminalFailureMessage,
+  getGoalWorkflowInterruptionMessage,
+} from './error';
 
 describe('AI public failure presentation', () => {
   it('keeps an unconfirmed transport interruption distinct from a stopped run and names the requested model', () => {
-    const i18n = createI18n({ legacy: false, locale: 'zh-CN', messages: { 'zh-CN': { errors: zhErrors, aiAssistant: zhAI } } });
-    const message = getGoalWorkflowInterruptionMessage({ confirmation: 'unconfirmed', draftPreserved: true,
-      requestedModel: { name: 'Gemini 2.5 Flash', provider: 'Google' }, failure: { code: 'TIMEOUT', message: 'PRIVATE_RESPONSE' },
-    }, i18n.global.t);
+    const i18n = createI18n({
+      legacy: false,
+      locale: 'zh-CN',
+      messages: { 'zh-CN': { errors: zhErrors, aiAssistant: zhAI } },
+    });
+    const message = getGoalWorkflowInterruptionMessage(
+      {
+        confirmation: 'unconfirmed',
+        draftPreserved: true,
+        requestedModel: { name: 'Gemini 2.5 Flash', provider: 'Google' },
+        failure: { code: 'TIMEOUT', message: 'PRIVATE_RESPONSE' },
+      },
+      i18n.global.t,
+    );
     expect(message).toContain('暂时无法确认');
     expect(message).toContain('Gemini 2.5 Flash');
     expect(message).toContain('Google');
@@ -20,14 +35,23 @@ describe('AI public failure presentation', () => {
     expect(message).not.toContain('PRIVATE_RESPONSE');
   });
   it.each(['zh-CN', 'en-US'])('presents safe quota and retry hints in %s', (locale) => {
-    const i18n = createI18n({ legacy: false, locale, messages: {
-      'zh-CN': { errors: zhErrors, aiAssistant: zhAI },
-      'en-US': { errors: enErrors, aiAssistant: enAI },
-    } });
-    const message = getAIWorkflowTerminalFailureMessage({
-      code: 'RATE_LIMITED', message: 'PRIVATE_RESPONSE',
-      details: { limitKind: 'quota_exhausted' }, retryHint: { kind: 'after', afterMs: 30250 },
-    }, i18n.global.t);
+    const i18n = createI18n({
+      legacy: false,
+      locale,
+      messages: {
+        'zh-CN': { errors: zhErrors, aiAssistant: zhAI },
+        'en-US': { errors: enErrors, aiAssistant: enAI },
+      },
+    });
+    const message = getAIWorkflowTerminalFailureMessage(
+      {
+        code: 'RATE_LIMITED',
+        message: 'PRIVATE_RESPONSE',
+        details: { limitKind: 'quota_exhausted' },
+        retryHint: { kind: 'after', afterMs: 30250 },
+      },
+      i18n.global.t,
+    );
     expect(message).toContain('31');
     expect(message).toContain(locale === 'zh-CN' ? '配额不足' : 'insufficient quota');
     expect(message).not.toContain('PRIVATE_RESPONSE');

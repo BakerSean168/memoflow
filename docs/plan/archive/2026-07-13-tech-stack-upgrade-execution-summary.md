@@ -21,45 +21,46 @@ updated: 2026-07-14T00:00:00+00:00
 代码侧技术栈升级**已完成**，并在远程开发环境通过最终验证矩阵。  
 本地开发机/其他工作区在拉取该分支后，需要按 [`../guides/development/tech-stack-upgrade-local-sync.md`](../guides/development/tech-stack-upgrade-local-sync.md) 同步依赖与数据卷。
 
-| 维度 | 状态 |
-| --- | --- |
-| 目标版本写入 + lockfile | 完成 |
-| 代码/配置适配 | 完成 |
-| 本地最终验证矩阵 | 通过（见 §5） |
-| 生产 PG dump/restore | **未做**（计划内独立维护窗口） |
-| PR / 干净 CI 复核 | 待开 PR 后执行 |
+| 维度                    | 状态                           |
+| ----------------------- | ------------------------------ |
+| 目标版本写入 + lockfile | 完成                           |
+| 代码/配置适配           | 完成                           |
+| 本地最终验证矩阵        | 通过（见 §5）                  |
+| 生产 PG dump/restore    | **未做**（计划内独立维护窗口） |
+| PR / 干净 CI 复核       | 待开 PR 后执行                 |
 
 ## 2. 落地版本（实测）
 
-| 组件 | 升级后 |
-| --- | --- |
-| pnpm | **11.12.0**（`packageManager` 钉死） |
-| Node（CI / Docker） | **24** |
-| Vite | **8.1.4**（Rolldown） |
-| Nx | **23.0.2** |
-| Electron | **43.1.0** |
-| TypeScript | **6.0.3** |
-| ESLint | **10.7.0** |
-| Vitest | **4.1.10** |
-| Vue | **3.5.39** |
-| vue-router | **5.1.0** |
-| vue-tsc | **3.3.7** |
-| @lucide/vue | **1.24.0**（替代 lucide-vue-next） |
-| Prisma | **7.8.0** |
-| better-sqlite3 | **12.11.1** |
-| Storybook | **10.5.0** |
-| Tailwind CSS | **4.3.2** |
-| Expo / RN | **57.0.4 / 0.86.0** |
-| reanimated / worklets | **4.5.0 / 0.10.0** |
-| PostgreSQL（Docker） | **pgvector/pgvector:0.8.5-pg18** |
-| Redis（Docker） | **redis:8-alpine** |
-| @powersync/common / node | **1.57.2 / 0.19.4** |
-| electron-builder / updater | **26.15.6 / 6.8.9** |
-| node-abi | **4.33.0**（ABI 148） |
+| 组件                       | 升级后                               |
+| -------------------------- | ------------------------------------ |
+| pnpm                       | **11.12.0**（`packageManager` 钉死） |
+| Node（CI / Docker）        | **24**                               |
+| Vite                       | **8.1.4**（Rolldown）                |
+| Nx                         | **23.0.2**                           |
+| Electron                   | **43.1.0**                           |
+| TypeScript                 | **6.0.3**                            |
+| ESLint                     | **10.7.0**                           |
+| Vitest                     | **4.1.10**                           |
+| Vue                        | **3.5.39**                           |
+| vue-router                 | **5.1.0**                            |
+| vue-tsc                    | **3.3.7**                            |
+| @lucide/vue                | **1.24.0**（替代 lucide-vue-next）   |
+| Prisma                     | **7.8.0**                            |
+| better-sqlite3             | **12.11.1**                          |
+| Storybook                  | **10.5.0**                           |
+| Tailwind CSS               | **4.3.2**                            |
+| Expo / RN                  | **57.0.4 / 0.86.0**                  |
+| reanimated / worklets      | **4.5.0 / 0.10.0**                   |
+| PostgreSQL（Docker）       | **pgvector/pgvector:0.8.5-pg18**     |
+| Redis（Docker）            | **redis:8-alpine**                   |
+| @powersync/common / node   | **1.57.2 / 0.19.4**                  |
+| electron-builder / updater | **26.15.6 / 6.8.9**                  |
+| node-abi                   | **4.33.0**（ABI 148）                |
 
 ## 3. 主要适配与结构性变更
 
 ### 依赖与工作区
+
 - 移除未使用 Vercel AI SDK（`ai` / `@ai-sdk/openai`）
 - 退役 `packages/scheduler-server`
 - 仓库内版本漂移对齐（zod / express / vue-tsc / vitest / eslint 等）
@@ -67,18 +68,21 @@ updated: 2026-07-14T00:00:00+00:00
 - `Dockerfile.api`：`PNPM_VERSION=11.12.0`，Node 24 基础镜像
 
 ### 构建与前端
+
 - Vite 8：`rollupOptions` → `rolldownOptions`
 - lucide：源码 import 迁移到 `@lucide/vue`
 - patterns：`resolve.tsconfigPaths: true`
 - electron-builder `electronVersion: 43.1.0` + `@electron/rebuild` 4.2.0
 
 ### TypeScript / ESLint / Mobile
+
 - `tsconfig.base.json`：`ignoreDeprecations: "6.0"`；部分 typecheck 包剥离冲突 `rootDir`/`outDir`
 - Error 子类 `cause` 字段与 TS6 对齐
 - Mobile：Expo 57 peers；`StyleSheet.absoluteFillObject` → `absoluteFill`
 - Mobile lint：在 ESLint 10 下使用仓库基线 flat config（避免 eslint-config-expo 内旧 react 插件崩溃）
 
 ### 数据层（B7 代码侧）
+
 - compose / CI 镜像统一到 PG18 + Redis 8
 - 卷路径改为 `/var/lib/postgresql`（PG18 官方镜像布局）
 - **未**对已有生产数据执行 dump/restore
@@ -87,15 +91,15 @@ updated: 2026-07-14T00:00:00+00:00
 
 远程开发环境最终矩阵（`/tmp/ultimate-matrix.log`，2026-07-13）：
 
-| Gate | Result |
-| --- | --- |
-| core typecheck（utils…api 等 10 项目） | pass |
-| `api:build` / `web:build` / `desktop:build` | pass |
-| `utils:test` / `contracts:test` / `desktop:test` | pass |
-| `memoflow:governance-check` | pass |
-| `apps/mobile` `expo install --check` | Dependencies are up to date |
-| local docker health | postgres(pg18)/redis8/api/web/ai/powersync healthy |
-| HTTP smoke | api `/info` 200，web `/` 200 |
+| Gate                                             | Result                                             |
+| ------------------------------------------------ | -------------------------------------------------- |
+| core typecheck（utils…api 等 10 项目）           | pass                                               |
+| `api:build` / `web:build` / `desktop:build`      | pass                                               |
+| `utils:test` / `contracts:test` / `desktop:test` | pass                                               |
+| `memoflow:governance-check`                      | pass                                               |
+| `apps/mobile` `expo install --check`             | Dependencies are up to date                        |
+| local docker health                              | postgres(pg18)/redis8/api/web/ai/powersync healthy |
+| HTTP smoke                                       | api `/info` 200，web `/` 200                       |
 
 补充：desktop typecheck、native-rebuild（better-sqlite3）、app-vue/app-react/ui-react-native/mobile typecheck、api/mobile lint 等在修复验证失败过程中均已通过。
 

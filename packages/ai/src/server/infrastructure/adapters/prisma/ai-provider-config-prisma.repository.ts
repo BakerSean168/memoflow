@@ -127,7 +127,10 @@ export class AIProviderConfigPrismaRepository implements IAIProviderConfigReposi
 
   async setDefaultForIdentity(identityId: string, id: string) {
     return this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      await tx.$queryRawUnsafe('SELECT pg_advisory_xact_lock(hashtext($1))::text AS acquired', identityId);
+      await tx.$queryRawUnsafe(
+        'SELECT pg_advisory_xact_lock(hashtext($1))::text AS acquired',
+        identityId,
+      );
 
       const provider = await tx.aiProviderConfig.findFirst({
         where: { id, identityId, isActive: true, deletedAt: null },
@@ -154,7 +157,8 @@ export class AIProviderConfigPrismaRepository implements IAIProviderConfigReposi
       id: row.id as AIProviderConfigServerDTO['id'],
       identityId: row.identityId as AIProviderConfigServerDTO['identityId'],
       name: row.name,
-      providerDefinitionId: row.providerDefinitionId as AIProviderConfigServerDTO['providerDefinitionId'],
+      providerDefinitionId:
+        row.providerDefinitionId as AIProviderConfigServerDTO['providerDefinitionId'],
       baseUrl: row.baseUrl,
       credentialRef: row.credentialRef as AIProviderConfigServerDTO['credentialRef'],
       defaultModel: row.defaultModel,
@@ -167,5 +171,4 @@ export class AIProviderConfigPrismaRepository implements IAIProviderConfigReposi
       deletedAt: row.deletedAt ? new Date(row.deletedAt).getTime() : null,
     };
   }
-
 }

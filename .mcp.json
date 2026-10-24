@@ -3,20 +3,12 @@
     "codegraph": {
       "type": "stdio",
       "command": "codegraph",
-      "args": [
-        "serve",
-        "--mcp"
-      ]
+      "args": ["serve", "--mcp"]
     },
     "nx-mcp": {
       "type": "stdio",
       "command": "node",
-      "args": [
-        "./node_modules/nx-mcp/main.js",
-        ".",
-        "--no-minimal",
-        "--disableTelemetry"
-      ]
+      "args": ["./node_modules/nx-mcp/main.js", ".", "--no-minimal", "--disableTelemetry"]
     }
   }
 }

@@ -193,15 +193,15 @@ updated: 2026-07-04T14:24:20+08:00
 
 ## 6. 轮次总览
 
-| Round | 状态 | 目标 | 主模块 | 同轮必须删除 | 完成信号 |
-| --- | --- | --- | --- | --- | --- |
-| `R01` | `已完成` | 打通 repository resource mutation 的 typed event end-to-end | `repository`, `ai`, `contracts`, `utils` | raw cast 与 payload parser | 发布端与订阅端共享 typed contract |
-| `R02` | `已完成` | 收敛 AIConversation 的 domain-event flush pattern | `ai`, `utils` | open-coded loop 与 raw cast | Prisma / PowerSync 共用 typed flush |
-| `R03` | `已完成` | 硬切 PowerSync checkpoint live stub | `ai` | throwing stub、`db: unknown` live surface | live surface 不再暴露未实现能力 |
-| `R04` | `已完成` | 收敛剩余 repository 的 domain-event flush 样板 | `notification`, `schedule`, `reminder`, `utils` | open-coded `pullDomainEvents()` loop | 相关 repository 统一共享 typed flush |
-| `R05` | `已完成` | 清零剩余 untyped event seam | `account`, `schedule` | `eventBus as any` | 生产与 touched tests 不再绕过 typed seam |
-| `R06` | `已完成` | 为新 seam 加最小回归护栏 | `ai`, `notification`, `schedule`, `reminder`, `account` | 只验证 happy-path、无 direct seam 守护的测试缺口 | 关键 seam 有直接守护测试与 pattern search |
-| `R07` | `已完成` | 回写治理与文档状态 | `docs`, `tools/governance` | 过时的 active / audit 状态描述 | active / audit / umbrella plan 与当前真值一致 |
+| Round | 状态     | 目标                                                        | 主模块                                                  | 同轮必须删除                                     | 完成信号                                      |
+| ----- | -------- | ----------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------ | --------------------------------------------- |
+| `R01` | `已完成` | 打通 repository resource mutation 的 typed event end-to-end | `repository`, `ai`, `contracts`, `utils`                | raw cast 与 payload parser                       | 发布端与订阅端共享 typed contract             |
+| `R02` | `已完成` | 收敛 AIConversation 的 domain-event flush pattern           | `ai`, `utils`                                           | open-coded loop 与 raw cast                      | Prisma / PowerSync 共用 typed flush           |
+| `R03` | `已完成` | 硬切 PowerSync checkpoint live stub                         | `ai`                                                    | throwing stub、`db: unknown` live surface        | live surface 不再暴露未实现能力               |
+| `R04` | `已完成` | 收敛剩余 repository 的 domain-event flush 样板              | `notification`, `schedule`, `reminder`, `utils`         | open-coded `pullDomainEvents()` loop             | 相关 repository 统一共享 typed flush          |
+| `R05` | `已完成` | 清零剩余 untyped event seam                                 | `account`, `schedule`                                   | `eventBus as any`                                | 生产与 touched tests 不再绕过 typed seam      |
+| `R06` | `已完成` | 为新 seam 加最小回归护栏                                    | `ai`, `notification`, `schedule`, `reminder`, `account` | 只验证 happy-path、无 direct seam 守护的测试缺口 | 关键 seam 有直接守护测试与 pattern search     |
+| `R07` | `已完成` | 回写治理与文档状态                                          | `docs`, `tools/governance`                              | 过时的 active / audit 状态描述                   | active / audit / umbrella plan 与当前真值一致 |
 
 ## 7. 多轮执行方案
 
@@ -621,4 +621,3 @@ pnpm nx run memoflow:governance-check
 ### Prompt E：执行 `R07`
 
 请只执行 [2026-07-04-audit-follow-up-elegant-refactor-blueprint.md](D:/home/projects/memoflow/docs/plan/active/2026-07-04-audit-follow-up-elegant-refactor-blueprint.md) 的 `R07`。基于当前代码和命令结果回写 active / audit / umbrella plan 的状态，并运行 `memoflow:target-baseline-check` 与 `memoflow:governance-check`。如果全部完成，再把本蓝图移入 archive。
-

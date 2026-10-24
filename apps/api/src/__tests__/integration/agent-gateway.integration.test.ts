@@ -391,23 +391,41 @@ it('serves all six reads through the official SDK with separate Task scopes and 
   }
 });
 
-
 it('cancels a blocked Setting time read within the Task owner deadline', async () => {
   let unlock!: () => void, locked!: () => void;
-  const ready = new Promise<void>((resolve) => { locked = resolve; });
-  const release = new Promise<void>((resolve) => { unlock = resolve; });
-  const holder = prisma.$transaction(async (tx) => {
-    await tx.$executeRaw`LOCK TABLE user_preference_records IN ACCESS EXCLUSIVE MODE`;
-    locked();
-    await release;
-  }, { timeout: 5000 });
+  const ready = new Promise<void>((resolve) => {
+    locked = resolve;
+  });
+  const release = new Promise<void>((resolve) => {
+    unlock = resolve;
+  });
+  const holder = prisma.$transaction(
+    async (tx) => {
+      await tx.$executeRaw`LOCK TABLE user_preference_records IN ACCESS EXCLUSIVE MODE`;
+      locked();
+      await release;
+    },
+    { timeout: 5000 },
+  );
   await ready;
   try {
     const queries = createTaskPrismaReadQueries(prisma, createSettingPrismaTimeQuery(prisma));
-    expect(await queries.searchTaskPlans('deadline-owner', { limit: 1 }, {
-      deadlineAt: Date.now() + 150, signal: new AbortController().signal,
-    })).toMatchObject({ ok: false, error: { code: 'TIMEOUT' } });
-    const [active] = await prisma.$queryRaw<{ count: bigint }[]>`SELECT count(*) FROM pg_stat_activity WHERE pid<>pg_backend_pid() AND state='active' AND wait_event_type='Lock' AND query LIKE '%user_preference_records%'`;
+    expect(
+      await queries.searchTaskPlans(
+        'deadline-owner',
+        { limit: 1 },
+        {
+          deadlineAt: Date.now() + 150,
+          signal: new AbortController().signal,
+        },
+      ),
+    ).toMatchObject({ ok: false, error: { code: 'TIMEOUT' } });
+    const [active] = await prisma.$queryRaw<
+      { count: bigint }[]
+    >`SELECT count(*) FROM pg_stat_activity WHERE pid<>pg_backend_pid() AND state='active' AND wait_event_type='Lock' AND query LIKE '%user_preference_records%'`;
     expect(Number(active.count)).toBe(0);
-  } finally { unlock(); await holder; }
+  } finally {
+    unlock();
+    await holder;
+  }
 });

@@ -15,12 +15,12 @@ desktop-renderer presentation surface, routing them through the established
 
 Inventory moves **163 → 138** grandfathered findings:
 
-| Rule                         | Before | After | Delta |
-| ---------------------------- | -----: | ----: | ----: |
-| `UI_RAW_RESULT_MESSAGE`      |     82 |    63 |   -19 |
-| `RAW_RESULT_MESSAGE_RETHROW` |     26 |    20 |    -6 |
-| `DOMAIN_ERROR_SUBCLASS`      |     47 |    47 |     0 |
-| `FAILURE_MESSAGE_BRANCH`     |      8 |     8 |     0 |
+| Rule                         |  Before |   After |   Delta |
+| ---------------------------- | ------: | ------: | ------: |
+| `UI_RAW_RESULT_MESSAGE`      |      82 |      63 |     -19 |
+| `RAW_RESULT_MESSAGE_RETHROW` |      26 |      20 |      -6 |
+| `DOMAIN_ERROR_SUBCLASS`      |      47 |      47 |       0 |
+| `FAILURE_MESSAGE_BRANCH`     |       8 |       8 |       0 |
 | **Total**                    | **163** | **138** | **-25** |
 
 Scanner: `passed (no new or expired production findings)`; 25 stale baseline entries
@@ -39,20 +39,21 @@ The ACR-032 acceptance allows raw message to remain only on internal developer s
 
 ## 3. Changes by file
 
-| File | Old | New |
-|---|---|---|
-| `di-app.ts` L108/112 | `throw new Error(lockResult.error.message)` | `throw new Error(getAppT()('common.operationFailed'))` |
-| `di-app.ts` L127 | toast desc `error.message` | toast desc `getAppT()('common.operationFailed')`; `throw error` retained |
-| `chatViewHelpers.ts` L205 | `error.message ?? ctx.translate('common.operationFailed')` | `translateResultError(error, ctx.translate, { fallbackKey })` |
-| `useAssistantDispatch.ts` L72 | `error.message : 'Assistant dispatch failed'` | `translateResultError(error, t, { scope:'ai', fallbackKey })` |
-| `reportAuthOperationFailure.ts` L38 | raw `error.message` | reuse `deps.getLocalizedAuthError(error, 'auth.errors.UNKNOWN')` |
-| `useKnowledgeWriteRequestLedger.ts` L47/68/71 | `result.error.message` | `translateResultError(..., scope:'repository')` |
-| `useLocalVault.ts` L34/44 | `throw new Error(result.error.message)` / `errorMessage(cause)` | `unwrapOrThrowError(result)` + `translateResultError(cause,...,scope:'repository')` |
-| `useRecentKnowledgeNotes.ts` L47/68/71/100 | raw message/throw | `unwrapOrThrowError` + `translateResultError(...,scope:'repository')` |
-| `useDataPortability.ts` L34/59/92/159 | raw message throws/assigns | `translateResultError(...,scope:'setting', fallbackKey export/importFailed)` |
-| `usePresentationBootstrap.ts` L107 | `getI18nGlobal()?.t ? translate : raw` | unify on `getGlobalResultErrorT()` + `translateResultError` |
+| File                                          | Old                                                             | New                                                                                 |
+| --------------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `di-app.ts` L108/112                          | `throw new Error(lockResult.error.message)`                     | `throw new Error(getAppT()('common.operationFailed'))`                              |
+| `di-app.ts` L127                              | toast desc `error.message`                                      | toast desc `getAppT()('common.operationFailed')`; `throw error` retained            |
+| `chatViewHelpers.ts` L205                     | `error.message ?? ctx.translate('common.operationFailed')`      | `translateResultError(error, ctx.translate, { fallbackKey })`                       |
+| `useAssistantDispatch.ts` L72                 | `error.message : 'Assistant dispatch failed'`                   | `translateResultError(error, t, { scope:'ai', fallbackKey })`                       |
+| `reportAuthOperationFailure.ts` L38           | raw `error.message`                                             | reuse `deps.getLocalizedAuthError(error, 'auth.errors.UNKNOWN')`                    |
+| `useKnowledgeWriteRequestLedger.ts` L47/68/71 | `result.error.message`                                          | `translateResultError(..., scope:'repository')`                                     |
+| `useLocalVault.ts` L34/44                     | `throw new Error(result.error.message)` / `errorMessage(cause)` | `unwrapOrThrowError(result)` + `translateResultError(cause,...,scope:'repository')` |
+| `useRecentKnowledgeNotes.ts` L47/68/71/100    | raw message/throw                                               | `unwrapOrThrowError` + `translateResultError(...,scope:'repository')`               |
+| `useDataPortability.ts` L34/59/92/159         | raw message throws/assigns                                      | `translateResultError(...,scope:'setting', fallbackKey export/importFailed)`        |
+| `usePresentationBootstrap.ts` L107            | `getI18nGlobal()?.t ? translate : raw`                          | unify on `getGlobalResultErrorT()` + `translateResultError`                         |
 
 Supporting infrastructure:
+
 - `app-vue/shared/utils/translate-result-error.ts` adds `getGlobalResultErrorT()` — a safe
   vue-i18n `t` resolver that returns an identity function when i18n is not yet installed
   (unit tests / pre-bootstrap), so `translateResultError` never throws outside a host app.

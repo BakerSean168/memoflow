@@ -14,6 +14,7 @@ description: 本地 Obsidian Vault、可选 GitHub 私有仓库同步、Web 快�
 created: 2026-07-16T00:00:00
 updated: 2026-07-26T00:00:00
 ---
+
 ---
 
 > **归档结果（2026-07-26）**：§13.2 **15/15** 完成；PR readiness yes；已合 `main`（PR #188）。  
@@ -648,6 +649,7 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 
 > 续进展 2026-07-21：完成定义 §13.2 证据审计（代码/规格为主，不凭感觉勾选）与阶段 6 残留收口。
 > **§13.2 审计结果**：
+>
 > 1. 账密/GitHub/访客入口 — **部分实现**：三入口代码与 Desktop profile 在位；完整三端 E2E 未齐。
 > 2. GitHub 登录与仓库授权解耦 — **已证明**：独立 contract/token/UI/routes；登录不申请 Contents。
 > 3. 访客/未绑定不上传 Vault — **已证明**：访客无 knowledge connection；未绑定仅 Local Vault。
@@ -663,10 +665,10 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 13. webhook/read model/附件/RAG 可重建 — **已证明**：projection + reconciliation + AI index 专用表。
 > 14. Web Markdown 安全 — **已证明**：sanitizer/危险 URL 测试边界。
 > 15. lint/typecheck/test/E2E/governance/prod-like — **部分验证 + 外部阻塞**：prod-like `docker:local:up` 残留二十七轮已绿（六服务 healthy）；真实 GitHub fixture 缺凭据；全量 PR 门禁套件未宣称通过。
-> **阶段 6 本轮代码收口**：删除未挂载的 legacy `folder/repository/resource` API route builders；壳层/AI 最近笔记改为
-> Web projection + Desktop Local Vault，不再调用已退役 Resource CRUD；`/repository?note=` 深链选中；Note capsule /
-> AI open 跳转 projection/local workspace。旧 `RepositoryWorkspaceView` 与 `packages/editor` 仍残留为非路由死代码，
-> 下轮继续删除。计划状态保持 **实施中**；PR readiness 仍为 no。
+>     **阶段 6 本轮代码收口**：删除未挂载的 legacy `folder/repository/resource` API route builders；壳层/AI 最近笔记改为
+>     Web projection + Desktop Local Vault，不再调用已退役 Resource CRUD；`/repository?note=` 深链选中；Note capsule /
+>     AI open 跳转 projection/local workspace。旧 `RepositoryWorkspaceView` 与 `packages/editor` 仍残留为非路由死代码，
+>     下轮继续删除。计划状态保持 **实施中**；PR readiness 仍为 no。
 
 > 续进展 2026-07-21（阶段 6 残留二轮）：客户端 HTTP/IPC adapter 对已退役 Repository/Folder/Resource/Bookmark
 > 方法硬失败 `NOT_SUPPORTED`，不再请求未挂载端点或未注册 IPC channel；Web MSW 仅保留 knowledge connection/
@@ -699,8 +701,9 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > Editor* branded IDs；package export/tsup/package-export-audit/README 同步。portable editor 契约仅保留在
 > `@memoflow/contracts/data-portability`。产品 `editor-files` 索引已对齐。验证：`contracts:typecheck`、
 > desktop ipc-contracts 30、`governance-check` 通过。§13.2 未打勾项仍为：三入口完整 E2E（Web 账密/GitHub E2E
-> + Desktop guest 单测已有，跨端一揽子 E2E 未齐）、Agent Host 全量隔离（ADR-035）、以及外部阻塞验收。
-> 状态保持 **实施中**；PR readiness 仍为 no。
+>
+> - Desktop guest 单测已有，跨端一揽子 E2E 未齐）、Agent Host 全量隔离（ADR-035）、以及外部阻塞验收。
+>   状态保持 **实施中**；PR readiness 仍为 no。
 
 > 续进展 2026-07-21（阶段 6 残留八轮）：收缩 `RepositoryChannels` 为 knowledge connection + Local Vault；
 > 删除 resource/folder/bookmark/current/search 遗留 IPC 常量；`RepositoryRpcMap` 清空为无 runtime RPC。
@@ -871,13 +874,11 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：authentication routes/controller 相关 specs、contracts typecheck、desktop ipc-contracts。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留三十一轮）：删除认证双轨兼容残留——`IPasswordResetCodeStore` /
 > `InMemoryPasswordResetCodeStore`（已由 `IVerificationChallengeStore` + PasswordReset purpose 取代）
 > 以及 reset-password 未使用的 throw 型错误类。Web Auth 页面契约（e2e + WebAuthView 单测）明确
 > 无 phone/SMS/guest 入口。§13.2 三入口边界再收口。验证：authentication forgot/reset specs、
 > WebAuthView spec、auth routes specs。状态保持 **实施中**；PR readiness 仍为 no。
-
 
 > 续进展 2026-07-21（阶段 6 残留三十二轮）：删除无消费者的 `@deprecated` `DesktopAIRuntime`
 > （`packages/ai/src/electron/services/desktop-ai-runtime.ts`；组合根已是 `createAIPowerSyncModule`）。
@@ -890,7 +891,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > toCloudAccessToken + guest-upgrade journey、governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留三十三轮）：继续删除无消费者双轨兼容面——Desktop
 > `configureMainProcessDependencies` / `resetAllContainers` / `isDIConfigured` no-op；
 > 删除无调用的 `connectPowerSync` / `promotePowerSyncToSync` / `disconnectPowerSync`，
@@ -902,7 +902,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > specs、contracts typecheck（或 result 相关）、governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留三十四轮）：删除已无注册方的懒加载模块双轨——
 > `apps/desktop/src/main/di/`（`lazy-module-loader` + 空 DI barrel）、
 > `SystemChannels.GET_LAZY_MODULE_STATS` / `system:getLazyModuleStats` handler，以及
@@ -910,7 +909,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 遗留字段双轨回退，只使用 `startDate`/`targetDate` 契约；删除已无源码的 `@memoflow/contracts/response` 导出与 API vitest 别名。§13.2 未打勾项仍为部分/外部阻塞。
 > 验证：desktop system-handlers + ipc-contracts specs、app-vue goal 相关 specs（如有）、
 > contracts typecheck、governance-check。状态保持 **实施中**；PR readiness 仍为 no。
-
 
 > 续进展 2026-07-21（阶段 6 残留三十五轮）：收口 AI conversation 双轨——删除无传输层消费者的
 > `CreateConversationUseCase` / `DeleteConversationUseCase` / `GetConversationUseCase` /
@@ -920,7 +918,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：ai typecheck + focused runtime/module tests、governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留三十六轮）：AI conversation 命名收口——`*ConversationV2UseCase` 与
 > `conversationServices.*V2` 字段统一为无版本后缀的规范名（v1 已在三十五轮删除）；补
 > `conversation-services.surface.spec.ts` 防回归。删除 Desktop 认证无消费者 stub 服务层
@@ -928,7 +925,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > credential coordinator / AuthDesktopApplicationService）。§13.2 未打勾项仍为部分/外部阻塞。
 > 验证：ai conversation surface + runtime focused specs、desktop 相关 specs（如有）、governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
-
 
 > 续进展 2026-07-21（阶段 6 残留三十七轮）：删除无传输层 / `AIApplicationPort` 接线的 conversation
 > 死用例 `AddConversationMessageUseCase`、`GetConversationsByStatusUseCase`、
@@ -940,7 +936,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：ai conversation surface + runtime focused specs、governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留三十八轮）：删除无传输层 / `AIApplicationPort` 接线的
 > `GetDefaultAIProviderUseCase`（默认提供方经 `setDefault` + list/`isDefault` 与
 > `findDefaultByIdentityId` 解析，客户端不再需要 getDefault 装配）；补
@@ -949,7 +944,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：ai provider/conversation surface + runtime focused specs、governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留三十九轮）：Desktop auth 生命周期 `AutoLoginResult` 不再重复定义，
 > 复用 infrastructure `session-types`；`SessionRestoreResult` 仅叠加 `hasValidSession`。
 > app-vue AI 去掉 `LegacyWorkflowMode`/`PersistedWorkflowMode` 双轨类型，`normalizeWorkflowMode`
@@ -957,13 +951,11 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：desktop lifecycle/auth specs、app-vue AI focused specs、governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留四十轮）：增强 §13.2 部分项证据（仍不打勾）——ADR-035 journey 增加
 > multi-turn 二次 confirm 不重复落盘、Web surface 不能顶替 Desktop local_vault write requirements；
 > 三入口 matrix journey 增加 GitHub 登录≠仓库 App 授权边界断言。无外部凭据，不宣称跨端 E2E 完成。
 > 验证：adr-035 journey、three-login matrix specs、governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
-
 
 > 续进展 2026-07-21（阶段 6 残留四十一轮）：删除 conversation 仓储死表面
 > `findByStatus` / `findRecent` / `exists`（无传输层/use-case 调用；列表分页走
@@ -972,14 +964,12 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 仍为部分/外部阻塞。验证：ai conversation/repo surface + focused runtime specs、governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留四十二轮）：删除 provider-config 仓储死表面
 > `findByIdentityIdAndName` / `exists`（无 use-case/传输层调用；默认解析走
 > `findDefaultByIdentityId`，删除/读写走 id 主键）。同步 memory/prisma/powersync 与 test
 > stub，补 `ai-provider-config-repository.surface.spec.ts`。§13.2 未打勾项仍为部分/外部阻塞。
 > 验证：ai provider-config repo surface + provider focused specs、governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
-
 
 > 续进展 2026-07-21（阶段 6 残留四十三轮）：删除认证 identity 仓储 phone 登录查询死表面
 > `findByPhone` / `existsByPhone`（phone/SMS 已非三入口运行时登录面；保留
@@ -988,13 +978,11 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > §13.2 三入口仍为部分（缺真实 OAuth fixture 跨端 E2E）。验证：authentication focused
 > specs、three-login matrix、governance-check。状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留四十四轮）：继续 phone 登录残留收口——删除 account 仓储
 > `findByPhone`（availability 仅 email/nickname）；删除 Desktop `DEVICE_TRUST` IPC 空 stub
 > （NOT_IMPLEMENTED、无 renderer 消费者）及 contracts channel。§13.2 仍为部分/外部阻塞。
 > 验证：account focused specs、desktop auth shell/ipc contracts specs、governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
-
 
 > 续进展 2026-07-21（阶段 6 残留四十五轮）：删除 Desktop 2FA / API Key 管理双轨死表面——
 > `DesktopAuthSecurityAdminService` 与 facade 委托、`desktop-auth-shell` IPC handlers、
@@ -1004,7 +992,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：desktop auth security/admin + shell + ipc contracts/auth-surface specs、governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留四十六轮）：删除 Desktop device 管理 IPC 死表面——
 > `listDevices`/`getCurrentDevice`/`revokeDevice`/`renameDevice` 服务与 facade、shell handlers、
 > contracts `DEVICE_*` channels 与 `DeviceInfoUI` 类型（无 app-vue/web 消费者；`revokeDevice`
@@ -1013,7 +1000,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：desktop auth security/admin + shell + ipc contracts/auth-surface specs、governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留四十七轮）：删除无 `AuthIpcAdapter`/renderer 消费者的诊断会话 IPC——
 > `VERIFY_TOKEN`/`TOKEN_STATUS`/`SESSION_STATUS`/`CLEANUP_SESSIONS`/`SESSION_GET_CURRENT`/
 > `SESSION_REVOKE_ALL` 及对应 facade/lifecycle/security-admin 委托。保留
@@ -1021,19 +1007,16 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 扩展 auth-surface。§13.2 仍为部分/外部阻塞。验证：desktop auth + ipc contracts/auth-surface、
 > governance-check。状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留四十八轮）：消除 Desktop auth shell 本地 `Ch` 与 contracts
 > `AuthChannels` 双轨——handlers 直接使用 `AuthChannels`/`Object.values(AuthChannels)`；
 > 补 `desktop-auth-shell.surface.spec.ts`。§13.2 仍为部分/外部阻塞。
 > 验证：desktop auth shell + module-handler-contracts + ipc-contracts + auth-surface、
 > governance-check。状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留四十九轮）：删除 governance `mapper-helpers` 兼容 re-export shim，
 > prisma/powersync mappers 与 repository 直接 import `@memoflow/utils/shared`。§13.2 仍为
 > 部分/外部阻塞。验证：governance focused specs（如有）+ governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
-
 
 > 续进展 2026-07-21（阶段 6 残留五十轮）：删除无真实调用的兼容别名——ui-core
 > `generateStrongPassword`（= `generatePassword`）与 goal
@@ -1042,31 +1025,26 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：goal value-objects + ui-core/ui-vue-shadcn 相关 specs（如有）、governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留五十一轮）：删除 Web E2E 双轨测试用户别名
 > `TEST_USER`/`TEST_USER_2`/`ADMIN_TEST_USER`，调用方统一 `TEST_USERS`（`e2e/config`）。
 > §13.2 仍为部分/外部阻塞。验证：e2e 文件 import 语法自检、governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
-
 
 > 续进展 2026-07-21（阶段 6 残留五十二轮）：删除 `@memoflow/utils` 根级 `src/uuid.ts` 与
 > `shared/uuid.ts` 双文件——domain `create-id-type` 改为 import `shared/uuid`，uuid 单一
 > 真值在 `shared`。§13.2 仍为部分/外部阻塞。验证：utils typecheck + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留五十三轮）：删除无消费者的 `ipc-client` `ElectronAPI` 兼容别名
 > （保留 `ElectronBridge`）；删除 API 向后兼容 `/health` 探针（compose/e2e 统一
 > `/healthz`，E2E `HEALTH_ENDPOINT` 同步）。§13.2 仍为部分/外部阻塞。
 > 验证：ipc-client tests + governance-check。状态保持 **实施中**；PR readiness 仍为 no。
-
 
 > 续进展 2026-07-21（阶段 6 残留五十四轮）：删除 API `AuthenticatedRequest.identityId`/
 > `sessionId` 双轨字段——认证真值仅 `req.user`；PowerSync 路由与 `requireAuth`/
 > `getCurrentAccountId` 统一读 `req.user.identityId`。§13.2 仍为部分/外部阻塞。
 > 验证：api powersync/auth middleware specs + governance-check。状态保持 **实施中**；
 > PR readiness 仍为 no。
-
 
 > 续进展 2026-07-21（阶段 6 残留五十五轮）：折叠 account 资料读取 IPC 三轨（`account:get` /
 > `account:current` / `account:get-me`）为单一活通道 `GET_ME`；删除无 renderer 消费者的
@@ -1075,7 +1053,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > §13.2 仍为部分/外部阻塞。验证：account/contracts focused specs + desktop ipc contracts +
 > module-handler-contracts + governance-check。状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留五十六轮）：setting electron 本地 `Ch` 折叠到 contracts
 > `SettingChannels`；`SettingIpcAdapter` 去掉 `setting:` 字符串拼接双轨，统一 invoke
 > `SettingChannels.*`；删除 API `requireAuth`/`getCurrentAccountId` 无消费者辅助函数。
@@ -1083,12 +1060,10 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：setting focused specs + desktop ipc/module-handler contracts + api auth middleware
 > specs + governance-check。状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留五十七轮）：reminder electron 本地 `Ch` 与 adapter
 > `REMINDER_CHANNELS` 双轨折叠到 contracts `ReminderChannels` 单一真值。补 electron/adapter
 > surface specs。§13.2 仍为部分/外部阻塞。验证：reminder focused specs + desktop
 > ipc/module-handler contracts + governance-check。状态保持 **实施中**；PR readiness 仍为 no。
-
 
 > 续进展 2026-07-21（阶段 6 残留五十八轮）：删除 task electron 不支持的 `task:instance:update`
 > 死通道（仅抛错、无 adapter 消费者）；task electron 本地 `Ch` 折叠到 contracts
@@ -1096,13 +1071,11 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：task/contracts focused specs + desktop ipc/module-handler contracts + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留五十九轮）：contracts `GoalChannels` 补齐活通道
 > `ARCHIVE_EXPIRED`（`goal:archiveExpired`）；goal electron 本地 `Ch` 与 goal/folder/focus
 > IPC adapters 字符串拼接双轨折叠到 `GoalChannels`。补 goal electron/adapter/contracts surface
 > specs。§13.2 仍为部分/外部阻塞。验证：goal/contracts focused specs + desktop
 > ipc/module-handler contracts + governance-check。状态保持 **实施中**；PR readiness 仍为 no。
-
 
 > 续进展 2026-07-21（阶段 6 残留六十轮）：repository electron 本地 `Ch`（部分已别名
 > `RepositoryChannels`、部分字面量）与 `RepositoryIpcAdapter` 字符串拼接双轨折叠到 contracts
@@ -1110,20 +1083,17 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：repository focused specs + desktop ipc/module-handler contracts + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留六十一轮）：AI electron 本地 `Ch` 折叠到 contracts
 > `AIChannels`；stream push 事件保持 `AIStreamChannels`（不再把 chunk/done/error 放进本地
 > handler 频道表双轨）。补 ai electron + contracts ai-surface specs。§13.2 仍为部分/外部阻塞。
 > 验证：ai/contracts focused specs + desktop ipc/module-handler contracts + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留六十二轮）：notification electron 本地 `Ch`/`RendererCh` 与
 > adapter `NOTIFICATION_CHANNELS` 双轨折叠到 contracts `NotificationChannels`；custom 频道仍由
 > desktop `custom-notification.manager` 注册，destroy 仍清理完整 NotificationChannels 集合。
 > 补 electron/adapter surface specs。§13.2 仍为部分/外部阻塞。验证：notification focused specs +
 > desktop ipc/module-handler contracts + governance-check。状态保持 **实施中**；PR readiness 仍为 no。
-
 
 > 续进展 2026-07-21（阶段 6 残留六十三轮）：删除 schedule 事件 throw-only 死通道
 > `schedule:complete`/`cancel`/`reschedule`；schedule electron `EventCh`/`TaskCh` 与
@@ -1132,31 +1102,26 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：schedule/contracts focused specs + desktop ipc/module-handler contracts + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留六十四轮）：desktop `system-handlers` 与 `dashboard-handler`
 > 字符串频道双轨折叠到 contracts `SystemChannels`/`DesktopFeatureChannels`/
 > `DashboardChannels`。补 system-handlers/dashboard-handler surface specs。§13.2 仍为部分/
 > 外部阻塞。验证：desktop system-handlers + surface + ipc contracts + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留六十五轮）：desktop `ipc-cache` 管理 handlers 与列表 TTL 键、
 > `memory-monitor` dev handlers 折叠到 contracts `CacheChannels`/`DevChannels` 及
 > Goal/Task/Dashboard/Reminder 频道常量。补 surface specs。§13.2 仍为部分/外部阻塞。
 > 验证：desktop focused surface/specs + governance-check。状态保持 **实施中**；PR readiness 仍为 no。
-
 
 > 续进展 2026-07-21（阶段 6 残留六十六轮）：新增 contracts `AutoUpdateChannels`，desktop
 > auto-update IPC handlers 从字符串频道折叠到 contracts 单一真值。补 contracts/desktop
 > surface specs。§13.2 仍为部分/外部阻塞。验证：contracts + desktop focused specs +
 > governance-check。状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留六十七轮）：auto-update 与 ipc-cache 管理 handlers 的
 > `{ success }` 双轨响应折叠为 contracts Result `ok`/`fail` 信封（与 ResultIpcClient 对齐）。
 > 扩展 surface specs。§13.2 仍为部分/外部阻塞。验证：desktop focused surface specs +
 > governance-check。状态保持 **实施中**；PR readiness 仍为 no。
-
 
 > 续进展 2026-07-21（阶段 6 残留六十八轮）：desktop `window-manager` IPC handlers 的
 > `{ success }` 双轨响应折叠为 contracts Result `ok`/`fail`；`useDesktopWindowControls`
@@ -1164,13 +1129,11 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：desktop + app-vue focused surface specs + governance-check。状态保持 **实施中**；
 > PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留六十九轮）：desktop `system-handlers`（system + desktop-feature）
 > 原始/非 Result 响应折叠为 contracts Result `ok`/`fail`；OPEN_EXTERNAL 校验改为 `fail`
 > （不再 throw）；app-vue 设置页 UserFiles/DataPortability/UserSettings 解包 Result。
 > 补 surface specs。§13.2 仍为部分/外部阻塞。验证：desktop system-handlers specs +
 > app-vue focused surface specs + governance-check。状态保持 **实施中**；PR readiness 仍为 no。
-
 
 > 续进展 2026-07-21（阶段 6 残留七十轮）：折叠 `SessionRestoreResult` 的 `success`/`ok` 双轨
 > （contracts 仅 `ok: boolean`；lifecycle 幂等重入路径改 `ok: true`）；dev memory-monitor
@@ -1178,13 +1141,11 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：desktop lifecycle/memory focused specs + contracts surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留七十一轮）：custom-notification IPC handlers 返回 Result
 > `ok` 信封；`notification:clicked` 字符串双轨折叠到 contracts `RendererEventChannels.NOTIFICATION_CLICKED`
 > （custom + native notification service）。补 surface specs。§13.2 仍为部分/外部阻塞。
 > 验证：desktop notification surfaces + contracts surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
-
 
 > 续进展 2026-07-21（阶段 6 残留七十二轮）：desktop-auth-shell 剩余原始 DTO 响应
 > （GET_STATUS / GET_BOOTSTRAP_SNAPSHOT / INITIALIZE / AUTO_LOGIN / REMEMBERED_ACCOUNTS_LIST /
@@ -1193,13 +1154,11 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > §13.2 仍为部分/外部阻塞。验证：desktop auth shell + app-vue recovery/bootstrap focused specs +
 > governance-check。状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留七十三轮）：contracts 新增严格 `isIpcResultEnvelope`（要求
 > `ok` + `data`/`error`），ipc-client / ResultIpcClient 删除 raw 双轨透传并对非信封响应失败；
 > authenticated-ipc 共用同一检测。补 contracts/ipc-client surface specs。§13.2 仍为部分/外部阻塞。
 > 验证：contracts + ipc-client focused specs + governance-check。状态保持 **实施中**；
 > PR readiness 仍为 no。
-
 
 > 续进展 2026-07-21（阶段 6 残留七十四轮）：文档/深链边界对齐——UI redesign 文中仍写为现行
 > 契约的 `/note/:id` 深链改为 `/repository?note=`（`/note/:id` 已退役）；补 AI
@@ -1207,7 +1166,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 不能顶替 knowledge mutation）。§13.2 未打勾项仍为部分/外部阻塞（真实 OAuth/GitHub fixture
 > E2E、完整 multi-engine Turn Engine E2E、全量 PR 门禁）。验证：ai journey + app-vue surface +
 > governance-check。状态保持 **实施中**；PR readiness 仍为 no。
-
 
 > 续进展 2026-07-21（阶段 6 残留七十五轮）：ADR-035 journey 增 step 11——`engine.direct_turn` /
 > `engine.pi_readonly` / `engine.cli_readonly` 引擎 offer 单独不能顶替 knowledge mutation
@@ -1218,7 +1176,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > multi-engine Turn Engine E2E、全量 PR 门禁）。验证：ai journey + app-vue matrix/surface +
 > data-portability ipc adapter + governance-check。状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留七十六轮）：Desktop `AuthRemoteGateway` 删除 auth HTTP raw
 > dual-track——register/login/refresh/listOAuthProviders/postResult 成功响应必须带 `data`
 > 信封，裸业务体 fail-closed；lifecycle `hasValidSession` 去掉可选 `ok` 兜底；ADR-035
@@ -1227,7 +1184,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > login/register/refresh focused specs + ai journey + governance-check。状态保持 **实施中**；
 > PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留七十七轮）：Desktop 知识仓库远程网关与 profile snapshot 删除
 > HTTP raw dual-track——`KnowledgeRepositoryRemoteGateway` 成功响应必须带 `data` 信封（不再
 > `payload.data ?? payload`）；`ProfileSnapshotService` manifest 无 data 信封时 fail-closed
@@ -1235,13 +1191,11 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：desktop knowledge-repository-remote.gateway + ProfileSnapshotService specs +
 > governance-check。状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留七十八轮）：`ResultHttpClient` 删除 first-party HTTP raw
 > dual-track——非标准信封 / 缺 `data` 的 `ok:true` 体 fail-closed；`app-react`
 > session refresh 强制 data 信封（对齐 Desktop AuthRemoteGateway）。补 http-client 与
 > app-session surface specs。§13.2 仍为部分/外部阻塞。验证：http-client + app-react
 > focused specs + governance-check。状态保持 **实施中**；PR readiness 仍为 no。
-
 
 > 续进展 2026-07-21（阶段 6 残留七十九轮）：修复 `GoalIpcAdapter` 错误导入 `AIChannels` 却
 > 调用 `GoalChannels` 的双轨错线（导致 `goal:build`/`ai:build` 连锁 typecheck 失败）；
@@ -1249,20 +1203,17 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：goal focused surface + goal:build + governance-check。状态保持 **实施中**；
 > PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留八十轮）：`AxiosHttpClient` 对齐 `ResultHttpClient`——JSON
 > 成功体无 HttpResponse 信封 fail-closed（删除 raw dual-track）；blob/arraybuffer/text
 > 下载仍允许非 JSON 透传；信封检测要求 `ok:true` 含 `data` 键。补 http-client specs 与
 > surface；修正 web platform 过时 AxiosHttpClient 注释。§13.2 仍为部分/外部阻塞。
 > 验证：http-client focused + governance-check。状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留八十一轮）：删除 throw 风格 `IpcClientImpl` / `IpcClient` /
 > `IpcClientError` 双轨（包入口本就只导出 ResultIpcClient；Desktop DI 仅用
 > createResultIpcClient）；修正 task/schedule IPC 工厂注释与 http-client 包说明以
 > Result 信封为主路径。§13.2 仍为部分/外部阻塞。验证：ipc-client focused +
 > governance-check。状态保持 **实施中**；PR readiness 仍为 no。
-
 
 > 续进展 2026-07-21（阶段 6 残留八十二轮）：清理残留双轨文档/注释与 AI 传输面——task HTTP
 > adapter 头注释 `IHttpClient`→`IResultHttpClient`；contracts `createIpcClient` 示例改为
@@ -1272,7 +1223,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 面保留。§13.2 仍为部分/外部阻塞（无伪造 GitHub/OAuth fixture）。验证：contracts/ai
 > focused + governance-check。状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留八十三轮）：删除 throw 风格 `AxiosHttpClient` / `IHttpClient` /
 > `HttpClientError` / `createHttpClient` 双轨（全仓无生产消费者；模块 adapters 与
 > Web/Desktop/Mobile DI 仅用 `ResultHttpClient`/`createResultHttpClient`）；保留
@@ -1281,14 +1231,12 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 阻塞。验证：http-client focused + governance-check。状态保持 **实施中**；PR readiness
 > 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留八十四轮）：Result 传输面继续收口——`AxiosHttpClientConfig`
 > 重命名为 `HttpClientConfig`；contracts `createIpcClientWrapper` 删除 throw 风格
 > `invokeUnsafe`（仅保留 Result `invoke`）；ADR-032 工厂约定改为 `IResultHttpClient` 并
 > 移除已删除的 editor 工厂行；repository adapter specs 本地 stub 命名对齐 Result。§13.2
 > 仍为部分/外部阻塞。验证：http-client + contracts focused + governance-check。状态保持
 > **实施中**；PR readiness 仍为 no。
-
 
 > 续进展 2026-07-21（阶段 6 残留八十五轮）：删除零生产消费者的 `createIpcClientWrapper`
 > （Renderer 生产路径仅 `ResultIpcClient`/`createResultIpcClient`；保留 `toIpcResult`/
@@ -1297,13 +1245,11 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > IPC `ok` 业务标志拒绝。§13.2 仍为部分/外部阻塞。验证：contracts + http-client +
 > governance-check。状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留八十六轮）：折叠 AI provider list 双轨响应——HTTP/Desktop
 > IPC/client 统一 contracts `ListAIProviderConfigsRes`（`{ data: [...] }`）；删除 IPC
 > adapter `Array.isArray ? data : data.data` 兼容分支；controller/electron 显式
 > `ok({ data })`。补 provider-list envelope surface。§13.2 仍为部分/外部阻塞。验证：
 > ai focused + governance-check。状态保持 **实施中**；PR readiness 仍为 no。
-
 
 > 续进展 2026-07-21（阶段 6 残留八十七轮）：折叠 AI void 成功双轨——删除
 > `ActionSuccessSchema`（`{ success: boolean }`）；delete conversation / delete provider /
@@ -1312,20 +1258,17 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 仍为部分/外部阻塞。验证：ai focused + governance-check。状态保持 **实施中**；
 > PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留八十八轮）：Desktop IPC 对齐 HTTP void 成功信封——
 > `PROVIDER_DELETE` / `PROVIDER_SET_DEFAULT` / `CONVERSATION_DELETE` 成功路径显式
 > `ok(null)`（不再透传 `Result<void>`/`data:undefined` 双轨）。扩展 void-success
 > envelope surface 覆盖 electron。§13.2 仍为部分/外部阻塞。验证：ai focused +
 > governance-check。状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留八十九轮）：折叠 goal void 删除双轨——删除
 > `DeleteSuccessResSchema`（`{ success: boolean }`）；review/record delete OpenAPI 改为
 > `z.null()`；controller/electron 对 key-result/review/record/folder delete 返回
 > `ok(null)`。补 goal void-success envelope surface。§13.2 仍为部分/外部阻塞。验证：
 > goal focused + governance-check。状态保持 **实施中**；PR readiness 仍为 no。
-
 
 > 续进展 2026-07-21（阶段 6 残留九十轮）：折叠 task/governance void 删除双轨——task template
 > delete 去掉 `{ success: true }`；OpenAPI 已有 `z.null()` 的 template/instance/dependency
@@ -1334,14 +1277,12 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 补 task/governance void-success envelope surfaces。§13.2 仍为部分/外部阻塞。验证：
 > task + governance focused + governance-check。状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留九十一轮）：折叠 reminder void/success 双轨——template/group
 > delete 与 frequency-adjustment reject 在 controller/electron 统一 `ok(null)`（对齐 OpenAPI
 > `z.null()`）；`FrequencyAdjustmentResultSchema` / use case 去掉冗余 `success: boolean`
 > （成功已由 Result 信封表达）。补 reminder void-success envelope surface。§13.2 仍为部分/
 > 外部阻塞。验证：reminder focused + contracts + governance-check。状态保持 **实施中**；
 > PR readiness 仍为 no。
-
 
 > 续进展 2026-07-21（阶段 6 残留九十二轮）：折叠 notification void/batch 双轨——单条 delete
 > controller/electron `ok(null)`；batch delete/cleanup 对齐 contracts
@@ -1351,7 +1292,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > void-success envelope surface。§13.2 仍为部分/外部阻塞。验证：notification focused +
 > governance-check。状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留九十三轮）：折叠 account/schedule void 删除双轨——账户注销
 > close 与 schedule task/event delete 在 controller/electron 统一 `ok(null)`（对齐 OpenAPI
 > `z.null()`）；`CloseAccountRes` 改为 `null`；删除零运行时消费者的 account
@@ -1360,13 +1300,11 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 部分/外部阻塞。验证：account + schedule focused + governance-check。状态保持 **实施中**；
 > PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留九十四轮）：折叠 authentication void 成功双轨——logout /
 > revoke session / change-password / forgot-password / reset-password / send-email-code /
 > oauth unbind 在 controller 统一 `ok(null)`；OpenAPI unbind 从 `z.void()` 改为 `z.null()`
 > 与其它 void 端点一致。补 auth void-success envelope surface。§13.2 仍为部分/外部阻塞。
 > 验证：authentication focused + governance-check。状态保持 **实施中**；PR readiness 仍为 no。
-
 
 > 续进展 2026-07-21（阶段 6 残留九十五轮）：折叠 knowledge repository disconnect 成功双轨——
 > `DisconnectKnowledgeRepositoryConnectionRes` / OpenAPI 改为 `z.null()`；service/
@@ -1374,7 +1312,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 重复表达）。UI 仅检查 `result.ok`，无 body 依赖。补 disconnect void-success envelope
 > surface。§13.2 仍为部分/外部阻塞。验证：repository focused + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
-
 
 > 续进展 2026-07-21（阶段 6 残留九十六轮）：AI provider-config 客户端 Result 端口迁移——
 > `IAIProviderConfigApiClient` / `AIClientPort` provider 方法改为 `Promise<Result<T>>`；
@@ -1386,7 +1323,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：ai typecheck + provider result/list envelope surfaces + useAI + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留九十七轮）：AI capabilities + conversation 客户端 Result
 > 端口迁移——`IAICapabilitiesApiClient` / `IAIConversationApiClient` 与 `AIClientPort` 对应
 > 方法改为 `Promise<Result<T>>`；HTTP/IPC adapters 去掉 `unwrapResultOrThrow`；Vue/React
@@ -1396,14 +1332,12 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：ai typecheck + focused surfaces + useAI/AIChatView specs + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留九十八轮）：AI goal/evaluation/knowledge/analytics 客户端
 > Result 端口迁移——对应 ports + HTTP/IPC adapters 去掉 `unwrapResultOrThrow`；
 > `goalAutomationHelpers` / `useAI.expandKnowledge` 在 composable 边界 `unwrap`。补
 > `ai-query-result-port.surface`。message/stream/agent 仍 throw-unwrap。§13.2 仍为
 > 部分/外部阻塞。验证：ai typecheck + surfaces + useAI/AIChatView + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
-
 
 > 续进展 2026-07-21（阶段 6 残留九十九轮）：AI message send/list 客户端 Result 端口迁移——
 > `sendMessage` / `getMessages`/`listMessages` 改为 `Promise<Result<T>>`；HTTP/IPC 对应
@@ -1413,7 +1347,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 阻塞。验证：ai typecheck + surfaces + AIChatView/useAI + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留一百轮）：AI agent-runtime 客户端 Result 端口迁移——
 > list/start/resume/get/events 改为 `Promise<Result<T>>`；HTTP/IPC adapters 去掉
 > `unwrapResultOrThrow`；Vue chat/goal/knowledge workflows 在 composable 边界 `unwrap`。
@@ -1422,14 +1355,12 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：ai typecheck + agent adapter/surface + AIChatView + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
 > 续进展 2026-07-21（阶段 6 残留一百零一轮）：删除无实现/无消费者的 `IAIStreamMessageApiClient`
 > 双轨端口（stream 仅保留在 `IAIMessageApiClient`/`AIClientPort` 的 throw-based
 > `streamMessage`）；清理 infrastructure-client 过时 `IAIGenerationTaskApiClient` 注释；补
 > `ai-client-result-port-surface` 固化 Result 端口完成态与禁止 stream 双接口回归。
 > §13.2 仍为部分/外部阻塞。验证：ai focused surfaces + typecheck + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
->
 >
 > 续进展 2026-07-21（阶段 6 残留一百零二轮）：Agent 隔离 hardening——`startRun`/`resumeRun` 在
 > host side-effect（`resolveRuntimeExecutionInterrupt`）之前强制 `ensureAgentRunOwnedByIdentity`
@@ -1440,7 +1371,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 外部阻塞）。验证：ai journey/runtime focused specs + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-21（阶段 6 残留一百零三轮）：Agent 事件隔离——`getEvents` 在返回事件前经
 > `getRun` + `ensureAgentRunOwnedByIdentity` fail-closed，foreign-owned run 不调用底层
 > getEvents、不泄露事件；ADR-035 journey 增 step 14；三入口 matrix step 9 固化
@@ -1450,7 +1380,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > runtime + app-vue three-login matrix + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-21（阶段 6 残留一百零四轮）：补齐 getEvents 正向路径证据——owned identity
 > 通过 ownership gate 后正常返回事件；ADR-035 journey 增 step 15；新增
 > `ai-agent-events-ownership.surface` 固化 getEvents 必须先 getRun+ownership 再取事件。
@@ -1458,7 +1387,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > ai journey/runtime/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-21（阶段 6 残留一百零五轮）：Agent checkpoint upsert 身份隔离——禁止
 > `run.identityId` 冒充与 foreign `runId` 覆盖（原 bare `where:{runId}` upsert 可改写他人
 > checkpoint）；事务内 findUnique + owner gate 后 create/update；补 adapter 单测与
@@ -1466,7 +1394,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 仍为部分。验证：ai checkpoint adapter/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-21（阶段 6 残留一百零六轮）：服务端持有数据披露不可导入 hardening——
 > `parseUserDataExportEnvelope` 对 `memoflow.server-held-data-disclosure` 先于通用 schema
 > fail-closed 并给出明确 not-importable 文案；ImportUserData 用例 dryRun/正式导入均拒绝且
@@ -1475,14 +1402,12 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > data-portability focused + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-21（阶段 6 残留一百零七轮）：Agent checkpoint get/list 元数据身份
 > defense-in-depth——`get` 在 row 归属匹配后仍校验 `run.identityId`，不匹配则当 not found；
 > `list` 过滤 spoofed metadata。补 adapter 单测与 ownership surface 扩展。§13.2 Agent
 > 证据再增强，仍为部分。验证：ai checkpoint adapter/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-21（阶段 6 残留一百零八轮）：HTTP 204 void 信封收口——`expressAdapter` /
 > `expressAdapterWithValidation` 对 `successStatus: 204` 发送无 body 的 No Content（不再
 > `json(success(...))` 双轨）；AI agent/langgraph checkpoint upsert/delete 路由统一
@@ -1491,7 +1416,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > utils express-adapter + ai surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-21（阶段 6 残留一百零九轮）：知识笔记 write-request 状态转移身份隔离——
 > `retryFailed` / `markCommitted` / `markFailed` 端口与 Prisma 仓储强制 `identityId` 过滤
 > （`updateMany where { id, identityId }`，禁止仅靠主键改写他人 ledger）；commit service
@@ -1499,7 +1423,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 证据再增强，仍为部分。验证：repository commit specs/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-21（阶段 6 残留一百一十轮）：GitHub webhook delivery 状态转移 connection 隔离——
 > `updateStatus` 端口与 Prisma 仓储强制 `connectionId` 过滤（`updateMany where { id, connectionId }`，
 > 禁止仅靠 delivery 主键改写他人连接的投递状态）；projection service 调用透传
@@ -1507,7 +1430,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：repository projection specs/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-21（阶段 6 残留一百一十一轮）：知识仓库 connection 状态转移身份隔离——
 > `updateStatus` 端口与 Prisma 仓储强制 `identityId` 过滤（`updateMany where { id, identityId }`，
 > 禁止仅靠 connection 主键 revoke/改状态）；disconnect 透传 identityId。补 ownership surface
@@ -1515,7 +1437,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-21（阶段 6 残留一百一十二轮）：知识仓库 connection 读路径身份隔离——新增
 > `findByIdForIdentity(identityId, id)`（Prisma `findFirst where { id, identityId }`）；
 > connection/commit/attachment 服务身份操作改走该读路径；API cloud purger 删除
@@ -1523,15 +1444,13 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > GitHub App 授权边界证据再增强。验证：repository + api purger specs + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-21（阶段 6 残留一百一十三轮）：知识仓库 connection `save` 身份不可改写——
 > 去掉 bare `upsert` 更新路径上的 `identityId` 写入；既有行必须 `existing.identityId ===
-> connection.identityId`，再以 `updateMany where { id, identityId }` 更新；跨 identity 改写
+connection.identityId`，再以 `updateMany where { id, identityId }` 更新；跨 identity 改写
 > fail-closed。补 prisma/memory 单测与 ownership surface。§13.2 GitHub App 授权边界证据再
 > 增强。验证：repository connection prisma/service/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-21（阶段 6 残留一百一十四轮）：AI conversation get/update/delete 身份隔离——
 > 新增 `findByIdForIdentity`；delete 改为 `updateMany where { id, identityId }`；save 拒绝
 > 跨 identity 改写；HTTP/Electron 与 use case 透传 identityId；sendMessage 路径 helpers 同步
@@ -1539,7 +1458,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 部分。验证：ai conversation ownership specs/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-21（阶段 6 残留一百一十五轮）：AI provider config get/update/delete 身份隔离——
 > 新增 `findByIdForIdentity`；delete 改为 `updateMany where { id, identityId }`；save 拒绝
 > 跨 identity 改写；HTTP/Electron get/update/delete 透传 identityId；resolution/set-default/
@@ -1547,7 +1465,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 仍为部分。验证：ai provider ownership specs/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-21（阶段 6 残留一百一十六轮）：Goal folder get/update/delete 身份隔离——新增
 > `findByIdForIdentity`；delete 改为 `deleteMany where { id, identityId }`；PowerSync update
 > 不再改写 `identity_id`；get use case/HTTP/Electron 透传 identityId。补 ownership surface 与
@@ -1555,8 +1472,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-21（阶段 6 残留一百一十七轮）：Goal get/update/delete 与 progress record
 > create/delete 身份隔离——Goal/`GoalRecord` 新增 `findByIdForIdentity`；record delete 改为
 > `deleteMany where { id, identityId }`；get/aggregate/update/delete/createRecord use case 经
@@ -1565,17 +1480,13 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > goal ownership specs/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-21（阶段 6 残留一百一十八轮）：Goal status 变更身份隔离——archive/activate/
 > complete/permanentlyDelete 经 `findByIdForIdentity`；物理 delete 改为 `deleteMany where
-> { id, identityId }`（PowerSync 同步 AND identity_id）；HTTP/Electron archive/activate/
+{ id, identityId }`（PowerSync 同步 AND identity_id）；HTTP/Electron archive/activate/
 > complete 透传 identity 上下文。补 ownership surface 与 status 单测。§13.2 Agent/边界证据再
 > 增强，仍为部分。验证：goal ownership specs/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-21（阶段 6 残留一百一十九轮）：Goal key-result/review 读写身份隔离——add/
 > update/progress/delete KR、batch weights、add/list/update/delete review、clone 的 goal 读
 > 路径均经 `findByIdForIdentity`；HTTP/Electron 透传 identity 上下文。补 ownership surface
@@ -1583,8 +1494,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-21（阶段 6 残留一百二十轮）：Goal 剩余 bare-id 读路径收口——create parent、
 > activate-focus focusedGoalIds、list records（identity 过滤 + owned goal）、progress
 > breakdown、cross-module task-binding 均经 `findByIdForIdentity`；HTTP/Electron progress/
@@ -1592,8 +1501,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 部分。验证：goal ownership specs/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-21（阶段 6 残留一百二十一轮）：Schedule task get/update/delete/actions 与
 > list-by-status/source 身份隔离——新增 `findByIdForIdentity`；deleteById 改为
 > `deleteMany where { id, identityId }`；HTTP/Electron task 读写透传 identity 上下文。补
@@ -1601,8 +1508,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > schedule ownership specs/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-21（阶段 6 残留一百二十二轮）：Schedule calendar event get/update/delete 与
 > conflict get/resolve 身份隔离——`IScheduleRepository.findByIdForIdentity`；deleteById/
 > deleteAggregate 改为 `deleteMany where { id, identityId }`；冲突检测/解决链路透传
@@ -1611,8 +1516,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > ownership specs/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-21（阶段 6 残留一百二十三轮）：Task template get/update/delete/actions 与
 > list-instances-by-template 身份隔离——新增 `findByIdForIdentity` /
 > `findByIdWithChildrenForIdentity`；delete 改为 `deleteMany where { id, identityId }`；
@@ -1621,8 +1524,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > template ownership specs/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-21（阶段 6 残留一百二十四轮）：Task instance get/complete/skip/start/delete
 > 身份隔离——新增 `findByIdForIdentity`；delete 改为 `deleteMany where { id, identityId }`；
 > complete 模板读取同 identity；HTTP/Electron（含原未认证 INSTANCE_GET）透传 identity 上下文。
@@ -1630,8 +1531,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > instance ownership specs/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-21（阶段 6 残留一百二十五轮）：Task dependency list/get/update/delete/validate
 > 与 dependency-chain 身份隔离——`findByIdForIdentity` / `findAggregateByIdForIdentity`；
 > 列表与递归链查询附带 identityId；delete/update 使用 id+identityId。HTTP/Electron 透传
@@ -1639,8 +1538,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 为部分。验证：task dependency ownership specs/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-21（阶段 6 残留一百二十六轮）：Notification get/mark-read/update/delete/batch
 > 身份隔离——新增 `findByIdForIdentity`；应用层不再用 bare findById 授权；HTTP/Electron
 > （含原未认证 GET/MARK_READ/DELETE）透传 identity 上下文。补 ownership surface 与 notification
@@ -1648,48 +1545,36 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-21（阶段 6 残留一百二十七轮）：Reminder template/group get/update/delete/actions
 > 身份隔离——新增 `findByIdForIdentity` 到 template/group 仓储；应用层 owned helpers 与
 > adjust-frequency 走 identity 过滤，不再 bare findById + 事后比对。补 ownership surface。
 > §13.2 Agent/边界证据再增强，仍为部分。验证：reminder ownership specs/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-21（阶段 6 残留一百二十八轮）：Reminder `findByGroupId` 身份隔离——列表/批
 > 量分组动作与 domain stats/delete 路径均要求 identityId；不再 bare groupId 后 filter。
 > ownership surface 扩展。§13.2 仍部分（缺跨端 E2E / 真实 GitHub fixture）。验证：reminder
 > focused specs/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-21（阶段 6 残留一百二十九轮）：Reminder response list/stats/delete 与
 > frequency analyze 身份隔离——仓储 `findByTemplateId`/`getResponseStats`/`deleteByTemplateId`
 > 要求 identityId；analyze 走 `findByIdForIdentity`。补 ownership surface。§13.2 仍部分。
 > 验证：reminder response/analyze specs/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-21（阶段 6 残留一百三十轮）：Goal/Reminder schedule projection+execution
 > 身份隔离——有 identity 时用 `findByIdForIdentity`；execution 始终用 task.identityId。
 > 无 identity 的系统回退仍保留 bare findById。补 surface/specs。§13.2 仍部分。验证：
 > goal/reminder schedule source specs/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-21（阶段 6 残留一百三十一轮）：Schedule runtime sync/execute
 > 身份隔离——`ScheduledItem.identityId`；有 identity 时 `findByIdForIdentity`，
 > 无 identity 时 bare findById 后再以 task.identityId 复核。补 surface/specs。
 > §13.2 仍部分。验证：schedule runtime specs/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-21（阶段 6 残留一百三十二轮）：Task schedule projection+execution
 > 身份隔离——有 identity 时 template 用 `findByIdForIdentity`；execution 始终用
 > task.identityId 加载 instance/template；instance 列表按 identity 过滤。
@@ -1697,8 +1582,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：task schedule source specs/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-21（阶段 6 残留一百三十三轮）：Task instance `findByTemplateId`
 > 身份隔离——仓储签名要求 identityId；Prisma/PowerSync 过滤 templateId+identityId；
 > list-by-template / get-template stats / complete siblings / schedule projection
@@ -1706,8 +1589,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：task instance list/get/complete/projection/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-21（阶段 6 残留一百三十四轮）：Task instance 其余 template-scoped
 > 查询/删除身份隔离——`getTemplateStats` / `deleteByTemplateId` /
 > `deleteIncompleteInstancesFrom` / `countFutureInstances` /
@@ -1716,8 +1597,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：task pause/delete/list/get/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-22（阶段 6 残留一百三十五轮）：Reminder domain service / control /
 > mapper 身份隔离——`getTemplate`/`getGroup`/`delete*`/`assign`/`updateGroupStats`/
 > `toggle`/`syncByGroup` 要求 identityId；control 用 `findByIdForIdentity(task.identityId)`；
@@ -1725,8 +1604,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：reminder domain/control/app/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-22（阶段 6 残留一百三十六轮）：Reminder `findByIds` 身份隔离——
 > group/template 仓储 `findByIds(identityId, ids)`；Prisma/PowerSync 过滤 id∈ids +
 > identityId；control batch 与 mapper list 按 identity 分组 owned 批量加载。
@@ -1734,16 +1611,12 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：reminder control/use-cases/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-22（阶段 6 残留一百三十七轮）：Knowledge projection 系统路径
 > connection 身份复核——reconcile/delivery 经 `loadOwnedConnectionById`：bare findById
 > 后以 `findByIdForIdentity(connection.identityId)` 再加载。补 ownership surface。
 > §13.2 仍部分。验证：projection service/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-22（阶段 6 残留一百三十八轮）：Notification domain service 身份隔离——
 > `markAsRead`/`markManyAsRead`/`deleteNotification`/`deleteManyNotifications`/
 > `getNotification`/`executeNotificationAction` 要求 identityId，经 `findByIdForIdentity`
@@ -1751,8 +1624,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：notification domain/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-22（阶段 6 残留一百三十九轮）：Auth session 身份隔离——仓储新增
 > `findByIdForIdentity`；`revoke-session` 与 `get-current-user` 不再用 bare findById
 > 后 FORBIDDEN 二次判断，owned miss 统一 NOT_FOUND；JWT/refresh 仍可用 bare findById。
@@ -1760,16 +1631,12 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：auth session ownership/revoke + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-22（阶段 6 残留一百四十轮）：Task template list 按 folder/goal 过滤
 > 身份隔离——`findByFolderId`/`findByGoalId` 要求 identityId；Prisma/PowerSync 过滤
 > identity + folder/goal；list use case 透传。补 ownership surface。§13.2 仍部分。
 > 验证：task template list/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-22（阶段 6 残留一百四十一轮）：Goal record 次级查询身份隔离——
 > `findByKeyResultId`/`findByGoalId`/`findByKeyResultIds`/`countByKeyResultId` 要求
 > identityId；list/aggregate/create/progress-calculator 透传；goal `findByFolderId`
@@ -1777,147 +1644,118 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：goal record/list/progress/surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-22（阶段 6 残留一百四十二轮）：Task template 次级查询身份隔离——
 > `findByKeyResultId`/`findSubtasks` 要求 identityId；Prisma/PowerSync 过滤 identity。
 > 补 ownership surface。§13.2 仍部分。
 > 验证：task template surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-22（阶段 6 残留一百四十三轮）：Task folder 身份隔离——仓储新增
 > `findByIdForIdentity`；`delete`/`exists` 要求 identityId；Prisma/PowerSync 过滤
 > id+identity。补 ownership surface。§13.2 仍部分。
 > 验证：task folder surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-22（阶段 6 残留一百四十四轮）：Schedule execution 身份隔离——仓储新增
 > `findByIdForIdentity`；`findByTaskId(identityId, taskId)`；Prisma/PowerSync 过滤
 > identity。补 ownership surface。§13.2 仍部分。
 > 验证：schedule execution surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-22（阶段 6 残留一百四十五轮）：Focus session 身份隔离——仓储新增
 > `findByIdForIdentity`；`findByGoalId`/`delete`/`exists` 要求 identityId；Prisma
 > 过滤 identity。补 ownership surface。§13.2 仍部分。
 > 验证：focus session surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-22（阶段 6 残留一百四十六轮）：Focus mode 身份隔离——仓储新增
 > `findByIdForIdentity`；`delete` 要求 identityId；Prisma/PowerSync 过滤 identity。
 > 运行时激活路径已用 `findActiveByIdentityId`。补 ownership surface。§13.2 仍部分。
 > 验证：focus mode surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-22（阶段 6 残留一百四十七轮）：Notification preference 身份隔离——仓储
 > 新增 `findByIdForIdentity`；`delete`/`exists` 要求 identityId；Prisma/PowerSync
 > 过滤 identity。运行时 get/update 已用 `findByIdentityId`。补 ownership surface。
 > §13.2 仍部分。验证：notification preference surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-22（阶段 6 残留一百四十八轮）：Reminder response 身份隔离——仓储新增
 > `findByIdForIdentity`；Prisma/PowerSync 过滤 id+identity。模板级 list/stats/delete
 > 此前已 identity-scoped。补 ownership surface。§13.2 仍部分。
 > 验证：reminder response surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
-
->
 > 续进展 2026-07-22（阶段 6 残留一百四十九轮）：Weight snapshot 身份隔离——`findByGoal`/
 > `findByKeyResult`/`findByTimeRange`/`findByIdForIdentity`/`delete*` 要求 identityId；
 > Prisma 过滤 identity。补 ownership surface。§13.2 仍部分。
 > 验证：weight snapshot surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-22（阶段 6 残留一百五十轮）：Notification 身份隔离——`findByRelatedEntity`/
 > `delete`/`deleteMany`/`softDelete`/`exists`/`markManyAsRead` 要求 identityId；Prisma/
 > PowerSync 过滤 identity。domain/query/maintenance 调用同步。补 ownership surface。§13.2 仍部分。
 > 验证：notification ownership surface + domain/query/maintenance tests + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-22（阶段 6 残留一百五十一轮）：Reminder group/template 身份隔离——
 > `delete`/`exists` 要求 identityId；Prisma/PowerSync 过滤 identity；domain hard delete
 > 传 identityId。补 ownership surface。§13.2 仍部分。
 > 验证：reminder template ownership surface + use-cases + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-22（阶段 6 残留一百五十二轮）：Goal folder 身份隔离——`exists` 要求
 > identityId；Prisma/PowerSync 过滤 identity。补 ownership surface。§13.2 仍部分。
 > 验证：goal folder surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-22（阶段 6 残留一百五十三轮）：Task dependency 身份隔离——
 > `deleteByTaskId` 要求 identityId；Prisma/PowerSync 过滤 identity。补 ownership
 > surface。§13.2 仍部分。
 > 验证：task dependency surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-22（阶段 6 残留一百五十四轮）：Goal record 身份隔离——`deleteMany`
 > 要求 identityId；Prisma/PowerSync 过滤 identity。补 ownership surface。§13.2 仍部分。
 > 验证：goal ownership surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-22（阶段 6 残留一百五十五轮）：Schedule task 身份隔离——`deleteBatch`
 > 要求 identityId；Prisma/PowerSync 过滤 identity；shared projection 按 identity
 > 分组批量删除。补 ownership surface。§13.2 仍部分。
 > 验证：schedule task surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-22（阶段 6 残留一百五十六轮）：Task template 身份隔离——`deleteBatch`
 > 要求 identityId；Prisma/PowerSync 过滤 identity。补 ownership surface。§13.2 仍部分。
 > 验证：task template surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-22（阶段 6 残留一百五十七轮）：Task instance 身份隔离——`deleteMany`
 > 要求 identityId；Prisma/PowerSync 过滤 identity。补 ownership surface。§13.2 仍部分。
 > 验证：task instance surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-22（阶段 6 残留一百五十八轮）：Goal 身份隔离——`exists`/`batchUpdateStatus`
 > 要求 identityId；Prisma/PowerSync 过滤 identity。补 ownership surface。§13.2 仍部分。
 > 验证：goal ownership surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-22（阶段 6 残留一百五十九轮）：Task template 身份隔离——`softDelete`/
 > `restore` 要求 identityId；Prisma/PowerSync 过滤 identity。补 ownership surface。
 > §13.2 仍部分。验证：task template surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-22（阶段 6 残留一百六十轮）：Goal 身份隔离——`batchMoveToFolder` 要求
 > identityId；Prisma/PowerSync 过滤 identity。补 ownership surface。§13.2 仍部分。
 > 验证：goal ownership surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-22（阶段 6 残留一百六十一轮）：Goal 层级查询身份隔离——`isAncestor`/
 > `findChildren` 要求 identityId；Prisma/PowerSync 过滤 identity。补 ownership surface。
 > §13.2 仍部分。验证：goal ownership surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-22（阶段 6 残留一百六十二轮）：Schedule task 列表身份隔离——
 > `findBySourceModule`/`findBySourceEntity`/`findByStatus` 要求 identityId；Prisma/
 > PowerSync 始终过滤 identity；shared projection 无 identity 时拒绝。`findEnabled`/
@@ -1925,35 +1763,30 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 验证：schedule task surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-22（阶段 6 残留一百六十三轮）：Task template 身份隔离——合并
 > `findByIdWithChildren`/`ForIdentity` 为单一 `findByIdWithChildren(identityId, id)`；
 > Prisma/PowerSync 过滤 identity；get use case 同步。补 ownership surface。§13.2 仍部分。
 > 验证：task template surface + get-task-template tests + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-22（阶段 6 残留一百六十四轮）：Reminder findActive 身份隔离——template/
 > group `findActive` 要求 identityId；Prisma/PowerSync 始终过滤 identity。
 > `findByNextTriggerBefore` 保留系统调度可选 identity。补 ownership surface。§13.2 仍部分。
 > 验证：reminder template surface + list tests + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-22（阶段 6 残留一百六十五轮）：Schedule task query/count 身份隔离——
 > `IScheduleTaskQueryOptions.identityId` 必填；Prisma/PowerSync query/count 始终
 > 过滤 identity。`findEnabled`/`findDue` 仍为系统调度路径。补 ownership surface。
 > §13.2 仍部分。验证：schedule task surface + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-22（阶段 6 残留一百六十六轮）：Task dependency 身份隔离——合并
 > `findAggregateById`/`ForIdentity` 为单一 `findAggregateById(identityId, id)`；
 > Prisma/PowerSync 过滤 identity；delete use case 同步。补 ownership surface。§13.2 仍部分。
 > 验证：task dependency surface + dependency tests + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
->
 > 续进展 2026-07-22（阶段 6 残留一百六十七轮）：旧 editor/repository 运行时面审计——
 > API/Desktop/Vue 源码表面锁定仅 knowledge 路径；无 Editor module 注册；无
 > SyncRepositoryUseCase；contracts RepositoryRpcMap 为空；Vue 无 /note/:id。
@@ -2035,18 +1868,20 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > Schedule task bare `findById` 仅允许 runtime bootstrap（surface 锁定）；auth use-case 禁止 bare 读。
 > `packages/editor` 目录与 `@memoflow/editor` 依赖保持删除。portable editor_* 备份导入边界未动。
 > §13.2 仍部分（三入口/Agent multi-engine/真实 GitHub fixture E2E 仍缺）。验证：schedule-task/runtime
-> + legacy-editor surfaces + governance-check。状态保持 **实施中**；PR readiness 仍为 no。
+>
+> - legacy-editor surfaces + governance-check。状态保持 **实施中**；PR readiness 仍为 no。
 >
 > 续进展 2026-07-22（阶段 6 残留一百八十一轮）：§13.2 未打勾项诚实证据重审（不改 checkbox）——
-> 1) 三入口仍为 **部分**：`three-login-surface.matrix.spec.ts`（14）+ Desktop/Web auth surface 通过；
+>
+> 1. 三入口仍为 **部分**：`three-login-surface.matrix.spec.ts`（14）+ Desktop/Web auth surface 通过；
 >    仍缺真实 OAuth/跨端 Playwright-Electron 一揽子。
-> 2) Agent 隔离仍为 **部分**：`adr-035-capability-turn-isolation.journey.spec.ts`（13）通过
->   （confirm-only / cancel 无副作用 / cross-capability fail-closed / identity isolation）；
+> 2. Agent 隔离仍为 **部分**：`adr-035-capability-turn-isolation.journey.spec.ts`（13）通过
+>    （confirm-only / cancel 无副作用 / cross-capability fail-closed / identity isolation）；
 >    仍缺完整 multi-engine Turn Engine E2E 与跨端对抗 E2E。
-> 3) 门禁验收仍为 **部分+外部阻塞**：本分支 focused vitest + `memoflow:governance-check` 绿；
+> 3. 门禁验收仍为 **部分+外部阻塞**：本分支 focused vitest + `memoflow:governance-check` 绿；
 >    真实 GitHub App fixture E2E 缺凭据；不伪造。
-> 身份隔离 dual-method 波次 169–179 已收口 + 180 锁定；不因此宣称 plan 完成。
-> 验证：matrix + adr-035 journey + governance-check。状态保持 **实施中**；PR readiness 仍为 no。
+>    身份隔离 dual-method 波次 169–179 已收口 + 180 锁定；不因此宣称 plan 完成。
+>    验证：matrix + adr-035 journey + governance-check。状态保持 **实施中**；PR readiness 仍为 no。
 >
 > 续进展 2026-07-22（阶段 6 残留一百八十二轮）：根脚本清理删除的 editor Nx 工程——
 > `package.json` 的 `test:integration` / `test:coverage:domain` 不再包含已删除的 `editor` project。
@@ -2284,8 +2119,9 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > goal provider 解析写/读 snake_case；app-vue knowledge.qa/generate/goal 工作流入参对齐；
 > 扩展 snake-case surface。artifact/响应面仍用 camelCase（contracts）。§13.2 未打勾项仍为
 > 部分/外部阻塞。验证：snake-case surface + remote runtime + ADR-035 journey + AIChatView
-> + pytest test_agent_runtime_routes（27）+ governance-check。状态保持 **实施中**；
-> PR readiness 仍为 no。
+>
+> - pytest test_agent_runtime_routes（27）+ governance-check。状态保持 **实施中**；
+>   PR readiness 仍为 no。
 
 > 续进展 2026-07-22（阶段 6 残留二百一十八轮）：Python ai-service knowledge Resource→Note 命名——
 > `KnowledgeResourceDocument`→`KnowledgeNoteDocument`、`IndexedKnowledgeResource`→
@@ -2378,14 +2214,16 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 去掉 `fetchAllResources` 残留 stub；统一 `listRelevantNotes` / `listIndexableNotes` /
 > `getNoteById`。补 `knowledge-source-note-test-mocks.surface.spec.ts`。
 > §13.2 未打勾项仍为部分/外部阻塞。验证：surface + capabilities + remote knowledge tests
-> + governance-check。状态保持 **实施中**；PR readiness 仍为 no。
+>
+> - governance-check。状态保持 **实施中**；PR readiness 仍为 no。
 
 > 续进展 2026-07-22（阶段 6 残留二百三十轮）：阶段 6 dual-track 再收口——
-> 1) schedule 路由删除 week/dashboard 兼容 redirect，E2E 落地 `/schedule/calendar`；
-> 2) 删除无调用链的 `getBootstrapper` 便利 dual-path（main/runtime/profile manager）；
-> 3) remote AI runtime fixture `sourceResource`→`sourceNote`。
-> 补 schedule-router / desktop-bootstrapper-access surfaces。§13.2 未打勾项仍为部分/外部阻塞。
-> 验证：app-vue/desktop/ai surfaces + governance-check。状态保持 **实施中**；PR readiness 仍为 no。
+>
+> 1. schedule 路由删除 week/dashboard 兼容 redirect，E2E 落地 `/schedule/calendar`；
+> 2. 删除无调用链的 `getBootstrapper` 便利 dual-path（main/runtime/profile manager）；
+> 3. remote AI runtime fixture `sourceResource`→`sourceNote`。
+>    补 schedule-router / desktop-bootstrapper-access surfaces。§13.2 未打勾项仍为部分/外部阻塞。
+>    验证：app-vue/desktop/ai surfaces + governance-check。状态保持 **实施中**；PR readiness 仍为 no。
 
 > 续进展 2026-07-22（阶段 6 残留二百三十一轮）：§13.2 核心证据套件复跑（含 residual 229–230
 > note mocks / schedule single route / bootstrapper access 锁，不改 checkbox）——
@@ -2571,7 +2409,7 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 续进展 2026-07-22（阶段 6 残留二百五十六轮）：desktop shared/types ipc-channels dual barrel 收口——
 > 删除 `apps/desktop/src/shared/types/ipc-channels.ts` 及空 types/shared index 再导出；
 > preload `allowed-channels` 与 `CustomNotificationView` 改从 `@memoflow/contracts/electron`
->（GovernanceChannels 从 `@memoflow/contracts/governance`）导入。补 surface。
+> （GovernanceChannels 从 `@memoflow/contracts/governance`）导入。补 surface。
 > §13.2 未打勾项仍为部分/外部阻塞。验证：desktop dual surfaces + governance-check。
 > 状态保持 **实施中**；PR readiness 仍为 no。
 
@@ -2979,11 +2817,12 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 
 > 续进展 2026-07-22（阶段 6 残留三百一十四轮）：ADR-035 首个生产 Turn Engine（仍不打勾 Agent）——
 > 新增 `DirectTurnEngine`（`engine.direct_turn`）实现 `ITurnEnginePort`，经 `IAIChatExecutionPort`
-> + provider/conversation 解析完成开放式 chat/analysis；ownership fail-closed、abort、无
-> waiting_approval/mutation。`createAIModule` 暴露 `turnEngine`；**不**静默 emit `engine.*`
-> capability offers；仍无 Workflow/Capability/Proposal 生产实现与第二引擎。验证：direct-turn 7 +
-> composition/harness/journey + stage-0 freeze + governance-check（GOV_EXIT:0）。§13.2 Agent 仍为
-> **部分实现**。状态保持 **实施中**；PR readiness 仍为 no。
+>
+> - provider/conversation 解析完成开放式 chat/analysis；ownership fail-closed、abort、无
+>   waiting_approval/mutation。`createAIModule` 暴露 `turnEngine`；**不**静默 emit `engine.*`
+>   capability offers；仍无 Workflow/Capability/Proposal 生产实现与第二引擎。验证：direct-turn 7 +
+>   composition/harness/journey + stage-0 freeze + governance-check（GOV_EXIT:0）。§13.2 Agent 仍为
+>   **部分实现**。状态保持 **实施中**；PR readiness 仍为 no。
 
 > 续进展 2026-07-22（阶段 6 残留三百一十五轮）：§13.2 聚焦证据套件复跑（含 residual 250–314
 > dual/docs/disclosure/ADR-035/three-login/harness/composition/DirectTurnEngine 锁，不改 checkbox）——
@@ -3736,7 +3575,7 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 状态保持 **实施中**；PR 就绪仍为否。
 
 > 续进展 2026-07-22（阶段 6 残留四百一十五轮）：Goal/Knowledge workflow **诊断事件展示脱敏**（仍不打勾）——
-> `formatLangGraphVendorDiagnosticEventLabel` 将 node.*/tool.* 映射为 workflow step / tool 诊断文案；
+> `formatLangGraphVendorDiagnosticEventLabel` 将 node._/tool._ 映射为 workflow step / tool 诊断文案；
 > `AIGoalWorkflowPanel` 不再把 raw `node.started`/`node.completed` 直出到 UI。状态保持 **实施中**；
 > 不改 §13.2 checkbox。
 
@@ -4211,7 +4050,7 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > GitHub App fixture E2E、全量 PR 门禁、跨进程 durable task runtime / 完整 LangGraph。
 > 状态保持 **实施中**；PR 就绪仍为否。
 
-> 续进展 2026-07-22（阶段 6 残留四百八十七轮）：阶段 6 **task DAG *ViewModel 双轨收口**（仍不打勾）——
+> 续进展 2026-07-22（阶段 6 残留四百八十七轮）：阶段 6 *_task DAG *ViewModel 双轨收口*_（仍不打勾）——
 > 删除消费者侧 `TaskForDAGViewModel`/`TaskGraph*ViewModel` 幻影类型引用，统一 `TaskForDAG`/
 > `TaskGraphData`/`TaskGraphEdge`（`task-dag.types` / `@memoflow/task/client`）；surface 锁扩展到全 module 扫描；非跨端 E2E。
 > 状态保持 **实施中**；不改 §13.2 checkbox。
@@ -7068,7 +6907,7 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 仍为部分/外部阻塞：真实 OAuth 跨端 E2E、完整跨端 multi-engine product E2E、真实 Pi spawn、
 > GitHub App fixture E2E、全量 PR 门禁、跨进程 durable task runtime / 完整 LangGraph。
 > 状态保持 **实施中**；PR 就绪仍为否。
-> 续进展 2026-07-23（阶段 6 残留九百二十七轮）：app-vue DI **I*Service = *ClientPort facade keep-boundary**（仍不打勾）——
+> 续进展 2026-07-23（阶段 6 残留九百二十七轮）：app-vue DI _*I*Service = *ClientPort facade keep-boundary**（仍不打勾）——
 > 十二个 type-alias 门面 + InjectionKey 绑定；surface Residual 927 锁。
 > 续进展 2026-07-23（阶段 6 残留九百二十八轮）：§13.2 聚焦证据套件复跑（含 residual 250–927
 > I*Service ClientPort facade keep-boundary 锁，不改 checkbox）——**258 文件 / 1156 测试**（app-vue 37/345、
@@ -7282,7 +7121,7 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 状态保持 **实施中**；PR 就绪仍为否。
 > 续进展 2026-07-23（阶段 6 残留九百七十一轮）：ai package **withObservabilityPayload dual retired**（仍不打勾）——
 > PowerSync/Prisma execution-log adapters 本地 dual 收口；adapters/with-observability-payload 唯 helper；
-> __observability merge；surface Residual 971 锁。
+> \__observability merge；surface Residual 971 锁。
 > 续进展 2026-07-23（阶段 6 残留九百七十二轮）：§13.2 聚焦证据套件复跑（含 residual 250–971
 > withObservabilityPayload dual retired 锁，不改 checkbox）——**277 文件 / 1219 测试**（app-vue 40/356、
 > ai 39/273、repository 7/38、contracts 130/385、governance 2/4、api 10/24、data-portability 5/21、… utils 2/7、desktop 21/59、authentication 7/22、task 2/4）+ `GOV_EXIT:0`。
@@ -8310,7 +8149,7 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 续进展 2026-07-23（阶段 6 残留一千一百五十六轮）：**toDashboardTaskInstanceRecord dual 收口**（仍不打勾）——
 > 提取 `@memoflow/dashboard` sole（duck-typed DashboardTaskInstanceSource）；
 > API Prisma + Desktop Electron dashboard-read-service duals 退休为 sole import；
-> surface Residual 1156 锁（host wiring Prisma create* vs Electron get* 仍分离）。
+> surface Residual 1156 锁（host wiring Prisma create* vs Electron get\* 仍分离）。
 > 续进展 2026-07-23（阶段 6 残留一千一百五十七轮）：§13.2 聚焦证据套件复跑（含 residual 250–1156
 > toDashboardTaskInstanceRecord dual 收口锁，不改 checkbox）——**347 文件 / 1500 测试**（app-vue 54/413、
 > ai 50/315、repository 7/38、contracts 130/385、governance 3/10、api 12/33、
@@ -8789,7 +8628,7 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > tip 指针 Residual 1241：**375 文件 / 1626 测试** + GOV_EXIT:0；再确认 3 项仍为部分/外部阻塞；
 > open-items surface Residual 1242 锁。
 > 续进展 2026-07-24（阶段 6 残留一千二百四十三轮）：**formatDuration keep-boundary**（仍不打勾）——
-> schedule-presentation：durationMs → presentation ms/sec i18n；ScheduleConflictAlert：minutes → duration.*；
+> schedule-presentation：durationMs → presentation ms/sec i18n；ScheduleConflictAlert：minutes → duration._；
 > soft residual：ConflictAlert ms floor、FormDemo 本地、task graph 拼接、formatTaskDuration Intl、AI formatDurationMs、react buildDuration；
 > 不强制合并；surface Residual 1243 锁。
 > 续进展 2026-07-24（阶段 6 残留一千二百四十四轮）：§13.2 聚焦证据套件复跑（含 residual 250–1243
@@ -9325,218 +9164,59 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > Web/Desktop E2E、prod-like 与 OAuth/App fixture 仍未闭环。状态保持 **实施中**；PR 就绪仍为否。
 > 续进展 2026-07-24（阶段 6 残留一千三百三十二轮）：**P0 全仓标准 test 全绿**（仍不打勾 §13.2 门禁项）——
 > 收口 Residual 1331 剩余三类根因：
-> 1) data-portability FakePowerSyncDb `goal_records` 查询绑定对齐 export SQL `[identityId, goalId]`；
-> 2) desktop `GIT_CONFIG_GLOBAL` Windows 用 `NUL` 替代 `os.devNull`（`\\.\nul` 导致 git 128），
+>
+> 1. data-portability FakePowerSyncDb `goal_records` 查询绑定对齐 export SQL `[identityId, goalId]`；
+> 2. desktop `GIT_CONFIG_GLOBAL` Windows 用 `NUL` 替代 `os.devNull`（`\\.\nul` 导致 git 128），
 >    git suite timeout/EBUSY 清理加固；
-> 3) app-vue AIChatView 提供 `TASK_SERVICE_KEY`、KnowledgeProjection `useRoute` mock、
+> 3. app-vue AIChatView 提供 `TASK_SERVICE_KEY`、KnowledgeProjection `useRoute` mock、
 >    observability stub 走 LangGraph humanize、icon a11y timeout 60s。
-> 全 workspace 标准 test **30/30 项目通过（EXIT:0）**（parallel=1 复跑）。
-> open-items + governance-check 本轮同步。
-> 边界：这只证明标准 workspace test 全绿；Web/Desktop 完整 E2E、prod-like、真实 OAuth/App
-> fixture 仍未闭环，故 **不改 checkbox**。状态保持 **实施中**；PR 就绪仍为否。
-> 续进展 2026-07-24（阶段 6 残留一千三百三十三轮）：**P0 prod-like + Web 认证/边界 E2E + 全仓门禁 VPS 复验**（仍不打勾）——
-> tip `140ce022a`（`fix(docker): copy tools/mcp into API image for root postinstall`）。
-> prod-like：`pnpm docker:local:up` **EXIT:0**；六服务 healthy（postgres/redis/api/web/ai-service/powersync）；
-> 探针 Web `/` 200、API `/healthz` 200、AI `/healthz` 200、PowerSync `/probes/liveness` 200；
-> OCI revision label `140ce022a11e6eba25e0313d526036fc3dc79ce7`。
-> Web 认证主线（login + page-contract + password）**两轮 9/9 通过（EXIT:0）**；
-> note-boundary **1/1 通过（EXIT:0）**。
-> 全仓复验：lint **36/36**、typecheck **34/34**、标准 test **30/30**（parallel=1）均 EXIT:0；
-> governance-check **GOV_EXIT:0**。
-> 加分尝试：goal-workflow **8/8 失败**（`ai-chat-view` 未挂载 / knowledge-qa/goal-agent 按钮 disabled；诚实记红，不装绿）。
-> Desktop Linux guest：裸跑缺 `$DISPLAY`；`xvfb-run` 可启动 Electron，但 guest 进入失败
-> （`GUEST_MODE_ERROR: Token encryption is not available on this system` + waitForEvent window 超时）；
-> Windows 本机 guest 两轮 1/1 仍有效，Linux 不构成补证。
-> OAuth/App fixture / 真实跨端 GitHub E2E 仍为**外部阻塞**。§13.2 保持 **12 [x] / 3 [ ]**，**不改 checkbox**。
-> 状态保持 **实施中**；PR 就绪仍为否。证据日志：`/tmp/residual-1333/`。
-> 续进展 2026-07-24（阶段 6 残留一千三百三十三轮续 — manifest callback re-submit）：用户再次提交
-> Manifest 转换回调 URL；`POST …/app-manifests/<code>/conversions` **404**（code 已消费）。保留 App
-> `memoflow-dev-test` id 4385206。JWT `GET /app` 200、`installations_count=0`；`desktop:test:live-github`
-> 缺 INSTALLATION_ID fail-fast（拒 PAT）。**外部阻塞**仍为浏览器安装同意：
-> https://github.com/apps/memoflow-dev-test/installations/new 。§13.2 **12 [x] / 3 [ ]** 不改 checkbox。
-> 状态保持 **实施中**；PR 就绪仍为否。SCRATCH：`/tmp/grok-goal-c4fbe856261c/implementer/`。
-> 续进展 2026-07-24（阶段 6 残留一千三百三十三轮续 — verification plan re-run）：凭据盘检 OK；
-> install count 仍 0（EXTERNAL_BLOCK_BROWSER_CONSENT）；live-github fail-fast + preflight OK；
-> residual suites：goal-workflow 8/8、repo GitHub 46/46、desktop guest e2e 1/1、web auth 5/5；
-> open-items 3/3 + governance GOV_EXIT:0。§13.2 **12 [x] / 3 [ ]** 不改 checkbox；PR readiness no。
-> 安装：https://github.com/apps/memoflow-dev-test/installations/new
-> 续进展 2026-07-24（阶段 6 残留一千三百三十三轮续 — workspace gates）：install count 仍 0；
-> prod-like 六服务 healthy + 探针 200；全仓 test 30/30 + lint 36/36 + typecheck 34/34 EXIT:0；
-> residual suites 仍绿；§13.2 **12 [x] / 3 [ ]** 不改 checkbox；PR readiness no。
-> 安装仍需浏览器：https://github.com/apps/memoflow-dev-test/installations/new
-> 续进展 2026-07-24（阶段 6 残留一千三百三十三轮续 — e2e-mock OAuth）：真实 GITHUB_OAUTH_* 不再挤掉 e2e mock；
-> auth-oauth e2e **1/1 绿**；install 仍 0；§13.2 **12 [x] / 3 [ ]** 不改 checkbox。
-> 续进展 2026-07-24（阶段 6 残留一千三百三十三轮续 — verification re-run）：Web auth full **14/14**、
-> goal-workflow+note-boundary **9/9**、Desktop guest **1/1**；install count 仍 0；§13.2 不改 checkbox。
-> 续进展 2026-07-24（阶段 6 残留一千三百三十三轮续 — core business e2e）：manifest code 再提交仍 404；
-> install count 仍 0；goal/reminder/task/notification e2e 原 7 红已收口（testid + activatedAt + locales）；
-> §13.2 **12 [x] / 3 [ ]** 不改 checkbox；PR readiness no。
-> 续进展 2026-07-25（阶段 6 残留一千三百三十三轮续 — App install 成功 + live-github 绿）：
-> installation **148867606** on `BakerSean168/memoflow-github-app-e2e-fixture`；二次 install 页 Not Found 为已装后重进
-> `/installations/new` 的预期噪声。产品门禁从错误的 `permissions.admin` 改为 `contents:write`/`push`；
-> `desktop:test:live-github` **1/1 绿**；repository focused unit **58/58**。
-> 续进展 2026-07-25（阶段 6 残留一千三百三十三轮续 — residual 1333 closure re-verify）：
-> live-github 再验 EXIT:0；open-items 3/3；governance GOV_EXIT:0；§13.2 仍 **12 [x]/3 [ ]** 含 handoff；PR readiness **no**。
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+>    全 workspace 标准 test **30/30 项目通过（EXIT:0）**（parallel=1 复跑）。
+>    open-items + governance-check 本轮同步。
+>    边界：这只证明标准 workspace test 全绿；Web/Desktop 完整 E2E、prod-like、真实 OAuth/App
+>    fixture 仍未闭环，故 **不改 checkbox**。状态保持 **实施中**；PR 就绪仍为否。
+>    续进展 2026-07-24（阶段 6 残留一千三百三十三轮）：**P0 prod-like + Web 认证/边界 E2E + 全仓门禁 VPS 复验**（仍不打勾）——
+>    tip `140ce022a`（`fix(docker): copy tools/mcp into API image for root postinstall`）。
+>    prod-like：`pnpm docker:local:up` **EXIT:0**；六服务 healthy（postgres/redis/api/web/ai-service/powersync）；
+>    探针 Web `/` 200、API `/healthz` 200、AI `/healthz` 200、PowerSync `/probes/liveness` 200；
+>    OCI revision label `140ce022a11e6eba25e0313d526036fc3dc79ce7`。
+>    Web 认证主线（login + page-contract + password）**两轮 9/9 通过（EXIT:0）**；
+>    note-boundary **1/1 通过（EXIT:0）**。
+>    全仓复验：lint **36/36**、typecheck **34/34**、标准 test **30/30**（parallel=1）均 EXIT:0；
+>    governance-check **GOV_EXIT:0**。
+>    加分尝试：goal-workflow **8/8 失败**（`ai-chat-view` 未挂载 / knowledge-qa/goal-agent 按钮 disabled；诚实记红，不装绿）。
+>    Desktop Linux guest：裸跑缺 `$DISPLAY`；`xvfb-run` 可启动 Electron，但 guest 进入失败
+>    （`GUEST_MODE_ERROR: Token encryption is not available on this system` + waitForEvent window 超时）；
+>    Windows 本机 guest 两轮 1/1 仍有效，Linux 不构成补证。
+>    OAuth/App fixture / 真实跨端 GitHub E2E 仍为**外部阻塞**。§13.2 保持 **12 [x] / 3 [ ]**，**不改 checkbox**。
+>    状态保持 **实施中**；PR 就绪仍为否。证据日志：`/tmp/residual-1333/`。
+>    续进展 2026-07-24（阶段 6 残留一千三百三十三轮续 — manifest callback re-submit）：用户再次提交
+>    Manifest 转换回调 URL；`POST …/app-manifests/<code>/conversions` **404**（code 已消费）。保留 App
+>    `memoflow-dev-test` id 4385206。JWT `GET /app` 200、`installations_count=0`；`desktop:test:live-github`
+>    缺 INSTALLATION_ID fail-fast（拒 PAT）。**外部阻塞**仍为浏览器安装同意：
+>    https://github.com/apps/memoflow-dev-test/installations/new 。§13.2 **12 [x] / 3 [ ]** 不改 checkbox。
+>    状态保持 **实施中**；PR 就绪仍为否。SCRATCH：`/tmp/grok-goal-c4fbe856261c/implementer/`。
+>    续进展 2026-07-24（阶段 6 残留一千三百三十三轮续 — verification plan re-run）：凭据盘检 OK；
+>    install count 仍 0（EXTERNAL_BLOCK_BROWSER_CONSENT）；live-github fail-fast + preflight OK；
+>    residual suites：goal-workflow 8/8、repo GitHub 46/46、desktop guest e2e 1/1、web auth 5/5；
+>    open-items 3/3 + governance GOV_EXIT:0。§13.2 **12 [x] / 3 [ ]** 不改 checkbox；PR readiness no。
+>    安装：https://github.com/apps/memoflow-dev-test/installations/new
+>    续进展 2026-07-24（阶段 6 残留一千三百三十三轮续 — workspace gates）：install count 仍 0；
+>    prod-like 六服务 healthy + 探针 200；全仓 test 30/30 + lint 36/36 + typecheck 34/34 EXIT:0；
+>    residual suites 仍绿；§13.2 **12 [x] / 3 [ ]** 不改 checkbox；PR readiness no。
+>    安装仍需浏览器：https://github.com/apps/memoflow-dev-test/installations/new
+>    续进展 2026-07-24（阶段 6 残留一千三百三十三轮续 — e2e-mock OAuth）：真实 GITHUB_OAUTH_* 不再挤掉 e2e mock；
+>    auth-oauth e2e **1/1 绿**；install 仍 0；§13.2 **12 [x] / 3 [ ]** 不改 checkbox。
+>    续进展 2026-07-24（阶段 6 残留一千三百三十三轮续 — verification re-run）：Web auth full **14/14**、
+>    goal-workflow+note-boundary **9/9**、Desktop guest **1/1**；install count 仍 0；§13.2 不改 checkbox。
+>    续进展 2026-07-24（阶段 6 残留一千三百三十三轮续 — core business e2e）：manifest code 再提交仍 404；
+>    install count 仍 0；goal/reminder/task/notification e2e 原 7 红已收口（testid + activatedAt + locales）；
+>    §13.2 **12 [x] / 3 [ ]** 不改 checkbox；PR readiness no。
+>    续进展 2026-07-25（阶段 6 残留一千三百三十三轮续 — App install 成功 + live-github 绿）：
+>    installation **148867606** on `BakerSean168/memoflow-github-app-e2e-fixture`；二次 install 页 Not Found 为已装后重进
+>    `/installations/new` 的预期噪声。产品门禁从错误的 `permissions.admin` 改为 `contents:write`/`push`；
+>    `desktop:test:live-github` **1/1 绿**；repository focused unit **58/58**。
+>    续进展 2026-07-25（阶段 6 残留一千三百三十三轮续 — residual 1333 closure re-verify）：
+>    live-github 再验 EXIT:0；open-items 3/3；governance GOV_EXIT:0；§13.2 仍 **12 [x]/3 [ ]** 含 handoff；PR readiness **no**。
 
 ## 13. 测试与完成定义
 
@@ -9568,83 +9248,78 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
 > 但 `@memoflow/test-utils:lint` 额外探测仍有 2 个既有 layer-boundary error，且尚无全仓
 > lint/typecheck/test/E2E/prod-like 一揽子证据；OAuth/App fixture 无凭据仍为外部阻塞。
 > Residual 1329：`@memoflow/test-utils:lint` 已收缩为 0 errors，`test-utils:typecheck`
-> + 4 个依赖任务、`goal:lint`、integration seam focused **3 文件 / 12 测试**通过；
-> 修复 `ai-service` 7 个 Ruff I001 后，全 workspace lint **36/36 项目通过**。
-> AI Service **4 文件 / 25 测试**、open-items **1 文件 / 3 测试**、
-> governance **4 文件 / 23 测试**及 governance-check 通过。
-> Residual 1330：全 workspace typecheck 由 8 失败收缩为 **34/34 项目通过（EXIT:0）**；
-> utils recurrence **1 文件 / 4 测试**、schedule-orchestration **4 文件 / 7 测试**、
-> governance-check EXIT:0。`app-vue:typecheck` 排除 `*.spec/test`（对齐 goal/reminder）；
-> 依赖 build 日志仍可能打印既有 declaration/rootDir 诊断但 typecheck target exit 0。
-> Residual 1331：全 workspace 标准 test 目标 **30**；首次 11 失败收缩为 **3 失败 / 27 通过（EXIT:1）**。
-> 根因含 Zod openapi 装载、Windows path 归一、editor 残骸清理与 ownership/list/reminder/addKeyResult 测试对齐。
-> Residual 1331 续：desktop 低风险 harness 已收口（ipc dual import→contracts、vault-path resolve、
-> AIStreamChannels allowlist、provider list 信封）；focused desktop harness 6/58 通过。
-> Residual 1332：收口 powersync goal_records 假库绑定、desktop Windows `GIT_CONFIG_GLOBAL=NUL`、
-> app-vue TaskService/useRoute/LangGraph stub/icon a11y timeout；全 workspace 标准 test
-> **30/30 项目通过（EXIT:0）**。
-> 这只证明 lint + typecheck + **标准 test** 门禁已绿；Web/Desktop 完整 E2E、prod-like 一揽子
-> 与真实 OAuth/GitHub App fixture 仍未闭环，故不改 checkbox。
-> Residual 1333：VPS tip `140ce022a`；prod-like `docker:local:up` EXIT:0 + **六服务 healthy** + 关键探针 OK
-> （Web/API/AI/PowerSync；revision label 对齐 tip）；Web 认证主线两轮 **9/9**、note-boundary **1/1**；
-> 全仓 lint **36/36** + typecheck **34/34** + 标准 test **30/30** 复验 EXIT:0；governance-check GOV_EXIT:0；
-> goal-workflow 8/8 红（AI workspace 按钮/视图未就绪）；续：goal-workflow 8/8 绿（Host `/ai/assistant/dispatch/sse` mock + conversation list/message 持久化 + parseSSE final-chunk flush）；Desktop Linux guest 续：xvfb + safeStorage basic_text **1/1 绿**；
-> GitHub App Manifest 凭据已就绪（`memoflow-dev-test` / fixture private repo）；历史曾 `installations_count=0` 需浏览器安装；
-> 续收口：`installations_count=1` installation **148867606** on `BakerSean168/memoflow-github-app-e2e-fixture`；
-> `desktop:test:live-github` **1/1 绿**（App installation-token write→read→Vault pull，非 PAT）；
-> 交互式浏览器 GitHub **OAuth 用户登录同意**仍可能外部；全量 Web/Desktop E2E 一揽子未宣称；**不改 checkbox**。
-> Residual 1334：tip 起全仓 lint/typecheck/标准 test **36/36 + 34/34 + 30/30 EXIT:0**；governance **GOV_EXIT:0**；
-> Web auth **14/14** + Desktop guest xvfb **1/1** + ADR-035 multi-engine **45** + live-github **1/1**；
-> §13.2 仍 **12 [x] / 3 [ ]**（交互式 OAuth / durable multi-engine 跨端 / 全量业务 E2E+本 tip prod-like）；**不改 checkbox**；PR readiness **no**。
-> Residual 1335：跳过交互式 OAuth；业务 E2E 子集 **24/24** + goal-workflow+note **10/10** + prod-like 六服务 healthy。
-> Residual 1336：默认 Playwright `testMatch` **`web:e2e` 71/71 EXIT:0**；仍缺 Desktop 完整 E2E / 交互式 OAuth / durable multi-engine；**不改 checkbox**；PR readiness **no**。
-> Residual 1337：远程可跑外围 E2E 收口——`web:e2e:shell` **8/8**、`desktop:e2e` **1/1**、`web:e2e:ai-workspace` **8/8**（runner 补 API+CORS）、`web:e2e:sync` **3/3**（ensureE2EAccount send+verify）；仍缺交互式 OAuth / ADR-035 durable multi-engine 产品 E2E；**不改 checkbox**；PR readiness **no**。
-> Residual 1338：Windows 本机收尾——`desktop:e2e` **1/1 EXIT:0**（production Electron password+guest）；governance-check GOV_EXIT:0；open-items 3/3；ADR-035 multi-engine focused **4 文件 / 33 测试**（不翻 Agent 勾）；交互式真实 GitHub OAuth **外部阻塞**（`GITHUB_OAUTH_CLIENT_SECRET` 本机缺席，仅 CLIENT_ID；e2e-mock 不计入）；prod-like 本机 Docker Desktop 不可用，沿用远程 1333/1335；**不改 checkbox**；PR readiness **no**。
-> Residual 1339：冲 A——补 `web:e2e:oauth-real`（host-dev 真 provider 路径，非 e2e-mock）+ session identity 纯函数锁 + `createRealOAuthApiServer`；ADR-035 全套 **6 文件 / 51 测试**；Docker Desktop 曾起但 `docker:local:up` 中途 npipe EOF 失败；**仍缺** CLIENT_SECRET 真人同意闭环与 durable 跨端 Agent E2E；**不改 checkbox**；PR readiness **no**。
-> Residual 1340：本机配置 `GITHUB_OAUTH_CLIENT_SECRET` 后 `pnpm nx run web:e2e:oauth-real` **1/1 EXIT:0**（headed 真 GitHub 同意 → `hasOAuth`）；redirect 收口为精确 `/auth`（匹配 OAuth App callback）；**翻勾** §13.2 第 1 项三入口；Agent / 全量门禁仍 open → **13 [x] / 2 [ ]**；PR readiness **no**。
-> Residual 1341：Windows prod-like **六服务 healthy**（`docker compose … up -d --no-build`，探针 Web/API/AI/PowerSync **200**；`pnpm docker:local:up` 全量 rebuild 仍偶发 npipe EOF）；governance **GOV_EXIT:0**；`desktop:e2e` **1/1**；**翻勾** §13.2 第 15 项门禁；Agent durable/跨端仍 open → **14 [x] / 1 [ ]**；PR readiness **no**。
-> Residual 1342：Web multi-engine Host **产品 E2E** `apps/web/e2e/ai/multi-engine-host.spec.ts` **2/2 EXIT:0**（direct_turn/pi_readonly + engine badge + cancel_run；无 identityId；无 process.pi_readonly_spike）；修 AIChatView `hasWorkflowContext` 以展示 open-chat engine strip；scaffold `e2e.playwright_web_full` → implemented_unit；**翻勾** Agent 项 → **15 [x] / 0 [ ]**；Electron multi-engine / real Pi spawn 仍属 agent-host 延伸；**PR readiness = yes**（vault-repo DoD 满）。
-> Residual 891 指针仍有效（open-items surface）；本轮刷新 tip suite 数字（含 residual 1321–1324 toLocalDateKey→padTwoDigits / formatScheduleDurationMinutes dual-retired 锁）。
-
-
-
-
+>
+> - 4 个依赖任务、`goal:lint`、integration seam focused **3 文件 / 12 测试**通过；
+>   修复 `ai-service` 7 个 Ruff I001 后，全 workspace lint **36/36 项目通过**。
+>   AI Service **4 文件 / 25 测试**、open-items **1 文件 / 3 测试**、
+>   governance **4 文件 / 23 测试**及 governance-check 通过。
+>   Residual 1330：全 workspace typecheck 由 8 失败收缩为 **34/34 项目通过（EXIT:0）**；
+>   utils recurrence **1 文件 / 4 测试**、schedule-orchestration **4 文件 / 7 测试**、
+>   governance-check EXIT:0。`app-vue:typecheck` 排除 `*.spec/test`（对齐 goal/reminder）；
+>   依赖 build 日志仍可能打印既有 declaration/rootDir 诊断但 typecheck target exit 0。
+>   Residual 1331：全 workspace 标准 test 目标 **30**；首次 11 失败收缩为 **3 失败 / 27 通过（EXIT:1）**。
+>   根因含 Zod openapi 装载、Windows path 归一、editor 残骸清理与 ownership/list/reminder/addKeyResult 测试对齐。
+>   Residual 1331 续：desktop 低风险 harness 已收口（ipc dual import→contracts、vault-path resolve、
+>   AIStreamChannels allowlist、provider list 信封）；focused desktop harness 6/58 通过。
+>   Residual 1332：收口 powersync goal_records 假库绑定、desktop Windows `GIT_CONFIG_GLOBAL=NUL`、
+>   app-vue TaskService/useRoute/LangGraph stub/icon a11y timeout；全 workspace 标准 test
+>   **30/30 项目通过（EXIT:0）**。
+>   这只证明 lint + typecheck + **标准 test** 门禁已绿；Web/Desktop 完整 E2E、prod-like 一揽子
+>   与真实 OAuth/GitHub App fixture 仍未闭环，故不改 checkbox。
+>   Residual 1333：VPS tip `140ce022a`；prod-like `docker:local:up` EXIT:0 + **六服务 healthy** + 关键探针 OK
+>   （Web/API/AI/PowerSync；revision label 对齐 tip）；Web 认证主线两轮 **9/9**、note-boundary **1/1**；
+>   全仓 lint **36/36** + typecheck **34/34** + 标准 test **30/30** 复验 EXIT:0；governance-check GOV_EXIT:0；
+>   goal-workflow 8/8 红（AI workspace 按钮/视图未就绪）；续：goal-workflow 8/8 绿（Host `/ai/assistant/dispatch/sse` mock + conversation list/message 持久化 + parseSSE final-chunk flush）；Desktop Linux guest 续：xvfb + safeStorage basic_text **1/1 绿**；
+>   GitHub App Manifest 凭据已就绪（`memoflow-dev-test` / fixture private repo）；历史曾 `installations_count=0` 需浏览器安装；
+>   续收口：`installations_count=1` installation **148867606** on `BakerSean168/memoflow-github-app-e2e-fixture`；
+>   `desktop:test:live-github` **1/1 绿**（App installation-token write→read→Vault pull，非 PAT）；
+>   交互式浏览器 GitHub **OAuth 用户登录同意**仍可能外部；全量 Web/Desktop E2E 一揽子未宣称；**不改 checkbox**。
+>   Residual 1334：tip 起全仓 lint/typecheck/标准 test **36/36 + 34/34 + 30/30 EXIT:0**；governance **GOV_EXIT:0**；
+>   Web auth **14/14** + Desktop guest xvfb **1/1** + ADR-035 multi-engine **45** + live-github **1/1**；
+>   §13.2 仍 **12 [x] / 3 [ ]**（交互式 OAuth / durable multi-engine 跨端 / 全量业务 E2E+本 tip prod-like）；**不改 checkbox**；PR readiness **no**。
+>   Residual 1335：跳过交互式 OAuth；业务 E2E 子集 **24/24** + goal-workflow+note **10/10** + prod-like 六服务 healthy。
+>   Residual 1336：默认 Playwright `testMatch` **`web:e2e` 71/71 EXIT:0**；仍缺 Desktop 完整 E2E / 交互式 OAuth / durable multi-engine；**不改 checkbox**；PR readiness **no**。
+>   Residual 1337：远程可跑外围 E2E 收口——`web:e2e:shell` **8/8**、`desktop:e2e` **1/1**、`web:e2e:ai-workspace` **8/8**（runner 补 API+CORS）、`web:e2e:sync` **3/3**（ensureE2EAccount send+verify）；仍缺交互式 OAuth / ADR-035 durable multi-engine 产品 E2E；**不改 checkbox**；PR readiness **no**。
+>   Residual 1338：Windows 本机收尾——`desktop:e2e` **1/1 EXIT:0**（production Electron password+guest）；governance-check GOV_EXIT:0；open-items 3/3；ADR-035 multi-engine focused **4 文件 / 33 测试**（不翻 Agent 勾）；交互式真实 GitHub OAuth **外部阻塞**（`GITHUB_OAUTH_CLIENT_SECRET` 本机缺席，仅 CLIENT_ID；e2e-mock 不计入）；prod-like 本机 Docker Desktop 不可用，沿用远程 1333/1335；**不改 checkbox**；PR readiness **no**。
+>   Residual 1339：冲 A——补 `web:e2e:oauth-real`（host-dev 真 provider 路径，非 e2e-mock）+ session identity 纯函数锁 + `createRealOAuthApiServer`；ADR-035 全套 **6 文件 / 51 测试**；Docker Desktop 曾起但 `docker:local:up` 中途 npipe EOF 失败；**仍缺** CLIENT_SECRET 真人同意闭环与 durable 跨端 Agent E2E；**不改 checkbox**；PR readiness **no**。
+>   Residual 1340：本机配置 `GITHUB_OAUTH_CLIENT_SECRET` 后 `pnpm nx run web:e2e:oauth-real` **1/1 EXIT:0**（headed 真 GitHub 同意 → `hasOAuth`）；redirect 收口为精确 `/auth`（匹配 OAuth App callback）；**翻勾** §13.2 第 1 项三入口；Agent / 全量门禁仍 open → **13 [x] / 2 [ ]**；PR readiness **no**。
+>   Residual 1341：Windows prod-like **六服务 healthy**（`docker compose … up -d --no-build`，探针 Web/API/AI/PowerSync **200**；`pnpm docker:local:up` 全量 rebuild 仍偶发 npipe EOF）；governance **GOV_EXIT:0**；`desktop:e2e` **1/1**；**翻勾** §13.2 第 15 项门禁；Agent durable/跨端仍 open → **14 [x] / 1 [ ]**；PR readiness **no**。
+>   Residual 1342：Web multi-engine Host **产品 E2E** `apps/web/e2e/ai/multi-engine-host.spec.ts` **2/2 EXIT:0**（direct_turn/pi_readonly + engine badge + cancel_run；无 identityId；无 process.pi_readonly_spike）；修 AIChatView `hasWorkflowContext` 以展示 open-chat engine strip；scaffold `e2e.playwright_web_full` → implemented_unit；**翻勾** Agent 项 → **15 [x] / 0 [ ]**；Electron multi-engine / real Pi spawn 仍属 agent-host 延伸；**PR readiness = yes**（vault-repo DoD 满）。
+>   Residual 891 指针仍有效（open-items surface）；本轮刷新 tip suite 数字（含 residual 1321–1324 toLocalDateKey→padTwoDigits / formatScheduleDurationMinutes dual-retired 锁）。
 
 > Residual 1047 loadWorkspaceEnv keep-boundary 锁仍有效；schedule route parsers keep-boundary 仍不强制并入 utils。
 > Soft residual：usePassword / account checkAvailability / removeRememberedAccount toast-only keep-boundary 仍不并入 reportAuth/handleError sole。
 > Soft residual：goal createGoalErrorHandler rich-log keep-boundary（scope/details ≠ createComposableHandleError）不强制合并。
 > Soft residual：account PowerSync parseJson throw、api parseJsonLikeString、data-portability parseJsonField、asRecord/toRecord、toTimestamp、toNumber、toStringArray、toBoolean、optionalString/toNonEmptyString、asNonEmptyString、toDate/toDateString、extractErrorMessage、generateUUID、newId、isPlainObject、toMillis、formatFileSize、toKnowledgeNoteRef、tokenize、toPrismaJson account cast vs AI deep-clone、goal clampPercentage、isRecord cross-package keep-boundary、contracts private isRecord、startOfDay、mapImportanceToTaskPriority dual-retired、readString、normalizePath、buildTaskName、comparePriority、defaultExtractContext、getTemplateById、getCorsOrigins、delay dual-retired、scoreIndexedResource dual-retired、readJson、handleAuthSuccess、formatDateTime、formatMessageTime、formatDateToInput、formatTimeRange、formatTimestamp、getImportanceLabel、getStatusLabel、parseDateInput、toDateInput、toTimeInput、combineDateAndTime/parseTimestamp、formatTime、formatDate、formatDuration、describeConflict、formatDisplayDate dual-retired、formatDateToYMD dual-retired、parseToDate dual-retired、handleCalendarSelect dual-retired、formatDateNotSet dual-retired、formatDateUnknown dual-retired、handleEndDateCalendarSelect dual-retired、handleAbsoluteDateSelect dual-retired、formatCalendarEventTimeRange dual-retired、formatHour dual-retired、formatEventTime、toLocalDateKey dual-retired、getWeekStart dual-retired、calendarEventBgClass dual-retired、calendarEventSourceLabel dual-retired、formatLocalHHmm dual-retired、formatHHmmParts dual-retired、formatEventTime→formatLocalHHmm dual-retired、formatCalendarEventTimeRange→formatLocalHHmm dual-retired、calendar event layout keep-boundary、dashboard formatTime absolute→formatLocalHHmm dual-retired、padTwoDigits dual-retired、ScheduleFormDemo datetime-local→formatDateToYMD+formatLocalHHmm dual-retired、padTwoDigits multi-sole compose dual-retired、toLocalDateKey→padTwoDigits dual-retired、formatScheduleDurationMinutes dual-retired 不强制合并其他 delay 语义。
 > 不因此把三入口完整 E2E、Agent multi-engine 全量、全量 PR 门禁未完成项打勾。
-> 阶段 6 dual 收口（残留 250–300；四百八十七轮补 task DAG *ViewModel 消费者收口；五百三十九轮 portable editor_* / knowledge routes / /note strip 再锁）与身份隔离 dual-method 收口（残留 169–192）指针仍有效。
+> 阶段 6 dual 收口（残留 250–300；四百八十七轮补 task DAG _ViewModel 消费者收口；五百三十九轮 portable editor__ / knowledge routes / /note strip 再锁）与身份隔离 dual-method 收口（残留 169–192）指针仍有效。
 > Host task.create 进程内产品路径（残留 427–491 + 501–589）：AgentType + toolMode + start/store/resume(cancel/confirm/edit)
-> + history/session focus + linked goal restore + client settlement 会话隔离 + store 容量边界 + process-local product journey + runId 身份/会话/thread 绑定 + confirm 必须 client executedActions + edit 非空 title + dirty approve 先 process-local revise + start 必须 conversationId（runtime+builder fail-closed，无 silent null）+ start 必须 threadId（trim 非空 fail-closed）+ start 非空 title（builder fail-closed，无静默默认）+ confirm settlement title/templateId 可回收 + confirm goalId/title 禁重绑 + confirm 仅 process-local draft + 单 executed + edit 单 approvedAction + edit/confirm tool+empty-action 命名常量 fail-closed + cancel/confirm/edit 仅 waiting_approval（Host+client complete 双门禁）+ edit draftAction 单 create_task_template（541）+ confirm settlementAction 单 create_task_template（543）+ confirm store draftAction 单 create_task_template（545）+ client complete/revise sole draftAction（547）+ workbench soleProductDraftAction（549）+ applyHost*Patch sole product draftAction（551）+ confirm store draft resolve sole create_task_template（553）+ knowledge.write confirm sole create_knowledge_note（555）+ goal.create confirm sole create_goal（557）+ goal confirm/cancel + knowledge confirm waiting_approval-only（559）+ Host panel goal/knowledge approve pre-lifecycle product gate（561）+ Host panel task.create approve pre-lifecycle sole create_task_template（563）+ Host panel product reject pre-lifecycle waiting_approval（565）+ Host panel product revise pre-lifecycle waiting_approval（567）+ Host panel shared product ownership resolver（569）+ Host panel settlement reuses shared ownership（571）+ Host panel revise sole product draftAction（573）+ goal session primary-task confirm sole create_task_template（575）+ Host panel primary-task-shaped ownership → create_task_template（577）+ Host panel primary-task-shaped settlement via goal session（579）+ Host panel settlement ownership classifiers（581）+ goal session primary-task confirm forwards Host-revised goalId（583）+ Host workbench primary-task exclusive kind routing（585）+ goal session Host lifecycle kind primary-task → task.create（587）+ dual-mirror primary-task goal session settle into exclusive task lane（589）；永不 `executeApproved`。
-> Client product-lane isolation（残留 501/507/519–537/547/549/551/555/557/559/561/563/565/567/569/571/573/575/577/579/581/583/585/587/589）：complete/revise/draft title·path·markdown·summary·pendingCount·primaryEntityId·receipt cross-lane·failed message·ok 均 product-tool 门禁。
-> 仍非跨进程 durable / 完整 Task LangGraph / 跨端 Playwright-Electron multi-engine E2E。
-> 身份隔离 dual-method 收口（残留 169–179）：业务聚合 bare `findById` 双轨已基本拆除；intentional
-> dual/bootstrap 与自然主键路径均已 surface 锁定：schedule-task（180）、knowledge connection（186）、
-> webhook delivery（187）、auth session token（188）、notification template catalog（189）、
-> governance rule catalog（190）、account/auth-identity 自然主键（192）。
-> 不因此把三入口/Agent/E2E 未完成项打勾。
+>
+> - history/session focus + linked goal restore + client settlement 会话隔离 + store 容量边界 + process-local product journey + runId 身份/会话/thread 绑定 + confirm 必须 client executedActions + edit 非空 title + dirty approve 先 process-local revise + start 必须 conversationId（runtime+builder fail-closed，无 silent null）+ start 必须 threadId（trim 非空 fail-closed）+ start 非空 title（builder fail-closed，无静默默认）+ confirm settlement title/templateId 可回收 + confirm goalId/title 禁重绑 + confirm 仅 process-local draft + 单 executed + edit 单 approvedAction + edit/confirm tool+empty-action 命名常量 fail-closed + cancel/confirm/edit 仅 waiting_approval（Host+client complete 双门禁）+ edit draftAction 单 create_task_template（541）+ confirm settlementAction 单 create_task_template（543）+ confirm store draftAction 单 create_task_template（545）+ client complete/revise sole draftAction（547）+ workbench soleProductDraftAction（549）+ applyHost*Patch sole product draftAction（551）+ confirm store draft resolve sole create_task_template（553）+ knowledge.write confirm sole create_knowledge_note（555）+ goal.create confirm sole create_goal（557）+ goal confirm/cancel + knowledge confirm waiting_approval-only（559）+ Host panel goal/knowledge approve pre-lifecycle product gate（561）+ Host panel task.create approve pre-lifecycle sole create_task_template（563）+ Host panel product reject pre-lifecycle waiting_approval（565）+ Host panel product revise pre-lifecycle waiting_approval（567）+ Host panel shared product ownership resolver（569）+ Host panel settlement reuses shared ownership（571）+ Host panel revise sole product draftAction（573）+ goal session primary-task confirm sole create_task_template（575）+ Host panel primary-task-shaped ownership → create_task_template（577）+ Host panel primary-task-shaped settlement via goal session（579）+ Host panel settlement ownership classifiers（581）+ goal session primary-task confirm forwards Host-revised goalId（583）+ Host workbench primary-task exclusive kind routing（585）+ goal session Host lifecycle kind primary-task → task.create（587）+ dual-mirror primary-task goal session settle into exclusive task lane（589）；永不 `executeApproved`。
+>   Client product-lane isolation（残留 501/507/519–537/547/549/551/555/557/559/561/563/565/567/569/571/573/575/577/579/581/583/585/587/589）：complete/revise/draft title·path·markdown·summary·pendingCount·primaryEntityId·receipt cross-lane·failed message·ok 均 product-tool 门禁。
+>   仍非跨进程 durable / 完整 Task LangGraph / 跨端 Playwright-Electron multi-engine E2E。
+>   身份隔离 dual-method 收口（残留 169–179）：业务聚合 bare `findById` 双轨已基本拆除；intentional
+>   dual/bootstrap 与自然主键路径均已 surface 锁定：schedule-task（180）、knowledge connection（186）、
+>   webhook delivery（187）、auth session token（188）、notification template catalog（189）、
+>   governance rule catalog（190）、account/auth-identity 自然主键（192）。
+>   不因此把三入口/Agent/E2E 未完成项打勾。
 
 - [x] 账密、GitHub 和访客入口均可用。 **（已证明）**
-  证据边界：三入口分别可证，非单一 Playwright 脚本跨 Web+Desktop 一揽子串联。
+      证据边界：三入口分别可证，非单一 Playwright 脚本跨 Web+Desktop 一揽子串联。
   - **账密（Web）**：历史 `auth-flow` / Web auth E2E 主线绿（含 residual 1334 **14/14** 等）。
   - **访客 + 账密（Desktop）**：Windows residual 1338 `desktop:e2e` **1/1 EXIT:0**（production Electron password + guest）。
   - **GitHub 登录（Web 真实 OAuth）**：residual 1340 `pnpm nx run web:e2e:oauth-real` **1/1 EXIT:0**
     （headed，真 github.com 同意，非 e2e-mock；session `hasOAuth=true`）；redirect 精确 `/auth` 匹配 OAuth App callback。
   - **解耦**：GitHub 登录 ≠ knowledge-repo App 授权（matrix step 6/10；App install + live-github 另证）。
-  **残留 1333 收口 handoff（仍不打勾）**（历史）：App install + live-github 已证仓库路径；当时仍缺交互式 OAuth。
-  **残留 1334 handoff（仍不打勾）**（历史）：Web auth **14/14** + Desktop guest **1/1** + live-github；当时仍缺交互式 OAuth。
-  **残留 1335 handoff（仍不打勾）**（历史）：明确延后交互式 OAuth 同意。
-  **残留 1336 handoff（仍不打勾）**（历史）：web:e2e 71/71；仍缺交互式 OAuth。
-  **残留 1337 handoff（仍不打勾）**（历史）：shell/desktop/ai-workspace/sync；仍缺交互式 OAuth。
-  **残留 1338 handoff（仍不打勾）**（历史）：Windows desktop:e2e 绿；缺 CLIENT_SECRET。
-  **残留 1339 handoff（仍不打勾）**（历史）：oauth-real harness 入库；缺 secret 闭环。
-  **残留 1340 收口**：交互式真实 OAuth **已证明** → 本项翻勾。
-  残留二十三轮补 surface contract 单测：`packages/app-vue/src/views/DesktopAuthView.spec.ts`
-
-
-
+    **残留 1333 收口 handoff（仍不打勾）**（历史）：App install + live-github 已证仓库路径；当时仍缺交互式 OAuth。
+    **残留 1334 handoff（仍不打勾）**（历史）：Web auth **14/14** + Desktop guest **1/1** + live-github；当时仍缺交互式 OAuth。
+    **残留 1335 handoff（仍不打勾）**（历史）：明确延后交互式 OAuth 同意。
+    **残留 1336 handoff（仍不打勾）**（历史）：web:e2e 71/71；仍缺交互式 OAuth。
+    **残留 1337 handoff（仍不打勾）**（历史）：shell/desktop/ai-workspace/sync；仍缺交互式 OAuth。
+    **残留 1338 handoff（仍不打勾）**（历史）：Windows desktop:e2e 绿；缺 CLIENT_SECRET。
+    **残留 1339 handoff（仍不打勾）**（历史）：oauth-real harness 入库；缺 secret 闭环。
+    **残留 1340 收口**：交互式真实 OAuth **已证明** → 本项翻勾。
+    残留二十三轮补 surface contract 单测：`packages/app-vue/src/views/DesktopAuthView.spec.ts`
 
   （账密 + guest-mode-button，无 login-github-button）；`apps/web/src/auth/WebAuthView.spec.ts`
   （账密 + 条件 login-github-button，无 guest-mode-button；OAuth 不可用时隐藏 GitHub）。
@@ -9680,37 +9355,36 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
   仍缺：真实跨端 Playwright/Electron 一揽子 E2E（含真实 OAuth/GitHub fixture）。
   残留五百四十一轮：§13.2 证据审计刷新（tip suite 627 + product-lane/stage-6 指针）；仍为部分（缺真实 OAuth 跨端 E2E）。
   残留八百五十九轮：DomainDate dual keep-boundary surface 锁 + exact VO duals 已尽；仍为部分（缺真实 OAuth 跨端 E2E）。
+
 - [x] GitHub 登录与仓库授权在 UI、contract 和 token 上完全解耦。 **（已证明）**
 - [x] 访客和未绑定用户不上传 Vault 内容。 **（已证明）**
 - [x] Desktop 本地 Vault 在云端故障时仍可用。 **（已证明）**
 - [x] GitHub App 只访问用户明确授权的 knowledge repository。 **（已证明）**
-  残留一百一十一轮：connection status 转移 identity-scoped（disconnect updateStatus id+identityId）。
-  残留一百一十二轮：connection 读路径 findByIdForIdentity + purger deleteMany id+identityId。
-  残留一百一十三轮：connection save 拒绝跨 identity 改写（updateMany id+identityId，无 identity 字段）。
+      残留一百一十一轮：connection status 转移 identity-scoped（disconnect updateStatus id+identityId）。
+      残留一百一十二轮：connection 读路径 findByIdForIdentity + purger deleteMany id+identityId。
+      残留一百一十三轮：connection save 拒绝跨 identity 改写（updateMany id+identityId，无 identity 字段）。
 - [x] private repo 可创建/连接，连接两个非空仓库不会自动覆盖。 **（已证明）**
 - [x] Desktop Git 同步具备离线恢复且不 force push。 **（已证明）**
 - [x] 冲突明确暂停并保留双方内容。 **（已证明）**
 - [x] Web 新建笔记产生唯一 Git commit，重复请求不重复创建。 **（已证明）**
-  残留一百零九轮：write-request status 转移 identity-scoped（retry/markCommitted/markFailed）。
+      残留一百零九轮：write-request status 转移 identity-scoped（retry/markCommitted/markFailed）。
 - [x] 已有笔记编辑在首期仍关闭。 **（已证明）**
-  残留二百零一轮：`confirmed-create-only-note-boundary.surface.spec.ts` +
-  `notePanelAdaptation.spec.ts` 锁定 confirmed-create-only 写面、无现有笔记 update API、
-  projection `editDraft` 仅 draft 回退、Local Vault 独占创建与 Obsidian 外链编辑。
+      残留二百零一轮：`confirmed-create-only-note-boundary.surface.spec.ts` +
+      `notePanelAdaptation.spec.ts` 锁定 confirmed-create-only 写面、无现有笔记 update API、
+      projection `editDraft` 仅 draft 回退、Local Vault 独占创建与 Obsidian 外链编辑。
 - [x] AI 无固定默认目录设置，完整写入提案必须获得用户确认。 **（已证明）**
 - [x] Agent 上下文不能逃逸 Vault、执行代码、扩大授权或绕过用户确认。 **（已证明）**
-  证据边界（residual 1342）：
+      证据边界（residual 1342）：
   - **隔离 unit/journey**：ADR-035 capability/turn isolation + multi-engine harness + production host
-    + vault path/confirm-only/cross-capability fail-closed（历史 1333–1339 focused 绿）。
+    - vault path/confirm-only/cross-capability fail-closed（历史 1333–1339 focused 绿）。
   - **Web multi-engine 产品 E2E**：`pnpm exec playwright test e2e/ai/multi-engine-host.spec.ts` **2/2 EXIT:0**
     — DirectTurn/ReadonlyAnalysis profile 切换；SSE `executionProfileId`；timeline engine badge
     `engine.direct_turn` / `engine.pi_readonly`；`cancel_run` 无 `identityId`；无 `process.pi_readonly_spike`。
   - **产品修**：`AIChatView` `hasWorkflowContext` 在 open-chat Host turns 存在时展示 timeline strip。
   - **不宣称**：Electron multi-engine 产品 E2E、real Pi process spawn、跨进程 durable LangGraph Turn Engine
     （仍交叉引用 `2026-07-17-unified-assistant-agent-host.md`；scaffold 仍 external_blocked）。
-  **残留 1333–1339 handoff 历史**：曾缺产品 multi-engine E2E；1342 Web 路径已闭环 vault DoD。
-  证据：知识笔记 `CreateKnowledgeNoteSchema` 强制 confirmation；targetSubpath 拒绝绝对路径与
-
-
+    **残留 1333–1339 handoff 历史**：曾缺产品 multi-engine E2E；1342 Web 路径已闭环 vault DoD。
+    证据：知识笔记 `CreateKnowledgeNoteSchema` 强制 confirmation；targetSubpath 拒绝绝对路径与
 
   `.`/`..`（contracts dto specs）；`AIKnowledgeNotePathResolver` 应用层同样拒绝 vault-escaping
   路径；runtime 仅在 `userDecision=confirm` 时解析 `execution.required` 并执行 side-effect
@@ -9889,7 +9563,7 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
   残留二百四十轮：authentication drop AuthenticationRuntimeContribution dual alias (Module type only)。
   残留二百四十一轮：§13.2 core evidence suite re-run (258 tests, residuals 238–240 locks, no checkbox changes)。
   残留二百四十二轮：desktop drop dead shared/contracts electron dual re-export barrel。
-  残留二百四十三轮：cross-module drop *RuntimeContribution dual aliases (Module type only)。
+  残留二百四十三轮：cross-module drop _RuntimeContribution dual aliases (Module type only)。
   残留二百四十四轮：dashboard drop contracts DTO convenience re-export (contracts-only DTO path)。
   残留二百四十五轮：§13.2 core evidence suite re-run (262 tests, residuals 242–244 locks, no checkbox changes)。
   残留二百四十六轮：drop NotificationUseCases/ReminderUseCases/AITransportHandlers dual aliases + app-vue useI18n re-export。
@@ -9966,7 +9640,7 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
   残留三百二十六轮：§13.2 证据指针刷新（Host residual 305–325；不改 checkbox）。
   残留三百二十七轮：产品 ai/setting 文档对齐 ADR-034/035 runtime + surface 锁。
   残留三百二十八轮：§13.2 focused evidence suite re-run（253 tests，residuals 250–327 锁；不改 checkbox）。
-  残留三百二十九轮：ai-files 索引对齐 server/* Host adapters + surface 锁。
+  残留三百二十九轮：ai-files 索引对齐 server/_ Host adapters + surface 锁。
   残留三百三十轮：§13.2 focused evidence suite re-run（254 tests，residuals 250–329 锁；不改 checkbox）。
   残留三百三十一轮：module-index 全量路径对齐 server/* + integrity surface。
   残留三百三十二轮：§13.2 focused evidence suite re-run（255 tests，residuals 250–331 锁；不改 checkbox）。
@@ -10124,7 +9798,7 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
   残留四百八十四轮：§13.2 focused evidence suite re-run（526 tests，residuals 250–483 锁；不改 checkbox）。
   残留四百八十五轮：Host task.create start threadId builder fail-closed（trim 非空）。
   残留四百八十六轮：§13.2 focused evidence suite re-run（530 tests，residuals 250–485 锁；不改 checkbox）。
-  残留四百八十七轮：阶段 6 task DAG *ViewModel 双轨收口（canonical TaskForDAG/TaskGraph*）。
+  残留四百八十七轮：阶段 6 task DAG _ViewModel 双轨收口（canonical TaskForDAG/TaskGraph_）。
   残留四百八十八轮：§13.2 focused evidence suite re-run（532 tests，residuals 250–487 锁；不改 checkbox）。
   残留四百八十九轮：Host task.create client complete 仅 waiting_approval（对称 cancel/edit + Host 475）。
   残留四百九十轮：§13.2 focused evidence suite re-run（533 tests，residuals 250–489 锁；不改 checkbox）。
@@ -11999,21 +11673,21 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
   残留五百五十七轮：Client goal.create confirm sole create_goal draftAction (no multi product invent)。
   残留五百五十八轮：§13.2 focused evidence suite re-run (646 tests, residuals 250–557 locks, no checkbox changes)。
   残留五百五十九轮：Client goal.create confirm/cancel + knowledge.write confirm waiting_approval-only。
-  仍缺完整 multi-engine Turn Engine E2E 与跨端对抗 Playwright/Electron。  残留五百四十一轮：Host edit draftAction 单 create_task_template + Client product-lane isolation 501–537 + tip suite 627 证据指针刷新；仍不构成跨端 Playwright/Electron multi-engine E2E / 真实 Pi spawn 证据。
+  仍缺完整 multi-engine Turn Engine E2E 与跨端对抗 Playwright/Electron。 残留五百四十一轮：Host edit draftAction 单 create_task_template + Client product-lane isolation 501–537 + tip suite 627 证据指针刷新；仍不构成跨端 Playwright/Electron multi-engine E2E / 真实 Pi spawn 证据。
   残留八百五十九轮：DomainDate dual keep-boundary surface 锁（非 Agent multi-engine E2E）；仍为部分。
 
 - [x] webhook、read model、附件和 RAG 可从 GitHub default branch 重建。 **（已证明）**
 - [x] Web Markdown 安全测试通过，不泄露本机路径或 GitHub token。 **（已证明）**
-  残留三百零五至三百二十五轮（ADR-035 Host 部分落地，仍不打勾）：
-  journey steps 1–16 + multi-engine conformance harness（in-suite doubles）；生产
-  `DirectTurnEngine`/`LangGraphWorkflowAdapter`/`ProposalKernel`/`CapabilityResolver`；
-  open-chat 经 DirectTurnEngine；`startRun` knowledge.generate 经共享 CapabilityResolver
-  fail-closed 热路径；stage-0 freeze 仅允许上述生产 adapter。
-  tip residual 325 focused suite：**71 文件 / 247 测试** + governance-check GOV_EXIT:0。
-  **仍缺**：第二生产 Turn Engine、统一助手 UI、完整 multi-engine runtime E2E、跨端对抗
-  Playwright/Electron 与真实 OAuth/GitHub fixture。
+      残留三百零五至三百二十五轮（ADR-035 Host 部分落地，仍不打勾）：
+      journey steps 1–16 + multi-engine conformance harness（in-suite doubles）；生产
+      `DirectTurnEngine`/`LangGraphWorkflowAdapter`/`ProposalKernel`/`CapabilityResolver`；
+      open-chat 经 DirectTurnEngine；`startRun` knowledge.generate 经共享 CapabilityResolver
+      fail-closed 热路径；stage-0 freeze 仅允许上述生产 adapter。
+      tip residual 325 focused suite：**71 文件 / 247 测试** + governance-check GOV_EXIT:0。
+      **仍缺**：第二生产 Turn Engine、统一助手 UI、完整 multi-engine runtime E2E、跨端对抗
+      Playwright/Electron 与真实 OAuth/GitHub fixture。
 - [x] 相关 lint、typecheck、test、Web/Desktop E2E、governance 和 prod-like 验收通过。 **（已证明）**
-  证据边界（residual 1341）：
+      证据边界（residual 1341）：
   - **lint/typecheck/标准 test**：沿用 residual 1332–1334 全仓 **36/36 + 34/34 + 30/30 EXIT:0**（本 tip 未全仓复跑）。
   - **Web E2E**：residual 1336 默认 testMatch **`web:e2e` 71/71**；1337 shell **8/8** / ai-workspace **8/8** / sync **3/3**；1340 真实 OAuth **`web:e2e:oauth-real` 1/1**。
   - **Desktop E2E**：Windows residual 1338/1341 `desktop:e2e` **1/1 EXIT:0**（production Electron password+guest）。
@@ -12021,1178 +11695,1175 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
   - **prod-like**：本 tip 六服务 **healthy**（postgres/redis/ai-service/api/powersync/web）+ 探针 Web/API/AI/PowerSync **HTTP 200**；
     通过已有 `memoflow-*:local` 镜像 `docker compose -f docker-compose.local.yml --env-file .env.production.local up -d --no-build`；
     全量 `pnpm docker:local:up` rebuild 仍可能 npipe EOF（环境限制，不挡本 tip 运行态验收）。
-  **不覆盖**：Agent durable multi-engine 跨端产品 E2E（仍属第 2 项 open）。
-  **残留 1333 收口 handoff（仍不打勾）**（历史）：当时缺完整 E2E 一揽子。
-  **残留 1334 handoff（仍不打勾）**（历史）：lint/typecheck/test 绿；缺业务 E2E+prod-like。
-  **残留 1335 handoff（仍不打勾；跳过交互式 OAuth）**（历史）：业务子集 24/24 + prod-like 六服务。
-  **残留 1336 handoff（仍不打勾）**（历史）：web:e2e 71/71；缺 Desktop/OAuth。
-  **残留 1337 handoff（仍不打勾）**（历史）：shell/desktop/ai-workspace/sync。
-  **残留 1338 handoff（仍不打勾）**（历史）：Windows desktop:e2e；缺 OAuth/prod-like 本机。
-  **残留 1339 handoff（仍不打勾；冲 A）**（历史）：docker rebuild npipe。
-  **残留 1340 handoff（仍不打勾）**（历史）：OAuth 绿；缺本 tip prod-like。
-  **残留 1341 收口**：本 tip prod-like 六服务 healthy + governance + desktop 复验 → **本项翻勾**。
-  残留一千三百二十八轮：正式 `web:typecheck` 及 24 个依赖任务通过；同一 12-project lint
-
-
-
+    **不覆盖**：Agent durable multi-engine 跨端产品 E2E（仍属第 2 项 open）。
+    **残留 1333 收口 handoff（仍不打勾）**（历史）：当时缺完整 E2E 一揽子。
+    **残留 1334 handoff（仍不打勾）**（历史）：lint/typecheck/test 绿；缺业务 E2E+prod-like。
+    **残留 1335 handoff（仍不打勾；跳过交互式 OAuth）**（历史）：业务子集 24/24 + prod-like 六服务。
+    **残留 1336 handoff（仍不打勾）**（历史）：web:e2e 71/71；缺 Desktop/OAuth。
+    **残留 1337 handoff（仍不打勾）**（历史）：shell/desktop/ai-workspace/sync。
+    **残留 1338 handoff（仍不打勾）**（历史）：Windows desktop:e2e；缺 OAuth/prod-like 本机。
+    **残留 1339 handoff（仍不打勾；冲 A）**（历史）：docker rebuild npipe。
+    **残留 1340 handoff（仍不打勾）**（历史）：OAuth 绿；缺本 tip prod-like。
+    **残留 1341 收口**：本 tip prod-like 六服务 healthy + governance + desktop 复验 → **本项翻勾**。
+    残留一千三百二十八轮：正式 `web:typecheck` 及 24 个依赖任务通过；同一 12-project lint
 
   集合 12/12 通过；focused 回归 8 文件 / 160 测试、governance 4/23 + GOV_EXIT:0。
   额外全仓方向探测发现 `@memoflow/test-utils:lint` 仍有 2 个既有 layer-boundary error；
   依赖 build 的 declaration 诊断、全仓 test/E2E/prod-like 与 OAuth/App fixture 仍未闭环，
   因此仍不构成全量 PR 门禁。
   残留一千三百二十九轮：`@memoflow/test-utils:lint` 0 errors、`test-utils:typecheck`
-  + 4 个依赖任务、`goal:lint`、integration seam focused 3 文件 / 12 测试通过；
-  修复 7 个 Ruff I001 后全 workspace lint 36/36 项目通过；AI Service 4/25、
-  open-items 1/3、governance 4/23 + governance-check 通过。全仓 typecheck/test、
-  Web/Desktop E2E、prod-like 与 OAuth/App fixture 仍未闭环，故不打勾。
-  残留一千三百三十轮：全 workspace typecheck 34/34 项目通过（EXIT:0）；
-  utils recurrence 1 文件 / 4 测试、schedule-orchestration 4 文件 / 7 测试、
-  governance-check EXIT:0。全仓 test、Web/Desktop E2E、prod-like 与 OAuth/App
-  fixture 仍未闭环，故不打勾。
-  残留一千三百三十一轮：全 workspace 标准 test 30 目标，首次 11 失败收缩为
-  3 失败 / 27 通过（EXIT:1）；desktop 低风险 harness 已收口（focused 6/58 通过）；
-  剩余 data-portability powersync-round-trip、desktop git runtime/sync GitProcessError
-  16 测试、app-vue AIChatView TaskService inject + KnowledgeProjection useRoute mock。
-  残留一千三百三十二轮：全 workspace 标准 test **30/30 项目通过（EXIT:0）**
-  （powersync 假库、desktop GIT_CONFIG_GLOBAL=NUL、app-vue inject/mock/timeout）。
-  Web/Desktop 完整 E2E、prod-like 与 OAuth/App fixture 仍未闭环，故不打勾。
-  残留一千三百三十三轮：VPS tip `140ce022a`；prod-like `docker:local:up` EXIT:0 + **六服务 healthy** +
-  关键探针 OK；Web 认证主线两轮 **9/9**、note-boundary **1/1**；全仓 lint **36/36** +
-  typecheck **34/34** + 标准 test **30/30** 复验 EXIT:0；governance-check GOV_EXIT:0。
-  goal-workflow 8/8 红（AI workspace 未就绪）；续：goal-workflow 8/8 绿（Host SSE mock）；Desktop Linux guest 续 xvfb+basic_text **1/1 绿**；
-  GitHub App JWT 已接线、install 需浏览器；OAuth/App 完整 fixture 仍外部阻塞；**不改 checkbox**，仍不构成全量 PR 门禁。
-  证据：本分支多轮 focused lint/typecheck/test 与 `memoflow:governance-check` 通过；Web 核心
-  Playwright 集合含 knowledge note boundary 与 AI goal-workflow。残留二十七轮：prod-like
-  `docker:local:up` 在当前宿主机已成功（六服务 healthy；Web 200 / API health 200），历史 Docker
-  磁盘耗尽不再是阻塞。残留一百零八轮：HTTP 204 无 body + checkpoint void `ok(null)` 收口。
-  残留一百八十一轮：tip 上 `memoflow:governance-check` + focused ownership/journey specs 通过；仍不构成全量 PR 门禁证据。
-  残留一百九十一轮：tip 上 87 项核心 evidence suite + `memoflow:governance-check` 通过；仍不构成全量 PR 门禁证据。
-  残留一百九十五轮：tip 上 107 项核心 evidence suite 通过；仍不构成全量 PR 门禁证据。
-  残留一百九十八轮：tip 上 118 项核心 evidence suite 通过；仍不构成全量 PR 门禁证据。
-  残留二百零四轮：tip 上 157 项核心 evidence suite（含 confirmed-create / editor-pref / dual-track VO 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百零八轮：tip 上 205 项核心 evidence suite（含 206–207 terminology + eval fixture 对齐）通过；仍不构成全量 PR 门禁证据。
-  残留二百一十二轮：tip 上 204 项核心 evidence suite（含 residual 211 MSW/e2e/docs 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百一十六轮：tip 上 212 项核心 evidence suite（含 residual 213–215 source/index/snake 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百一十九轮：tip 上 216 项核心 evidence suite（含 residual 217–218 snake/python Note 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百二十四轮：tip 上 225 项核心 evidence suite（含 residual 220–223 eval/checkpoint/goal/note-mutation 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百二十八轮：tip 上 231 项核心 evidence suite（含 residual 225–227 usage/runner/menu-labels 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百三十一轮：tip 上 235 项核心 evidence suite（含 residual 229–230 note mocks/schedule/bootstrapper 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百三十四轮：tip 上 238 项核心 evidence suite（含 residual 232–233 schedule docs/reminder DTO 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百三十七轮：tip 上 249 项核心 evidence suite（含 residual 235–236 auth export/provider barrel 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百四十一轮：tip 上 258 项核心 evidence suite（含 residual 238–240 powersync/runtime/goal priority 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百四十五轮：tip 上 262 项核心 evidence suite（含 residual 242–244 electron/runtime/dashboard 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百四十九轮：tip 上 270 项核心 evidence suite（含 residual 246–248 transport/task/AI dual 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百五十三轮：tip 上 100 项 focused evidence suite（含 residual 250–252 dual 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百五十四轮：GoalDraft/GoalClarification dual 收口 + dual surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
-  残留二百五十五轮：tip 上 115 项 focused evidence suite（含 residual 250–254 dual 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百五十六轮：desktop shared ipc-channels dual barrel 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
-  残留二百五十七轮：task domain events dual barrel 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
-  残留二百五十八轮：tip 上 119 项 focused evidence suite（含 residual 250–257 dual 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百五十九轮：StreamMessageDonePayload dual 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
-  残留二百六十轮：ScheduleTaskDTO/ScheduleExecutionDTO dual 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
-  残留二百六十一轮：tip 上 123 项 focused evidence suite（含 residual 250–260 dual 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百六十二轮：task TaskDomainEvent/Complete·Skip Res dual 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
-  残留二百六十三轮：19 dead unused *Res dual aliases 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
-  残留二百六十四轮：tip 上 127 项 focused evidence suite（含 residual 250–263 dual 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百六十五轮：notification AssetImageKey dual 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
-  残留二百六十六轮：IResultIpcClient dual 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
-  残留二百六十七轮：tip 上 136 项 focused evidence suite（含 residual 250–266 dual 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百六十八轮：dashboard transport dual 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
-  残留二百六十九轮：tip 上 138 项 focused evidence suite（含 residual 250–268 dual 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百七十轮：ElectronBridge dual 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
-  残留二百七十一轮：tip 上 144 项 focused evidence suite（含 residual 250–270 dual 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百七十二轮：GovernanceIpcTransport dual 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
-  残留二百七十三轮：tip 上 146 项 focused evidence suite（含 residual 250–272 dual 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百七十四轮：ResultHttpClient implements dual 收口 + surface 锁 + typecheck + governance-check；仍不构成全量 PR 门禁证据。
-  残留二百七十五轮：tip 上 151 项 focused evidence suite（含 residual 250–274 dual 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百七十六轮：setting/data-portability API port dual 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
-  残留二百七十七轮：tip 上 157 项 focused evidence suite（含 residual 250–276 dual 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百七十八轮：DataPortabilityClientPort dual 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
-  残留二百七十九轮：tip 上 159 项 focused evidence suite（含 residual 250–278 dual 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百八十轮：SettingClientPort dual 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
-  残留二百八十一轮：tip 上 161 项 focused evidence suite（含 residual 250–280 dual 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百八十二轮：AuthenticationClientPort dual 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
-  残留二百八十三轮：tip 上 163 项 focused evidence suite（含 residual 250–282 dual 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百八十四轮：RepositoryClientPort dual 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
-  残留二百八十五轮：tip 上 165 项 focused evidence suite（含 residual 250–284 dual 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百八十六轮：ReminderClientPort dual 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
-  残留二百八十七轮：tip 上 167 项 focused evidence suite（含 residual 250–286 dual 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百八十八轮：NotificationClientPort dual 收口（去 dismissAll）+ surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
-  残留二百八十九轮：tip 上 169 项 focused evidence suite（含 residual 250–288 dual 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百九十轮：再删 6 项死 *Res dual + dead-res surface 扩展 + governance-check；仍不构成全量 PR 门禁证据。
-  残留二百九十一轮：tip 上 169 项 focused evidence suite（含 residual 250–290 dual 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百九十二轮：AccountClientPort 有意 mapping dual surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
-  残留二百九十三轮：tip 上 171 项 focused evidence suite（含 residual 250–292 dual 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百九十四轮：GoalClientPort 有意 facade dual surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
-  残留二百九十五轮：tip 上 173 项 focused evidence suite（含 residual 250–294 dual 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百九十六轮：TaskClientPort 有意 facade dual surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
-  残留二百九十七轮：tip 上 175 项 focused evidence suite（含 residual 250–296 dual 锁）通过；仍不构成全量 PR 门禁证据。
-  残留二百九十八轮：ScheduleClientPort 有意 facade dual surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
-  残留二百九十九轮：AIClientPort 有意 multi-API facade dual surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
-  残留三百轮：tip 上 179 项 focused evidence suite（含 residual 250–299 dual 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百零一轮：§13.2 证据指针刷新 + redesign docs 边界对齐 + legacy-note surface；仍不构成全量 PR 门禁证据。
-  残留三百零二轮：tip 上 180 项 focused evidence suite（含 residual 250–301 dual/docs 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百零三轮：portable backup vs server-held disclosure 边界 surface 扩展 + product 文档对齐 + governance-check；仍不构成全量 PR 门禁证据。
-  残留三百零四轮：tip 上 193 项 focused evidence suite（含 residual 250–303 dual/docs/disclosure 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百零五轮：ADR-035 multi-engine 标签隔离 journey/surface 增强（Agent 仍部分；无完整 Turn Engine conformance E2E）；仍不构成全量 PR 门禁证据。
-  残留三百零六轮：tip 上 197 项 focused evidence suite（含 residual 250–305 dual/docs/disclosure/ADR-035 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百零七轮：three-login matrix 15 通过（step 10 identity≠knowledge-repo install/token 源码锁）+ nearest auth surfaces + governance-check；仍不构成全量 PR 门禁/跨端 OAuth E2E 证据。
-  残留三百零八轮：tip 上 198 项 focused evidence suite（含 residual 250–307 dual/docs/disclosure/ADR-035/three-login step 10 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百零九轮：multi-engine Turn Engine conformance harness 14 通过（双引擎同 suite isolation + ownership；生产 adapter 仍缺）+ journey/stage-0 + governance-check；仍不构成全量 multi-engine runtime E2E 证据。
-  残留三百一十轮：tip 上 212 项 focused evidence suite（含 residual 250–309 dual/docs/disclosure/ADR-035/three-login/harness 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百一十一轮：Agent Host stage-0 composition/port freeze surfaces 通过（生产 adapter 仍缺；runtime 不静默 emit engine.*）+ governance-check；仍不构成生产 multi-engine 接线 E2E 证据。
-  残留三百一十二轮：tip 上 216 项 focused evidence suite（含 residual 250–311 dual/docs/disclosure/ADR-035/three-login/harness/composition 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百一十三轮：Agent Host plan stage-0 证据指针对齐 + governance-check；仍不构成生产 multi-engine/统一助手完成证据。
-  残留三百一十四轮：DirectTurnEngine 生产首引擎 + module.turnEngine + stage-0 仅允许该引擎；仍不构成 multi-engine/统一助手完成证据。
-  残留三百一十五轮：tip 上 223 项 focused evidence suite（含 residual 250–314 dual/docs/disclosure/ADR-035/three-login/harness/composition/DirectTurnEngine 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百一十六轮：open chat 经 DirectTurnEngine + IOpenChatTurnPort + composition surface；仍不构成 multi-engine/统一助手完成证据。
-  残留三百一十七轮：tip 上 226 项 focused evidence suite（含 residual 250–316 open-chat/DirectTurnEngine 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百一十八轮：LangGraphWorkflowAdapter + stage-0/composition 锁通过；仍不构成 multi-engine/统一助手完成证据。
-  残留三百一十九轮：tip 上 231 项 focused evidence suite（含 residual 250–318 workflow adapter 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百二十轮：ProposalKernel + stage-0/composition 锁通过；仍不构成 multi-engine/统一助手完成证据。
-  残留三百二十一轮：tip 上 239 项 focused evidence suite（含 residual 250–320 ProposalKernel 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百二十二轮：CapabilityResolver + stage-0/composition 锁通过；仍不构成 multi-engine/统一助手完成证据。
-  残留三百二十三轮：tip 上 246 项 focused evidence suite（含 residual 250–322 CapabilityResolver 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百二十四轮：CapabilityResolver start-gate 热路径接线 + composition 锁通过；仍不构成 multi-engine/统一助手完成证据。
-  残留三百二十五轮：tip 上 247 项 focused evidence suite（含 residual 250–324 start-gate 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百二十六轮：§13.2 Agent/全量门禁证据指针刷新（305–325 Host 部分）；仍不构成完成证据。
-  残留三百二十七轮：product ai/setting 文档与 runtime 边界对齐 + surface 锁；仍不构成全量 PR 门禁证据。
-  残留三百二十八轮：tip 上 253 项 focused evidence suite（含 residual 250–327 product-docs 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百二十九轮：ai-files 索引与 Host 生产路径对齐 + surface 锁；仍不构成全量 PR 门禁证据。
-  残留三百三十轮：tip 上 254 项 focused evidence suite（含 residual 250–329 ai-files 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百三十一轮：module-index 全量路径对齐 + integrity surface；仍不构成全量 PR 门禁证据。
-  残留三百三十二轮：tip 上 255 项 focused evidence suite（含 residual 250–331 module-index 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百三十三轮：authentication product-doc + three-login step 10 identity≠knowledge-repo surface 锁；仍不构成全量 PR 门禁/跨端 OAuth E2E 证据。
-  残留三百三十四轮：tip 上 255 项 focused evidence suite（含 residual 250–333 auth identity≠repo 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百三十五轮：authentication-files OAuth 真值收口 + module-index surface；仍不构成全量 PR 门禁/跨端 OAuth E2E 证据。
-  残留三百三十六轮：tip 上 256 项 focused evidence suite（含 residual 250–335 auth OAuth 索引锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百三十七轮：CustomModelGateway Host 适配 + editor-test 清理；仍不构成第二 Turn Engine/统一助手完成证据。
-  残留三百三十八轮：tip 上 260 项 focused evidence suite（含 residual 250–337 CustomModelGateway 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百三十九轮：feature-map/public debug 收口；仍不构成全量 PR 门禁/跨端 OAuth E2E 证据。
-  残留三百四十轮：tip 上 263 项 focused evidence suite（含 residual 250–339 feature-map/public 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百四十一轮：第二生产 Turn Engine（ReadonlyAnalysis）落地；仍不构成完整 multi-engine runtime E2E/统一助手完成证据。
-  残留三百四十二轮：tip 上 268 项 focused evidence suite（含 residual 250–341 ReadonlyAnalysis 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百四十三轮：生产 AssistantFacade 统一 Host dispatch 落地；仍不构成统一助手 UI 工作台/完整 multi-engine runtime E2E 证据。
-  残留三百四十四轮：tip 上 273 项 focused evidence suite（含 residual 250–343 AssistantFacade 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百四十五轮：AssistantFacade HTTP/SSE 传输面落地；仍不构成统一助手 UI 工作台/完整 multi-engine runtime E2E 证据。
-  残留三百四十六轮：tip 上 277 项 focused evidence suite（含 residual 250–345 AssistantFacade transport 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百四十七轮：AssistantFacade 客户端 HTTP/SSE 适配落地；仍不构成统一助手 UI 工作台/Desktop IPC stream 证据。
-  残留三百四十八轮：tip 上 281 项 focused evidence suite（含 residual 250–347 AssistantFacade client 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百四十九轮：Vue useAssistantDispatch 薄入口落地；仍不构成统一助手 UI 工作台/完整 open chat 切换证据。
-  残留三百五十轮：tip 上 284 项 focused evidence suite（含 residual 250–349 useAssistantDispatch 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百五十一轮：open chat 默认 Host dispatch 落地；仍不构成统一助手右侧工作台/完整 multi-engine E2E 证据。
-  残留三百五十二轮：tip 上 285 项 focused evidence suite（含 residual 250–351 open-chat Host dispatch 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百五十三轮：Desktop AssistantFacade IPC stream 落地；仍不构成统一助手右侧工作台/完整 multi-engine E2E 证据。
-  残留三百五十四轮：tip 上 290 项 focused evidence suite（含 residual 250–353 Desktop Assistant IPC 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百五十五轮：Host Proposal approve/reject UI 路径落地；仍不构成统一助手右侧工作台/完整 multi-engine runtime E2E 证据。
-  残留三百五十六轮：tip 上 298 项 focused evidence suite（含 residual 250–355 Host proposal UI 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百五十七轮：薄 Host Proposal 工作台面板落地；仍不构成完整右侧工作台切换/完整 multi-engine runtime E2E 证据。
-  残留三百五十八轮：tip 上 301 项 focused evidence suite（含 residual 250–357 Host proposal panel 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百五十九轮：Host Proposal revise-before-approve 落地；仍不构成完整右侧工作台切换/完整 multi-engine runtime E2E 证据。
-  残留三百六十轮：tip 上 306 项 focused evidence suite（含 residual 250–359 Host proposal revise 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百六十一轮：knowledge Host Proposal 路径/正文修订落地；仍不构成完整右侧工作台切换/完整 multi-engine runtime E2E 证据。
-  残留三百六十二轮：tip 上 307 项 focused evidence suite（含 residual 250–361 knowledge Host patch 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百六十三轮：Host knowledge patch → note executor 映射落地；仍不构成完整右侧工作台切换/完整 multi-engine runtime E2E 证据。
-  残留三百六十四轮：tip 上 308 项 focused evidence suite（含 residual 250–363 Host knowledge executor patch 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百六十五轮：Host goal title patch → create_goal executor 映射落地；仍不构成完整右侧工作台切换/完整 multi-engine runtime E2E 证据。
-  残留三百六十六轮：tip 上 310 项 focused evidence suite（含 residual 250–365 Host goal executor patch 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百六十七轮：goal Host Proposal description 修订 UI 落地；仍不构成完整右侧工作台切换/完整 multi-engine runtime E2E 证据。
-  残留三百六十八轮：tip 上 311 项 focused evidence suite（含 residual 250–367 goal Host description 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百六十九轮：open-chat Host 引擎 profile 选择落地；仍不构成真实 Pi SDK/CLI 进程适配与完整 multi-engine runtime E2E 证据。
-  残留三百七十轮：tip 上 312 项 focused evidence suite（含 residual 250–369 Host engine profile 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百七十一轮：Host Proposal 右侧工作台激活落地；仍不构成完整统一助手右侧工作台切换/完整 multi-engine runtime E2E 证据。
-  残留三百七十二轮：tip 上 312 项 focused evidence suite（含 residual 250–371 Host workbench activation 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百七十三轮：Pi/CLI process adapter fail-closed spike 落地；仍不构成真实 Pi spawn 产品路径/完整 multi-engine runtime E2E 证据。
-  残留三百七十四轮：tip 上 322 项 focused evidence suite（含 residual 250–373 Pi process adapter 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百七十五轮：生产 multi-engine Host journey 落地；仍不构成跨端 Playwright/Electron 全量 multi-engine E2E/真实 Pi spawn 证据。
-  残留三百七十六轮：tip 上 327 项 focused evidence suite（含 residual 250–375 production multi-engine journey 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百七十七轮：multi-profile Host transport journey 落地；仍不构成跨端 Playwright/Electron 全量 multi-engine E2E/真实 Pi spawn 证据。
-  残留三百七十八轮：tip 上 331 项 focused evidence suite（含 residual 250–377 multi-profile Host transport 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百七十九轮：Host execution receipt 工作台落地；仍不构成 Conversation 时间线 Artifact 回放/完整 multi-engine runtime E2E 证据。
-  残留三百八十轮：tip 上 335 项 focused evidence suite（含 residual 250–379 Host execution receipt 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百八十一轮：Host 工作台 AgentRun 历史重开落地；仍不构成消息时间线 Artifact 卡片/完整 multi-engine runtime E2E 证据。
-  残留三百八十二轮：tip 上 339 项 focused evidence suite（含 residual 250–381 Host workbench reopen 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百八十三轮：Host 时间线 Artifact 卡片落地；仍不构成 Artifact 富内容编辑回放/完整 multi-engine runtime E2E 证据。
-  残留三百八十四轮：tip 上 342 项 focused evidence suite（含 residual 250–383 Host timeline Artifact 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百八十五轮：Host 执行报告富回放落地；仍不构成真实 Pi spawn/完整 multi-engine runtime E2E 证据。
-  残留三百八十六轮：tip 上 345 项 focused evidence suite（含 residual 250–385 Host receipt rich replay 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百八十七轮：Host 时间线聚焦工作台行落地；仍不构成真实 Pi spawn/完整 multi-engine runtime E2E 证据。
-  残留三百八十八轮：tip 上 348 项 focused evidence suite（含 residual 250–387 Host timeline focus 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百八十九轮：Host 工作台文档对齐与 composition journey 落地；仍不构成真实 Pi spawn/完整 multi-engine runtime E2E 证据。
-  残留三百九十轮：tip 上 351 项 focused evidence suite（含 residual 250–389 Host workbench docs/composition 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百九十一轮：Pi process spike dry-run plan 与生产路由隔离落地；仍不构成真实 Pi spawn/完整 multi-engine runtime E2E 证据。
-  残留三百九十二轮：tip 上 353 项 focused evidence suite（含 residual 250–391 Pi process dry-run plan 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百九十三轮：Host open-chat stop → cancel_run 落地；仍不构成跨端 Playwright/Electron multi-engine E2E/真实 Pi spawn 证据。
-  残留三百九十四轮：tip 上 357 项 focused evidence suite（含 residual 250–393 Host open-chat cancel_run 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百九十五轮：Host mid-turn cancel_run 生产 journey 落地；仍不构成跨端 Playwright/Electron multi-engine E2E/真实 Pi spawn 证据。
-  残留三百九十六轮：tip 上 358 项 focused evidence suite（含 residual 250–395 Host mid-turn cancel_run 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百九十七轮：Host Proposal 自由拒绝原因落地；仍不构成跨端 multi-engine E2E/真实 Pi spawn 证据。
-  残留三百九十八轮：tip 上 361 项 focused evidence suite（含 residual 250–397 Host freeform reject reason 锁）通过；仍不构成全量 PR 门禁证据。
-  残留三百九十九轮：Host 时间线 multi-engine badge 落地；仍不构成跨端 multi-engine E2E/真实 Pi spawn 证据。
-  残留四百轮：tip 上 365 项 focused evidence suite（含 residual 250–399 Host timeline multi-engine badge 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百零一轮：open-chat Host 时间线 Artifact 落地；仍不构成跨端 multi-engine E2E/真实 Pi spawn 证据。
-  残留四百零二轮：tip 上 368 项 focused evidence suite（含 residual 250–401 open-chat Host timeline Artifact 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百零三轮：open-chat Host 回合徽章会话记忆落地；仍不构成跨端 multi-engine E2E/真实 Pi spawn 证据。
-  残留四百零四轮：tip 上 372 项 focused evidence suite（含 residual 250–403 open-chat Host turn session memory 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百零五轮：跨端 multi-engine Host 产品 E2E scaffold 落地；仍不构成 Playwright/Electron 全量 product E2E/真实 Pi spawn 证据。
-  残留四百零六轮：tip 上 378 项 focused evidence suite（含 residual 250–405 cross-end multi-engine product E2E scaffold 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百零七轮：跨端 multi-engine Host 产品 unit driver 落地；仍不构成 Playwright/Electron 全量 product E2E/真实 Pi spawn 证据。
-  残留四百零八轮：tip 上 383 项 focused evidence suite（含 residual 250–407 cross-end multi-engine product unit driver 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百零九轮：Host 时间线 open_chat vs AgentRun surface isolation 落地；仍不构成跨端 multi-engine E2E/真实 Pi spawn 证据。
-  残留四百一十轮：tip 上 387 项 focused evidence suite（含 residual 250–409 Host timeline surface isolation 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百一十一轮：Host 工作台时间线 composition 落地；仍不构成跨端 multi-engine E2E/真实 Pi spawn 证据。
-  残留四百一十二轮：tip 上 390 项 focused evidence suite（含 residual 250–411 Host workbench timeline composition 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百一十三轮：Host 工作台 LangGraph UI 泄漏边界落地；仍不构成跨端 multi-engine E2E/真实 Pi spawn 证据。
-  残留四百一十四轮：tip 上 397 项 focused evidence suite（含 residual 250–413 Host LangGraph UI leakage boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百一十五轮：Goal/Knowledge workflow 诊断展示脱敏落地；仍不构成跨端 multi-engine E2E/真实 Pi spawn 证据。
-  残留四百一十六轮：tip 上 409 项 focused evidence suite（含 residual 250–415 Goal workflow diagnostic sanitization 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百一十七轮：跨端 multi-engine scaffold/driver 16 步扩展落地；仍不构成 Playwright/Electron 全量 product E2E 证据。
-  残留四百一十八轮：tip 上 410 项 focused evidence suite（含 residual 250–417 cross-end 16-step scaffold/driver 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百一十九轮：Host task.create lane 基础落地；仍不构成 Task 域 executor/完整 Task 工作台证据。
-  残留四百二十轮：tip 上 414 项 focused evidence suite（含 residual 250–419 Host task.create lane 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百二十一轮：Goal diagnosticWorkflowStepTiming i18n + scaffold/driver 17-step（task.create lane unit）落地；仍不构成 Task 域 executor/Playwright 全量 E2E 证据。
-  残留四百二十二轮：tip 上 415 项 focused evidence suite（含 residual 250–421 diagnosticWorkflowStepTiming + task.create unit 步锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百二十三轮：Host task.create live lane + domain executor 基础落地；仍不构成完整 Task 工作台/AgentType task.create 证据。
-  残留四百二十四轮：tip 上 418 项 focused evidence suite（含 residual 250–423 Host task.create live lane 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百二十五轮：Host task.create client settle + createTemplate receipt 落地；仍不构成 AgentType task.create/完整 Task 工作台证据。
-  残留四百二十六轮：tip 上 421 项 focused evidence suite（含 residual 250–425 Host task.create client settle/receipt 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百二十七轮：Host AgentType task.create 基础 + taskAgentRun 落地；仍不构成完整 Task Agent 工作流/E2E 证据。
-  残留四百二十八轮：tip 上 423 项 focused evidence suite（含 residual 250–427 Host AgentType task.create + taskAgentRun 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百二十九轮：task.create 产品 toolMode/Welcome/Footer 落地；仍不构成完整 Task Agent 工作流/E2E 证据。
-  残留四百三十轮：tip 上 424 项 focused evidence suite（含 residual 250–429 Host task.create 产品 toolMode 入口锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百三十一轮：task.create 产品 start 基础落地；仍不构成完整 Task LangGraph 工作流/E2E 证据。
-  残留四百三十二轮：tip 上 425 项 focused evidence suite（含 residual 250–431 Host task.create 产品 start 基础锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百三十三轮：task.create restore/linked goal 落地；仍不构成完整 Task LangGraph 工作流/E2E 证据。
-  残留四百三十四轮：tip 上 426 项 focused evidence suite（含 residual 250–433 Host task.create restore/linked goal 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百三十五轮：task.create 进程内 run store 落地；仍不构成跨进程 durable/LangGraph 全量证据。
-  残留四百三十六轮：tip 上 433 项 focused evidence suite（含 residual 250–435 Host task.create process-local store 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百三十七轮：task.create 进程内 cancel/complete resume 落地；仍不构成跨进程 durable/LangGraph 全量证据。
-  残留四百三十八轮：tip 上 439 项 focused evidence suite（含 residual 250–437 Host task.create process-local cancel/complete resume 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百三十九轮：task.create 进程内 edit revise + 幂等 terminal 落地；仍不构成跨进程 durable/LangGraph 全量证据。
-  残留四百四十轮：tip 上 443 项 focused evidence suite（含 residual 250–439 Host task.create process-local edit revise 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百四十一轮：AgentRun 历史 reopen 聚焦 + task 标题回收落地；仍不构成跨端 Playwright/Electron multi-engine E2E 证据。
-  残留四百四十二轮：tip 上 446 项 focused evidence suite（含 residual 250–441 Host AgentRun history reopen focus 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百四十三轮：会话 restore Host 工作台聚焦落地；仍不构成跨端 Playwright/Electron multi-engine E2E 证据。
-  残留四百四十四轮：tip 上 449 项 focused evidence suite（含 residual 250–443 Host conversation restore workbench focus 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百四十五轮：linked goal restore + client settlement 会话隔离落地；仍不构成跨端 Playwright/Electron multi-engine E2E 证据。
-  残留四百四十六轮：tip 上 452 项 focused evidence suite（含 residual 250–445 Host linked goal restore + settlement isolation 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百四十七轮：§13.2 证据指针刷新 + process-local store 容量边界落地；仍不构成全量 PR 门禁/跨端 multi-engine E2E 证据。
-  残留四百四十八轮：tip 上 455 项 focused evidence suite（含 residual 250–447 Host store bound + §13.2 指针锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百四十九轮：task.create process-local product journey 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留四百五十轮：tip 上 460 项 focused evidence suite（含 residual 250–449 Host process-local product journey 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百五十一轮：process-local runId 身份绑定 fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留四百五十二轮：tip 上 464 项 focused evidence suite（含 residual 250–451 Host runId 身份绑定锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百五十三轮：confirm client settlement fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留四百五十四轮：tip 上 468 项 focused evidence suite（含 residual 250–453 Host confirm client settlement 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百五十五轮：edit non-empty title fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留四百五十六轮：tip 上 472 项 focused evidence suite（含 residual 250–455 Host edit non-empty title 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百五十七轮：conversation/thread runId 绑定 + activeOnly 会话隔离落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留四百五十八轮：tip 上 478 项 focused evidence suite（含 residual 250–457 Host conversation/thread runId 绑定锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百五十九轮：dirty approve process-local revise-before-settle 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留四百六十轮：tip 上 481 项 focused evidence suite（含 residual 250–459 Host dirty approve revise-before-settle 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百六十一轮：start conversationId 会话绑定 fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留四百六十二轮：tip 上 484 项 focused evidence suite（含 residual 250–461 Host start conversationId 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百六十三轮：confirm settlement title 可回收 fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留四百六十四轮：tip 上 488 项 focused evidence suite（含 residual 250–463 Host confirm settlement title 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百六十五轮：confirm settlement template entity id 可回收 fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留四百六十六轮：tip 上 492 项 focused evidence suite（含 residual 250–465 Host confirm settlement template id 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百六十七轮：confirm settlement goalId 禁重绑 fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留四百六十八轮：tip 上 496 项 focused evidence suite（含 residual 250–467 Host confirm goalId no-rebind 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百六十九轮：confirm settlement title 禁重绑 fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留四百七十轮：tip 上 500 项 focused evidence suite（含 residual 250–469 Host confirm title no-rebind 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百七十一轮：confirm process-local draft only + single executed fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留四百七十二轮：tip 上 505 项 focused evidence suite（含 residual 250–471 Host confirm process-local draft only 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百七十三轮：edit 单 approvedAction fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留四百七十四轮：tip 上 509 项 focused evidence suite（含 residual 250–473 Host edit single approvedAction 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百七十五轮：confirm waiting_approval-only fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留四百七十六轮：tip 上 513 项 focused evidence suite（含 residual 250–475 Host confirm waiting_approval-only 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百七十七轮：cancel waiting_approval-only fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留四百七十八轮：tip 上 517 项 focused evidence suite（含 residual 250–477 Host cancel waiting_approval-only 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百七十九轮：start 非空 title fail-closed（禁静默默认）落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留四百八十轮：tip 上 520 项 focused evidence suite（含 residual 250–479 Host start non-empty title 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百八十一轮：edit waiting_approval-only fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留四百八十二轮：tip 上 524 项 focused evidence suite（含 residual 250–481 Host edit waiting_approval-only 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百八十三轮：start conversationId builder fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留四百八十四轮：tip 上 526 项 focused evidence suite（含 residual 250–483 Host start conversationId builder 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百八十五轮：start threadId builder fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留四百八十六轮：tip 上 530 项 focused evidence suite（含 residual 250–485 Host start threadId builder 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百八十七轮：task DAG *ViewModel 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留四百八十八轮：tip 上 532 项 focused evidence suite（含 residual 250–487 task DAG *ViewModel 双轨收口锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百八十九轮：client complete waiting_approval-only fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留四百九十轮：tip 上 533 项 focused evidence suite（含 residual 250–489 Host client complete waiting_approval-only 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百九十一轮：edit/confirm tool+empty-action 命名常量 fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留四百九十二轮：tip 上 536 项 focused evidence suite（含 residual 250–491 Host edit/confirm tool named-constant 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百九十三轮：start identityId builder fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留四百九十四轮：tip 上 540 项 focused evidence suite（含 residual 250–493 Host start identityId fail-closed 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百九十五轮：resume agentType/unsupported-decision + store agentType fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留四百九十六轮：tip 上 543 项 focused evidence suite（含 residual 250–495 Host resume/store agentType fail-closed 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百九十七轮：start runId builder fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留四百九十八轮：tip 上 547 项 focused evidence suite（含 residual 250–497 Host start runId fail-closed 锁）通过；仍不构成全量 PR 门禁证据。
-  残留四百九十九轮：start agentType builder fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百轮：tip 上 550 项 focused evidence suite（含 residual 250–499 Host start agentType fail-closed 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百零一轮：client complete settlement draft create_task_template-only 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百零二轮：tip 上 551 项 focused evidence suite（含 residual 250–501 client complete draft tool 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百零三轮：process-local store identity trim match 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百零四轮：tip 上 556 项 focused evidence suite（含 residual 250–503 store identity trim match 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百零五轮：process-local store runId trim lookup 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百零六轮：tip 上 561 项 focused evidence suite（含 residual 250–505 store runId trim lookup 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百零七轮：client revise draft create_task_template-only 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百零八轮：tip 上 562 项 focused evidence suite（含 residual 250–507 client revise draft tool 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百零九轮：process-local store conversationId trim match 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百一十轮：tip 上 567 项 focused evidence suite（含 residual 250–509 store conversationId trim match 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百一十一轮：process-local store threadId trim match 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百一十二轮：tip 上 572 项 focused evidence suite（含 residual 250–511 store threadId trim match 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百一十三轮：process-local store conversationId upsert normalize 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百一十四轮：tip 上 577 项 focused evidence suite（含 residual 250–513 store conversation upsert normalize 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百一十五轮：process-local store identityId upsert normalize 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百一十六轮：tip 上 581 项 focused evidence suite（含 residual 250–515 store identity upsert normalize 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百一十七轮：listRuns remote ownership trim match 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百一十八轮：tip 上 583 项 focused evidence suite（含 residual 250–517 listRuns remote ownership trim 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百一十九轮：client task draft title/goalId create_task_template-only 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百二十轮：tip 上 586 项 focused evidence suite（含 residual 250–519 client draft tool gate 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百二十一轮：client knowledge draft path/markdown create_knowledge_note-only 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百二十二轮：tip 上 589 项 focused evidence suite（含 residual 250–521 knowledge draft tool gate 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百二十三轮：client goal draft title/description create_goal-only 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百二十四轮：tip 上 592 项 focused evidence suite（含 residual 250–523 goal draft tool gate 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百二十五轮：client workbench summary product-lane rationale 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百二十六轮：tip 上 597 项 focused evidence suite（含 residual 250–525 summary product-lane 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百二十七轮：client workbench pendingActionCount product-lane 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百二十八轮：tip 上 602 项 focused evidence suite（含 residual 250–527 pendingActionCount product-lane 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百二十九轮：client receipt primaryEntityId product-lane 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百三十轮：tip 上 607 项 focused evidence suite（含 residual 250–529 primaryEntityId product-lane 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百三十一轮：client knowledge draft title create_knowledge_note-only 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百三十二轮：tip 上 611 项 focused evidence suite（含 residual 250–531 knowledge title tool gate 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百三十三轮：client receipt cross-lane foreign tool exclusion 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百三十四轮：tip 上 615 项 focused evidence suite（含 residual 250–533 receipt cross-lane exclusion 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百三十五轮：client receipt summary same-lane failed message 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百三十六轮：tip 上 619 项 focused evidence suite（含 residual 250–535 receipt same-lane failed message 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百三十七轮：client receipt ok product-lane executed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百三十八轮：tip 上 624 项 focused evidence suite（含 residual 250–537 receipt ok product-lane 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百三十九轮：stage-6 editor dual-track / portable boundary 再锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留五百四十轮：tip 上 627 项 focused evidence suite（含 residual 250–539 stage-6 portable boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百四十一轮：§13.2 证据审计刷新 + Host edit draftAction 锁；tip suite 仍 627（本轮无 suite re-run）；仍不构成全量 PR 门禁证据。
-  残留五百四十二轮：tip 上 628 项 focused evidence suite（含 residual 250–541 Host edit draftAction 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百四十三轮：Host confirm settlementAction 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百四十四轮：tip 上 629 项 focused evidence suite（含 residual 250–543 Host confirm settlementAction 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百四十五轮：Host confirm store draftAction 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百四十六轮：tip 上 632 项 focused evidence suite（含 residual 250–545 Host confirm store draftAction 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百四十七轮：Client complete/revise sole draftAction 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百四十八轮：tip 上 633 项 focused evidence suite（含 residual 250–547 Client sole draftAction 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百四十九轮：Client workbench soleProductDraftAction 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百五十轮：tip 上 637 项 focused evidence suite（含 residual 250–549 soleProductDraftAction 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百五十一轮：Client applyHost*Patch sole product draftAction 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百五十二轮：tip 上 642 项 focused evidence suite（含 residual 250–551 applyHost*Patch sole product draft 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百五十三轮：Host confirm store draft resolve sole create_task_template 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百五十四轮：tip 上 644 项 focused evidence suite（含 residual 250–553 store draft resolve sole product 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百五十五轮：Client knowledge.write confirm sole create_knowledge_note 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百五十六轮：tip 上 645 项 focused evidence suite（含 residual 250–555 knowledge confirm sole create_knowledge_note 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百五十七轮：Client goal.create confirm sole create_goal 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百五十八轮：tip 上 646 项 focused evidence suite（含 residual 250–557 goal confirm sole create_goal 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百五十九轮：Client goal confirm/cancel + knowledge confirm waiting_approval-only 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百六十轮：tip 上 647 项 focused evidence suite（含 residual 250–559 waiting_approval-only 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百六十一轮：Host panel goal/knowledge approve pre-lifecycle product gate 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百六十二轮：tip 上 651 项 focused evidence suite（含 residual 250–561 Host approve pre-lifecycle product gate 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百六十三轮：Host panel task.create approve pre-lifecycle sole create_task_template 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百六十四轮：tip 上 653 项 focused evidence suite（含 residual 250–563 task Host approve pre-lifecycle product gate 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百六十五轮：Host panel product reject pre-lifecycle waiting_approval 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百六十六轮：tip 上 655 项 focused evidence suite（含 residual 250–565 Host reject pre-lifecycle waiting_approval 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百六十七轮：Host panel product revise pre-lifecycle waiting_approval 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百六十八轮：tip 上 657 项 focused evidence suite（含 residual 250–567 Host revise pre-lifecycle waiting_approval 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百六十九轮：Host panel shared product ownership resolver 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百七十轮：tip 上 660 项 focused evidence suite（含 residual 250–569 Host ownership resolver 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百七十一轮：Host panel settlement reuses shared ownership resolver 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百七十二轮：tip 上 661 项 focused evidence suite（含 residual 250–571 Host settlement ownership 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百七十三轮：Host panel revise sole product draftAction gate 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百七十四轮：tip 上 663 项 focused evidence suite（含 residual 250–573 Host revise sole product 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百七十五轮：goal session primary-task confirm sole create_task_template 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百七十六轮：tip 上 664 项 focused evidence suite（含 residual 250–575 primary-task sole product 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百七十七轮：Host panel primary-task-shaped ownership → create_task_template 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百七十八轮：tip 上 666 项 focused evidence suite（含 residual 250–577 primary-task ownership 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百七十九轮：Host panel primary-task-shaped settlement via goal session 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百八十轮：tip 上 667 项 focused evidence suite（含 residual 250–579 primary-task settlement 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百八十一轮：Host panel settlement ownership classifiers 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百八十二轮：tip 上 669 项 focused evidence suite（含 residual 250–581 settlement classifiers 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百八十三轮：goal session primary-task confirm 转发 Host-revised goalId 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百八十四轮：tip 上 670 项 focused evidence suite（含 residual 250–583 primary-task goalId forward 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百八十五轮：Host workbench primary-task exclusive kind routing 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百八十六轮：tip 上 674 项 focused evidence suite（含 residual 250–585 primary-task exclusive kind 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百八十七轮：goal session Host lifecycle kind primary-task → task.create 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百八十八轮：tip 上 675 项 focused evidence suite（含 residual 250–587 Host lifecycle kind 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百八十九轮：dual-mirror primary-task goal session settle into exclusive task lane 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百九十轮：tip 上 679 项 focused evidence suite（含 residual 250–589 dual-mirror settle 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百九十一轮：dual-mirror process-local task.create 优先于 goal overwrite 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百九十二轮：tip 上 681 项 focused evidence suite（含 residual 250–591 process-local dual-mirror first 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百九十三轮：session restore dual-mirror exclusive task before focus 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百九十四轮：tip 上 683 项 focused evidence suite（含 residual 250–593 session dual-mirror focus 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百九十五轮：live exclusive dual-mirror before builders 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百九十六轮：tip 上 685 项 focused evidence suite（含 residual 250–595 live dual-mirror builders 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百九十七轮：Host panel ownership dual-mirror exclusive before match 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留五百九十八轮：tip 上 688 项 focused evidence suite（含 residual 250–597 ownership dual-mirror exclusive 锁）通过；仍不构成全量 PR 门禁证据。
-  残留五百九十九轮：drop dual-mirror primary-task ghost beside normal goal 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留六百轮：tip 上 690 项 focused evidence suite（含 residual 250–599 dual-mirror ghost drop 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百零一轮：knowledge ghost drop + focus exclusive-only 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留六百零二轮：tip 上 692 项 focused evidence suite（含 residual 250–601 knowledge ghost + focus exclusive 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百零三轮：knowledge classifier + AgentRun history session focus 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留六百零四轮：tip 上 694 项 focused evidence suite（含 residual 250–603 knowledge classifier + history session focus 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百零五轮：knowledge process-local edit revise via classifier 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留六百零六轮：tip 上 695 项 focused evidence suite（含 residual 250–605 knowledge process-local edit revise 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百零七轮：goal-session process-local edit revise via classifier 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留六百零八轮：tip 上 696 项 focused evidence suite（含 residual 250–607 goal-session process-local edit revise 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百零九轮：dirty approve process-local revise before goal/knowledge confirm 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留六百一十轮：tip 上 699 项 focused evidence suite（含 residual 250–609 dirty approve process-local revise before confirm 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百一十一轮：default Host workbench focus prefers exclusive session 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留六百一十二轮：tip 上 702 项 focused evidence suite（含 residual 250–611 exclusive default Host workbench focus 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百一十三轮：Host proposal/receipt exclusive session order 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
-  残留六百一十四轮：tip 上 705 项 focused evidence suite（含 residual 250–613 exclusive Host proposal/receipt order 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百一十五轮：contracts ActionResult 双轨死表面删除落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百一十六轮：tip 上 708 项 focused evidence suite（含 residual 250–615 ActionResult dual-track retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百一十七轮：Result ADR 文档双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百一十八轮：tip 上 710 项 focused evidence suite（含 residual 250–617 Result ADR alignment 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百一十九轮：ADR-021/022 contracts/response 死引用收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百二十轮：tip 上 711 项 focused evidence suite（含 residual 250–619 ADR route response package retirement 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百二十一轮：API POST /logs Result 信封收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百二十二轮：tip 上 716 项 focused evidence suite（含 residual 250–621 POST /logs Result envelope 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百二十三轮：API GET /metrics/json Result 信封收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百二十四轮：tip 上 720 项 focused evidence suite（含 residual 250–623 /metrics/json Result envelope 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百二十五轮：API GET /info Result 信封收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百二十六轮：tip 上 724 项 focused evidence suite（含 residual 250–625 GET /info Result envelope 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百二十七轮：API 全局错误中间件 Result 信封收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百二十八轮：tip 上 730 项 focused evidence suite（含 residual 250–627 error middleware Result envelope 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百二十九轮：API PowerSync GET /schema Result 信封收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百三十轮：tip 上 735 项 focused evidence suite（含 residual 250–629 PowerSync /schema Result envelope 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百三十一轮：schedule 操作响应双轨 DTO 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百三十二轮：tip 上 737 项 focused evidence suite（含 residual 250–631 schedule operation dual DTO retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百三十三轮：SettingOperationRes 双轨信封收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百三十四轮：tip 上 739 项 focused evidence suite（含 residual 250–633 SettingOperationRes dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百三十五轮：reminder 操作响应双轨信封收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百三十六轮：tip 上 741 项 focused evidence suite（含 residual 250–635 reminder operation dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百三十七轮：AuthOperationResult 双轨信封收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百三十八轮：tip 上 745 项 focused evidence suite（含 residual 250–637 AuthOperationResult dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百三十九轮：BatchOperationResponseDTO 双名收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百四十轮：tip 上 747 项 focused evidence suite（含 residual 250–639 BatchOperationResponseDTO dual name retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百四十一轮：shared/dtos 死表面清零落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百四十二轮：tip 上 749 项 focused evidence suite（含 residual 250–641 shared/dtos dead dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百四十三轮：shared UI 死双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百四十四轮：tip 上 751 项 focused evidence suite（含 residual 250–643 shared UI editor dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百四十五轮：shared 配置 VO/错误 schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百四十六轮：tip 上 754 项 focused evidence suite（含 residual 250–645 shared dual config/error schema retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百四十七轮：contracts Summary 双轨死表面收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百四十八轮：tip 上 758 项 focused evidence suite（含 residual 250–647 Summary dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百四十九轮：task 依赖/子任务 Server 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百五十轮：tip 上 760 项 focused evidence suite（含 residual 250–649 task dependency/subtask server dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百五十一轮：governance RuleServerDTO 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百五十二轮：tip 上 762 项 focused evidence suite（含 residual 250–651 RuleServerDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百五十三轮：schedule Static/Dashboard 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百五十四轮：tip 上 765 项 focused evidence suite（含 residual 250–653 schedule Static/Dashboard dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百五十五轮：entities dual re-export 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百五十六轮：tip 上 767 项 focused evidence suite（含 residual 250–655 entities dual re-export retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百五十七轮：SettingOverviewDTO 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百五十八轮：tip 上 769 项 focused evidence suite（含 residual 250–657 SettingOverviewDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百五十九轮：notification 模板 VO 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百六十轮：tip 上 771 项 focused evidence suite（含 residual 250–659 notification template VO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百六十一轮：空 dual barrel re-export 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百六十二轮：tip 上 774 项 focused evidence suite（含 residual 250–661 empty dual barrel re-export retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百六十三轮：schedule list/stats ResponseDTO + detect-conflicts 包装双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百六十四轮：tip 上 776 项 focused evidence suite（含 residual 250–663 schedule list/stats + detect-conflicts dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百六十五轮：schedule batch-delete OpenAPI schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百六十六轮：tip 上 778 项 focused evidence suite（含 residual 250–665 schedule batch-delete OpenAPI schema dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百六十七轮：task bind-to-goal 请求 schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百六十八轮：tip 上 780 项 focused evidence suite（含 residual 250–667 task bind-to-goal request schema dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百六十九轮：knowledge sync 请求 params schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百七十轮：tip 上 783 项 focused evidence suite（含 residual 250–669 knowledge sync params dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百七十一轮：notification id-batch 请求 schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百七十二轮：tip 上 785 项 focused evidence suite（含 residual 250–671 notification id-batch dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百七十三轮：AI conversation name 请求 schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百七十四轮：tip 上 787 项 focused evidence suite（含 residual 250–673 AI conversation name dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百七十五轮：knowledge list projection filter schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百七十六轮：tip 上 789 项 focused evidence suite（含 residual 250–675 knowledge list projection filter dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百七十七轮：goal goalId list params schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百七十八轮：tip 上 791 项 focused evidence suite（含 residual 250–677 goal list params dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百七十九轮：schedule detect-conflicts response schema 名称双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百八十轮：tip 上 793 项 focused evidence suite（含 residual 250–679 detect-conflicts response schema name dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百八十一轮：governance OpenAPI response schema 名称双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百八十二轮：tip 上 795 项 focused evidence suite（含 residual 250–681 governance OpenAPI response schema name dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百八十三轮：AI provider create schema 名称双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百八十四轮：tip 上 797 项 focused evidence suite（含 residual 250–683 AI provider create schema name dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百八十五轮：authentication credential server 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百八十六轮：tip 上 799 项 focused evidence suite（含 residual 250–685 auth credential server dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百八十七轮：authentication base credential server 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百八十八轮：tip 上 800 项 focused evidence suite（含 residual 250–687 auth base credential server dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百八十九轮：goal list response schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百九十轮：tip 上 802 项 focused evidence suite（含 residual 250–689 goal list response dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百九十一轮：ai chat list response schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百九十二轮：tip 上 805 项 focused evidence suite（含 residual 250–691 ai chat list response dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百九十三轮：reminder list response schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百九十四轮：tip 上 808 项 focused evidence suite（含 residual 250–693 reminder list response dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百九十五轮：ai response Res schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百九十六轮：tip 上 811 项 focused evidence suite（含 residual 250–695 ai response Res dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百九十七轮：task check-expired instances response schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留六百九十八轮：tip 上 814 项 focused evidence suite（含 residual 250–697 task check-expired Res dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留六百九十九轮：repository installation response schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百轮：tip 上 817 项 focused evidence suite（含 residual 250–699 knowledge installation Res dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百零一轮：repository installation repository DTO schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百零二轮：tip 上 820 项 focused evidence suite（含 residual 250–701 installation repository DTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百零三轮：schedule query params schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百零四轮：tip 上 823 项 focused evidence suite（含 residual 250–703 schedule query params dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百零五轮：ai goal automation plan/preview schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百零六轮：tip 上 826 项 focused evidence suite（含 residual 250–705 goal automation plan dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百零七轮：schedule request schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百零八轮：tip 上 830 项 focused evidence suite（含 residual 250–707 schedule request dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百零九轮：schedule-task request schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百一十轮：tip 上 834 项 focused evidence suite（含 residual 250–709 schedule-task request dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百一十一轮：task dependency transport schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百一十二轮：tip 上 838 项 focused evidence suite（含 residual 250–711 task dependency transport dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百一十三轮：authentication session response schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百一十四轮：tip 上 841 项 focused evidence suite（含 residual 250–713 auth session response dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百一十五轮：schedule create/resolve response schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百一十六轮：tip 上 844 项 focused evidence suite（含 residual 250–715 schedule response dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百一十七轮：schedule batch response schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百一十八轮：tip 上 847 项 focused evidence suite（含 residual 250–717 schedule batch response dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百一十九轮：ai goal generation draft/preview/result schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百二十轮：tip 上 850 项 focused evidence suite（含 residual 250–719 goal generation draft dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百二十一轮：ai provider test result schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百二十二轮：tip 上 853 项 focused evidence suite（含 residual 250–721 provider test result dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百二十三轮：ai knowledge note persisted-ref schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百二十四轮：tip 上 856 项 focused evidence suite（含 residual 250–723 knowledge note persisted-ref dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百二十五轮：schedule conflict detection result schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百二十六轮：tip 上 859 项 focused evidence suite（含 residual 250–725 schedule conflict result dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百二十七轮：ai token usage schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百二十八轮：tip 上 862 项 focused evidence suite（含 residual 250–727 token usage dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百二十九轮：ai goal workflow result schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百三十轮：tip 上 865 项 focused evidence suite（含 residual 250–729 goal workflow result dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百三十一轮：governance code snippet / rule tag schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百三十二轮：tip 上 868 项 focused evidence suite（含 residual 250–731 governance snippet/tag dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百三十三轮：reminder active hours / group stats schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百三十四轮：tip 上 871 项 focused evidence suite（含 residual 250–733 reminder hours/stats dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百三十五轮：reminder trigger / notification config schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百三十六轮：tip 上 874 项 focused evidence suite（含 residual 250–735 reminder trigger/notification dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百三十七轮：goal key-result progress / snapshot schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百三十八轮：tip 上 877 项 focused evidence suite（含 residual 250–737 key-result progress/snapshot dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百三十九轮：task goal-binding / reminder-config schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百四十轮：tip 上 880 项 focused evidence suite（含 residual 250–739 task goal-binding/reminder dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百四十一轮：goal reminder-config schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百四十二轮：tip 上 883 项 focused evidence suite（含 residual 250–741 goal reminder-config dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百四十三轮：task recurrence-rule schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百四十四轮：tip 上 886 项 focused evidence suite（含 residual 250–743 task recurrence-rule dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百四十五轮：goal focus-mode schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百四十六轮：tip 上 889 项 focused evidence suite（含 residual 250–745 goal focus-mode dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百四十七轮：task time-config schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百四十八轮：tip 上 892 项 focused evidence suite（含 residual 250–747 task time-config dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百四十九轮：schedule nested VO response schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百五十轮：tip 上 896 项 focused evidence suite（含 residual 250–749 schedule nested VO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百五十一轮：TimeSlot + AIModelInfo schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百五十二轮：tip 上 902 项 focused evidence suite（含 residual 250–751 TimeSlot + AIModelInfo dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百五十三轮：goal create/update reminder-config request dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百五十四轮：tip 上 905 项 focused evidence suite（含 residual 250–753 goal reminder-config request dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百五十五轮：KnowledgeCitation schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百五十六轮：tip 上 908 项 focused evidence suite（含 residual 250–755 KnowledgeCitation dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百五十七轮：AgentCitation schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百五十八轮：tip 上 911 项 focused evidence suite（含 residual 250–757 AgentCitation dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百五十九轮：OAuth callback/bind payload dual 收口落地；仍不构成真实 OAuth 跨端 E2E / 全量 PR 门禁证据。
-  残留七百六十轮：tip 上 914 项 focused evidence suite（含 residual 250–759 OAuth callback/bind dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百六十一轮：ReindexKnowledgeRes dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百六十二轮：tip 上 917 项 focused evidence suite（含 residual 250–761 ReindexKnowledgeRes dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百六十三轮：OAuth provider enum dual 收口落地；仍不构成真实 OAuth 跨端 E2E / 全量 PR 门禁证据。
-  残留七百六十四轮：tip 上 920 项 focused evidence suite（含 residual 250–763 OAuth provider enum dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百六十五轮：OAuth response dual 收口落地；仍不构成真实 OAuth 跨端 E2E / 全量 PR 门禁证据。
-  残留七百六十六轮：tip 上 923 项 focused evidence suite（含 residual 250–765 OAuth response dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百六十七轮：CheckAvailabilityRes dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百六十八轮：tip 上 926 项 focused evidence suite（含 residual 250–767 CheckAvailabilityRes dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百六十九轮：session ValidateToken/GuestMode Res dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百七十轮：tip 上 929 项 focused evidence suite（含 residual 250–769 session Res dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百七十一轮：export/import settings Res dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百七十二轮：tip 上 932 项 focused evidence suite（含 residual 250–771 settings export/import Res dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百七十三轮：ListKnowledgeRepositoryConnectionsRes dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百七十四轮：tip 上 935 项 focused evidence suite（含 residual 250–773 list knowledge connections Res dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百七十五轮：upcoming/today schedule list Res dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百七十六轮：tip 上 938 项 focused evidence suite（含 residual 250–775 reminder schedule list Res dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百七十七轮：focus statistics/pomodoro Res dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百七十八轮：tip 上 941 项 focused evidence suite（含 residual 250–777 focus statistics/pomodoro Res dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百七十九轮：QueryGoalFoldersRes dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百八十轮：tip 上 944 项 focused evidence suite（含 residual 250–779 QueryGoalFoldersRes dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百八十一轮：BatchGroupTemplatesRes dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百八十二轮：tip 上 947 项 focused evidence suite（含 residual 250–781 BatchGroupTemplatesRes dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百八十三轮：list/search/revisions Res dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百八十四轮：tip 上 950 项 focused evidence suite（含 residual 250–783 list/search/revisions Res dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百八十五轮：focus status/history Res dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百八十六轮：tip 上 952 项 focused evidence suite（含 residual 250–785 focus status/history Res dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百八十七轮：GenerateGoalAutomationRes dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百八十八轮：tip 上 954 项 focused evidence suite（含 residual 250–787 GenerateGoalAutomationRes dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百八十九轮：task instance range/op Res dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百九十轮：tip 上 956 项 focused evidence suite（含 residual 250–789 task instance range/op Res dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百九十一轮：export/import goals Res dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百九十二轮：tip 上 958 项 focused evidence suite（含 residual 250–791 export/import goals Res dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百九十三轮：local vault Res dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百九十四轮：tip 上 961 项 focused evidence suite（含 residual 250–793 local vault Res dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百九十五轮：local vault Req dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百九十六轮：tip 上 964 项 focused evidence suite（含 residual 250–795 local vault req dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百九十七轮：TaskGraphDependencyDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留七百九十八轮：tip 上 967 项 focused evidence suite（含 residual 250–797 TaskGraphDependencyDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留七百九十九轮：BatchOperationResultDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百轮：tip 上 970 项 focused evidence suite（含 residual 250–799 BatchOperationResultDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百零一轮：UnreadCountResponse dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百零二轮：tip 上 973 项 focused evidence suite（含 residual 250–801 UnreadCountResponse dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百零三轮：KnowledgeRepositoryConnectionClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百零四轮：tip 上 976 项 focused evidence suite（含 residual 250–803 KnowledgeRepositoryConnectionClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百零五轮：ProgressBreakdown dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百零六轮：tip 上 979 项 focused evidence suite（含 residual 250–805 ProgressBreakdown dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百零七轮：MessageClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百零八轮：tip 上 982 项 focused evidence suite（含 residual 250–807 MessageClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百零九轮：AIConversationClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百一十轮：tip 上 985 项 focused evidence suite（含 residual 250–809 AIConversationClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百一十一轮：AIProviderConfigClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百一十二轮：tip 上 988 项 focused evidence suite（含 residual 250–811 AIProviderConfigClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百一十三轮：FocusSessionClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百一十四轮：tip 上 991 项 focused evidence suite（含 residual 250–813 FocusSessionClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百一十五轮：GoalRecordClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百一十六轮：tip 上 994 项 focused evidence suite（含 residual 250–815 GoalRecordClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百一十七轮：KeyResult/GoalReview ClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百一十八轮：tip 上 997 项 focused evidence suite（含 residual 250–817 KeyResult/GoalReview ClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百一十九轮：Goal/GoalFolder ClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百二十轮：tip 上 1000 项 focused evidence suite（含 residual 250–819 Goal/GoalFolder ClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百二十一轮：Rule/RuleRevision ClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百二十二轮：tip 上 1003 项 focused evidence suite（含 residual 250–821 Rule/RuleRevision ClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百二十三轮：UserSettingClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百二十四轮：tip 上 1006 项 focused evidence suite（含 residual 250–823 UserSettingClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百二十五轮：AccountClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百二十六轮：tip 上 1009 项 focused evidence suite（含 residual 250–825 AccountClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百二十七轮：ReminderGroup/History ClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百二十八轮：tip 上 1012 项 focused evidence suite（含 residual 250–827 ReminderGroup/History ClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百二十九轮：NotificationPreference/CalendarEntry/UserReminderPreferences ClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百三十轮：tip 上 1015 项 focused evidence suite（含 residual 250–829 Preference/Calendar ClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百三十一轮：TaskDependency/TaskInstance/ScheduleTask ClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百三十二轮：tip 上 1018 项 focused evidence suite（含 residual 250–831 Task/Schedule ClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百三十三轮：ActiveTime/ReminderTemplate/ScheduleExecution dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百三十四轮：tip 上 1021 项 focused evidence suite（含 residual 250–833 ActiveTime/Template/Execution dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百三十五轮：ReminderTemplate request ActiveTime dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百三十六轮：tip 上 1024 项 focused evidence suite（含 residual 250–835 request ActiveTime dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百三十七轮：TaskFolder/TaskTemplateHistory ClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百三十八轮：tip 上 1027 项 focused evidence suite（含 residual 250–837 TaskFolder/History ClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百三十九轮：NotificationTemplate ClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百四十轮：tip 上 1030 项 focused evidence suite（含 residual 250–839 NotificationTemplate ClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百四十一轮：SubtaskClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百四十二轮：tip 上 1033 项 focused evidence suite（含 residual 250–841 SubtaskClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百四十三轮：TaskFolder/History ServerDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百四十四轮：tip 上 1036 项 focused evidence suite（含 residual 250–843 TaskFolder/History ServerDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百四十五轮：NotificationTemplate ServerDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百四十六轮：tip 上 1039 项 focused evidence suite（含 residual 250–845 NotificationTemplate ServerDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百四十七轮：DeviceInfoDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百四十八轮：tip 上 1042 项 focused evidence suite（含 residual 250–847 DeviceInfoDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百四十九轮：ChannelResponse/Error/RateLimit DTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百五十轮：tip 上 1045 项 focused evidence suite（含 residual 250–849 channel VO DTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百五十一轮：CategoryPreference/Action/DND/Metadata DTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百五十二轮：tip 上 1048 项 focused evidence suite（含 residual 250–851 preference VO DTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百五十三轮：GoalMetadata/AccountSettings/ChecklistItemDefinition DTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百五十四轮：tip 上 1051 项 focused evidence suite（含 residual 250–853 exact VO DTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百五十五轮：HashedPassword/Email/Phone/PlainPassword DTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百五十六轮：tip 上 1054 项 focused evidence suite（含 residual 250–855 auth secret VO DTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百五十七轮：FrequencyAdjustment/ResponseMetrics DTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百五十八轮：tip 上 1057 项 focused evidence suite（含 residual 250–857 reminder metrics VO DTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百五十九轮：DomainDate≠TransferDate dual keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百六十轮：tip 上 1060 项 focused evidence suite（含 residual 250–859 DomainDate dual keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百六十一轮：ReminderResponse/NotificationChannel subset dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百六十二轮：tip 上 1063 项 focused evidence suite（含 residual 250–861 subset Client/Server dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百六十三轮：NotificationClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百六十四轮：tip 上 1066 项 focused evidence suite（含 residual 250–863 NotificationClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百六十五轮：AuthStatusDTO 死 dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百六十六轮：tip 上 1069 项 focused evidence suite（含 residual 250–865 AuthStatusDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百六十七轮：LoginResponse 死 dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百六十八轮：tip 上 1072 项 focused evidence suite（含 residual 250–867 LoginResponse dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百六十九轮：DesktopLoginRequest dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百七十轮：tip 上 1075 项 focused evidence suite（含 residual 250–869 DesktopLoginRequest dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百七十一轮：RegisterRequest dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百七十二轮：tip 上 1078 项 focused evidence suite（含 residual 250–871 RegisterRequest dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百七十三轮：OfflineLoginResponse dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百七十四轮：tip 上 1081 项 focused evidence suite（含 residual 250–873 OfflineLoginResponse dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百七十五轮：RegistrationRequestPayload dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百七十六轮：tip 上 1084 项 focused evidence suite（含 residual 250–875 RegistrationRequestPayload dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百七十七轮：ChannelConfig dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百七十八轮：tip 上 1087 项 focused evidence suite（含 residual 250–877 ChannelConfig dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百七十九轮：Client≠Server keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百八十轮：tip 上 1090 项 focused evidence suite（含 residual 250–879 Client≠Server keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百八十一轮：DeviceInfoClientDTO keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百八十二轮：tip 上 1093 项 focused evidence suite（含 residual 250–881 DeviceInfoClientDTO keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百八十三轮：SessionRestoreResult layered extension keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百八十四轮：tip 上 1096 项 focused evidence suite（含 residual 250–883 SessionRestoreResult keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百八十五轮：portable boundary re-lock surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百八十六轮：tip 上 1099 项 focused evidence suite（含 residual 250–885 portable boundary re-lock 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百八十七轮：AutoLoginResult layered extension keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百八十八轮：tip 上 1102 项 focused evidence suite（含 residual 250–887 AutoLoginResult keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百八十九轮：SessionStatus extension keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留八百九十轮：tip 上 1105 项 focused evidence suite（含 residual 250–889 SessionStatus keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百九十一轮：§13.2 open-items honest re-audit surface 锁落地；仍不构成全量 PR 门禁证据。
-  残留八百九十二轮：tip 上 1108 项 focused evidence suite（含 residual 250–891 open-items honest re-audit surface 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百九十三轮：OAuthProvider transport≠domain keep-boundary surface 锁落地；仍不构成全量 PR 门禁证据。
-  残留八百九十四轮：tip 上 1111 项 focused evidence suite（含 residual 250–893 OAuthProvider keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百九十五轮：refresh-result layered dual keep-boundary surface 锁落地；仍不构成全量 PR 门禁证据。
-  残留八百九十六轮：tip 上 1114 项 focused evidence suite（含 residual 250–895 refresh-result keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百九十七轮：TokenStorageData ≠ SaveTokenRequest keep-boundary surface 锁落地；仍不构成全量 PR 门禁证据。
-  残留八百九十八轮：tip 上 1117 项 focused evidence suite（含 residual 250–897 TokenStorage keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留八百九十九轮：LoginRequest ≠ EmailLoginCredentials keep-boundary surface 锁落地；仍不构成全量 PR 门禁证据。
-  残留九百轮：tip 上 1120 项 focused evidence suite（含 residual 250–899 LoginRequest keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百零一轮：DesktopAuthStatus dual retired surface 锁落地；仍不构成全量 PR 门禁证据。
-  残留九百零二轮：tip 上 1123 项 focused evidence suite（含 residual 250–901 DesktopAuthStatus dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百零三轮：DesktopBootstrapApi dual retired surface 锁落地；仍不构成全量 PR 门禁证据。
-  残留九百零四轮：tip 上 1126 项 focused evidence suite（含 residual 250–903 DesktopBootstrapApi dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百零五轮：reminder DesktopApi dual retired surface 锁落地；仍不构成全量 PR 门禁证据。
-  残留九百零六轮：tip 上 1129 项 focused evidence suite（含 residual 250–905 reminder DesktopApi dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百零七轮：themeSync electronAPI dual retired surface 锁落地；仍不构成全量 PR 门禁证据。
-  残留九百零八轮：tip 上 1132 项 focused evidence suite（含 residual 250–907 themeSync dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百零九轮：Window.electronAPI + desktop-detect dual retired surface 锁落地；仍不构成全量 PR 门禁证据。
-  残留九百一十轮：tip 上 1135 项 focused evidence suite（含 residual 250–909 Window dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百一十一轮：CustomNotificationView ElectronBridge dual retired surface 锁落地；仍不构成全量 PR 门禁证据。
-  残留九百一十二轮：tip 上 1138 项 focused evidence suite（含 residual 250–911 CustomNotification ElectronBridge dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百一十三轮：host-access cast dual retired surface 锁落地；仍不构成全量 PR 门禁证据。
-  残留九百一十四轮：tip 上 1141 项 focused evidence suite（含 residual 250–913 host-access dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百一十五轮：DESKTOP_AUTH_API_KEY dual retired surface 锁落地；仍不构成全量 PR 门禁证据。
-  残留九百一十六轮：tip 上 1144 项 focused evidence suite（含 residual 250–915 DESKTOP_AUTH_API_KEY dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百一十七轮：AuthFlowResult named duals retired surface 锁落地；仍不构成全量 PR 门禁证据。
-  残留九百一十八轮：tip 上 1147 项 focused evidence suite（含 residual 250–917 AuthFlowResult named duals retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百一十九轮：DesktopBootstrapApi name + hasDesktopElectronBridge dual retired surface 锁落地；仍不构成全量 PR 门禁证据。
-  残留九百二十轮：tip 上 1150 项 focused evidence suite（含 residual 250–919 bootstrap/detect name dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百二十一轮：DesktopLoginRequest name dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百二十二轮：tip 上 1150 项 focused evidence suite（含 residual 250–921 DesktopLoginRequest name dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百二十三轮：isDesktopEnvironment name dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百二十四轮：tip 上 1153 项 focused evidence suite（含 residual 250–923 isDesktopEnvironment name dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百二十五轮：OfflineLoginResponse name dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百二十六轮：tip 上 1153 项 focused evidence suite（含 residual 250–925 OfflineLoginResponse name dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百二十七轮：I*Service ClientPort facade keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百二十八轮：tip 上 1156 项 focused evidence suite（含 residual 250–927 I*Service ClientPort facade keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百二十九轮：ElectronBridge window-controls keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百三十轮：tip 上 1158 项 focused evidence suite（含 residual 250–929 ElectronBridge window-controls keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百三十一轮：RegisterRequest→EmailRegisterCredentials dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百三十二轮：tip 上 1158 项 focused evidence suite（含 residual 250–931 RegisterRequest→EmailRegisterCredentials dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百三十三轮：AuthRemoteApiResult dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百三十四轮：tip 上 1161 项 focused evidence suite（含 residual 250–933 AuthRemoteApiResult dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百三十五轮：LifecycleSessionRestoreResult name dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百三十六轮：tip 上 1162 项 focused evidence suite（含 residual 250–935 LifecycleSessionRestoreResult name dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百三十七轮：session helper duals retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百三十八轮：tip 上 1165 项 focused evidence suite（含 residual 250–937 session helper duals retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百三十九轮：toErrorLog dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百四十轮：tip 上 1169 项 focused evidence suite（含 residual 250–939 toErrorLog dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百四十一轮：host ElectronBridge helper duals retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百四十二轮：tip 上 1172 项 focused evidence suite（含 residual 250–941 host ElectronBridge helper duals retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百四十三轮：escapeHtml dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百四十四轮：tip 上 1175 项 focused evidence suite（含 residual 250–943 escapeHtml dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百四十五轮：formatZodErrors dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百四十六轮：tip 上 1179 项 focused evidence suite（含 residual 250–945 formatZodErrors dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百四十七轮：http envelope guard duals retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百四十八轮：tip 上 1182 项 focused evidence suite（含 residual 250–947 http envelope guard duals retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百四十九轮：maskEmail dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百五十轮：tip 上 1185 项 focused evidence suite（含 residual 250–949 maskEmail dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百五十一轮：app-vue AI isRecord dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百五十二轮：tip 上 1188 项 focused evidence suite（含 residual 250–951 AI isRecord dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百五十三轮：app-vue AI createAgentId dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百五十四轮：tip 上 1191 项 focused evidence suite（含 residual 250–953 createAgentId dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百五十五轮：app-vue AI getRecordString dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百五十六轮：tip 上 1194 项 focused evidence suite（含 residual 250–955 getRecordString dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百五十七轮：vault FS guards dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百五十八轮：tip 上 1197 项 focused evidence suite（含 residual 250–957 vault FS guards dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百五十九轮：normalizeEmail dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百六十轮：tip 上 1200 项 focused evidence suite（含 residual 250–959 normalizeEmail dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百六十一轮：toChallengePurpose dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百六十二轮：tip 上 1203 项 focused evidence suite（含 residual 250–961 toChallengePurpose dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百六十三轮：findSSEBoundary dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百六十四轮：tip 上 1206 项 focused evidence suite（含 residual 250–963 findSSEBoundary dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百六十五轮：getRequestId dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百六十六轮：tip 上 1209 项 focused evidence suite（含 residual 250–965 getRequestId dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百六十七轮：isAbortLikeError dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百六十八轮：tip 上 1213 项 focused evidence suite（含 residual 250–967 isAbortLikeError dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百六十九轮：knowledge-index value helpers dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百七十轮：tip 上 1216 项 focused evidence suite（含 residual 250–969 knowledge-index value helpers dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百七十一轮：withObservabilityPayload dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百七十二轮：tip 上 1219 项 focused evidence suite（含 residual 250–971 withObservabilityPayload dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百七十三轮：createComposableHandleError dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百七十四轮：tip 上 1223 项 focused evidence suite（含 residual 250–973 createComposableHandleError dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百七十五轮：task toast handleError dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百七十六轮：tip 上 1224 项 focused evidence suite（含 residual 250–975 task toast handleError dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百七十七轮：parseSSE dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百七十八轮：tip 上 1227 项 focused evidence suite（含 residual 250–977 parseSSE dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百七十九轮：toPrismaJson dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百八十轮：tip 上 1231 项 focused evidence suite（含 residual 250–979 toPrismaJson dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百八十一轮：toIso dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百八十二轮：tip 上 1234 项 focused evidence suite（含 residual 250–981 toIso dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百八十三轮：getFirstQueryValue dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百八十四轮：tip 上 1237 项 focused evidence suite（含 residual 250–983 getFirstQueryValue dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百八十五轮：parseBoolean dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百八十六轮：tip 上 1240 项 focused evidence suite（含 residual 250–985 parseBoolean dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百八十七轮：normalizeRuntimeContributions dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百八十八轮：tip 上 1244 项 focused evidence suite（含 residual 250–987 normalizeRuntimeContributions dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百八十九轮：parseString/parseNumber dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百九十轮：tip 上 1248 项 focused evidence suite（含 residual 250–989 parseString/parseNumber dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百九十一轮：toDomainProvider dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百九十二轮：tip 上 1251 项 focused evidence suite（含 residual 250–991 toDomainProvider dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百九十三轮：createStreamId dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百九十四轮：tip 上 1254 项 focused evidence suite（含 residual 250–993 createStreamId dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百九十五轮：previewText dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百九十六轮：tip 上 1258 项 focused evidence suite（含 residual 250–995 previewText dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百九十七轮：lastArg dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留九百九十八轮：tip 上 1261 项 focused evidence suite（含 residual 250–997 lastArg dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留九百九十九轮：errorMessage dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千轮：tip 上 1265 项 focused evidence suite（含 residual 250–999 errorMessage dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零一轮：clamp dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零二轮：tip 上 1268 项 focused evidence suite（含 residual 250–1001 clamp dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零三轮：resolveExportRef dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零四轮：tip 上 1272 项 focused evidence suite（含 residual 250–1003 resolveExportRef dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零五轮：presentation preference dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零六轮：tip 上 1275 项 focused evidence suite（含 residual 250–1005 presentation preference dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零七轮：reminder time-of-day dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零八轮：tip 上 1279 项 focused evidence suite（含 residual 250–1007 reminder time-of-day dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零九轮：readNestedNumber dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零一十轮：tip 上 1283 项 focused evidence suite（含 residual 250–1009 readNestedNumber dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零一十一轮：previewText dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零一十二轮：tip 上 1287 项 focused evidence suite（含 residual 250–1011 previewText dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零一十三轮：buildReminderTemplateInput dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零一十四轮：tip 上 1291 项 focused evidence suite（含 residual 250–1013 buildReminderTemplateInput dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零一十五轮：buildRecurrenceRule dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零一十六轮：tip 上 1295 项 focused evidence suite（含 residual 250–1015 buildRecurrenceRule dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零一十七轮：goal/editor resolveRef dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零一十八轮：tip 上 1299 项 focused evidence suite（含 residual 250–1017 goal/editor resolveRef dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零一十九轮：database CLI toErrorMessage dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零二十轮：tip 上 1303 项 focused evidence suite（含 residual 250–1019 database CLI toErrorMessage dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零二十一轮：notification parseBoolean dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零二十二轮：tip 上 1307 项 focused evidence suite（含 residual 250–1021 notification parseBoolean dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零二十三轮：governance parseString/parseNumber dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零二十四轮：tip 上 1311 项 focused evidence suite（含 residual 250–1023 governance parseString/parseNumber dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零二十五轮：notification parseJsonSafe dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零二十六轮：tip 上 1315 项 focused evidence suite（含 residual 250–1025 notification parseJsonSafe dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零二十七轮：web e2e normalizeOrigin dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零二十八轮：tip 上 1319 项 focused evidence suite（含 residual 250–1027 web e2e normalizeOrigin dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零二十九轮：openapi successResponse/errorResponse dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零三十轮：tip 上 1323 项 focused evidence suite（含 residual 250–1029 openapi successResponse/errorResponse dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零三十一轮：patterns createEventBusAdapter dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零三十二轮：tip 上 1327 项 focused evidence suite（含 residual 250–1031 patterns createEventBusAdapter dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零三十三轮：anIdentityId dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零三十四轮：tip 上 1331 项 focused evidence suite（含 residual 250–1033 anIdentityId dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零三十五轮：schedule-package-shim dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零三十六轮：tip 上 1335 项 focused evidence suite（含 residual 250–1035 schedule-package-shim dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零三十七轮：integration-global-setup dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零三十八轮：tip 上 1339 项 focused evidence suite（含 residual 250–1037 integration-global-setup dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零三十九轮：patterns scheduler dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零四十轮：tip 上 1343 项 focused evidence suite（含 residual 250–1039 patterns scheduler dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零四十一轮：desktop-build globalSetup dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零四十二轮：tip 上 1347 项 focused evidence suite（含 residual 250–1041 desktop-build globalSetup dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零四十三轮：integration-helpers dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零四十四轮：tip 上 1351 项 focused evidence suite（含 residual 250–1043 integration-helpers dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零四十五轮：completeAuthSuccess dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零四十六轮：tip 上 1355 项 focused evidence suite（含 residual 250–1045 completeAuthSuccess dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零四十七轮：§13.2 tip 指针刷新 + loadWorkspaceEnv keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零四十八轮：tip 上 1359 项 focused evidence suite（含 residual 250–1047 §13.2 tip refresh + loadWorkspaceEnv keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零四十九轮：auth operation failure dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零五十轮：tip 上 1363 项 focused evidence suite（含 residual 250–1049 reportAuthOperationFailure dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零五十一轮：enterGuestMode failure dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零五十二轮：tip 上 1363 项 focused evidence suite（含 residual 250–1051 enterGuestMode failure dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零五十三轮：§13.2 tip 指针刷新 + keep-boundary 再确认锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零五十四轮：tip 上 1363 项 focused evidence suite（含 residual 250–1053 §13.2 tip refresh + keep-boundary reaffirm 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零五十五轮：createComposableHandleError toast cluster 扩展 surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零五十六轮：tip 上 1364 项 focused evidence suite（含 residual 250–1055 createComposableHandleError toast cluster 扩展 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零五十七轮：setGovernanceError dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零五十八轮：tip 上 1364 项 focused evidence suite（含 residual 250–1057 setGovernanceError dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零五十九轮：useDashboard error dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零六十轮：tip 上 1364 项 focused evidence suite（含 residual 250–1059 useDashboard error dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零六十一轮：§13.2 tip 指针刷新 + keep-boundary 再确认锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零六十二轮：tip 上 1364 项 focused evidence suite（含 residual 250–1061 §13.2 tip refresh + keep-boundary reaffirm 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零六十三轮：dead useResultHandler dual removed surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零六十四轮：tip 上 1368 项 focused evidence suite（含 residual 250–1063 dead useResultHandler dual removed 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零六十五轮：§13.2 tip 指针刷新 + goalOperations keep-boundary 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零六十六轮：tip 上 1372 项 focused evidence suite（含 residual 250–1065 goalOperations keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零六十七轮：goal parseNumber/parseStringArray keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零六十八轮：tip 上 1377 项 focused evidence suite（含 residual 250–1067 goal parseNumber/parseStringArray keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零六十九轮：governance parseStringArray keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零七十轮：tip 上 1383 项 focused evidence suite（含 residual 250–1069 governance parseStringArray keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零七十一轮：dead useViewportBreakpoint removed surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零七十二轮：tip 上 1386 项 focused evidence suite（含 residual 250–1071 dead useViewportBreakpoint removed 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零七十三轮：§13.2 tip 指针刷新 + schedule route parsers keep-boundary 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零七十四轮：tip 上 1389 项 focused evidence suite（含 residual 250–1073 schedule route parsers keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零七十五轮：password/checkAvailability toast-only keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零七十六轮：tip 上 1393 项 focused evidence suite（含 residual 250–1075 password toast-only keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零七十七轮：autoLoginDesktop AutoLoginResult keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零七十八轮：tip 上 1397 项 focused evidence suite（含 residual 250–1077 autoLoginDesktop keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零七十九轮：removeRememberedAccount toast-only keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零八十轮：tip 上 1402 项 focused evidence suite（含 residual 250–1079 removeRemembered toast-only keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零八十一轮：account PowerSync parseJson keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零八十二轮：tip 上 1406 项 focused evidence suite（含 residual 250–1081 account PowerSync parseJson keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零八十三轮：goal clampPercentage keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零八十四轮：tip 上 1410 项 focused evidence suite（含 residual 250–1083 goal clampPercentage keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零八十五轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零八十六轮：tip 上 1410 项 focused evidence suite（含 residual 250–1085 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零八十七轮：dead useAIDraftPersistence removed surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零八十八轮：tip 上 1414 项 focused evidence suite（含 residual 250–1087 dead useAIDraftPersistence removed 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零八十九轮：isRecord cross-package keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零九十轮：tip 上 1418 项 focused evidence suite（含 residual 250–1089 isRecord keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零九十一轮：api PowerSync parseJsonLikeString keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零九十二轮：tip 上 1423 项 focused evidence suite（含 residual 250–1091 parseJsonLikeString keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零九十三轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零九十四轮：tip 上 1423 项 focused evidence suite（含 residual 250–1093 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零九十五轮：data-portability parseJsonField keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零九十六轮：tip 上 1428 项 focused evidence suite（含 residual 250–1095 parseJsonField keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零九十七轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千零九十八轮：tip 上 1428 项 focused evidence suite（含 residual 250–1097 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千零九十九轮：asRecord/toRecord keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百轮：tip 上 1433 项 focused evidence suite（含 residual 250–1099 asRecord/toRecord keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百零一轮：toTimestamp keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百零二轮：tip 上 1439 项 focused evidence suite（含 residual 250–1101 toTimestamp keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百零三轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百零四轮：tip 上 1439 项 focused evidence suite（含 residual 250–1103 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百零五轮：AI toNumber keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百零六轮：tip 上 1442 项 focused evidence suite（含 residual 250–1105 toNumber keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百零七轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百零八轮：tip 上 1442 项 focused evidence suite（含 residual 250–1107 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百零九轮：toStringArray keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百一十轮：tip 上 1447 项 focused evidence suite（含 residual 250–1109 toStringArray keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百一十一轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百一十二轮：tip 上 1447 项 focused evidence suite（含 residual 250–1111 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百一十三轮：data-portability toBoolean keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百一十四轮：tip 上 1451 项 focused evidence suite（含 residual 250–1113 toBoolean keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百一十五轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百一十六轮：tip 上 1451 项 focused evidence suite（含 residual 250–1115 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百一十七轮：optionalString/toNonEmptyString keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百一十八轮：tip 上 1454 项 focused evidence suite（含 residual 250–1117 optionalString/toNonEmptyString keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百一十九轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百二十轮：tip 上 1454 项 focused evidence suite（含 residual 250–1119 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百二十一轮：AI asNonEmptyString dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百二十二轮：tip 上 1459 项 focused evidence suite（含 residual 250–1121 asNonEmptyString dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百二十三轮：toDate/toDateString keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百二十四轮：tip 上 1464 项 focused evidence suite（含 residual 250–1123 toDate/toDateString keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百二十五轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百二十六轮：tip 上 1464 项 focused evidence suite（含 residual 250–1125 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百二十七轮：extractErrorMessage dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百二十八轮：tip 上 1468 项 focused evidence suite（含 residual 250–1127 extractErrorMessage dual retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百二十九轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百三十轮：tip 上 1468 项 focused evidence suite（含 residual 250–1129 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百三十一轮：generateUUID keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百三十二轮：tip 上 1472 项 focused evidence suite（含 residual 250–1131 generateUUID keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百三十三轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百三十四轮：tip 上 1472 项 focused evidence suite（含 residual 250–1133 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百三十五轮：newId/generateUUID keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百三十六轮：tip 上 1476 项 focused evidence suite（含 residual 250–1135 newId/generateUUID keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百三十七轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百三十八轮：tip 上 1476 项 focused evidence suite（含 residual 250–1137 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百三十九轮：isPlainObject/isRecord keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百四十轮：tip 上 1480 项 focused evidence suite（含 residual 250–1139 isPlainObject/isRecord keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百四十一轮：toMillis/toTimestamp keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百四十二轮：tip 上 1484 项 focused evidence suite（含 residual 250–1141 toMillis/toTimestamp keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百四十三轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百四十四轮：tip 上 1484 项 focused evidence suite（含 residual 250–1143 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百四十五轮：formatFileSize keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百四十六轮：tip 上 1488 项 focused evidence suite（含 residual 250–1145 formatFileSize keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百四十七轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百四十八轮：tip 上 1488 项 focused evidence suite（含 residual 250–1147 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百四十九轮：toKnowledgeNoteRef keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百五十轮：tip 上 1492 项 focused evidence suite（含 residual 250–1149 toKnowledgeNoteRef keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百五十一轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百五十二轮：tip 上 1492 项 focused evidence suite（含 residual 250–1151 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百五十三轮：tokenize keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百五十四轮：tip 上 1496 项 focused evidence suite（含 residual 250–1153 tokenize keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百五十五轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百五十六轮：toDashboardTaskInstanceRecord dual 收口 surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百五十七轮：tip 上 1500 项 focused evidence suite（含 residual 250–1156 toDashboardTaskInstanceRecord dual 收口锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百五十八轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百五十九轮：toPrismaJson keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百六十轮：tip 上 1504 项 focused evidence suite（含 residual 250–1159 toPrismaJson keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百六十一轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百六十二轮：contracts private isRecord keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百六十三轮：tip 上 1508 项 focused evidence suite（含 residual 250–1162 contracts isRecord keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百六十四轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百六十五轮：startOfDay keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百六十六轮：tip 上 1512 项 focused evidence suite（含 residual 250–1165 startOfDay keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百六十七轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百六十八轮：mapPriority dual 收口 surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百六十九轮：tip 上 1516 项 focused evidence suite（含 residual 250–1168 mapPriority dual 收口锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百七十轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百七十一轮：readString keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百七十二轮：tip 上 1520 项 focused evidence suite（含 residual 250–1171 readString keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百七十三轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百七十四轮：normalizePath keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百七十五轮：tip 上 1524 项 focused evidence suite（含 residual 250–1174 normalizePath keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百七十六轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百七十七轮：buildTaskName keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百七十八轮：tip 上 1528 项 focused evidence suite（含 residual 250–1177 buildTaskName keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百七十九轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百八十轮：comparePriority keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百八十一轮：tip 上 1532 项 focused evidence suite（含 residual 250–1180 comparePriority keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百八十二轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百八十三轮：defaultExtractContext keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百八十四轮：tip 上 1536 项 focused evidence suite（含 residual 250–1183 defaultExtractContext keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百八十五轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百八十六轮：getTemplateById keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百八十七轮：tip 上 1540 项 focused evidence suite（含 residual 250–1186 getTemplateById keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百八十八轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百八十九轮：getCorsOrigins keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百九十轮：tip 上 1544 项 focused evidence suite（含 residual 250–1189 getCorsOrigins keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百九十一轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百九十二轮：delay dual 收口 surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百九十三轮：tip 上 1548 项 focused evidence suite（含 residual 250–1192 delay dual 收口锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百九十四轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百九十五轮：scoreIndexedResource dual 收口 surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百九十六轮：tip 上 1552 项 focused evidence suite（含 residual 250–1195 scoreIndexedResource dual 收口锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千一百九十七轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百九十八轮：readJson keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千一百九十九轮：tip 上 1557 项 focused evidence suite（含 residual 250–1198 readJson keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百零一轮：handleAuthSuccess keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百零二轮：tip 上 1561 项 focused evidence suite（含 residual 250–1201 handleAuthSuccess keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百零三轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百零四轮：formatDateTime keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百零五轮：tip 上 1566 项 focused evidence suite（含 residual 250–1204 formatDateTime keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百零六轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百零七轮：formatMessageTime keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百零八轮：tip 上 1570 项 focused evidence suite（含 residual 250–1207 formatMessageTime keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百零九轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百一十轮：formatDateToInput keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百一十一轮：tip 上 1574 项 focused evidence suite（含 residual 250–1210 formatDateToInput keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百一十二轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百一十三轮：formatTimeRange keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百一十四轮：tip 上 1579 项 focused evidence suite（含 residual 250–1213 formatTimeRange keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百一十五轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百一十六轮：formatTimestamp keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百一十七轮：tip 上 1584 项 focused evidence suite（含 residual 250–1216 formatTimestamp keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百一十八轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百一十九轮：getImportanceLabel keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百二十轮：tip 上 1589 项 focused evidence suite（含 residual 250–1219 getImportanceLabel keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百二十一轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百二十二轮：getStatusLabel keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百二十三轮：tip 上 1595 项 focused evidence suite（含 residual 250–1222 getStatusLabel keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百二十四轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百二十五轮：parseDateInput keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百二十六轮：tip 上 1600 项 focused evidence suite（含 residual 250–1225 parseDateInput keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百二十七轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百二十八轮：toDateInput keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百二十九轮：tip 上 1606 项 focused evidence suite（含 residual 250–1228 toDateInput keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百三十轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百三十一轮：toTimeInput keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百三十二轮：tip 上 1611 项 focused evidence suite（含 residual 250–1231 toTimeInput keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百三十三轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百三十四轮：combineDateAndTime/parseTimestamp keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百三十五轮：tip 上 1616 项 focused evidence suite（含 residual 250–1234 combineDateAndTime/parseTimestamp keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百三十六轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百三十七轮：formatTime keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百三十八轮：tip 上 1621 项 focused evidence suite（含 residual 250–1237 formatTime keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百三十九轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百四十轮：formatDate keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百四十一轮：tip 上 1626 项 focused evidence suite（含 residual 250–1240 formatDate keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百四十二轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百四十三轮：formatDuration keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百四十四轮：tip 上 1631 项 focused evidence suite（含 residual 250–1243 formatDuration keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百四十五轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百四十六轮：describeConflict keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百四十七轮：tip 上 1636 项 focused evidence suite（含 residual 250–1246 describeConflict keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百四十八轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百四十九轮：formatDisplayDate dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百五十轮：tip 上 1641 项 focused evidence suite（含 residual 250–1249 formatDisplayDate dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百五十一轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百五十二轮：formatDateToYMD dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百五十三轮：tip 上 1646 项 focused evidence suite（含 residual 250–1252 formatDateToYMD dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百五十四轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百五十五轮：parseToDate dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百五十六轮：tip 上 1651 项 focused evidence suite（含 residual 250–1255 parseToDate dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百五十七轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百五十八轮：handleCalendarSelect dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百五十九轮：tip 上 1656 项 focused evidence suite（含 residual 250–1258 handleCalendarSelect dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百六十轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百六十一轮：formatDateNotSet dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百六十二轮：tip 上 1661 项 focused evidence suite（含 residual 250–1261 formatDateNotSet dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百六十三轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百六十四轮：formatDateUnknown dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百六十五轮：tip 上 1666 项 focused evidence suite（含 residual 250–1264 formatDateUnknown dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百六十六轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百六十七轮：handleEndDateCalendarSelect dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百六十八轮：tip 上 1671 项 focused evidence suite（含 residual 250–1267 handleEndDateCalendarSelect dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百六十九轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百七十轮：handleAbsoluteDateSelect dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百七十一轮：tip 上 1676 项 focused evidence suite（含 residual 250–1270 handleAbsoluteDateSelect dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百七十二轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百七十三轮：formatCalendarEventTimeRange dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百七十四轮：tip 上 1681 项 focused evidence suite（含 residual 250–1273 formatCalendarEventTimeRange dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百七十五轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百七十六轮：formatHour dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百七十七轮：tip 上 1686 项 focused evidence suite（含 residual 250–1276 formatHour dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百七十八轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百七十九轮：formatEventTime keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百八十轮：tip 上 1691 项 focused evidence suite（含 residual 250–1279 formatEventTime keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百八十一轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百八十二轮：toLocalDateKey dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百八十三轮：tip 上 1696 项 focused evidence suite（含 residual 250–1282 toLocalDateKey dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百八十四轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百八十五轮：getWeekStart dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百八十六轮：tip 上 1701 项 focused evidence suite（含 residual 250–1285 getWeekStart dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百八十七轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百八十八轮：calendarEventBgClass dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百八十九轮：tip 上 1706 项 focused evidence suite（含 residual 250–1288 calendarEventBgClass dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百九十轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百九十一轮：calendarEventSourceLabel dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百九十二轮：tip 上 1711 项 focused evidence suite（含 residual 250–1291 calendarEventSourceLabel dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百九十三轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百九十四轮：formatLocalHHmm dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百九十五轮：tip 上 1716 项 focused evidence suite（含 residual 250–1294 formatLocalHHmm dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百九十六轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百九十七轮：formatHHmmParts dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千二百九十八轮：tip 上 1721 项 focused evidence suite（含 residual 250–1297 formatHHmmParts dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千二百九十九轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千三百轮：formatEventTime→formatLocalHHmm dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千三百零一轮：tip 上 1726 项 focused evidence suite（含 residual 250–1300 formatEventTime→formatLocalHHmm dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千三百零二轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千三百零三轮：formatCalendarEventTimeRange→formatLocalHHmm dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千三百零四轮：tip 上 1731 项 focused evidence suite（含 residual 250–1303 formatCalendarEventTimeRange→formatLocalHHmm dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千三百零五轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千三百零六轮：calendar event layout keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千三百零七轮：tip 上 1736 项 focused evidence suite（含 residual 250–1306 calendar event layout keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千三百零八轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千三百零九轮：dashboard formatTime absolute→formatLocalHHmm dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千三百一十轮：tip 上 1741 项 focused evidence suite（含 residual 250–1309 dashboard formatTime absolute→formatLocalHHmm dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千三百一十一轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千三百一十二轮：padTwoDigits dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千三百一十三轮：tip 上 1746 项 focused evidence suite（含 residual 250–1312 padTwoDigits dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千三百一十四轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千三百一十五轮：ScheduleFormDemo datetime-local→formatDateToYMD+formatLocalHHmm dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千三百一十六轮：tip 上 1751 项 focused evidence suite（含 residual 250–1315 ScheduleFormDemo datetime-local dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千三百一十七轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千三百一十八轮：padTwoDigits multi-sole compose dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千三百一十九轮：tip 上 1756 项 focused evidence suite（含 residual 250–1318 padTwoDigits multi-sole compose dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千三百二十轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千三百二十一轮：toLocalDateKey→padTwoDigits dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千三百二十二轮：tip 上 1761 项 focused evidence suite（含 residual 250–1321 toLocalDateKey→padTwoDigits dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千三百二十三轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千三百二十四轮：formatScheduleDurationMinutes dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千三百二十五轮：tip 上 1766 项 focused evidence suite（含 residual 250–1324 formatScheduleDurationMinutes dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
-  残留一千三百二十六轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
-  残留一千三百二十七轮：Web 账密两轮 3/3、Desktop production Electron guest 两轮 1/1、Agent/Vault/Pi fixture 7/114、governance 4/23 + GOV_EXIT:0；12-project lint 有 8 个失败、`web:typecheck` 失败，OAuth/App fixture 无凭据为外部阻塞；仍不构成三入口完整 E2E / 全量 PR 门禁证据。
-  残留一千三百二十八轮：`web:typecheck` + 24 个依赖任务通过、同一 12-project lint 12/12 通过、focused 回归 8/160、governance 4/23 + GOV_EXIT:0；test-utils lint 仍有 2 个既有 layer-boundary error，全仓 test/E2E/prod-like 与 OAuth/App fixture 仍未闭环；仍不构成三入口完整 E2E / 全量 PR 门禁证据。
-  残留一千三百二十九轮：test-utils lint 0 errors、typecheck + 4 个依赖任务、goal lint、integration seam focused 3/12、AI Service 4/25、open-items 1/3、governance 4/23 + governance-check 通过；修复 7 个 Ruff I001 后全 workspace lint 36/36 通过；全仓 typecheck/test、Web/Desktop E2E、prod-like 与 OAuth/App fixture 仍未闭环；仍不构成三入口完整 E2E / 全量 PR 门禁证据。
-  残留一千三百三十轮：全 workspace typecheck 34/34 项目通过（EXIT:0）；utils recurrence 1/4、schedule-orchestration 4/7、governance-check EXIT:0；全仓 test、Web/Desktop E2E、prod-like 与 OAuth/App fixture 仍未闭环；仍不构成三入口完整 E2E / 全量 PR 门禁证据。
-  残留一千三百三十一轮：全 workspace 标准 test 30 目标 11→3 失败 / 27 通过（EXIT:1）；desktop 低风险 harness 已收口（ipc dual/vault-path/AIStream/provider 信封；focused 6/58）；剩余 data-portability powersync-round-trip、desktop git runtime/sync GitProcessError 16 测试、app-vue AIChatView TaskService inject + KnowledgeProjection useRoute mock；全仓 test 未完全绿、Web/Desktop E2E、prod-like 与 OAuth/App fixture 仍未闭环；仍不构成三入口完整 E2E / 全量 PR 门禁证据。
-  残留一千三百三十二轮：全 workspace 标准 test 30/30 项目通过（EXIT:0）；lint 36/36 + typecheck 34/34 + 标准 test 30/30 已齐；Web/Desktop 完整 E2E、prod-like 与 OAuth/App fixture 仍未闭环；仍不构成三入口完整 E2E / 全量 PR 门禁证据。
-  残留一千三百三十三轮：VPS prod-like docker:local:up EXIT:0 + 六服务 healthy + 探针 OK（tip 140ce022a）；Web 认证主线两轮 9/9 + note-boundary 1/1；全仓 lint/typecheck/标准 test 复验 36/36 + 34/34 + 30/30 EXIT:0；governance-check GOV_EXIT:0；Desktop Linux guest 未稳定复现；仍不构成三入口完整 E2E / 全量 PR 门禁证据。
-  残留一千三百三十三轮续（GitHub App Manifest + goal-workflow）：
-  - Manifest 回调 code 已消费；App `memoflow-dev-test` id 4385206 凭据在 `~/.config/memoflow/`（git 外）；`.env.test.local` 已接线 OAuth/App + `GITHUB_TEST_REPOSITORY=BakerSean168/memoflow-github-app-e2e-fixture`（private 存在）；JWT `GET /app` 200。
-  - **外部阻塞**：`GET /app/installations` count=0；安装需浏览器同意 `https://github.com/apps/memoflow-dev-test/installations/new`（选 fixture 仓）；`GITHUB_TEST_INSTALLATION_ID` 未写入；不伪造 OAuth/install。
-  - goal-workflow：`pnpm nx run web:e2e -- e2e/ai/goal-workflow.spec.ts` **8/8 绿**（Host `/ai/assistant/dispatch/sse` mock + conversation list/message 持久化 + `sendComposerMessage`；`parseSSE` flush final chunk when done=true）。
-  - 仍缺：真实 GitHub App install + installation-token 路径 E2E、全量 Web/Desktop 业务 E2E 一揽子、§13.2 未勾选项（12 部分 / 15 部分）不因本轮翻勾。
-  仍缺：全量 Web/Desktop 业务 E2E 与 OAuth/App fixture 作为 PR 门禁一揽子证据；
-  真实 GitHub App fixture E2E 缺 **installation**（App/OAuth 凭据已就绪；安装浏览器同意仍为外部阻塞）。
-  残留一千三百三十三轮续（install 轮询 + host-dev 接线 + live fail-fast）：
-  - 再轮询 `GET /app/installations` → count **0**；`POST .../access_tokens` 对假 installation 404 fail-closed。
-  - 凭据 layout：`~/.config/memoflow/{github-app-credentials.json,github-app.env}` mode 600；repo 侧 gitignored `.env.test.local` + `.env.development.local`（从 secret store 注入，含 OAuth/App + fixture 仓，无 INSTALLATION_ID）。
-  - `pnpm runtime:preflight --profile e2e` OK；`desktop:test:live-github` 在缺 `GITHUB_TEST_INSTALLATION_ID` 时 fail-fast（shipped message，拒 PAT）。
-  - `GitHubAppClient` unit **15/15**；goal-workflow 复验 **8/8**（SCRATCH residual-suites）。
-  - §13.2 仍 **12 [x] / 3 [ ]**，**不改 checkbox**；真实 install 仍需浏览器：https://github.com/apps/memoflow-dev-test/installations/new
-  残留一千三百三十三轮续（Desktop Linux guest + verification evidence）：
-  - Desktop production Electron guest e2e 在 xvfb 下根因：`Token encryption is not available`（无 Secret Service）。
-  - 修复：`apps/desktop/e2e/authentication/desktop-auth-flow.spec.ts` 在 Linux 上启用 Electron `safeStorage.setUsePlainTextEncryption(true)`（与 web sync desktop helper 同一 shipped 路径），**1/1 绿**。
-  - guest unit/coordinator + toCloudAccessToken focused **42** 通过；install 再轮询仍 **0**（外部阻塞不变）。
-  - Verification SCRATCH：secrets-layout / app-install / github-real-path / residual-suites（goal-workflow 8/8、desktop guest 1/1）。
-  残留一千三百三十三轮续（verification re-run + web auth）：
-  - Web 账密主线再验：auth-login 3 + auth-password 1 + auth-register 1 = **5/5 绿**（非 OAuth 伪造）。
-  - Repository GitHubAppClient + connection service focused **46/46**；install 再轮询仍 **0**。
-  - Verification 报告：`{SCRATCH}/VERIFICATION-REPORT.txt`；§13.2 **不改 checkbox**。
-  残留一千三百三十三轮续（manifest callback re-submit + install still external）：
-  - 用户再次提交 Manifest 转换回调 URL（`/memoflow-github-app-manifest-callback?code=…&state=…`）。
-  - `POST https://api.github.com/app-manifests/<code>/conversions` → **404 Not Found**（code 单次消费已用尽；非 install 回调）。
-  - 保留既有 App 凭据：id **4385206** slug **memoflow-dev-test**（`~/.config/memoflow/` mode 600；git 外）。
-  - 再轮询：`GET /app` 200 `installations_count=0`；`GET /app/installations` count **0**；假 installation `POST …/access_tokens` **404 fail-closed**；**NO_PAT**。
-  - `desktop:test:live-github` 缺 `GITHUB_TEST_INSTALLATION_ID` 时 fail-fast（shipped message，拒 PAT）——预期红，非伪造。
-  - 仍需浏览器安装同意（选 fixture 仓）：https://github.com/apps/memoflow-dev-test/installations/new
-  - §13.2 仍 **12 [x] / 3 [ ]**，**不改 checkbox**；PR readiness 仍为 no。
+  - 4 个依赖任务、`goal:lint`、integration seam focused 3 文件 / 12 测试通过；
+    修复 7 个 Ruff I001 后全 workspace lint 36/36 项目通过；AI Service 4/25、
+    open-items 1/3、governance 4/23 + governance-check 通过。全仓 typecheck/test、
+    Web/Desktop E2E、prod-like 与 OAuth/App fixture 仍未闭环，故不打勾。
+    残留一千三百三十轮：全 workspace typecheck 34/34 项目通过（EXIT:0）；
+    utils recurrence 1 文件 / 4 测试、schedule-orchestration 4 文件 / 7 测试、
+    governance-check EXIT:0。全仓 test、Web/Desktop E2E、prod-like 与 OAuth/App
+    fixture 仍未闭环，故不打勾。
+    残留一千三百三十一轮：全 workspace 标准 test 30 目标，首次 11 失败收缩为
+    3 失败 / 27 通过（EXIT:1）；desktop 低风险 harness 已收口（focused 6/58 通过）；
+    剩余 data-portability powersync-round-trip、desktop git runtime/sync GitProcessError
+    16 测试、app-vue AIChatView TaskService inject + KnowledgeProjection useRoute mock。
+    残留一千三百三十二轮：全 workspace 标准 test **30/30 项目通过（EXIT:0）**
+    （powersync 假库、desktop GIT_CONFIG_GLOBAL=NUL、app-vue inject/mock/timeout）。
+    Web/Desktop 完整 E2E、prod-like 与 OAuth/App fixture 仍未闭环，故不打勾。
+    残留一千三百三十三轮：VPS tip `140ce022a`；prod-like `docker:local:up` EXIT:0 + **六服务 healthy** +
+    关键探针 OK；Web 认证主线两轮 **9/9**、note-boundary **1/1**；全仓 lint **36/36** +
+    typecheck **34/34** + 标准 test **30/30** 复验 EXIT:0；governance-check GOV_EXIT:0。
+    goal-workflow 8/8 红（AI workspace 未就绪）；续：goal-workflow 8/8 绿（Host SSE mock）；Desktop Linux guest 续 xvfb+basic_text **1/1 绿**；
+    GitHub App JWT 已接线、install 需浏览器；OAuth/App 完整 fixture 仍外部阻塞；**不改 checkbox**，仍不构成全量 PR 门禁。
+    证据：本分支多轮 focused lint/typecheck/test 与 `memoflow:governance-check` 通过；Web 核心
+    Playwright 集合含 knowledge note boundary 与 AI goal-workflow。残留二十七轮：prod-like
+    `docker:local:up` 在当前宿主机已成功（六服务 healthy；Web 200 / API health 200），历史 Docker
+    磁盘耗尽不再是阻塞。残留一百零八轮：HTTP 204 无 body + checkpoint void `ok(null)` 收口。
+    残留一百八十一轮：tip 上 `memoflow:governance-check` + focused ownership/journey specs 通过；仍不构成全量 PR 门禁证据。
+    残留一百九十一轮：tip 上 87 项核心 evidence suite + `memoflow:governance-check` 通过；仍不构成全量 PR 门禁证据。
+    残留一百九十五轮：tip 上 107 项核心 evidence suite 通过；仍不构成全量 PR 门禁证据。
+    残留一百九十八轮：tip 上 118 项核心 evidence suite 通过；仍不构成全量 PR 门禁证据。
+    残留二百零四轮：tip 上 157 项核心 evidence suite（含 confirmed-create / editor-pref / dual-track VO 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百零八轮：tip 上 205 项核心 evidence suite（含 206–207 terminology + eval fixture 对齐）通过；仍不构成全量 PR 门禁证据。
+    残留二百一十二轮：tip 上 204 项核心 evidence suite（含 residual 211 MSW/e2e/docs 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百一十六轮：tip 上 212 项核心 evidence suite（含 residual 213–215 source/index/snake 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百一十九轮：tip 上 216 项核心 evidence suite（含 residual 217–218 snake/python Note 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百二十四轮：tip 上 225 项核心 evidence suite（含 residual 220–223 eval/checkpoint/goal/note-mutation 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百二十八轮：tip 上 231 项核心 evidence suite（含 residual 225–227 usage/runner/menu-labels 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百三十一轮：tip 上 235 项核心 evidence suite（含 residual 229–230 note mocks/schedule/bootstrapper 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百三十四轮：tip 上 238 项核心 evidence suite（含 residual 232–233 schedule docs/reminder DTO 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百三十七轮：tip 上 249 项核心 evidence suite（含 residual 235–236 auth export/provider barrel 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百四十一轮：tip 上 258 项核心 evidence suite（含 residual 238–240 powersync/runtime/goal priority 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百四十五轮：tip 上 262 项核心 evidence suite（含 residual 242–244 electron/runtime/dashboard 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百四十九轮：tip 上 270 项核心 evidence suite（含 residual 246–248 transport/task/AI dual 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百五十三轮：tip 上 100 项 focused evidence suite（含 residual 250–252 dual 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百五十四轮：GoalDraft/GoalClarification dual 收口 + dual surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
+    残留二百五十五轮：tip 上 115 项 focused evidence suite（含 residual 250–254 dual 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百五十六轮：desktop shared ipc-channels dual barrel 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
+    残留二百五十七轮：task domain events dual barrel 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
+    残留二百五十八轮：tip 上 119 项 focused evidence suite（含 residual 250–257 dual 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百五十九轮：StreamMessageDonePayload dual 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
+    残留二百六十轮：ScheduleTaskDTO/ScheduleExecutionDTO dual 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
+    残留二百六十一轮：tip 上 123 项 focused evidence suite（含 residual 250–260 dual 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百六十二轮：task TaskDomainEvent/Complete·Skip Res dual 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
+    残留二百六十三轮：19 dead unused *Res dual aliases 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
+    残留二百六十四轮：tip 上 127 项 focused evidence suite（含 residual 250–263 dual 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百六十五轮：notification AssetImageKey dual 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
+    残留二百六十六轮：IResultIpcClient dual 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
+    残留二百六十七轮：tip 上 136 项 focused evidence suite（含 residual 250–266 dual 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百六十八轮：dashboard transport dual 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
+    残留二百六十九轮：tip 上 138 项 focused evidence suite（含 residual 250–268 dual 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百七十轮：ElectronBridge dual 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
+    残留二百七十一轮：tip 上 144 项 focused evidence suite（含 residual 250–270 dual 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百七十二轮：GovernanceIpcTransport dual 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
+    残留二百七十三轮：tip 上 146 项 focused evidence suite（含 residual 250–272 dual 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百七十四轮：ResultHttpClient implements dual 收口 + surface 锁 + typecheck + governance-check；仍不构成全量 PR 门禁证据。
+    残留二百七十五轮：tip 上 151 项 focused evidence suite（含 residual 250–274 dual 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百七十六轮：setting/data-portability API port dual 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
+    残留二百七十七轮：tip 上 157 项 focused evidence suite（含 residual 250–276 dual 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百七十八轮：DataPortabilityClientPort dual 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
+    残留二百七十九轮：tip 上 159 项 focused evidence suite（含 residual 250–278 dual 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百八十轮：SettingClientPort dual 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
+    残留二百八十一轮：tip 上 161 项 focused evidence suite（含 residual 250–280 dual 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百八十二轮：AuthenticationClientPort dual 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
+    残留二百八十三轮：tip 上 163 项 focused evidence suite（含 residual 250–282 dual 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百八十四轮：RepositoryClientPort dual 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
+    残留二百八十五轮：tip 上 165 项 focused evidence suite（含 residual 250–284 dual 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百八十六轮：ReminderClientPort dual 收口 + surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
+    残留二百八十七轮：tip 上 167 项 focused evidence suite（含 residual 250–286 dual 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百八十八轮：NotificationClientPort dual 收口（去 dismissAll）+ surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
+    残留二百八十九轮：tip 上 169 项 focused evidence suite（含 residual 250–288 dual 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百九十轮：再删 6 项死 *Res dual + dead-res surface 扩展 + governance-check；仍不构成全量 PR 门禁证据。
+    残留二百九十一轮：tip 上 169 项 focused evidence suite（含 residual 250–290 dual 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百九十二轮：AccountClientPort 有意 mapping dual surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
+    残留二百九十三轮：tip 上 171 项 focused evidence suite（含 residual 250–292 dual 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百九十四轮：GoalClientPort 有意 facade dual surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
+    残留二百九十五轮：tip 上 173 项 focused evidence suite（含 residual 250–294 dual 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百九十六轮：TaskClientPort 有意 facade dual surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
+    残留二百九十七轮：tip 上 175 项 focused evidence suite（含 residual 250–296 dual 锁）通过；仍不构成全量 PR 门禁证据。
+    残留二百九十八轮：ScheduleClientPort 有意 facade dual surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
+    残留二百九十九轮：AIClientPort 有意 multi-API facade dual surface 锁 + governance-check；仍不构成全量 PR 门禁证据。
+    残留三百轮：tip 上 179 项 focused evidence suite（含 residual 250–299 dual 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百零一轮：§13.2 证据指针刷新 + redesign docs 边界对齐 + legacy-note surface；仍不构成全量 PR 门禁证据。
+    残留三百零二轮：tip 上 180 项 focused evidence suite（含 residual 250–301 dual/docs 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百零三轮：portable backup vs server-held disclosure 边界 surface 扩展 + product 文档对齐 + governance-check；仍不构成全量 PR 门禁证据。
+    残留三百零四轮：tip 上 193 项 focused evidence suite（含 residual 250–303 dual/docs/disclosure 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百零五轮：ADR-035 multi-engine 标签隔离 journey/surface 增强（Agent 仍部分；无完整 Turn Engine conformance E2E）；仍不构成全量 PR 门禁证据。
+    残留三百零六轮：tip 上 197 项 focused evidence suite（含 residual 250–305 dual/docs/disclosure/ADR-035 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百零七轮：three-login matrix 15 通过（step 10 identity≠knowledge-repo install/token 源码锁）+ nearest auth surfaces + governance-check；仍不构成全量 PR 门禁/跨端 OAuth E2E 证据。
+    残留三百零八轮：tip 上 198 项 focused evidence suite（含 residual 250–307 dual/docs/disclosure/ADR-035/three-login step 10 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百零九轮：multi-engine Turn Engine conformance harness 14 通过（双引擎同 suite isolation + ownership；生产 adapter 仍缺）+ journey/stage-0 + governance-check；仍不构成全量 multi-engine runtime E2E 证据。
+    残留三百一十轮：tip 上 212 项 focused evidence suite（含 residual 250–309 dual/docs/disclosure/ADR-035/three-login/harness 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百一十一轮：Agent Host stage-0 composition/port freeze surfaces 通过（生产 adapter 仍缺；runtime 不静默 emit engine.*）+ governance-check；仍不构成生产 multi-engine 接线 E2E 证据。
+    残留三百一十二轮：tip 上 216 项 focused evidence suite（含 residual 250–311 dual/docs/disclosure/ADR-035/three-login/harness/composition 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百一十三轮：Agent Host plan stage-0 证据指针对齐 + governance-check；仍不构成生产 multi-engine/统一助手完成证据。
+    残留三百一十四轮：DirectTurnEngine 生产首引擎 + module.turnEngine + stage-0 仅允许该引擎；仍不构成 multi-engine/统一助手完成证据。
+    残留三百一十五轮：tip 上 223 项 focused evidence suite（含 residual 250–314 dual/docs/disclosure/ADR-035/three-login/harness/composition/DirectTurnEngine 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百一十六轮：open chat 经 DirectTurnEngine + IOpenChatTurnPort + composition surface；仍不构成 multi-engine/统一助手完成证据。
+    残留三百一十七轮：tip 上 226 项 focused evidence suite（含 residual 250–316 open-chat/DirectTurnEngine 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百一十八轮：LangGraphWorkflowAdapter + stage-0/composition 锁通过；仍不构成 multi-engine/统一助手完成证据。
+    残留三百一十九轮：tip 上 231 项 focused evidence suite（含 residual 250–318 workflow adapter 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百二十轮：ProposalKernel + stage-0/composition 锁通过；仍不构成 multi-engine/统一助手完成证据。
+    残留三百二十一轮：tip 上 239 项 focused evidence suite（含 residual 250–320 ProposalKernel 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百二十二轮：CapabilityResolver + stage-0/composition 锁通过；仍不构成 multi-engine/统一助手完成证据。
+    残留三百二十三轮：tip 上 246 项 focused evidence suite（含 residual 250–322 CapabilityResolver 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百二十四轮：CapabilityResolver start-gate 热路径接线 + composition 锁通过；仍不构成 multi-engine/统一助手完成证据。
+    残留三百二十五轮：tip 上 247 项 focused evidence suite（含 residual 250–324 start-gate 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百二十六轮：§13.2 Agent/全量门禁证据指针刷新（305–325 Host 部分）；仍不构成完成证据。
+    残留三百二十七轮：product ai/setting 文档与 runtime 边界对齐 + surface 锁；仍不构成全量 PR 门禁证据。
+    残留三百二十八轮：tip 上 253 项 focused evidence suite（含 residual 250–327 product-docs 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百二十九轮：ai-files 索引与 Host 生产路径对齐 + surface 锁；仍不构成全量 PR 门禁证据。
+    残留三百三十轮：tip 上 254 项 focused evidence suite（含 residual 250–329 ai-files 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百三十一轮：module-index 全量路径对齐 + integrity surface；仍不构成全量 PR 门禁证据。
+    残留三百三十二轮：tip 上 255 项 focused evidence suite（含 residual 250–331 module-index 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百三十三轮：authentication product-doc + three-login step 10 identity≠knowledge-repo surface 锁；仍不构成全量 PR 门禁/跨端 OAuth E2E 证据。
+    残留三百三十四轮：tip 上 255 项 focused evidence suite（含 residual 250–333 auth identity≠repo 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百三十五轮：authentication-files OAuth 真值收口 + module-index surface；仍不构成全量 PR 门禁/跨端 OAuth E2E 证据。
+    残留三百三十六轮：tip 上 256 项 focused evidence suite（含 residual 250–335 auth OAuth 索引锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百三十七轮：CustomModelGateway Host 适配 + editor-test 清理；仍不构成第二 Turn Engine/统一助手完成证据。
+    残留三百三十八轮：tip 上 260 项 focused evidence suite（含 residual 250–337 CustomModelGateway 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百三十九轮：feature-map/public debug 收口；仍不构成全量 PR 门禁/跨端 OAuth E2E 证据。
+    残留三百四十轮：tip 上 263 项 focused evidence suite（含 residual 250–339 feature-map/public 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百四十一轮：第二生产 Turn Engine（ReadonlyAnalysis）落地；仍不构成完整 multi-engine runtime E2E/统一助手完成证据。
+    残留三百四十二轮：tip 上 268 项 focused evidence suite（含 residual 250–341 ReadonlyAnalysis 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百四十三轮：生产 AssistantFacade 统一 Host dispatch 落地；仍不构成统一助手 UI 工作台/完整 multi-engine runtime E2E 证据。
+    残留三百四十四轮：tip 上 273 项 focused evidence suite（含 residual 250–343 AssistantFacade 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百四十五轮：AssistantFacade HTTP/SSE 传输面落地；仍不构成统一助手 UI 工作台/完整 multi-engine runtime E2E 证据。
+    残留三百四十六轮：tip 上 277 项 focused evidence suite（含 residual 250–345 AssistantFacade transport 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百四十七轮：AssistantFacade 客户端 HTTP/SSE 适配落地；仍不构成统一助手 UI 工作台/Desktop IPC stream 证据。
+    残留三百四十八轮：tip 上 281 项 focused evidence suite（含 residual 250–347 AssistantFacade client 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百四十九轮：Vue useAssistantDispatch 薄入口落地；仍不构成统一助手 UI 工作台/完整 open chat 切换证据。
+    残留三百五十轮：tip 上 284 项 focused evidence suite（含 residual 250–349 useAssistantDispatch 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百五十一轮：open chat 默认 Host dispatch 落地；仍不构成统一助手右侧工作台/完整 multi-engine E2E 证据。
+    残留三百五十二轮：tip 上 285 项 focused evidence suite（含 residual 250–351 open-chat Host dispatch 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百五十三轮：Desktop AssistantFacade IPC stream 落地；仍不构成统一助手右侧工作台/完整 multi-engine E2E 证据。
+    残留三百五十四轮：tip 上 290 项 focused evidence suite（含 residual 250–353 Desktop Assistant IPC 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百五十五轮：Host Proposal approve/reject UI 路径落地；仍不构成统一助手右侧工作台/完整 multi-engine runtime E2E 证据。
+    残留三百五十六轮：tip 上 298 项 focused evidence suite（含 residual 250–355 Host proposal UI 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百五十七轮：薄 Host Proposal 工作台面板落地；仍不构成完整右侧工作台切换/完整 multi-engine runtime E2E 证据。
+    残留三百五十八轮：tip 上 301 项 focused evidence suite（含 residual 250–357 Host proposal panel 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百五十九轮：Host Proposal revise-before-approve 落地；仍不构成完整右侧工作台切换/完整 multi-engine runtime E2E 证据。
+    残留三百六十轮：tip 上 306 项 focused evidence suite（含 residual 250–359 Host proposal revise 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百六十一轮：knowledge Host Proposal 路径/正文修订落地；仍不构成完整右侧工作台切换/完整 multi-engine runtime E2E 证据。
+    残留三百六十二轮：tip 上 307 项 focused evidence suite（含 residual 250–361 knowledge Host patch 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百六十三轮：Host knowledge patch → note executor 映射落地；仍不构成完整右侧工作台切换/完整 multi-engine runtime E2E 证据。
+    残留三百六十四轮：tip 上 308 项 focused evidence suite（含 residual 250–363 Host knowledge executor patch 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百六十五轮：Host goal title patch → create_goal executor 映射落地；仍不构成完整右侧工作台切换/完整 multi-engine runtime E2E 证据。
+    残留三百六十六轮：tip 上 310 项 focused evidence suite（含 residual 250–365 Host goal executor patch 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百六十七轮：goal Host Proposal description 修订 UI 落地；仍不构成完整右侧工作台切换/完整 multi-engine runtime E2E 证据。
+    残留三百六十八轮：tip 上 311 项 focused evidence suite（含 residual 250–367 goal Host description 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百六十九轮：open-chat Host 引擎 profile 选择落地；仍不构成真实 Pi SDK/CLI 进程适配与完整 multi-engine runtime E2E 证据。
+    残留三百七十轮：tip 上 312 项 focused evidence suite（含 residual 250–369 Host engine profile 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百七十一轮：Host Proposal 右侧工作台激活落地；仍不构成完整统一助手右侧工作台切换/完整 multi-engine runtime E2E 证据。
+    残留三百七十二轮：tip 上 312 项 focused evidence suite（含 residual 250–371 Host workbench activation 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百七十三轮：Pi/CLI process adapter fail-closed spike 落地；仍不构成真实 Pi spawn 产品路径/完整 multi-engine runtime E2E 证据。
+    残留三百七十四轮：tip 上 322 项 focused evidence suite（含 residual 250–373 Pi process adapter 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百七十五轮：生产 multi-engine Host journey 落地；仍不构成跨端 Playwright/Electron 全量 multi-engine E2E/真实 Pi spawn 证据。
+    残留三百七十六轮：tip 上 327 项 focused evidence suite（含 residual 250–375 production multi-engine journey 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百七十七轮：multi-profile Host transport journey 落地；仍不构成跨端 Playwright/Electron 全量 multi-engine E2E/真实 Pi spawn 证据。
+    残留三百七十八轮：tip 上 331 项 focused evidence suite（含 residual 250–377 multi-profile Host transport 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百七十九轮：Host execution receipt 工作台落地；仍不构成 Conversation 时间线 Artifact 回放/完整 multi-engine runtime E2E 证据。
+    残留三百八十轮：tip 上 335 项 focused evidence suite（含 residual 250–379 Host execution receipt 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百八十一轮：Host 工作台 AgentRun 历史重开落地；仍不构成消息时间线 Artifact 卡片/完整 multi-engine runtime E2E 证据。
+    残留三百八十二轮：tip 上 339 项 focused evidence suite（含 residual 250–381 Host workbench reopen 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百八十三轮：Host 时间线 Artifact 卡片落地；仍不构成 Artifact 富内容编辑回放/完整 multi-engine runtime E2E 证据。
+    残留三百八十四轮：tip 上 342 项 focused evidence suite（含 residual 250–383 Host timeline Artifact 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百八十五轮：Host 执行报告富回放落地；仍不构成真实 Pi spawn/完整 multi-engine runtime E2E 证据。
+    残留三百八十六轮：tip 上 345 项 focused evidence suite（含 residual 250–385 Host receipt rich replay 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百八十七轮：Host 时间线聚焦工作台行落地；仍不构成真实 Pi spawn/完整 multi-engine runtime E2E 证据。
+    残留三百八十八轮：tip 上 348 项 focused evidence suite（含 residual 250–387 Host timeline focus 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百八十九轮：Host 工作台文档对齐与 composition journey 落地；仍不构成真实 Pi spawn/完整 multi-engine runtime E2E 证据。
+    残留三百九十轮：tip 上 351 项 focused evidence suite（含 residual 250–389 Host workbench docs/composition 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百九十一轮：Pi process spike dry-run plan 与生产路由隔离落地；仍不构成真实 Pi spawn/完整 multi-engine runtime E2E 证据。
+    残留三百九十二轮：tip 上 353 项 focused evidence suite（含 residual 250–391 Pi process dry-run plan 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百九十三轮：Host open-chat stop → cancel_run 落地；仍不构成跨端 Playwright/Electron multi-engine E2E/真实 Pi spawn 证据。
+    残留三百九十四轮：tip 上 357 项 focused evidence suite（含 residual 250–393 Host open-chat cancel_run 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百九十五轮：Host mid-turn cancel_run 生产 journey 落地；仍不构成跨端 Playwright/Electron multi-engine E2E/真实 Pi spawn 证据。
+    残留三百九十六轮：tip 上 358 项 focused evidence suite（含 residual 250–395 Host mid-turn cancel_run 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百九十七轮：Host Proposal 自由拒绝原因落地；仍不构成跨端 multi-engine E2E/真实 Pi spawn 证据。
+    残留三百九十八轮：tip 上 361 项 focused evidence suite（含 residual 250–397 Host freeform reject reason 锁）通过；仍不构成全量 PR 门禁证据。
+    残留三百九十九轮：Host 时间线 multi-engine badge 落地；仍不构成跨端 multi-engine E2E/真实 Pi spawn 证据。
+    残留四百轮：tip 上 365 项 focused evidence suite（含 residual 250–399 Host timeline multi-engine badge 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百零一轮：open-chat Host 时间线 Artifact 落地；仍不构成跨端 multi-engine E2E/真实 Pi spawn 证据。
+    残留四百零二轮：tip 上 368 项 focused evidence suite（含 residual 250–401 open-chat Host timeline Artifact 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百零三轮：open-chat Host 回合徽章会话记忆落地；仍不构成跨端 multi-engine E2E/真实 Pi spawn 证据。
+    残留四百零四轮：tip 上 372 项 focused evidence suite（含 residual 250–403 open-chat Host turn session memory 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百零五轮：跨端 multi-engine Host 产品 E2E scaffold 落地；仍不构成 Playwright/Electron 全量 product E2E/真实 Pi spawn 证据。
+    残留四百零六轮：tip 上 378 项 focused evidence suite（含 residual 250–405 cross-end multi-engine product E2E scaffold 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百零七轮：跨端 multi-engine Host 产品 unit driver 落地；仍不构成 Playwright/Electron 全量 product E2E/真实 Pi spawn 证据。
+    残留四百零八轮：tip 上 383 项 focused evidence suite（含 residual 250–407 cross-end multi-engine product unit driver 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百零九轮：Host 时间线 open_chat vs AgentRun surface isolation 落地；仍不构成跨端 multi-engine E2E/真实 Pi spawn 证据。
+    残留四百一十轮：tip 上 387 项 focused evidence suite（含 residual 250–409 Host timeline surface isolation 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百一十一轮：Host 工作台时间线 composition 落地；仍不构成跨端 multi-engine E2E/真实 Pi spawn 证据。
+    残留四百一十二轮：tip 上 390 项 focused evidence suite（含 residual 250–411 Host workbench timeline composition 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百一十三轮：Host 工作台 LangGraph UI 泄漏边界落地；仍不构成跨端 multi-engine E2E/真实 Pi spawn 证据。
+    残留四百一十四轮：tip 上 397 项 focused evidence suite（含 residual 250–413 Host LangGraph UI leakage boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百一十五轮：Goal/Knowledge workflow 诊断展示脱敏落地；仍不构成跨端 multi-engine E2E/真实 Pi spawn 证据。
+    残留四百一十六轮：tip 上 409 项 focused evidence suite（含 residual 250–415 Goal workflow diagnostic sanitization 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百一十七轮：跨端 multi-engine scaffold/driver 16 步扩展落地；仍不构成 Playwright/Electron 全量 product E2E 证据。
+    残留四百一十八轮：tip 上 410 项 focused evidence suite（含 residual 250–417 cross-end 16-step scaffold/driver 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百一十九轮：Host task.create lane 基础落地；仍不构成 Task 域 executor/完整 Task 工作台证据。
+    残留四百二十轮：tip 上 414 项 focused evidence suite（含 residual 250–419 Host task.create lane 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百二十一轮：Goal diagnosticWorkflowStepTiming i18n + scaffold/driver 17-step（task.create lane unit）落地；仍不构成 Task 域 executor/Playwright 全量 E2E 证据。
+    残留四百二十二轮：tip 上 415 项 focused evidence suite（含 residual 250–421 diagnosticWorkflowStepTiming + task.create unit 步锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百二十三轮：Host task.create live lane + domain executor 基础落地；仍不构成完整 Task 工作台/AgentType task.create 证据。
+    残留四百二十四轮：tip 上 418 项 focused evidence suite（含 residual 250–423 Host task.create live lane 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百二十五轮：Host task.create client settle + createTemplate receipt 落地；仍不构成 AgentType task.create/完整 Task 工作台证据。
+    残留四百二十六轮：tip 上 421 项 focused evidence suite（含 residual 250–425 Host task.create client settle/receipt 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百二十七轮：Host AgentType task.create 基础 + taskAgentRun 落地；仍不构成完整 Task Agent 工作流/E2E 证据。
+    残留四百二十八轮：tip 上 423 项 focused evidence suite（含 residual 250–427 Host AgentType task.create + taskAgentRun 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百二十九轮：task.create 产品 toolMode/Welcome/Footer 落地；仍不构成完整 Task Agent 工作流/E2E 证据。
+    残留四百三十轮：tip 上 424 项 focused evidence suite（含 residual 250–429 Host task.create 产品 toolMode 入口锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百三十一轮：task.create 产品 start 基础落地；仍不构成完整 Task LangGraph 工作流/E2E 证据。
+    残留四百三十二轮：tip 上 425 项 focused evidence suite（含 residual 250–431 Host task.create 产品 start 基础锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百三十三轮：task.create restore/linked goal 落地；仍不构成完整 Task LangGraph 工作流/E2E 证据。
+    残留四百三十四轮：tip 上 426 项 focused evidence suite（含 residual 250–433 Host task.create restore/linked goal 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百三十五轮：task.create 进程内 run store 落地；仍不构成跨进程 durable/LangGraph 全量证据。
+    残留四百三十六轮：tip 上 433 项 focused evidence suite（含 residual 250–435 Host task.create process-local store 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百三十七轮：task.create 进程内 cancel/complete resume 落地；仍不构成跨进程 durable/LangGraph 全量证据。
+    残留四百三十八轮：tip 上 439 项 focused evidence suite（含 residual 250–437 Host task.create process-local cancel/complete resume 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百三十九轮：task.create 进程内 edit revise + 幂等 terminal 落地；仍不构成跨进程 durable/LangGraph 全量证据。
+    残留四百四十轮：tip 上 443 项 focused evidence suite（含 residual 250–439 Host task.create process-local edit revise 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百四十一轮：AgentRun 历史 reopen 聚焦 + task 标题回收落地；仍不构成跨端 Playwright/Electron multi-engine E2E 证据。
+    残留四百四十二轮：tip 上 446 项 focused evidence suite（含 residual 250–441 Host AgentRun history reopen focus 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百四十三轮：会话 restore Host 工作台聚焦落地；仍不构成跨端 Playwright/Electron multi-engine E2E 证据。
+    残留四百四十四轮：tip 上 449 项 focused evidence suite（含 residual 250–443 Host conversation restore workbench focus 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百四十五轮：linked goal restore + client settlement 会话隔离落地；仍不构成跨端 Playwright/Electron multi-engine E2E 证据。
+    残留四百四十六轮：tip 上 452 项 focused evidence suite（含 residual 250–445 Host linked goal restore + settlement isolation 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百四十七轮：§13.2 证据指针刷新 + process-local store 容量边界落地；仍不构成全量 PR 门禁/跨端 multi-engine E2E 证据。
+    残留四百四十八轮：tip 上 455 项 focused evidence suite（含 residual 250–447 Host store bound + §13.2 指针锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百四十九轮：task.create process-local product journey 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留四百五十轮：tip 上 460 项 focused evidence suite（含 residual 250–449 Host process-local product journey 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百五十一轮：process-local runId 身份绑定 fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留四百五十二轮：tip 上 464 项 focused evidence suite（含 residual 250–451 Host runId 身份绑定锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百五十三轮：confirm client settlement fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留四百五十四轮：tip 上 468 项 focused evidence suite（含 residual 250–453 Host confirm client settlement 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百五十五轮：edit non-empty title fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留四百五十六轮：tip 上 472 项 focused evidence suite（含 residual 250–455 Host edit non-empty title 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百五十七轮：conversation/thread runId 绑定 + activeOnly 会话隔离落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留四百五十八轮：tip 上 478 项 focused evidence suite（含 residual 250–457 Host conversation/thread runId 绑定锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百五十九轮：dirty approve process-local revise-before-settle 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留四百六十轮：tip 上 481 项 focused evidence suite（含 residual 250–459 Host dirty approve revise-before-settle 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百六十一轮：start conversationId 会话绑定 fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留四百六十二轮：tip 上 484 项 focused evidence suite（含 residual 250–461 Host start conversationId 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百六十三轮：confirm settlement title 可回收 fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留四百六十四轮：tip 上 488 项 focused evidence suite（含 residual 250–463 Host confirm settlement title 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百六十五轮：confirm settlement template entity id 可回收 fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留四百六十六轮：tip 上 492 项 focused evidence suite（含 residual 250–465 Host confirm settlement template id 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百六十七轮：confirm settlement goalId 禁重绑 fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留四百六十八轮：tip 上 496 项 focused evidence suite（含 residual 250–467 Host confirm goalId no-rebind 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百六十九轮：confirm settlement title 禁重绑 fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留四百七十轮：tip 上 500 项 focused evidence suite（含 residual 250–469 Host confirm title no-rebind 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百七十一轮：confirm process-local draft only + single executed fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留四百七十二轮：tip 上 505 项 focused evidence suite（含 residual 250–471 Host confirm process-local draft only 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百七十三轮：edit 单 approvedAction fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留四百七十四轮：tip 上 509 项 focused evidence suite（含 residual 250–473 Host edit single approvedAction 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百七十五轮：confirm waiting_approval-only fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留四百七十六轮：tip 上 513 项 focused evidence suite（含 residual 250–475 Host confirm waiting_approval-only 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百七十七轮：cancel waiting_approval-only fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留四百七十八轮：tip 上 517 项 focused evidence suite（含 residual 250–477 Host cancel waiting_approval-only 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百七十九轮：start 非空 title fail-closed（禁静默默认）落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留四百八十轮：tip 上 520 项 focused evidence suite（含 residual 250–479 Host start non-empty title 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百八十一轮：edit waiting_approval-only fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留四百八十二轮：tip 上 524 项 focused evidence suite（含 residual 250–481 Host edit waiting_approval-only 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百八十三轮：start conversationId builder fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留四百八十四轮：tip 上 526 项 focused evidence suite（含 residual 250–483 Host start conversationId builder 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百八十五轮：start threadId builder fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留四百八十六轮：tip 上 530 项 focused evidence suite（含 residual 250–485 Host start threadId builder 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百八十七轮：task DAG *ViewModel 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留四百八十八轮：tip 上 532 项 focused evidence suite（含 residual 250–487 task DAG *ViewModel 双轨收口锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百八十九轮：client complete waiting_approval-only fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留四百九十轮：tip 上 533 项 focused evidence suite（含 residual 250–489 Host client complete waiting_approval-only 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百九十一轮：edit/confirm tool+empty-action 命名常量 fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留四百九十二轮：tip 上 536 项 focused evidence suite（含 residual 250–491 Host edit/confirm tool named-constant 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百九十三轮：start identityId builder fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留四百九十四轮：tip 上 540 项 focused evidence suite（含 residual 250–493 Host start identityId fail-closed 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百九十五轮：resume agentType/unsupported-decision + store agentType fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留四百九十六轮：tip 上 543 项 focused evidence suite（含 residual 250–495 Host resume/store agentType fail-closed 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百九十七轮：start runId builder fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留四百九十八轮：tip 上 547 项 focused evidence suite（含 residual 250–497 Host start runId fail-closed 锁）通过；仍不构成全量 PR 门禁证据。
+    残留四百九十九轮：start agentType builder fail-closed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百轮：tip 上 550 项 focused evidence suite（含 residual 250–499 Host start agentType fail-closed 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百零一轮：client complete settlement draft create_task_template-only 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百零二轮：tip 上 551 项 focused evidence suite（含 residual 250–501 client complete draft tool 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百零三轮：process-local store identity trim match 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百零四轮：tip 上 556 项 focused evidence suite（含 residual 250–503 store identity trim match 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百零五轮：process-local store runId trim lookup 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百零六轮：tip 上 561 项 focused evidence suite（含 residual 250–505 store runId trim lookup 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百零七轮：client revise draft create_task_template-only 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百零八轮：tip 上 562 项 focused evidence suite（含 residual 250–507 client revise draft tool 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百零九轮：process-local store conversationId trim match 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百一十轮：tip 上 567 项 focused evidence suite（含 residual 250–509 store conversationId trim match 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百一十一轮：process-local store threadId trim match 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百一十二轮：tip 上 572 项 focused evidence suite（含 residual 250–511 store threadId trim match 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百一十三轮：process-local store conversationId upsert normalize 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百一十四轮：tip 上 577 项 focused evidence suite（含 residual 250–513 store conversation upsert normalize 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百一十五轮：process-local store identityId upsert normalize 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百一十六轮：tip 上 581 项 focused evidence suite（含 residual 250–515 store identity upsert normalize 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百一十七轮：listRuns remote ownership trim match 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百一十八轮：tip 上 583 项 focused evidence suite（含 residual 250–517 listRuns remote ownership trim 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百一十九轮：client task draft title/goalId create_task_template-only 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百二十轮：tip 上 586 项 focused evidence suite（含 residual 250–519 client draft tool gate 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百二十一轮：client knowledge draft path/markdown create_knowledge_note-only 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百二十二轮：tip 上 589 项 focused evidence suite（含 residual 250–521 knowledge draft tool gate 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百二十三轮：client goal draft title/description create_goal-only 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百二十四轮：tip 上 592 项 focused evidence suite（含 residual 250–523 goal draft tool gate 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百二十五轮：client workbench summary product-lane rationale 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百二十六轮：tip 上 597 项 focused evidence suite（含 residual 250–525 summary product-lane 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百二十七轮：client workbench pendingActionCount product-lane 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百二十八轮：tip 上 602 项 focused evidence suite（含 residual 250–527 pendingActionCount product-lane 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百二十九轮：client receipt primaryEntityId product-lane 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百三十轮：tip 上 607 项 focused evidence suite（含 residual 250–529 primaryEntityId product-lane 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百三十一轮：client knowledge draft title create_knowledge_note-only 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百三十二轮：tip 上 611 项 focused evidence suite（含 residual 250–531 knowledge title tool gate 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百三十三轮：client receipt cross-lane foreign tool exclusion 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百三十四轮：tip 上 615 项 focused evidence suite（含 residual 250–533 receipt cross-lane exclusion 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百三十五轮：client receipt summary same-lane failed message 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百三十六轮：tip 上 619 项 focused evidence suite（含 residual 250–535 receipt same-lane failed message 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百三十七轮：client receipt ok product-lane executed 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百三十八轮：tip 上 624 项 focused evidence suite（含 residual 250–537 receipt ok product-lane 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百三十九轮：stage-6 editor dual-track / portable boundary 再锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留五百四十轮：tip 上 627 项 focused evidence suite（含 residual 250–539 stage-6 portable boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百四十一轮：§13.2 证据审计刷新 + Host edit draftAction 锁；tip suite 仍 627（本轮无 suite re-run）；仍不构成全量 PR 门禁证据。
+    残留五百四十二轮：tip 上 628 项 focused evidence suite（含 residual 250–541 Host edit draftAction 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百四十三轮：Host confirm settlementAction 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百四十四轮：tip 上 629 项 focused evidence suite（含 residual 250–543 Host confirm settlementAction 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百四十五轮：Host confirm store draftAction 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百四十六轮：tip 上 632 项 focused evidence suite（含 residual 250–545 Host confirm store draftAction 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百四十七轮：Client complete/revise sole draftAction 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百四十八轮：tip 上 633 项 focused evidence suite（含 residual 250–547 Client sole draftAction 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百四十九轮：Client workbench soleProductDraftAction 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百五十轮：tip 上 637 项 focused evidence suite（含 residual 250–549 soleProductDraftAction 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百五十一轮：Client applyHost*Patch sole product draftAction 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百五十二轮：tip 上 642 项 focused evidence suite（含 residual 250–551 applyHost*Patch sole product draft 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百五十三轮：Host confirm store draft resolve sole create_task_template 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百五十四轮：tip 上 644 项 focused evidence suite（含 residual 250–553 store draft resolve sole product 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百五十五轮：Client knowledge.write confirm sole create_knowledge_note 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百五十六轮：tip 上 645 项 focused evidence suite（含 residual 250–555 knowledge confirm sole create_knowledge_note 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百五十七轮：Client goal.create confirm sole create_goal 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百五十八轮：tip 上 646 项 focused evidence suite（含 residual 250–557 goal confirm sole create_goal 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百五十九轮：Client goal confirm/cancel + knowledge confirm waiting_approval-only 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百六十轮：tip 上 647 项 focused evidence suite（含 residual 250–559 waiting_approval-only 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百六十一轮：Host panel goal/knowledge approve pre-lifecycle product gate 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百六十二轮：tip 上 651 项 focused evidence suite（含 residual 250–561 Host approve pre-lifecycle product gate 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百六十三轮：Host panel task.create approve pre-lifecycle sole create_task_template 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百六十四轮：tip 上 653 项 focused evidence suite（含 residual 250–563 task Host approve pre-lifecycle product gate 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百六十五轮：Host panel product reject pre-lifecycle waiting_approval 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百六十六轮：tip 上 655 项 focused evidence suite（含 residual 250–565 Host reject pre-lifecycle waiting_approval 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百六十七轮：Host panel product revise pre-lifecycle waiting_approval 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百六十八轮：tip 上 657 项 focused evidence suite（含 residual 250–567 Host revise pre-lifecycle waiting_approval 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百六十九轮：Host panel shared product ownership resolver 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百七十轮：tip 上 660 项 focused evidence suite（含 residual 250–569 Host ownership resolver 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百七十一轮：Host panel settlement reuses shared ownership resolver 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百七十二轮：tip 上 661 项 focused evidence suite（含 residual 250–571 Host settlement ownership 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百七十三轮：Host panel revise sole product draftAction gate 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百七十四轮：tip 上 663 项 focused evidence suite（含 residual 250–573 Host revise sole product 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百七十五轮：goal session primary-task confirm sole create_task_template 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百七十六轮：tip 上 664 项 focused evidence suite（含 residual 250–575 primary-task sole product 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百七十七轮：Host panel primary-task-shaped ownership → create_task_template 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百七十八轮：tip 上 666 项 focused evidence suite（含 residual 250–577 primary-task ownership 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百七十九轮：Host panel primary-task-shaped settlement via goal session 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百八十轮：tip 上 667 项 focused evidence suite（含 residual 250–579 primary-task settlement 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百八十一轮：Host panel settlement ownership classifiers 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百八十二轮：tip 上 669 项 focused evidence suite（含 residual 250–581 settlement classifiers 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百八十三轮：goal session primary-task confirm 转发 Host-revised goalId 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百八十四轮：tip 上 670 项 focused evidence suite（含 residual 250–583 primary-task goalId forward 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百八十五轮：Host workbench primary-task exclusive kind routing 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百八十六轮：tip 上 674 项 focused evidence suite（含 residual 250–585 primary-task exclusive kind 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百八十七轮：goal session Host lifecycle kind primary-task → task.create 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百八十八轮：tip 上 675 项 focused evidence suite（含 residual 250–587 Host lifecycle kind 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百八十九轮：dual-mirror primary-task goal session settle into exclusive task lane 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百九十轮：tip 上 679 项 focused evidence suite（含 residual 250–589 dual-mirror settle 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百九十一轮：dual-mirror process-local task.create 优先于 goal overwrite 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百九十二轮：tip 上 681 项 focused evidence suite（含 residual 250–591 process-local dual-mirror first 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百九十三轮：session restore dual-mirror exclusive task before focus 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百九十四轮：tip 上 683 项 focused evidence suite（含 residual 250–593 session dual-mirror focus 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百九十五轮：live exclusive dual-mirror before builders 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百九十六轮：tip 上 685 项 focused evidence suite（含 residual 250–595 live dual-mirror builders 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百九十七轮：Host panel ownership dual-mirror exclusive before match 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留五百九十八轮：tip 上 688 项 focused evidence suite（含 residual 250–597 ownership dual-mirror exclusive 锁）通过；仍不构成全量 PR 门禁证据。
+    残留五百九十九轮：drop dual-mirror primary-task ghost beside normal goal 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留六百轮：tip 上 690 项 focused evidence suite（含 residual 250–599 dual-mirror ghost drop 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百零一轮：knowledge ghost drop + focus exclusive-only 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留六百零二轮：tip 上 692 项 focused evidence suite（含 residual 250–601 knowledge ghost + focus exclusive 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百零三轮：knowledge classifier + AgentRun history session focus 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留六百零四轮：tip 上 694 项 focused evidence suite（含 residual 250–603 knowledge classifier + history session focus 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百零五轮：knowledge process-local edit revise via classifier 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留六百零六轮：tip 上 695 项 focused evidence suite（含 residual 250–605 knowledge process-local edit revise 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百零七轮：goal-session process-local edit revise via classifier 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留六百零八轮：tip 上 696 项 focused evidence suite（含 residual 250–607 goal-session process-local edit revise 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百零九轮：dirty approve process-local revise before goal/knowledge confirm 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留六百一十轮：tip 上 699 项 focused evidence suite（含 residual 250–609 dirty approve process-local revise before confirm 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百一十一轮：default Host workbench focus prefers exclusive session 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留六百一十二轮：tip 上 702 项 focused evidence suite（含 residual 250–611 exclusive default Host workbench focus 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百一十三轮：Host proposal/receipt exclusive session order 落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 跨进程 durable 证据。
+    残留六百一十四轮：tip 上 705 项 focused evidence suite（含 residual 250–613 exclusive Host proposal/receipt order 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百一十五轮：contracts ActionResult 双轨死表面删除落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百一十六轮：tip 上 708 项 focused evidence suite（含 residual 250–615 ActionResult dual-track retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百一十七轮：Result ADR 文档双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百一十八轮：tip 上 710 项 focused evidence suite（含 residual 250–617 Result ADR alignment 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百一十九轮：ADR-021/022 contracts/response 死引用收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百二十轮：tip 上 711 项 focused evidence suite（含 residual 250–619 ADR route response package retirement 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百二十一轮：API POST /logs Result 信封收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百二十二轮：tip 上 716 项 focused evidence suite（含 residual 250–621 POST /logs Result envelope 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百二十三轮：API GET /metrics/json Result 信封收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百二十四轮：tip 上 720 项 focused evidence suite（含 residual 250–623 /metrics/json Result envelope 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百二十五轮：API GET /info Result 信封收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百二十六轮：tip 上 724 项 focused evidence suite（含 residual 250–625 GET /info Result envelope 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百二十七轮：API 全局错误中间件 Result 信封收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百二十八轮：tip 上 730 项 focused evidence suite（含 residual 250–627 error middleware Result envelope 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百二十九轮：API PowerSync GET /schema Result 信封收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百三十轮：tip 上 735 项 focused evidence suite（含 residual 250–629 PowerSync /schema Result envelope 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百三十一轮：schedule 操作响应双轨 DTO 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百三十二轮：tip 上 737 项 focused evidence suite（含 residual 250–631 schedule operation dual DTO retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百三十三轮：SettingOperationRes 双轨信封收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百三十四轮：tip 上 739 项 focused evidence suite（含 residual 250–633 SettingOperationRes dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百三十五轮：reminder 操作响应双轨信封收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百三十六轮：tip 上 741 项 focused evidence suite（含 residual 250–635 reminder operation dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百三十七轮：AuthOperationResult 双轨信封收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百三十八轮：tip 上 745 项 focused evidence suite（含 residual 250–637 AuthOperationResult dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百三十九轮：BatchOperationResponseDTO 双名收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百四十轮：tip 上 747 项 focused evidence suite（含 residual 250–639 BatchOperationResponseDTO dual name retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百四十一轮：shared/dtos 死表面清零落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百四十二轮：tip 上 749 项 focused evidence suite（含 residual 250–641 shared/dtos dead dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百四十三轮：shared UI 死双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百四十四轮：tip 上 751 项 focused evidence suite（含 residual 250–643 shared UI editor dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百四十五轮：shared 配置 VO/错误 schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百四十六轮：tip 上 754 项 focused evidence suite（含 residual 250–645 shared dual config/error schema retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百四十七轮：contracts Summary 双轨死表面收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百四十八轮：tip 上 758 项 focused evidence suite（含 residual 250–647 Summary dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百四十九轮：task 依赖/子任务 Server 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百五十轮：tip 上 760 项 focused evidence suite（含 residual 250–649 task dependency/subtask server dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百五十一轮：governance RuleServerDTO 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百五十二轮：tip 上 762 项 focused evidence suite（含 residual 250–651 RuleServerDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百五十三轮：schedule Static/Dashboard 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百五十四轮：tip 上 765 项 focused evidence suite（含 residual 250–653 schedule Static/Dashboard dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百五十五轮：entities dual re-export 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百五十六轮：tip 上 767 项 focused evidence suite（含 residual 250–655 entities dual re-export retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百五十七轮：SettingOverviewDTO 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百五十八轮：tip 上 769 项 focused evidence suite（含 residual 250–657 SettingOverviewDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百五十九轮：notification 模板 VO 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百六十轮：tip 上 771 项 focused evidence suite（含 residual 250–659 notification template VO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百六十一轮：空 dual barrel re-export 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百六十二轮：tip 上 774 项 focused evidence suite（含 residual 250–661 empty dual barrel re-export retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百六十三轮：schedule list/stats ResponseDTO + detect-conflicts 包装双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百六十四轮：tip 上 776 项 focused evidence suite（含 residual 250–663 schedule list/stats + detect-conflicts dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百六十五轮：schedule batch-delete OpenAPI schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百六十六轮：tip 上 778 项 focused evidence suite（含 residual 250–665 schedule batch-delete OpenAPI schema dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百六十七轮：task bind-to-goal 请求 schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百六十八轮：tip 上 780 项 focused evidence suite（含 residual 250–667 task bind-to-goal request schema dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百六十九轮：knowledge sync 请求 params schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百七十轮：tip 上 783 项 focused evidence suite（含 residual 250–669 knowledge sync params dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百七十一轮：notification id-batch 请求 schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百七十二轮：tip 上 785 项 focused evidence suite（含 residual 250–671 notification id-batch dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百七十三轮：AI conversation name 请求 schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百七十四轮：tip 上 787 项 focused evidence suite（含 residual 250–673 AI conversation name dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百七十五轮：knowledge list projection filter schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百七十六轮：tip 上 789 项 focused evidence suite（含 residual 250–675 knowledge list projection filter dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百七十七轮：goal goalId list params schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百七十八轮：tip 上 791 项 focused evidence suite（含 residual 250–677 goal list params dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百七十九轮：schedule detect-conflicts response schema 名称双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百八十轮：tip 上 793 项 focused evidence suite（含 residual 250–679 detect-conflicts response schema name dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百八十一轮：governance OpenAPI response schema 名称双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百八十二轮：tip 上 795 项 focused evidence suite（含 residual 250–681 governance OpenAPI response schema name dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百八十三轮：AI provider create schema 名称双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百八十四轮：tip 上 797 项 focused evidence suite（含 residual 250–683 AI provider create schema name dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百八十五轮：authentication credential server 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百八十六轮：tip 上 799 项 focused evidence suite（含 residual 250–685 auth credential server dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百八十七轮：authentication base credential server 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百八十八轮：tip 上 800 项 focused evidence suite（含 residual 250–687 auth base credential server dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百八十九轮：goal list response schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百九十轮：tip 上 802 项 focused evidence suite（含 residual 250–689 goal list response dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百九十一轮：ai chat list response schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百九十二轮：tip 上 805 项 focused evidence suite（含 residual 250–691 ai chat list response dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百九十三轮：reminder list response schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百九十四轮：tip 上 808 项 focused evidence suite（含 residual 250–693 reminder list response dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百九十五轮：ai response Res schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百九十六轮：tip 上 811 项 focused evidence suite（含 residual 250–695 ai response Res dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百九十七轮：task check-expired instances response schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留六百九十八轮：tip 上 814 项 focused evidence suite（含 residual 250–697 task check-expired Res dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留六百九十九轮：repository installation response schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百轮：tip 上 817 项 focused evidence suite（含 residual 250–699 knowledge installation Res dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百零一轮：repository installation repository DTO schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百零二轮：tip 上 820 项 focused evidence suite（含 residual 250–701 installation repository DTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百零三轮：schedule query params schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百零四轮：tip 上 823 项 focused evidence suite（含 residual 250–703 schedule query params dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百零五轮：ai goal automation plan/preview schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百零六轮：tip 上 826 项 focused evidence suite（含 residual 250–705 goal automation plan dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百零七轮：schedule request schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百零八轮：tip 上 830 项 focused evidence suite（含 residual 250–707 schedule request dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百零九轮：schedule-task request schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百一十轮：tip 上 834 项 focused evidence suite（含 residual 250–709 schedule-task request dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百一十一轮：task dependency transport schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百一十二轮：tip 上 838 项 focused evidence suite（含 residual 250–711 task dependency transport dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百一十三轮：authentication session response schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百一十四轮：tip 上 841 项 focused evidence suite（含 residual 250–713 auth session response dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百一十五轮：schedule create/resolve response schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百一十六轮：tip 上 844 项 focused evidence suite（含 residual 250–715 schedule response dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百一十七轮：schedule batch response schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百一十八轮：tip 上 847 项 focused evidence suite（含 residual 250–717 schedule batch response dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百一十九轮：ai goal generation draft/preview/result schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百二十轮：tip 上 850 项 focused evidence suite（含 residual 250–719 goal generation draft dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百二十一轮：ai provider test result schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百二十二轮：tip 上 853 项 focused evidence suite（含 residual 250–721 provider test result dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百二十三轮：ai knowledge note persisted-ref schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百二十四轮：tip 上 856 项 focused evidence suite（含 residual 250–723 knowledge note persisted-ref dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百二十五轮：schedule conflict detection result schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百二十六轮：tip 上 859 项 focused evidence suite（含 residual 250–725 schedule conflict result dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百二十七轮：ai token usage schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百二十八轮：tip 上 862 项 focused evidence suite（含 residual 250–727 token usage dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百二十九轮：ai goal workflow result schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百三十轮：tip 上 865 项 focused evidence suite（含 residual 250–729 goal workflow result dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百三十一轮：governance code snippet / rule tag schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百三十二轮：tip 上 868 项 focused evidence suite（含 residual 250–731 governance snippet/tag dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百三十三轮：reminder active hours / group stats schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百三十四轮：tip 上 871 项 focused evidence suite（含 residual 250–733 reminder hours/stats dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百三十五轮：reminder trigger / notification config schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百三十六轮：tip 上 874 项 focused evidence suite（含 residual 250–735 reminder trigger/notification dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百三十七轮：goal key-result progress / snapshot schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百三十八轮：tip 上 877 项 focused evidence suite（含 residual 250–737 key-result progress/snapshot dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百三十九轮：task goal-binding / reminder-config schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百四十轮：tip 上 880 项 focused evidence suite（含 residual 250–739 task goal-binding/reminder dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百四十一轮：goal reminder-config schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百四十二轮：tip 上 883 项 focused evidence suite（含 residual 250–741 goal reminder-config dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百四十三轮：task recurrence-rule schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百四十四轮：tip 上 886 项 focused evidence suite（含 residual 250–743 task recurrence-rule dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百四十五轮：goal focus-mode schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百四十六轮：tip 上 889 项 focused evidence suite（含 residual 250–745 goal focus-mode dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百四十七轮：task time-config schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百四十八轮：tip 上 892 项 focused evidence suite（含 residual 250–747 task time-config dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百四十九轮：schedule nested VO response schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百五十轮：tip 上 896 项 focused evidence suite（含 residual 250–749 schedule nested VO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百五十一轮：TimeSlot + AIModelInfo schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百五十二轮：tip 上 902 项 focused evidence suite（含 residual 250–751 TimeSlot + AIModelInfo dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百五十三轮：goal create/update reminder-config request dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百五十四轮：tip 上 905 项 focused evidence suite（含 residual 250–753 goal reminder-config request dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百五十五轮：KnowledgeCitation schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百五十六轮：tip 上 908 项 focused evidence suite（含 residual 250–755 KnowledgeCitation dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百五十七轮：AgentCitation schema 双轨收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百五十八轮：tip 上 911 项 focused evidence suite（含 residual 250–757 AgentCitation dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百五十九轮：OAuth callback/bind payload dual 收口落地；仍不构成真实 OAuth 跨端 E2E / 全量 PR 门禁证据。
+    残留七百六十轮：tip 上 914 项 focused evidence suite（含 residual 250–759 OAuth callback/bind dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百六十一轮：ReindexKnowledgeRes dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百六十二轮：tip 上 917 项 focused evidence suite（含 residual 250–761 ReindexKnowledgeRes dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百六十三轮：OAuth provider enum dual 收口落地；仍不构成真实 OAuth 跨端 E2E / 全量 PR 门禁证据。
+    残留七百六十四轮：tip 上 920 项 focused evidence suite（含 residual 250–763 OAuth provider enum dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百六十五轮：OAuth response dual 收口落地；仍不构成真实 OAuth 跨端 E2E / 全量 PR 门禁证据。
+    残留七百六十六轮：tip 上 923 项 focused evidence suite（含 residual 250–765 OAuth response dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百六十七轮：CheckAvailabilityRes dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百六十八轮：tip 上 926 项 focused evidence suite（含 residual 250–767 CheckAvailabilityRes dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百六十九轮：session ValidateToken/GuestMode Res dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百七十轮：tip 上 929 项 focused evidence suite（含 residual 250–769 session Res dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百七十一轮：export/import settings Res dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百七十二轮：tip 上 932 项 focused evidence suite（含 residual 250–771 settings export/import Res dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百七十三轮：ListKnowledgeRepositoryConnectionsRes dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百七十四轮：tip 上 935 项 focused evidence suite（含 residual 250–773 list knowledge connections Res dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百七十五轮：upcoming/today schedule list Res dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百七十六轮：tip 上 938 项 focused evidence suite（含 residual 250–775 reminder schedule list Res dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百七十七轮：focus statistics/pomodoro Res dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百七十八轮：tip 上 941 项 focused evidence suite（含 residual 250–777 focus statistics/pomodoro Res dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百七十九轮：QueryGoalFoldersRes dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百八十轮：tip 上 944 项 focused evidence suite（含 residual 250–779 QueryGoalFoldersRes dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百八十一轮：BatchGroupTemplatesRes dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百八十二轮：tip 上 947 项 focused evidence suite（含 residual 250–781 BatchGroupTemplatesRes dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百八十三轮：list/search/revisions Res dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百八十四轮：tip 上 950 项 focused evidence suite（含 residual 250–783 list/search/revisions Res dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百八十五轮：focus status/history Res dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百八十六轮：tip 上 952 项 focused evidence suite（含 residual 250–785 focus status/history Res dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百八十七轮：GenerateGoalAutomationRes dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百八十八轮：tip 上 954 项 focused evidence suite（含 residual 250–787 GenerateGoalAutomationRes dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百八十九轮：task instance range/op Res dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百九十轮：tip 上 956 项 focused evidence suite（含 residual 250–789 task instance range/op Res dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百九十一轮：export/import goals Res dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百九十二轮：tip 上 958 项 focused evidence suite（含 residual 250–791 export/import goals Res dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百九十三轮：local vault Res dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百九十四轮：tip 上 961 项 focused evidence suite（含 residual 250–793 local vault Res dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百九十五轮：local vault Req dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百九十六轮：tip 上 964 项 focused evidence suite（含 residual 250–795 local vault req dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百九十七轮：TaskGraphDependencyDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留七百九十八轮：tip 上 967 项 focused evidence suite（含 residual 250–797 TaskGraphDependencyDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留七百九十九轮：BatchOperationResultDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百轮：tip 上 970 项 focused evidence suite（含 residual 250–799 BatchOperationResultDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百零一轮：UnreadCountResponse dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百零二轮：tip 上 973 项 focused evidence suite（含 residual 250–801 UnreadCountResponse dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百零三轮：KnowledgeRepositoryConnectionClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百零四轮：tip 上 976 项 focused evidence suite（含 residual 250–803 KnowledgeRepositoryConnectionClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百零五轮：ProgressBreakdown dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百零六轮：tip 上 979 项 focused evidence suite（含 residual 250–805 ProgressBreakdown dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百零七轮：MessageClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百零八轮：tip 上 982 项 focused evidence suite（含 residual 250–807 MessageClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百零九轮：AIConversationClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百一十轮：tip 上 985 项 focused evidence suite（含 residual 250–809 AIConversationClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百一十一轮：AIProviderConfigClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百一十二轮：tip 上 988 项 focused evidence suite（含 residual 250–811 AIProviderConfigClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百一十三轮：FocusSessionClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百一十四轮：tip 上 991 项 focused evidence suite（含 residual 250–813 FocusSessionClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百一十五轮：GoalRecordClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百一十六轮：tip 上 994 项 focused evidence suite（含 residual 250–815 GoalRecordClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百一十七轮：KeyResult/GoalReview ClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百一十八轮：tip 上 997 项 focused evidence suite（含 residual 250–817 KeyResult/GoalReview ClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百一十九轮：Goal/GoalFolder ClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百二十轮：tip 上 1000 项 focused evidence suite（含 residual 250–819 Goal/GoalFolder ClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百二十一轮：Rule/RuleRevision ClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百二十二轮：tip 上 1003 项 focused evidence suite（含 residual 250–821 Rule/RuleRevision ClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百二十三轮：UserSettingClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百二十四轮：tip 上 1006 项 focused evidence suite（含 residual 250–823 UserSettingClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百二十五轮：AccountClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百二十六轮：tip 上 1009 项 focused evidence suite（含 residual 250–825 AccountClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百二十七轮：ReminderGroup/History ClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百二十八轮：tip 上 1012 项 focused evidence suite（含 residual 250–827 ReminderGroup/History ClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百二十九轮：NotificationPreference/CalendarEntry/UserReminderPreferences ClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百三十轮：tip 上 1015 项 focused evidence suite（含 residual 250–829 Preference/Calendar ClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百三十一轮：TaskDependency/TaskInstance/ScheduleTask ClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百三十二轮：tip 上 1018 项 focused evidence suite（含 residual 250–831 Task/Schedule ClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百三十三轮：ActiveTime/ReminderTemplate/ScheduleExecution dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百三十四轮：tip 上 1021 项 focused evidence suite（含 residual 250–833 ActiveTime/Template/Execution dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百三十五轮：ReminderTemplate request ActiveTime dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百三十六轮：tip 上 1024 项 focused evidence suite（含 residual 250–835 request ActiveTime dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百三十七轮：TaskFolder/TaskTemplateHistory ClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百三十八轮：tip 上 1027 项 focused evidence suite（含 residual 250–837 TaskFolder/History ClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百三十九轮：NotificationTemplate ClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百四十轮：tip 上 1030 项 focused evidence suite（含 residual 250–839 NotificationTemplate ClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百四十一轮：SubtaskClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百四十二轮：tip 上 1033 项 focused evidence suite（含 residual 250–841 SubtaskClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百四十三轮：TaskFolder/History ServerDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百四十四轮：tip 上 1036 项 focused evidence suite（含 residual 250–843 TaskFolder/History ServerDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百四十五轮：NotificationTemplate ServerDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百四十六轮：tip 上 1039 项 focused evidence suite（含 residual 250–845 NotificationTemplate ServerDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百四十七轮：DeviceInfoDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百四十八轮：tip 上 1042 项 focused evidence suite（含 residual 250–847 DeviceInfoDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百四十九轮：ChannelResponse/Error/RateLimit DTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百五十轮：tip 上 1045 项 focused evidence suite（含 residual 250–849 channel VO DTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百五十一轮：CategoryPreference/Action/DND/Metadata DTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百五十二轮：tip 上 1048 项 focused evidence suite（含 residual 250–851 preference VO DTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百五十三轮：GoalMetadata/AccountSettings/ChecklistItemDefinition DTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百五十四轮：tip 上 1051 项 focused evidence suite（含 residual 250–853 exact VO DTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百五十五轮：HashedPassword/Email/Phone/PlainPassword DTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百五十六轮：tip 上 1054 项 focused evidence suite（含 residual 250–855 auth secret VO DTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百五十七轮：FrequencyAdjustment/ResponseMetrics DTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百五十八轮：tip 上 1057 项 focused evidence suite（含 residual 250–857 reminder metrics VO DTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百五十九轮：DomainDate≠TransferDate dual keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百六十轮：tip 上 1060 项 focused evidence suite（含 residual 250–859 DomainDate dual keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百六十一轮：ReminderResponse/NotificationChannel subset dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百六十二轮：tip 上 1063 项 focused evidence suite（含 residual 250–861 subset Client/Server dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百六十三轮：NotificationClientDTO dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百六十四轮：tip 上 1066 项 focused evidence suite（含 residual 250–863 NotificationClientDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百六十五轮：AuthStatusDTO 死 dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百六十六轮：tip 上 1069 项 focused evidence suite（含 residual 250–865 AuthStatusDTO dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百六十七轮：LoginResponse 死 dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百六十八轮：tip 上 1072 项 focused evidence suite（含 residual 250–867 LoginResponse dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百六十九轮：DesktopLoginRequest dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百七十轮：tip 上 1075 项 focused evidence suite（含 residual 250–869 DesktopLoginRequest dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百七十一轮：RegisterRequest dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百七十二轮：tip 上 1078 项 focused evidence suite（含 residual 250–871 RegisterRequest dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百七十三轮：OfflineLoginResponse dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百七十四轮：tip 上 1081 项 focused evidence suite（含 residual 250–873 OfflineLoginResponse dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百七十五轮：RegistrationRequestPayload dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百七十六轮：tip 上 1084 项 focused evidence suite（含 residual 250–875 RegistrationRequestPayload dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百七十七轮：ChannelConfig dual 收口落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百七十八轮：tip 上 1087 项 focused evidence suite（含 residual 250–877 ChannelConfig dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百七十九轮：Client≠Server keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百八十轮：tip 上 1090 项 focused evidence suite（含 residual 250–879 Client≠Server keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百八十一轮：DeviceInfoClientDTO keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百八十二轮：tip 上 1093 项 focused evidence suite（含 residual 250–881 DeviceInfoClientDTO keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百八十三轮：SessionRestoreResult layered extension keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百八十四轮：tip 上 1096 项 focused evidence suite（含 residual 250–883 SessionRestoreResult keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百八十五轮：portable boundary re-lock surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百八十六轮：tip 上 1099 项 focused evidence suite（含 residual 250–885 portable boundary re-lock 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百八十七轮：AutoLoginResult layered extension keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百八十八轮：tip 上 1102 项 focused evidence suite（含 residual 250–887 AutoLoginResult keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百八十九轮：SessionStatus extension keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留八百九十轮：tip 上 1105 项 focused evidence suite（含 residual 250–889 SessionStatus keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百九十一轮：§13.2 open-items honest re-audit surface 锁落地；仍不构成全量 PR 门禁证据。
+    残留八百九十二轮：tip 上 1108 项 focused evidence suite（含 residual 250–891 open-items honest re-audit surface 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百九十三轮：OAuthProvider transport≠domain keep-boundary surface 锁落地；仍不构成全量 PR 门禁证据。
+    残留八百九十四轮：tip 上 1111 项 focused evidence suite（含 residual 250–893 OAuthProvider keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百九十五轮：refresh-result layered dual keep-boundary surface 锁落地；仍不构成全量 PR 门禁证据。
+    残留八百九十六轮：tip 上 1114 项 focused evidence suite（含 residual 250–895 refresh-result keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百九十七轮：TokenStorageData ≠ SaveTokenRequest keep-boundary surface 锁落地；仍不构成全量 PR 门禁证据。
+    残留八百九十八轮：tip 上 1117 项 focused evidence suite（含 residual 250–897 TokenStorage keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留八百九十九轮：LoginRequest ≠ EmailLoginCredentials keep-boundary surface 锁落地；仍不构成全量 PR 门禁证据。
+    残留九百轮：tip 上 1120 项 focused evidence suite（含 residual 250–899 LoginRequest keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百零一轮：DesktopAuthStatus dual retired surface 锁落地；仍不构成全量 PR 门禁证据。
+    残留九百零二轮：tip 上 1123 项 focused evidence suite（含 residual 250–901 DesktopAuthStatus dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百零三轮：DesktopBootstrapApi dual retired surface 锁落地；仍不构成全量 PR 门禁证据。
+    残留九百零四轮：tip 上 1126 项 focused evidence suite（含 residual 250–903 DesktopBootstrapApi dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百零五轮：reminder DesktopApi dual retired surface 锁落地；仍不构成全量 PR 门禁证据。
+    残留九百零六轮：tip 上 1129 项 focused evidence suite（含 residual 250–905 reminder DesktopApi dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百零七轮：themeSync electronAPI dual retired surface 锁落地；仍不构成全量 PR 门禁证据。
+    残留九百零八轮：tip 上 1132 项 focused evidence suite（含 residual 250–907 themeSync dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百零九轮：Window.electronAPI + desktop-detect dual retired surface 锁落地；仍不构成全量 PR 门禁证据。
+    残留九百一十轮：tip 上 1135 项 focused evidence suite（含 residual 250–909 Window dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百一十一轮：CustomNotificationView ElectronBridge dual retired surface 锁落地；仍不构成全量 PR 门禁证据。
+    残留九百一十二轮：tip 上 1138 项 focused evidence suite（含 residual 250–911 CustomNotification ElectronBridge dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百一十三轮：host-access cast dual retired surface 锁落地；仍不构成全量 PR 门禁证据。
+    残留九百一十四轮：tip 上 1141 项 focused evidence suite（含 residual 250–913 host-access dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百一十五轮：DESKTOP_AUTH_API_KEY dual retired surface 锁落地；仍不构成全量 PR 门禁证据。
+    残留九百一十六轮：tip 上 1144 项 focused evidence suite（含 residual 250–915 DESKTOP_AUTH_API_KEY dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百一十七轮：AuthFlowResult named duals retired surface 锁落地；仍不构成全量 PR 门禁证据。
+    残留九百一十八轮：tip 上 1147 项 focused evidence suite（含 residual 250–917 AuthFlowResult named duals retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百一十九轮：DesktopBootstrapApi name + hasDesktopElectronBridge dual retired surface 锁落地；仍不构成全量 PR 门禁证据。
+    残留九百二十轮：tip 上 1150 项 focused evidence suite（含 residual 250–919 bootstrap/detect name dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百二十一轮：DesktopLoginRequest name dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百二十二轮：tip 上 1150 项 focused evidence suite（含 residual 250–921 DesktopLoginRequest name dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百二十三轮：isDesktopEnvironment name dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百二十四轮：tip 上 1153 项 focused evidence suite（含 residual 250–923 isDesktopEnvironment name dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百二十五轮：OfflineLoginResponse name dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百二十六轮：tip 上 1153 项 focused evidence suite（含 residual 250–925 OfflineLoginResponse name dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百二十七轮：I*Service ClientPort facade keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百二十八轮：tip 上 1156 项 focused evidence suite（含 residual 250–927 I*Service ClientPort facade keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百二十九轮：ElectronBridge window-controls keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百三十轮：tip 上 1158 项 focused evidence suite（含 residual 250–929 ElectronBridge window-controls keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百三十一轮：RegisterRequest→EmailRegisterCredentials dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百三十二轮：tip 上 1158 项 focused evidence suite（含 residual 250–931 RegisterRequest→EmailRegisterCredentials dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百三十三轮：AuthRemoteApiResult dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百三十四轮：tip 上 1161 项 focused evidence suite（含 residual 250–933 AuthRemoteApiResult dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百三十五轮：LifecycleSessionRestoreResult name dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百三十六轮：tip 上 1162 项 focused evidence suite（含 residual 250–935 LifecycleSessionRestoreResult name dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百三十七轮：session helper duals retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百三十八轮：tip 上 1165 项 focused evidence suite（含 residual 250–937 session helper duals retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百三十九轮：toErrorLog dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百四十轮：tip 上 1169 项 focused evidence suite（含 residual 250–939 toErrorLog dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百四十一轮：host ElectronBridge helper duals retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百四十二轮：tip 上 1172 项 focused evidence suite（含 residual 250–941 host ElectronBridge helper duals retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百四十三轮：escapeHtml dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百四十四轮：tip 上 1175 项 focused evidence suite（含 residual 250–943 escapeHtml dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百四十五轮：formatZodErrors dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百四十六轮：tip 上 1179 项 focused evidence suite（含 residual 250–945 formatZodErrors dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百四十七轮：http envelope guard duals retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百四十八轮：tip 上 1182 项 focused evidence suite（含 residual 250–947 http envelope guard duals retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百四十九轮：maskEmail dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百五十轮：tip 上 1185 项 focused evidence suite（含 residual 250–949 maskEmail dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百五十一轮：app-vue AI isRecord dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百五十二轮：tip 上 1188 项 focused evidence suite（含 residual 250–951 AI isRecord dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百五十三轮：app-vue AI createAgentId dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百五十四轮：tip 上 1191 项 focused evidence suite（含 residual 250–953 createAgentId dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百五十五轮：app-vue AI getRecordString dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百五十六轮：tip 上 1194 项 focused evidence suite（含 residual 250–955 getRecordString dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百五十七轮：vault FS guards dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百五十八轮：tip 上 1197 项 focused evidence suite（含 residual 250–957 vault FS guards dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百五十九轮：normalizeEmail dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百六十轮：tip 上 1200 项 focused evidence suite（含 residual 250–959 normalizeEmail dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百六十一轮：toChallengePurpose dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百六十二轮：tip 上 1203 项 focused evidence suite（含 residual 250–961 toChallengePurpose dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百六十三轮：findSSEBoundary dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百六十四轮：tip 上 1206 项 focused evidence suite（含 residual 250–963 findSSEBoundary dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百六十五轮：getRequestId dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百六十六轮：tip 上 1209 项 focused evidence suite（含 residual 250–965 getRequestId dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百六十七轮：isAbortLikeError dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百六十八轮：tip 上 1213 项 focused evidence suite（含 residual 250–967 isAbortLikeError dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百六十九轮：knowledge-index value helpers dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百七十轮：tip 上 1216 项 focused evidence suite（含 residual 250–969 knowledge-index value helpers dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百七十一轮：withObservabilityPayload dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百七十二轮：tip 上 1219 项 focused evidence suite（含 residual 250–971 withObservabilityPayload dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百七十三轮：createComposableHandleError dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百七十四轮：tip 上 1223 项 focused evidence suite（含 residual 250–973 createComposableHandleError dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百七十五轮：task toast handleError dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百七十六轮：tip 上 1224 项 focused evidence suite（含 residual 250–975 task toast handleError dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百七十七轮：parseSSE dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百七十八轮：tip 上 1227 项 focused evidence suite（含 residual 250–977 parseSSE dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百七十九轮：toPrismaJson dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百八十轮：tip 上 1231 项 focused evidence suite（含 residual 250–979 toPrismaJson dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百八十一轮：toIso dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百八十二轮：tip 上 1234 项 focused evidence suite（含 residual 250–981 toIso dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百八十三轮：getFirstQueryValue dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百八十四轮：tip 上 1237 项 focused evidence suite（含 residual 250–983 getFirstQueryValue dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百八十五轮：parseBoolean dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百八十六轮：tip 上 1240 项 focused evidence suite（含 residual 250–985 parseBoolean dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百八十七轮：normalizeRuntimeContributions dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百八十八轮：tip 上 1244 项 focused evidence suite（含 residual 250–987 normalizeRuntimeContributions dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百八十九轮：parseString/parseNumber dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百九十轮：tip 上 1248 项 focused evidence suite（含 residual 250–989 parseString/parseNumber dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百九十一轮：toDomainProvider dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百九十二轮：tip 上 1251 项 focused evidence suite（含 residual 250–991 toDomainProvider dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百九十三轮：createStreamId dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百九十四轮：tip 上 1254 项 focused evidence suite（含 residual 250–993 createStreamId dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百九十五轮：previewText dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百九十六轮：tip 上 1258 项 focused evidence suite（含 residual 250–995 previewText dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百九十七轮：lastArg dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留九百九十八轮：tip 上 1261 项 focused evidence suite（含 residual 250–997 lastArg dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留九百九十九轮：errorMessage dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千轮：tip 上 1265 项 focused evidence suite（含 residual 250–999 errorMessage dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零一轮：clamp dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零二轮：tip 上 1268 项 focused evidence suite（含 residual 250–1001 clamp dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零三轮：resolveExportRef dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零四轮：tip 上 1272 项 focused evidence suite（含 residual 250–1003 resolveExportRef dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零五轮：presentation preference dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零六轮：tip 上 1275 项 focused evidence suite（含 residual 250–1005 presentation preference dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零七轮：reminder time-of-day dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零八轮：tip 上 1279 项 focused evidence suite（含 residual 250–1007 reminder time-of-day dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零九轮：readNestedNumber dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零一十轮：tip 上 1283 项 focused evidence suite（含 residual 250–1009 readNestedNumber dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零一十一轮：previewText dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零一十二轮：tip 上 1287 项 focused evidence suite（含 residual 250–1011 previewText dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零一十三轮：buildReminderTemplateInput dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零一十四轮：tip 上 1291 项 focused evidence suite（含 residual 250–1013 buildReminderTemplateInput dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零一十五轮：buildRecurrenceRule dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零一十六轮：tip 上 1295 项 focused evidence suite（含 residual 250–1015 buildRecurrenceRule dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零一十七轮：goal/editor resolveRef dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零一十八轮：tip 上 1299 项 focused evidence suite（含 residual 250–1017 goal/editor resolveRef dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零一十九轮：database CLI toErrorMessage dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零二十轮：tip 上 1303 项 focused evidence suite（含 residual 250–1019 database CLI toErrorMessage dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零二十一轮：notification parseBoolean dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零二十二轮：tip 上 1307 项 focused evidence suite（含 residual 250–1021 notification parseBoolean dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零二十三轮：governance parseString/parseNumber dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零二十四轮：tip 上 1311 项 focused evidence suite（含 residual 250–1023 governance parseString/parseNumber dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零二十五轮：notification parseJsonSafe dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零二十六轮：tip 上 1315 项 focused evidence suite（含 residual 250–1025 notification parseJsonSafe dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零二十七轮：web e2e normalizeOrigin dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零二十八轮：tip 上 1319 项 focused evidence suite（含 residual 250–1027 web e2e normalizeOrigin dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零二十九轮：openapi successResponse/errorResponse dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零三十轮：tip 上 1323 项 focused evidence suite（含 residual 250–1029 openapi successResponse/errorResponse dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零三十一轮：patterns createEventBusAdapter dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零三十二轮：tip 上 1327 项 focused evidence suite（含 residual 250–1031 patterns createEventBusAdapter dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零三十三轮：anIdentityId dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零三十四轮：tip 上 1331 项 focused evidence suite（含 residual 250–1033 anIdentityId dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零三十五轮：schedule-package-shim dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零三十六轮：tip 上 1335 项 focused evidence suite（含 residual 250–1035 schedule-package-shim dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零三十七轮：integration-global-setup dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零三十八轮：tip 上 1339 项 focused evidence suite（含 residual 250–1037 integration-global-setup dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零三十九轮：patterns scheduler dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零四十轮：tip 上 1343 项 focused evidence suite（含 residual 250–1039 patterns scheduler dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零四十一轮：desktop-build globalSetup dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零四十二轮：tip 上 1347 项 focused evidence suite（含 residual 250–1041 desktop-build globalSetup dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零四十三轮：integration-helpers dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零四十四轮：tip 上 1351 项 focused evidence suite（含 residual 250–1043 integration-helpers dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零四十五轮：completeAuthSuccess dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零四十六轮：tip 上 1355 项 focused evidence suite（含 residual 250–1045 completeAuthSuccess dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零四十七轮：§13.2 tip 指针刷新 + loadWorkspaceEnv keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零四十八轮：tip 上 1359 项 focused evidence suite（含 residual 250–1047 §13.2 tip refresh + loadWorkspaceEnv keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零四十九轮：auth operation failure dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零五十轮：tip 上 1363 项 focused evidence suite（含 residual 250–1049 reportAuthOperationFailure dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零五十一轮：enterGuestMode failure dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零五十二轮：tip 上 1363 项 focused evidence suite（含 residual 250–1051 enterGuestMode failure dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零五十三轮：§13.2 tip 指针刷新 + keep-boundary 再确认锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零五十四轮：tip 上 1363 项 focused evidence suite（含 residual 250–1053 §13.2 tip refresh + keep-boundary reaffirm 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零五十五轮：createComposableHandleError toast cluster 扩展 surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零五十六轮：tip 上 1364 项 focused evidence suite（含 residual 250–1055 createComposableHandleError toast cluster 扩展 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零五十七轮：setGovernanceError dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零五十八轮：tip 上 1364 项 focused evidence suite（含 residual 250–1057 setGovernanceError dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零五十九轮：useDashboard error dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零六十轮：tip 上 1364 项 focused evidence suite（含 residual 250–1059 useDashboard error dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零六十一轮：§13.2 tip 指针刷新 + keep-boundary 再确认锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零六十二轮：tip 上 1364 项 focused evidence suite（含 residual 250–1061 §13.2 tip refresh + keep-boundary reaffirm 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零六十三轮：dead useResultHandler dual removed surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零六十四轮：tip 上 1368 项 focused evidence suite（含 residual 250–1063 dead useResultHandler dual removed 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零六十五轮：§13.2 tip 指针刷新 + goalOperations keep-boundary 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零六十六轮：tip 上 1372 项 focused evidence suite（含 residual 250–1065 goalOperations keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零六十七轮：goal parseNumber/parseStringArray keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零六十八轮：tip 上 1377 项 focused evidence suite（含 residual 250–1067 goal parseNumber/parseStringArray keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零六十九轮：governance parseStringArray keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零七十轮：tip 上 1383 项 focused evidence suite（含 residual 250–1069 governance parseStringArray keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零七十一轮：dead useViewportBreakpoint removed surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零七十二轮：tip 上 1386 项 focused evidence suite（含 residual 250–1071 dead useViewportBreakpoint removed 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零七十三轮：§13.2 tip 指针刷新 + schedule route parsers keep-boundary 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零七十四轮：tip 上 1389 项 focused evidence suite（含 residual 250–1073 schedule route parsers keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零七十五轮：password/checkAvailability toast-only keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零七十六轮：tip 上 1393 项 focused evidence suite（含 residual 250–1075 password toast-only keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零七十七轮：autoLoginDesktop AutoLoginResult keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零七十八轮：tip 上 1397 项 focused evidence suite（含 residual 250–1077 autoLoginDesktop keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零七十九轮：removeRememberedAccount toast-only keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零八十轮：tip 上 1402 项 focused evidence suite（含 residual 250–1079 removeRemembered toast-only keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零八十一轮：account PowerSync parseJson keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零八十二轮：tip 上 1406 项 focused evidence suite（含 residual 250–1081 account PowerSync parseJson keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零八十三轮：goal clampPercentage keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零八十四轮：tip 上 1410 项 focused evidence suite（含 residual 250–1083 goal clampPercentage keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零八十五轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零八十六轮：tip 上 1410 项 focused evidence suite（含 residual 250–1085 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零八十七轮：dead useAIDraftPersistence removed surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零八十八轮：tip 上 1414 项 focused evidence suite（含 residual 250–1087 dead useAIDraftPersistence removed 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零八十九轮：isRecord cross-package keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零九十轮：tip 上 1418 项 focused evidence suite（含 residual 250–1089 isRecord keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零九十一轮：api PowerSync parseJsonLikeString keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零九十二轮：tip 上 1423 项 focused evidence suite（含 residual 250–1091 parseJsonLikeString keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零九十三轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零九十四轮：tip 上 1423 项 focused evidence suite（含 residual 250–1093 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零九十五轮：data-portability parseJsonField keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零九十六轮：tip 上 1428 项 focused evidence suite（含 residual 250–1095 parseJsonField keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零九十七轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千零九十八轮：tip 上 1428 项 focused evidence suite（含 residual 250–1097 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千零九十九轮：asRecord/toRecord keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百轮：tip 上 1433 项 focused evidence suite（含 residual 250–1099 asRecord/toRecord keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百零一轮：toTimestamp keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百零二轮：tip 上 1439 项 focused evidence suite（含 residual 250–1101 toTimestamp keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百零三轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百零四轮：tip 上 1439 项 focused evidence suite（含 residual 250–1103 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百零五轮：AI toNumber keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百零六轮：tip 上 1442 项 focused evidence suite（含 residual 250–1105 toNumber keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百零七轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百零八轮：tip 上 1442 项 focused evidence suite（含 residual 250–1107 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百零九轮：toStringArray keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百一十轮：tip 上 1447 项 focused evidence suite（含 residual 250–1109 toStringArray keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百一十一轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百一十二轮：tip 上 1447 项 focused evidence suite（含 residual 250–1111 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百一十三轮：data-portability toBoolean keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百一十四轮：tip 上 1451 项 focused evidence suite（含 residual 250–1113 toBoolean keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百一十五轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百一十六轮：tip 上 1451 项 focused evidence suite（含 residual 250–1115 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百一十七轮：optionalString/toNonEmptyString keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百一十八轮：tip 上 1454 项 focused evidence suite（含 residual 250–1117 optionalString/toNonEmptyString keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百一十九轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百二十轮：tip 上 1454 项 focused evidence suite（含 residual 250–1119 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百二十一轮：AI asNonEmptyString dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百二十二轮：tip 上 1459 项 focused evidence suite（含 residual 250–1121 asNonEmptyString dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百二十三轮：toDate/toDateString keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百二十四轮：tip 上 1464 项 focused evidence suite（含 residual 250–1123 toDate/toDateString keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百二十五轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百二十六轮：tip 上 1464 项 focused evidence suite（含 residual 250–1125 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百二十七轮：extractErrorMessage dual retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百二十八轮：tip 上 1468 项 focused evidence suite（含 residual 250–1127 extractErrorMessage dual retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百二十九轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百三十轮：tip 上 1468 项 focused evidence suite（含 residual 250–1129 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百三十一轮：generateUUID keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百三十二轮：tip 上 1472 项 focused evidence suite（含 residual 250–1131 generateUUID keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百三十三轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百三十四轮：tip 上 1472 项 focused evidence suite（含 residual 250–1133 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百三十五轮：newId/generateUUID keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百三十六轮：tip 上 1476 项 focused evidence suite（含 residual 250–1135 newId/generateUUID keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百三十七轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百三十八轮：tip 上 1476 项 focused evidence suite（含 residual 250–1137 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百三十九轮：isPlainObject/isRecord keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百四十轮：tip 上 1480 项 focused evidence suite（含 residual 250–1139 isPlainObject/isRecord keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百四十一轮：toMillis/toTimestamp keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百四十二轮：tip 上 1484 项 focused evidence suite（含 residual 250–1141 toMillis/toTimestamp keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百四十三轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百四十四轮：tip 上 1484 项 focused evidence suite（含 residual 250–1143 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百四十五轮：formatFileSize keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百四十六轮：tip 上 1488 项 focused evidence suite（含 residual 250–1145 formatFileSize keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百四十七轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百四十八轮：tip 上 1488 项 focused evidence suite（含 residual 250–1147 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百四十九轮：toKnowledgeNoteRef keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百五十轮：tip 上 1492 项 focused evidence suite（含 residual 250–1149 toKnowledgeNoteRef keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百五十一轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百五十二轮：tip 上 1492 项 focused evidence suite（含 residual 250–1151 tip refresh 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百五十三轮：tokenize keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百五十四轮：tip 上 1496 项 focused evidence suite（含 residual 250–1153 tokenize keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百五十五轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百五十六轮：toDashboardTaskInstanceRecord dual 收口 surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百五十七轮：tip 上 1500 项 focused evidence suite（含 residual 250–1156 toDashboardTaskInstanceRecord dual 收口锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百五十八轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百五十九轮：toPrismaJson keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百六十轮：tip 上 1504 项 focused evidence suite（含 residual 250–1159 toPrismaJson keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百六十一轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百六十二轮：contracts private isRecord keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百六十三轮：tip 上 1508 项 focused evidence suite（含 residual 250–1162 contracts isRecord keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百六十四轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百六十五轮：startOfDay keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百六十六轮：tip 上 1512 项 focused evidence suite（含 residual 250–1165 startOfDay keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百六十七轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百六十八轮：mapPriority dual 收口 surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百六十九轮：tip 上 1516 项 focused evidence suite（含 residual 250–1168 mapPriority dual 收口锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百七十轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百七十一轮：readString keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百七十二轮：tip 上 1520 项 focused evidence suite（含 residual 250–1171 readString keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百七十三轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百七十四轮：normalizePath keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百七十五轮：tip 上 1524 项 focused evidence suite（含 residual 250–1174 normalizePath keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百七十六轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百七十七轮：buildTaskName keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百七十八轮：tip 上 1528 项 focused evidence suite（含 residual 250–1177 buildTaskName keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百七十九轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百八十轮：comparePriority keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百八十一轮：tip 上 1532 项 focused evidence suite（含 residual 250–1180 comparePriority keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百八十二轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百八十三轮：defaultExtractContext keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百八十四轮：tip 上 1536 项 focused evidence suite（含 residual 250–1183 defaultExtractContext keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百八十五轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百八十六轮：getTemplateById keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百八十七轮：tip 上 1540 项 focused evidence suite（含 residual 250–1186 getTemplateById keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百八十八轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百八十九轮：getCorsOrigins keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百九十轮：tip 上 1544 项 focused evidence suite（含 residual 250–1189 getCorsOrigins keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百九十一轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百九十二轮：delay dual 收口 surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百九十三轮：tip 上 1548 项 focused evidence suite（含 residual 250–1192 delay dual 收口锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百九十四轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百九十五轮：scoreIndexedResource dual 收口 surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百九十六轮：tip 上 1552 项 focused evidence suite（含 residual 250–1195 scoreIndexedResource dual 收口锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千一百九十七轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百九十八轮：readJson keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千一百九十九轮：tip 上 1557 项 focused evidence suite（含 residual 250–1198 readJson keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百零一轮：handleAuthSuccess keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百零二轮：tip 上 1561 项 focused evidence suite（含 residual 250–1201 handleAuthSuccess keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百零三轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百零四轮：formatDateTime keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百零五轮：tip 上 1566 项 focused evidence suite（含 residual 250–1204 formatDateTime keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百零六轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百零七轮：formatMessageTime keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百零八轮：tip 上 1570 项 focused evidence suite（含 residual 250–1207 formatMessageTime keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百零九轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百一十轮：formatDateToInput keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百一十一轮：tip 上 1574 项 focused evidence suite（含 residual 250–1210 formatDateToInput keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百一十二轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百一十三轮：formatTimeRange keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百一十四轮：tip 上 1579 项 focused evidence suite（含 residual 250–1213 formatTimeRange keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百一十五轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百一十六轮：formatTimestamp keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百一十七轮：tip 上 1584 项 focused evidence suite（含 residual 250–1216 formatTimestamp keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百一十八轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百一十九轮：getImportanceLabel keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百二十轮：tip 上 1589 项 focused evidence suite（含 residual 250–1219 getImportanceLabel keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百二十一轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百二十二轮：getStatusLabel keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百二十三轮：tip 上 1595 项 focused evidence suite（含 residual 250–1222 getStatusLabel keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百二十四轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百二十五轮：parseDateInput keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百二十六轮：tip 上 1600 项 focused evidence suite（含 residual 250–1225 parseDateInput keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百二十七轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百二十八轮：toDateInput keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百二十九轮：tip 上 1606 项 focused evidence suite（含 residual 250–1228 toDateInput keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百三十轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百三十一轮：toTimeInput keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百三十二轮：tip 上 1611 项 focused evidence suite（含 residual 250–1231 toTimeInput keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百三十三轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百三十四轮：combineDateAndTime/parseTimestamp keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百三十五轮：tip 上 1616 项 focused evidence suite（含 residual 250–1234 combineDateAndTime/parseTimestamp keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百三十六轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百三十七轮：formatTime keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百三十八轮：tip 上 1621 项 focused evidence suite（含 residual 250–1237 formatTime keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百三十九轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百四十轮：formatDate keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百四十一轮：tip 上 1626 项 focused evidence suite（含 residual 250–1240 formatDate keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百四十二轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百四十三轮：formatDuration keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百四十四轮：tip 上 1631 项 focused evidence suite（含 residual 250–1243 formatDuration keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百四十五轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百四十六轮：describeConflict keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百四十七轮：tip 上 1636 项 focused evidence suite（含 residual 250–1246 describeConflict keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百四十八轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百四十九轮：formatDisplayDate dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百五十轮：tip 上 1641 项 focused evidence suite（含 residual 250–1249 formatDisplayDate dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百五十一轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百五十二轮：formatDateToYMD dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百五十三轮：tip 上 1646 项 focused evidence suite（含 residual 250–1252 formatDateToYMD dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百五十四轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百五十五轮：parseToDate dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百五十六轮：tip 上 1651 项 focused evidence suite（含 residual 250–1255 parseToDate dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百五十七轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百五十八轮：handleCalendarSelect dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百五十九轮：tip 上 1656 项 focused evidence suite（含 residual 250–1258 handleCalendarSelect dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百六十轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百六十一轮：formatDateNotSet dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百六十二轮：tip 上 1661 项 focused evidence suite（含 residual 250–1261 formatDateNotSet dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百六十三轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百六十四轮：formatDateUnknown dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百六十五轮：tip 上 1666 项 focused evidence suite（含 residual 250–1264 formatDateUnknown dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百六十六轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百六十七轮：handleEndDateCalendarSelect dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百六十八轮：tip 上 1671 项 focused evidence suite（含 residual 250–1267 handleEndDateCalendarSelect dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百六十九轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百七十轮：handleAbsoluteDateSelect dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百七十一轮：tip 上 1676 项 focused evidence suite（含 residual 250–1270 handleAbsoluteDateSelect dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百七十二轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百七十三轮：formatCalendarEventTimeRange dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百七十四轮：tip 上 1681 项 focused evidence suite（含 residual 250–1273 formatCalendarEventTimeRange dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百七十五轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百七十六轮：formatHour dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百七十七轮：tip 上 1686 项 focused evidence suite（含 residual 250–1276 formatHour dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百七十八轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百七十九轮：formatEventTime keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百八十轮：tip 上 1691 项 focused evidence suite（含 residual 250–1279 formatEventTime keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百八十一轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百八十二轮：toLocalDateKey dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百八十三轮：tip 上 1696 项 focused evidence suite（含 residual 250–1282 toLocalDateKey dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百八十四轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百八十五轮：getWeekStart dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百八十六轮：tip 上 1701 项 focused evidence suite（含 residual 250–1285 getWeekStart dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百八十七轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百八十八轮：calendarEventBgClass dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百八十九轮：tip 上 1706 项 focused evidence suite（含 residual 250–1288 calendarEventBgClass dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百九十轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百九十一轮：calendarEventSourceLabel dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百九十二轮：tip 上 1711 项 focused evidence suite（含 residual 250–1291 calendarEventSourceLabel dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百九十三轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百九十四轮：formatLocalHHmm dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百九十五轮：tip 上 1716 项 focused evidence suite（含 residual 250–1294 formatLocalHHmm dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百九十六轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百九十七轮：formatHHmmParts dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千二百九十八轮：tip 上 1721 项 focused evidence suite（含 residual 250–1297 formatHHmmParts dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千二百九十九轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千三百轮：formatEventTime→formatLocalHHmm dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千三百零一轮：tip 上 1726 项 focused evidence suite（含 residual 250–1300 formatEventTime→formatLocalHHmm dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千三百零二轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千三百零三轮：formatCalendarEventTimeRange→formatLocalHHmm dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千三百零四轮：tip 上 1731 项 focused evidence suite（含 residual 250–1303 formatCalendarEventTimeRange→formatLocalHHmm dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千三百零五轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千三百零六轮：calendar event layout keep-boundary surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千三百零七轮：tip 上 1736 项 focused evidence suite（含 residual 250–1306 calendar event layout keep-boundary 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千三百零八轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千三百零九轮：dashboard formatTime absolute→formatLocalHHmm dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千三百一十轮：tip 上 1741 项 focused evidence suite（含 residual 250–1309 dashboard formatTime absolute→formatLocalHHmm dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千三百一十一轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千三百一十二轮：padTwoDigits dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千三百一十三轮：tip 上 1746 项 focused evidence suite（含 residual 250–1312 padTwoDigits dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千三百一十四轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千三百一十五轮：ScheduleFormDemo datetime-local→formatDateToYMD+formatLocalHHmm dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千三百一十六轮：tip 上 1751 项 focused evidence suite（含 residual 250–1315 ScheduleFormDemo datetime-local dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千三百一十七轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千三百一十八轮：padTwoDigits multi-sole compose dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千三百一十九轮：tip 上 1756 项 focused evidence suite（含 residual 250–1318 padTwoDigits multi-sole compose dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千三百二十轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千三百二十一轮：toLocalDateKey→padTwoDigits dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千三百二十二轮：tip 上 1761 项 focused evidence suite（含 residual 250–1321 toLocalDateKey→padTwoDigits dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千三百二十三轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千三百二十四轮：formatScheduleDurationMinutes dual-retired surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千三百二十五轮：tip 上 1766 项 focused evidence suite（含 residual 250–1324 formatScheduleDurationMinutes dual-retired 锁）通过；仍不构成全量 PR 门禁证据。
+    残留一千三百二十六轮：§13.2 tip 指针刷新 + open-items surface 锁落地；仍不构成跨端 Playwright/Electron multi-engine E2E / 全量 PR 门禁证据。
+    残留一千三百二十七轮：Web 账密两轮 3/3、Desktop production Electron guest 两轮 1/1、Agent/Vault/Pi fixture 7/114、governance 4/23 + GOV_EXIT:0；12-project lint 有 8 个失败、`web:typecheck` 失败，OAuth/App fixture 无凭据为外部阻塞；仍不构成三入口完整 E2E / 全量 PR 门禁证据。
+    残留一千三百二十八轮：`web:typecheck` + 24 个依赖任务通过、同一 12-project lint 12/12 通过、focused 回归 8/160、governance 4/23 + GOV_EXIT:0；test-utils lint 仍有 2 个既有 layer-boundary error，全仓 test/E2E/prod-like 与 OAuth/App fixture 仍未闭环；仍不构成三入口完整 E2E / 全量 PR 门禁证据。
+    残留一千三百二十九轮：test-utils lint 0 errors、typecheck + 4 个依赖任务、goal lint、integration seam focused 3/12、AI Service 4/25、open-items 1/3、governance 4/23 + governance-check 通过；修复 7 个 Ruff I001 后全 workspace lint 36/36 通过；全仓 typecheck/test、Web/Desktop E2E、prod-like 与 OAuth/App fixture 仍未闭环；仍不构成三入口完整 E2E / 全量 PR 门禁证据。
+    残留一千三百三十轮：全 workspace typecheck 34/34 项目通过（EXIT:0）；utils recurrence 1/4、schedule-orchestration 4/7、governance-check EXIT:0；全仓 test、Web/Desktop E2E、prod-like 与 OAuth/App fixture 仍未闭环；仍不构成三入口完整 E2E / 全量 PR 门禁证据。
+    残留一千三百三十一轮：全 workspace 标准 test 30 目标 11→3 失败 / 27 通过（EXIT:1）；desktop 低风险 harness 已收口（ipc dual/vault-path/AIStream/provider 信封；focused 6/58）；剩余 data-portability powersync-round-trip、desktop git runtime/sync GitProcessError 16 测试、app-vue AIChatView TaskService inject + KnowledgeProjection useRoute mock；全仓 test 未完全绿、Web/Desktop E2E、prod-like 与 OAuth/App fixture 仍未闭环；仍不构成三入口完整 E2E / 全量 PR 门禁证据。
+    残留一千三百三十二轮：全 workspace 标准 test 30/30 项目通过（EXIT:0）；lint 36/36 + typecheck 34/34 + 标准 test 30/30 已齐；Web/Desktop 完整 E2E、prod-like 与 OAuth/App fixture 仍未闭环；仍不构成三入口完整 E2E / 全量 PR 门禁证据。
+    残留一千三百三十三轮：VPS prod-like docker:local:up EXIT:0 + 六服务 healthy + 探针 OK（tip 140ce022a）；Web 认证主线两轮 9/9 + note-boundary 1/1；全仓 lint/typecheck/标准 test 复验 36/36 + 34/34 + 30/30 EXIT:0；governance-check GOV_EXIT:0；Desktop Linux guest 未稳定复现；仍不构成三入口完整 E2E / 全量 PR 门禁证据。
+    残留一千三百三十三轮续（GitHub App Manifest + goal-workflow）：
+  * Manifest 回调 code 已消费；App `memoflow-dev-test` id 4385206 凭据在 `~/.config/memoflow/`（git 外）；`.env.test.local` 已接线 OAuth/App + `GITHUB_TEST_REPOSITORY=BakerSean168/memoflow-github-app-e2e-fixture`（private 存在）；JWT `GET /app` 200。
+  * **外部阻塞**：`GET /app/installations` count=0；安装需浏览器同意 `https://github.com/apps/memoflow-dev-test/installations/new`（选 fixture 仓）；`GITHUB_TEST_INSTALLATION_ID` 未写入；不伪造 OAuth/install。
+  * goal-workflow：`pnpm nx run web:e2e -- e2e/ai/goal-workflow.spec.ts` **8/8 绿**（Host `/ai/assistant/dispatch/sse` mock + conversation list/message 持久化 + `sendComposerMessage`；`parseSSE` flush final chunk when done=true）。
+  * 仍缺：真实 GitHub App install + installation-token 路径 E2E、全量 Web/Desktop 业务 E2E 一揽子、§13.2 未勾选项（12 部分 / 15 部分）不因本轮翻勾。
+    仍缺：全量 Web/Desktop 业务 E2E 与 OAuth/App fixture 作为 PR 门禁一揽子证据；
+    真实 GitHub App fixture E2E 缺 **installation**（App/OAuth 凭据已就绪；安装浏览器同意仍为外部阻塞）。
+    残留一千三百三十三轮续（install 轮询 + host-dev 接线 + live fail-fast）：
+  * 再轮询 `GET /app/installations` → count **0**；`POST .../access_tokens` 对假 installation 404 fail-closed。
+  * 凭据 layout：`~/.config/memoflow/{github-app-credentials.json,github-app.env}` mode 600；repo 侧 gitignored `.env.test.local` + `.env.development.local`（从 secret store 注入，含 OAuth/App + fixture 仓，无 INSTALLATION_ID）。
+  * `pnpm runtime:preflight --profile e2e` OK；`desktop:test:live-github` 在缺 `GITHUB_TEST_INSTALLATION_ID` 时 fail-fast（shipped message，拒 PAT）。
+  * `GitHubAppClient` unit **15/15**；goal-workflow 复验 **8/8**（SCRATCH residual-suites）。
+  * §13.2 仍 **12 [x] / 3 [ ]**，**不改 checkbox**；真实 install 仍需浏览器：https://github.com/apps/memoflow-dev-test/installations/new
+    残留一千三百三十三轮续（Desktop Linux guest + verification evidence）：
+  * Desktop production Electron guest e2e 在 xvfb 下根因：`Token encryption is not available`（无 Secret Service）。
+  * 修复：`apps/desktop/e2e/authentication/desktop-auth-flow.spec.ts` 在 Linux 上启用 Electron `safeStorage.setUsePlainTextEncryption(true)`（与 web sync desktop helper 同一 shipped 路径），**1/1 绿**。
+  * guest unit/coordinator + toCloudAccessToken focused **42** 通过；install 再轮询仍 **0**（外部阻塞不变）。
+  * Verification SCRATCH：secrets-layout / app-install / github-real-path / residual-suites（goal-workflow 8/8、desktop guest 1/1）。
+    残留一千三百三十三轮续（verification re-run + web auth）：
+  * Web 账密主线再验：auth-login 3 + auth-password 1 + auth-register 1 = **5/5 绿**（非 OAuth 伪造）。
+  * Repository GitHubAppClient + connection service focused **46/46**；install 再轮询仍 **0**。
+  * Verification 报告：`{SCRATCH}/VERIFICATION-REPORT.txt`；§13.2 **不改 checkbox**。
+    残留一千三百三十三轮续（manifest callback re-submit + install still external）：
+  * 用户再次提交 Manifest 转换回调 URL（`/memoflow-github-app-manifest-callback?code=…&state=…`）。
+  * `POST https://api.github.com/app-manifests/<code>/conversions` → **404 Not Found**（code 单次消费已用尽；非 install 回调）。
+  * 保留既有 App 凭据：id **4385206** slug **memoflow-dev-test**（`~/.config/memoflow/` mode 600；git 外）。
+  * 再轮询：`GET /app` 200 `installations_count=0`；`GET /app/installations` count **0**；假 installation `POST …/access_tokens` **404 fail-closed**；**NO_PAT**。
+  * `desktop:test:live-github` 缺 `GITHUB_TEST_INSTALLATION_ID` 时 fail-fast（shipped message，拒 PAT）——预期红，非伪造。
+  * 仍需浏览器安装同意（选 fixture 仓）：https://github.com/apps/memoflow-dev-test/installations/new
+  * §13.2 仍 **12 [x] / 3 [ ]**，**不改 checkbox**；PR readiness 仍为 no。
 
   残留一千三百三十三轮续（verification plan re-run + residual suites green）：
   - 凭据盘检 OK：`~/.config/memoflow/{github-app-credentials.json,github-app.env,github-app.pem}` mode 600；App id 4385206 slug memoflow-dev-test；repo gitignored `.env.*.local` 已接线 OAuth/App + fixture 仓，**无** INSTALLATION_ID。
@@ -13202,7 +12873,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
   - open-items **3/3** + governance-check **GOV_EXIT:0**；§13.2 **12 [x] / 3 [ ]**，**不改 checkbox**；PR readiness 仍为 no。
   - 安装仍需浏览器：https://github.com/apps/memoflow-dev-test/installations/new （fixture `BakerSean168/memoflow-github-app-e2e-fixture`）。
 
-
   残留一千三百三十三轮续（workspace gates + prod-like probes；install 仍外部阻塞）：
   - 再轮询 install count **0**；JWT App 路径 OK；live-github 缺 INSTALLATION_ID fail-fast（拒 PAT）。
   - prod-like local-docker：六服务 healthy；探针 web/api/ai/powersync 均 **200**。
@@ -13210,12 +12880,10 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
   - residual suites 仍绿：goal-workflow 8/8、repo GitHub 46/46、desktop guest e2e 1/1、web auth 5/5、note-boundary 1/1。
   - §13.2 **12 [x] / 3 [ ]**，**不改 checkbox**；真实 App install 仍需浏览器同意；PR readiness 仍为 no。
 
-
   残留一千三百三十三轮续（e2e-mock OAuth keep-boundary；install 仍外部阻塞）：
   - 根因：gitignored `.env.test.local` 写入真实 `GITHUB_OAUTH_*` 后覆盖 e2e 车道默认 `e2e-mock`，`auth-oauth` 跳到真实 github.com/login（无浏览器同意则超时）。
   - 修复：`getGithubOAuthConfig()` 在 `RUNTIME_LANE=e2e` 时强制 `e2e-mock`（App 凭据仍走 `getGithubAppConfig()` / live-github 独立路径）。
   - 验证：surface **2/2**；`auth-oauth` e2e **1/1 绿**；page-contract 此前 **5/5**；install count 仍 **0**；§13.2 **不改 checkbox**。
-
 
   残留一千三百三十三轮续（verification re-run after e2e-mock；install 仍外部阻塞）：
   - install 再轮询 count **0**；live-github fail-fast；preflight OK；prod-like 探针 200。
@@ -13257,7 +12925,6 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
   - 门禁项：本 tip 复验 lint+typecheck+标准 test+governance+Web 认证 E2E+Desktop guest E2E+live-github；
     **仍缺**全量 Web 业务 E2E 一揽子与本 tip 的 prod-like `docker:local:up` 复跑 → **部分验证**；
     **PR readiness = no**；§13.2 **12 [x] / 3 [ ]**，**不改 checkbox**。
-
 
   残留一千三百三十五轮（跳过交互式 OAuth；推进门禁/E2E/prod-like；**不改 checkbox**）：
   - **决策**：交互式浏览器 GitHub OAuth 用户登录同意 **延后**（凭据与 e2e-mock 边界已在位；不阻塞后续验证）。
@@ -13343,10 +13010,7 @@ Open Design、Pi 和当前 LangGraph/TS runtime 专项调研已经完成。通�
   - **scaffold**：`e2e.playwright_web_full` → `implemented_unit`；Electron/Pi 仍 external_blocked。
   - **§13.2**：**15 [x] / 0 [ ]**；**PR readiness = yes**（vault-repo 完成定义证据闭环；agent-host durable 延伸独立）。
 
-
 ## 14. 相关资料
-
-
 
 - [ADR-034: 本地 Obsidian Vault 与可选 GitHub 知识仓库](../../architecture/adr/ADR-034-obsidian-vault-repository.md)
 - [ADR-035: 统一助手与可插拔 Agent Host](../../architecture/adr/ADR-035-unified-assistant-agent-host.md)

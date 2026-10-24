@@ -11,12 +11,7 @@ import { dirname, extname, join, relative } from 'node:path';
 
 const ROOT = join(import.meta.dirname, '..', '..');
 
-const CONFIG_GLOBS = [
-  'vitest.config.ts',
-  'vitest.shared.ts',
-  'apps',
-  'packages',
-];
+const CONFIG_GLOBS = ['vitest.config.ts', 'vitest.shared.ts', 'apps', 'packages'];
 
 const SOURCE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.mts', '.cts']);
 const PASS_WITH_NO_TESTS_TRUE = /\bpassWithNoTests\s*:\s*true\b/;
@@ -77,7 +72,9 @@ function main() {
     for (const violation of violations) {
       console.error(`  ${violation.file}: ${violation.message}`);
     }
-    console.error('\nAdd real tests, set passWithNoTests to false, or document a narrow exception in this audit.');
+    console.error(
+      '\nAdd real tests, set passWithNoTests to false, or document a narrow exception in this audit.',
+    );
     process.exit(1);
   }
 

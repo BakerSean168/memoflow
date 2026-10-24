@@ -101,9 +101,12 @@ export function ScheduleCalendarScreen() {
     );
   }, [monthBounds.start, profile]);
 
-
   const busiestDays = useMemo(
-    () => groupedEntries.slice().sort((left, right) => right.items.length - left.items.length).slice(0, 3),
+    () =>
+      groupedEntries
+        .slice()
+        .sort((left, right) => right.items.length - left.items.length)
+        .slice(0, 3),
     [groupedEntries],
   );
   const actionSections = [
@@ -137,24 +140,56 @@ export function ScheduleCalendarScreen() {
       eyebrow="Schedule"
       title="Calendar"
       subtitle="月历页先提供月份热力概览和高密度日期入口。"
-      refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refresh} />}>
+      refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refresh} />}
+    >
       <SectionCard title={formatMonthLabel(monthAnchor)} description="按天展示事件密度和冲突数量。">
         <View style={styles.actionRow}>
-          <PrimaryButton label="Prev month" onPress={() => setMonthAnchor((current) => shiftMonth(current, -1))} variant="ghost" />
-          <PrimaryButton label="This month" onPress={() => setMonthAnchor(Date.now())} variant="secondary" />
-          <PrimaryButton label="Next month" onPress={() => setMonthAnchor((current) => shiftMonth(current, 1))} variant="ghost" />
+          <PrimaryButton
+            label="Prev month"
+            onPress={() => setMonthAnchor((current) => shiftMonth(current, -1))}
+            variant="ghost"
+          />
+          <PrimaryButton
+            label="This month"
+            onPress={() => setMonthAnchor(Date.now())}
+            variant="secondary"
+          />
+          <PrimaryButton
+            label="Next month"
+            onPress={() => setMonthAnchor((current) => shiftMonth(current, 1))}
+            variant="ghost"
+          />
         </View>
         <View style={styles.weekdayRow}>
           {weekdayLabels.map((item) => (
-            <ThemedText key={item} type="small" themeColor="textSecondary" style={styles.weekdayCell}>{item}</ThemedText>
+            <ThemedText
+              key={item}
+              type="small"
+              themeColor="textSecondary"
+              style={styles.weekdayCell}
+            >
+              {item}
+            </ThemedText>
           ))}
         </View>
         <View style={styles.calendarGrid}>
           {gridDays.map((day) => (
-            <ThemedView key={day.key} type={day.isCurrentMonth ? 'backgroundSelected' : 'background'} style={[styles.dayCell, !day.isCurrentMonth ? styles.dayCellMuted : null]}>
+            <ThemedView
+              key={day.key}
+              type={day.isCurrentMonth ? 'backgroundSelected' : 'background'}
+              style={[styles.dayCell, !day.isCurrentMonth ? styles.dayCellMuted : null]}
+            >
               <ThemedText type="smallBold">{day.day}</ThemedText>
-              {day.count > 0 ? <StatusPill label={`${day.count} items`} tone="tint" /> : <ThemedText type="small" themeColor="textSecondary">-</ThemedText>}
-              {day.conflicts > 0 ? <StatusPill label={`${day.conflicts} conflicts`} tone="warning" /> : null}
+              {day.count > 0 ? (
+                <StatusPill label={`${day.count} items`} tone="tint" />
+              ) : (
+                <ThemedText type="small" themeColor="textSecondary">
+                  -
+                </ThemedText>
+              )}
+              {day.conflicts > 0 ? (
+                <StatusPill label={`${day.conflicts} conflicts`} tone="warning" />
+              ) : null}
             </ThemedView>
           ))}
         </View>
@@ -162,11 +197,16 @@ export function ScheduleCalendarScreen() {
 
       {error ? (
         <SectionCard title="Calendar load failed" description="月历数据加载失败。">
-          <ThemedText type="small" themeColor="warning">{error}</ThemedText>
+          <ThemedText type="small" themeColor="warning">
+            {error}
+          </ThemedText>
         </SectionCard>
       ) : null}
 
-      <SectionCard title="Busiest days" description="优先暴露本月最忙的三个日期，方便移动端快速 drill-down。">
+      <SectionCard
+        title="Busiest days"
+        description="优先暴露本月最忙的三个日期，方便移动端快速 drill-down。"
+      >
         <View style={styles.listColumn}>
           {busiestDays.length > 0 ? (
             busiestDays.map((group) => (
@@ -179,14 +219,20 @@ export function ScheduleCalendarScreen() {
                   {group.items.slice(0, 3).map((item) => (
                     <View key={item.id} style={styles.summaryRow}>
                       <ThemedText type="small">{item.title}</ThemedText>
-                      <PrimaryButton label="Edit" onPress={() => router.push(`./event-editor?id=${item.id}`)} variant="ghost" />
+                      <PrimaryButton
+                        label="Edit"
+                        onPress={() => router.push(`./event-editor?id=${item.id}`)}
+                        variant="ghost"
+                      />
                     </View>
                   ))}
                 </View>
               </ThemedView>
             ))
           ) : (
-            <ThemedText type="small" themeColor="textSecondary">这个月还没有事件。</ThemedText>
+            <ThemedText type="small" themeColor="textSecondary">
+              这个月还没有事件。
+            </ThemedText>
           )}
         </View>
       </SectionCard>

@@ -12,12 +12,23 @@ import {
 } from '../../../vite.workspace-aliases.ts';
 
 const workspace = path.resolve(import.meta.dirname, '../../..');
+
+// Storybook UI exposes the full catalog. The Vitest browser project owns only
+// the three audited interaction suites (12 stories); loading every draft story
+// in a test browser also loads unverified deep application imports.
+const browserTestStories = [
+  '../../../packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.stories.ts',
+  '../../../packages/app-vue/src/modules/task/components/TaskPlanForm/TaskPlanForm.stories.ts',
+  '../../../packages/app-vue/src/shared/components/__stories__/BrowserInteraction.stories.ts',
+];
 const config: StorybookConfig = {
-  stories: [
-    '../../../packages/ui-vue-shadcn/src/**/*.stories.@(js|jsx|ts|tsx|vue)',
-    '../../../packages/app-vue/src/**/*.stories.@(js|jsx|ts|tsx|vue)',
-  ],
-  addons: ['@storybook/addon-docs'],
+  stories: process.env.VITEST
+    ? browserTestStories
+    : [
+        '../../../packages/ui-vue-shadcn/src/**/*.stories.@(js|jsx|ts|tsx|vue)',
+        '../../../packages/app-vue/src/**/*.stories.@(js|jsx|ts|tsx|vue)',
+      ],
+  addons: ['@storybook/addon-docs', '@storybook/addon-vitest'],
   framework: { name: '@storybook/vue3-vite', options: {} },
   async viteFinal(config) {
     const aliases = config.resolve?.alias ?? [];

@@ -42,28 +42,28 @@ updated: 2026-07-07T16:55:00+00:00
 
 ## 当前验证基线
 
-| 命令 | 当前结果 | 说明 |
-| --- | --- | --- |
-| `pnpm nx run schedule:test --skipSync` | 通过 | `schedule` 包测试可运行，21 files / 259 tests |
-| `pnpm nx run schedule-orchestration:test --skipSync` | 通过 | 4 files / 6 tests，跨包 alias 问题已修复 |
-| `pnpm nx run api:test:smoke --skipSync` | 通过 | 2 files / 58 tests，route auth 语义收敛后 smoke 通过 |
-| `pnpm nx run repository:test --skipSync` | 通过 | 12 files / 58 tests，包含 storage config helper 测试 |
-| `pnpm nx run editor:test --skipSync` | 通过 | 19 files / 103 tests，覆盖 editor 相关调整 |
-| `pnpm nx run api:typecheck --skipSync` | 通过 | 包含 24 个依赖任务；同时暴露并确认修复 `data-portability` server seam 构建破口 |
-| `pnpm nx run memoflow:governance-check --skipSync` | 通过 | server feature shape 与治理脚本已对齐 |
-| `pnpm nx run memoflow:docs-check --skipSync` | 通过 | 测试文档 coverage 路径更新后通过 |
+| 命令                                                 | 当前结果 | 说明                                                                           |
+| ---------------------------------------------------- | -------- | ------------------------------------------------------------------------------ |
+| `pnpm nx run schedule:test --skipSync`               | 通过     | `schedule` 包测试可运行，21 files / 259 tests                                  |
+| `pnpm nx run schedule-orchestration:test --skipSync` | 通过     | 4 files / 6 tests，跨包 alias 问题已修复                                       |
+| `pnpm nx run api:test:smoke --skipSync`              | 通过     | 2 files / 58 tests，route auth 语义收敛后 smoke 通过                           |
+| `pnpm nx run repository:test --skipSync`             | 通过     | 12 files / 58 tests，包含 storage config helper 测试                           |
+| `pnpm nx run editor:test --skipSync`                 | 通过     | 19 files / 103 tests，覆盖 editor 相关调整                                     |
+| `pnpm nx run api:typecheck --skipSync`               | 通过     | 包含 24 个依赖任务；同时暴露并确认修复 `data-portability` server seam 构建破口 |
+| `pnpm nx run memoflow:governance-check --skipSync`   | 通过     | server feature shape 与治理脚本已对齐                                          |
+| `pnpm nx run memoflow:docs-check --skipSync`         | 通过     | 测试文档 coverage 路径更新后通过                                               |
 
 ## 风险排序
 
-| 优先级 | 问题 ID | 严重级别 | 核心风险 | 推荐先后 |
-| --- | --- | --- | --- | --- |
-| P0 | Q-001 | High | `schedule` runtime 启动 Promise 被 `void` 丢弃，失败不可观察 | 第 1 个修 |
-| P0 | Q-002 | High | `schedule-orchestration` 核心测试目标不可运行 | 第 2 个修 |
-| P1 | Q-004 | Medium | route auth 同时存在 `[auth]` 和 `{ requireAuth: false }` 两套真值 | 第 3 个修 |
-| P1 | Q-003 | Medium | ADR、治理脚本和实际 server feature 入口不一致 | 第 4 个修 |
-| P2 | Q-005 | Medium | repository storage path 默认值和 env 配置重复维护 | 第 5 个修 |
-| P3 | Q-006 | Low | 测试文档 coverage 路径仍是 legacy 结构 | 第 6 个修 |
-| P3 | Q-007 | Low | Electron schedule seam 为拿 repository 临时构建完整 module | 第 7 个修 |
+| 优先级 | 问题 ID | 严重级别 | 核心风险                                                          | 推荐先后  |
+| ------ | ------- | -------- | ----------------------------------------------------------------- | --------- |
+| P0     | Q-001   | High     | `schedule` runtime 启动 Promise 被 `void` 丢弃，失败不可观察      | 第 1 个修 |
+| P0     | Q-002   | High     | `schedule-orchestration` 核心测试目标不可运行                     | 第 2 个修 |
+| P1     | Q-004   | Medium   | route auth 同时存在 `[auth]` 和 `{ requireAuth: false }` 两套真值 | 第 3 个修 |
+| P1     | Q-003   | Medium   | ADR、治理脚本和实际 server feature 入口不一致                     | 第 4 个修 |
+| P2     | Q-005   | Medium   | repository storage path 默认值和 env 配置重复维护                 | 第 5 个修 |
+| P3     | Q-006   | Low      | 测试文档 coverage 路径仍是 legacy 结构                            | 第 6 个修 |
+| P3     | Q-007   | Low      | Electron schedule seam 为拿 repository 临时构建完整 module        | 第 7 个修 |
 
 ## 修复边界
 
@@ -299,11 +299,11 @@ ADR-031 把 `src/server/index.ts` 定义为 canonical server feature shape 的�
 
 必须先做一次小决策，再动代码：
 
-| 选项 | 含义 | 影响 |
-| --- | --- | --- |
-| A | `src/server/index.ts` 仍是 canonical 标准 | 需要补齐 audited packages 的入口文件，并让治理脚本检查 |
-| B | root barrel 直出 `./server/infrastructure` 才是当前标准 | 需要修正 ADR，删除对 `server/index.ts` 的要求 |
-| C | feature packages 和 shared orchestration packages 使用不同标准 | 需要在 ADR 或 governance docs 中显式记录例外 |
+| 选项 | 含义                                                           | 影响                                                   |
+| ---- | -------------------------------------------------------------- | ------------------------------------------------------ |
+| A    | `src/server/index.ts` 仍是 canonical 标准                      | 需要补齐 audited packages 的入口文件，并让治理脚本检查 |
+| B    | root barrel 直出 `./server/infrastructure` 才是当前标准        | 需要修正 ADR，删除对 `server/index.ts` 的要求          |
+| C    | feature packages 和 shared orchestration packages 使用不同标准 | 需要在 ADR 或 governance docs 中显式记录例外           |
 
 推荐优先选 A，除非当前导出策略已经被构建或发布流程强依赖。
 
@@ -518,37 +518,37 @@ pnpm nx run desktop:test:main
 
 建议使用如下状态：
 
-| 状态 | 含义 |
-| --- | --- |
-| Pending | 尚未开始 |
-| In Progress | 正在修复 |
-| Fixed | 已修复且 targeted verification 通过 |
-| Blocked | 需要外部决策或依赖其他 pass |
-| Superseded | 被后续架构决策替代 |
+| 状态        | 含义                                |
+| ----------- | ----------------------------------- |
+| Pending     | 尚未开始                            |
+| In Progress | 正在修复                            |
+| Fixed       | 已修复且 targeted verification 通过 |
+| Blocked     | 需要外部决策或依赖其他 pass         |
+| Superseded  | 被后续架构决策替代                  |
 
 当前状态：
 
-| 问题 ID | 状态 |
-| --- | --- |
-| Q-001 | Fixed |
-| Q-002 | Fixed |
-| Q-003 | Fixed |
-| Q-004 | Fixed |
-| Q-005 | Fixed |
-| Q-006 | Fixed |
-| Q-007 | Fixed |
+| 问题 ID | 状态  |
+| ------- | ----- |
+| Q-001   | Fixed |
+| Q-002   | Fixed |
+| Q-003   | Fixed |
+| Q-004   | Fixed |
+| Q-005   | Fixed |
+| Q-006   | Fixed |
+| Q-007   | Fixed |
 
 完成证据：
 
-| 问题 ID | 完成内容 | Targeted verification |
-| --- | --- | --- |
-| Q-001 | `schedule` runtime/module/API/Electron 启动语义改为可等待，启动失败可传播并可重试 | `pnpm nx run schedule:test --skipSync` |
-| Q-002 | `schedule-orchestration` 测试 alias 恢复，4 个 suite 能真实执行 | `pnpm nx run schedule-orchestration:test --skipSync` |
-| Q-003 | server feature canonical seam 与治理检查对齐；`data-portability` 无 domain 层的 seam 构建破口已修正 | `pnpm nx run memoflow:governance-check --skipSync`、`pnpm nx run api:typecheck --skipSync` |
-| Q-004 | 删除 route 中与 `[auth]` 冲突的 `requireAuth: false`，清理过时 smoke 注释 | `pnpm nx run api:test:smoke --skipSync` |
-| Q-005 | 新增 repository storage resolver，API/repository/editor 共用单一解析入口，env schema 与 example 已补齐 | `pnpm nx run repository:test --skipSync`、`pnpm nx run editor:test --skipSync`、`pnpm nx run api:typecheck --skipSync` |
-| Q-006 | `docs/test/running-tests.md` coverage 路径改为当前 `src/server/domain/**` roots | `pnpm nx run memoflow:docs-check --skipSync` |
-| Q-007 | Electron schedule seam 改用明确 PowerSync repository factory，不再构建临时完整 module | `pnpm nx run schedule:test --skipSync` |
+| 问题 ID | 完成内容                                                                                               | Targeted verification                                                                                                  |
+| ------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| Q-001   | `schedule` runtime/module/API/Electron 启动语义改为可等待，启动失败可传播并可重试                      | `pnpm nx run schedule:test --skipSync`                                                                                 |
+| Q-002   | `schedule-orchestration` 测试 alias 恢复，4 个 suite 能真实执行                                        | `pnpm nx run schedule-orchestration:test --skipSync`                                                                   |
+| Q-003   | server feature canonical seam 与治理检查对齐；`data-portability` 无 domain 层的 seam 构建破口已修正    | `pnpm nx run memoflow:governance-check --skipSync`、`pnpm nx run api:typecheck --skipSync`                             |
+| Q-004   | 删除 route 中与 `[auth]` 冲突的 `requireAuth: false`，清理过时 smoke 注释                              | `pnpm nx run api:test:smoke --skipSync`                                                                                |
+| Q-005   | 新增 repository storage resolver，API/repository/editor 共用单一解析入口，env schema 与 example 已补齐 | `pnpm nx run repository:test --skipSync`、`pnpm nx run editor:test --skipSync`、`pnpm nx run api:typecheck --skipSync` |
+| Q-006   | `docs/test/running-tests.md` coverage 路径改为当前 `src/server/domain/**` roots                        | `pnpm nx run memoflow:docs-check --skipSync`                                                                           |
+| Q-007   | Electron schedule seam 改用明确 PowerSync repository factory，不再构建临时完整 module                  | `pnpm nx run schedule:test --skipSync`                                                                                 |
 
 ## 后续提示词
 

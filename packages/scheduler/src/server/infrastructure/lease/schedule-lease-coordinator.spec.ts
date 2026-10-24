@@ -6,7 +6,9 @@ import {
 } from './schedule-lease-coordinator';
 import type { IScheduleLeaseRepository } from '../../application/ports/schedule-lease.port';
 
-function mockRepository(overrides: Partial<IScheduleLeaseRepository> = {}): IScheduleLeaseRepository {
+function mockRepository(
+  overrides: Partial<IScheduleLeaseRepository> = {},
+): IScheduleLeaseRepository {
   return {
     tryAcquire: vi.fn(async () => true),
     renew: vi.fn(async () => true),
@@ -27,7 +29,9 @@ describe('ScheduleLeaseCoordinator (R3a)', () => {
   });
 
   it('does not run the task when acquire fails', async () => {
-    const coordinator = new ScheduleLeaseCoordinator(mockRepository({ tryAcquire: vi.fn(async () => false) }));
+    const coordinator = new ScheduleLeaseCoordinator(
+      mockRepository({ tryAcquire: vi.fn(async () => false) }),
+    );
     const task = vi.fn(async () => 'ok');
 
     const result = await coordinator.execute(SCHEDULE_LEASE_KEY, task);
@@ -60,10 +64,12 @@ describe('ScheduleLeaseCoordinator (R3a)', () => {
       });
 
       let resolveTask: (() => void) | undefined;
-      const promise = coordinator.execute(SCHEDULE_LEASE_KEY, () =>
-        new Promise<void>((resolve) => {
-          resolveTask = resolve;
-        }),
+      const promise = coordinator.execute(
+        SCHEDULE_LEASE_KEY,
+        () =>
+          new Promise<void>((resolve) => {
+            resolveTask = resolve;
+          }),
       );
 
       await vi.advanceTimersByTimeAsync(2_500);
@@ -79,9 +85,11 @@ describe('ScheduleLeaseCoordinator (R3a)', () => {
 
   it('surfaces acquire errors as not-acquired instead of crashing the host', async () => {
     const coordinator = new ScheduleLeaseCoordinator(
-      mockRepository({ tryAcquire: vi.fn(async () => {
-        throw new Error('db down');
-      }) }),
+      mockRepository({
+        tryAcquire: vi.fn(async () => {
+          throw new Error('db down');
+        }),
+      }),
     );
     const task = vi.fn(async () => 'ok');
 

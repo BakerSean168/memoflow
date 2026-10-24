@@ -258,11 +258,7 @@ describe('TaskPlanOutcomeEvaluator (TASK-2202)', () => {
     expect(
       evaluator.evaluate(
         plan,
-        [
-          completedFact('2026-03-01'),
-          completedFact('2026-03-02'),
-          completedFact('2026-03-05'),
-        ],
+        [completedFact('2026-03-01'), completedFact('2026-03-02'), completedFact('2026-03-05')],
         TASK_TEST_TIME_CONTEXT,
       ),
     ).toBe(TaskPlanOutcome.Open);

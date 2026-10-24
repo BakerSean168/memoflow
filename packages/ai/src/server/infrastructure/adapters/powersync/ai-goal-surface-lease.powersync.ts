@@ -22,7 +22,9 @@ export class AiGoalSurfaceLeasePowerSyncRepository implements IGoalSurfaceLeaseR
 
   private ensureTable(): Promise<void> {
     if (!this.ensurePromise) {
-      this.ensurePromise = this.db.execute(`
+      this.ensurePromise = this.db
+        .execute(
+          `
         CREATE TABLE IF NOT EXISTS ai_goal_surface_leases (
           identity_id TEXT NOT NULL,
           run_id TEXT NOT NULL,
@@ -31,15 +33,20 @@ export class AiGoalSurfaceLeasePowerSyncRepository implements IGoalSurfaceLeaseR
           expires_at INTEGER NOT NULL,
           PRIMARY KEY(identity_id, run_id)
         )
-      `).then(() => undefined).catch((error: unknown) => {
-        this.ensurePromise = null;
-        throw error;
-      });
+      `,
+        )
+        .then(() => undefined)
+        .catch((error: unknown) => {
+          this.ensurePromise = null;
+          throw error;
+        });
     }
     return this.ensurePromise;
   }
 
-  async claim(input: GoalSurfaceLeaseRequest & { token: string }): Promise<GoalSurfaceLeaseGrant | null> {
+  async claim(
+    input: GoalSurfaceLeaseRequest & { token: string },
+  ): Promise<GoalSurfaceLeaseGrant | null> {
     await this.ensureTable();
     return this.db.writeTransaction(async (tx) => {
       const row = await tx.getOptional<LeaseRow>(
@@ -75,7 +82,11 @@ export class AiGoalSurfaceLeasePowerSyncRepository implements IGoalSurfaceLeaseR
   }
 
   async release(input: {
-    identityId: string; runId: string; token: string; fence: number; now: number;
+    identityId: string;
+    runId: string;
+    token: string;
+    fence: number;
+    now: number;
   }): Promise<boolean> {
     await this.ensureTable();
     const updated = await this.db.execute(

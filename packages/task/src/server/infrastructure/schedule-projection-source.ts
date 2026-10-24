@@ -194,7 +194,10 @@ function shouldSchedulePlan(plan: TaskPlanServerDTO): boolean {
   );
 }
 
-function isSchedulableOccurrence(occurrence: { status: string; deletedAt: number | null }): boolean {
+function isSchedulableOccurrence(occurrence: {
+  status: string;
+  deletedAt: number | null;
+}): boolean {
   return (
     occurrence.deletedAt === null &&
     (occurrence.status === TaskOccurrenceStatus.Pending ||
@@ -319,10 +322,8 @@ export function createTaskScheduleProjectionEventHandlers(
   ) => Promise<void>;
 } {
   return {
-    'task:created': async (event) =>
-      handlers.upsertPlan(event.planId, String(event.identityId)),
-    'task:updated': async (event) =>
-      handlers.upsertPlan(event.task.id, String(event.identityId)),
+    'task:created': async (event) => handlers.upsertPlan(event.planId, String(event.identityId)),
+    'task:updated': async (event) => handlers.upsertPlan(event.task.id, String(event.identityId)),
     'task:occurrence-generated': async (event) =>
       handlers.upsertPlan(event.planId, String(event.identityId)),
     'task:plan-resumed': async (event) =>
