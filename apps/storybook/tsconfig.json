@@ -10,7 +10,8 @@
     ".storybook/**/*.ts",
     "../../packages/app-vue/src/env.d.ts",
     "../../packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.stories.ts",
-    "../../packages/app-vue/src/modules/task/components/TaskPlanForm/TaskPlanForm.stories.ts"
+    "../../packages/app-vue/src/modules/task/components/TaskPlanForm/TaskPlanForm.stories.ts",
+    "../../packages/app-vue/src/shared/components/__stories__/BrowserInteraction.stories.ts"
   ],
   "exclude": []
 }
