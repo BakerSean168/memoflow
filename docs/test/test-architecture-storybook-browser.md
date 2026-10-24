@@ -47,7 +47,7 @@ Runner 自动检测 WSL（`os.release()` 中包含 Microsoft）：WSL 使用非�
 
 ### Storybook 可视化
 
-Storybook 的正式 `@storybook/addon-vitest` 已注册，六条通用交互场景位于 `Quality/Browser Interaction Contracts`。`pnpm nx run ui-storybook:serve` 使用相同的 `MEMOFLOW_STORYBOOK_NETNS=auto|on|off` 选择。WSL 默认在命名空间内启动服务，通过权限 0600 的独立 Unix socket 将 4402 端口转发至宿主 localhost；已验证 Windows 与 WSL 均可读取 `/index.json`。此模式没有外网；需要在线资源时选择 `off`。**本地命令行验收通过，不自动等于 Storybook UI 内的交互式 Vitest 控制面已可从隔离网络命名空间被访问**；对此以实际连通性测试为准，不能虚报。
+Storybook 的正式 `@storybook/addon-vitest` 已注册，六条通用交互场景位于 `Quality/Browser Interaction Contracts`。`pnpm nx run ui-storybook:serve` 使用相同的 `MEMOFLOW_STORYBOOK_NETNS=auto|on|off` 选择。WSL 默认在命名空间内启动服务，通过权限 0600 的独立 Unix socket 将 4402 端口转发至宿主 localhost；已验证 Windows 与 WSL 均可读取 `/index.json`。此模式没有外网；需要在线资源时选择 `off`。UI 控制面已实际验收：浏览器点击 Run tests、重新运行及页面重连后结果回传正常。首次启动应运行完整的 `serve` target 构建依赖；新工作区缺少产物时跳过依赖会造成模块解析和初始化失败。
 
 ## #610 验收证据
 
@@ -73,4 +73,22 @@ Storybook 的正式 `@storybook/addon-vitest` 已注册，六条通用交互场�
 - Runner 保留已有 CI artifact 路径 `test-results/storybook-results.json`；现有 CI 的 build/preview 仍验证静态 Storybook，测试本身只执行一次 Browser Mode，不需要预览服务来加载测试。
 - 测试及开发适配层在 Linux 管理整个子进程组，转发 SIGINT/SIGTERM、两秒后强制结束、退出时清理后代；保留测试实际退出码。开发桥先绑定端口，端口被占用时不启动孤儿服务；每次使用独立临时 socket 目录，退出时清理连接和目录。
 - `auto` 按 WSL 身份选择隔离，不以短时“无变化”监控推断长期稳定；userns 或 `ip` 不可用时直接报错，无自动降级或重试。普通 Linux/CI 使用宿主网络。
-- 本轮新验收：热启动 7.59s、清空 sb-vitest 缓存冷启动 10.60s，均 3/3、12/12、0 skipped/todo；当前没有目标 SHA 的真实 GitHub CI 收据。
+- 本轮新验收：热启动 7.59s、清空 sb-vitest 缓存冷启动 10.60s，均 3/3、12/12、0 skipped/todo；`fd8a71b99` 已通过 [真实 CI #2276](https://github.com/BakerSean168/memoflow/actions/runs/40096934662)：标准 Linux host network，3/3、12/12、12.93s，报告 artifact 上传成功。
+
+## Storybook UI 验收（2026-10-24）
+
+在独立工作区安装 frozen dependencies，执行 `pnpm nx run ui-storybook:serve`（含 28 个依赖任务）。T3 协作浏览器通过 WSL socket bridge 点击 Run tests，真实 Vitest 首轮 3/3、12/12（16.67s），再次点击启动 3/3、12/12（8.93s）；测试状态回传为 Component tests passed。不是通过脚本直接调用 Vitest 冒充 UI 启动。
+
+T3 的 Chromium 自身运行于 WSL 宿主网络，Story Canvas 两次等待均因动态模块导入失败而超时。随后按同一项目的 Playwright 浏览器运行方式，将验收客户端及 Storybook 一起放入用户网络命名空间；Canvas 正常渲染，UI 两次全量运行分别 14.63s / 7.62s，3/3、12/12，0 请求失败、0 pageerror；刷新 UI 后仍保留成功状态。这说明服务端和内置测试浏览器的隔离不会自动隔离外部 Linux 浏览器。Windows 浏览器不位于该 Linux 网络命名空间；没有将其结果冒充 Windows GUI 自动化验收。
+
+第一次在未构建的新工作区使用 `--excludeTaskDependencies` 产生缺少 `domain-shared` 产物、Pinia 未初始化错误，不能计为通过；正常依赖构建后消失。本轮不增加端口转发层、重试或新测试执行框架。
+
+### Watch 与取消
+
+UI 的 Vitest 主进程从 `apps/storybook` 启动，普通 CLI 从仓库根目录启动。原配置的 UI watcher 没有接收外部 `packages` 源文件变更，勾选 Watch 也不自动重跑。修复在 Vitest 顶层 Vite 插件中显式注册 `packages` 目录；仅在真实 watcher 启用时生效，项目子服务和 CI run 模式不增加监听。没有改变测试发现、用例或 Storybook 控制协议。
+
+回归用例 `Storybook UI watch receives source changes outside the addon root` 从 `apps/storybook` 创建真实 Vite watcher，修改外部源目录的临时文件并等待 change 事件：旧配置下失败，新配置下通过；该文件全部 4/4 测试通过。Nx 工具测试 inputs 同时补入 Storybook 配置，避免配置变化后误用缓存。
+
+UI 开启 Watch 后修改真实 BrowserInteraction Story（仅临时注释，验收后原样恢复），自动重跑 **1 文件 / 6 用例，6/6 通过，2.64s**；手动全量仍为 **3 文件 / 12 用例，12/12 通过，19.33s**。取消运行后恢复到可启动状态，再运行完整 12/12；取消中的 skipped 是用户主动中断的结果，不计作正式通过收据。
+
+最终修复后完整 UI 复验：全量首轮 **19.55s / 12/12**、再次启动 **7.07s / 12/12**、主动取消后恢复 **5.58s / 12/12**、Watch 自动选中改变的 Story 文件 **2.75s / 6/6**；重连后成功状态保留。该轮客户端记录 **0 请求失败、0 pageerror**，退出后无 Storybook 服务进程和端口残留。最终截图保存在执行环境 `/tmp/memoflow-storybook-ui-isolated-pass.png`，关键命令与数字同时写入 #610 的持久 Checkpoint。

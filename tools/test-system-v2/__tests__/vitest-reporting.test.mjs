@@ -101,3 +101,49 @@ test(
     }
   },
 );
+
+test('Storybook UI watch receives source changes outside the addon root', () => {
+  const configUrl = new URL('../../../apps/storybook/vitest.config.ts', import.meta.url).href;
+  const script = `
+    import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+    import path from 'node:path';
+    import { createServer } from 'vite';
+    const { default: config } = await import(${JSON.stringify(configUrl)});
+    const workspace = process.cwd();
+    const directory = mkdtempSync(path.join(workspace, 'packages', '.tmp-storybook-watch-'));
+    const file = path.join(directory, 'probe.txt');
+    writeFileSync(file, 'before');
+    let server;
+    try {
+      server = await createServer({
+        configFile: false, root: path.join(workspace, 'apps/storybook'),
+        plugins: config.plugins, server: { middlewareMode: true },
+        optimizeDeps: { noDiscovery: true, include: [] },
+      });
+      const deadline = Date.now() + 8000;
+      while (!server.watcher.getWatched()[directory]?.includes('probe.txt')) {
+        if (Date.now() > deadline) throw new Error('External Storybook sources are not watched');
+        await new Promise(resolve => setTimeout(resolve, 20));
+      }
+      await new Promise(resolve => setTimeout(resolve, 100));
+      const changed = new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error('Source change was lost')), 3000);
+        server.watcher.on('change', name => { if (name === file) { clearTimeout(timer); resolve(); } });
+      });
+      writeFileSync(file, 'after');
+      await changed;
+    } finally {
+      await server?.close();
+      rmSync(directory, {recursive: true, force: true});
+    }
+  `;
+  const result = spawnSync(
+    process.execPath,
+    ['--import', 'tsx', '--input-type=module', '-e', script],
+    {
+      encoding: 'utf8',
+      timeout: 20000,
+    },
+  );
+  assert.equal(result.status, 0, result.stderr);
+});

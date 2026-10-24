@@ -32,6 +32,7 @@
         "{workspaceRoot}/tools/ci-cd-platform/lib/**/*",
         "{workspaceRoot}/tools/ci-cd-platform/unit-test-durations.json",
         "{workspaceRoot}/tools/test/storybook-process.mjs",
+        "{workspaceRoot}/apps/storybook/vitest.config.ts",
         "repoTestInventory"
       ],
       "options": { "command": "node --test tools/test-system-v2/__tests__/*.test.mjs" }

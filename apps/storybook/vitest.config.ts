@@ -3,6 +3,8 @@ import { defineConfig } from 'vitest/config';
 import { playwright } from '@vitest/browser-playwright';
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 
+const workspaceRoot = path.resolve(import.meta.dirname, '../..');
+
 /**
  * Browser component suite: the same three audited Storybook interaction files
  * are used by the Storybook UI and CI. Other Vitest projects remain untouched.
@@ -10,6 +12,18 @@ import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
  * Storybook's plugin loads our Vue/Vite aliases and annotations itself.
  */
 export default defineConfig({
+  plugins: [
+    {
+      name: 'storybook-workspace-watch',
+      configureServer(server) {
+        // The UI starts Vitest at apps/storybook; the component sources live
+        // outside that root. Register them with the shared watch server too.
+        if (server.config.server.watch !== null) {
+          server.watcher.add(path.join(workspaceRoot, 'packages'));
+        }
+      },
+    },
+  ],
   test: {
     projects: [
       {

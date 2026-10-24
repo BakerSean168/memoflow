@@ -57,7 +57,7 @@ Windows 使用 `iphlpapi!NotifyUnicastIpAddressChange(AF_UNSPEC)` 注册回调�
 - `pnpm nx run ui-storybook:test:interaction --skip-nx-cache --outputStyle=static`：基线 9.77s，修正后热启动 7.59s、移走 sb-vitest 优化缓存后冷启动 10.60s；每次 **3 文件、12 用例通过，0 skipped/todo**。均为本地收据。
 - `node --test tools/test-system-v2/__tests__/vitest-reporting.test.mjs`：3/3，通过真实失败退出 7、ENOENT 和 SIGTERM→143、忽略 SIGTERM 的浏览器后代清理验证。
 - `pnpm nx run ui-storybook:build --skip-nx-cache --outputStyle=static`：通过，Nx 5.8s；`ui-storybook:lint` 通过。
-- `pnpm nx run ui-storybook:serve --excludeTaskDependencies`：WSL 和 Windows curl 均可读取 `http://127.0.0.1:4402/index.json`。随后 SIGTERM 结束服务，4402/63315 无监听、无本轮 Storybook/Vitest 孤儿进程、临时 socket 目录已清理。这只证明开发桥 HTTP 连通，未验证 UI 点击 Run Tests 的全部控制面。
+- `pnpm nx run ui-storybook:serve --excludeTaskDependencies`：WSL 和 Windows curl 均可读取 `http://127.0.0.1:4402/index.json`。随后 SIGTERM 结束服务，4402/63315 无监听、无本轮 Storybook/Vitest 孤儿进程、临时 socket 目录已清理。该阶段只证明开发桥 HTTP 连通；后续 UI 完整验收见 Browser Mode 架构文档的 Storybook UI 验收记录。
 - 全仓 `memoflow:governance-check` 已执行：依赖的 ci-cd-platform 工具测试 34/34、Test System V2 测试 122/122 和 Inventory/Architecture 通过；最终被两个 9 月遗留的 ignored Desktop dist-electron chunk 中 NotificationTemplate 词汇阻断。未降低门禁或删除这些既有产物。
 - 首轮 `ui-storybook:typecheck` 被 relation/data-portability 依赖构建声明缺失阻断；直接执行 target 也发现 relation/client 声明缺失。随后 `pnpm nx run relation:build --skip-nx-cache` 成功，重跑 `ui-storybook:typecheck --excludeTaskDependencies --skip-nx-cache` **通过，6.2s**；没有为此改动产品源码或增加类型 shim。
 - 显式 `MEMOFLOW_STORYBOOK_NETNS=off` 的标准执行路径在外层已隔离的命名空间内通过 3/3、12/12（7.50s），runner 本身未创建命名空间；这验证分支行为，但不是实际普通 Linux 主机或 GitHub Actions 运行，不能宣称 CI 已通过。现有 CI artifact 路径保持，测试配置没有 WSL 逻辑。
@@ -70,3 +70,11 @@ Windows 使用 `iphlpapi!NotifyUnicastIpAddressChange(AF_UNSPEC)` 注册回调�
 - Test System V2：**93/93** 通过，Nx 19.2s。上面的 122/122 是接续工作区包含 T1/T2 未提交测试时的数量；这些其他任务的修改没有混入本 PR。
 - pnpm 11 在切换 package.json 后触发过自动安装而没有继续运行原命令；未把安装日志当成测试结果。上述独立提交复验直接使用 `node node_modules/nx/dist/bin/nx.js run <target>`，执行的仍是相同 Nx target。
 - `pnpm install --lockfile-only --ignore-scripts --offline --frozen-lockfile` 已通过。共享文件仅 package.json 与 pnpm-lock.yaml 的 Storybook 依赖迁移；未变更 GitHub workflows、nx.json 或 Playwright CI 配置。
+
+## 后续真实 CI 与 UI 收据
+
+`fd8a71b99` 的 [CI #2276](https://github.com/BakerSean168/memoflow/actions/runs/40096934662) 已全部成功，标准 Linux host network 下 Storybook 3/3、12/12，12.93s，artifact `storybook-interactions-1`；远端 Governance、Typecheck、Build 与 Web 四分片成功。此前“尚无 CI 收据”属于当时阶段状态，已被此证据更新。
+
+2026-10-24 已通过 UI Run tests、再次运行与重连结果保留验收。T3 宿主 Chromium 的 Story Canvas 仍会受 eth1 事件影响；将验收浏览器与 Storybook 放入同一隔离网络后 Canvas 和全部交互通过且无网络错误。UI 成功不证明 Windows/WSL mirrored/GNS 的上游根因已修复，系统侧调查继续由 #610 跟踪。
+
+UI Watch 另发现项目配置问题：addon 从 `apps/storybook` 启动的 watcher 未覆盖外部 packages 源码；现已显式注册源目录，真实文件事件回归由失败转为通过，UI 修改 Story 自动重跑 6/6。该缺陷独立于 WSL 网络波动；未通过禁用 Watch 或增加重试来掩盖。详细验收见 Browser Mode 架构文档。
