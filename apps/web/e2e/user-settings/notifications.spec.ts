@@ -1,6 +1,6 @@
 import { test, expect, type Locator, type Page } from '@playwright/test';
 import { TIMEOUT_CONFIG } from '../config';
-import { registerAndLogin } from '../helpers/testHelpers';
+import { registerAndLogin } from '../helpers/auth-api';
 
 const generateTestEmail = () =>
   `e2e-settings-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@test.com`;

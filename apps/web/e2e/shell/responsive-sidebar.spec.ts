@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { registerAndLogin } from '../helpers/testHelpers';
+import { registerAndLogin } from '../helpers/auth-api';
 
 const password = 'Test123456!';
 

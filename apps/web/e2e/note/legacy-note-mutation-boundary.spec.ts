@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { API_CONFIG } from '../config';
-import { registerAndLogin } from '../helpers/testHelpers';
+import { registerAndLogin } from '../helpers/auth-api';
 
 const testPassword = 'Test123456!';
 

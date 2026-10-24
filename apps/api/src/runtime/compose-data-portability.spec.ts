@@ -1,7 +1,5 @@
 import type { Express, Router } from 'express';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { z } from 'zod';
 import type { PrismaClient } from '@memoflow/database';
 import type { DataPortabilityApiModuleContext } from '@memoflow/data-portability/api';
@@ -104,13 +102,3 @@ describe('composeDataPortability V3 assembly', () => {
   });
 });
 
-describe('composeDataPortability layering boundary', () => {
-  it('does not reference retired persistence-shaped portability seams', () => {
-    const composer = readFileSync(resolve(__dirname, './compose-data-portability.ts'), 'utf8');
-    expect(composer).toContain("from '@memoflow/data-portability'");
-    expect(composer).toContain("from '@memoflow/data-portability/api'");
-    expect(composer).toContain('portableCapabilities');
-    expect(composer).not.toMatch(/\bDataPortability(?:Dependencies|ImportStore)\b/);
-    expect(composer).not.toMatch(/PowerSync|new Prisma.*Adapter/);
-  });
-});

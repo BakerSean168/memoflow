@@ -1,6 +1,6 @@
 import { expect, test, type APIResponse } from '@playwright/test';
 import { API_CONFIG, TIMEOUT_CONFIG } from '../config';
-import { registerAndLogin } from '../helpers/testHelpers';
+import { registerAndLogin } from '../helpers/auth-api';
 
 const password = 'Test123456!';
 

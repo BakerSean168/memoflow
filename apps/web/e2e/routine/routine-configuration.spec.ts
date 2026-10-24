@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { TIMEOUT_CONFIG } from '../config';
-import { registerAndLogin } from '../helpers/testHelpers';
+import { registerAndLogin } from '../helpers/auth-api';
 
 const password = 'Test123456!';
 

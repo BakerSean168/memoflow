@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { PortableBackupEnvelopeV3Schema } from '@memoflow/contracts/data-portability';
 import { API_CONFIG, TIMEOUT_CONFIG } from '../config';
-import { registerAndLogin } from '../helpers/testHelpers';
+import { registerAndLogin } from '../helpers/auth-api';
 
 const V3_CAPABILITY_KEYS = [
   'account-profile',
