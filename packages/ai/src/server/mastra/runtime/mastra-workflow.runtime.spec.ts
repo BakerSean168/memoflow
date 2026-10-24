@@ -799,10 +799,7 @@ describe('MastraAIRuntime Assistant approval protocol', () => {
       requestContext: { permissionMode: 'supervised' },
     } as never);
     const suspendedAgent = first.runtime.assistant as never as {
-      listSuspendedRuns: (input: {
-        threadId: string;
-        resourceId: string;
-      }) => Promise<{
+      listSuspendedRuns: (input: { threadId: string; resourceId: string }) => Promise<{
         runs: {
           runId: string;
           toolCalls: { toolCallId: string; toolName: string; suspendPayload: unknown }[];

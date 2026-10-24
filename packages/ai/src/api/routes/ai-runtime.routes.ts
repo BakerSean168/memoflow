@@ -325,16 +325,14 @@ export function registerAIRuntimeRoutes(
       return;
     }
     try {
-      res
-        .status(200)
-        .json(
-          responseBuilder.success(
-            await runtime.listAskUserSuspensions({
-              identityId,
-              conversationId: parsed.data.conversationId,
-            }),
-          ),
-        );
+      res.status(200).json(
+        responseBuilder.success(
+          await runtime.listAskUserSuspensions({
+            identityId,
+            conversationId: parsed.data.conversationId,
+          }),
+        ),
+      );
     } catch (error) {
       const failure = toAITransportFailure(error, {
         fallbackCode: 'AI_RUNTIME_ERROR',

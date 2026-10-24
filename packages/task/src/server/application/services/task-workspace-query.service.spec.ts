@@ -7,16 +7,14 @@ describe('TaskWorkspaceQueryService', () => {
   function harness() {
     const plan = aOneTimeTask();
     const occurrences = {
-      getStatusCountsForPlan: vi
-        .fn()
-        .mockResolvedValue({
-          total: 10,
-          completed: 4,
-          missed: 1,
-          skipped: 1,
-          pending: 3,
-          inProgress: 1,
-        }),
+      getStatusCountsForPlan: vi.fn().mockResolvedValue({
+        total: 10,
+        completed: 4,
+        missed: 1,
+        skipped: 1,
+        pending: 3,
+        inProgress: 1,
+      }),
       findRecentByPlan: vi.fn().mockResolvedValue([]),
     };
     const service = new TaskWorkspaceQueryService({

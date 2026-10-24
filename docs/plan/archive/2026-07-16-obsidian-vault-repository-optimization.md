@@ -8149,7 +8149,7 @@ connection.identityId`，再以 `updateMany where { id, identityId }` 更新；�
 > 续进展 2026-07-23（阶段 6 残留一千一百五十六轮）：**toDashboardTaskInstanceRecord dual 收口**（仍不打勾）——
 > 提取 `@memoflow/dashboard` sole（duck-typed DashboardTaskInstanceSource）；
 > API Prisma + Desktop Electron dashboard-read-service duals 退休为 sole import；
-> surface Residual 1156 锁（host wiring Prisma create* vs Electron get* 仍分离）。
+> surface Residual 1156 锁（host wiring Prisma create* vs Electron get\* 仍分离）。
 > 续进展 2026-07-23（阶段 6 残留一千一百五十七轮）：§13.2 聚焦证据套件复跑（含 residual 250–1156
 > toDashboardTaskInstanceRecord dual 收口锁，不改 checkbox）——**347 文件 / 1500 测试**（app-vue 54/413、
 > ai 50/315、repository 7/38、contracts 130/385、governance 3/10、api 12/33、

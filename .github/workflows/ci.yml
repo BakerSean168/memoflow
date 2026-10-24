@@ -261,6 +261,11 @@ jobs:
           setup-uv: 'false'
           consume-delivery-manifest: 'true'
       - run: pnpm exec playwright install chromium
+      # The Browser Mode dev server resolves workspace deps through their
+      # package exports (dist); build the Storybook dependency chain first
+      # (this is what the old in-Web-job step relied on the Build job for).
+      - name: Build Storybook and its dependency chain
+        run: pnpm exec nx run ui-storybook:build
       - name: Storybook interaction tests (Vitest Browser Mode)
         run: pnpm exec nx run ui-storybook:test:interaction
       - name: Upload Storybook interaction evidence

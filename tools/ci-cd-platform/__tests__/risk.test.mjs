@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { classifyCapabilities, classifyRisk, selectLanes, webFlowCandidateFiles } from '../lib/risk.mjs';
+import {
+  classifyCapabilities,
+  classifyRisk,
+  selectLanes,
+  webFlowCandidateFiles,
+} from '../lib/risk.mjs';
 
 test('classifies highest-risk root and release changes', () => {
   assert.equal(classifyRisk(['docs/README.md']).level, 'docs');
@@ -232,7 +237,14 @@ test('classifyCapabilities maps stories to componentBrowser only', () => {
 test('classifyCapabilities maps contract package changes to contract', () => {
   const caps = classifyCapabilities({
     changedFiles: ['packages/contracts/src/modules/goal.ts', 'docs/guide.md'],
-    scope: { unit: ['contracts'], integration: [], boundary: [], coverage: [], perf: [], webFlowFiles: [] },
+    scope: {
+      unit: ['contracts'],
+      integration: [],
+      boundary: [],
+      coverage: [],
+      perf: [],
+      webFlowFiles: [],
+    },
   });
   assert.deepEqual(caps.contract.files, ['packages/contracts/src/modules/goal.ts']);
   assert.deepEqual(caps.unit.projects, ['contracts']);

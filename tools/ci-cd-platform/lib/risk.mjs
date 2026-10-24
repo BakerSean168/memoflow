@@ -155,11 +155,34 @@ export function selectLanes({ risk, scope, event = 'pull_request', full = scope.
 }
 
 const FORMAT_EXTENSIONS = new Set([
-  '.ts', '.tsx', '.mts', '.cts', '.js', '.mjs', '.cjs', '.jsx',
-  '.vue', '.json', '.md', '.css', '.scss', '.less', '.html', '.yml', '.yaml',
+  '.ts',
+  '.tsx',
+  '.mts',
+  '.cts',
+  '.js',
+  '.mjs',
+  '.cjs',
+  '.jsx',
+  '.vue',
+  '.json',
+  '.md',
+  '.css',
+  '.scss',
+  '.less',
+  '.html',
+  '.yml',
+  '.yaml',
 ]);
 const LINT_EXTENSIONS = new Set([
-  '.ts', '.tsx', '.mts', '.cts', '.js', '.mjs', '.cjs', '.jsx', '.vue',
+  '.ts',
+  '.tsx',
+  '.mts',
+  '.cts',
+  '.js',
+  '.mjs',
+  '.cjs',
+  '.jsx',
+  '.vue',
 ]);
 const TYPE_EXTENSIONS = new Set(['.ts', '.tsx', '.mts', '.cts', '.vue']);
 const STORY_PATTERN = /(?:\.stories\.[^/]+$|^apps\/storybook\/)/u;

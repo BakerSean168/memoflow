@@ -225,13 +225,34 @@ test('laneDetails validation enforces shape and lane consistency (VNext Q2)', as
   const { validateDeliveryManifest } = await import('../lib/contracts.mjs');
   const { buildDeliveryManifest } = await import('../generate-delivery-manifest.mjs');
   const scope = {
-    version: 1, base: 'base', head: 'head', full: false, projects: ['web'], unit: ['web'],
-    coverage: [], smoke: [], integration: [], boundary: [], perf: [], webFlow: true, desktopFlow: false,
+    version: 1,
+    base: 'base',
+    head: 'head',
+    full: false,
+    projects: ['web'],
+    unit: ['web'],
+    coverage: [],
+    smoke: [],
+    integration: [],
+    boundary: [],
+    perf: [],
+    webFlow: true,
+    desktopFlow: false,
   };
-  const good = await buildDeliveryManifest({ base: 'base', head: 'head', scope, files: ['apps/web/src/main.ts'] });
+  const good = await buildDeliveryManifest({
+    base: 'base',
+    head: 'head',
+    scope,
+    files: ['apps/web/src/main.ts'],
+  });
   assert.doesNotThrow(() => validateDeliveryManifest(good));
   const unknown = structuredClone(good);
-  unknown.laneDetails.bogusCapability = { required: true, files: [], targets: [], skipReason: null };
+  unknown.laneDetails.bogusCapability = {
+    required: true,
+    files: [],
+    targets: [],
+    skipReason: null,
+  };
   assert.throws(() => validateDeliveryManifest(unknown), /unsupported capability/);
   const badReason = structuredClone(good);
   badReason.laneDetails.fmt.skipReason = 'should not be set';
