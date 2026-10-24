@@ -58,7 +58,7 @@ describe('task plan ownership surface', () => {
 
   it('get/delete use cases load via findByIdForIdentity', () => {
     expect(getUseCase).toContain('findByIdForIdentity(identityId, id)');
-    expect(getUseCase).toMatch(/execute\(\s*id: string,\s*identityId: string,/);
+    expect(getUseCase).toMatch(/execute\(\s*id: string,\s*identityId: string,?\s*[):]/);
     expect(deleteUseCase).toContain('findByIdForIdentity(identityId, id)');
     expect(deleteUseCase).toContain('delete(identityId, id)');
   });
