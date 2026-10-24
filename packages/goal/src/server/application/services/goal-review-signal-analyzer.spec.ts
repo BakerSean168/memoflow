@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { GoalReviewSignalSchema, type GoalReviewSystemContext } from '@memoflow/contracts/goal';
 import { analyzeGoalReviewSignals } from './goal-review-signal-analyzer';
@@ -13,6 +14,19 @@ function facts(start = 20, end = 40): Omit<GoalReviewSystemContext, 'signals'> {
 }
 
 describe('Goal review observed-fact signals', () => {
+  it('keeps the deterministic analyzer, builder and Review UI free of AI dependencies', () => {
+    for (const path of [
+      './goal-review-signal-analyzer.ts',
+      './goal-review-context-builder.ts',
+      '../../../../../app-vue/src/modules/goal/components/GoalReviewSnapshot.vue',
+      '../../../../../app-vue/src/modules/goal/components/dialogs/GoalReviewCreateDialog.vue',
+      '../../../../../app-vue/src/modules/goal/components/dialogs/GoalReviewInspectDialog.vue',
+    ]) {
+      const source = readFileSync(new URL(path, import.meta.url), 'utf8');
+      expect(source).not.toMatch(/@memoflow\/ai|AI_SERVICE|useAI|generateText|generateObject|llm/i);
+      expect(source).not.toMatch(/sourceId|source_id/);
+    }
+  });
   it.each([
     [20, 40, 'increased'],
     [40, 20, 'decreased'],

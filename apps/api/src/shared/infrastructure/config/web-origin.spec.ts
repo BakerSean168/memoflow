@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   deriveWebOrigin,
@@ -117,3 +119,44 @@ describe('getTrustedWebOrigins', () => {
   });
 });
 
+describe('production GitHub login callback wiring', () => {
+  it('forwards the dedicated provider redirect override in the canonical and legacy stacks', () => {
+    const production = readFileSync(
+      resolve(__dirname, '../../../../../../deployment/production/docker-compose.production.yml'),
+      'utf8',
+    );
+    const legacy = readFileSync(
+      resolve(__dirname, '../../../../../../docker-compose.prod.yml'),
+      'utf8',
+    );
+
+    for (const compose of [production, legacy]) {
+      expect(compose).toContain('GITHUB_OAUTH_CLIENT_ID: ${GITHUB_OAUTH_CLIENT_ID:-}');
+      expect(compose).toContain('GITHUB_OAUTH_CLIENT_SECRET: ${GITHUB_OAUTH_CLIENT_SECRET:-}');
+      expect(compose).toContain('GITHUB_OAUTH_REDIRECT_URI: ${GITHUB_OAUTH_REDIRECT_URI:-}');
+    }
+  });
+
+  it('keeps the login callback reachable on the Web host through the same-origin API proxy', () => {
+    const nginx = readFileSync(resolve(__dirname, '../../../../../../nginx.conf'), 'utf8');
+    expect(nginx).toContain('location /api/ {');
+    expect(nginx).toContain('proxy_pass $api_upstream;');
+  });
+});
+
+describe('O2V-01 machine-public URL wiring', () => {
+  it('server.ts trustedOrigins is derived via getTrustedWebOrigins + MEMOFLOW_WEB_URL', () => {
+    const server = readFileSync(resolve(__dirname, '../../../server.ts'), 'utf8');
+    expect(server).toContain('getTrustedWebOrigins');
+    expect(server).toContain('env.MEMOFLOW_WEB_URL');
+    expect(server).toContain("from './shared/infrastructure/config/web-origin.js'");
+  });
+
+  it('global.ts CORS allowedOrigins includes the derived WEB origin', () => {
+    const globalMiddleware = readFileSync(resolve(__dirname, '../middleware/global.ts'), 'utf8');
+    expect(globalMiddleware).toContain('getTrustedWebOrigins');
+    expect(globalMiddleware).toContain('env.MEMOFLOW_WEB_URL');
+    expect(globalMiddleware).toContain('shouldDisableCrossOriginOpenerPolicyForLocalValidation');
+    expect(globalMiddleware).toContain('crossOriginOpenerPolicy: false');
+  });
+});

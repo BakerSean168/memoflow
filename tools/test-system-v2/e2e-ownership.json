@@ -291,6 +291,12 @@
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.config.ts"
     },
+    "apps/web/e2e/desktop-screenshots/thesis-capture.spec.ts": {
+      "surface": "desktop-screenshots",
+      "role": "artifact",
+      "lifecycle": "active",
+      "primaryCollector": "apps/web/playwright.sync.config.ts"
+    },
     "apps/web/e2e/desktop-screenshots/workspace-layout-matrix.spec.ts": {
       "surface": "desktop-screenshots",
       "role": "artifact",

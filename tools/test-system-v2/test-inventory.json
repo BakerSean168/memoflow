@@ -106,6 +106,16 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/api/src/bootstrap-module-names.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
       "path": "apps/api/src/bootstrap.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -302,6 +312,26 @@
       ]
     },
     {
+      "path": "apps/api/src/modules/powersync/parse-json-like-string-keep-boundary.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "apps/api/src/modules/powersync/powersync-schema-result-envelope.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
       "path": "apps/api/src/modules/powersync/relation-crud-executor.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -418,6 +448,16 @@
       ]
     },
     {
+      "path": "apps/api/src/runtime/compose-account.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
       "path": "apps/api/src/runtime/compose-ai.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -439,6 +479,16 @@
     },
     {
       "path": "apps/api/src/runtime/compose-goal.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "apps/api/src/runtime/compose-goal.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/api/vitest.config.ts"
@@ -602,6 +652,16 @@
       ]
     },
     {
+      "path": "apps/api/src/shared/infrastructure/http/controllers/info-result-envelope.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
       "path": "apps/api/src/shared/infrastructure/http/controllers/info.controller.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -612,7 +672,27 @@
       ]
     },
     {
+      "path": "apps/api/src/shared/infrastructure/http/controllers/logs-result-envelope.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
       "path": "apps/api/src/shared/infrastructure/http/controllers/logs.controller.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "apps/api/src/shared/infrastructure/http/controllers/metrics-result-envelope.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/api/vitest.config.ts"
@@ -643,6 +723,16 @@
     },
     {
       "path": "apps/api/src/shared/infrastructure/http/middlewares/request-context.middleware.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "apps/api/src/shared/infrastructure/middleware/error-result-envelope.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/api/vitest.config.ts"
@@ -998,6 +1088,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/desktop-update-shell-ownership.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/ipc/__tests__/data-portability-handler.spec.ts",
       "primarySuite": "boundary-ipc",
       "collectors": [
@@ -1119,6 +1217,14 @@
     },
     {
       "path": "apps/desktop/src/main/modules/ai/routine-command.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/modules/ai/stable-knowledge-note-ref-boundary.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -1638,6 +1744,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/main/runtime/compose-goal.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/main/runtime/compose-routine.runtime.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -1647,6 +1761,14 @@
     },
     {
       "path": "apps/desktop/src/main/services/custom-notification.manager.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/services/desktop-notification-preference-wiring.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -1734,7 +1856,23 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/desktop/src/renderer/custom-notification-electron-bridge-dual.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/desktop/src/renderer/focus-window/FocusWindowApp.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/renderer/host-electron-bridge-helper-dual.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -2057,6 +2195,20 @@
         "role": "canonical",
         "lifecycle": "active",
         "primaryCollector": "apps/web/playwright.config.ts"
+      }
+    },
+    {
+      "path": "apps/web/e2e/desktop-screenshots/thesis-capture.spec.ts",
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.sync.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "desktop-screenshots",
+        "role": "artifact",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.sync.config.ts"
       }
     },
     {
@@ -2718,6 +2870,16 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/account/src/api/account-void-success-envelope.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/account/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/account/src/api/module-lifecycle.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -2926,12 +3088,32 @@
       ]
     },
     {
+      "path": "packages/account/src/server/infrastructure/adapters/powersync/mappers/account-powersync-parse-json-keep-boundary.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/account/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/account/src/server/infrastructure/adapters/prisma/__tests__/account-auth-email-retirement.integration.test.ts",
       "primarySuite": "integration",
       "collectors": [
         "packages/account/vitest.integration.config.ts"
       ],
       "measurementCollectors": []
+    },
+    {
+      "path": "packages/account/src/server/infrastructure/adapters/prisma/__tests__/account-auth-email-retirement.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/account/vitest.config.ts"
+      ]
     },
     {
       "path": "packages/account/src/server/infrastructure/adapters/prisma/__tests__/account-closure-coordinator-db.integration.test.ts",
@@ -3062,6 +3244,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/api/routes/ai-void-success-envelope.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/api/routes/workspace-sse.http.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3132,6 +3324,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/infrastructure-client/adapters/read-string-keep-boundary.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/infrastructure-client/adapters/result-client-error.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3163,6 +3365,16 @@
     },
     {
       "path": "packages/ai/src/server/application/ai-conversation-portability.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/application/ports/knowledge-source-note.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -3462,6 +3674,16 @@
       ]
     },
     {
+      "path": "packages/ai/src/server/infrastructure/adapters/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/ai/src/server/infrastructure/adapters/fs/__tests__/ai-evaluation-report-file.adapter.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -3623,6 +3845,16 @@
     },
     {
       "path": "packages/ai/src/server/infrastructure/adapters/prisma/conversation-events.postgres.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/server/infrastructure/adapters/prisma/to-prisma-json-keep-boundary.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/ai/vitest.config.ts"
@@ -6168,6 +6400,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/cloud-auth/src/index.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/cloud-auth/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/cloud-auth/src/server/auth-flow.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6217,6 +6457,14 @@
     },
     {
       "path": "packages/cloud-auth/src/server/password-compatibility.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/cloud-auth/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/cloud-auth/src/server/public-surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/cloud-auth/vitest.config.ts"
@@ -6336,6 +6584,22 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/account/api/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/modules/account/empty-dual-barrel.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/account/portable-v3.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6440,6 +6704,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/ai/api/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/ai/api/goal-panel.dto.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6473,6 +6745,14 @@
     },
     {
       "path": "packages/contracts/src/modules/data-portability/portable-v3-contract.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/modules/goal/api/dual-registry.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -6568,6 +6848,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/goal/value-objects/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/goal/value-objects/goal-timeframe.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6577,6 +6865,14 @@
     },
     {
       "path": "packages/contracts/src/modules/label/label-contract.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/modules/notification/api/dual-registry.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -6624,6 +6920,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/notification/value-objects/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/operations/operations-dist.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6648,6 +6952,22 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/repository/aggregates/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/modules/repository/api/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/repository/api/knowledge-document-identity.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6657,6 +6977,14 @@
     },
     {
       "path": "packages/contracts/src/modules/repository/api/knowledge-note-projection.dto.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/modules/schedule/api/dual-registry.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -6696,7 +7024,31 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/setting/preferences/product-feature-map-public.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/modules/setting/preferences/product-module-index-paths.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/task/api/complete-task-occurrence.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/modules/task/api/dual-registry.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -6857,6 +7209,14 @@
     },
     {
       "path": "packages/contracts/src/result/transports.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/contracts/src/shared/dual-registry.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -7166,6 +7526,16 @@
       ]
     },
     {
+      "path": "packages/goal/src/__tests__/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/goal/src/api/__tests__/goal-api-module-gate.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -7186,7 +7556,47 @@
       ]
     },
     {
+      "path": "packages/goal/src/api/routes/goal-parse-number-string-array-keep-boundary.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/goal/src/api/routes/goal-void-success-envelope.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/goal/src/api/routes/goal.routes.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/goal/src/api/routes/parse-boolean-dual.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/goal/src/electron/goal-electron.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/goal/vitest.config.ts"
@@ -7899,6 +8309,16 @@
       ]
     },
     {
+      "path": "packages/goal/src/server/infrastructure/__tests__/schedule-source-ownership.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/goal/src/server/infrastructure/adapters/goal-record-ordering.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -8000,6 +8420,16 @@
     },
     {
       "path": "packages/goal/src/server/infrastructure/adapters/prisma/__tests__/goal-page.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/goal/src/server/infrastructure/adapters/prisma/__tests__/goal-schema-projection.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/goal/vitest.config.ts"
@@ -8240,6 +8670,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/http-client/src/__tests__/result-http-envelope.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/http-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/ipc-client/src/__tests__/ipc-client.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -8315,6 +8753,16 @@
     },
     {
       "path": "packages/notification/src/api/module-lifecycle.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/notification/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/notification/src/api/notification-void-success-envelope.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/notification/vitest.config.ts"
@@ -8699,6 +9147,16 @@
     },
     {
       "path": "packages/notification/src/server/transport/__tests__/notification-transport-parity.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/notification/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/notification/src/server/transport/notification-usecases-export.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/notification/vitest.config.ts"
@@ -9182,6 +9640,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/repository/src/api/routes/knowledge-disconnect-void-envelope.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/repository/src/api/routes/knowledge-repository-connection.routes.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -9398,6 +9864,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/repository/src/server/infrastructure/adapters/prisma/__tests__/legacy-editor-repository-runtime.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/repository/src/server/infrastructure/adapters/prisma/knowledge-attachment-content-cache-prisma.repository.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -9549,6 +10023,26 @@
     },
     {
       "path": "packages/schedule/src/api/schedule-event.routes.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/schedule/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/schedule/src/api/schedule-route-parsers-keep-boundary.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/schedule/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/schedule/src/api/schedule-void-success-envelope.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/schedule/vitest.config.ts"
@@ -9726,6 +10220,16 @@
     },
     {
       "path": "packages/scheduler/src/api/routes.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/scheduler/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/scheduler/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/scheduler/src/api/scheduler-route-parsers.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/scheduler/vitest.config.ts"
@@ -9994,6 +10498,16 @@
       ]
     },
     {
+      "path": "packages/task/src/api/routes/get-first-query-value-dual.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/task/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/task/src/api/routes/task-occurrence.routes.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10005,6 +10519,16 @@
     },
     {
       "path": "packages/task/src/api/routes/task-plan.routes.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/task/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/task/src/api/routes/task-void-success-envelope.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -10455,6 +10979,26 @@
       ]
     },
     {
+      "path": "packages/task/src/server/domain/task-domain-events-barrel.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/task/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/task/src/server/domain/task-domain-simplification.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/task/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/task/src/server/domain/task-goal-contribution-v2.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10806,6 +11350,16 @@
       ]
     },
     {
+      "path": "packages/task/src/server/infrastructure/schedule-source-ownership.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/task/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/task/src/server/infrastructure/task-goal-outbox-runtime.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10864,6 +11418,16 @@
       ]
     },
     {
+      "path": "packages/task/src/testing/an-identity-id-dual.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/task/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/time/src/__tests__/facade.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10881,6 +11445,14 @@
     },
     {
       "path": "packages/time/src/__tests__/recurrence.conformance.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/time/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/time/src/__tests__/runtime-dependency-boundary.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/time/vitest.config.ts"
@@ -11009,6 +11581,14 @@
     },
     {
       "path": "packages/utils/src/logger/winston-logger.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/utils/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/utils/src/result/default-extract-context-keep-boundary.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/utils/vitest.config.ts"
@@ -11678,21 +12258,21 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 55
+      "fileCount": 64
     },
     {
       "id": "packages/account/vitest.config.ts",
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 24
+      "fileCount": 27
     },
     {
       "id": "packages/ai/vitest.config.ts",
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 110
+      "fileCount": 115
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -11720,7 +12300,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 95
+      "fileCount": 102
     },
     {
       "id": "packages/goal/vitest.mappers.config.ts",
@@ -11741,7 +12321,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 38
+      "fileCount": 40
     },
     {
       "id": "packages/reminder/vitest.config.ts",
@@ -11755,7 +12335,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 19
+      "fileCount": 21
     },
     {
       "id": "packages/schedule/vitest.mappers.config.ts",
@@ -11769,7 +12349,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 13
+      "fileCount": 14
     },
     {
       "id": "packages/scheduler/vitest.mappers.config.ts",
@@ -11790,7 +12370,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 78
+      "fileCount": 84
     },
     {
       "id": "packages/task/vitest.mappers.config.ts",
@@ -11938,7 +12518,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 5,
+      "fileCount": 6,
       "e2eOwnership": {
         "lane": "specialized",
         "lifecycle": "active",
@@ -12130,14 +12710,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 55
+      "fileCount": 64
     },
     {
       "id": "apps/desktop/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 93
+      "fileCount": 99
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -12158,7 +12738,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 24
+      "fileCount": 27
     },
     {
       "id": "packages/agent-gateway/vitest.config.ts",
@@ -12172,7 +12752,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 110
+      "fileCount": 115
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -12193,14 +12773,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 10
+      "fileCount": 12
     },
     {
       "id": "packages/contracts/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 79
+      "fileCount": 93
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -12228,14 +12808,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 95
+      "fileCount": 102
     },
     {
       "id": "packages/http-client/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 4
+      "fileCount": 5
     },
     {
       "id": "packages/ipc-client/vitest.config.ts",
@@ -12256,7 +12836,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 38
+      "fileCount": 40
     },
     {
       "id": "packages/patterns/vitest.config.ts",
@@ -12291,7 +12871,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 34
+      "fileCount": 36
     },
     {
       "id": "packages/schedule-orchestration/vitest.config.ts",
@@ -12305,14 +12885,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 19
+      "fileCount": 21
     },
     {
       "id": "packages/scheduler/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 13
+      "fileCount": 14
     },
     {
       "id": "packages/setting/vitest.config.ts",
@@ -12326,14 +12906,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 78
+      "fileCount": 84
     },
     {
       "id": "packages/time/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 9
+      "fileCount": 10
     },
     {
       "id": "packages/ui-core/vitest.config.ts",
@@ -12354,11 +12934,12 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 12
+      "fileCount": 13
     }
   ],
   "measurementSuites": {
     "coverage": [
+      "apps/api/src/bootstrap-module-names.surface.spec.ts",
       "apps/api/src/bootstrap.spec.ts",
       "apps/api/src/modules/agent-gateway/audit.spec.ts",
       "apps/api/src/modules/agent-gateway/module.spec.ts",
@@ -12377,6 +12958,8 @@
       "apps/api/src/modules/powersync/crud-executor.routine-schedule.spec.ts",
       "apps/api/src/modules/powersync/crud-normalization.spec.ts",
       "apps/api/src/modules/powersync/module.spec.ts",
+      "apps/api/src/modules/powersync/parse-json-like-string-keep-boundary.surface.spec.ts",
+      "apps/api/src/modules/powersync/powersync-schema-result-envelope.surface.spec.ts",
       "apps/api/src/modules/powersync/relation-crud-executor.spec.ts",
       "apps/api/src/modules/powersync/routine-compound-crud-executor.spec.ts",
       "apps/api/src/modules/powersync/snapshot-builder.spec.ts",
@@ -12387,9 +12970,11 @@
       "apps/api/src/modules/routine/module.spec.ts",
       "apps/api/src/outbox/prisma-outbox-writer.spec.ts",
       "apps/api/src/runtime/compose-account.spec.ts",
+      "apps/api/src/runtime/compose-account.surface.spec.ts",
       "apps/api/src/runtime/compose-ai.spec.ts",
       "apps/api/src/runtime/compose-data-portability.spec.ts",
       "apps/api/src/runtime/compose-goal.spec.ts",
+      "apps/api/src/runtime/compose-goal.surface.spec.ts",
       "apps/api/src/runtime/compose-notification.spec.ts",
       "apps/api/src/runtime/compose-repository.spec.ts",
       "apps/api/src/runtime/compose-routine.spec.ts",
@@ -12403,17 +12988,22 @@
       "apps/api/src/shared/infrastructure/config/web-origin.spec.ts",
       "apps/api/src/shared/infrastructure/cron/jobs/snapshot-rebuild.job.spec.ts",
       "apps/api/src/shared/infrastructure/cron/registerCronJobs.spec.ts",
+      "apps/api/src/shared/infrastructure/http/controllers/info-result-envelope.surface.spec.ts",
       "apps/api/src/shared/infrastructure/http/controllers/info.controller.spec.ts",
+      "apps/api/src/shared/infrastructure/http/controllers/logs-result-envelope.surface.spec.ts",
       "apps/api/src/shared/infrastructure/http/controllers/logs.controller.spec.ts",
+      "apps/api/src/shared/infrastructure/http/controllers/metrics-result-envelope.surface.spec.ts",
       "apps/api/src/shared/infrastructure/http/controllers/metrics.controller.spec.ts",
       "apps/api/src/shared/infrastructure/http/middlewares/authMiddleware.spec.ts",
       "apps/api/src/shared/infrastructure/http/middlewares/request-context.middleware.spec.ts",
+      "apps/api/src/shared/infrastructure/middleware/error-result-envelope.surface.spec.ts",
       "apps/api/src/shared/infrastructure/middleware/error.spec.ts",
       "apps/api/src/shared/infrastructure/observability/external-agent-edge-audit.spec.ts",
       "apps/api/src/shared/infrastructure/observability/http-request-metrics.spec.ts",
       "apps/api/src/shared/infrastructure/observability/http-request-observation.spec.ts",
       "apps/api/src/shared/infrastructure/observability/opentelemetry-http-request-trace.spec.ts",
       "apps/api/src/shared/infrastructure/openapi/generator.spec.ts",
+      "packages/account/src/api/account-void-success-envelope.surface.spec.ts",
       "packages/account/src/api/module-lifecycle.spec.ts",
       "packages/account/src/api/routes.spec.ts",
       "packages/account/src/application-client/services/account-client-port-mapping-dual.surface.spec.ts",
@@ -12434,6 +13024,8 @@
       "packages/account/src/server/infrastructure/__tests__/account-repositories.surface.spec.ts",
       "packages/account/src/server/infrastructure/adapters/cloud-auth/cloud-auth-revocation.adapter.spec.ts",
       "packages/account/src/server/infrastructure/adapters/powersync/account-powersync.repository.spec.ts",
+      "packages/account/src/server/infrastructure/adapters/powersync/mappers/account-powersync-parse-json-keep-boundary.surface.spec.ts",
+      "packages/account/src/server/infrastructure/adapters/prisma/__tests__/account-auth-email-retirement.surface.spec.ts",
       "packages/account/src/server/infrastructure/adapters/prisma/__tests__/account-ownership.surface.spec.ts",
       "packages/account/src/server/infrastructure/adapters/prisma/mappers/account-prisma.mapper.spec.ts",
       "packages/account/src/server/infrastructure/cloud-account-provisioner.spec.ts",
@@ -12442,6 +13034,7 @@
       "packages/ai/src/api/routes/ai-provider-onboarding.routes.spec.ts",
       "packages/ai/src/api/routes/ai-runtime.goal-surface-lease.spec.ts",
       "packages/ai/src/api/routes/ai-runtime.routes.test.ts",
+      "packages/ai/src/api/routes/ai-void-success-envelope.surface.spec.ts",
       "packages/ai/src/api/routes/workspace-sse.http.spec.ts",
       "packages/ai/src/client/runtime-assistant.spec.ts",
       "packages/ai/src/client/runtime-usage.spec.ts",
@@ -12449,10 +13042,12 @@
       "packages/ai/src/electron/index-lifecycle.spec.ts",
       "packages/ai/src/evals/eval-runner.spec.ts",
       "packages/ai/src/infrastructure-client/adapters/__tests__/ai-provider-onboarding-v2.adapters.spec.ts",
+      "packages/ai/src/infrastructure-client/adapters/read-string-keep-boundary.surface.spec.ts",
       "packages/ai/src/infrastructure-client/adapters/result-client-error.test.ts",
       "packages/ai/src/server/application/agent-instance/agent-instance.registry.spec.ts",
       "packages/ai/src/server/application/ai-application-capabilities.surface.spec.ts",
       "packages/ai/src/server/application/ai-conversation-portability.spec.ts",
+      "packages/ai/src/server/application/ports/knowledge-source-note.surface.spec.ts",
       "packages/ai/src/server/application/services/conversation-attention-observer.spec.ts",
       "packages/ai/src/server/application/services/owner-activity-projection.spec.ts",
       "packages/ai/src/server/application/use-cases/commands/__tests__/ai-provider-config-service.test.ts",
@@ -12482,6 +13077,7 @@
       "packages/ai/src/server/infrastructure/adapters/__tests__/ai-conversation-repository.surface.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/__tests__/ai-execution-record-usage.test.ts",
       "packages/ai/src/server/infrastructure/adapters/__tests__/ai-provider-config-repository.surface.spec.ts",
+      "packages/ai/src/server/infrastructure/adapters/dual-registry.surface.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/fs/__tests__/ai-evaluation-report-file.adapter.test.ts",
       "packages/ai/src/server/infrastructure/adapters/fs/ai-evaluation-report-wire.surface.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/mastra-vnext-native-ai-adapters.spec.ts",
@@ -12499,6 +13095,7 @@
       "packages/ai/src/server/infrastructure/adapters/prisma/__tests__/ai-provider-config-prisma.repository.test.ts",
       "packages/ai/src/server/infrastructure/adapters/prisma/attention-events.postgres.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/prisma/conversation-events.postgres.spec.ts",
+      "packages/ai/src/server/infrastructure/adapters/prisma/to-prisma-json-keep-boundary.surface.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/provider-secret-vault.contract.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/provider-web-research.adapter.spec.ts",
       "packages/ai/src/server/infrastructure/adapters/tokenize-keep-boundary.surface.spec.ts",
@@ -12570,9 +13167,14 @@
       "packages/data-portability/src/server/infrastructure/prisma-server-held-data-disclosure.source.test.ts",
       "packages/data-portability/src/server/transport/data-portability.controller.test.ts",
       "packages/domain-shared/src/shared/primitives/__tests__/identity-id.spec.ts",
+      "packages/goal/src/__tests__/dual-registry.surface.spec.ts",
       "packages/goal/src/api/__tests__/goal-api-module-gate.surface.spec.ts",
       "packages/goal/src/api/module-lifecycle.spec.ts",
+      "packages/goal/src/api/routes/goal-parse-number-string-array-keep-boundary.surface.spec.ts",
+      "packages/goal/src/api/routes/goal-void-success-envelope.surface.spec.ts",
       "packages/goal/src/api/routes/goal.routes.spec.ts",
+      "packages/goal/src/api/routes/parse-boolean-dual.surface.spec.ts",
+      "packages/goal/src/electron/goal-electron.surface.spec.ts",
       "packages/goal/src/electron/index.spec.ts",
       "packages/goal/src/import-safety.spec.ts",
       "packages/goal/src/infrastructure-client/adapters/goal-record-preview-context.spec.ts",
@@ -12639,6 +13241,7 @@
       "packages/goal/src/server/domain/value-objects/__tests__/key-result-weight-snapshot-impl.spec.ts",
       "packages/goal/src/server/infrastructure/__tests__/goal-module-partial-start.spec.ts",
       "packages/goal/src/server/infrastructure/__tests__/goal-repositories.surface.spec.ts",
+      "packages/goal/src/server/infrastructure/__tests__/schedule-source-ownership.surface.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/goal-record-ordering.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/goal-timeframe-persistence.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/goal-write-buffered-event-bus.spec.ts",
@@ -12650,6 +13253,7 @@
       "packages/goal/src/server/infrastructure/adapters/powersync/powersync-goal-native-lease.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/__tests__/goal-ownership.surface.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/__tests__/goal-page.spec.ts",
+      "packages/goal/src/server/infrastructure/adapters/prisma/__tests__/goal-schema-projection.surface.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/__tests__/weight-snapshot-ownership.surface.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/mappers/goal-record-provenance.spec.ts",
       "packages/goal/src/server/infrastructure/adapters/prisma/mappers/goal-review-signals.spec.ts",
@@ -12667,6 +13271,7 @@
       "packages/goal/src/shared/goal-record-preview.spec.ts",
       "packages/notification/src/api/__tests__/notification-lane-bootstrap.spec.ts",
       "packages/notification/src/api/module-lifecycle.spec.ts",
+      "packages/notification/src/api/notification-void-success-envelope.surface.spec.ts",
       "packages/notification/src/api/routes.spec.ts",
       "packages/notification/src/electron/index-lifecycle.spec.ts",
       "packages/notification/src/infrastructure-client/adapters/http/notification-http.adapter.spec.ts",
@@ -12703,6 +13308,7 @@
       "packages/notification/src/server/infrastructure/runtime/__tests__/notification-durable-dispatch.spec.ts",
       "packages/notification/src/server/infrastructure/runtime/notification.runtime.spec.ts",
       "packages/notification/src/server/transport/__tests__/notification-transport-parity.spec.ts",
+      "packages/notification/src/server/transport/notification-usecases-export.surface.spec.ts",
       "packages/reminder/src/__tests__/package-root-owner-surface.spec.ts",
       "packages/reminder/src/client/client.spec.ts",
       "packages/reminder/src/method-library/method-library.spec.ts",
@@ -12740,6 +13346,8 @@
       "packages/schedule/src/api/routes.spec.ts",
       "packages/schedule/src/api/schedule-event-routes-roundtrip.spec.ts",
       "packages/schedule/src/api/schedule-event.routes.spec.ts",
+      "packages/schedule/src/api/schedule-route-parsers-keep-boundary.surface.spec.ts",
+      "packages/schedule/src/api/schedule-void-success-envelope.surface.spec.ts",
       "packages/schedule/src/application-client/planner-conflict-read-model.spec.ts",
       "packages/schedule/src/application-client/schedule-client-port-facade-dual.surface.spec.ts",
       "packages/schedule/src/electron/index-lifecycle.spec.ts",
@@ -12756,6 +13364,7 @@
       "packages/schedule/src/server/infrastructure/adapters/prisma/__tests__/schedule-event-ownership.surface.spec.ts",
       "packages/schedule/src/server/infrastructure/adapters/prisma/mappers/prisma-schedule-mapper.spec.ts",
       "packages/scheduler/src/api/routes.spec.ts",
+      "packages/scheduler/src/api/scheduler-route-parsers.surface.spec.ts",
       "packages/scheduler/src/scheduling/__tests__/handler-registry.spec.ts",
       "packages/scheduler/src/scheduling/__tests__/scheduling-contracts.spec.ts",
       "packages/scheduler/src/server/application/scheduler/patterns-scheduler-dual.surface.spec.ts",
@@ -12781,8 +13390,10 @@
       "packages/setting/src/server/preferences/preference-portability.spec.ts",
       "packages/setting/src/server/preferences/user-preference-service.spec.ts",
       "packages/task/src/api/module-lifecycle.spec.ts",
+      "packages/task/src/api/routes/get-first-query-value-dual.surface.spec.ts",
       "packages/task/src/api/routes/task-occurrence.routes.spec.ts",
       "packages/task/src/api/routes/task-plan.routes.spec.ts",
+      "packages/task/src/api/routes/task-void-success-envelope.surface.spec.ts",
       "packages/task/src/application-client/task-client-service.spec.ts",
       "packages/task/src/domain-client/aggregates/task-plan.spec.ts",
       "packages/task/src/electron/authenticated-ipc.spec.ts",
@@ -12823,6 +13434,8 @@
       "packages/task/src/server/domain/aggregates/task-recurrence-date.adapter.spec.ts",
       "packages/task/src/server/domain/services/TaskOccurrenceGenerationService.spec.ts",
       "packages/task/src/server/domain/services/task-plan-outcome-evaluator.spec.ts",
+      "packages/task/src/server/domain/task-domain-events-barrel.surface.spec.ts",
+      "packages/task/src/server/domain/task-domain-simplification.surface.spec.ts",
       "packages/task/src/server/domain/task-goal-contribution-v2.surface.spec.ts",
       "packages/task/src/server/domain/value-objects/__tests__/task-domain-value-objects.spec.ts",
       "packages/task/src/server/domain/value-objects/__tests__/task-occurrence-occurrence-key.spec.ts",
@@ -12853,11 +13466,13 @@
       "packages/task/src/server/infrastructure/runtime/__tests__/task-occurrence-maintenance-runtime.spec.ts",
       "packages/task/src/server/infrastructure/runtime/task.runtime.spec.ts",
       "packages/task/src/server/infrastructure/schedule-projection-source.spec.ts",
+      "packages/task/src/server/infrastructure/schedule-source-ownership.surface.spec.ts",
       "packages/task/src/server/infrastructure/task-goal-outbox-runtime.spec.ts",
       "packages/task/src/server/infrastructure/task-goal-outbox.test.ts",
       "packages/task/src/server/transport/__tests__/task-occurrence.controller.test.ts",
       "packages/task/src/server/transport/__tests__/task-plan.controller.test.ts",
-      "packages/task/src/server/transport/__tests__/task-transport-parity.spec.ts"
+      "packages/task/src/server/transport/__tests__/task-transport-parity.spec.ts",
+      "packages/task/src/testing/an-identity-id-dual.surface.spec.ts"
     ]
   },
   "measurementOnly": [],
@@ -12865,12 +13480,12 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1053,
+    "unit": 1115,
     "integration": 53,
     "smoke": 3,
     "boundary-ipc": 6,
     "boundary-main": 12,
-    "e2e": 68,
+    "e2e": 69,
     "perf": 2,
     "governance": 76
   },
@@ -12883,11 +13498,11 @@
       "reference": 6,
       "required": 35,
       "secure-acceptance": 1,
-      "specialized": 4,
+      "specialized": 5,
       "visual-artifact": 3
     },
     "countsByRole": {
-      "artifact": 2,
+      "artifact": 3,
       "canonical": 32,
       "reference": 6,
       "supplemental": 28
