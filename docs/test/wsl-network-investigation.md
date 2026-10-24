@@ -61,3 +61,12 @@ Windows 使用 `iphlpapi!NotifyUnicastIpAddressChange(AF_UNSPEC)` 注册回调�
 - 全仓 `memoflow:governance-check` 已执行：依赖的 ci-cd-platform 工具测试 34/34、Test System V2 测试 122/122 和 Inventory/Architecture 通过；最终被两个 9 月遗留的 ignored Desktop dist-electron chunk 中 NotificationTemplate 词汇阻断。未降低门禁或删除这些既有产物。
 - 首轮 `ui-storybook:typecheck` 被 relation/data-portability 依赖构建声明缺失阻断；直接执行 target 也发现 relation/client 声明缺失。随后 `pnpm nx run relation:build --skip-nx-cache` 成功，重跑 `ui-storybook:typecheck --excludeTaskDependencies --skip-nx-cache` **通过，6.2s**；没有为此改动产品源码或增加类型 shim。
 - 显式 `MEMOFLOW_STORYBOOK_NETNS=off` 的标准执行路径在外层已隔离的命名空间内通过 3/3、12/12（7.50s），runner 本身未创建命名空间；这验证分支行为，但不是实际普通 Linux 主机或 GitHub Actions 运行，不能宣称 CI 已通过。现有 CI artifact 路径保持，测试配置没有 WSL 逻辑。
+
+## 同步 main 后的独立提交验证
+
+同步 `main@b1186f738`，暂存其他 T1/T2/T3 工作后，在本任务独立提交上验证：
+
+- Browser Mode：3/3 文件、12/12 通过、0 skipped/todo，Vitest 20.29s、Nx 22.2s（同时进行工具测试，不作为单任务性能基准）。
+- Test System V2：**93/93** 通过，Nx 19.2s。上面的 122/122 是接续工作区包含 T1/T2 未提交测试时的数量；这些其他任务的修改没有混入本 PR。
+- pnpm 11 在切换 package.json 后触发过自动安装而没有继续运行原命令；未把安装日志当成测试结果。上述独立提交复验直接使用 `node node_modules/nx/dist/bin/nx.js run <target>`，执行的仍是相同 Nx target。
+- `pnpm install --lockfile-only --ignore-scripts --offline --frozen-lockfile` 已通过。共享文件仅 package.json 与 pnpm-lock.yaml 的 Storybook 依赖迁移；未变更 GitHub workflows、nx.json 或 Playwright CI 配置。

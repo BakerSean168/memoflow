@@ -14,6 +14,9 @@ updated: Sun 2026-10-18 9:50 PM CST (UTC+08:00)
 > 状态：已实施。代码、项目 target、`.github/workflows/ci.yml` 和
 > `.github/rulesets/main.json` 是执行真源；本文件只记录稳定契约。
 
+> Storybook 组件测试的运行入口与边界见 [Browser Mode 架构](./test-architecture-storybook-browser.md)；
+> WSL 接口重配置的已知证据及未确认项见 [网络调查](./wsl-network-investigation.md)。
+
 ## 1. 设计目标
 
 Test System V2 将测试文件、执行器、Nx 项目图、CI DAG、GitHub ruleset 和质量报告视为一个系统。
