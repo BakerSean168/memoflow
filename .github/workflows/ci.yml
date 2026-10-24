@@ -8,7 +8,8 @@ on:
     branches: [main, feat/system-wide-vnext-convergence]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  # PR: group by PR number, new push cancels the old run. main: group by SHA, each merge runs in parallel.
+  group: ci-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
