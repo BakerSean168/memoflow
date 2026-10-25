@@ -536,3 +536,16 @@ test('manifest laneDetails marks contract changes as required', async () => {
   assert.equal(m.laneDetails.contract.required, true);
   assert.equal(m.laneDetails.contract.skipReason, null);
 });
+
+test('injected scope stays authoritative under a main-push event (regression)', async () => {
+  const m = await buildDeliveryManifest({
+    base: 'base',
+    head: 'head',
+    event: 'push',
+    ref: 'refs/heads/main',
+    scope,
+    files: ['packages/contracts/src/index.ts'],
+  });
+  assert.equal(m.full, false);
+  assert.equal(m.scope.full, m.full);
+});

@@ -45,20 +45,28 @@ export async function buildDeliveryManifest({
   head = process.env.NX_HEAD ?? process.env.GITHUB_SHA ?? null,
   event = process.env.GITHUB_EVENT_NAME ?? 'pull_request',
   ref = process.env.GITHUB_REF ?? null,
-  full = event === 'schedule' ||
-    event === 'workflow_dispatch' ||
-    (event === 'push' && ref === 'refs/heads/main'),
+  full,
   scope,
   files,
 } = {}) {
-  const changed = files ?? (await changedFiles({ root, base, head, full }));
-  const resolvedScope = scope ?? (await detectScope({ root, base, head, full, files: changed }));
+  // An injected scope is authoritative: ambient CI env (e.g. a push to
+  // main) must not silently override its full flag, or the manifest
+  // becomes internally inconsistent (scope.full !== manifest.full).
+  const resolvedFull =
+    full ??
+    scope?.full ??
+    (event === 'schedule' ||
+      event === 'workflow_dispatch' ||
+      (event === 'push' && ref === 'refs/heads/main'));
+  const changed = files ?? (await changedFiles({ root, base, head, full: resolvedFull }));
+  const resolvedScope =
+    scope ?? (await detectScope({ root, base, head, full: resolvedFull, files: changed }));
   const risk = classifyRisk(changed);
   const forcedLanes = (process.env.DELIVERY_FORCE_LANES ?? '')
     .split(',')
     .map((lane) => lane.trim())
     .filter(Boolean);
-  const effectiveFull = full || resolvedScope.full === true;
+  const effectiveFull = resolvedFull || resolvedScope.full === true;
   const selectedLanes = selectLanes({ risk, scope: resolvedScope, event, full: effectiveFull });
   for (const lane of forcedLanes) selectedLanes[lane] = true;
   const history = JSON.parse(
