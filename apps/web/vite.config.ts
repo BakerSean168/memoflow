@@ -52,13 +52,13 @@ const webBundledDevWorkspaceEntries = [
 const webDevWorkspaceEntries = [
   ['@memoflow/cloud-auth', 'packages/cloud-auth/src/index.ts'],
   ['@memoflow/goal-client', 'packages/goal-client/src/index.ts'],
-  ['@memoflow/goal-core', 'packages/goal-core/src/index.ts'],
   ['@memoflow/goal-core/ids', 'packages/goal-core/src/ids.ts'],
   [
     '@memoflow/goal-core/key-result-progress-calculator',
     'packages/goal-core/src/key-result-progress-calculator.ts',
   ],
   ['@memoflow/goal-core/goal-record-preview', 'packages/goal-core/src/goal-record-preview.ts'],
+  ['@memoflow/goal-core', 'packages/goal-core/src/index.ts'],
   ['@memoflow/schedule/client', 'packages/schedule/src/client/index.ts'],
   ['@memoflow/notification/client', 'packages/notification/src/client/index.ts'],
   ['@memoflow/repository/client', 'packages/repository/src/client/index.ts'],
