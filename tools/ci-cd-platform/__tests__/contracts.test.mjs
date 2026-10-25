@@ -77,6 +77,49 @@ test('validates a delivery manifest and gives deterministic provenance', () => {
   assert.match(manifest.provenance.inputDigest, /^[a-f0-9]{64}$/u);
 });
 
+test('manifest validation mirrors the coverage-mode app-vue split rule', () => {
+  const coverageScope = { ...scope, unit: ['app-vue', 'web'], coverage: ['app-vue'] };
+  const buildManifest = (unitShards) => {
+    const manifest = {
+      kind: 'delivery-manifest-v1',
+      version: 1,
+      commit: 'head',
+      base: 'base',
+      head: 'head',
+      event: 'push',
+      full: false,
+      changedFiles: [],
+      risk: { level: 'web-flow', reasons: [] },
+      scope: coverageScope,
+      lanes: {
+        governance: true,
+        validate: true,
+        boundary: false,
+        integration: false,
+        web: false,
+        coverage: true,
+        performance: false,
+      },
+      provenance: { generator: 'test', inputDigest: 'a'.repeat(64) },
+      webShards: { specs: [], shards: [], shardCount: 0, fallback: false, estimatedTotalMs: 0 },
+      unitShards,
+    };
+    manifest.digest = digest(manifest);
+    return manifest;
+  };
+  // Coverage mode: app-vue must appear exactly once, unsplit.
+  validateDeliveryManifest(
+    buildManifest(
+      planUnitShards(coverageScope.unit, { coverage: true, unsplittable: ['app-vue'] }),
+    ),
+  );
+  // The split plan is a contract violation in coverage mode.
+  assert.throws(
+    () => validateDeliveryManifest(buildManifest(planUnitShards(coverageScope.unit))),
+    /cover every Unit task exactly once/,
+  );
+});
+
 test('rejects missing or unsupported contract fields', () => {
   assert.throws(
     () => validateDeliveryManifest({ kind: 'delivery-manifest-v1', version: 2 }),

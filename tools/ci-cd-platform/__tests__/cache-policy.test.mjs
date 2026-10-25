@@ -1,5 +1,9 @@
 import assert from 'node:assert/strict';
-import { readFile, readdir } from 'node:fs/promises';
+import { readFile, readdir, mkdtemp, writeFile, rm } from 'node:fs/promises';
+import { execFileSync, spawnSync } from 'node:child_process';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import YAML from 'yaml';
 import test from 'node:test';
 import {
   cacheBudgets,
@@ -9,6 +13,87 @@ import {
 } from '../cleanup-actions-cache.mjs';
 
 const read = (file) => readFile(new URL(`../../../${file}`, import.meta.url), 'utf8');
+
+test('manifest consumers recover shallow merge ranges without changing SHAs or accepting missing history', async () => {
+  const action = YAML.parse(await read('.github/actions/setup-nx-affected-job/action.yml'));
+  const script = action.runs.steps.find(
+    (step) => step.name === 'Resolve affected range from delivery manifest',
+  ).run;
+  const root = await mkdtemp(path.join(tmpdir(), 'manifest-checkout-'));
+  const git = (cwd, ...args) =>
+    execFileSync(
+      'git',
+      [
+        '-c',
+        'user.name=Fixture',
+        '-c',
+        'user.email=fixture@example.test',
+        '-c',
+        'core.hooksPath=/dev/null',
+        ...args,
+      ],
+      { cwd, encoding: 'utf8', stdio: 'pipe' },
+    ).trim();
+  try {
+    const origin = path.join(root, 'origin');
+    git(root, 'init', '--initial-branch=main', origin);
+    await writeFile(path.join(origin, 'base'), 'base');
+    git(origin, 'add', '.');
+    git(origin, 'commit', '-m', 'base');
+    const base = git(origin, 'rev-parse', 'HEAD');
+    git(origin, 'checkout', '-b', 'feature');
+    for (const file of ['feature-one', 'feature-two']) {
+      await writeFile(path.join(origin, file), file);
+      git(origin, 'add', '.');
+      git(origin, 'commit', '-m', file);
+    }
+    const head = git(origin, 'rev-parse', 'HEAD');
+    git(origin, 'checkout', 'main');
+    await writeFile(path.join(origin, 'main-advance'), 'advance');
+    git(origin, 'add', '.');
+    git(origin, 'commit', '-m', 'main advances');
+    git(origin, 'merge', '--no-ff', 'feature', '-m', 'PR merge checkout');
+
+    for (const depth of [2, 3]) {
+      const clone = path.join(root, `depth-${depth}`);
+      git(root, 'clone', `--depth=${depth}`, `file://${origin}`, clone);
+      const envFile = path.join(root, `env-${depth}`);
+      const env = { ...process.env, DELIVERY_MANIFEST_PATH: 'scope.json', GITHUB_ENV: envFile };
+      await writeFile(path.join(clone, 'scope.json'), JSON.stringify({ base, head, commit: head }));
+      const before = spawnSync('git', ['merge-base', base, head], { cwd: clone });
+      assert.notEqual(before.status, 0, `depth ${depth} must reproduce the unavailable range`);
+      if (depth === 3) {
+        // Both endpoints can exist while a shallow boundary hides their relationship.
+        git(clone, 'rev-parse', '--verify', `${base}^{commit}`);
+        git(clone, 'rev-parse', '--verify', `${head}^{commit}`);
+      }
+      const result = spawnSync('bash', ['-c', script], { cwd: clone, env, encoding: 'utf8' });
+      assert.equal(result.status, 0, result.stderr);
+      assert.equal(git(clone, 'merge-base', base, head), base);
+      assert.equal(await readFile(envFile, 'utf8'), `NX_BASE=${base}\nNX_HEAD=${head}\n`);
+      git(clone, 'remote', 'set-url', 'origin', `file://${root}/unavailable`);
+      const fast = spawnSync('bash', ['-c', script], { cwd: clone, env, encoding: 'utf8' });
+      assert.equal(fast.status, 0, 'an available range must not need its remote');
+      await writeFile(
+        path.join(clone, 'scope.json'),
+        JSON.stringify({ base: 'f'.repeat(40), head, commit: head }),
+      );
+      const missing = spawnSync('bash', ['-c', script], { cwd: clone, env, encoding: 'utf8' });
+      assert.notEqual(missing.status, 0, 'unavailable evidence must still fail closed');
+    }
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('every Unit shard provides history required when LPT moves the live Git selector test', async () => {
+  const workflow = await read('.github/workflows/ci.yml');
+  for (const job of ['unit-1', 'unit-2', 'unit-3']) {
+    const section = workflow.match(new RegExp(`^  ${job}:\\n([\\s\\S]*?)(?=^  \\S)`, 'mu'))?.[1];
+    assert.ok(section, job);
+    assert.match(section, /with: \{ fetch-depth: 0 \}/u, job);
+  }
+});
 
 test('cache writes are main-only post-job saves and every other ref is restore-only', async () => {
   const action = await read('.github/actions/restore-main-cache/action.yml');

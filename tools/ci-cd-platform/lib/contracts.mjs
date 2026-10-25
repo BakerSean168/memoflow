@@ -229,10 +229,16 @@ export function validateDeliveryManifest(manifest) {
   const routedProjects = new Set(
     contractRoutedProjects({ scope: manifest.scope, laneDetails: manifest.laneDetails }),
   );
+  // Mirror planUnitShards (contracts stays standalone, see above): app-vue is
+  // file-split except in coverage mode, where coverage projects run their
+  // test:coverage target whole — its thresholds are defined over the full
+  // suite, so a split coverage task set is a contract violation.
+  const coverageUnsplit =
+    manifest.lanes?.coverage === true ? new Set(manifest.scope.coverage ?? []) : new Set();
   const expectedTasks = manifest.scope.unit
     .filter((project) => project !== 'memoflow' && !routedProjects.has(project))
     .flatMap((project) =>
-      project === 'app-vue'
+      project === 'app-vue' && !coverageUnsplit.has(project)
         ? [
             { project, shard: '1/2' },
             { project, shard: '2/2' },

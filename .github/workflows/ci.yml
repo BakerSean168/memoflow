@@ -32,8 +32,8 @@ jobs:
   #   endpoints): fetch-depth 2 = the merge commit plus its parents, which are exactly the
   #   manifest head and base for both pull_request and push events.
   # - Aggregation-only jobs (delivery-observation, ci-check) sparse-checkout tools/ci-cd-platform.
-  # - Exception: unit-3 keeps full history - its shard contains tools/ci-cd-platform's own
-  #   test suite, whose affected-shadow live-mode test resolves HEAD^ against the real repo.
+  # - Unit shards keep full history: LPT can assign ci-cd-platform's live Git
+  #   selector test to any shard; that test checks a historical commit range.
   scope-detector:
     name: Scope Detector
     runs-on: ubuntu-latest
@@ -196,7 +196,7 @@ jobs:
     env: { UNIT_SHARD_ID: unit-1 }
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with: { fetch-depth: 2 }
+        with: { fetch-depth: 0 }
       - uses: ./.github/actions/setup-nx-affected-job
         with:
           node-version: '${{ env.NODE_VERSION }}'
@@ -218,7 +218,7 @@ jobs:
     env: { UNIT_SHARD_ID: unit-2 }
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with: { fetch-depth: 2 }
+        with: { fetch-depth: 0 }
       - uses: ./.github/actions/setup-nx-affected-job
         with:
           node-version: '${{ env.NODE_VERSION }}'
@@ -320,6 +320,62 @@ jobs:
       - uses: ./.github/actions/publish-lane-evidence
         with: { lane: validate }
 
+  build-backend:
+    name: Build Backend (API + Database)
+    needs: scope-detector
+    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.lane_web == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with: { fetch-depth: 2 }
+      - uses: ./.github/actions/setup-nx-affected-job
+        with:
+          node-version: '${{ env.NODE_VERSION }}'
+          setup-python: 'true'
+          setup-uv: 'true'
+          lane: validate
+          consume-delivery-manifest: 'true'
+      # Specialized browser acceptance executes Vite source; its only
+      # build-artifact dependencies are the API and database dists. Building
+      # just those here takes the web build (and the full Build job) off the
+      # shards' critical path. The full Build job still produces and uploads
+      # the canonical ci-build-artifacts bundle for the release chain.
+      - name: Build API and database artifacts
+        run: |
+          pnpm exec nx run-many -t build --projects=api,database --parallel=2 --outputStyle=static
+          pnpm exec nx run database:runtime-scripts:build --outputStyle=static
+      - name: Create API artifact manifest
+        run: node ./tools/ci-cd-platform/create-artifact-manifest.mjs --name api --path apps/api/dist --manifest scope/delivery-manifest-v1.json --output reports/ci-cd-platform/api-artifact-manifest.json
+      - name: Create Database artifact manifest
+        run: node ./tools/ci-cd-platform/create-artifact-manifest.mjs --name database --path packages/database/dist --manifest scope/delivery-manifest-v1.json --output reports/ci-cd-platform/database-artifact-manifest.json
+      - name: Create Database runtime artifact manifest
+        if: ${{ hashFiles('packages/database/dist/runtime-scripts/**') != '' }}
+        run: node ./tools/ci-cd-platform/create-artifact-manifest.mjs --name database-runtime --path packages/database/dist/runtime-scripts --manifest scope/delivery-manifest-v1.json --output reports/ci-cd-platform/database-runtime-artifact-manifest.json
+      - name: Create API runtime dependency closure
+        run: node ./tools/ci-cd-platform/create-runtime-closure.mjs --manifest scope/delivery-manifest-v1.json --output-dir api-runtime-closure --output reports/ci-cd-platform/api-runtime-closure-artifact-manifest.json
+      - name: Verify backend artifacts
+        shell: bash
+        run: |
+          digest=$(node -p "require('./scope/delivery-manifest-v1.json').digest")
+          test -n "$digest"
+          node ./tools/ci-cd-platform/verify-artifact.mjs reports/ci-cd-platform/api-artifact-manifest.json apps/api/dist "$digest"
+          node ./tools/ci-cd-platform/verify-artifact.mjs reports/ci-cd-platform/database-artifact-manifest.json packages/database/dist "$digest"
+      - name: Upload backend build artifacts
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: ci-build-artifacts-backend
+          path: |
+            apps/api/dist
+            packages/database/dist
+            api-runtime-closure
+            scope/delivery-manifest-v1.json
+            reports/ci-cd-platform/api-artifact-manifest.json
+            reports/ci-cd-platform/database-artifact-manifest.json
+            reports/ci-cd-platform/database-runtime-artifact-manifest.json
+            reports/ci-cd-platform/api-runtime-closure-artifact-manifest.json
+          if-no-files-found: error
+          retention-days: 14
+
   build:
     name: Build
     needs: scope-detector
@@ -363,6 +419,19 @@ jobs:
       - name: Create API runtime dependency closure
         if: ${{ hashFiles('apps/api/dist/**') != '' }}
         run: node ./tools/ci-cd-platform/create-runtime-closure.mjs --manifest scope/delivery-manifest-v1.json --output-dir api-runtime-closure --output reports/ci-cd-platform/api-runtime-closure-artifact-manifest.json
+      # The Web artifact has no other consumer-side verifier left (browser
+      # shards run from source and no longer download it), so the Build job
+      # verifies its own Web and Migrator artifacts before upload; the
+      # candidate chain re-verifies the uploaded bundle against these
+      # manifests and the runtime closure.
+      - name: Verify Web and Migrator artifacts
+        if: ${{ hashFiles('reports/ci-cd-platform/web-artifact-manifest.json') != '' || hashFiles('reports/ci-cd-platform/migrator-artifact-manifest.json') != '' }}
+        shell: bash
+        run: |
+          digest=$(node -p "require('./scope/delivery-manifest-v1.json').digest")
+          test -n "$digest"
+          if [ -f reports/ci-cd-platform/web-artifact-manifest.json ]; then node ./tools/ci-cd-platform/verify-artifact.mjs reports/ci-cd-platform/web-artifact-manifest.json dist/apps/web "$digest"; fi
+          if [ -f reports/ci-cd-platform/migrator-artifact-manifest.json ]; then node ./tools/ci-cd-platform/verify-artifact.mjs reports/ci-cd-platform/migrator-artifact-manifest.json apps/migrator/dist "$digest"; fi
       - name: Upload immutable build artifacts
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
@@ -387,13 +456,11 @@ jobs:
       needs.scope-detector.result == 'success' &&
       (needs.scope-detector.outputs.lane_boundary == 'true' ||
        needs.scope-detector.outputs.lane_integration == 'true' ||
-       needs.scope-detector.outputs.lane_coverage == 'true' ||
        needs.scope-detector.outputs.lane_performance == 'true')
     runs-on: ubuntu-latest
     outputs:
       boundary: ${{ steps.lane_status.outputs.boundary }}
       integration: ${{ steps.lane_status.outputs.integration }}
-      coverage: ${{ steps.lane_status.outputs.coverage }}
       performance: ${{ steps.lane_status.outputs.performance }}
     services:
       postgres:
@@ -417,10 +484,17 @@ jobs:
       - name: Prepare independent lane contracts on the shared runner
         run: >-
           node ./tools/ci-cd-platform/prepare-shared-lanes.mjs
-          --lanes boundary,integration,coverage,performance
+          --lanes boundary,integration,performance
           --manifest scope/delivery-manifest-v1.json
           --receipt reports/ci-cd-platform/workspace-receipt.json
           --output reports/ci-cd-platform
+      # One schema push per job: Boundary and Integration share this
+      # runner's PostgreSQL and schema; pushing again per lane was a
+      # measured 7s of pure repetition.
+      - name: Prepare database schema (once for all verification lanes)
+        if: needs.scope-detector.outputs.lane_boundary == 'true' || needs.scope-detector.outputs.lane_integration == 'true'
+        env: { TEST_REPORT_NAME: verification-database }
+        run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run database:prisma-push
       - name: Boundary children
         id: boundary
         if: needs.scope-detector.outputs.has_desktop_boundary == 'true'
@@ -430,7 +504,6 @@ jobs:
           LANE_INPUT_PATH: reports/ci-cd-platform/boundary-input-v1.json
         run: |
           status=0
-          TEST_REPORT_NAME=boundary-database node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run database:prisma-push || status=$?
           TEST_REPORT_NAME=desktop-ipc node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run desktop:test:ipc || status=$?
           TEST_REPORT_NAME=desktop-main node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run desktop:test:main || status=$?
           if [ "${{ needs.scope-detector.outputs.has_smoke }}" = 'true' ]; then
@@ -446,7 +519,6 @@ jobs:
           LANE_INPUT_PATH: reports/ci-cd-platform/boundary-input-v1.json
         run: |
           status=0
-          TEST_REPORT_NAME=boundary-database node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run database:prisma-push || status=$?
           if [ "${{ needs.scope-detector.outputs.has_smoke }}" = 'true' ]; then
             TEST_REPORT_NAME=smoke node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx affected -t test:smoke --parallel=2 --outputStyle=static || status=$?
           fi
@@ -460,18 +532,8 @@ jobs:
           LANE_INPUT_PATH: reports/ci-cd-platform/integration-input-v1.json
         run: |
           status=0
-          TEST_REPORT_NAME=integration-database node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run database:prisma-push || status=$?
           TEST_REPORT_NAME=integration node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx affected -t test:integration --parallel=1 --outputStyle=static || status=$?
           exit "$status"
-      - name: Affected coverage
-        id: coverage
-        if: needs.scope-detector.outputs.lane_coverage == 'true'
-        continue-on-error: true
-        env:
-          DELIVERY_LANE: coverage
-          LANE_INPUT_PATH: reports/ci-cd-platform/coverage-input-v1.json
-          TEST_REPORT_NAME: coverage
-        run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx affected -t test:coverage --parallel=2 --outputStyle=static
       - name: Performance budget
         id: performance
         if: needs.scope-detector.outputs.lane_performance == 'true'
@@ -492,11 +554,6 @@ jobs:
           lane: integration
           receipt: reports/ci-cd-platform/integration-workspace-receipt.json
       - uses: ./.github/actions/publish-lane-evidence
-        if: always() && needs.scope-detector.outputs.lane_coverage == 'true'
-        with:
-          lane: coverage
-          receipt: reports/ci-cd-platform/coverage-workspace-receipt.json
-      - uses: ./.github/actions/publish-lane-evidence
         if: always() && needs.scope-detector.outputs.lane_performance == 'true'
         with:
           lane: performance
@@ -508,21 +565,19 @@ jobs:
         run: |
           echo "boundary=${{ needs.scope-detector.outputs.lane_boundary == 'true' && (steps.boundary.outcome == 'success' || steps.boundary_smoke.outcome == 'success') && 'success' || needs.scope-detector.outputs.lane_boundary == 'true' && 'failure' || 'skipped' }}" >> "$GITHUB_OUTPUT"
           echo "integration=${{ needs.scope-detector.outputs.lane_integration == 'true' && steps.integration.outcome == 'success' && 'success' || needs.scope-detector.outputs.lane_integration == 'true' && 'failure' || 'skipped' }}" >> "$GITHUB_OUTPUT"
-          echo "coverage=${{ needs.scope-detector.outputs.lane_coverage == 'true' && steps.coverage.outcome == 'success' && 'success' || needs.scope-detector.outputs.lane_coverage == 'true' && 'failure' || 'skipped' }}" >> "$GITHUB_OUTPUT"
           echo "performance=${{ needs.scope-detector.outputs.lane_performance == 'true' && steps.performance.outcome == 'success' && 'success' || needs.scope-detector.outputs.lane_performance == 'true' && 'failure' || 'skipped' }}" >> "$GITHUB_OUTPUT"
       - name: Fail closed when an enabled lane failed
         if: >-
           always() &&
           ((needs.scope-detector.outputs.lane_boundary == 'true' && steps.lane_status.outputs.boundary != 'success') ||
            (needs.scope-detector.outputs.lane_integration == 'true' && steps.lane_status.outputs.integration != 'success') ||
-           (needs.scope-detector.outputs.lane_coverage == 'true' && steps.lane_status.outputs.coverage != 'success') ||
            (needs.scope-detector.outputs.lane_performance == 'true' && steps.lane_status.outputs.performance != 'success'))
         run: exit 1
 
   web-specialized:
     name: Web Specialized Acceptance (${{ matrix.shard }})
-    needs: [scope-detector, build]
-    if: needs.scope-detector.result == 'success' && needs.build.result == 'success' && needs.scope-detector.outputs.lane_web == 'true'
+    needs: [scope-detector, build-backend]
+    if: needs.scope-detector.result == 'success' && needs.build-backend.result == 'success' && needs.scope-detector.outputs.lane_web == 'true'
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -552,7 +607,7 @@ jobs:
       - name: Download immutable build artifacts
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
-          name: ci-build-artifacts
+          name: ci-build-artifacts-backend
           path: .
       - name: Resolve artifact source manifest digest
         id: artifact-source
@@ -565,8 +620,6 @@ jobs:
         run: node ./tools/ci-cd-platform/restore-runtime-closure.mjs reports/ci-cd-platform/api-runtime-closure-artifact-manifest.json api-runtime-closure . "${{ steps.artifact-source.outputs.digest }}"
       - name: Verify API artifact
         run: node ./tools/ci-cd-platform/verify-artifact.mjs reports/ci-cd-platform/api-artifact-manifest.json apps/api/dist "${{ steps.artifact-source.outputs.digest }}"
-      - name: Verify Web artifact
-        run: node ./tools/ci-cd-platform/verify-artifact.mjs reports/ci-cd-platform/web-artifact-manifest.json dist/apps/web "${{ steps.artifact-source.outputs.digest }}"
       - name: Verify Database artifact
         run: node ./tools/ci-cd-platform/verify-artifact.mjs reports/ci-cd-platform/database-artifact-manifest.json packages/database/dist "${{ steps.artifact-source.outputs.digest }}"
       - run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run database:prisma-push
@@ -670,6 +723,7 @@ jobs:
       - unit-3
       - typecheck
       - build
+      - build-backend
       - verification-children
       - web-specialized
       - component-browser
@@ -696,6 +750,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: node ./tools/ci-cd-platform/collect-github-run-metrics.mjs --github-output >> "$GITHUB_OUTPUT"
+      # Coverage executes inside the Unit shards now; fold their recorded
+      # attempts into the coverage lane summary the run summary expects.
+      - name: Summarize merged coverage evidence
+        run: node ./tools/ci-cd-platform/summarize-coverage.mjs --manifest scope/delivery-manifest-v1.json --evidence reports/run-evidence --output reports/run-evidence/coverage-summary-v1.json
       - name: Aggregate run summary
         env:
           DELIVERY_RUN_STARTED_AT: ${{ steps.run_metrics.outputs.started_at }}
@@ -720,6 +778,7 @@ jobs:
       - unit-3
       - typecheck
       - build
+      - build-backend
       - verification-children
       - web-specialized
       - component-browser
@@ -743,6 +802,14 @@ jobs:
         with:
           pattern: web-shard-receipt-*
           path: reports/web-shards
+      # Merged coverage is gated from the Unit shards' recorded attempts;
+      # a missing download is reported by the gate itself (fail closed).
+      - name: Download Unit shard evidence
+        continue-on-error: true
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          pattern: delivery-validate-unit-*-job-${{ github.run_id }}
+          path: reports/unit-evidence
       - name: Gate on manifest-selected lanes
         env:
           CI_CHECK_NEEDS: ${{ toJSON(needs) }}

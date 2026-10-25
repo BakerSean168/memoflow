@@ -64,7 +64,7 @@ const check = (input) =>
   });
 const verificationOutputs = (m) =>
   Object.fromEntries(
-    ['boundary', 'integration', 'coverage', 'performance'].map((lane) => [
+    ['boundary', 'integration', 'performance'].map((lane) => [
       lane,
       m.lanes[lane] ? 'success' : 'skipped',
     ]),
@@ -152,12 +152,99 @@ test('a lane that ran although the manifest disabled it fails the gate', () => {
 test('verification sub-lane outputs are checked against the manifest', () => {
   const m = manifest({ performance: false });
   const needs = healthyNeeds(m);
-  needs['verification-children'].outputs.coverage = 'failure';
+  needs['verification-children'].outputs.boundary = 'failure';
   needs['verification-children'].outputs.performance = 'success';
   assert.deepEqual(check({ needs, manifest: m }).failures, [
-    'verification-children/coverage:failure',
+    'verification-children/boundary:failure',
     'verification-children/performance:unexpected-success',
   ]);
+});
+
+const coverageManifest = (coverage = ['ai'], unit = ['ai'], laneOverrides = {}) => {
+  const base = manifest(laneOverrides, unit);
+  const content = { ...base, scope: { version: 1, unit, coverage } };
+  delete content.digest;
+  return { ...content, digest: digest(content) };
+};
+const coverageReport = (m, project, { result = 'success', targetProject = project } = {}) => {
+  for (const shard of m.unitShards) {
+    const index = shard.tasks.findIndex((task) => task.project === project);
+    if (index < 0) continue;
+    return {
+      version: 1,
+      name: `${shard.id}-${index}`,
+      lane: 'validate',
+      result,
+      attempts: [
+        {
+          attempt: 1,
+          command: [
+            'pnpm',
+            'exec',
+            'nx',
+            'run',
+            `${targetProject}:test:coverage`,
+            '--outputStyle=static',
+          ],
+          exitCode: result === 'success' ? 0 : 1,
+          durationMs: 1000,
+          classification: result,
+        },
+      ],
+      provenance: { unitShardId: shard.id, job: shard.id },
+    };
+  }
+  throw new Error(`no shard task for ${project}`);
+};
+
+test('merged coverage passes when every selected project recorded a coverage attempt', () => {
+  const m = coverageManifest(['ai']);
+  const result = check({
+    needs: healthyNeeds(m),
+    manifest: m,
+    coverageReports: [coverageReport(m, 'ai')],
+  });
+  assert.deepEqual(result.failures, []);
+  assert.deepEqual(result.jobs['coverage'], { expected: 'success', actual: 'success' });
+});
+
+test('merged coverage fails closed when a selected project has no coverage attempt', () => {
+  const m = coverageManifest(['ai']);
+  const result = check({ needs: healthyNeeds(m), manifest: m, coverageReports: [] });
+  assert.deepEqual(result.failures, ['coverage:ai:missing-attempt']);
+});
+
+test('merged coverage fails closed when the unit evidence could not be read', () => {
+  const m = coverageManifest(['ai']);
+  const result = check({ needs: healthyNeeds(m), manifest: m, coverageReports: null });
+  assert.deepEqual(result.failures, ['coverage:evidence-missing']);
+});
+
+test('merged coverage fails when the coverage attempt failed', () => {
+  const m = coverageManifest(['ai']);
+  const result = check({
+    needs: healthyNeeds(m),
+    manifest: m,
+    coverageReports: [coverageReport(m, 'ai', { result: 'failure' })],
+  });
+  assert.deepEqual(result.failures, ['coverage:ai:attempt-failed']);
+});
+
+test('merged coverage rejects attempts for projects the manifest did not select', () => {
+  const m = coverageManifest(['ai']);
+  const drifted = coverageReport(m, 'ai', { targetProject: 'other' });
+  const result = check({ needs: healthyNeeds(m), manifest: m, coverageReports: [drifted] });
+  assert.deepEqual(result.failures, [
+    'coverage:ai:missing-attempt',
+    'coverage:other:unexpected-attempt',
+  ]);
+});
+
+test('coverage evidence is not required when the manifest did not select the lane', () => {
+  const m = coverageManifest(['ai'], ['ai'], { coverage: false });
+  const result = check({ needs: healthyNeeds(m), manifest: m, coverageReports: [] });
+  assert.equal(result.state, 'success');
+  assert.equal(result.jobs['coverage'], undefined);
 });
 
 test('detector failure, missing manifest, digest mismatch and unknown jobs fail closed', () => {
@@ -513,7 +600,7 @@ test('a valid self-digest cannot authorize a missing or inconsistent Web plan', 
 });
 
 test('CI Check CLI consumes newest shard artifact on retry and rejects a latest failure', async () => {
-  const m = manifest();
+  const m = manifest({ coverage: false });
   const cwd = await mkdtemp(join(tmpdir(), 'memoflow-web-retry-'));
   try {
     const oldDir = join(cwd, 'reports/web-shards/web-shard-receipt-1-0');
@@ -552,7 +639,7 @@ test('CI Check CLI consumes newest shard artifact on retry and rejects a latest 
 });
 
 test('CI Check CLI accepts the flat single-artifact receipt layout', async () => {
-  const m = manifest();
+  const m = manifest({ coverage: false });
   const cwd = await mkdtemp(join(tmpdir(), 'memoflow-web-flat-'));
   try {
     const flatDir = join(cwd, 'reports/web-shards');
@@ -610,4 +697,43 @@ test('capability gate fails when a required capability producer is skipped (VNex
     capabilityResults: { componentBrowser: 'success' },
   });
   assert.deepEqual(green.failures, []);
+});
+
+test('CI Check CLI fails closed without unit coverage evidence and passes with it', async () => {
+  const m = coverageManifest(['ai']);
+  const cwd = await mkdtemp(join(tmpdir(), 'memoflow-coverage-cli-'));
+  try {
+    await mkdir(join(cwd, 'scope'), { recursive: true });
+    await mkdir(join(cwd, 'reports/web-shards'), { recursive: true });
+    await writeFile(join(cwd, 'scope/delivery-manifest-v1.json'), JSON.stringify(m));
+    await writeFile(join(cwd, 'reports/web-shards/shard-1.json'), JSON.stringify(receipts(m)[0]));
+    const env = {
+      ...process.env,
+      GITHUB_RUN_ID: 'test-run',
+      GITHUB_RUN_ATTEMPT: '1',
+      CI_CHECK_NEEDS: JSON.stringify(healthyNeeds(m)),
+    };
+    const command = resolve('tools/ci-cd-platform/ci-check.mjs');
+    const execute = () =>
+      execFileSync(process.execPath, [command, '--manifest', 'scope/delivery-manifest-v1.json'], {
+        cwd,
+        env,
+        stdio: 'pipe',
+      });
+    // Fault injection: the manifest selected the coverage lane but no unit
+    // evidence was downloaded — the gate must go red, naming coverage.
+    assert.throws(execute, (error) =>
+      error.stdout.toString().includes('coverage:evidence-missing'),
+    );
+    const evidenceDir = join(
+      cwd,
+      'reports/unit-evidence/delivery-validate-unit-1-job-test-run/reports/test-system-v2',
+    );
+    await mkdir(evidenceDir, { recursive: true });
+    const report = coverageReport(m, 'ai');
+    await writeFile(join(evidenceDir, `${report.name}.json`), JSON.stringify(report));
+    assert.equal(JSON.parse(execute().toString()).state, 'success');
+  } finally {
+    await rm(cwd, { recursive: true, force: true });
+  }
 });

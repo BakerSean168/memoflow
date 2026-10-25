@@ -172,6 +172,20 @@ runs:
           echo "Delivery manifest must provide head for CI affected execution (commit=$MANIFEST_COMMIT)"
           exit 1
         fi
+        # A PR merge checkout's parents can differ from the manifest's merge base
+        # after main advances. Hydrate only an unavailable range, keeping its SHAs.
+        required_commits=("$NX_HEAD_VALUE")
+        if [ -n "$NX_BASE_VALUE" ]; then required_commits+=("$NX_BASE_VALUE"); fi
+        fetch_range=false
+        for revision in "${required_commits[@]}"; do
+          if ! git rev-parse --verify "${revision}^{commit}" >/dev/null 2>&1; then fetch_range=true; fi
+        done
+        if [ -n "$NX_BASE_VALUE" ] && ! git merge-base "$NX_BASE_VALUE" "$NX_HEAD_VALUE" >/dev/null 2>&1; then fetch_range=true; fi
+        if [ "$fetch_range" = true ]; then
+          fetch_options=(--no-tags)
+          if [ "$(git rev-parse --is-shallow-repository)" = true ]; then fetch_options+=(--unshallow); fi
+          git fetch "${fetch_options[@]}" origin "${required_commits[@]}"
+        fi
         if ! git rev-parse --verify "${NX_HEAD_VALUE}^{commit}" >/dev/null 2>&1; then
           echo "Delivery manifest head is not available in the checkout: $NX_HEAD_VALUE"
           exit 1

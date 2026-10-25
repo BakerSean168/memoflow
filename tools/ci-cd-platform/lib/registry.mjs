@@ -60,13 +60,7 @@ export const LANE_REGISTRY = Object.freeze({
   web: lane({
     owner: 'platform-web',
     capabilities: ['node', 'pnpm', 'playwright', 'postgres'],
-    inputs: [
-      'delivery-manifest',
-      'api-artifact',
-      'api-runtime-closure',
-      'web-artifact',
-      'database-artifact',
-    ],
+    inputs: ['delivery-manifest', 'api-artifact', 'api-runtime-closure', 'database-artifact'],
     outputs: ['lane-result', 'test-evidence'],
     environment: { isolation: 'dedicated', database: 'ephemeral-postgres', browser: 'chromium' },
     cache: { read: ['pnpm', 'playwright'], write: ['pnpm', 'playwright'] },

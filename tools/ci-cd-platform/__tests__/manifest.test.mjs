@@ -186,6 +186,35 @@ test('Unit LPT is deterministic, complete, fixed at three jobs and only splits a
   }
 });
 
+test('Unit LPT never file-splits unsplittable projects (coverage thresholds need the full suite)', () => {
+  const projects = ['app-vue', 'desktop', 'web', 'new-project'];
+  const plan = planUnitShards(projects, { unsplittable: ['app-vue'] });
+  const tasks = plan.flatMap(({ tasks }) => tasks);
+  assert.deepEqual(
+    tasks.filter((task) => task.project === 'app-vue'),
+    [{ project: 'app-vue' }],
+  );
+  assert.equal(tasks.length, projects.length);
+  assert.deepEqual(plan, planUnitShards([...projects].reverse(), { unsplittable: ['app-vue'] }));
+});
+
+test('Unit LPT weighs coverage projects by their coverage durations in coverage mode', () => {
+  // Test weights: app-vue 302 (split 151/151), goal 182, task 159 — the split
+  // halves dominate placement. Goal/task use measured coverage weights; app-vue
+  // keeps the full Unit weight because coverage now executes all of its tests.
+  const projects = ['app-vue', 'goal', 'task'];
+  const testPlan = planUnitShards(projects);
+  assert.equal(
+    testPlan.flatMap(({ tasks }) => tasks).filter((task) => task.project === 'app-vue').length,
+    2,
+  );
+  const coveragePlan = planUnitShards(projects, { coverage: true, unsplittable: ['app-vue'] });
+  assert.deepEqual(
+    coveragePlan.map(({ tasks }) => tasks.map((task) => task.project)),
+    [['app-vue'], ['goal'], ['task']],
+  );
+});
+
 test('Unit LPT keeps app-vue file shards on different jobs for the Full Audit workload', async () => {
   // Full Audit selects every measured project plus the known unmeasured ones (36 projects in
   // run 39208602533). With measured heavy projects, plain LPT put both app-vue halves on unit-3.
@@ -548,6 +577,69 @@ test('injected scope stays authoritative under a main-push event (regression)', 
   });
   assert.equal(m.full, false);
   assert.equal(m.scope.full, m.full);
+});
+
+test('Unit runner swaps in test:coverage for coverage-selected projects only', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'memoflow-unit-coverage-'));
+  try {
+    const manifest = await buildDeliveryManifest({
+      base: 'base',
+      head: 'head',
+      event: 'push',
+      full: true,
+      ref: 'refs/heads/main',
+      files: ['nx.json'],
+      scope: { ...scope, full: true, unit: ['desktop', 'web'], coverage: ['desktop'] },
+    });
+    assert.equal(manifest.lanes.coverage, true);
+    const manifestPath = path.join(root, 'manifest.json');
+    const inputPath = path.join(root, 'input.json');
+    const callsPath = path.join(root, 'calls.jsonl');
+    await writeFile(manifestPath, JSON.stringify(manifest));
+    await createLaneInput({ lane: 'validate', manifest, output: inputPath });
+    const pnpm = path.join(root, 'pnpm');
+    await writeFile(
+      pnpm,
+      `#!/usr/bin/env node
+import { appendFileSync } from 'node:fs';
+appendFileSync(process.env.UNIT_CALLS_PATH, JSON.stringify(process.argv.slice(2)) + '\\n');
+`,
+    );
+    await chmod(pnpm, 0o755);
+    const env = {
+      ...process.env,
+      PATH: `${root}:${process.env.PATH}`,
+      UNIT_CALLS_PATH: callsPath,
+      DELIVERY_MANIFEST_PATH: manifestPath,
+      LANE_INPUT_PATH: inputPath,
+      DELIVERY_LANE: 'validate',
+      TEST_REPORTS_DIR: path.join(root, 'reports'),
+    };
+    for (const { id, tasks } of manifest.unitShards) {
+      if (tasks.length === 0) continue;
+      execFileSync(process.execPath, ['tools/ci-cd-platform/run-unit-shard.mjs', id], {
+        env,
+        stdio: 'pipe',
+      });
+    }
+    const calls = (await readFile(callsPath, 'utf8'))
+      .trim()
+      .split('\n')
+      .map((line) => JSON.parse(line));
+    const expected = manifest.unitShards.flatMap(({ tasks }) =>
+      tasks.map((task) => [
+        'exec',
+        'nx',
+        'run',
+        `${task.project}:${task.project === 'desktop' ? 'test:coverage' : 'test'}`,
+        '--outputStyle=static',
+        ...(task.shard ? [`--shard=${task.shard}`, '--maxWorkers=2'] : []),
+      ]),
+    );
+    assert.deepEqual(calls, expected);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });
 
 test('migrated browser contracts run for production views and transitive package inputs', async () => {
