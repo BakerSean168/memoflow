@@ -41,7 +41,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import type { GoalRecordPreview } from '@memoflow/goal/client';
+import type { GoalRecordPreview } from '@memoflow/goal-client';
 
 defineProps<{ preview: GoalRecordPreview | null; unit?: string | null }>();
 const { t } = useI18n();

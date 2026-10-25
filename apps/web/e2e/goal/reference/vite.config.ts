@@ -20,7 +20,7 @@ export default defineConfig({
       ...createWorkspaceSourceAliasEntries(workspace, [
         // Harness-only source access; production package exports stay unchanged.
         ['@memoflow/app-vue', 'packages/app-vue/src'],
-        ['@memoflow/goal/client', 'packages/goal/src/client/index.ts'],
+        ['@memoflow/goal-client', 'packages/goal-client/src/index.ts'],
         ['@memoflow/utils/logger', 'packages/utils/src/logger/index.ts'],
         ['@memoflow/time', 'packages/time/src/index.ts'],
         ['@memoflow/http-client', 'packages/http-client/src/index.ts'],

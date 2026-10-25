@@ -11,8 +11,8 @@ const ipcWorkspaceAliasEntries = [
     replacement: resolve(import.meta.dirname, '../../packages/domain-shared/src/shared/index.ts'),
   },
   {
-    find: '@memoflow/goal/client',
-    replacement: resolve(import.meta.dirname, '../../packages/goal/src/client/index.ts'),
+    find: '@memoflow/goal-client',
+    replacement: resolve(import.meta.dirname, '../../packages/goal-client/src/index.ts'),
   },
   {
     find: '@memoflow/goal/electron',

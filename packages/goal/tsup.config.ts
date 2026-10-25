@@ -8,7 +8,6 @@ export default defineConfig({
     'src/schedule-execution/index.ts',
     'src/schedule-projection/index.ts',
     'src/api/index.ts',
-    'src/client/index.ts',
     'src/electron/index.ts',
   ],
   format: ['esm'],

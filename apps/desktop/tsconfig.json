@@ -18,7 +18,7 @@
       "@memoflow/ai/client": ["../../packages/ai/src/client/index.ts"],
       "@memoflow/ai/electron": ["../../packages/ai/src/electron/index.ts"],
       "@memoflow/ai/ports": ["../../packages/ai/src/ports/index.ts"],
-      "@memoflow/goal/client": ["../../packages/goal/src/client/index.ts"],
+      "@memoflow/goal-client": ["../../packages/goal-client/src/index.ts"],
       "@memoflow/goal/electron": ["../../packages/goal/src/electron/index.ts"],
       "@memoflow/goal/schedule-execution": ["../../packages/goal/src/schedule-execution/index.ts"],
       "@memoflow/goal/schedule-projection": [

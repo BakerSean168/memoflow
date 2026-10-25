@@ -11,7 +11,7 @@
       "@memoflow/app-vue/web-i18n": ["../../packages/app-vue/src/web-i18n.ts"],
       "@memoflow/app-vue/web-bootstrap": ["../../packages/app-vue/src/web-bootstrap.ts"],
       "@memoflow/app-vue": ["../../packages/app-vue/src/index.ts"],
-      "@memoflow/goal/client": ["../../packages/goal/dist/client/index.d.ts"],
+      "@memoflow/goal-client": ["../../packages/goal-client/dist/index.d.ts"],
       "@memoflow/ai/client": ["../../packages/ai/dist/client/index.d.ts"],
       "@memoflow/schedule/client": ["../../packages/schedule/dist/client/index.d.ts"],
       "@memoflow/notification/client": ["../../packages/notification/dist/client/index.d.ts"],

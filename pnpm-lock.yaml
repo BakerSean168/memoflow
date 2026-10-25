@@ -552,6 +552,9 @@ importers:
       '@memoflow/goal':
         specifier: workspace:*
         version: link:../../packages/goal
+      '@memoflow/goal-client':
+        specifier: workspace:*
+        version: link:../../packages/goal-client
       '@memoflow/ipc-client':
         specifier: workspace:*
         version: link:../../packages/ipc-client
@@ -990,9 +993,9 @@ importers:
       '@memoflow/database':
         specifier: workspace:*
         version: link:../../packages/database
-      '@memoflow/goal':
+      '@memoflow/goal-client':
         specifier: workspace:*
-        version: link:../../packages/goal
+        version: link:../../packages/goal-client
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../../packages/http-client
@@ -1227,9 +1230,9 @@ importers:
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@memoflow/goal':
+      '@memoflow/goal-client':
         specifier: workspace:*
-        version: link:../goal
+        version: link:../goal-client
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client
@@ -1324,9 +1327,9 @@ importers:
       '@memoflow/data-portability':
         specifier: workspace:*
         version: link:../data-portability
-      '@memoflow/goal':
+      '@memoflow/goal-client':
         specifier: workspace:*
-        version: link:../goal
+        version: link:../goal-client
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client
@@ -1633,12 +1636,9 @@ importers:
       '@memoflow/domain-shared':
         specifier: workspace:*
         version: link:../domain-shared
-      '@memoflow/http-client':
+      '@memoflow/goal-core':
         specifier: workspace:*
-        version: link:../http-client
-      '@memoflow/ipc-client':
-        specifier: workspace:*
-        version: link:../ipc-client
+        version: link:../goal-core
       '@memoflow/patterns':
         specifier: workspace:*
         version: link:../patterns
@@ -1661,6 +1661,36 @@ importers:
       '@types/express':
         specifier: ^5.0.0
         version: 5.0.6
+
+  packages/goal-client:
+    dependencies:
+      '@memoflow/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@memoflow/domain-shared':
+        specifier: workspace:*
+        version: link:../domain-shared
+      '@memoflow/goal-core':
+        specifier: workspace:*
+        version: link:../goal-core
+      '@memoflow/http-client':
+        specifier: workspace:*
+        version: link:../http-client
+      '@memoflow/ipc-client':
+        specifier: workspace:*
+        version: link:../ipc-client
+      '@memoflow/utils':
+        specifier: workspace:*
+        version: link:../utils
+
+  packages/goal-core:
+    dependencies:
+      '@memoflow/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@memoflow/utils':
+        specifier: workspace:*
+        version: link:../utils
 
   packages/http-client:
     dependencies:

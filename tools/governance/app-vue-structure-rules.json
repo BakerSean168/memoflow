@@ -256,7 +256,7 @@
           "names": ["CloudAuthClientPort"]
         },
         {
-          "from": "@memoflow/goal/client"
+          "from": "@memoflow/goal-client"
         },
         {
           "from": "@memoflow/ai/client"

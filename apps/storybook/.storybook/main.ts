@@ -48,7 +48,7 @@ const config: StorybookConfig = {
             ['@memoflow/domain-shared/shared', 'packages/domain-shared/src/shared/index.ts'],
             ['@memoflow/domain-shared', 'packages/domain-shared/src/index.ts'],
             ['@memoflow/http-client', 'packages/http-client/src/index.ts'],
-            ['@memoflow/goal/client', 'packages/goal/src/client/index.ts'],
+            ['@memoflow/goal-client', 'packages/goal-client/src/index.ts'],
             ['@memoflow/task/client', 'packages/task/src/client/index.ts'],
             ['@memoflow/time', 'packages/time/src/index.ts'],
             ['@memoflow/utils/domain', 'packages/utils/src/domain/index.ts'],

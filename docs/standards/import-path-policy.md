@@ -38,7 +38,7 @@ updated: 2026-07-27T00:00:00
 // good
 import { createTimeFacade } from '@memoflow/time';
 import type { GoalClientDTO } from '@memoflow/contracts/goal';
-import { GoalHttpAdapter } from '@memoflow/goal/client';
+import { GoalHttpAdapter } from '@memoflow/goal-client';
 
 // bad — 跨包深路径 / 源码路径
 import { Goal } from '../../../goal/src/server/domain/aggregates/goal';

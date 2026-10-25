@@ -7632,6 +7632,70 @@
       ]
     },
     {
+      "path": "packages/goal-client/src/goal-review-mapping.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-client/src/import-boundary.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-client/src/infrastructure-client/adapters/goal-record-preview-context.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-client/src/infrastructure-client/adapters/goal-record-provenance.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-client/src/infrastructure-client/adapters/goal-review-window.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-client/src/infrastructure-client/adapters/goal-workspace-client-parity.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-client/src/infrastructure-client/adapters/ipc/goal-ipc-channels.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-core/src/progress.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-core/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/goal/src/__tests__/dual-registry.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -7723,56 +7787,6 @@
     },
     {
       "path": "packages/goal/src/import-safety.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/goal/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/goal/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal/src/infrastructure-client/adapters/goal-record-preview-context.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/goal/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/goal/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal/src/infrastructure-client/adapters/goal-record-provenance.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/goal/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/goal/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal/src/infrastructure-client/adapters/goal-review-window.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/goal/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/goal/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal/src/infrastructure-client/adapters/goal-workspace-client-parity.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/goal/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/goal/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal/src/infrastructure-client/adapters/ipc/goal-ipc-channels.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/goal/vitest.config.ts"
@@ -12438,7 +12452,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 102
+      "fileCount": 97
     },
     {
       "id": "packages/goal/vitest.mappers.config.ts",
@@ -12945,11 +12959,25 @@
       "fileCount": 1
     },
     {
+      "id": "packages/goal-client/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 7
+    },
+    {
+      "id": "packages/goal-core/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 1
+    },
+    {
       "id": "packages/goal/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 102
+      "fileCount": 97
     },
     {
       "id": "packages/http-client/vitest.config.ts",
@@ -13561,11 +13589,6 @@
       "packages/goal/src/electron/goal-electron.surface.spec.ts",
       "packages/goal/src/electron/index.spec.ts",
       "packages/goal/src/import-safety.spec.ts",
-      "packages/goal/src/infrastructure-client/adapters/goal-record-preview-context.spec.ts",
-      "packages/goal/src/infrastructure-client/adapters/goal-record-provenance.spec.ts",
-      "packages/goal/src/infrastructure-client/adapters/goal-review-window.spec.ts",
-      "packages/goal/src/infrastructure-client/adapters/goal-workspace-client-parity.spec.ts",
-      "packages/goal/src/infrastructure-client/adapters/ipc/goal-ipc-channels.surface.spec.ts",
       "packages/goal/src/server/application/errors/weight-snapshot-errors.spec.ts",
       "packages/goal/src/server/application/event-handlers/__tests__/register-goal-event-listeners.test.ts",
       "packages/goal/src/server/application/event-handlers/task-goal-progress.handler.spec.ts",
@@ -13864,7 +13887,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1115,
+    "unit": 1118,
     "integration": 57,
     "smoke": 3,
     "boundary-ipc": 6,

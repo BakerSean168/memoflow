@@ -8,7 +8,7 @@ import type {
   GoalTimeframe,
   KeyResultClientDTO,
 } from '@memoflow/contracts/goal';
-import type { Goal } from '@memoflow/goal/client';
+import type { Goal } from '@memoflow/goal-client';
 import { presentErrorMessage } from '@memoflow/http-client';
 
 import { useAppSession } from './useAppSession';

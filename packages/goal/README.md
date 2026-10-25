@@ -10,7 +10,7 @@
 @memoflow/goal
 @memoflow/goal/api
 @memoflow/goal/electron
-@memoflow/goal/client
+@memoflow/goal-client
 ```
 
 ## 模块职责
@@ -18,7 +18,7 @@
 - `@memoflow/goal`：transport-neutral 深模块工厂 `createGoalModule` + 宿主装配 ingredient factory（`createGoalPrismaRepositories` / `createGoalPowerSyncRepositories` / `createGoalRuntimeContribution` / `createGoalEventListenersRuntime`）+ port/set 类型（`GoalRepositorySet` 等）
 - `@memoflow/goal/api`：HTTP 传输与生命周期适配器（接收已装配的 `{ instance }`，不含组合）
 - `@memoflow/goal/electron`：IPC 传输与生命周期适配器（接收已装配的 `{ instance }`，不含组合）
-- `@memoflow/goal/client`：Web / Desktop renderer 客户端 seam
+- `@memoflow/goal-client`：Web / Desktop renderer 客户端 seam
 
 ## 内部结构标准
 

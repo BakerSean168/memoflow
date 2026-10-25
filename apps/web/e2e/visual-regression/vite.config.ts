@@ -26,7 +26,7 @@ export default defineConfig(({ mode }) =>
           ['@memoflow/reminder/method-library', 'packages/reminder/src/method-library/index.ts'],
           ['@memoflow/utils/domain', 'packages/utils/src/domain/index.ts'],
           ['@memoflow/task/client', 'packages/task/src/client/index.ts'],
-          ['@memoflow/goal/client', 'packages/goal/src/client/index.ts'],
+          ['@memoflow/goal-client', 'packages/goal-client/src/index.ts'],
           ['@memoflow/http-client', 'packages/http-client/src/index.ts'],
           ['@memoflow/reminder/client', 'packages/reminder/src/client/index.ts'],
           ['@memoflow/repository/client', 'packages/repository/src/client/index.ts'],

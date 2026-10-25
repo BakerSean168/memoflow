@@ -12,7 +12,7 @@ import type { Instant } from '@memoflow/contracts/primitives';
 
 import type { GoalRecordClientDTO } from '@memoflow/contracts/goal';
 import { Entity } from '@memoflow/utils/domain';
-import { GoalRecordId, KeyResultId, GoalId } from '../../server/domain';
+import { GoalRecordId, KeyResultId, GoalId } from '@memoflow/goal-core/ids';
 
 export interface GoalRecordState {
   id: GoalRecordId;

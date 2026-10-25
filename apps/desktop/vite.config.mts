@@ -20,7 +20,7 @@ import {
 const desktopRendererDevWorkspaceEntries = [
   ['@memoflow/ai/client', 'packages/ai/src/client/index.ts'],
   ['@memoflow/ai/electron', 'packages/ai/src/electron/index.ts'],
-  ['@memoflow/goal/client', 'packages/goal/src/client/index.ts'],
+  ['@memoflow/goal-client', 'packages/goal-client/src/index.ts'],
   ['@memoflow/goal/electron', 'packages/goal/src/electron/index.ts'],
   ['@memoflow/ipc-client', 'packages/ipc-client/src/index.ts'],
   ['@memoflow/cloud-auth', 'packages/cloud-auth/src/index.ts'],

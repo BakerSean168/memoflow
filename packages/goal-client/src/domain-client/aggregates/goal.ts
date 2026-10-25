@@ -14,7 +14,7 @@ import type { GoalClientDTO, GoalReminderConfig, GoalTimeframe } from '@memoflow
 import type { LabelDto } from '@memoflow/contracts/label';
 import { GoalStatus } from '@memoflow/contracts/goal';
 import { AggregateRoot } from '@memoflow/utils/domain';
-import { GoalId } from '../../server/domain';
+import { GoalId } from '@memoflow/goal-core/ids';
 import { IdentityId } from '@memoflow/domain-shared/shared';
 import { KeyResult, GoalReview } from '../entities';
 
