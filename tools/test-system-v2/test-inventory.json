@@ -6594,86 +6594,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/electron/desktop-update.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/electron/device-notification-preference.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/electron/intervention-window.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/electron/ipc-channels.account-surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/electron/ipc-channels.ai-surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/electron/ipc-channels.goal-surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/electron/ipc-channels.renderer-events.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/electron/ipc-channels.schedule-surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/electron/ipc-channels.system-surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/electron/ipc-channels.task-surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/contracts/src/modules/account/api/account-birthday-ymd.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -7554,6 +7474,86 @@
       "primarySuite": "unit",
       "collectors": [
         "packages/database/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/desktop-contracts/src/desktop-update.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/desktop-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/desktop-contracts/src/device-notification-preference.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/desktop-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/desktop-contracts/src/intervention-window.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/desktop-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/desktop-contracts/src/ipc-channels.account-surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/desktop-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/desktop-contracts/src/ipc-channels.ai-surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/desktop-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/desktop-contracts/src/ipc-channels.goal-surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/desktop-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/desktop-contracts/src/ipc-channels.renderer-events.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/desktop-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/desktop-contracts/src/ipc-channels.schedule-surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/desktop-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/desktop-contracts/src/ipc-channels.system-surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/desktop-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/desktop-contracts/src/ipc-channels.task-surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/desktop-contracts/vitest.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -12943,7 +12943,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 85
+      "fileCount": 75
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -12958,6 +12958,13 @@
       "suite": "unit",
       "runner": "vitest",
       "fileCount": 17
+    },
+    {
+      "id": "packages/desktop-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 10
     },
     {
       "id": "packages/domain-shared/vitest.config.ts",

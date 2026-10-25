@@ -35,6 +35,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   'goal-core': ['./goal-record-preview', './ids', './key-result-progress-calculator'],
   'shared-primitives': ['./*'],
   'transport-contracts': ['./*'],
+  'desktop-contracts': ['./*'],
   task: ['./analytics', './testing', './schema', './schedule-execution', './schedule-projection'],
   ai: ['./agent-gateway', './ports', './schema', './testing'],
   repository: ['./schema', './server'],

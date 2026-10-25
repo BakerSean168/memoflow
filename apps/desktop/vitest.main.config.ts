@@ -167,6 +167,63 @@ const mainWorkspaceAliasEntries = [
     replacement: resolve(import.meta.dirname, '../../packages/transport-contracts/src/index.ts'),
   },
   {
+    find: '@memoflow/desktop-contracts/auth-context',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/desktop-contracts/src/auth-context.ts',
+    ),
+  },
+  {
+    find: '@memoflow/desktop-contracts/database',
+    replacement: resolve(import.meta.dirname, '../../packages/desktop-contracts/src/database.ts'),
+  },
+  {
+    find: '@memoflow/desktop-contracts/desktop-update',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/desktop-contracts/src/desktop-update.ts',
+    ),
+  },
+  {
+    find: '@memoflow/desktop-contracts/device-notification-preference',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/desktop-contracts/src/device-notification-preference.ts',
+    ),
+  },
+  {
+    find: '@memoflow/desktop-contracts/focus-window',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/desktop-contracts/src/focus-window.ts',
+    ),
+  },
+  {
+    find: '@memoflow/desktop-contracts/intervention-window',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/desktop-contracts/src/intervention-window.ts',
+    ),
+  },
+  {
+    find: '@memoflow/desktop-contracts/ipc-channels',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/desktop-contracts/src/ipc-channels.ts',
+    ),
+  },
+  {
+    find: '@memoflow/desktop-contracts/profile-access',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/desktop-contracts/src/profile-access.ts',
+    ),
+  },
+  {
+    find: '@memoflow/desktop-contracts',
+    replacement: resolve(import.meta.dirname, '../../packages/desktop-contracts/src/index.ts'),
+  },
+  {
     find: '@memoflow/goal/electron',
     replacement: resolve(import.meta.dirname, '../../packages/goal/src/electron/index.ts'),
   },

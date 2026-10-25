@@ -95,6 +95,36 @@ export default defineConfig(({ mode }) =>
             'packages/transport-contracts/src/execution-context.ts',
           ],
           ['@memoflow/transport-contracts', 'packages/transport-contracts/src/index.ts'],
+          [
+            '@memoflow/desktop-contracts/auth-context',
+            'packages/desktop-contracts/src/auth-context.ts',
+          ],
+          ['@memoflow/desktop-contracts/database', 'packages/desktop-contracts/src/database.ts'],
+          [
+            '@memoflow/desktop-contracts/desktop-update',
+            'packages/desktop-contracts/src/desktop-update.ts',
+          ],
+          [
+            '@memoflow/desktop-contracts/device-notification-preference',
+            'packages/desktop-contracts/src/device-notification-preference.ts',
+          ],
+          [
+            '@memoflow/desktop-contracts/focus-window',
+            'packages/desktop-contracts/src/focus-window.ts',
+          ],
+          [
+            '@memoflow/desktop-contracts/intervention-window',
+            'packages/desktop-contracts/src/intervention-window.ts',
+          ],
+          [
+            '@memoflow/desktop-contracts/ipc-channels',
+            'packages/desktop-contracts/src/ipc-channels.ts',
+          ],
+          [
+            '@memoflow/desktop-contracts/profile-access',
+            'packages/desktop-contracts/src/profile-access.ts',
+          ],
+          ['@memoflow/desktop-contracts', 'packages/desktop-contracts/src/index.ts'],
           ['@memoflow/http-client', 'packages/http-client/src/index.ts'],
           ['@memoflow/reminder/client', 'packages/reminder/src/client/index.ts'],
           ['@memoflow/repository/client', 'packages/repository/src/client/index.ts'],

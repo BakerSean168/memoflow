@@ -168,6 +168,24 @@ export function createTransportContractsAliasEntries(workspaceRoot: string): Ali
   ];
 }
 
+export function createDesktopContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const desktopContractsRoot = resolveFromWorkspace(
+    workspaceRoot,
+    'packages/desktop-contracts/src',
+  );
+
+  return [
+    {
+      find: /^@memoflow\/desktop-contracts$/,
+      replacement: `${desktopContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/desktop-contracts\/(.+)$/,
+      replacement: `${desktopContractsRoot}/$1`,
+    },
+  ];
+}
+
 export function createUiVueSourceAliasEntries(workspaceRoot: string): Alias[] {
   const uiVueRoot = resolveFromWorkspace(workspaceRoot, 'packages/ui-vue-shadcn/src');
   const uiCoreRoot = resolveFromWorkspace(workspaceRoot, 'packages/ui-core/src');
