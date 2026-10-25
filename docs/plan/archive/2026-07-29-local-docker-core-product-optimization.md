@@ -72,19 +72,19 @@ status: completed
 
 ### 3.1 环境
 
-| 项目 | 本轮状态 |
-| --- | --- |
-| 工作区 | `/home/ubuntu/backups/memoflow-legacy-feature-repository` |
-| Web | `http://localhost:58080` |
-| API | `http://localhost:53080` |
-| PowerSync | `http://localhost:58081` |
-| AI Service | `http://localhost:58100` |
-| Postgres | `127.0.0.1:55432` |
-| Redis | `127.0.0.1:56379` |
-| Node | `v24.18.0`；pnpm `11.12.0` |
-| Docker | Docker Engine `29.6.2`；六个 MemoFlow 服务均 healthy |
-| 浏览器 | Playwright Chromium；1280 × 720、1440 × 900、390 × 844 |
-| Desktop | Electron + Xvfb；900 × 600、1024 × 768、1200 × 800、1440 × 900 |
+| 项目       | 本轮状态                                                       |
+| ---------- | -------------------------------------------------------------- |
+| 工作区     | `/home/ubuntu/backups/memoflow-legacy-feature-repository`      |
+| Web        | `http://localhost:58080`                                       |
+| API        | `http://localhost:53080`                                       |
+| PowerSync  | `http://localhost:58081`                                       |
+| AI Service | `http://localhost:58100`                                       |
+| Postgres   | `127.0.0.1:55432`                                              |
+| Redis      | `127.0.0.1:56379`                                              |
+| Node       | `v24.18.0`；pnpm `11.12.0`                                     |
+| Docker     | Docker Engine `29.6.2`；六个 MemoFlow 服务均 healthy           |
+| 浏览器     | Playwright Chromium；1280 × 720、1440 × 900、390 × 844         |
+| Desktop    | Electron + Xvfb；900 × 600、1024 × 768、1200 × 800、1440 × 900 |
 
 ### 3.2 本地端口纠偏
 
@@ -111,18 +111,18 @@ status: completed
 
 ### 3.4 工程验证结果
 
-| 检查项 | 结果 | 备注 |
-| --- | --- | --- |
-| affected lint/typecheck/test/build | 通过 | 37 个项目、137 个目标；lint 仅有既有非阻断 warning |
-| Task integration / API smoke | 通过 | `22 passed` / `61 passed` |
-| Docker local rebuild | 通过 | 六个服务 healthy；Web/API/AI 镜像 revision 精确匹配验证 HEAD |
-| Web PM journey | 通过 | A–E 共 `7 passed`，覆盖 1280、1440 与移动断点 |
-| Desktop shell / serve | 通过 | Electron 壳层 `8 passed`；`desktop:serve-safe` 真实启动并正常清理 |
-| AI Service typecheck | 通过 | `0 errors, 0 warnings` |
-| AI Service test | 通过 | `182 passed` |
-| validation report | 通过 | `verdict: pass`、`readyForPr: true`，无 host-tool/code/docker failure |
-| 测试数据 | 已清理 | `pm-phase-*` preview → apply → preview，最终 `0 rows` |
-| 工作区状态 | 干净 | 报告、Playwright 产物、日志、缓存与本机 env 均未进入 Git |
+| 检查项                             | 结果   | 备注                                                                  |
+| ---------------------------------- | ------ | --------------------------------------------------------------------- |
+| affected lint/typecheck/test/build | 通过   | 37 个项目、137 个目标；lint 仅有既有非阻断 warning                    |
+| Task integration / API smoke       | 通过   | `22 passed` / `61 passed`                                             |
+| Docker local rebuild               | 通过   | 六个服务 healthy；Web/API/AI 镜像 revision 精确匹配验证 HEAD          |
+| Web PM journey                     | 通过   | A–E 共 `7 passed`，覆盖 1280、1440 与移动断点                         |
+| Desktop shell / serve              | 通过   | Electron 壳层 `8 passed`；`desktop:serve-safe` 真实启动并正常清理     |
+| AI Service typecheck               | 通过   | `0 errors, 0 warnings`                                                |
+| AI Service test                    | 通过   | `182 passed`                                                          |
+| validation report                  | 通过   | `verdict: pass`、`readyForPr: true`，无 host-tool/code/docker failure |
+| 测试数据                           | 已清理 | `pm-phase-*` preview → apply → preview，最终 `0 rows`                 |
+| 工作区状态                         | 干净   | 报告、Playwright 产物、日志、缓存与本机 env 均未进入 Git              |
 
 初次验证报告中的 AI 检查失败来自复制工作区后 `.venv` 的 `pytest`、`pyright`
 shebang 仍指向旧路径。执行 `uv sync --locked --reinstall` 重建锁定环境后，仓库定义的
@@ -154,42 +154,42 @@ MemoFlow 已具备目标和任务的基础数据能力：
 
 ### 4.2 测试矩阵
 
-| 模块 | 场景 | 结果 | 产品判断 |
-| --- | --- | --- | --- |
-| 账号 | 注册、取码、邮箱验证、进入工作区 | 通过 | 本地完整注册旅程可执行 |
-| 首页 | 未配置模型时进入工作区 | 部分通过 | 能进入，但 AI 主工作区几乎不可操作 |
-| AI 空闲态 | 今日概览位置 | 失败 | 概览挤占对话初始页，应迁回可切换的右侧面板起始页 |
-| 壳层 | Toggle Side Panel | 失败 | 顶栏缺少右侧面板开关，空闲右栏已被历史实现主动移除 |
-| 壳层 | 业务面板专注模式 | 失败 | 点击专注会强制隐藏左侧栏，两个区域没有独立控制 |
-| AI Composer | 未配置模型提示 | 失败 | 共享组件仍渲染冗长警告，Web/Desktop 预期不一致 |
-| 目标 | 创建目标基本信息 | 通过 | 表单清晰度相对较好 |
-| 目标 | 创建一个关键结果 | 通过 | 可用，但嵌套弹窗和术语仍需优化 |
-| 目标 | 目标卡片状态展示 | 部分通过 | 状态和动作语义不够明确 |
-| 任务 | 创建普通任务模板 | 通过 | 能成功并生成今日实例 |
-| 任务 | 再次打开新建任务 | 失败 | 保留上次提交内容 |
-| 任务 | 关联目标和关键结果 | 阻断 | 面板崩溃并丢失表单 |
-| 任务 | 完成今日实例 | 通过 | 今日概览更新为 `1/1` |
-| 状态一致性 | 完成后模板卡片同步 | 部分通过 | 模板仍显示“进行中 / 完成率 0%” |
-| 导航 | 从顶部模块胶囊进入目标/任务 | 可用但低效 | 需要二次点击“进入” |
-| UI | 1280 × 720 主视口 | 部分通过 | 基本对齐，但任务弹窗过长、视觉语言不一致 |
-| 无障碍 | 任务开关、目标/KR 下拉 | 失败 | 多个控件缺少可访问名称 |
+| 模块        | 场景                             | 结果       | 产品判断                                           |
+| ----------- | -------------------------------- | ---------- | -------------------------------------------------- |
+| 账号        | 注册、取码、邮箱验证、进入工作区 | 通过       | 本地完整注册旅程可执行                             |
+| 首页        | 未配置模型时进入工作区           | 部分通过   | 能进入，但 AI 主工作区几乎不可操作                 |
+| AI 空闲态   | 今日概览位置                     | 失败       | 概览挤占对话初始页，应迁回可切换的右侧面板起始页   |
+| 壳层        | Toggle Side Panel                | 失败       | 顶栏缺少右侧面板开关，空闲右栏已被历史实现主动移除 |
+| 壳层        | 业务面板专注模式                 | 失败       | 点击专注会强制隐藏左侧栏，两个区域没有独立控制     |
+| AI Composer | 未配置模型提示                   | 失败       | 共享组件仍渲染冗长警告，Web/Desktop 预期不一致     |
+| 目标        | 创建目标基本信息                 | 通过       | 表单清晰度相对较好                                 |
+| 目标        | 创建一个关键结果                 | 通过       | 可用，但嵌套弹窗和术语仍需优化                     |
+| 目标        | 目标卡片状态展示                 | 部分通过   | 状态和动作语义不够明确                             |
+| 任务        | 创建普通任务模板                 | 通过       | 能成功并生成今日实例                               |
+| 任务        | 再次打开新建任务                 | 失败       | 保留上次提交内容                                   |
+| 任务        | 关联目标和关键结果               | 阻断       | 面板崩溃并丢失表单                                 |
+| 任务        | 完成今日实例                     | 通过       | 今日概览更新为 `1/1`                               |
+| 状态一致性  | 完成后模板卡片同步               | 部分通过   | 模板仍显示“进行中 / 完成率 0%”                     |
+| 导航        | 从顶部模块胶囊进入目标/任务      | 可用但低效 | 需要二次点击“进入”                                 |
+| UI          | 1280 × 720 主视口                | 部分通过   | 基本对齐，但任务弹窗过长、视觉语言不一致           |
+| 无障碍      | 任务开关、目标/KR 下拉           | 失败       | 多个控件缺少可访问名称                             |
 
 ### 4.3 已确认决策矩阵
 
-| 决策 | 已确认方案 |
-| --- | --- |
-| 右侧面板空闲态 | 今日概览是 Home surface，不是 BusinessTab |
-| 右侧面板默认与持久化 | 首次默认打开；用户 Toggle 偏好跨重启保存 |
-| 关闭最后业务 Tab | 回到 Home，不关闭右侧面板 |
-| 显式导航 | 模块、深链和“查看全部”可以重新打开右侧面板 |
-| Focus | 只隐藏中央 AI；左侧栏保持独立，AI 实例继续保活 |
-| 工作流审批 | 采用上下文感知自动切换；脏表单或用户已关闭面板时只提示 |
-| 任务用户术语 | 任务计划 / 待办任务 / 今日任务 / 快速任务 |
-| 任务计划完成率 | 最近 30 天已到期实例，显示分子/分母和百分比 |
-| KR 整体完成触发 | 只允许有限任务计划，整个计划只贡献一次 |
-| 编辑任务计划 | 同步当前时刻之后的 Pending；进行中和历史不变 |
-| 表单草稿 | 首期仅弹窗生命周期内恢复 |
-| 无模型 Composer | 删除常驻长提示，保留紧凑“配置 AI”入口 |
+| 决策                 | 已确认方案                                             |
+| -------------------- | ------------------------------------------------------ |
+| 右侧面板空闲态       | 今日概览是 Home surface，不是 BusinessTab              |
+| 右侧面板默认与持久化 | 首次默认打开；用户 Toggle 偏好跨重启保存               |
+| 关闭最后业务 Tab     | 回到 Home，不关闭右侧面板                              |
+| 显式导航             | 模块、深链和“查看全部”可以重新打开右侧面板             |
+| Focus                | 只隐藏中央 AI；左侧栏保持独立，AI 实例继续保活         |
+| 工作流审批           | 采用上下文感知自动切换；脏表单或用户已关闭面板时只提示 |
+| 任务用户术语         | 任务计划 / 待办任务 / 今日任务 / 快速任务              |
+| 任务计划完成率       | 最近 30 天已到期实例，显示分子/分母和百分比            |
+| KR 整体完成触发      | 只允许有限任务计划，整个计划只贡献一次                 |
+| 编辑任务计划         | 同步当前时刻之后的 Pending；进行中和历史不变           |
+| 表单草稿             | 首期仅弹窗生命周期内恢复                               |
+| 无模型 Composer      | 删除常驻长提示，保留紧凑“配置 AI”入口                  |
 
 以上决策作为本计划实施基线。后续实现不得重新引入并行状态模型或平台分叉；
 需要变更时先更新本文的决策与验收标准。
@@ -374,10 +374,10 @@ props.template 变化
 
 已确认采用面向用户的产品语言，代码领域名保持不变：
 
-| 领域对象 | 用户可见名称 | 说明 |
-| --- | --- | --- |
-| TaskTemplate | 任务计划 | 定义标题、时间、重复、提醒和目标关联 |
-| TaskInstance | 待办任务 | 某一天真正执行、完成或跳过的任务 |
+| 领域对象     | 用户可见名称 | 说明                                 |
+| ------------ | ------------ | ------------------------------------ |
+| TaskTemplate | 任务计划     | 定义标题、时间、重复、提醒和目标关联 |
+| TaskInstance | 待办任务     | 某一天真正执行、完成或跳过的任务     |
 
 补充约定：
 
@@ -912,13 +912,13 @@ packages/app-vue/src/locales/zh-CN/aiAssistant.ts
 
 ## 7.3 状态语言规范
 
-| 对象 | 已确认状态 |
-| --- | --- |
-| 目标 | 未开始、进行中、已完成、已暂停、已放弃 |
-| 关键结果 | 未开始、推进中、已达成、存在风险 |
-| 任务计划 | 已启用、已暂停、已结束 |
-| 今日任务 | 待完成、已完成、已跳过、已过期 |
-| 同步 | 正在同步、同步完成、同步失败 |
+| 对象     | 已确认状态                             |
+| -------- | -------------------------------------- |
+| 目标     | 未开始、进行中、已完成、已暂停、已放弃 |
+| 关键结果 | 未开始、推进中、已达成、存在风险       |
+| 任务计划 | 已启用、已暂停、已结束                 |
+| 今日任务 | 待完成、已完成、已跳过、已过期         |
+| 同步     | 正在同步、同步完成、同步失败           |
 
 禁止使用同一个“进行中”同时表达模板启用和实例未完成。
 
@@ -1333,20 +1333,20 @@ Docker、报告与数据证据：
 
 ## 9. 建议切片与验证目标
 
-| 切片 | 主要文件 | 最小验证 |
-| --- | --- | --- |
-| S1 KR 关联崩溃测试 | `KeyResultLinksSection.vue`、对应新 spec | `pnpm nx run app-vue:test` 的定向用例 |
-| S2 KR 加载所有权修复 | `TaskTemplateDialog.vue`、`useTaskGoalBindingOptions.ts` | app-vue test + typecheck |
-| S3 目标任务闭环 E2E | `apps/web/e2e` | Docker local + focused e2e |
-| S4 新建状态重置 | `TaskTemplateDialog.vue`、`TaskManagementView.vue` | create/edit/copy 组件测试 |
-| S5 状态口径 | task store/query/card/widget | task tests + dashboard tests |
-| S6 无模型 onboarding | AI 首页与 locale | app-vue test + 浏览器 smoke |
-| S7 模块导航 | `WindowHeader.vue`、`useShellRouterSync.ts` | shell tests + keyboard smoke |
-| S8 表单视觉统一 | Goal/Task dialogs、UI primitives | Storybook/视觉检查 + axe |
-| S9 右侧面板状态模型 | `useAppShellStore.ts`、`AppShell.vue`、`WindowHeader.vue` | store/shell tests + geometry e2e |
-| S10 今日概览迁移 | `AIChatView.vue`、`AIMessagePanel.vue`、新 overview panel | app-vue test + 1280 × 720 visual |
-| S11 Focus/左栏解耦 | `AppShell.vue`、panel geometry | shell geometry e2e |
-| S12 无模型 Composer 收敛 | `AIFooterComposer.vue`、locale | Web/Desktop shared component test |
+| 切片                     | 主要文件                                                  | 最小验证                              |
+| ------------------------ | --------------------------------------------------------- | ------------------------------------- |
+| S1 KR 关联崩溃测试       | `KeyResultLinksSection.vue`、对应新 spec                  | `pnpm nx run app-vue:test` 的定向用例 |
+| S2 KR 加载所有权修复     | `TaskTemplateDialog.vue`、`useTaskGoalBindingOptions.ts`  | app-vue test + typecheck              |
+| S3 目标任务闭环 E2E      | `apps/web/e2e`                                            | Docker local + focused e2e            |
+| S4 新建状态重置          | `TaskTemplateDialog.vue`、`TaskManagementView.vue`        | create/edit/copy 组件测试             |
+| S5 状态口径              | task store/query/card/widget                              | task tests + dashboard tests          |
+| S6 无模型 onboarding     | AI 首页与 locale                                          | app-vue test + 浏览器 smoke           |
+| S7 模块导航              | `WindowHeader.vue`、`useShellRouterSync.ts`               | shell tests + keyboard smoke          |
+| S8 表单视觉统一          | Goal/Task dialogs、UI primitives                          | Storybook/视觉检查 + axe              |
+| S9 右侧面板状态模型      | `useAppShellStore.ts`、`AppShell.vue`、`WindowHeader.vue` | store/shell tests + geometry e2e      |
+| S10 今日概览迁移         | `AIChatView.vue`、`AIMessagePanel.vue`、新 overview panel | app-vue test + 1280 × 720 visual      |
+| S11 Focus/左栏解耦       | `AppShell.vue`、panel geometry                            | shell geometry e2e                    |
+| S12 无模型 Composer 收敛 | `AIFooterComposer.vue`、locale                            | Web/Desktop shared component test     |
 
 每个切片都应：
 
@@ -1432,12 +1432,12 @@ Docker、报告与数据证据：
 
 已确认 canonical terminology：
 
-| 工程领域名 | 用户界面术语 |
-| --- | --- |
-| `TaskTemplate` | 任务计划 |
-| `TaskInstance` | 待办任务 |
-| 当日 `TaskInstance` 集合 | 今日任务 |
-| 低配置创建入口 | 快速任务 |
+| 工程领域名               | 用户界面术语 |
+| ------------------------ | ------------ |
+| `TaskTemplate`           | 任务计划     |
+| `TaskInstance`           | 待办任务     |
+| 当日 `TaskInstance` 集合 | 今日任务     |
+| 低配置创建入口           | 快速任务     |
 
 实施时必须统一路由标题、按钮、弹窗、成功反馈、空态和帮助文案，不能只改局部
 标题。工程日志和接口继续使用领域名，避免为了 UI 文案重命名领域对象。

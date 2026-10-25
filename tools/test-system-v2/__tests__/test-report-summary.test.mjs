@@ -96,7 +96,7 @@ test('aggregates framework reports without losing slowest evidence', () => {
 });
 
 for (const ci of ['', 'true']) {
-  test(`AI workspace config disables retries and rejects CI flaky outcomes (CI=${ci})`, () => {
+  test(`Provider acceptance config disables retries and rejects CI flaky outcomes (CI=${ci})`, () => {
     const result = spawnSync(
       process.execPath,
       [
@@ -107,7 +107,11 @@ for (const ci of ['', 'true']) {
         `import config from './apps/web/playwright.config.ts';
          console.log(JSON.stringify({ retries: config.retries, failOnFlakyTests: config.failOnFlakyTests }));`,
       ],
-      { env: { ...process.env, CI: ci, WEB_E2E_MODE: 'workspace' }, encoding: 'utf8', timeout: 15000 },
+      {
+        env: { ...process.env, CI: ci, WEB_E2E_MODE: 'provider' },
+        encoding: 'utf8',
+        timeout: 15000,
+      },
     );
     assert.equal(result.error, undefined);
     assert.equal(result.status, 0, result.stderr);

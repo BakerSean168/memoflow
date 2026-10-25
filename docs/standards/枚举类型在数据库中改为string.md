@@ -19,10 +19,10 @@ tags:
 #### 为什么？
 
 1. **迁移成本低**：如果你以后要在 `contracts` 包里增加一种设备类型 `'VR_HEADSET'`。
-	
-	- 如果是 **String**：你只需要改代码，**不需要**做数据库迁移（Migration）。
-	- 如果是 **DB ENUM**：PostgreSQL 的 ENUM 修改虽然支持 `ALTER TYPE ADD VALUE`，但在 Prisma 中管理起来相对麻烦，且回滚困难。
-		
+
+   - 如果是 **String**：你只需要改代码，**不需要**做数据库迁移（Migration）。
+   - 如果是 **DB ENUM**：PostgreSQL 的 ENUM 修改虽然支持 `ALTER TYPE ADD VALUE`，但在 Prisma 中管理起来相对麻烦，且回滚困难。
+
 2. **解耦**：数据库只负责存数据，业务规则（哪些是合法的 DeviceType）由你的领域层（Domain Layer）和契约包（Contracts）决定。
 
 #### Prisma Schema 写法
@@ -36,8 +36,8 @@ model DeviceInfo {
   id              String   @id @default(uuid())
   // ... 其他字段
   // 在数据库里，它就是一个 varchar/text
-  deviceType      String   
-  
+  deviceType      String
+
   firstSeenAt     DateTime
   lastSeenAt      DateTime
 
@@ -56,7 +56,7 @@ TypeScript
 
 import { DeviceInfo } from '@memoflow/domain-server'; // 你的领域对象
 import type { DeviceInfoPersistenceDTO } from '@memoflow/contracts';
-import { prisma } from '../prisma'; 
+import { prisma } from '../prisma';
 
 // 假设这是 Prisma 返回的原生数据
 const prismaData = await prisma.deviceInfo.findUnique({ where: { id: '...' } });
@@ -71,7 +71,7 @@ if (prismaData) {
     ...prismaData,
     deviceType: deviceType, // string -> 'DESKTOP' | 'MOBILE' ...
     // Prisma 的 DateTime 直接对应 JS Date，不需要转换
-    firstSeenAt: prismaData.firstSeenAt, 
+    firstSeenAt: prismaData.firstSeenAt,
     lastSeenAt: prismaData.lastSeenAt,
   };
 
@@ -126,15 +126,13 @@ model DeviceInfo {
 
 针对你的定义，有一个小细节需要注意：
 
-
-
 ```TypeScript
 export interface DeviceInfoPersistenceDTO {
   // ...
-  
+
   // 这里的类型如果是 contracts 里的联合类型
-  deviceType: DeviceType; 
-  
+  deviceType: DeviceType;
+
   // Prisma 返回的是 Date 对象，这里定义为 Date 是对的
   firstSeenAt: Date;
   lastSeenAt: Date;
@@ -144,12 +142,12 @@ export interface DeviceInfoPersistenceDTO {
 **最佳实践流程：**
 
 1. **写入数据库 (To DB)**：
-	
-	Domain Entity (`deviceType` 是联合类型) -> 赋值给 Prisma input (`string`)。TypeScript 兼容（联合类型是 string 的子集）。
-	
+
+   Domain Entity (`deviceType` 是联合类型) -> 赋值给 Prisma input (`string`)。TypeScript 兼容（联合类型是 string 的子集）。
+
 2. **读取数据库 (From DB)**：
-	
-	Prisma output (`string`) -> **强制断言 (`as DeviceType`)** -> `PersistenceDTO` -> Domain Entity。
+
+   Prisma output (`string`) -> **强制断言 (`as DeviceType`)** -> `PersistenceDTO` -> Domain Entity。
 
 ### 总结建议
 

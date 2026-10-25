@@ -1,38 +1,41 @@
 <script setup lang="ts">
-import type { Hm } from '@memoflow/time'
-import { asHm } from '@memoflow/time'
-import { computed, useId } from 'vue'
-import { Input } from '../../../ui/input'
-import { Label } from '../../../ui/label'
+import type { Hm } from '@memoflow/time';
+import { asHm } from '@memoflow/time';
+import { computed, useId } from 'vue';
+import { Input } from '../../../ui/input';
+import { Label } from '../../../ui/label';
 
-const props = withDefaults(defineProps<{
-  modelValue?: Hm | null
-  id?: string
-  label?: string
-  disabled?: boolean
-  error?: string | null
-}>(), {
-  modelValue: null,
-  label: 'Time',
-  disabled: false,
-  error: null,
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue?: Hm | null;
+    id?: string;
+    label?: string;
+    disabled?: boolean;
+    error?: string | null;
+  }>(),
+  {
+    modelValue: null,
+    label: 'Time',
+    disabled: false,
+    error: null,
+  },
+);
 
 const emit = defineEmits<{
-  (event: 'update:modelValue', value: Hm | null): void
-}>()
+  (event: 'update:modelValue', value: Hm | null): void;
+}>();
 
-const generatedId = useId()
-const fieldId = computed(() => props.id ?? `time-field-${generatedId}`)
-const errorId = computed(() => `${fieldId.value}-error`)
+const generatedId = useId();
+const fieldId = computed(() => props.id ?? `time-field-${generatedId}`);
+const errorId = computed(() => `${fieldId.value}-error`);
 
 function updateTime(value: string | number) {
-  const raw = String(value)
+  const raw = String(value);
   if (!raw) {
-    emit('update:modelValue', null)
-    return
+    emit('update:modelValue', null);
+    return;
   }
-  emit('update:modelValue', asHm(raw))
+  emit('update:modelValue', asHm(raw));
 }
 </script>
 

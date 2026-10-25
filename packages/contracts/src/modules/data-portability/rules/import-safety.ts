@@ -67,8 +67,7 @@ export function findBannedImportKey(value: unknown, path: string[] = []): string
 // ============ V3-only Typed Envelope Parser ============
 
 export type ParsePortableBackupEnvelopeV3Result =
-  | { ok: true; envelope: PortableBackupEnvelopeV3 }
-  | { ok: false; error: string };
+  { ok: true; envelope: PortableBackupEnvelopeV3 } | { ok: false; error: string };
 
 /**
  * Parse the canonical owner-driven V3 backup envelope.
@@ -101,7 +100,11 @@ export function parsePortableBackupEnvelopeV3(raw: unknown): ParsePortableBackup
       candidate.format === 'memoflow.user-data-export' ||
       candidate.kind === 'memoflow.user-data-export' ||
       candidate.data !== undefined;
-    if (isPortableBackup && typeof candidate.schemaVersion === 'number' && candidate.schemaVersion !== 3) {
+    if (
+      isPortableBackup &&
+      typeof candidate.schemaVersion === 'number' &&
+      candidate.schemaVersion !== 3
+    ) {
       return {
         ok: false,
         error: `Unsupported Data Portability schemaVersion: ${candidate.schemaVersion}; only V3 is supported`,

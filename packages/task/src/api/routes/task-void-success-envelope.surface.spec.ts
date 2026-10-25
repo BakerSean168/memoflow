@@ -20,10 +20,7 @@ describe('task void success envelope surface', () => {
   );
   const electron = readFileSync(resolve(__dirname, '../../electron/index.ts'), 'utf8');
   const deletePlanUseCase = readFileSync(
-    resolve(
-      __dirname,
-      '../../server/application/use-cases/commands/delete-task-plan.use-case.ts',
-    ),
+    resolve(__dirname, '../../server/application/use-cases/commands/delete-task-plan.use-case.ts'),
     'utf8',
   );
 

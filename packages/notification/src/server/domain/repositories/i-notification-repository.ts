@@ -115,7 +115,10 @@ export interface INotificationRepository {
    * @param identityId 璐︽埛 UUID
    * @param options.limit 闄愬埗鏁伴噺
    */
-  findUnread(identityId: string, options?: { archiveState?: 'active' | 'archived' | 'all'; limit?: number }): Promise<Notification[]>;
+  findUnread(
+    identityId: string,
+    options?: { archiveState?: 'active' | 'archived' | 'all'; limit?: number },
+  ): Promise<Notification[]>;
 
   /**
    * 鏌ユ壘鐩稿叧瀹炰綋鐨勯€氱煡

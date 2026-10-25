@@ -73,7 +73,10 @@ describe('API Docker workspace closure', () => {
 
 describe('local Docker image provenance', () => {
   it('stamps the locally built PowerSync image with the exact workspace revision and build date', () => {
-    const compose = readFileSync(new URL('../../../docker-compose.local.yml', import.meta.url), 'utf8');
+    const compose = readFileSync(
+      new URL('../../../docker-compose.local.yml', import.meta.url),
+      'utf8',
+    );
     const powersyncStart = compose.indexOf('\n  powersync:\n');
     const webStart = compose.indexOf('\n  web:\n', powersyncStart + 1);
 

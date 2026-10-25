@@ -2,7 +2,11 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
 import { TaskGoalBindingTrigger, TaskPlanOutcome } from '@memoflow/contracts/task';
-import { aLoadedTaskPlan, aTaskOccurrence, TASK_TEST_OCCURRENCE_PROJECTION } from '../../../../../testing';
+import {
+  aLoadedTaskPlan,
+  aTaskOccurrence,
+  TASK_TEST_OCCURRENCE_PROJECTION,
+} from '../../../../../testing';
 import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
 import type { ITaskPlanRepository } from '../../../../domain/repositories/i-task-plan-repository';
 import { CompleteTaskOccurrenceUseCase } from '../complete-task-occurrence.use-case';
@@ -44,7 +48,9 @@ describe('CompleteTaskOccurrenceUseCase', () => {
   it('throws an error if transactionRunner is missing', () => {
     expect(
       () => new CompleteTaskOccurrenceUseCase(instanceRepo, templateRepo, undefined as any),
-    ).toThrow('TaskWriteTransactionRunner must be explicitly provided to CompleteTaskOccurrenceUseCase');
+    ).toThrow(
+      'TaskWriteTransactionRunner must be explicitly provided to CompleteTaskOccurrenceUseCase',
+    );
   });
 
   it('should return NOT_FOUND when occurrence does not exist', async () => {
@@ -204,7 +210,9 @@ describe('CompleteTaskOccurrenceUseCase', () => {
       goalBinding: plan.goalBinding?.toDTO(),
     });
     expect(plan.outcome).toBe(TaskPlanOutcome.Open);
-    expect(plan.domainEvents.filter((event) => event.eventType === 'task:plan-outcome-changed')).toHaveLength(0);
+    expect(
+      plan.domainEvents.filter((event) => event.eventType === 'task:plan-outcome-changed'),
+    ).toHaveLength(0);
   });
 
   it('should return the occurrence client DTO in the response', async () => {

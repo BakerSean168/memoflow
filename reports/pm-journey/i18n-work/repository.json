@@ -1,374 +1,280 @@
 [
- {
-  "key": "repository.localVault.changeVault",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.localVault.detach",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.localVault.detachDescription",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.localVault.detachTitle",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.localVault.noNotes",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.localVault.noSearchResults",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.localVault.openNote",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.localVault.openRoot",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.localVault.rescan",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.localVault.searchPlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.localVault.selectAction",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.localVault.selectDescription",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.localVault.selectNote",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.localVault.selectNoteDescription",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.localVault.selectTitle",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.ambiguousLink",
-  "files": [
-   "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
-  ]
- },
- {
-  "key": "repository.projection.backlinks",
-  "files": [
-   "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
-  ]
- },
- {
-  "key": "repository.projection.commit",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.confirmAction",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.confirmDescription",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.confirmImmutable",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.confirmTitle",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.connectAction",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.connectDescription",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.connectTitle",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.connectionLabel",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.createAction",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.createDescription",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.createTitle",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.depthValue",
-  "files": [
-   "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
-  ]
- },
- {
-  "key": "repository.projection.graphDepth",
-  "files": [
-   "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
-  ]
- },
- {
-  "key": "repository.projection.graphSummary",
-  "files": [
-   "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
-  ]
- },
- {
-  "key": "repository.projection.graphTruncated",
-  "files": [
-   "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
-  ]
- },
- {
-  "key": "repository.projection.invalidDraft",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.missingLink",
-  "files": [
-   "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
-  ]
- },
- {
-  "key": "repository.projection.noBacklinks",
-  "files": [
-   "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
-  ]
- },
- {
-  "key": "repository.projection.noNotes",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.noOutgoingLinks",
-  "files": [
-   "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
-  ]
- },
- {
-  "key": "repository.projection.noRelatedNotes",
-  "files": [
-   "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
-  ]
- },
- {
-  "key": "repository.projection.noSearchResults",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.noUnresolvedLinks",
-  "files": [
-   "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
-  ]
- },
- {
-  "key": "repository.projection.noteContent",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.notePath",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.noteReason",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.noteTitle",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.noteViews",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.outgoingLinks",
-  "files": [
-   "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
-  ]
- },
- {
-  "key": "repository.projection.previewTab",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.readOnly",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.refresh",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.refreshRelations",
-  "files": [
-   "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
-  ]
- },
- {
-  "key": "repository.projection.relatedNotes",
-  "files": [
-   "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
-  ]
- },
- {
-  "key": "repository.projection.relationsTab",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.reviewAction",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.searchPlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.selectNote",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.selectNoteDescription",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.status.Unknown",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.title",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"
-  ]
- },
- {
-  "key": "repository.projection.unresolvedLinks",
-  "files": [
-   "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
-  ]
- },
- {
-  "key": "repository.segments.governance",
-  "files": [
-   "packages/app-vue/src/modules/repository/components/NoteSegmentBar.vue"
-  ]
- },
- {
-  "key": "repository.segments.notes",
-  "files": [
-   "packages/app-vue/src/modules/repository/components/NoteSegmentBar.vue"
-  ]
- }
+  {
+    "key": "repository.localVault.changeVault",
+    "files": ["packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.localVault.detach",
+    "files": ["packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.localVault.detachDescription",
+    "files": ["packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.localVault.detachTitle",
+    "files": ["packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.localVault.noNotes",
+    "files": ["packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.localVault.noSearchResults",
+    "files": ["packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.localVault.openNote",
+    "files": ["packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.localVault.openRoot",
+    "files": ["packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.localVault.rescan",
+    "files": ["packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.localVault.searchPlaceholder",
+    "files": ["packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.localVault.selectAction",
+    "files": ["packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.localVault.selectDescription",
+    "files": ["packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.localVault.selectNote",
+    "files": ["packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.localVault.selectNoteDescription",
+    "files": ["packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.localVault.selectTitle",
+    "files": ["packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.ambiguousLink",
+    "files": [
+      "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
+    ]
+  },
+  {
+    "key": "repository.projection.backlinks",
+    "files": [
+      "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
+    ]
+  },
+  {
+    "key": "repository.projection.commit",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.confirmAction",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.confirmDescription",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.confirmImmutable",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.confirmTitle",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.connectAction",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.connectDescription",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.connectTitle",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.connectionLabel",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.createAction",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.createDescription",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.createTitle",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.depthValue",
+    "files": [
+      "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
+    ]
+  },
+  {
+    "key": "repository.projection.graphDepth",
+    "files": [
+      "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
+    ]
+  },
+  {
+    "key": "repository.projection.graphSummary",
+    "files": [
+      "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
+    ]
+  },
+  {
+    "key": "repository.projection.graphTruncated",
+    "files": [
+      "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
+    ]
+  },
+  {
+    "key": "repository.projection.invalidDraft",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.missingLink",
+    "files": [
+      "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
+    ]
+  },
+  {
+    "key": "repository.projection.noBacklinks",
+    "files": [
+      "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
+    ]
+  },
+  {
+    "key": "repository.projection.noNotes",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.noOutgoingLinks",
+    "files": [
+      "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
+    ]
+  },
+  {
+    "key": "repository.projection.noRelatedNotes",
+    "files": [
+      "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
+    ]
+  },
+  {
+    "key": "repository.projection.noSearchResults",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.noUnresolvedLinks",
+    "files": [
+      "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
+    ]
+  },
+  {
+    "key": "repository.projection.noteContent",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.notePath",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.noteReason",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.noteTitle",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.noteViews",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.outgoingLinks",
+    "files": [
+      "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
+    ]
+  },
+  {
+    "key": "repository.projection.previewTab",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.readOnly",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.refresh",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.refreshRelations",
+    "files": [
+      "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
+    ]
+  },
+  {
+    "key": "repository.projection.relatedNotes",
+    "files": [
+      "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
+    ]
+  },
+  {
+    "key": "repository.projection.relationsTab",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.reviewAction",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.searchPlaceholder",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.selectNote",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.selectNoteDescription",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.status.Unknown",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.title",
+    "files": ["packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue"]
+  },
+  {
+    "key": "repository.projection.unresolvedLinks",
+    "files": [
+      "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.vue"
+    ]
+  },
+  {
+    "key": "repository.segments.governance",
+    "files": ["packages/app-vue/src/modules/repository/components/NoteSegmentBar.vue"]
+  },
+  {
+    "key": "repository.segments.notes",
+    "files": ["packages/app-vue/src/modules/repository/components/NoteSegmentBar.vue"]
+  }
 ]

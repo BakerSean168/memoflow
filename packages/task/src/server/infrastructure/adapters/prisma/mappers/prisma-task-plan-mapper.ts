@@ -50,12 +50,19 @@ export class PrismaTaskPlanMapper {
       data.goalId != null ||
       data.keyResultId != null ||
       data.goalRecordValue != null ||
-      data.goalProgressTrigger != null || data.goalProgressMode != null || data.goalSuggestedValue != null;
+      data.goalProgressTrigger != null ||
+      data.goalProgressMode != null ||
+      data.goalSuggestedValue != null;
     const goalBinding = hasGoalBinding
       ? TaskGoalBinding.fromDTO({
           goalId: data.goalId,
           keyResultId: data.keyResultId,
-          progressRule: decodeTaskGoalProgress({ mode: data.goalProgressMode, value: data.goalRecordValue, trigger: data.goalProgressTrigger, suggestedValue: data.goalSuggestedValue }),
+          progressRule: decodeTaskGoalProgress({
+            mode: data.goalProgressMode,
+            value: data.goalRecordValue,
+            trigger: data.goalProgressTrigger,
+            suggestedValue: data.goalSuggestedValue,
+          }),
         } as Parameters<typeof TaskGoalBinding.fromDTO>[0])
       : null;
 

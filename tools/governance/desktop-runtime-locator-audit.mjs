@@ -27,8 +27,13 @@ const ROOT = path.join(import.meta.dirname, '..', '..');
 const SCAN_DIR = path.join(ROOT, 'apps', 'desktop', 'src', 'main');
 
 const SKIP_DIRS = new Set([
-  'node_modules', 'dist', 'build', '.git', '.nx',
-  '__mocks__', 'generated',
+  'node_modules',
+  'dist',
+  'build',
+  '.git',
+  '.nx',
+  '__mocks__',
+  'generated',
 ]);
 
 // __tests__ are allowed — test helpers may legitimately reset singletons
@@ -76,7 +81,9 @@ if (errors.length > 0) {
   }
   process.exit(1);
 } else {
-  console.log('[desktop-runtime-locator-audit] passed: no new runtime locator patterns in desktop main');
+  console.log(
+    '[desktop-runtime-locator-audit] passed: no new runtime locator patterns in desktop main',
+  );
 }
 
 // ────────────────────────────────────────────────────────────────────────
@@ -130,8 +137,14 @@ function scanFile(fullPath, fileRel) {
         const getterName = `get${getterMatch[1]}`;
         // Look for the typical pattern: returns a module-level let
         const bodySnippet = lines.slice(i, Math.min(i + 30, lines.length)).join('\n');
-        if (/return\s+_\w+/.test(bodySnippet) || /return\s+\w+!/.test(bodySnippet) || /return\s+\w+\s*;/.test(bodySnippet)) {
-          errors.push(`${fileRel}:${lineNum}: exported singleton getter '${getterName}()' — use explicit injection instead`);
+        if (
+          /return\s+_\w+/.test(bodySnippet) ||
+          /return\s+\w+!/.test(bodySnippet) ||
+          /return\s+\w+\s*;/.test(bodySnippet)
+        ) {
+          errors.push(
+            `${fileRel}:${lineNum}: exported singleton getter '${getterName}()' — use explicit injection instead`,
+          );
         }
       }
     }
@@ -146,11 +159,15 @@ function scanFile(fullPath, fileRel) {
     // ── Pattern 3: module-level `let xxx: XxxManager | null = null` ──
     // Only flag top-level declarations (no leading whitespace or minimal indent)
     if (!ALLOWLIST_MODULE_OWNERS.has(fileRel)) {
-      const moduleOwnerMatch = line.match(/^let\s+(\w+):\s*(\w+Manager|\w+Service|\w+Registry|\w+Coordinator)\s*\|\s*null\s*=\s*null/);
+      const moduleOwnerMatch = line.match(
+        /^let\s+(\w+):\s*(\w+Manager|\w+Service|\w+Registry|\w+Coordinator)\s*\|\s*null\s*=\s*null/,
+      );
       if (moduleOwnerMatch) {
         const varName = moduleOwnerMatch[1];
         const typeName = moduleOwnerMatch[2];
-        errors.push(`${fileRel}:${lineNum}: module-level owner 'let ${varName}: ${typeName} | null = null' — use runtime-owned object graph instead`);
+        errors.push(
+          `${fileRel}:${lineNum}: module-level owner 'let ${varName}: ${typeName} | null = null' — use runtime-owned object graph instead`,
+        );
       }
     }
   }

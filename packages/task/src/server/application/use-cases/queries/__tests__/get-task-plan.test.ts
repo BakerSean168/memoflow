@@ -61,10 +61,7 @@ describe('GetTaskPlanUseCase', () => {
     completedInstance.complete();
 
     vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
-    vi.mocked(instanceRepo.findByPlanId).mockResolvedValue([
-      pendingInstance,
-      completedInstance,
-    ]);
+    vi.mocked(instanceRepo.findByPlanId).mockResolvedValue([pendingInstance, completedInstance]);
 
     const result = await useCase.execute(plan.id, plan.identityId);
 

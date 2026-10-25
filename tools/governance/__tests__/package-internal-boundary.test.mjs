@@ -13,7 +13,14 @@ const APPLICATION_RULE = {
 
 const DOMAIN_RULE = {
   layer: 'server/domain',
-  forbidden: ['server/application', 'server/transport', 'server/infrastructure', 'client', 'electron', 'api'],
+  forbidden: [
+    'server/application',
+    'server/transport',
+    'server/infrastructure',
+    'client',
+    'electron',
+    'api',
+  ],
   forbiddenExternalSpecifiers: ['@memoflow/database', '@prisma/client'],
 };
 
@@ -22,7 +29,7 @@ describe('findBoundaryViolations — forbidden external @memoflow/database', () 
     const content = [
       "import type { PrismaClient } from '@memoflow/database';",
       '',
-      "export const create = async (db: PrismaClient) => db.user.findMany();",
+      'export const create = async (db: PrismaClient) => db.user.findMany();',
     ].join('\n');
     const violations = findBoundaryViolations({
       content,
@@ -39,7 +46,8 @@ describe('findBoundaryViolations — forbidden external @memoflow/database', () 
   });
 
   it('flags `import { PrismaClient } from "@memoflow/database"` in server/domain', () => {
-    const content = "import { PrismaClient } from '@memoflow/database';\n\nexport const x: PrismaClient | null = null;\n";
+    const content =
+      "import { PrismaClient } from '@memoflow/database';\n\nexport const x: PrismaClient | null = null;\n";
     const violations = findBoundaryViolations({
       content,
       relPath: 'packages/foo/src/server/domain/repositories/i-repository.ts',
@@ -91,7 +99,8 @@ describe('findBoundaryViolations — forbidden external @memoflow/database', () 
   });
 
   it('flags subpath `import { prisma } from "@memoflow/database/prisma"` in server/application', () => {
-    const content = "import { prisma } from '@memoflow/database/prisma';\n\nexport const client = prisma;\n";
+    const content =
+      "import { prisma } from '@memoflow/database/prisma';\n\nexport const client = prisma;\n";
     const violations = findBoundaryViolations({
       content,
       relPath: 'packages/foo/src/server/application/db/prisma.ts',
@@ -103,7 +112,9 @@ describe('findBoundaryViolations — forbidden external @memoflow/database', () 
       layer: 'server/application',
       specifier: '@memoflow/database/prisma',
     });
-    expect(violations[0].message).toContain("forbidden external specifier '@memoflow/database/prisma'");
+    expect(violations[0].message).toContain(
+      "forbidden external specifier '@memoflow/database/prisma'",
+    );
   });
 
   it('flags deeper subpath `import type ... from "@memoflow/database/prisma/generated"` in server/domain', () => {
@@ -129,7 +140,8 @@ describe('findBoundaryViolations — forbidden external @memoflow/database', () 
   });
 
   it('flags `import { PrismaClient } from "@prisma/client"` in server/application', () => {
-    const content = "import { PrismaClient } from '@prisma/client';\n\nexport const create = async (db: PrismaClient) => db.user.findMany();\n";
+    const content =
+      "import { PrismaClient } from '@prisma/client';\n\nexport const create = async (db: PrismaClient) => db.user.findMany();\n";
     const violations = findBoundaryViolations({
       content,
       relPath: 'packages/goal/src/server/application/use-cases/commands/relation.use-cases.ts',
@@ -146,7 +158,8 @@ describe('findBoundaryViolations — forbidden external @memoflow/database', () 
   });
 
   it('flags `import { PrismaClient } from "@prisma/client"` in server/domain', () => {
-    const content = "import { PrismaClient } from '@prisma/client';\n\nexport const x: PrismaClient | null = null;\n";
+    const content =
+      "import { PrismaClient } from '@prisma/client';\n\nexport const x: PrismaClient | null = null;\n";
     const violations = findBoundaryViolations({
       content,
       relPath: 'packages/foo/src/server/domain/repositories/i-repository.ts',
@@ -249,14 +262,18 @@ describe('findBoundaryViolations — positive cases', () => {
 
 describe('shouldSkipSourceFile — test fixture exclusion', () => {
   it('skips *.spec.ts, *.test.ts and __tests__ paths', () => {
-    expect(shouldSkipSourceFile('relation.use-cases.spec.ts', '/x/relation.use-cases.spec.ts')).toBe(true);
+    expect(
+      shouldSkipSourceFile('relation.use-cases.spec.ts', '/x/relation.use-cases.spec.ts'),
+    ).toBe(true);
     expect(shouldSkipSourceFile('prisma.test.ts', '/x/prisma.test.ts')).toBe(true);
     expect(shouldSkipSourceFile('index.ts', '/x/__tests__/index.ts')).toBe(true);
   });
 
   it('does not skip production files (fixture exclusion only)', () => {
     expect(shouldSkipSourceFile('relation.use-cases.ts', '/x/relation.use-cases.ts')).toBe(false);
-    expect(shouldSkipSourceFile('prisma.repository.ts', '/x/infrastructure/prisma.repository.ts')).toBe(false);
+    expect(
+      shouldSkipSourceFile('prisma.repository.ts', '/x/infrastructure/prisma.repository.ts'),
+    ).toBe(false);
   });
 });
 

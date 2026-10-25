@@ -144,4 +144,3 @@ updated: 2026-07-03T20:54:00+08:00
 - Old path deleted: 过时的 desktop Electron install baseline blocker 叙述、`SessionManager` branded ID warning follow-up 叙述，以及各 active plan 中对旧阻塞状态的当前时描述。
 - Verification: `.\node_modules\.bin\nx.cmd run api:test`、`api:test:smoke`、`web:test`、`task:typecheck`、`task:test`、`goal:test`、`reminder:test`、`schedule:test`、`schedule-orchestration:test`、`desktop:test:main`、`desktop:test`、`memoflow:governance-check` 通过；`.\node_modules\.bin\madge.cmd --circular --extensions ts packages/task/src/index.ts` 无循环依赖。
 - Remaining follow-up: none。本轮完成后整组 core-seam 计划满足归档条件。
-

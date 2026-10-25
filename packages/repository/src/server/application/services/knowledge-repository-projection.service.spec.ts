@@ -1326,7 +1326,7 @@ describe('KnowledgeRepositoryProjectionService', () => {
       'new-sha',
     );
     expect(projectionRepository.applySnapshot).toHaveBeenCalledWith(connection().id, 'new-sha', [
-        expect.objectContaining({ relativePath: 'notes/reconciled.md' }),
+      expect.objectContaining({ relativePath: 'notes/reconciled.md' }),
     ]);
     expect(
       fourAxis.projectionCheckpointRepository.rows.get(connection().id)?.projectedCommitSha,

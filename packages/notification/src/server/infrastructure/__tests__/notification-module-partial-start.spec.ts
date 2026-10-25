@@ -14,7 +14,10 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import type { INotificationRepository } from '../../domain/repositories';
-import type { INotificationPreferenceRepository, INotificationInteractionRepository } from '../../domain/repositories';
+import type {
+  INotificationPreferenceRepository,
+  INotificationInteractionRepository,
+} from '../../domain/repositories';
 import type { NotificationDurableRuntimePort } from '../runtime/notification.runtime';
 import {
   createNotificationModule,
@@ -80,9 +83,7 @@ describe('createNotificationModule partial-start cleanup', () => {
     const a = makeContribution('a');
     const b = makeContribution('b', true);
 
-    const instance = createNotificationModule(
-      makeDeps([a.contribution, b.contribution]),
-    );
+    const instance = createNotificationModule(makeDeps([a.contribution, b.contribution]));
 
     expect(() => instance.start()).toThrow('b start failed');
     expect(a.stop).toHaveBeenCalledTimes(1);
@@ -99,9 +100,7 @@ describe('createNotificationModule partial-start cleanup', () => {
     });
     const b = makeContribution('b', true);
 
-    const instance = createNotificationModule(
-      makeDeps([a.contribution, b.contribution]),
-    );
+    const instance = createNotificationModule(makeDeps([a.contribution, b.contribution]));
 
     expect(() => instance.start()).toThrow('b start failed');
     expect(a.stop).toHaveBeenCalledTimes(1);
@@ -111,9 +110,7 @@ describe('createNotificationModule partial-start cleanup', () => {
     const a = makeContribution('a');
     const b = makeContribution('b');
 
-    const instance = createNotificationModule(
-      makeDeps([a.contribution, b.contribution]),
-    );
+    const instance = createNotificationModule(makeDeps([a.contribution, b.contribution]));
 
     instance.start();
     expect(a.start).toHaveBeenCalledTimes(1);

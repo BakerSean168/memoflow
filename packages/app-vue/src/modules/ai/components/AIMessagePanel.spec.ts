@@ -32,7 +32,15 @@ const i18n = createI18n({
           emptyDescription: 'Describe',
           context: { todayOverview: 'Today' },
           message: { copy: 'Copy', copied: 'Copied' },
-          local: { pending: 'Waiting', sending: 'Sending', answered: 'Answered', expired: 'Expired', answer: 'Send answer', chooseAnswer: 'Choose answer', cancel: 'Cancel' },
+          local: {
+            pending: 'Waiting',
+            sending: 'Sending',
+            answered: 'Answered',
+            expired: 'Expired',
+            answer: 'Send answer',
+            chooseAnswer: 'Choose answer',
+            cancel: 'Cancel',
+          },
           tools: {
             approvalTitle: 'Tool approval',
             pending: 'Waiting for your decision',
@@ -79,12 +87,20 @@ const i18n = createI18n({
 describe('AIMessagePanel (V2 §6.0 welcome)', () => {
   it('renders failed tool history and omits empty internal assistant bubbles', () => {
     const wrapper = mount(AIMessagePanel, {
-      props: { toolMode: 'chat', timeline: [
-        { id: 'empty', role: 'assistant', status: 'success', content: '' },
-        { id: 'tool', role: 'assistant', status: 'error', content: '', toolActivities: [
-          { toolCallId: 'call', toolName: 'routine_create', state: 'failed' },
-        ] },
-      ] }, global: { plugins: [i18n] },
+      props: {
+        toolMode: 'chat',
+        timeline: [
+          { id: 'empty', role: 'assistant', status: 'success', content: '' },
+          {
+            id: 'tool',
+            role: 'assistant',
+            status: 'error',
+            content: '',
+            toolActivities: [{ toolCallId: 'call', toolName: 'routine_create', state: 'failed' }],
+          },
+        ],
+      },
+      global: { plugins: [i18n] },
     });
     expect(wrapper.findAll('article')).toHaveLength(1);
     expect(wrapper.get('[data-testid="ai-tool-history"]').text()).toContain('Create a routine');
@@ -95,20 +111,42 @@ describe('AIMessagePanel (V2 §6.0 welcome)', () => {
       slots: { 'workflow-context': '<button data-testid="recover-workflow">Retry</button>' },
       global: { plugins: [i18n] },
     });
-    expect(wrapper.get('[data-testid="ai-message-panel"] button[data-testid="recover-workflow"]').text()).toBe('Retry');
+    expect(
+      wrapper.get('[data-testid="ai-message-panel"] button[data-testid="recover-workflow"]').text(),
+    ).toBe('Retry');
   });
   it('renders a localized interruption once with muted status and no send-failure alert', async () => {
-    const locale = createI18n({ legacy: false, locale: 'en-US', messages: {
-      'en-US': { aiAssistant: enAI }, 'zh-CN': { aiAssistant: zhAI },
-    } });
-    const wrapper = mount(AIMessagePanel, { props: {
-      toolMode: 'goal-create', timeline: [{ id: 'run-status', role: 'assistant', status: 'interrupted',
-        content: 'An interrupted request', workflowInterruption: { draftPreserved: true, failure: {
-          code: 'RATE_LIMITED', message: 'PRIVATE_BODY', details: { limitKind: 'quota_exhausted' },
-          retryHint: { kind: 'after', afterMs: 30000 },
-        } },
-      }],
-    }, global: { plugins: [locale] } });
+    const locale = createI18n({
+      legacy: false,
+      locale: 'en-US',
+      messages: {
+        'en-US': { aiAssistant: enAI },
+        'zh-CN': { aiAssistant: zhAI },
+      },
+    });
+    const wrapper = mount(AIMessagePanel, {
+      props: {
+        toolMode: 'goal-create',
+        timeline: [
+          {
+            id: 'run-status',
+            role: 'assistant',
+            status: 'interrupted',
+            content: 'An interrupted request',
+            workflowInterruption: {
+              draftPreserved: true,
+              failure: {
+                code: 'RATE_LIMITED',
+                message: 'PRIVATE_BODY',
+                details: { limitKind: 'quota_exhausted' },
+                retryHint: { kind: 'after', afterMs: 30000 },
+              },
+            },
+          },
+        ],
+      },
+      global: { plugins: [locale] },
+    });
     expect(wrapper.findAll('[data-testid="ai-workflow-interruption"]')).toHaveLength(1);
     const status = wrapper.get('[data-testid="ai-workflow-interruption"]');
     expect(status.attributes('role')).toBe('status');
@@ -180,11 +218,38 @@ describe('AIMessagePanel (V2 §6.0 welcome)', () => {
   });
 
   it('renders an Ask User prompt with selection and answer/cancel actions', async () => {
-    const wrapper = mount(AIMessagePanel, { props: { timeline: [{ id: 'assistant-ask', role: 'assistant', content: '', status: 'generating', askUserRequests: [{ toolCallId: 'ask-1', runId: 'run-1', conversationId: 'conversation-1', question: 'Choose a target', options: [{ label: 'Near term' }, { label: 'Long term' }], selectionMode: 'single_select', status: 'pending' }] }], toolMode: 'chat' }, global: { plugins: [i18n] } });
+    const wrapper = mount(AIMessagePanel, {
+      props: {
+        timeline: [
+          {
+            id: 'assistant-ask',
+            role: 'assistant',
+            content: '',
+            status: 'generating',
+            askUserRequests: [
+              {
+                toolCallId: 'ask-1',
+                runId: 'run-1',
+                conversationId: 'conversation-1',
+                question: 'Choose a target',
+                options: [{ label: 'Near term' }, { label: 'Long term' }],
+                selectionMode: 'single_select',
+                status: 'pending',
+              },
+            ],
+          },
+        ],
+        toolMode: 'chat',
+      },
+      global: { plugins: [i18n] },
+    });
     expect(wrapper.get('[data-testid="ai-ask-user-request"]').text()).toContain('Choose a target');
     await wrapper.get('select').setValue('Long term');
     await wrapper.get('[data-testid="ai-ask-user-submit"]').trigger('submit');
-    expect(wrapper.emitted('ask-user-answer')?.[0]).toMatchObject([{ toolCallId: 'ask-1' }, 'Long term']);
+    expect(wrapper.emitted('ask-user-answer')?.[0]).toMatchObject([
+      { toolCallId: 'ask-1' },
+      'Long term',
+    ]);
     await wrapper.get('[data-testid="ai-ask-user-cancel"]').trigger('click');
     expect(wrapper.emitted('ask-user-cancel')?.[0]).toMatchObject([{ toolCallId: 'ask-1' }]);
     wrapper.unmount();

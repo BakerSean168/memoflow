@@ -43,7 +43,9 @@ function revertEvent(): Extract<TaskGoalProgressOutboxEventV2, { action: 'revert
   };
 }
 
-function handler(overrides: { create?: ReturnType<typeof vi.fn>; remove?: ReturnType<typeof vi.fn> } = {}) {
+function handler(
+  overrides: { create?: ReturnType<typeof vi.fn>; remove?: ReturnType<typeof vi.fn> } = {},
+) {
   return new GoalTaskProgressHandler(
     { execute: overrides.create ?? vi.fn(async () => ok({} as never)) },
     { execute: overrides.remove ?? vi.fn(async () => ok({} as never)) },

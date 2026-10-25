@@ -505,7 +505,9 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
       { notificationId },
     );
 
-    const receiptsRes = await moduleInstance.operations.getDeliveryReceipts(identityId, { limit: 10 });
+    const receiptsRes = await moduleInstance.operations.getDeliveryReceipts(identityId, {
+      limit: 10,
+    });
     expect(receiptsRes.ok).toBe(true);
     const receipts = receiptsRes.ok ? (receiptsRes.data as any[]) : [];
     expect(receipts.length).toBeGreaterThanOrEqual(1);
@@ -1084,11 +1086,15 @@ describe('Notification Reliable Operation & Durable Dispatch Integration (W2)', 
 
     // InApp has no pre-receipt external side effect; executing it is replay-safe.
     const notifObj = await notificationRepo.findByIdForIdentity(identityId, notifId);
-    await countingDeliverer.deliver(notifObj!, { channelType: 'InApp', recipient: identityId }, {
-      deliveryId: opId,
-      idempotencyKey,
-      identityId,
-    });
+    await countingDeliverer.deliver(
+      notifObj!,
+      { channelType: 'InApp', recipient: identityId },
+      {
+        deliveryId: opId,
+        idempotencyKey,
+        identityId,
+      },
+    );
     expect(delivererCount).toBe(1);
 
     // Worker 1 crashes BEFORE calling recordDeliveryReceipt.

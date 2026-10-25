@@ -156,9 +156,17 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
 
   private async assertGoalRestartSource(input: GoalCreateWorkflowInput): Promise<void> {
     if (!input.sourceDraft) return;
-    const source = await this.get({ identityId: input.identityId, runId: input.sourceDraft.sourceRunId });
-    if (!source || source.kind !== 'goal.create' || source.conversationId !== input.conversationId ||
-        !['failed', 'cancelled'].includes(source.status) || source.result?.referenceMap.goal)
+    const source = await this.get({
+      identityId: input.identityId,
+      runId: input.sourceDraft.sourceRunId,
+    });
+    if (
+      !source ||
+      source.kind !== 'goal.create' ||
+      source.conversationId !== input.conversationId ||
+      !['failed', 'cancelled'].includes(source.status) ||
+      source.result?.referenceMap.goal
+    )
       throw new AIExecutionError('conflict', 'Goal restart source is unavailable or already saved');
   }
 
@@ -223,7 +231,11 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
         await run.start({
           inputData: taskInput,
           initialState: initialTaskCreateWorkflowState(taskInput),
-          requestContext: await this.workflowRequestContext(input.context, taskInput, input.external),
+          requestContext: await this.workflowRequestContext(
+            input.context,
+            taskInput,
+            input.external,
+          ),
         });
       } catch (cause) {
         const persisted = await this.get({
@@ -429,7 +441,11 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
       await run.resume({
         step: lifecycleStepId,
         resumeData: input.request.command,
-        requestContext: await this.workflowRequestContext(input.context, workflowInput, input.external),
+        requestContext: await this.workflowRequestContext(
+          input.context,
+          workflowInput,
+          input.external,
+        ),
       });
     } catch (cause) {
       const persisted = await this.get({
@@ -516,14 +532,20 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
     await run.resumeAsync({
       step: lifecycleStepId,
       resumeData: input.request.command,
-      requestContext: await this.workflowRequestContext(input.context, workflowInput, input.external),
+      requestContext: await this.workflowRequestContext(
+        input.context,
+        workflowInput,
+        input.external,
+      ),
     });
     return this.runningWorkflowView({
       runId: before.runId,
       kind: before.kind,
       conversationId: before.conversationId,
       createdAt: before.createdAt,
-      ...(before.kind === 'goal.create' && before.resourceVersion ? { awaitAfterVersion: before.resourceVersion } : {}),
+      ...(before.kind === 'goal.create' && before.resourceVersion
+        ? { awaitAfterVersion: before.resourceVersion }
+        : {}),
     });
   }
 
@@ -534,13 +556,24 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
     external: ExternalWorkflowInvocation;
   }): Promise<AIWorkflowRunView> {
     const store = await this.workflowStore();
-    const row = await store.getWorkflowRunById({ workflowName: TASK_CREATE_WORKFLOW_ID, runId: input.runId });
-    if (!row || row.resourceId !== input.context.identityId) throw new Error('AI_WORKFLOW_RUN_NOT_FOUND');
+    const row = await store.getWorkflowRunById({
+      workflowName: TASK_CREATE_WORKFLOW_ID,
+      runId: input.runId,
+    });
+    if (!row || row.resourceId !== input.context.identityId)
+      throw new Error('AI_WORKFLOW_RUN_NOT_FOUND');
     const workflowInput = workflowInputFromSnapshot(TASK_CREATE_WORKFLOW_ID, row.snapshot);
     await this.assertWorkflowSelection(input.context, workflowInput);
-    const requestContext = await this.workflowRequestContext(input.context, workflowInput, input.external);
+    const requestContext = await this.workflowRequestContext(
+      input.context,
+      workflowInput,
+      input.external,
+    );
     if (input.command) requestContext.setRaw('externalResumeCommand', input.command);
-    const run = await this.deps.taskCreateWorkflow.createRun({ runId: input.runId, resourceId: input.context.identityId });
+    const run = await this.deps.taskCreateWorkflow.createRun({
+      runId: input.runId,
+      resourceId: input.context.identityId,
+    });
     await run.restart({ requestContext });
     const view = await this.get({ identityId: input.context.identityId, runId: input.runId });
     if (!view) throw new Error('AI_WORKFLOW_SNAPSHOT_MISSING');
@@ -578,7 +611,9 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
       if (goalRow.resourceId !== input.identityId) return null;
       const source = getGoalWorkflowEventSource(this.deps.storage);
       return this.attachWorkflowUsage(
-        source ? await source.snapshot(input.identityId, input.runId) : projectGoalCreateRun(goalRow, input.identityId),
+        source
+          ? await source.snapshot(input.identityId, input.runId)
+          : projectGoalCreateRun(goalRow, input.identityId),
         input.identityId,
       );
     }
@@ -660,24 +695,31 @@ export class MastraDurableWorkflowRuntime implements AIWorkflowRuntimePort {
     const scope = { identityId: input.identityId, runId: run.runId, now };
     if (input.request.action === 'release') {
       const released = await repository.release({
-        ...scope, token: input.request.token, fence: input.request.fence,
+        ...scope,
+        token: input.request.token,
+        fence: input.request.fence,
       });
       return { status: released ? 'released' : 'lost' };
     }
     if (run.status !== 'running' && run.status !== 'suspended') return { status: 'lost' };
     if (input.request.action === 'renew') {
       const renewed = await repository.renew({
-        ...scope, token: input.request.token, fence: input.request.fence, expiresAt,
+        ...scope,
+        token: input.request.token,
+        fence: input.request.fence,
+        expiresAt,
       });
       return renewed ? { status: 'renewed', expiresAt } : { status: 'lost' };
     }
     const claimed = await repository.claim({ ...scope, expiresAt, token: randomUUID() });
-    return claimed ? {
-      status: 'claimed',
-      token: claimed.token,
-      fence: claimed.fence,
-      expiresAt: claimed.expiresAt,
-    } : { status: 'busy' };
+    return claimed
+      ? {
+          status: 'claimed',
+          token: claimed.token,
+          fence: claimed.fence,
+          expiresAt: claimed.expiresAt,
+        }
+      : { status: 'busy' };
   }
 
   async cancel(input: { identityId: string; runId: string }): Promise<AIWorkflowRunView | null> {

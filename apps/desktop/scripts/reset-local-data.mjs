@@ -8,13 +8,18 @@ const VALID_SCOPES = new Set(['all', 'auth', 'db']);
 
 function collectTargets(roots, scope) {
   if (scope === 'all') {
-    return ['configRoot', 'dataRoot', 'stateRoot', 'cacheRoot', 'logsDir'].map((key) => ({ label: key, path: roots[key] }));
+    return ['configRoot', 'dataRoot', 'stateRoot', 'cacheRoot', 'logsDir'].map((key) => ({
+      label: key,
+      path: roots[key],
+    }));
   }
   const data = roots.dataRoot;
   if (scope === 'auth') {
-    return [{ label: 'shared credentials', path: path.join(data, 'shared', 'secure') },
+    return [
+      { label: 'shared credentials', path: path.join(data, 'shared', 'secure') },
       { label: 'device identity', path: path.join(data, 'shared', 'auth') },
-      ...profileTargets(data, 'auth')];
+      ...profileTargets(data, 'auth'),
+    ];
   }
   return profileTargets(data, 'db');
 }
@@ -22,7 +27,8 @@ function collectTargets(roots, scope) {
 function profileTargets(dataRoot, directory) {
   const profiles = path.join(dataRoot, 'profiles');
   if (!fs.existsSync(profiles)) return [];
-  return fs.readdirSync(profiles, { withFileTypes: true })
+  return fs
+    .readdirSync(profiles, { withFileTypes: true })
     .filter((entry) => entry.isDirectory() && /^p_[a-f0-9]{24}$/.test(entry.name))
     .map((entry) => ({ label: directory, path: path.join(profiles, entry.name, directory) }));
 }

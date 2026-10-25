@@ -25,11 +25,15 @@ export class GetGoalAggregateUseCase {
     }
 
     const goalDTO = goal.toClientDTO(true);
-    const records = await this.goalRecordRepository.findByGoalId(identityId, goalId, { orderBy: 'desc' });
+    const records = await this.goalRecordRepository.findByGoalId(identityId, goalId, {
+      orderBy: 'desc',
+    });
     const keyResults = goal.keyResults.map((keyResult) => keyResult.toClientDTO());
     const reviews = goal.goalReviews.map((review) => review.toClientDTO());
     const recordDTOs = records.map((r) => r.toClientDTO(goalId));
-    const completedKeyResults = goal.keyResults.filter((keyResult) => keyResult.isCompleted()).length;
+    const completedKeyResults = goal.keyResults.filter((keyResult) =>
+      keyResult.isCompleted(),
+    ).length;
     const overallProgress = goal.calculateProgress();
 
     return ok({

@@ -150,7 +150,9 @@ describe('createDataPortabilityElectronModule lifecycle', () => {
     for (const channel of Object.values(DataPortabilityChannels)) {
       expect(mocks.handlers.has(channel)).toBe(false);
     }
-    expect(mocks.removeHandler).toHaveBeenCalledTimes(Object.values(DataPortabilityChannels).length);
+    expect(mocks.removeHandler).toHaveBeenCalledTimes(
+      Object.values(DataPortabilityChannels).length,
+    );
     expect(fake.dispose).toHaveBeenCalledTimes(1);
 
     moduleDef.destroy?.();

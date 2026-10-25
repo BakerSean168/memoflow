@@ -17,7 +17,9 @@ export interface GoalWorkflowLiveActionSink {
   append(command: GoalWorkflowLiveAction): Promise<GoalWorkflowLiveActionRecord>;
 }
 
-export function requireGoalWorkflowLiveActionSink(context: RequestContext): GoalWorkflowLiveActionSink {
+export function requireGoalWorkflowLiveActionSink(
+  context: RequestContext,
+): GoalWorkflowLiveActionSink {
   const candidate = context.getRaw(GOAL_WORKFLOW_LIVE_ACTION_SINK_KEY);
   if (
     !candidate ||
@@ -30,7 +32,10 @@ export function requireGoalWorkflowLiveActionSink(context: RequestContext): Goal
     throw new Error('Goal live action sink is unavailable');
   }
   const sink = candidate as GoalWorkflowLiveActionSink;
-  if (sink.identityId !== context.getRaw('identityId') || sink.runId !== context.getRaw('workflowRunId')) {
+  if (
+    sink.identityId !== context.getRaw('identityId') ||
+    sink.runId !== context.getRaw('workflowRunId')
+  ) {
     throw new Error('Goal live action sink does not match authenticated workflow');
   }
   return sink;
@@ -55,7 +60,10 @@ export function appendGoalWorkflowLiveAction(input: {
   if (command.revision !== input.revision) {
     throw new Error('Stale Goal action revision');
   }
-  const existing = journal.find((item) => item.command.actionId === command.actionId && item.command.revision === command.revision);
+  const existing = journal.find(
+    (item) =>
+      item.command.actionId === command.actionId && item.command.revision === command.revision,
+  );
   if (existing) {
     if (JSON.stringify(existing.command) !== JSON.stringify(command)) {
       throw new Error('Goal action idempotency conflict');
@@ -96,17 +104,24 @@ export async function publishRunningGoalActions(input: {
   if (!row || row.resourceId !== input.identityId) {
     throw new Error('Goal workflow live action owner mismatch');
   }
-  const snapshot = typeof row.snapshot === 'string' ? JSON.parse(row.snapshot) as unknown : row.snapshot;
-  if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot) ||
-      (snapshot as Record<string, unknown>).status !== 'running') {
+  const snapshot =
+    typeof row.snapshot === 'string' ? (JSON.parse(row.snapshot) as unknown) : row.snapshot;
+  if (
+    !snapshot ||
+    typeof snapshot !== 'object' ||
+    Array.isArray(snapshot) ||
+    (snapshot as Record<string, unknown>).status !== 'running'
+  ) {
     throw new Error('Goal workflow is no longer running');
   }
   const previous = GoalWorkflowLiveActionJournalSchema.parse(
     (snapshot as Record<string, unknown>).goalLiveActions ?? [],
   );
   const journal = GoalWorkflowLiveActionJournalSchema.parse(input.journal);
-  if (previous.length > journal.length ||
-      JSON.stringify(previous) !== JSON.stringify(journal.slice(0, previous.length))) {
+  if (
+    previous.length > journal.length ||
+    JSON.stringify(previous) !== JSON.stringify(journal.slice(0, previous.length))
+  ) {
     throw new Error('Goal workflow preview journal diverged');
   }
   if (previous.length === journal.length) return;
@@ -121,9 +136,11 @@ export async function publishRunningGoalActions(input: {
       goalLiveActions: journal,
     } as Parameters<typeof store.updateWorkflowState>[0]['opts'],
   });
-  if (!result || JSON.stringify(
-    (result as unknown as Record<string, unknown>).goalLiveActions,
-  ) !== JSON.stringify(journal)) {
+  if (
+    !result ||
+    JSON.stringify((result as unknown as Record<string, unknown>).goalLiveActions) !==
+      JSON.stringify(journal)
+  ) {
     throw new Error('Goal workflow preview publish failed');
   }
 }

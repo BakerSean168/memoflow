@@ -1,5 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
-import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from '.';
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '.';
 import { Button } from '../button';
 
 const meta = {
@@ -13,7 +22,17 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => ({
-    components: { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger, Button },
+    components: {
+      Drawer,
+      DrawerClose,
+      DrawerContent,
+      DrawerDescription,
+      DrawerFooter,
+      DrawerHeader,
+      DrawerTitle,
+      DrawerTrigger,
+      Button,
+    },
     template: `
       <Drawer>
         <DrawerTrigger as-child>

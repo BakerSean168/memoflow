@@ -54,18 +54,14 @@ export class RescheduleTaskOccurrenceUseCase {
         (candidate) => candidate.id !== occurrence.id && candidate.occurrenceKey === targetKey,
       );
       if (collision) {
-        return error(
-          'CONFLICT',
-          `Task occurrence already exists on target day (${collision.id})`,
-          [
-            {
-              field: 'scheduleSnapshot.date',
-              code: 'TASK_OCCURRENCE_TARGET_DATE_CONFLICT',
-              message: 'Another occurrence from this task plan already exists on the target day',
-              value: targetDate,
-            },
-          ],
-        );
+        return error('CONFLICT', `Task occurrence already exists on target day (${collision.id})`, [
+          {
+            field: 'scheduleSnapshot.date',
+            code: 'TASK_OCCURRENCE_TARGET_DATE_CONFLICT',
+            message: 'Another occurrence from this task plan already exists on the target day',
+            value: targetDate,
+          },
+        ]);
       }
 
       const changed = occurrence.reschedule(nextSchedule, timeContext);

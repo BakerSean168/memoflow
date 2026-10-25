@@ -37,7 +37,6 @@ export interface AutoLaunchConfig {
  * Class to manage auto-launch settings.
  */
 export class AutoLaunchManager {
-
   private autoLauncher: AutoLaunchInstance | null = null;
   private config: AutoLaunchConfig;
   private initialized = false;
@@ -70,7 +69,9 @@ export class AutoLaunchManager {
     // Windows/Linux use auto-launch - dynamic import
     if (!AutoLaunchClass) {
       try {
-        const autoLaunchModule = (await import('auto-launch')) as { default?: AutoLaunchConstructor } & AutoLaunchConstructor;
+        const autoLaunchModule = (await import('auto-launch')) as {
+          default?: AutoLaunchConstructor;
+        } & AutoLaunchConstructor;
         AutoLaunchClass = autoLaunchModule.default ?? autoLaunchModule;
       } catch (error) {
         console.warn('[AutoLaunchManager] auto-launch module not available:', error);

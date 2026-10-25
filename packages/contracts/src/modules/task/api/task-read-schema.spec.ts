@@ -21,7 +21,15 @@ import { TaskOccurrenceReadQuerySchema } from './read-page.dto';
 import { TaskOccurrenceListInputSchema } from '../../agent-gateway';
 it('rejects instants outside canonical calendar bounds at the owner and MCP boundaries', () => {
   for (const schema of [TaskOccurrenceReadQuerySchema, TaskOccurrenceListInputSchema]) {
-    expect(schema.safeParse({ startDate: Number.MAX_SAFE_INTEGER, endDate: Number.MAX_SAFE_INTEGER }).success).toBe(false);
-    expect(schema.safeParse({ startDate: Date.parse('2026-10-07T00:00:00Z'), endDate: Date.parse('2026-10-08T00:00:00Z') }).success).toBe(true);
+    expect(
+      schema.safeParse({ startDate: Number.MAX_SAFE_INTEGER, endDate: Number.MAX_SAFE_INTEGER })
+        .success,
+    ).toBe(false);
+    expect(
+      schema.safeParse({
+        startDate: Date.parse('2026-10-07T00:00:00Z'),
+        endDate: Date.parse('2026-10-08T00:00:00Z'),
+      }).success,
+    ).toBe(true);
   }
 });

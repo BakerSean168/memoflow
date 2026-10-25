@@ -1,7 +1,7 @@
 /**
  * 测试用户数据库初始化脚本
  * 用于在测试数据库中插入固定的测试用户
- * 
+ *
  * 运行方式:
  *   pnpm tsx tools/test/seed-test-user.ts
  */
@@ -42,27 +42,24 @@ const TEST_USERS = [
 /**
  * 创建或更新测试用户
  */
-async function seedTestUser(userData: typeof TEST_USERS[0]) {
+async function seedTestUser(userData: (typeof TEST_USERS)[0]) {
   console.log(`\n📝 处理测试用户: ${userData.username}`);
 
   // 检查用户是否已存在
   const existingAccount = await prisma.account.findFirst({
     where: {
-      OR: [
-        { username: userData.username },
-        { email: userData.email },
-      ],
+      OR: [{ username: userData.username }, { email: userData.email }],
     },
   });
 
   if (existingAccount) {
     console.log(`  ✅ 用户已存在: ${userData.username} (UUID: ${existingAccount.uuid})`);
-    
+
     // 更新密码（如果需要）
     const hashedPassword = await bcrypt.hash(userData.password, 12);
     const now = Date.now();
     const passwordCredentialId = randomUUID();
-    
+
     // 查找并更新认证凭证
     const credential = await prisma.authCredential.findFirst({
       where: { identityId: existingAccount.uuid },
@@ -86,10 +83,10 @@ async function seedTestUser(userData: typeof TEST_USERS[0]) {
 
       // 解析现有的 data 字段
       const existingData = JSON.parse(credential.data);
-      
+
       // 更新 password_credential
       existingData.password_credential = passwordCredentialDTO;
-      
+
       // 保存更新
       await prisma.authCredential.update({
         where: { uuid: credential.uuid },
@@ -98,7 +95,7 @@ async function seedTestUser(userData: typeof TEST_USERS[0]) {
           updatedAt: new Date(now),
         },
       });
-      
+
       console.log(`  🔄 密码已更新`);
     }
 
@@ -111,7 +108,7 @@ async function seedTestUser(userData: typeof TEST_USERS[0]) {
   // 1. 生成密码哈希
   const hashedPassword = await bcrypt.hash(userData.password, 12);
   const now = Date.now();
-  
+
   const identityId = randomUUID();
   const credentialId = randomUUID();
   const passwordCredentialId = randomUUID();
@@ -243,7 +240,6 @@ async function main() {
       console.log(`    Password: ${user.password}`);
       console.log(`    Email:    ${user.email}\n`);
     }
-
   } catch (error) {
     console.error('❌ 错误:', error);
     process.exit(1);

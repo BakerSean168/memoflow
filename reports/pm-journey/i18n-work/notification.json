@@ -1,118 +1,90 @@
 [
- {
-  "key": "notification.action.dismiss",
-  "files": [
-   "packages/app-vue/src/modules/notification/components/NotificationPermissionWarning.vue"
-  ]
- },
- {
-  "key": "notification.action.enableNotification",
-  "files": [
-   "packages/app-vue/src/modules/notification/components/NotificationPermissionWarning.vue"
-  ]
- },
- {
-  "key": "notification.bell.title",
-  "files": [
-   "packages/app-vue/src/modules/notification/components/NotificationBell.vue"
-  ]
- },
- {
-  "key": "notification.bell.unreadCount",
-  "files": [
-   "packages/app-vue/src/modules/notification/components/NotificationBell.vue"
-  ]
- },
- {
-  "key": "notification.drawer.title",
-  "files": [
-   "packages/app-vue/src/modules/notification/components/NotificationCapsulePreview.vue",
-   "packages/app-vue/src/modules/notification/components/NotificationDrawer.vue"
-  ]
- },
- {
-  "key": "notification.drawer.viewAll",
-  "files": [
-   "packages/app-vue/src/modules/notification/components/NotificationCapsulePreview.vue",
-   "packages/app-vue/src/modules/notification/components/NotificationDrawer.vue"
-  ]
- },
- {
-  "key": "notification.item.priorityImportant",
-  "files": [
-   "packages/app-vue/src/modules/notification/components/NotificationItem.vue"
-  ]
- },
- {
-  "key": "notification.item.priorityVital",
-  "files": [
-   "packages/app-vue/src/modules/notification/components/NotificationItem.vue"
-  ]
- },
- {
-  "key": "notification.permission.warningTitle",
-  "files": [
-   "packages/app-vue/src/modules/notification/components/NotificationPermissionWarning.vue"
-  ]
- },
- {
-  "key": "notification.sseMonitor.actionConnect",
-  "files": [
-   "packages/app-vue/src/modules/notification/views/SSEMonitorPage.vue"
-  ]
- },
- {
-  "key": "notification.sseMonitor.actionDisconnect",
-  "files": [
-   "packages/app-vue/src/modules/notification/views/SSEMonitorPage.vue"
-  ]
- },
- {
-  "key": "notification.sseMonitor.clearLog",
-  "files": [
-   "packages/app-vue/src/modules/notification/views/SSEMonitorPage.vue"
-  ]
- },
- {
-  "key": "notification.sseMonitor.connected",
-  "files": [
-   "packages/app-vue/src/modules/notification/views/SSEMonitorPage.vue"
-  ]
- },
- {
-  "key": "notification.sseMonitor.disconnected",
-  "files": [
-   "packages/app-vue/src/modules/notification/views/SSEMonitorPage.vue"
-  ]
- },
- {
-  "key": "notification.sseMonitor.msgConnected",
-  "files": [
-   "packages/app-vue/src/modules/notification/views/SSEMonitorPage.vue"
-  ]
- },
- {
-  "key": "notification.sseMonitor.msgDisconnected",
-  "files": [
-   "packages/app-vue/src/modules/notification/views/SSEMonitorPage.vue"
-  ]
- },
- {
-  "key": "notification.sseMonitor.title",
-  "files": [
-   "packages/app-vue/src/modules/notification/views/SSEMonitorPage.vue"
-  ]
- },
- {
-  "key": "notification.sseMonitor.waitingDescription",
-  "files": [
-   "packages/app-vue/src/modules/notification/views/SSEMonitorPage.vue"
-  ]
- },
- {
-  "key": "notification.sseMonitor.waitingTitle",
-  "files": [
-   "packages/app-vue/src/modules/notification/views/SSEMonitorPage.vue"
-  ]
- }
+  {
+    "key": "notification.action.dismiss",
+    "files": [
+      "packages/app-vue/src/modules/notification/components/NotificationPermissionWarning.vue"
+    ]
+  },
+  {
+    "key": "notification.action.enableNotification",
+    "files": [
+      "packages/app-vue/src/modules/notification/components/NotificationPermissionWarning.vue"
+    ]
+  },
+  {
+    "key": "notification.bell.title",
+    "files": ["packages/app-vue/src/modules/notification/components/NotificationBell.vue"]
+  },
+  {
+    "key": "notification.bell.unreadCount",
+    "files": ["packages/app-vue/src/modules/notification/components/NotificationBell.vue"]
+  },
+  {
+    "key": "notification.drawer.title",
+    "files": [
+      "packages/app-vue/src/modules/notification/components/NotificationCapsulePreview.vue",
+      "packages/app-vue/src/modules/notification/components/NotificationDrawer.vue"
+    ]
+  },
+  {
+    "key": "notification.drawer.viewAll",
+    "files": [
+      "packages/app-vue/src/modules/notification/components/NotificationCapsulePreview.vue",
+      "packages/app-vue/src/modules/notification/components/NotificationDrawer.vue"
+    ]
+  },
+  {
+    "key": "notification.item.priorityImportant",
+    "files": ["packages/app-vue/src/modules/notification/components/NotificationItem.vue"]
+  },
+  {
+    "key": "notification.item.priorityVital",
+    "files": ["packages/app-vue/src/modules/notification/components/NotificationItem.vue"]
+  },
+  {
+    "key": "notification.permission.warningTitle",
+    "files": [
+      "packages/app-vue/src/modules/notification/components/NotificationPermissionWarning.vue"
+    ]
+  },
+  {
+    "key": "notification.sseMonitor.actionConnect",
+    "files": ["packages/app-vue/src/modules/notification/views/SSEMonitorPage.vue"]
+  },
+  {
+    "key": "notification.sseMonitor.actionDisconnect",
+    "files": ["packages/app-vue/src/modules/notification/views/SSEMonitorPage.vue"]
+  },
+  {
+    "key": "notification.sseMonitor.clearLog",
+    "files": ["packages/app-vue/src/modules/notification/views/SSEMonitorPage.vue"]
+  },
+  {
+    "key": "notification.sseMonitor.connected",
+    "files": ["packages/app-vue/src/modules/notification/views/SSEMonitorPage.vue"]
+  },
+  {
+    "key": "notification.sseMonitor.disconnected",
+    "files": ["packages/app-vue/src/modules/notification/views/SSEMonitorPage.vue"]
+  },
+  {
+    "key": "notification.sseMonitor.msgConnected",
+    "files": ["packages/app-vue/src/modules/notification/views/SSEMonitorPage.vue"]
+  },
+  {
+    "key": "notification.sseMonitor.msgDisconnected",
+    "files": ["packages/app-vue/src/modules/notification/views/SSEMonitorPage.vue"]
+  },
+  {
+    "key": "notification.sseMonitor.title",
+    "files": ["packages/app-vue/src/modules/notification/views/SSEMonitorPage.vue"]
+  },
+  {
+    "key": "notification.sseMonitor.waitingDescription",
+    "files": ["packages/app-vue/src/modules/notification/views/SSEMonitorPage.vue"]
+  },
+  {
+    "key": "notification.sseMonitor.waitingTitle",
+    "files": ["packages/app-vue/src/modules/notification/views/SSEMonitorPage.vue"]
+  }
 ]

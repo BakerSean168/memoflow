@@ -1,13 +1,19 @@
 export default {
   businessSurface: {
     interrupted: 'This Goal planning round has stopped.',
-    interruptionUnconfirmed: 'This planning round cannot be confirmed right now. Entered content is retained.',
+    interruptionUnconfirmed:
+      'This planning round cannot be confirmed right now. Entered content is retained.',
     selectedModelContext: 'Selected for this round: {model} ({provider}).',
-    draftPreserved: 'Your Goal draft is preserved in the right panel. You can keep editing and save it.',
-    rateLimited: 'The model service has temporarily reached its request limit. Retry later or choose another model or provider.',
-    quotaExhausted: 'The model service has insufficient quota. Check your quota or choose another model or provider.',
-    limitUnknown: 'The model service reached a request or quota limit. Retry later or choose another model or provider.',
-    retryAfter: 'The service suggests waiting at least about {seconds} seconds before trying again; recovery is not guaranteed.',
+    draftPreserved:
+      'Your Goal draft is preserved in the right panel. You can keep editing and save it.',
+    rateLimited:
+      'The model service has temporarily reached its request limit. Retry later or choose another model or provider.',
+    quotaExhausted:
+      'The model service has insufficient quota. Check your quota or choose another model or provider.',
+    limitUnknown:
+      'The model service reached a request or quota limit. Retry later or choose another model or provider.',
+    retryAfter:
+      'The service suggests waiting at least about {seconds} seconds before trying again; recovery is not guaranteed.',
     controlLost: 'AI control is unavailable. Your draft is preserved and read-only until verified.',
     controlRetry: 'Recheck control',
     retryPlanning: 'Retry planning',
@@ -36,7 +42,8 @@ export default {
   },
   composer: {
     switchBlocked: {
-      incompatible: 'This conversation cannot switch to this Agent yet. Start a new conversation to use it.',
+      incompatible:
+        'This conversation cannot switch to this Agent yet. Start a new conversation to use it.',
       busy: 'Wait for the current reply, tool operation or workflow review to finish before switching.',
       loading: 'Loading the conversation selection…',
     },
@@ -163,7 +170,8 @@ export default {
       approve: 'Approve',
       decline: 'Decline',
       unknown: 'Approval result unconfirmed',
-      decisionUnknown: 'Decision delivery is unconfirmed. Refresh the conversation to check its status before continuing.',
+      decisionUnknown:
+        'Decision delivery is unconfirmed. Refresh the conversation to check its status before continuing.',
       runFailed: 'The run failed. Previously accepted approval decisions remain valid.',
       runCancelled: 'The run was cancelled.',
       execution: { completed: 'Completed', failed: 'Failed', denied: 'Denied' },

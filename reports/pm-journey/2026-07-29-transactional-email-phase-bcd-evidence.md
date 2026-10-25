@@ -10,17 +10,17 @@ Finish residual work from `docs/plan/active/2026-07-28-transactional-email-smtp.
 
 ## Code
 
-| Area | Path |
-|------|------|
-| Redis challenge | `redis-verification-challenge-store.ts`, `create-verification-challenge-store.ts` |
-| Shared policy | `verification-challenge-constants.ts` (memory + redis) |
-| Templates | `email-templates.ts` (zh \| en via SMTP_LOCALE) |
-| Resend | `resend-email-sender.ts` |
-| Failover | `failover-email-sender.ts` + `SMTP_SECONDARY_*` |
-| Factory | `create-email-sender.ts` (`console` \| `smtp` \| `resend`) |
-| Wiring | `authentication.module.ts`, `prisma.ts`, `api/module.ts`, `apps/api/main.ts` |
-| Redis client | `apps/api/.../redis/create-redis-client.ts` (only if `AUTH_CHALLENGE_STORE=redis`) |
-| Env | `env.schema.ts`, `.env.example` |
+| Area            | Path                                                                               |
+| --------------- | ---------------------------------------------------------------------------------- |
+| Redis challenge | `redis-verification-challenge-store.ts`, `create-verification-challenge-store.ts`  |
+| Shared policy   | `verification-challenge-constants.ts` (memory + redis)                             |
+| Templates       | `email-templates.ts` (zh \| en via SMTP_LOCALE)                                    |
+| Resend          | `resend-email-sender.ts`                                                           |
+| Failover        | `failover-email-sender.ts` + `SMTP_SECONDARY_*`                                    |
+| Factory         | `create-email-sender.ts` (`console` \| `smtp` \| `resend`)                         |
+| Wiring          | `authentication.module.ts`, `prisma.ts`, `api/module.ts`, `apps/api/main.ts`       |
+| Redis client    | `apps/api/.../redis/create-redis-client.ts` (only if `AUTH_CHALLENGE_STORE=redis`) |
+| Env             | `env.schema.ts`, `.env.example`                                                    |
 
 ## Docs
 

@@ -1,8 +1,11 @@
-import { TaskTimeType as TaskTimeTypeContract, type TaskTimeType as ITaskTimeType } from '@memoflow/contracts/task';
+import {
+  TaskTimeType as TaskTimeTypeContract,
+  type TaskTimeType as ITaskTimeType,
+} from '@memoflow/contracts/task';
 
 /**
  * 📝 任务时间类型 - 任务的时间类型
- * 
+ *
  * Branded Type：运行时为 string，编译时具有类型安全性
  * 零序列化成本，内存开销极小
  */
@@ -21,7 +24,7 @@ const VALUES: ITaskTimeType[] = Object.values(TaskTimeTypeContract);
  */
 export const TaskTimeType = {
   // ================= 常量定义 =================
-  
+
   AllDay: 'AllDay' as TaskTimeType,
   TimePoint: 'TimePoint' as TaskTimeType,
   TimeRange: 'TimeRange' as TaskTimeType,

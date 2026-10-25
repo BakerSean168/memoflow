@@ -48,9 +48,7 @@ export function createNotificationHttpClient(
   return createNotificationClientService(new NotificationHttpAdapter(httpClient));
 }
 
-export function createNotificationIpcClient(
-  ipcClient: IResultIpcClient,
-): NotificationClientPort {
+export function createNotificationIpcClient(ipcClient: IResultIpcClient): NotificationClientPort {
   return createNotificationClientService(new NotificationIpcAdapter(ipcClient));
 }
 

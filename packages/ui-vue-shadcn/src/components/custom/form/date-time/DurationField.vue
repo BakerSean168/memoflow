@@ -1,33 +1,36 @@
 <script setup lang="ts">
-import { computed, useId } from 'vue'
-import { Input } from '../../../ui/input'
-import { Label } from '../../../ui/label'
+import { computed, useId } from 'vue';
+import { Input } from '../../../ui/input';
+import { Label } from '../../../ui/label';
 
-const props = withDefaults(defineProps<{
-  modelValue?: number | null
-  id?: string
-  label?: string
-  unitLabel?: string
-  min?: number
-  step?: number
-  disabled?: boolean
-  error?: string | null
-}>(), {
-  modelValue: null,
-  label: 'Duration',
-  unitLabel: 'min',
-  min: 0,
-  step: 1,
-  disabled: false,
-  error: null,
-})
-const emit = defineEmits<{ (event: 'update:modelValue', value: number | null): void }>()
-const generatedId = useId()
-const fieldId = computed(() => props.id ?? `duration-field-${generatedId}`)
-const errorId = computed(() => `${fieldId.value}-error`)
+const props = withDefaults(
+  defineProps<{
+    modelValue?: number | null;
+    id?: string;
+    label?: string;
+    unitLabel?: string;
+    min?: number;
+    step?: number;
+    disabled?: boolean;
+    error?: string | null;
+  }>(),
+  {
+    modelValue: null,
+    label: 'Duration',
+    unitLabel: 'min',
+    min: 0,
+    step: 1,
+    disabled: false,
+    error: null,
+  },
+);
+const emit = defineEmits<{ (event: 'update:modelValue', value: number | null): void }>();
+const generatedId = useId();
+const fieldId = computed(() => props.id ?? `duration-field-${generatedId}`);
+const errorId = computed(() => `${fieldId.value}-error`);
 function update(value: string | number) {
-  const raw = String(value)
-  emit('update:modelValue', raw === '' ? null : Number(raw))
+  const raw = String(value);
+  emit('update:modelValue', raw === '' ? null : Number(raw));
 }
 </script>
 
@@ -47,7 +50,9 @@ function update(value: string | number) {
         :aria-describedby="error ? errorId : undefined"
         @update:model-value="update"
       />
-      <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-muted-foreground">
+      <span
+        class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-muted-foreground"
+      >
         {{ unitLabel }}
       </span>
     </div>

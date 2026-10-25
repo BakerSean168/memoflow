@@ -238,11 +238,11 @@ The canonical effective-enabled evaluator consumes only the derived gate `tempor
 
 ### Trigger ownership matrix
 
-| Trigger | Timing truth owner | Durable Scheduler projection | Runtime implementation now |
-| --- | --- | --- | --- |
-| WallClock | Scheduler + RecurrenceEnginePort projection contract | yes, **Wave 3 only** | domain calculation contract only |
-| Elapsed | local deterministic runtime | no | W4 |
-| ActiveUsage | local deterministic runtime + Activity/Idle sensors | no | W4 |
+| Trigger     | Timing truth owner                                   | Durable Scheduler projection | Runtime implementation now       |
+| ----------- | ---------------------------------------------------- | ---------------------------- | -------------------------------- |
+| WallClock   | Scheduler + RecurrenceEnginePort projection contract | yes, **Wave 3 only**         | domain calculation contract only |
+| Elapsed     | local deterministic runtime                          | no                           | W4                               |
+| ActiveUsage | local deterministic runtime + Activity/Idle sensors  | no                           | W4                               |
 
 No W2 code adds a second wall-clock authority or edits the existing Scheduler engine.
 

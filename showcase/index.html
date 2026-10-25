@@ -1,69 +1,1550 @@
 <!doctype html>
-<html lang="en" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#fbfbfd"><meta name="description" content="MemoFlow is an AI-first personal productivity workspace connecting conversations, goals, tasks, knowledge, schedules and execution into one durable workflow."><title>MemoFlow · Project Showcase</title><script>try{const t=localStorage.getItem('project-showcase-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t}catch{}</script><style>
-:root{color-scheme:light dark;--bg:#fbfbfd;--surface:#fff;--surface-2:#f6f7fb;--glass:rgba(251,251,253,.82);--text:#111318;--text-2:#424855;--muted:#6f7785;--line:#e6e8ee;--line-strong:#d7dae3;--shadow:0 24px 70px rgba(28,33,45,.10);--shadow-sm:0 10px 30px rgba(28,33,45,.08);--accent:#6b63f6;--accent-2:#36b777;--accent-soft:rgba(107,99,246,.14);--max:1180px;--radius:22px;--radius-sm:14px}
-html[data-theme="dark"]{--bg:#0b0d11;--surface:#11141a;--surface-2:#151922;--glass:rgba(11,13,17,.82);--text:#f7f8fa;--text-2:#d3d7df;--muted:#939baa;--line:#242933;--line-strong:#343a47;--shadow:0 26px 80px rgba(0,0,0,.34);--shadow-sm:0 12px 34px rgba(0,0,0,.22);--accent-soft:rgba(107,99,246,.11)}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.65 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}button,a{font:inherit}a{color:inherit;text-decoration:none}button{color:inherit}.page-bg{position:fixed;inset:0;pointer-events:none;z-index:-1;background:radial-gradient(circle at 50% -10%,var(--accent-soft),transparent 30rem),linear-gradient(to right,color-mix(in srgb,var(--line) 45%,transparent) 1px,transparent 1px),linear-gradient(to bottom,color-mix(in srgb,var(--line) 45%,transparent) 1px,transparent 1px);background-size:auto,56px 56px,56px 56px;mask-image:linear-gradient(to bottom,#000 0,transparent 42rem)}.wrap{width:min(calc(100% - 40px),var(--max));margin:auto}.nav{position:sticky;top:0;z-index:40;border-bottom:1px solid color-mix(in srgb,var(--line) 75%,transparent);background:var(--glass);backdrop-filter:blur(18px)}.nav-inner{height:68px;display:flex;align-items:center;justify-content:space-between;gap:24px}.brand{display:flex;align-items:center;gap:10px;font-weight:780;letter-spacing:-.03em;font-size:17px}.brand-mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:grid;place-items:center;color:white;font-weight:850;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}.nav-center{display:flex;align-items:center;gap:26px;color:var(--muted);font-size:13px}.nav-center a:hover{color:var(--text)}.nav-actions{display:flex;align-items:center;gap:8px}.icon-btn,.lang-btn,.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;transition:.18s ease;cursor:pointer}.icon-btn{width:38px;height:38px;display:grid;place-items:center}.lang-btn{height:38px;min-width:48px;padding:0 11px;font-weight:700;font-size:12px}.icon-btn:hover,.lang-btn:hover,.btn.secondary:hover{border-color:var(--line-strong);transform:translateY(-1px);box-shadow:var(--shadow-sm)}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 16px;gap:8px;font-weight:670;font-size:13px}.btn.primary{border-color:var(--text);background:var(--text);color:var(--bg)}.btn.primary:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm)}.btn.secondary{color:var(--text);background:var(--surface)}.btn.ghost{border-color:transparent;background:transparent;color:var(--muted)}.hero{padding:96px 0 0;text-align:center}.eyebrow{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:color-mix(in srgb,var(--surface) 86%,transparent);padding:7px 11px;border-radius:999px;color:var(--text-2);font-size:12px;font-weight:680;box-shadow:0 1px 2px rgba(0,0,0,.03)}.eyebrow i{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 16%,transparent)}.hero h1{max-width:970px;margin:24px auto 20px;font-size:clamp(48px,7vw,84px);line-height:.99;letter-spacing:-.065em;font-weight:760}.gradient{background:linear-gradient(115deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent}.hero-lead{max-width:730px;margin:0 auto;color:var(--muted);font-size:clamp(17px,2vw,20px);line-height:1.65}.hero-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:30px}.hero-note{margin-top:14px;color:var(--muted);font-size:12px}.visual-wrap{margin-top:64px;position:relative}.visual-wrap:before{content:"";position:absolute;inset:-50px 8% auto;height:250px;background:radial-gradient(ellipse,var(--accent-soft),transparent 68%);filter:blur(28px);z-index:-1}.product-window{border:1px solid var(--line-strong);border-radius:20px;background:var(--surface);box-shadow:var(--shadow);overflow:hidden;text-align:left}.window-bar{height:46px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 15px;border-bottom:1px solid var(--line);background:var(--surface-2);color:var(--muted);font-size:11px;font-weight:650;letter-spacing:.02em}.traffic{display:flex;gap:6px}.traffic i{width:8px;height:8px;border-radius:50%;background:var(--line-strong)}.window-status{justify-self:end;display:flex;align-items:center;gap:6px;font-size:10px}.window-status i{width:6px;height:6px;border-radius:50%;background:#34c782}.app-grid{display:grid;min-height:470px;background:var(--surface)}.three-col{grid-template-columns:180px 1.45fr 1fr}.app-sidebar{padding:18px 12px;border-right:1px solid var(--line);background:var(--surface-2)}.app-logo{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;font-weight:800;margin:2px 8px 28px}.side-label{padding:0 10px 8px;color:var(--muted);font-size:9px;font-weight:800;letter-spacing:.12em}.side-item{display:flex;align-items:center;gap:9px;margin:3px 0;padding:9px 10px;border-radius:9px;color:var(--muted);font-size:11px}.side-item b{width:7px;height:7px;border-radius:3px;border:1px solid var(--line-strong)}.side-item.active{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.04)}.side-item.active b{border-color:var(--accent);background:var(--accent)}.chat-pane,.biome-content{padding:18px 20px;position:relative}.pane-head{display:flex;align-items:baseline;justify-content:space-between;padding-bottom:15px;border-bottom:1px solid var(--line);font-size:12px;font-weight:700}.pane-head small{color:var(--muted);font-size:8px;letter-spacing:.09em}.message{max-width:88%;margin-top:26px;border-radius:14px;padding:13px 15px;font-size:11px;line-height:1.6}.message.user{margin-left:auto;background:var(--surface-2);border:1px solid var(--line)}.message.ai{display:flex;gap:10px;padding-left:0;background:transparent}.message.ai b{font-size:10px}.message.ai p{margin:6px 0;color:var(--text-2)}.ai-dot{flex:0 0 auto;width:24px;height:24px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent-2));box-shadow:0 0 0 4px var(--accent-soft)}.tool-row{display:flex;gap:6px;flex-wrap:wrap}.tool-row span,.preview-actions span{padding:4px 7px;border-radius:6px;border:1px solid var(--line);background:var(--surface-2);color:var(--muted);font:8px ui-monospace,SFMono-Regular,Menlo,monospace}.timeline{position:absolute;left:20px;right:20px;bottom:20px;display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--surface-2);border-radius:12px;padding:12px}.timeline i{width:9px;height:9px;border-radius:50%;background:#34c782;box-shadow:0 0 0 5px rgba(52,199,130,.11)}.timeline b,.timeline small{display:block;font-size:9px}.timeline small{margin-top:2px;color:var(--muted)}.state-pane{padding:18px;border-left:1px solid var(--line);background:color-mix(in srgb,var(--surface-2) 55%,var(--surface))}.tab-row{display:flex;gap:16px;color:var(--muted);font-size:8px;font-weight:780;letter-spacing:.06em}.tab-row span{padding-bottom:8px}.tab-row .active{color:var(--text);border-bottom:1.5px solid var(--accent)}.state-card{margin-top:18px;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}.state-card small,.state-card b,.state-card span{display:block}.state-card small{color:var(--muted);font-size:8px;letter-spacing:.08em}.state-card b{font-size:11px;margin-top:8px}.state-card span{color:var(--muted);font-size:9px;margin-top:5px}.state-card.soft{background:var(--surface-2)}.signal-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.signal-row>div{padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}.signal-row small,.signal-row b{display:block;font-size:8px}.signal-row small{color:var(--muted)}.signal-row b{font-size:9px;margin-top:5px}.task-mini{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--surface);font-size:9px}.task-mini i{width:8px;height:8px;border:1px solid var(--line-strong);border-radius:3px}.task-mini small{color:var(--muted)}.task-mini.done i{background:#34c782;border-color:#34c782}.biome-grid{grid-template-columns:180px 1fr 300px}.project-preview{margin-top:12px;padding:15px;border:1px solid var(--line);border-radius:12px;background:var(--surface);display:flex;align-items:center;justify-content:space-between;gap:12px}.project-preview.active{border-color:color-mix(in srgb,var(--accent) 45%,var(--line));box-shadow:0 8px 24px var(--accent-soft)}.project-preview small,.project-preview b,.project-preview span{display:block}.project-preview small{font-size:8px;color:var(--accent);letter-spacing:.08em}.project-preview b{font-size:13px;margin:4px 0}.project-preview div>span{font-size:9px;color:var(--muted)}.preview-actions{display:flex;gap:5px}.graph-pane{display:flex;flex-direction:column}.graph{height:220px;margin-top:18px;border:1px solid var(--line);border-radius:12px;background:radial-gradient(circle at 50% 40%,var(--accent-soft),transparent 50%),var(--surface);position:relative;overflow:hidden}.graph svg{position:absolute;inset:12px;width:calc(100% - 24px);height:calc(100% - 24px)}.graph path{fill:none;stroke:var(--line-strong);stroke-width:1.4}.graph i{position:absolute;width:10px;height:10px;border-radius:50%;background:var(--surface);border:2px solid var(--accent);z-index:2;box-shadow:0 0 0 5px var(--accent-soft)}.g1{left:12%;top:52%}.g2{left:40%;top:27%}.g3{left:68%;top:40%}.g4{left:50%;top:75%}.g5{right:10%;top:66%}.proof{padding:42px 0 24px}.proof-grid{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:16px;background:color-mix(in srgb,var(--surface) 88%,transparent);overflow:hidden}.proof-item{padding:20px 22px;border-right:1px solid var(--line)}.proof-item:last-child{border-right:0}.proof-item strong{display:block;font-size:15px;letter-spacing:-.02em}.proof-item span{display:block;margin-top:3px;color:var(--muted);font-size:11px}.section{padding:94px 0}.section-head{max-width:760px;margin-bottom:34px}.kicker{color:var(--accent);font-size:11px;font-weight:800;letter-spacing:.11em;text-transform:uppercase}.section h2{font-size:clamp(34px,5vw,55px);line-height:1.04;letter-spacing:-.05em;margin:14px 0}.section-lead{color:var(--muted);font-size:17px}.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.flow-step{padding:22px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface);min-height:180px;position:relative}.flow-step:after{content:"";position:absolute;left:22px;right:-11px;top:38px;height:1px;background:linear-gradient(90deg,var(--accent),var(--line));z-index:0}.flow-step:last-child:after{display:none}.step-no{position:relative;z-index:1;display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:var(--surface);border:1px solid color-mix(in srgb,var(--accent) 42%,var(--line));color:var(--accent);font-size:9px;font-weight:800}.flow-step h3{font-size:14px;margin:28px 0 7px}.flow-step p{margin:0;color:var(--muted);font-size:12px}.bento-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.bento{padding:26px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);min-height:225px;box-shadow:0 1px 2px rgba(0,0,0,.02)}.bento-large{grid-column:span 2;background:linear-gradient(145deg,var(--surface),color-mix(in srgb,var(--accent-soft) 60%,var(--surface)))}.icon-box{width:38px;height:38px;border-radius:11px;background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center;color:var(--accent);font-weight:800}.bento h3{font-size:18px;margin:35px 0 8px;letter-spacing:-.02em}.bento p{margin:0;color:var(--muted);max-width:48ch}.architecture-card{display:grid;grid-template-columns:1.22fr .78fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}.arch-main,.arch-side{background:var(--surface);padding:32px}.arch-main{background:linear-gradient(145deg,var(--surface),color-mix(in srgb,var(--accent-soft) 45%,var(--surface)))}.arch-diagram{display:flex;align-items:center;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:28px}.arch-node{padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:var(--surface);box-shadow:0 3px 12px rgba(0,0,0,.03);font-size:11px;font-weight:700}.arch-arrow{color:var(--muted)}.arch-side h3{margin:0 0 10px;font-size:18px}.arch-side p{color:var(--muted);margin:0}.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:22px}.chip{padding:6px 9px;border:1px solid var(--line);border-radius:999px;background:var(--surface-2);font-size:10px;color:var(--text-2)}.safety-note{margin-top:16px;padding:15px 17px;border:1px solid color-mix(in srgb,#e8a23a 35%,var(--line));border-radius:12px;background:color-mix(in srgb,#e8a23a 6%,var(--surface));color:var(--text-2);font-size:12px}.cta{padding:32px 0 100px}.cta-card{position:relative;overflow:hidden;border:1px solid var(--line-strong);border-radius:28px;background:var(--text);color:var(--bg);padding:58px;text-align:center}.cta-card:after{content:"";position:absolute;width:380px;height:380px;border-radius:50%;right:-160px;top:-220px;background:radial-gradient(circle,var(--accent),transparent 68%);opacity:.45}.cta-card h2{position:relative;z-index:1;max-width:720px;margin:0 auto;font-size:clamp(32px,5vw,54px);line-height:1.05;letter-spacing:-.05em}.cta-card p{position:relative;z-index:1;max-width:680px;margin:16px auto 26px;color:color-mix(in srgb,var(--bg) 65%,transparent);font-size:16px}.cta-card .hero-actions{position:relative;z-index:1;margin-top:0}.cta-card .btn.primary{background:var(--bg);color:var(--text);border-color:transparent}.cta-card .btn.secondary{background:transparent;border-color:color-mix(in srgb,var(--bg) 25%,transparent);color:var(--bg)}.footer{border-top:1px solid var(--line);padding:28px 0 38px}.footer-inner{display:flex;align-items:center;justify-content:space-between;gap:24px;color:var(--muted);font-size:11px}.footer-links{display:flex;gap:18px}.footer a:hover{color:var(--text)}@media(max-width:920px){.nav-center{display:none}.three-col,.biome-grid{grid-template-columns:145px 1fr}.state-pane{display:none}.proof-grid{grid-template-columns:1fr 1fr}.proof-item:nth-child(2){border-right:0}.proof-item:nth-child(-n+2){border-bottom:1px solid var(--line)}.flow{grid-template-columns:1fr 1fr}.flow-step:after{display:none}.bento-grid{grid-template-columns:1fr 1fr}.bento-large{grid-column:span 2}.architecture-card{grid-template-columns:1fr}}@media(max-width:640px){.wrap{width:min(calc(100% - 24px),var(--max))}.nav-inner{height:62px}.nav-actions .github-nav{display:none}.hero{padding-top:70px}.hero h1{font-size:45px}.hero-lead{font-size:16px}.visual-wrap{margin-top:42px}.product-window{border-radius:15px}.window-bar{grid-template-columns:1fr auto}.window-bar>span:nth-of-type(1){display:none}.app-grid,.three-col,.biome-grid{grid-template-columns:1fr;min-height:420px}.app-sidebar{display:none}.chat-pane,.biome-content{min-height:410px}.proof-grid,.flow,.bento-grid{grid-template-columns:1fr}.proof-item{border-right:0!important;border-bottom:1px solid var(--line)}.proof-item:last-child{border-bottom:0}.bento-large{grid-column:span 1}.section{padding:70px 0}.cta-card{padding:40px 22px}.footer-inner{align-items:flex-start;flex-direction:column}.footer-links{flex-wrap:wrap}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
-</style>
-<script>
-(() => {
-  const root = document.documentElement;
-  const q = new URLSearchParams(location.search);
-  const storedLang = localStorage.getItem('project-showcase-lang');
-  const requestedLang = q.get('lang');
-  let lang = ['zh','en'].includes(requestedLang) ? requestedLang : (storedLang || (navigator.language.toLowerCase().startsWith('zh') ? 'zh' : 'en'));
-  const storedTheme = localStorage.getItem('project-showcase-theme');
-  let theme = storedTheme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-  const descriptions = { zh: 'MemoFlow 是一个 AI-first 个人生产力工作区，把对话、目标、任务、知识、日程与执行连接成可持续的业务闭环。', en: 'MemoFlow is an AI-first personal productivity workspace connecting conversations, goals, tasks, knowledge, schedules and execution into one durable workflow.' };
-  const titles = { zh: 'MemoFlow · 项目介绍', en: 'MemoFlow · Project Showcase' };
-  function applyLanguage(next) {
-    lang = next;
-    root.lang = lang === 'zh' ? 'zh-CN' : 'en';
-    root.dataset.lang = lang;
-    document.querySelectorAll('[data-zh][data-en]').forEach(el => el.textContent = el.dataset[lang]);
-    const langBtn = document.querySelector('[data-language-toggle]');
-    if (langBtn) { langBtn.textContent = lang === 'zh' ? 'EN' : '中文'; langBtn.setAttribute('aria-label', lang === 'zh' ? 'Switch to English' : '切换为中文'); }
-    document.title = titles[lang];
-    document.querySelector('meta[name="description"]').setAttribute('content', descriptions[lang]);
-    localStorage.setItem('project-showcase-lang', lang);
-  }
-  function applyTheme(next) {
-    theme = next;
-    root.dataset.theme = theme;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#0b0d11' : '#fbfbfd');
-    const btn = document.querySelector('[data-theme-toggle]');
-    if (btn) { btn.textContent = theme === 'dark' ? '☀' : '◐'; btn.setAttribute('aria-label', theme === 'dark' ? (lang === 'zh' ? '切换浅色主题' : 'Switch to light theme') : (lang === 'zh' ? '切换深色主题' : 'Switch to dark theme')); }
-    localStorage.setItem('project-showcase-theme', theme);
-  }
-  document.addEventListener('DOMContentLoaded', () => {
-    applyTheme(theme); applyLanguage(lang);
-    document.querySelector('[data-language-toggle]')?.addEventListener('click', () => { applyLanguage(lang === 'zh' ? 'en' : 'zh'); applyTheme(theme); });
-    document.querySelector('[data-theme-toggle]')?.addEventListener('click', () => applyTheme(theme === 'dark' ? 'light' : 'dark'));
-  });
-})();
-</script>
-</head>
-<body><div class="page-bg"></div><nav class="nav"><div class="wrap nav-inner"><a class="brand" href="#top"><span class="brand-mark">M</span><span>MemoFlow</span></a><div class="nav-center"><a href="#product"><span data-zh="产品" data-en="Product"></span></a><a href="#engineering"><span data-zh="工程" data-en="Engineering"></span></a><a href="#architecture"><span data-zh="架构" data-en="Architecture"></span></a></div><div class="nav-actions"><button class="lang-btn" type="button" data-language-toggle aria-label="Switch language">EN</button><button class="icon-btn" type="button" data-theme-toggle aria-label="Switch theme">◐</button><a class="btn secondary github-nav" href="https://github.com/BakerSean168/memoflow">GitHub ↗</a><a class="btn primary" href="https://memoflow.bakersean.top"><span data-zh="打开产品" data-en="Open app"></span></a></div></div></nav>
-<main id="top"><section class="hero"><div class="wrap"><div class="eyebrow"><i></i><span data-zh="AI-first 个人生产力工作区" data-en="AI-first personal productivity workspace"></span><span>· v0.10.0</span></div><h1><span data-zh="让想法不止停在聊天里。" data-en="Don’t let ideas stop in chat."></span><br><span class="gradient"><span data-zh="把它变成行动流。" data-en="Turn them into a flow of action."></span></span></h1><p class="hero-lead" data-zh="AI 对话、Goal、Task、Knowledge、Schedule 与 Reminder 共享同一个业务上下文：从产生意图，到结构化确认、执行，再到可追踪结果。" data-en="AI conversations, Goals, Tasks, Knowledge, Schedules and Reminders share one domain context—from intent to typed confirmation, execution and traceable outcomes."></p><div class="hero-actions"><a class="btn primary" href="https://memoflow.bakersean.top"><span data-zh="打开 Web 产品" data-en="Open web product"></span><span>↗</span></a><a class="btn secondary" href="https://github.com/BakerSean168/memoflow"><span data-zh="查看源码" data-en="View source"></span><span>↗</span></a></div><div class="hero-note" data-zh="Web + Desktop · 共享契约" data-en="Web + Desktop · shared contracts"></div><div class="visual-wrap" id="product"><div class="product-window memo-product">
-          <div class="window-bar"><div class="traffic"><i></i><i></i><i></i></div><span>MemoFlow / <span data-zh="工作区" data-en="workspace"></span></span><span class="window-status"><i></i><span data-zh="已同步" data-en="SYNCED"></span></span></div>
-          <div class="app-grid three-col memo-grid"><aside class="app-sidebar"><div class="app-logo">M</div><div class="side-label" data-zh="工作区" data-en="WORKSPACE"></div><div class="side-item active"><b></b><span data-zh="今天" data-en="Today"></span></div><div class="side-item"><b></b><span data-zh="目标" data-en="Goals"></span></div><div class="side-item"><b></b><span data-zh="任务" data-en="Tasks"></span></div><div class="side-item"><b></b><span data-zh="知识" data-en="Knowledge"></span></div></aside>
-          <section class="chat-pane"><div class="pane-head"><span data-zh="AI 协作" data-en="AI collaboration"></span><small data-zh="共享业务上下文" data-en="SHARED DOMAIN CONTEXT"></small></div><div class="message user"><span data-zh="把本周的项目发布整理成目标，并安排今天最重要的三个任务。" data-en="Turn this week’s release into a goal and schedule the three most important tasks for today."></span></div><div class="message ai"><span class="ai-dot"></span><div><b>MemoFlow</b><p data-zh="我整理了一个 Goal、三个可执行 Task，并根据今天的时间窗口生成了安排草案。" data-en="I created one Goal, three executable Tasks, and a schedule draft based on today’s available windows."></p><div class="tool-row"><span>goal.create</span><span>task.plan</span><span>schedule</span></div></div></div><div class="timeline"><i></i><div><b data-zh="草案等待确认" data-en="Draft ready for review"></b><small data-zh="AI 生成 → 结构化确认 → 执行" data-en="AI draft → typed confirmation → execution"></small></div></div></section>
-          <aside class="state-pane task-board"><div class="tab-row"><span class="active" data-zh="计划" data-en="PLAN"></span><span data-zh="时间线" data-en="TIMELINE"></span></div><div class="state-card"><small>GOAL</small><b data-zh="完成 0.10 发布闭环" data-en="Close the 0.10 release loop"></b><span data-zh="本周 · 3 个任务" data-en="This week · 3 tasks"></span></div><div class="task-mini done"><i></i><span data-zh="验证构建" data-en="Verify build"></span><small>09:30</small></div><div class="task-mini"><i></i><span data-zh="发布生产环境" data-en="Deploy production"></span><small>14:00</small></div><div class="task-mini"><i></i><span data-zh="复盘发布结果" data-en="Review release outcome"></span><small>18:30</small></div></aside></div></div></div></div></section>
-<section class="section" id="visual-proof" aria-label="Workspace screenshot from automated UI tests">
-  <div class="wrap">
-    <div class="section-head">
-      <div class="kicker">00 · <span data-zh="真实界面证据" data-en="UI evidence">真实界面证据</span></div>
-      <h2 data-zh="Vue 工作区视觉回归截图" data-en="Vue workspace visual-regression capture">Vue 工作区视觉回归截图</h2>
-      <p data-zh="以下是项目现有自动化测试保存的实际前端渲染截图，使用测试状态，不代表线上真实用户数据。" data-en="A preserved screenshot of the actual frontend rendered during automated visual tests, using fixture state rather than real user data.">以下是项目现有自动化测试保存的实际前端渲染截图，使用测试状态，不代表线上真实用户数据。</p>
-    </div>
-    <figure style="margin: 16px 0 0; max-width: 100%;">
-      <img src="./assets/workspace-e2e-visual-regression.png" alt="MemoFlow Vue 三栏工作区的视觉回归截图" loading="lazy" style="display:block; width:100%;height:auto;border:1px solid var(--line);border-radius:var(--radius-sm);box-shadow:var(--shadow-sm);" />
-      <figcaption style="padding-top:8px;color:var(--muted);font-size:13px;" data-zh="来源：apps/web/e2e/visual-regression/baselines；来自自动化测试基线，非生产用户会话。" data-en="Source: apps/web/e2e/visual-regression/baselines; an automated test baseline, not a production user session.">来源：apps/web/e2e/visual-regression/baselines；来自自动化测试基线，非生产用户会话。</figcaption>
-    </figure>
-  </div>
-</section>
-<section class="proof"><div class="wrap"><div class="proof-grid"><div class="proof-item"><strong data-zh="AI 优先" data-en="AI-first"></strong><span data-zh="AI 是入口，不是孤岛" data-en="AI is an entry point, not a silo"></span></div><div class="proof-item"><strong data-zh="多端协同" data-en="Multi-surface"></strong><span data-zh="Web + Electron" data-en="Web + Electron"></span></div><div class="proof-item"><strong data-zh="领域驱动" data-en="Domain-driven"></strong><span data-zh="Goal / Task / Time / Knowledge" data-en="Goal / Task / Time / Knowledge"></span></div><div class="proof-item"><strong data-zh="持久工作流" data-en="Durable"></strong><span data-zh="Workflow / timeline / delivery" data-en="Workflow / timeline / delivery"></span></div></div></div></section>
-<section class="section"><div class="wrap"><div class="section-head"><div class="kicker">01 · <span data-zh="产品流程" data-en="Product flow"></span></div><h2 data-zh="从思考，到业务对象，再到真实执行。" data-en="From thinking, to typed objects, to real execution."></h2></div><div class="flow"><article class="flow-step"><span class="step-no">01</span><h3 data-zh="思考" data-en="Think"></h3><p data-zh="和 AI 对话形成目标、问题或知识需求。" data-en="Collaborate with AI to form a goal, question or knowledge need."></p></article><article class="flow-step"><span class="step-no">02</span><h3 data-zh="结构化" data-en="Structure"></h3><p data-zh="把意图落为 Goal、Task、Note 等 typed object。" data-en="Turn intent into typed Goal, Task and Note objects."></p></article><article class="flow-step"><span class="step-no">03</span><h3 data-zh="时间" data-en="Plan time"></h3><p data-zh="Schedule 与 Reminder 提供统一时间语义。" data-en="Use Schedule and Reminder as one consistent time model."></p></article><article class="flow-step"><span class="step-no">04</span><h3 data-zh="执行" data-en="Execute"></h3><p data-zh="业务操作与 delivery contract 承接真实动作。" data-en="Let domain operations and delivery contracts carry real actions."></p></article><article class="flow-step"><span class="step-no">05</span><h3 data-zh="复盘" data-en="Reflect"></h3><p data-zh="Timeline、结果与上下文回到下一轮决策。" data-en="Feed timeline, outcomes and context back into the next decision."></p></article></div></div></section>
-<section class="section" id="engineering"><div class="wrap"><div class="section-head"><div class="kicker">02 · <span data-zh="工程能力" data-en="Engineering"></span></div><h2 data-zh="AI 常驻，但业务真值始终结构化。" data-en="AI is always present, while business truth stays structured."></h2></div><div class="bento-grid"><article class="bento bento-large"><div class="icon-box">⌘</div><h3 data-zh="中央契约" data-en="Central contracts"></h3><p data-zh="@memoflow/contracts 统一 DTO、业务命令与 transport contract，避免多端各自解释字段。" data-en="@memoflow/contracts unifies DTOs, domain commands and transport contracts across every surface."></p></article><article class="bento"><div class="icon-box">✦</div><h3 data-zh="Mastra 运行时" data-en="Mastra-native runtime"></h3><p data-zh="AI runtime 收敛到 TypeScript + Mastra，typed workflow 拥有恢复、取消和状态语义。" data-en="The AI runtime converges on TypeScript + Mastra with typed state, recovery and cancellation semantics."></p></article><article class="bento"><div class="icon-box">⇄</div><h3 data-zh="跨端数据" data-en="Cross-device data"></h3><p data-zh="PostgreSQL 与 PowerSync 支撑多客户端数据路径，并显式管理离线一致性边界。" data-en="PostgreSQL and PowerSync support multi-client data flows with explicit offline consistency boundaries."></p></article><article class="bento"><div class="icon-box">✓</div><h3 data-zh="可执行治理" data-en="Executable governance"></h3><p data-zh="治理、边界、浏览器流程、覆盖率与 delivery observation 全部成为 protected-main 门禁。" data-en="Architecture, browser flows, coverage and delivery observation are executable protected-main gates."></p></article></div></div></section>
-<section class="section" id="architecture"><div class="wrap"><div class="section-head"><div class="kicker">03 · <span data-zh="架构" data-en="Architecture"></span></div><h2 data-zh="多端 UI，共享领域与 AI 运行时。" data-en="Multiple surfaces, one domain and AI runtime."></h2><p class="section-lead" data-zh="Web 与 Desktop 共享 contracts 与领域模型，API 组合运行时，PowerSync 管理跨端数据路径。" data-en="Web and Desktop share contracts and domain models, the API composes runtime services, and PowerSync manages cross-device data."></p></div><div class="architecture-card"><div class="arch-main"><div class="kicker" data-zh="系统关系" data-en="SYSTEM MAP"></div><div class="arch-diagram"><span class="arch-node">Vue Web</span><span class="arch-arrow">→</span><span class="arch-node">Electron Desktop</span><span class="arch-arrow">→</span><span class="arch-node">@memoflow/contracts</span><span class="arch-arrow">→</span><span class="arch-node">Express API</span><span class="arch-arrow">→</span><span class="arch-node">Mastra</span><span class="arch-arrow">→</span><span class="arch-node">PostgreSQL</span><span class="arch-arrow">→</span><span class="arch-node">PowerSync</span></div></div><aside class="arch-side"><h3 data-zh="技术栈" data-en="Technology"></h3><p data-zh="保持边界清晰，让工具服务于产品，而不是让产品围着工具转。" data-en="Keep boundaries explicit so technology serves the product rather than defining it."></p><div class="chips"><span class="chip">TypeScript 6</span><span class="chip">Vue 3</span><span class="chip">Electron 43</span><span class="chip">Express 5</span><span class="chip">Prisma</span><span class="chip">Mastra</span><span class="chip">PowerSync</span><span class="chip">Playwright</span></div></aside></div></div></section>
-<section class="cta"><div class="wrap"><div class="cta-card"><h2 data-zh="体验产品，然后沿着契约深入。" data-en="Explore the product, then follow the contracts."></h2><p data-zh="生产环境展示 AI-first 工作流；仓库记录 50+ ADR、测试治理和 release lifecycle。" data-en="The live product demonstrates the AI-first workflow; the repository records 50+ ADRs, test governance and the release lifecycle."></p><div class="hero-actions"><a class="btn primary" href="https://memoflow.bakersean.top"><span data-zh="打开 Web 产品" data-en="Open web product"></span> ↗</a><a class="btn secondary" href="https://github.com/BakerSean168/memoflow">GitHub ↗</a></div></div></div></section></main>
-<footer class="footer"><div class="wrap footer-inner"><span>© 2026 MemoFlow</span><div class="footer-links"><a href="https://memoflow.bakersean.top"><span data-zh="生产环境" data-en="Live product"></span></a><a href="https://github.com/BakerSean168/memoflow">GitHub</a><a href="#top">↑ <span data-zh="返回顶部" data-en="Back to top"></span></a></div></div></footer></body></html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#fbfbfd" />
+    <meta
+      name="description"
+      content="MemoFlow is an AI-first personal productivity workspace connecting conversations, goals, tasks, knowledge, schedules and execution into one durable workflow."
+    />
+    <title>MemoFlow · Project Showcase</title>
+    <script>
+      try {
+        const t =
+          localStorage.getItem('project-showcase-theme') ||
+          (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.dataset.theme = t;
+      } catch {}
+    </script>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #fbfbfd;
+        --surface: #fff;
+        --surface-2: #f6f7fb;
+        --glass: rgba(251, 251, 253, 0.82);
+        --text: #111318;
+        --text-2: #424855;
+        --muted: #6f7785;
+        --line: #e6e8ee;
+        --line-strong: #d7dae3;
+        --shadow: 0 24px 70px rgba(28, 33, 45, 0.1);
+        --shadow-sm: 0 10px 30px rgba(28, 33, 45, 0.08);
+        --accent: #6b63f6;
+        --accent-2: #36b777;
+        --accent-soft: rgba(107, 99, 246, 0.14);
+        --max: 1180px;
+        --radius: 22px;
+        --radius-sm: 14px;
+      }
+      html[data-theme='dark'] {
+        --bg: #0b0d11;
+        --surface: #11141a;
+        --surface-2: #151922;
+        --glass: rgba(11, 13, 17, 0.82);
+        --text: #f7f8fa;
+        --text-2: #d3d7df;
+        --muted: #939baa;
+        --line: #242933;
+        --line-strong: #343a47;
+        --shadow: 0 26px 80px rgba(0, 0, 0, 0.34);
+        --shadow-sm: 0 12px 34px rgba(0, 0, 0, 0.22);
+        --accent-soft: rgba(107, 99, 246, 0.11);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font:
+          15px/1.65 Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      button,
+      a {
+        font: inherit;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      button {
+        color: inherit;
+      }
+      .page-bg {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: -1;
+        background:
+          radial-gradient(circle at 50% -10%, var(--accent-soft), transparent 30rem),
+          linear-gradient(
+            to right,
+            color-mix(in srgb, var(--line) 45%, transparent) 1px,
+            transparent 1px
+          ),
+          linear-gradient(
+            to bottom,
+            color-mix(in srgb, var(--line) 45%, transparent) 1px,
+            transparent 1px
+          );
+        background-size:
+          auto,
+          56px 56px,
+          56px 56px;
+        mask-image: linear-gradient(to bottom, #000 0, transparent 42rem);
+      }
+      .wrap {
+        width: min(calc(100% - 40px), var(--max));
+        margin: auto;
+      }
+      .nav {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        border-bottom: 1px solid color-mix(in srgb, var(--line) 75%, transparent);
+        background: var(--glass);
+        backdrop-filter: blur(18px);
+      }
+      .nav-inner {
+        height: 68px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 780;
+        letter-spacing: -0.03em;
+        font-size: 17px;
+      }
+      .brand-mark {
+        width: 30px;
+        height: 30px;
+        border-radius: 9px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        display: grid;
+        place-items: center;
+        color: white;
+        font-weight: 850;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+      }
+      .nav-center {
+        display: flex;
+        align-items: center;
+        gap: 26px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .nav-center a:hover {
+        color: var(--text);
+      }
+      .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .icon-btn,
+      .lang-btn,
+      .btn {
+        border: 1px solid var(--line);
+        background: var(--surface);
+        border-radius: 10px;
+        transition: 0.18s ease;
+        cursor: pointer;
+      }
+      .icon-btn {
+        width: 38px;
+        height: 38px;
+        display: grid;
+        place-items: center;
+      }
+      .lang-btn {
+        height: 38px;
+        min-width: 48px;
+        padding: 0 11px;
+        font-weight: 700;
+        font-size: 12px;
+      }
+      .icon-btn:hover,
+      .lang-btn:hover,
+      .btn.secondary:hover {
+        border-color: var(--line-strong);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-sm);
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 0 16px;
+        gap: 8px;
+        font-weight: 670;
+        font-size: 13px;
+      }
+      .btn.primary {
+        border-color: var(--text);
+        background: var(--text);
+        color: var(--bg);
+      }
+      .btn.primary:hover {
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-sm);
+      }
+      .btn.secondary {
+        color: var(--text);
+        background: var(--surface);
+      }
+      .btn.ghost {
+        border-color: transparent;
+        background: transparent;
+        color: var(--muted);
+      }
+      .hero {
+        padding: 96px 0 0;
+        text-align: center;
+      }
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid var(--line);
+        background: color-mix(in srgb, var(--surface) 86%, transparent);
+        padding: 7px 11px;
+        border-radius: 999px;
+        color: var(--text-2);
+        font-size: 12px;
+        font-weight: 680;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+      }
+      .eyebrow i {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent);
+      }
+      .hero h1 {
+        max-width: 970px;
+        margin: 24px auto 20px;
+        font-size: clamp(48px, 7vw, 84px);
+        line-height: 0.99;
+        letter-spacing: -0.065em;
+        font-weight: 760;
+      }
+      .gradient {
+        background: linear-gradient(115deg, var(--accent), var(--accent-2));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      .hero-lead {
+        max-width: 730px;
+        margin: 0 auto;
+        color: var(--muted);
+        font-size: clamp(17px, 2vw, 20px);
+        line-height: 1.65;
+      }
+      .hero-actions {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 30px;
+      }
+      .hero-note {
+        margin-top: 14px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .visual-wrap {
+        margin-top: 64px;
+        position: relative;
+      }
+      .visual-wrap:before {
+        content: '';
+        position: absolute;
+        inset: -50px 8% auto;
+        height: 250px;
+        background: radial-gradient(ellipse, var(--accent-soft), transparent 68%);
+        filter: blur(28px);
+        z-index: -1;
+      }
+      .product-window {
+        border: 1px solid var(--line-strong);
+        border-radius: 20px;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        text-align: left;
+      }
+      .window-bar {
+        height: 46px;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        padding: 0 15px;
+        border-bottom: 1px solid var(--line);
+        background: var(--surface-2);
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 650;
+        letter-spacing: 0.02em;
+      }
+      .traffic {
+        display: flex;
+        gap: 6px;
+      }
+      .traffic i {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--line-strong);
+      }
+      .window-status {
+        justify-self: end;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 10px;
+      }
+      .window-status i {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #34c782;
+      }
+      .app-grid {
+        display: grid;
+        min-height: 470px;
+        background: var(--surface);
+      }
+      .three-col {
+        grid-template-columns: 180px 1.45fr 1fr;
+      }
+      .app-sidebar {
+        padding: 18px 12px;
+        border-right: 1px solid var(--line);
+        background: var(--surface-2);
+      }
+      .app-logo {
+        width: 34px;
+        height: 34px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: #fff;
+        font-weight: 800;
+        margin: 2px 8px 28px;
+      }
+      .side-label {
+        padding: 0 10px 8px;
+        color: var(--muted);
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+      }
+      .side-item {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin: 3px 0;
+        padding: 9px 10px;
+        border-radius: 9px;
+        color: var(--muted);
+        font-size: 11px;
+      }
+      .side-item b {
+        width: 7px;
+        height: 7px;
+        border-radius: 3px;
+        border: 1px solid var(--line-strong);
+      }
+      .side-item.active {
+        background: var(--surface);
+        color: var(--text);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      }
+      .side-item.active b {
+        border-color: var(--accent);
+        background: var(--accent);
+      }
+      .chat-pane,
+      .biome-content {
+        padding: 18px 20px;
+        position: relative;
+      }
+      .pane-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--line);
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .pane-head small {
+        color: var(--muted);
+        font-size: 8px;
+        letter-spacing: 0.09em;
+      }
+      .message {
+        max-width: 88%;
+        margin-top: 26px;
+        border-radius: 14px;
+        padding: 13px 15px;
+        font-size: 11px;
+        line-height: 1.6;
+      }
+      .message.user {
+        margin-left: auto;
+        background: var(--surface-2);
+        border: 1px solid var(--line);
+      }
+      .message.ai {
+        display: flex;
+        gap: 10px;
+        padding-left: 0;
+        background: transparent;
+      }
+      .message.ai b {
+        font-size: 10px;
+      }
+      .message.ai p {
+        margin: 6px 0;
+        color: var(--text-2);
+      }
+      .ai-dot {
+        flex: 0 0 auto;
+        width: 24px;
+        height: 24px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        box-shadow: 0 0 0 4px var(--accent-soft);
+      }
+      .tool-row {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .tool-row span,
+      .preview-actions span {
+        padding: 4px 7px;
+        border-radius: 6px;
+        border: 1px solid var(--line);
+        background: var(--surface-2);
+        color: var(--muted);
+        font:
+          8px ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          monospace;
+      }
+      .timeline {
+        position: absolute;
+        left: 20px;
+        right: 20px;
+        bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: 1px solid var(--line);
+        background: var(--surface-2);
+        border-radius: 12px;
+        padding: 12px;
+      }
+      .timeline i {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #34c782;
+        box-shadow: 0 0 0 5px rgba(52, 199, 130, 0.11);
+      }
+      .timeline b,
+      .timeline small {
+        display: block;
+        font-size: 9px;
+      }
+      .timeline small {
+        margin-top: 2px;
+        color: var(--muted);
+      }
+      .state-pane {
+        padding: 18px;
+        border-left: 1px solid var(--line);
+        background: color-mix(in srgb, var(--surface-2) 55%, var(--surface));
+      }
+      .tab-row {
+        display: flex;
+        gap: 16px;
+        color: var(--muted);
+        font-size: 8px;
+        font-weight: 780;
+        letter-spacing: 0.06em;
+      }
+      .tab-row span {
+        padding-bottom: 8px;
+      }
+      .tab-row .active {
+        color: var(--text);
+        border-bottom: 1.5px solid var(--accent);
+      }
+      .state-card {
+        margin-top: 18px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--surface);
+      }
+      .state-card small,
+      .state-card b,
+      .state-card span {
+        display: block;
+      }
+      .state-card small {
+        color: var(--muted);
+        font-size: 8px;
+        letter-spacing: 0.08em;
+      }
+      .state-card b {
+        font-size: 11px;
+        margin-top: 8px;
+      }
+      .state-card span {
+        color: var(--muted);
+        font-size: 9px;
+        margin-top: 5px;
+      }
+      .state-card.soft {
+        background: var(--surface-2);
+      }
+      .signal-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .signal-row > div {
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--surface);
+      }
+      .signal-row small,
+      .signal-row b {
+        display: block;
+        font-size: 8px;
+      }
+      .signal-row small {
+        color: var(--muted);
+      }
+      .signal-row b {
+        font-size: 9px;
+        margin-top: 5px;
+      }
+      .task-mini {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: 8px;
+        margin-top: 8px;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        background: var(--surface);
+        font-size: 9px;
+      }
+      .task-mini i {
+        width: 8px;
+        height: 8px;
+        border: 1px solid var(--line-strong);
+        border-radius: 3px;
+      }
+      .task-mini small {
+        color: var(--muted);
+      }
+      .task-mini.done i {
+        background: #34c782;
+        border-color: #34c782;
+      }
+      .biome-grid {
+        grid-template-columns: 180px 1fr 300px;
+      }
+      .project-preview {
+        margin-top: 12px;
+        padding: 15px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--surface);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .project-preview.active {
+        border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+        box-shadow: 0 8px 24px var(--accent-soft);
+      }
+      .project-preview small,
+      .project-preview b,
+      .project-preview span {
+        display: block;
+      }
+      .project-preview small {
+        font-size: 8px;
+        color: var(--accent);
+        letter-spacing: 0.08em;
+      }
+      .project-preview b {
+        font-size: 13px;
+        margin: 4px 0;
+      }
+      .project-preview div > span {
+        font-size: 9px;
+        color: var(--muted);
+      }
+      .preview-actions {
+        display: flex;
+        gap: 5px;
+      }
+      .graph-pane {
+        display: flex;
+        flex-direction: column;
+      }
+      .graph {
+        height: 220px;
+        margin-top: 18px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background:
+          radial-gradient(circle at 50% 40%, var(--accent-soft), transparent 50%), var(--surface);
+        position: relative;
+        overflow: hidden;
+      }
+      .graph svg {
+        position: absolute;
+        inset: 12px;
+        width: calc(100% - 24px);
+        height: calc(100% - 24px);
+      }
+      .graph path {
+        fill: none;
+        stroke: var(--line-strong);
+        stroke-width: 1.4;
+      }
+      .graph i {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--surface);
+        border: 2px solid var(--accent);
+        z-index: 2;
+        box-shadow: 0 0 0 5px var(--accent-soft);
+      }
+      .g1 {
+        left: 12%;
+        top: 52%;
+      }
+      .g2 {
+        left: 40%;
+        top: 27%;
+      }
+      .g3 {
+        left: 68%;
+        top: 40%;
+      }
+      .g4 {
+        left: 50%;
+        top: 75%;
+      }
+      .g5 {
+        right: 10%;
+        top: 66%;
+      }
+      .proof {
+        padding: 42px 0 24px;
+      }
+      .proof-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: color-mix(in srgb, var(--surface) 88%, transparent);
+        overflow: hidden;
+      }
+      .proof-item {
+        padding: 20px 22px;
+        border-right: 1px solid var(--line);
+      }
+      .proof-item:last-child {
+        border-right: 0;
+      }
+      .proof-item strong {
+        display: block;
+        font-size: 15px;
+        letter-spacing: -0.02em;
+      }
+      .proof-item span {
+        display: block;
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 11px;
+      }
+      .section {
+        padding: 94px 0;
+      }
+      .section-head {
+        max-width: 760px;
+        margin-bottom: 34px;
+      }
+      .kicker {
+        color: var(--accent);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.11em;
+        text-transform: uppercase;
+      }
+      .section h2 {
+        font-size: clamp(34px, 5vw, 55px);
+        line-height: 1.04;
+        letter-spacing: -0.05em;
+        margin: 14px 0;
+      }
+      .section-lead {
+        color: var(--muted);
+        font-size: 17px;
+      }
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 10px;
+      }
+      .flow-step {
+        padding: 22px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-sm);
+        background: var(--surface);
+        min-height: 180px;
+        position: relative;
+      }
+      .flow-step:after {
+        content: '';
+        position: absolute;
+        left: 22px;
+        right: -11px;
+        top: 38px;
+        height: 1px;
+        background: linear-gradient(90deg, var(--accent), var(--line));
+        z-index: 0;
+      }
+      .flow-step:last-child:after {
+        display: none;
+      }
+      .step-no {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        place-items: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 9px;
+        background: var(--surface);
+        border: 1px solid color-mix(in srgb, var(--accent) 42%, var(--line));
+        color: var(--accent);
+        font-size: 9px;
+        font-weight: 800;
+      }
+      .flow-step h3 {
+        font-size: 14px;
+        margin: 28px 0 7px;
+      }
+      .flow-step p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .bento-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+      .bento {
+        padding: 26px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        min-height: 225px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+      }
+      .bento-large {
+        grid-column: span 2;
+        background: linear-gradient(
+          145deg,
+          var(--surface),
+          color-mix(in srgb, var(--accent-soft) 60%, var(--surface))
+        );
+      }
+      .icon-box {
+        width: 38px;
+        height: 38px;
+        border-radius: 11px;
+        background: var(--surface-2);
+        border: 1px solid var(--line);
+        display: grid;
+        place-items: center;
+        color: var(--accent);
+        font-weight: 800;
+      }
+      .bento h3 {
+        font-size: 18px;
+        margin: 35px 0 8px;
+        letter-spacing: -0.02em;
+      }
+      .bento p {
+        margin: 0;
+        color: var(--muted);
+        max-width: 48ch;
+      }
+      .architecture-card {
+        display: grid;
+        grid-template-columns: 1.22fr 0.78fr;
+        gap: 1px;
+        background: var(--line);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+      .arch-main,
+      .arch-side {
+        background: var(--surface);
+        padding: 32px;
+      }
+      .arch-main {
+        background: linear-gradient(
+          145deg,
+          var(--surface),
+          color-mix(in srgb, var(--accent-soft) 45%, var(--surface))
+        );
+      }
+      .arch-diagram {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        flex-wrap: wrap;
+        margin-top: 28px;
+      }
+      .arch-node {
+        padding: 11px 13px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--surface);
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.03);
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .arch-arrow {
+        color: var(--muted);
+      }
+      .arch-side h3 {
+        margin: 0 0 10px;
+        font-size: 18px;
+      }
+      .arch-side p {
+        color: var(--muted);
+        margin: 0;
+      }
+      .chips {
+        display: flex;
+        gap: 7px;
+        flex-wrap: wrap;
+        margin-top: 22px;
+      }
+      .chip {
+        padding: 6px 9px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--surface-2);
+        font-size: 10px;
+        color: var(--text-2);
+      }
+      .safety-note {
+        margin-top: 16px;
+        padding: 15px 17px;
+        border: 1px solid color-mix(in srgb, #e8a23a 35%, var(--line));
+        border-radius: 12px;
+        background: color-mix(in srgb, #e8a23a 6%, var(--surface));
+        color: var(--text-2);
+        font-size: 12px;
+      }
+      .cta {
+        padding: 32px 0 100px;
+      }
+      .cta-card {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--line-strong);
+        border-radius: 28px;
+        background: var(--text);
+        color: var(--bg);
+        padding: 58px;
+        text-align: center;
+      }
+      .cta-card:after {
+        content: '';
+        position: absolute;
+        width: 380px;
+        height: 380px;
+        border-radius: 50%;
+        right: -160px;
+        top: -220px;
+        background: radial-gradient(circle, var(--accent), transparent 68%);
+        opacity: 0.45;
+      }
+      .cta-card h2 {
+        position: relative;
+        z-index: 1;
+        max-width: 720px;
+        margin: 0 auto;
+        font-size: clamp(32px, 5vw, 54px);
+        line-height: 1.05;
+        letter-spacing: -0.05em;
+      }
+      .cta-card p {
+        position: relative;
+        z-index: 1;
+        max-width: 680px;
+        margin: 16px auto 26px;
+        color: color-mix(in srgb, var(--bg) 65%, transparent);
+        font-size: 16px;
+      }
+      .cta-card .hero-actions {
+        position: relative;
+        z-index: 1;
+        margin-top: 0;
+      }
+      .cta-card .btn.primary {
+        background: var(--bg);
+        color: var(--text);
+        border-color: transparent;
+      }
+      .cta-card .btn.secondary {
+        background: transparent;
+        border-color: color-mix(in srgb, var(--bg) 25%, transparent);
+        color: var(--bg);
+      }
+      .footer {
+        border-top: 1px solid var(--line);
+        padding: 28px 0 38px;
+      }
+      .footer-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        color: var(--muted);
+        font-size: 11px;
+      }
+      .footer-links {
+        display: flex;
+        gap: 18px;
+      }
+      .footer a:hover {
+        color: var(--text);
+      }
+      @media (max-width: 920px) {
+        .nav-center {
+          display: none;
+        }
+        .three-col,
+        .biome-grid {
+          grid-template-columns: 145px 1fr;
+        }
+        .state-pane {
+          display: none;
+        }
+        .proof-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+        .proof-item:nth-child(2) {
+          border-right: 0;
+        }
+        .proof-item:nth-child(-n + 2) {
+          border-bottom: 1px solid var(--line);
+        }
+        .flow {
+          grid-template-columns: 1fr 1fr;
+        }
+        .flow-step:after {
+          display: none;
+        }
+        .bento-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+        .bento-large {
+          grid-column: span 2;
+        }
+        .architecture-card {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (max-width: 640px) {
+        .wrap {
+          width: min(calc(100% - 24px), var(--max));
+        }
+        .nav-inner {
+          height: 62px;
+        }
+        .nav-actions .github-nav {
+          display: none;
+        }
+        .hero {
+          padding-top: 70px;
+        }
+        .hero h1 {
+          font-size: 45px;
+        }
+        .hero-lead {
+          font-size: 16px;
+        }
+        .visual-wrap {
+          margin-top: 42px;
+        }
+        .product-window {
+          border-radius: 15px;
+        }
+        .window-bar {
+          grid-template-columns: 1fr auto;
+        }
+        .window-bar > span:nth-of-type(1) {
+          display: none;
+        }
+        .app-grid,
+        .three-col,
+        .biome-grid {
+          grid-template-columns: 1fr;
+          min-height: 420px;
+        }
+        .app-sidebar {
+          display: none;
+        }
+        .chat-pane,
+        .biome-content {
+          min-height: 410px;
+        }
+        .proof-grid,
+        .flow,
+        .bento-grid {
+          grid-template-columns: 1fr;
+        }
+        .proof-item {
+          border-right: 0 !important;
+          border-bottom: 1px solid var(--line);
+        }
+        .proof-item:last-child {
+          border-bottom: 0;
+        }
+        .bento-large {
+          grid-column: span 1;
+        }
+        .section {
+          padding: 70px 0;
+        }
+        .cta-card {
+          padding: 40px 22px;
+        }
+        .footer-inner {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+        .footer-links {
+          flex-wrap: wrap;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          scroll-behavior: auto !important;
+          transition: none !important;
+        }
+      }
+    </style>
+    <script>
+      (() => {
+        const root = document.documentElement;
+        const q = new URLSearchParams(location.search);
+        const storedLang = localStorage.getItem('project-showcase-lang');
+        const requestedLang = q.get('lang');
+        let lang = ['zh', 'en'].includes(requestedLang)
+          ? requestedLang
+          : storedLang || (navigator.language.toLowerCase().startsWith('zh') ? 'zh' : 'en');
+        const storedTheme = localStorage.getItem('project-showcase-theme');
+        let theme =
+          storedTheme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        const descriptions = {
+          zh: 'MemoFlow 是一个 AI-first 个人生产力工作区，把对话、目标、任务、知识、日程与执行连接成可持续的业务闭环。',
+          en: 'MemoFlow is an AI-first personal productivity workspace connecting conversations, goals, tasks, knowledge, schedules and execution into one durable workflow.',
+        };
+        const titles = { zh: 'MemoFlow · 项目介绍', en: 'MemoFlow · Project Showcase' };
+        function applyLanguage(next) {
+          lang = next;
+          root.lang = lang === 'zh' ? 'zh-CN' : 'en';
+          root.dataset.lang = lang;
+          document
+            .querySelectorAll('[data-zh][data-en]')
+            .forEach((el) => (el.textContent = el.dataset[lang]));
+          const langBtn = document.querySelector('[data-language-toggle]');
+          if (langBtn) {
+            langBtn.textContent = lang === 'zh' ? 'EN' : '中文';
+            langBtn.setAttribute('aria-label', lang === 'zh' ? 'Switch to English' : '切换为中文');
+          }
+          document.title = titles[lang];
+          document
+            .querySelector('meta[name="description"]')
+            .setAttribute('content', descriptions[lang]);
+          localStorage.setItem('project-showcase-lang', lang);
+        }
+        function applyTheme(next) {
+          theme = next;
+          root.dataset.theme = theme;
+          document
+            .querySelector('meta[name="theme-color"]')
+            ?.setAttribute('content', theme === 'dark' ? '#0b0d11' : '#fbfbfd');
+          const btn = document.querySelector('[data-theme-toggle]');
+          if (btn) {
+            btn.textContent = theme === 'dark' ? '☀' : '◐';
+            btn.setAttribute(
+              'aria-label',
+              theme === 'dark'
+                ? lang === 'zh'
+                  ? '切换浅色主题'
+                  : 'Switch to light theme'
+                : lang === 'zh'
+                  ? '切换深色主题'
+                  : 'Switch to dark theme',
+            );
+          }
+          localStorage.setItem('project-showcase-theme', theme);
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+          applyTheme(theme);
+          applyLanguage(lang);
+          document.querySelector('[data-language-toggle]')?.addEventListener('click', () => {
+            applyLanguage(lang === 'zh' ? 'en' : 'zh');
+            applyTheme(theme);
+          });
+          document
+            .querySelector('[data-theme-toggle]')
+            ?.addEventListener('click', () => applyTheme(theme === 'dark' ? 'light' : 'dark'));
+        });
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="page-bg"></div>
+    <nav class="nav">
+      <div class="wrap nav-inner">
+        <a class="brand" href="#top"><span class="brand-mark">M</span><span>MemoFlow</span></a>
+        <div class="nav-center">
+          <a href="#product"><span data-zh="产品" data-en="Product"></span></a
+          ><a href="#engineering"><span data-zh="工程" data-en="Engineering"></span></a
+          ><a href="#architecture"><span data-zh="架构" data-en="Architecture"></span></a>
+        </div>
+        <div class="nav-actions">
+          <button class="lang-btn" type="button" data-language-toggle aria-label="Switch language">
+            EN</button
+          ><button class="icon-btn" type="button" data-theme-toggle aria-label="Switch theme">
+            ◐</button
+          ><a class="btn secondary github-nav" href="https://github.com/BakerSean168/memoflow"
+            >GitHub ↗</a
+          ><a class="btn primary" href="https://memoflow.bakersean.top"
+            ><span data-zh="打开产品" data-en="Open app"></span
+          ></a>
+        </div>
+      </div>
+    </nav>
+    <main id="top">
+      <section class="hero">
+        <div class="wrap">
+          <div class="eyebrow">
+            <i></i
+            ><span
+              data-zh="AI-first 个人生产力工作区"
+              data-en="AI-first personal productivity workspace"
+            ></span
+            ><span>· v0.10.0</span>
+          </div>
+          <h1>
+            <span data-zh="让想法不止停在聊天里。" data-en="Don’t let ideas stop in chat."></span
+            ><br /><span class="gradient"
+              ><span data-zh="把它变成行动流。" data-en="Turn them into a flow of action."></span
+            ></span>
+          </h1>
+          <p
+            class="hero-lead"
+            data-zh="AI 对话、Goal、Task、Knowledge、Schedule 与 Reminder 共享同一个业务上下文：从产生意图，到结构化确认、执行，再到可追踪结果。"
+            data-en="AI conversations, Goals, Tasks, Knowledge, Schedules and Reminders share one domain context—from intent to typed confirmation, execution and traceable outcomes."
+          ></p>
+          <div class="hero-actions">
+            <a class="btn primary" href="https://memoflow.bakersean.top"
+              ><span data-zh="打开 Web 产品" data-en="Open web product"></span><span>↗</span></a
+            ><a class="btn secondary" href="https://github.com/BakerSean168/memoflow"
+              ><span data-zh="查看源码" data-en="View source"></span><span>↗</span></a
+            >
+          </div>
+          <div
+            class="hero-note"
+            data-zh="Web + Desktop · 共享契约"
+            data-en="Web + Desktop · shared contracts"
+          ></div>
+          <div class="visual-wrap" id="product">
+            <div class="product-window memo-product">
+              <div class="window-bar">
+                <div class="traffic"><i></i><i></i><i></i></div>
+                <span>MemoFlow / <span data-zh="工作区" data-en="workspace"></span></span
+                ><span class="window-status"
+                  ><i></i><span data-zh="已同步" data-en="SYNCED"></span
+                ></span>
+              </div>
+              <div class="app-grid three-col memo-grid">
+                <aside class="app-sidebar">
+                  <div class="app-logo">M</div>
+                  <div class="side-label" data-zh="工作区" data-en="WORKSPACE"></div>
+                  <div class="side-item active">
+                    <b></b><span data-zh="今天" data-en="Today"></span>
+                  </div>
+                  <div class="side-item"><b></b><span data-zh="目标" data-en="Goals"></span></div>
+                  <div class="side-item"><b></b><span data-zh="任务" data-en="Tasks"></span></div>
+                  <div class="side-item">
+                    <b></b><span data-zh="知识" data-en="Knowledge"></span>
+                  </div>
+                </aside>
+                <section class="chat-pane">
+                  <div class="pane-head">
+                    <span data-zh="AI 协作" data-en="AI collaboration"></span
+                    ><small data-zh="共享业务上下文" data-en="SHARED DOMAIN CONTEXT"></small>
+                  </div>
+                  <div class="message user">
+                    <span
+                      data-zh="把本周的项目发布整理成目标，并安排今天最重要的三个任务。"
+                      data-en="Turn this week’s release into a goal and schedule the three most important tasks for today."
+                    ></span>
+                  </div>
+                  <div class="message ai">
+                    <span class="ai-dot"></span>
+                    <div>
+                      <b>MemoFlow</b>
+                      <p
+                        data-zh="我整理了一个 Goal、三个可执行 Task，并根据今天的时间窗口生成了安排草案。"
+                        data-en="I created one Goal, three executable Tasks, and a schedule draft based on today’s available windows."
+                      ></p>
+                      <div class="tool-row">
+                        <span>goal.create</span><span>task.plan</span><span>schedule</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="timeline">
+                    <i></i>
+                    <div>
+                      <b data-zh="草案等待确认" data-en="Draft ready for review"></b
+                      ><small
+                        data-zh="AI 生成 → 结构化确认 → 执行"
+                        data-en="AI draft → typed confirmation → execution"
+                      ></small>
+                    </div>
+                  </div>
+                </section>
+                <aside class="state-pane task-board">
+                  <div class="tab-row">
+                    <span class="active" data-zh="计划" data-en="PLAN"></span
+                    ><span data-zh="时间线" data-en="TIMELINE"></span>
+                  </div>
+                  <div class="state-card">
+                    <small>GOAL</small
+                    ><b data-zh="完成 0.10 发布闭环" data-en="Close the 0.10 release loop"></b
+                    ><span data-zh="本周 · 3 个任务" data-en="This week · 3 tasks"></span>
+                  </div>
+                  <div class="task-mini done">
+                    <i></i><span data-zh="验证构建" data-en="Verify build"></span
+                    ><small>09:30</small>
+                  </div>
+                  <div class="task-mini">
+                    <i></i><span data-zh="发布生产环境" data-en="Deploy production"></span
+                    ><small>14:00</small>
+                  </div>
+                  <div class="task-mini">
+                    <i></i><span data-zh="复盘发布结果" data-en="Review release outcome"></span
+                    ><small>18:30</small>
+                  </div>
+                </aside>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section
+        class="section"
+        id="visual-proof"
+        aria-label="Workspace screenshot from automated UI tests"
+      >
+        <div class="wrap">
+          <div class="section-head">
+            <div class="kicker">
+              00 · <span data-zh="真实界面证据" data-en="UI evidence">真实界面证据</span>
+            </div>
+            <h2 data-zh="Vue 工作区视觉回归截图" data-en="Vue workspace visual-regression capture">
+              Vue 工作区视觉回归截图
+            </h2>
+            <p
+              data-zh="以下是项目现有自动化测试保存的实际前端渲染截图，使用测试状态，不代表线上真实用户数据。"
+              data-en="A preserved screenshot of the actual frontend rendered during automated visual tests, using fixture state rather than real user data."
+            >
+              以下是项目现有自动化测试保存的实际前端渲染截图，使用测试状态，不代表线上真实用户数据。
+            </p>
+          </div>
+          <figure style="margin: 16px 0 0; max-width: 100%">
+            <img
+              src="./assets/workspace-e2e-visual-regression.png"
+              alt="MemoFlow Vue 三栏工作区的视觉回归截图"
+              loading="lazy"
+              style="
+                display: block;
+                width: 100%;
+                height: auto;
+                border: 1px solid var(--line);
+                border-radius: var(--radius-sm);
+                box-shadow: var(--shadow-sm);
+              "
+            />
+            <figcaption
+              style="padding-top: 8px; color: var(--muted); font-size: 13px"
+              data-zh="来源：apps/web/e2e/visual-regression/baselines；来自自动化测试基线，非生产用户会话。"
+              data-en="Source: apps/web/e2e/visual-regression/baselines; an automated test baseline, not a production user session."
+            >
+              来源：apps/web/e2e/visual-regression/baselines；来自自动化测试基线，非生产用户会话。
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+      <section class="proof">
+        <div class="wrap">
+          <div class="proof-grid">
+            <div class="proof-item">
+              <strong data-zh="AI 优先" data-en="AI-first"></strong
+              ><span
+                data-zh="AI 是入口，不是孤岛"
+                data-en="AI is an entry point, not a silo"
+              ></span>
+            </div>
+            <div class="proof-item">
+              <strong data-zh="多端协同" data-en="Multi-surface"></strong
+              ><span data-zh="Web + Electron" data-en="Web + Electron"></span>
+            </div>
+            <div class="proof-item">
+              <strong data-zh="领域驱动" data-en="Domain-driven"></strong
+              ><span
+                data-zh="Goal / Task / Time / Knowledge"
+                data-en="Goal / Task / Time / Knowledge"
+              ></span>
+            </div>
+            <div class="proof-item">
+              <strong data-zh="持久工作流" data-en="Durable"></strong
+              ><span
+                data-zh="Workflow / timeline / delivery"
+                data-en="Workflow / timeline / delivery"
+              ></span>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="section">
+        <div class="wrap">
+          <div class="section-head">
+            <div class="kicker">01 · <span data-zh="产品流程" data-en="Product flow"></span></div>
+            <h2
+              data-zh="从思考，到业务对象，再到真实执行。"
+              data-en="From thinking, to typed objects, to real execution."
+            ></h2>
+          </div>
+          <div class="flow">
+            <article class="flow-step">
+              <span class="step-no">01</span>
+              <h3 data-zh="思考" data-en="Think"></h3>
+              <p
+                data-zh="和 AI 对话形成目标、问题或知识需求。"
+                data-en="Collaborate with AI to form a goal, question or knowledge need."
+              ></p>
+            </article>
+            <article class="flow-step">
+              <span class="step-no">02</span>
+              <h3 data-zh="结构化" data-en="Structure"></h3>
+              <p
+                data-zh="把意图落为 Goal、Task、Note 等 typed object。"
+                data-en="Turn intent into typed Goal, Task and Note objects."
+              ></p>
+            </article>
+            <article class="flow-step">
+              <span class="step-no">03</span>
+              <h3 data-zh="时间" data-en="Plan time"></h3>
+              <p
+                data-zh="Schedule 与 Reminder 提供统一时间语义。"
+                data-en="Use Schedule and Reminder as one consistent time model."
+              ></p>
+            </article>
+            <article class="flow-step">
+              <span class="step-no">04</span>
+              <h3 data-zh="执行" data-en="Execute"></h3>
+              <p
+                data-zh="业务操作与 delivery contract 承接真实动作。"
+                data-en="Let domain operations and delivery contracts carry real actions."
+              ></p>
+            </article>
+            <article class="flow-step">
+              <span class="step-no">05</span>
+              <h3 data-zh="复盘" data-en="Reflect"></h3>
+              <p
+                data-zh="Timeline、结果与上下文回到下一轮决策。"
+                data-en="Feed timeline, outcomes and context back into the next decision."
+              ></p>
+            </article>
+          </div>
+        </div>
+      </section>
+      <section class="section" id="engineering">
+        <div class="wrap">
+          <div class="section-head">
+            <div class="kicker">02 · <span data-zh="工程能力" data-en="Engineering"></span></div>
+            <h2
+              data-zh="AI 常驻，但业务真值始终结构化。"
+              data-en="AI is always present, while business truth stays structured."
+            ></h2>
+          </div>
+          <div class="bento-grid">
+            <article class="bento bento-large">
+              <div class="icon-box">⌘</div>
+              <h3 data-zh="中央契约" data-en="Central contracts"></h3>
+              <p
+                data-zh="@memoflow/contracts 统一 DTO、业务命令与 transport contract，避免多端各自解释字段。"
+                data-en="@memoflow/contracts unifies DTOs, domain commands and transport contracts across every surface."
+              ></p>
+            </article>
+            <article class="bento">
+              <div class="icon-box">✦</div>
+              <h3 data-zh="Mastra 运行时" data-en="Mastra-native runtime"></h3>
+              <p
+                data-zh="AI runtime 收敛到 TypeScript + Mastra，typed workflow 拥有恢复、取消和状态语义。"
+                data-en="The AI runtime converges on TypeScript + Mastra with typed state, recovery and cancellation semantics."
+              ></p>
+            </article>
+            <article class="bento">
+              <div class="icon-box">⇄</div>
+              <h3 data-zh="跨端数据" data-en="Cross-device data"></h3>
+              <p
+                data-zh="PostgreSQL 与 PowerSync 支撑多客户端数据路径，并显式管理离线一致性边界。"
+                data-en="PostgreSQL and PowerSync support multi-client data flows with explicit offline consistency boundaries."
+              ></p>
+            </article>
+            <article class="bento">
+              <div class="icon-box">✓</div>
+              <h3 data-zh="可执行治理" data-en="Executable governance"></h3>
+              <p
+                data-zh="治理、边界、浏览器流程、覆盖率与 delivery observation 全部成为 protected-main 门禁。"
+                data-en="Architecture, browser flows, coverage and delivery observation are executable protected-main gates."
+              ></p>
+            </article>
+          </div>
+        </div>
+      </section>
+      <section class="section" id="architecture">
+        <div class="wrap">
+          <div class="section-head">
+            <div class="kicker">03 · <span data-zh="架构" data-en="Architecture"></span></div>
+            <h2
+              data-zh="多端 UI，共享领域与 AI 运行时。"
+              data-en="Multiple surfaces, one domain and AI runtime."
+            ></h2>
+            <p
+              class="section-lead"
+              data-zh="Web 与 Desktop 共享 contracts 与领域模型，API 组合运行时，PowerSync 管理跨端数据路径。"
+              data-en="Web and Desktop share contracts and domain models, the API composes runtime services, and PowerSync manages cross-device data."
+            ></p>
+          </div>
+          <div class="architecture-card">
+            <div class="arch-main">
+              <div class="kicker" data-zh="系统关系" data-en="SYSTEM MAP"></div>
+              <div class="arch-diagram">
+                <span class="arch-node">Vue Web</span><span class="arch-arrow">→</span
+                ><span class="arch-node">Electron Desktop</span><span class="arch-arrow">→</span
+                ><span class="arch-node">@memoflow/contracts</span><span class="arch-arrow">→</span
+                ><span class="arch-node">Express API</span><span class="arch-arrow">→</span
+                ><span class="arch-node">Mastra</span><span class="arch-arrow">→</span
+                ><span class="arch-node">PostgreSQL</span><span class="arch-arrow">→</span
+                ><span class="arch-node">PowerSync</span>
+              </div>
+            </div>
+            <aside class="arch-side">
+              <h3 data-zh="技术栈" data-en="Technology"></h3>
+              <p
+                data-zh="保持边界清晰，让工具服务于产品，而不是让产品围着工具转。"
+                data-en="Keep boundaries explicit so technology serves the product rather than defining it."
+              ></p>
+              <div class="chips">
+                <span class="chip">TypeScript 6</span><span class="chip">Vue 3</span
+                ><span class="chip">Electron 43</span><span class="chip">Express 5</span
+                ><span class="chip">Prisma</span><span class="chip">Mastra</span
+                ><span class="chip">PowerSync</span><span class="chip">Playwright</span>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+      <section class="cta">
+        <div class="wrap">
+          <div class="cta-card">
+            <h2
+              data-zh="体验产品，然后沿着契约深入。"
+              data-en="Explore the product, then follow the contracts."
+            ></h2>
+            <p
+              data-zh="生产环境展示 AI-first 工作流；仓库记录 50+ ADR、测试治理和 release lifecycle。"
+              data-en="The live product demonstrates the AI-first workflow; the repository records 50+ ADRs, test governance and the release lifecycle."
+            ></p>
+            <div class="hero-actions">
+              <a class="btn primary" href="https://memoflow.bakersean.top"
+                ><span data-zh="打开 Web 产品" data-en="Open web product"></span> ↗</a
+              ><a class="btn secondary" href="https://github.com/BakerSean168/memoflow">GitHub ↗</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer class="footer">
+      <div class="wrap footer-inner">
+        <span>© 2026 MemoFlow</span>
+        <div class="footer-links">
+          <a href="https://memoflow.bakersean.top"
+            ><span data-zh="生产环境" data-en="Live product"></span></a
+          ><a href="https://github.com/BakerSean168/memoflow">GitHub</a
+          ><a href="#top">↑ <span data-zh="返回顶部" data-en="Back to top"></span></a>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

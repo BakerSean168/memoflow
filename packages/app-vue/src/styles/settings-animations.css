@@ -3,8 +3,11 @@
    ============================================================================ */
 
 /* Main transitions */
-html, body {
-  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+html,
+body {
+  transition:
+    background-color 0.3s ease-in-out,
+    color 0.3s ease-in-out;
 }
 
 /* ============================================================================
@@ -109,11 +112,15 @@ html:not(.compact-mode) {
    ============================================================================ */
 
 .v-card {
-  transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  transition:
+    background-color 0.3s ease-in-out,
+    box-shadow 0.3s ease-in-out;
 }
 
 .v-btn {
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+  transition:
+    background-color 0.2s ease-in-out,
+    color 0.2s ease-in-out;
 }
 
 /* ============================================================================
@@ -134,4 +141,3 @@ html:not(.compact-mode) {
 .setting-panel {
   animation: fadeIn 0.3s ease-out;
 }
-

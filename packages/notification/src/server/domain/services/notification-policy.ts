@@ -87,8 +87,8 @@ export class NotificationPolicy {
 
     const now = context.now ?? new Date();
     if (
-      context.quietHours?.isActiveAt(now)
-      && capability.dndBehavior !== NotificationDndBehavior.Bypass
+      context.quietHours?.isActiveAt(now) &&
+      capability.dndBehavior !== NotificationDndBehavior.Bypass
     ) {
       if (capability.dndBehavior === NotificationDndBehavior.Suppress) {
         return {
@@ -119,8 +119,8 @@ export class NotificationPolicy {
   assertCanSend(context: NotificationPolicyContext): void {
     const decision = this.evaluate(context);
     if (
-      decision.outcome === NotificationDeliveryPlanOutcome.Enqueued
-      || decision.outcome === NotificationDeliveryPlanOutcome.Deferred
+      decision.outcome === NotificationDeliveryPlanOutcome.Enqueued ||
+      decision.outcome === NotificationDeliveryPlanOutcome.Deferred
     ) {
       return;
     }

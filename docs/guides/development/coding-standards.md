@@ -28,7 +28,7 @@ updated: 2026-04-13T00:00:00
   - [`../../standards/值对象里的时间使用number时间戳-毫秒.md`](../../standards/值对象里的时间使用number时间戳-毫秒.md)
 - config / constant / enum 规则：
   - [`../../standards/configs-vs-constants规范.md`](../../standards/configs-vs-constants规范.md)
-  - [`../../standards/枚举与常量对象规范(Enum&Constant-Objects).md`](../../standards/枚举与常量对象规范(Enum&Constant-Objects).md)
+  - [`../../standards/枚举与常量对象规范(Enum&Constant-Objects).md`](<../../standards/枚举与常量对象规范(Enum&Constant-Objects).md>)
   - [`../../standards/枚举类型在数据库中改为string.md`](../../standards/枚举类型在数据库中改为string.md)
   - [`../../standards/enum写法.md`](../../standards/enum写法.md)
   - [`../../standards/id值对象生成id的实现.md`](../../standards/id值对象生成id的实现.md)

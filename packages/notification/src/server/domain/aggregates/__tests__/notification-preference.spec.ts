@@ -21,7 +21,9 @@ describe('NotificationPreference aggregate', () => {
     pref.setGlobalChannel(NotificationChannelType.Email, false);
     expect(pref.getGlobalChannel(NotificationChannelType.Email)).toBe(false);
     pref.setWorkflowChannelOverride('task.deadline', NotificationChannelType.Desktop, true);
-    expect(pref.getWorkflowChannelOverride('task.deadline', NotificationChannelType.Desktop)).toBe(true);
+    expect(pref.getWorkflowChannelOverride('task.deadline', NotificationChannelType.Desktop)).toBe(
+      true,
+    );
     pref.clearGlobalChannel(NotificationChannelType.Email);
     pref.clearWorkflowChannelOverride('task.deadline', NotificationChannelType.Desktop);
     expect(pref.getGlobalChannel(NotificationChannelType.Email)).toBeUndefined();
@@ -37,7 +39,9 @@ describe('NotificationPreference aggregate', () => {
 
     pref.setWorkflowChannelOverride('task.deadline', NotificationChannelType.Desktop, true);
     pref.workflowOverrides.get('task.deadline')?.set(NotificationChannelType.Desktop, false);
-    expect(pref.getWorkflowChannelOverride('task.deadline', NotificationChannelType.Desktop)).toBe(true);
+    expect(pref.getWorkflowChannelOverride('task.deadline', NotificationChannelType.Desktop)).toBe(
+      true,
+    );
   });
 
   it('owns Product-Time QuietHours but no platform rate-limit state', () => {

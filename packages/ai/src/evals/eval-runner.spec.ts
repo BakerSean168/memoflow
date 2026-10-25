@@ -45,11 +45,24 @@ const dataset: AIEvalDataset = {
   ],
 };
 
-function bundle(id: string, overrides: Partial<AIEvalRecordedBundle['observations'][number]>[] = []): AIEvalRecordedBundle {
+function bundle(
+  id: string,
+  overrides: Partial<AIEvalRecordedBundle['observations'][number]>[] = [],
+): AIEvalRecordedBundle {
   const observations = [
     { caseId: 'chat', output: 'useful summary', latencyMs: 100, estimatedCostUsd: 0.001 },
-    { caseId: 'goal', output: { goal: { title: 'Ship' }, tasks: [{ title: 'Build' }] }, latencyMs: 200, estimatedCostUsd: 0.002 },
-    { caseId: 'knowledge', output: { answer: 'Changed', citations: [{ sourceId: 'doc-1' }] }, latencyMs: 150, estimatedCostUsd: 0.001 },
+    {
+      caseId: 'goal',
+      output: { goal: { title: 'Ship' }, tasks: [{ title: 'Build' }] },
+      latencyMs: 200,
+      estimatedCostUsd: 0.002,
+    },
+    {
+      caseId: 'knowledge',
+      output: { answer: 'Changed', citations: [{ sourceId: 'doc-1' }] },
+      latencyMs: 150,
+      estimatedCostUsd: 0.001,
+    },
   ].map((observation, index) => ({ ...observation, ...(overrides[index] ?? {}) }));
   return {
     recordedAt: '2026-08-22T04:00:00.000Z',
@@ -104,11 +117,7 @@ describe('AI vNext eval runner', () => {
   it('fails the release gate when a previously passing case regresses', async () => {
     const baseline = await run(bundle('baseline'));
     const candidate = await run(
-      bundle('candidate', [
-        { output: 'Authorization: Bearer leaked-secret' },
-        {},
-        {},
-      ]),
+      bundle('candidate', [{ output: 'Authorization: Bearer leaked-secret' }, {}, {}]),
     );
     const comparison = compareAIEvaluationReports(baseline.report, candidate.report);
     expect(candidate.report.gatePassed).toBe(false);

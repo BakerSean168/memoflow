@@ -109,8 +109,11 @@ it('reacts to hydration and lease expiry without modifying the native execution 
     expect((await source.read('owner', 0))[0].data.attention?.state).toBe('working');
     // A second row changes while LIMIT 1 still returns the first row.
     wake.mockClear();
-    await db.execute(`INSERT INTO ai_conversation_attention(id,identity_id,runtime_kind,conversation_id,run_id,run_sequence,state,revision,seen_revision,run_started_at,updated_at)
-      VALUES('second','owner','builtin','second-thread','second-run',1,'done',1,0,?,?)`, [Date.now(), Date.now()]);
+    await db.execute(
+      `INSERT INTO ai_conversation_attention(id,identity_id,runtime_kind,conversation_id,run_id,run_sequence,state,revision,seen_revision,run_started_at,updated_at)
+      VALUES('second','owner','builtin','second-thread','second-run',1,'done',1,0,?,?)`,
+      [Date.now(), Date.now()],
+    );
     await vi.waitFor(() => expect(wake).toHaveBeenCalled(), { timeout: 800 });
     wake.mockClear();
     // The deadline timer must wake and persist the projection itself: no head/read polling.
@@ -118,15 +121,24 @@ it('reacts to hydration and lease expiry without modifying the native execution 
     await vi.waitFor(
       async () =>
         expect(
-          await db.getAll("SELECT resource_version,expired FROM ai_attention_event_states WHERE conversation_id='thread'"),
+          await db.getAll(
+            "SELECT resource_version,expired FROM ai_attention_event_states WHERE conversation_id='thread'",
+          ),
         ).toEqual([{ resource_version: 2, expired: 1 }]),
       { timeout: 2000 },
     );
-    expect(await db.getOptional("SELECT state,revision FROM ai_conversation_attention WHERE id='hydrated'")).toEqual({
+    expect(
+      await db.getOptional(
+        "SELECT state,revision FROM ai_conversation_attention WHERE id='hydrated'",
+      ),
+    ).toEqual({
       state: 'working',
       revision: 1,
     });
-    expect((await source.read('owner', 1)).find((event) => event.data.conversationId === 'thread')?.data.attention).toMatchObject({
+    expect(
+      (await source.read('owner', 1)).find((event) => event.data.conversationId === 'thread')?.data
+        .attention,
+    ).toMatchObject({
       state: 'normal',
       revision: 1,
       resourceVersion: 2,

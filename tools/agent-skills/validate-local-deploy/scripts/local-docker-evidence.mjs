@@ -269,13 +269,7 @@ export function hasBrowserProbeEvidence(logs, token) {
   return String(logs ?? '').includes(`__pm_local_docker_probe=${normalizedToken}`);
 }
 
-export function collectBrowserProbeEvidence({
-  workspace,
-  env,
-  composeArgs,
-  token,
-  since,
-}) {
+export function collectBrowserProbeEvidence({ workspace, env, composeArgs, token, since }) {
   const result = runCommand(
     'docker',
     [...composeArgs, 'logs', '--no-color', `--since=${since}`, 'web'],
@@ -288,9 +282,7 @@ export function collectBrowserProbeEvidence({
     since,
     logCommandExitCode: result.exitCode,
     matchingLine:
-      logs
-        .split(/\r?\n/gu)
-        .find((line) => hasBrowserProbeEvidence(line, token)) ?? null,
+      logs.split(/\r?\n/gu).find((line) => hasBrowserProbeEvidence(line, token)) ?? null,
     error:
       result.exitCode === 0
         ? null

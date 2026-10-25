@@ -3,9 +3,7 @@
  * Token 使用量值对象 - 服务端
  */
 
-import type {
-  TokenUsageDTO,
-} from '@memoflow/contracts/ai';
+import type { TokenUsageDTO } from '@memoflow/contracts/ai';
 
 /**
  * TokenUsage 值对象 - 服务端
@@ -15,7 +13,7 @@ export class TokenUsage {
   private constructor(
     public readonly promptTokens: number,
     public readonly completionTokens: number,
-    public readonly totalTokens: number
+    public readonly totalTokens: number,
   ) {}
 
   /**
@@ -26,8 +24,7 @@ export class TokenUsage {
     completionTokens: number;
     totalTokens?: number;
   }): TokenUsage {
-    const totalTokens =
-      props.totalTokens ?? props.promptTokens + props.completionTokens;
+    const totalTokens = props.totalTokens ?? props.promptTokens + props.completionTokens;
     return new TokenUsage(props.promptTokens, props.completionTokens, totalTokens);
   }
 
@@ -63,7 +60,7 @@ export class TokenUsage {
     return new TokenUsage(
       this.promptTokens + other.promptTokens,
       this.completionTokens + other.completionTokens,
-      this.totalTokens + other.totalTokens
+      this.totalTokens + other.totalTokens,
     );
   }
 

@@ -106,4 +106,3 @@ updated: 2026-07-03T10:00:00+08:00
 - Old path deleted: `packages/task/src/api/schedule-runtime.ts`
 - Verification: `.\node_modules\.bin\nx.cmd run task:typecheck` 通过；`.\node_modules\.bin\nx.cmd run task:test` 通过（`44` files / `662` tests）；`.\node_modules\.bin\nx.cmd run api:typecheck` 通过；`.\node_modules\.bin\tsc.cmd --noEmit -p apps/desktop/tsconfig.typecheck.json` 通过。`.\node_modules\.bin\nx.cmd run api:test:smoke` 仍被现有 `@memoflow/patterns/scheduler` 模块解析失败阻塞；`.\node_modules\.bin\nx.cmd run desktop:test:main` 仍被现有 Electron 安装问题与认证测试空文件基线阻塞；`.\node_modules\.bin\nx.cmd run desktop:typecheck` 的 `^build` 链仍被 `ui-vue-shadcn:build` 的现有 `TS2742` 错误阻塞。
 - Remaining follow-up: 进入 `R04`，把 host-level task projection owner 收进真正的 `schedule-orchestration` 包。
-

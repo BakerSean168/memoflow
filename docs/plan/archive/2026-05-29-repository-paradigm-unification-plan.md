@@ -263,13 +263,13 @@ vitest 配置清理：
 
 ### 第八轮完成判定
 
-| 完成要求 | 当前证据 | 结论 |
-| --- | --- | --- |
-| 1. 生产 public surface 继续保持 0 回退 | `public-surface-audit` 通过；`rg` 检索 0 命中 | `已完成` |
-| 2. 测试层 internal-layer 依赖已迁到受控 seam | `apps/` 中 `@memoflow/.+/(infrastructure-server\|application-server\|domain-server\|controllers)` 检索 0 命中 | `已完成` |
-| 3. `task:typecheck` 不再被测试 helper 断言卡住 | `task:typecheck` 通过 | `已完成` |
-| 4. `goal:typecheck`、`goal:build`、`editor:build` 稳定通过 | 全部通过，`contracts:build`/`database:build` 文件锁问题已修复 | `已完成` |
-| 5. plan 文档已把"主目标完成"和"收尾完成"清楚分层记录 | 本节已更新 | `已完成` |
+| 完成要求                                                   | 当前证据                                                                                                      | 结论     |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | -------- |
+| 1. 生产 public surface 继续保持 0 回退                     | `public-surface-audit` 通过；`rg` 检索 0 命中                                                                 | `已完成` |
+| 2. 测试层 internal-layer 依赖已迁到受控 seam               | `apps/` 中 `@memoflow/.+/(infrastructure-server\|application-server\|domain-server\|controllers)` 检索 0 命中 | `已完成` |
+| 3. `task:typecheck` 不再被测试 helper 断言卡住             | `task:typecheck` 通过                                                                                         | `已完成` |
+| 4. `goal:typecheck`、`goal:build`、`editor:build` 稳定通过 | 全部通过，`contracts:build`/`database:build` 文件锁问题已修复                                                 | `已完成` |
+| 5. plan 文档已把"主目标完成"和"收尾完成"清楚分层记录       | 本节已更新                                                                                                    | `已完成` |
 
 **第八轮收尾完成判定：5 条完成要求全部达成。范式统一的优雅收尾可以判定为完成。**
 
@@ -277,16 +277,17 @@ vitest 配置清理：
 
 `validate-local-deploy` 报告判定为 `fail`，但阻塞项均为**预存在问题**，非本轮回归：
 
-| 阻塞项 | 性质 | 说明 |
-| --- | --- | --- |
-| `.env.production.local` 缺失 | 环境配置 | Docker 验证前提条件未满足 |
-| `desktop:lint` 失败 | 预存在 | `preload/__tests__/ipc-contracts.spec.ts` 中 `@nx/enforce-module-boundaries` 相对路径导入错误 |
-| `web:lint` 失败 | 预存在 | `mocks/handlers/*.spec.ts` 中 lazy-loaded library 静态导入错误 |
-| `editor:lint` 失败 | 预存在 | `no-explicit-any` warnings + 1 error |
-| `@memoflow/test-utils:lint` 失败 | 预存在 | 未调查具体原因 |
-| `memoflow:test` 失败 | 预存在 | `@memoflow/contracts/account` 从 account dist 解析失败，workspace vitest 配置问题 |
+| 阻塞项                           | 性质     | 说明                                                                                          |
+| -------------------------------- | -------- | --------------------------------------------------------------------------------------------- |
+| `.env.production.local` 缺失     | 环境配置 | Docker 验证前提条件未满足                                                                     |
+| `desktop:lint` 失败              | 预存在   | `preload/__tests__/ipc-contracts.spec.ts` 中 `@nx/enforce-module-boundaries` 相对路径导入错误 |
+| `web:lint` 失败                  | 预存在   | `mocks/handlers/*.spec.ts` 中 lazy-loaded library 静态导入错误                                |
+| `editor:lint` 失败               | 预存在   | `no-explicit-any` warnings + 1 error                                                          |
+| `@memoflow/test-utils:lint` 失败 | 预存在   | 未调查具体原因                                                                                |
+| `memoflow:test` 失败             | 预存在   | `@memoflow/contracts/account` 从 account dist 解析失败，workspace vitest 配置问题             |
 
 **本轮改动验证结果（直接运行）：**
+
 - `desktop:test` — 通过（210 tests, 22 files）
 - `api:test` — 通过（15 tests）
 - `api:test:smoke` — 通过（58 tests）
@@ -573,23 +574,23 @@ vitest 配置清理：
 
 ### 当前执行状态（针对新目标）
 
-| 项目 | 当前状态 |
-| --- | --- |
-| 详细方案文档 | **已写入，并需按当前真值继续滚动维护** |
-| 代码实施 | **已完成** |
-| tsconfig privileged alias 回收 | **已完成** |
-| app/runtime internal-layer import 清零 | **已完成** |
-| cross-feature internal-layer import 清零 | **已完成** |
-| machine audit 固化 | **已完成** |
+| 项目                                     | 当前状态                               |
+| ---------------------------------------- | -------------------------------------- |
+| 详细方案文档                             | **已写入，并需按当前真值继续滚动维护** |
+| 代码实施                                 | **已完成**                             |
+| tsconfig privileged alias 回收           | **已完成**                             |
+| app/runtime internal-layer import 清零   | **已完成**                             |
+| cross-feature internal-layer import 清零 | **已完成**                             |
+| machine audit 固化                       | **已完成**                             |
 
 ### 第七轮完成判定
 
-| 目标 | 当前证据 | 结论 |
-| --- | --- | --- |
-| 宿主 app 不得特权直连内部层 | app 源码真实 import 0 命中；app tsconfig alias 已移除 | `已完成` |
-| cross-feature package 不得跨包消费内部层 | public-surface-audit 通过；生产代码真实 import 0 命中 | `已完成` |
-| 治理规则必须机器化 | `public-surface-audit` 已进入 governance-check | `已完成` |
-| 文档与示例同步到新规则 | 非测试文档与 package root 注释示例已清理；剩余仅测试与 vitest 配置特例 | `已完成` |
+| 目标                                     | 当前证据                                                               | 结论     |
+| ---------------------------------------- | ---------------------------------------------------------------------- | -------- |
+| 宿主 app 不得特权直连内部层              | app 源码真实 import 0 命中；app tsconfig alias 已移除                  | `已完成` |
+| cross-feature package 不得跨包消费内部层 | public-surface-audit 通过；生产代码真实 import 0 命中                  | `已完成` |
+| 治理规则必须机器化                       | `public-surface-audit` 已进入 governance-check                         | `已完成` |
+| 文档与示例同步到新规则                   | 非测试文档与 package root 注释示例已清理；剩余仅测试与 vitest 配置特例 | `已完成` |
 
 **最新判定：第七轮的实现与治理闭环已经完成，但文档示例层面仍有少量过期残留。**
 如果标准是“代码、配置、治理门禁已经完全落地”，答案是 `是`。
@@ -673,28 +674,28 @@ vitest 配置清理：
 
 ### 当前执行状态总览（最终判定）
 
-| Track | 当前状态 | 当前证据结论 |
-| --- | --- | --- |
-| Track 1: 包内分层约束机器化 | 已闭环 | `package-internal-boundary-audit` 0 known violations |
-| Track 2: target baseline 豁免收缩 | **已闭环** | 12 个永久豁免，0 个临时豁免 |
-| Track 3: 测试边界治理收紧 | 已闭环 | `@memoflow/test-utils` 是显式测试 seam，生产代码禁止导入 |
-| Track 4: 稳定公共 API 面收窄 | **已闭环** | `./infrastructure-server` 和 `./application-server` 均从 12 个包的 export map 移除 |
-| Track 5: typed API module context | 已闭环 | 生产 `as PrismaClient` 已清零，`DbClient = unknown` 已移除 |
-| Track 6: governance 活文档审计深化 | 已闭环 | richer docs audit 持续通过 |
-| Track 7: lint ratchet | 已闭环 | 多个高价值包生产代码目录已升级为 `error` |
-| Phase G: tsconfig 分层统一 | 已闭环 | `tsconfig.workspace-dist.json` 已落地；app tsconfig 已收成 editor-first |
+| Track                              | 当前状态   | 当前证据结论                                                                       |
+| ---------------------------------- | ---------- | ---------------------------------------------------------------------------------- |
+| Track 1: 包内分层约束机器化        | 已闭环     | `package-internal-boundary-audit` 0 known violations                               |
+| Track 2: target baseline 豁免收缩  | **已闭环** | 12 个永久豁免，0 个临时豁免                                                        |
+| Track 3: 测试边界治理收紧          | 已闭环     | `@memoflow/test-utils` 是显式测试 seam，生产代码禁止导入                           |
+| Track 4: 稳定公共 API 面收窄       | **已闭环** | `./infrastructure-server` 和 `./application-server` 均从 12 个包的 export map 移除 |
+| Track 5: typed API module context  | 已闭环     | 生产 `as PrismaClient` 已清零，`DbClient = unknown` 已移除                         |
+| Track 6: governance 活文档审计深化 | 已闭环     | richer docs audit 持续通过                                                         |
+| Track 7: lint ratchet              | 已闭环     | 多个高价值包生产代码目录已升级为 `error`                                           |
+| Phase G: tsconfig 分层统一         | 已闭环     | `tsconfig.workspace-dist.json` 已落地；app tsconfig 已收成 editor-first            |
 
 ### 完成判定审计（最终）
 
-| 完成要求 | 当前证据 | 结论 |
-| --- | --- | --- |
-| 1. package-internal layering 不再主要靠文档约束 | `package-internal-boundary-audit` 0 known violations | `已完成` |
-| 2. target baseline documented exemption 显著减少，并且临时豁免都有 owner 与收口时间 | 12 个永久豁免，0 个临时豁免 | `已完成` |
-| 3. 测试边界不再整体豁免 module boundary rules | `@memoflow/test-utils` 是显式 allowlist seam，生产代码禁止导入 | `已完成` |
-| 4. `governance` 活文档审计能验证注释质量 | richer docs audit 通过 | `已完成` |
-| 5. `governance` 和至少 3 个高价值 feature 包完成稳定 public surface 收缩 | `./infrastructure-server` 和 `./application-server` 均从 12 个包移除 | `已完成` |
-| 6. 高价值模块开始使用目录级 lint ratchet | 多个包生产代码目录已升为 `error` | `已完成` |
-| 7. feature `api/module.ts` 的 `db: unknown` + `as PrismaClient` 模式被统一替换 | shared contract 默认值已移除，生产代码 cast 已清零 | `已完成` |
+| 完成要求                                                                            | 当前证据                                                             | 结论     |
+| ----------------------------------------------------------------------------------- | -------------------------------------------------------------------- | -------- |
+| 1. package-internal layering 不再主要靠文档约束                                     | `package-internal-boundary-audit` 0 known violations                 | `已完成` |
+| 2. target baseline documented exemption 显著减少，并且临时豁免都有 owner 与收口时间 | 12 个永久豁免，0 个临时豁免                                          | `已完成` |
+| 3. 测试边界不再整体豁免 module boundary rules                                       | `@memoflow/test-utils` 是显式 allowlist seam，生产代码禁止导入       | `已完成` |
+| 4. `governance` 活文档审计能验证注释质量                                            | richer docs audit 通过                                               | `已完成` |
+| 5. `governance` 和至少 3 个高价值 feature 包完成稳定 public surface 收缩            | `./infrastructure-server` 和 `./application-server` 均从 12 个包移除 | `已完成` |
+| 6. 高价值模块开始使用目录级 lint ratchet                                            | 多个包生产代码目录已升为 `error`                                     | `已完成` |
+| 7. feature `api/module.ts` 的 `db: unknown` + `as PrismaClient` 模式被统一替换      | shared contract 默认值已移除，生产代码 cast 已清零                   | `已完成` |
 
 **最新判定：7 条完成要求全部达成。按当前仓库规则，范式统一收口可以判定为完成。**
 
@@ -758,16 +759,16 @@ vitest 配置清理：
 
 ### 当前执行状态总览（按真实证据重判）
 
-| Track | 当前状态 | 当前证据结论 |
-| --- | --- | --- |
-| Track 1: 包内分层约束机器化 | 已闭环 | `package-internal-boundary-audit` 通过，0 known violations |
-| Track 2: target baseline 豁免收缩 | 部分完成 | documented exemptions 已降到 12，但 temporary exemptions 仍有 3 条 |
-| Track 3: 测试边界治理收紧 | 部分完成 | `no-restricted-imports` 测试层全局关闭已移除；但 `@nx/enforce-module-boundaries` 仍对测试全局关闭 |
-| Track 4: 稳定公共 API 面收窄 | **未完成，且是当前门禁红线** | `package-export-audit` 当前直接失败；12 个包仍导出 `./application-server` |
-| Track 5: typed API module context | 部分完成 | 统一 context 已有基础，但仍有 4 处生产 `as PrismaClient` + `DbClient = unknown` 默认值 |
-| Track 6: governance 活文档审计深化 | 已落地 | 当前审计仍通过 |
-| Track 7: lint ratchet | 已显著推进 | 多个高价值包生产代码目录已升级为 `error` |
-| Phase G: tsconfig 分层统一 | 仅形成方案 | root 模板未落地，`api/web/desktop` 默认 tsconfig 仍混写编辑器与构建语义 |
+| Track                              | 当前状态                     | 当前证据结论                                                                                      |
+| ---------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------- |
+| Track 1: 包内分层约束机器化        | 已闭环                       | `package-internal-boundary-audit` 通过，0 known violations                                        |
+| Track 2: target baseline 豁免收缩  | 部分完成                     | documented exemptions 已降到 12，但 temporary exemptions 仍有 3 条                                |
+| Track 3: 测试边界治理收紧          | 部分完成                     | `no-restricted-imports` 测试层全局关闭已移除；但 `@nx/enforce-module-boundaries` 仍对测试全局关闭 |
+| Track 4: 稳定公共 API 面收窄       | **未完成，且是当前门禁红线** | `package-export-audit` 当前直接失败；12 个包仍导出 `./application-server`                         |
+| Track 5: typed API module context  | 部分完成                     | 统一 context 已有基础，但仍有 4 处生产 `as PrismaClient` + `DbClient = unknown` 默认值            |
+| Track 6: governance 活文档审计深化 | 已落地                       | 当前审计仍通过                                                                                    |
+| Track 7: lint ratchet              | 已显著推进                   | 多个高价值包生产代码目录已升级为 `error`                                                          |
+| Phase G: tsconfig 分层统一         | 仅形成方案                   | root 模板未落地，`api/web/desktop` 默认 tsconfig 仍混写编辑器与构建语义                           |
 
 ### 对“是否已经优雅完整实现”的最新判断
 
@@ -791,15 +792,15 @@ vitest 配置清理：
 
 ### 完成判定审计（按当前证据重做）
 
-| 完成要求 | 当前证据 | 结论 |
-| --- | --- | --- |
-| 1. package-internal layering 不再主要靠文档约束 | governance audit 已覆盖，0 known violations | `已完成` |
-| 2. target baseline documented exemption 显著减少，并且临时豁免都有 owner 与收口时间 | 已降到 12；temporary 3 条且均有 owner + targetDate | `部分完成` |
-| 3. 测试边界不再整体豁免 module boundary rules | `@nx/enforce-module-boundaries` 仍对测试层整体关闭 | `未完成` |
-| 4. `governance` 活文档审计能验证注释质量 | docs audit 当前通过 | `已完成` |
-| 5. `governance` 和至少 3 个高价值 feature 包完成稳定 public surface 收缩 | `package-export-audit` 当前失败，12 个 `./application-server` export 仍在 | `未完成` |
-| 6. 高价值模块开始使用目录级 lint ratchet | 多个包生产代码目录已升为 `error` | `已完成` |
-| 7. feature `api/module.ts` 的 `db: unknown` + `as PrismaClient` 模式被统一替换 | shared contract 默认值仍在，生产代码仍有 4 处 cast | `未完成` |
+| 完成要求                                                                            | 当前证据                                                                  | 结论       |
+| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ---------- |
+| 1. package-internal layering 不再主要靠文档约束                                     | governance audit 已覆盖，0 known violations                               | `已完成`   |
+| 2. target baseline documented exemption 显著减少，并且临时豁免都有 owner 与收口时间 | 已降到 12；temporary 3 条且均有 owner + targetDate                        | `部分完成` |
+| 3. 测试边界不再整体豁免 module boundary rules                                       | `@nx/enforce-module-boundaries` 仍对测试层整体关闭                        | `未完成`   |
+| 4. `governance` 活文档审计能验证注释质量                                            | docs audit 当前通过                                                       | `已完成`   |
+| 5. `governance` 和至少 3 个高价值 feature 包完成稳定 public surface 收缩            | `package-export-audit` 当前失败，12 个 `./application-server` export 仍在 | `未完成`   |
+| 6. 高价值模块开始使用目录级 lint ratchet                                            | 多个包生产代码目录已升为 `error`                                          | `已完成`   |
+| 7. feature `api/module.ts` 的 `db: unknown` + `as PrismaClient` 模式被统一替换      | shared contract 默认值仍在，生产代码仍有 4 处 cast                        | `未完成`   |
 
 **最新判定：7 条完成要求中，3 条已完成，1 条部分完成，3 条未完成。**
 
@@ -1253,7 +1254,7 @@ vitest 配置清理：
 3. export map 泄露面
    - 当前仍有 12 个 `package.json#exports["./application-server"]`
 
-1. `PR-5a`：先收 `task` smoke seam
+4. `PR-5a`：先收 `task` smoke seam
    - 动作：
      - 新增 `createTaskSmokeWiring(...)`
      - `apps/api/src/__tests__/smoke/helpers/create-smoke-app.ts` 改依赖 `@memoflow/task/testing`
@@ -1266,7 +1267,7 @@ vitest 配置清理：
      - `pnpm nx run api:test --skip-nx-cache`
      - `node tools/governance/package-export-audit.mjs`
 
-2. `PR-5b`：再收 `schedule` runtime helper
+5. `PR-5b`：再收 `schedule` runtime helper
    - 动作：
      - 把 `createSharedSourceExecutor` 迁到 `api` surface，或以 `createScheduleSourceExecutor` 名义重新导出
      - `apps/api/src/main.ts` 改从 `@memoflow/schedule/api` 或允许的 runtime seam 导入
@@ -1280,7 +1281,7 @@ vitest 配置清理：
      - `pnpm nx run api:typecheck`
      - `node tools/governance/package-export-audit.mjs`
 
-3. `PR-5c`：补 `ai` 窄 ports seam
+6. `PR-5c`：补 `ai` 窄 ports seam
    - 动作：
      - 新增 `packages/ai/src/ports/index.ts`
      - `apps/api/src/modules/ai/*.ts` 与 `apps/desktop/src/main/modules/ai/*.ts` 改从 `@memoflow/ai/ports` 导入
@@ -1295,7 +1296,7 @@ vitest 配置清理：
      - `pnpm nx run desktop:typecheck`
      - `node tools/governance/package-export-audit.mjs`
 
-4. `PR-5d`：复用 `NotificationApplicationPort` 收 `notification`
+7. `PR-5d`：复用 `NotificationApplicationPort` 收 `notification`
    - 动作：
      - app-local 新增 `createNotificationSourceCreator(...)` 薄适配器
      - `apps/api/src/main.ts` 和 `apps/desktop/src/main/modules/schedule/source-executors.ts` 不再 direct new `CreateNotificationUseCase`
@@ -1310,7 +1311,7 @@ vitest 配置清理：
      - `pnpm nx run desktop:typecheck`
      - `node tools/governance/package-export-audit.mjs`
 
-5. `PR-5e`：统一清剩余 8 个无真实消费者包 + 升级 audit
+8. `PR-5e`：统一清剩余 8 个无真实消费者包 + 升级 audit
    - 动作：
      - 删除剩余 8 个包的 `./application-server` export 与 root barrel re-export
      - 扩展 `package-export-audit.mjs`，让 root barrel `application-server` re-export 直接失败
@@ -1458,27 +1459,27 @@ vitest 配置清理：
 
 ### 执行状态总览（更新）
 
-| Track | 当前状态 | 审计结论 |
-| --- | --- | --- |
-| Track 1: 包内分层约束机器化 | 已闭环 | `package-internal-boundary-audit` 0 known violations |
-| Track 2: target baseline 豁免收缩 | **已闭环** | 12 个永久豁免，0 个临时豁免；均有明确平台技术理由 |
-| Track 3: 测试边界治理收紧 | **已闭环** | `repository + ai` testing seams 已落地；`goal` / `task` 已确认干净；全局 `no-restricted-imports` 关闭已移除；package-specific 限制已生效 |
-| Track 4: 稳定公共 API 面收窄 | **已闭环** | `package-export-audit.mjs` 覆盖 `src/index.ts` 与 `package.json#exports`；12 个包的 `./application-server` dead export 已移除；白名单机制已落地 |
-| Track 5: typed API module context | **已闭环** | 12 个 feature `api/module.ts` 统一使用 `ServerModuleContext<PrismaClient>`；生产代码 `as PrismaClient` cast 已清零；`ServerModuleContext` 默认值已移除 |
-| Track 6: governance 活文档审计深化 | 已落地 | 持续维护中 |
-| Track 7: lint ratchet | 已超出 governance 试点 | 多个高价值包已升级为 error |
+| Track                              | 当前状态               | 审计结论                                                                                                                                               |
+| ---------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Track 1: 包内分层约束机器化        | 已闭环                 | `package-internal-boundary-audit` 0 known violations                                                                                                   |
+| Track 2: target baseline 豁免收缩  | **已闭环**             | 12 个永久豁免，0 个临时豁免；均有明确平台技术理由                                                                                                      |
+| Track 3: 测试边界治理收紧          | **已闭环**             | `repository + ai` testing seams 已落地；`goal` / `task` 已确认干净；全局 `no-restricted-imports` 关闭已移除；package-specific 限制已生效               |
+| Track 4: 稳定公共 API 面收窄       | **已闭环**             | `package-export-audit.mjs` 覆盖 `src/index.ts` 与 `package.json#exports`；12 个包的 `./application-server` dead export 已移除；白名单机制已落地        |
+| Track 5: typed API module context  | **已闭环**             | 12 个 feature `api/module.ts` 统一使用 `ServerModuleContext<PrismaClient>`；生产代码 `as PrismaClient` cast 已清零；`ServerModuleContext` 默认值已移除 |
+| Track 6: governance 活文档审计深化 | 已落地                 | 持续维护中                                                                                                                                             |
+| Track 7: lint ratchet              | 已超出 governance 试点 | 多个高价值包已升级为 error                                                                                                                             |
 
 ### 完成判定审计（更新）
 
-| 完成要求 | 当前证据 | 结论 |
-| --- | --- | --- |
-| 1. package-internal layering 不再主要靠文档约束 | `package-internal-boundary-audit.mjs` 已接入 `memoflow:governance-check`；0 known violations | `已完成` |
-| 2. target baseline documented exemption 显著减少，并且临时豁免都有 owner 与收口时间 | 12 个永久豁免，0 个临时豁免；均有明确平台技术理由 | `已完成` |
-| 3. 测试边界不再整体豁免 module boundary rules | `@nx/enforce-module-boundaries` 仍对测试关闭（因 test-utils 跨层需求）；但 `no-restricted-imports` 保持活跃，`repository`/`ai` 有 package-specific 限制 | `部分完成` |
-| 4. `governance` 活文档审计能验证注释质量 | `governance-module-docs-audit.mjs` 检查文件级 JSDoc 内容量、`@internal`、公开导出 JSDoc | `已完成` |
-| 5. `governance` 和至少 3 个高价值 feature 包完成稳定 public surface 收缩 | `package-export-audit.mjs` 覆盖 `src/index.ts` 与 `package.json#exports`；12 个包的 `./application-server` 已移除 | `已完成` |
-| 6. 高价值模块开始使用目录级 lint ratchet | `eslint.config.ts` 已将多个高价值包生产代码目录的 `no-explicit-any` / `no-unused-vars` 升为 `error` | `已完成` |
-| 7. feature `api/module.ts` 的 `db: unknown` + `as PrismaClient` 模式被统一替换 | 12 个 feature `api/module.ts` 统一使用 `ServerModuleContext<PrismaClient>`；生产 cast 已清零；默认值已移除 | `已完成` |
+| 完成要求                                                                            | 当前证据                                                                                                                                                | 结论       |
+| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| 1. package-internal layering 不再主要靠文档约束                                     | `package-internal-boundary-audit.mjs` 已接入 `memoflow:governance-check`；0 known violations                                                            | `已完成`   |
+| 2. target baseline documented exemption 显著减少，并且临时豁免都有 owner 与收口时间 | 12 个永久豁免，0 个临时豁免；均有明确平台技术理由                                                                                                       | `已完成`   |
+| 3. 测试边界不再整体豁免 module boundary rules                                       | `@nx/enforce-module-boundaries` 仍对测试关闭（因 test-utils 跨层需求）；但 `no-restricted-imports` 保持活跃，`repository`/`ai` 有 package-specific 限制 | `部分完成` |
+| 4. `governance` 活文档审计能验证注释质量                                            | `governance-module-docs-audit.mjs` 检查文件级 JSDoc 内容量、`@internal`、公开导出 JSDoc                                                                 | `已完成`   |
+| 5. `governance` 和至少 3 个高价值 feature 包完成稳定 public surface 收缩            | `package-export-audit.mjs` 覆盖 `src/index.ts` 与 `package.json#exports`；12 个包的 `./application-server` 已移除                                       | `已完成`   |
+| 6. 高价值模块开始使用目录级 lint ratchet                                            | `eslint.config.ts` 已将多个高价值包生产代码目录的 `no-explicit-any` / `no-unused-vars` 升为 `error`                                                     | `已完成`   |
+| 7. feature `api/module.ts` 的 `db: unknown` + `as PrismaClient` 模式被统一替换      | 12 个 feature `api/module.ts` 统一使用 `ServerModuleContext<PrismaClient>`；生产 cast 已清零；默认值已移除                                              | `已完成`   |
 
 **结论：7 条完成要求中，6 条已判定为已完成，1 条部分完成（`@nx/enforce-module-boundaries` 因 test-utils 跨层需求仍对测试关闭）。当前状态可判定为"范式已基本统一收口"。**
 
@@ -1553,15 +1554,15 @@ vitest 配置清理：
 
 ### 执行状态总览（更新）
 
-| Track | 当前状态 | 审计结论 |
-| --- | --- | --- |
-| Track 1: 包内分层约束机器化 | 已闭环 | `package-internal-boundary-audit` 0 known violations |
-| Track 2: target baseline 豁免收缩 | **已大幅推进** | 12 个 documented exemption（从 25 → 15 → 14 → 12），3 个临时豁免剩余（均为 UI 组件库，需框架特定测试基础设施） |
-| Track 3: 测试边界治理收紧 | **已闭环** | `repository + ai` testing seams 已落地；`goal` / `task` 已确认干净；全局 `no-restricted-imports` 关闭已移除；package-specific 限制已生效 |
-| Track 4: 稳定公共 API 面收窄 | **audit 已扩展，dead exports 已清理** | `package-export-audit.mjs` 现在同时覆盖 `src/index.ts` 与 `package.json#exports`；12 个包的 `./application-server` dead export 已移除；白名单机制已落地 |
-| Track 5: typed API module context | API module 基本完成，生产 cast 未清零 | 仍存在 4 处实现体内部 `as PrismaClient` cast（hidden behind overloaded signatures） |
-| Track 6: governance 活文档审计深化 | 已落地 | 持续维护中 |
-| Track 7: lint ratchet | 已超出 governance 试点 | 多个高价值包已升级为 error |
+| Track                              | 当前状态                              | 审计结论                                                                                                                                                |
+| ---------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Track 1: 包内分层约束机器化        | 已闭环                                | `package-internal-boundary-audit` 0 known violations                                                                                                    |
+| Track 2: target baseline 豁免收缩  | **已大幅推进**                        | 12 个 documented exemption（从 25 → 15 → 14 → 12），3 个临时豁免剩余（均为 UI 组件库，需框架特定测试基础设施）                                          |
+| Track 3: 测试边界治理收紧          | **已闭环**                            | `repository + ai` testing seams 已落地；`goal` / `task` 已确认干净；全局 `no-restricted-imports` 关闭已移除；package-specific 限制已生效                |
+| Track 4: 稳定公共 API 面收窄       | **audit 已扩展，dead exports 已清理** | `package-export-audit.mjs` 现在同时覆盖 `src/index.ts` 与 `package.json#exports`；12 个包的 `./application-server` dead export 已移除；白名单机制已落地 |
+| Track 5: typed API module context  | API module 基本完成，生产 cast 未清零 | 仍存在 4 处实现体内部 `as PrismaClient` cast（hidden behind overloaded signatures）                                                                     |
+| Track 6: governance 活文档审计深化 | 已落地                                | 持续维护中                                                                                                                                              |
+| Track 7: lint ratchet              | 已超出 governance 试点                | 多个高价值包已升级为 error                                                                                                                              |
 
 ### 下一轮推荐执行顺序（更新）
 
@@ -1649,15 +1650,15 @@ vitest 配置清理：
 
 ### 执行状态总览
 
-| Track | 当前状态 | 审计结论 |
-| --- | --- | --- |
-| Track 1: 包内分层约束机器化 | 已闭环第一版 | `project.json` 已把 `package-internal-boundary-audit.mjs` 接入 `memoflow:governance-check`；`docs/standards/architecture.md` 与 `ADR-031` 已改为“规则已落地”的表述；2026-05-30 本轮代码收口已把 known violation 从 4 压到 0 |
-| Track 2: target baseline 豁免收缩 | 已明显推进 | manifest 已升级到 v2，temporary exemption 强制 `owner` + `targetDate`；当前 documented exemption 已降到 12，但尚未收敛到计划要求的 10 以内 |
-| Track 3: 测试边界治理收紧 | `repository + ai` 试点已落地，但 repo-wide 仍未闭环 | `packages/repository/src/testing/` 与 `packages/ai/src/testing/` 已落地；repository application tests 已迁移到 `../../testing`，AI application tests 已迁移到 `../../../../testing`；`eslint.config.ts` 已分别对 repository / ai tests 加入专用 `no-restricted-imports` 拦截 private infra/api import；但全仓测试层仍存在 `@nx/enforce-module-boundaries` 与 `no-restricted-imports` 的全局关闭，尚未进入 package-scoped allowlist 阶段 |
-| Track 4: 稳定公共 API 面收窄 | audit 已扩展，但当前已成为 governance 红线 | `package-export-audit.mjs` 已扩展为同时审计 `src/index.ts` 与 `package.json#exports`；但最新 `memoflow:governance-check` 已因 12 个包仍导出 `./application-server` 而失败，说明 Track 4 仍未收口，且已经从“结构欠账”升级为“当前门禁红线” |
-| Track 5: typed API module context | API module 基本完成，仓库 seam 未清零 | 12 个 feature `api/module.ts` 已统一使用 `ServerModuleContext<PrismaClient>`；但生产代码中仍存在 `as PrismaClient` cast，且 `ServerModuleContext<DbClient = unknown>` 仍保留兼容默认值 |
-| Track 6: governance 活文档审计深化 | 基本落地 | `governance-module-docs-audit.mjs` 已不再只是 existence check，当前会检查文件级 JSDoc 内容量、English-first / 中文 second、`@internal`、公开导出 JSDoc，且 2026-05-30 复跑通过 |
-| Track 7: lint ratchet | 已超出最初 `governance` 试点 | `eslint.config.ts` 已把多组高价值包生产代码目录的 `no-explicit-any` / `no-unused-vars` 升为 `error`，不再只局限于 `governance` |
+| Track                              | 当前状态                                            | 审计结论                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ---------------------------------- | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Track 1: 包内分层约束机器化        | 已闭环第一版                                        | `project.json` 已把 `package-internal-boundary-audit.mjs` 接入 `memoflow:governance-check`；`docs/standards/architecture.md` 与 `ADR-031` 已改为“规则已落地”的表述；2026-05-30 本轮代码收口已把 known violation 从 4 压到 0                                                                                                                                                                                                             |
+| Track 2: target baseline 豁免收缩  | 已明显推进                                          | manifest 已升级到 v2，temporary exemption 强制 `owner` + `targetDate`；当前 documented exemption 已降到 12，但尚未收敛到计划要求的 10 以内                                                                                                                                                                                                                                                                                              |
+| Track 3: 测试边界治理收紧          | `repository + ai` 试点已落地，但 repo-wide 仍未闭环 | `packages/repository/src/testing/` 与 `packages/ai/src/testing/` 已落地；repository application tests 已迁移到 `../../testing`，AI application tests 已迁移到 `../../../../testing`；`eslint.config.ts` 已分别对 repository / ai tests 加入专用 `no-restricted-imports` 拦截 private infra/api import；但全仓测试层仍存在 `@nx/enforce-module-boundaries` 与 `no-restricted-imports` 的全局关闭，尚未进入 package-scoped allowlist 阶段 |
+| Track 4: 稳定公共 API 面收窄       | audit 已扩展，但当前已成为 governance 红线          | `package-export-audit.mjs` 已扩展为同时审计 `src/index.ts` 与 `package.json#exports`；但最新 `memoflow:governance-check` 已因 12 个包仍导出 `./application-server` 而失败，说明 Track 4 仍未收口，且已经从“结构欠账”升级为“当前门禁红线”                                                                                                                                                                                                |
+| Track 5: typed API module context  | API module 基本完成，仓库 seam 未清零               | 12 个 feature `api/module.ts` 已统一使用 `ServerModuleContext<PrismaClient>`；但生产代码中仍存在 `as PrismaClient` cast，且 `ServerModuleContext<DbClient = unknown>` 仍保留兼容默认值                                                                                                                                                                                                                                                  |
+| Track 6: governance 活文档审计深化 | 基本落地                                            | `governance-module-docs-audit.mjs` 已不再只是 existence check，当前会检查文件级 JSDoc 内容量、English-first / 中文 second、`@internal`、公开导出 JSDoc，且 2026-05-30 复跑通过                                                                                                                                                                                                                                                          |
+| Track 7: lint ratchet              | 已超出最初 `governance` 试点                        | `eslint.config.ts` 已把多组高价值包生产代码目录的 `no-explicit-any` / `no-unused-vars` 升为 `error`，不再只局限于 `governance`                                                                                                                                                                                                                                                                                                          |
 
 ### 明确结论
 
@@ -1682,15 +1683,15 @@ vitest 配置清理：
 
 以下审计直接对照本文件“完成判定”中的 7 条要求，结论以 2026-05-30 当前工作树与已复跑命令结果为准。
 
-| 完成要求 | 当前证据 | 结论 | 仍缺什么 |
-| --- | --- | --- | --- |
-| 1. package-internal layering 不再主要靠文档约束 | `package-internal-boundary-audit.mjs` 已接入 `memoflow:governance-check`；`architecture.md` 与 `ADR-031` 已改为“规则已落地”口径；`goal`、`repository`、`ai`、`schedule` 的 4 条 tracked violation 已在 2026-05-30 全部清零 | `已完成` | 后续只需保持 `KNOWN_VIOLATIONS` 为空并防止回退 |
-| 2. target baseline documented exemption 显著减少，并且临时豁免都有 owner 与收口时间 | `target-baseline-manifest.json` 已升级到 v2；temporary exemption 强制 `owner` + `targetDate`；`memoflow:target-baseline-check` 当前报告 12 个 documented exemption | `部分完成` | 12 仍高于计划要求的 10 以内 |
-| 3. 测试边界不再整体豁免 module boundary rules | `eslint.config.ts` 的全仓测试块仍对 `@nx/enforce-module-boundaries` 与 `no-restricted-imports` 做全局关闭；但 `repository` 与 `ai` 已新增 `src/testing` seam，application tests 已迁移到 test-support import，且 package-specific `no-restricted-imports` 已能拦截 private infra/api import | `未完成` | 需要把 `repository + ai` 试点扩展成真正的 package-scoped allowlist，并最终移除全局测试关闭 |
-| 4. `governance` 活文档审计能验证注释质量，而不只是 JSDoc 存在性 | `governance-module-docs-audit.mjs` 已检查文件级 JSDoc 内容量、English-first / 中文 second、`@internal`、公开导出 JSDoc；复跑通过 | `已完成` | 后续只需持续维护 |
-| 5. `governance` 和至少 3 个高价值 feature 包完成稳定 public surface 收缩 | `governance` 仅完成了 root barrel 第一层收窄；`governance`、`goal`、`task`、`repository` 的 `package.json#exports` 仍公开宽 surface | `未完成` | 需扩展 package export audit 到 `package.json#exports`，并同时收口 `governance` + 至少 3 个高价值包 |
-| 6. 高价值模块开始使用目录级 lint ratchet，而不是继续停留在全局 warn | `eslint.config.ts` 已将多个高价值包生产代码目录的 `no-explicit-any` / `no-unused-vars` 升为 `error` | `已完成` | 后续是扩大范围，不影响本条已达成 |
-| 7. feature `api/module.ts` 的 `db: unknown` + `as PrismaClient` 模式被统一替换 | 12 个 feature `api/module.ts` 已统一使用 `ServerModuleContext<PrismaClient>`；但生产代码仍有 5 处 `as PrismaClient` cast，shared contract 仍保留 `DbClient = unknown` 默认值 | `部分完成` | 需清零剩余生产 cast，并收紧 shared contract |
+| 完成要求                                                                            | 当前证据                                                                                                                                                                                                                                                                                    | 结论       | 仍缺什么                                                                                           |
+| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------- |
+| 1. package-internal layering 不再主要靠文档约束                                     | `package-internal-boundary-audit.mjs` 已接入 `memoflow:governance-check`；`architecture.md` 与 `ADR-031` 已改为“规则已落地”口径；`goal`、`repository`、`ai`、`schedule` 的 4 条 tracked violation 已在 2026-05-30 全部清零                                                                  | `已完成`   | 后续只需保持 `KNOWN_VIOLATIONS` 为空并防止回退                                                     |
+| 2. target baseline documented exemption 显著减少，并且临时豁免都有 owner 与收口时间 | `target-baseline-manifest.json` 已升级到 v2；temporary exemption 强制 `owner` + `targetDate`；`memoflow:target-baseline-check` 当前报告 12 个 documented exemption                                                                                                                          | `部分完成` | 12 仍高于计划要求的 10 以内                                                                        |
+| 3. 测试边界不再整体豁免 module boundary rules                                       | `eslint.config.ts` 的全仓测试块仍对 `@nx/enforce-module-boundaries` 与 `no-restricted-imports` 做全局关闭；但 `repository` 与 `ai` 已新增 `src/testing` seam，application tests 已迁移到 test-support import，且 package-specific `no-restricted-imports` 已能拦截 private infra/api import | `未完成`   | 需要把 `repository + ai` 试点扩展成真正的 package-scoped allowlist，并最终移除全局测试关闭         |
+| 4. `governance` 活文档审计能验证注释质量，而不只是 JSDoc 存在性                     | `governance-module-docs-audit.mjs` 已检查文件级 JSDoc 内容量、English-first / 中文 second、`@internal`、公开导出 JSDoc；复跑通过                                                                                                                                                            | `已完成`   | 后续只需持续维护                                                                                   |
+| 5. `governance` 和至少 3 个高价值 feature 包完成稳定 public surface 收缩            | `governance` 仅完成了 root barrel 第一层收窄；`governance`、`goal`、`task`、`repository` 的 `package.json#exports` 仍公开宽 surface                                                                                                                                                         | `未完成`   | 需扩展 package export audit 到 `package.json#exports`，并同时收口 `governance` + 至少 3 个高价值包 |
+| 6. 高价值模块开始使用目录级 lint ratchet，而不是继续停留在全局 warn                 | `eslint.config.ts` 已将多个高价值包生产代码目录的 `no-explicit-any` / `no-unused-vars` 升为 `error`                                                                                                                                                                                         | `已完成`   | 后续是扩大范围，不影响本条已达成                                                                   |
+| 7. feature `api/module.ts` 的 `db: unknown` + `as PrismaClient` 模式被统一替换      | 12 个 feature `api/module.ts` 已统一使用 `ServerModuleContext<PrismaClient>`；但生产代码仍有 5 处 `as PrismaClient` cast，shared contract 仍保留 `DbClient = unknown` 默认值                                                                                                                | `部分完成` | 需清零剩余生产 cast，并收紧 shared contract                                                        |
 
 结论：7 条完成要求里，当前已有 **3 条可直接判定为已完成**，**2 条是部分完成**，**2 条仍未完成**。因此当前状态仍只能叫“治理显著深化并已有强约束基础”，不能叫“范式已经优雅完整收口”。
 
@@ -1698,14 +1699,14 @@ vitest 配置清理：
 
 为避免后续执行方案停留在“看起来合理但仓库里并没有对应 target”的层面，已额外核对本计划中最常用的项目级验证命令。
 
-| 项目 | `build` | `lint` | `typecheck` | `test` | 备注 |
-| --- | --- | --- | --- | --- | --- |
-| `repository` | 存在 | 存在 | 存在 | 存在 | `build` 依赖 `database:build` |
-| `goal` | 存在 | 存在 | 存在 | 存在 | 另有 integration / coverage 细分 target |
-| `ai` | 存在 | 存在 | 存在 | 存在 | 适合验证 PR-2 |
-| `schedule` | 存在 | 存在 | 存在 | 存在 | 另有 integration / coverage 细分 target |
-| `governance` | 存在 | 存在 | 存在 | 存在 | 适合验证 export / docs 审计相关改动 |
-| `notification` | 存在 | 存在 | 存在 | 存在 | 适合验证 repository-factory cast 清理 |
+| 项目           | `build` | `lint` | `typecheck` | `test` | 备注                                    |
+| -------------- | ------- | ------ | ----------- | ------ | --------------------------------------- |
+| `repository`   | 存在    | 存在   | 存在        | 存在   | `build` 依赖 `database:build`           |
+| `goal`         | 存在    | 存在   | 存在        | 存在   | 另有 integration / coverage 细分 target |
+| `ai`           | 存在    | 存在   | 存在        | 存在   | 适合验证 PR-2                           |
+| `schedule`     | 存在    | 存在   | 存在        | 存在   | 另有 integration / coverage 细分 target |
+| `governance`   | 存在    | 存在   | 存在        | 存在   | 适合验证 export / docs 审计相关改动     |
+| `notification` | 存在    | 存在   | 存在        | 存在   | 适合验证 repository-factory cast 清理   |
 
 补充说明：
 
@@ -1821,7 +1822,7 @@ vitest 配置清理：
    - 2026-05-30 执行状态：**已完成**
    - 2026-05-30 代码核对结果：
      - 当前 `ScheduleTaskExecutionResult` 与 `ScheduleTaskSourceExecutor` 只定义在 `packages/schedule/src/api/runtime.ts`
-      - `application-server/source-executors/shared-source-executor.ts` 因而被迫反向依赖 `api/runtime`
+     - `application-server/source-executors/shared-source-executor.ts` 因而被迫反向依赖 `api/runtime`
      - 已按 application-level contract 路线完成：
        - 新增 `application-server/source-executors/runtime-contract.ts`
        - `api/runtime.ts` 改为消费并 re-export 该 contract
@@ -2016,11 +2017,11 @@ vitest 配置清理：
    - Slice E4：最后回收注释文本
      - 在生产 cast 清零后，再修改 `ServerModuleContext` 与相关 API module 注释，避免文档提前宣称完成
 
-3. 第二阶段完成后再收紧 shared contract：
+4. 第二阶段完成后再收紧 shared contract：
    - 去掉 `ServerModuleContext<DbClient = unknown>` 的默认值
    - 让所有使用方显式声明 `DbClient`
 
-4. 验证门槛：
+5. 验证门槛：
    - `rg -n "as PrismaClient" packages --glob "!**/*.test.ts" --glob "!**/*.spec.ts"` 为 0
 
 #### Phase F: 继续压缩 target baseline exemptions
@@ -2062,79 +2063,80 @@ vitest 配置清理：
      - 但还没有一个与之对称的 workspace-level dist/export baseline
 
 1.1 当前仓库配置清单（2026-05-31 真值快照）
-   - 默认 `tsconfig.json` 仍携带 build-only 字段的项目至少有以下 17 个：
-     - `apps/api`
-       - `rootDir`、`outDir`、`noEmit: false`、`declaration`、`declarationMap`、`sourceMap`
-     - `apps/web`
-       - `outDir`、`declaration: false`、`declarationMap: false`、`sourceMap`
-     - `apps/desktop`
-       - `outDir`
-     - `packages/app-vue`
-       - `outDir`、`declaration`、`declarationMap`
-     - `packages/assets`
-       - `rootDir`、`outDir`
-     - `packages/authentication`
-       - `outDir`
-     - `packages/contracts`
-       - `rootDir`、`outDir`
-     - `packages/dashboard`
-       - `outDir`
-     - `packages/database`
-       - `rootDir`、`outDir`、`declaration`
-     - `packages/domain-shared`
-       - `rootDir`、`outDir`
-     - `packages/http-client`
-       - `outDir`
-     - `packages/ipc-client`
-       - `outDir`、`declaration`、`declarationMap`
-     - `packages/powersync-schema`
-       - `outDir`
-     - `packages/scheduler-server`
-       - `outDir`、`sourceMap`
-     - `packages/ui-core`
-       - `rootDir`、`outDir`、`declaration`、`declarationMap`
-     - `packages/ui-vue-shadcn`
-       - `rootDir`、`outDir`、`declaration`、`declarationMap`
-     - `packages/utils`
-       - `rootDir`、`outDir`
-   - 当前显式把 `typecheck` 绑定到具体工程文件的项目其实很少：
-     - `apps/api`
-       - `tsc --noEmit -p tsconfig.typecheck.json`
-     - `packages/domain-shared`
-       - `tsc --noEmit -p tsconfig.typecheck.json`
-     - `packages/ui-vue-shadcn`
-       - `vue-tsc --noEmit -p tsconfig.typecheck.json`
-     - `packages/contracts`
-       - 例外：当前用 `tsc --build packages/contracts/tsconfig.json`
-   - 其余多数项目仍是：
-     - `tsc --noEmit`
-     - `vue-tsc --noEmit`
-     - 或 `pnpm exec tsc --noEmit`
-     - 也就是仍默认依赖“最近的 `tsconfig.json`”而非显式绑定工程文件
-   - 真实 build authority 现在分成五类：
-     - Node app / feature libs：`tsup`
-       - `apps/api`
-       - `account`、`ai`、`authentication`、`contracts`、`dashboard`、`domain-shared`、`editor`、`goal`、`governance`、`http-client`、`ipc-client`、`notification`、`patterns`、`powersync-schema`、`reminder`、`repository`、`schedule`、`scheduler-server`、`setting`、`task`、`ui-core`、`utils`
-     - Vite app / package：
-       - `apps/web`（`@nx/vite:build`）
-       - `apps/desktop`（`vite build`）
-       - `packages/app-vue`
-       - `packages/assets`
-       - `packages/ui-vue-shadcn`
-     - TSC-first 特例：
-       - `packages/database`（`prisma generate && tsc --build`）
-     - Expo / Metro 或平台内建构建：
-       - `apps/mobile`
-       - `packages/app-react`
-       - `packages/ui-react-native`
-     - 无独立 build 目标或非 TypeScript 主导：
-       - `packages/test-utils`
-       - `apps/ai-service`
-   - 这也直接说明了：
-     - `apps/api` 最需要的是 editor/runtime/typecheck 分层，而不是先机械新增 `tsconfig.build.json`
-     - `apps/web` / `apps/desktop` 最需要的是去掉默认 `tsconfig.json` 的 build 噪音，并显式绑定 typecheck 工程
-     - 真正长期需要 `tsconfig.build.json` 的，主要是“`tsup + tsc --emitDeclarationOnly` 双阶段”的 Node/feature libraries
-     - `database`、`mobile`、`ui-react-native` 这类特例不应被硬套进同一模板
+
+- 默认 `tsconfig.json` 仍携带 build-only 字段的项目至少有以下 17 个：
+  - `apps/api`
+    - `rootDir`、`outDir`、`noEmit: false`、`declaration`、`declarationMap`、`sourceMap`
+  - `apps/web`
+    - `outDir`、`declaration: false`、`declarationMap: false`、`sourceMap`
+  - `apps/desktop`
+    - `outDir`
+  - `packages/app-vue`
+    - `outDir`、`declaration`、`declarationMap`
+  - `packages/assets`
+    - `rootDir`、`outDir`
+  - `packages/authentication`
+    - `outDir`
+  - `packages/contracts`
+    - `rootDir`、`outDir`
+  - `packages/dashboard`
+    - `outDir`
+  - `packages/database`
+    - `rootDir`、`outDir`、`declaration`
+  - `packages/domain-shared`
+    - `rootDir`、`outDir`
+  - `packages/http-client`
+    - `outDir`
+  - `packages/ipc-client`
+    - `outDir`、`declaration`、`declarationMap`
+  - `packages/powersync-schema`
+    - `outDir`
+  - `packages/scheduler-server`
+    - `outDir`、`sourceMap`
+  - `packages/ui-core`
+    - `rootDir`、`outDir`、`declaration`、`declarationMap`
+  - `packages/ui-vue-shadcn`
+    - `rootDir`、`outDir`、`declaration`、`declarationMap`
+  - `packages/utils`
+    - `rootDir`、`outDir`
+- 当前显式把 `typecheck` 绑定到具体工程文件的项目其实很少：
+  - `apps/api`
+    - `tsc --noEmit -p tsconfig.typecheck.json`
+  - `packages/domain-shared`
+    - `tsc --noEmit -p tsconfig.typecheck.json`
+  - `packages/ui-vue-shadcn`
+    - `vue-tsc --noEmit -p tsconfig.typecheck.json`
+  - `packages/contracts`
+    - 例外：当前用 `tsc --build packages/contracts/tsconfig.json`
+- 其余多数项目仍是：
+  - `tsc --noEmit`
+  - `vue-tsc --noEmit`
+  - 或 `pnpm exec tsc --noEmit`
+  - 也就是仍默认依赖“最近的 `tsconfig.json`”而非显式绑定工程文件
+- 真实 build authority 现在分成五类：
+  - Node app / feature libs：`tsup`
+    - `apps/api`
+    - `account`、`ai`、`authentication`、`contracts`、`dashboard`、`domain-shared`、`editor`、`goal`、`governance`、`http-client`、`ipc-client`、`notification`、`patterns`、`powersync-schema`、`reminder`、`repository`、`schedule`、`scheduler-server`、`setting`、`task`、`ui-core`、`utils`
+  - Vite app / package：
+    - `apps/web`（`@nx/vite:build`）
+    - `apps/desktop`（`vite build`）
+    - `packages/app-vue`
+    - `packages/assets`
+    - `packages/ui-vue-shadcn`
+  - TSC-first 特例：
+    - `packages/database`（`prisma generate && tsc --build`）
+  - Expo / Metro 或平台内建构建：
+    - `apps/mobile`
+    - `packages/app-react`
+    - `packages/ui-react-native`
+  - 无独立 build 目标或非 TypeScript 主导：
+    - `packages/test-utils`
+    - `apps/ai-service`
+- 这也直接说明了：
+  - `apps/api` 最需要的是 editor/runtime/typecheck 分层，而不是先机械新增 `tsconfig.build.json`
+  - `apps/web` / `apps/desktop` 最需要的是去掉默认 `tsconfig.json` 的 build 噪音，并显式绑定 typecheck 工程
+  - 真正长期需要 `tsconfig.build.json` 的，主要是“`tsup + tsc --emitDeclarationOnly` 双阶段”的 Node/feature libraries
+  - `database`、`mobile`、`ui-react-native` 这类特例不应被硬套进同一模板
 
 2. 当前问题不是“每个项目都缺一个 `tsconfig.build.json`”，而是职责边界没有统一
    - VS Code / tsserver 默认只认最近的 `tsconfig.json` 或 `jsconfig.json`
@@ -2227,87 +2229,88 @@ vitest 配置清理：
      - build/typecheck-back-to-boundary 工程只能指向 `dist`、`exports` 或显式批准的 public entry
 
 补充：按当前仓库真实构建器推导出的最终文件矩阵
-   - 根层统一只保留三层模板：
-     - `tsconfig.base.json`
-       - 语言级规则、strictness、module 语义
-       - 不承载 workspace alias 策略
-     - `tsconfig.workspace-src.json`
-       - 只承载 editor / 开发态源码联调 alias
-       - 不承载 emit、`rootDir`、`outDir`
-     - `tsconfig.workspace-dist.json`
-       - 新增
-       - 只承载“回到真实包边界”的最小 alias
-       - 默认尽量少配；优先让构建器按 package exports / dependencies 解析
-   - `apps/api`
-     - 推荐最终形态：
-       - `tsconfig.json`
-         - editor-first
-         - 不再保留 `rootDir`、`outDir`、`noEmit: false`、`declaration`
-         - 只放 `@/*` 和确实需要源码联调的少量白名单 alias
-       - `tsconfig.runtime.json`
-         - 仅在 `tsx watch` 需要与编辑器不同的 alias / include 时保留
-         - `serve` target 显式 `TS_NODE_PROJECT` / `--tsconfig` 绑定到它
-       - `tsconfig.typecheck.json`
-         - 仅在 CLI typecheck 需要“回到 dist/export 边界”时保留
-         - 不再只是为了绕过 `rootDir` 冲突而存在
-       - `tsconfig.build.json`
-         - **不是默认必需**
-         - 只有当 `tsup` 显式消费单独 tsconfig，或后续重新引入 `tsc` declaration/build 步骤时才新增
-     - 当前仓库结论：
-       - `api` 最急需的是把默认 `tsconfig.json` 收成 editor-first
-       - 不是先机械新增一个 `tsconfig.build.json`
-   - `apps/web`
-     - 推荐最终形态：
-       - `tsconfig.json`
-         - editor-first / `vue-tsc`-friendly
-         - 去掉 `outDir`、`declaration`、`declarationMap`、`sourceMap`
-       - `tsconfig.typecheck.json`
-         - 仅在 `vue-tsc` 需要与编辑器不同的 include / paths 时保留
-       - 不新增 `tsconfig.build.json`
-         - `vite build` 是唯一 build authority
-   - `apps/desktop`
-     - 推荐最终形态：
-       - `tsconfig.json`
-         - renderer/editor-first
-         - 去掉 `outDir`
-       - `tsconfig.node.json`
-         - 只服务 Vite config、Electron main/preload、Node-side scripts
-       - `tsconfig.typecheck.json`
-         - 仅在 renderer-side typecheck 与默认编辑器工程不一致时新增
-       - 不新增 `tsconfig.build.json`
-         - `vite` / `electron-builder` 才是真实构建链
-   - `apps/mobile` 与 `packages/ui-react-native`
-     - 推荐最终形态：
-       - 尽量维持单一 `tsconfig.json`
-       - 继续让 Expo / Metro 语义主导，不引入 web/electron 那套额外工程文件
-   - Node/tsup feature libraries
-     - 适用：
-       - `account`、`ai`、`authentication`、`editor`、`goal`、`governance`、`notification`、`reminder`、`repository`、`schedule`、`setting`、`task`
-     - 推荐最终形态：
-       - `tsconfig.json`
-         - editor-first / default typecheck project
-       - `tsconfig.build.json`
-         - 保留
-         - 专门给 `tsc --emitDeclarationOnly` 或 `tsup` 的 build-time tsconfig 使用
-         - 依赖解析优先走 `dist` / public exports，不回落 sibling `src`
-   - 基础 TS libraries
-     - 适用：
-       - `utils`、`contracts`、`domain-shared`、`ui-core`、`http-client`、`ipc-client`、`patterns`、`scheduler-server`、`powersync-schema`、`test-utils`
-     - 推荐最终形态：
-       - 默认只保留 `tsconfig.json`
-       - 只有 declaration emit 或 CLI-only typecheck 真有差异时才补 `tsconfig.build.json` / `tsconfig.typecheck.json`
-       - 重点是删掉“挂着 `outDir/rootDir/declaration`，但实际不负责 build”的伪 build 配置
-   - Vue/UI packages
-     - 适用：
-       - `ui-vue-shadcn`、`app-vue`、`assets`
-     - 推荐最终形态：
-       - `tsconfig.json`
-         - editor-first
-       - `tsconfig.typecheck.json`
-         - 只在 `vue-tsc` 或模板类型检查需要额外选项时保留
-       - 是否需要 `tsconfig.build.json`
-         - 取决于是否仍用 `tsc` 补 declaration emit
-         - 如果真实 build 完全交给 `vite` / `tsup` 且无额外 emit，则不应机械新增
+
+- 根层统一只保留三层模板：
+  - `tsconfig.base.json`
+    - 语言级规则、strictness、module 语义
+    - 不承载 workspace alias 策略
+  - `tsconfig.workspace-src.json`
+    - 只承载 editor / 开发态源码联调 alias
+    - 不承载 emit、`rootDir`、`outDir`
+  - `tsconfig.workspace-dist.json`
+    - 新增
+    - 只承载“回到真实包边界”的最小 alias
+    - 默认尽量少配；优先让构建器按 package exports / dependencies 解析
+- `apps/api`
+  - 推荐最终形态：
+    - `tsconfig.json`
+      - editor-first
+      - 不再保留 `rootDir`、`outDir`、`noEmit: false`、`declaration`
+      - 只放 `@/*` 和确实需要源码联调的少量白名单 alias
+    - `tsconfig.runtime.json`
+      - 仅在 `tsx watch` 需要与编辑器不同的 alias / include 时保留
+      - `serve` target 显式 `TS_NODE_PROJECT` / `--tsconfig` 绑定到它
+    - `tsconfig.typecheck.json`
+      - 仅在 CLI typecheck 需要“回到 dist/export 边界”时保留
+      - 不再只是为了绕过 `rootDir` 冲突而存在
+    - `tsconfig.build.json`
+      - **不是默认必需**
+      - 只有当 `tsup` 显式消费单独 tsconfig，或后续重新引入 `tsc` declaration/build 步骤时才新增
+  - 当前仓库结论：
+    - `api` 最急需的是把默认 `tsconfig.json` 收成 editor-first
+    - 不是先机械新增一个 `tsconfig.build.json`
+- `apps/web`
+  - 推荐最终形态：
+    - `tsconfig.json`
+      - editor-first / `vue-tsc`-friendly
+      - 去掉 `outDir`、`declaration`、`declarationMap`、`sourceMap`
+    - `tsconfig.typecheck.json`
+      - 仅在 `vue-tsc` 需要与编辑器不同的 include / paths 时保留
+    - 不新增 `tsconfig.build.json`
+      - `vite build` 是唯一 build authority
+- `apps/desktop`
+  - 推荐最终形态：
+    - `tsconfig.json`
+      - renderer/editor-first
+      - 去掉 `outDir`
+    - `tsconfig.node.json`
+      - 只服务 Vite config、Electron main/preload、Node-side scripts
+    - `tsconfig.typecheck.json`
+      - 仅在 renderer-side typecheck 与默认编辑器工程不一致时新增
+    - 不新增 `tsconfig.build.json`
+      - `vite` / `electron-builder` 才是真实构建链
+- `apps/mobile` 与 `packages/ui-react-native`
+  - 推荐最终形态：
+    - 尽量维持单一 `tsconfig.json`
+    - 继续让 Expo / Metro 语义主导，不引入 web/electron 那套额外工程文件
+- Node/tsup feature libraries
+  - 适用：
+    - `account`、`ai`、`authentication`、`editor`、`goal`、`governance`、`notification`、`reminder`、`repository`、`schedule`、`setting`、`task`
+  - 推荐最终形态：
+    - `tsconfig.json`
+      - editor-first / default typecheck project
+    - `tsconfig.build.json`
+      - 保留
+      - 专门给 `tsc --emitDeclarationOnly` 或 `tsup` 的 build-time tsconfig 使用
+      - 依赖解析优先走 `dist` / public exports，不回落 sibling `src`
+- 基础 TS libraries
+  - 适用：
+    - `utils`、`contracts`、`domain-shared`、`ui-core`、`http-client`、`ipc-client`、`patterns`、`scheduler-server`、`powersync-schema`、`test-utils`
+  - 推荐最终形态：
+    - 默认只保留 `tsconfig.json`
+    - 只有 declaration emit 或 CLI-only typecheck 真有差异时才补 `tsconfig.build.json` / `tsconfig.typecheck.json`
+    - 重点是删掉“挂着 `outDir/rootDir/declaration`，但实际不负责 build”的伪 build 配置
+- Vue/UI packages
+  - 适用：
+    - `ui-vue-shadcn`、`app-vue`、`assets`
+  - 推荐最终形态：
+    - `tsconfig.json`
+      - editor-first
+    - `tsconfig.typecheck.json`
+      - 只在 `vue-tsc` 或模板类型检查需要额外选项时保留
+    - 是否需要 `tsconfig.build.json`
+      - 取决于是否仍用 `tsc` 补 declaration emit
+      - 如果真实 build 完全交给 `vite` / `tsup` 且无额外 emit，则不应机械新增
 
 6. 推荐的 rollout 顺序
    - Slice G1：定义 root-level 模板契约
@@ -2386,12 +2389,12 @@ vitest 配置清理：
    - 目标文件：
      - `packages/schedule/src/api/runtime.ts`
      - `packages/schedule/src/application-server/source-executors/shared-source-executor.ts`
-      - `packages/schedule/src/application-server/source-executors/runtime-contract.ts`
-      - `packages/schedule/src/api/module.ts`
-      - `packages/schedule/src/electron-entry/index.ts`
+     - `packages/schedule/src/application-server/source-executors/runtime-contract.ts`
+     - `packages/schedule/src/api/module.ts`
+     - `packages/schedule/src/electron-entry/index.ts`
    - 预期动作：
      - 新建 shared/application-level runtime contract 文件
-      - `shared-source-executor.ts` 不再 import `api/runtime`
+     - `shared-source-executor.ts` 不再 import `api/runtime`
    - 验证：
      - `pnpm nx run schedule:test --skip-nx-cache` 通过
      - `pnpm nx run schedule:lint` 通过（仅剩既有 warnings）
@@ -2502,41 +2505,43 @@ vitest 配置清理：
      - 用 VS Code / tsserver 视角检查 `apps/api/src` 的源码联调场景不再受 `rootDir: "./src"` 误约束
 
 10. `PR-10` 收紧 `apps/web + apps/desktop` 的 editor/typecheck/runtime 分层
-   - 目标文件：
-     - `apps/web/tsconfig.json`
-     - 需要时新增 `apps/web/tsconfig.typecheck.json`
-     - `apps/web/project.json`
-     - `apps/desktop/tsconfig.json`
-     - `apps/desktop/tsconfig.node.json`
-     - 需要时新增 `apps/desktop/tsconfig.typecheck.json`
-     - `apps/desktop/project.json`
-   - 预期动作：
-     - 去掉默认 `tsconfig.json` 中只为 build 服务的字段
-     - 把 `vue-tsc` / renderer-side typecheck 绑定到显式工程文件
-     - 把 Electron main/preload / Vite config 的 Node-side 语义收进 `tsconfig.node.json` 或等价 runtime config
-     - 保持 `vite` 作为唯一 build authority
-   - 验证：
-     - `pnpm nx run web:typecheck`
-     - `pnpm nx build web --configuration=production`
-     - `pnpm nx run desktop:typecheck`
-     - `pnpm nx build desktop`
+
+- 目标文件：
+  - `apps/web/tsconfig.json`
+  - 需要时新增 `apps/web/tsconfig.typecheck.json`
+  - `apps/web/project.json`
+  - `apps/desktop/tsconfig.json`
+  - `apps/desktop/tsconfig.node.json`
+  - 需要时新增 `apps/desktop/tsconfig.typecheck.json`
+  - `apps/desktop/project.json`
+- 预期动作：
+  - 去掉默认 `tsconfig.json` 中只为 build 服务的字段
+  - 把 `vue-tsc` / renderer-side typecheck 绑定到显式工程文件
+  - 把 Electron main/preload / Vite config 的 Node-side 语义收进 `tsconfig.node.json` 或等价 runtime config
+  - 保持 `vite` 作为唯一 build authority
+- 验证：
+  - `pnpm nx run web:typecheck`
+  - `pnpm nx build web --configuration=production`
+  - `pnpm nx run desktop:typecheck`
+  - `pnpm nx build desktop`
 
 11. `PR-11` 统一 library tsconfig 约定并补 tsconfig shape audit
-   - 目标文件：
-     - `packages/*/tsconfig.json`
-     - `packages/*/tsconfig.build.json`
-     - `packages/*/tsconfig.typecheck.json`
-     - `packages/*/project.json`
-     - 新增 `tools/governance/tsconfig-shape-audit.mjs`
-     - `project.json`
-   - 预期动作：
-     - 把 Node/tsup libraries 的 `typecheck` target 统一成显式 `-p tsconfig.json`
-     - 只在确有 CLI-only 差异时保留 `tsconfig.typecheck.json`
-     - 收紧 build config 到 dist/export 语义
-     - 给默认 `tsconfig.json` 添加治理门禁，阻止新的 build/editor 混写回归
-   - 验证：
-     - `pnpm nx run-many -t typecheck --projects=account,ai,authentication,editor,goal,governance,notification,reminder,repository,schedule,setting,task,domain-shared,ui-vue-shadcn,utils,contracts,ui-core`
-     - `pnpm nx run memoflow:governance-check`
+
+- 目标文件：
+  - `packages/*/tsconfig.json`
+  - `packages/*/tsconfig.build.json`
+  - `packages/*/tsconfig.typecheck.json`
+  - `packages/*/project.json`
+  - 新增 `tools/governance/tsconfig-shape-audit.mjs`
+  - `project.json`
+- 预期动作：
+  - 把 Node/tsup libraries 的 `typecheck` target 统一成显式 `-p tsconfig.json`
+  - 只在确有 CLI-only 差异时保留 `tsconfig.typecheck.json`
+  - 收紧 build config 到 dist/export 语义
+  - 给默认 `tsconfig.json` 添加治理门禁，阻止新的 build/editor 混写回归
+- 验证：
+  - `pnpm nx run-many -t typecheck --projects=account,ai,authentication,editor,goal,governance,notification,reminder,repository,schedule,setting,task,domain-shared,ui-vue-shadcn,utils,contracts,ui-core`
+  - `pnpm nx run memoflow:governance-check`
 
 ### Phase G 子切片（进一步细化）
 
@@ -2846,15 +2851,15 @@ vitest 配置清理：
 
 ## 审计结论总览
 
-| 领域 | 当前状态 | 结论 |
-| --- | --- | --- |
-| 仓库治理入口 | 已存在且可运行 | 不是缺入口，而是需要把更多规则从文档挪进脚本和 lint |
-| target baseline | 已有审计 | 仍容纳 25 个豁免，说明统一工程化还没收口 |
-| feature package shape | 已有 ADR + audit | 只检查目录形状，不检查包内层间依赖是否合法 |
-| ESLint 分层治理 | 已有 `@nx/enforce-module-boundaries` | 只管 package tag，不管 feature 包内部 `domain/application/infra/api` 子层 |
-| 测试治理 | 已有统一 target 与 sync generator | 测试文件被整体豁免 module boundaries，seam 仍过宽 |
-| governance 模块 | lint/typecheck/test/governance-check 全绿 | 是健康示范模块，但“活文档详细度”和“稳定导出面”仍可继续深化 |
-| 文档与 ADR 收敛 | 基本健康 | 仍缺少一套 repo-level 可消费的统一 domain/context 入口，且不少架构约束仍写着 future work |
+| 领域                  | 当前状态                                  | 结论                                                                                     |
+| --------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------- |
+| 仓库治理入口          | 已存在且可运行                            | 不是缺入口，而是需要把更多规则从文档挪进脚本和 lint                                      |
+| target baseline       | 已有审计                                  | 仍容纳 25 个豁免，说明统一工程化还没收口                                                 |
+| feature package shape | 已有 ADR + audit                          | 只检查目录形状，不检查包内层间依赖是否合法                                               |
+| ESLint 分层治理       | 已有 `@nx/enforce-module-boundaries`      | 只管 package tag，不管 feature 包内部 `domain/application/infra/api` 子层                |
+| 测试治理              | 已有统一 target 与 sync generator         | 测试文件被整体豁免 module boundaries，seam 仍过宽                                        |
+| governance 模块       | lint/typecheck/test/governance-check 全绿 | 是健康示范模块，但“活文档详细度”和“稳定导出面”仍可继续深化                               |
+| 文档与 ADR 收敛       | 基本健康                                  | 仍缺少一套 repo-level 可消费的统一 domain/context 入口，且不少架构约束仍写着 future work |
 
 ---
 
@@ -2876,7 +2881,7 @@ vitest 配置清理：
    - `infrastructure-server`
    - `api`
    - `controllers`
-   它不检查这些子层之间有没有越层依赖
+     它不检查这些子层之间有没有越层依赖
 
 ### 当前问题
 
@@ -2959,7 +2964,7 @@ vitest 配置清理：
    - `assets`
    - `mobile build`
    - `ui-react-native build`
-   这类有明确平台原因的例外
+     这类有明确平台原因的例外
 2. **收敛中例外**
    - 需要附带：
      - owner

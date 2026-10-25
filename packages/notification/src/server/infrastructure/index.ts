@@ -22,10 +22,7 @@ export {
   type NotificationModuleUseCases,
   type NotificationRuntimeContributionsInput,
 } from './notification.module';
-export type {
-  NotificationInboxPort,
-  NotificationOperationsPort,
-} from '../application';
+export type { NotificationInboxPort, NotificationOperationsPort } from '../application';
 export type {
   INotificationRepository,
   INotificationPreferenceRepository,

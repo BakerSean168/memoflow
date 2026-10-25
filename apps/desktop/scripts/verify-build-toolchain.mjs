@@ -16,7 +16,10 @@ const resolvedVite = require('vite/package.json').version;
 const resolvedRolldown = require('rolldown/package.json').version;
 
 function versionTuple(value) {
-  return String(value).split(/[.-]/u).slice(0, 3).map((part) => Number.parseInt(part, 10) || 0);
+  return String(value)
+    .split(/[.-]/u)
+    .slice(0, 3)
+    .map((part) => Number.parseInt(part, 10) || 0);
 }
 
 function atLeast(actual, minimum) {
@@ -30,13 +33,19 @@ function atLeast(actual, minimum) {
 }
 
 if (!declaredVite || !overrideVite) {
-  throw new Error('Desktop build requires Vite to be declared in package.json and pnpm-workspace.yaml overrides');
+  throw new Error(
+    'Desktop build requires Vite to be declared in package.json and pnpm-workspace.yaml overrides',
+  );
 }
 if (declaredVite !== overrideVite || resolvedVite !== declaredVite) {
-  throw new Error(`Desktop Vite version drift: package=${declaredVite}, override=${overrideVite}, resolved=${resolvedVite}`);
+  throw new Error(
+    `Desktop Vite version drift: package=${declaredVite}, override=${overrideVite}, resolved=${resolvedVite}`,
+  );
 }
 if (!atLeast(resolvedRolldown, '1.2.1')) {
   throw new Error(`Desktop build requires Rolldown >=1.2.1, resolved ${resolvedRolldown}`);
 }
 
-console.log(`[verify-build-toolchain] Vite ${resolvedVite} / Rolldown ${resolvedRolldown} verified for Desktop build`);
+console.log(
+  `[verify-build-toolchain] Vite ${resolvedVite} / Rolldown ${resolvedRolldown} verified for Desktop build`,
+);

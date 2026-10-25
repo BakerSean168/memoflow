@@ -1,9 +1,9 @@
 [
- {
-  "key": "common.clear",
-  "files": [
-   "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue",
-   "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"
-  ]
- }
+  {
+    "key": "common.clear",
+    "files": [
+      "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue",
+      "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue"
+    ]
+  }
 ]

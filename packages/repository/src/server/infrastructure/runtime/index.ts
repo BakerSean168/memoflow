@@ -1,3 +1,1 @@
-export {
-  createRepositoryRuntimeContribution,
-} from './repository.runtime';
+export { createRepositoryRuntimeContribution } from './repository.runtime';

@@ -9,9 +9,18 @@ import {
 
 describe('ensureTaskGoalBindingConstraint', () => {
   it('ships a migration matching the runtime invariant and explicit suggestion column', () => {
-    const migration = readFileSync(new URL('../../prisma/migrations/task-goal-progress-rule.sql', import.meta.url), 'utf8');
-    const source = readFileSync(new URL('./task-goal-binding-constraint.ts', import.meta.url), 'utf8');
-    const check = source.slice(source.indexOf('  CHECK ('), source.indexOf('\n`;', source.indexOf('  CHECK (')));
+    const migration = readFileSync(
+      new URL('../../prisma/migrations/task-goal-progress-rule.sql', import.meta.url),
+      'utf8',
+    );
+    const source = readFileSync(
+      new URL('./task-goal-binding-constraint.ts', import.meta.url),
+      'utf8',
+    );
+    const check = source.slice(
+      source.indexOf('  CHECK ('),
+      source.indexOf('\n`;', source.indexOf('  CHECK (')),
+    );
     expect(migration).toContain(check);
     expect(migration).toContain('goal_progress_mode TEXT');
     expect(migration).toContain('goal_suggested_value DOUBLE PRECISION');
@@ -105,7 +114,8 @@ describe('ensureTaskGoalBindingConstraint', () => {
       .mockResolvedValueOnce({
         rows: [
           {
-            definition: "CHECK (goal_progress_trigger IN ('EachCompletion', 'PlanCompletion') AND goal_progress_mode IN ('Fixed', 'Prompt') AND goal_suggested_value IS NULL) IS TRUE",
+            definition:
+              "CHECK (goal_progress_trigger IN ('EachCompletion', 'PlanCompletion') AND goal_progress_mode IN ('Fixed', 'Prompt') AND goal_suggested_value IS NULL) IS TRUE",
             comment: TASK_GOAL_BINDING_CONSTRAINT_VERSION,
           },
         ],

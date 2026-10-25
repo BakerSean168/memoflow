@@ -93,10 +93,7 @@ describe('composeTask assembly order with goalProgressHandler', () => {
     composeTask({ db: fakeDb, goalProgressHandler });
 
     expect(createTaskPrismaRepositories).toHaveBeenCalledWith(fakeDb);
-    expect(createTaskPrismaGoalOutboxRuntime).toHaveBeenCalledWith(
-      fakeDb,
-      goalProgressHandler,
-    );
+    expect(createTaskPrismaGoalOutboxRuntime).toHaveBeenCalledWith(fakeDb, goalProgressHandler);
 
     const repoSet = createTaskPrismaRepositories.mock.results[0].value;
     const moduleCall = createTaskModule.mock.calls[0][0];

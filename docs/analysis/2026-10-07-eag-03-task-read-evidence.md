@@ -13,13 +13,13 @@ updated: 2026-10-07T00:00:00Z
 
 ## 已实现行为
 
-| 工具 | Scope | 输入与投影 |
-| --- | --- | --- |
-| goal_get | goals:read | Goal ID；最小 Goal/KR 投影 |
-| goal_search | goals:read | query、limit、cursor；有界 Goal 页 |
-| task_plan_get | tasks:read | TaskPlan ID；定义、schedule、状态、version，不伪造统计 |
-| task_plan_search | tasks:read | query、limit、cursor；createdAt DESC/id DESC |
-| task_occurrence_get | tasks:read | TaskOccurrence ID；已有事实、dueAt、isOverdue、version |
+| 工具                 | Scope      | 输入与投影                                                                             |
+| -------------------- | ---------- | -------------------------------------------------------------------------------------- |
+| goal_get             | goals:read | Goal ID；最小 Goal/KR 投影                                                             |
+| goal_search          | goals:read | query、limit、cursor；有界 Goal 页                                                     |
+| task_plan_get        | tasks:read | TaskPlan ID；定义、schedule、状态、version，不伪造统计                                 |
+| task_plan_search     | tasks:read | query、limit、cursor；createdAt DESC/id DESC                                           |
+| task_occurrence_get  | tasks:read | TaskOccurrence ID；已有事实、dueAt、isOverdue、version                                 |
 | task_occurrence_list | tasks:read | startDate/endDate epoch-ms、includeOverdueOpen、limit、cursor；scheduleDate ASC/id ASC |
 
 所有工具都验证当前凭据、scope、账户及资源归属。PAT 默认仅 goals:read，tasks:read 必须显式授予；旧凭据不自动扩权。发现过滤之外还有调用时校验和 owner 前重新认证。读工具不调用 Assistant、LLM 或浏览器，不产生 Occurrence、outbox 或业务变更。
@@ -49,7 +49,6 @@ Setting preference SQL 也纳入 Task deadline。API integration 增加真实 `u
 最终 lint/typecheck/test、数据库、治理、docs、API bundle boundary 与本地部署报告均已通过；本次 Task 部署由下方新镜像与六工具 journey 证明。
 
 两项审查（Spec 与 Standards）于修正后只读复核通过：日期输入界限、Setting 有界读取、诊断 cause seam 均解决原发现。复核本身不代替执行测试。
-
 
 审查修正后执行结果：`/tmp/eag03-review-tests.log` 的 contracts/agent-gateway/setting/time/api 五项目测试全部通过；`/tmp/eag03-review-checks.log` 六项目最近 lint/typecheck（39 targets）通过；`/tmp/eag03-review-db.log` 真实数据库 3 tests 通过（包含 Preference 锁取消）；`/tmp/eag03-gateway-reviewed.log` Gateway lint/typecheck/test 通过；`/tmp/eag03-diagnostic-test.log` 2 项 audit/诊断脱敏测试通过。`/tmp/eag03-api-build.log` API 构建通过，永久产物断言确认 main/server 共用外部 logger package。日期 red→green 与新增诊断测试没有删减原有保护行为。
 

@@ -4,13 +4,7 @@
  * L5 passes resolved strings (or kinds via app helpers) into Style.empty overrides.
  */
 
-export type TimeEmptyKind =
-  | 'emdash'
-  | 'dash'
-  | 'notSet'
-  | 'na'
-  | 'unknown'
-  | 'blank';
+export type TimeEmptyKind = 'emdash' | 'dash' | 'notSet' | 'na' | 'unknown' | 'blank';
 
 /** Default literal table (EN / neutral). Apps may override via resolveEmptyLabel options. */
 export const DEFAULT_EMPTY_LITERALS: Readonly<Record<TimeEmptyKind, string>> = Object.freeze({
@@ -35,10 +29,7 @@ export interface ResolveEmptyLabelOptions {
 /**
  * Resolve a catalog kind to the display string used as Style.empty.display / EmptyLabel.
  */
-export function resolveEmptyLabel(
-  kind: TimeEmptyKind,
-  options?: ResolveEmptyLabelOptions,
-): string {
+export function resolveEmptyLabel(kind: TimeEmptyKind, options?: ResolveEmptyLabelOptions): string {
   const fromT = options?.translate?.(kind);
   if (fromT != null && fromT !== '') {
     return fromT;
@@ -51,7 +42,6 @@ export function resolveEmptyLabel(
 
 export function isTimeEmptyKind(value: unknown): value is TimeEmptyKind {
   return (
-    typeof value === 'string' &&
-    Object.prototype.hasOwnProperty.call(DEFAULT_EMPTY_LITERALS, value)
+    typeof value === 'string' && Object.prototype.hasOwnProperty.call(DEFAULT_EMPTY_LITERALS, value)
   );
 }

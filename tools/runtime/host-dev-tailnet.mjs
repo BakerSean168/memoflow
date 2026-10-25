@@ -155,7 +155,9 @@ if (action === 'up' || action === 'status') {
     'off',
   ]);
   console.log(`[host-dev:tailnet] disabled Tailnet ingress on :${profile.ports.web}`);
-  console.log(`[host-dev:tailnet] removed host-dev GitHub callback bridge from :${oauthIngressProfile.ports.api}`);
+  console.log(
+    `[host-dev:tailnet] removed host-dev GitHub callback bridge from :${oauthIngressProfile.ports.api}`,
+  );
 } else {
   console.error(`Unsupported host-dev Tailnet command: ${action}. Use up, status, or down.`);
   process.exit(2);

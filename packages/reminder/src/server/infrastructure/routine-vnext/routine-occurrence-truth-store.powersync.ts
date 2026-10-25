@@ -1,8 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type {
-  IElectronDatabase,
-  IElectronDatabaseTransaction,
-} from '@memoflow/contracts/electron';
+import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
 import { buildIdempotencyKeyString } from '@memoflow/contracts/reliable-messaging';
 import { asInstant } from '@memoflow/time';
 import type {
@@ -61,7 +58,8 @@ function nonEmpty(value: string, field: string): string {
 }
 
 function assertEnum<T extends string>(value: string, allowed: readonly T[], field: string): T {
-  if (!(allowed as readonly string[]).includes(value)) throw new TypeError(`Invalid ${field}: ${value}`);
+  if (!(allowed as readonly string[]).includes(value))
+    throw new TypeError(`Invalid ${field}: ${value}`);
   return value as T;
 }
 
@@ -78,7 +76,8 @@ function mapOccurrence(row: RoutineOccurrenceRow): RoutineOccurrenceFact {
     routineId: row.routine_id,
     occurrenceKey: row.occurrence_key,
     triggerKind: assertEnum(row.trigger_kind, ROUTINE_OCCURRENCE_TRIGGER_KINDS, 'triggerKind'),
-    scheduledFor: row.scheduled_for == null ? null : parseInstant(row.scheduled_for, 'scheduledFor'),
+    scheduledFor:
+      row.scheduled_for == null ? null : parseInstant(row.scheduled_for, 'scheduledFor'),
     becameDueAt: parseInstant(row.became_due_at, 'becameDueAt'),
     sourceRevision: row.source_revision,
     resolutionState: assertEnum(
@@ -130,7 +129,9 @@ function assertInteractionReplayMatches(
     row.action !== input.action ||
     row.snooze_duration_ms !== snoozeDurationMs
   ) {
-    throw new Error(`Routine interaction idempotency key '${input.idempotencyKey}' was reused for a different command`);
+    throw new Error(
+      `Routine interaction idempotency key '${input.idempotencyKey}' was reused for a different command`,
+    );
   }
 }
 
@@ -154,13 +155,23 @@ async function requireOccurrenceRow(
   input: { identityId: string; routineId: string; occurrenceKey: string },
 ): Promise<RoutineOccurrenceRow> {
   const row = await findOccurrenceRow(db, input);
-  if (!row) throw new Error(`Routine occurrence '${input.occurrenceKey}' was not found for owner '${input.routineId}'`);
+  if (!row)
+    throw new Error(
+      `Routine occurrence '${input.occurrenceKey}' was not found for owner '${input.routineId}'`,
+    );
   return row;
 }
 
-async function resolveOnDb(db: Db, input: ResolveRoutineOccurrenceInput): Promise<RoutineOccurrenceRow> {
+async function resolveOnDb(
+  db: Db,
+  input: ResolveRoutineOccurrenceInput,
+): Promise<RoutineOccurrenceRow> {
   const current = await requireOccurrenceRow(db, input);
-  const state = assertEnum(current.resolution_state, ROUTINE_OCCURRENCE_RESOLUTION_STATES, 'resolutionState');
+  const state = assertEnum(
+    current.resolution_state,
+    ROUTINE_OCCURRENCE_RESOLUTION_STATES,
+    'resolutionState',
+  );
   if (state !== 'Open') {
     if (state === input.state && current.resolution_kind === input.resolutionKind) return current;
     throw new Error(`Routine occurrence '${input.occurrenceKey}' is already resolved as ${state}`);
@@ -182,23 +193,40 @@ async function resolveOnDb(db: Db, input: ResolveRoutineOccurrenceInput): Promis
   );
   if (result.rowsAffected !== 1) {
     const raced = await requireOccurrenceRow(db, input);
-    if (raced.resolution_state === input.state && raced.resolution_kind === input.resolutionKind) return raced;
+    if (raced.resolution_state === input.state && raced.resolution_kind === input.resolutionKind)
+      return raced;
     throw new Error(`Routine occurrence '${input.occurrenceKey}' resolution conflict`);
   }
   return requireOccurrenceRow(db, input);
 }
 
-function resolutionForInteraction(input: ApplyRoutineInteractionInput): Omit<ResolveRoutineOccurrenceInput, 'identityId' | 'routineId' | 'occurrenceKey'> | null {
+function resolutionForInteraction(
+  input: ApplyRoutineInteractionInput,
+): Omit<ResolveRoutineOccurrenceInput, 'identityId' | 'routineId' | 'occurrenceKey'> | null {
   if (input.action === 'Completed') {
-    return { state: 'Satisfied', resolutionKind: 'ExplicitComplete', resolvedAt: input.actedAt, reason: null };
+    return {
+      state: 'Satisfied',
+      resolutionKind: 'ExplicitComplete',
+      resolvedAt: input.actedAt,
+      reason: null,
+    };
   }
   if (input.action === 'Skipped') {
-    return { state: 'Skipped', resolutionKind: 'UserSkipped', resolvedAt: input.actedAt, reason: null };
+    return {
+      state: 'Skipped',
+      resolutionKind: 'UserSkipped',
+      resolvedAt: input.actedAt,
+      reason: null,
+    };
   }
   return null;
 }
 
-function normalizeOptionalNumber(value: number | null | undefined, field: string, positiveOnly: boolean): number | null {
+function normalizeOptionalNumber(
+  value: number | null | undefined,
+  field: string,
+  positiveOnly: boolean,
+): number | null {
   if (value == null) return null;
   if (!Number.isFinite(value) || (positiveOnly ? value <= 0 : value < 0)) {
     throw new TypeError(`${field} must be ${positiveOnly ? 'positive' : 'non-negative'}`);
@@ -227,8 +255,7 @@ export class PowerSyncRoutineOccurrenceTruthStore implements RoutineOccurrenceTr
       }
 
       const dueAt = new Date(Number(input.becameDueAt));
-      const scheduledFor =
-        input.scheduledFor == null ? null : new Date(Number(input.scheduledFor));
+      const scheduledFor = input.scheduledFor == null ? null : new Date(Number(input.scheduledFor));
       if (
         !Number.isFinite(dueAt.getTime()) ||
         (scheduledFor != null && !Number.isFinite(scheduledFor.getTime()))
@@ -254,7 +281,11 @@ export class PowerSyncRoutineOccurrenceTruthStore implements RoutineOccurrenceTr
           occurrenceKey,
           scheduledFor?.toISOString() ?? null,
           input.sourceRevision == null ? null : String(input.sourceRevision),
-          buildIdempotencyKeyString({ identityId, source: ROUTINE_OCCURRENCE_SOURCE, occurrenceKey }),
+          buildIdempotencyKeyString({
+            identityId,
+            source: ROUTINE_OCCURRENCE_SOURCE,
+            occurrenceKey,
+          }),
           'succeeded',
           input.triggerKind,
           timestamp,
@@ -279,12 +310,19 @@ export class PowerSyncRoutineOccurrenceTruthStore implements RoutineOccurrenceTr
           timestamp,
         ],
       );
-      if (result.rowsAffected !== 1) throw new Error(`Routine occurrence '${occurrenceKey}' insert failed`);
-      return mapOccurrence(await requireOccurrenceRow(tx, { identityId, routineId, occurrenceKey }));
+      if (result.rowsAffected !== 1)
+        throw new Error(`Routine occurrence '${occurrenceKey}' insert failed`);
+      return mapOccurrence(
+        await requireOccurrenceRow(tx, { identityId, routineId, occurrenceKey }),
+      );
     });
   }
 
-  async findOccurrence(input: { readonly identityId: string; readonly routineId: string; readonly occurrenceKey: string }): Promise<RoutineOccurrenceFact | null> {
+  async findOccurrence(input: {
+    readonly identityId: string;
+    readonly routineId: string;
+    readonly occurrenceKey: string;
+  }): Promise<RoutineOccurrenceFact | null> {
     const row = await findOccurrenceRow(this.db, input);
     return row ? mapOccurrence(row) : null;
   }
@@ -306,13 +344,25 @@ export class PowerSyncRoutineOccurrenceTruthStore implements RoutineOccurrenceTr
     return this.db.writeTransaction(async (tx) => mapOccurrence(await resolveOnDb(tx, input)));
   }
 
-  async applyInteraction(input: ApplyRoutineInteractionInput): Promise<RoutineInteractionApplyReceipt> {
+  async applyInteraction(
+    input: ApplyRoutineInteractionInput,
+  ): Promise<RoutineInteractionApplyReceipt> {
     const idempotencyKey = nonEmpty(input.idempotencyKey, 'idempotencyKey');
-    const responseLatencyMs = normalizeOptionalNumber(input.responseLatencyMs, 'responseLatencyMs', false);
-    const snoozeDurationMs = normalizeOptionalNumber(input.snoozeDurationMs, 'snoozeDurationMs', true);
+    const responseLatencyMs = normalizeOptionalNumber(
+      input.responseLatencyMs,
+      'responseLatencyMs',
+      false,
+    );
+    const snoozeDurationMs = normalizeOptionalNumber(
+      input.snoozeDurationMs,
+      'snoozeDurationMs',
+      true,
+    );
     const temporaryOverride = input.temporaryOverride ?? null;
-    if (input.action === 'Snoozed' && snoozeDurationMs == null) throw new TypeError('Snoozed interaction requires snoozeDurationMs');
-    if (input.action === 'Snoozed' && temporaryOverride == null) throw new TypeError('Snoozed interaction requires temporaryOverride');
+    if (input.action === 'Snoozed' && snoozeDurationMs == null)
+      throw new TypeError('Snoozed interaction requires snoozeDurationMs');
+    if (input.action === 'Snoozed' && temporaryOverride == null)
+      throw new TypeError('Snoozed interaction requires temporaryOverride');
     if (input.action !== 'Snoozed' && (snoozeDurationMs != null || temporaryOverride != null)) {
       throw new TypeError('Snooze state is only valid for Snoozed interaction');
     }
@@ -334,7 +384,11 @@ export class PowerSyncRoutineOccurrenceTruthStore implements RoutineOccurrenceTr
       if (replay) {
         assertInteractionReplayMatches(replay, input, snoozeDurationMs);
         const occurrence = await requireOccurrenceRow(tx, input);
-        return { interaction: mapInteraction(replay), occurrence: mapOccurrence(occurrence), replayed: true };
+        return {
+          interaction: mapInteraction(replay),
+          occurrence: mapOccurrence(occurrence),
+          replayed: true,
+        };
       }
 
       let occurrence = await requireOccurrenceRow(tx, input);
@@ -390,18 +444,27 @@ export class PowerSyncRoutineOccurrenceTruthStore implements RoutineOccurrenceTr
           new Date(Number(input.actedAt)).toISOString(),
         ],
       );
-      if (result.rowsAffected !== 1) throw new Error(`Routine interaction '${idempotencyKey}' insert failed`);
+      if (result.rowsAffected !== 1)
+        throw new Error(`Routine interaction '${idempotencyKey}' insert failed`);
       const interaction = await tx.get<RoutineInteractionRow>(
         `SELECT id, idempotency_key, identity_id, routine_id, occurrence_key, action,
                 acted_at, response_latency_ms, snooze_duration_ms, metadata_json
            FROM routine_interactions WHERE id = ?`,
         [id],
       );
-      return { interaction: mapInteraction(interaction), occurrence: mapOccurrence(occurrence), replayed: false };
+      return {
+        interaction: mapInteraction(interaction),
+        occurrence: mapOccurrence(occurrence),
+        replayed: false,
+      };
     });
   }
 
-  async listInteractions(input: { readonly identityId: string; readonly routineId: string; readonly occurrenceKey: string }): Promise<RoutineInteractionFact[]> {
+  async listInteractions(input: {
+    readonly identityId: string;
+    readonly routineId: string;
+    readonly occurrenceKey: string;
+  }): Promise<RoutineInteractionFact[]> {
     const rows = await this.db.getAll<RoutineInteractionRow>(
       `SELECT id, idempotency_key, identity_id, routine_id, occurrence_key, action,
               acted_at, response_latency_ms, snooze_duration_ms, metadata_json

@@ -73,8 +73,12 @@ export class QuietHours extends ValueObject<QuietHoursDTO> {
     }
   }
 
-  get enabled(): boolean { return this.props.enabled; }
-  get timeZone(): QuietHoursDTO['timeZone'] { return this.props.timeZone; }
+  get enabled(): boolean {
+    return this.props.enabled;
+  }
+  get timeZone(): QuietHoursDTO['timeZone'] {
+    return this.props.timeZone;
+  }
   get weeklyWindows(): readonly QuietHoursWindow[] {
     return this.props.weeklyWindows.map(cloneWindow);
   }
@@ -91,11 +95,15 @@ export class QuietHours extends ValueObject<QuietHoursDTO> {
       const start = minutes(String(window.start));
       const end = minutes(String(window.end));
       if (start < end) {
-        return window.daysOfWeek.includes(currentWeekday) && currentMinutes >= start && currentMinutes < end;
+        return (
+          window.daysOfWeek.includes(currentWeekday) &&
+          currentMinutes >= start &&
+          currentMinutes < end
+        );
       }
       return (
-        (window.daysOfWeek.includes(currentWeekday) && currentMinutes >= start)
-        || (window.daysOfWeek.includes(previousWeekday) && currentMinutes < end)
+        (window.daysOfWeek.includes(currentWeekday) && currentMinutes >= start) ||
+        (window.daysOfWeek.includes(previousWeekday) && currentMinutes < end)
       );
     });
   }
@@ -117,9 +125,10 @@ export class QuietHours extends ValueObject<QuietHoursDTO> {
       let active = false;
 
       if (start < end) {
-        active = window.daysOfWeek.includes(currentWeekday)
-          && currentMinutes >= start
-          && currentMinutes < end;
+        active =
+          window.daysOfWeek.includes(currentWeekday) &&
+          currentMinutes >= start &&
+          currentMinutes < end;
       } else if (window.daysOfWeek.includes(currentWeekday) && currentMinutes >= start) {
         active = true;
         endYmd = addYmdDays(ymd, 1);

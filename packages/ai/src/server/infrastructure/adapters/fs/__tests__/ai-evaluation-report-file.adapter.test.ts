@@ -40,7 +40,11 @@ afterEach(async () => {
 describe('AIEvaluationReportFileAdapter', () => {
   it('reads canonical Mastra-native latest reports', async () => {
     const reportsRoot = await tempRoot('memoflow-ai-evals-');
-    await writeFile(path.join(reportsRoot, 'latest.json'), JSON.stringify(canonicalReport()), 'utf8');
+    await writeFile(
+      path.join(reportsRoot, 'latest.json'),
+      JSON.stringify(canonicalReport()),
+      'utf8',
+    );
     await writeFile(
       path.join(reportsRoot, 'live-latest.json'),
       JSON.stringify(

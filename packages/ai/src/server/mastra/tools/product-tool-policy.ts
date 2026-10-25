@@ -56,7 +56,10 @@ export async function applyMemoFlowSessionToolPolicy(
     permissionRules: {
       categories: { other: 'deny' },
       tools: Object.fromEntries(
-        [...Object.keys(MEMOFLOW_PRODUCT_TOOL_POLICY), 'ask_user'].map((name) => [name, permissionFor(name)]),
+        [...Object.keys(MEMOFLOW_PRODUCT_TOOL_POLICY), 'ask_user'].map((name) => [
+          name,
+          permissionFor(name),
+        ]),
       ),
     },
   });

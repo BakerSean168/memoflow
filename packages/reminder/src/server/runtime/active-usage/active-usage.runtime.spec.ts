@@ -215,7 +215,11 @@ describe('ActiveUsage local runtime (ROUTINE-4102)', () => {
     restarted.stop();
   });
   it('re-arms the same generation when durable occurrence persistence fails', () => {
-    const sensor = new FakeActivitySensor({ state: 'active', observedAt: asInstant(0), idleDurationMs: 0 });
+    const sensor = new FakeActivitySensor({
+      state: 'active',
+      observedAt: asInstant(0),
+      idleDurationMs: 0,
+    });
     const due = vi.fn();
     const runtime = createActiveUsageRuntime({
       activitySensor: sensor,
@@ -243,5 +247,4 @@ describe('ActiveUsage local runtime (ROUTINE-4102)', () => {
       generation: 1,
     });
   });
-
 });

@@ -7,18 +7,14 @@
 import type { NotificationClientDTO } from '@memoflow/contracts/notification';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
-import type {
-  INotificationRepository,
-} from '../../../domain/repositories';
+import type { INotificationRepository } from '../../../domain/repositories';
 import { toNotificationClientDTO } from './notification-dto-converters';
 
 /**
  * Mark Notification As Read Use Case
  */
 export class MarkNotificationAsReadUseCase {
-  constructor(
-    private readonly notificationRepository: INotificationRepository,
-  ) {}
+  constructor(private readonly notificationRepository: INotificationRepository) {}
 
   async execute(id: string, identityId: string): Promise<Result<NotificationClientDTO>> {
     const notification = await this.notificationRepository.findByIdForIdentity(identityId, id);
@@ -34,8 +30,12 @@ export class MarkNotificationAsReadUseCase {
 
   async executeMany(ids: string[], identityId: string): Promise<Result<number>> {
     const notifications = (
-      await Promise.all(ids.map((id) => this.notificationRepository.findByIdForIdentity(identityId, id)))
-    ).filter((notification): notification is NonNullable<typeof notification> => notification !== null);
+      await Promise.all(
+        ids.map((id) => this.notificationRepository.findByIdForIdentity(identityId, id)),
+      )
+    ).filter(
+      (notification): notification is NonNullable<typeof notification> => notification !== null,
+    );
 
     for (const notification of notifications) {
       notification.markAsRead();

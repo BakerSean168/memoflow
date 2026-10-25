@@ -27,7 +27,9 @@ export class DeleteTaskPlanUseCase {
     transactionRunner: TaskWriteTransactionRunner,
   ) {
     if (!transactionRunner) {
-      throw new Error('TaskWriteTransactionRunner must be explicitly provided to DeleteTaskPlanUseCase');
+      throw new Error(
+        'TaskWriteTransactionRunner must be explicitly provided to DeleteTaskPlanUseCase',
+      );
     }
     this.transactionRunner = transactionRunner;
   }
@@ -53,9 +55,7 @@ export class DeleteTaskPlanUseCase {
       });
     } catch (caughtError) {
       this.logger.error('Failed to delete task plan', { error: caughtError });
-      return fail(
-        mapTaskWriteErrorToResultError(caughtError, 'Failed to delete task plan'),
-      );
+      return fail(mapTaskWriteErrorToResultError(caughtError, 'Failed to delete task plan'));
     }
   }
 }

@@ -18,29 +18,19 @@ describe('weight snapshot ownership surface', () => {
   );
 
   it('port drops bare findById dual method (residual 173)', () => {
-    expect(port).not.toContain(
-      'findById(id: string): Promise<KeyResultWeightSnapshot | null>;',
-    );
+    expect(port).not.toContain('findById(id: string): Promise<KeyResultWeightSnapshot | null>;');
     expect(prisma).not.toMatch(/async findById\(id: string\)/);
   });
 
   it('port query/delete methods require identityId (residual 149)', () => {
-    expect(port).toMatch(
-      /findByGoal\(\s*identityId: string,\s*goalId: string,/,
-    );
-    expect(port).toMatch(
-      /findByKeyResult\(\s*identityId: string,\s*keyResultId: string,/,
-    );
-    expect(port).toMatch(
-      /findByTimeRange\(\s*identityId: string,\s*startTime: number,/,
-    );
+    expect(port).toMatch(/findByGoal\(\s*identityId: string,\s*goalId: string,/);
+    expect(port).toMatch(/findByKeyResult\(\s*identityId: string,\s*keyResultId: string,/);
+    expect(port).toMatch(/findByTimeRange\(\s*identityId: string,\s*startTime: number,/);
     expect(port).toContain(
       'findByIdForIdentity(identityId: string, id: string): Promise<KeyResultWeightSnapshot | null>;',
     );
     expect(port).toContain('delete(identityId: string, id: string): Promise<void>;');
-    expect(port).toContain(
-      'deleteByGoal(identityId: string, goalId: string): Promise<void>;',
-    );
+    expect(port).toContain('deleteByGoal(identityId: string, goalId: string): Promise<void>;');
     expect(port).toContain(
       'deleteByKeyResult(identityId: string, keyResultId: string): Promise<void>;',
     );

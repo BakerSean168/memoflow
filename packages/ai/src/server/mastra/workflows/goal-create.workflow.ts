@@ -69,8 +69,10 @@ export function initialGoalCreateWorkflowState(
     planningMode: 'initial',
     targetRevision: 1,
     researchEvidence: [],
-    ...(input.sourceDraft && GoalPlanDraftSchema.safeParse({ ...input.sourceDraft.draft, revision: 1 }).success
-      ? { draft: { ...input.sourceDraft.draft, revision: 1 } } : {}),
+    ...(input.sourceDraft &&
+    GoalPlanDraftSchema.safeParse({ ...input.sourceDraft.draft, revision: 1 }).success
+      ? { draft: { ...input.sourceDraft.draft, revision: 1 } }
+      : {}),
   });
 }
 
@@ -308,7 +310,10 @@ export function createGoalCreateWorkflow(input: {
               }
               return recorded.record;
             });
-            actionQueue = append.then(() => undefined, () => undefined);
+            actionQueue = append.then(
+              () => undefined,
+              () => undefined,
+            );
             return append;
           },
         };

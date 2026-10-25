@@ -1,13 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
-import {
-  Animated,
-  Dimensions,
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { Animated, Dimensions, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Spacing } from '../constants/theme';
 import { PrimaryButton } from './PrimaryButton';
@@ -105,11 +97,7 @@ export function PageActionDrawer({
   }
 
   return (
-    <Modal
-      animationType="none"
-      onRequestClose={() => handleClose()}
-      transparent
-      visible>
+    <Modal animationType="none" onRequestClose={() => handleClose()} transparent visible>
       <View style={styles.modalRoot}>
         <Animated.View style={[styles.overlay, { opacity: overlayOpacity }]}>
           <Pressable style={StyleSheet.absoluteFill} onPress={() => handleClose()} />
@@ -126,17 +114,10 @@ export function PageActionDrawer({
                   </ThemedText>
                 ) : null}
               </View>
-              <PrimaryButton
-                label={closeLabel}
-                onPress={() => handleClose()}
-                variant="ghost"
-              />
+              <PrimaryButton label={closeLabel} onPress={() => handleClose()} variant="ghost" />
             </View>
 
-            <ScrollView
-              contentContainerStyle={styles.content}
-              showsVerticalScrollIndicator={false}
-            >
+            <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
               {sections.map((section) => (
                 <View key={section.title} style={styles.section}>
                   <View style={styles.sectionHeader}>

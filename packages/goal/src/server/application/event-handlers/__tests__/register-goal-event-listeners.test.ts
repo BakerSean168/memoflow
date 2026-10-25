@@ -10,9 +10,8 @@ import { registerGoalEventListeners } from '../index';
 
 type CompletedEvent = TaskEventMap['task:instance-completed'];
 
-const taskPublisher = createTypedEventPublisher<Pick<TaskEventMap, 'task:instance-completed'>>(
-  eventBus,
-);
+const taskPublisher =
+  createTypedEventPublisher<Pick<TaskEventMap, 'task:instance-completed'>>(eventBus);
 
 function aGoalBinding(overrides: Partial<TaskGoalBindingDTO> = {}): TaskGoalBindingDTO {
   return {

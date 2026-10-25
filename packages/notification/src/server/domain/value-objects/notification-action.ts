@@ -43,7 +43,8 @@ export class NotificationAction extends ValueObject<NotificationActionDTO> {
 
     switch (props.kind) {
       case 'navigate':
-        if (!props.destination.route?.trim()) throw new Error('Navigate destination.route is required');
+        if (!props.destination.route?.trim())
+          throw new Error('Navigate destination.route is required');
         return;
       case 'owner-command':
         if (!props.owner.type?.trim() || !props.owner.id?.trim()) {
@@ -63,9 +64,15 @@ export class NotificationAction extends ValueObject<NotificationActionDTO> {
     }
   }
 
-  get actionKey(): string { return this.props.actionKey; }
-  get labelKey(): string { return this.props.labelKey; }
-  get kind(): NotificationActionDTO['kind'] { return this.props.kind; }
+  get actionKey(): string {
+    return this.props.actionKey;
+  }
+  get labelKey(): string {
+    return this.props.labelKey;
+  }
+  get kind(): NotificationActionDTO['kind'] {
+    return this.props.kind;
+  }
 
   toDTO(): NotificationActionDTO {
     return cloneAction(this.props);

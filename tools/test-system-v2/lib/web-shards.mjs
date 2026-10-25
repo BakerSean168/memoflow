@@ -1,6 +1,5 @@
 /* eslint-disable @nx/enforce-module-boundaries -- planner consumes the Web-owned canonical spec list */
-import { WEB_FLOW_SPECS } from '../../../apps/web/web-flow-specs.mjs';
-import { WEB_CORE_SPECS, WEB_OWNER_EXTENSIONS } from '../../../apps/web/web-core-specs.mjs';
+import { WEB_SPECIALIZED_SPECS } from '../../../apps/web/web-specialized-specs.mjs';
 import { medianDuration, planShards } from './shard-balance.mjs';
 
 // Wall budget includes the measured fixed setup cost. Keep all tuning here.
@@ -11,39 +10,35 @@ export const WEB_SHARD_POLICY = Object.freeze({
   defaultShards: 4,
 });
 
+// Storybook-only files (stories and the Storybook app itself) never change
+// product behavior; they are verified by the Component Browser lane (Q4)
+// and must not select Web E2E specs.
+const STORYBOOK_ONLY = /(^|\/)[^/]+\.stories\.[^/]+$/u;
+export const isStorybookOnlyFile = (file) =>
+  STORYBOOK_ONLY.test(file) || file.startsWith('apps/storybook/');
+
 export function selectWebSpecs({ enabled, full, files }) {
   if (!enabled) return { specs: [], fallback: false };
-  if (full) return { specs: [...WEB_FLOW_SPECS], fallback: false };
-  const canonical = new Set(WEB_FLOW_SPECS.map((spec) => `apps/web/e2e/${spec}`));
+  if (full) return { specs: [...WEB_SPECIALIZED_SPECS], fallback: false };
+  if (Array.isArray(files)) {
+    const productFiles = files.filter((file) => !isStorybookOnlyFile(file));
+    if (files.length > 0 && productFiles.length === 0) return { specs: [], fallback: false };
+    files = productFiles;
+  }
+  const canonical = new Set(WEB_SPECIALIZED_SPECS.map((spec) => `apps/web/e2e/${spec}`));
   if (!Array.isArray(files) || files.length === 0) {
-    return { specs: [...WEB_FLOW_SPECS], fallback: true };
+    return { specs: [...WEB_SPECIALIZED_SPECS], fallback: true };
   }
   if (files.every((file) => canonical.has(file))) {
-    return { specs: [...new Set(files.map((file) => file.slice('apps/web/e2e/'.length)))].sort(), fallback: false };
+    return {
+      specs: [...new Set(files.map((file) => file.slice('apps/web/e2e/'.length)))].sort(),
+      fallback: false,
+    };
   }
-  const selected = new Set(WEB_CORE_SPECS);
-  for (const file of files) {
-    if (canonical.has(file)) {
-      selected.add(file.slice('apps/web/e2e/'.length));
-      continue;
-    }
-    const owner = /^packages\/app-vue\/src\/modules\/([^/]+)\//u.exec(file)?.[1]
-      ?? /^packages\/([^/]+)\/src\//u.exec(file)?.[1];
-    const prefixes = WEB_OWNER_EXTENSIONS[owner];
-    // No guessed dependency graph: shared contracts, global styles, helpers,
-    // root/config and unrecognized owners retain the full four-shard fallback.
-    if (!prefixes) return { specs: [...WEB_FLOW_SPECS], fallback: true };
-    for (const spec of WEB_FLOW_SPECS) {
-      if (prefixes.some((prefix) => spec.startsWith(prefix))) selected.add(spec);
-    }
-    // Goal/Task feed AI tools and planner writes; do not silently omit those consumers.
-    if (['goal', 'task', 'repository'].includes(owner)) {
-      for (const spec of WEB_FLOW_SPECS) {
-        if (spec.startsWith('ai/') || spec.startsWith('schedule/')) selected.add(spec);
-      }
-    }
-  }
-  return { specs: [...selected].sort(), fallback: false };
+  // Ordinary owner journeys and their core floor are retired. The remaining
+  // Provider acceptance also hosts visual comparisons, so an enabled Web lane
+  // must retain this dedicated job rather than silently losing either suite.
+  return { specs: [...WEB_SPECIALIZED_SPECS], fallback: true };
 }
 
 export function planWebShards({
@@ -61,12 +56,12 @@ export function planWebShards({
   }
   if (
     !Array.isArray(specs) ||
-    specs.some((spec) => !WEB_FLOW_SPECS.includes(spec)) ||
+    specs.some((spec) => !WEB_SPECIALIZED_SPECS.includes(spec)) ||
     new Set(specs).size !== specs.length
   ) {
     throw new Error('Invalid selected Web specs');
   }
-  const selected = fallback ? [...WEB_FLOW_SPECS] : [...specs].sort();
+  const selected = fallback ? [...WEB_SPECIALIZED_SPECS] : [...specs].sort();
   const valid = (value) => Number.isFinite(value) && value > 0;
   const defaultMs = medianDuration(Object.values(durations).map((entry) => entry?.durationMs));
   const weights = Object.fromEntries(
@@ -81,16 +76,16 @@ export function planWebShards({
     (total, entry) => total + entry.durationMs,
     0,
   );
+  // Fallback expands the SPEC SET, not the number of runners. A shrinking
+  // E2E inventory must not keep paying for four fixed environments.
   const shardCount =
     selected.length === 0
       ? 0
-      : fallback
-        ? policy.defaultShards
-        : Math.min(
-            policy.maxShards,
-            selected.length,
-            Math.max(1, Math.ceil(estimatedTotalMs / (policy.targetPerShardMs - policy.setupMs))),
-          );
+      : Math.min(
+          fallback ? policy.defaultShards : policy.maxShards,
+          selected.length,
+          Math.max(1, Math.ceil(estimatedTotalMs / (policy.targetPerShardMs - policy.setupMs))),
+        );
   const shards =
     shardCount === 0
       ? []

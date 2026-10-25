@@ -31,12 +31,12 @@
 
 #### ✅ 优势
 
-| 维度 | 说明 |
-|------|------|
-| **业务语义** | 专注是为了完成目标/任务，自然属于 Goal 领域 |
-| **数据流转** | 专注时长直接累积到 Goal 进度，无需跨模块查询 |
+| 维度         | 说明                                                |
+| ------------ | --------------------------------------------------- |
+| **业务语义** | 专注是为了完成目标/任务，自然属于 Goal 领域         |
+| **数据流转** | 专注时长直接累积到 Goal 进度，无需跨模块查询        |
 | **统计集成** | Goal 已有 `GoalStatistics` 聚合根，专注统计自然融入 |
-| **用户体验** | 用户在目标详情页直接看到专注记录，心智模型一致 |
+| **用户体验** | 用户在目标详情页直接看到专注记录，心智模型一致      |
 
 #### 📐 实现方式
 
@@ -61,19 +61,19 @@
 // Goal 聚合根扩展
 export class Goal extends AggregateRoot implements GoalClient {
   // ... 现有字段
-  
+
   // 新增专注相关字段
   private _totalFocusMinutes: number = 0;
   private _pomodoroCount: number = 0;
   private _focusSessions: FocusSession[] = [];
-  
+
   // 新增方法
   recordPomodoroSession(session: PomodoroSession): void {
     this._pomodoroCount++;
     this._totalFocusMinutes += session.duration / 60;
     this.addDomainEvent(new PomodoroCompletedEvent(this.uuid, session));
   }
-  
+
   getPomodoroStats(): PomodoroStats {
     return {
       totalPomodoros: this._pomodoroCount,
@@ -87,6 +87,7 @@ export class Goal extends AggregateRoot implements GoalClient {
 #### 🚫 避免的问题
 
 如果新增独立 `focus` 模块：
+
 - ❌ **数据孤岛**: 专注统计与目标进度隔离
 - ❌ **重复查询**: 需要跨模块关联查询 `Goal + FocusSession`
 - ❌ **用户困惑**: 为什么专注和目标是两个东西？
@@ -98,12 +99,12 @@ export class Goal extends AggregateRoot implements GoalClient {
 
 #### ✅ 优势
 
-| 维度 | 说明 | 复用率 |
-|------|------|--------|
-| **提醒调度** | 复用 `ReminderTemplate` 的时间触发、重复规则 | 85% |
-| **通知管理** | 复用 `NotificationConfig` 的多渠道通知 | 100% |
-| **免打扰** | 复用 `DoNotDisturbPeriod` 的时段控制 | 100% |
-| **提醒日志** | 复用 `ReminderHistory` 的执行记录 | 100% |
+| 维度         | 说明                                         | 复用率 |
+| ------------ | -------------------------------------------- | ------ |
+| **提醒调度** | 复用 `ReminderTemplate` 的时间触发、重复规则 | 85%    |
+| **通知管理** | 复用 `NotificationConfig` 的多渠道通知       | 100%   |
+| **免打扰**   | 复用 `DoNotDisturbPeriod` 的时段控制         | 100%   |
+| **提醒日志** | 复用 `ReminderHistory` 的执行记录            | 100%   |
 
 #### 📐 实现方式
 
@@ -113,18 +114,18 @@ export class HabitReminder extends ReminderTemplate {
   private _habitId: string;
   private _chainTrigger?: HabitChainConfig;
   private _locationTrigger?: LocationConfig;
-  
+
   // 继承 ReminderTemplate 的所有能力:
   // - triggerConfig (时间配置)
   // - recurrence (重复规则)
   // - notificationConfig (通知设置)
   // - activeTimeConfig (生效时段)
-  
+
   // 扩展习惯特定功能
   checkHabitChain(): boolean {
     // 检查习惯链是否满足触发条件
   }
-  
+
   checkLocationTrigger(currentLocation: Location): boolean {
     // 检查地理位置触发条件
   }
@@ -138,21 +139,18 @@ export class HabitReminder extends ReminderTemplate {
 export class HabitReminderService extends ReminderService {
   // 继承基础提醒能力
   // + 扩展习惯特定逻辑
-  
-  async createHabitReminder(
-    habitId: string,
-    config: HabitReminderConfig
-  ): Promise<HabitReminder> {
+
+  async createHabitReminder(habitId: string, config: HabitReminderConfig): Promise<HabitReminder> {
     // 1. 调用父类创建基础提醒
     const baseReminder = await super.createReminder(config);
-    
+
     // 2. 扩展习惯特定字段
     const habitReminder = new HabitReminder(baseReminder);
     habitReminder.setHabitId(habitId);
-    
+
     return habitReminder;
   }
-  
+
   async scheduleHabitChain(habitIds: string[]): Promise<void> {
     // 习惯链特有逻辑
   }
@@ -162,6 +160,7 @@ export class HabitReminderService extends ReminderService {
 #### 🚫 避免的问题
 
 如果独立实现习惯提醒系统：
+
 - ❌ **重复造轮子**: 需要重新实现定时任务调度（与 `ReminderScheduler` 重复）
 - ❌ **双重维护**: 提醒 bug 需要在两个模块修复
 - ❌ **通知混乱**: 两套通知系统（reminder + habit），用户体验割裂
@@ -173,11 +172,11 @@ export class HabitReminderService extends ReminderService {
 
 #### ✅ 为什么需要独立 `habit` 模块？
 
-| 原因 | 说明 |
-|------|------|
-| **独立领域** | 习惯管理是独立的业务领域（Bounded Context） |
+| 原因         | 说明                                                 |
+| ------------ | ---------------------------------------------------- |
+| **独立领域** | 习惯管理是独立的业务领域（Bounded Context）          |
 | **核心实体** | `Habit` 聚合根有自己的生命周期（创建、归档、Streak） |
-| **低耦合** | 与 Goal/Task/Reminder 都有关联，但不从属于任何一个 |
+| **低耦合**   | 与 Goal/Task/Reminder 都有关联，但不从属于任何一个   |
 
 #### 📐 职责边界
 
@@ -210,7 +209,7 @@ goal/
 async createHabit(habitData: CreateHabitInput): Promise<Habit> {
   // 1. Habit 模块：创建习惯
   const habit = await habitService.create(habitData);
-  
+
   // 2. Reminder 模块：创建提醒（如果用户设置了提醒时间）
   if (habitData.reminderTime) {
     await habitReminderService.createHabitReminder(
@@ -218,7 +217,7 @@ async createHabit(habitData: CreateHabitInput): Promise<Habit> {
       habitData.reminderTime
     );
   }
-  
+
   return habit;
 }
 ```
@@ -229,28 +228,28 @@ async createHabit(habitData: CreateHabitInput): Promise<Habit> {
 
 ### 代码复用率
 
-| 功能 | 新增模块 | 扩展模块 | 节省代码 |
-|------|---------|---------|---------|
-| 专注功能 | 100% 新代码 | 复用 Goal 统计 65% | **~800 行** |
-| 习惯提醒 | 100% 新代码 | 复用 Reminder 85% | **~1500 行** |
-| **总计** | **~3500 行** | **~1200 行** | **~2300 行** |
+| 功能     | 新增模块     | 扩展模块           | 节省代码     |
+| -------- | ------------ | ------------------ | ------------ |
+| 专注功能 | 100% 新代码  | 复用 Goal 统计 65% | **~800 行**  |
+| 习惯提醒 | 100% 新代码  | 复用 Reminder 85%  | **~1500 行** |
+| **总计** | **~3500 行** | **~1200 行**       | **~2300 行** |
 
 ### 维护成本
 
-| 维度 | 新增模块 | 扩展模块 |
-|------|---------|---------|
-| Bug 修复 | 需要在多个模块修复 | 统一修复 |
-| 功能迭代 | 需要跨模块协调 | 同模块内演进 |
-| 测试覆盖 | 需要大量集成测试 | 单元测试为主 |
-| 文档维护 | 多份文档 | 统一文档 |
+| 维度     | 新增模块           | 扩展模块     |
+| -------- | ------------------ | ------------ |
+| Bug 修复 | 需要在多个模块修复 | 统一修复     |
+| 功能迭代 | 需要跨模块协调     | 同模块内演进 |
+| 测试覆盖 | 需要大量集成测试   | 单元测试为主 |
+| 文档维护 | 多份文档           | 统一文档     |
 
 ### 用户体验
 
-| 场景 | 新增模块 | 扩展模块 |
-|------|---------|---------|
-| 查看专注统计 | 需要切换到专注模块 | 目标详情页直接显示 ✅ |
-| 设置习惯提醒 | 需要在两个入口设置 | 统一的提醒管理界面 ✅ |
-| 数据关联查询 | 需要手动关联 | 自动关联（聚合根内部）✅ |
+| 场景         | 新增模块           | 扩展模块                 |
+| ------------ | ------------------ | ------------------------ |
+| 查看专注统计 | 需要切换到专注模块 | 目标详情页直接显示 ✅    |
+| 设置习惯提醒 | 需要在两个入口设置 | 统一的提醒管理界面 ✅    |
+| 数据关联查询 | 需要手动关联       | 自动关联（聚合根内部）✅ |
 
 ---
 
@@ -287,12 +286,12 @@ Week 5: Habit 模块独立实现
 
 ## 🎯 成功指标
 
-| 指标 | 目标 | 原因 |
-|------|------|------|
-| 代码复用率 | ≥ 70% | 避免重复造轮子 |
-| 集成测试数量 | < 30% (单元测试为主) | 低耦合 |
-| 模块间依赖 | 单向依赖 | 清晰的架构层次 |
-| 用户操作路径 | ≤ 3 步 | 简化用户体验 |
+| 指标         | 目标                 | 原因           |
+| ------------ | -------------------- | -------------- |
+| 代码复用率   | ≥ 70%                | 避免重复造轮子 |
+| 集成测试数量 | < 30% (单元测试为主) | 低耦合         |
+| 模块间依赖   | 单向依赖             | 清晰的架构层次 |
+| 用户操作路径 | ≤ 3 步               | 简化用户体验   |
 
 ---
 
@@ -309,8 +308,8 @@ Week 5: Habit 模块独立实现
 
 ## 🔄 历史记录
 
-| 日期 | 版本 | 变更 | 作者 |
-|------|------|------|------|
+| 日期       | 版本 | 变更         | 作者           |
+| ---------- | ---- | ------------ | -------------- |
 | 2025-12-08 | v1.0 | 初始决策文档 | GitHub Copilot |
 
 ---
@@ -321,11 +320,11 @@ Week 5: Habit 模块独立实现
 
 **平衡原则**: 既要避免过度拆分（微服务陷阱），也要避免巨石模块（单体地狱）
 
-| 场景 | 决策 |
-|------|------|
-| 功能复用 > 70% | ✅ 扩展现有模块 |
-| 独立业务领域 | ✅ 新增模块（但保持轻量） |
-| 功能复用 < 30% | ✅ 新增独立模块 |
+| 场景           | 决策                      |
+| -------------- | ------------------------- |
+| 功能复用 > 70% | ✅ 扩展现有模块           |
+| 独立业务领域   | ✅ 新增模块（但保持轻量） |
+| 功能复用 < 30% | ✅ 新增独立模块           |
 
 ### 如何判断是否需要新增模块？
 

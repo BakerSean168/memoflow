@@ -112,9 +112,10 @@ test('Windows AGY signs in to Google from MemoFlow and signs out through the ACP
     const cancelledFlow = (await auth('auth_status')).data as AuthState;
     expect(cancelledFlow.authorizationUrl).toMatch(/^https:\/\/accounts\.google\.com\//);
     expect(cancelledFlow.authorizationUrl).not.toContain('code=');
-    expect(
-      (await auth('auth_cancel', { flowId: cancelledFlow.flowId })).data,
-    ).toMatchObject({ phase: 'cancelled', authorizationUrl: null });
+    expect((await auth('auth_cancel', { flowId: cancelledFlow.flowId })).data).toMatchObject({
+      phase: 'cancelled',
+      authorizationUrl: null,
+    });
     expect((await probe()).data).toMatchObject({ status: 'login_required' });
 
     // Positive flow: the fake native server writes the token only after the

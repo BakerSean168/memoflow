@@ -1,13 +1,13 @@
 /// <reference types="vitest" />
-import path from 'node:path'
-import { defineConfig } from 'vitest/config'
+import path from 'node:path';
+import { defineConfig } from 'vitest/config';
 import {
   contractsDeepImportResolver,
   createPackageResolveAliases,
   domainResolveAtAlias,
-} from '../../vitest.workspace-helpers'
-import { createIntegrationTestEnv } from '../test-utils/src/setup/database'
-import { createVitestReportConfig } from '../../vitest.shared.ts'
+} from '../../vitest.workspace-helpers';
+import { createIntegrationTestEnv } from '../test-utils/src/setup/database';
+import { createVitestReportConfig } from '../../vitest.shared.ts';
 
 export default defineConfig({
   plugins: [contractsDeepImportResolver, domainResolveAtAlias],
@@ -23,10 +23,12 @@ export default defineConfig({
     testTimeout: 30000,
     passWithNoTests: false,
     env: createIntegrationTestEnv(),
-    globalSetup: [path.resolve(import.meta.dirname, '../test-utils/src/setup/integration-global-setup.ts')],
+    globalSetup: [
+      path.resolve(import.meta.dirname, '../test-utils/src/setup/integration-global-setup.ts'),
+    ],
     fileParallelism: false,
     pool: 'forks',
     maxWorkers: 1,
     isolate: false,
   },
-})
+});

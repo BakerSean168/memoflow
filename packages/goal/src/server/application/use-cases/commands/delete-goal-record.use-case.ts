@@ -46,7 +46,10 @@ export class DeleteGoalRecordUseCase {
         }
 
         if (!record.canUserDelete) {
-          return error('VALIDATION_ERROR', 'Task Goal records must be removed through Task correction or revert');
+          return error(
+            'VALIDATION_ERROR',
+            'Task Goal records must be removed through Task correction or revert',
+          );
         }
 
         const keyResult = goal.keyResults.find((item) => item.id === keyResultId);

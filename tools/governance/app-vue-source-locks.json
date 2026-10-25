@@ -89,9 +89,7 @@
             "start": "async function verifyConnection",
             "end": "async function refreshModels"
           },
-          "require": [
-            "apiKey.value = ''"
-          ],
+          "require": ["apiKey.value = ''"],
           "reason": "AISettings.provider-onboarding-v2: residual source-order/region/count assertion (1 matcher(s)) not expressible as AST; structural coverage: rule-aisettings-provider-onboarding-v2-167."
         },
         {
@@ -102,10 +100,7 @@
           },
           "order": [
             {
-              "tokens": [
-                "await ai.probeProviderConnection",
-                "apiKey.value = ''"
-              ],
+              "tokens": ["await ai.probeProviderConnection", "apiKey.value = ''"],
               "chained": false
             }
           ],
@@ -124,9 +119,7 @@
             "start": "async exportServerHeldDataDisclosure",
             "end": "async dryRunPortableDataV3"
           },
-          "forbid": [
-            "this.ipcClient.invoke"
-          ],
+          "forbid": ["this.ipcClient.invoke"],
           "reason": "use-data-portability: residual source-order/region/count assertion (1 matcher(s)) not expressible as AST; structural coverage: rule-use-data-portability-172."
         }
       ]

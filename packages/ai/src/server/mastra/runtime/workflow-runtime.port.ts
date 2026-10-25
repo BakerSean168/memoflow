@@ -14,8 +14,9 @@ import type { GoalWorkflowEventSource } from '../../application/ports/goal-workf
  * Mastra workflow implementations stay behind this port so HTTP/IPC transports
  * never depend on framework-private snapshots, run handles, or suspend payloads.
  */
-export type ExternalTaskApply = (input: import('../workflows/task-plan-mutation.port').ApplyTaskPlanInput) =>
-  Promise<import('@memoflow/contracts/ai').TaskPlanExecutionReceipt>;
+export type ExternalTaskApply = (
+  input: import('../workflows/task-plan-mutation.port').ApplyTaskPlanInput,
+) => Promise<import('@memoflow/contracts/ai').TaskPlanExecutionReceipt>;
 
 export interface ExternalWorkflowInvocation {
   readonly connectionId: string;
@@ -61,5 +62,8 @@ export interface AIWorkflowRuntimePort {
     conversationId?: string;
   }): Promise<readonly AIWorkflowRunView[]>;
   cancel(input: { identityId: string; runId: string }): Promise<AIWorkflowRunView | null>;
-  goalSurfaceLease(input: { identityId: string; request: AIGoalSurfaceLeaseRequest }): Promise<AIGoalSurfaceLeaseResponse>;
+  goalSurfaceLease(input: {
+    identityId: string;
+    request: AIGoalSurfaceLeaseRequest;
+  }): Promise<AIGoalSurfaceLeaseResponse>;
 }

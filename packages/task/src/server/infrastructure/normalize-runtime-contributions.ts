@@ -8,17 +8,13 @@
 import type { TaskModuleRuntimeContribution } from './task.module';
 
 export function isRuntimeContributionArray(
-  runtimeContributions:
-    | TaskModuleRuntimeContribution
-    | readonly TaskModuleRuntimeContribution[],
+  runtimeContributions: TaskModuleRuntimeContribution | readonly TaskModuleRuntimeContribution[],
 ): runtimeContributions is readonly TaskModuleRuntimeContribution[] {
   return Array.isArray(runtimeContributions);
 }
 
 export function normalizeRuntimeContributions(
-  runtimeContributions?:
-    | TaskModuleRuntimeContribution
-    | readonly TaskModuleRuntimeContribution[],
+  runtimeContributions?: TaskModuleRuntimeContribution | readonly TaskModuleRuntimeContribution[],
 ): readonly TaskModuleRuntimeContribution[] {
   if (!runtimeContributions) {
     return [];

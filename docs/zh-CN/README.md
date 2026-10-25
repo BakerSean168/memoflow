@@ -54,16 +54,16 @@ AI 区是持续协作入口，业务工作区则拥有结构化状态和更大�
 
 ## 工程亮点
 
-| 工程问题 | MemoFlow 的处理方式 |
-| --- | --- |
-| 多端一致性 | 集中式 `@memoflow/contracts` + transport parity |
-| AI 运行时 | TypeScript + Mastra，内嵌在产品运行时中 |
-| 持久 AI 工作流 | 类型化 workflow state、恢复/取消路径、产品持有 projection |
+| 工程问题       | MemoFlow 的处理方式                                              |
+| -------------- | ---------------------------------------------------------------- |
+| 多端一致性     | 集中式 `@memoflow/contracts` + transport parity                  |
+| AI 运行时      | TypeScript + Mastra，内嵌在产品运行时中                          |
+| 持久 AI 工作流 | 类型化 workflow state、恢复/取消路径、产品持有 projection        |
 | 模块化业务领域 | Goal / Task / Schedule / Reminder / Notification / Repository 包 |
-| 多客户端数据 | PostgreSQL + PowerSync + 显式离线/query-cache 策略 |
-| 投递语义 | operation、occurrence、delivery intent/attempt/receipt 契约 |
-| 可审计性 | 统一 operation timeline、replay 与 execution context |
-| 质量门禁 | Nx 管理 lint/typecheck/test、浏览器流程、覆盖率/性能/投递 oracle |
+| 多客户端数据   | PostgreSQL + PowerSync + 显式离线/query-cache 策略               |
+| 投递语义       | operation、occurrence、delivery intent/attempt/receipt 契约      |
+| 可审计性       | 统一 operation timeline、replay 与 execution context             |
+| 质量门禁       | Nx 管理 lint/typecheck/test、浏览器流程、覆盖率/性能/投递 oracle |
 
 ## 系统架构
 

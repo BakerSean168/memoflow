@@ -1,5 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
-import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '.';
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '.';
 import { Button } from '../button';
 
 const meta = {
@@ -13,7 +22,17 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => ({
-    components: { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger, Button },
+    components: {
+      Sheet,
+      SheetClose,
+      SheetContent,
+      SheetDescription,
+      SheetFooter,
+      SheetHeader,
+      SheetTitle,
+      SheetTrigger,
+      Button,
+    },
     template: `
       <Sheet>
         <SheetTrigger as-child>
@@ -40,7 +59,15 @@ export const Default: Story = {
 
 export const LeftSide: Story = {
   render: () => ({
-    components: { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger, Button },
+    components: {
+      Sheet,
+      SheetContent,
+      SheetDescription,
+      SheetHeader,
+      SheetTitle,
+      SheetTrigger,
+      Button,
+    },
     template: `
       <Sheet>
         <SheetTrigger as-child>

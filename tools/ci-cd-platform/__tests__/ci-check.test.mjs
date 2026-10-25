@@ -94,8 +94,10 @@ test('CI job graph has one authoritative gate and no dangling dependencies', asy
   }
   assert.deepEqual(
     [...jobs['ci-check'].needs].sort(),
-    Object.keys(CI_CHECK_JOBS).filter((id) => id !== 'scope-detector')
-      .concat('scope-detector').sort(),
+    Object.keys(CI_CHECK_JOBS)
+      .filter((id) => id !== 'scope-detector')
+      .concat('scope-detector')
+      .sort(),
   );
   assert.equal(jobs['ci-check'].if, 'always()');
 });
@@ -119,7 +121,7 @@ test('docs-only run passes with validate/web/verification skipped by the manifes
   );
   const result = check({ needs: healthyNeeds(m), manifest: m });
   assert.equal(result.state, 'success');
-  assert.equal(result.jobs['web-flow-shard'].expected, 'skipped');
+  assert.equal(result.jobs['web-specialized'].expected, 'skipped');
 });
 
 test('unit skip is allowed only when the manifest scope has no unit projects', () => {
@@ -135,16 +137,16 @@ for (const result of ['failure', 'cancelled', 'skipped']) {
   test(`enabled lane job ${result} fails the gate`, () => {
     const m = manifest();
     const needs = healthyNeeds(m);
-    needs['web-flow-shard'].result = result;
-    assert.deepEqual(check({ needs, manifest: m }).failures, [`web-flow-shard:${result}`]);
+    needs['web-specialized'].result = result;
+    assert.deepEqual(check({ needs, manifest: m }).failures, [`web-specialized:${result}`]);
   });
 }
 
 test('a lane that ran although the manifest disabled it fails the gate', () => {
   const m = manifest({ web: false });
   const needs = healthyNeeds(m);
-  needs['web-flow-shard'].result = 'success';
-  assert.deepEqual(check({ needs, manifest: m }).failures, ['web-flow-shard:unexpected-success']);
+  needs['web-specialized'].result = 'success';
+  assert.deepEqual(check({ needs, manifest: m }).failures, ['web-specialized:unexpected-success']);
 });
 
 test('verification sub-lane outputs are checked against the manifest', () => {
@@ -465,7 +467,7 @@ test('CI upload keeps Web receipts from different run attempts distinct', async 
   );
   const jobs = workflowJobs(workflow);
   assert.match(
-    jobs['web-flow-shard'],
+    jobs['web-specialized'],
     /name: web-shard-receipt-\$\{\{ github\.run_attempt \}\}-\$\{\{ strategy\.job-index \}\}/u,
   );
   assert.match(jobs['ci-check'], /pattern: web-shard-receipt-\*/u);
@@ -579,4 +581,33 @@ test('CI Check CLI accepts the flat single-artifact receipt layout', async () =>
   } finally {
     await rm(cwd, { recursive: true, force: true });
   }
+});
+
+test('capability gate fails when a required capability producer is skipped (VNext Q2)', () => {
+  const baseManifest = manifest();
+  const { digest: _staleDigest, ...manifestContent } = baseManifest;
+  const m = {
+    ...manifestContent,
+    laneDetails: {
+      componentBrowser: {
+        required: true,
+        files: ['packages/app-vue/src/x.stories.ts'],
+        targets: ['ui-storybook:test:interaction'],
+        skipReason: null,
+      },
+    },
+  };
+  m.digest = digest(m);
+  const skipped = check({
+    needs: healthyNeeds(m),
+    manifest: m,
+    capabilityResults: { componentBrowser: 'skipped' },
+  });
+  assert.ok(skipped.failures.includes('capability:componentBrowser:skipped'));
+  const green = check({
+    needs: healthyNeeds(m),
+    manifest: m,
+    capabilityResults: { componentBrowser: 'success' },
+  });
+  assert.deepEqual(green.failures, []);
 });

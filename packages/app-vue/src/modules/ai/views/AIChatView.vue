@@ -119,7 +119,8 @@
         ref="messagePanelRef"
         :timeline="chatTimeline"
         :show-workflow-surface="
-          toolMode === 'goal-create' && (goalSurfaceConflict || goalSurfaceReady || goalPlanningInterrupted)
+          toolMode === 'goal-create' &&
+          (goalSurfaceConflict || goalSurfaceReady || goalPlanningInterrupted)
         "
         :tool-mode="toolMode"
         :has-models="modelGroups.length > 0 || runtimeChoice.runtimeKind === 'local_agent'"
@@ -145,23 +146,46 @@
             <Button variant="outline" :disabled="!canRunGoalAgent" @click="startGoalAgentRun()">{{
               t('aiAssistant.businessSurface.retryPlanning')
             }}</Button>
-            <Button variant="ghost" :disabled="goalRestartPending" @click="composerControlsRef?.openModelPicker()">{{
-              t('aiAssistant.businessSurface.switchModel')
-            }}</Button>
-            <Button v-if="goalDraftPreserved" variant="ghost" :disabled="goalRestartPending" @click="focusPreservedGoal">{{
-              t('aiAssistant.businessSurface.continueEditing')
-            }}</Button>
+            <Button
+              variant="ghost"
+              :disabled="goalRestartPending"
+              @click="composerControlsRef?.openModelPicker()"
+              >{{ t('aiAssistant.businessSurface.switchModel') }}</Button
+            >
+            <Button
+              v-if="goalDraftPreserved"
+              variant="ghost"
+              :disabled="goalRestartPending"
+              @click="focusPreservedGoal"
+              >{{ t('aiAssistant.businessSurface.continueEditing') }}</Button
+            >
           </section>
           <section
             v-if="goalSurfaceConflict"
             class="space-y-3 rounded-lg border p-3"
             data-testid="ai-goal-surface-conflict"
           >
-            <p>{{ t(goalSurfaceControlLost ? 'aiAssistant.businessSurface.controlLost' : 'aiAssistant.businessSurface.conflict') }}</p>
+            <p>
+              {{
+                t(
+                  goalSurfaceControlLost
+                    ? 'aiAssistant.businessSurface.controlLost'
+                    : 'aiAssistant.businessSurface.conflict',
+                )
+              }}
+            </p>
             <div class="flex flex-wrap gap-2">
-              <Button :disabled="goalAgentResuming || goalSurfaceRecovering" @click="continueGoalSurfaceControl">{{
-                t(goalSurfaceControlLost ? 'aiAssistant.businessSurface.controlRetry' : 'aiAssistant.businessSurface.continue')
-              }}</Button>
+              <Button
+                :disabled="goalAgentResuming || goalSurfaceRecovering"
+                @click="continueGoalSurfaceControl"
+                >{{
+                  t(
+                    goalSurfaceControlLost
+                      ? 'aiAssistant.businessSurface.controlRetry'
+                      : 'aiAssistant.businessSurface.continue',
+                  )
+                }}</Button
+              >
               <Button variant="outline" :disabled="goalAgentResuming" @click="cancelGoalAgentRun">{{
                 t('aiAssistant.businessSurface.pause')
               }}</Button>
@@ -202,54 +226,54 @@
           </section>
         </template>
         <template #workflow-context>
-        <AIGoalWorkflowPanel
-          :tool-mode="toolMode"
-          :goal-clarification="goalClarification"
-          :goal-workflow-run="goalWorkflowRun"
-          :editable-goal="editableGoal"
-          :editable-key-results="editableKeyResults"
-          :editable-tasks="editableTasks"
-          :editable-knowledge="editableKnowledge"
-          :goal-owner-submitted="goalOwnerSubmitted"
-          :busy="goalAgentResuming"
-          :can-retry-execution="canRetryGoalAgentExecution"
-          :can-accept-partial-execution="canAcceptGoalPartialExecution"
-          :can-cancel-remaining-execution="canCancelRemainingGoalExecution"
-          :knowledge-answer="knowledgeAnswer"
-          :format-execution-outcome="formatExecutionOutcome"
-          @open-native-review="openGoalNativeReview"
-          @open-knowledge-citation="openKnowledgeCitation"
-          @retry="retryGoalAgentExecution"
-          @accept-partial="acceptPartialGoalExecution"
-          @cancel-remaining="cancelRemainingGoalExecution"
-        />
-        <AITaskWorkflowPanel
-          :tool-mode="toolMode"
-          :task-workflow-run="taskWorkflowRun"
-          :busy="taskAgentResuming"
-          :owner-attempt-pending="taskOwnerAttemptPending"
-          :owner-submitted="taskOwnerSubmitted"
-          :can-retry-execution="canRetryTaskAgentExecution"
-          :can-accept-partial-execution="canAcceptTaskPartialExecution"
-          :can-cancel-remaining-execution="canCancelRemainingTaskExecution"
-          @confirm="confirmTaskAgentRun"
-          @cancel="cancelTaskAgentRun"
-          @retry="retryTaskAgentExecution"
-          @accept-partial="acceptPartialTaskExecution"
-          @cancel-remaining="cancelRemainingTaskExecution"
-          @open-native-review="openTaskNativeReview"
-        />
-        <AIKnowledgeCapturePanel
-          :tool-mode="toolMode"
-          :knowledge-capture-run="knowledgeCaptureRun"
-          :busy="knowledgeCaptureResuming"
-          :can-retry-execution="canRetryKnowledgeCaptureExecution"
-          :can-cancel-remaining-execution="canCancelRemainingKnowledgeCaptureExecution"
-          @cancel="cancelKnowledgeCaptureRun"
-          @retry="retryKnowledgeCaptureExecution"
-          @cancel-remaining="cancelRemainingKnowledgeCaptureExecution"
-          @open-native-review="openKnowledgeNativeReview"
-        />
+          <AIGoalWorkflowPanel
+            :tool-mode="toolMode"
+            :goal-clarification="goalClarification"
+            :goal-workflow-run="goalWorkflowRun"
+            :editable-goal="editableGoal"
+            :editable-key-results="editableKeyResults"
+            :editable-tasks="editableTasks"
+            :editable-knowledge="editableKnowledge"
+            :goal-owner-submitted="goalOwnerSubmitted"
+            :busy="goalAgentResuming"
+            :can-retry-execution="canRetryGoalAgentExecution"
+            :can-accept-partial-execution="canAcceptGoalPartialExecution"
+            :can-cancel-remaining-execution="canCancelRemainingGoalExecution"
+            :knowledge-answer="knowledgeAnswer"
+            :format-execution-outcome="formatExecutionOutcome"
+            @open-native-review="openGoalNativeReview"
+            @open-knowledge-citation="openKnowledgeCitation"
+            @retry="retryGoalAgentExecution"
+            @accept-partial="acceptPartialGoalExecution"
+            @cancel-remaining="cancelRemainingGoalExecution"
+          />
+          <AITaskWorkflowPanel
+            :tool-mode="toolMode"
+            :task-workflow-run="taskWorkflowRun"
+            :busy="taskAgentResuming"
+            :owner-attempt-pending="taskOwnerAttemptPending"
+            :owner-submitted="taskOwnerSubmitted"
+            :can-retry-execution="canRetryTaskAgentExecution"
+            :can-accept-partial-execution="canAcceptTaskPartialExecution"
+            :can-cancel-remaining-execution="canCancelRemainingTaskExecution"
+            @confirm="confirmTaskAgentRun"
+            @cancel="cancelTaskAgentRun"
+            @retry="retryTaskAgentExecution"
+            @accept-partial="acceptPartialTaskExecution"
+            @cancel-remaining="cancelRemainingTaskExecution"
+            @open-native-review="openTaskNativeReview"
+          />
+          <AIKnowledgeCapturePanel
+            :tool-mode="toolMode"
+            :knowledge-capture-run="knowledgeCaptureRun"
+            :busy="knowledgeCaptureResuming"
+            :can-retry-execution="canRetryKnowledgeCaptureExecution"
+            :can-cancel-remaining-execution="canCancelRemainingKnowledgeCaptureExecution"
+            @cancel="cancelKnowledgeCaptureRun"
+            @retry="retryKnowledgeCaptureExecution"
+            @cancel-remaining="cancelRemainingKnowledgeCaptureExecution"
+            @open-native-review="openKnowledgeNativeReview"
+          />
         </template>
       </AIMessagePanel>
 
@@ -309,7 +333,6 @@
         </AIFooterComposer>
       </Teleport>
     </section>
-
   </div>
 </template>
 
@@ -612,7 +635,10 @@ async function handleComposerSend() {
   }
   const inferredMode = workflowInProgress.value
     ? toolMode.value
-    : inferWorkflowMode(chatMessage.value, chatTimeline.value[chatTimeline.value.length - 1]?.content ?? '');
+    : inferWorkflowMode(
+        chatMessage.value,
+        chatTimeline.value[chatTimeline.value.length - 1]?.content ?? '',
+      );
 
   if (!workflowInProgress.value && inferredMode !== toolMode.value) {
     if (toolMode.value !== 'chat') exitToolMode();

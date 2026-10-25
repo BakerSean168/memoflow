@@ -11,7 +11,12 @@ import type { IGoalRepository, IGoalRecordRepository } from '../../../domain';
 import { GoalVersionConflictError } from '../../../domain';
 import { GoalRecord } from '../../../domain';
 import { KeyResultProgress } from '../../../domain';
-import { GoalRecordAuthorship, KeyResultCalculationMethod, type GoalMutationReceipt, type GoalRecordSource } from '@memoflow/contracts/goal';
+import {
+  GoalRecordAuthorship,
+  KeyResultCalculationMethod,
+  type GoalMutationReceipt,
+  type GoalRecordSource,
+} from '@memoflow/contracts/goal';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
 import type { IdentityId, KeyResultId } from '@memoflow/contracts/primitives';
@@ -59,14 +64,23 @@ export class CreateGoalRecordUseCase {
 
         const authorship = params.authorship ?? GoalRecordAuthorship.Manual;
         try {
-          GoalRecord.validateProvenance(authorship, params.source?.type ?? null, params.source?.id ?? null);
+          GoalRecord.validateProvenance(
+            authorship,
+            params.source?.type ?? null,
+            params.source?.id ?? null,
+          );
         } catch (cause) {
-          return error('VALIDATION_ERROR', cause instanceof Error ? cause.message : 'Invalid Goal record provenance');
+          return error(
+            'VALIDATION_ERROR',
+            cause instanceof Error ? cause.message : 'Invalid Goal record provenance',
+          );
         }
 
         if (params.source) {
-          if (authorship === GoalRecordAuthorship.TaskAutomatic &&
-              keyResult.progress.aggregationMethod !== KeyResultCalculationMethod.Sum) {
+          if (
+            authorship === GoalRecordAuthorship.TaskAutomatic &&
+            keyResult.progress.aggregationMethod !== KeyResultCalculationMethod.Sum
+          ) {
             return error(
               'VALIDATION_ERROR',
               'Automatic Task contribution is supported only for Sum key results',
@@ -78,8 +92,11 @@ export class CreateGoalRecordUseCase {
             params.source.id,
           );
           if (existing) {
-            if (String(existing.keyResultId) !== keyResultId || existing.value !== params.value ||
-                existing.authorship !== authorship) {
+            if (
+              String(existing.keyResultId) !== keyResultId ||
+              existing.value !== params.value ||
+              existing.authorship !== authorship
+            ) {
               return error(
                 'VALIDATION_ERROR',
                 'Goal contribution source is already bound to another value',

@@ -175,9 +175,7 @@ function planOutcomeSettlementRecord(
       identityId: payload.identityId,
       taskOccurrenceId: payload.triggeringTaskOccurrenceId,
       taskPlanId: payload.taskPlanId,
-      sources: [
-        { type: TaskGoalSettlementSourceType.TaskPlan, id: String(payload.taskPlanId) },
-      ],
+      sources: [{ type: TaskGoalSettlementSourceType.TaskPlan, id: String(payload.taskPlanId) }],
       occurredAt: payload.changedAt,
     };
     return outboxRecord({

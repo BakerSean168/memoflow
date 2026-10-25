@@ -47,8 +47,7 @@ export type ServerStateInvalidation =
       projection?: 'all' | 'lists' | 'details';
       entityId?: string;
       dedupeKey?: string;
-    }
-;
+    };
 
 /**
  * Dispatcher public interface: `invalidate` for intents, `clearIdentity` on identity change.

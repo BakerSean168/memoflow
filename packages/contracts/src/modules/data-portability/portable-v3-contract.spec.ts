@@ -61,12 +61,12 @@ describe('PortableBackupEnvelopeV3', () => {
 
   it('rejects V2 envelopes instead of treating them as V3', () => {
     const legacy = {
-        kind: 'memoflow.user-data-export',
-        schemaVersion: 2,
-        exportedAt: baseEnvelope.exportedAt,
-        scope: { includesBinaryResources: false, importMode: 'append-create-like' },
-        data: {},
-      };
+      kind: 'memoflow.user-data-export',
+      schemaVersion: 2,
+      exportedAt: baseEnvelope.exportedAt,
+      scope: { includesBinaryResources: false, importMode: 'append-create-like' },
+      data: {},
+    };
     expect(PortableBackupEnvelopeV3Schema.safeParse(legacy).success).toBe(false);
     expect(parsePortableBackupEnvelopeV3(legacy)).toEqual({
       ok: false,
@@ -75,11 +75,13 @@ describe('PortableBackupEnvelopeV3', () => {
   });
 
   it('rejects a V1-shaped business backup without a legacy decoder', () => {
-    expect(parsePortableBackupEnvelopeV3({
-      kind: 'memoflow.user-data-export',
-      schemaVersion: 1,
-      data: {},
-    })).toEqual({
+    expect(
+      parsePortableBackupEnvelopeV3({
+        kind: 'memoflow.user-data-export',
+        schemaVersion: 1,
+        data: {},
+      }),
+    ).toEqual({
       ok: false,
       error: 'Unsupported Data Portability schemaVersion: 1; only V3 is supported',
     });
@@ -114,10 +116,12 @@ describe('parsePortableBackupEnvelopeV3', () => {
   });
 
   it('keeps server-held disclosure explicitly non-importable', () => {
-    expect(parsePortableBackupEnvelopeV3({ kind: 'memoflow.server-held-data-disclosure' })).toEqual({
-      ok: false,
-      error:
-        'Server-held data disclosure is not importable. Export/import only memoflow.user-data-export business backups.',
-    });
+    expect(parsePortableBackupEnvelopeV3({ kind: 'memoflow.server-held-data-disclosure' })).toEqual(
+      {
+        ok: false,
+        error:
+          'Server-held data disclosure is not importable. Export/import only memoflow.user-data-export business backups.',
+      },
+    );
   });
 });

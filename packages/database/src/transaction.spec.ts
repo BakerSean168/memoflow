@@ -26,10 +26,7 @@ describe('withPrismaTransaction', () => {
     const work = vi.fn(async () => 'done');
     const root = {
       $transaction: vi.fn(
-        async (
-          callback: (client: unknown) => Promise<unknown>,
-          options?: { timeout?: number },
-        ) => {
+        async (callback: (client: unknown) => Promise<unknown>, options?: { timeout?: number }) => {
           expect(options).toEqual({ timeout: 15_000 });
           return callback(tx);
         },

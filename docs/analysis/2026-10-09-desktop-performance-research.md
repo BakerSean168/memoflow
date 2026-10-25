@@ -24,18 +24,18 @@ updated: 2026-10-09T00:00:00Z
 
 附件的大方向成立，但进一步研究改变了几个具体落点：
 
-| 主题 | 本轮新增或收紧的结论 | 建议顺序 |
-| --- | --- | --- |
-| PowerSync 销毁 | 不仅缺少 `close()`：已安装 SDK 中存在明确的定时器保活链；实测 6 个 Worker 在 disconnect 和 GC 后仍存在。wrapper 还有打开/关闭交叠及跨路径复用反例 | 第一批 |
-| Markdown 内存 | `gray-matter` 默认按完整正文做无上限全局缓存；一个文件的 200 个版本在 detach 后仍全部保留 | 第一批 |
-| Vault 完整性 | 10,000 篇上限静默截断；第 10,001 篇既搜不到，也可能逃过稳定文档 ID 去重 | 第一批 |
-| Vault 切换 | 搜索扫描后重新读取当前 binding，受控交叠可返回 A 库标题与 B 库正文命中 | 第一批 |
-| 启动网络 | 主进程激活和 renderer mount 前各有一次云校验等待；只移走第一处 await 不足以恢复本地优先 | 第二批 |
-| 搜索规模 | 10,000 篇、每篇 4 KiB 的热查询中位数为 16.27 秒；2N 次 Markdown 读取之外还有 N+1 次 binding 读取 | 第二批 |
-| 搜索以外的扫描 | Goal/Task 关联解析和 AI 按 ID 查找也使用全库扫描；K 个关联可形成 K 次全库扫描 | 第二批 |
-| 通知窗口 | 首次通知才创建，但随后复用完整 app bootstrap，并保留 100 ms 时钟；应优先利用已有轻量入口模式 | 第二批 |
-| 隐藏页面、AI 长历史 | 存在具体的后台失效刷新和全量历史读取路径；已有 Tab 上限、流式节流，不能重复建设 | 后续按剖析排序 |
-| 构建与包体 | main 的 tree-shaking 关闭有明确构建故障背景；旧 0.12.0 包不能代表当前 0.16.0，更不能代表 Windows | 独立测量后决定 |
+| 主题                | 本轮新增或收紧的结论                                                                                                                              | 建议顺序       |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| PowerSync 销毁      | 不仅缺少 `close()`：已安装 SDK 中存在明确的定时器保活链；实测 6 个 Worker 在 disconnect 和 GC 后仍存在。wrapper 还有打开/关闭交叠及跨路径复用反例 | 第一批         |
+| Markdown 内存       | `gray-matter` 默认按完整正文做无上限全局缓存；一个文件的 200 个版本在 detach 后仍全部保留                                                         | 第一批         |
+| Vault 完整性        | 10,000 篇上限静默截断；第 10,001 篇既搜不到，也可能逃过稳定文档 ID 去重                                                                           | 第一批         |
+| Vault 切换          | 搜索扫描后重新读取当前 binding，受控交叠可返回 A 库标题与 B 库正文命中                                                                            | 第一批         |
+| 启动网络            | 主进程激活和 renderer mount 前各有一次云校验等待；只移走第一处 await 不足以恢复本地优先                                                           | 第二批         |
+| 搜索规模            | 10,000 篇、每篇 4 KiB 的热查询中位数为 16.27 秒；2N 次 Markdown 读取之外还有 N+1 次 binding 读取                                                  | 第二批         |
+| 搜索以外的扫描      | Goal/Task 关联解析和 AI 按 ID 查找也使用全库扫描；K 个关联可形成 K 次全库扫描                                                                     | 第二批         |
+| 通知窗口            | 首次通知才创建，但随后复用完整 app bootstrap，并保留 100 ms 时钟；应优先利用已有轻量入口模式                                                      | 第二批         |
+| 隐藏页面、AI 长历史 | 存在具体的后台失效刷新和全量历史读取路径；已有 Tab 上限、流式节流，不能重复建设                                                                   | 后续按剖析排序 |
+| 构建与包体          | main 的 tree-shaking 关闭有明确构建故障背景；旧 0.12.0 包不能代表当前 0.16.0，更不能代表 Windows                                                  | 独立测量后决定 |
 
 “第一批/第二批”是建议的工程顺序，不是已确认生产事故等级。轻量观测应与第一批修复一起做，不必等完整性能平台建成后才修正已复现的资源或正确性问题。
 
@@ -58,11 +58,11 @@ updated: 2026-10-09T00:00:00Z
 
 这里必须保留两个不同合同：
 
-| 操作 | 正确含义 | 资源预期 |
-| --- | --- | --- |
-| 关闭云同步，继续使用当前本地 Profile | 当前 `disablePowerSyncSyncMode()` 使用 disconnect 合理 | 本地连接池继续存在 |
-| 销毁 Profile runtime / 应用退出 | 完成现有持久化与停止协议后，关闭该实例 | DB 连接、Worker、订阅和内部计时器被释放 |
-| `disconnectAndClear()` | 清理同步/本地数据，具体取决于参数 | **不是**释放连接池的替代 API |
+| 操作                                 | 正确含义                                               | 资源预期                                |
+| ------------------------------------ | ------------------------------------------------------ | --------------------------------------- |
+| 关闭云同步，继续使用当前本地 Profile | 当前 `disablePowerSyncSyncMode()` 使用 disconnect 合理 | 本地连接池继续存在                      |
+| 销毁 Profile runtime / 应用退出      | 完成现有持久化与停止协议后，关闭该实例                 | DB 连接、Worker、订阅和内部计时器被释放 |
+| `disconnectAndClear()`               | 清理同步/本地数据，具体取决于参数                      | **不是**释放连接池的替代 API            |
 
 SDK 的 `disconnectAndClear()` 默认 `clearLocal: true, soft: false`；不能为“省内存”改用清库操作。关闭完成的数据库实例不能再次使用，之后应创建新实例。
 
@@ -95,14 +95,14 @@ Node timer
 
 使用空 Schema、临时数据库和公开 openWorker factory；没有 connector 或网络。计数器仅保留 Worker 的 WeakRef，第二阶段也仅保留数据库 WeakRef，避免测试器自己制造保活。
 
-| 检查点 | 活跃 Worker |
-| --- | ---: |
-| 第一个 DB init 后 | 6 |
-| disconnect 后 | 6 |
-| close 后 | 0 |
-| 第二个 DB init、disconnect，丢弃业务强引用后 | 6 |
-| 20 次 GC，每次相隔 50 ms，再等待 100 ms | 6，DB WeakRef 仍可取回 |
-| 显式 close 后 | 0 |
+| 检查点                                       |            活跃 Worker |
+| -------------------------------------------- | ---------------------: |
+| 第一个 DB init 后                            |                      6 |
+| disconnect 后                                |                      6 |
+| close 后                                     |                      0 |
+| 第二个 DB init、disconnect，丢弃业务强引用后 |                      6 |
+| 20 次 GC，每次相隔 50 ms，再等待 100 ms      | 6，DB WeakRef 仍可取回 |
+| 显式 close 后                                |                      0 |
 
 [复现脚本](./evidence/2026-10-09-desktop-performance/powersync-sdk-experiment.mjs) · [原始结果](./evidence/2026-10-09-desktop-performance/powersync-sdk-results.json)。
 
@@ -114,10 +114,10 @@ Node timer
 
 用未改动生产文件转译后运行，外部 Electron/DB 使用 fake，控制 ready 时刻得到：
 
-| 顺序 | 结果 |
-| --- | --- |
+| 顺序                                         | 结果                                                   |
+| -------------------------------------------- | ------------------------------------------------------ |
 | open(A) 尚未 ready → shutdown 返回 → A ready | shutdown 后旧 DB 仍被发布；disconnect/close 调用均为 0 |
-| open(A) 尚未 ready → open(B) → A ready | 仅创建一个 DB，两位调用者都得到 A 路径 |
+| open(A) 尚未 ready → open(B) → A ready       | 仅创建一个 DB，两位调用者都得到 A 路径                 |
 
 [边界脚本](./evidence/2026-10-09-desktop-performance/powersync-wrapper-experiment.mjs) · [原始结果与源码 SHA-256](./evidence/2026-10-09-desktop-performance/powersync-wrapper-results.json)。这些是 wrapper 层反例；本轮没有证明 UI 一定触发同样交叠。
 
@@ -193,11 +193,11 @@ binding 重读来自 [requireAvailableBinding:617](../../packages/repository/src
 
 直接通过 tsx 导入当前 runtime；每篇文件 4,096 bytes，查询 needlealpha。每种规模先查询一次，再执行 5 次未插桩重复查询；另跑一次插桩查询统计 fs.promises 调用。文件刚生成，未驱逐 OS cache；“首次查询”也不是严格冷磁盘基准。
 
-| 笔记数 | 重复查询中位数 | 5 次范围 | 每次 Markdown 读取 | 每次 binding 读取 |
-| --- | ---: | ---: | ---: | ---: |
-| 100 | 237.96 ms | 187.86–261.84 ms | 200 | 101 |
-| 1,000 | 1,605.26 ms | 1,537.42–2,029.79 ms | 2,000 | 1,001 |
-| 10,000 | 16,273.97 ms | 14,164.44–18,302.51 ms | 20,000 | 10,001 |
+| 笔记数 | 重复查询中位数 |               5 次范围 | 每次 Markdown 读取 | 每次 binding 读取 |
+| ------ | -------------: | ---------------------: | -----------------: | ----------------: |
+| 100    |      237.96 ms |       187.86–261.84 ms |                200 |               101 |
+| 1,000  |    1,605.26 ms |   1,537.42–2,029.79 ms |              2,000 |             1,001 |
+| 10,000 |   16,273.97 ms | 14,164.44–18,302.51 ms |             20,000 |            10,001 |
 
 首次查询分别为 288.31 ms、1,741.11 ms、23,795.88 ms。10,000 篇时一次查询累计读取 Markdown **78.125 MiB**，并产生 30,001 次 readFile、30,001 次 stat、40,001 次 realpath、10,001 次 access、51 次 readdir。这里计数的是 API 调用和读取字节，不等于底层物理磁盘 IOPS/流量。
 
@@ -213,13 +213,13 @@ binding 重读来自 [requireAvailableBinding:617](../../packages/repository/src
 
 实验使用**同一个 64 KiB 文件的 200 个不同版本**，每个版本读入一次，采样前执行 GC：
 
-| 检查点 | 缓存条目 |
-| --- | ---: |
-| 开始前 | 0 |
-| 50 / 100 / 150 / 200 个版本后 | 50 / 100 / 150 / 200 |
-| detach Vault 后 | 200 |
-| 测试器显式 clearCache 后 | 0 |
-| 200 次传入显式空 options 的对照调用 | 0 |
+| 检查点                              |             缓存条目 |
+| ----------------------------------- | -------------------: |
+| 开始前                              |                    0 |
+| 50 / 100 / 150 / 200 个版本后       | 50 / 100 / 150 / 200 |
+| detach Vault 后                     |                  200 |
+| 测试器显式 clearCache 后            |                    0 |
+| 200 次传入显式空 options 的对照调用 |                    0 |
 
 从开始到 200 版本，heapUsed 增加约 **12.68 MiB**，external 增加约 **12.50 MiB**；清除后两者回到接近起点。arrayBuffers 已包含在 external 中，不应再次相加。这个进程先做过大库实验，RSS 保留了分配器高水位；不能把约 660 MB 的实验 RSS 宣称为 MemoFlow 空闲内存，也不能保证清缓存会立即降低 OS 工作集。
 
@@ -393,15 +393,15 @@ PowerSync 本身已经把 SQLite 执行放到 Node Workers。剩余主线程瓶�
 
 ### 10.2 必须记录的指标及口径
 
-| 层次 | 指标 | 用途 |
-| --- | --- | --- |
-| 启动 | main entry、DB ready、local runtime ready、window visible、首屏可读写、cloud ready | 区分壳层出现与真正可操作 |
-| 进程 | app.getAppMetrics 的 pid + creationTime、类型、CPU、workingSetSize、Windows privateBytes | 覆盖 main/renderer/GPU/utility，避免 PID 复用误判 |
-| 线程/资源 | Worker 创建和 exit、打开 DB、订阅、timer、query observer、owner scope | 用资源计数解释残留，进程数不能代替 Worker 数 |
-| 主线程 | event loop delay、长任务、CPU profile、GC | 区分异步等待与同步阻塞 |
-| 数据路径 | 文件读取次数/字节、解析数、查询行数、索引更新量、IPC bytes、refetch 数 | 找到数据规模放大的阶段 |
-| 交互 | 输入至结果、列表滚动、Tab/会话切换、流式响应、后台恢复 | 衡量用户实际路径 |
-| 持续运行 | 空闲/隐藏/最小化 CPU、重复循环后资源平台、恢复后提醒正确性 | 区分合理缓存与持续保留 |
+| 层次      | 指标                                                                                     | 用途                                              |
+| --------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| 启动      | main entry、DB ready、local runtime ready、window visible、首屏可读写、cloud ready       | 区分壳层出现与真正可操作                          |
+| 进程      | app.getAppMetrics 的 pid + creationTime、类型、CPU、workingSetSize、Windows privateBytes | 覆盖 main/renderer/GPU/utility，避免 PID 复用误判 |
+| 线程/资源 | Worker 创建和 exit、打开 DB、订阅、timer、query observer、owner scope                    | 用资源计数解释残留，进程数不能代替 Worker 数      |
+| 主线程    | event loop delay、长任务、CPU profile、GC                                                | 区分异步等待与同步阻塞                            |
+| 数据路径  | 文件读取次数/字节、解析数、查询行数、索引更新量、IPC bytes、refetch 数                   | 找到数据规模放大的阶段                            |
+| 交互      | 输入至结果、列表滚动、Tab/会话切换、流式响应、后台恢复                                   | 衡量用户实际路径                                  |
+| 持续运行  | 空闲/隐藏/最小化 CPU、重复循环后资源平台、恢复后提醒正确性                               | 区分合理缓存与持续保留                            |
 
 Electron ProcessMetric 的 CPU 是前后采样之间的平均值，内存字段单位 KB；Node memoryUsage 单位 byte。Windows privateBytes 与 working set 含义不同，后者不能简单相加当作完全独占物理内存。Linux RSS 不下降可能含分配器碎片，不能单靠 RSS 判泄漏；Worker 的 RSS 也不能逐线程相加。
 
@@ -409,18 +409,18 @@ Electron ProcessMetric 的 CPU 是前后采样之间的平均值，内存字段�
 
 以下是后续实施的设计，**本轮未执行**：
 
-| 场景 | 数据/条件 | 硬性行为验收与测量 |
-| --- | --- | --- |
-| 本地启动 | guest；已缓存 cloud Profile；有/无 PIN；无网/弱网/会话过期 | 本地内容可操作不依赖云请求完成，云失败状态正确 |
-| 启动分层 | 安装首次；新进程重启；系统重启后启动 | 分别记录文件缓存条件，不能把新进程都叫冷启动 |
-| Profile 生命周期 | A/B 反复切换 20 轮；打开未完成时锁定；关闭失败注入 | 旧代次不复活，非活动 DB Worker 为 0，当前活动实例数量稳定 |
-| Vault 规模 | 100 / 1k / 10k / 超过 10k；大小文件混合 | 完整性显式，重复 ID 被正确处理，索引前后结果一致 |
-| Vault 变化 | 外部修改、rename/delete、解绑重绑、权限失败、休眠恢复 | 索引可恢复，在途结果不串库，不把不完整扫描当否定事实 |
-| 通知 | 从未通知；首次显示；隐藏；连续到达；renderer 失败 | 隐藏时无不必要时钟、展示队列有界、持久化提醒不丢 |
-| 页面缓存 | 8 个 Tab，包含草稿/原生 review；DB 高频失效 | 非可见页面刷新有界，激活补刷新，草稿/审批继续正确 |
-| 长会话 | 100 / 1k / 5k 条消息，带 Markdown/工具结果/正在流式项 | IPC/DOM 有界，旧页加载保持锚点和活跃消息 |
-| 整机稳态 | visible/hidden/minimized；空闲与到期提醒；电源场景分组 | CPU、唤醒、进程内存和资源计数，恢复后交互正确 |
-| 正式包 | 相同 SHA、构建配置、签名和默认启动参数 | 依赖/Worker/native/更新关闭合同无回归 |
+| 场景             | 数据/条件                                                  | 硬性行为验收与测量                                        |
+| ---------------- | ---------------------------------------------------------- | --------------------------------------------------------- |
+| 本地启动         | guest；已缓存 cloud Profile；有/无 PIN；无网/弱网/会话过期 | 本地内容可操作不依赖云请求完成，云失败状态正确            |
+| 启动分层         | 安装首次；新进程重启；系统重启后启动                       | 分别记录文件缓存条件，不能把新进程都叫冷启动              |
+| Profile 生命周期 | A/B 反复切换 20 轮；打开未完成时锁定；关闭失败注入         | 旧代次不复活，非活动 DB Worker 为 0，当前活动实例数量稳定 |
+| Vault 规模       | 100 / 1k / 10k / 超过 10k；大小文件混合                    | 完整性显式，重复 ID 被正确处理，索引前后结果一致          |
+| Vault 变化       | 外部修改、rename/delete、解绑重绑、权限失败、休眠恢复      | 索引可恢复，在途结果不串库，不把不完整扫描当否定事实      |
+| 通知             | 从未通知；首次显示；隐藏；连续到达；renderer 失败          | 隐藏时无不必要时钟、展示队列有界、持久化提醒不丢          |
+| 页面缓存         | 8 个 Tab，包含草稿/原生 review；DB 高频失效                | 非可见页面刷新有界，激活补刷新，草稿/审批继续正确         |
+| 长会话           | 100 / 1k / 5k 条消息，带 Markdown/工具结果/正在流式项      | IPC/DOM 有界，旧页加载保持锚点和活跃消息                  |
+| 整机稳态         | visible/hidden/minimized；空闲与到期提醒；电源场景分组     | CPU、唤醒、进程内存和资源计数，恢复后交互正确             |
+| 正式包           | 相同 SHA、构建配置、签名和默认启动参数                     | 依赖/Worker/native/更新关闭合同无回归                     |
 
 固定 OS、CPU、内存、磁盘、缩放、电源模式、杀毒软件状态与数据集摘要。先做少量试运行排除场景错误，再收集足够重复样本，例如每关键场景至少 30 次并保留全部原始数据；尾部噪声大时增加样本。对比同机同数据的变更前后，不在共享 CI 单次跑分上设苛刻门槛。
 
@@ -436,30 +436,30 @@ Electron ProcessMetric 的 CPU 是前后采样之间的平均值，内存字段�
 
 这些优化可以落在现有 owner；性能观测只记录事实，不负责接管业务状态。
 
-| 资源/工作 | 应有 owner | 停止或失效边界 |
-| --- | --- | --- |
-| PowerSync DB、连接池、广播 | Profile runtime / database lifecycle | prepared 失败、deactivate、quit；先完成既有停止协议 |
-| 云校验、同步连接恢复 | CloudConnectionManager，绑定 Profile generation | 切换、锁定、注销、超时；迟到结果不得发布 |
-| Vault lookup/index、文件变更队列 | 当前 Profile 的 LocalVaultRuntime 或其内部模块 | binding 更换、detach、Profile 关闭；派生数据可重建 |
-| 搜索/打开/扫描请求 | 发起操作及其 scope | 新请求、scope 变化、取消；worker/后台批次也停止 |
-| 通知窗口、展示队列、计时器 | 设备通知能力 / window manager | toast 清空、窗口回收、Profile 变化、应用关闭 |
-| 页面 query/DOM listener | 对应业务 surface | deactivated 暂停工作，activated 补刷新，unmounted 释放 |
-| AI run / 历史页面 | AI runtime / conversation projection 各持其职责 | run 依业务终止，历史按 cursor 释放；切页面不随意取消用户 run |
-| 持久化 Scheduler / Routine 提醒 | 原有后台 owner | 依到期/取消/退出合同运行，不跟随页面可见性停止 |
+| 资源/工作                        | 应有 owner                                      | 停止或失效边界                                               |
+| -------------------------------- | ----------------------------------------------- | ------------------------------------------------------------ |
+| PowerSync DB、连接池、广播       | Profile runtime / database lifecycle            | prepared 失败、deactivate、quit；先完成既有停止协议          |
+| 云校验、同步连接恢复             | CloudConnectionManager，绑定 Profile generation | 切换、锁定、注销、超时；迟到结果不得发布                     |
+| Vault lookup/index、文件变更队列 | 当前 Profile 的 LocalVaultRuntime 或其内部模块  | binding 更换、detach、Profile 关闭；派生数据可重建           |
+| 搜索/打开/扫描请求               | 发起操作及其 scope                              | 新请求、scope 变化、取消；worker/后台批次也停止              |
+| 通知窗口、展示队列、计时器       | 设备通知能力 / window manager                   | toast 清空、窗口回收、Profile 变化、应用关闭                 |
+| 页面 query/DOM listener          | 对应业务 surface                                | deactivated 暂停工作，activated 补刷新，unmounted 释放       |
+| AI run / 历史页面                | AI runtime / conversation projection 各持其职责 | run 依业务终止，历史按 cursor 释放；切页面不随意取消用户 run |
+| 持久化 Scheduler / Routine 提醒  | 原有后台 owner                                  | 依到期/取消/退出合同运行，不跟随页面可见性停止               |
 
 ### 11.2 可拆成独立审查的工作包
 
-| 顺序 | 最小纵切与依赖 | 验收证据 | 主要反效果与防护 |
-| --- | --- | --- | --- |
-| A0 轻量观测 | 启动阶段、Worker create/exit、关键请求读取计数；修 metric 缺失可假绿 | 确定性场景能采到非伪造指标；日志带 revision/scope，正文与凭据不落日志 | 采样本身有开销，默认低频，诊断开关可关闭 |
-| A1 DB 生命周期 | Profile 打开→本地操作→切换/退出；补打开/关闭及路径合同 | 真实 SDK 资源计数回零、wrapper 时序回归、Profile/更新退出既有测试 | 不能通过清库、吞关闭失败或跳过 flush 来提速 |
-| A2 Vault 正确性 | parse 缓存、binding/generation、扫描完整性与 ID 校验 | 单文件多版本缓存有界；10,001 篇重复 ID；A/B 切换反例不再成立 | 禁用解析缓存后 CPU 可能增加，用一次投影/owner 缓存消除重复 |
-| B1 本地启动 | 同时拆 main 和 GET_SNAPSHOT 两个等待点；复用 cloud owner | 断网/延迟云请求下本地可编辑；只一个校验；旧 Profile 不恢复同步 | 不跳过初次本地准备，不把缓存会话当云授权 |
-| B2 轻量通知 | 独立 bootstrap、空闲 timer/窗口、队列/ready 生命周期 | 首次与热通知、隐藏、失败恢复；持久化 inbox 与点击导航正确 | 过短回收导致反复创建；用实测决定复用窗口 |
-| C1 Vault lookup/index | A2 后先完成 Repository/Vault；Goal/Task 为后续消费验证 | 全量与索引结果对照、中文短查询、变更/重建、O(KN) 放大消失 | watcher 不可靠、索引过期、短词退化；显式完整性与恢复 |
-| C2 Vault 视图 | C1 后分页/摘要 + 虚拟列表/逻辑键盘导航 | 10k 列表 DOM 有界，焦点、选中、Home/End、过滤与滚动正确 | 只改 DOM 会留下 I/O；键盘不能只看当前渲染行 |
-| D1 页面/AI | 先 Goal 隐藏刷新，再第二 owner；AI 历史另做纵切 | Tab 草稿保持、refetch 有界、长会话分页/流式锚点 | 不能为省资源卸载未保存草稿或中断审批 |
-| D2 主进程/包体 | A0 数据 + 当前 SHA Windows 包；只改实测大项 | bundle/模块加载证据、native/Worker/依赖闭包、默认 GPU smoke | tree-shaking panic、动态导入仍被打包、错误删运行时文件 |
+| 顺序                  | 最小纵切与依赖                                                       | 验收证据                                                              | 主要反效果与防护                                           |
+| --------------------- | -------------------------------------------------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------- |
+| A0 轻量观测           | 启动阶段、Worker create/exit、关键请求读取计数；修 metric 缺失可假绿 | 确定性场景能采到非伪造指标；日志带 revision/scope，正文与凭据不落日志 | 采样本身有开销，默认低频，诊断开关可关闭                   |
+| A1 DB 生命周期        | Profile 打开→本地操作→切换/退出；补打开/关闭及路径合同               | 真实 SDK 资源计数回零、wrapper 时序回归、Profile/更新退出既有测试     | 不能通过清库、吞关闭失败或跳过 flush 来提速                |
+| A2 Vault 正确性       | parse 缓存、binding/generation、扫描完整性与 ID 校验                 | 单文件多版本缓存有界；10,001 篇重复 ID；A/B 切换反例不再成立          | 禁用解析缓存后 CPU 可能增加，用一次投影/owner 缓存消除重复 |
+| B1 本地启动           | 同时拆 main 和 GET_SNAPSHOT 两个等待点；复用 cloud owner             | 断网/延迟云请求下本地可编辑；只一个校验；旧 Profile 不恢复同步        | 不跳过初次本地准备，不把缓存会话当云授权                   |
+| B2 轻量通知           | 独立 bootstrap、空闲 timer/窗口、队列/ready 生命周期                 | 首次与热通知、隐藏、失败恢复；持久化 inbox 与点击导航正确             | 过短回收导致反复创建；用实测决定复用窗口                   |
+| C1 Vault lookup/index | A2 后先完成 Repository/Vault；Goal/Task 为后续消费验证               | 全量与索引结果对照、中文短查询、变更/重建、O(KN) 放大消失             | watcher 不可靠、索引过期、短词退化；显式完整性与恢复       |
+| C2 Vault 视图         | C1 后分页/摘要 + 虚拟列表/逻辑键盘导航                               | 10k 列表 DOM 有界，焦点、选中、Home/End、过滤与滚动正确               | 只改 DOM 会留下 I/O；键盘不能只看当前渲染行                |
+| D1 页面/AI            | 先 Goal 隐藏刷新，再第二 owner；AI 历史另做纵切                      | Tab 草稿保持、refetch 有界、长会话分页/流式锚点                       | 不能为省资源卸载未保存草稿或中断审批                       |
+| D2 主进程/包体        | A0 数据 + 当前 SHA Windows 包；只改实测大项                          | bundle/模块加载证据、native/Worker/依赖闭包、默认 GPU smoke           | tree-shaking panic、动态导入仍被打包、错误删运行时文件     |
 
 这些是研究建议，不是已授权且完成的产品任务列表。实施时先写行为 characterization/contract tests，再在最小真实 owner 上验证；至少第二个稳定用例后才提升抽象。不要把本轮研究计划的归档误读为这些工作包已经实施。
 
@@ -467,22 +467,22 @@ Electron ProcessMetric 的 CPU 是前后采样之间的平均值，内存字段�
 
 资料提供机制与可迁移经验，不提供 MemoFlow 的实测收益。以下均在本轮核验；SDK 版本实现细节另见第 2 节的已安装源码。
 
-| 来源 | 直接支持的事实/经验 | 对本项目的适用边界 |
-| --- | --- | --- |
-| [Electron Performance](https://www.electronjs.org/docs/latest/tutorial/performance) | 先剖析，避免主进程长任务，减少过早加载 | 分阶段记录启动/解析/数据库/渲染，不因 async 名称误认为离开主线程 |
-| [Electron WebPreferences](https://www.electronjs.org/docs/latest/api/structures/web-preferences) / [Page Visibility](https://www.electronjs.org/docs/latest/api/browser-window#page-visibility) | backgroundThrottling 会影响计时器与页面可见性 | 通知 native hidden 状态和页面刷新要一起设计 |
-| [ProcessMetric](https://www.electronjs.org/docs/latest/api/structures/process-metric) / [MemoryInfo](https://www.electronjs.org/docs/latest/api/structures/memory-info) | 进程 CPU/内存、KB 单位与 Windows private bytes | 不用 main heap 或单 renderer 指标代表整应用 |
-| [Node memoryUsage](https://nodejs.org/api/process.html#processmemoryusage) / [Worker threads](https://nodejs.org/docs/latest-v24.x/api/worker_threads.html) | Worker 内存口径、CPU 工作与异步 I/O 区别 | 先量化重复读取/解析，再决定迁移计算 |
-| [Electron utilityProcess](https://www.electronjs.org/docs/latest/api/utility-process) | 独立 Node 子进程、MessagePort、serviceName | 用于必要隔离，不当作总内存下降保证 |
-| [Vue KeepAlive](https://vuejs.org/guide/built-ins/keep-alive.html) / [Vue Performance](https://vuejs.org/guide/best-practices/performance.html) | deactivated 生命周期、列表虚拟化与浅响应边界 | 保留草稿，按页面暂停刷新；先限制数据，再限制 DOM |
-| [TanStack Query defaults](https://tanstack.com/query/v5/docs/framework/vue/guides/important-defaults) / [focus](https://tanstack.com/query/latest/docs/framework/vue/guides/window-focus-refetching) | query 缓存、失效与焦点模型 | 结合已安装 useBaseQuery/Query Core，active 不等于可见 |
-| [SQLite FTS5](https://www.sqlite.org/fts5.html) / [LIKE optimization](https://www.sqlite.org/optoverview.html#the_like_optimization) / [SQL expressions](https://www.sqlite.org/lang_expr.html#the_like_glob_regexp_match_and_extract_operators) | 分词、trigram、短词与 LIKE 限制 | 保留中文子串、字面符号、排序和完整性，验证执行计划 |
-| [Unicode UAX #15](https://www.unicode.org/reports/tr15/) | Unicode normalization 的语义 | 索引与查询一致归一化，原文和高亮偏移单独处理 |
-| [gray-matter source](https://github.com/jonschlinkert/gray-matter/blob/master/index.js) | 默认完整内容缓存及 clearCache | 具体结论以安装的 4.0.3 源码与本轮缓存实验为准 |
-| [Slack incremental boot，2016](https://slack.engineering/getting-to-slack-faster-with-incremental-boot/) | content visible 与 fully loaded 分开衡量 | 首屏出现和本地可操作分别验收，不迁移历史秒数 |
-| [Slack memory，2017](https://slack.engineering/reducing-slacks-memory-footprint/) | 后台只保留必要业务工作；卸载 DOM 不一定够 | 通知/草稿/提醒和隐藏页面计算分开，不照搬旧多 webview 架构 |
-| [VS Code sandbox，2022](https://code.visualstudio.com/blogs/2022/11/28/vscode-sandbox) | 重工作隔离、MessagePort 与通信路径 | 按需求选择进程，旧 AMD/shared-window/cache 技术不原样搬到 Electron 44 |
-| [Notion faster page load，2021](https://www.notion.com/blog/faster-page-load-navigation) | 本地 SQLite、缓存和代码拆分共同改善用户路径 | 本项目已有 SQLite，关键仍是本地读取能否绕开无关网络和全量模型 |
+| 来源                                                                                                                                                                                                                                             | 直接支持的事实/经验                            | 对本项目的适用边界                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------- | --------------------------------------------------------------------- |
+| [Electron Performance](https://www.electronjs.org/docs/latest/tutorial/performance)                                                                                                                                                              | 先剖析，避免主进程长任务，减少过早加载         | 分阶段记录启动/解析/数据库/渲染，不因 async 名称误认为离开主线程      |
+| [Electron WebPreferences](https://www.electronjs.org/docs/latest/api/structures/web-preferences) / [Page Visibility](https://www.electronjs.org/docs/latest/api/browser-window#page-visibility)                                                  | backgroundThrottling 会影响计时器与页面可见性  | 通知 native hidden 状态和页面刷新要一起设计                           |
+| [ProcessMetric](https://www.electronjs.org/docs/latest/api/structures/process-metric) / [MemoryInfo](https://www.electronjs.org/docs/latest/api/structures/memory-info)                                                                          | 进程 CPU/内存、KB 单位与 Windows private bytes | 不用 main heap 或单 renderer 指标代表整应用                           |
+| [Node memoryUsage](https://nodejs.org/api/process.html#processmemoryusage) / [Worker threads](https://nodejs.org/docs/latest-v24.x/api/worker_threads.html)                                                                                      | Worker 内存口径、CPU 工作与异步 I/O 区别       | 先量化重复读取/解析，再决定迁移计算                                   |
+| [Electron utilityProcess](https://www.electronjs.org/docs/latest/api/utility-process)                                                                                                                                                            | 独立 Node 子进程、MessagePort、serviceName     | 用于必要隔离，不当作总内存下降保证                                    |
+| [Vue KeepAlive](https://vuejs.org/guide/built-ins/keep-alive.html) / [Vue Performance](https://vuejs.org/guide/best-practices/performance.html)                                                                                                  | deactivated 生命周期、列表虚拟化与浅响应边界   | 保留草稿，按页面暂停刷新；先限制数据，再限制 DOM                      |
+| [TanStack Query defaults](https://tanstack.com/query/v5/docs/framework/vue/guides/important-defaults) / [focus](https://tanstack.com/query/latest/docs/framework/vue/guides/window-focus-refetching)                                             | query 缓存、失效与焦点模型                     | 结合已安装 useBaseQuery/Query Core，active 不等于可见                 |
+| [SQLite FTS5](https://www.sqlite.org/fts5.html) / [LIKE optimization](https://www.sqlite.org/optoverview.html#the_like_optimization) / [SQL expressions](https://www.sqlite.org/lang_expr.html#the_like_glob_regexp_match_and_extract_operators) | 分词、trigram、短词与 LIKE 限制                | 保留中文子串、字面符号、排序和完整性，验证执行计划                    |
+| [Unicode UAX #15](https://www.unicode.org/reports/tr15/)                                                                                                                                                                                         | Unicode normalization 的语义                   | 索引与查询一致归一化，原文和高亮偏移单独处理                          |
+| [gray-matter source](https://github.com/jonschlinkert/gray-matter/blob/master/index.js)                                                                                                                                                          | 默认完整内容缓存及 clearCache                  | 具体结论以安装的 4.0.3 源码与本轮缓存实验为准                         |
+| [Slack incremental boot，2016](https://slack.engineering/getting-to-slack-faster-with-incremental-boot/)                                                                                                                                         | content visible 与 fully loaded 分开衡量       | 首屏出现和本地可操作分别验收，不迁移历史秒数                          |
+| [Slack memory，2017](https://slack.engineering/reducing-slacks-memory-footprint/)                                                                                                                                                                | 后台只保留必要业务工作；卸载 DOM 不一定够      | 通知/草稿/提醒和隐藏页面计算分开，不照搬旧多 webview 架构             |
+| [VS Code sandbox，2022](https://code.visualstudio.com/blogs/2022/11/28/vscode-sandbox)                                                                                                                                                           | 重工作隔离、MessagePort 与通信路径             | 按需求选择进程，旧 AMD/shared-window/cache 技术不原样搬到 Electron 44 |
+| [Notion faster page load，2021](https://www.notion.com/blog/faster-page-load-navigation)                                                                                                                                                         | 本地 SQLite、缓存和代码拆分共同改善用户路径    | 本项目已有 SQLite，关键仍是本地读取能否绕开无关网络和全量模型         |
 
 ## 13. 可复现证据与本轮验证
 
@@ -500,14 +500,14 @@ node --expose-gc --import tsx docs/analysis/evidence/2026-10-09-desktop-performa
 
 这是独立诊断脚本，不是新的生产 benchmark framework，也不替代 Nx 回归测试。Vault 脚本含多轮 10k 扫描，运行需数分钟；源码变化后的结果应另存并记录 revision，不能覆盖本轮基线再声称是同一实验。
 
-| 证据 | 本轮结果 | 解释范围 |
-| --- | --- | --- |
-| PowerSync SDK probe | exit 0；6→6→0，GC 后仍 6，最终关闭 0 | 真实 SDK 生命周期，不是整应用内存曲线 |
-| PowerSync wrapper probe | exit 0；两个并发反例成立 | 真实 wrapper + fake 依赖，非 UI 事故 |
-| Local Vault probe | exit 0；3 档读取计数、缓存/截断/切换反例完成 | 当前源码 + 合成文件；未包括 renderer/Windows |
-| repository 现有 focused tests | 1 文件，15/15 通过 | 固定既有 Vault 基本行为，不代表新发现已修复 |
-| desktop 现有 focused tests | 2 文件，15/15 通过 | CloudConnectionManager / ProfileRuntimeManager 既有合同 |
-| governance/docs 与 diff | governance-check 通过（含文档检查），diff --check 通过 | 研究文件和归档索引的仓库一致性 |
+| 证据                          | 本轮结果                                               | 解释范围                                                |
+| ----------------------------- | ------------------------------------------------------ | ------------------------------------------------------- |
+| PowerSync SDK probe           | exit 0；6→6→0，GC 后仍 6，最终关闭 0                   | 真实 SDK 生命周期，不是整应用内存曲线                   |
+| PowerSync wrapper probe       | exit 0；两个并发反例成立                               | 真实 wrapper + fake 依赖，非 UI 事故                    |
+| Local Vault probe             | exit 0；3 档读取计数、缓存/截断/切换反例完成           | 当前源码 + 合成文件；未包括 renderer/Windows            |
+| repository 现有 focused tests | 1 文件，15/15 通过                                     | 固定既有 Vault 基本行为，不代表新发现已修复             |
+| desktop 现有 focused tests    | 2 文件，15/15 通过                                     | CloudConnectionManager / ProfileRuntimeManager 既有合同 |
+| governance/docs 与 diff       | governance-check 通过（含文档检查），diff --check 通过 | 研究文件和归档索引的仓库一致性                          |
 
 已执行的现有测试命令：
 

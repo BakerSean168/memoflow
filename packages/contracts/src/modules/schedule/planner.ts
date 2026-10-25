@@ -98,7 +98,6 @@ export type CalendarEventProjection =
   | GoalCalendarEventProjection
   | RoutineCalendarEventProjection;
 
-
 export interface PlannerProjectionRef {
   readonly sourceType: PlannerSourceType;
   readonly sourceId: string;

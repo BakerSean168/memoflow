@@ -3,12 +3,15 @@
 Repo: /home/ubuntu/projects/memoflow-ai-vnext (branch refactor/mastra-native-ai-vnext)
 
 ## Mission (ONE concern, surgical)
+
 Rewrite the legacy `useAITaskWorkflow` composable to a thin `AIWorkflowRunView` (kind `task.create`) projection — mirroring the already-done `useAIGoalWorkflow` — and add an `AITaskWorkflowPanel.vue` component mirroring `AIGoalWorkflowPanel.vue` (testid `task-workflow-panel`), plus composable + component tests. Then wire it into `useAIChatView.ts`. Do NOT touch knowledge.* yet (separate round). Do NOT touch goal.* (already done).
 
 ## Ground rule
+
 New production code must NEVER use `AgentRunResult`, `AgentStartRunClientRequest`, `AgentResumePayload`, `AgentExecutedAction`, `pendingActions`, `approvedActions`, `createAgentId`, `hostProposalLifecycle`, `dispatchHostProposalDecision`, `startAgentRun`, `resumeAgentRun`. The task UI must own NO workflow state — it is a thin projection over the Mastra runtime (`workflowRuntime`). Mutations never run client-side; they happen in the Mastra workflow via typed resume commands (`approve`/`answer`/`cancel`/`edit_structured`/`retry`).
 
 ## Reference files (copy the pattern, do not reinvent)
+
 - COMPOSABLE PATTERN: `packages/app-vue/src/modules/ai/composables/useAIGoalWorkflow.ts` (already the vNext thin-projection reference)
 - COMPOSABLE TEST PATTERN: `packages/app-vue/src/modules/ai/composables/useAIGoalWorkflow.spec.ts`
 - COMPONENT PATTERN: `packages/app-vue/src/modules/ai/components/AIGoalWorkflowPanel.vue` (testid `goal-workflow-panel`/`goal-workflow-recovery`/`goal-workflow-result`/`goal-workflow-revision`)
@@ -18,10 +21,12 @@ New production code must NEVER use `AgentRunResult`, `AgentStartRunClientRequest
 - CONSUMER TO REWIRE: `packages/app-vue/src/modules/ai/composables/useAIChatView.ts` (currently assembles `useAITaskWorkflow` with `service.startAgentRun/resumeAgentRun` + `taskAgentRun` ref + `syncLinkedGoalFromTaskAgentRun`)
 
 ## Contracts (already committed; read these)
+
 - `packages/contracts/src/modules/ai/api/ai-runtime.dto.ts`: `AIWorkflowRunView` discriminated union with kind `task.create`; `AIWorkflowSuspension` (`clarification_required` w/ questions+round, `task_draft_review` w/ draft+revision, `recovery_required` w/ retryable+failures); `AIWorkflowResumeCommand` (`answer`/`approve`/`cancel`/`edit_structured`/`retry`/...); `AIWorkflowStartClientRequest` kind `task.create` (input `TaskCreateClientInput`).
 - `packages/contracts/src/modules/ai/api/ai-task-create-workflow.dto.ts`: `TaskCreateClientInput` (`{idea, goalId?, surfaceContext?}` strict), `TaskPlanDraft` (`{revision, task, rationale, warnings}` where `task` has title/description/importance/cadence/startDate/timeOfDay/daysOfWeek/occurrences/goalId/tags), `TaskPlanExecutionReceipt` (`{workflowRunId, revision, status, taskPlanId?, taskIds, failures, retryable}`).
 
 ## Deliverables
+
 1. **Rewrite `useAITaskWorkflow.ts`** as a vNext projection. New options type `UseAITaskWorkflowOptions`:
    - `workflowRuntime: IWorkflowRuntimeService`
    - `selectedModel: Ref<ChatModelOption | null>`
@@ -57,6 +62,7 @@ New production code must NEVER use `AgentRunResult`, `AgentStartRunClientRequest
    - Any template/component referencing `taskAgentRun`/`task-workflow-panel` must be updated to use `taskWorkflow.taskWorkflowRun`. Find all usages of `taskAgentRun` and `task-workflow` across `packages/app-vue/src` and `packages/app-vue/src/modules/ai/components/**` and update.
 
 ## Verification (run from repo root with PATH="$HOME/.cargo/bin:$PATH")
+
 - `node --stack_size=8192 node_modules/vitest/vitest.mjs run --config packages/app-vue/vitest.config.ts packages/app-vue/src/modules/ai/composables/useAITaskWorkflow.spec.ts packages/app-vue/src/modules/ai/composables/useAIGoalWorkflow.spec.ts`
 - `cd packages/app-vue && node --stack_size=8192 ../../node_modules/typescript/bin/tsc --noEmit -p tsconfig.json`
 - Then full `packages/app-vue` unit suite (expect ~186-187 files; all green or only pre-existing environmental better-sqlite3 failures).
@@ -64,6 +70,7 @@ New production code must NEVER use `AgentRunResult`, `AgentStartRunClientRequest
 - `pnpm test:inventory` from repo root if you add NEW test files (regenerates tools/test-system-v2/test-inventory.json) — REQUIRED for any new spec file.
 
 ## Hard constraints
+
 - identityId is NEVER sent by the client — the contracts `.strict()` schema rejects it. Assert tests prove the request omits it.
 - No `AgentAction`/`pendingActions`/`approvedActions`/`dependsOn` in production code.
 - Mastra is the ONLY runtime — do not re-add any Host Proposal / AgentRun bridge. If a section of the old panel cannot be projected yet because there is no vNext surface, REMOVE it rather than resurrecting a legacy path.

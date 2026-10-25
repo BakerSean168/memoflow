@@ -46,7 +46,7 @@ updated: 2026-08-03T20:20:00+08:00
 - 过期协议：PostgreSQL 使用
   `(CURRENT_TIMESTAMP AT TIME ZONE 'UTC') - INTERVAL '1 minute'` 写入真实过去时间后，
   Better Auth 原生返回 `expired_token` 并删除记录。`expires_at` 是 `timestamp without time
-  zone`，不能用数据库 `+08` 会话中的裸 `NOW()` 模拟 UTC 过期，否则会得到错误诊断。
+zone`，不能用数据库 `+08` 会话中的裸 `NOW()` 模拟 UTC 过期，否则会得到错误诊断。
 - 标准验证报告 [`reports/local-deploy-validation/latest.md`](../../../reports/local-deploy-validation/latest.md)
   于 `2026-08-03T12:19:46.580Z` 生成：affected lint/typecheck/test、Docker local rebuild
   全部通过，六个服务 healthy，镜像 revision 匹配，`readyForPr: true`。
@@ -199,7 +199,7 @@ plugins: [
       deviceCode: { modelName: 'cloudAuthDeviceCode' },
     },
   }),
-]
+];
 ```
 
 要求：

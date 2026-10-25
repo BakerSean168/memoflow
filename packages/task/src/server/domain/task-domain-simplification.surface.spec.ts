@@ -49,9 +49,7 @@ describe('Task vNext simplified domain surface', () => {
   });
 
   it('keeps TaskPlan independent from TaskOccurrence ownership', () => {
-    expect(plan).not.toMatch(
-      /private _instances|addInstance\(|removeInstance\(|getAllInstances\(/,
-    );
+    expect(plan).not.toMatch(/private _instances|addInstance\(|removeInstance\(|getAllInstances\(/);
     expect(plan).not.toMatch(/createInstance\(|generateOccurrences\(|getInstanceForDate\(/);
     expect(planRepositoryPort).not.toContain('findByIdWithChildren');
   });
@@ -127,7 +125,9 @@ describe('Task vNext simplified domain surface', () => {
     expect(source).not.toMatch(
       /\bTaskStatistic\b|\btaskStatistic\b|\btask_statistics\b|task_templates|task_instances|task_template_history/,
     );
-    expect(source).not.toMatch(/task_template_id|task_instance_id|status\s*[:=].*\b(blocked|cancelled)\b/);
+    expect(source).not.toMatch(
+      /task_template_id|task_instance_id|status\s*[:=].*\b(blocked|cancelled)\b/,
+    );
     expect(source).toContain('task_plans');
     expect(source).toContain('task_occurrences');
     expect(source).toContain('task_plan_history');

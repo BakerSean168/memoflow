@@ -149,4 +149,8 @@ export type {
   IAINotificationReadPort,
 } from './notification-read.port';
 
-export type { IGoalSurfaceLeaseRepository, GoalSurfaceLeaseRequest, GoalSurfaceLeaseGrant } from './goal-surface-lease.port';
+export type {
+  IGoalSurfaceLeaseRepository,
+  GoalSurfaceLeaseRequest,
+  GoalSurfaceLeaseGrant,
+} from './goal-surface-lease.port';

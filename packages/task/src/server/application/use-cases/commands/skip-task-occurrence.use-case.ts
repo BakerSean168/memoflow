@@ -32,9 +32,13 @@ export class SkipTaskOccurrenceUseCase {
     try {
       const timeContext = await this.projection.getTimeContext(identityId);
       return await this.transactionRunner.run(async (repositories) => {
-        const occurrence = await repositories.occurrenceRepository.findByIdForIdentity(identityId, id);
+        const occurrence = await repositories.occurrenceRepository.findByIdForIdentity(
+          identityId,
+          id,
+        );
         if (!occurrence) return error('NOT_FOUND', `TaskOccurrence ${id} not found`);
-        if (!occurrence.canSkip()) return error('VALIDATION_ERROR', 'Cannot skip this task occurrence');
+        if (!occurrence.canSkip())
+          return error('VALIDATION_ERROR', 'Cannot skip this task occurrence');
         occurrence.skip(request?.reason);
         await repositories.occurrenceRepository.save(occurrence);
         await reevaluateTaskPlanOutcome(

@@ -97,15 +97,18 @@ export function useGoal() {
     savingId.value = 'new';
     store.setError(null);
     try {
-      const data = await executeGoalOperation(async () => {
-        const result = await service.createGoal(sanitizeForIpc(req));
-        lastCreateRejected.value = !result.ok && result.error.code === 'VALIDATION_ERROR';
-        return result;
-      }, {
-        ...opOpts,
-        fallbackKey: 'goal.error.createFailed',
-        scope: 'createGoal',
-      });
+      const data = await executeGoalOperation(
+        async () => {
+          const result = await service.createGoal(sanitizeForIpc(req));
+          lastCreateRejected.value = !result.ok && result.error.code === 'VALIDATION_ERROR';
+          return result;
+        },
+        {
+          ...opOpts,
+          fallbackKey: 'goal.error.createFailed',
+          scope: 'createGoal',
+        },
+      );
       if (data && checkpointStore?.scope() === identityScope) {
         store.applyGoalMutationReceipt(data);
         return data.readModel;

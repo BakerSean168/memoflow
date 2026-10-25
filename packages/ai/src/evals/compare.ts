@@ -60,7 +60,9 @@ export function compareAIEvaluationReports(
     .map((result) => result.id);
 
   if (candidate.passRate < policy.minCandidatePassRate) {
-    gateFailures.push(`candidate pass rate ${candidate.passRate.toFixed(4)} below ${policy.minCandidatePassRate.toFixed(4)}`);
+    gateFailures.push(
+      `candidate pass rate ${candidate.passRate.toFixed(4)} below ${policy.minCandidatePassRate.toFixed(4)}`,
+    );
   }
   if (baseline.passRate - candidate.passRate > policy.maxPassRateDrop) {
     gateFailures.push('candidate pass-rate regression exceeds policy');
@@ -74,12 +76,15 @@ export function compareAIEvaluationReports(
 
   const costRatio = ratio(candidate.totalEstimatedCostUsd, baseline.totalEstimatedCostUsd);
   const latencyRatio = ratio(candidate.p95LatencyMs, baseline.p95LatencyMs);
-  if (costRatio > policy.maxCostIncreaseRatio) gateFailures.push(`estimated cost regression ${(costRatio * 100).toFixed(2)}%`);
-  if (latencyRatio > policy.maxP95LatencyIncreaseRatio) gateFailures.push(`p95 latency regression ${(latencyRatio * 100).toFixed(2)}%`);
+  if (costRatio > policy.maxCostIncreaseRatio)
+    gateFailures.push(`estimated cost regression ${(costRatio * 100).toFixed(2)}%`);
+  if (latencyRatio > policy.maxP95LatencyIncreaseRatio)
+    gateFailures.push(`p95 latency regression ${(latencyRatio * 100).toFixed(2)}%`);
 
   const candidateTypes = new Set(candidateReport.results.map((result) => result.type));
   for (const required of policy.requiredCaseTypes as readonly AIEvalCaseType[]) {
-    if (!candidateTypes.has(required)) gateFailures.push(`candidate missing required case type: ${required}`);
+    if (!candidateTypes.has(required))
+      gateFailures.push(`candidate missing required case type: ${required}`);
   }
 
   return {

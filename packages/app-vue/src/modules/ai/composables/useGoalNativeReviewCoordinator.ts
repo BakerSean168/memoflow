@@ -139,9 +139,15 @@ export function useGoalNativeReviewCoordinator(input: {
     if (!session) return null;
     try {
       const snapshot = session.readDraftState();
-      return snapshot.mode === 'create' && snapshot.goalId === null && !snapshot.busy && snapshot.restoredWorkflowRunId === runId
-        ? { session, snapshot } : null;
-    } catch { return null; }
+      return snapshot.mode === 'create' &&
+        snapshot.goalId === null &&
+        !snapshot.busy &&
+        snapshot.restoredWorkflowRunId === runId
+        ? { session, snapshot }
+        : null;
+    } catch {
+      return null;
+    }
   }
 
   function applyNativeLiveCommand(
@@ -226,7 +232,8 @@ export function useGoalNativeReviewCoordinator(input: {
       }
       if (epoch !== projectionEpoch) return;
       try {
-        session = restored ? nativeSurface.reclaimControlledCreate(run.runId, restored.session, restored.snapshot)
+        session = restored
+          ? nativeSurface.reclaimControlledCreate(run.runId, restored.session, restored.snapshot)
           : await nativeSurface.openControlledCreate(run.runId);
         opened = !restored;
       } catch (error) {
@@ -477,7 +484,8 @@ export function useGoalNativeReviewCoordinator(input: {
     if (epoch !== projectionEpoch) return;
     let session: GoalNativeEditSession;
     try {
-      session = restored ? nativeSurface.reclaimControlledCreate(run.runId, restored.session, restored.snapshot)
+      session = restored
+        ? nativeSurface.reclaimControlledCreate(run.runId, restored.session, restored.snapshot)
         : await nativeSurface.openControlledCreate(run.runId);
     } catch (error) {
       if (epoch !== projectionEpoch) return;
@@ -520,17 +528,26 @@ export function useGoalNativeReviewCoordinator(input: {
         let fresh: AIWorkflowRunView | null;
         if (pending.runId) fresh = await options.workflowRuntime.get({ runId: pending.runId });
         else {
-          const matches = (await options.workflowRuntime.list({ conversationId: options.chatConversationId.value }))
-            .filter((item) => item.startRequestId === pending.source.attemptId);
+          const matches = (
+            await options.workflowRuntime.list({ conversationId: options.chatConversationId.value })
+          ).filter((item) => item.startRequestId === pending.source.attemptId);
           fresh = matches.length === 1 ? matches[0]! : null;
         }
-        if (pendingRestart !== pending || !fresh || fresh.kind !== 'goal.create' ||
-            fresh.conversationId !== options.chatConversationId.value) return;
+        if (
+          pendingRestart !== pending ||
+          !fresh ||
+          fresh.kind !== 'goal.create' ||
+          fresh.conversationId !== options.chatConversationId.value
+        )
+          return;
         pending.epoch = ++projectionEpoch;
         await adoptGoalRestart(fresh);
         await projectRun(fresh);
-      } catch { /* Uncertain start remains read-only until its correlated run can be read. */ }
-      finally { goalSurfaceRecovering.value = false; }
+      } catch {
+        /* Uncertain start remains read-only until its correlated run can be read. */
+      } finally {
+        goalSurfaceRecovering.value = false;
+      }
       return;
     }
     if (goalSurfaceControlLost.value) {
@@ -541,9 +558,18 @@ export function useGoalNativeReviewCoordinator(input: {
       const epoch = projectionEpoch;
       try {
         const fresh = await options.workflowRuntime.get({ runId: run.runId });
-        if (epoch !== projectionEpoch || !fresh || fresh.kind !== 'goal.create' ||
-            fresh.runId !== run.runId || fresh.conversationId !== run.conversationId) return;
-        if (fresh.status === 'failed') { await projectRun(fresh); return; }
+        if (
+          epoch !== projectionEpoch ||
+          !fresh ||
+          fresh.kind !== 'goal.create' ||
+          fresh.runId !== run.runId ||
+          fresh.conversationId !== run.conversationId
+        )
+          return;
+        if (fresh.status === 'failed') {
+          await projectRun(fresh);
+          return;
+        }
         if (fresh.status !== 'running' && fresh.status !== 'suspended') return;
         if (!(await surfaceLease.claim(run.runId)) || epoch !== projectionEpoch) return;
         // Preserve owner-first replay if any save has already been attempted.
@@ -677,10 +703,16 @@ export function useGoalNativeReviewCoordinator(input: {
     if (snapshot.mode !== 'create' || snapshot.busy)
       throw new Error('The preserved Goal draft is busy');
     const source = {
-      sourceRunId, attemptId: crypto.randomUUID(), draftRevision: snapshot.revision,
+      sourceRunId,
+      attemptId: crypto.randomUUID(),
+      draftRevision: snapshot.revision,
       draft: buildGoalPlanningSeed({
-        native: snapshot.draft, labels: labelCatalog.labels.value,
-        pendingLabelNames, keyResultRefs, tasks: editableTasks.value, knowledge: editableKnowledge.value,
+        native: snapshot.draft,
+        labels: labelCatalog.labels.value,
+        pendingLabelNames,
+        keyResultRefs,
+        tasks: editableTasks.value,
+        knowledge: editableKnowledge.value,
       }),
     };
     session.setEditingBlocked(true);
@@ -696,7 +728,9 @@ export function useGoalNativeReviewCoordinator(input: {
     goalSurfaceReady.value = false;
   }
 
-  async function adoptGoalRestart(run: Extract<AIWorkflowRunView, { kind: 'goal.create' }>): Promise<void> {
+  async function adoptGoalRestart(
+    run: Extract<AIWorkflowRunView, { kind: 'goal.create' }>,
+  ): Promise<void> {
     const pending = pendingRestart;
     if (!pending) return;
     pending.runId = run.runId;
@@ -712,20 +746,31 @@ export function useGoalNativeReviewCoordinator(input: {
       goalSurfaceConflict.value = false;
       return;
     }
-    if (!(await surfaceLease.claim(run.runId)) || pendingRestart !== pending || pending.epoch !== projectionEpoch) {
+    if (
+      !(await surfaceLease.claim(run.runId)) ||
+      pendingRestart !== pending ||
+      pending.epoch !== projectionEpoch
+    ) {
       keepGoalRestartReadonly();
       return;
     }
     try {
       pending.session.setEditingBlocked(false);
-      nativeSession = nativeSurface.reclaimControlledCreate(run.runId, pending.session, pending.snapshot);
+      nativeSession = nativeSurface.reclaimControlledCreate(
+        run.runId,
+        pending.session,
+        pending.snapshot,
+      );
     } catch (error) {
       pending.session.setEditingBlocked(true);
       void surfaceLease.release();
       keepGoalRestartReadonly();
       throw error;
     }
-    nativeSession.coordinateSubmit(async () => undefined, () => cancelGoalAgentRun());
+    nativeSession.coordinateSubmit(
+      async () => undefined,
+      () => cancelGoalAgentRun(),
+    );
     projectedRunId = run.runId;
     projectedRevision = null;
     projectedMode = 'live';
@@ -1031,21 +1076,24 @@ export function useGoalNativeReviewCoordinator(input: {
       await continueGoalSurfaceControl();
       if (pendingRestart && !pendingRestart.runId) return;
     }
-    const run = pendingRestart?.runId && pendingRestart.runId !== goalWorkflowRun.value?.runId
-      ? await options.workflowRuntime.get({ runId: pendingRestart.runId }) : goalWorkflowRun.value;
+    const run =
+      pendingRestart?.runId && pendingRestart.runId !== goalWorkflowRun.value?.runId
+        ? await options.workflowRuntime.get({ runId: pendingRestart.runId })
+        : goalWorkflowRun.value;
     if (!run || goalAgentResuming.value || pendingOwnerAttempt) return;
     goalAgentResuming.value = true;
     try {
       retireNativeReview();
-      const next = run.status === 'suspended'
-        ? await options.workflowRuntime.resume({
-            runId: run.runId,
-            command:
-              run.suspension?.type === 'recovery_required'
-                ? { type: 'cancel_remaining' }
-                : { type: 'cancel' },
-          })
-        : await options.workflowRuntime.cancel({ runId: run.runId });
+      const next =
+        run.status === 'suspended'
+          ? await options.workflowRuntime.resume({
+              runId: run.runId,
+              command:
+                run.suspension?.type === 'recovery_required'
+                  ? { type: 'cancel_remaining' }
+                  : { type: 'cancel' },
+            })
+          : await options.workflowRuntime.cancel({ runId: run.runId });
       if (next?.kind === 'goal.create' && next.status === 'cancelled') await adoptGoalRestart(next);
       await projectRun(next);
     } catch (error) {

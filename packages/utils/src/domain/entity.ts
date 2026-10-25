@@ -1,4 +1,3 @@
-
 import type { Equatable } from '@memoflow/contracts/shared';
 
 export abstract class Entity<TId extends string | number | Equatable> {
@@ -28,14 +27,10 @@ export abstract class Entity<TId extends string | number | Equatable> {
   }
   private isIdEquals(otherId: TId): boolean {
     // 如果 ID 是对象且有 equals 方法 (Value Object)
-    if (
-      typeof this.id === 'object' && 
-      this.id !== null && 
-      'equals' in this.id
-    ) {
+    if (typeof this.id === 'object' && this.id !== null && 'equals' in this.id) {
       return (this.id as Equatable).equals(otherId);
     }
-    
+
     // 否则降级为原始类型比较 (string / number)
     return this.id === otherId;
   }

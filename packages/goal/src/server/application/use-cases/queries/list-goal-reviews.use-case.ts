@@ -15,9 +15,7 @@ export interface ListGoalReviewsResult {
 }
 
 export class ListGoalReviewsUseCase {
-  constructor(
-    private readonly goalRepository: IGoalRepository,
-  ) {}
+  constructor(private readonly goalRepository: IGoalRepository) {}
 
   async execute(goalId: string, identityId: string): Promise<Result<ListGoalReviewsResult>> {
     const goal = await this.goalRepository.findByIdForIdentity(identityId, goalId, {

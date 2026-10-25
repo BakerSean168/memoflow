@@ -317,44 +317,41 @@ describe('AppShell right-panel integration', () => {
     },
   );
 
-  it.each(['frame', 'guard'] as const)(
-    'cancels the resize focus %s on unmount',
-    async (stage) => {
-      const host = document.createElement('div');
-      document.body.appendChild(host);
-      onTestFinished(() => host.remove());
-      const { wrapper } = await mountShell('/goals', host);
-      const input = wrapper.get('[data-testid="shell-resize-focus-probe"]')
-        .element as HTMLInputElement;
-      input.focus();
-      vi.useFakeTimers();
-      const frames: FrameRequestCallback[] = [];
-      vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
-        frames.push(callback);
-        return 73;
-      });
-      const cancelFrame = vi.spyOn(window, 'cancelAnimationFrame');
-      await wrapper
-        .get('[data-testid="business-panel-resizer"]')
-        .trigger('pointerdown', { pointerId: 32, clientX: 700 });
-      window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 32 }));
-      expect(frames).toHaveLength(1);
-      if (stage === 'guard') {
-        frames[0](performance.now());
-        expect(vi.getTimerCount()).toBeGreaterThan(0);
-      }
+  it.each(['frame', 'guard'] as const)('cancels the resize focus %s on unmount', async (stage) => {
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    onTestFinished(() => host.remove());
+    const { wrapper } = await mountShell('/goals', host);
+    const input = wrapper.get('[data-testid="shell-resize-focus-probe"]')
+      .element as HTMLInputElement;
+    input.focus();
+    vi.useFakeTimers();
+    const frames: FrameRequestCallback[] = [];
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      frames.push(callback);
+      return 73;
+    });
+    const cancelFrame = vi.spyOn(window, 'cancelAnimationFrame');
+    await wrapper
+      .get('[data-testid="business-panel-resizer"]')
+      .trigger('pointerdown', { pointerId: 32, clientX: 700 });
+    window.dispatchEvent(new PointerEvent('pointerup', { pointerId: 32 }));
+    expect(frames).toHaveLength(1);
+    if (stage === 'guard') {
+      frames[0](performance.now());
+      expect(vi.getTimerCount()).toBeGreaterThan(0);
+    }
 
-      wrapper.unmount();
-      if (stage === 'frame') expect(cancelFrame).toHaveBeenCalledWith(73);
-      expect(vi.getTimerCount()).toBe(0);
-      // A stale focus guard would focus a replacement matching the old input.
-      const replacement = document.createElement('input');
-      replacement.dataset.testid = 'shell-resize-focus-probe';
-      host.appendChild(replacement);
-      document.body.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
-      expect(document.activeElement).not.toBe(replacement);
-    },
-  );
+    wrapper.unmount();
+    if (stage === 'frame') expect(cancelFrame).toHaveBeenCalledWith(73);
+    expect(vi.getTimerCount()).toBe(0);
+    // A stale focus guard would focus a replacement matching the old input.
+    const replacement = document.createElement('input');
+    replacement.dataset.testid = 'shell-resize-focus-probe';
+    host.appendChild(replacement);
+    document.body.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    expect(document.activeElement).not.toBe(replacement);
+  });
 
   it('releases its preview-entry callback on unmount', async () => {
     const { wrapper } = await mountShell('/goals');

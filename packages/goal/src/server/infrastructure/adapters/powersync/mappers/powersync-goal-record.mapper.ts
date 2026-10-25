@@ -16,9 +16,7 @@ export class PowerSyncGoalRecordMapper {
       value: Number(row.value ?? 0),
       authorship: row.authorship as GoalRecord['authorship'],
       note: row.note ? String(row.note) : null,
-      sourceType: row.source_type
-        ? (String(row.source_type) as GoalRecord['sourceType'])
-        : null,
+      sourceType: row.source_type ? (String(row.source_type) as GoalRecord['sourceType']) : null,
       sourceId: row.source_id ? String(row.source_id) : null,
       recordedAt: requiredMs(row.recorded_at ? String(row.recorded_at) : null),
       createdAt: requiredMs(row.created_at ? String(row.created_at) : null),

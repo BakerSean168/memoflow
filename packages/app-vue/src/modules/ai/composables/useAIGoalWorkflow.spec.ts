@@ -291,21 +291,41 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
     const receivers: WorkspaceEventStreamOptions[] = [];
     runtime.streamWorkspaceEvents = vi.fn((input: WorkspaceEventStreamOptions) => {
       receivers.push(input);
-      return new Promise<void>((resolve) => input.signal.addEventListener('abort', () => resolve(), { once: true }));
+      return new Promise<void>((resolve) =>
+        input.signal.addEventListener('abort', () => resolve(), { once: true }),
+      );
     });
     const options = makeOptions(runtime);
     const wrapper = mountComposable(options);
     try {
       const vm = wrapper.vm as unknown as ReturnType<typeof useAIGoalWorkflow>;
       let resolveOld!: (value: GoalRun) => void;
-      runtime.start.mockResolvedValueOnce(makeGoalRun({ runId: 'old-run' }))
+      runtime.start
+        .mockResolvedValueOnce(makeGoalRun({ runId: 'old-run' }))
         .mockResolvedValueOnce(makeGoalRun({ runId: 'new-run' }));
       runtime.get.mockImplementation(({ runId }: { runId: string }) =>
         runId === 'old-run'
-          ? new Promise((resolve) => { resolveOld = resolve; })
-          : Promise.resolve(makeGoalRun({ runId: 'new-run', status: 'running', resourceVersion: 2,
-              liveActions: [{ sequence: 1, command: { actionId: 'new-name', revision: 1, operation: 'goal.setName', value: 'New run' } }],
-            })),
+          ? new Promise((resolve) => {
+              resolveOld = resolve;
+            })
+          : Promise.resolve(
+              makeGoalRun({
+                runId: 'new-run',
+                status: 'running',
+                resourceVersion: 2,
+                liveActions: [
+                  {
+                    sequence: 1,
+                    command: {
+                      actionId: 'new-name',
+                      revision: 1,
+                      operation: 'goal.setName',
+                      value: 'New run',
+                    },
+                  },
+                ],
+              }),
+            ),
       );
       runtime.cancel.mockResolvedValue(makeGoalRun({ runId: 'old-run', status: 'cancelled' }));
       await vm.startGoalAgentRun();
@@ -316,10 +336,19 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
       await vm.startGoalAgentRun();
       await receivers[1]!.onEvent({ type: 'stream.ready', cursor: 'new-ready' });
       expect(native.state!.name).toBe('New run');
-      resolveOld(makeGoalRun({ runId: 'old-run', resourceVersion: 3, status: 'suspended', suspension: review(makeDraft(1)) }));
+      resolveOld(
+        makeGoalRun({
+          runId: 'old-run',
+          resourceVersion: 3,
+          status: 'suspended',
+          suspension: review(makeDraft(1)),
+        }),
+      );
       await oldReady;
       expect(vm.goalWorkflowRun?.runId).toBe('new-run');
-    } finally { wrapper.unmount(); }
+    } finally {
+      wrapper.unmount();
+    }
   });
 
   it('projects field events immediately and makes no periodic workflow reads over a healthy connection', async () => {
@@ -328,7 +357,9 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
     let receive!: WorkspaceEventStreamOptions['onEvent'];
     runtime.streamWorkspaceEvents = vi.fn((input: WorkspaceEventStreamOptions) => {
       receive = input.onEvent;
-      return new Promise<void>((resolve) => input.signal.addEventListener('abort', () => resolve(), { once: true }));
+      return new Promise<void>((resolve) =>
+        input.signal.addEventListener('abort', () => resolve(), { once: true }),
+      );
     });
     const options = makeOptions(runtime);
     const wrapper = mountComposable(options);
@@ -338,19 +369,54 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
       runtime.get.mockResolvedValue(makeGoalRun({ status: 'running', resourceVersion: 1 }));
       await vm.startGoalAgentRun();
       await receive({ type: 'stream.ready', cursor: 'initial' });
-      const action = { sequence: 1, command: { actionId: 'model-tool-1', revision: 1, operation: 'goal.setName' as const, value: 'Running preview' } };
-      await receive({ type: 'workflow.updated', eventId: 'run-1:2', cursor: 'preview', resourceVersion: 2,
-        data: makeGoalRun({ status: 'running', resourceVersion: 2 }), actions: [action], baseActionSequence: 0, lastActionSequence: 1 });
+      const action = {
+        sequence: 1,
+        command: {
+          actionId: 'model-tool-1',
+          revision: 1,
+          operation: 'goal.setName' as const,
+          value: 'Running preview',
+        },
+      };
+      await receive({
+        type: 'workflow.updated',
+        eventId: 'run-1:2',
+        cursor: 'preview',
+        resourceVersion: 2,
+        data: makeGoalRun({ status: 'running', resourceVersion: 2 }),
+        actions: [action],
+        baseActionSequence: 0,
+        lastActionSequence: 1,
+      });
       expect(native.state!.name).toBe('Running preview');
-      expect(options.chatTimeline.value.find((item) => item.businessOperation?.operation === 'goal.setName')).toBeTruthy();
-      await receive({ type: 'workflow.updated', eventId: 'run-1:3', cursor: 'review', resourceVersion: 3,
-        data: makeGoalRun({ resourceVersion: 3, status: 'suspended', suspension: review(makeDraft(1)) }), actions: [], baseActionSequence: 1, lastActionSequence: 1 });
+      expect(
+        options.chatTimeline.value.find(
+          (item) => item.businessOperation?.operation === 'goal.setName',
+        ),
+      ).toBeTruthy();
+      await receive({
+        type: 'workflow.updated',
+        eventId: 'run-1:3',
+        cursor: 'review',
+        resourceVersion: 3,
+        data: makeGoalRun({
+          resourceVersion: 3,
+          status: 'suspended',
+          suspension: review(makeDraft(1)),
+        }),
+        actions: [],
+        baseActionSequence: 1,
+        lastActionSequence: 1,
+      });
       expect(vm.goalWorkflowStage).toBe('confirm');
       expect(native.state!.name).toBe('Deep work');
       await vi.advanceTimersByTimeAsync(30_000);
       expect(runtime.get).toHaveBeenCalledTimes(1);
       expect(runtime.streamWorkspaceEvents).toHaveBeenCalledOnce();
-    } finally { wrapper.unmount(); vi.useRealTimers(); }
+    } finally {
+      wrapper.unmount();
+      vi.useRealTimers();
+    }
   });
 
   it('keeps restore read-only until review is explicitly opened and rejects an obsolete resume acknowledgement', async () => {
@@ -358,12 +424,18 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
     let receive!: WorkspaceEventStreamOptions['onEvent'];
     runtime.streamWorkspaceEvents = vi.fn((input: WorkspaceEventStreamOptions) => {
       receive = input.onEvent;
-      return new Promise<void>((resolve) => input.signal.addEventListener('abort', () => resolve(), { once: true }));
+      return new Promise<void>((resolve) =>
+        input.signal.addEventListener('abort', () => resolve(), { once: true }),
+      );
     });
     const wrapper = mountComposable(makeOptions(runtime));
     try {
       const vm = wrapper.vm as unknown as ReturnType<typeof useAIGoalWorkflow>;
-      const restored = makeGoalRun({ resourceVersion: 3, status: 'suspended', suspension: review(makeDraft(1)) });
+      const restored = makeGoalRun({
+        resourceVersion: 3,
+        status: 'suspended',
+        suspension: review(makeDraft(1)),
+      });
       runtime.get.mockResolvedValue(restored);
       await vm.projectRun(restored, false);
       await receive({ type: 'stream.ready', cursor: 'restore' });
@@ -374,7 +446,9 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
       expect(vm.goalWorkflowRun?.status).toBe('suspended');
       expect(vm.goalWorkflowRun?.resourceVersion).toBe(3);
       expect(native.state!.name).toBe('Deep work');
-    } finally { wrapper.unmount(); }
+    } finally {
+      wrapper.unmount();
+    }
   });
 
   it('applies real ordered model actions to the claimed native Goal form during planning', async () => {
@@ -385,13 +459,32 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
     const running = makeGoalRun({
       status: 'running',
       liveActions: [
-        { sequence: 1, command: { actionId: 'name-1', revision: 1, operation: 'goal.setName', value: 'Learn TypeScript' } },
-        { sequence: 2, command: { actionId: 'description-1', revision: 1, operation: 'goal.patchDescription', value: 'Finish the course' } },
+        {
+          sequence: 1,
+          command: {
+            actionId: 'name-1',
+            revision: 1,
+            operation: 'goal.setName',
+            value: 'Learn TypeScript',
+          },
+        },
+        {
+          sequence: 2,
+          command: {
+            actionId: 'description-1',
+            revision: 1,
+            operation: 'goal.patchDescription',
+            value: 'Finish the course',
+          },
+        },
       ],
     });
     await vm.projectRun(running);
     expect(native.openCreate).toHaveBeenCalledOnce();
-    expect(native.state).toMatchObject({ name: 'Learn TypeScript', description: 'Finish the course' });
+    expect(native.state).toMatchObject({
+      name: 'Learn TypeScript',
+      description: 'Finish the course',
+    });
     expect(options.chatTimeline.value.filter((item) => item.businessOperation)).toHaveLength(2);
     await vm.projectRun(running);
     expect(native.openCreate).toHaveBeenCalledOnce();
@@ -399,7 +492,13 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
 
     // The final canonical review reconciles staged fields under the SAME owner,
     // and must not close/discard the AI-owned form.
-    await vm.projectRun(makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)), liveActions: running.liveActions }));
+    await vm.projectRun(
+      makeGoalRun({
+        status: 'suspended',
+        suspension: review(makeDraft(1)),
+        liveActions: running.liveActions,
+      }),
+    );
     expect(native.state!.name).toBe('Deep work');
     expect(native.requestCancel).not.toHaveBeenCalled();
     wrapper.unmount();
@@ -412,7 +511,17 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
     const vm = wrapper.vm as unknown as ReturnType<typeof useAIGoalWorkflow>;
     const running = makeGoalRun({
       status: 'running',
-      liveActions: [{ sequence: 1, command: { actionId: 'name-1', revision: 1, operation: 'goal.setName', value: 'AI proposal' } }],
+      liveActions: [
+        {
+          sequence: 1,
+          command: {
+            actionId: 'name-1',
+            revision: 1,
+            operation: 'goal.setName',
+            value: 'AI proposal',
+          },
+        },
+      ],
     });
     native.available = false;
     native.state!.name = 'My existing draft';
@@ -426,10 +535,23 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
     vm.handoffGoalNativeReview();
     expect(vm.goalManualHandoff).toBe(true);
     native.state!.name = 'Human override';
-    await vm.projectRun(makeGoalRun({
-      status: 'running',
-      liveActions: [...running.liveActions!, { sequence: 2, command: { actionId: 'name-2', revision: 1, operation: 'goal.setName', value: 'Should not overwrite' } }],
-    }));
+    await vm.projectRun(
+      makeGoalRun({
+        status: 'running',
+        liveActions: [
+          ...running.liveActions!,
+          {
+            sequence: 2,
+            command: {
+              actionId: 'name-2',
+              revision: 1,
+              operation: 'goal.setName',
+              value: 'Should not overwrite',
+            },
+          },
+        ],
+      }),
+    );
     expect(native.state!.name).toBe('Human override');
     wrapper.unmount();
   });
@@ -440,10 +562,17 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
     const vm = wrapper.vm as unknown as ReturnType<typeof useAIGoalWorkflow>;
     const running = makeGoalRun({
       status: 'running',
-      liveActions: [{
-        sequence: 1,
-        command: { actionId: 'server-tool-1', revision: 1, operation: 'goal.setName', value: 'AI projected' },
-      }],
+      liveActions: [
+        {
+          sequence: 1,
+          command: {
+            actionId: 'server-tool-1',
+            revision: 1,
+            operation: 'goal.setName',
+            value: 'AI projected',
+          },
+        },
+      ],
     });
     native.state!.name = 'Unsaved user draft';
     runtime.goalSurfaceLease.mockResolvedValueOnce({ status: 'busy' });
@@ -465,27 +594,47 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
     const vm = wrapper.vm as unknown as ReturnType<typeof useAIGoalWorkflow>;
     const action = {
       sequence: 1,
-      command: { actionId: 'name-1', revision: 1, operation: 'goal.setName' as const, value: 'Initial model title' },
+      command: {
+        actionId: 'name-1',
+        revision: 1,
+        operation: 'goal.setName' as const,
+        value: 'Initial model title',
+      },
     };
     await vm.projectRun(makeGoalRun({ status: 'running', liveActions: [action] }));
     expect(native.state!.name).toBe('Initial model title');
     runtime.goalSurfaceLease.mockResolvedValueOnce({ status: 'lost' });
-    await vm.projectRun(makeGoalRun({
-      status: 'running',
-      liveActions: [
-        action,
-        { sequence: 2, command: { actionId: 'name-2', revision: 1, operation: 'goal.setName', value: 'Stale model title' } },
-      ],
-    }));
+    await vm.projectRun(
+      makeGoalRun({
+        status: 'running',
+        liveActions: [
+          action,
+          {
+            sequence: 2,
+            command: {
+              actionId: 'name-2',
+              revision: 1,
+              operation: 'goal.setName',
+              value: 'Stale model title',
+            },
+          },
+        ],
+      }),
+    );
     expect(vm.goalSurfaceConflict).toBe(true);
     expect(vm.goalSurfaceReady).toBe(false);
     expect(native.requestCancel).not.toHaveBeenCalled();
     expect(native.blocked).toBe(true);
     expect(native.active).toBe(true);
     expect(native.state!.name).toBe('Initial model title');
-    runtime.start.mockResolvedValue(makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) }));
+    runtime.start.mockResolvedValue(
+      makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) }),
+    );
     // No native save may bypass the lost server lease.
-    await vm.projectRun(makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) }), false);
+    await vm.projectRun(
+      makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) }),
+      false,
+    );
     await vm.confirmGoalAgentRun();
     expect(native.requestSubmit).not.toHaveBeenCalled();
     wrapper.unmount();
@@ -495,14 +644,36 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
     const runtime = createRuntimeStub();
     const wrapper = mountComposable(makeOptions(runtime));
     const vm = wrapper.vm as unknown as ReturnType<typeof useAIGoalWorkflow>;
-    const running = makeGoalRun({ liveActions: [{ sequence: 1, command: {
-      actionId: 'name', revision: 1, operation: 'goal.setName', value: 'Preserved on disconnect',
-    } }] });
+    const running = makeGoalRun({
+      liveActions: [
+        {
+          sequence: 1,
+          command: {
+            actionId: 'name',
+            revision: 1,
+            operation: 'goal.setName',
+            value: 'Preserved on disconnect',
+          },
+        },
+      ],
+    });
     await vm.projectRun(running);
     runtime.goalSurfaceLease.mockResolvedValueOnce({ status: 'lost' });
-    await vm.projectRun({ ...running, liveActions: [...running.liveActions!, { sequence: 2, command: {
-      actionId: 'description', revision: 1, operation: 'goal.patchDescription', value: 'Late update',
-    } }] });
+    await vm.projectRun({
+      ...running,
+      liveActions: [
+        ...running.liveActions!,
+        {
+          sequence: 2,
+          command: {
+            actionId: 'description',
+            revision: 1,
+            operation: 'goal.patchDescription',
+            value: 'Late update',
+          },
+        },
+      ],
+    });
     expect(native.blocked).toBe(true);
     runtime.get.mockResolvedValue(running);
     await vm.continueGoalSurfaceControl();
@@ -639,18 +810,34 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
   });
 
   it.each(['live', 'review', 'handoff'] as const)(
-    'keeps the %s draft open and detaches its failed workflow', async (mode) => {
+    'keeps the %s draft open and detaches its failed workflow',
+    async (mode) => {
       const runtime = createRuntimeStub();
       const wrapper = mountComposable(makeOptions(runtime));
       const vm = wrapper.vm as unknown as ReturnType<typeof useAIGoalWorkflow>;
-      await vm.projectRun(mode === 'live'
-        ? makeGoalRun({ liveActions: [{ sequence: 1, command: {
-          actionId: 'name', revision: 1, operation: 'goal.setName', value: 'Preserved live draft',
-        } }] })
-        : makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) }));
+      await vm.projectRun(
+        mode === 'live'
+          ? makeGoalRun({
+              liveActions: [
+                {
+                  sequence: 1,
+                  command: {
+                    actionId: 'name',
+                    revision: 1,
+                    operation: 'goal.setName',
+                    value: 'Preserved live draft',
+                  },
+                },
+              ],
+            })
+          : makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) }),
+      );
       if (mode === 'handoff') vm.handoffGoalNativeReview();
       const draft = JSON.parse(JSON.stringify(native.state));
-      const failed = makeGoalRun({ status: 'failed', failure: { code: 'RATE_LIMITED', message: 'Safe' } });
+      const failed = makeGoalRun({
+        status: 'failed',
+        failure: { code: 'RATE_LIMITED', message: 'Safe' },
+      });
       await vm.projectRun(failed);
       await vm.projectRun(failed);
       expect(native.active).toBe(true);
@@ -658,7 +845,9 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
       expect(native.requestCancel).not.toHaveBeenCalled();
       expect(native.openCreate).toHaveBeenCalledOnce();
       expect(native.detachWorkflow).toHaveBeenCalledOnce();
-      expect(runtime.goalSurfaceLease).toHaveBeenCalledWith(expect.objectContaining({ action: 'release' }));
+      expect(runtime.goalSurfaceLease).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'release' }),
+      );
       expect(vm.goalSurfaceReady).toBe(false);
       expect(vm.goalManualHandoff).toBe(false);
       wrapper.unmount();
@@ -672,10 +861,18 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
     const vm = wrapper.vm as unknown as ReturnType<typeof useAIGoalWorkflow>;
     await vm.projectRun(makeGoalRun({ status: 'suspended', suspension: review(makeDraft(1)) }));
     let renew!: (response: { status: 'renewed'; expiresAt: number }) => void;
-    runtime.goalSurfaceLease.mockImplementationOnce(() => new Promise((resolve) => { renew = resolve; }));
-    const stale = vm.projectRun(makeGoalRun({
-      status: 'suspended', suspension: review(makeDraft(2)),
-    }));
+    runtime.goalSurfaceLease.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          renew = resolve;
+        }),
+    );
+    const stale = vm.projectRun(
+      makeGoalRun({
+        status: 'suspended',
+        suspension: review(makeDraft(2)),
+      }),
+    );
     await flushPromises();
     await vm.projectRun(makeGoalRun({ status: 'failed' }));
     native.state!.name = 'User edits after failure';
@@ -743,12 +940,16 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
     await vm.startGoalAgentRun();
     await expect(vm.submitGoalClarificationResponse('Peking University')).resolves.toBe(false);
 
-    const statuses = options.chatTimeline.value.filter((item) => item.id.startsWith('goal-runtime:'));
+    const statuses = options.chatTimeline.value.filter((item) =>
+      item.id.startsWith('goal-runtime:'),
+    );
     expect(statuses).toHaveLength(1);
     expect(statuses[0]).toMatchObject({ role: 'assistant', status: 'interrupted' });
     expect(statuses[0].content).toContain('aiAssistant.businessSurface.limitUnknown');
     expect(statuses[0]).not.toHaveProperty('errorMessage');
-    expect(options.chatTimeline.value.some((item) => item.id === 'goal-workflow-failure-run-1')).toBe(false);
+    expect(
+      options.chatTimeline.value.some((item) => item.id === 'goal-workflow-failure-run-1'),
+    ).toBe(false);
     expect(toastMocks.error).not.toHaveBeenCalled();
 
     await vm.projectRun(
@@ -775,13 +976,22 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
     native.state!.description = 'Preserve user description';
     runtime.start.mockResolvedValue(makeGoalRun({ runId: 'run-new' }));
     await vm.startGoalAgentRun();
-    expect(runtime.start).toHaveBeenCalledWith(expect.objectContaining({ input: expect.objectContaining({
-      sourceDraft: expect.objectContaining({ sourceRunId: 'run-1', draftRevision: 1,
-        draft: expect.objectContaining({ goal: expect.objectContaining({
-          name: 'My manual changes', description: 'Preserve user description',
-        }) }),
+    expect(runtime.start).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: expect.objectContaining({
+          sourceDraft: expect.objectContaining({
+            sourceRunId: 'run-1',
+            draftRevision: 1,
+            draft: expect.objectContaining({
+              goal: expect.objectContaining({
+                name: 'My manual changes',
+                description: 'Preserve user description',
+              }),
+            }),
+          }),
+        }),
       }),
-    }) }));
+    );
     expect(native.openCreate).toHaveBeenCalledOnce();
     expect(native.reclaim).toHaveBeenCalledOnce();
     expect(runtime.resume).not.toHaveBeenCalled();
@@ -809,7 +1019,9 @@ describe('useAIGoalWorkflow (AI-VNEXT-05: UI projects workflow state, does not o
     expect(vm.goalWorkflowRun?.runId).toBe('new-run');
     expect(native.state!.summary).toBe('Manual unsaved summary');
     expect(native.reclaim).toHaveBeenCalledOnce();
-    expect(options.chatTimeline.value.filter((item) => item.id.startsWith('goal-runtime:'))).toHaveLength(2);
+    expect(
+      options.chatTimeline.value.filter((item) => item.id.startsWith('goal-runtime:')),
+    ).toHaveLength(2);
     wrapper.unmount();
   });
 

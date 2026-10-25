@@ -59,8 +59,11 @@ export class ProbeAIProviderConnectionUseCase {
     } catch (error) {
       if (isUnsupportedModelDiscovery(error)) {
         discoveryStatus = 'unsupported';
-        warnings.push('This provider does not expose a compatible /models catalog. Enter a Model ID and test it before saving.');
-        if (catalog.credentialProbeStrategy !== 'openrouter_key') credentialStatus = 'requires_model_test';
+        warnings.push(
+          'This provider does not expose a compatible /models catalog. Enter a Model ID and test it before saving.',
+        );
+        if (catalog.credentialProbeStrategy !== 'openrouter_key')
+          credentialStatus = 'requires_model_test';
       } else {
         throw error;
       }
@@ -94,7 +97,10 @@ export class ProbeAIProviderConnectionUseCase {
       catalogId: catalog.id,
       baseUrl,
       credential: { status: credentialStatus },
-      discovery: { status: discoveryStatus, source: discoveryStatus === 'unsupported' ? 'manual' : 'provider_api' },
+      discovery: {
+        status: discoveryStatus,
+        source: discoveryStatus === 'unsupported' ? 'manual' : 'provider_api',
+      },
       models,
       warnings,
     };
@@ -111,11 +117,16 @@ function resolveBaseUrl(
     return supplied;
   }
   if (supplied && supplied !== catalog.defaultBaseUrl.replace(/\/+$/, '')) {
-    throw new AIExecutionError('validation', 'This provider uses a fixed endpoint; choose Custom to edit Base URL');
+    throw new AIExecutionError(
+      'validation',
+      'This provider uses a fixed endpoint; choose Custom to edit Base URL',
+    );
   }
   return catalog.defaultBaseUrl.replace(/\/+$/, '');
 }
 
 function isUnsupportedModelDiscovery(error: unknown): boolean {
-  return error instanceof AIExecutionError && (error.statusCode === 404 || error.statusCode === 405);
+  return (
+    error instanceof AIExecutionError && (error.statusCode === 404 || error.statusCode === 405)
+  );
 }

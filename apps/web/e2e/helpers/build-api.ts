@@ -10,9 +10,13 @@ export function buildApiApp(workspaceRoot: string): void {
     console.log('[playwright-api-server] using verified API build artifact');
     return;
   }
-  execFileSync(process.execPath, [join(workspaceRoot, 'node_modules', 'nx', 'dist', 'bin', 'nx.js'), 'run', 'api:build'], {
-    cwd: workspaceRoot,
-    stdio: 'inherit',
-    env: process.env,
-  });
+  execFileSync(
+    process.execPath,
+    [join(workspaceRoot, 'node_modules', 'nx', 'dist', 'bin', 'nx.js'), 'run', 'api:build'],
+    {
+      cwd: workspaceRoot,
+      stdio: 'inherit',
+      env: process.env,
+    },
+  );
 }

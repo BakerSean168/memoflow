@@ -90,7 +90,6 @@ Web 的试点端点为 `GET /ai/runtime/workspace/sse`（API host 前缀为 `/ap
 
 分阶段修改保持可回退到上一可验证切片，不以增加轮询间隔作为最终方案。本轮 UI 切片不变更数据库；后续 schema 必须按仓库现行规则实施，不设计额外兼容双轨。没有两个真实 owner 的证据前不创建共享事件 framework。
 
-
 ## S5 实际传输与第二 owner
 
 Attention 的 PostgreSQL 事件记录由原生表 AFTER INSERT/UPDATE/DELETE 触发器与状态写入同事务提交；投递序号在提交后由 identity head 锁分配，未提交事务不能预占续传位置。Desktop 的原生 owner 写入在 PowerSync writeTransaction 内追加本地日志；同步收到的数据通过公共 watch 唤醒后按身份从已提交快照校准，不依赖进程内 EventBus。

@@ -25,6 +25,7 @@ No deployment/runtime configuration changes: package verification is the relevan
 Completed. Runtime shrank from 1669 to 1386 lines. Snapshot decoding/input dispatch and explicit Goal/Task/Knowledge run projections are internal modules, not package exports. Added 55 characterization cases and refreshed the deterministic test inventory.
 
 Verification on the completed code candidate:
+
 - `pnpm nx run ai:test --args='src/server/mastra/runtime/workflow-run-projection.spec.ts src/server/mastra/runtime/mastra-workflow.runtime.spec.ts --maxWorkers=2' --skip-nx-cache`: 82/82 passed, including 27 existing durable runtime tests.
 - `pnpm nx run ai:test --args='--maxWorkers=2' --skip-nx-cache`: 556/556 passed across 91 files.
 - `pnpm nx run ai:typecheck`, `pnpm nx run ai:build`, `pnpm nx run ai:lint`: passed; lint has five existing warnings outside changed files.

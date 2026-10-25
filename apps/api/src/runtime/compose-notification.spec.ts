@@ -128,7 +128,12 @@ describe('composeNotification assembly order', () => {
   });
 
   it('exposes the SAME durable NotificationRequested writer from the repository set', () => {
-    const composed = composeNotification({ db: fakeDb, closureChecker, userTimeContextPort, channelCapabilities });
+    const composed = composeNotification({
+      db: fakeDb,
+      closureChecker,
+      userTimeContextPort,
+      channelCapabilities,
+    });
     const repoSet = createNotificationPrismaRepositories.mock.results[0].value;
     expect(composed.requestedWriter).toBe(repoSet.requestedWriter);
     expect(composed.repositories.requestedWriter).toBe(repoSet.requestedWriter);

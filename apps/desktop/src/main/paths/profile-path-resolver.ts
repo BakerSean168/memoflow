@@ -46,7 +46,10 @@ export function createProfilePathResolver(
     attachmentsDir: path.join(storageDir, 'attachments'),
     localVaultBindingPath: path.join(storageDir, 'local-vault-binding.json'),
     localVaultWriteLedgerPath: path.join(storageDir, 'local-vault-write-ledger.json'),
-    knowledgeRepositoryAutoSyncStatePath: path.join(storageDir, 'knowledge-repository-auto-sync.json'),
+    knowledgeRepositoryAutoSyncStatePath: path.join(
+      storageDir,
+      'knowledge-repository-auto-sync.json',
+    ),
 
     uiDir,
     mainWindowStatePath: path.join(uiDir, 'main-window-state.json'),

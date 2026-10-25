@@ -221,7 +221,9 @@ function throwIfOccurrenceConflict(
     JSON.stringify(dto.result) !== JSON.stringify(incoming.result) ||
     JSON.stringify(dto.checklistState) !== JSON.stringify(incomingChecklistState)
   ) {
-    throw new Error(`tasks@3 deterministic occurrence target conflicts with imported state: ${String(current.id)}`);
+    throw new Error(
+      `tasks@3 deterministic occurrence target conflicts with imported state: ${String(current.id)}`,
+    );
   }
 }
 
@@ -364,7 +366,8 @@ export class TaskPortableCapability implements PortableCapability<TaskPortablePa
     for (const occurrence of target.occurrences) {
       const id = deterministicOccurrenceId(context.identityId, batchId, occurrence.ref);
       const planId = planIdsByRef.get(occurrence.planRef);
-      if (!planId) throw new Error(`tasks@3 occurrence references an unknown plan: ${occurrence.planRef}`);
+      if (!planId)
+        throw new Error(`tasks@3 occurrence references an unknown plan: ${occurrence.planRef}`);
       const current = await this.occurrenceRepository.findByIdForIdentity(context.identityId, id);
       if (current) {
         throwIfOccurrenceConflict(current, occurrence, planId, checklistIdsByRef);

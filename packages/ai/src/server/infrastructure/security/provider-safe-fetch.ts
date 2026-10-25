@@ -9,16 +9,18 @@ import {
 } from './provider-endpoint-policy';
 
 function normalizedHostname(value: string): string {
-  return value.trim().toLowerCase().replace(/^\[|\]$/g, '').replace(/\.$/, '');
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/^\[|\]$/g, '')
+    .replace(/\.$/, '');
 }
 
 /**
  * DNS lookup used by the real socket connector. It never performs DNS itself;
  * it can only return addresses already authorized for this exact connection.
  */
-export function createPinnedLookup(
-  authorization: AuthorizedProviderConnection,
-): LookupFunction {
+export function createPinnedLookup(authorization: AuthorizedProviderConnection): LookupFunction {
   const expectedHostname = normalizedHostname(authorization.hostname);
   const addresses = [...authorization.addresses];
 
@@ -36,15 +38,21 @@ export function createPinnedLookup(
       ? addresses.filter((item) => item.family === requestedFamily)
       : addresses;
     if (!candidates.length) {
-      const error = Object.assign(new Error('Pinned provider lookup has no address for requested family'), {
-        code: 'ENOTFOUND',
-      });
+      const error = Object.assign(
+        new Error('Pinned provider lookup has no address for requested family'),
+        {
+          code: 'ENOTFOUND',
+        },
+      );
       callback(error, '', 0);
       return;
     }
 
     if (options.all) {
-      callback(null, candidates.map((item) => ({ ...item })));
+      callback(
+        null,
+        candidates.map((item) => ({ ...item })),
+      );
       return;
     }
     const first = candidates[0]!;
@@ -73,7 +81,9 @@ export function createProviderSecureConnector(
         callback(
           cause instanceof Error
             ? cause
-            : new AIExecutionError('transport', 'Provider endpoint authorization failed', { cause }),
+            : new AIExecutionError('transport', 'Provider endpoint authorization failed', {
+                cause,
+              }),
           null,
         );
       });

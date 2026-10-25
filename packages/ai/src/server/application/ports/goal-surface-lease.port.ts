@@ -14,10 +14,16 @@ export interface GoalSurfaceLeaseRequest {
 }
 
 export interface IGoalSurfaceLeaseRepository {
-  claim(input: GoalSurfaceLeaseRequest & { readonly token: string }): Promise<GoalSurfaceLeaseGrant | null>;
-  renew(input: GoalSurfaceLeaseRequest & { readonly token: string; readonly fence: number }): Promise<boolean>;
-  release(input: Pick<GoalSurfaceLeaseRequest, 'identityId' | 'runId' | 'now'> & {
-    readonly token: string;
-    readonly fence: number;
-  }): Promise<boolean>;
+  claim(
+    input: GoalSurfaceLeaseRequest & { readonly token: string },
+  ): Promise<GoalSurfaceLeaseGrant | null>;
+  renew(
+    input: GoalSurfaceLeaseRequest & { readonly token: string; readonly fence: number },
+  ): Promise<boolean>;
+  release(
+    input: Pick<GoalSurfaceLeaseRequest, 'identityId' | 'runId' | 'now'> & {
+      readonly token: string;
+      readonly fence: number;
+    },
+  ): Promise<boolean>;
 }

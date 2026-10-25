@@ -14,7 +14,9 @@ function memoryDb(): IElectronDatabase {
       return { rowsAffected: result.changes };
     },
     async getOptional<T>(command: string, parameters: unknown[] = []) {
-      return (sql.prepare(command).get(...(parameters as SQLInputValue[])) as T | undefined) ?? null;
+      return (
+        (sql.prepare(command).get(...(parameters as SQLInputValue[])) as T | undefined) ?? null
+      );
     },
     async getAll<T>(command: string, parameters: unknown[] = []) {
       return sql.prepare(command).all(...(parameters as SQLInputValue[])) as T[];
@@ -28,9 +30,13 @@ function memoryDb(): IElectronDatabase {
   let tail: Promise<void> = Promise.resolve();
   return {
     ...query,
-    async writeTransaction<T>(callback: (tx: IElectronDatabaseTransaction) => Promise<T>): Promise<T> {
+    async writeTransaction<T>(
+      callback: (tx: IElectronDatabaseTransaction) => Promise<T>,
+    ): Promise<T> {
       let unlock!: () => void;
-      const next = new Promise<void>((resolve) => { unlock = resolve; });
+      const next = new Promise<void>((resolve) => {
+        unlock = resolve;
+      });
       const previous = tail;
       tail = next;
       await previous;
@@ -53,7 +59,13 @@ afterEach(() => {
 });
 
 describe('Profile-local Goal surface lease: real SQLite transactional fencing', () => {
-  const a = { identityId: 'identity-one', runId: 'goal-run', token: 'token-A', now: 1_000, expiresAt: 31_000 };
+  const a = {
+    identityId: 'identity-one',
+    runId: 'goal-run',
+    token: 'token-A',
+    now: 1_000,
+    expiresAt: 31_000,
+  };
   it('allows one concurrent claimant and no second window with the same owner identity', async () => {
     const db = memoryDb();
     const first = new AiGoalSurfaceLeasePowerSyncRepository(db);
@@ -77,13 +89,27 @@ describe('Profile-local Goal surface lease: real SQLite transactional fencing', 
     expect(claim2).toMatchObject({ token: 'token-B', fence: 2 });
     expect(await first.renew({ ...a, now: 32_001, expiresAt: 63_000, fence: 1 })).toBe(false);
     expect(await first.release({ ...a, now: 32_001, fence: 1 })).toBe(false);
-    expect(await second.renew({ ...a, token: 'token-B', now: 32_001, expiresAt: 62_500, fence: 2 })).toBe(true);
-    expect(await second.release({
-      identityId: 'identity-other', runId: a.runId, token: 'token-B', now: 32_001, fence: 2,
-    })).toBe(false);
-    expect(await second.release({
-      identityId: a.identityId, runId: a.runId, token: 'token-B', now: 32_001, fence: 2,
-    })).toBe(true);
+    expect(
+      await second.renew({ ...a, token: 'token-B', now: 32_001, expiresAt: 62_500, fence: 2 }),
+    ).toBe(true);
+    expect(
+      await second.release({
+        identityId: 'identity-other',
+        runId: a.runId,
+        token: 'token-B',
+        now: 32_001,
+        fence: 2,
+      }),
+    ).toBe(false);
+    expect(
+      await second.release({
+        identityId: a.identityId,
+        runId: a.runId,
+        token: 'token-B',
+        now: 32_001,
+        fence: 2,
+      }),
+    ).toBe(true);
     const claim3 = await first.claim({ ...a, token: 'token-C', now: 32_002, expiresAt: 63_000 });
     expect(claim3?.fence).toBe(3);
   });

@@ -19,19 +19,19 @@ performed.
 
 ## Required quality gates
 
-| Gate | Command | Result |
-| --- | --- | --- |
-| Test inventory | `pnpm test:inventory` | PASS — 1,184 files: unit 1,017; integration 34; smoke 3; boundary-ipc 8; boundary-main 6; E2E 57; perf 1; governance 58. |
-| Documentation | `pnpm docs:check` | PASS. |
-| Governance | `pnpm governance:check` | PASS — all audits passed. Nx reported its existing flaky-task warning for `assets:build`; it did not fail the gate. |
-| TypeScript | `pnpm typecheck` | PASS — 37 projects / 68 tasks, 63 cache reads. |
-| Lint | `pnpm lint` | PASS — 41 projects; warnings only. |
-| Full tests | `pnpm test` | PASS — 36 projects plus 6 dependency tasks, 42/42 successful. |
-| Build | `pnpm build` | PASS — 35 projects plus 1 dependency task. |
-| AI replay | `pnpm nx run ai:eval:replay` | PASS — recorded replay; baseline and candidate pass rate 1.000; cost delta -4.81%; p95 latency delta -10.61%; report at `reports/apps/ai/evals/latest.json`. |
-| Smoke | `pnpm test:smoke` | PASS — 3 files / 67 tests. |
-| Canonical integration | `pnpm test:integration` | PASS — task 6 files / 31 tests; goal 4 / 18; schedule 2 / 24; scheduler 1 / 3; reminder 3 / 15. |
-| Affected integration | `pnpm nx affected -t test:integration --base=main --parallel=1` | PASS — 11 projects / 20 tasks. |
+| Gate                  | Command                                                         | Result                                                                                                                                                       |
+| --------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Test inventory        | `pnpm test:inventory`                                           | PASS — 1,184 files: unit 1,017; integration 34; smoke 3; boundary-ipc 8; boundary-main 6; E2E 57; perf 1; governance 58.                                     |
+| Documentation         | `pnpm docs:check`                                               | PASS.                                                                                                                                                        |
+| Governance            | `pnpm governance:check`                                         | PASS — all audits passed. Nx reported its existing flaky-task warning for `assets:build`; it did not fail the gate.                                          |
+| TypeScript            | `pnpm typecheck`                                                | PASS — 37 projects / 68 tasks, 63 cache reads.                                                                                                               |
+| Lint                  | `pnpm lint`                                                     | PASS — 41 projects; warnings only.                                                                                                                           |
+| Full tests            | `pnpm test`                                                     | PASS — 36 projects plus 6 dependency tasks, 42/42 successful.                                                                                                |
+| Build                 | `pnpm build`                                                    | PASS — 35 projects plus 1 dependency task.                                                                                                                   |
+| AI replay             | `pnpm nx run ai:eval:replay`                                    | PASS — recorded replay; baseline and candidate pass rate 1.000; cost delta -4.81%; p95 latency delta -10.61%; report at `reports/apps/ai/evals/latest.json`. |
+| Smoke                 | `pnpm test:smoke`                                               | PASS — 3 files / 67 tests.                                                                                                                                   |
+| Canonical integration | `pnpm test:integration`                                         | PASS — task 6 files / 31 tests; goal 4 / 18; schedule 2 / 24; scheduler 1 / 3; reminder 3 / 15.                                                              |
+| Affected integration  | `pnpm nx affected -t test:integration --base=main --parallel=1` | PASS — 11 projects / 20 tasks.                                                                                                                               |
 
 ## Fresh database and PowerSync validation
 

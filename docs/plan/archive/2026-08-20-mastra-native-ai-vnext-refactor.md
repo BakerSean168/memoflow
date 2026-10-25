@@ -366,7 +366,6 @@ workflow.cancelled
 
 **Next owner（AI-VNEXT-06 续点 / AI-VNEXT-07 前置）：** ① 重写 `useAITaskWorkflow` 去除 AgentRun/`pendingActions`/`approvedActions`/`createAgentId`/`hostProposalLifecycle` ownership，投影到 `AIWorkflowRunView`（kind `task.create`）+ `AITaskWorkflowPanel`（testid `task-workflow-panel`）+ 组合式/组件测试；② `knowledge.*`（generate/capture/qa）迁移 Mastra-native；③ task/knowledge E2E（3400 端口）；④ AI-VNEXT-07 「Remove Python/AgentHost legacy」随后执行。
 
-
 ## 5.10 Final Runtime Closure Checkpoint — 2026-08-22
 
 **AI-VNEXT-06 / 07 / 08 已完成；AI-VNEXT-09 已进入最终 delivery gate。** 当前 tree 的核心 AI execution authority 已完全收敛到 TypeScript + Mastra，没有 Python/AgentHost 双 runtime fallback。

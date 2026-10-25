@@ -297,11 +297,29 @@ export function createNotificationElectronModule(
           (args) => ({ params: { id: (args as { id?: string }).id ?? (args as string) } }),
         );
         installed.push(NotificationChannels.MARK_READ);
-        registerValidatedChannel(ctx, NotificationChannels.MARK_UNREAD, MarkNotificationUnreadInvocationSchema, (data, requestContext) => controller.markAsUnread(data.params.id, requestContext), (args) => ({ params: { id: (args as { id?: string }).id ?? (args as string) } }));
+        registerValidatedChannel(
+          ctx,
+          NotificationChannels.MARK_UNREAD,
+          MarkNotificationUnreadInvocationSchema,
+          (data, requestContext) => controller.markAsUnread(data.params.id, requestContext),
+          (args) => ({ params: { id: (args as { id?: string }).id ?? (args as string) } }),
+        );
         installed.push(NotificationChannels.MARK_UNREAD);
-        registerValidatedChannel(ctx, NotificationChannels.ARCHIVE, ArchiveNotificationInvocationSchema, (data, requestContext) => controller.archive(data.params.id, requestContext), (args) => ({ params: { id: (args as { id?: string }).id ?? (args as string) } }));
+        registerValidatedChannel(
+          ctx,
+          NotificationChannels.ARCHIVE,
+          ArchiveNotificationInvocationSchema,
+          (data, requestContext) => controller.archive(data.params.id, requestContext),
+          (args) => ({ params: { id: (args as { id?: string }).id ?? (args as string) } }),
+        );
         installed.push(NotificationChannels.ARCHIVE);
-        registerValidatedChannel(ctx, NotificationChannels.RESTORE, RestoreNotificationInvocationSchema, (data, requestContext) => controller.restore(data.params.id, requestContext), (args) => ({ params: { id: (args as { id?: string }).id ?? (args as string) } }));
+        registerValidatedChannel(
+          ctx,
+          NotificationChannels.RESTORE,
+          RestoreNotificationInvocationSchema,
+          (data, requestContext) => controller.restore(data.params.id, requestContext),
+          (args) => ({ params: { id: (args as { id?: string }).id ?? (args as string) } }),
+        );
         installed.push(NotificationChannels.RESTORE);
         registerValidatedChannel(
           ctx,

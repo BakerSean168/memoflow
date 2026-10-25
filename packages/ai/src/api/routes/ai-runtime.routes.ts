@@ -45,7 +45,10 @@ import { once } from 'node:events';
 
 // HTTP hosts only own built-in conversations; a Desktop reference never falls back.
 const AssistantRuntimeClientCommandSchema = AnyAssistantRuntimeClientCommandSchema.refine(
-  (command) => command.type === 'tool_approval' || command.type === 'tool_answer' || command.runtimeKind !== 'local_agent',
+  (command) =>
+    command.type === 'tool_approval' ||
+    command.type === 'tool_answer' ||
+    command.runtimeKind !== 'local_agent',
   'Local Agent execution requires Desktop',
 );
 const AssistantRuntimeHistoryClientRequestSchema =
@@ -115,13 +118,20 @@ export function registerAIRuntimeRoutes(
       return;
     }
     let source;
-    try { source = await workflowRuntime?.goalEvents?.(); await attentionPort?.events?.init(); await conversationEvents?.init(); }
-    catch {
-      res.status(503).json(responseBuilder.error('SERVICE_UNAVAILABLE', 'Workspace events unavailable'));
+    try {
+      source = await workflowRuntime?.goalEvents?.();
+      await attentionPort?.events?.init();
+      await conversationEvents?.init();
+    } catch {
+      res
+        .status(503)
+        .json(responseBuilder.error('SERVICE_UNAVAILABLE', 'Workspace events unavailable'));
       return;
     }
     if (!source && !attentionPort?.events && !conversationEvents) {
-      res.status(503).json(responseBuilder.error('SERVICE_UNAVAILABLE', 'Workspace events unavailable'));
+      res
+        .status(503)
+        .json(responseBuilder.error('SERVICE_UNAVAILABLE', 'Workspace events unavailable'));
       return;
     }
     res.setHeader('Content-Type', 'text/event-stream');
@@ -137,14 +147,24 @@ export function registerAIRuntimeRoutes(
       if (!res.writableEnded && !res.write(': heartbeat\n\n')) close();
     }, 15_000);
     try {
-      for await (const event of workspaceEventStream({ source: source ?? null, attention: attentionPort?.events, conversations: conversationEvents, identityId, cursor, signal: controller.signal })) {
+      for await (const event of workspaceEventStream({
+        source: source ?? null,
+        attention: attentionPort?.events,
+        conversations: conversationEvents,
+        identityId,
+        cursor,
+        signal: controller.signal,
+      })) {
         if (controller.signal.aborted || res.writableEnded) break;
-        if (!res.write(`id: ${event.cursor}\nevent: workspace\ndata: ${JSON.stringify(event)}\n\n`)) {
+        if (
+          !res.write(`id: ${event.cursor}\nevent: workspace\ndata: ${JSON.stringify(event)}\n\n`)
+        ) {
           await once(res, 'drain', { signal: controller.signal });
         }
       }
-    } catch { /* Disconnects recover through the persisted cursor, never a fabricated business failure. */ }
-    finally {
+    } catch {
+      /* Disconnects recover through the persisted cursor, never a fabricated business failure. */
+    } finally {
       clearInterval(heartbeat);
       close();
       req.removeListener('aborted', close);
@@ -276,19 +296,60 @@ export function registerAIRuntimeRoutes(
       });
       res
         .status(failure.statusCode)
-        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context, failure.failure));
+        .json(
+          responseBuilder.error(
+            failure.code,
+            failure.message,
+            undefined,
+            failure.context,
+            failure.failure,
+          ),
+        );
     }
   });
 
   router.post('/assistant/ask-user/pending', auth, async (req, res) => {
     const responseBuilder = createHttpResponseBuilder(readAiExpressEnvelopeMeta(req));
     const identityId = authenticatedIdentity(req);
-    if (!identityId) { res.status(401).json(responseBuilder.unauthorized('未授权，请登录')); return; }
-    if (!runtime) { res.status(503).json(responseBuilder.error('SERVICE_UNAVAILABLE', 'AI runtime unavailable')); return; }
+    if (!identityId) {
+      res.status(401).json(responseBuilder.unauthorized('未授权，请登录'));
+      return;
+    }
+    if (!runtime) {
+      res.status(503).json(responseBuilder.error('SERVICE_UNAVAILABLE', 'AI runtime unavailable'));
+      return;
+    }
     const parsed = AssistantRuntimeHistoryClientRequestSchema.safeParse(req.body);
-    if (!parsed.success) { res.status(400).json(responseBuilder.validationError(formatZodErrors(parsed.error.issues))); return; }
-    try { res.status(200).json(responseBuilder.success(await runtime.listAskUserSuspensions({ identityId, conversationId: parsed.data.conversationId }))); }
-    catch (error) { const failure = toAITransportFailure(error, { fallbackCode: 'AI_RUNTIME_ERROR', fallbackMessage: 'AI runtime request failed' }); res.status(failure.statusCode).json(responseBuilder.error(failure.code, failure.message, undefined, failure.context, failure.failure)); }
+    if (!parsed.success) {
+      res.status(400).json(responseBuilder.validationError(formatZodErrors(parsed.error.issues)));
+      return;
+    }
+    try {
+      res.status(200).json(
+        responseBuilder.success(
+          await runtime.listAskUserSuspensions({
+            identityId,
+            conversationId: parsed.data.conversationId,
+          }),
+        ),
+      );
+    } catch (error) {
+      const failure = toAITransportFailure(error, {
+        fallbackCode: 'AI_RUNTIME_ERROR',
+        fallbackMessage: 'AI runtime request failed',
+      });
+      res
+        .status(failure.statusCode)
+        .json(
+          responseBuilder.error(
+            failure.code,
+            failure.message,
+            undefined,
+            failure.context,
+            failure.failure,
+          ),
+        );
+    }
   });
 
   router.post('/assistant/delete', auth, async (req, res) => {
@@ -327,31 +388,58 @@ export function registerAIRuntimeRoutes(
       });
       res
         .status(failure.statusCode)
-        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context, failure.failure));
+        .json(
+          responseBuilder.error(
+            failure.code,
+            failure.message,
+            undefined,
+            failure.context,
+            failure.failure,
+          ),
+        );
     }
   });
 
   router.post('/assistant/answer', auth, async (req, res) => {
     const responseBuilder = createHttpResponseBuilder(readAiExpressEnvelopeMeta(req));
     const identityId = authenticatedIdentity(req);
-    if (!identityId) { res.status(401).json(responseBuilder.unauthorized('未授权，请登录')); return; }
-    if (!runtime) { res.status(503).json(responseBuilder.error('SERVICE_UNAVAILABLE', 'AI runtime unavailable')); return; }
+    if (!identityId) {
+      res.status(401).json(responseBuilder.unauthorized('未授权，请登录'));
+      return;
+    }
+    if (!runtime) {
+      res.status(503).json(responseBuilder.error('SERVICE_UNAVAILABLE', 'AI runtime unavailable'));
+      return;
+    }
     const parsed = AssistantRuntimeToolAnswerCommandSchema.safeParse(req.body);
-    if (!parsed.success) { res.status(400).json(responseBuilder.validationError(formatZodErrors(parsed.error.issues))); return; }
+    if (!parsed.success) {
+      res.status(400).json(responseBuilder.validationError(formatZodErrors(parsed.error.issues)));
+      return;
+    }
     try {
       const accepted = await runtime.answerToolSuspension({
         context: extractAiExpressExecutionContext(req),
         command: parsed.data,
       });
-      res.status(200).json(responseBuilder.success(AssistantRuntimeToolAnswerResultSchema.parse({ accepted })));
+      res
+        .status(200)
+        .json(responseBuilder.success(AssistantRuntimeToolAnswerResultSchema.parse({ accepted })));
     } catch (error) {
       const failure = toAITransportFailure(error, {
         fallbackCode: 'AI_RUNTIME_ERROR',
         fallbackMessage: 'AI runtime request failed',
       });
-      res.status(failure.statusCode).json(
-        responseBuilder.error(failure.code, failure.message, undefined, failure.context, failure.failure),
-      );
+      res
+        .status(failure.statusCode)
+        .json(
+          responseBuilder.error(
+            failure.code,
+            failure.message,
+            undefined,
+            failure.context,
+            failure.failure,
+          ),
+        );
     }
   });
 
@@ -449,7 +537,15 @@ export function registerAIRuntimeRoutes(
       });
       res
         .status(failure.statusCode)
-        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context, failure.failure));
+        .json(
+          responseBuilder.error(
+            failure.code,
+            failure.message,
+            undefined,
+            failure.context,
+            failure.failure,
+          ),
+        );
     }
   });
 
@@ -512,7 +608,15 @@ export function registerAIRuntimeRoutes(
       });
       res
         .status(failure.statusCode)
-        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context, failure.failure));
+        .json(
+          responseBuilder.error(
+            failure.code,
+            failure.message,
+            undefined,
+            failure.context,
+            failure.failure,
+          ),
+        );
     }
   });
 
@@ -549,7 +653,15 @@ export function registerAIRuntimeRoutes(
       });
       res
         .status(failure.statusCode)
-        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context, failure.failure));
+        .json(
+          responseBuilder.error(
+            failure.code,
+            failure.message,
+            undefined,
+            failure.context,
+            failure.failure,
+          ),
+        );
     }
   });
 
@@ -586,7 +698,15 @@ export function registerAIRuntimeRoutes(
       });
       res
         .status(failure.statusCode)
-        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context, failure.failure));
+        .json(
+          responseBuilder.error(
+            failure.code,
+            failure.message,
+            undefined,
+            failure.context,
+            failure.failure,
+          ),
+        );
     }
   });
 
@@ -598,7 +718,9 @@ export function registerAIRuntimeRoutes(
       return;
     }
     if (!workflowRuntime) {
-      res.status(503).json(responseBuilder.error('SERVICE_UNAVAILABLE', 'AI workflow runtime unavailable'));
+      res
+        .status(503)
+        .json(responseBuilder.error('SERVICE_UNAVAILABLE', 'AI workflow runtime unavailable'));
       return;
     }
     const parsed = AIGoalSurfaceLeaseRequestSchema.safeParse(req.body);
@@ -616,9 +738,17 @@ export function registerAIRuntimeRoutes(
         fallbackCode: 'AI_WORKFLOW_RUNTIME_ERROR',
         fallbackMessage: 'Goal surface lease failed',
       });
-      res.status(failure.statusCode).json(
-        responseBuilder.error(failure.code, failure.message, undefined, failure.context, failure.failure),
-      );
+      res
+        .status(failure.statusCode)
+        .json(
+          responseBuilder.error(
+            failure.code,
+            failure.message,
+            undefined,
+            failure.context,
+            failure.failure,
+          ),
+        );
     }
   });
 
@@ -652,7 +782,15 @@ export function registerAIRuntimeRoutes(
       });
       res
         .status(failure.statusCode)
-        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context, failure.failure));
+        .json(
+          responseBuilder.error(
+            failure.code,
+            failure.message,
+            undefined,
+            failure.context,
+            failure.failure,
+          ),
+        );
     }
   });
 
@@ -689,7 +827,15 @@ export function registerAIRuntimeRoutes(
       });
       res
         .status(failure.statusCode)
-        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context, failure.failure));
+        .json(
+          responseBuilder.error(
+            failure.code,
+            failure.message,
+            undefined,
+            failure.context,
+            failure.failure,
+          ),
+        );
     }
   });
 
@@ -723,7 +869,15 @@ export function registerAIRuntimeRoutes(
       });
       res
         .status(failure.statusCode)
-        .json(responseBuilder.error(failure.code, failure.message, undefined, failure.context, failure.failure));
+        .json(
+          responseBuilder.error(
+            failure.code,
+            failure.message,
+            undefined,
+            failure.context,
+            failure.failure,
+          ),
+        );
     }
   });
 

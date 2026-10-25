@@ -29,10 +29,7 @@ import { useRecentKnowledgeNotes } from '../../repository/composables/useRecentK
 import { useReferenceableKnowledgeNotes } from '../../repository/composables/useReferenceableKnowledgeNotes';
 import { useAIModelCatalog, composerAgentKey } from './useAIModelCatalog';
 import { sortAgentInstances } from '../agent-instance-order';
-import {
-  antigravityEffortVariant,
-  presentAntigravityModels,
-} from './antigravityModelPresentation';
+import { antigravityEffortVariant, presentAntigravityModels } from './antigravityModelPresentation';
 import { useLocalAssistantChoices } from './useLocalAssistantChoices';
 import { useServerStateIdentityScope } from '../../../platform/server-state';
 import { getAIErrorMessage, getNativeAgentExecutionFailureMessage } from './error';

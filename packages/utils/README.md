@@ -15,6 +15,7 @@ pnpm add @memoflow/utils
 A robust, cross-platform logging system based on Winston (Node.js) and Console/HTTP (Browser).
 
 **Features:**
+
 - **Cross-Platform**: Unified `ILogger` interface.
 - **Node.js**: Uses `winston` with daily file rotation (`logs/app-YYYY-MM-DD.log`).
 - **Browser**: Uses `ConsoleTransport` for dev tools and `HttpTransport` to send logs to the API.
@@ -113,5 +114,3 @@ const headers = createAuthHeader(token);
 - **Time/Date**: `Time`, `Date` helpers.
 - **UUID**: UUID generation.
 - **Response**: Standard API response wrappers (`Result`, `Either`).
-
-

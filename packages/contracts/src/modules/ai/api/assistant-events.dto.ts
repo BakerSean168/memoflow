@@ -55,19 +55,38 @@ export const AssistantRuntimeEventSchema = z.discriminatedUnion('type', [
     .object({
       ...RuntimeEventBaseShape,
       type: z.literal('assistant.ask_user.required'),
-      data: z.object({
-        toolCallId: z.string().min(1).max(512),
-        question: z.string().trim().min(1).max(2000),
-        options: z.array(z.object({ label: z.string().min(1).max(500), description: z.string().max(1000).optional() }).strict()).max(20).optional(),
-        selectionMode: z.enum(['single_select', 'multi_select']).optional(),
-      }).strict(),
-    }).strict(),
+      data: z
+        .object({
+          toolCallId: z.string().min(1).max(512),
+          question: z.string().trim().min(1).max(2000),
+          options: z
+            .array(
+              z
+                .object({
+                  label: z.string().min(1).max(500),
+                  description: z.string().max(1000).optional(),
+                })
+                .strict(),
+            )
+            .max(20)
+            .optional(),
+          selectionMode: z.enum(['single_select', 'multi_select']).optional(),
+        })
+        .strict(),
+    })
+    .strict(),
   z
     .object({
       ...RuntimeEventBaseShape,
       type: z.literal('assistant.ask_user.resolved'),
-      data: z.object({ toolCallId: z.string().min(1).max(512), resolution: z.enum(['answered', 'cancelled', 'failed']) }).strict(),
-    }).strict(),
+      data: z
+        .object({
+          toolCallId: z.string().min(1).max(512),
+          resolution: z.enum(['answered', 'cancelled', 'failed']),
+        })
+        .strict(),
+    })
+    .strict(),
 
   z
     .object({

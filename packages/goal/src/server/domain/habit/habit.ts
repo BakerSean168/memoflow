@@ -64,9 +64,7 @@ export function calculateStreak(
   const today = startOfLocalDay(now, timeContext);
   const dates = Array.from(
     new Set(completedDates.map((d) => startOfLocalDay(d, timeContext))),
-  ).sort(
-    (a, b) => a - b,
-  );
+  ).sort((a, b) => a - b);
 
   if (dates.length === 0) {
     return { currentStreak: 0, longestStreak: 0, lastCheckInDate: null };

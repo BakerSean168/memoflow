@@ -162,7 +162,9 @@ export class GoalPlannerWorker implements GoalPlannerPort {
       name: 'Goal Planner Worker',
       description: 'Internal structured planner used only by the goal.create durable workflow.',
       tools: ({ requestContext }) =>
-        requestContext.getRaw(GOAL_WORKFLOW_LIVE_ACTION_SINK_KEY) ? createGoalLiveActionTools() : {},
+        requestContext.getRaw(GOAL_WORKFLOW_LIVE_ACTION_SINK_KEY)
+          ? createGoalLiveActionTools()
+          : {},
       instructions: ({ requestContext }) => {
         const locale = stringContext(requestContext, 'locale') === 'en-US' ? 'en-US' : 'zh-CN';
         const language = locale === 'en-US' ? 'English' : 'Simplified Chinese';
@@ -277,10 +279,12 @@ export class GoalPlannerWorker implements GoalPlannerPort {
       userInput: {
         idea: request.input.idea,
         surfaceContext: request.input.surfaceContext,
-        sourceDraft: request.input.sourceDraft ? {
-          draftRevision: request.input.sourceDraft.draftRevision,
-          ...(!request.currentDraft ? { draft: request.input.sourceDraft.draft } : {}),
-        } : undefined,
+        sourceDraft: request.input.sourceDraft
+          ? {
+              draftRevision: request.input.sourceDraft.draftRevision,
+              ...(!request.currentDraft ? { draft: request.input.sourceDraft.draft } : {}),
+            }
+          : undefined,
         clarification: request.clarification,
       },
       workflowInstructions,
@@ -414,7 +418,11 @@ export class GoalPlannerWorker implements GoalPlannerPort {
     const researchAvailable = await this.supportsResearch(request);
     const prompt = [
       'Produce the next goal.create planning decision from this trusted workflow state.',
-      ...(request.input.sourceDraft ? ['This is a new planning run seeded by the user\'s existing native draft. Preserve valid fields and Key Results unless the user asks to change them; complete missing information without discarding the seed.'] : []),
+      ...(request.input.sourceDraft
+        ? [
+            "This is a new planning run seeded by the user's existing native draft. Preserve valid fields and Key Results unless the user asks to change them; complete missing information without discarding the seed.",
+          ]
+        : []),
       researchAvailable
         ? `Goal Research product policy is enabled for ${GOAL_RESEARCH_POLICY.scope.join(', ')} and the selected provider has an explicit hosted-search contract. If the plan materially depends on current public facts that are not already grounded in the canonical context, return needs_research with 1-${GOAL_RESEARCH_POLICY.maxRequestsPerPlan} focused requests. If the user explicitly requests verification of current or official public facts and the canonical external evidence is absent or insufficient, needs_research is mandatory; do not substitute model memory. Otherwise return the normal Goal planning decision.`
         : 'External research is unavailable for this invocation by product policy or provider capability. Return the normal Goal planning decision without waiting for web evidence.',

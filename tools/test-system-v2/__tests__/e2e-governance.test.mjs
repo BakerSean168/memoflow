@@ -42,16 +42,16 @@ test('retired route matching rejects profile navigation while allowing the profi
 test('repository E2E ownership is execution-aware and complete', () => {
   assert.equal(inventory.version, 3);
   assert.deepEqual(inventory.e2eGovernance.issues, []);
-  assert.equal(inventory.e2eGovernance.countsByLane.required, 35);
+  assert.equal(inventory.e2eGovernance.countsByLane.required, 6);
   assert.equal(inventory.e2eGovernance.countsByLane.nightly, undefined);
   assert.equal(inventory.e2eGovernance.countsByLane.debug, undefined);
-  assert.equal(inventory.e2eGovernance.countsByRole.canonical, 32);
+  assert.equal(inventory.e2eGovernance.countsByRole.canonical, 4);
   assert.equal(inventory.e2eGovernance.countsByRole.diagnostic, undefined);
   assert.equal(inventory.e2eGovernance.automatedCollectorCount, 2);
-  assert.equal(inventory.e2eGovernance.automationBindingCount, 5);
+  assert.equal(inventory.e2eGovernance.automationBindingCount, 4);
 
   const goalWorkflow = inventory.primary.find(
-    (entry) => entry.path === 'apps/web/e2e/ai/goal-workflow/multi-session.spec.ts',
+    (entry) => entry.path === 'apps/web/e2e/ai/provider-onboarding.spec.ts',
   );
   assert.equal(goalWorkflow?.collectors.length, 1);
   assert.equal(goalWorkflow?.e2eOwnership.primaryCollector, 'apps/web/playwright.config.ts');
@@ -71,7 +71,7 @@ test('repository E2E ownership is execution-aware and complete', () => {
 
 test('repository retirement contract blocks retired E2E surfaces', () => {
   assert.deepEqual(inventory.e2eRetirement.issues, []);
-  assert.equal(inventory.e2eRetirement.retiredSpecCount, 20);
+  assert.equal(inventory.e2eRetirement.retiredSpecCount, 49);
   assert.equal(inventory.e2eRetirement.forbiddenReferenceCount, 3);
 });
 
@@ -106,8 +106,10 @@ test('required and nightly collectors fail closed without automation ownership',
 test('declared GitHub workflow automation must bind its target', async () => {
   const contract = structuredClone(ownership);
   contract.collectors['apps/web/playwright.config.ts'].automation[0] = {
-    kind: 'github-workflow', workflow: '.github/workflows/nightly-audit.yml', target:
-    'web:e2e:missing-audit' };
+    kind: 'github-workflow',
+    workflow: '.github/workflows/nightly-audit.yml',
+    target: 'web:e2e:missing-audit',
+  };
 
   const governance = await analyzeE2EOwnership(root, inventory, contract);
   assert.ok(
@@ -121,14 +123,14 @@ test('declared GitHub workflow automation must bind its target', async () => {
 
 test('same-suite E2E overlaps require one explicit primary collector', async () => {
   const contract = structuredClone(ownership);
-  contract.specs['apps/web/e2e/ai/goal-workflow/multi-session.spec.ts'].primaryCollector =
+  contract.specs['apps/web/e2e/ai/provider-onboarding.spec.ts'].primaryCollector =
     'apps/web/playwright.sync.config.ts';
 
   const governance = await analyzeE2EOwnership(root, inventory, contract);
   assert.ok(
     governance.issues.some(
       (issue) =>
-        issue.path === 'apps/web/e2e/ai/goal-workflow/multi-session.spec.ts' &&
+        issue.path === 'apps/web/e2e/ai/provider-onboarding.spec.ts' &&
         issue.reason === 'primary-collector-does-not-collect-spec',
     ),
   );
@@ -137,6 +139,7 @@ test('same-suite E2E overlaps require one explicit primary collector', async () 
 test('Nx execution contracts must bind the declared Playwright collector', async () => {
   const contract = structuredClone(ownership);
   contract.collectors['apps/web/playwright.config.ts'].execution.target = 'web:e2e:sync';
+  delete contract.collectors['apps/web/playwright.config.ts'].execution.entrypoint;
 
   const governance = await analyzeE2EOwnership(root, inventory, contract);
   assert.ok(

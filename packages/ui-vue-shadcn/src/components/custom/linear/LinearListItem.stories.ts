@@ -17,14 +17,16 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = { ...({} as any),
+export const Default: Story = {
+  ...({} as any),
   args: {
     title: 'Implement user authentication',
     subtitle: 'Add JWT-based auth flow with refresh tokens',
   },
 };
 
-export const Active: Story = { ...({} as any),
+export const Active: Story = {
+  ...({} as any),
   args: {
     title: 'Implement user authentication',
     subtitle: 'Add JWT-based auth flow with refresh tokens',
@@ -32,7 +34,8 @@ export const Active: Story = { ...({} as any),
   },
 };
 
-export const WithSlots: Story = { ...({} as any),
+export const WithSlots: Story = {
+  ...({} as any),
   render: (args: any) => ({
     components: { LinearListItem, Badge, Button },
     setup() {
@@ -61,7 +64,8 @@ export const WithSlots: Story = { ...({} as any),
   },
 };
 
-export const ListExample: Story = { ...({} as any),
+export const ListExample: Story = {
+  ...({} as any),
   render: (args: any) => ({
     components: { LinearListItem, Badge },
     template: `

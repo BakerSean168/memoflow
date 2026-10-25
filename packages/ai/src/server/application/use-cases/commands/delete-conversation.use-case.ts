@@ -28,7 +28,10 @@ export class DeleteConversationUseCase {
       return ok(undefined);
     } catch (err) {
       logger.error('Failed to delete conversation', { error: err, conversationId, identityId });
-      return error('INTERNAL_ERROR', err instanceof Error ? err.message : 'Failed to delete conversation');
+      return error(
+        'INTERNAL_ERROR',
+        err instanceof Error ? err.message : 'Failed to delete conversation',
+      );
     }
   }
 }

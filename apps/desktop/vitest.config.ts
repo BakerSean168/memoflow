@@ -47,7 +47,10 @@ const sharedConfig = createSharedConfig({
     { find: /^electron$/, replacement: './test-support/electron.stub.ts' },
     ...createAppVueSourceAliasEntries(import.meta.dirname + '/../..'),
     ...createUiVueSourceAliasEntries(import.meta.dirname + '/../..'),
-    ...createWorkspaceSourceAliasEntries(import.meta.dirname + '/../..', desktopTestWorkspaceEntries),
+    ...createWorkspaceSourceAliasEntries(
+      import.meta.dirname + '/../..',
+      desktopTestWorkspaceEntries,
+    ),
   ],
 }) as Record<string, unknown>;
 

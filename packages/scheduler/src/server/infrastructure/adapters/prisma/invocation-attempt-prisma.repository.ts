@@ -8,7 +8,9 @@ export class InvocationAttemptPrismaRepository implements IInvocationAttemptRepo
 
   async append(attempt: InvocationAttempt): Promise<void> {
     await this.db.invocationAttempt.create({
-      data: PrismaInvocationAttemptMapper.toCreate(attempt) as Prisma.InvocationAttemptUncheckedCreateInput,
+      data: PrismaInvocationAttemptMapper.toCreate(
+        attempt,
+      ) as Prisma.InvocationAttemptUncheckedCreateInput,
     });
   }
 
@@ -34,9 +36,13 @@ export class InvocationAttemptPrismaRepository implements IInvocationAttemptRepo
     return rows.map(PrismaInvocationAttemptMapper.toDomain);
   }
 
-  async findLatestForInvocation(identityId: string, invocationId: string): Promise<InvocationAttempt | null> {
+  async findLatestForInvocation(
+    identityId: string,
+    invocationId: string,
+  ): Promise<InvocationAttempt | null> {
     const row = await this.db.invocationAttempt.findFirst({
-      where: { identityId, invocationId }, orderBy: { attemptNumber: 'desc' },
+      where: { identityId, invocationId },
+      orderBy: { attemptNumber: 'desc' },
     });
     return row ? PrismaInvocationAttemptMapper.toDomain(row) : null;
   }

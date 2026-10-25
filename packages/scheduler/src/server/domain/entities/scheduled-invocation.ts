@@ -10,16 +10,17 @@ import { generateUUID } from '@memoflow/utils/shared';
 
 export interface ScheduledInvocationState extends ScheduledInvocationContract {}
 
-const ALLOWED_TRANSITIONS: Record<ScheduledInvocationStatus, readonly ScheduledInvocationStatus[]> = {
-  pending: ['running', 'superseded'],
-  running: ['succeeded', 'skipped', 'retry_wait', 'failed', 'dead_letter', 'superseded'],
-  retry_wait: ['running', 'superseded'],
-  succeeded: [],
-  skipped: [],
-  failed: [],
-  dead_letter: [],
-  superseded: [],
-};
+const ALLOWED_TRANSITIONS: Record<ScheduledInvocationStatus, readonly ScheduledInvocationStatus[]> =
+  {
+    pending: ['running', 'superseded'],
+    running: ['succeeded', 'skipped', 'retry_wait', 'failed', 'dead_letter', 'superseded'],
+    retry_wait: ['running', 'superseded'],
+    succeeded: [],
+    skipped: [],
+    failed: [],
+    dead_letter: [],
+    superseded: [],
+  };
 
 export class ScheduledInvocationTransitionError extends Error {
   constructor(
@@ -91,31 +92,75 @@ export class ScheduledInvocation {
     });
   }
 
-  get id(): string { return this.state.id; }
-  get identityId(): string { return this.state.identityId; }
+  get id(): string {
+    return this.state.id;
+  }
+  get identityId(): string {
+    return this.state.identityId;
+  }
   get owner(): SchedulingOwner {
     return { identityId: this.identityId, type: this.state.ownerType, id: this.state.ownerId };
   }
-  get ownerType(): string { return this.state.ownerType; }
-  get ownerId(): string { return this.state.ownerId; }
-  get schedulingKey(): string { return this.state.schedulingKey; }
-  get handlerKey(): string { return this.state.handlerKey; }
-  get payloadVersion(): number { return this.state.payloadVersion; }
-  get payload(): unknown { return this.state.payload; }
-  get runAt(): number { return this.state.runAt; }
-  get sourceRevision(): number | string | null { return this.state.sourceRevision; }
-  get retryPolicy(): ScheduledInvocationRetryPolicy { return this.state.retryPolicy; }
-  get priority(): SchedulingPriority { return this.state.priority; }
-  get timeoutMs(): number | null { return this.state.timeoutMs; }
-  get status(): ScheduledInvocationStatus { return this.state.status; }
-  get attemptCount(): number { return this.state.attemptCount; }
-  get nextAttemptAt(): number | null { return this.state.nextAttemptAt; }
-  get claimToken(): string | null { return this.state.claimToken; }
-  get claimExpiresAt(): number | null { return this.state.claimExpiresAt; }
-  get fencingToken(): number { return this.state.fencingToken; }
-  get observability(): ScheduledInvocationContract['observability'] { return this.state.observability; }
-  get createdAt(): number { return this.state.createdAt; }
-  get updatedAt(): number { return this.state.updatedAt; }
+  get ownerType(): string {
+    return this.state.ownerType;
+  }
+  get ownerId(): string {
+    return this.state.ownerId;
+  }
+  get schedulingKey(): string {
+    return this.state.schedulingKey;
+  }
+  get handlerKey(): string {
+    return this.state.handlerKey;
+  }
+  get payloadVersion(): number {
+    return this.state.payloadVersion;
+  }
+  get payload(): unknown {
+    return this.state.payload;
+  }
+  get runAt(): number {
+    return this.state.runAt;
+  }
+  get sourceRevision(): number | string | null {
+    return this.state.sourceRevision;
+  }
+  get retryPolicy(): ScheduledInvocationRetryPolicy {
+    return this.state.retryPolicy;
+  }
+  get priority(): SchedulingPriority {
+    return this.state.priority;
+  }
+  get timeoutMs(): number | null {
+    return this.state.timeoutMs;
+  }
+  get status(): ScheduledInvocationStatus {
+    return this.state.status;
+  }
+  get attemptCount(): number {
+    return this.state.attemptCount;
+  }
+  get nextAttemptAt(): number | null {
+    return this.state.nextAttemptAt;
+  }
+  get claimToken(): string | null {
+    return this.state.claimToken;
+  }
+  get claimExpiresAt(): number | null {
+    return this.state.claimExpiresAt;
+  }
+  get fencingToken(): number {
+    return this.state.fencingToken;
+  }
+  get observability(): ScheduledInvocationContract['observability'] {
+    return this.state.observability;
+  }
+  get createdAt(): number {
+    return this.state.createdAt;
+  }
+  get updatedAt(): number {
+    return this.state.updatedAt;
+  }
 
   toState(): ScheduledInvocationState {
     return {
@@ -213,13 +258,21 @@ export class ScheduledInvocation {
     now = Date.now(),
   ): void {
     const status: ScheduledInvocationStatus =
-      outcome === 'succeeded' ? 'succeeded' :
-      outcome === 'skipped' ? 'skipped' :
-      outcome === 'retryable_failure' && nextAttemptAt !== null ? 'retry_wait' :
-      outcome === 'retryable_failure' ? 'dead_letter' :
-      outcome === 'timeout' && nextAttemptAt !== null ? 'retry_wait' :
-      outcome === 'timeout' ? 'dead_letter' :
-      outcome === 'permanent_failure' ? 'failed' : 'failed';
+      outcome === 'succeeded'
+        ? 'succeeded'
+        : outcome === 'skipped'
+          ? 'skipped'
+          : outcome === 'retryable_failure' && nextAttemptAt !== null
+            ? 'retry_wait'
+            : outcome === 'retryable_failure'
+              ? 'dead_letter'
+              : outcome === 'timeout' && nextAttemptAt !== null
+                ? 'retry_wait'
+                : outcome === 'timeout'
+                  ? 'dead_letter'
+                  : outcome === 'permanent_failure'
+                    ? 'failed'
+                    : 'failed';
     this.transitionTo(status, now);
     this.state = {
       ...this.state,
@@ -232,5 +285,11 @@ export class ScheduledInvocation {
 }
 
 export function isTerminalScheduledInvocationStatus(status: ScheduledInvocationStatus): boolean {
-  return status === 'succeeded' || status === 'skipped' || status === 'failed' || status === 'dead_letter' || status === 'superseded';
+  return (
+    status === 'succeeded' ||
+    status === 'skipped' ||
+    status === 'failed' ||
+    status === 'dead_letter' ||
+    status === 'superseded'
+  );
 }

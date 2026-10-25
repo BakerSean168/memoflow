@@ -18,10 +18,7 @@ type RuntimeEventEnvelope = {
 
 type RuntimeEventMap = Record<string, RuntimeEventEnvelope>;
 
-type RuntimeEventHandler<T> = (
-  event: T,
-  metadata?: EventDeliveryMetadata,
-) => void | Promise<void>;
+type RuntimeEventHandler<T> = (event: T, metadata?: EventDeliveryMetadata) => void | Promise<void>;
 
 type RegisteredHandler = RuntimeEventHandler<unknown>;
 
@@ -43,10 +40,7 @@ const logger = createLogger('CrossPlatformEventBus');
  */
 export class CrossPlatformEventBus<TEvents extends EventMap = EventMap> {
   private readonly emitter = new Emittery<RuntimeEventMap>();
-  private readonly subscriptions = new Map<
-    string,
-    Map<RegisteredHandler, UnsubscribeFunction[]>
-  >();
+  private readonly subscriptions = new Map<string, Map<RegisteredHandler, UnsubscribeFunction[]>>();
   private debugEnabled = false;
 
   /**

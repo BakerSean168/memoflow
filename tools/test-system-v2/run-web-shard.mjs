@@ -2,7 +2,6 @@
 /* eslint-disable @nx/enforce-module-boundaries -- the runner executes the Web-owned spec list */
 import { readFile, mkdir, writeFile, rm } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
-import { createServer } from 'node:net';
 import { pathToFileURL } from 'node:url';
 import { validateDeliveryManifest } from '../ci-cd-platform/lib/contracts.mjs';
 import { executedWebSpecs } from './lib/web-shards.mjs';
@@ -12,30 +11,12 @@ export const WEB_SPEC_DURATIONS_PATH = 'tools/test-system-v2/web-spec-durations.
 
 export function parseShardArgument(value) {
   const match = /^(\d+)\/(\d+)$/u.exec(value ?? '');
-  if (!match) throw new Error(`Web Flow shard must look like <index>/<count>, got ${value}`);
+  if (!match) throw new Error(`Web specialized shard must look like <index>/<count>, got ${value}`);
   const index = Number(match[1]);
   const count = Number(match[2]);
   if (!Number.isSafeInteger(index) || !Number.isSafeInteger(count) || index < 1 || index > count)
-    throw new Error(`Unknown Web Flow shard: ${value}`);
+    throw new Error(`Unknown Web specialized shard: ${value}`);
   return { index, count };
-}
-
-function findFreeLoopbackPort() {
-  return new Promise((resolve, reject) => {
-    const server = createServer();
-    server.unref();
-    server.once('error', reject);
-    server.listen(0, '127.0.0.1', () => {
-      const address = server.address();
-      if (!address || typeof address === 'string') {
-        server.close();
-        reject(new Error('Unable to allocate a loopback port for the Web Flow provider mock.'));
-        return;
-      }
-      const { port } = address;
-      server.close((error) => (error ? reject(error) : resolve(port)));
-    });
-  });
 }
 
 async function main() {
@@ -57,33 +38,33 @@ async function main() {
   });
   for (const warning of warnings) console.log(`::warning::${warning}`);
   console.log(
-    `[test-system-v2] Web Flow shard ${index}/${count}: ~${Math.round(shard.estimatedMs / 1000)}s, ${shard.specs.join(' ')}`,
+    `[test-system-v2] Web specialized shard ${index}/${count}: ~${Math.round(shard.estimatedMs / 1000)}s, ${shard.specs.join(' ')}`,
   );
-
-  const mockPort = process.env.E2E_OPENAI_MOCK_PORT || String(await findFreeLoopbackPort());
-  console.log(`[test-system-v2] Web Flow OpenAI mock port: ${mockPort}`);
 
   const args = [
     'exec',
-    'playwright',
-    'test',
+    'nx',
+    'run',
+    'web:e2e:ai-provider',
+    '--output-style=static',
+    '--',
     '--config',
     'playwright.config.ts',
     ...shard.specs.map((spec) => `e2e/${spec}`),
   ];
-  await rm('apps/web/test-results/results.json', { force: true });
+  await rm('apps/web/test-results/provider-results.json', { force: true });
   const exitCode = await new Promise((resolve) => {
     const child = spawn('pnpm', args, {
-      cwd: 'apps/web',
+      cwd: process.cwd(),
       stdio: 'inherit',
       shell: process.platform === 'win32',
-      env: { ...process.env, E2E_OPENAI_MOCK_PORT: mockPort },
+      env: process.env,
     });
     child.on('close', (code) => resolve(code ?? 1));
     child.on('error', () => resolve(1));
   });
   // Capture before visual/provider suites overwrite the shared JSON reporter.
-  const report = JSON.parse(await readFile('apps/web/test-results/results.json', 'utf8'));
+  const report = JSON.parse(await readFile('apps/web/test-results/provider-results.json', 'utf8'));
   await mkdir('reports/web-shards', { recursive: true });
   await writeFile(
     `reports/web-shards/shard-${index}.json`,

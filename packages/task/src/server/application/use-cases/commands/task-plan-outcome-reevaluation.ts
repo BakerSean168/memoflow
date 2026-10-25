@@ -29,7 +29,10 @@ export async function reevaluateTaskPlanOutcome(
   if (next === plan.outcome && !needsLifecycleRepair) return false;
 
   plan.applyPlanOutcome(
-    next as typeof TaskPlanOutcome.Open | typeof TaskPlanOutcome.Succeeded | typeof TaskPlanOutcome.Failed,
+    next as
+      | typeof TaskPlanOutcome.Open
+      | typeof TaskPlanOutcome.Succeeded
+      | typeof TaskPlanOutcome.Failed,
     { triggeringTaskOccurrenceId },
   );
   await repositories.planRepository.save(plan);

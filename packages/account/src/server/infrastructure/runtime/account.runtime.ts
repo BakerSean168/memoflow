@@ -2,8 +2,7 @@ import type { IAccountRepository } from '../../domain';
 import type { AccountModuleRuntimeContribution } from '../account.module';
 
 export type AccountRuntimeContributionsInput =
-  | AccountModuleRuntimeContribution
-  | readonly AccountModuleRuntimeContribution[];
+  AccountModuleRuntimeContribution | readonly AccountModuleRuntimeContribution[];
 
 function normalizeRuntimeContributions(
   runtimeContributions?: AccountRuntimeContributionsInput,

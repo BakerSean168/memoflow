@@ -105,27 +105,30 @@ describe('TaskPlanRow', () => {
     expect(wrapper.emitted('delete')).toHaveLength(1);
   });
 
-  it.each(['Succeeded', 'Failed', 'Abandoned'] as const)('shows terminal %s and hides End Plan independently of archive metadata', (outcome) => {
-    const wrapper = mount(TaskPlanRow, {
-      props: {
-        plan: plan({
-          status: 'CLOSED',
-          statusText: 'Closed',
-          outcome,
-          outcomeText: outcome,
-          stateText: outcome,
-          isActive: false,
-          isPaused: false,
-        }),
-      },
-      global: { plugins: [i18n] },
-    });
+  it.each(['Succeeded', 'Failed', 'Abandoned'] as const)(
+    'shows terminal %s and hides End Plan independently of archive metadata',
+    (outcome) => {
+      const wrapper = mount(TaskPlanRow, {
+        props: {
+          plan: plan({
+            status: 'CLOSED',
+            statusText: 'Closed',
+            outcome,
+            outcomeText: outcome,
+            stateText: outcome,
+            isActive: false,
+            isPaused: false,
+          }),
+        },
+        global: { plugins: [i18n] },
+      });
 
-    expect(wrapper.get('[data-testid="task-plan-row"]').text()).toContain(outcome);
-    expect(wrapper.get('[data-testid="task-plan-row"]').text()).not.toContain('Closed');
-    const actions = wrapper.getComponent(ActionableWrapper).props('actions') as MenuAction[];
-    expect(actions.map((action) => action.key)).toEqual(['delete']);
-  });
+      expect(wrapper.get('[data-testid="task-plan-row"]').text()).toContain(outcome);
+      expect(wrapper.get('[data-testid="task-plan-row"]').text()).not.toContain('Closed');
+      const actions = wrapper.getComponent(ActionableWrapper).props('actions') as MenuAction[];
+      expect(actions.map((action) => action.key)).toEqual(['delete']);
+    },
+  );
 
   it('emits navigation from the row body while keeping actions separate', async () => {
     const wrapper = mount(TaskPlanRow, {

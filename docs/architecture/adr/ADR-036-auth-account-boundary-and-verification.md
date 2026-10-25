@@ -45,15 +45,15 @@ MemoFlow 已在 monorepo 中自建：
 
 ### 2. 模块边界与真源
 
-| 关注点 | 权威模块 | 说明 |
-| --- | --- | --- |
-| 能否认证 / 登录 | Authentication | `AuthIdentity.status` + 锁定字段 |
-| 登录标识符（邮箱/手机）及其验证 | Authentication | `AuthIdentifier.isVerified` |
-| 凭证与 OAuth binding | Authentication | 密码、GitHub subject 等 |
-| 会话 | Authentication | `AuthSession`；业务 API 只认 MemoFlow token |
-| 昵称/头像/简介等资料 | Account | 不拥有登录权威 |
-| 资料卡展示用联系邮箱 | Account | **Auth 主邮箱的投影**，事件同步 |
-| 扩展键值/设备级偏好 | Setting | 不承载登录安全状态 |
+| 关注点                          | 权威模块       | 说明                                        |
+| ------------------------------- | -------------- | ------------------------------------------- |
+| 能否认证 / 登录                 | Authentication | `AuthIdentity.status` + 锁定字段            |
+| 登录标识符（邮箱/手机）及其验证 | Authentication | `AuthIdentifier.isVerified`                 |
+| 凭证与 OAuth binding            | Authentication | 密码、GitHub subject 等                     |
+| 会话                            | Authentication | `AuthSession`；业务 API 只认 MemoFlow token |
+| 昵称/头像/简介等资料            | Account        | 不拥有登录权威                              |
+| 资料卡展示用联系邮箱            | Account        | **Auth 主邮箱的投影**，事件同步             |
+| 扩展键值/设备级偏好             | Setting        | 不承载登录安全状态                          |
 
 硬规则：
 
@@ -74,10 +74,10 @@ MemoFlow 已在 monorepo 中自建：
 
 密码重置、邮箱验证、后续绑邮箱等共用同一抽象（名称可实现为 `IVerificationChallengeStore`）：
 
-| purpose | 用途 |
-| --- | --- |
-| `PasswordReset` | 忘记密码 |
-| `EmailVerify` | 注册后验证主邮箱 |
+| purpose                     | 用途                           |
+| --------------------------- | ------------------------------ |
+| `PasswordReset`             | 忘记密码                       |
+| `EmailVerify`               | 注册后验证主邮箱               |
 | `EmailBind` / `EmailChange` | 已登录绑定或换绑（换绑可分期） |
 
 约束：
@@ -122,9 +122,9 @@ MemoFlow 已在 monorepo 中自建：
 
 建议事件（实施时可微调命名）：
 
-- `auth:identity-created`（已有）→ 创建 Account  
-- `auth:email-verified` → Account 投影 verify  
-- `auth:email-changed` → Account 更新展示邮箱  
+- `auth:identity-created`（已有）→ 创建 Account
+- `auth:email-verified` → Account 投影 verify
+- `auth:email-changed` → Account 更新展示邮箱
 - `auth:identity-disabled` → Account 停用（若注销未同步调用时的兜底）
 
 ### 8. OAuth 与账号链接
@@ -142,11 +142,11 @@ MemoFlow 已在 monorepo 中自建：
 
 ## Rationale
 
-1. **identityId 已是全域租户键** — 替换 IdP 的成本远高于补齐验证/发信。  
-2. **Auth/Account 拆分符合**「凭证 vs 资料」主流心智，问题在同步与级联，不在拆分本身。  
-3. **统一 challenge** 避免验证邮箱、重置密码、绑邮箱各造一套存储与限流。  
-4. **保留现网 forgot/reset 路径** 避免契约双轨；旧「链接令牌新 API」计划与代码冲突，应归档而非并行实施。  
-5. **注册后验证** 兼容当前注册即登录，并允许逐步加门禁。  
+1. **identityId 已是全域租户键** — 替换 IdP 的成本远高于补齐验证/发信。
+2. **Auth/Account 拆分符合**「凭证 vs 资料」主流心智，问题在同步与级联，不在拆分本身。
+3. **统一 challenge** 避免验证邮箱、重置密码、绑邮箱各造一套存储与限流。
+4. **保留现网 forgot/reset 路径** 避免契约双轨；旧「链接令牌新 API」计划与代码冲突，应归档而非并行实施。
+5. **注册后验证** 兼容当前注册即登录，并允许逐步加门禁。
 6. **注销级联** 是安全底线，与「Account 只是资料」不矛盾：资料关闭不能代替禁用登录。
 
 ## Consequences
@@ -174,21 +174,21 @@ MemoFlow 已在 monorepo 中自建：
 
 ## Migration & Enforcement
 
-1. **计划**：以 `docs/plan/archive/2026-07-17-auth-account-security-closure.md` 为唯一实施真源；密码找回旧计划已归档。  
-2. **代码顺序**：通用 challenge + 邮件端口 → 加固 forgot/reset + 邮箱验证 → 注销级联 → OAuth 完整流 → 访客升级。  
-3. **契约**：优先扩展现有 `/api/v1/auth/*`，新增 email send/verify；重置保持 `password/forgot|reset`。  
-4. **测试**：challenge 单测；验证/重置重放与枚举防护；注销后 login/refresh 失败；关键 e2e。  
+1. **计划**：以 `docs/plan/archive/2026-07-17-auth-account-security-closure.md` 为唯一实施真源；密码找回旧计划已归档。
+2. **代码顺序**：通用 challenge + 邮件端口 → 加固 forgot/reset + 邮箱验证 → 注销级联 → OAuth 完整流 → 访客升级。
+3. **契约**：优先扩展现有 `/api/v1/auth/*`，新增 email send/verify；重置保持 `password/forgot|reset`。
+4. **测试**：challenge 单测；验证/重置重放与枚举防护；注销后 login/refresh 失败；关键 e2e。
 5. **产品文档**：`docs/product/modules/authentication.md` 与 `account.md` 在实施后同步「真源与投影」表述。
 
 ## References
 
-- ADR-010 / ADR-017 集中 contracts  
-- ADR-023 / ADR-025 / ADR-031 服务端形态与组合  
-- ADR-030 Result 模式  
-- ADR-033 跨模块通信  
-- ADR-034 GitHub 登录与仓库授权分离  
-- `docs/product/modules/authentication.md`  
-- `docs/product/modules/account.md`  
-- `docs/plan/archive/2026-07-17-auth-account-security-closure.md`  
-- `docs/plan/archive/2026-07-16-password-recovery.md`（已废）  
+- ADR-010 / ADR-017 集中 contracts
+- ADR-023 / ADR-025 / ADR-031 服务端形态与组合
+- ADR-030 Result 模式
+- ADR-033 跨模块通信
+- ADR-034 GitHub 登录与仓库授权分离
+- `docs/product/modules/authentication.md`
+- `docs/product/modules/account.md`
+- `docs/plan/archive/2026-07-17-auth-account-security-closure.md`
+- `docs/plan/archive/2026-07-16-password-recovery.md`（已废）
 - 现网：`ForgotPasswordUseCase`、`ResetPasswordUseCase`、`IEmailSender`、`IPasswordResetCodeStore`

@@ -12,15 +12,15 @@ Application-Server 层标准化（Phases 1-4）已全部完成。现在需要将
 
 ### 审计发现
 
-| 维度 | Setting（标准） | 其他模块现状 |
-|------|----------------|-------------|
-| ClientPort 接口 | `SettingClientPort` 定义在 index.ts | 仅 setting 有；其余模块无 |
-| Factory 函数 | `createSettingClientService()` | 仅 setting 有 |
-| 废弃代理 | 无 | authentication/goal/schedule 有 singleton proxy |
-| 废弃别名 | 无 | authentication 有 `AuthenticationApplicationService` |
-| 废弃标记 | 无 | 5 个模块的 ClientService 有 `@deprecated` |
-| 遗留基础设施 | 无 | notification 有 legacy NotificationApiClient + NotificationPermissionService |
-| Port 定义位置 | infrastructure-client/re-export | account/auth 在 `ports/`，其余在 `infrastructure-client/adapters/types.ts` |
+| 维度            | Setting（标准）                     | 其他模块现状                                                                 |
+| --------------- | ----------------------------------- | ---------------------------------------------------------------------------- |
+| ClientPort 接口 | `SettingClientPort` 定义在 index.ts | 仅 setting 有；其余模块无                                                    |
+| Factory 函数    | `createSettingClientService()`      | 仅 setting 有                                                                |
+| 废弃代理        | 无                                  | authentication/goal/schedule 有 singleton proxy                              |
+| 废弃别名        | 无                                  | authentication 有 `AuthenticationApplicationService`                         |
+| 废弃标记        | 无                                  | 5 个模块的 ClientService 有 `@deprecated`                                    |
+| 遗留基础设施    | 无                                  | notification 有 legacy NotificationApiClient + NotificationPermissionService |
+| Port 定义位置   | infrastructure-client/re-export     | account/auth 在 `ports/`，其余在 `infrastructure-client/adapters/types.ts`   |
 
 ### 关键原则
 
@@ -35,11 +35,11 @@ Application-Server 层标准化（Phases 1-4）已全部完成。现在需要将
 
 ### 1a. 移除 deprecated singleton proxy（3 模块）
 
-| 模块 | 删除内容 | 文件 |
-|------|---------|------|
+| 模块           | 删除内容                                                                                                                                                           | 文件                          |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------- |
 | authentication | `_authenticationApplicationService` / `setAuthenticationApplicationService()` / `authenticationApplicationService` Proxy + `AuthenticationApplicationService` 别名 | `application-client/index.ts` |
-| goal | `_goalApplicationService` / `setGoalApplicationService()` / `goalApplicationService` Proxy | `application-client/index.ts` |
-| schedule | `_scheduleApplicationService` / `setScheduleApplicationService()` / `scheduleApplicationService` Proxy | `application-client/index.ts` |
+| goal           | `_goalApplicationService` / `setGoalApplicationService()` / `goalApplicationService` Proxy                                                                         | `application-client/index.ts` |
+| schedule       | `_scheduleApplicationService` / `setScheduleApplicationService()` / `scheduleApplicationService` Proxy                                                             | `application-client/index.ts` |
 
 外部引用检查：上述 deprecated proxy 仅在各自 `index.ts` 内部定义和使用，无外部消费者。
 
@@ -52,9 +52,11 @@ Application-Server 层标准化（Phases 1-4）已全部完成。现在需要将
 ### 1c. 清理 deprecation 标记
 
 **Goal 数据文件**：
+
 - `GoalTemplates.ts` 和 `BuiltInRules.ts` — 移除 `@deprecated` 标记（数据文件不适合"拆分为单操作文件"的 deprecation 消息）
 
 **5 个 ClientService 文件** — 移除 `@deprecated` JSDoc：
+
 - `packages/goal/src/application-client/goal-client-service.ts`
 - `packages/notification/src/application-client/notification-client-service.ts`
 - `packages/reminder/src/application-client/reminder-client-service.ts`
@@ -82,81 +84,81 @@ pnpm nx run-many --target=typecheck --projects=authentication,goal,schedule,noti
 
 当前定义位置：`infrastructure-client/adapters/types.ts`（~186 行）
 
-| 操作 | 文件 |
-|------|------|
-| 新建 | `application-client/ports/goal-api-client.port.ts` — 搬入 `IGoalApiClient` |
+| 操作 | 文件                                                                                    |
+| ---- | --------------------------------------------------------------------------------------- |
+| 新建 | `application-client/ports/goal-api-client.port.ts` — 搬入 `IGoalApiClient`              |
 | 新建 | `application-client/ports/goal-folder-api-client.port.ts` — 搬入 `IGoalFolderApiClient` |
-| 新建 | `application-client/ports/goal-focus-api-client.port.ts` — 搬入 `IGoalFocusApiClient` |
-| 更新 | `infrastructure-client/adapters/types.ts` — 删除本地定义，改为 re-export |
-| 更新 | `application-client/goal-client-service.ts` import 路径 |
-| 更新 | `application-client/index.ts` barrel |
+| 新建 | `application-client/ports/goal-focus-api-client.port.ts` — 搬入 `IGoalFocusApiClient`   |
+| 更新 | `infrastructure-client/adapters/types.ts` — 删除本地定义，改为 re-export                |
+| 更新 | `application-client/goal-client-service.ts` import 路径                                 |
+| 更新 | `application-client/index.ts` barrel                                                    |
 
 ### 2b. reminder（1 个 port）
 
 当前定义位置：`infrastructure-client/adapters/types.ts`（~94 行）
 
-| 操作 | 文件 |
-|------|------|
+| 操作 | 文件                                                                               |
+| ---- | ---------------------------------------------------------------------------------- |
 | 新建 | `application-client/ports/reminder-api-client.port.ts` — 搬入 `IReminderApiClient` |
-| 更新 | `infrastructure-client/adapters/types.ts` |
-| 更新 | service import + barrel |
+| 更新 | `infrastructure-client/adapters/types.ts`                                          |
+| 更新 | service import + barrel                                                            |
 
 ### 2c. notification（1 个 port）
 
 当前定义位置：`infrastructure-client/adapters/types.ts`（~72 行）
 
-| 操作 | 文件 |
-|------|------|
+| 操作 | 文件                                                                                       |
+| ---- | ------------------------------------------------------------------------------------------ |
 | 新建 | `application-client/ports/notification-api-client.port.ts` — 搬入 `INotificationApiClient` |
-| 更新 | re-export 链 |
+| 更新 | re-export 链                                                                               |
 
 ### 2d. repository（1 个 port）
 
 当前定义位置：`infrastructure-client/adapters/types.ts`（~132 行）
 
-| 操作 | 文件 |
-|------|------|
+| 操作 | 文件                                                                                   |
+| ---- | -------------------------------------------------------------------------------------- |
 | 新建 | `application-client/ports/repository-api-client.port.ts` — 搬入 `IRepositoryApiClient` |
-| 更新 | re-export 链 |
+| 更新 | re-export 链                                                                           |
 
 ### 2e. schedule（2 个 port）
 
 当前定义位置：`infrastructure-client/adapters/types.ts`（~116 行）
 
-| 操作 | 文件 |
-|------|------|
+| 操作 | 文件                                                                                          |
+| ---- | --------------------------------------------------------------------------------------------- |
 | 新建 | `application-client/ports/schedule-event-api-client.port.ts` — 搬入 `IScheduleEventApiClient` |
-| 新建 | `application-client/ports/schedule-task-api-client.port.ts` — 搬入 `IScheduleTaskApiClient` |
-| 更新 | re-export 链 |
+| 新建 | `application-client/ports/schedule-task-api-client.port.ts` — 搬入 `IScheduleTaskApiClient`   |
+| 更新 | re-export 链                                                                                  |
 
 ### 2f. task（3 个 port）
 
 当前定义位置：`infrastructure-client/adapters/types.ts`（~132 行）
 
-| 操作 | 文件 |
-|------|------|
-| 新建 | `application-client/ports/task-template-api-client.port.ts` — 搬入 `ITaskTemplateApiClient` |
-| 新建 | `application-client/ports/task-instance-api-client.port.ts` — 搬入 `ITaskInstanceApiClient` |
+| 操作 | 文件                                                                                            |
+| ---- | ----------------------------------------------------------------------------------------------- |
+| 新建 | `application-client/ports/task-template-api-client.port.ts` — 搬入 `ITaskTemplateApiClient`     |
+| 新建 | `application-client/ports/task-instance-api-client.port.ts` — 搬入 `ITaskInstanceApiClient`     |
 | 新建 | `application-client/ports/task-dependency-api-client.port.ts` — 搬入 `ITaskDependencyApiClient` |
-| 更新 | re-export 链 |
+| 更新 | re-export 链                                                                                    |
 
 ### 2g. editor（1 个 port）
 
 当前定义位置：`infrastructure-client/adapters/types.ts`（~79 行）
 
-| 操作 | 文件 |
-|------|------|
+| 操作 | 文件                                                                           |
+| ---- | ------------------------------------------------------------------------------ |
 | 新建 | `application-client/ports/editor-api-client.port.ts` — 搬入 `IEditorApiClient` |
-| 更新 | re-export 链 |
+| 更新 | re-export 链                                                                   |
 
 ### 2h. ai（10 个 port）
 
 当前定义位置：`infrastructure-client/adapters/types.ts`（~152 行）
 
-| 操作 | 文件 |
-|------|------|
+| 操作 | 文件                                                                        |
+| ---- | --------------------------------------------------------------------------- |
 | 新建 | `application-client/ports/ai-api-client.port.ts` — 搬入全部 10 个 port 接口 |
-| 更新 | re-export 链 |
+| 更新 | re-export 链                                                                |
 
 ### 每个模块的变更文件清单
 
@@ -326,6 +328,7 @@ pnpm nx run-many --target=typecheck --projects=governance,account,authentication
 ```
 
 全部完成后的确认项：
+
 - 无 deprecated singleton proxy（authentication/goal/schedule）
 - 无 legacy infrastructure（notification）
 - 无 `@deprecated` ClientService 标记（5 个模块）

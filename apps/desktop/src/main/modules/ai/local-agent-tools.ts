@@ -284,11 +284,18 @@ export function createDesktopLocalAgentTools(
           try {
             const scope = command.action === 'snapshot' ? 'read' : 'goals:write';
             await context.authorize(scope);
-            const response = await context.track(() => panelBridge!.executeCommand(context, command));
+            const response = await context.track(() =>
+              panelBridge!.executeCommand(context, command),
+            );
             if (!response.ok) {
               return {
                 isError: true,
-                content: [{ type: 'text' as const, text: response.error?.message ?? 'Panel command failed' }],
+                content: [
+                  {
+                    type: 'text' as const,
+                    text: response.error?.message ?? 'Panel command failed',
+                  },
+                ],
                 structuredContent: { error: response.error, snapshot: response.snapshot },
               };
             }

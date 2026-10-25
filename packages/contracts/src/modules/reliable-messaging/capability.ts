@@ -47,7 +47,7 @@ export class CapabilityMissingStartupException extends Error {
   constructor(public readonly contract: CapabilityRequirementContract) {
     super(
       `[FAIL-FAST] Production capability '${contract.capabilityName}' in module '${contract.moduleName}' is MISSING. ` +
-        `Production missing required capabilities MUST cause startup failure. Implicit fallback or no-op success is strictly prohibited.`
+        `Production missing required capabilities MUST cause startup failure. Implicit fallback or no-op success is strictly prohibited.`,
     );
     this.name = 'CapabilityMissingStartupException';
   }
@@ -60,7 +60,7 @@ export class CapabilityTestDoubleForbiddenException extends Error {
   constructor(public readonly contract: CapabilityRequirementContract) {
     super(
       `[FAIL-FAST] Test double for capability '${contract.capabilityName}' in module '${contract.moduleName}' is FORBIDDEN ` +
-        `because allowTestDoubleInTest is false.`
+        `because allowTestDoubleInTest is false.`,
     );
     this.name = 'CapabilityTestDoubleForbiddenException';
   }
@@ -80,7 +80,7 @@ export class CapabilityTestDoubleForbiddenException extends Error {
  */
 export function assertProductionCapabilityOrFailFast(
   contract: CapabilityRequirementContract,
-  environment: 'production' | 'development' | 'test'
+  environment: 'production' | 'development' | 'test',
 ): void {
   if (environment === 'production') {
     if (contract.status === 'test_double') {

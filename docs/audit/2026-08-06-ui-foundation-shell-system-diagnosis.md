@@ -55,33 +55,33 @@ updated: 2026-08-06T00:00:00Z
 
 当前 AppShell 实际同时维护五类状态：
 
-| 状态维度 | 当前实现 | 应表达的事实 |
-| --- | --- | --- |
-| Scene | `workspace` / `settings` | 当前是工作区还是独立设置场景 |
-| Surface | `home` / `business` / `workflow` | BusinessPanel 当前显示哪种内容 |
-| Layout | `split` / `focus` | AI 与业务面板是否并列 |
-| Tab | `BusinessTab[]` + `activeTabId` | 已打开的业务上下文和当前 URL |
-| Viewport | `showSidebar`、动态 panel clamp | 当前窗口能否容纳这些区域 |
+| 状态维度 | 当前实现                         | 应表达的事实                   |
+| -------- | -------------------------------- | ------------------------------ |
+| Scene    | `workspace` / `settings`         | 当前是工作区还是独立设置场景   |
+| Surface  | `home` / `business` / `workflow` | BusinessPanel 当前显示哪种内容 |
+| Layout   | `split` / `focus`                | AI 与业务面板是否并列          |
+| Tab      | `BusinessTab[]` + `activeTabId`  | 已打开的业务上下文和当前 URL   |
+| Viewport | `showSidebar`、动态 panel clamp  | 当前窗口能否容纳这些区域       |
 
 这些状态目前由不同组件分别修改：路由同步在 `useShellRouterSync`，面板动作在 `AppShell`，工作流状态在 AIChatView，宽度状态在 AppShell 和 Pinia store，设置场景通过模板分支切换。结果是同一件事存在多个入口和多个行为协议。
 
 ## 4. 分级问题总表
 
-| ID | 级别 | 问题 | 用户影响 | 结论 |
-| --- | --- | --- | --- | --- |
-| UI-001 | P0 | 进入设置会卸载整个 workspace 和 AI 实例，且没有统一离开保护 | 未保存编辑可能丢失；AI 流式回复中断 | 必须先修 |
-| UI-002 | P1 | 入口导航分散，部分动作直接 `router.push`，绕过 Tab/dirty/busy 协议 | URL、Tab、返回行为不一致 | 必须收敛 |
-| UI-003 | P1 | 胶囊入口激活旧 Tab 时不保证 landing；preview 项目 ID 未转成精确深链 | “进入模块”和“恢复上下文”含义冲突 | 必须收敛 |
-| UI-004 | P1 | Dirty/busy 保护只覆盖 Goal/Task 的部分动作 | Reminder、Schedule、Governance 等编辑页面可无提示离开 | 必须补齐 |
-| UI-005 | P1 | KeepAlive `max=8` 与实际无限增长的 Tab 列表不一致 | 超过上限后缓存静默驱逐，草稿可能丢失 | 必须修正契约 |
-| UI-006 | P1 | BusinessPanel wrapper 与模块内部重复声明滚动 | 滚轮抢占、sticky 参照错误、滚动位置不稳定 | 必须统一 |
-| UI-007 | P1 | 设置返回优先 activeTab，而不是进入设置前的 origin | 返回到过时后台 Tab | 必须修正 |
-| UI-008 | P1 | 顶栏 notification badgeSource 注册但未传入 header | 未读状态不可扫描 | 应补齐 |
-| UI-009 | P2 | 各模块页面骨架、二级导航和返回语义差异大 | 认知成本和维护成本持续增加 | 建议统一 |
-| UI-010 | P2 | AI workflow 状态同时出现在时间线、ActionBar 和右工作台 | 状态重复、下一步动作层级不清 | 建议重排 |
-| UI-011 | P2 | Help 菜单全部 disabled/soon | 可见但不可用的功能债务 | 应隐藏或实现 |
-| UI-012 | P2 | preview 数据源和完整页面数据生命周期没有统一读模型 | 摘要与完整页面可能短暂不一致 | 建议收敛 |
-| UI-013 | P2 | ARIA roles、active state、Tab semantics 在模块间不一致 | 键盘和辅助技术反馈不统一 | 应纳入基础模板 |
+| ID     | 级别 | 问题                                                                | 用户影响                                              | 结论           |
+| ------ | ---- | ------------------------------------------------------------------- | ----------------------------------------------------- | -------------- |
+| UI-001 | P0   | 进入设置会卸载整个 workspace 和 AI 实例，且没有统一离开保护         | 未保存编辑可能丢失；AI 流式回复中断                   | 必须先修       |
+| UI-002 | P1   | 入口导航分散，部分动作直接 `router.push`，绕过 Tab/dirty/busy 协议  | URL、Tab、返回行为不一致                              | 必须收敛       |
+| UI-003 | P1   | 胶囊入口激活旧 Tab 时不保证 landing；preview 项目 ID 未转成精确深链 | “进入模块”和“恢复上下文”含义冲突                      | 必须收敛       |
+| UI-004 | P1   | Dirty/busy 保护只覆盖 Goal/Task 的部分动作                          | Reminder、Schedule、Governance 等编辑页面可无提示离开 | 必须补齐       |
+| UI-005 | P1   | KeepAlive `max=8` 与实际无限增长的 Tab 列表不一致                   | 超过上限后缓存静默驱逐，草稿可能丢失                  | 必须修正契约   |
+| UI-006 | P1   | BusinessPanel wrapper 与模块内部重复声明滚动                        | 滚轮抢占、sticky 参照错误、滚动位置不稳定             | 必须统一       |
+| UI-007 | P1   | 设置返回优先 activeTab，而不是进入设置前的 origin                   | 返回到过时后台 Tab                                    | 必须修正       |
+| UI-008 | P1   | 顶栏 notification badgeSource 注册但未传入 header                   | 未读状态不可扫描                                      | 应补齐         |
+| UI-009 | P2   | 各模块页面骨架、二级导航和返回语义差异大                            | 认知成本和维护成本持续增加                            | 建议统一       |
+| UI-010 | P2   | AI workflow 状态同时出现在时间线、ActionBar 和右工作台              | 状态重复、下一步动作层级不清                          | 建议重排       |
+| UI-011 | P2   | Help 菜单全部 disabled/soon                                         | 可见但不可用的功能债务                                | 应隐藏或实现   |
+| UI-012 | P2   | preview 数据源和完整页面数据生命周期没有统一读模型                  | 摘要与完整页面可能短暂不一致                          | 建议收敛       |
+| UI-013 | P2   | ARIA roles、active state、Tab semantics 在模块间不一致              | 键盘和辅助技术反馈不统一                              | 应纳入基础模板 |
 
 ## 5. 详细诊断
 
@@ -198,4 +198,3 @@ Help 菜单当前所有项目都是 disabled/soon。未实现入口不应继续�
 - 每个模块检查主 scroll host 数量、sticky toolbar 参照对象和滚动位置恢复；
 - Notification 未读数量在顶栏入口、preview 和列表之间即时一致；
 - 宽屏设置长页面滚动时分类导航保持可见。
-

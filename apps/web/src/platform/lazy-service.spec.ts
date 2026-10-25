@@ -66,9 +66,7 @@ describe('createLazyService', () => {
     await expect(service.greet('Ada') as unknown as Promise<string>).rejects.toThrow(
       'bootstrap failed',
     );
-    await expect(service.greet('Grace') as unknown as Promise<string>).resolves.toBe(
-      'hello Grace',
-    );
+    await expect(service.greet('Grace') as unknown as Promise<string>).resolves.toBe('hello Grace');
     expect(factory).toHaveBeenCalledTimes(2);
   });
 

@@ -41,14 +41,14 @@ The component tests use deterministic local Select stubs to validate presentatio
 
 ## Validation
 
-| Check | Result |
-| --- | --- |
-| Focused app-vue suite | PASS — 7 files / 52 tests |
-| `app-vue:typecheck` | PASS |
-| Changed-file ESLint | PASS |
+| Check                            | Result                            |
+| -------------------------------- | --------------------------------- |
+| Focused app-vue suite            | PASS — 7 files / 52 tests         |
+| `app-vue:typecheck`              | PASS                              |
+| Changed-file ESLint              | PASS                              |
 | Prettier on changed TS/Vue files | PASS / unchanged after formatting |
-| `git diff --check` | PASS |
-| `memoflow:governance-check` | PASS |
+| `git diff --check`               | PASS                              |
+| `memoflow:governance-check`      | PASS                              |
 
 Nx reported the existing `time:build` flaky-task advisory during typecheck, but the `app-vue:typecheck` target completed successfully.
 

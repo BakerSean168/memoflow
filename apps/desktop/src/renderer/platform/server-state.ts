@@ -97,6 +97,5 @@ export function mapTablesToInvalidationIntents(
     });
   }
 
-
   return intents;
 }

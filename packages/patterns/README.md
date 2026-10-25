@@ -95,7 +95,8 @@ L5: Apps（应用入口）
 - ✅ **包含**: 通用数据结构、框架接口、设计模式基类
 - ❌ **不包含**: 业务逻辑、特定领域规则、具体实现
 
-**注意：** 
+**注意：**
+
 - 事件总线（EventBus）的具体实现在 `@memoflow/utils` 包中
 - patterns 中的 Events 模块将提供事件处理器的通用抽象（BaseEventHandler、IEventDispatcher 等）
 
@@ -122,14 +123,12 @@ pnpm nx typecheck patterns
 
 从旧位置迁移到 patterns 的文件：
 
-| 旧位置 | 新位置 | 说明 |
-|--------|--------|------|
-| `application-server/schedule/scheduler/MinHeap.ts` | `patterns/scheduler/priority-queue/MinHeap.ts` | 最小堆数据结构 |
-| `application-server/schedule/scheduler/IScheduleTimer.ts` | `patterns/scheduler/IScheduleTimer.ts` | Timer 抽象 |
-| `application-server/schedule/scheduler/IScheduleMonitor.ts` | `patterns/scheduler/IScheduleMonitor.ts` | 监控接口 |
+| 旧位置                                                      | 新位置                                         | 说明           |
+| ----------------------------------------------------------- | ---------------------------------------------- | -------------- |
+| `application-server/schedule/scheduler/MinHeap.ts`          | `patterns/scheduler/priority-queue/MinHeap.ts` | 最小堆数据结构 |
+| `application-server/schedule/scheduler/IScheduleTimer.ts`   | `patterns/scheduler/IScheduleTimer.ts`         | Timer 抽象     |
+| `application-server/schedule/scheduler/IScheduleMonitor.ts` | `patterns/scheduler/IScheduleMonitor.ts`       | 监控接口       |
 
 ## 许可证
 
 MIT
-
-

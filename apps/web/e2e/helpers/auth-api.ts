@@ -59,8 +59,8 @@ export async function loginViaApi(
  * verification link captured by the API's test-only mailbox endpoint, then
  * API sign-in. Drop-in replacement for testHelpers.registerAndLogin (same
  * options); kept under the same name via the alias export below so call
- * sites only change their import source. The UI registration flow itself
- * remains covered by e2e/authentication/*.
+ * sites only change their import source. Registration/session/password contracts now live in
+ * cloud-auth-http.integration.test.ts; WebAuthView stories cover the UI contract.
  */
 export async function registerAndLoginViaApi(
   page: Page,

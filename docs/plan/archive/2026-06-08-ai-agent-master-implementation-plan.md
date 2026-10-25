@@ -483,14 +483,14 @@ resume payload：
 
 ### 7.1 总体状态
 
-| Phase | 当前状态 | 结论 |
-| --- | --- | --- |
-| Phase 1：Workspace 与 Agent contract | 基本完成 | `/` 已接入 AI Agent Workspace；TS/Python contract、用户意图模式和右侧 context panel 已落地。 |
-| Phase 2：LangGraph runtime spike | 已完成并扩展 | Python `agent_runtime` 已引入 LangGraph，已覆盖 `goal.create`、`knowledge.qa`、`knowledge.generate`，不再只是最小 goal spike。 |
-| Phase 3：Goal Agent 接入真实 workflow | 主流程完成，approval 编辑闭环基本完成 | Goal Agent 已支持 clarification、draft、approval、`execution.required`、TS executor 执行和 retry；Agent 确认/继续/重试路径已不再由前端调用旧 `generateGoal(command: execute)`，goal/KR/task template/reminder 编辑会通过 `editedArtifacts` / `approvedActions` / `approvedPlan` 回传。 |
-| Phase 4：Knowledge Q&A artifact 化 | 基本完成 | `knowledge.qa` 已产出 `knowledge_answer` artifact，前端展示 citations、related notes、证据不足状态，并可从 grounded answer 进入笔记草稿。 |
-| Phase 5：Knowledge Generation Agent | 部分完成 | `knowledge.generate` graph、approval、外部执行和保存结果已打通；草稿生成仍是最小模板，duplicate risk 和真实生成质量还需要深化。 |
-| Phase 6：Durability、observability 与 eval | 部分完成 | 已有 file-backed checkpoint、run history、node/tool timing、token usage 和 agent runtime eval harness；持久化仍在 Python 本地文件层，尚未收敛到正式 TS run history/checkpoint port。 |
+| Phase                                      | 当前状态                              | 结论                                                                                                                                                                                                                                                                                   |
+| ------------------------------------------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Phase 1：Workspace 与 Agent contract       | 基本完成                              | `/` 已接入 AI Agent Workspace；TS/Python contract、用户意图模式和右侧 context panel 已落地。                                                                                                                                                                                           |
+| Phase 2：LangGraph runtime spike           | 已完成并扩展                          | Python `agent_runtime` 已引入 LangGraph，已覆盖 `goal.create`、`knowledge.qa`、`knowledge.generate`，不再只是最小 goal spike。                                                                                                                                                         |
+| Phase 3：Goal Agent 接入真实 workflow      | 主流程完成，approval 编辑闭环基本完成 | Goal Agent 已支持 clarification、draft、approval、`execution.required`、TS executor 执行和 retry；Agent 确认/继续/重试路径已不再由前端调用旧 `generateGoal(command: execute)`，goal/KR/task template/reminder 编辑会通过 `editedArtifacts` / `approvedActions` / `approvedPlan` 回传。 |
+| Phase 4：Knowledge Q&A artifact 化         | 基本完成                              | `knowledge.qa` 已产出 `knowledge_answer` artifact，前端展示 citations、related notes、证据不足状态，并可从 grounded answer 进入笔记草稿。                                                                                                                                              |
+| Phase 5：Knowledge Generation Agent        | 部分完成                              | `knowledge.generate` graph、approval、外部执行和保存结果已打通；草稿生成仍是最小模板，duplicate risk 和真实生成质量还需要深化。                                                                                                                                                        |
+| Phase 6：Durability、observability 与 eval | 部分完成                              | 已有 file-backed checkpoint、run history、node/tool timing、token usage 和 agent runtime eval harness；持久化仍在 Python 本地文件层，尚未收敛到正式 TS run history/checkpoint port。                                                                                                   |
 
 ### 7.2 已落地的关键实现
 

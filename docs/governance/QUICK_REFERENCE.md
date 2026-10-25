@@ -12,16 +12,16 @@ updated: 2026-10-03T10:30:00+09:00
 
 ## 当前边界
 
-| Surface | Canonical owner |
-| --- | --- |
-| Engineering rule metadata | `tools/governance/engineering-rules.json` |
-| Semantic pin | `tools/governance/pinned-engineering-rules.json` |
-| Rule runner | `tools/governance/engineering-rule-adapter.mjs` |
-| Deterministic audits | `tools/governance/*.mjs` |
-| Human standards | `docs/standards/**` |
-| Governance docs | `docs/governance/**` |
-| Architecture decisions | `docs/architecture/adr/**` |
-| Root gate | `pnpm nx run memoflow:governance-check` |
+| Surface                   | Canonical owner                                  |
+| ------------------------- | ------------------------------------------------ |
+| Engineering rule metadata | `tools/governance/engineering-rules.json`        |
+| Semantic pin              | `tools/governance/pinned-engineering-rules.json` |
+| Rule runner               | `tools/governance/engineering-rule-adapter.mjs`  |
+| Deterministic audits      | `tools/governance/*.mjs`                         |
+| Human standards           | `docs/standards/**`                              |
+| Governance docs           | `docs/governance/**`                             |
+| Architecture decisions    | `docs/architecture/adr/**`                       |
+| Root gate                 | `pnpm nx run memoflow:governance-check`          |
 
 不存在 Product Governance package/contracts/UI/DB/API/IPC/route/DI surface。
 

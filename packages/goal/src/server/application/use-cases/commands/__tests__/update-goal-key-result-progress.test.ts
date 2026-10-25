@@ -144,7 +144,9 @@ describe('UpdateGoalKeyResultProgressUseCase', () => {
 
     await useCase.execute('goal-id-1', 'identity-1', 'kr-1', 50, 1);
 
-    expect(goalRepo.findByIdForIdentity).toHaveBeenCalledWith('identity-1', 'goal-id-1', { includeChildren: true });
+    expect(goalRepo.findByIdForIdentity).toHaveBeenCalledWith('identity-1', 'goal-id-1', {
+      includeChildren: true,
+    });
   });
 
   it('materializes the authoritative Goal read model', async () => {

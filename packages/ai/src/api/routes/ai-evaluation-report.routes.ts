@@ -1,9 +1,5 @@
 import { Router, type RequestHandler } from 'express';
-import {
-  RouteRegistrar,
-  type OpenApiRegistryLike,
-  successResponse,
-} from '@memoflow/utils/result';
+import { RouteRegistrar, type OpenApiRegistryLike, successResponse } from '@memoflow/utils/result';
 import { AIEvaluationOverviewSchema } from '@memoflow/contracts/ai';
 import type { AIEvaluationReportController } from '../../server/transport/ai-evaluation-report.controller';
 

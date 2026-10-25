@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { access, readFile } from 'node:fs/promises';
-import { WEB_FLOW_SPECS } from '../../../apps/web/web-flow-specs.mjs';
+import { WEB_SPECIALIZED_SPECS } from '../../../apps/web/web-specialized-specs.mjs';
 import { planShards, planWarnings } from '../lib/shard-balance.mjs';
 import { parseShardArgument, WEB_SPEC_DURATIONS_PATH } from '../run-web-shard.mjs';
 import {
@@ -23,11 +23,11 @@ const history = JSON.parse(await readFile(WEB_SPEC_DURATIONS_PATH, 'utf8'));
 async function ciShardMatrix() {
   const ci = await readFile('.github/workflows/ci.yml', 'utf8');
   assert.match(ci, /matrix: \$\{\{ fromJSON\(needs.scope-detector.outputs.web_matrix\) \}\}/u);
-  const plan = planWebShards({ specs: WEB_FLOW_SPECS, durations: history.specs });
+  const plan = planWebShards({ specs: WEB_SPECIALIZED_SPECS, durations: history.specs });
   return plan.shards.map(({ id }) => parseShardArgument(id));
 }
 
-test('the CI shard plan covers every canonical Web Flow spec exactly once', async () => {
+test('the CI shard plan covers every specialized Web spec exactly once', async () => {
   const matrix = await ciShardMatrix();
   assert.ok(matrix.length > 0);
   assert.ok(matrix.every((entry) => entry.count === matrix.length));
@@ -36,24 +36,24 @@ test('the CI shard plan covers every canonical Web Flow spec exactly once', asyn
     matrix.map((_, index) => index + 1),
   );
   const { shards } = planShards({
-    specs: WEB_FLOW_SPECS,
+    specs: WEB_SPECIALIZED_SPECS,
     durations: history.specs,
     shardCount: matrix.length,
   });
   const collected = shards.flatMap((shard) => shard.specs);
   assert.equal(collected.length, new Set(collected).size);
-  assert.deepEqual([...collected].sort(), [...WEB_FLOW_SPECS].sort());
+  assert.deepEqual([...collected].sort(), [...WEB_SPECIALIZED_SPECS].sort());
   assert.ok(shards.every((shard) => shard.specs.length > 0));
 });
 
 test('shard arguments are validated', () => {
   assert.deepEqual(parseShardArgument('3/4'), { index: 3, count: 4 });
-  assert.throws(() => parseShardArgument('5/4'), /Unknown Web Flow shard/u);
+  assert.throws(() => parseShardArgument('5/4'), /Unknown Web specialized shard/u);
   assert.throws(() => parseShardArgument('3'), /<index>\/<count>/u);
 });
 
-test('canonical Web Flow specs exist on disk and duration history has no retired specs', async () => {
-  for (const spec of WEB_FLOW_SPECS) {
+test('specialized Web specs exist on disk and duration history has no retired specs', async () => {
+  for (const spec of WEB_SPECIALIZED_SPECS) {
     await access(`apps/web/e2e/${spec}`);
   }
   assert.equal(history.version, 2);
@@ -61,7 +61,7 @@ test('canonical Web Flow specs exist on disk and duration history has no retired
   assert.ok(Number.isFinite(Date.parse(history.observedAt)), 'observedAt is required');
   assert.equal(typeof history.source, 'string');
   const retiredDurationSpecs = Object.keys(history.specs).filter(
-    (spec) => !WEB_FLOW_SPECS.includes(spec),
+    (spec) => !WEB_SPECIALIZED_SPECS.includes(spec),
   );
   assert.deepEqual(retiredDurationSpecs, []);
   for (const entry of Object.values(history.specs)) {
@@ -157,35 +157,24 @@ test('timing reports with missing, invalid or future observation dates are rejec
   }
 });
 
-test('Web Flow shard runner allocates a dynamic provider-mock port', async () => {
-  const source = await readFile('tools/test-system-v2/run-web-shard.mjs', 'utf8');
-  assert.match(source, /server\.listen\(0, '127\.0\.0\.1'/);
-  assert.match(source, /E2E_OPENAI_MOCK_PORT: mockPort/);
-  assert.match(source, /'--config',\s*'playwright\.config\.ts'/u);
+test('specialized acceptance owns dynamic ports without ordinary Flow startup', async () => {
+  const source = await readFile('apps/web/e2e/helpers/run-ai-provider-playwright.ts', 'utf8');
+  assert.match(source, /server\.listen\(0, '127\.0\.0\.1'/u);
+  const runner = await readFile('tools/test-system-v2/run-web-shard.mjs', 'utf8');
+  assert.match(runner, /web:e2e:ai-provider/u);
+  assert.doesNotMatch(runner, /E2E_OPENAI_MOCK_PORT/u);
 });
 
-test('dynamic shard math respects setup budget, bounds, zero and missing durations', () => {
-  const specs = WEB_FLOW_SPECS.slice(0, 3);
-  const durations = Object.fromEntries(specs.map((spec) => [spec, { durationMs: 300_000 }]));
-  assert.equal(planWebShards({ specs, durations }).shardCount, 3);
-  assert.equal(planWebShards({ specs: [specs[0]], durations }).shardCount, 1);
-  assert.equal(planWebShards({ specs: [], durations }).shardCount, 0);
+test('specialized shard math caps a single acceptance spec at one runner and handles zero', () => {
+  const specs = [...WEB_SPECIALIZED_SPECS];
   assert.equal(
-    planWebShards({
-      specs,
-      durations,
-      policy: { ...WEB_SHARD_POLICY, maxShards: 2, defaultShards: 2 },
-    }).shardCount,
-    2,
+    planWebShards({ specs, durations: { [specs[0]]: { durationMs: 900_000 } } }).shardCount,
+    1,
   );
-  const missing = planWebShards({
-    specs,
-    durations: { [specs[0]]: { durationMs: 20 }, [specs[1]]: { durationMs: 40 } },
-  });
-  assert.equal(missing.estimatedTotalMs, 90);
+  assert.equal(planWebShards({ specs: [] }).shardCount, 0);
   assert.equal(
     planWebShards({ specs, durations: { [specs[0]]: { durationMs: -1 } } }).estimatedTotalMs,
-    3,
+    1,
   );
   assert.throws(
     () => planWebShards({ specs, policy: { ...WEB_SHARD_POLICY, targetPerShardMs: 1 } }),
@@ -194,7 +183,7 @@ test('dynamic shard math respects setup budget, bounds, zero and missing duratio
 });
 
 test('scope narrowing proves canonical-only edits; unknown/shared/full scope runs all', () => {
-  const spec = WEB_FLOW_SPECS[0];
+  const spec = WEB_SPECIALIZED_SPECS[0];
   assert.deepEqual(selectWebSpecs({ enabled: true, files: [`apps/web/e2e/${spec}`] }), {
     specs: [spec],
     fallback: false,
@@ -202,36 +191,26 @@ test('scope narrowing proves canonical-only edits; unknown/shared/full scope run
   for (const files of [undefined, [], ['apps/web/src/App.vue'], ['apps/web/e2e/deleted.spec.ts']]) {
     const selection = selectWebSpecs({ enabled: true, files });
     const plan = planWebShards({ ...selection, durations: history.specs });
-    assert.deepEqual(plan.specs, [...WEB_FLOW_SPECS]);
-    assert.equal(plan.shardCount, WEB_SHARD_POLICY.defaultShards);
+    assert.deepEqual(plan.specs, [...WEB_SPECIALIZED_SPECS]);
+    assert.ok(plan.shardCount >= 1 && plan.shardCount <= WEB_SHARD_POLICY.defaultShards);
     assert.equal(plan.fallback, true);
   }
   const full = selectWebSpecs({ enabled: true, full: true, files: [] });
   assert.equal(full.fallback, false);
-  assert.deepEqual(full.specs, [...WEB_FLOW_SPECS]);
+  assert.deepEqual(full.specs, [...WEB_SPECIALIZED_SPECS]);
   assert.deepEqual(selectWebSpecs({ enabled: false }), { specs: [], fallback: false });
 });
 
-test('owner-scoped selection keeps the core floor and security/consumer extensions', () => {
-  const notification = selectWebSpecs({ enabled: true, files: ['packages/notification/src/api/index.ts'] });
-  assert.equal(notification.fallback, false);
-  assert.equal(notification.specs.length, 11);
-  assert.ok(notification.specs.includes('notification/notification-center.spec.ts'));
-  assert.equal(planWebShards({ ...notification, durations: history.specs }).shardCount, 2);
-  for (const owner of ['account', 'cloud-auth']) {
-    const selected = selectWebSpecs({ enabled: true, files: [`packages/${owner}/src/index.ts`] });
-    for (const spec of WEB_FLOW_SPECS.filter((spec) => spec.startsWith('authentication/'))) {
-      assert.ok(selected.specs.includes(spec), `${owner}: ${spec}`);
-    }
-  }
-  for (const owner of ['task', 'goal', 'repository']) {
-    const selected = selectWebSpecs({ enabled: true, files: [`packages/app-vue/src/modules/${owner}/view.vue`] });
-    for (const spec of WEB_FLOW_SPECS.filter((spec) => spec.startsWith('ai/') || spec.startsWith('schedule/'))) {
-      assert.ok(selected.specs.includes(spec), `${owner}: ${spec}`);
-    }
-  }
-  for (const file of ['nx.json', 'packages/contracts/src/index.ts', 'packages/app-vue/src/shared/Button.vue']) {
-    assert.equal(selectWebSpecs({ enabled: true, files: ['packages/goal/src/index.ts', file] }).fallback, true);
+test('ordinary owners have no Flow/core floor while specialized acceptance and visuals retain their job', () => {
+  for (const file of [
+    'packages/notification/src/api/index.ts',
+    'packages/goal/src/index.ts',
+    'packages/app-vue/src/modules/task/view.vue',
+    'nx.json',
+  ]) {
+    const selected = selectWebSpecs({ enabled: true, files: [file] });
+    assert.deepEqual(selected.specs, ['ai/provider-onboarding.spec.ts']);
+    assert.equal(planWebShards({ ...selected, durations: history.specs }).shardCount, 1);
   }
 });
 
@@ -271,7 +250,7 @@ test('runner consumes exact manifest assignment and captures results before late
   const { buildDeliveryManifest } =
     await import('../../ci-cd-platform/generate-delivery-manifest.mjs');
   const root = await mkdtemp(path.join(tmpdir(), 'web-shard-runner-'));
-  const spec = WEB_FLOW_SPECS[0];
+  const spec = WEB_SPECIALIZED_SPECS[0];
   const manifest = await buildDeliveryManifest({
     event: 'pull_request',
     full: false,
@@ -300,7 +279,7 @@ test('runner consumes exact manifest assignment and captures results before late
       `#!/usr/bin/env node
 const fs = require('node:fs');
 fs.writeFileSync('args.json', JSON.stringify(process.argv.slice(2)));
-fs.writeFileSync('test-results/results.json', JSON.stringify({suites:[{specs:[{file:${JSON.stringify(spec)},tests:[{results:[{status:'passed'}]}]}]}]}));
+fs.writeFileSync('apps/web/test-results/provider-results.json', JSON.stringify({suites:[{specs:[{file:${JSON.stringify(spec)},tests:[{results:[{status:'passed'}]}]}]}]}));
 `,
     );
     await chmod(path.join(root, 'pnpm'), 0o755);
@@ -308,7 +287,6 @@ fs.writeFileSync('test-results/results.json', JSON.stringify({suites:[{specs:[{f
     const env = {
       ...process.env,
       PATH: `${root}:${process.env.PATH}`,
-      E2E_OPENAI_MOCK_PORT: '19999',
       GITHUB_RUN_ID: '90210',
       GITHUB_RUN_ATTEMPT: '2',
     };
@@ -318,10 +296,13 @@ fs.writeFileSync('test-results/results.json', JSON.stringify({suites:[{specs:[{f
       stdio: 'pipe',
       timeout: 30_000,
     });
-    assert.deepEqual(JSON.parse(await readFile(path.join(root, 'apps/web/args.json'), 'utf8')), [
+    assert.deepEqual(JSON.parse(await readFile(path.join(root, 'args.json'), 'utf8')), [
       'exec',
-      'playwright',
-      'test',
+      'nx',
+      'run',
+      'web:e2e:ai-provider',
+      '--output-style=static',
+      '--',
       '--config',
       'playwright.config.ts',
       `e2e/${spec}`,
@@ -350,4 +331,37 @@ fs.writeFileSync('test-results/results.json', JSON.stringify({suites:[{specs:[{f
   } finally {
     await rm(root, { recursive: true, force: true });
   }
+});
+
+test('storybook-only changes select no Web specs (Q4 Component Browser lane owns them)', async () => {
+  const { selectWebSpecs } = await import('../lib/web-shards.mjs');
+  assert.deepEqual(
+    selectWebSpecs({
+      enabled: true,
+      full: false,
+      files: ['packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.stories.ts'],
+    }),
+    { specs: [], fallback: false },
+  );
+  const mixed = selectWebSpecs({
+    enabled: true,
+    full: false,
+    files: [
+      'packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.stories.ts',
+      'apps/web/e2e/ai/provider-onboarding.spec.ts',
+    ],
+  });
+  assert.deepEqual(mixed.specs, ['ai/provider-onboarding.spec.ts']);
+});
+
+test('unknown-scope fallback retains every spec without reserving four runners for a small suite', () => {
+  const durations = Object.fromEntries(
+    WEB_SPECIALIZED_SPECS.map((spec) => [spec, { durationMs: 1000 }]),
+  );
+  const plan = planWebShards({ specs: [WEB_SPECIALIZED_SPECS[0]], fallback: true, durations });
+  assert.equal(plan.shardCount, 1);
+  assert.deepEqual(
+    [...plan.shards.flatMap((shard) => shard.specs)].sort(),
+    [...WEB_SPECIALIZED_SPECS].sort(),
+  );
 });

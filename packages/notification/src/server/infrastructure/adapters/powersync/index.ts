@@ -4,4 +4,3 @@ export { NotificationInteractionPowerSyncRepository } from './notification-inter
 export { PowerSyncNotificationReliableAdapter } from './power-sync-notification-reliable.adapter';
 export { NotificationRequestedPowerSyncWriterAdapter } from './notification-requested-writer.powersync.adapter';
 export * from './mappers';
-

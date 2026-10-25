@@ -19,7 +19,8 @@
       "options": {
         "command": "tsc --noEmit -p tsconfig.json",
         "cwd": "packages/cloud-auth"
-      }
+      },
+      "dependsOn": ["^build"]
     },
     "test": {
       "executor": "nx:run-commands",

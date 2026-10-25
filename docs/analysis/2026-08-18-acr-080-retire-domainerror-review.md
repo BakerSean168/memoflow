@@ -33,6 +33,7 @@ total findings **28 → 21** (only `RAW_RESULT_MESSAGE_RETHROW:20` + documented
   (residual reference fixed by orchestrator).
 
 ## 3. Validation
+
 - utils 60, notification 237, reminder 376, task 167, ai transport 25 tests pass.
 - Typecheck (`tsc --noEmit`) clean for utils, notification, reminder, task, ai.
 - Inventory scanner `passed`; 142 stale baseline entries await next rewrite.

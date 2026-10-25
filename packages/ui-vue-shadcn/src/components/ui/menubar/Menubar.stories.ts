@@ -1,9 +1,20 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import {
-  Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarSeparator,
-  MenubarShortcut, MenubarSub, MenubarSubContent, MenubarSubTrigger,
-  MenubarTrigger, MenubarCheckboxItem, MenubarRadioGroup, MenubarRadioItem,
-  MenubarGroup, MenubarLabel,
+  Menubar,
+  MenubarContent,
+  MenubarItem,
+  MenubarMenu,
+  MenubarSeparator,
+  MenubarShortcut,
+  MenubarSub,
+  MenubarSubContent,
+  MenubarSubTrigger,
+  MenubarTrigger,
+  MenubarCheckboxItem,
+  MenubarRadioGroup,
+  MenubarRadioItem,
+  MenubarGroup,
+  MenubarLabel,
 } from '.';
 
 const meta = {
@@ -18,10 +29,21 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: () => ({
     components: {
-      Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarSeparator,
-      MenubarShortcut, MenubarSub, MenubarSubContent, MenubarSubTrigger,
-      MenubarTrigger, MenubarCheckboxItem, MenubarRadioGroup, MenubarRadioItem,
-      MenubarGroup, MenubarLabel,
+      Menubar,
+      MenubarContent,
+      MenubarItem,
+      MenubarMenu,
+      MenubarSeparator,
+      MenubarShortcut,
+      MenubarSub,
+      MenubarSubContent,
+      MenubarSubTrigger,
+      MenubarTrigger,
+      MenubarCheckboxItem,
+      MenubarRadioGroup,
+      MenubarRadioItem,
+      MenubarGroup,
+      MenubarLabel,
     },
     template: `
       <Menubar>

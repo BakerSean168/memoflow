@@ -14,10 +14,13 @@ import type {
 } from './types';
 
 function readPath(value: unknown, path: string): unknown {
-  return path.split('.').filter(Boolean).reduce<unknown>((current, segment) => {
-    if (!current || typeof current !== 'object' || Array.isArray(current)) return undefined;
-    return (current as Record<string, unknown>)[segment];
-  }, value);
+  return path
+    .split('.')
+    .filter(Boolean)
+    .reduce<unknown>((current, segment) => {
+      if (!current || typeof current !== 'object' || Array.isArray(current)) return undefined;
+      return (current as Record<string, unknown>)[segment];
+    }, value);
 }
 
 function asSearchableText(value: unknown): string {
@@ -32,7 +35,10 @@ function evaluateCheck(output: unknown, check: AIEvalCheckDefinition): AIEvaluat
       return {
         name: check.name,
         passed: missing.length === 0,
-        detail: missing.length === 0 ? 'all required fragments present' : `missing: ${missing.join(', ')}`,
+        detail:
+          missing.length === 0
+            ? 'all required fragments present'
+            : `missing: ${missing.join(', ')}`,
       };
     }
     case 'text_excludes_any': {
@@ -41,7 +47,10 @@ function evaluateCheck(output: unknown, check: AIEvalCheckDefinition): AIEvaluat
       return {
         name: check.name,
         passed: leaked.length === 0,
-        detail: leaked.length === 0 ? 'forbidden fragments absent' : `found forbidden: ${leaked.join(', ')}`,
+        detail:
+          leaked.length === 0
+            ? 'forbidden fragments absent'
+            : `found forbidden: ${leaked.join(', ')}`,
       };
     }
     case 'json_path_exists': {
@@ -49,7 +58,8 @@ function evaluateCheck(output: unknown, check: AIEvalCheckDefinition): AIEvaluat
       return {
         name: check.name,
         passed: value !== undefined && value !== null,
-        detail: value !== undefined && value !== null ? `${check.path} exists` : `${check.path} missing`,
+        detail:
+          value !== undefined && value !== null ? `${check.path} exists` : `${check.path} missing`,
       };
     }
     case 'json_path_equals': {
@@ -67,13 +77,20 @@ function evaluateCheck(output: unknown, check: AIEvalCheckDefinition): AIEvaluat
       return {
         name: check.name,
         passed: length >= check.min,
-        detail: length >= check.min ? `${check.path} length ${length}` : `${check.path} length ${length}; expected >= ${check.min}`,
+        detail:
+          length >= check.min
+            ? `${check.path} length ${length}`
+            : `${check.path} length ${length}; expected >= ${check.min}`,
       };
     }
   }
 }
 
-function evaluateCase(evalCase: AIEvalCase, observation: AIEvalObservation, bundleId: string): AIEvaluationResult {
+function evaluateCase(
+  evalCase: AIEvalCase,
+  observation: AIEvalObservation,
+  bundleId: string,
+): AIEvaluationResult {
   const checks = evalCase.checks.map((check) => evaluateCheck(observation.output, check));
   if (observation.errorCode) {
     checks.push({ name: 'execution_error', passed: false, detail: observation.errorCode });
@@ -124,13 +141,17 @@ export async function runAIEvaluation(input: {
   const minPassRate = input.minPassRate ?? 1;
   const requiredTypes = new Set(input.dataset.cases.map((evalCase) => evalCase.type));
   const gateFailures: string[] = [];
-  if (passRate < minPassRate) gateFailures.push(`pass rate ${passRate.toFixed(4)} below ${minPassRate.toFixed(4)}`);
+  if (passRate < minPassRate)
+    gateFailures.push(`pass rate ${passRate.toFixed(4)} below ${minPassRate.toFixed(4)}`);
   for (const required of ['open_chat', 'goal_planning', 'knowledge_answer'] as const) {
     if (!requiredTypes.has(required)) gateFailures.push(`required case type missing: ${required}`);
   }
 
   const byType = Object.fromEntries(
-    [...requiredTypes].map((type) => [type, results.filter((result) => result.type === type).length]),
+    [...requiredTypes].map((type) => [
+      type,
+      results.filter((result) => result.type === type).length,
+    ]),
   );
   const report = AIEvaluationReportSchema.parse({
     generatedAt: input.generatedAt,

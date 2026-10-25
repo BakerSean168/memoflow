@@ -36,7 +36,17 @@ export const Default: Story = {
 
 export const WithForm: Story = {
   render: () => ({
-    components: { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Button, Input, Label },
+    components: {
+      Card,
+      CardHeader,
+      CardTitle,
+      CardDescription,
+      CardContent,
+      CardFooter,
+      Button,
+      Input,
+      Label,
+    },
     template: `
       <Card class="w-[350px]">
         <CardHeader>

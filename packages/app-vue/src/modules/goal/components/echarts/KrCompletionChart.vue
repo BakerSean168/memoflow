@@ -41,7 +41,9 @@ const completionStats = computed(() => {
     const percentage = getKeyResultProgressPercentage(kr.progress);
     return percentage > 0 && percentage < 100;
   }).length;
-  const notStarted = keyResults.value.filter((kr) => getKeyResultProgressPercentage(kr.progress) === 0).length;
+  const notStarted = keyResults.value.filter(
+    (kr) => getKeyResultProgressPercentage(kr.progress) === 0,
+  ).length;
 
   return {
     completed,

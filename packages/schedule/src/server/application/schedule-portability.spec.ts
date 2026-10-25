@@ -43,8 +43,11 @@ function makeRepository(initial: CalendarEntry[] = []) {
     findByIdentityId: vi.fn(async (identityId: string) =>
       entries.filter((entry) => String(entry.identityId) === identityId),
     ),
-    findByIdForIdentity: vi.fn(async (identityId: string, id: string) =>
-      entries.find((entry) => String(entry.identityId) === identityId && String(entry.id) === id) ?? null,
+    findByIdForIdentity: vi.fn(
+      async (identityId: string, id: string) =>
+        entries.find(
+          (entry) => String(entry.identityId) === identityId && String(entry.id) === id,
+        ) ?? null,
     ),
     save: vi.fn(async (entry: CalendarEntry) => {
       entries = [...entries.filter((current) => String(current.id) !== String(entry.id)), entry];
@@ -93,7 +96,9 @@ describe('SchedulePortableCapability', () => {
 
     const target = makeRepository();
     const targetCapability = new SchedulePortableCapability(target.repository);
-    await expect(targetCapability.dryRun(payload, context(new FakeReferences()))).resolves.toMatchObject({
+    await expect(
+      targetCapability.dryRun(payload, context(new FakeReferences())),
+    ).resolves.toMatchObject({
       created: 2,
       updated: 0,
       skipped: 0,

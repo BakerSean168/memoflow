@@ -7,9 +7,7 @@
  */
 
 import type { PortableCapability } from '@memoflow/contracts/data-portability';
-import {
-  createDataPortabilityModule,
-} from '@memoflow/data-portability';
+import { createDataPortabilityModule } from '@memoflow/data-portability';
 import {
   createDataPortabilityElectronModule,
   type DataPortabilityElectronModuleDef,

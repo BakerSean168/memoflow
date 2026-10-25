@@ -21,25 +21,25 @@
 
 ### 2.1 Runtime / Composition Root
 
-| Runtime | 当前实现 | 评审结论 |
-| --- | --- | --- |
-| Cloud API | `apps/api/src/main.ts`、`apps/api/src/bootstrap.ts` | **基本正确**：DB/CloudAuth/跨模块 Port/模块注册/生命周期均在 API runtime；但 `register()` 内仍有模块级组合根。 |
-| Web | `apps/web/src/main.ts`、`packages/app-vue/src` | **维持**：Presentation 通过注入的 module client/service 使用 HTTP 或 Desktop API；状态主要由 Pinia 管理。 |
-| Desktop main | `apps/desktop/src/main/bootstrap.ts`、`desktop-main-runtime.ts`、`profile/desktop-profile-runtime-manager.ts` | **维持并继续清理**：PowerSync DB、IPC module、profile lifecycle 在 main/runtime；仍有少量 feature 级模块状态与 IPC handler 集中。 |
-| AI service | `apps/ai-service/src/ai_service/app.py`、`middleware/*`、`api/routes/*` | **强项**：FastAPI app factory/lifespan 统一创建 shared client 与 workflow services；内部 HMAC、request context 已独立。 |
-| Migrator / scheduler | `apps/migrator`、`apps/api/src/shared/infrastructure/cron` | **维持**：生命周期不进入 domain；scheduler 通过 runtime ownership/lease 运行。 |
+| Runtime              | 当前实现                                                                                                      | 评审结论                                                                                                                          |
+| -------------------- | ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Cloud API            | `apps/api/src/main.ts`、`apps/api/src/bootstrap.ts`                                                           | **基本正确**：DB/CloudAuth/跨模块 Port/模块注册/生命周期均在 API runtime；但 `register()` 内仍有模块级组合根。                    |
+| Web                  | `apps/web/src/main.ts`、`packages/app-vue/src`                                                                | **维持**：Presentation 通过注入的 module client/service 使用 HTTP 或 Desktop API；状态主要由 Pinia 管理。                         |
+| Desktop main         | `apps/desktop/src/main/bootstrap.ts`、`desktop-main-runtime.ts`、`profile/desktop-profile-runtime-manager.ts` | **维持并继续清理**：PowerSync DB、IPC module、profile lifecycle 在 main/runtime；仍有少量 feature 级模块状态与 IPC handler 集中。 |
+| AI service           | `apps/ai-service/src/ai_service/app.py`、`middleware/*`、`api/routes/*`                                       | **强项**：FastAPI app factory/lifespan 统一创建 shared client 与 workflow services；内部 HMAC、request context 已独立。           |
+| Migrator / scheduler | `apps/migrator`、`apps/api/src/shared/infrastructure/cron`                                                    | **维持**：生命周期不进入 domain；scheduler 通过 runtime ownership/lease 运行。                                                    |
 
 ### 2.2 Domain / Business Capability
 
-| Capability | 主要位置 | 当前状态 |
-| --- | --- | --- |
-| Goal | `packages/goal/src/server/domain` | **强**：Goal aggregate、VO、policy、repository Port；关系/钱包是尚未完成归位的试点。 |
-| Task | `packages/task/src/server/domain` | **强**：Template/Instance/Dependency aggregate 与四类 repository Port。 |
-| Knowledge / Repository | `packages/repository/src/server/domain` | **强**：knowledge connection/projection/lease 等 capability 通过 Port 表达。 |
-| Reminder | `packages/reminder/src/server/domain` | **强**：四类 repository Port，状态与触发规则在 domain。 |
-| Schedule | `packages/schedule/src/server/domain` | **强**：schedule/task/execution Port、VO、lease 语义清晰。 |
-| Notification | `packages/notification/src/server/domain` | **强**：Notification aggregate、channel、reliable delivery contract 与 domain event。 |
-| Account | `packages/account/src/server/domain` | **强**：Account aggregate、closure operation Port、VO 和 ownership rule。 |
+| Capability             | 主要位置                                  | 当前状态                                                                              |
+| ---------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------- |
+| Goal                   | `packages/goal/src/server/domain`         | **强**：Goal aggregate、VO、policy、repository Port；关系/钱包是尚未完成归位的试点。  |
+| Task                   | `packages/task/src/server/domain`         | **强**：Template/Instance/Dependency aggregate 与四类 repository Port。               |
+| Knowledge / Repository | `packages/repository/src/server/domain`   | **强**：knowledge connection/projection/lease 等 capability 通过 Port 表达。          |
+| Reminder               | `packages/reminder/src/server/domain`     | **强**：四类 repository Port，状态与触发规则在 domain。                               |
+| Schedule               | `packages/schedule/src/server/domain`     | **强**：schedule/task/execution Port、VO、lease 语义清晰。                            |
+| Notification           | `packages/notification/src/server/domain` | **强**：Notification aggregate、channel、reliable delivery contract 与 domain event。 |
+| Account                | `packages/account/src/server/domain`      | **强**：Account aggregate、closure operation Port、VO 和 ownership rule。             |
 
 ### 2.3 Application / Use Case / Port
 
@@ -241,18 +241,18 @@
 
 ## 4. 重点重构候选清单
 
-| 优先级 | 现状 | 问题 | 目标设计 | 改动范围 | 主要风险 |
-| --- | --- | --- | --- | --- | --- |
-| **P0** | Goal relation/wallet use-case 文件内含 Prisma repository | Application 反向依赖 DB；Port 无法跨 Prisma/PowerSync 复用 | `domain/application Port` + `infrastructure/adapters/prisma` mapper/repository | `packages/goal/src/server/application/use-cases/commands/{relation,wallet}.use-cases.ts`；新增 infrastructure files；module wiring/tests | 事务行为、错误码和 Decimal 转换变化 |
-| **P0** | AI backend executor 自己组装三套 Prisma module | executor 浅而宽；测试困难；AI 绑定 Prisma module lifecycle | API runtime 组装 Goal/Task/Reminder Application Port，executor 只做 action orchestration | `apps/api/src/main.ts`、`apps/api/src/modules/ai/backend-automation-tool-executor.adapter.ts`、`packages/ai/src/server/application/ports` | action 顺序、receipt、跨模块事件重复注册 |
-| **P0** | API 无统一 request-scoped context/trace pipeline | API 与 AI service 的 requestId 不一定来自同一个入口；日志搜索断链 | RequestContext middleware → Principal middleware → adapters → Application/AI internal client | `apps/api/src/shared/infrastructure/http/middlewares`、`packages/contracts/src/shared/execution-context.ts`、`packages/utils/src/result/*adapter.ts` | 现有 response envelope、smoke test、SSE header 兼容 |
-| **P1** | `IApiModule.register()` 内含 composition root | runtime 与 feature package ownership 混合；依赖顺序隐含 | `apps/api/src/runtime/compose-*.ts` 完成 assembly，module register 只挂 transport/lifecycle | `apps/api/src/main.ts`、`bootstrap.ts`、各 `packages/*/src/api/module.ts` | 迁移面大，应先 Goal/Task slice |
-| **P1** | HTTP/IPC 共享 handlers 但 parity 依赖人工保持 | 新增 channel/route 可能一边漏实现 | contract fixture 驱动的 HTTP/IPC parity tests | `packages/goal`、`packages/task`、`packages/utils/result`、contracts | IPC 参数序列化与 HTTP status 差异 |
-| **P1** | Data Portability 的 Prisma import/read adapters 位于 Application | Port 已存在但实现归属错误；破坏 Application 禁止数据库依赖的可治理性 | Port/use case 留在 Application，Prisma 与 PowerSync 实现都归 Infrastructure | `packages/data-portability/src/server/application/{import-store/prisma-data-portability-import-store.ts,prisma-adapters.ts}`、`server/infrastructure/prisma.ts`、exports/tests | 大量 import path 变化；跨 capability 导出/导入事务行为必须保持 |
-| **P1** | Pinia 同时承载 server state，事件策略分散 | mutation 局部 patch、refetch、eventBus 写 store 并存，多宿主易漂移 | Query Cache authority；Pinia 仅 UI state；SSE/PowerSync/eventBus 统一 invalidate | `packages/app-vue/src/modules/notification` 先试点，再 task | 离线/PowerSync freshness、optimistic rollback |
-| **P1** | `ExecutionContext` 只有 identity/device | agent run、thread、approval、trace 不能在应用层稳定传递 | metadata-only Request/Execution Context，AI run context 显式建模 | `packages/contracts/src/shared`、controllers、AI ports | 过度把业务对象塞入 context；必须保持 metadata-only |
-| **P2** | AI service 已有完整 request context，API/AI trace 尚未全链路接通 | Python 日志和 TS 日志只能按局部 requestId 对齐 | API 生成/接收 requestId，AI internal client 原样转发，Python response echo | API middleware、`packages/ai` internal client、AI tests | 代理/重试时 requestId 语义和敏感 header 处理 |
-| **P2** | Prisma mapper 已较完整但少数 runtime adapter 直接查库 | 跨模块 read/write 入口变多，未来替换 persistence 成本高 | `AnalyticsReadPort`、`KnowledgeSourcePort` 等由 infrastructure adapter 实现 | `apps/api/src/modules/ai/*adapter.ts`、对应 packages application ports | read model 性能和 SQL 查询能力损失 |
+| 优先级 | 现状                                                             | 问题                                                                 | 目标设计                                                                                     | 改动范围                                                                                                                                                                       | 主要风险                                                       |
+| ------ | ---------------------------------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
+| **P0** | Goal relation/wallet use-case 文件内含 Prisma repository         | Application 反向依赖 DB；Port 无法跨 Prisma/PowerSync 复用           | `domain/application Port` + `infrastructure/adapters/prisma` mapper/repository               | `packages/goal/src/server/application/use-cases/commands/{relation,wallet}.use-cases.ts`；新增 infrastructure files；module wiring/tests                                       | 事务行为、错误码和 Decimal 转换变化                            |
+| **P0** | AI backend executor 自己组装三套 Prisma module                   | executor 浅而宽；测试困难；AI 绑定 Prisma module lifecycle           | API runtime 组装 Goal/Task/Reminder Application Port，executor 只做 action orchestration     | `apps/api/src/main.ts`、`apps/api/src/modules/ai/backend-automation-tool-executor.adapter.ts`、`packages/ai/src/server/application/ports`                                      | action 顺序、receipt、跨模块事件重复注册                       |
+| **P0** | API 无统一 request-scoped context/trace pipeline                 | API 与 AI service 的 requestId 不一定来自同一个入口；日志搜索断链    | RequestContext middleware → Principal middleware → adapters → Application/AI internal client | `apps/api/src/shared/infrastructure/http/middlewares`、`packages/contracts/src/shared/execution-context.ts`、`packages/utils/src/result/*adapter.ts`                           | 现有 response envelope、smoke test、SSE header 兼容            |
+| **P1** | `IApiModule.register()` 内含 composition root                    | runtime 与 feature package ownership 混合；依赖顺序隐含              | `apps/api/src/runtime/compose-*.ts` 完成 assembly，module register 只挂 transport/lifecycle  | `apps/api/src/main.ts`、`bootstrap.ts`、各 `packages/*/src/api/module.ts`                                                                                                      | 迁移面大，应先 Goal/Task slice                                 |
+| **P1** | HTTP/IPC 共享 handlers 但 parity 依赖人工保持                    | 新增 channel/route 可能一边漏实现                                    | contract fixture 驱动的 HTTP/IPC parity tests                                                | `packages/goal`、`packages/task`、`packages/utils/result`、contracts                                                                                                           | IPC 参数序列化与 HTTP status 差异                              |
+| **P1** | Data Portability 的 Prisma import/read adapters 位于 Application | Port 已存在但实现归属错误；破坏 Application 禁止数据库依赖的可治理性 | Port/use case 留在 Application，Prisma 与 PowerSync 实现都归 Infrastructure                  | `packages/data-portability/src/server/application/{import-store/prisma-data-portability-import-store.ts,prisma-adapters.ts}`、`server/infrastructure/prisma.ts`、exports/tests | 大量 import path 变化；跨 capability 导出/导入事务行为必须保持 |
+| **P1** | Pinia 同时承载 server state，事件策略分散                        | mutation 局部 patch、refetch、eventBus 写 store 并存，多宿主易漂移   | Query Cache authority；Pinia 仅 UI state；SSE/PowerSync/eventBus 统一 invalidate             | `packages/app-vue/src/modules/notification` 先试点，再 task                                                                                                                    | 离线/PowerSync freshness、optimistic rollback                  |
+| **P1** | `ExecutionContext` 只有 identity/device                          | agent run、thread、approval、trace 不能在应用层稳定传递              | metadata-only Request/Execution Context，AI run context 显式建模                             | `packages/contracts/src/shared`、controllers、AI ports                                                                                                                         | 过度把业务对象塞入 context；必须保持 metadata-only             |
+| **P2** | AI service 已有完整 request context，API/AI trace 尚未全链路接通 | Python 日志和 TS 日志只能按局部 requestId 对齐                       | API 生成/接收 requestId，AI internal client 原样转发，Python response echo                   | API middleware、`packages/ai` internal client、AI tests                                                                                                                        | 代理/重试时 requestId 语义和敏感 header 处理                   |
+| **P2** | Prisma mapper 已较完整但少数 runtime adapter 直接查库            | 跨模块 read/write 入口变多，未来替换 persistence 成本高              | `AnalyticsReadPort`、`KnowledgeSourcePort` 等由 infrastructure adapter 实现                  | `apps/api/src/modules/ai/*adapter.ts`、对应 packages application ports                                                                                                         | read model 性能和 SQL 查询能力损失                             |
 
 ## 5. 不建议做的事
 

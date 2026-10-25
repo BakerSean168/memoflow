@@ -114,7 +114,8 @@ export class NotificationRequestedPrismaWriterAdapter implements NotificationReq
       }
     }
 
-    const correlationId = envelope.correlationId ?? validated.correlationId ?? validated.operationId;
+    const correlationId =
+      envelope.correlationId ?? validated.correlationId ?? validated.operationId;
     const causationId = envelope.causationId ?? validated.causationId ?? null;
 
     try {

@@ -11,8 +11,6 @@ export function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 /** Narrow unknown JSON body to a record that has a `data` key (MemoFlow HttpResponse envelope). */
-export function hasDataKey(
-  body: unknown,
-): body is Record<string, unknown> & { data: unknown } {
+export function hasDataKey(body: unknown): body is Record<string, unknown> & { data: unknown } {
   return isRecord(body) && 'data' in body;
 }

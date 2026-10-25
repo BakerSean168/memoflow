@@ -7,7 +7,9 @@ let isPackaged = false;
 let userDataPath = '';
 
 vi.mock('../../runtime-init', () => ({
-  getSharedPathResolver: () => ({ runtimeConfigPath: path.join(userDataPath, 'config', 'desktop-runtime.json') }),
+  getSharedPathResolver: () => ({
+    runtimeConfigPath: path.join(userDataPath, 'config', 'desktop-runtime.json'),
+  }),
 }));
 
 vi.mock('electron', () => ({

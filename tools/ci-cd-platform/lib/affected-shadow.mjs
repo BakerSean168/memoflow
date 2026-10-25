@@ -55,7 +55,10 @@ export function diffSelection(legacyTasks, taskBasedTasks) {
  * Nx locators marked touched (which adds package.json / lockfile semantics
  * beyond file ownership).
  */
-export function legacyReachForProject(project, { projectDependencies, touchedProjects, changedFiles, projectRoots }) {
+export function legacyReachForProject(
+  project,
+  { projectDependencies, touchedProjects, changedFiles, projectRoots },
+) {
   const ownsFile = (file, owner) => {
     const root = projectRoots[owner];
     if (root === undefined) return false;
@@ -94,7 +97,10 @@ export function legacyReachForProject(project, { projectDependencies, touchedPro
       }
     }
   }
-  via.sort((left, right) => left.path.length - right.path.length || left.project.localeCompare(right.project));
+  via.sort(
+    (left, right) =>
+      left.path.length - right.path.length || left.project.localeCompare(right.project),
+  );
 
   return {
     project,
@@ -147,7 +153,18 @@ export function summarizeCases(cases) {
 
 export const SHADOW_REPORT_VERSION = 1;
 
-export function buildShadowReport({ kind = SHADOW_REPORT_KIND, version = SHADOW_REPORT_VERSION, mode, targets, source, status, skipReason, cases, summary, error }) {
+export function buildShadowReport({
+  kind = SHADOW_REPORT_KIND,
+  version = SHADOW_REPORT_VERSION,
+  mode,
+  targets,
+  source,
+  status,
+  skipReason,
+  cases,
+  summary,
+  error,
+}) {
   return {
     kind,
     version,
@@ -176,7 +193,10 @@ export function buildErrorReport({ mode, targets, source }, error) {
     status: 'error',
     error: {
       message: error?.message ?? 'unknown error',
-      stack: String(error?.stack ?? '').split('\n').slice(0, 10).join('\n'),
+      stack: String(error?.stack ?? '')
+        .split('\n')
+        .slice(0, 10)
+        .join('\n'),
     },
   });
 }
@@ -233,35 +253,56 @@ function renderCase(caseResult, targets) {
     return lines.join('\n');
   }
   if (underSelection.length > 0) {
-    lines.push('', `**task-based under-selection (${underSelection.length})** — legacy runs these, task-based drops them:`);
+    lines.push(
+      '',
+      `**task-based under-selection (${underSelection.length})** — legacy runs these, task-based drops them:`,
+    );
     for (const detail of caseResult.underDetails) {
       lines.push(`- \`${detail.task}\``);
       lines.push(...renderReach(detail.legacyReach).map((line) => `  - ${line}`));
     }
   }
   if (overSelection.length > 0) {
-    lines.push('', `**task-based over-selection (${overSelection.length})** — not selected by legacy:`);
+    lines.push(
+      '',
+      `**task-based over-selection (${overSelection.length})** — not selected by legacy:`,
+    );
     for (const detail of caseResult.overDetails) {
       const reasons = detail.reasons.map(renderReason).join('; ');
       lines.push(`- \`${detail.task}\` — ${reasons || 'selected as a dependency'}`);
     }
   }
   const targetNote = targets
-    .map((target) => `${target}: legacy ${caseResult.legacy.byTarget[target] ?? 0} / task-based ${caseResult.taskBased.byTarget[target] ?? 0}`)
+    .map(
+      (target) =>
+        `${target}: legacy ${caseResult.legacy.byTarget[target] ?? 0} / task-based ${caseResult.taskBased.byTarget[target] ?? 0}`,
+    )
     .join(', ');
   lines.push('', `_Per-target task counts — ${targetNote}_`);
   const laneImpact = caseResult.laneImpact;
   if (laneImpact) {
     if (laneImpact.droppedLanes.length > 0) {
-      lines.push('', `**:rotating_light: dropped lanes vs ground truth: ${laneImpact.droppedLanes.join(', ')}**`);
+      lines.push(
+        '',
+        `**:rotating_light: dropped lanes vs ground truth: ${laneImpact.droppedLanes.join(', ')}**`,
+      );
     } else {
-      lines.push('', '_Lane impact: none — every expected lane stays enabled under task-based selection._');
+      lines.push(
+        '',
+        '_Lane impact: none — every expected lane stays enabled under task-based selection._',
+      );
     }
     if (laneImpact.gainedLanes.length > 0) {
-      lines.push('', `_Gained lanes (expected false, task-based true): ${laneImpact.gainedLanes.join(', ')}_`);
+      lines.push(
+        '',
+        `_Gained lanes (expected false, task-based true): ${laneImpact.gainedLanes.join(', ')}_`,
+      );
     }
     if (laneImpact.legacyLaneDrift.length > 0) {
-      lines.push('', `_Legacy lane drift vs fixture (fixture needs re-review): ${laneImpact.legacyLaneDrift.join(', ')}_`);
+      lines.push(
+        '',
+        `_Legacy lane drift vs fixture (fixture needs re-review): ${laneImpact.legacyLaneDrift.join(', ')}_`,
+      );
     }
   }
   return lines.join('\n');

@@ -38,14 +38,23 @@ export const useWeightSnapshot = () => {
   const weightTrend = ref<WeightTrendData | null>(null);
   const weightComparison = ref<WeightComparisonData | null>(null);
   const goalSnapshots = ref<GoalSnapshotItem[]>([]);
-  const pagination = ref<SnapshotPagination | null>({ page: 1, pageSize: 20, total: 0, totalPages: 1 });
+  const pagination = ref<SnapshotPagination | null>({
+    page: 1,
+    pageSize: 20,
+    total: 0,
+    totalPages: 1,
+  });
 
   const isFetchingTrend = ref(false);
   const isFetchingComparison = ref(false);
   const isLoading = ref(false);
 
-  const hasWeightTrend = computed(() => !!weightTrend.value && weightTrend.value.keyResults.length > 0);
-  const hasWeightComparison = computed(() => !!weightComparison.value && weightComparison.value.keyResults.length > 0);
+  const hasWeightTrend = computed(
+    () => !!weightTrend.value && weightTrend.value.keyResults.length > 0,
+  );
+  const hasWeightComparison = computed(
+    () => !!weightComparison.value && weightComparison.value.keyResults.length > 0,
+  );
   const hasGoalSnapshots = computed(() => goalSnapshots.value.length > 0);
 
   const fetchWeightTrend = async (_goalId: string, _startTime?: number, _endTime?: number) => {
@@ -60,7 +69,11 @@ export const useWeightSnapshot = () => {
   const fetchWeightComparison = async (_goalId: string, _timePoints: number[]) => {
     isFetchingComparison.value = true;
     try {
-      weightComparison.value = weightComparison.value ?? { keyResults: [], timePoints: [], comparisons: {} };
+      weightComparison.value = weightComparison.value ?? {
+        keyResults: [],
+        timePoints: [],
+        comparisons: {},
+      };
     } finally {
       isFetchingComparison.value = false;
     }

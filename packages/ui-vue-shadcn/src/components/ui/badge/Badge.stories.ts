@@ -20,7 +20,9 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: (args) => ({
     components: { Badge },
-    setup() { return { args }; },
+    setup() {
+      return { args };
+    },
     template: '<Badge v-bind="args">Badge</Badge>',
   }),
 };

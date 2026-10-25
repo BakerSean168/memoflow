@@ -17,6 +17,7 @@ created: 2026-08-08T00:00:00Z
 ## 1. 总体判断
 
 MemoFlow 已经是一个**资产丰富但完成度不均**的个人操作系统型产品：
+
 - **强项**：功能资产多（Goal / Task / Reminder / Schedule / Notification / Knowledge / AI / Dashboard / Repository / Account / Cloud Auth），
   契约驱动、Nx 多包架构、plan 纪律与 agent 协作规范成熟；AI 能力（统一助手 / Agent Host / Workflow / Turn / Model）是清晰的主产品线；
   CI/CD 平台 V2 六平面契约已落地，测试资产庞大（763 个 spec/test）。
@@ -25,17 +26,17 @@ MemoFlow 已经是一个**资产丰富但完成度不均**的个人操作系统�
 
 ## 2. 产品线盘点（成熟度）
 
-| 产品线 | 核心资产 | 成熟度 | 备注 |
-|---|---|---|---|
-| 统一助手 / Agent Host | AssistantFacade、Workflow/Turn/Model、ProposalKernel、CapabilityResolver | 🟡 实施中 | 完成定义未宣称；AH-2/4/5/6/7 切片 pending |
-| Goal | Goal Agent workflow（澄清→草稿→编辑→确认→执行） | 🟢 完整 | 含 Knowledge Q&A + Citations |
-| Task | Task 服务 + TaskInstance 维护 runtime（乐观锁、outbox） | 🟢 近期重构完成 | PR #211 R0-R7 落地 |
-| Reminder / Schedule / Notification | 业务闭环 R0-R7 | 🟢 完成 | ScheduleLease/claim、Reminder/Notification 通道 |
-| Knowledge | 知识库 + 索引（PowerSync 本地 / Prisma 表）+ Q&A | 🟡 双后端 | 向量召回支持 none/local-js-hybrid/pgvector |
-| AI Runtime | direct-provider / remote-ai-service 双模式 | 🟢 本次收缩 | AH-7 单 capability 投影（2026-08-08） |
-| Dashboard / Repository / Account / Cloud Auth | 完整模块 | 🟢 完成 | device flow、Profile 单轨 |
-| 桌面端（Electron） | 三栏 UI、Tab/KeepAlive、单一滚动宿主 | 🟢 基础完成 | 多引擎 E2E 待建（AH-5） |
-| 移动端 | app-react / app-vue / ui-react-native 资产存在 | 🔴 不在本轮范围 | 明确边界 |
+| 产品线                                        | 核心资产                                                                 | 成熟度          | 备注                                            |
+| --------------------------------------------- | ------------------------------------------------------------------------ | --------------- | ----------------------------------------------- |
+| 统一助手 / Agent Host                         | AssistantFacade、Workflow/Turn/Model、ProposalKernel、CapabilityResolver | 🟡 实施中       | 完成定义未宣称；AH-2/4/5/6/7 切片 pending       |
+| Goal                                          | Goal Agent workflow（澄清→草稿→编辑→确认→执行）                          | 🟢 完整         | 含 Knowledge Q&A + Citations                    |
+| Task                                          | Task 服务 + TaskInstance 维护 runtime（乐观锁、outbox）                  | 🟢 近期重构完成 | PR #211 R0-R7 落地                              |
+| Reminder / Schedule / Notification            | 业务闭环 R0-R7                                                           | 🟢 完成         | ScheduleLease/claim、Reminder/Notification 通道 |
+| Knowledge                                     | 知识库 + 索引（PowerSync 本地 / Prisma 表）+ Q&A                         | 🟡 双后端       | 向量召回支持 none/local-js-hybrid/pgvector      |
+| AI Runtime                                    | direct-provider / remote-ai-service 双模式                               | 🟢 本次收缩     | AH-7 单 capability 投影（2026-08-08）           |
+| Dashboard / Repository / Account / Cloud Auth | 完整模块                                                                 | 🟢 完成         | device flow、Profile 单轨                       |
+| 桌面端（Electron）                            | 三栏 UI、Tab/KeepAlive、单一滚动宿主                                     | 🟢 基础完成     | 多引擎 E2E 待建（AH-5）                         |
+| 移动端                                        | app-react / app-vue / ui-react-native 资产存在                           | 🔴 不在本轮范围 | 明确边界                                        |
 
 ## 3. 用户价值与体验
 
@@ -90,27 +91,30 @@ MemoFlow 已经是一个**资产丰富但完成度不均**的个人操作系统�
 
 ## 9. 风险清单
 
-| 风险 | 等级 | 缓解 |
-|---|---|---|
-| Agent Host 完成定义长期未宣称 → 产品主线悬空 | 高 | AH-4/AH-5 排期，P1 补恢复 UI |
-| CI baseline 证据缺失 → 优化无对照 | 中 | 采集 ≥5 次 comparable run |
-| 单机容器栈承载生产（oracle2） | 中 | 明确容灾/回滚演练 |
-| 第三方 AI 中转配额/稳定性 | 中 | 多上游 + 免费模型优先 |
-| 文档冗余（根级 UI_REDESIGN_* 等历史文档） | 低 | 归档清理，遵守 docs 分层 |
+| 风险                                         | 等级 | 缓解                         |
+| -------------------------------------------- | ---- | ---------------------------- |
+| Agent Host 完成定义长期未宣称 → 产品主线悬空 | 高   | AH-4/AH-5 排期，P1 补恢复 UI |
+| CI baseline 证据缺失 → 优化无对照            | 中   | 采集 ≥5 次 comparable run    |
+| 单机容器栈承载生产（oracle2）                | 中   | 明确容灾/回滚演练            |
+| 第三方 AI 中转配额/稳定性                    | 中   | 多上游 + 免费模型优先        |
+| 文档冗余（根级 UI_REDESIGN_* 等历史文档）    | 低   | 归档清理，遵守 docs 分层     |
 
 ## 10. 机会点清单（按优先级）
 
 ### P0（北极星，主线）
+
 1. **AH-4 Task 共用 Artifact 工作台（最小一档）**：非全量富编辑，先把 Agent 产出展示为只读+可复制的工作台，打通 journey。
 2. **AH-2 产品恢复 UI（最小闭环）**：按 conversationId 枚举 open-chat 的只读恢复路径，fail-closed 缺省提示。
 
 ### P1（补齐主线的支撑）
+
 3. **AH-5 Electron 多引擎 E2E scaffold**（或诚实 external + driver 一步）。
 4. **CI baseline-v1 采集**：≥5 次 comparable run，固化 timing 报告。
 5. **写保护与 DX 修复**：仓库加入 HERMES_WRITE_SAFE_ROOT；devcontainer 预装依赖。
 6. **密钥扫描**：CI 增加 secret/明文密钥扫描。
 
 ### P2（打磨与治理）
+
 7. **文档清理**：根级 UI_REDESIGN_* 历史文档移入 archive；IMPLEMENTATION_STATUS.md 与当前状态对齐或归档。
 8. **可观测性扩展**：Goal/Task 关键链路 P99 指标入 CI audit 门禁。
 9. **AI 成本策略**：默认路由 deepseek/glm，gpt 仅按需；记录单任务成本。

@@ -46,7 +46,11 @@ async function dispatchNotificationOutbox(
       source: 'notification',
       occurrenceKey,
       channel,
-      payloadJson: JSON.stringify({ notificationId, title: notification.title, content: notification.content }),
+      payloadJson: JSON.stringify({
+        notificationId,
+        title: notification.title,
+        content: notification.content,
+      }),
       idempotencyKey: adapter.idempotencyKeyFor(identityId, occurrenceKey),
     },
     { notificationId },

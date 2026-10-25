@@ -49,10 +49,7 @@ describe('PrismaTaskWriteTransactionRunner Prompt transaction', () => {
       taskOccurrence: {},
       taskGoalOutbox: {},
     };
-    const runner = new PrismaTaskWriteTransactionRunner(
-      tx as unknown as PrismaClient,
-      publisher,
-    );
+    const runner = new PrismaTaskWriteTransactionRunner(tx as unknown as PrismaClient, publisher);
     await expect(runner.run(async () => 'joined')).resolves.toBe('joined');
     expect(nested).not.toHaveBeenCalled();
   });
@@ -76,10 +73,7 @@ async function createHarness(failOutbox = false) {
   const publisher = { publish: vi.fn(async () => {}) };
   const transactionOptions: unknown[] = [];
   const prisma = {
-    $transaction: async <T>(
-      work: (tx: unknown) => Promise<T>,
-      options?: unknown,
-    ) => {
+    $transaction: async <T>(work: (tx: unknown) => Promise<T>, options?: unknown) => {
       transactionOptions.push(options);
       const staged = structuredClone(committed);
       const tx = {

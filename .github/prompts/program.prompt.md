@@ -1,6 +1,7 @@
 ---
 agent: agent
 ---
+
 # Program Prompt
 
 程序设计、架构分析和实现规划优先参考：
@@ -18,11 +19,10 @@ agent: agent
 
 使用值对象
 
-
 setPassword(new RawPassword(pwd))，确保只要 RawPassword 对象存在，它就一定是符合复杂度要求的。
 
 6. 完整的调用链路 (Flow)
-看看各层是如何配合的：
+   看看各层是如何配合的：
 
 Interface Layer (Controller):
 
@@ -74,7 +74,7 @@ auth 模块需要 一个 session 聚合根来管理 认证的会话吗
 以下是详细的 DDD 设计推演：
 
 1. 为什么要独立出 Session 聚合根？
-初学者常犯的错误是将 Session 作为一个简单的字段放在 User (或 AuthenticationIdentity) 聚合里。
+   初学者常犯的错误是将 Session 作为一个简单的字段放在 User (或 AuthenticationIdentity) 聚合里。
 
 错误设计： 在 AuthenticationIdentity 里放一个 List<Session>。
 
@@ -85,7 +85,7 @@ auth 模块需要 一个 session 聚合根来管理 认证的会话吗
 理由： Session 的生命周期（创建、刷新、过期、销毁）与 User 的生命周期（注册、改密、注销）是解耦的。User 是相对静态的，Session 是高度动态的。
 
 2. Session 聚合根的模型设计
-在 Identity Context (认证上下文) 中，Session 聚合根应该长这样：
+   在 Identity Context (认证上下文) 中，Session 聚合根应该长这样：
 
 核心属性
 SessionId: 聚合的唯一标识 (通常直接作为 Refresh Token 发给客户端)。
@@ -110,11 +110,11 @@ TypeScript
 // Domain/Model/Session/Session.ts
 
 export class Session { // Aggregate Root
-    private id: SessionId;
-    private identityId: IdentityId; // 引用另一个聚合的ID
-    private deviceInfo: DeviceInfo; // Value Object
-    private expiresAt: Date;
-    private isRevoked: boolean;
+private id: SessionId;
+private identityId: IdentityId; // 引用另一个聚合的ID
+private deviceInfo: DeviceInfo; // Value Object
+private expiresAt: Date;
+private isRevoked: boolean;
 
     constructor(identityId: IdentityId, deviceInfo: DeviceInfo, durationSeconds: number) {
         this.id = new SessionId(UUID.random()); // 这个ID就是 Refresh Token
@@ -147,8 +147,8 @@ export class Session { // Aggregate Root
             throw new SessionExpiredException("Session is no longer valid.");
         }
     }
-}
-3. Session 聚合根与其他模块的交互
+
+} 3. Session 聚合根与其他模块的交互
 这里有一个经典的 DDD 协作场景：如何限制一个用户只能同时在线 3 个设备？
 
 这个逻辑不属于 Session 自身（因为 Session 不知道其他 Session 的存在），也不完全属于 AuthenticationIdentity。这里需要引入一个 Domain Service (领域服务)。
@@ -174,7 +174,7 @@ SessionRepository.save(newSession)。
 返回 SessionId (作为 Refresh Token)。
 
 4. 这里的 SessionId 和 Refresh Token 是什么关系？
-这是一个常见的困惑点。在 DDD 实现中：
+   这是一个常见的困惑点。在 DDD 实现中：
 
 SessionId (聚合根的 ID) 本质上就是 Refresh Token。
 
@@ -189,7 +189,7 @@ Access Token (JWT) 是什么？
 Access Token 包含了 SessionId、UserId、Scope，并被签名。它是由 Session 生成的“短期通行证”。
 
 5. 总结：架构图谱
-在你的 DDD 架构中，现在的 Auth 模块包含两个核心聚合：
+   在你的 DDD 架构中，现在的 Auth 模块包含两个核心聚合：
 
 AuthenticationIdentity (聚合根)
 
@@ -224,8 +224,8 @@ TypeScript
 // --- Shared Kernel / Primitives ---
 
 // 使用 Brand Type 防止 ID 混用 (User ID 不能传给 Session ID)
-export type IdentityId = string & { readonly brand: unique symbol }; 
-export type SessionId = string & { readonly brand: unique symbol }; 
+export type IdentityId = string & { readonly brand: unique symbol };
+export type SessionId = string & { readonly brand: unique symbol };
 export type AccountId = string & { readonly brand: unique symbol }; // 通常与 IdentityId 是同一个值
 
 // 时间戳统一类型
@@ -233,97 +233,96 @@ export type DateTime = Date;
 
 // 客户端设备信息 (Value Object)
 export interface DeviceInfo {
-  ipAddress: string;
-  userAgent: string;
-  location?: string; // 可选: 基于IP解析的地理位置
-  fingerprint?: string; // 可选: 设备指纹
+ipAddress: string;
+userAgent: string;
+location?: string; // 可选: 基于IP解析的地理位置
+fingerprint?: string; // 可选: 设备指纹
 }
 二、 Identity Context (认证模块 - 核心)
 这是最复杂的模块，包含两个聚合根：AuthenticationIdentity (静态身份) 和 Session (动态会话)。
 
 1. 聚合根: AuthenticationIdentity
-管理凭证、锁定状态、安全策略。
+   管理凭证、锁定状态、安全策略。
 
 TypeScript
 // --- Domain: Identity Aggregate ---
 
 export enum IdentityStatus {
-  ACTIVE = 'ACTIVE',       // 正常
-  LOCKED = 'LOCKED',       // 临时锁定 (密码输错太多)
-  DISABLED = 'DISABLED',   // 永久禁用 (违规)
-  UNVERIFIED = 'UNVERIFIED' // 未验证 (如邮箱未激活)
+ACTIVE = 'ACTIVE', // 正常
+LOCKED = 'LOCKED', // 临时锁定 (密码输错太多)
+DISABLED = 'DISABLED', // 永久禁用 (违规)
+UNVERIFIED = 'UNVERIFIED' // 未验证 (如邮箱未激活)
 }
 
 export enum CredentialType {
-  PASSWORD = 'PASSWORD',
-  GOOGLE = 'GOOGLE',
-  GITHUB = 'GITHUB',
-  WECHAT = 'WECHAT',
-  PHONE_SMS = 'PHONE_SMS' // 仅手机号+验证码登录，无密码
+PASSWORD = 'PASSWORD',
+GOOGLE = 'GOOGLE',
+GITHUB = 'GITHUB',
+WECHAT = 'WECHAT',
+PHONE_SMS = 'PHONE_SMS' // 仅手机号+验证码登录，无密码
 }
 
 // 实体: 凭证 (Entity)
 export interface Credential {
-  // 复合主键通常是 (type + identifier)
-  type: CredentialType;
-  
-  // 登录标识: email, phone, open_id
-  identifier: string; 
-  
-  // 密钥: 密码Hash, 或者 OAuth 的 AccessToken (如果是持久化的话)
-  // 注意: 对于 PASSWORD 类型，这里存的是 bcrypt string ($2a$10$...)
-  // 对于 SMS 或 第三方登录，这里可能是空，或者存第三方的 union_id
-  secret?: string; 
-  
-  verified: boolean; // 如: 邮箱是否已点击链接验证
+// 复合主键通常是 (type + identifier)
+type: CredentialType;
+
+// 登录标识: email, phone, open_id
+identifier: string;
+
+// 密钥: 密码Hash, 或者 OAuth 的 AccessToken (如果是持久化的话)
+// 注意: 对于 PASSWORD 类型，这里存的是 bcrypt string ($2a$10$...)
+// 对于 SMS 或 第三方登录，这里可能是空，或者存第三方的 union_id
+secret?: string;
+
+verified: boolean; // 如: 邮箱是否已点击链接验证
 }
 
 // 聚合根: 身份 (Aggregate Root)
 export interface AuthenticationIdentity {
-  readonly id: IdentityId; // 全局唯一ID
-  
-  status: IdentityStatus;
-  
-  // 失败计数器 (用于判断是否锁定)
-  failedLoginAttempts: number;
-  lastFailedAttempt?: DateTime;
-  lockedUntil?: DateTime;
+readonly id: IdentityId; // 全局唯一ID
 
-  // 凭证列表 (一个用户可以同时有 邮箱密码 + 谷歌登录)
-  credentials: Credential[];
+status: IdentityStatus;
 
-  createdAt: DateTime;
-  updatedAt: DateTime;
+// 失败计数器 (用于判断是否锁定)
+failedLoginAttempts: number;
+lastFailedAttempt?: DateTime;
+lockedUntil?: DateTime;
 
-  // --- 领域行为方法 (仅示意) ---
-  // login(cmd: LoginCommand): void;
-  // changePassword(newHash: string): void;
-  // bindCredential(cred: Credential): void;
-}
-2. 聚合根: Session
+// 凭证列表 (一个用户可以同时有 邮箱密码 + 谷歌登录)
+credentials: Credential[];
+
+createdAt: DateTime;
+updatedAt: DateTime;
+
+// --- 领域行为方法 (仅示意) ---
+// login(cmd: LoginCommand): void;
+// changePassword(newHash: string): void;
+// bindCredential(cred: Credential): void;
+} 2. 聚合根: Session
 管理登录态、刷新令牌、踢人下线。
 
 TypeScript
 // --- Domain: Session Aggregate ---
 
 export interface Session {
-  // SessionId 本质上就是 Refresh Token (UUID)
-  readonly id: SessionId; 
-  
-  readonly identityId: IdentityId; // 关联到上面的 Identity
-  
-  readonly deviceInfo: DeviceInfo; // 登录时的设备信息
-  
-  createdAt: DateTime;
-  expiresAt: DateTime; // Refresh Token 的绝对过期时间 (如 30天后)
-  
-  isRevoked: boolean; // 是否被撤销 (踢下线/登出)
-  lastRefreshedAt: DateTime; // 最后一次刷新时间 (用于滑动过期)
-  
-  // --- 领域行为方法 (仅示意) ---
-  // refresh(newDevice: DeviceInfo): void;
-  // revoke(): void;
-  // isValid(): boolean;
+// SessionId 本质上就是 Refresh Token (UUID)
+readonly id: SessionId;
+
+readonly identityId: IdentityId; // 关联到上面的 Identity
+
+readonly deviceInfo: DeviceInfo; // 登录时的设备信息
+
+createdAt: DateTime;
+expiresAt: DateTime; // Refresh Token 的绝对过期时间 (如 30天后)
+
+isRevoked: boolean; // 是否被撤销 (踢下线/登出)
+lastRefreshedAt: DateTime; // 最后一次刷新时间 (用于滑动过期)
+
+// --- 领域行为方法 (仅示意) ---
+// refresh(newDevice: DeviceInfo): void;
+// revoke(): void;
+// isValid(): boolean;
 }
 三、 Account Context (账号/用户资料模块)
 这是业务层面的用户档案。它不包含密码，只包含展示信息。
@@ -332,89 +331,86 @@ TypeScript
 // --- Domain: User Profile Aggregate ---
 
 export interface UserProfile {
-  readonly id: AccountId; // 与 IdentityId 保持一致，方便关联
-  
-  // 基础资料
-  nickname: string;
-  avatarUrl: string;
-  bio?: string;
-  gender?: 'MALE' | 'FEMALE' | 'OTHER' | 'UNKNOWN';
-  birthday?: DateTime;
+readonly id: AccountId; // 与 IdentityId 保持一致，方便关联
 
-  // 偏好设置 (JSON 结构，用 Value Object 封装)
-  preferences: UserPreferences;
-  
-  // 业务状态 (与认证状态不同，这里是业务层面的，如“禁言”)
-  reputationScore: number; // 信誉分
-  isMuted: boolean; // 是否被禁言
+// 基础资料
+nickname: string;
+avatarUrl: string;
+bio?: string;
+gender?: 'MALE' | 'FEMALE' | 'OTHER' | 'UNKNOWN';
+birthday?: DateTime;
 
-  createdAt: DateTime;
-  updatedAt: DateTime;
+// 偏好设置 (JSON 结构，用 Value Object 封装)
+preferences: UserPreferences;
+
+// 业务状态 (与认证状态不同，这里是业务层面的，如“禁言”)
+reputationScore: number; // 信誉分
+isMuted: boolean; // 是否被禁言
+
+createdAt: DateTime;
+updatedAt: DateTime;
 }
 
 // 值对象: 用户偏好
 export interface UserPreferences {
-  theme: 'LIGHT' | 'DARK' | 'SYSTEM';
-  language: string; // 'en-US', 'zh-CN'
-  notificationEnabled: boolean;
+theme: 'LIGHT' | 'DARK' | 'SYSTEM';
+language: string; // 'en-US', 'zh-CN'
+notificationEnabled: boolean;
 }
 四、 应用层交互对象 (DTOs)
 这是前端与后端 API 交互时的数据结构，必须与领域对象区分开。
 
 1. 登录交互 (Login)
-TypeScript
-// [Request] POST /auth/login
-export interface LoginRequestDTO {
-  type: 'PASSWORD' | 'SMS' | 'SOCIAL';
-  identifier: string; // email 或 phone
-  credential: string; // 密码明文 或 验证码 或 OAuth Code
-  deviceId?: string;  // 前端生成的设备唯一码 (可选)
-}
+   TypeScript
+   // [Request] POST /auth/login
+   export interface LoginRequestDTO {
+   type: 'PASSWORD' | 'SMS' | 'SOCIAL';
+   identifier: string; // email 或 phone
+   credential: string; // 密码明文 或 验证码 或 OAuth Code
+   deviceId?: string; // 前端生成的设备唯一码 (可选)
+   }
 
 // [Response]
 export interface LoginResponseDTO {
-  accessToken: string;  // JWT
-  refreshToken: string; // UUID (SessionId)
-  expiresIn: number;    // 秒
-  user: UserCardDTO;    // 附带简单的用户信息，方便前端展示
-}
-2. 令牌刷新 (Refresh)
+accessToken: string; // JWT
+refreshToken: string; // UUID (SessionId)
+expiresIn: number; // 秒
+user: UserCardDTO; // 附带简单的用户信息，方便前端展示
+} 2. 令牌刷新 (Refresh)
 TypeScript
 // [Request] POST /auth/refresh
 export interface RefreshTokenRequestDTO {
-  refreshToken: string;
+refreshToken: string;
 }
 
 // [Response]
 export interface RefreshTokenResponseDTO {
-  accessToken: string;
-  refreshToken?: string; // 如果支持 Refresh Token 轮转，这里会返回新的
-}
-3. 注册交互 (Register)
+accessToken: string;
+refreshToken?: string; // 如果支持 Refresh Token 轮转，这里会返回新的
+} 3. 注册交互 (Register)
 TypeScript
 // [Request] POST /auth/register
 export interface RegisterRequestDTO {
-  username?: string;
-  email?: string;
-  phone?: string;
-  password?: string; // 密码明文
-  verifyCode?: string; // 验证码 (注册通常需要验证)
-}
-4. JWT Payload (Access Token 内部结构)
+username?: string;
+email?: string;
+phone?: string;
+password?: string; // 密码明文
+verifyCode?: string; // 验证码 (注册通常需要验证)
+} 4. JWT Payload (Access Token 内部结构)
 这是 JWT解码后的 JSON 结构：
 
 TypeScript
 export interface JwtPayload {
-  sub: string;       // Subject (IdentityId)
-  iss: string;       // Issuer (api.yourdomain.com)
-  iat: number;       // Issued At (Timestamp)
-  exp: number;       // Expiration (Timestamp)
-  
-  // 自定义 Claims (不要放敏感信息!)
-  sid: string;       // Session ID (关联到 Session 聚合)
-  scope: string;     // 权限范围 "read write"
-  role: string;      // "user" | "admin"
-  name?: string;     // 冗余字段，方便前端显示
+sub: string; // Subject (IdentityId)
+iss: string; // Issuer (api.yourdomain.com)
+iat: number; // Issued At (Timestamp)
+exp: number; // Expiration (Timestamp)
+
+// 自定义 Claims (不要放敏感信息!)
+sid: string; // Session ID (关联到 Session 聚合)
+scope: string; // 权限范围 "read write"
+role: string; // "user" | "admin"
+name?: string; // 冗余字段，方便前端显示
 }
 总结：关键差异点
 Identity vs UserProfile:
@@ -455,104 +451,101 @@ AuthCrendential 下的实体对象呢
 安全性：使用值对象（Value Object）来封装敏感数据（如密码哈希）。
 
 二、 具体 Type 定义
+
 1. 基础接口 (Base Entity)
-所有凭据共有的属性。
+   所有凭据共有的属性。
 
 TypeScript
 // 凭据类型的枚举
 export enum CredentialType {
-  PASSWORD = 'PASSWORD',      // 传统的账号/邮箱 + 密码
-  OAUTH2 = 'OAUTH2',          // 第三方登录 (Google, GitHub, WeChat)
-  PHONE_SMS = 'PHONE_SMS',    // 手机号 (无密码，靠验证码)
-  API_KEY = 'API_KEY',        // 机器对接用的 Key
-  MAGIC_LINK = 'MAGIC_LINK'   // 邮箱免密链接
+PASSWORD = 'PASSWORD', // 传统的账号/邮箱 + 密码
+OAUTH2 = 'OAUTH2', // 第三方登录 (Google, GitHub, WeChat)
+PHONE_SMS = 'PHONE_SMS', // 手机号 (无密码，靠验证码)
+API_KEY = 'API_KEY', // 机器对接用的 Key
+MAGIC_LINK = 'MAGIC_LINK' // 邮箱免密链接
 }
 
 // 基础凭据接口
 interface BaseCredential {
-  // 局部实体ID (在 Identity 内部唯一即可，数据库通常用自增或 UUID)
-  readonly id: string; 
-  
-  readonly type: CredentialType;
-  
-  // 标识符 (用于登录的“账号”)
-  // 对于 PASSWORD 类型，这里是 email 或 username
-  // 对于 OAUTH2 类型，这里是 provider + openId 的组合
-  // 对于 PHONE 类型，这里是 E.164 格式的手机号 (+86138...)
-  readonly identifier: string;
+// 局部实体ID (在 Identity 内部唯一即可，数据库通常用自增或 UUID)
+readonly id: string;
 
-  // 凭据状态
-  isVerified: boolean; // 例如：邮箱是否验证过
-  
-  createdAt: Date;
-  updatedAt: Date;
-}
-2. 密码凭据实体 (PasswordCredential)
+readonly type: CredentialType;
+
+// 标识符 (用于登录的“账号”)
+// 对于 PASSWORD 类型，这里是 email 或 username
+// 对于 OAUTH2 类型，这里是 provider + openId 的组合
+// 对于 PHONE 类型，这里是 E.164 格式的手机号 (+86138...)
+readonly identifier: string;
+
+// 凭据状态
+isVerified: boolean; // 例如：邮箱是否验证过
+
+createdAt: Date;
+updatedAt: Date;
+} 2. 密码凭据实体 (PasswordCredential)
 这是最复杂的，因为涉及加密安全。
 
 TypeScript
 // 值对象: 封装哈希后的密码 (防止把明文当哈希存)
 export class HashedPassword {
-  constructor(private readonly value: string) {
-    if (!value.startsWith('$2a$') && !value.startsWith('$argon2')) {
-      throw new Error("Invalid hash format"); // 简单的防御性编程
-    }
-  }
-  toString() { return this.value; }
+constructor(private readonly value: string) {
+if (!value.startsWith('$2a$') && !value.startsWith('$argon2')) {
+throw new Error("Invalid hash format"); // 简单的防御性编程
+}
+}
+toString() { return this.value; }
 }
 
 export interface PasswordCredential extends BaseCredential {
-  readonly type: CredentialType.PASSWORD;
-  
-  // 核心敏感数据
-  passwordHash: HashedPassword;
-  
-  // 安全策略元数据
-  passwordChangedAt: Date; // 用于强制踢出旧 Token
-  mustChangePassword: boolean; // 管理员重置密码后，用户下次登录需修改
-}
-3. OAuth/第三方凭据实体 (OAuthCredential)
+readonly type: CredentialType.PASSWORD;
+
+// 核心敏感数据
+passwordHash: HashedPassword;
+
+// 安全策略元数据
+passwordChangedAt: Date; // 用于强制踢出旧 Token
+mustChangePassword: boolean; // 管理员重置密码后，用户下次登录需修改
+} 3. OAuth/第三方凭据实体 (OAuthCredential)
 不需要存密码，但需要存第三方的元数据。
 
 TypeScript
 export interface OAuthCredential extends BaseCredential {
-  readonly type: CredentialType.OAUTH2;
-  
-  provider: 'GOOGLE' | 'GITHUB' | 'WECHAT';
-  
-  // 第三方的唯一ID (OpenID / Subject)
-  externalUserId: string; 
-  
-  // (可选) 如果你需要调用第三方 API (如获取用户好友列表)，需要持久化这些
-  accessToken?: string;
-  refreshToken?: string;
-  tokenExpiresAt?: Date;
-  
-  // 冗余字段: 第三方那边的昵称 (防止第三方把号删了我们不知道是谁)
-  externalUsername?: string; 
-}
-4. 手机/短信凭据实体 (PhoneCredential)
+readonly type: CredentialType.OAUTH2;
+
+provider: 'GOOGLE' | 'GITHUB' | 'WECHAT';
+
+// 第三方的唯一ID (OpenID / Subject)
+externalUserId: string;
+
+// (可选) 如果你需要调用第三方 API (如获取用户好友列表)，需要持久化这些
+accessToken?: string;
+refreshToken?: string;
+tokenExpiresAt?: Date;
+
+// 冗余字段: 第三方那边的昵称 (防止第三方把号删了我们不知道是谁)
+externalUsername?: string;
+} 4. 手机/短信凭据实体 (PhoneCredential)
 手机验证码是瞬时的（Transient），通常存在 Redis 里，不持久化在 SQL 的 Credential 表中。 所以这个实体主要用于“占位”，表示“这个用户绑定了手机号”。
 
 TypeScript
 export interface PhoneCredential extends BaseCredential {
-  readonly type: CredentialType.PHONE_SMS;
-  
-  // 规范化的手机号 (e.g. "+8613800138000")
-  phoneNumber: string; 
-  
-  // 手机号验证时间
-  verifiedAt: Date;
-}
-5. 最终的联合类型 (The Union Type)
+readonly type: CredentialType.PHONE_SMS;
+
+// 规范化的手机号 (e.g. "+8613800138000")
+phoneNumber: string;
+
+// 手机号验证时间
+verifiedAt: Date;
+} 5. 最终的联合类型 (The Union Type)
 在聚合根 AuthenticationIdentity 中使用的就是这个类型。
 
 TypeScript
 // 这就是你在代码里主要引用的类型
-export type AuthCredential = 
-  | PasswordCredential 
-  | OAuthCredential 
-  | PhoneCredential;
+export type AuthCredential =
+| PasswordCredential
+| OAuthCredential
+| PhoneCredential;
 三、 在聚合根中如何使用？
 在 AuthenticationIdentity 聚合根中，我们通过这个联合类型来处理逻辑。 TypeScript 的类型守卫（Type Guard）在这里非常有用。
 
@@ -560,8 +553,8 @@ TypeScript
 // Domain/Model/Identity/AuthenticationIdentity.ts
 
 export class AuthenticationIdentity {
-    // ... 其他属性
-    private _credentials: AuthCredential[] = [];
+// ... 其他属性
+private _credentials: AuthCredential[] = [];
 
     // 获取该用户所有的登录方式
     public get credentials(): AuthCredential[] {
@@ -597,11 +590,11 @@ export class AuthenticationIdentity {
         };
 
         this._credentials[credIndex] = newCred;
-        
+
         // 4. 触发事件
         this.addDomainEvent(new PasswordChangedEvent(this.id));
     }
-    
+
     /**
      * 业务逻辑：绑定第三方账号
      */
@@ -620,6 +613,7 @@ export class AuthenticationIdentity {
        };
        this._credentials.push(newCred);
     }
+
 }
 四、 数据库映射参考 (Infrastructure)
 虽然上面是领域对象，但最终要存数据库。通常有两种策略：
@@ -642,11 +636,9 @@ auth_credentials_oauth (cred_id, provider, token)
 
 在 DDD 实践中，策略 A 通常更好，因为查询聚合根时，我们要一次性把所有凭据捞出来，单表查询性能最高，也更容易映射回上面的 AuthCredential 联合类型。
 
- 所以，实现方法应该是先有一个 **identify** 聚合根，然后这个聚合根下有一个 **credential** 实体，
+所以，实现方法应该是先有一个 **identify** 聚合根，然后这个聚合根下有一个 **credential** 实体，
 
-
-
-然后这个实体是有多种类别的。 
+然后这个实体是有多种类别的。
 
 你的理解完全正确。
 
@@ -655,8 +647,8 @@ auth_credentials_oauth (cred_id, provider, token)
 我们可以用一张清晰的结构图来总结这个模型：
 
 1. 为什么这种结构最合理？
-A. 生命周期管控 (Lifecycle Management)
-聚合根 (Identity) 是老板：Credential 不能独立存在。必须先有人（Identity），才能有这个人的密码（Credential）。
+   A. 生命周期管控 (Lifecycle Management)
+   聚合根 (Identity) 是老板：Credential 不能独立存在。必须先有人（Identity），才能有这个人的密码（Credential）。
 
 级联效应：如果你删除了 Identity（注销账号），或者锁定了 Identity（封号），那么该用户下挂载的所有 Credential（无论是密码、微信还是 GitHub）都会瞬间全部失效。这保证了业务一致性。
 
@@ -666,32 +658,31 @@ B. 扩展性 (Extensibility - Open/Closed Principle)
 关闭修改：你不需要去修改 Identity 聚合根的核心逻辑（如锁定逻辑、ID 生成逻辑），也不需要改动现有的 PasswordCredential。
 
 2. 这个结构的“逻辑视图”
-在内存中，当你把这个聚合根从数据库查出来时，它的样子大概是这样的（JSON 伪代码表示）：
+   在内存中，当你把这个聚合根从数据库查出来时，它的样子大概是这样的（JSON 伪代码表示）：
 
 JSON
 // Aggregate Root: Identity
 {
-  "id": "identity_9527",
-  "status": "ACTIVE",       // 只要把它改成 LOCKED，下面所有登录方式全废
-  "failed_attempts": 0,
-  
-  // List<Entity>: Credentials (多态列表)
-  "credentials": [
-    // 类别 1: 密码凭据
-    {
-      "type": "PASSWORD",
-      "identifier": "my_email@test.com",
-      "secret": "$2a$10$Xj..." // Hash
-    },
-    // 类别 2: 微信凭据
-    {
-      "type": "OAUTH_WECHAT",
-      "identifier": "open_id_xyz123", // 微信的OpenID
-      "secret": "access_token_..."
-    }
-  ]
+"id": "identity_9527",
+"status": "ACTIVE", // 只要把它改成 LOCKED，下面所有登录方式全废
+"failed_attempts": 0,
+
+// List<Entity>: Credentials (多态列表)
+"credentials": [
+// 类别 1: 密码凭据
+{
+"type": "PASSWORD",
+"identifier": "my_email@test.com",
+"secret": "$2a$10$Xj..." // Hash
+},
+// 类别 2: 微信凭据
+{
+"type": "OAUTH_WECHAT",
+"identifier": "open_id_xyz123", // 微信的OpenID
+"secret": "access_token_..."
 }
-3. 一个关键的实现细节：标识符的唯一性
+]
+} 3. 一个关键的实现细节：标识符的唯一性
 虽然 Credential 是内部实体，但它有一个特殊性：全局唯一性校验。
 
 通常，DDD 里的内部实体只需要在聚合内部唯一。但是，identifier（如邮箱、手机号）必须在全系统中唯一。

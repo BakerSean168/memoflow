@@ -14,7 +14,11 @@ import type { ImportanceLevel } from '@memoflow/contracts/shared';
 import type { IdentityId } from '@memoflow/domain-shared';
 import type { TaskPlanId } from '../../domain/value-objects/task-plan-id';
 import { TaskOccurrence } from './task-occurrence';
-import { nextRecurrenceDate, recurrenceDatesBetween, recurrenceOccursOn } from './task-recurrence-date.adapter';
+import {
+  nextRecurrenceDate,
+  recurrenceDatesBetween,
+  recurrenceOccursOn,
+} from './task-recurrence-date.adapter';
 
 export interface OccurrenceGenerationContext {
   planId: TaskPlanId;
@@ -82,8 +86,14 @@ export function createOccurrenceFromPlan(
   });
 }
 
-function passesBusinessGenerationGuards(ctx: OccurrenceGenerationContext, candidateDay: number): boolean {
-  if (ctx.status !== TaskPlanStatus.Active || ctx.schedule.kind !== TaskPlanScheduleKind.Recurring) {
+function passesBusinessGenerationGuards(
+  ctx: OccurrenceGenerationContext,
+  candidateDay: number,
+): boolean {
+  if (
+    ctx.status !== TaskPlanStatus.Active ||
+    ctx.schedule.kind !== TaskPlanScheduleKind.Recurring
+  ) {
     return false;
   }
   if (hasOccurrenceOnDate(ctx, candidateDay)) return false;
@@ -144,7 +154,9 @@ export function generateOccurrences(
 
   const maxOccurrences =
     ctx.schedule.recurrence.end.kind === 'Count' ? ctx.schedule.recurrence.end.count : null;
-  const existingCount = ctx.existingOccurrences.filter((occurrence) => !occurrence.deletedAt).length;
+  const existingCount = ctx.existingOccurrences.filter(
+    (occurrence) => !occurrence.deletedAt,
+  ).length;
   if (maxOccurrences !== null && existingCount >= maxOccurrences) return { occurrences: [] };
 
   const occurrences: TaskOccurrence[] = [];
@@ -207,7 +219,10 @@ export function isActiveOnDate(ctx: OccurrenceGenerationContext, date: number): 
   );
 }
 
-export function getNextOccurrence(ctx: OccurrenceGenerationContext, afterDate: number): number | null {
+export function getNextOccurrence(
+  ctx: OccurrenceGenerationContext,
+  afterDate: number,
+): number | null {
   if (ctx.status !== TaskPlanStatus.Active) return null;
   if (ctx.schedule.kind === TaskPlanScheduleKind.OneTime) {
     const startDate = ymdStart(ctx.schedule.date, ctx.timeContext);

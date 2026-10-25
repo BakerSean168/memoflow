@@ -355,7 +355,10 @@ if (process.env.FAIL_COMMAND === 'true') process.exit(17);
       })) {
         const inputPath = path.join(root, 'input.json');
         if (!manifest.lanes[lane]) {
-          await assert.rejects(createLaneInput({ lane, manifest, output: inputPath }), /not enabled/u);
+          await assert.rejects(
+            createLaneInput({ lane, manifest, output: inputPath }),
+            /not enabled/u,
+          );
           continue;
         }
         const input = await createLaneInput({ lane, manifest, output: inputPath });
@@ -446,7 +449,7 @@ if (process.env.FAIL_COMMAND === 'true') process.exit(17);
 
 test('Web manifest projects narrow/full/zero selections into dynamic outputs', async () => {
   // eslint-disable-next-line @nx/enforce-module-boundaries -- contract test checks the Web-owned canonical list
-  const { WEB_FLOW_SPECS } = await import('../../../apps/web/web-flow-specs.mjs');
+  const { WEB_SPECIALIZED_SPECS } = await import('../../../apps/web/web-specialized-specs.mjs');
   const { writeManifestOutputs } = await import('../generate-delivery-manifest.mjs');
   const { mkdtemp, readFile, rm } = await import('node:fs/promises');
   const { tmpdir } = await import('node:os');
@@ -458,18 +461,18 @@ test('Web manifest projects narrow/full/zero selections into dynamic outputs', a
       {
         event: 'pull_request',
         full: false,
-        files: [`apps/web/e2e/${WEB_FLOW_SPECS[0]}`],
+        files: [`apps/web/e2e/${WEB_SPECIALIZED_SPECS[0]}`],
         count: 1,
-        specs: [WEB_FLOW_SPECS[0]],
+        specs: [WEB_SPECIALIZED_SPECS[0]],
       },
       {
         event: 'pull_request',
         full: false,
         files: ['apps/web/src/App.vue'],
-        count: 4,
-        specs: WEB_FLOW_SPECS,
+        count: 1,
+        specs: WEB_SPECIALIZED_SPECS,
       },
-      { event: 'workflow_dispatch', full: true, files: [], count: 4, specs: WEB_FLOW_SPECS },
+      { event: 'workflow_dispatch', full: true, files: [], count: 1, specs: WEB_SPECIALIZED_SPECS },
       { event: 'pull_request', full: false, files: ['docs/README.md'], count: 0, specs: [] },
     ]) {
       const m = await buildDeliveryManifest({
@@ -506,4 +509,71 @@ test('Web manifest projects narrow/full/zero selections into dynamic outputs', a
     else process.env.GITHUB_OUTPUT = previousOutput;
     await rm(root, { recursive: true, force: true });
   }
+});
+
+test('manifest carries laneDetails with skip reasons (VNext Q2)', async () => {
+  const m = await buildDeliveryManifest({
+    base: 'base',
+    head: 'head',
+    scope,
+    files: ['packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.stories.ts'],
+  });
+  assert.equal(m.laneDetails.componentBrowser.required, true);
+  assert.deepEqual(m.laneDetails.componentBrowser.targets, ['ui-storybook:test:interaction']);
+  assert.equal(m.laneDetails.contract.required, false);
+  assert.ok(m.laneDetails.contract.skipReason.length > 0);
+  assert.equal(m.laneDetails.fmt.required, true);
+  assert.equal(m.laneDetails.web.required, m.lanes.web);
+});
+
+test('manifest laneDetails marks contract changes as required', async () => {
+  const m = await buildDeliveryManifest({
+    base: 'base',
+    head: 'head',
+    scope,
+    files: ['packages/contracts/src/index.ts'],
+  });
+  assert.equal(m.laneDetails.contract.required, true);
+  assert.equal(m.laneDetails.contract.skipReason, null);
+});
+
+test('injected scope stays authoritative under a main-push event (regression)', async () => {
+  const m = await buildDeliveryManifest({
+    base: 'base',
+    head: 'head',
+    event: 'push',
+    ref: 'refs/heads/main',
+    scope,
+    files: ['packages/contracts/src/index.ts'],
+  });
+  assert.equal(m.full, false);
+  assert.equal(m.scope.full, m.full);
+});
+
+test('migrated browser contracts run for production views and transitive package inputs', async () => {
+  for (const [file, projects] of [
+    ['apps/web/src/auth/WebAuthView.vue', ['web']],
+    ['apps/web/src/auth/validation.ts', ['web']],
+    ['packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue', ['app-vue']],
+    ['packages/ui-vue-shadcn/src/components/ui/input/Input.vue', ['ui-vue-shadcn']],
+    ['packages/contracts/src/index.ts', ['contracts', 'ui-storybook']],
+  ]) {
+    const m = await buildDeliveryManifest({
+      base: 'base',
+      head: 'head',
+      event: 'pull_request',
+      scope: { ...scope, projects },
+      files: [file],
+    });
+    assert.equal(m.laneDetails.componentBrowser.required, true, file);
+    assert.deepEqual(m.laneDetails.componentBrowser.files, [file]);
+  }
+  const backend = await buildDeliveryManifest({
+    base: 'base',
+    head: 'head',
+    event: 'pull_request',
+    scope: { ...scope, projects: ['api'] },
+    files: ['apps/api/src/health.ts'],
+  });
+  assert.equal(backend.laneDetails.componentBrowser.required, false);
 });

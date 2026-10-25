@@ -14,17 +14,20 @@
 在用户直接生成 goal draft 之前，增加一个 **clarification 阶段**。
 
 ### 背景
+
 - 当前 Chat Goal Tool 是唯一的主产品入口
 - 用户输入的信息可能不足，导致生成的 goal 过于模糊
 - 需要系统主动补齐信息缺口
 
 ### 目标
+
 - 系统先判断用户输入是否足够
 - 信息不足时返回澄清问题（而不是直接出 draft）
 - 用户回答后，信息并入下一轮规划
 - 工作流状态可恢复（刷新页面后）
 
 ### 验收标准
+
 - ✅ 模糊 idea → 系统返回澄清问题
 - ✅ 前端显示问题列表 & 收集回答
 - ✅ 继续生成 goal draft
@@ -70,14 +73,14 @@ localStorage: 持久化澄清状态
 
 ### 分层改动清单
 
-| 层级 | 文件 | 改动 | 代码量 |
-|------|------|------|--------|
-| **Python** | `goals.py` | 新增 Schema | 50 行 |
-| | `goal_planning_service.py` | 新增方法 + 提示词 | 150 行 |
-| **API** | `backend-automation-tool-executor.adapter.ts` | 路由澄清逻辑 | 30 行 |
-| **TS** | `ai-client-service.ts` | 扩展方法签名 | 20 行 |
-| **Vue** | `AIChatView.vue` | 新增状态 + UI + 持久化 | 150 行 |
-| **总计** | | | ~400 行 |
+| 层级       | 文件                                          | 改动                   | 代码量  |
+| ---------- | --------------------------------------------- | ---------------------- | ------- |
+| **Python** | `goals.py`                                    | 新增 Schema            | 50 行   |
+|            | `goal_planning_service.py`                    | 新增方法 + 提示词      | 150 行  |
+| **API**    | `backend-automation-tool-executor.adapter.ts` | 路由澄清逻辑           | 30 行   |
+| **TS**     | `ai-client-service.ts`                        | 扩展方法签名           | 20 行   |
+| **Vue**    | `AIChatView.vue`                              | 新增状态 + UI + 持久化 | 150 行  |
+| **总计**   |                                               |                        | ~400 行 |
 
 ---
 
@@ -86,34 +89,39 @@ localStorage: 持久化澄清状态
 位置：`docs/guides/ai/`
 
 ### 1. **p0-1-clarification-implementation-plan.md**
-   - 任务概述和验收标准
-   - 分阶段任务清单
-   - 时间估算和风险评估
-   - **使用场景**：项目管理，跟踪进度
+
+- 任务概述和验收标准
+- 分阶段任务清单
+- 时间估算和风险评估
+- **使用场景**：项目管理，跟踪进度
 
 ### 2. **p0-1-python-implementation-guide.md**
-   - 逐步可执行的 Python 编码指南
-   - 5 个具体步骤（复制即用）
-   - 测试验证方法
-   - **使用场景**：立即开始 Python 实现
+
+- 逐步可执行的 Python 编码指南
+- 5 个具体步骤（复制即用）
+- 测试验证方法
+- **使用场景**：立即开始 Python 实现
 
 ### 3. **code-review-python-p0-1.md**
-   - Python 层深度代码审查
-   - 当前架构分析
-   - 5 大改动点的设计理由
-   - 提示词设计注意事项
-   - **使用场景**：理解设计，讨论方案
+
+- Python 层深度代码审查
+- 当前架构分析
+- 5 大改动点的设计理由
+- 提示词设计注意事项
+- **使用场景**：理解设计，讨论方案
 
 ### 4. **code-review-frontend-p0-1.md**
-   - Vue 前端深度代码审查
-   - 当前工作流流程
-   - 5 大改动点（状态、函数、UI、持久化）
-   - 与其他组件的关系
-   - **使用场景**：理解前端架构，规划 UI
+
+- Vue 前端深度代码审查
+- 当前工作流流程
+- 5 大改动点（状态、函数、UI、持久化）
+- 与其他组件的关系
+- **使用场景**：理解前端架构，规划 UI
 
 ### 5. **p0-1-澄清式-goal-创建-完整方案总结.md**
-   - 本文档
-   - 快速参考和导航
+
+- 本文档
+- 快速参考和导航
 
 ---
 
@@ -152,34 +160,34 @@ localStorage: 持久化澄清状态
 
 ### 复杂度评估
 
-| 维度 | 评估 | 说明 |
-|------|------|------|
-| **后端逻辑** | ⭐⭐ | 两个新方法，逻辑清晰 |
+| 维度         | 评估   | 说明                     |
+| ------------ | ------ | ------------------------ |
+| **后端逻辑** | ⭐⭐   | 两个新方法，逻辑清晰     |
 | **前端状态** | ⭐⭐⭐ | 引入新阶段，状态管理复杂 |
-| **API 设计** | ⭐ | 基本路由，无复杂逻辑 |
-| **UI 实现** | ⭐⭐ | 新卡片，类似现有 UI |
-| **测试覆盖** | ⭐⭐⭐ | E2E + localStorage 恢复 |
-| **总体** | ⭐⭐⭐ | **中等复杂度** |
+| **API 设计** | ⭐     | 基本路由，无复杂逻辑     |
+| **UI 实现**  | ⭐⭐   | 新卡片，类似现有 UI      |
+| **测试覆盖** | ⭐⭐⭐ | E2E + localStorage 恢复  |
+| **总体**     | ⭐⭐⭐ | **中等复杂度**           |
 
 ### 时间分解
 
-| 阶段 | 任务 | 单人 | 双人 |
-|------|------|------|------|
-| 1 | Python 澄清逻辑 | 2-3h | 2-3h |
-| 2 | API 路由 | 1-2h | 1-2h |
-| 3 | 前端集成 | 2-3h | 1-1.5h |
-| 4 | 测试优化 | 1-2h | 0.5-1h |
-| **总计** | | **6-10h** | **4.5-7.5h** |
+| 阶段     | 任务            | 单人      | 双人         |
+| -------- | --------------- | --------- | ------------ |
+| 1        | Python 澄清逻辑 | 2-3h      | 2-3h         |
+| 2        | API 路由        | 1-2h      | 1-2h         |
+| 3        | 前端集成        | 2-3h      | 1-1.5h       |
+| 4        | 测试优化        | 1-2h      | 0.5-1h       |
+| **总计** |                 | **6-10h** | **4.5-7.5h** |
 
 ### 风险评估
 
-| 项目 | 等级 | 说明 | 缓解 |
-|------|------|------|------|
-| 澄清逻辑隔离 | 🟢 低 | 不改现有方法 | 新增独立方法 |
-| 前端状态管理 | 🟡 中 | 状态转换复杂 | 充分 E2E 测试 |
-| 提示词质量 | 🟡 中 | 澄清准确性 | 迭代优化 + regression cases |
-| 向后兼容 | 🟢 低 | Response schema 扩展 | 默认值设计 |
-| Token 成本 | 🟢 低 | 额外 API 调用 | 可选澄清 + 缓存 |
+| 项目         | 等级  | 说明                 | 缓解                        |
+| ------------ | ----- | -------------------- | --------------------------- |
+| 澄清逻辑隔离 | 🟢 低 | 不改现有方法         | 新增独立方法                |
+| 前端状态管理 | 🟡 中 | 状态转换复杂         | 充分 E2E 测试               |
+| 提示词质量   | 🟡 中 | 澄清准确性           | 迭代优化 + regression cases |
+| 向后兼容     | 🟢 低 | Response schema 扩展 | 默认值设计                  |
+| Token 成本   | 🟢 低 | 额外 API 调用        | 可选澄清 + 缓存             |
 
 ---
 
@@ -189,10 +197,12 @@ localStorage: 持久化澄清状态
 
 **负责人**：后端工程师  
 **文件**：
+
 - `apps/ai-service/src/ai_service/schemas/goals.py`
 - `apps/ai-service/src/ai_service/services/goal_planning_service.py`
 
 **具体任务**：
+
 - [ ] 阅读 `code-review-python-p0-1.md` 理解设计
 - [ ] 按 `p0-1-python-implementation-guide.md` 第 1-4 步执行
 - [ ] 运行第 5 步的测试
@@ -206,10 +216,12 @@ localStorage: 持久化澄清状态
 
 **负责人**：后端 / 全栈工程师  
 **文件**：
+
 - `apps/api/src/modules/ai/backend-automation-tool-executor.adapter.ts`
 - `packages/ai/src/application-client/ai-client-service.ts`
 
 **具体任务**：
+
 - [ ] 修改 API 路由，添加澄清判断逻辑
 - [ ] 扩展 AIClientService 方法签名
 - [ ] 用 curl 测试 API 端点
@@ -223,9 +235,11 @@ localStorage: 持久化澄清状态
 
 **负责人**：前端工程师  
 **文件**：
+
 - `packages/app-vue/src/modules/ai/views/AIChatView.vue`
 
 **具体任务**：
+
 - [ ] 新增 ref 状态（6 个）
 - [ ] 改进 `generateGoalDraftFromConversation()` 方法
 - [ ] 添加澄清问题 UI 卡片
@@ -240,6 +254,7 @@ localStorage: 持久化澄清状态
 
 **负责人**：全员  
 **具体任务**：
+
 - [ ] E2E 测试（各种 idea 类型）
 - [ ] localStorage 恢复测试
 - [ ] 错误处理测试
@@ -334,6 +349,7 @@ P1 项目（Unified AI Workflow Orchestrator）
 选择你的路径：
 
 ### 🟢 立即开始
+
 ```bash
 # 打开编码指南
 cat docs/guides/ai/p0-1-python-implementation-guide.md
@@ -343,6 +359,7 @@ cat docs/guides/ai/p0-1-python-implementation-guide.md
 ```
 
 ### 🟡 先讨论设计
+
 ```bash
 # 阅读代码审查文档
 cat docs/guides/ai/code-review-python-p0-1.md
@@ -352,6 +369,7 @@ cat docs/guides/ai/code-review-frontend-p0-1.md
 ```
 
 ### 🟣 查看任务管理
+
 ```bash
 # 查看完整的任务清单
 cat docs/guides/ai/p0-1-clarification-implementation-plan.md
@@ -362,26 +380,34 @@ cat docs/guides/ai/p0-1-clarification-implementation-plan.md
 ## 📞 问题排查
 
 ### Q: 应该从哪里开始？
+
 **A**: 推荐顺序：
-1. Python（底层）→ API →  前端（表现层）
+
+1. Python（底层）→ API → 前端（表现层）
 2. 理由：从下往上，依赖关系清晰
 
 ### Q: 如果澄清 LLM 调用失败怎么办？
+
 **A**: 前端应该降级：
+
 - 捕获异常
 - 提示用户
 - 给予"跳过澄清"选项
 - 直接进入 draft 生成
 
 ### Q: Token 成本如何管理？
+
 **A**: 建议措施：
+
 - 澄清检查可选（default=true，但可关闭）
 - 监控 usage 字段
 - 考虑缓存同一 idea 的澄清结果
 - 用 local LLM 做澄清检查
 
 ### Q: 如果提示词效果不好怎么办？
+
 **A**: 迭代步骤：
+
 1. 收集失败 cases
 2. 调整提示词
 3. 运行 regression tests
@@ -400,6 +426,7 @@ P0-1 是 Route 2 路线的**第一个可交付产品增强**。完成它之后�
 
 **预计总投入**：6-10 小时  
 **预期收益**：
+
 - 学习 AI 工作流设计
 - 积累两阶段规划经验
 - 为求职作品增加亮点

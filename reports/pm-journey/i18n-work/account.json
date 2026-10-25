@@ -1,403 +1,293 @@
 [
- {
-  "key": "account.actions.saveProfile",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.center",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.description",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.gender.female",
-  "files": [
-   "packages/app-vue/src/modules/account/components/ProfileCard.vue",
-   "packages/app-vue/src/modules/account/components/ProfileForm.vue"
-  ]
- },
- {
-  "key": "account.gender.male",
-  "files": [
-   "packages/app-vue/src/modules/account/components/ProfileCard.vue",
-   "packages/app-vue/src/modules/account/components/ProfileForm.vue"
-  ]
- },
- {
-  "key": "account.gender.notSet",
-  "files": [
-   "packages/app-vue/src/modules/account/components/ProfileCard.vue"
-  ]
- },
- {
-  "key": "account.gender.other",
-  "files": [
-   "packages/app-vue/src/modules/account/components/ProfileCard.vue",
-   "packages/app-vue/src/modules/account/components/ProfileForm.vue"
-  ]
- },
- {
-  "key": "account.gender.unspecified",
-  "files": [
-   "packages/app-vue/src/modules/account/components/ProfileForm.vue"
-  ]
- },
- {
-  "key": "account.guestLabel",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue",
-   "packages/app-vue/src/modules/account/composables/useAccount.ts"
-  ]
- },
- {
-  "key": "account.logoutHandlerUnavailable",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.logoutHint",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.oauth.alreadyLinked",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.oauth.bindGithub",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.oauth.bindSuccess",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.oauth.description",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.oauth.githubLinked",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.oauth.githubNotLinked",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.oauth.githubUnavailable",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.oauth.invalidState",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.oauth.lastLoginPath",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.oauth.repoScopeHint",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.oauth.serviceUnavailable",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.oauth.title",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.oauth.unbindConfirmDescription",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.oauth.unbindConfirmText",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.oauth.unbindConfirmTitle",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.oauth.unbindGithub",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.oauth.unbindSuccess",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.placeholder.avatarUrl",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.placeholder.bio",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue",
-   "packages/app-vue/src/modules/account/components/ProfileForm.vue"
-  ]
- },
- {
-  "key": "account.placeholder.gender",
-  "files": [
-   "packages/app-vue/src/modules/account/components/ProfileForm.vue"
-  ]
- },
- {
-  "key": "account.placeholder.nickname",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue",
-   "packages/app-vue/src/modules/account/components/ProfileForm.vue"
-  ]
- },
- {
-  "key": "account.placeholder.realNameOptional",
-  "files": [
-   "packages/app-vue/src/modules/account/components/ProfileForm.vue"
-  ]
- },
- {
-  "key": "account.placeholder.selectDate",
-  "files": [
-   "packages/app-vue/src/modules/account/components/ProfileForm.vue"
-  ]
- },
- {
-  "key": "account.profile.avatarRecommendation",
-  "files": [
-   "packages/app-vue/src/modules/account/components/ProfileForm.vue"
-  ]
- },
- {
-  "key": "account.profile.avatarUrl",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.profile.bio",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue",
-   "packages/app-vue/src/modules/account/components/ProfileCard.vue",
-   "packages/app-vue/src/modules/account/components/ProfileForm.vue"
-  ]
- },
- {
-  "key": "account.profile.birthday",
-  "files": [
-   "packages/app-vue/src/modules/account/components/ProfileCard.vue",
-   "packages/app-vue/src/modules/account/components/ProfileForm.vue"
-  ]
- },
- {
-  "key": "account.profile.changeAvatar",
-  "files": [
-   "packages/app-vue/src/modules/account/components/ProfileForm.vue"
-  ]
- },
- {
-  "key": "account.profile.editProfile",
-  "files": [
-   "packages/app-vue/src/modules/account/components/ProfileCard.vue"
-  ]
- },
- {
-  "key": "account.profile.editTitle",
-  "files": [
-   "packages/app-vue/src/modules/account/components/ProfileForm.vue"
-  ]
- },
- {
-  "key": "account.profile.gender",
-  "files": [
-   "packages/app-vue/src/modules/account/components/ProfileCard.vue",
-   "packages/app-vue/src/modules/account/components/ProfileForm.vue"
-  ]
- },
- {
-  "key": "account.profile.nickname",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue",
-   "packages/app-vue/src/modules/account/components/ProfileForm.vue"
-  ]
- },
- {
-  "key": "account.profile.realName",
-  "files": [
-   "packages/app-vue/src/modules/account/components/ProfileForm.vue"
-  ]
- },
- {
-  "key": "account.sessions.cannotRevokeCurrent",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.sessions.current",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.sessions.description",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.sessions.empty",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.sessions.lastActive",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.sessions.loading",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.sessions.refresh",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.sessions.revoke",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.sessions.revokeConfirmDescription",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.sessions.revokeConfirmText",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.sessions.revokeConfirmTitle",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.sessions.title",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.sessions.unknownDevice",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.status.loading",
-  "files": [
-   "packages/app-vue/src/modules/account/components/AccountProfileSection.vue"
-  ]
- },
- {
-  "key": "account.toast.accountClosed",
-  "files": [
-   "packages/app-vue/src/modules/account/composables/useAccount.ts"
-  ]
- },
- {
-  "key": "account.toast.checkFailed",
-  "files": [
-   "packages/app-vue/src/modules/account/composables/useAccount.ts"
-  ]
- },
- {
-  "key": "account.toast.guestCloseAccountUnavailable",
-  "files": [
-   "packages/app-vue/src/modules/account/composables/useAccount.ts"
-  ]
- },
- {
-  "key": "account.toast.guestProfileUpdateUnavailable",
-  "files": [
-   "packages/app-vue/src/modules/account/composables/useAccount.ts"
-  ]
- },
- {
-  "key": "account.toast.guestSettingsUpdateUnavailable",
-  "files": [
-   "packages/app-vue/src/modules/account/composables/useAccount.ts"
-  ]
- },
- {
-  "key": "account.toast.profileUpdated",
-  "files": [
-   "packages/app-vue/src/modules/account/composables/useAccount.ts"
-  ]
- },
- {
-  "key": "account.toast.settingsUpdated",
-  "files": [
-   "packages/app-vue/src/modules/account/composables/useAccount.ts"
-  ]
- }
+  {
+    "key": "account.actions.saveProfile",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.center",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.description",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.gender.female",
+    "files": [
+      "packages/app-vue/src/modules/account/components/ProfileCard.vue",
+      "packages/app-vue/src/modules/account/components/ProfileForm.vue"
+    ]
+  },
+  {
+    "key": "account.gender.male",
+    "files": [
+      "packages/app-vue/src/modules/account/components/ProfileCard.vue",
+      "packages/app-vue/src/modules/account/components/ProfileForm.vue"
+    ]
+  },
+  {
+    "key": "account.gender.notSet",
+    "files": ["packages/app-vue/src/modules/account/components/ProfileCard.vue"]
+  },
+  {
+    "key": "account.gender.other",
+    "files": [
+      "packages/app-vue/src/modules/account/components/ProfileCard.vue",
+      "packages/app-vue/src/modules/account/components/ProfileForm.vue"
+    ]
+  },
+  {
+    "key": "account.gender.unspecified",
+    "files": ["packages/app-vue/src/modules/account/components/ProfileForm.vue"]
+  },
+  {
+    "key": "account.guestLabel",
+    "files": [
+      "packages/app-vue/src/modules/account/components/AccountProfileSection.vue",
+      "packages/app-vue/src/modules/account/composables/useAccount.ts"
+    ]
+  },
+  {
+    "key": "account.logoutHandlerUnavailable",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.logoutHint",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.oauth.alreadyLinked",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.oauth.bindGithub",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.oauth.bindSuccess",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.oauth.description",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.oauth.githubLinked",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.oauth.githubNotLinked",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.oauth.githubUnavailable",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.oauth.invalidState",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.oauth.lastLoginPath",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.oauth.repoScopeHint",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.oauth.serviceUnavailable",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.oauth.title",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.oauth.unbindConfirmDescription",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.oauth.unbindConfirmText",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.oauth.unbindConfirmTitle",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.oauth.unbindGithub",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.oauth.unbindSuccess",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.placeholder.avatarUrl",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.placeholder.bio",
+    "files": [
+      "packages/app-vue/src/modules/account/components/AccountProfileSection.vue",
+      "packages/app-vue/src/modules/account/components/ProfileForm.vue"
+    ]
+  },
+  {
+    "key": "account.placeholder.gender",
+    "files": ["packages/app-vue/src/modules/account/components/ProfileForm.vue"]
+  },
+  {
+    "key": "account.placeholder.nickname",
+    "files": [
+      "packages/app-vue/src/modules/account/components/AccountProfileSection.vue",
+      "packages/app-vue/src/modules/account/components/ProfileForm.vue"
+    ]
+  },
+  {
+    "key": "account.placeholder.realNameOptional",
+    "files": ["packages/app-vue/src/modules/account/components/ProfileForm.vue"]
+  },
+  {
+    "key": "account.placeholder.selectDate",
+    "files": ["packages/app-vue/src/modules/account/components/ProfileForm.vue"]
+  },
+  {
+    "key": "account.profile.avatarRecommendation",
+    "files": ["packages/app-vue/src/modules/account/components/ProfileForm.vue"]
+  },
+  {
+    "key": "account.profile.avatarUrl",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.profile.bio",
+    "files": [
+      "packages/app-vue/src/modules/account/components/AccountProfileSection.vue",
+      "packages/app-vue/src/modules/account/components/ProfileCard.vue",
+      "packages/app-vue/src/modules/account/components/ProfileForm.vue"
+    ]
+  },
+  {
+    "key": "account.profile.birthday",
+    "files": [
+      "packages/app-vue/src/modules/account/components/ProfileCard.vue",
+      "packages/app-vue/src/modules/account/components/ProfileForm.vue"
+    ]
+  },
+  {
+    "key": "account.profile.changeAvatar",
+    "files": ["packages/app-vue/src/modules/account/components/ProfileForm.vue"]
+  },
+  {
+    "key": "account.profile.editProfile",
+    "files": ["packages/app-vue/src/modules/account/components/ProfileCard.vue"]
+  },
+  {
+    "key": "account.profile.editTitle",
+    "files": ["packages/app-vue/src/modules/account/components/ProfileForm.vue"]
+  },
+  {
+    "key": "account.profile.gender",
+    "files": [
+      "packages/app-vue/src/modules/account/components/ProfileCard.vue",
+      "packages/app-vue/src/modules/account/components/ProfileForm.vue"
+    ]
+  },
+  {
+    "key": "account.profile.nickname",
+    "files": [
+      "packages/app-vue/src/modules/account/components/AccountProfileSection.vue",
+      "packages/app-vue/src/modules/account/components/ProfileForm.vue"
+    ]
+  },
+  {
+    "key": "account.profile.realName",
+    "files": ["packages/app-vue/src/modules/account/components/ProfileForm.vue"]
+  },
+  {
+    "key": "account.sessions.cannotRevokeCurrent",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.sessions.current",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.sessions.description",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.sessions.empty",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.sessions.lastActive",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.sessions.loading",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.sessions.refresh",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.sessions.revoke",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.sessions.revokeConfirmDescription",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.sessions.revokeConfirmText",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.sessions.revokeConfirmTitle",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.sessions.title",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.sessions.unknownDevice",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.status.loading",
+    "files": ["packages/app-vue/src/modules/account/components/AccountProfileSection.vue"]
+  },
+  {
+    "key": "account.toast.accountClosed",
+    "files": ["packages/app-vue/src/modules/account/composables/useAccount.ts"]
+  },
+  {
+    "key": "account.toast.checkFailed",
+    "files": ["packages/app-vue/src/modules/account/composables/useAccount.ts"]
+  },
+  {
+    "key": "account.toast.guestCloseAccountUnavailable",
+    "files": ["packages/app-vue/src/modules/account/composables/useAccount.ts"]
+  },
+  {
+    "key": "account.toast.guestProfileUpdateUnavailable",
+    "files": ["packages/app-vue/src/modules/account/composables/useAccount.ts"]
+  },
+  {
+    "key": "account.toast.guestSettingsUpdateUnavailable",
+    "files": ["packages/app-vue/src/modules/account/composables/useAccount.ts"]
+  },
+  {
+    "key": "account.toast.profileUpdated",
+    "files": ["packages/app-vue/src/modules/account/composables/useAccount.ts"]
+  },
+  {
+    "key": "account.toast.settingsUpdated",
+    "files": ["packages/app-vue/src/modules/account/composables/useAccount.ts"]
+  }
 ]

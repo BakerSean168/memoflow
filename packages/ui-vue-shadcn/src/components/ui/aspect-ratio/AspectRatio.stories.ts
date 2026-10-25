@@ -21,7 +21,9 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: (args) => ({
     components: { AspectRatio },
-    setup() { return { args }; },
+    setup() {
+      return { args };
+    },
     template: `
       <div class="w-[450px]">
         <AspectRatio v-bind="args">

@@ -28,8 +28,5 @@ export function resolveRepositoryStorageBaseDir(
   }
 
   const env = options.env ?? process.env;
-  return (
-    normalizePath(env.REPOSITORY_STORAGE_PATH) ??
-    DEFAULT_REPOSITORY_STORAGE_BASE_DIR
-  );
+  return normalizePath(env.REPOSITORY_STORAGE_PATH) ?? DEFAULT_REPOSITORY_STORAGE_BASE_DIR;
 }

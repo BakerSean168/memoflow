@@ -8,7 +8,10 @@ import type { ImportanceLevel, UrgencyLevel } from '@memoflow/contracts/shared';
 import { AggregateRoot } from '@memoflow/utils/domain';
 import { NotificationId } from '../../server/domain/value-objects/notification-id';
 import { IdentityId } from '@memoflow/domain-shared';
-import type { NotificationId as NotificationIdBranded, IdentityId as IdentityIdBranded } from '@memoflow/contracts/primitives';
+import type {
+  NotificationId as NotificationIdBranded,
+  IdentityId as IdentityIdBranded,
+} from '@memoflow/contracts/primitives';
 
 export interface NotificationState {
   id: NotificationId;
@@ -35,28 +38,70 @@ export interface NotificationState {
 }
 
 export class Notification extends AggregateRoot<NotificationId> {
-  private constructor(private readonly _props: NotificationState) { super(_props.id); }
-  get identityId(): IdentityId { return this._props.identityId; }
-  get workflowKey(): string { return this._props.workflowKey; }
-  get topic(): string { return this._props.topic; }
-  get idempotencyKey(): string { return this._props.idempotencyKey; }
-  get title(): string { return this._props.title; }
-  get content(): string { return this._props.content; }
-  get type(): NotificationType { return this._props.type; }
-  get category(): NotificationCategory { return this._props.category; }
-  get importance(): ImportanceLevel { return this._props.importance; }
-  get urgency(): UrgencyLevel { return this._props.urgency; }
-  get isRead(): boolean { return this._props.readAt !== null; }
-  get readAt(): Date | null { return this._props.readAt; }
-  get version(): number { return this._props.version; }
-  get createdAt(): Date { return this._props.createdAt; }
-  get updatedAt(): Date { return this._props.updatedAt; }
-  get deletedAt(): Date | null { return this._props.deletedAt; }
-  get isDeleted(): boolean { return this._props.deletedAt !== null; }
-  get hasActions(): boolean { return false; }
-  get displayTitle(): string { return this._props.title; }
+  private constructor(private readonly _props: NotificationState) {
+    super(_props.id);
+  }
+  get identityId(): IdentityId {
+    return this._props.identityId;
+  }
+  get workflowKey(): string {
+    return this._props.workflowKey;
+  }
+  get topic(): string {
+    return this._props.topic;
+  }
+  get idempotencyKey(): string {
+    return this._props.idempotencyKey;
+  }
+  get title(): string {
+    return this._props.title;
+  }
+  get content(): string {
+    return this._props.content;
+  }
+  get type(): NotificationType {
+    return this._props.type;
+  }
+  get category(): NotificationCategory {
+    return this._props.category;
+  }
+  get importance(): ImportanceLevel {
+    return this._props.importance;
+  }
+  get urgency(): UrgencyLevel {
+    return this._props.urgency;
+  }
+  get isRead(): boolean {
+    return this._props.readAt !== null;
+  }
+  get readAt(): Date | null {
+    return this._props.readAt;
+  }
+  get version(): number {
+    return this._props.version;
+  }
+  get createdAt(): Date {
+    return this._props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this._props.updatedAt;
+  }
+  get deletedAt(): Date | null {
+    return this._props.deletedAt;
+  }
+  get isDeleted(): boolean {
+    return this._props.deletedAt !== null;
+  }
+  get hasActions(): boolean {
+    return false;
+  }
+  get displayTitle(): string {
+    return this._props.title;
+  }
 
-  static load(state: NotificationState): Notification { return new Notification(state); }
+  static load(state: NotificationState): Notification {
+    return new Notification(state);
+  }
 
   toDTO(): NotificationClientDTO {
     return {

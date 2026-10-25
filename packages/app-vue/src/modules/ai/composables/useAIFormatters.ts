@@ -10,7 +10,8 @@ export function useAIFormatters() {
 
   function getMessageStatusLabel(item: ChatItem): string {
     if (item.status === 'aborted') return t('aiAssistant.dialogs.chat.aborted');
-    if (item.status === 'error') return item.errorMessage || t('aiAssistant.dialogs.chat.sendFailed');
+    if (item.status === 'error')
+      return item.errorMessage || t('aiAssistant.dialogs.chat.sendFailed');
     return '';
   }
 

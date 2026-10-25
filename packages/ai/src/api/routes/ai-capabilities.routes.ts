@@ -1,9 +1,5 @@
 import { Router, type RequestHandler } from 'express';
-import {
-  RouteRegistrar,
-  type OpenApiRegistryLike,
-  successResponse,
-} from '@memoflow/utils/result';
+import { RouteRegistrar, type OpenApiRegistryLike, successResponse } from '@memoflow/utils/result';
 import { AICapabilitiesSchema } from '@memoflow/contracts/ai';
 import type { AICapabilitiesController } from '../../server/transport/ai-capabilities.controller';
 

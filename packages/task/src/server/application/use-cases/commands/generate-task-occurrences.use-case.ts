@@ -44,35 +44,32 @@ export class GenerateTaskOccurrencesUseCase {
   ): Promise<Result<TaskOccurrenceClientDTO[]>> {
     try {
       const timeContext = await this.userTimeContextPort.getUserTimeContext(identityId);
-      return await this.transactionRunner.run(
-        async ({ planRepository, occurrenceRepository }) => {
-          const plan = await planRepository!.findByIdForIdentity(identityId, planId);
-          if (!plan) {
-            return error('NOT_FOUND', `TaskPlan ${planId} not found`);
-          }
+      return await this.transactionRunner.run(async ({ planRepository, occurrenceRepository }) => {
+        const plan = await planRepository!.findByIdForIdentity(identityId, planId);
+        if (!plan) {
+          return error('NOT_FOUND', `TaskPlan ${planId} not found`);
+        }
 
-          const existingOccurrences = await occurrenceRepository.findByPlanId(
-            planId,
-            identityId,
-          );
-          const occurrences = this.generationService.generateOccurrences(plan, timeContext, {
-            targetDate: request.toDate,
-            // R2-2：force 路径不再忽略请求区间——从 fromDate 生成到 toDate。
-            fromDate: request.fromDate,
-            existingOccurrences,
-          });
+        const existingOccurrences = await occurrenceRepository.findByPlanId(planId, identityId);
+        const occurrences = this.generationService.generateOccurrences(plan, timeContext, {
+          targetDate: request.toDate,
+          // R2-2：force 路径不再忽略请求区间——从 fromDate 生成到 toDate。
+          fromDate: request.fromDate,
+          existingOccurrences,
+        });
 
-          if (occurrences.length > 0) {
-            await occurrenceRepository.saveMany(occurrences);
-            await planRepository!.save(plan);
-          }
+        if (occurrences.length > 0) {
+          await occurrenceRepository.saveMany(occurrences);
+          await planRepository!.save(plan);
+        }
 
-          return ok(occurrences.map((occurrence) => occurrence.toClientDTOAt(timeContext)));
-        },
-      );
+        return ok(occurrences.map((occurrence) => occurrence.toClientDTOAt(timeContext)));
+      });
     } catch (caughtError) {
       this.logger.error('Failed to generate task occurrences', { error: caughtError });
-      return fail(mapTaskWriteErrorToResultError(caughtError, 'Failed to generate task occurrences'));
+      return fail(
+        mapTaskWriteErrorToResultError(caughtError, 'Failed to generate task occurrences'),
+      );
     }
   }
 }

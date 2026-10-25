@@ -34,16 +34,16 @@ import { BusinessRuleViolationError } from '@memoflow/utils/errors';
 
 Available subpaths:
 
-| Subpath | Contents |
-|---|---|
-| `@memoflow/utils/logger` | `createLogger`, `ILogger`, `LoggerFactory`, `LogLevel` |
-| `@memoflow/utils/domain` | `Entity`, `AggregateRoot`, `ValueObject`, `eventBus`, `createIdType` |
-| `@memoflow/utils/errors` | `DomainError`, `BusinessRuleViolationError`, `NotFoundError`, `mapInfraErrorToResultError` |
-| `@memoflow/utils/shared` | `generateUUID`, `toDateOrNull`, `parseJson`, `envConfig` |
-| `@memoflow/utils/result` | `ok`, `fail`, `Result`, `expressAdapter`, `ipcAdapter`, `RouteRegistrar` |
-| `@memoflow/utils/frontend` | `getEnvironmentConfig`, `LoadingState`, `debounce/throttle` |
-| `@memoflow/utils/validation` | `FormValidator`, `BuiltinValidators` |
-| `@memoflow/utils/lifecycle` | `InitializationManager`, `InitializationPhase`, `WebInitializationManager`, `ModuleGroup` |
+| Subpath                      | Contents                                                                                   |
+| ---------------------------- | ------------------------------------------------------------------------------------------ |
+| `@memoflow/utils/logger`     | `createLogger`, `ILogger`, `LoggerFactory`, `LogLevel`                                     |
+| `@memoflow/utils/domain`     | `Entity`, `AggregateRoot`, `ValueObject`, `eventBus`, `createIdType`                       |
+| `@memoflow/utils/errors`     | `DomainError`, `BusinessRuleViolationError`, `NotFoundError`, `mapInfraErrorToResultError` |
+| `@memoflow/utils/shared`     | `generateUUID`, `toDateOrNull`, `parseJson`, `envConfig`                                   |
+| `@memoflow/utils/result`     | `ok`, `fail`, `Result`, `expressAdapter`, `ipcAdapter`, `RouteRegistrar`                   |
+| `@memoflow/utils/frontend`   | `getEnvironmentConfig`, `LoadingState`, `debounce/throttle`                                |
+| `@memoflow/utils/validation` | `FormValidator`, `BuiltinValidators`                                                       |
+| `@memoflow/utils/lifecycle`  | `InitializationManager`, `InitializationPhase`, `WebInitializationManager`, `ModuleGroup`  |
 
 An ESLint `no-restricted-imports` warning enforces this for new code.
 
@@ -61,18 +61,18 @@ export function createXxxServiceFromHttpClient(httpClient: IResultHttpClient): I
 This convention applies to both Web (HTTP) and Desktop (IPC) transport. First-party
 clients use `IResultHttpClient` / `IResultIpcClient` only (no throw-style dual client).
 
-| Package | Factory |
-|---|---|
-| `authentication` | `createAuthenticationServiceFromHttpClient` |
-| `account` | `createAccountServiceFromHttpClient` |
-| `task` | `createTaskServiceFromHttpClient` |
-| `goal` | `createGoalServiceFromHttpClient` |
-| `schedule` | `createScheduleServiceFromHttpClient` |
-| `reminder` | `createReminderServiceFromHttpClient` |
-| `notification` | `createNotificationServiceFromHttpClient` |
-| `repository` | `createRepositoryServiceFromHttpClient` |
-| `setting` | `createSettingServiceFromHttpClient` |
-| `ai` | `createAIServiceFromHttpClient` |
+| Package            | Factory                                      |
+| ------------------ | -------------------------------------------- |
+| `authentication`   | `createAuthenticationServiceFromHttpClient`  |
+| `account`          | `createAccountServiceFromHttpClient`         |
+| `task`             | `createTaskServiceFromHttpClient`            |
+| `goal`             | `createGoalServiceFromHttpClient`            |
+| `schedule`         | `createScheduleServiceFromHttpClient`        |
+| `reminder`         | `createReminderServiceFromHttpClient`        |
+| `notification`     | `createNotificationServiceFromHttpClient`    |
+| `repository`       | `createRepositoryServiceFromHttpClient`      |
+| `setting`          | `createSettingServiceFromHttpClient`         |
+| `ai`               | `createAIServiceFromHttpClient`              |
 | `data-portability` | `createDataPortabilityServiceFromHttpClient` |
 
 Desktop uses Result IPC factories such as `createXxxIpcClient(resultIpcClient)` with the same port shape.

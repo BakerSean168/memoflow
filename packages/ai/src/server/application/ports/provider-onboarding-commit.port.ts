@@ -3,10 +3,7 @@ import type { AIProviderCredentialRef } from '@memoflow/contracts/primitives';
 
 export type AIProviderOnboardingCommitOutcome = 'COMMITTED' | 'SESSION_UNAVAILABLE' | 'CONFLICT';
 export type AIProviderReplacementCommitOutcome =
-  | 'REPLACED'
-  | 'SESSION_UNAVAILABLE'
-  | 'PROVIDER_NOT_FOUND'
-  | 'CONFLICT';
+  'REPLACED' | 'SESSION_UNAVAILABLE' | 'PROVIDER_NOT_FOUND' | 'CONFLICT';
 
 /**
  * Atomic persistence boundary for Provider onboarding and connection replacement.

@@ -48,7 +48,9 @@ export function loadWorkspaceEnv(nodeEnv = process.env.NODE_ENV || 'development'
   normalizePostgresLoopbackUrl('SHADOW_DATABASE_URL');
 }
 
-function normalizePostgresLoopbackUrl(envKey: 'DATABASE_URL' | 'DIRECT_URL' | 'SHADOW_DATABASE_URL'): void {
+function normalizePostgresLoopbackUrl(
+  envKey: 'DATABASE_URL' | 'DIRECT_URL' | 'SHADOW_DATABASE_URL',
+): void {
   const rawValue = process.env[envKey];
   if (!rawValue) {
     return;

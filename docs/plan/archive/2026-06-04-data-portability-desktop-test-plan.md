@@ -169,16 +169,16 @@ it('data-portability electron entry covers all shared data-portability channels'
 
 ## 5. 需要修改的文件
 
-| 文件 | 操作 |
-|------|------|
-| `packages/contracts/src/electron/ipc-channels.ts` | 新增 `DataPortabilityChannels` |
-| `packages/contracts/src/electron/index.ts` | 确认 re-export |
-| `apps/desktop/src/preload/allowed-channels.ts` | 添加 `DataPortabilityChannels` 到白名单 |
-| `packages/data-portability/src/infrastructure-client/adapters/ipc/data-portability-ipc.adapter.ts` | 引用共享常量 |
-| `packages/data-portability/src/electron-entry/index.ts` | 引用共享常量 |
-| `apps/desktop/src/preload/__tests__/ipc-contracts.spec.ts` | 新增 2 个测试 |
-| `apps/desktop/src/main/ipc/__tests__/module-handler-contracts.spec.ts` | 新增 1 个测试 |
-| `apps/desktop/src/main/ipc/__tests__/data-portability-handler.spec.ts` | 新建，5 个测试 |
+| 文件                                                                                                   | 操作                                    |
+| ------------------------------------------------------------------------------------------------------ | --------------------------------------- |
+| `packages/contracts/src/electron/ipc-channels.ts`                                                      | 新增 `DataPortabilityChannels`          |
+| `packages/contracts/src/electron/index.ts`                                                             | 确认 re-export                          |
+| `apps/desktop/src/preload/allowed-channels.ts`                                                         | 添加 `DataPortabilityChannels` 到白名单 |
+| `packages/data-portability/src/infrastructure-client/adapters/ipc/data-portability-ipc.adapter.ts`     | 引用共享常量                            |
+| `packages/data-portability/src/electron-entry/index.ts`                                                | 引用共享常量                            |
+| `apps/desktop/src/preload/__tests__/ipc-contracts.spec.ts`                                             | 新增 2 个测试                           |
+| `apps/desktop/src/main/ipc/__tests__/module-handler-contracts.spec.ts`                                 | 新增 1 个测试                           |
+| `apps/desktop/src/main/ipc/__tests__/data-portability-handler.spec.ts`                                 | 新建，5 个测试                          |
 | `packages/data-portability/src/infrastructure-server/powersync/__tests__/powersync-round-trip.test.ts` | 提取 `FakePowerSyncDb` 为可复用 fixture |
 
 ## 6. 验证

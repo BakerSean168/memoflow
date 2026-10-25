@@ -39,7 +39,9 @@ export function createNotificationScheduleNotificationPort(
   deps: CreateNotificationScheduleNotificationPortDeps,
 ): ScheduleNotificationPort {
   if (!deps.closureChecker) {
-    throw new Error('[FAIL-CLOSED] createNotificationScheduleNotificationPort requires closureChecker');
+    throw new Error(
+      '[FAIL-CLOSED] createNotificationScheduleNotificationPort requires closureChecker',
+    );
   }
   const createNotification = new CreateNotificationUseCase(
     deps.notificationRepository,

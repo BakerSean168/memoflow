@@ -13,14 +13,22 @@
       "@memoflow/utils": ["../../packages/utils/src/index.ts"],
       "@memoflow/utils/*": ["../../packages/utils/src/*/index.ts", "../../packages/utils/src/*.ts"],
       "@memoflow/task": ["../../packages/task/dist/index.d.ts"],
-      "@memoflow/task/schedule-execution": ["../../packages/task/dist/schedule-execution/index.d.ts"],
-      "@memoflow/task/schedule-projection": ["../../packages/task/dist/schedule-projection/index.d.ts"],
+      "@memoflow/task/schedule-execution": [
+        "../../packages/task/dist/schedule-execution/index.d.ts"
+      ],
+      "@memoflow/task/schedule-projection": [
+        "../../packages/task/dist/schedule-projection/index.d.ts"
+      ],
       "@memoflow/task/*": [
         "../../packages/task/dist/*/index.d.ts",
         "../../packages/task/dist/*.d.ts"
       ],
-      "@memoflow/goal/schedule-execution": ["../../packages/goal/dist/schedule-execution/index.d.ts"],
-      "@memoflow/goal/schedule-projection": ["../../packages/goal/dist/schedule-projection/index.d.ts"],
+      "@memoflow/goal/schedule-execution": [
+        "../../packages/goal/dist/schedule-execution/index.d.ts"
+      ],
+      "@memoflow/goal/schedule-projection": [
+        "../../packages/goal/dist/schedule-projection/index.d.ts"
+      ],
       "@memoflow/reminder/schedule-execution": [
         "../../packages/reminder/dist/schedule-execution/index.d.ts"
       ],

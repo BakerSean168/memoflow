@@ -1,9 +1,19 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
-  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut,
-  DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger,
-  DropdownMenuTrigger, DropdownMenuCheckboxItem, DropdownMenuRadioGroup, DropdownMenuRadioItem,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+  DropdownMenuCheckboxItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
 } from '.';
 import { Button } from '../button';
 
@@ -19,10 +29,18 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: () => ({
     components: {
-      DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
-      DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut,
-      DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger,
-      DropdownMenuTrigger, Button,
+      DropdownMenu,
+      DropdownMenuContent,
+      DropdownMenuGroup,
+      DropdownMenuItem,
+      DropdownMenuLabel,
+      DropdownMenuSeparator,
+      DropdownMenuShortcut,
+      DropdownMenuSub,
+      DropdownMenuSubContent,
+      DropdownMenuSubTrigger,
+      DropdownMenuTrigger,
+      Button,
     },
     template: `
       <DropdownMenu>
@@ -66,8 +84,13 @@ export const Default: Story = {
 export const WithCheckboxes: Story = {
   render: () => ({
     components: {
-      DropdownMenu, DropdownMenuContent, DropdownMenuCheckboxItem,
-      DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, Button,
+      DropdownMenu,
+      DropdownMenuContent,
+      DropdownMenuCheckboxItem,
+      DropdownMenuLabel,
+      DropdownMenuSeparator,
+      DropdownMenuTrigger,
+      Button,
     },
     template: `
       <DropdownMenu>

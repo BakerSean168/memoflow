@@ -19,7 +19,9 @@ export class SettingIpcAdapter implements ISettingApiClient {
   getPreferenceProfile(): Promise<Result<UserPreferenceProfile>> {
     return this.ipcClient.invoke(SettingChannels.PREFERENCES_PROFILE_GET);
   }
-  getPreferenceNamespace(namespace: PreferenceNamespace): Promise<Result<PreferenceNamespaceResponse>> {
+  getPreferenceNamespace(
+    namespace: PreferenceNamespace,
+  ): Promise<Result<PreferenceNamespaceResponse>> {
     return this.ipcClient.invoke(SettingChannels.PREFERENCE_GET, namespace);
   }
   patchPreferenceNamespace<N extends PreferenceNamespace>(

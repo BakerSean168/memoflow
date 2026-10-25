@@ -40,15 +40,26 @@ try {
   await event.waitFor({ state: 'visible' });
   await event.scrollIntoViewIfNeeded();
   await page.waitForTimeout(100);
-  check((await event.getAttribute('role')) === 'button', 'production event is not keyboard-actionable');
+  check(
+    (await event.getAttribute('role')) === 'button',
+    'production event is not keyboard-actionable',
+  );
   check((await event.getAttribute('tabindex')) === '0', 'production event has no tabindex');
 
   const beforeMove = await event.boundingBox();
   await dragBy(event, 0, 44);
-  await page.waitForFunction(() => document.querySelector('[data-testid="last-command"]')?.textContent?.includes('"kind": "move"'));
+  await page.waitForFunction(() =>
+    document.querySelector('[data-testid="last-command"]')?.textContent?.includes('"kind": "move"'),
+  );
   const afterMove = await event.boundingBox();
-  check(Boolean(beforeMove && afterMove && Math.abs(afterMove.y - beforeMove.y) > 10), 'successful drag did not move event visually');
-  check((await outcomeText()).includes('"status": "applied"'), 'successful drag did not reach applied owner outcome');
+  check(
+    Boolean(beforeMove && afterMove && Math.abs(afterMove.y - beforeMove.y) > 10),
+    'successful drag did not move event visually',
+  );
+  check(
+    (await outcomeText()).includes('"status": "applied"'),
+    'successful drag did not reach applied owner outcome',
+  );
 
   const resizer = event.locator('.fc-ve.fc-ll').last();
   await resizer.waitFor({ state: 'visible' });
@@ -64,29 +75,40 @@ try {
   await page.waitForTimeout(180);
   await page.mouse.up();
   await page.waitForTimeout(350);
-  await page.waitForFunction(() => document.querySelector('[data-testid="last-command"]')?.textContent?.includes('"kind": "resize"'));
+  await page.waitForFunction(() =>
+    document
+      .querySelector('[data-testid="last-command"]')
+      ?.textContent?.includes('"kind": "resize"'),
+  );
   const afterResize = await event.boundingBox();
-  check(Boolean(beforeResize && afterResize && afterResize.height > beforeResize.height + 8), 'successful resize did not change event height');
-  check((await outcomeText()).includes('"status": "applied"'), 'successful resize did not reach applied owner outcome');
+  check(
+    Boolean(beforeResize && afterResize && afterResize.height > beforeResize.height + 8),
+    'successful resize did not change event height',
+  );
+  check(
+    (await outcomeText()).includes('"status": "applied"'),
+    'successful resize did not reach applied owner outcome',
+  );
 
   await page.getByTestId('fail-next-mutation').click();
   const beforeRejectedMove = await event.boundingBox();
   const previousCommand = await commandText();
   await dragBy(event, 0, 44);
-  await page.waitForFunction(
-    (previous) => {
-      const current = document.querySelector('[data-testid="last-command"]')?.textContent ?? '';
-      const outcome = document.querySelector('[data-testid="last-outcome"]')?.textContent ?? '';
-      return current !== previous && current.includes('"kind": "move"') && outcome.includes('"status": "failed"');
-    },
-    previousCommand,
-  );
+  await page.waitForFunction((previous) => {
+    const current = document.querySelector('[data-testid="last-command"]')?.textContent ?? '';
+    const outcome = document.querySelector('[data-testid="last-outcome"]')?.textContent ?? '';
+    return (
+      current !== previous &&
+      current.includes('"kind": "move"') &&
+      outcome.includes('"status": "failed"')
+    );
+  }, previousCommand);
   const afterRejectedMove = await event.boundingBox();
   check(
     Boolean(
       beforeRejectedMove &&
-        afterRejectedMove &&
-        Math.abs(afterRejectedMove.y - beforeRejectedMove.y) < 3,
+      afterRejectedMove &&
+      Math.abs(afterRejectedMove.y - beforeRejectedMove.y) < 3,
     ),
     'failed owner mutation did not visually revert',
   );

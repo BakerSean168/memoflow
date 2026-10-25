@@ -13,8 +13,5 @@ export default {
   ...config,
   entry: ['src/index.ts'],
   dts: createLocalOnlyDtsPaths(),
-  external: [
-    ...(config.external || []),
-    'axios',
-  ],
+  external: [...(config.external || []), 'axios'],
 };

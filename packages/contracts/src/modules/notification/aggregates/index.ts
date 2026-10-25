@@ -4,22 +4,13 @@
  */
 
 // ===== Notification Server =====
-export type {
-  NotificationServerDTO,
-  NotificationNavigationIntentDTO,
-} from './notification-server';
+export type { NotificationServerDTO, NotificationNavigationIntentDTO } from './notification-server';
 
 // ===== Notification Client =====
-export type {
-  NotificationClientDTO,
-} from './notification-client';
+export type { NotificationClientDTO } from './notification-client';
 
 // ===== NotificationPreference Server =====
-export type {
-  NotificationPreferenceServerDTO,
-} from './notification-preference-server';
+export type { NotificationPreferenceServerDTO } from './notification-preference-server';
 
 // ===== NotificationPreference Client =====
-export type {
-  NotificationPreferenceClientDTO,
-} from './notification-preference-client';
+export type { NotificationPreferenceClientDTO } from './notification-preference-client';

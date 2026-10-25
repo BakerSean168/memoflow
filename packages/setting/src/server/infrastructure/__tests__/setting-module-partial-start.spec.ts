@@ -53,7 +53,9 @@ describe('createSettingModule partial-start cleanup', () => {
 
   it('preserves the original start failure even if rollback stop fails', () => {
     const a = contribution('a');
-    a.stop.mockImplementation(() => { throw new Error('a stop failed'); });
+    a.stop.mockImplementation(() => {
+      throw new Error('a stop failed');
+    });
     const b = contribution('b', true);
     const instance = createSettingModule(deps([a.contribution, b.contribution]));
     expect(() => instance.start()).toThrow('b start failed');

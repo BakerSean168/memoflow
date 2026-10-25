@@ -171,4 +171,3 @@ rootRouter.use('/xxx', router);
 - Old path deleted: `task` 的 root-router mutation seam、`goal` 的 `.execute` wrapper contract，以及只为旧 shape 存在的异常 route registration 命名与 pass-through 映射。
 - Verification: `.\node_modules\.bin\nx.cmd run task:typecheck`、`goal:typecheck`、`task:test`、`goal:test`、`schedule:test`、`api:typecheck`、`api:test` 通过。
 - Remaining follow-up: 进入 `R08`，在统一 transport 基面上收紧 strict ID contract 与 fixture 体系。
-

@@ -143,7 +143,10 @@ export async function prepareTaskSharedLabelMigration(
       );
       tasksScanned = tasks.rows.length;
 
-      const parsed = tasks.rows.map((task) => ({ ...task, tagsParsed: parseLegacyTaskTags(task.tags) }));
+      const parsed = tasks.rows.map((task) => ({
+        ...task,
+        tagsParsed: parseLegacyTaskTags(task.tags),
+      }));
       const hasAnyTags = parsed.some((task) => task.tagsParsed.length > 0);
       if (hasAnyTags && (!labelTablePresent || !assignmentTablePresent)) {
         throw new Error(
@@ -177,7 +180,9 @@ export async function prepareTaskSharedLabelMigration(
               );
               labelId = raced.rows[0]?.id;
               if (!labelId) {
-                throw new Error(`Shared Label create race did not converge for ${tag.normalizedName}.`);
+                throw new Error(
+                  `Shared Label create race did not converge for ${tag.normalizedName}.`,
+                );
               }
             }
           }

@@ -19,23 +19,23 @@
 严重级别统计：
 
 | 严重级别 | 数量 |
-| --- | ---: |
-| Blocker | 0 |
-| High | 2 |
-| Medium | 3 |
-| Low | 2 |
+| -------- | ---: |
+| Blocker  |    0 |
+| High     |    2 |
+| Medium   |    3 |
+| Low      |    2 |
 
 修复状态：
 
-| 问题 ID | 状态 | 关键验证 |
-| --- | --- | --- |
-| Q-001 | Fixed | `pnpm nx run schedule:test --skipSync` |
-| Q-002 | Fixed | `pnpm nx run schedule-orchestration:test --skipSync` |
-| Q-003 | Fixed | `pnpm nx run memoflow:governance-check --skipSync` |
-| Q-004 | Fixed | `pnpm nx run api:test:smoke --skipSync` |
-| Q-005 | Fixed | `pnpm nx run api:typecheck --skipSync`、`pnpm nx run repository:test --skipSync`、`pnpm nx run editor:test --skipSync` |
-| Q-006 | Fixed | `pnpm nx run memoflow:docs-check --skipSync` |
-| Q-007 | Fixed | `pnpm nx run schedule:test --skipSync` |
+| 问题 ID | 状态  | 关键验证                                                                                                               |
+| ------- | ----- | ---------------------------------------------------------------------------------------------------------------------- |
+| Q-001   | Fixed | `pnpm nx run schedule:test --skipSync`                                                                                 |
+| Q-002   | Fixed | `pnpm nx run schedule-orchestration:test --skipSync`                                                                   |
+| Q-003   | Fixed | `pnpm nx run memoflow:governance-check --skipSync`                                                                     |
+| Q-004   | Fixed | `pnpm nx run api:test:smoke --skipSync`                                                                                |
+| Q-005   | Fixed | `pnpm nx run api:typecheck --skipSync`、`pnpm nx run repository:test --skipSync`、`pnpm nx run editor:test --skipSync` |
+| Q-006   | Fixed | `pnpm nx run memoflow:docs-check --skipSync`                                                                           |
+| Q-007   | Fixed | `pnpm nx run schedule:test --skipSync`                                                                                 |
 
 阅读说明：第 2-8 章保留初始审查快照、证据和推荐修复路径，其中出现的“当前观察”指 2026-07-07 初始审查时的工作区状态。修复后的权威状态以本节 `Fixed` 表、`Verification Log` 和当前代码为准。
 
@@ -47,52 +47,52 @@
 
 主要应用：
 
-| 目录 | 职责 |
-| --- | --- |
-| `apps/api` | Express API 启动、模块注册、HTTP middleware、OpenAPI/route 装配 |
-| `apps/web` | Vue/Vite Web 客户端与 mock handlers |
-| `apps/desktop` | Electron main/preload/renderer，桌面 profile runtime、IPC 与 PowerSync 运行时 |
-| `apps/mobile` | 移动端应用配置 |
-| `apps/ai-service` | Python FastAPI AI service |
+| 目录              | 职责                                                                          |
+| ----------------- | ----------------------------------------------------------------------------- |
+| `apps/api`        | Express API 启动、模块注册、HTTP middleware、OpenAPI/route 装配               |
+| `apps/web`        | Vue/Vite Web 客户端与 mock handlers                                           |
+| `apps/desktop`    | Electron main/preload/renderer，桌面 profile runtime、IPC 与 PowerSync 运行时 |
+| `apps/mobile`     | 移动端应用配置                                                                |
+| `apps/ai-service` | Python FastAPI AI service                                                     |
 
 主要包：
 
-| 目录 | 职责 |
-| --- | --- |
+| 目录                                                                                                                                  | 职责                                                                                          |
+| ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
 | `packages/{account,ai,authentication,data-portability,editor,goal,governance,notification,reminder,repository,schedule,setting,task}` | 业务 feature packages，当前目标形态是 `src/api`、`src/client`、`src/electron`、`src/server/*` |
-| `packages/contracts` | 跨端 DTO、contracts 与公共协议 |
-| `packages/domain-shared` | 跨 feature/domain 的共享类型和值对象 |
-| `packages/utils` | Result、route registrar、HTTP adapter、事件总线等共享基础设施 |
-| `packages/database` | Prisma schema/client 与数据库基础设施 |
-| `packages/schedule-orchestration` | 调度投影与 source execution 的跨 feature 编排 |
-| `packages/app-vue`、`packages/ui-*` | 前端应用/UI 共享层 |
+| `packages/contracts`                                                                                                                  | 跨端 DTO、contracts 与公共协议                                                                |
+| `packages/domain-shared`                                                                                                              | 跨 feature/domain 的共享类型和值对象                                                          |
+| `packages/utils`                                                                                                                      | Result、route registrar、HTTP adapter、事件总线等共享基础设施                                 |
+| `packages/database`                                                                                                                   | Prisma schema/client 与数据库基础设施                                                         |
+| `packages/schedule-orchestration`                                                                                                     | 调度投影与 source execution 的跨 feature 编排                                                 |
+| `packages/app-vue`、`packages/ui-*`                                                                                                   | 前端应用/UI 共享层                                                                            |
 
 ### 重点审查文件清单
 
-| 文件 | 审查原因 |
-| --- | --- |
-| `apps/api/src/main.ts` | API bootstrap、跨模块依赖注入、调度编排与 storage 配置入口 |
-| `apps/desktop/src/main/main.ts`、`apps/desktop/src/main/profile/desktop-profile-runtime-manager.ts` | Electron runtime/profile 启动链路 |
-| `packages/schedule/src/server/infrastructure/runtime/schedule.runtime.ts` | 调度 runtime contribution 的启动/停止与事件订阅 |
-| `packages/schedule/src/server/application/scheduler/schedule-task-queue.ts` | 调度队列真实异步启动、loader、错误传播 |
-| `packages/schedule/src/api/module.ts`、`packages/schedule/src/electron/index.ts` | API/Electron 调度 runtime 启动入口 |
-| `packages/schedule-orchestration/vitest.config.ts`、`vitest.shared.ts`、`vitest.workspace-helpers.ts` | 跨包测试 alias 与 resolver 配置 |
-| `packages/task/src/api/routes/*.ts`、`packages/goal/src/api/routes/goal.routes.ts`、`packages/setting/src/api/routes.ts` | route middleware 与 `expressAdapter` auth 语义 |
-| `packages/utils/src/result/route-registrar.ts`、`packages/utils/src/result/express-adapter.ts` | 路由注册和 auth option 的实际执行顺序 |
-| `tools/governance/server-feature-shape-audit.mjs` | server-first 目录治理规则 |
-| `docs/architecture/adr/ADR-031-server-feature-standard-shape.md` | server-first ADR 标准 |
-| `docs/test/running-tests.md`、`vitest.shared.ts` | 测试文档与实际 coverage 配置 |
+| 文件                                                                                                                     | 审查原因                                                   |
+| ------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------- |
+| `apps/api/src/main.ts`                                                                                                   | API bootstrap、跨模块依赖注入、调度编排与 storage 配置入口 |
+| `apps/desktop/src/main/main.ts`、`apps/desktop/src/main/profile/desktop-profile-runtime-manager.ts`                      | Electron runtime/profile 启动链路                          |
+| `packages/schedule/src/server/infrastructure/runtime/schedule.runtime.ts`                                                | 调度 runtime contribution 的启动/停止与事件订阅            |
+| `packages/schedule/src/server/application/scheduler/schedule-task-queue.ts`                                              | 调度队列真实异步启动、loader、错误传播                     |
+| `packages/schedule/src/api/module.ts`、`packages/schedule/src/electron/index.ts`                                         | API/Electron 调度 runtime 启动入口                         |
+| `packages/schedule-orchestration/vitest.config.ts`、`vitest.shared.ts`、`vitest.workspace-helpers.ts`                    | 跨包测试 alias 与 resolver 配置                            |
+| `packages/task/src/api/routes/*.ts`、`packages/goal/src/api/routes/goal.routes.ts`、`packages/setting/src/api/routes.ts` | route middleware 与 `expressAdapter` auth 语义             |
+| `packages/utils/src/result/route-registrar.ts`、`packages/utils/src/result/express-adapter.ts`                           | 路由注册和 auth option 的实际执行顺序                      |
+| `tools/governance/server-feature-shape-audit.mjs`                                                                        | server-first 目录治理规则                                  |
+| `docs/architecture/adr/ADR-031-server-feature-standard-shape.md`                                                         | server-first ADR 标准                                      |
+| `docs/test/running-tests.md`、`vitest.shared.ts`                                                                         | 测试文档与实际 coverage 配置                               |
 
 ### 当前推断出的职责边界
 
-| 边界 | 期望职责 | 当前观察 |
-| --- | --- | --- |
-| App bootstrap | 只做组合、注入、生命周期启动 | `apps/api/src/main.ts` 同时重复维护 repository storage path 默认值 |
-| Feature `api` | Express routes、API module 注册、HTTP transport seam | 部分 route 同时表达 `[auth]` middleware 和 `{ requireAuth: false }`，语义来源不唯一 |
-| Feature `server/domain` | 聚合、实体、值对象、domain service | 新结构基本建立，但 ADR 要求的 `server/index.ts` 缺失 |
-| Feature `server/application` | use cases、ports、scheduler queue 等业务流程 | `ScheduleTaskQueue.start()` 是真实异步入口，但外层 runtime 没有等待 |
+| 边界                            | 期望职责                                                      | 当前观察                                                                               |
+| ------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| App bootstrap                   | 只做组合、注入、生命周期启动                                  | `apps/api/src/main.ts` 同时重复维护 repository storage path 默认值                     |
+| Feature `api`                   | Express routes、API module 注册、HTTP transport seam          | 部分 route 同时表达 `[auth]` middleware 和 `{ requireAuth: false }`，语义来源不唯一    |
+| Feature `server/domain`         | 聚合、实体、值对象、domain service                            | 新结构基本建立，但 ADR 要求的 `server/index.ts` 缺失                                   |
+| Feature `server/application`    | use cases、ports、scheduler queue 等业务流程                  | `ScheduleTaskQueue.start()` 是真实异步入口，但外层 runtime 没有等待                    |
 | Feature `server/infrastructure` | repository adapters、module composition、runtime contribution | root barrel 直接导出 `./server/infrastructure`，与 ADR 的 `server/index.ts` 入口不一致 |
-| `schedule-orchestration` | 跨 feature schedule projection/source execution 编排 | 仍使用 `infrastructure-server` 命名，且测试配置无法处理被导入包内部 `@` alias |
+| `schedule-orchestration`        | 跨 feature schedule projection/source execution 编排          | 仍使用 `infrastructure-server` 命名，且测试配置无法处理被导入包内部 `@` alias          |
 
 ### 高风险区域
 
@@ -122,11 +122,11 @@ ApiBootstrapper.registerModules()
 Express routes / runtime contribution / OpenAPI 输出
 ```
 
-| 阶段 | Owner | 输入 | 输出 | 风险点 |
-| --- | --- | --- | --- | --- |
-| API bootstrap | `apps/api` | env、Prisma client、module list | Express app 与模块注册 | `apps/api/src/main.ts:68-85` 重复读取 `REPOSITORY_STORAGE_PATH` |
-| Schedule module register | `packages/schedule/src/api/module.ts` | db、sourceExecutor | `activeScheduleModule` 与 routes | `scheduleModule.start()` 在 `register()` 内同步调用，未等待 queue 异步启动 |
-| Route registration | `packages/utils` + feature routes | route defs、middleware、adapter options | Express route | `[auth]` middleware 与 `{ requireAuth: false }` 可冲突 |
+| 阶段                     | Owner                                 | 输入                                    | 输出                             | 风险点                                                                     |
+| ------------------------ | ------------------------------------- | --------------------------------------- | -------------------------------- | -------------------------------------------------------------------------- |
+| API bootstrap            | `apps/api`                            | env、Prisma client、module list         | Express app 与模块注册           | `apps/api/src/main.ts:68-85` 重复读取 `REPOSITORY_STORAGE_PATH`            |
+| Schedule module register | `packages/schedule/src/api/module.ts` | db、sourceExecutor                      | `activeScheduleModule` 与 routes | `scheduleModule.start()` 在 `register()` 内同步调用，未等待 queue 异步启动 |
+| Route registration       | `packages/utils` + feature routes     | route defs、middleware、adapter options | Express route                    | `[auth]` middleware 与 `{ requireAuth: false }` 可冲突                     |
 
 #### 流程 2：Desktop profile/runtime 启动
 
@@ -146,10 +146,10 @@ startScheduleRuntime()
 Schedule module runtime contribution
 ```
 
-| 阶段 | Owner | 输入 | 输出 | 风险点 |
-| --- | --- | --- | --- | --- |
-| Desktop shell | `apps/desktop` | profile、PowerSync db、窗口生命周期 | Desktop runtime | 认证/账户/profile 逻辑集中在桌面端 app-local 模块，后续需保持与 feature seam 对齐 |
-| Schedule runtime | `packages/schedule/src/electron/index.ts` | `activeScheduleModule` | runtime started 日志 | `activeScheduleModule.start()` 同步返回，不能表达 queue loader 失败 |
+| 阶段             | Owner                                     | 输入                                | 输出                 | 风险点                                                                            |
+| ---------------- | ----------------------------------------- | ----------------------------------- | -------------------- | --------------------------------------------------------------------------------- |
+| Desktop shell    | `apps/desktop`                            | profile、PowerSync db、窗口生命周期 | Desktop runtime      | 认证/账户/profile 逻辑集中在桌面端 app-local 模块，后续需保持与 feature seam 对齐 |
+| Schedule runtime | `packages/schedule/src/electron/index.ts` | `activeScheduleModule`              | runtime started 日志 | `activeScheduleModule.start()` 同步返回，不能表达 queue loader 失败               |
 
 #### 流程 3：Task CRUD/API route
 
@@ -169,11 +169,11 @@ repositories / event bus
 Result / HTTP response / client state 更新
 ```
 
-| 阶段 | Owner | 输入 | 输出 | 风险点 |
-| --- | --- | --- | --- | --- |
-| Client seam | `packages/task/src/client` | DTO/request | HTTP/IPC 调用 | 依赖 contracts 一致性 |
-| API routes | `packages/task/src/api/routes` | Express req/context | controller result | 部分 route 同时传 `[auth]` 和 `{ requireAuth: false }` |
-| Adapter | `packages/utils/src/result/express-adapter.ts` | Result、adapter options | HTTP response | `requireAuth` 只在 middleware 后执行，不能覆盖已绑定 middleware 的认证行为 |
+| 阶段        | Owner                                          | 输入                    | 输出              | 风险点                                                                     |
+| ----------- | ---------------------------------------------- | ----------------------- | ----------------- | -------------------------------------------------------------------------- |
+| Client seam | `packages/task/src/client`                     | DTO/request             | HTTP/IPC 调用     | 依赖 contracts 一致性                                                      |
+| API routes  | `packages/task/src/api/routes`                 | Express req/context     | controller result | 部分 route 同时传 `[auth]` 和 `{ requireAuth: false }`                     |
+| Adapter     | `packages/utils/src/result/express-adapter.ts` | Result、adapter options | HTTP response     | `requireAuth` 只在 middleware 后执行，不能覆盖已绑定 middleware 的认证行为 |
 
 #### 流程 4：Schedule projection 与执行
 
@@ -191,23 +191,23 @@ sourceExecutor / schedule-orchestration source router
 任务执行、事件发布、状态更新
 ```
 
-| 阶段 | Owner | 输入 | 输出 | 风险点 |
-| --- | --- | --- | --- | --- |
-| Projection owner | `task` / `goal` / `reminder` | feature domain state | `ScheduleTask` | 跨 feature 投影依赖 orchestration 测试保护 |
-| Runtime queue | `packages/schedule` | enabled tasks、clock、executor | scheduled execution | `queue.start()` 异步错误可能被外层吞掉 |
-| Orchestration | `packages/schedule-orchestration` | source module/type/id | source execution | 当前 test target 导入阶段失败，无法验证核心路由 |
+| 阶段             | Owner                             | 输入                           | 输出                | 风险点                                          |
+| ---------------- | --------------------------------- | ------------------------------ | ------------------- | ----------------------------------------------- |
+| Projection owner | `task` / `goal` / `reminder`      | feature domain state           | `ScheduleTask`      | 跨 feature 投影依赖 orchestration 测试保护      |
+| Runtime queue    | `packages/schedule`               | enabled tasks、clock、executor | scheduled execution | `queue.start()` 异步错误可能被外层吞掉          |
+| Orchestration    | `packages/schedule-orchestration` | source module/type/id          | source execution    | 当前 test target 导入阶段失败，无法验证核心路由 |
 
 ## 3. Responsibility Boundaries
 
 当前职责边界已经有清晰方向，但仍有几类混乱：
 
-| 边界问题 | 证据 | 影响 |
-| --- | --- | --- |
-| 生命周期 owner 不清 | `ScheduleTaskQueue.start(): Promise<void>`，但 `createScheduleRuntimeContribution.start(): void` 使用 `void queue.start()` | 上层模块无法知道调度队列是否真正启动成功 |
-| 标准入口不统一 | ADR 要求 `src/server/index.ts`，实际 feature root barrel 直接导出 `./server/infrastructure` | 新人按文档找入口会失败；治理通过不代表符合 ADR |
-| route auth 真值源不唯一 | route 传 `[auth]`，同时 adapter option 传 `{ requireAuth: false }` | 代码读者和后续工具可能误判 public/private 边界 |
-| 配置 owner 分散 | `REPOSITORY_STORAGE_PATH` 在 API、repository、editor、repository prisma adapter 重复 default | 部署配置漂移会导致多个模块使用不同 storage root |
-| 测试 resolver owner 不明确 | `schedule-orchestration` 只使用 shared config，但需要跨包 `@` alias resolver | 核心编排测试 target 失败 |
+| 边界问题                   | 证据                                                                                                                       | 影响                                            |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| 生命周期 owner 不清        | `ScheduleTaskQueue.start(): Promise<void>`，但 `createScheduleRuntimeContribution.start(): void` 使用 `void queue.start()` | 上层模块无法知道调度队列是否真正启动成功        |
+| 标准入口不统一             | ADR 要求 `src/server/index.ts`，实际 feature root barrel 直接导出 `./server/infrastructure`                                | 新人按文档找入口会失败；治理通过不代表符合 ADR  |
+| route auth 真值源不唯一    | route 传 `[auth]`，同时 adapter option 传 `{ requireAuth: false }`                                                         | 代码读者和后续工具可能误判 public/private 边界  |
+| 配置 owner 分散            | `REPOSITORY_STORAGE_PATH` 在 API、repository、editor、repository prisma adapter 重复 default                               | 部署配置漂移会导致多个模块使用不同 storage root |
+| 测试 resolver owner 不明确 | `schedule-orchestration` 只使用 shared config，但需要跨包 `@` alias resolver                                               | 核心编排测试 target 失败                        |
 
 ## 4. Critical Findings (Resolved)
 
@@ -362,27 +362,27 @@ sourceExecutor / schedule-orchestration source router
 
 ## 6. Consistency Matrix
 
-| 概念 / 规则 / 数据 | 位置 A | 位置 B | 位置 C | 不一致表现 | 风险 | 建议统一方式 |
-| --- | --- | --- | --- | --- | --- | --- |
-| Schedule runtime start 语义 | `schedule.runtime.ts:285-305` | `schedule-task-queue.ts:164-183` | `api/module.ts:69`, `electron/index.ts:86-88` | 外层 `start(): void`，内层 `start(): Promise<void>` | 启动成功状态和真实队列状态不一致 | 统一为可等待 lifecycle 或显式 degraded state |
-| `@/` alias 解析 | `vitest.shared.ts:329-334` | `vitest.workspace-helpers.ts:3-49` | `schedule-orchestration/vitest.config.ts:5-17` | shared config 把 `@` 固定到当前项目，orchestration 未接入 importer-aware resolver | 跨包测试 import 失败 | 统一 test alias strategy，按 importer package 解析 |
-| Server feature shape | ADR-031 lines 31-52 | `server-feature-shape-audit.mjs:24-96` | `packages/task/src/index.ts:14-29` | ADR 要求 `server/index.ts`，治理不查，实际 root barrel 直出 infrastructure | 文档、治理、实现三方漂移 | 更新治理或更新 ADR，形成单一标准 |
-| 认证要求 | route files 的 `[auth]` middleware | `expressAdapter({ requireAuth: false })` | smoke test 注释 | middleware 与 adapter option 表达相反语义 | route public/private 边界误判 | 只保留一个认证真值源 |
-| Repository storage path | `apps/api/src/main.ts:72,77,84` | `repository/api/module.ts:71-72` | `editor/api/module.ts:75`, `repository/server/infrastructure/prisma.ts:24` | 同一 env/default 多处重复，schema/docs 未收录 | 部署配置漂移 | 单一 config resolver + schema/docs |
-| Coverage 文档路径 | `docs/test/running-tests.md:19` | `vitest.shared.ts:75-78` | - | 文档仍写 legacy `domain-server` 路径 | 补测方向错误 | 文档改为 `src/server/domain/**` |
-| Orchestration infra 命名 | `schedule-orchestration/src/index.ts:8` | ADR legacy 禁止方向 | `project.json:6` | domain-tagged shared 包仍暴露 `infrastructure-server` | 治理覆盖盲区 | 明确是否纳入 server-first 或保留例外并文档化 |
+| 概念 / 规则 / 数据          | 位置 A                                  | 位置 B                                   | 位置 C                                                                     | 不一致表现                                                                        | 风险                             | 建议统一方式                                       |
+| --------------------------- | --------------------------------------- | ---------------------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------- | -------------------------------------------------- |
+| Schedule runtime start 语义 | `schedule.runtime.ts:285-305`           | `schedule-task-queue.ts:164-183`         | `api/module.ts:69`, `electron/index.ts:86-88`                              | 外层 `start(): void`，内层 `start(): Promise<void>`                               | 启动成功状态和真实队列状态不一致 | 统一为可等待 lifecycle 或显式 degraded state       |
+| `@/` alias 解析             | `vitest.shared.ts:329-334`              | `vitest.workspace-helpers.ts:3-49`       | `schedule-orchestration/vitest.config.ts:5-17`                             | shared config 把 `@` 固定到当前项目，orchestration 未接入 importer-aware resolver | 跨包测试 import 失败             | 统一 test alias strategy，按 importer package 解析 |
+| Server feature shape        | ADR-031 lines 31-52                     | `server-feature-shape-audit.mjs:24-96`   | `packages/task/src/index.ts:14-29`                                         | ADR 要求 `server/index.ts`，治理不查，实际 root barrel 直出 infrastructure        | 文档、治理、实现三方漂移         | 更新治理或更新 ADR，形成单一标准                   |
+| 认证要求                    | route files 的 `[auth]` middleware      | `expressAdapter({ requireAuth: false })` | smoke test 注释                                                            | middleware 与 adapter option 表达相反语义                                         | route public/private 边界误判    | 只保留一个认证真值源                               |
+| Repository storage path     | `apps/api/src/main.ts:72,77,84`         | `repository/api/module.ts:71-72`         | `editor/api/module.ts:75`, `repository/server/infrastructure/prisma.ts:24` | 同一 env/default 多处重复，schema/docs 未收录                                     | 部署配置漂移                     | 单一 config resolver + schema/docs                 |
+| Coverage 文档路径           | `docs/test/running-tests.md:19`         | `vitest.shared.ts:75-78`                 | -                                                                          | 文档仍写 legacy `domain-server` 路径                                              | 补测方向错误                     | 文档改为 `src/server/domain/**`                    |
+| Orchestration infra 命名    | `schedule-orchestration/src/index.ts:8` | ADR legacy 禁止方向                      | `project.json:6`                                                           | domain-tagged shared 包仍暴露 `infrastructure-server`                             | 治理覆盖盲区                     | 明确是否纳入 server-first 或保留例外并文档化       |
 
 ## 7. Testing Gaps (Closed Or Covered By Targeted Verification)
 
-| 测试缺口 | 风险 | 建议测试类型 | 推荐测试位置 | 优先级 | 验证命令 |
-| --- | --- | --- | --- | --- | --- |
-| Schedule runtime 启动失败未被外层 lifecycle 捕获 | loader 失败时 API/Electron 仍认为 runtime started | 单元测试 + lifecycle contract test | `packages/schedule/src/server/infrastructure/runtime/schedule.runtime.spec.ts` | High | `pnpm nx run schedule:test --skipSync` |
-| `schedule-orchestration` test target 当前不可运行 | 核心编排无测试保护 | 配置回归 + 现有 suite 真实执行 | `packages/schedule-orchestration/vitest.config.ts` 与 `src/__tests__/*` | High | `pnpm nx run schedule-orchestration:test --skipSync` |
-| route auth 语义缺少统一 contract 测试 | public/private 边界可能被误改 | route registration/auth contract test | `packages/task/src/api/routes/*.spec.ts`、`packages/goal/src/api/routes/goal.routes.spec.ts`、`packages/setting/src/api/routes.spec.ts` | Medium | `pnpm nx run api:test:smoke` |
-| Repository storage config 没有集中解析测试 | storage root 漂移难以及时发现 | config/helper 单元测试 + API config smoke | 新增 storage config helper 对应 spec | Medium | `pnpm nx run api:typecheck`、`pnpm nx run repository:test` |
-| server-first shape 文档/治理不一致未被测试锁定 | 新包结构可能继续漂移 | governance script test 或 governance check | `tools/governance/server-feature-shape-audit.mjs` | Medium | `pnpm nx run memoflow:governance-check` |
-| coverage 文档路径过时 | 新人补测路径错误 | docs check | `docs/test/running-tests.md` | Low | `pnpm nx run memoflow:docs-check` |
-| Electron schedule module 双组装 seam 未覆盖 | 后续 factory 增加副作用后风险扩大 | seam 单元测试 | `packages/schedule/src/electron/*.spec.ts` | Low | `pnpm nx run schedule:test --skipSync` |
+| 测试缺口                                          | 风险                                              | 建议测试类型                               | 推荐测试位置                                                                                                                            | 优先级 | 验证命令                                                   |
+| ------------------------------------------------- | ------------------------------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- | ------ | ---------------------------------------------------------- |
+| Schedule runtime 启动失败未被外层 lifecycle 捕获  | loader 失败时 API/Electron 仍认为 runtime started | 单元测试 + lifecycle contract test         | `packages/schedule/src/server/infrastructure/runtime/schedule.runtime.spec.ts`                                                          | High   | `pnpm nx run schedule:test --skipSync`                     |
+| `schedule-orchestration` test target 当前不可运行 | 核心编排无测试保护                                | 配置回归 + 现有 suite 真实执行             | `packages/schedule-orchestration/vitest.config.ts` 与 `src/__tests__/*`                                                                 | High   | `pnpm nx run schedule-orchestration:test --skipSync`       |
+| route auth 语义缺少统一 contract 测试             | public/private 边界可能被误改                     | route registration/auth contract test      | `packages/task/src/api/routes/*.spec.ts`、`packages/goal/src/api/routes/goal.routes.spec.ts`、`packages/setting/src/api/routes.spec.ts` | Medium | `pnpm nx run api:test:smoke`                               |
+| Repository storage config 没有集中解析测试        | storage root 漂移难以及时发现                     | config/helper 单元测试 + API config smoke  | 新增 storage config helper 对应 spec                                                                                                    | Medium | `pnpm nx run api:typecheck`、`pnpm nx run repository:test` |
+| server-first shape 文档/治理不一致未被测试锁定    | 新包结构可能继续漂移                              | governance script test 或 governance check | `tools/governance/server-feature-shape-audit.mjs`                                                                                       | Medium | `pnpm nx run memoflow:governance-check`                    |
+| coverage 文档路径过时                             | 新人补测路径错误                                  | docs check                                 | `docs/test/running-tests.md`                                                                                                            | Low    | `pnpm nx run memoflow:docs-check`                          |
+| Electron schedule module 双组装 seam 未覆盖       | 后续 factory 增加副作用后风险扩大                 | seam 单元测试                              | `packages/schedule/src/electron/*.spec.ts`                                                                                              | Low    | `pnpm nx run schedule:test --skipSync`                     |
 
 ## 8. Recommended Repair Plan
 
@@ -487,21 +487,21 @@ sourceExecutor / schedule-orchestration source router
 
 本轮审查和修复执行过的关键命令：
 
-| 命令 | 结果 |
-| --- | --- |
-| `git status --short` | 工作区存在大量未提交修改，作为审查背景记录 |
-| `node tools/governance/server-feature-shape-audit.mjs` | 通过 |
-| `node tools/governance/package-internal-boundary-audit.mjs` | 通过 |
-| `node tools/governance/package-export-audit.mjs` | 通过 |
-| `node tools/governance/public-surface-audit.mjs` | 通过 |
-| `node tools/test/test-target-governance.mjs --check` | 通过 |
-| `pnpm nx run schedule:test --skipSync` | 通过，21 files / 259 tests |
-| `pnpm nx run schedule-orchestration:test --skipSync` | 通过，4 files / 6 tests |
-| `pnpm nx run api:test:smoke --skipSync` | 通过，2 files / 58 tests |
-| `pnpm nx run repository:test --skipSync` | 通过，12 files / 58 tests |
-| `pnpm nx run editor:test --skipSync` | 通过，19 files / 103 tests |
-| `pnpm nx run api:typecheck --skipSync` | 通过，包含 24 个依赖任务 |
-| `pnpm nx run memoflow:governance-check --skipSync` | 通过 |
-| `pnpm nx run memoflow:docs-check --skipSync` | 通过 |
+| 命令                                                        | 结果                                       |
+| ----------------------------------------------------------- | ------------------------------------------ |
+| `git status --short`                                        | 工作区存在大量未提交修改，作为审查背景记录 |
+| `node tools/governance/server-feature-shape-audit.mjs`      | 通过                                       |
+| `node tools/governance/package-internal-boundary-audit.mjs` | 通过                                       |
+| `node tools/governance/package-export-audit.mjs`            | 通过                                       |
+| `node tools/governance/public-surface-audit.mjs`            | 通过                                       |
+| `node tools/test/test-target-governance.mjs --check`        | 通过                                       |
+| `pnpm nx run schedule:test --skipSync`                      | 通过，21 files / 259 tests                 |
+| `pnpm nx run schedule-orchestration:test --skipSync`        | 通过，4 files / 6 tests                    |
+| `pnpm nx run api:test:smoke --skipSync`                     | 通过，2 files / 58 tests                   |
+| `pnpm nx run repository:test --skipSync`                    | 通过，12 files / 58 tests                  |
+| `pnpm nx run editor:test --skipSync`                        | 通过，19 files / 103 tests                 |
+| `pnpm nx run api:typecheck --skipSync`                      | 通过，包含 24 个依赖任务                   |
+| `pnpm nx run memoflow:governance-check --skipSync`          | 通过                                       |
+| `pnpm nx run memoflow:docs-check --skipSync`                | 通过                                       |
 
 注意：`api:typecheck` 的第一次修复后验证暴露出 `packages/data-portability/src/server/index.ts` 导出不存在的 `./domain`。该问题属于 Q-003 server feature shape 收敛时产生的构建破口，已通过移除虚假导出修复，并由后续 `api:typecheck` 与 `memoflow:governance-check` 覆盖。

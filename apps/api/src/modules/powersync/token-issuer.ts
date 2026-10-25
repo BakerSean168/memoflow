@@ -31,15 +31,11 @@ export function issuePowerSyncToken(
     return null;
   }
 
-  const token = jwt.sign(
-    { sub: identityId, aud: 'powersync-dev' },
-    config.privateKey,
-    {
-      algorithm: 'RS256',
-      expiresIn: '5m',
-      keyid: config.keyId,
-    } as jwt.SignOptions,
-  );
+  const token = jwt.sign({ sub: identityId, aud: 'powersync-dev' }, config.privateKey, {
+    algorithm: 'RS256',
+    expiresIn: '5m',
+    keyid: config.keyId,
+  } as jwt.SignOptions);
 
   logger.info('Issued PowerSync token', {
     identityId,

@@ -127,7 +127,9 @@ export class InMemoryNotificationReliableAdapter implements NotificationReliable
 
     const now = new Date();
     const notificationId =
-      options?.notificationId ?? (JSON.parse(input.payloadJson)?.notificationId as string | undefined) ?? '';
+      options?.notificationId ??
+      (JSON.parse(input.payloadJson)?.notificationId as string | undefined) ??
+      '';
     const row: DurableOutboxRow = {
       id: input.operationId,
       identityId: input.identityId,
@@ -164,7 +166,12 @@ export class InMemoryNotificationReliableAdapter implements NotificationReliable
     leaseDurationMs?: number;
     limit?: number;
   }): Promise<
-    Array<{ claimed: boolean; lease: LeaseClaim | null; receipt: BusinessOperationReceipt; outbox: DurableOutboxRow }>
+    Array<{
+      claimed: boolean;
+      lease: LeaseClaim | null;
+      receipt: BusinessOperationReceipt;
+      outbox: DurableOutboxRow;
+    }>
   > {
     const now = new Date();
     const leaseDurationMs = input.leaseDurationMs ?? 30000;
@@ -180,8 +187,11 @@ export class InMemoryNotificationReliableAdapter implements NotificationReliable
       if (results.length >= limit) break;
       const isDue =
         row.status === 'pending' ||
-        (row.status === 'retryable' && (!row.nextRetryAt || row.nextRetryAt.getTime() <= now.getTime())) ||
-        (row.status === 'running' && row.leaseExpiresAt !== null && row.leaseExpiresAt.getTime() < now.getTime());
+        (row.status === 'retryable' &&
+          (!row.nextRetryAt || row.nextRetryAt.getTime() <= now.getTime())) ||
+        (row.status === 'running' &&
+          row.leaseExpiresAt !== null &&
+          row.leaseExpiresAt.getTime() < now.getTime());
       if (!isDue) continue;
 
       row.status = 'running';
@@ -208,7 +218,10 @@ export class InMemoryNotificationReliableAdapter implements NotificationReliable
     );
     if (!row) return Promise.resolve(receipt);
 
-    if (claimContext && (claimContext.ownerToken !== undefined || claimContext.fencingToken !== undefined)) {
+    if (
+      claimContext &&
+      (claimContext.ownerToken !== undefined || claimContext.fencingToken !== undefined)
+    ) {
       const matches =
         row.status === 'running' &&
         (claimContext.ownerToken === undefined || row.ownerToken === claimContext.ownerToken) &&
@@ -255,17 +268,27 @@ export class InMemoryNotificationReliableAdapter implements NotificationReliable
 
   queryDeadLetters(identityId: string): Promise<BusinessOperationReceipt[]> {
     return Promise.resolve(
-      this.rows.filter((r) => r.identityId === identityId && r.status === 'dead_letter').map(mapRowToReceipt),
+      this.rows
+        .filter((r) => r.identityId === identityId && r.status === 'dead_letter')
+        .map(mapRowToReceipt),
     );
   }
 
-  replayDeadLetter(params: { identityId: string; operationId: string }): Promise<BusinessOperationReceipt> {
+  replayDeadLetter(params: {
+    identityId: string;
+    operationId: string;
+  }): Promise<BusinessOperationReceipt> {
     const row = this.rows.find(
-      (r) => r.id === params.operationId && r.identityId === params.identityId && r.status === 'dead_letter',
+      (r) =>
+        r.id === params.operationId &&
+        r.identityId === params.identityId &&
+        r.status === 'dead_letter',
     );
     if (!row) {
       return Promise.reject(
-        new Error(`Dead letter operation '${params.operationId}' not found for identity '${params.identityId}'`),
+        new Error(
+          `Dead letter operation '${params.operationId}' not found for identity '${params.identityId}'`,
+        ),
       );
     }
 
@@ -297,8 +320,11 @@ export class InMemoryNotificationReliableAdapter implements NotificationReliable
 
       const isDue =
         row.status === 'pending' ||
-        (row.status === 'failed' && (!row.nextAvailableAt || row.nextAvailableAt.getTime() <= now.getTime())) ||
-        (row.status === 'running' && row.leaseExpiresAt !== null && row.leaseExpiresAt.getTime() < now.getTime());
+        (row.status === 'failed' &&
+          (!row.nextAvailableAt || row.nextAvailableAt.getTime() <= now.getTime())) ||
+        (row.status === 'running' &&
+          row.leaseExpiresAt !== null &&
+          row.leaseExpiresAt.getTime() < now.getTime());
       if (!isDue) continue;
 
       row.status = 'running';

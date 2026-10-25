@@ -6,9 +6,15 @@ import {
   buildIdempotencyKeyString,
   refineOperationStateInvariants,
 } from './operation-receipt';
-import { IsoDatetimeSchema, LeaseClaimSchema, RELIABLE_MESSAGING_SCHEMA_VERSION, SchemaVersionSchema } from './lease';
+import {
+  IsoDatetimeSchema,
+  LeaseClaimSchema,
+  RELIABLE_MESSAGING_SCHEMA_VERSION,
+  SchemaVersionSchema,
+} from './lease';
 
-const GIT_SHA_OR_UUID_REGEX = /^(?:[0-9a-fA-F]{7,40}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$/;
+const GIT_SHA_OR_UUID_REGEX =
+  /^(?:[0-9a-fA-F]{7,40}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$/;
 
 /**
  * 投影源 Revision Schema (P2-2)。
@@ -17,7 +23,7 @@ const GIT_SHA_OR_UUID_REGEX = /^(?:[0-9a-fA-F]{7,40}|[0-9a-fA-F]{8}-[0-9a-fA-F]{
  */
 export const SourceRevisionSchema = z.union([
   z.number().int().nonnegative(),
-  z.string().refine(s => GIT_SHA_OR_UUID_REGEX.test(s), {
+  z.string().refine((s) => GIT_SHA_OR_UUID_REGEX.test(s), {
     message: 'sourceRevision string must be a valid Git commit SHA (7-40 hex chars) or UUID string',
   }),
 ]);
@@ -110,7 +116,9 @@ export type ProjectionOperation = z.infer<typeof ProjectionOperationSchema>;
  * 将 ProjectionOperation 转换为通用 BusinessOperationReceipt。
  * 运行时强制对转换后的对象执行 BusinessOperationReceiptSchema.parse()，确保返回的一定是合法 Receipt。
  */
-export function projectionOperationToReceipt(projection: ProjectionOperation): BusinessOperationReceipt {
+export function projectionOperationToReceipt(
+  projection: ProjectionOperation,
+): BusinessOperationReceipt {
   const rawReceipt = {
     schemaVersion: projection.schemaVersion,
     operationId: projection.operationId,

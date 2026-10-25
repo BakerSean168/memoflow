@@ -99,4 +99,3 @@ updated: 2026-07-02T20:45:00+08:00
 - Old path deleted: `packages/task/src/domain-server/aggregates/task-template-dto.ts`、`packages/task/src/domain-server/aggregates/task-template-factory.ts`、`task-template.ts` 底部 lazy import。
 - Verification: `.\node_modules\.bin\madge.cmd --circular --extensions ts packages/task/src/index.ts` 通过；`.\node_modules\.bin\nx.cmd run task:typecheck` 通过；`.\node_modules\.bin\nx.cmd run task:test` 通过。
 - Remaining follow-up: 进入 `R02`，不要在本轮之后再把 DTO 或 factory 逻辑拉回聚合。
-

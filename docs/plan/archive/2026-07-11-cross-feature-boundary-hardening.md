@@ -31,11 +31,11 @@ updated: 2026-07-18T07:00:00+00:00
 
 系统化约束前必须先摸清现状，否则会大面积误伤。当前真实的跨 feature 边只有以下几类：
 
-| 源 | 目标 | 导入内容 | 判定 |
-| --- | --- | --- | --- |
-| goal / task / reminder | `@memoflow/schedule`、`@memoflow/schedule/domain-shared` | `ScheduleTask`、`ScheduleConfig`、`ScheduleTaskMetadata` | schedule 调度 shared-kernel，需决策：提为 contracts/shared 还是显式白名单 |
-| editor | `@memoflow/repository/api` | `createRepositoryPrismaModule`（Port 组装） | 合法：走 `/api` 公开面，ADR-033 范式 B |
-| data-portability | `@memoflow/{goal,task,reminder,notification,setting}/api` | `create*PrismaRepositories`（导入/导出聚合壳） | 合法：data-portability 本就是跨模块聚合宿主，走 `/api` |
+| 源                     | 目标                                                      | 导入内容                                                 | 判定                                                                      |
+| ---------------------- | --------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------- |
+| goal / task / reminder | `@memoflow/schedule`、`@memoflow/schedule/domain-shared`  | `ScheduleTask`、`ScheduleConfig`、`ScheduleTaskMetadata` | schedule 调度 shared-kernel，需决策：提为 contracts/shared 还是显式白名单 |
+| editor                 | `@memoflow/repository/api`                                | `createRepositoryPrismaModule`（Port 组装）              | 合法：走 `/api` 公开面，ADR-033 范式 B                                    |
+| data-portability       | `@memoflow/{goal,task,reminder,notification,setting}/api` | `create*PrismaRepositories`（导入/导出聚合壳）           | 合法：data-portability 本就是跨模块聚合宿主，走 `/api`                    |
 
 > 注：`ai → governance` 只是 `ai.module.ts` 的一条 `@see` docstring 引用，不是真实 import，不计入。
 
@@ -49,6 +49,7 @@ updated: 2026-07-18T07:00:00+00:00
 - **路径 B — 扩 `public-surface-audit`**：给 audit 加一档拦「feature 间任何 import，除非 allowlist」。
 
 **选路径 A**，理由：
+
 1. 复用 Nx graph 的**精确**依赖分析，优于 audit 的正则/AST 近似。
 2. 与现有 `layer:*` 约束同机制、同配置块，不引入第二套边界规则（避免路径 B 的「两套规则漂移」）。
 3. 「默认拒绝 + 显式白名单」正是 ADR-033 依赖显式化的精神，硬编码的 goal↔task 个案随之自然消失。
@@ -101,8 +102,8 @@ updated: 2026-07-18T07:00:00+00:00
 
 ## 实施进度
 
-| 日期 | 进度 |
-| --- | --- |
+| 日期       | 进度                                                                                                                                         |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2026-07-18 | **阶段二起步**：`eslint.config.ts` 增加 feature `scope:*` depConstraints；删除 goal↔task 硬编码 `no-restricted-imports`；schedule 暂作白名单 |
 
 | 2026-07-18 | **阶段二完成**：feature/app `scope:*` depConstraints 覆盖；goal↔task 硬编码删除；schedule shared-kernel 暂显式白名单（决策 (b) 过渡） |
@@ -110,4 +111,3 @@ updated: 2026-07-18T07:00:00+00:00
 | 2026-07-18 | **验收**：feature lint（goal/task/reminder/editor/data-portability/account）+ authentication lint 绿；`memoflow:governance-check` 绿 |
 
 | 2026-07-18 | **归档**：本计划目标（系统化 scope 默认拒绝 + 治理防回归）已达成；schedule contracts 下沉不在本计划范围 |
-

@@ -29,7 +29,9 @@ export class SettingClientService implements ISettingApiClient {
   getPreferenceProfile(): Promise<Result<UserPreferenceProfile>> {
     return this.apiClient.getPreferenceProfile();
   }
-  getPreferenceNamespace(namespace: PreferenceNamespace): Promise<Result<PreferenceNamespaceResponse>> {
+  getPreferenceNamespace(
+    namespace: PreferenceNamespace,
+  ): Promise<Result<PreferenceNamespaceResponse>> {
     return this.apiClient.getPreferenceNamespace(namespace);
   }
   patchPreferenceNamespace<N extends PreferenceNamespace>(

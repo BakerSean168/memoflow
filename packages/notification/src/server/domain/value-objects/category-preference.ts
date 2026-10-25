@@ -1,6 +1,6 @@
 /**
  * CategoryPreference 值对象
- * 
+ *
  * 分类偏好：启用状态、渠道配置、重要性级别
  * 不可变性（所有修改返回新实例）
  */
@@ -16,14 +16,16 @@ import type { ImportanceLevel } from '@memoflow/contracts/shared';
 /**
  * CategoryPreference 值对象实现
  */
-export class CategoryPreference extends ValueObject<CategoryPreferenceDTO> implements ICategoryPreference {
-
+export class CategoryPreference
+  extends ValueObject<CategoryPreferenceDTO>
+  implements ICategoryPreference
+{
   private constructor(props: CategoryPreferenceDTO) {
     super(props);
   }
 
   // ================= 工厂方法 =================
-  
+
   public static create(props: CategoryPreferenceDTO): CategoryPreference {
     this.validate(props);
     return new CategoryPreference(props);
@@ -47,7 +49,7 @@ export class CategoryPreference extends ValueObject<CategoryPreferenceDTO> imple
   }
 
   // ================= 校验 =================
-  
+
   private static validate(props: CategoryPreferenceDTO): void {
     if (!props.channels) {
       throw new Error('Channels configuration is required');

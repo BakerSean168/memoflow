@@ -8,7 +8,6 @@
 
 // Residual 1039: sole schedule monitor lives in patterns; schedule dual file deleted.
 
-
 /**
  * 执行统计数据
  */
@@ -171,7 +170,7 @@ export class InMemoryScheduleMonitor implements IScheduleMonitor {
       ? {
           ...pending,
           completedAt: now,
-          duration: duration ?? (now.getTime() - pending.startedAt.getTime()),
+          duration: duration ?? now.getTime() - pending.startedAt.getTime(),
           status: 'success',
         }
       : {
@@ -192,8 +191,7 @@ export class InMemoryScheduleMonitor implements IScheduleMonitor {
 
     if (record.duration !== undefined) {
       this.totalDuration += record.duration;
-      this.stats.averageExecutionDuration =
-        this.totalDuration / this.stats.totalExecutions;
+      this.stats.averageExecutionDuration = this.totalDuration / this.stats.totalExecutions;
     }
   }
 

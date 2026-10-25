@@ -17,9 +17,7 @@ export const taskPerformanceAliases = {
   '@memoflow/database': '../../packages/database/src',
 };
 
-const benchmarkIncludes = [
-  'src/server/domain/performance/task-vnext.performance.bench.ts',
-];
+const benchmarkIncludes = ['src/server/domain/performance/task-vnext.performance.bench.ts'];
 
 const sharedConfig = createSharedConfig({
   projectRoot: import.meta.dirname,

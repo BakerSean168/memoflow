@@ -162,11 +162,8 @@ export interface ComposeTaskResult {
  * @returns ComposeTaskResult — the bound Electron module handle plus repository view.
  */
 export function composeTask(dependencies: ComposeTaskDependencies): ComposeTaskResult {
-  const {
-    taskPlanRepository,
-    taskOccurrenceRepository,
-    taskWriteTransactionRunner,
-  } = createTaskPowerSyncRepositories(dependencies.db);
+  const { taskPlanRepository, taskOccurrenceRepository, taskWriteTransactionRunner } =
+    createTaskPowerSyncRepositories(dependencies.db);
 
   const runtimeContributions = [
     createTaskRuntimeContribution(),

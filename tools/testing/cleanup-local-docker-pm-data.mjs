@@ -3,10 +3,7 @@
 import { spawnSync } from 'node:child_process';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import {
-  createLocalComposeRuntimeEnv,
-  localComposeArgs,
-} from '../docker/local-compose.mjs';
+import { createLocalComposeRuntimeEnv, localComposeArgs } from '../docker/local-compose.mjs';
 import {
   buildCleanupExecArgs,
   buildCleanupPreviewSql,
@@ -46,16 +43,12 @@ const env = createLocalComposeRuntimeEnv({ quiet: true });
 const sql = options.apply
   ? buildCleanupSql(options.prefix)
   : buildCleanupPreviewSql(options.prefix);
-const result = spawnSync(
-  'docker',
-  [...localComposeArgs, ...buildCleanupExecArgs(sql)],
-  {
-    cwd: workspaceRoot,
-    env,
-    encoding: 'utf8',
-    stdio: 'inherit',
-  },
-);
+const result = spawnSync('docker', [...localComposeArgs, ...buildCleanupExecArgs(sql)], {
+  cwd: workspaceRoot,
+  env,
+  encoding: 'utf8',
+  stdio: 'inherit',
+});
 
 if (result.error) throw result.error;
 if (!options.apply) {

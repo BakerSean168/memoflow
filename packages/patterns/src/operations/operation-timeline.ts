@@ -61,9 +61,7 @@ function normalizeStatus(status: string): OperationStatus {
     'dead_letter',
     'cancelled',
   ];
-  return known.includes(status as OperationStatus)
-    ? (status as OperationStatus)
-    : 'failed';
+  return known.includes(status as OperationStatus) ? (status as OperationStatus) : 'failed';
 }
 
 export { OperationTimelineEntrySchema };

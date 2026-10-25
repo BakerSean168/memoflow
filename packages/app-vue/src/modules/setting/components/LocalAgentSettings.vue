@@ -188,16 +188,13 @@ const loginMessage = computed(() => {
   if (isAntigravity.value && props.status?.status === 'not_installed')
     return t('setting.agentInstances.antigravityExecutableMissing');
   const state = auth.value;
-  if (state?.phase === 'starting')
-    return t('setting.agentInstances.antigravityLoginStarting');
+  if (state?.phase === 'starting') return t('setting.agentInstances.antigravityLoginStarting');
   if (state?.phase === 'waiting') {
-    if (!state.authorizationUrl)
-      return t('setting.agentInstances.antigravityLoginBrowserPending');
+    if (!state.authorizationUrl) return t('setting.agentInstances.antigravityLoginBrowserPending');
     if (openFailed.value) return t('setting.agentInstances.antigravityLoginOpenFailed');
     return t('setting.agentInstances.antigravityLoginWaiting');
   }
-  if (state?.phase === 'verifying')
-    return t('setting.agentInstances.antigravityLoginVerifying');
+  if (state?.phase === 'verifying') return t('setting.agentInstances.antigravityLoginVerifying');
   if (state?.phase === 'succeeded') return t('setting.agentInstances.antigravityLoginSucceeded');
   if (state?.phase === 'cancelled') return t('setting.agentInstances.antigravityLoginCancelled');
   if (!isAntigravity.value) return '';
@@ -230,9 +227,11 @@ const showLoginAction = computed(
       auth.value?.phase === 'cancelled'),
 );
 const showSignedInActions = computed(
-  () => isAntigravity.value && Boolean(connectionId.value) && !signingIn.value && (
-    auth.value?.phase === 'succeeded' || props.status?.status === 'ready'
-  ),
+  () =>
+    isAntigravity.value &&
+    Boolean(connectionId.value) &&
+    !signingIn.value &&
+    (auth.value?.phase === 'succeeded' || props.status?.status === 'ready'),
 );
 const showLoginLink = computed(
   () => auth.value?.phase === 'waiting' && Boolean(auth.value.authorizationUrl),
@@ -296,8 +295,7 @@ function schedulePoll() {
     } catch {
       if (generation !== pollGeneration) return;
     }
-    if (generation === pollGeneration && signingIn.value)
-      pollTimer = setTimeout(tick, 1_000);
+    if (generation === pollGeneration && signingIn.value) pollTimer = setTimeout(tick, 1_000);
   };
   pollTimer = setTimeout(tick, 1_000);
 }
@@ -380,7 +378,8 @@ function selectAuthorization(event: Event) {
   const input = event.target as HTMLInputElement;
   input.select();
 }
-async function submitCallback() {  const client = local;
+async function submitCallback() {
+  const client = local;
   const id = connectionId.value;
   const flowId = auth.value?.flowId;
   const value = callbackValue.value.trim();

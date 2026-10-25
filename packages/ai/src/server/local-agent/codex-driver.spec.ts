@@ -3,7 +3,10 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { LocalAgentStatusSchema } from '@memoflow/contracts/ai';
-import { createNativeAgentFlowFixture, type NativeProbeFailure } from '../../testing/native-agent-flow';
+import {
+  createNativeAgentFlowFixture,
+  type NativeProbeFailure,
+} from '../../testing/native-agent-flow';
 import type { LocalAgentConnection } from '@memoflow/contracts/ai';
 import { NativeRpcTransport } from './native-rpc-transport';
 import { CodexDriver } from './codex-driver';
@@ -64,33 +67,48 @@ function driver(extra = '', config: LocalAgentConnection = connection) {
 describe('Codex native driver', () => {
   it.each([
     ['spawn', 'not_installed', 'The configured Agent executable could not be started.', undefined],
-    ['stderr', 'unavailable', 'The local Agent is unavailable. Check its native configuration.', undefined],
+    [
+      'stderr',
+      'unavailable',
+      'The local Agent is unavailable. Check its native configuration.',
+      undefined,
+    ],
     ['rpc', 'unavailable', 'The local Agent is unavailable. Check its native configuration.', 503],
-    ['rpc', 'unavailable', 'The local Agent returned an unsupported or invalid protocol message.', -32603],
-  ] as const)('publishes only sanitized %s/%s probe diagnostics', async (kind, status, message, code) => {
-    const directory = await mkdtemp(join(tmpdir(), 'memoflow-probe-privacy-'));
-    vi.stubEnv('CODEX_HOME', directory);
-    const flow = createNativeAgentFlowFixture(directory);
-    const logs = (['debug', 'info', 'log', 'warn', 'error'] as const).map((method) =>
-      vi.spyOn(console, method).mockImplementation(() => {}),
-    );
-    try {
-      flow.setProbeFailure({
-        kind, ...(code === undefined ? {} : { code }),
-        message: 'Native startup or RPC failed PRIVATE_STDERR_FIXTURE C:\\\\Users\\\\PRIVATE_HOME_FIXTURE user@PRIVATE_ACCOUNT_FIXTURE.test api_key=PRIVATE_KEY_FIXTURE',
-      } as NativeProbeFailure);
-      const result = await flow.local.probeDefaultDriver('codex');
-      expect(LocalAgentStatusSchema.parse(result)).toEqual({ status, message });
-      expect(JSON.stringify(result)).not.toContain('PRIVATE_');
-      expect(JSON.stringify(logs.flatMap((log) => log.mock.calls))).not.toContain('PRIVATE_');
-      expect(flow.requests.some(([method]) => method === 'turn/start')).toBe(false);
-    } finally {
-      await flow.close();
-      logs.forEach((log) => log.mockRestore());
-      vi.unstubAllEnvs();
-      await rm(directory, { recursive: true, force: true });
-    }
-  });
+    [
+      'rpc',
+      'unavailable',
+      'The local Agent returned an unsupported or invalid protocol message.',
+      -32603,
+    ],
+  ] as const)(
+    'publishes only sanitized %s/%s probe diagnostics',
+    async (kind, status, message, code) => {
+      const directory = await mkdtemp(join(tmpdir(), 'memoflow-probe-privacy-'));
+      vi.stubEnv('CODEX_HOME', directory);
+      const flow = createNativeAgentFlowFixture(directory);
+      const logs = (['debug', 'info', 'log', 'warn', 'error'] as const).map((method) =>
+        vi.spyOn(console, method).mockImplementation(() => {}),
+      );
+      try {
+        flow.setProbeFailure({
+          kind,
+          ...(code === undefined ? {} : { code }),
+          message:
+            'Native startup or RPC failed PRIVATE_STDERR_FIXTURE C:\\\\Users\\\\PRIVATE_HOME_FIXTURE user@PRIVATE_ACCOUNT_FIXTURE.test api_key=PRIVATE_KEY_FIXTURE',
+        } as NativeProbeFailure);
+        const result = await flow.local.probeDefaultDriver('codex');
+        expect(LocalAgentStatusSchema.parse(result)).toEqual({ status, message });
+        expect(JSON.stringify(result)).not.toContain('PRIVATE_');
+        expect(JSON.stringify(logs.flatMap((log) => log.mock.calls))).not.toContain('PRIVATE_');
+        expect(flow.requests.some(([method]) => method === 'turn/start')).toBe(false);
+      } finally {
+        await flow.close();
+        logs.forEach((log) => log.mockRestore());
+        vi.unstubAllEnvs();
+        await rm(directory, { recursive: true, force: true });
+      }
+    },
+  );
 
   it('reports a valid failed turn as unavailable instead of protocol corruption', async () => {
     const native = driver(`if (frame.method === 'turn/start') {

@@ -39,7 +39,9 @@ export function usePassword() {
 
   // ========== 修改密码 ==========
 
-  async function changePassword(req: Parameters<CloudAuthClientPort['changePassword']>[0]): Promise<boolean> {
+  async function changePassword(
+    req: Parameters<CloudAuthClientPort['changePassword']>[0],
+  ): Promise<boolean> {
     if (!store.isAuthenticated) {
       toast.error(t('auth.toast.pleaseLogin'));
       return false;
@@ -92,7 +94,9 @@ export function usePassword() {
 
   // ========== 重置密码 ==========
 
-  async function resetPassword(req: Parameters<CloudAuthClientPort['resetPassword']>[0]): Promise<boolean> {
+  async function resetPassword(
+    req: Parameters<CloudAuthClientPort['resetPassword']>[0],
+  ): Promise<boolean> {
     isLoading.value = true;
     const result = await service.resetPassword(req);
     isLoading.value = false;

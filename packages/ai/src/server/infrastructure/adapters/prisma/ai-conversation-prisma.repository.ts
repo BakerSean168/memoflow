@@ -11,7 +11,10 @@ import { createTypedEventPublisher, eventBus, flushDomainEvents } from '@memoflo
 const aiEventPublisher = createTypedEventPublisher<AIEventMap>(eventBus);
 
 export class AIConversationPrismaRepository implements IAIConversationRepository {
-  constructor(private readonly prisma: Pick<PrismaClient, 'aiConversation'>, readonly events?: ConversationEventSource) {}
+  constructor(
+    private readonly prisma: Pick<PrismaClient, 'aiConversation'>,
+    readonly events?: ConversationEventSource,
+  ) {}
 
   async save(conversation: AIConversation): Promise<void> {
     await this.events?.init();

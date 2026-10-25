@@ -22,13 +22,13 @@ updated: 2026-08-12T00:00:00+08:00
 
 ## 1. 统一操作时间线
 
-| 模块 | Timeline 端点 | 说明 |
-| --- | --- | --- |
-| Reminder | `GET /api/v1/reminders/operations/timeline` | reminder occurrence 状态、失败原因、下次重试、可重放 |
-| Notification | `GET /api/v1/notifications/operations/timeline` | notification dispatch outbox 状态 |
-| Schedule rebuild | `GET /api/v1/schedules/operations/rebuild/timeline` | 冲突重算 outbox 状态 |
-| Account closure | `GET /api/v1/accounts/operations/closure/timeline` | 账户关闭 saga 状态 |
-| Knowledge projection | `GET /api/v1/repositories/operations/timeline` | knowledge write-request 投影状态 |
+| 模块                 | Timeline 端点                                       | 说明                                                 |
+| -------------------- | --------------------------------------------------- | ---------------------------------------------------- |
+| Reminder             | `GET /api/v1/reminders/operations/timeline`         | reminder occurrence 状态、失败原因、下次重试、可重放 |
+| Notification         | `GET /api/v1/notifications/operations/timeline`     | notification dispatch outbox 状态                    |
+| Schedule rebuild     | `GET /api/v1/schedules/operations/rebuild/timeline` | 冲突重算 outbox 状态                                 |
+| Account closure      | `GET /api/v1/accounts/operations/closure/timeline`  | 账户关闭 saga 状态                                   |
+| Knowledge projection | `GET /api/v1/repositories/operations/timeline`      | knowledge write-request 投影状态                     |
 
 统一返回 `OperationTimelineEntry[]`：
 
@@ -60,12 +60,12 @@ updated: 2026-08-12T00:00:00+08:00
 
 ### 2.2 操作步骤
 
-| 模块 | Replay 端点 |
-| --- | --- |
-| Reminder | `POST /api/v1/reminders/operations/:id/replay` |
-| Notification | `POST /api/v1/notifications/dead-letters/:id/replay` |
-| Schedule rebuild | `POST /api/v1/schedules/operations/rebuild/:id/replay` |
-| Account closure | `POST /api/v1/accounts/operations/closure/:id/replay` |
+| 模块                 | Replay 端点                                                                 |
+| -------------------- | --------------------------------------------------------------------------- |
+| Reminder             | `POST /api/v1/reminders/operations/:id/replay`                              |
+| Notification         | `POST /api/v1/notifications/dead-letters/:id/replay`                        |
+| Schedule rebuild     | `POST /api/v1/schedules/operations/rebuild/:id/replay`                      |
+| Account closure      | `POST /api/v1/accounts/operations/closure/:id/replay`                       |
 | Knowledge projection | `POST /api/v1/repositories/knowledge-write-requests/:writeRequestId/replay` |
 
 前置条件：
@@ -86,8 +86,16 @@ updated: 2026-08-12T00:00:00+08:00
 `GET <module>/operations/audit`（actor-scoped，只能看到自己的审计记录）：
 
 ```json
-[{ "actorIdentityId": "…", "source": "notification", "operationId": "…",
-   "action": "replay", "details": "status -> retryable", "createdAt": "…" }]
+[
+  {
+    "actorIdentityId": "…",
+    "source": "notification",
+    "operationId": "…",
+    "action": "replay",
+    "details": "status -> retryable",
+    "createdAt": "…"
+  }
+]
 ```
 
 共享事实表：`reliable_operation_audit_logs`（跨模块单一来源）。`action` 含 `replay` 与 `timeline_query`。

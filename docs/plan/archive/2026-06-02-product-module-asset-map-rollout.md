@@ -34,12 +34,12 @@ updated: 2026-06-02T00:00:00
 
 本轮覆盖除 `goal` 外的用户可见模块。`goal` 保持为样板，不重复重写。
 
-| 批次 | 模块 | 覆盖原因 | 主要关注点 |
-| --- | --- | --- | --- |
-| Batch 1 | `task`、`schedule` | 目标之后最核心的执行与时间安排链路 | 目标、任务、日程之间的跨模块依赖 |
-| Batch 2 | `reminder`、`notification`、`dashboard` | 提醒触达、通知承载和状态汇总 | 业务提醒、通知基础设施、Dashboard 读模型边界 |
-| Batch 3 | `ai`、`repository`、`editor` | AI、知识资源和编辑器链路 | AI 写入边界、资源引用、编辑状态、跨模块上下文 |
-| Batch 4 | `account`、`authentication`、`setting`、`governance` | 账户、登录会话、用户偏好和治理入口 | 身份、权限、配置生效路径、用户可见治理能力 |
+| 批次    | 模块                                                 | 覆盖原因                           | 主要关注点                                    |
+| ------- | ---------------------------------------------------- | ---------------------------------- | --------------------------------------------- |
+| Batch 1 | `task`、`schedule`                                   | 目标之后最核心的执行与时间安排链路 | 目标、任务、日程之间的跨模块依赖              |
+| Batch 2 | `reminder`、`notification`、`dashboard`              | 提醒触达、通知承载和状态汇总       | 业务提醒、通知基础设施、Dashboard 读模型边界  |
+| Batch 3 | `ai`、`repository`、`editor`                         | AI、知识资源和编辑器链路           | AI 写入边界、资源引用、编辑状态、跨模块上下文 |
+| Batch 4 | `account`、`authentication`、`setting`、`governance` | 账户、登录会话、用户偏好和治理入口 | 身份、权限、配置生效路径、用户可见治理能力    |
 
 ## 4. 不覆盖范围
 
@@ -463,4 +463,3 @@ $env:NX_DAEMON='false'; pnpm nx run memoflow:governance-check
 5. Final：统一检查文档链接、状态词、导航和治理检查结果。
 
 每个提交都应保持文档检查通过。
-

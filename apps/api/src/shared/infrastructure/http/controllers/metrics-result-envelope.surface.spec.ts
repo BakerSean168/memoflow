@@ -21,7 +21,7 @@ describe('API metrics JSON Result envelope (residual 623)', () => {
     expect(source).toContain('createApiResponseBuilder');
     expect(source).toContain('responseBuilder.success');
     // Prometheus path remains text/plain, not Result envelope.
-    expect(source).toContain("text/plain; version=0.0.4");
+    expect(source).toContain('text/plain; version=0.0.4');
     // getJson body is success(payload), not raw dual-track object keys at top level.
     const getJsonIdx = source.indexOf('getJson:');
     expect(getJsonIdx).toBeGreaterThan(-1);

@@ -7,11 +7,7 @@ import { presentErrorMessage } from '@memoflow/http-client';
 
 import { useGoalService } from '../hooks/useGoalService';
 import { useGoalWorkspace } from '../hooks/useGoalWorkspace';
-import {
-  formatProductDate,
-  getProductTime,
-  getProductTodayYmd,
-} from '../utils/product-time';
+import { formatProductDate, getProductTime, getProductTodayYmd } from '../utils/product-time';
 import {
   PageShell,
   PrimaryButton,

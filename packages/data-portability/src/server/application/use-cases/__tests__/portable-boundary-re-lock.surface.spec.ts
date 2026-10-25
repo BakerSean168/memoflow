@@ -8,7 +8,11 @@ const LEGACY_AUTHORITY =
 function productionSources(root: string): string[] {
   const files: string[] = [];
   for (const entry of readdirSync(root, { withFileTypes: true })) {
-    if (entry.name === '__tests__' || entry.name.endsWith('.spec.ts') || entry.name.endsWith('.test.ts')) {
+    if (
+      entry.name === '__tests__' ||
+      entry.name.endsWith('.spec.ts') ||
+      entry.name.endsWith('.test.ts')
+    ) {
       continue;
     }
     const path = join(root, entry.name);
@@ -26,12 +30,10 @@ describe('Data Portability V3-only anti-resurrection locks', () => {
       resolve(repoRoot, 'packages/data-portability/src'),
       resolve(repoRoot, 'packages/contracts/src/modules/data-portability'),
     ];
-    const hits = roots
-      .flatMap(productionSources)
-      .flatMap((file) => {
-        const source = readFileSync(file, 'utf8');
-        return LEGACY_AUTHORITY.test(source) ? [file] : [];
-      });
+    const hits = roots.flatMap(productionSources).flatMap((file) => {
+      const source = readFileSync(file, 'utf8');
+      return LEGACY_AUTHORITY.test(source) ? [file] : [];
+    });
     expect(hits).toEqual([]);
   });
 
@@ -55,7 +57,10 @@ describe('Data Portability V3-only anti-resurrection locks', () => {
       'utf8',
     );
     const disclosure = readFileSync(
-      resolve(repoRoot, 'packages/data-portability/src/server/application/use-cases/export-server-held-data-disclosure.use-case.ts'),
+      resolve(
+        repoRoot,
+        'packages/data-portability/src/server/application/use-cases/export-server-held-data-disclosure.use-case.ts',
+      ),
       'utf8',
     );
     const channels = readFileSync(

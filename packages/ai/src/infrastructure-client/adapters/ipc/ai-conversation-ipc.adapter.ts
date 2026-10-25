@@ -18,10 +18,7 @@ export class AIConversationIpcAdapter implements IAIConversationApiClient {
   async createConversation(
     request: CreateConversationReq,
   ): Promise<Result<AIConversationClientDTO>> {
-    return this.ipcClient.invoke<AIConversationClientDTO>(
-      AIChannels.CONVERSATION_CREATE,
-      request,
-    );
+    return this.ipcClient.invoke<AIConversationClientDTO>(AIChannels.CONVERSATION_CREATE, request);
   }
 
   async updateConversation(

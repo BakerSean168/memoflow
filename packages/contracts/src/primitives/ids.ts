@@ -74,7 +74,6 @@ export type SettingGroupId = string & { readonly __brand: 'SettingGroupId' };
 /** 通知 ID */
 export type NotificationId = string & { readonly __brand: 'NotificationId' };
 
-
 /** 通知偏好 ID */
 export type NotificationPreferenceId = string & { readonly __brand: 'NotificationPreferenceId' };
 
@@ -174,7 +173,6 @@ export const ID_PREFIXES = {
   // === AI ===
   AiConversationId: 'IAiConversationId',
   AiProviderConfigId: 'IAiProviderConfigId',
-
 } as const;
 
 export type IdPrefixKey = keyof typeof ID_PREFIXES;

@@ -177,7 +177,10 @@ describe('repository module GitHub credential boundary', () => {
     const module = createRepositoryModule({});
 
     await expect(
-      module.api.listKnowledgeWriteRequests({ identityId: 'identity-without-github-app' }, { limit: 20 }),
+      module.api.listKnowledgeWriteRequests(
+        { identityId: 'identity-without-github-app' },
+        { limit: 20 },
+      ),
     ).resolves.toMatchObject({ ok: false, error: { code: 'SERVICE_UNAVAILABLE' } });
 
     await expect(

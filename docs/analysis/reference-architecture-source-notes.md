@@ -8,10 +8,10 @@
 
 本次使用用户指定命令做 shallow clone，并固定以下上游版本：
 
-| 项目 | 本地目录 | HEAD | 提交时间 | 提交主题 |
-| --- | --- | --- | --- | --- |
-| `ardanlabs/service` | `/tmp/ardanlabs-service` | `43e8ae07abdc554ab7361d73fcbbee7a87bfa891` | 2026-06-22T13:26:41-04:00 | `upgrading deps and fixing bugs` |
-| `usememos/memos` | `/tmp/usememos-memos` | `bba1d6d4975a44cf60abee63a85fc1b2e2a3dea5` | 2026-08-12T20:52:25+08:00 | `fix(i18n): correct French memo link label (#6182)` |
+| 项目                | 本地目录                 | HEAD                                       | 提交时间                  | 提交主题                                            |
+| ------------------- | ------------------------ | ------------------------------------------ | ------------------------- | --------------------------------------------------- |
+| `ardanlabs/service` | `/tmp/ardanlabs-service` | `43e8ae07abdc554ab7361d73fcbbee7a87bfa891` | 2026-06-22T13:26:41-04:00 | `upgrading deps and fixing bugs`                    |
+| `usememos/memos`    | `/tmp/usememos-memos`    | `bba1d6d4975a44cf60abee63a85fc1b2e2a3dea5` | 2026-08-12T20:52:25+08:00 | `fix(i18n): correct French memo link label (#6182)` |
 
 路径均为对应上游仓库的相对路径。结论来自当前 HEAD 的源码，而不是项目介绍或二手文章。需要特别注意：用户方向锚点中提到的 Ardan `business/core/*` 已不是本次 HEAD 的目录；当前代码位于 `business/domain/*`。
 
@@ -274,21 +274,21 @@ Memos 有清晰启动链，但依赖构造分布在 main、Server、APIV1Service
 
 ## 4. 对方向锚点的逐条核验矩阵
 
-| 方向 | 源码核验 | 最准确的表述 |
-| --- | --- | --- |
-| Runtime ≠ Domain | 支持 | Ardan 的 Sales/Auth runtime 装配多个独立 business domain；目录名是实现细节。 |
-| Composition Root 最外层 | Ardan 强支持；Memos 部分支持 | Ardan main 主导 DB/store/business/client/router 装配；Memos 的构造责任还下沉到 Server/APIV1Service。 |
-| Business 依赖 Port | Ardan 强支持 | 五个 business 包都拥有 `Storer`；但 transaction/logger 等概念仍进入 business API。 |
-| 跨层允许类型转换 | 强支持 | Ardan 有 HTTP primitive、business VO、DB row；Memos 有 API Proto、Store model、DB adapter。 |
-| Middleware 管横切能力 | 支持但需纠偏 | Ardan 有统一 Otel/Logger/Error/Metrics/Panic 与 route auth；没有独立 RequestID/validation middleware。 |
-| Context 只放执行元数据 | Memos 较支持；Ardan 反证 | Memos 主要放 identity/claims；Ardan 还放 User/Product/Home 与 transaction，不能作为该约束的直接范本。 |
-| Cache 是 Decorator | Ardan 支持；Memos 不同实现 | Ardan User cache 实现同一 Storer decorator 且按需装配；Memos 把选定 cache 内置在 Store。 |
-| AI 写入走 Proposal/Approval/Executor | 两项目均无直接证据 | 这是目标系统应自行强化的安全架构，不能声称从当前参考源码直接验证。 |
-| Contract 是系统的腰 | Memos 强支持 | 真值源是 Proto/Buf，不是 Zod；同源生成 Go、Connect、Gateway、OpenAPI、TS。 |
-| Transport 是 Adapter | Memos 支持 | Connect 与 Gateway 复用 APIV1Service；但 convergence point 仍过胖，不等于独立 Application Port。 |
-| Authentication 在入口完成 | Memos 强支持 | 多 transport 共用 Authorizer，context 放 ID/claims，完整 User 按需查 Store；细粒度 authorization 仍有 service 内判断。 |
-| Server State 统一 Query Cache | Memos 强支持但非零复杂度 | QueryClient 是 authority，SSE 也 invalidate cache；optimistic update 仍会手工 patch detail/list projections。 |
-| Database Model 是 infrastructure detail | 部分支持 | API/Store 类型确实分离；但 Memos 上层直接依赖 concrete broad Store，未形成 capability-owned repository ports。 |
+| 方向                                    | 源码核验                     | 最准确的表述                                                                                                           |
+| --------------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Runtime ≠ Domain                        | 支持                         | Ardan 的 Sales/Auth runtime 装配多个独立 business domain；目录名是实现细节。                                           |
+| Composition Root 最外层                 | Ardan 强支持；Memos 部分支持 | Ardan main 主导 DB/store/business/client/router 装配；Memos 的构造责任还下沉到 Server/APIV1Service。                   |
+| Business 依赖 Port                      | Ardan 强支持                 | 五个 business 包都拥有 `Storer`；但 transaction/logger 等概念仍进入 business API。                                     |
+| 跨层允许类型转换                        | 强支持                       | Ardan 有 HTTP primitive、business VO、DB row；Memos 有 API Proto、Store model、DB adapter。                            |
+| Middleware 管横切能力                   | 支持但需纠偏                 | Ardan 有统一 Otel/Logger/Error/Metrics/Panic 与 route auth；没有独立 RequestID/validation middleware。                 |
+| Context 只放执行元数据                  | Memos 较支持；Ardan 反证     | Memos 主要放 identity/claims；Ardan 还放 User/Product/Home 与 transaction，不能作为该约束的直接范本。                  |
+| Cache 是 Decorator                      | Ardan 支持；Memos 不同实现   | Ardan User cache 实现同一 Storer decorator 且按需装配；Memos 把选定 cache 内置在 Store。                               |
+| AI 写入走 Proposal/Approval/Executor    | 两项目均无直接证据           | 这是目标系统应自行强化的安全架构，不能声称从当前参考源码直接验证。                                                     |
+| Contract 是系统的腰                     | Memos 强支持                 | 真值源是 Proto/Buf，不是 Zod；同源生成 Go、Connect、Gateway、OpenAPI、TS。                                             |
+| Transport 是 Adapter                    | Memos 支持                   | Connect 与 Gateway 复用 APIV1Service；但 convergence point 仍过胖，不等于独立 Application Port。                       |
+| Authentication 在入口完成               | Memos 强支持                 | 多 transport 共用 Authorizer，context 放 ID/claims，完整 User 按需查 Store；细粒度 authorization 仍有 service 内判断。 |
+| Server State 统一 Query Cache           | Memos 强支持但非零复杂度     | QueryClient 是 authority，SSE 也 invalidate cache；optimistic update 仍会手工 patch detail/list projections。          |
+| Database Model 是 infrastructure detail | 部分支持                     | API/Store 类型确实分离；但 Memos 上层直接依赖 concrete broad Store，未形成 capability-owned repository ports。         |
 
 ## 5. 用于后续架构评审的引用建议
 

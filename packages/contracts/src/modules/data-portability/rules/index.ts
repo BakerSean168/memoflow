@@ -6,6 +6,4 @@ export {
   parsePortableBackupEnvelopeV3,
 } from './import-safety';
 
-export type {
-  ParsePortableBackupEnvelopeV3Result,
-} from './import-safety';
+export type { ParsePortableBackupEnvelopeV3Result } from './import-safety';

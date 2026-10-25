@@ -31,10 +31,12 @@ describe('ConversationShellSource', () => {
       }),
     ).resolves.toBeNull();
     await expect(
-      new ConversationShellSource(repository({ name: 'Deleted', deletedAt: new Date() })).loadShell({
-        identityId: 'identity-1',
-        conversationId: 'deleted',
-      }),
+      new ConversationShellSource(repository({ name: 'Deleted', deletedAt: new Date() })).loadShell(
+        {
+          identityId: 'identity-1',
+          conversationId: 'deleted',
+        },
+      ),
     ).resolves.toBeNull();
   });
 });

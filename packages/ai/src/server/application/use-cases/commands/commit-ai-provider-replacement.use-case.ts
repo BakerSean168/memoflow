@@ -33,17 +33,26 @@ export class CommitAIProviderReplacementUseCase {
     ]);
     if (!current) return error('NOT_FOUND', 'AI provider was not found');
     if (!session || session.targetProviderId !== providerId) {
-      return error('CONFLICT', 'Provider replacement session expired, was used, or targets another provider');
+      return error(
+        'CONFLICT',
+        'Provider replacement session expired, was used, or targets another provider',
+      );
     }
     if (session.credentialStatus !== 'valid') {
-      return error('VALIDATION_ERROR', 'Test a model successfully before replacing this connection');
+      return error(
+        'VALIDATION_ERROR',
+        'Test a model successfully before replacing this connection',
+      );
     }
 
     const defaultModelId = normalizeOpenAICompatibleModelId(request.defaultModelId);
     const discovered = session.models.some((model) => model.id === defaultModelId);
     const explicitlyVerified = session.verifiedModelIds.includes(defaultModelId);
     if (!discovered && !explicitlyVerified) {
-      return error('VALIDATION_ERROR', 'Selected model was not discovered or verified for this provider');
+      return error(
+        'VALIDATION_ERROR',
+        'Selected model was not discovered or verified for this provider',
+      );
     }
 
     const replacement: AIProviderConfigServerDTO = {

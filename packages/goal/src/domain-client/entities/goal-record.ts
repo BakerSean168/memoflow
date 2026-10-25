@@ -59,11 +59,17 @@ export class GoalRecord extends Entity<GoalRecordId> {
     return this._props.comment;
   }
 
-  get authorship(): GoalRecordClientDTO['authorship'] { return this._props.authorship; }
+  get authorship(): GoalRecordClientDTO['authorship'] {
+    return this._props.authorship;
+  }
 
-  get source(): GoalRecordClientDTO['source'] { return this._props.source; }
+  get source(): GoalRecordClientDTO['source'] {
+    return this._props.source;
+  }
 
-  get recordedAt(): Instant { return this._props.recordedAt; }
+  get recordedAt(): Instant {
+    return this._props.recordedAt;
+  }
 
   get createdAt(): Instant {
     const v = this._props.createdAt;

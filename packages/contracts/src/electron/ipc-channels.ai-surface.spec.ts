@@ -14,7 +14,9 @@ describe('AIChannels / AIStreamChannels vNext surface', () => {
     expect(AIChannels.RUNTIME_WORKFLOW_GET).toBe('ai:runtime:workflow:get');
     expect(AIChannels.RUNTIME_WORKFLOW_LIST).toBe('ai:runtime:workflow:list');
     expect(AIChannels.RUNTIME_WORKFLOW_CANCEL).toBe('ai:runtime:workflow:cancel');
-    expect(AIChannels.RUNTIME_WORKFLOW_GOAL_SURFACE_LEASE).toBe('ai:runtime:workflow:goal-surface-lease');
+    expect(AIChannels.RUNTIME_WORKFLOW_GOAL_SURFACE_LEASE).toBe(
+      'ai:runtime:workflow:goal-surface-lease',
+    );
     expect(AIStreamChannels.RUNTIME_ASSISTANT_EVENT).toBe('ai:runtime:assistant:event');
     expect(AIStreamChannels.RUNTIME_ASSISTANT_ERROR).toBe('ai:runtime:assistant:error');
   });

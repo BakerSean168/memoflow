@@ -26,10 +26,7 @@ describe('API client logs Result envelope (residual 621)', () => {
   });
 
   it('infrastructure routes still mount POST /logs', () => {
-    const routes = readFileSync(
-      join(here, '../routes/infrastructure-routes.ts'),
-      'utf8',
-    );
+    const routes = readFileSync(join(here, '../routes/infrastructure-routes.ts'), 'utf8');
     expect(routes).toContain("router.post('/logs', logsController.capture)");
   });
 });

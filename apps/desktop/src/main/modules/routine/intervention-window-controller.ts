@@ -76,10 +76,7 @@ function compareCandidates(a: InterventionSnapshot, b: InterventionSnapshot): nu
   return a.occurrenceKey.localeCompare(b.occurrenceKey);
 }
 
-function commandIdFor(
-  snapshot: InterventionSnapshot,
-  command: InterventionWindowCommand,
-): string {
+function commandIdFor(snapshot: InterventionSnapshot, command: InterventionWindowCommand): string {
   const suffix = command.action === 'snooze' ? `:${command.durationMs}` : '';
   return `${snapshot.occurrenceKey}:v${snapshot.version}:${command.action}${suffix}`;
 }

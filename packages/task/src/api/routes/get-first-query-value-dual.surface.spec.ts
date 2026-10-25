@@ -28,7 +28,9 @@ describe('getFirstQueryValue dual retired (residual 983)', () => {
       ['plan', plan],
     ] as const) {
       expect(source, label).toContain('Residual 983');
-      expect(source, label).toContain("import { getFirstQueryValue } from './get-first-query-value'");
+      expect(source, label).toContain(
+        "import { getFirstQueryValue } from './get-first-query-value'",
+      );
       expect(source, label).not.toMatch(/function getFirstQueryValue\b/);
       expect(source, label).toContain('getFirstQueryValue(');
     }

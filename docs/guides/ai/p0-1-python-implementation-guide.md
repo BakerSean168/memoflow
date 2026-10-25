@@ -54,6 +54,7 @@ class GoalClarificationLLMResponse(BaseModel):
 **修改位置**：约第 167-177 行
 
 **当前代码**：
+
 ```python
 class GoalPlanningResponse(BaseModel):
     """Final response returned to the internal caller."""
@@ -69,10 +70,11 @@ class GoalPlanningResponse(BaseModel):
 ```
 
 **改成**：
+
 ```python
 class GoalPlanningResponse(BaseModel):
     """Final response returned to the internal caller.
-    
+
     Can be in one of two states:
     - Clarification needed: state='clarification', clarification contains questions
     - Draft ready: state='draft', goal and key_results contain the plan
@@ -107,6 +109,7 @@ class GoalPlanningResponse(BaseModel):
 **修改位置**：约第 23-33 行
 
 **当前代码**：
+
 ```python
 class GoalPlanningRequest(BaseModel):
     """Request for generating a structured goal plan."""
@@ -122,6 +125,7 @@ class GoalPlanningRequest(BaseModel):
 ```
 
 **改成**：
+
 ```python
 class GoalPlanningRequest(BaseModel):
     """Request for generating a structured goal plan."""
@@ -196,11 +200,11 @@ def build_goal_clarification_user_prompt(
     category: str | None = None,
 ) -> str:
     """Build user prompt for clarification check.
-    
+
     Args:
         idea: The goal idea to evaluate
         category: Optional category hint for context
-    
+
     Returns:
         User prompt string
     """
@@ -223,13 +227,13 @@ def build_goal_clarification_user_prompt(
 
 def parse_clarification_payload(content: str) -> GoalClarificationLLMResponse:
     """Parse and validate clarification response from the model.
-    
+
     Args:
         content: Raw model output
-        
+
     Returns:
         Validated GoalClarificationLLMResponse
-        
+
     Raises:
         StructuredOutputError: If parsing or validation fails
     """
@@ -267,12 +271,12 @@ def parse_clarification_payload(content: str) -> GoalClarificationLLMResponse:
         provider_config: ProviderConfig,
     ) -> GoalPlanningResponse:
         """Check if a goal idea needs clarification before planning.
-        
+
         Args:
             idea: The goal idea to check
             category: Optional category for context
             provider_config: Configuration for the provider
-            
+
         Returns:
             GoalPlanningResponse with state='clarification' if questions needed,
             state='draft' if ready to plan
@@ -324,13 +328,13 @@ def parse_clarification_payload(content: str) -> GoalClarificationLLMResponse:
         clarification_answers: list[str] | None = None,
     ) -> GoalPlanningResponse:
         """Generate a goal plan with optional clarification step.
-        
+
         This is the main entry point that handles the two-stage workflow:
         1. If enable_clarification=True and no answers, check if clarification needed
         2. If clarification needed, return questions for user to answer
         3. If answers provided, augment idea with them
         4. Generate and return goal draft
-        
+
         Args:
             idea: The goal idea
             category: Optional category
@@ -339,7 +343,7 @@ def parse_clarification_payload(content: str) -> GoalClarificationLLMResponse:
             provider_config: Provider configuration
             enable_clarification: Whether to do clarification check
             clarification_answers: Answers to previous clarification questions
-            
+
         Returns:
             GoalPlanningResponse with either clarification questions or draft
         """
@@ -386,6 +390,7 @@ def parse_clarification_payload(content: str) -> GoalClarificationLLMResponse:
 确保文件顶部已经导入了新的 schema 类和 `Literal`：
 
 **当前（约第 1-20 行）**：
+
 ```python
 from __future__ import annotations
 
@@ -408,6 +413,7 @@ from ai_service.services.chat_service import ChatService
 ```
 
 **改成**：
+
 ```python
 from __future__ import annotations
 
@@ -439,6 +445,7 @@ from ai_service.services.chat_service import ChatService
 ### 简单验证：导入检查
 
 在项目根目录运行：
+
 ```bash
 cd apps/ai-service
 python -c "from ai_service.schemas.goals import ClarificationQuestion, GoalClarificationLLMResponse, GoalPlanningResponse; print('✓ Imports OK')"
@@ -460,7 +467,7 @@ from ai_service.schemas.goals import (
 
 def test_schema_validation():
     """Test that schemas validate correctly."""
-    
+
     # Test 1: Clarification required response
     clarification_json = {
         "needsClarification": True,
@@ -476,12 +483,12 @@ def test_schema_validation():
         ],
         "rationale": "The idea is vague about timing and motivation"
     }
-    
+
     clari = GoalClarificationLLMResponse.model_validate(clarification_json)
     assert clari.needs_clarification == True
     assert len(clari.questions) == 2
     print("✓ Test 1: Clarification schema OK")
-    
+
     # Test 2: Planning response with clarification
     response = GoalPlanningResponse(
         state="clarification",
@@ -491,10 +498,10 @@ def test_schema_validation():
     assert response.state == "clarification"
     assert response.goal is None
     print("✓ Test 2: PlanningResponse with clarification OK")
-    
+
     # Test 3: Planning response with draft
     from ai_service.schemas.goals import PlannedGoal, KeyResultDraft
-    
+
     goal = PlannedGoal(
         title="Test Goal",
         description="Test description",
@@ -504,7 +511,7 @@ def test_schema_validation():
         suggested_start_date=1000,
         suggested_end_date=2000,
     )
-    
+
     response2 = GoalPlanningResponse(
         state="draft",
         goal=goal,
@@ -522,6 +529,7 @@ if __name__ == "__main__":
 ```
 
 运行：
+
 ```bash
 cd apps/ai-service
 python test_clarification.py
@@ -534,6 +542,7 @@ python test_clarification.py
 ### Q1：导入失败 "ModuleNotFoundError: No module named 'ai_service'"
 
 **解决**：
+
 ```bash
 cd apps/ai-service
 pip install -e .  # 安装可编辑模式
@@ -542,6 +551,7 @@ pip install -e .  # 安装可编辑模式
 ### Q2：Pydantic 验证错误
 
 **检查清单**：
+
 - 字段别名是否正确（`alias="needsClarification"`）
 - Field 默认值是否合理
 - 字段类型是否匹配（用 `list[...]` 而不是 `List[...]`）
@@ -550,12 +560,14 @@ pip install -e .  # 安装可编辑模式
 ### Q3：缩进错误（IndentationError）
 
 **确保**：
+
 - 方法在 `GoalPlanningService` 类内（缩进 4 空格）
 - 方法体内部代码缩进 8 空格
 
 ### Q4：旧的 GoalPlanningResponse 不兼容
 
 **答案**：新的 `GoalPlanningResponse` 是向后兼容的：
+
 - 默认 `state="draft"`
 - 如果 `goal` 为 None，会报 schema 错误（需要显式设置 `goal=None`）
 

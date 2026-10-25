@@ -18,15 +18,19 @@ const meta = {
       // Deliberately partial I/O ports: unexpected calls fail instead of returning
       // success. Real owner validation, draft state and rendering remain intact.
       provide(GOAL_SERVICE_KEY, {
-        createGoal: async (request: CreateGoalReq) => parameters.saveSucceeds
-          ? { ok: true, data: createMockGoalMutationReceipt({ name: request.name }) }
-          : { ok: false, error: { code: 'OFFLINE', message: 'Offline story fixture' } },
+        createGoal: async (request: CreateGoalReq) =>
+          parameters.saveSucceeds
+            ? { ok: true, data: createMockGoalMutationReceipt({ name: request.name }) }
+            : { ok: false, error: { code: 'OFFLINE', message: 'Offline story fixture' } },
       } as unknown as IGoalService);
-      provide(LABEL_SERVICE_KEY, { listLabels: async () => ({ ok: true, data: [] }) } as unknown as ILabelService);
+      provide(LABEL_SERVICE_KEY, {
+        listLabels: async () => ({ ok: true, data: [] }),
+      } as unknown as ILabelService);
       const open = ref(true);
       return { args, open };
     },
-    template: '<main style="display:flex;height:800px"><aside style="width:40%"><textarea aria-label="Chat composer" /></aside><section style="position:relative;flex:1"><p>Goal background</p><GoalDialog v-bind="args" :open="open" @created="open = false" /></section></main>',
+    template:
+      '<main style="display:flex;height:800px"><aside style="width:40%"><textarea aria-label="Chat composer" /></aside><section style="position:relative;flex:1"><p>Goal background</p><GoalDialog v-bind="args" :open="open" @created="open = false" /></section></main>',
   }),
 } satisfies Meta<typeof GoalDialog>;
 export default meta;
@@ -58,7 +62,9 @@ export const ValidationRecovery: Story = {
     await userEvent.click(name);
     await userEvent.tab();
     await expect(name).toHaveAttribute('aria-invalid', 'true');
-    await expect(canvas.getByTestId('goal-name-limit-error')).toHaveTextContent('Goal name is required');
+    await expect(canvas.getByTestId('goal-name-limit-error')).toHaveTextContent(
+      'Goal name is required',
+    );
     await userEvent.type(name, 'Corrected goal');
     await expect(canvas.queryByTestId('goal-name-limit-error')).not.toBeInTheDocument();
     await expect(name).not.toHaveAttribute('aria-describedby');

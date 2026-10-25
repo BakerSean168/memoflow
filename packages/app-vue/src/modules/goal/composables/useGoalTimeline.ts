@@ -20,7 +20,10 @@ export const useGoalTimeline = (goalRef: Ref<GoalClientDTO | null>) => {
     const snapshot: TimelineSnapshot = {
       timestamp: Date.now(),
       data: {
-        totalWeight: keyResults.reduce((sum: number, kr: KeyResultClientDTO) => sum + (kr.weight ?? 0), 0),
+        totalWeight: keyResults.reduce(
+          (sum: number, kr: KeyResultClientDTO) => sum + (kr.weight ?? 0),
+          0,
+        ),
         totalProgress: goal.overallProgress,
         keyResults: keyResults.map((kr: KeyResultClientDTO) => ({
           id: String(kr.id ?? ''),

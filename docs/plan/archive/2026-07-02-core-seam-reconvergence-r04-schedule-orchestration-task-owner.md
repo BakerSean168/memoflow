@@ -256,4 +256,3 @@ apps/api / apps/desktop
 - Old path deleted: `apps/api/src/modules/task-schedule-projection/runtime.ts`、`apps/desktop/src/main/modules/schedule/task-schedule-projection.runtime.ts`
 - Verification: `.\node_modules\.bin\nx.cmd run schedule-orchestration:typecheck`、`.\node_modules\.bin\nx.cmd run schedule-orchestration:test`、`.\node_modules\.bin\nx.cmd run schedule:test`、`.\node_modules\.bin\nx.cmd run task:test`、`.\node_modules\.bin\nx.cmd run api:typecheck`、`.\node_modules\.bin\nx.cmd run schedule-orchestration:build`、`.\node_modules\.bin\nx.cmd run memoflow:governance-check` 通过。
 - Remaining follow-up: 进入 `R05`，沿同一 owner 模型把 goal/reminder projection 收回 `schedule-orchestration`。
-

@@ -45,13 +45,18 @@ vi.mock('../server/transport', () => {
     constructor(_api: unknown) {}
   }
 
-  return { ScheduleEventController: MockScheduleEventController, ScheduleController: MockScheduleController };
+  return {
+    ScheduleEventController: MockScheduleEventController,
+    ScheduleController: MockScheduleController,
+  };
 });
 
 import { ipcMain } from 'electron';
 import { createScheduleElectronModule } from './index';
 
-function getRegisteredHandler(channel: string): ((...args: unknown[]) => Promise<unknown>) | undefined {
+function getRegisteredHandler(
+  channel: string,
+): ((...args: unknown[]) => Promise<unknown>) | undefined {
   const handleMock = ipcMain.handle as unknown as ReturnType<typeof vi.fn>;
   const call = handleMock.mock.calls.find(([ch]) => ch === channel);
   return call?.[1] as ((...args: unknown[]) => Promise<unknown>) | undefined;

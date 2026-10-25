@@ -214,17 +214,32 @@ describe('createTaskElectronModule IPC lifecycle', () => {
     ['Open', 'active'],
     [['Succeeded', 'Failed'], 'all'],
     [['Abandoned'], 'archived'],
-  ])('passes validated outcome %s and archive state %s through IPC', async (outcome, archiveState) => {
-    await moduleDef.register(context);
-    const result = await registered(TaskChannels.PLAN_LIST)(undefined, {
-      page: 2, limit: 10, status: 'Active', labelIdsAll: ['a', 'b'], outcome, archiveState,
-    });
-    expect(result).toMatchObject({ ok: true });
-    expect(fake.api.listTaskPlans).toHaveBeenCalledWith(expect.objectContaining({
-      identityId: expect.any(String), page: 2, limit: 10, status: ['Active'], labelIdsAll: ['a', 'b'],
-      outcome: typeof outcome === 'string' ? [outcome] : outcome, archiveState,
-    }));
-  });
+  ])(
+    'passes validated outcome %s and archive state %s through IPC',
+    async (outcome, archiveState) => {
+      await moduleDef.register(context);
+      const result = await registered(TaskChannels.PLAN_LIST)(undefined, {
+        page: 2,
+        limit: 10,
+        status: 'Active',
+        labelIdsAll: ['a', 'b'],
+        outcome,
+        archiveState,
+      });
+      expect(result).toMatchObject({ ok: true });
+      expect(fake.api.listTaskPlans).toHaveBeenCalledWith(
+        expect.objectContaining({
+          identityId: expect.any(String),
+          page: 2,
+          limit: 10,
+          status: ['Active'],
+          labelIdsAll: ['a', 'b'],
+          outcome: typeof outcome === 'string' ? [outcome] : outcome,
+          archiveState,
+        }),
+      );
+    },
+  );
 
   it.each([
     { outcome: ['Unknown'] },

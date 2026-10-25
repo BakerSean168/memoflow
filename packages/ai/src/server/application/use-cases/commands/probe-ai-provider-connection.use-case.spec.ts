@@ -28,7 +28,10 @@ describe('ProbeAIProviderConnectionUseCase', () => {
       generateId: () => '01234567-89ab-cdef-0123-456789abcdef',
     });
 
-    const result = await useCase.execute({ catalogId: 'openrouter', apiKey: 'secret' }, cx as never);
+    const result = await useCase.execute(
+      { catalogId: 'openrouter', apiKey: 'secret' },
+      cx as never,
+    );
 
     expect(credentialProbe.validate).toHaveBeenCalledOnce();
     expect(modelCatalog.listModels).toHaveBeenCalledWith({

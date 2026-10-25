@@ -26,9 +26,9 @@ describe('email-verification-circuit', () => {
   });
 
   it('detects EMAIL_VERIFICATION_REQUIRED via domainCode or code', () => {
-    expect(
-      isEmailVerificationRequiredError({ domainCode: EMAIL_VERIFICATION_DOMAIN_CODE }),
-    ).toBe(true);
+    expect(isEmailVerificationRequiredError({ domainCode: EMAIL_VERIFICATION_DOMAIN_CODE })).toBe(
+      true,
+    );
     expect(isEmailVerificationRequiredError({ code: EMAIL_VERIFICATION_DOMAIN_CODE })).toBe(true);
     expect(isEmailVerificationRequiredError({ code: 'FORBIDDEN' })).toBe(false);
   });
@@ -114,8 +114,7 @@ describe('ResultHttpClient EMAIL_VERIFICATION_REQUIRED fuse', () => {
     }
     if (!third.ok) {
       const ctx = third.error.context as
-        | { shortCircuited?: boolean; domainCode?: string; messageKey?: string }
-        | undefined;
+        { shortCircuited?: boolean; domainCode?: string; messageKey?: string } | undefined;
       expect(
         ctx?.shortCircuited === true ||
           ctx?.domainCode === EMAIL_VERIFICATION_DOMAIN_CODE ||

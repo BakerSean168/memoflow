@@ -1,6 +1,6 @@
 /**
  * Task Module - Domain Events
- * 
+ *
  * All domain event types for the Task module
  */
 

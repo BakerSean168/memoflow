@@ -4,4 +4,7 @@
  */
 
 export { Notification, type NotificationState } from './notification.js';
-export { NotificationPreference, type NotificationPreferenceState } from './notification-preference.js';
+export {
+  NotificationPreference,
+  type NotificationPreferenceState,
+} from './notification-preference.js';

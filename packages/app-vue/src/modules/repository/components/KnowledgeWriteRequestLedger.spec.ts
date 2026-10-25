@@ -102,7 +102,10 @@ function createService(overrides: Partial<Record<string, ReturnType<typeof vi.fn
   };
 }
 
-function mountLedger(service: ReturnType<typeof createService>, props: { connectionId?: string } = {}) {
+function mountLedger(
+  service: ReturnType<typeof createService>,
+  props: { connectionId?: string } = {},
+) {
   return mount(KnowledgeWriteRequestLedger, {
     props,
     global: {
@@ -162,23 +165,29 @@ describe('KnowledgeWriteRequestLedger (W6 P1-1 ledger/replay UI)', () => {
     expect(wrapper.get('[data-testid="ledger-row-wr-failed"]').text()).toContain(
       'Projection: Failed',
     );
-    expect(wrapper.get('[data-testid="ledger-row-wr-failed"]').text()).toContain(
-      '3 attempt(s)',
-    );
+    expect(wrapper.get('[data-testid="ledger-row-wr-failed"]').text()).toContain('3 attempt(s)');
     // Failed projection exposes the actionable server error.
     expect(wrapper.get('[data-testid="ledger-projection-error"]').text()).toContain(
       'applyChanges crashed',
     );
     // Replay is offered only for replayable (Pending/Failed) projections.
-    expect(wrapper.find('[data-testid="ledger-row-wr-succeeded"] [data-testid="ledger-replay-button"]').exists()).toBe(false);
-    expect(wrapper.find('[data-testid="ledger-row-wr-failed"] [data-testid="ledger-replay-button"]').exists()).toBe(true);
+    expect(
+      wrapper
+        .find('[data-testid="ledger-row-wr-succeeded"] [data-testid="ledger-replay-button"]')
+        .exists(),
+    ).toBe(false);
+    expect(
+      wrapper
+        .find('[data-testid="ledger-row-wr-failed"] [data-testid="ledger-replay-button"]')
+        .exists(),
+    ).toBe(true);
   });
 
   it('refreshes from the server when the refresh button is pressed', async () => {
     const service = createService({
-      listKnowledgeWriteRequests: vi.fn().mockResolvedValue(
-        ok<ListKnowledgeWriteRequestsRes>({ writeRequests: [createRow()] }),
-      ),
+      listKnowledgeWriteRequests: vi
+        .fn()
+        .mockResolvedValue(ok<ListKnowledgeWriteRequestsRes>({ writeRequests: [createRow()] })),
     });
     const wrapper = mountLedger(service);
     await flushPromises();
@@ -206,9 +215,11 @@ describe('KnowledgeWriteRequestLedger (W6 P1-1 ledger/replay UI)', () => {
         first = false;
         return Promise.resolve(ok<ListKnowledgeWriteRequestsRes>({ writeRequests: rows }));
       }),
-      replayKnowledgeWriteRequestProjection: vi.fn().mockResolvedValue(
-        ok({ writeRequestId: 'wr-pending', commitSha: 'abcdef1234567890', status: 'Succeeded' }),
-      ),
+      replayKnowledgeWriteRequestProjection: vi
+        .fn()
+        .mockResolvedValue(
+          ok({ writeRequestId: 'wr-pending', commitSha: 'abcdef1234567890', status: 'Succeeded' }),
+        ),
     });
     const wrapper = mountLedger(service);
     await flushPromises();
@@ -216,7 +227,9 @@ describe('KnowledgeWriteRequestLedger (W6 P1-1 ledger/replay UI)', () => {
       'Projection: Pending',
     );
 
-    await wrapper.get('[data-testid="ledger-row-wr-pending"] [data-testid="ledger-replay-button"]').trigger('click');
+    await wrapper
+      .get('[data-testid="ledger-row-wr-pending"] [data-testid="ledger-replay-button"]')
+      .trigger('click');
     await flushPromises();
 
     expect(service.replayKnowledgeWriteRequestProjection).toHaveBeenCalledWith('wr-pending');
@@ -226,7 +239,11 @@ describe('KnowledgeWriteRequestLedger (W6 P1-1 ledger/replay UI)', () => {
       'Projection: Succeeded',
     );
     // Succeeded rows no longer offer replay.
-    expect(wrapper.find('[data-testid="ledger-row-wr-pending"] [data-testid="ledger-replay-button"]').exists()).toBe(false);
+    expect(
+      wrapper
+        .find('[data-testid="ledger-row-wr-pending"] [data-testid="ledger-replay-button"]')
+        .exists(),
+    ).toBe(false);
   });
 
   it('surfaces an actionable error when replay fails', async () => {
@@ -236,14 +253,16 @@ describe('KnowledgeWriteRequestLedger (W6 P1-1 ledger/replay UI)', () => {
           writeRequests: [createRow({ id: 'wr-pending', projectionStatus: 'Failed' })],
         }),
       ),
-      replayKnowledgeWriteRequestProjection: vi.fn().mockResolvedValue(
-        fail({ code: 'CONFLICT', message: 'Repository is busy' }),
-      ),
+      replayKnowledgeWriteRequestProjection: vi
+        .fn()
+        .mockResolvedValue(fail({ code: 'CONFLICT', message: 'Repository is busy' })),
     });
     const wrapper = mountLedger(service);
     await flushPromises();
 
-    await wrapper.get('[data-testid="ledger-row-wr-pending"] [data-testid="ledger-replay-button"]').trigger('click');
+    await wrapper
+      .get('[data-testid="ledger-row-wr-pending"] [data-testid="ledger-replay-button"]')
+      .trigger('click');
     await flushPromises();
 
     expect(wrapper.get('[data-testid="ledger-error"]').text()).toContain('Repository is busy');
@@ -251,9 +270,9 @@ describe('KnowledgeWriteRequestLedger (W6 P1-1 ledger/replay UI)', () => {
 
   it('passes the connection id when provided so the ledger is scoped to one connection', async () => {
     const service = createService({
-      listKnowledgeWriteRequests: vi.fn().mockResolvedValue(
-        ok<ListKnowledgeWriteRequestsRes>({ writeRequests: [] }),
-      ),
+      listKnowledgeWriteRequests: vi
+        .fn()
+        .mockResolvedValue(ok<ListKnowledgeWriteRequestsRes>({ writeRequests: [] })),
     });
     const wrapper = mountLedger(service, { connectionId: 'conn-42' });
     await flushPromises();

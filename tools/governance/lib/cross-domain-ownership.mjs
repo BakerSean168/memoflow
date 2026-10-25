@@ -31,9 +31,7 @@ function walkFiles(root, relativeDirectory = '') {
 }
 
 function stripComments(source) {
-  return source
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/(^|\s)\/\/.*$/gm, '$1');
+  return source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|\s)\/\/.*$/gm, '$1');
 }
 
 function packageSpecifierMatches(specifier, forbiddenPackage) {
@@ -80,7 +78,10 @@ export function validateCrossDomainOwnershipManifest(manifest) {
       if (!Array.isArray(owner?.forbiddenConfigurationReferences)) {
         errors.push(`${prefix}.forbiddenConfigurationReferences must be an array`);
       } else {
-        for (const [referenceIndex, reference] of owner.forbiddenConfigurationReferences.entries()) {
+        for (const [
+          referenceIndex,
+          reference,
+        ] of owner.forbiddenConfigurationReferences.entries()) {
           const referencePrefix = `${prefix}.forbiddenConfigurationReferences[${referenceIndex}]`;
           validateRequiredString(reference?.path, `${referencePrefix}.path`, errors);
           if (!Array.isArray(reference?.values) || reference.values.length === 0) {
