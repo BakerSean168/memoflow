@@ -70,7 +70,9 @@
     "governance-tools": "tooling-lib",
     "time": "runtime-lib",
     "agent-gateway": "runtime-lib",
-    "ui-storybook": "app"
+    "ui-storybook": "app",
+    "goal-core": "runtime-lib",
+    "goal-client": "runtime-lib"
   },
   "exemptions": [
     {
