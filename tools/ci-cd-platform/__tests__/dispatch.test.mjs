@@ -109,6 +109,8 @@ test('task runner executes the exact Nx batch, emits successful/failed receipts 
         PATH: `${cwd}/bin:${process.env.PATH}`,
         GITHUB_RUN_ID: '123',
         GITHUB_RUN_ATTEMPT: '1',
+        DELIVERY_LANE: '',
+        LANE_INPUT_PATH: '',
         ...env,
       },
     });
@@ -199,7 +201,7 @@ test('Server receipt assignment cannot silently move a required suite between sh
     await readFile('tools/ci-cd-platform/__tests__/fixtures/pr-dispatch-matrix.json', 'utf8'),
   );
   const source = fixture.cases.find((c) => c.id === 'apiRoute');
-  const m = await buildDeliveryManifest({ head: 'a'.repeat(40), files: source.files });
+  const m = await buildDeliveryManifest({ base: null, head: 'a'.repeat(40), files: source.files });
   const needs = Object.fromEntries(
     Object.entries(CI_CHECK_JOBS).map(([id, enabled]) => [
       id,

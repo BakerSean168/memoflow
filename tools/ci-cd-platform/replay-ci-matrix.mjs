@@ -17,6 +17,9 @@ export async function replayCiMatrix({ check = true } = {}) {
   for (const entry of fixture.cases) {
     for (const file of entry.files) await readFile(file);
     const manifest = await buildDeliveryManifest({
+      // A file-list replay has no Git comparison range. CI's NX_BASE must
+      // not turn the synthetic replay head into a real revision lookup.
+      base: null,
       files: entry.files,
       event: entry.event ?? 'pull_request',
       ref: entry.event === 'push' ? 'refs/heads/main' : undefined,
