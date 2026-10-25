@@ -326,6 +326,62 @@ jobs:
       - uses: ./.github/actions/publish-lane-evidence
         with: { lane: validate }
 
+  build-backend:
+    name: Build Backend (API + Database)
+    needs: scope-detector
+    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.lane_web == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with: { fetch-depth: 2 }
+      - uses: ./.github/actions/setup-nx-affected-job
+        with:
+          node-version: '${{ env.NODE_VERSION }}'
+          setup-python: 'true'
+          setup-uv: 'true'
+          lane: validate
+          consume-delivery-manifest: 'true'
+      # Web Flow shards execute the Vite dev server from source; their only
+      # build-artifact dependencies are the API and database dists. Building
+      # just those here takes the web build (and the full Build job) off the
+      # shards' critical path. The full Build job still produces and uploads
+      # the canonical ci-build-artifacts bundle for the release chain.
+      - name: Build API and database artifacts
+        run: |
+          pnpm exec nx run-many -t build --projects=api,database --parallel=2 --outputStyle=static
+          pnpm exec nx run database:runtime-scripts:build --outputStyle=static
+      - name: Create API artifact manifest
+        run: node ./tools/ci-cd-platform/create-artifact-manifest.mjs --name api --path apps/api/dist --manifest scope/delivery-manifest-v1.json --output reports/ci-cd-platform/api-artifact-manifest.json
+      - name: Create Database artifact manifest
+        run: node ./tools/ci-cd-platform/create-artifact-manifest.mjs --name database --path packages/database/dist --manifest scope/delivery-manifest-v1.json --output reports/ci-cd-platform/database-artifact-manifest.json
+      - name: Create Database runtime artifact manifest
+        if: ${{ hashFiles('packages/database/dist/runtime-scripts/**') != '' }}
+        run: node ./tools/ci-cd-platform/create-artifact-manifest.mjs --name database-runtime --path packages/database/dist/runtime-scripts --manifest scope/delivery-manifest-v1.json --output reports/ci-cd-platform/database-runtime-artifact-manifest.json
+      - name: Create API runtime dependency closure
+        run: node ./tools/ci-cd-platform/create-runtime-closure.mjs --manifest scope/delivery-manifest-v1.json --output-dir api-runtime-closure --output reports/ci-cd-platform/api-runtime-closure-artifact-manifest.json
+      - name: Verify backend artifacts
+        shell: bash
+        run: |
+          digest=$(node -p "require('./scope/delivery-manifest-v1.json').digest")
+          test -n "$digest"
+          node ./tools/ci-cd-platform/verify-artifact.mjs reports/ci-cd-platform/api-artifact-manifest.json apps/api/dist "$digest"
+          node ./tools/ci-cd-platform/verify-artifact.mjs reports/ci-cd-platform/database-artifact-manifest.json packages/database/dist "$digest"
+      - name: Upload backend build artifacts
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: ci-build-artifacts-backend
+          path: |
+            apps/api/dist
+            packages/database/dist
+            api-runtime-closure
+            scope/delivery-manifest-v1.json
+            reports/ci-cd-platform/api-artifact-manifest.json
+            reports/ci-cd-platform/database-artifact-manifest.json
+            reports/ci-cd-platform/database-runtime-artifact-manifest.json
+            reports/ci-cd-platform/api-runtime-closure-artifact-manifest.json
+          if-no-files-found: error
+          retention-days: 14
+
   build:
     name: Build
     needs: scope-detector
@@ -369,6 +425,19 @@ jobs:
       - name: Create API runtime dependency closure
         if: ${{ hashFiles('apps/api/dist/**') != '' }}
         run: node ./tools/ci-cd-platform/create-runtime-closure.mjs --manifest scope/delivery-manifest-v1.json --output-dir api-runtime-closure --output reports/ci-cd-platform/api-runtime-closure-artifact-manifest.json
+      # The Web artifact has no other consumer-side verifier left (Web Flow
+      # shards run from source and no longer download it), so the Build job
+      # verifies its own Web and Migrator artifacts before upload; the
+      # candidate chain re-verifies the uploaded bundle against these
+      # manifests and the runtime closure.
+      - name: Verify Web and Migrator artifacts
+        if: ${{ hashFiles('reports/ci-cd-platform/web-artifact-manifest.json') != '' || hashFiles('reports/ci-cd-platform/migrator-artifact-manifest.json') != '' }}
+        shell: bash
+        run: |
+          digest=$(node -p "require('./scope/delivery-manifest-v1.json').digest")
+          test -n "$digest"
+          if [ -f reports/ci-cd-platform/web-artifact-manifest.json ]; then node ./tools/ci-cd-platform/verify-artifact.mjs reports/ci-cd-platform/web-artifact-manifest.json dist/apps/web "$digest"; fi
+          if [ -f reports/ci-cd-platform/migrator-artifact-manifest.json ]; then node ./tools/ci-cd-platform/verify-artifact.mjs reports/ci-cd-platform/migrator-artifact-manifest.json apps/migrator/dist "$digest"; fi
       - name: Upload immutable build artifacts
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
@@ -513,8 +582,8 @@ jobs:
 
   web-flow-shard:
     name: Web Flow Shard (${{ matrix.shard }})
-    needs: [scope-detector, build]
-    if: needs.scope-detector.result == 'success' && needs.build.result == 'success' && needs.scope-detector.outputs.lane_web == 'true'
+    needs: [scope-detector, build-backend]
+    if: needs.scope-detector.result == 'success' && needs.build-backend.result == 'success' && needs.scope-detector.outputs.lane_web == 'true'
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
@@ -544,7 +613,7 @@ jobs:
       - name: Download immutable build artifacts
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
-          name: ci-build-artifacts
+          name: ci-build-artifacts-backend
           path: .
       - name: Resolve artifact source manifest digest
         id: artifact-source
@@ -557,8 +626,6 @@ jobs:
         run: node ./tools/ci-cd-platform/restore-runtime-closure.mjs reports/ci-cd-platform/api-runtime-closure-artifact-manifest.json api-runtime-closure . "${{ steps.artifact-source.outputs.digest }}"
       - name: Verify API artifact
         run: node ./tools/ci-cd-platform/verify-artifact.mjs reports/ci-cd-platform/api-artifact-manifest.json apps/api/dist "${{ steps.artifact-source.outputs.digest }}"
-      - name: Verify Web artifact
-        run: node ./tools/ci-cd-platform/verify-artifact.mjs reports/ci-cd-platform/web-artifact-manifest.json dist/apps/web "${{ steps.artifact-source.outputs.digest }}"
       - name: Verify Database artifact
         run: node ./tools/ci-cd-platform/verify-artifact.mjs reports/ci-cd-platform/database-artifact-manifest.json packages/database/dist "${{ steps.artifact-source.outputs.digest }}"
       - run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run database:prisma-push
@@ -668,6 +735,7 @@ jobs:
       - unit-3
       - typecheck
       - build
+      - build-backend
       - verification-children
       - web-flow-shard
       - component-browser
@@ -722,6 +790,7 @@ jobs:
       - unit-3
       - typecheck
       - build
+      - build-backend
       - verification-children
       - web-flow-shard
       - component-browser
