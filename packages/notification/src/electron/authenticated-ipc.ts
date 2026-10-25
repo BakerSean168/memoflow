@@ -21,8 +21,8 @@
 import {
   createAuthenticatedIdentityIpcWrapper,
   createAuthenticatedIpcWrapper,
-  type IElectronModuleContext,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/host-runtime/electron-ipc';
+import type { IElectronModuleContext } from '@memoflow/contracts/electron';
 import type { Result } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { ipcAdapterWithValidation } from '@memoflow/utils/result';

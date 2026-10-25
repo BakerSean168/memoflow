@@ -48,6 +48,7 @@
     "@memoflow/contracts": "workspace:*",
     "@memoflow/database": "workspace:*",
     "@memoflow/domain-shared": "workspace:*",
+    "@memoflow/host-runtime": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",
     "@memoflow/patterns": "workspace:*",

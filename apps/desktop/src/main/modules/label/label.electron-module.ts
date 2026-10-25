@@ -1,10 +1,10 @@
 import { ipcMain } from 'electron';
 import {
   LabelChannels,
-  withAuthenticatedIdentity,
   type IElectronModule,
   type IElectronModuleContext,
 } from '@memoflow/contracts/electron';
+import { withAuthenticatedIdentity } from '@memoflow/host-runtime/electron-ipc';
 import { CreateLabelReqSchema, ListLabelsReqSchema } from '@memoflow/contracts/label';
 import { fail, ok } from '@memoflow/contracts/result';
 import type { LabelService } from '@memoflow/label';
