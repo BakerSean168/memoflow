@@ -10,8 +10,8 @@ const workflow = readFileSync(
   new URL('../../../.github/workflows/ci.yml', import.meta.url),
   'utf8',
 );
-const shard = workflow.match(/^  web-specialized:\n([\s\S]*?)(?=^  \S)/mu)?.[1];
-assert.ok(shard, 'Web Flow shard job must exist');
+const shard = workflow.match(/^  web-visual:\n([\s\S]*?)(?=^  \S)/mu)?.[1];
+assert.ok(shard, 'independent Web Visual Regression job must exist');
 const fontStep = shard.match(
   /      - name: Provision visual regression fonts\n([\s\S]*?)(?=^      - |^      #)/mu,
 )?.[1];
@@ -90,14 +90,17 @@ function runPreflight({
   }
 }
 
-test('visual shards provision Noble fonts before comparisons; PR representatives run once', () => {
+test('visual job provisions Noble fonts without depending on backend artifacts or Provider', () => {
   assert.match(shard, /runs-on: ubuntu-24\.04/u);
-  assert.match(shard, /matrix: \$\{\{ fromJSON\(needs.scope-detector.outputs.web_matrix\) \}\}/u);
-  assert.ok(fontStep, 'font prerequisite must exist in the matrix job');
+  assert.match(shard, /needs: scope-detector/u);
+  assert.doesNotMatch(
+    shard,
+    /needs:\s*\[.*build|build-backend|postgres:|run-web-shard\.mjs|matrix:/u,
+  );
+  assert.ok(fontStep, 'font prerequisite must exist in the visual job');
   assert.match(fontStep, /shell: bash/u);
   assert.match(fontStep, /timeout-minutes: 5/u);
-  assert.match(fontStep, /if: github\.event_name != 'pull_request' \|\| strategy\.job-index == 0/u);
-  assert.doesNotMatch(fontStep, /continue-on-error:/u);
+  assert.doesNotMatch(fontStep, /strategy\.job-index|continue-on-error:/u);
   assert.match(script, /set -euo pipefail/u);
   assert.match(
     script,
@@ -105,7 +108,7 @@ test('visual shards provision Noble fonts before comparisons; PR representatives
   );
   const provisionIndex = shard.indexOf('- name: Provision visual regression fonts');
   assert.ok(shard.indexOf('playwright install chromium') < provisionIndex);
-  assert.ok(provisionIndex < shard.indexOf('run-web-shard.mjs'));
+  assert.doesNotMatch(shard, /run-web-shard\.mjs/u);
   assert.ok(provisionIndex < shard.indexOf('nx run web:e2e:visual-regression'));
   assert.equal((workflow.match(/name: Provision visual regression fonts/gu) ?? []).length, 1);
 });
@@ -117,14 +120,17 @@ test('PR visual selection is nonempty and smaller; nightly/manual retain the ful
   );
   assert.ok(nightly.on.schedule.length > 0);
   assert.ok(Object.hasOwn(config.on, 'workflow_dispatch'));
-  const steps = config.jobs['web-specialized'].steps;
+  const steps = config.jobs['web-visual'].steps;
+  const provider = config.jobs['web-specialized'];
+  assert.deepEqual(provider.needs, ['scope-detector', 'build-backend']);
+  assert.ok(!provider.steps.some((step) => step.name?.startsWith('Product visual')));
   const representative = steps.find(
     (step) => step.name === 'Product visual representatives (compare only)',
   );
   const audit = steps.find((step) => step.name === 'Product visual full audit (compare only)');
-  assert.equal(representative.if, "github.event_name == 'pull_request' && strategy.job-index == 0");
+  assert.equal(representative.if, "github.event_name == 'pull_request'");
   assert.equal(audit.if, "github.event_name != 'pull_request'");
-  assert.doesNotMatch(audit.run, /--grep|update-snapshots/u);
+  assert.doesNotMatch(audit.run, /--grep|--shard|update-snapshots/u);
   assert.doesNotMatch(representative.run, /--shard|update-snapshots/u);
   const list = (args) => {
     const result = spawnSync(
@@ -164,6 +170,14 @@ test('PR visual selection is nonempty and smaller; nightly/manual retain the ful
       `empty visual owner ${file}`,
     );
   }
+});
+
+test('visual Vite build resolves Desktop IPC dependencies from source', () => {
+  const config = readFileSync(
+    new URL('../../../apps/web/e2e/visual-regression/vite.config.ts', import.meta.url),
+    'utf8',
+  );
+  assert.match(config, /\['@memoflow\/ipc-client', 'packages\/ipc-client\/src\/index\.ts'\]/u);
 });
 
 test('font preflight provisions both pinned packages before checking both CJK fallbacks', () => {

@@ -30,6 +30,8 @@ export default defineConfig(({ mode }) =>
           ['@memoflow/http-client', 'packages/http-client/src/index.ts'],
           ['@memoflow/reminder/client', 'packages/reminder/src/client/index.ts'],
           ['@memoflow/repository/client', 'packages/repository/src/client/index.ts'],
+          // Desktop visual fixtures import this from app-vue; no prebuilt dist is required.
+          ['@memoflow/ipc-client', 'packages/ipc-client/src/index.ts'],
           ['@memoflow/ai/client', 'packages/ai/src/client/index.ts'],
           ['@memoflow/notification/client', 'packages/notification/src/client/index.ts'],
         ]),

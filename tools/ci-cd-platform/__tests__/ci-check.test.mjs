@@ -149,6 +149,22 @@ test('a lane that ran although the manifest disabled it fails the gate', () => {
   assert.deepEqual(check({ needs, manifest: m }).failures, ['web-specialized:unexpected-success']);
 });
 
+test('visual regression runs independently and is a fail-closed Web lane gate', () => {
+  const selected = manifest();
+  for (const state of ['failure', 'cancelled', 'skipped']) {
+    const needs = healthyNeeds(selected);
+    needs['web-visual'].result = state;
+    assert.deepEqual(check({ needs, manifest: selected }).failures, [`web-visual:${state}`]);
+  }
+  const disabled = manifest({ web: false });
+  const needs = healthyNeeds(disabled);
+  assert.equal(needs['web-visual'].result, 'skipped');
+  needs['web-visual'].result = 'success';
+  assert.deepEqual(check({ needs, manifest: disabled }).failures, [
+    'web-visual:unexpected-success',
+  ]);
+});
+
 test('verification sub-lane outputs are checked against the manifest', () => {
   const m = manifest({ performance: false });
   const needs = healthyNeeds(m);

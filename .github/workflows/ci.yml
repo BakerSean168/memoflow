@@ -625,14 +625,67 @@ jobs:
       - run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run database:prisma-push
         env: { TEST_REPORT_NAME: web-database, DELIVERY_LANE: web }
       - run: pnpm exec playwright install chromium
+      # Only the dedicated Provider acceptance starts the built API; ordinary Web Flow is retired.
+      - run: node ./tools/test-system-v2/run-command.mjs -- node ./tools/test-system-v2/run-web-shard.mjs ${{ matrix.shard }}
+        env:
+          TEST_REPORT_NAME: web-ai-provider
+          DELIVERY_LANE: web
+          E2E_PREBUILT_ARTIFACT: '1'
+      - name: Upload actual Web shard execution receipt
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          # Re-running failed jobs must not overwrite or shadow a prior attempt.
+          name: web-shard-receipt-${{ github.run_attempt }}-${{ strategy.job-index }}
+          path: reports/web-shards/*.json
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: web-specialized-${{ strategy.job-index }}-results
+          path: apps/web/test-results/provider-results.json
+          if-no-files-found: ignore
+          retention-days: 14
+      - if: failure()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: web-specialized-${{ strategy.job-index }}-failure
+          path: |
+            apps/web/test-results
+            apps/web/playwright-report
+          if-no-files-found: ignore
+          retention-days: 7
+      - uses: ./.github/actions/publish-lane-evidence
+        with:
+          lane: web
+          artifact-suffix: shard-${{ strategy.job-index }}
+
+  web-visual:
+    name: Web Visual Regression
+    needs: scope-detector
+    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.lane_web == 'true'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with: { fetch-depth: 2 }
+      - uses: ./.github/actions/setup-nx-affected-job
+        with:
+          cache-variant: web-visual
+          node-version: '${{ env.NODE_VERSION }}'
+          setup-python: 'false'
+          setup-uv: 'false'
+          capabilities: node,pnpm,playwright
+          lane: web
+          consume-delivery-manifest: 'true'
+      - run: pnpm exec playwright install chromium
       - name: Provision visual regression fonts
-        if: github.event_name != 'pull_request' || strategy.job-index == 0
         shell: bash
         timeout-minutes: 5
         run: |
           set -euo pipefail
           # Match the Ubuntu Noble CJK fallback used to generate the tracked PNG baselines.
-          # Only shards executing visual comparisons need this prerequisite.
+          # This isolated visual runner must match the snapshot baseline fonts.
           # Avoid the runner mirror list repeatedly retrying an unreachable Azure mirror.
           fonts_sources="$RUNNER_TEMP/visual-fonts.list"
           printf '%s\n' 'deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://archive.ubuntu.com/ubuntu noble main universe' > "$fonts_sources"
@@ -660,26 +713,11 @@ jobs:
             echo "::error::Visual baselines require the WenQuanYi Zen Hei fallback for CJK glyphs in English text."
             exit 1
           fi
-      # Only the dedicated Provider acceptance starts the built API; ordinary Web Flow is retired.
-      - run: node ./tools/test-system-v2/run-command.mjs -- node ./tools/test-system-v2/run-web-shard.mjs ${{ matrix.shard }}
-        env:
-          TEST_REPORT_NAME: web-ai-provider
-          DELIVERY_LANE: web
-          E2E_PREBUILT_ARTIFACT: '1'
-      - name: Upload actual Web shard execution receipt
-        if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
-          # Re-running failed jobs must not overwrite or shadow a prior attempt.
-          name: web-shard-receipt-${{ github.run_attempt }}-${{ strategy.job-index }}
-          path: reports/web-shards/*.json
-          if-no-files-found: error
-          retention-days: 14
       # Keep the existing algorithms and baselines. PRs exercise wide/light,
       # narrow/dark, long text, every canonical Web surface and Desktop shell.
       # Schedule/dispatch retain the complete existing target, without a grep.
       - name: Product visual representatives (compare only)
-        if: github.event_name == 'pull_request' && strategy.job-index == 0
+        if: github.event_name == 'pull_request'
         run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run web:e2e:visual-regression -- --grep "$VISUAL_PR_GREP"
         env:
           VISUAL_PR_GREP: '1280px light$|440px dark$|840px light$|web: |desktop: (shell\.|foundation\.)|#484 (web .*1280px|desktop .*440px)$|UI-9002|post-vNext|preserve the active Task draft \(light\)'
@@ -687,30 +725,23 @@ jobs:
           DELIVERY_LANE: web
       - name: Product visual full audit (compare only)
         if: github.event_name != 'pull_request'
-        run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run web:e2e:visual-regression -- --shard=${{ matrix.shard }}
+        run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run web:e2e:visual-regression
         env:
-          TEST_REPORT_NAME: web-visual-${{ strategy.job-index }}
+          TEST_REPORT_NAME: web-visual-full
           DELIVERY_LANE: web
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        if: always()
-        with:
-          name: web-specialized-${{ strategy.job-index }}-results
-          path: apps/web/test-results/provider-results.json
-          if-no-files-found: ignore
-          retention-days: 14
       - if: failure()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: web-specialized-${{ strategy.job-index }}-failure
+          name: web-visual-failure-${{ github.run_attempt }}
           path: |
-            apps/web/test-results
-            apps/web/playwright-report
+            apps/web/test-results/visual-regression
+            apps/web/playwright-visual-report
           if-no-files-found: ignore
           retention-days: 7
       - uses: ./.github/actions/publish-lane-evidence
         with:
           lane: web
-          artifact-suffix: shard-${{ strategy.job-index }}
+          artifact-suffix: visual
 
   delivery-observation:
     name: Delivery Observation
@@ -726,6 +757,7 @@ jobs:
       - build-backend
       - verification-children
       - web-specialized
+      - web-visual
       - component-browser
       - contract
     if: always()
@@ -781,6 +813,7 @@ jobs:
       - build-backend
       - verification-children
       - web-specialized
+      - web-visual
       - component-browser
       - contract
     if: always()
