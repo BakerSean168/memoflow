@@ -3987,7 +3987,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/components/shared/ModuleHeader.spec.ts",
@@ -3995,7 +3997,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/components/shared/settings/SettingsPresentationPrimitives.spec.ts",
@@ -4003,7 +4007,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/di/navigation.spec.ts",
@@ -4011,7 +4017,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/AppShell.spec.ts",
@@ -4019,7 +4027,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/BusinessPanel.spec.ts",
@@ -4027,7 +4037,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/CloudConnectionDialog.spec.ts",
@@ -4035,7 +4047,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/ConversationSidebar.spec.ts",
@@ -4043,7 +4057,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/DesktopUpdateShellIndicator.spec.ts",
@@ -4051,7 +4067,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/ManageAccountsDialog.spec.ts",
@@ -4059,7 +4077,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/ModuleCapsule.spec.ts",
@@ -4067,7 +4087,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/PanelErrorBoundary.spec.ts",
@@ -4075,7 +4097,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/ProfileImportDialog.spec.ts",
@@ -4083,7 +4107,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/TodayOverviewPanel.spec.ts",
@@ -4091,7 +4117,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/WindowHeader.spec.ts",
@@ -4099,7 +4127,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/business-surface-control.spec.ts",
@@ -4107,7 +4137,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/clamp-dual.surface.spec.ts",
@@ -4115,7 +4147,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/desktop-update-shell-indicator.presentation.spec.ts",
@@ -4123,7 +4157,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/notificationCapsulePreview.spec.ts",
@@ -4131,7 +4167,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/panel-cache-key.spec.ts",
@@ -4139,7 +4177,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/panelGeometry.spec.ts",
@@ -4147,7 +4187,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/persisted-business-route.spec.ts",
@@ -4155,7 +4197,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/previews/GoalCapsulePreview.spec.ts",
@@ -4163,7 +4207,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/previews/NoteCapsulePreview.spec.ts",
@@ -4171,7 +4217,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/previews/ScheduleCapsulePreview.spec.ts",
@@ -4179,7 +4227,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/previews/TaskCapsulePreview.spec.ts",
@@ -4187,7 +4237,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/surface-leave-protocol.spec.ts",
@@ -4195,7 +4247,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/unverified-email-banner.spec.ts",
@@ -4203,7 +4257,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/useAppShellStore.spec.ts",
@@ -4211,7 +4267,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/useKnowledgeNativeSurface.spec.ts",
@@ -4219,7 +4277,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/useNativeBusinessPanelBridge.spec.ts",
@@ -4227,7 +4287,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/usePanelWidth.spec.ts",
@@ -4235,7 +4297,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/useShellRouterSync.spec.ts",
@@ -4243,7 +4307,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/layouts/shell/useTaskNativeSurface.spec.ts",
@@ -4251,7 +4317,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/locales/localePresentation.spec.ts",
@@ -4259,7 +4327,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/locales/setting-updates-locale.spec.ts",
@@ -4267,7 +4337,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/account/components/AccountProfileSection.spec.ts",
@@ -4275,7 +4347,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/account/components/CloudPasswordSection.spec.ts",
@@ -4283,7 +4357,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/account/components/account-logout-locale.spec.ts",
@@ -4291,7 +4367,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/account/index.spec.ts",
@@ -4299,7 +4377,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/account/stores/accountStore.spec.ts",
@@ -4317,7 +4397,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/components/AIComposerControls.spec.ts",
@@ -4325,7 +4407,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/components/AIConversationSidebar.email-verification.spec.ts",
@@ -4333,7 +4417,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/components/AIConversationSidebar.status.spec.ts",
@@ -4341,7 +4427,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/components/AIFooterComposer.spec.ts",
@@ -4349,7 +4437,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/components/AIGoalWorkflowPanel.spec.ts",
@@ -4357,7 +4447,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/components/AIKnowledgeCapturePanel.spec.ts",
@@ -4365,7 +4457,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/components/AIMessageContent.spec.ts",
@@ -4373,7 +4467,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/components/AIMessagePanel.spec.ts",
@@ -4381,7 +4477,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/components/AIRuntimeUsageBadge.spec.ts",
@@ -4389,7 +4487,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/components/AITaskWorkflowPanel.spec.ts",
@@ -4397,7 +4497,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/components/AgentDriverIcon.spec.ts",
@@ -4405,7 +4507,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/components/MemoFlowAiIcon.spec.ts",
@@ -4413,7 +4517,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/antigravityModelPresentation.spec.ts",
@@ -4421,7 +4527,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/chatViewHelpers.spec.ts",
@@ -4429,7 +4537,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/error.spec.ts",
@@ -4437,7 +4547,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/native-model-visibility.spec.ts",
@@ -4445,7 +4557,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/surface-context.spec.ts",
@@ -4453,7 +4567,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/useAI.spec.ts",
@@ -4461,7 +4577,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/useAIChatSession.spec.ts",
@@ -4469,7 +4587,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/useAIChatView.lifecycle.spec.ts",
@@ -4477,7 +4597,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/useAIGoalWorkflow.spec.ts",
@@ -4485,7 +4607,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/useAIKnowledgeCapture.spec.ts",
@@ -4493,7 +4617,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/useAIKnowledgeQaWorkflow.spec.ts",
@@ -4501,7 +4627,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/useAIModelCatalog.spec.ts",
@@ -4509,7 +4637,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/useAIModelSelection.agent-instance.spec.ts",
@@ -4517,7 +4647,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/useAITaskWorkflow.spec.ts",
@@ -4525,7 +4657,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/useAIWorkflowPersistence.spec.ts",
@@ -4533,7 +4667,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/useAIWorkflowReconciliation.spec.ts",
@@ -4541,7 +4677,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/useAssistantStream.spec.ts",
@@ -4549,7 +4687,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/useConversationAttention.spec.ts",
@@ -4557,7 +4697,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/useDurableConversationAttention.spec.ts",
@@ -4565,7 +4707,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/useGoalSurfaceLease.spec.ts",
@@ -4573,7 +4717,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/useGoalWorkflowEvents.spec.ts",
@@ -4581,7 +4727,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/useLocalAssistantChoices.spec.ts",
@@ -4589,7 +4737,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/workflow-intent.spec.ts",
@@ -4597,7 +4747,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/ai/composables/workspaceEventSubscription.spec.ts",
@@ -4605,7 +4757,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/authentication/composables/usePassword.spec.ts",
@@ -4613,7 +4767,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/authentication/stores/authenticationStore.spec.ts",
@@ -4631,7 +4787,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/goal/components/GoalKeyResultEditors.spec.ts",
@@ -4639,7 +4797,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/goal/components/GoalKeyResultTrajectoryPlot.spec.ts",
@@ -4647,7 +4807,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/goal/components/GoalPageToolbar.spec.ts",
@@ -4655,7 +4817,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/goal/components/GoalProgressRow.spec.ts",
@@ -4663,7 +4827,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/goal/components/GoalRecordComposerSurface.spec.ts",
@@ -4671,7 +4837,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/goal/components/GoalRecordPreview.spec.ts",
@@ -4679,7 +4847,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/goal/components/cards/GoalRecordCard.spec.ts",
@@ -4687,7 +4857,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.spec.ts",
@@ -4695,7 +4867,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/goal/components/dialogs/GoalKeyResultInspectDialog.spec.ts",
@@ -4703,7 +4877,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/goal/components/dialogs/GoalRecordDialog.spec.ts",
@@ -4711,7 +4887,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.spec.ts",
@@ -4719,7 +4897,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/goal/composables/goal-status-transitions.spec.ts",
@@ -4727,7 +4907,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/goal/composables/useGoal.label-filter.spec.ts",
@@ -4735,7 +4917,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/goal/composables/useGoalDraftCheckpoint.spec.ts",
@@ -4743,7 +4927,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/goal/composables/useGoalHomeSummary.spec.ts",
@@ -4751,7 +4937,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/goal/composables/useGoalRecords.spec.ts",
@@ -4759,7 +4947,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/goal/composables/useGoalWorkspace.spec.ts",
@@ -4767,7 +4957,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/goal/index.spec.ts",
@@ -4775,7 +4967,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/goal/stores/goalStore.spec.ts",
@@ -4793,7 +4987,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/goal/utils/progress.spec.ts",
@@ -4801,7 +4997,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/goal/views/GoalDeepLinks.characterization.spec.ts",
@@ -4809,7 +5007,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/goal/views/GoalDetailView.spec.ts",
@@ -4817,7 +5017,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/goal/views/GoalListView.spec.ts",
@@ -4825,7 +5027,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/goal/views/GoalModuleLayout.spec.ts",
@@ -4833,7 +5037,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/goal/views/GoalReviewSignals.spec.ts",
@@ -4841,7 +5047,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/notification/browser-system-notification.spec.ts",
@@ -4849,7 +5057,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/notification/components/NotificationCapsulePreview.spec.ts",
@@ -4857,7 +5067,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/notification/components/notificationSemanticControls.spec.ts",
@@ -4865,7 +5077,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/notification/composables/useNotificationListQuery.spec.ts",
@@ -4873,7 +5087,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/notification/composables/useNotificationMutations.spec.ts",
@@ -4881,7 +5097,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/notification/composables/useNotificationPreferences.spec.ts",
@@ -4889,7 +5107,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/notification/composables/useNotificationUnreadQuery.spec.ts",
@@ -4897,7 +5117,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/notification/desktop/notification-click-navigation.spec.ts",
@@ -4905,7 +5127,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/notification/initialization/index.spec.ts",
@@ -4913,7 +5137,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/notification/initialization/notification-sse-invalidation-source.spec.ts",
@@ -4921,7 +5147,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/notification/stores/notificationStore.spec.ts",
@@ -4939,7 +5167,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/notification/web-live-notification.spec.ts",
@@ -4947,7 +5177,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/repository/components/DocumentPresentationPrimitives.spec.ts",
@@ -4955,7 +5187,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/repository/components/KnowledgeCaptureReviewDialog.spec.ts",
@@ -4963,7 +5197,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/repository/components/KnowledgeMarkdownPreview.spec.ts",
@@ -4971,7 +5207,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/repository/components/KnowledgeNoteCatalog.spec.ts",
@@ -4979,7 +5217,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/repository/components/KnowledgeNoteContextPanel.spec.ts",
@@ -4987,7 +5227,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.spec.ts",
@@ -4995,7 +5237,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/repository/components/KnowledgeWriteRequestLedger.spec.ts",
@@ -5003,7 +5247,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/repository/composables/localAgentNoteReview.spec.ts",
@@ -5011,7 +5257,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/repository/composables/useRecentKnowledgeNotes.spec.ts",
@@ -5019,7 +5267,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/repository/composables/useReferenceableKnowledgeNotes.spec.ts",
@@ -5027,7 +5277,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/repository/router/index.spec.ts",
@@ -5035,7 +5287,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.spec.ts",
@@ -5043,7 +5297,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.spec.ts",
@@ -5051,7 +5307,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/routine/components/RoutineCapsulePreview.spec.ts",
@@ -5059,7 +5317,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/routine/components/RoutineEditorDialog.spec.ts",
@@ -5067,7 +5327,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/routine/components/RoutineProfileDialog.spec.ts",
@@ -5075,7 +5337,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/routine/components/RoutineUpcomingWidget.spec.ts",
@@ -5083,7 +5347,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/routine/views/RoutineConfigurationView.spec.ts",
@@ -5091,7 +5357,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.spec.ts",
@@ -5099,7 +5367,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/schedule/components/calendar-event-semantics.spec.ts",
@@ -5107,7 +5377,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/schedule/composables/useCalendarView.capsule.spec.ts",
@@ -5115,7 +5387,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/schedule/composables/useCalendarView.owner-cache.spec.ts",
@@ -5123,7 +5397,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/schedule/composables/useCalendarView.spec.ts",
@@ -5131,7 +5407,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/schedule/composables/useScheduleCalendar.cache.spec.ts",
@@ -5139,7 +5417,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/schedule/planner/PlannerCalendar.spec.ts",
@@ -5147,7 +5427,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/schedule/planner/calendar-event-projection.spec.ts",
@@ -5155,7 +5437,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/schedule/planner/planner-fullcalendar-mutation.adapter.spec.ts",
@@ -5163,7 +5447,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/schedule/planner/planner-owner-command.router.spec.ts",
@@ -5171,7 +5457,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/schedule/planner/planner-presentation.spec.ts",
@@ -5179,7 +5467,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/schedule/stores/scheduleStore.spec.ts",
@@ -5197,7 +5487,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/setting/components/AISettings.spec.ts",
@@ -5205,7 +5497,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/setting/components/AccountSettingsSection.spec.ts",
@@ -5213,7 +5507,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/setting/components/AntigravityAcpDownload.spec.ts",
@@ -5221,7 +5517,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/setting/components/DesktopUpdateSettingsSection.spec.ts",
@@ -5229,7 +5527,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/setting/components/KeyboardSettings.spec.ts",
@@ -5237,7 +5537,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.spec.ts",
@@ -5245,7 +5547,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/setting/components/NotificationSettings.spec.ts",
@@ -5253,7 +5557,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.spec.ts",
@@ -5261,7 +5567,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/setting/components/SettingsResetSection.spec.ts",
@@ -5269,7 +5577,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/setting/components/UserPreferenceSettingsSection.spec.ts",
@@ -5277,7 +5587,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/setting/components/ai-provider-default-policy.spec.ts",
@@ -5285,7 +5597,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/setting/components/desktop-update-settings.presentation.spec.ts",
@@ -5293,7 +5607,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/setting/composables/usePreferencePortability.spec.ts",
@@ -5301,7 +5617,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/setting/composables/usePresentationBootstrap.spec.ts",
@@ -5309,7 +5627,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/setting/stores/presentationPreferenceStore.spec.ts",
@@ -5327,7 +5647,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/components/TaskOccurrenceQuickRow.spec.ts",
@@ -5335,7 +5657,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/components/TaskOccurrenceQuickSurface.spec.ts",
@@ -5343,7 +5667,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/components/TaskOccurrenceRow.spec.ts",
@@ -5351,7 +5677,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/components/TaskPageToolbar.spec.ts",
@@ -5359,7 +5687,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/components/TaskPlanForm/TaskPlanForm.spec.ts",
@@ -5367,7 +5697,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/BasicInfoSection.spec.ts",
@@ -5375,7 +5707,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ChecklistSection.spec.ts",
@@ -5383,7 +5717,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.spec.ts",
@@ -5391,7 +5727,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.spec.ts",
@@ -5399,7 +5737,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/selectors-accessibility.spec.ts",
@@ -5407,7 +5747,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/components/TaskPlanRow.spec.ts",
@@ -5415,7 +5757,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/components/TaskQuickSurface.spec.ts",
@@ -5423,7 +5767,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/components/dialogs/QuickTaskDialog.spec.ts",
@@ -5431,7 +5777,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/components/dialogs/TaskCompletionMeasurementDialog.spec.ts",
@@ -5439,7 +5787,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/components/dialogs/TaskOccurrenceInspectDialog.spec.ts",
@@ -5447,7 +5797,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.spec.ts",
@@ -5455,7 +5807,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/components/widgets/DailyTodoWidget.spec.ts",
@@ -5463,7 +5817,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/composables/taskPlanCache.spec.ts",
@@ -5471,7 +5827,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/composables/useTask.spec.ts",
@@ -5479,7 +5837,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/composables/useTaskGoalBindingOptions.spec.ts",
@@ -5487,7 +5847,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/composables/useTaskOccurrenceActionCoordinator.spec.ts",
@@ -5495,7 +5857,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/composables/useTaskOccurrenceDetailQuery.spec.ts",
@@ -5503,7 +5867,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/composables/useTaskOccurrences.spec.ts",
@@ -5511,7 +5877,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/composables/useTaskPlanMutations.spec.ts",
@@ -5519,7 +5887,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/composables/useTaskPlanQueries.spec.ts",
@@ -5527,7 +5897,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/composables/useTaskToday.spec.ts",
@@ -5535,7 +5907,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/stores/taskStore.spec.ts",
@@ -5553,7 +5927,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/utils/task-occurrence-presentation.spec.ts",
@@ -5561,7 +5937,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/utils/task-plan-presentation.spec.ts",
@@ -5569,7 +5947,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/views/TaskDetailView.spec.ts",
@@ -5577,7 +5957,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/modules/task/views/TaskManagementView.runtime.spec.ts",
@@ -5585,7 +5967,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/platform/server-state/invalidation-dispatcher.spec.ts",
@@ -5593,7 +5977,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/platform/server-state/query-keys.spec.ts",
@@ -5601,7 +5987,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/platform/server-state/result-query.spec.ts",
@@ -5609,7 +5997,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/platform/server-state/runtime.spec.ts",
@@ -5617,7 +6007,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/router/guards.spec.ts",
@@ -5625,7 +6017,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/router/index.spec.ts",
@@ -5633,7 +6027,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/components/CapsulePreviewShell.spec.ts",
@@ -5641,7 +6037,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/components/KeyboardHelp.spec.ts",
@@ -5649,7 +6047,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/components/LabelCommandPanel.spec.ts",
@@ -5657,7 +6057,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/components/LabelFilterPopover.spec.ts",
@@ -5665,7 +6067,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/components/LabelPicker.spec.ts",
@@ -5673,7 +6077,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductAutoTextarea.spec.ts",
@@ -5681,7 +6087,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductDatePicker.spec.ts",
@@ -5689,7 +6097,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductDateTimePicker.spec.ts",
@@ -5697,7 +6107,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductDialogShell.spec.ts",
@@ -5705,7 +6117,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductEditorFrame.spec.ts",
@@ -5713,7 +6127,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductEntityMetadataPrimitives.spec.ts",
@@ -5721,7 +6137,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductExpandableSection.spec.ts",
@@ -5729,7 +6147,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductOverlayStateRecipes.spec.ts",
@@ -5737,7 +6157,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductPropertyChip.spec.ts",
@@ -5745,7 +6167,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductSingleSelectFilter.spec.ts",
@@ -5753,7 +6177,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductSurfaceHeader.spec.ts",
@@ -5761,7 +6187,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductTimePicker.spec.ts",
@@ -5769,7 +6197,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductTimeZoneSelector.spec.ts",
@@ -5777,7 +6207,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/components/ProductTimeframePicker.spec.ts",
@@ -5785,7 +6217,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/components/RadioGroupAccessibility.spec.ts",
@@ -5793,7 +6227,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/components/ReleaseNotes.spec.ts",
@@ -5801,7 +6237,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/components/ResponsivePrimaryAction.spec.ts",
@@ -5809,7 +6247,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/components/ResponsiveSegmentedFilter.spec.ts",
@@ -5817,7 +6257,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/composables/useLabelCatalog.spec.ts",
@@ -5825,7 +6267,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/composables/useRouteDialogState.spec.ts",
@@ -5833,7 +6277,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/dialog-content-forwarding.spec.ts",
@@ -5841,7 +6287,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/keyboard/device-keymap-controller.spec.ts",
@@ -5849,7 +6297,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/keyboard/keymap.spec.ts",
@@ -5857,7 +6307,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/keyboard/list-navigation.spec.ts",
@@ -5865,7 +6317,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/keyboard/runtime.spec.ts",
@@ -5873,7 +6327,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/keyboard/shortcut-engine.spec.ts",
@@ -5881,7 +6337,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/reka-primitives.contract.spec.ts",
@@ -5889,7 +6347,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/utils/desktopAuthRecovery.spec.ts",
@@ -5897,7 +6357,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/utils/format-date-keep-boundary.surface.spec.ts",
@@ -5905,7 +6367,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/utils/format-datetime-keep-boundary.surface.spec.ts",
@@ -5913,7 +6377,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/utils/format-time-range-keep-boundary.surface.spec.ts",
@@ -5921,7 +6387,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/utils/ipc/is-plain-object-keep-boundary.surface.spec.ts",
@@ -5929,7 +6397,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/utils/normalize-select-string.spec.ts",
@@ -5937,7 +6407,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/utils/parse-explicit-product-date.spec.ts",
@@ -5945,7 +6417,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/utils/product-time.spec.ts",
@@ -5953,7 +6427,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/utils/release-notes.spec.ts",
@@ -5961,7 +6437,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/shared/utils/safe-markdown.spec.ts",
@@ -5969,7 +6447,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/views/AuthPlatformEntry.spec.ts",
@@ -5977,7 +6457,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/views/DesktopProfileAccessView.spec.ts",
@@ -5985,7 +6467,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/app-vue/src/views/dead-surfaces.surface.spec.ts",
@@ -5993,7 +6477,9 @@
       "collectors": [
         "packages/app-vue/vitest.config.ts"
       ],
-      "measurementCollectors": []
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
     },
     {
       "path": "packages/assets/src/__tests__/images.test.ts",
@@ -11931,7 +12417,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 7
+      "fileCount": 250
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -12800,13 +13286,256 @@
       "packages/ai/src/server/transport/ai-controller-errors.spec.ts",
       "packages/ai/src/server/transport/ai-provider-config.controller.onboarding-v2.spec.ts",
       "packages/ai/src/server/transport/workspace-event-stream.spec.ts",
+      "packages/app-vue/src/components/shared/ActionableWrapper.spec.ts",
+      "packages/app-vue/src/components/shared/ModuleHeader.spec.ts",
+      "packages/app-vue/src/components/shared/settings/SettingsPresentationPrimitives.spec.ts",
+      "packages/app-vue/src/di/navigation.spec.ts",
+      "packages/app-vue/src/layouts/shell/AppShell.spec.ts",
+      "packages/app-vue/src/layouts/shell/BusinessPanel.spec.ts",
+      "packages/app-vue/src/layouts/shell/CloudConnectionDialog.spec.ts",
+      "packages/app-vue/src/layouts/shell/ConversationSidebar.spec.ts",
+      "packages/app-vue/src/layouts/shell/DesktopUpdateShellIndicator.spec.ts",
+      "packages/app-vue/src/layouts/shell/ManageAccountsDialog.spec.ts",
+      "packages/app-vue/src/layouts/shell/ModuleCapsule.spec.ts",
+      "packages/app-vue/src/layouts/shell/PanelErrorBoundary.spec.ts",
+      "packages/app-vue/src/layouts/shell/ProfileImportDialog.spec.ts",
+      "packages/app-vue/src/layouts/shell/TodayOverviewPanel.spec.ts",
+      "packages/app-vue/src/layouts/shell/WindowHeader.spec.ts",
+      "packages/app-vue/src/layouts/shell/business-surface-control.spec.ts",
+      "packages/app-vue/src/layouts/shell/clamp-dual.surface.spec.ts",
+      "packages/app-vue/src/layouts/shell/desktop-update-shell-indicator.presentation.spec.ts",
+      "packages/app-vue/src/layouts/shell/notificationCapsulePreview.spec.ts",
+      "packages/app-vue/src/layouts/shell/panel-cache-key.spec.ts",
+      "packages/app-vue/src/layouts/shell/panelGeometry.spec.ts",
+      "packages/app-vue/src/layouts/shell/persisted-business-route.spec.ts",
+      "packages/app-vue/src/layouts/shell/previews/GoalCapsulePreview.spec.ts",
+      "packages/app-vue/src/layouts/shell/previews/NoteCapsulePreview.spec.ts",
+      "packages/app-vue/src/layouts/shell/previews/ScheduleCapsulePreview.spec.ts",
+      "packages/app-vue/src/layouts/shell/previews/TaskCapsulePreview.spec.ts",
+      "packages/app-vue/src/layouts/shell/surface-leave-protocol.spec.ts",
+      "packages/app-vue/src/layouts/shell/unverified-email-banner.spec.ts",
+      "packages/app-vue/src/layouts/shell/useAppShellStore.spec.ts",
+      "packages/app-vue/src/layouts/shell/useKnowledgeNativeSurface.spec.ts",
+      "packages/app-vue/src/layouts/shell/useNativeBusinessPanelBridge.spec.ts",
+      "packages/app-vue/src/layouts/shell/usePanelWidth.spec.ts",
+      "packages/app-vue/src/layouts/shell/useShellRouterSync.spec.ts",
+      "packages/app-vue/src/layouts/shell/useTaskNativeSurface.spec.ts",
+      "packages/app-vue/src/locales/localePresentation.spec.ts",
+      "packages/app-vue/src/locales/setting-updates-locale.spec.ts",
+      "packages/app-vue/src/modules/account/components/AccountProfileSection.spec.ts",
+      "packages/app-vue/src/modules/account/components/CloudPasswordSection.spec.ts",
+      "packages/app-vue/src/modules/account/components/account-logout-locale.spec.ts",
+      "packages/app-vue/src/modules/account/index.spec.ts",
       "packages/app-vue/src/modules/account/stores/accountStore.spec.ts",
+      "packages/app-vue/src/modules/ai/agent-instance-order.spec.ts",
+      "packages/app-vue/src/modules/ai/components/AIComposerControls.spec.ts",
+      "packages/app-vue/src/modules/ai/components/AIConversationSidebar.email-verification.spec.ts",
+      "packages/app-vue/src/modules/ai/components/AIConversationSidebar.status.spec.ts",
+      "packages/app-vue/src/modules/ai/components/AIFooterComposer.spec.ts",
+      "packages/app-vue/src/modules/ai/components/AIGoalWorkflowPanel.spec.ts",
+      "packages/app-vue/src/modules/ai/components/AIKnowledgeCapturePanel.spec.ts",
+      "packages/app-vue/src/modules/ai/components/AIMessageContent.spec.ts",
+      "packages/app-vue/src/modules/ai/components/AIMessagePanel.spec.ts",
+      "packages/app-vue/src/modules/ai/components/AIRuntimeUsageBadge.spec.ts",
+      "packages/app-vue/src/modules/ai/components/AITaskWorkflowPanel.spec.ts",
+      "packages/app-vue/src/modules/ai/components/AgentDriverIcon.spec.ts",
+      "packages/app-vue/src/modules/ai/components/MemoFlowAiIcon.spec.ts",
+      "packages/app-vue/src/modules/ai/composables/antigravityModelPresentation.spec.ts",
+      "packages/app-vue/src/modules/ai/composables/chatViewHelpers.spec.ts",
+      "packages/app-vue/src/modules/ai/composables/error.spec.ts",
+      "packages/app-vue/src/modules/ai/composables/native-model-visibility.spec.ts",
+      "packages/app-vue/src/modules/ai/composables/surface-context.spec.ts",
+      "packages/app-vue/src/modules/ai/composables/useAI.spec.ts",
+      "packages/app-vue/src/modules/ai/composables/useAIChatSession.spec.ts",
+      "packages/app-vue/src/modules/ai/composables/useAIChatView.lifecycle.spec.ts",
+      "packages/app-vue/src/modules/ai/composables/useAIGoalWorkflow.spec.ts",
+      "packages/app-vue/src/modules/ai/composables/useAIKnowledgeCapture.spec.ts",
+      "packages/app-vue/src/modules/ai/composables/useAIKnowledgeQaWorkflow.spec.ts",
+      "packages/app-vue/src/modules/ai/composables/useAIModelCatalog.spec.ts",
+      "packages/app-vue/src/modules/ai/composables/useAIModelSelection.agent-instance.spec.ts",
+      "packages/app-vue/src/modules/ai/composables/useAITaskWorkflow.spec.ts",
+      "packages/app-vue/src/modules/ai/composables/useAIWorkflowPersistence.spec.ts",
+      "packages/app-vue/src/modules/ai/composables/useAIWorkflowReconciliation.spec.ts",
+      "packages/app-vue/src/modules/ai/composables/useAssistantStream.spec.ts",
+      "packages/app-vue/src/modules/ai/composables/useConversationAttention.spec.ts",
+      "packages/app-vue/src/modules/ai/composables/useDurableConversationAttention.spec.ts",
+      "packages/app-vue/src/modules/ai/composables/useGoalSurfaceLease.spec.ts",
+      "packages/app-vue/src/modules/ai/composables/useGoalWorkflowEvents.spec.ts",
+      "packages/app-vue/src/modules/ai/composables/useLocalAssistantChoices.spec.ts",
+      "packages/app-vue/src/modules/ai/composables/workflow-intent.spec.ts",
+      "packages/app-vue/src/modules/ai/composables/workspaceEventSubscription.spec.ts",
+      "packages/app-vue/src/modules/authentication/composables/usePassword.spec.ts",
       "packages/app-vue/src/modules/authentication/stores/authenticationStore.spec.ts",
+      "packages/app-vue/src/modules/goal/components/GoalKeyResultDirectControls.spec.ts",
+      "packages/app-vue/src/modules/goal/components/GoalKeyResultEditors.spec.ts",
+      "packages/app-vue/src/modules/goal/components/GoalKeyResultTrajectoryPlot.spec.ts",
+      "packages/app-vue/src/modules/goal/components/GoalPageToolbar.spec.ts",
+      "packages/app-vue/src/modules/goal/components/GoalProgressRow.spec.ts",
+      "packages/app-vue/src/modules/goal/components/GoalRecordComposerSurface.spec.ts",
+      "packages/app-vue/src/modules/goal/components/GoalRecordPreview.spec.ts",
+      "packages/app-vue/src/modules/goal/components/cards/GoalRecordCard.spec.ts",
+      "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.spec.ts",
+      "packages/app-vue/src/modules/goal/components/dialogs/GoalKeyResultInspectDialog.spec.ts",
+      "packages/app-vue/src/modules/goal/components/dialogs/GoalRecordDialog.spec.ts",
+      "packages/app-vue/src/modules/goal/components/dialogs/KeyResultDialog.spec.ts",
+      "packages/app-vue/src/modules/goal/composables/goal-status-transitions.spec.ts",
+      "packages/app-vue/src/modules/goal/composables/useGoal.label-filter.spec.ts",
+      "packages/app-vue/src/modules/goal/composables/useGoalDraftCheckpoint.spec.ts",
+      "packages/app-vue/src/modules/goal/composables/useGoalHomeSummary.spec.ts",
+      "packages/app-vue/src/modules/goal/composables/useGoalRecords.spec.ts",
+      "packages/app-vue/src/modules/goal/composables/useGoalWorkspace.spec.ts",
+      "packages/app-vue/src/modules/goal/index.spec.ts",
       "packages/app-vue/src/modules/goal/stores/goalStore.spec.ts",
+      "packages/app-vue/src/modules/goal/utils/key-result-calculation-presentation.spec.ts",
+      "packages/app-vue/src/modules/goal/utils/progress.spec.ts",
+      "packages/app-vue/src/modules/goal/views/GoalDeepLinks.characterization.spec.ts",
+      "packages/app-vue/src/modules/goal/views/GoalDetailView.spec.ts",
+      "packages/app-vue/src/modules/goal/views/GoalListView.spec.ts",
+      "packages/app-vue/src/modules/goal/views/GoalModuleLayout.spec.ts",
+      "packages/app-vue/src/modules/goal/views/GoalReviewSignals.spec.ts",
+      "packages/app-vue/src/modules/notification/browser-system-notification.spec.ts",
+      "packages/app-vue/src/modules/notification/components/NotificationCapsulePreview.spec.ts",
+      "packages/app-vue/src/modules/notification/components/notificationSemanticControls.spec.ts",
+      "packages/app-vue/src/modules/notification/composables/useNotificationListQuery.spec.ts",
+      "packages/app-vue/src/modules/notification/composables/useNotificationMutations.spec.ts",
+      "packages/app-vue/src/modules/notification/composables/useNotificationPreferences.spec.ts",
+      "packages/app-vue/src/modules/notification/composables/useNotificationUnreadQuery.spec.ts",
+      "packages/app-vue/src/modules/notification/desktop/notification-click-navigation.spec.ts",
+      "packages/app-vue/src/modules/notification/initialization/index.spec.ts",
+      "packages/app-vue/src/modules/notification/initialization/notification-sse-invalidation-source.spec.ts",
       "packages/app-vue/src/modules/notification/stores/notificationStore.spec.ts",
+      "packages/app-vue/src/modules/notification/views/NotificationListPage.spec.ts",
+      "packages/app-vue/src/modules/notification/web-live-notification.spec.ts",
+      "packages/app-vue/src/modules/repository/components/DocumentPresentationPrimitives.spec.ts",
+      "packages/app-vue/src/modules/repository/components/KnowledgeCaptureReviewDialog.spec.ts",
+      "packages/app-vue/src/modules/repository/components/KnowledgeMarkdownPreview.spec.ts",
+      "packages/app-vue/src/modules/repository/components/KnowledgeNoteCatalog.spec.ts",
+      "packages/app-vue/src/modules/repository/components/KnowledgeNoteContextPanel.spec.ts",
+      "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.spec.ts",
+      "packages/app-vue/src/modules/repository/components/KnowledgeWriteRequestLedger.spec.ts",
+      "packages/app-vue/src/modules/repository/composables/localAgentNoteReview.spec.ts",
+      "packages/app-vue/src/modules/repository/composables/useRecentKnowledgeNotes.spec.ts",
+      "packages/app-vue/src/modules/repository/composables/useReferenceableKnowledgeNotes.spec.ts",
+      "packages/app-vue/src/modules/repository/router/index.spec.ts",
+      "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.spec.ts",
+      "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.spec.ts",
+      "packages/app-vue/src/modules/routine/components/RoutineCapsulePreview.spec.ts",
+      "packages/app-vue/src/modules/routine/components/RoutineEditorDialog.spec.ts",
+      "packages/app-vue/src/modules/routine/components/RoutineProfileDialog.spec.ts",
+      "packages/app-vue/src/modules/routine/components/RoutineUpcomingWidget.spec.ts",
+      "packages/app-vue/src/modules/routine/views/RoutineConfigurationView.spec.ts",
+      "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.spec.ts",
+      "packages/app-vue/src/modules/schedule/components/calendar-event-semantics.spec.ts",
+      "packages/app-vue/src/modules/schedule/composables/useCalendarView.capsule.spec.ts",
+      "packages/app-vue/src/modules/schedule/composables/useCalendarView.owner-cache.spec.ts",
+      "packages/app-vue/src/modules/schedule/composables/useCalendarView.spec.ts",
+      "packages/app-vue/src/modules/schedule/composables/useScheduleCalendar.cache.spec.ts",
+      "packages/app-vue/src/modules/schedule/planner/PlannerCalendar.spec.ts",
+      "packages/app-vue/src/modules/schedule/planner/calendar-event-projection.spec.ts",
+      "packages/app-vue/src/modules/schedule/planner/planner-fullcalendar-mutation.adapter.spec.ts",
+      "packages/app-vue/src/modules/schedule/planner/planner-owner-command.router.spec.ts",
+      "packages/app-vue/src/modules/schedule/planner/planner-presentation.spec.ts",
       "packages/app-vue/src/modules/schedule/stores/scheduleStore.spec.ts",
+      "packages/app-vue/src/modules/schedule/views/ScheduleInspect.characterization.spec.ts",
+      "packages/app-vue/src/modules/setting/components/AISettings.spec.ts",
+      "packages/app-vue/src/modules/setting/components/AccountSettingsSection.spec.ts",
+      "packages/app-vue/src/modules/setting/components/AntigravityAcpDownload.spec.ts",
+      "packages/app-vue/src/modules/setting/components/DesktopUpdateSettingsSection.spec.ts",
+      "packages/app-vue/src/modules/setting/components/KeyboardSettings.spec.ts",
+      "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.spec.ts",
+      "packages/app-vue/src/modules/setting/components/NotificationSettings.spec.ts",
+      "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.spec.ts",
+      "packages/app-vue/src/modules/setting/components/SettingsResetSection.spec.ts",
+      "packages/app-vue/src/modules/setting/components/UserPreferenceSettingsSection.spec.ts",
+      "packages/app-vue/src/modules/setting/components/ai-provider-default-policy.spec.ts",
+      "packages/app-vue/src/modules/setting/components/desktop-update-settings.presentation.spec.ts",
+      "packages/app-vue/src/modules/setting/composables/usePreferencePortability.spec.ts",
+      "packages/app-vue/src/modules/setting/composables/usePresentationBootstrap.spec.ts",
       "packages/app-vue/src/modules/setting/stores/presentationPreferenceStore.spec.ts",
+      "packages/app-vue/src/modules/task/components/TaskOccurrenceCompactList.spec.ts",
+      "packages/app-vue/src/modules/task/components/TaskOccurrenceQuickRow.spec.ts",
+      "packages/app-vue/src/modules/task/components/TaskOccurrenceQuickSurface.spec.ts",
+      "packages/app-vue/src/modules/task/components/TaskOccurrenceRow.spec.ts",
+      "packages/app-vue/src/modules/task/components/TaskPageToolbar.spec.ts",
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/TaskPlanForm.spec.ts",
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/BasicInfoSection.spec.ts",
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ChecklistSection.spec.ts",
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.spec.ts",
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.spec.ts",
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/selectors-accessibility.spec.ts",
+      "packages/app-vue/src/modules/task/components/TaskPlanRow.spec.ts",
+      "packages/app-vue/src/modules/task/components/TaskQuickSurface.spec.ts",
+      "packages/app-vue/src/modules/task/components/dialogs/QuickTaskDialog.spec.ts",
+      "packages/app-vue/src/modules/task/components/dialogs/TaskCompletionMeasurementDialog.spec.ts",
+      "packages/app-vue/src/modules/task/components/dialogs/TaskOccurrenceInspectDialog.spec.ts",
+      "packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.spec.ts",
+      "packages/app-vue/src/modules/task/components/widgets/DailyTodoWidget.spec.ts",
+      "packages/app-vue/src/modules/task/composables/taskPlanCache.spec.ts",
+      "packages/app-vue/src/modules/task/composables/useTask.spec.ts",
+      "packages/app-vue/src/modules/task/composables/useTaskGoalBindingOptions.spec.ts",
+      "packages/app-vue/src/modules/task/composables/useTaskOccurrenceActionCoordinator.spec.ts",
+      "packages/app-vue/src/modules/task/composables/useTaskOccurrenceDetailQuery.spec.ts",
+      "packages/app-vue/src/modules/task/composables/useTaskOccurrences.spec.ts",
+      "packages/app-vue/src/modules/task/composables/useTaskPlanMutations.spec.ts",
+      "packages/app-vue/src/modules/task/composables/useTaskPlanQueries.spec.ts",
+      "packages/app-vue/src/modules/task/composables/useTaskToday.spec.ts",
       "packages/app-vue/src/modules/task/stores/taskStore.spec.ts",
+      "packages/app-vue/src/modules/task/utils/format-task-duration.spec.ts",
+      "packages/app-vue/src/modules/task/utils/task-occurrence-presentation.spec.ts",
+      "packages/app-vue/src/modules/task/utils/task-plan-presentation.spec.ts",
+      "packages/app-vue/src/modules/task/views/TaskDetailView.spec.ts",
+      "packages/app-vue/src/modules/task/views/TaskManagementView.runtime.spec.ts",
+      "packages/app-vue/src/platform/server-state/invalidation-dispatcher.spec.ts",
+      "packages/app-vue/src/platform/server-state/query-keys.spec.ts",
+      "packages/app-vue/src/platform/server-state/result-query.spec.ts",
+      "packages/app-vue/src/platform/server-state/runtime.spec.ts",
+      "packages/app-vue/src/router/guards.spec.ts",
+      "packages/app-vue/src/router/index.spec.ts",
+      "packages/app-vue/src/shared/components/CapsulePreviewShell.spec.ts",
+      "packages/app-vue/src/shared/components/KeyboardHelp.spec.ts",
+      "packages/app-vue/src/shared/components/LabelCommandPanel.spec.ts",
+      "packages/app-vue/src/shared/components/LabelFilterPopover.spec.ts",
+      "packages/app-vue/src/shared/components/LabelPicker.spec.ts",
+      "packages/app-vue/src/shared/components/ProductAutoTextarea.spec.ts",
+      "packages/app-vue/src/shared/components/ProductDatePicker.spec.ts",
+      "packages/app-vue/src/shared/components/ProductDateTimePicker.spec.ts",
+      "packages/app-vue/src/shared/components/ProductDialogShell.spec.ts",
+      "packages/app-vue/src/shared/components/ProductEditorFrame.spec.ts",
+      "packages/app-vue/src/shared/components/ProductEntityMetadataPrimitives.spec.ts",
+      "packages/app-vue/src/shared/components/ProductExpandableSection.spec.ts",
+      "packages/app-vue/src/shared/components/ProductOverlayStateRecipes.spec.ts",
+      "packages/app-vue/src/shared/components/ProductPropertyChip.spec.ts",
+      "packages/app-vue/src/shared/components/ProductSingleSelectFilter.spec.ts",
+      "packages/app-vue/src/shared/components/ProductSurfaceHeader.spec.ts",
+      "packages/app-vue/src/shared/components/ProductTimePicker.spec.ts",
+      "packages/app-vue/src/shared/components/ProductTimeZoneSelector.spec.ts",
+      "packages/app-vue/src/shared/components/ProductTimeframePicker.spec.ts",
+      "packages/app-vue/src/shared/components/RadioGroupAccessibility.spec.ts",
+      "packages/app-vue/src/shared/components/ReleaseNotes.spec.ts",
+      "packages/app-vue/src/shared/components/ResponsivePrimaryAction.spec.ts",
+      "packages/app-vue/src/shared/components/ResponsiveSegmentedFilter.spec.ts",
+      "packages/app-vue/src/shared/composables/useLabelCatalog.spec.ts",
+      "packages/app-vue/src/shared/composables/useRouteDialogState.spec.ts",
+      "packages/app-vue/src/shared/dialog-content-forwarding.spec.ts",
+      "packages/app-vue/src/shared/keyboard/device-keymap-controller.spec.ts",
+      "packages/app-vue/src/shared/keyboard/keymap.spec.ts",
+      "packages/app-vue/src/shared/keyboard/list-navigation.spec.ts",
+      "packages/app-vue/src/shared/keyboard/runtime.spec.ts",
+      "packages/app-vue/src/shared/keyboard/shortcut-engine.spec.ts",
+      "packages/app-vue/src/shared/reka-primitives.contract.spec.ts",
+      "packages/app-vue/src/shared/utils/desktopAuthRecovery.spec.ts",
+      "packages/app-vue/src/shared/utils/format-date-keep-boundary.surface.spec.ts",
+      "packages/app-vue/src/shared/utils/format-datetime-keep-boundary.surface.spec.ts",
+      "packages/app-vue/src/shared/utils/format-time-range-keep-boundary.surface.spec.ts",
+      "packages/app-vue/src/shared/utils/ipc/is-plain-object-keep-boundary.surface.spec.ts",
+      "packages/app-vue/src/shared/utils/normalize-select-string.spec.ts",
+      "packages/app-vue/src/shared/utils/parse-explicit-product-date.spec.ts",
+      "packages/app-vue/src/shared/utils/product-time.spec.ts",
+      "packages/app-vue/src/shared/utils/release-notes.spec.ts",
+      "packages/app-vue/src/shared/utils/safe-markdown.spec.ts",
+      "packages/app-vue/src/views/AuthPlatformEntry.spec.ts",
+      "packages/app-vue/src/views/DesktopProfileAccessView.spec.ts",
+      "packages/app-vue/src/views/dead-surfaces.surface.spec.ts",
       "packages/data-portability/src/api/module-lifecycle.spec.ts",
       "packages/data-portability/src/api/profile-import-routes.spec.ts",
       "packages/data-portability/src/electron/index-lifecycle.spec.ts",
