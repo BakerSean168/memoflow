@@ -101,7 +101,6 @@
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^9.1.0",
     "@memoflow/desktop-contracts": "workspace:*",
-    "@memoflow/host-runtime": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/transport-contracts": "workspace:*",
     "zod": "^4.6.5"

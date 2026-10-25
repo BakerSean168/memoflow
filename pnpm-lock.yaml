@@ -347,6 +347,9 @@ importers:
       '@memoflow/goal':
         specifier: workspace:*
         version: link:../../packages/goal
+      '@memoflow/host-runtime':
+        specifier: workspace:*
+        version: link:../../packages/host-runtime
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../../packages/http-client
@@ -1527,9 +1530,6 @@ importers:
       '@memoflow/desktop-contracts':
         specifier: workspace:*
         version: link:../desktop-contracts
-      '@memoflow/host-runtime':
-        specifier: workspace:*
-        version: link:../host-runtime
       '@memoflow/shared-primitives':
         specifier: workspace:*
         version: link:../shared-primitives
@@ -1883,6 +1883,9 @@ importers:
       '@memoflow/database':
         specifier: workspace:*
         version: link:../database
+      '@memoflow/host-runtime':
+        specifier: workspace:*
+        version: link:../host-runtime
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client

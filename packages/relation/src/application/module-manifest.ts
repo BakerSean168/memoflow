@@ -1,4 +1,4 @@
-import type { ModuleManifest } from '@memoflow/contracts/shared';
+import type { ModuleManifest } from '@memoflow/host-runtime';
 import { RelationTypes, SubjectTypes, type CreateRelationReq } from '@memoflow/contracts/relation';
 import type { RelationService } from './relation-service';
 

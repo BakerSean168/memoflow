@@ -63,7 +63,7 @@
  *   仍为 no-op。
  */
 
-import type { ServerModuleHandle, ServerTransportModuleContext } from '@memoflow/contracts/shared';
+import type { ServerModuleHandle, ServerTransportModuleContext } from '@memoflow/host-runtime';
 import { createLogger } from '@memoflow/utils/logger';
 import type { ScheduleModuleInstance } from '../server/infrastructure';
 import { registerScheduleRoutes } from './routes';

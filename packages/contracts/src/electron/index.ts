@@ -10,16 +10,9 @@
  *   待其契约阶段理顺），由本桶原样转出。
  *
  * P1 S4（Issue #633）：authenticated-ipc 运行时中间件真身已迁至
- * @memoflow/host-runtime（./electron-ipc 子路径），本桶改经 host-runtime
- * 单向转出以兼容，新代码请直接引用 @memoflow/host-runtime/electron-ipc。
+ * @memoflow/host-runtime（./electron-ipc 子路径）。本桶不转出这批符号：
+ * contracts 是 layer:shared，模块边界规则禁止 shared 依赖 layer:infra，
+ * 全部消费方已在本步直接改引 @memoflow/host-runtime/electron-ipc。
  */
 export * from '@memoflow/desktop-contracts';
-export {
-  createAuthenticatedIpcWrapper,
-  createAuthenticatedIdentityIpcWrapper,
-  withAuthenticatedValue,
-  withAuthenticatedIdentity,
-  type AuthenticatedIpcWrapperOptions,
-  type AuthenticatedIdentityIpcWrapperOptions,
-} from '@memoflow/host-runtime/electron-ipc';
 export * from './profile-import';
