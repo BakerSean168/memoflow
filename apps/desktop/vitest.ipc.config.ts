@@ -15,10 +15,6 @@ const ipcWorkspaceAliasEntries = [
     replacement: resolve(import.meta.dirname, '../../packages/goal-client/src/index.ts'),
   },
   {
-    find: '@memoflow/goal-core',
-    replacement: resolve(import.meta.dirname, '../../packages/goal-core/src/index.ts'),
-  },
-  {
     find: '@memoflow/goal-core/ids',
     replacement: resolve(import.meta.dirname, '../../packages/goal-core/src/ids.ts'),
   },
@@ -35,6 +31,10 @@ const ipcWorkspaceAliasEntries = [
       import.meta.dirname,
       '../../packages/goal-core/src/goal-record-preview.ts',
     ),
+  },
+  {
+    find: '@memoflow/goal-core',
+    replacement: resolve(import.meta.dirname, '../../packages/goal-core/src/index.ts'),
   },
   {
     find: '@memoflow/goal/electron',
