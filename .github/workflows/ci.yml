@@ -537,6 +537,7 @@ jobs:
           setup-python: 'false'
           setup-uv: 'false'
           capabilities: node,pnpm,playwright
+          lane: web
           consume-delivery-manifest: 'true'
       - run: pnpm exec playwright install chromium
       - name: Provision visual regression fonts

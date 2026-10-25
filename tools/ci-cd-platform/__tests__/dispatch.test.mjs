@@ -88,6 +88,18 @@ test('Server shards use history, retain exact ownership, balance work and do not
   assert.deepEqual(planServerShards([]), []);
   assert.equal(planServerShards([{ key: 'api:test:smoke' }]).length, 1);
 });
+test('every delivery lane command has a manifest-bound lane input provisioned by setup', async () => {
+  const { jobs } = YAML.parse(await readFile('.github/workflows/ci.yml', 'utf8'));
+  for (const [id, job] of Object.entries(jobs)) {
+    for (const step of job.steps ?? []) {
+      const lane = step.env?.DELIVERY_LANE ?? job.env?.DELIVERY_LANE;
+      if (!lane) continue;
+      const setup = job.steps.find((s) => s.uses === './.github/actions/setup-nx-affected-job');
+      assert.equal(setup?.with?.lane, lane, `${id}: ${step.name ?? step.run}`);
+      assert.equal(setup.with['consume-delivery-manifest'], 'true', `${id}: manifest required`);
+    }
+  }
+});
 test('unknown or removed application/package owners expand to full validation', async () => {
   for (const file of ['packages/unknown-owner/src/index.ts', 'apps/removed-app/src/index.ts']) {
     const scope = await detectScope({ files: [file] });
