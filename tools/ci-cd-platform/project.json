@@ -16,7 +16,7 @@
       "{workspaceRoot}/packages/**/*.config.{ts,mts,cts,js,mjs,cjs}",
       "{workspaceRoot}/tools/build/**/*",
       "{workspaceRoot}/tools/ci/node-process-bootstrap.cjs",
-      "{workspaceRoot}/apps/web/web-flow-specs.mjs",
+      "{workspaceRoot}/apps/web/web-specialized-specs.mjs",
       "{workspaceRoot}/tools/test-system-v2/lib/web-shards.mjs",
       "{workspaceRoot}/tools/test-system-v2/lib/shard-balance.mjs",
       "{workspaceRoot}/tools/test-system-v2/web-spec-durations.json",

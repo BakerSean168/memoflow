@@ -10,7 +10,7 @@ const workflow = readFileSync(
   new URL('../../../.github/workflows/ci.yml', import.meta.url),
   'utf8',
 );
-const shard = workflow.match(/^  web-flow-shard:\n([\s\S]*?)(?=^  \S)/mu)?.[1];
+const shard = workflow.match(/^  web-specialized:\n([\s\S]*?)(?=^  \S)/mu)?.[1];
 assert.ok(shard, 'Web Flow shard job must exist');
 const fontStep = shard.match(
   /      - name: Provision visual regression fonts\n([\s\S]*?)(?=^      - |^      #)/mu,
@@ -117,7 +117,7 @@ test('PR visual selection is nonempty and smaller; nightly/manual retain the ful
   );
   assert.ok(nightly.on.schedule.length > 0);
   assert.ok(Object.hasOwn(config.on, 'workflow_dispatch'));
-  const steps = config.jobs['web-flow-shard'].steps;
+  const steps = config.jobs['web-specialized'].steps;
   const representative = steps.find(
     (step) => step.name === 'Product visual representatives (compare only)',
   );

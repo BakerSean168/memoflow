@@ -438,18 +438,22 @@ function getBoundaryTargetPlans(projectName) {
           '{workspaceRoot}/apps/web/playwright-report',
         ],
         options: {
-          command: 'playwright test',
+          command:
+            'node ../../node_modules/tsx/dist/cli.mjs ./e2e/helpers/run-ai-provider-playwright.ts',
           cwd: 'apps/web',
         },
         configurations: {
           ci: {
-            command: 'playwright test --reporter=html,json,list',
+            command:
+              'node ../../node_modules/tsx/dist/cli.mjs ./e2e/helpers/run-ai-provider-playwright.ts --reporter=html,json,list',
           },
           headed: {
-            command: 'playwright test --headed',
+            command:
+              'node ../../node_modules/tsx/dist/cli.mjs ./e2e/helpers/run-ai-provider-playwright.ts --headed',
           },
           debug: {
-            command: 'playwright test --debug',
+            command:
+              'node ../../node_modules/tsx/dist/cli.mjs ./e2e/helpers/run-ai-provider-playwright.ts --debug',
           },
         },
       },

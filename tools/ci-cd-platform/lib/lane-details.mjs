@@ -50,7 +50,7 @@ export function buildLaneDetails({ lanes, changedFiles, scope, full = false }) {
     componentBrowser: byFiles(
       'componentBrowser',
       ['ui-storybook:test:interaction'],
-      'no storybook stories or storybook app files changed',
+      'no component browser inputs or dependencies changed',
     ),
     contract: byFiles('contract', ['test:contract'], 'no contract surface changed'),
     boundary: byLane('boundary', ['test:boundary'], 'no boundary-affected projects'),

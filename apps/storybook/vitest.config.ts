@@ -6,7 +6,7 @@ import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 const workspaceRoot = path.resolve(import.meta.dirname, '../..');
 
 /**
- * Browser component suite: the same three audited Storybook interaction files
+ * Browser component suite: the audited Storybook interaction files
  * are used by the Storybook UI and CI. Other Vitest projects remain untouched.
  *
  * Storybook's plugin loads our Vue/Vite aliases and annotations itself.
@@ -40,7 +40,7 @@ export default defineConfig({
           browser: {
             enabled: true,
             api: { host: '127.0.0.1', port: 63315 },
-            provider: playwright(),
+            provider: playwright({ contextOptions: { colorScheme: 'light' } }),
             headless: true,
             instances: [{ browser: 'chromium' }],
           },
