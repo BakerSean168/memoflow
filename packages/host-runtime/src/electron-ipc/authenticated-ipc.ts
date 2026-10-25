@@ -6,7 +6,7 @@ import {
   type IpcResult,
 } from '@memoflow/transport-contracts/result';
 import type { IElectronModuleContext } from '@memoflow/desktop-contracts';
-import type { ExecutionContext } from '../shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import { isElectronAuthResolutionError } from '@memoflow/desktop-contracts';
 
 type UnexpectedErrorCode = 'INTERNAL_ERROR';

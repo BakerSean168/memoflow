@@ -3,7 +3,7 @@ import type { IElectronModuleContext } from '@memoflow/desktop-contracts';
 import { createAuthenticatedIpcWrapper } from './authenticated-ipc';
 import { ElectronAuthResolutionError } from '@memoflow/desktop-contracts';
 import { ResultErrorException } from '@memoflow/transport-contracts/result';
-import type { ExecutionContext } from '../shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 
 function executionContext(identityId: string): ExecutionContext {
   return {
