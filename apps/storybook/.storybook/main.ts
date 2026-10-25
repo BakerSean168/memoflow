@@ -150,7 +150,10 @@ const config: StorybookConfig = {
               'packages/desktop-contracts/src/profile-access.ts',
             ],
             ['@memoflow/desktop-contracts', 'packages/desktop-contracts/src/index.ts'],
-            ['@memoflow/host-runtime/electron-ipc', 'packages/host-runtime/src/electron-ipc/index.ts'],
+            [
+              '@memoflow/host-runtime/electron-ipc',
+              'packages/host-runtime/src/electron-ipc/index.ts',
+            ],
             ['@memoflow/host-runtime', 'packages/host-runtime/src/index.ts'],
             ['@memoflow/task/client', 'packages/task/src/client/index.ts'],
             ['@memoflow/time', 'packages/time/src/index.ts'],
