@@ -31,10 +31,21 @@ export type {
   ExecutionSource,
   RequestContext,
 } from '@memoflow/transport-contracts';
-export type { ServerModuleHandle, ServerTransportModuleContext } from './server-module-context';
 export * from './account-active-checker';
 
 export * from './value-objects';
 
-export * from './module-manifest';
+// P1 S4（Issue #633）：ModuleManifest/CommandRegistry 与
+// ServerTransportModuleContext/ServerModuleHandle 真身已迁至
+// @memoflow/host-runtime，本桶仅单向 re-export 兼容，新代码请直接
+// 引用 @memoflow/host-runtime。
+export {
+  CommandRegistry,
+  type ModuleActivityManifest,
+  type ModuleCommandManifest,
+  type ModuleManifest,
+  type ModuleQueryManifest,
+  type ModuleRelationManifest,
+} from '@memoflow/host-runtime';
+export type { ServerModuleHandle, ServerTransportModuleContext } from '@memoflow/host-runtime';
 export * from './keyboard-keymap';
