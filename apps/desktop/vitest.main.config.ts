@@ -97,35 +97,59 @@ const mainWorkspaceAliasEntries = [
   },
   {
     find: '@memoflow/transport-contracts/result/codes',
-    replacement: resolve(import.meta.dirname, '../../packages/transport-contracts/src/result/codes.ts'),
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/transport-contracts/src/result/codes.ts',
+    ),
   },
   {
     find: '@memoflow/transport-contracts/result/core',
-    replacement: resolve(import.meta.dirname, '../../packages/transport-contracts/src/result/core.ts'),
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/transport-contracts/src/result/core.ts',
+    ),
   },
   {
     find: '@memoflow/transport-contracts/result/failure-compat',
-    replacement: resolve(import.meta.dirname, '../../packages/transport-contracts/src/result/failure-compat.ts'),
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/transport-contracts/src/result/failure-compat.ts',
+    ),
   },
   {
     find: '@memoflow/transport-contracts/result/failure-policy',
-    replacement: resolve(import.meta.dirname, '../../packages/transport-contracts/src/result/failure-policy.ts'),
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/transport-contracts/src/result/failure-policy.ts',
+    ),
   },
   {
     find: '@memoflow/transport-contracts/result/http',
-    replacement: resolve(import.meta.dirname, '../../packages/transport-contracts/src/result/http.ts'),
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/transport-contracts/src/result/http.ts',
+    ),
   },
   {
     find: '@memoflow/transport-contracts/result/ipc',
-    replacement: resolve(import.meta.dirname, '../../packages/transport-contracts/src/result/ipc.ts'),
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/transport-contracts/src/result/ipc.ts',
+    ),
   },
   {
     find: '@memoflow/transport-contracts/result/public-failure',
-    replacement: resolve(import.meta.dirname, '../../packages/transport-contracts/src/result/public-failure.ts'),
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/transport-contracts/src/result/public-failure.ts',
+    ),
   },
   {
     find: '@memoflow/transport-contracts/result',
-    replacement: resolve(import.meta.dirname, '../../packages/transport-contracts/src/result/index.ts'),
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/transport-contracts/src/result/index.ts',
+    ),
   },
   {
     find: '@memoflow/transport-contracts/context',
@@ -133,7 +157,10 @@ const mainWorkspaceAliasEntries = [
   },
   {
     find: '@memoflow/transport-contracts/execution-context',
-    replacement: resolve(import.meta.dirname, '../../packages/transport-contracts/src/execution-context.ts'),
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/transport-contracts/src/execution-context.ts',
+    ),
   },
   {
     find: '@memoflow/transport-contracts',

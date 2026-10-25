@@ -7,7 +7,9 @@
       "@memoflow/shared-primitives": ["./packages/shared-primitives/src/index.ts"],
       "@memoflow/shared-primitives/*": ["./packages/shared-primitives/src/*.ts"],
       "@memoflow/transport-contracts": ["./packages/transport-contracts/src/index.ts"],
-      "@memoflow/transport-contracts/result": ["./packages/transport-contracts/src/result/index.ts"],
+      "@memoflow/transport-contracts/result": [
+        "./packages/transport-contracts/src/result/index.ts"
+      ],
       "@memoflow/transport-contracts/*": ["./packages/transport-contracts/src/*.ts"],
       "@memoflow/goal-client": ["./packages/goal-client/src/index.ts"],
       "@memoflow/database": ["./packages/database/src/index.ts"],
