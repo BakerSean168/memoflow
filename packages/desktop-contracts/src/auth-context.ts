@@ -1,4 +1,4 @@
-import type { ExecutionContext } from '../shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 
 export type ElectronAuthResolutionCode = 'AUTH_REQUIRED' | 'AUTH_RESTORING';
 
