@@ -22,7 +22,18 @@ const credential = 'Bearer portability-integration';
 beforeEach(async () => {
   await cleanAll();
   const db = await getPrisma();
-  const account = await seedAccount();
+  // Match the provisioned Account shape. The low-level seed helper defaults
+  // to {}, which is not a valid portable AccountProfile (unlike UI signup).
+  const account = await seedAccount({
+    profile: {
+      nickname: 'Portability user',
+      realName: null,
+      avatarUrl: null,
+      bio: null,
+      gender: 'PreferNotToSay',
+      birthday: null,
+    },
+  });
   const auth = createCloudAuthStub();
   auth.resolveNodePrincipal = async (headers) =>
     headers.authorization === credential
@@ -97,7 +108,7 @@ async function callExportAPI(capabilities?: string[]): Promise<ExportResult> {
     .post('/api/v1/data-portability/export')
     .set('authorization', credential)
     .send({ capabilities });
-  expect(response.status).toBe(200);
+  expect(response.status, JSON.stringify(response.body.error)).toBe(200);
   return response.body;
 }
 async function callImportAPI(

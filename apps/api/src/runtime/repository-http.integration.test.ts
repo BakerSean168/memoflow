@@ -56,10 +56,10 @@ describe('Repository HTTP mutation boundary', () => {
     const livePath = '/api/v1/repositories/knowledge-notes';
     expect((await request(app).get(livePath)).status).toBe(401);
     const live = await request(app).get(livePath).set('authorization', credential);
-    // No GitHub App is configured in this lane: the installed route must
-    // return the owner's unavailable receipt, not Express' fallback 404.
-    expect(live.status).toBe(503);
-    expect(live.body.error.code).toBe('SERVICE_UNAVAILABLE');
+    // With no GitHub App, the production list route returns an empty
+    // projection. Connection/write operations have a different 503 contract.
+    expect(live.status, JSON.stringify(live.body.error)).toBe(200);
+    expect(live.body.data).toEqual({ notes: [], total: 0, nextCursor: null });
 
     expect(
       (await request(app).get('/api/v1/repositories/current').set('authorization', credential))
