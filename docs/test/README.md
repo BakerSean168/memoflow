@@ -36,13 +36,13 @@
 - [contract-tests.md](./contract-tests.md)：Web mock handler 契约测试约定
 - [ci-validation.md](./ci-validation.md)：PR 测试拓扑、required checks、本地 clean-source 入口与性能快照
 
-## 覆盖率目标
+## 覆盖率策略
 
-| 层                      | 目标 | 说明                   |
-| ----------------------- | ---- | ---------------------- |
-| Domain（核心业务逻辑）  | 80%  | 必须稳固               |
-| Application（用例编排） | 70%  |                        |
-| 关键路径                | 90%  | 登录、支付、数据同步等 |
+覆盖率是**测量手段，不是门禁**（2026-10-25 起取代旧的 80/70/90 固定百分比目标）：
+
+- PR/Main CI 不做覆盖率仪表化，也不存在因百分比导致的失败。
+- `nightly-audit.yml` 每日独立运行全量 `test:coverage`，上传报告；百分比只用于观察趋势，不因数值失败。
+- 质量仍由测试行为断言与 CI 各 lane 的 fail-closed 保证；不允许以删除真实测试来交换覆盖率数字。
 
 详见 [ADR-013: Standard Testing Strategy](../architecture/adr/ADR-013-standard-testing-strategy.md)。
 
@@ -54,7 +54,7 @@
 
 - 运行测试时统一优先走 `pnpm nx ...`，不要把底层 `vitest` / `playwright` 命令写成主文档入口。
 - `test` 只承担快反馈测试；真实数据库、HTTP 装配、IPC、浏览器流程都应进入专门 target。
-- `test:coverage` 只承担领域质量门禁，不作为默认本地循环命令。
+- `test:coverage` 只承担 Nightly Audit 的覆盖率测量，不作为默认本地循环命令。
 - 文档不再硬编码测试数量、文件数量、历史统计。
 - 具体实现理由应写在对应配置文件、setup 文件、fixture、helper 注释中。
 - 如果文档与代码冲突，以当前 `project.json`、测试配置文件和测试目录为准。

@@ -114,14 +114,9 @@ export async function buildDeliveryManifest({
     risk,
     scope: resolvedScope,
     laneDetails,
-    // Coverage mode: coverage projects run their test:coverage target in the
-    // shards, whose thresholds are defined over each project's full suite —
-    // they must not be file-split and are weighed by their measured coverage
-    // durations (see planUnitShards).
-    unitShards: planUnitShards(shardUnitProjects, {
-      coverage: selectedLanes.coverage === true,
-      unsplittable: selectedLanes.coverage === true ? resolvedScope.coverage : [],
-    }),
+    // Unit shards always run the plain test target; coverage measurement is
+    // nightly-audit-only and never re-weighs or de-splits the CI plan.
+    unitShards: planUnitShards(shardUnitProjects),
     webShards,
     lanes: selectedLanes,
     provenance: buildProvenance({

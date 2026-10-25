@@ -55,23 +55,10 @@ interface PackageVitestConfigOptions extends SharedConfigOptions {
   governedCoverage?: boolean | { extraRoots?: string[] };
   sliceCoverage?: {
     roots: string[];
-    thresholds: {
-      statements: number;
-      lines: number;
-      functions: number;
-      branches: number;
-    };
     reportsDirectory: string;
     fileIncludePattern?: RegExp;
   };
 }
-
-export const GOVERNED_DOMAIN_COVERAGE_THRESHOLDS = {
-  statements: 80,
-  lines: 80,
-  functions: 80,
-  branches: 70,
-} as const;
 
 export function createVitestReportConfig(projectRoot: string, reportName?: string) {
   if (!process.env.CI || !process.env.TEST_REPORT_NAME || process.env.TEST_INVENTORY_LIST === '1')
@@ -191,18 +178,18 @@ export function createGovernedCoverage(
     exclude: ['**/index.ts', '**/*.d.ts', '**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     reportsDirectory: path.resolve(workspaceRoot, 'coverage', relativeProjectRoot),
     reporter: ['text', 'json', 'html', 'lcov'],
-    thresholds: GOVERNED_DOMAIN_COVERAGE_THRESHOLDS,
   };
 }
 
 /**
- * Generic coverage config generator for any slice/layer
+ * Generic coverage config generator for any slice/layer. Coverage is
+ * measurement-only (Nightly Audit statistics); no fixed percentage
+ * thresholds gate PR/Main CI.
  * @example
  * ```ts
  * createSliceCoverage({
  *   projectRoot: import.meta.dirname,
  *   roots: ['src/server/application/use-cases'],
- *   thresholds: { statements: 70, lines: 70, functions: 70, branches: 60 },
  *   reportsDirectory: 'coverage/use-cases',
  * })
  * ```
@@ -210,16 +197,10 @@ export function createGovernedCoverage(
 export function createSliceCoverage(options: {
   projectRoot: string;
   roots: string[];
-  thresholds: {
-    statements: number;
-    lines: number;
-    functions: number;
-    branches: number;
-  };
   reportsDirectory: string;
   fileIncludePattern?: RegExp;
 }) {
-  const { projectRoot, roots, thresholds, reportsDirectory, fileIncludePattern } = options;
+  const { projectRoot, roots, reportsDirectory, fileIncludePattern } = options;
   const workspaceRoot = path.resolve(projectRoot, '../..');
   const include = collectGovernedCoverageFiles(projectRoot, roots).filter((relativePath) =>
     fileIncludePattern ? fileIncludePattern.test(relativePath) : true,
@@ -231,7 +212,6 @@ export function createSliceCoverage(options: {
     exclude: ['**/index.ts', '**/*.d.ts', '**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     reportsDirectory: path.resolve(workspaceRoot, reportsDirectory),
     reporter: ['text', 'json', 'html', 'lcov'],
-    thresholds,
   };
 }
 

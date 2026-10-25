@@ -19,7 +19,7 @@ env:
 
 jobs:
   coverage:
-    name: Coverage Gates
+    name: Coverage Statistics
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -92,7 +92,7 @@ jobs:
           echo "has_target=$([ -n "$selected_projects" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
           echo "projects=$selected_projects" >> "$GITHUB_OUTPUT"
 
-      - name: Run governed coverage gates
+      - name: Run governed coverage statistics
         env:
           NODE_OPTIONS: --require=${{ github.workspace }}/tools/ci/node-process-bootstrap.cjs
           DELIVERY_LANE: coverage

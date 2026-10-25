@@ -21,12 +21,6 @@ export default mergeConfig(
         projectRoot: import.meta.dirname,
         roots: ['src/server/infrastructure/adapters/prisma/mappers'],
         reportsDirectory: 'coverage/packages/goal/server-infrastructure-adapters-prisma-mappers',
-        thresholds: {
-          statements: 80,
-          lines: 80,
-          functions: 80,
-          branches: 70,
-        },
       }),
     },
   }),

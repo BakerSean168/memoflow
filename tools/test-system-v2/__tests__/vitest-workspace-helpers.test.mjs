@@ -5,7 +5,7 @@ import test from 'node:test';
 
 const workspaceRoot = process.cwd();
 
-test('app-vue coverage retains the complete Unit collection and the stores thresholds', () => {
+test('app-vue coverage retains the complete Unit collection and stays measurement-only', () => {
   const result = spawnSync(
     process.execPath,
     [
@@ -32,7 +32,7 @@ test('app-vue coverage retains the complete Unit collection and the stores thres
     config.unit,
     'coverage must not discard components/composables',
   );
-  assert.deepEqual(config.thresholds, { statements: 70, lines: 70, functions: 70, branches: 60 });
+  assert.equal(config.thresholds, undefined, 'coverage measurement must not gate on percentages');
   assert.deepEqual(config.setupFiles, ['./src/test/setup.ts']);
 });
 

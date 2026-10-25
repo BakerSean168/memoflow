@@ -183,7 +183,6 @@ flowchart LR
   scope --> boundary["Boundary Children"]
   scope --> integration["Integration Children"]
   scope --> web["Web Flow Shards"]
-  scope --> coverage["Affected Coverage"]
   scope --> perf["Performance Budget"]
 
   governance --> governanceOracle["Governance Oracle"]
@@ -194,7 +193,6 @@ flowchart LR
   boundary --> boundaryOracle["Boundary Oracle"]
   integration --> integrationOracle["Integration Oracle"]
   web --> webOracle["Web Flow Oracle"]
-  coverage --> coverageOracle["Coverage Oracle"]
   perf --> perfOracle["Performance Oracle"]
 ```
 
@@ -292,20 +290,14 @@ Oracle job 使用 `if: always()`，不得因为 dependency skipped 而自身消�
 
 ## 9. Coverage 模型
 
-### PR affected coverage
+### Coverage 测量模型（2026-10-25 起）
 
-- 只运行 affected 且受 coverage governance 的项目。
-- Domain、application use case、store 和 Prisma mapper 各自保留明确 threshold。
-- `Coverage Oracle` 在没有相关项目时合法成功，在有项目但任一 gate 失败时失败。
+- PR/Main CI 不运行 `test:coverage`，也不存在 `Coverage Oracle`；旧 merged-coverage 期望已删除。
+- Nightly audit（`nightly-audit.yml`）每日（及手工）运行全部受治理项目的 `test:coverage`，只测量并上传报告。
+- 用于发现 Nx affected、项目 tags、target capability 或 inputs 配置漏检；保存 machine-readable summary，跟踪项目数量和跳过原因。
+- 测试行为失败仍 fail closed；百分比只用于观察回归趋势，不作为门禁。
 
-### Full coverage audit
-
-- nightly 和手工触发运行全部受治理项目。
-- 用于发现 Nx affected、项目 tags、target capability 或 inputs 配置漏检。
-- 保存 machine-readable summary，跟踪 threshold、项目数量和跳过原因。
-
-Coverage 不追求仓库统一百分比；门禁按业务风险和受治理子树定义。阈值变化需要显式评审，不能通过
-排除新增源码静默维持数字。
+Coverage 不追求仓库统一百分比，也不再有按子树的固定 threshold；不允许通过删除真实测试交换覆盖率数字。
 
 ## 10. 性能模型
 
@@ -395,7 +387,7 @@ V2 首次切换验收预算：
 - 普通 affected PR 比当前同范围基线更快，不能仅依赖更多 runners。
 - 完整 affected PR 首阶段目标 7–8 分钟；Web shard 平衡后再评估 6 分钟级目标。
 - 完整 affected runner-minutes 不高于当前约 42.3 分钟。
-- coverage regression 在合并前失败。
+- coverage 回归由 nightly audit 的测量报告观察，不再以百分比在合并前失败。
 - required Oracle 无法通过直接 push 或 disabled ruleset 绕过。
 - assertion、infrastructure、crash、flaky 和 timeout 在 summary 中可区分。
 

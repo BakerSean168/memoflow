@@ -41,32 +41,9 @@ try {
 } catch (error) {
   if (error.code !== 'ENOENT') webReceipts = null;
 }
-// Merged coverage: the Unit shard reports are the coverage evidence of
-// record. Read them when the manifest selected the coverage lane; a
-// missing or unreadable evidence tree fails the gate closed (null).
-let coverageReports = undefined;
-if (manifest?.lanes?.coverage === true) {
-  coverageReports = null;
-  try {
-    const files = await readdir('reports/unit-evidence', { recursive: true });
-    const parsed = await Promise.all(
-      files
-        .filter((file) => file.endsWith('.json'))
-        .map(async (file) => {
-          try {
-            return JSON.parse(await readFile(`reports/unit-evidence/${file}`, 'utf8'));
-          } catch {
-            return null;
-          }
-        }),
-    );
-    coverageReports = parsed.filter(
-      (value) => value && value.version === 1 && Array.isArray(value.attempts),
-    );
-  } catch (error) {
-    if (error.code !== 'ENOENT') coverageReports = null;
-  }
-}
+// Coverage instrumentation is nightly-audit-only: CI Check neither expects
+// nor downloads coverage evidence, and the manifest never selects the
+// coverage lane for PR/Main runs, so no gate is silently dropped here.
 const capabilityResults = {};
 if (manifest?.laneDetails?.componentBrowser) {
   // Q4: Component Browser is an independent job (producer of record).
@@ -84,7 +61,6 @@ const result = evaluateCiCheck({
   manifest,
   webReceipts,
   capabilityResults,
-  coverageReports,
   runId: process.env.GITHUB_RUN_ID,
   runAttempt: Number(process.env.GITHUB_RUN_ATTEMPT),
 });

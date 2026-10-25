@@ -77,7 +77,7 @@ test('validates a delivery manifest and gives deterministic provenance', () => {
   assert.match(manifest.provenance.inputDigest, /^[a-f0-9]{64}$/u);
 });
 
-test('manifest validation mirrors the coverage-mode app-vue split rule', () => {
+test('manifest validation mirrors the always-on app-vue split rule', () => {
   const coverageScope = { ...scope, unit: ['app-vue', 'web'], coverage: ['app-vue'] };
   const buildManifest = (unitShards) => {
     const manifest = {
@@ -97,6 +97,7 @@ test('manifest validation mirrors the coverage-mode app-vue split rule', () => {
         boundary: false,
         integration: false,
         web: false,
+        // Nightly-audit forced lane: measurement never de-splits the Unit plan.
         coverage: true,
         performance: false,
       },
@@ -107,16 +108,19 @@ test('manifest validation mirrors the coverage-mode app-vue split rule', () => {
     manifest.digest = digest(manifest);
     return manifest;
   };
-  // Coverage mode: app-vue must appear exactly once, unsplit.
-  validateDeliveryManifest(
-    buildManifest(
-      planUnitShards(coverageScope.unit, { coverage: true, unsplittable: ['app-vue'] }),
-    ),
-  );
-  // The split plan is a contract violation in coverage mode.
+  // app-vue is file-split even when the coverage lane is forced.
+  validateDeliveryManifest(buildManifest(planUnitShards(coverageScope.unit)));
+  // An unsplit app-vue task set is a contract violation.
   assert.throws(
-    () => validateDeliveryManifest(buildManifest(planUnitShards(coverageScope.unit))),
-    /cover every Unit task exactly once/,
+    () =>
+      validateDeliveryManifest(
+        buildManifest([
+          { id: 'unit-1', tasks: [{ project: 'app-vue' }, { project: 'web' }] },
+          { id: 'unit-2', tasks: [] },
+          { id: 'unit-3', tasks: [] },
+        ]),
+      ),
+    /cover every Unit task exactly once/u,
   );
 });
 

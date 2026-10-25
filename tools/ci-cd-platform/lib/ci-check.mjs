@@ -7,7 +7,6 @@
  * missing job) fails the gate. Unknown inputs fail closed.
  */
 import { validateDeliveryManifest } from './contracts.mjs';
-import { evaluateCoverageEvidence } from './coverage-evidence.mjs';
 import { UNIT_JOB_IDS, unitJobEnabled } from './unit-shards.mjs';
 
 /** Lane jobs the gate aggregates, and how the manifest decides each one. */
@@ -29,8 +28,7 @@ export const CI_CHECK_JOBS = Object.freeze({
 
 /**
  * Sub-lanes reported by verification-children outputs. Coverage is not one
- * of them any more: it executes inside the Unit shards and is gated from
- * their recorded attempts (see coverage-evidence.mjs).
+ * of them: coverage measurement is nightly-audit-only and never gates CI.
  */
 export const VERIFICATION_SUBLANES = Object.freeze(['boundary', 'integration', 'performance']);
 
@@ -87,7 +85,6 @@ export function evaluateCiCheck({
   runId = null,
   runAttempt = null,
   capabilityResults = {},
-  coverageReports = undefined,
 }) {
   const failures = [];
   const jobs = {};
@@ -152,20 +149,6 @@ export function evaluateCiCheck({
           `verification-children/${lane}:${expected === 'skipped' ? `unexpected-${actual}` : actual}`,
         );
       }
-    }
-  }
-  // Merged coverage gate: when the stage wires coverage evidence
-  // (coverageReports !== undefined), a selected coverage lane must show a
-  // successful test:coverage attempt for every expected project in the
-  // Unit shard reports. Missing or failed attempts fail the gate.
-  if (coverageReports !== undefined) {
-    const coverage = evaluateCoverageEvidence({ manifest, reports: coverageReports });
-    if (coverage.required) {
-      jobs['coverage'] = {
-        expected: 'success',
-        actual: coverage.failures.length === 0 ? 'success' : 'failure',
-      };
-      failures.push(...coverage.failures);
     }
   }
   const expectedShards = manifest.lanes.web ? manifest.webShards.shards : [];

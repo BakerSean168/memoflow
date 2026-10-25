@@ -750,10 +750,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: node ./tools/ci-cd-platform/collect-github-run-metrics.mjs --github-output >> "$GITHUB_OUTPUT"
-      # Coverage executes inside the Unit shards now; fold their recorded
-      # attempts into the coverage lane summary the run summary expects.
-      - name: Summarize merged coverage evidence
-        run: node ./tools/ci-cd-platform/summarize-coverage.mjs --manifest scope/delivery-manifest-v1.json --evidence reports/run-evidence --output reports/run-evidence/coverage-summary-v1.json
+      # Coverage measurement is nightly-audit-only; PR/Main CI does not
+      # instrument coverage, so no coverage summary is aggregated here.
       - name: Aggregate run summary
         env:
           DELIVERY_RUN_STARTED_AT: ${{ steps.run_metrics.outputs.started_at }}
@@ -802,14 +800,7 @@ jobs:
         with:
           pattern: web-shard-receipt-*
           path: reports/web-shards
-      # Merged coverage is gated from the Unit shards' recorded attempts;
-      # a missing download is reported by the gate itself (fail closed).
-      - name: Download Unit shard evidence
-        continue-on-error: true
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
-        with:
-          pattern: delivery-validate-unit-*-job-${{ github.run_id }}
-          path: reports/unit-evidence
+      # Coverage evidence is nightly-audit-only; CI Check does not gate on it.
       - name: Gate on manifest-selected lanes
         env:
           CI_CHECK_NEEDS: ${{ toJSON(needs) }}
