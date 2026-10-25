@@ -218,6 +218,17 @@ const ipcWorkspaceAliasEntries = [
     replacement: resolve(import.meta.dirname, '../../packages/desktop-contracts/src/index.ts'),
   },
   {
+    find: '@memoflow/host-runtime/electron-ipc',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/host-runtime/src/electron-ipc/index.ts',
+    ),
+  },
+  {
+    find: '@memoflow/host-runtime',
+    replacement: resolve(import.meta.dirname, '../../packages/host-runtime/src/index.ts'),
+  },
+  {
     find: '@memoflow/goal/electron',
     replacement: resolve(import.meta.dirname, '../../packages/goal/src/electron/index.ts'),
   },

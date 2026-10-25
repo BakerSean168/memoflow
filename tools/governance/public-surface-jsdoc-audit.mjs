@@ -44,7 +44,7 @@ const FEATURE_MODULES = [
 ].map((pkg) => `packages/${pkg}/src/api/module.ts`);
 
 const DEFAULT_PATHS = [
-  'packages/contracts/src/shared/server-module-context.ts',
+  'packages/host-runtime/src/server-module-context.ts',
   'apps/api/src/shared/infrastructure/observability/http-request-observation.ts',
   'apps/api/src/shared/infrastructure/observability/http-request-metrics.ts',
   'apps/api/src/shared/infrastructure/observability/http-request-trace.ts',

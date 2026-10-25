@@ -6586,14 +6586,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/electron/authenticated-ipc.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/contracts/src/modules/account/api/account-birthday-ymd.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -8692,6 +8684,14 @@
       "measurementCollectors": [
         "packages/goal/vitest.config.ts"
       ]
+    },
+    {
+      "path": "packages/host-runtime/src/electron-ipc/authenticated-ipc.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/host-runtime/vitest.config.ts"
+      ],
+      "measurementCollectors": []
     },
     {
       "path": "packages/http-client/src/__tests__/email-verification-circuit.test.ts",
@@ -12943,7 +12943,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 75
+      "fileCount": 74
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -12993,6 +12993,13 @@
       "suite": "unit",
       "runner": "vitest",
       "fileCount": 97
+    },
+    {
+      "id": "packages/host-runtime/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 1
     },
     {
       "id": "packages/http-client/vitest.config.ts",
