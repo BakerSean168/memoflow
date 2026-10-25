@@ -50,20 +50,34 @@ function githubFixture(overrides = {}) {
     comparison: AHEAD,
     tagSha: SHA_PREVIOUS,
     version: '0.22.1',
+    rootVersion: '0.22.1',
+    manifestVersion: '0.22.1',
+    finalMainSha: SHA_MAIN,
     ...overrides,
   };
   const calls = [];
+  let branchReads = 0;
   const github = {
     rest: {
       repos: {
-        getBranch: async () => ({ data: { commit: { sha: values.mainSha } } }),
-        listReleases: () => {},
-        getContent: async () => ({
-          data: {
-            encoding: 'base64',
-            content: Buffer.from(JSON.stringify({ version: values.version })).toString('base64'),
-          },
+        getBranch: async () => ({
+          data: { commit: { sha: ++branchReads === 1 ? values.mainSha : values.finalMainSha } },
         }),
+        listReleases: () => {},
+        getContent: async ({ path }) => {
+          const contents = {
+            'apps/desktop/package.json': { version: values.version },
+            'package.json': { version: values.rootVersion },
+            '.release-please-manifest.json': { '.': values.manifestVersion },
+          };
+          if (!Object.hasOwn(contents, path)) throw new Error('unexpected version metadata path');
+          return {
+            data: {
+              encoding: 'base64',
+              content: Buffer.from(JSON.stringify(contents[path])).toString('base64'),
+            },
+          };
+        },
         compareCommits: async () => ({ data: values.comparison }),
       },
       actions: { listWorkflowRuns: () => {}, listJobsForWorkflowRun: () => {} },
@@ -263,13 +277,34 @@ test('API failures and tag collisions abort rather than declaring eligibility', 
     /publication time/u,
   );
   await assert.rejects(
-    () => resolve({ version: '0.22.1-nightly.2' }),
+    () =>
+      resolve({
+        version: '0.22.1-nightly.2',
+        rootVersion: '0.22.1-nightly.2',
+        manifestVersion: '0.22.1-nightly.2',
+      }),
     /unexpected desktop version/u,
   );
   await assert.rejects(
     () => resolve({ releases: [rawRelease({ tag_name: 'v0.22.2-nightly.20261025.198' })] }),
     /tag already exists/u,
   );
+});
+
+test('Nightly release refuses version drift across Desktop, root and Release Please', async () => {
+  for (const mismatch of [{ rootVersion: '0.22.3' }, { manifestVersion: '0.22.0' }]) {
+    await assert.rejects(() => resolve(mismatch), /release version drift/u);
+  }
+});
+
+test('Nightly release checks main again and rejects a mid-flight HEAD advance', async () => {
+  const outcome = await resolve({ finalMainSha: SHA_PREVIOUS });
+  assert.deepEqual(outcome, {
+    eligible: false,
+    reason: 'main_advanced_during_check',
+    mainSha: SHA_MAIN,
+    ciRunId: 1234,
+  });
 });
 
 test('workflow checks eligibility without installing repository dependencies or performing mutation', async () => {

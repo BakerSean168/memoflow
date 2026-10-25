@@ -203,25 +203,53 @@ async function resolveNightlyEligibility({
   if (!decision.eligible) {
     return { ...decision, mainSha, ciRunId: verifiedCi.id, lastNightlyTag: last?.tag ?? null };
   }
-  const metadata = data(
-    await github.rest.repos.getContent({
-      owner,
-      repo,
-      path: 'apps/desktop/package.json',
-      ref: mainSha,
-    }),
-    'Desktop package metadata',
-  );
-  if (metadata?.encoding !== 'base64' || typeof metadata.content !== 'string') {
-    throw new Error('Desktop package metadata cannot be decoded');
+  async function readVersionFile(path) {
+    const metadata = data(
+      await github.rest.repos.getContent({ owner, repo, path, ref: mainSha }),
+      path + ' metadata',
+    );
+    if (metadata?.encoding !== 'base64' || typeof metadata.content !== 'string') {
+      throw new Error(path + ' metadata cannot be decoded');
+    }
+    return JSON.parse(
+      Buffer.from(metadata.content.replaceAll('\n', ''), 'base64').toString('utf8'),
+    );
   }
-  const desktop = JSON.parse(
-    Buffer.from(metadata.content.replaceAll('\n', ''), 'base64').toString('utf8'),
-  );
+
+  // Release Please maintains these three identities; a Nightly must never
+  // become a new version of one package while the others describe older code.
+  const [desktop, rootPackage, releaseManifest] = await Promise.all([
+    readVersionFile('apps/desktop/package.json'),
+    readVersionFile('package.json'),
+    readVersionFile('.release-please-manifest.json'),
+  ]);
+  if (
+    typeof desktop.version !== 'string' ||
+    desktop.version !== rootPackage?.version ||
+    desktop.version !== releaseManifest?.['.']
+  ) {
+    throw new Error('release version drift between Desktop, root package and Release Please');
+  }
   const tag = makeNightlyTag(desktop.version, now, runNumber);
   if (releases.some((release) => release.tag_name === tag)) {
     throw new Error('Nightly release tag already exists: ' + tag);
   }
+
+  // The scheduled event can be delayed. Fail closed if main moves while GitHub
+  // API evidence is being collected, before exposing an eligible release SHA.
+  const mainAtCommit = data(
+    await github.rest.repos.getBranch({ owner, repo, branch: 'main' }),
+    'main final',
+  );
+  if (assertSha(mainAtCommit?.commit?.sha, 'main final') !== mainSha) {
+    return {
+      eligible: false,
+      reason: 'main_advanced_during_check',
+      mainSha,
+      ciRunId: verifiedCi.id,
+    };
+  }
+
   return {
     ...decision,
     mainSha,

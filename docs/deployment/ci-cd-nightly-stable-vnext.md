@@ -61,7 +61,7 @@ Nightly Audit 是扩展测试，不等于 Nightly Release；Main CI 成功也不
 - 始终从 GitHub API 获取 main 当前 HEAD SHA，且要求该 SHA 的 push/main CI 已成功，具体 CI Check Job 为成功。过期 commit、PR 事件、单个任务绿灯都不够。
 - 找最近的已发布 Nightly prerelease（标记为 vX.Y.Z-nightly.YYYYMMDD.RUN），忽略草稿、Stable 和其他 prerelease；若 SHA 相同，跳过；若祖先关系不成立，禁止生成。
 - 新 main 必须严格比该 Nightly 有更新提交，且距上次 Nightly 发布至少 6 小时；没有任何 Nightly 时允许首发，但必须有完整 Main CI。
-- API、SHA、Tag、发布时间、版本号等不可信或缺失时失败封闭，不得以未找到结果解释为成功。
+- API、SHA、Tag、发布时间、版本号等不可信或缺失时失败封闭，不得以未找到结果解释为成功。资格判定必须对同一个 main SHA 的根 package、Desktop package、Release Please manifest 做版本一致性校验，并在完成检查后再次确认 main HEAD 未变化；正式发布前还要重新校验以避免检查与构建之间的竞态。
 - 通过 Actions concurrency 序列化定时与人工重试，运行中不取消旧发布。Fast skip 不安装 pnpm、Node 依赖或 Docker。
 
 ## Nightly 到 Stable：产物契约
