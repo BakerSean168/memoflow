@@ -34,14 +34,14 @@ jobs:
         with:
           fetch-depth: 1
           persist-credentials: false
-          sparse-checkout: .github/scripts
+          sparse-checkout: tools/ci-cd-platform/lib
 
       - name: Evaluate exact-SHA main CI and Nightly gap
         id: check
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         with:
           script: |
-            const { resolveNightlyEligibility } = require('./.github/scripts/nightly-eligibility.cjs');
+            const { resolveNightlyEligibility } = require('./tools/ci-cd-platform/lib/nightly-eligibility.cjs');
             const result = await resolveNightlyEligibility({
               github,
               owner: context.repo.owner,

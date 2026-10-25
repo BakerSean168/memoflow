@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
-import nightly from '../../../.github/scripts/nightly-eligibility.cjs';
+import nightly from '../lib/nightly-eligibility.cjs';
 
 const SHA_MAIN = 'a'.repeat(40);
 const SHA_PREVIOUS = 'b'.repeat(40);

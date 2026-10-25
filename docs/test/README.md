@@ -48,7 +48,7 @@
 
 ## 测试目录约定
 
-新代码优先使用与源码同目录的 `*.test.ts` / `*.spec.ts`。已有的 `__tests__/` 子目录继续保留，不要求迁移。两种方式均受 eslint module-boundaries 豁免。
+新代码优先使用与源码同目录的 `*.test.ts` / `*.spec.ts`。已有的 `__tests__/` 子目录继续保留，不要求迁移。两种方式都仍受 `@nx/enforce-module-boundaries` 约束：豁免仅限根配置 `moduleBoundaryOptions.allow` 中的 `@memoflow/test-utils`，测试不能以相对路径导入其他 Nx 项目根之外的文件。
 
 ## 使用原则
 
