@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { safeStorage } from 'electron';
+import { WindowsUserDpapiProvider } from './wsl-dpapi';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ElectronProfileKeyStore } from './profile-key-store';
 
@@ -12,12 +13,14 @@ describe('ElectronProfileKeyStore', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    vi.spyOn(WindowsUserDpapiProvider.prototype, 'isAvailable').mockReturnValue(false);
     isEncryptionAvailable.mockReturnValue(true);
     getSelectedStorageBackend.mockReturnValue('gnome_libsecret');
     rootDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'profile-key-store-'));
   });
 
   afterEach(async () => {
+    vi.restoreAllMocks();
     await fs.promises.rm(rootDir, { recursive: true, force: true });
   });
 

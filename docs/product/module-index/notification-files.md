@@ -117,7 +117,7 @@ updated: 2026-09-17T17:28:00+08:00
 | [`packages/notification/src/server/application/use-cases/queries/__tests__/get-unread-notifications.test.ts`](../../../packages/notification/src/server/application/use-cases/queries/__tests__/get-unread-notifications.test.ts)     | 未读通知查询测试                |
 | [`packages/notification/src/api/routes.spec.ts`](../../../packages/notification/src/api/routes.spec.ts)                                                                                                                               | 通知 routes 测试                |
 | [`packages/app-vue/src/modules/notification/stores/notificationStore.spec.ts`](../../../packages/app-vue/src/modules/notification/stores/notificationStore.spec.ts)                                                                   | 通知 store 测试                 |
-| [`apps/web/e2e/notification/notification-center.spec.ts`](../../../apps/web/e2e/notification/notification-center.spec.ts)                                                                                                             | Web 通知中心 e2e                |
+| [`packages/app-vue/src/modules/notification/views/NotificationListPage.spec.ts`](../../../packages/app-vue/src/modules/notification/views/NotificationListPage.spec.ts)                                                               | 通知页面筛选、点击与计数 Unit   |
 
 ## 需要重点关注的改动风险
 

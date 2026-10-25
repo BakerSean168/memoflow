@@ -121,7 +121,7 @@ updated: 2026-09-29T11:38:00+08:00
 | [`packages/contracts/src/modules/goal/value-objects/goal-timeframe.spec.ts`](../../../packages/contracts/src/modules/goal/value-objects/goal-timeframe.spec.ts)                                           | GoalTimeframe 精度、边界、排序、past-target 与 label 测试 |
 | [`packages/app-vue/src/modules/goal/stores/goalStore.spec.ts`](../../../packages/app-vue/src/modules/goal/stores/goalStore.spec.ts)                                                                       | 目标 store 测试                                           |
 | [`packages/app-vue/src/modules/goal/index.spec.ts`](../../../packages/app-vue/src/modules/goal/index.spec.ts)                                                                                             | 前端目标模块入口测试                                      |
-| [`apps/web/e2e/goal/goal-crud.spec.ts`](../../../apps/web/e2e/goal/goal-crud.spec.ts)                                                                                                                     | Web 目标 CRUD 与关键结果创建/编辑 e2e                     |
+| [`apps/api/src/runtime/goal-task-http.integration.test.ts`](../../../apps/api/src/runtime/goal-task-http.integration.test.ts)                                                                             | 目标/任务生产 HTTP 契约与持久化集成                       |
 | [`apps/web/e2e/sync/goal-sync-regression.spec.ts`](../../../apps/web/e2e/sync/goal-sync-regression.spec.ts)                                                                                               | 目标同步回归 e2e                                          |
 
 ## 需要重点关注的改动风险
