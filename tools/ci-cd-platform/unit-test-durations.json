@@ -297,6 +297,30 @@
         "web"
       ],
       "workloadKind": "full-audit"
+    },
+    {
+      "runId": 40163045719,
+      "event": "workflow_dispatch",
+      "unitSeconds": 240.0,
+      "ciSeconds": 660.0,
+      "runnerMinutes": 55.0,
+      "projects": [
+        "goal",
+        "task",
+        "ai",
+        "notification",
+        "reminder",
+        "account",
+        "schedule",
+        "api",
+        "app-vue",
+        "setting",
+        "scheduler",
+        "domain-shared",
+        "data-portability"
+      ],
+      "workloadKind": "observed-full-coverage",
+      "note": "First merged-coverage run: per-task wall seconds of <project>:test:coverage from run-command summaries seed coverageRanking (single observation each). app-vue halves (2.9s + 5.2s, threshold-failed when file-sharded) sum to the 8.1s whole-suite estimate; app-vue is unsplittable in coverage mode. Unit jobs 2/3 failed on the app-vue threshold split; all other coverage tasks succeeded."
     }
   ],
   "ranking": [
@@ -2767,5 +2791,59 @@
       "hit": true
     }
   ],
-  "unmeasuredProjects": ["assets", "migrator", "powersync-schema", "ui-core"]
+  "unmeasuredProjects": ["assets", "migrator", "powersync-schema", "ui-core"],
+  "coverageRanking": [
+    {
+      "project": "goal",
+      "p50Seconds": 68.4
+    },
+    {
+      "project": "task",
+      "p50Seconds": 58.0
+    },
+    {
+      "project": "ai",
+      "p50Seconds": 32.2
+    },
+    {
+      "project": "notification",
+      "p50Seconds": 26.6
+    },
+    {
+      "project": "reminder",
+      "p50Seconds": 15.7
+    },
+    {
+      "project": "account",
+      "p50Seconds": 15.2
+    },
+    {
+      "project": "schedule",
+      "p50Seconds": 9.6
+    },
+    {
+      "project": "api",
+      "p50Seconds": 8.4
+    },
+    {
+      "project": "app-vue",
+      "p50Seconds": 8.1
+    },
+    {
+      "project": "setting",
+      "p50Seconds": 7.4
+    },
+    {
+      "project": "scheduler",
+      "p50Seconds": 3.4
+    },
+    {
+      "project": "domain-shared",
+      "p50Seconds": 3.4
+    },
+    {
+      "project": "data-portability",
+      "p50Seconds": 3.2
+    }
+  ]
 }

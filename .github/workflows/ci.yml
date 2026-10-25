@@ -393,13 +393,11 @@ jobs:
       needs.scope-detector.result == 'success' &&
       (needs.scope-detector.outputs.lane_boundary == 'true' ||
        needs.scope-detector.outputs.lane_integration == 'true' ||
-       needs.scope-detector.outputs.lane_coverage == 'true' ||
        needs.scope-detector.outputs.lane_performance == 'true')
     runs-on: ubuntu-latest
     outputs:
       boundary: ${{ steps.lane_status.outputs.boundary }}
       integration: ${{ steps.lane_status.outputs.integration }}
-      coverage: ${{ steps.lane_status.outputs.coverage }}
       performance: ${{ steps.lane_status.outputs.performance }}
     services:
       postgres:
@@ -423,10 +421,17 @@ jobs:
       - name: Prepare independent lane contracts on the shared runner
         run: >-
           node ./tools/ci-cd-platform/prepare-shared-lanes.mjs
-          --lanes boundary,integration,coverage,performance
+          --lanes boundary,integration,performance
           --manifest scope/delivery-manifest-v1.json
           --receipt reports/ci-cd-platform/workspace-receipt.json
           --output reports/ci-cd-platform
+      # One schema push per job: Boundary and Integration share this
+      # runner's PostgreSQL and schema; pushing again per lane was a
+      # measured 7s of pure repetition.
+      - name: Prepare database schema (once for all verification lanes)
+        if: needs.scope-detector.outputs.lane_boundary == 'true' || needs.scope-detector.outputs.lane_integration == 'true'
+        env: { TEST_REPORT_NAME: verification-database }
+        run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run database:prisma-push
       - name: Boundary children
         id: boundary
         if: needs.scope-detector.outputs.has_desktop_boundary == 'true'
@@ -436,7 +441,6 @@ jobs:
           LANE_INPUT_PATH: reports/ci-cd-platform/boundary-input-v1.json
         run: |
           status=0
-          TEST_REPORT_NAME=boundary-database node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run database:prisma-push || status=$?
           TEST_REPORT_NAME=desktop-ipc node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run desktop:test:ipc || status=$?
           TEST_REPORT_NAME=desktop-main node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run desktop:test:main || status=$?
           if [ "${{ needs.scope-detector.outputs.has_smoke }}" = 'true' ]; then
@@ -452,7 +456,6 @@ jobs:
           LANE_INPUT_PATH: reports/ci-cd-platform/boundary-input-v1.json
         run: |
           status=0
-          TEST_REPORT_NAME=boundary-database node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run database:prisma-push || status=$?
           if [ "${{ needs.scope-detector.outputs.has_smoke }}" = 'true' ]; then
             TEST_REPORT_NAME=smoke node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx affected -t test:smoke --parallel=2 --outputStyle=static || status=$?
           fi
@@ -466,18 +469,8 @@ jobs:
           LANE_INPUT_PATH: reports/ci-cd-platform/integration-input-v1.json
         run: |
           status=0
-          TEST_REPORT_NAME=integration-database node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run database:prisma-push || status=$?
           TEST_REPORT_NAME=integration node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx affected -t test:integration --parallel=1 --outputStyle=static || status=$?
           exit "$status"
-      - name: Affected coverage
-        id: coverage
-        if: needs.scope-detector.outputs.lane_coverage == 'true'
-        continue-on-error: true
-        env:
-          DELIVERY_LANE: coverage
-          LANE_INPUT_PATH: reports/ci-cd-platform/coverage-input-v1.json
-          TEST_REPORT_NAME: coverage
-        run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx affected -t test:coverage --parallel=2 --outputStyle=static
       - name: Performance budget
         id: performance
         if: needs.scope-detector.outputs.lane_performance == 'true'
@@ -498,11 +491,6 @@ jobs:
           lane: integration
           receipt: reports/ci-cd-platform/integration-workspace-receipt.json
       - uses: ./.github/actions/publish-lane-evidence
-        if: always() && needs.scope-detector.outputs.lane_coverage == 'true'
-        with:
-          lane: coverage
-          receipt: reports/ci-cd-platform/coverage-workspace-receipt.json
-      - uses: ./.github/actions/publish-lane-evidence
         if: always() && needs.scope-detector.outputs.lane_performance == 'true'
         with:
           lane: performance
@@ -514,14 +502,12 @@ jobs:
         run: |
           echo "boundary=${{ needs.scope-detector.outputs.lane_boundary == 'true' && (steps.boundary.outcome == 'success' || steps.boundary_smoke.outcome == 'success') && 'success' || needs.scope-detector.outputs.lane_boundary == 'true' && 'failure' || 'skipped' }}" >> "$GITHUB_OUTPUT"
           echo "integration=${{ needs.scope-detector.outputs.lane_integration == 'true' && steps.integration.outcome == 'success' && 'success' || needs.scope-detector.outputs.lane_integration == 'true' && 'failure' || 'skipped' }}" >> "$GITHUB_OUTPUT"
-          echo "coverage=${{ needs.scope-detector.outputs.lane_coverage == 'true' && steps.coverage.outcome == 'success' && 'success' || needs.scope-detector.outputs.lane_coverage == 'true' && 'failure' || 'skipped' }}" >> "$GITHUB_OUTPUT"
           echo "performance=${{ needs.scope-detector.outputs.lane_performance == 'true' && steps.performance.outcome == 'success' && 'success' || needs.scope-detector.outputs.lane_performance == 'true' && 'failure' || 'skipped' }}" >> "$GITHUB_OUTPUT"
       - name: Fail closed when an enabled lane failed
         if: >-
           always() &&
           ((needs.scope-detector.outputs.lane_boundary == 'true' && steps.lane_status.outputs.boundary != 'success') ||
            (needs.scope-detector.outputs.lane_integration == 'true' && steps.lane_status.outputs.integration != 'success') ||
-           (needs.scope-detector.outputs.lane_coverage == 'true' && steps.lane_status.outputs.coverage != 'success') ||
            (needs.scope-detector.outputs.lane_performance == 'true' && steps.lane_status.outputs.performance != 'success'))
         run: exit 1
 
@@ -708,6 +694,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: node ./tools/ci-cd-platform/collect-github-run-metrics.mjs --github-output >> "$GITHUB_OUTPUT"
+      # Coverage executes inside the Unit shards now; fold their recorded
+      # attempts into the coverage lane summary the run summary expects.
+      - name: Summarize merged coverage evidence
+        run: node ./tools/ci-cd-platform/summarize-coverage.mjs --manifest scope/delivery-manifest-v1.json --evidence reports/run-evidence --output reports/run-evidence/coverage-summary-v1.json
       - name: Aggregate run summary
         env:
           DELIVERY_RUN_STARTED_AT: ${{ steps.run_metrics.outputs.started_at }}
@@ -755,6 +745,14 @@ jobs:
         with:
           pattern: web-shard-receipt-*
           path: reports/web-shards
+      # Merged coverage is gated from the Unit shards' recorded attempts;
+      # a missing download is reported by the gate itself (fail closed).
+      - name: Download Unit shard evidence
+        continue-on-error: true
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          pattern: delivery-validate-unit-*-job-${{ github.run_id }}
+          path: reports/unit-evidence
       - name: Gate on manifest-selected lanes
         env:
           CI_CHECK_NEEDS: ${{ toJSON(needs) }}
