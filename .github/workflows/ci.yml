@@ -25,6 +25,13 @@ env:
   NX_LEGACY_AFFECTED: 'false'
 
 jobs:
+# Checkout depth policy:
+# - scope-detector / affected-shadow compute the base...head range themselves: full history.
+# - Manifest-consuming jobs only need the two range endpoints as objects (the shared setup
+#   verifies NX_BASE/NX_HEAD with git rev-parse, and nx affected / fmt --changed diff those
+#   endpoints): fetch-depth 2 = the merge commit plus its parents, which are exactly the
+#   manifest head and base for both pull_request and push events.
+# - Aggregation-only jobs (delivery-observation, ci-check) sparse-checkout tools/ci-cd-platform.
   scope-detector:
     name: Scope Detector
     runs-on: ubuntu-latest
@@ -122,7 +129,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with: { fetch-depth: 0 }
+        with: { fetch-depth: 2 }
       - uses: ./.github/actions/setup-nx-affected-job
         with:
           node-version: '${{ env.NODE_VERSION }}'
@@ -166,7 +173,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with: { fetch-depth: 0 }
+        with: { fetch-depth: 2 }
       - uses: ./.github/actions/setup-nx-affected-job
         with:
           node-version: '${{ env.NODE_VERSION }}'
@@ -187,7 +194,7 @@ jobs:
     env: { UNIT_SHARD_ID: unit-1 }
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with: { fetch-depth: 0 }
+        with: { fetch-depth: 2 }
       - uses: ./.github/actions/setup-nx-affected-job
         with:
           node-version: '${{ env.NODE_VERSION }}'
@@ -209,7 +216,7 @@ jobs:
     env: { UNIT_SHARD_ID: unit-2 }
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with: { fetch-depth: 0 }
+        with: { fetch-depth: 2 }
       - uses: ./.github/actions/setup-nx-affected-job
         with:
           node-version: '${{ env.NODE_VERSION }}'
@@ -231,7 +238,7 @@ jobs:
     env: { UNIT_SHARD_ID: unit-3 }
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with: { fetch-depth: 0 }
+        with: { fetch-depth: 2 }
       - uses: ./.github/actions/setup-nx-affected-job
         with:
           node-version: '${{ env.NODE_VERSION }}'
@@ -253,7 +260,7 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with: { fetch-depth: 0 }
+        with: { fetch-depth: 2 }
       - uses: ./.github/actions/setup-nx-affected-job
         with:
           node-version: '${{ env.NODE_VERSION }}'
@@ -287,7 +294,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with: { fetch-depth: 0 }
+        with: { fetch-depth: 2 }
       - uses: ./.github/actions/setup-nx-affected-job
         with:
           node-version: '${{ env.NODE_VERSION }}'
@@ -304,7 +311,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with: { fetch-depth: 0 }
+        with: { fetch-depth: 2 }
       - uses: ./.github/actions/setup-nx-affected-job
         with:
           node-version: '${{ env.NODE_VERSION }}'
@@ -324,7 +331,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with: { fetch-depth: 0 }
+        with: { fetch-depth: 2 }
       - uses: ./.github/actions/setup-nx-affected-job
         with:
           node-version: '${{ env.NODE_VERSION }}'
@@ -404,7 +411,7 @@ jobs:
       TZ: UTC
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with: { fetch-depth: 0 }
+        with: { fetch-depth: 2 }
       - uses: ./.github/actions/setup-nx-affected-job
         with:
           node-version: '${{ env.NODE_VERSION }}'
@@ -536,7 +543,7 @@ jobs:
         options: --health-cmd "pg_isready -U test_user -d memoflow_test" --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with: { fetch-depth: 0 }
+        with: { fetch-depth: 2 }
       - uses: ./.github/actions/setup-nx-affected-job
         with:
           cache-variant: web-${{ strategy.job-index }}
@@ -681,6 +688,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 1
+          sparse-checkout: tools/ci-cd-platform
       - name: Download delivery manifest
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
