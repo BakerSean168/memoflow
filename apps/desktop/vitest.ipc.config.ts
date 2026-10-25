@@ -37,6 +37,14 @@ const ipcWorkspaceAliasEntries = [
     replacement: resolve(import.meta.dirname, '../../packages/goal-core/src/index.ts'),
   },
   {
+    find: '@memoflow/shared-primitives/command',
+    replacement: resolve(import.meta.dirname, '../../packages/shared-primitives/src/command.ts'),
+  },
+  {
+    find: '@memoflow/shared-primitives',
+    replacement: resolve(import.meta.dirname, '../../packages/shared-primitives/src/index.ts'),
+  },
+  {
     find: '@memoflow/goal/electron',
     replacement: resolve(import.meta.dirname, '../../packages/goal/src/electron/index.ts'),
   },

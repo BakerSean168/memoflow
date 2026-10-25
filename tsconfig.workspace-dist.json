@@ -4,6 +4,8 @@
     "paths": {
       "@memoflow/goal-core": ["./packages/goal-core/dist/index.d.ts"],
       "@memoflow/goal-core/*": ["./packages/goal-core/dist/*.d.ts"],
+      "@memoflow/shared-primitives": ["./packages/shared-primitives/dist/index.d.ts"],
+      "@memoflow/shared-primitives/*": ["./packages/shared-primitives/dist/*.d.ts"],
       "@memoflow/goal-client": ["./packages/goal-client/dist/index.d.ts"],
       "@memoflow/database": ["./packages/database/dist/index.d.ts"],
       "@memoflow/database/prisma": ["./packages/database/dist/generated/prisma/client.d.ts"],

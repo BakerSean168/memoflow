@@ -59,6 +59,8 @@ const config: StorybookConfig = {
               'packages/goal-core/src/goal-record-preview.ts',
             ],
             ['@memoflow/goal-core', 'packages/goal-core/src/index.ts'],
+            ['@memoflow/shared-primitives/command', 'packages/shared-primitives/src/command.ts'],
+            ['@memoflow/shared-primitives', 'packages/shared-primitives/src/index.ts'],
             ['@memoflow/task/client', 'packages/task/src/client/index.ts'],
             ['@memoflow/time', 'packages/time/src/index.ts'],
             ['@memoflow/utils/domain', 'packages/utils/src/domain/index.ts'],

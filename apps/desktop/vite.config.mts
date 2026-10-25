@@ -28,6 +28,8 @@ const desktopRendererDevWorkspaceEntries = [
   ],
   ['@memoflow/goal-core/goal-record-preview', 'packages/goal-core/src/goal-record-preview.ts'],
   ['@memoflow/goal-core', 'packages/goal-core/src/index.ts'],
+  ['@memoflow/shared-primitives/command', 'packages/shared-primitives/src/command.ts'],
+  ['@memoflow/shared-primitives', 'packages/shared-primitives/src/index.ts'],
   ['@memoflow/goal/electron', 'packages/goal/src/electron/index.ts'],
   ['@memoflow/ipc-client', 'packages/ipc-client/src/index.ts'],
   ['@memoflow/cloud-auth', 'packages/cloud-auth/src/index.ts'],

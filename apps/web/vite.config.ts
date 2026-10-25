@@ -59,6 +59,8 @@ const webDevWorkspaceEntries = [
   ],
   ['@memoflow/goal-core/goal-record-preview', 'packages/goal-core/src/goal-record-preview.ts'],
   ['@memoflow/goal-core', 'packages/goal-core/src/index.ts'],
+  ['@memoflow/shared-primitives/command', 'packages/shared-primitives/src/command.ts'],
+  ['@memoflow/shared-primitives', 'packages/shared-primitives/src/index.ts'],
   ['@memoflow/schedule/client', 'packages/schedule/src/client/index.ts'],
   ['@memoflow/notification/client', 'packages/notification/src/client/index.ts'],
   ['@memoflow/repository/client', 'packages/repository/src/client/index.ts'],

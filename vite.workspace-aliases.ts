@@ -132,6 +132,24 @@ export function createGoalCoreAliasEntries(workspaceRoot: string): Alias[] {
   ];
 }
 
+export function createSharedPrimitivesAliasEntries(workspaceRoot: string): Alias[] {
+  const sharedPrimitivesRoot = resolveFromWorkspace(
+    workspaceRoot,
+    'packages/shared-primitives/src',
+  );
+
+  return [
+    {
+      find: /^@memoflow\/shared-primitives$/,
+      replacement: `${sharedPrimitivesRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/shared-primitives\/(.+)$/,
+      replacement: `${sharedPrimitivesRoot}/$1`,
+    },
+  ];
+}
+
 export function createUiVueSourceAliasEntries(workspaceRoot: string): Alias[] {
   const uiVueRoot = resolveFromWorkspace(workspaceRoot, 'packages/ui-vue-shadcn/src');
   const uiCoreRoot = resolveFromWorkspace(workspaceRoot, 'packages/ui-core/src');

@@ -26,21 +26,21 @@
     },
     {
       "kind": "canonical",
-      "path": "packages/contracts/src/primitives/instant.ts",
+      "path": "packages/shared-primitives/src/instant.ts",
       "symbol": "Instant",
       "reason": "Brand epoch ms; TransferDate is the transport representation of an Instant",
       "owner": "contracts"
     },
     {
       "kind": "canonical",
-      "path": "packages/contracts/src/primitives/ymd.ts",
+      "path": "packages/shared-primitives/src/ymd.ts",
       "symbol": "Ymd|YmdSchema|parseYmd|requireYmd",
       "reason": "Validated portable local calendar-day primitive",
       "owner": "contracts"
     },
     {
       "kind": "canonical",
-      "path": "packages/contracts/src/primitives/hm.ts",
+      "path": "packages/shared-primitives/src/hm.ts",
       "symbol": "Hm",
       "reason": "Local HH:mm brand",
       "owner": "contracts"

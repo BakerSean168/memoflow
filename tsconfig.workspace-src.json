@@ -4,6 +4,8 @@
     "paths": {
       "@memoflow/goal-core": ["./packages/goal-core/src/index.ts"],
       "@memoflow/goal-core/*": ["./packages/goal-core/src/*.ts"],
+      "@memoflow/shared-primitives": ["./packages/shared-primitives/src/index.ts"],
+      "@memoflow/shared-primitives/*": ["./packages/shared-primitives/src/*.ts"],
       "@memoflow/goal-client": ["./packages/goal-client/src/index.ts"],
       "@memoflow/database": ["./packages/database/src/index.ts"],
       "@memoflow/database/transaction": ["./packages/database/src/transaction.ts"],

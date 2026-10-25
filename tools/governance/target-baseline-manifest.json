@@ -72,7 +72,8 @@
     "agent-gateway": "runtime-lib",
     "ui-storybook": "app",
     "goal-core": "runtime-lib",
-    "goal-client": "runtime-lib"
+    "goal-client": "runtime-lib",
+    "shared-primitives": "runtime-lib"
   },
   "exemptions": [
     {
