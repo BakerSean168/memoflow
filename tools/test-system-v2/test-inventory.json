@@ -7258,30 +7258,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/primitives/command.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/primitives/time-zone-id.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/primitives/ymd.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/contracts/src/result/failure-policy.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10608,6 +10584,30 @@
       ]
     },
     {
+      "path": "packages/shared-primitives/src/command.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/shared-primitives/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/shared-primitives/src/time-zone-id.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/shared-primitives/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/shared-primitives/src/ymd.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/shared-primitives/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/task/src/api/module-lifecycle.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12935,7 +12935,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 93
+      "fileCount": 90
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -13069,6 +13069,13 @@
       "suite": "unit",
       "runner": "vitest",
       "fileCount": 12
+    },
+    {
+      "id": "packages/shared-primitives/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 3
     },
     {
       "id": "packages/task/vitest.config.ts",

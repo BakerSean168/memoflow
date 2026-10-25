@@ -5,7 +5,12 @@
  * transport to the same Plan/Occurrence vocabulary; legacy client projection fields are retired.
  */
 
-import type { IdentityId, TaskOccurrenceId, TaskPlanId, TransferDate } from '../../../primitives';
+import type {
+  IdentityId,
+  TaskOccurrenceId,
+  TaskPlanId,
+  TransferDate,
+} from '@memoflow/shared-primitives';
 import type { ImportanceLevel } from '../../../shared/value-objects/importance';
 import type {
   TaskOccurrenceChecklistItem,

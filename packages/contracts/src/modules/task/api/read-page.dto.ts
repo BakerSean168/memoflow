@@ -5,7 +5,7 @@ import {
   YmdSchema,
   type TaskPlanId,
   type TaskOccurrenceId,
-} from '../../../primitives';
+} from '@memoflow/shared-primitives';
 import { TaskPlanResponseSchema, TaskOccurrenceResponseSchema } from './response-schemas';
 
 /** Epoch milliseconds whose local day remains a canonical four-digit Ymd in any IANA zone. */

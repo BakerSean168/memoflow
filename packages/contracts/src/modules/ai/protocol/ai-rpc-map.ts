@@ -40,7 +40,7 @@ import type {
   AIWorkflowRunView,
   AIWorkflowStartClientRequest,
 } from '../api/ai-runtime.dto';
-import type { AiProviderConfigId, AiConversationId } from '../../../primitives';
+import type { AiProviderConfigId, AiConversationId } from '@memoflow/shared-primitives';
 
 /** Canonical cross-process AI RPC map after the Mastra cutover. */
 export type AIRpcMap = {

@@ -6,8 +6,8 @@
  */
 
 import { z } from 'zod';
-import { brandedId, ID_PREFIXES } from '../../../primitives';
-import type { KnowledgeSpaceId, LocalVaultBindingId } from '../../../primitives';
+import { brandedId, ID_PREFIXES } from '@memoflow/shared-primitives';
+import type { KnowledgeSpaceId, LocalVaultBindingId } from '@memoflow/shared-primitives';
 import { KnowledgeDocumentIdSchema } from './knowledge-document-identity';
 
 export const LocalVaultBindingClientDTOSchema = z

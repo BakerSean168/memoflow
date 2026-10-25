@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import type { GoalId, KnowledgeDocumentId, TaskPlanId } from '../../primitives';
-import { brandedId } from '../../primitives/zod-extensions';
+import type { GoalId, KnowledgeDocumentId, TaskPlanId } from '@memoflow/shared-primitives';
+import { brandedId } from '@memoflow/shared-primitives/zod-extensions';
 import {
   KnowledgeDocumentIdSchema,
   KnowledgeDocumentRefSchema,

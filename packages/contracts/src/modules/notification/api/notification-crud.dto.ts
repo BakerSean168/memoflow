@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { brandedId, openApiJsonValue } from '../../../primitives';
+import { brandedId, openApiJsonValue } from '@memoflow/shared-primitives';
 import type { NotificationServerDTO } from '../aggregates/notification-server';
 import { NotificationType } from '../value-objects/notification-type';
 import { NotificationCategory } from '../value-objects/notification-category';

@@ -7,7 +7,7 @@
  * Planning preserves semantic start/target timeframes; boundary dates are derived projections.
  */
 
-import type { TransferDate, GoalId, IdentityId } from '../../../primitives';
+import type { TransferDate, GoalId, IdentityId } from '@memoflow/shared-primitives';
 import type { GoalStatus } from '../value-objects/goal-status';
 import type { KeyResultServerDTO } from '../entities/key-result-server';
 import type { GoalReviewServerDTO } from '../entities/goal-review-server';

@@ -1,5 +1,10 @@
 import { z } from 'zod';
 import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
+// Side-effect import kept intentionally: it carries the `declare module 'zod'`
+// augmentation that adds `.openapi()` to ZodType. Declaration emit elides the
+// named import above (only used in a statement), which would leave dist-mode
+// consumers of this package without the `.openapi()` typing.
+import '@asteasolutions/zod-to-openapi';
 
 // Extend Zod with .openapi() method — must run before any schema that uses .openapi()
 extendZodWithOpenApi(z);

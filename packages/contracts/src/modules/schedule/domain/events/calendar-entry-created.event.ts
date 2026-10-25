@@ -1,4 +1,4 @@
-import type { IdentityId } from '../../../../primitives';
+import type { IdentityId } from '@memoflow/shared-primitives';
 import type { CalendarEntryRange } from '../../calendar-entry-range';
 
 /** Emitted after a CalendarEntry with canonical ADR-080 range truth is created. */

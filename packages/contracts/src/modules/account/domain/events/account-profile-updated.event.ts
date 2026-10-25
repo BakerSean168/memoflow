@@ -1,5 +1,5 @@
 import type { AccountServerDTO } from '../../aggregates';
-import type { IdentityId } from '../../../../primitives';
+import type { IdentityId } from '@memoflow/shared-primitives';
 
 export interface AccountProfileUpdatedEvent {
   identityId: IdentityId;

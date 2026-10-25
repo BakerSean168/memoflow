@@ -1,4 +1,4 @@
-import type { IdentityId, TaskOccurrenceId, TaskPlanId } from '../../../../primitives';
+import type { IdentityId, TaskOccurrenceId, TaskPlanId } from '@memoflow/shared-primitives';
 import type { TaskGoalBindingDTO } from '../../value-objects/task-goal-binding';
 import type { TaskPlanOutcome as TaskPlanOutcomeValue } from '../../value-objects/task-plan-outcome';
 

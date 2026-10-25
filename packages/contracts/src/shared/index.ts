@@ -28,7 +28,6 @@ export type { ServerModuleHandle, ServerTransportModuleContext } from './server-
 export * from './account-active-checker';
 
 export * from './value-objects';
-export * from './dtos';
 
 export * from './module-manifest';
 export * from './keyboard-keymap';

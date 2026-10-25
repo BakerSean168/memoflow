@@ -100,6 +100,7 @@
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^9.1.0",
+    "@memoflow/shared-primitives": "workspace:*",
     "zod": "^4.6.5"
   },
   "devDependencies": {

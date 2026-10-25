@@ -5,8 +5,8 @@
  */
 
 import { z } from 'zod';
-import { brandedId } from '../../../primitives';
-import type { GoalId, KeyResultId } from '../../../primitives';
+import { brandedId } from '@memoflow/shared-primitives';
+import type { GoalId, KeyResultId } from '@memoflow/shared-primitives';
 import { GoalRecordListResSchema } from './response-schemas';
 
 // ============================================================================

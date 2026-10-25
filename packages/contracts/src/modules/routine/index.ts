@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { TimeZoneIdSchema, YmdSchema } from '../../primitives';
+import { TimeZoneIdSchema, YmdSchema } from '@memoflow/shared-primitives';
 
 export const ROUTINE_NAME_MAX_LENGTH = 100;
 export const ROUTINE_DESCRIPTION_MAX_LENGTH = 2000;

@@ -4,8 +4,8 @@
  */
 
 import { z } from 'zod';
-import type { KnowledgeSpaceId } from '../../../primitives';
-import { brandedId, ID_PREFIXES } from '../../../primitives';
+import type { KnowledgeSpaceId } from '@memoflow/shared-primitives';
+import { brandedId, ID_PREFIXES } from '@memoflow/shared-primitives';
 import {
   KnowledgeProjectionCheckpointSchema,
   KnowledgeRemoteBindingSchema,

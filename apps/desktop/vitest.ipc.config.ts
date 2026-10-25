@@ -37,6 +37,59 @@ const ipcWorkspaceAliasEntries = [
     replacement: resolve(import.meta.dirname, '../../packages/goal-core/src/index.ts'),
   },
   {
+    find: '@memoflow/shared-primitives/command',
+    replacement: resolve(import.meta.dirname, '../../packages/shared-primitives/src/command.ts'),
+  },
+  {
+    find: '@memoflow/shared-primitives/duration',
+    replacement: resolve(import.meta.dirname, '../../packages/shared-primitives/src/duration.ts'),
+  },
+  {
+    find: '@memoflow/shared-primitives/hm',
+    replacement: resolve(import.meta.dirname, '../../packages/shared-primitives/src/hm.ts'),
+  },
+  {
+    find: '@memoflow/shared-primitives/ids',
+    replacement: resolve(import.meta.dirname, '../../packages/shared-primitives/src/ids.ts'),
+  },
+  {
+    find: '@memoflow/shared-primitives/instant',
+    replacement: resolve(import.meta.dirname, '../../packages/shared-primitives/src/instant.ts'),
+  },
+  {
+    find: '@memoflow/shared-primitives/runtime',
+    replacement: resolve(import.meta.dirname, '../../packages/shared-primitives/src/runtime.ts'),
+  },
+  {
+    find: '@memoflow/shared-primitives/time-zone-id',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/shared-primitives/src/time-zone-id.ts',
+    ),
+  },
+  {
+    find: '@memoflow/shared-primitives/transfer-date',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/shared-primitives/src/transfer-date.ts',
+    ),
+  },
+  {
+    find: '@memoflow/shared-primitives/ymd',
+    replacement: resolve(import.meta.dirname, '../../packages/shared-primitives/src/ymd.ts'),
+  },
+  {
+    find: '@memoflow/shared-primitives/zod-extensions',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/shared-primitives/src/zod-extensions.ts',
+    ),
+  },
+  {
+    find: '@memoflow/shared-primitives',
+    replacement: resolve(import.meta.dirname, '../../packages/shared-primitives/src/index.ts'),
+  },
+  {
     find: '@memoflow/goal/electron',
     replacement: resolve(import.meta.dirname, '../../packages/goal/src/electron/index.ts'),
   },

@@ -21,7 +21,7 @@ import { describe, expect, it } from 'vitest';
     const goalVo = __dirname;
     const accountVo = resolve(goalVo, '../../account/value-objects');
     const taskVo = resolve(goalVo, '../../task/value-objects');
-    const primitives = resolve(goalVo, '../../../primitives');
+    const primitives = resolve(goalVo, '../../../../../shared-primitives/src');
     const taskPlanSchedule = readFileSync(resolve(taskVo, 'task-plan-schedule.ts'), 'utf8');
     const taskOccurrenceResult = readFileSync(resolve(taskVo, 'task-occurrence-result.ts'), 'utf8');
 

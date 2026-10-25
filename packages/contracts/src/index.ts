@@ -34,8 +34,8 @@
 // ============================================================
 // Primitives
 // ============================================================
-export { brandedId } from './primitives';
-export type { IdentityId, TimeZoneId } from './primitives';
+export { brandedId } from '@memoflow/shared-primitives';
+export type { IdentityId, TimeZoneId } from '@memoflow/shared-primitives';
 
 // ============================================================
 // Operations (W7 统一 operation timeline / replay / audit)

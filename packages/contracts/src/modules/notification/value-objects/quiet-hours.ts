@@ -1,4 +1,4 @@
-import type { Hm, TimeZoneId } from '../../../primitives';
+import type { Hm, TimeZoneId } from '@memoflow/shared-primitives';
 
 export type NotificationWeekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 

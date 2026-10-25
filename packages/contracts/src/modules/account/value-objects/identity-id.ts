@@ -1,1 +1,1 @@
-export type { IdentityId } from '../../../primitives';
+export type { IdentityId } from '@memoflow/shared-primitives';

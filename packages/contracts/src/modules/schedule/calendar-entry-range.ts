@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import type { Instant, Ymd } from '../../primitives';
-import { YmdSchema } from '../../primitives';
+import type { Instant, Ymd } from '@memoflow/shared-primitives';
+import { YmdSchema } from '@memoflow/shared-primitives';
 
 /**
  * Canonical CalendarEntry time truth (ADR-080).

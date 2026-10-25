@@ -1,4 +1,4 @@
-import type { IdentityId, TaskOccurrenceId, TaskPlanId } from '../../../../primitives';
+import type { IdentityId, TaskOccurrenceId, TaskPlanId } from '@memoflow/shared-primitives';
 
 /** Task occurrence time changed by its owning Task command. */
 export interface TaskRescheduledEvent {

@@ -9,8 +9,8 @@
  */
 
 import { z } from 'zod';
-import { brandedId } from '../../../primitives';
-import type { ScheduleId } from '../../../primitives';
+import { brandedId } from '@memoflow/shared-primitives';
+import type { ScheduleId } from '@memoflow/shared-primitives';
 import { ConflictSeverity } from './conflict-severity';
 
 /**

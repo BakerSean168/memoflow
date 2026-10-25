@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { brandedId } from '../../../primitives';
-import type { KeyResultId } from '../../../primitives';
+import { brandedId } from '@memoflow/shared-primitives';
+import type { KeyResultId } from '@memoflow/shared-primitives';
 import { KeyResultCalculationMethod } from '../value-objects/key-result-calculation-method';
 import {
   KEY_RESULT_DESCRIPTION_MAX_LENGTH,

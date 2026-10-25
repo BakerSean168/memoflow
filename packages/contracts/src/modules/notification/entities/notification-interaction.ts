@@ -3,7 +3,7 @@ import type {
   NotificationId,
   NotificationInteractionId,
   TransferDate,
-} from '../../../primitives';
+} from '@memoflow/shared-primitives';
 
 export type NotificationInteractionKind = 'navigate' | 'owner-command' | 'archive';
 export type NotificationInteractionOutcome = 'accepted' | 'rejected' | 'failed';

@@ -1,4 +1,4 @@
-import type { IdentityId } from '../../../../primitives';
+import type { IdentityId } from '@memoflow/shared-primitives';
 
 export interface SettingImportedEvent {
   readonly identityId: IdentityId;

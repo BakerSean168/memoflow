@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { brandedId, ID_PREFIXES } from '../../../primitives';
-import type { IdentityId, GoalId, KeyResultId, TaskPlanId } from '../../../primitives';
+import { brandedId, ID_PREFIXES } from '@memoflow/shared-primitives';
+import type { IdentityId, GoalId, KeyResultId, TaskPlanId } from '@memoflow/shared-primitives';
 import { ImportanceLevel } from '../../../shared/value-objects/importance';
 import type { TaskPlanClientDTO } from '../aggregates/task-plan-client';
 import type { TaskOccurrenceClientDTO } from '../aggregates/task-occurrence-client';
