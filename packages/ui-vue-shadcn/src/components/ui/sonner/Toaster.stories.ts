@@ -19,7 +19,8 @@ export const Default: Story = {
       const showToast = () => toast('Event has been created.');
       const showSuccess = () => toast.success('Profile updated successfully.');
       const showError = () => toast.error('Something went wrong.');
-      const showDescription = () => toast('Event created', { description: 'Monday, January 3rd at 6:00pm' });
+      const showDescription = () =>
+        toast('Event created', { description: 'Monday, January 3rd at 6:00pm' });
       return { showToast, showSuccess, showError, showDescription };
     },
     template: `

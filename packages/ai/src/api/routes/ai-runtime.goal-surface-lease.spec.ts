@@ -13,16 +13,20 @@ describe('Goal native surface lease authenticated HTTP transport', () => {
     }));
     const app = express();
     app.use(express.json());
-    app.use('/ai/runtime', registerAIRuntimeRoutes(
-      null,
-      {
-        auth: (req, _res, next) => {
-          if (identityId) (req as typeof req & { user: { identityId: string } }).user = { identityId };
-          next();
+    app.use(
+      '/ai/runtime',
+      registerAIRuntimeRoutes(
+        null,
+        {
+          auth: (req, _res, next) => {
+            if (identityId)
+              (req as typeof req & { user: { identityId: string } }).user = { identityId };
+            next();
+          },
         },
-      },
-      { goalSurfaceLease } as never,
-    ));
+        { goalSurfaceLease } as never,
+      ),
+    );
     return { app, goalSurfaceLease };
   }
 
@@ -33,7 +37,8 @@ describe('Goal native surface lease authenticated HTTP transport', () => {
       .send({ action: 'claim', runId: 'run-1' });
     expect(response.status).toBe(200);
     expect(response.body.data).toMatchObject({
-      status: 'claimed', fence: 3,
+      status: 'claimed',
+      fence: 3,
     });
     expect(goalSurfaceLease).toHaveBeenCalledExactlyOnceWith({
       identityId: 'owner-1',

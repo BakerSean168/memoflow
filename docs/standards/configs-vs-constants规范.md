@@ -13,6 +13,7 @@ tags: [standard, architecture, config, constant]
 **定义：** 影响业务逻辑行为的可配置参数，可能在不同环境或场景下需要调整。
 
 **特征：**
+
 - ✅ 影响业务行为（如批次大小、阈值、默认值）
 - ✅ 可能需要根据环境或需求调整
 - ✅ 通常是数字、字符串等具体值
@@ -26,6 +27,7 @@ tags: [standard, architecture, config, constant]
 **结论：** `constants/` 文件夹在当前架构中**不应使用**，应该被移除。
 
 **原因：**
+
 1. 所有"枚举类"常量已经归入 `value-objects/`
 2. 配置类常量已经归入 `configs/`
 3. 避免命名混淆和重复概念
@@ -53,11 +55,13 @@ modules/{module}/
 ### 1️⃣ **Value Objects**（值对象 + 枚举）
 
 **内容：**
+
 - 枚举类常量（状态、类型、模式等）
 - 复杂值对象（带验证逻辑）
 - 简单值对象（不可变数据结构）
 
 **命名规范：**
+
 - 对象名：`PascalCase`（如 `TaskInstanceStatus`）
 - Key/Value：`PascalCase`（如 `Pending: 'Pending'`）
 - 类型：`PascalCase`（如 `type TaskInstanceStatus`）
@@ -77,10 +81,11 @@ export const TaskInstanceStatus = {
   Skipped: 'Skipped',
 } as const;
 
-export type TaskInstanceStatus = typeof TaskInstanceStatus[keyof typeof TaskInstanceStatus];
+export type TaskInstanceStatus = (typeof TaskInstanceStatus)[keyof typeof TaskInstanceStatus];
 ```
 
 **使用场景：**
+
 - ✅ 状态枚举（Status、Mode、Type）
 - ✅ 固定选项集合（Priority、Channel、Format）
 - ✅ 业务领域概念（不会频繁变化的值）
@@ -90,11 +95,13 @@ export type TaskInstanceStatus = typeof TaskInstanceStatus[keyof typeof TaskInst
 ### 2️⃣ **Configs**（配置常量）
 
 **内容：**
+
 - 业务规则参数（阈值、限制、默认值）
 - 系统行为配置（批次大小、超时时间）
 - 验证规则（最大长度、最小值）
 
 **命名规范：**
+
 - 配置对象：`SCREAMING_SNAKE_CASE`（如 `TASK_INSTANCE_GENERATION_CONFIG`）
 - 配置项：`SCREAMING_SNAKE_CASE`（如 `DEFAULT_BATCH_SIZE`）
 - 分组清晰，每组配置一个对象
@@ -135,6 +142,7 @@ export const TASK_VALIDATION_CONFIG = {
 ```
 
 **使用场景：**
+
 - ✅ 业务规则参数（默认优先级、默认排序）
 - ✅ 数量限制（最大页大小、批次大小）
 - ✅ 时间配置（提前天数、超时时长）
@@ -146,11 +154,11 @@ export const TASK_VALIDATION_CONFIG = {
 
 ### 问自己：
 
-| 问题 | 答案是「是」→ | 答案是「否」→ |
-|------|-------------|-------------|
-| 这是一个固定的业务概念（如状态、类型）吗？ | `value-objects/` | ⬇️ |
-| 这个值可能需要根据需求调整吗？ | `configs/` | ⬇️ |
-| 这是一个纯粹的魔法数字或字符串吗？ | 放在使用它的文件内部 | - |
+| 问题                                       | 答案是「是」→        | 答案是「否」→ |
+| ------------------------------------------ | -------------------- | ------------- |
+| 这是一个固定的业务概念（如状态、类型）吗？ | `value-objects/`     | ⬇️            |
+| 这个值可能需要根据需求调整吗？             | `configs/`           | ⬇️            |
+| 这是一个纯粹的魔法数字或字符串吗？         | 放在使用它的文件内部 | -             |
 
 ### 示例判断：
 
@@ -175,6 +183,7 @@ export const TASK_VALIDATION_CONFIG = {
 ### 清理 `constants/` 文件夹
 
 1. **检查现有 `constants/` 内容**
+
    ```bash
    # 查找所有 constants 文件夹
    find packages/contracts/src/modules -type d -name "constants"
@@ -186,6 +195,7 @@ export const TASK_VALIDATION_CONFIG = {
    - 仅在一处使用的 → 移到使用它的文件内部
 
 3. **删除空文件夹**
+
    ```bash
    # 删除空的 constants 文件夹
    rmdir packages/contracts/src/modules/*/constants
@@ -225,7 +235,7 @@ export const TASK_API_PREFIX = '/api/tasks';
 
 ```typescript
 // ❌ 不要创建 constants/ 文件夹
-modules/task/constants/status.ts
+modules / task / constants / status.ts;
 
 // ❌ 不要在 configs/ 放枚举
 export const TASK_STATUSES = {
@@ -237,16 +247,17 @@ export const TASK_STATUSES = {
 export const DEFAULT_PAGE_SIZE = 20;
 
 // ❌ 不要混用命名风格
-export const taskStatus = { // ❌ camelCase
-  DRAFT: 'DRAFT',           // ❌ SCREAMING_SNAKE_CASE value
-}
+export const taskStatus = {
+  // ❌ camelCase
+  DRAFT: 'DRAFT', // ❌ SCREAMING_SNAKE_CASE value
+};
 ```
 
 ---
 
 ## 📖 参考文档
 
-- [枚举与常量对象规范](./枚举与常量对象规范(Enum&Constant-Objects).md)
+- [枚举与常量对象规范](<./枚举与常量对象规范(Enum&Constant-Objects).md>)
 - [enum 写法规范](./enum写法.md)
 - Example Module - [packages/contracts/src/modules/example/](../../packages/contracts/src/modules/example/)
 
@@ -254,13 +265,14 @@ export const taskStatus = { // ❌ camelCase
 
 ## 🎓 总结
 
-| 概念 | 文件夹 | 命名风格 | 用途 | 示例 |
-|------|--------|----------|------|------|
-| **枚举** | `value-objects/` | PascalCase | 固定业务概念 | `TaskStatus.Active` |
-| **配置** | `configs/` | SCREAMING_SNAKE_CASE | 可调整参数 | `BATCH_SIZE: 50` |
-| **废弃** | ~~`constants/`~~ | - | 不再使用 | - |
+| 概念     | 文件夹           | 命名风格             | 用途         | 示例                |
+| -------- | ---------------- | -------------------- | ------------ | ------------------- |
+| **枚举** | `value-objects/` | PascalCase           | 固定业务概念 | `TaskStatus.Active` |
+| **配置** | `configs/`       | SCREAMING_SNAKE_CASE | 可调整参数   | `BATCH_SIZE: 50`    |
+| **废弃** | ~~`constants/`~~ | -                    | 不再使用     | -                   |
 
 **记住：**
+
 - 业务语义 → `value-objects/`
 - 业务参数 → `configs/`
 - 局部使用 → 文件内部

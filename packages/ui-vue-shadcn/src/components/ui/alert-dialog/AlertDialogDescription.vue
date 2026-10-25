@@ -1,20 +1,17 @@
 <script setup lang="ts">
-import type { AlertDialogDescriptionProps } from 'reka-ui'
-import type { HTMLAttributes } from 'vue'
-import { cn } from '../../../lib/utils'
-import {
-  AlertDialogDescription,
+import type { AlertDialogDescriptionProps } from 'reka-ui';
+import type { HTMLAttributes } from 'vue';
+import { cn } from '../../../lib/utils';
+import { AlertDialogDescription } from 'reka-ui';
+import { computed } from 'vue';
 
-} from 'reka-ui'
-import { computed } from 'vue'
-
-const props = defineProps<AlertDialogDescriptionProps & { class?: HTMLAttributes['class'] }>()
+const props = defineProps<AlertDialogDescriptionProps & { class?: HTMLAttributes['class'] }>();
 
 const delegatedProps = computed(() => {
-  const { class: _, ...delegated } = props
+  const { class: _, ...delegated } = props;
 
-  return delegated
-})
+  return delegated;
+});
 </script>
 
 <template>

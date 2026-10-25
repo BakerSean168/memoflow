@@ -31,9 +31,7 @@ export class DataPortabilityClientService implements IDataPortabilityApiClient {
     this.applyPortableDataV3 = this.applyPortableDataV3.bind(this);
   }
 
-  exportPortableDataV3(
-    data: ExportPortableDataV3Req,
-  ): Promise<Result<ExportPortableDataV3Res>> {
+  exportPortableDataV3(data: ExportPortableDataV3Req): Promise<Result<ExportPortableDataV3Res>> {
     return this.apiClient.exportPortableDataV3(data);
   }
 
@@ -43,15 +41,11 @@ export class DataPortabilityClientService implements IDataPortabilityApiClient {
     return this.apiClient.exportServerHeldDataDisclosure(data);
   }
 
-  dryRunPortableDataV3(
-    data: PortableDataV3ImportReq,
-  ): Promise<Result<PortableDataV3ImportRes>> {
+  dryRunPortableDataV3(data: PortableDataV3ImportReq): Promise<Result<PortableDataV3ImportRes>> {
     return this.apiClient.dryRunPortableDataV3(data);
   }
 
-  applyPortableDataV3(
-    data: PortableDataV3ImportReq,
-  ): Promise<Result<PortableDataV3ImportRes>> {
+  applyPortableDataV3(data: PortableDataV3ImportReq): Promise<Result<PortableDataV3ImportRes>> {
     return this.apiClient.applyPortableDataV3(data);
   }
 }

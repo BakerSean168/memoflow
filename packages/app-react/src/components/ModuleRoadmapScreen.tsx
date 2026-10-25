@@ -32,7 +32,10 @@ export function ModuleRoadmapScreen({
 }: ModuleRoadmapScreenProps) {
   return (
     <PageShell eyebrow={eyebrow} title={title} subtitle={subtitle}>
-      <SectionCard title="Current status" description="模块壳已纳入移动端信息架构，接下来直接往里接真实页面和数据流。">
+      <SectionCard
+        title="Current status"
+        description="模块壳已纳入移动端信息架构，接下来直接往里接真实页面和数据流。"
+      >
         <View style={styles.pillRow}>
           <StatusPill label={statusLabel} tone={statusTone} />
           <StatusPill label="Mobile-first layout" tone="tint" />
@@ -45,7 +48,13 @@ export function ModuleRoadmapScreen({
       <SectionCard title="Planned surface" description="这个模块在移动端的首批落地范围。">
         <View style={styles.tileGrid}>
           {scope.map((item) => (
-            <FeatureTile key={item.title} eyebrow={item.phase} title={item.title} description={item.description} disabled />
+            <FeatureTile
+              key={item.title}
+              eyebrow={item.phase}
+              title={item.title}
+              description={item.description}
+              disabled
+            />
           ))}
         </View>
       </SectionCard>

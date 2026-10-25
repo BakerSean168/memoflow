@@ -9,14 +9,8 @@
       "ciSeconds": 731.0,
       "runnerMinutes": 44.4,
       "cacheSummaries": [
-        [
-          0,
-          7
-        ],
-        [
-          7,
-          7
-        ]
+        [0, 7],
+        [7, 7]
       ],
       "projects": [
         "app-vue",
@@ -36,14 +30,8 @@
       "ciSeconds": 684.0,
       "runnerMinutes": 44.72,
       "cacheSummaries": [
-        [
-          0,
-          7
-        ],
-        [
-          7,
-          7
-        ]
+        [0, 7],
+        [7, 7]
       ],
       "projects": [
         "app-vue",
@@ -63,14 +51,8 @@
       "ciSeconds": 898.0,
       "runnerMinutes": 49.02,
       "cacheSummaries": [
-        [
-          0,
-          8
-        ],
-        [
-          8,
-          9
-        ]
+        [0, 8],
+        [8, 9]
       ],
       "projects": [
         "app-vue",
@@ -92,14 +74,8 @@
       "ciSeconds": 857.0,
       "runnerMinutes": 50.9,
       "cacheSummaries": [
-        [
-          0,
-          9
-        ],
-        [
-          9,
-          9
-        ]
+        [0, 9],
+        [9, 9]
       ],
       "projects": [
         "app-vue",
@@ -121,14 +97,8 @@
       "ciSeconds": 887.0,
       "runnerMinutes": 50.62,
       "cacheSummaries": [
-        [
-          0,
-          7
-        ],
-        [
-          7,
-          7
-        ]
+        [0, 7],
+        [7, 7]
       ],
       "projects": [
         "app-vue",
@@ -148,14 +118,8 @@
       "ciSeconds": 757.0,
       "runnerMinutes": 49.93,
       "cacheSummaries": [
-        [
-          0,
-          7
-        ],
-        [
-          7,
-          7
-        ]
+        [0, 7],
+        [7, 7]
       ],
       "projects": [
         "app-vue",
@@ -175,14 +139,8 @@
       "ciSeconds": 825.0,
       "runnerMinutes": 49.72,
       "cacheSummaries": [
-        [
-          0,
-          7
-        ],
-        [
-          7,
-          7
-        ]
+        [0, 7],
+        [7, 7]
       ],
       "projects": [
         "app-vue",
@@ -202,14 +160,8 @@
       "ciSeconds": 880.0,
       "runnerMinutes": 49.53,
       "cacheSummaries": [
-        [
-          0,
-          7
-        ],
-        [
-          7,
-          7
-        ]
+        [0, 7],
+        [7, 7]
       ],
       "projects": [
         "app-vue",
@@ -229,14 +181,8 @@
       "ciSeconds": 690.0,
       "runnerMinutes": 45.57,
       "cacheSummaries": [
-        [
-          0,
-          7
-        ],
-        [
-          7,
-          7
-        ]
+        [0, 7],
+        [7, 7]
       ],
       "projects": [
         "app-vue",
@@ -256,14 +202,8 @@
       "ciSeconds": 806.0,
       "runnerMinutes": 49.47,
       "cacheSummaries": [
-        [
-          0,
-          7
-        ],
-        [
-          7,
-          7
-        ]
+        [0, 7],
+        [7, 7]
       ],
       "projects": [
         "app-vue",
@@ -283,14 +223,8 @@
       "ciSeconds": 878.0,
       "runnerMinutes": 52.3,
       "cacheSummaries": [
-        [
-          0,
-          7
-        ],
-        [
-          7,
-          7
-        ]
+        [0, 7],
+        [7, 7]
       ],
       "projects": [
         "app-vue",
@@ -309,17 +243,8 @@
       "setupSeconds": 34.0,
       "ciSeconds": 872.0,
       "runnerMinutes": 46.38,
-      "cacheSummaries": [
-        [
-          0,
-          4
-        ]
-      ],
-      "projects": [
-        "ci-cd-platform",
-        "governance-tools",
-        "test-system-v2"
-      ],
+      "cacheSummaries": [[0, 4]],
+      "projects": ["ci-cd-platform", "governance-tools", "test-system-v2"],
       "workloadKind": "observed-affected"
     },
     {
@@ -330,14 +255,8 @@
       "ciSeconds": 886.0,
       "runnerMinutes": 64.95,
       "cacheSummaries": [
-        [
-          0,
-          40
-        ],
-        [
-          40,
-          40
-        ]
+        [0, 40],
+        [40, 40]
       ],
       "projects": [
         "account",
@@ -2848,10 +2767,5 @@
       "hit": true
     }
   ],
-  "unmeasuredProjects": [
-    "assets",
-    "migrator",
-    "powersync-schema",
-    "ui-core"
-  ]
+  "unmeasuredProjects": ["assets", "migrator", "powersync-schema", "ui-core"]
 }

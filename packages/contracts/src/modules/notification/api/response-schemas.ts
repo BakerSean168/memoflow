@@ -6,11 +6,7 @@
 
 import { z } from 'zod';
 import { brandedId } from '../../../primitives';
-import type {
-  IdentityId,
-  NotificationId,
-  NotificationPreferenceId,
-} from '../../../primitives';
+import type { IdentityId, NotificationId, NotificationPreferenceId } from '../../../primitives';
 import { NotificationType } from '../value-objects/notification-type';
 import { NotificationCategory } from '../value-objects/notification-category';
 import { NotificationChannelType } from '../value-objects/notification-channel-type';
@@ -35,10 +31,13 @@ export const NotificationResponseSchema = z.object({
   urgency: z.enum(UrgencyLevel),
   relatedEntityType: z.string().trim().min(1).max(120).nullable().optional(),
   relatedEntityId: z.string().nullable().optional(),
-  navigationIntent: z.object({
-    route: z.string(),
-    params: z.record(z.string(), z.string()).optional(),
-  }).nullable().optional(),
+  navigationIntent: z
+    .object({
+      route: z.string(),
+      params: z.record(z.string(), z.string()).optional(),
+    })
+    .nullable()
+    .optional(),
   correlationId: z.string().nullable().optional(),
   causationId: z.string().nullable().optional(),
   isRead: z.boolean(),

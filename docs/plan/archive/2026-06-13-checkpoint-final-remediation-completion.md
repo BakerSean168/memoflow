@@ -19,15 +19,18 @@
 ### ✅ Task #1: 修复 ts 策略启动失败
 
 **问题**:
+
 - `build_run_history_store` 在 ts 策略下要求 `identity_id`
 - 但 `app.py` lifespan 使用 `identity_id=None` 构造 runtime
 - 导致 `AGENT_CHECKPOINT_STRATEGY=ts` 时启动失败
 
-**根本原因**: 
+**根本原因**:
+
 - 注释说"lazily constructed"，但实际在 lifespan 就尝试构造
 - ts 策略需要 identity-aware runtime，不能用 None
 
 **修复方案**: 按策略分别处理
+
 - **local 策略**: app-scoped singleton runtime（启动时构造）
 - **ts 策略**: per-request identity-aware runtime（在 dependency 中构造）
 
@@ -46,6 +49,7 @@
      - ts: 设置 None placeholders（实际 runtime 在 dependency 中构造）
 
 **影响**:
+
 - ✅ ts 策略现在可以正常启动
 - ✅ 每个请求使用正确的 identity
 - ✅ local 策略保持原有行为（零破坏）
@@ -55,6 +59,7 @@
 ### ✅ Task #2: 补齐 checkpoint route 的 events/interrupts 透传
 
 **问题**:
+
 - Python client 发送 `events` 和 `interrupts`
 - Prisma adapter 支持持久化这些字段
 - 但 `ai-agent-checkpoint.routes.ts` 的 body schema 只接收 `run`, `state`, `threadId`
@@ -74,6 +79,7 @@
 2. **Controller**: 无需修改（已经直接透传 port 接口）
 
 **影响**:
+
 - ✅ events/interrupts 完整流转：Python → HTTP → TS → Database
 - ✅ 端到端闭合
 
@@ -82,6 +88,7 @@
 ### ✅ Task #3: 明确 durable resume 语义并返回稳定错误
 
 **问题**:
+
 - 当前只有 snapshot persistence，没有 LangGraph checkpoint persistence
 - ts 策略使用 `InMemorySaver`（内存中）
 - 服务重启后内存 checkpoint 丢失，但 persisted snapshot 还在
@@ -111,6 +118,7 @@
        ```
 
 **影响**:
+
 - ✅ 明确区分"可查看 snapshot"和"可 resume 执行"
 - ✅ 用户获得稳定、可预期的错误响应
 - ✅ 不再误导用户"多实例 durable resume 已完成"
@@ -131,6 +139,7 @@
 **明确的边界**:
 
 当前**已实现**:
+
 - ✅ Snapshot persistence（run metadata + state）
 - ✅ local 策略：file-backed，单实例可用
 - ✅ ts 策略：HTTP + database，identity-aware
@@ -138,6 +147,7 @@
 - ✅ Resume 当前会话的 interrupted runs
 
 当前**未实现**:
+
 - ❌ 跨进程/重启的 durable LangGraph checkpoint
 - ❌ 服务重启后 resume interrupt（返回 409 错误）
 - ❌ PowerSync checkpoint adapter
@@ -167,25 +177,25 @@ pnpm --filter @memoflow/ai exec tsc --noEmit
 
 ### Python
 
-| 文件 | 变更 | 说明 |
-|------|------|------|
-| `apps/ai-service/src/ai_service/api/dependencies.py` | Modified | ts 策略按请求构造 identity-aware runtime |
-| `apps/ai-service/src/ai_service/app.py` | Modified | ts 策略不在 lifespan 构造 runtime |
-| `apps/ai-service/src/ai_service/agent_runtime/runtime.py` | Modified | Resume 时检查 graph checkpoint 存在性 |
-| `apps/ai-service/src/ai_service/api/routes/agents.py` | Modified | 返回 409 当 checkpoint missing |
+| 文件                                                      | 变更     | 说明                                     |
+| --------------------------------------------------------- | -------- | ---------------------------------------- |
+| `apps/ai-service/src/ai_service/api/dependencies.py`      | Modified | ts 策略按请求构造 identity-aware runtime |
+| `apps/ai-service/src/ai_service/app.py`                   | Modified | ts 策略不在 lifespan 构造 runtime        |
+| `apps/ai-service/src/ai_service/agent_runtime/runtime.py` | Modified | Resume 时检查 graph checkpoint 存在性    |
+| `apps/ai-service/src/ai_service/api/routes/agents.py`     | Modified | 返回 409 当 checkpoint missing           |
 
 ### TypeScript
 
-| 文件 | 变更 | 说明 |
-|------|------|------|
+| 文件                                                       | 变更     | 说明                   |
+| ---------------------------------------------------------- | -------- | ---------------------- |
 | `packages/ai/src/api/routes/ai-agent-checkpoint.routes.ts` | Modified | 接收 events/interrupts |
 
 ### 文档
 
-| 文件 | 变更 | 说明 |
-|------|------|------|
-| `docs/plan/active/2026-06-13-checkpoint-refinement-completion.md` | Modified | 标记为"已废弃" |
-| `docs/plan/active/2026-06-13-checkpoint-final-remediation-completion.md` | Created | 本文档（准确版） |
+| 文件                                                                     | 变更     | 说明             |
+| ------------------------------------------------------------------------ | -------- | ---------------- |
+| `docs/plan/active/2026-06-13-checkpoint-refinement-completion.md`        | Modified | 标记为"已废弃"   |
+| `docs/plan/active/2026-06-13-checkpoint-final-remediation-completion.md` | Created  | 本文档（准确版） |
 
 ---
 
@@ -201,6 +211,7 @@ AGENT_CHECKPOINT_STRATEGY=local  # 默认值
 ```
 
 **能力**:
+
 - ✅ File-based snapshot persistence
 - ✅ 当前会话 interrupt/resume
 - ✅ 查看历史 runs
@@ -211,6 +222,7 @@ AGENT_CHECKPOINT_STRATEGY=local  # 默认值
 ### 多实例部署（部分可用）⚠️
 
 **前提条件**:
+
 1. 运行 Prisma migration
 2. 设置环境变量：
    ```bash
@@ -220,6 +232,7 @@ AGENT_CHECKPOINT_STRATEGY=local  # 默认值
    ```
 
 **能力**:
+
 - ✅ Database snapshot persistence
 - ✅ 多实例共享 run history
 - ✅ Identity-aware checkpoint isolation
@@ -228,6 +241,7 @@ AGENT_CHECKPOINT_STRATEGY=local  # 默认值
 - ⚠️ 重启后 resume 返回 409 错误
 
 **限制说明**:
+
 - LangGraph 使用 `InMemorySaver`（内存 checkpoint）
 - Persisted snapshot 不包含 LangGraph 执行状态
 - 跨进程 durable resume 需要真正的 persistent LangGraph checkpointer
@@ -236,16 +250,16 @@ AGENT_CHECKPOINT_STRATEGY=local  # 默认值
 
 ## 完成度评估（修正版）
 
-| 维度 | 状态 | 说明 |
-|------|------|------|
-| **Snapshot Persistence** | ✅ 完成 | run metadata + state 持久化 |
-| **Events/Interrupts** | ✅ 完成 | 端到端透传和持久化 |
-| **Local 策略** | ✅ 可用 | File-backed，单实例 |
-| **TS 策略启动** | ✅ 修复 | Identity-aware，可正常启动 |
-| **Resume 错误处理** | ✅ 完成 | 409 runtime_checkpoint_missing |
-| **同会话 Resume** | ✅ 可用 | 当前会话内 interrupt/resume |
-| **跨进程 Resume** | ❌ 未实现 | 返回明确 409 错误 |
-| **Durable LangGraph Checkpoint** | ❌ 未实现 | 需要 persistent checkpointer |
+| 维度                             | 状态      | 说明                           |
+| -------------------------------- | --------- | ------------------------------ |
+| **Snapshot Persistence**         | ✅ 完成   | run metadata + state 持久化    |
+| **Events/Interrupts**            | ✅ 完成   | 端到端透传和持久化             |
+| **Local 策略**                   | ✅ 可用   | File-backed，单实例            |
+| **TS 策略启动**                  | ✅ 修复   | Identity-aware，可正常启动     |
+| **Resume 错误处理**              | ✅ 完成   | 409 runtime_checkpoint_missing |
+| **同会话 Resume**                | ✅ 可用   | 当前会话内 interrupt/resume    |
+| **跨进程 Resume**                | ❌ 未实现 | 返回明确 409 错误              |
+| **Durable LangGraph Checkpoint** | ❌ 未实现 | 需要 persistent checkpointer   |
 
 **总体完成度**: **85%** ✅
 
@@ -273,6 +287,7 @@ AGENT_CHECKPOINT_STRATEGY=local  # 默认值
 ```
 
 **关键改进**:
+
 - ✅ 文档与代码一致
 - ✅ 错误边界明确
 - ✅ 用户获得可预期的行为
@@ -315,22 +330,26 @@ AGENT_CHECKPOINT_STRATEGY=local  # 默认值
 ### 能力边界
 
 **当前系统支持**:
+
 - ✅ 单实例 file-backed checkpoint（生产可用）
 - ✅ 多实例 database snapshot persistence（部分可用）
 - ✅ 同会话 interrupt/resume
 - ✅ 查看历史 runs 和 snapshots
 
 **当前系统不支持**（明确返回错误）:
+
 - ⚠️ 跨进程/重启后 resume → 409 runtime_checkpoint_missing
 - ⚠️ Durable LangGraph execution state
 
 ### 后续建议
 
 **立即可部署**:
+
 - ✅ 单实例模式（推荐）
 - ✅ 多实例模式（snapshot persistence only）
 
 **如需 durable resume**:
+
 - 实现 database LangGraph saver（可选，独立任务）
 
 ---

@@ -16,20 +16,20 @@ DDD 定义值对象，看的是它的**特性**，而不是它的**实现代码*
 值对象的定义有三条，TypeScript 的原生字符串类型完美符合：
 
 1. **没有生命周期 (No Identity)**：
-	
-	- 你不需要追踪一个字符串的变化。
-	- `IdentityId` 就是一个值，就像数字 `1` 一样。
-		
+
+   - 你不需要追踪一个字符串的变化。
+   - `IdentityId` 就是一个值，就像数字 `1` 一样。
+
 2. **不可变性 (Immutability)**：
-	
-	- 在 JavaScript/TypeScript 中，`string`、`number` 这些原始类型**天然是不可变的**。你无法修改字符串的某一位，你只能替换整个字符串。
-	- 不需要 `readonly` 关键字修饰，它天生就是 readonly。
-		
+
+   - 在 JavaScript/TypeScript 中，`string`、`number` 这些原始类型**天然是不可变的**。你无法修改字符串的某一位，你只能替换整个字符串。
+   - 不需要 `readonly` 关键字修饰，它天生就是 readonly。
+
 3. **通过值比较相等 (Structural Equality)**：
-	
-	- `const a = "id-1"; const b = "id-1";`
-	- `a === b` 是 **true**。
-	- 它不需要像 Java 那样写 `.equals()` 方法，JS 引擎自动帮你按值比较了。
+
+   - `const a = "id-1"; const b = "id-1";`
+   - `a === b` 是 **true**。
+   - 它不需要像 Java 那样写 `.equals()` 方法，JS 引擎自动帮你按值比较了。
 
 **结论：**
 
@@ -111,13 +111,13 @@ TypeScript
 import { IdentityId } from './IdentityId';
 
 // 创建
-const userId = IdentityId.of("user-123"); 
+const userId = IdentityId.of("user-123");
 
 // 使用 (直接当字符串用)
-console.log("User ID is: " + userId); 
+console.log("User ID is: " + userId);
 
 // 调用逻辑 (函数式调用，而不是方法调用)
-if (IdentityId.isTemporary(userId)) { 
+if (IdentityId.isTemporary(userId)) {
   // ...
 }
 ```
@@ -126,10 +126,10 @@ if (IdentityId.isTemporary(userId)) {
 
 在你的项目中，可以混合使用这两种策略，它们都是值对象：
 
-|**场景**|**推荐实现方式**|**例子**|**理由**|
-|---|---|---|---|
-|**简单包装器**|**Type (Branded Type)**|`IdentityId`<br><br>  <br><br>`Email`<br><br>  <br><br>`PhoneNumber`<br><br>  <br><br>`OrderCode`|只有一个属性；主要依赖原生比较 (`===`)；不需要复杂的内部状态变化。|
-|**复杂逻辑组合**|**Class (extends ValueObject)**|`DeviceInfo`<br><br>  <br><br>`Money` (金额+币种)<br><br>  <br><br>`Address`<br><br>  <br><br>`DateRange` (开始+结束)|有多个属性；需要封装复杂的计算逻辑；可能需要派生出新对象。|
+| **场景**         | **推荐实现方式**                | **例子**                                                                                                           | **理由**                                                           |
+| ---------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| **简单包装器**   | **Type (Branded Type)**         | `IdentityId`<br><br> <br><br>`Email`<br><br> <br><br>`PhoneNumber`<br><br> <br><br>`OrderCode`                     | 只有一个属性；主要依赖原生比较 (`===`)；不需要复杂的内部状态变化。 |
+| **复杂逻辑组合** | **Class (extends ValueObject)** | `DeviceInfo`<br><br> <br><br>`Money` (金额+币种)<br><br> <br><br>`Address`<br><br> <br><br>`DateRange` (开始+结束) | 有多个属性；需要封装复杂的计算逻辑；可能需要派生出新对象。         |
 
 **回答你的核心疑问：**
 

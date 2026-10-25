@@ -15,7 +15,12 @@ import { createInlineTaskWriteTransactionRunner } from '../task-write-support';
 import { createTimeFacade } from '@memoflow/time';
 
 const goalReadPort = { getKeyResultMeasurementContext: vi.fn() };
-const testBinding = (progressRule: unknown) => TaskGoalLinkSchema.parse({ goalId: 'GoalId_11111111-1111-4111-8111-111111111111', keyResultId: 'KeyResultId_22222222-2222-4222-8222-222222222222', progressRule });
+const testBinding = (progressRule: unknown) =>
+  TaskGoalLinkSchema.parse({
+    goalId: 'GoalId_11111111-1111-4111-8111-111111111111',
+    keyResultId: 'KeyResultId_22222222-2222-4222-8222-222222222222',
+    progressRule,
+  });
 
 const userTimeContextPort = {
   getUserTimeContext: vi.fn().mockResolvedValue(TASK_TEST_TIME_CONTEXT),
@@ -83,7 +88,9 @@ describe('CreateTaskPlanUseCase', () => {
   }
 
   beforeEach(() => {
-    goalReadPort.getKeyResultMeasurementContext.mockResolvedValue(ok({ progress: { aggregationMethod: 'Sum' } }));
+    goalReadPort.getKeyResultMeasurementContext.mockResolvedValue(
+      ok({ progress: { aggregationMethod: 'Sum' } }),
+    );
     vi.clearAllMocks();
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     mockGenerateOccurrences.mockReturnValue([]);
@@ -109,15 +116,36 @@ describe('CreateTaskPlanUseCase', () => {
     );
   });
 
-  it.each(Object.values(KeyResultCalculationMethod))('validates Fixed and Prompt against %s before creating', async (method) => {
-    goalReadPort.getKeyResultMeasurementContext.mockResolvedValue(ok({ progress: { aggregationMethod: method } }));
-    const fixed = await useCase.execute(aCreateRequest({ goalBinding: testBinding({ mode: 'Fixed', trigger: 'EachCompletion', value: -2 }) }));
-    expect(fixed.ok).toBe(method === 'Sum');
-    if (method !== 'Sum') expect(templateRepo.save).not.toHaveBeenCalled();
-    const prompt = await useCase.execute(aCreateRequest({ goalBinding: testBinding({ mode: 'Prompt', trigger: 'EachCompletion', suggestedValue: 0 }) }));
-    expect(prompt.ok).toBe(true);
-    expect(goalReadPort.getKeyResultMeasurementContext).toHaveBeenCalledWith(expect.any(String), expect.any(String), expect.any(String));
-  });
+  it.each(Object.values(KeyResultCalculationMethod))(
+    'validates Fixed and Prompt against %s before creating',
+    async (method) => {
+      goalReadPort.getKeyResultMeasurementContext.mockResolvedValue(
+        ok({ progress: { aggregationMethod: method } }),
+      );
+      const fixed = await useCase.execute(
+        aCreateRequest({
+          goalBinding: testBinding({ mode: 'Fixed', trigger: 'EachCompletion', value: -2 }),
+        }),
+      );
+      expect(fixed.ok).toBe(method === 'Sum');
+      if (method !== 'Sum') expect(templateRepo.save).not.toHaveBeenCalled();
+      const prompt = await useCase.execute(
+        aCreateRequest({
+          goalBinding: testBinding({
+            mode: 'Prompt',
+            trigger: 'EachCompletion',
+            suggestedValue: 0,
+          }),
+        }),
+      );
+      expect(prompt.ok).toBe(true);
+      expect(goalReadPort.getKeyResultMeasurementContext).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(String),
+        expect.any(String),
+      );
+    },
+  );
 
   afterEach(() => {
     vi.restoreAllMocks();

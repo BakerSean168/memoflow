@@ -1,8 +1,6 @@
 import { DatabaseSync, type SQLInputValue } from 'node:sqlite';
 import { describe, expect, it } from 'vitest';
-import type {
-  IElectronDatabase, IElectronDatabaseTransaction,
-} from '@memoflow/contracts/electron';
+import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
 import { PowerSyncGoalWriteTransactionRunner } from './powersync-goal-write-transaction-runner';
 
 function sqliteHarness() {
@@ -24,9 +22,7 @@ function sqliteHarness() {
   };
   const db = {
     ...statements,
-    async writeTransaction<T>(
-      work: (tx: IElectronDatabaseTransaction) => Promise<T>,
-    ): Promise<T> {
+    async writeTransaction<T>(work: (tx: IElectronDatabaseTransaction) => Promise<T>): Promise<T> {
       sql.exec('BEGIN IMMEDIATE');
       try {
         const result = await work(statements as never);
@@ -48,25 +44,30 @@ describe('PowerSync native Goal AI lease in the same SQLite transaction as Save'
       const runner = new PowerSyncGoalWriteTransactionRunner(db);
       const identityId = 'user-1';
       const lease = { runId: 'run-1', token: '11111111-1111-4111-8111-111111111111', fence: 1 };
-      sql.prepare('INSERT INTO ai_goal_surface_leases VALUES (?, ?, ?, ?, ?)').run(
-        identityId, lease.runId, lease.token, lease.fence, Date.now() + 30_000,
-      );
+      sql
+        .prepare('INSERT INTO ai_goal_surface_leases VALUES (?, ?, ?, ?, ?)')
+        .run(identityId, lease.runId, lease.token, lease.fence, Date.now() + 30_000);
 
       const proof = (who: string, grant: typeof lease) =>
         runner.run((context) => context.assertNativeAiLease!(who, grant));
       expect(await proof(identityId, lease)).toBe(true);
       expect(await proof('user-2', lease)).toBe(false);
-      expect(await proof(identityId, { ...lease, token: '22222222-2222-4222-8222-222222222222' }))
-        .toBe(false);
+      expect(
+        await proof(identityId, { ...lease, token: '22222222-2222-4222-8222-222222222222' }),
+      ).toBe(false);
 
-      sql.prepare('UPDATE ai_goal_surface_leases SET owner_token = ?, fence = 2 WHERE run_id = ?')
+      sql
+        .prepare('UPDATE ai_goal_surface_leases SET owner_token = ?, fence = 2 WHERE run_id = ?')
         .run('22222222-2222-4222-8222-222222222222', lease.runId);
       expect(await proof(identityId, lease)).toBe(false);
       const current = {
-        ...lease, token: '22222222-2222-4222-8222-222222222222', fence: 2,
+        ...lease,
+        token: '22222222-2222-4222-8222-222222222222',
+        fence: 2,
       };
       expect(await proof(identityId, current)).toBe(true);
-      sql.prepare('UPDATE ai_goal_surface_leases SET expires_at = ? WHERE run_id = ?')
+      sql
+        .prepare('UPDATE ai_goal_surface_leases SET expires_at = ? WHERE run_id = ?')
         .run(Date.now() - 1, lease.runId);
       expect(await proof(identityId, current)).toBe(false);
     } finally {

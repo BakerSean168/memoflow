@@ -13,7 +13,27 @@ interface InvocationQueueItem {
 
 export interface ScheduledInvocationRuntimeOptions {
   readonly repository: IScheduledInvocationRepository;
-  readonly handlerRegistry: { execute(context: ScheduledInvocation['payload'] extends never ? never : { identityId: string; owner: { identityId: string; type: string; id: string }; schedulingKey: string; handlerKey: string; runAt: number; payloadVersion: number; payload: unknown; sourceRevision?: number | string }): Promise<{ status: 'succeeded' | 'skipped' | 'retryable' | 'failed' | 'dead_letter'; result?: Record<string, unknown>; reason?: string; failure?: { code: string; message: string; retryable: boolean } }> };
+  readonly handlerRegistry: {
+    execute(
+      context: ScheduledInvocation['payload'] extends never
+        ? never
+        : {
+            identityId: string;
+            owner: { identityId: string; type: string; id: string };
+            schedulingKey: string;
+            handlerKey: string;
+            runAt: number;
+            payloadVersion: number;
+            payload: unknown;
+            sourceRevision?: number | string;
+          },
+    ): Promise<{
+      status: 'succeeded' | 'skipped' | 'retryable' | 'failed' | 'dead_letter';
+      result?: Record<string, unknown>;
+      reason?: string;
+      failure?: { code: string; message: string; retryable: boolean };
+    }>;
+  };
   readonly leaseCoordinator?: { isLeaseHeld?(): boolean };
   readonly timer?: IScheduleTimer;
   readonly workerId?: string;
@@ -60,11 +80,17 @@ export class ScheduledInvocationQueue {
   add(invocation: ScheduledInvocation): void {
     const dueAt = invocation.nextAttemptAt ?? invocation.runAt;
     this.heap.remove(invocation.id);
-    this.heap.insert({ taskId: invocation.id, nextRunAt: dueAt, identityId: invocation.identityId });
+    this.heap.insert({
+      taskId: invocation.id,
+      nextRunAt: dueAt,
+      identityId: invocation.identityId,
+    });
     if (this.running && !this.executing) this.schedule();
   }
 
-  remove(invocationId: string): void { this.heap.remove(invocationId); }
+  remove(invocationId: string): void {
+    this.heap.remove(invocationId);
+  }
 
   private schedule(): void {
     if (!this.running) return;
@@ -103,36 +129,81 @@ export class ScheduledInvocationQueue {
     }
   }
 
-  private async executeClaim(claim: { invocation: ScheduledInvocation; attempt: { attemptNumber: number; claimToken: string | null; fencingToken: number | null } }): Promise<void> {
+  private async executeClaim(claim: {
+    invocation: ScheduledInvocation;
+    attempt: { attemptNumber: number; claimToken: string | null; fencingToken: number | null };
+  }): Promise<void> {
     const invocation = claim.invocation;
-    let result: Awaited<ReturnType<ScheduledInvocationRuntimeOptions['handlerRegistry']['execute']>>;
+    let result: Awaited<
+      ReturnType<ScheduledInvocationRuntimeOptions['handlerRegistry']['execute']>
+    >;
     try {
       result = await this.options.handlerRegistry.execute({
         identityId: invocation.identityId,
-        owner: { identityId: invocation.identityId, type: invocation.ownerType, id: invocation.ownerId },
+        owner: {
+          identityId: invocation.identityId,
+          type: invocation.ownerType,
+          id: invocation.ownerId,
+        },
         schedulingKey: invocation.schedulingKey,
         handlerKey: invocation.handlerKey,
         runAt: invocation.runAt,
         payloadVersion: invocation.payloadVersion,
         payload: invocation.payload,
-        ...(invocation.sourceRevision === null ? {} : { sourceRevision: invocation.sourceRevision }),
+        ...(invocation.sourceRevision === null
+          ? {}
+          : { sourceRevision: invocation.sourceRevision }),
       });
     } catch (error) {
-      result = { status: 'retryable', failure: { code: 'HANDLER_EXECUTION_FAILED', message: error instanceof Error ? error.message : String(error), retryable: true } };
+      result = {
+        status: 'retryable',
+        failure: {
+          code: 'HANDLER_EXECUTION_FAILED',
+          message: error instanceof Error ? error.message : String(error),
+          retryable: true,
+        },
+      };
     }
     const retryable = result.status === 'retryable';
     const attemptsUsed = claim.attempt.attemptNumber;
-    const mayRetry = retryable && invocation.retryPolicy.enabled && attemptsUsed <= invocation.retryPolicy.maxRetries;
-    const delay = Math.min(invocation.retryPolicy.maxDelayMs, invocation.retryPolicy.initialDelayMs * Math.pow(invocation.retryPolicy.backoffMultiplier, Math.max(0, attemptsUsed - 1)));
+    const mayRetry =
+      retryable &&
+      invocation.retryPolicy.enabled &&
+      attemptsUsed <= invocation.retryPolicy.maxRetries;
+    const delay = Math.min(
+      invocation.retryPolicy.maxDelayMs,
+      invocation.retryPolicy.initialDelayMs *
+        Math.pow(invocation.retryPolicy.backoffMultiplier, Math.max(0, attemptsUsed - 1)),
+    );
     const nextAttemptAt = mayRetry ? this.timer.now() + delay : null;
-    const status = result.status === 'succeeded' ? 'succeeded' : result.status === 'skipped' ? 'skipped' : result.status === 'failed' ? 'failed' : result.status === 'dead_letter' ? 'dead_letter' : mayRetry ? 'retry_wait' : 'dead_letter';
+    const status =
+      result.status === 'succeeded'
+        ? 'succeeded'
+        : result.status === 'skipped'
+          ? 'skipped'
+          : result.status === 'failed'
+            ? 'failed'
+            : result.status === 'dead_letter'
+              ? 'dead_letter'
+              : mayRetry
+                ? 'retry_wait'
+                : 'dead_letter';
     await this.options.repository.completeAttempt({
       invocationId: invocation.id,
       identityId: invocation.identityId,
       claimToken: claim.attempt.claimToken ?? '',
       fencingToken: claim.attempt.fencingToken ?? 0,
       attemptNumber: claim.attempt.attemptNumber,
-      outcome: result.status === 'succeeded' ? 'succeeded' : result.status === 'skipped' ? 'skipped' : retryable ? 'retryable_failure' : result.status === 'dead_letter' || result.status === 'failed' ? 'permanent_failure' : 'timeout',
+      outcome:
+        result.status === 'succeeded'
+          ? 'succeeded'
+          : result.status === 'skipped'
+            ? 'skipped'
+            : retryable
+              ? 'retryable_failure'
+              : result.status === 'dead_letter' || result.status === 'failed'
+                ? 'permanent_failure'
+                : 'timeout',
       status,
       nextAttemptAt,
       finishedAt: this.timer.now(),

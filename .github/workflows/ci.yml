@@ -34,6 +34,9 @@ jobs:
       manifest_digest: ${{ steps.scope.outputs.manifest_digest }}
       risk: ${{ steps.scope.outputs.risk }}
       lane_governance: ${{ steps.scope.outputs.lane_governance }}
+      capability_fmt: ${{ steps.scope.outputs.capability_fmt }}
+      capability_component_browser: ${{ steps.scope.outputs.capability_component_browser }}
+      capability_contract: ${{ steps.scope.outputs.capability_contract }}
       lane_validate: ${{ steps.scope.outputs.lane_validate }}
       lane_boundary: ${{ steps.scope.outputs.lane_boundary }}
       lane_integration: ${{ steps.scope.outputs.lane_integration }}
@@ -113,9 +116,9 @@ jobs:
           retention-days: 14
 
   governance:
-    name: Governance
+    name: Static Checks (Fmt + Governance)
     needs: scope-detector
-    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.lane_governance == 'true'
+    if: needs.scope-detector.result == 'success' && (needs.scope-detector.outputs.lane_governance == 'true' || needs.scope-detector.outputs.capability_fmt == 'true')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -127,6 +130,26 @@ jobs:
           setup-uv: 'false'
           lane: governance
           consume-delivery-manifest: 'true'
+      - name: Format check (changed files; full scan on full runs)
+        shell: bash
+        run: |
+          mkdir -p reports/quality
+          FULL=$(node -p "require('./scope/delivery-manifest-v1.json').full")
+          BASE=$(node -p "require('./scope/delivery-manifest-v1.json').base ?? ''")
+          HEAD=$(node -p "require('./scope/delivery-manifest-v1.json').head ?? ''")
+          if [ "$FULL" = "true" ]; then
+            node ./tools/quality/fmt.mjs --check --all --receipt reports/quality/fmt-receipt.json
+          else
+            node ./tools/quality/fmt.mjs --check --changed --base "$BASE" --head "$HEAD" --receipt reports/quality/fmt-receipt.json
+          fi
+      - name: Upload format receipt
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: quality-fmt-receipt-${{ github.run_id }}
+          path: reports/quality/fmt-receipt.json
+          if-no-files-found: warn
+          retention-days: 14
       - name: Nx sync generators are applied
         run: pnpm exec nx sync:check
       # governance-check depends on test-system-v2:test:governance, which owns
@@ -221,6 +244,58 @@ jobs:
       - uses: ./.github/actions/publish-lane-evidence
         if: always()
         with: { lane: validate }
+
+  component-browser:
+    name: Component Browser
+    needs: scope-detector
+    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.capability_component_browser == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with: { fetch-depth: 0 }
+      - uses: ./.github/actions/setup-nx-affected-job
+        with:
+          node-version: '${{ env.NODE_VERSION }}'
+          setup-python: 'false'
+          setup-uv: 'false'
+          consume-delivery-manifest: 'true'
+      - run: pnpm exec playwright install chromium
+      # The story import graph reaches workspace packages whose subpath
+      # exports resolve to dist (e.g. @memoflow/domain-shared/shared) and
+      # which the Storybook alias lists intentionally do not cover; a clean
+      # checkout must build the workspace first (the old in-Web-job step
+      # got this for free from the Build job).
+      - name: Build workspace packages
+        run: pnpm exec nx run-many -t build --all --parallel=3
+      - name: Storybook interaction tests (Vitest Browser Mode)
+        run: pnpm exec nx run ui-storybook:test:interaction
+      - name: Upload Storybook interaction evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: storybook-interactions-${{ github.run_attempt }}
+          path: test-results/storybook-results.json
+          if-no-files-found: error
+          retention-days: 14
+
+  contract:
+    name: Contract Tests
+    needs: scope-detector
+    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.capability_contract == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with: { fetch-depth: 0 }
+      - uses: ./.github/actions/setup-nx-affected-job
+        with:
+          node-version: '${{ env.NODE_VERSION }}'
+          setup-python: 'false'
+          setup-uv: 'false'
+          consume-delivery-manifest: 'true'
+      - run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx affected -t test:contract --parallel=2 --outputStyle=static
+        env: { TEST_REPORT_NAME: contract-tests }
 
   typecheck:
     name: Typecheck
@@ -560,32 +635,6 @@ jobs:
         env:
           TEST_REPORT_NAME: web-visual-${{ strategy.job-index }}
           DELIVERY_LANE: web
-      - name: Goal and Task Storybook interactions (single build, no API)
-        if: strategy.job-index == 0
-        shell: bash
-        run: |
-          pnpm exec nx run ui-storybook:build
-          setsid pnpm exec nx run ui-storybook:preview > "$RUNNER_TEMP/storybook-preview.log" 2>&1 &
-          server=$!
-          trap 'kill -- -"$server" 2>/dev/null || true' EXIT
-          for attempt in {1..30}; do
-            curl --fail --silent http://127.0.0.1:4402/index.json > /dev/null && break
-            kill -0 "$server"
-            sleep 1
-          done
-          curl --fail --silent http://127.0.0.1:4402/index.json > /dev/null
-          node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run ui-storybook:test:interaction
-        env:
-          TEST_REPORT_NAME: storybook-interactions
-          DELIVERY_LANE: web
-      - name: Upload Storybook interaction evidence
-        if: always() && strategy.job-index == 0
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
-          name: storybook-interactions-${{ github.run_attempt }}
-          path: test-results/storybook-results.json
-          if-no-files-found: error
-          retention-days: 14
       - name: Secure AI Provider product acceptance
         if: strategy.job-index == 0
         run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run web:e2e:ai-provider
@@ -626,6 +675,8 @@ jobs:
       - build
       - verification-children
       - web-flow-shard
+      - component-browser
+      - contract
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -671,6 +722,8 @@ jobs:
       - build
       - verification-children
       - web-flow-shard
+      - component-browser
+      - contract
     if: always()
     runs-on: ubuntu-latest
     steps:

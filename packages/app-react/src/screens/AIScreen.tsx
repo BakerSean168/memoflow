@@ -77,8 +77,12 @@ export function AIScreen() {
       eyebrow="More"
       title="AI workspace"
       subtitle="AI 页面现在已经接入 provider 选择、默认 provider 切换和流式消息发送。"
-      refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refresh} />}>
-      <SectionCard title="Navigation" description="AI 先放在 More 栈，等移动端使用频率稳定后再评估是否提升。">
+      refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refresh} />}
+    >
+      <SectionCard
+        title="Navigation"
+        description="AI 先放在 More 栈，等移动端使用频率稳定后再评估是否提升。"
+      >
         <PrimaryButton label="Back to More" onPress={() => router.back()} variant="secondary" />
       </SectionCard>
 
@@ -91,7 +95,10 @@ export function AIScreen() {
         </SectionCard>
       ) : (
         <>
-          <SectionCard title="Overview" description="当前会话、provider 和运行时能力都已经进入同一页。">
+          <SectionCard
+            title="Overview"
+            description="当前会话、provider 和运行时能力都已经进入同一页。"
+          >
             <View style={styles.pillRow}>
               <StatusPill label={`${conversations.length} conversations`} tone="tint" />
               <StatusPill label={`${providers.length} providers`} tone="success" />
@@ -103,7 +110,10 @@ export function AIScreen() {
             </View>
           </SectionCard>
 
-          <SectionCard title="Provider" description="消息发送时可以选择 provider；默认模型来自已保存配置，完整模型目录按需读取而不缓存到 Provider。">
+          <SectionCard
+            title="Provider"
+            description="消息发送时可以选择 provider；默认模型来自已保存配置，完整模型目录按需读取而不缓存到 Provider。"
+          >
             {providers.length > 0 ? (
               <>
                 <View style={styles.listColumn}>
@@ -112,7 +122,9 @@ export function AIScreen() {
                       <View style={styles.messageHeader}>
                         <ThemedText type="smallBold">{provider.name}</ThemedText>
                         <View style={styles.pillRow}>
-                          {provider.isDefault ? <StatusPill label="Default" tone="success" /> : null}
+                          {provider.isDefault ? (
+                            <StatusPill label="Default" tone="success" />
+                          ) : null}
                           <StatusPill label={provider.providerDefinitionId} tone="textSecondary" />
                         </View>
                       </View>
@@ -124,13 +136,17 @@ export function AIScreen() {
                       </ThemedText>
                       <View style={styles.actionRow}>
                         <PrimaryButton
-                          label={selectedProviderId === String(provider.id) ? 'Selected' : 'Use provider'}
+                          label={
+                            selectedProviderId === String(provider.id) ? 'Selected' : 'Use provider'
+                          }
                           onPress={() => {
                             setSelectedProviderId(String(provider.id));
                             setSelectedModel(provider.defaultModel ?? null);
                           }}
                           disabled={selectedProviderId === String(provider.id)}
-                          variant={selectedProviderId === String(provider.id) ? 'ghost' : 'secondary'}
+                          variant={
+                            selectedProviderId === String(provider.id) ? 'ghost' : 'secondary'
+                          }
                         />
                         <PrimaryButton
                           label={provider.isDefault ? 'Default provider' : 'Set default'}
@@ -145,7 +161,9 @@ export function AIScreen() {
 
                 {selectedProvider ? (
                   <ThemedText type="small" themeColor="textSecondary">
-                    Selected model: {selectedModel ?? selectedProvider.defaultModel ?? 'No model selected'}. Model inventory is loaded on demand and is not stored on the Provider.
+                    Selected model:{' '}
+                    {selectedModel ?? selectedProvider.defaultModel ?? 'No model selected'}. Model
+                    inventory is loaded on demand and is not stored on the Provider.
                   </ThemedText>
                 ) : null}
               </>
@@ -156,7 +174,10 @@ export function AIScreen() {
             )}
           </SectionCard>
 
-          <SectionCard title="New conversation" description="先显式创建会话，避免移动端空态里直接暴露复杂设置。">
+          <SectionCard
+            title="New conversation"
+            description="先显式创建会话，避免移动端空态里直接暴露复杂设置。"
+          >
             <PrimaryTextField
               value={conversationName}
               onChangeText={setConversationName}
@@ -178,17 +199,28 @@ export function AIScreen() {
             </SectionCard>
           ) : null}
 
-          <SectionCard title="Conversations" description="会话列表保持轻量，详情和消息历史在同页下方展示。">
+          <SectionCard
+            title="Conversations"
+            description="会话列表保持轻量，详情和消息历史在同页下方展示。"
+          >
             <View style={styles.listColumn}>
               {conversations.length > 0 ? (
                 conversations.map((conversation) => (
-                  <ThemedView key={conversation.id} type="backgroundSelected" style={styles.itemCard}>
+                  <ThemedView
+                    key={conversation.id}
+                    type="backgroundSelected"
+                    style={styles.itemCard}
+                  >
                     <ThemedText type="smallBold">{conversation.name}</ThemedText>
                     <View style={styles.pillRow}>
                       <StatusPill label={conversation.status} tone="tint" />
                     </View>
                     <PrimaryButton
-                      label={activeConversation?.id === conversation.id ? 'Active conversation' : 'Open conversation'}
+                      label={
+                        activeConversation?.id === conversation.id
+                          ? 'Active conversation'
+                          : 'Open conversation'
+                      }
                       onPress={() => selectConversation(String(conversation.id))}
                       disabled={isMutating || activeConversation?.id === conversation.id}
                       variant={activeConversation?.id === conversation.id ? 'ghost' : 'secondary'}
@@ -205,21 +237,27 @@ export function AIScreen() {
 
           <SectionCard
             title={activeConversation ? activeConversation.name : 'Conversation detail'}
-            description="消息已经支持流式输出，后续再补更细的 provider 管理和会话维护动作。">
+            description="消息已经支持流式输出，后续再补更细的 provider 管理和会话维护动作。"
+          >
             <View style={styles.listColumn}>
               {activeConversation?.messages && activeConversation.messages.length > 0 ? (
                 activeConversation.messages.map((message) => (
                   <ThemedView
                     key={message.id}
                     type={message.isUser ? 'backgroundSelected' : 'backgroundElement'}
-                    style={styles.messageCard}>
+                    style={styles.messageCard}
+                  >
                     <View style={styles.messageHeader}>
-                      <ThemedText type="smallBold">{message.isUser ? 'You' : message.isAssistant ? 'Assistant' : message.role}</ThemedText>
+                      <ThemedText type="smallBold">
+                        {message.isUser ? 'You' : message.isAssistant ? 'Assistant' : message.role}
+                      </ThemedText>
                       <ThemedText type="small" themeColor="textSecondary">
                         {message.formattedTime}
                       </ThemedText>
                     </View>
-                    <ThemedText type="small">{message.content || (isStreaming && message.isAssistant ? '...' : '')}</ThemedText>
+                    <ThemedText type="small">
+                      {message.content || (isStreaming && message.isAssistant ? '...' : '')}
+                    </ThemedText>
                   </ThemedView>
                 ))
               ) : (
@@ -230,7 +268,10 @@ export function AIScreen() {
             </View>
           </SectionCard>
 
-          <SectionCard title="Message composer" description="消息通过与 Web/Desktop 相同的 Mastra Assistant runtime 流式发送，provider 与 model 使用上面的选择结果。">
+          <SectionCard
+            title="Message composer"
+            description="消息通过与 Web/Desktop 相同的 Mastra Assistant runtime 流式发送，provider 与 model 使用上面的选择结果。"
+          >
             <View style={styles.actionRow}>
               {selectedProvider ? <StatusPill label={selectedProvider.name} tone="tint" /> : null}
               {selectedModel ? <StatusPill label={selectedModel} tone="textSecondary" /> : null}

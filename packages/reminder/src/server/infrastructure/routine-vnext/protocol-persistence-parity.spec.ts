@@ -39,10 +39,12 @@ describe('Routine protocol Prisma / PowerSync parity', () => {
     const prisma = protocolDefinitionToPrisma(protocol);
     const powerSync = protocolDefinitionToPowerSync(protocol);
 
-    expect(normalizeProtocolDefinitionPrisma(prisma))
-      .toEqual(normalizeProtocolDefinitionPowerSync(powerSync));
-    expect(deserializeProtocolDefinition(prisma.definitionJson).snapshot())
-      .toEqual(protocol.snapshot());
+    expect(normalizeProtocolDefinitionPrisma(prisma)).toEqual(
+      normalizeProtocolDefinitionPowerSync(powerSync),
+    );
+    expect(deserializeProtocolDefinition(prisma.definitionJson).snapshot()).toEqual(
+      protocol.snapshot(),
+    );
   });
 
   it('persists a restart-safe session snapshot with protocol version, phase plan and deadline', () => {
@@ -58,8 +60,9 @@ describe('Routine protocol Prisma / PowerSync parity', () => {
 
     const prisma = protocolSessionToPrisma(session);
     const powerSync = protocolSessionToPowerSync(session);
-    expect(normalizeProtocolSessionPrisma(prisma))
-      .toEqual(normalizeProtocolSessionPowerSync(powerSync));
+    expect(normalizeProtocolSessionPrisma(prisma)).toEqual(
+      normalizeProtocolSessionPowerSync(powerSync),
+    );
 
     const restored = deserializeProtocolSession(prisma.snapshotJson);
     expect(restored.snapshot()).toEqual(session.snapshot());
@@ -72,12 +75,16 @@ describe('Routine protocol Prisma / PowerSync parity', () => {
       definitions: 'routine_protocol_definitions',
       sessions: 'routine_protocol_sessions',
     });
-    expect(() => deserializeProtocolSession(JSON.stringify({
-      id: 'fake',
-      identityId: 'identity-1',
-      protocolId: 'p',
-      state: 'Running',
-      phasePlan: [],
-    }))).toThrow();
+    expect(() =>
+      deserializeProtocolSession(
+        JSON.stringify({
+          id: 'fake',
+          identityId: 'identity-1',
+          protocolId: 'p',
+          state: 'Running',
+          phasePlan: [],
+        }),
+      ),
+    ).toThrow();
   });
 });

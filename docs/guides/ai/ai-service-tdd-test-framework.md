@@ -7,6 +7,7 @@
 ### 1.1 当前测试的优点 ✅
 
 **已有基础设施**：
+
 - ✅ Pytest 框架完整（pytest, pytest-asyncio, pytest-cov, pytest-html）
 - ✅ conftest.py 有良好的环保变量和 test client 配置
 - ✅ 安全认证 fixtures（signed_json_request）
@@ -15,6 +16,7 @@
 - ✅ 类型检查工具齐全（pyright, ruff）
 
 **现有测试的风格**：
+
 - 使用 unittest.mock (AsyncMock, patch)
 - Mock LLM 的 ChatService
 - 测试 HTTP 端点（client.post）
@@ -22,6 +24,7 @@
 ### 1.2 现有测试的缺陷 ❌
 
 **缺乏确定性逻辑的单元测试**：
+
 ```python
 # 现有代码结构：LLM 调用 → 返回响应
 async def plan(self, *, idea, category, ...):
@@ -31,6 +34,7 @@ async def plan(self, *, idea, category, ...):
 ```
 
 **问题**：
+
 - 只测了 HTTP 层（端点是否成功调用）
 - 没有测 parse_goal_payload() 的正确性
 - 没有测时间计算逻辑
@@ -38,12 +42,14 @@ async def plan(self, *, idea, category, ...):
 - Mock 的 LLM 响应是硬编码的，无法复用
 
 **缺乏系统的 LLM mocking 策略**：
+
 - 没有专用的 fixtures 来生成不同类型的 LLM 响应
 - 没有测试"LLM 返回无效数据"的情况
 - 没有测试"LLM 返回边界数据"的情况（例如：极长的字符串）
 - 没有定义可复用的 mock 数据工厂
 
 **缺乏集成测试的分层**：
+
 - 现有测试都是 HTTP 集成测试
 - 没有"只测 service 逻辑"的单元测试
 - 没有"测 service + mocked LLM"的集成测试
@@ -60,7 +66,7 @@ async def plan(self, *, idea, category, ...):
                /    \
              /  E2E   \        (HTTP 端点 + 真实/Mocked LLM)
            /____________\
-         
+
           /\
         /    \
       / 集成   \      (Service 逻辑 + Mocked LLM)
@@ -82,25 +88,26 @@ async def plan(self, *, idea, category, ...):
 # tests/unit/test_goal_planning_parsing.py
 class TestGoalPayloadParsing:
     """测试解析逻辑，不涉及 LLM"""
-    
+
     def test_parse_valid_goal_json(self):
         """Given 有效的 JSON，When 解析，Then 返回正确结构"""
-        
+
     def test_parse_missing_required_fields(self):
         """Given 缺失必须字段，When 解析，Then 抛出有用的错误"""
-        
+
     def test_parse_invalid_json(self):
         """Given 非 JSON 文本，When 解析，Then 抛出 ValidationError"""
 
 # tests/unit/test_goal_planning_calculations.py
 class TestGoalTimeCalculations:
     """测试时间计算逻辑"""
-    
+
     def test_calculate_suggested_end_date(self):
         """Given 开始时间和持续天数，Then 计算结束时间正确"""
 ```
 
 **特点**：
+
 - 快速（<100ms）
 - 100% 确定性
 - 无外部依赖
@@ -114,17 +121,18 @@ class TestGoalTimeCalculations:
 # tests/integration/test_goal_planning_workflow.py
 class TestGoalPlanningWorkflow:
     """测试 service 方法，用 mock 的 LLM"""
-    
+
     @pytest.mark.asyncio
     async def test_plan_with_mocked_llm(self, goal_planning_service, mock_llm_response):
         """Given mocked LLM，When plan()，Then 返回结构正确"""
-        
+
     @pytest.mark.asyncio
     async def test_plan_handles_llm_timeout(self, goal_planning_service):
         """Given LLM 超时，When plan()，Then 返回友好错误"""
 ```
 
 **特点**：
+
 - 中速（100ms - 1s）
 - 测试 async 流程
 - 依赖通过 mock 控制
@@ -138,12 +146,13 @@ class TestGoalPlanningWorkflow:
 # tests/e2e/test_goal_planning_endpoints.py
 class TestGoalPlanningEndpoints:
     """测试 HTTP 端点"""
-    
+
     def test_plan_goal_endpoint_success(self, client, mock_llm_response):
         """测试 POST /internal/goals/plan"""
 ```
 
 **特点**：
+
 - 最慢（1s+）
 - 测试完整请求/响应
 - 包括认证、序列化等
@@ -159,7 +168,7 @@ class TestGoalPlanningEndpoints:
 @pytest.fixture
 def llm_response_factory():
     """工厂模式生成不同类型的 LLM 响应"""
-    
+
     def _create(
         response_type: str = "valid",
         **overrides
@@ -171,7 +180,7 @@ def llm_response_factory():
         - 'invalid_json': 非法 JSON
         - 'boundary': 边界情况（极长文本等）
         """
-        
+
     return _create
 
 @pytest.fixture
@@ -325,20 +334,20 @@ from ai_service.services.goal_planning_service import (
 
 class TestClarificationLogic:
     """澄清逻辑的单元测试"""
-    
+
     def test_extract_questions_returns_list(self):
         """Given LLM 响应，When 提取问题，Then 返回列表"""
         response = {
             "state": "clarification",
             "questions": ["问题1", "问题2", "问题3"]
         }
-        
+
         questions = extract_questions(response)
-        
+
         assert isinstance(questions, list)
         assert len(questions) == 3
         assert all(isinstance(q, str) for q in questions)
-    
+
     def test_validate_clarification_enforces_min_max(self):
         """Given 问题列表，When 验证，Then 强制 2-4 个问题"""
         # 1 个问题 → 应该抛错
@@ -347,14 +356,14 @@ class TestClarificationLogic:
                 "state": "clarification",
                 "questions": ["只有一个"]
             })
-        
+
         # 5 个问题 → 应该截断到 4 个
         result = validate_clarification_response({
             "state": "clarification",
             "questions": ["q1", "q2", "q3", "q4", "q5"]
         })
         assert len(result.questions) == 4
-    
+
     def test_questions_not_empty_strings(self):
         """Given 空字符串问题，When 验证，Then 拒绝"""
         with pytest.raises(ValueError, match="问题不能为空"):
@@ -376,7 +385,7 @@ from ai_service.schemas import ChatCompletion, TokenUsage
 
 class TestClarificationWorkflow:
     """澄清工作流的集成测试"""
-    
+
     @pytest.mark.asyncio
     async def test_clarify_returns_structured_response(
         self,
@@ -395,18 +404,18 @@ class TestClarificationWorkflow:
             }),
             usage=TokenUsage(prompt_tokens=10, completion_tokens=20, total_tokens=30)
         )
-        
+
         # Act
         result = await goal_planning_service.clarify(
             idea="想学编程",
             provider_config=ProviderConfig(...)
         )
-        
+
         # Assert
         assert result.state == "clarification"
         assert len(result.questions) == 2
         assert result.usage.total_tokens == 30
-    
+
     @pytest.mark.asyncio
     async def test_full_workflow_from_clarification_to_draft(
         self,
@@ -427,13 +436,13 @@ class TestClarificationWorkflow:
             }),
             usage=TokenUsage(...)
         )
-        
+
         clarify_result = await goal_planning_service.clarify(
             idea="想做项目",
             provider_config=...
         )
         assert clarify_result.state == "clarification"
-        
+
         # Step 2: 用户回答 + 规划
         mock_chat_service.complete.return_value = ChatCompletion(
             content=json.dumps({
@@ -443,13 +452,13 @@ class TestClarificationWorkflow:
             }),
             usage=TokenUsage(...)
         )
-        
+
         draft_result = await goal_planning_service.plan_with_clarifications(
             idea="想做项目",
             answers={"q1": "a1", "q2": "a2"},
             provider_config=...
         )
-        
+
         assert draft_result.state == "draft"
         assert draft_result.goal is not None
 ```
@@ -559,7 +568,7 @@ tests/fixtures/
 # tests/unit/test_clarification_schema.py
 def test_clarification_response_has_required_fields():
     """ClarificationResponse 应该有 state, questions, draft 字段"""
-    
+
 # Step 2：实现 Schema
 # src/ai_service/schemas.py
 class ClarificationResponse(BaseModel):
@@ -700,6 +709,7 @@ pytest --cov=src --cov-report=html --cov-report=xml
 ### 7.1 不破坏现有测试
 
 新的 conftest.py 和 fixtures 应该：
+
 - ✅ 向后兼容现有的 test_goal_planning.py
 - ✅ 新增 fixtures 不与旧 fixtures 冲突
 - ✅ 所有现有测试仍然能运行
@@ -724,13 +734,13 @@ Week 3+ — TDD implementation of P0-1:
 
 ## 八、性能和覆盖率目标
 
-| 指标 | 目标 | 说明 |
-|-----|-----|-----|
-| 单元测试耗时 | <1s | 快速反馈 |
-| 集成测试耗时 | <5s | 可接受的开发周期 |
-| 代码覆盖率 | >85% | 关键路径 >90% |
-| 行覆盖率 | >80% | 包括不太可能的路径 |
-| 分支覆盖率 | >75% | 条件分支 |
+| 指标         | 目标 | 说明               |
+| ------------ | ---- | ------------------ |
+| 单元测试耗时 | <1s  | 快速反馈           |
+| 集成测试耗时 | <5s  | 可接受的开发周期   |
+| 代码覆盖率   | >85% | 关键路径 >90%      |
+| 行覆盖率     | >80% | 包括不太可能的路径 |
+| 分支覆盖率   | >75% | 条件分支           |
 
 ---
 
@@ -745,6 +755,7 @@ Week 3+ — TDD implementation of P0-1:
 5. **TDD 流程**：确定性逻辑先写测试，再实现
 
 **预期收益**：
+
 - ✅ P0-1 澄清工作流有 >90% 的测试覆盖
 - ✅ 确定性逻辑的 bug 在单元测试阶段就被发现
 - ✅ LLM 调用的边界情况（无效 JSON、缺失字段）都被测试

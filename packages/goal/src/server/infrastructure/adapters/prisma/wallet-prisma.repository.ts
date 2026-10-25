@@ -1,9 +1,5 @@
 import type { PrismaClient } from '@memoflow/database';
-import type {
-  IWalletRepository,
-  WalletAccountDTO,
-  WalletTransactionDTO,
-} from '../../../domain';
+import type { IWalletRepository, WalletAccountDTO, WalletTransactionDTO } from '../../../domain';
 import { PrismaWalletMapper } from './mappers/prisma-wallet.mapper';
 import { WalletAccountNotFoundError } from '../../../domain/errors/wallet-account-not-found-error';
 
@@ -68,8 +64,7 @@ export class WalletPrismaRepository implements IWalletRepository {
       if (!account) {
         throw new WalletAccountNotFoundError();
       }
-      const delta =
-        input.type === 'income' ? input.amount : `-${input.amount}`;
+      const delta = input.type === 'income' ? input.amount : `-${input.amount}`;
       await tx.walletAccount.update({
         where: { id: account.id },
         data: { balance: { increment: delta } },
@@ -92,10 +87,7 @@ export class WalletPrismaRepository implements IWalletRepository {
   }
 
   /** 按身份列出交易（occurredAt DESC，limit 默认 50）/ Lists transactions by identity ordered by occurredAt DESC. */
-  async listTransactions(
-    identityId: string,
-    limit?: number,
-  ): Promise<WalletTransactionDTO[]> {
+  async listTransactions(identityId: string, limit?: number): Promise<WalletTransactionDTO[]> {
     const rows = await this.db.walletTransaction.findMany({
       where: { identityId },
       orderBy: { occurredAt: 'desc' },

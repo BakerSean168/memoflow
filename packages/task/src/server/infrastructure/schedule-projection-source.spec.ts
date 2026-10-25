@@ -55,7 +55,12 @@ describe('task schedule projection source -> ScheduledIntent', () => {
       const plan = aLoadedTaskPlan({
         identityId,
         title: 'Thesis defense',
-        schedule: canonicalTaskPlanScheduleForTest(TaskPlanScheduleKind.OneTime, instanceDay, timing, null),
+        schedule: canonicalTaskPlanScheduleForTest(
+          TaskPlanScheduleKind.OneTime,
+          instanceDay,
+          timing,
+          null,
+        ),
         reminderConfig: aRelativeReminder(30),
       });
       const occurrence = await aTaskOccurrence({
@@ -69,10 +74,7 @@ describe('task schedule projection source -> ScheduledIntent', () => {
 
       const projection = await source.buildPlanProjection(plan.id, String(identityId));
 
-      expect(dependencies.findByIdForIdentity).toHaveBeenCalledWith(
-        String(identityId),
-        plan.id,
-      );
+      expect(dependencies.findByIdForIdentity).toHaveBeenCalledWith(String(identityId), plan.id);
       expect(dependencies.findById).not.toHaveBeenCalled();
       expect(projection.owner).toEqual({
         identityId: String(identityId),
@@ -124,7 +126,13 @@ describe('task schedule projection source -> ScheduledIntent', () => {
       const plan = aLoadedTaskPlan({
         identityId,
         title: 'DST-safe task',
-        schedule: canonicalTaskPlanScheduleForTest(TaskPlanScheduleKind.OneTime, instanceDay, timing, null, newYorkContext),
+        schedule: canonicalTaskPlanScheduleForTest(
+          TaskPlanScheduleKind.OneTime,
+          instanceDay,
+          timing,
+          null,
+          newYorkContext,
+        ),
         reminderConfig: aRelativeReminder(1, 'Days'),
       });
       const occurrence = await aTaskOccurrence({
@@ -150,9 +158,7 @@ describe('task schedule projection source -> ScheduledIntent', () => {
       });
       expect(
         projection.desired[0]!.payload.anchorTime - projection.desired[0]!.payload.reminderTime,
-      ).toBe(
-        23 * 60 * 60 * 1000,
-      );
+      ).toBe(23 * 60 * 60 * 1000);
     } finally {
       vi.useRealTimers();
     }

@@ -27,13 +27,15 @@ export const QuietHoursSchema = z.object({
   enabled: z.boolean(),
   timeZone: TimeZoneIdSchema,
   weeklyWindows: z.array(
-    z.object({
-      daysOfWeek: z.array(WeekdaySchema).min(1),
-      start: HmSchema,
-      end: HmSchema,
-    }).refine((value) => value.start !== value.end, {
-      message: 'QuietHours window start and end must differ',
-    }),
+    z
+      .object({
+        daysOfWeek: z.array(WeekdaySchema).min(1),
+        start: HmSchema,
+        end: HmSchema,
+      })
+      .refine((value) => value.start !== value.end, {
+        message: 'QuietHours window start and end must differ',
+      }),
   ),
 });
 

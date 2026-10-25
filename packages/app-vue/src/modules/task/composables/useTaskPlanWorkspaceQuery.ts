@@ -6,13 +6,20 @@ import { TASK_SERVICE_KEY } from '../../../di/keys';
 import { useServerStateIdentityScope } from '../../../platform/server-state';
 import { taskPlanQueryKeys } from '../../../platform/server-state/query-keys';
 
-export function useTaskPlanWorkspaceQuery(id: MaybeRefOrGetter<string | undefined | null>, request?: GetTaskWorkspaceReq) {
+export function useTaskPlanWorkspaceQuery(
+  id: MaybeRefOrGetter<string | undefined | null>,
+  request?: GetTaskWorkspaceReq,
+) {
   const service = useStrictInject(TASK_SERVICE_KEY, 'TaskService');
   const identityScope = useServerStateIdentityScope();
   const query = useQuery(() => {
     const planId = toValue(id);
     return {
-      queryKey: taskPlanQueryKeys.workspace(identityScope(), planId ?? '', Number(request?.recentLimit ?? 5)),
+      queryKey: taskPlanQueryKeys.workspace(
+        identityScope(),
+        planId ?? '',
+        Number(request?.recentLimit ?? 5),
+      ),
       enabled: !!planId && planId !== 'new',
       queryFn: async () => {
         const result = await service.getWorkspace(planId as string, request);

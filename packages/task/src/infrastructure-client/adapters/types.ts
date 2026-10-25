@@ -15,5 +15,8 @@
 export type { IResultIpcClient } from '@memoflow/ipc-client';
 
 // ============ Port Interface Re-exports ============
-export type { ITaskPlanApiClient, TaskPlanListParams } from '../../application-client/ports/task-plan-api-client.port';
+export type {
+  ITaskPlanApiClient,
+  TaskPlanListParams,
+} from '../../application-client/ports/task-plan-api-client.port';
 export type { ITaskOccurrenceApiClient } from '../../application-client/ports/task-occurrence-api-client.port';

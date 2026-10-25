@@ -3,10 +3,7 @@ import type {
   InvocationAttempt as PrismaInvocationAttempt,
   ScheduledInvocation as PrismaScheduledInvocation,
 } from '@memoflow/database';
-import type {
-  InvocationAttempt,
-  ScheduledInvocation,
-} from '@memoflow/contracts/schedule';
+import type { InvocationAttempt, ScheduledInvocation } from '@memoflow/contracts/schedule';
 import {
   PrismaInvocationAttemptMapper,
   PrismaScheduledInvocationMapper,
@@ -47,9 +44,7 @@ function invocationRow(
   } as PrismaScheduledInvocation;
 }
 
-function invocationDomain(
-  overrides: Partial<ScheduledInvocation> = {},
-): ScheduledInvocation {
+function invocationDomain(overrides: Partial<ScheduledInvocation> = {}): ScheduledInvocation {
   return {
     id: 'invocation-1',
     identityId: 'identity-1',
@@ -83,9 +78,7 @@ function invocationDomain(
   };
 }
 
-function attemptRow(
-  overrides: Partial<PrismaInvocationAttempt> = {},
-): PrismaInvocationAttempt {
+function attemptRow(overrides: Partial<PrismaInvocationAttempt> = {}): PrismaInvocationAttempt {
   return {
     id: 'attempt-1',
     identityId: 'identity-1',
@@ -245,9 +238,9 @@ describe('PrismaInvocationAttemptMapper', () => {
     expect(
       PrismaInvocationAttemptMapper.toDomain(attemptRow({ finishedAt: null, result: 'raw' })),
     ).toMatchObject({ finishedAt: null, result: null });
-    expect(
-      PrismaInvocationAttemptMapper.toDomain(attemptRow({ result: null })),
-    ).toMatchObject({ result: null });
+    expect(PrismaInvocationAttemptMapper.toDomain(attemptRow({ result: null }))).toMatchObject({
+      result: null,
+    });
   });
 
   it('maps canonical attempt state to Prisma create data', () => {

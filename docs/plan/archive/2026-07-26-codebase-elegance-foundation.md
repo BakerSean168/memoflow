@@ -16,19 +16,20 @@ status: done
 > **归档结果（2026-07-29）**：E1–E7 硬完成定义已勾选；PR #189 已合 main；E5b bootstrap 死域 follow-up 已合 #190。  
 > Dual Registry / dual 税减负 / AI 路径地图为历史资产。  
 > 后续产品主线：[`../active/2026-07-17-unified-assistant-agent-host.md`](2026-07-17-unified-assistant-agent-host.md)。
+
 # 代码优雅化与后续实施地基计划
 
 ## 1. 文档地位
 
-| 角色 | 文档 |
-|------|------|
-| **本文件** | **主目标 plan**：定义「优雅状态」、阶段、完成定义、与其它 plan 的边界 |
-| 执行协议（每夜怎么跑） | [`2026-07-25-nightly-hygiene-and-agent-host.md`](./2026-07-25-nightly-hygiene-and-agent-host.md) |
-| 主产品能力 plan（完成定义未宣称） | [`2026-07-17-unified-assistant-agent-host.md`](./2026-07-17-unified-assistant-agent-host.md) |
+| 角色                                         | 文档                                                                                                                               |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| **本文件**                                   | **主目标 plan**：定义「优雅状态」、阶段、完成定义、与其它 plan 的边界                                                              |
+| 执行协议（每夜怎么跑）                       | [`2026-07-25-nightly-hygiene-and-agent-host.md`](./2026-07-25-nightly-hygiene-and-agent-host.md)                                   |
+| 主产品能力 plan（完成定义未宣称）            | [`2026-07-17-unified-assistant-agent-host.md`](./2026-07-17-unified-assistant-agent-host.md)                                       |
 | Vault 产品切片（§13.2 **15/15**，已合 main） | [`2026-07-16-obsidian-vault-repository-optimization.md`](../archive/2026-07-16-obsidian-vault-repository-optimization.md) → 应归档 |
-| Windows handoff（历史） | [`2026-07-25-windows-vault-repo-residual-handoff.md`](../archive/2026-07-25-windows-vault-repo-residual-handoff.md) → 应归档 |
-| Auth 旁支 | [`2026-07-17-auth-account-security-closure.md`](./2026-07-17-auth-account-security-closure.md) |
-| 产品审查材料 | `2026-07-15-web-core-product-review.md` / `2026-07-16-web-product-design-review.md`（转 backlog，不在本 plan 做 UX 大改） |
+| Windows handoff（历史）                      | [`2026-07-25-windows-vault-repo-residual-handoff.md`](../archive/2026-07-25-windows-vault-repo-residual-handoff.md) → 应归档       |
+| Auth 旁支                                    | [`2026-07-17-auth-account-security-closure.md`](./2026-07-17-auth-account-security-closure.md)                                     |
+| 产品审查材料                                 | `2026-07-15-web-core-product-review.md` / `2026-07-16-web-product-design-review.md`（转 backlog，不在本 plan 做 UX 大改）          |
 
 规范入口：`AGENT.md`。真值：代码/配置/测试 > 根配置 > `docs/`。
 
@@ -37,15 +38,15 @@ status: done
 
 ### 1.1 交付载体与合并策略（重要）
 
-| 项 | 约定 |
-|----|------|
-| **工作分支** | `docs/codebase-elegance-foundation`（可随实施改名，但默认此支） |
-| **PR** | https://github.com/BakerSean168/memoflow/pull/189 → `main` |
-| **合并时机** | **执行完本 plan 本轮交付范围后再 merge**；禁止「仅 plan 文档」提前合 main |
-| **本 PR 必须包含** | 阶段 **A**（归档）+ 阶段 **B**（Dual Registry + **dual 清理/税减负**，满足 E2 + E3） |
-| **本 PR 宜包含** | 阶段 **C** 中 C1–C2（AI 路径地图 + 调用方审计）与 **E5 死域 S 清扫**（若时间允许） |
-| **本 PR 可延后** | 阶段 **D**（AH-4/5/6 产品切片）、完整阶段 **E** 勾选可在 follow-up；但 residual 须写清「未做项」 |
-| **提交方式** | 在 **同一 PR 分支** 上多次 commit push（A → B → C…），**最后一次**再 merge；不要为 dual 另开平行 PR 拆散审查上下文 |
+| 项                 | 约定                                                                                                               |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| **工作分支**       | `docs/codebase-elegance-foundation`（可随实施改名，但默认此支）                                                    |
+| **PR**             | https://github.com/BakerSean168/memoflow/pull/189 → `main`                                                         |
+| **合并时机**       | **执行完本 plan 本轮交付范围后再 merge**；禁止「仅 plan 文档」提前合 main                                          |
+| **本 PR 必须包含** | 阶段 **A**（归档）+ 阶段 **B**（Dual Registry + **dual 清理/税减负**，满足 E2 + E3）                               |
+| **本 PR 宜包含**   | 阶段 **C** 中 C1–C2（AI 路径地图 + 调用方审计）与 **E5 死域 S 清扫**（若时间允许）                                 |
+| **本 PR 可延后**   | 阶段 **D**（AH-4/5/6 产品切片）、完整阶段 **E** 勾选可在 follow-up；但 residual 须写清「未做项」                   |
+| **提交方式**       | 在 **同一 PR 分支** 上多次 commit push（A → B → C…），**最后一次**再 merge；不要为 dual 另开平行 PR 拆散审查上下文 |
 
 **一句话：先干完 dual 清理与优雅地基，再合 #189。**
 
@@ -61,15 +62,15 @@ status: done
 
 ### 2.2 未解决（本 plan 要对齐的问题）
 
-| 问题 | 现象（量级示意，以仓库实测为准） | 风险 |
-|------|----------------------------------|------|
-| **P1 Dual 税过重** | `*dual*.surface.spec.ts` **≈ 237**；`keep-boundary` **≈ 66**；集中在 `app-vue/shared/utils`、`contracts/*/api`、`utils` | 新人无法分辨「已 retired 锁」vs「真双实现」；测试与文档噪音掩盖真债 |
-| **P2 微 dual 近饱和仍被当主战场** | format/pad/date helper 级 residual 叙事极长 | 刷 residual 无产品收益；掩盖结构债 |
-| **P3 多路径未写清** | AI：`dispatchAssistant` vs `sendMessage`/`streamMessage` vs AgentRun/`listAgentRuns`；Host `assistant-run-*` ≠ 持久 AgentRun（N2 已诚实锁） | 后续 Host 实施踩双编排；UI 拼装多源状态 |
-| **P4 文档未归档** | vault plan / Windows handoff 仍在 `active/`，README 状态过时 | 协作入口混乱；agent 误把已合 DoD 当未完成 |
-| **P5 产品债未分层** | 产品审查 P0 与 agent-host 大切片、auth 发信混在同一优先级感知里 | 夜间 agent 乱选 scope |
-| **P6 死域 / 兼容层残留** | 注释中的 `Legacy*`、过期 re-export、仅文档存在的模块名 | 误导阅读与 import 习惯 |
-| **P7 优雅无度量** | 无「优雅状态」可检查清单，只有感觉 | 无法宣称阶段完成、无法为后续实施做硬铺垫 |
+| 问题                              | 现象（量级示意，以仓库实测为准）                                                                                                            | 风险                                                                |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| **P1 Dual 税过重**                | `*dual*.surface.spec.ts` **≈ 237**；`keep-boundary` **≈ 66**；集中在 `app-vue/shared/utils`、`contracts/*/api`、`utils`                     | 新人无法分辨「已 retired 锁」vs「真双实现」；测试与文档噪音掩盖真债 |
+| **P2 微 dual 近饱和仍被当主战场** | format/pad/date helper 级 residual 叙事极长                                                                                                 | 刷 residual 无产品收益；掩盖结构债                                  |
+| **P3 多路径未写清**               | AI：`dispatchAssistant` vs `sendMessage`/`streamMessage` vs AgentRun/`listAgentRuns`；Host `assistant-run-*` ≠ 持久 AgentRun（N2 已诚实锁） | 后续 Host 实施踩双编排；UI 拼装多源状态                             |
+| **P4 文档未归档**                 | vault plan / Windows handoff 仍在 `active/`，README 状态过时                                                                                | 协作入口混乱；agent 误把已合 DoD 当未完成                           |
+| **P5 产品债未分层**               | 产品审查 P0 与 agent-host 大切片、auth 发信混在同一优先级感知里                                                                             | 夜间 agent 乱选 scope                                               |
+| **P6 死域 / 兼容层残留**          | 注释中的 `Legacy*`、过期 re-export、仅文档存在的模块名                                                                                      | 误导阅读与 import 习惯                                              |
+| **P7 优雅无度量**                 | 无「优雅状态」可检查清单，只有感觉                                                                                                          | 无法宣称阶段完成、无法为后续实施做硬铺垫                            |
 
 ### 2.3 非目标（明确不做）
 
@@ -128,11 +129,11 @@ status: done
 
 **目标**：协作入口与 main 真值一致。
 
-| 步骤 | 动作 | 验收 |
-|------|------|------|
-| A1 | vault plan + Windows handoff → `docs/plan/archive/`（文首加「已合 main / DoD 15/15」结果条） | archive 存在；active 无误导「待 OAuth」 |
-| A2 | 重写 `docs/plan/active/README.md` 状态表 | vault 归档；elegance + nightly + agent-host 置顶 |
-| A3 | nightly 协议 §2 去掉「PR 跑完再合 vault」过时句；指向本 plan | 交叉链接双向 |
+| 步骤 | 动作                                                                                         | 验收                                             |
+| ---- | -------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| A1   | vault plan + Windows handoff → `docs/plan/archive/`（文首加「已合 main / DoD 15/15」结果条） | archive 存在；active 无误导「待 OAuth」          |
+| A2   | 重写 `docs/plan/active/README.md` 状态表                                                     | vault 归档；elegance + nightly + agent-host 置顶 |
+| A3   | nightly 协议 §2 去掉「PR 跑完再合 vault」过时句；指向本 plan                                 | 交叉链接双向                                     |
 
 **产出**：干净 active 目录。  
 **不改**：业务代码（可附带 README-only commit）。
@@ -152,30 +153,30 @@ status: done
 
 每项字段：
 
-| 字段 | 说明 |
-|------|------|
-| `id` | 稳定 id（路径 hash 或 residual 号） |
-| `path` | `*.surface.spec.ts` 或 keep-boundary spec |
-| `package` | nx project / 目录 |
-| `class` | `retired` \| `keep_boundary` \| `open_S` \| `open_M` \| `open_X` |
-| `sole` | sole 实现路径（若有） |
-| `blast` | 一句话 blast radius |
-| `next` | `none` \| `delete_surface` \| `merge_impl` \| `defer:date` |
+| 字段      | 说明                                                             |
+| --------- | ---------------------------------------------------------------- |
+| `id`      | 稳定 id（路径 hash 或 residual 号）                              |
+| `path`    | `*.surface.spec.ts` 或 keep-boundary spec                        |
+| `package` | nx project / 目录                                                |
+| `class`   | `retired` \| `keep_boundary` \| `open_S` \| `open_M` \| `open_X` |
+| `sole`    | sole 实现路径（若有）                                            |
+| `blast`   | 一句话 blast radius                                              |
+| `next`    | `none` \| `delete_surface` \| `merge_impl` \| `defer:date`       |
 
 #### 5.2 分类规则（与 nightly §5 对齐）
 
-| class | 判定 | 后续 |
-|-------|------|------|
-| `retired` | 文案含 dual-retired / local dual retired，且 sole 存在、无第二实现体 | 可进入「合并锁」候选（E3b） |
-| `keep_boundary` | 明确语义不同、禁止 force-merge | 只登记；本 plan **不 merge** |
-| `open_S` | 死 re-export / 无消费者 / 假 dual | 删除实现或锁文件 |
-| `open_M` | 两实现语义相同仍并存 | sole + 改调用方 |
-| `open_X` | 跨 Host/auth/token | 转 agent-host 或 auth plan |
+| class           | 判定                                                                 | 后续                         |
+| --------------- | -------------------------------------------------------------------- | ---------------------------- |
+| `retired`       | 文案含 dual-retired / local dual retired，且 sole 存在、无第二实现体 | 可进入「合并锁」候选（E3b）  |
+| `keep_boundary` | 明确语义不同、禁止 force-merge                                       | 只登记；本 plan **不 merge** |
+| `open_S`        | 死 re-export / 无消费者 / 假 dual                                    | 删除实现或锁文件             |
+| `open_M`        | 两实现语义相同仍并存                                                 | sole + 改调用方              |
+| `open_X`        | 跨 Host/auth/token                                                   | 转 agent-host 或 auth plan   |
 
 #### 5.3 税减负手段（允许的 E3b 动作）
 
-1. **Registry suite**：同一 package 下 N 个 `*-dual.surface.spec.ts` 合并为 `dual-registry.surface.spec.ts`，内表驱动断言（路径列表 + 关键字），**行为锁不丢**。  
-2. **删除重复锁**：两文件锁同一 sole 且断言子集 → 留一。  
+1. **Registry suite**：同一 package 下 N 个 `*-dual.surface.spec.ts` 合并为 `dual-registry.surface.spec.ts`，内表驱动断言（路径列表 + 关键字），**行为锁不丢**。
+2. **删除重复锁**：两文件锁同一 sole 且断言子集 → 留一。
 3. **禁止**：为减文件数而删掉对仍存在双实现的断言。
 
 **验收**：registry 覆盖率 ≥ 95%；E3a 或 E3b 满足其一；`pnpm nx` 相关 test 绿。
@@ -186,13 +187,13 @@ status: done
 
 **目标**：后续实施不会踩「第二条暗道」。
 
-| 步骤 | 主题 | 动作 | 验收 |
-|------|------|------|------|
-| C1 | **AI 路径地图** | 文档化：① Host open-chat（`dispatchAssistant` / SSE / IPC）② Workflow AgentRun（start/resume/list）③ 遗留 message send/stream（谁还调用） | docs + surface；产品 open-chat 禁止回退 streamMessage（已有则加强） |
-| C2 | **调用方审计** | `rg`/CodeGraph：`sendMessage`/`streamMessage`/`dispatchAssistant`/`listAgentRuns` 生产调用表 | 表进 registry 或 ai 路径地图附录；死调用方 S 删 |
-| C3 | **Host 恢复决策** | AH-2 产品恢复 UI：做最小只读列表 / 或明确不做并 keep-boundary | 写入 agent-host plan 一行决策 |
-| C4 | **死域 S 清扫** | 无消费者 export、误导 Legacy 注释、空 barrel | 每 PR 主题单一；governance 不回归 |
-| C5 | **runtimeMode 小步（AH-7 预热）** | 找一处 direct/remote 分支可改为 capability 投影 | 单切片 + test；不宣称阶段 8 完成 |
+| 步骤 | 主题                              | 动作                                                                                                                                      | 验收                                                                |
+| ---- | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| C1   | **AI 路径地图**                   | 文档化：① Host open-chat（`dispatchAssistant` / SSE / IPC）② Workflow AgentRun（start/resume/list）③ 遗留 message send/stream（谁还调用） | docs + surface；产品 open-chat 禁止回退 streamMessage（已有则加强） |
+| C2   | **调用方审计**                    | `rg`/CodeGraph：`sendMessage`/`streamMessage`/`dispatchAssistant`/`listAgentRuns` 生产调用表                                              | 表进 registry 或 ai 路径地图附录；死调用方 S 删                     |
+| C3   | **Host 恢复决策**                 | AH-2 产品恢复 UI：做最小只读列表 / 或明确不做并 keep-boundary                                                                             | 写入 agent-host plan 一行决策                                       |
+| C4   | **死域 S 清扫**                   | 无消费者 export、误导 Legacy 注释、空 barrel                                                                                              | 每 PR 主题单一；governance 不回归                                   |
+| C5   | **runtimeMode 小步（AH-7 预热）** | 找一处 direct/remote 分支可改为 capability 投影                                                                                           | 单切片 + test；不宣称阶段 8 完成                                    |
 
 **非目标**：重写 Python LangGraph；接入 real Pi。
 
@@ -202,11 +203,11 @@ status: done
 
 **目标**：优雅不只是删，还要 **下一刀有落点**。
 
-| 步骤 | 对应 nightly | 最小可交付 |
-|------|----------------|------------|
-| D1 | AH-4 | Task 与 Goal/Knowledge **共用** Artifact 工作台的 **一处** UI/数据通路（非富编辑全量） |
-| D2 | AH-5 | Electron multi-engine：要么 driver 一步 + scaffold 状态更新，要么 **external** 原因写死 |
-| D3 | AH-6 | Pi：product fail-closed 文案/锁 **或** 永久 research keep-boundary（二选一，禁止悬空） |
+| 步骤 | 对应 nightly | 最小可交付                                                                              |
+| ---- | ------------ | --------------------------------------------------------------------------------------- |
+| D1   | AH-4         | Task 与 Goal/Knowledge **共用** Artifact 工作台的 **一处** UI/数据通路（非富编辑全量）  |
+| D2   | AH-5         | Electron multi-engine：要么 driver 一步 + scaffold 状态更新，要么 **external** 原因写死 |
+| D3   | AH-6         | Pi：product fail-closed 文案/锁 **或** 永久 research keep-boundary（二选一，禁止悬空）  |
 
 D 阶段可与 C 并行，但 **不得** 假绿勾 agent-host §20。
 
@@ -214,11 +215,11 @@ D 阶段可与 C 并行，但 **不得** 假绿勾 agent-host §20。
 
 ### 阶段 E — 收口与交接（1 PR）
 
-| 步骤 | 动作 |
-|------|------|
-| E1 | 本 plan §3.1 全部勾选；写「优雅收口 residual」 |
-| E2 | nightly 协议更新：GOAL_PRIORITY 以 agent-host 产品切片为主，dual 仅 open_S/M |
-| E3 | 可选：本 plan 迁 archive，或保持 active 直到 agent-host 下一里程碑 |
+| 步骤 | 动作                                                                         |
+| ---- | ---------------------------------------------------------------------------- |
+| E1   | 本 plan §3.1 全部勾选；写「优雅收口 residual」                               |
+| E2   | nightly 协议更新：GOAL_PRIORITY 以 agent-host 产品切片为主，dual 仅 open_S/M |
+| E3   | 可选：本 plan 迁 archive，或保持 active 直到 agent-host 下一里程碑           |
 
 ---
 
@@ -243,15 +244,15 @@ GOAL_PRIORITY（优雅阶段期间调整为）=
 
 ## 7. 执行节奏建议（相对 PR #189）
 
-| 节奏 | 内容 | 是否进 #189 |
-|------|------|-------------|
-| 段 0 | 更新本 plan / 提示词 / PR 描述（本提交） | 是 |
-| 段 1 | 阶段 A 归档 vault + Windows handoff + README | 是 |
-| 段 2 | 阶段 B Dual Registry 初版 + 分类 | 是（**核心**） |
-| 段 3 | 阶段 B dual 清理：E3a 和/或 E3b 税减负 | 是（**核心，必达 merge 门槛**） |
-| 段 4 | 阶段 C1–C2 路径地图 + 调用方审计；E5 死域 S | 宜进 #189 |
-| 段 5 | 相关 nx test / governance 绿；更新 residual；**再 merge #189** | 是 |
-| 段 6+ | 阶段 D AH-4/5/6、完整 E 勾选 | 默认可 follow-up PR |
+| 节奏  | 内容                                                           | 是否进 #189                     |
+| ----- | -------------------------------------------------------------- | ------------------------------- |
+| 段 0  | 更新本 plan / 提示词 / PR 描述（本提交）                       | 是                              |
+| 段 1  | 阶段 A 归档 vault + Windows handoff + README                   | 是                              |
+| 段 2  | 阶段 B Dual Registry 初版 + 分类                               | 是（**核心**）                  |
+| 段 3  | 阶段 B dual 清理：E3a 和/或 E3b 税减负                         | 是（**核心，必达 merge 门槛**） |
+| 段 4  | 阶段 C1–C2 路径地图 + 调用方审计；E5 死域 S                    | 宜进 #189                       |
+| 段 5  | 相关 nx test / governance 绿；更新 residual；**再 merge #189** | 是                              |
+| 段 6+ | 阶段 D AH-4/5/6、完整 E 勾选                                   | 默认可 follow-up PR             |
 
 允许更慢；**禁止**为赶 E3b 破坏锁语义；**禁止**未达 E2+E3 就 merge #189。
 
@@ -259,14 +260,14 @@ GOAL_PRIORITY（优雅阶段期间调整为）=
 
 ## 8. 风险与回滚
 
-| 风险 | 缓解 |
-|------|------|
-| 合并 dual surface 丢断言 | 表驱动保留关键字；CI 跑合并后的 suite |
-| 误 merge keep_boundary | registry class=L 禁止 M 动作；code review 看 class |
-| 范围膨胀进 UX 大改 | 产品审查只抽 3 条 backlog，本 plan 不实施 |
-| agent-host 假绿 | §3 明确不勾 §20；D 阶段 external 合法 |
-| 大 PR 难审 | **本轮刻意单 PR（#189）** 承载 A+B（+可选 C）；用多次小 commit 分段，PR 描述按阶段列文件；审查按 commit 看 |
-| 过早 merge | **禁止** plan-only 合 main；merge 门槛 = E2+E3 落地 + 相关 test 绿 |
+| 风险                     | 缓解                                                                                                       |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| 合并 dual surface 丢断言 | 表驱动保留关键字；CI 跑合并后的 suite                                                                      |
+| 误 merge keep_boundary   | registry class=L 禁止 M 动作；code review 看 class                                                         |
+| 范围膨胀进 UX 大改       | 产品审查只抽 3 条 backlog，本 plan 不实施                                                                  |
+| agent-host 假绿          | §3 明确不勾 §20；D 阶段 external 合法                                                                      |
+| 大 PR 难审               | **本轮刻意单 PR（#189）** 承载 A+B（+可选 C）；用多次小 commit 分段，PR 描述按阶段列文件；审查按 commit 看 |
+| 过早 merge               | **禁止** plan-only 合 main；merge 门槛 = E2+E3 落地 + 相关 test 绿                                         |
 
 回滚：git revert 单 commit 或整支 PR；registry 文件可单独回滚。
 
@@ -274,19 +275,19 @@ GOAL_PRIORITY（优雅阶段期间调整为）=
 
 ## 9. Residual 日志
 
-| ID | 日期 | 说明 | 阶段 | 结果 |
-|----|------|------|------|------|
-| E0 | 2026-07-26 | 创建本 plan；基线 dual-surface≈237、keep-boundary≈66；main 含 #188 + N1–N3 | — | 文档入库 |
-| E0b | 2026-07-26 | 合并策略改为：PR #189 承载 dual 清理；**执行完再 merge**；重写 §10 提示词 | — | 提示词/策略更新 |
-| E1a | 2026-07-26 | 阶段 A：vault plan + Windows handoff → archive；active README 真值；交叉链接修正 | A | 入口干净 |
-| E2 | 2026-07-26 | Dual Registry：`tools/governance/dual-registry.json` + `docs/governance/dual-registry.md`；150 条目全部分类（retired/keep_boundary）；path surface 锁 | B | E2 达标 |
-| E3b | 2026-07-26 | dual-surface 237→84（**-64.6%**）；25 个 `dual-registry.surface.spec.ts` suite；open_S/M/X=0（E3a 亦满足） | B | E3 达标 |
-| E4 | 2026-07-26 | AI 路径地图 `docs/architecture/ai-runtime-path-map.md` + host-dispatch surface 加强 | C | E4 达标 |
-| E5 | 2026-07-26 | 死域 S 初核：result-helpers-dead 等既有锁；**未**改 bootstrap（E5 当时过宽宣称） | C | 部分 |
-| E5b | 2026-07-26 | **真 E5 S**：`apps/api/src/bootstrap.ts` 示例 `LegacyAccountModule` → `AccountApiModule`；surface 锁与 main 一致 | C | 死域 S 落地 |
-| E6 | 2026-07-26 | AH-2 **本轮不做**（书面决策进 agent-host）；AH-4/5/6 follow-up/external | D 轻量 | 决策落盘 |
-| E7 | 2026-07-26 | governance-check 绿；contracts/utils/ai/auth/governance/goal/app-vue/desktop:test:main 绿 | E | 门禁 |
-| E-merge | 2026-07-26 | PR #189 达 merge 门槛后合 main | E | merge |
+| ID      | 日期       | 说明                                                                                                                                                  | 阶段   | 结果            |
+| ------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | --------------- |
+| E0      | 2026-07-26 | 创建本 plan；基线 dual-surface≈237、keep-boundary≈66；main 含 #188 + N1–N3                                                                            | —      | 文档入库        |
+| E0b     | 2026-07-26 | 合并策略改为：PR #189 承载 dual 清理；**执行完再 merge**；重写 §10 提示词                                                                             | —      | 提示词/策略更新 |
+| E1a     | 2026-07-26 | 阶段 A：vault plan + Windows handoff → archive；active README 真值；交叉链接修正                                                                      | A      | 入口干净        |
+| E2      | 2026-07-26 | Dual Registry：`tools/governance/dual-registry.json` + `docs/governance/dual-registry.md`；150 条目全部分类（retired/keep_boundary）；path surface 锁 | B      | E2 达标         |
+| E3b     | 2026-07-26 | dual-surface 237→84（**-64.6%**）；25 个 `dual-registry.surface.spec.ts` suite；open_S/M/X=0（E3a 亦满足）                                            | B      | E3 达标         |
+| E4      | 2026-07-26 | AI 路径地图 `docs/architecture/ai-runtime-path-map.md` + host-dispatch surface 加强                                                                   | C      | E4 达标         |
+| E5      | 2026-07-26 | 死域 S 初核：result-helpers-dead 等既有锁；**未**改 bootstrap（E5 当时过宽宣称）                                                                      | C      | 部分            |
+| E5b     | 2026-07-26 | **真 E5 S**：`apps/api/src/bootstrap.ts` 示例 `LegacyAccountModule` → `AccountApiModule`；surface 锁与 main 一致                                      | C      | 死域 S 落地     |
+| E6      | 2026-07-26 | AH-2 **本轮不做**（书面决策进 agent-host）；AH-4/5/6 follow-up/external                                                                               | D 轻量 | 决策落盘        |
+| E7      | 2026-07-26 | governance-check 绿；contracts/utils/ai/auth/governance/goal/app-vue/desktop:test:main 绿                                                             | E      | 门禁            |
+| E-merge | 2026-07-26 | PR #189 达 merge 门槛后合 main                                                                                                                        | E      | merge           |
 
 ---
 
@@ -349,10 +350,10 @@ D 与完整 E 勾选可 follow-up，但须在 residual 写明未做项。
 
 当 E1–E7 满足时，后续 agent / 人类应能：
 
-1. 从 **active README** 只看到真 active 产品与优雅收口后的主线。  
-2. 从 **Dual Registry** 秒判「锁还是债」。  
-3. 从 **AI 路径地图** 知道新功能挂 Host 还是 Workflow，而不是复制 streamMessage。  
-4. 从 **AH-4 落点** 继续 Task 工作台，而不是先挖 dual 坟。  
+1. 从 **active README** 只看到真 active 产品与优雅收口后的主线。
+2. 从 **Dual Registry** 秒判「锁还是债」。
+3. 从 **AI 路径地图** 知道新功能挂 Host 还是 Workflow，而不是复制 streamMessage。
+4. 从 **AH-4 落点** 继续 Task 工作台，而不是先挖 dual 坟。
 5. 保持门禁绿，把精力放在 **用户可见能力** 与 **ADR-035 真缺口**（Pi/Electron/durable）上，而不是 format helper。
 
 ---
@@ -361,7 +362,6 @@ D 与完整 E 勾选可 follow-up，但须在 residual 写明未做项。
 
 - [ADR-037 产品时间体系](../../architecture/adr/ADR-037-product-time-system.md)（后续时间横切主宪法；与 dual 税减负分工）
 - [产品时间体系实施](./2026-07-26-product-time-system.md)
-
 
 - [夜间 hygiene + Agent Host](./2026-07-25-nightly-hygiene-and-agent-host.md)
 - [统一助手与可插拔 Agent Host](./2026-07-17-unified-assistant-agent-host.md)

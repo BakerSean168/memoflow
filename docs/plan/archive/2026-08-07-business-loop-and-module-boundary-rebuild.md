@@ -10,7 +10,6 @@ created: 2026-08-07T00:00:00Z
 
 > ✅ 已归档 2026-08-08：R0-R7 全部实施（乐观锁、outbox 单通道、ScheduleLease/claim、Habit/Relation/AI/Activity/Wallet）；local-docker e2e 7/7、PR #211 19/19 全绿。
 
-
 # 业务闭环与模块边界重构计划
 
 对应审查：[2026-08-07-business-architecture-deep-audit.md](../../audit/2026-08-07-business-architecture-deep-audit.md)

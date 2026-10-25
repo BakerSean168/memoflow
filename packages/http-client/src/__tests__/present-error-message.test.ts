@@ -19,9 +19,9 @@ const TestFailureRegistry = defineFailureRegistry({
 
 describe('presentErrorMessage', () => {
   it('maps a result.error FORBIDDEN code to the stable message, never the raw', () => {
-    expect(
-      presentErrorMessage({ code: 'FORBIDDEN', message: 'Provider leaked: nope' }),
-    ).toBe('拒绝访问');
+    expect(presentErrorMessage({ code: 'FORBIDDEN', message: 'Provider leaked: nope' })).toBe(
+      '拒绝访问',
+    );
   });
 
   it('maps a result.error SERVICE_UNAVAILABLE code to the stable message', () => {
@@ -33,9 +33,9 @@ describe('presentErrorMessage', () => {
   });
 
   it('maps an INTERNAL_ERROR code to the stable message, never the raw', () => {
-    expect(
-      presentErrorMessage({ code: 'INTERNAL_ERROR', message: 'stack trace raw' }),
-    ).toBe('服务器内部错误');
+    expect(presentErrorMessage({ code: 'INTERNAL_ERROR', message: 'stack trace raw' })).toBe(
+      '服务器内部错误',
+    );
   });
 
   it('returns the UNKNOWN fallback for non-error / non-object input', () => {

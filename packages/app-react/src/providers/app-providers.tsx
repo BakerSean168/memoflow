@@ -8,7 +8,11 @@ import { AppSessionProvider } from './app-session-provider';
 
 function CanonicalThemeBoundary({ children }: PropsWithChildren) {
   const { profile } = useAppPreferences();
-  return <AppThemeProvider themeMode={profile?.presentation.theme ?? 'auto'}>{children}</AppThemeProvider>;
+  return (
+    <AppThemeProvider themeMode={profile?.presentation.theme ?? 'auto'}>
+      {children}
+    </AppThemeProvider>
+  );
 }
 
 export function AppProviders({ children }: PropsWithChildren) {

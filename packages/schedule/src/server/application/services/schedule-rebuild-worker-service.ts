@@ -10,7 +10,6 @@ export interface ProcessOutboxResult {
   leaseAcquired: boolean;
 }
 
-
 export interface ScheduleRebuildWorkerOptions {
   maxAttempts?: number;
   claimTimeoutMs?: number;

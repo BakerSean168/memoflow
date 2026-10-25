@@ -75,8 +75,7 @@ export default defineConfig(({ command, mode }) => {
 
   const rendererAliases = [
     ...devWorkspaceAliases,
-    ...createWorkspaceSourceAliasEntries(workspaceRoot, [
-    ]),
+    ...createWorkspaceSourceAliasEntries(workspaceRoot, []),
     {
       find: '@main',
       replacement: path.resolve(configDir, './src/main'),

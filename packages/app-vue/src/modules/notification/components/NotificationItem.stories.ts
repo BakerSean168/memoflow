@@ -34,9 +34,7 @@ const meta = {
   component: NotificationItem,
   tags: ['autodocs'],
   parameters: { layout: 'padded' },
-  decorators: [
-    () => ({ template: '<div style="max-width: 500px;"><story /></div>' }),
-  ],
+  decorators: [() => ({ template: '<div style="max-width: 500px;"><story /></div>' })],
   argTypes: {
     notification: { description: '通知数据对象 (NotificationClientDTO)' },
   },

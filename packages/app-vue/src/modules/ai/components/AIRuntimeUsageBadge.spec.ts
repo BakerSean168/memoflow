@@ -21,6 +21,8 @@ describe('AIRuntimeUsageBadge', () => {
   });
 
   it('stays hidden when no usage is available', () => {
-    expect(mount(AIRuntimeUsageBadge).find('[data-testid="ai-runtime-usage"]').exists()).toBe(false);
+    expect(mount(AIRuntimeUsageBadge).find('[data-testid="ai-runtime-usage"]').exists()).toBe(
+      false,
+    );
   });
 });

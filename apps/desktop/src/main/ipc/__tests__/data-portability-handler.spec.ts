@@ -35,7 +35,9 @@ function createContext(): IElectronModuleContext {
 type IpcHandler = (_event: unknown, dto: unknown) => Promise<unknown>;
 
 function getHandler(channel: string): IpcHandler {
-  const call = electronMock.handle.mock.calls.find(([registeredChannel]) => registeredChannel === channel);
+  const call = electronMock.handle.mock.calls.find(
+    ([registeredChannel]) => registeredChannel === channel,
+  );
   expect(call, `Expected handler for channel ${channel} to be registered`).toBeTruthy();
   return call![1] as IpcHandler;
 }
@@ -66,9 +68,12 @@ describe('DataPortabilityElectronModule V3 IPC surface', () => {
 
   it('exports V3 data and round-trips through dry-run then apply', async () => {
     const module = registerModule(createContext());
-    const exportResult = (await getHandler(DataPortabilityChannels.EXPORT)({}, {
-      capabilities: ['preferences'],
-    })) as { ok: boolean; data: { content: string; summary: { capabilityKeys: string[] } } };
+    const exportResult = (await getHandler(DataPortabilityChannels.EXPORT)(
+      {},
+      {
+        capabilities: ['preferences'],
+      },
+    )) as { ok: boolean; data: { content: string; summary: { capabilityKeys: string[] } } };
     expect(exportResult.ok).toBe(true);
     expect(exportResult.data.summary.capabilityKeys).toEqual(['preferences']);
     const envelope = JSON.parse(exportResult.data.content) as {
@@ -77,12 +82,18 @@ describe('DataPortabilityElectronModule V3 IPC surface', () => {
     };
     expect(envelope).toMatchObject({ format: 'memoflow.user-data-export', schemaVersion: 3 });
 
-    const dryRun = (await getHandler(DataPortabilityChannels.DRY_RUN)({}, {
-      content: exportResult.data.content,
-    })) as { ok: boolean; data: { dryRun: boolean } };
-    const apply = (await getHandler(DataPortabilityChannels.APPLY)({}, {
-      content: exportResult.data.content,
-    })) as { ok: boolean; data: { dryRun: boolean } };
+    const dryRun = (await getHandler(DataPortabilityChannels.DRY_RUN)(
+      {},
+      {
+        content: exportResult.data.content,
+      },
+    )) as { ok: boolean; data: { dryRun: boolean } };
+    const apply = (await getHandler(DataPortabilityChannels.APPLY)(
+      {},
+      {
+        content: exportResult.data.content,
+      },
+    )) as { ok: boolean; data: { dryRun: boolean } };
     expect(dryRun).toMatchObject({ ok: true, data: { dryRun: true } });
     expect(apply).toMatchObject({ ok: true, data: { dryRun: false } });
     module.destroy?.();
@@ -90,7 +101,10 @@ describe('DataPortabilityElectronModule V3 IPC surface', () => {
 
   it('rejects malformed and banned V3 input with structured validation errors', async () => {
     const module = registerModule(createContext());
-    const malformed = await getHandler(DataPortabilityChannels.DRY_RUN)({}, { content: '{bad json' });
+    const malformed = await getHandler(DataPortabilityChannels.DRY_RUN)(
+      {},
+      { content: '{bad json' },
+    );
     expect(malformed).toMatchObject({ ok: false, error: { code: 'VALIDATION_ERROR' } });
 
     const exported = (await getHandler(DataPortabilityChannels.EXPORT)({}, {})) as {
@@ -100,9 +114,12 @@ describe('DataPortabilityElectronModule V3 IPC surface', () => {
       capabilities: Array<{ payload: Record<string, unknown> }>;
     };
     envelope.capabilities[0]!.payload.identityId = 'source-identity';
-    const banned = await getHandler(DataPortabilityChannels.DRY_RUN)({}, {
-      content: JSON.stringify(envelope),
-    });
+    const banned = await getHandler(DataPortabilityChannels.DRY_RUN)(
+      {},
+      {
+        content: JSON.stringify(envelope),
+      },
+    );
     expect(banned).toMatchObject({ ok: false, error: { code: 'VALIDATION_ERROR' } });
     module.destroy?.();
   });

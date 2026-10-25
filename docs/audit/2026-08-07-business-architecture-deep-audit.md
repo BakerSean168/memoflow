@@ -205,21 +205,21 @@ Occurrence(sourceRef, occurrenceKey, scheduledAt, claimedBy, leaseUntil,
 
 ## 8. 验收矩阵
 
-| 场景 | 必须证明的结果 |
-| --- | --- |
-| 两个 API 实例同时抢一个 occurrence | 只有一个 claim 成功，另一个可安全重试 |
-| Scheduler 崩溃于 source mutation 与 notification 之间 | 重启后继续，最终只产生一份 source mutation 和一份 delivery intent |
-| Projection runtime 首次启动 | 自动从 cursor/账本对账，旧读模型不被半成品覆盖 |
-| 两个客户端更新同一 TaskTemplate | 一个成功，一个收到 CONFLICT，不得静默覆盖 |
-| 完成再撤销 Task | Goal contribution 可 apply/revert，最终与 Task 状态一致 |
-| 任务列表并发打开 | 查询无写副作用，occurrence 唯一，不产生重复实例 |
-| DST 春秋切换 | LocalDate + timezone 规则保持正确的本地时刻 |
-| Reminder snooze/complete/dismiss | 源状态、response、notification receipt 三者可追踪 |
-| Notification 渠道失败 | 有 durable retry、退避、最终失败状态和可观测 receipt |
-| AI execute 重试 | 相同 plan hash/action id 不重复创建实体 |
-| PowerSync 离线冲突 | 使用同一版本/幂等合同，不能产生悬空 relation |
-| Export -> Import -> Export | 关系、状态、时间、复盘字段 round-trip 等价 |
-| 新增 Wallet | 只新增 manifest 和模块代码，不修改中央 dashboard/portability/router switch |
+| 场景                                                  | 必须证明的结果                                                             |
+| ----------------------------------------------------- | -------------------------------------------------------------------------- |
+| 两个 API 实例同时抢一个 occurrence                    | 只有一个 claim 成功，另一个可安全重试                                      |
+| Scheduler 崩溃于 source mutation 与 notification 之间 | 重启后继续，最终只产生一份 source mutation 和一份 delivery intent          |
+| Projection runtime 首次启动                           | 自动从 cursor/账本对账，旧读模型不被半成品覆盖                             |
+| 两个客户端更新同一 TaskTemplate                       | 一个成功，一个收到 CONFLICT，不得静默覆盖                                  |
+| 完成再撤销 Task                                       | Goal contribution 可 apply/revert，最终与 Task 状态一致                    |
+| 任务列表并发打开                                      | 查询无写副作用，occurrence 唯一，不产生重复实例                            |
+| DST 春秋切换                                          | LocalDate + timezone 规则保持正确的本地时刻                                |
+| Reminder snooze/complete/dismiss                      | 源状态、response、notification receipt 三者可追踪                          |
+| Notification 渠道失败                                 | 有 durable retry、退避、最终失败状态和可观测 receipt                       |
+| AI execute 重试                                       | 相同 plan hash/action id 不重复创建实体                                    |
+| PowerSync 离线冲突                                    | 使用同一版本/幂等合同，不能产生悬空 relation                               |
+| Export -> Import -> Export                            | 关系、状态、时间、复盘字段 round-trip 等价                                 |
+| 新增 Wallet                                           | 只新增 manifest 和模块代码，不修改中央 dashboard/portability/router switch |
 
 ## 9. 结论
 

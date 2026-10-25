@@ -1,494 +1,330 @@
 [
- {
-  "key": "governance.detail.badExamples",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"
-  ]
- },
- {
-  "key": "governance.detail.breadcrumbRules",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"
-  ]
- },
- {
-  "key": "governance.detail.cancel",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"
-  ]
- },
- {
-  "key": "governance.detail.changedFields",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"
-  ]
- },
- {
-  "key": "governance.detail.codePrefix",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"
-  ]
- },
- {
-  "key": "governance.detail.confirmDeleteMsg",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"
-  ]
- },
- {
-  "key": "governance.detail.confirmDeleteTitle",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"
-  ]
- },
- {
-  "key": "governance.detail.delete",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"
-  ]
- },
- {
-  "key": "governance.detail.deleting",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"
-  ]
- },
- {
-  "key": "governance.detail.deprecatedWarning",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"
-  ]
- },
- {
-  "key": "governance.detail.description",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"
-  ]
- },
- {
-  "key": "governance.detail.edit",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"
-  ]
- },
- {
-  "key": "governance.detail.goodExamples",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"
-  ]
- },
- {
-  "key": "governance.detail.history",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"
-  ]
- },
- {
-  "key": "governance.detail.initialCreation",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"
-  ]
- },
- {
-  "key": "governance.detail.liveReference",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"
-  ]
- },
- {
-  "key": "governance.detail.noRevisions",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"
-  ]
- },
- {
-  "key": "governance.detail.replacementRule",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"
-  ]
- },
- {
-  "key": "governance.detail.revisionCreated",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"
-  ]
- },
- {
-  "key": "governance.detail.revisionDeprecated",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"
-  ]
- },
- {
-  "key": "governance.detail.revisionHistory",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"
-  ]
- },
- {
-  "key": "governance.detail.revisionReactivated",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"
-  ]
- },
- {
-  "key": "governance.detail.revisionUpdated",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"
-  ]
- },
- {
-  "key": "governance.detail.severityMandatory",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"
-  ]
- },
- {
-  "key": "governance.detail.severityRecommended",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"
-  ]
- },
- {
-  "key": "governance.detail.updatedAt",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"
-  ]
- },
- {
-  "key": "governance.detail.viewReplacement",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"
-  ]
- },
- {
-  "key": "governance.editor.actions",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.editor.addBtn",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.editor.badExamples",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.editor.badExamplesCount",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.editor.basicInfo",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.editor.breadcrumbRules",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.editor.cancelBtn",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.editor.captionPlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.editor.codeFormat",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.editor.codePlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.editor.createRule",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.editor.description",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.editor.descriptionPlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.editor.editRule",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.editor.goodExamples",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.editor.goodExamplesCount",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.editor.liveReference",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.editor.needBadExample",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.editor.needGoodExample",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.editor.newRule",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.editor.ruleCode",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.editor.saveChanges",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.editor.saving",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.editor.severity",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.editor.severityMandatory",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.editor.severityRecommended",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.editor.tagsCount",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.editor.title",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.editor.titlePlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.list.clearFilter",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceListView.vue"
-  ]
- },
- {
-  "key": "governance.list.clearFilters",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceListView.vue"
-  ]
- },
- {
-  "key": "governance.list.createFirst",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceListView.vue"
-  ]
- },
- {
-  "key": "governance.list.emptyFilterHint",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceListView.vue"
-  ]
- },
- {
-  "key": "governance.list.emptyHint",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceListView.vue"
-  ]
- },
- {
-  "key": "governance.list.emptyTitle",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceListView.vue"
-  ]
- },
- {
-  "key": "governance.list.filteredCount",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceListView.vue"
-  ]
- },
- {
-  "key": "governance.list.newRule",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceListView.vue"
-  ]
- },
- {
-  "key": "governance.list.nextPage",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceListView.vue"
-  ]
- },
- {
-  "key": "governance.list.prevPage",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceListView.vue"
-  ]
- },
- {
-  "key": "governance.list.severityAll",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceListView.vue"
-  ]
- },
- {
-  "key": "governance.list.severityMandatory",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceListView.vue"
-  ]
- },
- {
-  "key": "governance.list.severityRecommended",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceListView.vue"
-  ]
- },
- {
-  "key": "governance.list.statusActive",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceListView.vue"
-  ]
- },
- {
-  "key": "governance.list.statusAll",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceListView.vue"
-  ]
- },
- {
-  "key": "governance.list.statusDeprecated",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceListView.vue"
-  ]
- },
- {
-  "key": "governance.list.statusDraft",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceListView.vue"
-  ]
- },
- {
-  "key": "governance.list.tagFilterLabel",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceListView.vue"
-  ]
- },
- {
-  "key": "governance.list.totalCount",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/GovernanceListView.vue"
-  ]
- },
- {
-  "key": "governance.revision.backToDetail",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RevisionHistoryView.vue"
-  ]
- },
- {
-  "key": "governance.revision.empty",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RevisionHistoryView.vue"
-  ]
- },
- {
-  "key": "governance.revision.title",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RevisionHistoryView.vue"
-  ]
- },
- {
-  "key": "governance.search.placeholder",
-  "files": [
-   "packages/app-vue/src/modules/governance/components/GovernanceSearchBar.vue"
-  ]
- },
- {
-  "key": "governance.tagInput.hint",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.tagInput.label",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- },
- {
-  "key": "governance.tagInput.placeholder",
-  "files": [
-   "packages/app-vue/src/modules/governance/views/RuleEditorView.vue"
-  ]
- }
+  {
+    "key": "governance.detail.badExamples",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"]
+  },
+  {
+    "key": "governance.detail.breadcrumbRules",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"]
+  },
+  {
+    "key": "governance.detail.cancel",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"]
+  },
+  {
+    "key": "governance.detail.changedFields",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"]
+  },
+  {
+    "key": "governance.detail.codePrefix",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"]
+  },
+  {
+    "key": "governance.detail.confirmDeleteMsg",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"]
+  },
+  {
+    "key": "governance.detail.confirmDeleteTitle",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"]
+  },
+  {
+    "key": "governance.detail.delete",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"]
+  },
+  {
+    "key": "governance.detail.deleting",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"]
+  },
+  {
+    "key": "governance.detail.deprecatedWarning",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"]
+  },
+  {
+    "key": "governance.detail.description",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"]
+  },
+  {
+    "key": "governance.detail.edit",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"]
+  },
+  {
+    "key": "governance.detail.goodExamples",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"]
+  },
+  {
+    "key": "governance.detail.history",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"]
+  },
+  {
+    "key": "governance.detail.initialCreation",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"]
+  },
+  {
+    "key": "governance.detail.liveReference",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"]
+  },
+  {
+    "key": "governance.detail.noRevisions",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"]
+  },
+  {
+    "key": "governance.detail.replacementRule",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"]
+  },
+  {
+    "key": "governance.detail.revisionCreated",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"]
+  },
+  {
+    "key": "governance.detail.revisionDeprecated",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"]
+  },
+  {
+    "key": "governance.detail.revisionHistory",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"]
+  },
+  {
+    "key": "governance.detail.revisionReactivated",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"]
+  },
+  {
+    "key": "governance.detail.revisionUpdated",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"]
+  },
+  {
+    "key": "governance.detail.severityMandatory",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"]
+  },
+  {
+    "key": "governance.detail.severityRecommended",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"]
+  },
+  {
+    "key": "governance.detail.updatedAt",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"]
+  },
+  {
+    "key": "governance.detail.viewReplacement",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceDetailView.vue"]
+  },
+  {
+    "key": "governance.editor.actions",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.editor.addBtn",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.editor.badExamples",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.editor.badExamplesCount",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.editor.basicInfo",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.editor.breadcrumbRules",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.editor.cancelBtn",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.editor.captionPlaceholder",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.editor.codeFormat",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.editor.codePlaceholder",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.editor.createRule",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.editor.description",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.editor.descriptionPlaceholder",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.editor.editRule",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.editor.goodExamples",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.editor.goodExamplesCount",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.editor.liveReference",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.editor.needBadExample",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.editor.needGoodExample",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.editor.newRule",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.editor.ruleCode",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.editor.saveChanges",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.editor.saving",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.editor.severity",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.editor.severityMandatory",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.editor.severityRecommended",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.editor.tagsCount",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.editor.title",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.editor.titlePlaceholder",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.list.clearFilter",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceListView.vue"]
+  },
+  {
+    "key": "governance.list.clearFilters",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceListView.vue"]
+  },
+  {
+    "key": "governance.list.createFirst",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceListView.vue"]
+  },
+  {
+    "key": "governance.list.emptyFilterHint",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceListView.vue"]
+  },
+  {
+    "key": "governance.list.emptyHint",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceListView.vue"]
+  },
+  {
+    "key": "governance.list.emptyTitle",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceListView.vue"]
+  },
+  {
+    "key": "governance.list.filteredCount",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceListView.vue"]
+  },
+  {
+    "key": "governance.list.newRule",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceListView.vue"]
+  },
+  {
+    "key": "governance.list.nextPage",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceListView.vue"]
+  },
+  {
+    "key": "governance.list.prevPage",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceListView.vue"]
+  },
+  {
+    "key": "governance.list.severityAll",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceListView.vue"]
+  },
+  {
+    "key": "governance.list.severityMandatory",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceListView.vue"]
+  },
+  {
+    "key": "governance.list.severityRecommended",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceListView.vue"]
+  },
+  {
+    "key": "governance.list.statusActive",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceListView.vue"]
+  },
+  {
+    "key": "governance.list.statusAll",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceListView.vue"]
+  },
+  {
+    "key": "governance.list.statusDeprecated",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceListView.vue"]
+  },
+  {
+    "key": "governance.list.statusDraft",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceListView.vue"]
+  },
+  {
+    "key": "governance.list.tagFilterLabel",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceListView.vue"]
+  },
+  {
+    "key": "governance.list.totalCount",
+    "files": ["packages/app-vue/src/modules/governance/views/GovernanceListView.vue"]
+  },
+  {
+    "key": "governance.revision.backToDetail",
+    "files": ["packages/app-vue/src/modules/governance/views/RevisionHistoryView.vue"]
+  },
+  {
+    "key": "governance.revision.empty",
+    "files": ["packages/app-vue/src/modules/governance/views/RevisionHistoryView.vue"]
+  },
+  {
+    "key": "governance.revision.title",
+    "files": ["packages/app-vue/src/modules/governance/views/RevisionHistoryView.vue"]
+  },
+  {
+    "key": "governance.search.placeholder",
+    "files": ["packages/app-vue/src/modules/governance/components/GovernanceSearchBar.vue"]
+  },
+  {
+    "key": "governance.tagInput.hint",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.tagInput.label",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  },
+  {
+    "key": "governance.tagInput.placeholder",
+    "files": ["packages/app-vue/src/modules/governance/views/RuleEditorView.vue"]
+  }
 ]

@@ -105,7 +105,9 @@ export function GoalReviewDetailScreen() {
 
     setIsMutating(true);
     setError(null);
-    const result = await service.deleteGoalReview(goalId, reviewId, { expectedVersion: goalVersion });
+    const result = await service.deleteGoalReview(goalId, reviewId, {
+      expectedVersion: goalVersion,
+    });
     setIsMutating(false);
     if (!result.ok) {
       setError(presentErrorMessage(result.error));
@@ -127,19 +129,27 @@ export function GoalReviewDetailScreen() {
 
       {error ? (
         <SectionCard title="Review request failed" description="Unable to update this review.">
-          <ThemedText type="small" themeColor="warning">{error}</ThemedText>
+          <ThemedText type="small" themeColor="warning">
+            {error}
+          </ThemedText>
         </SectionCard>
       ) : null}
 
       {!isLoading && !error && !review ? (
-        <SectionCard title="Review not found" description="This review does not exist or is inaccessible.">
+        <SectionCard
+          title="Review not found"
+          description="This review does not exist or is inaccessible."
+        >
           <PrimaryButton label="Back" onPress={() => router.back()} variant="secondary" />
         </SectionCard>
       ) : null}
 
       {review ? (
         <>
-          <SectionCard title="Measurement context" description="Captured when the review was created.">
+          <SectionCard
+            title="Measurement context"
+            description="Captured when the review was created."
+          >
             <View style={styles.pillRow}>
               <StatusPill
                 label={`${review.systemContext.overallProgress.startPercentage}% → ${review.systemContext.overallProgress.endPercentage}%`}
@@ -147,11 +157,15 @@ export function GoalReviewDetailScreen() {
               />
               <StatusPill
                 label={`${review.systemContext.overallProgress.deltaPercentage >= 0 ? '+' : ''}${review.systemContext.overallProgress.deltaPercentage}%`}
-                tone={review.systemContext.overallProgress.deltaPercentage >= 0 ? 'success' : 'warning'}
+                tone={
+                  review.systemContext.overallProgress.deltaPercentage >= 0 ? 'success' : 'warning'
+                }
               />
             </View>
             <ThemedText type="small" themeColor="textSecondary">
-              Reviewed {formatProductDate(review.reviewedAt, emptyKind('dash'))} · {review.systemContext.summary.recordCount} records · {review.systemContext.summary.taskContributionCount} task contributions
+              Reviewed {formatProductDate(review.reviewedAt, emptyKind('dash'))} ·{' '}
+              {review.systemContext.summary.recordCount} records ·{' '}
+              {review.systemContext.summary.taskContributionCount} task contributions
             </ThemedText>
           </SectionCard>
 
@@ -165,8 +179,18 @@ export function GoalReviewDetailScreen() {
               textAlignVertical="top"
               style={styles.multilineField}
             />
-            <PrimaryTextField label="Challenges" value={challenges} onChangeText={setChallenges} multiline />
-            <PrimaryTextField label="Adjustments" value={adjustments} onChangeText={setAdjustments} multiline />
+            <PrimaryTextField
+              label="Challenges"
+              value={challenges}
+              onChangeText={setChallenges}
+              multiline
+            />
+            <PrimaryTextField
+              label="Adjustments"
+              value={adjustments}
+              onChangeText={setAdjustments}
+              multiline
+            />
             <View style={styles.actionRow}>
               <PrimaryButton
                 label={isMutating ? 'Saving…' : 'Save review'}

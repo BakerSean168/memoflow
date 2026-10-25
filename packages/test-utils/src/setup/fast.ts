@@ -15,12 +15,7 @@ export interface FastTestSetupOptions {
  * external boundary. Slow suites should own that setup explicitly.
  */
 export function applyFastTestEnv(options: FastTestSetupOptions = {}) {
-  const {
-    env = {},
-    nodeEnv = 'test',
-    timezone = 'UTC',
-    preserveExistingEnv = false,
-  } = options;
+  const { env = {}, nodeEnv = 'test', timezone = 'UTC', preserveExistingEnv = false } = options;
 
   if (nodeEnv !== false) {
     setEnvValue('NODE_ENV', nodeEnv, preserveExistingEnv);

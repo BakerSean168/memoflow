@@ -165,10 +165,16 @@ describe('registerAIRuntimeRoutes', () => {
     const router = registerAIRuntimeRoutes(stub.runtime, { auth }, workflow.runtime);
     const handler = getRouteHandler(router, 'get', '/workspace/sse');
     const unauthenticated = response();
-    await handler(request({}, '') as unknown as Request, unauthenticated.res as unknown as Response);
+    await handler(
+      request({}, '') as unknown as Request,
+      unauthenticated.res as unknown as Response,
+    );
     expect(unauthenticated.res.statusCode).toBe(401);
     const unavailable = response();
-    await handler(Object.assign(request({}), { header: () => undefined, query: {} }) as unknown as Request, unavailable.res as unknown as Response);
+    await handler(
+      Object.assign(request({}), { header: () => undefined, query: {} }) as unknown as Request,
+      unavailable.res as unknown as Response,
+    );
     expect(unavailable.res.statusCode).toBe(503);
     expect(unavailable.res.flushHeaders).not.toHaveBeenCalled();
   });
@@ -204,30 +210,58 @@ describe('registerAIRuntimeRoutes', () => {
     const runtime = Object.assign(stub.runtime, { answerToolSuspension });
     const router = registerAIRuntimeRoutes(runtime, { auth });
     const { res } = response();
-    const command = { type: 'tool_answer', action: 'answer', conversationId: 'conversation-1', runId: 'run-1', toolCallId: 'tool-1', answer: 'A' };
+    const command = {
+      type: 'tool_answer',
+      action: 'answer',
+      conversationId: 'conversation-1',
+      runId: 'run-1',
+      toolCallId: 'tool-1',
+      answer: 'A',
+    };
 
-    await getRouteHandler(router, 'post', '/assistant/answer')(request(command) as never, res as never);
+    await getRouteHandler(
+      router,
+      'post',
+      '/assistant/answer',
+    )(request(command) as never, res as never);
 
-    expect(answerToolSuspension).toHaveBeenCalledWith(expect.objectContaining({
-      context: expect.objectContaining({ identityId: 'identity-1' }),
-      command,
-    }));
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
-      ok: true,
-      data: { accepted: true },
-    }));
+    expect(answerToolSuspension).toHaveBeenCalledWith(
+      expect.objectContaining({
+        context: expect.objectContaining({ identityId: 'identity-1' }),
+        command,
+      }),
+    );
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ok: true,
+        data: { accepted: true },
+      }),
+    );
   });
 
   it('redacts native ask_user resume failures over HTTP instead of leaking provider diagnostics', async () => {
     const stub = runtimeStub();
     const runtime = Object.assign(stub.runtime, {
-      answerToolSuspension: vi.fn(async () => { throw new AIExecutionError('provider_unavailable', 'vault=private-model-key'); }),
+      answerToolSuspension: vi.fn(async () => {
+        throw new AIExecutionError('provider_unavailable', 'vault=private-model-key');
+      }),
     });
     const router = registerAIRuntimeRoutes(runtime, { auth });
     const { res } = response();
 
-    await getRouteHandler(router, 'post', '/assistant/answer')(
-      request({ type: 'tool_answer', action: 'answer', conversationId: 'conversation-1', runId: 'run-1', toolCallId: 'tool-1', answer: 'A' }) as never,
+    await getRouteHandler(
+      router,
+      'post',
+      '/assistant/answer',
+    )(
+      request({
+        type: 'tool_answer',
+        action: 'answer',
+        conversationId: 'conversation-1',
+        runId: 'run-1',
+        toolCallId: 'tool-1',
+        answer: 'A',
+      }) as never,
       res as never,
     );
 

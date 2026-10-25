@@ -1,4 +1,10 @@
-import { Pressable, StyleSheet, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
+import {
+  Pressable,
+  StyleSheet,
+  type PressableProps,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 
 import { Spacing } from '../constants/theme';
 import { useTheme } from '../hooks/useTheme';
@@ -47,7 +53,8 @@ export function PrimaryButton({
         },
         style,
       ]}
-      {...props}>
+      {...props}
+    >
       <ThemedText type="smallBold" style={[styles.label, { color: labelColor }]}>
         {label}
       </ThemedText>

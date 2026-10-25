@@ -15,13 +15,17 @@ function override(): RoutineTemporaryOverride {
 }
 
 function createHarness() {
-  const written: Array<{ identityId: string; routineId: string; override?: RoutineTemporaryOverride }> = [];
+  const written: Array<{
+    identityId: string;
+    routineId: string;
+    override?: RoutineTemporaryOverride;
+  }> = [];
   const cleared: Array<{ identityId: string; routineId: string }> = [];
   const published: RoutineOverrideChangedEvent[] = [];
   const store = {
-    findRoutineTemporaryOverride: vi.fn<
-      () => Promise<RoutineTemporaryOverride | null>
-    >(async () => null),
+    findRoutineTemporaryOverride: vi.fn<() => Promise<RoutineTemporaryOverride | null>>(
+      async () => null,
+    ),
     setRoutineTemporaryOverride: vi.fn(async (input) => {
       written.push(input);
     }),
@@ -70,9 +74,7 @@ describe('createRoutineOverrideChangedPublishingStore (ROUTINE-3401)', () => {
     expect(harness.written).toEqual([
       { identityId: 'identity-1', routineId: 'routine-1', override: override() },
     ]);
-    expect(harness.published).toEqual([
-      { identityId: 'identity-1', routineId: 'routine-1' },
-    ]);
+    expect(harness.published).toEqual([{ identityId: 'identity-1', routineId: 'routine-1' }]);
   });
 
   it('publishes override-changed after clearing a suppress so the Scheduler re-arms', async () => {
@@ -84,9 +86,7 @@ describe('createRoutineOverrideChangedPublishingStore (ROUTINE-3401)', () => {
     });
 
     expect(harness.cleared).toEqual([{ identityId: 'identity-1', routineId: 'routine-1' }]);
-    expect(harness.published).toEqual([
-      { identityId: 'identity-1', routineId: 'routine-1' },
-    ]);
+    expect(harness.published).toEqual([{ identityId: 'identity-1', routineId: 'routine-1' }]);
   });
 
   it('does not publish when the durable write fails', async () => {

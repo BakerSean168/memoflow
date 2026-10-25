@@ -31,11 +31,7 @@ import {
   TaskTimingKind,
 } from '@memoflow/contracts/task';
 import type { TaskRecurrence, TaskTiming } from '@memoflow/contracts/task';
-import {
-  TaskReminderConfig,
-  TaskGoalBinding,
-  TaskPlanSchedule,
-} from '../../value-objects';
+import { TaskReminderConfig, TaskGoalBinding, TaskPlanSchedule } from '../../value-objects';
 import {
   canonicalTaskPlanScheduleForTest,
   aDailyRecurrence,
@@ -131,10 +127,7 @@ function localYmd(instant: number): string {
   return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
 }
 
-function makeState(
-  overrides: Partial<TaskPlanState> & {
-  } = {},
-): TaskPlanState {
+function makeState(overrides: Partial<TaskPlanState> & {} = {}): TaskPlanState {
   const now = Date.now();
   return {
     id: overrides.id ?? TaskPlanId.generate(),
@@ -143,12 +136,7 @@ function makeState(
     description: overrides.description ?? null,
     schedule:
       overrides.schedule ??
-      canonicalTaskPlanScheduleForTest(
-        TaskPlanScheduleKind.OneTime,
-        now,
-        anAllDayTiming(),
-        null,
-      ),
+      canonicalTaskPlanScheduleForTest(TaskPlanScheduleKind.OneTime, now, anAllDayTiming(), null),
     importance: overrides.importance ?? ImportanceLevel.Moderate,
     status: overrides.status ?? TaskPlanStatus.Active,
     outcome: overrides.outcome ?? TaskPlanOutcome.Open,
@@ -422,8 +410,8 @@ describe('TaskPlan Aggregate', () => {
           title: 'Task',
           schedule: canonicalTaskPlanScheduleForTest(
             TaskPlanScheduleKind.OneTime,
-        Date.now(),
-        anAllDayTiming(),
+            Date.now(),
+            anAllDayTiming(),
             null,
             TASK_TEST_TIME_CONTEXT,
           ),
@@ -446,8 +434,8 @@ describe('TaskPlan Aggregate', () => {
             title: 'Checklisted task',
             schedule: canonicalTaskPlanScheduleForTest(
               TaskPlanScheduleKind.OneTime,
-        Date.now(),
-        anAllDayTiming(),
+              Date.now(),
+              anAllDayTiming(),
               null,
               TASK_TEST_TIME_CONTEXT,
             ),
@@ -756,9 +744,7 @@ describe('TaskPlan Aggregate', () => {
       const generationService = new TaskOccurrenceGenerationService();
 
       it('keeps occurrence creation outside the TaskPlan aggregate', () => {
-        const plan = TaskPlan.load(
-          makeState({ status: TaskPlanStatus.Active }),
-        );
+        const plan = TaskPlan.load(makeState({ status: TaskPlanStatus.Active }));
 
         const occurrence = generationService.createOccurrence(
           plan,
@@ -936,7 +922,10 @@ describe('TaskPlan Aggregate', () => {
       });
 
       it('should return false for recurring task past endDate', () => {
-        const rule = { ...makeDailyRecurrence(), end: { kind: TaskRecurrenceEndKind.Until, date: '2020-01-01' } };
+        const rule = {
+          ...makeDailyRecurrence(),
+          end: { kind: TaskRecurrenceEndKind.Until, date: '2020-01-01' },
+        };
         const plan = TaskPlan.load(
           makeState({
             status: TaskPlanStatus.Active,
@@ -968,7 +957,10 @@ describe('TaskPlan Aggregate', () => {
           }),
         );
 
-        const next = plan.getNextOccurrence(Date.parse('2029-12-25T00:00:00.000Z'), TASK_TEST_TIME_CONTEXT);
+        const next = plan.getNextOccurrence(
+          Date.parse('2029-12-25T00:00:00.000Z'),
+          TASK_TEST_TIME_CONTEXT,
+        );
         expect(localYmd(next!)).toBe(localYmd(futureDate.getTime()));
       });
 
@@ -985,7 +977,10 @@ describe('TaskPlan Aggregate', () => {
           }),
         );
 
-        const next = plan.getNextOccurrence(Date.parse('2025-01-01T00:00:00.000Z'), TASK_TEST_TIME_CONTEXT);
+        const next = plan.getNextOccurrence(
+          Date.parse('2025-01-01T00:00:00.000Z'),
+          TASK_TEST_TIME_CONTEXT,
+        );
         expect(next).toBeNull();
       });
 
@@ -1013,10 +1008,7 @@ describe('TaskPlan Aggregate', () => {
           }),
         );
 
-        const next = plan.getNextOccurrence(
-          Date.UTC(2026, 0, 1, 12, 0, 0),
-          TASK_TEST_TIME_CONTEXT,
-        );
+        const next = plan.getNextOccurrence(Date.UTC(2026, 0, 1, 12, 0, 0), TASK_TEST_TIME_CONTEXT);
         expect(next).not.toBeNull();
         expect(localYmd(next!)).toBe('2026-01-03');
         expect(new Date(next!).getUTCHours()).toBe(0);
@@ -1097,8 +1089,8 @@ describe('TaskPlan Aggregate', () => {
         title: 'Goal task',
         schedule: canonicalTaskPlanScheduleForTest(
           TaskPlanScheduleKind.OneTime,
-        Date.now(),
-        anAllDayTiming(),
+          Date.now(),
+          anAllDayTiming(),
           null,
           TASK_TEST_TIME_CONTEXT,
         ),
@@ -1126,8 +1118,8 @@ describe('TaskPlan Aggregate', () => {
           title: 'Incomplete goal task',
           schedule: canonicalTaskPlanScheduleForTest(
             TaskPlanScheduleKind.OneTime,
-        Date.now(),
-        anAllDayTiming(),
+            Date.now(),
+            anAllDayTiming(),
             null,
             TASK_TEST_TIME_CONTEXT,
           ),
@@ -1331,8 +1323,8 @@ describe('TaskPlan Aggregate', () => {
         title: 'Task',
         schedule: canonicalTaskPlanScheduleForTest(
           TaskPlanScheduleKind.OneTime,
-        Date.now(),
-        anAllDayTiming(),
+          Date.now(),
+          anAllDayTiming(),
           null,
           TASK_TEST_TIME_CONTEXT,
         ),
@@ -1347,7 +1339,7 @@ describe('TaskPlan Aggregate', () => {
     });
 
     it('should emit task:delete on softDelete', () => {
-        const plan = createOneTimePlanForTest({
+      const plan = createOneTimePlanForTest({
         identityId: makeIdentityId(),
         title: 'Task',
         timeContext: TASK_TEST_TIME_CONTEXT,
@@ -1360,7 +1352,7 @@ describe('TaskPlan Aggregate', () => {
     });
 
     it('should emit task:update on updateTitle', () => {
-        const plan = createOneTimePlanForTest({
+      const plan = createOneTimePlanForTest({
         identityId: makeIdentityId(),
         title: 'Original',
         timeContext: TASK_TEST_TIME_CONTEXT,
@@ -1378,8 +1370,8 @@ describe('TaskPlan Aggregate', () => {
         title: 'Task',
         schedule: canonicalTaskPlanScheduleForTest(
           TaskPlanScheduleKind.OneTime,
-        Date.now(),
-        anAllDayTiming(),
+          Date.now(),
+          anAllDayTiming(),
           null,
           TASK_TEST_TIME_CONTEXT,
         ),

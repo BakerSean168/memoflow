@@ -73,7 +73,7 @@ R4-2201C 的正确目标是删除 legacy Reminder model，而不是删除 Routin
 
 最终产品结构：
 
-~~~text
+```text
 WindowHeader
   └─ Routine capsule
        └─ /routines
@@ -84,17 +84,17 @@ WindowHeader
                  ├─ Runtime active state
                  ├─ Temporary override status/actions
                  └─ Method Library
-~~~
+```
 
 执行面继续保持分离：
 
-~~~text
+```text
 Configuration Center = 配置 / 查看 owner truth
 AI                 = 创建、修改、启停、profile/override command
 Desktop Runtime    = ActiveUsage / Elapsed / Intervention
 Protocol Surface   = 50/10 / Pomodoro session execution
 Schedule Planner   = calendar projection / owner-command mutation
-~~~
+```
 
 Routine Configuration Center **不是**旧 Reminder 页的 rename，也不是新的 Reminder CRUD。
 
@@ -127,7 +127,7 @@ UI 只消费 canonical Routine contracts：
 
 /routines 必须通过：
 
-~~~text
+```text
 Vue
  -> ROUTINE_SERVICE_KEY
  -> @memoflow/reminder/client
@@ -135,7 +135,7 @@ Vue
  -> host composition
  -> Routine owner application/query service
  -> canonical stores
-~~~
+```
 
 ### RUI-INV-03 — Query 与 command 都不能暴露 persistence row
 
@@ -168,7 +168,7 @@ Occurrence/intervention 的 daily execution 不搬进配置中心。页面最多
 
 建议最小 landing snapshot：
 
-~~~ts
+```ts
 interface RoutineConfigurationSnapshot {
   definitions: RoutineDefinitionDto[];
   profiles: RoutineProfileDto[];
@@ -176,11 +176,11 @@ interface RoutineConfigurationSnapshot {
   runtimeContext: RoutineRuntimeContextDto;
   overrides: RoutineTemporaryOverrideDto[];
 }
-~~~
+```
 
 Definition DTO：
 
-~~~ts
+```ts
 interface RoutineDefinitionDto {
   id: string;
   name: string;
@@ -191,11 +191,11 @@ interface RoutineDefinitionDto {
   createdAt: string;
   updatedAt: string;
 }
-~~~
+```
 
 Profile DTO：
 
-~~~ts
+```ts
 interface RoutineProfileDto {
   id: string;
   name: string;
@@ -204,22 +204,22 @@ interface RoutineProfileDto {
   active: boolean;
   version: number;
 }
-~~~
+```
 
 Membership DTO：
 
-~~~ts
+```ts
 interface RoutineMembershipDto {
   routineId: string;
   profileId: string;
   enabled: boolean;
   version: number;
 }
-~~~
+```
 
 Override DTO：
 
-~~~ts
+```ts
 interface RoutineTemporaryOverrideDto {
   routineId: string;
   snoozeUntil: number | null;
@@ -229,13 +229,13 @@ interface RoutineTemporaryOverrideDto {
   reason: string;
   source: 'user' | 'ai' | 'runtime';
 }
-~~~
+```
 
 ### 4.2 ClientPort
 
 首批必须覆盖配置中心实际需要的接口：
 
-~~~ts
+```ts
 interface RoutineClientPort {
   getConfigurationSnapshot(): Promise<Result<RoutineConfigurationSnapshot>>;
 
@@ -254,7 +254,7 @@ interface RoutineClientPort {
   setTemporaryOverride(...): Promise<Result<...>>;
   clearTemporaryOverride(routineId, expectedVersion?): Promise<Result<...>>;
 }
-~~~
+```
 
 Method Library 是静态 canonical catalog，直接从 @memoflow/reminder/method-library 读取，不再复制一份 UI 常量。
 
@@ -276,7 +276,7 @@ Method Library 是静态 canonical catalog，直接从 @memoflow/reminder/method
 
 建立 canonical Routine endpoints，统一前缀：
 
-~~~text
+```text
 GET    /api/v1/routines/configuration
 POST   /api/v1/routines
 PATCH  /api/v1/routines/:routineId
@@ -291,7 +291,7 @@ PATCH  /api/v1/routine-profiles/:profileId/runtime
 
 PUT    /api/v1/routines/:routineId/override
 DELETE /api/v1/routines/:routineId/override
-~~~
+```
 
 身份由 host/request context 注入，客户端不得提交 authority identityId。
 
@@ -314,14 +314,14 @@ API / Desktop 都复用同一 Routine application command/query service；transp
 
 新增：
 
-~~~text
+```text
 packages/app-vue/src/modules/routine/
   router/
   views/
   components/
   composables/
   index.ts
-~~~
+```
 
 ### 6.1 页面 IA
 
@@ -371,9 +371,9 @@ packages/app-vue/src/modules/routine/
 
 canonical landing：
 
-~~~text
+```text
 /routines
-~~~
+```
 
 不新增 /routine、/reminders alias。
 
@@ -390,20 +390,20 @@ canonical landing：
 
 defaultModuleCapsules 增加：
 
-~~~ts
+```ts
 {
   id: 'routine',
   title: 'nav.capsule.routine',
   icon: Repeat2,
   route: '/routines'
 }
-~~~
+```
 
 产品顺序：
 
-~~~text
+```text
 Goal → Task → Routine → Note → Schedule → Notification
-~~~
+```
 
 ### RUI-1103 — i18n
 
@@ -420,11 +420,13 @@ Goal → Task → Routine → Note → Schedule → Notification
 ### Phase A — Contract / owner seam
 
 #### RUI-2101 Routine configuration query
+
 - 定义 serializable DTO
 - 建 query service
 - tests：definitions/profiles/memberships/runtime/overrides
 
 #### RUI-2102 Routine client public seam
+
 - @memoflow/reminder/client
 - Result-based port
 - package export
@@ -433,6 +435,7 @@ Goal → Task → Routine → Note → Schedule → Notification
 ### Phase B — Host transport
 
 #### RUI-2201 Web HTTP
+
 - canonical Routine routes
 - request identity ownership
 - validation
@@ -440,6 +443,7 @@ Goal → Task → Routine → Note → Schedule → Notification
 - route integration tests
 
 #### RUI-2202 Desktop IPC
+
 - canonical Routine channels
 - main composition
 - renderer client
@@ -448,16 +452,19 @@ Goal → Task → Routine → Note → Schedule → Notification
 ### Phase C — Vue composition
 
 #### RUI-2301 DI
+
 - IRoutineService = RoutineClientPort
 - ROUTINE_SERVICE_KEY
 - Web/desktop provide client
 
 #### RUI-2302 Module/router
+
 - modules/routine
 - /routines
 - route tests
 
 #### RUI-2303 Configuration Center
+
 - owner-backed list/profile/filter
 - create/edit/delete routine
 - profile management
@@ -468,12 +475,14 @@ Goal → Task → Routine → Note → Schedule → Notification
 ### Phase D — Shell recovery
 
 #### RUI-2401 Capsule + tab semantics
+
 - Routine capsule
 - router sync
 - tab persistence
 - preview strategy：首版允许无 hover preview；不得因此阻塞 landing surface
 
 #### RUI-2402 Accessibility/responsive
+
 - keyboard navigation
 - aria
 - narrow panel
@@ -513,7 +522,7 @@ Web 与 Desktop 至少各验证一次核心 landing + CRUD smoke。
 
 Focused：
 
-~~~text
+```text
 pnpm nx run reminder:test
 pnpm nx run reminder:typecheck
 pnpm nx run app-vue:test
@@ -522,24 +531,24 @@ pnpm nx run api:test
 pnpm nx run api:typecheck
 pnpm nx run desktop:test
 pnpm nx run desktop:typecheck
-~~~
+```
 
 Structure：
 
-~~~text
+```text
 pnpm docs:check
 pnpm governance:check
 pnpm test:inventory:check
-~~~
+```
 
 Build：
 
-~~~text
+```text
 pnpm nx run reminder:build
 pnpm nx run app-vue:build
 pnpm nx run web:build
 pnpm nx run desktop:build
-~~~
+```
 
 E2E 按受影响环境选择 local-docker / shell / desktop smoke；不以单元测试替代真实 route + host composition 验证。
 

@@ -16,9 +16,7 @@ export const AIConversationShellPortableV3Schema = z
   })
   .strict();
 
-export type AIConversationShellPortableV3 = z.infer<
-  typeof AIConversationShellPortableV3Schema
->;
+export type AIConversationShellPortableV3 = z.infer<typeof AIConversationShellPortableV3Schema>;
 
 /** Owner-driven V3 payload for product-owned Conversation shells. */
 export const AIConversationPortablePayloadV3Schema = z
@@ -40,6 +38,4 @@ export const AIConversationPortablePayloadV3Schema = z
     }
   });
 
-export type AIConversationPortablePayloadV3 = z.infer<
-  typeof AIConversationPortablePayloadV3Schema
->;
+export type AIConversationPortablePayloadV3 = z.infer<typeof AIConversationPortablePayloadV3Schema>;

@@ -5,18 +5,29 @@ import {
   type ProviderDnsResolver,
 } from './provider-endpoint-policy';
 
-function resolver(entries: Record<string, Array<{ address: string; family: 4 | 6 }>>): ProviderDnsResolver {
-  return vi.fn(async (hostname: string) => entries[hostname] ?? [{ address: '8.8.8.8', family: 4 }]);
+function resolver(
+  entries: Record<string, Array<{ address: string; family: 4 | 6 }>>,
+): ProviderDnsResolver {
+  return vi.fn(
+    async (hostname: string) => entries[hostname] ?? [{ address: '8.8.8.8', family: 4 }],
+  );
 }
 
 describe('ProviderEndpointPolicy', () => {
   it('accepts public HTTPS endpoints and returns the exact authorized addresses', async () => {
-    const policy = new ProviderEndpointPolicy(new Set(), resolver({
-      'public.example': [{ address: '8.8.8.8', family: 4 }],
-    }));
+    const policy = new ProviderEndpointPolicy(
+      new Set(),
+      resolver({
+        'public.example': [{ address: '8.8.8.8', family: 4 }],
+      }),
+    );
 
-    await expect(policy.validate({ baseUrl: 'https://public.example/v1' })).resolves.toBeUndefined();
-    await expect(policy.authorizeConnection({ hostname: 'public.example', port: 443 })).resolves.toMatchObject({
+    await expect(
+      policy.validate({ baseUrl: 'https://public.example/v1' }),
+    ).resolves.toBeUndefined();
+    await expect(
+      policy.authorizeConnection({ hostname: 'public.example', port: 443 }),
+    ).resolves.toMatchObject({
       hostname: 'public.example',
       port: 443,
       addresses: [{ address: '8.8.8.8', family: 4 }],
@@ -32,17 +43,17 @@ describe('ProviderEndpointPolicy', () => {
     'https://metadata.google.internal/computeMetadata/v1',
     'https://private.example/v1',
   ])('rejects unsafe provider endpoint %s', async (baseUrl) => {
-    const policy = new ProviderEndpointPolicy(new Set(), resolver({
-      'private.example': [{ address: '10.0.0.8', family: 4 }],
-    }));
+    const policy = new ProviderEndpointPolicy(
+      new Set(),
+      resolver({
+        'private.example': [{ address: '10.0.0.8', family: 4 }],
+      }),
+    );
     await expect(policy.validate({ baseUrl })).rejects.toMatchObject({ category: 'validation' });
   });
 
   it('allows only an explicitly deployment-approved private host:port', async () => {
-    const policy = new ProviderEndpointPolicy(
-      new Set(['10.0.0.5:8443']),
-      resolver({}),
-    );
+    const policy = new ProviderEndpointPolicy(new Set(['10.0.0.5:8443']), resolver({}));
     await expect(
       policy.authorizeConnection({ hostname: '10.0.0.5', port: 8443 }),
     ).resolves.toMatchObject({ privateAllowlisted: true });

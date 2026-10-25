@@ -23,12 +23,7 @@ export async function fetchRoutineUpcomingCached(
 ): Promise<RoutineUpcomingOccurrence[]> {
   const limit = input.limit ?? 500;
   return input.queryClient.fetchQuery<RoutineUpcomingOccurrence[]>({
-    queryKey: routineUpcomingQueryKeys.range(
-      input.identityScope,
-      input.start,
-      input.end,
-      limit,
-    ),
+    queryKey: routineUpcomingQueryKeys.range(input.identityScope, input.start, input.end, limit),
     staleTime: input.force ? 0 : ROUTINE_UPCOMING_STALE_TIME_MS,
     queryFn: async () => {
       const result = await input.service.getUpcomingOccurrences({

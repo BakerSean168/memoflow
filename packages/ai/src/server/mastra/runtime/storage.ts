@@ -57,7 +57,9 @@ function withCommitWake(client: SqliteClient, wake: () => void, databaseKey: str
   const acquire = async () => {
     const previous = sqliteTails.get(databaseKey);
     let resolve!: () => void;
-    const tail = new Promise<void>((done) => { resolve = done; });
+    const tail = new Promise<void>((done) => {
+      resolve = done;
+    });
     sqliteTails.set(databaseKey, tail);
     await previous;
     return () => {
@@ -66,11 +68,19 @@ function withCommitWake(client: SqliteClient, wake: () => void, databaseKey: str
     };
   };
   return {
-    get closed() { return client.closed; },
-    get protocol() { return client.protocol; },
+    get closed() {
+      return client.closed;
+    },
+    get protocol() {
+      return client.protocol;
+    },
     async close() {
       const release = await acquire();
-      try { await client.close(); } finally { release(); }
+      try {
+        await client.close();
+      } finally {
+        release();
+      }
     },
     async execute(statement) {
       const release = await acquire();
@@ -78,7 +88,9 @@ function withCommitWake(client: SqliteClient, wake: () => void, databaseKey: str
         const result = await client.execute(statement);
         if (result.rowsAffected > 0) wake();
         return result;
-      } finally { release(); }
+      } finally {
+        release();
+      }
     },
     async batch(statements, mode) {
       const release = await acquire();
@@ -86,18 +98,38 @@ function withCommitWake(client: SqliteClient, wake: () => void, databaseKey: str
         const results = await client.batch(statements, mode);
         if (results.some((result) => result.rowsAffected > 0)) wake();
         return results;
-      } finally { release(); }
+      } finally {
+        release();
+      }
     },
     async transaction(mode) {
       const release = await acquire();
       let transaction;
-      try { transaction = await client.transaction(mode); }
-      catch (error) { release(); throw error; }
+      try {
+        transaction = await client.transaction(mode);
+      } catch (error) {
+        release();
+        throw error;
+      }
       let changed = false;
       return {
-        get closed() { return transaction.closed; },
-        close() { try { transaction.close(); } finally { release(); } },
-        async rollback() { try { await transaction.rollback(); } finally { release(); } },
+        get closed() {
+          return transaction.closed;
+        },
+        close() {
+          try {
+            transaction.close();
+          } finally {
+            release();
+          }
+        },
+        async rollback() {
+          try {
+            await transaction.rollback();
+          } finally {
+            release();
+          }
+        },
         async execute(statement) {
           const result = await transaction.execute(statement);
           changed ||= result.rowsAffected > 0;
@@ -117,7 +149,10 @@ class GoalEventLibSQLStore extends LibSQLStore {
   private readonly events: GoalWorkflowEventsLibSQL;
 
   constructor(url: string) {
-    const rawClient = createClient({ url, ...(url.startsWith('file:') || url.includes(':memory:') ? { timeout: 5000 } : {}) });
+    const rawClient = createClient({
+      url,
+      ...(url.startsWith('file:') || url.includes(':memory:') ? { timeout: 5000 } : {}),
+    });
     const client = withCommitWake(rawClient, () => events.notify(), sqliteDatabaseKey(url));
     const events = new GoalWorkflowEventsLibSQL(client);
     super({ id: 'memoflow-ai', client });

@@ -1,5 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis } from '.';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+  BreadcrumbEllipsis,
+} from '.';
 
 const meta = {
   title: 'Atoms/Breadcrumb',
@@ -12,7 +20,14 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => ({
-    components: { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator },
+    components: {
+      Breadcrumb,
+      BreadcrumbItem,
+      BreadcrumbLink,
+      BreadcrumbList,
+      BreadcrumbPage,
+      BreadcrumbSeparator,
+    },
     template: `
       <Breadcrumb>
         <BreadcrumbList>
@@ -35,7 +50,15 @@ export const Default: Story = {
 
 export const WithEllipsis: Story = {
   render: () => ({
-    components: { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis },
+    components: {
+      Breadcrumb,
+      BreadcrumbItem,
+      BreadcrumbLink,
+      BreadcrumbList,
+      BreadcrumbPage,
+      BreadcrumbSeparator,
+      BreadcrumbEllipsis,
+    },
     template: `
       <Breadcrumb>
         <BreadcrumbList>

@@ -314,12 +314,12 @@ describe('POC-6401 pg-boss SchedulingPort evidence', () => {
 
     await boss.deleteJob(PGBOSS_POC_QUEUE, claimed.id);
     expect(await boss.redrive(PGBOSS_POC_DLQ, { sourceName: PGBOSS_POC_QUEUE })).toBe(1);
-    expect(
-      await boss.findJobs(PGBOSS_POC_QUEUE, { data: { marker: 'dlq-redrive' } }),
-    ).toHaveLength(1);
-    expect(
-      await boss.findJobs(PGBOSS_POC_DLQ, { data: { marker: 'dlq-redrive' } }),
-    ).toHaveLength(0);
+    expect(await boss.findJobs(PGBOSS_POC_QUEUE, { data: { marker: 'dlq-redrive' } })).toHaveLength(
+      1,
+    );
+    expect(await boss.findJobs(PGBOSS_POC_DLQ, { data: { marker: 'dlq-redrive' } })).toHaveLength(
+      0,
+    );
   });
 
   it('supports heartbeat touch and expiration supervision for active jobs', async () => {

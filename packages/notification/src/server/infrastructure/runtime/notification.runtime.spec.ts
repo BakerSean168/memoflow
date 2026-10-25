@@ -151,7 +151,11 @@ describe('Notification durable delivery worker', () => {
       environment: 'test',
       repository,
       reliableAdapter: adapter,
-      deliverer: { deliver: vi.fn(async () => { throw new Error('channel unreachable'); }) },
+      deliverer: {
+        deliver: vi.fn(async () => {
+          throw new Error('channel unreachable');
+        }),
+      },
       deadLetterThreshold: 3,
     });
 
@@ -174,7 +178,11 @@ describe('Notification durable delivery worker', () => {
       environment: 'test',
       repository,
       reliableAdapter: adapter,
-      deliverer: { deliver: vi.fn(async () => { throw new Error('channel unreachable'); }) },
+      deliverer: {
+        deliver: vi.fn(async () => {
+          throw new Error('channel unreachable');
+        }),
+      },
     });
 
     await expect(runtime.tick()).resolves.toBeUndefined();

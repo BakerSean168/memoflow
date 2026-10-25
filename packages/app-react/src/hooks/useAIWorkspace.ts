@@ -64,7 +64,9 @@ export function useAIWorkspace() {
   const { aiClient, aiAssistantRuntime: runtime } = useAppClientRegistry();
   const { isRemoteAuthenticated } = useAppSession();
   const [conversations, setConversations] = useState<AIConversationClientDTO[]>([]);
-  const [activeConversation, setActiveConversation] = useState<AIWorkspaceConversation | null>(null);
+  const [activeConversation, setActiveConversation] = useState<AIWorkspaceConversation | null>(
+    null,
+  );
   const [providers, setProviders] = useState<AIProviderConfigClientDTO[]>([]);
   const [capabilities, setCapabilities] = useState<AICapabilities | null>(null);
   const [selectedProviderId, setSelectedProviderId] = useState<string | null>(null);

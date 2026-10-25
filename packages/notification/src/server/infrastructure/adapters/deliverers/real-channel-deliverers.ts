@@ -10,9 +10,10 @@ import type {
   NotificationEventMap,
 } from '@memoflow/contracts/notification';
 
-const notificationDispatchEvents = createTypedEventPublisher<
-  Pick<NotificationEventMap, 'notification:dispatch_in_app' | 'notification:dispatch_desktop'>
->(eventBus);
+const notificationDispatchEvents =
+  createTypedEventPublisher<
+    Pick<NotificationEventMap, 'notification:dispatch_in_app' | 'notification:dispatch_desktop'>
+  >(eventBus);
 
 type TargetObject = Record<string, unknown>;
 

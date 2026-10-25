@@ -1,15 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import {
-  TaskGoalBindingTrigger,
-  type CreateTaskPlanReq,
-} from '@memoflow/contracts/task';
+import { TaskGoalBindingTrigger, type CreateTaskPlanReq } from '@memoflow/contracts/task';
 
 describe('TASK-2205 Goal link / contribution V2 contract', () => {
   it('uses the canonical settlement triggers', () => {
-    expect(Object.values(TaskGoalBindingTrigger)).toEqual([
-      'EachCompletion',
-      'PlanCompletion',
-    ]);
+    expect(Object.values(TaskGoalBindingTrigger)).toEqual(['EachCompletion', 'PlanCompletion']);
   });
 
   it('allows a Goal link without configuring automatic contribution', () => {

@@ -11780,6 +11780,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/ci-cd-platform/__tests__/lane-details.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "ci-cd-platform:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/ci-cd-platform/__tests__/macos-signing.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -12152,6 +12160,22 @@
       "primarySuite": "governance",
       "collectors": [
         "tools/governance/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "tools/quality/__tests__/fmt.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "quality:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "tools/quality/__tests__/git-files.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "quality:test"
       ],
       "measurementCollectors": []
     },
@@ -12570,7 +12594,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "node-test",
-      "fileCount": 42
+      "fileCount": 43
     },
     {
       "id": "memoflow:test:governance",
@@ -12578,6 +12602,13 @@
       "suite": "governance",
       "runner": "node-test",
       "fileCount": 4
+    },
+    {
+      "id": "quality:test",
+      "type": "primary",
+      "suite": "governance",
+      "runner": "node-test",
+      "fileCount": 2
     },
     {
       "id": "test-system-v2:test",
@@ -13487,7 +13518,7 @@
     "boundary-main": 12,
     "e2e": 69,
     "perf": 2,
-    "governance": 76
+    "governance": 79
   },
   "e2eGovernance": {
     "version": 2,

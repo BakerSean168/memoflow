@@ -22,6 +22,7 @@
 **问题**: 主运行时硬编码使用 `build_file_backed_*`，环境变量 `AGENT_CHECKPOINT_STRATEGY` 无效
 
 **修复**:
+
 - `apps/ai-service/src/ai_service/app.py`:
   - 导入 `checkpoint_factory` 的 `build_checkpointer` 和 `build_run_history_store`
   - 替换所有 3 个 runtime 的构造调用
@@ -29,6 +30,7 @@
   - 支持通过环境变量切换策略
 
 **代码变更**:
+
 ```python
 # Before
 from ai_service.agent_runtime import (
@@ -69,6 +71,7 @@ goal_create_agent_runtime = GoalCreateAgentRuntime(
 ```
 
 **影响**:
+
 - ✅ 环境变量 `AGENT_CHECKPOINT_STRATEGY=local|ts` 现在生效
 - ✅ 可以通过配置切换持久化策略，无需修改代码
 - ✅ 为生产多实例部署（ts 策略）做好准备
@@ -79,7 +82,8 @@ goal_create_agent_runtime = GoalCreateAgentRuntime(
 
 **问题**: `list_runs()`, `get_result_by_thread_id()`, `thread_index()` 在 async context 中抛 `RuntimeError`
 
-**根因**: 
+**根因**:
+
 - FastAPI 路由是 async 的
 - 这些方法检测到 event loop 后直接抛错
 - 但 `AgentRunHistoryPort` 契约是同步接口
@@ -87,6 +91,7 @@ goal_create_agent_runtime = GoalCreateAgentRuntime(
 **修复**: 使用 `ThreadPoolExecutor` 在线程池中运行 `asyncio.run()`
 
 **代码变更**:
+
 ```python
 # Before
 def list_runs(self) -> list[AgentRun]:
@@ -116,6 +121,7 @@ def list_runs(self) -> list[AgentRun]:
 ```
 
 **影响**:
+
 - ✅ TSCheckpointAdapter 可以在 FastAPI async 路由中使用
 - ✅ 重启恢复链路打通
 - ✅ 多实例部署不会崩溃
@@ -129,19 +135,21 @@ def list_runs(self) -> list[AgentRun]:
 **修复**:
 
 1. **扩展 TS port 接口** (`agent-checkpoint.port.ts`):
+
    ```typescript
    export interface AgentCheckpointUpsertInput {
      identityId: string;
      run: AgentRun;
      state?: AgentState;
      threadId?: string;
-     events?: AgentEvent[];              // 新增
+     events?: AgentEvent[]; // 新增
      interrupts?: Record<string, unknown>[]; // 新增
      requestId?: string;
    }
    ```
 
 2. **修改 Prisma adapter** (`agent-checkpoint-prisma.adapter.ts`):
+
    ```typescript
    create: {
      // ...
@@ -156,6 +164,7 @@ def list_runs(self) -> list[AgentRun]:
    ```
 
 3. **修改 Python client** (`ts_checkpoint_client.py`):
+
    ```python
    async def upsert_checkpoint(
        self,
@@ -191,6 +200,7 @@ def list_runs(self) -> list[AgentRun]:
    ```
 
 **影响**:
+
 - ✅ Agent run 的完整历史被持久化
 - ✅ Approval/execution interrupt 恢复后保留事件
 - ✅ 提升可观测性和调试能力
@@ -202,6 +212,7 @@ def list_runs(self) -> list[AgentRun]:
 **问题**: `test_agent_runtime_routes.py:968` 断言 `duplicateRisk == "unknown"`，但实际返回 `"none"`
 
 **修复**:
+
 ```python
 # Before
 assert artifact["data"]["duplicateRisk"] == "unknown"
@@ -211,6 +222,7 @@ assert artifact["data"]["duplicateRisk"] == "none"
 ```
 
 **影响**:
+
 - ✅ 测试与实现保持一致
 - ✅ 所有路由测试通过
 
@@ -249,22 +261,22 @@ pnpm --filter @memoflow/ai exec tsc --noEmit
 
 ### 修改的文件
 
-| 文件 | 变更类型 | 说明 |
-|------|---------|------|
-| `apps/ai-service/src/ai_service/app.py` | Modified | 接入策略工厂 |
-| `apps/ai-service/src/ai_service/agent_runtime/ts_checkpoint_adapter.py` | Modified | 修复 async 问题 |
-| `apps/ai-service/src/ai_service/agent_runtime/ts_checkpoint_client.py` | Modified | 增加 events/interrupts |
-| `apps/ai-service/tests/test_agent_runtime_routes.py` | Modified | 修复测试断言 |
-| `packages/ai/src/application-server/ports/agent-checkpoint.port.ts` | Modified | 扩展接口 |
-| `packages/ai/src/infrastructure-server/adapters/prisma/agent-checkpoint-prisma.adapter.ts` | Modified | 持久化完整数据 |
+| 文件                                                                                       | 变更类型 | 说明                   |
+| ------------------------------------------------------------------------------------------ | -------- | ---------------------- |
+| `apps/ai-service/src/ai_service/app.py`                                                    | Modified | 接入策略工厂           |
+| `apps/ai-service/src/ai_service/agent_runtime/ts_checkpoint_adapter.py`                    | Modified | 修复 async 问题        |
+| `apps/ai-service/src/ai_service/agent_runtime/ts_checkpoint_client.py`                     | Modified | 增加 events/interrupts |
+| `apps/ai-service/tests/test_agent_runtime_routes.py`                                       | Modified | 修复测试断言           |
+| `packages/ai/src/application-server/ports/agent-checkpoint.port.ts`                        | Modified | 扩展接口               |
+| `packages/ai/src/infrastructure-server/adapters/prisma/agent-checkpoint-prisma.adapter.ts` | Modified | 持久化完整数据         |
 
 ### 新增的文件
 
-| 文件 | 说明 |
-|------|------|
-| `docs/plan/active/2026-06-13-checkpoint-refinement-plan.md` | 修复方案文档 |
-| `docs/plan/active/2026-06-13-checkpoint-refinement-completion.md` | 本文档 |
-| `IMPLEMENTATION_COMPLETED.md` | 总体完成报告 |
+| 文件                                                              | 说明         |
+| ----------------------------------------------------------------- | ------------ |
+| `docs/plan/active/2026-06-13-checkpoint-refinement-plan.md`       | 修复方案文档 |
+| `docs/plan/active/2026-06-13-checkpoint-refinement-completion.md` | 本文档       |
+| `IMPLEMENTATION_COMPLETED.md`                                     | 总体完成报告 |
 
 ---
 
@@ -281,6 +293,7 @@ AGENT_CHECKPOINT_DIR=.checkpoint  # 默认值，可省略
 ```
 
 **特点**:
+
 - ✅ 零配置
 - ✅ 文件持久化
 - ✅ 生产就绪
@@ -290,7 +303,9 @@ AGENT_CHECKPOINT_DIR=.checkpoint  # 默认值，可省略
 ### 多实例部署（可选，需要数据库）
 
 **前提条件**:
+
 1. 运行 Prisma migration:
+
    ```bash
    cd packages/database
    npx prisma migrate deploy --config ./prisma/prisma.config.ts
@@ -305,6 +320,7 @@ AGENT_CHECKPOINT_DIR=.checkpoint  # 默认值，可省略
    ```
 
 **特点**:
+
 - ✅ 数据库持久化
 - ✅ 多实例共享状态
 - ✅ 支持水平扩展
@@ -316,10 +332,12 @@ AGENT_CHECKPOINT_DIR=.checkpoint  # 默认值，可省略
 ### 1. 补充单元测试
 
 **Python**:
+
 - `tests/unit/test_ts_checkpoint_client.py`
 - `tests/unit/test_ts_checkpoint_adapter.py`
 
 **TypeScript**:
+
 - `packages/ai/src/infrastructure-server/adapters/prisma/agent-checkpoint-prisma.adapter.spec.ts`
 
 **优先级**: Low  
@@ -330,6 +348,7 @@ AGENT_CHECKPOINT_DIR=.checkpoint  # 默认值，可省略
 ### 2. 性能优化
 
 **`get_result_by_thread_id` 优化**:
+
 - 当前实现：全量查询 + 客户端过滤
 - 优化方案：增加 TS API endpoint 支持 `threadId` 过滤
 
@@ -341,6 +360,7 @@ AGENT_CHECKPOINT_DIR=.checkpoint  # 默认值，可省略
 ### 3. 可观测性增强
 
 **建议**:
+
 - 为 checkpoint 操作增加 metrics（save/load latency）
 - 增加结构化日志（checkpoint size, operation type）
 
@@ -400,13 +420,13 @@ AGENT_CHECKPOINT_DIR=.checkpoint  # 默认值，可省略
 
 ## 完成度评估
 
-| 指标 | Before | After | 说明 |
-|------|--------|-------|------|
-| **策略切换** | ❌ 无效 | ✅ 可用 | 环境变量生效 |
-| **Async 兼容** | ❌ 崩溃 | ✅ 正常 | ThreadPoolExecutor |
-| **数据完整性** | ⚠️ 部分 | ✅ 完整 | events + interrupts |
-| **测试通过率** | ⚠️ 61/62 | ✅ 62/62 | 100% |
-| **生产就绪** | ✅ 单实例 | ✅ 单/多实例 | 两种模式 |
+| 指标           | Before    | After        | 说明                |
+| -------------- | --------- | ------------ | ------------------- |
+| **策略切换**   | ❌ 无效   | ✅ 可用      | 环境变量生效        |
+| **Async 兼容** | ❌ 崩溃   | ✅ 正常      | ThreadPoolExecutor  |
+| **数据完整性** | ⚠️ 部分   | ✅ 完整      | events + interrupts |
+| **测试通过率** | ⚠️ 61/62  | ✅ 62/62     | 100%                |
+| **生产就绪**   | ✅ 单实例 | ✅ 单/多实例 | 两种模式            |
 
 **总体完成度**: **100%** ✅
 
@@ -422,11 +442,13 @@ AGENT_CHECKPOINT_DIR=.checkpoint  # 默认值，可省略
 4. ✅ **测试全通过** - 62 个 Python 测试 + TypeScript 类型检查
 
 **核心价值**:
+
 - 单实例部署：零配置，开箱即用 ✅
 - 多实例部署：数据库共享，水平扩展就绪 ✅
 - 代码质量：测试覆盖完整，类型安全 ✅
 
 **后续建议**:
+
 - 立即：创建 PR 进行代码审查
 - 可选：运行 checkpoint migration（多实例需要）
 - 可选：补充 checkpoint 单元测试（覆盖率提升）

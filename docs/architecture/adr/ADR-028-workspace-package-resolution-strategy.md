@@ -382,5 +382,3 @@ In short:
 - **TypeScript paths do not replace Vite alias**
 - **Vite alias does not replace dependency declarations**
 - **dependency declarations do not replace `exports`**
-
-

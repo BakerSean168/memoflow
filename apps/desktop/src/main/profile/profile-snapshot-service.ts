@@ -163,12 +163,7 @@ export class ProfileSnapshotService {
     const available = this.readBoolean(data, ['available', 'hasSnapshot'], false);
     const downloadUrl = this.readString(data, ['downloadUrl', 'url', 'download_path']);
     const version = this.readString(data, ['version', 'snapshotVersion']);
-    const checksumSha256 = this.readString(data, [
-      'checksumSha256',
-      'sha256',
-      'checksum',
-      'hash',
-    ]);
+    const checksumSha256 = this.readString(data, ['checksumSha256', 'sha256', 'checksum', 'hash']);
     const generatedAt = this.readString(data, ['generatedAt', 'createdAt']);
 
     return {

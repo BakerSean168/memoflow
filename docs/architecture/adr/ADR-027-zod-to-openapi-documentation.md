@@ -12,7 +12,7 @@ updated: 2026-02-19
 # ADR-027: API Documentation with Zod-to-OpenAPI
 
 **状态**: ✅ 已采纳  
-**日期**: 2026-02-19  
+**日期**: 2026-02-19
 
 ## 背景
 

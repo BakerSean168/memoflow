@@ -44,7 +44,10 @@ export class RuntimeUsageIpcClient implements RuntimeUsageClient {
   constructor(private readonly ipcClient: IResultIpcClient) {}
 
   async get(request: AIRuntimeUsageQueryClientRequest): Promise<AIRuntimeUsageSummary> {
-    const result = await this.ipcClient.invoke<unknown>(AIChannels.RUNTIME_USAGE_GET, parseRequest(request));
+    const result = await this.ipcClient.invoke<unknown>(
+      AIChannels.RUNTIME_USAGE_GET,
+      parseRequest(request),
+    );
     return parseSummary(unwrapOrThrowError(result));
   }
 }

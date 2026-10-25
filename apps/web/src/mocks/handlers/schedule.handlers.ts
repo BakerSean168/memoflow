@@ -11,7 +11,6 @@ import { faker } from '@faker-js/faker';
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 const EVENTS = `${API_BASE}/schedules/events`;
 
-
 function createMockCalendarEntry(overrides: Record<string, unknown> = {}) {
   const now = Date.now();
   const start = now + faker.number.int({ min: 3600000, max: 86400000 });
@@ -149,5 +148,4 @@ export const scheduleHandlers = [
       timestamp: Date.now(),
     });
   }),
-
 ];

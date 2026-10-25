@@ -16,10 +16,7 @@ export class ListTaskOccurrencesByPlanUseCase {
     private readonly projection: TaskOccurrenceProjectionService,
   ) {}
 
-  async execute(
-    planId: string,
-    identityId: string,
-  ): Promise<Result<TaskOccurrenceClientDTO[]>> {
+  async execute(planId: string, identityId: string): Promise<Result<TaskOccurrenceClientDTO[]>> {
     const plan = await this.planRepository.findByIdForIdentity(identityId, planId);
     if (!plan) {
       return ok([]);

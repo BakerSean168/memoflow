@@ -10,7 +10,8 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = { ...({} as any),
+export const Default: Story = {
+  ...({} as any),
   render: () => ({
     template: `
       <div class="rounded-md border p-6">

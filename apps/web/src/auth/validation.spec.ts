@@ -17,14 +17,16 @@ describe('web auth validation', () => {
   });
 
   it('validates registration and reset password strength and confirmation', () => {
-    expect(validateRegistration({ email: 'bad', password: 'short', confirmPassword: 'other' }))
-      .toEqual({
-        email: 'auth.validation.emailInvalid',
-        password: 'auth.validation.passwordMinLength',
-        confirmPassword: 'auth.validation.passwordMismatch',
-      });
-    expect(validateResetPassword({ newPassword: 'StrongPass123!', confirmPassword: 'StrongPass123!' }))
-      .toEqual({});
+    expect(
+      validateRegistration({ email: 'bad', password: 'short', confirmPassword: 'other' }),
+    ).toEqual({
+      email: 'auth.validation.emailInvalid',
+      password: 'auth.validation.passwordMinLength',
+      confirmPassword: 'auth.validation.passwordMismatch',
+    });
+    expect(
+      validateResetPassword({ newPassword: 'StrongPass123!', confirmPassword: 'StrongPass123!' }),
+    ).toEqual({});
   });
 
   it('keeps forgot-password validation and focus order deterministic', () => {

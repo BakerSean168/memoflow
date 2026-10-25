@@ -462,22 +462,36 @@ describe('task plan mutation routes run the real validation adapter (Phase 4)', 
     ['Open', 'active'],
     [['Succeeded', 'Failed'], 'all'],
     [['Abandoned'], 'archived'],
-  ])('passes validated outcome %s and archive state %s to the controller', async (outcome, archiveState) => {
-    const controller = createControllerStub();
-    const router = registerTaskPlanRoutes(controller, { auth: authMiddleware });
-    const req = createReq(undefined);
-    req.query = { page: '2', limit: '10', status: 'Active', labelIdsAll: ['a', 'b'], outcome, archiveState };
-    const res = createRes();
-    await getHandler(router, 'get', '/')(req, res);
-    expect(res.statusCode).toBe(200);
-    expect(controller.listPlans).toHaveBeenCalledWith(
-      expect.objectContaining({
-        page: 2, limit: 10, status: ['Active'], labelIdsAll: ['a', 'b'],
-        outcome: typeof outcome === 'string' ? [outcome] : outcome, archiveState,
-      }),
-      expect.objectContaining({ identityId: 'identity-1' }),
-    );
-  });
+  ])(
+    'passes validated outcome %s and archive state %s to the controller',
+    async (outcome, archiveState) => {
+      const controller = createControllerStub();
+      const router = registerTaskPlanRoutes(controller, { auth: authMiddleware });
+      const req = createReq(undefined);
+      req.query = {
+        page: '2',
+        limit: '10',
+        status: 'Active',
+        labelIdsAll: ['a', 'b'],
+        outcome,
+        archiveState,
+      };
+      const res = createRes();
+      await getHandler(router, 'get', '/')(req, res);
+      expect(res.statusCode).toBe(200);
+      expect(controller.listPlans).toHaveBeenCalledWith(
+        expect.objectContaining({
+          page: 2,
+          limit: 10,
+          status: ['Active'],
+          labelIdsAll: ['a', 'b'],
+          outcome: typeof outcome === 'string' ? [outcome] : outcome,
+          archiveState,
+        }),
+        expect.objectContaining({ identityId: 'identity-1' }),
+      );
+    },
+  );
 
   it.each([
     { outcome: ['Unknown'] },

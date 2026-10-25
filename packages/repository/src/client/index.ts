@@ -8,10 +8,7 @@
  */
 
 import type { IResultHttpClient } from '@memoflow/http-client';
-import {
-  createRepositoryClientService,
-  type RepositoryClientPort,
-} from '../application-client';
+import { createRepositoryClientService, type RepositoryClientPort } from '../application-client';
 import {
   RepositoryHttpAdapter,
   createRepositoryHttpAdapters,
@@ -36,15 +33,11 @@ export type {
   IResultIpcClient,
 };
 
-export function createRepositoryHttpClient(
-  httpClient: IResultHttpClient,
-): RepositoryClientPort {
+export function createRepositoryHttpClient(httpClient: IResultHttpClient): RepositoryClientPort {
   return createRepositoryClientService(new RepositoryHttpAdapter(httpClient));
 }
 
-export function createRepositoryIpcClient(
-  ipcClient: IResultIpcClient,
-): RepositoryClientPort {
+export function createRepositoryIpcClient(ipcClient: IResultIpcClient): RepositoryClientPort {
   return createRepositoryClientService(new RepositoryIpcAdapter(ipcClient));
 }
 

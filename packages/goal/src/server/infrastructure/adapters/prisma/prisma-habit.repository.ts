@@ -1,9 +1,6 @@
 import type { PrismaClient } from '@memoflow/database';
 import type { TimeContext } from '@memoflow/time';
-import {
-  Habit,
-  type HabitState,
-} from '../../../domain/habit/habit';
+import { Habit, type HabitState } from '../../../domain/habit/habit';
 import type { IHabitRepository } from '../../../application/use-cases/commands/habit.use-cases';
 
 function toState(row: {
@@ -114,16 +111,12 @@ export class PrismaHabitRepository implements IHabitRepository {
           habitId: s.id,
           currentStreak: streak.currentStreak,
           longestStreak: streak.longestStreak,
-          lastCheckInDate: streak.lastCheckInDate
-            ? new Date(streak.lastCheckInDate)
-            : null,
+          lastCheckInDate: streak.lastCheckInDate ? new Date(streak.lastCheckInDate) : null,
         },
         update: {
           currentStreak: streak.currentStreak,
           longestStreak: streak.longestStreak,
-          lastCheckInDate: streak.lastCheckInDate
-            ? new Date(streak.lastCheckInDate)
-            : null,
+          lastCheckInDate: streak.lastCheckInDate ? new Date(streak.lastCheckInDate) : null,
         },
       });
     });

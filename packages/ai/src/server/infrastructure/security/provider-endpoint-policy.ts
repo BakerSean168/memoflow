@@ -25,7 +25,11 @@ export interface AuthorizedProviderConnection {
 }
 
 function normalizeHostname(hostname: string): string {
-  return hostname.trim().toLowerCase().replace(/^\[|\]$/g, '').replace(/\.$/, '');
+  return hostname
+    .trim()
+    .toLowerCase()
+    .replace(/^\[|\]$/g, '')
+    .replace(/\.$/, '');
 }
 
 function normalizeHostPort(hostname: string, port: number): string {
@@ -33,7 +37,9 @@ function normalizeHostPort(hostname: string, port: number): string {
   return normalized.includes(':') ? `[${normalized}]:${port}` : `${normalized}:${port}`;
 }
 
-export function parseProviderPrivateEndpointAllowlist(value: string | undefined): ReadonlySet<string> {
+export function parseProviderPrivateEndpointAllowlist(
+  value: string | undefined,
+): ReadonlySet<string> {
   if (!value?.trim()) return new Set();
   const entries = new Set<string>();
   for (const raw of value.split(',')) {
@@ -129,7 +135,9 @@ export class ProviderEndpointPolicy implements IAIProviderEndpointPolicyPort {
 
     for (const { address } of addresses) {
       if (isNeverAllowedAddress(address)) {
-        throw invalidEndpoint('Provider endpoint resolves to a forbidden link-local or metadata address');
+        throw invalidEndpoint(
+          'Provider endpoint resolves to a forbidden link-local or metadata address',
+        );
       }
       if (!privateAllowlisted && !isPublicAddress(address)) {
         throw invalidEndpoint('Provider endpoint DNS resolves to a non-public address');
@@ -143,7 +151,9 @@ export class ProviderEndpointPolicy implements IAIProviderEndpointPolicyPort {
     try {
       return await this.resolver(hostname);
     } catch (error) {
-      throw new AIExecutionError('transport', 'Provider endpoint DNS resolution failed', { cause: error });
+      throw new AIExecutionError('transport', 'Provider endpoint DNS resolution failed', {
+        cause: error,
+      });
     }
   }
 }
@@ -166,7 +176,10 @@ function isPublicAddress(address: string): boolean {
   const value = normalizeHostname(address);
   if (value.includes(':')) return isPublicIpv6(value);
   const parts = value.split('.').map(Number);
-  if (parts.length !== 4 || parts.some((part) => !Number.isInteger(part) || part < 0 || part > 255)) {
+  if (
+    parts.length !== 4 ||
+    parts.some((part) => !Number.isInteger(part) || part < 0 || part > 255)
+  ) {
     return false;
   }
   const [a, b, c] = parts;

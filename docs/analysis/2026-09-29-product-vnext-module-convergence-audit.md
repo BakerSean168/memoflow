@@ -312,8 +312,7 @@ The Routine editor already uses `ProductPropertyChip` heavily.
 Current `RoutineEditorDialog` still contains:
 
 ```html
-<input type="time">
-<input type="date">
+<input type="time" /> <input type="date" />
 ```
 
 This bypasses:
@@ -564,12 +563,14 @@ The problem is not Settings architecture; it is local component responsibility.
 Future split should follow workflows:
 
 AI:
+
 - provider list;
 - provider onboarding flow;
 - connection/model probe;
 - defaults.
 
 Knowledge:
+
 - connection summary;
 - installation/repository selection;
 - health/reconciliation;

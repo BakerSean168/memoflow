@@ -88,20 +88,10 @@
         }
       ],
       "metadata": {
-        "stages": [
-          "clarification",
-          "draft",
-          "confirm",
-          "result"
-        ],
-        "tool_calls_seen": [
-          "submit_goal_automation_plan"
-        ],
+        "stages": ["clarification", "draft", "confirm", "result"],
+        "tool_calls_seen": ["submit_goal_automation_plan"],
         "goal_title": "Enhance Work Planning and Execution",
-        "action_tools": [
-          "create_goal",
-          "create_key_result"
-        ],
+        "action_tools": ["create_goal", "create_key_result"],
         "executed_actions": [
           {
             "tool": "create_goal",

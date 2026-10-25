@@ -7,12 +7,7 @@
       "title": "Entity Props Pattern",
       "description": "Entities MUST encapsulate constructor arguments inside a dedicated Props object to keep signatures stable and explicit.",
       "severity": "Mandatory",
-      "tags": [
-        "architecture",
-        "consistency",
-        "ddd",
-        "entity"
-      ],
+      "tags": ["architecture", "consistency", "ddd", "entity"],
       "goodExamples": [
         {
           "language": "TypeScript",
@@ -36,12 +31,7 @@
       "title": "No Logic in DTOs",
       "description": "DTOs MUST remain pure data contracts. Validation and business rules belong to Value Objects, Entities, and Use Cases.",
       "severity": "Mandatory",
-      "tags": [
-        "contracts",
-        "ddd",
-        "dto",
-        "separation-of-concerns"
-      ],
+      "tags": ["contracts", "ddd", "dto", "separation-of-concerns"],
       "goodExamples": [
         {
           "language": "TypeScript",
@@ -65,12 +55,7 @@
       "title": "Layer Isolation",
       "description": "Domain and application layers MUST not directly depend on infrastructure details such as Prisma clients or HTTP adapters.",
       "severity": "Mandatory",
-      "tags": [
-        "ddd",
-        "dependency-inversion",
-        "infrastructure",
-        "layering"
-      ],
+      "tags": ["ddd", "dependency-inversion", "infrastructure", "layering"],
       "goodExamples": [
         {
           "language": "TypeScript",
@@ -94,12 +79,7 @@
       "title": "Value Object Collections",
       "description": "Collections in aggregates MUST use Value Objects for normalization and invariants instead of passing primitive strings directly.",
       "severity": "Recommended",
-      "tags": [
-        "collection",
-        "ddd",
-        "invariants",
-        "value-object"
-      ],
+      "tags": ["collection", "ddd", "invariants", "value-object"],
       "goodExamples": [
         {
           "language": "TypeScript",
@@ -123,12 +103,7 @@
       "title": "Factory Method Pattern",
       "description": "Aggregates MUST expose static factory methods and hide constructors to guarantee invariant validation at creation time.",
       "severity": "Recommended",
-      "tags": [
-        "aggregate",
-        "ddd",
-        "factory-method",
-        "invariants"
-      ],
+      "tags": ["aggregate", "ddd", "factory-method", "invariants"],
       "goodExamples": [
         {
           "language": "TypeScript",

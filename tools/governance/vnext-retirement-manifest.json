@@ -26,9 +26,7 @@
       "id": "editor-runtime-package",
       "status": "active",
       "decision": "ADR-107",
-      "forbiddenPaths": [
-        "packages/editor"
-      ]
+      "forbiddenPaths": ["packages/editor"]
     },
     {
       "id": "standalone-dashboard-bounded-context",
@@ -47,9 +45,7 @@
       "id": "legacy-editor-persistence",
       "status": "active",
       "decision": "ADR-107 / EDITOR-1702",
-      "forbiddenPaths": [
-        "packages/database/prisma/schema/editor.prisma"
-      ]
+      "forbiddenPaths": ["packages/database/prisma/schema/editor.prisma"]
     },
     {
       "id": "account-settings-legacy",
@@ -64,9 +60,7 @@
       "id": "legacy-reminder-model",
       "status": "active",
       "decision": "ADR-076..079 / ROUTINE-2201",
-      "forbiddenPaths": [
-        "packages/reminder/src/server/domain/aggregates/reminder-template.ts"
-      ],
+      "forbiddenPaths": ["packages/reminder/src/server/domain/aggregates/reminder-template.ts"],
       "requiredPaths": [
         "packages/contracts/src/modules/routine/index.ts",
         "packages/reminder/src/client/index.ts",

@@ -14,27 +14,27 @@ const meta = {
       control: 'select',
       options: ['default', 'sm', 'xs', 'lg', 'icon', 'icon-sm', 'icon-xs'],
     },
-    /* @ts-ignore */ disabled: { control: "boolean" },
+    /* @ts-ignore */ disabled: { control: 'boolean' },
   },
-  args: { ...({} as any),
-    variant: 'default',
-    size: 'default',
-
-  },
+  args: { ...({} as any), variant: 'default', size: 'default' },
 } as Meta<typeof Button>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = { ...({} as any),
+export const Default: Story = {
+  ...({} as any),
   render: (args) => ({
     components: { Button },
-    setup() { return { args }; },
+    setup() {
+      return { args };
+    },
     template: '<Button v-bind="args">Button</Button>',
   }),
 };
 
-export const AllVariants: Story = { ...({} as any),
+export const AllVariants: Story = {
+  ...({} as any),
   render: () => ({
     components: { Button },
     template: `
@@ -50,7 +50,8 @@ export const AllVariants: Story = { ...({} as any),
   }),
 };
 
-export const AllSizes: Story = { ...({} as any),
+export const AllSizes: Story = {
+  ...({} as any),
   render: () => ({
     components: { Button },
     template: `
@@ -67,7 +68,8 @@ export const AllSizes: Story = { ...({} as any),
   }),
 };
 
-export const Disabled: Story = { ...({} as any),
+export const Disabled: Story = {
+  ...({} as any),
   render: () => ({
     components: { Button },
     template: `

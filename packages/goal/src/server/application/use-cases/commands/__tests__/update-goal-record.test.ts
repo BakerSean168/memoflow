@@ -30,61 +30,67 @@ function createGoalWithSum() {
 }
 
 describe('UpdateGoalRecordUseCase', () => {
-  it.each(['Manual', 'TaskUserMeasurement'] as const)('corrects %s and recalculates Sum from the complete edited record history', async (authorship) => {
-    const { goal, keyResult } = createGoalWithSum();
-    const recordA = GoalRecord.create({
-      id: 'IGoalRecordId_550e8400-e29b-41d4-a716-446655440101' as never,
-      keyResultId: keyResult.id as never,
-      identityId: 'identity-1' as never,
-      value: 5,
-      authorship,
-      source: authorship === 'TaskUserMeasurement' ? { type: 'TASK_INSTANCE', id: 'task-occurrence-1' } : undefined,
-    });
-    const recordB = GoalRecord.create({
-      id: 'IGoalRecordId_550e8400-e29b-41d4-a716-446655440102' as never,
-      keyResultId: keyResult.id as never,
-      identityId: 'identity-1' as never,
-      value: 7,
-    });
-    const goalRepository = createMockRepo<IGoalRepository>({
-      findByIdForIdentity: vi.fn().mockResolvedValue(goal),
-      saveRootWithExpectedVersion: vi.fn().mockResolvedValue(undefined),
-    });
-    const recordRepository = createMockRepo<IGoalRecordRepository>({
-      findByIdForIdentity: vi.fn().mockResolvedValue(recordA),
-      save: vi.fn().mockResolvedValue(undefined),
-      findByKeyResultId: vi.fn().mockImplementation(async () => [recordA, recordB]),
-    });
-    const useCase = new UpdateGoalRecordUseCase(
-      goalRepository,
-      recordRepository,
-      createInlineGoalWriteTransactionRunner(
-        { goalRepository, goalRecordRepository: recordRepository },
-        new InMemoryGoalReliableOperationAdapter(),
-      ),
-    );
+  it.each(['Manual', 'TaskUserMeasurement'] as const)(
+    'corrects %s and recalculates Sum from the complete edited record history',
+    async (authorship) => {
+      const { goal, keyResult } = createGoalWithSum();
+      const recordA = GoalRecord.create({
+        id: 'IGoalRecordId_550e8400-e29b-41d4-a716-446655440101' as never,
+        keyResultId: keyResult.id as never,
+        identityId: 'identity-1' as never,
+        value: 5,
+        authorship,
+        source:
+          authorship === 'TaskUserMeasurement'
+            ? { type: 'TASK_INSTANCE', id: 'task-occurrence-1' }
+            : undefined,
+      });
+      const recordB = GoalRecord.create({
+        id: 'IGoalRecordId_550e8400-e29b-41d4-a716-446655440102' as never,
+        keyResultId: keyResult.id as never,
+        identityId: 'identity-1' as never,
+        value: 7,
+      });
+      const goalRepository = createMockRepo<IGoalRepository>({
+        findByIdForIdentity: vi.fn().mockResolvedValue(goal),
+        saveRootWithExpectedVersion: vi.fn().mockResolvedValue(undefined),
+      });
+      const recordRepository = createMockRepo<IGoalRecordRepository>({
+        findByIdForIdentity: vi.fn().mockResolvedValue(recordA),
+        save: vi.fn().mockResolvedValue(undefined),
+        findByKeyResultId: vi.fn().mockImplementation(async () => [recordA, recordB]),
+      });
+      const useCase = new UpdateGoalRecordUseCase(
+        goalRepository,
+        recordRepository,
+        createInlineGoalWriteTransactionRunner(
+          { goalRepository, goalRecordRepository: recordRepository },
+          new InMemoryGoalReliableOperationAdapter(),
+        ),
+      );
 
-    const result = await useCase.execute(
-      String(goal.id),
-      String(keyResult.id),
-      String(recordA.id),
-      { value: 20, note: 'corrected', expectedVersion: 1 },
-      'identity-1',
-    );
+      const result = await useCase.execute(
+        String(goal.id),
+        String(keyResult.id),
+        String(recordA.id),
+        { value: 20, note: 'corrected', expectedVersion: 1 },
+        'identity-1',
+      );
 
-    expect(result).toBeOk();
-    expect(recordA.value).toBe(20);
-    expect(recordA.note).toBe('corrected');
-    expect(recordA.authorship).toBe(authorship);
-    expect(recordA.sourceId).toBe(authorship === 'Manual' ? null : 'task-occurrence-1');
-    expect(recordA.sourceType).toBe(authorship === 'Manual' ? null : 'TASK_INSTANCE');
-    expect(goal.getKeyResult(String(keyResult.id))?.progress.currentValue).toBe(37);
-    expect(recordRepository.save).toHaveBeenCalledWith(recordA);
-    expect(goalRepository.saveRootWithExpectedVersion).toHaveBeenCalledWith(goal, 1);
-    if (result.ok) {
-      expect(result.data.recordChanges?.upserted[0]).toMatchObject({ value: 20, valueAfter: 37 });
-    }
-  });
+      expect(result).toBeOk();
+      expect(recordA.value).toBe(20);
+      expect(recordA.note).toBe('corrected');
+      expect(recordA.authorship).toBe(authorship);
+      expect(recordA.sourceId).toBe(authorship === 'Manual' ? null : 'task-occurrence-1');
+      expect(recordA.sourceType).toBe(authorship === 'Manual' ? null : 'TASK_INSTANCE');
+      expect(goal.getKeyResult(String(keyResult.id))?.progress.currentValue).toBe(37);
+      expect(recordRepository.save).toHaveBeenCalledWith(recordA);
+      expect(goalRepository.saveRootWithExpectedVersion).toHaveBeenCalledWith(goal, 1);
+      if (result.ok) {
+        expect(result.data.recordChanges?.upserted[0]).toMatchObject({ value: 20, valueAfter: 37 });
+      }
+    },
+  );
 
   it('Fixture C: editing the latest 75 -> 70 Last measurement recalculates the decreasing KR from authoritative history', async () => {
     const goal = Goal.create({

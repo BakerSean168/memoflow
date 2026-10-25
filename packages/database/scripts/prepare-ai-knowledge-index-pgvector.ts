@@ -3,7 +3,6 @@ import { loadWorkspaceEnv } from '../src/load-workspace-env';
 // Residual 1019: sole errorMessage (local toErrorMessage dual retired).
 import { errorMessage as toErrorMessage } from '@memoflow/utils/shared';
 
-
 async function main(): Promise<void> {
   loadWorkspaceEnv();
 

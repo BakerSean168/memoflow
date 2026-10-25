@@ -136,9 +136,7 @@ for (const projectFile of projectFiles) {
       }
     }
   } else if (isGovernedDomainProject && hasLocalVitestConfig) {
-    const coverageTarget = getLocalVitestTargetPlans(projectRoot, true, json.name)[
-      'test:coverage'
-    ];
+    const coverageTarget = getLocalVitestTargetPlans(projectRoot, true, json.name)['test:coverage'];
     if (!areTargetsEqual(targets['test:coverage'], coverageTarget)) {
       if (shouldWrite) {
         targets['test:coverage'] = structuredClone(coverageTarget);

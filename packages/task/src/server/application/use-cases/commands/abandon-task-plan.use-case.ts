@@ -5,7 +5,10 @@ import { createLogger } from '@memoflow/utils/logger';
 import { createTimeFacade, type UserTimeContextPort } from '@memoflow/time';
 import type { ITaskPlanRepository } from '../../../domain/repositories/i-task-plan-repository';
 import type { ITaskOccurrenceRepository } from '../../../domain/repositories/i-task-occurrence-repository';
-import { mapTaskWriteErrorToResultError, type TaskWriteTransactionRunner } from './task-write-support';
+import {
+  mapTaskWriteErrorToResultError,
+  type TaskWriteTransactionRunner,
+} from './task-write-support';
 
 /** Explicit user abandonment. Delete is reserved for mistaken creation. */
 export class AbandonTaskPlanUseCase {
@@ -16,10 +19,17 @@ export class AbandonTaskPlanUseCase {
     private readonly transactionRunner: TaskWriteTransactionRunner,
     private readonly userTimeContextPort: UserTimeContextPort,
   ) {
-    if (!transactionRunner) throw new Error('TaskWriteTransactionRunner must be explicitly provided to AbandonTaskPlanUseCase');
+    if (!transactionRunner)
+      throw new Error(
+        'TaskWriteTransactionRunner must be explicitly provided to AbandonTaskPlanUseCase',
+      );
   }
 
-  async execute(id: string, identityId: string, request?: AbandonTaskPlanReq): Promise<Result<TaskPlanClientDTO>> {
+  async execute(
+    id: string,
+    identityId: string,
+    request?: AbandonTaskPlanReq,
+  ): Promise<Result<TaskPlanClientDTO>> {
     try {
       const timeContext = await this.userTimeContextPort.getUserTimeContext(identityId);
       const effectiveFrom = Date.now();

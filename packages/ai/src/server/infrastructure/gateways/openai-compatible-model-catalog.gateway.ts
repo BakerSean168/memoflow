@@ -69,9 +69,13 @@ export class OpenAICompatibleModelCatalogGateway implements IAIProviderModelCata
 
       if (response.status >= 300 && response.status < 400) {
         await response.body?.cancel().catch(() => undefined);
-        throw new AIExecutionError('transport', 'Provider model discovery redirected unexpectedly', {
-          statusCode: response.status,
-        });
+        throw new AIExecutionError(
+          'transport',
+          'Provider model discovery redirected unexpectedly',
+          {
+            statusCode: response.status,
+          },
+        );
       }
 
       if (!response.ok) {
@@ -126,16 +130,23 @@ export class OpenAICompatibleModelCatalogGateway implements IAIProviderModelCata
   }
 }
 
-
-async function readModelCatalogPayload(response: Response): Promise<OpenAICompatibleModelsResponse> {
+async function readModelCatalogPayload(
+  response: Response,
+): Promise<OpenAICompatibleModelsResponse> {
   const declaredLength = Number(response.headers.get('content-length'));
   if (Number.isFinite(declaredLength) && declaredLength > MAX_MODEL_CATALOG_BYTES) {
     await response.body?.cancel().catch(() => undefined);
-    throw new AIExecutionError('upstream_provider_error', 'Provider model catalog response is too large');
+    throw new AIExecutionError(
+      'upstream_provider_error',
+      'Provider model catalog response is too large',
+    );
   }
 
   if (!response.body) {
-    throw new AIExecutionError('upstream_provider_error', 'Provider returned an empty model catalog response');
+    throw new AIExecutionError(
+      'upstream_provider_error',
+      'Provider returned an empty model catalog response',
+    );
   }
 
   const reader = response.body.getReader();
@@ -149,7 +160,10 @@ async function readModelCatalogPayload(response: Response): Promise<OpenAICompat
       total += value.byteLength;
       if (total > MAX_MODEL_CATALOG_BYTES) {
         await reader.cancel().catch(() => undefined);
-        throw new AIExecutionError('upstream_provider_error', 'Provider model catalog response is too large');
+        throw new AIExecutionError(
+          'upstream_provider_error',
+          'Provider model catalog response is too large',
+        );
       }
       chunks.push(value);
     }
@@ -168,9 +182,13 @@ async function readModelCatalogPayload(response: Response): Promise<OpenAICompat
   try {
     return JSON.parse(new TextDecoder().decode(bytes)) as OpenAICompatibleModelsResponse;
   } catch (cause) {
-    throw new AIExecutionError('upstream_provider_error', 'Provider returned malformed model catalog JSON', {
-      cause,
-    });
+    throw new AIExecutionError(
+      'upstream_provider_error',
+      'Provider returned malformed model catalog JSON',
+      {
+        cause,
+      },
+    );
   }
 }
 

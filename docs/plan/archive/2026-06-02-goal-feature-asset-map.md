@@ -46,4 +46,3 @@ updated: 2026-06-02T00:00:00
 - README 与治理入口能找到 `docs/product`。
 - `pnpm nx run memoflow:docs-check` 通过。
 - `pnpm nx run memoflow:governance-check` 通过。
-

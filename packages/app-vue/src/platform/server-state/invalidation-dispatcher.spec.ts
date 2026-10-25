@@ -144,8 +144,6 @@ describe('invalidation-dispatcher — key mapping', () => {
     expect(keys).toContainEqual(taskPlanQueryKeys.lists('id-1'));
     expect(keys).not.toContainEqual(taskPlanQueryKeys.details('id-1'));
   });
-
-
 });
 
 describe('invalidation-dispatcher — turn batching & dedupe', () => {

@@ -29,16 +29,16 @@ updated: 2026-08-02T00:00:00+08:00
 
 在做 PoC 前必须确认：
 
-| 维度 | 必须回答的问题 |
-| --- | --- |
-| 许可证 | MIT/Apache/BSD，还是 GPL/AGPL/source-available？是否允许闭源桌面分发？ |
-| 持久化 | 是否支持多 Profile、独立目录、原子迁移、损坏恢复和版本化 schema？ |
-| 解锁 | 是否把本地 key 与云端密码分离？是否支持 Electron safeStorage、PIN、设备密钥？ |
-| 同步 | 同步是否可选、可暂停、可重试？云端 session 失效是否会锁本地数据？ |
-| 身份 | 本地 owner、Profile ID、云端 Account ID 是否分离？guest 升级是否原子保留本地数据？ |
-| 运行时 | 是否支持 Electron main-process 安全边界，避免 renderer 接触 bearer token？ |
-| 生态 | release 频率、issue 响应、breaking change 策略、测试和安全审计是否可靠？ |
-| 退出机制 | 能否导出标准数据并在未来移除 BattleOS，而不重写全部业务模块？ |
+| 维度     | 必须回答的问题                                                                     |
+| -------- | ---------------------------------------------------------------------------------- |
+| 许可证   | MIT/Apache/BSD，还是 GPL/AGPL/source-available？是否允许闭源桌面分发？             |
+| 持久化   | 是否支持多 Profile、独立目录、原子迁移、损坏恢复和版本化 schema？                  |
+| 解锁     | 是否把本地 key 与云端密码分离？是否支持 Electron safeStorage、PIN、设备密钥？      |
+| 同步     | 同步是否可选、可暂停、可重试？云端 session 失效是否会锁本地数据？                  |
+| 身份     | 本地 owner、Profile ID、云端 Account ID 是否分离？guest 升级是否原子保留本地数据？ |
+| 运行时   | 是否支持 Electron main-process 安全边界，避免 renderer 接触 bearer token？         |
+| 生态     | release 频率、issue 响应、breaking change 策略、测试和安全审计是否可靠？           |
+| 退出机制 | 能否导出标准数据并在未来移除 BattleOS，而不重写全部业务模块？                      |
 
 没有这些答案，不能把“源码看起来完整”当作可生产采用的证据。
 
@@ -77,19 +77,19 @@ BattleOS Coordinator
 
 ## 4. 关键维度对比
 
-| 维度 | 方案 A：本地解耦 + 局部借鉴 | 方案 B：全量 BattleOS |
-| --- | --- | --- |
+| 维度          | 方案 A：本地解耦 + 局部借鉴                     | 方案 B：全量 BattleOS                              |
+| ------------- | ----------------------------------------------- | -------------------------------------------------- |
 | 当前 bug 修复 | 直接修复：窗口、路由、session、Profile 状态独立 | 取决于 BattleOS 是否已有正确状态机，迁移期间风险高 |
-| guest 语义 | 可确保是真本地用户、无 token/session | 需要证明 BattleOS guest 不是伪造的临时 session |
-| 云端密码变化 | 只暂停同步，Profile 继续可用 | 若内核绑定凭据，可能锁死本地；需专项验证 |
-| PowerSync | 原生保留现有同步边界，可交换 token adapter | 可能需要 BattleOS 同步协议或双重同步层 |
-| Electron 安全 | main process 自己持有 key/token，边界可控 | 需审查其 renderer/main 边界和 IPC 暴露面 |
-| 数据模型 | 直接匹配现有 profileId、identity_id、Vault | 可能需要一次性全量映射和数据迁移 |
-| 可替换性 | 高，BattleOS 只是 adapter | 低，业务层会依赖 BattleOS 类型和生命周期 |
-| 初始工作量 | 中等，需实现本地访问核心 | 可能较低，但集成、迁移和调试成本不确定 |
-| 长期维护 | MemoFlow 控制关键业务语义，第三方升级集中 | 受外部项目路线图和 breaking changes 影响 |
-| 合规/分发 | 只需审查少量依赖 | 许可证可能直接阻断商业桌面分发 |
-| 故障隔离 | 本地、云端、同步可分别降级 | 外部协调器故障可能影响整个运行时 |
+| guest 语义    | 可确保是真本地用户、无 token/session            | 需要证明 BattleOS guest 不是伪造的临时 session     |
+| 云端密码变化  | 只暂停同步，Profile 继续可用                    | 若内核绑定凭据，可能锁死本地；需专项验证           |
+| PowerSync     | 原生保留现有同步边界，可交换 token adapter      | 可能需要 BattleOS 同步协议或双重同步层             |
+| Electron 安全 | main process 自己持有 key/token，边界可控       | 需审查其 renderer/main 边界和 IPC 暴露面           |
+| 数据模型      | 直接匹配现有 profileId、identity_id、Vault      | 可能需要一次性全量映射和数据迁移                   |
+| 可替换性      | 高，BattleOS 只是 adapter                       | 低，业务层会依赖 BattleOS 类型和生命周期           |
+| 初始工作量    | 中等，需实现本地访问核心                        | 可能较低，但集成、迁移和调试成本不确定             |
+| 长期维护      | MemoFlow 控制关键业务语义，第三方升级集中       | 受外部项目路线图和 breaking changes 影响           |
+| 合规/分发     | 只需审查少量依赖                                | 许可证可能直接阻断商业桌面分发                     |
+| 故障隔离      | 本地、云端、同步可分别降级                      | 外部协调器故障可能影响整个运行时                   |
 
 结论：对 MemoFlow 的实际目标，方案 A 在总体风险和长期可演化性上胜出；方案 B 只有在 BattleOS 已经被证明是“本地 Profile 内核”而不是“全栈身份平台”时才有优势。
 
@@ -181,4 +181,3 @@ BattleOS adapter 不得暴露 Better Auth session、PowerSync JWT 或 MemoFlow `
 - **未来**：只有当 BattleOS 通过准入门槛，并且不会接管云端认证、业务 tenant 或同步授权，才考虑替换 `LocalProfileKernel` 的内部实现。
 
 因此，“不引进 BattleOS，然后使用优化后的版本”在当前信息和当前代码状态下更好；“直接引进 BattleOS”只有在完成上述实证后才有可能成为更优雅的长期方案，而不是现在的默认答案。
-

@@ -9,7 +9,7 @@
 > - [Repository Resource Mutation Deepening 执行方案](./2026-05-06-repository-resource-mutation-deepening.md)
 > - [Goal Read-Model Workflow Deepening 执行方案](./2026-05-06-goal-read-model-workflow-deepening.md)
 > - [AI Runtime Module Split 执行方案](./2026-05-06-ai-runtime-module-split.md)
-> 归档说明：相关实现已按诊断结论完成，本文件现仅保留为历史诊断基线。
+>   归档说明：相关实现已按诊断结论完成，本文件现仅保留为历史诊断基线。
 
 ## 文档定位
 
@@ -139,7 +139,7 @@
   - `getProgressBreakdown()`
   - `cloneGoal()`
   - `batchUpdateKeyResultWeights()`
-  现在均直接委派独立 use case
+    现在均直接委派独立 use case
 - 新增的 deep workflow seam 已建立：
   - `GetGoalAggregateUseCase`
   - `GetGoalProgressBreakdownUseCase`
@@ -187,9 +187,10 @@
 4. `AIApplicationPort` 仍通过 `if (!services.xxx)` 逐项判空处理 unavailable capability
 5. `packages/ai/src/api/module.ts` 仍通过 `services.*` presence guard 决定是否允许 API 模块创建
 6. 计划中的 runtime split 产物尚未建立：
-  - `direct-provider-ai.runtime`
-  - `remote-ai-service.runtime`
-  - runtime-owned capability surface
+
+- `direct-provider-ai.runtime`
+- `remote-ai-service.runtime`
+- runtime-owned capability surface
 
 #### 证据
 

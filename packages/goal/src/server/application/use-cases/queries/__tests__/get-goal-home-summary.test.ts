@@ -4,14 +4,16 @@ import { createMockRepo } from '@memoflow/test-utils';
 import type { IGoalRepository } from '../../../../domain';
 import { GetGoalHomeSummaryUseCase } from '../get-goal-home-summary.use-case';
 
-function goal(overrides: Partial<{
-  id: string;
-  name: string;
-  progress: number;
-  status: (typeof GoalStatus)[keyof typeof GoalStatus];
-  updatedAt: number;
-  keyResultCount: number;
-}> = {}) {
+function goal(
+  overrides: Partial<{
+    id: string;
+    name: string;
+    progress: number;
+    status: (typeof GoalStatus)[keyof typeof GoalStatus];
+    updatedAt: number;
+    keyResultCount: number;
+  }> = {},
+) {
   return {
     id: overrides.id ?? 'goal-1',
     name: overrides.name ?? 'Goal',
@@ -25,14 +27,16 @@ function goal(overrides: Partial<{
 
 describe('GetGoalHomeSummaryUseCase', () => {
   it('loads the owner active view with children and returns newest five plus total active count', async () => {
-    const findByIdentityId = vi.fn().mockResolvedValue([
-      goal({ id: 'g1', updatedAt: 1, progress: Number.NaN }),
-      goal({ id: 'g2', updatedAt: 6, progress: 99.6 }),
-      goal({ id: 'g3', updatedAt: 5, progress: 40.4 }),
-      goal({ id: 'g4', updatedAt: 4, progress: -5 }),
-      goal({ id: 'g5', updatedAt: 3, progress: 120 }),
-      goal({ id: 'g6', updatedAt: 2, progress: 20, keyResultCount: 4 }),
-    ]);
+    const findByIdentityId = vi
+      .fn()
+      .mockResolvedValue([
+        goal({ id: 'g1', updatedAt: 1, progress: Number.NaN }),
+        goal({ id: 'g2', updatedAt: 6, progress: 99.6 }),
+        goal({ id: 'g3', updatedAt: 5, progress: 40.4 }),
+        goal({ id: 'g4', updatedAt: 4, progress: -5 }),
+        goal({ id: 'g5', updatedAt: 3, progress: 120 }),
+        goal({ id: 'g6', updatedAt: 2, progress: 20, keyResultCount: 4 }),
+      ]);
     const useCase = new GetGoalHomeSummaryUseCase(
       createMockRepo<IGoalRepository>({ findByIdentityId }),
     );
@@ -60,10 +64,12 @@ describe('GetGoalHomeSummaryUseCase', () => {
   });
 
   it('uses goal id as a deterministic tie-breaker for equal update times', async () => {
-    const findByIdentityId = vi.fn().mockResolvedValue([
-      goal({ id: 'goal-b', updatedAt: 10 }),
-      goal({ id: 'goal-a', updatedAt: 10 }),
-    ]);
+    const findByIdentityId = vi
+      .fn()
+      .mockResolvedValue([
+        goal({ id: 'goal-b', updatedAt: 10 }),
+        goal({ id: 'goal-a', updatedAt: 10 }),
+      ]);
     const useCase = new GetGoalHomeSummaryUseCase(
       createMockRepo<IGoalRepository>({ findByIdentityId }),
     );

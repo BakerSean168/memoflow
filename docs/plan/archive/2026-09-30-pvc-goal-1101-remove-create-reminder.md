@@ -26,12 +26,12 @@ docs/plan/archive/2026-09-30-pvc-goal-1101-remove-create-reminder.md
 
 Validation commands run from the worktree root:
 
-| Command | Result |
-| --- | --- |
-| `NX_DAEMON=false NX_SKIP_NX_CACHE=true pnpm nx run app-vue:test -- src/modules/goal/components/dialogs/GoalDialog.spec.ts` | PASS: 1 file, 25 tests; fresh execution after review repairs |
-| `NX_DAEMON=false pnpm nx run app-vue:typecheck` | PASS, including 28 dependency tasks |
-| `pnpm exec eslint packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.spec.ts` | PASS: no errors or warnings |
-| `git diff --check` | PASS |
-| `NX_DAEMON=false pnpm nx run memoflow:governance-check` | PASS |
+| Command                                                                                                                                                        | Result                                                       |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `NX_DAEMON=false NX_SKIP_NX_CACHE=true pnpm nx run app-vue:test -- src/modules/goal/components/dialogs/GoalDialog.spec.ts`                                     | PASS: 1 file, 25 tests; fresh execution after review repairs |
+| `NX_DAEMON=false pnpm nx run app-vue:typecheck`                                                                                                                | PASS, including 28 dependency tasks                          |
+| `pnpm exec eslint packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.spec.ts` | PASS: no errors or warnings                                  |
+| `git diff --check`                                                                                                                                             | PASS                                                         |
+| `NX_DAEMON=false pnpm nx run memoflow:governance-check`                                                                                                        | PASS                                                         |
 
 The incoming suite also passed 25 tests before review repairs; the stronger switch regression exposed the child-state leak that those assertions missed. Dependencies were already installed and were not changed in this review. No locale keys or snapshot/visual fixtures changed. Validation uses mounted component behavior and the existing create request schema; no browser screenshot comparison was performed.

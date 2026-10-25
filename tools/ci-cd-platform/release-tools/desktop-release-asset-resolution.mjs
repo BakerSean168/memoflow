@@ -20,7 +20,7 @@ export async function walkDesktopArtifactFiles(directory) {
   const files = [];
   for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
     const absolute = path.join(directory, entry.name);
-    if (entry.isDirectory()) files.push(...await walkDesktopArtifactFiles(absolute));
+    if (entry.isDirectory()) files.push(...(await walkDesktopArtifactFiles(absolute)));
     else if (entry.isFile()) files.push(absolute);
   }
   return files;
@@ -33,12 +33,7 @@ function belongsToPlatform(file, artifactRoot, platform) {
   return segments.includes(platform) || segments.includes(`desktop-${platform}`);
 }
 
-export function resolveDesktopPlatformAssetFile({
-  artifactRoot,
-  files,
-  platform,
-  name,
-}) {
+export function resolveDesktopPlatformAssetFile({ artifactRoot, files, platform, name }) {
   assertAssetCoordinate({ platform, name });
   const matches = files.filter(
     (file) => path.basename(file) === name && belongsToPlatform(file, artifactRoot, platform),

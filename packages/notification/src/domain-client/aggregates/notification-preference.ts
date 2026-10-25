@@ -24,18 +24,42 @@ export interface NotificationPreferenceState {
 }
 
 export class NotificationPreference extends AggregateRoot<NotificationPreferenceId> {
-  private constructor(private readonly _props: NotificationPreferenceState) { super(_props.id); }
-  get identityId(): IdentityId { return this._props.identityId; }
-  get globalChannels() { return this._props.globalChannels; }
-  get workflowOverrides() { return this._props.workflowOverrides; }
-  get quietHours(): QuietHoursDTO | null { return this._props.quietHours; }
-  get version(): number { return this._props.version; }
-  get createdAt(): Date { return this._props.createdAt; }
-  get updatedAt(): Date { return this._props.updatedAt; }
-  get deletedAt(): Date | null { return this._props.deletedAt; }
-  get isDeleted(): boolean { return this._props.deletedAt !== null; }
-  isChannelEnabled(channel: NotificationChannelType): boolean | undefined { return this._props.globalChannels[channel]; }
-  static load(state: NotificationPreferenceState): NotificationPreference { return new NotificationPreference(state); }
+  private constructor(private readonly _props: NotificationPreferenceState) {
+    super(_props.id);
+  }
+  get identityId(): IdentityId {
+    return this._props.identityId;
+  }
+  get globalChannels() {
+    return this._props.globalChannels;
+  }
+  get workflowOverrides() {
+    return this._props.workflowOverrides;
+  }
+  get quietHours(): QuietHoursDTO | null {
+    return this._props.quietHours;
+  }
+  get version(): number {
+    return this._props.version;
+  }
+  get createdAt(): Date {
+    return this._props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this._props.updatedAt;
+  }
+  get deletedAt(): Date | null {
+    return this._props.deletedAt;
+  }
+  get isDeleted(): boolean {
+    return this._props.deletedAt !== null;
+  }
+  isChannelEnabled(channel: NotificationChannelType): boolean | undefined {
+    return this._props.globalChannels[channel];
+  }
+  static load(state: NotificationPreferenceState): NotificationPreference {
+    return new NotificationPreference(state);
+  }
   toDTO(): NotificationPreferenceClientDTO {
     return {
       id: this.id as unknown as NotificationPreferenceIdBranded,

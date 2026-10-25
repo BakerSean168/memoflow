@@ -14,6 +14,7 @@ status: done
 
 > **归档结果（2026-07-29）**：配套 Goal 提示词；实施波次已完成，随 product-time plan 一并归档。  
 > 新时间工作以 ADR-037 / architecture 详设为准，勿再从 W0 空跑。
+
 # ADR-037 产品时间体系 — Goal 实施提示词
 
 > **用法**：新会话把 **§ 完整 Goal 提示词** 整段交给 agent。  
@@ -24,13 +25,13 @@ status: done
 
 ## 文档地图（先读）
 
-| 优先级 | 路径 | 角色 |
-|--------|------|------|
-| 0 | [`AGENT.md`](../../../AGENT.md) | 协作与验证习惯 |
-| 1 | [`docs/architecture/adr/ADR-037-product-time-system.md`](../../architecture/adr/ADR-037-product-time-system.md) | **宪法（已采纳）** |
-| 2 | [`docs/architecture/product-time-system.md`](../../architecture/product-time-system.md) | **详设**（类型、API、Style、治理、波次） |
-| 3 | [`docs/plan/archive/2026-07-26-product-time-system.md`](./2026-07-26-product-time-system.md) | 波次状态 / residual |
-| 4 | 本文件 | Goal 提示词 |
+| 优先级 | 路径                                                                                                            | 角色                                     |
+| ------ | --------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| 0      | [`AGENT.md`](../../../AGENT.md)                                                                                 | 协作与验证习惯                           |
+| 1      | [`docs/architecture/adr/ADR-037-product-time-system.md`](../../architecture/adr/ADR-037-product-time-system.md) | **宪法（已采纳）**                       |
+| 2      | [`docs/architecture/product-time-system.md`](../../architecture/product-time-system.md)                         | **详设**（类型、API、Style、治理、波次） |
+| 3      | [`docs/plan/archive/2026-07-26-product-time-system.md`](./2026-07-26-product-time-system.md)                    | 波次状态 / residual                      |
+| 4      | 本文件                                                                                                          | Goal 提示词                              |
 
 真值顺序：代码/配置/测试 > ADR-037 > 详设 > plan。
 
@@ -142,5 +143,5 @@ status: done
 
 ## 维护
 
-- 波次完成后：更新 [`2026-07-26-product-time-system.md`](./2026-07-26-product-time-system.md) §4 状态与 §7 residual；本文件提示词仅在决策变更时改。  
+- 波次完成后：更新 [`2026-07-26-product-time-system.md`](./2026-07-26-product-time-system.md) §4 状态与 §7 residual；本文件提示词仅在决策变更时改。
 - 全部 W0–W8 完成后：可将本 goal 提示词与实施 plan 一并归档或留 active 至下一时间里程碑。

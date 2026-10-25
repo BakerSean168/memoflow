@@ -82,22 +82,10 @@
         }
       ],
       "metadata": {
-        "stages": [
-          "clarification",
-          "draft",
-          "confirm",
-          "result"
-        ],
-        "tool_calls_seen": [
-          "search_notes",
-          "submit_goal_automation_plan"
-        ],
+        "stages": ["clarification", "draft", "confirm", "result"],
+        "tool_calls_seen": ["search_notes", "submit_goal_automation_plan"],
         "goal_title": "建立稳定的 AI agent 工作流",
-        "action_tools": [
-          "create_goal",
-          "create_key_result",
-          "create_task_template"
-        ],
+        "action_tools": ["create_goal", "create_key_result", "create_task_template"],
         "executed_actions": [
           {
             "tool": "create_goal",
@@ -197,20 +185,10 @@
         }
       ],
       "metadata": {
-        "stages": [
-          "draft",
-          "confirm",
-          "result"
-        ],
-        "tool_calls_seen": [
-          "fetch_stats",
-          "submit_goal_automation_plan"
-        ],
+        "stages": ["draft", "confirm", "result"],
+        "tool_calls_seen": ["fetch_stats", "submit_goal_automation_plan"],
         "goal_title": "Ship a weekly AI workflow review system",
-        "action_tools": [
-          "create_goal",
-          "create_task_template"
-        ],
+        "action_tools": ["create_goal", "create_task_template"],
         "executed_actions": [
           {
             "tool": "create_goal",
@@ -292,19 +270,10 @@
         }
       ],
       "metadata": {
-        "stages": [
-          "draft",
-          "confirm",
-          "result"
-        ],
-        "tool_calls_seen": [
-          "submit_goal_automation_plan"
-        ],
+        "stages": ["draft", "confirm", "result"],
+        "tool_calls_seen": ["submit_goal_automation_plan"],
         "goal_title": "Build a structured AI learning habit",
-        "action_tools": [
-          "create_goal",
-          "create_key_result"
-        ],
+        "action_tools": ["create_goal", "create_key_result"],
         "executed_actions": [
           {
             "tool": "create_goal",
@@ -376,12 +345,8 @@
         }
       ],
       "metadata": {
-        "stages": [
-          "draft"
-        ],
-        "tool_calls_seen": [
-          "submit_goal_automation_plan"
-        ],
+        "stages": ["draft"],
+        "tool_calls_seen": ["submit_goal_automation_plan"],
         "goal_title": "Ship an approval-first AI workflow loop",
         "action_tools": [],
         "executed_actions": [],
@@ -458,15 +423,8 @@
         }
       ],
       "metadata": {
-        "stages": [
-          "clarification",
-          "draft",
-          "confirm",
-          "result"
-        ],
-        "tool_calls_seen": [
-          "submit_goal_automation_plan"
-        ],
+        "stages": ["clarification", "draft", "confirm", "result"],
+        "tool_calls_seen": ["submit_goal_automation_plan"],
         "goal_title": "建立稳定的晨间运动习惯",
         "action_tools": [
           "create_goal",
@@ -576,15 +534,8 @@
         }
       ],
       "metadata": {
-        "stages": [
-          "clarification",
-          "draft",
-          "confirm",
-          "result"
-        ],
-        "tool_calls_seen": [
-          "submit_goal_automation_plan"
-        ],
+        "stages": ["clarification", "draft", "confirm", "result"],
+        "tool_calls_seen": ["submit_goal_automation_plan"],
         "goal_title": "Build a reliable weekly planning routine",
         "action_tools": [
           "create_goal",
@@ -694,15 +645,8 @@
         }
       ],
       "metadata": {
-        "stages": [
-          "clarification",
-          "draft",
-          "confirm",
-          "result"
-        ],
-        "tool_calls_seen": [
-          "submit_goal_automation_plan"
-        ],
+        "stages": ["clarification", "draft", "confirm", "result"],
+        "tool_calls_seen": ["submit_goal_automation_plan"],
         "goal_title": "建立稳定的每周复盘流程",
         "action_tools": [
           "create_goal",

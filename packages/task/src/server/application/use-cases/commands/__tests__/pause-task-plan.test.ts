@@ -134,7 +134,9 @@ describe('PauseTaskPlanUseCase', () => {
   it('should return INTERNAL_ERROR when deleting incomplete occurrences fails', async () => {
     const plan = aLoadedTaskPlan({ status: TaskPlanStatus.Active });
     vi.mocked(templateRepo.findByIdForIdentity).mockResolvedValue(plan);
-    vi.mocked(instanceRepo.deleteIncompleteOccurrencesFrom).mockRejectedValue(new Error('DB error'));
+    vi.mocked(instanceRepo.deleteIncompleteOccurrencesFrom).mockRejectedValue(
+      new Error('DB error'),
+    );
 
     const result = await useCase.execute(plan.id, plan.identityId);
 

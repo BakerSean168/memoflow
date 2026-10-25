@@ -14,12 +14,14 @@ Code review 发现当前 checkpoint 实现虽然代码完整，但正式链路�
 
 **位置**: `apps/ai-service/src/ai_service/app.py:99`
 
-**问题**: 
+**问题**:
+
 - 注释写明 "For now, we use the legacy builder"
 - 实际构造仍调用 `build_file_backed_*` 而非 `build_checkpointer/build_run_history_store`
 - 虽然 `checkpoint_factory.py` 已实现策略切换（local/ts），但主 wiring 未接入
 
 **影响**:
+
 - 环境变量 `AGENT_CHECKPOINT_STRATEGY=ts` 无效
 - 无法切换到 database checkpoint
 - 多实例部署无法共享状态
@@ -29,6 +31,7 @@ Code review 发现当前 checkpoint 实现虽然代码完整，但正式链路�
 **位置**: `apps/ai-service/src/ai_service/agent_runtime/ts_checkpoint_adapter.py:52, 74, 104`
 
 **问题**:
+
 ```python
 def list_runs(self) -> list[AgentRun]:
     try:
@@ -44,6 +47,7 @@ def list_runs(self) -> list[AgentRun]:
 - Runtime 的 fallback 逻辑也是同步调用（`runtime.py:263, 306`）
 
 **影响**:
+
 - 无法在 async 上下文中恢复 checkpoint
 - 重启恢复链路不可用
 - 多实例部署会崩溃
@@ -52,12 +56,14 @@ def list_runs(self) -> list[AgentRun]:
 
 #### 3. TS checkpoint 会丢失 events 和 interrupts
 
-**位置**: 
+**位置**:
+
 - `apps/ai-service/src/ai_service/agent_runtime/ts_checkpoint_client.py:39`
 - `packages/ai/src/application-server/ports/agent-checkpoint.port.ts:10`
 - `packages/ai/src/infrastructure-server/adapters/prisma/agent-checkpoint-prisma.adapter.ts:23`
 
 **问题**:
+
 - Python client 只上传 `run`, `state`, `threadId`
 - TS port 接口也只定义了这些字段
 - Prisma adapter 把 `events` 和 `interrupts` 写死为空数组：
@@ -68,6 +74,7 @@ def list_runs(self) -> list[AgentRun]:
 - 但数据库 schema 已有这些列（`packages/database/prisma/schema/ai.prisma:191`）
 
 **影响**:
+
 - Approval/execution 等中断态恢复后丢失历史事件
 - 无法追溯 agent 执行历史
 - 降低可观测性
@@ -76,7 +83,8 @@ def list_runs(self) -> list[AgentRun]:
 
 **位置**: `apps/ai-service/tests/test_agent_runtime_routes.py:968`
 
-**问题**: 
+**问题**:
+
 - Implementation 已将 `duplicateRisk` 算成 `none/low/medium/high`
 - Unit test 按 `none` 断言
 - 但 route test 还在断言 `unknown`
@@ -94,6 +102,7 @@ def list_runs(self) -> list[AgentRun]:
 **步骤**:
 
 1. **修改 `app.py` 的 runtime 构造**:
+
    ```python
    # Before (legacy):
    checkpointer = build_file_backed_saver(
@@ -104,13 +113,13 @@ def list_runs(self) -> list[AgentRun]:
        checkpoint_dir=settings.agent_checkpoint_dir,
        name="goal_create",
    )
-   
+
    # After (strategy-aware):
    from ai_service.agent_runtime.checkpoint_factory import (
        build_checkpointer,
        build_run_history_store,
    )
-   
+
    checkpointer = build_checkpointer(
        settings=settings,
        name="goal_create",
@@ -129,13 +138,14 @@ def list_runs(self) -> list[AgentRun]:
      - 在 `start_run()` 时根据 `identity_id` 创建
      - 存储在 runtime 的 `_run_history_stores: dict[str, AgentRunHistoryPort]` 缓存中
    - **方案 B**: 使用 factory pattern，runtime 持有 factory 函数而非实例
-   
+
 3. **更新所有 Agent runtime**:
    - `GoalCreateAgentRuntime`
    - `KnowledgeQAAgentRuntime`
    - `KnowledgeGenerateAgentRuntime`
 
 **验证**:
+
 - 设置 `AGENT_CHECKPOINT_STRATEGY=local`，测试通过
 - 设置 `AGENT_CHECKPOINT_STRATEGY=ts`（mock TS API），测试通过
 - 确认环境变量生效
@@ -146,7 +156,8 @@ def list_runs(self) -> list[AgentRun]:
 
 **目标**: 让 TSCheckpointAdapter 在 async 上下文中可用
 
-**根因**: 
+**根因**:
+
 - FastAPI 路由天然是 async
 - Runtime 在 async 路由中调用同步方法 `list_runs()`
 - 当前实现检测到 event loop 就抛错
@@ -159,7 +170,7 @@ def list_runs(self) -> list[AgentRun]:
 def list_runs(self) -> list[AgentRun]:
     """List all runs for the current identity."""
     import asyncio
-    
+
     try:
         loop = asyncio.get_running_loop()
     except RuntimeError:
@@ -176,11 +187,13 @@ def list_runs(self) -> list[AgentRun]:
 ```
 
 **优点**:
+
 - 保持同步接口契约（`AgentRunHistoryPort` 是同步的）
 - 在 async 上下文中不会崩溃
 - 利用线程池避免阻塞 event loop
 
 **缺点**:
+
 - 线程池开销（但 checkpoint 操作不是热路径）
 
 #### 选项 B: 重构为 async port（激进）
@@ -189,11 +202,13 @@ def list_runs(self) -> list[AgentRun]:
 - Runtime 的所有调用点改为 await
 - File-backed 实现用 `aiofiles`
 
-**优点**: 
+**优点**:
+
 - 正统的 async 设计
 - 更好的性能
 
 **缺点**:
+
 - 改动面大
 - File-backed 实现也需改造
 - 不适合当前阶段
@@ -201,8 +216,9 @@ def list_runs(self) -> list[AgentRun]:
 **推荐**: 选项 A，短期内收口；长期可考虑选项 B 重构
 
 **需修改的方法**:
+
 - `list_runs()` - 被 `routes/agents.py:332` 调用
-- `get_result_by_thread_id()` - 被 `runtime.py:263` 调用  
+- `get_result_by_thread_id()` - 被 `runtime.py:263` 调用
 - `thread_index()` - 被 `runtime.py:306` 调用
 
 ---
@@ -214,6 +230,7 @@ def list_runs(self) -> list[AgentRun]:
 **步骤**:
 
 1. **扩展 TS port 接口**:
+
    ```typescript
    // packages/ai/src/application-server/ports/agent-checkpoint.port.ts
    export interface AgentCheckpointUpsertInput {
@@ -221,13 +238,14 @@ def list_runs(self) -> list[AgentRun]:
      run: AgentRun;
      state?: AgentState;
      threadId?: string;
-     events?: AgentEvent[];        // 新增
+     events?: AgentEvent[]; // 新增
      interrupts?: AgentInterrupt[]; // 新增
      requestId?: string;
    }
    ```
 
 2. **修改 Prisma adapter 实现**:
+
    ```typescript
    // packages/ai/src/infrastructure-server/adapters/prisma/agent-checkpoint-prisma.adapter.ts
    async upsert(input: AgentCheckpointUpsertInput): Promise<void> {
@@ -248,6 +266,7 @@ def list_runs(self) -> list[AgentRun]:
    ```
 
 3. **修改 Python client 上传**:
+
    ```python
    # apps/ai-service/src/ai_service/agent_runtime/ts_checkpoint_client.py
    async def upsert_checkpoint(
@@ -286,6 +305,7 @@ def list_runs(self) -> list[AgentRun]:
    ```
 
 **验证**:
+
 - 创建 run → approval → resume，检查数据库 `events` 列
 - 确认 approval interrupt 被持久化
 
@@ -343,12 +363,12 @@ def list_runs(self) -> list[AgentRun]:
 
 ## 风险评估
 
-| 风险 | 级别 | 缓解措施 |
-|------|------|----------|
-| identity_id 依赖导致 ts 策略无法初始化 | Medium | 采用延迟构造或 factory pattern |
-| asyncio.to_thread() 性能影响 | Low | Checkpoint 不在热路径，可接受 |
-| events/interrupts 序列化兼容性 | Low | 已有 AgentEvent contract，schema 已定义 |
-| 破坏现有 file-backed 流程 | Low | 保留 legacy builder 作为 fallback |
+| 风险                                   | 级别   | 缓解措施                                |
+| -------------------------------------- | ------ | --------------------------------------- |
+| identity_id 依赖导致 ts 策略无法初始化 | Medium | 采用延迟构造或 factory pattern          |
+| asyncio.to_thread() 性能影响           | Low    | Checkpoint 不在热路径，可接受           |
+| events/interrupts 序列化兼容性         | Low    | 已有 AgentEvent contract，schema 已定义 |
+| 破坏现有 file-backed 流程              | Low    | 保留 legacy builder 作为 fallback       |
 
 ---
 
@@ -370,6 +390,7 @@ def list_runs(self) -> list[AgentRun]:
 - **修复路径**: 3 个 phase，共 2.5 小时，风险可控
 
 完成后，系统将真正支持：
+
 - ✅ 单实例部署（file-backed，已可用）
 - ✅ 多实例部署（database checkpoint，修复后可用）
 - ✅ 优雅重启恢复

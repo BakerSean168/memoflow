@@ -1,7 +1,23 @@
-import { createContext, type PropsWithChildren, useContext, useEffect, useRef, useState } from 'react';
+import {
+  createContext,
+  type PropsWithChildren,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { createCloudAuthHttpClient, type CloudAuthClientPort } from '@memoflow/cloud-auth';
-import type { CloudAccountSummary, CloudSessionSummary, CloudSignInRequest, CloudSignUpRequest } from '@memoflow/contracts';
-import { createResultHttpClient, presentErrorMessage, type IResultHttpClient } from '@memoflow/http-client';
+import type {
+  CloudAccountSummary,
+  CloudSessionSummary,
+  CloudSignInRequest,
+  CloudSignUpRequest,
+} from '@memoflow/contracts';
+import {
+  createResultHttpClient,
+  presentErrorMessage,
+  type IResultHttpClient,
+} from '@memoflow/http-client';
 import { MOBILE_API_BASE_URL } from '../constants/auth';
 
 export type AppSessionKind = 'signed-out' | 'authenticating' | 'authenticated' | 'guest' | 'demo';
@@ -30,11 +46,23 @@ export type AppSessionValue = {
 };
 
 const AppSessionContext = createContext<AppSessionValue | null>(null);
-const GUEST_USER = { id: 'guest-local', displayName: 'Guest session', workspaceName: 'Local sandbox' };
-const DEMO_USER = { id: 'demo-owner', displayName: 'MemoFlow Demo', workspaceName: 'MemoFlow preview' };
+const GUEST_USER = {
+  id: 'guest-local',
+  displayName: 'Guest session',
+  workspaceName: 'Local sandbox',
+};
+const DEMO_USER = {
+  id: 'demo-owner',
+  displayName: 'MemoFlow Demo',
+  workspaceName: 'MemoFlow preview',
+};
 
 function apiOrigin() {
-  try { return new URL(MOBILE_API_BASE_URL).origin; } catch { return ''; }
+  try {
+    return new URL(MOBILE_API_BASE_URL).origin;
+  } catch {
+    return '';
+  }
 }
 
 export function AppSessionProvider({ children }: PropsWithChildren) {
@@ -62,7 +90,9 @@ export function AppSessionProvider({ children }: PropsWithChildren) {
       }
       setIsBootstrapping(false);
     });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   async function loginByEmail(req: CloudSignInRequest) {
@@ -70,7 +100,9 @@ export function AppSessionProvider({ children }: PropsWithChildren) {
     const result = await auth.current!.signIn(req);
     if (!result.ok || !result.data.session) {
       setSessionKind('signed-out');
-      setLastError(result.ok ? 'Verify your email before signing in.' : presentErrorMessage(result.error));
+      setLastError(
+        result.ok ? 'Verify your email before signing in.' : presentErrorMessage(result.error),
+      );
       return false;
     }
     setCurrentIdentity(result.data.account);
@@ -91,7 +123,9 @@ export function AppSessionProvider({ children }: PropsWithChildren) {
     setCurrentIdentity(result.data.account);
     setCurrentSession(result.data.session);
     setSessionKind(result.data.session ? 'authenticated' : 'signed-out');
-    setLastError(result.data.requiresEmailVerification ? 'Check your email to verify the account.' : null);
+    setLastError(
+      result.data.requiresEmailVerification ? 'Check your email to verify the account.' : null,
+    );
     return true;
   }
 
@@ -106,34 +140,61 @@ export function AppSessionProvider({ children }: PropsWithChildren) {
     setCurrentSession(null);
   }
 
-  function enterGuestMode() { clearRemoteState(); setSessionKind('guest'); setLastError(null); }
-  function signInDemo() { clearRemoteState(); setSessionKind('demo'); setLastError(null); }
-  async function signOut() { if (sessionKind === 'authenticated') await auth.current!.signOut(); clearRemoteState(); setSessionKind('signed-out'); }
+  function enterGuestMode() {
+    clearRemoteState();
+    setSessionKind('guest');
+    setLastError(null);
+  }
+  function signInDemo() {
+    clearRemoteState();
+    setSessionKind('demo');
+    setLastError(null);
+  }
+  async function signOut() {
+    if (sessionKind === 'authenticated') await auth.current!.signOut();
+    clearRemoteState();
+    setSessionKind('signed-out');
+  }
 
-  const currentUser = sessionKind === 'authenticated' && currentIdentity
-    ? { id: currentIdentity.id, displayName: currentIdentity.name || currentIdentity.email, workspaceName: 'Remote workspace' }
-    : sessionKind === 'guest' ? GUEST_USER : sessionKind === 'demo' ? DEMO_USER : null;
+  const currentUser =
+    sessionKind === 'authenticated' && currentIdentity
+      ? {
+          id: currentIdentity.id,
+          displayName: currentIdentity.name || currentIdentity.email,
+          workspaceName: 'Remote workspace',
+        }
+      : sessionKind === 'guest'
+        ? GUEST_USER
+        : sessionKind === 'demo'
+          ? DEMO_USER
+          : null;
 
-  return <AppSessionContext.Provider value={{
-    apiBaseUrl: MOBILE_API_BASE_URL,
-    currentIdentity,
-    currentSession,
-    currentUser,
-    isAuthenticated: sessionKind !== 'signed-out' && sessionKind !== 'authenticating',
-    isBootstrapping,
-    isGuest: sessionKind === 'guest',
-    isRemoteAuthenticated: sessionKind === 'authenticated',
-    lastError,
-    sessionKind,
-    clearError: () => setLastError(null),
-    createAuthorizedHttpClient,
-    enterGuestMode,
-    forgotPassword,
-    loginByEmail,
-    registerByEmail,
-    signInDemo,
-    signOut,
-  }}>{children}</AppSessionContext.Provider>;
+  return (
+    <AppSessionContext.Provider
+      value={{
+        apiBaseUrl: MOBILE_API_BASE_URL,
+        currentIdentity,
+        currentSession,
+        currentUser,
+        isAuthenticated: sessionKind !== 'signed-out' && sessionKind !== 'authenticating',
+        isBootstrapping,
+        isGuest: sessionKind === 'guest',
+        isRemoteAuthenticated: sessionKind === 'authenticated',
+        lastError,
+        sessionKind,
+        clearError: () => setLastError(null),
+        createAuthorizedHttpClient,
+        enterGuestMode,
+        forgotPassword,
+        loginByEmail,
+        registerByEmail,
+        signInDemo,
+        signOut,
+      }}
+    >
+      {children}
+    </AppSessionContext.Provider>
+  );
 }
 
 export function useAppSession() {

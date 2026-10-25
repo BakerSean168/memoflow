@@ -53,8 +53,14 @@ export type ActiveAssistantTurn = {
   readonly identityId: string;
   readonly abort: () => boolean;
   readonly conversationId: string;
-  readonly decide: (command: AssistantRuntimeApprovalCommand, context: ExecutionContext) => Promise<boolean>;
-  readonly answer: (command: AssistantRuntimeToolAnswerCommand, context: ExecutionContext) => boolean;
+  readonly decide: (
+    command: AssistantRuntimeApprovalCommand,
+    context: ExecutionContext,
+  ) => Promise<boolean>;
+  readonly answer: (
+    command: AssistantRuntimeToolAnswerCommand,
+    context: ExecutionContext,
+  ) => boolean;
 };
 
 export type AssistantTurnInput = {
@@ -119,14 +125,18 @@ export class AssistantTurnSession {
     >();
     const pending = new Set<string>();
     const suspensions = new Set<string>();
-    const questions = new Map<string, { options?: { label: string }[]; selectionMode?: 'single_select' | 'multi_select' }>();
+    const questions = new Map<
+      string,
+      { options?: { label: string }[]; selectionMode?: 'single_select' | 'multi_select' }
+    >();
     const ownsTurn = () =>
       !settled &&
       session.run.bindingGeneration() === bindingGeneration &&
       session.thread.getId() === input.conversationId &&
       session.identity.getOwnerId() === input.identityId &&
       session.identity.getResourceId() === input.identityId &&
-      (activeRuns.get(runId || fallbackRunId)?.decide === decide || activeRuns.get(runId || fallbackRunId)?.answer === answer);
+      (activeRuns.get(runId || fallbackRunId)?.decide === decide ||
+        activeRuns.get(runId || fallbackRunId)?.answer === answer);
     const ownsNativeRun = () => ownsTurn() && session.getCurrentRunId() === nativeRunId;
 
     const currentRunId = (): string => runId || fallbackRunId;
@@ -165,8 +175,12 @@ export class AssistantTurnSession {
       if (settled) return;
       if (type !== 'assistant.run.completed') {
         terminalHistory = this.deps.history.appendRuntimeRecord({
-          identityId: input.identityId, conversationId: input.conversationId,
-          runOutcome: { runId: currentRunId(), status: type === 'assistant.run.failed' ? 'failed' : 'cancelled' },
+          identityId: input.identityId,
+          conversationId: input.conversationId,
+          runOutcome: {
+            runId: currentRunId(),
+            status: type === 'assistant.run.failed' ? 'failed' : 'cancelled',
+          },
         });
         // Observe immediately; the generator's finally owns the awaited write,
         // including when the HTTP/IPC reader disconnects before the final event.
@@ -180,7 +194,11 @@ export class AssistantTurnSession {
         });
       }
       pending.clear();
-      for (const toolCallId of suspensions) emit('assistant.ask_user.resolved', { toolCallId, resolution: type === 'assistant.run.cancelled' ? 'cancelled' : 'failed' });
+      for (const toolCallId of suspensions)
+        emit('assistant.ask_user.resolved', {
+          toolCallId,
+          resolution: type === 'assistant.run.cancelled' ? 'cancelled' : 'failed',
+        });
       suspensions.clear();
       questions.clear();
       settled = true;
@@ -246,9 +264,16 @@ export class AssistantTurnSession {
         return false;
       }
       const approvalHistory = this.deps.history.appendRuntimeRecord({
-        identityId: input.identityId, conversationId: input.conversationId,
-        approvalReceipt: { runId: currentRunId(), toolCallId: command.toolCallId,
-          toolName: tool.toolName, category: tool.category, risk: 'high', decision: command.decision },
+        identityId: input.identityId,
+        conversationId: input.conversationId,
+        approvalReceipt: {
+          runId: currentRunId(),
+          toolCallId: command.toolCallId,
+          toolName: tool.toolName,
+          category: tool.category,
+          risk: 'high',
+          decision: command.decision,
+        },
       });
       telemetry.approvalResolved(command.toolCallId, command.decision);
       emit('assistant.approval.resolved', {
@@ -258,23 +283,65 @@ export class AssistantTurnSession {
       await approvalHistory;
       return true;
     };
-    const answer = (command: AssistantRuntimeToolAnswerCommand, context: ExecutionContext): boolean => {
-      if (command.action !== 'answer' || !ownsNativeRun() || stopping || session.run.isAbortRequested() || !suspensions.has(command.toolCallId)) return false;
+    const answer = (
+      command: AssistantRuntimeToolAnswerCommand,
+      context: ExecutionContext,
+    ): boolean => {
+      if (
+        command.action !== 'answer' ||
+        !ownsNativeRun() ||
+        stopping ||
+        session.run.isAbortRequested() ||
+        !suspensions.has(command.toolCallId)
+      )
+        return false;
       const suspension = session.suspensions.get({ toolCallId: command.toolCallId });
       const question = questions.get(command.toolCallId);
-      if (!suspension || suspension.runId !== runId || suspension.threadId !== input.conversationId || suspension.resourceId !== input.identityId || !question) return false;
+      if (
+        !suspension ||
+        suspension.runId !== runId ||
+        suspension.threadId !== input.conversationId ||
+        suspension.resourceId !== input.identityId ||
+        !question
+      )
+        return false;
       const labels = new Set((question.options ?? []).map(({ label }) => label));
       if (question.selectionMode === 'multi_select') {
-        if (!Array.isArray(command.answer) || command.answer.length === 0 || new Set(command.answer).size !== command.answer.length || command.answer.some((value) => !labels.has(value))) return false;
+        if (
+          !Array.isArray(command.answer) ||
+          command.answer.length === 0 ||
+          new Set(command.answer).size !== command.answer.length ||
+          command.answer.some((value) => !labels.has(value))
+        )
+          return false;
       } else if (question.options) {
         if (typeof command.answer !== 'string' || !labels.has(command.answer)) return false;
-      } else if (typeof command.answer !== 'string' || !command.answer.trim() || command.answer.length > 4000) return false;
-      suspensions.delete(command.toolCallId); questions.delete(command.toolCallId);
+      } else if (
+        typeof command.answer !== 'string' ||
+        !command.answer.trim() ||
+        command.answer.length > 4000
+      )
+        return false;
+      suspensions.delete(command.toolCallId);
+      questions.delete(command.toolCallId);
       const answerContext = new RequestContext(requestContext.entries());
-      answerContext.setRaw('identityId', input.identityId); answerContext.setRaw('executionContext', context);
-      answerContext.setRaw(MASTRA_RESOURCE_ID_KEY, input.identityId); answerContext.setRaw(MASTRA_THREAD_ID_KEY, input.conversationId);
-      session.respondToToolSuspension({ resumeData: command.answer, toolCallId: command.toolCallId, requestContext: answerContext }).catch((error) => { lastRuntimeError = publicRuntimeError(error); });
-      emit('assistant.ask_user.resolved', { toolCallId: command.toolCallId, resolution: 'answered' });
+      answerContext.setRaw('identityId', input.identityId);
+      answerContext.setRaw('executionContext', context);
+      answerContext.setRaw(MASTRA_RESOURCE_ID_KEY, input.identityId);
+      answerContext.setRaw(MASTRA_THREAD_ID_KEY, input.conversationId);
+      session
+        .respondToToolSuspension({
+          resumeData: command.answer,
+          toolCallId: command.toolCallId,
+          requestContext: answerContext,
+        })
+        .catch((error) => {
+          lastRuntimeError = publicRuntimeError(error);
+        });
+      emit('assistant.ask_user.resolved', {
+        toolCallId: command.toolCallId,
+        resolution: 'answered',
+      });
       return true;
     };
     const activeRun: ActiveAssistantTurn = {
@@ -322,29 +389,78 @@ export class AssistantTurnSession {
         return;
       }
       if (event.type === 'tool_suspended') {
-        if (event.toolName !== 'ask_user' || !event.toolCallId || event.toolCallId.length > 512) { abort(); return; }
+        if (event.toolName !== 'ask_user' || !event.toolCallId || event.toolCallId.length > 512) {
+          abort();
+          return;
+        }
         const suspension = session.suspensions.get({ toolCallId: event.toolCallId });
         const raw = event.suspendPayload;
-        if (!suspension || suspension.runId !== runId || suspension.threadId !== input.conversationId || suspension.resourceId !== input.identityId || !raw || typeof raw !== 'object' || Array.isArray(raw)) { abort(); return; }
+        if (
+          !suspension ||
+          suspension.runId !== runId ||
+          suspension.threadId !== input.conversationId ||
+          suspension.resourceId !== input.identityId ||
+          !raw ||
+          typeof raw !== 'object' ||
+          Array.isArray(raw)
+        ) {
+          abort();
+          return;
+        }
         const payload = raw as Record<string, unknown>;
         const rawOptions = payload.options;
-        const validOptions = rawOptions === undefined || (Array.isArray(rawOptions) && rawOptions.length <= 20 && rawOptions.every((item) => {
-          if (!item || typeof item !== 'object') return false;
-          const choice = item as Record<string, unknown>;
-          return typeof choice.label === 'string' && choice.label.trim().length > 0 && choice.label.length <= 500 &&
-            (choice.description === undefined || (typeof choice.description === 'string' && choice.description.length <= 1000));
-        }));
-        if (typeof payload.question !== 'string' || !payload.question.trim() || payload.question.length > 2000 || !validOptions ||
-          (payload.selectionMode !== undefined && payload.selectionMode !== 'single_select' && payload.selectionMode !== 'multi_select')) { abort(); return; }
+        const validOptions =
+          rawOptions === undefined ||
+          (Array.isArray(rawOptions) &&
+            rawOptions.length <= 20 &&
+            rawOptions.every((item) => {
+              if (!item || typeof item !== 'object') return false;
+              const choice = item as Record<string, unknown>;
+              return (
+                typeof choice.label === 'string' &&
+                choice.label.trim().length > 0 &&
+                choice.label.length <= 500 &&
+                (choice.description === undefined ||
+                  (typeof choice.description === 'string' && choice.description.length <= 1000))
+              );
+            }));
+        if (
+          typeof payload.question !== 'string' ||
+          !payload.question.trim() ||
+          payload.question.length > 2000 ||
+          !validOptions ||
+          (payload.selectionMode !== undefined &&
+            payload.selectionMode !== 'single_select' &&
+            payload.selectionMode !== 'multi_select')
+        ) {
+          abort();
+          return;
+        }
         const options = rawOptions as { label: string; description?: string }[] | undefined;
-        questions.set(event.toolCallId, { ...(options ? { options: options.map(({ label }) => ({ label })) } : {}), ...(payload.selectionMode ? { selectionMode: payload.selectionMode as 'single_select' | 'multi_select' } : {}) });
+        questions.set(event.toolCallId, {
+          ...(options ? { options: options.map(({ label }) => ({ label })) } : {}),
+          ...(payload.selectionMode
+            ? { selectionMode: payload.selectionMode as 'single_select' | 'multi_select' }
+            : {}),
+        });
         suspensions.add(event.toolCallId);
-        emit('assistant.ask_user.required', { toolCallId: event.toolCallId, question: payload.question.trim(), ...(options ? { options } : {}), ...(payload.selectionMode ? { selectionMode: payload.selectionMode as 'single_select' | 'multi_select' } : {}) });
+        emit('assistant.ask_user.required', {
+          toolCallId: event.toolCallId,
+          question: payload.question.trim(),
+          ...(options ? { options } : {}),
+          ...(payload.selectionMode
+            ? { selectionMode: payload.selectionMode as 'single_select' | 'multi_select' }
+            : {}),
+        });
         return;
       }
       if (event.type === 'tool_suspension_cancelled') {
-        suspensions.delete(event.toolCallId); questions.delete(event.toolCallId);
-        emit('assistant.ask_user.resolved', { toolCallId: event.toolCallId, resolution: 'cancelled' });
+        suspensions.delete(event.toolCallId);
+        questions.delete(event.toolCallId);
+        emit('assistant.ask_user.resolved', {
+          toolCallId: event.toolCallId,
+          resolution: 'cancelled',
+        });
         return;
       }
       if (event.type === 'tool_start' && event.toolName === 'ask_user') return;

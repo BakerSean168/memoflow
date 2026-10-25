@@ -54,27 +54,30 @@ describe('RemoveTaskGoalContributionUseCase', () => {
     );
   });
 
-  it.each(['TaskAutomatic', 'TaskUserMeasurement'] as const)('removes %s by source and recalculates canonical Sum history', async (authorship) => {
-    const { goal, keyResult } = createGoalWithProgress();
-    const record = GoalRecord.create({
-      keyResultId: keyResult.id as never,
-      identityId: 'identity-1' as never,
-      value: 3,
-      authorship,
-      source: { type: 'TASK_INSTANCE', id: 'task-occurrence-1' },
-    });
-    vi.mocked(goalRecordRepository.findBySource).mockResolvedValue(record);
-    vi.mocked(goalRecordRepository.findByKeyResultId).mockResolvedValue([record]);
-    vi.mocked(goalRepository.findByKeyResultIdForIdentity).mockResolvedValue(goal);
+  it.each(['TaskAutomatic', 'TaskUserMeasurement'] as const)(
+    'removes %s by source and recalculates canonical Sum history',
+    async (authorship) => {
+      const { goal, keyResult } = createGoalWithProgress();
+      const record = GoalRecord.create({
+        keyResultId: keyResult.id as never,
+        identityId: 'identity-1' as never,
+        value: 3,
+        authorship,
+        source: { type: 'TASK_INSTANCE', id: 'task-occurrence-1' },
+      });
+      vi.mocked(goalRecordRepository.findBySource).mockResolvedValue(record);
+      vi.mocked(goalRecordRepository.findByKeyResultId).mockResolvedValue([record]);
+      vi.mocked(goalRepository.findByKeyResultIdForIdentity).mockResolvedValue(goal);
 
-    const result = await useCase.execute('identity-1', 'TASK_INSTANCE', 'task-occurrence-1');
+      const result = await useCase.execute('identity-1', 'TASK_INSTANCE', 'task-occurrence-1');
 
-    expect(result).toBeOk();
-    expect(goalRecordRepository.delete).toHaveBeenCalledWith('identity-1', String(record.id));
-    expect(goal.getKeyResult(keyResult.id)?.progress.currentValue).toBe(0);
-    expect(goalRepository.saveRootWithExpectedVersion).toHaveBeenCalledWith(goal, 1);
-    expect(goal.version).toBe(2);
-  });
+      expect(result).toBeOk();
+      expect(goalRecordRepository.delete).toHaveBeenCalledWith('identity-1', String(record.id));
+      expect(goal.getKeyResult(keyResult.id)?.progress.currentValue).toBe(0);
+      expect(goalRepository.saveRootWithExpectedVersion).toHaveBeenCalledWith(goal, 1);
+      expect(goal.version).toBe(2);
+    },
+  );
 
   it('is idempotent when the source contribution is already absent', async () => {
     const result = await useCase.execute('identity-1', 'TASK_INSTANCE', 'task-occurrence-1');

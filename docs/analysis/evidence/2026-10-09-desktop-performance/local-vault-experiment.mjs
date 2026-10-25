@@ -26,12 +26,14 @@ const output = {
     totalMemoryBytes: os.totalmem(),
   },
   methodology: {
-    source: 'packages/repository/src/electron/local-vault-runtime.ts (direct source import via tsx)',
+    source:
+      'packages/repository/src/electron/local-vault-runtime.ts (direct source import via tsx)',
     bytesPerNote,
     searchQuery: 'needlealpha',
     samples: 5,
     filesystem: 'Fresh synthetic files, OS cache not evicted; repeated queries are warm.',
-    counts: 'A separate instrumented query counts fs.promises calls; timed samples are uninstrumented.',
+    counts:
+      'A separate instrumented query counts fs.promises calls; timed samples are uninstrumented.',
     scope: 'Node/Linux source-level experiment; excludes Electron, renderer, IPC, GPU and Windows.',
   },
   search: [],
@@ -59,16 +61,24 @@ async function fixture(count) {
   const name = `size-${count}`;
   const vault = path.join(root, name, 'vault');
   for (let i = 0; i < Math.ceil(count / 200); i++) {
-    await fs.promises.mkdir(path.join(vault, `group-${String(i).padStart(4, '0')}`), { recursive: true });
+    await fs.promises.mkdir(path.join(vault, `group-${String(i).padStart(4, '0')}`), {
+      recursive: true,
+    });
   }
   for (let batch = 0; batch < count; batch += 32) {
-    await Promise.all(Array.from({ length: Math.min(32, count - batch) }, (_, offset) => {
-      const i = batch + offset;
-      return fs.promises.writeFile(
-        path.join(vault, `group-${String(Math.floor(i / 200)).padStart(4, '0')}`, `note-${String(i).padStart(5, '0')}.md`),
-        markdown(i),
-      );
-    }));
+    await Promise.all(
+      Array.from({ length: Math.min(32, count - batch) }, (_, offset) => {
+        const i = batch + offset;
+        return fs.promises.writeFile(
+          path.join(
+            vault,
+            `group-${String(Math.floor(i / 200)).padStart(4, '0')}`,
+            `note-${String(i).padStart(5, '0')}.md`,
+          ),
+          markdown(i),
+        );
+      }),
+    );
   }
   const runtime = makeRuntime(name, async () => vault);
   await runtime.selectVault();
@@ -144,7 +154,10 @@ try {
 
   // Exercise the real scan boundary and duplicate-identity check using only fixtures.
   const sentinelId = documentId(999999999999);
-  await fs.promises.writeFile(path.join(largest.vault, 'zzzz-sentinel.md'), `---\nmemoflow_id: ${sentinelId}\n---\n# Unique sentinel\nonlybeyondscanlimit`);
+  await fs.promises.writeFile(
+    path.join(largest.vault, 'zzzz-sentinel.md'),
+    `---\nmemoflow_id: ${sentinelId}\n---\n# Unique sentinel\nonlybeyondscanlimit`,
+  );
   const scan = await largest.runtime.scanVault();
   const sentinelSearch = await largest.runtime.searchVault({ query: 'onlybeyondscanlimit' });
   let duplicateWrite;
@@ -164,7 +177,7 @@ try {
     inputNotes: 10001,
     returnedNotes: scan.notes.length,
     responseKeys: Object.keys(scan),
-    sentinelPresentInScan: scan.notes.some(note => note.relativePath === 'zzzz-sentinel.md'),
+    sentinelPresentInScan: scan.notes.some((note) => note.relativePath === 'zzzz-sentinel.md'),
     sentinelSearchResults: sentinelSearch.results.length,
     duplicateIdentityWriteCreated: duplicateWrite.created === true,
     duplicateWriteError: duplicateWrite.error ?? null,
@@ -181,7 +194,7 @@ try {
   const racing = makeRuntime('race', async () => selected);
   await racing.selectVault();
   const originalRead = racing.readNote.bind(racing);
-  racing.readNote = async request => {
+  racing.readNote = async (request) => {
     selected = vaultB;
     await racing.selectVault();
     return originalRead(request);
@@ -191,7 +204,8 @@ try {
     resultCount: raceResult.results.length,
     summaryTitle: raceResult.results[0]?.note.title ?? null,
     matchedLine: raceResult.results[0]?.matches[0]?.lineContent ?? null,
-    injection: 'Select Vault B immediately before public readNote; scan summaries came from Vault A.',
+    injection:
+      'Select Vault B immediately before public readNote; scan summaries came from Vault A.',
   };
 
   // Release benchmark parser entries, then read 200 revisions of ONE 64 KiB note.
@@ -213,7 +227,13 @@ try {
   // API-level control: passing options bypasses gray-matter's default global cache.
   for (let version = 1; version <= 200; version++) matter(markdown(1, 65536, version), {});
   snapshots.push(await memorySnapshot('explicit-options-control'));
-  output.parserCache = { uniqueFiles: 1, versions: 200, bytesPerVersion: 65536, gcExposed: !!global.gc, snapshots };
+  output.parserCache = {
+    uniqueFiles: 1,
+    versions: 200,
+    bytesPerVersion: 65536,
+    gcExposed: !!global.gc,
+    snapshots,
+  };
 
   const serialized = `${JSON.stringify(output, null, 2)}\n`;
   if (process.argv[2]) await fs.promises.writeFile(process.argv[2], serialized, { flag: 'wx' });

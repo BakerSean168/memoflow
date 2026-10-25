@@ -15,9 +15,7 @@ import {
 } from '@memoflow/contracts/task';
 import { eventBus } from '@memoflow/utils/domain';
 import { TaskPlan } from '../../../domain/aggregates/task-plan';
-import {
-  TaskOccurrenceId,
-} from '../../../domain/value-objects';
+import { TaskOccurrenceId } from '../../../domain/value-objects';
 import {
   anIdentityId,
   aDailyRecurrence,
@@ -298,7 +296,9 @@ class FakePowerSyncTaskDb implements IElectronDatabase {
 
     if (sql.includes('SELECT id, version FROM task_occurrences WHERE id = ?')) {
       const row = state.occurrences.get(String(parameters?.[0]));
-      return (row ? { id: row.id, version: (row as { version?: number }).version } : null) as T | null;
+      return (
+        row ? { id: row.id, version: (row as { version?: number }).version } : null
+      ) as T | null;
     }
 
     if (sql.includes('SELECT id FROM task_occurrences WHERE id = ?')) {
@@ -375,7 +375,11 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
     const db = new FakePowerSyncTaskDb();
     const module = createTaskPowerSyncModule(db, {
       userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
-      goalReadPort: { getKeyResultMeasurementContext: vi.fn().mockResolvedValue(ok({ progress: { aggregationMethod: 'Sum' } })) },
+      goalReadPort: {
+        getKeyResultMeasurementContext: vi
+          .fn()
+          .mockResolvedValue(ok({ progress: { aggregationMethod: 'Sum' } })),
+      },
     });
     const dispatchSpy = vi.spyOn(eventBus, 'dispatch').mockResolvedValue(undefined);
     vi.spyOn(PowerSyncTaskOccurrenceRepository.prototype, 'saveMany').mockRejectedValue(
@@ -407,7 +411,11 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
     const db = new FakePowerSyncTaskDb();
     const module = createTaskPowerSyncModule(db, {
       userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
-      goalReadPort: { getKeyResultMeasurementContext: vi.fn().mockResolvedValue(ok({ progress: { aggregationMethod: 'Sum' } })) },
+      goalReadPort: {
+        getKeyResultMeasurementContext: vi
+          .fn()
+          .mockResolvedValue(ok({ progress: { aggregationMethod: 'Sum' } })),
+      },
     });
     const identityId = anIdentityId();
     const plan = TaskPlan.create({
@@ -482,9 +490,9 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
       expect(db.occurrenceCount).toBeGreaterThan(0);
       const occurrenceId = db.firstOccurrenceId;
 
-    dispatchSpy.mockClear();
+      dispatchSpy.mockClear();
 
-    db.failOutbox = true;
+      db.failOutbox = true;
 
       const result = await module.api.completeTaskOccurrence(
         occurrenceId,
@@ -492,17 +500,17 @@ describe('PowerSyncTaskWriteTransactionRunner', () => {
         mode === 'Prompt' ? { goalMeasurement: { value: 0, note: 'Measured' } } : undefined,
       );
 
-    expect(result).toBeErrorWithCode('INTERNAL_ERROR');
-    expect(db.templateCount).toBe(1);
-    expect(db.outboxCount).toBe(0);
-    expect(dispatchSpy).not.toHaveBeenCalled();
+      expect(result).toBeErrorWithCode('INTERNAL_ERROR');
+      expect(db.templateCount).toBe(1);
+      expect(db.outboxCount).toBe(0);
+      expect(dispatchSpy).not.toHaveBeenCalled();
 
-    // The completed occurrence must have ROLLED BACK to its pre-complete status
-    const instanceRow = await db.getOptional<{ status: string }>(
-      'SELECT status FROM task_occurrences WHERE id = ?',
-      [occurrenceId],
-    );
-    expect(instanceRow?.status).toBe('Pending');
+      // The completed occurrence must have ROLLED BACK to its pre-complete status
+      const instanceRow = await db.getOptional<{ status: string }>(
+        'SELECT status FROM task_occurrences WHERE id = ?',
+        [occurrenceId],
+      );
+      expect(instanceRow?.status).toBe('Pending');
 
       module.dispose();
     },

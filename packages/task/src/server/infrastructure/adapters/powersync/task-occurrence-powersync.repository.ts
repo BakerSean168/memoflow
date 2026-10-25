@@ -201,11 +201,7 @@ export class PowerSyncTaskOccurrenceRepository
     ]);
   }
 
-  async countFutureOccurrences(
-    planId: string,
-    identityId: string,
-    fromDate: Ymd,
-  ): Promise<number> {
+  async countFutureOccurrences(planId: string, identityId: string, fromDate: Ymd): Promise<number> {
     const row = await this.db.get<{ count: number }>(
       'SELECT COUNT(*) as count FROM task_occurrences WHERE plan_id = ? AND identity_id = ? AND schedule_date >= ? AND deleted_at IS NULL',
       [planId, identityId, fromDate],
@@ -298,13 +294,23 @@ export class PowerSyncTaskOccurrenceRepository
     return stats;
   }
 
-  async getStatusCountsForPlan(planId: string, identityId: string): Promise<TaskOccurrenceStatusCounts> {
+  async getStatusCountsForPlan(
+    planId: string,
+    identityId: string,
+  ): Promise<TaskOccurrenceStatusCounts> {
     const rows = await this.db.getAll<{ status: TaskOccurrenceStatus; count: number }>(
       `SELECT status, COUNT(*) as count FROM task_occurrences
        WHERE plan_id = ? AND identity_id = ? AND deleted_at IS NULL GROUP BY status`,
       [planId, identityId],
     );
-    const counts: TaskOccurrenceStatusCounts = { total: 0, completed: 0, missed: 0, skipped: 0, pending: 0, inProgress: 0 };
+    const counts: TaskOccurrenceStatusCounts = {
+      total: 0,
+      completed: 0,
+      missed: 0,
+      skipped: 0,
+      pending: 0,
+      inProgress: 0,
+    };
     for (const row of rows) {
       const count = Number(row.count ?? 0);
       counts.total += count;
@@ -317,7 +323,11 @@ export class PowerSyncTaskOccurrenceRepository
     return counts;
   }
 
-  async findRecentByPlan(planId: string, identityId: string, limit: number): Promise<TaskOccurrence[]> {
+  async findRecentByPlan(
+    planId: string,
+    identityId: string,
+    limit: number,
+  ): Promise<TaskOccurrence[]> {
     return this.query(
       'SELECT * FROM task_occurrences WHERE plan_id = ? AND identity_id = ? AND deleted_at IS NULL ORDER BY schedule_date DESC, updated_at DESC LIMIT ?',
       [planId, identityId, limit],

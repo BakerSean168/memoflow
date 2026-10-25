@@ -51,7 +51,6 @@ export const ConversationListResSchema = z.object({
   pageSize: z.number(),
 });
 
-
 // Residual 721: TestAIProviderResultDTOSchema owned by provider-test-result.dto.ts
 // (re-exported for OpenAPI route consumers).
 export { TestAIProviderResultDTOSchema };

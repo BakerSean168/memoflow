@@ -1,11 +1,14 @@
-import { ConversationStatus as ConversationStatusContract, type ConversationStatus as IConversationStatus } from '@memoflow/contracts/ai';
+import {
+  ConversationStatus as ConversationStatusContract,
+  type ConversationStatus as IConversationStatus,
+} from '@memoflow/contracts/ai';
 
 /**
  * ConversationStatus 枚举类型
- * 
+ *
  * 【规范说明：枚举与常量对象规范】
  * 参考 docs/standards/枚举与常量对象规范(Enum&Constant-Objects).md
- * 
+ *
  * 核心原则：
  * 1. 使用 const object as const，不使用 TypeScript enum
  * 2. Key 和 Value 使用 PascalCase
@@ -14,7 +17,7 @@ import { ConversationStatus as ConversationStatusContract, type ConversationStat
 
 /**
  * AI 对话状态 - 对话生命周期状态
- * 
+ *
  * Branded Type：运行时为 string，编译时具有类型安全性
  * 零序列化成本，内存开销极小
  */
@@ -34,7 +37,7 @@ const VALUES: IConversationStatus[] = Object.values(ConversationStatusContract);
  */
 export const ConversationStatus = {
   // ================= 常量定义 =================
-  
+
   Active: 'Active' as ConversationStatus,
   Archived: 'Archived' as ConversationStatus,
 

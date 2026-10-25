@@ -63,9 +63,15 @@ export interface IAIConversationApiClient {
 
 export interface IAIProviderConfigApiClient {
   getProviderCatalog(): Promise<Result<ListAIProviderCatalogRes>>;
-  probeProviderConnection(request: ProbeAIProviderConnectionReq): Promise<Result<ProbeAIProviderConnectionRes>>;
-  testProviderOnboardingModel(request: TestAIProviderOnboardingModelReq): Promise<Result<TestAIProviderOnboardingModelRes>>;
-  commitProviderOnboarding(request: CommitAIProviderOnboardingReq): Promise<Result<AIProviderConfigClientDTO>>;
+  probeProviderConnection(
+    request: ProbeAIProviderConnectionReq,
+  ): Promise<Result<ProbeAIProviderConnectionRes>>;
+  testProviderOnboardingModel(
+    request: TestAIProviderOnboardingModelReq,
+  ): Promise<Result<TestAIProviderOnboardingModelRes>>;
+  commitProviderOnboarding(
+    request: CommitAIProviderOnboardingReq,
+  ): Promise<Result<AIProviderConfigClientDTO>>;
   probeProviderReplacement(
     id: string,
     request: ProbeAIProviderReplacementReq,

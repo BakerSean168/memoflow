@@ -43,10 +43,7 @@ export class AccountClosedWorker {
         where: {
           messageType: 'account:closed',
           status: 'pending',
-          OR: [
-            { ownerToken: null },
-            { leaseExpiresAt: { lt: now } },
-          ],
+          OR: [{ ownerToken: null }, { leaseExpiresAt: { lt: now } }],
         },
         select: { id: true },
       });
@@ -59,10 +56,7 @@ export class AccountClosedWorker {
         where: {
           id: candidate.id,
           status: 'pending',
-          OR: [
-            { ownerToken: null },
-            { leaseExpiresAt: { lt: now } },
-          ],
+          OR: [{ ownerToken: null }, { leaseExpiresAt: { lt: now } }],
         },
         data: {
           ownerToken: workerToken,

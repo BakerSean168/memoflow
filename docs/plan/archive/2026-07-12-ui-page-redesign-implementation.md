@@ -40,16 +40,20 @@ updated: 2026-07-12T00:00:00
 - [x] typecheck（app-vue tsc / web vue-tsc / desktop）+ app-vue 182 测试 + lint 0 error 通过
 
 实现备注：
+
 - `ModuleSidebar` 用简单可折叠 aside（w-64 ↔ w-10 细轨）而非 ResizablePanel 封装——ResizablePanel 要求 panel 是 group 直接子节点，无法在独立容器组件内封装；折叠行为契约不变。
 - e2e 契约核对：`main-nav-home` 仍是第一个、`main-nav-dashboard` 第二个（dashboard-overview.spec.ts:107-109）、`bottom-nav-settings` 保留。
 
 ### P1 招牌路径（依赖 P0）
+
 - §1 AI 工作台（按钮迁移 + 右栏三态）；§2 仪表盘压缩；§6 任务页（视图模式 + 危险区）
 
 ### P2 对齐批（依赖 P0）
+
 - §3–§5 目标、§7 日程（含 EventDetailSheet）、§8 提醒、§11 通知、§12 治理、§13 设置
 
 ### P3 笔记收缩（依赖 P0）
+
 - §9 / §10 阶段 0（退役 + 收敛 + 更名）
 
 ## 验收（Plan §15.4）

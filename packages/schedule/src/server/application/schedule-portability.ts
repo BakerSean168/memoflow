@@ -75,7 +75,9 @@ function assertScheduleMatches(
     current.location !== incoming.location ||
     !same(current.attendees, incoming.attendees)
   ) {
-    throw new Error(`schedules@3 deterministic target conflicts with portable entry ${incoming.ref}`);
+    throw new Error(
+      `schedules@3 deterministic target conflicts with portable entry ${incoming.ref}`,
+    );
   }
 }
 
@@ -91,7 +93,11 @@ export class SchedulePortableCapability implements PortableCapability<SchedulePo
   async export(context: PortableCapabilityExecutionContext): Promise<SchedulePortablePayloadV3> {
     const entries = (await this.repository.findByIdentityId(context.identityId))
       .slice()
-      .sort((a, b) => portableSortKey(a).localeCompare(portableSortKey(b)) || String(a.id).localeCompare(String(b.id)));
+      .sort(
+        (a, b) =>
+          portableSortKey(a).localeCompare(portableSortKey(b)) ||
+          String(a.id).localeCompare(String(b.id)),
+      );
     return SchedulePortablePayloadV3Schema.parse({
       entries: entries.map((entry) => ({
         ...projectSchedule(entry),

@@ -26,9 +26,9 @@ describe('W7 operations contracts (surface)', () => {
       updatedAt: '2026-08-12T00:00:00.000Z',
     });
     expect(entry.replayable).toBe(true);
-    expect(
-      OperationTimelineEntrySchema.safeParse({ ...entry, source: 'reminder' }).success,
-    ).toBe(false);
+    expect(OperationTimelineEntrySchema.safeParse({ ...entry, source: 'reminder' }).success).toBe(
+      false,
+    );
     expect(() =>
       OperationTimelineEntrySchema.parse({
         source: 'notification',
@@ -48,9 +48,7 @@ describe('W7 operations contracts (surface)', () => {
     });
     expect(query.identityId).toBe('identity-1');
     expect(query.limit).toBe(50);
-    expect(() =>
-      OperationTimelineQuerySchema.parse({ identityId: 'x', limit: 5000 }),
-    ).toThrow();
+    expect(() => OperationTimelineQuerySchema.parse({ identityId: 'x', limit: 5000 })).toThrow();
   });
 
   it('replay request carries source + operationId + identityId', () => {
@@ -73,9 +71,7 @@ describe('W7 operations contracts (surface)', () => {
       createdAt: '2026-08-12T00:00:00.000Z',
     });
     expect(rec.action).toBe('replay');
-    expect(() =>
-      OperationAuditRecordSchema.parse({ ...rec, action: 'nope' }),
-    ).toThrow();
+    expect(() => OperationAuditRecordSchema.parse({ ...rec, action: 'nope' })).toThrow();
   });
 
   it('audit query is actor-scoped', () => {
@@ -105,9 +101,7 @@ describe('W7 unified metric naming (B)', () => {
     expect(workerMetricKey('schedule-rebuild', 'completed')).toBe(
       'memoflow.schedule-rebuild.worker.completed',
     );
-    expect(workerMetricKey('knowledge', 'failed')).toBe(
-      'memoflow.knowledge.worker.failed',
-    );
+    expect(workerMetricKey('knowledge', 'failed')).toBe('memoflow.knowledge.worker.failed');
   });
 });
 

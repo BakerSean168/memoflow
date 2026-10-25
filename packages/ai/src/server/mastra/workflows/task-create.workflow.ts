@@ -127,8 +127,11 @@ export function createTaskCreateWorkflow(input: {
     suspendSchema: AIWorkflowSuspensionSchema,
     execute: async ({ inputData, state, setState, resumeData, suspend, runId, requestContext }) => {
       // Recovery rebinds the trusted host callback and durable command intent.
-      resumeData = resumeData ?? (requestContext.getRaw('externalResumeCommand')
-        ? AIWorkflowResumeCommandSchema.parse(requestContext.getRaw('externalResumeCommand')) : undefined);
+      resumeData =
+        resumeData ??
+        (requestContext.getRaw('externalResumeCommand')
+          ? AIWorkflowResumeCommandSchema.parse(requestContext.getRaw('externalResumeCommand'))
+          : undefined);
       let current = TaskCreateWorkflowStateSchema.parse(state);
       const workflowInput = TaskCreateWorkflowInputSchema.parse(inputData);
       if (
@@ -235,7 +238,7 @@ export function createTaskCreateWorkflow(input: {
         if (current.input.externalConnectionId && typeof externalApply !== 'function')
           throw new Error('External workflow requires a current owner authority binding');
         const apply = current.input.externalConnectionId
-          ? externalApply as ExternalTaskApply
+          ? (externalApply as ExternalTaskApply)
           : input.applyService.apply.bind(input.applyService);
         const receipt = await apply({
           workflowRunId: runId,
@@ -269,7 +272,10 @@ export function createTaskCreateWorkflow(input: {
       };
 
       if (current.phase === 'completed' && current.priorReceipt)
-        return TaskCreateWorkflowOutputSchema.parse({ outcome: 'completed', receipt: current.priorReceipt });
+        return TaskCreateWorkflowOutputSchema.parse({
+          outcome: 'completed',
+          receipt: current.priorReceipt,
+        });
 
       if (!resumeData) {
         if (current.phase !== 'planning') {

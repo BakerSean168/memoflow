@@ -47,7 +47,11 @@ export function ScheduleWeekScreen() {
   });
 
   const totalConflicts = useMemo(
-    () => groupedEntries.reduce((sum, group) => sum + group.items.filter((item) => item.hasConflict).length, 0),
+    () =>
+      groupedEntries.reduce(
+        (sum, group) => sum + group.items.filter((item) => item.hasConflict).length,
+        0,
+      ),
     [groupedEntries],
   );
   const actionSections = [
@@ -81,22 +85,47 @@ export function ScheduleWeekScreen() {
       eyebrow="Schedule"
       title="Week view"
       subtitle="周视图先按天分组，保留移动端更自然的单列 agenda 结构。"
-      refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refresh} />}>
-      <SectionCard title={formatRangeLabel(weekAnchor, weekEnd)} description="未来和历史周都可以快速滑动查看。">
+      refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refresh} />}
+    >
+      <SectionCard
+        title={formatRangeLabel(weekAnchor, weekEnd)}
+        description="未来和历史周都可以快速滑动查看。"
+      >
         <View style={styles.actionRow}>
-          <PrimaryButton label="Prev week" onPress={() => setWeekAnchor((current) => Number(getProductTime().calendar.addDays(current, -7)))} variant="ghost" />
-          <PrimaryButton label="This week" onPress={() => setWeekAnchor(startOfWeek(Date.now()))} variant="secondary" />
-          <PrimaryButton label="Next week" onPress={() => setWeekAnchor((current) => Number(getProductTime().calendar.addDays(current, 7)))} variant="ghost" />
+          <PrimaryButton
+            label="Prev week"
+            onPress={() =>
+              setWeekAnchor((current) => Number(getProductTime().calendar.addDays(current, -7)))
+            }
+            variant="ghost"
+          />
+          <PrimaryButton
+            label="This week"
+            onPress={() => setWeekAnchor(startOfWeek(Date.now()))}
+            variant="secondary"
+          />
+          <PrimaryButton
+            label="Next week"
+            onPress={() =>
+              setWeekAnchor((current) => Number(getProductTime().calendar.addDays(current, 7)))
+            }
+            variant="ghost"
+          />
         </View>
         <View style={styles.pillRow}>
           <StatusPill label={`${groupedEntries.length} active days`} tone="tint" />
-          <StatusPill label={`${totalConflicts} conflicts`} tone={totalConflicts > 0 ? 'warning' : 'textSecondary'} />
+          <StatusPill
+            label={`${totalConflicts} conflicts`}
+            tone={totalConflicts > 0 ? 'warning' : 'textSecondary'}
+          />
         </View>
       </SectionCard>
 
       {error ? (
         <SectionCard title="Week load failed" description="周视图数据加载失败。">
-          <ThemedText type="small" themeColor="warning">{error}</ThemedText>
+          <ThemedText type="small" themeColor="warning">
+            {error}
+          </ThemedText>
         </SectionCard>
       ) : null}
 
@@ -109,7 +138,9 @@ export function ScheduleWeekScreen() {
                   <ThemedText type="smallBold">{group.dayLabel}</ThemedText>
                   <View style={styles.pillRow}>
                     <StatusPill label={`${group.items.length} events`} tone="tint" />
-                    {group.items.some((item) => item.hasConflict) ? <StatusPill label="Conflict" tone="warning" /> : null}
+                    {group.items.some((item) => item.hasConflict) ? (
+                      <StatusPill label="Conflict" tone="warning" />
+                    ) : null}
                   </View>
                 </View>
                 <View style={styles.listColumn}>
@@ -119,15 +150,27 @@ export function ScheduleWeekScreen() {
                         <ThemedText type="smallBold">{item.title}</ThemedText>
                         <StatusPill label={item.timeRange} tone="textSecondary" />
                       </View>
-                      {item.description ? <ThemedText type="small">{item.description}</ThemedText> : null}
+                      {item.description ? (
+                        <ThemedText type="small">{item.description}</ThemedText>
+                      ) : null}
                       <View style={styles.pillRow}>
                         <StatusPill label={`${item.durationMinutes} min`} tone="textSecondary" />
-                        {item.location ? <StatusPill label={item.location} tone="textSecondary" /> : null}
+                        {item.location ? (
+                          <StatusPill label={item.location} tone="textSecondary" />
+                        ) : null}
                         {item.hasConflict ? <StatusPill label="Conflict" tone="warning" /> : null}
                       </View>
                       <View style={styles.actionRow}>
-                        <PrimaryButton label="Edit" onPress={() => router.push(`./event-editor?id=${item.id}`)} variant="secondary" />
-                        <PrimaryButton label="Duplicate" onPress={() => router.push(`./event-editor?date=${group.dayKey}`)} variant="ghost" />
+                        <PrimaryButton
+                          label="Edit"
+                          onPress={() => router.push(`./event-editor?id=${item.id}`)}
+                          variant="secondary"
+                        />
+                        <PrimaryButton
+                          label="Duplicate"
+                          onPress={() => router.push(`./event-editor?date=${group.dayKey}`)}
+                          variant="ghost"
+                        />
                       </View>
                     </ThemedView>
                   ))}
@@ -135,7 +178,9 @@ export function ScheduleWeekScreen() {
               </View>
             ))
           ) : (
-            <ThemedText type="small" themeColor="textSecondary">这一周还没有日程事件。</ThemedText>
+            <ThemedText type="small" themeColor="textSecondary">
+              这一周还没有日程事件。
+            </ThemedText>
           )}
         </View>
       </SectionCard>

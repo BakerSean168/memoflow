@@ -77,7 +77,8 @@ export function PageShell({
             },
             contentContainerStyle,
           ]}
-          {...props}>
+          {...props}
+        >
           <ThemedView style={styles.header}>
             {hasActionSections || headerSlot ? (
               <View style={styles.headerChrome}>

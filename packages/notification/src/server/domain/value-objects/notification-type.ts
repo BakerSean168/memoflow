@@ -1,8 +1,11 @@
-import { NotificationType as NotificationTypeContract, type NotificationType as INotificationType } from '@memoflow/contracts/notification';
+import {
+  NotificationType as NotificationTypeContract,
+  type NotificationType as INotificationType,
+} from '@memoflow/contracts/notification';
 
 /**
  * 📝 通知类型 - 通知的分类类型
- * 
+ *
  * Branded Type：运行时为 string，编译时具有类型安全性
  * 零序列化成本，内存开销极小
  */
@@ -22,7 +25,7 @@ const VALUES: INotificationType[] = Object.values(NotificationTypeContract);
  */
 export const NotificationType = {
   // ================= 常量定义 =================
-  
+
   Info: 'Info' as NotificationType,
   Success: 'Success' as NotificationType,
   Warning: 'Warning' as NotificationType,

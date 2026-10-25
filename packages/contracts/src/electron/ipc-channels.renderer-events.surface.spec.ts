@@ -11,7 +11,7 @@ describe('RendererEventChannels surface', () => {
   const source = readFileSync(resolve(__dirname, 'ipc-channels.ts'), 'utf8');
 
   it('includes NOTIFICATION_CLICKED on the contracts map', () => {
-    expect(source).toContain('NOTIFICATION_CLICKED: \'notification:clicked\'');
+    expect(source).toContain("NOTIFICATION_CLICKED: 'notification:clicked'");
     expect(RendererEventChannels.NOTIFICATION_CLICKED).toBe('notification:clicked');
     expect(Object.values(RendererEventChannels)).toContain('notification:clicked');
   });

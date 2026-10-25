@@ -13,9 +13,10 @@ const item = {
 
 describe('GoalHomeProgressSummarySchema', () => {
   it('accepts only the narrow Goal-owned Home shape', () => {
-    expect(
-      GoalHomeProgressSummarySchema.parse({ activeCount: 8, goals: [item] }),
-    ).toEqual({ activeCount: 8, goals: [item] });
+    expect(GoalHomeProgressSummarySchema.parse({ activeCount: 8, goals: [item] })).toEqual({
+      activeCount: 8,
+      goals: [item],
+    });
   });
 
   it('rejects invalid percentages and more than five preview rows', () => {

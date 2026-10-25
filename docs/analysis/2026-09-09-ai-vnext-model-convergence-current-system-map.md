@@ -143,12 +143,12 @@ PowerSync, and AI persistence surfaces.
 
 当前实际性质更接近：
 
-| 当前模型                      | 当前真实用途/性质                                                        |
-| ----------------------------- | ------------------------------------------------------------------------ |
-| `AiConversation`              | 产品 conversation shell metadata；Mastra 持有 transcript                   |
-| `AiExecutionRecord`           | bounded usage/trace/cost/outcome operations projection                      |
+| 当前模型                      | 当前真实用途/性质                                                         |
+| ----------------------------- | ------------------------------------------------------------------------- |
+| `AiConversation`              | 产品 conversation shell metadata；Mastra 持有 transcript                  |
+| `AiExecutionRecord`           | bounded usage/trace/cost/outcome operations projection                    |
 | `AiProviderConfig`            | 用户 BYOK Connection；只保存 credentialRef，不保存 plaintext secret       |
-| `AiProviderOnboardingSession` | 临时 credential/model onboarding state                                   |
+| `AiProviderOnboardingSession` | 临时 credential/model onboarding state                                    |
 | `AiKnowledgeIndexEntry`       | AI-owned knowledge retrieval/index projection keyed by stable document id |
 
 因此当前 persistence 已按 runtime/product/operations ownership 分离；历史名称只保留在
@@ -336,7 +336,6 @@ AI tools consume typed owner read/command ports and do not import raw repositori
 Scheduler worker state, delivery worker state, or retired template/category vocabulary
 ```
 
-
 ## 8. Context / Memory 当前状态（AI-9606 as-built）
 
 ADR-051 已经定义了正确目标：
@@ -500,21 +499,21 @@ API and Desktop composition use the same four properties. There is no broad publ
 
 ## 12. Current ownership matrix
 
-| State / capability                | Current effective owner        | Current boundary/status                  |
-| --------------------------------- | ------------------------------ | ----------------------------------------- |
-| Assistant thread/messages         | Mastra                         | none; runtime authority is explicit       |
-| Workflow run/snapshot              | Mastra                         | UI keeps pointer/overlay only              |
-| Conversation title/list shell      | MemoFlow AI                    | shell-only by contract                    |
-| Provider definition/connection     | AI catalog + host persistence  | separate from Vault                       |
-| Provider secret at rest            | Host SecretVault               | request-time revocation guard              |
-| Model discovery/capability         | AI catalog/evidence + resolver | fail-closed on unknown/stale              |
-| Goal/Task/Knowledge product truth  | owner domains                  | typed drafts/apply ports                  |
-| Routine commands                   | Routine owner via AI tool port | approval + Product Time boundary           |
-| Product time preference            | Setting/Time owner             | explicit AI context input                 |
-| Knowledge document identity        | Knowledge owner                | stable space/document ids                 |
-| AI index                           | AI projection                  | no Repository status writeback             |
-| execution telemetry                | AIExecutionRecord              | bounded operations projection             |
-| quota/billing                      | future explicit owner          | no speculative AI quota aggregate         |
+| State / capability                | Current effective owner        | Current boundary/status             |
+| --------------------------------- | ------------------------------ | ----------------------------------- |
+| Assistant thread/messages         | Mastra                         | none; runtime authority is explicit |
+| Workflow run/snapshot             | Mastra                         | UI keeps pointer/overlay only       |
+| Conversation title/list shell     | MemoFlow AI                    | shell-only by contract              |
+| Provider definition/connection    | AI catalog + host persistence  | separate from Vault                 |
+| Provider secret at rest           | Host SecretVault               | request-time revocation guard       |
+| Model discovery/capability        | AI catalog/evidence + resolver | fail-closed on unknown/stale        |
+| Goal/Task/Knowledge product truth | owner domains                  | typed drafts/apply ports            |
+| Routine commands                  | Routine owner via AI tool port | approval + Product Time boundary    |
+| Product time preference           | Setting/Time owner             | explicit AI context input           |
+| Knowledge document identity       | Knowledge owner                | stable space/document ids           |
+| AI index                          | AI projection                  | no Repository status writeback      |
+| execution telemetry               | AIExecutionRecord              | bounded operations projection       |
+| quota/billing                     | future explicit owner          | no speculative AI quota aggregate   |
 
 ## 13. Implemented model summary
 

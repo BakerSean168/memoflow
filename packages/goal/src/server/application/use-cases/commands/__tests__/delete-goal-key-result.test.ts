@@ -63,9 +63,7 @@ describe('DeleteGoalKeyResultUseCase', () => {
     expect(goalPolicy.ensureGoalCanBeModified).toHaveBeenCalledWith(goal);
     if (result.ok) {
       expect(result.data.affectedEntityIds.keyResultIds).toEqual(['kr-1']);
-      expect(result.data.readModel.keyResults).toEqual([
-        { id: 'kr-2', title: 'Key Result 2' },
-      ]);
+      expect(result.data.readModel.keyResults).toEqual([{ id: 'kr-2', title: 'Key Result 2' }]);
     }
   });
 
@@ -99,7 +97,9 @@ describe('DeleteGoalKeyResultUseCase', () => {
     });
     const useCase = new DeleteGoalKeyResultUseCase(goalRepo, goalPolicy);
 
-    await expect(useCase.execute('goal-id-1', 'identity-1', 'kr-1', 1)).rejects.toThrow('Goal cannot be modified');
+    await expect(useCase.execute('goal-id-1', 'identity-1', 'kr-1', 1)).rejects.toThrow(
+      'Goal cannot be modified',
+    );
     expect(goalRepo.save).not.toHaveBeenCalled();
   });
 
@@ -114,6 +114,8 @@ describe('DeleteGoalKeyResultUseCase', () => {
 
     await useCase.execute('goal-id-1', 'identity-1', 'kr-1', 1);
 
-    expect(goalRepo.findByIdForIdentity).toHaveBeenCalledWith('identity-1', 'goal-id-1', { includeChildren: true });
+    expect(goalRepo.findByIdForIdentity).toHaveBeenCalledWith('identity-1', 'goal-id-1', {
+      includeChildren: true,
+    });
   });
 });

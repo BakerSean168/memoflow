@@ -1,50 +1,53 @@
 <script setup lang="ts">
-import type { Ymd } from '@memoflow/time'
-import { calendarDateValueToYmd, ymdToCalendarDateValue } from '@memoflow/time'
-import { CalendarDays } from '@lucide/vue'
-import { computed, useId } from 'vue'
-import { Button } from '../../../ui/button'
-import { Calendar } from '../../../ui/calendar'
-import { Label } from '../../../ui/label'
-import { Popover, PopoverContent, PopoverTrigger } from '../../../ui/popover'
+import type { Ymd } from '@memoflow/time';
+import { calendarDateValueToYmd, ymdToCalendarDateValue } from '@memoflow/time';
+import { CalendarDays } from '@lucide/vue';
+import { computed, useId } from 'vue';
+import { Button } from '../../../ui/button';
+import { Calendar } from '../../../ui/calendar';
+import { Label } from '../../../ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '../../../ui/popover';
 
-const props = withDefaults(defineProps<{
-  modelValue?: Ymd | null
-  id?: string
-  label?: string
-  placeholder?: string
-  locale?: string
-  disabled?: boolean
-  error?: string | null
-}>(), {
-  modelValue: null,
-  label: 'Date',
-  placeholder: 'Select date',
-  locale: 'en-US',
-  disabled: false,
-  error: null,
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue?: Ymd | null;
+    id?: string;
+    label?: string;
+    placeholder?: string;
+    locale?: string;
+    disabled?: boolean;
+    error?: string | null;
+  }>(),
+  {
+    modelValue: null,
+    label: 'Date',
+    placeholder: 'Select date',
+    locale: 'en-US',
+    disabled: false,
+    error: null,
+  },
+);
 
 const emit = defineEmits<{
-  (event: 'update:modelValue', value: Ymd | null): void
-}>()
+  (event: 'update:modelValue', value: Ymd | null): void;
+}>();
 
-const generatedId = useId()
-const fieldId = computed(() => props.id ?? `date-field-${generatedId}`)
-const errorId = computed(() => `${fieldId.value}-error`)
+const generatedId = useId();
+const fieldId = computed(() => props.id ?? `date-field-${generatedId}`);
+const errorId = computed(() => `${fieldId.value}-error`);
 const calendarValue = computed(() =>
   props.modelValue ? ymdToCalendarDateValue(props.modelValue) : undefined,
-)
+);
 
 function updateDate(value: unknown) {
   if (!value) {
-    emit('update:modelValue', null)
-    return
+    emit('update:modelValue', null);
+    return;
   }
   emit(
     'update:modelValue',
     calendarDateValueToYmd(value as ReturnType<typeof ymdToCalendarDateValue>),
-  )
+  );
 }
 </script>
 

@@ -1,11 +1,15 @@
-import { AIRateLimitPublicFailureSchema, type AIWorkflowTerminalFailure } from '@memoflow/contracts/ai';
+import {
+  AIRateLimitPublicFailureSchema,
+  type AIWorkflowTerminalFailure,
+} from '@memoflow/contracts/ai';
 
 type LimitMetadata = Pick<AIWorkflowTerminalFailure, 'details' | 'retryHint'>;
 const MAX_DELAY_MS = 86_400_000;
 
 function record(value: unknown): Record<string, unknown> | undefined {
   return value && typeof value === 'object' && !Array.isArray(value)
-    ? value as Record<string, unknown> : undefined;
+    ? (value as Record<string, unknown>)
+    : undefined;
 }
 
 function retryDelay(value: unknown, duration = false): LimitMetadata['retryHint'] {
@@ -14,7 +18,8 @@ function retryDelay(value: unknown, duration = false): LimitMetadata['retryHint'
   if (!match) return undefined;
   const afterMs = Math.ceil(Number(match[1]) * 1000);
   return Number.isSafeInteger(afterMs) && afterMs >= 0 && afterMs <= MAX_DELAY_MS
-    ? { kind: 'after', afterMs } : undefined;
+    ? { kind: 'after', afterMs }
+    : undefined;
 }
 
 /** Provider-private structured parsing; messages, quota identifiers and bodies never leave this seam. */
@@ -26,14 +31,19 @@ export function readAIProviderRateLimit(error: unknown): LimitMetadata {
     if (!candidate || seen.has(current)) break;
     seen.add(current);
     const canonical = AIRateLimitPublicFailureSchema.safeParse(candidate.failure);
-    if (canonical.success) return {
-      ...(canonical.data.details ? { details: canonical.data.details } : {}),
-      ...(canonical.data.retryHint ? { retryHint: canonical.data.retryHint } : {}),
-    };
+    if (canonical.success)
+      return {
+        ...(canonical.data.details ? { details: canonical.data.details } : {}),
+        ...(canonical.data.retryHint ? { retryHint: canonical.data.retryHint } : {}),
+      };
     if (candidate.statusCode === 429) {
       let body: unknown = candidate.data;
       if (typeof candidate.responseBody === 'string' && candidate.responseBody.length <= 32_768) {
-        try { body = JSON.parse(candidate.responseBody); } catch { /* No text-based classification. */ }
+        try {
+          body = JSON.parse(candidate.responseBody);
+        } catch {
+          /* No text-based classification. */
+        }
       }
       const provider = record(record(body)?.error);
       let limitKind: NonNullable<LimitMetadata['details']>['limitKind'] | undefined;
@@ -46,19 +56,32 @@ export function readAIProviderRateLimit(error: unknown): LimitMetadata {
         const detail = record(value);
         if (detail?.['@type'] === 'type.googleapis.com/google.rpc.RetryInfo')
           retryHint = retryDelay(detail.retryDelay, true) ?? retryHint;
-        if (detail?.['@type'] === 'type.googleapis.com/google.rpc.QuotaFailure' && Array.isArray(detail.violations)) {
+        if (
+          detail?.['@type'] === 'type.googleapis.com/google.rpc.QuotaFailure' &&
+          Array.isArray(detail.violations)
+        ) {
           for (const value of detail.violations.slice(0, 16)) {
             const violation = record(value);
             // Quota value zero and daily quota IDs cannot be resolved by a short backoff.
-            if (violation?.quotaValue === '0' || violation?.quotaValue === 0 ||
-                (typeof violation?.quotaId === 'string' && violation.quotaId.includes('PerDay')))
+            if (
+              violation?.quotaValue === '0' ||
+              violation?.quotaValue === 0 ||
+              (typeof violation?.quotaId === 'string' && violation.quotaId.includes('PerDay'))
+            )
               limitKind = 'quota_exhausted';
-            else if (limitKind !== 'quota_exhausted' && typeof violation?.quotaId === 'string' &&
-                violation.quotaId.includes('PerMinute')) limitKind = 'rate_limit';
+            else if (
+              limitKind !== 'quota_exhausted' &&
+              typeof violation?.quotaId === 'string' &&
+              violation.quotaId.includes('PerMinute')
+            )
+              limitKind = 'rate_limit';
           }
         }
       }
-      return { ...(limitKind ? { details: { limitKind } } : {}), ...(retryHint ? { retryHint } : {}) };
+      return {
+        ...(limitKind ? { details: { limitKind } } : {}),
+        ...(retryHint ? { retryHint } : {}),
+      };
     }
     current = candidate.lastError ?? candidate.cause;
   }

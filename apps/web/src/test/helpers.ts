@@ -36,7 +36,6 @@ export function createMockStore(initialState: Record<string, unknown> = {}) {
   };
 }
 
-
 /**
  * 创建 mock 实体
  */

@@ -14,7 +14,7 @@ updated: 2026-09-08T09:00:00+08:00
 
 **状态**: 历史决策（事件语义保留；实现由 ADR-033 / ADR-064 修订）
 **日期**: 2024-09-01  
-**决策者**: @BakerSean168  
+**决策者**: @BakerSean168
 
 ## 2026-09-08 实现状态
 
@@ -30,6 +30,7 @@ MemoFlow 包含多个业务模块（目标、任务、提醒、通知等），�
 - 用户操作时 → 记录日志
 
 我们需要一种机制来实现：
+
 1. **模块解耦** - 模块不直接依赖彼此
 2. **扩展性** - 新增监听者不影响发布者
 3. **一致性** - 确保相关操作都能完成
@@ -45,6 +46,7 @@ MemoFlow 包含多个业务模块（目标、任务、提醒、通知等），�
 ## 决策
 
 采用 **事件驱动架构**，使用：
+
 - **内存事件总线** (本地通信)
 - **Redis Pub/Sub** (跨进程通信)
 - **Server-Sent Events (SSE)** (服务器到客户端)
@@ -54,21 +56,25 @@ MemoFlow 包含多个业务模块（目标、任务、提醒、通知等），�
 ### 为什么选择事件驱动？
 
 ✅ **松耦合**
+
 - 发布者不知道订阅者
 - 新增订阅者不影响现有代码
 - 模块可独立开发和测试
 
 ✅ **可扩展**
+
 - 轻松添加新的事件监听者
 - 支持多个订阅者
 - 易于实现新功能
 
 ✅ **可维护**
+
 - 事件流清晰
 - 业务逻辑分离
 - 易于追踪和调试
 
 ✅ **最终一致性**
+
 - 异步处理
 - 不阻塞主流程
 - 提升性能
@@ -80,17 +86,20 @@ MemoFlow 包含多个业务模块（目标、任务、提醒、通知等），�
 **用途**: 单进程内模块间通信
 
 ✅ **优点**:
+
 - 零延迟
 - 无需外部依赖
 - 实现简单
 - 适合本地事件
 
 ❌ **缺点**:
+
 - 仅单进程
 - 重启丢失
 - 不支持分布式
 
 **使用场景**:
+
 ```typescript
 // 发布事件
 eventEmitter.emit('goal.completed', { goalUuid: '...' });
@@ -107,17 +116,20 @@ handleGoalCompleted(event: GoalCompletedEvent) {
 **用途**: 跨进程通信、持久化
 
 ✅ **优点**:
+
 - 支持多进程
 - 支持持久化
 - 高性能
 - 简单可靠
 
 ❌ **缺点**:
+
 - 需要 Redis
 - 不保证顺序（无序）
 - 无消息持久化（除非配置）
 
 **使用场景**:
+
 ```typescript
 // 跨 API 实例通信
 redis.publish('task.deadline.approaching', JSON.stringify(event));
@@ -132,22 +144,25 @@ redis.subscribe('task.deadline.approaching', (message) => {
 **用途**: 服务器推送到客户端
 
 ✅ **优点**:
+
 - 标准 Web API
 - 自动重连
 - 单向推送
 - 实现简单
 
 ❌ **缺点**:
+
 - 仅单向（服务器→客户端）
 - 不支持 IE
 - 连接数限制
 
 **使用场景**:
+
 ```typescript
 // 服务器推送
 sseService.sendEvent(userId, {
   type: 'notification.new',
-  data: { message: '...' }
+  data: { message: '...' },
 });
 
 // 客户端接收
@@ -160,17 +175,20 @@ eventSource.onmessage = (event) => {
 ### 为什么不选其他方案？
 
 ❌ **直接调用**
+
 - 紧耦合
 - 难以扩展
 - 循环依赖风险
 
 ❌ **消息队列 (RabbitMQ, Kafka)**
+
 - 过度设计（当前规模）
 - 运维复杂
 - 成本高
 - 可在未来扩展时引入
 
 ❌ **事件溯源**
+
 - 过度复杂
 - 实现成本高
 - 查询困难
@@ -187,6 +205,7 @@ eventSource.onmessage = (event) => {
 ```
 
 **示例**:
+
 - `goal.created` - 目标创建
 - `goal.completed` - 目标完成
 - `task.deadline.approaching` - 任务截止临近
@@ -199,13 +218,13 @@ eventSource.onmessage = (event) => {
 
 ```typescript
 interface DomainEvent<T = any> {
-  type: string;              // 事件类型
-  payload: T;                // 事件数据
+  type: string; // 事件类型
+  payload: T; // 事件数据
   metadata: {
-    timestamp: Date;         // 时间戳
-    correlationId: string;   // 关联 ID（追踪）
-    userId?: string;         // 触发用户
-    source: string;          // 事件源
+    timestamp: Date; // 时间戳
+    correlationId: string; // 关联 ID（追踪）
+    userId?: string; // 触发用户
+    source: string; // 事件源
   };
 }
 ```
@@ -274,13 +293,13 @@ export class GoalService {
     // 发布本地事件
     this.eventEmitter.emit('goal.completed', {
       type: 'goal.completed',
-      payload: { goalUuid: uuid, userId, completedAt: new Date() }
+      payload: { goalUuid: uuid, userId, completedAt: new Date() },
     });
 
     // 发布跨进程事件（如果需要）
     await this.redisPublisher.publish('goal.completed', {
       type: 'goal.completed',
-      payload: { goalUuid: uuid, userId, completedAt: new Date() }
+      payload: { goalUuid: uuid, userId, completedAt: new Date() },
     });
   }
 }
@@ -318,7 +337,7 @@ export class SseService {
   async handleNewNotification(event: NotificationNewEvent): Promise<void> {
     const userId = event.payload.userId;
     const connection = this.connections.get(userId);
-    
+
     if (connection) {
       connection.write(`data: ${JSON.stringify(event)}\n\n`);
     }
@@ -353,21 +372,24 @@ export function useNotifications() {
 ✅ **可扩展性** - 新增功能无需修改现有代码  
 ✅ **实时体验** - SSE 实现实时通知推送  
 ✅ **可追溯性** - 事件流清晰，易于调试  
-✅ **性能提升** - 异步处理，主流程不阻塞  
+✅ **性能提升** - 异步处理，主流程不阻塞
 
 ### 负面影响
 
 ⚠️ **复杂度增加**
+
 - 事件流需要追踪
 - 调试困难（异步）
 - 需要日志和监控
 
 ⚠️ **最终一致性**
+
 - 不是强一致性
 - 需要处理失败场景
 - 幂等性要求
 
 ⚠️ **依赖 Redis**
+
 - 需要运维 Redis
 - 单点故障风险（可用集群解决）
 

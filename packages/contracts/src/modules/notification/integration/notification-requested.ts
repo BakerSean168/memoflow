@@ -20,7 +20,10 @@ import { NotificationType } from '../value-objects/notification-type';
 import { NotificationCategory } from '../value-objects/notification-category';
 import { ImportanceLevel } from '../../../shared/value-objects/importance';
 import { UrgencyLevel } from '../../../shared/value-objects/urgency';
-import { NotificationActionIntentSchema, NotificationEntityRefSchema } from '../api/notification-action.dto';
+import {
+  NotificationActionIntentSchema,
+  NotificationEntityRefSchema,
+} from '../api/notification-action.dto';
 
 /** 跨模块共享 outbox 消息类型：NotificationRequested 信封。 */
 export const NOTIFICATION_REQUESTED_MESSAGE_TYPE = 'notification.requested' as const;

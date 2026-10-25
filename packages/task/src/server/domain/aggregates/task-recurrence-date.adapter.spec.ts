@@ -14,7 +14,6 @@ const UTC_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });
 const TOKYO_CONTEXT = createTimeContext({ timeZone: 'Asia/Tokyo', weekStartsOn: 1 });
 const NEW_YORK_CONTEXT = createTimeContext({ timeZone: 'America/New_York', weekStartsOn: 1 });
 
-
 afterEach(() => {
   if (originalTimeZone === undefined) delete process.env.TZ;
   else process.env.TZ = originalTimeZone;
@@ -218,13 +217,7 @@ describe('Task recurrence adapter (TASK-2204)', () => {
     process.env.TZ = 'UTC';
     const fromUtcHost = adapter.between(taskRecurrence, startDate, from, to, TOKYO_CONTEXT);
     process.env.TZ = 'America/Los_Angeles';
-    const fromLosAngelesHost = adapter.between(
-      taskRecurrence,
-      startDate,
-      from,
-      to,
-      TOKYO_CONTEXT,
-    );
+    const fromLosAngelesHost = adapter.between(taskRecurrence, startDate, from, to, TOKYO_CONTEXT);
 
     expect(fromLosAngelesHost).toEqual(fromUtcHost);
     expect(fromUtcHost.map((instant) => new Date(instant).toISOString())).toEqual([
@@ -232,5 +225,4 @@ describe('Task recurrence adapter (TASK-2204)', () => {
       '2026-09-09T15:00:00.000Z',
     ]);
   });
-
 });

@@ -23,7 +23,7 @@ import type { KnowledgeIndexedNote } from '../../application/ports';
    * Sole body in knowledge-index-value-helpers.ts; PowerSync + Prisma repositories import it.
    * Soft residual 967: isAbortLikeError dual retired (shared/is-abort-like-error-dual.surface.spec.ts).
    * Soft residual 974: tip focused suite numbers track Residual 974 evidence tip (278/1223).
-     * Soft residual 1109: toStringArray keep-boundary vs goal-planning trim + portable parseJsonField.
+   * Soft residual 1109: toStringArray keep-boundary vs goal-planning trim + portable parseJsonField.
    * Soft residual 1153: API repository-knowledge-source tokenize CJK keep-boundary remains separate.
    * Soft residual 1195: scoreIndexedResource dual retired (score-indexed-resource-dual.surface.spec.ts).
    * Does not flip §13.2 checkboxes.

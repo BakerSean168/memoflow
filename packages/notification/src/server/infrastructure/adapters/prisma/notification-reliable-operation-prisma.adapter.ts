@@ -6,7 +6,11 @@
  */
 
 import { randomUUID } from 'crypto';
-import type { Prisma, PrismaClient, NotificationDispatchOutbox as PrismaNotificationDispatchOutbox } from '@memoflow/database';
+import type {
+  Prisma,
+  PrismaClient,
+  NotificationDispatchOutbox as PrismaNotificationDispatchOutbox,
+} from '@memoflow/database';
 import {
   assertValidBusinessOperationReceipt,
   type BusinessOperationReceipt,
@@ -17,7 +21,10 @@ import {
   NotificationOutboxDispatchInputSchema,
   type NotificationReliableOperationPort,
 } from '@memoflow/contracts/reliable-messaging';
-import type { OperationAuditRecordInput, OperationAuditRepository } from '@memoflow/patterns/operations';
+import type {
+  OperationAuditRecordInput,
+  OperationAuditRepository,
+} from '@memoflow/patterns/operations';
 
 function formatResourceKey(notificationId: string, occurrenceKey: string): string {
   return occurrenceKey.startsWith('notification:')
@@ -34,9 +41,11 @@ export function encodeReceiptCursor(updatedAtIso: string, operationId: string): 
   return `${updatedAtIso}|${operationId}`;
 }
 
-export function decodeReceiptCursor(
-  cursor: string | null | undefined,
-): { cursorTs: Date; cursorId: string; valid: boolean } {
+export function decodeReceiptCursor(cursor: string | null | undefined): {
+  cursorTs: Date;
+  cursorId: string;
+  valid: boolean;
+} {
   const raw = cursor ?? '';
   if (!raw) {
     return { cursorTs: new Date(0), cursorId: '', valid: false };
@@ -90,7 +99,9 @@ function extractNotificationIdFromPayload(payloadJson: string): string | null {
   return null;
 }
 
-export function mapPrismaOutboxToReceipt(outbox: PrismaNotificationDispatchOutbox): BusinessOperationReceipt {
+export function mapPrismaOutboxToReceipt(
+  outbox: PrismaNotificationDispatchOutbox,
+): BusinessOperationReceipt {
   let lease: LeaseClaim | null = null;
 
   if (outbox.leaseExpiresAt && outbox.ownerToken && outbox.claimId) {
@@ -376,7 +387,9 @@ export class NotificationReliableOperationPrismaAdapter implements NotificationR
     claimContext?: { ownerToken?: string; fencingToken?: number },
   ): Promise<BusinessOperationReceipt> {
     const validatedReceipt = assertValidBusinessOperationReceipt(receipt);
-    const isTerminal = ['succeeded', 'skipped', 'failed', 'cancelled', 'dead_letter'].includes(validatedReceipt.status);
+    const isTerminal = ['succeeded', 'skipped', 'failed', 'cancelled', 'dead_letter'].includes(
+      validatedReceipt.status,
+    );
 
     const ownerToken = claimContext?.ownerToken ?? validatedReceipt.lease?.ownerToken;
     const fencingToken = claimContext?.fencingToken ?? validatedReceipt.lease?.fencingToken;
@@ -409,7 +422,9 @@ export class NotificationReliableOperationPrismaAdapter implements NotificationR
         attempt: validatedReceipt.attempt,
         lastError: validatedReceipt.lastError,
         nextRetryAt: validatedReceipt.nextRetryAt ? new Date(validatedReceipt.nextRetryAt) : null,
-        deadLetterAt: validatedReceipt.deadLetterAt ? new Date(validatedReceipt.deadLetterAt) : null,
+        deadLetterAt: validatedReceipt.deadLetterAt
+          ? new Date(validatedReceipt.deadLetterAt)
+          : null,
         finishedAt: validatedReceipt.finishedAt
           ? new Date(validatedReceipt.finishedAt)
           : isTerminal && validatedReceipt.status !== 'dead_letter'
@@ -417,8 +432,14 @@ export class NotificationReliableOperationPrismaAdapter implements NotificationR
             : null,
         ownerToken: isTerminal ? null : (ownerToken ?? null),
         claimId: isTerminal ? null : (validatedReceipt.lease?.claimId ?? null),
-        leaseExpiresAt: isTerminal ? null : (validatedReceipt.lease?.expiresAt ? new Date(validatedReceipt.lease.expiresAt) : null),
-        attemptsHistoryJson: validatedReceipt.attemptsHistory ? JSON.stringify(validatedReceipt.attemptsHistory) : null,
+        leaseExpiresAt: isTerminal
+          ? null
+          : validatedReceipt.lease?.expiresAt
+            ? new Date(validatedReceipt.lease.expiresAt)
+            : null,
+        attemptsHistoryJson: validatedReceipt.attemptsHistory
+          ? JSON.stringify(validatedReceipt.attemptsHistory)
+          : null,
         updatedAt: new Date(),
       },
     });
@@ -458,8 +479,9 @@ export class NotificationReliableOperationPrismaAdapter implements NotificationR
     if (!identityId) {
       throw new Error('identityId is required');
     }
-    const limit = typeof options === 'number' ? options : options?.limit ?? 50;
-    const lastCursor = typeof options === 'object' ? (options?.lastCursor ?? options?.since) : undefined;
+    const limit = typeof options === 'number' ? options : (options?.limit ?? 50);
+    const lastCursor =
+      typeof options === 'object' ? (options?.lastCursor ?? options?.since) : undefined;
     const status = typeof options === 'object' ? options?.status : undefined;
 
     const whereCondition: Prisma.NotificationDispatchOutboxWhereInput = {
@@ -512,7 +534,10 @@ export class NotificationReliableOperationPrismaAdapter implements NotificationR
     return deadLetters.map(mapPrismaOutboxToReceipt);
   }
 
-  async replayDeadLetter(params: { identityId: string; operationId: string }): Promise<BusinessOperationReceipt> {
+  async replayDeadLetter(params: {
+    identityId: string;
+    operationId: string;
+  }): Promise<BusinessOperationReceipt> {
     const { identityId, operationId } = params;
     const now = new Date();
 
@@ -535,10 +560,7 @@ export class NotificationReliableOperationPrismaAdapter implements NotificationR
         id: existing.id,
         identityId,
         status: 'dead_letter',
-        OR: [
-          { leaseExpiresAt: null },
-          { leaseExpiresAt: { lt: now } },
-        ],
+        OR: [{ leaseExpiresAt: null }, { leaseExpiresAt: { lt: now } }],
       },
       data: {
         status: 'retryable',
@@ -663,10 +685,7 @@ export class NotificationReliableOperationPrismaAdapter implements NotificationR
         messageType: 'notification.requested',
         AND: [
           {
-            OR: [
-              { leaseExpiresAt: null },
-              { leaseExpiresAt: { lt: now } },
-            ],
+            OR: [{ leaseExpiresAt: null }, { leaseExpiresAt: { lt: now } }],
           },
           {
             OR: [
@@ -695,10 +714,7 @@ export class NotificationReliableOperationPrismaAdapter implements NotificationR
           id: candidate.id,
           status: candidate.status,
           attempts: candidate.attempts,
-          OR: [
-            { leaseExpiresAt: null },
-            { leaseExpiresAt: { lt: now } },
-          ],
+          OR: [{ leaseExpiresAt: null }, { leaseExpiresAt: { lt: now } }],
         },
         data: {
           status: 'running',
@@ -766,7 +782,4 @@ export class NotificationReliableOperationPrismaAdapter implements NotificationR
 
     return updateResult.count === 0 ? 'conflict' : 'ok';
   }
-
-
 }
-

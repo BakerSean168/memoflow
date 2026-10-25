@@ -20,10 +20,7 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 
 const ROOT = path.join(import.meta.dirname, '..', '..');
-const SCAN_ROOTS = [
-  path.join(ROOT, 'apps'),
-  path.join(ROOT, 'packages'),
-];
+const SCAN_ROOTS = [path.join(ROOT, 'apps'), path.join(ROOT, 'packages')];
 
 const SKIP_DIRS = new Set([
   '.git',

@@ -2,43 +2,21 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "paths": {
-      "@memoflow/database": [
-        "./packages/database/src/index.ts"
-      ],
+      "@memoflow/database": ["./packages/database/src/index.ts"],
       "@memoflow/database/transaction": ["./packages/database/src/transaction.ts"],
-      "@memoflow/database/environment": [
-        "./packages/database/src/load-workspace-env.ts"
-      ],
-      "@memoflow/database/prisma": [
-        "./packages/database/src/generated/prisma/client.js"
-      ],
-      "@memoflow/powersync-schema": [
-        "./packages/powersync-schema/src/index.ts"
-      ],
-      "@memoflow/patterns": [
-        "./packages/patterns/src/index.ts"
-      ],
+      "@memoflow/database/environment": ["./packages/database/src/load-workspace-env.ts"],
+      "@memoflow/database/prisma": ["./packages/database/src/generated/prisma/client.js"],
+      "@memoflow/powersync-schema": ["./packages/powersync-schema/src/index.ts"],
+      "@memoflow/patterns": ["./packages/patterns/src/index.ts"],
       "@memoflow/patterns/*": [
         "./packages/patterns/src/*/index.ts",
         "./packages/patterns/src/*.ts"
       ],
-      "@memoflow/time": [
-        "./packages/time/src/index.ts"
-      ],
-      "@memoflow/time/*": [
-        "./packages/time/src/*/index.ts",
-        "./packages/time/src/*.ts"
-      ],
-      "@memoflow/utils": [
-        "./packages/utils/src/index.ts"
-      ],
-      "@memoflow/utils/*": [
-        "./packages/utils/src/*/index.ts",
-        "./packages/utils/src/*.ts"
-      ],
-      "@memoflow/contracts": [
-        "./packages/contracts/src/index.ts"
-      ],
+      "@memoflow/time": ["./packages/time/src/index.ts"],
+      "@memoflow/time/*": ["./packages/time/src/*/index.ts", "./packages/time/src/*.ts"],
+      "@memoflow/utils": ["./packages/utils/src/index.ts"],
+      "@memoflow/utils/*": ["./packages/utils/src/*/index.ts", "./packages/utils/src/*.ts"],
+      "@memoflow/contracts": ["./packages/contracts/src/index.ts"],
       "@memoflow/contracts/notification": [
         "./packages/contracts/src/modules/notification/index.ts"
       ],
@@ -46,156 +24,63 @@
         "./packages/contracts/src/modules/*/index.ts",
         "./packages/contracts/src/*/index.ts"
       ],
-      "@memoflow/assets": [
-        "./packages/assets/src/index.ts"
-      ],
-      "@memoflow/assets/*": [
-        "./packages/assets/src/*/index.ts",
-        "./packages/assets/src/*.ts"
-      ],
-      "@memoflow/domain-shared": [
-        "./packages/domain-shared/src/index.ts"
-      ],
-      "@memoflow/domain-shared/*": [
-        "./packages/domain-shared/src/*/index.ts"
-      ],
-      "@memoflow/account": [
-        "./packages/account/src/index.ts"
-      ],
-      "@memoflow/account/*": [
-        "./packages/account/src/*/index.ts"
-      ],
-      "@memoflow/cloud-auth": [
-        "./packages/cloud-auth/src/index.ts"
-      ],
-      "@memoflow/cloud-auth/*": [
-        "./packages/cloud-auth/src/*/index.ts"
-      ],
-      "@memoflow/goal": [
-        "./packages/goal/src/index.ts"
-      ],
-      "@memoflow/goal/*": [
-        "./packages/goal/src/*/index.ts"
-      ],
-      "@memoflow/task": [
-        "./packages/task/src/index.ts"
-      ],
-      "@memoflow/task/*": [
-        "./packages/task/src/*/index.ts"
-      ],
-      "@memoflow/repository": [
-        "./packages/repository/src/index.ts"
-      ],
-      "@memoflow/repository/*": [
-        "./packages/repository/src/*/index.ts"
-      ],
-      "@memoflow/reminder": [
-        "./packages/reminder/src/index.ts"
-      ],
-      "@memoflow/reminder/*": [
-        "./packages/reminder/src/*/index.ts"
-      ],
-      "@memoflow/notification": [
-        "./packages/notification/src/index.ts"
-      ],
-      "@memoflow/notification/*": [
-        "./packages/notification/src/*/index.ts"
-      ],
-      "@memoflow/schedule": [
-        "./packages/schedule/src/index.ts"
-      ],
-      "@memoflow/schedule/*": [
-        "./packages/schedule/src/*/index.ts"
-      ],
-      "@memoflow/schedule-orchestration": [
-        "./packages/schedule-orchestration/src/index.ts"
-      ],
+      "@memoflow/assets": ["./packages/assets/src/index.ts"],
+      "@memoflow/assets/*": ["./packages/assets/src/*/index.ts", "./packages/assets/src/*.ts"],
+      "@memoflow/domain-shared": ["./packages/domain-shared/src/index.ts"],
+      "@memoflow/domain-shared/*": ["./packages/domain-shared/src/*/index.ts"],
+      "@memoflow/account": ["./packages/account/src/index.ts"],
+      "@memoflow/account/*": ["./packages/account/src/*/index.ts"],
+      "@memoflow/cloud-auth": ["./packages/cloud-auth/src/index.ts"],
+      "@memoflow/cloud-auth/*": ["./packages/cloud-auth/src/*/index.ts"],
+      "@memoflow/goal": ["./packages/goal/src/index.ts"],
+      "@memoflow/goal/*": ["./packages/goal/src/*/index.ts"],
+      "@memoflow/task": ["./packages/task/src/index.ts"],
+      "@memoflow/task/*": ["./packages/task/src/*/index.ts"],
+      "@memoflow/repository": ["./packages/repository/src/index.ts"],
+      "@memoflow/repository/*": ["./packages/repository/src/*/index.ts"],
+      "@memoflow/reminder": ["./packages/reminder/src/index.ts"],
+      "@memoflow/reminder/*": ["./packages/reminder/src/*/index.ts"],
+      "@memoflow/notification": ["./packages/notification/src/index.ts"],
+      "@memoflow/notification/*": ["./packages/notification/src/*/index.ts"],
+      "@memoflow/schedule": ["./packages/schedule/src/index.ts"],
+      "@memoflow/schedule/*": ["./packages/schedule/src/*/index.ts"],
+      "@memoflow/schedule-orchestration": ["./packages/schedule-orchestration/src/index.ts"],
       "@memoflow/schedule-orchestration/*": [
         "./packages/schedule-orchestration/src/*/index.ts",
         "./packages/schedule-orchestration/src/*.ts"
       ],
-      "@memoflow/setting": [
-        "./packages/setting/src/index.ts"
-      ],
-      "@memoflow/setting/*": [
-        "./packages/setting/src/*/index.ts"
-      ],
-      "@memoflow/data-portability": [
-        "./packages/data-portability/src/index.ts"
-      ],
-      "@memoflow/data-portability/*": [
-        "./packages/data-portability/src/*/index.ts"
-      ],
-      "@memoflow/ai": [
-        "./packages/ai/src/index.ts"
-      ],
-      "@memoflow/ai/*": [
-        "./packages/ai/src/*/index.ts"
-      ],
-      "@memoflow/http-client": [
-        "./packages/http-client/src/index.ts"
-      ],
-      "@memoflow/ipc-client": [
-        "./packages/ipc-client/src/index.ts"
-      ],
-      "@memoflow/ui-core": [
-        "./packages/ui-core/src/index.ts"
-      ],
-      "@memoflow/ui-core/*": [
-        "./packages/ui-core/src/*",
-        "./packages/ui-core/src/*/index.ts"
-      ],
-      "@memoflow/ui-react-native": [
-        "./packages/ui-react-native/src/index.ts"
-      ],
-      "@memoflow/app-react": [
-        "./packages/app-react/src/index.ts"
-      ],
-      "@memoflow/app-vue": [
-        "./packages/app-vue/src/index.ts"
-      ],
-      "@memoflow/ui-vue-shadcn": [
-        "./packages/ui-vue-shadcn/src/index.ts"
-      ],
+      "@memoflow/setting": ["./packages/setting/src/index.ts"],
+      "@memoflow/setting/*": ["./packages/setting/src/*/index.ts"],
+      "@memoflow/data-portability": ["./packages/data-portability/src/index.ts"],
+      "@memoflow/data-portability/*": ["./packages/data-portability/src/*/index.ts"],
+      "@memoflow/ai": ["./packages/ai/src/index.ts"],
+      "@memoflow/ai/*": ["./packages/ai/src/*/index.ts"],
+      "@memoflow/http-client": ["./packages/http-client/src/index.ts"],
+      "@memoflow/ipc-client": ["./packages/ipc-client/src/index.ts"],
+      "@memoflow/ui-core": ["./packages/ui-core/src/index.ts"],
+      "@memoflow/ui-core/*": ["./packages/ui-core/src/*", "./packages/ui-core/src/*/index.ts"],
+      "@memoflow/ui-react-native": ["./packages/ui-react-native/src/index.ts"],
+      "@memoflow/app-react": ["./packages/app-react/src/index.ts"],
+      "@memoflow/app-vue": ["./packages/app-vue/src/index.ts"],
+      "@memoflow/ui-vue-shadcn": ["./packages/ui-vue-shadcn/src/index.ts"],
       "@memoflow/ui-vue-shadcn/*": [
         "./packages/ui-vue-shadcn/src/*",
         "./packages/ui-vue-shadcn/src/*/index.ts"
       ],
-      "@memoflow/label": [
-        "./packages/label/src/index.ts"
-      ],
-      "@memoflow/label/*": [
-        "./packages/label/src/*/index.ts",
-        "./packages/label/src/*.ts"
-      ],
-      "@memoflow/test-utils": [
-        "./packages/test-utils/src/index.ts"
-      ],
-      "@memoflow/nx-test-system": [
-        "./tools/nx-test-system/index.js"
-      ],
-      "@api/shared": [
-        "./apps/api/src/shared/index.ts"
-      ],
-      "@memoflow/scheduler": [
-        "./packages/scheduler/src/index.ts"
-      ],
-      "@memoflow/scheduler/*": [
-        "./packages/scheduler/src/*/index.ts"
-      ],
-      "@memoflow/relation": [
-        "./packages/relation/src/index.ts"
-      ],
+      "@memoflow/label": ["./packages/label/src/index.ts"],
+      "@memoflow/label/*": ["./packages/label/src/*/index.ts", "./packages/label/src/*.ts"],
+      "@memoflow/test-utils": ["./packages/test-utils/src/index.ts"],
+      "@memoflow/nx-test-system": ["./tools/nx-test-system/index.js"],
+      "@api/shared": ["./apps/api/src/shared/index.ts"],
+      "@memoflow/scheduler": ["./packages/scheduler/src/index.ts"],
+      "@memoflow/scheduler/*": ["./packages/scheduler/src/*/index.ts"],
+      "@memoflow/relation": ["./packages/relation/src/index.ts"],
       "@memoflow/relation/*": [
         "./packages/relation/src/*/index.ts",
         "./packages/relation/src/*.ts"
       ],
-      "@memoflow/agent-gateway": [
-        "./packages/agent-gateway/src/index.ts"
-      ],
-      "@memoflow/agent-gateway/*": [
-        "./packages/agent-gateway/src/*/index.ts"
-      ]
+      "@memoflow/agent-gateway": ["./packages/agent-gateway/src/index.ts"],
+      "@memoflow/agent-gateway/*": ["./packages/agent-gateway/src/*/index.ts"]
     }
   }
 }

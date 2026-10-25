@@ -214,15 +214,23 @@ interface ComposedAccountDesktop {
 #### Data portability
 
 ```ts
-interface ComposeDataPortabilityApiDependencies { readonly db: PrismaClient }
+interface ComposeDataPortabilityApiDependencies {
+  readonly db: PrismaClient;
+}
 interface ComposedDataPortabilityApi {
   readonly module: DataPortabilityApiModuleDef;
   readonly serverHeldDataDisclosureApi: ServerHeldDataDisclosureApplicationPort;
 }
-function composeDataPortability(deps: ComposeDataPortabilityApiDependencies): ComposedDataPortabilityApi;
+function composeDataPortability(
+  deps: ComposeDataPortabilityApiDependencies,
+): ComposedDataPortabilityApi;
 
-interface ComposeDataPortabilityDesktopDependencies { readonly db: IElectronDatabase }
-function composeDataPortability(deps: ComposeDataPortabilityDesktopDependencies): DataPortabilityElectronModuleDef;
+interface ComposeDataPortabilityDesktopDependencies {
+  readonly db: IElectronDatabase;
+}
+function composeDataPortability(
+  deps: ComposeDataPortabilityDesktopDependencies,
+): DataPortabilityElectronModuleDef;
 ```
 
 Expose `createPrismaDataPortabilityDependencies(db)` and `createPowerSyncDataPortabilityDependencies(db)` as typed `DataPortabilityDependencies` ingredient factories, plus `createPrisma/PowerSyncDataPortabilityImportStore` behind a `DataPortabilityImportStore` port (`packages/data-portability/src/server/application/import-store/data-portability-import-store.ts:464-466`). API composer creates the server-held disclosure port (`packages/data-portability/src/server/infrastructure/server-held-data-disclosure.ts:6-16`) and passes it explicitly to `createDataPortabilityApiModule({ instance, serverHeldDataDisclosureApi })`; Electron composer creates PowerSync dependencies/import store.
@@ -344,8 +352,12 @@ The host calls `create*Repositories(db)` first, uses `scheduleTaskRepository` to
 #### Setting
 
 ```ts
-interface ComposeSettingApiDependencies { readonly db: PrismaClient }
-interface ComposeSettingElectronDependencies { readonly db: IElectronDatabase }
+interface ComposeSettingApiDependencies {
+  readonly db: PrismaClient;
+}
+interface ComposeSettingElectronDependencies {
+  readonly db: IElectronDatabase;
+}
 function composeSettingApi(deps: ComposeSettingApiDependencies): SettingApiModuleDef;
 function composeSettingElectron(deps: ComposeSettingElectronDependencies): SettingElectronModuleDef;
 ```
@@ -370,15 +382,15 @@ Add `createAIPowerSyncRepositories(db)` with conversation/provider/index/executi
 
 ### 3.4 Cross-module host wiring decisions
 
-| Capability | API composer owner | Desktop composer owner | Required behavior |
-| --- | --- | --- | --- |
-| `cloudAuth` | `composeAccount({ db, cloudAuth })`; `cloudAuth` built in `apps/api/src/main.ts:129-146` | account `syncOptions` host callbacks, not inferred from Electron auth context | Cloud revocation remains account port; no second CloudAuth instance |
-| `closureChecker` | account-active checker from `apps/api/src/main.ts:126-128` passed to notification/reminder/repository | PowerSync checker built from profile DB and passed explicitly to notification/reminder/account module | Missing checker fail-fast/fail-closed as existing factories require |
-| notification capabilities | `[InApp, requiredInProduction]` from `apps/api/src/main.ts:220-233` | explicit `[InApp, Desktop]` capability set and native transport | Never let PowerSync default silently decide host policy |
-| schedule sources | reminder/goal/task/notification composers return source ports; orchestration consumes them | same, with PowerSync variants | no direct concrete repo creation in `main.ts` |
-| repository API | `storageBaseDir`, closure, GitHub App config, cloud purger from `apps/api/src/main.ts:183-188` | local vault + remote/reconciliation/sync/auto-sync ports from `apps/desktop/src/main/main.ts:180-226` | all ports passed into composer; no `/server` import |
-| schedule runtime lifecycle | API starts with module | Desktop returns bound `start/stop` controller to window/profile owners | remove `startScheduleRuntime`/`stopScheduleRuntime` globals and preserve delayed start |
-| dashboard/analytics | n/a | extend existing Goal/Task repository view (`apps/desktop/src/main/main.ts:155-178`) with schedule/reminder/notification ports | consumers use instance-bound injection only |
+| Capability                 | API composer owner                                                                                    | Desktop composer owner                                                                                                        | Required behavior                                                                      |
+| -------------------------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `cloudAuth`                | `composeAccount({ db, cloudAuth })`; `cloudAuth` built in `apps/api/src/main.ts:129-146`              | account `syncOptions` host callbacks, not inferred from Electron auth context                                                 | Cloud revocation remains account port; no second CloudAuth instance                    |
+| `closureChecker`           | account-active checker from `apps/api/src/main.ts:126-128` passed to notification/reminder/repository | PowerSync checker built from profile DB and passed explicitly to notification/reminder/account module                         | Missing checker fail-fast/fail-closed as existing factories require                    |
+| notification capabilities  | `[InApp, requiredInProduction]` from `apps/api/src/main.ts:220-233`                                   | explicit `[InApp, Desktop]` capability set and native transport                                                               | Never let PowerSync default silently decide host policy                                |
+| schedule sources           | reminder/goal/task/notification composers return source ports; orchestration consumes them            | same, with PowerSync variants                                                                                                 | no direct concrete repo creation in `main.ts`                                          |
+| repository API             | `storageBaseDir`, closure, GitHub App config, cloud purger from `apps/api/src/main.ts:183-188`        | local vault + remote/reconciliation/sync/auto-sync ports from `apps/desktop/src/main/main.ts:180-226`                         | all ports passed into composer; no `/server` import                                    |
+| schedule runtime lifecycle | API starts with module                                                                                | Desktop returns bound `start/stop` controller to window/profile owners                                                        | remove `startScheduleRuntime`/`stopScheduleRuntime` globals and preserve delayed start |
+| dashboard/analytics        | n/a                                                                                                   | extend existing Goal/Task repository view (`apps/desktop/src/main/main.ts:155-178`) with schedule/reminder/notification ports | consumers use instance-bound injection only                                            |
 
 ### 3.5 Step E documented deviations & residuals
 
@@ -710,15 +722,15 @@ Only after Steps A-E are green may the plan be considered complete. Archive move
 
 ### Per-step gates
 
-| Gate | Evidence required |
-| --- | --- |
-| Step 0 baseline | all existing failures named; current `rg` accessor/deep-import inventory attached |
-| Step A ingredients | every Prisma/PowerSync set is complete and port-shaped; old convenience roots delegate; concrete classes not public |
-| Step B transports | lifecycle specs pass for all handles; route-before-start/route-after-successful-start; Electron installed-channel reverse cleanup; deep partial-start cleanup |
-| Step C API | composer order/object identity specs; API main has no DB-composing remaining transport call for seven modules; routes/OpenAPI/order unchanged |
-| Step D Desktop | PowerSync selection only in composers; repository/dashboard/analytics injection; no accessor imports; schedule delayed start preserved |
-| Step E surface/docs | governance/docs checks green; barrel/export and no-deep-import specs green; bilingual JSDoc and inventory updated |
-| Final | direct Vitest for all touched package/API/Desktop configs plus typecheck/lint; no Nx package test target |
+| Gate                | Evidence required                                                                                                                                             |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Step 0 baseline     | all existing failures named; current `rg` accessor/deep-import inventory attached                                                                             |
+| Step A ingredients  | every Prisma/PowerSync set is complete and port-shaped; old convenience roots delegate; concrete classes not public                                           |
+| Step B transports   | lifecycle specs pass for all handles; route-before-start/route-after-successful-start; Electron installed-channel reverse cleanup; deep partial-start cleanup |
+| Step C API          | composer order/object identity specs; API main has no DB-composing remaining transport call for seven modules; routes/OpenAPI/order unchanged                 |
+| Step D Desktop      | PowerSync selection only in composers; repository/dashboard/analytics injection; no accessor imports; schedule delayed start preserved                        |
+| Step E surface/docs | governance/docs checks green; barrel/export and no-deep-import specs green; bilingual JSDoc and inventory updated                                             |
+| Final               | direct Vitest for all touched package/API/Desktop configs plus typecheck/lint; no Nx package test target                                                      |
 
 ### Behavior invariance matrix
 

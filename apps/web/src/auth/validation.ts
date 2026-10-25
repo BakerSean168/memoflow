@@ -33,7 +33,10 @@ function passwordError(value: string): AuthValidationKey | undefined {
   return undefined;
 }
 
-export function validateLogin(values: { email: string; password: string }): ValidationErrors<LoginField> {
+export function validateLogin(values: {
+  email: string;
+  password: string;
+}): ValidationErrors<LoginField> {
   const errors: ValidationErrors<LoginField> = {};
   const email = emailError(values.email);
   if (email) errors.email = email;
@@ -52,7 +55,8 @@ export function validateRegistration(values: {
   if (email) errors.email = email;
   if (password) errors.password = password;
   if (!values.confirmPassword) errors.confirmPassword = 'auth.validation.confirmPasswordRequired';
-  else if (values.password !== values.confirmPassword) errors.confirmPassword = 'auth.validation.passwordMismatch';
+  else if (values.password !== values.confirmPassword)
+    errors.confirmPassword = 'auth.validation.passwordMismatch';
   return errors;
 }
 
@@ -69,7 +73,8 @@ export function validateResetPassword(values: {
   const password = passwordError(values.newPassword);
   if (password) errors.newPassword = password;
   if (!values.confirmPassword) errors.confirmPassword = 'auth.validation.confirmPasswordRequired';
-  else if (values.newPassword !== values.confirmPassword) errors.confirmPassword = 'auth.validation.passwordMismatch';
+  else if (values.newPassword !== values.confirmPassword)
+    errors.confirmPassword = 'auth.validation.passwordMismatch';
   return errors;
 }
 

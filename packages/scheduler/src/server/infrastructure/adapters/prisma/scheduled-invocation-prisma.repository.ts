@@ -12,10 +12,16 @@ import type {
   ScheduledInvocationClaim,
   ScheduledInvocationCompleteInput,
 } from '../../../domain/repositories/i-scheduled-invocation-repository';
-import { PrismaInvocationAttemptMapper, PrismaScheduledInvocationMapper } from './mappers/prisma-scheduled-invocation.mapper';
+import {
+  PrismaInvocationAttemptMapper,
+  PrismaScheduledInvocationMapper,
+} from './mappers/prisma-scheduled-invocation.mapper';
 import { generateUUID } from '@memoflow/utils/shared';
 
-type InvocationDb = Pick<PrismaClient, 'scheduledInvocation' | 'invocationAttempt' | 'schedulingReconcileOperation'>;
+type InvocationDb = Pick<
+  PrismaClient,
+  'scheduledInvocation' | 'invocationAttempt' | 'schedulingReconcileOperation'
+>;
 type InvocationRootDb = InvocationDb & Pick<PrismaClient, '$transaction'>;
 
 export class ScheduledInvocationPrismaRepository implements IScheduledInvocationRepository {
@@ -63,12 +69,12 @@ export class ScheduledInvocationPrismaRepository implements IScheduledInvocation
           ? {}
           : {
               OR: [
-                { status: "pending", runAt: { lte: dueBefore } },
-                { status: "retry_wait", nextAttemptAt: { lte: dueBefore } },
+                { status: 'pending', runAt: { lte: dueBefore } },
+                { status: 'retry_wait', nextAttemptAt: { lte: dueBefore } },
               ],
             }),
       },
-      orderBy: [{ runAt: "asc" }, { nextAttemptAt: "asc" }, { id: "asc" }],
+      orderBy: [{ runAt: 'asc' }, { nextAttemptAt: 'asc' }, { id: 'asc' }],
       take: Math.max(1, Math.min(200, options.limit ?? 100)),
     });
     return rows.map(PrismaScheduledInvocationMapper.toDomain);
@@ -120,14 +126,19 @@ export class ScheduledInvocationPrismaRepository implements IScheduledInvocation
     });
   }
 
-  async supersedeStale(owner: SchedulingOwner, keepSchedulingKeys: readonly string[]): Promise<number> {
+  async supersedeStale(
+    owner: SchedulingOwner,
+    keepSchedulingKeys: readonly string[],
+  ): Promise<number> {
     const result = await this.db.scheduledInvocation.updateMany({
       where: {
         identityId: owner.identityId,
         ownerType: owner.type,
         ownerId: owner.id,
         status: { not: 'superseded' },
-        ...(keepSchedulingKeys.length > 0 ? { schedulingKey: { notIn: [...keepSchedulingKeys] } } : {}),
+        ...(keepSchedulingKeys.length > 0
+          ? { schedulingKey: { notIn: [...keepSchedulingKeys] } }
+          : {}),
       },
       data: {
         status: 'superseded',
@@ -192,7 +203,9 @@ export class ScheduledInvocationPrismaRepository implements IScheduledInvocation
       createdAt: input.now,
     };
     await this.db.invocationAttempt.create({
-      data: PrismaInvocationAttemptMapper.toCreate(attempt) as Prisma.InvocationAttemptUncheckedCreateInput,
+      data: PrismaInvocationAttemptMapper.toCreate(
+        attempt,
+      ) as Prisma.InvocationAttemptUncheckedCreateInput,
     });
     return { invocation: PrismaScheduledInvocationMapper.toDomain(row), attempt };
   }
@@ -230,13 +243,17 @@ export class ScheduledInvocationPrismaRepository implements IScheduledInvocation
       data: {
         finishedAt: new Date(input.finishedAt),
         outcome: input.outcome,
-        result: input.result === undefined || input.result === null ? Prisma.JsonNull : JSON.parse(JSON.stringify(input.result)),
+        result:
+          input.result === undefined || input.result === null
+            ? Prisma.JsonNull
+            : JSON.parse(JSON.stringify(input.result)),
         failureCode: input.failureCode ?? null,
         failureMessage: input.failureMessage ?? null,
         failureRetryable: input.failureRetryable ?? null,
       },
     });
-    if (attempt.count !== 1) throw new Error('Invocation attempt completion failed after state CAS.');
+    if (attempt.count !== 1)
+      throw new Error('Invocation attempt completion failed after state CAS.');
     return true;
   }
 
@@ -244,10 +261,19 @@ export class ScheduledInvocationPrismaRepository implements IScheduledInvocation
     const where = {
       status: 'running' as const,
       claimExpiresAt: { lt: new Date(now) },
-      ...(limit === undefined ? {} : { id: { in: (await this.db.scheduledInvocation.findMany({
-        where: { status: 'running', claimExpiresAt: { lt: new Date(now) } },
-        select: { id: true }, take: limit,
-      })).map((row) => row.id) } }),
+      ...(limit === undefined
+        ? {}
+        : {
+            id: {
+              in: (
+                await this.db.scheduledInvocation.findMany({
+                  where: { status: 'running', claimExpiresAt: { lt: new Date(now) } },
+                  select: { id: true },
+                  take: limit,
+                })
+              ).map((row) => row.id),
+            },
+          }),
     };
     const deadLetter = await this.db.scheduledInvocation.updateMany({
       where: { ...where, attemptCount: { gte: 1 }, retryEnabled: false },
@@ -255,7 +281,12 @@ export class ScheduledInvocationPrismaRepository implements IScheduledInvocation
     });
     const retry = await this.db.scheduledInvocation.updateMany({
       where: { ...where, status: 'running' },
-      data: { status: 'retry_wait', nextAttemptAt: new Date(now), claimToken: null, claimExpiresAt: null },
+      data: {
+        status: 'retry_wait',
+        nextAttemptAt: new Date(now),
+        claimToken: null,
+        claimExpiresAt: null,
+      },
     });
     return deadLetter.count + retry.count;
   }
@@ -282,7 +313,9 @@ export class ScheduledInvocationPrismaRepository implements IScheduledInvocation
     });
   }
 
-  async withTransaction<T>(fn: (repository: IScheduledInvocationRepository) => Promise<T>): Promise<T> {
+  async withTransaction<T>(
+    fn: (repository: IScheduledInvocationRepository) => Promise<T>,
+  ): Promise<T> {
     if (!this.rootClient) return fn(this);
     return this.rootClient.$transaction(async (tx) => {
       const repository = new ScheduledInvocationPrismaRepository(tx, null);

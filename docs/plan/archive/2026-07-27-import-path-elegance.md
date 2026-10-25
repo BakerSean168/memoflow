@@ -12,6 +12,7 @@ status: done
 
 > **归档结果（2026-07-29）**：包内 `@/` → 相对路径已完成；政策见 `docs/standards/import-path-policy.md`。  
 > Follow-up（tsconfig 删 `@/*`、ESLint ban）不阻塞本 plan 归档。
+
 # Import Path Elegance（路径优雅化）
 
 ## 目标
@@ -26,23 +27,23 @@ status: done
 
 ## 完成情况
 
-| 项 | 状态 |
-| --- | --- |
-| 政策文档 `import-path-policy.md` + standards 索引 | done |
-| 业务源码 `@/` → 相对路径 bulk rewrite（~339 files / ~529 imports） | done |
-| `vi.mock('@/...')` / 测试 mock 路径对齐 | done |
-| `packages/task/vitest.performance.config.ts` 去掉无用 `@` alias | done |
-| 受影响包 `typecheck`（goal/task/governance/auth/schedule/notification/setting/reminder/ui-vue-shadcn/api） | green |
-| 删除各包 tsconfig `@/*` paths | **本轮不做**（兼容 shadcn CLI / 逃生舱） |
-| ESLint ban `@/` | **follow-up** |
+| 项                                                                                                         | 状态                                     |
+| ---------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| 政策文档 `import-path-policy.md` + standards 索引                                                          | done                                     |
+| 业务源码 `@/` → 相对路径 bulk rewrite（~339 files / ~529 imports）                                         | done                                     |
+| `vi.mock('@/...')` / 测试 mock 路径对齐                                                                    | done                                     |
+| `packages/task/vitest.performance.config.ts` 去掉无用 `@` alias                                            | done                                     |
+| 受影响包 `typecheck`（goal/task/governance/auth/schedule/notification/setting/reminder/ui-vue-shadcn/api） | green                                    |
+| 删除各包 tsconfig `@/*` paths                                                                              | **本轮不做**（兼容 shadcn CLI / 逃生舱） |
+| ESLint ban `@/`                                                                                            | **follow-up**                            |
 
 ## 范围（已执行）
 
-| 包 | 动作 |
-| --- | --- |
-| ui-vue-shadcn | 相对化；保留 components.json 生成别名 |
-| governance / task / authentication / goal | 相对化 |
-| schedule / notification / setting / reminder / api | 相对化 |
+| 包                                                 | 动作                                  |
+| -------------------------------------------------- | ------------------------------------- |
+| ui-vue-shadcn                                      | 相对化；保留 components.json 生成别名 |
+| governance / task / authentication / goal          | 相对化                                |
+| schedule / notification / setting / reminder / api | 相对化                                |
 
 不改：`@memoflow/*`、node builtins、第三方包。
 

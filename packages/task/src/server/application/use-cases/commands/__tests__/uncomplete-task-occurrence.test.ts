@@ -25,7 +25,9 @@ describe('UncompleteTaskOccurrenceUseCase', () => {
   it('throws an error if transactionRunner is missing', () => {
     expect(
       () => new UncompleteTaskOccurrenceUseCase(occurrenceRepository, undefined as any),
-    ).toThrow('TaskWriteTransactionRunner must be explicitly provided to UncompleteTaskOccurrenceUseCase');
+    ).toThrow(
+      'TaskWriteTransactionRunner must be explicitly provided to UncompleteTaskOccurrenceUseCase',
+    );
   });
 
   it('returns a completed occurrence to Pending and saves it', async () => {

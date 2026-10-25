@@ -33,7 +33,12 @@ function freePort(): Promise<number> {
   });
 }
 
-function spawnChild(command: string, args: string[], cwd: string, env: NodeJS.ProcessEnv): ChildProcess {
+function spawnChild(
+  command: string,
+  args: string[],
+  cwd: string,
+  env: NodeJS.ProcessEnv,
+): ChildProcess {
   return spawn(command, args, { cwd, env, stdio: 'inherit' });
 }
 
@@ -83,9 +88,52 @@ function createTlsFixture(root: string): { ca: string; cert: string; key: string
   const cert = join(root, 'server.crt');
   const ext = join(root, 'server.ext');
   writeFileSync(ext, 'subjectAltName=IP:127.0.0.1\nextendedKeyUsage=serverAuth\n');
-  execFileSync('openssl', ['req', '-x509', '-newkey', 'rsa:2048', '-nodes', '-keyout', caKey, '-out', ca, '-subj', '/CN=MemoFlow E2E Provider CA', '-days', '1'], { stdio: 'ignore' });
-  execFileSync('openssl', ['req', '-newkey', 'rsa:2048', '-nodes', '-keyout', key, '-out', csr, '-subj', '/CN=127.0.0.1'], { stdio: 'ignore' });
-  execFileSync('openssl', ['x509', '-req', '-in', csr, '-CA', ca, '-CAkey', caKey, '-CAcreateserial', '-out', cert, '-days', '1', '-sha256', '-extfile', ext], { stdio: 'ignore' });
+  execFileSync(
+    'openssl',
+    [
+      'req',
+      '-x509',
+      '-newkey',
+      'rsa:2048',
+      '-nodes',
+      '-keyout',
+      caKey,
+      '-out',
+      ca,
+      '-subj',
+      '/CN=MemoFlow E2E Provider CA',
+      '-days',
+      '1',
+    ],
+    { stdio: 'ignore' },
+  );
+  execFileSync(
+    'openssl',
+    ['req', '-newkey', 'rsa:2048', '-nodes', '-keyout', key, '-out', csr, '-subj', '/CN=127.0.0.1'],
+    { stdio: 'ignore' },
+  );
+  execFileSync(
+    'openssl',
+    [
+      'x509',
+      '-req',
+      '-in',
+      csr,
+      '-CA',
+      ca,
+      '-CAkey',
+      caKey,
+      '-CAcreateserial',
+      '-out',
+      cert,
+      '-days',
+      '1',
+      '-sha256',
+      '-extfile',
+      ext,
+    ],
+    { stdio: 'ignore' },
+  );
   return { ca, cert, key };
 }
 
@@ -115,7 +163,8 @@ async function main(): Promise<void> {
       AUTH_BASE_URL: `${apiOrigin}/api/auth`,
       MEMOFLOW_WEB_URL: webOrigin,
       CORS_ORIGIN: `${webOrigin},http://localhost:${webPort}`,
-      AI_PROVIDER_ENCRYPTION_KEY: process.env.AI_PROVIDER_ENCRYPTION_KEY ?? 'e2e-ai-provider-encryption-key-32-bytes',
+      AI_PROVIDER_ENCRYPTION_KEY:
+        process.env.AI_PROVIDER_ENCRYPTION_KEY ?? 'e2e-ai-provider-encryption-key-32-bytes',
       AI_PROVIDER_PRIVATE_ENDPOINT_ALLOWLIST: `127.0.0.1:${providerPort}`,
       NODE_EXTRA_CA_CERTS: tls.ca,
       E2E_AI_PROVIDER_PORT: String(providerPort),
@@ -130,16 +179,41 @@ async function main(): Promise<void> {
     provider = spawnChild(process.execPath, [tsxCli, startProvider], webRoot, sharedEnv);
     await waitHttps(`${providerOrigin}/healthz`, tls.ca, 30_000);
 
-    api = spawnChild(process.execPath, [tsxCli, startApi], webRoot, { ...sharedEnv, RUNTIME_LANE: 'e2e', API_PORT: String(apiPort) });
+    api = spawnChild(process.execPath, [tsxCli, startApi], webRoot, {
+      ...sharedEnv,
+      RUNTIME_LANE: 'e2e',
+      API_PORT: String(apiPort),
+    });
     await waitHttp(`${apiOrigin}/healthz`, 300_000);
 
-    web = spawnChild(process.execPath, [viteBin, '--config', 'vite.config.ts', '--host', '127.0.0.1', '--port', String(webPort), '--strictPort'], webRoot, { ...sharedEnv, PROXY_TARGET_URL: apiOrigin });
+    web = spawnChild(
+      process.execPath,
+      [
+        viteBin,
+        '--config',
+        'vite.config.ts',
+        '--host',
+        '127.0.0.1',
+        '--port',
+        String(webPort),
+        '--strictPort',
+      ],
+      webRoot,
+      { ...sharedEnv, PROXY_TARGET_URL: apiOrigin },
+    );
     await waitHttp(`${webOrigin}/auth`, 60_000);
 
-    playwright = spawnChild(process.execPath, [playwrightCli, 'test', '--config', 'playwright.config.ts', ...process.argv.slice(2)], webRoot, sharedEnv);
+    playwright = spawnChild(
+      process.execPath,
+      [playwrightCli, 'test', '--config', 'playwright.config.ts', ...process.argv.slice(2)],
+      webRoot,
+      sharedEnv,
+    );
     const code = await new Promise<number>((resolveExit, reject) => {
       playwright!.once('error', reject);
-      playwright!.once('exit', (exitCode, signal) => signal ? reject(new Error(`Playwright exited with ${signal}`)) : resolveExit(exitCode ?? 1));
+      playwright!.once('exit', (exitCode, signal) =>
+        signal ? reject(new Error(`Playwright exited with ${signal}`)) : resolveExit(exitCode ?? 1),
+      );
     });
     process.exitCode = code;
   } finally {

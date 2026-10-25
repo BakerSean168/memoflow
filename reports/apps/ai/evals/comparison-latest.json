@@ -51,11 +51,7 @@
       "maxCostIncreaseRatio": 0.2,
       "maxP95LatencyIncreaseRatio": 0.25,
       "maxNewFailedCases": 0,
-      "requiredCaseTypes": [
-        "open_chat",
-        "goal_planning",
-        "knowledge_answer"
-      ]
+      "requiredCaseTypes": ["open_chat", "goal_planning", "knowledge_answer"]
     }
   }
 }

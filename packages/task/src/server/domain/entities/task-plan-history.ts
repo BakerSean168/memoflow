@@ -6,10 +6,7 @@ import type { Instant } from '@memoflow/contracts/primitives';
 
 import { Entity } from '@memoflow/utils/domain';
 import { generateUUID } from '@memoflow/utils/shared';
-import type {
-  TaskPlanHistoryServerDTO,
-  TaskPlanHistoryClientDTO,
-} from '@memoflow/contracts/task';
+import type { TaskPlanHistoryServerDTO, TaskPlanHistoryClientDTO } from '@memoflow/contracts/task';
 
 /**
  * Internal state interface for TaskPlanHistory
@@ -45,7 +42,6 @@ export class TaskPlanHistory extends Entity<string> {
   }
 
   // Getters
-
 
   public get planId(): string {
     return this._planId;

@@ -1,4 +1,7 @@
-import type { InvocationAttempt as PrismaAttempt, ScheduledInvocation as PrismaInvocation } from '@memoflow/database';
+import type {
+  InvocationAttempt as PrismaAttempt,
+  ScheduledInvocation as PrismaInvocation,
+} from '@memoflow/database';
 import type { InvocationAttempt, ScheduledInvocation } from '@memoflow/contracts/schedule';
 
 function jsonValue(value: unknown): unknown {
@@ -66,7 +69,8 @@ export class PrismaScheduledInvocationMapper {
       attemptCount: invocation.attemptCount,
       nextAttemptAt: invocation.nextAttemptAt === null ? null : new Date(invocation.nextAttemptAt),
       claimToken: invocation.claimToken,
-      claimExpiresAt: invocation.claimExpiresAt === null ? null : new Date(invocation.claimExpiresAt),
+      claimExpiresAt:
+        invocation.claimExpiresAt === null ? null : new Date(invocation.claimExpiresAt),
       fencingToken: invocation.fencingToken,
       name: invocation.observability.name,
       tags: invocation.observability.tags,
@@ -86,7 +90,10 @@ export class PrismaInvocationAttemptMapper {
       startedAt: row.startedAt.getTime(),
       finishedAt: row.finishedAt?.getTime() ?? null,
       outcome: row.outcome as InvocationAttempt['outcome'],
-      result: row.result && typeof row.result === 'object' ? row.result as Record<string, unknown> : null,
+      result:
+        row.result && typeof row.result === 'object'
+          ? (row.result as Record<string, unknown>)
+          : null,
       failureCode: row.failureCode,
       failureMessage: row.failureMessage,
       failureRetryable: row.failureRetryable,

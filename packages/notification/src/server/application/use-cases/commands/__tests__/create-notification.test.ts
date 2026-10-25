@@ -26,11 +26,13 @@ function nightlyQuietHours(): QuietHours {
   return QuietHours.create({
     enabled: true,
     timeZone: requireTimeZoneId('UTC'),
-    weeklyWindows: [{
-      daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
-      start: asHm('22:00'),
-      end: asHm('08:00'),
-    }],
+    weeklyWindows: [
+      {
+        daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+        start: asHm('22:00'),
+        end: asHm('08:00'),
+      },
+    ],
   });
 }
 
@@ -121,10 +123,12 @@ describe('CreateNotificationUseCase Fact / DeliveryPolicy', () => {
     expect(result.ok).toBe(true);
     const [, outbox, decisions] = vi.mocked(notificationRepo.save).mock.calls[0];
     expect(outbox?.map((entry) => entry.channel)).toEqual([NotificationChannelType.InApp]);
-    expect(decisions).toContainEqual(expect.objectContaining({
-      channel: NotificationChannelType.Email,
-      outcome: NotificationDeliveryPlanOutcome.Unsupported,
-    }));
+    expect(decisions).toContainEqual(
+      expect.objectContaining({
+        channel: NotificationChannelType.Email,
+        outcome: NotificationDeliveryPlanOutcome.Unsupported,
+      }),
+    );
   });
 
   it('keeps per-channel user preferences independent', async () => {
@@ -144,11 +148,13 @@ describe('CreateNotificationUseCase Fact / DeliveryPolicy', () => {
     expect(result.ok).toBe(true);
     const [, outbox, decisions] = vi.mocked(notificationRepo.save).mock.calls[0];
     expect(outbox?.map((entry) => entry.channel)).toEqual([NotificationChannelType.InApp]);
-    expect(decisions).toContainEqual(expect.objectContaining({
-      channel: NotificationChannelType.Email,
-      outcome: NotificationDeliveryPlanOutcome.Disabled,
-      reason: NotificationDeliveryReason.UserGlobalDisabled,
-    }));
+    expect(decisions).toContainEqual(
+      expect.objectContaining({
+        channel: NotificationChannelType.Email,
+        outcome: NotificationDeliveryPlanOutcome.Disabled,
+        reason: NotificationDeliveryReason.UserGlobalDisabled,
+      }),
+    );
   });
 
   it('keeps Inbox Fact visible while QuietHours suppresses Desktop delivery', async () => {
@@ -235,14 +241,16 @@ describe('CreateNotificationUseCase Fact / DeliveryPolicy', () => {
   });
 
   it('round-trips typed actions into Fact and dispatch payload', async () => {
-    const actions = [{
-      kind: 'owner-command' as const,
-      actionKey: 'complete',
-      labelKey: 'routine.action.complete',
-      owner: { type: 'routine-occurrence', id: 'occ-1' },
-      commandKey: 'routine.complete',
-      input: { routineId: 'r-1', occurrenceKey: 'occ-1' },
-    }];
+    const actions = [
+      {
+        kind: 'owner-command' as const,
+        actionKey: 'complete',
+        labelKey: 'routine.action.complete',
+        owner: { type: 'routine-occurrence', id: 'occ-1' },
+        commandKey: 'routine.complete',
+        input: { routineId: 'r-1', occurrenceKey: 'occ-1' },
+      },
+    ];
     const result = await useCase.execute({
       identityId: anIdentityId(),
       workflowKey: 'routine.intervention',

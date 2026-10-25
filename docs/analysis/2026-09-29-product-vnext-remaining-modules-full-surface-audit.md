@@ -251,26 +251,26 @@ Diagnostic surfaces may show technical detail, but still use current shared prim
 
 # 4. Finding ledger
 
-| ID | Severity | Area | Finding |
-| --- | --- | --- | --- |
-| RUI-01 | P1 | Cross-module Task actions | Schedule, Task capsule and Today widget directly complete Task occurrences and would bypass completion-time KR measurement |
-| RUI-02 | P1 | Schedule | CalendarEntry update/delete exist in owner APIs and edit dialog, but normal event inspect is read-only |
-| RUI-03 | P1 | Governance | Fake Product Governance reference runtime has high maintenance cost and already drifted from real modules; evaluate retirement instead of UI modernization |
-| RUI-04 | P1 | AI | AI owns duplicate Goal/Task/Knowledge editors; migrate to owner-native surface orchestration and retire AI-owned product forms |
-| RUI-05 | P1 | Product-wide QA | No representative screenshot-regression matrix protects the converged surface families |
-| RUI-06 | P2 | Product-wide shell | Header/toolbar/filter variants are implemented ad hoc instead of as documented legal surface variants |
-| RUI-07 | P2 | Routine | WallClock editor uses native date/time/number inputs and free-text IANA timezone |
-| RUI-08 | P2 | Knowledge | Web/Desktop document workspace presentation diverges where semantics are actually shared; catalog still has native select |
-| RUI-09 | P2 | Notification | Browser system-notification click always opens Inbox while in-app/Desktop resolve owner destination |
-| RUI-10 | P2 | Settings/Account | Settings is card-heavy and contains raw dialogs, raw palette states and a visible native select |
-| RUI-11 | P2 | Capsules | Six capsule previews independently rebuild nearly the same preview shell/state/footer grammar |
-| RUI-12 | P2 | AI/Shell | AI composer wiring is duplicated across Teleport/non-Teleport paths and uses bespoke elevation styling |
-| RUI-13 | P2 | Schedule/Notification | owner/source tone mapping and badge styling are duplicated |
-| RUI-14 | P2 | Product-wide states | Loading/error/empty patterns vary by module despite equivalent semantics |
-| RUI-15 | P2 | Ownership/maintainability | Several large surface files combine stable sub-surfaces; split only along semantic boundaries, not by line count |
-| RUI-16 | P3 | Account | ProfileCard/ProfileForm appear to be non-production/story-era alternate account surfaces |
-| RUI-17 | P3 | Authentication | main-shell auth redirect sentinel uses a raw hard-coded visual fallback |
-| RUI-18 | P3 | Diagnostics | SSE Monitor remains visually older but is correctly dev/diagnostic scoped |
+| ID     | Severity | Area                      | Finding                                                                                                                                                    |
+| ------ | -------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RUI-01 | P1       | Cross-module Task actions | Schedule, Task capsule and Today widget directly complete Task occurrences and would bypass completion-time KR measurement                                 |
+| RUI-02 | P1       | Schedule                  | CalendarEntry update/delete exist in owner APIs and edit dialog, but normal event inspect is read-only                                                     |
+| RUI-03 | P1       | Governance                | Fake Product Governance reference runtime has high maintenance cost and already drifted from real modules; evaluate retirement instead of UI modernization |
+| RUI-04 | P1       | AI                        | AI owns duplicate Goal/Task/Knowledge editors; migrate to owner-native surface orchestration and retire AI-owned product forms                             |
+| RUI-05 | P1       | Product-wide QA           | No representative screenshot-regression matrix protects the converged surface families                                                                     |
+| RUI-06 | P2       | Product-wide shell        | Header/toolbar/filter variants are implemented ad hoc instead of as documented legal surface variants                                                      |
+| RUI-07 | P2       | Routine                   | WallClock editor uses native date/time/number inputs and free-text IANA timezone                                                                           |
+| RUI-08 | P2       | Knowledge                 | Web/Desktop document workspace presentation diverges where semantics are actually shared; catalog still has native select                                  |
+| RUI-09 | P2       | Notification              | Browser system-notification click always opens Inbox while in-app/Desktop resolve owner destination                                                        |
+| RUI-10 | P2       | Settings/Account          | Settings is card-heavy and contains raw dialogs, raw palette states and a visible native select                                                            |
+| RUI-11 | P2       | Capsules                  | Six capsule previews independently rebuild nearly the same preview shell/state/footer grammar                                                              |
+| RUI-12 | P2       | AI/Shell                  | AI composer wiring is duplicated across Teleport/non-Teleport paths and uses bespoke elevation styling                                                     |
+| RUI-13 | P2       | Schedule/Notification     | owner/source tone mapping and badge styling are duplicated                                                                                                 |
+| RUI-14 | P2       | Product-wide states       | Loading/error/empty patterns vary by module despite equivalent semantics                                                                                   |
+| RUI-15 | P2       | Ownership/maintainability | Several large surface files combine stable sub-surfaces; split only along semantic boundaries, not by line count                                           |
+| RUI-16 | P3       | Account                   | ProfileCard/ProfileForm appear to be non-production/story-era alternate account surfaces                                                                   |
+| RUI-17 | P3       | Authentication            | main-shell auth redirect sentinel uses a raw hard-coded visual fallback                                                                                    |
+| RUI-18 | P3       | Diagnostics               | SSE Monitor remains visually older but is correctly dev/diagnostic scoped                                                                                  |
 
 # 5. Schedule / Planner deep audit
 
@@ -414,13 +414,16 @@ The information is all legitimate, but the persistent top strip is too responsib
 Recommended grammar:
 
 left:
+
 - status/system view
 
 right:
+
 - current Profile scope/gate
 - Add Routine
 
 inside Profile menu:
+
 - profile selection
 - create/edit/delete
 - runtime activate/pause when host capability permits
@@ -599,6 +602,7 @@ This produces heavier visual hierarchy than Goal/Task and makes simple preferenc
 Converge to:
 
 SettingsSection
+
 - section heading/description
 - property rows
 - inline status/help
@@ -874,21 +878,25 @@ Current modules variously use:
 Target state family:
 
 Collection:
+
 - row skeleton;
 - inline retry/error;
 - AppEmptyState.
 
 Workspace:
+
 - bounded skeleton/placeholder;
 - non-destructive inline error with retry;
 - content owner remains visible when possible.
 
 Dialog:
+
 - keep shell visible;
 - body loading/error;
 - action disabled/busy rather than replacing entire dialog.
 
 Diagnostic:
+
 - explicit technical status allowed.
 
 The state primitive should encode presentation, not centralize business loading state.
@@ -910,20 +918,24 @@ Split only when a stable semantic owner exists.
 Good candidate extractions:
 
 Knowledge:
+
 - toolbar/catalog/context/reading composition boundaries already exist; keep moving orchestration into composables rather than creating one mega UI abstraction.
 
 Routine:
+
 - WallClockTriggerEditor
 - ElapsedTriggerEditor
 - ActiveUsageTriggerEditor
 - ProfileScopeControl
 
 AI:
+
 - one composer host wrapper;
 - owner-specific draft review cards;
 - diagnostic metadata details.
 
 Shell:
+
 - stable capsule registry/mount orchestration only after behavior characterization.
 
 Avoid generic "UniversalModulePage", "UniversalDetailForm" or "UniversalEntityCard".
@@ -948,22 +960,26 @@ For this UI convergence, create representative visual baselines after the gramma
 Minimum matrix:
 
 Collection:
+
 - Goal list
 - Task Today
 - Routine list
 - Notification inbox
 
 Entity:
+
 - Goal detail
 - TaskPlan detail
 
 Specialized:
+
 - Schedule month/week/day
 - Knowledge wide/narrow
 - Settings General + one capability-heavy section
 - AI workspace with owner-native Goal/Task workflow surface
 
 Overlays:
+
 - Goal/KR or Record composer
 - Task occurrence inspect
 - Schedule event inspect
@@ -971,6 +987,7 @@ Overlays:
 - responsive narrow Sheet state
 
 Shell:
+
 - normal split
 - narrow business panel
 - focus mode
@@ -1059,18 +1076,21 @@ ADR-113 evaluates retiring Product Governance Runtime while preserving Engineeri
 The convergence must preserve:
 
 Schedule:
+
 - CalendarEntry vs owner projection separation;
 - Planner vs Scheduler/Temporal Engine separation;
 - owner-command mutation routing;
 - Product Time semantics.
 
 Routine:
+
 - Routine/Profile/Membership/TemporaryOverride ownership;
 - deterministic runtime;
 - host capability gating;
 - no legacy Reminder CRUD resurrection.
 
 Knowledge:
+
 - Local Vault truth;
 - GitHub authorization/source boundaries;
 - stable KnowledgeDocument identity;
@@ -1078,30 +1098,35 @@ Knowledge:
 - no built-in Markdown editor resurrection.
 
 Notification:
+
 - Fact/Inbox/Workflow/Delivery/Interaction separation;
 - read state != business completion;
 - SSE cursor/reconnect;
 - typed owner actions.
 
 Settings/Account/Auth:
+
 - capability owners remain distributed;
 - Account != Auth identity;
 - device vs user preference semantics;
 - host capability filtering.
 
 AI:
+
 - Mastra/runtime authority;
 - HITL/draft approval;
 - owner-domain application ports;
 - no AI-owned business truth.
 
 Shell:
+
 - panel geometry/minimum widths;
 - focus mode;
 - route/tab leave guards;
 - one-scroll-owner rule.
 
 Governance:
+
 - permanent reference module;
 - Rule/RuleRevision semantics;
 - HTTP/IPC and Prisma/PowerSync parity.

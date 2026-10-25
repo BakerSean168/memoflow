@@ -12,7 +12,7 @@ updated: 2026-02-19
 # ADR-026: Server-Side Adapter Pattern
 
 **状态**: ✅ 已采纳  
-**日期**: 2026-02-19  
+**日期**: 2026-02-19
 
 ## 背景
 
@@ -76,19 +76,27 @@ packages/utils/src/result/
 // Before (重复代码)
 router.post('/', auth, async (req, res) => {
   const parsed = CreateGoalSchema.safeParse(req.body);
-  if (!parsed.success) { /* 5+ lines of error handling */ }
+  if (!parsed.success) {
+    /* 5+ lines of error handling */
+  }
   const identityId = getIdentityId(req);
-  if (!identityId) { /* 3+ lines */ }
+  if (!identityId) {
+    /* 3+ lines */
+  }
   const result = await handlers.createGoal.execute(parsed.data, { identityId });
   respondWithResult(res, result, 201);
 });
 
 // After (简洁、统一)
-router.post('/', auth, expressAdapterWithValidation(
-  CreateGoalSchema,
-  (data, ctx) => handlers.createGoal.execute(data, ctx),
-  { successStatus: 201 },
-));
+router.post(
+  '/',
+  auth,
+  expressAdapterWithValidation(
+    CreateGoalSchema,
+    (data, ctx) => handlers.createGoal.execute(data, ctx),
+    { successStatus: 201 },
+  ),
+);
 ```
 
 ## 影响

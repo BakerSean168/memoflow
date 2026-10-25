@@ -1,5 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '.';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '.';
 
 const meta = {
   title: 'Atoms/Select',
@@ -12,7 +20,15 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => ({
-    components: { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue },
+    components: {
+      Select,
+      SelectContent,
+      SelectGroup,
+      SelectItem,
+      SelectLabel,
+      SelectTrigger,
+      SelectValue,
+    },
     template: `
       <Select>
         <SelectTrigger class="w-[180px]">
@@ -35,7 +51,15 @@ export const Default: Story = {
 
 export const WithGroups: Story = {
   render: () => ({
-    components: { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue },
+    components: {
+      Select,
+      SelectContent,
+      SelectGroup,
+      SelectItem,
+      SelectLabel,
+      SelectTrigger,
+      SelectValue,
+    },
     template: `
       <Select>
         <SelectTrigger class="w-[280px]">

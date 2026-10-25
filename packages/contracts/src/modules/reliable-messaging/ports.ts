@@ -44,7 +44,7 @@ export function assertValidProjectionOperation(projection: unknown): ProjectionO
  */
 export function refinePortIdempotencyKey(
   data: { identityId: string; source: string; occurrenceKey: string; idempotencyKey: string },
-  ctx: z.RefinementCtx
+  ctx: z.RefinementCtx,
 ): void {
   if (!parseIdempotencyKeyString(data.idempotencyKey)) {
     ctx.addIssue({
@@ -88,7 +88,10 @@ export interface NotificationReliableOperationPort {
   /** 查询指定 identity 的死信队列 (输出必须过 BusinessOperationReceiptSchema.parse) */
   queryDeadLetters(identityId: string): Promise<BusinessOperationReceipt[]>;
   /** 人工/运维 重发死信操作 (输出必须过 BusinessOperationReceiptSchema.parse) */
-  replayDeadLetter(params: { identityId: string; operationId: string }): Promise<BusinessOperationReceipt>;
+  replayDeadLetter(params: {
+    identityId: string;
+    operationId: string;
+  }): Promise<BusinessOperationReceipt>;
 }
 
 /** 3. Account 模块 Application Port */

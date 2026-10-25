@@ -11,6 +11,8 @@ export interface NotificationIpcAdapters {
   notification: NotificationIpcAdapter;
 }
 
-export function createNotificationIpcAdapters(ipcClient: IResultIpcClient): NotificationIpcAdapters {
+export function createNotificationIpcAdapters(
+  ipcClient: IResultIpcClient,
+): NotificationIpcAdapters {
   return { notification: new NotificationIpcAdapter(ipcClient) };
 }

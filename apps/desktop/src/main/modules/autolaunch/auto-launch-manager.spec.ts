@@ -27,9 +27,7 @@ const harness = {
 
 vi.mock('auto-launch', () => {
   class FakeAutoLaunch {
-    constructor(
-      readonly config: { name: string; path: string; isHidden?: boolean },
-    ) {
+    constructor(readonly config: { name: string; path: string; isHidden?: boolean }) {
       if (harness.forceFail) {
         throw new Error('auto-launch unavailable');
       }

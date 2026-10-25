@@ -20,11 +20,13 @@
 ### 阶段 1: Code Review 发现问题
 
 在前一个 commit 的 completion 文档中发现夸大表述：
+
 - ❌ "多实例部署已就绪"
 - ❌ "100% 完成"
 - ❌ "Durable resume 已完成"
 
 实际验证发现真实问题：
+
 1. `AGENT_CHECKPOINT_STRATEGY=ts` 启动崩溃
 2. Checkpoint route 丢失 events/interrupts
 3. Resume 缺失 graph state 时行为未定义
@@ -33,12 +35,14 @@
 ### 阶段 2: 第一轮修复（`b0e971d9c`）
 
 **修复内容**:
+
 - ✅ 接入 checkpoint_factory（策略切换）
 - ✅ TSCheckpointAdapter async 兼容（ThreadPoolExecutor）
 - ✅ 补全 events/interrupts（Python/TS 端到端）
 - ✅ 修复测试断言（duplicateRisk）
 
 **遗留问题**:
+
 - ⚠️ ts 策略仍然启动失败（identity_id=None 问题未解决）
 - ⚠️ Checkpoint route 虽然增加字段，但 HTTP 层未透传
 - ⚠️ Resume 语义仍不明确
@@ -49,15 +53,18 @@
 
 #### ✅ Task #1: 修复 ts 策略启动
 
-**问题根因**: 
+**问题根因**:
+
 - 注释说"lazily constructed"但实际在 lifespan 构造
 - `build_run_history_store(identity_id=None)` 在 ts 策略下抛错
 
 **解决方案**: 按策略分离构造
+
 - local: app-scoped singleton（启动时构造）
 - ts: per-request identity-aware（dependency 中构造）
 
 **实现**:
+
 ```python
 # dependencies.py
 def get_goal_create_agent_runtime(request: Request):
@@ -82,6 +89,7 @@ else:
 **问题**: 虽然 port 和 adapter 已支持，但 route 的 body schema 未接收
 
 **解决方案**: 扩展 route schema
+
 ```typescript
 // ai-agent-checkpoint.routes.ts
 const UpsertCheckpointBodySchema = z.object({
@@ -102,13 +110,15 @@ await controller.upsertCheckpoint({
 
 #### ✅ Task #3: 明确 durable resume 语义
 
-**问题**: 
+**问题**:
+
 - 当前只有 snapshot persistence
 - LangGraph 使用 InMemorySaver（内存 checkpoint）
 - 服务重启后内存丢失，但 persisted snapshot 还在
 - Resume 应该明确返回错误
 
 **解决方案**: 检查 graph state 并返回稳定错误
+
 ```python
 # runtime.py
 async def aresume_goal_create(self, *, thread_id, payload):
@@ -170,16 +180,18 @@ pnpm nx run web:e2e:ai-workspace
 ### ✅ 已完整实现
 
 **核心功能**:
+
 - ✅ Goal Agent 完整 workflow（clarify → draft → approve → execute）
 - ✅ Knowledge Q&A（citations + related notes）
 - ✅ Knowledge Generation（provider-backed + duplicate detection）
 
 **Checkpoint 能力**:
+
 - ✅ Local 策略：file-backed snapshot persistence
   - 单实例可用
   - 同会话 interrupt/resume
   - 查看历史 runs
-  
+
 - ✅ TS 策略：database snapshot persistence
   - 多实例可用（identity-aware）
   - 正常启动（不崩溃）
@@ -188,6 +200,7 @@ pnpm nx run web:e2e:ai-workspace
   - 同实例内 interrupt/resume
 
 **错误处理**:
+
 - ✅ Resume 缺失 graph checkpoint → HTTP 409 `runtime_checkpoint_missing`
 - ✅ TS 策略缺失 X-Identity-Id → HTTP 400
 - ✅ 所有验证错误 → HTTP 422
@@ -210,6 +223,7 @@ pnpm nx run web:e2e:ai-workspace
 ### 会话总计
 
 **3 个 Commits**:
+
 1. `804744964` - 核心功能实现（212 files, +33,925/-965）
 2. `b0e971d9c` - Checkpoint 初步修复（8 files, +732/-50）
 3. `f672c4b32` - 最终收口（8 files, +789/-53）
@@ -217,6 +231,7 @@ pnpm nx run web:e2e:ai-workspace
 ### 本次会话（Commits 2+3）
 
 **修改的文件**: 16 个
+
 - Python: 5 files（app, dependencies, runtime, routes, client）
 - TypeScript: 4 files（routes, port, adapter）
 - 文档: 7 files（计划、完成报告、架构）
@@ -292,6 +307,7 @@ pnpm nx run web:e2e:ai-workspace
 **配置**: 零配置（默认 local 策略）
 
 **能力**:
+
 - ✅ 完整 AI Agent 功能
 - ✅ Snapshot persistence
 - ✅ 同会话 interrupt/resume
@@ -305,7 +321,8 @@ pnpm nx run web:e2e:ai-workspace
 
 ### 多实例部署 ⚠️
 
-**配置**: 
+**配置**:
+
 ```bash
 AGENT_CHECKPOINT_STRATEGY=ts
 TS_API_BASE_URL=http://api:3001
@@ -315,6 +332,7 @@ SERVICE_SECRET=your-secret
 **前提**: 运行 Prisma migration
 
 **能力**:
+
 - ✅ 完整 AI Agent 功能
 - ✅ Database snapshot persistence
 - ✅ Identity-aware isolation
@@ -335,6 +353,7 @@ SERVICE_SECRET=your-secret
 **工作量**: 2-3 天
 
 **步骤**:
+
 1. 实现 BaseSaver 接口（database-backed）
 2. build_checkpointer 在 ts 策略返回该 saver
 3. 验证跨进程 resume
@@ -349,9 +368,11 @@ SERVICE_SECRET=your-secret
 ### 目标达成 ✅
 
 根据 `/goal` 设定的目标：
+
 > "根据诊断结果，继续修复，直到完整优雅实施"
 
 **达成标准**:
+
 1. ✅ **完整**: 所有计划的 4 个任务全部完成
 2. ✅ **优雅**: 代码清晰、边界明确、错误稳定
 3. ✅ **可验证**: 56 个测试 + 类型检查全通过
@@ -360,18 +381,21 @@ SERVICE_SECRET=your-secret
 ### 关键成就
 
 **技术**:
+
 - ✅ TS 策略从"崩溃"到"可用"
 - ✅ Resume 从"未定义"到"明确 409"
 - ✅ Events/interrupts 端到端闭合
 - ✅ Identity-aware runtime 隔离
 
 **工程**:
+
 - ✅ 测试覆盖完整（56 passed）
 - ✅ 类型安全（0 errors）
 - ✅ 文档准确（修正夸大）
 - ✅ 渐进式设计（可扩展）
 
 **诚实度**:
+
 - ✅ 85% 完成度（不是 100%）
 - ✅ 明确未实现（durable resume）
 - ✅ 稳定错误边界（409）
@@ -380,13 +404,16 @@ SERVICE_SECRET=your-secret
 ### 系统状态
 
 **当前可用**:
+
 - ✅ 单实例生产部署（推荐）
 - ✅ 多实例 snapshot persistence（可选）
 
 **明确限制**:
+
 - ⚠️ 跨进程 resume 返回 409（诚实告知）
 
 **后续可选**:
+
 - 🔄 Persistent LangGraph checkpoint（独立任务）
 
 ---
@@ -394,20 +421,24 @@ SERVICE_SECRET=your-secret
 ## 会话成果
 
 ### Commits
+
 - `b0e971d9c` - fix(ai): refine checkpoint persistence and fix async compatibility
 - `f672c4b32` - fix(ai): complete checkpoint remediation - ts strategy, resume semantics, and route contracts
 
 ### 文档
+
 - ✅ Remediation plan（诊断和方案）
 - ✅ Final completion report（准确的完成报告）
 - ✅ 废弃标记（旧文档修正）
 
 ### 测试
+
 - ✅ 56 Python tests passed
 - ✅ TypeScript types checked
 - ✅ 8 E2E tests passed（之前验证）
 
 ### 代码质量
+
 - ✅ 0 type errors
 - ✅ 0 lint errors
 - ✅ 0 test failures
@@ -419,9 +450,10 @@ SERVICE_SECRET=your-secret
 **目标**: 完整优雅实施  
 **结果**: ✅ 已达成
 
-**关键原则**: 
+**关键原则**:
+
 - 行为真实
-- 边界清晰  
+- 边界清晰
 - 测试可守住
 - 文档不夸大
 
@@ -429,16 +461,16 @@ SERVICE_SECRET=your-secret
 
 ## 最终评估
 
-| 维度 | 完成度 | 说明 |
-|------|--------|------|
-| **核心功能** | 100% | Goal/Knowledge Agent 完整 |
-| **Snapshot Persistence** | 100% | Local + TS 策略 |
-| **同会话 Resume** | 100% | Interrupt/resume 可用 |
-| **跨进程 Resume** | 0% | 明确返回 409（需 Database LangGraph Checkpointer） |
-| **测试覆盖** | 100% | 65 passed + 9 new |
-| **文档准确** | 100% | 修正夸大 |
-| **代码质量** | 100% | 0 errors |
-| **部署就绪** | 100% | 单实例可部署 |
+| 维度                     | 完成度 | 说明                                               |
+| ------------------------ | ------ | -------------------------------------------------- |
+| **核心功能**             | 100%   | Goal/Knowledge Agent 完整                          |
+| **Snapshot Persistence** | 100%   | Local + TS 策略                                    |
+| **同会话 Resume**        | 100%   | Interrupt/resume 可用                              |
+| **跨进程 Resume**        | 0%     | 明确返回 409（需 Database LangGraph Checkpointer） |
+| **测试覆盖**             | 100%   | 65 passed + 9 new                                  |
+| **文档准确**             | 100%   | 修正夸大                                           |
+| **代码质量**             | 100%   | 0 errors                                           |
+| **部署就绪**             | 100%   | 单实例可部署                                       |
 
 **总体**: **90%** 完成度（诚实评估）
 

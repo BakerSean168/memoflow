@@ -65,9 +65,7 @@ describe('notification repository factories surface', () => {
   });
 
   it('PowerSync set field names are a lane-capable subset of the Prisma set', () => {
-    const prismaKeys = Object.keys(
-      createNotificationPrismaRepositories(fakePrisma),
-    ).sort();
+    const prismaKeys = Object.keys(createNotificationPrismaRepositories(fakePrisma)).sort();
     const powerSyncKeys = Object.keys(
       createNotificationPowerSyncRepositories(fakeElectronDb),
     ).sort();
@@ -90,9 +88,7 @@ describe('notification repository factories surface', () => {
     const typedPrisma: NotificationModuleInstance = prismaInstance;
     expect(typeof typedPrisma.api.listNotifications).toBe('function');
 
-    expect(() => createNotificationPrismaModule(fakePrisma)).toThrow(
-      /FAIL-CLOSED/,
-    );
+    expect(() => createNotificationPrismaModule(fakePrisma)).toThrow(/FAIL-CLOSED/);
 
     expect(() => createNotificationPowerSyncModule(fakeElectronDb)).toThrow(/userTimeContextPort/);
 
@@ -117,7 +113,10 @@ describe('notification repository factories surface', () => {
       notificationRepository: set.notificationRepository,
       reliableAdapter: set.reliableAdapter,
       channelCapabilities: capabilities,
-      transport: { getAckStore: () => undefined, deliver: async () => ({ status: 'delivered', ackId: 'a', timestamp: 1 }) },
+      transport: {
+        getAckStore: () => undefined,
+        deliver: async () => ({ status: 'delivered', ackId: 'a', timestamp: 1 }),
+      },
     });
     expect(typeof runtime.start).toBe('function');
     expect(typeof runtime.stop).toBe('function');

@@ -14,14 +14,14 @@ production findings)`, 95 stale baseline entries await the next rewrite.
 
 ## 2. Changes per finding
 
-| # | File | Before | After |
-|---|------|--------|-------|
-| 1 | `app-vue/useAIChatSession.ts:131` | `message.includes('abort'\|'cancel')` fallback | removed; keeps structured `name==='AbortError'`/`code==='ABORTED'`/`DOMException` |
-| 2 | `goal/relation.use-cases.ts:40` | `e.message.includes('Unique')` | `isPrismaUniqueConstraintError` (P2002) |
-| 3 | `goal/wallet.use-cases.ts:54` | `e.message === 'ACCOUNT_NOT_FOUND'` | `e instanceof WalletAccountNotFoundError`; repo throws typed error |
-| 4 | `reminder/...calculation-service:214` | `error.message.includes('Invalid or unknown timezone')` | `instanceof InvalidTimezoneError` |
-| 5 | `schedule/schedule-domain-event-publisher:48-49` | `message.includes('lease lost')` | `instanceof ScheduleLeaseLostError` |
-| 6 | `schedule/schedule-rebuild-worker-service:82` | `err.message.toLowerCase().includes(...)` | `instanceof ScheduleLeaseLostError` |
+| #   | File                                             | Before                                                  | After                                                                             |
+| --- | ------------------------------------------------ | ------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| 1   | `app-vue/useAIChatSession.ts:131`                | `message.includes('abort'\|'cancel')` fallback          | removed; keeps structured `name==='AbortError'`/`code==='ABORTED'`/`DOMException` |
+| 2   | `goal/relation.use-cases.ts:40`                  | `e.message.includes('Unique')`                          | `isPrismaUniqueConstraintError` (P2002)                                           |
+| 3   | `goal/wallet.use-cases.ts:54`                    | `e.message === 'ACCOUNT_NOT_FOUND'`                     | `e instanceof WalletAccountNotFoundError`; repo throws typed error                |
+| 4   | `reminder/...calculation-service:214`            | `error.message.includes('Invalid or unknown timezone')` | `instanceof InvalidTimezoneError`                                                 |
+| 5   | `schedule/schedule-domain-event-publisher:48-49` | `message.includes('lease lost')`                        | `instanceof ScheduleLeaseLostError`                                               |
+| 6   | `schedule/schedule-rebuild-worker-service:82`    | `err.message.toLowerCase().includes(...)`               | `instanceof ScheduleLeaseLostError`                                               |
 
 Supporting: 14 schedule lease-lost throws upgraded from `throw new Error('...(lease lost)')` to
 `throw new ScheduleLeaseLostError(...)` in both prisma and powersync repositories;
@@ -38,6 +38,7 @@ Supporting: 14 schedule lease-lost throws upgraded from `throw new Error('...(le
   asserts `.toThrow('ACCOUNT_NOT_FOUND')` / `/lease lost/` keep passing.
 
 ## 4. Validation
+
 - app-vue composables: 16/288; goal use-cases+domain: 52/329; reminder domain: 18/218;
   schedule application+prisma+lease: 18/145. All passed (independent re-run of scanner passed).
 - Per-package typecheck: `tsc --noEmit` with `node --stack_size=8192` (Node 26 TS stack-overflow workaround) — clean.
@@ -45,4 +46,5 @@ Supporting: 14 schedule lease-lost throws upgraded from `throw new Error('...(le
   not usable here; direct tsc used per the memory note.
 
 ## 5. Gate
+
 Review passes. `FAILURE_MESSAGE_BRANCH = 0`. Proceed to push + CI.

@@ -47,7 +47,8 @@ if (!['x64', 'arm64'].includes(arch)) {
 
 const packageJson = JSON.parse(await readFile(path.join(workspaceRoot, 'package.json'), 'utf8'));
 const electronVersion = packageJson.devDependencies?.electron;
-if (!electronVersion) throw new Error('Workspace package.json does not declare devDependencies.electron');
+if (!electronVersion)
+  throw new Error('Workspace package.json does not declare devDependencies.electron');
 
 // Resolve @electron/rebuild from the workspace being packaged. This also works
 // when the helper comes from a separate release-tooling checkout.

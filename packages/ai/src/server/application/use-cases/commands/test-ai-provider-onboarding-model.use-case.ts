@@ -30,7 +30,8 @@ export class TestAIProviderOnboardingModelUseCase {
       request.onboardingId,
       startedAt,
     );
-    if (!session) throw new AIExecutionError('not_found', 'AI provider onboarding session is unavailable');
+    if (!session)
+      throw new AIExecutionError('not_found', 'AI provider onboarding session is unavailable');
 
     const modelId = normalizeOpenAICompatibleModelId(request.modelId);
     const credential = await this.secretVault.resolve({
@@ -57,7 +58,11 @@ export class TestAIProviderOnboardingModelUseCase {
       modelId,
       now: this.now(),
     });
-    if (!verified) throw new AIExecutionError('conflict', 'AI provider onboarding session changed during model test');
+    if (!verified)
+      throw new AIExecutionError(
+        'conflict',
+        'AI provider onboarding session changed during model test',
+      );
 
     return ok({ ok: true, modelId, latencyMs: Math.max(0, this.now() - startedAt) });
   }

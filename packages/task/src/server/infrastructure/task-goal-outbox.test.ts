@@ -92,7 +92,11 @@ describe('toTaskGoalOutboxRecord V2', () => {
 
   it.each([0, -2, null])('never enqueues a Prompt suggestion %s as a fact', (suggestedValue) => {
     const event = completionEvent(null);
-    event.payload.goalBinding!.progressRule = { mode: 'Prompt', trigger: 'EachCompletion', suggestedValue };
+    event.payload.goalBinding!.progressRule = {
+      mode: 'Prompt',
+      trigger: 'EachCompletion',
+      suggestedValue,
+    };
     expect(toTaskGoalOutboxRecord(event)).toBeNull();
   });
 

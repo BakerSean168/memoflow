@@ -19,14 +19,14 @@ updated: 2026-09-19T00:00:00+00:00
 
 Account 是用户资料和生命周期的业务聚合，不负责密码、OAuth、Session、本地 Profile 解锁或跨模块偏好。
 
-| 事实                             | 真源                                 |
-| -------------------------------- | ------------------------------------ |
-| 登录邮箱、验证状态、云端 Session | Better Auth / `@memoflow/cloud-auth` |
-| 昵称、真实姓名、头像、简介、性别和生日 | Account                         |
-| 外观、区域和跨设备用户偏好       | Setting / `UserPreferenceRecord`    |
-| 通知投递偏好                     | Notification                      |
-| Desktop 当前打开哪个本地容器     | Desktop Profile Access               |
-| Profile 是否连接云端 Account     | `CloudBinding`                       |
+| 事实                                   | 真源                                 |
+| -------------------------------------- | ------------------------------------ |
+| 登录邮箱、验证状态、云端 Session       | Better Auth / `@memoflow/cloud-auth` |
+| 昵称、真实姓名、头像、简介、性别和生日 | Account                              |
+| 外观、区域和跨设备用户偏好             | Setting / `UserPreferenceRecord`     |
+| 通知投递偏好                           | Notification                         |
+| Desktop 当前打开哪个本地容器           | Desktop Profile Access               |
+| Profile 是否连接云端 Account           | `CloudBinding`                       |
 
 Better Auth user ID 直接作为云端 `Account.id` 和业务 `identityId`，不再保留平行 `AuthIdentity` 映射。
 

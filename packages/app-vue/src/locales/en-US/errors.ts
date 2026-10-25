@@ -13,8 +13,10 @@ export default {
 
   AI_WORKFLOW_STATUS_UNSUPPORTED:
     'This workflow state is no longer supported. Start a new workflow.',
-  LOCAL_AGENT_RATE_LIMITED: 'This Agent channel is rate limiting requests. Try again later or choose another model.',
-  LOCAL_AGENT_QUOTA_EXHAUSTED: 'This Agent channel has insufficient quota. Wait for quota to recover or explicitly choose another channel.',
+  LOCAL_AGENT_RATE_LIMITED:
+    'This Agent channel is rate limiting requests. Try again later or choose another model.',
+  LOCAL_AGENT_QUOTA_EXHAUSTED:
+    'This Agent channel has insufficient quota. Wait for quota to recover or explicitly choose another channel.',
   AI_RUNTIME_ERROR: 'This reply could not be completed. Try again or switch models.',
   AI_RUNTIME_TRANSPORT_ERROR: 'This reply could not be completed. Try again or switch models.',
   PROVIDER_AUTH_FAILED:

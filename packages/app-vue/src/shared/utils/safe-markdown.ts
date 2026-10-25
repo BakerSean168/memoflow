@@ -7,7 +7,12 @@
  * text and attribute escaping paths.
  */
 
-import MarkdownIt, { type StateBlock, type StateCore, type StateInline, type Token } from 'markdown-it';
+import MarkdownIt, {
+  type StateBlock,
+  type StateCore,
+  type StateInline,
+  type Token,
+} from 'markdown-it';
 import hljs from 'highlight.js/lib/core';
 import bash from 'highlight.js/lib/languages/bash';
 import css from 'highlight.js/lib/languages/css';

@@ -18,31 +18,30 @@ type DesktopAuthHost = object | null | undefined;
 // Residual 901: local DesktopAuthStatus dual retired — sole status shape is contracts AuthStatus
 // (residual 865 already deleted AuthStatusDTO; recovery must not reintroduce a slim dual body).
 
-type DesktopAuthErrorLike = {
-  code?: string | null;
-} | null | undefined;
+type DesktopAuthErrorLike =
+  | {
+      code?: string | null;
+    }
+  | null
+  | undefined;
 
 export function isDesktopAuthRecoverable(error: DesktopAuthErrorLike): boolean {
   return error?.code === 'AUTH_REQUIRED' || error?.code === 'AUTH_RESTORING';
 }
 
-export function getDesktopAuthApi(
-  host?: DesktopAuthHost,
-): DesktopAuthApi | undefined {
+export function getDesktopAuthApi(host?: DesktopAuthHost): DesktopAuthApi | undefined {
   return (host as { electronAPI?: DesktopAuthApi } | null | undefined)?.electronAPI;
 }
 
 // Residual 909: sole desktop-detect helper (no inline { invoke?: unknown } duals at call sites).
-export function hasDesktopAuthApi(
-  host?: DesktopAuthHost,
-): boolean {
+export function hasDesktopAuthApi(host?: DesktopAuthHost): boolean {
   return typeof getDesktopAuthApi(host)?.invoke === 'function';
 }
 
-async function readAccessSnapshot(
-  api: DesktopAuthApi,
-): Promise<DesktopAccessSnapshot | null> {
-  const response = (await api.invoke!(ProfileAccessChannels.GET_SNAPSHOT)) as IpcResult<DesktopAccessSnapshot>;
+async function readAccessSnapshot(api: DesktopAuthApi): Promise<DesktopAccessSnapshot | null> {
+  const response = (await api.invoke!(
+    ProfileAccessChannels.GET_SNAPSHOT,
+  )) as IpcResult<DesktopAccessSnapshot>;
   const result = fromIpcResult(response);
   return isOk(result) ? result.data : null;
 }

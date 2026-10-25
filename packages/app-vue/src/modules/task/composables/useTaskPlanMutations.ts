@@ -105,11 +105,7 @@ export function useTaskPlanMutations() {
     onSuccess: (data, _vars, context) => {
       // Seed the detail key from the server response (plan §3.4).
       // 用 server 返回的 plan seed detail key（§3.4）。
-      patchTaskPlanEverywhere(
-        runtime.queryClient,
-        context!.identityScope,
-        data.plan.toDTO(),
-      );
+      patchTaskPlanEverywhere(runtime.queryClient, context!.identityScope, data.plan.toDTO());
       toast.success(
         t(createFeedbackKey(_vars.feedbackIntent ?? 'plan', data.todayOccurrenceCreated), {
           count: data.occurrenceCount,
@@ -253,11 +249,7 @@ export function useTaskPlanMutations() {
       },
       onError: (_error, _id, context) => {
         if (context?.snapshot) {
-          restoreTaskPlanSnapshot(
-            runtime.queryClient,
-            context!.identityScope,
-            context.snapshot,
-          );
+          restoreTaskPlanSnapshot(runtime.queryClient, context!.identityScope, context.snapshot);
         }
       },
       onSuccess: (dto, _id, context) => {

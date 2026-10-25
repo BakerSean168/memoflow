@@ -7,8 +7,7 @@ describe('KnowledgeMarkdownPreview', () => {
     const wrapper = mount(KnowledgeMarkdownPreview, {
       props: {
         title: 'Zyte Scrapy Cloud',
-        markdown:
-          '---\ntitle: Zyte Scrapy Cloud\n---\n\n# Zyte Scrapy Cloud\n\n## Summary\n\nBody',
+        markdown: '---\ntitle: Zyte Scrapy Cloud\n---\n\n# Zyte Scrapy Cloud\n\n## Summary\n\nBody',
       },
     });
 

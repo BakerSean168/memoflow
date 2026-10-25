@@ -109,11 +109,7 @@ export default function AppTabs() {
                   底部只保留一个全局入口，页面跳转集中在这里。
                 </ThemedText>
               </View>
-              <PrimaryButton
-                label="Close"
-                onPress={() => setIsMenuOpen(false)}
-                variant="ghost"
-              />
+              <PrimaryButton label="Close" onPress={() => setIsMenuOpen(false)} variant="ghost" />
             </View>
 
             <View style={styles.menuList}>
@@ -150,12 +146,7 @@ export default function AppTabs() {
           </ThemedView>
         ) : null}
 
-        <View
-          style={[
-            styles.bottomLauncherWrap,
-            { paddingBottom: insets.bottom + Spacing.two },
-          ]}
-        >
+        <View style={[styles.bottomLauncherWrap, { paddingBottom: insets.bottom + Spacing.two }]}>
           <ThemedView type="backgroundElement" style={styles.bottomLauncher}>
             <View style={styles.bottomCopy}>
               <ThemedText type="small" themeColor="textSecondary">

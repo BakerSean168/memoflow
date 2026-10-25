@@ -20,9 +20,11 @@ type GlobalWithEnv = typeof globalThis & {
 };
 
 function getEnv(): Record<string, string | boolean | undefined> {
-  return (globalThis as GlobalWithEnv).import?.meta?.env
-    ?? (globalThis as GlobalWithEnv).process?.env
-    ?? {};
+  return (
+    (globalThis as GlobalWithEnv).import?.meta?.env ??
+    (globalThis as GlobalWithEnv).process?.env ??
+    {}
+  );
 }
 
 /**
@@ -31,7 +33,13 @@ function getEnv(): Record<string, string | boolean | undefined> {
 export function getEnvironmentConfig(): EnvironmentConfig {
   const env = getEnv();
 
-  const validLogLevels: EnvironmentConfig['logLevel'][] = ['debug', 'info', 'warn', 'error', 'silent'];
+  const validLogLevels: EnvironmentConfig['logLevel'][] = [
+    'debug',
+    'info',
+    'warn',
+    'error',
+    'silent',
+  ];
   const rawLogLevel = env.VITE_LOG_LEVEL;
   const logLevel: EnvironmentConfig['logLevel'] =
     typeof rawLogLevel === 'string' && (validLogLevels as string[]).includes(rawLogLevel)
@@ -40,7 +48,8 @@ export function getEnvironmentConfig(): EnvironmentConfig {
 
   const config: EnvironmentConfig = {
     apiBaseUrl: (env.VITE_API_BASE_URL as string | undefined) || 'http://localhost:3000/api/v1',
-    uploadBaseUrl: (env.VITE_UPLOAD_BASE_URL as string | undefined) || 'http://localhost:3000/api/v1/upload',
+    uploadBaseUrl:
+      (env.VITE_UPLOAD_BASE_URL as string | undefined) || 'http://localhost:3000/api/v1/upload',
     timeout: Number(env.VITE_API_TIMEOUT) || 10000,
     enableMock: env.VITE_ENABLE_MOCK === 'true',
     logLevel,
@@ -197,7 +206,11 @@ export function shouldRetry(error: unknown, attempt: number, maxAttempts: number
 /**
  * 创建缓存键
  */
-export function createCacheKey(method: string, url: string, params?: Record<string, unknown>): string {
+export function createCacheKey(
+  method: string,
+  url: string,
+  params?: Record<string, unknown>,
+): string {
   const baseKey = `${method.toUpperCase()}:${url}`;
 
   if (!params) return baseKey;

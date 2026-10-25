@@ -21,17 +21,19 @@ const provider = {
 
 function databaseFixture(tx: IElectronDatabaseTransaction, events: string[]) {
   return {
-    writeTransaction: vi.fn(async <T>(work: (value: IElectronDatabaseTransaction) => Promise<T>) => {
-      events.push('tx-start');
-      try {
-        const result = await work(tx);
-        events.push('tx-commit');
-        return result;
-      } catch (error) {
-        events.push('tx-rollback');
-        throw error;
-      }
-    }),
+    writeTransaction: vi.fn(
+      async <T>(work: (value: IElectronDatabaseTransaction) => Promise<T>) => {
+        events.push('tx-start');
+        try {
+          const result = await work(tx);
+          events.push('tx-commit');
+          return result;
+        } catch (error) {
+          events.push('tx-rollback');
+          throw error;
+        }
+      },
+    ),
     execute: vi.fn(),
     getAll: vi.fn(),
     getOptional: vi.fn(),
@@ -85,7 +87,9 @@ function createFixture(
       if (sql.includes('INSERT INTO ai_provider_configs')) {
         events.push('insert-provider');
         if (options.insertErrorCode) {
-          throw Object.assign(new Error('provider insert failed'), { code: options.insertErrorCode });
+          throw Object.assign(new Error('provider insert failed'), {
+            code: options.insertErrorCode,
+          });
         }
         if (options.insertFails) throw new Error('provider insert failed');
         return { rowsAffected: 1 };
@@ -93,7 +97,7 @@ function createFixture(
       return { rowsAffected: 0 };
     }),
     getAll: vi.fn(async () => []),
-    get: vi.fn(async () => ({} as never)),
+    get: vi.fn(async () => ({}) as never),
   };
   return { db: databaseFixture(tx, events), tx, events };
 }
@@ -151,7 +155,7 @@ function replacementFixture(
       return { rowsAffected: 0 };
     }),
     getAll: vi.fn(async () => []),
-    get: vi.fn(async () => ({} as never)),
+    get: vi.fn(async () => ({}) as never),
   };
   return { db: databaseFixture(tx, events), tx, events };
 }

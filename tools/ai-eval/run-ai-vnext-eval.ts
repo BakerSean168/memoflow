@@ -75,18 +75,28 @@ async function main(): Promise<void> {
   const historyDir = path.join(absoluteOut, 'history');
   await mkdir(historyDir, { recursive: true });
   await Promise.all([
-    writeFile(path.join(absoluteOut, 'baseline-latest.json'), `${JSON.stringify(baseline.report, null, 2)}\n`),
-    writeFile(path.join(absoluteOut, 'latest.json'), `${JSON.stringify(candidateReport, null, 2)}\n`),
+    writeFile(
+      path.join(absoluteOut, 'baseline-latest.json'),
+      `${JSON.stringify(baseline.report, null, 2)}\n`,
+    ),
+    writeFile(
+      path.join(absoluteOut, 'latest.json'),
+      `${JSON.stringify(candidateReport, null, 2)}\n`,
+    ),
     writeFile(
       path.join(absoluteOut, 'comparison-latest.json'),
-      `${JSON.stringify({
-        generatedAt: candidateRecording.recordedAt,
-        evidenceSource: candidateRecording.config.source,
-        dataset: { id: dataset.id, version: dataset.version, path: datasetPath },
-        baselineBundle: baselineRecording.config,
-        candidateBundle: candidateRecording.config,
-        comparison,
-      }, null, 2)}\n`,
+      `${JSON.stringify(
+        {
+          generatedAt: candidateRecording.recordedAt,
+          evidenceSource: candidateRecording.config.source,
+          dataset: { id: dataset.id, version: dataset.version, path: datasetPath },
+          baselineBundle: baselineRecording.config,
+          candidateBundle: candidateRecording.config,
+          comparison,
+        },
+        null,
+        2,
+      )}\n`,
     ),
     writeFile(
       path.join(historyDir, archiveFileName(baselineRecording.recordedAt)),
@@ -100,8 +110,12 @@ async function main(): Promise<void> {
 
   console.log(`AI vNext eval: ${candidateReport.gatePassed ? 'PASS' : 'FAIL'}`);
   console.log(`evidence=${candidateRecording.config.source}`);
-  console.log(`baseline=${baselineRecording.config.id} passRate=${baseline.report.passRate.toFixed(3)}`);
-  console.log(`candidate=${candidateRecording.config.id} passRate=${candidateReport.passRate.toFixed(3)}`);
+  console.log(
+    `baseline=${baselineRecording.config.id} passRate=${baseline.report.passRate.toFixed(3)}`,
+  );
+  console.log(
+    `candidate=${candidateRecording.config.id} passRate=${candidateReport.passRate.toFixed(3)}`,
+  );
   console.log(`costDelta=${(comparison.deltas.estimatedCostRatio * 100).toFixed(2)}%`);
   console.log(`p95LatencyDelta=${(comparison.deltas.p95LatencyRatio * 100).toFixed(2)}%`);
   console.log(`report=${path.relative(root, path.join(absoluteOut, 'latest.json'))}`);

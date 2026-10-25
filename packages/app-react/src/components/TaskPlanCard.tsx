@@ -37,7 +37,9 @@ export function TaskPlanCard({
       description={template.description ?? 'No description yet.'}
       footer={
         <View style={styles.actionRow}>
-          {onOpen ? <PrimaryButton label="Open detail" onPress={onOpen} variant="secondary" /> : null}
+          {onOpen ? (
+            <PrimaryButton label="Open detail" onPress={onOpen} variant="secondary" />
+          ) : null}
           {onEdit ? <PrimaryButton label="Edit" onPress={onEdit} variant="ghost" /> : null}
         </View>
       }
@@ -59,7 +61,10 @@ export function TaskPlanCard({
       <ThemedView type="backgroundSelected" style={styles.progressFillWrap}>
         <ThemedView
           type="tint"
-          style={[styles.progressFill, { width: `${Math.min(100, Math.max(0, template.completionRate))}%` }]}
+          style={[
+            styles.progressFill,
+            { width: `${Math.min(100, Math.max(0, template.completionRate))}%` },
+          ]}
         />
       </ThemedView>
 
@@ -70,7 +75,9 @@ export function TaskPlanCard({
         <View style={styles.tagRow}>
           {template.labels.slice(0, 3).map((label) => (
             <ThemedView key={label.id} type="backgroundSelected" style={styles.tagBadge}>
-              <ThemedText type="small" themeColor="textSecondary">{label.name}</ThemedText>
+              <ThemedText type="small" themeColor="textSecondary">
+                {label.name}
+              </ThemedText>
             </ThemedView>
           ))}
         </View>
@@ -82,7 +89,9 @@ export function TaskPlanCard({
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <ThemedView type="backgroundSelected" style={styles.metricCard}>
-      <ThemedText type="small" themeColor="textSecondary">{label}</ThemedText>
+      <ThemedText type="small" themeColor="textSecondary">
+        {label}
+      </ThemedText>
       <ThemedText type="smallBold">{value}</ThemedText>
     </ThemedView>
   );
@@ -91,7 +100,12 @@ function Metric({ label, value }: { label: string; value: string }) {
 const styles = StyleSheet.create({
   pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   metricGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
-  metricCard: { minWidth: 88, borderRadius: Spacing.three, padding: Spacing.two, gap: Spacing.half },
+  metricCard: {
+    minWidth: 88,
+    borderRadius: Spacing.three,
+    padding: Spacing.two,
+    gap: Spacing.half,
+  },
   progressFillWrap: { height: 10, borderRadius: 999, overflow: 'hidden' },
   progressFill: { height: '100%', borderRadius: 999 },
   footerRow: { gap: Spacing.two },

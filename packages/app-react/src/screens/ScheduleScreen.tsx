@@ -58,9 +58,8 @@ export function ScheduleScreen() {
       eyebrow="Schedule"
       title="Agenda and reminders"
       subtitle="日程、冲突和 agenda。"
-      refreshControl={
-        <RefreshControl refreshing={isAgendaLoading} onRefresh={refreshAgenda} />
-      }>
+      refreshControl={<RefreshControl refreshing={isAgendaLoading} onRefresh={refreshAgenda} />}
+    >
       {!isRemoteAuthenticated ? (
         <SectionCard title="Sign in required" description="登录后可查看日程数据。">
           <ThemedText type="small" themeColor="textSecondary">
@@ -82,7 +81,9 @@ export function ScheduleScreen() {
 
           {agendaError ? (
             <SectionCard title="Agenda load failed" description="Unable to load agenda events.">
-              <ThemedText type="small" themeColor="warning">{agendaError}</ThemedText>
+              <ThemedText type="small" themeColor="warning">
+                {agendaError}
+              </ThemedText>
               <PrimaryButton label="Retry" onPress={refreshAgenda} variant="secondary" />
             </SectionCard>
           ) : null}
@@ -105,7 +106,11 @@ export function ScheduleScreen() {
                     </View>
                     <View style={styles.listColumn}>
                       {group.items.map((entry) => (
-                        <ThemedView key={entry.id} type="backgroundSelected" style={styles.agendaCard}>
+                        <ThemedView
+                          key={entry.id}
+                          type="backgroundSelected"
+                          style={styles.agendaCard}
+                        >
                           <View style={styles.laneHeader}>
                             <ThemedText type="smallBold">{entry.title}</ThemedText>
                             <StatusPill label={entry.timeRange} tone="tint" />
@@ -114,7 +119,10 @@ export function ScheduleScreen() {
                             <ThemedText type="small">{entry.description}</ThemedText>
                           ) : null}
                           <View style={styles.pillRow}>
-                            <StatusPill label={`${entry.durationMinutes} min`} tone="textSecondary" />
+                            <StatusPill
+                              label={`${entry.durationMinutes} min`}
+                              tone="textSecondary"
+                            />
                             {entry.location ? (
                               <StatusPill label={entry.location} tone="textSecondary" />
                             ) : null}
@@ -124,7 +132,9 @@ export function ScheduleScreen() {
                                 tone="textSecondary"
                               />
                             ) : null}
-                            {entry.hasConflict ? <StatusPill label="Conflict" tone="warning" /> : null}
+                            {entry.hasConflict ? (
+                              <StatusPill label="Conflict" tone="warning" />
+                            ) : null}
                           </View>
                           <View style={styles.actionRow}>
                             <PrimaryButton

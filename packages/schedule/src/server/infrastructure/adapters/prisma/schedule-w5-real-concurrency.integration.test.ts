@@ -355,7 +355,8 @@ describe('W5: Real Database Concurrency & PowerSync Integration Matrix', () => {
     const remaining = await repo.findByIdForIdentity(identityId, e1.id);
     expect(remaining).not.toBeNull();
     expect(
-      (await new ScheduleConflictDetectionService(repo).detectConflictsForEntry(remaining!)).hasConflict,
+      (await new ScheduleConflictDetectionService(repo).detectConflictsForEntry(remaining!))
+        .hasConflict,
     ).toBe(false);
   });
 

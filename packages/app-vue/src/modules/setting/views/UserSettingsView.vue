@@ -168,7 +168,10 @@ onBeforeUnmount(() => {
         </Button>
       </ProductSurfaceHeader>
 
-      <main class="min-h-0 flex-1 overflow-y-auto scrollbar-gutter-stable" data-testid="settings-content-scroll">
+      <main
+        class="min-h-0 flex-1 overflow-y-auto scrollbar-gutter-stable"
+        data-testid="settings-content-scroll"
+      >
         <div
           class="mx-auto w-full px-5 py-8 sm:px-8 sm:py-10"
           :class="activeTab === 'ai' ? 'max-w-[1064px]' : 'max-w-4xl'"

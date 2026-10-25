@@ -15,9 +15,9 @@ describe('loadWebAuthCapabilities', () => {
   });
 
   it('returns an explicitly disabled provider without retrying', async () => {
-    const fetchMock = vi.fn().mockResolvedValue(
-      jsonResponse(200, { providers: { github: false } }),
-    );
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(jsonResponse(200, { providers: { github: false } }));
     vi.stubGlobal('fetch', fetchMock);
 
     await expect(loadWebAuthCapabilities()).resolves.toEqual({ github: false });

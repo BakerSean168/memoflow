@@ -1,8 +1,8 @@
 /**
  * TaskReminderConfig 值对象
- * 
+ *
  * 【规范说明：Class 类型值对象 - 参考 domain-class-value-object-spec.md】
- * 
+ *
  * 任务提醒配置：包含总开关和多个触发器配置
  * 不可变性（所有修改返回新实例）
  */
@@ -27,13 +27,15 @@ interface ReminderTrigger {
 
 /**
  * TaskReminderConfig 值对象实现
- * 
+ *
  * 包含：
  * - enabled: 提醒总开关
  * - triggers: 触发器列表
  */
-export class TaskReminderConfig extends ValueObject<TaskReminderConfigDTO> implements ITaskReminderConfig {
-
+export class TaskReminderConfig
+  extends ValueObject<TaskReminderConfigDTO>
+  implements ITaskReminderConfig
+{
   private constructor(props: TaskReminderConfigDTO) {
     super(props);
   }
@@ -62,18 +64,17 @@ export class TaskReminderConfig extends ValueObject<TaskReminderConfigDTO> imple
   /**
    * 创建相对时间提醒（如任务开始前 30 分钟）
    */
-  public static createRelativeReminder(
-    value: number,
-    unit: ReminderTimeUnit,
-  ): TaskReminderConfig {
+  public static createRelativeReminder(value: number, unit: ReminderTimeUnit): TaskReminderConfig {
     return new TaskReminderConfig({
       enabled: true,
-      triggers: [{
-        type: 'Relative',
-        absoluteTime: null,
-        relativeValue: value,
-        relativeUnit: unit,
-      }],
+      triggers: [
+        {
+          type: 'Relative',
+          absoluteTime: null,
+          relativeValue: value,
+          relativeUnit: unit,
+        },
+      ],
     });
   }
 
@@ -135,16 +136,16 @@ export class TaskReminderConfig extends ValueObject<TaskReminderConfigDTO> imple
   /**
    * 添加相对时间触发器
    */
-  public addRelativeTrigger(
-    value: number,
-    unit: ReminderTimeUnit,
-  ): TaskReminderConfig {
-    const triggers = [...this.props.triggers, {
-      type: 'Relative' as TaskReminderType,
-      absoluteTime: null,
-      relativeValue: value,
-      relativeUnit: unit,
-    }];
+  public addRelativeTrigger(value: number, unit: ReminderTimeUnit): TaskReminderConfig {
+    const triggers = [
+      ...this.props.triggers,
+      {
+        type: 'Relative' as TaskReminderType,
+        absoluteTime: null,
+        relativeValue: value,
+        relativeUnit: unit,
+      },
+    ];
     const newProps = { ...this.props, triggers };
     TaskReminderConfig.validate(newProps);
     return new TaskReminderConfig(newProps);
@@ -154,12 +155,15 @@ export class TaskReminderConfig extends ValueObject<TaskReminderConfigDTO> imple
    * 添加绝对时间触发器
    */
   public addAbsoluteTrigger(absoluteTime: number): TaskReminderConfig {
-    const triggers = [...this.props.triggers, {
-      type: 'Absolute' as TaskReminderType,
-      absoluteTime,
-      relativeValue: null,
-      relativeUnit: null,
-    }];
+    const triggers = [
+      ...this.props.triggers,
+      {
+        type: 'Absolute' as TaskReminderType,
+        absoluteTime,
+        relativeValue: null,
+        relativeUnit: null,
+      },
+    ];
     const newProps = { ...this.props, triggers };
     TaskReminderConfig.validate(newProps);
     return new TaskReminderConfig(newProps);
@@ -206,5 +210,4 @@ export class TaskReminderConfig extends ValueObject<TaskReminderConfigDTO> imple
       triggers: [...this.props.triggers],
     };
   }
-
 }

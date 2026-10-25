@@ -328,7 +328,9 @@ it('checks consent before saving an answer and clears a stale pending resume so 
   await expect(f.service.resume(answer, cx(owner), authority)).rejects.toMatchObject({
     code: 'FORBIDDEN',
   });
-  expect((await f.repository.find(ask.handle, owner, authority.connectionId))?.pendingJson).toBeNull();
+  expect(
+    (await f.repository.find(ask.handle, owner, authority.connectionId))?.pendingJson,
+  ).toBeNull();
 
   await f.repository.save(row.id, {
     pendingJson: JSON.stringify({
@@ -342,7 +344,9 @@ it('checks consent before saving an answer and clears a stale pending resume so 
     status: 'suspended',
     suspension: { type: 'recovery_required', retryable: false },
   });
-  expect((await f.repository.find(ask.handle, owner, authority.connectionId))?.pendingJson).toBeNull();
+  expect(
+    (await f.repository.find(ask.handle, owner, authority.connectionId))?.pendingJson,
+  ).toBeNull();
   expect(f.plan).toHaveBeenCalledTimes(1);
   const cancelled = await f.service.cancel(handleInput(recovered), cx(owner), authority);
   expect(cancelled.run.status).toBe('cancelled');
@@ -411,7 +415,10 @@ it('routes an in-flight durable run through recoverTask after API restart', asyn
   const recovered = await f.service.get(handleInput(review), cx(owner), authority);
 
   expect(recoverTask).toHaveBeenCalledWith(
-    expect.objectContaining({ runId: row.runId, context: expect.objectContaining({ identityId: owner }) }),
+    expect.objectContaining({
+      runId: row.runId,
+      context: expect.objectContaining({ identityId: owner }),
+    }),
   );
   expect(recovered.revision).toBe(review.revision + 1);
   expect(recovered.run).toEqual(review.run);
@@ -499,17 +506,13 @@ it('enforces the assisted handle binding and live PAT authority inside the Task 
     pendingJson: null,
   });
   await expect(
-    attempt(
-      { handleId: foreignRow.id, pendingJson: 'null', taskId },
-      owner,
-      authority,
-    ),
+    attempt({ handleId: foreignRow.id, pendingJson: 'null', taskId }, owner, authority),
   ).rejects.toMatchObject({ code: 'FORBIDDEN' });
 
   await pats.revoke(owner, authority.connectionId);
-  await expect(
-    attempt({ handleId: row.id, pendingJson: 'null', taskId }),
-  ).rejects.toMatchObject({ code: 'FORBIDDEN' });
+  await expect(attempt({ handleId: row.id, pendingJson: 'null', taskId })).rejects.toMatchObject({
+    code: 'FORBIDDEN',
+  });
   expect(await prisma.taskPlan.count({ where: { identityId: owner } })).toBe(0);
   expect(await prisma.externalMutationReceipt.count({ where: { identityId: owner } })).toBe(0);
 });

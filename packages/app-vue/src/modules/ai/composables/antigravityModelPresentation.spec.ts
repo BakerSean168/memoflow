@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  antigravityEffortVariant,
-  presentAntigravityModels,
-} from './antigravityModelPresentation';
+import { antigravityEffortVariant, presentAntigravityModels } from './antigravityModelPresentation';
 import type { ComposerModel } from './useAIModelCatalog';
 
 const variants = (['high', 'medium', 'low'] as const).map((effort) => ({

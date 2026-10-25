@@ -36,9 +36,19 @@ export class AIProviderOnboardingSessionMemoryRepository implements IAIProviderO
     return clone(row);
   }
 
-  async markModelVerified(input: { identityId: string; onboardingId: string; modelId: string; now: number }) {
+  async markModelVerified(input: {
+    identityId: string;
+    onboardingId: string;
+    modelId: string;
+    now: number;
+  }) {
     const row = this.rows.get(input.onboardingId);
-    if (!row || row.identityId !== input.identityId || row.expiresAt <= input.now || row.consumedAt != null) {
+    if (
+      !row ||
+      row.identityId !== input.identityId ||
+      row.expiresAt <= input.now ||
+      row.consumedAt != null
+    ) {
       return null;
     }
     const next: AIProviderOnboardingSessionRecord = {
@@ -51,9 +61,18 @@ export class AIProviderOnboardingSessionMemoryRepository implements IAIProviderO
     return clone(next);
   }
 
-  async markConsumed(input: { identityId: string; onboardingId: string; now: number }): Promise<boolean> {
+  async markConsumed(input: {
+    identityId: string;
+    onboardingId: string;
+    now: number;
+  }): Promise<boolean> {
     const row = this.rows.get(input.onboardingId);
-    if (!row || row.identityId !== input.identityId || row.expiresAt <= input.now || row.consumedAt != null) {
+    if (
+      !row ||
+      row.identityId !== input.identityId ||
+      row.expiresAt <= input.now ||
+      row.consumedAt != null
+    ) {
       return false;
     }
     this.rows.set(row.id, { ...row, consumedAt: input.now, updatedAt: input.now });

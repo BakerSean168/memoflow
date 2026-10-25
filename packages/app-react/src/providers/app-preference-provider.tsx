@@ -19,10 +19,7 @@ import { presentErrorMessage } from '@memoflow/http-client';
 
 import { useAppSession } from './app-session-provider';
 import { useAppClientRegistry } from './app-client-registry-provider';
-import {
-  resetProductTimePreferences,
-  setProductTimePreferences,
-} from '../utils/product-time';
+import { resetProductTimePreferences, setProductTimePreferences } from '../utils/product-time';
 
 type PresentationResponse = Extract<PreferenceNamespaceResponse, { namespace: 'presentation' }>;
 type RegionalResponse = Extract<PreferenceNamespaceResponse, { namespace: 'regional' }>;
@@ -81,7 +78,10 @@ export function AppPreferenceProvider({ children }: PropsWithChildren) {
       setError(presentErrorMessage(regionalResult.error));
       return;
     }
-    if (presentationResult.data.namespace !== 'presentation' || regionalResult.data.namespace !== 'regional') {
+    if (
+      presentationResult.data.namespace !== 'presentation' ||
+      regionalResult.data.namespace !== 'regional'
+    ) {
       setError('Preference namespace response mismatch.');
       return;
     }
@@ -99,58 +99,75 @@ export function AppPreferenceProvider({ children }: PropsWithChildren) {
     if (profile) setProductTimePreferences(profile);
   }, [profile]);
 
-  const patchPresentation = useCallback(async (patch: PreferenceNamespacePatch<'presentation'>) => {
-    if (!presentation) return false;
-    setIsMutating(true);
-    const result = await settingService.patchPreferenceNamespace('presentation', patch, presentation.revision);
-    setIsMutating(false);
-    if (!result.ok) {
-      setError(presentErrorMessage(result.error));
-      await refresh();
-      return false;
-    }
-    setPresentation({
-      namespace: 'presentation',
-      preferences: { ...presentation.preferences, ...patch } as PresentationPreferences,
-      revision: result.data.revision,
-    });
-    setError(null);
-    return true;
-  }, [presentation, refresh, settingService]);
+  const patchPresentation = useCallback(
+    async (patch: PreferenceNamespacePatch<'presentation'>) => {
+      if (!presentation) return false;
+      setIsMutating(true);
+      const result = await settingService.patchPreferenceNamespace(
+        'presentation',
+        patch,
+        presentation.revision,
+      );
+      setIsMutating(false);
+      if (!result.ok) {
+        setError(presentErrorMessage(result.error));
+        await refresh();
+        return false;
+      }
+      setPresentation({
+        namespace: 'presentation',
+        preferences: { ...presentation.preferences, ...patch } as PresentationPreferences,
+        revision: result.data.revision,
+      });
+      setError(null);
+      return true;
+    },
+    [presentation, refresh, settingService],
+  );
 
-  const patchRegional = useCallback(async (patch: PreferenceNamespacePatch<'regional'>) => {
-    if (!regional) return false;
-    setIsMutating(true);
-    const result = await settingService.patchPreferenceNamespace('regional', patch, regional.revision);
-    setIsMutating(false);
-    if (!result.ok) {
-      setError(presentErrorMessage(result.error));
-      await refresh();
-      return false;
-    }
-    setRegional({
-      namespace: 'regional',
-      preferences: { ...regional.preferences, ...patch } as RegionalPreferences,
-      revision: result.data.revision,
-    });
-    setError(null);
-    return true;
-  }, [refresh, regional, settingService]);
+  const patchRegional = useCallback(
+    async (patch: PreferenceNamespacePatch<'regional'>) => {
+      if (!regional) return false;
+      setIsMutating(true);
+      const result = await settingService.patchPreferenceNamespace(
+        'regional',
+        patch,
+        regional.revision,
+      );
+      setIsMutating(false);
+      if (!result.ok) {
+        setError(presentErrorMessage(result.error));
+        await refresh();
+        return false;
+      }
+      setRegional({
+        namespace: 'regional',
+        preferences: { ...regional.preferences, ...patch } as RegionalPreferences,
+        revision: result.data.revision,
+      });
+      setError(null);
+      return true;
+    },
+    [refresh, regional, settingService],
+  );
 
-  const resetNamespace = useCallback(async (namespace: 'presentation' | 'regional') => {
-    const current = namespace === 'presentation' ? presentation : regional;
-    if (!current) return false;
-    setIsMutating(true);
-    const result = await settingService.resetPreferenceNamespace(namespace, current.revision);
-    setIsMutating(false);
-    if (!result.ok) {
-      setError(presentErrorMessage(result.error));
+  const resetNamespace = useCallback(
+    async (namespace: 'presentation' | 'regional') => {
+      const current = namespace === 'presentation' ? presentation : regional;
+      if (!current) return false;
+      setIsMutating(true);
+      const result = await settingService.resetPreferenceNamespace(namespace, current.revision);
+      setIsMutating(false);
+      if (!result.ok) {
+        setError(presentErrorMessage(result.error));
+        await refresh();
+        return false;
+      }
       await refresh();
-      return false;
-    }
-    await refresh();
-    return true;
-  }, [presentation, refresh, regional, settingService]);
+      return true;
+    },
+    [presentation, refresh, regional, settingService],
+  );
 
   const resetAll = useCallback(async () => {
     if (!presentation || !regional) return false;
@@ -170,19 +187,21 @@ export function AppPreferenceProvider({ children }: PropsWithChildren) {
   }, [presentation, refresh, regional, settingService]);
 
   return (
-    <AppPreferenceContext.Provider value={{
-      profile,
-      presentationRevision: presentation?.revision ?? null,
-      regionalRevision: regional?.revision ?? null,
-      isLoading,
-      isMutating,
-      error,
-      refresh,
-      patchPresentation,
-      patchRegional,
-      resetNamespace,
-      resetAll,
-    }}>
+    <AppPreferenceContext.Provider
+      value={{
+        profile,
+        presentationRevision: presentation?.revision ?? null,
+        regionalRevision: regional?.revision ?? null,
+        isLoading,
+        isMutating,
+        error,
+        refresh,
+        patchPresentation,
+        patchRegional,
+        resetNamespace,
+        resetAll,
+      }}
+    >
       {children}
     </AppPreferenceContext.Provider>
   );

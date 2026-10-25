@@ -94,4 +94,3 @@ export interface IResultIpcClient {
   ): Promise<import('@memoflow/contracts/result').Result<T>>;
   getBridge?: () => ElectronBridge | undefined;
 }
-

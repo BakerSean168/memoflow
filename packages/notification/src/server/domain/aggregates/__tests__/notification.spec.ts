@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  NotificationCategory,
-  NotificationType,
-} from '@memoflow/contracts/notification';
+import { NotificationCategory, NotificationType } from '@memoflow/contracts/notification';
 import { Notification } from '../notification';
 
 function createFact() {
@@ -37,7 +34,9 @@ describe('Notification Fact aggregate', () => {
     const fact = createFact();
     expect(fact.domainEvents.map((event) => event.eventType)).toContain('notification:created');
     expect(fact.domainEvents.map((event) => event.eventType)).not.toContain('notification:sent');
-    expect(fact.domainEvents.map((event) => event.eventType)).not.toContain('notification:status-changed');
+    expect(fact.domainEvents.map((event) => event.eventType)).not.toContain(
+      'notification:status-changed',
+    );
   });
 
   it('marks read as Fact presentation state only', () => {

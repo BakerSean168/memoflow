@@ -86,13 +86,14 @@ describe('ElapsedRuntime', () => {
     );
 
     const satisfiedAt = t0 + 70_000;
-    expect(runtime.markSatisfied({ identityId: 'i-1', routineId: 'r-1', at: satisfiedAt }))
-      .toMatchObject({
-        occurrenceKey: 'routine:r-1:elapsed:definition-1:1',
-        completedGeneration: 1,
-        nextAnchorRevision: `satisfied-${satisfiedAt}`,
-        nextGeneration: 1,
-      });
+    expect(
+      runtime.markSatisfied({ identityId: 'i-1', routineId: 'r-1', at: satisfiedAt }),
+    ).toMatchObject({
+      occurrenceKey: 'routine:r-1:elapsed:definition-1:1',
+      completedGeneration: 1,
+      nextAnchorRevision: `satisfied-${satisfiedAt}`,
+      nextGeneration: 1,
+    });
     expect(runtime.getSnapshot('i-1', 'r-1')).toMatchObject({
       anchorAt: satisfiedAt,
       anchorRevision: `satisfied-${satisfiedAt}`,
@@ -142,11 +143,12 @@ describe('ElapsedRuntime', () => {
         occurrenceKey: `routine:r-1:elapsed:profile-${t0 + 10_000}:1`,
       }),
     );
-    expect(runtime.markSatisfied({ identityId: 'i-1', routineId: 'r-1', at: t0 + 75_000 }))
-      .toMatchObject({
-        nextAnchorRevision: `profile-${t0 + 10_000}`,
-        nextGeneration: 2,
-      });
+    expect(
+      runtime.markSatisfied({ identityId: 'i-1', routineId: 'r-1', at: t0 + 75_000 }),
+    ).toMatchObject({
+      nextAnchorRevision: `profile-${t0 + 10_000}`,
+      nextGeneration: 2,
+    });
 
     runtime.updateGates({
       identityId: 'i-1',

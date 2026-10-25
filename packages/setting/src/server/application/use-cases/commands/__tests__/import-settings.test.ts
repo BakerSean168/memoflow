@@ -61,7 +61,10 @@ describe('ImportSettings V3', () => {
     ['source identity', { preferences: { ...profile, identityId: 'source-user' } }],
     ['device preference', { preferences: { ...profile, device: { soundEnabled: false } } }],
     ['notification owner', { preferences: { ...profile, notification: { inApp: false } } }],
-    ['unknown key', { preferences: { ...profile, presentation: { ...profile.presentation, typo: true } } }],
+    [
+      'unknown key',
+      { preferences: { ...profile, presentation: { ...profile.presentation, typo: true } } },
+    ],
   ])('rejects %s leakage before mutation', async (_name, overrides) => {
     await expect(useCase.execute('destination-user', v3(overrides))).rejects.toThrow(
       'Invalid preference V3 import',

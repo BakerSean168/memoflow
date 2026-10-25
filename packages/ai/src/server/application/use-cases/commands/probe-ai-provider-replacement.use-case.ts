@@ -27,9 +27,7 @@ export class ProbeAIProviderReplacementUseCase {
         // Custom replacement defaults to the current endpoint when the user is
         // rotating only the credential. Preset endpoints stay catalog-owned.
         baseUrl:
-          request.catalogId === 'custom' && !request.baseUrl
-            ? current.baseUrl
-            : request.baseUrl,
+          request.catalogId === 'custom' && !request.baseUrl ? current.baseUrl : request.baseUrl,
       },
       cx,
       { targetProviderId: providerId },

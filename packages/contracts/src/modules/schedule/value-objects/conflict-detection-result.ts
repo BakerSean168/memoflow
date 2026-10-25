@@ -35,11 +35,7 @@ export const ConflictDetailSchema = z.object({
   overlapEnd: z.number(),
   overlapDuration: z.number(),
   severity: z
-    .enum([
-      ConflictSeverity.Minor,
-      ConflictSeverity.Moderate,
-      ConflictSeverity.Severe,
-    ])
+    .enum([ConflictSeverity.Minor, ConflictSeverity.Moderate, ConflictSeverity.Severe])
     .optional(),
 });
 

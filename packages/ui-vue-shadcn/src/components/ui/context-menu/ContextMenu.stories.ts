@@ -1,9 +1,19 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import {
-  ContextMenu, ContextMenuContent, ContextMenuGroup, ContextMenuItem,
-  ContextMenuLabel, ContextMenuSeparator, ContextMenuShortcut,
-  ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger,
-  ContextMenuTrigger, ContextMenuCheckboxItem, ContextMenuRadioGroup, ContextMenuRadioItem,
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuGroup,
+  ContextMenuItem,
+  ContextMenuLabel,
+  ContextMenuSeparator,
+  ContextMenuShortcut,
+  ContextMenuSub,
+  ContextMenuSubContent,
+  ContextMenuSubTrigger,
+  ContextMenuTrigger,
+  ContextMenuCheckboxItem,
+  ContextMenuRadioGroup,
+  ContextMenuRadioItem,
 } from '.';
 
 const meta = {
@@ -18,10 +28,20 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: () => ({
     components: {
-      ContextMenu, ContextMenuContent, ContextMenuGroup, ContextMenuItem,
-      ContextMenuLabel, ContextMenuSeparator, ContextMenuShortcut,
-      ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger,
-      ContextMenuTrigger, ContextMenuCheckboxItem, ContextMenuRadioGroup, ContextMenuRadioItem,
+      ContextMenu,
+      ContextMenuContent,
+      ContextMenuGroup,
+      ContextMenuItem,
+      ContextMenuLabel,
+      ContextMenuSeparator,
+      ContextMenuShortcut,
+      ContextMenuSub,
+      ContextMenuSubContent,
+      ContextMenuSubTrigger,
+      ContextMenuTrigger,
+      ContextMenuCheckboxItem,
+      ContextMenuRadioGroup,
+      ContextMenuRadioItem,
     },
     template: `
       <ContextMenu>

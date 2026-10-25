@@ -25,7 +25,8 @@ import { formatDateUnknown as formatDate } from '../utils/format-date-unknown';
 export function NotificationDetailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ id?: string | string[] }>();
-  const notificationId = typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : null;
+  const notificationId =
+    typeof params.id === 'string' ? params.id : Array.isArray(params.id) ? params.id[0] : null;
   const service = useNotificationService();
   const { isRemoteAuthenticated, signOut } = useAppSession();
 
@@ -97,10 +98,15 @@ export function NotificationDetailScreen() {
       eyebrow="More"
       title={notification?.title ?? 'Notification detail'}
       subtitle="通知详情页承接已读、删除和实体元数据查看。"
-      refreshControl={<RefreshControl refreshing={isLoading} onRefresh={load} />}>
+      refreshControl={<RefreshControl refreshing={isLoading} onRefresh={load} />}
+    >
       <SectionCard title="Navigation" description="通知详情作为列表页的下钻 screen。">
         <View style={styles.actionRow}>
-          <PrimaryButton label="Back to notifications" onPress={() => router.back()} variant="secondary" />
+          <PrimaryButton
+            label="Back to notifications"
+            onPress={() => router.back()}
+            variant="secondary"
+          />
         </View>
       </SectionCard>
 
@@ -111,13 +117,21 @@ export function NotificationDetailScreen() {
       ) : null}
 
       {error ? (
-        <SectionCard title="Notification detail failed" description="详情请求失败时先直接展示错误。">
-          <ThemedText type="small" themeColor="warning">{error}</ThemedText>
+        <SectionCard
+          title="Notification detail failed"
+          description="详情请求失败时先直接展示错误。"
+        >
+          <ThemedText type="small" themeColor="warning">
+            {error}
+          </ThemedText>
         </SectionCard>
       ) : null}
 
       {!isLoading && !error && !notification ? (
-        <SectionCard title="Notification not found" description="当前通知不存在或当前账号无权限访问。">
+        <SectionCard
+          title="Notification not found"
+          description="当前通知不存在或当前账号无权限访问。"
+        >
           <PrimaryButton label="Back" onPress={() => router.back()} variant="secondary" />
         </SectionCard>
       ) : null}
@@ -128,7 +142,10 @@ export function NotificationDetailScreen() {
             <View style={styles.pillRow}>
               <StatusPill label={notification.type} tone="tint" />
               <StatusPill label={notification.category} tone="textSecondary" />
-              <StatusPill label={notification.isRead ? 'Read' : 'Unread'} tone={notification.isRead ? 'success' : 'warning'} />
+              <StatusPill
+                label={notification.isRead ? 'Read' : 'Unread'}
+                tone={notification.isRead ? 'success' : 'warning'}
+              />
               <StatusPill label={notification.importance} tone="textSecondary" />
             </View>
             <View style={styles.actionRow}>
@@ -156,10 +173,14 @@ export function NotificationDetailScreen() {
 
           <SectionCard title="Metadata" description="先用摘要方式展示关联实体信息和动作。">
             <ThemedText type="small" themeColor="textSecondary">
-              {notification.metadata ? JSON.stringify(notification.metadata, null, 2) : 'No metadata attached.'}
+              {notification.metadata
+                ? JSON.stringify(notification.metadata, null, 2)
+                : 'No metadata attached.'}
             </ThemedText>
             <ThemedText type="small" themeColor="textSecondary">
-              {notification.actions ? JSON.stringify(notification.actions, null, 2) : 'No actions attached.'}
+              {notification.actions
+                ? JSON.stringify(notification.actions, null, 2)
+                : 'No actions attached.'}
             </ThemedText>
           </SectionCard>
         </>
@@ -171,7 +192,9 @@ export function NotificationDetailScreen() {
 function MetaRow({ label, value }: { label: string; value: string }) {
   return (
     <View style={styles.metaRow}>
-      <ThemedText type="small" themeColor="textSecondary">{label}</ThemedText>
+      <ThemedText type="small" themeColor="textSecondary">
+        {label}
+      </ThemedText>
       <ThemedText type="smallBold">{value}</ThemedText>
     </View>
   );

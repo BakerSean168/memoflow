@@ -18,7 +18,9 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: (args) => ({
     components: { Avatar, AvatarImage, AvatarFallback },
-    setup() { return { args }; },
+    setup() {
+      return { args };
+    },
     template: `
       <Avatar v-bind="args">
         <AvatarImage src="https://github.com/unovue.png" alt="UnoVue" />

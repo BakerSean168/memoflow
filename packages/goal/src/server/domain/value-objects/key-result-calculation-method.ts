@@ -1,6 +1,11 @@
-import { KeyResultCalculationMethod as KeyResultCalculationMethodContract, type KeyResultCalculationMethod as IKeyResultCalculationMethod } from '@memoflow/contracts/goal';
+import {
+  KeyResultCalculationMethod as KeyResultCalculationMethodContract,
+  type KeyResultCalculationMethod as IKeyResultCalculationMethod,
+} from '@memoflow/contracts/goal';
 
-export type KeyResultCalculationMethod = IKeyResultCalculationMethod & { readonly __brand: unique symbol };
+export type KeyResultCalculationMethod = IKeyResultCalculationMethod & {
+  readonly __brand: unique symbol;
+};
 
 // Derive the valid-value set from the contracts source of truth so a new status
 // only ever has to be added in one place (@memoflow/contracts).

@@ -156,7 +156,6 @@ import { describe, expect, it } from 'vitest';
       expect(routes).toContain('CalendarEntryResponseSchema');
       expect(routes).toContain("successResponse(z.array(CalendarEntryResponseSchema), '获取成功')");
     });
-
   });
 }
 

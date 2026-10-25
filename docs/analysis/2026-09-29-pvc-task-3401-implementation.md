@@ -28,6 +28,7 @@ A semantic-parity review found two major gaps and both were fixed:
    - sibling rows are disabled while the surface command is in flight without showing a fake spinner.
 
 The extraction also migrated browser selectors from DailyTodo-specific child markup to shared semantic contracts:
+
 - `data-task-occurrence-id`
 - `data-task-status`
 - shared `task-compact-complete-*` controls
@@ -35,15 +36,15 @@ The extraction also migrated browser selectors from DailyTodo-specific child mar
 
 ## Validation
 
-| Check | Result |
-| --- | --- |
-| Final focused app-vue suite | PASS — 9 files / 64 tests |
-| `app-vue:typecheck --skipNxCache` | PASS — exit 0 |
-| Changed-file ESLint | PASS |
-| `git diff --check` | PASS |
-| Selector-migration focused suite | PASS — 3 files / 19 tests |
-| Playwright discovery/compile | PASS — 4 affected tests discovered (1 task completion loop + 3 local-docker Phase A/B tests) |
-| Actual browser E2E `task/task-completion-loop.spec.ts` | PASS — 1/1; test 31.3s, total 1.2m |
+| Check                                                  | Result                                                                                       |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| Final focused app-vue suite                            | PASS — 9 files / 64 tests                                                                    |
+| `app-vue:typecheck --skipNxCache`                      | PASS — exit 0                                                                                |
+| Changed-file ESLint                                    | PASS                                                                                         |
+| `git diff --check`                                     | PASS                                                                                         |
+| Selector-migration focused suite                       | PASS — 3 files / 19 tests                                                                    |
+| Playwright discovery/compile                           | PASS — 4 affected tests discovered (1 task completion loop + 3 local-docker Phase A/B tests) |
+| Actual browser E2E `task/task-completion-loop.spec.ts` | PASS — 1/1; test 31.3s, total 1.2m                                                           |
 
 The actual browser E2E exercised the canonical DailyTodo quick-row selector and the Task -> Goal EachCompletion closed loop.
 

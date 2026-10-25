@@ -18,13 +18,13 @@ MemoFlow 不再维护 `AgentRunCheckpoint`、`LangGraphCheckpoint` 或 `LangGrap
 
 当前 authority：
 
-| Runtime data | Authority |
-| --- | --- |
-| Assistant thread / memory | Mastra storage |
-| Goal/Task/Knowledge workflow snapshot | Mastra storage |
-| Product Goal/Task/Reminder/Knowledge rows | MemoFlow domain stores |
-| ProviderConfig | MemoFlow AI persistence |
-| token/cost/request/trace projection | `ai_execution_records` / `AIExecutionRecord` bounded operations projection |
+| Runtime data                              | Authority                                                                  |
+| ----------------------------------------- | -------------------------------------------------------------------------- |
+| Assistant thread / memory                 | Mastra storage                                                             |
+| Goal/Task/Knowledge workflow snapshot     | Mastra storage                                                             |
+| Product Goal/Task/Reminder/Knowledge rows | MemoFlow domain stores                                                     |
+| ProviderConfig                            | MemoFlow AI persistence                                                    |
+| token/cost/request/trace projection       | `ai_execution_records` / `AIExecutionRecord` bounded operations projection |
 
 API lane 的 Mastra storage 使用 PostgreSQL；Desktop profile 使用 local LibSQL。两端不通过 HTTP callback 互相复制 framework checkpoint。
 

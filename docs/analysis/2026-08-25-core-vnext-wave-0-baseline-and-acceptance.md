@@ -31,16 +31,16 @@ The baseline intentionally includes ADR-053~064 and the umbrella plan but does *
 
 The following counts were produced with `git grep -l <pattern> 43bf4ef72 -- packages apps`, excluding no source category; generated Prisma references therefore contribute to the totals and are useful as a reminder that Schema Train regeneration has a broad blast radius.
 
-| Legacy / hotspot | Files at baseline | Wave 2 owner |
-| --- | ---: | --- |
-| `GoalFolder` | 118 | Goal lane + Contract/Schema Train |
-| `TaskFolder` | 64 | Task lane + Contract/Schema Train |
-| `TaskDependency` | 103 | Task lane + Contract/Schema Train |
-| `CriticalPath` | 13 | Task lane |
-| `SourceModule` | 60 | Scheduling migration / W3 |
-| `ScheduleTask.create` | 17 | Goal/Task/Routine projectors + schedule compatibility layer |
-| `createReminderTriggerCronRuntime` | 7 | Routine wall-clock cutover / W3 |
-| `KeyResultValueType` | 13 | Goal lane + Contract/Schema Train |
+| Legacy / hotspot                   | Files at baseline | Wave 2 owner                                                |
+| ---------------------------------- | ----------------: | ----------------------------------------------------------- |
+| `GoalFolder`                       |               118 | Goal lane + Contract/Schema Train                           |
+| `TaskFolder`                       |                64 | Task lane + Contract/Schema Train                           |
+| `TaskDependency`                   |               103 | Task lane + Contract/Schema Train                           |
+| `CriticalPath`                     |                13 | Task lane                                                   |
+| `SourceModule`                     |                60 | Scheduling migration / W3                                   |
+| `ScheduleTask.create`              |                17 | Goal/Task/Routine projectors + schedule compatibility layer |
+| `createReminderTriggerCronRuntime` |                 7 | Routine wall-clock cutover / W3                             |
+| `KeyResultValueType`               |                13 | Goal lane + Contract/Schema Train                           |
 
 These are **consumer-map counts, not deletion goals by themselves**. A later residual grep may legitimately keep historical ADR/test migration fixtures, but production authority must converge to one path.
 
@@ -182,18 +182,18 @@ All calendar-value conversion goes through `@memoflow/time`; feature contracts s
 
 These IDs are stable test vocabulary. Later tickets should cite the fixture ID in test names or comments when the behavior is covered.
 
-| ID | Scenario | Canonical facts / expected behavior | Primary later owner |
-| --- | --- | --- | --- |
-| A | Graduation / second-class points, finite 15-day plan | 15 planned occurrences; completion/missed/skipped remain facts; Plan closes only under explicit outcome policy; PlanCompletion can settle once | Task + Goal settlement |
-| B | Running 100 km, `EachCompletion` | Each completed run contributes the configured measurement once; replay is idempotent; uncomplete reverses the same source contribution | Task + Goal |
-| C | Weight 75 -> 70, `Last` measurement | Latest measurement owns current KR value; progress direction handles decreasing target; edit/delete recalculates from the same canonical calculator | Goal |
-| D | One-time Task at 14:00, reminder -30m | Exactly one stable neutral invocation at 13:30; repeated reconcile does not duplicate; completing/deleting before fire yields skipped handler result | Task + Scheduler |
-| E | Goal due date reminder -7d | Goal semantics choose the reminder; one stable invocation is reconciled; completed/abandoned Goal before due produces no user notification | Goal + Scheduler |
-| F | Routine 23:30 WallClock + snooze | IANA-zone recurrence determines 23:30 occurrence; snooze creates/updates the next eligible durable invocation without duplicate occurrence | Routine + Scheduler |
-| G | Stand Routine ActiveUsage 40m + natural idle break | ActiveUsage is owned by local runtime, not Scheduler; natural idle can satisfy/reset the work interval according to Routine policy | Routine + Desktop runtime |
-| H | 50/10 protocol, restart recovery | Protocol session transition table survives restart from persisted snapshot/version; renderer is not state authority | Routine + Desktop runtime |
-| I | DND mixed-channel Notification | Channel policy is evaluated independently; an allowed InApp fact can coexist with suppressed/deferred Email/Desktop outcome; DND/rate reason is observable | Notification |
-| J | Planner Task drag 14:00 -> 16:00 + failed command | Planner routes edit to Task owner command; optimistic UI reverts on command failure; Planner never becomes Task source of truth | Planner + Task |
+| ID  | Scenario                                             | Canonical facts / expected behavior                                                                                                                        | Primary later owner       |
+| --- | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| A   | Graduation / second-class points, finite 15-day plan | 15 planned occurrences; completion/missed/skipped remain facts; Plan closes only under explicit outcome policy; PlanCompletion can settle once             | Task + Goal settlement    |
+| B   | Running 100 km, `EachCompletion`                     | Each completed run contributes the configured measurement once; replay is idempotent; uncomplete reverses the same source contribution                     | Task + Goal               |
+| C   | Weight 75 -> 70, `Last` measurement                  | Latest measurement owns current KR value; progress direction handles decreasing target; edit/delete recalculates from the same canonical calculator        | Goal                      |
+| D   | One-time Task at 14:00, reminder -30m                | Exactly one stable neutral invocation at 13:30; repeated reconcile does not duplicate; completing/deleting before fire yields skipped handler result       | Task + Scheduler          |
+| E   | Goal due date reminder -7d                           | Goal semantics choose the reminder; one stable invocation is reconciled; completed/abandoned Goal before due produces no user notification                 | Goal + Scheduler          |
+| F   | Routine 23:30 WallClock + snooze                     | IANA-zone recurrence determines 23:30 occurrence; snooze creates/updates the next eligible durable invocation without duplicate occurrence                 | Routine + Scheduler       |
+| G   | Stand Routine ActiveUsage 40m + natural idle break   | ActiveUsage is owned by local runtime, not Scheduler; natural idle can satisfy/reset the work interval according to Routine policy                         | Routine + Desktop runtime |
+| H   | 50/10 protocol, restart recovery                     | Protocol session transition table survives restart from persisted snapshot/version; renderer is not state authority                                        | Routine + Desktop runtime |
+| I   | DND mixed-channel Notification                       | Channel policy is evaluated independently; an allowed InApp fact can coexist with suppressed/deferred Email/Desktop outcome; DND/rate reason is observable | Notification              |
+| J   | Planner Task drag 14:00 -> 16:00 + failed command    | Planner routes edit to Task owner command; optimistic UI reverts on command failure; Planner never becomes Task source of truth                            | Planner + Task            |
 
 Wave 1 already covers the foundation portions of D (stable reconcile), I (per-channel policy), and recurrence/time primitives used by F. Full A–J closure belongs to W7.
 
@@ -205,24 +205,24 @@ Wave 1 already covers the foundation portions of D (stable reconcile), I (per-ch
 
 Within one integration wave, feature lanes may propose changes to shared hotspots, but only the train owner writes the central bundle:
 
-| Train | Canonical hotspots | Rule |
-| --- | --- | --- |
-| Contract Train | `packages/contracts/**` | One coherent contract bundle per wave; feature packages consume it, never create competing public types |
-| Schema Train | `packages/database/prisma/schema/**`, `packages/powersync-schema/**`, generated Prisma client | Prisma and PowerSync change together; generated client is regenerated once after the merged schema bundle |
-| Orchestration Train | `packages/schedule-orchestration/**`, API/Desktop composition roots | One composition owner; business lanes register handlers/projectors through exposed seams |
-| UI Core Train | `packages/ui-vue-shadcn/**`, shared app composites | Shared accessible primitive/composite changes merge before feature pages duplicate them |
+| Train               | Canonical hotspots                                                                            | Rule                                                                                                      |
+| ------------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Contract Train      | `packages/contracts/**`                                                                       | One coherent contract bundle per wave; feature packages consume it, never create competing public types   |
+| Schema Train        | `packages/database/prisma/schema/**`, `packages/powersync-schema/**`, generated Prisma client | Prisma and PowerSync change together; generated client is regenerated once after the merged schema bundle |
+| Orchestration Train | `packages/schedule-orchestration/**`, API/Desktop composition roots                           | One composition owner; business lanes register handlers/projectors through exposed seams                  |
+| UI Core Train       | `packages/ui-vue-shadcn/**`, shared app composites                                            | Shared accessible primitive/composite changes merge before feature pages duplicate them                   |
 
 Generated Prisma files are **Schema Train output**, never an independent feature-lane source edit.
 
 ### 3.2 Wave-by-wave central changes
 
-| Wave | Contract Train | Schema Train | Orchestration/UI notes |
-| --- | --- | --- | --- |
-| W1 | neutral scheduling; Label contracts | scheduling identity/receipt; Label joins | SchedulingPort/HandlerRegistry hook; shared date/time composites |
-| W2 | Goal/KR; Task occurrence/plan; Routine; Notification Fact | destructive Goal/Task/Routine/Notification business schema bundle | Four domain lanes stay isolated; UI pages do not force old fields back |
-| W3 | durable `NotificationRequested`, handler payloads, settlement source identity | integration outbox / projector metadata as required | Task/Goal/Routine handlers registered by composition; legacy SourceModule switches shrink |
-| W4–W5 | Planner/Routine runtime contracts only as needed | runtime/session/calendar-entry persistence | Planner adapter + Desktop local runtime |
-| W6–W7 | AI/Mobile parity cleanup | final legacy column deletion/reset | generated residual audit and docs closure |
+| Wave  | Contract Train                                                                | Schema Train                                                      | Orchestration/UI notes                                                                    |
+| ----- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| W1    | neutral scheduling; Label contracts                                           | scheduling identity/receipt; Label joins                          | SchedulingPort/HandlerRegistry hook; shared date/time composites                          |
+| W2    | Goal/KR; Task occurrence/plan; Routine; Notification Fact                     | destructive Goal/Task/Routine/Notification business schema bundle | Four domain lanes stay isolated; UI pages do not force old fields back                    |
+| W3    | durable `NotificationRequested`, handler payloads, settlement source identity | integration outbox / projector metadata as required               | Task/Goal/Routine handlers registered by composition; legacy SourceModule switches shrink |
+| W4–W5 | Planner/Routine runtime contracts only as needed                              | runtime/session/calendar-entry persistence                        | Planner adapter + Desktop local runtime                                                   |
+| W6–W7 | AI/Mobile parity cleanup                                                      | final legacy column deletion/reset                                | generated residual audit and docs closure                                                 |
 
 ### 3.3 Wave 2 collision rule
 
@@ -234,18 +234,18 @@ The next four feature worktrees may edit their own packages freely, but **must n
 
 The mandatory reuse ledger remains [`2026-08-25-core-vnext-reuse-and-reference-ledger.md`](./2026-08-25-core-vnext-reuse-and-reference-ledger.md). Wave 0 verification confirms:
 
-| Capability | Decision | License / guardrail | W1 status |
-| --- | --- | --- | --- |
-| Runtime EventBus | Borrow `emittery@2.0.0` | MIT | implemented ADR-064 |
-| Recurrence | Borrow `rrule@2.8.1` behind MemoFlow port | BSD-3-Clause | selected + conformance fixture passes |
-| UI calendar/date | Borrow existing `@internationalized/date@3.11.0`, Reka UI, shadcn-vue | Apache-2.0 / MIT / MIT | shared fields implemented |
-| Planner | Prefer FullCalendar **Standard** Vue only | MIT Standard; no Premium dependency | not installed yet; W4 PoC/Planner lane |
-| Schedule-X | Reference only for interactive v1 | drag/resize v4 Premium conflicts with target | not installed |
-| `ical.js` | Deferred to ICS interoperability | MPL-2.0 | not added; no observed recurrence gap requires it |
-| pg-boss | PoC only after business packages leave `ScheduleTask` | do not replace engine during seam migration | not installed |
-| Novu | Semantic reference only | do not introduce second Notification source of truth | not integrated |
-| Workrave / Safe Eyes | Behavioral/architecture reference only | GPL-3.0; **no code copying** | no dependency |
-| Super Productivity | Primary Focus/Routine code-level reference | MIT | reference only |
+| Capability           | Decision                                                              | License / guardrail                                  | W1 status                                         |
+| -------------------- | --------------------------------------------------------------------- | ---------------------------------------------------- | ------------------------------------------------- |
+| Runtime EventBus     | Borrow `emittery@2.0.0`                                               | MIT                                                  | implemented ADR-064                               |
+| Recurrence           | Borrow `rrule@2.8.1` behind MemoFlow port                             | BSD-3-Clause                                         | selected + conformance fixture passes             |
+| UI calendar/date     | Borrow existing `@internationalized/date@3.11.0`, Reka UI, shadcn-vue | Apache-2.0 / MIT / MIT                               | shared fields implemented                         |
+| Planner              | Prefer FullCalendar **Standard** Vue only                             | MIT Standard; no Premium dependency                  | not installed yet; W4 PoC/Planner lane            |
+| Schedule-X           | Reference only for interactive v1                                     | drag/resize v4 Premium conflicts with target         | not installed                                     |
+| `ical.js`            | Deferred to ICS interoperability                                      | MPL-2.0                                              | not added; no observed recurrence gap requires it |
+| pg-boss              | PoC only after business packages leave `ScheduleTask`                 | do not replace engine during seam migration          | not installed                                     |
+| Novu                 | Semantic reference only                                               | do not introduce second Notification source of truth | not integrated                                    |
+| Workrave / Safe Eyes | Behavioral/architecture reference only                                | GPL-3.0; **no code copying**                         | no dependency                                     |
+| Super Productivity   | Primary Focus/Routine code-level reference                            | MIT                                                  | reference only                                    |
 
 No Wave 1 dependency violates the ledger. Third-party recurrence/UI types remain behind MemoFlow adapters and do not enter business contracts.
 

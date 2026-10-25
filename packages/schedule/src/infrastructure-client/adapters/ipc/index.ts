@@ -1,1 +1,4 @@
-export { ScheduleEventIpcAdapter, createScheduleEventIpcAdapter } from './schedule-event-ipc.adapter';
+export {
+  ScheduleEventIpcAdapter,
+  createScheduleEventIpcAdapter,
+} from './schedule-event-ipc.adapter';

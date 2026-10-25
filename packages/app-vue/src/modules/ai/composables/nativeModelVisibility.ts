@@ -44,9 +44,7 @@ export function useNativeModelVisibility(
   function isVisible(instanceId: string, modelId: string, context = resolveContext()): boolean {
     // Reactive dependency shared by all mounted Settings and Composer consumers.
     void revision.value;
-    return !readHidden(storageKey(resolveIdentity(), instanceId, context)).includes(
-      modelId,
-    );
+    return !readHidden(storageKey(resolveIdentity(), instanceId, context)).includes(modelId);
   }
   function setVisible(instanceId: string, modelId: string, visible: boolean): boolean {
     const key = storageKey(resolveIdentity(), instanceId, resolveContext());

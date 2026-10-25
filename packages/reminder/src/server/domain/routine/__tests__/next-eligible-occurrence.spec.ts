@@ -8,9 +8,14 @@ import {
 
 const engine = createRecurrenceEngine();
 
-function dailyAt(localTime: string, timeZone: string, startDate: string, options?: {
-  count?: number | null;
-}) {
+function dailyAt(
+  localTime: string,
+  timeZone: string,
+  startDate: string,
+  options?: {
+    count?: number | null;
+  },
+) {
   return createWallClockTrigger({
     localTime,
     timeZone,

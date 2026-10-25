@@ -75,11 +75,18 @@ export class PowerSyncTaskPlanMapper {
         data.goal_id != null ||
         data.key_result_id != null ||
         data.goal_record_value != null ||
-        data.goal_progress_trigger != null || data.goal_progress_mode != null || data.goal_suggested_value != null
+        data.goal_progress_trigger != null ||
+        data.goal_progress_mode != null ||
+        data.goal_suggested_value != null
           ? TaskGoalBinding.fromDTO({
               goalId: data.goal_id,
               keyResultId: data.key_result_id,
-              progressRule: decodeTaskGoalProgress({ mode: data.goal_progress_mode, value: data.goal_record_value, trigger: data.goal_progress_trigger, suggestedValue: data.goal_suggested_value }),
+              progressRule: decodeTaskGoalProgress({
+                mode: data.goal_progress_mode,
+                value: data.goal_record_value,
+                trigger: data.goal_progress_trigger,
+                suggestedValue: data.goal_suggested_value,
+              }),
             } as Parameters<typeof TaskGoalBinding.fromDTO>[0])
           : null,
       checklist: data.checklist

@@ -17,11 +17,21 @@ export const useScheduleStore = defineStore('schedule', {
     isInitialized: false,
   }),
   actions: {
-    setCalendarEntries(items: CalendarEntryClientDTO[]) { this.calendarEntries = items; },
-    setLoading(v: boolean) { this.isLoading = v; },
-    setError(e: string | null) { this.error = e; },
-    setInitialized(v: boolean) { this.isInitialized = v; },
-    reset() { this.$reset(); },
+    setCalendarEntries(items: CalendarEntryClientDTO[]) {
+      this.calendarEntries = items;
+    },
+    setLoading(v: boolean) {
+      this.isLoading = v;
+    },
+    setError(e: string | null) {
+      this.error = e;
+    },
+    setInitialized(v: boolean) {
+      this.isInitialized = v;
+    },
+    reset() {
+      this.$reset();
+    },
   },
 });
 

@@ -11,8 +11,10 @@ const ROOT = path.join(import.meta.dirname, '..', '..');
 const APPS_DIR = path.join(ROOT, 'apps');
 const PACKAGES_DIR = path.join(ROOT, 'packages');
 
-const INTERNAL_LAYER_REGEX = /(?:from\s+['"]|import\s*\(\s*['"])@memoflow\/([^/'"]+)\/(domain-server|application-server|infrastructure-server|controllers|server\/(?:domain|application|transport|infrastructure))['"]/g;
-const RETIRED_PRODUCT_GOVERNANCE_REGEX = /(?:from\s+['"]|import\s*\(\s*['"])(@memoflow\/governance(?:\/[^'"]+)?|@memoflow\/contracts\/governance)['"]/g;
+const INTERNAL_LAYER_REGEX =
+  /(?:from\s+['"]|import\s*\(\s*['"])@memoflow\/([^/'"]+)\/(domain-server|application-server|infrastructure-server|controllers|server\/(?:domain|application|transport|infrastructure))['"]/g;
+const RETIRED_PRODUCT_GOVERNANCE_REGEX =
+  /(?:from\s+['"]|import\s*\(\s*['"])(@memoflow\/governance(?:\/[^'"]+)?|@memoflow\/contracts\/governance)['"]/g;
 
 function getSourceFiles(dir, extensions = ['.ts', '.tsx', '.vue']) {
   const results = [];
@@ -22,7 +24,8 @@ function getSourceFiles(dir, extensions = ['.ts', '.tsx', '.vue']) {
   for (const entry of entries) {
     const fullPath = path.join(dir, entry.name);
     if (entry.isDirectory()) {
-      if (entry.name === 'node_modules' || entry.name === 'dist' || entry.name === '__tests__') continue;
+      if (entry.name === 'node_modules' || entry.name === 'dist' || entry.name === '__tests__')
+        continue;
       results.push(...getSourceFiles(fullPath, extensions));
     } else {
       const ext = path.extname(entry.name);
@@ -60,9 +63,13 @@ function auditFile(filePath, violations) {
     const subpath = match[2];
 
     if (isInApps) {
-      violations.push(`${relPath}: imports @memoflow/${importedPkg}/${subpath} (apps must use public API surface)`);
+      violations.push(
+        `${relPath}: imports @memoflow/${importedPkg}/${subpath} (apps must use public API surface)`,
+      );
     } else if (pkg && importedPkg !== pkg) {
-      violations.push(`${relPath}: cross-package import @memoflow/${importedPkg}/${subpath} from package "${pkg}" (use a public seam instead)`);
+      violations.push(
+        `${relPath}: cross-package import @memoflow/${importedPkg}/${subpath} from package "${pkg}" (use a public seam instead)`,
+      );
     }
   }
 

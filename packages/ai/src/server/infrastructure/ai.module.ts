@@ -889,10 +889,14 @@ export function createAIModule(dependencies: AIModuleDependencies): AIModuleInst
           await dependencies.mastraRuntime?.dispose();
         } finally {
           try {
-            try { await dependencies.conversationAttentionPort?.events?.dispose(); }
-            finally { await conversationRepository.events?.dispose(); }
+            try {
+              await dependencies.conversationAttentionPort?.events?.dispose();
+            } finally {
+              await conversationRepository.events?.dispose();
+            }
+          } finally {
+            await providerSafeFetch.close();
           }
-          finally { await providerSafeFetch.close(); }
         }
       }
     },

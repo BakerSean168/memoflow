@@ -29,7 +29,8 @@ function buildGreeting(name: string | null) {
 
 export function HomeScreen() {
   const router = useRouter();
-  const { currentUser, isGuest, isRemoteAuthenticated, sessionKind, signInDemo, signOut } = useAppSession();
+  const { currentUser, isGuest, isRemoteAuthenticated, sessionKind, signInDemo, signOut } =
+    useAppSession();
   const { templates } = useTaskPlans();
   const { goals } = useGoals();
   const { unreadCount } = useNotifications();
@@ -50,7 +51,13 @@ export function HomeScreen() {
       description: '账号和会话操作。',
       items: [
         ...(isGuest
-          ? [{ label: 'Upgrade account', description: '切到 demo workspace。', onPress: signInDemo }]
+          ? [
+              {
+                label: 'Upgrade account',
+                description: '切到 demo workspace。',
+                onPress: signInDemo,
+              },
+            ]
           : []),
         {
           label: isRemoteAuthenticated ? 'Sign out' : 'Leave shell',
@@ -67,14 +74,27 @@ export function HomeScreen() {
       actionSections={actionSections}
       eyebrow="MemoFlow Mobile"
       title={buildGreeting(currentUser?.displayName ?? null)}
-      subtitle="今日概览、快捷入口和收件信息。">
+      subtitle="今日概览、快捷入口和收件信息。"
+    >
       <SectionCard
         title="Account"
-        description={currentUser ? `${currentUser.workspaceName} is active on this device.` : APP_DESCRIPTION}>
+        description={
+          currentUser ? `${currentUser.workspaceName} is active on this device.` : APP_DESCRIPTION
+        }
+      >
         <View style={styles.pillRow}>
-          <StatusPill label={`Session: ${sessionKind}`} tone={isRemoteAuthenticated ? 'success' : 'tint'} />
           <StatusPill
-            label={isRemoteAuthenticated ? 'Remote auth ready' : isGuest ? 'Guest sandbox' : 'Local shell mode'}
+            label={`Session: ${sessionKind}`}
+            tone={isRemoteAuthenticated ? 'success' : 'tint'}
+          />
+          <StatusPill
+            label={
+              isRemoteAuthenticated
+                ? 'Remote auth ready'
+                : isGuest
+                  ? 'Guest sandbox'
+                  : 'Local shell mode'
+            }
             tone={isRemoteAuthenticated ? 'success' : isGuest ? 'warning' : 'textSecondary'}
           />
           <StatusPill label={APP_NAME} tone="tint" />
@@ -95,18 +115,35 @@ export function HomeScreen() {
       <SectionCard
         title="Today"
         description="当天待处理内容和收件概况。"
-        footer={<PrimaryButton label="Open More" onPress={() => router.push('./explore')} variant="secondary" />}>
+        footer={
+          <PrimaryButton
+            label="Open More"
+            onPress={() => router.push('./explore')}
+            variant="secondary"
+          />
+        }
+      >
         <View style={styles.pillRow}>
           <StatusPill label={`${templates.length} tasks`} tone="tint" />
           <StatusPill label={`${goals.length} goals`} tone="success" />
-          <StatusPill label={`${unreadCount} unread`} tone={unreadCount > 0 ? 'warning' : 'success'} />
+          <StatusPill
+            label={`${unreadCount} unread`}
+            tone={unreadCount > 0 ? 'warning' : 'success'}
+          />
         </View>
       </SectionCard>
 
       <SectionCard
         title="Tasks"
         description="最近的任务模板和待处理数量。"
-        footer={<PrimaryButton label="Open task workspace" onPress={() => router.push('./tasks')} variant="secondary" />}>
+        footer={
+          <PrimaryButton
+            label="Open task workspace"
+            onPress={() => router.push('./tasks')}
+            variant="secondary"
+          />
+        }
+      >
         {isRemoteAuthenticated ? (
           templates.length > 0 ? (
             <View style={styles.previewList}>
@@ -117,8 +154,14 @@ export function HomeScreen() {
                     {template.description ?? 'No description yet.'}
                   </ThemedText>
                   <View style={styles.previewMetaRow}>
-                    <StatusPill label={template.status} tone={template.status === 'Active' ? 'success' : 'warning'} />
-                    <StatusPill label={`${template.pendingOccurrenceCount} pending`} tone="textSecondary" />
+                    <StatusPill
+                      label={template.status}
+                      tone={template.status === 'Active' ? 'success' : 'warning'}
+                    />
+                    <StatusPill
+                      label={`${template.pendingOccurrenceCount} pending`}
+                      tone="textSecondary"
+                    />
                   </View>
                 </ThemedView>
               ))}
@@ -135,9 +178,7 @@ export function HomeScreen() {
         )}
       </SectionCard>
 
-      <SectionCard
-        title="Open modules"
-        description="从主页直接进入高频模块。">
+      <SectionCard title="Open modules" description="从主页直接进入高频模块。">
         <View style={styles.tileGrid}>
           <FeatureTile
             eyebrow="Live"

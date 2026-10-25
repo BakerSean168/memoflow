@@ -153,3 +153,71 @@ export function selectLanes({ risk, scope, event = 'pull_request', full = scope.
     performance: event !== 'pull_request' && (root || has(scope.perf)),
   };
 }
+
+const FORMAT_EXTENSIONS = new Set([
+  '.ts',
+  '.tsx',
+  '.mts',
+  '.cts',
+  '.js',
+  '.mjs',
+  '.cjs',
+  '.jsx',
+  '.vue',
+  '.json',
+  '.md',
+  '.css',
+  '.scss',
+  '.less',
+  '.html',
+  '.yml',
+  '.yaml',
+]);
+const LINT_EXTENSIONS = new Set([
+  '.ts',
+  '.tsx',
+  '.mts',
+  '.cts',
+  '.js',
+  '.mjs',
+  '.cjs',
+  '.jsx',
+  '.vue',
+]);
+const TYPE_EXTENSIONS = new Set(['.ts', '.tsx', '.mts', '.cts', '.vue']);
+const STORY_PATTERN = /(?:\.stories\.[^/]+$|^apps\/storybook\/)/u;
+const CONTRACT_PATTERN =
+  /^(?:packages\/contracts\/|apps\/api\/src\/shared\/infrastructure\/openapi\/|packages\/[^/]+\/src\/contracts\/)/u;
+
+function extensionOf(file) {
+  const dot = file.lastIndexOf('.');
+  return dot > file.lastIndexOf('/') ? file.slice(dot) : '';
+}
+
+/**
+ * Multi-dimensional capability impact of a change set (VNext Q2): instead of
+ * collapsing a diff into a single risk level, report which quality
+ * capabilities it touches and through which files/projects. Lane selection
+ * keeps using classifyRisk/selectLanes; capabilities feed the manifest's
+ * laneDetails plan and stage-gate verification.
+ */
+export function classifyCapabilities({ changedFiles, scope }) {
+  const pick = (set) => changedFiles.filter((file) => set.has(extensionOf(file)));
+  return {
+    fmt: { files: pick(FORMAT_EXTENSIONS) },
+    lint: { files: pick(LINT_EXTENSIONS) },
+    typecheck: { files: pick(TYPE_EXTENSIONS) },
+    componentBrowser: {
+      files: changedFiles.filter((file) => STORY_PATTERN.test(file)),
+    },
+    contract: { files: changedFiles.filter((file) => CONTRACT_PATTERN.test(file)) },
+    unit: { files: [], projects: scope?.unit ?? [] },
+    integration: { files: [], projects: scope?.integration ?? [] },
+    boundary: { files: [], projects: scope?.boundary ?? [] },
+    coverage: { files: [], projects: scope?.coverage ?? [] },
+    performance: { files: [], projects: scope?.perf ?? [] },
+    web: { files: scope?.webFlowFiles ?? [] },
+    governance: { files: [] },
+    validate: { files: [] },
+  };
+}

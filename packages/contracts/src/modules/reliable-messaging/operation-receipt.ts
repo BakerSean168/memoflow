@@ -1,5 +1,11 @@
 import { z } from 'zod';
-import { IsoDatetimeSchema, LeaseClaimSchema, RELIABLE_MESSAGING_SCHEMA_VERSION, SchemaVersionSchema, type LeaseClaim } from './lease';
+import {
+  IsoDatetimeSchema,
+  LeaseClaimSchema,
+  RELIABLE_MESSAGING_SCHEMA_VERSION,
+  SchemaVersionSchema,
+  type LeaseClaim,
+} from './lease';
 
 /**
  * 统一业务操作与可靠消息状态语义 (W0-1)。
@@ -84,9 +90,7 @@ export type BusinessOperationIdempotencyKey = z.infer<typeof BusinessOperationId
  * 生成无碰撞、防歧义的规范化合成幂等键字符串。
  * 采用长度前缀规范化编码: `v1:${len(identityId)}:${identityId}:${len(source)}:${source}:${len(occurrenceKey)}:${occurrenceKey}`
  */
-export function buildIdempotencyKeyString(
-  params: BusinessOperationIdempotencyKey
-): string {
+export function buildIdempotencyKeyString(params: BusinessOperationIdempotencyKey): string {
   const { identityId, source, occurrenceKey } = params;
   return `v1:${identityId.length}:${identityId}:${source.length}:${source}:${occurrenceKey.length}:${occurrenceKey}`;
 }
@@ -159,7 +163,7 @@ export type OperationStateRefinementData = {
  */
 export function refineOperationStateInvariants(
   data: OperationStateRefinementData,
-  ctx: z.RefinementCtx
+  ctx: z.RefinementCtx,
 ): void {
   const isTerminal = (TERMINAL_OPERATION_STATUSES as readonly string[]).includes(data.status);
   const isSuccess = (SUCCESS_OPERATION_STATUSES as readonly string[]).includes(data.status);

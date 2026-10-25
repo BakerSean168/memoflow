@@ -54,7 +54,8 @@ function collectTypeScript(file, source, target) {
     scriptKind(file),
   );
   const visit = (node) => {
-    if (ts.isIdentifier(node)) target.identifiers.set(node.text, (target.identifiers.get(node.text) ?? 0) + 1);
+    if (ts.isIdentifier(node))
+      target.identifiers.set(node.text, (target.identifiers.get(node.text) ?? 0) + 1);
 
     if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
       const names = [];
@@ -130,7 +131,8 @@ function collectTypeScript(file, source, target) {
 
     if (ts.isCallExpression(node) || ts.isNewExpression(node)) {
       const callee = normalize(node.expression.getText(sourceFile));
-      if (ts.isNewExpression(node)) target.newExpressions.set(callee, (target.newExpressions.get(callee) ?? 0) + 1);
+      if (ts.isNewExpression(node))
+        target.newExpressions.set(callee, (target.newExpressions.get(callee) ?? 0) + 1);
       else target.calls.set(callee, (target.calls.get(callee) ?? 0) + 1);
     }
 
@@ -144,31 +146,42 @@ function collectTypeScript(file, source, target) {
       if (text.length > 0) {
         target.typeNodes.set(text, (target.typeNodes.get(text) ?? 0) + 1);
         const compact = text.replace(/\s+/g, '');
-        if (compact !== text) target.typeNodes.set(compact, (target.typeNodes.get(compact) ?? 0) + 1);
+        if (compact !== text)
+          target.typeNodes.set(compact, (target.typeNodes.get(compact) ?? 0) + 1);
       }
     }
 
-      if (
-        ts.isPropertySignature(node) ||
-        ts.isMethodSignature(node) ||
-        ts.isPropertyDeclaration(node) ||
-        ts.isMethodDeclaration(node)
-      ) {
-        const text = normalize(node.getText(sourceFile));
+    if (
+      ts.isPropertySignature(node) ||
+      ts.isMethodSignature(node) ||
+      ts.isPropertyDeclaration(node) ||
+      ts.isMethodDeclaration(node)
+    ) {
+      const text = normalize(node.getText(sourceFile));
       if (text.length > 0) {
         target.typeMembers.set(text, (target.typeMembers.get(text) ?? 0) + 1);
         const compact = text.replace(/\s+/g, '');
-        if (compact !== text) target.typeMembers.set(compact, (target.typeMembers.get(compact) ?? 0) + 1);
+        if (compact !== text)
+          target.typeMembers.set(compact, (target.typeMembers.get(compact) ?? 0) + 1);
         const withoutSemicolon = text.replace(/;$/, '');
         if (withoutSemicolon !== text) {
-          target.typeMembers.set(withoutSemicolon, (target.typeMembers.get(withoutSemicolon) ?? 0) + 1);
-          target.typeMembers.set(withoutSemicolon.replace(/\s+/g, ''), (target.typeMembers.get(withoutSemicolon.replace(/\s+/g, '')) ?? 0) + 1);
+          target.typeMembers.set(
+            withoutSemicolon,
+            (target.typeMembers.get(withoutSemicolon) ?? 0) + 1,
+          );
+          target.typeMembers.set(
+            withoutSemicolon.replace(/\s+/g, ''),
+            (target.typeMembers.get(withoutSemicolon.replace(/\s+/g, '')) ?? 0) + 1,
+          );
         }
       }
-        if (node.name && (ts.isIdentifier(node.name) || ts.isStringLiteral(node.name))) {
-          target.propertyNames.set(node.name.text, (target.propertyNames.get(node.name.text) ?? 0) + 1);
-        }
+      if (node.name && (ts.isIdentifier(node.name) || ts.isStringLiteral(node.name))) {
+        target.propertyNames.set(
+          node.name.text,
+          (target.propertyNames.get(node.name.text) ?? 0) + 1,
+        );
       }
+    }
 
     if (ts.isExpressionNode(node) || ts.isStatement(node)) {
       const text = normalize(node.getText(sourceFile));
@@ -177,14 +190,18 @@ function collectTypeScript(file, source, target) {
           target.statements.set(text, (target.statements.get(text) ?? 0) + 1);
           const withoutSemicolon = text.replace(/;$/, '');
           if (withoutSemicolon !== text) {
-            target.statements.set(withoutSemicolon, (target.statements.get(withoutSemicolon) ?? 0) + 1);
+            target.statements.set(
+              withoutSemicolon,
+              (target.statements.get(withoutSemicolon) ?? 0) + 1,
+            );
           }
         } else {
           target.expressions.set(text, (target.expressions.get(text) ?? 0) + 1);
         }
         const compact = text.replace(/\s+/g, '');
         if (compact !== text) {
-          if (ts.isStatement(node)) target.statements.set(compact, (target.statements.get(compact) ?? 0) + 1);
+          if (ts.isStatement(node))
+            target.statements.set(compact, (target.statements.get(compact) ?? 0) + 1);
           else target.expressions.set(compact, (target.expressions.get(compact) ?? 0) + 1);
         }
       }
@@ -196,7 +213,8 @@ function collectTypeScript(file, source, target) {
     }
 
     if (ts.isPropertyAssignment(node)) {
-      const name = ts.isIdentifier(node.name) || ts.isStringLiteral(node.name) ? node.name.text : null;
+      const name =
+        ts.isIdentifier(node.name) || ts.isStringLiteral(node.name) ? node.name.text : null;
       if (name) target.propertyNames.set(name, (target.propertyNames.get(name) ?? 0) + 1);
       if (
         name &&
@@ -206,10 +224,21 @@ function collectTypeScript(file, source, target) {
           node.initializer.kind === ts.SyntaxKind.TrueKeyword ||
           node.initializer.kind === ts.SyntaxKind.FalseKeyword)
       ) {
-        target.objectProperties.push({ name, value: ts.isStringLiteral(node.initializer) || ts.isNumericLiteral(node.initializer) || ts.isIdentifier(node.initializer) ? node.initializer.text : node.initializer.kind === ts.SyntaxKind.TrueKeyword ? 'true' : 'false' });
+        target.objectProperties.push({
+          name,
+          value:
+            ts.isStringLiteral(node.initializer) ||
+            ts.isNumericLiteral(node.initializer) ||
+            ts.isIdentifier(node.initializer)
+              ? node.initializer.text
+              : node.initializer.kind === ts.SyntaxKind.TrueKeyword
+                ? 'true'
+                : 'false',
+        });
       }
       const text = normalize(node.getText(sourceFile));
-      if (name && text.length > 0) target.objectPropertyTexts.set(text, (target.objectPropertyTexts.get(text) ?? 0) + 1);
+      if (name && text.length > 0)
+        target.objectPropertyTexts.set(text, (target.objectPropertyTexts.get(text) ?? 0) + 1);
     }
 
     if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
@@ -226,13 +255,21 @@ function collectExpression(file, expression, target) {
   if (!expression || expression.trim().length === 0) return;
   const source = expressionSource(expression);
   try {
-    const sourceFile = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+    const sourceFile = ts.createSourceFile(
+      file,
+      source,
+      ts.ScriptTarget.Latest,
+      true,
+      ts.ScriptKind.TS,
+    );
     if (sourceFile.parseDiagnostics.length > 0) return;
     const visit = (node) => {
-      if (ts.isIdentifier(node)) target.identifiers.set(node.text, (target.identifiers.get(node.text) ?? 0) + 1);
+      if (ts.isIdentifier(node))
+        target.identifiers.set(node.text, (target.identifiers.get(node.text) ?? 0) + 1);
       if (ts.isCallExpression(node) || ts.isNewExpression(node)) {
         const callee = normalize(node.expression.getText(sourceFile));
-        if (ts.isNewExpression(node)) target.newExpressions.set(callee, (target.newExpressions.get(callee) ?? 0) + 1);
+        if (ts.isNewExpression(node))
+          target.newExpressions.set(callee, (target.newExpressions.get(callee) ?? 0) + 1);
         else target.calls.set(callee, (target.calls.get(callee) ?? 0) + 1);
       }
       if (ts.isPropertyAccessExpression(node)) {
@@ -259,12 +296,14 @@ function collectExpression(file, expression, target) {
       if (ts.isExpressionNode(node) || ts.isStatement(node)) {
         const text = normalize(node.getText(sourceFile));
         if (text.length > 0) {
-          if (ts.isStatement(node)) target.statements.set(text, (target.statements.get(text) ?? 0) + 1);
+          if (ts.isStatement(node))
+            target.statements.set(text, (target.statements.get(text) ?? 0) + 1);
           else target.expressions.set(text, (target.expressions.get(text) ?? 0) + 1);
         }
       }
       if (ts.isPropertyAssignment(node)) {
-        const name = ts.isIdentifier(node.name) || ts.isStringLiteral(node.name) ? node.name.text : null;
+        const name =
+          ts.isIdentifier(node.name) || ts.isStringLiteral(node.name) ? node.name.text : null;
         if (name) target.propertyNames.set(name, (target.propertyNames.get(name) ?? 0) + 1);
         if (
           name &&
@@ -274,10 +313,21 @@ function collectExpression(file, expression, target) {
             node.initializer.kind === ts.SyntaxKind.TrueKeyword ||
             node.initializer.kind === ts.SyntaxKind.FalseKeyword)
         ) {
-          target.objectProperties.push({ name, value: ts.isStringLiteral(node.initializer) || ts.isNumericLiteral(node.initializer) || ts.isIdentifier(node.initializer) ? node.initializer.text : node.initializer.kind === ts.SyntaxKind.TrueKeyword ? 'true' : 'false' });
+          target.objectProperties.push({
+            name,
+            value:
+              ts.isStringLiteral(node.initializer) ||
+              ts.isNumericLiteral(node.initializer) ||
+              ts.isIdentifier(node.initializer)
+                ? node.initializer.text
+                : node.initializer.kind === ts.SyntaxKind.TrueKeyword
+                  ? 'true'
+                  : 'false',
+          });
         }
         const text = normalize(node.getText(sourceFile));
-        if (name && text.length > 0) target.objectPropertyTexts.set(text, (target.objectPropertyTexts.get(text) ?? 0) + 1);
+        if (name && text.length > 0)
+          target.objectPropertyTexts.set(text, (target.objectPropertyTexts.get(text) ?? 0) + 1);
       }
       if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
         target.stringLiterals.push(node.text);

@@ -50,9 +50,7 @@ function parseTemplateFilters(query: Record<string, unknown> | undefined) {
       ? [query!.status as string]
       : undefined;
   const goalId =
-    typeof query?.goalId === 'string'
-      ? (query.goalId as ListTaskPlanFilters['goalId'])
-      : undefined;
+    typeof query?.goalId === 'string' ? (query.goalId as ListTaskPlanFilters['goalId']) : undefined;
   const keyResultId =
     typeof query?.keyResultId === 'string'
       ? (query.keyResultId as ListTaskPlanFilters['keyResultId'])
@@ -144,7 +142,6 @@ export function registerTaskPlanRoutes(
     [auth],
     (data, ctx) => controller.listPlans(data, ctx),
   );
-
 
   // GET /:id — Get plan by ID
   r.route(
@@ -264,7 +261,9 @@ export function registerTaskPlanRoutes(
       summary: '主动放弃任务计划',
       request: {
         params: AbandonTaskPlanInvocationSchema.shape.params,
-        body: { content: { 'application/json': { schema: AbandonTaskPlanInvocationSchema.shape.body } } },
+        body: {
+          content: { 'application/json': { schema: AbandonTaskPlanInvocationSchema.shape.body } },
+        },
       },
       responses: {
         200: successResponse(TaskPlanResponseSchema, '计划已放弃'),
@@ -328,7 +327,9 @@ export function registerTaskPlanRoutes(
       request: {
         params: GenerateOccurrencesInvocationSchema.shape.params,
         body: {
-          content: { 'application/json': { schema: GenerateOccurrencesInvocationSchema.shape.body } },
+          content: {
+            'application/json': { schema: GenerateOccurrencesInvocationSchema.shape.body },
+          },
         },
       },
       responses: {

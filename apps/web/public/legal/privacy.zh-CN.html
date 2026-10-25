@@ -1,52 +1,99 @@
 <!doctype html>
 <html lang="zh-CN">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>隐私政策 · MemoFlow</title>
-  <style>
-    :root { color-scheme: light dark; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif; }
-    body { margin: 0; background: #0f1115; color: #e8eaf0; line-height: 1.65; }
-    main { max-width: 720px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
-    h1 { font-size: 1.75rem; margin: 0 0 0.5rem; }
-    .meta { color: #9aa3b2; font-size: 0.9rem; margin-bottom: 1.75rem; }
-    h2 { font-size: 1.15rem; margin-top: 1.75rem; }
-    a { color: #8ab4ff; }
-    footer { margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid #2a3140; color: #9aa3b2; font-size: 0.9rem; }
-  </style>
-</head>
-<body>
-  <main>
-    <h1>隐私政策</h1>
-    <p class="meta">Version 2026.07.18 · Effective 2026-07-18 · Updated 2026-07-18</p>
-    
-    <p>本政策说明 MemoFlow 如何收集、使用与保护与您相关的信息。</p>
-    <h2>1. 我们处理的数据</h2>
-    <ul>
-      <li>账号数据：邮箱、认证状态、会话与安全事件。</li>
-      <li>业务数据：目标、任务、笔记、提醒等您主动创建的内容。</li>
-      <li>设备与诊断：设备类型、大致地区（若可得）、错误日志与性能指标。</li>
-      <li>可选集成：GitHub 身份或仓库授权元数据（仅在您明确授权后）。</li>
-    </ul>
-    <h2>2. 使用目的</h2>
-    <p>用于提供与改进服务、保障账号安全、同步与检索、响应支持请求，以及在您启用时调用 AI 能力。</p>
-    <h2>3. 本地与云端边界</h2>
-    <p>Desktop 访客与未绑定同步的本地 Vault 默认不上传业务内容。启用同步或 Web 云端功能后，相关数据才会按您的配置进入服务端或您授权的仓库。</p>
-    <h2>4. 共享</h2>
-    <p>我们不会出售个人数据。仅在提供服务所必需时与基础设施/邮件/模型供应商共享，或在法律要求时披露。</p>
-    <h2>5. 保留与删除</h2>
-    <p>账号存续期间保留业务数据；关闭账号后将按产品流程删除或匿名化，法律要求保留的安全日志除外。</p>
-    <h2>6. 您的权利</h2>
-    <p>您可访问、更正导出范围内的数据，或请求关闭账号。请联系 <a href="mailto:legal@memoflow.app">legal@memoflow.app</a>。</p>
-    <h2>7. 儿童</h2>
-    <p>本服务不面向 13 岁（或当地更高年龄）以下儿童。</p>
-    <h2>8. 变更</h2>
-    <p>政策更新后会在本页更新“更新日期”。继续使用即表示知悉更新后的政策。</p>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>隐私政策 · MemoFlow</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          sans-serif;
+      }
+      body {
+        margin: 0;
+        background: #0f1115;
+        color: #e8eaf0;
+        line-height: 1.65;
+      }
+      main {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 2.5rem 1.25rem 4rem;
+      }
+      h1 {
+        font-size: 1.75rem;
+        margin: 0 0 0.5rem;
+      }
+      .meta {
+        color: #9aa3b2;
+        font-size: 0.9rem;
+        margin-bottom: 1.75rem;
+      }
+      h2 {
+        font-size: 1.15rem;
+        margin-top: 1.75rem;
+      }
+      a {
+        color: #8ab4ff;
+      }
+      footer {
+        margin-top: 2.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid #2a3140;
+        color: #9aa3b2;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>隐私政策</h1>
+      <p class="meta">Version 2026.07.18 · Effective 2026-07-18 · Updated 2026-07-18</p>
 
-    <footer>
-      Contact: <a href="mailto:legal@memoflow.app">legal@memoflow.app</a>
-      · Product: MemoFlow / MemoFlow
-    </footer>
-  </main>
-</body>
+      <p>本政策说明 MemoFlow 如何收集、使用与保护与您相关的信息。</p>
+      <h2>1. 我们处理的数据</h2>
+      <ul>
+        <li>账号数据：邮箱、认证状态、会话与安全事件。</li>
+        <li>业务数据：目标、任务、笔记、提醒等您主动创建的内容。</li>
+        <li>设备与诊断：设备类型、大致地区（若可得）、错误日志与性能指标。</li>
+        <li>可选集成：GitHub 身份或仓库授权元数据（仅在您明确授权后）。</li>
+      </ul>
+      <h2>2. 使用目的</h2>
+      <p>
+        用于提供与改进服务、保障账号安全、同步与检索、响应支持请求，以及在您启用时调用 AI 能力。
+      </p>
+      <h2>3. 本地与云端边界</h2>
+      <p>
+        Desktop 访客与未绑定同步的本地 Vault 默认不上传业务内容。启用同步或 Web
+        云端功能后，相关数据才会按您的配置进入服务端或您授权的仓库。
+      </p>
+      <h2>4. 共享</h2>
+      <p>
+        我们不会出售个人数据。仅在提供服务所必需时与基础设施/邮件/模型供应商共享，或在法律要求时披露。
+      </p>
+      <h2>5. 保留与删除</h2>
+      <p>
+        账号存续期间保留业务数据；关闭账号后将按产品流程删除或匿名化，法律要求保留的安全日志除外。
+      </p>
+      <h2>6. 您的权利</h2>
+      <p>
+        您可访问、更正导出范围内的数据，或请求关闭账号。请联系
+        <a href="mailto:legal@memoflow.app">legal@memoflow.app</a>。
+      </p>
+      <h2>7. 儿童</h2>
+      <p>本服务不面向 13 岁（或当地更高年龄）以下儿童。</p>
+      <h2>8. 变更</h2>
+      <p>政策更新后会在本页更新“更新日期”。继续使用即表示知悉更新后的政策。</p>
+
+      <footer>
+        Contact: <a href="mailto:legal@memoflow.app">legal@memoflow.app</a>
+        · Product: MemoFlow / MemoFlow
+      </footer>
+    </main>
+  </body>
 </html>

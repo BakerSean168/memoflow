@@ -59,17 +59,23 @@ export function toAIPublicFailure(
     return { code: error.code, message: localAgentFailureMessage(error.code, error.driver) };
   if (isAIExecutionError(error)) {
     const code = mapAIExecutionCategory(error.category);
-    return withRateLimitMetadata(createPublicFailure(
-      code,
-      safeAIPublicMessage(code),
-      error.requestId ? { requestId: error.requestId } : undefined,
-    ), error);
+    return withRateLimitMetadata(
+      createPublicFailure(
+        code,
+        safeAIPublicMessage(code),
+        error.requestId ? { requestId: error.requestId } : undefined,
+      ),
+      error,
+    );
   }
 
   const structured = extractStructuredResultError(error);
   if (structured && isAIPublicFailureCode(structured.code)) {
     const code = structured.code;
-    return withRateLimitMetadata(createPublicFailure(code, safeAIPublicMessage(code), structured.context), error);
+    return withRateLimitMetadata(
+      createPublicFailure(code, safeAIPublicMessage(code), structured.context),
+      error,
+    );
   }
 
   const { statusCode, timedOut } = readAIProviderFailureDiagnostics(error);
@@ -87,17 +93,18 @@ export function toAIPublicFailure(
               ? 'SERVICE_UNAVAILABLE'
               : undefined;
   if (providerCode)
-    return withRateLimitMetadata(createPublicFailure(
-      providerCode,
-      safeAIPublicMessage(providerCode),
-      structured?.context,
-    ), error);
+    return withRateLimitMetadata(
+      createPublicFailure(providerCode, safeAIPublicMessage(providerCode), structured?.context),
+      error,
+    );
 
   return createPublicFailure(options.fallbackCode, options.fallbackMessage, structured?.context);
 }
 
 function withRateLimitMetadata(failure: AIPublicFailure, error: unknown): AIPublicFailure {
-  return failure.code === 'RATE_LIMITED' ? { ...failure, ...readAIProviderRateLimit(error) } : failure;
+  return failure.code === 'RATE_LIMITED'
+    ? { ...failure, ...readAIProviderRateLimit(error) }
+    : failure;
 }
 
 /** Bounded, allowlisted diagnostics: never copy messages, bodies, headers or URLs. */

@@ -105,7 +105,9 @@ for (const host of ['web', 'desktop'] as const) {
       ['shell-focus', 1280],
       ['shell-split', 440],
     ] as const) {
-      test(`#483 ${host} bordered composer ${scene} ${width}px ${theme}`, async ({ page }, testInfo) => {
+      test(`#483 ${host} bordered composer ${scene} ${width}px ${theme}`, async ({
+        page,
+      }, testInfo) => {
         await openVisualCase(page, {
           owner: 'pages',
           host,

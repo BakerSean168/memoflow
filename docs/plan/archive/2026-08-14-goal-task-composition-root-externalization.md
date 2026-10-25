@@ -165,7 +165,10 @@ export interface ComposeTaskDesktopDependencies {
 }
 export interface ComposedTaskDesktop {
   readonly module: IElectronModule;
-  readonly repositories: Pick<TaskModuleInstance, 'taskTemplateRepository' | 'taskInstanceRepository'>;
+  readonly repositories: Pick<
+    TaskModuleInstance,
+    'taskTemplateRepository' | 'taskInstanceRepository'
+  >;
 }
 export function composeTask(deps: ComposeTaskDesktopDependencies): ComposedTaskDesktop;
 ```
@@ -367,16 +370,16 @@ Before marking this plan complete, attach raw command results and the final `rg`
 
 ### 5.1 Per-step gates
 
-| 阶段 | Gate | Expected result |
-| --- | --- | --- |
-| Step 0 | `goal/task/api typecheck + lint` | baseline and no unexplained new diagnostics |
-| Step 0 | direct Vitest configs for Goal, Task, API, Desktop main/IPC | baseline test inventory captured; no Nx test hang |
-| Step 1 | Goal/Task repository surface specs | both persistence variants return the same port-shaped dependency names; missing transaction runner is impossible at type level |
-| Step 2 | package API/Electron lifecycle specs | state machine, double-register policy, failure cleanup, idempotent destroy, handler removal pass |
-| Step 3 | API composer order/surface + bootstrap/integration tests | Prisma selected only in `apps/api/runtime`; Task async start awaited; paths/envelopes unchanged |
-| Step 4 | Desktop composer/main/IPC tests | PowerSync selected only in Desktop composer; no DB composition in Electron module; injected repository consumers work |
-| Step 5 | `memoflow:governance-check`, `memoflow:docs-check` | exports, JSDoc, surface specs and test inventory pass |
-| Final | direct Vitest + `pnpm nx run ...:typecheck/lint` for all touched projects | all required lanes green; no residual unverified behavior change |
+| 阶段   | Gate                                                                      | Expected result                                                                                                                |
+| ------ | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Step 0 | `goal/task/api typecheck + lint`                                          | baseline and no unexplained new diagnostics                                                                                    |
+| Step 0 | direct Vitest configs for Goal, Task, API, Desktop main/IPC               | baseline test inventory captured; no Nx test hang                                                                              |
+| Step 1 | Goal/Task repository surface specs                                        | both persistence variants return the same port-shaped dependency names; missing transaction runner is impossible at type level |
+| Step 2 | package API/Electron lifecycle specs                                      | state machine, double-register policy, failure cleanup, idempotent destroy, handler removal pass                               |
+| Step 3 | API composer order/surface + bootstrap/integration tests                  | Prisma selected only in `apps/api/runtime`; Task async start awaited; paths/envelopes unchanged                                |
+| Step 4 | Desktop composer/main/IPC tests                                           | PowerSync selected only in Desktop composer; no DB composition in Electron module; injected repository consumers work          |
+| Step 5 | `memoflow:governance-check`, `memoflow:docs-check`                        | exports, JSDoc, surface specs and test inventory pass                                                                          |
+| Final  | direct Vitest + `pnpm nx run ...:typecheck/lint` for all touched projects | all required lanes green; no residual unverified behavior change                                                               |
 
 ### 5.2 Behavior invariance checklist
 

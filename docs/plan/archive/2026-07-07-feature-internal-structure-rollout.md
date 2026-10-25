@@ -327,12 +327,12 @@ archived: 2026-07-07T14:10:58+00:00
    - 从“governance 特判 + legacy 默认”改为“server/* 默认”
    - 迁移期间曾用显式 baseline 记录未迁移包；最终已移除 baseline，
      并直接拒绝 legacy 根目录
-   当前已完成。
+     当前已完成。
 3. 更新 `tools/governance/package-internal-boundary-audit.mjs`：
    - 统一到 `server/domain` / `server/application` /
      `server/transport` / `server/infrastructure`
    - 移除 legacy 布局审计分支，不再维护永久双轨
-   当前已完成。
+     当前已完成。
 4. 更新 `tools/governance/package-export-audit.mjs`：
    - 默认公开结构改为 `.` / `./api` / `./client` / `./electron`
    - 专门 seam 继续由 package-specific allowlist 显式声明

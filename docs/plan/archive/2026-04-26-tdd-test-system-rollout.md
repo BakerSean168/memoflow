@@ -42,16 +42,16 @@ Build a fast-feedback, Nx-first testing system for the monorepo so day-to-day wo
 
 ## Final Ownership Model
 
-| Boundary changed | Primary target | Owner project |
-| --- | --- | --- |
-| Domain logic, mapping, local component behavior, contract checks | `<project>:test` / `<project>:test:watch` | current changed project |
-| Real DB / Prisma / transaction boundary | `task:test:integration` | `task` |
-| HTTP route wiring / middleware / serialization / controller composition | `api:test:smoke` | `api` |
-| Electron preload / IPC handlers | `desktop:test:ipc` | `desktop` |
-| Electron main-process logic | `desktop:test:main` | `desktop` |
-| Browser end-user critical flows | `web:e2e` | `web` |
-| Cross-end sync regression | `web:e2e:sync` | `web` |
-| Explicit perf verification | `task:test:bench` | `task` |
+| Boundary changed                                                        | Primary target                            | Owner project           |
+| ----------------------------------------------------------------------- | ----------------------------------------- | ----------------------- |
+| Domain logic, mapping, local component behavior, contract checks        | `<project>:test` / `<project>:test:watch` | current changed project |
+| Real DB / Prisma / transaction boundary                                 | `task:test:integration`                   | `task`                  |
+| HTTP route wiring / middleware / serialization / controller composition | `api:test:smoke`                          | `api`                   |
+| Electron preload / IPC handlers                                         | `desktop:test:ipc`                        | `desktop`               |
+| Electron main-process logic                                             | `desktop:test:main`                       | `desktop`               |
+| Browser end-user critical flows                                         | `web:e2e`                                 | `web`                   |
+| Cross-end sync regression                                               | `web:e2e:sync`                            | `web`                   |
+| Explicit perf verification                                              | `task:test:bench`                         | `task`                  |
 
 ## Status Snapshot
 

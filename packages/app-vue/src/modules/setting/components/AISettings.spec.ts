@@ -1286,7 +1286,9 @@ it('uses the models already verified by an AGY login without a second native pro
   });
   await wrapper.get('[data-testid="ai-agy-login"]').trigger('click');
   await flushPromises();
-  expect(wrapper.get('[data-testid="ai-agy-login-status"]').text()).toContain('Google account connected');
+  expect(wrapper.get('[data-testid="ai-agy-login-status"]').text()).toContain(
+    'Google account connected',
+  );
   expect(wrapper.get('[data-testid="ai-provider-select-agent:antigravity"]').text()).toContain(
     '1 model',
   );
@@ -1377,9 +1379,7 @@ it('skips the redundant AGY scan if Google verified models while earlier provide
   const callsAfterVerification = localClient.probeConnection.mock.calls.length;
 
   finishCodex({ status: 'not_installed', message: 'Not installed' });
-  await vi.waitFor(() =>
-    expect(localClient.probeDefaultDriver).toHaveBeenCalledWith('dsh'),
-  );
+  await vi.waitFor(() => expect(localClient.probeDefaultDriver).toHaveBeenCalledWith('dsh'));
   await flushPromises();
   expect(localClient.probeConnection).toHaveBeenCalledTimes(callsAfterVerification);
   expect(wrapper.get('[data-testid="ai-native-model-id"]').text()).toBe('ready-while-scanning');

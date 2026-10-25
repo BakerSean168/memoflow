@@ -56,7 +56,11 @@ describe('AI Provider onboarding V2 client adapters', () => {
 
     expect(client.get).toHaveBeenCalledWith('/ai/provider-catalog');
     expect(client.post).toHaveBeenNthCalledWith(1, '/ai/provider-connections/probe', probe);
-    expect(client.post).toHaveBeenNthCalledWith(2, '/ai/provider-connections/test-model', modelTest);
+    expect(client.post).toHaveBeenNthCalledWith(
+      2,
+      '/ai/provider-connections/test-model',
+      modelTest,
+    );
     expect(client.post).toHaveBeenNthCalledWith(3, '/ai/providers', commit);
     expect(client.post).toHaveBeenNthCalledWith(
       4,
@@ -83,17 +87,19 @@ describe('AI Provider onboarding V2 client adapters', () => {
 
     expect(client.invoke).toHaveBeenNthCalledWith(1, AIChannels.PROVIDER_CATALOG_GET);
     expect(client.invoke).toHaveBeenNthCalledWith(2, AIChannels.PROVIDER_ONBOARDING_PROBE, probe);
-    expect(client.invoke).toHaveBeenNthCalledWith(3, AIChannels.PROVIDER_ONBOARDING_TEST_MODEL, modelTest);
+    expect(client.invoke).toHaveBeenNthCalledWith(
+      3,
+      AIChannels.PROVIDER_ONBOARDING_TEST_MODEL,
+      modelTest,
+    );
     expect(client.invoke).toHaveBeenNthCalledWith(4, AIChannels.PROVIDER_ONBOARDING_COMMIT, commit);
-    expect(client.invoke).toHaveBeenNthCalledWith(
-      5,
-      AIChannels.PROVIDER_REPLACEMENT_PROBE,
-      { providerId: 'provider-1', request: replacementProbe },
-    );
-    expect(client.invoke).toHaveBeenNthCalledWith(
-      6,
-      AIChannels.PROVIDER_REPLACEMENT_COMMIT,
-      { providerId: 'provider-1', request: replacementCommit },
-    );
+    expect(client.invoke).toHaveBeenNthCalledWith(5, AIChannels.PROVIDER_REPLACEMENT_PROBE, {
+      providerId: 'provider-1',
+      request: replacementProbe,
+    });
+    expect(client.invoke).toHaveBeenNthCalledWith(6, AIChannels.PROVIDER_REPLACEMENT_COMMIT, {
+      providerId: 'provider-1',
+      request: replacementCommit,
+    });
   });
 });

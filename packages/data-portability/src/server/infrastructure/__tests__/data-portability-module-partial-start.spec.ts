@@ -71,9 +71,7 @@ describe('createDataPortabilityModule partial-start cleanup', () => {
     const a = makeContribution('a');
     const b = makeContribution('b', true);
 
-    const instance = createDataPortabilityModule(
-      makeDeps([a.contribution, b.contribution]),
-    );
+    const instance = createDataPortabilityModule(makeDeps([a.contribution, b.contribution]));
 
     expect(() => instance.start()).toThrow('b start failed');
     expect(a.stop).toHaveBeenCalledTimes(1);
@@ -90,9 +88,7 @@ describe('createDataPortabilityModule partial-start cleanup', () => {
     });
     const b = makeContribution('b', true);
 
-    const instance = createDataPortabilityModule(
-      makeDeps([a.contribution, b.contribution]),
-    );
+    const instance = createDataPortabilityModule(makeDeps([a.contribution, b.contribution]));
 
     expect(() => instance.start()).toThrow('b start failed');
     expect(a.stop).toHaveBeenCalledTimes(1);
@@ -102,9 +98,7 @@ describe('createDataPortabilityModule partial-start cleanup', () => {
     const a = makeContribution('a');
     const b = makeContribution('b');
 
-    const instance = createDataPortabilityModule(
-      makeDeps([a.contribution, b.contribution]),
-    );
+    const instance = createDataPortabilityModule(makeDeps([a.contribution, b.contribution]));
 
     instance.start();
     expect(a.start).toHaveBeenCalledTimes(1);

@@ -77,7 +77,8 @@ function sortTemplates(templates: TaskPlanSummary[], sortBy: TaskSortOption) {
   next.sort((left, right) => {
     if (sortBy === 'pending') {
       return (
-        right.pendingOccurrenceCount - left.pendingOccurrenceCount || right.updatedAt - left.updatedAt
+        right.pendingOccurrenceCount - left.pendingOccurrenceCount ||
+        right.updatedAt - left.updatedAt
       );
     }
     if (sortBy === 'completion') {

@@ -35,7 +35,11 @@ export class NotificationMaintenanceApplicationService {
   private async mutateLifecycle(
     id: string,
     identityId: string,
-    mutate: (notification: NonNullable<Awaited<ReturnType<INotificationRepository['findByIdForIdentity']>>>) => void,
+    mutate: (
+      notification: NonNullable<
+        Awaited<ReturnType<INotificationRepository['findByIdForIdentity']>>
+      >,
+    ) => void,
   ): Promise<Result<NotificationClientDTO>> {
     const notification = await this.notificationRepository.findByIdForIdentity(identityId, id);
     if (!notification) return fail({ code: 'NOT_FOUND', message: 'notification not found' });
@@ -90,7 +94,10 @@ export class NotificationMaintenanceApplicationService {
     const expiredIds = notifications
       .map((notification) => notification.toServerDTO())
       .filter((notification) => this.matchesCategory(notification.category, data.category))
-      .filter((notification) => notification.expiresAt != null && notification.expiresAt < beforeTimestamp)
+      .filter(
+        (notification) =>
+          notification.expiresAt != null && notification.expiresAt < beforeTimestamp,
+      )
       .map((notification) => String(notification.id));
 
     if (expiredIds.length > 0) {

@@ -54,7 +54,10 @@ await step('login', async () => {
 await step('goal-plus-dialog', async () => {
   await page.goto(BASE + '/goals', { waitUntil: 'networkidle' });
   await page.waitForTimeout(2000);
-  const plus = page.locator('button').filter({ has: page.locator('svg.lucide-plus') }).first();
+  const plus = page
+    .locator('button')
+    .filter({ has: page.locator('svg.lucide-plus') })
+    .first();
   await plus.click({ timeout: 8000 });
   await page.waitForTimeout(1500);
   await shot('20-goal-create-dialog');
@@ -63,7 +66,9 @@ await step('goal-plus-dialog', async () => {
 });
 
 await step('goal-fill-and-save', async () => {
-  const nameInput = page.locator('[role="dialog"] input:visible, .v-overlay input:visible, form input:visible').first();
+  const nameInput = page
+    .locator('[role="dialog"] input:visible, .v-overlay input:visible, form input:visible')
+    .first();
   await nameInput.fill('Q3 上线知识库检索', { timeout: 8000 });
   await shot('21-goal-filled');
   const save = page
@@ -74,14 +79,21 @@ await step('goal-fill-and-save', async () => {
   await page.waitForTimeout(3000);
   await shot('22-goal-after-save');
   const body = await page.evaluate(() => document.body.innerText);
-  const times = [...new Set(body.match(/(\d{4}[-/年.]\d{1,2}[-/月.]\d{1,2}日?|\d{1,2}:\d{2}|Invalid Date|NaN)/g) ?? [])];
+  const times = [
+    ...new Set(
+      body.match(/(\d{4}[-/年.]\d{1,2}[-/月.]\d{1,2}日?|\d{1,2}:\d{2}|Invalid Date|NaN)/g) ?? [],
+    ),
+  ];
   record('goal-times', 'INFO', JSON.stringify(times.slice(0, 30)));
 });
 
 await step('task-plus-dialog', async () => {
   await page.goto(BASE + '/tasks', { waitUntil: 'networkidle' });
   await page.waitForTimeout(2000);
-  const plus = page.locator('button').filter({ has: page.locator('svg.lucide-plus') }).first();
+  const plus = page
+    .locator('button')
+    .filter({ has: page.locator('svg.lucide-plus') })
+    .first();
   await plus.click({ timeout: 8000 });
   await page.waitForTimeout(1500);
   await shot('23-task-create-dialog');
@@ -101,12 +113,18 @@ await step('lang-switch-en', async () => {
   await page.goto(BASE + '/settings', { waitUntil: 'networkidle' });
   await page.waitForTimeout(1500);
   await shot('25-settings-zh');
-  const langSelect = page.locator('select, [role="combobox"]').filter({ hasText: /简体中文/ }).first();
+  const langSelect = page
+    .locator('select, [role="combobox"]')
+    .filter({ hasText: /简体中文/ })
+    .first();
   await langSelect.click({ timeout: 5000 }).catch(() => {});
   await page.waitForTimeout(800);
   await shot('26-settings-lang-open');
 });
 
-fs.writeFileSync(path.join(OUT, 'journey2-log.json'), JSON.stringify({ log, apiErrors: [...new Set(apiErrors)].slice(0, 30) }, null, 2));
+fs.writeFileSync(
+  path.join(OUT, 'journey2-log.json'),
+  JSON.stringify({ log, apiErrors: [...new Set(apiErrors)].slice(0, 30) }, null, 2),
+);
 console.log('=== api errors:', [...new Set(apiErrors)].slice(0, 10).join(' ; '));
 await browser.close();

@@ -1,5 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '.';
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  TableFooter,
+} from '.';
 
 const meta = {
   title: 'Atoms/Table',
@@ -20,8 +29,19 @@ const invoices = [
 
 export const Default: Story = {
   render: () => ({
-    components: { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow, TableFooter },
-    setup() { return { invoices }; },
+    components: {
+      Table,
+      TableBody,
+      TableCaption,
+      TableCell,
+      TableHead,
+      TableHeader,
+      TableRow,
+      TableFooter,
+    },
+    setup() {
+      return { invoices };
+    },
     template: `
       <Table>
         <TableCaption>A list of your recent invoices.</TableCaption>

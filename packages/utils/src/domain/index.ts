@@ -1,4 +1,4 @@
-export { Entity} from './entity';
+export { Entity } from './entity';
 export { AggregateRoot } from './aggregate-root';
 export { ValueObject } from './value-object';
 export { eventBus } from './global-event-bus';

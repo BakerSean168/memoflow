@@ -217,12 +217,15 @@ export class TaskOccurrence extends AggregateRoot<TaskOccurrenceId> {
     this._props.result = null;
     this._props.updatedAt = now as Instant;
     this.advanceVersion();
-    this.addDomainEvent<TaskEventMap['task:occurrence-uncompleted']>('task:occurrence-uncompleted', {
-      identityId: this._props.identityId,
-      taskOccurrenceId: this.id,
-      taskPlanId: this._props.planId,
-      uncompletedAt: now,
-    });
+    this.addDomainEvent<TaskEventMap['task:occurrence-uncompleted']>(
+      'task:occurrence-uncompleted',
+      {
+        identityId: this._props.identityId,
+        taskOccurrenceId: this.id,
+        taskPlanId: this._props.planId,
+        uncompletedAt: now,
+      },
+    );
   }
 
   skip(reason?: string, now = Date.now()): void {

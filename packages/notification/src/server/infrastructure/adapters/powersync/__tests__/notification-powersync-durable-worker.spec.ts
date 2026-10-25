@@ -339,15 +339,19 @@ describe('PowerSync Notification delivery execution', () => {
       const repository = new PowerSyncNotificationPreferenceRepository(db);
       const preference = NotificationPreference.create({ identityId: 'user-policy-pref' as never });
       preference.setGlobalChannel(NotificationChannelType.InApp, true);
-      preference.setQuietHours(QuietHours.create({
-        enabled: true,
-        timeZone: requireTimeZoneId('Asia/Tokyo'),
-        weeklyWindows: [{
-          daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
-          start: asHm('22:00'),
-          end: asHm('08:00'),
-        }],
-      }));
+      preference.setQuietHours(
+        QuietHours.create({
+          enabled: true,
+          timeZone: requireTimeZoneId('Asia/Tokyo'),
+          weeklyWindows: [
+            {
+              daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+              start: asHm('22:00'),
+              end: asHm('08:00'),
+            },
+          ],
+        }),
+      );
 
       await repository.save(preference);
       const loaded = await repository.findByIdentityId('user-policy-pref');
@@ -362,10 +366,9 @@ describe('PowerSync Notification delivery execution', () => {
     const { PowerSyncAppSchema } = (await import('@memoflow/powersync-schema')) as unknown as {
       PowerSyncAppSchema: Record<string, any>;
     };
-    const tables = (PowerSyncAppSchema.props ?? PowerSyncAppSchema.tables ?? PowerSyncAppSchema) as Record<
-      string,
-      any
-    >;
+    const tables = (PowerSyncAppSchema.props ??
+      PowerSyncAppSchema.tables ??
+      PowerSyncAppSchema) as Record<string, any>;
     expect(tables.notification_channels).toBeUndefined();
     expect(tables.notification_delivery_decisions).toBeDefined();
     expect(tables.notification_dispatch_outbox).toBeDefined();
@@ -390,7 +393,9 @@ describe('PowerSync Notification delivery execution', () => {
         ]),
       ).rejects.toThrow();
       expect(
-        await db.getOptional('SELECT id FROM notifications WHERE id = ?', [String(notification.id)]),
+        await db.getOptional('SELECT id FROM notifications WHERE id = ?', [
+          String(notification.id),
+        ]),
       ).toBeNull();
     } finally {
       sqlite.close();

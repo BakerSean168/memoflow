@@ -28,9 +28,11 @@ export interface ComposableHandleErrorOptions {
 export function createComposableHandleError(
   options: ComposableHandleErrorOptions,
 ): (error: unknown, fallbackKey: string) => void {
-  const report = options.report ?? ((message: string) => {
-    console.error(message);
-  });
+  const report =
+    options.report ??
+    ((message: string) => {
+      console.error(message);
+    });
 
   return function handleError(error: unknown, fallbackKey: string): void {
     const message = translateResultError(error, options.t, { fallbackKey });

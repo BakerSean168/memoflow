@@ -9,7 +9,10 @@ import type {
   AIProviderConfigClientDTO,
   AIProviderConfigServerDTO,
 } from '@memoflow/contracts/ai';
-import type { AIProviderCredentialRef, IdentityId as IIdentityId } from '@memoflow/contracts/primitives';
+import type {
+  AIProviderCredentialRef,
+  IdentityId as IIdentityId,
+} from '@memoflow/contracts/primitives';
 import { AiProviderConfigId } from '../../domain/value-objects/ai-provider-config-id';
 import { IdentityId } from '@memoflow/domain-shared/shared';
 
@@ -65,7 +68,6 @@ export class AIProviderConfig extends AggregateRoot<AiProviderConfigId> {
   public get defaultModel(): string | null {
     return this._props.defaultModel;
   }
-
 
   public get isActive(): boolean {
     return this._props.isActive;
@@ -126,10 +128,13 @@ export class AIProviderConfig extends AggregateRoot<AiProviderConfigId> {
       deletedAt: null,
     });
 
-    instance.addDomainEvent<AIEventMap['ai:provider-config-created']>('ai:provider-config-created', {
-      identityId,
-      providerConnection: instance.toServerDTO(),
-    });
+    instance.addDomainEvent<AIEventMap['ai:provider-config-created']>(
+      'ai:provider-config-created',
+      {
+        identityId,
+        providerConnection: instance.toServerDTO(),
+      },
+    );
 
     return instance;
   }

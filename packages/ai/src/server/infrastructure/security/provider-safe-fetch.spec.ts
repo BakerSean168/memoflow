@@ -37,15 +37,16 @@ describe('createPinnedLookup', () => {
 
   it('honors the socket family without performing another resolver call', async () => {
     const lookup = createPinnedLookup(authorization);
-    await expect(
-      invokeLookup(lookup, 'provider.example', { family: 4 }),
-    ).resolves.toEqual({ address: '8.8.8.8', family: 4 });
+    await expect(invokeLookup(lookup, 'provider.example', { family: 4 })).resolves.toEqual({
+      address: '8.8.8.8',
+      family: 4,
+    });
   });
 
   it('fails closed if the connector asks for a different hostname', async () => {
     const lookup = createPinnedLookup(authorization);
-    await expect(
-      invokeLookup(lookup, 'rebound.internal', { family: 4 }),
-    ).rejects.toMatchObject({ code: 'ENOTFOUND' });
+    await expect(invokeLookup(lookup, 'rebound.internal', { family: 4 })).rejects.toMatchObject({
+      code: 'ENOTFOUND',
+    });
   });
 });

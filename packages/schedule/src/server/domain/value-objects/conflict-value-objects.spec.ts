@@ -47,7 +47,8 @@ describe('Planner/Calendar conflict value objects', () => {
       suggestions: [{ type: 'MoveLater', newStartTime: 140, newEndTime: 170 }],
     });
     expect(
-      ConflictDetectionResult.create({ hasConflict: false, conflicts: [], suggestions: [] }).hasConflict,
+      ConflictDetectionResult.create({ hasConflict: false, conflicts: [], suggestions: [] })
+        .hasConflict,
     ).toBe(false);
   });
 });

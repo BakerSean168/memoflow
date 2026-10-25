@@ -67,7 +67,9 @@ export interface AssistantRuntimeClient {
   ): Promise<void>;
   cancelRun(runId: string, runtimeKind?: AssistantRuntimeKind): Promise<boolean>;
   answerToolSuspension(command: AssistantRuntimeToolAnswerCommand): Promise<boolean>;
-  listAskUserSuspensions(conversationId: string): Promise<readonly import('@memoflow/contracts/ai').AssistantRuntimeAskUserSuspension[]>;
+  listAskUserSuspensions(
+    conversationId: string,
+  ): Promise<readonly import('@memoflow/contracts/ai').AssistantRuntimeAskUserSuspension[]>;
   decideToolApproval(command: AssistantRuntimeApprovalCommand): Promise<boolean>;
 }
 
@@ -124,9 +126,13 @@ export class AssistantRuntimeHttpClient implements AssistantRuntimeClient {
 
   async listAskUserSuspensions(conversationId: string) {
     const request = AssistantRuntimeHistoryClientRequestSchema.parse({ conversationId });
-    const result = await this.httpClient.post<unknown>('/ai/runtime/assistant/ask-user/pending', request);
+    const result = await this.httpClient.post<unknown>(
+      '/ai/runtime/assistant/ask-user/pending',
+      request,
+    );
     const parsed = AssistantRuntimeAskUserSuspensionsSchema.safeParse(unwrapOrThrowError(result));
-    if (!parsed.success) throw runtimeProtocolError('AI runtime ask-user history failed protocol validation');
+    if (!parsed.success)
+      throw runtimeProtocolError('AI runtime ask-user history failed protocol validation');
     return parsed.data;
   }
 
@@ -305,9 +311,13 @@ export class AssistantRuntimeIpcClient implements AssistantRuntimeClient {
 
   async listAskUserSuspensions(conversationId: string) {
     const request = AssistantRuntimeHistoryClientRequestSchema.parse({ conversationId });
-    const result = await this.ipcClient.invoke<unknown>(AIChannels.RUNTIME_ASSISTANT_ASK_USER_PENDING, request);
+    const result = await this.ipcClient.invoke<unknown>(
+      AIChannels.RUNTIME_ASSISTANT_ASK_USER_PENDING,
+      request,
+    );
     const parsed = AssistantRuntimeAskUserSuspensionsSchema.safeParse(unwrapOrThrowError(result));
-    if (!parsed.success) throw runtimeProtocolError('AI runtime ask-user history failed protocol validation');
+    if (!parsed.success)
+      throw runtimeProtocolError('AI runtime ask-user history failed protocol validation');
     return parsed.data;
   }
 
@@ -491,7 +501,10 @@ export class AssistantRuntimeIpcClient implements AssistantRuntimeClient {
 
   async answerToolSuspension(command: AssistantRuntimeToolAnswerCommand): Promise<boolean> {
     const validated = AssistantRuntimeToolAnswerCommandSchema.parse(command);
-    const result = await this.ipcClient.invoke<unknown>(AIChannels.RUNTIME_ASSISTANT_ANSWER, validated);
+    const result = await this.ipcClient.invoke<unknown>(
+      AIChannels.RUNTIME_ASSISTANT_ANSWER,
+      validated,
+    );
     const parsed = AssistantRuntimeToolAnswerResultSchema.safeParse(unwrapOrThrowError(result));
     if (!parsed.success) throw runtimeProtocolError('AI runtime answer failed protocol validation');
     return parsed.data.accepted;

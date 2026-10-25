@@ -12,3 +12,8 @@
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
+
+# Generated artifacts: formatting is owned by their generators (VNext Q1)
+/graph.json
+packages/database/src/generated
+tools/test-system-v2/test-inventory.json

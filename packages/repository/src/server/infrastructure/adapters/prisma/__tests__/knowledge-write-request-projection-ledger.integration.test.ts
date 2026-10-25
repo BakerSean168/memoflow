@@ -222,7 +222,6 @@ class ThrowingProjectionRepository implements IKnowledgeNoteProjectionRepository
   ): Promise<KnowledgeNoteLinkGraphSourceSet | null> {
     return this.delegate.loadLinkGraphSourcesForIdentity(identityId, centerProjectionId, limit);
   }
-
 }
 
 /**
@@ -1221,7 +1220,9 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
     expect(after?.projectionAttempts).toBe(0);
 
     const projections = await runtime.projectionRepo.listByIdentity(seed.identityId, { limit: 10 });
-    expect(projections.notes.find((p) => p.relativePath === 'notes/audit-missing.md')).toBeUndefined();
+    expect(
+      projections.notes.find((p) => p.relativePath === 'notes/audit-missing.md'),
+    ).toBeUndefined();
 
     moduleWithoutAudit.dispose();
     await runtime.close();
@@ -1266,7 +1267,9 @@ describe('Knowledge write-request projection ledger (W6-A real routes/services, 
     expect(after?.projectionAttempts).toBe(0);
 
     const projections = await runtime.projectionRepo.listByIdentity(seed.identityId, { limit: 10 });
-    expect(projections.notes.find((p) => p.relativePath === 'notes/audit-write-fail.md')).toBeUndefined();
+    expect(
+      projections.notes.find((p) => p.relativePath === 'notes/audit-write-fail.md'),
+    ).toBeUndefined();
 
     moduleWithFailingAudit.dispose();
     await runtime.close();

@@ -66,7 +66,9 @@ describe('GenerateTaskOccurrencesUseCase (TASK-2204)', () => {
 
     expect(result).toBeOk();
     if (result.ok) {
-      expect(result.data.map((occurrence) => occurrence.scheduleSnapshot.date)).toEqual(['2026-01-02']);
+      expect(result.data.map((occurrence) => occurrence.scheduleSnapshot.date)).toEqual([
+        '2026-01-02',
+      ]);
     }
     expect(instanceRepo.saveMany).toHaveBeenCalledTimes(1);
     expect(vi.mocked(instanceRepo.saveMany).mock.calls[0][0]).toHaveLength(1);

@@ -43,33 +43,33 @@ updated: 2026-07-03T20:54:00+08:00
 - `docs/plan/archive/2026-07-03-core-seam-reconvergence-direct-execution-runbook.md`
 - `docs/plan/archive/2026-07-03-core-seam-reconvergence-round-playbook.md`
 
-| Round | 状态 | 独立执行文档 |
-| --- | --- | --- |
-| R01 | done | `docs/plan/archive/2026-07-02-core-seam-reconvergence-r01-task-template-deep-aggregate.md` |
-| R02 | done | `docs/plan/archive/2026-07-02-core-seam-reconvergence-r02-typed-event-seam-foundation.md` |
-| R03 | done | `docs/plan/archive/2026-07-02-core-seam-reconvergence-r03-task-schedule-projection-source.md` |
-| R04 | done | `docs/plan/archive/2026-07-02-core-seam-reconvergence-r04-schedule-orchestration-task-owner.md` |
-| R05 | done | `docs/plan/archive/2026-07-02-core-seam-reconvergence-r05-goal-reminder-projection-owner.md` |
-| R06 | done | `docs/plan/archive/2026-07-02-core-seam-reconvergence-r06-source-executor-host-thinning.md` |
-| R07 | done | `docs/plan/archive/2026-07-02-core-seam-reconvergence-r07-controller-route-seam-unification.md` |
-| R08 | done | `docs/plan/archive/2026-07-02-core-seam-reconvergence-r08-strict-id-contract-fixtures.md` |
-| R09 | done | `docs/plan/archive/2026-07-02-core-seam-reconvergence-r09-host-runtime-tests-doc-alignment.md` |
+| Round | 状态 | 独立执行文档                                                                                    |
+| ----- | ---- | ----------------------------------------------------------------------------------------------- |
+| R01   | done | `docs/plan/archive/2026-07-02-core-seam-reconvergence-r01-task-template-deep-aggregate.md`      |
+| R02   | done | `docs/plan/archive/2026-07-02-core-seam-reconvergence-r02-typed-event-seam-foundation.md`       |
+| R03   | done | `docs/plan/archive/2026-07-02-core-seam-reconvergence-r03-task-schedule-projection-source.md`   |
+| R04   | done | `docs/plan/archive/2026-07-02-core-seam-reconvergence-r04-schedule-orchestration-task-owner.md` |
+| R05   | done | `docs/plan/archive/2026-07-02-core-seam-reconvergence-r05-goal-reminder-projection-owner.md`    |
+| R06   | done | `docs/plan/archive/2026-07-02-core-seam-reconvergence-r06-source-executor-host-thinning.md`     |
+| R07   | done | `docs/plan/archive/2026-07-02-core-seam-reconvergence-r07-controller-route-seam-unification.md` |
+| R08   | done | `docs/plan/archive/2026-07-02-core-seam-reconvergence-r08-strict-id-contract-fixtures.md`       |
+| R09   | done | `docs/plan/archive/2026-07-02-core-seam-reconvergence-r09-host-runtime-tests-doc-alignment.md`  |
 
 ## 1.2 审计问题到执行轮次映射
 
 这份文档现在直接承担“把审计问题拆成多轮可执行方案”的职责。  
 后续执行者不需要再二次分解，只需要按表选择当前轮次并打开对应独立文档。
 
-| 审计问题 | 当前风险 | 最终优雅形态 | 执行轮次 | 当前状态 |
-| --- | --- | --- | --- | --- |
-| `Q-001` | `apps/api` 越权装配跨域执行链 | host 只做 module composition，execution owner 收回 `schedule-orchestration` | `R06`，并在 `R09` 补 bootstrap tests | `R06` done，`R09` done |
-| `Q-002` | `TaskTemplate` 真正循环依赖 + lazy import hack | 深聚合收敛，删除反向 factory / DTO helper | `R01` | done |
-| `Q-003` | controller / transport contract 同层异形 | 全部统一成 plain function port + returned `Router` | `R07` | done |
-| `Q-004` | projection / execution owner 分散在多个模块 | `schedule-orchestration` 成为唯一系统 owner，feature 只保留 source ports | `R03` - `R06` | `R03` - `R06` done |
-| `Q-005` | 事件总线 cast 绕过类型系统 | typed `Publisher` / `Subscriber` seam 成为唯一入口 | `R02` | done |
-| `Q-006` | fixture 与 branded ID 契约漂移 | 全部 happy-path fixture 使用合法 builder | `R08` | done |
-| `Q-007` | schedule test 噪声会掩盖真实问题 | 在测试收口轮清理重复 mock/object shape 噪声 | `R08` | done |
-| `Q-008` | bootstrap/runtime 关键链路缺少直达测试 | API / web / desktop / orchestration 增加 direct tests | `R09` | done |
+| 审计问题 | 当前风险                                       | 最终优雅形态                                                                | 执行轮次                             | 当前状态               |
+| -------- | ---------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------ | ---------------------- |
+| `Q-001`  | `apps/api` 越权装配跨域执行链                  | host 只做 module composition，execution owner 收回 `schedule-orchestration` | `R06`，并在 `R09` 补 bootstrap tests | `R06` done，`R09` done |
+| `Q-002`  | `TaskTemplate` 真正循环依赖 + lazy import hack | 深聚合收敛，删除反向 factory / DTO helper                                   | `R01`                                | done                   |
+| `Q-003`  | controller / transport contract 同层异形       | 全部统一成 plain function port + returned `Router`                          | `R07`                                | done                   |
+| `Q-004`  | projection / execution owner 分散在多个模块    | `schedule-orchestration` 成为唯一系统 owner，feature 只保留 source ports    | `R03` - `R06`                        | `R03` - `R06` done     |
+| `Q-005`  | 事件总线 cast 绕过类型系统                     | typed `Publisher` / `Subscriber` seam 成为唯一入口                          | `R02`                                | done                   |
+| `Q-006`  | fixture 与 branded ID 契约漂移                 | 全部 happy-path fixture 使用合法 builder                                    | `R08`                                | done                   |
+| `Q-007`  | schedule test 噪声会掩盖真实问题               | 在测试收口轮清理重复 mock/object shape 噪声                                 | `R08`                                | done                   |
+| `Q-008`  | bootstrap/runtime 关键链路缺少直达测试         | API / web / desktop / orchestration 增加 direct tests                       | `R09`                                | done                   |
 
 ## 1.3 直接执行方式
 
@@ -160,17 +160,17 @@ updated: 2026-07-03T20:54:00+08:00
 
 ## 4. 总体轮次总览
 
-| Round | 核心目标 | 主要模块 | 必须同轮删除的旧路径 | 合并门槛 |
-| --- | --- | --- | --- | --- |
-| R01 | 收敛 `TaskTemplate` 深聚合 | `packages/task` | lazy import、反向 factory、聚合对 DTO helper 的认知 | `task-template` 相关环消失 |
-| R02 | 建立 typed event seam 基础设施 | `packages/utils`, `packages/task` | 被触碰文件中的 event bus cast | task runtime 与写路径 use-case 至少一处真实切换 |
-| R03 | 抽离 task 的 schedule projection source | `packages/task` | task 内部最终 projection runtime ownership | task 只保留业务规则，不保留系统 owner |
-| R04 | 新建 `schedule-orchestration`，接管 task projection | `packages/schedule-orchestration`, `packages/task`, `apps/api` | task 旧 projection runtime 最后入口 | task projection owner 单一化 |
-| R05 | 迁移 goal/reminder projection ownership | `packages/goal`, `packages/reminder`, `packages/schedule-orchestration`, `apps/api`, `apps/desktop` | goal/reminder 旧 runtime 文件与接线 | 三类 projection owner 全收回 |
-| R06 | 回收 source executor ownership，压薄宿主层 | `packages/schedule-orchestration`, `packages/notification`, `apps/api`, `apps/desktop` | `apps/api/src/main.ts` 中跨域执行链拼装 | host 退回纯宿主级 composition root |
-| R07 | 统一 controller seam 与 route registration seam | `packages/task`, `packages/goal`, `packages/schedule` | `.execute` wrapper、task 的 root-router mutation seam | controller contract 同形 |
-| R08 | 收紧 strict ID contract 与 fixture 体系 | shared ID contract + task/schedule/api tests | 依赖 warning 的 happy-path fixture | 核心测试无 ID warning |
-| R09 | 补宿主启动链和 runtime 直达测试，清理文档 | `apps/api`, `apps/web`, `apps/desktop`, `packages/schedule`, `packages/schedule-orchestration`, `docs/` | 过时旧 seam 文档描述 | 关键运行链有 direct tests，文档回收完成 |
+| Round | 核心目标                                            | 主要模块                                                                                                | 必须同轮删除的旧路径                                  | 合并门槛                                        |
+| ----- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | ----------------------------------------------- |
+| R01   | 收敛 `TaskTemplate` 深聚合                          | `packages/task`                                                                                         | lazy import、反向 factory、聚合对 DTO helper 的认知   | `task-template` 相关环消失                      |
+| R02   | 建立 typed event seam 基础设施                      | `packages/utils`, `packages/task`                                                                       | 被触碰文件中的 event bus cast                         | task runtime 与写路径 use-case 至少一处真实切换 |
+| R03   | 抽离 task 的 schedule projection source             | `packages/task`                                                                                         | task 内部最终 projection runtime ownership            | task 只保留业务规则，不保留系统 owner           |
+| R04   | 新建 `schedule-orchestration`，接管 task projection | `packages/schedule-orchestration`, `packages/task`, `apps/api`                                          | task 旧 projection runtime 最后入口                   | task projection owner 单一化                    |
+| R05   | 迁移 goal/reminder projection ownership             | `packages/goal`, `packages/reminder`, `packages/schedule-orchestration`, `apps/api`, `apps/desktop`     | goal/reminder 旧 runtime 文件与接线                   | 三类 projection owner 全收回                    |
+| R06   | 回收 source executor ownership，压薄宿主层          | `packages/schedule-orchestration`, `packages/notification`, `apps/api`, `apps/desktop`                  | `apps/api/src/main.ts` 中跨域执行链拼装               | host 退回纯宿主级 composition root              |
+| R07   | 统一 controller seam 与 route registration seam     | `packages/task`, `packages/goal`, `packages/schedule`                                                   | `.execute` wrapper、task 的 root-router mutation seam | controller contract 同形                        |
+| R08   | 收紧 strict ID contract 与 fixture 体系             | shared ID contract + task/schedule/api tests                                                            | 依赖 warning 的 happy-path fixture                    | 核心测试无 ID warning                           |
+| R09   | 补宿主启动链和 runtime 直达测试，清理文档           | `apps/api`, `apps/web`, `apps/desktop`, `packages/schedule`, `packages/schedule-orchestration`, `docs/` | 过时旧 seam 文档描述                                  | 关键运行链有 direct tests，文档回收完成         |
 
 ## 4.1 当前进度快照
 
@@ -903,5 +903,3 @@ R09 可以在一个更干净的测试基座上补宿主启动链和 runtime 直�
 9. R09
 
 不建议为了“减少轮次数”跨过底层基础轮次直接做上层切换。
-
-

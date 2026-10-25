@@ -95,7 +95,7 @@ export function createIdType<T extends string>() {
     generate(): T {
       return IdGenerator.uuid() as T;
     },
-    
+
     // 自动获得还原能力
     of(value: string): T {
       if (!value) throw new Error("ID cannot be empty");
@@ -166,7 +166,7 @@ export function createIdType<T extends string>(prefix: string) {
       // 自动拼装前缀
       return `${prefix}_${IdGenerator.uuid()}` as T;
     },
-    
+
     of(value: string): T {
       // 自动校验前缀 (可选，增加安全性)
       if (!value.startsWith(prefix + '_')) {

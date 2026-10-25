@@ -110,14 +110,8 @@
     {
       "id": "notification",
       "packagePath": "packages/notification",
-      "forbiddenProductionDependencies": [
-        "@memoflow/powersync-schema",
-        "@memoflow/scheduler"
-      ],
-      "forbiddenProductionImports": [
-        "@memoflow/powersync-schema",
-        "@memoflow/scheduler"
-      ],
+      "forbiddenProductionDependencies": ["@memoflow/powersync-schema", "@memoflow/scheduler"],
+      "forbiddenProductionImports": ["@memoflow/powersync-schema", "@memoflow/scheduler"],
       "forbiddenConfigurationReferences": [
         {
           "path": "packages/notification/tsconfig.json",

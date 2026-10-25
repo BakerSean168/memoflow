@@ -90,9 +90,7 @@ export function useNotificationPreferences() {
     }
   }
 
-  async function updatePreferences(
-    request: UpdateNotificationPreferenceReq,
-  ): Promise<boolean> {
+  async function updatePreferences(request: UpdateNotificationPreferenceReq): Promise<boolean> {
     isSaving.value = true;
     error.value = null;
     try {

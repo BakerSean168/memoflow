@@ -188,19 +188,27 @@ export type GoalPlanDraftContent = z.infer<typeof GoalPlanDraftContentSchema>;
 
 /** A partial native draft is planning input, never a persisted Goal. */
 export const GoalPlanningSeedSchema = GoalPlanDraftContentSchema.safeExtend({
-  goal: GoalPlanGoalSchema.extend({ name: z.string().trim().pipe(CreateGoalSchema.shape.name.or(z.literal(''))) }),
+  goal: GoalPlanGoalSchema.extend({
+    name: z
+      .string()
+      .trim()
+      .pipe(CreateGoalSchema.shape.name.or(z.literal(''))),
+  }),
 });
 export type GoalPlanningSeed = z.infer<typeof GoalPlanningSeedSchema>;
 
 export const GoalCreateClientInputSchema = z
   .object({
     idea: z.string().trim().min(1).max(8000),
-    sourceDraft: z.object({
-      sourceRunId: z.string().min(1),
-      attemptId: z.string().uuid(),
-      draftRevision: z.number().int().nonnegative(),
-      draft: GoalPlanningSeedSchema,
-    }).strict().optional(),
+    sourceDraft: z
+      .object({
+        sourceRunId: z.string().min(1),
+        attemptId: z.string().uuid(),
+        draftRevision: z.number().int().nonnegative(),
+        draft: GoalPlanningSeedSchema,
+      })
+      .strict()
+      .optional(),
     surfaceContext: z
       .object({
         currentRoute: z.string().trim().max(500).optional(),
@@ -232,7 +240,12 @@ export type GoalPlanDraft = z.infer<typeof GoalPlanDraftSchema>;
  * they are never permission to persist a Goal or bypass native owner approval.
  * Every command is scoped to the current durable workflow run by its journal.
  */
-export const GoalWorkflowActionIdSchema = z.string().trim().min(1).max(100).regex(/^[a-zA-Z0-9][a-zA-Z0-9._:-]*$/);
+export const GoalWorkflowActionIdSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(100)
+  .regex(/^[a-zA-Z0-9][a-zA-Z0-9._:-]*$/);
 
 const GoalLiveActionBase = {
   actionId: GoalWorkflowActionIdSchema,
@@ -240,58 +253,87 @@ const GoalLiveActionBase = {
 };
 
 export const GoalWorkflowLiveActionSchema = z.discriminatedUnion('operation', [
-  z.object({
-    ...GoalLiveActionBase,
-    operation: z.literal('goal.setName'),
-    value: GoalPlanGoalSchema.shape.name,
-  }).strict(),
-  z.object({
-    ...GoalLiveActionBase,
-    operation: z.literal('goal.patchDescription'),
-    value: GoalPlanGoalSchema.shape.description.unwrap(),
-  }).strict(),
-  z.object({
-    ...GoalLiveActionBase,
-    operation: z.literal('goal.setStart'),
-    value: GoalPlanGoalSchema.shape.start.unwrap(),
-  }).strict(),
-  z.object({
-    ...GoalLiveActionBase,
-    operation: z.literal('goal.setTarget'),
-    value: GoalPlanGoalSchema.shape.target.unwrap(),
-  }).strict(),
-  z.object({
-    ...GoalLiveActionBase,
-    operation: z.literal('goal.patchKeyResults'),
-    value: z.array(GoalPlanKeyResultSchema).max(50).superRefine((items, ctx) => {
-      const seen = new Set<string>();
-      items.forEach((item, index) => {
-        if (seen.has(item.draftRef)) {
-          ctx.addIssue({ code: z.ZodIssueCode.custom, path: [index, 'draftRef'], message: 'Duplicate keyResult draftRef' });
-        }
-        seen.add(item.draftRef);
-      });
-    }),
-  }).strict(),
+  z
+    .object({
+      ...GoalLiveActionBase,
+      operation: z.literal('goal.setName'),
+      value: GoalPlanGoalSchema.shape.name,
+    })
+    .strict(),
+  z
+    .object({
+      ...GoalLiveActionBase,
+      operation: z.literal('goal.patchDescription'),
+      value: GoalPlanGoalSchema.shape.description.unwrap(),
+    })
+    .strict(),
+  z
+    .object({
+      ...GoalLiveActionBase,
+      operation: z.literal('goal.setStart'),
+      value: GoalPlanGoalSchema.shape.start.unwrap(),
+    })
+    .strict(),
+  z
+    .object({
+      ...GoalLiveActionBase,
+      operation: z.literal('goal.setTarget'),
+      value: GoalPlanGoalSchema.shape.target.unwrap(),
+    })
+    .strict(),
+  z
+    .object({
+      ...GoalLiveActionBase,
+      operation: z.literal('goal.patchKeyResults'),
+      value: z
+        .array(GoalPlanKeyResultSchema)
+        .max(50)
+        .superRefine((items, ctx) => {
+          const seen = new Set<string>();
+          items.forEach((item, index) => {
+            if (seen.has(item.draftRef)) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: [index, 'draftRef'],
+                message: 'Duplicate keyResult draftRef',
+              });
+            }
+            seen.add(item.draftRef);
+          });
+        }),
+    })
+    .strict(),
 ]);
 export type GoalWorkflowLiveAction = z.infer<typeof GoalWorkflowLiveActionSchema>;
 
-export const GoalWorkflowLiveActionRecordSchema = z.object({
-  sequence: z.number().int().positive(),
-  command: GoalWorkflowLiveActionSchema,
-}).strict();
+export const GoalWorkflowLiveActionRecordSchema = z
+  .object({
+    sequence: z.number().int().positive(),
+    command: GoalWorkflowLiveActionSchema,
+  })
+  .strict();
 export type GoalWorkflowLiveActionRecord = z.infer<typeof GoalWorkflowLiveActionRecordSchema>;
 
-export const GoalWorkflowLiveActionJournalSchema = z.array(GoalWorkflowLiveActionRecordSchema).max(64)
+export const GoalWorkflowLiveActionJournalSchema = z
+  .array(GoalWorkflowLiveActionRecordSchema)
+  .max(64)
   .superRefine((records, ctx) => {
     const keys = new Set<string>();
     records.forEach((record, index) => {
       if (record.sequence !== index + 1) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, path: [index, 'sequence'], message: 'Out-of-order Goal action sequence' });
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: [index, 'sequence'],
+          message: 'Out-of-order Goal action sequence',
+        });
       }
       const key = `${record.command.revision}:${record.command.actionId}`;
       if (keys.has(key)) {
-        ctx.addIssue({ code: z.ZodIssueCode.custom, path: [index, 'command', 'actionId'], message: 'Duplicate Goal action id' });
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: [index, 'command', 'actionId'],
+          message: 'Duplicate Goal action id',
+        });
       }
       keys.add(key);
     });

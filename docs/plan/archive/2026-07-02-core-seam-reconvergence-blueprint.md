@@ -75,16 +75,16 @@ updated: 2026-07-03T20:54:00+08:00
 
 为避免“审计报告 -> 蓝图 -> 执行轮次”脱节，本蓝图固定采用以下问题映射：
 
-| 审计问题 | 结构性根因 | 优雅终态 | 对应轮次 |
-| --- | --- | --- | --- |
-| `Q-001` | host 越权拼装跨域执行链 | host 只做 composition root，execution owner 收回 `schedule-orchestration` | `R06` + `R09` |
-| `Q-002` | `TaskTemplate` 聚合边界失稳并出现真实循环依赖 | 聚合自持 create/rehydrate/invariants，删除反向 factory / DTO helper / lazy import | `R01` |
-| `Q-003` | controller / transport seam 形状不统一 | server-side controller 统一改成 plain function port，routes 统一返回 `Router` | `R07` |
-| `Q-004` | projection / execution owner 多来源分散 | `schedule-orchestration` 成为唯一系统 owner，feature 只暴露 source adapter | `R03` - `R06` |
-| `Q-005` | 事件总线通过 `string + unknown` cast 绕开类型系统 | 所有发布/订阅通过 typed `Publisher` / `Subscriber` seam | `R02` |
-| `Q-006` | branded ID fixture 与真实契约不一致 | 统一合法 ID builder，happy-path fixture 不再依赖 warning | `R08` |
-| `Q-007` | schedule test 自身存在 mock/object 噪声 | 在测试收口轮一并清理，确保测试噪声不会掩盖真实回归 | `R08` |
-| `Q-008` | host/bootstrap/runtime 关键链路缺少 direct tests | API / web / desktop / orchestration 关键链路补齐直达测试 | `R09` |
+| 审计问题 | 结构性根因                                        | 优雅终态                                                                          | 对应轮次      |
+| -------- | ------------------------------------------------- | --------------------------------------------------------------------------------- | ------------- |
+| `Q-001`  | host 越权拼装跨域执行链                           | host 只做 composition root，execution owner 收回 `schedule-orchestration`         | `R06` + `R09` |
+| `Q-002`  | `TaskTemplate` 聚合边界失稳并出现真实循环依赖     | 聚合自持 create/rehydrate/invariants，删除反向 factory / DTO helper / lazy import | `R01`         |
+| `Q-003`  | controller / transport seam 形状不统一            | server-side controller 统一改成 plain function port，routes 统一返回 `Router`     | `R07`         |
+| `Q-004`  | projection / execution owner 多来源分散           | `schedule-orchestration` 成为唯一系统 owner，feature 只暴露 source adapter        | `R03` - `R06` |
+| `Q-005`  | 事件总线通过 `string + unknown` cast 绕开类型系统 | 所有发布/订阅通过 typed `Publisher` / `Subscriber` seam                           | `R02`         |
+| `Q-006`  | branded ID fixture 与真实契约不一致               | 统一合法 ID builder，happy-path fixture 不再依赖 warning                          | `R08`         |
+| `Q-007`  | schedule test 自身存在 mock/object 噪声           | 在测试收口轮一并清理，确保测试噪声不会掩盖真实回归                                | `R08`         |
+| `Q-008`  | host/bootstrap/runtime 关键链路缺少 direct tests  | API / web / desktop / orchestration 关键链路补齐直达测试                          | `R09`         |
 
 当前最重要的结论已经从“继续回收 execution owner”转为“确认新结构完成收敛并归档”。  
 `schedule-orchestration` 已经通过 `@memoflow/task|goal|reminder/schedule-projection` 与 `schedule-execution` 窄公共出口接管 projection / execution owner；API / web / desktop 的 bootstrap 直达测试和计划文档状态也已经完成对齐。
@@ -766,5 +766,3 @@ packages/schedule-orchestration/
 6. 为事件总线 cast 添加共享 helper，然后继续 cast
 
 这些方案都只是在给浅 Module 化妆，不会真正提升 **Depth**、**Leverage** 和 **Locality**。
-
-

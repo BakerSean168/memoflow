@@ -12,11 +12,21 @@ export function inferWorkflowMode(message: string, previousMessage = ''): Workfl
   // Quoted plans describe source material, not commands for this turn. Scan
   // unquoted instruction paragraphs from the end so a pasted plan cannot win
   // over the user's final request.
-  const unquoted = message.replace(/```[\s\S]*?```|~~~[\s\S]*?~~~/gu, '')
-    .split('\n').filter((line) => !/^\s*>/u.test(line)).join('\n');
-  const segments = unquoted.split(/[\n。！？!?；;]/u).map((part) => part.trim()).filter(Boolean);
+  const unquoted = message
+    .replace(/```[\s\S]*?```|~~~[\s\S]*?~~~/gu, '')
+    .split('\n')
+    .filter((line) => !/^\s*>/u.test(line))
+    .join('\n');
+  const segments = unquoted
+    .split(/[\n。！？!?；;]/u)
+    .map((part) => part.trim())
+    .filter(Boolean);
   for (const segment of segments.reverse()) {
-    if (/(?:不要|别|暂不|先不|不必|无需).*(?:创建|新建|写入|保存|添加|规划)|(?:do not|don't)\s+(?:create|save|add|plan)/iu.test(segment)) {
+    if (
+      /(?:不要|别|暂不|先不|不必|无需).*(?:创建|新建|写入|保存|添加|规划)|(?:do not|don't)\s+(?:create|save|add|plan)/iu.test(
+        segment,
+      )
+    ) {
       return 'chat';
     }
     const mode = inferInstructionMode(segment);

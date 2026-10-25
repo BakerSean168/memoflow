@@ -41,7 +41,17 @@ describe('TaskGoalOutboxDispatcher', () => {
   });
 
   it('delivers a signed non-zero fixed delta', async () => {
-    const store = { claimPending: vi.fn(async () => [{ ...pendingEvent, payload: JSON.stringify({ ...JSON.parse(pendingEvent.payload), value: -2 }) }]), markDelivered: vi.fn(), markRetry: vi.fn(), replayDeadLetter: vi.fn() };
+    const store = {
+      claimPending: vi.fn(async () => [
+        {
+          ...pendingEvent,
+          payload: JSON.stringify({ ...JSON.parse(pendingEvent.payload), value: -2 }),
+        },
+      ]),
+      markDelivered: vi.fn(),
+      markRetry: vi.fn(),
+      replayDeadLetter: vi.fn(),
+    };
     const handler = { handle: vi.fn(async () => {}) };
     await new TaskGoalOutboxDispatcher(store, handler).dispatchPending();
     expect(handler.handle).toHaveBeenCalledWith(expect.objectContaining({ value: -2 }));
@@ -68,7 +78,11 @@ describe('TaskGoalOutboxDispatcher', () => {
   it('rejects V1 payloads so an obsolete contract cannot be silently replayed', async () => {
     const obsolete = {
       eventId: 'old-1',
-      payload: JSON.stringify({ ...JSON.parse(pendingEvent.payload), eventId: 'old-1', schemaVersion: 1 }),
+      payload: JSON.stringify({
+        ...JSON.parse(pendingEvent.payload),
+        eventId: 'old-1',
+        schemaVersion: 1,
+      }),
     };
     const store = {
       claimPending: vi.fn(async () => [obsolete]),
@@ -80,7 +94,10 @@ describe('TaskGoalOutboxDispatcher', () => {
     await new TaskGoalOutboxDispatcher(store, { handle: vi.fn() }).dispatchPending();
 
     expect(store.markDelivered).not.toHaveBeenCalled();
-    expect(store.markRetry).toHaveBeenCalledWith('old-1', 'Unsupported Task -> Goal event contract');
+    expect(store.markRetry).toHaveBeenCalledWith(
+      'old-1',
+      'Unsupported Task -> Goal event contract',
+    );
   });
 
   it('keeps the same eventId pending for retry when delivery fails', async () => {
@@ -90,7 +107,11 @@ describe('TaskGoalOutboxDispatcher', () => {
       markRetry: vi.fn(),
       replayDeadLetter: vi.fn(),
     };
-    const handler = { handle: vi.fn(async () => { throw new Error('Goal unavailable'); }) };
+    const handler = {
+      handle: vi.fn(async () => {
+        throw new Error('Goal unavailable');
+      }),
+    };
 
     await new TaskGoalOutboxDispatcher(store, handler).dispatchPending();
 

@@ -29,7 +29,7 @@ export type OutboxMessageStatus = 'pending' | 'dispatched' | 'failed' | 'dead';
  * 映射 R1 遗留 OutboxMessageStatus 到 W0 8 状态 BusinessOperationStatus (P2-3)
  */
 export function mapOutboxStatusToBusinessOperationStatus(
-  status: OutboxMessageStatus
+  status: OutboxMessageStatus,
 ): import('./operation-receipt').BusinessOperationStatus {
   switch (status) {
     case 'pending':

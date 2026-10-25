@@ -41,10 +41,23 @@ try {
 } catch (error) {
   if (error.code !== 'ENOENT') webReceipts = null;
 }
+const capabilityResults = {};
+if (manifest?.laneDetails?.componentBrowser) {
+  // Q4: Component Browser is an independent job (producer of record).
+  capabilityResults.componentBrowser = needs?.['component-browser']?.result ?? 'missing';
+}
+if (manifest?.laneDetails?.contract) {
+  capabilityResults.contract = needs?.['contract']?.result ?? 'missing';
+}
+if (manifest?.laneDetails?.fmt) {
+  // Fmt shares the lightweight Static Checks runner (governance job).
+  capabilityResults.fmt = needs?.['governance']?.result ?? 'missing';
+}
 const result = evaluateCiCheck({
   needs,
   manifest,
   webReceipts,
+  capabilityResults,
   runId: process.env.GITHUB_RUN_ID,
   runAttempt: Number(process.env.GITHUB_RUN_ATTEMPT),
 });

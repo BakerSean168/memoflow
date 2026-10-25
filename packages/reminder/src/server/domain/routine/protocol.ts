@@ -92,21 +92,32 @@ export class ProtocolDefinition {
     return new ProtocolDefinition(cloneProtocolDefinitionState(state));
   }
 
-  get id(): string { return this.state.id; }
-  get identityId(): string { return this.state.identityId; }
-  get name(): string { return this.state.name; }
-  get version(): number { return this.state.version; }
+  get id(): string {
+    return this.state.id;
+  }
+  get identityId(): string {
+    return this.state.identityId;
+  }
+  get name(): string {
+    return this.state.name;
+  }
+  get version(): number {
+    return this.state.version;
+  }
 
   snapshot(): ProtocolDefinitionState {
     return cloneProtocolDefinitionState(this.state);
   }
 
-  revise(input: {
-    name?: string;
-    phases?: readonly ProtocolPhaseDefinition[];
-    cyclePolicy?: ProtocolCyclePolicy;
-    breakPolicy?: Partial<ProtocolBreakPolicy>;
-  }, at: Instant | number): void {
+  revise(
+    input: {
+      name?: string;
+      phases?: readonly ProtocolPhaseDefinition[];
+      cyclePolicy?: ProtocolCyclePolicy;
+      breakPolicy?: Partial<ProtocolBreakPolicy>;
+    },
+    at: Instant | number,
+  ): void {
     const name = input.name?.trim() ?? this.state.name;
     assertNonEmpty(name, 'name');
     const phases = input.phases ?? this.state.phases;
@@ -172,13 +183,10 @@ export const PROTOCOL_SESSION_STATES = [
   'Cancelled',
 ] as const;
 export type ProtocolSessionState = (typeof PROTOCOL_SESSION_STATES)[number];
-export type ProtocolSessionAction = 'start' | 'pause' | 'resume' | 'phase-complete' | 'end' | 'cancel';
+export type ProtocolSessionAction =
+  'start' | 'pause' | 'resume' | 'phase-complete' | 'end' | 'cancel';
 export type ProtocolTerminationReason =
-  | 'completed'
-  | 'user-ended'
-  | 'user-cancelled'
-  | 'superseded'
-  | 'runtime-aborted';
+  'completed' | 'user-ended' | 'user-cancelled' | 'superseded' | 'runtime-aborted';
 
 export const PROTOCOL_SESSION_TRANSITIONS = {
   Idle: {
@@ -197,7 +205,10 @@ export const PROTOCOL_SESSION_TRANSITIONS = {
   },
   Completed: {},
   Cancelled: {},
-} as const satisfies Record<ProtocolSessionState, Partial<Record<ProtocolSessionAction, readonly ProtocolSessionState[]>>>;
+} as const satisfies Record<
+  ProtocolSessionState,
+  Partial<Record<ProtocolSessionAction, readonly ProtocolSessionState[]>>
+>;
 
 export interface ProtocolSessionSnapshot {
   id: string;
@@ -267,19 +278,35 @@ export class ProtocolSession {
     return new ProtocolSession(cloneSessionSnapshot(snapshot));
   }
 
-  get id(): string { return this.state.id; }
-  get identityId(): string { return this.state.identityId; }
-  get protocolId(): string { return this.state.protocolId; }
-  get protocolVersion(): number { return this.state.protocolVersion; }
-  get status(): ProtocolSessionState { return this.state.state; }
-  get version(): number { return this.state.version; }
-  get terminationReason(): ProtocolTerminationReason | null { return this.state.terminationReason; }
+  get id(): string {
+    return this.state.id;
+  }
+  get identityId(): string {
+    return this.state.identityId;
+  }
+  get protocolId(): string {
+    return this.state.protocolId;
+  }
+  get protocolVersion(): number {
+    return this.state.protocolVersion;
+  }
+  get status(): ProtocolSessionState {
+    return this.state.state;
+  }
+  get version(): number {
+    return this.state.version;
+  }
+  get terminationReason(): ProtocolTerminationReason | null {
+    return this.state.terminationReason;
+  }
   get currentPhase(): ProtocolPhasePlanEntry | null {
     return this.state.currentPlanIndex == null
       ? null
       : { ...this.state.phasePlan[this.state.currentPlanIndex] };
   }
-  get currentCycle(): number | null { return this.currentPhase?.cycle ?? null; }
+  get currentCycle(): number | null {
+    return this.currentPhase?.cycle ?? null;
+  }
 
   start(at: Instant | number): void {
     this.assertTransition('start');
@@ -298,9 +325,10 @@ export class ProtocolSession {
     this.assertTransition('pause');
     this.assertNotBefore(this.state.phaseStartedAt, now, 'pause.at');
     this.state.pausedAt = now;
-    this.state.pausedRemainingMs = this.state.phaseDeadline == null
-      ? null
-      : Math.max(0, Number(this.state.phaseDeadline) - Number(now));
+    this.state.pausedRemainingMs =
+      this.state.phaseDeadline == null
+        ? null
+        : Math.max(0, Number(this.state.phaseDeadline) - Number(now));
     this.state.state = 'Paused';
     this.touch(now);
   }
@@ -311,9 +339,10 @@ export class ProtocolSession {
     if (this.state.pausedAt == null) throw new TypeError('Paused session is missing pausedAt');
     this.assertNotBefore(this.state.pausedAt, now, 'resume.at');
     this.state.accumulatedPauseMs += Number(now) - Number(this.state.pausedAt);
-    this.state.phaseDeadline = this.state.pausedRemainingMs == null
-      ? null
-      : asInstant(Number(now) + this.state.pausedRemainingMs);
+    this.state.phaseDeadline =
+      this.state.pausedRemainingMs == null
+        ? null
+        : asInstant(Number(now) + this.state.pausedRemainingMs);
     this.state.pausedAt = null;
     this.state.pausedRemainingMs = null;
     this.state.state = 'Running';
@@ -376,7 +405,8 @@ export class ProtocolSession {
   }
 
   private advanceOnePhase(at: Instant): void {
-    if (this.state.currentPlanIndex == null) throw new TypeError('Running session has no current phase');
+    if (this.state.currentPlanIndex == null)
+      throw new TypeError('Running session has no current phase');
     const nextIndex = this.state.currentPlanIndex + 1;
     if (nextIndex >= this.state.phasePlan.length) {
       this.terminate('Completed', 'completed', at);
@@ -391,9 +421,8 @@ export class ProtocolSession {
     if (!phase) throw new TypeError(`Protocol phase plan index ${index} does not exist`);
     this.state.currentPlanIndex = index;
     this.state.phaseStartedAt = at;
-    this.state.phaseDeadline = phase.durationMs == null
-      ? null
-      : asInstant(Number(at) + phase.durationMs);
+    this.state.phaseDeadline =
+      phase.durationMs == null ? null : asInstant(Number(at) + phase.durationMs);
     this.state.pausedAt = null;
     this.state.pausedRemainingMs = null;
   }
@@ -451,7 +480,8 @@ function validatePhases(phases: readonly ProtocolPhaseDefinition[]): void {
     if (!PROTOCOL_PHASE_KINDS.includes(phase.kind)) {
       throw new TypeError(`Unsupported protocol phase kind: ${phase.kind}`);
     }
-    if (phase.durationMs != null) assertPositiveFinite(phase.durationMs, `phase.${phase.id}.durationMs`);
+    if (phase.durationMs != null)
+      assertPositiveFinite(phase.durationMs, `phase.${phase.id}.durationMs`);
   }
 }
 
@@ -487,7 +517,8 @@ function validateSessionSnapshot(snapshot: ProtocolSessionSnapshot): void {
   }
 
   const hasCurrentPhase = snapshot.currentPlanIndex != null;
-  const hasStartedState = snapshot.startedAt != null && snapshot.phaseStartedAt != null && hasCurrentPhase;
+  const hasStartedState =
+    snapshot.startedAt != null && snapshot.phaseStartedAt != null && hasCurrentPhase;
   const hasTerminalState = snapshot.endedAt != null && snapshot.terminationReason != null;
 
   switch (snapshot.state) {
@@ -505,7 +536,12 @@ function validateSessionSnapshot(snapshot: ProtocolSessionSnapshot): void {
       }
       break;
     case 'Running':
-      if (!hasStartedState || snapshot.pausedAt != null || snapshot.pausedRemainingMs != null || hasTerminalState) {
+      if (
+        !hasStartedState ||
+        snapshot.pausedAt != null ||
+        snapshot.pausedRemainingMs != null ||
+        hasTerminalState
+      ) {
         throw new TypeError('Running ProtocolSession snapshot is inconsistent');
       }
       break;
@@ -518,10 +554,17 @@ function validateSessionSnapshot(snapshot: ProtocolSessionSnapshot): void {
       if (!hasStartedState || !hasTerminalState) {
         throw new TypeError('Completed ProtocolSession snapshot is missing terminal state');
       }
-      if (snapshot.terminationReason !== 'completed' && snapshot.terminationReason !== 'user-ended') {
+      if (
+        snapshot.terminationReason !== 'completed' &&
+        snapshot.terminationReason !== 'user-ended'
+      ) {
         throw new TypeError('Completed ProtocolSession has an invalid termination reason');
       }
-      if (snapshot.phaseDeadline != null || snapshot.pausedAt != null || snapshot.pausedRemainingMs != null) {
+      if (
+        snapshot.phaseDeadline != null ||
+        snapshot.pausedAt != null ||
+        snapshot.pausedRemainingMs != null
+      ) {
         throw new TypeError('Completed ProtocolSession snapshot retains active timing state');
       }
       break;
@@ -536,7 +579,11 @@ function validateSessionSnapshot(snapshot: ProtocolSessionSnapshot): void {
       ) {
         throw new TypeError('Cancelled ProtocolSession has an invalid termination reason');
       }
-      if (snapshot.phaseDeadline != null || snapshot.pausedAt != null || snapshot.pausedRemainingMs != null) {
+      if (
+        snapshot.phaseDeadline != null ||
+        snapshot.pausedAt != null ||
+        snapshot.pausedRemainingMs != null
+      ) {
         throw new TypeError('Cancelled ProtocolSession snapshot retains active timing state');
       }
       break;
@@ -569,16 +616,19 @@ function isBreakKind(kind: ProtocolPhaseKind): boolean {
 }
 
 function normalizeInstant(value: Instant | number, field: string): Instant {
-  if (!Number.isFinite(Number(value))) throw new TypeError(`${field} must be a finite epoch-ms Instant`);
+  if (!Number.isFinite(Number(value)))
+    throw new TypeError(`${field} must be a finite epoch-ms Instant`);
   return asInstant(Number(value));
 }
 
 function assertPositiveInteger(value: number, field: string): void {
-  if (!Number.isInteger(value) || value <= 0) throw new TypeError(`${field} must be a positive integer`);
+  if (!Number.isInteger(value) || value <= 0)
+    throw new TypeError(`${field} must be a positive integer`);
 }
 
 function assertPositiveFinite(value: number, field: string): void {
-  if (!Number.isFinite(value) || value <= 0) throw new TypeError(`${field} must be a positive finite number`);
+  if (!Number.isFinite(value) || value <= 0)
+    throw new TypeError(`${field} must be a positive finite number`);
 }
 
 function assertNonEmpty(value: string, field: string): void {

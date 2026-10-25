@@ -24,6 +24,8 @@ export const CI_CHECK_JOBS = Object.freeze({
     m.lanes.coverage === true ||
     m.lanes.performance === true,
   'web-flow-shard': (m) => m.lanes.web === true,
+  'component-browser': (m) => m.laneDetails?.componentBrowser?.required === true,
+  contract: (m) => m.laneDetails?.contract?.required === true,
 });
 
 /** Sub-lanes reported by verification-children outputs. */
@@ -86,6 +88,7 @@ export function evaluateCiCheck({
   webReceipts = [],
   runId = null,
   runAttempt = null,
+  capabilityResults = {},
 }) {
   const failures = [];
   const jobs = {};
@@ -118,6 +121,25 @@ export function evaluateCiCheck({
     if (job.result === expected) continue;
     if (expected === 'skipped') failures.push(`${name}:unexpected-${job.result}`);
     else failures.push(`${name}:${job.result}`);
+  }
+
+  // Capability gate (VNext Q2): the manifest's laneDetails plan states what
+  // must run; the stage passes results only for capabilities it wires.
+  // A wired capability that the plan requires must report success — a
+  // conditionally skipped GitHub job therefore cannot fake green.
+  for (const [capability, result] of Object.entries(capabilityResults)) {
+    const detail = manifest.laneDetails?.[capability];
+    if (!detail) {
+      failures.push(`capability:${capability}:no-plan`);
+      continue;
+    }
+    jobs[`capability/${capability}`] = {
+      expected: detail.required ? 'success' : 'any',
+      actual: result,
+    };
+    if (detail.required && result !== 'success') {
+      failures.push(`capability:${capability}:${result ?? 'missing'}`);
+    }
   }
 
   const verification = needs['verification-children'];

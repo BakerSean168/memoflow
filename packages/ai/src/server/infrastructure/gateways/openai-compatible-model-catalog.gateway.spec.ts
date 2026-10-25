@@ -18,7 +18,9 @@ describe('OpenAICompatibleModelCatalogGateway', () => {
         { status: 200, headers: { 'Content-Type': 'application/json' } },
       ),
     );
-    const models = await new OpenAICompatibleModelCatalogGateway(fetchMock as typeof fetch).listModels({
+    const models = await new OpenAICompatibleModelCatalogGateway(
+      fetchMock as typeof fetch,
+    ).listModels({
       baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai///',
       apiKey: 'test-key',
     });
@@ -38,15 +40,22 @@ describe('OpenAICompatibleModelCatalogGateway', () => {
 
   it('converts provider per-token pricing into USD per 1M tokens', async () => {
     const fetchMock = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({
-        data: [{
-          id: 'openai/gpt-test',
-          pricing: { prompt: '0.0000025', completion: '0.00001' },
-        }],
-      }), { status: 200, headers: { 'Content-Type': 'application/json' } }),
+      new Response(
+        JSON.stringify({
+          data: [
+            {
+              id: 'openai/gpt-test',
+              pricing: { prompt: '0.0000025', completion: '0.00001' },
+            },
+          ],
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      ),
     );
 
-    const [model] = await new OpenAICompatibleModelCatalogGateway(fetchMock as typeof fetch).listModels({
+    const [model] = await new OpenAICompatibleModelCatalogGateway(
+      fetchMock as typeof fetch,
+    ).listModels({
       baseUrl: 'https://openrouter.ai/api/v1',
       apiKey: 'test-key',
     });
@@ -56,9 +65,11 @@ describe('OpenAICompatibleModelCatalogGateway', () => {
   });
 
   it('rejects malformed JSON as a typed upstream provider error', async () => {
-    const fetchMock = vi.fn().mockResolvedValue(
-      new Response('{not-json', { status: 200, headers: { 'Content-Type': 'application/json' } }),
-    );
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(
+        new Response('{not-json', { status: 200, headers: { 'Content-Type': 'application/json' } }),
+      );
 
     await expect(
       new OpenAICompatibleModelCatalogGateway(fetchMock as typeof fetch).listModels({
@@ -72,7 +83,10 @@ describe('OpenAICompatibleModelCatalogGateway', () => {
     const fetchMock = vi.fn().mockResolvedValue(
       new Response('{"data":[]}', {
         status: 200,
-        headers: { 'Content-Type': 'application/json', 'Content-Length': String(2 * 1024 * 1024 + 1) },
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': String(2 * 1024 * 1024 + 1),
+        },
       }),
     );
 
@@ -116,5 +130,4 @@ describe('OpenAICompatibleModelCatalogGateway', () => {
       }),
     ).rejects.toMatchObject({ category: 'upstream_provider_error' });
   });
-
 });

@@ -33,7 +33,9 @@ export type DesktopNotificationPreferencePathResolver = () => string | null;
  * must always provide the Profile path resolver.
  */
 export class DesktopNotificationPreferenceStore {
-  private preference: DesktopNotificationPreference = { ...DEFAULT_DESKTOP_NOTIFICATION_PREFERENCE };
+  private preference: DesktopNotificationPreference = {
+    ...DEFAULT_DESKTOP_NOTIFICATION_PREFERENCE,
+  };
   private readonly listeners = new Set<Listener>();
   private loadedPath: string | null | undefined = undefined;
 

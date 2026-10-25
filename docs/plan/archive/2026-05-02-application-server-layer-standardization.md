@@ -12,14 +12,14 @@ Domain 层标准化（Waves 0-5）已全部完成。现在需要将同样的标�
 
 ### 审计发现的核心不一致
 
-| 维度 | Governance（标准） | 其他模块现状 |
-|------|-------------------|-------------|
-| 文件命名 | `*.use-case.ts` | 多数无后缀，editor/ai 用 `*-application-service.ts` |
-| 类命名 | `XxxUseCase` | `CreateGoal`、`Login`、`EditorSessionApplicationService` 等 |
-| 返回值 | `Promise<Result<T>>` | 仅 goal/task 用 Result，其余抛异常 |
-| 参数 | `ExecutionContext{identityId}` | `Context` / `identityId:string` / `params.identityId` 等 3 种 |
-| 结构 | Pure Use Case（每文件一个操作） | schedule/editor/ai 用多方法 Application Service |
-| Controller 位置 | `src/controllers/` | task 和 ai 在 `src/api/controllers/` |
+| 维度            | Governance（标准）              | 其他模块现状                                                  |
+| --------------- | ------------------------------- | ------------------------------------------------------------- |
+| 文件命名        | `*.use-case.ts`                 | 多数无后缀，editor/ai 用 `*-application-service.ts`           |
+| 类命名          | `XxxUseCase`                    | `CreateGoal`、`Login`、`EditorSessionApplicationService` 等   |
+| 返回值          | `Promise<Result<T>>`            | 仅 goal/task 用 Result，其余抛异常                            |
+| 参数            | `ExecutionContext{identityId}`  | `Context` / `identityId:string` / `params.identityId` 等 3 种 |
+| 结构            | Pure Use Case（每文件一个操作） | schedule/editor/ai 用多方法 Application Service               |
+| Controller 位置 | `src/controllers/`              | task 和 ai 在 `src/api/controllers/`                          |
 
 ### 关键原则
 
@@ -56,50 +56,59 @@ Domain 层标准化（Waves 0-5）已全部完成。现在需要将同样的标�
 Governance 和 schedule 已遵循此规范。其余 8 个模块需重命名。每个重命名后同步更新 barrel `index.ts`。
 
 **goal**（32 文件）:
+
 - [ ] `packages/goal/src/application-server/use-cases/commands/` — 所有 `*.ts` → `*.use-case.ts`
 - [ ] `packages/goal/src/application-server/use-cases/queries/` — 所有 `*.ts` → `*.use-case.ts`
 - [ ] 更新 `commands/index.ts` 和 `queries/index.ts`
 
 **task**（30 文件）:
+
 - [ ] 同上模式
 
 **reminder**（9 文件）:
+
 - [ ] 同上模式
 
 **notification**（5 文件）:
+
 - [ ] 同上模式（保留 `notification-dto-converters.ts` 工具文件不动）
 
 **authentication**（10 文件）:
+
 - [ ] 同上模式
 
 **repository**（20 文件）:
+
 - [ ] 同上模式
 
 **editor**（2 文件）:
+
 - [ ] `editor-session-application-service.ts` → `manage-editor-session.use-case.ts`
 - [ ] `editor-workspace-application-service.ts` → `manage-editor-workspace.use-case.ts`
 
 **account**（5 文件）:
+
 - [ ] 同上模式
 
 **ai**（15 文件）:
+
 - [ ] 纯 use case 和 application service 统一重命名
 
 ### 1d. Use case 类名添加 `UseCase` 后缀
 
 在文件重命名的同时，将类名也统一加上 `UseCase` 后缀。影响面：类声明 + 所有 import 站点 + composition root + barrel exports + controller 类型引用。
 
-| 模块 | 示例 |
-|------|------|
-| goal | `CreateGoal` → `CreateGoalUseCase` |
-| task | `CreateTaskTemplate` → `CreateTaskTemplateUseCase` |
-| reminder | `CreateReminderTemplate` → `CreateReminderTemplateUseCase` |
-| notification | `CreateNotification` → `CreateNotificationUseCase` |
-| authentication | `Login` → `LoginUseCase` |
-| repository | `CreateRepository` → `CreateRepositoryUseCase` |
-| editor | `EditorSessionApplicationService` → `ManageEditorSessionUseCase` |
-| account | 已有 `XxxUseCase` 后缀的保持不变 |
-| ai | `AIChatApplicationService` → `ManageAIChatUseCase` |
+| 模块           | 示例                                                             |
+| -------------- | ---------------------------------------------------------------- |
+| goal           | `CreateGoal` → `CreateGoalUseCase`                               |
+| task           | `CreateTaskTemplate` → `CreateTaskTemplateUseCase`               |
+| reminder       | `CreateReminderTemplate` → `CreateReminderTemplateUseCase`       |
+| notification   | `CreateNotification` → `CreateNotificationUseCase`               |
+| authentication | `Login` → `LoginUseCase`                                         |
+| repository     | `CreateRepository` → `CreateRepositoryUseCase`                   |
+| editor         | `EditorSessionApplicationService` → `ManageEditorSessionUseCase` |
+| account        | 已有 `XxxUseCase` 后缀的保持不变                                 |
+| ai             | `AIChatApplicationService` → `ManageAIChatUseCase`               |
 
 ### Phase 1 验证
 
@@ -165,6 +174,7 @@ pnpm nx run-many --target=typecheck --projects=goal,task,reminder,schedule,notif
 - [x] `pnpm nx run ai:typecheck`
 
 每个模块变更文件：
+
 1. `packages/{module}/src/application-server/use-cases/**/*.{ts,use-case.ts}` — 返回类型 + 替换 throw
 2. `packages/{module}/src/infrastructure-server/{module}.module.ts` — 移除 try/catch shim
 3. `packages/{module}/src/controllers/*.controller.ts` — 简化错误处理
@@ -232,6 +242,7 @@ pnpm nx run-many --target=typecheck --projects=contracts,goal,task,reminder,sche
 ```
 
 全部完成后的确认项：
+
 - 所有 use case 文件以 `*.use-case.ts` 结尾
 - 所有 use case 类以 `UseCase` 后缀结尾
 - 所有 use case `execute()` 返回 `Promise<Result<T>>`

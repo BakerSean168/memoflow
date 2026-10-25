@@ -55,11 +55,7 @@ export function buildOperationAuditLogCreateData(input: OperationAuditRecordInpu
 function hasOperationAuditLogModel(
   candidate: unknown,
 ): candidate is { operationAuditLog: { create(data: { data: unknown }): Promise<unknown> } } {
-  return (
-    typeof candidate === 'object' &&
-    candidate !== null &&
-    'operationAuditLog' in candidate
-  );
+  return typeof candidate === 'object' && candidate !== null && 'operationAuditLog' in candidate;
 }
 
 /**
@@ -71,15 +67,14 @@ function hasOperationAuditLogModel(
 export class PrismaOperationAuditRepository implements OperationAuditRepository {
   constructor(private readonly prisma: OperationAuditPrismaClient) {}
 
-  async record(
-    input: OperationAuditRecordInput,
-    tx?: unknown,
-  ): Promise<OperationAuditRecord> {
+  async record(input: OperationAuditRecordInput, tx?: unknown): Promise<OperationAuditRecord> {
     const db = hasOperationAuditLogModel(tx) ? tx : this.prisma;
     const row = await db.operationAuditLog.create({
       data: buildOperationAuditLogCreateData(input),
     });
-    return assertValidOperationAuditRecord(toAuditRecord(row as Parameters<typeof toAuditRecord>[0]));
+    return assertValidOperationAuditRecord(
+      toAuditRecord(row as Parameters<typeof toAuditRecord>[0]),
+    );
   }
 
   async listByActor(query: {

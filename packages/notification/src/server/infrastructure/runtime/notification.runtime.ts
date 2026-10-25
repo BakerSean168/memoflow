@@ -17,7 +17,10 @@ import {
   type LeaseClaim,
   type NotificationOutboxDispatchInput,
 } from '@memoflow/contracts/reliable-messaging';
-import type { OperationAuditRecordInput, OperationAuditRepository } from '@memoflow/patterns/operations';
+import type {
+  OperationAuditRecordInput,
+  OperationAuditRepository,
+} from '@memoflow/patterns/operations';
 
 /**
  * Structural reliable-operation port consumed by the notification durable
@@ -92,9 +95,16 @@ export interface NotificationReliableOperationPort {
     options?: number | { limit?: number; lastCursor?: string; since?: string; status?: string },
   ): Promise<BusinessOperationReceipt[]>;
   queryDeadLetters(identityId: string): Promise<BusinessOperationReceipt[]>;
-  replayDeadLetter(params: { identityId: string; operationId: string }): Promise<BusinessOperationReceipt>;
+  replayDeadLetter(params: {
+    identityId: string;
+    operationId: string;
+  }): Promise<BusinessOperationReceipt>;
 }
-import { NotificationMetricsService, globalNotificationMetrics, type NotificationMetricsSnapshot } from '../../domain/services/notification-metrics-service';
+import {
+  NotificationMetricsService,
+  globalNotificationMetrics,
+  type NotificationMetricsSnapshot,
+} from '../../domain/services/notification-metrics-service';
 import { NotificationSseAdapter } from '../adapters/sse/notification-sse.adapter';
 import { randomUUID } from 'crypto';
 import type { UserTimeContextPort } from '@memoflow/time';
@@ -136,8 +146,6 @@ export interface NotificationChannelDeliverer {
     context: NotificationDeliveryContext,
   ): Promise<void>;
 }
-
-
 
 export interface ChannelCapabilitySpec {
   channelType: string;
@@ -227,7 +235,8 @@ export function createNotificationRuntimeContribution(
   const ownerToken = deps?.ownerToken ?? `notification-worker:${randomUUID()}`;
   const pollIntervalMs = deps?.pollIntervalMs ?? NOTIFICATION_CHANNEL_POLL_INTERVAL_MS;
   const backoffBaseMs = deps?.backoffBaseMs ?? NOTIFICATION_CHANNEL_BACKOFF_BASE_MS;
-  const deadLetterThreshold = deps?.deadLetterThreshold ?? NOTIFICATION_CHANNEL_DEAD_LETTER_THRESHOLD;
+  const deadLetterThreshold =
+    deps?.deadLetterThreshold ?? NOTIFICATION_CHANNEL_DEAD_LETTER_THRESHOLD;
   const leaseDurationMs = deps?.leaseDurationMs ?? 30000;
   const metricsService = deps?.metricsService ?? new NotificationMetricsService();
   const sseAdapter = deps?.sseAdapter ?? new NotificationSseAdapter(deps?.reliableAdapter);
@@ -318,8 +327,7 @@ export function createNotificationRuntimeContribution(
 
     for (const channelType of channelsToCheck) {
       const spec =
-        declaredSpecs.get(channelType) ??
-        declaredSpecs.get(normalizeChannelType(channelType));
+        declaredSpecs.get(channelType) ?? declaredSpecs.get(normalizeChannelType(channelType));
       const available = hasDelivererForChannel(channelType);
       const declaredStatus = spec?.status ?? (available ? 'available' : 'missing');
       const status: CapabilityStatus = available
@@ -434,7 +442,10 @@ export function createNotificationRuntimeContribution(
         ],
       };
 
-      const recordedReceipt = await reliableAdapter.recordDeliveryReceipt(updatedReceipt, claimContext);
+      const recordedReceipt = await reliableAdapter.recordDeliveryReceipt(
+        updatedReceipt,
+        claimContext,
+      );
       const isApplied = (recordedReceipt as unknown as { applied?: boolean }).applied !== false;
 
       if (recordedReceipt.status === 'succeeded' && isApplied) {
@@ -458,11 +469,14 @@ export function createNotificationRuntimeContribution(
           identityId: outbox.identityId,
         });
       } else {
-        logger.warn('[NotificationRuntime] Outbox completion condition failed (stale owner or preempted)', {
-          operationId: outbox.id,
-          expectedStatus: 'succeeded',
-          actualStatus: recordedReceipt.status,
-        });
+        logger.warn(
+          '[NotificationRuntime] Outbox completion condition failed (stale owner or preempted)',
+          {
+            operationId: outbox.id,
+            expectedStatus: 'succeeded',
+            actualStatus: recordedReceipt.status,
+          },
+        );
       }
       return recordedReceipt;
     } catch (error) {
@@ -491,8 +505,12 @@ export function createNotificationRuntimeContribution(
           ],
         };
 
-        const recordedReceipt = await reliableAdapter.recordDeliveryReceipt(deadReceipt, claimContext);
-        if (recordedReceipt.status === 'dead_letter') {          // W7 互斥语义：dead-letter 是独立终态，不再累计 outbox.failed
+        const recordedReceipt = await reliableAdapter.recordDeliveryReceipt(
+          deadReceipt,
+          claimContext,
+        );
+        if (recordedReceipt.status === 'dead_letter') {
+          // W7 互斥语义：dead-letter 是独立终态，不再累计 outbox.failed
           metricsService.recordDeadLetter();
 
           logger.error('[NotificationRuntime] Outbox dispatch reached dead-letter state', {
@@ -533,8 +551,12 @@ export function createNotificationRuntimeContribution(
         ],
       };
 
-      const recordedReceipt = await reliableAdapter.recordDeliveryReceipt(retryReceipt, claimContext);
-      if (recordedReceipt.status === 'retryable') {        // W7 互斥语义：retryable 是独立状态，不再累计 outbox.failed
+      const recordedReceipt = await reliableAdapter.recordDeliveryReceipt(
+        retryReceipt,
+        claimContext,
+      );
+      if (recordedReceipt.status === 'retryable') {
+        // W7 互斥语义：retryable 是独立状态，不再累计 outbox.failed
         metricsService.recordRetry();
 
         logger.warn('[NotificationRuntime] Outbox dispatch failed, scheduled retry', {
@@ -576,9 +598,12 @@ export function createNotificationRuntimeContribution(
         // W7 互斥语义：dead-letter 是独立终态，不再累计 outbox.failed
         metricsService.recordDeadLetter();
       } else {
-        logger.warn('[NotificationRuntime] Shared outbox dead-letter returned conflict (stale owner ignored)', {
-          operationId: sharedMsg.id,
-        });
+        logger.warn(
+          '[NotificationRuntime] Shared outbox dead-letter returned conflict (stale owner ignored)',
+          {
+            operationId: sharedMsg.id,
+          },
+        );
       }
       logger.error('[NotificationRuntime] Shared outbox reached dead-letter state', {
         operationId: sharedMsg.id,
@@ -795,7 +820,10 @@ export function createNotificationRuntimeContribution(
         throw new Error('Reliable adapter is required to replay dead letters.');
       }
       const adapter = deps.reliableAdapter as unknown as {
-        replayDeadLetter(params: { identityId: string; operationId: string }): Promise<BusinessOperationReceipt>;
+        replayDeadLetter(params: {
+          identityId: string;
+          operationId: string;
+        }): Promise<BusinessOperationReceipt>;
         replayDeadLetterWithAudit?: (
           params: { identityId: string; operationId: string },
           audit: OperationAuditRecordInput,

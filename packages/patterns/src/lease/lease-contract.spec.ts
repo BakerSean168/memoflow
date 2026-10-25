@@ -15,9 +15,11 @@ describe('lease contract', () => {
         return { acquired: true, value: await task({ ensureHeld: async () => undefined }) };
       },
     };
-    await expect(coordinator.execute('job', async (guard) => {
-      await guard.ensureHeld();
-      return 1;
-    })).resolves.toEqual({ acquired: true, value: 1 });
+    await expect(
+      coordinator.execute('job', async (guard) => {
+        await guard.ensureHeld();
+        return 1;
+      }),
+    ).resolves.toEqual({ acquired: true, value: 1 });
   });
 });

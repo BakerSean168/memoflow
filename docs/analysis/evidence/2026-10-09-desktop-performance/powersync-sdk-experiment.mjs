@@ -27,10 +27,11 @@ const openWorker = (url, options) => {
   worker.once('exit', () => active.delete(id));
   return worker;
 };
-const createDb = filename => new PowerSyncDatabase({
-  schema: new Schema({}),
-  database: { dbLocation: temp, dbFilename: filename, openWorker },
-});
+const createDb = (filename) =>
+  new PowerSyncDatabase({
+    schema: new Schema({}),
+    database: { dbLocation: temp, dbFilename: filename, openWorker },
+  });
 async function openThenDiscard() {
   const db = createDb('discarded.db');
   await db.init();
@@ -64,12 +65,28 @@ try {
   observe('discarded-after-explicit-close');
   const output = {
     recordedAt: new Date().toISOString(),
-    runtime: { node: process.versions.node, modules: process.versions.modules, platform: process.platform, arch: process.arch },
-    versions: {
-      powersyncNode: JSON.parse(await fs.readFile(new URL('../../../../node_modules/@powersync/node/package.json', import.meta.url), 'utf8')).version,
-      powersyncCommon: JSON.parse(await fs.readFile(new URL('../../../../node_modules/@powersync/common/package.json', import.meta.url), 'utf8')).version,
+    runtime: {
+      node: process.versions.node,
+      modules: process.versions.modules,
+      platform: process.platform,
+      arch: process.arch,
     },
-    notes: 'Empty Schema; no connector or network; temporary databases. Twenty GC rounds with 50ms delay; the harness retains no strong Worker or discarded DB references. This is SDK behavior, not whole-app performance.',
+    versions: {
+      powersyncNode: JSON.parse(
+        await fs.readFile(
+          new URL('../../../../node_modules/@powersync/node/package.json', import.meta.url),
+          'utf8',
+        ),
+      ).version,
+      powersyncCommon: JSON.parse(
+        await fs.readFile(
+          new URL('../../../../node_modules/@powersync/common/package.json', import.meta.url),
+          'utf8',
+        ),
+      ).version,
+    },
+    notes:
+      'Empty Schema; no connector or network; temporary databases. Twenty GC rounds with 50ms delay; the harness retains no strong Worker or discarded DB references. This is SDK behavior, not whole-app performance.',
     observations,
   };
   const serialized = `${JSON.stringify(output, null, 2)}\n`;
@@ -77,7 +94,7 @@ try {
   else process.stdout.write(serialized);
 } finally {
   await explicitDb?.close().catch(() => undefined);
-  await Promise.allSettled(weakWorkers.map(ref => ref.deref()?.terminate()));
+  await Promise.allSettled(weakWorkers.map((ref) => ref.deref()?.terminate()));
   clearTimeout(deadline);
   await fs.rm(temp, { recursive: true, force: true });
 }

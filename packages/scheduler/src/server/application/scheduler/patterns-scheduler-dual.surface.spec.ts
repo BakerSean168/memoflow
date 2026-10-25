@@ -16,7 +16,10 @@ describe('patterns scheduler dual retired (residual 1039)', () => {
   const soleMonitor = readFileSync(resolve(patternsRoot, 'schedule-monitor.ts'), 'utf8');
   const soleHeap = readFileSync(resolve(patternsRoot, 'priority-queue/min-heap.ts'), 'utf8');
   const scheduleIndex = readFileSync(resolve(scheduleDir, 'index.ts'), 'utf8');
-  const invocationQueue = readFileSync(resolve(scheduleDir, 'scheduled-invocation-queue.ts'), 'utf8');
+  const invocationQueue = readFileSync(
+    resolve(scheduleDir, 'scheduled-invocation-queue.ts'),
+    'utf8',
+  );
 
   it('owns sole timer/monitor/min-heap bodies in patterns', () => {
     expect(soleTimer).toContain('Residual 1039');

@@ -4,7 +4,12 @@ import { delay, formatFileSize } from './api-utils';
 afterEach(() => vi.useRealTimers());
 
 it('formats zero and binary file-size units', () => {
-  expect([0, 1024, 1536, 1048576].map(formatFileSize)).toEqual(['0 Bytes', '1 KB', '1.5 KB', '1 MB']);
+  expect([0, 1024, 1536, 1048576].map(formatFileSize)).toEqual([
+    '0 Bytes',
+    '1 KB',
+    '1.5 KB',
+    '1 MB',
+  ]);
 });
 
 it('resolves delay only after the requested duration', async () => {

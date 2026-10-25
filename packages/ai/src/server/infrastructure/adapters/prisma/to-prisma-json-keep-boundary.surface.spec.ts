@@ -60,10 +60,7 @@ describe('toPrismaJson keep-boundary (residual 1159)', () => {
   });
 
   it('documents residual 1159 lock intent without claiming §13.2 complete', () => {
-    const self = readFileSync(
-      resolve(dir, 'to-prisma-json-keep-boundary.surface.spec.ts'),
-      'utf8',
-    );
+    const self = readFileSync(resolve(dir, 'to-prisma-json-keep-boundary.surface.spec.ts'), 'utf8');
     expect(self).toContain('Residual 1159');
     expect(self).toContain('Does not flip §13.2 checkboxes');
     expect(self).toContain('keep-boundary');

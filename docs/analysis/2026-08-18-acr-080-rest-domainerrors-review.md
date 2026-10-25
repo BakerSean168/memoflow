@@ -45,6 +45,7 @@ no mapper/middleware change (per ACR-080 intended).
 - `instanceof`-based assertions keep passing (class names unchanged).
 
 ## 5. Validation
+
 - task 375, schedule 150, reminder 218, setting 24 tests pass; typecheck clean each.
 - Inventory scanner `passed`; 135 stale baseline entries await next rewrite.
 

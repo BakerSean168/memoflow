@@ -57,21 +57,21 @@ GoalPlanningResponse (goal + keyResults + usage)
 ```python
 class ClarificationQuestion(BaseModel):
     """Single clarification question."""
-    
+
     model_config = ConfigDict(extra="ignore")
-    
+
     question: str = Field(..., min_length=5)
     context: str | None = Field(
-        default=None, 
+        default=None,
         description="Why this question matters for goal planning"
     )
 
 
 class GoalClarificationLLMResponse(BaseModel):
     """LLM response for clarification check."""
-    
+
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
-    
+
     needs_clarification: bool = Field(
         ...,
         alias="needsClarification",
@@ -88,6 +88,7 @@ class GoalClarificationLLMResponse(BaseModel):
 ```
 
 **改动理由**：
+
 - `GoalClarificationLLMResponse` 定义澄清问题的输出格式
 - 支持可选的 context，帮助用户理解为什么要回答这个问题
 
@@ -123,6 +124,7 @@ class GoalPlanningResponse(BaseModel):
 ```
 
 **改动理由**：
+
 - `state` 字段明确表示当前阶段
 - `goal` 和 `key_results` 仅在 `state="draft"` 时有效
 - `clarification` 仅在 `state="clarification"` 时有效
@@ -146,7 +148,7 @@ class GoalPlanningRequest(BaseModel):
     include_key_results: bool = True
     provider_config: ProviderConfig
     request_id: str | None = None
-    
+
     # P0-1 新增
     enable_clarification: bool = Field(
         default=True,
@@ -159,6 +161,7 @@ class GoalPlanningRequest(BaseModel):
 ```
 
 **改动理由**：
+
 - `enable_clarification` 允许调用者选择是否进行澄清检查
 - `clarification_answers` 传递用户对澄清问题的回答
 
@@ -228,7 +231,7 @@ async def clarify(
     provider_config: ProviderConfig,
 ) -> GoalPlanningResponse:
     """Check if a goal idea needs clarification."""
-    
+
     completion = await self._chat_service.complete(
         messages=[
             ChatMessage(role="system", content=build_goal_clarification_system_prompt()),
@@ -267,14 +270,14 @@ async def plan_with_clarification(
     clarification_answers: list[str] | None = None,
 ) -> GoalPlanningResponse:
     """Generate goal plan with optional clarification step.
-    
+
     Two-stage workflow:
     1. If enable_clarification and no answers: check if clarification needed
     2. If clarification needed: return questions
     3. If answers provided: augment idea and generate draft
     4. If no clarification needed: generate draft directly
     """
-    
+
     # Stage 1: Check clarification if enabled
     if enable_clarification and not clarification_answers:
         response = await self.clarify(
@@ -306,21 +309,25 @@ async def plan_with_clarification(
 ## 关键设计决策
 
 ### 决策 1：保持原有 `plan()` 方法不变
+
 - **原因**：现有代码和 API 可能已依赖现有签名
 - **方案**：新增 `plan_with_clarification()` 作为新的主入口
 - **迁移**：API 层和前端切换到新方法
 
 ### 决策 2：在 Response 中用 `state` 字段而非多态
+
 - **原因**：避免破坏性改动，保持 DTO 稳定
 - **方案**：`state: "clarification" | "draft"` 决定哪些字段有效
 - **好处**：向后兼容，前端可以渐进式升级
 
 ### 决策 3：澄清问题单独一轮 LLM 调用
+
 - **原因**：分离关注点，让澄清逻辑独立可测试
 - **好处**：可以单独优化澄清提示词，不影响 goal draft 生成
 - **成本**：多一次 API 调用，但澄清 token 通常较少
 
 ### 决策 4：澄清答案通过下一轮请求传递
+
 - **原因**：利用现有 HTTP 请求/响应模式
 - **方案**：`clarification_answers` 列表和原始 `idea` 一起发送第二次请求
 - **好处**：无需服务端会话存储，完全无状态
@@ -332,6 +339,7 @@ async def plan_with_clarification(
 ### 澄清检查提示词
 
 需要特别注意：
+
 - **不要生成过多问题**：2-4 个问题足够
 - **问题要有针对性**：Focus on motivation, success criteria, timeline, scope
 - **输出格式要稳定**：JSON 而不是自由文本
@@ -439,7 +447,7 @@ async def test_clarify_clear_idea():
 async def test_plan_with_clarification_two_step():
     """Full two-step workflow."""
     service = create_service()
-    
+
     # Step 1: Request without answers
     response1 = await service.plan_with_clarification(
         idea="improve",
@@ -448,7 +456,7 @@ async def test_plan_with_clarification_two_step():
         include_key_results=True,
         provider_config=test_config,
     )
-    
+
     if response1.state == "clarification":
         # Step 2: Request with answers
         response2 = await service.plan_with_clarification(
@@ -475,6 +483,7 @@ async def test_plan_with_clarification_two_step():
 **A**: 不一定。只有当 `enable_clarification=True` 且 LLM 判断需要澄清时，才会有两次调用。
 
 流程：
+
 1. 第一次调用：检查是否需要澄清 → 需要 → 返回问题
 2. 用户回答 → 第二次调用：生成 draft（带答案）→ 返回 draft
 
@@ -485,6 +494,7 @@ async def test_plan_with_clarification_two_step():
 **A**: 澄清检查的 token 用量通常较小（100-200 tokens），因为它只是判断是否需要澄清和生成 2-4 个问题。
 
 关键变量：
+
 - idea 长度
 - LLM 模型
 - 响应长度
@@ -494,6 +504,7 @@ async def test_plan_with_clarification_two_step():
 ### Q: 如果澄清 API 失败怎么办？
 
 **A**: 前端应该处理失败情况：
+
 - 网络错误 → 重试或提示用户
 - LLM 返回错误格式 → 降级为直接生成（跳过澄清）
 
@@ -506,6 +517,7 @@ augmented_idea = f"{idea}\n\nAdditional context:\n{answers_text}"
 ```
 
 未来可以优化为：
+
 - 向量化融合（semantic augmentation）
 - 自然语言合并（rewrite idea based on answers）
 - 结构化融合（fill a template）
@@ -516,11 +528,11 @@ augmented_idea = f"{idea}\n\nAdditional context:\n{answers_text}"
 
 ### 单次调用成本
 
-| 操作 | Token | 时间 | 成本 |
-|-----|-------|------|------|
-| 澄清检查 | 100-200 | 1-2s | 低 |
-| Goal 规划 | 300-500 | 2-4s | 中 |
-| **总计** | 400-700 | 3-6s | 中 |
+| 操作      | Token   | 时间 | 成本 |
+| --------- | ------- | ---- | ---- |
+| 澄清检查  | 100-200 | 1-2s | 低   |
+| Goal 规划 | 300-500 | 2-4s | 中   |
+| **总计**  | 400-700 | 3-6s | 中   |
 
 ### 优化建议
 

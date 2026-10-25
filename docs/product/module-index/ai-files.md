@@ -37,7 +37,7 @@ AI-9612 后，MemoFlow 的核心 AI execution runtime 已收敛为 **TypeScript 
 | [`packages/ai/src/server/mastra/runtime/mastra-ai.runtime.ts`](../../../packages/ai/src/server/mastra/runtime/mastra-ai.runtime.ts)                           | 单一 Assistant / Workflow runtime owner                              |
 | [`packages/ai/src/server/mastra/runtime/assistant-history.service.ts`](../../../packages/ai/src/server/mastra/runtime/assistant-history.service.ts)           | Assistant transcript/history                                         |
 | [`packages/ai/src/server/mastra/models/model-resolver.ts`](../../../packages/ai/src/server/mastra/models/model-resolver.ts)                                   | BYOK provider/model resolution                                       |
-| [`packages/ai/src/server/mastra/context/ai-context-assembler.ts`](../../../packages/ai/src/server/mastra/context/ai-context-assembler.ts)                         | Product Time、trust metadata 与 token budget boundary                 |
+| [`packages/ai/src/server/mastra/context/ai-context-assembler.ts`](../../../packages/ai/src/server/mastra/context/ai-context-assembler.ts)                     | Product Time、trust metadata 与 token budget boundary                |
 | [`packages/ai/src/server/mastra/agents/memoflow-assistant.ts`](../../../packages/ai/src/server/mastra/agents/memoflow-assistant.ts)                           | 用户开放式 Assistant                                                 |
 | [`packages/ai/src/server/mastra/agents/goal-planner.worker.ts`](../../../packages/ai/src/server/mastra/agents/goal-planner.worker.ts)                         | Goal planning worker                                                 |
 | [`packages/ai/src/server/mastra/agents/task-planner.worker.ts`](../../../packages/ai/src/server/mastra/agents/task-planner.worker.ts)                         | Task planning worker                                                 |
@@ -55,11 +55,11 @@ AI-9612 后，MemoFlow 的核心 AI execution runtime 已收敛为 **TypeScript 
 
 ## Application capabilities 与 failure boundary
 
-| 文件                                                                                                                                                                      | 说明                                                                                         |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| [`packages/ai/src/server/application/ai.application.capabilities.ts`](../../../packages/ai/src/server/application/ai.application.capabilities.ts)                         | Provider、Assistant、Knowledge、Evaluation 四个真实 consumer capability ports               |
-| [`packages/ai/src/server/transport/ai-controller-errors.ts`](../../../packages/ai/src/server/transport/ai-controller-errors.ts)                                           | API/IPC 共用的 stable AI failure code、HTTP projection 与 secret-safe message mapping         |
-| [`packages/ai/src/server/infrastructure/security/provider-safe-fetch.ts`](../../../packages/ai/src/server/infrastructure/security/provider-safe-fetch.ts)                   | provider HTTPS/SSRF/DNS 与 request-time credential guard                                     |
+| 文件                                                                                                                                                      | 说明                                                                                  |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| [`packages/ai/src/server/application/ai.application.capabilities.ts`](../../../packages/ai/src/server/application/ai.application.capabilities.ts)         | Provider、Assistant、Knowledge、Evaluation 四个真实 consumer capability ports         |
+| [`packages/ai/src/server/transport/ai-controller-errors.ts`](../../../packages/ai/src/server/transport/ai-controller-errors.ts)                           | API/IPC 共用的 stable AI failure code、HTTP projection 与 secret-safe message mapping |
+| [`packages/ai/src/server/infrastructure/security/provider-safe-fetch.ts`](../../../packages/ai/src/server/infrastructure/security/provider-safe-fetch.ts) | provider HTTPS/SSRF/DNS 与 request-time credential guard                              |
 
 ## Transport 与宿主组合
 
@@ -84,27 +84,27 @@ AI-9612 后，MemoFlow 的核心 AI execution runtime 已收敛为 **TypeScript 
 
 ## Contracts 与持久化
 
-| 文件                                                                                                                                                                | 说明                                                 |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| [`packages/contracts/src/modules/ai/api/ai-runtime.dto.ts`](../../../packages/contracts/src/modules/ai/api/ai-runtime.dto.ts)                                       | Canonical Assistant/Workflow cross-boundary contract |
-| [`packages/contracts/src/modules/ai/api/ai-goal-create-workflow.dto.ts`](../../../packages/contracts/src/modules/ai/api/ai-goal-create-workflow.dto.ts)             | Goal workflow contract                               |
-| [`packages/contracts/src/modules/ai/api/ai-task-create-workflow.dto.ts`](../../../packages/contracts/src/modules/ai/api/ai-task-create-workflow.dto.ts)             | Task workflow contract                               |
-| [`packages/contracts/src/modules/ai/api/ai-knowledge-capture-workflow.dto.ts`](../../../packages/contracts/src/modules/ai/api/ai-knowledge-capture-workflow.dto.ts) | Knowledge capture workflow contract                  |
-| [`packages/contracts/src/modules/ai/protocol/ai-rpc-map.ts`](../../../packages/contracts/src/modules/ai/protocol/ai-rpc-map.ts)                                     | AI RPC map                                           |
-| [`packages/database/prisma/schema/ai.prisma`](../../../packages/database/prisma/schema/ai.prisma)                                                                   | 当前 AI product persistence schema                   |
-| [`packages/powersync-schema/src/index.ts`](../../../packages/powersync-schema/src/index.ts)                                                                         | API/Desktop AI schema parity（含 `ai_execution_records`，无 `ai_messages`）                    |
-| [`packages/ai/src/server/application/ai-conversation-portability.ts`](../../../packages/ai/src/server/application/ai-conversation-portability.ts) | owner-provided `ai-conversations@3` capability |
-| [`packages/ai/src/server/infrastructure/adapters/prisma/ai-execution-record-prisma.adapter.ts`](../../../packages/ai/src/server/infrastructure/adapters/prisma/ai-execution-record-prisma.adapter.ts) | bounded execution observability projection                              |
+| 文件                                                                                                                                                                                                  | 说明                                                                        |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| [`packages/contracts/src/modules/ai/api/ai-runtime.dto.ts`](../../../packages/contracts/src/modules/ai/api/ai-runtime.dto.ts)                                                                         | Canonical Assistant/Workflow cross-boundary contract                        |
+| [`packages/contracts/src/modules/ai/api/ai-goal-create-workflow.dto.ts`](../../../packages/contracts/src/modules/ai/api/ai-goal-create-workflow.dto.ts)                                               | Goal workflow contract                                                      |
+| [`packages/contracts/src/modules/ai/api/ai-task-create-workflow.dto.ts`](../../../packages/contracts/src/modules/ai/api/ai-task-create-workflow.dto.ts)                                               | Task workflow contract                                                      |
+| [`packages/contracts/src/modules/ai/api/ai-knowledge-capture-workflow.dto.ts`](../../../packages/contracts/src/modules/ai/api/ai-knowledge-capture-workflow.dto.ts)                                   | Knowledge capture workflow contract                                         |
+| [`packages/contracts/src/modules/ai/protocol/ai-rpc-map.ts`](../../../packages/contracts/src/modules/ai/protocol/ai-rpc-map.ts)                                                                       | AI RPC map                                                                  |
+| [`packages/database/prisma/schema/ai.prisma`](../../../packages/database/prisma/schema/ai.prisma)                                                                                                     | 当前 AI product persistence schema                                          |
+| [`packages/powersync-schema/src/index.ts`](../../../packages/powersync-schema/src/index.ts)                                                                                                           | API/Desktop AI schema parity（含 `ai_execution_records`，无 `ai_messages`） |
+| [`packages/ai/src/server/application/ai-conversation-portability.ts`](../../../packages/ai/src/server/application/ai-conversation-portability.ts)                                                     | owner-provided `ai-conversations@3` capability                              |
+| [`packages/ai/src/server/infrastructure/adapters/prisma/ai-execution-record-prisma.adapter.ts`](../../../packages/ai/src/server/infrastructure/adapters/prisma/ai-execution-record-prisma.adapter.ts) | bounded execution observability projection                                  |
 
 ## Convergence and closure docs（已实施）
 
-| 文件                                                                                                                                                                      | 说明                                                                                           |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| [`docs/analysis/2026-09-09-ai-vnext-model-convergence-current-system-map.md`](../../analysis/2026-09-09-ai-vnext-model-convergence-current-system-map.md)                 | AI vNext as-built ownership、runtime、provider、workflow 与 persistence 证据地图              |
-| [`docs/analysis/2026-09-09-ai-vnext-model-convergence-reference-and-reuse-ledger.md`](../../analysis/2026-09-09-ai-vnext-model-convergence-reference-and-reuse-ledger.md) | Mastra/Time/Knowledge/owner-domain 直接复用、薄 adapter 与禁止自研清单                         |
-| [`docs/architecture/ai-vnext-model-convergence.md`](../../architecture/ai-vnext-model-convergence.md)                                                                     | AI vNext Model Convergence 北极星架构                                                          |
-| [`docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md`](../../plan/archive/2026-09-09-ai-vnext-model-convergence.md)                                                 | AI-9601～9612 实施顺序、accepted status 与 closure gate                                       |
-| [`docs/analysis/2026-09-18-ai-9612-vnext-closure-evidence.md`](../../analysis/2026-09-18-ai-9612-vnext-closure-evidence.md)                                             | AI-9612 五层 exact-head findings/disposition 与 gates evidence                               |
+| 文件                                                                                                                                                                      | 说明                                                                             |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| [`docs/analysis/2026-09-09-ai-vnext-model-convergence-current-system-map.md`](../../analysis/2026-09-09-ai-vnext-model-convergence-current-system-map.md)                 | AI vNext as-built ownership、runtime、provider、workflow 与 persistence 证据地图 |
+| [`docs/analysis/2026-09-09-ai-vnext-model-convergence-reference-and-reuse-ledger.md`](../../analysis/2026-09-09-ai-vnext-model-convergence-reference-and-reuse-ledger.md) | Mastra/Time/Knowledge/owner-domain 直接复用、薄 adapter 与禁止自研清单           |
+| [`docs/architecture/ai-vnext-model-convergence.md`](../../architecture/ai-vnext-model-convergence.md)                                                                     | AI vNext Model Convergence 北极星架构                                            |
+| [`docs/plan/archive/2026-09-09-ai-vnext-model-convergence.md`](../../plan/archive/2026-09-09-ai-vnext-model-convergence.md)                                               | AI-9601～9612 实施顺序、accepted status 与 closure gate                          |
+| [`docs/analysis/2026-09-18-ai-9612-vnext-closure-evidence.md`](../../analysis/2026-09-18-ai-9612-vnext-closure-evidence.md)                                               | AI-9612 五层 exact-head findings/disposition 与 gates evidence                   |
 
 这组文档现在记录已实施的 convergence truth 与 AI-9612 closure evidence；不构成 PORT-1611 的启动授权。
 

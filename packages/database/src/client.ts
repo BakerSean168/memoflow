@@ -24,13 +24,10 @@ function resolveDatabaseConnectionString(): string {
   }
 
   const username = encodeURIComponent(process.env.DB_USER || 'memoflow');
-  const password = process.env.DB_PASSWORD
-    ? `:${encodeURIComponent(process.env.DB_PASSWORD)}`
-    : '';
+  const password = process.env.DB_PASSWORD ? `:${encodeURIComponent(process.env.DB_PASSWORD)}` : '';
   const port = process.env.DB_PORT || '5432';
   const database = encodeURIComponent(process.env.DB_NAME || 'memoflow');
-  const connectionString =
-    `postgresql://${username}${password}@${host}:${port}/${database}?schema=public`;
+  const connectionString = `postgresql://${username}${password}@${host}:${port}/${database}?schema=public`;
 
   process.env.DATABASE_URL = connectionString;
   return connectionString;
@@ -57,10 +54,7 @@ export const prisma: PrismaClient = (() => {
   // 创建 PrismaClient
   const client = new PrismaClient({
     adapter,
-    log:
-      process.env.NODE_ENV === 'development'
-        ? ['query', 'warn', 'error']
-        : ['warn', 'error'],
+    log: process.env.NODE_ENV === 'development' ? ['query', 'warn', 'error'] : ['warn', 'error'],
   });
 
   if (process.env.NODE_ENV !== 'production') {

@@ -195,9 +195,7 @@ describe('useTaskPlanMutations (plan §3.4)', () => {
   it('rolls back a newly-created detail key (optimistic patch residue) when the mutation fails', async () => {
     const tpl = template();
     const service = makeService({
-      updatePlan: vi
-        .fn()
-        .mockResolvedValue(fail({ code: 'VALIDATION_ERROR', message: 'nope' })),
+      updatePlan: vi.fn().mockResolvedValue(fail({ code: 'VALIDATION_ERROR', message: 'nope' })),
     });
     const { api, runtime } = mountTaskComposable(() => useTaskPlanMutations(), { service });
 

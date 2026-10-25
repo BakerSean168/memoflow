@@ -18,12 +18,13 @@ interface NotificationPreferenceRow {
 }
 
 function hydratePreference(row: NotificationPreferenceRow): NotificationPreference {
-  const globalChannels = parseJsonSafe<Record<NotificationChannelType, boolean>>(
-    row.global_channels,
-  ) ?? {} as Record<NotificationChannelType, boolean>;
-  const workflowOverrides = parseJsonSafe<
-    Record<string, Partial<Record<NotificationChannelType, boolean>>>
-  >(row.workflow_overrides) ?? {};
+  const globalChannels =
+    parseJsonSafe<Record<NotificationChannelType, boolean>>(row.global_channels) ??
+    ({} as Record<NotificationChannelType, boolean>);
+  const workflowOverrides =
+    parseJsonSafe<Record<string, Partial<Record<NotificationChannelType, boolean>>>>(
+      row.workflow_overrides,
+    ) ?? {};
   return NotificationPreference.load({
     id: row.id as never,
     identityId: row.identity_id as never,
@@ -69,7 +70,10 @@ export class PowerSyncNotificationPreferenceRepository implements INotificationP
     );
   }
 
-  async findByIdForIdentity(identityId: string, id: string): Promise<NotificationPreference | null> {
+  async findByIdForIdentity(
+    identityId: string,
+    id: string,
+  ): Promise<NotificationPreference | null> {
     const row = await this.db.getOptional<NotificationPreferenceRow>(
       `SELECT * FROM notification_preferences WHERE id = ? AND identity_id = ? LIMIT 1`,
       [id, identityId],
@@ -79,7 +83,8 @@ export class PowerSyncNotificationPreferenceRepository implements INotificationP
 
   async findByIdentityId(identityId: string): Promise<NotificationPreference | null> {
     const row = await this.db.getOptional<NotificationPreferenceRow>(
-      `SELECT * FROM notification_preferences WHERE identity_id = ? LIMIT 1`, [identityId],
+      `SELECT * FROM notification_preferences WHERE identity_id = ? LIMIT 1`,
+      [identityId],
     );
     return row ? hydratePreference(row) : null;
   }
@@ -88,7 +93,10 @@ export class PowerSyncNotificationPreferenceRepository implements INotificationP
     if (!(await this.findByIdForIdentity(identityId, id))) {
       throw new Error('Notification preference not found for the current identity.');
     }
-    await this.db.execute(`DELETE FROM notification_preferences WHERE id = ? AND identity_id = ?`, [id, identityId]);
+    await this.db.execute(`DELETE FROM notification_preferences WHERE id = ? AND identity_id = ?`, [
+      id,
+      identityId,
+    ]);
   }
 
   async exists(identityId: string, id: string): Promise<boolean> {

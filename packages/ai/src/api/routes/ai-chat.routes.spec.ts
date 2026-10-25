@@ -42,7 +42,9 @@ function getRegisteredRoute(
   method: string,
   path: string,
 ): RegisteredRoute {
-  const route = registry.paths.find((candidate) => candidate.method === method && candidate.path === path);
+  const route = registry.paths.find(
+    (candidate) => candidate.method === method && candidate.path === path,
+  );
 
   expect(route).toBeDefined();
   return route!;
@@ -55,12 +57,23 @@ function getResponseSchema(
   safeParse: (value: unknown) => { success: boolean };
   _def?: { typeName?: string };
 } {
-  const responses = route.responses as Record<string, { content?: Record<string, unknown> }> | undefined;
+  const responses = route.responses as
+    Record<string, { content?: Record<string, unknown> }> | undefined;
   const response = responses?.[String(status)];
   const schema = (response?.content as Record<string, unknown> | undefined)?.[
     'application/json'
-  ] as { schema?: { safeParse: (value: unknown) => { success: boolean }; _def?: { typeName?: string } } } | undefined;
-  return schema?.schema ?? (response as unknown as { safeParse: (value: unknown) => { success: boolean } });
+  ] as
+    | {
+        schema?: {
+          safeParse: (value: unknown) => { success: boolean };
+          _def?: { typeName?: string };
+        };
+      }
+    | undefined;
+  return (
+    schema?.schema ??
+    (response as unknown as { safeParse: (value: unknown) => { success: boolean } })
+  );
 }
 
 function getParamsSchema(route: RegisteredRoute): {
@@ -74,20 +87,33 @@ function getParamsSchema(route: RegisteredRoute): {
 function getJsonBodySchema(route: RegisteredRoute): {
   safeParse: (value: unknown) => { success: boolean };
 } {
-  return (((route.request?.body as Record<string, unknown> | undefined)?.content as
-    | Record<string, unknown>
-    | undefined)?.['application/json'] as Record<string, unknown> | undefined)?.schema as {
+  return (
+    (
+      (route.request?.body as Record<string, unknown> | undefined)?.content as
+        Record<string, unknown> | undefined
+    )?.['application/json'] as Record<string, unknown> | undefined
+  )?.schema as {
     safeParse: (value: unknown) => { success: boolean };
   };
 }
 
-function collectAllSchemas(obj: unknown): Array<{ safeParse: (value: unknown) => { success: boolean }; _def?: { typeName?: string } }> {
-  const schemas: Array<{ safeParse: (value: unknown) => { success: boolean }; _def?: { typeName?: string } }> = [];
+function collectAllSchemas(
+  obj: unknown,
+): Array<{ safeParse: (value: unknown) => { success: boolean }; _def?: { typeName?: string } }> {
+  const schemas: Array<{
+    safeParse: (value: unknown) => { success: boolean };
+    _def?: { typeName?: string };
+  }> = [];
   if (!obj || typeof obj !== 'object') return schemas;
 
   const record = obj as Record<string, unknown>;
   if (typeof record.safeParse === 'function') {
-    schemas.push(record as { safeParse: (value: unknown) => { success: boolean }; _def?: { typeName?: string } });
+    schemas.push(
+      record as {
+        safeParse: (value: unknown) => { success: boolean };
+        _def?: { typeName?: string };
+      },
+    );
   }
 
   for (const value of Object.values(record)) {
@@ -114,7 +140,8 @@ describe('ai chat route contracts', () => {
       // Skip the SSE route which is not registered in OpenAPI
       if (route.method === 'post' && route.path === '/messages/sse') continue;
 
-      const responses = route.responses as Record<string, { content?: Record<string, unknown> }> | undefined;
+      const responses = route.responses as
+        Record<string, { content?: Record<string, unknown> }> | undefined;
       if (!responses) continue;
 
       for (const [status, response] of Object.entries(responses)) {
@@ -199,7 +226,6 @@ describe('ai chat route contracts', () => {
     expect(createSchema.safeParse({}).success).toBe(false);
     expect(createSchema.safeParse({ name: '' }).success).toBe(false);
   });
-
 
   it('delete conversation response uses z.null() (no ActionSuccess dual-track)', () => {
     const registry = new TestOpenApiRegistry();

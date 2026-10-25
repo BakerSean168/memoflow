@@ -73,7 +73,11 @@ export function applyGlobalMiddleware(
   if (env.EAG_READ_PILOT_ENABLED) {
     const auditLogger = createLogger('ExternalAgentEdgeAudit');
     auditLogger.setLevel('info');
-    app.use(createExternalAgentEdgeAudit((event) => auditLogger.info('External agent audit', { ...event })));
+    app.use(
+      createExternalAgentEdgeAudit((event) =>
+        auditLogger.info('External agent audit', { ...event }),
+      ),
+    );
   }
 
   // Security. Controlled HTTP local-validation origins (for example Tailscale

@@ -10,9 +10,9 @@ const shell = {
 
 describe('AI Conversation shell portable V3 contract', () => {
   it('accepts the canonical shell payload and preserves only name/status facts', () => {
-    expect(
-      AIConversationPortablePayloadV3Schema.parse({ conversations: [shell] }),
-    ).toEqual({ conversations: [shell] });
+    expect(AIConversationPortablePayloadV3Schema.parse({ conversations: [shell] })).toEqual({
+      conversations: [shell],
+    });
   });
 
   it('rejects invalid status, refs, and duplicate refs', () => {

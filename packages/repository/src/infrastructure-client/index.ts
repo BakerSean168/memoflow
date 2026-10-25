@@ -5,10 +5,7 @@
  */
 
 // Port Interfaces
-export type {
-  IRepositoryApiClient,
-  IResultIpcClient,
-} from './adapters/types';
+export type { IRepositoryApiClient, IResultIpcClient } from './adapters/types';
 
 // HTTP Adapters
 export {

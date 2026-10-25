@@ -123,7 +123,12 @@ function createService(overrides: Partial<CloudAuthClientPort> = {}) {
 function seedAuthenticatedAccount(pinia = createPinia()) {
   const store = useAuthenticationStore(pinia);
   store.handleCloudAuthResponse({
-    account: { id: 'cloud-user-1', email: 'person@example.com', name: 'Person', emailVerified: true },
+    account: {
+      id: 'cloud-user-1',
+      email: 'person@example.com',
+      name: 'Person',
+      emailVerified: true,
+    },
     session: { id: 'session-1', expiresAt: '2030-01-01T00:00:00.000Z' },
     requiresEmailVerification: false,
   });
@@ -270,9 +275,11 @@ describe('CloudPasswordSection (W6 P1-3 auth receipt restore UI)', () => {
 
   it('dismisses the restored receipt from store and localStorage', async () => {
     const service = createService({
-      changePassword: vi.fn().mockResolvedValue(
-        fail({ code: 'SERVICE_UNAVAILABLE', message: 'down', context: { requestId: 'req-1' } }),
-      ),
+      changePassword: vi
+        .fn()
+        .mockResolvedValue(
+          fail({ code: 'SERVICE_UNAVAILABLE', message: 'down', context: { requestId: 'req-1' } }),
+        ),
     });
     const pinia = createPinia();
     seedAuthenticatedAccount(pinia);

@@ -50,7 +50,10 @@ describe('MarkNotificationAsReadUseCase — Fact read state', () => {
     const fact = anUnreadFact('identity-1' as never);
     vi.mocked(notificationRepo.findByIdForIdentity).mockResolvedValue(fact);
     await useCase.execute('notification-1', 'identity-1');
-    expect(notificationRepo.findByIdForIdentity).toHaveBeenCalledWith('identity-1', 'notification-1');
+    expect(notificationRepo.findByIdForIdentity).toHaveBeenCalledWith(
+      'identity-1',
+      'notification-1',
+    );
   });
 
   it('returns NOT_FOUND when the owned Fact does not exist', async () => {
@@ -78,7 +81,10 @@ describe('MarkNotificationAsReadUseCase — Fact read state', () => {
       .mockResolvedValueOnce(facts[0])
       .mockResolvedValueOnce(facts[1])
       .mockResolvedValueOnce(facts[2]);
-    const result = await useCase.executeMany(facts.map((fact) => String(fact.id)), 'identity-batch');
+    const result = await useCase.executeMany(
+      facts.map((fact) => String(fact.id)),
+      'identity-batch',
+    );
     expect(result).toEqual({ ok: true, data: 3 });
     expect(facts.every((fact) => fact.isRead)).toBe(true);
     expect(notificationRepo.saveMany).toHaveBeenCalledWith(facts);

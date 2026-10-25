@@ -33,7 +33,7 @@ const now = new Date();
 const device = new BadDeviceInfo(now);
 
 // 外部代码修改了原始的 now 对象
-now.setFullYear(2000); 
+now.setFullYear(2000);
 
 // 灾难：值对象内部的时间也被“偷偷”改了！
 // 因为它们指向同一个内存地址
@@ -71,11 +71,9 @@ const device = new GoodDeviceInfo(nowStr);
 
 在你的 `DeviceInfo` 值对象中，推荐采用 **“内部存 String，计算转 Date”** 的模式：
 
-
-
 ```TypeScript
 export class DeviceInfo extends ValueObject<DeviceInfoDTO> {
-  
+
   // 1. 内部状态 (Props)：存 string，保证序列化安全和不可变性
   // props.firstSeenAt 是 string
 
@@ -90,7 +88,7 @@ export class DeviceInfo extends ValueObject<DeviceInfoDTO> {
     const lastSeen = new Date(this.props.lastSeenAt).getTime(); // 转 Date
     const now = Date.now();
     const fiveMinutes = 5 * 60 * 1000;
-    
+
     return (now - lastSeen) < fiveMinutes;
   }
 }

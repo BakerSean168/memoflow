@@ -24,22 +24,22 @@ updated: 2026-09-20T08:58:00+08:00
 
 ## 2. Form / Dialog inventory
 
-| Surface                                             | 当前形态                                                     | 分类       | 决策                                                                    |
-| --------------------------------------------------- | ------------------------------------------------------------ | ---------- | ----------------------------------------------------------------------- |
-| `GoalDialog.vue`                                    | ProductDialogShell + property row                            | A          | 第一批继续精修，作为 North Star                                         |
-| `KeyResultDialog.vue`                               | ProductDialogShell + core measurement + Advanced collapsible | A/C hybrid | 保留 measurement-first；后续只做 density polish                         |
-| `GoalRecordDialog.vue`                              | 原自定义 header/footer + value/note/quick values             | A          | 本轮已迁移 ProductDialogShell；quick values 使用共享 property primitive |
-| `TaskPlanDialog.vue` + `TaskPlanForm`               | ProductDialogShell + property row                            | A          | 第一批精修完成                                                          |
-| `QuickTaskDialog.vue`                               | 极简 title-only                                              | A          | 已经足够轻，不增加属性                                                  |
-| `TaskAIGenerationDialog.vue`                        | AI 生成后的批量 task editor                                  | C          | 不 chip 化 task rows；本轮只统一 ProductDialogShell                     |
-| `TemplateSelectionDialog.vue`                       | template card selection                                      | B          | 保留 selection grid；本轮只统一 ProductDialogShell                      |
-| `CreateScheduleDialog.vue`                          | 原传统长表单                                                 | A          | 第一批已改 identity + property row                                      |
-| `CloudConnectionDialog.vue`                         | ProductDialogShell staged connection                         | B          | 保持 staged flow                                                        |
-| `ProfileForm.vue`                                   | Card + avatar/nickname/name/bio/gender/birthday              | D/settings | 不做 property chips；后续改善 grouping、density、sticky actions         |
-| `AISettings.vue` provider onboarding                | provider picker -> credentials -> model selection            | B/D        | 当前 staged model 正确；只做 shell/card density 与状态反馈 polish       |
-| `KnowledgeRepositorySettings.vue`                   | 多 card + connection/disconnect                              | B/D        | 不压成 chips；后续减少 card-in-card、强化连接状态层级                   |
-| `CloudPasswordSection.vue`                          | credential/security                                          | D          | 保持显式传统表单                                                        |
-| `SettingsResetSection.vue`                          | destructive settings                                         | D          | 保持显式危险操作区                                                      |
+| Surface                                    | 当前形态                                                     | 分类       | 决策                                                                    |
+| ------------------------------------------ | ------------------------------------------------------------ | ---------- | ----------------------------------------------------------------------- |
+| `GoalDialog.vue`                           | ProductDialogShell + property row                            | A          | 第一批继续精修，作为 North Star                                         |
+| `KeyResultDialog.vue`                      | ProductDialogShell + core measurement + Advanced collapsible | A/C hybrid | 保留 measurement-first；后续只做 density polish                         |
+| `GoalRecordDialog.vue`                     | 原自定义 header/footer + value/note/quick values             | A          | 本轮已迁移 ProductDialogShell；quick values 使用共享 property primitive |
+| `TaskPlanDialog.vue` + `TaskPlanForm`      | ProductDialogShell + property row                            | A          | 第一批精修完成                                                          |
+| `QuickTaskDialog.vue`                      | 极简 title-only                                              | A          | 已经足够轻，不增加属性                                                  |
+| `TaskAIGenerationDialog.vue`               | AI 生成后的批量 task editor                                  | C          | 不 chip 化 task rows；本轮只统一 ProductDialogShell                     |
+| `TemplateSelectionDialog.vue`              | template card selection                                      | B          | 保留 selection grid；本轮只统一 ProductDialogShell                      |
+| `CreateScheduleDialog.vue`                 | 原传统长表单                                                 | A          | 第一批已改 identity + property row                                      |
+| `CloudConnectionDialog.vue`                | ProductDialogShell staged connection                         | B          | 保持 staged flow                                                        |
+| `ProfileForm.vue`                          | Card + avatar/nickname/name/bio/gender/birthday              | D/settings | 不做 property chips；后续改善 grouping、density、sticky actions         |
+| `AISettings.vue` provider onboarding       | provider picker -> credentials -> model selection            | B/D        | 当前 staged model 正确；只做 shell/card density 与状态反馈 polish       |
+| `KnowledgeRepositorySettings.vue`          | 多 card + connection/disconnect                              | B/D        | 不压成 chips；后续减少 card-in-card、强化连接状态层级                   |
+| `CloudPasswordSection.vue`                 | credential/security                                          | D          | 保持显式传统表单                                                        |
+| `SettingsResetSection.vue`                 | destructive settings                                         | D          | 保持显式危险操作区                                                      |
 | `DataSettingsSection.vue`（原生导入/导出） | data/storage settings                                        | D          | 优先可解释性，不追求极限密度                                            |
 
 ## 3. Page / Workspace inventory

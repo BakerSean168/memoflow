@@ -89,7 +89,12 @@ describe('Habit aggregate', () => {
     const time = createTimeFacade({ context });
     const start = Number(time.codec.startOfYmd(asYmd('2026-03-07')));
     const end = Number(time.codec.startOfYmd(asYmd('2026-03-09')));
-    const habit = Habit.create({ identityId: 'u1', name: '跑步', now: start, timeContext: context });
+    const habit = Habit.create({
+      identityId: 'u1',
+      name: '跑步',
+      now: start,
+      timeContext: context,
+    });
 
     const created = habit.ensureOccurrences(start, end, start, context);
 

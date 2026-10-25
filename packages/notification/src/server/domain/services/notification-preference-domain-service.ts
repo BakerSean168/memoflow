@@ -16,9 +16,7 @@ import type { NotificationPreference } from '../aggregates/notification-preferen
  * - Get or create default preferences for an account
  */
 export class NotificationPreferenceDomainService {
-  constructor(
-    private readonly preferenceRepo: INotificationPreferenceRepository,
-  ) {}
+  constructor(private readonly preferenceRepo: INotificationPreferenceRepository) {}
 
   /**
    * Get preference for a specific account

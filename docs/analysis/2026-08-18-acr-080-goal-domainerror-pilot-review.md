@@ -38,11 +38,13 @@ removed (ResultErrorException supplies statusCode; object details mapped to `con
 - `instanceof`-based tests (goal-policy, value-objects specs) untouched and pass.
 
 ## 4. Validation
+
 - Goal vitest 18 files / 128 passed; typecheck (tsc --noEmit) clean.
 - goal no longer imports `DomainError` anywhere.
 - Inventory scanner `passed`; 111 stale baseline entries await next rewrite.
 
 ## 5. Gate
+
 Pilot passes. This proves the ResultErrorException migration pattern with zero API-contract
 regression. Remaining DomainError classes (task 10, schedule 7, reminder 4, setting 3, utils 7,
 plus goal's prisma-unique if it still extends DomainError) cleared in follow-on batches.

@@ -7,10 +7,7 @@
  */
 
 import type { IResultHttpClient } from '@memoflow/http-client';
-import {
-  createSettingClientService,
-  type SettingClientPort,
-} from '../application-client';
+import { createSettingClientService, type SettingClientPort } from '../application-client';
 import {
   SettingHttpAdapter,
   createSettingHttpAdapters,
@@ -36,18 +33,14 @@ export type {
 /**
  * Creates the setting HTTP client seam.
  */
-export function createSettingHttpClient(
-  httpClient: IResultHttpClient,
-): SettingClientPort {
+export function createSettingHttpClient(httpClient: IResultHttpClient): SettingClientPort {
   return createSettingClientService(new SettingHttpAdapter(httpClient));
 }
 
 /**
  * Creates the setting IPC client seam.
  */
-export function createSettingIpcClient(
-  ipcClient: IResultIpcClient,
-): SettingClientPort {
+export function createSettingIpcClient(ipcClient: IResultIpcClient): SettingClientPort {
   return createSettingClientService(new SettingIpcAdapter(ipcClient));
 }
 

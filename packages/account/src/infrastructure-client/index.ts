@@ -3,10 +3,7 @@
  */
 
 // Types (port interfaces + transport interfaces)
-export type {
-  IResultIpcClient,
-  IAccountApiClient,
-} from './adapters/types';
+export type { IResultIpcClient, IAccountApiClient } from './adapters/types';
 
 // Adapters
 export {

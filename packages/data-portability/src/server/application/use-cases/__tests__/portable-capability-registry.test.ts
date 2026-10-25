@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
-import {
-  PortableCapabilityRegistry,
-  type PortableCapability,
-} from '../../portable-capability';
+import { PortableCapabilityRegistry, type PortableCapability } from '../../portable-capability';
 import { PortableReferenceRegistry } from '../../portable-reference-registry';
 
 const payloadSchema = z.object({ name: z.string() }).strict();
@@ -13,7 +10,9 @@ function executionContext() {
   return { identityId: 'identity-1', references: new PortableReferenceRegistry() };
 }
 
-function createCapability(overrides: Partial<PortableCapability<Payload>> = {}): PortableCapability<Payload> {
+function createCapability(
+  overrides: Partial<PortableCapability<Payload>> = {},
+): PortableCapability<Payload> {
   return {
     key: 'goals',
     schemaVersion: 3,
@@ -39,10 +38,12 @@ describe('PortableCapabilityRegistry', () => {
     const registered = registry.get('goals');
     expect(registered?.schemaVersion).toBe(3);
     expect(await registered?.exportValidated(executionContext())).toEqual({ name: 'Goal' });
-    expect(await registered?.dryRunValidated({ name: 'abc' }, executionContext())).toMatchObject({ created: 3 });
-    await expect(
-      registered?.applyValidated({ name: 42 }, executionContext()),
-    ).rejects.toThrow('Portable capability payload validation failed for goals@3');
+    expect(await registered?.dryRunValidated({ name: 'abc' }, executionContext())).toMatchObject({
+      created: 3,
+    });
+    await expect(registered?.applyValidated({ name: 42 }, executionContext())).rejects.toThrow(
+      'Portable capability payload validation failed for goals@3',
+    );
   });
 
   it('rejects duplicate registrations and self dependencies', () => {

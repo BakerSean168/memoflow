@@ -7,12 +7,7 @@
 
 import { z } from 'zod';
 
-import type {
-  TransferDate,
-  GoalRecordId,
-  KeyResultId,
-  IdentityId,
-} from '../../../primitives';
+import type { TransferDate, GoalRecordId, KeyResultId, IdentityId } from '../../../primitives';
 
 export const GoalRecordAuthorship = {
   Manual: 'Manual',
@@ -28,8 +23,7 @@ export const GoalRecordSourceType = {
   TaskPlan: 'TASK_TEMPLATE',
 } as const;
 
-export type GoalRecordSourceType =
-  (typeof GoalRecordSourceType)[keyof typeof GoalRecordSourceType];
+export type GoalRecordSourceType = (typeof GoalRecordSourceType)[keyof typeof GoalRecordSourceType];
 
 export interface GoalRecordSource {
   type: GoalRecordSourceType;

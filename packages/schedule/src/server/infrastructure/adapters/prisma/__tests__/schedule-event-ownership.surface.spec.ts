@@ -18,24 +18,15 @@ describe('schedule event ownership surface', () => {
     'utf8',
   );
   const service = readFileSync(
-    resolve(
-      __dirname,
-      '../../../../application/services/schedule-event-application-service.ts',
-    ),
+    resolve(__dirname, '../../../../application/services/schedule-event-application-service.ts'),
     'utf8',
   );
   const conflictDetection = readFileSync(
-    resolve(
-      __dirname,
-      '../../../../application/services/schedule-conflict-detection-service.ts',
-    ),
+    resolve(__dirname, '../../../../application/services/schedule-conflict-detection-service.ts'),
     'utf8',
   );
   const conflictResolution = readFileSync(
-    resolve(
-      __dirname,
-      '../../../../application/services/schedule-conflict-resolution-service.ts',
-    ),
+    resolve(__dirname, '../../../../application/services/schedule-conflict-resolution-service.ts'),
     'utf8',
   );
   const controller = readFileSync(
@@ -94,23 +85,21 @@ describe('schedule event ownership surface', () => {
     expect(controller).toContain('async update(id: string, input: unknown, ctx: Context)');
     expect(controller).toContain('async delete(id: string, input: unknown, ctx: Context');
     expect(controller).toContain('async getConflicts(id: string, ctx: Context)');
-    expect(controller).toContain(
-      'async resolveConflict(id: string, input: unknown, ctx: Context)',
-    );
+    expect(controller).toContain('async resolveConflict(id: string, input: unknown, ctx: Context)');
     expect(routes).toContain('controller.get(req.params!.id, ctx)');
     expect(routes).toContain('controller.update(req.params!.id, req.body, ctx)');
     expect(routes).toContain('controller.delete(req.params!.id, req.body, ctx)');
     expect(routes).toContain('controller.getConflicts(req.params!.id, ctx)');
     expect(routes).toContain('controller.resolveConflict(req.params!.id, req.body, ctx)');
-    expect(electron).toMatch(
-      /ScheduleChannels\.GET[\s\S]*controller\.get\(id, requestContext\)/,
-    );
+    expect(electron).toMatch(/ScheduleChannels\.GET[\s\S]*controller\.get\(id, requestContext\)/);
     expect(electron).toMatch(
       /ScheduleChannels\.UPDATE[\s\S]*controller\.update\(id, dto, requestContext\)/,
     );
     expect(electron).toMatch(
       /ScheduleChannels\.DELETE[\s\S]*controller\.delete\(id, payload, requestContext\)/,
     );
-    expect(electron).not.toContain('ipcMain.handle(ScheduleChannels.GET, (_event, id) => controller.get(id));');
+    expect(electron).not.toContain(
+      'ipcMain.handle(ScheduleChannels.GET, (_event, id) => controller.get(id));',
+    );
   });
 });

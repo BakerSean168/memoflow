@@ -1,4 +1,9 @@
-import { ResultErrorException, fail, toHttpResponse, toIpcResult } from '@memoflow/contracts/result';
+import {
+  ResultErrorException,
+  fail,
+  toHttpResponse,
+  toIpcResult,
+} from '@memoflow/contracts/result';
 import { describe, expect, it } from 'vitest';
 import { LocalAgentError } from '../../shared/local-agent-error';
 import { AIExecutionError } from '../../shared/ai-execution-error';
@@ -15,28 +20,54 @@ const fallback = {
 
 describe('AI public failure projection', () => {
   it('preserves identical typed rate-limit metadata through HTTP and IPC envelopes', () => {
-    const mapped = toAITransportFailure({ statusCode: 429,
-      responseBody: JSON.stringify({ error: { code: 'rate_limit_exceeded', message: 'SECRET' } }),
-      responseHeaders: { 'retry-after': '30' },
-    }, fallback);
+    const mapped = toAITransportFailure(
+      {
+        statusCode: 429,
+        responseBody: JSON.stringify({ error: { code: 'rate_limit_exceeded', message: 'SECRET' } }),
+        responseHeaders: { 'retry-after': '30' },
+      },
+      fallback,
+    );
     const result = fail({ code: mapped.code, message: mapped.message, failure: mapped.failure });
     expect(toHttpResponse(result).error?.failure).toEqual(toIpcResult(result).error?.failure);
-    expect(mapped.failure).toMatchObject({ code: 'RATE_LIMITED', category: 'rate_limited',
-      details: { limitKind: 'rate_limit' }, retryHint: { kind: 'after', afterMs: 30000 },
+    expect(mapped.failure).toMatchObject({
+      code: 'RATE_LIMITED',
+      category: 'rate_limited',
+      details: { limitKind: 'rate_limit' },
+      retryHint: { kind: 'after', afterMs: 30000 },
     });
-    expect(JSON.stringify({ http: toHttpResponse(result), ipc: toIpcResult(result) })).not.toContain('SECRET');
+    expect(
+      JSON.stringify({ http: toHttpResponse(result), ipc: toIpcResult(result) }),
+    ).not.toContain('SECRET');
   });
   it('projects structured quota and retry information without provider text or metadata', () => {
-    const failure = toAIPublicFailure({ statusCode: 429, responseBody: JSON.stringify({ error: {
-      message: 'SECRET_API_KEY', details: [
-        { '@type': 'type.googleapis.com/google.rpc.QuotaFailure', violations: [
-          { quotaId: 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', quotaValue: '0', description: 'SECRET_API_KEY' },
-        ] },
-        { '@type': 'type.googleapis.com/google.rpc.RetryInfo', retryDelay: '30.25s' },
-      ],
-    } }) }, fallback);
+    const failure = toAIPublicFailure(
+      {
+        statusCode: 429,
+        responseBody: JSON.stringify({
+          error: {
+            message: 'SECRET_API_KEY',
+            details: [
+              {
+                '@type': 'type.googleapis.com/google.rpc.QuotaFailure',
+                violations: [
+                  {
+                    quotaId: 'GenerateRequestsPerDayPerProjectPerModel-FreeTier',
+                    quotaValue: '0',
+                    description: 'SECRET_API_KEY',
+                  },
+                ],
+              },
+              { '@type': 'type.googleapis.com/google.rpc.RetryInfo', retryDelay: '30.25s' },
+            ],
+          },
+        }),
+      },
+      fallback,
+    );
     expect(failure).toMatchObject({
-      code: 'RATE_LIMITED', details: { limitKind: 'quota_exhausted' },
+      code: 'RATE_LIMITED',
+      details: { limitKind: 'quota_exhausted' },
       retryHint: { kind: 'after', afterMs: 30250 },
     });
     expect(JSON.stringify(failure)).not.toContain('SECRET_API_KEY');
@@ -47,18 +78,32 @@ describe('AI public failure projection', () => {
     ['insufficient_quota', 'quota_exhausted'],
     ['rate_limit_exceeded', 'rate_limit'],
   ])('classifies structured provider %s and safe retry-after', (code, limitKind) => {
-    expect(toAIPublicFailure({ lastError: {
-      statusCode: 429, responseBody: JSON.stringify({ error: { code, message: 'SECRET' } }),
-      responseHeaders: { 'retry-after': '15' },
-    } }, fallback)).toMatchObject({
-      details: { limitKind }, retryHint: { kind: 'after', afterMs: 15000 },
+    expect(
+      toAIPublicFailure(
+        {
+          lastError: {
+            statusCode: 429,
+            responseBody: JSON.stringify({ error: { code, message: 'SECRET' } }),
+            responseHeaders: { 'retry-after': '15' },
+          },
+        },
+        fallback,
+      ),
+    ).toMatchObject({
+      details: { limitKind },
+      retryHint: { kind: 'after', afterMs: 15000 },
     });
   });
 
   it('does not infer a quota reason from text or fabricate an invalid retry hint', () => {
-    const failure = toAIPublicFailure({ statusCode: 429,
-      responseBody: 'insufficient_quota: secret', responseHeaders: { 'retry-after': '-5' },
-    }, fallback);
+    const failure = toAIPublicFailure(
+      {
+        statusCode: 429,
+        responseBody: 'insufficient_quota: secret',
+        responseHeaders: { 'retry-after': '-5' },
+      },
+      fallback,
+    );
     expect(failure).not.toHaveProperty('details');
     expect(failure).not.toHaveProperty('retryHint');
   });
@@ -185,19 +230,30 @@ describe('AI public failure projection', () => {
 it.each([
   ['LOCAL_AGENT_LOGIN_REQUIRED', 'Sign in using the Agent’s native login command, then refresh.'],
   ['LOCAL_AGENT_UNAVAILABLE', 'The local Agent is unavailable. Check its native configuration.'],
-] as const)('re-maps a tainted %s exception at the final public transport boundary', (code, message) => {
-  const error = new LocalAgentError(code);
-  error.message = 'C:\\Users\\PRIVATE_HOME_FIXTURE PRIVATE_ACCOUNT_FIXTURE@example.test api_key=PRIVATE_KEY_FIXTURE';
-  expect(toAITransportFailure(error, fallback)).toMatchObject({ code, message });
-  expect(JSON.stringify(toAITransportFailure(error, fallback))).not.toContain('PRIVATE_');
-});
+] as const)(
+  're-maps a tainted %s exception at the final public transport boundary',
+  (code, message) => {
+    const error = new LocalAgentError(code);
+    error.message =
+      'C:\\Users\\PRIVATE_HOME_FIXTURE PRIVATE_ACCOUNT_FIXTURE@example.test api_key=PRIVATE_KEY_FIXTURE';
+    expect(toAITransportFailure(error, fallback)).toMatchObject({ code, message });
+    expect(JSON.stringify(toAITransportFailure(error, fallback))).not.toContain('PRIVATE_');
+  },
+);
 
 it('uses the fixed Desktop fallback for an unknown private native exception', () => {
-  const error = new Error('PRIVATE_STDERR_FIXTURE C:\\Users\\PRIVATE_HOME_FIXTURE PRIVATE_KEY_FIXTURE');
+  const error = new Error(
+    'PRIVATE_STDERR_FIXTURE C:\\Users\\PRIVATE_HOME_FIXTURE PRIVATE_KEY_FIXTURE',
+  );
   const failure = toAITransportFailure(error, {
-    fallbackCode: 'INTERNAL_ERROR', fallbackMessage: 'Local Agent operation failed',
+    fallbackCode: 'INTERNAL_ERROR',
+    fallbackMessage: 'Local Agent operation failed',
   });
-  expect(failure).toEqual({ code: 'INTERNAL_ERROR', message: 'Local Agent operation failed', statusCode: 500 });
+  expect(failure).toEqual({
+    code: 'INTERNAL_ERROR',
+    message: 'Local Agent operation failed',
+    statusCode: 500,
+  });
   expect(JSON.stringify(failure)).not.toContain('PRIVATE_');
 });
 

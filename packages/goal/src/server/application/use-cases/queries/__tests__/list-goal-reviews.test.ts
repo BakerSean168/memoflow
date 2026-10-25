@@ -37,7 +37,9 @@ describe('ListGoalReviewsUseCase', () => {
 
     const result = await useCase.execute('goal-1', 'identity-1');
 
-    expect(findByIdForIdentity).toHaveBeenCalledWith('identity-1', 'goal-1', { includeChildren: true });
+    expect(findByIdForIdentity).toHaveBeenCalledWith('identity-1', 'goal-1', {
+      includeChildren: true,
+    });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.data.total).toBe(2);

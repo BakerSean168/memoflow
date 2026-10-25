@@ -114,11 +114,13 @@ status: active
 具体要求：
 
 1. `notification.handlers.ts`
+
 - 为 `params.id` 增加本地转换 helper，返回 `NotificationClientDTO['id']`
 - `createMockNotification({ id: ... })` 全部改用该 helper
 - 不改响应 shape，不改路由
 
 2. `repository.handlers.ts`
+
 - 保留已有 `toRepoId` / `toResourceId` 思路，但补齐 bookmark/search 场景的 typed helper
 - `createMockResourceBookmark()` 中 `id` 与 `resourceId` 默认值都必须满足 DTO 类型
 - `PATCH /bookmarks/:bookmarkId`、`reorder`、`POST /bookmarks` 中所有 bookmark/resource id 都必须走 typed helper
@@ -126,6 +128,7 @@ status: active
 - 重点修复 `resourceId`，不要再用 `as string`
 
 3. `task.handlers.ts`
+
 - `createMockTaskDependency()` 只返回 `TaskDependencyClientDTO` 真实存在字段
 - 删除 `version`、`deletedAt` 的构造与覆盖
 - 为 dependency/template/instance id 分别增加本地 typed helper
@@ -146,14 +149,17 @@ status: active
 具体改动：
 
 1. `IGoalService`
+
 - 从 `PublicInterface<any>` 改为：
   `PublicInterface<import('@memoflow/goal/application-client').GoalClientService>`
 
 2. `ITaskService`
+
 - 从 `PublicInterface<any>` 改为：
   `PublicInterface<import('@memoflow/task/application-client').TaskClientService>`
 
 3. `IAIService`
+
 - 放弃当前手写的 `Promise<unknown>` 接口
 - 改为：
   `PublicInterface<import('@memoflow/ai/application-client').AIClientService>`
@@ -173,6 +179,7 @@ status: active
 实施要求：
 
 1. `useTask.ts`
+
 - 保持 `executeDesktopAuthenticatedResult` 为唯一错误恢复入口
 - `executeTaskOperation<T>` 应显式返回 `Promise<Result<T>>`
 - 所有 `service.*` 调用通过真实 `ITaskService` 签名推导 `T`
@@ -182,6 +189,7 @@ status: active
   - 单体实体仍 `result.data.toDTO()`
 
 2. `useTaskGoalBindingOptions.ts`
+
 - `executeGoalBindingOperation<T>` 的 `operation` 参数改成 `() => Promise<Result<T>>`
 - 移除自定义 `{ ok: boolean; data?: T; error?: ... }` 返回类型
 - `loadGoals()` 必须直接消费 `GoalClientService.listGoals()` 的真实数据结构：
@@ -200,6 +208,7 @@ status: active
 实施要求：
 
 1. 补齐 `canRunWorkflowActions`
+
 - 当前模板在知识笔记按钮上使用了该变量，但脚本内未定义
 - 新增一个计算属性，语义与当前页面行为一致：
   - 有可用模型
@@ -209,17 +218,19 @@ status: active
 - 不要把它做成与 `canRunGoalWorkflow` 强绑定；它服务于通用 workflow 操作，尤其是 note workflow
 
 2. 修复 `goalExecutionSummary` 的状态类型引用
+
 - 当前 `NonNullable<ReturnType<typeof goalExecutionSummary>>['status']` 是错误用法，因为 `goalExecutionSummary` 是 `ComputedRef`
 - 改为从 value 层或明确 union type 派生
 - 目标是让 `formatExecutionOutcome()` 的参数成为：
   - `'success' | 'partial' | 'failed'`
 
 3. 利用 `IAIService` 修复结果，消除 service 赋值不兼容
+
 - `useAI()` 返回的 `service`
 - 传给 `useAIChatSession`
 - 传给 `useAIGoalWorkflow`
 - 传给 `useAIKnowledgeNoteWorkflow`
-都应在不额外断言的情况下通过类型检查
+  都应在不额外断言的情况下通过类型检查
 
 ## 同步测试断言与验证
 
@@ -233,6 +244,7 @@ status: active
 具体要求：
 
 1. `task.handlers.spec.ts`
+
 - 删除对 `createMockTaskDependency().version` 的断言
 - 只断言当前 DTO 真实字段：
   - `predecessorTaskId`
@@ -240,6 +252,7 @@ status: active
   - `dependencyType`
 
 2. `repository.handlers.spec.ts`
+
 - 如 branded helper 收口方式影响测试构造，保持断言语义不变，只修正类型构造方式
 - 不扩大测试范围，不重写 spec 结构
 
@@ -248,10 +261,12 @@ status: active
 按下面顺序执行，减少反馈成本：
 
 1. 受影响 spec / 局部类型检查
+
 - `repository.handlers.spec.ts`
 - `task.handlers.spec.ts`
 
 2. 全量验收
+
 - `pnpm nx run web:typecheck`
 
 如果 DI 收紧后暴露同链路新增错误，原则是：

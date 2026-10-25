@@ -1,2303 +1,1895 @@
 [
- {
-  "key": "task.action.complete",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/DayDetailSheet.vue",
-   "packages/app-vue/src/modules/schedule/components/TaskEventActionPanel.vue",
-   "packages/app-vue/src/modules/task/components/TaskOccurrenceCard.vue"
-  ]
- },
- {
-  "key": "task.action.undoComplete",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskOccurrenceCard.vue"
-  ]
- },
- {
-  "key": "task.aiGeneration.cancel",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskAIGenerationDialog.vue"
-  ]
- },
- {
-  "key": "task.aiGeneration.generated",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskAIGenerationDialog.vue"
-  ]
- },
- {
-  "key": "task.aiGeneration.generating",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskAIGenerationDialog.vue"
-  ]
- },
- {
-  "key": "task.aiGeneration.generatingHint",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskAIGenerationDialog.vue"
-  ]
- },
- {
-  "key": "task.aiGeneration.hours",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskAIGenerationDialog.vue"
-  ]
- },
- {
-  "key": "task.aiGeneration.importSelected",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskAIGenerationDialog.vue"
-  ]
- },
- {
-  "key": "task.aiGeneration.priorityHigh",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskAIGenerationDialog.vue"
-  ]
- },
- {
-  "key": "task.aiGeneration.priorityLow",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskAIGenerationDialog.vue"
-  ]
- },
- {
-  "key": "task.aiGeneration.priorityNormal",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskAIGenerationDialog.vue"
-  ]
- },
- {
-  "key": "task.aiGeneration.priorityUrgent",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskAIGenerationDialog.vue"
-  ]
- },
- {
-  "key": "task.aiGeneration.title",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskAIGenerationDialog.vue"
-  ]
- },
- {
-  "key": "task.basicInfo.descPlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/BasicInfoSection.vue"
-  ]
- },
- {
-  "key": "task.basicInfo.description",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/BasicInfoSection.vue"
-  ]
- },
- {
-  "key": "task.basicInfo.taskTitle",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/BasicInfoSection.vue"
-  ]
- },
- {
-  "key": "task.basicInfo.title",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/BasicInfoSection.vue"
-  ]
- },
- {
-  "key": "task.basicInfo.titlePlaceholderRequired",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/BasicInfoSection.vue"
-  ]
- },
- {
-  "key": "task.basicInfo.titleRequired",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/BasicInfoSection.vue"
-  ]
- },
- {
-  "key": "task.blocked.completionProgress",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/BlockedTaskInfo.vue"
-  ]
- },
- {
-  "key": "task.blocked.estimate",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/BlockedTaskInfo.vue"
-  ]
- },
- {
-  "key": "task.blocked.ready",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/BlockedTaskInfo.vue"
-  ]
- },
- {
-  "key": "task.blocked.readyMessage",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/BlockedTaskInfo.vue"
-  ]
- },
- {
-  "key": "task.blocked.title",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/BlockedTaskInfo.vue"
-  ]
- },
- {
-  "key": "task.blocked.waitingMessage",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/BlockedTaskInfo.vue"
-  ]
- },
- {
-  "key": "task.complete.actualTimeOptional",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.actualTimePlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.afterCompletion",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.amount",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.amountHintAvg",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.amountHintCumulative",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.amountHintLatest",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.amountHintMax",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.amountHintMin",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.avg",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.calcMethod",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.cancel",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.confirm",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.cumulative",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.currentProgress",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.currentValue",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.hintAvg",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.hintLast",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.hintMax",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.hintMin",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.hintSum",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.inputPlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.inputRequired",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.keyResult",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.latest",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.linkedGoal",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.max",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.min",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.minuteUnit",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.negativeError",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.noGoalHint",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.noteOptional",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.notePlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.quickValues",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.remaining",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.targetValue",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.title",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.complete.unknown",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"
-  ]
- },
- {
-  "key": "task.criticalPath.addDepsHint",
-  "files": [
-   "packages/app-vue/src/modules/task/components/critical-path/CriticalPathPanel.vue"
-  ]
- },
- {
-  "key": "task.criticalPath.criticalTaskCount",
-  "files": [
-   "packages/app-vue/src/modules/task/components/critical-path/CriticalPathPanel.vue"
-  ]
- },
- {
-  "key": "task.criticalPath.durationLabel",
-  "files": [
-   "packages/app-vue/src/modules/task/components/critical-path/CriticalPathPanel.vue"
-  ]
- },
- {
-  "key": "task.criticalPath.estimatedDuration",
-  "files": [
-   "packages/app-vue/src/modules/task/components/critical-path/CriticalPathPanel.vue"
-  ]
- },
- {
-  "key": "task.criticalPath.export",
-  "files": [
-   "packages/app-vue/src/modules/task/components/critical-path/CriticalPathPanel.vue"
-  ]
- },
- {
-  "key": "task.criticalPath.tasks",
-  "files": [
-   "packages/app-vue/src/modules/task/components/critical-path/CriticalPathPanel.vue"
-  ]
- },
- {
-  "key": "task.criticalPath.title",
-  "files": [
-   "packages/app-vue/src/modules/task/components/critical-path/CriticalPathPanel.vue"
-  ]
- },
- {
-  "key": "task.dagVisualization.criticalPath",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dag/TaskDAGVisualization.vue"
-  ]
- },
- {
-  "key": "task.dagVisualization.criticalPathLabel",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dag/TaskDAGVisualization.vue"
-  ]
- },
- {
-  "key": "task.dagVisualization.durationTooltip",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dag/TaskDAGVisualization.vue"
-  ]
- },
- {
-  "key": "task.dagVisualization.forceLayout",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dag/TaskDAGVisualization.vue"
-  ]
- },
- {
-  "key": "task.dagVisualization.layeredLayout",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dag/TaskDAGVisualization.vue"
-  ]
- },
- {
-  "key": "task.dagVisualization.minuteUnit",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dag/TaskDAGVisualization.vue"
-  ]
- },
- {
-  "key": "task.dagVisualization.minutes",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dag/TaskDAGVisualization.vue"
-  ]
- },
- {
-  "key": "task.dagVisualization.statusTooltip",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dag/TaskDAGVisualization.vue"
-  ]
- },
- {
-  "key": "task.dagVisualization.title",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dag/TaskDAGVisualization.vue"
-  ]
- },
- {
-  "key": "task.depValidation.backToStart",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyValidationDialog.vue"
-  ]
- },
- {
-  "key": "task.depValidation.cannotCreate",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyValidationDialog.vue"
-  ]
- },
- {
-  "key": "task.depValidation.close",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyValidationDialog.vue"
-  ]
- },
- {
-  "key": "task.depValidation.cyclicPath",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyValidationDialog.vue"
-  ]
- },
- {
-  "key": "task.depValidation.details",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyValidationDialog.vue"
-  ]
- },
- {
-  "key": "task.depValidation.errorCode",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyValidationDialog.vue"
-  ]
- },
- {
-  "key": "task.depValidation.suggestion1",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyValidationDialog.vue"
-  ]
- },
- {
-  "key": "task.depValidation.suggestion2",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyValidationDialog.vue"
-  ]
- },
- {
-  "key": "task.depValidation.suggestion3",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyValidationDialog.vue"
-  ]
- },
- {
-  "key": "task.depValidation.suggestions",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyValidationDialog.vue"
-  ]
- },
- {
-  "key": "task.depValidation.viewGraph",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyValidationDialog.vue"
-  ]
- },
- {
-  "key": "task.depValidationDemo.description",
-  "files": [
-   "packages/app-vue/src/modules/task/views/DependencyValidationDemoView.vue"
-  ]
- },
- {
-  "key": "task.depValidationDemo.devInProgress",
-  "files": [
-   "packages/app-vue/src/modules/task/views/DependencyValidationDemoView.vue"
-  ]
- },
- {
-  "key": "task.depValidationDemo.subtitle",
-  "files": [
-   "packages/app-vue/src/modules/task/views/DependencyValidationDemoView.vue"
-  ]
- },
- {
-  "key": "task.depValidationDemo.title",
-  "files": [
-   "packages/app-vue/src/modules/task/views/DependencyValidationDemoView.vue"
-  ]
- },
- {
-  "key": "task.dependency.add",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue"
-  ]
- },
- {
-  "key": "task.dependency.addNew",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue"
-  ]
- },
- {
-  "key": "task.dependency.alreadyExists",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue"
-  ]
- },
- {
-  "key": "task.dependency.currentDeps",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue"
-  ]
- },
- {
-  "key": "task.dependency.cyclicError",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue"
-  ]
- },
- {
-  "key": "task.dependency.depType",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue"
-  ]
- },
- {
-  "key": "task.dependency.ff",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue"
-  ]
- },
- {
-  "key": "task.dependency.ffLabel",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue",
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.dependency.fs",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue"
-  ]
- },
- {
-  "key": "task.dependency.fsLabel",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue",
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.dependency.selectSource",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue"
-  ]
- },
- {
-  "key": "task.dependency.selectType",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue"
-  ]
- },
- {
-  "key": "task.dependency.sf",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue"
-  ]
- },
- {
-  "key": "task.dependency.sfLabel",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue",
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.dependency.sourceTask",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue"
-  ]
- },
- {
-  "key": "task.dependency.ss",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue"
-  ]
- },
- {
-  "key": "task.dependency.ssLabel",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue",
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.dependency.title",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue"
-  ]
- },
- {
-  "key": "task.dependencyGraph.circularLayout",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"
-  ]
- },
- {
-  "key": "task.dependencyGraph.criticalPath",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"
-  ]
- },
- {
-  "key": "task.dependencyGraph.criticalPathLabel",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"
-  ]
- },
- {
-  "key": "task.dependencyGraph.criticalTaskCount",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"
-  ]
- },
- {
-  "key": "task.dependencyGraph.cyclicDetected",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"
-  ]
- },
- {
-  "key": "task.dependencyGraph.depCount",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"
-  ]
- },
- {
-  "key": "task.dependencyGraph.emptyDescription",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"
-  ]
- },
- {
-  "key": "task.dependencyGraph.emptyTitle",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"
-  ]
- },
- {
-  "key": "task.dependencyGraph.estimateTooltip",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"
-  ]
- },
- {
-  "key": "task.dependencyGraph.forceLayout",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"
-  ]
- },
- {
-  "key": "task.dependencyGraph.hours",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"
-  ]
- },
- {
-  "key": "task.dependencyGraph.minutes",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"
-  ]
- },
- {
-  "key": "task.dependencyGraph.refresh",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"
-  ]
- },
- {
-  "key": "task.dependencyGraph.retry",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"
-  ]
- },
- {
-  "key": "task.dependencyGraph.stats",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"
-  ]
- },
- {
-  "key": "task.dependencyGraph.taskCount",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"
-  ]
- },
- {
-  "key": "task.dependencyGraph.title",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"
-  ]
- },
- {
-  "key": "task.dependencyGraph.totalDuration",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"
-  ]
- },
- {
-  "key": "task.detail.basicInfo",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.blockedState",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.completed",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.completionRate",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.createTime",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.dependencyStatus",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.description",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.edit",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.executionStats",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.importance",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.loading",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.noParentTask",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.noPredecessors",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.noSubtasks",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.noSuccessors",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.notFound",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.parentTask",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.predecessors",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.priority",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.readyState",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.relations",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.subtasks",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.successors",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.tags",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.templateStartDate",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.timeType",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.timeValue",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.title",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.totalInstances",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.detail.updateTime",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
-  ]
- },
- {
-  "key": "task.draggableCard.cannotCreateDep",
-  "files": [
-   "packages/app-vue/src/modules/task/components/cards/DraggableTaskCard.vue"
-  ]
- },
- {
-  "key": "task.draggableCard.releaseToDep",
-  "files": [
-   "packages/app-vue/src/modules/task/components/cards/DraggableTaskCard.vue"
-  ]
- },
- {
-  "key": "task.error.operationFailed",
-  "files": [
-   "packages/app-vue/src/modules/task/composables/useTaskDependencies.ts",
-   "packages/app-vue/src/modules/task/composables/useTaskOccurrences.ts",
-   "packages/app-vue/src/modules/task/composables/useTaskPlans.ts"
-  ]
- },
- {
-  "key": "task.field.status",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/TaskEventActionPanel.vue"
-  ]
- },
- {
-  "key": "task.infoCard.close",
-  "files": [
-   "packages/app-vue/src/modules/task/components/cards/TaskInfoShowCard.vue"
-  ]
- },
- {
-  "key": "task.infoCard.dateLabel",
-  "files": [
-   "packages/app-vue/src/modules/task/components/cards/TaskInfoShowCard.vue"
-  ]
- },
- {
-  "key": "task.infoCard.timeLabel",
-  "files": [
-   "packages/app-vue/src/modules/task/components/cards/TaskInfoShowCard.vue"
-  ]
- },
- {
-  "key": "task.infoCard.title",
-  "files": [
-   "packages/app-vue/src/modules/task/components/cards/TaskInfoShowCard.vue"
-  ]
- },
- {
-  "key": "task.instanceCard.completedAt",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskOccurrenceCard.vue"
-  ]
- },
- {
-  "key": "task.krLinks.configPreview",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
-  ]
- },
- {
-  "key": "task.krLinks.enable",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
-  ]
- },
- {
-  "key": "task.krLinks.hint",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
-  ]
- },
- {
-  "key": "task.krLinks.linkedCount",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
-  ]
- },
- {
-  "key": "task.krLinks.points",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
-  ]
- },
- {
-  "key": "task.krLinks.progressPlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
-  ]
- },
- {
-  "key": "task.krLinks.progressText",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
-  ]
- },
- {
-  "key": "task.krLinks.progressValue",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
-  ]
- },
- {
-  "key": "task.krLinks.selectGoal",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
-  ]
- },
- {
-  "key": "task.krLinks.selectGoalFirst",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
-  ]
- },
- {
-  "key": "task.krLinks.selectGoalPlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
-  ]
- },
- {
-  "key": "task.krLinks.selectKR",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
-  ]
- },
- {
-  "key": "task.krLinks.title",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
-  ]
- },
- {
-  "key": "task.krLinks.trigger.allInstancesCompleted",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
-  ]
- },
- {
-  "key": "task.krLinks.trigger.allInstancesCompletedDesc",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
-  ]
- },
- {
-  "key": "task.krLinks.trigger.label",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
-  ]
- },
- {
-  "key": "task.krLinks.trigger.perInstance",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
-  ]
- },
- {
-  "key": "task.krLinks.trigger.perInstanceDesc",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
-  ]
- },
- {
-  "key": "task.krLinks.trigger.placeholder",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
-  ]
- },
- {
-  "key": "task.krLinks.weight",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
-  ]
- },
- {
-  "key": "task.management.allDeleted",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
-  ]
- },
- {
-  "key": "task.management.confirmDelete",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
-  ]
- },
- {
-  "key": "task.management.deletePlan",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
-  ]
- },
- {
-  "key": "task.management.pauseDescription",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
-  ]
- },
- {
-  "key": "task.management.pauseTitle",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
-  ]
- },
- {
-  "key": "task.management.searchPlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskFilterBar.vue"
-  ]
- },
- {
-  "key": "task.metadata.clearColor",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.colorMark",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.importance",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.importanceCriticalSub",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.importanceHighSub",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.importanceLowSub",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.importanceMediumSub",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.importanceMinimalSub",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.noParentTask",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.parentTask",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.selectImportance",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.selectParentTask",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.tagCreative",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.tagDeadline",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.tagExercise",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.tagFinance",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.tagHealth",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.tagHome",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.tagMeeting",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.tagPersonal",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.tagPlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.tagReading",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.tagReview",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.tagShopping",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.tagSocial",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.tagStudy",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.tagTravel",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.tagUrgent",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.tagWork",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.tags",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.metadata.title",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
-  ]
- },
- {
-  "key": "task.monthDay.clear",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/MonthDaySelector.vue"
-  ]
- },
- {
-  "key": "task.monthDay.evenDays",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/MonthDaySelector.vue"
-  ]
- },
- {
-  "key": "task.monthDay.firstHalf",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/MonthDaySelector.vue"
-  ]
- },
- {
-  "key": "task.monthDay.oddDays",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/MonthDaySelector.vue"
-  ]
- },
- {
-  "key": "task.monthDay.secondHalf",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/MonthDaySelector.vue"
-  ]
- },
- {
-  "key": "task.monthDay.selectAll",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/MonthDaySelector.vue"
-  ]
- },
- {
-  "key": "task.monthDay.title",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/MonthDaySelector.vue"
-  ]
- },
- {
-  "key": "task.recurrence.count",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
-  ]
- },
- {
-  "key": "task.recurrence.countLimit",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
-  ]
- },
- {
-  "key": "task.recurrence.countPositive",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
-  ]
- },
- {
-  "key": "task.recurrence.currentSetting",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
-  ]
- },
- {
-  "key": "task.recurrence.daily",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
-  ]
- },
- {
-  "key": "task.recurrence.enable",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
-  ]
- },
- {
-  "key": "task.recurrence.endCondition",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
-  ]
- },
- {
-  "key": "task.recurrence.endDate",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
-  ]
- },
- {
-  "key": "task.recurrence.frequency",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
-  ]
- },
- {
-  "key": "task.recurrence.fri",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
-  ]
- },
- {
-  "key": "task.recurrence.interval",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
-  ]
- },
- {
-  "key": "task.recurrence.intervalRange",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
-  ]
- },
- {
-  "key": "task.recurrence.invalidConfig",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
-  ]
- },
- {
-  "key": "task.recurrence.mon",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
-  ]
- },
- {
-  "key": "task.recurrence.monthly",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
-  ]
- },
- {
-  "key": "task.recurrence.never",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
-  ]
- },
- {
-  "key": "task.recurrence.sat",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
-  ]
- },
- {
-  "key": "task.recurrence.selectDay",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
-  ]
- },
- {
-  "key": "task.recurrence.selectEndDate",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
-  ]
- },
- {
-  "key": "task.recurrence.selectFrequency",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
-  ]
- },
- {
-  "key": "task.recurrence.sun",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
-  ]
- },
- {
-  "key": "task.recurrence.thu",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
-  ]
- },
- {
-  "key": "task.recurrence.title",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
-  ]
- },
- {
-  "key": "task.recurrence.tue",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
-  ]
- },
- {
-  "key": "task.recurrence.wed",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
-  ]
- },
- {
-  "key": "task.recurrence.weekdayRequired",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
-  ]
- },
- {
-  "key": "task.recurrence.weekly",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
-  ]
- },
- {
-  "key": "task.recurrence.yearly",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
-  ]
- },
- {
-  "key": "task.reminderAlerts.absolute",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
-  ]
- },
- {
-  "key": "task.reminderAlerts.absoluteTime",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
-  ]
- },
- {
-  "key": "task.reminderAlerts.add",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
-  ]
- },
- {
-  "key": "task.reminderAlerts.advanceMinutes",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
-  ]
- },
- {
-  "key": "task.reminderAlerts.customMessage",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
-  ]
- },
- {
-  "key": "task.reminderAlerts.email",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
-  ]
- },
- {
-  "key": "task.reminderAlerts.emptyMessage",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
-  ]
- },
- {
-  "key": "task.reminderAlerts.method",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
-  ]
- },
- {
-  "key": "task.reminderAlerts.notImplemented",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
-  ]
- },
- {
-  "key": "task.reminderAlerts.notification",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
-  ]
- },
- {
-  "key": "task.reminderAlerts.relative",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
-  ]
- },
- {
-  "key": "task.reminderAlerts.selectMethod",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
-  ]
- },
- {
-  "key": "task.reminderAlerts.selectMethodRequired",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
-  ]
- },
- {
-  "key": "task.reminderAlerts.selectTiming",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
-  ]
- },
- {
-  "key": "task.reminderAlerts.sms",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
-  ]
- },
- {
-  "key": "task.reminderAlerts.sound",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
-  ]
- },
- {
-  "key": "task.reminderAlerts.time",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
-  ]
- },
- {
-  "key": "task.reminderAlerts.timing",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
-  ]
- },
- {
-  "key": "task.reminderSection.absolute",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
-  ]
- },
- {
-  "key": "task.reminderSection.addTrigger",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
-  ]
- },
- {
-  "key": "task.reminderSection.advanceTime",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
-  ]
- },
- {
-  "key": "task.reminderSection.atLeastOneTrigger",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
-  ]
- },
- {
-  "key": "task.reminderSection.days",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
-  ]
- },
- {
-  "key": "task.reminderSection.enable",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
-  ]
- },
- {
-  "key": "task.reminderSection.hours",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
-  ]
- },
- {
-  "key": "task.reminderSection.minutes",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
-  ]
- },
- {
-  "key": "task.reminderSection.relative",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
-  ]
- },
- {
-  "key": "task.reminderSection.reminderTime",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
-  ]
- },
- {
-  "key": "task.reminderSection.selectType",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
-  ]
- },
- {
-  "key": "task.reminderSection.selectUnit",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
-  ]
- },
- {
-  "key": "task.reminderSection.timeUnit",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
-  ]
- },
- {
-  "key": "task.reminderSection.title",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
-  ]
- },
- {
-  "key": "task.reminderSection.triggerAdvanceTimePositive",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
-  ]
- },
- {
-  "key": "task.reminderSection.triggerSelectTime",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
-  ]
- },
- {
-  "key": "task.reminderSection.triggerSelectUnit",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
-  ]
- },
- {
-  "key": "task.reminderSection.triggers",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
-  ]
- },
- {
-  "key": "task.reminderSection.type",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
-  ]
- },
- {
-  "key": "task.reminderSnooze.alertText",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderSnoozeSettings.vue"
-  ]
- },
- {
-  "key": "task.reminderSnooze.allowSnooze",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderSnoozeSettings.vue"
-  ]
- },
- {
-  "key": "task.reminderSnooze.maxRepeats",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderSnoozeSettings.vue"
-  ]
- },
- {
-  "key": "task.reminderSnooze.snoozeInterval",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderSnoozeSettings.vue"
-  ]
- },
- {
-  "key": "task.rootInstanceCard.taskFallback",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskOccurrenceCard.vue"
-  ]
- },
- {
-  "key": "task.schedulingPolicy.alertDescription",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/SchedulingPolicySection.vue"
-  ]
- },
- {
-  "key": "task.schedulingPolicy.alertMessage",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/SchedulingPolicySection.vue"
-  ]
- },
- {
-  "key": "task.schedulingPolicy.label",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/SchedulingPolicySection.vue"
-  ]
- },
- {
-  "key": "task.schedulingPolicy.tagPlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/SchedulingPolicySection.vue"
-  ]
- },
- {
-  "key": "task.schedulingPolicy.title",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/SchedulingPolicySection.vue"
-  ]
- },
- {
-  "key": "task.status.completed",
-  "files": [
-   "packages/app-vue/src/modules/schedule/components/TaskEventActionPanel.vue"
-  ]
- },
- {
-  "key": "task.summaryCard.addNew",
-  "files": [
-   "packages/app-vue/src/modules/task/components/cards/TaskInSummaryCard.vue"
-  ]
- },
- {
-  "key": "task.summaryCard.allCompleted",
-  "files": [
-   "packages/app-vue/src/modules/task/components/cards/TaskInSummaryCard.vue"
-  ]
- },
- {
-  "key": "task.summaryCard.congratsMessage",
-  "files": [
-   "packages/app-vue/src/modules/task/components/cards/TaskInSummaryCard.vue"
-  ]
- },
- {
-  "key": "task.summaryCard.pendingTasks",
-  "files": [
-   "packages/app-vue/src/modules/task/components/cards/TaskInSummaryCard.vue"
-  ]
- },
- {
-  "key": "task.summaryCard.title",
-  "files": [
-   "packages/app-vue/src/modules/task/components/cards/TaskInSummaryCard.vue"
-  ]
- },
- {
-  "key": "task.templateCard.allDay",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskOccurrenceCard.vue"
-  ]
- },
- {
-  "key": "task.templateDialog.cancel",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.vue"
-  ]
- },
- {
-  "key": "task.templateDialog.create",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.vue"
-  ]
- },
- {
-  "key": "task.templateDialog.createSubtitle",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.vue"
-  ]
- },
- {
-  "key": "task.templateDialog.createTitle",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.vue"
-  ]
- },
- {
-  "key": "task.templateDialog.editSubtitle",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.vue"
-  ]
- },
- {
-  "key": "task.templateDialog.editTitle",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.vue"
-  ]
- },
- {
-  "key": "task.templateDialog.saveChanges",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.vue"
-  ]
- },
- {
-  "key": "task.templateForm.close",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/TaskPlanForm.vue"
-  ]
- },
- {
-  "key": "task.templateForm.loadError",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/TaskPlanForm.vue"
-  ]
- },
- {
-  "key": "task.templateForm.notFoundMessage",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/TaskPlanForm.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.cancel",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.cannotUndo",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.clearFilter",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskFilterBar.vue",
-   "packages/app-vue/src/modules/task/components/TaskPlanGrid.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.confirmDeleteAll",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.confirmDeleteAllBtn",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.confirmText",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.countLabel",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.createNew",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.deleteAll",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.emptyAiLink",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanGrid.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.emptyDescription",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanGrid.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.emptyTitle",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanGrid.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.inputDeletePlaceholder",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.noActive",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.noArchived",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.noMatch",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.noPaused",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.noTemplates",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.relationAll",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.relationBlocked",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.relationChildren",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.relationDependencies",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.relationFilterLabel",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskFilterBar.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.relationParented",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.statusActive",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.statusArchived",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.statusPaused",
-  "files": [
-   "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.viewCard",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskFilterBar.vue"
-  ]
- },
- {
-  "key": "task.templateMgmt.viewGraph",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskFilterBar.vue"
-  ]
- },
- {
-  "key": "task.templateSelection.cancel",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TemplateSelectionDialog.vue"
-  ]
- },
- {
-  "key": "task.templateSelection.loading",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TemplateSelectionDialog.vue"
-  ]
- },
- {
-  "key": "task.templateSelection.noDescription",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TemplateSelectionDialog.vue"
-  ]
- },
- {
-  "key": "task.templateSelection.noTemplates",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TemplateSelectionDialog.vue"
-  ]
- },
- {
-  "key": "task.templateSelection.title",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TemplateSelectionDialog.vue"
-  ]
- },
- {
-  "key": "task.templateSelection.useTemplate",
-  "files": [
-   "packages/app-vue/src/modules/task/components/dialogs/TemplateSelectionDialog.vue"
-  ]
- },
- {
-  "key": "task.timeConfig.endTime",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue"
-  ]
- },
- {
-  "key": "task.timeConfig.enterFullRange",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue"
-  ]
- },
- {
-  "key": "task.timeConfig.enterTime",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue"
-  ]
- },
- {
-  "key": "task.timeConfig.specificTime",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue"
-  ]
- },
- {
-  "key": "task.timeConfig.startDate",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue"
-  ]
- },
- {
-  "key": "task.timeConfig.startDateFixedHint",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue"
-  ]
- },
- {
-  "key": "task.timeConfig.startTime",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue"
-  ]
- },
- {
-  "key": "task.timeConfig.timeType",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue"
-  ]
- },
- {
-  "key": "task.timeConfig.timeTypeFixedHint",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue"
-  ]
- },
- {
-  "key": "task.timeConfig.title",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue"
-  ]
- },
- {
-  "key": "task.weekday.clear",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/WeekdaySelector.vue"
-  ]
- },
- {
-  "key": "task.weekday.fri",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/WeekdaySelector.vue"
-  ]
- },
- {
-  "key": "task.weekday.mon",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/WeekdaySelector.vue"
-  ]
- },
- {
-  "key": "task.weekday.sat",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/WeekdaySelector.vue"
-  ]
- },
- {
-  "key": "task.weekday.selectAll",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/WeekdaySelector.vue"
-  ]
- },
- {
-  "key": "task.weekday.sun",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/WeekdaySelector.vue"
-  ]
- },
- {
-  "key": "task.weekday.thu",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/WeekdaySelector.vue"
-  ]
- },
- {
-  "key": "task.weekday.title",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/WeekdaySelector.vue"
-  ]
- },
- {
-  "key": "task.weekday.tue",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/WeekdaySelector.vue"
-  ]
- },
- {
-  "key": "task.weekday.wed",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/WeekdaySelector.vue"
-  ]
- },
- {
-  "key": "task.weekday.weekends",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/WeekdaySelector.vue"
-  ]
- },
- {
-  "key": "task.weekday.workdays",
-  "files": [
-   "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/WeekdaySelector.vue"
-  ]
- }
+  {
+    "key": "task.action.complete",
+    "files": [
+      "packages/app-vue/src/modules/schedule/components/DayDetailSheet.vue",
+      "packages/app-vue/src/modules/schedule/components/TaskEventActionPanel.vue",
+      "packages/app-vue/src/modules/task/components/TaskOccurrenceCard.vue"
+    ]
+  },
+  {
+    "key": "task.action.undoComplete",
+    "files": ["packages/app-vue/src/modules/task/components/TaskOccurrenceCard.vue"]
+  },
+  {
+    "key": "task.aiGeneration.cancel",
+    "files": ["packages/app-vue/src/modules/task/components/TaskAIGenerationDialog.vue"]
+  },
+  {
+    "key": "task.aiGeneration.generated",
+    "files": ["packages/app-vue/src/modules/task/components/TaskAIGenerationDialog.vue"]
+  },
+  {
+    "key": "task.aiGeneration.generating",
+    "files": ["packages/app-vue/src/modules/task/components/TaskAIGenerationDialog.vue"]
+  },
+  {
+    "key": "task.aiGeneration.generatingHint",
+    "files": ["packages/app-vue/src/modules/task/components/TaskAIGenerationDialog.vue"]
+  },
+  {
+    "key": "task.aiGeneration.hours",
+    "files": ["packages/app-vue/src/modules/task/components/TaskAIGenerationDialog.vue"]
+  },
+  {
+    "key": "task.aiGeneration.importSelected",
+    "files": ["packages/app-vue/src/modules/task/components/TaskAIGenerationDialog.vue"]
+  },
+  {
+    "key": "task.aiGeneration.priorityHigh",
+    "files": ["packages/app-vue/src/modules/task/components/TaskAIGenerationDialog.vue"]
+  },
+  {
+    "key": "task.aiGeneration.priorityLow",
+    "files": ["packages/app-vue/src/modules/task/components/TaskAIGenerationDialog.vue"]
+  },
+  {
+    "key": "task.aiGeneration.priorityNormal",
+    "files": ["packages/app-vue/src/modules/task/components/TaskAIGenerationDialog.vue"]
+  },
+  {
+    "key": "task.aiGeneration.priorityUrgent",
+    "files": ["packages/app-vue/src/modules/task/components/TaskAIGenerationDialog.vue"]
+  },
+  {
+    "key": "task.aiGeneration.title",
+    "files": ["packages/app-vue/src/modules/task/components/TaskAIGenerationDialog.vue"]
+  },
+  {
+    "key": "task.basicInfo.descPlaceholder",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/BasicInfoSection.vue"
+    ]
+  },
+  {
+    "key": "task.basicInfo.description",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/BasicInfoSection.vue"
+    ]
+  },
+  {
+    "key": "task.basicInfo.taskTitle",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/BasicInfoSection.vue"
+    ]
+  },
+  {
+    "key": "task.basicInfo.title",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/BasicInfoSection.vue"
+    ]
+  },
+  {
+    "key": "task.basicInfo.titlePlaceholderRequired",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/BasicInfoSection.vue"
+    ]
+  },
+  {
+    "key": "task.basicInfo.titleRequired",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/BasicInfoSection.vue"
+    ]
+  },
+  {
+    "key": "task.blocked.completionProgress",
+    "files": ["packages/app-vue/src/modules/task/components/dependency/BlockedTaskInfo.vue"]
+  },
+  {
+    "key": "task.blocked.estimate",
+    "files": ["packages/app-vue/src/modules/task/components/dependency/BlockedTaskInfo.vue"]
+  },
+  {
+    "key": "task.blocked.ready",
+    "files": ["packages/app-vue/src/modules/task/components/dependency/BlockedTaskInfo.vue"]
+  },
+  {
+    "key": "task.blocked.readyMessage",
+    "files": ["packages/app-vue/src/modules/task/components/dependency/BlockedTaskInfo.vue"]
+  },
+  {
+    "key": "task.blocked.title",
+    "files": ["packages/app-vue/src/modules/task/components/dependency/BlockedTaskInfo.vue"]
+  },
+  {
+    "key": "task.blocked.waitingMessage",
+    "files": ["packages/app-vue/src/modules/task/components/dependency/BlockedTaskInfo.vue"]
+  },
+  {
+    "key": "task.complete.actualTimeOptional",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.actualTimePlaceholder",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.afterCompletion",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.amount",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.amountHintAvg",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.amountHintCumulative",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.amountHintLatest",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.amountHintMax",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.amountHintMin",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.avg",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.calcMethod",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.cancel",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.confirm",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.cumulative",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.currentProgress",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.currentValue",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.hintAvg",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.hintLast",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.hintMax",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.hintMin",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.hintSum",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.inputPlaceholder",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.inputRequired",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.keyResult",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.latest",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.linkedGoal",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.max",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.min",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.minuteUnit",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.negativeError",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.noGoalHint",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.noteOptional",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.notePlaceholder",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.quickValues",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.remaining",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.targetValue",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.title",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.complete.unknown",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskCompleteDialog.vue"]
+  },
+  {
+    "key": "task.criticalPath.addDepsHint",
+    "files": ["packages/app-vue/src/modules/task/components/critical-path/CriticalPathPanel.vue"]
+  },
+  {
+    "key": "task.criticalPath.criticalTaskCount",
+    "files": ["packages/app-vue/src/modules/task/components/critical-path/CriticalPathPanel.vue"]
+  },
+  {
+    "key": "task.criticalPath.durationLabel",
+    "files": ["packages/app-vue/src/modules/task/components/critical-path/CriticalPathPanel.vue"]
+  },
+  {
+    "key": "task.criticalPath.estimatedDuration",
+    "files": ["packages/app-vue/src/modules/task/components/critical-path/CriticalPathPanel.vue"]
+  },
+  {
+    "key": "task.criticalPath.export",
+    "files": ["packages/app-vue/src/modules/task/components/critical-path/CriticalPathPanel.vue"]
+  },
+  {
+    "key": "task.criticalPath.tasks",
+    "files": ["packages/app-vue/src/modules/task/components/critical-path/CriticalPathPanel.vue"]
+  },
+  {
+    "key": "task.criticalPath.title",
+    "files": ["packages/app-vue/src/modules/task/components/critical-path/CriticalPathPanel.vue"]
+  },
+  {
+    "key": "task.dagVisualization.criticalPath",
+    "files": ["packages/app-vue/src/modules/task/components/dag/TaskDAGVisualization.vue"]
+  },
+  {
+    "key": "task.dagVisualization.criticalPathLabel",
+    "files": ["packages/app-vue/src/modules/task/components/dag/TaskDAGVisualization.vue"]
+  },
+  {
+    "key": "task.dagVisualization.durationTooltip",
+    "files": ["packages/app-vue/src/modules/task/components/dag/TaskDAGVisualization.vue"]
+  },
+  {
+    "key": "task.dagVisualization.forceLayout",
+    "files": ["packages/app-vue/src/modules/task/components/dag/TaskDAGVisualization.vue"]
+  },
+  {
+    "key": "task.dagVisualization.layeredLayout",
+    "files": ["packages/app-vue/src/modules/task/components/dag/TaskDAGVisualization.vue"]
+  },
+  {
+    "key": "task.dagVisualization.minuteUnit",
+    "files": ["packages/app-vue/src/modules/task/components/dag/TaskDAGVisualization.vue"]
+  },
+  {
+    "key": "task.dagVisualization.minutes",
+    "files": ["packages/app-vue/src/modules/task/components/dag/TaskDAGVisualization.vue"]
+  },
+  {
+    "key": "task.dagVisualization.statusTooltip",
+    "files": ["packages/app-vue/src/modules/task/components/dag/TaskDAGVisualization.vue"]
+  },
+  {
+    "key": "task.dagVisualization.title",
+    "files": ["packages/app-vue/src/modules/task/components/dag/TaskDAGVisualization.vue"]
+  },
+  {
+    "key": "task.depValidation.backToStart",
+    "files": [
+      "packages/app-vue/src/modules/task/components/dependency/DependencyValidationDialog.vue"
+    ]
+  },
+  {
+    "key": "task.depValidation.cannotCreate",
+    "files": [
+      "packages/app-vue/src/modules/task/components/dependency/DependencyValidationDialog.vue"
+    ]
+  },
+  {
+    "key": "task.depValidation.close",
+    "files": [
+      "packages/app-vue/src/modules/task/components/dependency/DependencyValidationDialog.vue"
+    ]
+  },
+  {
+    "key": "task.depValidation.cyclicPath",
+    "files": [
+      "packages/app-vue/src/modules/task/components/dependency/DependencyValidationDialog.vue"
+    ]
+  },
+  {
+    "key": "task.depValidation.details",
+    "files": [
+      "packages/app-vue/src/modules/task/components/dependency/DependencyValidationDialog.vue"
+    ]
+  },
+  {
+    "key": "task.depValidation.errorCode",
+    "files": [
+      "packages/app-vue/src/modules/task/components/dependency/DependencyValidationDialog.vue"
+    ]
+  },
+  {
+    "key": "task.depValidation.suggestion1",
+    "files": [
+      "packages/app-vue/src/modules/task/components/dependency/DependencyValidationDialog.vue"
+    ]
+  },
+  {
+    "key": "task.depValidation.suggestion2",
+    "files": [
+      "packages/app-vue/src/modules/task/components/dependency/DependencyValidationDialog.vue"
+    ]
+  },
+  {
+    "key": "task.depValidation.suggestion3",
+    "files": [
+      "packages/app-vue/src/modules/task/components/dependency/DependencyValidationDialog.vue"
+    ]
+  },
+  {
+    "key": "task.depValidation.suggestions",
+    "files": [
+      "packages/app-vue/src/modules/task/components/dependency/DependencyValidationDialog.vue"
+    ]
+  },
+  {
+    "key": "task.depValidation.viewGraph",
+    "files": [
+      "packages/app-vue/src/modules/task/components/dependency/DependencyValidationDialog.vue"
+    ]
+  },
+  {
+    "key": "task.depValidationDemo.description",
+    "files": ["packages/app-vue/src/modules/task/views/DependencyValidationDemoView.vue"]
+  },
+  {
+    "key": "task.depValidationDemo.devInProgress",
+    "files": ["packages/app-vue/src/modules/task/views/DependencyValidationDemoView.vue"]
+  },
+  {
+    "key": "task.depValidationDemo.subtitle",
+    "files": ["packages/app-vue/src/modules/task/views/DependencyValidationDemoView.vue"]
+  },
+  {
+    "key": "task.depValidationDemo.title",
+    "files": ["packages/app-vue/src/modules/task/views/DependencyValidationDemoView.vue"]
+  },
+  {
+    "key": "task.dependency.add",
+    "files": ["packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue"]
+  },
+  {
+    "key": "task.dependency.addNew",
+    "files": ["packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue"]
+  },
+  {
+    "key": "task.dependency.alreadyExists",
+    "files": ["packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue"]
+  },
+  {
+    "key": "task.dependency.currentDeps",
+    "files": ["packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue"]
+  },
+  {
+    "key": "task.dependency.cyclicError",
+    "files": ["packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue"]
+  },
+  {
+    "key": "task.dependency.depType",
+    "files": ["packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue"]
+  },
+  {
+    "key": "task.dependency.ff",
+    "files": ["packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue"]
+  },
+  {
+    "key": "task.dependency.ffLabel",
+    "files": [
+      "packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue",
+      "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
+    ]
+  },
+  {
+    "key": "task.dependency.fs",
+    "files": ["packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue"]
+  },
+  {
+    "key": "task.dependency.fsLabel",
+    "files": [
+      "packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue",
+      "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
+    ]
+  },
+  {
+    "key": "task.dependency.selectSource",
+    "files": ["packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue"]
+  },
+  {
+    "key": "task.dependency.selectType",
+    "files": ["packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue"]
+  },
+  {
+    "key": "task.dependency.sf",
+    "files": ["packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue"]
+  },
+  {
+    "key": "task.dependency.sfLabel",
+    "files": [
+      "packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue",
+      "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
+    ]
+  },
+  {
+    "key": "task.dependency.sourceTask",
+    "files": ["packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue"]
+  },
+  {
+    "key": "task.dependency.ss",
+    "files": ["packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue"]
+  },
+  {
+    "key": "task.dependency.ssLabel",
+    "files": [
+      "packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue",
+      "packages/app-vue/src/modules/task/views/TaskDetailView.vue"
+    ]
+  },
+  {
+    "key": "task.dependency.title",
+    "files": ["packages/app-vue/src/modules/task/components/dependency/DependencyManager.vue"]
+  },
+  {
+    "key": "task.dependencyGraph.circularLayout",
+    "files": ["packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"]
+  },
+  {
+    "key": "task.dependencyGraph.criticalPath",
+    "files": ["packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"]
+  },
+  {
+    "key": "task.dependencyGraph.criticalPathLabel",
+    "files": ["packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"]
+  },
+  {
+    "key": "task.dependencyGraph.criticalTaskCount",
+    "files": ["packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"]
+  },
+  {
+    "key": "task.dependencyGraph.cyclicDetected",
+    "files": ["packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"]
+  },
+  {
+    "key": "task.dependencyGraph.depCount",
+    "files": ["packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"]
+  },
+  {
+    "key": "task.dependencyGraph.emptyDescription",
+    "files": ["packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"]
+  },
+  {
+    "key": "task.dependencyGraph.emptyTitle",
+    "files": ["packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"]
+  },
+  {
+    "key": "task.dependencyGraph.estimateTooltip",
+    "files": ["packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"]
+  },
+  {
+    "key": "task.dependencyGraph.forceLayout",
+    "files": ["packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"]
+  },
+  {
+    "key": "task.dependencyGraph.hours",
+    "files": ["packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"]
+  },
+  {
+    "key": "task.dependencyGraph.minutes",
+    "files": ["packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"]
+  },
+  {
+    "key": "task.dependencyGraph.refresh",
+    "files": ["packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"]
+  },
+  {
+    "key": "task.dependencyGraph.retry",
+    "files": ["packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"]
+  },
+  {
+    "key": "task.dependencyGraph.stats",
+    "files": ["packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"]
+  },
+  {
+    "key": "task.dependencyGraph.taskCount",
+    "files": ["packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"]
+  },
+  {
+    "key": "task.dependencyGraph.title",
+    "files": ["packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"]
+  },
+  {
+    "key": "task.dependencyGraph.totalDuration",
+    "files": ["packages/app-vue/src/modules/task/components/TaskDependencyGraph.vue"]
+  },
+  {
+    "key": "task.detail.basicInfo",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.blockedState",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.completed",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.completionRate",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.createTime",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.dependencyStatus",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.description",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.edit",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.executionStats",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.importance",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.loading",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.noParentTask",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.noPredecessors",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.noSubtasks",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.noSuccessors",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.notFound",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.parentTask",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.predecessors",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.priority",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.readyState",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.relations",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.subtasks",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.successors",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.tags",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.templateStartDate",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.timeType",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.timeValue",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.title",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.totalInstances",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.detail.updateTime",
+    "files": ["packages/app-vue/src/modules/task/views/TaskDetailView.vue"]
+  },
+  {
+    "key": "task.draggableCard.cannotCreateDep",
+    "files": ["packages/app-vue/src/modules/task/components/cards/DraggableTaskCard.vue"]
+  },
+  {
+    "key": "task.draggableCard.releaseToDep",
+    "files": ["packages/app-vue/src/modules/task/components/cards/DraggableTaskCard.vue"]
+  },
+  {
+    "key": "task.error.operationFailed",
+    "files": [
+      "packages/app-vue/src/modules/task/composables/useTaskDependencies.ts",
+      "packages/app-vue/src/modules/task/composables/useTaskOccurrences.ts",
+      "packages/app-vue/src/modules/task/composables/useTaskPlans.ts"
+    ]
+  },
+  {
+    "key": "task.field.status",
+    "files": ["packages/app-vue/src/modules/schedule/components/TaskEventActionPanel.vue"]
+  },
+  {
+    "key": "task.infoCard.close",
+    "files": ["packages/app-vue/src/modules/task/components/cards/TaskInfoShowCard.vue"]
+  },
+  {
+    "key": "task.infoCard.dateLabel",
+    "files": ["packages/app-vue/src/modules/task/components/cards/TaskInfoShowCard.vue"]
+  },
+  {
+    "key": "task.infoCard.timeLabel",
+    "files": ["packages/app-vue/src/modules/task/components/cards/TaskInfoShowCard.vue"]
+  },
+  {
+    "key": "task.infoCard.title",
+    "files": ["packages/app-vue/src/modules/task/components/cards/TaskInfoShowCard.vue"]
+  },
+  {
+    "key": "task.instanceCard.completedAt",
+    "files": ["packages/app-vue/src/modules/task/components/TaskOccurrenceCard.vue"]
+  },
+  {
+    "key": "task.krLinks.configPreview",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
+    ]
+  },
+  {
+    "key": "task.krLinks.enable",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
+    ]
+  },
+  {
+    "key": "task.krLinks.hint",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
+    ]
+  },
+  {
+    "key": "task.krLinks.linkedCount",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
+    ]
+  },
+  {
+    "key": "task.krLinks.points",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
+    ]
+  },
+  {
+    "key": "task.krLinks.progressPlaceholder",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
+    ]
+  },
+  {
+    "key": "task.krLinks.progressText",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
+    ]
+  },
+  {
+    "key": "task.krLinks.progressValue",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
+    ]
+  },
+  {
+    "key": "task.krLinks.selectGoal",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
+    ]
+  },
+  {
+    "key": "task.krLinks.selectGoalFirst",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
+    ]
+  },
+  {
+    "key": "task.krLinks.selectGoalPlaceholder",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
+    ]
+  },
+  {
+    "key": "task.krLinks.selectKR",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
+    ]
+  },
+  {
+    "key": "task.krLinks.title",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
+    ]
+  },
+  {
+    "key": "task.krLinks.trigger.allInstancesCompleted",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
+    ]
+  },
+  {
+    "key": "task.krLinks.trigger.allInstancesCompletedDesc",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
+    ]
+  },
+  {
+    "key": "task.krLinks.trigger.label",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
+    ]
+  },
+  {
+    "key": "task.krLinks.trigger.perInstance",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
+    ]
+  },
+  {
+    "key": "task.krLinks.trigger.perInstanceDesc",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
+    ]
+  },
+  {
+    "key": "task.krLinks.trigger.placeholder",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
+    ]
+  },
+  {
+    "key": "task.krLinks.weight",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/KeyResultLinksSection.vue"
+    ]
+  },
+  {
+    "key": "task.management.allDeleted",
+    "files": ["packages/app-vue/src/modules/task/views/TaskManagementView.vue"]
+  },
+  {
+    "key": "task.management.confirmDelete",
+    "files": ["packages/app-vue/src/modules/task/views/TaskManagementView.vue"]
+  },
+  {
+    "key": "task.management.deletePlan",
+    "files": ["packages/app-vue/src/modules/task/views/TaskManagementView.vue"]
+  },
+  {
+    "key": "task.management.pauseDescription",
+    "files": ["packages/app-vue/src/modules/task/views/TaskManagementView.vue"]
+  },
+  {
+    "key": "task.management.pauseTitle",
+    "files": ["packages/app-vue/src/modules/task/views/TaskManagementView.vue"]
+  },
+  {
+    "key": "task.management.searchPlaceholder",
+    "files": ["packages/app-vue/src/modules/task/components/TaskFilterBar.vue"]
+  },
+  {
+    "key": "task.metadata.clearColor",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.colorMark",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.importance",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.importanceCriticalSub",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.importanceHighSub",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.importanceLowSub",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.importanceMediumSub",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.importanceMinimalSub",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.noParentTask",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.parentTask",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.selectImportance",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.selectParentTask",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.tagCreative",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.tagDeadline",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.tagExercise",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.tagFinance",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.tagHealth",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.tagHome",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.tagMeeting",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.tagPersonal",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.tagPlaceholder",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.tagReading",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.tagReview",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.tagShopping",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.tagSocial",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.tagStudy",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.tagTravel",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.tagUrgent",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.tagWork",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.tags",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.metadata.title",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/MetadataSection.vue"
+    ]
+  },
+  {
+    "key": "task.monthDay.clear",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/MonthDaySelector.vue"
+    ]
+  },
+  {
+    "key": "task.monthDay.evenDays",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/MonthDaySelector.vue"
+    ]
+  },
+  {
+    "key": "task.monthDay.firstHalf",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/MonthDaySelector.vue"
+    ]
+  },
+  {
+    "key": "task.monthDay.oddDays",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/MonthDaySelector.vue"
+    ]
+  },
+  {
+    "key": "task.monthDay.secondHalf",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/MonthDaySelector.vue"
+    ]
+  },
+  {
+    "key": "task.monthDay.selectAll",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/MonthDaySelector.vue"
+    ]
+  },
+  {
+    "key": "task.monthDay.title",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/MonthDaySelector.vue"
+    ]
+  },
+  {
+    "key": "task.recurrence.count",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
+    ]
+  },
+  {
+    "key": "task.recurrence.countLimit",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
+    ]
+  },
+  {
+    "key": "task.recurrence.countPositive",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
+    ]
+  },
+  {
+    "key": "task.recurrence.currentSetting",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
+    ]
+  },
+  {
+    "key": "task.recurrence.daily",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
+    ]
+  },
+  {
+    "key": "task.recurrence.enable",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
+    ]
+  },
+  {
+    "key": "task.recurrence.endCondition",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
+    ]
+  },
+  {
+    "key": "task.recurrence.endDate",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
+    ]
+  },
+  {
+    "key": "task.recurrence.frequency",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
+    ]
+  },
+  {
+    "key": "task.recurrence.fri",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
+    ]
+  },
+  {
+    "key": "task.recurrence.interval",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
+    ]
+  },
+  {
+    "key": "task.recurrence.intervalRange",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
+    ]
+  },
+  {
+    "key": "task.recurrence.invalidConfig",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
+    ]
+  },
+  {
+    "key": "task.recurrence.mon",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
+    ]
+  },
+  {
+    "key": "task.recurrence.monthly",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
+    ]
+  },
+  {
+    "key": "task.recurrence.never",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
+    ]
+  },
+  {
+    "key": "task.recurrence.sat",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
+    ]
+  },
+  {
+    "key": "task.recurrence.selectDay",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
+    ]
+  },
+  {
+    "key": "task.recurrence.selectEndDate",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
+    ]
+  },
+  {
+    "key": "task.recurrence.selectFrequency",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
+    ]
+  },
+  {
+    "key": "task.recurrence.sun",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
+    ]
+  },
+  {
+    "key": "task.recurrence.thu",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
+    ]
+  },
+  {
+    "key": "task.recurrence.title",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
+    ]
+  },
+  {
+    "key": "task.recurrence.tue",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
+    ]
+  },
+  {
+    "key": "task.recurrence.wed",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
+    ]
+  },
+  {
+    "key": "task.recurrence.weekdayRequired",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
+    ]
+  },
+  {
+    "key": "task.recurrence.weekly",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
+    ]
+  },
+  {
+    "key": "task.recurrence.yearly",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/RecurrenceSection.vue"
+    ]
+  },
+  {
+    "key": "task.reminderAlerts.absolute",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
+    ]
+  },
+  {
+    "key": "task.reminderAlerts.absoluteTime",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
+    ]
+  },
+  {
+    "key": "task.reminderAlerts.add",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
+    ]
+  },
+  {
+    "key": "task.reminderAlerts.advanceMinutes",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
+    ]
+  },
+  {
+    "key": "task.reminderAlerts.customMessage",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
+    ]
+  },
+  {
+    "key": "task.reminderAlerts.email",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
+    ]
+  },
+  {
+    "key": "task.reminderAlerts.emptyMessage",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
+    ]
+  },
+  {
+    "key": "task.reminderAlerts.method",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
+    ]
+  },
+  {
+    "key": "task.reminderAlerts.notImplemented",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
+    ]
+  },
+  {
+    "key": "task.reminderAlerts.notification",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
+    ]
+  },
+  {
+    "key": "task.reminderAlerts.relative",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
+    ]
+  },
+  {
+    "key": "task.reminderAlerts.selectMethod",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
+    ]
+  },
+  {
+    "key": "task.reminderAlerts.selectMethodRequired",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
+    ]
+  },
+  {
+    "key": "task.reminderAlerts.selectTiming",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
+    ]
+  },
+  {
+    "key": "task.reminderAlerts.sms",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
+    ]
+  },
+  {
+    "key": "task.reminderAlerts.sound",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
+    ]
+  },
+  {
+    "key": "task.reminderAlerts.time",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
+    ]
+  },
+  {
+    "key": "task.reminderAlerts.timing",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderAlertsList.vue"
+    ]
+  },
+  {
+    "key": "task.reminderSection.absolute",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
+    ]
+  },
+  {
+    "key": "task.reminderSection.addTrigger",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
+    ]
+  },
+  {
+    "key": "task.reminderSection.advanceTime",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
+    ]
+  },
+  {
+    "key": "task.reminderSection.atLeastOneTrigger",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
+    ]
+  },
+  {
+    "key": "task.reminderSection.days",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
+    ]
+  },
+  {
+    "key": "task.reminderSection.enable",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
+    ]
+  },
+  {
+    "key": "task.reminderSection.hours",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
+    ]
+  },
+  {
+    "key": "task.reminderSection.minutes",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
+    ]
+  },
+  {
+    "key": "task.reminderSection.relative",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
+    ]
+  },
+  {
+    "key": "task.reminderSection.reminderTime",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
+    ]
+  },
+  {
+    "key": "task.reminderSection.selectType",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
+    ]
+  },
+  {
+    "key": "task.reminderSection.selectUnit",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
+    ]
+  },
+  {
+    "key": "task.reminderSection.timeUnit",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
+    ]
+  },
+  {
+    "key": "task.reminderSection.title",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
+    ]
+  },
+  {
+    "key": "task.reminderSection.triggerAdvanceTimePositive",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
+    ]
+  },
+  {
+    "key": "task.reminderSection.triggerSelectTime",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
+    ]
+  },
+  {
+    "key": "task.reminderSection.triggerSelectUnit",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
+    ]
+  },
+  {
+    "key": "task.reminderSection.triggers",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
+    ]
+  },
+  {
+    "key": "task.reminderSection.type",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/ReminderSection.vue"
+    ]
+  },
+  {
+    "key": "task.reminderSnooze.alertText",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderSnoozeSettings.vue"
+    ]
+  },
+  {
+    "key": "task.reminderSnooze.allowSnooze",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderSnoozeSettings.vue"
+    ]
+  },
+  {
+    "key": "task.reminderSnooze.maxRepeats",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderSnoozeSettings.vue"
+    ]
+  },
+  {
+    "key": "task.reminderSnooze.snoozeInterval",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/ReminderSnoozeSettings.vue"
+    ]
+  },
+  {
+    "key": "task.rootInstanceCard.taskFallback",
+    "files": ["packages/app-vue/src/modules/task/components/TaskOccurrenceCard.vue"]
+  },
+  {
+    "key": "task.schedulingPolicy.alertDescription",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/SchedulingPolicySection.vue"
+    ]
+  },
+  {
+    "key": "task.schedulingPolicy.alertMessage",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/SchedulingPolicySection.vue"
+    ]
+  },
+  {
+    "key": "task.schedulingPolicy.label",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/SchedulingPolicySection.vue"
+    ]
+  },
+  {
+    "key": "task.schedulingPolicy.tagPlaceholder",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/SchedulingPolicySection.vue"
+    ]
+  },
+  {
+    "key": "task.schedulingPolicy.title",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/SchedulingPolicySection.vue"
+    ]
+  },
+  {
+    "key": "task.status.completed",
+    "files": ["packages/app-vue/src/modules/schedule/components/TaskEventActionPanel.vue"]
+  },
+  {
+    "key": "task.summaryCard.addNew",
+    "files": ["packages/app-vue/src/modules/task/components/cards/TaskInSummaryCard.vue"]
+  },
+  {
+    "key": "task.summaryCard.allCompleted",
+    "files": ["packages/app-vue/src/modules/task/components/cards/TaskInSummaryCard.vue"]
+  },
+  {
+    "key": "task.summaryCard.congratsMessage",
+    "files": ["packages/app-vue/src/modules/task/components/cards/TaskInSummaryCard.vue"]
+  },
+  {
+    "key": "task.summaryCard.pendingTasks",
+    "files": ["packages/app-vue/src/modules/task/components/cards/TaskInSummaryCard.vue"]
+  },
+  {
+    "key": "task.summaryCard.title",
+    "files": ["packages/app-vue/src/modules/task/components/cards/TaskInSummaryCard.vue"]
+  },
+  {
+    "key": "task.templateCard.allDay",
+    "files": ["packages/app-vue/src/modules/task/components/TaskOccurrenceCard.vue"]
+  },
+  {
+    "key": "task.templateDialog.cancel",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.vue"]
+  },
+  {
+    "key": "task.templateDialog.create",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.vue"]
+  },
+  {
+    "key": "task.templateDialog.createSubtitle",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.vue"]
+  },
+  {
+    "key": "task.templateDialog.createTitle",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.vue"]
+  },
+  {
+    "key": "task.templateDialog.editSubtitle",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.vue"]
+  },
+  {
+    "key": "task.templateDialog.editTitle",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.vue"]
+  },
+  {
+    "key": "task.templateDialog.saveChanges",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.vue"]
+  },
+  {
+    "key": "task.templateForm.close",
+    "files": ["packages/app-vue/src/modules/task/components/TaskPlanForm/TaskPlanForm.vue"]
+  },
+  {
+    "key": "task.templateForm.loadError",
+    "files": ["packages/app-vue/src/modules/task/components/TaskPlanForm/TaskPlanForm.vue"]
+  },
+  {
+    "key": "task.templateForm.notFoundMessage",
+    "files": ["packages/app-vue/src/modules/task/components/TaskPlanForm/TaskPlanForm.vue"]
+  },
+  {
+    "key": "task.templateMgmt.cancel",
+    "files": ["packages/app-vue/src/modules/task/views/TaskManagementView.vue"]
+  },
+  {
+    "key": "task.templateMgmt.cannotUndo",
+    "files": ["packages/app-vue/src/modules/task/views/TaskManagementView.vue"]
+  },
+  {
+    "key": "task.templateMgmt.clearFilter",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskFilterBar.vue",
+      "packages/app-vue/src/modules/task/components/TaskPlanGrid.vue"
+    ]
+  },
+  {
+    "key": "task.templateMgmt.confirmDeleteAll",
+    "files": ["packages/app-vue/src/modules/task/views/TaskManagementView.vue"]
+  },
+  {
+    "key": "task.templateMgmt.confirmDeleteAllBtn",
+    "files": ["packages/app-vue/src/modules/task/views/TaskManagementView.vue"]
+  },
+  {
+    "key": "task.templateMgmt.confirmText",
+    "files": ["packages/app-vue/src/modules/task/views/TaskManagementView.vue"]
+  },
+  {
+    "key": "task.templateMgmt.countLabel",
+    "files": ["packages/app-vue/src/modules/task/views/TaskManagementView.vue"]
+  },
+  {
+    "key": "task.templateMgmt.createNew",
+    "files": ["packages/app-vue/src/modules/task/views/TaskManagementView.vue"]
+  },
+  {
+    "key": "task.templateMgmt.deleteAll",
+    "files": ["packages/app-vue/src/modules/task/views/TaskManagementView.vue"]
+  },
+  {
+    "key": "task.templateMgmt.emptyAiLink",
+    "files": ["packages/app-vue/src/modules/task/components/TaskPlanGrid.vue"]
+  },
+  {
+    "key": "task.templateMgmt.emptyDescription",
+    "files": ["packages/app-vue/src/modules/task/components/TaskPlanGrid.vue"]
+  },
+  {
+    "key": "task.templateMgmt.emptyTitle",
+    "files": ["packages/app-vue/src/modules/task/components/TaskPlanGrid.vue"]
+  },
+  {
+    "key": "task.templateMgmt.inputDeletePlaceholder",
+    "files": ["packages/app-vue/src/modules/task/views/TaskManagementView.vue"]
+  },
+  {
+    "key": "task.templateMgmt.noActive",
+    "files": ["packages/app-vue/src/modules/task/views/TaskManagementView.vue"]
+  },
+  {
+    "key": "task.templateMgmt.noArchived",
+    "files": ["packages/app-vue/src/modules/task/views/TaskManagementView.vue"]
+  },
+  {
+    "key": "task.templateMgmt.noMatch",
+    "files": ["packages/app-vue/src/modules/task/views/TaskManagementView.vue"]
+  },
+  {
+    "key": "task.templateMgmt.noPaused",
+    "files": ["packages/app-vue/src/modules/task/views/TaskManagementView.vue"]
+  },
+  {
+    "key": "task.templateMgmt.noTemplates",
+    "files": ["packages/app-vue/src/modules/task/views/TaskManagementView.vue"]
+  },
+  {
+    "key": "task.templateMgmt.relationAll",
+    "files": ["packages/app-vue/src/modules/task/views/TaskManagementView.vue"]
+  },
+  {
+    "key": "task.templateMgmt.relationBlocked",
+    "files": ["packages/app-vue/src/modules/task/views/TaskManagementView.vue"]
+  },
+  {
+    "key": "task.templateMgmt.relationChildren",
+    "files": ["packages/app-vue/src/modules/task/views/TaskManagementView.vue"]
+  },
+  {
+    "key": "task.templateMgmt.relationDependencies",
+    "files": ["packages/app-vue/src/modules/task/views/TaskManagementView.vue"]
+  },
+  {
+    "key": "task.templateMgmt.relationFilterLabel",
+    "files": ["packages/app-vue/src/modules/task/components/TaskFilterBar.vue"]
+  },
+  {
+    "key": "task.templateMgmt.relationParented",
+    "files": ["packages/app-vue/src/modules/task/views/TaskManagementView.vue"]
+  },
+  {
+    "key": "task.templateMgmt.statusActive",
+    "files": ["packages/app-vue/src/modules/task/views/TaskManagementView.vue"]
+  },
+  {
+    "key": "task.templateMgmt.statusArchived",
+    "files": ["packages/app-vue/src/modules/task/views/TaskManagementView.vue"]
+  },
+  {
+    "key": "task.templateMgmt.statusPaused",
+    "files": ["packages/app-vue/src/modules/task/views/TaskManagementView.vue"]
+  },
+  {
+    "key": "task.templateMgmt.viewCard",
+    "files": ["packages/app-vue/src/modules/task/components/TaskFilterBar.vue"]
+  },
+  {
+    "key": "task.templateMgmt.viewGraph",
+    "files": ["packages/app-vue/src/modules/task/components/TaskFilterBar.vue"]
+  },
+  {
+    "key": "task.templateSelection.cancel",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TemplateSelectionDialog.vue"]
+  },
+  {
+    "key": "task.templateSelection.loading",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TemplateSelectionDialog.vue"]
+  },
+  {
+    "key": "task.templateSelection.noDescription",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TemplateSelectionDialog.vue"]
+  },
+  {
+    "key": "task.templateSelection.noTemplates",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TemplateSelectionDialog.vue"]
+  },
+  {
+    "key": "task.templateSelection.title",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TemplateSelectionDialog.vue"]
+  },
+  {
+    "key": "task.templateSelection.useTemplate",
+    "files": ["packages/app-vue/src/modules/task/components/dialogs/TemplateSelectionDialog.vue"]
+  },
+  {
+    "key": "task.timeConfig.endTime",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue"
+    ]
+  },
+  {
+    "key": "task.timeConfig.enterFullRange",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue"
+    ]
+  },
+  {
+    "key": "task.timeConfig.enterTime",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue"
+    ]
+  },
+  {
+    "key": "task.timeConfig.specificTime",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue"
+    ]
+  },
+  {
+    "key": "task.timeConfig.startDate",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue"
+    ]
+  },
+  {
+    "key": "task.timeConfig.startDateFixedHint",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue"
+    ]
+  },
+  {
+    "key": "task.timeConfig.startTime",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue"
+    ]
+  },
+  {
+    "key": "task.timeConfig.timeType",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue"
+    ]
+  },
+  {
+    "key": "task.timeConfig.timeTypeFixedHint",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue"
+    ]
+  },
+  {
+    "key": "task.timeConfig.title",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/TimeConfigSection.vue"
+    ]
+  },
+  {
+    "key": "task.weekday.clear",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/WeekdaySelector.vue"
+    ]
+  },
+  {
+    "key": "task.weekday.fri",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/WeekdaySelector.vue"
+    ]
+  },
+  {
+    "key": "task.weekday.mon",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/WeekdaySelector.vue"
+    ]
+  },
+  {
+    "key": "task.weekday.sat",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/WeekdaySelector.vue"
+    ]
+  },
+  {
+    "key": "task.weekday.selectAll",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/WeekdaySelector.vue"
+    ]
+  },
+  {
+    "key": "task.weekday.sun",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/WeekdaySelector.vue"
+    ]
+  },
+  {
+    "key": "task.weekday.thu",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/WeekdaySelector.vue"
+    ]
+  },
+  {
+    "key": "task.weekday.title",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/WeekdaySelector.vue"
+    ]
+  },
+  {
+    "key": "task.weekday.tue",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/WeekdaySelector.vue"
+    ]
+  },
+  {
+    "key": "task.weekday.wed",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/WeekdaySelector.vue"
+    ]
+  },
+  {
+    "key": "task.weekday.weekends",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/WeekdaySelector.vue"
+    ]
+  },
+  {
+    "key": "task.weekday.workdays",
+    "files": [
+      "packages/app-vue/src/modules/task/components/TaskPlanForm/widgets/WeekdaySelector.vue"
+    ]
+  }
 ]

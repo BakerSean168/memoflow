@@ -200,26 +200,54 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
         ipcMain.handle(AIChannels.RUNTIME_WORKSPACE_START, async (event, request) =>
           withAuthenticatedValue(ctx, async (requestContext) => {
             const parsed = WorkspaceStreamRequestSchema.safeParse(request);
-            if (!parsed.success) return fail({ code: 'VALIDATION_ERROR', message: 'Invalid Workspace subscription' });
+            if (!parsed.success)
+              return fail({ code: 'VALIDATION_ERROR', message: 'Invalid Workspace subscription' });
             const { streamId, cursor } = parsed.data;
-            if (activeStreamSessions.has(streamId) || [...workspaceOwners.values()].some((owner) => owner.webContentsId === event.sender.id)) {
+            if (
+              activeStreamSessions.has(streamId) ||
+              [...workspaceOwners.values()].some((owner) => owner.webContentsId === event.sender.id)
+            ) {
               return fail({ code: 'CONFLICT', message: 'Workspace subscription already active' });
             }
             let source;
-            try { source = await aiModule.workflowRuntime?.goalEvents?.(); await aiModule.conversationAttentionPort?.events?.init(); await aiModule.conversationEvents?.init(); }
-            catch { return fail({ code: 'SERVICE_UNAVAILABLE', message: 'Workspace events unavailable' }); }
-            if (!source && !aiModule.conversationAttentionPort?.events && !aiModule.conversationEvents) return fail({ code: 'SERVICE_UNAVAILABLE', message: 'Workspace events unavailable' });
-            if (event.sender.isDestroyed() || activeStreamSessions.has(streamId) || [...workspaceOwners.values()].some((owner) => owner.webContentsId === event.sender.id)) {
+            try {
+              source = await aiModule.workflowRuntime?.goalEvents?.();
+              await aiModule.conversationAttentionPort?.events?.init();
+              await aiModule.conversationEvents?.init();
+            } catch {
+              return fail({ code: 'SERVICE_UNAVAILABLE', message: 'Workspace events unavailable' });
+            }
+            if (
+              !source &&
+              !aiModule.conversationAttentionPort?.events &&
+              !aiModule.conversationEvents
+            )
+              return fail({ code: 'SERVICE_UNAVAILABLE', message: 'Workspace events unavailable' });
+            if (
+              event.sender.isDestroyed() ||
+              activeStreamSessions.has(streamId) ||
+              [...workspaceOwners.values()].some((owner) => owner.webContentsId === event.sender.id)
+            ) {
               return fail({ code: 'CONFLICT', message: 'Workspace subscription unavailable' });
             }
             const abortController = new AbortController();
             const close = () => abortController.abort();
             activeStreamSessions.set(streamId, { abortController, webContentsId: event.sender.id });
-            workspaceOwners.set(streamId, { identityId: requestContext.identityId, webContentsId: event.sender.id });
+            workspaceOwners.set(streamId, {
+              identityId: requestContext.identityId,
+              webContentsId: event.sender.id,
+            });
             event.sender.once('destroyed', close);
             void (async () => {
               try {
-                for await (const update of workspaceEventStream({ source: source ?? null, attention: aiModule.conversationAttentionPort?.events, conversations: aiModule.conversationEvents, identityId: requestContext.identityId, cursor, signal: abortController.signal })) {
+                for await (const update of workspaceEventStream({
+                  source: source ?? null,
+                  attention: aiModule.conversationAttentionPort?.events,
+                  conversations: aiModule.conversationEvents,
+                  identityId: requestContext.identityId,
+                  cursor,
+                  signal: abortController.signal,
+                })) {
                   if (abortController.signal.aborted || event.sender.isDestroyed()) break;
                   await new Promise<void>((resolve) => {
                     const timeout = setTimeout(close, 30_000);
@@ -231,19 +259,30 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                     };
                     workspaceAcks.set(streamId, { cursor: update.cursor, resolve: done });
                     abortController.signal.addEventListener('abort', done, { once: true });
-                    try { event.sender.send(AIStreamChannels.RUNTIME_WORKSPACE_EVENT, { streamId, event: update }); }
-                    catch { close(); }
+                    try {
+                      event.sender.send(AIStreamChannels.RUNTIME_WORKSPACE_EVENT, {
+                        streamId,
+                        event: update,
+                      });
+                    } catch {
+                      close();
+                    }
                   });
                 }
-              } catch { /* The client reconnects to durable state; no business failure is synthesized. */ }
-              finally {
+              } catch {
+                /* The client reconnects to durable state; no business failure is synthesized. */
+              } finally {
                 close();
                 event.sender.removeListener('destroyed', close);
                 workspaceAcks.delete(streamId);
                 workspaceOwners.delete(streamId);
                 activeStreamSessions.delete(streamId);
-                try { if (!event.sender.isDestroyed()) event.sender.send(AIStreamChannels.RUNTIME_WORKSPACE_END, { streamId }); }
-                catch { /* The renderer may disappear between the check and the send. */ }
+                try {
+                  if (!event.sender.isDestroyed())
+                    event.sender.send(AIStreamChannels.RUNTIME_WORKSPACE_END, { streamId });
+                } catch {
+                  /* The renderer may disappear between the check and the send. */
+                }
               }
             })();
             return ok({ accepted: true });
@@ -253,9 +292,17 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
         ipcMain.handle(AIChannels.RUNTIME_WORKSPACE_ACK, async (event, request) =>
           withAuthenticatedValue(ctx, async (requestContext) => {
             const parsed = WorkspaceStreamAckSchema.safeParse(request);
-            if (!parsed.success) return fail({ code: 'VALIDATION_ERROR', message: 'Invalid Workspace acknowledgement' });
+            if (!parsed.success)
+              return fail({
+                code: 'VALIDATION_ERROR',
+                message: 'Invalid Workspace acknowledgement',
+              });
             const owner = workspaceOwners.get(parsed.data.streamId);
-            if (owner?.identityId !== requestContext.identityId || owner.webContentsId !== event.sender.id) return fail({ code: 'FORBIDDEN', message: 'Workspace subscription unavailable' });
+            if (
+              owner?.identityId !== requestContext.identityId ||
+              owner.webContentsId !== event.sender.id
+            )
+              return fail({ code: 'FORBIDDEN', message: 'Workspace subscription unavailable' });
             const pending = workspaceAcks.get(parsed.data.streamId);
             if (pending?.cursor === parsed.data.cursor) pending.resolve();
             return ok({ accepted: Boolean(pending?.cursor === parsed.data.cursor) });
@@ -265,9 +312,14 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
         ipcMain.handle(AIChannels.RUNTIME_WORKSPACE_STOP, async (event, request) =>
           withAuthenticatedValue(ctx, async (requestContext) => {
             const parsed = WorkspaceStreamStopSchema.safeParse(request);
-            if (!parsed.success) return fail({ code: 'VALIDATION_ERROR', message: 'Invalid Workspace cancellation' });
+            if (!parsed.success)
+              return fail({ code: 'VALIDATION_ERROR', message: 'Invalid Workspace cancellation' });
             const owner = workspaceOwners.get(parsed.data.streamId);
-            if (owner?.identityId !== requestContext.identityId || owner.webContentsId !== event.sender.id) return fail({ code: 'FORBIDDEN', message: 'Workspace subscription unavailable' });
+            if (
+              owner?.identityId !== requestContext.identityId ||
+              owner.webContentsId !== event.sender.id
+            )
+              return fail({ code: 'FORBIDDEN', message: 'Workspace subscription unavailable' });
             activeStreamSessions.get(parsed.data.streamId)?.abortController.abort();
             return ok({ accepted: true });
           }),
@@ -493,9 +545,7 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                 case 'auth_status':
                   return ok(runtime.loginStatus(owner, input.connectionId));
                 case 'auth_cancel':
-                  return ok(
-                    await runtime.cancelLogin(owner, input.connectionId, input.flowId),
-                  );
+                  return ok(await runtime.cancelLogin(owner, input.connectionId, input.flowId));
                 case 'auth_complete':
                   return ok(
                     await runtime.completeLogin(
@@ -628,19 +678,35 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
         installed.push(AIChannels.RUNTIME_ASSISTANT_START);
         ipcMain.handle(AIChannels.RUNTIME_ASSISTANT_ANSWER, async (_, command) =>
           withAuthenticatedValue(ctx, async (requestContext) => {
-            if (!aiModule.mastraRuntime) return fail({ code: 'SERVICE_UNAVAILABLE', message: 'AI runtime unavailable' });
+            if (!aiModule.mastraRuntime)
+              return fail({ code: 'SERVICE_UNAVAILABLE', message: 'AI runtime unavailable' });
             const parsed = AssistantRuntimeToolAnswerCommandSchema.safeParse(command);
-            if (!parsed.success) return fail({ code: 'VALIDATION_ERROR', message: 'Invalid ask-user response' });
-            return ok(AssistantRuntimeToolAnswerResultSchema.parse({ accepted: await aiModule.mastraRuntime.answerToolSuspension({ context: requestContext, command: parsed.data }) }));
+            if (!parsed.success)
+              return fail({ code: 'VALIDATION_ERROR', message: 'Invalid ask-user response' });
+            return ok(
+              AssistantRuntimeToolAnswerResultSchema.parse({
+                accepted: await aiModule.mastraRuntime.answerToolSuspension({
+                  context: requestContext,
+                  command: parsed.data,
+                }),
+              }),
+            );
           }),
         );
         installed.push(AIChannels.RUNTIME_ASSISTANT_ANSWER);
         ipcMain.handle(AIChannels.RUNTIME_ASSISTANT_ASK_USER_PENDING, async (_, request) =>
           withAuthenticatedValue(ctx, async (requestContext) => {
-            if (!aiModule.mastraRuntime) return fail({ code: 'SERVICE_UNAVAILABLE', message: 'AI runtime unavailable' });
+            if (!aiModule.mastraRuntime)
+              return fail({ code: 'SERVICE_UNAVAILABLE', message: 'AI runtime unavailable' });
             const parsed = AssistantRuntimeHistoryClientRequestSchema.safeParse(request);
-            if (!parsed.success) return fail({ code: 'VALIDATION_ERROR', message: 'Invalid conversation reference' });
-            return ok(await aiModule.mastraRuntime.listAskUserSuspensions({ identityId: requestContext.identityId, conversationId: parsed.data.conversationId }));
+            if (!parsed.success)
+              return fail({ code: 'VALIDATION_ERROR', message: 'Invalid conversation reference' });
+            return ok(
+              await aiModule.mastraRuntime.listAskUserSuspensions({
+                identityId: requestContext.identityId,
+                conversationId: parsed.data.conversationId,
+              }),
+            );
           }),
         );
         installed.push(AIChannels.RUNTIME_ASSISTANT_ASK_USER_PENDING);
@@ -979,7 +1045,10 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
         ipcMain.handle(AIChannels.RUNTIME_WORKFLOW_GOAL_SURFACE_LEASE, async (_, request) =>
           withAuthenticatedValue(ctx, async (requestContext) => {
             if (!aiModule.workflowRuntime) {
-              return fail({ code: 'SERVICE_UNAVAILABLE', message: 'AI workflow runtime unavailable' });
+              return fail({
+                code: 'SERVICE_UNAVAILABLE',
+                message: 'AI workflow runtime unavailable',
+              });
             }
             const parsed = AIGoalSurfaceLeaseRequestSchema.safeParse(request);
             if (!parsed.success) {
@@ -992,7 +1061,8 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
             try {
               const result = AIGoalSurfaceLeaseResponseSchema.parse(
                 await aiModule.workflowRuntime.goalSurfaceLease({
-                  identityId: requestContext.identityId, request: parsed.data,
+                  identityId: requestContext.identityId,
+                  request: parsed.data,
                 }),
               );
               return ok(result);
@@ -1001,7 +1071,11 @@ export function createAIElectronModule(options: AIElectronModuleOptions): AIElec
                 fallbackCode: 'AI_WORKFLOW_RUNTIME_ERROR',
                 fallbackMessage: 'Goal surface lease failed',
               });
-              return fail({ code: failure.code, message: failure.message, context: failure.context });
+              return fail({
+                code: failure.code,
+                message: failure.message,
+                context: failure.context,
+              });
             }
           }),
         );

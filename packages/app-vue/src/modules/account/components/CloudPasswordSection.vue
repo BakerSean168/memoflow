@@ -103,7 +103,10 @@ function handleDismiss() {
         class="flex flex-col gap-3 rounded-md border border-destructive/40 bg-destructive/8 p-4"
         data-testid="password-mutation-error"
       >
-        <p class="text-sm font-medium text-destructive" data-testid="password-mutation-error-message">
+        <p
+          class="text-sm font-medium text-destructive"
+          data-testid="password-mutation-error-message"
+        >
           {{ receipt.message }}
         </p>
         <p
@@ -124,7 +127,12 @@ function handleDismiss() {
             <RotateCcw class="mr-2 h-4 w-4" />
             {{ t('account.password.retry') }}
           </Button>
-          <Button size="sm" variant="ghost" data-testid="password-mutation-error-dismiss" @click="handleDismiss">
+          <Button
+            size="sm"
+            variant="ghost"
+            data-testid="password-mutation-error-dismiss"
+            @click="handleDismiss"
+          >
             <X class="mr-2 h-4 w-4" />
             {{ t('account.password.dismiss') }}
           </Button>
@@ -188,7 +196,10 @@ function handleDismiss() {
       <div class="space-y-3">
         <h3 class="text-sm font-medium">{{ t('account.password.forgotTitle') }}</h3>
         <p class="text-sm text-muted-foreground">{{ t('account.password.forgotDescription') }}</p>
-        <form class="flex flex-col gap-3 sm:flex-row sm:items-end" @submit.prevent="handleSendResetEmail">
+        <form
+          class="flex flex-col gap-3 sm:flex-row sm:items-end"
+          @submit.prevent="handleSendResetEmail"
+        >
           <div class="min-w-0 flex-1 space-y-2">
             <Label for="cloud-forgot-email">{{ t('account.password.resetEmail') }}</Label>
             <Input
@@ -199,7 +210,12 @@ function handleDismiss() {
               autocomplete="email"
             />
           </div>
-          <Button type="submit" variant="outline" data-testid="cloud-password-forgot-button" :disabled="passwordLoading">
+          <Button
+            type="submit"
+            variant="outline"
+            data-testid="cloud-password-forgot-button"
+            :disabled="passwordLoading"
+          >
             <Mail class="mr-2 h-4 w-4" />
             {{ t('account.password.sendResetEmail') }}
           </Button>

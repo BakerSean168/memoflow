@@ -1,23 +1,24 @@
 <script setup lang="ts">
-import type { PaginationFirstProps } from 'reka-ui'
-import type { HTMLAttributes } from 'vue'
-import {
-  Button,
-} from '../button'
-import { cn } from '../../../lib/utils'
-import { DoubleArrowLeftIcon } from '@radix-icons/vue'
-import { PaginationFirst } from 'reka-ui'
-import { computed } from 'vue'
+import type { PaginationFirstProps } from 'reka-ui';
+import type { HTMLAttributes } from 'vue';
+import { Button } from '../button';
+import { cn } from '../../../lib/utils';
+import { DoubleArrowLeftIcon } from '@radix-icons/vue';
+import { PaginationFirst } from 'reka-ui';
+import { computed } from 'vue';
 
-const props = withDefaults(defineProps<PaginationFirstProps & { class?: HTMLAttributes['class'] }>(), {
-  asChild: true,
-})
+const props = withDefaults(
+  defineProps<PaginationFirstProps & { class?: HTMLAttributes['class'] }>(),
+  {
+    asChild: true,
+  },
+);
 
 const delegatedProps = computed(() => {
-  const { class: _, ...delegated } = props
+  const { class: _, ...delegated } = props;
 
-  return delegated
-})
+  return delegated;
+});
 </script>
 
 <template>

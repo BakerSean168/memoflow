@@ -13,9 +13,7 @@ export async function createResultClientErrorFromResponse(
 ): Promise<ResultErrorException> {
   const parsed = await tryParseJson(response);
   const message =
-    readString(parsed, 'error.message') ??
-    readString(parsed, 'message') ??
-    fallbackMessage;
+    readString(parsed, 'error.message') ?? readString(parsed, 'message') ?? fallbackMessage;
   const code = readString(parsed, 'error.code') ?? readString(parsed, 'code') ?? 'INTERNAL_ERROR';
   const details = readDetails(parsed);
 

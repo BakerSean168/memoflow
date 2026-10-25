@@ -45,7 +45,9 @@ export type MarkNotificationReadInvocation = z.infer<typeof MarkNotificationRead
 export const MarkNotificationUnreadInvocationSchema = z.object({
   params: NotificationIdParamsSchema,
 });
-export type MarkNotificationUnreadInvocation = z.infer<typeof MarkNotificationUnreadInvocationSchema>;
+export type MarkNotificationUnreadInvocation = z.infer<
+  typeof MarkNotificationUnreadInvocationSchema
+>;
 
 /** POST /:id/archive — archive a notification. */
 export const ArchiveNotificationInvocationSchema = z.object({

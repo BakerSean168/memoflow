@@ -28,7 +28,8 @@ registry.registerComponent('securitySchemes', 'bearerAuth', {
   type: 'http',
   scheme: 'bearer',
   bearerFormat: 'Better Auth session token',
-  description: 'Desktop 使用 Better Auth bearer session token；token 仅由 Electron main process 持有',
+  description:
+    'Desktop 使用 Better Auth bearer session token；token 仅由 Electron main process 持有',
 });
 
 registry.registerComponent('securitySchemes', 'cookieAuth', {
@@ -50,15 +51,23 @@ export const HttpResponseSchema = z.object({
   code: z.number().describe('HTTP status code'),
   message: z.string().describe('Response message'),
   data: z.any().optional().describe('Response data (on success)'),
-  error: z.object({
-    code: z.string().describe('Error code'),
-    message: z.string().describe('Error message'),
-    details: z.array(z.object({
-      field: z.string().optional().describe('Related field name'),
-      code: z.string().describe('Detail error code'),
-      message: z.string().describe('Detail error message'),
-    })).optional().describe('Validation error details'),
-  }).optional().describe('Error information (on failure)'),
+  error: z
+    .object({
+      code: z.string().describe('Error code'),
+      message: z.string().describe('Error message'),
+      details: z
+        .array(
+          z.object({
+            field: z.string().optional().describe('Related field name'),
+            code: z.string().describe('Detail error code'),
+            message: z.string().describe('Detail error message'),
+          }),
+        )
+        .optional()
+        .describe('Validation error details'),
+    })
+    .optional()
+    .describe('Error information (on failure)'),
   timestamp: z.number().describe('Response timestamp'),
   traceId: z.string().optional().describe('Request trace ID'),
   duration: z.number().optional().describe('Request duration in ms'),
@@ -76,11 +85,15 @@ export const ErrorResponseSchema = z.object({
   error: z.object({
     code: z.string(),
     message: z.string(),
-    details: z.array(z.object({
-      field: z.string().optional(),
-      code: z.string(),
-      message: z.string(),
-    })).optional(),
+    details: z
+      .array(
+        z.object({
+          field: z.string().optional(),
+          code: z.string(),
+          message: z.string(),
+        }),
+      )
+      .optional(),
   }),
   timestamp: z.number(),
 });

@@ -14,7 +14,11 @@ import type {
 } from '../../../domain/repositories/i-notification-repository';
 import type { NotificationDeliveryDecision } from '../../../domain/services/notification-policy';
 import { Notification } from '../../../domain/aggregates/notification';
-import { NotificationId, NotificationAction, NotificationMetadata } from '../../../domain/value-objects';
+import {
+  NotificationId,
+  NotificationAction,
+  NotificationMetadata,
+} from '../../../domain/value-objects';
 import { createTypedEventPublisher, eventBus, flushDomainEvents } from '@memoflow/utils/domain';
 // Residual 1025: sole parseJsonSafe (local dual retired).
 import { parseJsonSafe } from '@memoflow/utils/shared';
@@ -50,7 +54,6 @@ interface NotificationRow {
   archived_at: string | null;
 }
 
-
 // Residual 1101 keep-boundary: PowerSync row ISO string → number|null (empty/invalid → null).
 // Soft residual 1101: projection unknown→undefined and AI positive-only keep-boundaries (no force-merge).
 // Soft residual 1141: auth PowerSync toMillis (same string→null shape; co-located; no force-merge).
@@ -59,7 +62,6 @@ function toTimestamp(value: string | null | undefined): number | null {
   const timestamp = new Date(value).getTime();
   return Number.isNaN(timestamp) ? null : timestamp;
 }
-
 
 function toServerDTO(row: NotificationRow): NotificationServerDTO {
   return {
@@ -209,123 +211,165 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
     await this.ensureTablesExist();
     const dto = notification.toServerDTO();
     await this.db.writeTransaction(async (tx) => {
-    const existing = await tx.getOptional<{ id: string }>(
-      `SELECT id FROM notifications WHERE id = ? LIMIT 1`,
-      [dto.id],
-    );
+      const existing = await tx.getOptional<{ id: string }>(
+        `SELECT id FROM notifications WHERE id = ? LIMIT 1`,
+        [dto.id],
+      );
 
-    if (existing) {
-      await tx.execute(
-        `UPDATE notifications
+      if (existing) {
+        await tx.execute(
+          `UPDATE notifications
             SET identity_id = ?, workflow_key = ?, topic = ?, idempotency_key = ?,
                 title = ?, content = ?, type = ?, category = ?, importance = ?, urgency = ?,
                 is_read = ?, read_at = ?, related_entity_type = ?, related_entity_id = ?,
                 navigation_intent = ?, correlation_id = ?, causation_id = ?, metadata = ?, actions = ?,
                 expires_at = ?, version = ?, updated_at = ?, deleted_at = ?, archived_at = ?
           WHERE id = ?`,
-        [
-          dto.identityId, dto.workflowKey, dto.topic, dto.idempotencyKey,
-          dto.title, dto.content, dto.type, dto.category, dto.importance, dto.urgency,
-          dto.isRead ? 1 : 0, dto.readAt ? new Date(dto.readAt).toISOString() : null,
-          dto.relatedEntityType ?? null, dto.relatedEntityId ?? null,
-          dto.navigationIntent ? JSON.stringify(dto.navigationIntent) : null,
-          dto.correlationId ?? null, dto.causationId ?? null,
-          dto.metadata ? JSON.stringify(dto.metadata) : null,
-          dto.actions ? JSON.stringify(dto.actions) : null,
-          dto.expiresAt ? new Date(dto.expiresAt).toISOString() : null,
-          dto.version, new Date(dto.updatedAt).toISOString(),
-          dto.deletedAt ? new Date(dto.deletedAt).toISOString() : null,
-          dto.archivedAt ? new Date(dto.archivedAt).toISOString() : null, dto.id,
-        ],
-      );
-    } else {
-      await tx.execute(
-        `INSERT INTO notifications (
+          [
+            dto.identityId,
+            dto.workflowKey,
+            dto.topic,
+            dto.idempotencyKey,
+            dto.title,
+            dto.content,
+            dto.type,
+            dto.category,
+            dto.importance,
+            dto.urgency,
+            dto.isRead ? 1 : 0,
+            dto.readAt ? new Date(dto.readAt).toISOString() : null,
+            dto.relatedEntityType ?? null,
+            dto.relatedEntityId ?? null,
+            dto.navigationIntent ? JSON.stringify(dto.navigationIntent) : null,
+            dto.correlationId ?? null,
+            dto.causationId ?? null,
+            dto.metadata ? JSON.stringify(dto.metadata) : null,
+            dto.actions ? JSON.stringify(dto.actions) : null,
+            dto.expiresAt ? new Date(dto.expiresAt).toISOString() : null,
+            dto.version,
+            new Date(dto.updatedAt).toISOString(),
+            dto.deletedAt ? new Date(dto.deletedAt).toISOString() : null,
+            dto.archivedAt ? new Date(dto.archivedAt).toISOString() : null,
+            dto.id,
+          ],
+        );
+      } else {
+        await tx.execute(
+          `INSERT INTO notifications (
             id, identity_id, workflow_key, topic, idempotency_key, title, content, type, category,
             importance, urgency, is_read, read_at, related_entity_type, related_entity_id,
             navigation_intent, correlation_id, causation_id, metadata, actions, expires_at,
             version, created_at, updated_at, deleted_at, archived_at
           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          dto.id, dto.identityId, dto.workflowKey, dto.topic, dto.idempotencyKey,
-          dto.title, dto.content, dto.type, dto.category, dto.importance, dto.urgency,
-          dto.isRead ? 1 : 0, dto.readAt ? new Date(dto.readAt).toISOString() : null,
-          dto.relatedEntityType ?? null, dto.relatedEntityId ?? null,
-          dto.navigationIntent ? JSON.stringify(dto.navigationIntent) : null,
-          dto.correlationId ?? null, dto.causationId ?? null,
-          dto.metadata ? JSON.stringify(dto.metadata) : null,
-          dto.actions ? JSON.stringify(dto.actions) : null,
-          dto.expiresAt ? new Date(dto.expiresAt).toISOString() : null, dto.version,
-          new Date(dto.createdAt).toISOString(), new Date(dto.updatedAt).toISOString(),
-          dto.deletedAt ? new Date(dto.deletedAt).toISOString() : null,
-          dto.archivedAt ? new Date(dto.archivedAt).toISOString() : null,
-        ],
-      );
-    }
-
-    if (outboxDispatches && outboxDispatches.length > 0) {
-      const nowIso = new Date().toISOString();
-      for (const outboxInput of outboxDispatches) {
-        const validatedInput = NotificationOutboxDispatchInputSchema.parse(outboxInput);
-        const existingOutbox = await tx.getOptional<{ id: string }>(
-          `SELECT id FROM notification_dispatch_outbox WHERE idempotency_key = ? LIMIT 1`,
-          [validatedInput.idempotencyKey],
+          [
+            dto.id,
+            dto.identityId,
+            dto.workflowKey,
+            dto.topic,
+            dto.idempotencyKey,
+            dto.title,
+            dto.content,
+            dto.type,
+            dto.category,
+            dto.importance,
+            dto.urgency,
+            dto.isRead ? 1 : 0,
+            dto.readAt ? new Date(dto.readAt).toISOString() : null,
+            dto.relatedEntityType ?? null,
+            dto.relatedEntityId ?? null,
+            dto.navigationIntent ? JSON.stringify(dto.navigationIntent) : null,
+            dto.correlationId ?? null,
+            dto.causationId ?? null,
+            dto.metadata ? JSON.stringify(dto.metadata) : null,
+            dto.actions ? JSON.stringify(dto.actions) : null,
+            dto.expiresAt ? new Date(dto.expiresAt).toISOString() : null,
+            dto.version,
+            new Date(dto.createdAt).toISOString(),
+            new Date(dto.updatedAt).toISOString(),
+            dto.deletedAt ? new Date(dto.deletedAt).toISOString() : null,
+            dto.archivedAt ? new Date(dto.archivedAt).toISOString() : null,
+          ],
         );
+      }
 
-        if (!existingOutbox) {
-          const notificationId = String(dto.id);
-          await tx.execute(
-            `INSERT INTO notification_dispatch_outbox (
+      if (outboxDispatches && outboxDispatches.length > 0) {
+        const nowIso = new Date().toISOString();
+        for (const outboxInput of outboxDispatches) {
+          const validatedInput = NotificationOutboxDispatchInputSchema.parse(outboxInput);
+          const existingOutbox = await tx.getOptional<{ id: string }>(
+            `SELECT id FROM notification_dispatch_outbox WHERE idempotency_key = ? LIMIT 1`,
+            [validatedInput.idempotencyKey],
+          );
+
+          if (!existingOutbox) {
+            const notificationId = String(dto.id);
+            await tx.execute(
+              `INSERT INTO notification_dispatch_outbox (
               id, identity_id, notification_id, source, occurrence_key, channel,
               payload_json, idempotency_key, status, attempt, fencing_token, next_retry_at,
               created_at, updated_at
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, ?, ?, ?)`,
+              [
+                validatedInput.operationId,
+                validatedInput.identityId,
+                notificationId,
+                validatedInput.source,
+                validatedInput.occurrenceKey,
+                validatedInput.channel,
+                validatedInput.payloadJson,
+                validatedInput.idempotencyKey,
+                outboxInput.deferUntil ? 'retryable' : 'pending',
+                outboxInput.deferUntil?.toISOString() ?? null,
+                nowIso,
+                nowIso,
+              ],
+            );
+            this.metricsService?.recordPersisted();
+          }
+        }
+      }
+
+      for (const decision of deliveryDecisions ?? []) {
+        const nowIso = new Date().toISOString();
+        const existingDecision = await tx.getOptional<{ id: string }>(
+          `SELECT id FROM notification_delivery_decisions WHERE notification_id = ? AND channel = ? LIMIT 1`,
+          [dto.id, decision.channel],
+        );
+        if (existingDecision) {
+          await tx.execute(
+            `UPDATE notification_delivery_decisions
+             SET outcome = ?, reason = ?, preference_source = ?, retry_at = ?, updated_at = ?
+           WHERE id = ?`,
             [
-              validatedInput.operationId,
-              validatedInput.identityId,
-              notificationId,
-              validatedInput.source,
-              validatedInput.occurrenceKey,
-              validatedInput.channel,
-              validatedInput.payloadJson,
-              validatedInput.idempotencyKey,
-              outboxInput.deferUntil ? 'retryable' : 'pending',
-              outboxInput.deferUntil?.toISOString() ?? null,
+              decision.outcome,
+              decision.reason,
+              decision.preferenceSource ?? null,
+              decision.retryAt?.toISOString() ?? null,
+              nowIso,
+              existingDecision.id,
+            ],
+          );
+        } else {
+          await tx.execute(
+            `INSERT INTO notification_delivery_decisions (
+             id, identity_id, notification_id, channel, outcome, reason, preference_source,
+             retry_at, created_at, updated_at
+           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+              randomUUID(),
+              dto.identityId,
+              dto.id,
+              decision.channel,
+              decision.outcome,
+              decision.reason,
+              decision.preferenceSource ?? null,
+              decision.retryAt?.toISOString() ?? null,
               nowIso,
               nowIso,
             ],
           );
-          this.metricsService?.recordPersisted();
         }
       }
-    }
-
-    for (const decision of deliveryDecisions ?? []) {
-      const nowIso = new Date().toISOString();
-      const existingDecision = await tx.getOptional<{ id: string }>(
-        `SELECT id FROM notification_delivery_decisions WHERE notification_id = ? AND channel = ? LIMIT 1`,
-        [dto.id, decision.channel],
-      );
-      if (existingDecision) {
-        await tx.execute(
-          `UPDATE notification_delivery_decisions
-             SET outcome = ?, reason = ?, preference_source = ?, retry_at = ?, updated_at = ?
-           WHERE id = ?`,
-          [decision.outcome, decision.reason, decision.preferenceSource ?? null,
-           decision.retryAt?.toISOString() ?? null, nowIso, existingDecision.id],
-        );
-      } else {
-        await tx.execute(
-          `INSERT INTO notification_delivery_decisions (
-             id, identity_id, notification_id, channel, outcome, reason, preference_source,
-             retry_at, created_at, updated_at
-           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          [randomUUID(), dto.identityId, dto.id, decision.channel, decision.outcome, decision.reason,
-           decision.preferenceSource ?? null, decision.retryAt?.toISOString() ?? null, nowIso, nowIso],
-        );
-      }
-    }
-
     });
     flushDomainEvents(notificationEventPublisher, notification);
   }
@@ -373,7 +417,10 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
     return hydrateNotification(row);
   }
 
-  async findByIdempotencyKey(identityId: string, idempotencyKey: string): Promise<Notification | null> {
+  async findByIdempotencyKey(
+    identityId: string,
+    idempotencyKey: string,
+  ): Promise<Notification | null> {
     const row = await this.db.getOptional<NotificationRow>(
       `SELECT * FROM notifications WHERE identity_id = ? AND idempotency_key = ? LIMIT 1`,
       [identityId, idempotencyKey],
@@ -433,7 +480,10 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
     }).then((items) => items.filter((item) => item.toServerDTO().category === category));
   }
 
-  async findUnread(identityId: string, options?: { archiveState?: 'active' | 'archived' | 'all'; limit?: number }): Promise<Notification[]> {
+  async findUnread(
+    identityId: string,
+    options?: { archiveState?: 'active' | 'archived' | 'all'; limit?: number },
+  ): Promise<Notification[]> {
     return this.findByIdentityId(identityId, {
       includeRead: false,
       includeDeleted: false,
@@ -448,11 +498,12 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
     relatedEntityId: string,
     options?: { archiveState?: 'active' | 'archived' | 'all' },
   ): Promise<Notification[]> {
-    const archiveFilter = options?.archiveState === 'archived'
-      ? 'AND archived_at IS NOT NULL'
-      : options?.archiveState === 'all'
-        ? ''
-        : 'AND archived_at IS NULL';
+    const archiveFilter =
+      options?.archiveState === 'archived'
+        ? 'AND archived_at IS NOT NULL'
+        : options?.archiveState === 'all'
+          ? ''
+          : 'AND archived_at IS NULL';
     const rows = await this.db.getAll<NotificationRow>(
       `SELECT * FROM notifications
         WHERE identity_id = ?
@@ -471,10 +522,10 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
     if (!existing) {
       throw new Error('Notification not found for the current identity.');
     }
-    await this.db.execute(
-      `DELETE FROM notifications WHERE id = ? AND identity_id = ?`,
-      [id, identityId],
-    );
+    await this.db.execute(`DELETE FROM notifications WHERE id = ? AND identity_id = ?`, [
+      id,
+      identityId,
+    ]);
   }
 
   async deleteMany(identityId: string, ids: string[]): Promise<void> {
@@ -503,7 +554,8 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
         WHERE id = ? AND identity_id = ? AND deleted_at IS NULL`,
       [archivedAt.toISOString(), archivedAt.toISOString(), id, identityId],
     );
-    if (result.rowsAffected !== 1) throw new Error('Notification not found for the current identity.');
+    if (result.rowsAffected !== 1)
+      throw new Error('Notification not found for the current identity.');
   }
 
   async restore(identityId: string, id: string): Promise<void> {
@@ -513,7 +565,8 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
         WHERE id = ? AND identity_id = ? AND deleted_at IS NULL`,
       [now, id, identityId],
     );
-    if (result.rowsAffected !== 1) throw new Error('Notification not found for the current identity.');
+    if (result.rowsAffected !== 1)
+      throw new Error('Notification not found for the current identity.');
   }
 
   async exists(identityId: string, id: string): Promise<boolean> {
@@ -595,7 +648,8 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
       `DELETE FROM notifications WHERE deleted_at IS NULL AND expires_at IS NOT NULL AND expires_at < ?`,
       [before],
     );
-    if (result.rowsAffected === undefined) throw new Error('Expired notification cleanup did not report affected rows.');
+    if (result.rowsAffected === undefined)
+      throw new Error('Expired notification cleanup did not report affected rows.');
     return result.rowsAffected;
   }
 
@@ -605,7 +659,8 @@ export class PowerSyncNotificationRepository implements INotificationRepository 
       `DELETE FROM notifications WHERE deleted_at IS NOT NULL AND deleted_at < ?`,
       [before],
     );
-    if (result.rowsAffected === undefined) throw new Error('Deleted notification cleanup did not report affected rows.');
+    if (result.rowsAffected === undefined)
+      throw new Error('Deleted notification cleanup did not report affected rows.');
     return result.rowsAffected;
   }
 }

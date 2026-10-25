@@ -5,10 +5,7 @@
  * 包含权重变化的完整上下文信息（谁、什么时候、为什么、怎么变的）。
  */
 
-import type {
-  KeyResultWeightSnapshotDTO,
-  SnapshotTrigger,
-} from '@memoflow/contracts/goal';
+import type { KeyResultWeightSnapshotDTO, SnapshotTrigger } from '@memoflow/contracts/goal';
 import { InvalidWeightError } from './weight-errors';
 
 // 类型别名
@@ -89,5 +86,4 @@ export class KeyResultWeightSnapshot {
       dto.createdAt,
     );
   }
-
 }

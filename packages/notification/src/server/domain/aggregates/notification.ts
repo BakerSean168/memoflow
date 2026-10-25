@@ -7,14 +7,13 @@ import type {
   NotificationType,
   NotificationCategory,
 } from '@memoflow/contracts/notification';
-import type { IdentityId, NotificationId as NotificationIdBranded } from '@memoflow/contracts/primitives';
+import type {
+  IdentityId,
+  NotificationId as NotificationIdBranded,
+} from '@memoflow/contracts/primitives';
 import { ImportanceLevel, UrgencyLevel } from '@memoflow/contracts/shared';
 import { AggregateRoot } from '@memoflow/utils/domain';
-import {
-  NotificationId,
-  NotificationAction,
-  NotificationMetadata,
-} from '../value-objects';
+import { NotificationId, NotificationAction, NotificationMetadata } from '../value-objects';
 
 export interface NotificationState {
   id: NotificationId;
@@ -67,33 +66,81 @@ export class Notification extends AggregateRoot<NotificationId> {
     };
   }
 
-  get identityId(): IdentityId { return this._props.identityId; }
-  get workflowKey(): string { return this._props.workflowKey; }
-  get topic(): string { return this._props.topic; }
-  get idempotencyKey(): string { return this._props.idempotencyKey; }
-  get title(): string { return this._props.title; }
-  get content(): string { return this._props.content; }
-  get type(): NotificationType { return this._props.type; }
-  get category(): NotificationCategory { return this._props.category; }
-  get importance(): ImportanceLevel { return this._props.importance; }
-  get urgency(): UrgencyLevel { return this._props.urgency; }
-  get relatedEntityType(): string | null { return this._props.relatedEntityType; }
-  get relatedEntityId(): string | null { return this._props.relatedEntityId; }
+  get identityId(): IdentityId {
+    return this._props.identityId;
+  }
+  get workflowKey(): string {
+    return this._props.workflowKey;
+  }
+  get topic(): string {
+    return this._props.topic;
+  }
+  get idempotencyKey(): string {
+    return this._props.idempotencyKey;
+  }
+  get title(): string {
+    return this._props.title;
+  }
+  get content(): string {
+    return this._props.content;
+  }
+  get type(): NotificationType {
+    return this._props.type;
+  }
+  get category(): NotificationCategory {
+    return this._props.category;
+  }
+  get importance(): ImportanceLevel {
+    return this._props.importance;
+  }
+  get urgency(): UrgencyLevel {
+    return this._props.urgency;
+  }
+  get relatedEntityType(): string | null {
+    return this._props.relatedEntityType;
+  }
+  get relatedEntityId(): string | null {
+    return this._props.relatedEntityId;
+  }
   get navigationIntent(): NotificationNavigationIntentDTO | null {
     return cloneNavigationIntent(this._props.navigationIntent);
   }
-  get correlationId(): string | null { return this._props.correlationId; }
-  get causationId(): string | null { return this._props.causationId; }
-  get isRead(): boolean { return this._props.readAt !== null; }
-  get readAt(): number | null { return this._props.readAt; }
-  get actions(): NotificationAction[] | null { return this._props.actions ? [...this._props.actions] : null; }
-  get metadata(): NotificationMetadata | null { return this._props.metadata; }
-  get expiresAt(): number | null { return this._props.expiresAt; }
-  get version(): number { return this._props.version; }
-  get deletedAt(): Date | null { return this._props.deletedAt; }
-  get archivedAt(): Date | null { return this._props.archivedAt; }
-  get createdAt(): Date { return this._props.createdAt; }
-  get updatedAt(): Date { return this._props.updatedAt; }
+  get correlationId(): string | null {
+    return this._props.correlationId;
+  }
+  get causationId(): string | null {
+    return this._props.causationId;
+  }
+  get isRead(): boolean {
+    return this._props.readAt !== null;
+  }
+  get readAt(): number | null {
+    return this._props.readAt;
+  }
+  get actions(): NotificationAction[] | null {
+    return this._props.actions ? [...this._props.actions] : null;
+  }
+  get metadata(): NotificationMetadata | null {
+    return this._props.metadata;
+  }
+  get expiresAt(): number | null {
+    return this._props.expiresAt;
+  }
+  get version(): number {
+    return this._props.version;
+  }
+  get deletedAt(): Date | null {
+    return this._props.deletedAt;
+  }
+  get archivedAt(): Date | null {
+    return this._props.archivedAt;
+  }
+  get createdAt(): Date {
+    return this._props.createdAt;
+  }
+  get updatedAt(): Date {
+    return this._props.updatedAt;
+  }
 
   markAsRead(now: Date = new Date()): void {
     if (this._props.readAt !== null) return;
@@ -143,7 +190,9 @@ export class Notification extends AggregateRoot<NotificationId> {
     });
   }
 
-  hasBeenRead(): boolean { return this._props.readAt !== null; }
+  hasBeenRead(): boolean {
+    return this._props.readAt !== null;
+  }
 
   softDelete(now: Date = new Date()): void {
     if (this._props.deletedAt) return;
@@ -157,7 +206,6 @@ export class Notification extends AggregateRoot<NotificationId> {
       deletedAt: this._props.deletedAt.getTime(),
     });
   }
-
 
   toServerDTO(): NotificationServerDTO {
     return {
@@ -245,11 +293,14 @@ export class Notification extends AggregateRoot<NotificationId> {
       updatedAt: now,
     });
 
-    notification.addDomainEvent<NotificationEventMap['notification:created']>('notification:created', {
-      identityId: notification.identityId,
-      notificationId: notification.id as NotificationIdBranded,
-      notification: notification.toServerDTO(),
-    });
+    notification.addDomainEvent<NotificationEventMap['notification:created']>(
+      'notification:created',
+      {
+        identityId: notification.identityId,
+        notificationId: notification.id as NotificationIdBranded,
+        notification: notification.toServerDTO(),
+      },
+    );
     return notification;
   }
 }

@@ -146,12 +146,13 @@ export class MemoryMonitor {
       return { direction: 'stable', changePerHour: 0, isLikelyLeak: false };
     }
 
-    const values = this.snapshots.map(s => s.heapUsed);
+    const values = this.snapshots.map((s) => s.heapUsed);
     const slope = this.calculateSlope(values);
 
     // Calculate change per hour
-    const duration = (this.snapshots[this.snapshots.length - 1].timestamp -
-                      this.snapshots[0].timestamp) / (1000 * 60 * 60);
+    const duration =
+      (this.snapshots[this.snapshots.length - 1].timestamp - this.snapshots[0].timestamp) /
+      (1000 * 60 * 60);
     const changePerHour = duration > 0 ? (slope * this.snapshots.length) / duration : 0;
 
     let direction: MemoryTrend['direction'] = 'stable';
@@ -200,14 +201,13 @@ export class MemoryMonitor {
     const status = this.getCurrentStatus();
     const trend = status.trend;
 
-    const trendIcon = trend.direction === 'up' ? '📈' :
-                      trend.direction === 'down' ? '📉' : '➡️';
+    const trendIcon = trend.direction === 'up' ? '📈' : trend.direction === 'down' ? '📉' : '➡️';
     const leakWarning = trend.isLikelyLeak ? ' ⚠️ POSSIBLE LEAK' : '';
 
     console.log(
       `[Memory] Heap: ${status.heapUsed.toFixed(1)}MB / ${status.heapTotal.toFixed(1)}MB | ` +
-      `RSS: ${status.rss.toFixed(1)}MB | ` +
-      `${trendIcon} ${trend.changePerHour.toFixed(1)}MB/h${leakWarning}`
+        `RSS: ${status.rss.toFixed(1)}MB | ` +
+        `${trendIcon} ${trend.changePerHour.toFixed(1)}MB/h${leakWarning}`,
     );
   }
 
@@ -222,7 +222,10 @@ export class MemoryMonitor {
     const n = values.length;
     if (n < 2) return 0;
 
-    let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+    let sumX = 0,
+      sumY = 0,
+      sumXY = 0,
+      sumX2 = 0;
 
     for (let i = 0; i < n; i++) {
       sumX += i;

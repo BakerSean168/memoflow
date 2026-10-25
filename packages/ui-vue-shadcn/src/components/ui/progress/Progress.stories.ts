@@ -17,7 +17,9 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: (args) => ({
     components: { Progress },
-    setup() { return { args }; },
+    setup() {
+      return { args };
+    },
     template: '<Progress v-bind="args" class="w-[60%]" />',
   }),
 };
