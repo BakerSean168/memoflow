@@ -195,31 +195,7 @@
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.config.ts"
     },
-    "apps/web/e2e/ai/goal-workflow/goal-agent-approval.spec.ts": {
-      "surface": "ai",
-      "role": "canonical",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
-    },
-    "apps/web/e2e/ai/goal-workflow/knowledge.spec.ts": {
-      "surface": "ai",
-      "role": "canonical",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
-    },
     "apps/web/e2e/ai/goal-workflow/multi-session.spec.ts": {
-      "surface": "ai",
-      "role": "canonical",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
-    },
-    "apps/web/e2e/ai/goal-workflow/sse-budget.spec.ts": {
-      "surface": "ai",
-      "role": "canonical",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
-    },
-    "apps/web/e2e/ai/goal-workflow/task-create-approval.spec.ts": {
       "surface": "ai",
       "role": "canonical",
       "lifecycle": "active",
@@ -314,12 +290,6 @@
       "role": "supplemental",
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.local-docker.config.ts"
-    },
-    "apps/web/e2e/notification/notification-inbox-loop.spec.ts": {
-      "surface": "notification",
-      "role": "canonical",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
     },
     "apps/web/e2e/performance/ai-workspace-performance.spec.ts": {
       "surface": "performance",

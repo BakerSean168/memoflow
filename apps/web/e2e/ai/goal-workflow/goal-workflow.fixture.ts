@@ -119,61 +119,6 @@ async function seedAiLocalState(
   );
 }
 
-/**
- * Real JWT via register/login, then AI route mocks, then optional AI local state, then navigate.
- * Mocks are installed after auth so register/login/settings are not blocked incorrectly.
- */
-
-/**
- * Residual 1333: Vue-controlled composer uses :value + @input.
- * Wait for model readiness, drive input via fill+input event, and assert SSE completes
- * so hasWorkflowUserMessages/chatLoading unlock Start Agent / knowledge actions.
- */
-export async function sendComposerMessage(
-  page: Page,
-  message: string,
-  transport: 'assistant' | 'goal-workflow' = 'assistant',
-): Promise<void> {
-  const composer = page.getByTestId('ai-chat-composer');
-  await expect(composer).toBeEnabled({
-    timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
-  });
-  // Model select populated → canSendMessage can become true once text is non-empty.
-  await expect(page.getByTestId('ai-chat-empty-models')).toHaveCount(0, {
-    timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
-  });
-
-  await composer.click();
-  await composer.fill(message);
-  await expect(composer).toHaveValue(message);
-
-  const sendButton = page.getByTestId('ai-chat-send-message');
-  await expect(sendButton).toBeEnabled({
-    timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
-  });
-
-  const expectedPath =
-    transport === 'goal-workflow' ? '/ai/runtime/workflow/start' : '/ai/runtime/assistant/sse';
-  const sendResponse = page.waitForResponse(
-    (response) =>
-      response.url().includes(expectedPath) &&
-      response.request().method() === 'POST' &&
-      response.status() === 200,
-    { timeout: TIMEOUT_CONFIG.NAVIGATION },
-  );
-  await sendButton.click();
-  await sendResponse;
-
-  // Composer clears after a successful Mastra open-chat turn starts.
-  await expect(composer).toHaveValue('', {
-    timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
-  });
-  // Stop button disappears once chatLoading clears (stream closed + finally).
-  await expect(page.getByTestId('ai-chat-stop-generating')).toHaveCount(0, {
-    timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
-  });
-}
-
 export async function bootstrapGoalWorkflowSession(
   page: Page,
   options: GoalWorkflowSessionOptions = {},
@@ -493,14 +438,6 @@ function createRestoredGoalWorkflowDraft(): GoalPlanDraft {
     rationale: 'Create the restored Agent goal after user approval.',
     warnings: [],
   };
-}
-
-export function createPendingApprovalWorkflowEntry() {
-  return { activeRunId: 'workflow-e2e-restored-approval' };
-}
-
-export function createPendingTaskApprovalWorkflowEntry() {
-  return { activeRunId: 'workflow-e2e-restored-task-approval' };
 }
 
 export function createGoalAgentWorkflowDraft(): GoalPlanDraft {

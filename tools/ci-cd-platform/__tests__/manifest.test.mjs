@@ -469,10 +469,10 @@ test('Web manifest projects narrow/full/zero selections into dynamic outputs', a
         event: 'pull_request',
         full: false,
         files: ['apps/web/src/App.vue'],
-        count: 2,
+        count: 1,
         specs: WEB_FLOW_SPECS,
       },
-      { event: 'workflow_dispatch', full: true, files: [], count: 2, specs: WEB_FLOW_SPECS },
+      { event: 'workflow_dispatch', full: true, files: [], count: 1, specs: WEB_FLOW_SPECS },
       { event: 'pull_request', full: false, files: ['docs/README.md'], count: 0, specs: [] },
     ]) {
       const m = await buildDeliveryManifest({

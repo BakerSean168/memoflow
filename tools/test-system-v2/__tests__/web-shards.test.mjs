@@ -218,8 +218,7 @@ test('owner-scoped selection keeps the core floor and security/consumer extensio
     files: ['packages/notification/src/api/index.ts'],
   });
   assert.equal(notification.fallback, false);
-  assert.equal(notification.specs.length, 3);
-  assert.ok(notification.specs.includes('notification/notification-inbox-loop.spec.ts'));
+  assert.deepEqual(notification.specs, ['authentication/auth-login.spec.ts']);
   assert.equal(planWebShards({ ...notification, durations: history.specs }).shardCount, 1);
   for (const owner of ['account', 'cloud-auth']) {
     const selected = selectWebSpecs({ enabled: true, files: [`packages/${owner}/src/index.ts`] });
@@ -382,10 +381,10 @@ test('storybook-only changes select no Web specs (Q4 Component Browser lane owns
     full: false,
     files: [
       'packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.stories.ts',
-      'apps/web/e2e/ai/goal-workflow/goal-agent-approval.spec.ts',
+      'apps/web/e2e/ai/goal-workflow/multi-session.spec.ts',
     ],
   });
-  assert.deepEqual(mixed.specs, ['ai/goal-workflow/goal-agent-approval.spec.ts']);
+  assert.deepEqual(mixed.specs, ['ai/goal-workflow/multi-session.spec.ts']);
 });
 
 test('unknown-scope fallback retains every spec without reserving four runners for a small suite', () => {

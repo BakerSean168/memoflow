@@ -42,10 +42,10 @@ test('retired route matching rejects profile navigation while allowing the profi
 test('repository E2E ownership is execution-aware and complete', () => {
   assert.equal(inventory.version, 3);
   assert.deepEqual(inventory.e2eGovernance.issues, []);
-  assert.equal(inventory.e2eGovernance.countsByLane.required, 17);
+  assert.equal(inventory.e2eGovernance.countsByLane.required, 12);
   assert.equal(inventory.e2eGovernance.countsByLane.nightly, undefined);
   assert.equal(inventory.e2eGovernance.countsByLane.debug, undefined);
-  assert.equal(inventory.e2eGovernance.countsByRole.canonical, 15);
+  assert.equal(inventory.e2eGovernance.countsByRole.canonical, 10);
   assert.equal(inventory.e2eGovernance.countsByRole.diagnostic, undefined);
   assert.equal(inventory.e2eGovernance.automatedCollectorCount, 2);
   assert.equal(inventory.e2eGovernance.automationBindingCount, 5);
@@ -71,7 +71,7 @@ test('repository E2E ownership is execution-aware and complete', () => {
 
 test('repository retirement contract blocks retired E2E surfaces', () => {
   assert.deepEqual(inventory.e2eRetirement.issues, []);
-  assert.equal(inventory.e2eRetirement.retiredSpecCount, 38);
+  assert.equal(inventory.e2eRetirement.retiredSpecCount, 43);
   assert.equal(inventory.e2eRetirement.forbiddenReferenceCount, 3);
 });
 

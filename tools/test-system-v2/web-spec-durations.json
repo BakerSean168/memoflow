@@ -10,28 +10,8 @@
       "samples": 3,
       "observedAt": "2026-10-18T09:42:26.319Z"
     },
-    "ai/goal-workflow/goal-agent-approval.spec.ts": {
-      "durationMs": 51433,
-      "samples": 3,
-      "observedAt": "2026-10-18T09:42:26.319Z"
-    },
-    "ai/goal-workflow/knowledge.spec.ts": {
-      "durationMs": 79940,
-      "samples": 3,
-      "observedAt": "2026-10-18T09:42:26.319Z"
-    },
     "ai/goal-workflow/multi-session.spec.ts": {
       "durationMs": 23545,
-      "samples": 3,
-      "observedAt": "2026-10-18T09:42:26.319Z"
-    },
-    "ai/goal-workflow/sse-budget.spec.ts": {
-      "durationMs": 48804,
-      "samples": 3,
-      "observedAt": "2026-10-18T09:42:26.319Z"
-    },
-    "ai/goal-workflow/task-create-approval.spec.ts": {
-      "durationMs": 50563,
       "samples": 3,
       "observedAt": "2026-10-18T09:42:26.319Z"
     },
@@ -49,11 +29,6 @@
       "durationMs": 7322,
       "samples": 3,
       "observedAt": "2026-10-18T09:42:26.319Z"
-    },
-    "notification/notification-inbox-loop.spec.ts": {
-      "durationMs": 11079,
-      "samples": 3,
-      "observedAt": "2026-10-18T09:42:43.730Z"
     },
     "user-settings/persistence.spec.ts": {
       "durationMs": 46685,

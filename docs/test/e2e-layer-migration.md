@@ -21,7 +21,7 @@
 
 Provider lane 另外退休 `provider-composer-states.spec.ts` 两条加载/空态/重置场景，由 AIComposerControls、AISettings 和 Registry 下层测试负责；provider-onboarding 的凭据持久化与 owner 安全验收继续保留。
 
-最终 canonical Web Flow 是 **11 文件 / 15 用例**：相对第一批 24/60，再减少 13 文件 /45 用例；相对原始 28/84，减少 17 文件 /69 用例（82.1%）。
+第二批结束时 canonical Web Flow 是 **11 文件 / 15 用例**：相对第一批 24/60，再减少 13 文件 /45 用例；相对原始 28/84，减少 17 文件 /69 用例（82.1%）。
 
 - 整体退休 Goal CRUD、Task CRUD、Calendar、Planner 拖拽回滚、Routine、Notification Center 布局、Notes 空态、响应式 Sidebar、Task→Goal 完成闭环、剩余 Data Portability UI smoke、OAuth 按钮 smoke、AI multi-engine-host 与 workspace-shell。
 - Goal/Task CRUD 和 Goal 四态转换改由 `apps/api/src/runtime/goal-task-http.integration.test.ts` 的生产 HTTP→composer→owner→Prisma 契约承接；增加版本冲突、身份隔离、非法输入不写入、Task checklist 和数据库直接读回。身份解析器用测试 principal；不声称替代真实登录 Cookie 验收。
@@ -31,21 +31,35 @@ Provider lane 另外退休 `provider-composer-states.spec.ts` 两条加载/空�
 
 core floor 从十个文件缩为三个：auth-login、notification-inbox-loop、goal-agent-approval（共四例）。owner 扩展和 unknown/shared/root 的全集选择继续保留。fallback 只扩大 spec 集合，不再硬占四台 runner；按现有保守历史权重，目前全集规划为两片。没有伪造删减后的时长权重。
 
+## 第三批：移除审批、审阅、SSE 窗口与通知整系统旅程
+
+用户进一步明确：Goal/Task 审批刷新、Knowledge 审阅刷新、SSE 30 秒不轮询、通知创建/已读/计数闭环均不再需要 E2E。本批直接退休这五个文件五条用例；不为逐条复刻 E2E 新建另一套测试链，也不再保留真实时间的 30 秒等待。
+
+- Goal/Task 的恢复、打开原生审阅和审批责任落在既有 `useAIGoalWorkflow.spec.ts`、`useAITaskWorkflow.spec.ts` 与服务端 `goal-create.workflow.spec.ts`、`task-create.workflow.spec.ts`。服务端已有跨 restart/review/approve 契约。
+- Knowledge 恢复与重新打开审阅由既有 `useAIKnowledgeCapture.spec.ts` 覆盖。
+- SSE 订阅由既有 `useGoalWorkflowEvents.spec.ts`、`useAIGoalWorkflow.spec.ts` 和 `workspace-sse.http.spec.ts` 负责。前两者已使用虚拟时钟推进 30 秒并断言只读一次，无需浏览器实际等待 30 秒。
+- 通知点击、筛选和计数显示由 `NotificationListPage.spec.ts` 负责；创建、已读、全部已读及未读查询由 Notification 的既有应用服务/用例测试负责。接受不再把页面点击、真实 Cookie、数据库和计数 UI 拼成一条 E2E。
+- 接受的信号缺口：整页真实 reload 后的审批/审阅拼装、真实浏览器 SSE 连接上的 30 秒网络观察、通知 UI→真实后端闭环。上述下层测试不声称逐条等价。
+
+最终 Web Flow 为 **6 文件 /10 用例**，相对原始 28/84 减少 22 文件 /74 用例（88.1%）。保留 checkpoint 身份隔离两例、多会话收敛一例、登录两例、密码重置一例、注册一例、设置持久化/跨标签三例。Provider onboarding、视觉、nightly 和 Desktop 专门 lane 未计入这十例。
+
+core floor 只剩 `auth-login.spec.ts` 一文件两例；通知、scheduler、reminder owner 无专属 Web 扩展。unknown/shared/root 仍选全部六文件；按保留的原历史时长预算，全集现规划为一片，而非硬占四台 runner。不据此声称整轮 CI 已缩短。
+
 ## 执行与选择契约
 
 Component Browser 不再在 job 内运行 `build --all`。Storybook 为缺失的 `domain-shared` 两个导出增加源码别名，新 worktree 无预先生产构建时已实际跑通。它不依赖 API、数据库、Web 生产包或在线 provider。主题契约使用显式 light 浏览器环境；小屏由 Storybook Vitest 插件设置真实 iframe viewport。
 
 迁移必须同时保护调度：修改 Story、Web Auth 源码、App-Vue/UI 控件源码，或 Nx 判断影响 `ui-storybook` 的传递依赖，均要求 Component Browser。否则“把 E2E 删了、生产组件改动时却不跑替代测试”会丢失门禁。Manifest 回归测试覆盖这些情况和无关 backend 反例；现有 CI Check 在 required producer 跳过时仍判失败。收据继续使用 `storybook-results.json`，要求 17 条全部成功、零 skipped/todo，Story ID 唯一。
 
-普通 PR 已经按 changed files / Nx affected 选择项目和 Web spec，非每次全量。Web owner 变更保留三个 core spec 地板，再加 owner 扩展；Goal/Task/Repository 还有 AI/Schedule 消费者扩展。只改 canonical spec 则只选择对应文件。未知、共享、root 改动扩大到完整集合；main、手动 full 和 nightly 仍承担更广验证。第二批已移除普通 CRUD 的跨 owner 地板，风险收缩由用户明确接受；真实 owner 的下层验证仍由 affected targets 承担。
+普通 PR 已经按 changed files / Nx affected 选择项目和 Web spec，非每次全量。Web owner 变更保留登录一个 core spec 地板，再加 owner 扩展；Goal/Task/Repository 还有 AI/Schedule 消费者扩展。只改 canonical spec 则只选择对应文件。未知、共享、root 改动扩大到完整集合；main、手动 full 和 nightly 仍承担更广验证。第二、三批已移除普通 CRUD、审批与通知的跨 owner 地板，风险收缩由用户明确接受；真实 owner 的下层验证仍由 affected targets 承担。
 
 ## 实测与边界
 
 - 本地 WSL，真实 Chromium：新增五条认证页面 Story 加原有十二条交互，17/17 成功，首次成功整套 10.56 秒（测试体 3.06 秒），随后 17/17 成功。不是 CI 耗时。
-- `playwright --list`：第一批24文件/60用例；第二批11文件/15用例。这里只是收集，不冒充 E2E PASS。
+- `playwright --list`：第一批24文件/60用例；第二批11文件/15用例；第三批6文件/10用例。这里只是收集，不冒充 E2E PASS。
 - 最终提交的 affected 自检、治理和 CI 执行凭证记录在 Issue #625 / 对应 PR。API integration 的成功必须来自真实 PostgreSQL 执行，不能用收集结果代替。
 - 旧 `web-spec-durations.json` 只删除已退休文件的历史条目，不给剩余缩短后的文件编造新时长；真实 CI report 可用于后续刷新、重配平和墙钟比较。
-- 第二批继续保留 SSE 30 秒无轮询、刷新恢复、跨身份和多会话收敛；真实指针/几何和普通 UI 持久化旅程按上面的接受缺口退休。
+- 第二批保留的审批/审阅刷新、SSE 30 秒窗口和通知闭环在第三批继续退休；跨身份和多会话收敛仍保留。
 
 ## T3 Code 对照核实
 

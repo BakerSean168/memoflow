@@ -263,6 +263,62 @@
       ],
       "issue": "https://github.com/BakerSean168/memoflow/issues/625",
       "coverageDisposition": "lower-layer state/registry coverage; accepted loss of whole-page reset journey"
+    },
+    {
+      "path": "apps/web/e2e/ai/goal-workflow/goal-agent-approval.spec.ts",
+      "reason": "User explicitly authorized retirement in Issue #625: existing workflow/component/subscription/notification contracts own this behavior. Whole-browser refresh assembly, real-time SSE network observation and notification UI-to-DB orchestration are deliberately no longer required; lower-layer coverage is not assertion-for-assertion equivalence.",
+      "sourceSha256": "9c8ec927c72f1ea7416e83756718d8967c7b48776a5f51c30d73f1bc645d1b9a",
+      "replacements": [
+        "packages/app-vue/src/modules/ai/composables/useAIGoalWorkflow.spec.ts",
+        "packages/ai/src/server/mastra/workflows/goal-create.workflow.spec.ts"
+      ],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625",
+      "coverageDisposition": "existing lower-layer contracts; user accepts loss of browser refresh/network/notification whole-system signal"
+    },
+    {
+      "path": "apps/web/e2e/ai/goal-workflow/task-create-approval.spec.ts",
+      "reason": "User explicitly authorized retirement in Issue #625: existing workflow/component/subscription/notification contracts own this behavior. Whole-browser refresh assembly, real-time SSE network observation and notification UI-to-DB orchestration are deliberately no longer required; lower-layer coverage is not assertion-for-assertion equivalence.",
+      "sourceSha256": "1faf7a7c8b85e5a3af6ef480c8ec9abd2c551fffba9b8f2782b873b764e6be05",
+      "replacements": [
+        "packages/app-vue/src/modules/ai/composables/useAITaskWorkflow.spec.ts",
+        "packages/ai/src/server/mastra/workflows/task-create.workflow.spec.ts"
+      ],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625",
+      "coverageDisposition": "existing lower-layer contracts; user accepts loss of browser refresh/network/notification whole-system signal"
+    },
+    {
+      "path": "apps/web/e2e/ai/goal-workflow/knowledge.spec.ts",
+      "reason": "User explicitly authorized retirement in Issue #625: existing workflow/component/subscription/notification contracts own this behavior. Whole-browser refresh assembly, real-time SSE network observation and notification UI-to-DB orchestration are deliberately no longer required; lower-layer coverage is not assertion-for-assertion equivalence.",
+      "sourceSha256": "689e41869b80f109dc7a1cd9db8b09b92262dfec2ee93f871e4dff062254beac",
+      "replacements": ["packages/app-vue/src/modules/ai/composables/useAIKnowledgeCapture.spec.ts"],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625",
+      "coverageDisposition": "existing lower-layer contracts; user accepts loss of browser refresh/network/notification whole-system signal"
+    },
+    {
+      "path": "apps/web/e2e/ai/goal-workflow/sse-budget.spec.ts",
+      "reason": "User explicitly authorized retirement in Issue #625: existing workflow/component/subscription/notification contracts own this behavior. Whole-browser refresh assembly, real-time SSE network observation and notification UI-to-DB orchestration are deliberately no longer required; lower-layer coverage is not assertion-for-assertion equivalence.",
+      "sourceSha256": "6b81b74bb71f5388517f5f61bd486bac80130c20cdcd5327984637a3e1837c08",
+      "replacements": [
+        "packages/app-vue/src/modules/ai/composables/useGoalWorkflowEvents.spec.ts",
+        "packages/app-vue/src/modules/ai/composables/useAIGoalWorkflow.spec.ts",
+        "packages/ai/src/api/routes/workspace-sse.http.spec.ts"
+      ],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625",
+      "coverageDisposition": "existing lower-layer contracts; user accepts loss of browser refresh/network/notification whole-system signal"
+    },
+    {
+      "path": "apps/web/e2e/notification/notification-inbox-loop.spec.ts",
+      "reason": "User explicitly authorized retirement in Issue #625: existing workflow/component/subscription/notification contracts own this behavior. Whole-browser refresh assembly, real-time SSE network observation and notification UI-to-DB orchestration are deliberately no longer required; lower-layer coverage is not assertion-for-assertion equivalence.",
+      "sourceSha256": "e64f7efc6bd198926fb475061141eb532dec320ea08aa90c39aac3455b6c5412",
+      "replacements": [
+        "packages/app-vue/src/modules/notification/views/NotificationListPage.spec.ts",
+        "packages/notification/src/server/application/use-cases/commands/__tests__/create-notification.test.ts",
+        "packages/notification/src/server/application/use-cases/commands/__tests__/mark-notification-as-read.test.ts",
+        "packages/notification/src/server/application/services/notification-maintenance-application-service.test.ts",
+        "packages/notification/src/server/application/use-cases/queries/__tests__/get-unread-notifications.test.ts"
+      ],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625",
+      "coverageDisposition": "existing lower-layer contracts; user accepts loss of browser refresh/network/notification whole-system signal"
     }
   ],
   "forbiddenReferences": [
