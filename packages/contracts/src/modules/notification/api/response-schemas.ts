@@ -6,7 +6,11 @@
 
 import { z } from 'zod';
 import { brandedId } from '@memoflow/shared-primitives';
-import type { IdentityId, NotificationId, NotificationPreferenceId } from '@memoflow/shared-primitives';
+import type {
+  IdentityId,
+  NotificationId,
+  NotificationPreferenceId,
+} from '@memoflow/shared-primitives';
 import { NotificationType } from '../value-objects/notification-type';
 import { NotificationCategory } from '../value-objects/notification-category';
 import { NotificationChannelType } from '../value-objects/notification-channel-type';
