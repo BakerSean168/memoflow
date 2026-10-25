@@ -59,7 +59,8 @@ export async function buildDeliveryManifest({
       event === 'workflow_dispatch' ||
       (event === 'push' && ref === 'refs/heads/main'));
   const changed = files ?? (await changedFiles({ root, base, head, full: resolvedFull }));
-  const resolvedScope = scope ?? (await detectScope({ root, base, head, full: resolvedFull, files: changed }));
+  const resolvedScope =
+    scope ?? (await detectScope({ root, base, head, full: resolvedFull, files: changed }));
   const risk = classifyRisk(changed);
   const forcedLanes = (process.env.DELIVERY_FORCE_LANES ?? '')
     .split(',')
