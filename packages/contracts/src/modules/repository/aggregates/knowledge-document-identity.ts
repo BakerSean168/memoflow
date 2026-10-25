@@ -1,8 +1,8 @@
 /** ADR-090 stable, document-carried knowledge identity. */
 import { z } from 'zod';
-import type { KnowledgeDocumentId, KnowledgeSpaceId } from '../../../primitives';
-import { brandedId } from '../../../primitives/zod-extensions';
-import { ID_PREFIXES } from '../../../primitives/ids';
+import type { KnowledgeDocumentId, KnowledgeSpaceId } from '@memoflow/shared-primitives';
+import { brandedId } from '@memoflow/shared-primitives/zod-extensions';
+import { ID_PREFIXES } from '@memoflow/shared-primitives/ids';
 
 const UUID_BODY = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
 

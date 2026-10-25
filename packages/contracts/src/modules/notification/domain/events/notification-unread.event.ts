@@ -1,4 +1,4 @@
-import type { IdentityId, NotificationId } from '../../../../primitives';
+import type { IdentityId, NotificationId } from '@memoflow/shared-primitives';
 import type { NotificationServerDTO } from '../../aggregates/notification-server';
 
 export interface NotificationUnreadEvent {

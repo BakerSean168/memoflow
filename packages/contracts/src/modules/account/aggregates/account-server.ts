@@ -3,11 +3,11 @@
  * 账户实体 - 服务器接口
  */
 
-import type { IdentityId } from '../../../primitives';
+import type { IdentityId } from '@memoflow/shared-primitives';
 import type { AccountStatus } from '../value-objects/account-status';
 import type { AccountProfileDTO } from '../value-objects/account-profile';
 
-import type { TransferDate } from '../../../primitives';
+import type { TransferDate } from '@memoflow/shared-primitives';
 
 // ============ DTO 定义 ============
 

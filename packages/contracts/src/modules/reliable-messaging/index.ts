@@ -3,7 +3,7 @@
 // 通用 OutboxMessage / InboxReceipt / ProjectionCursor / BusinessOperationReceipt / Lease / Fail-Fast Capability / Application Ports
 // ==========================================
 
-import type { CausationId, CorrelationId, MessageId } from '../../primitives/command';
+import type { CausationId, CorrelationId, MessageId } from '@memoflow/shared-primitives/command';
 
 // ============ W0-1: 统一业务操作、交付、租约、能力与 Application Port 契约 ============
 export * from './operation-receipt';

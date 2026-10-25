@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { brandedId } from '../../../primitives';
-import type { AiProviderConfigId } from '../../../primitives';
+import { brandedId } from '@memoflow/shared-primitives';
+import type { AiProviderConfigId } from '@memoflow/shared-primitives';
 import { QueryAnalyticsResSchema } from './response-schemas';
 
 export const QueryAnalyticsSchema = z.object({

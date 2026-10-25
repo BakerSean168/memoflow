@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import type { GoalId, KeyResultId, TaskPlanId } from '../../../primitives';
-import { brandedId } from '../../../primitives';
+import type { GoalId, KeyResultId, TaskPlanId } from '@memoflow/shared-primitives';
+import { brandedId } from '@memoflow/shared-primitives';
 import { KnowledgeDocumentIdSchema, KnowledgeDocumentRefSchema } from '../../repository';
 import { GoalClientDTOSchema, KeyResultClientDTOSchema } from '../../goal/api/response-schemas';
 import { TaskOccurrenceResponseSchema, TaskPlanResponseSchema } from './response-schemas';

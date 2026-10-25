@@ -13,7 +13,7 @@
  */
 
 import { faker } from '@faker-js/faker';
-import { requireYmd } from '../primitives';
+import { requireYmd } from '@memoflow/shared-primitives';
 import type { GoalClientDTO } from '../modules/goal/aggregates/goal-client';
 import type { KeyResultClientDTO } from '../modules/goal/entities/key-result-client';
 import type { GoalRecordClientDTO } from '../modules/goal/aggregates/goal-record-client';
@@ -23,7 +23,7 @@ import type {
   GoalMutationReceipt,
   QueryGoalsRes,
 } from '../modules/goal/api/response-schemas';
-import type { KeyResultId } from '../primitives';
+import type { KeyResultId } from '@memoflow/shared-primitives';
 
 // ============================================================================
 // GoalClientDTO

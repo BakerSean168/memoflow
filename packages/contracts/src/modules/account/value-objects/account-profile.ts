@@ -4,7 +4,7 @@
  * ADR-037 W5: birthday is a calendar day (`Ymd`), not midnight Date / epoch Instant.
  */
 
-import type { Ymd } from '../../../primitives';
+import type { Ymd } from '@memoflow/shared-primitives';
 
 import type { GenderType } from './gender-type';
 

@@ -1,4 +1,4 @@
-import type { Instant, Ymd } from '../../primitives';
+import type { Instant, Ymd } from '@memoflow/shared-primitives';
 
 export type PlannerSourceType = 'schedule' | 'task' | 'goal' | 'routine';
 

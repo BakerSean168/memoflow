@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { requireYmd, YmdSchema, type Ymd } from '../../../primitives';
+import { requireYmd, YmdSchema, type Ymd } from '@memoflow/shared-primitives';
 
 const GoalYearSchema = z.number().int().min(1).max(9999);
 

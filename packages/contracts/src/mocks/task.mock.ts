@@ -2,7 +2,7 @@
 import { faker } from '@faker-js/faker';
 import type { TaskPlanClientDTO } from '../modules/task/aggregates/task-plan-client';
 import type { TaskOccurrenceClientDTO } from '../modules/task/aggregates/task-occurrence-client';
-import type { TaskPlanId, TaskOccurrenceId, IdentityId } from '../primitives';
+import type { TaskPlanId, TaskOccurrenceId, IdentityId } from '@memoflow/shared-primitives';
 
 export function createMockTaskPlan(overrides: Partial<TaskPlanClientDTO> = {}): TaskPlanClientDTO {
   const now = Date.now();

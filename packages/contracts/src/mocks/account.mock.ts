@@ -13,7 +13,7 @@
 
 import { faker } from '@faker-js/faker';
 import type { AccountClientDTO } from '../modules/account/aggregates/account-client';
-import type { IdentityId } from '../primitives';
+import type { IdentityId } from '@memoflow/shared-primitives';
 
 // ============================================================================
 // AccountClientDTO

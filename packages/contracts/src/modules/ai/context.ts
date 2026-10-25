@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { TimeZoneIdSchema } from '../../primitives';
+import { TimeZoneIdSchema } from '@memoflow/shared-primitives';
 import { KnowledgeDocumentRefSchema } from '../repository/aggregates/knowledge-document-identity';
 
 /** The bounded categories that can participate in one AI invocation. */

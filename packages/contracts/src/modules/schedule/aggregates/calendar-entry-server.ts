@@ -8,7 +8,7 @@
  * @module Schedule
  */
 
-import type { ScheduleId, IdentityId, TransferDate } from '../../../primitives';
+import type { ScheduleId, IdentityId, TransferDate } from '@memoflow/shared-primitives';
 import type { CalendarEntryRange } from '../calendar-entry-range';
 
 export interface CalendarEntryServerDTO {

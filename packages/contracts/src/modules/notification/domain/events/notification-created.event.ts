@@ -1,5 +1,5 @@
 import type { NotificationServerDTO } from '../../aggregates/notification-server';
-import type { IdentityId, NotificationId } from '../../../../primitives';
+import type { IdentityId, NotificationId } from '@memoflow/shared-primitives';
 
 /**
  * Notification Created Event

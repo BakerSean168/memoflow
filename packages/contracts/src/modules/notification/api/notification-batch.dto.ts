@@ -6,8 +6,8 @@
  */
 
 import { z } from 'zod';
-import { brandedId } from '../../../primitives';
-import type { NotificationId } from '../../../primitives';
+import { brandedId } from '@memoflow/shared-primitives';
+import type { NotificationId } from '@memoflow/shared-primitives';
 import type { BatchOperationResultDTO } from '../dtos/batch-result.dto';
 import { NotificationCategory } from '../value-objects/notification-category';
 

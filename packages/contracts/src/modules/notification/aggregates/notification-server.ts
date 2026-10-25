@@ -5,7 +5,7 @@ import type { NotificationMetadataDTO } from '../value-objects/notification-meta
 import type { NotificationActionDTO } from '../value-objects/notification-action';
 import type { ImportanceLevel } from '../../../shared/value-objects/importance';
 import type { UrgencyLevel } from '../../../shared/value-objects/urgency';
-import type { IdentityId, NotificationId, TransferDate } from '../../../primitives';
+import type { IdentityId, NotificationId, TransferDate } from '@memoflow/shared-primitives';
 
 export interface NotificationNavigationIntentDTO {
   route: string;

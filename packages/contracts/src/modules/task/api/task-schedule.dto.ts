@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { brandedId } from '../../../primitives';
-import type { TaskOccurrenceId } from '../../../primitives';
+import { brandedId } from '@memoflow/shared-primitives';
+import type { TaskOccurrenceId } from '@memoflow/shared-primitives';
 import { TaskOccurrenceScheduleSnapshotSchema } from '../value-objects/task-occurrence-schedule-snapshot';
 import type { TaskOccurrenceClientDTO } from '../aggregates/task-occurrence-client';
 

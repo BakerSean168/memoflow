@@ -18,8 +18,8 @@
  */
 
 import { z } from 'zod';
-import { brandedId } from '../../../primitives';
-import type { TaskOccurrenceId, TaskPlanId } from '../../../primitives';
+import { brandedId } from '@memoflow/shared-primitives';
+import type { TaskOccurrenceId, TaskPlanId } from '@memoflow/shared-primitives';
 import {
   GenerateOccurrencesSchema,
   TaskGoalBindingSchema,

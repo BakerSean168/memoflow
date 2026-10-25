@@ -8,7 +8,7 @@ import type {
   AIProviderCredentialRef,
   IdentityId,
   TransferDate,
-} from '../../../primitives';
+} from '@memoflow/shared-primitives';
 import type { AIProviderDefinitionId } from '../configs/ai-provider-catalog';
 
 /**

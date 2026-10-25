@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { brandedId } from '../../../primitives';
-import type { KeyResultId } from '../../../primitives';
+import { brandedId } from '@memoflow/shared-primitives';
+import type { KeyResultId } from '@memoflow/shared-primitives';
 
 export const GoalReviewTrendPointSchema = z.object({
   at: z.number().int(),

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import type { NotificationPreferenceServerDTO } from '../aggregates/notification-preference-server';
 import type { NotificationStatsDTO } from '../dtos/notification-result.dto';
-import { TimeZoneIdSchema } from '../../../primitives';
+import { TimeZoneIdSchema } from '@memoflow/shared-primitives';
 
 const ChannelPreferenceFlagsSchema = z.object({
   InApp: z.boolean().optional(),
