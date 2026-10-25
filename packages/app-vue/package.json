@@ -92,7 +92,7 @@
     "@memoflow/assets": "workspace:*",
     "@memoflow/contracts": "workspace:*",
     "@memoflow/data-portability": "workspace:*",
-    "@memoflow/goal": "workspace:*",
+    "@memoflow/goal-client": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",
     "@memoflow/label": "workspace:*",

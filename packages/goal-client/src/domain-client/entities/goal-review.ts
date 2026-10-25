@@ -2,7 +2,7 @@
 import type { GoalReviewClientDTO, GoalReviewSystemContext } from '@memoflow/contracts/goal';
 import { GoalReviewSystemContextSchema } from '@memoflow/contracts/goal';
 import { Entity } from '@memoflow/utils/domain';
-import { GoalReviewId, GoalId } from '../../server/domain';
+import { GoalReviewId, GoalId } from '@memoflow/goal-core/ids';
 
 export interface GoalReviewState {
   id: GoalReviewId;

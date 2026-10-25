@@ -160,8 +160,8 @@ requireTokens('packages/contracts/src/electron/ipc-channels.ts', [
 ]);
 
 for (const clientPath of [
-  'packages/goal/src/infrastructure-client/adapters/http/goal-http.adapter.ts',
-  'packages/goal/src/infrastructure-client/adapters/ipc/goal-ipc.adapter.ts',
+  'packages/goal-client/src/infrastructure-client/adapters/http/goal-http.adapter.ts',
+  'packages/goal-client/src/infrastructure-client/adapters/ipc/goal-ipc.adapter.ts',
 ]) {
   requireTokens(clientPath, [
     'getGoalWorkspace(',

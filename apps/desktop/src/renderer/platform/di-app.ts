@@ -8,7 +8,7 @@ import { toast } from 'vue-sonner';
 import { getI18nGlobal } from '@memoflow/app-vue/plugins/i18n';
 import { createAccountIpcClient } from '@memoflow/account/client';
 import { createCloudAuthIpcClient } from '@memoflow/cloud-auth';
-import { createGoalIpcClient } from '@memoflow/goal/client';
+import { createGoalIpcClient } from '@memoflow/goal-client';
 import { createGoalKnowledgeIpcClient } from '@memoflow/relation/client';
 import { createLabelIpcClient } from '@memoflow/label/client';
 import { createTaskIpcClient } from '@memoflow/task/client';

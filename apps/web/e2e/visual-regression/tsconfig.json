@@ -46,7 +46,7 @@
       "@memoflow/ui-vue-shadcn/*": ["../../../../packages/ui-vue-shadcn/dist/*"],
       "@memoflow/http-client": ["../../../../packages/http-client/src/index.ts"],
       "@memoflow/ai/client": ["../../../../packages/ai/dist/client/index.d.ts"],
-      "@memoflow/goal/client": ["../../../../packages/goal/dist/client/index.d.ts"],
+      "@memoflow/goal-client": ["../../../../packages/goal-client/dist/index.d.ts"],
       "@memoflow/schedule/client": ["../../../../packages/schedule/dist/client/index.d.ts"],
       "@memoflow/notification/client": ["../../../../packages/notification/dist/client/index.d.ts"],
       "@memoflow/reminder/client": ["../../../../packages/reminder/dist/client/index.d.ts"],

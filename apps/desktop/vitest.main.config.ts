@@ -17,8 +17,30 @@ const mainWorkspaceAliasEntries = [
     replacement: resolve(import.meta.dirname, '../../packages/domain-shared/src/shared/index.ts'),
   },
   {
-    find: '@memoflow/goal/client',
-    replacement: resolve(import.meta.dirname, '../../packages/goal/src/client/index.ts'),
+    find: '@memoflow/goal-client',
+    replacement: resolve(import.meta.dirname, '../../packages/goal-client/src/index.ts'),
+  },
+  {
+    find: '@memoflow/goal-core/ids',
+    replacement: resolve(import.meta.dirname, '../../packages/goal-core/src/ids.ts'),
+  },
+  {
+    find: '@memoflow/goal-core/key-result-progress-calculator',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/goal-core/src/key-result-progress-calculator.ts',
+    ),
+  },
+  {
+    find: '@memoflow/goal-core/goal-record-preview',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/goal-core/src/goal-record-preview.ts',
+    ),
+  },
+  {
+    find: '@memoflow/goal-core',
+    replacement: resolve(import.meta.dirname, '../../packages/goal-core/src/index.ts'),
   },
   {
     find: '@memoflow/goal/electron',

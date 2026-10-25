@@ -34,6 +34,15 @@ const SERVER_REQUIRED_FILES = ['server/index.ts'];
  */
 const SERVER_SEMANTIC_CORE_DIRS = new Map([['setting', ['preferences']]]);
 
+/**
+ * Packages whose client surface was extracted into a standalone client
+ * package by the modular architecture refactor (see
+ * docs/architecture/goal-package-boundaries.md). For these packages the
+ * `client` root requirement is satisfied by the declared sibling package
+ * instead of an in-package `src/client` directory.
+ */
+const STANDALONE_CLIENT_PACKAGES = new Map([['goal', 'goal-client']]);
+
 const EXCEPTIONS = new Set([
   'powersync-schema',
   'domain-shared',
@@ -79,6 +88,14 @@ export function auditPackageShape(pkg, srcDir) {
 
   const srcContents = readdirSync(srcDir);
   const missingRootDirs = SERVER_FIRST_REQUIRED_DIRS.filter((dir) => !srcContents.includes(dir));
+  const standaloneClient = STANDALONE_CLIENT_PACKAGES.get(pkg);
+  if (
+    standaloneClient &&
+    missingRootDirs.includes('client') &&
+    existsSync(join(PACKAGES_DIR, standaloneClient, 'src'))
+  ) {
+    missingRootDirs.splice(missingRootDirs.indexOf('client'), 1);
+  }
   if (missingRootDirs.length > 0) {
     return { package: pkg, missing: missingRootDirs };
   }

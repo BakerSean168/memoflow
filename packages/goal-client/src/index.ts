@@ -13,19 +13,19 @@ import {
   createGoalClientService,
   createGoalServiceFromHttpClient,
   type GoalClientPort,
-} from '../application-client';
-import { Goal, GoalRecord, GoalReview, KeyResult } from '../domain-client';
+} from './application-client';
+import { Goal, GoalRecord, GoalReview, KeyResult } from './domain-client';
 import {
   GoalHttpAdapter,
   createGoalHttpAdapters,
   type GoalHttpAdapters,
-} from '../infrastructure-client/adapters/http';
+} from './infrastructure-client/adapters/http';
 import {
   GoalIpcAdapter,
   createGoalIpcAdapters,
   type GoalIpcAdapters,
-} from '../infrastructure-client/adapters/ipc';
-import type { IGoalApiClient, IResultIpcClient } from '../infrastructure-client/adapters/types';
+} from './infrastructure-client/adapters/ipc';
+import type { IGoalApiClient, IResultIpcClient } from './infrastructure-client/adapters/types';
 
 export type {
   GoalClientPort,
@@ -58,5 +58,5 @@ export {
   createGoalIpcAdapters,
 };
 
-export * from '../shared/key-result-progress-calculator';
-export * from '../shared/goal-record-preview';
+export * from '@memoflow/goal-core/key-result-progress-calculator';
+export * from '@memoflow/goal-core/goal-record-preview';

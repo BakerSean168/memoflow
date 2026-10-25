@@ -16,7 +16,7 @@ import type {
   KeyResultProgress,
 } from '@memoflow/contracts/goal';
 import { Entity } from '@memoflow/utils/domain';
-import { KeyResultId } from '../../server/domain';
+import { KeyResultId } from '@memoflow/goal-core/ids';
 
 export interface KeyResultState {
   id: KeyResultId;

@@ -109,6 +109,29 @@ export function createContractsAliasEntries(workspaceRoot: string): Alias[] {
   ];
 }
 
+export function createGoalCoreAliasEntries(workspaceRoot: string): Alias[] {
+  const goalCoreRoot = resolveFromWorkspace(workspaceRoot, 'packages/goal-core/src');
+
+  return [
+    {
+      find: /^@memoflow\/goal-core$/,
+      replacement: `${goalCoreRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/goal-core\/ids$/,
+      replacement: `${goalCoreRoot}/ids.ts`,
+    },
+    {
+      find: /^@memoflow\/goal-core\/key-result-progress-calculator$/,
+      replacement: `${goalCoreRoot}/key-result-progress-calculator.ts`,
+    },
+    {
+      find: /^@memoflow\/goal-core\/goal-record-preview$/,
+      replacement: `${goalCoreRoot}/goal-record-preview.ts`,
+    },
+  ];
+}
+
 export function createUiVueSourceAliasEntries(workspaceRoot: string): Alias[] {
   const uiVueRoot = resolveFromWorkspace(workspaceRoot, 'packages/ui-vue-shadcn/src');
   const uiCoreRoot = resolveFromWorkspace(workspaceRoot, 'packages/ui-core/src');

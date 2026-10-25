@@ -49,15 +49,15 @@ updated: 2026-09-29T11:38:00+08:00
 
 ## API、控制器与适配器
 
-| 文件                                                                                                                                                                | 说明                     |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| [`packages/goal/src/api/routes/goal.routes.ts`](../../../packages/goal/src/api/routes/goal.routes.ts)                                                               | 目标相关 HTTP routes     |
-| [`packages/goal/src/api/routes/key-result.routes.ts`](../../../packages/goal/src/api/routes/key-result.routes.ts)                                                   | 关键结果相关 HTTP routes |
-| [`packages/goal/src/api/routes/review.routes.ts`](../../../packages/goal/src/api/routes/review.routes.ts)                                                           | 目标复盘相关 HTTP routes |
-| [`packages/goal/src/api/routes/goal-record.routes.ts`](../../../packages/goal/src/api/routes/goal-record.routes.ts)                                                 | 目标记录相关 HTTP routes |
-| [`packages/goal/src/server/transport/goal.controller.ts`](../../../packages/goal/src/server/transport/goal.controller.ts)                                           | 目标控制器               |
-| [`packages/goal/src/infrastructure-client/adapters/http/goal-http.adapter.ts`](../../../packages/goal/src/infrastructure-client/adapters/http/goal-http.adapter.ts) | 客户端 HTTP 目标适配器   |
-| [`packages/goal/src/infrastructure-client/adapters/ipc/goal-ipc.adapter.ts`](../../../packages/goal/src/infrastructure-client/adapters/ipc/goal-ipc.adapter.ts)     | 客户端 IPC 目标适配器    |
+| 文件                                                                                                                                                                              | 说明                     |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| [`packages/goal/src/api/routes/goal.routes.ts`](../../../packages/goal/src/api/routes/goal.routes.ts)                                                                             | 目标相关 HTTP routes     |
+| [`packages/goal/src/api/routes/key-result.routes.ts`](../../../packages/goal/src/api/routes/key-result.routes.ts)                                                                 | 关键结果相关 HTTP routes |
+| [`packages/goal/src/api/routes/review.routes.ts`](../../../packages/goal/src/api/routes/review.routes.ts)                                                                         | 目标复盘相关 HTTP routes |
+| [`packages/goal/src/api/routes/goal-record.routes.ts`](../../../packages/goal/src/api/routes/goal-record.routes.ts)                                                               | 目标记录相关 HTTP routes |
+| [`packages/goal/src/server/transport/goal.controller.ts`](../../../packages/goal/src/server/transport/goal.controller.ts)                                                         | 目标控制器               |
+| [`packages/goal-client/src/infrastructure-client/adapters/http/goal-http.adapter.ts`](../../../packages/goal-client/src/infrastructure-client/adapters/http/goal-http.adapter.ts) | 客户端 HTTP 目标适配器   |
+| [`packages/goal-client/src/infrastructure-client/adapters/ipc/goal-ipc.adapter.ts`](../../../packages/goal-client/src/infrastructure-client/adapters/ipc/goal-ipc.adapter.ts)     | 客户端 IPC 目标适配器    |
 
 ## 领域、用例与仓储
 
@@ -121,7 +121,6 @@ updated: 2026-09-29T11:38:00+08:00
 | [`packages/contracts/src/modules/goal/value-objects/goal-timeframe.spec.ts`](../../../packages/contracts/src/modules/goal/value-objects/goal-timeframe.spec.ts)                                           | GoalTimeframe 精度、边界、排序、past-target 与 label 测试 |
 | [`packages/app-vue/src/modules/goal/stores/goalStore.spec.ts`](../../../packages/app-vue/src/modules/goal/stores/goalStore.spec.ts)                                                                       | 目标 store 测试                                           |
 | [`packages/app-vue/src/modules/goal/index.spec.ts`](../../../packages/app-vue/src/modules/goal/index.spec.ts)                                                                                             | 前端目标模块入口测试                                      |
-| [`apps/web/e2e/goal/goal-crud.spec.ts`](../../../apps/web/e2e/goal/goal-crud.spec.ts)                                                                                                                     | Web 目标 CRUD 与关键结果创建/编辑 e2e                     |
 | [`apps/web/e2e/sync/goal-sync-regression.spec.ts`](../../../apps/web/e2e/sync/goal-sync-regression.spec.ts)                                                                                               | 目标同步回归 e2e                                          |
 
 ## 需要重点关注的改动风险

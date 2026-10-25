@@ -1,4 +1,4 @@
-import type { GoalClientPort } from '@memoflow/goal/client';
+import type { GoalClientPort } from '@memoflow/goal-client';
 import type { ScheduleClientPort } from '@memoflow/schedule/client';
 import type { TaskClientPort } from '@memoflow/task/client';
 import { presentErrorMessage } from '@memoflow/http-client';

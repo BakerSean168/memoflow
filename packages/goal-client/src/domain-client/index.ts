@@ -24,4 +24,4 @@ export * from './aggregates';
 export * from './entities';
 
 // ===== Value Objects (re-export from server domain shared surface) =====
-export * from '../server/domain/value-objects';
+export * from '@memoflow/goal-core/ids';

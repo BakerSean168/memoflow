@@ -1,0 +1,33 @@
+{
+  "name": "@memoflow/goal-core",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./ids": {
+      "types": "./dist/ids.d.ts",
+      "import": "./dist/ids.js"
+    },
+    "./key-result-progress-calculator": {
+      "types": "./dist/key-result-progress-calculator.d.ts",
+      "import": "./dist/key-result-progress-calculator.js"
+    },
+    "./goal-record-preview": {
+      "types": "./dist/goal-record-preview.d.ts",
+      "import": "./dist/goal-record-preview.js"
+    }
+  },
+  "dependencies": {
+    "@memoflow/contracts": "workspace:*",
+    "@memoflow/utils": "workspace:*"
+  }
+}

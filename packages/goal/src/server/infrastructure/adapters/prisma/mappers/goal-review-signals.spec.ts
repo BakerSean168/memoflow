@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { GoalReviewClientDTOSchema, GoalReviewSystemContextSchema } from '@memoflow/contracts/goal';
 import { Goal, GoalReview } from '../../../../domain';
-import { GoalReview as ClientReview } from '../../../../../domain-client/entities/goal-review';
 import { GoalPrismaRepository } from '../goal-prisma.repository';
 import { PrismaGoalMapper } from './prisma-goal-mapper';
 import { PowerSyncGoalMapper } from '../../powersync/mappers/powersync-goal.mapper';
@@ -24,8 +23,8 @@ const facts = {
   ],
   summary: { recordCount: 3, manualRecordCount: 2, taskContributionCount: 1 },
 };
-describe('Review snapshot persistence and client parity', () => {
-  it('uses the real repository JSON write and both real storage mappers, then client decode', async () => {
+describe('Review snapshot persistence and wire contract parity', () => {
+  it('uses the real repository JSON write and both real storage mappers, then contract decode', async () => {
     const context = { ...facts, signals: analyzeGoalReviewSignals(facts) };
     const goal = Goal.create({
       identityId: 'identity-1' as never,
@@ -65,12 +64,7 @@ describe('Review snapshot persistence and client parity', () => {
       const dto = GoalReviewClientDTOSchema.parse(
         JSON.parse(JSON.stringify(restored.toClientDTO())),
       );
-      const client = ClientReview.load({
-        ...dto,
-        id: review.id as never,
-        goalId: goal.id as never,
-      });
-      expect(client.toDTO().systemContext).toEqual(context);
+      expect(dto.systemContext).toEqual(context);
     }
     const exposed = review.systemContext;
     const signal = exposed.signals[1];

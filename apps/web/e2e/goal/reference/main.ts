@@ -36,7 +36,7 @@ import type { GoalNativeEditSession } from '@memoflow/app-vue/modules/goal/compo
 import { goalRoutes } from '@memoflow/app-vue/modules/goal/router';
 import '../../../../../apps/web/src/styles/index.css';
 
-const { previewGoalRecord } = await import('@memoflow/goal/client');
+const { previewGoalRecord } = await import('@memoflow/goal-client');
 faker.seed(1601);
 const params = new URLSearchParams(location.search);
 const { locale } = bootstrapVisualApp(params, 'America/Los_Angeles');
