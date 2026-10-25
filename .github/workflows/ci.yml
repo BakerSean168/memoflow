@@ -25,13 +25,15 @@ env:
   NX_LEGACY_AFFECTED: 'false'
 
 jobs:
-# Checkout depth policy:
-# - scope-detector / affected-shadow compute the base...head range themselves: full history.
-# - Manifest-consuming jobs only need the two range endpoints as objects (the shared setup
-#   verifies NX_BASE/NX_HEAD with git rev-parse, and nx affected / fmt --changed diff those
-#   endpoints): fetch-depth 2 = the merge commit plus its parents, which are exactly the
-#   manifest head and base for both pull_request and push events.
-# - Aggregation-only jobs (delivery-observation, ci-check) sparse-checkout tools/ci-cd-platform.
+  # Checkout depth policy:
+  # - scope-detector / affected-shadow compute the base...head range themselves: full history.
+  # - Manifest-consuming jobs only need the two range endpoints as objects (the shared setup
+  #   verifies NX_BASE/NX_HEAD with git rev-parse, and nx affected / fmt --changed diff those
+  #   endpoints): fetch-depth 2 = the merge commit plus its parents, which are exactly the
+  #   manifest head and base for both pull_request and push events.
+  # - Aggregation-only jobs (delivery-observation, ci-check) sparse-checkout tools/ci-cd-platform.
+  # - Exception: unit-3 keeps full history - its shard contains tools/ci-cd-platform's own
+  #   test suite, whose affected-shadow live-mode test resolves HEAD^ against the real repo.
   scope-detector:
     name: Scope Detector
     runs-on: ubuntu-latest
@@ -238,7 +240,7 @@ jobs:
     env: { UNIT_SHARD_ID: unit-3 }
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with: { fetch-depth: 2 }
+        with: { fetch-depth: 0 }
       - uses: ./.github/actions/setup-nx-affected-job
         with:
           node-version: '${{ env.NODE_VERSION }}'
