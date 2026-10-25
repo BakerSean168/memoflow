@@ -1555,6 +1555,128 @@
           }
         ]
       }
+    },
+    {
+      "id": "taskClient",
+      "files": ["packages/task/src/client/index.ts"],
+      "expected": {
+        "full": false,
+        "targets": {
+          "build": [
+            "account",
+            "api",
+            "app-vue",
+            "desktop",
+            "governance-tools",
+            "notification",
+            "schedule-orchestration",
+            "task",
+            "ui-storybook",
+            "web"
+          ],
+          "typecheck": [
+            "account",
+            "api",
+            "app-react",
+            "app-vue",
+            "desktop",
+            "mobile",
+            "notification",
+            "schedule-orchestration",
+            "task",
+            "ui-storybook",
+            "web"
+          ],
+          "test": [
+            "account",
+            "api",
+            "app-vue",
+            "desktop",
+            "governance-tools",
+            "notification",
+            "schedule-orchestration",
+            "task",
+            "web"
+          ],
+          "test:contract": [],
+          "test:smoke": ["api"],
+          "test:integration": ["account", "api", "notification", "task"],
+          "test:boundary": ["desktop"],
+          "test:ipc": ["desktop"],
+          "test:main": ["desktop"],
+          "test:perf": ["task"],
+          "test:interaction": ["ui-storybook"],
+          "e2e:ai-provider": ["web"],
+          "e2e:visual-regression": ["web"],
+          "test:coverage": ["account", "api", "app-vue", "notification", "task"]
+        },
+        "jobs": {
+          "lint": [
+            "workspace:lint",
+            "workspace:format",
+            "workspace:sync",
+            "memoflow:governance-check"
+          ],
+          "unit-1": ["task:test", "account:test", "api:test", "schedule-orchestration:test"],
+          "unit-2": ["app-vue:test#1/2", "desktop:test"],
+          "unit-3": ["app-vue:test#2/2", "notification:test", "web:test"],
+          "typecheck": [
+            "account:typecheck",
+            "api:typecheck",
+            "app-react:typecheck",
+            "app-vue:typecheck",
+            "desktop:typecheck",
+            "mobile:typecheck",
+            "notification:typecheck",
+            "schedule-orchestration:typecheck",
+            "task:typecheck",
+            "ui-storybook:typecheck",
+            "web:typecheck"
+          ],
+          "build": [
+            "account:build",
+            "api:build",
+            "app-vue:build",
+            "desktop:build",
+            "notification:build",
+            "schedule-orchestration:build",
+            "task:build",
+            "ui-storybook:build",
+            "web:build"
+          ],
+          "build-backend": ["api:build", "database:build", "database:runtime-scripts:build"],
+          "verification-children": [
+            "desktop:test:ipc",
+            "desktop:test:main",
+            "api:test:smoke",
+            "account:test:integration",
+            "api:test:integration",
+            "notification:test:integration",
+            "task:test:integration"
+          ],
+          "web-specialized": ["web:e2e:ai-provider#1/1"],
+          "web-visual": ["web:e2e:visual-regression"],
+          "component-browser": ["ui-storybook:test:interaction"],
+          "contract": []
+        },
+        "serverShards": [
+          {
+            "id": "1/2",
+            "keys": ["api:test:integration", "desktop:test:main", "desktop:test:ipc"],
+            "estimatedMs": 33529
+          },
+          {
+            "id": "2/2",
+            "keys": [
+              "account:test:integration",
+              "notification:test:integration",
+              "task:test:integration",
+              "api:test:smoke"
+            ],
+            "estimatedMs": 31460
+          }
+        ]
+      }
     }
   ]
 }

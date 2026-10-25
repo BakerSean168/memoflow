@@ -107,8 +107,8 @@ Nightly Audit 是扩展测试，不等于 Nightly Release；Main CI 成功也不
 
 ## P1 选择与执行证据
 
-`node tools/ci-cd-platform/replay-ci-matrix.mjs` 回放 docs-only、app-vue Chat、AI Server、Desktop Main、Desktop Renderer、API route、Task Server、contracts、workflow/root、test-only 和 Main docs 共 11 个现有文件场景；固定预期在 `tools/ci-cd-platform/__tests__/fixtures/pr-dispatch-matrix.json`，重放报告在 `reports/ci-cd-platform/p1-acceptance-matrix.json`。报告明确区分真实 Nx 选出的任务和尚未执行的产品测试，不能把规划回放当成 suite 执行成功。
+`node tools/ci-cd-platform/replay-ci-matrix.mjs` 回放 docs-only、app-vue Chat、AI Server、Desktop Main、Desktop Renderer、API route、Task Server、contracts、workflow/root、test-only 和 Main docs、Task client 共 12 个现有文件场景；固定预期在 `tools/ci-cd-platform/__tests__/fixtures/pr-dispatch-matrix.json`，重放报告在 `reports/ci-cd-platform/p1-acceptance-matrix.json`。报告明确区分真实 Nx 选出的任务和尚未执行的产品测试，不能把规划回放当成 suite 执行成功。
 
-未知或已删除项目 owner 以及 selector 异常扩大为完整验证。测试文件仍按 Nx production/default inputs 区分 build 与 typecheck。Server primary suite 唯一归属一个 shard，Desktop boundary 聚合入口由 IPC/Main 两个 primary target 代替；contracts 的 contract 集合与 Unit 不重复执行。后端 build 的重复项属于 artifact 依赖构建，不是重复 primary test。
+未知或已删除项目 owner 以及 selector 异常扩大为完整验证。测试文件仍按 Nx production/default inputs 区分 build 与 typecheck。客户端与共享生产输入保留到 Browser/Acceptance 宿主回归的 Nx 传播；仅明确的 server/infrastructure-server/electron 路径适用资源排除。Server primary suite 唯一归属一个 shard，Desktop boundary 聚合入口由 IPC/Main 两个 primary target 代替；contracts 的 contract 集合与 Unit 不重复执行。后端 build 的重复项属于 artifact 依赖构建，不是重复 primary test。
 
 实际执行以本次 GitHub run 的 `ci-task-receipts-*`、`web-shard-receipt-*` 和 `delivery-run-summary-*` artifact 为准。汇总报告提供 setup、执行、最长 job 执行、wall clock 和 GitHub runner-minutes；最长 job 执行不包含依赖等待，不能冒充完整 DAG 关键路径。P1 验收前仍须检查真实 PR CI；当前文档不宣称已测得提速。

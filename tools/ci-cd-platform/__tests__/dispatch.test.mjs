@@ -34,6 +34,8 @@ test('live Nx replay covers reviewed PR counterexamples and Main full validation
     assert.deepEqual(byId[id].jobs['web-specialized'], [], id);
   }
   assert.ok(byId.desktopRenderer.jobs['web-specialized'].length);
+  assert.ok(byId.taskClient.jobs['component-browser'].length);
+  assert.ok(byId.taskClient.jobs['web-specialized'].length);
   for (const id of ['aiContract', 'workflow', 'mainDocs']) {
     assert.equal(byId[id].full, true);
     assert.ok(byId[id].jobs.contract.includes('contracts:test:contract'));

@@ -121,10 +121,11 @@ export async function detectScope({
   const list = (name) => targets[name].filter((p) => p !== 'memoflow');
   // Resource policy only: never use semantic layers to discard affected Unit,
   // Build, Types or Integration tasks. The combined domain projects stay intact.
-  const browserInput = (files ?? []).some((file) =>
-    /^(apps\/(web|storybook)\/|apps\/desktop\/src\/renderer\/|packages\/(app-vue|ui-vue-shadcn|ui-core|app-react)\/)/u.test(
-      file,
-    ),
+  const browserInput = (files ?? []).some(
+    (file) =>
+      /^(apps\/(web|storybook)\/|apps\/desktop\/src\/renderer\/)/u.test(file) ||
+      (file.startsWith('packages/') &&
+        !/^packages\/[^/]+\/src\/(?:server|infrastructure-server|electron)\//u.test(file)),
   );
   const webFlowFiles = webFlowCandidateFiles(files ?? []);
   const webFlow =
