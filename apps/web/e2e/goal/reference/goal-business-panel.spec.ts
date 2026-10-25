@@ -100,3 +100,208 @@ test('AI capability updates actual fields and hands off unsaved draft before use
   expect(after.calls.filter((call) => call === 'create')).toHaveLength(1);
   expect(after.goal.name).toBe('Edited after handoff');
 });
+
+/**
+ * T3 (#605): Chromium-native keyboard/focus acceptance against production
+ * components; no dispatchEvent('Tab'), DOM stubs, API or database dependencies.
+ */
+test.describe('Browser component interactions', () => {
+  test('production editor traps native Tab and restores opener focus after Escape', async ({
+    page,
+  }) => {
+    await page.goto('/?surface=t3&scenario=dialog');
+    const opener = page.getByTestId('t3-open-editor');
+    await opener.click();
+    const editor = page.getByTestId('t3-editor');
+    const draft = page.getByTestId('t3-draft');
+    await expect(editor).toBeVisible();
+    await expect(draft).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(page.getByTestId('t3-editor-next')).toBeFocused();
+    await page.keyboard.press('Shift+Tab');
+    await expect(draft).toBeFocused();
+    await draft.fill('Keep this draft');
+    await page.keyboard.press('Escape');
+    await expect(editor).toHaveCount(0);
+    await expect(opener).toBeFocused();
+  });
+
+  test('modal date-time picker keeps native Tab inside Portal and closes with Escape', async ({
+    page,
+  }) => {
+    await page.goto('/?surface=t3&scenario=picker');
+    const opener = page.getByTestId('t3-open-picker');
+    await opener.click();
+    const picker = page.getByTestId('t3-date-time-picker');
+    await expect(picker).toBeVisible();
+    for (let index = 0; index < 35; index += 1) {
+      await page.keyboard.press('Tab');
+      expect(await picker.evaluate((dialog) => dialog.contains(document.activeElement))).toBe(true);
+    }
+    for (let index = 0; index < 12; index += 1) {
+      await page.keyboard.press('Shift+Tab');
+      expect(await picker.evaluate((dialog) => dialog.contains(document.activeElement))).toBe(true);
+    }
+    await page.keyboard.press('Escape');
+    await expect(picker).toHaveCount(0);
+    await expect(opener).toBeFocused();
+  });
+
+  test('nested panel picker makes only the owning form inert and returns focus', async ({
+    page,
+  }) => {
+    await page.goto('/?surface=t3&scenario=panel');
+    await page.getByTestId('t3-open-editor').click();
+    const editor = page.getByTestId('t3-editor');
+    await expect(page.getByTestId('t3-draft')).toBeFocused();
+    await page.getByTestId('t3-open-picker').click();
+    const picker = page.getByTestId('t3-date-time-picker');
+    await expect(picker).toBeVisible();
+    await expect(editor.locator('..')).toHaveAttribute('inert', '');
+    await page.keyboard.press('Tab');
+    const focused = await page.evaluate(() =>
+      document.activeElement?.closest('[data-testid]')?.getAttribute('data-testid'),
+    );
+    expect(focused).not.toBe('t3-draft');
+    await page.keyboard.press('Escape');
+    await expect(picker).toHaveCount(0);
+    await expect(editor.locator('..')).not.toHaveAttribute('inert', '');
+    await expect(editor).toBeVisible();
+    await expect(page.getByTestId('t3-open-picker')).toBeFocused();
+  });
+
+  test('dropdown uses real native keyboard selection and does not lose trigger focus', async ({
+    page,
+  }) => {
+    await page.goto('/?surface=t3&scenario=filter');
+    const filter = page.getByTestId('t3-filter');
+    await filter.focus();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('menuitemradio', { name: 'Active' })).toBeVisible();
+    await page.getByRole('menuitemradio', { name: 'Active' }).focus();
+    await page.keyboard.press('Enter');
+    await expect(page.getByTestId('t3-filter-value')).toHaveText('active');
+    await expect(filter).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('menuitemradio', { name: 'Active' })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(filter).toBeFocused();
+  });
+
+  test('model picker excludes blocked agents under real ArrowDown and Enter navigation', async ({
+    page,
+  }) => {
+    await page.goto('/?surface=t3&scenario=model');
+    const trigger = page.getByTestId('ai-chat-model-selector');
+    await trigger.click();
+    const search = page.getByTestId('ai-model-picker-search');
+    await expect(search).toBeFocused();
+    await search.fill('Model');
+    const rows = page.getByTestId('ai-model-picker-option');
+    await expect(rows).toHaveCount(3);
+    await expect(rows.filter({ hasText: 'Model Blocked' })).toBeDisabled();
+    await page.keyboard.press('ArrowDown');
+    await expect(rows.filter({ hasText: 'Model Alpha' })).toBeFocused();
+    await page.keyboard.press('ArrowDown');
+    await expect(rows.filter({ hasText: 'Model Beta' })).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page.getByTestId('t3-model-selection')).toContainText('model-b');
+    await expect(page.getByTestId('ai-model-picker')).toHaveCount(0);
+    await trigger.click();
+    await search.fill('Blocked');
+    await expect(rows).toHaveCount(1);
+    await expect(rows).toBeDisabled();
+    await search.focus();
+    await page.keyboard.press('ArrowDown');
+    await expect(search).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page.getByTestId('t3-model-selection')).toContainText('model-b');
+    await page.keyboard.press('Escape');
+    await expect(page.getByTestId('ai-model-picker')).toHaveCount(0);
+  });
+
+  test('real Goal editor protects a dirty draft through Escape cancellation and explicit discard', async ({
+    page,
+  }) => {
+    await page.goto('/?state=create&locale=en-US');
+    const goal = page.getByTestId('goal-dialog');
+    const title = page.getByTestId('goal-name-input');
+    await expect(goal).toBeVisible();
+    await expect(title).toBeFocused();
+    await title.fill('Do not lose my unsaved goal');
+    await page.keyboard.press('Escape');
+    const confirm = page.getByTestId('global-confirm-dialog');
+    await expect(confirm).toBeVisible();
+    await page.getByTestId('global-confirm-cancel').click();
+    await expect(confirm).toHaveCount(0);
+    await expect(goal).toBeVisible();
+    await expect(title).toHaveValue('Do not lose my unsaved goal');
+    await title.focus();
+    await page.keyboard.press('Escape');
+    await expect(confirm).toBeVisible();
+    await page.getByTestId('global-confirm-confirm').click();
+    await expect(goal).toHaveCount(0);
+    const evidence = await page.evaluate(
+      () =>
+        (
+          window as unknown as { goalReferenceEvidence(): { calls: string[] } }
+        ).goalReferenceEvidence().calls,
+    );
+    expect(evidence).not.toContain('create');
+  });
+
+  test('task recurrence weekday and month-day controls work through native Tab, Space and Enter', async ({
+    page,
+  }) => {
+    await page.goto('/?surface=t3&scenario=recurrence');
+    await page.getByTestId('t3-before-weekdays').focus();
+    await page.keyboard.press('Tab');
+    const sunday = page.getByTestId('weekday-option-0');
+    const monday = page.getByTestId('weekday-option-1');
+    await expect(sunday).toBeFocused();
+    await expect(sunday).toHaveAttribute('aria-pressed', 'false');
+    await page.keyboard.press('Space');
+    await expect(sunday).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByTestId('t3-weekday-selection')).toHaveText('1,0');
+    await page.keyboard.press('Tab');
+    await expect(monday).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(monday).toHaveAttribute('aria-pressed', 'false');
+    await expect(page.getByTestId('t3-weekday-selection')).toHaveText('0');
+    const day = page.getByTestId('month-day-option-15');
+    await day.focus();
+    await page.keyboard.press('Space');
+    await expect(day).toHaveAttribute('aria-pressed', 'false');
+    await page.keyboard.press('Enter');
+    await expect(day).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByTestId('t3-month-day-selection')).toHaveText('15');
+  });
+
+  test('Goal deep links use real browser Back, Forward and reload without losing the KR route', async ({
+    page,
+  }) => {
+    await page.goto('/t3-history/goals/goal-reference?filter=active#context');
+    await expect(page.getByTestId('goal-detail-view')).toBeVisible();
+    await page
+      .getByTestId('goal-kr-summary-kr-0')
+      .getByRole('button', { name: 'More', exact: true })
+      .click();
+    await page.getByTestId('goal-kr-detail-kr-0').click();
+    await expect(page.getByTestId('goal-kr-inspect')).toBeVisible();
+    await expect(page).toHaveURL(/\/t3-history\/goals\/goal-reference\/key-results\/kr-0/);
+    await page.goBack();
+    await expect(page.getByTestId('goal-kr-inspect')).toHaveCount(0);
+    await expect(page.getByTestId('goal-detail-view')).toBeVisible();
+    await page.goForward();
+    await expect(page.getByTestId('goal-kr-inspect')).toBeVisible();
+    await page.reload();
+    await expect(page.getByTestId('goal-kr-inspect')).toBeVisible();
+    const evidence = await page.evaluate(
+      () =>
+        (
+          window as unknown as { goalReferenceEvidence(): { calls: string[] } }
+        ).goalReferenceEvidence().calls,
+    );
+    expect(evidence).toContain('workspace');
+  });
+});

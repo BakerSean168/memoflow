@@ -13,6 +13,33 @@ updated: Sun 2026-10-18 9:50 PM CST (UTC+08:00)
 
 > 状态：已实施。代码、项目 target、`.github/workflows/ci.yml` 和
 > `.github/rulesets/main.json` 是执行真源；本文件只记录稳定契约。
+>
+> [T1 正交四维测试架构与行为风险索引](./test-architecture-t1.md) 在现有 V3 primary ownership 上提供
+> Test Type / Verification Dimension / Execution Environment / Execution Phase 四维查询和风险证据视图。
+> Smoke/Governance/Source-constraint 作为辅助职责，不与测试类型混为一层；自动语义候选不改变原执行 target，
+> 有 CI 阶段绑定也不等于测试已在对应提交上执行或质量达标。
+>
+> [T2 第一批行为测试审查与退休证据](./test-architecture-t2-audit.md) 在四维索引上记录按源码指纹复核的
+> 真实断言、分类纠错、跨层互补关系和待补测缺口；没有经过等价证明的测试不得退休。
+> [T2 Component/Shell 审查](./test-architecture-t2-component-audit.md) 单独记录 29 个 Web Auth、桌面 Renderer
+> 和 App-Vue Shell 的代表性断言、160 个已实际执行的组件用例，以及 ErrorBoundary 草稿保持断言的缺口。
+>
+> **T2 定向审查已完成旧基线风险处置：[T2 收尾与新验收标准](./test-architecture-t2-closeout.md)。**
+> 组件交互已迁移至 Storybook 10.6.3 + Vitest Browser Mode / Playwright Chromium；旧 Jest Test Runner 已退休。最新 Runner、WSL 网络隔离、真实 Tab 差异与验收见 [Storybook 浏览器组件测试分工](./test-architecture-storybook-browser.md)。
+> T3 已建立 [真实 Chromium 键盘 / 焦点 / 浏览器历史的最小组件验收](./test-architecture-t3-browser.md)；
+> 使用现有 Goal Reference Playwright Collector，保留 Vitest + Happy DOM 原组件覆盖。
+> 1,336 文件全量 AST 扫描；46/46 风险信号已人工定性并移交，未扩大浏览器迁移、未批准任何测试退休。
+> 已确认的后续实施分别见 GitHub #605（浏览器交互）、#606（E2E Fixture）、#607（草稿保持断言）、#608（CI/Release 运行证据）及 PR #602（安全退休）。
+> [T2 认证前置条件与 PR #602 删除风险的详细审查](./test-architecture-t2-decision.md)。
+> [T2 重点静态排查与工程候选](./test-architecture-t2-triage.md) 和
+> [全部文件静态扫描参考](./test-architecture-t2-full-audit.md) 仅属于旧 1,336 文件基线，
+> 不能替代删除候选的行为等价证据。
+> 直接用 `node tools/test-system-v2/t2-review.mjs --write-report` 重生成 PR #602 快照决策，
+> `node tools/test-system-v2/focus-review.mjs --write-report` 重生成旧基线静态候选，
+> `node tools/test-system-v2/batch-audit.mjs --write-report` 重生成全部静态参考；
+> `node tools/test-system-v2/batch-audit.mjs --table --limit 30` 查看简洁文件表格。
+> 在已知 pnpm 11 会预先检查并自动安装依赖的环境里，优先使用上述 Node 入口。
+> 1,336 个文件全部 AST 扫描并不等于完成逐条人工行为等价审查。
 
 > Storybook 组件测试的运行入口与边界见 [Browser Mode 架构](./test-architecture-storybook-browser.md)；
 > WSL 接口重配置的已知证据及未确认项见 [网络调查](./wsl-network-investigation.md)。

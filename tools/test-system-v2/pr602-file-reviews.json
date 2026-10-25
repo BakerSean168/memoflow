@@ -1,0 +1,821 @@
+{
+  "version": 1,
+  "baseRef": "b1186f738",
+  "proposalRef": "cffcf9b15",
+  "scope": "Per-file PR #602 deletion review, requires matching source digest",
+  "reviews": [
+    {
+      "path": "apps/api/src/modules/powersync/parse-json-like-string-keep-boundary.surface.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "retain-until-equivalent",
+      "behavior": "normalizer handles JSON-looking, malformed and plain text independently of account mapper; other sections lock source separation",
+      "assertionEvidence": [
+        "normalizeCrudData('goals',{tags:'not-json'}) remains unchanged; '[invalid]' must not corrupt upload"
+      ],
+      "replacementAssessment": "crud-normalization.spec.ts covers normal/malformed JSON; plain non-JSON branch must be compared before retirement",
+      "sourceSha256": "4f921ea4980782408038493b0aeb106465424db508f0215d9345f43c59910313",
+      "verifiedRuntime": true,
+      "verifiedCaseCount": 5
+    },
+    {
+      "path": "packages/ai/src/server/infrastructure/adapters/dual-registry.surface.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "retain-until-equivalent",
+      "behavior": "runtime array conversion, tokenization and lexical/semantic Knowledge Index scoring plus Prisma/PowerSync single-owner imports",
+      "assertionEvidence": [
+        "toStringArray/toNumberArray/toChunkArray transform inputs; scoreIndexedResource(sample,'hello docs',1) equals lexical+4"
+      ],
+      "replacementAssessment": "tokenize-keep-boundary.surface.spec.ts covers tokenize, not all other direct behaviors",
+      "sourceSha256": "cf8d3459d5b6a040acfda20678b29ffbbc9e38672018264894d212e68f86c419",
+      "verifiedRuntime": true,
+      "verifiedCaseCount": 7
+    },
+    {
+      "path": "packages/goal/src/api/routes/parse-boolean-dual.surface.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "retain-until-equivalent",
+      "behavior": "Goal query parseBoolean must accept true/false and reject nonstrings and '1'",
+      "assertionEvidence": [
+        "parseBoolean('true')===true; parseBoolean('1')===undefined; parseBoolean(true)===undefined"
+      ],
+      "replacementAssessment": "a similarly named utils parseBoolean accepts '1'; it is not behavior-equivalent",
+      "sourceSha256": "bf07218e11d889046e03de613244acee0f68e0e00d440736682ef9323e09df98",
+      "verifiedRuntime": true,
+      "verifiedCaseCount": 2
+    },
+    {
+      "path": "packages/task/src/api/routes/get-first-query-value-dual.surface.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "retain-until-equivalent",
+      "behavior": "Task route getFirstQueryValue validates heterogeneous query array/string values",
+      "assertionEvidence": ["getFirstQueryValue(['a','b'])==='a'; [1,'b'] and [] return undefined"],
+      "replacementAssessment": "no sibling direct invocation test confirmed in prior repository scan",
+      "sourceSha256": "959ab200ccce866bcfd1c0b12dc85261e96ed32ae5bab132475b335755c7d9b7",
+      "verifiedRuntime": true,
+      "verifiedCaseCount": 3
+    },
+    {
+      "path": "packages/ai/src/server/infrastructure/adapters/prisma/to-prisma-json-keep-boundary.surface.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "retain-until-equivalent",
+      "behavior": "AI toPrismaJson deep clones nested object/arrays unlike Account DTO cast",
+      "assertionEvidence": [
+        "aiToPrismaJson(input) deep equal but neither root nor nested/list referentially identical; mutation does not affect source"
+      ],
+      "replacementAssessment": "no direct replacement found; source-only markers cannot prove clone semantics",
+      "sourceSha256": "a32f64a455eda5cb5f8fb226a63fa445a0992b58d9cbf94b0433ca08745b0cdb",
+      "verifiedRuntime": true,
+      "verifiedCaseCount": 4
+    },
+    {
+      "path": "packages/goal/src/electron/goal-electron.surface.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "retain-until-equivalent",
+      "behavior": "Goal Electron assembly with in-memory SQLite and mocked Electron IPC; rejects omitted TaskBindingReadPort; verifies register/destroy lifecycle",
+      "assertionEvidence": [
+        "createGoalPowerSyncModule(db) throws without taskBindingReadPort; ipcMain.handle invoked; start/dispose once"
+      ],
+      "replacementAssessment": "this is not a source-only test and does not substitute for real packaged Electron E2E",
+      "sourceSha256": "052ea71fce447dc1225a6d4d8edc9b71c8f815276704f84d00674287d9efaeb6",
+      "verifiedRuntime": true,
+      "verifiedCaseCount": 5
+    },
+    {
+      "path": "packages/task/src/testing/an-identity-id-dual.surface.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "retain-until-equivalent",
+      "behavior": "real anIdentityId() branded ID generator and fixed ID passthrough",
+      "assertionEvidence": [
+        "generated ID has IdentityId_ prefix; explicit IdentityId_test-fixed-1 remains unchanged"
+      ],
+      "replacementAssessment": "test-utils fixture behavior replacement not yet demonstrated",
+      "sourceSha256": "b7d4b6776771a7c2b771a082e17e4a162b21197786fd5f8a22f396ee6c405304",
+      "verifiedRuntime": true,
+      "verifiedCaseCount": 4
+    },
+    {
+      "path": "packages/account/src/server/infrastructure/adapters/prisma/__tests__/account-auth-email-retirement.surface.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "replace-guard-before-retire",
+      "behavior": "fail-closed ownership: Account DTO/Prisma/PowerSync must never regain cloud-auth email shadows; legacy migration scripts absent",
+      "assertionEvidence": [
+        "AccountResponseSchema has no email; account.prisma and powersync schema exclude email_is_verified; old migration scripts absent"
+      ],
+      "replacementAssessment": "needs equivalent schema/projection ownership governance rule or contract test",
+      "sourceSha256": "fb52fce7297ee6ca3a02bbfad70381f96d25cce3e5851a1b8656acb1726124d6",
+      "verifiedRuntime": true,
+      "verifiedCaseCount": 3
+    },
+    {
+      "path": "packages/contracts/src/modules/account/empty-dual-barrel.surface.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "replace-guard-before-retire",
+      "behavior": "disallow stale Account/Schedule/Setting DTO barrel re-export and removed duplicate directories",
+      "assertionEvidence": [
+        "account index excludes './entities'/'./dtos'; schedule/dtos and setting/dtos directories absent"
+      ],
+      "replacementAssessment": "needs modules public-export AST boundary guard if retiring file",
+      "sourceSha256": "d18f3b5cee27605fba04ccc6cecd73593e440b94ebc7dc8da4e52593fea9c14e",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/contracts/src/modules/goal/value-objects/dual-registry.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Goal Timeframe retains calendar semantics and old GoalTimeRange / Task recurrence duals stay deleted",
+      "assertionEvidence": [
+        "goal-time-range.ts, recurrence-rule.ts, task-time-config.ts absent; DTO bodies use canonical schema"
+      ],
+      "replacementAssessment": "link to canonical schema test or AST governance before retirement",
+      "sourceSha256": "dc865cf86cafe08ddeed8a1390560cde57a798a727971f8a2b01961765bd7151",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/contracts/src/modules/schedule/api/dual-registry.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "ScheduleTask/ScheduleExecution legacy contracts absent; CalendarEntry/Planner and neutral seam retained",
+      "assertionEvidence": [
+        "removes old files and read-only Scheduler diagnostic route uses invocation language"
+      ],
+      "replacementAssessment": "guard old ScheduleTask exports/path resurrection in contract or governance",
+      "sourceSha256": "2ce6af73087b0292664bd87faed0f5c351bb6ed306f718a7433d91bdc091fccf",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/contracts/src/modules/setting/preferences/product-feature-map-public.surface.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "replace-guard-before-retire",
+      "behavior": "product feature map reflects Better Auth/Mastra architecture; public debug/test pages absent and favicon/sw.js remain",
+      "assertionEvidence": [
+        "editor-test.html, sse-test.html, debug-events.js absent; favicon.ico and sw.js exist"
+      ],
+      "replacementAssessment": "requires new public-assets allowlist and docs feature-map validation before retirement",
+      "sourceSha256": "8b5f9cd6472be7e324ceb5b93bcbcd353fa51003083bfa13cd2f0c1d0992447c",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/contracts/src/modules/setting/preferences/product-module-index-paths.surface.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "replace-guard-before-retire",
+      "behavior": "every module-index Markdown local code/docs link resolves; current auth module index names live owner paths",
+      "assertionEvidence": [
+        "iterates module-index .md files and checks packages/apps/docs file links exist; obsolete legacy paths rejected"
+      ],
+      "replacementAssessment": "no equivalent link-integrity validator was found in prior review; provide it first",
+      "sourceSha256": "dfaa503230264bc19d23020a24f0c94dcd5aa4d54cadc7335ff6284c0642724f",
+      "verifiedRuntime": true,
+      "verifiedCaseCount": 2
+    },
+    {
+      "path": "packages/contracts/src/modules/task/api/dual-registry.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Task canonical schedule, binding/occurrence/response schemas and removed old recurrence duals",
+      "assertionEvidence": [
+        "old recurrence-rule.ts/time-config.ts absent; binding and occurrence schemas reused across route/RPC"
+      ],
+      "replacementAssessment": "many distinct ownership constraints (12 tests); do not count typecheck alone as equivalent",
+      "sourceSha256": "653d467d93f00fd01f90f34c0d15a8dbe5a3949e8038427ac9aa45ab7c258e98",
+      "verifiedRuntime": true,
+      "verifiedCaseCount": 12
+    },
+    {
+      "path": "packages/contracts/src/shared/dual-registry.surface.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "replace-guard-before-retire",
+      "behavior": "cross-repository fail-closed ExecutionContext metadata-only and uniqueness guard; forbids identity-only type casts; mutation fixtures test detector",
+      "assertionEvidence": [
+        "scans production *.ts/*.tsx for second ExecutionContext/Context, as casts and route-local requestId minting; probes forbidden field list by mutation"
+      ],
+      "replacementAssessment": "removing suite would drop repo-wide negative checks without an equivalent governance scanner",
+      "sourceSha256": "83b6ad7a1c07d73ca2197527b562b57f2a0aa5bd333f225b7751f9394a926e18",
+      "verifiedRuntime": true,
+      "verifiedCaseCount": 13
+    },
+    {
+      "path": "packages/http-client/src/__tests__/result-http-envelope.surface.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "replace-guard-before-retire",
+      "behavior": "HTTP ResultHttpClient rejects non-envelope and absent data; remove old Axios throw-path public exports and legacy cloud session wiring",
+      "assertionEvidence": [
+        "data key required in ok:true envelope, no AxiosHttpClient public export, axios-http-client.ts absent"
+      ],
+      "replacementAssessment": "needs runtime malformed-envelope cases and public exports guard; not just source token checks",
+      "sourceSha256": "8259c7e7204796360d2a98fa5eb745f5ca505ed30a6081fbdfd603838038621b",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/repository/src/server/infrastructure/adapters/prisma/__tests__/legacy-editor-repository-runtime.surface.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "replace-guard-before-retire",
+      "behavior": "retired Editor must not return in API/Desktop/Vue, package graph, migration scripts, schema or Nightly workflow",
+      "assertionEvidence": [
+        "packages/editor and editor.prisma absent; desktop/API must not mount Editor modules; GitHub workflow must not include editor Nx project"
+      ],
+      "replacementAssessment": "needs multi-surface governance guard; one repository contract test cannot replace it",
+      "sourceSha256": "ca826f9620904afc0266a95da74d616179f5d3793b78e79ce3c625d41da935a9",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/schedule/src/api/schedule-route-parsers-keep-boundary.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Scheduler only owns neutral invocation routes; retired Task query parser and old use-cases Vitest target absent",
+      "assertionEvidence": [
+        "schedule/vitest.use-cases.config.ts absent; project no longer points to old runner"
+      ],
+      "replacementAssessment": "replace by project-target and API-route governance checks",
+      "sourceSha256": "2c6b789a2e83bbfdcd77ff01695c2610767e2b08257038d81fd2c0d43a013cde",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/task/src/server/domain/task-domain-events-barrel.surface.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "replace-guard-before-retire",
+      "behavior": "legacy domain/events dual barrel removed, canonical Task domain index remains single owner",
+      "assertionEvidence": [
+        "domain/events and its index absent; Task domain index exports canonical events from canonical location"
+      ],
+      "replacementAssessment": "need export-graph single-owner boundary test if deleted",
+      "sourceSha256": "e130ea550d1a7fd7c2be5f309d247051277dc0c222b66f36c24221fa33099197",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/task/src/server/domain/task-domain-simplification.surface.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "replace-guard-before-retire",
+      "behavior": "TaskPlan/Occurrence ownership separation, dead folder/DAG/priority and materialization cursor removed",
+      "assertionEvidence": [
+        "checks no task-folder/dependency source files; no lastGeneratedDate/generateAheadDays in domain/portable/schemas; retains active task_plans/task_occurrences"
+      ],
+      "replacementAssessment": "domain model invariants require separate contract/architecture gate; plain typecheck insufficient",
+      "sourceSha256": "dec8f7c1867205d7d3be7cbfad3d8cb0b5851e32f9ac79b08bab005f7037a9b8",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "apps/api/src/bootstrap-module-names.surface.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "replace-guard-before-retire",
+      "behavior": "API server composes Account and rejects Legacy* module names",
+      "assertionEvidence": ["server.ts uses composeAccount with clock and no LegacyAccountModule"],
+      "replacementAssessment": "requires architecture registration guard or equivalent server composition test",
+      "sourceSha256": "8ea8d2fd014890ce49908db81f8daf200307e6c983a810eb2cba49c2dc643844",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "apps/api/src/runtime/compose-account.surface.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Account composer receives explicit Clock and narrow dependencies",
+      "assertionEvidence": [
+        "composeAccount({db,cloudAuth,clock:createSystemClock()}); no deep /server dependency"
+      ],
+      "replacementAssessment": "replace with integration composer and import-boundary check",
+      "sourceSha256": "3c570733a80b916576a995c663eeea6e022735c24fe9cc690c46f9f58f20ab05",
+      "verifiedRuntime": true,
+      "verifiedCaseCount": 3
+    },
+    {
+      "path": "apps/api/src/runtime/compose-goal.surface.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Goal, Workspace and Knowledge share owner reader instances in API",
+      "assertionEvidence": [
+        "taskBindingReadPort and taskContextReadPort share PrismaTaskBindingReadPort; reused goalKnowledgeService"
+      ],
+      "replacementAssessment": "requires real object identity/composition test",
+      "sourceSha256": "75a2949b4bbc247fc711d8b9cc8a03479ac60124d6c93ee2ce5703429727956b",
+      "verifiedRuntime": true,
+      "verifiedCaseCount": 3
+    },
+    {
+      "path": "apps/desktop/src/main/desktop-update-shell-ownership.surface.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Desktop updater is process-owned with one coordinator and safe startup/disposal ordering",
+      "assertionEvidence": [
+        "exactly one UpdateInstallCoordinator; verifyPendingDesktopUpdateInstall before ProfileRegistry; IPC registered after initialize"
+      ],
+      "replacementAssessment": "requires lifecycle and release update regression before deleting",
+      "sourceSha256": "71df62153b3aae2d922198d6981ef0a1b35e0880bea13525062e0e2b347dbb20",
+      "verifiedRuntime": true,
+      "verifiedCaseCount": 6
+    },
+    {
+      "path": "apps/desktop/src/main/modules/ai/stable-knowledge-note-ref-boundary.surface.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Desktop and API persisted note refs preserve KnowledgeDocumentId",
+      "assertionEvidence": [
+        "forbids relativePath hash IDs; stable committed KnowledgeDocumentId in both hosts"
+      ],
+      "replacementAssessment": "replace with cross-host identity contract assertions",
+      "sourceSha256": "38ef5646bfa1af0ed093418944ed1d5473697d93f98cf7d14843618f0d109d3e",
+      "verifiedRuntime": true,
+      "verifiedCaseCount": 3
+    },
+    {
+      "path": "apps/desktop/src/main/runtime/compose-goal.surface.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Desktop Goal composition uses one owner reader and PowerSync adapters",
+      "assertionEvidence": [
+        "PowerSyncTaskBindingReadPort reused, no deep server/infrastructure import from composer"
+      ],
+      "replacementAssessment": "requires Desktop composition/owner isolation verification",
+      "sourceSha256": "719b374b729801fdf632cbc11f53bbb0ef5dad640259bf5dd743c20abbbfb4e5",
+      "verifiedRuntime": true,
+      "verifiedCaseCount": 3
+    },
+    {
+      "path": "apps/desktop/src/main/services/desktop-notification-preference-wiring.surface.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Notification preference stored for current Profile, not window state",
+      "assertionEvidence": [
+        "getActiveProfileResolver to notification-preference.json distinct from main-window-state.json"
+      ],
+      "replacementAssessment": "requires device/profile preference persistence and owner separation tests",
+      "sourceSha256": "3b55946b192e5db9e22acf72a696fb2b3c48c7a411261dba684d7a3b81b5c531",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "apps/api/src/modules/powersync/powersync-schema-result-envelope.surface.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "replace-guard-before-retire",
+      "behavior": "PowerSync schema route uses full HttpResponse envelope",
+      "assertionEvidence": [
+        "module.ts uses createApiResponseBuilder; module.spec.ts references /schema and HttpResponse"
+      ],
+      "replacementAssessment": "verify direct route response in module.spec before retirement",
+      "sourceSha256": "12d1d7cb716e52dc3b11ed7613b16f4b9c8ed13959ad2127c8b5d8445b998001",
+      "verifiedRuntime": true,
+      "verifiedCaseCount": 2
+    },
+    {
+      "path": "apps/api/src/shared/infrastructure/middleware/error-result-envelope.surface.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Global error middleware uses canonical HttpResponse for 404/403/500",
+      "assertionEvidence": [
+        "error.ts has responseBuilder.notFound/forbidden/internalError; error.spec.ts references code shapes"
+      ],
+      "replacementAssessment": "must compare actual error response behavior for each error class",
+      "sourceSha256": "f90cc409f796b86bf3e5a1a1dec527fffad02f68f14c15ac996d992e2f1d1825",
+      "verifiedRuntime": true,
+      "verifiedCaseCount": 2
+    },
+    {
+      "path": "packages/cloud-auth/src/index.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Cloud Auth browser barrel never imports server",
+      "assertionEvidence": ["index.ts exports client and does not export server/index.js"],
+      "replacementAssessment": "needs browser bundle or import graph boundary gate",
+      "sourceSha256": "3dca6db2a69581a02ee1279f9d790c80b66cf007d44075745b824edeb8c76c59",
+      "verifiedRuntime": true,
+      "verifiedCaseCount": 1
+    },
+    {
+      "path": "packages/cloud-auth/src/server/public-surface.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Cloud Auth server surface only exports CloudSessionCapability and closure gate",
+      "assertionEvidence": [
+        "CloudPrincipal and CloudSessionCapability exports; CloudAuthOptions/UserProvisioner absent; isClosureBlocked present"
+      ],
+      "replacementAssessment": "needs public-API and closure policy contract guard",
+      "sourceSha256": "6f569e05f08c1f86be80f867181aad28f95b144d196b812cb86fd23d1698deef",
+      "verifiedRuntime": true,
+      "verifiedCaseCount": 2
+    },
+    {
+      "path": "packages/ai/src/server/application/ports/knowledge-source-note.surface.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Note-based AI port replaces retired Resource API with stable knowledgeDocumentId",
+      "assertionEvidence": [
+        "API and Desktop adapters implement listRelevantNotes/getNoteById; sourceContentHash and document ID explicit"
+      ],
+      "replacementAssessment": "needs cross-host port/schema equivalence test",
+      "sourceSha256": "9ccd09e7ef73c5b5e90014aeb96023d28da5a49e970c506362f668d9e5e52dd3",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "apps/web/e2e/desktop-screenshots/thesis-capture.spec.ts",
+      "reviewScope": "full-file",
+      "decision": "manual-artifact-not-regression",
+      "behavior": "Reference Playwright creates thesis screenshots of Goal, Settings and AI views",
+      "assertionEvidence": [
+        "screenshot PNGs written under docs/thesis/assets/desktop-e2e after UI visibility assertions"
+      ],
+      "replacementAssessment": "before deleting generator verify external thesis asset consumer",
+      "sourceSha256": "77318d5a0a3aef79cf06c9e14a97beebe5bcd9226d49cdc658093874bf38c7d9",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "apps/api/src/shared/infrastructure/http/controllers/info-result-envelope.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Info controller must use HttpResponse builder; /info route mounted; health probes remain ops-specific",
+      "assertionEvidence": [
+        "GET /info uses responseBuilder.success; liveness/readiness do not reuse builder"
+      ],
+      "replacementAssessment": "route/controller HTTP response behavior test and health-specific exception needed",
+      "sourceSha256": "f83097d2c2bab09d5be3b5fbc27a3d1771525bc3af13c31dc1f21504c685c1ca",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "apps/api/src/shared/infrastructure/http/controllers/logs-result-envelope.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Logs POST must preserve canonical success/bad-request envelopes",
+      "assertionEvidence": [
+        "capture route and responseBuilder.success/badRequest; no success boolean dual-track"
+      ],
+      "replacementAssessment": "verify POST /logs valid/invalid via API route test",
+      "sourceSha256": "8be276d2dd0b48754f676d7dbc168c068d1e4ad575a7ab8c3f961851b83fbbef",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "apps/api/src/shared/infrastructure/http/controllers/metrics-result-envelope.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Prometheus text and /metrics/json envelopes remain different",
+      "assertionEvidence": [
+        "/metrics returns text/plain 0.0.4 and JSON getJson uses responseBuilder.success"
+      ],
+      "replacementAssessment": "test both HTTP Content-Type and JSON envelope externally",
+      "sourceSha256": "471cc9469087e46a1760108bcd4683e1e49ae03fd79dc1c15683f06a6973ca0c",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "apps/desktop/src/renderer/custom-notification-electron-bridge-dual.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Notification renderer imports canonical bridge, not local window.electronAPI duplicate",
+      "assertionEvidence": [
+        "view uses platform/electron-bridge and NotificationChannels.CUSTOM_RECEIVE; ipc-client owns ElectronBridge"
+      ],
+      "replacementAssessment": "require runtime IPC/TypeScript architecture boundary to enforce one owner",
+      "sourceSha256": "dfb9071a1408b00e59b6161819a0999c3bc821ef3f5180d14ae9c2f0db0e440b",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "apps/desktop/src/renderer/host-electron-bridge-helper-dual.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Renderer DI and bootstrap consume canonical bridge helper without direct window access",
+      "assertionEvidence": [
+        "getElectronBridge/requireElectronBridge/ensureElectronBridgeAvailable are sole exports, DI imports helpers"
+      ],
+      "replacementAssessment": "need import graph guard and host bridge smoke to retire",
+      "sourceSha256": "b77752a56c864441b8abe055221b1b0e6b24b6cbc3e5c2a22689a27f2e044778",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/account/src/api/account-void-success-envelope.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Account closure returns structured closure receipt rather than null",
+      "assertionEvidence": [
+        "CloseAccountRes = AccountClosureReceiptDTO and controller Promise<Result<CloseAccountRes>>"
+      ],
+      "replacementAssessment": "actual OpenAPI/IPC closure receipt contract tests needed",
+      "sourceSha256": "d9464ad5b76e0313d46796246780a1175c73c4fa617842e657ad1163f6107b26",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/account/src/server/infrastructure/adapters/powersync/mappers/account-powersync-parse-json-keep-boundary.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Account private parseJson is distinct from utils parseJsonSafe fallback semantics",
+      "assertionEvidence": [
+        "private parseJson<T>(value:string) parses JSON and maps row.profile without row.settings"
+      ],
+      "replacementAssessment": "ensure mapper malformed required-string behavior is tested against implementation",
+      "sourceSha256": "633c0674d890ef6e52f33723ed3ef7e2bd015e6b85de11f39a102e62d838e4bd",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/ai/src/api/routes/ai-void-success-envelope.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "AI delete/set-default mutations use Result null, not success boolean",
+      "assertionEvidence": [
+        "OpenAPI z.null and controller/electron return ok(null) for provider/chat deletes"
+      ],
+      "replacementAssessment": "API+IPC contract assertions for void mutations needed",
+      "sourceSha256": "0629298ca91d9cb12630bed640da1791e4038074e2a1a9b680968cfef21fe90b",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/ai/src/infrastructure-client/adapters/read-string-keep-boundary.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "AI client readString rejects empty dotted paths; API requestContext lacks old fallback",
+      "assertionEvidence": [
+        "AI readPath + non-empty; API response builder reads requestContext for trace/startedAt"
+      ],
+      "replacementAssessment": "direct exported functional readString test or parser unit test needed",
+      "sourceSha256": "ef575b7bcdc0d1764be3026039c31d61044cf09457cbb730378631b09a8166fd",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/contracts/src/modules/account/api/dual-registry.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "AccountResponseSchema excludes auth/contact/settings shadows and is sole Client DTO",
+      "assertionEvidence": [
+        "AccountClientDTO z.infer alias, response schema owns product profile, no email/phone/settings"
+      ],
+      "replacementAssessment": "typed schema parsing and module owner-boundary tests required",
+      "sourceSha256": "4bb921a8e35cc334468eb4c2f577e6f2b8349457973f8a36482977171c874210",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/contracts/src/modules/ai/api/dual-registry.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "AI schemas enforce runtime vs product DTO separation, citations, provider secrets, and canonical result shapes",
+      "assertionEvidence": [
+        "37 test groups check AIConversation/AssistantRuntimeHistoryView/KnowledgeNotePersistedRef and one-time provider onboarding schemas"
+      ],
+      "replacementAssessment": "large cross-module contract matrix: migrate only after contract + regression suite covers each domain",
+      "sourceSha256": "a221bcd230d2ae225b27a885191df67aa451e3cddd38fe3124806ddc8b64b926",
+      "verifiedRuntime": true,
+      "verifiedCaseCount": 37
+    },
+    {
+      "path": "packages/contracts/src/modules/goal/api/dual-registry.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Goal schemas use one canonical read DTO, GoalRecord, reminders and import/export data",
+      "assertionEvidence": [
+        "24 test groups cover Goal/KeyResult/Review/Record DTO ownership and response schema aliases"
+      ],
+      "replacementAssessment": "contract compilation alone does not prove schema runtime shapes; preserve or replace by schema tests",
+      "sourceSha256": "7613b547e4f419d70d605bf8eeaa03da5e8a1c4edb6d29bfd392b74f15312915",
+      "verifiedRuntime": true,
+      "verifiedCaseCount": 24
+    },
+    {
+      "path": "packages/contracts/src/modules/notification/api/dual-registry.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Notification batch/unread/preference schemas have canonical single DTO ownership",
+      "assertionEvidence": [
+        "BatchOperationResultDTO z.infer; NotificationBatchResultSchema and unread response shared across routes"
+      ],
+      "replacementAssessment": "use runtime schema parsing/route contract coverage before retiring",
+      "sourceSha256": "17e18e66c64b1d5e0aaa871254cd1ffcb376131757400a1f3d85cb16044910ec",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/contracts/src/modules/notification/value-objects/dual-registry.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Notification action intent is discriminated union with no generic mutation authority",
+      "assertionEvidence": [
+        "navigate/owner-command/archive union; rejects payload unknown and legacy DoNotDisturbConfig"
+      ],
+      "replacementAssessment": "security/contract union discriminator coverage needed",
+      "sourceSha256": "a9d54d0c4d8ad70df089d553c691750424930085a483d289f9016c0fa6a6e311",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/contracts/src/modules/repository/aggregates/dual-registry.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Local Vault schemas have stable proposal ledger, durable bindings and nested note response shapes",
+      "assertionEvidence": [
+        "select/read/search/write ReqSchema + ResSchema; binding vs filesystem health separately represented"
+      ],
+      "replacementAssessment": "compile+schema parse tests must cover vault request/response and ledger fields",
+      "sourceSha256": "6ec92e63ced129157ae203080c8bcdb469e3d7d3e7d0536a2b713e03abc44fdb",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/contracts/src/modules/repository/api/dual-registry.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Remote knowledge binding schema includes independent observation/history-fence/checkpoint axes",
+      "assertionEvidence": [
+        "17 cases cover GitHub installation DTO, knowledge binding projection, disconnect schema, note-only fields"
+      ],
+      "replacementAssessment": "cross-service persistence/protocol and schema guards required",
+      "sourceSha256": "bd359f2119a0fb795fef18e90b7c93bfdb296d1e2f6477f7deaa18793d03922d",
+      "verifiedRuntime": true,
+      "verifiedCaseCount": 17
+    },
+    {
+      "path": "packages/goal/src/__tests__/dual-registry.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Shared test setup/getPrisma/seedAccount helpers should be unique across packages",
+      "assertionEvidence": [
+        "8 cases check setup/teardown re-export; integration globalSetup aliases sole helper; Task seeds avoid old Folder/DAG"
+      ],
+      "replacementAssessment": "replace by test-utils ownership and Nx/integration config checks before deletion",
+      "sourceSha256": "a3d833e040954079f5d36ab02746a4de64845e00a66941d3e30bc0ad6f95300e",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/goal/src/api/routes/goal-parse-number-string-array-keep-boundary.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Goal-specific Number.isFinite/comma string array route parsing differs from utils persistence parsers",
+      "assertionEvidence": [
+        "parseNumber and parseStringArray are local route functions and not utils parse-query-value"
+      ],
+      "replacementAssessment": "route parsing edge-case behavior tests required",
+      "sourceSha256": "95d73ac82ca84f26294011061168bec05585c3e2e554bdbebc650502b476d6c4",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/goal/src/api/routes/goal-void-success-envelope.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Goal review/record deletions return GoalMutationReceipt, not legacy null",
+      "assertionEvidence": [
+        "review & record routes use GoalMutationReceiptSchema; Desktop Goal channels preserved"
+      ],
+      "replacementAssessment": "actual API/IPC mutation receipt tests required",
+      "sourceSha256": "264c33778ddad12c81cd247cda3e9051793adf9a87efa184805198010807dd50",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/goal/src/server/infrastructure/__tests__/schedule-source-ownership.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Goal reminder scheduling projection is identity-scoped and has neutral SchedulingPort inputs",
+      "assertionEvidence": [
+        "findByIdForIdentity(identityId,goalId) and neutral ScheduledIntent; no ScheduleTask/SourceModule"
+      ],
+      "replacementAssessment": "owner-isolation integration plus forbidden legacy source test needed",
+      "sourceSha256": "8e115e13accfc429783c8d7753058f0722ab2d711ec4bfa671b20b1008fa8d9c",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/goal/src/server/infrastructure/adapters/prisma/__tests__/goal-schema-projection.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Goal ownership enforced by aggregate composite FK and no retired Folder/Focus cache schema",
+      "assertionEvidence": [
+        "Goal aggregate version/deletedAt only; GoalFolder/Focus/GoalStatistic absent from Prisma/PowerSync"
+      ],
+      "replacementAssessment": "schema ownership and DB migration/foreign-key integration tests required",
+      "sourceSha256": "58c2474bd9efe7e9058fa2a7649b9d5c972cf392931df7a50b1cf2d69badb2bf",
+      "verifiedRuntime": true,
+      "verifiedCaseCount": 4
+    },
+    {
+      "path": "packages/notification/src/api/notification-void-success-envelope.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Notification single delete returns null; batch returns updated/deleted counts",
+      "assertionEvidence": [
+        "OpenAPI z.null and NotificationBatchResultSchema; controllers ok(null) and ok({deletedCount})"
+      ],
+      "replacementAssessment": "HTTP route/IPC batch and void result contract tests needed",
+      "sourceSha256": "55d750ecf67b681b899c45eb7f91fb25cd7082dc2b28fc81a9b19b696d922bc2",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/notification/src/server/transport/notification-usecases-export.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Notification controller only references inbox, not deprecated broad use-cases interface",
+      "assertionEvidence": [
+        "NotificationInboxPort used; no NotificationUseCases alias or old ports"
+      ],
+      "replacementAssessment": "architecture import graph boundary guard needed",
+      "sourceSha256": "9fa283deed9f8ff71dbc3d42e319deeb41667166e8b41d562cacd39c2c061cef",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/repository/src/api/routes/knowledge-disconnect-void-envelope.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Disconnect connection returns Result<null> consistently on API and Electron",
+      "assertionEvidence": [
+        "DisconnectKnowledgeRepositoryConnectionRes = null; service/controller/IPC all return ok(null)"
+      ],
+      "replacementAssessment": "request/response and IPC contract tests required",
+      "sourceSha256": "eb09fae21d649405446160c2ad8dd31ce435e7944276e91dd5b7dd53a01a4517",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/schedule/src/api/schedule-void-success-envelope.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Schedule Calendar DELETE is null and never exposes retired task mutation channels",
+      "assertionEvidence": [
+        "Calendar event delete z.null, controller ok(null); IPC no TASK_DELETE/TASK_PAUSE/TASK_CREATE"
+      ],
+      "replacementAssessment": "calendar API/IPC contract and channel allowlist needed",
+      "sourceSha256": "d29f16c748f16295909e3aa3b0316bd04e488044dacf4bda77bdf78fe7db32e2",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/scheduler/src/api/scheduler-route-parsers.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Scheduler read-only invocation routes must parse query with canonical schema",
+      "assertionEvidence": [
+        "ScheduledInvocationDiagnosticQuerySchema.parse on invocation routes; no legacy /tasks or mutation verbs"
+      ],
+      "replacementAssessment": "read-only route permission and typed query contract should replace source lock",
+      "sourceSha256": "6945fef89190abe7c1c03fadb016e439777d538c6cc2aeab1acb96f165d9771a",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/task/src/api/routes/task-void-success-envelope.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Task plan/occurrence delete controllers map void to Result<null>",
+      "assertionEvidence": [
+        "OpenAPI z.null; use-case Result<void> and controller/IPC return ok(null)"
+      ],
+      "replacementAssessment": "functional endpoint and IPC contract tests required",
+      "sourceSha256": "3c6b9a200346f717490d80387ed683ed3d3e052d65c47589ed09f5b80f076ced",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/task/src/server/infrastructure/schedule-source-ownership.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Task reminder projection uses identity-scoped SchedulingPort, no legacy execution source",
+      "assertionEvidence": [
+        "findByIdForIdentity(identityId,planId), ScheduledIntent<TaskReminderScheduledPayload>; removed source file throws read"
+      ],
+      "replacementAssessment": "owner-isolation and scheduler boundary test needed",
+      "sourceSha256": "ee11380d95438bb7d9a1ed41d2e995268457659fa5aa4a9a495fa92af32eeb0c",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/time/src/__tests__/runtime-dependency-boundary.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "Time third-party adapters must be runtime dependencies, not dev-only",
+      "assertionEvidence": [
+        "@internationalized/date and @date-fns/tz in dependencies at pinned runtime versions, not devDependencies"
+      ],
+      "replacementAssessment": "package dependency governance rule or npm package pack smoke required",
+      "sourceSha256": "4e75c2694ffe36109869977edc1518b78e398494495ac4b843ea5915882354ed",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    },
+    {
+      "path": "packages/utils/src/result/default-extract-context-keep-boundary.surface.spec.ts",
+      "reviewScope": "representative-assertions",
+      "decision": "replace-guard-before-retire",
+      "behavior": "HTTP default context extractor supports request headers; IPC extractor rejects identity-only shortcuts",
+      "assertionEvidence": [
+        "Express requestContext/x-forwarded-for, and IPC fail-closed without identity-only desktop stub"
+      ],
+      "replacementAssessment": "direct context extractor runtime tests and IPC reject gate needed",
+      "sourceSha256": "4de5382b92a0e1e332fb1344f31a530c9acc4ab7ee4c5c6180481c6f03854b68",
+      "verifiedRuntime": false,
+      "verifiedCaseCount": 0
+    }
+  ]
+}

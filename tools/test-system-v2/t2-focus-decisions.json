@@ -1,0 +1,315 @@
+{
+  "version": 1,
+  "sourceBaseline": "88d452338",
+  "scope": "34 previously-unreviewed simulated-dom T2 signals; not a test-retirement request",
+  "reviews": [
+    {
+      "path": "packages/app-vue/src/modules/ai/components/AIComposerControls.spec.ts",
+      "decision": "browser-candidate",
+      "behavior": "已覆盖模型可用性/收藏/禁用状态与通过模拟 ArrowDown 搜索结果聚焦，但真实 Popover 内键盘选择、禁用项和焦点仍需浏览器验证",
+      "assertionEvidence": ["data-testid=\"ai-model-picker-search\""],
+      "reason": "现有模型选择和 Registry 逻辑测试有效；不需要迁移全部 26 个用例，只保留一个真实模型选择键盘流。",
+      "nextPhase": "T3-browser",
+      "sourceSha256": "193cd4db6013c21f41beaaf8fe93ee72902917243c54e9766bbfba9b2787b442"
+    },
+    {
+      "path": "packages/app-vue/src/modules/ai/components/AIFooterComposer.spec.ts",
+      "decision": "retain",
+      "behavior": "Enter 发送、Shift+Enter 换行、IME composing 不发送，输入期间 Stop 和 Context 菜单状态独立",
+      "assertionEvidence": ["does not send while IME composition is active"],
+      "reason": "测试的是发送语义/受控输入/附件回调；模拟事件能验证代码分支，实际输入法行为应在 AI 关键 E2E 抽验，而非独立重复整套测试。",
+      "nextPhase": "no-immediate-change",
+      "sourceSha256": "eb615a9077967690902fb1200549cea2a96e5d78f3d7ec3c572a7d7687a991a9"
+    },
+    {
+      "path": "packages/app-vue/src/modules/goal/components/dialogs/GoalKeyResultInspectDialog.spec.ts",
+      "decision": "retain",
+      "behavior": "KR Inspect 读取、分页、数据切换过期响应舍弃与 Escape 请求关闭",
+      "assertionEvidence": ["goal-kr-inspect-close"],
+      "reason": "服务端历史数据由 Mock 提供，测试旨在 UI 状态与命令，真实 Dialog Focus 可由共享弹层 Browser 试点兜底。",
+      "nextPhase": "no-immediate-change",
+      "sourceSha256": "53cd6b2234ade4c4b0d35e37ffe9bb7a903379a6289f6f832c6466cef3ede8f2"
+    },
+    {
+      "path": "packages/app-vue/src/modules/goal/components/dialogs/GoalRecordDialog.spec.ts",
+      "decision": "retain",
+      "behavior": "Goal Record 校验/数值边界、保存 pending/failure 保留草稿、关闭只在成功后发生、Enter/Escape 不误提交",
+      "assertionEvidence": ["goalActions.createGoalRecord"],
+      "reason": "覆盖领域保存时序和错误草稿；与 Goal E2E 互补，合成键盘信号不要求此文件全部迁移。",
+      "nextPhase": "no-immediate-change",
+      "sourceSha256": "163906ec37d920619df960331d07a204695ffbc1d268d16dbcb441a53e5589a9"
+    },
+    {
+      "path": "packages/app-vue/src/modules/goal/components/GoalKeyResultDirectControls.spec.ts",
+      "decision": "retain",
+      "behavior": "KR 原生方法菜单显示五种聚合模式，失败不提交体重/方法编辑，忙碌态全禁止修改",
+      "assertionEvidence": ["goal-kr-weight-kr-1"],
+      "reason": "受控组件事件与菜单选项测试有效；真实 Overlay 键盘归共享 Reka/Goal Browser 代表性测试。",
+      "nextPhase": "no-immediate-change",
+      "sourceSha256": "5d6d97eba8f5950c287d1defc5316ff31141f9b75ab55a38e17a1fbaf6d0c8b7"
+    },
+    {
+      "path": "packages/app-vue/src/modules/goal/components/GoalRecordComposerSurface.spec.ts",
+      "decision": "retain",
+      "behavior": "Record Composer 对不同 KR 算法展示标注；数值越界与 busy 状态阻止保存，支持 Escape/cancel",
+      "assertionEvidence": ["change-amount"],
+      "reason": "领域解析和受控提交由状态/事件断言验证，不需要为每一个数值边界启动 Browser。",
+      "nextPhase": "no-immediate-change",
+      "sourceSha256": "36d7f9748297c711a77968706b38b86845f3c43ac4a3f27d15f2084a25e8d936"
+    },
+    {
+      "path": "packages/app-vue/src/modules/goal/views/GoalDeepLinks.characterization.spec.ts",
+      "decision": "browser-candidate",
+      "behavior": "Vue MemoryHistory 测试 Goal/KR/Review 直接导航、query/hash 保留、保存期间阻挡换路由及草稿保留",
+      "assertionEvidence": [
+        "keeps saving busy through refresh and blocks close, Escape, routes and shell actions"
+      ],
+      "reason": "路由行为涉及真正浏览器的刷新/back-forward 与 URL history，不等于 MemoryHistory；T3 抽一条真实 URL/后退/草稿路径，已有源码用例保留。",
+      "nextPhase": "T3-browser",
+      "sourceSha256": "96b306fccb5bf1191db016faad41b5897ca8cf24f8bbb83a632fe38b8bcead13"
+    },
+    {
+      "path": "packages/app-vue/src/modules/goal/views/GoalDetailView.spec.ts",
+      "decision": "retain",
+      "behavior": "GoalDetail 中 KR 当前值/算法、日期继承、编辑失败、输入回车与 Key Result 深链路命令映射",
+      "assertionEvidence": ["actions.openDialog"],
+      "reason": "这是 Mock Owner 参与的语义映射/显示验证；浏览器 E2E 的真实修改提交和焦点用于补边界，不需整体迁移。",
+      "nextPhase": "no-immediate-change",
+      "sourceSha256": "f51ed5bbd8cb22c192070a24c1c35403ca36185bd091ceb94928a4f6fca82f22"
+    },
+    {
+      "path": "packages/app-vue/src/modules/goal/views/GoalModuleLayout.spec.ts",
+      "decision": "retain",
+      "behavior": "Goal Module Layout 的 Owner 会话单一性、异步聚合返回时序、dirty/busy 导航拦截与 query 过滤保持",
+      "assertionEvidence": ["goalMocks.fetchGoals"],
+      "reason": "重点是 Router/DI 生命周期和 Owner 单一性，在组件层直接可断言；视口真正测量交 Browser Layout E2E。",
+      "nextPhase": "no-immediate-change",
+      "sourceSha256": "4f74b5187dc0cc2ea846e7c1d1e52378eb58a2f3e371d568d212305e1f32901f"
+    },
+    {
+      "path": "packages/app-vue/src/modules/repository/components/DocumentPresentationPrimitives.spec.ts",
+      "decision": "retain",
+      "behavior": "文件目录的搜索清除、单选列表操作、Header 属性及 Loading/Error/Empty 状态",
+      "assertionEvidence": ["catalog-search-clear"],
+      "reason": "只是渲染语义与组件 emit，未要求真实滚动/物理键盘导航。",
+      "nextPhase": "no-immediate-change",
+      "sourceSha256": "109dd2c21906a89348490919c80afdd546301ab044e0eac2137f7b1a55f7320b"
+    },
+    {
+      "path": "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.spec.ts",
+      "decision": "browser-candidate",
+      "behavior": "10,000 Note 虚拟窗口与键盘到末项、不同 Vault 切换缓存清空、过期搜索和 Note 打开竞态",
+      "assertionEvidence": ["activeItemId"],
+      "reason": "Happy DOM 无真实布局/滚动；保留模拟 10k 数据性能断言，T3 挑一条浏览器虚拟列表滚动+焦点场景。",
+      "nextPhase": "T3-browser",
+      "sourceSha256": "999a4e294df4451d5afd80de8bcb55499e9e4590259f7823618a47c88b8b76ac"
+    },
+    {
+      "path": "packages/app-vue/src/modules/routine/components/RoutineEditorDialog.spec.ts",
+      "decision": "retain",
+      "behavior": "Routine 壁钟和时区输入、字段 blur 校验、Interval 箭头步进、无效 Hm 保留与保存失败草稿",
+      "assertionEvidence": ["RoutineTriggerSchema.safeParse"],
+      "reason": "Zod/受控输入语义覆盖有效；时区 Native 交互和键盘由共享 Picker 浏览器场景兜底。",
+      "nextPhase": "no-immediate-change",
+      "sourceSha256": "2af74d9fac5f28fa99a0eac9eebc8f0f1a721315ba60836a6893d408f5b0e7fa"
+    },
+    {
+      "path": "packages/app-vue/src/modules/routine/components/RoutineProfileDialog.spec.ts",
+      "decision": "retain",
+      "behavior": "独立 Routine Profile 模态 Schema 与 blur 后标题错误、保存前置条件",
+      "assertionEvidence": ["DialogRoot"],
+      "reason": "小型表单验证，无理由引入单独 Browser 套件。",
+      "nextPhase": "no-immediate-change",
+      "sourceSha256": "df2ba7e7481c448fcc093775188bab9ec66bcc66b371d93f9cee99b9b0c1ebde"
+    },
+    {
+      "path": "packages/app-vue/src/modules/schedule/components/calendar-event-semantics.spec.ts",
+      "decision": "retain",
+      "behavior": "Calendar Event Action 语义 Button 命名及月视图的稳定日期选择器",
+      "assertionEvidence": ["event-click"],
+      "reason": "标准 Button 触发和 emit 在组件层可验证，FullCalendar 真 Grid 几何已有 Browser Reference。",
+      "nextPhase": "no-immediate-change",
+      "sourceSha256": "5c15614892b1eae4d651ad1292d5640739762967b5dd3e6e036b762e5dd08d51"
+    },
+    {
+      "path": "packages/app-vue/src/modules/setting/components/AISettings.spec.ts",
+      "decision": "retain",
+      "behavior": "Provider/Agent Instance 启用、实例编辑、默认模型迁移、Catalog/Probe 分离和错误态及重载时序",
+      "assertionEvidence": ["ai-provider-toggle-mastra"],
+      "reason": "39 个用例主要是服务替身与复杂状态机，真实 OAuth/ACP/账号切换应使用独立专项验收而不是整文件 Browser 化。",
+      "nextPhase": "no-immediate-change",
+      "sourceSha256": "88959174773b78af38650f6c5250aa307a5680a01e1694557b67ca3db8d03629"
+    },
+    {
+      "path": "packages/app-vue/src/modules/setting/components/KeyboardSettings.spec.ts",
+      "decision": "retain",
+      "behavior": "录制键绑定、保留键拒绝、冲突显式替换与组件卸载自动取消录制",
+      "assertionEvidence": ["keyboard.engine.bindings"],
+      "reason": "Keyboard Engine 有独立运行时测试，本组件验证视觉/绑定管理；现有真 Browser 全局快捷键用例兜底。",
+      "nextPhase": "no-immediate-change",
+      "sourceSha256": "2fe42c3eb398d8993b96e3b0737f02ea3f8fe932663eaa3b3612a539b036e64a"
+    },
+    {
+      "path": "packages/app-vue/src/modules/task/components/dialogs/QuickTaskDialog.spec.ts",
+      "decision": "retain",
+      "behavior": "Quick Task Title-only 简化创建、未保存脏状态、关闭确认拒绝保留输入",
+      "assertionEvidence": ["wrapper.emitted('save')"],
+      "reason": "组件内草稿状态与 emit 足以验证；真实 Task 保存闭环在 Local Docker/Task E2E。",
+      "nextPhase": "no-immediate-change",
+      "sourceSha256": "b590d9889ada5c5c1995e3b4c8a4f9f825237302934d5082131c260da3a3f156"
+    },
+    {
+      "path": "packages/app-vue/src/modules/task/components/dialogs/TaskCompletionMeasurementDialog.spec.ts",
+      "decision": "retain",
+      "behavior": "Task Completion 测量值草稿在后端失败时保持，重开时复位并可退化到完成任务",
+      "assertionEvidence": ["task-record-and-complete"],
+      "reason": "Owner Mock 验证状态机，不需为表单失败各分支重复 Browser 测试。",
+      "nextPhase": "no-immediate-change",
+      "sourceSha256": "7e68d6baa04b21f64050a3affbe43569e595f108a8b30f4027762d1b7a92e9f2"
+    },
+    {
+      "path": "packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.spec.ts",
+      "decision": "retain",
+      "behavior": "Task Plan Owner Session 附着、提交/取消协调器、Busy 期间拒绝更新、超时回包和旧 Session 退役",
+      "assertionEvidence": ["session.readDraftState().dirty"],
+      "reason": "关键是协调器语义与脏草稿边界；合成 Escape 不代表实际焦点，但由共享 Dialog/完整 E2E 验证。",
+      "nextPhase": "no-immediate-change",
+      "sourceSha256": "d1d0dd60fc7252b3a68e3f07c64cf3e5166c6b4174851c6d42e68d18c8485f34"
+    },
+    {
+      "path": "packages/app-vue/src/modules/task/components/TaskPlanForm/sections/BasicInfoSection.spec.ts",
+      "decision": "retain",
+      "behavior": "Task Title blur 后错误行、aria-describedby、Saving 禁止修改及父表单有效性",
+      "assertionEvidence": ["aria-describedby"],
+      "reason": "A11y 属性和受控输入无需全部迁移；键盘周期选择器的真实路径是单独 T3 范围。",
+      "nextPhase": "no-immediate-change",
+      "sourceSha256": "eb9c1513424add25f7b5374b2f7866d60a85dc483a23687629ae07a5c9b82eb5"
+    },
+    {
+      "path": "packages/app-vue/src/modules/task/views/TaskManagementView.runtime.spec.ts",
+      "decision": "retain",
+      "behavior": "Task Today/Quick Create 路由、失败后草稿/重试、分页和 Task Owner 命令不污染 Goal scope",
+      "assertionEvidence": ["task-plan-pagination"],
+      "reason": "大量 Mock Service 生命周期可在组件层精确验证，真实任务闭环已有 Local Docker。",
+      "nextPhase": "no-immediate-change",
+      "sourceSha256": "b08d63e7a1e6f02f7c2d03860c776a50f32bddc2ec48afc982c144b37c20c475"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/KeyboardHelp.spec.ts",
+      "decision": "retain",
+      "behavior": "键盘帮助弹窗使用有效绑定，实时更新命令列表，Escape 关闭及跳设置",
+      "assertionEvidence": ["keyboard-help"],
+      "reason": "语义属性和事件分发可以在组件级验证，真实 Dialog Focus 共用 T3 浏览器代表性流程。",
+      "nextPhase": "no-immediate-change",
+      "sourceSha256": "283d877732ca02c504d9f4c523da4be6b93ebb94d4e5756a2f5ad682ea11c3c1"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductDatePicker.spec.ts",
+      "decision": "retain",
+      "behavior": "Product Date 精度切换、可解析日/季、错误展示与空值不臆造日期",
+      "assertionEvidence": ["start-picker"],
+      "reason": "文本解析与受控模型变更足够以 Happy DOM 验证；实际弹层 Tab 在共用 Picker 测试中覆盖。",
+      "nextPhase": "no-immediate-change",
+      "sourceSha256": "fd507556f102757a0bad1b3caa0d0792f5f71e35a690325c2478233dea79ceb8"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductDateTimePicker.spec.ts",
+      "decision": "browser-candidate",
+      "behavior": "模拟 KeyboardEvent Tab/Shift+Tab 与 opener 焦点返回、min 日期校验和 apply",
+      "assertionEvidence": ["last.dispatchEvent("],
+      "reason": "浏览器原生 Tab 默认动作无法靠 dispatchEvent 重现；T3 需真实 Chromium Tab/Shift+Tab/ESC 顺序验证。",
+      "nextPhase": "T3-browser",
+      "sourceSha256": "7d4a6b471e8d2aad018152b367fb868b75f36d4ab0214455f43d7cfbf7a1eaee"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductDialogShell.spec.ts",
+      "decision": "browser-candidate",
+      "behavior": "初始焦点、Escape 关闭、返回 opener 及 interactOutside 对话框行为",
+      "assertionEvidence": ["document.activeElement"],
+      "reason": "Dialog/Portal FocusTrap 与真实鼠标/键盘及层叠行为不同于 Happy DOM；T3 共享 Dialog Browser 验证。",
+      "nextPhase": "T3-browser",
+      "sourceSha256": "b1b172840e4eaaac354c7df0fa7f991accd095999ea64b0142e1fcaf8ab61f65"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductEditorFrame.spec.ts",
+      "decision": "browser-candidate",
+      "behavior": "Dialog/Pane 双呈现的 focus restore、inert 与嵌套 Picker 关闭策略",
+      "assertionEvidence": ["document.activeElement"],
+      "reason": "inert 对真实键盘导航与 Portal 事件隔离具有浏览器语义；与 DialogShell 合并为一个 Browser 代表性试点。",
+      "nextPhase": "T3-browser",
+      "sourceSha256": "8325bffd31a5cfb6b6592aba594954e3e18fa955fe4c6f6427dbd6b3724bde1a"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductPropertyChip.spec.ts",
+      "decision": "retain",
+      "behavior": "PropertyChip 语义 Button 使用原生 Enter/Space 激活，不拦截全局快捷键",
+      "assertionEvidence": ["aria-pressed"],
+      "reason": "普通原生 button 行为无需专门 Browser 复制全部用例；共享 Reka 浏览器事件验证即可。",
+      "nextPhase": "no-immediate-change",
+      "sourceSha256": "0fa72faff4862eb5610355c5e843dd6a7af98dc4c5852c3060de639e49b6a92b"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductSingleSelectFilter.spec.ts",
+      "decision": "browser-candidate",
+      "behavior": "Dropdown 退出时模拟 DOM 节点延迟夺焦与已关闭面板 Focus 恢复",
+      "assertionEvidence": ["data-reka-menu-content"],
+      "reason": "测试手动构造退出节点与时钟；真实 Portal teardown/Focus 顺序应由单个 Browser 下拉菜单实验验证。",
+      "nextPhase": "T3-browser",
+      "sourceSha256": "b317865f9434a704d7c38f2a626c05d48429f5dffd2c5945e9982e3174483916"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductTimeframePicker.spec.ts",
+      "decision": "retain",
+      "behavior": "Timeframe 日/季/年边界校验与空值/精度转换保持",
+      "assertionEvidence": ["target-picker"],
+      "reason": "日期数学与 modelValue 更新是逻辑测试，非必须的完整浏览器滚动交互。",
+      "nextPhase": "no-immediate-change",
+      "sourceSha256": "6c09ab0ecd1d5fedad49a4111f54a7c364782421a4da79d1be84112b53535900"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductTimePicker.spec.ts",
+      "decision": "retain",
+      "behavior": "时间输入 Hour/Minute 的 ArrowUp/ArrowDown wrap、非法值回滚与禁用态",
+      "assertionEvidence": ["ArrowUp"],
+      "reason": "JS 处理键盘命令的值变换可以用 trigger 精确测试；真实 Tab 归共享 DateTime Picker 抽测。",
+      "nextPhase": "no-immediate-change",
+      "sourceSha256": "14b2ad4efe52a86599bf3909bfa75a0604d587ca843df272ccfa93ee56d4f097"
+    },
+    {
+      "path": "packages/app-vue/src/shared/components/ProductTimeZoneSelector.spec.ts",
+      "decision": "retain",
+      "behavior": "IANA 时区别名、非法搜索值不创建、自定义 Provider 缺失时降级、受控选择",
+      "assertionEvidence": ["product-time-zone-selector-search"],
+      "reason": "主要是 Intl Provider 和受控选项逻辑；真实 Popover 和键盘仅需共享组件抽测。",
+      "nextPhase": "no-immediate-change",
+      "sourceSha256": "abcc6128f62082f4e031dea6921a7625037be109195ed78eace5264a59a751b4"
+    },
+    {
+      "path": "packages/app-vue/src/shared/keyboard/runtime.spec.ts",
+      "decision": "retain",
+      "behavior": "全局快捷键的输入保护、IME/Recorder 隔离、Dialog 优先级与卸载后监听停止",
+      "assertionEvidence": ["_getCommandPaletteState().open"],
+      "reason": "模拟事件足以验证 Runtime 路由与派发逻辑；真浏览器默认焦点/快捷键冲突由少量 Browser Smoke。",
+      "nextPhase": "no-immediate-change",
+      "sourceSha256": "d0eb52b008d835b9f7ef24b2120d9d1f3faf051f5c85c2f3505b1163f77a835e"
+    },
+    {
+      "path": "packages/app-vue/src/shared/reka-primitives.contract.spec.ts",
+      "decision": "browser-candidate",
+      "behavior": "Reka Dialog/Dropdown/Popover/Tabs/Sheet 通过合成键盘触发和控制态监听",
+      "assertionEvidence": ["document.activeElement"],
+      "reason": "共享 Overlay 的 Portal、FocusTrap、Tab/ESC 应有一个跨组件真实 Chromium Keyboard Smoke，测试原结构全部保留。",
+      "nextPhase": "T3-browser",
+      "sourceSha256": "28712ea84d0c1d39a2ee4b910312d0478809ed44fceb1b7214228dc9a1965bde"
+    },
+    {
+      "path": "packages/app-vue/src/views/DesktopProfileAccessView.spec.ts",
+      "decision": "retain",
+      "behavior": "Desktop Profile PIN 目标预选/本地 Guest 创建、更名与离线解锁输入焦点",
+      "assertionEvidence": ["desktop-profile-pin-profile-1"],
+      "reason": "Main/Profile Bridge 使用 stub；用户身分和 PIN 存储依赖安装版 Desktop E2E，不需要将此组件测试整体迁移。",
+      "nextPhase": "no-immediate-change",
+      "sourceSha256": "b12cab5b7a93a79eccaf546c5b53b330488c2f66a6e6327d8b8ea57e90d9e1bc"
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "baseline": "88d452338",
+  "source": "tools/test-system-v2/behavior-risk-matrix.json",
+  "status": "deferred-with-explicit-owner-not-verified",
+  "risks": [
+    {
+      "id": "AUTH-LOGIN",
+      "issues": [606, 608],
+      "acceptanceGap": "实际注册/登录和权限拒绝的覆盖边界须由 Auth 领域 UI + API 验证，不因 Worker Session 优化跳过。"
+    },
+    {
+      "id": "GOAL-DRAFT",
+      "issues": [605, 607],
+      "acceptanceGap": "草稿关闭/恢复/重试时的实例身份及浏览器导航需行为回归；PanelErrorBoundary 单独补断言。"
+    },
+    {
+      "id": "TASK-RECURRENCE-A11Y",
+      "issues": [605],
+      "acceptanceGap": "在真实 Browser 中从聚焦 Tab、Enter/Space 到实际选中周期完整动作验证，而非仅检查 ARIA。"
+    },
+    {
+      "id": "WEB-DESKTOP-SYNC",
+      "issues": [608],
+      "acceptanceGap": "Specialized Web/Desktop 同步双端实际运行收据、阶段归属与账户状态隔离。"
+    },
+    {
+      "id": "AI-APPROVAL",
+      "issues": [608],
+      "acceptanceGap": "实用 Provider / Tool Approval 端到端与 Mocked UI 分开，不强制所有 PR 调用收费 Provider。"
+    },
+    {
+      "id": "DESKTOP-IPC",
+      "issues": [608],
+      "acceptanceGap": "沿用现有 Windows Release Installed E2E；补精确 SHA 运行回执并核实授权边界，不重复创建 CI。"
+    },
+    {
+      "id": "DESKTOP-UPDATE",
+      "issues": [608],
+      "acceptanceGap": "Installed Windows/Desktop 的下载/签名/升级/回滚执行回执，不以 Mock Updater 单测替代。"
+    },
+    {
+      "id": "DATA-MIGRATION",
+      "issues": [608],
+      "acceptanceGap": "完整旧版 Postgres DB 至当前 Schema 的真实迁移和恢复演练，区别于 Mock SQL 生成测试。"
+    },
+    {
+      "id": "OWNER-ISOLATION",
+      "issues": [606, 608],
+      "acceptanceGap": "两身份/多表 DB 权限拒绝必须实际执行，认证 Fixture 不能导致跨用例数据污染。"
+    },
+    {
+      "id": "VISUAL-LAYOUT",
+      "issues": [605, 608],
+      "acceptanceGap": "保留代表性真实 Browser Visual Matrix，核对 PR/Nightly 阶段和实际截图证据。"
+    },
+    {
+      "id": "AI-EVAL-QUALITY",
+      "issues": [608],
+      "acceptanceGap": "Recorded Replay 与真实 Provider 质量评测明确区分执行阶段、费用准入和可重复结果。"
+    }
+  ]
+}

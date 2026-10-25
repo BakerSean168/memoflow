@@ -4,7 +4,7 @@ import { faker } from '@faker-js/faker';
 import { createApp, defineComponent, h, ref } from 'vue';
 import { createPinia } from 'pinia';
 import { createI18n } from 'vue-i18n';
-import { createMemoryHistory, createRouter, RouterView } from 'vue-router';
+import { createMemoryHistory, createRouter, createWebHistory, RouterView } from 'vue-router';
 import {
   createMockGoalMutationReceipt,
   createMockKeyResult,
@@ -32,6 +32,7 @@ import GoalModuleLayout from '@memoflow/app-vue/modules/goal/views/GoalModuleLay
 import GoalListView from '@memoflow/app-vue/modules/goal/views/GoalListView.vue';
 import GoalDetailView from '@memoflow/app-vue/modules/goal/views/GoalDetailView.vue';
 import GoalDialog from '@memoflow/app-vue/modules/goal/components/dialogs/GoalDialog.vue';
+import BrowserInteractionFixture from '@memoflow/app-vue/shared/components/__stories__/BrowserInteractionFixture.vue';
 import type { GoalNativeEditSession } from '@memoflow/app-vue/modules/goal/composables/goalNativeEditSession';
 import { goalRoutes } from '@memoflow/app-vue/modules/goal/router';
 import '../../../../../apps/web/src/styles/index.css';
@@ -208,8 +209,11 @@ const service = {
   },
 } as unknown as IGoalService;
 const parent = goalRoutes[0]!;
+// T3: one intentionally real browser-history lane; legacy screenshot fixtures
+// retain isolated memory routing. The /t3-history prefix survives full reloads.
+const browserHistory = location.pathname.startsWith('/t3-history/');
 const router = createRouter({
-  history: createMemoryHistory(),
+  history: browserHistory ? createWebHistory('/t3-history') : createMemoryHistory(),
   routes: [
     {
       path: parent.path,
@@ -350,16 +354,18 @@ function renderReferenceBusinessPanel() {
 const app = createApp(
   defineComponent({
     setup: () => () =>
-      panel
-        ? h('main', { class: 'flex h-screen w-full overflow-hidden' }, [
-            renderReferenceChat(),
-            renderReferenceBusinessPanel(),
-          ])
-        : h('main', { class: '@container/panel h-screen w-full' }, [
-            creating.value ? null : h(RouterView),
-            renderGoalEditor(),
-            h(GlobalConfirmDialog),
-          ]),
+      params.get('surface') === 't3'
+        ? h(BrowserInteractionFixture)
+        : panel
+          ? h('main', { class: 'flex h-screen w-full overflow-hidden' }, [
+              renderReferenceChat(),
+              renderReferenceBusinessPanel(),
+            ])
+          : h('main', { class: '@container/panel h-screen w-full' }, [
+              creating.value ? null : h(RouterView),
+              renderGoalEditor(),
+              h(GlobalConfirmDialog),
+            ]),
   }),
 );
 app
@@ -370,13 +376,15 @@ installServerStateRuntime(app, 'web', { identityScope: 'goal-reference' });
 app.provide(GOAL_SERVICE_KEY, service);
 app.provide(LABEL_SERVICE_KEY, { listLabels: async () => ok([]) } as unknown as ILabelService);
 app.provide(GOAL_KNOWLEDGE_SERVICE_KEY, {} as IGoalKnowledgeService);
-await router.push(
-  params.get('surface') === 'collection'
-    ? '/goals'
-    : params.get('state') === 'review'
-      ? '/goals/goal-reference/review/create'
-      : '/goals/goal-reference',
-);
+if (!browserHistory) {
+  await router.push(
+    params.get('surface') === 'collection'
+      ? '/goals'
+      : params.get('state') === 'review'
+        ? '/goals/goal-reference/review/create'
+        : '/goals/goal-reference',
+  );
+}
 await router.isReady();
 app.mount('#app');
 // Read-only diagnostics for acceptance assertions; no browser-side state manipulation.
