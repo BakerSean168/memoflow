@@ -73,7 +73,8 @@
     "ui-storybook": "app",
     "goal-core": "runtime-lib",
     "goal-client": "runtime-lib",
-    "shared-primitives": "runtime-lib"
+    "shared-primitives": "runtime-lib",
+    "transport-contracts": "runtime-lib"
   },
   "exemptions": [
     {

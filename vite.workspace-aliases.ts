@@ -150,6 +150,24 @@ export function createSharedPrimitivesAliasEntries(workspaceRoot: string): Alias
   ];
 }
 
+export function createTransportContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const transportContractsRoot = resolveFromWorkspace(
+    workspaceRoot,
+    'packages/transport-contracts/src',
+  );
+
+  return [
+    {
+      find: /^@memoflow\/transport-contracts$/,
+      replacement: `${transportContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/transport-contracts\/(.+)$/,
+      replacement: `${transportContractsRoot}/$1`,
+    },
+  ];
+}
+
 export function createUiVueSourceAliasEntries(workspaceRoot: string): Alias[] {
   const uiVueRoot = resolveFromWorkspace(workspaceRoot, 'packages/ui-vue-shadcn/src');
   const uiCoreRoot = resolveFromWorkspace(workspaceRoot, 'packages/ui-core/src');

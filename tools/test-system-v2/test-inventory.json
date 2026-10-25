@@ -7258,46 +7258,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/result/failure-policy.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/result/ipc-envelope.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/result/public-failure.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/result/result-error-exception.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/result/transports.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/contracts/src/shared/dual-registry.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11628,6 +11588,54 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/transport-contracts/src/execution-context.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/transport-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/transport-contracts/src/result/failure-policy.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/transport-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/transport-contracts/src/result/ipc-envelope.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/transport-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/transport-contracts/src/result/public-failure.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/transport-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/transport-contracts/src/result/result-error-exception.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/transport-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/transport-contracts/src/result/transports.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/transport-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/ui-core/src/form/validation.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12935,7 +12943,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 90
+      "fileCount": 85
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -13090,6 +13098,13 @@
       "suite": "unit",
       "runner": "vitest",
       "fileCount": 10
+    },
+    {
+      "id": "packages/transport-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 6
     },
     {
       "id": "packages/ui-core/vitest.config.ts",
@@ -13894,7 +13909,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1118,
+    "unit": 1119,
     "integration": 57,
     "smoke": 3,
     "boundary-ipc": 6,

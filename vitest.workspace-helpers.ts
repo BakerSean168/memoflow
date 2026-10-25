@@ -292,6 +292,14 @@ export const domainResolveAliases = [
     replacement: path.resolve(import.meta.dirname, './packages/shared-primitives/src/index.ts'),
   },
   {
+    find: /^@memoflow\/transport-contracts\/(.+)/,
+    replacement: path.resolve(import.meta.dirname, './packages/transport-contracts/src/$1'),
+  },
+  {
+    find: '@memoflow/transport-contracts',
+    replacement: path.resolve(import.meta.dirname, './packages/transport-contracts/src/index.ts'),
+  },
+  {
     find: /^@memoflow\/task\/(.+)/,
     replacement: path.resolve(import.meta.dirname, './packages/task/src/$1/index.ts'),
   },
