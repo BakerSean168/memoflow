@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { IElectronModuleContext } from './index';
 import { createAuthenticatedIpcWrapper } from './authenticated-ipc';
 import { ElectronAuthResolutionError } from './auth-context';
-import { ResultErrorException } from '../result';
+import { ResultErrorException } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '../shared';
 
 function executionContext(identityId: string): ExecutionContext {

@@ -4,7 +4,7 @@ import {
   FailureRetryHintSchema,
   FailureReferenceSchema,
   strictFailureDetails,
-} from '../../../result';
+} from '@memoflow/transport-contracts/result';
 import { CreateTaskPlanSchema } from '../../task';
 import {
   GoalCreateClientInputSchema,

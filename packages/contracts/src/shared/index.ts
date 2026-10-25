@@ -22,8 +22,15 @@ export type {
   AppRpcRegistryExtensions,
 } from './protocol';
 export type { IDomainEvent } from './domain-event.interface';
-export type { Context } from './context';
-export type { ExecutionContext, ExecutionSource, RequestContext } from './execution-context';
+// P1 S2（Issue #633）：ExecutionContext/RequestContext/Context 真身已迁至
+// @memoflow/transport-contracts，本桶仅单向 re-export 兼容，新代码请直接
+// 引用 @memoflow/transport-contracts。
+export type {
+  Context,
+  ExecutionContext,
+  ExecutionSource,
+  RequestContext,
+} from '@memoflow/transport-contracts';
 export type { ServerModuleHandle, ServerTransportModuleContext } from './server-module-context';
 export * from './account-active-checker';
 

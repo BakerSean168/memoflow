@@ -106,7 +106,7 @@ export {
   publicFailureToHttpStatus,
   isClientError,
   isServerError,
-} from './result';
+} from '@memoflow/transport-contracts';
 
 export type {
   Result,
@@ -143,7 +143,7 @@ export type {
   IpcResult,
   HttpResponse,
   HttpResponseOptions,
-} from './result';
+} from '@memoflow/transport-contracts';
 
 export type {
   CloudAccountSummary,
