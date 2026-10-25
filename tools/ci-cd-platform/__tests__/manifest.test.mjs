@@ -200,8 +200,8 @@ test('Unit LPT never file-splits unsplittable projects (coverage thresholds need
 
 test('Unit LPT weighs coverage projects by their coverage durations in coverage mode', () => {
   // Test weights: app-vue 302 (split 151/151), goal 182, task 159 — the split
-  // halves dominate placement. Coverage weights: goal 68.4, task 58, app-vue
-  // 8.1 — goal/task lead and app-vue lands whole in the lightest bin.
+  // halves dominate placement. Goal/task use measured coverage weights; app-vue
+  // keeps the full Unit weight because coverage now executes all of its tests.
   const projects = ['app-vue', 'goal', 'task'];
   const testPlan = planUnitShards(projects);
   assert.equal(
@@ -211,7 +211,7 @@ test('Unit LPT weighs coverage projects by their coverage durations in coverage 
   const coveragePlan = planUnitShards(projects, { coverage: true, unsplittable: ['app-vue'] });
   assert.deepEqual(
     coveragePlan.map(({ tasks }) => tasks.map((task) => task.project)),
-    [['goal'], ['task'], ['app-vue']],
+    [['app-vue'], ['goal'], ['task']],
   );
 });
 
@@ -478,7 +478,7 @@ if (process.env.FAIL_COMMAND === 'true') process.exit(17);
 
 test('Web manifest projects narrow/full/zero selections into dynamic outputs', async () => {
   // eslint-disable-next-line @nx/enforce-module-boundaries -- contract test checks the Web-owned canonical list
-  const { WEB_FLOW_SPECS } = await import('../../../apps/web/web-flow-specs.mjs');
+  const { WEB_SPECIALIZED_SPECS } = await import('../../../apps/web/web-specialized-specs.mjs');
   const { writeManifestOutputs } = await import('../generate-delivery-manifest.mjs');
   const { mkdtemp, readFile, rm } = await import('node:fs/promises');
   const { tmpdir } = await import('node:os');
@@ -490,18 +490,18 @@ test('Web manifest projects narrow/full/zero selections into dynamic outputs', a
       {
         event: 'pull_request',
         full: false,
-        files: [`apps/web/e2e/${WEB_FLOW_SPECS[0]}`],
+        files: [`apps/web/e2e/${WEB_SPECIALIZED_SPECS[0]}`],
         count: 1,
-        specs: [WEB_FLOW_SPECS[0]],
+        specs: [WEB_SPECIALIZED_SPECS[0]],
       },
       {
         event: 'pull_request',
         full: false,
         files: ['apps/web/src/App.vue'],
-        count: 4,
-        specs: WEB_FLOW_SPECS,
+        count: 1,
+        specs: WEB_SPECIALIZED_SPECS,
       },
-      { event: 'workflow_dispatch', full: true, files: [], count: 4, specs: WEB_FLOW_SPECS },
+      { event: 'workflow_dispatch', full: true, files: [], count: 1, specs: WEB_SPECIALIZED_SPECS },
       { event: 'pull_request', full: false, files: ['docs/README.md'], count: 0, specs: [] },
     ]) {
       const m = await buildDeliveryManifest({
@@ -640,4 +640,32 @@ appendFileSync(process.env.UNIT_CALLS_PATH, JSON.stringify(process.argv.slice(2)
   } finally {
     await rm(root, { recursive: true, force: true });
   }
+});
+
+test('migrated browser contracts run for production views and transitive package inputs', async () => {
+  for (const [file, projects] of [
+    ['apps/web/src/auth/WebAuthView.vue', ['web']],
+    ['apps/web/src/auth/validation.ts', ['web']],
+    ['packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue', ['app-vue']],
+    ['packages/ui-vue-shadcn/src/components/ui/input/Input.vue', ['ui-vue-shadcn']],
+    ['packages/contracts/src/index.ts', ['contracts', 'ui-storybook']],
+  ]) {
+    const m = await buildDeliveryManifest({
+      base: 'base',
+      head: 'head',
+      event: 'pull_request',
+      scope: { ...scope, projects },
+      files: [file],
+    });
+    assert.equal(m.laneDetails.componentBrowser.required, true, file);
+    assert.deepEqual(m.laneDetails.componentBrowser.files, [file]);
+  }
+  const backend = await buildDeliveryManifest({
+    base: 'base',
+    head: 'head',
+    event: 'pull_request',
+    scope: { ...scope, projects: ['api'] },
+    files: ['apps/api/src/health.ts'],
+  });
+  assert.equal(backend.laneDetails.componentBrowser.required, false);
 });

@@ -22,7 +22,7 @@ export const CI_CHECK_JOBS = Object.freeze({
   'build-backend': (m) => m.lanes.web === true,
   'verification-children': (m) =>
     m.lanes.boundary === true || m.lanes.integration === true || m.lanes.performance === true,
-  'web-flow-shard': (m) => m.lanes.web === true,
+  'web-specialized': (m) => m.lanes.web === true,
   'component-browser': (m) => m.laneDetails?.componentBrowser?.required === true,
   contract: (m) => m.laneDetails?.contract?.required === true,
 });

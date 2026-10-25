@@ -2826,10 +2826,6 @@
       "p50Seconds": 8.4
     },
     {
-      "project": "app-vue",
-      "p50Seconds": 8.1
-    },
-    {
       "project": "setting",
       "p50Seconds": 7.4
     },

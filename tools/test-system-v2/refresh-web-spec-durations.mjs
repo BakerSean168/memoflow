@@ -2,11 +2,11 @@
 /* eslint-disable @nx/enforce-module-boundaries -- governance tool maintains the Web-owned timing history */
 /**
  * Rebuilds tools/test-system-v2/web-spec-durations.json from Playwright JSON
- * reports (the `web-flow-*-results` artifacts of CI runs).
+ * reports (the `web-specialized-*-results` artifacts of CI runs).
  *
- *   gh run download <run-id> --pattern 'web-flow-*-results' --dir reports/web-timing/<run-id>
+ *   gh run download <run-id> --pattern 'web-specialized-*-results' --dir reports/web-timing/<run-id>
  *   node tools/test-system-v2/refresh-web-spec-durations.mjs --source "CI runs <ids>" \
- *     reports/web-timing/<run-id>/web-flow-0-results/results.json ...
+ *     reports/web-timing/<run-id>/web-specialized-0-results/provider-results.json ...
  *
  * Per run, a spec weighs the sum of its first-attempt test durations; across
  * runs the median is kept. Results reported under a file that is no longer a
@@ -15,7 +15,7 @@
  */
 import { readFile, writeFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
-import { WEB_FLOW_SPECS } from '../../apps/web/web-flow-specs.mjs';
+import { WEB_SPECIALIZED_SPECS } from '../../apps/web/web-specialized-specs.mjs';
 import { medianDuration } from './lib/shard-balance.mjs';
 
 export const WEB_SPEC_DURATIONS_PATH = 'tools/test-system-v2/web-spec-durations.json';
@@ -110,20 +110,23 @@ async function main() {
   }
   const sources = Object.fromEntries(
     await Promise.all(
-      WEB_FLOW_SPECS.map(async (spec) => [spec, await readFile(`apps/web/e2e/${spec}`, 'utf8')]),
+      WEB_SPECIALIZED_SPECS.map(async (spec) => [
+        spec,
+        await readFile(`apps/web/e2e/${spec}`, 'utf8'),
+      ]),
     ),
   );
   const history = buildDurationHistory({
     runs: [...byRun.values()],
-    specs: [...WEB_FLOW_SPECS],
+    specs: [...WEB_SPECIALIZED_SPECS],
     titleOwners: indexTitles(sources),
     source,
     generatedAt: new Date().toISOString(),
   });
   await writeFile(WEB_SPEC_DURATIONS_PATH, `${JSON.stringify(history, null, 2)}\n`);
-  const missing = WEB_FLOW_SPECS.filter((spec) => !history.specs[spec]);
+  const missing = WEB_SPECIALIZED_SPECS.filter((spec) => !history.specs[spec]);
   console.log(
-    `[web-spec-durations] ${Object.keys(history.specs).length}/${WEB_FLOW_SPECS.length} specs from ${byRun.size} run(s)` +
+    `[web-spec-durations] ${Object.keys(history.specs).length}/${WEB_SPECIALIZED_SPECS.length} specs from ${byRun.size} run(s)` +
       (missing.length ? `; missing: ${missing.join(', ')}` : ''),
   );
 }

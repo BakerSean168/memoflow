@@ -121,7 +121,7 @@ test('docs-only run passes with validate/web/verification skipped by the manifes
   );
   const result = check({ needs: healthyNeeds(m), manifest: m });
   assert.equal(result.state, 'success');
-  assert.equal(result.jobs['web-flow-shard'].expected, 'skipped');
+  assert.equal(result.jobs['web-specialized'].expected, 'skipped');
 });
 
 test('unit skip is allowed only when the manifest scope has no unit projects', () => {
@@ -137,16 +137,16 @@ for (const result of ['failure', 'cancelled', 'skipped']) {
   test(`enabled lane job ${result} fails the gate`, () => {
     const m = manifest();
     const needs = healthyNeeds(m);
-    needs['web-flow-shard'].result = result;
-    assert.deepEqual(check({ needs, manifest: m }).failures, [`web-flow-shard:${result}`]);
+    needs['web-specialized'].result = result;
+    assert.deepEqual(check({ needs, manifest: m }).failures, [`web-specialized:${result}`]);
   });
 }
 
 test('a lane that ran although the manifest disabled it fails the gate', () => {
   const m = manifest({ web: false });
   const needs = healthyNeeds(m);
-  needs['web-flow-shard'].result = 'success';
-  assert.deepEqual(check({ needs, manifest: m }).failures, ['web-flow-shard:unexpected-success']);
+  needs['web-specialized'].result = 'success';
+  assert.deepEqual(check({ needs, manifest: m }).failures, ['web-specialized:unexpected-success']);
 });
 
 test('verification sub-lane outputs are checked against the manifest', () => {
@@ -554,7 +554,7 @@ test('CI upload keeps Web receipts from different run attempts distinct', async 
   );
   const jobs = workflowJobs(workflow);
   assert.match(
-    jobs['web-flow-shard'],
+    jobs['web-specialized'],
     /name: web-shard-receipt-\$\{\{ github\.run_attempt \}\}-\$\{\{ strategy\.job-index \}\}/u,
   );
   assert.match(jobs['ci-check'], /pattern: web-shard-receipt-\*/u);

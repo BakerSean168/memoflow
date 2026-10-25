@@ -102,7 +102,7 @@ export default defineConfig(({ mode, command }) => {
   // host-dev lane can prefer one stable upfront bundle instead.
   const useBundledDevLazy = env.MEMOFLOW_VITE_BUNDLED_DEV_LAZY !== 'false';
 
-  // E2E lanes (web:e2e and web:e2e:ai-workspace) spawn this dev server with
+  // Specialized browser acceptance (web:e2e and web:e2e:ai-provider) spawn this dev server with
   // NODE_ENV=test. Workspace packages that are not source-aliased are served
   // from packages/*/dist, and a concurrent nx build rewriting those files made
   // Vite broadcast HMR full-reloads — page navigations that interrupted

@@ -10,6 +10,15 @@ import {
 
 const read = (file) => readFile(new URL(`../../../${file}`, import.meta.url), 'utf8');
 
+test('every Unit shard provides history required when LPT moves the live Git selector test', async () => {
+  const workflow = await read('.github/workflows/ci.yml');
+  for (const job of ['unit-1', 'unit-2', 'unit-3']) {
+    const section = workflow.match(new RegExp(`^  ${job}:\\n([\\s\\S]*?)(?=^  \\S)`, 'mu'))?.[1];
+    assert.ok(section, job);
+    assert.match(section, /with: \{ fetch-depth: 0 \}/u, job);
+  }
+});
+
 test('cache writes are main-only post-job saves and every other ref is restore-only', async () => {
   const action = await read('.github/actions/restore-main-cache/action.yml');
   const [main, restore] = action.split('    - id: read');
@@ -55,7 +64,7 @@ test('workspace cache keys bind lockfile and architecture; only Nx binds job, ma
   );
   const ci = await read('.github/workflows/ci.yml');
   assert.match(
-    ci.slice(ci.indexOf('  web-flow-shard:')),
+    ci.slice(ci.indexOf('  web-specialized:')),
     /cache-variant: web-\$\{\{ strategy.job-index \}\}/u,
   );
 });

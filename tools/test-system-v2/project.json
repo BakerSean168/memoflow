@@ -27,7 +27,7 @@
       "cache": true,
       "inputs": [
         "{projectRoot}/**/*",
-        "{workspaceRoot}/apps/web/web-flow-specs.mjs",
+        "{workspaceRoot}/apps/web/web-specialized-specs.mjs",
         "{workspaceRoot}/tools/ci-cd-platform/generate-delivery-manifest.mjs",
         "{workspaceRoot}/tools/ci-cd-platform/lib/**/*",
         "{workspaceRoot}/tools/ci-cd-platform/unit-test-durations.json",

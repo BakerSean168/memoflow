@@ -32,8 +32,8 @@ jobs:
   #   endpoints): fetch-depth 2 = the merge commit plus its parents, which are exactly the
   #   manifest head and base for both pull_request and push events.
   # - Aggregation-only jobs (delivery-observation, ci-check) sparse-checkout tools/ci-cd-platform.
-  # - Exception: unit-3 keeps full history - its shard contains tools/ci-cd-platform's own
-  #   test suite, whose affected-shadow live-mode test resolves HEAD^ against the real repo.
+  # - Unit shards keep full history: LPT can assign ci-cd-platform's live Git
+  #   selector test to any shard; that test checks a historical commit range.
   scope-detector:
     name: Scope Detector
     runs-on: ubuntu-latest
@@ -196,7 +196,7 @@ jobs:
     env: { UNIT_SHARD_ID: unit-1 }
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with: { fetch-depth: 2 }
+        with: { fetch-depth: 0 }
       - uses: ./.github/actions/setup-nx-affected-job
         with:
           node-version: '${{ env.NODE_VERSION }}'
@@ -218,7 +218,7 @@ jobs:
     env: { UNIT_SHARD_ID: unit-2 }
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with: { fetch-depth: 2 }
+        with: { fetch-depth: 0 }
       - uses: ./.github/actions/setup-nx-affected-job
         with:
           node-version: '${{ env.NODE_VERSION }}'
@@ -270,13 +270,7 @@ jobs:
           setup-uv: 'false'
           consume-delivery-manifest: 'true'
       - run: pnpm exec playwright install chromium
-      # The story import graph reaches workspace packages whose subpath
-      # exports resolve to dist (e.g. @memoflow/domain-shared/shared) and
-      # which the Storybook alias lists intentionally do not cover; a clean
-      # checkout must build the workspace first (the old in-Web-job step
-      # got this for free from the Build job).
-      - name: Build workspace packages
-        run: pnpm exec nx run-many -t build --all --parallel=3
+      # The audited interaction suites resolve workspace imports from source.
       - name: Storybook interaction tests (Vitest Browser Mode)
         run: pnpm exec nx run ui-storybook:test:interaction
       - name: Upload Storybook interaction evidence
@@ -341,7 +335,7 @@ jobs:
           setup-uv: 'true'
           lane: validate
           consume-delivery-manifest: 'true'
-      # Web Flow shards execute the Vite dev server from source; their only
+      # Specialized browser acceptance executes Vite source; its only
       # build-artifact dependencies are the API and database dists. Building
       # just those here takes the web build (and the full Build job) off the
       # shards' critical path. The full Build job still produces and uploads
@@ -425,7 +419,7 @@ jobs:
       - name: Create API runtime dependency closure
         if: ${{ hashFiles('apps/api/dist/**') != '' }}
         run: node ./tools/ci-cd-platform/create-runtime-closure.mjs --manifest scope/delivery-manifest-v1.json --output-dir api-runtime-closure --output reports/ci-cd-platform/api-runtime-closure-artifact-manifest.json
-      # The Web artifact has no other consumer-side verifier left (Web Flow
+      # The Web artifact has no other consumer-side verifier left (browser
       # shards run from source and no longer download it), so the Build job
       # verifies its own Web and Migrator artifacts before upload; the
       # candidate chain re-verifies the uploaded bundle against these
@@ -580,8 +574,8 @@ jobs:
            (needs.scope-detector.outputs.lane_performance == 'true' && steps.lane_status.outputs.performance != 'success'))
         run: exit 1
 
-  web-flow-shard:
-    name: Web Flow Shard (${{ matrix.shard }})
+  web-specialized:
+    name: Web Specialized Acceptance (${{ matrix.shard }})
     needs: [scope-detector, build-backend]
     if: needs.scope-detector.result == 'success' && needs.build-backend.result == 'success' && needs.scope-detector.outputs.lane_web == 'true'
     runs-on: ubuntu-24.04
@@ -666,10 +660,10 @@ jobs:
             echo "::error::Visual baselines require the WenQuanYi Zen Hei fallback for CJK glyphs in English text."
             exit 1
           fi
-      # start-api-server.ts builds the API immediately before launching its isolated process.
+      # Only the dedicated Provider acceptance starts the built API; ordinary Web Flow is retired.
       - run: node ./tools/test-system-v2/run-command.mjs -- node ./tools/test-system-v2/run-web-shard.mjs ${{ matrix.shard }}
         env:
-          TEST_REPORT_NAME: web-flow-${{ strategy.job-index }}
+          TEST_REPORT_NAME: web-ai-provider
           DELIVERY_LANE: web
           E2E_PREBUILT_ARTIFACT: '1'
       - name: Upload actual Web shard execution receipt
@@ -697,23 +691,17 @@ jobs:
         env:
           TEST_REPORT_NAME: web-visual-${{ strategy.job-index }}
           DELIVERY_LANE: web
-      - name: Secure AI Provider product acceptance
-        if: strategy.job-index == 0
-        run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run web:e2e:ai-provider
-        env:
-          TEST_REPORT_NAME: web-ai-provider
-          DELIVERY_LANE: web
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         if: always()
         with:
-          name: web-flow-${{ strategy.job-index }}-results
-          path: apps/web/test-results/results.json
+          name: web-specialized-${{ strategy.job-index }}-results
+          path: apps/web/test-results/provider-results.json
           if-no-files-found: ignore
           retention-days: 14
       - if: failure()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: web-flow-${{ strategy.job-index }}-failure
+          name: web-specialized-${{ strategy.job-index }}-failure
           path: |
             apps/web/test-results
             apps/web/playwright-report
@@ -737,7 +725,7 @@ jobs:
       - build
       - build-backend
       - verification-children
-      - web-flow-shard
+      - web-specialized
       - component-browser
       - contract
     if: always()
@@ -792,7 +780,7 @@ jobs:
       - build
       - build-backend
       - verification-children
-      - web-flow-shard
+      - web-specialized
       - component-browser
       - contract
     if: always()

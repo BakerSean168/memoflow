@@ -61,18 +61,18 @@
         "{workspaceRoot}/apps/web/playwright-report"
       ],
       "options": {
-        "command": "playwright test",
+        "command": "node ../../node_modules/tsx/dist/cli.mjs ./e2e/helpers/run-ai-provider-playwright.ts",
         "cwd": "apps/web"
       },
       "configurations": {
         "ci": {
-          "command": "playwright test --reporter=html,json,list"
+          "command": "node ../../node_modules/tsx/dist/cli.mjs ./e2e/helpers/run-ai-provider-playwright.ts --reporter=html,json,list"
         },
         "headed": {
-          "command": "playwright test --headed"
+          "command": "node ../../node_modules/tsx/dist/cli.mjs ./e2e/helpers/run-ai-provider-playwright.ts --headed"
         },
         "debug": {
-          "command": "playwright test --debug"
+          "command": "node ../../node_modules/tsx/dist/cli.mjs ./e2e/helpers/run-ai-provider-playwright.ts --debug"
         }
       }
     },
@@ -94,7 +94,7 @@
     "e2e:ui": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "playwright test --ui",
+        "command": "node ../../node_modules/tsx/dist/cli.mjs ./e2e/helpers/run-ai-provider-playwright.ts --ui",
         "cwd": "apps/web"
       }
     },
@@ -138,17 +138,6 @@
       ],
       "options": {
         "command": "node ./apps/web/e2e/helpers/run-local-docker-playwright.mjs"
-      }
-    },
-    "e2e:ai-workspace": {
-      "executor": "nx:run-commands",
-      "outputs": [
-        "{workspaceRoot}/apps/web/test-results",
-        "{workspaceRoot}/apps/web/playwright-ai-workspace-report"
-      ],
-      "options": {
-        "command": "node ../../node_modules/tsx/dist/cli.mjs ./e2e/helpers/run-ai-workspace-playwright.ts",
-        "cwd": "apps/web"
       }
     },
     "e2e:shell": {
