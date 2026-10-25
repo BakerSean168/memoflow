@@ -7,6 +7,7 @@ import { AUTH_SERVICE_KEY } from '@memoflow/app-vue/di';
 import { AUTH_WEB_SERVICE_KEY } from './service';
 import { enUSAuthMessages, zhCNAuthMessages } from './messages';
 import WebAuthView from './WebAuthView.vue';
+import '../styles/index.css';
 
 const password = 'Test123456!';
 const signUp = fn(async () => ({ ok: true, data: { session: null } }));
@@ -26,6 +27,7 @@ const meta = {
     const className = document.documentElement.className;
     const theme = document.documentElement.getAttribute('data-theme');
     const lang = document.documentElement.lang;
+    const colorScheme = document.documentElement.style.colorScheme;
     localStorage.setItem(
       'presentation-preference',
       JSON.stringify({ locale: 'en-US', theme: 'light' }),
@@ -48,6 +50,7 @@ const meta = {
       if (theme === null) document.documentElement.removeAttribute('data-theme');
       else document.documentElement.setAttribute('data-theme', theme);
       document.documentElement.lang = lang;
+      document.documentElement.style.colorScheme = colorScheme;
     };
   },
   render: () => ({
@@ -213,6 +216,9 @@ export const SmallViewport: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
+    const viewport = canvasElement.ownerDocument.defaultView!;
+    await expect(viewport.innerWidth).toBe(360);
+    await expect(viewport.innerHeight).toBe(640);
     await userEvent.click(canvas.getByRole('button', { name: /sign up|立即注册|注册/i }));
     await userEvent.click(canvas.getByTestId('register-submit-button'));
     await expect(canvas.getByTestId('register-confirm-password-error')).toBeVisible();
@@ -220,6 +226,7 @@ export const SmallViewport: Story = {
     submit.scrollIntoView();
     await expect(submit).toBeVisible();
     const page = canvas.getByTestId('web-auth-page');
+    await expect(viewport.getComputedStyle(page).minHeight).toBe('640px');
     await expect(page.scrollWidth).toBeLessThanOrEqual(page.clientWidth + 1);
     await expect(page.scrollHeight).toBeGreaterThan(640);
   },
