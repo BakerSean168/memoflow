@@ -21,6 +21,16 @@ export default defineConfig({
         // Harness-only source access; production package exports stay unchanged.
         ['@memoflow/app-vue', 'packages/app-vue/src'],
         ['@memoflow/goal-client', 'packages/goal-client/src/index.ts'],
+        ['@memoflow/goal-core/ids', 'packages/goal-core/src/ids.ts'],
+        [
+          '@memoflow/goal-core/key-result-progress-calculator',
+          'packages/goal-core/src/key-result-progress-calculator.ts',
+        ],
+        [
+          '@memoflow/goal-core/goal-record-preview',
+          'packages/goal-core/src/goal-record-preview.ts',
+        ],
+        ['@memoflow/goal-core', 'packages/goal-core/src/index.ts'],
         ['@memoflow/utils/logger', 'packages/utils/src/logger/index.ts'],
         ['@memoflow/time', 'packages/time/src/index.ts'],
         ['@memoflow/http-client', 'packages/http-client/src/index.ts'],
