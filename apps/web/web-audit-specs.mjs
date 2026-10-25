@@ -1,10 +1,9 @@
 /**
  * Nightly-only Web acceptance.
  *
- * Required PR/main Web Flow already owns Goal/Task/Schedule CRUD, notifications,
- * auth, AI workflows, Notes, Routine, and shell responsiveness. This audit keeps
- * only supplemental current-owner coverage rather than maintaining duplicate
- * tests for retired product surfaces.
+ * Ordinary PR Web Flow is retired in Issue #625. These five supplemental
+ * browser audits remain nightly-only; Provider and visual acceptance have
+ * separate explicit execution contracts.
  */
 export const WEB_AUDIT_SPECS = Object.freeze([
   'account/account-management.spec.ts',

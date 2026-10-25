@@ -14,7 +14,8 @@
       "lifecycle": "active",
       "execution": {
         "kind": "nx",
-        "target": "web:e2e"
+        "target": "web:e2e",
+        "entrypoint": "apps/web/e2e/helpers/run-ai-provider-playwright.ts"
       },
       "automation": [
         {
@@ -26,11 +27,6 @@
           "kind": "github-workflow",
           "workflow": ".github/workflows/nightly-audit.yml",
           "target": "web:e2e:audit"
-        },
-        {
-          "kind": "github-workflow",
-          "workflow": ".github/workflows/ci.yml",
-          "target": "web:e2e:ai-provider"
         },
         {
           "kind": "github-workflow",
@@ -189,27 +185,9 @@
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.config.ts"
     },
-    "apps/web/e2e/ai/goal-workflow/checkpoint-identity.spec.ts": {
-      "surface": "ai",
-      "role": "canonical",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
-    },
-    "apps/web/e2e/ai/goal-workflow/multi-session.spec.ts": {
-      "surface": "ai",
-      "role": "canonical",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
-    },
     "apps/web/e2e/ai/provider-onboarding.spec.ts": {
       "surface": "ai",
       "role": "supplemental",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
-    },
-    "apps/web/e2e/authentication/auth-login.spec.ts": {
-      "surface": "authentication",
-      "role": "canonical",
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.config.ts"
     },
@@ -218,18 +196,6 @@
       "role": "supplemental",
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.oauth-real.config.ts"
-    },
-    "apps/web/e2e/authentication/auth-password.spec.ts": {
-      "surface": "authentication",
-      "role": "canonical",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
-    },
-    "apps/web/e2e/authentication/auth-register.spec.ts": {
-      "surface": "authentication",
-      "role": "canonical",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
     },
     "apps/web/e2e/desktop-screenshots/thesis-capture.spec.ts": {
       "surface": "desktop-screenshots",
@@ -344,12 +310,6 @@
       "role": "reference",
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.task-visual-grammar.config.ts"
-    },
-    "apps/web/e2e/user-settings/persistence.spec.ts": {
-      "surface": "user-settings",
-      "role": "canonical",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
     },
     "apps/web/e2e/ux/command-palette.spec.ts": {
       "surface": "ux",

@@ -41,9 +41,23 @@ core floor 从十个文件缩为三个：auth-login、notification-inbox-loop、
 - 通知点击、筛选和计数显示由 `NotificationListPage.spec.ts` 负责；创建、已读、全部已读及未读查询由 Notification 的既有应用服务/用例测试负责。接受不再把页面点击、真实 Cookie、数据库和计数 UI 拼成一条 E2E。
 - 接受的信号缺口：整页真实 reload 后的审批/审阅拼装、真实浏览器 SSE 连接上的 30 秒网络观察、通知 UI→真实后端闭环。上述下层测试不声称逐条等价。
 
-最终 Web Flow 为 **6 文件 /10 用例**，相对原始 28/84 减少 22 文件 /74 用例（88.1%）。保留 checkpoint 身份隔离两例、多会话收敛一例、登录两例、密码重置一例、注册一例、设置持久化/跨标签三例。Provider onboarding、视觉、nightly 和 Desktop 专门 lane 未计入这十例。
+第三批结束时 Web Flow 为 **6 文件 /10 用例**，相对原始 28/84 减少 22 文件 /74 用例（88.1%）。保留 checkpoint 身份隔离两例、多会话收敛一例、登录两例、密码重置一例、注册一例、设置持久化/跨标签三例。Provider onboarding、视觉、nightly 和 Desktop 专门 lane 未计入这十例。
 
 core floor 只剩 `auth-login.spec.ts` 一文件两例；通知、scheduler、reminder owner 无专属 Web 扩展。unknown/shared/root 仍选全部六文件；按保留的原历史时长预算，全集现规划为一片，而非硬占四台 runner。不据此声称整轮 CI 已缩短。
+
+## 第四批：普通 Web Flow 全部退休
+
+用户进一步要求剩余六个文件也下沉。本批删除 checkpoint-identity、multi-session、auth-login、auth-password、auth-register、settings persistence；普通 Web Flow **28 文件/84 用例 → 0**，不再存在 core 保底。不是把六个文件藏到 nightly 或改成 skip。
+
+- 草稿恢复/稳定 create ID/身份隔离由既有 `useGoalDraftCheckpoint.spec.ts` 负责；会话事件的重排、迟到快照、改名和删除收敛由既有 `useAIChatSession.spec.ts` 负责。
+- 主题与通知偏好由既有 presentationPreferenceStore、NotificationSettings 和 UserPreferenceService 契约负责。接受不再逐条验证浏览器 reload/跨标签页/IndexedDB 的整系统拼装。
+- 新增 `apps/api/src/runtime/cloud-auth-http.integration.test.ts` 两例，走生产 ApiBootstrapper、Express、Better Auth 和 Prisma/PostgreSQL：注册后禁止未验证登录、捕获邮件链接并验证、错误密码、HttpOnly Cookie 与数据库会话、退出撤销和旧 Cookie 失效；密码重置经真实邮件 callback，旧密码失效、新密码成功、消费令牌后不可重放及 credential 数据库读回。只替换邮件发送和 Account owner 投影，不替换认证 handler、认证数据库或会话解析。
+- 认证页面契约仍由真实 Chromium `WebAuthView.stories.ts` 负责，`useWebAuth.spec.ts` 承担前端认证调用/错误状态；不声称代替真实浏览器跨页认证全旅程。
+- 删除仅供已退休 AI Flow 使用的约两千行 fixture、租约数据库镜像和专用启动 helper；专用 Provider/visual/nightly/Desktop 的运行面保留。
+
+原 Web job 改为 **Web Specialized Acceptance**，只运行 Provider onboarding 和视觉比较。Provider 执行入口及实际 report 纳入既有 manifest/收据，移除原先的第二处 Provider 调用，避免跑两遍。`web-specialized-specs.mjs` 明确只列 Provider 一个文件；旧 flow/core 清单删除。选择器在 Web lane 启用时保留专用验收，Storybook-only 仍只跑组件道；未知/共享/full 不能使专用验收消失。
+
+这不代表全部浏览器开销清零：Provider 仍启动 built API/Vite/PostgreSQL，仍等 Build；视觉仍需要浏览器及字体。现在该依赖由专用验收承担，不能再说十条普通 Web Flow 必须等 Build。nightly 五个补充文件、Desktop、本地手工/参考文件不在本批退休范围。
 
 ## 执行与选择契约
 
@@ -51,7 +65,7 @@ Component Browser 不再在 job 内运行 `build --all`。Storybook 为缺失的
 
 迁移必须同时保护调度：修改 Story、Web Auth 源码、App-Vue/UI 控件源码，或 Nx 判断影响 `ui-storybook` 的传递依赖，均要求 Component Browser。否则“把 E2E 删了、生产组件改动时却不跑替代测试”会丢失门禁。Manifest 回归测试覆盖这些情况和无关 backend 反例；现有 CI Check 在 required producer 跳过时仍判失败。收据继续使用 `storybook-results.json`，要求 17 条全部成功、零 skipped/todo，Story ID 唯一。
 
-普通 PR 已经按 changed files / Nx affected 选择项目和 Web spec，非每次全量。Web owner 变更保留登录一个 core spec 地板，再加 owner 扩展；Goal/Task/Repository 还有 AI/Schedule 消费者扩展。只改 canonical spec 则只选择对应文件。未知、共享、root 改动扩大到完整集合；main、手动 full 和 nightly 仍承担更广验证。第二、三批已移除普通 CRUD、审批与通知的跨 owner 地板，风险收缩由用户明确接受；真实 owner 的下层验证仍由 affected targets 承担。
+普通 PR 继续按 changed files / Nx affected 选择项目；普通 Web Flow/core 已清零，不再选择它们。当前 Web lane 代表 Provider/visual 专用验收，保持已启用 Web scope 的专用测试；Storybook-only 只跑 Component Browser。main、手动 full 和 nightly 继续承担其明确配置的更广验证。真实 owner 的下层测试由 affected targets 承担。
 
 ## 实测与边界
 

@@ -449,7 +449,7 @@ if (process.env.FAIL_COMMAND === 'true') process.exit(17);
 
 test('Web manifest projects narrow/full/zero selections into dynamic outputs', async () => {
   // eslint-disable-next-line @nx/enforce-module-boundaries -- contract test checks the Web-owned canonical list
-  const { WEB_FLOW_SPECS } = await import('../../../apps/web/web-flow-specs.mjs');
+  const { WEB_SPECIALIZED_SPECS } = await import('../../../apps/web/web-specialized-specs.mjs');
   const { writeManifestOutputs } = await import('../generate-delivery-manifest.mjs');
   const { mkdtemp, readFile, rm } = await import('node:fs/promises');
   const { tmpdir } = await import('node:os');
@@ -461,18 +461,18 @@ test('Web manifest projects narrow/full/zero selections into dynamic outputs', a
       {
         event: 'pull_request',
         full: false,
-        files: [`apps/web/e2e/${WEB_FLOW_SPECS[0]}`],
+        files: [`apps/web/e2e/${WEB_SPECIALIZED_SPECS[0]}`],
         count: 1,
-        specs: [WEB_FLOW_SPECS[0]],
+        specs: [WEB_SPECIALIZED_SPECS[0]],
       },
       {
         event: 'pull_request',
         full: false,
         files: ['apps/web/src/App.vue'],
         count: 1,
-        specs: WEB_FLOW_SPECS,
+        specs: WEB_SPECIALIZED_SPECS,
       },
-      { event: 'workflow_dispatch', full: true, files: [], count: 1, specs: WEB_FLOW_SPECS },
+      { event: 'workflow_dispatch', full: true, files: [], count: 1, specs: WEB_SPECIALIZED_SPECS },
       { event: 'pull_request', full: false, files: ['docs/README.md'], count: 0, specs: [] },
     ]) {
       const m = await buildDeliveryManifest({

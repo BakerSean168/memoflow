@@ -1,39 +1,14 @@
 {
   "version": 2,
-  "generatedAt": "2026-10-18T16:08:25.080Z",
-  "observedAt": "2026-10-18T09:42:26.319Z",
-  "source": "CI runs 39119993744, 39117495095, 39116027887 (main @69f013b era, web-flow-*-results); goal-workflow tests attributed by title to ai/goal-workflow/*",
-  "statistic": "median across runs of per-run first-attempt test duration",
+  "generatedAt": "2026-10-25T07:03:18.000Z",
+  "observedAt": "2026-10-25T07:02:59.240Z",
+  "source": "CI run 40170637281 job 121101436947 @0f82c0e; Provider first-attempt test durations reported as 35.3s + 14.4s (rounded to 0.1s)",
+  "statistic": "sum of reported first-attempt test durations; one observed run",
   "specs": {
-    "ai/goal-workflow/checkpoint-identity.spec.ts": {
-      "durationMs": 68299,
-      "samples": 3,
-      "observedAt": "2026-10-18T09:42:26.319Z"
-    },
-    "ai/goal-workflow/multi-session.spec.ts": {
-      "durationMs": 23545,
-      "samples": 3,
-      "observedAt": "2026-10-18T09:42:26.319Z"
-    },
-    "authentication/auth-login.spec.ts": {
-      "durationMs": 30787,
-      "samples": 3,
-      "observedAt": "2026-10-18T09:42:26.319Z"
-    },
-    "authentication/auth-password.spec.ts": {
-      "durationMs": 22160,
-      "samples": 3,
-      "observedAt": "2026-10-18T09:42:26.319Z"
-    },
-    "authentication/auth-register.spec.ts": {
-      "durationMs": 7322,
-      "samples": 3,
-      "observedAt": "2026-10-18T09:42:26.319Z"
-    },
-    "user-settings/persistence.spec.ts": {
-      "durationMs": 46685,
-      "samples": 3,
-      "observedAt": "2026-10-18T09:42:48.857Z"
+    "ai/provider-onboarding.spec.ts": {
+      "durationMs": 49700,
+      "samples": 1,
+      "observedAt": "2026-10-25T07:02:59.240Z"
     }
   }
 }

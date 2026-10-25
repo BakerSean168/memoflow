@@ -519,8 +519,8 @@ jobs:
            (needs.scope-detector.outputs.lane_performance == 'true' && steps.lane_status.outputs.performance != 'success'))
         run: exit 1
 
-  web-flow-shard:
-    name: Web Flow Shard (${{ matrix.shard }})
+  web-specialized:
+    name: Web Specialized Acceptance (${{ matrix.shard }})
     needs: [scope-detector, build]
     if: needs.scope-detector.result == 'success' && needs.build.result == 'success' && needs.scope-detector.outputs.lane_web == 'true'
     runs-on: ubuntu-24.04
@@ -607,10 +607,10 @@ jobs:
             echo "::error::Visual baselines require the WenQuanYi Zen Hei fallback for CJK glyphs in English text."
             exit 1
           fi
-      # start-api-server.ts builds the API immediately before launching its isolated process.
+      # Only the dedicated Provider acceptance starts the built API; ordinary Web Flow is retired.
       - run: node ./tools/test-system-v2/run-command.mjs -- node ./tools/test-system-v2/run-web-shard.mjs ${{ matrix.shard }}
         env:
-          TEST_REPORT_NAME: web-flow-${{ strategy.job-index }}
+          TEST_REPORT_NAME: web-ai-provider
           DELIVERY_LANE: web
           E2E_PREBUILT_ARTIFACT: '1'
       - name: Upload actual Web shard execution receipt
@@ -638,23 +638,17 @@ jobs:
         env:
           TEST_REPORT_NAME: web-visual-${{ strategy.job-index }}
           DELIVERY_LANE: web
-      - name: Secure AI Provider product acceptance
-        if: strategy.job-index == 0
-        run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run web:e2e:ai-provider
-        env:
-          TEST_REPORT_NAME: web-ai-provider
-          DELIVERY_LANE: web
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         if: always()
         with:
-          name: web-flow-${{ strategy.job-index }}-results
-          path: apps/web/test-results/results.json
+          name: web-specialized-${{ strategy.job-index }}-results
+          path: apps/web/test-results/provider-results.json
           if-no-files-found: ignore
           retention-days: 14
       - if: failure()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: web-flow-${{ strategy.job-index }}-failure
+          name: web-specialized-${{ strategy.job-index }}-failure
           path: |
             apps/web/test-results
             apps/web/playwright-report
@@ -677,7 +671,7 @@ jobs:
       - typecheck
       - build
       - verification-children
-      - web-flow-shard
+      - web-specialized
       - component-browser
       - contract
     if: always()
@@ -727,7 +721,7 @@ jobs:
       - typecheck
       - build
       - verification-children
-      - web-flow-shard
+      - web-specialized
       - component-browser
       - contract
     if: always()

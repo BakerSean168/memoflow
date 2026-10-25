@@ -319,6 +319,70 @@
       ],
       "issue": "https://github.com/BakerSean168/memoflow/issues/625",
       "coverageDisposition": "existing lower-layer contracts; user accepts loss of browser refresh/network/notification whole-system signal"
+    },
+    {
+      "path": "apps/web/e2e/ai/goal-workflow/checkpoint-identity.spec.ts",
+      "reason": "User authorized the remaining ordinary Web Flow to retire in Issue #625. Existing state/checkpoint/event/component contracts and real HTTP/PostgreSQL authentication own the lower-layer behavior. Actual browser reload, IndexedDB host assembly, cross-browser transport and UI auth navigation are accepted signal losses, not assertion-equivalent replacements.",
+      "sourceSha256": "ee299bd8b4616d07d402d75073c6503a6daddf2322677b46840207449ee88cee",
+      "replacements": [
+        "packages/app-vue/src/modules/goal/composables/useGoalDraftCheckpoint.spec.ts"
+      ],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625",
+      "coverageDisposition": "lower-layer ownership; accepted loss of ordinary whole-system Web journey"
+    },
+    {
+      "path": "apps/web/e2e/ai/goal-workflow/multi-session.spec.ts",
+      "reason": "User authorized the remaining ordinary Web Flow to retire in Issue #625. Existing state/checkpoint/event/component contracts and real HTTP/PostgreSQL authentication own the lower-layer behavior. Actual browser reload, IndexedDB host assembly, cross-browser transport and UI auth navigation are accepted signal losses, not assertion-equivalent replacements.",
+      "sourceSha256": "ad06ea2a204a9e0d1c4477e7595ad12c1766d0645658460551907fe6241765e8",
+      "replacements": ["packages/app-vue/src/modules/ai/composables/useAIChatSession.spec.ts"],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625",
+      "coverageDisposition": "lower-layer ownership; accepted loss of ordinary whole-system Web journey"
+    },
+    {
+      "path": "apps/web/e2e/authentication/auth-login.spec.ts",
+      "reason": "User authorized the remaining ordinary Web Flow to retire in Issue #625. Existing state/checkpoint/event/component contracts and real HTTP/PostgreSQL authentication own the lower-layer behavior. Actual browser reload, IndexedDB host assembly, cross-browser transport and UI auth navigation are accepted signal losses, not assertion-equivalent replacements.",
+      "sourceSha256": "0c9c21ead931f1c26825a500d218ea700b504c7a0a46d70d6558e0e8f36a1e35",
+      "replacements": [
+        "apps/api/src/runtime/cloud-auth-http.integration.test.ts",
+        "apps/web/src/auth/WebAuthView.stories.ts",
+        "apps/web/src/auth/useWebAuth.spec.ts"
+      ],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625",
+      "coverageDisposition": "lower-layer ownership; accepted loss of ordinary whole-system Web journey"
+    },
+    {
+      "path": "apps/web/e2e/authentication/auth-password.spec.ts",
+      "reason": "User authorized the remaining ordinary Web Flow to retire in Issue #625. Existing state/checkpoint/event/component contracts and real HTTP/PostgreSQL authentication own the lower-layer behavior. Actual browser reload, IndexedDB host assembly, cross-browser transport and UI auth navigation are accepted signal losses, not assertion-equivalent replacements.",
+      "sourceSha256": "8b5e59bde732dd8c08bdb9ebb3a280b4915f8c976dc34d011d5de74fd2694ca3",
+      "replacements": [
+        "apps/api/src/runtime/cloud-auth-http.integration.test.ts",
+        "apps/web/src/auth/useWebAuth.spec.ts"
+      ],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625",
+      "coverageDisposition": "lower-layer ownership; accepted loss of ordinary whole-system Web journey"
+    },
+    {
+      "path": "apps/web/e2e/authentication/auth-register.spec.ts",
+      "reason": "User authorized the remaining ordinary Web Flow to retire in Issue #625. Existing state/checkpoint/event/component contracts and real HTTP/PostgreSQL authentication own the lower-layer behavior. Actual browser reload, IndexedDB host assembly, cross-browser transport and UI auth navigation are accepted signal losses, not assertion-equivalent replacements.",
+      "sourceSha256": "af8c98348395aca1a51e61fb52b30a63fb41434ca503f2052b13e4240ee35233",
+      "replacements": [
+        "apps/api/src/runtime/cloud-auth-http.integration.test.ts",
+        "packages/cloud-auth/src/server/auth-flow.spec.ts"
+      ],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625",
+      "coverageDisposition": "lower-layer ownership; accepted loss of ordinary whole-system Web journey"
+    },
+    {
+      "path": "apps/web/e2e/user-settings/persistence.spec.ts",
+      "reason": "User authorized the remaining ordinary Web Flow to retire in Issue #625. Existing state/checkpoint/event/component contracts and real HTTP/PostgreSQL authentication own the lower-layer behavior. Actual browser reload, IndexedDB host assembly, cross-browser transport and UI auth navigation are accepted signal losses, not assertion-equivalent replacements.",
+      "sourceSha256": "c125fdd840ed2cade0b147d52e13739d42001f56e39f8cf87679d69d7fa1a895",
+      "replacements": [
+        "packages/app-vue/src/modules/setting/stores/presentationPreferenceStore.spec.ts",
+        "packages/app-vue/src/modules/setting/components/NotificationSettings.spec.ts",
+        "packages/setting/src/server/preferences/user-preference-service.spec.ts"
+      ],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625",
+      "coverageDisposition": "lower-layer ownership; accepted loss of ordinary whole-system Web journey"
     }
   ],
   "forbiddenReferences": [

@@ -18,7 +18,7 @@ import { composeGoal } from './compose-goal';
 import { composeTask } from './compose-task';
 
 // HTTP requests run the production route/validation/composer/owner/Prisma path.
-// Only session resolution is replaced; authentication UI has its own E2E owner.
+// Only session resolution is replaced; cloud-auth-http.integration owns real cookie sessions.
 let app: Express;
 let host: ApiBootstrapper | undefined;
 let ownerId: string;
