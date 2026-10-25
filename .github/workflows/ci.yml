@@ -35,7 +35,7 @@ jobs:
   # - Unit shards keep full history: LPT can assign ci-cd-platform's live Git
   #   selector test to any shard; that test checks a historical commit range.
   scope-detector:
-    name: Scope Detector
+    name: Changes
     runs-on: ubuntu-latest
     outputs:
       build_required: ${{ steps.scope.outputs.build_required }}
@@ -50,6 +50,8 @@ jobs:
       lane_boundary: ${{ steps.scope.outputs.lane_boundary }}
       lane_integration: ${{ steps.scope.outputs.lane_integration }}
       lane_web: ${{ steps.scope.outputs.lane_web }}
+      server_matrix: ${{ steps.scope.outputs.server_matrix }}
+      visual_matrix: ${{ steps.scope.outputs.visual_matrix }}
       web_matrix: ${{ steps.scope.outputs.web_matrix }}
       web_specs: ${{ steps.scope.outputs.web_specs }}
       web_estimated_total_ms: ${{ steps.scope.outputs.web_estimated_total_ms }}
@@ -66,6 +68,18 @@ jobs:
       has_desktop_boundary: ${{ steps.scope.outputs.has_desktop_boundary }}
       has_perf: ${{ steps.scope.outputs.has_perf }}
       has_web_flow: ${{ steps.scope.outputs.has_web_flow }}
+      job_lint: ${{ steps.scope.outputs.job_lint }}
+      job_unit_1: ${{ steps.scope.outputs.job_unit_1 }}
+      job_unit_2: ${{ steps.scope.outputs.job_unit_2 }}
+      job_unit_3: ${{ steps.scope.outputs.job_unit_3 }}
+      job_typecheck: ${{ steps.scope.outputs.job_typecheck }}
+      job_build: ${{ steps.scope.outputs.job_build }}
+      job_build_backend: ${{ steps.scope.outputs.job_build_backend }}
+      job_verification_children: ${{ steps.scope.outputs.job_verification_children }}
+      job_web_specialized: ${{ steps.scope.outputs.job_web_specialized }}
+      job_component_browser: ${{ steps.scope.outputs.job_component_browser }}
+      job_web_visual: ${{ steps.scope.outputs.job_web_visual }}
+      job_contract: ${{ steps.scope.outputs.job_contract }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with: { fetch-depth: 0 }
@@ -92,10 +106,8 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
-  affected-shadow:
-    name: Affected Selector Validation
-    needs: scope-detector
-    if: github.event_name == 'pull_request' && needs.scope-detector.result == 'success'
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -103,95 +115,17 @@ jobs:
       - uses: ./.github/actions/setup-nx-affected-job
         with:
           node-version: '${{ env.NODE_VERSION }}'
-          setup-python: 'false'
-          setup-uv: 'false'
-          enable-nx-cache: 'false'
-          consume-delivery-manifest: 'true'
-      - name: Validate task-based affected selection
-        run: >-
-          node ./tools/ci-cd-platform/shadow-affected.mjs
-          --base "$NX_BASE"
-          --head "$NX_HEAD"
-          --json-out reports/ci-cd-platform/affected-shadow-v1.json
-          --markdown-out reports/ci-cd-platform/affected-shadow-v1.md
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        if: always()
-        with:
-          name: affected-shadow-v1
-          path: |
-            reports/ci-cd-platform/affected-shadow-v1.json
-            reports/ci-cd-platform/affected-shadow-v1.md
-          if-no-files-found: warn
-          retention-days: 14
-
-  governance:
-    name: Static Checks (Fmt + Governance)
-    needs: scope-detector
-    if: needs.scope-detector.result == 'success' && (needs.scope-detector.outputs.lane_governance == 'true' || needs.scope-detector.outputs.capability_fmt == 'true')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with: { fetch-depth: 2 }
-      - uses: ./.github/actions/setup-nx-affected-job
-        with:
-          node-version: '${{ env.NODE_VERSION }}'
-          setup-python: 'false'
-          setup-uv: 'false'
-          lane: governance
-          consume-delivery-manifest: 'true'
-      - name: Format check (changed files; full scan on full runs)
-        shell: bash
-        run: |
-          mkdir -p reports/quality
-          FULL=$(node -p "require('./scope/delivery-manifest-v1.json').full")
-          BASE=$(node -p "require('./scope/delivery-manifest-v1.json').base ?? ''")
-          HEAD=$(node -p "require('./scope/delivery-manifest-v1.json').head ?? ''")
-          if [ "$FULL" = "true" ]; then
-            node ./tools/quality/fmt.mjs --check --all --receipt reports/quality/fmt-receipt.json
-          else
-            node ./tools/quality/fmt.mjs --check --changed --base "$BASE" --head "$HEAD" --receipt reports/quality/fmt-receipt.json
-          fi
-      - name: Upload format receipt
-        if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
-          name: quality-fmt-receipt-${{ github.run_id }}
-          path: reports/quality/fmt-receipt.json
-          if-no-files-found: warn
-          retention-days: 14
-      - name: Nx sync generators are applied
-        run: pnpm exec nx sync:check
-      # governance-check depends on test-system-v2:test:governance, which owns
-      # the single inventory + target-governance execution.
-      - run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run memoflow:governance-check
-        env: { TEST_REPORT_NAME: governance, DELIVERY_LANE: governance }
-      - uses: ./.github/actions/publish-lane-evidence
-        with: { lane: governance }
-
-  static-analysis:
-    name: Static Analysis
-    needs: scope-detector
-    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.lane_validate == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with: { fetch-depth: 2 }
-      - uses: ./.github/actions/setup-nx-affected-job
-        with:
-          node-version: '${{ env.NODE_VERSION }}'
           setup-python: 'true'
           setup-uv: 'true'
-          lane: validate
-          consume-delivery-manifest: 'true'
-      - run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx affected -t lint --parallel=3 --exclude=memoflow --outputStyle=static
-        env: { TEST_REPORT_NAME: static-analysis, DELIVERY_LANE: validate }
-      - uses: ./.github/actions/publish-lane-evidence
-        with: { lane: validate }
+      - name: Full workspace lint, format, sync and governance
+        run: node ./tools/ci-cd-platform/run-ci-tasks.mjs lint
+      - uses: ./.github/actions/publish-task-receipts
+        if: always()
 
   unit-1:
-    name: Unit Tests (1/3)
+    name: Test (1/3)
     needs: scope-detector
-    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.unit_1 == 'true'
+    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.job_unit_1 == 'true'
     runs-on: ubuntu-latest
     env: { UNIT_SHARD_ID: unit-1 }
     steps:
@@ -204,16 +138,18 @@ jobs:
           setup-uv: 'true'
           lane: validate
           consume-delivery-manifest: 'true'
-      - run: node ./tools/ci-cd-platform/run-unit-shard.mjs unit-1
+      - run: node ./tools/ci-cd-platform/run-ci-tasks.mjs unit-1
         env: { DELIVERY_LANE: validate }
       - uses: ./.github/actions/publish-lane-evidence
         if: always()
         with: { lane: validate }
+      - uses: ./.github/actions/publish-task-receipts
+        if: always()
 
   unit-2:
-    name: Unit Tests (2/3)
+    name: Test (2/3)
     needs: scope-detector
-    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.unit_2 == 'true'
+    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.job_unit_2 == 'true'
     runs-on: ubuntu-latest
     env: { UNIT_SHARD_ID: unit-2 }
     steps:
@@ -226,16 +162,18 @@ jobs:
           setup-uv: 'true'
           lane: validate
           consume-delivery-manifest: 'true'
-      - run: node ./tools/ci-cd-platform/run-unit-shard.mjs unit-2
+      - run: node ./tools/ci-cd-platform/run-ci-tasks.mjs unit-2
         env: { DELIVERY_LANE: validate }
       - uses: ./.github/actions/publish-lane-evidence
         if: always()
         with: { lane: validate }
+      - uses: ./.github/actions/publish-task-receipts
+        if: always()
 
   unit-3:
-    name: Unit Tests (3/3)
+    name: Test (3/3)
     needs: scope-detector
-    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.unit_3 == 'true'
+    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.job_unit_3 == 'true'
     runs-on: ubuntu-latest
     env: { UNIT_SHARD_ID: unit-3 }
     steps:
@@ -248,16 +186,18 @@ jobs:
           setup-uv: 'true'
           lane: validate
           consume-delivery-manifest: 'true'
-      - run: node ./tools/ci-cd-platform/run-unit-shard.mjs unit-3
+      - run: node ./tools/ci-cd-platform/run-ci-tasks.mjs unit-3
         env: { DELIVERY_LANE: validate }
       - uses: ./.github/actions/publish-lane-evidence
         if: always()
         with: { lane: validate }
+      - uses: ./.github/actions/publish-task-receipts
+        if: always()
 
   component-browser:
-    name: Component Browser
+    name: Test Web (Browser)
     needs: scope-detector
-    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.capability_component_browser == 'true'
+    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.job_component_browser == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -272,7 +212,7 @@ jobs:
       - run: pnpm exec playwright install chromium
       # The audited interaction suites resolve workspace imports from source.
       - name: Storybook interaction tests (Vitest Browser Mode)
-        run: pnpm exec nx run ui-storybook:test:interaction
+        run: node ./tools/ci-cd-platform/run-ci-tasks.mjs component-browser
       - name: Upload Storybook interaction evidence
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
@@ -281,11 +221,13 @@ jobs:
           path: test-results/storybook-results.json
           if-no-files-found: error
           retention-days: 14
+      - uses: ./.github/actions/publish-task-receipts
+        if: always()
 
   contract:
-    name: Contract Tests
+    name: Test (Contracts)
     needs: scope-detector
-    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.capability_contract == 'true'
+    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.job_contract == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -297,13 +239,15 @@ jobs:
           setup-python: 'false'
           setup-uv: 'false'
           consume-delivery-manifest: 'true'
-      - run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx affected -t test:contract --parallel=2 --outputStyle=static
+      - run: node ./tools/ci-cd-platform/run-ci-tasks.mjs contract
         env: { TEST_REPORT_NAME: contract-tests }
+      - uses: ./.github/actions/publish-task-receipts
+        if: always()
 
   typecheck:
-    name: Typecheck
+    name: Build + Typecheck (Types)
     needs: scope-detector
-    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.lane_validate == 'true'
+    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.job_typecheck == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -315,15 +259,17 @@ jobs:
           setup-uv: 'true'
           lane: validate
           consume-delivery-manifest: 'true'
-      - run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx affected -t typecheck --parallel=3 --outputStyle=static
+      - run: node ./tools/ci-cd-platform/run-ci-tasks.mjs typecheck
         env: { TEST_REPORT_NAME: typecheck, DELIVERY_LANE: validate }
       - uses: ./.github/actions/publish-lane-evidence
         with: { lane: validate }
+      - uses: ./.github/actions/publish-task-receipts
+        if: always()
 
   build-backend:
-    name: Build Backend (API + Database)
+    name: Build + Typecheck (Acceptance dependencies)
     needs: scope-detector
-    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.lane_web == 'true'
+    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.job_build_backend == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -341,9 +287,7 @@ jobs:
       # shards' critical path. The full Build job still produces and uploads
       # the canonical ci-build-artifacts bundle for the release chain.
       - name: Build API and database artifacts
-        run: |
-          pnpm exec nx run-many -t build --projects=api,database --parallel=2 --outputStyle=static
-          pnpm exec nx run database:runtime-scripts:build --outputStyle=static
+        run: node ./tools/ci-cd-platform/run-ci-tasks.mjs build-backend
       - name: Create API artifact manifest
         run: node ./tools/ci-cd-platform/create-artifact-manifest.mjs --name api --path apps/api/dist --manifest scope/delivery-manifest-v1.json --output reports/ci-cd-platform/api-artifact-manifest.json
       - name: Create Database artifact manifest
@@ -375,11 +319,13 @@ jobs:
             reports/ci-cd-platform/api-runtime-closure-artifact-manifest.json
           if-no-files-found: error
           retention-days: 14
+      - uses: ./.github/actions/publish-task-receipts
+        if: always()
 
   build:
-    name: Build
+    name: Build + Typecheck (Build)
     needs: scope-detector
-    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.build_required == 'true'
+    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.job_build == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -391,16 +337,9 @@ jobs:
           setup-uv: 'true'
           lane: validate
           consume-delivery-manifest: 'true'
-      - run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx affected -t build --parallel=3 --exclude='contracts,utils,ui-core,assets,sync-client' --outputStyle=static
+      - name: Execute every selected build and its Nx dependencies
+        run: node ./tools/ci-cd-platform/run-ci-tasks.mjs build
         env: { TEST_REPORT_NAME: build, DELIVERY_LANE: validate }
-      - name: Ensure Web flow build inputs exist
-        if: needs.scope-detector.outputs.lane_web == 'true'
-        run: pnpm exec nx run-many -t build --projects=api,web,database --parallel=2 --outputStyle=static
-      - name: Ensure main release build closure exists
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: |
-          pnpm exec nx run-many -t build --projects=api,web,migrator,database --parallel=2 --outputStyle=static
-          pnpm exec nx run database:runtime-scripts:build --outputStyle=static
       - name: Create API artifact manifest
         if: ${{ hashFiles('apps/api/dist/**') != '' }}
         run: node ./tools/ci-cd-platform/create-artifact-manifest.mjs --name api --path apps/api/dist --manifest scope/delivery-manifest-v1.json --output reports/ci-cd-platform/api-artifact-manifest.json
@@ -448,20 +387,17 @@ jobs:
           retention-days: 14
       - uses: ./.github/actions/publish-lane-evidence
         with: { lane: validate }
+      - uses: ./.github/actions/publish-task-receipts
+        if: always()
 
   verification-children:
-    name: Verification Children
+    name: Test Server (${{ matrix.shard }})
     needs: scope-detector
-    if: >-
-      needs.scope-detector.result == 'success' &&
-      (needs.scope-detector.outputs.lane_boundary == 'true' ||
-       needs.scope-detector.outputs.lane_integration == 'true' ||
-       needs.scope-detector.outputs.lane_performance == 'true')
+    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.job_verification_children == 'true'
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.scope-detector.outputs.server_matrix) }}
     runs-on: ubuntu-latest
-    outputs:
-      boundary: ${{ steps.lane_status.outputs.boundary }}
-      integration: ${{ steps.lane_status.outputs.integration }}
-      performance: ${{ steps.lane_status.outputs.performance }}
     services:
       postgres:
         image: pgvector/pgvector:0.8.5-pg18
@@ -469,6 +405,7 @@ jobs:
         ports: ['5433:5432']
         options: --health-cmd "pg_isready -U test_user -d memoflow_test" --health-interval 5s --health-timeout 5s --health-retries 10
     env:
+      CI_SERVER_SHARD: ${{ matrix.shard }}
       DATABASE_URL: postgresql://test_user:test_pass@127.0.0.1:5433/memoflow_test
       JWT_SECRET: test-jwt-secret-not-for-production-use
       TZ: UTC
@@ -478,111 +415,27 @@ jobs:
       - uses: ./.github/actions/setup-nx-affected-job
         with:
           node-version: '${{ env.NODE_VERSION }}'
+          cache-variant: server-${{ strategy.job-index }}
           setup-python: 'false'
           setup-uv: 'false'
           consume-delivery-manifest: 'true'
-      - name: Prepare independent lane contracts on the shared runner
-        run: >-
-          node ./tools/ci-cd-platform/prepare-shared-lanes.mjs
-          --lanes boundary,integration,performance
-          --manifest scope/delivery-manifest-v1.json
-          --receipt reports/ci-cd-platform/workspace-receipt.json
-          --output reports/ci-cd-platform
-      # One schema push per job: Boundary and Integration share this
-      # runner's PostgreSQL and schema; pushing again per lane was a
-      # measured 7s of pure repetition.
-      - name: Prepare database schema (once for all verification lanes)
-        if: needs.scope-detector.outputs.lane_boundary == 'true' || needs.scope-detector.outputs.lane_integration == 'true'
-        env: { TEST_REPORT_NAME: verification-database }
-        run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run database:prisma-push
-      - name: Boundary children
-        id: boundary
-        if: needs.scope-detector.outputs.has_desktop_boundary == 'true'
-        continue-on-error: true
-        env:
-          DELIVERY_LANE: boundary
-          LANE_INPUT_PATH: reports/ci-cd-platform/boundary-input-v1.json
-        run: |
-          status=0
-          TEST_REPORT_NAME=desktop-ipc node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run desktop:test:ipc || status=$?
-          TEST_REPORT_NAME=desktop-main node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run desktop:test:main || status=$?
-          if [ "${{ needs.scope-detector.outputs.has_smoke }}" = 'true' ]; then
-            TEST_REPORT_NAME=smoke node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx affected -t test:smoke --parallel=2 --outputStyle=static || status=$?
-          fi
-          exit "$status"
-      - name: Boundary smoke-only children
-        id: boundary_smoke
-        if: needs.scope-detector.outputs.lane_boundary == 'true' && needs.scope-detector.outputs.has_desktop_boundary != 'true'
-        continue-on-error: true
-        env:
-          DELIVERY_LANE: boundary
-          LANE_INPUT_PATH: reports/ci-cd-platform/boundary-input-v1.json
-        run: |
-          status=0
-          if [ "${{ needs.scope-detector.outputs.has_smoke }}" = 'true' ]; then
-            TEST_REPORT_NAME=smoke node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx affected -t test:smoke --parallel=2 --outputStyle=static || status=$?
-          fi
-          exit "$status"
-      - name: Integration children
-        id: integration
-        if: needs.scope-detector.outputs.lane_integration == 'true'
-        continue-on-error: true
-        env:
-          DELIVERY_LANE: integration
-          LANE_INPUT_PATH: reports/ci-cd-platform/integration-input-v1.json
-        run: |
-          status=0
-          TEST_REPORT_NAME=integration node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx affected -t test:integration --parallel=1 --outputStyle=static || status=$?
-          exit "$status"
-      - name: Performance budget
-        id: performance
-        if: needs.scope-detector.outputs.lane_performance == 'true'
-        continue-on-error: true
-        env:
-          DELIVERY_LANE: performance
-          LANE_INPUT_PATH: reports/ci-cd-platform/performance-input-v1.json
-          TEST_REPORT_NAME: performance
-        run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx affected -t test:perf --parallel=1 --outputStyle=static
-      - uses: ./.github/actions/publish-lane-evidence
-        if: always() && needs.scope-detector.outputs.lane_boundary == 'true'
-        with:
-          lane: boundary
-          receipt: reports/ci-cd-platform/boundary-workspace-receipt.json
-      - uses: ./.github/actions/publish-lane-evidence
-        if: always() && needs.scope-detector.outputs.lane_integration == 'true'
-        with:
-          lane: integration
-          receipt: reports/ci-cd-platform/integration-workspace-receipt.json
-      - uses: ./.github/actions/publish-lane-evidence
-        if: always() && needs.scope-detector.outputs.lane_performance == 'true'
-        with:
-          lane: performance
-          receipt: reports/ci-cd-platform/performance-workspace-receipt.json
-      - name: Expose independent lane status
-        id: lane_status
+      - name: Prepare database schema once for the Server resource pool
+        run: pnpm exec nx run database:prisma-push
+      - name: Execute selected API, DB, IPC and Electron Main suites
+        run: node ./tools/ci-cd-platform/run-ci-tasks.mjs verification-children
+      - uses: ./.github/actions/publish-task-receipts
         if: always()
-        shell: bash
-        run: |
-          echo "boundary=${{ needs.scope-detector.outputs.lane_boundary == 'true' && (steps.boundary.outcome == 'success' || steps.boundary_smoke.outcome == 'success') && 'success' || needs.scope-detector.outputs.lane_boundary == 'true' && 'failure' || 'skipped' }}" >> "$GITHUB_OUTPUT"
-          echo "integration=${{ needs.scope-detector.outputs.lane_integration == 'true' && steps.integration.outcome == 'success' && 'success' || needs.scope-detector.outputs.lane_integration == 'true' && 'failure' || 'skipped' }}" >> "$GITHUB_OUTPUT"
-          echo "performance=${{ needs.scope-detector.outputs.lane_performance == 'true' && steps.performance.outcome == 'success' && 'success' || needs.scope-detector.outputs.lane_performance == 'true' && 'failure' || 'skipped' }}" >> "$GITHUB_OUTPUT"
-      - name: Fail closed when an enabled lane failed
-        if: >-
-          always() &&
-          ((needs.scope-detector.outputs.lane_boundary == 'true' && steps.lane_status.outputs.boundary != 'success') ||
-           (needs.scope-detector.outputs.lane_integration == 'true' && steps.lane_status.outputs.integration != 'success') ||
-           (needs.scope-detector.outputs.lane_performance == 'true' && steps.lane_status.outputs.performance != 'success'))
-        run: exit 1
 
   web-specialized:
-    name: Web Specialized Acceptance (${{ matrix.shard }})
+    name: Test Web Acceptance (${{ matrix.shard }})
     needs: [scope-detector, build-backend]
-    if: needs.scope-detector.result == 'success' && needs.build-backend.result == 'success' && needs.scope-detector.outputs.lane_web == 'true'
+    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.job_web_specialized == 'true'
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.scope-detector.outputs.web_matrix) }}
     env:
+      CI_WEB_SHARD: ${{ matrix.shard }}
       DATABASE_URL: postgresql://test_user:test_pass@127.0.0.1:5433/memoflow_test
       JWT_SECRET: test-jwt-secret-for-e2e-testing-purposes
       TZ: UTC
@@ -625,6 +478,67 @@ jobs:
       - run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run database:prisma-push
         env: { TEST_REPORT_NAME: web-database, DELIVERY_LANE: web }
       - run: pnpm exec playwright install chromium
+      # Only the dedicated Provider acceptance starts the built API; ordinary Web Flow is retired.
+      - run: node ./tools/ci-cd-platform/run-ci-tasks.mjs web-specialized web-shard web:e2e:ai-provider
+        env:
+          TEST_REPORT_NAME: web-ai-provider
+          DELIVERY_LANE: web
+          E2E_PREBUILT_ARTIFACT: '1'
+      - name: Upload actual Web shard execution receipt
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          # Re-running failed jobs must not overwrite or shadow a prior attempt.
+          name: web-shard-receipt-${{ github.run_attempt }}-${{ strategy.job-index }}
+          path: reports/web-shards/*.json
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: web-specialized-${{ strategy.job-index }}-results
+          path: apps/web/test-results/provider-results.json
+          if-no-files-found: ignore
+          retention-days: 14
+      - if: failure()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: web-specialized-${{ strategy.job-index }}-failure
+          path: |
+            apps/web/test-results
+            apps/web/playwright-report
+          if-no-files-found: ignore
+          retention-days: 7
+      - uses: ./.github/actions/publish-lane-evidence
+        with:
+          lane: web
+          artifact-suffix: shard-${{ strategy.job-index }}
+      - uses: ./.github/actions/publish-task-receipts
+        if: always()
+
+  web-visual:
+    name: Test Web (Visual ${{ matrix.shard }})
+    needs: scope-detector
+    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.job_web_visual == 'true'
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.scope-detector.outputs.visual_matrix) }}
+    env:
+      CI_WEB_SHARD: ${{ matrix.shard }}
+      TZ: UTC
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with: { fetch-depth: 2 }
+      - uses: ./.github/actions/setup-nx-affected-job
+        with:
+          node-version: '${{ env.NODE_VERSION }}'
+          cache-variant: visual-${{ strategy.job-index }}
+          setup-python: 'false'
+          setup-uv: 'false'
+          capabilities: node,pnpm,playwright
+          consume-delivery-manifest: 'true'
+      - run: pnpm exec playwright install chromium
       - name: Provision visual regression fonts
         if: github.event_name != 'pull_request' || strategy.job-index == 0
         shell: bash
@@ -660,64 +574,37 @@ jobs:
             echo "::error::Visual baselines require the WenQuanYi Zen Hei fallback for CJK glyphs in English text."
             exit 1
           fi
-      # Only the dedicated Provider acceptance starts the built API; ordinary Web Flow is retired.
-      - run: node ./tools/test-system-v2/run-command.mjs -- node ./tools/test-system-v2/run-web-shard.mjs ${{ matrix.shard }}
-        env:
-          TEST_REPORT_NAME: web-ai-provider
-          DELIVERY_LANE: web
-          E2E_PREBUILT_ARTIFACT: '1'
-      - name: Upload actual Web shard execution receipt
-        if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
-          # Re-running failed jobs must not overwrite or shadow a prior attempt.
-          name: web-shard-receipt-${{ github.run_attempt }}-${{ strategy.job-index }}
-          path: reports/web-shards/*.json
-          if-no-files-found: error
-          retention-days: 14
       # Keep the existing algorithms and baselines. PRs exercise wide/light,
       # narrow/dark, long text, every canonical Web surface and Desktop shell.
       # Schedule/dispatch retain the complete existing target, without a grep.
       - name: Product visual representatives (compare only)
         if: github.event_name == 'pull_request' && strategy.job-index == 0
-        run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run web:e2e:visual-regression -- --grep "$VISUAL_PR_GREP"
+        run: node ./tools/ci-cd-platform/run-ci-tasks.mjs web-visual visual-pr web:e2e:visual-regression
         env:
           VISUAL_PR_GREP: '1280px light$|440px dark$|840px light$|web: |desktop: (shell\.|foundation\.)|#484 (web .*1280px|desktop .*440px)$|UI-9002|post-vNext|preserve the active Task draft \(light\)'
           TEST_REPORT_NAME: web-visual-representatives
           DELIVERY_LANE: web
       - name: Product visual full audit (compare only)
         if: github.event_name != 'pull_request'
-        run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run web:e2e:visual-regression -- --shard=${{ matrix.shard }}
+        run: node ./tools/ci-cd-platform/run-ci-tasks.mjs web-visual visual-full web:e2e:visual-regression
         env:
           TEST_REPORT_NAME: web-visual-${{ strategy.job-index }}
           DELIVERY_LANE: web
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        if: always()
-        with:
-          name: web-specialized-${{ strategy.job-index }}-results
-          path: apps/web/test-results/provider-results.json
-          if-no-files-found: ignore
-          retention-days: 14
       - if: failure()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: web-specialized-${{ strategy.job-index }}-failure
-          path: |
-            apps/web/test-results
-            apps/web/playwright-report
+          name: web-visual-${{ strategy.job-index }}-failure
+          path: apps/web/test-results/visual-regression
           if-no-files-found: ignore
           retention-days: 7
-      - uses: ./.github/actions/publish-lane-evidence
-        with:
-          lane: web
-          artifact-suffix: shard-${{ strategy.job-index }}
+      - uses: ./.github/actions/publish-task-receipts
+        if: always()
 
   delivery-observation:
     name: Delivery Observation
     needs:
       - scope-detector
-      - governance
-      - static-analysis
+      - lint
       - unit-1
       - unit-2
       - unit-3
@@ -726,6 +613,7 @@ jobs:
       - build-backend
       - verification-children
       - web-specialized
+      - web-visual
       - component-browser
       - contract
     if: always()
@@ -745,6 +633,16 @@ jobs:
         with:
           pattern: delivery-*-*-*-${{ github.run_id }}
           path: reports/run-evidence
+      - name: Download primary task and workspace receipts
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          pattern: ci-*-receipts-*
+          path: reports/run-evidence
+      - name: Download Web shard receipts
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          pattern: web-shard-receipt-*
+          path: reports/run-evidence
       - name: Collect GitHub run metrics
         id: run_metrics
         env:
@@ -754,6 +652,7 @@ jobs:
       # instrument coverage, so no coverage summary is aggregated here.
       - name: Aggregate run summary
         env:
+          CI_CHECK_NEEDS: ${{ toJSON(needs) }}
           DELIVERY_RUN_STARTED_AT: ${{ steps.run_metrics.outputs.started_at }}
           DELIVERY_RUNNER_MINUTES: ${{ steps.run_metrics.outputs.runner_minutes }}
         run: node ./tools/ci-cd-platform/observe-run.mjs --manifest scope/delivery-manifest-v1.json --evidence reports/run-evidence --output reports/ci-cd-platform/run-summary-v1.json
@@ -769,8 +668,7 @@ jobs:
     name: CI Check
     needs:
       - scope-detector
-      - governance
-      - static-analysis
+      - lint
       - unit-1
       - unit-2
       - unit-3
@@ -779,6 +677,7 @@ jobs:
       - build-backend
       - verification-children
       - web-specialized
+      - web-visual
       - component-browser
       - contract
     if: always()
@@ -800,6 +699,12 @@ jobs:
         with:
           pattern: web-shard-receipt-*
           path: reports/web-shards
+      - name: Download primary task receipts
+        continue-on-error: true
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          pattern: ci-task-receipts-*
+          path: reports/ci-tasks
       # Coverage evidence is nightly-audit-only; CI Check does not gate on it.
       - name: Gate on manifest-selected lanes
         env:

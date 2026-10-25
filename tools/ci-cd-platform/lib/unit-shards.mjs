@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 
 export const UNIT_JOB_IDS = Object.freeze(['unit-1', 'unit-2', 'unit-3']);
-export const unitJobName = (id) => `Unit Tests (${UNIT_JOB_IDS.indexOf(id) + 1}/3)`;
+export const unitJobName = (id) => `Test (${UNIT_JOB_IDS.indexOf(id) + 1}/3)`;
 const history = JSON.parse(readFileSync(new URL('../unit-test-durations.json', import.meta.url)));
 if (
   !Array.isArray(history.ranking) ||
@@ -61,6 +61,7 @@ export function planUnitShards(projects) {
 }
 
 export function unitJobEnabled(manifest, id) {
+  if (manifest.dispatch) return manifest.dispatch.jobs[id]?.required === true;
   return (
     manifest.lanes.validate === true &&
     manifest.unitShards.find((shard) => shard.id === id).tasks.length > 0

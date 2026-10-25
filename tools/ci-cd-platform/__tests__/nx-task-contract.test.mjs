@@ -63,10 +63,11 @@ test('Nx cache in CI is written to the same directory the cache action saves', a
   );
 });
 
-test('CI verifies Nx sync generators before affected selection is trusted', async () => {
-  const ci = await read('.github/workflows/ci.yml');
-  const governance = ci.slice(ci.indexOf('  governance:\n'), ci.indexOf('  static-analysis:\n'));
-  assert.match(governance, /pnpm exec nx sync:check/u);
+test('Lint validates Nx sync independently of Changes', async () => {
+  const workflow = (await import('yaml')).default.parse(await read('.github/workflows/ci.yml'));
+  assert.equal(workflow.jobs.lint.needs, undefined);
+  assert.ok(workflow.jobs.lint.steps.some((step) => step.run?.includes('run-ci-tasks.mjs lint')));
+  assert.match(await read('tools/ci-cd-platform/lib/dispatch.mjs'), /'sync:check'/u);
 });
 
 test('typecheck hashes the spec files it type-checks and declares no outputs', async () => {

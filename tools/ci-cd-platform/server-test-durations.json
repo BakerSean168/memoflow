@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "source": {
+    "runId": 40186354352,
+    "jobId": 121148427239,
+    "sha": "b3a23eb953bd568dd1e95d712db602c3ec2a4293",
+    "observedAt": "2026-10-25T10:55:09Z",
+    "url": "https://github.com/BakerSean168/memoflow/actions/runs/40186354352"
+  },
+  "method": "Observed uncached Vitest wall Duration per primary target; single sample bootstrap, not P50. Includes Vitest startup, excludes Nx/setup. Unknown targets use sample median.",
+  "tasks": {
+    "notification:test:integration": 6550,
+    "repository:test:integration": 3120,
+    "scheduler:test:integration": 1550,
+    "database:test:integration": 6060,
+    "relation:test:integration": 1480,
+    "reminder:test:integration": 3410,
+    "schedule:test:integration": 3590,
+    "account:test:integration": 9960,
+    "label:test:integration": 1480,
+    "goal:test:integration": 4810,
+    "task:test:integration": 4300,
+    "ai:test:integration": 2060,
+    "api:test:integration": 23680,
+    "api:test:smoke": 2650,
+    "desktop:test:main": 3100,
+    "desktop:test:ipc": 749
+  }
+}

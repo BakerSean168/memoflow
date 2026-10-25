@@ -21,7 +21,7 @@
         {
           "kind": "github-workflow",
           "workflow": ".github/workflows/ci.yml",
-          "entrypoint": "tools/test-system-v2/run-web-shard.mjs"
+          "target": "web:e2e:ai-provider"
         },
         {
           "kind": "github-workflow",

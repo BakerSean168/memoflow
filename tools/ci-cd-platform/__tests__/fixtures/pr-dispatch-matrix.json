@@ -1,0 +1,1977 @@
+{
+  "version": 1,
+  "review": "P1 #628: concrete existing source files, task inputs preserved, browser resource exclusions reviewed separately from task ownership",
+  "cases": [
+    {
+      "id": "docs",
+      "files": [
+        "docs/test/README.md"
+      ],
+      "expected": {
+        "full": false,
+        "targets": {
+          "build": [
+            "governance-tools"
+          ],
+          "typecheck": [],
+          "test": [
+            "governance-tools"
+          ],
+          "test:contract": [],
+          "test:smoke": [],
+          "test:integration": [],
+          "test:boundary": [],
+          "test:ipc": [],
+          "test:main": [],
+          "test:perf": [],
+          "test:interaction": [],
+          "e2e:ai-provider": [],
+          "e2e:visual-regression": [],
+          "test:coverage": []
+        },
+        "jobs": {
+          "lint": [
+            "workspace:lint",
+            "workspace:format",
+            "workspace:sync",
+            "memoflow:governance-check"
+          ],
+          "unit-1": [],
+          "unit-2": [],
+          "unit-3": [],
+          "typecheck": [],
+          "build": [],
+          "build-backend": [],
+          "verification-children": [],
+          "web-specialized": [],
+          "web-visual": [],
+          "component-browser": [],
+          "contract": []
+        },
+        "serverShards": []
+      }
+    },
+    {
+      "id": "chat",
+      "files": [
+        "packages/app-vue/src/modules/ai/views/AIChatView.vue"
+      ],
+      "expected": {
+        "full": false,
+        "targets": {
+          "build": [
+            "app-vue",
+            "desktop",
+            "governance-tools",
+            "ui-storybook",
+            "web"
+          ],
+          "typecheck": [
+            "app-vue",
+            "desktop",
+            "ui-storybook",
+            "web"
+          ],
+          "test": [
+            "app-vue",
+            "desktop",
+            "governance-tools",
+            "web"
+          ],
+          "test:contract": [],
+          "test:smoke": [],
+          "test:integration": [],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
+          "test:perf": [],
+          "test:interaction": [
+            "ui-storybook"
+          ],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
+          "test:coverage": [
+            "app-vue"
+          ]
+        },
+        "jobs": {
+          "lint": [
+            "workspace:lint",
+            "workspace:format",
+            "workspace:sync",
+            "memoflow:governance-check"
+          ],
+          "unit-1": [
+            "app-vue:test#1/2"
+          ],
+          "unit-2": [
+            "app-vue:test#2/2"
+          ],
+          "unit-3": [
+            "desktop:test",
+            "web:test"
+          ],
+          "typecheck": [
+            "app-vue:typecheck",
+            "desktop:typecheck",
+            "ui-storybook:typecheck",
+            "web:typecheck"
+          ],
+          "build": [
+            "app-vue:build",
+            "desktop:build",
+            "ui-storybook:build",
+            "web:build"
+          ],
+          "build-backend": [
+            "api:build",
+            "database:build",
+            "database:runtime-scripts:build"
+          ],
+          "verification-children": [
+            "desktop:test:ipc",
+            "desktop:test:main"
+          ],
+          "web-specialized": [
+            "web:e2e:ai-provider#1/1"
+          ],
+          "web-visual": [
+            "web:e2e:visual-regression"
+          ],
+          "component-browser": [
+            "ui-storybook:test:interaction"
+          ],
+          "contract": []
+        },
+        "serverShards": [
+          {
+            "id": "1/1",
+            "keys": [
+              "desktop:test:main",
+              "desktop:test:ipc"
+            ],
+            "estimatedMs": 7849
+          }
+        ]
+      }
+    },
+    {
+      "id": "aiServer",
+      "files": [
+        "packages/ai/src/server/transport/ai-chat.controller.ts"
+      ],
+      "expected": {
+        "full": false,
+        "targets": {
+          "build": [
+            "ai",
+            "api",
+            "app-vue",
+            "desktop",
+            "governance-tools",
+            "ui-storybook",
+            "web"
+          ],
+          "typecheck": [
+            "ai",
+            "api",
+            "app-react",
+            "app-vue",
+            "desktop",
+            "mobile",
+            "ui-storybook",
+            "web"
+          ],
+          "test": [
+            "ai",
+            "api",
+            "app-vue",
+            "desktop",
+            "governance-tools",
+            "web"
+          ],
+          "test:contract": [],
+          "test:smoke": [
+            "api"
+          ],
+          "test:integration": [
+            "ai",
+            "api"
+          ],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
+          "test:perf": [],
+          "test:interaction": [
+            "ui-storybook"
+          ],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
+          "test:coverage": [
+            "ai",
+            "api",
+            "app-vue"
+          ]
+        },
+        "jobs": {
+          "lint": [
+            "workspace:lint",
+            "workspace:format",
+            "workspace:sync",
+            "memoflow:governance-check"
+          ],
+          "unit-1": [
+            "app-vue:test#1/2",
+            "api:test"
+          ],
+          "unit-2": [
+            "app-vue:test#2/2",
+            "web:test"
+          ],
+          "unit-3": [
+            "desktop:test",
+            "ai:test"
+          ],
+          "typecheck": [
+            "ai:typecheck",
+            "api:typecheck",
+            "app-react:typecheck",
+            "app-vue:typecheck",
+            "desktop:typecheck",
+            "mobile:typecheck",
+            "ui-storybook:typecheck",
+            "web:typecheck"
+          ],
+          "build": [
+            "ai:build",
+            "api:build",
+            "app-vue:build",
+            "desktop:build",
+            "ui-storybook:build",
+            "web:build"
+          ],
+          "build-backend": [],
+          "verification-children": [
+            "desktop:test:ipc",
+            "desktop:test:main",
+            "api:test:smoke",
+            "ai:test:integration",
+            "api:test:integration"
+          ],
+          "web-specialized": [],
+          "web-visual": [],
+          "component-browser": [],
+          "contract": []
+        },
+        "serverShards": [
+          {
+            "id": "1/1",
+            "keys": [
+              "api:test:integration",
+              "desktop:test:main",
+              "api:test:smoke",
+              "ai:test:integration",
+              "desktop:test:ipc"
+            ],
+            "estimatedMs": 42239
+          }
+        ]
+      }
+    },
+    {
+      "id": "desktopMain",
+      "files": [
+        "apps/desktop/src/main/bootstrap.ts"
+      ],
+      "expected": {
+        "full": false,
+        "targets": {
+          "build": [
+            "desktop",
+            "governance-tools",
+            "web"
+          ],
+          "typecheck": [
+            "desktop",
+            "web"
+          ],
+          "test": [
+            "desktop",
+            "governance-tools",
+            "web"
+          ],
+          "test:contract": [],
+          "test:smoke": [],
+          "test:integration": [],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
+          "test:perf": [],
+          "test:interaction": [],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
+          "test:coverage": []
+        },
+        "jobs": {
+          "lint": [
+            "workspace:lint",
+            "workspace:format",
+            "workspace:sync",
+            "memoflow:governance-check"
+          ],
+          "unit-1": [
+            "desktop:test"
+          ],
+          "unit-2": [
+            "web:test"
+          ],
+          "unit-3": [],
+          "typecheck": [
+            "desktop:typecheck",
+            "web:typecheck"
+          ],
+          "build": [
+            "desktop:build",
+            "web:build"
+          ],
+          "build-backend": [],
+          "verification-children": [
+            "desktop:test:ipc",
+            "desktop:test:main"
+          ],
+          "web-specialized": [],
+          "web-visual": [],
+          "component-browser": [],
+          "contract": []
+        },
+        "serverShards": [
+          {
+            "id": "1/1",
+            "keys": [
+              "desktop:test:main",
+              "desktop:test:ipc"
+            ],
+            "estimatedMs": 7849
+          }
+        ]
+      }
+    },
+    {
+      "id": "desktopRenderer",
+      "files": [
+        "apps/desktop/src/renderer/App.vue"
+      ],
+      "expected": {
+        "full": false,
+        "targets": {
+          "build": [
+            "desktop",
+            "governance-tools",
+            "web"
+          ],
+          "typecheck": [
+            "desktop",
+            "web"
+          ],
+          "test": [
+            "desktop",
+            "governance-tools",
+            "web"
+          ],
+          "test:contract": [],
+          "test:smoke": [],
+          "test:integration": [],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
+          "test:perf": [],
+          "test:interaction": [],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
+          "test:coverage": []
+        },
+        "jobs": {
+          "lint": [
+            "workspace:lint",
+            "workspace:format",
+            "workspace:sync",
+            "memoflow:governance-check"
+          ],
+          "unit-1": [
+            "desktop:test"
+          ],
+          "unit-2": [
+            "web:test"
+          ],
+          "unit-3": [],
+          "typecheck": [
+            "desktop:typecheck",
+            "web:typecheck"
+          ],
+          "build": [
+            "desktop:build",
+            "web:build"
+          ],
+          "build-backend": [
+            "api:build",
+            "database:build",
+            "database:runtime-scripts:build"
+          ],
+          "verification-children": [
+            "desktop:test:ipc",
+            "desktop:test:main"
+          ],
+          "web-specialized": [
+            "web:e2e:ai-provider#1/1"
+          ],
+          "web-visual": [
+            "web:e2e:visual-regression"
+          ],
+          "component-browser": [],
+          "contract": []
+        },
+        "serverShards": [
+          {
+            "id": "1/1",
+            "keys": [
+              "desktop:test:main",
+              "desktop:test:ipc"
+            ],
+            "estimatedMs": 7849
+          }
+        ]
+      }
+    },
+    {
+      "id": "apiRoute",
+      "files": [
+        "apps/api/src/shared/infrastructure/http/routes/infrastructure-routes.ts"
+      ],
+      "expected": {
+        "full": false,
+        "targets": {
+          "build": [
+            "api",
+            "governance-tools"
+          ],
+          "typecheck": [
+            "api"
+          ],
+          "test": [
+            "api",
+            "governance-tools"
+          ],
+          "test:contract": [],
+          "test:smoke": [
+            "api"
+          ],
+          "test:integration": [
+            "api"
+          ],
+          "test:boundary": [],
+          "test:ipc": [],
+          "test:main": [],
+          "test:perf": [],
+          "test:interaction": [],
+          "e2e:ai-provider": [],
+          "e2e:visual-regression": [],
+          "test:coverage": [
+            "api"
+          ]
+        },
+        "jobs": {
+          "lint": [
+            "workspace:lint",
+            "workspace:format",
+            "workspace:sync",
+            "memoflow:governance-check"
+          ],
+          "unit-1": [
+            "api:test"
+          ],
+          "unit-2": [],
+          "unit-3": [],
+          "typecheck": [
+            "api:typecheck"
+          ],
+          "build": [
+            "api:build"
+          ],
+          "build-backend": [],
+          "verification-children": [
+            "api:test:smoke",
+            "api:test:integration"
+          ],
+          "web-specialized": [],
+          "web-visual": [],
+          "component-browser": [],
+          "contract": []
+        },
+        "serverShards": [
+          {
+            "id": "1/1",
+            "keys": [
+              "api:test:integration",
+              "api:test:smoke"
+            ],
+            "estimatedMs": 30330
+          }
+        ]
+      }
+    },
+    {
+      "id": "taskServer",
+      "files": [
+        "packages/task/src/server/transport/task.transport-handlers.ts"
+      ],
+      "expected": {
+        "full": false,
+        "targets": {
+          "build": [
+            "account",
+            "api",
+            "app-vue",
+            "desktop",
+            "governance-tools",
+            "notification",
+            "schedule-orchestration",
+            "task",
+            "ui-storybook",
+            "web"
+          ],
+          "typecheck": [
+            "account",
+            "api",
+            "app-react",
+            "app-vue",
+            "desktop",
+            "mobile",
+            "notification",
+            "schedule-orchestration",
+            "task",
+            "ui-storybook",
+            "web"
+          ],
+          "test": [
+            "account",
+            "api",
+            "app-vue",
+            "desktop",
+            "governance-tools",
+            "notification",
+            "schedule-orchestration",
+            "task",
+            "web"
+          ],
+          "test:contract": [],
+          "test:smoke": [
+            "api"
+          ],
+          "test:integration": [
+            "account",
+            "api",
+            "notification",
+            "task"
+          ],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
+          "test:perf": [
+            "task"
+          ],
+          "test:interaction": [
+            "ui-storybook"
+          ],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
+          "test:coverage": [
+            "account",
+            "api",
+            "app-vue",
+            "notification",
+            "task"
+          ]
+        },
+        "jobs": {
+          "lint": [
+            "workspace:lint",
+            "workspace:format",
+            "workspace:sync",
+            "memoflow:governance-check"
+          ],
+          "unit-1": [
+            "task:test",
+            "account:test",
+            "api:test",
+            "schedule-orchestration:test"
+          ],
+          "unit-2": [
+            "app-vue:test#1/2",
+            "desktop:test"
+          ],
+          "unit-3": [
+            "app-vue:test#2/2",
+            "notification:test",
+            "web:test"
+          ],
+          "typecheck": [
+            "account:typecheck",
+            "api:typecheck",
+            "app-react:typecheck",
+            "app-vue:typecheck",
+            "desktop:typecheck",
+            "mobile:typecheck",
+            "notification:typecheck",
+            "schedule-orchestration:typecheck",
+            "task:typecheck",
+            "ui-storybook:typecheck",
+            "web:typecheck"
+          ],
+          "build": [
+            "account:build",
+            "api:build",
+            "app-vue:build",
+            "desktop:build",
+            "notification:build",
+            "schedule-orchestration:build",
+            "task:build",
+            "ui-storybook:build",
+            "web:build"
+          ],
+          "build-backend": [],
+          "verification-children": [
+            "desktop:test:ipc",
+            "desktop:test:main",
+            "api:test:smoke",
+            "account:test:integration",
+            "api:test:integration",
+            "notification:test:integration",
+            "task:test:integration"
+          ],
+          "web-specialized": [],
+          "web-visual": [],
+          "component-browser": [],
+          "contract": []
+        },
+        "serverShards": [
+          {
+            "id": "1/2",
+            "keys": [
+              "api:test:integration",
+              "desktop:test:main",
+              "desktop:test:ipc"
+            ],
+            "estimatedMs": 33529
+          },
+          {
+            "id": "2/2",
+            "keys": [
+              "account:test:integration",
+              "notification:test:integration",
+              "task:test:integration",
+              "api:test:smoke"
+            ],
+            "estimatedMs": 31460
+          }
+        ]
+      }
+    },
+    {
+      "id": "aiContract",
+      "files": [
+        "packages/contracts/src/modules/ai/api/response-schemas.ts"
+      ],
+      "expected": {
+        "full": true,
+        "targets": {
+          "build": [
+            "@memoflow/test-utils",
+            "account",
+            "agent-gateway",
+            "ai",
+            "api",
+            "app-vue",
+            "assets",
+            "cloud-auth",
+            "contracts",
+            "data-portability",
+            "database",
+            "desktop",
+            "domain-shared",
+            "goal",
+            "governance-tools",
+            "http-client",
+            "ipc-client",
+            "label",
+            "migrator",
+            "notification",
+            "patterns",
+            "powersync-schema",
+            "relation",
+            "reminder",
+            "repository",
+            "schedule",
+            "schedule-orchestration",
+            "scheduler",
+            "setting",
+            "task",
+            "time",
+            "ui-core",
+            "ui-storybook",
+            "ui-vue-shadcn",
+            "utils",
+            "web"
+          ],
+          "typecheck": [
+            "@memoflow/test-utils",
+            "account",
+            "agent-gateway",
+            "ai",
+            "api",
+            "app-react",
+            "app-vue",
+            "assets",
+            "cloud-auth",
+            "contracts",
+            "data-portability",
+            "database",
+            "desktop",
+            "domain-shared",
+            "goal",
+            "http-client",
+            "ipc-client",
+            "label",
+            "migrator",
+            "mobile",
+            "notification",
+            "patterns",
+            "powersync-schema",
+            "relation",
+            "reminder",
+            "repository",
+            "schedule",
+            "schedule-orchestration",
+            "scheduler",
+            "setting",
+            "task",
+            "time",
+            "ui-core",
+            "ui-react-native",
+            "ui-storybook",
+            "ui-vue-shadcn",
+            "utils",
+            "web"
+          ],
+          "test": [
+            "account",
+            "agent-gateway",
+            "ai",
+            "api",
+            "app-vue",
+            "assets",
+            "ci-cd-platform",
+            "cloud-auth",
+            "contracts",
+            "data-portability",
+            "database",
+            "desktop",
+            "domain-shared",
+            "goal",
+            "governance-tools",
+            "http-client",
+            "ipc-client",
+            "label",
+            "migrator",
+            "notification",
+            "patterns",
+            "powersync-schema",
+            "quality",
+            "relation",
+            "reminder",
+            "repository",
+            "schedule",
+            "schedule-orchestration",
+            "scheduler",
+            "setting",
+            "task",
+            "test-system-v2",
+            "time",
+            "ui-core",
+            "ui-vue-shadcn",
+            "utils",
+            "web"
+          ],
+          "test:contract": [
+            "contracts"
+          ],
+          "test:smoke": [
+            "api"
+          ],
+          "test:integration": [
+            "account",
+            "ai",
+            "api",
+            "database",
+            "goal",
+            "label",
+            "notification",
+            "relation",
+            "reminder",
+            "repository",
+            "schedule",
+            "scheduler",
+            "task"
+          ],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
+          "test:perf": [
+            "task"
+          ],
+          "test:interaction": [
+            "ui-storybook"
+          ],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
+          "test:coverage": [
+            "account",
+            "ai",
+            "api",
+            "app-vue",
+            "data-portability",
+            "domain-shared",
+            "goal",
+            "notification",
+            "reminder",
+            "schedule",
+            "scheduler",
+            "setting",
+            "task"
+          ]
+        },
+        "jobs": {
+          "lint": [
+            "workspace:lint",
+            "workspace:format",
+            "workspace:sync",
+            "memoflow:governance-check"
+          ],
+          "unit-1": [
+            "goal:test",
+            "ai:test",
+            "reminder:test",
+            "api:test",
+            "schedule:test",
+            "migrator:test",
+            "ui-core:test",
+            "cloud-auth:test",
+            "data-portability:test",
+            "database:test",
+            "label:test",
+            "ipc-client:test"
+          ],
+          "unit-2": [
+            "task:test",
+            "app-vue:test#2/2",
+            "account:test",
+            "web:test",
+            "assets:test",
+            "quality:test",
+            "time:test",
+            "ui-vue-shadcn:test",
+            "scheduler:test",
+            "patterns:test",
+            "http-client:test"
+          ],
+          "unit-3": [
+            "app-vue:test#1/2",
+            "desktop:test",
+            "notification:test",
+            "ci-cd-platform:test",
+            "repository:test",
+            "powersync-schema:test",
+            "schedule-orchestration:test",
+            "setting:test",
+            "utils:test",
+            "relation:test",
+            "agent-gateway:test",
+            "domain-shared:test"
+          ],
+          "typecheck": [
+            "@memoflow/test-utils:typecheck",
+            "account:typecheck",
+            "agent-gateway:typecheck",
+            "ai:typecheck",
+            "api:typecheck",
+            "app-react:typecheck",
+            "app-vue:typecheck",
+            "assets:typecheck",
+            "cloud-auth:typecheck",
+            "contracts:typecheck",
+            "data-portability:typecheck",
+            "database:typecheck",
+            "desktop:typecheck",
+            "domain-shared:typecheck",
+            "goal:typecheck",
+            "http-client:typecheck",
+            "ipc-client:typecheck",
+            "label:typecheck",
+            "migrator:typecheck",
+            "mobile:typecheck",
+            "notification:typecheck",
+            "patterns:typecheck",
+            "powersync-schema:typecheck",
+            "relation:typecheck",
+            "reminder:typecheck",
+            "repository:typecheck",
+            "schedule:typecheck",
+            "schedule-orchestration:typecheck",
+            "scheduler:typecheck",
+            "setting:typecheck",
+            "task:typecheck",
+            "time:typecheck",
+            "ui-core:typecheck",
+            "ui-react-native:typecheck",
+            "ui-storybook:typecheck",
+            "ui-vue-shadcn:typecheck",
+            "utils:typecheck",
+            "web:typecheck"
+          ],
+          "build": [
+            "account:build",
+            "agent-gateway:build",
+            "ai:build",
+            "api:build",
+            "app-vue:build",
+            "assets:build",
+            "cloud-auth:build",
+            "contracts:build",
+            "data-portability:build",
+            "database:build",
+            "desktop:build",
+            "domain-shared:build",
+            "goal:build",
+            "http-client:build",
+            "ipc-client:build",
+            "label:build",
+            "migrator:build",
+            "notification:build",
+            "patterns:build",
+            "powersync-schema:build",
+            "relation:build",
+            "reminder:build",
+            "repository:build",
+            "schedule:build",
+            "schedule-orchestration:build",
+            "scheduler:build",
+            "setting:build",
+            "task:build",
+            "time:build",
+            "ui-core:build",
+            "ui-storybook:build",
+            "ui-vue-shadcn:build",
+            "utils:build",
+            "web:build",
+            "database:runtime-scripts:build"
+          ],
+          "build-backend": [
+            "api:build",
+            "database:build",
+            "database:runtime-scripts:build"
+          ],
+          "verification-children": [
+            "desktop:test:ipc",
+            "desktop:test:main",
+            "api:test:smoke",
+            "account:test:integration",
+            "ai:test:integration",
+            "api:test:integration",
+            "database:test:integration",
+            "goal:test:integration",
+            "label:test:integration",
+            "notification:test:integration",
+            "relation:test:integration",
+            "reminder:test:integration",
+            "repository:test:integration",
+            "schedule:test:integration",
+            "scheduler:test:integration",
+            "task:test:integration"
+          ],
+          "web-specialized": [
+            "web:e2e:ai-provider#1/1"
+          ],
+          "web-visual": [
+            "web:e2e:visual-regression"
+          ],
+          "component-browser": [
+            "ui-storybook:test:interaction"
+          ],
+          "contract": [
+            "contracts:test:contract"
+          ]
+        },
+        "serverShards": [
+          {
+            "id": "1/3",
+            "keys": [
+              "api:test:integration",
+              "desktop:test:main",
+              "scheduler:test:integration",
+              "desktop:test:ipc"
+            ],
+            "estimatedMs": 37079
+          },
+          {
+            "id": "2/3",
+            "keys": [
+              "account:test:integration",
+              "goal:test:integration",
+              "schedule:test:integration",
+              "repository:test:integration",
+              "ai:test:integration",
+              "relation:test:integration"
+            ],
+            "estimatedMs": 37020
+          },
+          {
+            "id": "3/3",
+            "keys": [
+              "notification:test:integration",
+              "database:test:integration",
+              "task:test:integration",
+              "reminder:test:integration",
+              "api:test:smoke",
+              "label:test:integration"
+            ],
+            "estimatedMs": 36450
+          }
+        ]
+      }
+    },
+    {
+      "id": "workflow",
+      "files": [
+        ".github/workflows/ci.yml"
+      ],
+      "expected": {
+        "full": true,
+        "targets": {
+          "build": [
+            "@memoflow/test-utils",
+            "account",
+            "agent-gateway",
+            "ai",
+            "api",
+            "app-vue",
+            "assets",
+            "cloud-auth",
+            "contracts",
+            "data-portability",
+            "database",
+            "desktop",
+            "domain-shared",
+            "goal",
+            "governance-tools",
+            "http-client",
+            "ipc-client",
+            "label",
+            "migrator",
+            "notification",
+            "patterns",
+            "powersync-schema",
+            "relation",
+            "reminder",
+            "repository",
+            "schedule",
+            "schedule-orchestration",
+            "scheduler",
+            "setting",
+            "task",
+            "time",
+            "ui-core",
+            "ui-storybook",
+            "ui-vue-shadcn",
+            "utils",
+            "web"
+          ],
+          "typecheck": [
+            "@memoflow/test-utils",
+            "account",
+            "agent-gateway",
+            "ai",
+            "api",
+            "app-react",
+            "app-vue",
+            "assets",
+            "cloud-auth",
+            "contracts",
+            "data-portability",
+            "database",
+            "desktop",
+            "domain-shared",
+            "goal",
+            "http-client",
+            "ipc-client",
+            "label",
+            "migrator",
+            "mobile",
+            "notification",
+            "patterns",
+            "powersync-schema",
+            "relation",
+            "reminder",
+            "repository",
+            "schedule",
+            "schedule-orchestration",
+            "scheduler",
+            "setting",
+            "task",
+            "time",
+            "ui-core",
+            "ui-react-native",
+            "ui-storybook",
+            "ui-vue-shadcn",
+            "utils",
+            "web"
+          ],
+          "test": [
+            "account",
+            "agent-gateway",
+            "ai",
+            "api",
+            "app-vue",
+            "assets",
+            "ci-cd-platform",
+            "cloud-auth",
+            "contracts",
+            "data-portability",
+            "database",
+            "desktop",
+            "domain-shared",
+            "goal",
+            "governance-tools",
+            "http-client",
+            "ipc-client",
+            "label",
+            "migrator",
+            "notification",
+            "patterns",
+            "powersync-schema",
+            "quality",
+            "relation",
+            "reminder",
+            "repository",
+            "schedule",
+            "schedule-orchestration",
+            "scheduler",
+            "setting",
+            "task",
+            "test-system-v2",
+            "time",
+            "ui-core",
+            "ui-vue-shadcn",
+            "utils",
+            "web"
+          ],
+          "test:contract": [
+            "contracts"
+          ],
+          "test:smoke": [
+            "api"
+          ],
+          "test:integration": [
+            "account",
+            "ai",
+            "api",
+            "database",
+            "goal",
+            "label",
+            "notification",
+            "relation",
+            "reminder",
+            "repository",
+            "schedule",
+            "scheduler",
+            "task"
+          ],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
+          "test:perf": [
+            "task"
+          ],
+          "test:interaction": [
+            "ui-storybook"
+          ],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
+          "test:coverage": [
+            "account",
+            "ai",
+            "api",
+            "app-vue",
+            "data-portability",
+            "domain-shared",
+            "goal",
+            "notification",
+            "reminder",
+            "schedule",
+            "scheduler",
+            "setting",
+            "task"
+          ]
+        },
+        "jobs": {
+          "lint": [
+            "workspace:lint",
+            "workspace:format",
+            "workspace:sync",
+            "memoflow:governance-check"
+          ],
+          "unit-1": [
+            "goal:test",
+            "ai:test",
+            "reminder:test",
+            "api:test",
+            "schedule:test",
+            "migrator:test",
+            "ui-core:test",
+            "cloud-auth:test",
+            "data-portability:test",
+            "database:test",
+            "label:test",
+            "ipc-client:test"
+          ],
+          "unit-2": [
+            "task:test",
+            "app-vue:test#2/2",
+            "account:test",
+            "web:test",
+            "assets:test",
+            "quality:test",
+            "time:test",
+            "ui-vue-shadcn:test",
+            "scheduler:test",
+            "patterns:test",
+            "http-client:test"
+          ],
+          "unit-3": [
+            "app-vue:test#1/2",
+            "desktop:test",
+            "notification:test",
+            "ci-cd-platform:test",
+            "repository:test",
+            "powersync-schema:test",
+            "schedule-orchestration:test",
+            "setting:test",
+            "utils:test",
+            "relation:test",
+            "agent-gateway:test",
+            "domain-shared:test"
+          ],
+          "typecheck": [
+            "@memoflow/test-utils:typecheck",
+            "account:typecheck",
+            "agent-gateway:typecheck",
+            "ai:typecheck",
+            "api:typecheck",
+            "app-react:typecheck",
+            "app-vue:typecheck",
+            "assets:typecheck",
+            "cloud-auth:typecheck",
+            "contracts:typecheck",
+            "data-portability:typecheck",
+            "database:typecheck",
+            "desktop:typecheck",
+            "domain-shared:typecheck",
+            "goal:typecheck",
+            "http-client:typecheck",
+            "ipc-client:typecheck",
+            "label:typecheck",
+            "migrator:typecheck",
+            "mobile:typecheck",
+            "notification:typecheck",
+            "patterns:typecheck",
+            "powersync-schema:typecheck",
+            "relation:typecheck",
+            "reminder:typecheck",
+            "repository:typecheck",
+            "schedule:typecheck",
+            "schedule-orchestration:typecheck",
+            "scheduler:typecheck",
+            "setting:typecheck",
+            "task:typecheck",
+            "time:typecheck",
+            "ui-core:typecheck",
+            "ui-react-native:typecheck",
+            "ui-storybook:typecheck",
+            "ui-vue-shadcn:typecheck",
+            "utils:typecheck",
+            "web:typecheck"
+          ],
+          "build": [
+            "account:build",
+            "agent-gateway:build",
+            "ai:build",
+            "api:build",
+            "app-vue:build",
+            "assets:build",
+            "cloud-auth:build",
+            "contracts:build",
+            "data-portability:build",
+            "database:build",
+            "desktop:build",
+            "domain-shared:build",
+            "goal:build",
+            "http-client:build",
+            "ipc-client:build",
+            "label:build",
+            "migrator:build",
+            "notification:build",
+            "patterns:build",
+            "powersync-schema:build",
+            "relation:build",
+            "reminder:build",
+            "repository:build",
+            "schedule:build",
+            "schedule-orchestration:build",
+            "scheduler:build",
+            "setting:build",
+            "task:build",
+            "time:build",
+            "ui-core:build",
+            "ui-storybook:build",
+            "ui-vue-shadcn:build",
+            "utils:build",
+            "web:build",
+            "database:runtime-scripts:build"
+          ],
+          "build-backend": [
+            "api:build",
+            "database:build",
+            "database:runtime-scripts:build"
+          ],
+          "verification-children": [
+            "desktop:test:ipc",
+            "desktop:test:main",
+            "api:test:smoke",
+            "account:test:integration",
+            "ai:test:integration",
+            "api:test:integration",
+            "database:test:integration",
+            "goal:test:integration",
+            "label:test:integration",
+            "notification:test:integration",
+            "relation:test:integration",
+            "reminder:test:integration",
+            "repository:test:integration",
+            "schedule:test:integration",
+            "scheduler:test:integration",
+            "task:test:integration"
+          ],
+          "web-specialized": [
+            "web:e2e:ai-provider#1/1"
+          ],
+          "web-visual": [
+            "web:e2e:visual-regression"
+          ],
+          "component-browser": [
+            "ui-storybook:test:interaction"
+          ],
+          "contract": [
+            "contracts:test:contract"
+          ]
+        },
+        "serverShards": [
+          {
+            "id": "1/3",
+            "keys": [
+              "api:test:integration",
+              "desktop:test:main",
+              "scheduler:test:integration",
+              "desktop:test:ipc"
+            ],
+            "estimatedMs": 37079
+          },
+          {
+            "id": "2/3",
+            "keys": [
+              "account:test:integration",
+              "goal:test:integration",
+              "schedule:test:integration",
+              "repository:test:integration",
+              "ai:test:integration",
+              "relation:test:integration"
+            ],
+            "estimatedMs": 37020
+          },
+          {
+            "id": "3/3",
+            "keys": [
+              "notification:test:integration",
+              "database:test:integration",
+              "task:test:integration",
+              "reminder:test:integration",
+              "api:test:smoke",
+              "label:test:integration"
+            ],
+            "estimatedMs": 36450
+          }
+        ]
+      }
+    },
+    {
+      "id": "testOnly",
+      "files": [
+        "packages/app-vue/src/modules/ai/components/AIMessageContent.spec.ts"
+      ],
+      "expected": {
+        "full": false,
+        "targets": {
+          "build": [
+            "governance-tools",
+            "ui-storybook"
+          ],
+          "typecheck": [
+            "app-vue"
+          ],
+          "test": [
+            "app-vue",
+            "governance-tools",
+            "test-system-v2"
+          ],
+          "test:contract": [],
+          "test:smoke": [],
+          "test:integration": [],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
+          "test:perf": [],
+          "test:interaction": [
+            "ui-storybook"
+          ],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
+          "test:coverage": [
+            "app-vue"
+          ]
+        },
+        "jobs": {
+          "lint": [
+            "workspace:lint",
+            "workspace:format",
+            "workspace:sync",
+            "memoflow:governance-check"
+          ],
+          "unit-1": [
+            "app-vue:test#1/2"
+          ],
+          "unit-2": [
+            "app-vue:test#2/2"
+          ],
+          "unit-3": [],
+          "typecheck": [
+            "app-vue:typecheck"
+          ],
+          "build": [
+            "ui-storybook:build"
+          ],
+          "build-backend": [
+            "api:build",
+            "database:build",
+            "database:runtime-scripts:build"
+          ],
+          "verification-children": [
+            "desktop:test:ipc",
+            "desktop:test:main"
+          ],
+          "web-specialized": [
+            "web:e2e:ai-provider#1/1"
+          ],
+          "web-visual": [
+            "web:e2e:visual-regression"
+          ],
+          "component-browser": [
+            "ui-storybook:test:interaction"
+          ],
+          "contract": []
+        },
+        "serverShards": [
+          {
+            "id": "1/1",
+            "keys": [
+              "desktop:test:main",
+              "desktop:test:ipc"
+            ],
+            "estimatedMs": 7849
+          }
+        ]
+      }
+    },
+    {
+      "id": "mainDocs",
+      "files": [
+        "docs/test/README.md"
+      ],
+      "event": "push",
+      "expected": {
+        "full": true,
+        "targets": {
+          "build": [
+            "@memoflow/test-utils",
+            "account",
+            "agent-gateway",
+            "ai",
+            "api",
+            "app-vue",
+            "assets",
+            "cloud-auth",
+            "contracts",
+            "data-portability",
+            "database",
+            "desktop",
+            "domain-shared",
+            "goal",
+            "governance-tools",
+            "http-client",
+            "ipc-client",
+            "label",
+            "migrator",
+            "notification",
+            "patterns",
+            "powersync-schema",
+            "relation",
+            "reminder",
+            "repository",
+            "schedule",
+            "schedule-orchestration",
+            "scheduler",
+            "setting",
+            "task",
+            "time",
+            "ui-core",
+            "ui-storybook",
+            "ui-vue-shadcn",
+            "utils",
+            "web"
+          ],
+          "typecheck": [
+            "@memoflow/test-utils",
+            "account",
+            "agent-gateway",
+            "ai",
+            "api",
+            "app-react",
+            "app-vue",
+            "assets",
+            "cloud-auth",
+            "contracts",
+            "data-portability",
+            "database",
+            "desktop",
+            "domain-shared",
+            "goal",
+            "http-client",
+            "ipc-client",
+            "label",
+            "migrator",
+            "mobile",
+            "notification",
+            "patterns",
+            "powersync-schema",
+            "relation",
+            "reminder",
+            "repository",
+            "schedule",
+            "schedule-orchestration",
+            "scheduler",
+            "setting",
+            "task",
+            "time",
+            "ui-core",
+            "ui-react-native",
+            "ui-storybook",
+            "ui-vue-shadcn",
+            "utils",
+            "web"
+          ],
+          "test": [
+            "account",
+            "agent-gateway",
+            "ai",
+            "api",
+            "app-vue",
+            "assets",
+            "ci-cd-platform",
+            "cloud-auth",
+            "contracts",
+            "data-portability",
+            "database",
+            "desktop",
+            "domain-shared",
+            "goal",
+            "governance-tools",
+            "http-client",
+            "ipc-client",
+            "label",
+            "migrator",
+            "notification",
+            "patterns",
+            "powersync-schema",
+            "quality",
+            "relation",
+            "reminder",
+            "repository",
+            "schedule",
+            "schedule-orchestration",
+            "scheduler",
+            "setting",
+            "task",
+            "test-system-v2",
+            "time",
+            "ui-core",
+            "ui-vue-shadcn",
+            "utils",
+            "web"
+          ],
+          "test:contract": [
+            "contracts"
+          ],
+          "test:smoke": [
+            "api"
+          ],
+          "test:integration": [
+            "account",
+            "ai",
+            "api",
+            "database",
+            "goal",
+            "label",
+            "notification",
+            "relation",
+            "reminder",
+            "repository",
+            "schedule",
+            "scheduler",
+            "task"
+          ],
+          "test:boundary": [
+            "desktop"
+          ],
+          "test:ipc": [
+            "desktop"
+          ],
+          "test:main": [
+            "desktop"
+          ],
+          "test:perf": [
+            "task"
+          ],
+          "test:interaction": [
+            "ui-storybook"
+          ],
+          "e2e:ai-provider": [
+            "web"
+          ],
+          "e2e:visual-regression": [
+            "web"
+          ],
+          "test:coverage": [
+            "account",
+            "ai",
+            "api",
+            "app-vue",
+            "data-portability",
+            "domain-shared",
+            "goal",
+            "notification",
+            "reminder",
+            "schedule",
+            "scheduler",
+            "setting",
+            "task"
+          ]
+        },
+        "jobs": {
+          "lint": [
+            "workspace:lint",
+            "workspace:format",
+            "workspace:sync",
+            "memoflow:governance-check"
+          ],
+          "unit-1": [
+            "goal:test",
+            "ai:test",
+            "reminder:test",
+            "api:test",
+            "schedule:test",
+            "migrator:test",
+            "ui-core:test",
+            "cloud-auth:test",
+            "data-portability:test",
+            "database:test",
+            "label:test",
+            "ipc-client:test"
+          ],
+          "unit-2": [
+            "task:test",
+            "app-vue:test#2/2",
+            "account:test",
+            "web:test",
+            "assets:test",
+            "quality:test",
+            "time:test",
+            "ui-vue-shadcn:test",
+            "scheduler:test",
+            "patterns:test",
+            "http-client:test"
+          ],
+          "unit-3": [
+            "app-vue:test#1/2",
+            "desktop:test",
+            "notification:test",
+            "ci-cd-platform:test",
+            "repository:test",
+            "powersync-schema:test",
+            "schedule-orchestration:test",
+            "setting:test",
+            "utils:test",
+            "relation:test",
+            "agent-gateway:test",
+            "domain-shared:test"
+          ],
+          "typecheck": [
+            "@memoflow/test-utils:typecheck",
+            "account:typecheck",
+            "agent-gateway:typecheck",
+            "ai:typecheck",
+            "api:typecheck",
+            "app-react:typecheck",
+            "app-vue:typecheck",
+            "assets:typecheck",
+            "cloud-auth:typecheck",
+            "contracts:typecheck",
+            "data-portability:typecheck",
+            "database:typecheck",
+            "desktop:typecheck",
+            "domain-shared:typecheck",
+            "goal:typecheck",
+            "http-client:typecheck",
+            "ipc-client:typecheck",
+            "label:typecheck",
+            "migrator:typecheck",
+            "mobile:typecheck",
+            "notification:typecheck",
+            "patterns:typecheck",
+            "powersync-schema:typecheck",
+            "relation:typecheck",
+            "reminder:typecheck",
+            "repository:typecheck",
+            "schedule:typecheck",
+            "schedule-orchestration:typecheck",
+            "scheduler:typecheck",
+            "setting:typecheck",
+            "task:typecheck",
+            "time:typecheck",
+            "ui-core:typecheck",
+            "ui-react-native:typecheck",
+            "ui-storybook:typecheck",
+            "ui-vue-shadcn:typecheck",
+            "utils:typecheck",
+            "web:typecheck"
+          ],
+          "build": [
+            "account:build",
+            "agent-gateway:build",
+            "ai:build",
+            "api:build",
+            "app-vue:build",
+            "assets:build",
+            "cloud-auth:build",
+            "contracts:build",
+            "data-portability:build",
+            "database:build",
+            "desktop:build",
+            "domain-shared:build",
+            "goal:build",
+            "http-client:build",
+            "ipc-client:build",
+            "label:build",
+            "migrator:build",
+            "notification:build",
+            "patterns:build",
+            "powersync-schema:build",
+            "relation:build",
+            "reminder:build",
+            "repository:build",
+            "schedule:build",
+            "schedule-orchestration:build",
+            "scheduler:build",
+            "setting:build",
+            "task:build",
+            "time:build",
+            "ui-core:build",
+            "ui-storybook:build",
+            "ui-vue-shadcn:build",
+            "utils:build",
+            "web:build",
+            "database:runtime-scripts:build"
+          ],
+          "build-backend": [
+            "api:build",
+            "database:build",
+            "database:runtime-scripts:build"
+          ],
+          "verification-children": [
+            "desktop:test:ipc",
+            "desktop:test:main",
+            "api:test:smoke",
+            "account:test:integration",
+            "ai:test:integration",
+            "api:test:integration",
+            "database:test:integration",
+            "goal:test:integration",
+            "label:test:integration",
+            "notification:test:integration",
+            "relation:test:integration",
+            "reminder:test:integration",
+            "repository:test:integration",
+            "schedule:test:integration",
+            "scheduler:test:integration",
+            "task:test:integration",
+            "task:test:perf"
+          ],
+          "web-specialized": [
+            "web:e2e:ai-provider#1/1"
+          ],
+          "web-visual": [
+            "web:e2e:visual-regression#1/1"
+          ],
+          "component-browser": [
+            "ui-storybook:test:interaction"
+          ],
+          "contract": [
+            "contracts:test:contract"
+          ]
+        },
+        "serverShards": [
+          {
+            "id": "1/3",
+            "keys": [
+              "api:test:integration",
+              "repository:test:integration",
+              "ai:test:integration",
+              "relation:test:integration"
+            ],
+            "estimatedMs": 38340
+          },
+          {
+            "id": "2/3",
+            "keys": [
+              "account:test:integration",
+              "goal:test:integration",
+              "schedule:test:integration",
+              "task:test:perf",
+              "api:test:smoke",
+              "label:test:integration"
+            ],
+            "estimatedMs": 37900
+          },
+          {
+            "id": "3/3",
+            "keys": [
+              "notification:test:integration",
+              "database:test:integration",
+              "task:test:integration",
+              "reminder:test:integration",
+              "desktop:test:main",
+              "scheduler:test:integration",
+              "desktop:test:ipc"
+            ],
+            "estimatedMs": 39719
+          }
+        ]
+      }
+    }
+  ]
+}

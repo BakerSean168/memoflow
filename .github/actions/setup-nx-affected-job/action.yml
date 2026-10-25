@@ -26,7 +26,7 @@ inputs:
     required: false
     default: 'true'
   consume-delivery-manifest:
-    description: Download and validate the manifest produced by Scope Detector
+    description: Download and validate the manifest produced by Changes
     required: false
     default: 'false'
   lane:

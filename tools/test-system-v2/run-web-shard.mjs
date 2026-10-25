@@ -71,6 +71,7 @@ async function main() {
     JSON.stringify(
       {
         id: `${index}/${count}`,
+        commit: manifest.commit,
         runId: process.env.GITHUB_RUN_ID ?? 'local',
         runAttempt: Number(process.env.GITHUB_RUN_ATTEMPT ?? 1),
         manifestDigest: manifest.digest,

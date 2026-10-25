@@ -1,6 +1,6 @@
 # MemoFlow CI/CD VNext：Nightly → Stable
 
-关联 [Issue #628](https://github.com/BakerSean168/memoflow/issues/628)。本文同时说明**目标架构**与**首个实现切片的现实状态**，避免将“Nightly 资格检查”误认为已经交付可安装的 Nightly。
+关联 [Issue #628](https://github.com/BakerSean168/memoflow/issues/628)。本文同时说明**目标架构**与**当前实现的现实状态**，避免将“Nightly 资格检查”误认为已经交付可安装的 Nightly。
 
 ## 目标：完整开发与交付链路
 
@@ -9,17 +9,20 @@ flowchart TD
   Dev["本地开发"] --> Local["按影响范围跑相关测试"]
   Local --> PR["提交 PR"]
   PR --> Scope["Fast Changes / Nx Affected"]
-  PR --> Static["Format + Lint"]
+  PR --> Static["Lint：全仓格式 / Nx 边界 / 治理"]
   PR -.-> Preview["按需预览构建和人工体验"]
-  Scope --> Tests["Web / Server / Desktop / Shared 测试"]
-  Scope --> Browser["Storybook 浏览器测试"]
-  Scope --> Integration["Integration / Contract"]
+  Scope --> Tests["Test：Node / Vitest / Domain / Contract"]
+  Scope --> Browser["Test Web：Storybook / Visual（源码）"]
+  Scope --> Integration["Test Server：API / DB / IPC / Main"]
+  Scope --> Backend["Build + Typecheck：Acceptance 依赖"]
+  Backend --> Acceptance["Test Web Acceptance：真实 API / DB"]
   Scope --> Build["Build + Typecheck"]
   Static --> Gate{"CI Check"}
   Tests --> Gate
   Browser --> Gate
   Integration --> Gate
   Build --> Gate
+  Acceptance --> Gate
   Gate -->|失败| Dev
   Gate -->|成功| Main["合并 Main"]
   Main --> MainCI["Main CI：完整 Linux 回归"]
@@ -75,19 +78,19 @@ Nightly Audit 是扩展测试，不等于 Nightly Release；Main CI 成功也不
 
 ## 现有路径与迁移边界
 
-| 当前组件              | 迁移时的职责                                                               |
-| --------------------- | -------------------------------------------------------------------------- |
-| ci.yml                | 保留 CI Check、Nx Affected 与 Main 全量 Linux；后续优化按运行边界的分片    |
-| candidate-publish.yml | 旧 Main CI 成功自动构建候选；新 Nightly 产物链可用后再一次性取消自动触发   |
-| release-publish.yml   | 旧候选成功自动进入 Release；新 Stable 必须只能手动选择一个验证过的 Nightly |
-| release-assets.yml    | 沿用多平台打包与安装、签名、更新合同，支持独立 Nightly 和 Stable           |
-| publish-images.yml    | 采用 OCI immutable digest 晋升，不重复构建                                 |
-| nightly-audit.yml     | 保持独立夜间扩展回归，而不是发行 Nightly                                   |
-| deploy-production.yml | 人工验证并选择 Stable，严禁 Nightly 直接部署生产                           |
+| 当前组件              | 迁移时的职责                                                                   |
+| --------------------- | ------------------------------------------------------------------------------ |
+| ci.yml                | 职责型 Job 家族、Nx task inputs 选择、唯一 primary receipts 与 Main 全量 Linux |
+| candidate-publish.yml | 旧 Main CI 成功自动构建候选；新 Nightly 产物链可用后再一次性取消自动触发       |
+| release-publish.yml   | 旧候选成功自动进入 Release；新 Stable 必须只能手动选择一个验证过的 Nightly     |
+| release-assets.yml    | 沿用多平台打包与安装、签名、更新合同，支持独立 Nightly 和 Stable               |
+| publish-images.yml    | 采用 OCI immutable digest 晋升，不重复构建                                     |
+| nightly-audit.yml     | 保持独立夜间扩展回归，而不是发行 Nightly                                       |
+| deploy-production.yml | 人工验证并选择 Stable，严禁 Nightly 直接部署生产                               |
 
-### 第一切片已实现与未实现
+### 当前已实现与未实现
 
-**已经实现**：独立 Node Nightly eligibility 判定、可模拟 GitHub API 的正反面测试、纯只读且无需安装依赖的 Nightly 定时/手动预检 Workflow、本计划与触发矩阵。
+**已经实现**：独立 Node Nightly eligibility 判定、可模拟 GitHub API 的正反面测试、纯只读且无需安装依赖的 Nightly 定时/手动预检 Workflow、本计划与触发矩阵。P1 调度已在同一 Draft PR #629 中实现：Lint 与 Changes 并行；Nx 23.3 task input adapter 选择 build/typecheck/test；Test 保留三路 LPT 和 app-vue 二分片；Server 按历史耗时分片，每个 runner 准备一次 Postgres schema；源码 Browser/Visual 无后端 build 依赖，Acceptance 单独消费后端 artifact。Check 验证 manifest、run/attempt/SHA、命令和每个 task/shard 的唯一成功 receipt，合法 skip 必须与计划一致。Main 常规 CI 不采集 coverage，统计保留在 Nightly Audit。
 
 **尚未实现**：Nightly 的四平台产物构建、实际 Nightly prerelease 发布、人工 Stable 晋升以及关闭旧 Candidate 自动触发。当前 Nightly eligibility Workflow 无任何仓库写权限或构建任务，即使标记 eligible 也只产生决策摘要，不能被当作发布产物。
 
@@ -98,6 +101,14 @@ Nightly Audit 是扩展测试，不等于 Nightly Release；Main CI 成功也不
 1. 接通 eligibility → 完整 Nightly（多平台 Desktop、Docker、Nightly Update、Release Manifest 和验收门禁）。
 2. 增加手动选择任意已发布 Nightly 的 Stable 晋升；绑定 exact SHA，同 SHA Desktop 重打包，Docker digest 晋升；测试拒绝错误 SHA、缺少收据、版本冲突、签名/渠道不一致。
 3. 在与历史 Release 兼容且可恢复的条件下关闭旧 Candidate/Release 自动触发；确保 Main CI 到此结束。
-4. 完成 PR/Main Scope 与 Web/Server/Desktop/Shared 测试调度优化，参考 T3 Code 的快速反馈思路但不漏测受影响项目。
+4. 用真实 PR CI 验证 P1 调度，记录关键路径和 runner-minutes；业务包 Server/UI 拆分留到后续独立优化。
 
 每个切片须分别取得测试、YAML parse、Prettier/Governance、GitHub PR CI 证据。发布和生产部署动作始终需要独立授权。
+
+## P1 选择与执行证据
+
+`node tools/ci-cd-platform/replay-ci-matrix.mjs` 回放 docs-only、app-vue Chat、AI Server、Desktop Main、Desktop Renderer、API route、Task Server、contracts、workflow/root、test-only 和 Main docs 共 11 个现有文件场景；固定预期在 `tools/ci-cd-platform/__tests__/fixtures/pr-dispatch-matrix.json`，重放报告在 `reports/ci-cd-platform/p1-acceptance-matrix.json`。报告明确区分真实 Nx 选出的任务和尚未执行的产品测试，不能把规划回放当成 suite 执行成功。
+
+未知或已删除项目 owner 以及 selector 异常扩大为完整验证。测试文件仍按 Nx production/default inputs 区分 build 与 typecheck。Server primary suite 唯一归属一个 shard，Desktop boundary 聚合入口由 IPC/Main 两个 primary target 代替；contracts 的 contract 集合与 Unit 不重复执行。后端 build 的重复项属于 artifact 依赖构建，不是重复 primary test。
+
+实际执行以本次 GitHub run 的 `ci-task-receipts-*`、`web-shard-receipt-*` 和 `delivery-run-summary-*` artifact 为准。汇总报告提供 setup、执行、最长 job 执行、wall clock 和 GitHub runner-minutes；最长 job 执行不包含依赖等待，不能冒充完整 DAG 关键路径。P1 验收前仍须检查真实 PR CI；当前文档不宣称已测得提速。

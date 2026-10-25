@@ -311,6 +311,7 @@ fs.writeFileSync('apps/web/test-results/provider-results.json', JSON.stringify({
       JSON.parse(await readFile(path.join(root, 'reports/web-shards/shard-1.json'), 'utf8')),
       {
         id: '1/1',
+        commit: manifest.commit,
         runId: '90210',
         runAttempt: 2,
         manifestDigest: manifest.digest,

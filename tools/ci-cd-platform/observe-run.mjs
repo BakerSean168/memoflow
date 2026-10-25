@@ -3,12 +3,14 @@
 import { pathToFileURL } from 'node:url';
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { evaluateCiCheck } from './lib/ci-check.mjs';
 import { unitJobEnabled } from './lib/unit-shards.mjs';
 import {
   digest,
   validateDeliveryManifest,
   validateLaneSummary,
   validateRunSummary,
+  validateWorkspaceReceipt,
 } from './lib/contracts.mjs';
 
 async function findJsonFiles(directory) {
@@ -37,6 +39,79 @@ function optionalNonNegativeNumber(value, field) {
   return number;
 }
 
+async function observeDispatch({
+  manifest,
+  evidenceDir,
+  output,
+  startedAt,
+  runnerMinutesInput,
+  now,
+}) {
+  const values = await Promise.all(
+    (await findJsonFiles(evidenceDir)).map(async (file) =>
+      JSON.parse(await readFile(file, 'utf8')),
+    ),
+  );
+  const taskReceipts = values.filter((v) => v.kind === 'ci-task-receipt-v1');
+  const webReceipts = values.filter((v) => typeof v.id === 'string' && Array.isArray(v.specs));
+  const result = evaluateCiCheck({
+    needs: JSON.parse(process.env.CI_CHECK_NEEDS ?? 'null'),
+    manifest,
+    taskReceipts,
+    webReceipts,
+    commit: process.env.GITHUB_SHA,
+    runId: process.env.GITHUB_RUN_ID,
+    runAttempt: Number(process.env.GITHUB_RUN_ATTEMPT),
+  });
+  const workspaces = [
+    ...new Map(
+      values.filter((v) => v.kind === 'workspace-receipt-v1').map((v) => [v.digest, v]),
+    ).values(),
+  ];
+  for (const receipt of workspaces) {
+    validateWorkspaceReceipt(receipt);
+    if (receipt.commit !== manifest.commit) throw new Error('Workspace receipt commit mismatch');
+  }
+  // A batch's duration is shared by all its task receipts; count it only once.
+  const commands = [
+    ...new Map(
+      taskReceipts.map((r) => [`${r.job}/${r.runAttempt}/${digest(r.command)}`, r]),
+    ).values(),
+  ];
+  const lanes = Object.entries(manifest.dispatch.jobs).map(([job, plan]) => ({
+    lane: job,
+    status: result.jobs[job]?.actual ?? 'missing',
+    required: plan.required,
+    executionMs: commands.filter((r) => r.job === job).reduce((n, r) => n + r.durationMs, 0),
+  }));
+  const summary = {
+    kind: 'run-summary-v1',
+    version: 1,
+    commit: manifest.commit,
+    manifestDigest: manifest.digest,
+    status: result.state,
+    lanes,
+    failures: result.failures,
+    timing: {
+      setupMs: workspaces.reduce((n, r) => n + (r.timing.setupMs ?? 0), 0),
+      executionMs: commands.reduce((n, r) => n + r.durationMs, 0),
+      longestLaneMs: Math.max(0, ...lanes.map((r) => r.executionMs)),
+      wallClockMs: startedAt ? Math.max(0, now - Date.parse(startedAt)) : null,
+      runnerMinutes: optionalNonNegativeNumber(runnerMinutesInput, 'DELIVERY_RUNNER_MINUTES'),
+    },
+    provenance: {
+      generator: 'ci-dispatch-v1/observe-run',
+      runId: process.env.GITHUB_RUN_ID,
+      runAttempt: Number(process.env.GITHUB_RUN_ATTEMPT),
+    },
+  };
+  summary.digest = digest(summary);
+  validateRunSummary(summary);
+  await mkdir(path.dirname(output), { recursive: true });
+  await writeFile(output, `${JSON.stringify(summary, null, 2)}\n`);
+  return summary;
+}
+
 export async function observeRun({
   manifest,
   evidenceDir,
@@ -46,6 +121,8 @@ export async function observeRun({
   now = Date.now(),
 }) {
   validateDeliveryManifest(manifest);
+  if (manifest.dispatch)
+    return observeDispatch({ manifest, evidenceDir, output, startedAt, runnerMinutesInput, now });
   const summaries = [];
   for (const file of await findJsonFiles(evidenceDir)) {
     let value;

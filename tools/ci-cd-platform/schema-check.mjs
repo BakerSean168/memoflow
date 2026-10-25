@@ -6,6 +6,8 @@ import path from 'node:path';
 const root = path.resolve('tools/ci-cd-platform/schemas');
 const expected = [
   'delivery-manifest-v1.schema.json',
+  'ci-dispatch-v1.schema.json',
+  'ci-task-receipt-v1.schema.json',
   'ci-evidence-v1.schema.json',
   'ci-chain-v1.schema.json',
   'lane-input-v1.schema.json',

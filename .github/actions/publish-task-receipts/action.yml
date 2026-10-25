@@ -1,0 +1,21 @@
+name: Publish primary task receipts
+description: Preserve exact run, attempt, checkout and manifest identity for CI Check.
+runs:
+  using: composite
+  steps:
+    - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      if: always()
+      with:
+        name: ci-task-receipts-${{ github.job }}-${{ strategy.job-index || 0 }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: reports/ci-tasks/*.json
+        if-no-files-found: error
+        retention-days: 14
+    - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      if: always()
+      with:
+        name: ci-workspace-receipts-${{ github.job }}-${{ strategy.job-index || 0 }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: |
+          reports/ci-cd-platform/workspace-receipt.json
+          reports/quality/fmt-receipt.json
+        if-no-files-found: error
+        retention-days: 14

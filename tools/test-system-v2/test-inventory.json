@@ -11870,6 +11870,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/ci-cd-platform/__tests__/dispatch.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "ci-cd-platform:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/ci-cd-platform/__tests__/esm-entrypoint.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -12579,7 +12587,7 @@
           {
             "kind": "github-workflow",
             "workflow": ".github/workflows/ci.yml",
-            "entrypoint": "tools/test-system-v2/run-web-shard.mjs"
+            "target": "web:e2e:ai-provider"
           },
           {
             "kind": "github-workflow",
@@ -12712,7 +12720,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "node-test",
-      "fileCount": 45
+      "fileCount": 46
     },
     {
       "id": "memoflow:test:governance",
@@ -13879,7 +13887,7 @@
     "boundary-main": 12,
     "e2e": 40,
     "perf": 2,
-    "governance": 81
+    "governance": 82
   },
   "e2eGovernance": {
     "version": 2,
