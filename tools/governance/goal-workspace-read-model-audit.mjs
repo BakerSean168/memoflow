@@ -153,7 +153,7 @@ requireTokens('apps/desktop/src/main/modules/goal/goal-workspace.electron-module
   'GoalWorkspaceChannels.TASKS',
   'GoalWorkspaceChannels.KNOWLEDGE',
 ]);
-requireTokens('packages/contracts/src/electron/ipc-channels.ts', [
+requireTokens('packages/desktop-contracts/src/ipc-channels.ts', [
   "GET: 'goal:workspace:get'",
   "TASKS: 'goal:workspace:tasks'",
   "KNOWLEDGE: 'goal:workspace:knowledge'",

@@ -1,36 +1,15 @@
 /**
- * Electron Module Contract
+ * 兼容 shim（P1 S3，Issue #633）：electron 桌面契约真身已迁至
+ * @memoflow/desktop-contracts，本文件仅作单向 re-export，新代码禁止再引用
+ * `@memoflow/contracts/electron`。
+ * 淘汰条件：全仓该 specifier 引用计数为 0，且 contracts 与 main CI 各绿一轮，
+ * 并在 Issue #633 记录摘除证据后，删除本 shim 并摘除 exports 子路径。
  *
- * Defines the interface for self-contained Electron main process modules.
- * Each business module implements this to perform its own Composition Root.
- *
- * @module contracts/electron
+ * 冻结例外（真身仍在本目录，由本桶原样转出）：
+ * - authenticated-ipc：运行时中间件，归 P1 S4 的 @memoflow/host-runtime；
+ * - profile-import：与 data-portability 所有权双向纠缠，待其契约阶段理顺。
  */
-
-export type { IElectronAuthContext, ElectronAuthResolutionCode } from './auth-context';
-export {
-  InterventionWindowCommandSchema,
-  type InterventionWindowCommand,
-  type InterventionWindowProjection,
-  type InterventionWindowState,
-} from './intervention-window';
-export {
-  FocusWindowCommandSchema,
-  type FocusWindowCommand,
-  type FocusWindowProjection,
-  type FocusWindowPhaseKind,
-  type FocusWindowSessionState,
-} from './focus-window';
-export type {
-  ProfileKind,
-  ProfileUnlockState,
-  ProfileCloudState,
-  ProfileSummary,
-  DesktopAccessSnapshot,
-  SelectProfileRequest,
-  RemoveProfileRequest,
-} from './profile-access';
-export { ElectronAuthResolutionError, isElectronAuthResolutionError } from './auth-context';
+export * from '@memoflow/desktop-contracts';
 export {
   createAuthenticatedIpcWrapper,
   createAuthenticatedIdentityIpcWrapper,
@@ -39,100 +18,4 @@ export {
   type AuthenticatedIpcWrapperOptions,
   type AuthenticatedIdentityIpcWrapperOptions,
 } from './authenticated-ipc';
-export * from './ipc-channels';
-export type {
-  DesktopNotificationPreference,
-  DesktopNotificationPreferencePatch,
-} from './device-notification-preference';
-export {
-  DesktopNotificationPreferenceSchema,
-  DesktopNotificationPreferencePatchSchema,
-} from './device-notification-preference';
-export {
-  DesktopInstallationOwnerSchema,
-  DesktopUpdateCapabilitiesSchema,
-  DesktopUpdateChannelSchema,
-  DesktopUpdateDisableReasonSchema,
-  DesktopUpdateFailureCodeSchema,
-  DesktopUpdateFailureSchema,
-  DesktopUpdateInstallAuthoritySchema,
-  DesktopUpdateIntentSchema,
-  DesktopUpdateOperationSchema,
-  DesktopUpdateOutcomeSchema,
-  DesktopUpdateProgressSchema,
-  DesktopUpdateReleaseSchema,
-  DesktopUpdateSnapshotSchema,
-  DesktopUpdateStateSchema,
-  type DesktopInstallationOwnerDTO,
-  type DesktopUpdateCapabilitiesDTO,
-  type DesktopUpdateChannelDTO,
-  type DesktopUpdateDisableReasonDTO,
-  type DesktopUpdateFailureCodeDTO,
-  type DesktopUpdateFailureDTO,
-  type DesktopUpdateInstallAuthorityDTO,
-  type DesktopUpdateIntentDTO,
-  type DesktopUpdateOperationDTO,
-  type DesktopUpdateOutcomeDTO,
-  type DesktopUpdateProgressDTO,
-  type DesktopUpdateReleaseDTO,
-  type DesktopUpdateSnapshotDTO,
-  type DesktopUpdateStateDTO,
-  DesktopUpdateFeedClassSchema,
-  DesktopUpdateDiagnosticsStateSchema,
-  DesktopUpdateDiagnosticsFailureSchema,
-  DesktopUpdateInstallReceiptStatusSchema,
-  DesktopUpdateDiagnosticsSchema,
-  type DesktopUpdateFeedClassDTO,
-  type DesktopUpdateDiagnosticsStateDTO,
-  type DesktopUpdateDiagnosticsFailureDTO,
-  type DesktopUpdateInstallReceiptStatusDTO,
-  type DesktopUpdateDiagnosticsDTO,
-} from './desktop-update';
-export { AIStreamChannels } from './ipc-channels';
-export type {
-  IElectronDatabase,
-  IElectronDatabaseQueryResult,
-  IElectronDatabaseTransaction,
-} from './database';
-import type { IElectronAuthContext } from './auth-context';
-import type { IElectronDatabase } from './database';
-
-/**
- * Shared context provided to every Electron module during registration.
- */
-export interface IElectronModuleContext {
-  /** The canonical PowerSync-backed desktop business database runtime. */
-  readonly db: IElectronDatabase;
-  /** Shared authenticated desktop session context. */
-  readonly auth: IElectronAuthContext;
-}
-
-/**
- * A self-contained Electron main-process module.
- */
-export interface IElectronModule {
-  /** Human-readable module name (used in logs). */
-  readonly name: string;
-
-  /**
-   * Composition Root — wire up repositories, domain services,
-   * application services, and IPC handlers.
-   */
-  register(context: IElectronModuleContext): Promise<void> | void;
-
-  /**
-   * Graceful shutdown — release resources, remove IPC handlers, etc.
-   */
-  destroy?(): Promise<void> | void;
-}
-
-export {
-  ProfileIdSchema,
-  ProfilePinSchema,
-  SelectProfileRequestSchema,
-  RemoveProfileRequestSchema,
-  CreateGuestProfileRequestSchema,
-  RenameProfileRequestSchema,
-} from './profile-access';
-export type { CreateGuestProfileRequest, RenameProfileRequest } from './profile-access';
 export * from './profile-import';
