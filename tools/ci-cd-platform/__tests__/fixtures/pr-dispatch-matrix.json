@@ -4,19 +4,13 @@
   "cases": [
     {
       "id": "docs",
-      "files": [
-        "docs/test/README.md"
-      ],
+      "files": ["docs/test/README.md"],
       "expected": {
         "full": false,
         "targets": {
-          "build": [
-            "governance-tools"
-          ],
+          "build": ["governance-tools"],
           "typecheck": [],
-          "test": [
-            "governance-tools"
-          ],
+          "test": ["governance-tools"],
           "test:contract": [],
           "test:smoke": [],
           "test:integration": [],
@@ -53,56 +47,24 @@
     },
     {
       "id": "chat",
-      "files": [
-        "packages/app-vue/src/modules/ai/views/AIChatView.vue"
-      ],
+      "files": ["packages/app-vue/src/modules/ai/views/AIChatView.vue"],
       "expected": {
         "full": false,
         "targets": {
-          "build": [
-            "app-vue",
-            "desktop",
-            "governance-tools",
-            "ui-storybook",
-            "web"
-          ],
-          "typecheck": [
-            "app-vue",
-            "desktop",
-            "ui-storybook",
-            "web"
-          ],
-          "test": [
-            "app-vue",
-            "desktop",
-            "governance-tools",
-            "web"
-          ],
+          "build": ["app-vue", "desktop", "governance-tools", "ui-storybook", "web"],
+          "typecheck": ["app-vue", "desktop", "ui-storybook", "web"],
+          "test": ["app-vue", "desktop", "governance-tools", "web"],
           "test:contract": [],
           "test:smoke": [],
           "test:integration": [],
-          "test:boundary": [
-            "desktop"
-          ],
-          "test:ipc": [
-            "desktop"
-          ],
-          "test:main": [
-            "desktop"
-          ],
+          "test:boundary": ["desktop"],
+          "test:ipc": ["desktop"],
+          "test:main": ["desktop"],
           "test:perf": [],
-          "test:interaction": [
-            "ui-storybook"
-          ],
-          "e2e:ai-provider": [
-            "web"
-          ],
-          "e2e:visual-regression": [
-            "web"
-          ],
-          "test:coverage": [
-            "app-vue"
-          ]
+          "test:interaction": ["ui-storybook"],
+          "e2e:ai-provider": ["web"],
+          "e2e:visual-regression": ["web"],
+          "test:coverage": ["app-vue"]
         },
         "jobs": {
           "lint": [
@@ -111,55 +73,27 @@
             "workspace:sync",
             "memoflow:governance-check"
           ],
-          "unit-1": [
-            "app-vue:test#1/2"
-          ],
-          "unit-2": [
-            "app-vue:test#2/2"
-          ],
-          "unit-3": [
-            "desktop:test",
-            "web:test"
-          ],
+          "unit-1": ["app-vue:test#1/2"],
+          "unit-2": ["app-vue:test#2/2"],
+          "unit-3": ["desktop:test", "web:test"],
           "typecheck": [
             "app-vue:typecheck",
             "desktop:typecheck",
             "ui-storybook:typecheck",
             "web:typecheck"
           ],
-          "build": [
-            "app-vue:build",
-            "desktop:build",
-            "ui-storybook:build",
-            "web:build"
-          ],
-          "build-backend": [
-            "api:build",
-            "database:build",
-            "database:runtime-scripts:build"
-          ],
-          "verification-children": [
-            "desktop:test:ipc",
-            "desktop:test:main"
-          ],
-          "web-specialized": [
-            "web:e2e:ai-provider#1/1"
-          ],
-          "web-visual": [
-            "web:e2e:visual-regression"
-          ],
-          "component-browser": [
-            "ui-storybook:test:interaction"
-          ],
+          "build": ["app-vue:build", "desktop:build", "ui-storybook:build", "web:build"],
+          "build-backend": ["api:build", "database:build", "database:runtime-scripts:build"],
+          "verification-children": ["desktop:test:ipc", "desktop:test:main"],
+          "web-specialized": ["web:e2e:ai-provider#1/1"],
+          "web-visual": ["web:e2e:visual-regression"],
+          "component-browser": ["ui-storybook:test:interaction"],
           "contract": []
         },
         "serverShards": [
           {
             "id": "1/1",
-            "keys": [
-              "desktop:test:main",
-              "desktop:test:ipc"
-            ],
+            "keys": ["desktop:test:main", "desktop:test:ipc"],
             "estimatedMs": 7849
           }
         ]
@@ -167,21 +101,11 @@
     },
     {
       "id": "aiServer",
-      "files": [
-        "packages/ai/src/server/transport/ai-chat.controller.ts"
-      ],
+      "files": ["packages/ai/src/server/transport/ai-chat.controller.ts"],
       "expected": {
         "full": false,
         "targets": {
-          "build": [
-            "ai",
-            "api",
-            "app-vue",
-            "desktop",
-            "governance-tools",
-            "ui-storybook",
-            "web"
-          ],
+          "build": ["ai", "api", "app-vue", "desktop", "governance-tools", "ui-storybook", "web"],
           "typecheck": [
             "ai",
             "api",
@@ -192,46 +116,18 @@
             "ui-storybook",
             "web"
           ],
-          "test": [
-            "ai",
-            "api",
-            "app-vue",
-            "desktop",
-            "governance-tools",
-            "web"
-          ],
+          "test": ["ai", "api", "app-vue", "desktop", "governance-tools", "web"],
           "test:contract": [],
-          "test:smoke": [
-            "api"
-          ],
-          "test:integration": [
-            "ai",
-            "api"
-          ],
-          "test:boundary": [
-            "desktop"
-          ],
-          "test:ipc": [
-            "desktop"
-          ],
-          "test:main": [
-            "desktop"
-          ],
+          "test:smoke": ["api"],
+          "test:integration": ["ai", "api"],
+          "test:boundary": ["desktop"],
+          "test:ipc": ["desktop"],
+          "test:main": ["desktop"],
           "test:perf": [],
-          "test:interaction": [
-            "ui-storybook"
-          ],
-          "e2e:ai-provider": [
-            "web"
-          ],
-          "e2e:visual-regression": [
-            "web"
-          ],
-          "test:coverage": [
-            "ai",
-            "api",
-            "app-vue"
-          ]
+          "test:interaction": ["ui-storybook"],
+          "e2e:ai-provider": ["web"],
+          "e2e:visual-regression": ["web"],
+          "test:coverage": ["ai", "api", "app-vue"]
         },
         "jobs": {
           "lint": [
@@ -240,18 +136,9 @@
             "workspace:sync",
             "memoflow:governance-check"
           ],
-          "unit-1": [
-            "app-vue:test#1/2",
-            "api:test"
-          ],
-          "unit-2": [
-            "app-vue:test#2/2",
-            "web:test"
-          ],
-          "unit-3": [
-            "desktop:test",
-            "ai:test"
-          ],
+          "unit-1": ["app-vue:test#1/2", "api:test"],
+          "unit-2": ["app-vue:test#2/2", "web:test"],
+          "unit-3": ["desktop:test", "ai:test"],
           "typecheck": [
             "ai:typecheck",
             "api:typecheck",
@@ -300,46 +187,23 @@
     },
     {
       "id": "desktopMain",
-      "files": [
-        "apps/desktop/src/main/bootstrap.ts"
-      ],
+      "files": ["apps/desktop/src/main/bootstrap.ts"],
       "expected": {
         "full": false,
         "targets": {
-          "build": [
-            "desktop",
-            "governance-tools",
-            "web"
-          ],
-          "typecheck": [
-            "desktop",
-            "web"
-          ],
-          "test": [
-            "desktop",
-            "governance-tools",
-            "web"
-          ],
+          "build": ["desktop", "governance-tools", "web"],
+          "typecheck": ["desktop", "web"],
+          "test": ["desktop", "governance-tools", "web"],
           "test:contract": [],
           "test:smoke": [],
           "test:integration": [],
-          "test:boundary": [
-            "desktop"
-          ],
-          "test:ipc": [
-            "desktop"
-          ],
-          "test:main": [
-            "desktop"
-          ],
+          "test:boundary": ["desktop"],
+          "test:ipc": ["desktop"],
+          "test:main": ["desktop"],
           "test:perf": [],
           "test:interaction": [],
-          "e2e:ai-provider": [
-            "web"
-          ],
-          "e2e:visual-regression": [
-            "web"
-          ],
+          "e2e:ai-provider": ["web"],
+          "e2e:visual-regression": ["web"],
           "test:coverage": []
         },
         "jobs": {
@@ -349,26 +213,13 @@
             "workspace:sync",
             "memoflow:governance-check"
           ],
-          "unit-1": [
-            "desktop:test"
-          ],
-          "unit-2": [
-            "web:test"
-          ],
+          "unit-1": ["desktop:test"],
+          "unit-2": ["web:test"],
           "unit-3": [],
-          "typecheck": [
-            "desktop:typecheck",
-            "web:typecheck"
-          ],
-          "build": [
-            "desktop:build",
-            "web:build"
-          ],
+          "typecheck": ["desktop:typecheck", "web:typecheck"],
+          "build": ["desktop:build", "web:build"],
           "build-backend": [],
-          "verification-children": [
-            "desktop:test:ipc",
-            "desktop:test:main"
-          ],
+          "verification-children": ["desktop:test:ipc", "desktop:test:main"],
           "web-specialized": [],
           "web-visual": [],
           "component-browser": [],
@@ -377,10 +228,7 @@
         "serverShards": [
           {
             "id": "1/1",
-            "keys": [
-              "desktop:test:main",
-              "desktop:test:ipc"
-            ],
+            "keys": ["desktop:test:main", "desktop:test:ipc"],
             "estimatedMs": 7849
           }
         ]
@@ -388,46 +236,23 @@
     },
     {
       "id": "desktopRenderer",
-      "files": [
-        "apps/desktop/src/renderer/App.vue"
-      ],
+      "files": ["apps/desktop/src/renderer/App.vue"],
       "expected": {
         "full": false,
         "targets": {
-          "build": [
-            "desktop",
-            "governance-tools",
-            "web"
-          ],
-          "typecheck": [
-            "desktop",
-            "web"
-          ],
-          "test": [
-            "desktop",
-            "governance-tools",
-            "web"
-          ],
+          "build": ["desktop", "governance-tools", "web"],
+          "typecheck": ["desktop", "web"],
+          "test": ["desktop", "governance-tools", "web"],
           "test:contract": [],
           "test:smoke": [],
           "test:integration": [],
-          "test:boundary": [
-            "desktop"
-          ],
-          "test:ipc": [
-            "desktop"
-          ],
-          "test:main": [
-            "desktop"
-          ],
+          "test:boundary": ["desktop"],
+          "test:ipc": ["desktop"],
+          "test:main": ["desktop"],
           "test:perf": [],
           "test:interaction": [],
-          "e2e:ai-provider": [
-            "web"
-          ],
-          "e2e:visual-regression": [
-            "web"
-          ],
+          "e2e:ai-provider": ["web"],
+          "e2e:visual-regression": ["web"],
           "test:coverage": []
         },
         "jobs": {
@@ -437,46 +262,22 @@
             "workspace:sync",
             "memoflow:governance-check"
           ],
-          "unit-1": [
-            "desktop:test"
-          ],
-          "unit-2": [
-            "web:test"
-          ],
+          "unit-1": ["desktop:test"],
+          "unit-2": ["web:test"],
           "unit-3": [],
-          "typecheck": [
-            "desktop:typecheck",
-            "web:typecheck"
-          ],
-          "build": [
-            "desktop:build",
-            "web:build"
-          ],
-          "build-backend": [
-            "api:build",
-            "database:build",
-            "database:runtime-scripts:build"
-          ],
-          "verification-children": [
-            "desktop:test:ipc",
-            "desktop:test:main"
-          ],
-          "web-specialized": [
-            "web:e2e:ai-provider#1/1"
-          ],
-          "web-visual": [
-            "web:e2e:visual-regression"
-          ],
+          "typecheck": ["desktop:typecheck", "web:typecheck"],
+          "build": ["desktop:build", "web:build"],
+          "build-backend": ["api:build", "database:build", "database:runtime-scripts:build"],
+          "verification-children": ["desktop:test:ipc", "desktop:test:main"],
+          "web-specialized": ["web:e2e:ai-provider#1/1"],
+          "web-visual": ["web:e2e:visual-regression"],
           "component-browser": [],
           "contract": []
         },
         "serverShards": [
           {
             "id": "1/1",
-            "keys": [
-              "desktop:test:main",
-              "desktop:test:ipc"
-            ],
+            "keys": ["desktop:test:main", "desktop:test:ipc"],
             "estimatedMs": 7849
           }
         ]
@@ -484,30 +285,16 @@
     },
     {
       "id": "apiRoute",
-      "files": [
-        "apps/api/src/shared/infrastructure/http/routes/infrastructure-routes.ts"
-      ],
+      "files": ["apps/api/src/shared/infrastructure/http/routes/infrastructure-routes.ts"],
       "expected": {
         "full": false,
         "targets": {
-          "build": [
-            "api",
-            "governance-tools"
-          ],
-          "typecheck": [
-            "api"
-          ],
-          "test": [
-            "api",
-            "governance-tools"
-          ],
+          "build": ["api", "governance-tools"],
+          "typecheck": ["api"],
+          "test": ["api", "governance-tools"],
           "test:contract": [],
-          "test:smoke": [
-            "api"
-          ],
-          "test:integration": [
-            "api"
-          ],
+          "test:smoke": ["api"],
+          "test:integration": ["api"],
           "test:boundary": [],
           "test:ipc": [],
           "test:main": [],
@@ -515,9 +302,7 @@
           "test:interaction": [],
           "e2e:ai-provider": [],
           "e2e:visual-regression": [],
-          "test:coverage": [
-            "api"
-          ]
+          "test:coverage": ["api"]
         },
         "jobs": {
           "lint": [
@@ -526,22 +311,13 @@
             "workspace:sync",
             "memoflow:governance-check"
           ],
-          "unit-1": [
-            "api:test"
-          ],
+          "unit-1": ["api:test"],
           "unit-2": [],
           "unit-3": [],
-          "typecheck": [
-            "api:typecheck"
-          ],
-          "build": [
-            "api:build"
-          ],
+          "typecheck": ["api:typecheck"],
+          "build": ["api:build"],
           "build-backend": [],
-          "verification-children": [
-            "api:test:smoke",
-            "api:test:integration"
-          ],
+          "verification-children": ["api:test:smoke", "api:test:integration"],
           "web-specialized": [],
           "web-visual": [],
           "component-browser": [],
@@ -550,10 +326,7 @@
         "serverShards": [
           {
             "id": "1/1",
-            "keys": [
-              "api:test:integration",
-              "api:test:smoke"
-            ],
+            "keys": ["api:test:integration", "api:test:smoke"],
             "estimatedMs": 30330
           }
         ]
@@ -561,9 +334,7 @@
     },
     {
       "id": "taskServer",
-      "files": [
-        "packages/task/src/server/transport/task.transport-handlers.ts"
-      ],
+      "files": ["packages/task/src/server/transport/task.transport-handlers.ts"],
       "expected": {
         "full": false,
         "targets": {
@@ -604,43 +375,16 @@
             "web"
           ],
           "test:contract": [],
-          "test:smoke": [
-            "api"
-          ],
-          "test:integration": [
-            "account",
-            "api",
-            "notification",
-            "task"
-          ],
-          "test:boundary": [
-            "desktop"
-          ],
-          "test:ipc": [
-            "desktop"
-          ],
-          "test:main": [
-            "desktop"
-          ],
-          "test:perf": [
-            "task"
-          ],
-          "test:interaction": [
-            "ui-storybook"
-          ],
-          "e2e:ai-provider": [
-            "web"
-          ],
-          "e2e:visual-regression": [
-            "web"
-          ],
-          "test:coverage": [
-            "account",
-            "api",
-            "app-vue",
-            "notification",
-            "task"
-          ]
+          "test:smoke": ["api"],
+          "test:integration": ["account", "api", "notification", "task"],
+          "test:boundary": ["desktop"],
+          "test:ipc": ["desktop"],
+          "test:main": ["desktop"],
+          "test:perf": ["task"],
+          "test:interaction": ["ui-storybook"],
+          "e2e:ai-provider": ["web"],
+          "e2e:visual-regression": ["web"],
+          "test:coverage": ["account", "api", "app-vue", "notification", "task"]
         },
         "jobs": {
           "lint": [
@@ -649,21 +393,9 @@
             "workspace:sync",
             "memoflow:governance-check"
           ],
-          "unit-1": [
-            "task:test",
-            "account:test",
-            "api:test",
-            "schedule-orchestration:test"
-          ],
-          "unit-2": [
-            "app-vue:test#1/2",
-            "desktop:test"
-          ],
-          "unit-3": [
-            "app-vue:test#2/2",
-            "notification:test",
-            "web:test"
-          ],
+          "unit-1": ["task:test", "account:test", "api:test", "schedule-orchestration:test"],
+          "unit-2": ["app-vue:test#1/2", "desktop:test"],
+          "unit-3": ["app-vue:test#2/2", "notification:test", "web:test"],
           "typecheck": [
             "account:typecheck",
             "api:typecheck",
@@ -706,11 +438,7 @@
         "serverShards": [
           {
             "id": "1/2",
-            "keys": [
-              "api:test:integration",
-              "desktop:test:main",
-              "desktop:test:ipc"
-            ],
+            "keys": ["api:test:integration", "desktop:test:main", "desktop:test:ipc"],
             "estimatedMs": 33529
           },
           {
@@ -728,9 +456,7 @@
     },
     {
       "id": "aiContract",
-      "files": [
-        "packages/contracts/src/modules/ai/api/response-schemas.ts"
-      ],
+      "files": ["packages/contracts/src/modules/ai/api/response-schemas.ts"],
       "expected": {
         "full": true,
         "targets": {
@@ -851,12 +577,8 @@
             "utils",
             "web"
           ],
-          "test:contract": [
-            "contracts"
-          ],
-          "test:smoke": [
-            "api"
-          ],
+          "test:contract": ["contracts"],
+          "test:smoke": ["api"],
           "test:integration": [
             "account",
             "ai",
@@ -872,27 +594,13 @@
             "scheduler",
             "task"
           ],
-          "test:boundary": [
-            "desktop"
-          ],
-          "test:ipc": [
-            "desktop"
-          ],
-          "test:main": [
-            "desktop"
-          ],
-          "test:perf": [
-            "task"
-          ],
-          "test:interaction": [
-            "ui-storybook"
-          ],
-          "e2e:ai-provider": [
-            "web"
-          ],
-          "e2e:visual-regression": [
-            "web"
-          ],
+          "test:boundary": ["desktop"],
+          "test:ipc": ["desktop"],
+          "test:main": ["desktop"],
+          "test:perf": ["task"],
+          "test:interaction": ["ui-storybook"],
+          "e2e:ai-provider": ["web"],
+          "e2e:visual-regression": ["web"],
           "test:coverage": [
             "account",
             "ai",
@@ -1034,11 +742,7 @@
             "web:build",
             "database:runtime-scripts:build"
           ],
-          "build-backend": [
-            "api:build",
-            "database:build",
-            "database:runtime-scripts:build"
-          ],
+          "build-backend": ["api:build", "database:build", "database:runtime-scripts:build"],
           "verification-children": [
             "desktop:test:ipc",
             "desktop:test:main",
@@ -1057,18 +761,10 @@
             "scheduler:test:integration",
             "task:test:integration"
           ],
-          "web-specialized": [
-            "web:e2e:ai-provider#1/1"
-          ],
-          "web-visual": [
-            "web:e2e:visual-regression"
-          ],
-          "component-browser": [
-            "ui-storybook:test:interaction"
-          ],
-          "contract": [
-            "contracts:test:contract"
-          ]
+          "web-specialized": ["web:e2e:ai-provider#1/1"],
+          "web-visual": ["web:e2e:visual-regression"],
+          "component-browser": ["ui-storybook:test:interaction"],
+          "contract": ["contracts:test:contract"]
         },
         "serverShards": [
           {
@@ -1110,9 +806,7 @@
     },
     {
       "id": "workflow",
-      "files": [
-        ".github/workflows/ci.yml"
-      ],
+      "files": [".github/workflows/ci.yml"],
       "expected": {
         "full": true,
         "targets": {
@@ -1233,12 +927,8 @@
             "utils",
             "web"
           ],
-          "test:contract": [
-            "contracts"
-          ],
-          "test:smoke": [
-            "api"
-          ],
+          "test:contract": ["contracts"],
+          "test:smoke": ["api"],
           "test:integration": [
             "account",
             "ai",
@@ -1254,27 +944,13 @@
             "scheduler",
             "task"
           ],
-          "test:boundary": [
-            "desktop"
-          ],
-          "test:ipc": [
-            "desktop"
-          ],
-          "test:main": [
-            "desktop"
-          ],
-          "test:perf": [
-            "task"
-          ],
-          "test:interaction": [
-            "ui-storybook"
-          ],
-          "e2e:ai-provider": [
-            "web"
-          ],
-          "e2e:visual-regression": [
-            "web"
-          ],
+          "test:boundary": ["desktop"],
+          "test:ipc": ["desktop"],
+          "test:main": ["desktop"],
+          "test:perf": ["task"],
+          "test:interaction": ["ui-storybook"],
+          "e2e:ai-provider": ["web"],
+          "e2e:visual-regression": ["web"],
           "test:coverage": [
             "account",
             "ai",
@@ -1416,11 +1092,7 @@
             "web:build",
             "database:runtime-scripts:build"
           ],
-          "build-backend": [
-            "api:build",
-            "database:build",
-            "database:runtime-scripts:build"
-          ],
+          "build-backend": ["api:build", "database:build", "database:runtime-scripts:build"],
           "verification-children": [
             "desktop:test:ipc",
             "desktop:test:main",
@@ -1439,18 +1111,10 @@
             "scheduler:test:integration",
             "task:test:integration"
           ],
-          "web-specialized": [
-            "web:e2e:ai-provider#1/1"
-          ],
-          "web-visual": [
-            "web:e2e:visual-regression"
-          ],
-          "component-browser": [
-            "ui-storybook:test:interaction"
-          ],
-          "contract": [
-            "contracts:test:contract"
-          ]
+          "web-specialized": ["web:e2e:ai-provider#1/1"],
+          "web-visual": ["web:e2e:visual-regression"],
+          "component-browser": ["ui-storybook:test:interaction"],
+          "contract": ["contracts:test:contract"]
         },
         "serverShards": [
           {
@@ -1492,49 +1156,24 @@
     },
     {
       "id": "testOnly",
-      "files": [
-        "packages/app-vue/src/modules/ai/components/AIMessageContent.spec.ts"
-      ],
+      "files": ["packages/app-vue/src/modules/ai/components/AIMessageContent.spec.ts"],
       "expected": {
         "full": false,
         "targets": {
-          "build": [
-            "governance-tools",
-            "ui-storybook"
-          ],
-          "typecheck": [
-            "app-vue"
-          ],
-          "test": [
-            "app-vue",
-            "governance-tools",
-            "test-system-v2"
-          ],
+          "build": ["governance-tools", "ui-storybook"],
+          "typecheck": ["app-vue"],
+          "test": ["app-vue", "governance-tools", "test-system-v2"],
           "test:contract": [],
           "test:smoke": [],
           "test:integration": [],
-          "test:boundary": [
-            "desktop"
-          ],
-          "test:ipc": [
-            "desktop"
-          ],
-          "test:main": [
-            "desktop"
-          ],
+          "test:boundary": ["desktop"],
+          "test:ipc": ["desktop"],
+          "test:main": ["desktop"],
           "test:perf": [],
-          "test:interaction": [
-            "ui-storybook"
-          ],
-          "e2e:ai-provider": [
-            "web"
-          ],
-          "e2e:visual-regression": [
-            "web"
-          ],
-          "test:coverage": [
-            "app-vue"
-          ]
+          "test:interaction": ["ui-storybook"],
+          "e2e:ai-provider": ["web"],
+          "e2e:visual-regression": ["web"],
+          "test:coverage": ["app-vue"]
         },
         "jobs": {
           "lint": [
@@ -1543,46 +1182,22 @@
             "workspace:sync",
             "memoflow:governance-check"
           ],
-          "unit-1": [
-            "app-vue:test#1/2"
-          ],
-          "unit-2": [
-            "app-vue:test#2/2"
-          ],
+          "unit-1": ["app-vue:test#1/2"],
+          "unit-2": ["app-vue:test#2/2"],
           "unit-3": [],
-          "typecheck": [
-            "app-vue:typecheck"
-          ],
-          "build": [
-            "ui-storybook:build"
-          ],
-          "build-backend": [
-            "api:build",
-            "database:build",
-            "database:runtime-scripts:build"
-          ],
-          "verification-children": [
-            "desktop:test:ipc",
-            "desktop:test:main"
-          ],
-          "web-specialized": [
-            "web:e2e:ai-provider#1/1"
-          ],
-          "web-visual": [
-            "web:e2e:visual-regression"
-          ],
-          "component-browser": [
-            "ui-storybook:test:interaction"
-          ],
+          "typecheck": ["app-vue:typecheck"],
+          "build": ["ui-storybook:build"],
+          "build-backend": ["api:build", "database:build", "database:runtime-scripts:build"],
+          "verification-children": ["desktop:test:ipc", "desktop:test:main"],
+          "web-specialized": ["web:e2e:ai-provider#1/1"],
+          "web-visual": ["web:e2e:visual-regression"],
+          "component-browser": ["ui-storybook:test:interaction"],
           "contract": []
         },
         "serverShards": [
           {
             "id": "1/1",
-            "keys": [
-              "desktop:test:main",
-              "desktop:test:ipc"
-            ],
+            "keys": ["desktop:test:main", "desktop:test:ipc"],
             "estimatedMs": 7849
           }
         ]
@@ -1590,9 +1205,7 @@
     },
     {
       "id": "mainDocs",
-      "files": [
-        "docs/test/README.md"
-      ],
+      "files": ["docs/test/README.md"],
       "event": "push",
       "expected": {
         "full": true,
@@ -1714,12 +1327,8 @@
             "utils",
             "web"
           ],
-          "test:contract": [
-            "contracts"
-          ],
-          "test:smoke": [
-            "api"
-          ],
+          "test:contract": ["contracts"],
+          "test:smoke": ["api"],
           "test:integration": [
             "account",
             "ai",
@@ -1735,27 +1344,13 @@
             "scheduler",
             "task"
           ],
-          "test:boundary": [
-            "desktop"
-          ],
-          "test:ipc": [
-            "desktop"
-          ],
-          "test:main": [
-            "desktop"
-          ],
-          "test:perf": [
-            "task"
-          ],
-          "test:interaction": [
-            "ui-storybook"
-          ],
-          "e2e:ai-provider": [
-            "web"
-          ],
-          "e2e:visual-regression": [
-            "web"
-          ],
+          "test:boundary": ["desktop"],
+          "test:ipc": ["desktop"],
+          "test:main": ["desktop"],
+          "test:perf": ["task"],
+          "test:interaction": ["ui-storybook"],
+          "e2e:ai-provider": ["web"],
+          "e2e:visual-regression": ["web"],
           "test:coverage": [
             "account",
             "ai",
@@ -1897,11 +1492,7 @@
             "web:build",
             "database:runtime-scripts:build"
           ],
-          "build-backend": [
-            "api:build",
-            "database:build",
-            "database:runtime-scripts:build"
-          ],
+          "build-backend": ["api:build", "database:build", "database:runtime-scripts:build"],
           "verification-children": [
             "desktop:test:ipc",
             "desktop:test:main",
@@ -1921,18 +1512,10 @@
             "task:test:integration",
             "task:test:perf"
           ],
-          "web-specialized": [
-            "web:e2e:ai-provider#1/1"
-          ],
-          "web-visual": [
-            "web:e2e:visual-regression#1/1"
-          ],
-          "component-browser": [
-            "ui-storybook:test:interaction"
-          ],
-          "contract": [
-            "contracts:test:contract"
-          ]
+          "web-specialized": ["web:e2e:ai-provider#1/1"],
+          "web-visual": ["web:e2e:visual-regression#1/1"],
+          "component-browser": ["ui-storybook:test:interaction"],
+          "contract": ["contracts:test:contract"]
         },
         "serverShards": [
           {
