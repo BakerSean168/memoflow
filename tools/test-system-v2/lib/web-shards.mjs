@@ -47,7 +47,7 @@ export function selectWebSpecs({ enabled, full, files }) {
       /^packages\/([^/]+)\/src\//u.exec(file)?.[1];
     const prefixes = WEB_OWNER_EXTENSIONS[owner];
     // No guessed dependency graph: shared contracts, global styles, helpers,
-    // root/config and unrecognized owners retain the full four-shard fallback.
+    // root/config and unrecognized owners retain the complete canonical spec set.
     if (!prefixes) return { specs: [...WEB_FLOW_SPECS], fallback: true };
     for (const spec of WEB_FLOW_SPECS) {
       if (prefixes.some((prefix) => spec.startsWith(prefix))) selected.add(spec);
@@ -97,16 +97,16 @@ export function planWebShards({
     (total, entry) => total + entry.durationMs,
     0,
   );
+  // Fallback expands the SPEC SET, not the number of runners. A shrinking
+  // E2E inventory must not keep paying for four fixed environments.
   const shardCount =
     selected.length === 0
       ? 0
-      : fallback
-        ? policy.defaultShards
-        : Math.min(
-            policy.maxShards,
-            selected.length,
-            Math.max(1, Math.ceil(estimatedTotalMs / (policy.targetPerShardMs - policy.setupMs))),
-          );
+      : Math.min(
+          fallback ? policy.defaultShards : policy.maxShards,
+          selected.length,
+          Math.max(1, Math.ceil(estimatedTotalMs / (policy.targetPerShardMs - policy.setupMs))),
+        );
   const shards =
     shardCount === 0
       ? []

@@ -115,6 +115,154 @@
       "sourceSha256": "6fccd352e0556cb2da09fd2045a578aab28527169d9a5cc87bc3d7842c998882",
       "replacements": ["apps/api/src/runtime/repository-http.integration.test.ts"],
       "issue": "https://github.com/BakerSean168/memoflow/issues/625"
+    },
+    {
+      "path": "apps/web/e2e/goal/goal-crud.spec.ts",
+      "reason": "Aggressive reduction authorized in Issue #625: routine behavior is owned by existing component/unit/API/database tests. Browser-specific geometry and complete UI-to-server journeys are deliberately no longer duplicated; this is not a claim of assertion-for-assertion equivalence.",
+      "sourceSha256": "458b22a073f105287d7dde13749b35a77e579eb97bc48094a4e7992d8972e5ec",
+      "replacements": [
+        "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.spec.ts",
+        "packages/app-vue/src/modules/goal/views/GoalDetailView.spec.ts",
+        "apps/api/src/runtime/goal-task-http.integration.test.ts"
+      ],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625",
+      "coverageDisposition": "lower-layer coverage; accepted loss of whole-system UI journey signal"
+    },
+    {
+      "path": "apps/web/e2e/task/task-plan-crud.spec.ts",
+      "reason": "Aggressive reduction authorized in Issue #625: routine behavior is owned by existing component/unit/API/database tests. Browser-specific geometry and complete UI-to-server journeys are deliberately no longer duplicated; this is not a claim of assertion-for-assertion equivalence.",
+      "sourceSha256": "4f9ff5c5d5eb47b207523ef8962d76bd1a89ed24f0ad57a814a0d536eee7363c",
+      "replacements": [
+        "packages/app-vue/src/modules/task/components/TaskPlanForm/TaskPlanForm.spec.ts",
+        "packages/app-vue/src/modules/task/views/TaskDetailView.spec.ts",
+        "apps/api/src/runtime/goal-task-http.integration.test.ts"
+      ],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625",
+      "coverageDisposition": "lower-layer coverage; accepted loss of whole-system UI journey signal"
+    },
+    {
+      "path": "apps/web/e2e/schedule/schedule-calendar.spec.ts",
+      "reason": "Aggressive reduction authorized in Issue #625: routine behavior is owned by existing component/unit/API/database tests. Browser-specific geometry and complete UI-to-server journeys are deliberately no longer duplicated; this is not a claim of assertion-for-assertion equivalence.",
+      "sourceSha256": "6e41d6368a92bd01651b63692b2445d282e55922c5d577c391e494a90abbe0fc",
+      "replacements": [
+        "packages/app-vue/src/modules/schedule/composables/useScheduleCalendar.cache.spec.ts",
+        "packages/schedule/src/api/schedule-event-routes-roundtrip.spec.ts"
+      ],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625",
+      "coverageDisposition": "lower-layer coverage; accepted loss of whole-system UI journey signal"
+    },
+    {
+      "path": "apps/web/e2e/schedule/planner-task-revert.spec.ts",
+      "reason": "Aggressive reduction authorized in Issue #625: routine behavior is owned by existing component/unit/API/database tests. Browser-specific geometry and complete UI-to-server journeys are deliberately no longer duplicated; this is not a claim of assertion-for-assertion equivalence.",
+      "sourceSha256": "94e6951d2aad80a59204f36cff3d322496ede47b5dd24f7071cbb6714e61aeac",
+      "replacements": [
+        "packages/app-vue/src/modules/schedule/planner/planner-fullcalendar-mutation.adapter.spec.ts"
+      ],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625",
+      "coverageDisposition": "lower-layer coverage; accepted loss of whole-system UI journey signal"
+    },
+    {
+      "path": "apps/web/e2e/routine/routine-configuration.spec.ts",
+      "reason": "Aggressive reduction authorized in Issue #625: routine behavior is owned by existing component/unit/API/database tests. Browser-specific geometry and complete UI-to-server journeys are deliberately no longer duplicated; this is not a claim of assertion-for-assertion equivalence.",
+      "sourceSha256": "f1eabfea79f2995efa1f7eff1e413d3ed360e039a38dffc30cd29ed4bdb5acf4",
+      "replacements": [
+        "packages/app-vue/src/modules/routine/views/RoutineConfigurationView.spec.ts",
+        "packages/app-vue/src/modules/routine/components/RoutineEditorDialog.spec.ts"
+      ],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625",
+      "coverageDisposition": "lower-layer coverage; accepted loss of whole-system UI journey signal"
+    },
+    {
+      "path": "apps/web/e2e/note/note-workspace.spec.ts",
+      "reason": "Aggressive reduction authorized in Issue #625: routine behavior is owned by existing component/unit/API/database tests. Browser-specific geometry and complete UI-to-server journeys are deliberately no longer duplicated; this is not a claim of assertion-for-assertion equivalence.",
+      "sourceSha256": "fa52d3aae16c33748d50d3f35776ea1c95bbed80b7a155e08b591dcef440b3cb",
+      "replacements": [
+        "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.spec.ts"
+      ],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625",
+      "coverageDisposition": "lower-layer coverage; accepted loss of whole-system UI journey signal"
+    },
+    {
+      "path": "apps/web/e2e/notification/notification-center.spec.ts",
+      "reason": "Aggressive reduction authorized in Issue #625: routine behavior is owned by existing component/unit/API/database tests. Browser-specific geometry and complete UI-to-server journeys are deliberately no longer duplicated; this is not a claim of assertion-for-assertion equivalence.",
+      "sourceSha256": "466e4dc7ae385bba4f641cd3d842af506b77f960d133d0f32af0864b7e55a713",
+      "replacements": [
+        "packages/app-vue/src/modules/notification/views/NotificationListPage.spec.ts"
+      ],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625",
+      "coverageDisposition": "lower-layer coverage; accepted loss of whole-system UI journey signal"
+    },
+    {
+      "path": "apps/web/e2e/shell/responsive-sidebar.spec.ts",
+      "reason": "Aggressive reduction authorized in Issue #625: routine behavior is owned by existing component/unit/API/database tests. Browser-specific geometry and complete UI-to-server journeys are deliberately no longer duplicated; this is not a claim of assertion-for-assertion equivalence.",
+      "sourceSha256": "e57f81806d079dedd03193d0d809d05cba7e3ea7e4337749feaf1f544c297546",
+      "replacements": ["packages/app-vue/src/layouts/shell/AppShell.spec.ts"],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625",
+      "coverageDisposition": "lower-layer coverage; accepted loss of whole-system UI journey signal"
+    },
+    {
+      "path": "apps/web/e2e/task/task-completion-loop.spec.ts",
+      "reason": "Aggressive reduction authorized in Issue #625: routine behavior is owned by existing component/unit/API/database tests. Browser-specific geometry and complete UI-to-server journeys are deliberately no longer duplicated; this is not a claim of assertion-for-assertion equivalence.",
+      "sourceSha256": "a0e266914f1f25e501f0668eec9a2b43fbc67fc31f9938352edf1d1cbd7b6566",
+      "replacements": [
+        "apps/api/src/__tests__/integration/task-goal-host-restart.integration.test.ts"
+      ],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625",
+      "coverageDisposition": "lower-layer coverage; accepted loss of whole-system UI journey signal"
+    },
+    {
+      "path": "apps/web/e2e/user-settings/data-portability.spec.ts",
+      "reason": "Aggressive reduction authorized in Issue #625: routine behavior is owned by existing component/unit/API/database tests. Browser-specific geometry and complete UI-to-server journeys are deliberately no longer duplicated; this is not a claim of assertion-for-assertion equivalence.",
+      "sourceSha256": "80f442e734b91397fa6f2a3f9e736287291cf68092082eac798d8f687915a74e",
+      "replacements": [
+        "apps/api/src/runtime/data-portability-http.integration.test.ts",
+        "apps/api/src/runtime/profile-import-capabilities.integration.test.ts"
+      ],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625",
+      "coverageDisposition": "lower-layer coverage; accepted loss of whole-system UI journey signal"
+    },
+    {
+      "path": "apps/web/e2e/authentication/auth-oauth.spec.ts",
+      "reason": "Aggressive reduction authorized in Issue #625: routine behavior is owned by existing component/unit/API/database tests. Browser-specific geometry and complete UI-to-server journeys are deliberately no longer duplicated; this is not a claim of assertion-for-assertion equivalence.",
+      "sourceSha256": "c81306c6ab3ec0c51533c1bbdc23ae26f9c85f1fb79ca5eca429df65aa56cc40",
+      "replacements": ["apps/web/src/auth/github-popup-sign-in.spec.ts"],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625",
+      "coverageDisposition": "lower-layer coverage; accepted loss of whole-system UI journey signal"
+    },
+    {
+      "path": "apps/web/e2e/ai/multi-engine-host.spec.ts",
+      "reason": "Aggressive reduction authorized in Issue #625: routine behavior is owned by existing component/unit/API/database tests. Browser-specific geometry and complete UI-to-server journeys are deliberately no longer duplicated; this is not a claim of assertion-for-assertion equivalence.",
+      "sourceSha256": "50407d59fc5514f1b950e833e00415c67e23874fae53945574039c74a7c3b6ac",
+      "replacements": [
+        "packages/app-vue/src/modules/ai/composables/useAIModelSelection.agent-instance.spec.ts",
+        "packages/app-vue/src/modules/ai/composables/useAIChatSession.spec.ts",
+        "packages/app-vue/src/modules/ai/composables/useAssistantStream.spec.ts"
+      ],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625",
+      "coverageDisposition": "lower-layer coverage; accepted loss of whole-system UI journey signal"
+    },
+    {
+      "path": "apps/web/e2e/ai/goal-workflow/workspace-shell.spec.ts",
+      "reason": "Aggressive reduction authorized in Issue #625: routine behavior is owned by existing component/unit/API/database tests. Browser-specific geometry and complete UI-to-server journeys are deliberately no longer duplicated; this is not a claim of assertion-for-assertion equivalence.",
+      "sourceSha256": "47920079a35a50289ca68bf5616686afdff7e95c2b271e704a9f91c99bc723c5",
+      "replacements": [
+        "packages/app-vue/src/layouts/shell/AppShell.spec.ts",
+        "packages/app-vue/src/modules/ai/composables/useAIChatView.lifecycle.spec.ts"
+      ],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625",
+      "coverageDisposition": "lower-layer coverage; accepted loss of whole-system UI journey signal"
+    },
+    {
+      "path": "apps/web/e2e/ai/provider-composer-states.spec.ts",
+      "reason": "Provider loading/empty/reset UI states are covered below E2E; aggressive retirement authorized in Issue #625. Browser-to-API reset journey is deliberately no longer duplicated.",
+      "sourceSha256": "f2a577a55ff655e36bd37bdff7527ae4302191f91ce1d84b18bd818084965288",
+      "replacements": [
+        "packages/app-vue/src/modules/ai/components/AIComposerControls.spec.ts",
+        "packages/app-vue/src/modules/setting/components/AISettings.spec.ts",
+        "apps/api/src/__tests__/integration/agent-instance-registry.integration.test.ts"
+      ],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625",
+      "coverageDisposition": "lower-layer state/registry coverage; accepted loss of whole-page reset journey"
     }
   ],
   "forbiddenReferences": [

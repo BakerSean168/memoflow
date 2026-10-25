@@ -203,7 +203,7 @@ test('scope narrowing proves canonical-only edits; unknown/shared/full scope run
     const selection = selectWebSpecs({ enabled: true, files });
     const plan = planWebShards({ ...selection, durations: history.specs });
     assert.deepEqual(plan.specs, [...WEB_FLOW_SPECS]);
-    assert.equal(plan.shardCount, WEB_SHARD_POLICY.defaultShards);
+    assert.ok(plan.shardCount >= 1 && plan.shardCount <= WEB_SHARD_POLICY.defaultShards);
     assert.equal(plan.fallback, true);
   }
   const full = selectWebSpecs({ enabled: true, full: true, files: [] });
@@ -218,9 +218,9 @@ test('owner-scoped selection keeps the core floor and security/consumer extensio
     files: ['packages/notification/src/api/index.ts'],
   });
   assert.equal(notification.fallback, false);
-  assert.equal(notification.specs.length, 11);
-  assert.ok(notification.specs.includes('notification/notification-center.spec.ts'));
-  assert.equal(planWebShards({ ...notification, durations: history.specs }).shardCount, 2);
+  assert.equal(notification.specs.length, 3);
+  assert.ok(notification.specs.includes('notification/notification-inbox-loop.spec.ts'));
+  assert.equal(planWebShards({ ...notification, durations: history.specs }).shardCount, 1);
   for (const owner of ['account', 'cloud-auth']) {
     const selected = selectWebSpecs({ enabled: true, files: [`packages/${owner}/src/index.ts`] });
     for (const spec of WEB_FLOW_SPECS.filter((spec) => spec.startsWith('authentication/'))) {
@@ -382,8 +382,18 @@ test('storybook-only changes select no Web specs (Q4 Component Browser lane owns
     full: false,
     files: [
       'packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.stories.ts',
-      'apps/web/e2e/goal/goal-crud.spec.ts',
+      'apps/web/e2e/ai/goal-workflow/goal-agent-approval.spec.ts',
     ],
   });
-  assert.deepEqual(mixed.specs, ['goal/goal-crud.spec.ts']);
+  assert.deepEqual(mixed.specs, ['ai/goal-workflow/goal-agent-approval.spec.ts']);
+});
+
+test('unknown-scope fallback retains every spec without reserving four runners for a small suite', () => {
+  const durations = Object.fromEntries(WEB_FLOW_SPECS.map((spec) => [spec, { durationMs: 1000 }]));
+  const plan = planWebShards({ specs: [WEB_FLOW_SPECS[0]], fallback: true, durations });
+  assert.equal(plan.shardCount, 1);
+  assert.deepEqual(
+    [...plan.shards.flatMap((shard) => shard.specs)].sort(),
+    [...WEB_FLOW_SPECS].sort(),
+  );
 });

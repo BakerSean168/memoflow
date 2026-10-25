@@ -225,24 +225,6 @@
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.config.ts"
     },
-    "apps/web/e2e/ai/goal-workflow/workspace-shell.spec.ts": {
-      "surface": "ai",
-      "role": "canonical",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
-    },
-    "apps/web/e2e/ai/multi-engine-host.spec.ts": {
-      "surface": "ai",
-      "role": "canonical",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
-    },
-    "apps/web/e2e/ai/provider-composer-states.spec.ts": {
-      "surface": "ai",
-      "role": "supplemental",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
-    },
     "apps/web/e2e/ai/provider-onboarding.spec.ts": {
       "surface": "ai",
       "role": "supplemental",
@@ -260,12 +242,6 @@
       "role": "supplemental",
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.oauth-real.config.ts"
-    },
-    "apps/web/e2e/authentication/auth-oauth.spec.ts": {
-      "surface": "authentication",
-      "role": "canonical",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
     },
     "apps/web/e2e/authentication/auth-password.spec.ts": {
       "surface": "authentication",
@@ -290,12 +266,6 @@
       "role": "artifact",
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.sync.config.ts"
-    },
-    "apps/web/e2e/goal/goal-crud.spec.ts": {
-      "surface": "goal",
-      "role": "canonical",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
     },
     "apps/web/e2e/goal/reference/goal-business-panel.spec.ts": {
       "surface": "goal",
@@ -345,18 +315,6 @@
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.local-docker.config.ts"
     },
-    "apps/web/e2e/note/note-workspace.spec.ts": {
-      "surface": "note",
-      "role": "canonical",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
-    },
-    "apps/web/e2e/notification/notification-center.spec.ts": {
-      "surface": "notification",
-      "role": "canonical",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
-    },
     "apps/web/e2e/notification/notification-inbox-loop.spec.ts": {
       "surface": "notification",
       "role": "canonical",
@@ -366,18 +324,6 @@
     "apps/web/e2e/performance/ai-workspace-performance.spec.ts": {
       "surface": "performance",
       "role": "supplemental",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
-    },
-    "apps/web/e2e/routine/routine-configuration.spec.ts": {
-      "surface": "routine",
-      "role": "canonical",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
-    },
-    "apps/web/e2e/schedule/planner-task-revert.spec.ts": {
-      "surface": "schedule",
-      "role": "canonical",
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.config.ts"
     },
@@ -399,12 +345,6 @@
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.schedule-presentation-authority.config.ts"
     },
-    "apps/web/e2e/schedule/schedule-calendar.spec.ts": {
-      "surface": "schedule",
-      "role": "canonical",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
-    },
     "apps/web/e2e/setting/setting-appearance.spec.ts": {
       "surface": "setting",
       "role": "supplemental",
@@ -416,12 +356,6 @@
       "role": "supplemental",
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.sync.config.ts"
-    },
-    "apps/web/e2e/shell/responsive-sidebar.spec.ts": {
-      "surface": "shell",
-      "role": "canonical",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
     },
     "apps/web/e2e/shell/shell-geometry.spec.ts": {
       "surface": "shell",
@@ -435,29 +369,11 @@
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.sync.config.ts"
     },
-    "apps/web/e2e/task/task-completion-loop.spec.ts": {
-      "surface": "task",
-      "role": "canonical",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
-    },
-    "apps/web/e2e/task/task-plan-crud.spec.ts": {
-      "surface": "task",
-      "role": "canonical",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
-    },
     "apps/web/e2e/task/visual-grammar/task-visual-grammar.spec.ts": {
       "surface": "task",
       "role": "reference",
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.task-visual-grammar.config.ts"
-    },
-    "apps/web/e2e/user-settings/data-portability.spec.ts": {
-      "surface": "user-settings",
-      "role": "canonical",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
     },
     "apps/web/e2e/user-settings/persistence.spec.ts": {
       "surface": "user-settings",

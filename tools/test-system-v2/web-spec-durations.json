@@ -35,25 +35,10 @@
       "samples": 3,
       "observedAt": "2026-10-18T09:42:26.319Z"
     },
-    "ai/goal-workflow/workspace-shell.spec.ts": {
-      "durationMs": 28371,
-      "samples": 3,
-      "observedAt": "2026-10-18T09:42:26.319Z"
-    },
-    "ai/multi-engine-host.spec.ts": {
-      "durationMs": 64854,
-      "samples": 3,
-      "observedAt": "2026-10-18T09:42:43.245Z"
-    },
     "authentication/auth-login.spec.ts": {
       "durationMs": 30787,
       "samples": 3,
       "observedAt": "2026-10-18T09:42:26.319Z"
-    },
-    "authentication/auth-oauth.spec.ts": {
-      "durationMs": 5728,
-      "samples": 3,
-      "observedAt": "2026-10-18T09:42:48.857Z"
     },
     "authentication/auth-password.spec.ts": {
       "durationMs": 22160,
@@ -65,60 +50,10 @@
       "samples": 3,
       "observedAt": "2026-10-18T09:42:26.319Z"
     },
-    "goal/goal-crud.spec.ts": {
-      "durationMs": 127524,
-      "samples": 3,
-      "observedAt": "2026-10-18T09:42:43.730Z"
-    },
-    "note/note-workspace.spec.ts": {
-      "durationMs": 11543,
-      "samples": 3,
-      "observedAt": "2026-10-18T09:42:43.245Z"
-    },
-    "notification/notification-center.spec.ts": {
-      "durationMs": 59256,
-      "samples": 3,
-      "observedAt": "2026-10-18T09:42:26.319Z"
-    },
     "notification/notification-inbox-loop.spec.ts": {
       "durationMs": 11079,
       "samples": 3,
       "observedAt": "2026-10-18T09:42:43.730Z"
-    },
-    "routine/routine-configuration.spec.ts": {
-      "durationMs": 16639,
-      "samples": 3,
-      "observedAt": "2026-10-18T09:42:43.730Z"
-    },
-    "schedule/planner-task-revert.spec.ts": {
-      "durationMs": 16187,
-      "samples": 3,
-      "observedAt": "2026-10-18T09:42:43.245Z"
-    },
-    "schedule/schedule-calendar.spec.ts": {
-      "durationMs": 53001,
-      "samples": 3,
-      "observedAt": "2026-10-18T09:42:48.857Z"
-    },
-    "shell/responsive-sidebar.spec.ts": {
-      "durationMs": 11127,
-      "samples": 3,
-      "observedAt": "2026-10-18T09:42:48.857Z"
-    },
-    "task/task-completion-loop.spec.ts": {
-      "durationMs": 15957,
-      "samples": 3,
-      "observedAt": "2026-10-18T09:42:43.730Z"
-    },
-    "task/task-plan-crud.spec.ts": {
-      "durationMs": 100033,
-      "samples": 3,
-      "observedAt": "2026-10-18T09:42:26.319Z"
-    },
-    "user-settings/data-portability.spec.ts": {
-      "durationMs": 83196,
-      "samples": 3,
-      "observedAt": "2026-10-18T09:42:48.857Z"
     },
     "user-settings/persistence.spec.ts": {
       "durationMs": 46685,

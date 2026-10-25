@@ -566,6 +566,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "apps/api/src/runtime/goal-task-http.integration.test.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "apps/api/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "apps/api/src/runtime/profile-import-capabilities.integration.test.ts",
       "primarySuite": "integration",
       "collectors": [
@@ -2056,48 +2064,6 @@
       }
     },
     {
-      "path": "apps/web/e2e/ai/goal-workflow/workspace-shell.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.config.ts"
-      ],
-      "measurementCollectors": [],
-      "e2eOwnership": {
-        "surface": "ai",
-        "role": "canonical",
-        "lifecycle": "active",
-        "primaryCollector": "apps/web/playwright.config.ts"
-      }
-    },
-    {
-      "path": "apps/web/e2e/ai/multi-engine-host.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.config.ts"
-      ],
-      "measurementCollectors": [],
-      "e2eOwnership": {
-        "surface": "ai",
-        "role": "canonical",
-        "lifecycle": "active",
-        "primaryCollector": "apps/web/playwright.config.ts"
-      }
-    },
-    {
-      "path": "apps/web/e2e/ai/provider-composer-states.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.config.ts"
-      ],
-      "measurementCollectors": [],
-      "e2eOwnership": {
-        "surface": "ai",
-        "role": "supplemental",
-        "lifecycle": "active",
-        "primaryCollector": "apps/web/playwright.config.ts"
-      }
-    },
-    {
       "path": "apps/web/e2e/ai/provider-onboarding.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
@@ -2138,20 +2104,6 @@
         "role": "supplemental",
         "lifecycle": "active",
         "primaryCollector": "apps/web/playwright.oauth-real.config.ts"
-      }
-    },
-    {
-      "path": "apps/web/e2e/authentication/auth-oauth.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.config.ts"
-      ],
-      "measurementCollectors": [],
-      "e2eOwnership": {
-        "surface": "authentication",
-        "role": "canonical",
-        "lifecycle": "active",
-        "primaryCollector": "apps/web/playwright.config.ts"
       }
     },
     {
@@ -2210,21 +2162,6 @@
         "role": "artifact",
         "lifecycle": "active",
         "primaryCollector": "apps/web/playwright.sync.config.ts"
-      }
-    },
-    {
-      "path": "apps/web/e2e/goal/goal-crud.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.config.ts",
-        "apps/web/playwright.local-docker.config.ts"
-      ],
-      "measurementCollectors": [],
-      "e2eOwnership": {
-        "surface": "goal",
-        "role": "canonical",
-        "lifecycle": "active",
-        "primaryCollector": "apps/web/playwright.config.ts"
       }
     },
     {
@@ -2340,34 +2277,6 @@
       }
     },
     {
-      "path": "apps/web/e2e/note/note-workspace.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.config.ts"
-      ],
-      "measurementCollectors": [],
-      "e2eOwnership": {
-        "surface": "note",
-        "role": "canonical",
-        "lifecycle": "active",
-        "primaryCollector": "apps/web/playwright.config.ts"
-      }
-    },
-    {
-      "path": "apps/web/e2e/notification/notification-center.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.config.ts"
-      ],
-      "measurementCollectors": [],
-      "e2eOwnership": {
-        "surface": "notification",
-        "role": "canonical",
-        "lifecycle": "active",
-        "primaryCollector": "apps/web/playwright.config.ts"
-      }
-    },
-    {
       "path": "apps/web/e2e/notification/notification-inbox-loop.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
@@ -2391,34 +2300,6 @@
       "e2eOwnership": {
         "surface": "performance",
         "role": "supplemental",
-        "lifecycle": "active",
-        "primaryCollector": "apps/web/playwright.config.ts"
-      }
-    },
-    {
-      "path": "apps/web/e2e/routine/routine-configuration.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.config.ts"
-      ],
-      "measurementCollectors": [],
-      "e2eOwnership": {
-        "surface": "routine",
-        "role": "canonical",
-        "lifecycle": "active",
-        "primaryCollector": "apps/web/playwright.config.ts"
-      }
-    },
-    {
-      "path": "apps/web/e2e/schedule/planner-task-revert.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.config.ts"
-      ],
-      "measurementCollectors": [],
-      "e2eOwnership": {
-        "surface": "schedule",
-        "role": "canonical",
         "lifecycle": "active",
         "primaryCollector": "apps/web/playwright.config.ts"
       }
@@ -2466,20 +2347,6 @@
       }
     },
     {
-      "path": "apps/web/e2e/schedule/schedule-calendar.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.config.ts"
-      ],
-      "measurementCollectors": [],
-      "e2eOwnership": {
-        "surface": "schedule",
-        "role": "canonical",
-        "lifecycle": "active",
-        "primaryCollector": "apps/web/playwright.config.ts"
-      }
-    },
-    {
       "path": "apps/web/e2e/setting/setting-appearance.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
@@ -2505,21 +2372,6 @@
         "role": "supplemental",
         "lifecycle": "active",
         "primaryCollector": "apps/web/playwright.sync.config.ts"
-      }
-    },
-    {
-      "path": "apps/web/e2e/shell/responsive-sidebar.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.config.ts",
-        "apps/web/playwright.sync.config.ts"
-      ],
-      "measurementCollectors": [],
-      "e2eOwnership": {
-        "surface": "shell",
-        "role": "canonical",
-        "lifecycle": "active",
-        "primaryCollector": "apps/web/playwright.config.ts"
       }
     },
     {
@@ -2551,34 +2403,6 @@
       }
     },
     {
-      "path": "apps/web/e2e/task/task-completion-loop.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.config.ts"
-      ],
-      "measurementCollectors": [],
-      "e2eOwnership": {
-        "surface": "task",
-        "role": "canonical",
-        "lifecycle": "active",
-        "primaryCollector": "apps/web/playwright.config.ts"
-      }
-    },
-    {
-      "path": "apps/web/e2e/task/task-plan-crud.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.config.ts"
-      ],
-      "measurementCollectors": [],
-      "e2eOwnership": {
-        "surface": "task",
-        "role": "canonical",
-        "lifecycle": "active",
-        "primaryCollector": "apps/web/playwright.config.ts"
-      }
-    },
-    {
       "path": "apps/web/e2e/task/visual-grammar/task-visual-grammar.spec.ts",
       "primarySuite": "e2e",
       "collectors": [
@@ -2590,20 +2414,6 @@
         "role": "reference",
         "lifecycle": "active",
         "primaryCollector": "apps/web/playwright.task-visual-grammar.config.ts"
-      }
-    },
-    {
-      "path": "apps/web/e2e/user-settings/data-portability.spec.ts",
-      "primarySuite": "e2e",
-      "collectors": [
-        "apps/web/playwright.config.ts"
-      ],
-      "measurementCollectors": [],
-      "e2eOwnership": {
-        "surface": "user-settings",
-        "role": "canonical",
-        "lifecycle": "active",
-        "primaryCollector": "apps/web/playwright.config.ts"
       }
     },
     {
@@ -12411,7 +12221,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 31,
+      "fileCount": 17,
       "e2eOwnership": {
         "lane": "required",
         "lifecycle": "active",
@@ -12463,7 +12273,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 10,
+      "fileCount": 9,
       "e2eOwnership": {
         "lane": "local-validation",
         "lifecycle": "active",
@@ -12509,7 +12319,7 @@
       "type": "primary",
       "suite": "e2e",
       "runner": "playwright",
-      "fileCount": 6,
+      "fileCount": 5,
       "e2eOwnership": {
         "lane": "specialized",
         "lifecycle": "active",
@@ -12596,7 +12406,7 @@
       "type": "primary",
       "suite": "integration",
       "runner": "vitest",
-      "fileCount": 19
+      "fileCount": 20
     },
     {
       "id": "packages/account/vitest.integration.config.ts",
@@ -13479,11 +13289,11 @@
   "unexpected": [],
   "counts": {
     "unit": 1115,
-    "integration": 55,
+    "integration": 56,
     "smoke": 3,
     "boundary-ipc": 6,
     "boundary-main": 12,
-    "e2e": 65,
+    "e2e": 51,
     "perf": 2,
     "governance": 80
   },
@@ -13494,16 +13304,16 @@
       "desktop": 13,
       "local-validation": 6,
       "reference": 6,
-      "required": 31,
+      "required": 17,
       "secure-acceptance": 1,
       "specialized": 5,
       "visual-artifact": 3
     },
     "countsByRole": {
       "artifact": 3,
-      "canonical": 28,
+      "canonical": 15,
       "reference": 6,
-      "supplemental": 28
+      "supplemental": 27
     },
     "automatedCollectorCount": 2,
     "automationBindingCount": 5
@@ -13511,7 +13321,7 @@
   "e2eRetirement": {
     "version": 1,
     "issues": [],
-    "retiredSpecCount": 24,
+    "retiredSpecCount": 38,
     "forbiddenReferenceCount": 3
   }
 }

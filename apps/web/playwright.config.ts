@@ -13,7 +13,7 @@ const mode = process.env.WEB_E2E_MODE ?? 'flow';
 if (!['flow', 'audit', 'workspace', 'provider'].includes(mode)) {
   throw new Error(`Unknown WEB_E2E_MODE: ${mode}`);
 }
-const providerSpecs = ['ai/provider-onboarding.spec.ts', 'ai/provider-composer-states.spec.ts'];
+const providerSpecs = ['ai/provider-onboarding.spec.ts'];
 const inventory = process.env.TEST_INVENTORY_LIST === '1';
 const specs = inventory
   ? [...WEB_FLOW_SPECS, ...WEB_AUDIT_SPECS, ...providerSpecs]

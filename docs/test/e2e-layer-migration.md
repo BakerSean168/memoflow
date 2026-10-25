@@ -2,7 +2,7 @@
 
 基线为 `main@5f9e5852314803d2b3c3ff05ddfaa50d94a9e83f`。本次迁移不包含尚未合入的 #602（API 认证前置）和 #624（Coverage 合并 / Web Build 解耦），也不复制根工作区未提交的 T1/T2 审计文件。
 
-## 断言去向
+## 第一批断言去向
 
 - `authentication/auth-flow.spec.ts` 三条注册、登出再登录、错误密码旅程删除。`auth-login.spec.ts` 的两个真实认证旅程包含这些步骤，并额外验证 session 存在、不持久化 bearer 凭据；错误密码后仍确认登录表单可见。独立邮箱验证继续由 `auth-register.spec.ts` 负责。
 - `authentication/auth-page-contract.spec.ts` 五条页面契约下沉到 `apps/web/src/auth/WebAuthView.stories.ts`：品牌主题不覆盖用户偏好、唯一主标题/表单/法律链接、全部注册字段与长度校验、提交后聚焦第一错误及修正清除、稳定错误随语言重译、登录焦点、360×640 可达性和无水平溢出。`auth-login.spec.ts` 的表单来回切换也并入该组件契约。真实生产组件、composable、翻译与输入控件在 Chromium 中执行，只替换外部认证服务响应。真实注册/邮件/错误密码服务端行为保留在认证 E2E。
@@ -13,7 +13,23 @@
 - `note/legacy-note-mutation-boundary.spec.ts` 的五个退休端点 404 断言迁到 `apps/api/src/runtime/repository-http.integration.test.ts`。使用生产 Repository composer 与 ApiBootstrapper，同时检查当前 owner 路由确实安装且执行认证，防止漏注册整个模块导致所有 404 假绿。
 - 删除 `testHelpers.ts` 中没有调用者的 Task 创建/清理及 Command Palette 打开/搜索/关闭辅助函数，不触碰专门的认证 fixture。
 
-Web Flow 收集结果为 **24 文件 / 60 用例**，基线为 28 / 84；减少 24 条浏览器用例（28.6%）。Component Browser 增加五个 Story，形成 **4 文件 / 17 条交互**；API integration 增加两个文件 / 八例（含新增未认证控制）。这不是删除 24 条业务信号，也不代表整轮 CI 墙钟减少 28.6%。
+第一批 Web Flow 收集结果为 **24 文件 / 60 用例**，基线为 28 / 84；减少 24 条浏览器用例（28.6%）。Component Browser 增加五个 Story，形成 **4 文件 / 17 条交互**；API integration 增加两个文件 / 八例（含新增未认证控制）。这不是删除 24 条业务信号，也不代表整轮 CI 墙钟减少 28.6%。
+
+## 第二批：按用户要求激进收缩
+
+用户明确接受删除低价值整系统验证、以后按实际缺陷补回。本批不再以“每个真实 owner 必须有 E2E CRUD”为默认要求，也不为了逐条复制旧浏览器断言而新增另一套长测试。
+
+Provider lane 另外退休 `provider-composer-states.spec.ts` 两条加载/空态/重置场景，由 AIComposerControls、AISettings 和 Registry 下层测试负责；provider-onboarding 的凭据持久化与 owner 安全验收继续保留。
+
+最终 canonical Web Flow 是 **11 文件 / 15 用例**：相对第一批 24/60，再减少 13 文件 /45 用例；相对原始 28/84，减少 17 文件 /69 用例（82.1%）。
+
+- 整体退休 Goal CRUD、Task CRUD、Calendar、Planner 拖拽回滚、Routine、Notification Center 布局、Notes 空态、响应式 Sidebar、Task→Goal 完成闭环、剩余 Data Portability UI smoke、OAuth 按钮 smoke、AI multi-engine-host 与 workspace-shell。
+- Goal/Task CRUD 和 Goal 四态转换改由 `apps/api/src/runtime/goal-task-http.integration.test.ts` 的生产 HTTP→composer→owner→Prisma 契约承接；增加版本冲突、身份隔离、非法输入不写入、Task checklist 和数据库直接读回。身份解析器用测试 principal；不声称替代真实登录 Cookie 验收。
+- GoalDialog/GoalDetail、TaskForm/TaskDetail、Calendar mutation/cache、Routine view、NotificationListPage、AppShell、KnowledgeProjectionWorkspace、AI model selection/ChatSession/AssistantStream 等现有下层测试直接承担各自业务/状态责任。本地定向执行 14 文件：279 passed /1 expected fail；后者是既有显式预期失败，不能计作普通 PASS。
+- Goal 审批 3→1、Task 审批 4→1、Knowledge 5→1，仅留跨刷新恢复代表。保留 checkpoint 跨身份/重登录、双会话收敛、SSE 30秒无轮询窗口、真实认证/密码/邮箱、通知读写闭环和设置刷新/跨标签一致性。
+- 接受的缺口：不再逐个验证所有业务页面的实际指针拖拽、几何布局、整页导航、真实 UI CRUD 落库，以及 mocked-provider 整页流式性能组合。组件/单元测试仍验证其可控状态，但不宣称与每条旧 E2E 完全等价。已退休文件在 `e2e-retirement.json` 保留原 SHA、下层路径和明确的 coverageDisposition；不是绕过或禁用缺失测试门禁。
+
+core floor 从十个文件缩为三个：auth-login、notification-inbox-loop、goal-agent-approval（共四例）。owner 扩展和 unknown/shared/root 的全集选择继续保留。fallback 只扩大 spec 集合，不再硬占四台 runner；按现有保守历史权重，目前全集规划为两片。没有伪造删减后的时长权重。
 
 ## 执行与选择契约
 
@@ -21,15 +37,15 @@ Component Browser 不再在 job 内运行 `build --all`。Storybook 为缺失的
 
 迁移必须同时保护调度：修改 Story、Web Auth 源码、App-Vue/UI 控件源码，或 Nx 判断影响 `ui-storybook` 的传递依赖，均要求 Component Browser。否则“把 E2E 删了、生产组件改动时却不跑替代测试”会丢失门禁。Manifest 回归测试覆盖这些情况和无关 backend 反例；现有 CI Check 在 required producer 跳过时仍判失败。收据继续使用 `storybook-results.json`，要求 17 条全部成功、零 skipped/todo，Story ID 唯一。
 
-普通 PR 已经按 changed files / Nx affected 选择项目和 Web spec，非每次全量。Web owner 变更保留十个 core spec 地板，再加 owner 扩展；Goal/Task/Repository 还有 AI/Schedule 消费者扩展。只改 canonical spec 则只选择对应文件。未知、共享、root 改动扩大到完整集合；main、手动 full 和 nightly 仍承担更广验证。此次保持 core 地板，仅将退休 auth-flow 改为 auth-login；data-portability 地板现在只执行一条全栈 smoke。后续是否缩小 core 必须单独证明跨 owner 影响范围，不把目录名当作完整依赖图。
+普通 PR 已经按 changed files / Nx affected 选择项目和 Web spec，非每次全量。Web owner 变更保留三个 core spec 地板，再加 owner 扩展；Goal/Task/Repository 还有 AI/Schedule 消费者扩展。只改 canonical spec 则只选择对应文件。未知、共享、root 改动扩大到完整集合；main、手动 full 和 nightly 仍承担更广验证。第二批已移除普通 CRUD 的跨 owner 地板，风险收缩由用户明确接受；真实 owner 的下层验证仍由 affected targets 承担。
 
 ## 实测与边界
 
 - 本地 WSL，真实 Chromium：新增五条认证页面 Story 加原有十二条交互，17/17 成功，首次成功整套 10.56 秒（测试体 3.06 秒），随后 17/17 成功。不是 CI 耗时。
-- `playwright --list`：24 文件 / 60 用例，仅收集、未执行，不冒充 E2E PASS。
+- `playwright --list`：第一批24文件/60用例；第二批11文件/15用例。这里只是收集，不冒充 E2E PASS。
 - 最终提交的 affected 自检、治理和 CI 执行凭证记录在 Issue #625 / 对应 PR。API integration 的成功必须来自真实 PostgreSQL 执行，不能用收集结果代替。
 - 旧 `web-spec-durations.json` 只删除已退休文件的历史条目，不给剩余缩短后的文件编造新时长；真实 CI report 可用于后续刷新、重配平和墙钟比较。
-- 保留 SSE 30 秒无轮询、刷新恢复、跨身份、多会话收敛、真实指针拖拽和真实持久化路径。没有把这些仅凭组件单测数量就删除。
+- 第二批继续保留 SSE 30 秒无轮询、刷新恢复、跨身份和多会话收敛；真实指针/几何和普通 UI 持久化旅程按上面的接受缺口退休。
 
 ## T3 Code 对照核实
 
