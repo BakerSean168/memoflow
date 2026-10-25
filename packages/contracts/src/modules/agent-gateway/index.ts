@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { Result } from '../../result';
+import type { Result } from '@memoflow/transport-contracts/result';
 import {
   TaskReadInstantSchema,
   TaskReadPlanSchema,

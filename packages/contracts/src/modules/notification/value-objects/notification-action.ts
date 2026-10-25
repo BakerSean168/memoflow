@@ -1,4 +1,4 @@
-import type { JsonValue } from '../../../result';
+import type { JsonValue } from '@memoflow/transport-contracts/result';
 
 export interface NotificationEntityRef {
   type: string;

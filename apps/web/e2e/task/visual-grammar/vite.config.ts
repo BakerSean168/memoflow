@@ -52,6 +52,44 @@ export default defineConfig({
           'packages/shared-primitives/src/zod-extensions.ts',
         ],
         ['@memoflow/shared-primitives', 'packages/shared-primitives/src/index.ts'],
+        [
+          '@memoflow/transport-contracts/result/codes',
+          'packages/transport-contracts/src/result/codes.ts',
+        ],
+        [
+          '@memoflow/transport-contracts/result/core',
+          'packages/transport-contracts/src/result/core.ts',
+        ],
+        [
+          '@memoflow/transport-contracts/result/failure-compat',
+          'packages/transport-contracts/src/result/failure-compat.ts',
+        ],
+        [
+          '@memoflow/transport-contracts/result/failure-policy',
+          'packages/transport-contracts/src/result/failure-policy.ts',
+        ],
+        [
+          '@memoflow/transport-contracts/result/http',
+          'packages/transport-contracts/src/result/http.ts',
+        ],
+        [
+          '@memoflow/transport-contracts/result/ipc',
+          'packages/transport-contracts/src/result/ipc.ts',
+        ],
+        [
+          '@memoflow/transport-contracts/result/public-failure',
+          'packages/transport-contracts/src/result/public-failure.ts',
+        ],
+        [
+          '@memoflow/transport-contracts/result',
+          'packages/transport-contracts/src/result/index.ts',
+        ],
+        ['@memoflow/transport-contracts/context', 'packages/transport-contracts/src/context.ts'],
+        [
+          '@memoflow/transport-contracts/execution-context',
+          'packages/transport-contracts/src/execution-context.ts',
+        ],
+        ['@memoflow/transport-contracts', 'packages/transport-contracts/src/index.ts'],
         ['@memoflow/utils/logger', 'packages/utils/src/logger/index.ts'],
         ['@memoflow/time', 'packages/time/src/index.ts'],
         ['@memoflow/http-client', 'packages/http-client/src/index.ts'],
