@@ -11926,6 +11926,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/ci-cd-platform/__tests__/nightly-release-eligibility.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "ci-cd-platform:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/ci-cd-platform/__tests__/nx-task-contract.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -12704,7 +12712,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "node-test",
-      "fileCount": 44
+      "fileCount": 45
     },
     {
       "id": "memoflow:test:governance",
@@ -13871,7 +13879,7 @@
     "boundary-main": 12,
     "e2e": 40,
     "perf": 2,
-    "governance": 80
+    "governance": 81
   },
   "e2eGovernance": {
     "version": 2,
