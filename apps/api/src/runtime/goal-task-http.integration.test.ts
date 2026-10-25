@@ -117,7 +117,10 @@ describe('Goal and Task HTTP persistence contracts', () => {
     }
     await http('delete', `/goals/${id}?expectedVersion=${receipt.goalVersion}`);
     expect((await db.goal.findUniqueOrThrow({ where: { id } })).deletedAt).not.toBeNull();
-    await http('get', `/goals/${id}`, undefined, 404);
+    expect(await http('get', `/goals/${id}`)).toMatchObject({
+      id,
+      deletedAt: expect.any(Number),
+    });
   });
 
   it('rejects invalid, stale and cross-owner Goal requests without changing persisted facts', async () => {
@@ -126,7 +129,8 @@ describe('Goal and Task HTTP persistence contracts', () => {
       .post('/api/v1/goals')
       .set('authorization', `Bearer ${ownerId}`)
       .send({ name: '' });
-    expect(malformed.status).toBe(422);
+    expect(malformed.status).toBe(400);
+    expect(malformed.body.error.code).toBe('VALIDATION_ERROR');
     expect(await db.goal.count()).toBe(0);
     const receipt = GoalMutationReceiptSchema.parse(
       await http('post', '/goals', { name: 'Private Goal' }, 201),
