@@ -16,20 +16,6 @@ const V3_CAPABILITY_KEYS = [
   'ai-conversations',
 ] as const;
 
-const BANNED_CONTENT_PATTERNS = [
-  'identityId',
-  'identity_id',
-  'accountId',
-  'account_id',
-  'password',
-  'apiKey',
-  'api_key',
-  'secret',
-  'sessionToken',
-  'accessToken',
-  'refreshToken',
-];
-
 function generateTestEmail(): string {
   return `e2e-data-portability-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@test.com`;
 }
@@ -40,27 +26,6 @@ interface ExportResult {
     fileName: string;
     content: string;
     summary: { capabilityKeys: string[]; warnings: string[] };
-  };
-  error?: { code: string; message: string };
-}
-
-interface ImportResult {
-  ok: boolean;
-  data?: {
-    batchId: string;
-    dryRun: boolean;
-    capabilities: Array<{
-      key: string;
-      schemaVersion: number;
-      created: number;
-      updated: number;
-      skipped: number;
-      warnings: string[];
-    }>;
-    created: Record<string, number>;
-    updated: Record<string, number>;
-    skipped: Record<string, number>;
-    warnings: string[];
   };
   error?: { code: string; message: string };
 }
@@ -77,25 +42,6 @@ async function callExportAPI(page: Page, capabilities?: string[]): Promise<Expor
       return res.json();
     },
     { apiBase: API_CONFIG.API_PREFIX, capabilities },
-  );
-}
-
-async function callImportAPI(
-  page: Page,
-  operation: 'dry-run' | 'apply',
-  content: string,
-): Promise<ImportResult> {
-  return page.evaluate(
-    async (args) => {
-      const res = await fetch(`${args.apiBase}/data-portability/${args.operation}`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: args.content }),
-      });
-      return res.json();
-    },
-    { apiBase: API_CONFIG.API_PREFIX, operation, content },
   );
 }
 
@@ -136,84 +82,6 @@ test.describe('Data Portability V3', () => {
       summary.capabilityKeys,
     );
     expect(envelope.capabilities.every((capability) => capability.schemaVersion === 3)).toBe(true);
-  });
-
-  test('[P1] export only accepts V3 capability filters', async ({ page }) => {
-    const result = await callExportAPI(page, ['preferences']);
-    expect(result.ok).toBe(true);
-
-    const envelope = PortableBackupEnvelopeV3Schema.parse(JSON.parse(result.data!.content));
-    expect(envelope.capabilities.map((capability) => capability.key)).toEqual(['preferences']);
-    expect(result.data!.summary.capabilityKeys).toEqual(['preferences']);
-  });
-
-  test('[P1] export does not contain banned identity or credential fields', async ({ page }) => {
-    const result = await callExportAPI(page);
-    expect(result.ok).toBe(true);
-    for (const pattern of BANNED_CONTENT_PATTERNS) {
-      expect(result.data!.content).not.toContain(pattern);
-    }
-  });
-
-  test('[P1] V3 export supports dry-run then apply round-trip', async ({ page }) => {
-    const exportResult = await callExportAPI(page);
-    expect(exportResult.ok).toBe(true);
-
-    const dryRunResult = await callImportAPI(page, 'dry-run', exportResult.data!.content);
-    expect(dryRunResult.ok).toBe(true);
-    expect(dryRunResult.data!.dryRun).toBe(true);
-    expect(typeof dryRunResult.data!.batchId).toBe('string');
-
-    const applyResult = await callImportAPI(page, 'apply', exportResult.data!.content);
-    expect(applyResult.ok).toBe(true);
-    expect(applyResult.data!.dryRun).toBe(false);
-    expect(typeof applyResult.data!.created).toBe('object');
-    expect(typeof applyResult.data!.updated).toBe('object');
-    expect(Array.isArray(applyResult.data!.capabilities)).toBe(true);
-  });
-
-  test('[P2] dry-run does not persist data', async ({ page }) => {
-    const exportBefore = await callExportAPI(page);
-    expect(exportBefore.ok).toBe(true);
-    const before = PortableBackupEnvelopeV3Schema.parse(JSON.parse(exportBefore.data!.content));
-
-    const dryRunResult = await callImportAPI(page, 'dry-run', exportBefore.data!.content);
-    expect(dryRunResult.ok).toBe(true);
-    expect(dryRunResult.data!.dryRun).toBe(true);
-
-    const exportAfter = await callExportAPI(page);
-    expect(exportAfter.ok).toBe(true);
-    const after = PortableBackupEnvelopeV3Schema.parse(JSON.parse(exportAfter.data!.content));
-    expect(after.capabilities).toEqual(before.capabilities);
-  });
-
-  test('[P2] rejects server-held and unsupported legacy backup envelopes', async ({ page }) => {
-    const disclosure = await callImportAPI(
-      page,
-      'dry-run',
-      JSON.stringify({ kind: 'memoflow.server-held-data-disclosure', schemaVersion: 1 }),
-    );
-    expect(disclosure.ok).toBe(false);
-
-    const legacy = await callImportAPI(
-      page,
-      'dry-run',
-      JSON.stringify({ kind: 'memoflow.user-data-export', schemaVersion: 2, data: {} }),
-    );
-    expect(legacy.ok).toBe(false);
-    expect(legacy.error?.message).toContain('only V3 is supported');
-  });
-
-  test('[P2] rejects V3 payloads containing identity fields', async ({ page }) => {
-    const exportResult = await callExportAPI(page);
-    expect(exportResult.ok).toBe(true);
-    const envelope = JSON.parse(exportResult.data!.content) as {
-      capabilities: Array<{ payload: Record<string, unknown> }>;
-    };
-    envelope.capabilities[0].payload.identityId = 'stolen-identity';
-
-    const importResult = await callImportAPI(page, 'dry-run', JSON.stringify(envelope));
-    expect(importResult.ok).toBe(false);
   });
 });
 

@@ -14,9 +14,10 @@ import {
 const workspace = path.resolve(import.meta.dirname, '../../..');
 
 // Storybook UI exposes the full catalog. The Vitest browser project owns only
-// the three audited interaction suites (12 stories); loading every draft story
+// the four audited interaction suites (17 stories); loading every draft story
 // in a test browser also loads unverified deep application imports.
 const browserTestStories = [
+  '../../../apps/web/src/auth/WebAuthView.stories.ts',
   '../../../packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.stories.ts',
   '../../../packages/app-vue/src/modules/task/components/TaskPlanForm/TaskPlanForm.stories.ts',
   '../../../packages/app-vue/src/shared/components/__stories__/BrowserInteraction.stories.ts',
@@ -27,6 +28,7 @@ const config: StorybookConfig = {
     : [
         '../../../packages/ui-vue-shadcn/src/**/*.stories.@(js|jsx|ts|tsx|vue)',
         '../../../packages/app-vue/src/**/*.stories.@(js|jsx|ts|tsx|vue)',
+        '../../../apps/web/src/auth/*.stories.ts',
       ],
   addons: ['@storybook/addon-docs', '@storybook/addon-vitest'],
   framework: { name: '@storybook/vue3-vite', options: {} },
@@ -43,6 +45,8 @@ const config: StorybookConfig = {
           ...createUiVueSourceAliasEntries(workspace),
           ...createContractsAliasEntries(workspace),
           ...createWorkspaceSourceAliasEntries(workspace, [
+            ['@memoflow/domain-shared/shared', 'packages/domain-shared/src/shared/index.ts'],
+            ['@memoflow/domain-shared', 'packages/domain-shared/src/index.ts'],
             ['@memoflow/http-client', 'packages/http-client/src/index.ts'],
             ['@memoflow/goal/client', 'packages/goal/src/client/index.ts'],
             ['@memoflow/task/client', 'packages/task/src/client/index.ts'],

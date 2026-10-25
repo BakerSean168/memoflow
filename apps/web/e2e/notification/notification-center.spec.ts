@@ -24,14 +24,25 @@ test.describe('Notification Center', () => {
     });
   });
 
-  test('[P0] should open notification center', async ({ page }) => {
+  test('[P0] should display a deterministic empty inbox for a new account', async ({ page }) => {
     await expect(page.getByTestId('notification-center')).toBeVisible();
     await expect(page.getByTestId('notification-filter-all')).toBeVisible();
-  });
-
-  test('[P0] should display a deterministic empty inbox for a new account', async ({ page }) => {
     await expect(page.getByTestId('notifications-empty-state')).toBeVisible();
     await expect(page.getByTestId('notification-item')).toHaveCount(0);
+    await expect(
+      page.locator('[data-testid="notification-item"][data-read-state="unread"]'),
+    ).toHaveCount(0);
+    await expect(page.getByTestId('mark-all-read-button')).toBeDisabled();
+    await page.getByTestId('notification-filter-unread').click();
+    await expect(page.getByTestId('notification-center')).toBeVisible();
+    await expect(page.getByTestId('notification-filter-unread')).toBeVisible();
+    await expect(page.getByTestId('notification-filter-unread')).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    await page.getByTestId('notification-filter-all').click();
+    await expect(page.getByTestId('notification-center')).toBeVisible();
+    await expect(page.getByTestId('notification-filter-all')).toBeVisible();
   });
 
   test('[P0] keeps one inbox toolbar and filter state across panel layouts', async ({ page }) => {
@@ -68,25 +79,6 @@ test.describe('Notification Center', () => {
     await assertStableNotificationWorkspace({ toolbar, scrollHost, unreadFilter, markAllRead });
     await expectElementToFit(toolbar);
     await expectElementToFit(center);
-  });
-
-  test('[P1] should disable mark-all-read for an empty inbox', async ({ page }) => {
-    const markAllButton = page.getByTestId('mark-all-read-button');
-    const unreadItems = page.locator('[data-testid="notification-item"][data-read-state="unread"]');
-
-    await expect(unreadItems).toHaveCount(0);
-    await expect(markAllButton).toBeDisabled();
-  });
-
-  test('[P2] should filter notifications by type', async ({ page }) => {
-    // UI only exposes all/unread tabs (see NotificationListPage filterTabs).
-    await page.getByTestId('notification-filter-unread').click();
-    await expect(page.getByTestId('notification-center')).toBeVisible();
-    await expect(page.getByTestId('notification-filter-unread')).toBeVisible();
-
-    await page.getByTestId('notification-filter-all').click();
-    await expect(page.getByTestId('notification-center')).toBeVisible();
-    await expect(page.getByTestId('notification-filter-all')).toBeVisible();
   });
 });
 

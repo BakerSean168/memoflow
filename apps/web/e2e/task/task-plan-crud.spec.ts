@@ -25,6 +25,15 @@ test.describe('Task Plan CRUD Operations', () => {
   });
 
   test('should create a new task plan', async ({ page }) => {
+    await expect(page.getByTestId('task-management-view')).toBeVisible();
+    await expect(page.getByTestId('task-surface-trigger')).toBeVisible();
+    await page.getByTestId('task-surface-trigger').click();
+    await expect(page.getByTestId('task-surface-today')).toBeVisible();
+    await expect(page.getByTestId('task-surface-upcoming')).toHaveCount(0);
+    await expect(page.getByTestId('task-surface-plans')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.getByTestId('create-task-plan-button')).toBeVisible();
+
     const planTitle = `E2E Task Plan ${Date.now()}`;
 
     const creation = await createTaskPlan(page, planTitle);
@@ -168,17 +177,6 @@ test.describe('Task Plan CRUD Operations', () => {
     ).toHaveAttribute('data-state', 'unchecked');
   });
 
-  test('should display task plan list', async ({ page }) => {
-    await expect(page.getByTestId('task-management-view')).toBeVisible();
-    await expect(page.getByTestId('task-surface-trigger')).toBeVisible();
-    await page.getByTestId('task-surface-trigger').click();
-    await expect(page.getByTestId('task-surface-today')).toBeVisible();
-    await expect(page.getByTestId('task-surface-upcoming')).toHaveCount(0);
-    await expect(page.getByTestId('task-surface-plans')).toBeVisible();
-    await page.keyboard.press('Escape');
-    await expect(page.getByTestId('create-task-plan-button')).toBeVisible();
-  });
-
   test('should edit an existing task plan inline from the detail workspace', async ({ page }) => {
     const originalTitle = `E2E Edit Task ${Date.now()}`;
     const updatedTitle = `${originalTitle} Updated`;
@@ -312,12 +310,6 @@ test.describe('Task Plan CRUD Operations', () => {
     await expect(taskCardByTitle(page, planTitle)).toHaveCount(0);
   });
 
-  test('should require a title before allowing save', async ({ page }) => {
-    await openCreateTaskDialog(page);
-
-    await expect(taskPrimaryActionButton(page)).toBeDisabled();
-  });
-
   test('[P0] keeps one task toolbar DOM and filter state across panel layouts', async ({
     page,
   }) => {
@@ -412,6 +404,7 @@ async function openCreateTaskDialog(page: Page) {
 async function createTaskPlan(page: Page, title: string) {
   await openCreateTaskDialog(page);
   const saveButton = taskPrimaryActionButton(page);
+  await expect(saveButton).toBeDisabled();
 
   await taskTitleInput(page).fill(title);
   await taskDescriptionInput(page).fill(`Description for ${title}`);

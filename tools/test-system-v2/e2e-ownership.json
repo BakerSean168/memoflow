@@ -249,12 +249,6 @@
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.config.ts"
     },
-    "apps/web/e2e/authentication/auth-flow.spec.ts": {
-      "surface": "authentication",
-      "role": "canonical",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
-    },
     "apps/web/e2e/authentication/auth-login.spec.ts": {
       "surface": "authentication",
       "role": "canonical",
@@ -268,12 +262,6 @@
       "primaryCollector": "apps/web/playwright.oauth-real.config.ts"
     },
     "apps/web/e2e/authentication/auth-oauth.spec.ts": {
-      "surface": "authentication",
-      "role": "canonical",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
-    },
-    "apps/web/e2e/authentication/auth-page-contract.spec.ts": {
       "surface": "authentication",
       "role": "canonical",
       "lifecycle": "active",
@@ -356,12 +344,6 @@
       "role": "supplemental",
       "lifecycle": "active",
       "primaryCollector": "apps/web/playwright.local-docker.config.ts"
-    },
-    "apps/web/e2e/note/legacy-note-mutation-boundary.spec.ts": {
-      "surface": "note",
-      "role": "canonical",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
     },
     "apps/web/e2e/note/note-workspace.spec.ts": {
       "surface": "note",
@@ -472,12 +454,6 @@
       "primaryCollector": "apps/web/playwright.task-visual-grammar.config.ts"
     },
     "apps/web/e2e/user-settings/data-portability.spec.ts": {
-      "surface": "user-settings",
-      "role": "canonical",
-      "lifecycle": "active",
-      "primaryCollector": "apps/web/playwright.config.ts"
-    },
-    "apps/web/e2e/user-settings/notifications.spec.ts": {
       "surface": "user-settings",
       "role": "canonical",
       "lifecycle": "active",

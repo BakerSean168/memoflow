@@ -52,7 +52,7 @@ const args = useNetworkNamespace
 console.log(
   '[Storybook Browser] Vitest + Playwright Chromium; ' +
     (useNetworkNamespace ? 'WSL user/network namespace (loopback only)' : 'host network') +
-    '; 3 suites / 12 interactions required.',
+    '; 4 suites / 17 interactions required.',
 );
 if (useNetworkNamespace) {
   console.log(
@@ -84,18 +84,18 @@ if (exit !== 0) {
 
 const report = JSON.parse(readFileSync(results, 'utf8'));
 assert.equal(report.success, true, 'Vitest JSON report must succeed');
-assert.equal(report.numPassedTestSuites, 3, 'Three audited Story files are required');
-assert.equal(report.numTotalTests, 12, 'Do not silently lose audited Story interactions');
-assert.equal(report.numPassedTests, 12, 'All twelve interactions must pass');
+assert.equal(report.numPassedTestSuites, 4, 'Four audited Story files are required');
+assert.equal(report.numTotalTests, 17, 'Do not silently lose audited Story interactions');
+assert.equal(report.numPassedTests, 17, 'All seventeen interactions must pass');
 assert.equal(report.numFailedTests, 0, 'No failing tests allowed');
 assert.equal(report.numPendingTests, 0, 'Do not silently skip Story interactions');
 assert.equal(report.numTodoTests, 0, 'Do not accept todo tests as passing');
 const ids = report.testResults.flatMap((file) =>
   file.assertionResults.map((test) => test.meta?.storyId),
 );
-assert.equal(ids.length, 12);
-assert.equal(new Set(ids).size, 12, 'Story IDs must be unique');
+assert.equal(ids.length, 17);
+assert.equal(new Set(ids).size, 17, 'Story IDs must be unique');
 assert.ok(ids.every(Boolean), 'Storybook addon must link every result to a Story ID');
 console.log(
-  '[Storybook Browser] PASS: 3/3 Story files, 12/12 interactions, no skipped or todo tests.',
+  '[Storybook Browser] PASS: 4/4 Story files, 17/17 interactions, no skipped or todo tests.',
 );

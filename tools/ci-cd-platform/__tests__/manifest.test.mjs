@@ -549,3 +549,31 @@ test('injected scope stays authoritative under a main-push event (regression)', 
   assert.equal(m.full, false);
   assert.equal(m.scope.full, m.full);
 });
+
+test('migrated browser contracts run for production views and transitive package inputs', async () => {
+  for (const [file, projects] of [
+    ['apps/web/src/auth/WebAuthView.vue', ['web']],
+    ['apps/web/src/auth/validation.ts', ['web']],
+    ['packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue', ['app-vue']],
+    ['packages/ui-vue-shadcn/src/components/ui/input/Input.vue', ['ui-vue-shadcn']],
+    ['packages/contracts/src/index.ts', ['contracts', 'ui-storybook']],
+  ]) {
+    const m = await buildDeliveryManifest({
+      base: 'base',
+      head: 'head',
+      event: 'pull_request',
+      scope: { ...scope, projects },
+      files: [file],
+    });
+    assert.equal(m.laneDetails.componentBrowser.required, true, file);
+    assert.deepEqual(m.laneDetails.componentBrowser.files, [file]);
+  }
+  const backend = await buildDeliveryManifest({
+    base: 'base',
+    head: 'head',
+    event: 'pull_request',
+    scope: { ...scope, projects: ['api'] },
+    files: ['apps/api/src/health.ts'],
+  });
+  assert.equal(backend.laneDetails.componentBrowser.required, false);
+});

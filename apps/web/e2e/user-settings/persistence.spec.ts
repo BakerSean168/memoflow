@@ -35,6 +35,7 @@ test.describe('Settings owner persistence', () => {
     await openNotificationsSettings(page);
 
     const notificationToggle = page.getByTestId('notification-global-inApp');
+    await expect(notificationToggle).toBeVisible();
     const initialState = await notificationToggle.getAttribute('aria-checked');
     const updatedState = initialState === 'true' ? 'false' : 'true';
 
@@ -58,6 +59,7 @@ test.describe('Settings owner persistence', () => {
     await openNotificationsSettings(page);
 
     const notificationToggle = page.getByTestId('notification-global-inApp');
+    await expect(notificationToggle).toBeVisible();
     const initialState = await notificationToggle.getAttribute('aria-checked');
     const updatedState = initialState === 'true' ? 'false' : 'true';
 

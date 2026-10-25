@@ -80,6 +80,41 @@
     {
       "path": "apps/web/e2e/user-settings/shortcuts.spec.ts",
       "reason": "Shortcut acceptance moved to the global command palette owner."
+    },
+    {
+      "path": "apps/web/e2e/authentication/auth-flow.spec.ts",
+      "reason": "The registration/logout/login and wrong-password journeys are covered by authentication/auth-login.spec.ts; standalone verified signup remains in auth-register.spec.ts.",
+      "sourceSha256": "07cb6a876c8fbcc0fd2fc2c6ed88fbb35bc68b9230082f8e46203a3a5da6427a",
+      "replacements": [
+        "apps/web/e2e/authentication/auth-login.spec.ts",
+        "apps/web/e2e/authentication/auth-register.spec.ts"
+      ],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625"
+    },
+    {
+      "path": "apps/web/e2e/user-settings/notifications.spec.ts",
+      "reason": "All card visibility, successful owner-backed PUT, toggle state and reload assertions are covered by user-settings/persistence.spec.ts.",
+      "sourceSha256": "3bd07d3f1c29aa2b746f54549595db81f3a74e9d51134476a27960dfa0cc837d",
+      "replacements": ["apps/web/e2e/user-settings/persistence.spec.ts"],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625"
+    },
+    {
+      "path": "apps/web/e2e/authentication/auth-page-contract.spec.ts",
+      "reason": "Five browser page contracts moved to apps/web/src/auth/WebAuthView.stories.ts (real Chromium Component Browser). Real signup/verification and bad-password HTTP handling remain in auth-register.spec.ts and auth-login.spec.ts.",
+      "sourceSha256": "4f1b7194082a95c7f8dfb382b0597e1f3ca08b14b2d6f572989f1a72594388fb",
+      "replacements": [
+        "apps/web/src/auth/WebAuthView.stories.ts",
+        "apps/web/e2e/authentication/auth-register.spec.ts",
+        "apps/web/e2e/authentication/auth-login.spec.ts"
+      ],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625"
+    },
+    {
+      "path": "apps/web/e2e/note/legacy-note-mutation-boundary.spec.ts",
+      "reason": "All five retired-route HTTP assertions moved to apps/api/src/runtime/repository-http.integration.test.ts with production owner composition, real PostgreSQL and a live-route/auth positive control.",
+      "sourceSha256": "6fccd352e0556cb2da09fd2045a578aab28527169d9a5cc87bc3d7842c998882",
+      "replacements": ["apps/api/src/runtime/repository-http.integration.test.ts"],
+      "issue": "https://github.com/BakerSean168/memoflow/issues/625"
     }
   ],
   "forbiddenReferences": [

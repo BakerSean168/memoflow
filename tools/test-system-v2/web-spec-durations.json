@@ -45,11 +45,6 @@
       "samples": 3,
       "observedAt": "2026-10-18T09:42:43.245Z"
     },
-    "authentication/auth-flow.spec.ts": {
-      "durationMs": 34262,
-      "samples": 3,
-      "observedAt": "2026-10-18T09:42:43.730Z"
-    },
     "authentication/auth-login.spec.ts": {
       "durationMs": 30787,
       "samples": 3,
@@ -57,11 +52,6 @@
     },
     "authentication/auth-oauth.spec.ts": {
       "durationMs": 5728,
-      "samples": 3,
-      "observedAt": "2026-10-18T09:42:48.857Z"
-    },
-    "authentication/auth-page-contract.spec.ts": {
-      "durationMs": 21908,
       "samples": 3,
       "observedAt": "2026-10-18T09:42:48.857Z"
     },
@@ -79,11 +69,6 @@
       "durationMs": 127524,
       "samples": 3,
       "observedAt": "2026-10-18T09:42:43.730Z"
-    },
-    "note/legacy-note-mutation-boundary.spec.ts": {
-      "durationMs": 11472,
-      "samples": 3,
-      "observedAt": "2026-10-18T09:42:43.245Z"
     },
     "note/note-workspace.spec.ts": {
       "durationMs": 11543,
@@ -134,11 +119,6 @@
       "durationMs": 83196,
       "samples": 3,
       "observedAt": "2026-10-18T09:42:48.857Z"
-    },
-    "user-settings/notifications.spec.ts": {
-      "durationMs": 39449,
-      "samples": 3,
-      "observedAt": "2026-10-18T09:42:43.245Z"
     },
     "user-settings/persistence.spec.ts": {
       "durationMs": 46685,

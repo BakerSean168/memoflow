@@ -12,7 +12,6 @@ if (!webOrigin || !apiOrigin) {
 export default defineConfig({
   testDir: './e2e',
   testMatch: [
-    '**/authentication/auth-flow.spec.ts',
     '**/authentication/auth-login.spec.ts',
     '**/authentication/auth-password.spec.ts',
     '**/authentication/auth-register.spec.ts',

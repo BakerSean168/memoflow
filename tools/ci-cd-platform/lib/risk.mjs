@@ -208,7 +208,17 @@ export function classifyCapabilities({ changedFiles, scope }) {
     lint: { files: pick(LINT_EXTENSIONS) },
     typecheck: { files: pick(TYPE_EXTENSIONS) },
     componentBrowser: {
-      files: changedFiles.filter((file) => STORY_PATTERN.test(file)),
+      // A migrated contract must run when its production component changes,
+      // not only when the Story itself changes. Nx supplies transitive package
+      // consumers; the Web-owned auth view is additionally an explicit input.
+      files: changedFiles.filter(
+        (file) =>
+          STORY_PATTERN.test(file) ||
+          file.startsWith('apps/web/src/auth/') ||
+          file.startsWith('packages/app-vue/src/') ||
+          file.startsWith('packages/ui-vue-shadcn/src/') ||
+          (scope?.projects ?? []).includes('ui-storybook'),
+      ),
     },
     contract: { files: changedFiles.filter((file) => CONTRACT_PATTERN.test(file)) },
     unit: { files: [], projects: scope?.unit ?? [] },

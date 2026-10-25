@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { ensureLoginScene, ensureRegisterScene, registerViaAuth } from '../helpers/testHelpers';
+import { ensureLoginScene, registerViaAuth } from '../helpers/testHelpers';
 import { WEB_CONFIG, TIMEOUT_CONFIG } from '../config';
 
 const generateTestEmail = () =>
@@ -47,19 +47,7 @@ test.describe('Authentication - 登录页基础验证', () => {
         timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
       },
     );
-    await expect.poll(async () => page.url()).toContain(WEB_CONFIG.LOGIN_PATH);
-  });
-
-  test('[P1] 可以在登录和注册表单间切换', async ({ page }) => {
-    await ensureRegisterScene(page);
-    await expect(page.locator('#reg-email')).toBeVisible({
-      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
-    });
-
-    await ensureLoginScene(page);
-    await expect(page.locator('#email')).toBeVisible({
-      timeout: TIMEOUT_CONFIG.ELEMENT_WAIT,
-    });
+    await expectOnAuthPage(page);
   });
 });
 
