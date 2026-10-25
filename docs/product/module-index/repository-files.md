@@ -84,7 +84,7 @@ updated: 2026-09-11T00:02:00+08:00
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
 | [`packages/contracts/src/modules/repository/`](../../../packages/contracts/src/modules/repository/)                                                                 | knowledge / Local Vault / projection / confirmed create 契约 |
 | [`packages/contracts/src/modules/repository/protocol/repository-event-map.ts`](../../../packages/contracts/src/modules/repository/protocol/repository-event-map.ts) | 仅 `repository:note:mutated`                                 |
-| [`packages/contracts/src/electron/ipc-channels.ts`](../../../packages/contracts/src/electron/ipc-channels.ts)                                                       | `RepositoryChannels`：knowledge connection + Local Vault     |
+| [`packages/desktop-contracts/src/ipc-channels.ts`](../../../packages/desktop-contracts/src/ipc-channels.ts)                                                         | `RepositoryChannels`：knowledge connection + Local Vault     |
 
 ## Repository facts and server-held disclosure
 

@@ -300,6 +300,14 @@ export const domainResolveAliases = [
     replacement: path.resolve(import.meta.dirname, './packages/transport-contracts/src/index.ts'),
   },
   {
+    find: /^@memoflow\/desktop-contracts\/(.+)/,
+    replacement: path.resolve(import.meta.dirname, './packages/desktop-contracts/src/$1'),
+  },
+  {
+    find: '@memoflow/desktop-contracts',
+    replacement: path.resolve(import.meta.dirname, './packages/desktop-contracts/src/index.ts'),
+  },
+  {
     find: /^@memoflow\/task\/(.+)/,
     replacement: path.resolve(import.meta.dirname, './packages/task/src/$1/index.ts'),
   },

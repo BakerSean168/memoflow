@@ -115,7 +115,7 @@ describe('Task vNext simplified domain surface', () => {
       templateState,
       readFileSync(resolve(contractsTask, 'api/response-schemas.ts'), 'utf8'),
       readFileSync(resolve(contractsTask, 'api/task-plan.dto.ts'), 'utf8'),
-      readFileSync(resolve(taskRoot, '../contracts/src/electron/ipc-channels.ts'), 'utf8'),
+      readFileSync(resolve(taskRoot, '../desktop-contracts/src/ipc-channels.ts'), 'utf8'),
       readFileSync(resolve(taskRoot, '../database/prisma/schema/task.prisma'), 'utf8'),
       readFileSync(resolve(taskRoot, '../powersync-schema/src/index.ts'), 'utf8'),
       integrationHelpers,

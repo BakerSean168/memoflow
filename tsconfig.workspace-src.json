@@ -11,6 +11,8 @@
         "./packages/transport-contracts/src/result/index.ts"
       ],
       "@memoflow/transport-contracts/*": ["./packages/transport-contracts/src/*.ts"],
+      "@memoflow/desktop-contracts": ["./packages/desktop-contracts/src/index.ts"],
+      "@memoflow/desktop-contracts/*": ["./packages/desktop-contracts/src/*.ts"],
       "@memoflow/goal-client": ["./packages/goal-client/src/index.ts"],
       "@memoflow/database": ["./packages/database/src/index.ts"],
       "@memoflow/database/transaction": ["./packages/database/src/transaction.ts"],

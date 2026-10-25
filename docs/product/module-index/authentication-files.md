@@ -50,7 +50,7 @@ updated: 2026-08-03T00:00:00+08:00
 | [`apps/desktop/src/main/profile/cloud-session-store.ts`](../../../apps/desktop/src/main/profile/cloud-session-store.ts)                           | main-process profile-scoped cloud credential 存储                  |
 | [`apps/desktop/src/main/profile/desktop-cloud-connection-manager.ts`](../../../apps/desktop/src/main/profile/desktop-cloud-connection-manager.ts) | `ONLINE/OFFLINE/REAUTH_REQUIRED` 恢复和 sync enablement            |
 | [`apps/desktop/src/main/profile/cloud-auth-ipc.ts`](../../../apps/desktop/src/main/profile/cloud-auth-ipc.ts)                                     | Desktop device authorization、当前 session 与独立云端退出          |
-| [`packages/contracts/src/electron/profile-access.ts`](../../../packages/contracts/src/electron/profile-access.ts)                                 | Profile snapshot、unlock state、cloud state 和 capability contract |
+| [`packages/desktop-contracts/src/profile-access.ts`](../../../packages/desktop-contracts/src/profile-access.ts)                                   | Profile snapshot、unlock state、cloud state 和 capability contract |
 
 ## Shared UI
 

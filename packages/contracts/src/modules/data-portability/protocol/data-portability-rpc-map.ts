@@ -2,7 +2,7 @@
  * Data Portability RPC Map — transport request/response pairs
  */
 
-import { DataPortabilityChannels } from '../../../electron/ipc-channels';
+import { DataPortabilityChannels } from '@memoflow/desktop-contracts';
 import type {
   ExportPortableDataV3Req,
   ExportPortableDataV3Res,

@@ -44,7 +44,7 @@ describe('controlled note-write boundary surface', () => {
     'utf8',
   );
   const repositoryChannels = readFileSync(
-    resolve(repoRoot, 'packages/contracts/src/electron/ipc-channels.ts'),
+    resolve(repoRoot, 'packages/desktop-contracts/src/ipc-channels.ts'),
     'utf8',
   );
   const createConfirmedDto = readFileSync(

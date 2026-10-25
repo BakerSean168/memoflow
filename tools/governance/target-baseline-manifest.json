@@ -74,7 +74,8 @@
     "goal-core": "runtime-lib",
     "goal-client": "runtime-lib",
     "shared-primitives": "runtime-lib",
-    "transport-contracts": "runtime-lib"
+    "transport-contracts": "runtime-lib",
+    "desktop-contracts": "runtime-lib"
   },
   "exemptions": [
     {

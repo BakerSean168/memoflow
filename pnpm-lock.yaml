@@ -1515,6 +1515,9 @@ importers:
       '@asteasolutions/zod-to-openapi':
         specifier: ^9.1.0
         version: 9.1.0(zod@4.6.5)
+      '@memoflow/desktop-contracts':
+        specifier: workspace:*
+        version: link:../desktop-contracts
       '@memoflow/shared-primitives':
         specifier: workspace:*
         version: link:../shared-primitives
@@ -1611,6 +1614,15 @@ importers:
       typescript:
         specifier: npm:@typescript/typescript6@6.0.2
         version: '@typescript/typescript6@6.0.2'
+
+  packages/desktop-contracts:
+    dependencies:
+      '@memoflow/transport-contracts':
+        specifier: workspace:*
+        version: link:../transport-contracts
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
 
   packages/domain-shared:
     dependencies:

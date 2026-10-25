@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { IElectronModuleContext } from './index';
+import type { IElectronModuleContext } from '@memoflow/desktop-contracts';
 import { createAuthenticatedIpcWrapper } from './authenticated-ipc';
-import { ElectronAuthResolutionError } from './auth-context';
+import { ElectronAuthResolutionError } from '@memoflow/desktop-contracts';
 import { ResultErrorException } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '../shared';
 
