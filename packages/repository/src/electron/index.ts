@@ -57,7 +57,7 @@ import type {
   KnowledgeRepositoryContentState,
   KnowledgeRepositoryReconciliationPreview,
   SyncKnowledgeRepositoryRes,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import { fail, ok, type Result } from '@memoflow/contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
 import { withAuthenticatedValue } from './authenticated-ipc';

@@ -23,7 +23,7 @@ import type {
   PreviewKnowledgeRepositoryReconciliationReq,
   StartKnowledgeRepositoryInstallationReq,
   StartKnowledgeRepositoryInstallationRes,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 
 export interface KnowledgeRepositoryInstallationSetupRequest {
   state: string;

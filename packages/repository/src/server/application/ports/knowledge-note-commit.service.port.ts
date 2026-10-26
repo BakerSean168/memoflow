@@ -15,7 +15,7 @@ import type {
   CreateConfirmedKnowledgeNoteResponse,
   AdoptKnowledgeDocumentReq,
   AdoptKnowledgeDocumentResponse,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 
 export interface IKnowledgeNoteCommitService {
   create(

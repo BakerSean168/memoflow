@@ -52,7 +52,7 @@ import type {
   ListKnowledgeWriteRequestsReq,
   ListKnowledgeWriteRequestsRes,
   KnowledgeWriteRequestReplayResponse,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 
 export interface IRepositoryApiClient {
   startKnowledgeRepositoryInstallation(

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { KnowledgeDocumentIdSchema } from '@memoflow/contracts/repository';
+import { KnowledgeDocumentIdSchema } from '@memoflow/repository-contracts';
 import { KnowledgeDocumentRefResolverService } from './knowledge-document-ref-resolver.service';
 
 const DOCUMENT_ID = KnowledgeDocumentIdSchema.parse('kdoc_550e8400-e29b-41d4-a716-446655440090');

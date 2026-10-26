@@ -2,7 +2,7 @@
  * Repository client seam.
  *
  * Public repository contracts stay centralized in
- * `@memoflow/contracts/repository`.
+ * `@memoflow/repository-contracts`.
  * Callers depend on this seam instead of the old application-client /
  * infrastructure-client layered exports.
  */

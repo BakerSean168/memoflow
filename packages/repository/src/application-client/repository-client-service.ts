@@ -51,7 +51,7 @@ import type {
   ListKnowledgeWriteRequestsReq,
   ListKnowledgeWriteRequestsRes,
   KnowledgeWriteRequestReplayResponse,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import type { IRepositoryApiClient } from './ports/repository-api-client.port';
 
 export class RepositoryClientService implements IRepositoryApiClient {
