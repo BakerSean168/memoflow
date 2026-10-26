@@ -110,7 +110,7 @@
         "packages/app-vue/src/modules/ai/components/AITaskDraftEditor.vue"
       ],
       "requiredPaths": [
-        "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.vue",
+        "packages/goal-ui/src/components/dialogs/GoalDialog.vue",
         "packages/app-vue/src/modules/task/components/dialogs/TaskPlanDialog.vue",
         "packages/app-vue/src/modules/repository/components/KnowledgeCaptureReviewDialog.vue"
       ]

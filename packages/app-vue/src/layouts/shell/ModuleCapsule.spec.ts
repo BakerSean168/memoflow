@@ -1,3 +1,4 @@
+import { installGoalUiHost } from '../../di/goal-ui-host';
 /** @vitest-environment happy-dom */
 
 import { flushPromises, mount } from '@vue/test-utils';
@@ -9,7 +10,7 @@ import ModuleCapsule from './ModuleCapsule.vue';
 import { ok } from '@memoflow/contracts/result';
 import { GOAL_SERVICE_KEY } from '../../di/keys';
 import { GOAL_HOME_STALE_TIME_MS } from '../../platform/server-state/query-policy';
-import { useGoalHomeSummary } from '../../modules/goal';
+import { useGoalHomeSummary } from '@memoflow/goal-ui';
 import {
   createTestServerStateRuntime,
   SERVER_STATE_IDENTITY_SCOPE_KEY,
@@ -284,3 +285,5 @@ it('returns keyboard Escape focus to the named preview action without reopening 
   expect(document.activeElement).toBe(preview.element);
   wrapper.unmount();
 });
+
+installGoalUiHost();

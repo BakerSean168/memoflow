@@ -45,7 +45,7 @@ const ALLOWLIST = new Set([
   // Feature initialization files - will be migrated to explicit hooks
   'packages/notification/src/api/initialization.ts',
   'packages/app-vue/src/modules/notification/initialization/index.ts',
-  'packages/app-vue/src/modules/goal/initialization/index.ts',
+  'packages/goal-ui/src/initialization/index.ts',
   'packages/goal/src/api/initialization.ts',
 ]);
 

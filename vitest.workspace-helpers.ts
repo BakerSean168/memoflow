@@ -327,6 +327,18 @@ export const domainResolveAliases = [
     replacement: path.resolve(import.meta.dirname, './packages/goal-contracts/src/$1'),
   },
   {
+    find: /^@memoflow\/goal-ui\/host$/,
+    replacement: path.resolve(import.meta.dirname, './packages/goal-ui/src/goalUiHost.ts'),
+  },
+  {
+    find: /^@memoflow\/goal-ui\/composables\/useGoal$/,
+    replacement: path.resolve(import.meta.dirname, './packages/goal-ui/src/composables/useGoal.ts'),
+  },
+  {
+    find: /^@memoflow\/goal-ui$/,
+    replacement: path.resolve(import.meta.dirname, './packages/goal-ui/src/index.ts'),
+  },
+  {
     find: '@memoflow/goal-contracts',
     replacement: path.resolve(import.meta.dirname, './packages/goal-contracts/src/index.ts'),
   },

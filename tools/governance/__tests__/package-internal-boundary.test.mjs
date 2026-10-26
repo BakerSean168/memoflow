@@ -177,7 +177,7 @@ describe('findBoundaryViolations — positive cases', () => {
   it('allows server/application importing domain Port / contracts / utils', () => {
     const content = [
       "import type { IRelationRepository, RelationDTO } from '../../domain/repositories';",
-      "import { SomeContractType } from '@memoflow/contracts/goal';",
+      "import { SomeContractType } from '@memoflow/goal-contracts';",
       "import { someUtil } from '@memoflow/utils';",
       "import { localHelper } from './local-helper';",
     ].join('\n');
@@ -286,6 +286,6 @@ describe('getWithinPackageLayer', () => {
 
   it('returns null for external specifiers', () => {
     expect(getWithinPackageLayer('@memoflow/database')).toBeNull();
-    expect(getWithinPackageLayer('@memoflow/contracts/goal')).toBeNull();
+    expect(getWithinPackageLayer('@memoflow/goal-contracts')).toBeNull();
   });
 });

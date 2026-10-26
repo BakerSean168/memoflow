@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Button, Dialog } from '@memoflow/ui-vue-shadcn';
 import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
-import { GoalRecordComposerSurface } from '../../../goal';
+import { GoalRecordComposerSurface } from '@memoflow/goal-ui';
 import { ProductDialogShell } from '../../../../shared/components';
 import { useDialogCloseGuard } from '../../../../shared/composables/useDialogCloseGuard';
 import type { useTaskOccurrenceActionCoordinator } from '../../composables/useTaskOccurrenceActionCoordinator';

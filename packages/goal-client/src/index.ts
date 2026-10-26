@@ -14,7 +14,6 @@ import {
   createGoalServiceFromHttpClient,
   type GoalClientPort,
 } from './application-client';
-import { Goal, GoalRecord, GoalReview, KeyResult } from './domain-client';
 import {
   GoalHttpAdapter,
   createGoalHttpAdapters,
@@ -46,13 +45,9 @@ export function createGoalIpcClient(ipcClient: IResultIpcClient): GoalClientPort
 }
 
 export {
-  Goal,
   GoalClientService,
   GoalHttpAdapter,
   GoalIpcAdapter,
-  GoalRecord,
-  GoalReview,
-  KeyResult,
   createGoalClientService,
   createGoalHttpAdapters,
   createGoalIpcAdapters,

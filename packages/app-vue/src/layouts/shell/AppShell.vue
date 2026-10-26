@@ -29,7 +29,7 @@ import { useAppShellStore, MAX_BUSINESS_TABS } from './useAppShellStore';
 import { provideTaskNativeSurface } from './useTaskNativeSurface';
 import { provideGoalNativeSurface } from './useGoalNativeSurface';
 import { canLeaveBusinessSurface } from './surface-leave-protocol';
-import { GoalSurfaceLeaveGuardKey, GoalSurfaceStatusSinkKey } from '../../modules/goal';
+import { GoalSurfaceLeaveGuardKey, GoalSurfaceStatusSinkKey } from '@memoflow/goal-ui';
 import { provideKnowledgeNativeSurface } from './useKnowledgeNativeSurface';
 import { useNativeBusinessPanelBridge } from './useNativeBusinessPanelBridge';
 import { useShellRouterSync, AUTO_FOCUS_VIEWPORT, moduleForPath } from './useShellRouterSync';

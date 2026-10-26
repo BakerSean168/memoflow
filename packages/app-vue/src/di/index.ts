@@ -6,3 +6,5 @@
 export * from './keys';
 export type * from './types';
 export { defaultModuleCapsules } from './navigation';
+
+export { installGoalUiHost } from './goal-ui-host';

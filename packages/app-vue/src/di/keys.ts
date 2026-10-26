@@ -1,4 +1,4 @@
-import type { GoalDraftCheckpointStore } from '../modules/goal/infrastructure/goal-draft-checkpoint.indexeddb';
+import type { GoalDraftCheckpointStore } from '@memoflow/goal-ui';
 /**
  * DI Injection Keys
  *

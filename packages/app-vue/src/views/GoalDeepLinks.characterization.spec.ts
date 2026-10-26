@@ -1,3 +1,4 @@
+import { installGoalUiHost } from '../di/goal-ui-host';
 import { DOMWrapper, enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { defineComponent, h, provide, ref } from 'vue';
 import { createPinia } from 'pinia';
@@ -12,13 +13,13 @@ import {
   GoalSurfaceLeaveGuardKey,
   GoalSurfaceStatusSinkKey,
   type GoalSurfaceStatus,
-} from '../modules/goal';
+} from '@memoflow/goal-ui';
 import { createMemoryHistory, createRouter, RouterView } from 'vue-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { GOAL_SERVICE_KEY } from '../di/keys';
 import { productionLocaleMessages } from '../locales/production-messages';
-import { goalRoutes } from '../modules/goal/router';
-import GoalDetailView from '../modules/goal/views/GoalDetailView.vue';
+import { goalRoutes } from '@memoflow/goal-ui';
+import { GoalDetailView } from '@memoflow/goal-ui';
 import { createMockGoalMutationReceipt } from '@memoflow/goal-contracts/test-support/goal.mock';
 
 const calls = vi.hoisted(() => ({
@@ -75,7 +76,7 @@ const review = {
 };
 const keyResults = ref<(typeof kr)[]>([]);
 const goalReviews = ref<(typeof review)[]>([]);
-vi.mock('../modules/goal/composables/useGoal', () => ({
+vi.mock('@memoflow/goal-ui/composables/useGoal', () => ({
   useGoal: () => ({ keyResults, goalReviews, ...calls }),
 }));
 vi.mock('../shared/composables/useLabelCatalog', () => ({
@@ -125,7 +126,7 @@ beforeEach(() => {
   });
   calls.getGoalReviews.mockResolvedValue({
     ok: true,
-    data: { reviews: [{ toDTO: () => review }] },
+    data: { reviews: [review] },
   });
   window.confirm = vi.fn(() => false);
 });
@@ -532,7 +533,7 @@ describe('Goal deep links — PVC-BASE-002', () => {
     expect(inspectDialog().text()).toContain(review.reflection);
     resolveOld({
       ok: true,
-      data: { reviews: [{ toDTO: () => ({ ...review, id: 'old', reflection: 'Stale review' }) }] },
+      data: { reviews: [{ ...review, id: 'old', reflection: 'Stale review' }] },
     });
     await flushPromises();
     expect(inspectDialog().text()).toContain(review.reflection);
@@ -661,7 +662,7 @@ describe('Goal deep links — PVC-BASE-002', () => {
     const older = { ...review, id: 'older', reflection: 'Older review beyond preview' };
     calls.getGoalReviews.mockResolvedValue({
       ok: true,
-      data: { reviews: [{ toDTO: () => older }] },
+      data: { reviews: [older] },
     });
     await router.push('/goals/goal-1/review/older');
     await flushPromises();
@@ -712,3 +713,5 @@ function inspectDialog() {
     document.querySelector<HTMLElement>('[data-testid="goal-review-inspect-dialog"]')!,
   );
 }
+
+installGoalUiHost();

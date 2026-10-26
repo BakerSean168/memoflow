@@ -433,7 +433,7 @@ export class Goal implements GoalClient {
 ```typescript
 // packages/application-client/src/goal/services/create-goal.ts
 import type { IGoalApiClient } from '@memoflow/infrastructure-client';
-import type { CreateGoalRequest } from '@memoflow/contracts/goal';
+import type { CreateGoalRequest } from '@memoflow/goal-contracts';
 import { Goal } from '@memoflow/domain-client/goal';
 
 export class CreateGoal {

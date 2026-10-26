@@ -1,5 +1,6 @@
+import { installGoalUiHost } from '../di/goal-ui-host';
 import { describe, expect, it } from 'vitest';
-import { goalRoutes } from '../modules/goal/router';
+import { goalRoutes } from '@memoflow/goal-ui';
 import { accountRoutes } from '../modules/account/router';
 
 // Retired barrel exports / files are governance locks (app-vue-source-locks.json#dead-surfaces).
@@ -16,3 +17,5 @@ describe('retired public render surfaces', () => {
     ).toEqual({ path: '/settings', query: { tab: 'account' } });
   });
 });
+
+installGoalUiHost();

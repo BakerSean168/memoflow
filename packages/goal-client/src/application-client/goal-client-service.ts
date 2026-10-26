@@ -1,8 +1,8 @@
 /**
- * Goal Client Service
+ * GoalClientDTO Client Service
  *
  * Constructor-injected application service for goal management.
- * Uses the Goal API client port directly,
+ * Uses the GoalClientDTO API client port directly,
  * returning Result<T> types throughout.
  *
  * @module application-client/goal-client-service
@@ -48,99 +48,12 @@ import type {
   GoalWorkspaceKnowledgePage,
 } from '@memoflow/workspace-contracts';
 import type { IGoalApiClient } from './ports/goal-api-client.port';
-import {
-  Goal,
-  KeyResult,
-  GoalReview,
-  GoalRecord,
-  GoalId,
-  KeyResultId,
-  GoalReviewId,
-  GoalRecordId,
-} from '../domain-client';
-import { IdentityId } from '@memoflow/domain-shared/shared';
-
-// ===== DTO-to-State Mappers =====
-
-function goalFromDTO(dto: GoalClientDTO): Goal {
-  return Goal.load({
-    id: GoalId.of(dto.id),
-    identityId: IdentityId.of(dto.identityId),
-    name: dto.name,
-    summary: dto.summary,
-    description: dto.description,
-    status: dto.status,
-    start: dto.start ?? null,
-    target: dto.target ?? null,
-    completedAt: dto.completedAt ? dto.completedAt : null,
-    archivedAt: dto.archivedAt ? dto.archivedAt : null,
-    sortOrder: dto.sortOrder,
-    reminderConfig: dto.reminderConfig ?? null,
-    labels: dto.labels ?? [],
-    version: dto.version,
-    createdAt: dto.createdAt,
-    updatedAt: dto.updatedAt,
-    deletedAt: dto.deletedAt ?? null,
-    keyResults: dto.keyResults?.map((kr) => keyResultFromDTO(kr)) ?? null,
-    reviews: dto.reviews?.map((r) => goalReviewFromDTO(r)) ?? null,
-    totalKeyResults: dto.totalKeyResults,
-    completedKeyResults: dto.completedKeyResults,
-    overallProgress: dto.overallProgress,
-  });
-}
-
-function keyResultFromDTO(dto: KeyResultClientDTO): KeyResult {
-  return KeyResult.load({
-    id: KeyResultId.of(dto.id),
-    title: dto.title,
-    description: dto.description,
-    progress: dto.progress,
-    target: dto.target,
-    progressPercentage: dto.progressPercentage,
-    isCompleted: dto.isCompleted,
-    weight: dto.weight,
-    order: dto.order,
-    createdAt: dto.createdAt,
-    updatedAt: dto.updatedAt,
-  });
-}
-
-function goalReviewFromDTO(dto: GoalReviewClientDTO): GoalReview {
-  return GoalReview.load({
-    id: GoalReviewId.of(dto.id),
-    goalId: GoalId.of(dto.goalId),
-    reflection: dto.reflection,
-    challenges: dto.challenges,
-    adjustments: dto.adjustments,
-    systemContext: dto.systemContext,
-    reviewedAt: dto.reviewedAt,
-    createdAt: dto.createdAt,
-    updatedAt: dto.updatedAt,
-  });
-}
-
-function goalRecordFromDTO(dto: GoalRecordClientDTO): GoalRecord {
-  return GoalRecord.load({
-    id: GoalRecordId.of(dto.id),
-    keyResultId: KeyResultId.of(dto.keyResultId),
-    goalId: GoalId.of(dto.goalId),
-    value: dto.value,
-    valueAfter: dto.valueAfter,
-    comment: dto.comment,
-    authorship: dto.authorship,
-    source: dto.source,
-    recordedAt: dto.recordedAt,
-    createdAt: dto.createdAt,
-    updatedAt: dto.updatedAt,
-  });
-}
-
 // ─── Client Application Port ────────────────────────────────────────────────
 
 /** High-level client-side operations for the goal module. */
 export interface GoalClientPort {
   createGoal(request: CreateGoalReq): Promise<Result<GoalMutationReceipt>>;
-  getGoal(id: string): Promise<Result<Goal>>;
+  getGoal(id: string): Promise<Result<GoalClientDTO>>;
   getHomeSummary(): Promise<Result<GoalHomeProgressSummary>>;
   listGoals(params?: {
     page?: number;
@@ -151,7 +64,7 @@ export interface GoalClientPort {
     labelIdsAll?: string[];
     targetStart?: import('@memoflow/contracts/primitives').Ymd;
     targetEnd?: import('@memoflow/contracts/primitives').Ymd;
-  }): Promise<Result<{ goals: Goal[]; pagination: QueryGoalsRes['pagination'] }>>;
+  }): Promise<Result<{ goals: GoalClientDTO[]; pagination: QueryGoalsRes['pagination'] }>>;
   updateGoal(id: string, request: UpdateGoalReq): Promise<Result<GoalMutationReceipt>>;
   deleteGoal(id: string, request: DeleteGoalReq): Promise<Result<GoalMutationReceipt>>;
   getGoalWorkspace(
@@ -177,14 +90,14 @@ export interface GoalClientPort {
     pageSize?: number;
     status?: string[];
     systemView?: GoalSystemView;
-  }): Promise<Result<{ goals: Goal[]; pagination: QueryGoalsRes['pagination'] }>>;
+  }): Promise<Result<{ goals: GoalClientDTO[]; pagination: QueryGoalsRes['pagination'] }>>;
   getGoalAggregateView(id: string): Promise<Result<GetGoalAggregateRes>>;
   cloneGoal(id: string, request?: CloneGoalReq): Promise<Result<GoalMutationReceipt>>;
   createKeyResult(
     goalId: string,
     request: Omit<AddKeyResultReq, 'goalId'>,
   ): Promise<Result<GoalMutationReceipt>>;
-  getKeyResults(goalId: string): Promise<Result<{ keyResults: KeyResult[] }>>;
+  getKeyResults(goalId: string): Promise<Result<{ keyResults: KeyResultClientDTO[] }>>;
   updateKeyResult(
     goalId: string,
     krId: string,
@@ -217,7 +130,7 @@ export interface GoalClientPort {
     params?: { limit?: number; offset?: number },
   ): Promise<
     Result<{
-      records: GoalRecord[];
+      records: GoalRecordClientDTO[];
       total: number;
       previewContext?: GetGoalRecordsRes['previewContext'];
     }>
@@ -225,7 +138,7 @@ export interface GoalClientPort {
   getGoalRecordsByGoal(
     goalId: string,
     params?: { limit?: number; offset?: number },
-  ): Promise<Result<{ records: GoalRecord[]; total: number }>>;
+  ): Promise<Result<{ records: GoalRecordClientDTO[]; total: number }>>;
   deleteGoalRecord(
     goalId: string,
     krId: string,
@@ -236,7 +149,7 @@ export interface GoalClientPort {
     goalId: string,
     request: CreateGoalReviewReq,
   ): Promise<Result<GoalMutationReceipt>>;
-  getGoalReviews(goalId: string): Promise<Result<{ reviews: GoalReview[] }>>;
+  getGoalReviews(goalId: string): Promise<Result<{ reviews: GoalReviewClientDTO[] }>>;
   getGoalReviewContext(
     goalId: string,
     input?: GoalReviewWindowInput,
@@ -288,15 +201,15 @@ export class GoalClientService implements GoalClientPort {
     this.deleteGoalReview = this.deleteGoalReview.bind(this);
   }
 
-  // ===== Goal Management =====
+  // ===== GoalClientDTO Management =====
 
   async createGoal(request: CreateGoalReq): Promise<Result<GoalMutationReceipt>> {
     return this.goalApi.createGoal(request);
   }
 
-  async getGoal(id: string): Promise<Result<Goal>> {
+  async getGoal(id: string): Promise<Result<GoalClientDTO>> {
     const result = await this.goalApi.getGoalById(id);
-    return mapResult(result, (dto) => goalFromDTO(dto));
+    return result;
   }
 
   async getHomeSummary(): Promise<Result<GoalHomeProgressSummary>> {
@@ -312,10 +225,10 @@ export class GoalClientService implements GoalClientPort {
     labelIdsAll?: string[];
     targetStart?: import('@memoflow/contracts/primitives').Ymd;
     targetEnd?: import('@memoflow/contracts/primitives').Ymd;
-  }): Promise<Result<{ goals: Goal[]; pagination: QueryGoalsRes['pagination'] }>> {
+  }): Promise<Result<{ goals: GoalClientDTO[]; pagination: QueryGoalsRes['pagination'] }>> {
     const result = await this.goalApi.getGoals(params);
     return mapResult(result, (data: QueryGoalsRes) => ({
-      goals: (data?.data ?? []).map((dto) => goalFromDTO(dto)),
+      goals: data?.data ?? [],
       pagination: data?.pagination ?? {
         page: 1,
         pageSize: 20,
@@ -381,10 +294,10 @@ export class GoalClientService implements GoalClientPort {
     pageSize?: number;
     status?: string[];
     systemView?: GoalSystemView;
-  }): Promise<Result<{ goals: Goal[]; pagination: QueryGoalsRes['pagination'] }>> {
+  }): Promise<Result<{ goals: GoalClientDTO[]; pagination: QueryGoalsRes['pagination'] }>> {
     const result = await this.goalApi.searchGoals(params);
     return mapResult(result, (data: QueryGoalsRes) => ({
-      goals: (data?.data ?? []).map((dto) => goalFromDTO(dto)),
+      goals: data?.data ?? [],
       pagination: data?.pagination ?? {
         page: 1,
         pageSize: 20,
@@ -412,10 +325,10 @@ export class GoalClientService implements GoalClientPort {
     return this.goalApi.addKeyResultForGoal(goalId, request);
   }
 
-  async getKeyResults(goalId: string): Promise<Result<{ keyResults: KeyResult[] }>> {
+  async getKeyResults(goalId: string): Promise<Result<{ keyResults: KeyResultClientDTO[] }>> {
     const result = await this.goalApi.getKeyResultsByGoal(goalId);
     return mapResult(result, (data: GetKeyResultsRes) => ({
-      keyResults: (data?.data ?? []).map((dto) => keyResultFromDTO(dto)),
+      keyResults: data?.data ?? [],
     }));
   }
 
@@ -446,7 +359,7 @@ export class GoalClientService implements GoalClientPort {
     });
   }
 
-  // ===== Goal Record Use Cases =====
+  // ===== GoalClientDTO Record Use Cases =====
 
   async createGoalRecord(
     goalId: string,
@@ -471,14 +384,14 @@ export class GoalClientService implements GoalClientPort {
     params?: { limit?: number; offset?: number },
   ): Promise<
     Result<{
-      records: GoalRecord[];
+      records: GoalRecordClientDTO[];
       total: number;
       previewContext?: GetGoalRecordsRes['previewContext'];
     }>
   > {
     const result = await this.goalApi.getGoalRecordsByKeyResult(goalId, krId, params);
     return mapResult(result, (data: GetGoalRecordsRes) => ({
-      records: data.data.map((dto) => goalRecordFromDTO(dto)),
+      records: data.data,
       total: data.total,
       previewContext: data.previewContext,
     }));
@@ -487,10 +400,10 @@ export class GoalClientService implements GoalClientPort {
   async getGoalRecordsByGoal(
     goalId: string,
     params?: { limit?: number; offset?: number },
-  ): Promise<Result<{ records: GoalRecord[]; total: number }>> {
+  ): Promise<Result<{ records: GoalRecordClientDTO[]; total: number }>> {
     const result = await this.goalApi.getGoalRecordsByGoal(goalId, params);
     return mapResult(result, (data: GetGoalRecordsRes) => ({
-      records: data.data.map((dto) => goalRecordFromDTO(dto)),
+      records: data.data,
       total: data.total,
     }));
   }
@@ -504,7 +417,7 @@ export class GoalClientService implements GoalClientPort {
     return this.goalApi.deleteGoalRecord(goalId, krId, recordId, request);
   }
 
-  // ===== Goal Review Use Cases =====
+  // ===== GoalClientDTO Review Use Cases =====
 
   async createGoalReview(
     goalId: string,
@@ -513,10 +426,10 @@ export class GoalClientService implements GoalClientPort {
     return this.goalApi.createGoalReview(goalId, request);
   }
 
-  async getGoalReviews(goalId: string): Promise<Result<{ reviews: GoalReview[] }>> {
+  async getGoalReviews(goalId: string): Promise<Result<{ reviews: GoalReviewClientDTO[] }>> {
     const result = await this.goalApi.getGoalReviewsByGoal(goalId);
     return mapResult(result, (data: GetGoalReviewsRes) => ({
-      reviews: data.data.map((dto) => goalReviewFromDTO(dto as GoalReviewClientDTO)),
+      reviews: data.data,
     }));
   }
 

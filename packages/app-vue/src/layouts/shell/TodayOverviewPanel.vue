@@ -5,7 +5,7 @@ import { Button } from '@memoflow/ui-vue-shadcn';
 import { Plus, Target } from '@lucide/vue';
 import DailyTodoWidget from '../../modules/task/components/widgets/DailyTodoWidget.vue';
 import RoutineUpcomingWidget from '../../modules/routine/components/RoutineUpcomingWidget.vue';
-import { GoalProgressWidget, useGoalHomeSummary } from '../../modules/goal';
+import { GoalProgressWidget, useGoalHomeSummary } from '@memoflow/goal-ui';
 import { getProductTime, productTimeRevision } from '../../shared/utils/product-time';
 
 const props = defineProps<{ active: boolean }>();

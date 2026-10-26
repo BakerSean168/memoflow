@@ -8,7 +8,7 @@ import type {
   GoalTimeframe,
   KeyResultClientDTO,
 } from '@memoflow/goal-contracts';
-import type { Goal } from '@memoflow/goal-client';
+import type { GoalClientDTO } from '@memoflow/goal-contracts';
 import { presentErrorMessage } from '@memoflow/http-client';
 
 import { useAppSession } from './useAppSession';
@@ -78,8 +78,8 @@ function mapGoalDTO(dto: GoalClientDTO): GoalSummary {
   };
 }
 
-function mapGoal(goal: Goal): GoalSummary {
-  return mapGoalDTO(goal.toDTO());
+function mapGoal(goal: GoalClientDTO): GoalSummary {
+  return mapGoalDTO(goal);
 }
 
 export function mapGoalDetail(goal: GoalAggregateReadModel): GoalDetail {

@@ -1,3 +1,4 @@
+import { installGoalUiHost } from '@memoflow/app-vue/di';
 /**
  * Desktop Platform DI — IPC Adapter Injection
  */
@@ -58,7 +59,7 @@ import {
   ASSISTANT_SURFACE_KEY,
   defaultModuleCapsules,
 } from '@memoflow/app-vue/di';
-import { createGoalDraftCheckpointStore } from '@memoflow/app-vue/modules/goal';
+import { createGoalDraftCheckpointStore } from '@memoflow/goal-ui';
 import { useAuthenticationStore } from '@memoflow/app-vue/modules/authentication';
 import { useAccountStore } from '@memoflow/app-vue/modules/account';
 import { readDesktopAccessSnapshot } from '@memoflow/app-vue/desktop';
@@ -86,6 +87,7 @@ export function installDesktopAppServices(
   app: App,
   initialSnapshot: DesktopAccessSnapshot | null = null,
 ): void {
+  installGoalUiHost();
   const bridge = requireElectronBridge('installDesktopAppServices');
 
   const resultIpcClient = createResultIpcClient({ bridge });

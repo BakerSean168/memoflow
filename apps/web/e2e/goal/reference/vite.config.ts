@@ -99,6 +99,9 @@ export default defineConfig({
           'packages/goal-contracts/src/test-support/goal.mock.ts',
         ],
         ['@memoflow/goal-contracts', 'packages/goal-contracts/src/index.ts'],
+        ['@memoflow/goal-ui/composables/useGoal', 'packages/goal-ui/src/composables/useGoal.ts'],
+        ['@memoflow/goal-ui/host', 'packages/goal-ui/src/goalUiHost.ts'],
+        ['@memoflow/goal-ui', 'packages/goal-ui/src/index.ts'],
         ['@memoflow/workspace-contracts', 'packages/workspace-contracts/src/index.ts'],
         [
           '@memoflow/desktop-contracts/auth-context',

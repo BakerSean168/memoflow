@@ -8,14 +8,14 @@ import { computed, onScopeDispose, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
 import { GOAL_SERVICE_KEY } from '../../../di/keys';
-import { useGoalNativeSurface } from '../../../modules/goal';
+import { useGoalNativeSurface } from '@memoflow/goal-ui';
 import { useLabelCatalog } from '../../../shared/composables/useLabelCatalog';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import type {
   GoalNativeEditSession,
   GoalNativeDraftState,
   GoalNativeSubmitContext,
-} from '../../goal/composables/goalNativeEditSession';
+} from '@memoflow/goal-ui';
 import { getAIErrorMessage } from './error';
 import { useGoalSurfaceLease } from './useGoalSurfaceLease';
 import {

@@ -39,6 +39,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   'label-contracts': ['./*'],
   'data-portability-contracts': ['./*'],
   'goal-contracts': ['./*'],
+  'goal-ui': ['./composables/useGoal', './host'],
   'workspace-contracts': ['./*'],
   'host-runtime': ['./electron-ipc'],
   task: ['./analytics', './testing', './schema', './schedule-execution', './schedule-projection'],
