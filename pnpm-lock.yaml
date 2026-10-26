@@ -1530,6 +1530,9 @@ importers:
       '@memoflow/desktop-contracts':
         specifier: workspace:*
         version: link:../desktop-contracts
+      '@memoflow/label-contracts':
+        specifier: workspace:*
+        version: link:../label-contracts
       '@memoflow/shared-primitives':
         specifier: workspace:*
         version: link:../shared-primitives
@@ -1784,6 +1787,9 @@ importers:
       '@memoflow/ipc-client':
         specifier: workspace:*
         version: link:../ipc-client
+      '@memoflow/label-contracts':
+        specifier: workspace:*
+        version: link:../label-contracts
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time
@@ -1800,6 +1806,15 @@ importers:
       vitest:
         specifier: 4.1.11
         version: 4.1.11(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/browser-playwright@4.1.11)(@vitest/coverage-v8@4.1.11)(@vitest/ui@4.1.11)(happy-dom@20.14.5)(jsdom@30.1.1(@noble/hashes@2.2.0))(msw@2.15.0(@types/node@24.13.3)(@typescript/typescript6@6.0.2))(vite@8.3.1(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.105.0)(sass@1.105.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.15)(yaml@2.9.0))
+
+  packages/label-contracts:
+    dependencies:
+      '@memoflow/shared-primitives':
+        specifier: workspace:*
+        version: link:../shared-primitives
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
 
   packages/notification:
     dependencies:

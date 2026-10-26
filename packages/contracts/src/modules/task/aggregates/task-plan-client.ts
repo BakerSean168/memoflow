@@ -2,7 +2,7 @@
  * TaskPlan Aggregate Root - Client Interface
  */
 
-import type { LabelClientDTO } from '../../label';
+import type { LabelClientDTO } from '@memoflow/label-contracts';
 import type { TaskPlanId, IdentityId, TransferDate } from '@memoflow/shared-primitives';
 
 import type { TaskPlanStatus } from '../value-objects/task-plan-status';

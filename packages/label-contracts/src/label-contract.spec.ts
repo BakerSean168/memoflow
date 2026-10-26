@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  CreateLabelReqSchema,
-  LabelClientDTOSchema,
-  LabelColorSchema,
-  LabelPortableItemV3Schema,
-} from './index';
+import { CreateLabelReqSchema, LabelClientDTOSchema, LabelColorSchema } from './index';
 
 describe('Label contract primitives', () => {
   it('canonicalizes valid six-digit RGB hex colors to lowercase', () => {
@@ -29,29 +24,8 @@ describe('Label contract primitives', () => {
     expect(CreateLabelReqSchema.parse({ name: ` ${'ﬃ'.repeat(16)} ` }).name).toBe('ffi'.repeat(16));
   });
 
-  it('normalizes portable names before enforcing the canonical length', () => {
-    const ligatures = 'ﬃ'.repeat(17);
-    expect(
-      LabelPortableItemV3Schema.safeParse({
-        ref: 'labels:1',
-        name: ligatures,
-        color: null,
-      }).success,
-    ).toBe(false);
-    expect(
-      LabelPortableItemV3Schema.parse({
-        ref: 'labels:1',
-        name: ` ${'ﬃ'.repeat(16)} `,
-        color: null,
-      }).name,
-    ).toBe('ffi'.repeat(16));
-  });
-
   it('trims whitespace introduced by NFKC normalization', () => {
     expect(CreateLabelReqSchema.parse({ name: '\u00a8' }).name).toBe('\u0308');
-    expect(
-      LabelPortableItemV3Schema.parse({ ref: 'labels:1', name: '\u00a8', color: null }).name,
-    ).toBe('\u0308');
   });
 
   it('keeps null color valid and client DTO strict with finite Instant-like timestamps', () => {

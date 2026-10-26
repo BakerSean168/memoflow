@@ -3,7 +3,7 @@ import { join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const sourceRoot = resolve(import.meta.dirname, '..');
-const contractsFile = resolve(import.meta.dirname, '../../../contracts/src/modules/label/index.ts');
+const contractsFile = resolve(import.meta.dirname, '../../../label-contracts/src/index.ts');
 const forbidden =
   /\bGoal(?:Label)?\b|\bTask(?:Plan|Label)?\b|goal_labels|task_labels|goal_id|task_plan_id/;
 

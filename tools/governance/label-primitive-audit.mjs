@@ -49,7 +49,7 @@ if (/readonly now\s*[:?]/.test(service)) {
   violations.push('LabelService must not resurrect a private now() option beside Clock');
 }
 
-const contracts = read('packages/contracts/src/modules/label/index.ts');
+const contracts = read('packages/label-contracts/src/index.ts');
 if (!contracts.includes('export const LabelColorSchema')) {
   violations.push('Shared Label contract must export LabelColorSchema');
 }

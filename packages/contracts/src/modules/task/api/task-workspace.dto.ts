@@ -4,7 +4,7 @@ import { brandedId } from '@memoflow/shared-primitives';
 import { KnowledgeDocumentIdSchema, KnowledgeDocumentRefSchema } from '../../repository';
 import { GoalClientDTOSchema, KeyResultClientDTOSchema } from '../../goal/api/response-schemas';
 import { TaskOccurrenceResponseSchema, TaskPlanResponseSchema } from './response-schemas';
-import { LabelClientDTOSchema } from '../../label';
+import { LabelClientDTOSchema } from '@memoflow/label-contracts';
 
 export const GetTaskWorkspaceReqSchema = z
   .object({

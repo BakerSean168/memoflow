@@ -1,4 +1,4 @@
-import { LabelColorSchema, type LabelColor, type LabelDto } from '@memoflow/contracts/label';
+import { LabelColorSchema, type LabelColor, type LabelDto } from '@memoflow/label-contracts';
 import type { Instant } from '@memoflow/contracts/primitives';
 
 const MAX_LABEL_NAME_LENGTH = 50;

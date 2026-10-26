@@ -1,4 +1,4 @@
-import type { LabelColor } from '@memoflow/contracts/label';
+import type { LabelColor } from '@memoflow/label-contracts';
 import type { Instant } from '@memoflow/contracts/primitives';
 import type { LabelRecord, NewLabelRecord } from './label';
 

@@ -1,4 +1,4 @@
-import { LabelColorSchema } from '@memoflow/contracts/label';
+import { LabelColorSchema } from '@memoflow/label-contracts';
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import type { LabelRecord, NewLabelRecord } from '../../domain/label';
 import type { LabelListOptions, LabelRepository } from '../../domain/label-repository';

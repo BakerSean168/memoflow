@@ -19,6 +19,8 @@
       ],
       "@memoflow/host-runtime/*": ["./packages/host-runtime/dist/*.d.ts"],
       "@memoflow/goal-client": ["./packages/goal-client/dist/index.d.ts"],
+      "@memoflow/label-contracts": ["./packages/label-contracts/dist/index.d.ts"],
+      "@memoflow/label-contracts/*": ["./packages/label-contracts/dist/*.d.ts"],
       "@memoflow/database": ["./packages/database/dist/index.d.ts"],
       "@memoflow/database/prisma": ["./packages/database/dist/generated/prisma/client.d.ts"],
       "@memoflow/powersync-schema": ["./packages/powersync-schema/dist/index.d.ts"],

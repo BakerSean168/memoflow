@@ -7,7 +7,7 @@
 
 import { z } from 'zod';
 import { TaskGoalProgressConfigurationSchema } from '../value-objects/task-goal-binding';
-import { LabelClientDTOSchema } from '../../label';
+import { LabelClientDTOSchema } from '@memoflow/label-contracts';
 import { brandedId } from '@memoflow/shared-primitives';
 import type { TaskPlanId, TaskOccurrenceId, IdentityId } from '@memoflow/shared-primitives';
 import {

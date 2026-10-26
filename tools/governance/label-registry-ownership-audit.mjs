@@ -8,7 +8,7 @@ import { join, relative, resolve } from 'node:path';
 
 const root = resolve(import.meta.dirname, '../..');
 const labelRoot = join(root, 'packages/label/src');
-const contractFile = join(root, 'packages/contracts/src/modules/label/index.ts');
+const contractFile = join(root, 'packages/label-contracts/src/index.ts');
 const forbidden = [
   /\bGoalLabelAssignmentCommand\b/,
   /\bTaskLabelAssignmentCommand\b/,

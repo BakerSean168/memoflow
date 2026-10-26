@@ -6,7 +6,7 @@
  */
 
 import { z } from 'zod';
-import { LabelColorSchema } from '../../label';
+import { LabelColorSchema } from '@memoflow/label-contracts';
 import { brandedId } from '@memoflow/shared-primitives';
 import type {
   GoalId,

@@ -75,6 +75,7 @@
     "goal-client": "runtime-lib",
     "shared-primitives": "runtime-lib",
     "transport-contracts": "runtime-lib",
+    "label-contracts": "runtime-lib",
     "desktop-contracts": "runtime-lib",
     "host-runtime": "runtime-lib"
   },
