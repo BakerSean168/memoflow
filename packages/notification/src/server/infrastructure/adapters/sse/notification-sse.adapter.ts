@@ -12,7 +12,8 @@ import {
 import type { BusinessOperationReceipt } from '@memoflow/contracts/reliable-messaging';
 
 export type NotificationSseDeliveryEvent =
-  NotificationDispatchInAppEvent | NotificationDispatchDesktopEvent;
+  | NotificationDispatchInAppEvent
+  | NotificationDispatchDesktopEvent;
 
 export type NotificationSseDeliveryEventHandler = (payload: NotificationSseDeliveryEvent) => void;
 

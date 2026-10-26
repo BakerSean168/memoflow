@@ -114,7 +114,8 @@ describe('ResultHttpClient EMAIL_VERIFICATION_REQUIRED fuse', () => {
     }
     if (!third.ok) {
       const ctx = third.error.context as
-        { shortCircuited?: boolean; domainCode?: string; messageKey?: string } | undefined;
+        | { shortCircuited?: boolean; domainCode?: string; messageKey?: string }
+        | undefined;
       expect(
         ctx?.shortCircuited === true ||
           ctx?.domainCode === EMAIL_VERIFICATION_DOMAIN_CODE ||

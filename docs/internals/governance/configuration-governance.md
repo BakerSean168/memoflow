@@ -19,9 +19,10 @@ updated: 2026-04-26T00:00:00
 - `project.json`
 - `package.json`
 - `eslint.config.ts`
+- `.oxlintrc.json`（Oxlint 原生规则；Nx 依赖边界必须与 eslint.config.ts 同步）
 - `tsconfig.base.json`
 - `tsconfig.workspace-src.json`
-- `.prettierrc`
+- `.oxfmtrc.json`
 - `.editorconfig`
 
 默认先继承这些文件，不再在多处复制同一套规则。

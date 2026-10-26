@@ -28,6 +28,8 @@ import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@memoflow/ui-
 import { useAppShellStore, MAX_BUSINESS_TABS } from './useAppShellStore';
 import { provideTaskNativeSurface } from './useTaskNativeSurface';
 import { provideGoalNativeSurface } from './useGoalNativeSurface';
+import { canLeaveBusinessSurface } from './surface-leave-protocol';
+import { GoalSurfaceLeaveGuardKey, GoalSurfaceStatusSinkKey } from '../../modules/goal';
 import { provideKnowledgeNativeSurface } from './useKnowledgeNativeSurface';
 import { useNativeBusinessPanelBridge } from './useNativeBusinessPanelBridge';
 import { useShellRouterSync, AUTO_FOCUS_VIEWPORT, moduleForPath } from './useShellRouterSync';
@@ -111,6 +113,10 @@ const sync = useShellRouterSync();
 // Vue's inject() cannot read a provide() created in the same component.
 // Pass the shell-owned native surface directly to its IPC bridge.
 const goalNativeSurface = provideGoalNativeSurface();
+provide(GoalSurfaceStatusSinkKey, {
+  setSurfaceStatus: (status) => store.setSurfaceStatus(status),
+});
+provide(GoalSurfaceLeaveGuardKey, (t, to) => canLeaveBusinessSurface(t, to));
 provideTaskNativeSurface();
 provideKnowledgeNativeSurface();
 useNativeBusinessPanelBridge(goalNativeSurface);

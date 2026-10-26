@@ -5020,16 +5020,6 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/goal/views/GoalDeepLinks.characterization.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
       "path": "packages/app-vue/src/modules/goal/views/GoalDetailView.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5041,16 +5031,6 @@
     },
     {
       "path": "packages/app-vue/src/modules/goal/views/GoalListView.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/goal/views/GoalModuleLayout.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -6481,6 +6461,26 @@
     },
     {
       "path": "packages/app-vue/src/views/DesktopProfileAccessView.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
+    },
+    {
+      "path": "packages/app-vue/src/views/GoalDeepLinks.characterization.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/app-vue/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/app-vue/vitest.store-coverage.config.ts"
+      ]
+    },
+    {
+      "path": "packages/app-vue/src/views/GoalModuleLayout.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/app-vue/vitest.config.ts"
@@ -12366,6 +12366,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/quality/__tests__/hybrid-lint.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "quality:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/runtime/host-dev-env.spec.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -12785,7 +12793,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "node-test",
-      "fileCount": 2
+      "fileCount": 3
     },
     {
       "id": "test-system-v2:test",
@@ -13526,10 +13534,8 @@
       "packages/app-vue/src/modules/goal/stores/goalStore.spec.ts",
       "packages/app-vue/src/modules/goal/utils/key-result-calculation-presentation.spec.ts",
       "packages/app-vue/src/modules/goal/utils/progress.spec.ts",
-      "packages/app-vue/src/modules/goal/views/GoalDeepLinks.characterization.spec.ts",
       "packages/app-vue/src/modules/goal/views/GoalDetailView.spec.ts",
       "packages/app-vue/src/modules/goal/views/GoalListView.spec.ts",
-      "packages/app-vue/src/modules/goal/views/GoalModuleLayout.spec.ts",
       "packages/app-vue/src/modules/goal/views/GoalReviewSignals.spec.ts",
       "packages/app-vue/src/modules/notification/browser-system-notification.spec.ts",
       "packages/app-vue/src/modules/notification/components/NotificationCapsulePreview.spec.ts",
@@ -13673,6 +13679,8 @@
       "packages/app-vue/src/shared/utils/safe-markdown.spec.ts",
       "packages/app-vue/src/views/AuthPlatformEntry.spec.ts",
       "packages/app-vue/src/views/DesktopProfileAccessView.spec.ts",
+      "packages/app-vue/src/views/GoalDeepLinks.characterization.spec.ts",
+      "packages/app-vue/src/views/GoalModuleLayout.spec.ts",
       "packages/app-vue/src/views/dead-surfaces.surface.spec.ts",
       "packages/data-portability/src/api/module-lifecycle.spec.ts",
       "packages/data-portability/src/api/profile-import-routes.spec.ts",
@@ -14004,7 +14012,7 @@
     "boundary-main": 12,
     "e2e": 40,
     "perf": 2,
-    "governance": 84
+    "governance": 85
   },
   "e2eGovernance": {
     "version": 2,

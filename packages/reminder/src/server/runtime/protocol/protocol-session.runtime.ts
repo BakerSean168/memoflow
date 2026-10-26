@@ -18,7 +18,13 @@ import {
 } from '../protocol-break-credit';
 
 export type ProtocolSessionRuntimeAction =
-  'start' | 'pause' | 'resume' | 'phase-complete' | 'end' | 'cancel' | 'recover';
+  | 'start'
+  | 'pause'
+  | 'resume'
+  | 'phase-complete'
+  | 'end'
+  | 'cancel'
+  | 'recover';
 
 export interface ProtocolPhaseTransitionReceipt {
   readonly operationId: string;

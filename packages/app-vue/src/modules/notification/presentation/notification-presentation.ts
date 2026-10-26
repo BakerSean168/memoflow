@@ -3,7 +3,13 @@ import type { NotificationClientDTO } from '@memoflow/contracts/notification';
 import type { SemanticTone } from '../../../shared/constants/semantic-tone';
 
 export type NotificationCategoryToken =
-  'account' | 'general' | 'goal' | 'reminder' | 'schedule' | 'system' | 'task';
+  | 'account'
+  | 'general'
+  | 'goal'
+  | 'reminder'
+  | 'schedule'
+  | 'system'
+  | 'task';
 
 export interface NotificationPresentation {
   categoryToken: NotificationCategoryToken;

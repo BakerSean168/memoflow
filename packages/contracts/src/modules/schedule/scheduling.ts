@@ -182,7 +182,11 @@ export type ScheduledInvocationStatus =
   | 'superseded';
 
 export type InvocationAttemptOutcome =
-  'succeeded' | 'skipped' | 'retryable_failure' | 'permanent_failure' | 'timeout';
+  | 'succeeded'
+  | 'skipped'
+  | 'retryable_failure'
+  | 'permanent_failure'
+  | 'timeout';
 
 export interface ScheduledInvocationRetryPolicy {
   readonly enabled: boolean;

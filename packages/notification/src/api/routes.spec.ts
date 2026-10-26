@@ -78,7 +78,8 @@ function getJsonBodySchema(route: RegisteredRoute): {
   return (
     (
       (route.request?.body as Record<string, unknown> | undefined)?.content as
-        Record<string, unknown> | undefined
+        | Record<string, unknown>
+        | undefined
     )?.['application/json'] as Record<string, unknown> | undefined
   )?.schema as {
     safeParse: (value: unknown) => { success: boolean };
@@ -93,7 +94,8 @@ function getResponseSchema(
   _def?: { typeName?: string };
 } {
   const responses = route.responses as
-    Record<string, { content?: Record<string, unknown> }> | undefined;
+    | Record<string, { content?: Record<string, unknown> }>
+    | undefined;
   const response = responses?.[String(status)];
   const schema = (response?.content as Record<string, unknown> | undefined)?.[
     'application/json'
@@ -644,7 +646,8 @@ describe('notification SSE framing + header-before-flush (RefArch Phase 2)', () 
 
   it('scopes the stream exclusively by cx.identityId — a query param cannot select another tenant', async () => {
     let sseHandler:
-      ((event: { identityId: string; id: string; updatedAt: number }) => void) | undefined;
+      | ((event: { identityId: string; id: string; updatedAt: number }) => void)
+      | undefined;
     const api = {
       subscribeSseEvents: vi.fn((handler: typeof sseHandler) => {
         sseHandler = handler;

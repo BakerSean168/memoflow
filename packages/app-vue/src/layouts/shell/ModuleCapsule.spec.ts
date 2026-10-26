@@ -9,7 +9,7 @@ import ModuleCapsule from './ModuleCapsule.vue';
 import { ok } from '@memoflow/contracts/result';
 import { GOAL_SERVICE_KEY } from '../../di/keys';
 import { GOAL_HOME_STALE_TIME_MS } from '../../platform/server-state/query-policy';
-import { useGoalHomeSummary } from '../../modules/goal/composables/useGoalHomeSummary';
+import { useGoalHomeSummary } from '../../modules/goal';
 import {
   createTestServerStateRuntime,
   SERVER_STATE_IDENTITY_SCOPE_KEY,

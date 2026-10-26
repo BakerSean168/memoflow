@@ -14,26 +14,28 @@ import {
   type Ref,
 } from 'vue';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { providePanelWidth } from '../../../layouts/shell/usePanelWidth';
-import GoalModuleLayout from './GoalModuleLayout.vue';
-import GoalDialog from '../components/dialogs/GoalDialog.vue';
-import { productionLocaleMessages } from '../../../locales/production-messages';
-import { useGoal } from '../composables/useGoal';
+import { providePanelWidth } from '../layouts/shell/usePanelWidth';
+import GoalModuleLayout from '../modules/goal/views/GoalModuleLayout.vue';
+import GoalDialog from '../modules/goal/components/dialogs/GoalDialog.vue';
+import { productionLocaleMessages } from '../locales/production-messages';
+import { useGoal } from '../modules/goal/composables/useGoal';
 import { createMockGoal } from '@memoflow/goal-contracts/test-support/goal.mock';
-import { GOAL_DRAFT_CHECKPOINT_KEY } from '../../../di/keys';
-import type { GoalDraftCheckpointStore } from '../infrastructure/goal-draft-checkpoint.indexeddb';
+import { GOAL_DRAFT_CHECKPOINT_KEY } from '../di/keys';
+import type { GoalDraftCheckpointStore } from '../modules/goal/infrastructure/goal-draft-checkpoint.indexeddb';
 import type { GoalDraftCheckpointSnapshot } from '@memoflow/goal-contracts';
 import type { GetGoalAggregateRes } from '@memoflow/goal-contracts';
-import type { GoalNativeEditSession } from '../composables/goalNativeEditSession';
+import type { GoalNativeEditSession } from '../modules/goal/composables/goalNativeEditSession';
+import { provideGoalNativeSurface } from '../layouts/shell/useGoalNativeSurface';
 import {
-  provideGoalNativeSurface,
+  GoalSurfaceStatusSinkKey,
   useGoalNativeSurface,
-} from '../../../layouts/shell/useGoalNativeSurface';
-import { useNativeBusinessPanelBridge } from '../../../layouts/shell/useNativeBusinessPanelBridge';
-import { useShellRouterSync } from '../../../layouts/shell/useShellRouterSync';
-import { useAppShellStore, MAX_BUSINESS_TABS } from '../../../layouts/shell/useAppShellStore';
-import { canLeaveBusinessSurface } from '../../../layouts/shell/surface-leave-protocol';
-import { canLeaveAIWorkflowReview } from '../../ai/composables/chatViewHelpers';
+  type GoalSurfaceStatus,
+} from '../modules/goal';
+import { useNativeBusinessPanelBridge } from '../layouts/shell/useNativeBusinessPanelBridge';
+import { useShellRouterSync } from '../layouts/shell/useShellRouterSync';
+import { useAppShellStore, MAX_BUSINESS_TABS } from '../layouts/shell/useAppShellStore';
+import { canLeaveBusinessSurface } from '../layouts/shell/surface-leave-protocol';
+import { canLeaveAIWorkflowReview } from '../modules/ai/composables/chatViewHelpers';
 
 const goalMocks = vi.hoisted(() => ({
   createGoal: vi.fn(),
@@ -47,7 +49,7 @@ const goalMocks = vi.hoisted(() => ({
   getGoalAggregateView: vi.fn(async (): Promise<GetGoalAggregateRes | null> => null),
 }));
 
-vi.mock('../composables/useGoal', async () => {
+vi.mock('../modules/goal/composables/useGoal', async () => {
   const { ref: vueRef } = await import('vue');
   const state = {
     goals: vueRef([]),
@@ -59,7 +61,7 @@ vi.mock('../composables/useGoal', async () => {
   return { useGoal: () => state };
 });
 
-vi.mock('../../../shared/composables/useLabelCatalog', async () => {
+vi.mock('../shared/composables/useLabelCatalog', async () => {
   const { ref: vueRef } = await import('vue');
   return {
     useLabelCatalog: () => ({
@@ -342,6 +344,14 @@ describe('GoalModuleLayout', () => {
     const wrapper = mount(GoalModuleLayout, {
       global: {
         plugins: [router, i18n],
+        // Host wiring (mirrors AppShell): the layout publishes dialog status
+        // through the goal-owned sink port backed by the shell store.
+        provide: {
+          [GoalSurfaceStatusSinkKey]: {
+            setSurfaceStatus: (status: GoalSurfaceStatus) =>
+              useAppShellStore().setSurfaceStatus(status),
+          },
+        },
         stubs: {
           GoalPageToolbar: ToolbarStub,
           GoalDialog: GoalDialogStub,

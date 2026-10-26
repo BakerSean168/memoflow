@@ -58,7 +58,8 @@ function getResponseSchema(
   _def?: { typeName?: string };
 } {
   const responses = route.responses as
-    Record<string, { content?: Record<string, unknown> }> | undefined;
+    | Record<string, { content?: Record<string, unknown> }>
+    | undefined;
   const response = responses?.[String(status)];
   const schema = (response?.content as Record<string, unknown> | undefined)?.[
     'application/json'
@@ -90,7 +91,8 @@ function getJsonBodySchema(route: RegisteredRoute): {
   return (
     (
       (route.request?.body as Record<string, unknown> | undefined)?.content as
-        Record<string, unknown> | undefined
+        | Record<string, unknown>
+        | undefined
     )?.['application/json'] as Record<string, unknown> | undefined
   )?.schema as {
     safeParse: (value: unknown) => { success: boolean };
@@ -141,7 +143,8 @@ describe('ai chat route contracts', () => {
       if (route.method === 'post' && route.path === '/messages/sse') continue;
 
       const responses = route.responses as
-        Record<string, { content?: Record<string, unknown> }> | undefined;
+        | Record<string, { content?: Record<string, unknown> }>
+        | undefined;
       if (!responses) continue;
 
       for (const [status, response] of Object.entries(responses)) {

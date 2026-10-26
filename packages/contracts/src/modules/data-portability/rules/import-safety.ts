@@ -67,7 +67,8 @@ export function findBannedImportKey(value: unknown, path: string[] = []): string
 // ============ V3-only Typed Envelope Parser ============
 
 export type ParsePortableBackupEnvelopeV3Result =
-  { ok: true; envelope: PortableBackupEnvelopeV3 } | { ok: false; error: string };
+  | { ok: true; envelope: PortableBackupEnvelopeV3 }
+  | { ok: false; error: string };
 
 /**
  * Parse the canonical owner-driven V3 backup envelope.

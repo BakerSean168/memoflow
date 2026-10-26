@@ -47,10 +47,7 @@ export function classifyTest(relativePath) {
   if (normalized.startsWith('tools/')) return 'governance';
   if (normalized.includes('/e2e/') || normalized.startsWith('apps/web/e2e/')) return 'e2e';
   if (normalized.startsWith('apps/desktop/src/main/')) {
-    if (
-      normalized.includes('/ipc/') ||
-      /(?:^|[-.])ipc(?:[-.])/.test(basename)
-    ) {
+    if (normalized.includes('/ipc/') || /(?:^|[-.])ipc(?:[-.])/.test(basename)) {
       return 'boundary-ipc';
     }
     if (
@@ -75,12 +72,7 @@ export async function collectTestFiles(root) {
     {
       cwd: root,
       dot: false,
-      ignore: [
-        '**/node_modules/**',
-        '**/.venv/**',
-        '**/dist/**',
-        '**/coverage/**',
-      ],
+      ignore: ['**/node_modules/**', '**/.venv/**', '**/dist/**', '**/coverage/**'],
     },
   );
   return files.map(normalizePath).sort();
@@ -131,13 +123,10 @@ function normalizeCollectedFile(root, cwd, value) {
 }
 
 async function normalizeListedFiles(root, cwd, values) {
-  const candidates = await fg(
-    '**/*.{test,spec,bench}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
-    {
-      cwd,
-      ignore: ['**/node_modules/**', '**/.venv/**', '**/dist/**', '**/coverage/**'],
-    },
-  );
+  const candidates = await fg('**/*.{test,spec,bench}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}', {
+    cwd,
+    ignore: ['**/node_modules/**', '**/.venv/**', '**/dist/**', '**/coverage/**'],
+  });
   return values.map((value) => {
     const normalized = normalizePath(value.replace(/\u001b\[[0-9;]*m/gu, '').trim());
     if (path.isAbsolute(normalized) || /^(?:apps|packages|tools)\//u.test(normalized)) {
@@ -176,7 +165,7 @@ async function listVitestFiles(root, configPath) {
   const listed = stdout
     .split(/\r?\n/u)
     .map((line) => line.match(/^(?:\[[^\]]+\]\s+)?(.+\.(?:test|spec|bench)\.[cm]?[jt]sx?)$/u)?.[1])
-    .filter(Boolean)
+    .filter(Boolean);
   return (await normalizeListedFiles(root, cwd, listed)).sort();
 }
 
@@ -185,14 +174,7 @@ async function listPlaywrightFiles(root, configPath) {
   const playwrightCli = path.resolve(root, 'node_modules/@playwright/test/cli.js');
   const { stdout } = await execFileAsync(
     process.execPath,
-    [
-      playwrightCli,
-      'test',
-      '--list',
-      '--reporter=list',
-      '--config',
-      path.basename(configPath),
-    ],
+    [playwrightCli, 'test', '--list', '--reporter=list', '--config', path.basename(configPath)],
     {
       cwd,
       env: {
@@ -210,9 +192,7 @@ async function listPlaywrightFiles(root, configPath) {
   const files = new Set();
   for (const line of stdout.split(/\r?\n/u)) {
     const withoutProject = line.trim().replace(/^\[[^\]]+\]\s+›\s+/u, '');
-    const match = withoutProject.match(
-      /^([^:\n]+?\.(?:test|spec)\.[cm]?[jt]sx?):\d+:/u,
-    );
+    const match = withoutProject.match(/^([^:\n]+?\.(?:test|spec)\.[cm]?[jt]sx?):\d+:/u);
     if (match) files.add(match[1]);
   }
   return (await normalizeListedFiles(root, cwd, [...files])).sort();
@@ -233,8 +213,11 @@ async function mapWithConcurrency(values, limit, mapper) {
 }
 
 function nodeTestPatterns(command) {
-  return [...command.matchAll(/((?:apps|packages|tools)\/[^^\s"';&]*\.(?:test|spec|bench)\.[^\s"';&]+)/gu)]
-    .map((match) => match[1]);
+  return [
+    ...command.matchAll(
+      /((?:apps|packages|tools)\/[^^\s"';&]*\.(?:test|spec|bench)\.[^\s"';&]+)/gu,
+    ),
+  ].map((match) => match[1]);
 }
 
 export async function collectConfiguredTests(root) {
@@ -294,12 +277,17 @@ export async function collectConfiguredTests(root) {
     const key = `${definition.runner}:${definition.configPath}`;
     if (!uniqueRuns.has(key)) uniqueRuns.set(key, definition);
   }
-  const collectedRuns = await mapWithConcurrency([...uniqueRuns.entries()], 4, async ([key, definition]) => {
-    const files = definition.runner === 'vitest'
-      ? await listVitestFiles(root, definition.configPath)
-      : await listPlaywrightFiles(root, definition.configPath);
-    return [key, files];
-  });
+  const collectedRuns = await mapWithConcurrency(
+    [...uniqueRuns.entries()],
+    4,
+    async ([key, definition]) => {
+      const files =
+        definition.runner === 'vitest'
+          ? await listVitestFiles(root, definition.configPath)
+          : await listPlaywrightFiles(root, definition.configPath);
+      return [key, files];
+    },
+  );
   const filesByRun = new Map(collectedRuns);
 
   return definitions.map(({ configPath, ...definition }) => ({
@@ -318,7 +306,9 @@ export function analyzeInventory(files, collectors) {
     ),
   );
   const fileSet = new Set(normalizedFiles);
-  const ownership = new Map(normalizedFiles.map((file) => [file, { primary: [], measurement: [] }]));
+  const ownership = new Map(
+    normalizedFiles.map((file) => [file, { primary: [], measurement: [] }]),
+  );
   const unexpected = [];
 
   for (const collector of normalizedCollectors) {
@@ -327,13 +317,21 @@ export function analyzeInventory(files, collectors) {
       continue;
     }
     if (collector.type === 'primary' && !PRIMARY_SUITES.includes(collector.suite)) {
-      unexpected.push({ collector: collector.id, reason: 'invalid-primary-suite', suite: collector.suite });
+      unexpected.push({
+        collector: collector.id,
+        reason: 'invalid-primary-suite',
+        suite: collector.suite,
+      });
       continue;
     }
     for (const file of collector.files) {
       const normalized = normalizePath(file);
       if (!fileSet.has(normalized)) {
-        unexpected.push({ collector: collector.id, path: normalized, reason: 'non-inventory-file' });
+        unexpected.push({
+          collector: collector.id,
+          path: normalized,
+          reason: 'non-inventory-file',
+        });
         continue;
       }
       ownership.get(normalized)[collector.type].push(collector);
@@ -395,13 +393,18 @@ export function analyzeInventory(files, collectors) {
       fileCount: collectorFiles.length,
     })),
     measurementSuites: Object.fromEntries(
-      Object.entries(measurementSuites).map(([suite, suiteFiles]) => [suite, [...suiteFiles].sort()]),
+      Object.entries(measurementSuites).map(([suite, suiteFiles]) => [
+        suite,
+        [...suiteFiles].sort(),
+      ]),
     ),
     measurementOnly,
     missing,
     duplicate,
     unexpected: unexpected.sort((left, right) =>
-      `${left.path ?? ''}:${left.collector ?? ''}`.localeCompare(`${right.path ?? ''}:${right.collector ?? ''}`),
+      `${left.path ?? ''}:${left.collector ?? ''}`.localeCompare(
+        `${right.path ?? ''}:${right.collector ?? ''}`,
+      ),
     ),
     counts: Object.fromEntries(
       PRIMARY_SUITES.map((suite) => [
@@ -413,11 +416,11 @@ export function analyzeInventory(files, collectors) {
 }
 
 export async function buildInventory(root, options = {}) {
-  const files = options.files ?? await collectTestFiles(root);
-  const collectors = options.collectors ?? await collectConfiguredTests(root);
+  const files = options.files ?? (await collectTestFiles(root));
+  const collectors = options.collectors ?? (await collectConfiguredTests(root));
   const baseInventory = analyzeInventory(files, collectors);
-  const contract = options.e2eOwnership ?? await loadE2EOwnership(root);
-  const retirement = options.e2eRetirement ?? await loadE2ERetirement(root);
+  const contract = options.e2eOwnership ?? (await loadE2EOwnership(root));
+  const retirement = options.e2eRetirement ?? (await loadE2ERetirement(root));
   const inventory = decorateE2EOwnership(baseInventory, contract);
   return {
     ...inventory,

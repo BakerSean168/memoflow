@@ -1,5 +1,10 @@
 export type AccountClosurePhase =
-  'requested' | 'revoking' | 'revoked' | 'closing' | 'closed' | 'failed';
+  | 'requested'
+  | 'revoking'
+  | 'revoked'
+  | 'closing'
+  | 'closed'
+  | 'failed';
 
 export type AccountClosureStatus = 'running' | 'succeeded' | 'failed';
 export type AccountClosureFailureCode = 'ACCOUNT_NOT_FOUND' | 'ACCOUNT_CLOSURE_FAILED';

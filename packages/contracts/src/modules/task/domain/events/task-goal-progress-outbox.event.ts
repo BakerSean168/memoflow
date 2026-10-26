@@ -60,4 +60,5 @@ export interface TaskGoalProgressRevertEventV2 extends TaskGoalProgressOutboxEve
 }
 
 export type TaskGoalProgressOutboxEventV2 =
-  TaskGoalProgressApplyEventV2 | TaskGoalProgressRevertEventV2;
+  | TaskGoalProgressApplyEventV2
+  | TaskGoalProgressRevertEventV2;

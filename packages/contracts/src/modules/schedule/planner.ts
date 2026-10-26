@@ -6,7 +6,11 @@ export type PlannerSourceType = 'schedule' | 'task' | 'goal' | 'routine';
 export type PlannerOccupancy = 'blocking' | 'non-blocking' | 'marker';
 
 export type PlannerDisplaySemantic =
-  'calendar-entry' | 'task-occurrence' | 'goal-start' | 'goal-target' | 'routine-wall-clock';
+  | 'calendar-entry'
+  | 'task-occurrence'
+  | 'goal-start'
+  | 'goal-target'
+  | 'routine-wall-clock';
 
 export type PlannerDisplayTone = 'default' | 'muted' | 'accent' | 'warning' | 'success';
 

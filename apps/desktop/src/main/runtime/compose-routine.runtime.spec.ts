@@ -107,7 +107,8 @@ class RoutineDb implements IElectronDatabase {
       if (sql.includes('idempotency_key = ?')) {
         return (
           ([...this.interactions.values()].find((row) => row.idempotency_key === parameters[0]) as
-            T | undefined) ?? null
+            | T
+            | undefined) ?? null
         );
       }
       if (sql.includes('id = ?')) {
@@ -117,7 +118,8 @@ class RoutineDb implements IElectronDatabase {
     if (sql.includes('FROM routine_occurrences')) {
       return (
         (this.occurrences.get(this.occurrenceKey(parameters[0], parameters[1], parameters[2])) as
-          T | undefined) ?? null
+          | T
+          | undefined) ?? null
       );
     }
     return null;

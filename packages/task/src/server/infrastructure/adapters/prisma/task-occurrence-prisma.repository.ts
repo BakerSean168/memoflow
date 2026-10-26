@@ -250,7 +250,8 @@ export class TaskOccurrencePrismaRepository
       if (stat.occurrenceCount === 1) {
         stat.singleOccurrenceStatus =
           (grouped.find((row) => row.planId === stat.planId && row._count._all === 1)?.status as
-            TaskOccurrenceStatus | undefined) ?? null;
+            | TaskOccurrenceStatus
+            | undefined) ?? null;
       }
       stat.completionRate =
         stat.dueOccurrenceCount > 0

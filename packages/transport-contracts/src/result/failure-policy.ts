@@ -12,7 +12,11 @@ export type BackoffPolicy =
 
 /** Retry mode owned by an operation or executor. */
 export type OperationRetryMode =
-  'never' | 'safe_read' | 'idempotent_write' | 'transaction' | 'workflow_step';
+  | 'never'
+  | 'safe_read'
+  | 'idempotent_write'
+  | 'transaction'
+  | 'workflow_step';
 
 /**
  * Operation-level automatic retry policy.

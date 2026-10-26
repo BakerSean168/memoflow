@@ -864,7 +864,9 @@ const scheduleChipLabel = computed(() => {
 });
 const taskReminderConfig = computed(() => {
   const config = viewModel.value?.reminderConfig as unknown as
-    TaskReminderConfigDTO | null | undefined;
+    | TaskReminderConfigDTO
+    | null
+    | undefined;
   return config ?? null;
 });
 const reminderTriggers = computed(() =>

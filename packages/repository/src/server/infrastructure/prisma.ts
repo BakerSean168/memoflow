@@ -73,7 +73,8 @@ export interface CreateRepositoryPrismaModuleOptions {
   readonly storageBaseDir?: string;
   readonly closureChecker?: (identityId: string) => Promise<boolean>;
   readonly runtimeContributions?:
-    RepositoryModuleRuntimeContribution | readonly RepositoryModuleRuntimeContribution[];
+    | RepositoryModuleRuntimeContribution
+    | readonly RepositoryModuleRuntimeContribution[];
   readonly githubApp?: GithubAppConfig;
   readonly githubAccountIdResolver?: (identityId: string) => Promise<string | null>;
   readonly knowledgeRepositoryCloudDataPurger?: IKnowledgeRepositoryCloudDataPurger;

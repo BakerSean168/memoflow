@@ -297,10 +297,12 @@ describe('HARD-7102 core vNext architecture lock', () => {
       ...canonicalNotificationFiles.map((file) => ({ ...file })),
       ...canonicalTaskGoalFiles.map((file) => ({ ...file })),
     ];
-    files.find((file) => file.relPath.endsWith('task-goal-binding-constraint.ts')).content =
-      `const VERSION = 'memoflow.task-goal-binding/v2';`;
-    files.find((file) => file.relPath.endsWith('task-goal-context-read.port.ts')).content =
-      `interface TaskGoalContextReadPort { listTasksByGoal(): unknown; }`;
+    files.find((file) =>
+      file.relPath.endsWith('task-goal-binding-constraint.ts'),
+    ).content = `const VERSION = 'memoflow.task-goal-binding/v2';`;
+    files.find((file) =>
+      file.relPath.endsWith('task-goal-context-read.port.ts'),
+    ).content = `interface TaskGoalContextReadPort { listTasksByGoal(): unknown; }`;
 
     const { violations } = findCoreVnextArchitectureLockViolations(files);
     const kinds = violations.map((violation) => violation.kind);

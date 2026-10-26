@@ -272,7 +272,8 @@ const startDateModel = computed<Ymd | null>({
   },
 });
 type ValidationErrorState =
-  { kind: 'translation'; key: string } | { kind: 'result'; cause: unknown };
+  | { kind: 'translation'; key: string }
+  | { kind: 'result'; cause: unknown };
 const validationErrorState = shallowRef<ValidationErrorState | null>(null);
 const validationError = computed(() => {
   const state = validationErrorState.value;

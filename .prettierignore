@@ -1,4 +1,4 @@
-# Add files here to ignore them from prettier formatting
+# Oxfmt honors this legacy .prettierignore (Nx / Oxc supported)
 /dist
 /build
 /coverage

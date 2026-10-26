@@ -5,7 +5,7 @@ import { createI18n } from 'vue-i18n';
 import { defineComponent, h, nextTick } from 'vue';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import TodayOverviewPanel from './TodayOverviewPanel.vue';
-import GoalProgressWidget from '../../modules/goal/components/widgets/GoalProgressWidget.vue';
+import { GoalProgressWidget } from '../../modules/goal';
 import type { GoalHomeProgressItem } from '@memoflow/goal-contracts';
 
 const goalHomeMocks = vi.hoisted(() => ({
@@ -13,9 +13,11 @@ const goalHomeMocks = vi.hoisted(() => ({
   errorMessage: null as string | null,
 }));
 
-vi.mock('../../modules/goal/composables/useGoalHomeSummary', async () => {
+vi.mock('../../modules/goal', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../modules/goal')>();
   const { computed, ref } = await import('vue');
   return {
+    ...actual,
     useGoalHomeSummary: () => ({
       goals: ref([]),
       isLoading: ref(false),

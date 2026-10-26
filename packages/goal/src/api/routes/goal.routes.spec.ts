@@ -61,7 +61,8 @@ function getJsonBodySchema(route: RegisteredRoute): {
   return (
     (
       (route.request?.body as Record<string, unknown> | undefined)?.content as
-        Record<string, unknown> | undefined
+        | Record<string, unknown>
+        | undefined
     )?.['application/json'] as Record<string, unknown> | undefined
   )?.schema as {
     safeParse: (value: unknown) => { success: boolean };
@@ -91,7 +92,8 @@ function getResponseSchema(
   safeParse: (value: unknown) => { success: boolean };
 } {
   const responses = route.responses as
-    Record<string, { content?: Record<string, unknown> }> | undefined;
+    | Record<string, { content?: Record<string, unknown> }>
+    | undefined;
   const response = responses?.[String(status)];
   const schema = (response?.content as Record<string, unknown> | undefined)?.[
     'application/json'

@@ -36,3 +36,6 @@ export { default as WeightTrendChart } from './weight-snapshot/WeightTrendChart.
 export { default as WeightSuggestionPanel } from './weight/WeightSuggestionPanel.vue';
 
 export { default as GoalRecordComposerSurface } from './GoalRecordComposerSurface.vue';
+
+// Widgets
+export { default as GoalProgressWidget } from './widgets/GoalProgressWidget.vue';
