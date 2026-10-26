@@ -141,7 +141,15 @@ describe('AI application capability boundaries', () => {
     const capabilities = read('packages/ai/src/server/application/ai.application.capabilities.ts');
 
     expect(capabilities).toMatch(/from ['"]@memoflow\/contracts\//);
-    expect(capabilities).not.toMatch(/from ['"].*(?:infrastructure|transport|api|electron)/);
+    // Contract-layer packages (@memoflow/contracts and @memoflow/*-contracts,
+    // e.g. transport-contracts — the canonical home of the Result contract) are
+    // contract definitions, not transport implementations, so they are exempt
+    // from the specifier ban below. Real transport/infrastructure stays banned:
+    // implementation-layer specifiers and the HTTP/IPC client packages.
+    expect(capabilities).not.toMatch(
+      /from ['"](?!@memoflow\/[a-z0-9-]*contracts(?:\/|['"]))[^'"]*(?:infrastructure|transport|api|electron)/,
+    );
+    expect(capabilities).not.toMatch(/from ['"]@memoflow\/(?:http-client|ipc-client)(?:\/|['"])/);
     expect(read('packages/ai/src/server/application/index.ts')).not.toContain(
       'ai.application.port',
     );
