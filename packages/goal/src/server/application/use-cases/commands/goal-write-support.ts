@@ -4,7 +4,7 @@ import type {
   BusinessOperationReceipt,
   GoalRecordReceiptInput,
   GoalReliableOperationPort,
-} from '@memoflow/contracts/reliable-messaging';
+} from '@memoflow/reliable-messaging-contracts';
 
 export interface GoalWriteRepositories {
   readonly goalRepository: IGoalRepository;

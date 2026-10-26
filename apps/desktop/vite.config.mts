@@ -12,6 +12,7 @@ import {
 import {
   createAppVueSourceAliasEntries,
   createAssetsAliasEntries,
+  createReliableMessagingContractsAliasEntries,
   createOperationsContractsAliasEntries,
   createContractsAliasEntries,
   createUiVueSourceAliasEntries,
@@ -147,6 +148,7 @@ export default defineConfig(({ command, mode }) => {
         ...createAppVueSourceAliasEntries(workspaceRoot),
         ...createAssetsAliasEntries(workspaceRoot),
         ...createUiVueSourceAliasEntries(workspaceRoot),
+        ...createReliableMessagingContractsAliasEntries(workspaceRoot),
         ...createOperationsContractsAliasEntries(workspaceRoot),
         ...createContractsAliasEntries(workspaceRoot),
         ...createWorkspaceSourceAliasEntries(workspaceRoot, desktopRendererDevWorkspaceEntries),

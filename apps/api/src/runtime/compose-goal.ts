@@ -52,7 +52,7 @@ import {
   type PrismaGoalRelationCleanupFactory,
 } from '@memoflow/goal';
 import { createGoalApiModule, type GoalApiModuleDef } from '@memoflow/goal/api';
-import type { GoalDependencyReadPort } from '@memoflow/contracts/reliable-messaging';
+import type { GoalDependencyReadPort } from '@memoflow/reliable-messaging-contracts';
 import type { UserTimeContextPort } from '@memoflow/time';
 
 /**

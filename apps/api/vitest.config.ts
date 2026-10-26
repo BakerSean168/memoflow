@@ -10,8 +10,7 @@ const sharedConfig = createSharedConfig({
     '@memoflow/goal-contracts': '../../packages/goal-contracts/src',
     '@memoflow/workspace-contracts': '../../packages/workspace-contracts/src',
     '@memoflow/contracts/primitives': '../../packages/contracts/src/primitives',
-    '@memoflow/contracts/reliable-messaging':
-      '../../packages/contracts/src/modules/reliable-messaging',
+    '@memoflow/reliable-messaging-contracts': '../../packages/reliable-messaging-contracts/src',
     '@memoflow/powersync-schema': '../../packages/powersync-schema/src',
   },
 });

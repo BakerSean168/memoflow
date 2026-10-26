@@ -1,7 +1,7 @@
 {
   "name": "@memoflow/notification",
   "version": "0.0.1",
-  "description": "\u901a\u77e5\u6a21\u5757 - \u591a\u6e20\u9053\u901a\u77e5\u7ba1\u7406",
+  "description": "通知模块 - 多渠道通知管理",
   "type": "module",
   "files": [
     "dist"
@@ -52,7 +52,8 @@
     "@memoflow/patterns": "workspace:*",
     "@memoflow/utils": "workspace:*",
     "express": "^5.2.1",
-    "zod": "^4.6.5"
+    "zod": "^4.6.5",
+    "@memoflow/reliable-messaging-contracts": "workspace:*"
   },
   "devDependencies": {
     "@memoflow/powersync-schema": "workspace:*",

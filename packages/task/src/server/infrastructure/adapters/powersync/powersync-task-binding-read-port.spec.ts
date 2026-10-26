@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import Database from 'better-sqlite3';
 import type { IElectronDatabase, IElectronDatabaseQueryResult } from '@memoflow/contracts/electron';
-import { GoalTaskBindingQueryInputSchema } from '@memoflow/contracts/reliable-messaging';
+import { GoalTaskBindingQueryInputSchema } from '@memoflow/reliable-messaging-contracts';
 import { PowerSyncTaskBindingReadPort } from './powersync-task-binding-read-port';
 
 function createDb(): IElectronDatabase {

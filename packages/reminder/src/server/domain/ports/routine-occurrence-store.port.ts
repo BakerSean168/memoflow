@@ -1,4 +1,4 @@
-import type { BusinessOperationReceipt } from '@memoflow/contracts/reliable-messaging';
+import type { BusinessOperationReceipt } from '@memoflow/reliable-messaging-contracts';
 
 export type RoutineTerminalStatus = 'succeeded' | 'skipped';
 

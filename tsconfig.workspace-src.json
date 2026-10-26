@@ -19,6 +19,12 @@
       "@memoflow/goal-client": ["./packages/goal-client/src/index.ts"],
       "@memoflow/label-contracts": ["./packages/label-contracts/src/index.ts"],
       "@memoflow/label-contracts/*": ["./packages/label-contracts/src/*.ts"],
+      "@memoflow/reliable-messaging-contracts": [
+        "./packages/reliable-messaging-contracts/src/index.ts"
+      ],
+      "@memoflow/reliable-messaging-contracts/*": [
+        "./packages/reliable-messaging-contracts/src/*.ts"
+      ],
       "@memoflow/operations-contracts": ["./packages/operations-contracts/src/index.ts"],
       "@memoflow/operations-contracts/*": ["./packages/operations-contracts/src/*.ts"],
       "@memoflow/data-portability-contracts": [

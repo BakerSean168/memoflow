@@ -6,6 +6,7 @@ import path from 'node:path';
 import {
   createAppVueSourceAliasEntries,
   createAssetsAliasEntries,
+  createReliableMessagingContractsAliasEntries,
   createOperationsContractsAliasEntries,
   createContractsAliasEntries,
   createUiVueSourceAliasEntries,
@@ -209,6 +210,7 @@ export default defineConfig(({ mode, command }) => {
 
   const envSpecificAliases = isDev
     ? [
+        ...createReliableMessagingContractsAliasEntries(workspaceRoot),
         ...createOperationsContractsAliasEntries(workspaceRoot),
         ...createContractsAliasEntries(workspaceRoot),
       ]

@@ -2,7 +2,7 @@ import { withPrismaTransaction } from '@memoflow/database/transaction';
 import { randomUUID } from 'node:crypto';
 import { Prisma } from '@memoflow/database/prisma';
 import type { PrismaClient, RoutineInteraction, RoutineOccurrence } from '@memoflow/database';
-import { buildIdempotencyKeyString } from '@memoflow/contracts/reliable-messaging';
+import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
 import { asInstant } from '@memoflow/time';
 import type {
   ApplyRoutineInteractionInput,

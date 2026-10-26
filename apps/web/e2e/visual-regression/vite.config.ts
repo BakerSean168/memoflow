@@ -2,6 +2,7 @@ import path from 'node:path';
 import { defineConfig, mergeConfig } from 'vite';
 import schedule from '../schedule/presentation-authority/vite.config.ts';
 import {
+  createReliableMessagingContractsAliasEntries,
   createOperationsContractsAliasEntries,
   createAssetsAliasEntries,
   createWorkspaceSourceAliasEntries,
@@ -22,6 +23,7 @@ export default defineConfig(({ mode }) =>
               : 'apps/web/src/styles/index.css',
           ),
         },
+        ...createReliableMessagingContractsAliasEntries(workspace),
         ...createOperationsContractsAliasEntries(workspace),
         ...createAssetsAliasEntries(workspace),
         ...createWorkspaceSourceAliasEntries(workspace, [

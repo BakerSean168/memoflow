@@ -13,7 +13,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type { GoalDependencyReadPort } from '@memoflow/contracts/reliable-messaging';
+import type { GoalDependencyReadPort } from '@memoflow/reliable-messaging-contracts';
 import { createTimeContext } from '@memoflow/time';
 import type { GoalWriteTransactionRunner } from '../../application/use-cases/commands/goal-write-support';
 import type { GoalDeletionTransactionRunner } from '../../application/use-cases/commands/goal-deletion-support';

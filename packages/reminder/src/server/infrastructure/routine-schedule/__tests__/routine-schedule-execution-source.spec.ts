@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { LeaseFencingException } from '@memoflow/contracts/reliable-messaging';
+import { LeaseFencingException } from '@memoflow/reliable-messaging-contracts';
 import { createRecurrenceEngine } from '@memoflow/time';
 import {
   createElapsedTrigger,

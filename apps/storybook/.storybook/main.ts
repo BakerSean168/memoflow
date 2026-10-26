@@ -6,6 +6,7 @@ import vue from '@vitejs/plugin-vue';
 import {
   createAppVueSourceAliasEntries,
   createAssetsAliasEntries,
+  createReliableMessagingContractsAliasEntries,
   createOperationsContractsAliasEntries,
   createContractsAliasEntries,
   createUiVueSourceAliasEntries,
@@ -44,6 +45,7 @@ const config: StorybookConfig = {
           ...createAppVueSourceAliasEntries(workspace),
           ...createAssetsAliasEntries(workspace),
           ...createUiVueSourceAliasEntries(workspace),
+          ...createReliableMessagingContractsAliasEntries(workspace),
           ...createOperationsContractsAliasEntries(workspace),
           ...createContractsAliasEntries(workspace),
           ...createWorkspaceSourceAliasEntries(workspace, [

@@ -3,7 +3,7 @@ import {
   GoalTaskBindingQueryInputSchema,
   type GoalDependencyReadPort,
   type GoalTaskBindingQueryInput,
-} from '@memoflow/contracts/reliable-messaging';
+} from '@memoflow/reliable-messaging-contracts';
 import {
   TaskGoalContextItemSchema,
   TaskGoalContextPageRequestSchema,

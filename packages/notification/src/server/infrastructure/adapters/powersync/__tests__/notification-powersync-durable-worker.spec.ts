@@ -7,7 +7,7 @@ import type {
   IElectronDatabaseTransaction,
 } from '@memoflow/contracts/electron';
 import { NotificationChannelType } from '@memoflow/contracts/notification';
-import { buildIdempotencyKeyString } from '@memoflow/contracts/reliable-messaging';
+import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
 import { asHm, createTimeContext, requireTimeZoneId } from '@memoflow/time';
 import { PowerSyncNotificationReliableAdapter } from '../power-sync-notification-reliable.adapter';
 import { PowerSyncNotificationRepository } from '../notification-powersync.repository';

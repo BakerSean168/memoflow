@@ -81,6 +81,7 @@
     "workspace-contracts": "runtime-lib",
     "desktop-contracts": "runtime-lib",
     "host-runtime": "runtime-lib",
+    "reliable-messaging-contracts": "runtime-lib",
     "operations-contracts": "runtime-lib"
   },
   "exemptions": [

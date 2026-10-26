@@ -141,7 +141,7 @@ describe('lib predicates (positive fixtures)', () => {
 
   it('collects imported binding names', () => {
     const source = parseSource(
-      `import { assertValidBusinessOperationReceipt, BusinessOperationReceipt } from '@memoflow/contracts/reliable-messaging';`,
+      `import { assertValidBusinessOperationReceipt, BusinessOperationReceipt } from '@memoflow/reliable-messaging-contracts';`,
       'a.ts',
     );
     const names = collectImports(source).flatMap((imp) => imp.names);

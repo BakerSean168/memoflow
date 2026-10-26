@@ -4,8 +4,8 @@ import {
   type OperationTimelineEntry,
   type OperationSource as OperationSourceType,
 } from '@memoflow/operations-contracts';
-import type { BusinessOperationReceipt } from '@memoflow/contracts/reliable-messaging';
-import type { ProjectionOperation } from '@memoflow/contracts/reliable-messaging';
+import type { BusinessOperationReceipt } from '@memoflow/reliable-messaging-contracts';
+import type { ProjectionOperation } from '@memoflow/reliable-messaging-contracts';
 
 /**
  * 将 W0 BusinessOperationReceipt 映射为 W7 统一 OperationTimelineEntry (A)。

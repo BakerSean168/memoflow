@@ -22,7 +22,7 @@ import {
   mapOutboxStatusToBusinessOperationStatus,
   type OutboxMessageStatus,
   parseIdempotencyKeyString,
-} from '@memoflow/contracts/reliable-messaging';
+} from '@memoflow/reliable-messaging-contracts';
 
 /**
  * Map a shared `outboxMessage` row to a unified BusinessOperationReceipt used by

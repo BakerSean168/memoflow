@@ -17,10 +17,6 @@
       "types": "./dist/modules/task/index.d.ts",
       "import": "./dist/modules/task/index.js"
     },
-    "./reliable-messaging": {
-      "types": "./dist/modules/reliable-messaging/index.d.ts",
-      "import": "./dist/modules/reliable-messaging/index.js"
-    },
     "./primitives": {
       "types": "./dist/primitives/index.d.ts",
       "import": "./dist/primitives/index.js"
@@ -98,7 +94,8 @@
     "@memoflow/label-contracts": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/transport-contracts": "workspace:*",
-    "zod": "^4.6.5"
+    "zod": "^4.6.5",
+    "@memoflow/reliable-messaging-contracts": "workspace:*"
   },
   "devDependencies": {
     "@faker-js/faker": "10.6.0",
