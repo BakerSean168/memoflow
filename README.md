@@ -9,8 +9,8 @@
 <p align="left">
   <a href="https://memoflow.bakersean.top"><strong>Live Web App</strong></a> ·
   <a href="https://bakersean168.github.io/memoflow/"><strong>Project Page</strong></a> ·
-  <a href="./docs/product/README.md"><strong>Product Docs</strong></a> ·
-  <a href="./docs/architecture/README.md"><strong>Architecture</strong></a>
+  <a href="./docs/internals/product/README.md"><strong>Product Docs</strong></a> ·
+  <a href="./docs/internals/README.md"><strong>Architecture</strong></a>
 </p>
 
 MemoFlow is an AI-first productivity workspace designed for long-term personal use. It does not place a chatbot next to a traditional todo application. Instead, AI conversations and business objects such as Goal, Task, Note, Schedule, Reminder, and Notification share the same product context: an intention can begin in conversation, move into a structured workspace for confirmation and editing, execute through product contracts, and return as a traceable outcome.
@@ -50,7 +50,7 @@ Conversation sidebar | AI collaboration | Business workspace
 
 The AI area is a persistent collaboration surface, while the business workspace owns structured state and provides room for editing. Global entry points can open Goal, Task, Note, Reminder, Schedule, and Notification directly; business tabs express current context instead of duplicating another navigation system.
 
-See [`docs/product/workspace-ui.md`](./docs/product/workspace-ui.md) for the current workspace contract.
+See [`docs/internals/product/workspace-ui.md`](./docs/internals/product/workspace-ui.md) for the current workspace contract.
 
 ## Engineering highlights
 
@@ -102,7 +102,7 @@ packages/
 ├── ui-*/       UI primitives / adapters
 └── utils/      Shared support code
 
-docs/           Product, architecture, ADR, standards, deployment and plans
+docs/           Internals (architecture/decisions) and operations (development/release)
 tools/          CI, governance, runtime and test-system tooling
 ```
 
@@ -145,7 +145,7 @@ pnpm nx run desktop:serve-safe
 
 `desktop:serve-safe` prepares dependencies and rebuilds Electron native modules. Once the environment is warm, `pnpm nx run desktop:serve` is the faster inner loop.
 
-Full local-development guidance: [`docs/guides/development/local-development.md`](./docs/guides/development/local-development.md).
+Full local-development guidance: [`docs/operations/development.md`](./docs/operations/development.md).
 
 ## Quality & verification
 
@@ -168,18 +168,14 @@ The current Web production entry is **[memoflow.bakersean.top](https://memoflow.
 
 The GitHub Pages site is intentionally only the public **project showcase**. The actual product continues to use the existing production stack with Web/API/PowerSync/PostgreSQL/Redis behind the repository's deployment contracts.
 
-See [`docs/deployment/README.md`](./docs/deployment/README.md) and [`docs/guides/development/release-workflow.md`](./docs/guides/development/release-workflow.md).
+See [`docs/operations/deployment.md`](./docs/operations/deployment.md) and [`docs/operations/release.md`](./docs/operations/release.md).
 
 ## Documentation map
 
-- [`docs/getting-started/README.md`](./docs/getting-started/README.md) — onboarding.
-- [`docs/product/README.md`](./docs/product/README.md) — product capabilities and module map.
-- [`docs/product/workspace-ui.md`](./docs/product/workspace-ui.md) — current workspace experience.
-- [`docs/architecture/README.md`](./docs/architecture/README.md) — architecture entry point.
-- [`docs/architecture/adr/README.md`](./docs/architecture/adr/README.md) — architectural decisions.
-- [`docs/standards/README.md`](./docs/standards/README.md) — engineering standards.
-- [`docs/test/README.md`](./docs/test/README.md) — testing system.
-- [`docs/deployment/README.md`](./docs/deployment/README.md) — production topology and operations.
+- [Docs index](./docs/README.md) — current documentation navigation.
+- [Internals](./docs/internals/README.md) — architecture, product contracts and decisions.
+- [Operations](./docs/operations/README.md) — development, testing, release and deployment.
+- [Agent instructions](./AGENTS.md) — repository-wide collaboration rules.
 
 ## Repository status & license
 

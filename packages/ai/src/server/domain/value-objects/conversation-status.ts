@@ -7,7 +7,7 @@ import {
  * ConversationStatus 枚举类型
  *
  * 【规范说明：枚举与常量对象规范】
- * 参考 docs/standards/枚举与常量对象规范(Enum&Constant-Objects).md
+ * 参考 docs/internals/standards/枚举与常量对象规范(Enum&Constant-Objects).md
  *
  * 核心原则：
  * 1. 使用 const object as const，不使用 TypeScript enum

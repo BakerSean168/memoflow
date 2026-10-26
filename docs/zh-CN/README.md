@@ -9,8 +9,8 @@
 <p align="left">
   <a href="https://memoflow.bakersean.top"><strong>在线 Web 产品</strong></a> ·
   <a href="https://bakersean168.github.io/memoflow/"><strong>项目介绍</strong></a> ·
-  <a href="../product/README.md"><strong>产品文档</strong></a> ·
-  <a href="../architecture/README.md"><strong>系统架构</strong></a>
+  <a href="../internals/product/README.md"><strong>产品文档</strong></a> ·
+  <a href="../internals/README.md"><strong>系统架构</strong></a>
 </p>
 
 MemoFlow 是一个面向个人长期使用的 AI 效能工作区。它不是把 Chatbot 放到传统 Todo 应用旁边，而是让 AI 对话与 Goal、Task、Note、Schedule、Reminder、Notification 等业务对象共享同一套产品上下文：用户可以从对话中形成意图，再进入结构化工作区确认和编辑，通过产品契约执行，最后沉淀为可追踪结果。
@@ -50,7 +50,7 @@ flowchart LR
 
 AI 区是持续协作入口，业务工作区则拥有结构化状态和更大的编辑面积。顶部全局入口可以直接打开 Goal、Task、Note、Reminder、Schedule、Notification；业务标签页表达当前上下文，而不是再复制一套导航。
 
-当前工作区契约见 [`docs/product/workspace-ui.md`](../product/workspace-ui.md)。
+当前工作区契约见 [`docs/internals/product/workspace-ui.md`](../internals/product/workspace-ui.md)。
 
 ## 工程亮点
 
@@ -145,7 +145,7 @@ pnpm nx run desktop:serve-safe
 
 `desktop:serve-safe` 会准备依赖并重建 Electron 原生模块。环境预热完成后，`pnpm nx run desktop:serve` 是更快的日常开发循环。
 
-完整本地开发指南见 [`docs/guides/development/local-development.md`](../guides/development/local-development.md)。
+完整本地开发指南见 [`docs/operations/development.md`](../operations/development.md)。
 
 ## 质量与验证
 
@@ -168,18 +168,18 @@ pnpm governance:check
 
 GitHub Pages 有意只承担公开的 **项目介绍页**。真实产品继续使用既有生产技术栈，由仓库中的部署契约约束 Web / API / PowerSync / PostgreSQL / Redis 等组件。
 
-参见 [`docs/deployment/README.md`](../deployment/README.md) 与 [`docs/guides/development/release-workflow.md`](../guides/development/release-workflow.md)。
+参见 [`docs/operations/deployment.md`](../operations/deployment.md) 与 [`docs/operations/release.md`](../operations/release.md)。
 
 ## 文档地图
 
-- [`docs/getting-started/README.md`](../getting-started/README.md) —— 新成员入门。
-- [`docs/product/README.md`](../product/README.md) —— 产品能力与模块地图。
-- [`docs/product/workspace-ui.md`](../product/workspace-ui.md) —— 当前工作区体验。
-- [`docs/architecture/README.md`](../architecture/README.md) —— 架构入口。
-- [`docs/architecture/adr/README.md`](../architecture/adr/README.md) —— 架构决策。
-- [`docs/standards/README.md`](../standards/README.md) —— 工程标准。
-- [`docs/test/README.md`](../test/README.md) —— 测试系统。
-- [`docs/deployment/README.md`](../deployment/README.md) —— 生产拓扑与运维。
+- [`docs/getting-started/README.md`](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/getting-started/README.md) —— 新成员入门。
+- [`docs/internals/product/README.md`](../internals/product/README.md) —— 产品能力与模块地图。
+- [`docs/internals/product/workspace-ui.md`](../internals/product/workspace-ui.md) —— 当前工作区体验。
+- [`docs/internals/README.md`](../internals/README.md) —— 架构入口。
+- [`docs/internals/decisions/README.md`](../internals/decisions/README.md) —— 架构决策。
+- [`docs/internals/standards/README.md`](../internals/standards/README.md) —— 工程标准。
+- [`docs/internals/testing/README.md`](../internals/testing/README.md) —— 测试系统。
+- [`docs/operations/deployment.md`](../operations/deployment.md) —— 生产拓扑与运维。
 
 ## 仓库状态与许可
 

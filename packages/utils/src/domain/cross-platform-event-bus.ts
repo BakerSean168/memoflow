@@ -35,8 +35,8 @@ const logger = createLogger('CrossPlatformEventBus');
  * 跨进程走 `@memoflow/ipc-client` / HTTP（范式 C）。本总线只在当前 JS runtime
  * 内生效，不承担跨进程可靠投递；durable integration events 继续走 Outbox/Queue。
  *
- * @see docs/architecture/adr/ADR-033-cross-module-communication-patterns.md
- * @see docs/architecture/adr/ADR-064-emittery-runtime-event-delivery.md
+ * @see docs/internals/decisions/ADR-033-cross-module-communication-patterns.md
+ * @see docs/internals/decisions/ADR-064-emittery-runtime-event-delivery.md
  */
 export class CrossPlatformEventBus<TEvents extends EventMap = EventMap> {
   private readonly emitter = new Emittery<RuntimeEventMap>();
