@@ -18,17 +18,7 @@ export const DISPATCH_JOB_IDS = Object.freeze([
 export const LINT_TASKS = Object.freeze([
   {
     key: 'workspace:lint',
-    command: [
-      'pnpm',
-      'exec',
-      'nx',
-      'run-many',
-      '-t',
-      'lint',
-      '--all',
-      '--parallel=3',
-      '--outputStyle=static',
-    ],
+    command: ['node', 'tools/quality/lint-hybrid.mjs'],
   },
   {
     key: 'workspace:format',

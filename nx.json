@@ -110,6 +110,12 @@
       }
     },
     {
+      "plugin": "@nx/oxlint",
+      "options": {
+        "targetName": "lint-oxc"
+      }
+    },
+    {
       "plugin": "@nx/vite/plugin",
       "options": {
         "buildTargetName": "vite:build",
