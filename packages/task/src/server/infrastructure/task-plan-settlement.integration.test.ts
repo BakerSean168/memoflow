@@ -1,6 +1,6 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { IdentityId } from '@memoflow/domain-shared';
-import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 import {
   TaskGoalBindingTrigger,
   TaskPlanCompletionPolicy,

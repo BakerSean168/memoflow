@@ -5,8 +5,8 @@ import type {
   INotificationRepository,
   RecordNotificationInteractionInput,
 } from '../../../../domain/repositories';
-import type { NotificationInteractionDTO } from '@memoflow/contracts/notification';
-import { NotificationCategory, NotificationType } from '@memoflow/contracts/notification';
+import type { NotificationInteractionDTO } from '@memoflow/notification-contracts';
+import { NotificationCategory, NotificationType } from '@memoflow/notification-contracts';
 import { NotificationOwnerCommandRegistry } from '../../../notification-owner-command.registry';
 import { ExecuteNotificationActionUseCase } from '../execute-notification-action.use-case';
 

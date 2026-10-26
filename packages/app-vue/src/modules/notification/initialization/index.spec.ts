@@ -4,7 +4,7 @@ import { eventBus } from '@memoflow/utils/domain';
 import type {
   NotificationDispatchInAppEvent,
   NotificationEventMap,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import { createTestServerStateRuntime } from '../../../platform/server-state';
 import { createNotificationStartupHook } from './index';
 

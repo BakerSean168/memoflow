@@ -6,6 +6,7 @@ import type { Alias, UserConfig } from 'vite';
 import {
   createReliableMessagingContractsAliasEntries,
   createOperationsContractsAliasEntries,
+  createNotificationContractsAliasEntries,
   createContractsAliasEntries,
   createGoalCoreAliasEntries,
   createSharedPrimitivesAliasEntries,
@@ -349,6 +350,7 @@ export function createSharedConfig(options: SharedConfigOptions) {
     ...commonWorkspaceAliasEntries,
     ...createReliableMessagingContractsAliasEntries(workspaceRoot),
     ...createOperationsContractsAliasEntries(workspaceRoot),
+    ...createNotificationContractsAliasEntries(workspaceRoot),
     ...createContractsAliasEntries(workspaceRoot),
     ...createGoalCoreAliasEntries(workspaceRoot),
     ...createSharedPrimitivesAliasEntries(workspaceRoot),

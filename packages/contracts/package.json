@@ -41,10 +41,6 @@
       "types": "./dist/modules/setting/index.d.ts",
       "import": "./dist/modules/setting/index.js"
     },
-    "./notification": {
-      "types": "./dist/modules/notification/index.d.ts",
-      "import": "./dist/modules/notification/index.js"
-    },
     "./routine": {
       "types": "./dist/modules/routine/index.d.ts",
       "import": "./dist/modules/routine/index.js"
@@ -88,10 +84,10 @@
     "@memoflow/desktop-contracts": "workspace:*",
     "@memoflow/goal-contracts": "workspace:*",
     "@memoflow/label-contracts": "workspace:*",
+    "@memoflow/notification-contracts": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/transport-contracts": "workspace:*",
-    "zod": "^4.6.5",
-    "@memoflow/reliable-messaging-contracts": "workspace:*"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@faker-js/faker": "10.6.0",

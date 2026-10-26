@@ -4,7 +4,7 @@
  *
  * Residual 851: CategoryPreferenceDTO dual retired — sole CategoryPreference interface + type alias.
  */
-import type { ImportanceLevel } from '../../../shared/index';
+import type { ImportanceLevel } from '@memoflow/shared-primitives';
 
 /**
  * 渠道偏好配置

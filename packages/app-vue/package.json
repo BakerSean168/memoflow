@@ -91,6 +91,8 @@
     "@memoflow/ai": "workspace:*",
     "@memoflow/assets": "workspace:*",
     "@memoflow/contracts": "workspace:*",
+    "@memoflow/notification-contracts": "workspace:*",
+    "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/data-portability": "workspace:*",
     "@memoflow/goal-client": "workspace:*",
     "@memoflow/goal-contracts": "workspace:*",

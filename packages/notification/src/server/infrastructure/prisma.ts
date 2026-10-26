@@ -22,7 +22,7 @@ import {
   NotificationReliableOperationPrismaAdapter,
 } from './adapters/prisma';
 import { NotificationRequestedPrismaWriterAdapter } from './adapters/prisma/notification-requested-writer.prisma.adapter';
-import type { NotificationRequestedWriterPort } from '@memoflow/contracts/notification';
+import type { NotificationRequestedWriterPort } from '@memoflow/notification-contracts';
 import {
   createNotificationRuntimeContribution,
   type NotificationReliableOperationPort,

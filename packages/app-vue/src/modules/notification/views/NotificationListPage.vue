@@ -132,7 +132,7 @@ import { useNotificationListQuery } from '../composables/useNotificationListQuer
 import { useNotificationUnreadQuery } from '../composables/useNotificationUnreadQuery';
 import { useNotificationMutations } from '../composables/useNotificationMutations';
 import { useNotificationStore } from '../stores/notification-store';
-import type { NotificationClientDTO } from '@memoflow/contracts/notification';
+import type { NotificationClientDTO } from '@memoflow/notification-contracts';
 import { resolveNotificationDestination } from '../notification-destination';
 
 const { notifications, isLoading, isError, refetch } = useNotificationListQuery();

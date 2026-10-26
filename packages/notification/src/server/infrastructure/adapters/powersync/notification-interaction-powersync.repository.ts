@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
-import type { NotificationInteractionDTO } from '@memoflow/contracts/notification';
+import type { NotificationInteractionDTO } from '@memoflow/notification-contracts';
 import type {
   INotificationInteractionRepository,
   RecordNotificationInteractionInput,

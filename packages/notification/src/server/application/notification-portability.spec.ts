@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { NotificationInteractionDTO } from '@memoflow/contracts/notification';
+import type { NotificationInteractionDTO } from '@memoflow/notification-contracts';
 import type {
   PortableCapabilityExecutionContext,
   PortableReferencePort,

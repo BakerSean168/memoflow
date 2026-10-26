@@ -1,7 +1,7 @@
 import { RefreshControl, StyleSheet, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
-import { NotificationChannelType } from '@memoflow/contracts/notification';
+import { NotificationChannelType } from '@memoflow/notification-contracts';
 
 import { useAppSession } from '../hooks/useAppSession';
 import { useNotificationPreferences } from '../hooks/useNotificationPreferences';

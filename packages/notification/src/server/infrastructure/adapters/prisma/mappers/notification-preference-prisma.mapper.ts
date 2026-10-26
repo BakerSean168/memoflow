@@ -1,5 +1,5 @@
 import { parseJsonSafe } from '@memoflow/utils/shared';
-import type { NotificationChannelType, QuietHoursDTO } from '@memoflow/contracts/notification';
+import type { NotificationChannelType, QuietHoursDTO } from '@memoflow/notification-contracts';
 import { NotificationPreference } from '../../../../domain/aggregates/notification-preference';
 import { QuietHours } from '../../../../domain/value-objects/quiet-hours';
 

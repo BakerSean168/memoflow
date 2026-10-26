@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { PortableReferenceV3Schema } from '@memoflow/data-portability-contracts';
-import { ImportanceLevel } from '../../shared/value-objects/importance';
-import { UrgencyLevel } from '../../shared/value-objects/urgency';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
+import { UrgencyLevel } from '@memoflow/shared-primitives';
 import { NotificationCategory } from './value-objects/notification-category';
 import { NotificationType } from './value-objects/notification-type';
 

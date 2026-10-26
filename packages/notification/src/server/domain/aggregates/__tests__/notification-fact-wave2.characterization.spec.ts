@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Notification } from '../notification';
-import { NotificationCategory, NotificationType } from '@memoflow/contracts/notification';
+import { NotificationCategory, NotificationType } from '@memoflow/notification-contracts';
 
 describe('NOTIF-2401 Notification Fact characterization', () => {
   it('does not expose a root delivery status on the user-visible Fact', () => {

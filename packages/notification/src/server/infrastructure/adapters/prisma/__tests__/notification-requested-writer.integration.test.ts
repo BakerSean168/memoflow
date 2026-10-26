@@ -7,7 +7,7 @@ import {
   NotificationRequestedSchema,
   NotificationType,
   type NotificationRequested,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import {
   ReminderTimeUnit,
   TaskOccurrenceStatus,

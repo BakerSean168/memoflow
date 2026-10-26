@@ -3,8 +3,8 @@ import type {
   NotificationType,
   NotificationCategory,
   NotificationNavigationIntentDTO,
-} from '@memoflow/contracts/notification';
-import type { ImportanceLevel, UrgencyLevel } from '@memoflow/contracts/shared';
+} from '@memoflow/notification-contracts';
+import type { ImportanceLevel, UrgencyLevel } from '@memoflow/shared-primitives';
 import { AggregateRoot } from '@memoflow/utils/domain';
 import { NotificationId } from '../../server/domain/value-objects/notification-id';
 import { IdentityId } from '@memoflow/domain-shared';

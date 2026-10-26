@@ -178,6 +178,14 @@ const mainWorkspaceAliasEntries = [
     ),
   },
   {
+    find: /^@memoflow\/notification-contracts\/(.+)$/,
+    replacement: resolve(import.meta.dirname, '../../packages/notification-contracts/src/$1'),
+  },
+  {
+    find: '@memoflow/notification-contracts',
+    replacement: resolve(import.meta.dirname, '../../packages/notification-contracts/src/index.ts'),
+  },
+  {
     find: /^@memoflow\/operations-contracts\/(.+)$/,
     replacement: resolve(import.meta.dirname, '../../packages/operations-contracts/src/$1'),
   },

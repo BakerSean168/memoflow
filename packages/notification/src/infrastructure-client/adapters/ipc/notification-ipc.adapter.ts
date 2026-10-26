@@ -21,7 +21,7 @@ import type {
   NotificationClientDTO,
   NotificationPreferenceClientDTO,
   UpdateNotificationPreferenceReq,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 
 export class NotificationIpcAdapter implements INotificationApiClient {
   constructor(private readonly ipcClient: IResultIpcClient) {}

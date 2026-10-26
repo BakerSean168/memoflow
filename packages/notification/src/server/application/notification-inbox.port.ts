@@ -5,7 +5,7 @@ import type {
   MarkAsReadBatchReq,
   NotificationDispatchDesktopEvent,
   NotificationDispatchInAppEvent,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 
 export type NotificationSseDeliveryEvent =
   | NotificationDispatchInAppEvent
