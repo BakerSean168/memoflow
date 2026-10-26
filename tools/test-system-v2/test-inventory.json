@@ -6788,14 +6788,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/label/label-portable-v3.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/contracts/src/modules/notification/api/dual-registry.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -8753,6 +8745,14 @@
     },
     {
       "path": "packages/label-contracts/src/label-contract.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/label-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/label-contracts/src/label-portable-v3.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/label-contracts/vitest.config.ts"
@@ -13004,7 +13004,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 59
+      "fileCount": 58
     },
     {
       "id": "packages/data-portability-contracts/vitest.config.ts",
@@ -13095,7 +13095,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 1
+      "fileCount": 2
     },
     {
       "id": "packages/label/vitest.config.ts",
