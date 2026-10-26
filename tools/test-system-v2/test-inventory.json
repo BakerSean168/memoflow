@@ -7076,6 +7076,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/data-portability-contracts/src/portable-v3.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/data-portability-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/data-portability/src/api/module-lifecycle.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13003,7 +13011,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 0
+      "fileCount": 1
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -14005,7 +14013,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1120,
+    "unit": 1121,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

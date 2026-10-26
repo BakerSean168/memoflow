@@ -100,6 +100,10 @@ export default defineConfig(({ mode }) =>
             '@memoflow/data-portability-contracts',
             'packages/data-portability-contracts/src/index.ts',
           ],
+          [
+            '@memoflow/goal-contracts/test-support/goal.mock',
+            'packages/goal-contracts/src/test-support/goal.mock.ts',
+          ],
           ['@memoflow/goal-contracts', 'packages/goal-contracts/src/index.ts'],
           ['@memoflow/workspace-contracts', 'packages/workspace-contracts/src/index.ts'],
           [
