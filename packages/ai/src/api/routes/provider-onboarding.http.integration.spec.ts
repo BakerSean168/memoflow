@@ -110,8 +110,10 @@ describe('Provider acceptance lowered to HTTP and PostgreSQL', () => {
       isDefault: true,
     };
     expect((await post('/providers', body, foreign)).status).toBe(404);
+    // VALIDATION_ERROR projects to 422 through the canonical
+    // ResultCodeToHttpStatus table, not the 400 used by request-body parsing.
     expect((await post('/providers', { ...body, defaultModelId: 'unadvertised' })).status).toBe(
-      400,
+      422,
     );
     expect(await db.aiProviderConfig.count()).toBe(0);
     expect(
@@ -125,7 +127,10 @@ describe('Provider acceptance lowered to HTTP and PostgreSQL', () => {
     expect(created.status, JSON.stringify(created.body)).toBe(201);
     expect(created.body.data).toMatchObject({ name: 'HTTP Provider', defaultModel: 'model-alpha' });
     expect(JSON.stringify(created.body)).not.toContain(secret);
-    expect(JSON.stringify(created.body)).not.toContain(session.credentialRef);
+    // The client DTO carries only the opaque SecretVault handle (documented in
+    // AIProviderConfigClientDTOSchema), never the plaintext credential.
+    expect(created.body.data.credentialRef).toBe(session.credentialRef);
+    expect(created.body.data.credentialRef).toMatch(/^credential_/);
     expect(await db.aiProviderConfig.count()).toBe(1);
     expect(
       (
@@ -169,8 +174,10 @@ describe('Provider acceptance lowered to HTTP and PostgreSQL', () => {
       defaultModel: 'model-beta',
       isDefault: true,
     });
-    for (const value of [secret, replacementSecret, replacement.credentialRef])
+    for (const value of [secret, replacementSecret])
       expect(JSON.stringify(result.body)).not.toContain(value);
+    expect(result.body.data.credentialRef).toBe(replacement.credentialRef);
+    expect(result.body.data.credentialRef).not.toBe(session.credentialRef);
     const db = await getPrisma();
     expect(await db.aiProviderConfig.count()).toBe(1);
     expect(
