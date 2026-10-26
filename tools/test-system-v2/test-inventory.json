@@ -835,81 +835,185 @@
     },
     {
       "path": "apps/desktop/e2e/antigravity-composer.spec.mts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/desktop/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "ai-workspace",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/desktop/playwright.config.ts"
+      }
     },
     {
       "path": "apps/desktop/e2e/antigravity-login.spec.mts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/desktop/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "ai-workspace",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/desktop/playwright.config.ts"
+      }
     },
     {
       "path": "apps/desktop/e2e/authentication/desktop-auth-flow.spec.mts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/desktop/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "authentication",
+        "role": "canonical",
+        "lifecycle": "active",
+        "primaryCollector": "apps/desktop/playwright.config.ts"
+      }
     },
     {
       "path": "apps/desktop/e2e/live-dsh-operator.spec.mts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/desktop/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "ai-workspace",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/desktop/playwright.config.ts"
+      }
     },
     {
       "path": "apps/desktop/e2e/model-picker-catalog.spec.mts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/desktop/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "ai",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/desktop/playwright.config.ts"
+      }
     },
     {
       "path": "apps/desktop/e2e/native-codex-account-operator.spec.mts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/desktop/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "ai-workspace",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/desktop/playwright.config.ts"
+      }
     },
     {
       "path": "apps/desktop/e2e/native-codex-goal-integrated-installed.spec.mts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/desktop/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "goal-native-owner",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/desktop/playwright.config.ts"
+      }
     },
     {
       "path": "apps/desktop/e2e/native-codex-unconfigured-installed.spec.mts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/desktop/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "ai-workspace",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/desktop/playwright.config.ts"
+      }
     },
     {
       "path": "apps/desktop/e2e/native-goal-panel-installed.spec.mts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/desktop/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "goal-native-owner",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/desktop/playwright.config.ts"
+      }
     },
     {
       "path": "apps/desktop/e2e/packaged-runtime/packaged-runtime.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/desktop/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "packaged-runtime",
+        "role": "canonical",
+        "lifecycle": "active",
+        "primaryCollector": "apps/desktop/playwright.config.ts"
+      }
     },
     {
       "path": "apps/desktop/e2e/packaged-runtime/provider-layout-window.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/desktop/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "packaged-runtime",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/desktop/playwright.config.ts"
+      }
     },
     {
       "path": "apps/desktop/e2e/workspace-attention.spec.mts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/desktop/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "ai-workspace",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/desktop/playwright.config.ts"
+      }
     },
     {
       "path": "apps/desktop/e2e/workspace-ipc.spec.mts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/desktop/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "ai-workspace",
+        "role": "canonical",
+        "lifecycle": "active",
+        "primaryCollector": "apps/desktop/playwright.config.ts"
+      }
     },
     {
       "path": "apps/desktop/src/main/__tests__/bootstrap.spec.ts",
@@ -1857,165 +1961,381 @@
     },
     {
       "path": "apps/web/e2e/account/account-management.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "account",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.config.ts"
+      }
     },
     {
       "path": "apps/web/e2e/account/account-profile.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "account",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.config.ts"
+      }
     },
     {
       "path": "apps/web/e2e/ai/provider-onboarding.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "ai",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.config.ts"
+      }
     },
     {
       "path": "apps/web/e2e/authentication/auth-oauth-real.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.oauth-real.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "authentication",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.oauth-real.config.ts"
+      }
     },
     {
       "path": "apps/web/e2e/desktop-screenshots/thesis-capture.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.sync.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "desktop-screenshots",
+        "role": "artifact",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.sync.config.ts"
+      }
     },
     {
       "path": "apps/web/e2e/desktop-screenshots/workspace-layout-matrix.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.sync.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "desktop-screenshots",
+        "role": "artifact",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.sync.config.ts"
+      }
     },
     {
       "path": "apps/web/e2e/goal/reference/goal-business-panel.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.goal-reference.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "goal",
+        "role": "reference",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.goal-reference.config.ts"
+      }
     },
     {
       "path": "apps/web/e2e/goal/reference/goal-reference.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.goal-reference.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "goal",
+        "role": "reference",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.goal-reference.config.ts"
+      }
     },
     {
       "path": "apps/web/e2e/local-docker/core-product-phase-a.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.local-docker.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "local-docker",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.local-docker.config.ts"
+      }
     },
     {
       "path": "apps/web/e2e/local-docker/core-product-phase-b.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.local-docker.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "local-docker",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.local-docker.config.ts"
+      }
     },
     {
       "path": "apps/web/e2e/local-docker/core-product-phase-c.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.local-docker.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "local-docker",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.local-docker.config.ts"
+      }
     },
     {
       "path": "apps/web/e2e/local-docker/core-product-phase-d.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.local-docker.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "local-docker",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.local-docker.config.ts"
+      }
     },
     {
       "path": "apps/web/e2e/local-docker/core-product-phase-e.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.local-docker.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "local-docker",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.local-docker.config.ts"
+      }
     },
     {
       "path": "apps/web/e2e/local-docker/keyboard-first.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.local-docker.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "local-docker",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.local-docker.config.ts"
+      }
     },
     {
       "path": "apps/web/e2e/performance/ai-workspace-performance.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "performance",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.config.ts"
+      }
     },
     {
       "path": "apps/web/e2e/schedule/presentation-authority/collision-regression.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.schedule-presentation-authority.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "schedule",
+        "role": "reference",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.schedule-presentation-authority.config.ts"
+      }
     },
     {
       "path": "apps/web/e2e/schedule/presentation-authority/schedule-presentation-authority.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.schedule-presentation-authority.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "schedule",
+        "role": "reference",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.schedule-presentation-authority.config.ts"
+      }
     },
     {
       "path": "apps/web/e2e/schedule/presentation-authority/task-quick.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.schedule-presentation-authority.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "schedule",
+        "role": "reference",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.schedule-presentation-authority.config.ts"
+      }
     },
     {
       "path": "apps/web/e2e/setting/setting-appearance.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "setting",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.config.ts"
+      }
     },
     {
       "path": "apps/web/e2e/shell/keyboard-first-desktop.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.sync.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "shell",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.sync.config.ts"
+      }
     },
     {
       "path": "apps/web/e2e/shell/shell-geometry.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.sync.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "shell",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.sync.config.ts"
+      }
     },
     {
       "path": "apps/web/e2e/sync/goal-sync-regression.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.sync.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "sync",
+        "role": "canonical",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.sync.config.ts"
+      }
     },
     {
       "path": "apps/web/e2e/task/visual-grammar/task-visual-grammar.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.task-visual-grammar.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "task",
+        "role": "reference",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.task-visual-grammar.config.ts"
+      }
     },
     {
       "path": "apps/web/e2e/ux/command-palette.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "ux",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.config.ts"
+      }
     },
     {
       "path": "apps/web/e2e/visual-regression/composer-footer.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.visual-regression.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "visual-regression",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.visual-regression.config.ts"
+      }
     },
     {
       "path": "apps/web/e2e/visual-regression/matrix.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.visual-regression.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "visual-regression",
+        "role": "artifact",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.visual-regression.config.ts"
+      }
     },
     {
       "path": "apps/web/e2e/visual-regression/scrollbar-gutter.spec.ts",
-      "primarySuite": null,
-      "collectors": [],
-      "measurementCollectors": []
+      "primarySuite": "e2e",
+      "collectors": [
+        "apps/web/playwright.visual-regression.config.ts"
+      ],
+      "measurementCollectors": [],
+      "e2eOwnership": {
+        "surface": "visual-regression",
+        "role": "supplemental",
+        "lifecycle": "active",
+        "primaryCollector": "apps/web/playwright.visual-regression.config.ts"
+      }
     },
     {
       "path": "apps/web/src/auth/DeviceAuthorizationView.spec.ts",
@@ -12155,7 +12475,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 250
+      "fileCount": 237
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -12211,7 +12531,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 21
+      "fileCount": 19
     },
     {
       "id": "packages/schedule/vitest.mappers.config.ts",
@@ -12633,7 +12953,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 250
+      "fileCount": 237
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -12654,7 +12974,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 55
+      "fileCount": 52
     },
     {
       "id": "packages/data-portability-contracts/vitest.config.ts",
@@ -12818,6 +13138,20 @@
       "fileCount": 36
     },
     {
+      "id": "packages/schedule-client/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 2
+    },
+    {
+      "id": "packages/schedule-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 3
+    },
+    {
       "id": "packages/schedule-orchestration/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
@@ -12825,11 +13159,18 @@
       "fileCount": 7
     },
     {
+      "id": "packages/schedule-ui/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 13
+    },
+    {
       "id": "packages/schedule/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 21
+      "fileCount": 19
     },
     {
       "id": "packages/scheduler/vitest.config.ts",
@@ -13247,19 +13588,6 @@
       "packages/app-vue/src/modules/routine/components/RoutineProfileDialog.spec.ts",
       "packages/app-vue/src/modules/routine/components/RoutineUpcomingWidget.spec.ts",
       "packages/app-vue/src/modules/routine/views/RoutineConfigurationView.spec.ts",
-      "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.spec.ts",
-      "packages/app-vue/src/modules/schedule/components/calendar-event-semantics.spec.ts",
-      "packages/app-vue/src/modules/schedule/composables/useCalendarView.capsule.spec.ts",
-      "packages/app-vue/src/modules/schedule/composables/useCalendarView.owner-cache.spec.ts",
-      "packages/app-vue/src/modules/schedule/composables/useCalendarView.spec.ts",
-      "packages/app-vue/src/modules/schedule/composables/useScheduleCalendar.cache.spec.ts",
-      "packages/app-vue/src/modules/schedule/planner/PlannerCalendar.spec.ts",
-      "packages/app-vue/src/modules/schedule/planner/calendar-event-projection.spec.ts",
-      "packages/app-vue/src/modules/schedule/planner/planner-fullcalendar-mutation.adapter.spec.ts",
-      "packages/app-vue/src/modules/schedule/planner/planner-owner-command.router.spec.ts",
-      "packages/app-vue/src/modules/schedule/planner/planner-presentation.spec.ts",
-      "packages/app-vue/src/modules/schedule/stores/scheduleStore.spec.ts",
-      "packages/app-vue/src/modules/schedule/views/ScheduleInspect.characterization.spec.ts",
       "packages/app-vue/src/modules/setting/components/AISettings.spec.ts",
       "packages/app-vue/src/modules/setting/components/AccountSettingsSection.spec.ts",
       "packages/app-vue/src/modules/setting/components/AntigravityAcpDownload.spec.ts",
@@ -13552,8 +13880,6 @@
       "packages/schedule/src/api/schedule-event.routes.spec.ts",
       "packages/schedule/src/api/schedule-route-parsers-keep-boundary.surface.spec.ts",
       "packages/schedule/src/api/schedule-void-success-envelope.surface.spec.ts",
-      "packages/schedule-client/src/application-client/planner-conflict-read-model.spec.ts",
-      "packages/schedule-client/src/application-client/schedule-client-port-facade-dual.surface.spec.ts",
       "packages/schedule/src/electron/index-lifecycle.spec.ts",
       "packages/schedule/src/electron/schedule-electron-delete-contract.spec.ts",
       "packages/schedule/src/server/application/schedule-portability.spec.ts",
