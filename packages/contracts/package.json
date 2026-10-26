@@ -77,10 +77,6 @@
       "types": "./dist/mocks/index.d.ts",
       "import": "./dist/mocks/index.js"
     },
-    "./label": {
-      "types": "./dist/modules/label/index.d.ts",
-      "import": "./dist/modules/label/index.js"
-    },
     "./relation": {
       "types": "./dist/modules/relation/index.d.ts",
       "import": "./dist/modules/relation/index.js"
