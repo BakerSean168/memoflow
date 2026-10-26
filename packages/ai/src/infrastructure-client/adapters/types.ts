@@ -1,7 +1,7 @@
 /** Product-only AI client adapter contracts after the Mastra cutover. */
 
 import type { IResultHttpClient } from '@memoflow/http-client';
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 import type {
   AICapabilities,
   AIConversationClientDTO,

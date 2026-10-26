@@ -3,7 +3,7 @@ import type {
   KnowledgeCaptureSource,
 } from '@memoflow/contracts/ai';
 import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 
 /**

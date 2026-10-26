@@ -9,7 +9,7 @@ import {
 import type { CreateGoalReq } from '@memoflow/contracts/goal';
 import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
 import type { KnowledgeDocumentRef } from '@memoflow/contracts/repository';
-import type { ResultError } from '@memoflow/contracts/result';
+import type { ResultError } from '@memoflow/transport-contracts/result';
 import type { CreateTaskPlanReq } from '@memoflow/contracts/task';
 import { goalWorkflowEntityId, goalWorkflowMutationRequestId } from './deterministic-entity-id';
 import type { ApplyGoalPlanInput, GoalPlanMutationPort } from './goal-plan-mutation.port';

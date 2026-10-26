@@ -1,4 +1,4 @@
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 import type { AICapabilities } from '@memoflow/contracts/ai';
 
 interface AICapabilitiesControllerService {

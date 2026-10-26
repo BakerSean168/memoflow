@@ -1,4 +1,4 @@
-import { fail, ok, type Result } from '@memoflow/contracts/result';
+import { fail, ok, type Result } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import {
   CommitAIProviderOnboardingSchema,

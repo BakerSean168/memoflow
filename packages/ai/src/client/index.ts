@@ -10,7 +10,7 @@
 import type { IResultHttpClient } from '@memoflow/http-client';
 import type { IResultIpcClient } from '@memoflow/ipc-client';
 import type { AiProviderConfigId } from '@memoflow/contracts/primitives';
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 import type {
   AICapabilities,
   AIConversationClientDTO,

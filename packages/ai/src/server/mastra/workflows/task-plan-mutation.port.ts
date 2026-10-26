@@ -1,5 +1,5 @@
 import type { TaskPlanExecutionReceipt } from '@memoflow/contracts/ai';
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { CreateTaskPlanReq } from '@memoflow/contracts/task';
 import type { TaskPlanMutationResult } from './goal-plan-mutation.port';

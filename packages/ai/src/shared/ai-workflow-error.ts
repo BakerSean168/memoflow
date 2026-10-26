@@ -1,5 +1,5 @@
 import { AIRateLimitPublicFailureSchema } from '@memoflow/contracts/ai';
-import type { PublicFailure } from '@memoflow/contracts/result';
+import type { PublicFailure } from '@memoflow/transport-contracts/result';
 import { toAIPublicFailure } from './ai-public-failure';
 
 /** Only this safe projection may enter an engine's durable error snapshot. */

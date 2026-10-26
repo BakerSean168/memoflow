@@ -1,4 +1,4 @@
-import { extractStructuredResultError } from '@memoflow/contracts/result';
+import { extractStructuredResultError } from '@memoflow/transport-contracts/result';
 import { LocalAgentError, localAgentFailureMessage } from './local-agent-error';
 import { isAIExecutionError, type AIExecutionErrorKind } from './ai-execution-error';
 import type { AIWorkflowTerminalFailure } from '@memoflow/contracts/ai';

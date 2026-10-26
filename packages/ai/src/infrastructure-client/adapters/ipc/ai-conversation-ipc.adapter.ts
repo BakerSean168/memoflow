@@ -6,7 +6,7 @@ import type {
   CreateConversationReq,
   UpdateConversationReq,
 } from '@memoflow/contracts/ai';
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 
 /**
  * IPC adapter for AI conversations.

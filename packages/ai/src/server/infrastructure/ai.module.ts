@@ -29,7 +29,7 @@
  *
  */
 
-import { ok, error } from '@memoflow/contracts/result';
+import { ok, error } from '@memoflow/transport-contracts/result';
 import type { ConversationEventSource } from '../domain/repositories/conversation-events.port';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { IAIConversationRepository, IAIProviderConfigRepository } from '../domain';
@@ -75,7 +75,7 @@ import { ProviderEndpointPolicy } from './security/provider-endpoint-policy';
 import { ProviderSafeFetch } from './security/provider-safe-fetch';
 import { isAIExecutionError } from '../../shared/ai-execution-error';
 
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 import type {
   ExpandKnowledgeReq,
   ExpandKnowledgeRes,

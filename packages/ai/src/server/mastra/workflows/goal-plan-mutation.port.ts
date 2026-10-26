@@ -6,7 +6,7 @@ import type {
 import type { GoalStatus, CreateGoalReq } from '@memoflow/contracts/goal';
 import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
 import type { KnowledgeDocumentRef } from '@memoflow/contracts/repository';
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { CreateTaskPlanReq } from '@memoflow/contracts/task';
 

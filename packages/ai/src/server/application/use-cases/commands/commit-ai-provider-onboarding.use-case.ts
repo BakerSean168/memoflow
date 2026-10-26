@@ -1,4 +1,4 @@
-import { error, ok, type Result } from '@memoflow/contracts/result';
+import { error, ok, type Result } from '@memoflow/transport-contracts/result';
 import {
   type AIProviderConfigClientDTO,
   type AIProviderConfigServerDTO,

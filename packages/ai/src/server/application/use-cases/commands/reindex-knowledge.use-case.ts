@@ -1,5 +1,5 @@
-import type { Result } from '@memoflow/contracts/result';
-import { ok, error } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { ok, error } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { KnowledgeDocumentIdSchema } from '@memoflow/contracts/repository';
 import type { ReindexKnowledgeReq, ReindexKnowledgeRes } from '@memoflow/contracts/ai';

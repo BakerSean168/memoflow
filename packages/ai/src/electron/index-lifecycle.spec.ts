@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AIChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import type { AIModuleInstance } from '../server/infrastructure';
 import { AIExecutionError } from '../shared/ai-execution-error';
 import { EventEmitter } from 'node:events';

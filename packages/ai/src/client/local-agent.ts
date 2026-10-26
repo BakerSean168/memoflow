@@ -19,7 +19,7 @@ import {
   type LocalAgentAuthState,
 } from '@memoflow/contracts/ai';
 import { AIChannels } from '@memoflow/contracts/electron';
-import { unwrapOrThrowError } from '@memoflow/contracts/result';
+import { unwrapOrThrowError } from '@memoflow/transport-contracts/result';
 import type { IResultIpcClient } from '@memoflow/ipc-client';
 
 /** Optional Desktop capability. Web hosts do not provide a local Agent client. */
