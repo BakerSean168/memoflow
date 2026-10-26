@@ -39,8 +39,10 @@ COPY packages/contracts/package.json ./packages/contracts/package.json
 COPY packages/data-portability/package.json ./packages/data-portability/package.json
 COPY packages/database/package.json ./packages/database/package.json
 COPY packages/database/prisma ./packages/database/prisma
+COPY packages/desktop-contracts/package.json ./packages/desktop-contracts/package.json
 COPY packages/domain-shared/package.json ./packages/domain-shared/package.json
 COPY packages/goal/package.json ./packages/goal/package.json
+COPY packages/goal-core/package.json ./packages/goal-core/package.json
 COPY packages/http-client/package.json ./packages/http-client/package.json
 COPY packages/ipc-client/package.json ./packages/ipc-client/package.json
 COPY packages/label/package.json ./packages/label/package.json
@@ -54,9 +56,11 @@ COPY packages/schedule/package.json ./packages/schedule/package.json
 COPY packages/scheduler/package.json ./packages/scheduler/package.json
 COPY packages/schedule-orchestration/package.json ./packages/schedule-orchestration/package.json
 COPY packages/setting/package.json ./packages/setting/package.json
+COPY packages/shared-primitives/package.json ./packages/shared-primitives/package.json
 COPY packages/task/package.json ./packages/task/package.json
 COPY packages/test-utils/package.json ./packages/test-utils/package.json
 COPY packages/time/package.json ./packages/time/package.json
+COPY packages/transport-contracts/package.json ./packages/transport-contracts/package.json
 COPY packages/utils/package.json ./packages/utils/package.json
 COPY tools/mcp/ensure-nx-src-link.mjs ./tools/mcp/ensure-nx-src-link.mjs
 
@@ -77,8 +81,10 @@ COPY packages/agent-gateway ./packages/agent-gateway
 COPY packages/contracts ./packages/contracts
 COPY packages/data-portability ./packages/data-portability
 COPY packages/database ./packages/database
+COPY packages/desktop-contracts ./packages/desktop-contracts
 COPY packages/domain-shared ./packages/domain-shared
 COPY packages/goal ./packages/goal
+COPY packages/goal-core ./packages/goal-core
 COPY packages/http-client ./packages/http-client
 COPY packages/ipc-client ./packages/ipc-client
 COPY packages/label ./packages/label
@@ -92,9 +98,11 @@ COPY packages/schedule ./packages/schedule
 COPY packages/scheduler ./packages/scheduler
 COPY packages/schedule-orchestration ./packages/schedule-orchestration
 COPY packages/setting ./packages/setting
+COPY packages/shared-primitives ./packages/shared-primitives
 COPY packages/task ./packages/task
 COPY packages/test-utils ./packages/test-utils
 COPY packages/time ./packages/time
+COPY packages/transport-contracts ./packages/transport-contracts
 COPY packages/utils ./packages/utils
 COPY tools/mcp ./tools/mcp
 COPY tools/build ./tools/build
