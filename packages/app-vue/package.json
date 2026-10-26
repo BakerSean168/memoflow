@@ -94,6 +94,7 @@
     "@memoflow/label": "workspace:*",
     "@memoflow/label-contracts": "workspace:*",
     "@memoflow/notification": "workspace:*",
+    "@memoflow/notification-client": "workspace:*",
     "@memoflow/relation": "workspace:*",
     "@memoflow/relation-contracts": "workspace:*",
     "@memoflow/reminder": "workspace:*",

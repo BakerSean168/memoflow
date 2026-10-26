@@ -609,6 +609,9 @@ importers:
       '@memoflow/notification':
         specifier: workspace:*
         version: link:../../packages/notification
+      '@memoflow/notification-client':
+        specifier: workspace:*
+        version: link:../../packages/notification-client
       '@memoflow/notification-contracts':
         specifier: workspace:*
         version: link:../../packages/notification-contracts
@@ -1077,6 +1080,9 @@ importers:
       '@memoflow/notification':
         specifier: workspace:*
         version: link:../../packages/notification
+      '@memoflow/notification-client':
+        specifier: workspace:*
+        version: link:../../packages/notification-client
       '@memoflow/notification-contracts':
         specifier: workspace:*
         version: link:../../packages/notification-contracts
@@ -1477,6 +1483,9 @@ importers:
       '@memoflow/notification':
         specifier: workspace:*
         version: link:../notification
+      '@memoflow/notification-client':
+        specifier: workspace:*
+        version: link:../notification-client
       '@memoflow/notification-contracts':
         specifier: workspace:*
         version: link:../notification-contracts
@@ -2132,12 +2141,6 @@ importers:
       '@memoflow/host-runtime':
         specifier: workspace:*
         version: link:../host-runtime
-      '@memoflow/http-client':
-        specifier: workspace:*
-        version: link:../http-client
-      '@memoflow/ipc-client':
-        specifier: workspace:*
-        version: link:../ipc-client
       '@memoflow/notification-contracts':
         specifier: workspace:*
         version: link:../notification-contracts
@@ -2175,6 +2178,24 @@ importers:
       '@types/express':
         specifier: ^5.0.0
         version: 5.0.6
+
+  packages/notification-client:
+    dependencies:
+      '@memoflow/desktop-contracts':
+        specifier: workspace:*
+        version: link:../desktop-contracts
+      '@memoflow/http-client':
+        specifier: workspace:*
+        version: link:../http-client
+      '@memoflow/ipc-client':
+        specifier: workspace:*
+        version: link:../ipc-client
+      '@memoflow/notification-contracts':
+        specifier: workspace:*
+        version: link:../notification-contracts
+      '@memoflow/transport-contracts':
+        specifier: workspace:*
+        version: link:../transport-contracts
 
   packages/notification-contracts:
     dependencies:

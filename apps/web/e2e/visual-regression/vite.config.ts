@@ -158,7 +158,7 @@ export default defineConfig(({ mode }) =>
           ['@memoflow/reminder/client', 'packages/reminder/src/client/index.ts'],
           ['@memoflow/repository/client', 'packages/repository/src/client/index.ts'],
           ['@memoflow/ai/client', 'packages/ai/src/client/index.ts'],
-          ['@memoflow/notification/client', 'packages/notification/src/client/index.ts'],
+          ['@memoflow/notification-client', 'packages/notification-client/src/index.ts'],
         ]),
       ],
     },

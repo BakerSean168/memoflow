@@ -3,32 +3,32 @@
  *
  * Public notification contracts stay centralized in
  * `@memoflow/notification-contracts`.
- * Callers depend on this seam instead of the old application-client /
- * infrastructure-client layered exports.
+ * Callers depend on this seam instead of the layered application-client /
+ * infrastructure-client internals.
  */
 
 import type { IResultHttpClient } from '@memoflow/http-client';
 import {
   createNotificationClientService,
   type NotificationClientPort,
-} from '../application-client';
+} from './application-client';
 import {
   NotificationHttpAdapter,
   createNotificationHttpAdapters,
   type NotificationHttpAdapters,
-} from '../infrastructure-client/adapters/http';
+} from './infrastructure-client/adapters/http';
 import {
   NotificationIpcAdapter,
   createNotificationIpcAdapters,
   type NotificationIpcAdapters,
-} from '../infrastructure-client/adapters/ipc';
+} from './infrastructure-client/adapters/ipc';
 import type {
   CreateNotificationRequest,
   INotificationApiClient,
   IResultIpcClient,
   NotificationListResponse,
   UnreadCountResponse,
-} from '../infrastructure-client/adapters/types';
+} from './infrastructure-client/adapters/types';
 
 export type {
   CreateNotificationRequest,

@@ -4,8 +4,8 @@
  * IPC implementation of INotificationApiClient for Electron desktop apps.
  */
 
-import type { Result } from '@memoflow/contracts/result';
-import { NotificationChannels } from '@memoflow/contracts/electron';
+import type { Result } from '@memoflow/transport-contracts';
+import { NotificationChannels } from '@memoflow/desktop-contracts';
 import type {
   IResultIpcClient,
   INotificationApiClient,

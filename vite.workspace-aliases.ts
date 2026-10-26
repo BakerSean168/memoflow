@@ -392,6 +392,15 @@ export function createNotificationContractsAliasEntries(workspaceRoot: string): 
   ];
 }
 
+export function createNotificationClientAliasEntries(workspaceRoot: string): Alias[] {
+  return [
+    {
+      find: /^@memoflow\/notification-client$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/notification-client/src/index.ts'),
+    },
+  ];
+}
+
 export function createOperationsContractsAliasEntries(workspaceRoot: string): Alias[] {
   const operationsContractsRoot = resolveFromWorkspace(
     workspaceRoot,

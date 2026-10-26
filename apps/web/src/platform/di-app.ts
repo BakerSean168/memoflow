@@ -68,7 +68,7 @@ const goalKnowledgeService = createLazyService(async () => {
 });
 
 const notificationService = createLazyService(async () => {
-  const { createNotificationHttpClient } = await import('@memoflow/notification/client');
+  const { createNotificationHttpClient } = await import('@memoflow/notification-client');
   return createNotificationHttpClient(resultHttpClient);
 });
 

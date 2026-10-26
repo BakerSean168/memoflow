@@ -21,7 +21,7 @@ const sharedConfig = createSharedConfig({
     '@memoflow/cloud-auth': '../../packages/cloud-auth/src/index.ts',
     '@memoflow/app-vue/web-i18n': '../../packages/app-vue/src/web-i18n.ts',
     '@memoflow/schedule-client': '../../packages/schedule-client/src/index.ts',
-    '@memoflow/notification/client': '../../packages/notification/src/client/index.ts',
+    '@memoflow/notification-client': '../../packages/notification-client/src/index.ts',
     '@memoflow/reminder/client': '../../packages/reminder/src/client/index.ts',
     '@memoflow/ai/client': '../../packages/ai/src/client/index.ts',
     '@memoflow/goal-client': '../../packages/goal-client/src/index.ts',

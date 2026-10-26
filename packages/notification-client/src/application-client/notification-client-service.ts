@@ -7,7 +7,7 @@
  * @module application-client/notification-client-service
  */
 
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts';
 import type {
   BatchOperationResultDTO,
   ExecuteNotificationActionReq,

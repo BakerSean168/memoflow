@@ -8,7 +8,7 @@
  */
 
 import type { QueryClient, QueryKey } from '@tanstack/vue-query';
-import type { NotificationListResponse, UnreadCountResponse } from '@memoflow/notification/client';
+import type { NotificationListResponse, UnreadCountResponse } from '@memoflow/notification-client';
 import type { NotificationClientDTO } from '@memoflow/notification-contracts';
 import { notificationQueryKeys } from '../../../platform/server-state/query-keys';
 

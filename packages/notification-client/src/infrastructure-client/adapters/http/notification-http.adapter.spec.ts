@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts';
 import { NotificationHttpAdapter } from './notification-http.adapter';
 
 describe('NotificationHttpAdapter typed actions', () => {

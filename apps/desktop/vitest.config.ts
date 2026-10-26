@@ -26,7 +26,7 @@ const desktopTestWorkspaceEntries = [
   ['@memoflow/reminder/routine-runtime', 'packages/reminder/src/routine-runtime/index.ts'],
   ['@memoflow/repository/client', 'packages/repository/src/client/index.ts'],
   ['@memoflow/repository/electron', 'packages/repository/src/electron/index.ts'],
-  ['@memoflow/notification/client', 'packages/notification/src/client/index.ts'],
+  ['@memoflow/notification-client', 'packages/notification-client/src/index.ts'],
   ['@memoflow/reminder/client', 'packages/reminder/src/client/index.ts'],
   ['@memoflow/notification/electron', 'packages/notification/src/electron/index.ts'],
   ['@memoflow/setting/client', 'packages/setting/src/client/index.ts'],
