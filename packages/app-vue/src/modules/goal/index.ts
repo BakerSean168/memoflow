@@ -13,6 +13,29 @@ export { useGoalTimeline } from './composables';
 export type { TimelineData, TimelineSnapshot } from './composables';
 export { formatTimelineTimestamp } from './composables';
 
+// ===== Surface Host Ports =====
+export {
+  useGoalNativeSurface,
+  useGoalNativeSurfaceRegistration,
+  useGoalSurfaceStatus,
+  useGoalSurfaceLeaveGuard,
+  GoalNativeSurfaceKey,
+  GoalSurfaceStatusSinkKey,
+  GoalSurfaceLeaveGuardKey,
+} from './composables';
+export type {
+  GoalAIEditSurface,
+  GoalNativeSurfaceHost,
+  GoalSurfaceStatus,
+  GoalSurfaceStatusSink,
+  GoalSurfaceLeaveGuard,
+} from './composables';
+export type {
+  GoalNativeDraftState,
+  GoalNativeEditSession,
+  GoalNativeSubmitContext,
+} from './composables/goalNativeEditSession';
+
 // ===== Stores =====
 export { useGoalStore } from './stores/goal-store';
 export type { GoalState, GoalStoreType } from './stores/goal-store';
