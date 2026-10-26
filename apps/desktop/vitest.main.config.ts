@@ -183,10 +183,7 @@ const mainWorkspaceAliasEntries = [
   },
   {
     find: '@memoflow/notification-contracts',
-    replacement: resolve(
-      import.meta.dirname,
-      '../../packages/notification-contracts/src/index.ts',
-    ),
+    replacement: resolve(import.meta.dirname, '../../packages/notification-contracts/src/index.ts'),
   },
   {
     find: /^@memoflow\/operations-contracts\/(.+)$/,

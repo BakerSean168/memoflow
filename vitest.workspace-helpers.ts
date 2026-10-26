@@ -323,7 +323,10 @@ export const domainResolveAliases = [
   },
   {
     find: '@memoflow/notification-contracts',
-    replacement: path.resolve(import.meta.dirname, './packages/notification-contracts/src/index.ts'),
+    replacement: path.resolve(
+      import.meta.dirname,
+      './packages/notification-contracts/src/index.ts',
+    ),
   },
   {
     find: /^@memoflow\/operations-contracts\/(.+)/,

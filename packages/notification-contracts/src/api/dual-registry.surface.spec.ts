@@ -19,10 +19,7 @@ import { describe, expect, it } from 'vitest';
     const dto = readFileSync(resolve(apiDir, '../dtos/batch-result.dto.ts'), 'utf8');
     const responseSchemas = readFileSync(resolve(apiDir, 'response-schemas.ts'), 'utf8');
     const batchDto = readFileSync(resolve(apiDir, 'notification-batch.dto.ts'), 'utf8');
-    const routes = readFileSync(
-      resolve(apiDir, '../../../notification/src/api/routes.ts'),
-      'utf8',
-    );
+    const routes = readFileSync(resolve(apiDir, '../../../notification/src/api/routes.ts'), 'utf8');
 
     it('owns BatchOperationResultDTO as z.infer of NotificationBatchResultSchema', () => {
       expect(dto).toContain('Residual 799');
@@ -67,15 +64,9 @@ import { describe, expect, it } from 'vitest';
   describe('notification ids batch request dual retired (residual 671)', () => {
     const apiDir = __dirname;
     const dto = readFileSync(resolve(apiDir, 'notification-batch.dto.ts'), 'utf8');
-    const routes = readFileSync(
-      resolve(apiDir, '../../../notification/src/api/routes.ts'),
-      'utf8',
-    );
+    const routes = readFileSync(resolve(apiDir, '../../../notification/src/api/routes.ts'), 'utf8');
     const controller = readFileSync(
-      resolve(
-        apiDir,
-        '../../../notification/src/server/transport/notification.controller.ts',
-      ),
+      resolve(apiDir, '../../../notification/src/server/transport/notification.controller.ts'),
       'utf8',
     );
 
@@ -182,10 +173,7 @@ import { describe, expect, it } from 'vitest';
       ),
       'utf8',
     );
-    const routes = readFileSync(
-      resolve(apiDir, '../../../notification/src/api/routes.ts'),
-      'utf8',
-    );
+    const routes = readFileSync(resolve(apiDir, '../../../notification/src/api/routes.ts'), 'utf8');
 
     it('owns UnreadCountResponse as z.infer of UnreadCountResponseSchema', () => {
       expect(responseSchemas).toContain('Residual 801');

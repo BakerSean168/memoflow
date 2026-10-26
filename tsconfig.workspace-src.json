@@ -33,12 +33,8 @@
       "@memoflow/data-portability-contracts/*": ["./packages/data-portability-contracts/src/*.ts"],
       "@memoflow/goal-contracts": ["./packages/goal-contracts/src/index.ts"],
       "@memoflow/goal-contracts/*": ["./packages/goal-contracts/src/*.ts"],
-      "@memoflow/notification-contracts": [
-        "./packages/notification-contracts/src/index.ts"
-      ],
-      "@memoflow/notification-contracts/*": [
-        "./packages/notification-contracts/src/*.ts"
-      ],
+      "@memoflow/notification-contracts": ["./packages/notification-contracts/src/index.ts"],
+      "@memoflow/notification-contracts/*": ["./packages/notification-contracts/src/*.ts"],
       "@memoflow/workspace-contracts": ["./packages/workspace-contracts/src/index.ts"],
       "@memoflow/workspace-contracts/*": ["./packages/workspace-contracts/src/*.ts"],
       "@memoflow/database": ["./packages/database/src/index.ts"],

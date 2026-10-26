@@ -30,9 +30,7 @@
       "@memoflow/ipc-client": ["../../packages/ipc-client/dist/index.d.ts"],
       "@memoflow/http-client": ["../../packages/http-client/dist/index.d.ts"],
       "@memoflow/contracts": ["../../packages/contracts/dist/index.d.ts"],
-      "@memoflow/notification-contracts": [
-        "../../packages/notification-contracts/dist/index.d.ts"
-      ],
+      "@memoflow/notification-contracts": ["../../packages/notification-contracts/dist/index.d.ts"],
       "@memoflow/notification-contracts/*": ["../../packages/notification-contracts/dist/*.d.ts"],
       "@memoflow/contracts/*": [
         "../../packages/contracts/dist/modules/*/index.d.ts",
