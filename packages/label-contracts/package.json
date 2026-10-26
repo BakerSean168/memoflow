@@ -19,7 +19,6 @@
     }
   },
   "dependencies": {
-    "@memoflow/label-contracts": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",
     "zod": "^4.6.5"
   }
