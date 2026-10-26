@@ -6,6 +6,9 @@
  * Empty legacy entities/value-objects/dtos barrels were removed.
  */
 
+// ============ Strong-typed IDs (migrated from shared-primitives, #630 §4.7) ============
+export * from './ids';
+
 // ============ Aggregates ============
 export * from './aggregates';
 

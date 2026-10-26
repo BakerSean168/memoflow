@@ -1,6 +1,6 @@
 /** ADR-090 stable, document-carried knowledge identity. */
 import { z } from 'zod';
-import type { KnowledgeDocumentId, KnowledgeSpaceId } from '@memoflow/shared-primitives';
+import type { KnowledgeDocumentId, KnowledgeSpaceId } from '../ids';
 import { brandedId } from '@memoflow/shared-primitives/zod-extensions';
 import { ID_PREFIXES } from '@memoflow/shared-primitives/ids';
 

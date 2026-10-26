@@ -8,11 +8,8 @@
 
 import { z } from 'zod';
 import { brandedId, ID_PREFIXES } from '@memoflow/shared-primitives';
-import type {
-  IdentityId,
-  KnowledgeRemoteBindingId,
-  KnowledgeSpaceId,
-} from '@memoflow/shared-primitives';
+import type { IdentityId } from '@memoflow/shared-primitives';
+import type { KnowledgeRemoteBindingId, KnowledgeSpaceId } from '../ids';
 
 export const KnowledgeRemoteProviderSchema = z.literal('GitHub');
 export type KnowledgeRemoteProvider = z.infer<typeof KnowledgeRemoteProviderSchema>;
