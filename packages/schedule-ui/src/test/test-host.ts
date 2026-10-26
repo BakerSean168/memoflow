@@ -7,7 +7,7 @@
  * package still imports no host internals from production code.
  */
 import { ref } from 'vue';
-import { bindScheduleUiHost, type ScheduleUiHost } from '../scheduleUiHost';
+import { bindScheduleUiHost, type ScheduleUiHost } from '../schedule-ui-host';
 import {
   GOAL_SERVICE_KEY,
   ROUTINE_SERVICE_KEY,

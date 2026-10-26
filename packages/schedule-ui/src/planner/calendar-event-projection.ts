@@ -13,7 +13,7 @@ import type {
 } from '@memoflow/schedule-contracts';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
 import type { Instant, Ymd } from '@memoflow/time';
-import { scheduleUiHost } from '../scheduleUiHost';
+import { scheduleUiHost } from '../schedule-ui-host';
 
 export interface PlannerProductTimePort {
   combine(date: Ymd, hm: string): Instant | null;

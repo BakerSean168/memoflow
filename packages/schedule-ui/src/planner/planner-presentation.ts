@@ -1,5 +1,5 @@
 import type { CalendarEventProjection, PlannerDisplaySemantic } from '@memoflow/schedule-contracts';
-import { scheduleUiHost } from '../scheduleUiHost';
+import { scheduleUiHost } from '../schedule-ui-host';
 
 export type PlannerProjectionSource = CalendarEventProjection['sourceType'];
 

@@ -145,7 +145,7 @@
       "reason": "Aggressive reduction authorized in Issue #625: routine behavior is owned by existing component/unit/API/database tests. Browser-specific geometry and complete UI-to-server journeys are deliberately no longer duplicated; this is not a claim of assertion-for-assertion equivalence.",
       "sourceSha256": "6e41d6368a92bd01651b63692b2445d282e55922c5d577c391e494a90abbe0fc",
       "replacements": [
-        "packages/app-vue/src/modules/schedule/composables/useScheduleCalendar.cache.spec.ts",
+        "packages/schedule-ui/src/composables/useScheduleCalendar.cache.spec.ts",
         "packages/schedule/src/api/schedule-event-routes-roundtrip.spec.ts"
       ],
       "issue": "https://github.com/BakerSean168/memoflow/issues/625",
@@ -156,7 +156,7 @@
       "reason": "Aggressive reduction authorized in Issue #625: routine behavior is owned by existing component/unit/API/database tests. Browser-specific geometry and complete UI-to-server journeys are deliberately no longer duplicated; this is not a claim of assertion-for-assertion equivalence.",
       "sourceSha256": "94e6951d2aad80a59204f36cff3d322496ede47b5dd24f7071cbb6714e61aeac",
       "replacements": [
-        "packages/app-vue/src/modules/schedule/planner/planner-fullcalendar-mutation.adapter.spec.ts"
+        "packages/schedule-ui/src/planner/planner-fullcalendar-mutation.adapter.spec.ts"
       ],
       "issue": "https://github.com/BakerSean168/memoflow/issues/625",
       "coverageDisposition": "lower-layer coverage; accepted loss of whole-system UI journey signal"

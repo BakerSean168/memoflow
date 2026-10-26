@@ -144,7 +144,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { createReusableTemplate } from '@vueuse/core';
-import { scheduleUiHost } from '../scheduleUiHost';
+import { scheduleUiHost } from '../schedule-ui-host';
 import { useI18n } from 'vue-i18n';
 import type { CalendarEventProjection } from '@memoflow/schedule-contracts';
 import {

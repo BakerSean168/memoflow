@@ -6,7 +6,7 @@ import type {
 import type { Result } from '@memoflow/contracts/result';
 import { fail } from '@memoflow/contracts/result';
 import type { ScheduleContext } from './useScheduleContext';
-import { scheduleUiHost } from '../scheduleUiHost';
+import { scheduleUiHost } from '../schedule-ui-host';
 
 function overlapsPlannerWindow(
   entry: CalendarEntryClientDTO,

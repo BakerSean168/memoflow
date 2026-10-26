@@ -4,7 +4,7 @@ import type { Result } from '@memoflow/contracts/result';
 import type { CalendarEventProjection, PlannerEventRange } from '@memoflow/schedule-contracts';
 import type { RescheduleTaskInput } from '@memoflow/contracts/task';
 import { asHm, type Hm, type Instant, type Ymd } from '@memoflow/time';
-import { scheduleUiHost } from '../scheduleUiHost';
+import { scheduleUiHost } from '../schedule-ui-host';
 
 const MINUTE_MS = 60_000;
 

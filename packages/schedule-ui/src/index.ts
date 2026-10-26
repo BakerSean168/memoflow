@@ -56,4 +56,4 @@ export {
   type ScheduleGoalPort,
   type ScheduleTaskPlannerPort,
   type ScheduleUiHost,
-} from './scheduleUiHost';
+} from './schedule-ui-host';

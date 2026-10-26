@@ -2376,10 +2376,6 @@ importers:
       zod:
         specifier: ^4.6.5
         version: 4.6.5
-    devDependencies:
-      '@memoflow/test-utils':
-        specifier: workspace:*
-        version: link:../test-utils
 
   packages/schedule-orchestration:
     dependencies:

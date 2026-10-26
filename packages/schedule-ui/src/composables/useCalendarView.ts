@@ -26,7 +26,7 @@ import {
   type PlannerProductTimePort,
 } from '../planner';
 import { plannerProjectionSourceLabel } from '../planner/planner-presentation';
-import { scheduleUiHost } from '../scheduleUiHost';
+import { scheduleUiHost } from '../schedule-ui-host';
 
 const PLANNER_GOAL_PAGE_SIZE = 100;
 const PLANNER_TASK_PLAN_LIMIT = 200;

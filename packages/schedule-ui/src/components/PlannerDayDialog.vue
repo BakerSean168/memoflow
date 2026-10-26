@@ -97,7 +97,7 @@
 </template>
 
 <script setup lang="ts">
-import { scheduleUiHost } from '../scheduleUiHost';
+import { scheduleUiHost } from '../schedule-ui-host';
 
 const vKeyboardList = scheduleUiHost.vKeyboardList;
 import { computed } from 'vue';

@@ -49,7 +49,8 @@ vi.mock('@memoflow/app-vue/modules/task', () => ({
   useTaskStore: () => ({ setInitialized: vi.fn() }),
 }));
 
-vi.mock('@memoflow/schedule-ui', () => ({
+vi.mock('@memoflow/schedule-ui', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@memoflow/schedule-ui')>()),
   useScheduleStore: () => ({ setInitialized: vi.fn() }),
 }));
 

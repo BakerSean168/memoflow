@@ -178,7 +178,7 @@ import {
   plannerProjectionKeyForUi,
 } from '../planner/planner-presentation';
 import { plannerConflictSourceKeys } from '@memoflow/schedule-client';
-import { scheduleUiHost, type PanelSurfaceStatus } from '../scheduleUiHost';
+import { scheduleUiHost, type PanelSurfaceStatus } from '../schedule-ui-host';
 
 const { ProductSurfaceHeader, ResponsivePrimaryAction, TaskOccurrenceQuickSurface } =
   scheduleUiHost.components;

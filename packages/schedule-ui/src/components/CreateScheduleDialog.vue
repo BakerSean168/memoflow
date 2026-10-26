@@ -369,7 +369,7 @@ import { Badge, Button, Input, Label, Switch, Textarea } from '@memoflow/ui-vue-
 import type { CalendarEntryClientDTO, CreateScheduleRequest } from '@memoflow/schedule-contracts';
 import { requireYmd, type Instant, type Ymd } from '@memoflow/contracts/primitives';
 import { formatDisplayDate } from '@memoflow/time';
-import { scheduleUiHost } from '../scheduleUiHost';
+import { scheduleUiHost } from '../schedule-ui-host';
 
 const {
   ProductDatePicker,

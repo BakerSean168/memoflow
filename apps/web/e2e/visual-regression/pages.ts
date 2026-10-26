@@ -1,4 +1,8 @@
 import { bootstrapVisualApp } from './app-environment';
+// The harness mounts App-vue surfaces directly, so it must also run the
+// renderer composition root that binds the @memoflow/schedule-ui host; the real
+// app gets this from packages/app-vue/src/index.ts.
+import '@memoflow/app-vue/di/schedule-ui-host';
 import { createApp, defineComponent, h } from 'vue';
 import { createPinia } from 'pinia';
 import { createI18n } from 'vue-i18n';

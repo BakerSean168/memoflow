@@ -27,7 +27,7 @@ vi.mock('./useSchedule', () => ({
 }));
 
 import { useCalendarView } from './useCalendarView';
-import { bindScheduleUiHost } from '../scheduleUiHost';
+import { bindScheduleUiHost } from '../schedule-ui-host';
 import { createScheduleUiTestHost } from '../test/test-host';
 
 function mountCalendar(

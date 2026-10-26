@@ -5,7 +5,7 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { ScheduleClientPort } from '@memoflow/schedule-client';
 import { useScheduleStore } from '../stores/schedule-store';
-import { scheduleUiHost } from '../scheduleUiHost';
+import { scheduleUiHost } from '../schedule-ui-host';
 
 export interface ScheduleContext {
   store: ReturnType<typeof useScheduleStore>;

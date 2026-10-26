@@ -59,7 +59,7 @@ import type {
 import { plannerConflictSourceKeys, plannerProjectionKey } from '@memoflow/schedule-client';
 import { Loader2, TriangleAlert } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
-import { scheduleUiHost } from '../scheduleUiHost';
+import { scheduleUiHost } from '../schedule-ui-host';
 import {
   applyFullCalendarPlannerMutation,
   defaultPlannerMutationTimePort,

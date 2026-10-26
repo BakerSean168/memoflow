@@ -18,7 +18,7 @@ import { createMemoryHistory, createRouter } from 'vue-router';
 import TaskOccurrenceQuickSurface from '@schedule-ui-test-host/modules/task/components/TaskOccurrenceQuickSurface.vue';
 import { toast } from 'vue-sonner';
 import PlannerEventDialog from '../components/PlannerEventDialog.vue';
-import { bindScheduleUiHost } from '../scheduleUiHost';
+import { bindScheduleUiHost } from '../schedule-ui-host';
 import { createScheduleUiTestHost } from '../test/test-host';
 
 const mocks = vi.hoisted(() => ({
