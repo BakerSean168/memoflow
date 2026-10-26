@@ -16,8 +16,8 @@
     "./setup/*": "./src/setup/*.ts"
   },
   "dependencies": {
-    "@memoflow/contracts": "workspace:*",
     "@memoflow/database": "workspace:*",
+    "@memoflow/desktop-contracts": "workspace:*",
     "@memoflow/domain-shared": "workspace:*",
     "@memoflow/powersync-schema": "workspace:*",
     "@vue/test-utils": "^2.5.1",

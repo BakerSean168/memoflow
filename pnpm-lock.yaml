@@ -2152,12 +2152,12 @@ importers:
 
   packages/test-utils:
     dependencies:
-      '@memoflow/contracts':
-        specifier: workspace:*
-        version: link:../contracts
       '@memoflow/database':
         specifier: workspace:*
         version: link:../database
+      '@memoflow/desktop-contracts':
+        specifier: workspace:*
+        version: link:../desktop-contracts
       '@memoflow/domain-shared':
         specifier: workspace:*
         version: link:../domain-shared

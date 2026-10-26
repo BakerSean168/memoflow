@@ -1,5 +1,5 @@
 import { DatabaseSync, type SQLInputValue } from 'node:sqlite';
-import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
+import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import { PowerSyncAppSchema } from '@memoflow/powersync-schema';
 
 /** Real SQLite using the published Profile schema, with serialized write transactions. */
