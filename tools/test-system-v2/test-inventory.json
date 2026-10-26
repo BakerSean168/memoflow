@@ -7050,14 +7050,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/setting/preferences/product-module-index-paths.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/contracts/src/modules/task/api/complete-task-occurrence.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13923,7 +13915,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1119,
+    "unit": 1118,
     "integration": 57,
     "smoke": 3,
     "boundary-ipc": 6,

@@ -1,7 +1,7 @@
 {
   "version": 2,
   "generated": "2026-09-09",
-  "constitution": "docs/architecture/adr/ADR-037-product-time-system.md",
+  "constitution": "docs/internals/decisions/ADR-037-product-time-system.md",
   "entries": [
     {
       "kind": "canonical",

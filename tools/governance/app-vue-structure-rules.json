@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "description": "App-vue AST/type structural rules migrated from source-text locks (#502). Generated and validated against current source; see docs/analysis/2026-10-19-app-vue-source-lock-ledger.md.",
+  "description": "App-vue AST/type structural rules migrated from source-text locks (#502). Generated and validated against current source; historical migration notes remain in Git history.",
   "rules": [
     {
       "id": "rule-task-authority-49",

@@ -70,7 +70,7 @@ async function main(): Promise<void> {
         '[playwright-api-server] Fix: free :3000 (e.g. pnpm docker:local:down if API_HOST_PORT was 3000), ensure local-docker uses 20201, then re-run e2e.',
       );
       console.error(
-        '[playwright-api-server] See docs/guides/development/runtime-lanes.md and pnpm runtime:preflight --profile e2e',
+        '[playwright-api-server] See docs/operations/runtime.md and pnpm runtime:preflight --profile e2e',
       );
     }
     process.exit(1);
