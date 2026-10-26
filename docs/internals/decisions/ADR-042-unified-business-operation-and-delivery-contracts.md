@@ -33,7 +33,7 @@ MemoFlow 包含 Reminder 扫描、Notification 投递、Account Closure 清理�
 
 ### 2.1 统一 `BusinessOperationReceipt` 与复合幂等键
 
-在 `@memoflow/contracts/reliable-messaging` 中定义标准 `BusinessOperationReceipt` Zod Schema 与 TypeScript 类型：
+在 `@memoflow/reliable-messaging-contracts` 中定义标准 `BusinessOperationReceipt` Zod Schema 与 TypeScript 类型：
 
 - `schemaVersion`: 正整数契约版本号 (默认为 1)，用于版本演进与未知版本锁定
 - `operationId`: 操作唯一标识符
@@ -98,7 +98,7 @@ _注：R1 遗留 `OutboxMessageStatus` (`pending/dispatched/failed/dead`) 作为
 
 ### 2.6 各模块 Application Port 契约交付与闭环约束
 
-为后续 W1~W7 冻结各业务模块接入的 Application Port 接口（声明位于 `@memoflow/contracts/reliable-messaging`），并建立运行时闭环约束：
+为后续 W1~W7 冻结各业务模块接入的 Application Port 接口（声明位于 `@memoflow/reliable-messaging-contracts`），并建立运行时闭环约束：
 
 1. **Port 输入契约**：所有 Application Port 输入 Schema 的 `identityId` / `source` / `occurrenceKey` 幂等三元组与 `idempotencyKey` 均设为 REQUIRED 非空，且 `idempotencyKey` 必须能够被 `parseIdempotencyKeyString` 成功解析且与三元组完全匹配，禁止接收缺失或未验证格式的裸 Key。
 2. **Port 输出契约与运行时闭环**：各 Application Port 输出必须返回 `BusinessOperationReceipt` 或 `ProjectionOperation`。实现与适配器在输出边界必须显式调用 `assertValidBusinessOperationReceipt` / `assertValidProjectionOperation`（即经 `BusinessOperationReceiptSchema.parse()` / `ProjectionOperationSchema.parse()` 校验），只有 Schema parse 成功的输出才可宣称执行成功。
@@ -149,7 +149,7 @@ _注：R1 遗留 `OutboxMessageStatus` (`pending/dispatched/failed/dead`) 作为
 
 ## 6. 验收标准
 
-- `@memoflow/contracts/reliable-messaging` 导出完整的 `BusinessOperationReceipt`、`DeliveryAttempt`、`LeaseClaim`、`ProjectionOperation` 和 Capability Zod Schemas。
+- `@memoflow/reliable-messaging-contracts` 导出完整的 `BusinessOperationReceipt`、`DeliveryAttempt`、`LeaseClaim`、`ProjectionOperation` 和 Capability Zod Schemas。
 - 契约单测正反向校验 100% 通过。
 - 新建 ADR-042 并在 `docs/internals/decisions/README.md` 中备案。
 
