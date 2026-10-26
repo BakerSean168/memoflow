@@ -801,8 +801,7 @@ import GoalTimeframePicker from '../components/GoalTimeframePicker.vue';
 import { useGoalWorkspace } from '../composables/useGoalWorkspace';
 import { GOAL_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
-import { usePanelSurfaceStatus } from '../../../layouts/shell/usePanelSurfaceStatus';
-import { canLeaveBusinessSurface } from '../../../layouts/shell/surface-leave-protocol';
+import { useGoalSurfaceLeaveGuard, useGoalSurfaceStatus } from '../composables/goalSurfaceHost';
 
 type KeyResultInput = Omit<AddKeyResultReq, 'goalId' | 'expectedVersion'>;
 type LifecycleAction = 'plan' | 'activate' | 'complete' | 'abandon';
@@ -866,8 +865,9 @@ const reviewSurfaceStatus = computed<'clean' | 'dirty' | 'busy'>(() => {
   if (reviewDraftBusy.value || reviewSaveTransition.value) return 'busy';
   return reviewDraftDirty.value ? 'dirty' : 'clean';
 });
-usePanelSurfaceStatus(reviewSurfaceStatus);
+useGoalSurfaceStatus(reviewSurfaceStatus);
 
+const surfaceLeaveGuard = useGoalSurfaceLeaveGuard();
 const guardReviewDraft: NavigationGuard = (to, from) => {
   if (from.name !== 'goal-review-create') return true;
   const sameDraft =
@@ -876,7 +876,7 @@ const guardReviewDraft: NavigationGuard = (to, from) => {
   if (reviewSurfaceStatus.value === 'busy') return false;
   if (sameDraft) return true;
   if (!reviewDraftDirty.value) return true;
-  return canLeaveBusinessSurface(t, to);
+  return surfaceLeaveGuard(t, to);
 };
 onBeforeRouteUpdate(guardReviewDraft);
 onBeforeRouteLeave(guardReviewDraft);

@@ -33,7 +33,7 @@ const native = vi.hoisted(() => ({
 vi.mock('../../../shared/utils/useStrictInject', () => ({
   useStrictInject: () => ({ getGoalAggregateView: native.readGoal }),
 }));
-vi.mock('../../../layouts/shell/useGoalNativeSurface', () => ({
+vi.mock('../../../modules/goal', () => ({
   useGoalNativeSurface: () => ({
     openCreate: native.openCreate,
     openControlledCreate: native.openCreate,

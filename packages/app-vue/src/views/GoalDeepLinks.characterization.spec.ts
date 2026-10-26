@@ -1,16 +1,24 @@
 import { DOMWrapper, enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
-import { defineComponent, h, ref } from 'vue';
+import { defineComponent, h, provide, ref } from 'vue';
 import { createPinia } from 'pinia';
-import { createI18nPlugin } from '../../../plugins/i18n';
-import { useShellRouterSync } from '../../../layouts/shell/useShellRouterSync';
-import { useAppShellStore } from '../../../layouts/shell/useAppShellStore';
-import { createSettingsSceneGuard } from '../../../layouts/shell/surface-leave-protocol';
+import { createI18nPlugin } from '../plugins/i18n';
+import { useShellRouterSync } from '../layouts/shell/useShellRouterSync';
+import { useAppShellStore } from '../layouts/shell/useAppShellStore';
+import {
+  canLeaveBusinessSurface,
+  createSettingsSceneGuard,
+} from '../layouts/shell/surface-leave-protocol';
+import {
+  GoalSurfaceLeaveGuardKey,
+  GoalSurfaceStatusSinkKey,
+  type GoalSurfaceStatus,
+} from '../modules/goal';
 import { createMemoryHistory, createRouter, RouterView } from 'vue-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { GOAL_SERVICE_KEY } from '../../../di/keys';
-import { productionLocaleMessages } from '../../../locales/production-messages';
-import { goalRoutes } from '../router';
-import GoalDetailView from './GoalDetailView.vue';
+import { GOAL_SERVICE_KEY } from '../di/keys';
+import { productionLocaleMessages } from '../locales/production-messages';
+import { goalRoutes } from '../modules/goal/router';
+import GoalDetailView from '../modules/goal/views/GoalDetailView.vue';
 import { createMockGoalMutationReceipt } from '@memoflow/contracts/mocks';
 
 const calls = vi.hoisted(() => ({
@@ -67,10 +75,10 @@ const review = {
 };
 const keyResults = ref<(typeof kr)[]>([]);
 const goalReviews = ref<(typeof review)[]>([]);
-vi.mock('../composables/useGoal', () => ({
+vi.mock('../modules/goal/composables/useGoal', () => ({
   useGoal: () => ({ keyResults, goalReviews, ...calls }),
 }));
-vi.mock('../../../shared/composables/useLabelCatalog', () => ({
+vi.mock('../shared/composables/useLabelCatalog', () => ({
   useLabelCatalog: () => ({ options: ref([]), isLoading: ref(false), createLabel: vi.fn() }),
 }));
 enableAutoUnmount(afterEach);
@@ -165,6 +173,13 @@ async function load(url: string) {
   const host = defineComponent({
     setup() {
       shell = useShellRouterSync();
+      // Host wiring (mirrors AppShell): goal views publish surface status and
+      // ask the leave protocol through goal-owned ports backed by the shell.
+      provide(GoalSurfaceStatusSinkKey, {
+        setSurfaceStatus: (status: GoalSurfaceStatus) =>
+          useAppShellStore().setSurfaceStatus(status),
+      });
+      provide(GoalSurfaceLeaveGuardKey, (t, to) => canLeaveBusinessSurface(t, to));
       return () => h(RouterView);
     },
   });

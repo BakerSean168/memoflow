@@ -2,10 +2,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAppShellStore } from './useAppShellStore';
 import { useNativeBusinessPanelBridge } from './useNativeBusinessPanelBridge';
-import type {
-  GoalNativeDraftState,
-  GoalNativeEditSession,
-} from '../../modules/goal/composables/goalNativeEditSession';
+import type { GoalNativeDraftState, GoalNativeEditSession } from '../../modules/goal';
 import { GoalStatus } from '@memoflow/contracts/goal';
 
 // Mock useGoalNativeSurface
@@ -33,7 +30,7 @@ const mockGoalSurface = {
   }),
 };
 
-vi.mock('./useGoalNativeSurface', () => ({
+vi.mock('../../modules/goal', () => ({
   useGoalNativeSurface: () => mockGoalSurface,
 }));
 

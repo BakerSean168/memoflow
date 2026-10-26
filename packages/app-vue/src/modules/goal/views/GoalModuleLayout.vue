@@ -60,9 +60,10 @@ import { GoalDialog } from '../components';
 import GoalPageToolbar from '../components/GoalPageToolbar.vue';
 import { useGoal } from '../composables/useGoal';
 import { useLabelCatalog } from '../../../shared/composables/useLabelCatalog';
-import { usePanelSurfaceStatus } from '../../../layouts/shell/usePanelSurfaceStatus';
-
-import { useGoalNativeSurfaceRegistration } from '../../../layouts/shell/useGoalNativeSurface';
+import {
+  useGoalNativeSurfaceRegistration,
+  useGoalSurfaceStatus,
+} from '../composables/goalSurfaceHost';
 import type { GoalNativeEditSession } from '../composables/goalNativeEditSession';
 
 const nativeSurface = useGoalNativeSurfaceRegistration();
@@ -157,7 +158,7 @@ const panelSurfaceStatus = computed<'clean' | 'dirty' | 'busy'>(() => {
   if (goalDialogBusy.value || isSaving.value) return 'busy';
   return goalDialogDirty.value ? 'dirty' : 'clean';
 });
-usePanelSurfaceStatus(panelSurfaceStatus);
+useGoalSurfaceStatus(panelSurfaceStatus);
 
 const views = computed(() => [
   { id: 'active' as GoalSystemView, label: t('goal.systemFolders.active') },
