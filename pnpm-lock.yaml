@@ -1728,9 +1728,9 @@ importers:
 
   packages/ipc-client:
     dependencies:
-      '@memoflow/contracts':
+      '@memoflow/transport-contracts':
         specifier: workspace:*
-        version: link:../contracts
+        version: link:../transport-contracts
     devDependencies:
       tsup:
         specifier: ^8.3.5

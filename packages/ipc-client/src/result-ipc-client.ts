@@ -30,14 +30,14 @@
  * @module @memoflow/ipc-client
  */
 
-import type { Result, ResultError } from '@memoflow/contracts/result';
+import type { Result, ResultError } from '@memoflow/transport-contracts/result';
 import {
   fail,
   ResultCode,
   fromIpcResult,
   type IpcResult,
   isIpcResultEnvelope,
-} from '@memoflow/contracts/result';
+} from '@memoflow/transport-contracts/result';
 import type { ElectronBridge, IpcClientConfig, IResultIpcClient } from './types';
 import { DEFAULT_IPC_CLIENT_CONFIG } from './types';
 
