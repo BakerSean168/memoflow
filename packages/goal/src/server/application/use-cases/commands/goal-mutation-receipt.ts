@@ -1,10 +1,5 @@
 import type { GoalMutationReceipt, GoalRecordClientDTO } from '@memoflow/goal-contracts';
-import type {
-  GoalId,
-  GoalRecordId,
-  GoalReviewId,
-  KeyResultId,
-} from '@memoflow/contracts/primitives';
+import type { GoalId, GoalRecordId, GoalReviewId, KeyResultId } from '@memoflow/goal-contracts';
 import type { Goal } from '../../../domain';
 
 interface GoalMutationAffectedEntities {

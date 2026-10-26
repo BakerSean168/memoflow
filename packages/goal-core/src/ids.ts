@@ -4,7 +4,7 @@ import type {
   KeyResultId as KeyResultIdType,
   GoalRecordId as GoalRecordIdType,
   GoalReviewId as GoalReviewIdType,
-} from '@memoflow/contracts/primitives';
+} from '@memoflow/goal-contracts';
 
 /** One canonical runtime-neutral factory per goal identifier. */
 export const GoalId = createIdType<GoalIdType>('IGoalId');

@@ -6,7 +6,7 @@
 
 import type { Result } from '@memoflow/contracts/result';
 import type { IGoalApiClient, IResultHttpClient } from '../types';
-import type { GoalId } from '@memoflow/contracts/primitives';
+import type { GoalId } from '@memoflow/goal-contracts';
 import type {
   GoalClientDTO,
   GoalMutationReceipt,

@@ -1,7 +1,7 @@
 /** Task-owned link configuration; Goal owns measurement and aggregation. */
 import { z } from 'zod';
 import { brandedId } from '@memoflow/shared-primitives';
-import type { GoalId, KeyResultId } from '@memoflow/shared-primitives';
+import type { GoalId, KeyResultId } from '@memoflow/goal-contracts';
 import { TaskGoalBindingTrigger } from './task-goal-binding-trigger';
 
 /** User fact only; binding and provenance are resolved by Task. */

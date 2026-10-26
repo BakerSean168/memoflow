@@ -19,7 +19,8 @@ import {
 } from '@memoflow/goal-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
-import type { IdentityId, KeyResultId } from '@memoflow/contracts/primitives';
+import type { IdentityId } from '@memoflow/contracts/primitives';
+import type { KeyResultId } from '@memoflow/goal-contracts';
 import { type GoalWriteTransactionRunner } from './goal-write-support';
 import { createGoalMutationReceipt } from './goal-mutation-receipt';
 

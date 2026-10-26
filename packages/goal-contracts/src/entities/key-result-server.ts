@@ -5,7 +5,8 @@
  */
 
 import type { GoalTimeframe, KeyResultMeasurement } from '../value-objects';
-import type { TransferDate, KeyResultId } from '@memoflow/shared-primitives';
+import type { TransferDate } from '@memoflow/shared-primitives';
+import type { KeyResultId } from '../value-objects/key-result-id';
 
 export interface KeyResultServerDTO {
   id: KeyResultId;

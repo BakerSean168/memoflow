@@ -719,7 +719,7 @@ import {
   PopoverTrigger,
   useConfirm,
 } from '@memoflow/ui-vue-shadcn';
-import type { GoalId, KeyResultId } from '@memoflow/contracts/primitives';
+import type { GoalId, KeyResultId } from '@memoflow/goal-contracts';
 import { ImportanceLevel } from '@memoflow/contracts/shared';
 import {
   ReminderTimeUnit,

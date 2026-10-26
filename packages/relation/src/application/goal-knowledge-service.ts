@@ -13,7 +13,7 @@ import {
   type RelationDTO,
 } from '@memoflow/contracts/relation';
 import type { KnowledgeDocumentRef } from '@memoflow/contracts/repository';
-import type { GoalId } from '@memoflow/contracts/primitives';
+import type { GoalId } from '@memoflow/goal-contracts';
 import type { RelationRepository } from '../domain/relation-repository';
 
 export interface KnowledgeDocumentRefResolver {

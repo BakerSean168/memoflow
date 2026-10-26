@@ -4,7 +4,7 @@ import type {
   KeyResultSnapshot as IKeyResultSnapshot,
   KeyResultSnapshotDTO,
 } from '@memoflow/goal-contracts';
-import type { KeyResultId } from '@memoflow/contracts/primitives';
+import type { KeyResultId } from '@memoflow/goal-contracts';
 
 /** Immutable authoritative KR measurement snapshot used by Goal Review. */
 export class KeyResultSnapshot

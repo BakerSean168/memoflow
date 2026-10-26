@@ -1,10 +1,5 @@
-import type {
-  IdentityId,
-  GoalId,
-  KeyResultId,
-  TaskOccurrenceId,
-  TaskPlanId,
-} from '@memoflow/shared-primitives';
+import type { IdentityId, TaskOccurrenceId, TaskPlanId } from '@memoflow/shared-primitives';
+import type { GoalId, KeyResultId } from '@memoflow/goal-contracts';
 
 /** Explicit settlement source owned by the durable Task -> Goal contract. */
 export const TaskGoalSettlementSourceType = {
