@@ -20,7 +20,10 @@ export function selectBuildTasks(projectGraph, keys) {
       ['build', 'typecheck', 'runtime-scripts:build'].includes(target),
       `unexpected build target: ${key}`,
     );
-    assert(projectGraph.nodes[project]?.data.targets?.[target], `unknown Nx task: ${key}`);
+    assert(
+      projectGraph.nodes[project]?.data.targets?.[target],
+      `unknown Nx task: ${key} (graph projects: ${Object.keys(projectGraph.nodes).join(', ') || '<none>'})`,
+    );
     const selected = createTaskGraph(projectGraph, {}, [project], [target], undefined, {
       __overrides_unparsed__: [],
     });

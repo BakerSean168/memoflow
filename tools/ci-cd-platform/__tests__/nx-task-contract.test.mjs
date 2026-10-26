@@ -269,7 +269,7 @@ test('mixed Build + Typecheck selects exact initiating tasks with one shared dep
 });
 
 test('real Nx merged scheduler runs both targets concurrently, deduplicates dependencies and exposes failures', async () => {
-  const { mkdtemp, mkdir, writeFile, symlink, rm } = await import('node:fs/promises');
+  const { mkdtemp, mkdir, writeFile, symlink, rm, readdir } = await import('node:fs/promises');
   const { tmpdir } = await import('node:os');
   const { spawnSync } = await import('node:child_process');
   const root = await mkdtemp(path.join(tmpdir(), 'nx-build-graph-'));
@@ -309,6 +309,13 @@ test('real Nx merged scheduler runs both targets concurrently, deduplicates depe
         }),
       );
     }
+    // Every Nx state location must resolve inside the fixture root; the runner
+    // exports absolute paths for the outer checkout.
+    const nxState = {
+      NX_WORKSPACE_DATA_DIRECTORY: path.join(root, '.nx/workspace-data'),
+      NX_PROJECT_GRAPH_CACHE_DIRECTORY: path.join(root, '.nx/workspace-data'),
+      NX_CACHE_DIRECTORY: path.join(root, '.nx/cache'),
+    };
     const execute = (env = {}) =>
       spawnSync(
         process.execPath,
@@ -318,15 +325,47 @@ test('real Nx merged scheduler runs both targets concurrently, deduplicates depe
           encoding: 'utf8',
           env: {
             ...process.env,
+            ...env,
             NX_DAEMON: 'false',
             NX_WORKSPACE_ROOT_PATH: root,
+            ...nxState,
             CI: 'true',
-            ...env,
           },
         },
       );
-    const success = execute();
+    // The runner exports absolute Nx state paths for the real workspace
+    // (NX_WORKSPACE_DATA_DIRECTORY / NX_CACHE_DIRECTORY). A fixture that inherits
+    // them resolves the outer checkout's state instead of its own temporary root.
+    const inheritedData = path.join(root, 'inherited-workspace-data');
+    const inheritedCache = path.join(root, 'inherited-cache');
+    await mkdir(inheritedData, { recursive: true });
+    await mkdir(inheritedCache, { recursive: true });
+    const inherited = {
+      NX_WORKSPACE_DATA_DIRECTORY: process.env.NX_WORKSPACE_DATA_DIRECTORY,
+      NX_CACHE_DIRECTORY: process.env.NX_CACHE_DIRECTORY,
+    };
+    process.env.NX_WORKSPACE_DATA_DIRECTORY = inheritedData;
+    process.env.NX_CACHE_DIRECTORY = inheritedCache;
+    let success;
+    try {
+      success = execute();
+    } finally {
+      for (const [key, value] of Object.entries(inherited)) {
+        if (value === undefined) delete process.env[key];
+        else process.env[key] = value;
+      }
+    }
     assert.equal(success.status, 0, success.stdout + success.stderr);
+    assert.deepEqual(
+      await readdir(inheritedData),
+      [],
+      'fixture Nx workspace data must stay inside its temporary root',
+    );
+    assert.deepEqual(
+      await readdir(inheritedCache),
+      [],
+      'fixture Nx task cache must stay inside its temporary root',
+    );
     const lines = (await readFile(path.join(root, 'executed.jsonl'), 'utf8'))
       .trim()
       .split('\n')
@@ -345,7 +384,6 @@ test('real Nx merged scheduler runs both targets concurrently, deduplicates depe
     );
     const failure = execute({ FAIL_TYPES: '1' });
     assert.equal(failure.status, 1, failure.stdout + failure.stderr);
-    const { readdir } = await import('node:fs/promises');
     const result = JSON.parse(
       await readFile(
         path.join(
