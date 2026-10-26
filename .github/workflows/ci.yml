@@ -72,11 +72,11 @@ jobs:
       job_unit_1: ${{ steps.scope.outputs.job_unit_1 }}
       job_unit_2: ${{ steps.scope.outputs.job_unit_2 }}
       job_unit_3: ${{ steps.scope.outputs.job_unit_3 }}
-      job_typecheck: ${{ steps.scope.outputs.job_typecheck }}
+      job_web_unit_1: ${{ steps.scope.outputs.job_web_unit_1 }}
+      job_web_unit_2: ${{ steps.scope.outputs.job_web_unit_2 }}
+      job_server_unit: ${{ steps.scope.outputs.job_server_unit }}
       job_build: ${{ steps.scope.outputs.job_build }}
-      job_build_backend: ${{ steps.scope.outputs.job_build_backend }}
       job_verification_children: ${{ steps.scope.outputs.job_verification_children }}
-      job_web_specialized: ${{ steps.scope.outputs.job_web_specialized }}
       job_component_browser: ${{ steps.scope.outputs.job_component_browser }}
       job_web_visual: ${{ steps.scope.outputs.job_web_visual }}
       job_contract: ${{ steps.scope.outputs.job_contract }}
@@ -194,6 +194,75 @@ jobs:
       - uses: ./.github/actions/publish-task-receipts
         if: always()
 
+  web-unit-1:
+    name: Test Web (Unit 1/2)
+    needs: scope-detector
+    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.job_web_unit_1 == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with: { fetch-depth: 0 }
+      - uses: ./.github/actions/setup-nx-affected-job
+        with:
+          node-version: '${{ env.NODE_VERSION }}'
+          setup-python: 'false'
+          setup-uv: 'false'
+          lane: validate
+          consume-delivery-manifest: 'true'
+      - run: node ./tools/ci-cd-platform/run-ci-tasks.mjs web-unit-1
+        env: { DELIVERY_LANE: validate }
+      - uses: ./.github/actions/publish-lane-evidence
+        if: always()
+        with: { lane: validate }
+      - uses: ./.github/actions/publish-task-receipts
+        if: always()
+
+  web-unit-2:
+    name: Test Web (Unit 2/2)
+    needs: scope-detector
+    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.job_web_unit_2 == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with: { fetch-depth: 0 }
+      - uses: ./.github/actions/setup-nx-affected-job
+        with:
+          node-version: '${{ env.NODE_VERSION }}'
+          setup-python: 'false'
+          setup-uv: 'false'
+          lane: validate
+          consume-delivery-manifest: 'true'
+      - run: node ./tools/ci-cd-platform/run-ci-tasks.mjs web-unit-2
+        env: { DELIVERY_LANE: validate }
+      - uses: ./.github/actions/publish-lane-evidence
+        if: always()
+        with: { lane: validate }
+      - uses: ./.github/actions/publish-task-receipts
+        if: always()
+
+  server-unit:
+    name: Test Server (Unit)
+    needs: scope-detector
+    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.job_server_unit == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with: { fetch-depth: 0 }
+      - uses: ./.github/actions/setup-nx-affected-job
+        with:
+          node-version: '${{ env.NODE_VERSION }}'
+          setup-python: 'false'
+          setup-uv: 'false'
+          lane: validate
+          consume-delivery-manifest: 'true'
+      - run: node ./tools/ci-cd-platform/run-ci-tasks.mjs server-unit
+        env: { DELIVERY_LANE: validate }
+      - uses: ./.github/actions/publish-lane-evidence
+        if: always()
+        with: { lane: validate }
+      - uses: ./.github/actions/publish-task-receipts
+        if: always()
+
   component-browser:
     name: Test Web (Browser)
     needs: scope-detector
@@ -244,86 +313,8 @@ jobs:
       - uses: ./.github/actions/publish-task-receipts
         if: always()
 
-  typecheck:
-    name: Build + Typecheck (Types)
-    needs: scope-detector
-    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.job_typecheck == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with: { fetch-depth: 2 }
-      - uses: ./.github/actions/setup-nx-affected-job
-        with:
-          node-version: '${{ env.NODE_VERSION }}'
-          setup-python: 'true'
-          setup-uv: 'true'
-          lane: validate
-          consume-delivery-manifest: 'true'
-      - run: node ./tools/ci-cd-platform/run-ci-tasks.mjs typecheck
-        env: { TEST_REPORT_NAME: typecheck, DELIVERY_LANE: validate }
-      - uses: ./.github/actions/publish-lane-evidence
-        with: { lane: validate }
-      - uses: ./.github/actions/publish-task-receipts
-        if: always()
-
-  build-backend:
-    name: Build + Typecheck (Acceptance dependencies)
-    needs: scope-detector
-    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.job_build_backend == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with: { fetch-depth: 2 }
-      - uses: ./.github/actions/setup-nx-affected-job
-        with:
-          node-version: '${{ env.NODE_VERSION }}'
-          setup-python: 'true'
-          setup-uv: 'true'
-          lane: validate
-          consume-delivery-manifest: 'true'
-      # Specialized browser acceptance executes Vite source; its only
-      # build-artifact dependencies are the API and database dists. Building
-      # just those here takes the web build (and the full Build job) off the
-      # shards' critical path. The full Build job still produces and uploads
-      # the canonical ci-build-artifacts bundle for the release chain.
-      - name: Build API and database artifacts
-        run: node ./tools/ci-cd-platform/run-ci-tasks.mjs build-backend
-      - name: Create API artifact manifest
-        run: node ./tools/ci-cd-platform/create-artifact-manifest.mjs --name api --path apps/api/dist --manifest scope/delivery-manifest-v1.json --output reports/ci-cd-platform/api-artifact-manifest.json
-      - name: Create Database artifact manifest
-        run: node ./tools/ci-cd-platform/create-artifact-manifest.mjs --name database --path packages/database/dist --manifest scope/delivery-manifest-v1.json --output reports/ci-cd-platform/database-artifact-manifest.json
-      - name: Create Database runtime artifact manifest
-        if: ${{ hashFiles('packages/database/dist/runtime-scripts/**') != '' }}
-        run: node ./tools/ci-cd-platform/create-artifact-manifest.mjs --name database-runtime --path packages/database/dist/runtime-scripts --manifest scope/delivery-manifest-v1.json --output reports/ci-cd-platform/database-runtime-artifact-manifest.json
-      - name: Create API runtime dependency closure
-        run: node ./tools/ci-cd-platform/create-runtime-closure.mjs --manifest scope/delivery-manifest-v1.json --output-dir api-runtime-closure --output reports/ci-cd-platform/api-runtime-closure-artifact-manifest.json
-      - name: Verify backend artifacts
-        shell: bash
-        run: |
-          digest=$(node -p "require('./scope/delivery-manifest-v1.json').digest")
-          test -n "$digest"
-          node ./tools/ci-cd-platform/verify-artifact.mjs reports/ci-cd-platform/api-artifact-manifest.json apps/api/dist "$digest"
-          node ./tools/ci-cd-platform/verify-artifact.mjs reports/ci-cd-platform/database-artifact-manifest.json packages/database/dist "$digest"
-      - name: Upload backend build artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
-          name: ci-build-artifacts-backend
-          path: |
-            apps/api/dist
-            packages/database/dist
-            api-runtime-closure
-            scope/delivery-manifest-v1.json
-            reports/ci-cd-platform/api-artifact-manifest.json
-            reports/ci-cd-platform/database-artifact-manifest.json
-            reports/ci-cd-platform/database-runtime-artifact-manifest.json
-            reports/ci-cd-platform/api-runtime-closure-artifact-manifest.json
-          if-no-files-found: error
-          retention-days: 14
-      - uses: ./.github/actions/publish-task-receipts
-        if: always()
-
   build:
-    name: Build + Typecheck (Build)
+    name: Build + Typecheck
     needs: scope-detector
     if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.job_build == 'true'
     runs-on: ubuntu-latest
@@ -337,7 +328,7 @@ jobs:
           setup-uv: 'true'
           lane: validate
           consume-delivery-manifest: 'true'
-      - name: Execute every selected build and its Nx dependencies
+      - name: Execute selected build and typecheck in one Nx dependency graph
         run: node ./tools/ci-cd-platform/run-ci-tasks.mjs build
         env: { TEST_REPORT_NAME: build, DELIVERY_LANE: validate }
       - name: Create API artifact manifest
@@ -423,96 +414,6 @@ jobs:
         run: pnpm exec nx run database:prisma-push
       - name: Execute selected API, DB, IPC and Electron Main suites
         run: node ./tools/ci-cd-platform/run-ci-tasks.mjs verification-children
-      - uses: ./.github/actions/publish-task-receipts
-        if: always()
-
-  web-specialized:
-    name: Test Web Acceptance (${{ matrix.shard }})
-    needs: [scope-detector, build-backend]
-    if: needs.scope-detector.result == 'success' && needs.scope-detector.outputs.job_web_specialized == 'true'
-    runs-on: ubuntu-24.04
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.scope-detector.outputs.web_matrix) }}
-    env:
-      CI_WEB_SHARD: ${{ matrix.shard }}
-      DATABASE_URL: postgresql://test_user:test_pass@127.0.0.1:5433/memoflow_test
-      JWT_SECRET: test-jwt-secret-for-e2e-testing-purposes
-      TZ: UTC
-    services:
-      postgres:
-        image: pgvector/pgvector:0.8.5-pg18
-        env: { POSTGRES_USER: test_user, POSTGRES_PASSWORD: test_pass, POSTGRES_DB: memoflow_test }
-        ports: ['5433:5432']
-        options: --health-cmd "pg_isready -U test_user -d memoflow_test" --health-interval 5s --health-timeout 5s --health-retries 10
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with: { fetch-depth: 2 }
-      - uses: ./.github/actions/setup-nx-affected-job
-        with:
-          cache-variant: web-${{ strategy.job-index }}
-          node-version: '${{ env.NODE_VERSION }}'
-          setup-python: 'false'
-          setup-uv: 'false'
-          capabilities: node,pnpm,playwright,postgres
-          lane: web
-          consume-delivery-manifest: 'true'
-      - name: Download immutable build artifacts
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
-        with:
-          name: ci-build-artifacts-backend
-          path: .
-      - name: Resolve artifact source manifest digest
-        id: artifact-source
-        shell: bash
-        run: |
-          digest=$(node -p "require('./reports/ci-cd-platform/web-input-v1.json').manifestDigest")
-          test -n "$digest"
-          echo "digest=$digest" >> "$GITHUB_OUTPUT"
-      - name: Restore API runtime dependency closure
-        run: node ./tools/ci-cd-platform/restore-runtime-closure.mjs reports/ci-cd-platform/api-runtime-closure-artifact-manifest.json api-runtime-closure . "${{ steps.artifact-source.outputs.digest }}"
-      - name: Verify API artifact
-        run: node ./tools/ci-cd-platform/verify-artifact.mjs reports/ci-cd-platform/api-artifact-manifest.json apps/api/dist "${{ steps.artifact-source.outputs.digest }}"
-      - name: Verify Database artifact
-        run: node ./tools/ci-cd-platform/verify-artifact.mjs reports/ci-cd-platform/database-artifact-manifest.json packages/database/dist "${{ steps.artifact-source.outputs.digest }}"
-      - run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run database:prisma-push
-        env: { TEST_REPORT_NAME: web-database, DELIVERY_LANE: web }
-      - run: pnpm exec playwright install chromium
-      # Only the dedicated Provider acceptance starts the built API; ordinary Web Flow is retired.
-      - run: node ./tools/ci-cd-platform/run-ci-tasks.mjs web-specialized web-shard web:e2e:ai-provider
-        env:
-          TEST_REPORT_NAME: web-ai-provider
-          DELIVERY_LANE: web
-          E2E_PREBUILT_ARTIFACT: '1'
-      - name: Upload actual Web shard execution receipt
-        if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
-          # Re-running failed jobs must not overwrite or shadow a prior attempt.
-          name: web-shard-receipt-${{ github.run_attempt }}-${{ strategy.job-index }}
-          path: reports/web-shards/*.json
-          if-no-files-found: error
-          retention-days: 14
-      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        if: always()
-        with:
-          name: web-specialized-${{ strategy.job-index }}-results
-          path: apps/web/test-results/provider-results.json
-          if-no-files-found: ignore
-          retention-days: 14
-      - if: failure()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
-          name: web-specialized-${{ strategy.job-index }}-failure
-          path: |
-            apps/web/test-results
-            apps/web/playwright-report
-          if-no-files-found: ignore
-          retention-days: 7
-      - uses: ./.github/actions/publish-lane-evidence
-        with:
-          lane: web
-          artifact-suffix: shard-${{ strategy.job-index }}
       - uses: ./.github/actions/publish-task-receipts
         if: always()
 
@@ -609,11 +510,11 @@ jobs:
       - unit-1
       - unit-2
       - unit-3
-      - typecheck
+      - web-unit-1
+      - web-unit-2
+      - server-unit
       - build
-      - build-backend
       - verification-children
-      - web-specialized
       - web-visual
       - component-browser
       - contract
@@ -638,11 +539,6 @@ jobs:
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
           pattern: ci-*-receipts-*
-          path: reports/run-evidence
-      - name: Download Web shard receipts
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
-        with:
-          pattern: web-shard-receipt-*
           path: reports/run-evidence
       - name: Collect GitHub run metrics
         id: run_metrics
@@ -673,11 +569,11 @@ jobs:
       - unit-1
       - unit-2
       - unit-3
-      - typecheck
+      - web-unit-1
+      - web-unit-2
+      - server-unit
       - build
-      - build-backend
       - verification-children
-      - web-specialized
       - web-visual
       - component-browser
       - contract
@@ -694,12 +590,6 @@ jobs:
         with:
           name: delivery-manifest-v1
           path: scope
-      - name: Download Web shard execution receipts
-        continue-on-error: true
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
-        with:
-          pattern: web-shard-receipt-*
-          path: reports/web-shards
       - name: Download primary task receipts
         continue-on-error: true
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7

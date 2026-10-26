@@ -10,7 +10,7 @@
       }
     },
     "apps/web/playwright.config.ts": {
-      "lane": "required",
+      "lane": "nightly",
       "lifecycle": "active",
       "execution": {
         "kind": "nx",
@@ -18,11 +18,6 @@
         "entrypoint": "apps/web/e2e/helpers/run-ai-provider-playwright.ts"
       },
       "automation": [
-        {
-          "kind": "github-workflow",
-          "workflow": ".github/workflows/ci.yml",
-          "target": "web:e2e:ai-provider"
-        },
         {
           "kind": "github-workflow",
           "workflow": ".github/workflows/nightly-audit.yml",

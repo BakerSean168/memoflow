@@ -1,14 +1,23 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://memoflow.dev/schemas/ci-dispatch-v1.schema.json",
+  "$id": "https://memoflow.dev/schemas/ci-dispatch-v2.schema.json",
   "type": "object",
-  "required": ["kind", "version", "selection", "jobs", "serverShards", "skippedTasks", "ownership"],
+  "required": [
+    "kind",
+    "version",
+    "selection",
+    "jobs",
+    "serverShards",
+    "skippedTasks",
+    "ownership",
+    "nightlyTasks"
+  ],
   "properties": {
     "kind": {
-      "const": "ci-dispatch-v1"
+      "const": "ci-dispatch-v2"
     },
     "version": {
-      "const": 1
+      "const": 2
     },
     "selection": {
       "type": "object"
@@ -49,6 +58,26 @@
     },
     "ownership": {
       "type": "object"
+    },
+    "nightlyTasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["key", "workflow", "reason"],
+        "properties": {
+          "key": {
+            "const": "web:e2e:ai-provider"
+          },
+          "workflow": {
+            "const": ".github/workflows/nightly-audit.yml"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      }
     }
   },
   "additionalProperties": true

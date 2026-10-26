@@ -24,18 +24,18 @@ test('live Nx replay covers reviewed PR counterexamples and Main full validation
     ['lint'],
   );
   assert.ok(byId.chat.jobs['component-browser'].length);
-  assert.ok(byId.chat.jobs['unit-1'].includes('app-vue:test#1/2'));
+  assert.ok(byId.chat.jobs['web-unit-1'].includes('app-vue:test#1/2'));
   assert.equal(
     byId.chat.jobs['verification-children'].some((key) => key.endsWith(':test:integration')),
     false,
   );
   for (const id of ['aiServer', 'taskServer', 'apiRoute', 'desktopMain']) {
     assert.deepEqual(byId[id].jobs['component-browser'], [], id);
-    assert.deepEqual(byId[id].jobs['web-specialized'], [], id);
+    assert.equal(byId[id].jobs['web-specialized'], undefined, id);
   }
-  assert.ok(byId.desktopRenderer.jobs['web-specialized'].length);
+  assert.ok(byId.desktopRenderer.jobs['web-visual'].length);
   assert.ok(byId.taskClient.jobs['component-browser'].length);
-  assert.ok(byId.taskClient.jobs['web-specialized'].length);
+  assert.ok(byId.taskClient.jobs['web-visual'].length);
   for (const id of ['aiContract', 'workflow', 'mainDocs']) {
     assert.equal(byId[id].full, true);
     assert.ok(byId[id].jobs.contract.includes('contracts:test:contract'));
@@ -45,16 +45,23 @@ test('live Nx replay covers reviewed PR counterexamples and Main full validation
     false,
     'test-only input must not rebuild production app-vue',
   );
-  assert.ok(byId.testOnly.jobs.typecheck.includes('app-vue:typecheck'));
+  assert.ok(byId.testOnly.jobs.build.includes('app-vue:typecheck'));
 });
-test('workflow runs Lint beside Changes and only acceptance waits for backend artifacts', async () => {
+test('workflow runs Lint beside Changes, one Build + Typecheck and resource-owned test pools', async () => {
   const workflow = YAML.parse(await readFile('.github/workflows/ci.yml', 'utf8'));
   const jobs = workflow.jobs;
   assert.equal(jobs.lint.needs, undefined);
   assert.equal(jobs['scope-detector'].needs, undefined);
   assert.equal(jobs['component-browser'].needs, 'scope-detector');
   assert.equal(jobs['web-visual'].needs, 'scope-detector');
-  assert.deepEqual(jobs['web-specialized'].needs, ['scope-detector', 'build-backend']);
+  assert.equal(jobs['web-specialized'], undefined);
+  assert.equal(jobs['build-backend'], undefined);
+  assert.equal(jobs.typecheck, undefined);
+  assert.equal(jobs.build.name, 'Build + Typecheck');
+  for (const id of ['web-unit-1', 'web-unit-2', 'server-unit']) {
+    assert.equal(jobs[id].needs, 'scope-detector');
+    assert.equal(jobs[id].services, undefined, `${id}: source tests need no database`);
+  }
   assert.equal(jobs['ci-check'].if, 'always()');
   assert.deepEqual([...jobs['ci-check'].needs].sort(), Object.keys(CI_CHECK_JOBS).sort());
   for (const [id] of Object.entries(CI_CHECK_JOBS)) {
@@ -151,11 +158,11 @@ test('task runner executes the exact Nx batch, emits successful/failed receipts 
     const pnpm = path.join(cwd, 'bin/pnpm');
     await writeFile(
       pnpm,
-      "#!/usr/bin/env node\nprocess.exit(process.env.FIXTURE_FAIL === 'true' ? 1 : 0);\n",
+      "#!/usr/bin/env node\nprocess.exit(process.env.FIXTURE_FAIL === 'true' && process.argv.includes('web:test') ? 1 : 0);\n",
     );
     await chmod(pnpm, 0o755);
     const tasks = Object.fromEntries(CI_TARGETS.map((t) => [t, []]));
-    tasks.typecheck = ['utils', 'time'];
+    tasks.test = ['web'];
     const manifest = await buildDeliveryManifest({
       head: sha,
       files: ['packages/utils/src/index.ts'],
@@ -165,7 +172,7 @@ test('task runner executes the exact Nx batch, emits successful/failed receipts 
         projects: ['utils', 'time'],
         tasks,
         selection: { version: 1, engine: 'nx-task-inputs', fallback: null },
-        unit: [],
+        unit: ['web'],
         coverage: [],
         smoke: [],
         integration: [],
@@ -176,10 +183,10 @@ test('task runner executes the exact Nx batch, emits successful/failed receipts 
       },
     });
     await writeFile(path.join(cwd, 'scope/delivery-manifest-v1.json'), JSON.stringify(manifest));
-    assert.equal(execute(['typecheck'], { GITHUB_SHA: sha }).status, 0);
+    assert.equal(execute(['web-unit-1'], { GITHUB_SHA: sha }).status, 0);
     const receiptDir = path.join(cwd, 'reports/ci-tasks');
     const files = await readdir(receiptDir);
-    assert.equal(files.length, 2);
+    assert.equal(files.length, 1);
     for (const file of files) {
       const receipt = JSON.parse(await readFile(path.join(receiptDir, file), 'utf8'));
       assert.equal(receipt.exitCode, 0);
@@ -188,20 +195,17 @@ test('task runner executes the exact Nx batch, emits successful/failed receipts 
         'pnpm',
         'exec',
         'nx',
-        'run-many',
-        '-t',
-        'typecheck',
-        '--projects=utils,time',
-        '--parallel=3',
+        'run',
+        'web:test',
         '--outputStyle=static',
       ]);
     }
-    assert.equal(execute(['typecheck'], { GITHUB_SHA: sha, FIXTURE_FAIL: 'true' }).status, 1);
+    assert.equal(execute(['web-unit-1'], { GITHUB_SHA: sha, FIXTURE_FAIL: 'true' }).status, 1);
     for (const file of files)
       assert.notEqual(JSON.parse(await readFile(path.join(receiptDir, file), 'utf8')).exitCode, 0);
-    assert.notEqual(execute(['typecheck', 'missing']).status, 0);
-    assert.notEqual(execute(['typecheck', 'utils:typecheck', 'time:typecheck']).status, 0);
-    assert.notEqual(execute(['typecheck'], { GITHUB_SHA: 'f'.repeat(40) }).status, 0);
+    assert.notEqual(execute(['web-unit-1', 'missing']).status, 0);
+    assert.notEqual(execute(['web-unit-1', 'web:test', 'time:test']).status, 0);
+    assert.notEqual(execute(['web-unit-1'], { GITHUB_SHA: 'f'.repeat(40) }).status, 0);
     assert.notEqual(execute(['contract']).status, 0);
     assert.doesNotThrow(() => validateDeliveryManifest(manifest));
   } finally {
@@ -239,4 +243,38 @@ test('Server receipt assignment cannot silently move a required suite between sh
       .state,
     'failure',
   );
+});
+
+test('all selected Unit suites have one existing-project owner, including the two exclusive app-vue file shards', async () => {
+  for (const row of await replayCiMatrix()) {
+    const jobs = row.actual.jobs;
+    const keys = Object.values(jobs)
+      .flat()
+      .filter((key) => /:test(?:#|$)/u.test(key));
+    const expected = row.actual.targets.test
+      .filter(
+        (project) =>
+          !['memoflow', 'governance-tools', 'test-system-v2'].includes(project) &&
+          !(project === 'contracts' && jobs.contract.length),
+      )
+      .flatMap((project) =>
+        project === 'app-vue' ? ['app-vue:test#1/2', 'app-vue:test#2/2'] : [`${project}:test`],
+      );
+    assert.deepEqual(keys.sort(), expected.sort(), row.id);
+    assert.equal(new Set(keys).size, keys.length, `${row.id}: no duplicate suite`);
+    for (const [id, tasks] of Object.entries(jobs)) {
+      for (const key of tasks.filter((k) => /:test(?:#|$)/u.test(k))) {
+        if (key.startsWith('app-vue:') || key.startsWith('web:')) assert.match(id, /^web-unit-/u);
+        else if (['api:', 'database:', 'migrator:'].some((prefix) => key.startsWith(prefix)))
+          assert.equal(id, 'server-unit');
+        else assert.match(id, /^unit-/u);
+      }
+    }
+    assert.equal(
+      Object.values(jobs)
+        .flat()
+        .some((key) => key.startsWith('web:e2e:ai-provider')),
+      false,
+    );
+  }
 });

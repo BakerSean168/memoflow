@@ -100,7 +100,7 @@ async function observeDispatch({
       runnerMinutes: optionalNonNegativeNumber(runnerMinutesInput, 'DELIVERY_RUNNER_MINUTES'),
     },
     provenance: {
-      generator: 'ci-dispatch-v1/observe-run',
+      generator: 'ci-dispatch-v2/observe-run',
       runId: process.env.GITHUB_RUN_ID,
       runAttempt: Number(process.env.GITHUB_RUN_ATTEMPT),
     },

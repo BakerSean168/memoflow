@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process';
-import { readFile, mkdir, writeFile } from 'node:fs/promises';
+import { readFile, mkdir, writeFile, rm } from 'node:fs/promises';
+import { successfulNxStatus } from './lib/nx-build-tasks.mjs';
 import { execFileSync } from 'node:child_process';
 import { digest, validateDeliveryManifest } from './lib/contracts.mjs';
-import { LINT_TASKS, validateDispatch, batchCommand } from './lib/dispatch.mjs';
+import { LINT_TASKS, validateDispatch, batchCommand, buildCommand } from './lib/dispatch.mjs';
 
 const [job, selector, expectedTarget] = process.argv.slice(2);
 const sha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
@@ -61,7 +62,7 @@ const run = async (command, name) => {
 await mkdir('reports/ci-tasks', { recursive: true });
 // One Nx scheduler per homogeneous build/typecheck batch retains dependencies,
 // cache restoration and task parallelism; no cross product of unrelated targets.
-if (job.startsWith('unit-')) {
+if (job.startsWith('unit-') || job.startsWith('web-unit-') || job === 'server-unit') {
   const setup = await run(
     ['pnpm', 'exec', 'nx', 'run', 'contracts:build', '--outputStyle=static'],
     `${job}-contracts-build`,
@@ -69,16 +70,30 @@ if (job.startsWith('unit-')) {
   if (setup.exitCode !== 0 || setup.signal || setup.error)
     throw new Error('Unit runtime contracts build failed');
 }
-const batches = ['build', 'typecheck', 'build-backend'].includes(job)
-  ? [...new Set(tasks.map((t) => t.target))].map((target) =>
-      tasks.filter((t) => t.target === target),
-    )
-  : tasks.map((task) => [task]);
+const batches = job === 'build' ? [tasks] : tasks.map((task) => [task]);
 for (const batch of batches) {
-  const command = batchCommand(batch);
+  const command = job === 'build' ? buildCommand(batch) : batchCommand(batch);
   const name = `${job}-${digest(batch.map((t) => t.key)).slice(0, 16)}`;
+  if (job === 'build')
+    await rm(`reports/ci-tasks/nx-build-${digest(batch.map((t) => t.key))}.result`, {
+      force: true,
+    });
   const result = await run(command, name);
+  let nxResults = null;
+  if (job === 'build') {
+    try {
+      nxResults = JSON.parse(
+        await readFile(
+          `reports/ci-tasks/nx-build-${digest(batch.map((t) => t.key))}.result`,
+          'utf8',
+        ),
+      );
+    } catch {
+      /* Missing scheduler results must fail each primary receipt closed. */
+    }
+  }
   for (const task of batch) {
+    const nx = nxResults?.tasks?.[task.key];
     const receipt = {
       kind: 'ci-task-receipt-v1',
       version: 1,
@@ -93,7 +108,17 @@ for (const batch of batches) {
       manifestDigest: manifest?.digest ?? null,
       command,
       ...result,
+      ...(job === 'build'
+        ? {
+            nx: nx ?? null,
+            exitCode:
+              result.exitCode === 0 && nxResults?.completed && successfulNxStatus(nx?.status)
+                ? 0
+                : 1,
+          }
+        : {}),
     };
+    if (receipt.exitCode !== 0) process.exitCode = 1;
     receipt.digest = digest(receipt);
     await writeFile(
       `reports/ci-tasks/${digest({ job, key: task.key })}.json`,

@@ -20,15 +20,17 @@ import {
 
 const history = JSON.parse(await readFile(WEB_SPEC_DURATIONS_PATH, 'utf8'));
 
-async function ciShardMatrix() {
+async function specializedShardMatrix() {
   const ci = await readFile('.github/workflows/ci.yml', 'utf8');
-  assert.match(ci, /matrix: \$\{\{ fromJSON\(needs.scope-detector.outputs.web_matrix\) \}\}/u);
+  assert.doesNotMatch(ci, /run-ci-tasks.mjs web-specialized/u);
+  const nightly = await readFile('.github/workflows/nightly-audit.yml', 'utf8');
+  assert.match(nightly, /nx run web:e2e:ai-provider/u);
   const plan = planWebShards({ specs: WEB_SPECIALIZED_SPECS, durations: history.specs });
   return plan.shards.map(({ id }) => parseShardArgument(id));
 }
 
-test('the CI shard plan covers every specialized Web spec exactly once', async () => {
-  const matrix = await ciShardMatrix();
+test('the retained specialized planner covers every Nightly Provider spec exactly once', async () => {
+  const matrix = await specializedShardMatrix();
   assert.ok(matrix.length > 0);
   assert.ok(matrix.every((entry) => entry.count === matrix.length));
   assert.deepEqual(

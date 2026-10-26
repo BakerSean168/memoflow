@@ -5,9 +5,9 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { buildDeliveryManifest } from '../generate-delivery-manifest.mjs';
-import { CI_CHECK_JOBS, evaluateCiCheck, validWebReceiptArtifactPath } from '../lib/ci-check.mjs';
+import { CI_CHECK_JOBS, evaluateCiCheck } from '../lib/ci-check.mjs';
 import { CI_TARGETS } from '../lib/task-selection.mjs';
-import { taskCommand } from '../lib/dispatch.mjs';
+import { taskCommand, buildCommand } from '../lib/dispatch.mjs';
 import { digest } from '../lib/contracts.mjs';
 
 const sha = 'a'.repeat(40);
@@ -63,7 +63,8 @@ async function fixture(web = true) {
         runId: '123',
         runAttempt: 1,
         manifestDigest: job === 'lint' ? null : manifest.digest,
-        command: taskCommand(task),
+        command: job === 'build' ? buildCommand(plan.tasks) : taskCommand(task),
+        ...(job === 'build' ? { nx: { taskId: task.key, status: 'success' } } : {}),
         resourceShard:
           job === 'verification-children'
             ? manifest.dispatch.serverShards.find((shard) => shard.keys.includes(task.key)).id
@@ -73,16 +74,15 @@ async function fixture(web = true) {
       }),
     ),
   );
-  const webReceipts = manifest.webShards.shards.map((s) => ({
-    id: s.id,
+  return {
+    needs,
+    manifest,
+    taskReceipts,
+    webReceipts: [],
     commit: sha,
     runId: '123',
     runAttempt: 1,
-    manifestDigest: manifest.digest,
-    exitCode: 0,
-    specs: s.specs,
-  }));
-  return { needs, manifest, taskReceipts, webReceipts, commit: sha, runId: '123', runAttempt: 1 };
+  };
 }
 function seal(receipt) {
   const { digest: _old, ...body } = receipt;
@@ -151,7 +151,7 @@ test('missing/malformed manifests, wrong dispatch version, omitted tasks and alt
     fails({ ...input, manifest: value });
   for (const mutate of [
     (m) => {
-      m.dispatch.version = 2;
+      m.dispatch.version = 1;
     },
     (m) => {
       m.dispatch.jobs.build.tasks = [];
@@ -170,30 +170,24 @@ test('missing/malformed manifests, wrong dispatch version, omitted tasks and alt
   fails({ ...input, commit: 'c'.repeat(40) });
   fails({ ...input, runId: null });
 });
-test('missing, extra, duplicate, stale and skipped Web shard evidence fails', async () => {
+test('retired PR Web shard evidence cannot be substituted for primary task receipts', async () => {
   const input = await fixture();
-  fails({ ...input, webReceipts: [] });
   fails({ ...input, webReceipts: null });
-  for (const patch of [
-    { id: '99/99' },
-    { exitCode: 1 },
-    { specs: [] },
-    { runId: '456' },
-    { runAttempt: 2 },
-    { commit: 'c'.repeat(40) },
-    { manifestDigest: 'd'.repeat(64) },
-  ])
-    fails({ ...input, webReceipts: [{ ...input.webReceipts[0], ...patch }] });
-  fails({ ...input, webReceipts: [...input.webReceipts, ...input.webReceipts] });
-  assert.equal(
-    validWebReceiptArtifactPath('web-shard-receipt-1-0/shard-1.json', input.webReceipts[0]),
-    true,
-  );
-  assert.equal(
-    validWebReceiptArtifactPath('web-shard-receipt-2-0/shard-1.json', input.webReceipts[0]),
-    false,
-  );
-  assert.equal(validWebReceiptArtifactPath('shard-1.json', input.webReceipts[0]), true);
+  fails({ ...input, webReceipts: [{ id: '1/1', specs: ['ai/provider-onboarding.spec.ts'] }] });
+});
+test('merged Build rejects missing, failed or forged Nx primary results even with successful wrapper', async () => {
+  const input = await fixture();
+  for (const nx of [
+    null,
+    { taskId: 'web:build', status: 'failure' },
+    { taskId: 'web:build', status: 'skipped' },
+    { taskId: 'api:build', status: 'success' },
+  ]) {
+    const broken = structuredClone(input);
+    const i = broken.taskReceipts.findIndex((r) => r.key === 'web:build');
+    broken.taskReceipts[i] = seal({ ...broken.taskReceipts[i], nx });
+    fails(broken);
+  }
 });
 test('rerun accepts untouched successful jobs but most recent failed receipt beats old green', async () => {
   const input = await fixture();
@@ -202,8 +196,6 @@ test('rerun accepts untouched successful jobs but most recent failed receipt bea
   input.taskReceipts.push(seal({ ...input.taskReceipts[0], runAttempt: 2, exitCode: 1 }));
   fails(input);
   input.taskReceipts.pop();
-  input.webReceipts.push({ ...input.webReceipts[0], runAttempt: 2, exitCode: 1 });
-  fails(input);
 });
 test('duplicate receipts and unexpected receipt keys fail', async () => {
   const input = await fixture();
@@ -226,21 +218,15 @@ test('every Server suite has one receipt from its assigned resource shard', asyn
   omitted.taskReceipts = omitted.taskReceipts.filter((r) => r.key !== receipt.key);
   assert.ok(fails(omitted).failures.includes(`${receipt.job}/${receipt.key}:missing-receipt`));
 });
-test('CLI reads recursive artifacts, rejects missing receipt and invalid artifact path', async () => {
+test('CLI reads recursive task artifacts and rejects missing or malformed receipts', async () => {
   const input = await fixture();
   const cwd = await mkdtemp(path.join(tmpdir(), 'ci-check-cli-'));
   try {
-    for (const d of [
-      'scope',
-      'reports/ci-tasks/attempt-1',
-      'reports/web-shards/web-shard-receipt-1-0',
-    ])
+    for (const d of ['scope', 'reports/ci-tasks/attempt-1'])
       await mkdir(path.join(cwd, d), { recursive: true });
     await writeFile(path.join(cwd, 'scope/manifest.json'), JSON.stringify(input.manifest));
     for (const [i, r] of input.taskReceipts.entries())
       await writeFile(path.join(cwd, `reports/ci-tasks/attempt-1/${i}.json`), JSON.stringify(r));
-    const webFile = path.join(cwd, 'reports/web-shards/web-shard-receipt-1-0/shard-1.json');
-    await writeFile(webFile, JSON.stringify(input.webReceipts[0]));
     const execute = () =>
       execFileSync(
         process.execPath,
@@ -264,7 +250,7 @@ test('CLI reads recursive artifacts, rejects missing receipt and invalid artifac
       path.join(cwd, 'reports/ci-tasks/attempt-1/0.json'),
       JSON.stringify(input.taskReceipts[0]),
     );
-    await writeFile(webFile, JSON.stringify({ ...input.webReceipts[0], runAttempt: 2 }));
+    await writeFile(path.join(cwd, 'reports/ci-tasks/attempt-1/0.json'), '{malformed');
     assert.throws(execute);
   } finally {
     await rm(cwd, { recursive: true, force: true });

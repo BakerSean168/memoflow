@@ -226,7 +226,7 @@
       "additionalProperties": false
     },
     "dispatch": {
-      "$ref": "ci-dispatch-v1.schema.json"
+      "$ref": "ci-dispatch-v2.schema.json"
     }
   },
   "additionalProperties": true

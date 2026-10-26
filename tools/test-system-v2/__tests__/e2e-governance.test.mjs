@@ -42,13 +42,13 @@ test('retired route matching rejects profile navigation while allowing the profi
 test('repository E2E ownership is execution-aware and complete', () => {
   assert.equal(inventory.version, 3);
   assert.deepEqual(inventory.e2eGovernance.issues, []);
-  assert.equal(inventory.e2eGovernance.countsByLane.required, 6);
-  assert.equal(inventory.e2eGovernance.countsByLane.nightly, undefined);
+  assert.equal(inventory.e2eGovernance.countsByLane.required, undefined);
+  assert.equal(inventory.e2eGovernance.countsByLane.nightly, 6);
   assert.equal(inventory.e2eGovernance.countsByLane.debug, undefined);
   assert.equal(inventory.e2eGovernance.countsByRole.canonical, 4);
   assert.equal(inventory.e2eGovernance.countsByRole.diagnostic, undefined);
   assert.equal(inventory.e2eGovernance.automatedCollectorCount, 2);
-  assert.equal(inventory.e2eGovernance.automationBindingCount, 4);
+  assert.equal(inventory.e2eGovernance.automationBindingCount, 3);
 
   const goalWorkflow = inventory.primary.find(
     (entry) => entry.path === 'apps/web/e2e/ai/provider-onboarding.spec.ts',

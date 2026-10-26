@@ -6,11 +6,11 @@ export const DISPATCH_JOB_IDS = Object.freeze([
   'unit-1',
   'unit-2',
   'unit-3',
-  'typecheck',
   'build',
-  'build-backend',
+  'web-unit-1',
+  'web-unit-2',
+  'server-unit',
   'verification-children',
-  'web-specialized',
   'web-visual',
   'component-browser',
   'contract',
@@ -66,13 +66,25 @@ export function buildDispatch(manifest) {
     reason: 'Nx noop target has no outputs or commands',
   }));
   jobs.build = tasks('build').filter((task) => !skippedTasks.some((skip) => skip.key === task.key));
-  jobs.typecheck = tasks('typecheck');
+  jobs.build.push(...tasks('typecheck'));
   // Governance owns these primary tests through its real Nx dependency graph.
   const governanceOwned = new Set(['governance-tools', 'test-system-v2']);
-  for (const shard of unitShards)
-    jobs[shard.id] = shard.tasks
-      .filter((t) => !governanceOwned.has(t.project))
-      .map((t) => nxTask(t.project, 'test', t.shard));
+  // Explicit existing Nx owners, never infer a business layer from source paths.
+  const webOwners = new Set(['app-vue', 'web']);
+  const serverOwners = new Set(['api', 'database', 'migrator']);
+  for (const shard of unitShards) {
+    for (const task of shard.tasks) {
+      if (governanceOwned.has(task.project)) continue;
+      const owner = webOwners.has(task.project)
+        ? task.shard === '2/2'
+          ? 'web-unit-2'
+          : 'web-unit-1'
+        : serverOwners.has(task.project)
+          ? 'server-unit'
+          : shard.id;
+      jobs[owner].push(nxTask(task.project, 'test', task.shard));
+    }
+  }
   if (laneDetails.contract.required) jobs.contract = tasks('test:contract');
   if (scope.browserRequired)
     jobs['component-browser'] = [nxTask('ui-storybook', 'test:interaction')];
@@ -85,18 +97,8 @@ export function buildDispatch(manifest) {
     ...tasks('test:integration'),
     ...(lanes.performance ? tasks('test:perf') : []),
   ];
-  // Source-only UI checks have no build edge. Only acceptance consumes API/DB artifacts.
+  // PR/Main keep source-only visuals; Provider acceptance belongs to Nightly Audit.
   if (lanes.web) {
-    jobs['build-backend'] = [
-      nxTask('api', 'build'),
-      nxTask('database', 'build'),
-      nxTask('database', 'runtime-scripts:build'),
-    ];
-    jobs['web-specialized'] = manifest.webShards.shards.map((shard) => ({
-      ...nxTask('web', 'e2e:ai-provider', shard.id),
-      executor: 'web-shard',
-      shard: shard.id,
-    }));
     jobs['web-visual'] = manifest.webShards.shards.flatMap((shard, index) =>
       fullVisual || index === 0
         ? [
@@ -111,10 +113,15 @@ export function buildDispatch(manifest) {
   // Runtime scripts are required by the existing main candidate artifact contract.
   if (full) jobs.build.push(nxTask('database', 'runtime-scripts:build'));
   return {
-    kind: 'ci-dispatch-v1',
-    version: 1,
+    kind: 'ci-dispatch-v2',
+    version: 2,
     selection: scope.selection,
     skippedTasks,
+    nightlyTasks: tasks('e2e:ai-provider').map((task) => ({
+      key: task.key,
+      workflow: '.github/workflows/nightly-audit.yml',
+      reason: 'Full Provider journey retained in the independent Nightly Audit',
+    })),
     serverShards: planServerShards(jobs['verification-children']),
     jobs: Object.fromEntries(
       Object.entries(jobs).map(([job, tasks]) => [
@@ -133,17 +140,12 @@ export function buildDispatch(manifest) {
     resources: {
       lint: ['node', 'pnpm'],
       Test: ['node', 'pnpm'],
+      'web-unit-1': ['node', 'pnpm'],
+      'web-unit-2': ['node', 'pnpm'],
+      'server-unit': ['node', 'pnpm'],
       'component-browser': ['node', 'pnpm', 'chromium'],
       'web-visual': ['node', 'pnpm', 'chromium', 'visual-fonts'],
       'verification-children': ['node', 'pnpm', 'postgres'],
-      'web-specialized': [
-        'node',
-        'pnpm',
-        'chromium',
-        'postgres',
-        'api-artifact',
-        'database-artifact',
-      ],
     },
     ownership: {
       'governance-tools:test': 'lint',
@@ -156,8 +158,8 @@ export function buildDispatch(manifest) {
 
 export function validateDispatch(manifest) {
   const plan = manifest.dispatch;
-  assert.equal(plan?.kind, 'ci-dispatch-v1', 'missing versioned CI dispatch');
-  assert.equal(plan.version, 1, 'unsupported CI dispatch');
+  assert.equal(plan?.kind, 'ci-dispatch-v2', 'missing versioned CI dispatch');
+  assert.equal(plan.version, 2, 'unsupported CI dispatch');
   assert.deepEqual(Object.keys(plan.jobs).sort(), [...DISPATCH_JOB_IDS].sort(), 'CI job map drift');
   // Recompute ownership and required/skip from the selected tasks. A self-digest
   // alone cannot detect a well-formed plan that silently omits an affected task.
@@ -210,4 +212,9 @@ export function batchCommand(tasks) {
         '--outputStyle=static',
       ]
     : taskCommand(tasks[0]);
+}
+
+/** One exact mixed-target Nx graph, no project/target cross product. */
+export function buildCommand(tasks) {
+  return ['node', 'tools/ci-cd-platform/run-nx-build-tasks.mjs', ...tasks.map((t) => t.key)];
 }

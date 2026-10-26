@@ -2874,6 +2874,24 @@
       ]
     },
     {
+      "path": "packages/ai/src/api/routes/assistant-sse.http.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/api/routes/provider-onboarding.http.integration.spec.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "packages/ai/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/ai/src/api/routes/workspace-sse.http.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12426,7 +12444,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 115
+      "fileCount": 116
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -12576,7 +12594,7 @@
       "runner": "playwright",
       "fileCount": 6,
       "e2eOwnership": {
-        "lane": "required",
+        "lane": "nightly",
         "lifecycle": "active",
         "execution": {
           "kind": "nx",
@@ -12584,11 +12602,6 @@
           "entrypoint": "apps/web/e2e/helpers/run-ai-provider-playwright.ts"
         },
         "automation": [
-          {
-            "kind": "github-workflow",
-            "workflow": ".github/workflows/ci.yml",
-            "target": "web:e2e:ai-provider"
-          },
           {
             "kind": "github-workflow",
             "workflow": ".github/workflows/nightly-audit.yml",
@@ -12769,7 +12782,7 @@
       "type": "primary",
       "suite": "integration",
       "runner": "vitest",
-      "fileCount": 1
+      "fileCount": 2
     },
     {
       "id": "packages/database/vitest.integration.config.ts",
@@ -12909,7 +12922,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 115
+      "fileCount": 116
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -13192,6 +13205,7 @@
       "packages/ai/src/api/routes/ai-runtime.goal-surface-lease.spec.ts",
       "packages/ai/src/api/routes/ai-runtime.routes.test.ts",
       "packages/ai/src/api/routes/ai-void-success-envelope.surface.spec.ts",
+      "packages/ai/src/api/routes/assistant-sse.http.spec.ts",
       "packages/ai/src/api/routes/workspace-sse.http.spec.ts",
       "packages/ai/src/client/runtime-assistant.spec.ts",
       "packages/ai/src/client/runtime-usage.spec.ts",
@@ -13880,8 +13894,8 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1115,
-    "integration": 57,
+    "unit": 1116,
+    "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,
     "boundary-main": 12,
@@ -13895,8 +13909,8 @@
     "countsByLane": {
       "desktop": 13,
       "local-validation": 6,
+      "nightly": 6,
       "reference": 6,
-      "required": 6,
       "secure-acceptance": 1,
       "specialized": 5,
       "visual-artifact": 3
@@ -13908,7 +13922,7 @@
       "supplemental": 27
     },
     "automatedCollectorCount": 2,
-    "automationBindingCount": 4
+    "automationBindingCount": 3
   },
   "e2eRetirement": {
     "version": 1,

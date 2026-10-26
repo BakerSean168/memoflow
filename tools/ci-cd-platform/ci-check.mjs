@@ -5,7 +5,7 @@
  * A missing or unreadable manifest fails the gate.
  */
 import { readFile, appendFile, readdir } from 'node:fs/promises';
-import { evaluateCiCheck, validWebReceiptArtifactPath } from './lib/ci-check.mjs';
+import { evaluateCiCheck } from './lib/ci-check.mjs';
 
 const manifestFlag = process.argv.indexOf('--manifest');
 const manifestPath =
@@ -24,23 +24,6 @@ try {
   manifest = null;
 }
 
-let webReceipts = [];
-try {
-  const files = await readdir('reports/web-shards', { recursive: true });
-  webReceipts = await Promise.all(
-    files
-      .filter((file) => file.endsWith('.json'))
-      .map(async (file) => {
-        const receipt = JSON.parse(await readFile(`reports/web-shards/${file}`, 'utf8'));
-        if (!validWebReceiptArtifactPath(file, receipt)) {
-          throw new Error(`Web receipt path conflicts with attempt/shard identity: ${file}`);
-        }
-        return receipt;
-      }),
-  );
-} catch (error) {
-  if (error.code !== 'ENOENT') webReceipts = null;
-}
 let taskReceipts = [];
 try {
   const files = await readdir('reports/ci-tasks', { recursive: true });
@@ -55,7 +38,6 @@ try {
 const result = evaluateCiCheck({
   needs,
   manifest,
-  webReceipts,
   taskReceipts,
   commit: process.env.GITHUB_SHA,
   runId: process.env.GITHUB_RUN_ID,

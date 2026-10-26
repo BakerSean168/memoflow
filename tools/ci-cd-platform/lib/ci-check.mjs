@@ -1,5 +1,6 @@
 import { digest, validateDeliveryManifest } from './contracts.mjs';
-import { DISPATCH_JOB_IDS, validateDispatch, taskCommand, batchCommand } from './dispatch.mjs';
+import { successfulNxStatus } from './nx-build-tasks.mjs';
+import { DISPATCH_JOB_IDS, validateDispatch, taskCommand, buildCommand } from './dispatch.mjs';
 
 export const CI_CHECK_JOBS = Object.freeze({
   'scope-detector': () => true,
@@ -61,15 +62,18 @@ export function evaluateCiCheck({
           : null;
       if ((receipt.resourceShard ?? null) !== expectedShard)
         failures.push(`${key}:wrong-resource-shard`);
-      const allowedCommands = [taskCommand(plan.task)];
-      if (['build', 'typecheck', 'build-backend'].includes(plan.job))
-        allowedCommands.push(
-          batchCommand(
-            manifest.dispatch.jobs[plan.job].tasks.filter((t) => t.target === plan.task.target),
-          ),
-        );
-      if (!allowedCommands.some((c) => JSON.stringify(c) === JSON.stringify(receipt.command)))
+      const expectedCommand =
+        plan.job === 'build'
+          ? buildCommand(manifest.dispatch.jobs.build.tasks)
+          : taskCommand(plan.task);
+      if (JSON.stringify(expectedCommand) !== JSON.stringify(receipt.command))
         failures.push(`${key}:wrong-command`);
+      if (
+        plan.job === 'build' &&
+        (!successfulNxStatus(receipt.nx?.status) ||
+          ![plan.task.key, `${plan.task.key}:production`].includes(receipt.nx?.taskId))
+      )
+        failures.push(`${key}:invalid-nx-result`);
 
       if (
         receiptDigest !== digest(body) ||
@@ -104,56 +108,7 @@ export function evaluateCiCheck({
         failures.push(`${key}:failed-receipt`);
     }
   }
-  const shards = manifest.lanes.web ? manifest.webShards.shards : [];
-  if (!Array.isArray(webReceipts)) failures.push('web:invalid-receipts');
-  else {
-    const latest = new Map();
-    const attempts = new Set();
-    for (const receipt of webReceipts) {
-      if (!shards.some((s) => s.id === receipt?.id)) {
-        failures.push('web:extra-shard');
-        continue;
-      }
-      if (
-        receipt.runId !== runId ||
-        receipt.commit !== commit ||
-        receipt.manifestDigest !== manifest.digest ||
-        !Number.isSafeInteger(receipt.runAttempt) ||
-        receipt.runAttempt < 1 ||
-        receipt.runAttempt > runAttempt
-      ) {
-        failures.push(`web:${receipt.id}:invalid-provenance`);
-        continue;
-      }
-      const key = `${receipt.id}/${receipt.runAttempt}`;
-      if (attempts.has(key)) failures.push(`web:${receipt.id}:duplicate-attempt`);
-      attempts.add(key);
-      if (!latest.has(receipt.id) || latest.get(receipt.id).runAttempt < receipt.runAttempt)
-        latest.set(receipt.id, receipt);
-    }
-    for (const shard of shards) {
-      const receipt = latest.get(shard.id);
-      if (!receipt) failures.push(`web:${shard.id}:missing-shard`);
-      else if (
-        receipt.exitCode !== 0 ||
-        JSON.stringify([...(receipt.specs ?? [])].sort()) !==
-          JSON.stringify([...shard.specs].sort())
-      )
-        failures.push(`web:${shard.id}:invalid-evidence`);
-    }
-  }
+  if (!Array.isArray(webReceipts) || webReceipts.length)
+    failures.push('web:unexpected-pr-evidence');
   return { state: failures.length ? 'failure' : 'success', failures, jobs };
-}
-export function validWebReceiptArtifactPath(relativePath, receipt) {
-  const match = /^web-shard-receipt-(\d+)-(\d+)\/shard-(\d+)\.json$/u.exec(relativePath);
-  const flat = /^shard-(\d+)\.json$/u.exec(relativePath);
-  const shard = /^(\d+)\/(\d+)$/u.exec(receipt?.id ?? '');
-  if (flat) return Boolean(shard && Number(flat[1]) === Number(shard[1]));
-  return Boolean(
-    match &&
-    shard &&
-    Number(match[1]) === receipt.runAttempt &&
-    Number(match[2]) + 1 === Number(shard[1]) &&
-    Number(match[3]) === Number(shard[1]),
-  );
 }
