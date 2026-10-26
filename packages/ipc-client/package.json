@@ -14,7 +14,7 @@
     }
   },
   "dependencies": {
-    "@memoflow/contracts": "workspace:*"
+    "@memoflow/transport-contracts": "workspace:*"
   },
   "devDependencies": {
     "tsup": "^8.3.5",

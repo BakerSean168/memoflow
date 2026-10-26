@@ -1,4 +1,4 @@
-import type { Instant, Ymd } from '@memoflow/contracts/primitives';
+import type { Instant, Ymd } from '@memoflow/shared-primitives';
 import type { TimeContext, TimeDisplaySlot, TimePresentationStyle, TimeZoneId } from '../types';
 import { isYmdShape } from '../codec/brand';
 import { getZonedDateTimeParts } from '../timezone/wall-clock';

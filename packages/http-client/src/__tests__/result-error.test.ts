@@ -6,7 +6,7 @@ import {
   defineFailureRegistry,
   strictFailureDetails,
   toLegacyResultError,
-} from '@memoflow/contracts/result';
+} from '@memoflow/transport-contracts/result';
 import { z } from 'zod';
 import { normalizeResultError, translateResultErrorMessage } from '../result-error';
 

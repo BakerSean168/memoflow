@@ -1,6 +1,6 @@
 import { createIdType } from '@memoflow/utils/domain';
 
-import type { IdentityId as IIdentityId } from '@memoflow/contracts';
+import type { IdentityId as IIdentityId } from '@memoflow/shared-primitives';
 
 /**
  * 全局 IdentityId 类型定义

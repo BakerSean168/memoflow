@@ -29,7 +29,7 @@
   "author": "bakersean",
   "license": "MIT",
   "dependencies": {
-    "@memoflow/contracts": "workspace:*",
+    "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/utils": "workspace:*"
   },
   "devDependencies": {

@@ -91,6 +91,6 @@ export interface IResultIpcClient {
   invoke<T = unknown>(
     channel: string,
     ...args: unknown[]
-  ): Promise<import('@memoflow/contracts/result').Result<T>>;
+  ): Promise<import('@memoflow/transport-contracts/result').Result<T>>;
   getBridge?: () => ElectronBridge | undefined;
 }

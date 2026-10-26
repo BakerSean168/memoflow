@@ -5,7 +5,7 @@ import {
   createPublicFailure,
   defineFailureRegistry,
   toLegacyResultError,
-} from '@memoflow/contracts/result';
+} from '@memoflow/transport-contracts/result';
 import { presentErrorMessage } from '../result-error';
 
 const TestFailureRegistry = defineFailureRegistry({

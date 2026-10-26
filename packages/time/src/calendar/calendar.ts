@@ -1,4 +1,4 @@
-import type { Instant, Ymd } from '@memoflow/contracts/primitives';
+import type { Instant, Ymd } from '@memoflow/shared-primitives';
 import type { Clock, TimeContext } from '../types';
 import {
   addCalendarDaysInContext,

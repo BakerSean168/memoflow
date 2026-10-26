@@ -4,7 +4,6 @@
   "projectType": "library",
   "sourceRoot": "packages/time/src",
   "tags": ["scope:shared", "type:lib", "layer:shared"],
-  "implicitDependencies": ["contracts"],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
