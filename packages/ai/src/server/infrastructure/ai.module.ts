@@ -200,7 +200,8 @@ export interface AIModuleDependencies {
 // ---------------------------------------------------------------------------
 
 export type AIRuntimeContributionsInput =
-  AIModuleRuntimeContribution | readonly AIModuleRuntimeContribution[];
+  | AIModuleRuntimeContribution
+  | readonly AIModuleRuntimeContribution[];
 
 /**
  * Module-owned runtime side effects.

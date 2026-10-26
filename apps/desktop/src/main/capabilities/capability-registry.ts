@@ -45,7 +45,8 @@ export type CapabilityFactoryResult<P> = P | typeof UNAVAILABLE;
 
 /** Factory that constructs an Electron-first capability port. */
 export type CapabilityFactory<P> = () =>
-  CapabilityFactoryResult<P> | Promise<CapabilityFactoryResult<P>>;
+  | CapabilityFactoryResult<P>
+  | Promise<CapabilityFactoryResult<P>>;
 
 type CapabilityRecord = {
   id: CapabilityId;

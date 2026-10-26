@@ -37,7 +37,8 @@ export interface AccountModuleDependencies {
   readonly userTimeContextPort: UserTimeContextPort;
   readonly laneCapability?: 'api' | 'desktop';
   readonly runtimeContributions?:
-    AccountModuleRuntimeContribution | readonly AccountModuleRuntimeContribution[];
+    | AccountModuleRuntimeContribution
+    | readonly AccountModuleRuntimeContribution[];
   /** W7：审计仓库（最小权限 + 审计） */
   readonly auditRepository?: OperationAuditRepository;
 }
@@ -118,7 +119,8 @@ export function createAccountUseCases(
 
 function normalizeRuntimeContributions(
   runtimeContributions?:
-    AccountModuleRuntimeContribution | readonly AccountModuleRuntimeContribution[],
+    | AccountModuleRuntimeContribution
+    | readonly AccountModuleRuntimeContribution[],
 ): readonly AccountModuleRuntimeContribution[] {
   if (!runtimeContributions) {
     return [];

@@ -50,7 +50,8 @@ export function useTaskPlanListQuery(
 ): ReturnType<typeof useTaskPlanListQueryImpl>;
 export function useTaskPlanListQuery(
   paramsOrOptions?:
-    MaybeRefOrGetter<UseTaskPlanListQueryOptions> | UseTaskPlanListQueryComposableOptions,
+    | MaybeRefOrGetter<UseTaskPlanListQueryOptions>
+    | UseTaskPlanListQueryComposableOptions,
 ) {
   const options: UseTaskPlanListQueryComposableOptions =
     paramsOrOptions !== null && typeof paramsOrOptions === 'object' && 'params' in paramsOrOptions

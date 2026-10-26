@@ -31,7 +31,8 @@ export interface CreateTaskPrismaModuleOptions {
   readonly userTimeContextPort: UserTimeContextPort;
   readonly goalReadPort?: TaskGoalMeasurementReadPort;
   readonly runtimeContributions?:
-    TaskModuleRuntimeContribution | readonly TaskModuleRuntimeContribution[];
+    | TaskModuleRuntimeContribution
+    | readonly TaskModuleRuntimeContribution[];
 }
 
 /**

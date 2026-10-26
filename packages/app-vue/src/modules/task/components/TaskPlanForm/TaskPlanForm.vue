@@ -336,7 +336,9 @@ const goalChipLabel = computed(() =>
 );
 const reminderChipLabel = computed(() => {
   const config = taskPlanBeingEdited.value?.reminderConfig as
-    { enabled?: boolean; triggers?: unknown[] } | null | undefined;
+    | { enabled?: boolean; triggers?: unknown[] }
+    | null
+    | undefined;
   const count = config?.enabled ? (config.triggers?.length ?? 0) : 0;
   return count > 0
     ? `${t('task.reminderSection.title')} · ${count}`

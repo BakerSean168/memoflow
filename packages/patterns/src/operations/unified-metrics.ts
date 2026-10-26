@@ -10,10 +10,18 @@
 export const OPERATION_METRIC_PREFIX = 'memoflow';
 
 export type OperationMetricModule =
-  'notification' | 'knowledge' | 'schedule-rebuild' | 'account-closure';
+  | 'notification'
+  | 'knowledge'
+  | 'schedule-rebuild'
+  | 'account-closure';
 
 export type OutboxState =
-  'persisted' | 'claimed' | 'succeeded' | 'retried' | 'failed' | 'dead_letter';
+  | 'persisted'
+  | 'claimed'
+  | 'succeeded'
+  | 'retried'
+  | 'failed'
+  | 'dead_letter';
 
 export type WorkerOutcome = 'completed' | 'failed' | 'retried' | 'skipped';
 

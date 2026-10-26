@@ -431,7 +431,9 @@ const triggers = ref<
 // 初始化触发器
 const initializeTriggers = () => {
   const config = props.modelValue.reminderConfig as unknown as
-    TaskReminderConfigDTO | null | undefined;
+    | TaskReminderConfigDTO
+    | null
+    | undefined;
   if (config?.triggers && config.triggers.length > 0) {
     triggers.value = config.triggers.map((t) => ({ ...t }));
   } else if (reminderEnabled.value && triggers.value.length === 0) {

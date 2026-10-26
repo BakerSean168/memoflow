@@ -74,7 +74,8 @@ export interface TaskModuleRuntimeContribution {
 }
 
 export type TaskRuntimeContributionsInput =
-  TaskModuleRuntimeContribution | readonly TaskModuleRuntimeContribution[];
+  | TaskModuleRuntimeContribution
+  | readonly TaskModuleRuntimeContribution[];
 
 /**
  * Everything the task server runtime needs from the outside world.

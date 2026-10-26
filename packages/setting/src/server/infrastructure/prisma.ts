@@ -14,7 +14,8 @@ import {
 
 export interface CreateSettingPrismaModuleOptions {
   readonly runtimeContributions?:
-    SettingModuleRuntimeContribution | readonly SettingModuleRuntimeContribution[];
+    | SettingModuleRuntimeContribution
+    | readonly SettingModuleRuntimeContribution[];
 }
 
 export interface SettingPrismaRepositorySet {

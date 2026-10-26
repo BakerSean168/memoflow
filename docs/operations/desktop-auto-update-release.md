@@ -348,7 +348,7 @@ node tools/ci-cd-platform/release-tools/release-contract.mjs \
   --require-release --expected-tag "$RELEASE_TAG"
 
 # Local docs-only validation with already installed tools.
-pnpm exec prettier --check docs/operations/desktop-auto-update-release.md \
+pnpm exec oxfmt --check docs/operations/desktop-auto-update-release.md \
   docs/plan/active/2026-09-30-desktop-auto-update-implementation.md
 pnpm nx run memoflow:docs-check
 pnpm nx run memoflow:governance-check

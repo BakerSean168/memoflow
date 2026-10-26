@@ -11,10 +11,17 @@ export interface AssistantUsageSnapshot {
 }
 
 export type AssistantTurnOutcome =
-  'assistant.run.completed' | 'assistant.run.failed' | 'assistant.run.cancelled';
+  | 'assistant.run.completed'
+  | 'assistant.run.failed'
+  | 'assistant.run.cancelled';
 
 export type AssistantExecutionPhase =
-  'transport' | 'first_activity' | 'first_token' | 'provider_inference' | 'tool' | 'approval_wait';
+  | 'transport'
+  | 'first_activity'
+  | 'first_token'
+  | 'provider_inference'
+  | 'tool'
+  | 'approval_wait';
 
 export function projectAssistantUsage(
   modelId: string,

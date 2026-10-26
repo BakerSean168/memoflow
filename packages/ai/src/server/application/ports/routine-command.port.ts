@@ -41,7 +41,9 @@ export interface AIActiveUsageTriggerInput {
 }
 
 export type AIRoutineTriggerInput =
-  AIWallClockTriggerInput | AIElapsedTriggerInput | AIActiveUsageTriggerInput;
+  | AIWallClockTriggerInput
+  | AIElapsedTriggerInput
+  | AIActiveUsageTriggerInput;
 
 export interface AIRoutineCreateInput {
   readonly context: ExecutionContext;

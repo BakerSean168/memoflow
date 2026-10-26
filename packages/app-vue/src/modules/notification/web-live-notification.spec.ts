@@ -115,11 +115,11 @@ describe('presentWebLiveNotification', () => {
       onActionSettled,
       translate: (key) =>
         (
-          ({
+          {
             'routine.action.complete': 'Complete',
             'routine.action.snooze10m': 'Remind in 10 min',
             'notification.toast.routineCompleted': 'Completed',
-          }) as Record<string, string>
+          } as Record<string, string>
         )[key] ?? key,
     });
 

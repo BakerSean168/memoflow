@@ -21,7 +21,7 @@ updated: 2026-04-26T00:00:00
 - `eslint.config.ts`
 - `tsconfig.base.json`
 - `tsconfig.workspace-src.json`
-- `.prettierrc`
+- `.oxfmtrc.json`
 - `.editorconfig`
 
 默认先继承这些文件，不再在多处复制同一套规则。

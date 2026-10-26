@@ -241,7 +241,8 @@ export function wallClockOccurrencesBetween(
 }
 
 export type DurableRoutineTrigger =
-  WallClockTrigger | Extract<ElapsedTrigger, { timingOwner: 'scheduler' }>;
+  | WallClockTrigger
+  | Extract<ElapsedTrigger, { timingOwner: 'scheduler' }>;
 
 export function requiresDurableScheduleProjection(
   trigger: RoutineTrigger,

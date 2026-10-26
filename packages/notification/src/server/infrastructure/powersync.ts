@@ -277,7 +277,8 @@ export function createDefaultElectronDesktopTransport(optionsOrDb?: unknown): un
     },
     async deliver(dto: unknown, context?: unknown) {
       const deliveryCtx = context as
-        { idempotencyKey?: string; deliveryId?: string; identityId?: string } | undefined;
+        | { idempotencyKey?: string; deliveryId?: string; identityId?: string }
+        | undefined;
       const idempotencyKey = deliveryCtx?.idempotencyKey;
 
       if (idempotencyKey) {

@@ -8,7 +8,8 @@ import type {
 } from '@memoflow/contracts/notification';
 
 export type NotificationSseDeliveryEvent =
-  NotificationDispatchInAppEvent | NotificationDispatchDesktopEvent;
+  | NotificationDispatchInAppEvent
+  | NotificationDispatchDesktopEvent;
 
 /** Product-facing Notification seam. Operational diagnostics are deliberately absent. */
 export interface NotificationInboxPort {

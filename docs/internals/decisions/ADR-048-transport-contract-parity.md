@@ -94,7 +94,7 @@ Zod request schema (input) + z.infer type
 ### 5. Direct Vitest gate
 
 - 本阶段门禁使用 direct Vitest（`node node_modules/vitest/vitest.mjs run
---config <pkg>/vitest.config.ts <files>`），不使用已知会 hang 的
+  --config <pkg>/vitest.config.ts <files>`），不使用已知会 hang 的
   `pnpm nx run <package>:test`。
 - 每条 migration 必须有对应的 route/electron/parity surface spec 可执行证据。
 

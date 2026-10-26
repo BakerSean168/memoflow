@@ -41,7 +41,8 @@ export interface NotificationModuleRuntimeContribution {
 }
 
 export type NotificationRuntimeContributionsInput =
-  NotificationModuleRuntimeContribution | readonly NotificationModuleRuntimeContribution[];
+  | NotificationModuleRuntimeContribution
+  | readonly NotificationModuleRuntimeContribution[];
 
 export interface NotificationModuleDependencies {
   readonly notificationRepository: INotificationRepository;
@@ -115,7 +116,8 @@ export function createNotificationUseCases(
 
 function normalizeRuntimeContributions(
   runtimeContributions?:
-    NotificationModuleRuntimeContribution | ReadonlyArray<NotificationModuleRuntimeContribution>,
+    | NotificationModuleRuntimeContribution
+    | ReadonlyArray<NotificationModuleRuntimeContribution>,
 ): readonly NotificationModuleRuntimeContribution[] {
   if (!runtimeContributions) return [];
   if (Array.isArray(runtimeContributions)) return Array.from(runtimeContributions);

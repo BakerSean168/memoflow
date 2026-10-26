@@ -128,7 +128,9 @@ export class DeviceAuthCoordinator {
         signal: AbortSignal.timeout(10_000),
       });
       const payload = (await response.json().catch(() => null)) as
-        DeviceCodeResponse | DeviceAuthErrorPayload | null;
+        | DeviceCodeResponse
+        | DeviceAuthErrorPayload
+        | null;
       if (!response.ok || !this.isDeviceCodeResponse(payload)) {
         return fail(
           this.toError(payload, 'CLOUD_CONNECTION_REQUEST_FAILED', '无法创建云端连接请求'),
@@ -276,7 +278,9 @@ export class DeviceAuthCoordinator {
           ]),
         });
         payload = (await response.json().catch(() => null)) as
-          DeviceTokenResponse | DeviceAuthErrorPayload | null;
+          | DeviceTokenResponse
+          | DeviceAuthErrorPayload
+          | null;
       } catch {
         this.increasePollBackoff(attempt);
         continue;

@@ -30,7 +30,7 @@
         "automatalabs.copilot-mcp",
         "nrwl.angular-console",
         "vue.volar",
-        "esbenp.prettier-vscode",
+        "oxc.oxc-vscode",
         "ms-ceintl.vscode-language-pack-zh-hans",
         "github.vscode-github-actions",
         "github.vscode-pull-request-github"
@@ -44,12 +44,12 @@
         },
         "files.eol": "\n",
         "editor.formatOnSave": true,
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.defaultFormatter": "oxc.oxc-vscode",
         "[typescript]": {
-          "editor.defaultFormatter": "esbenp.prettier-vscode"
+          "editor.defaultFormatter": "oxc.oxc-vscode"
         },
         "[vue]": {
-          "editor.defaultFormatter": "vue.volar"
+          "editor.defaultFormatter": "oxc.oxc-vscode"
         }
       }
     }

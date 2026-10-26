@@ -1641,7 +1641,8 @@ describe('KnowledgeRepositoryProjectionService', () => {
       mediaType: 'image/png',
     });
     let resolveBlob:
-      ((value: { blobSha: string; byteSize: number; bytes: Uint8Array }) => void) | null = null;
+      | ((value: { blobSha: string; byteSize: number; bytes: Uint8Array }) => void)
+      | null = null;
     const getBlob = vi.fn(
       () =>
         new Promise<{ blobSha: string; byteSize: number; bytes: Uint8Array }>((resolve) => {

@@ -2,7 +2,9 @@ import type { CloudAuthWebClientPort } from '@memoflow/contracts/cloud-auth';
 import type { ResultError } from '@memoflow/contracts/result';
 
 export type GithubPopupSignInResult =
-  { kind: 'authenticated' } | { kind: 'cancelled' } | { kind: 'failed'; error: ResultError };
+  | { kind: 'authenticated' }
+  | { kind: 'cancelled' }
+  | { kind: 'failed'; error: ResultError };
 
 export interface GithubPopupSignInOptions {
   popupName?: string;

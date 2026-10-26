@@ -184,9 +184,18 @@ export const PROTOCOL_SESSION_STATES = [
 ] as const;
 export type ProtocolSessionState = (typeof PROTOCOL_SESSION_STATES)[number];
 export type ProtocolSessionAction =
-  'start' | 'pause' | 'resume' | 'phase-complete' | 'end' | 'cancel';
+  | 'start'
+  | 'pause'
+  | 'resume'
+  | 'phase-complete'
+  | 'end'
+  | 'cancel';
 export type ProtocolTerminationReason =
-  'completed' | 'user-ended' | 'user-cancelled' | 'superseded' | 'runtime-aborted';
+  | 'completed'
+  | 'user-ended'
+  | 'user-cancelled'
+  | 'superseded'
+  | 'runtime-aborted';
 
 export const PROTOCOL_SESSION_TRANSITIONS = {
   Idle: {
