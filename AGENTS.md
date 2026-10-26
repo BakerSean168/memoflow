@@ -11,15 +11,14 @@ MemoFlow is a Vue/Web + Electron/Desktop + Express/Mastra monorepo. Business own
 ## Work safely
 
 - GitHub Issues own requirements, implementation decisions, acceptance and handoffs. Git commits record the implementation; PRs and CI record delivery evidence. Do not add task plans, reviews or scratch logs to `docs/`.
-- One active writer per Issue/worktree/branch. Independent Issues can proceed concurrently; do not modify another agent's worktree, kill its process or reset its changes. Start task branches from the latest available `main`; keep PRs focused.
-- Check `git status`, the active branch, existing processes and the Issue before changing anything. Do not force-push or push directly to `main`. Confirm unpublished work before removing a worktree.
+- Keep PRs focused; do not force-push or push directly to `main`.
 - PRs may merge when their required checks pass, subject to GitHub rules and merge conflicts. Do not require every agent to wait for another PR or for post-merge Main CI before starting an independent task.
 - For a complex handoff or interruption, leave a short checkpoint on the Issue: branch, commit, tests, blocker and next action. Do not duplicate it in a repository document.
 - Prefer the simplest fix that preserves current behavior and required contracts. No speculative compatibility shims or architecture for imaginary features.
 
 ## Develop and verify
 
-- Use `pnpm` and explicit Nx targets: `pnpm nx run <project>:<target>`. Web/API/Desktop start commands and worktree setup: [Development](docs/operations/development.md).
+- Use `pnpm` and explicit Nx targets: `pnpm nx run <project>:<target>`. Web/API/Desktop start commands: [Development](docs/operations/development.md).
 - Iterate with the nearest relevant test (`pnpm exec vitest run <file>` or a package Nx target). Add a focused failing regression test for a logic or protocol bug; provide before/after evidence for visual-only changes.
 - Before pushing, run `pnpm check:changed` for code changes; for documentation or governance changes run `pnpm nx run memoflow:docs-check` and `pnpm nx run memoflow:governance-check`. CI owns broad suites; don't run repo-wide lint/test/typecheck locally by default.
 - Run specialized integration, browser, Desktop or container tests only when the change crosses their boundary. Test owners and commands: [Testing](docs/operations/testing.md).
