@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 /** S4-2302B: legacy ScheduleTask/ScheduleExecution contract bodies must stay retired. */
 describe('Schedule/Scheduler contract convergence', () => {
   const schedule = resolve(__dirname, '..');
-  const schedulerRoutes = resolve(__dirname, '../../../../scheduler/src/api/routes.ts');
+  const schedulerRoutes = resolve(__dirname, '../../../scheduler/src/api/routes.ts');
 
   it('physically removes legacy ScheduleTask/ScheduleExecution contract bodies', () => {
     for (const relative of [

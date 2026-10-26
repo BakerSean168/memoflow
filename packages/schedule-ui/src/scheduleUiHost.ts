@@ -60,10 +60,19 @@ export interface RoutineUpcomingOccurrence {
   readonly revision: number;
 }
 
+/** Narrow Routine read seam consumed by the Planner calendar. */
+export interface RoutineUpcomingSourcePort {
+  getUpcomingOccurrences(input: {
+    start: number;
+    end: number;
+    limit: number;
+  }): Promise<Result<{ occurrences: RoutineUpcomingOccurrence[] }>>;
+}
+
 export interface FetchRoutineUpcomingCachedOptions {
   queryClient: QueryClient;
   identityScope: string;
-  service: unknown;
+  service: RoutineUpcomingSourcePort;
   start: number;
   end: number;
   limit: number;
