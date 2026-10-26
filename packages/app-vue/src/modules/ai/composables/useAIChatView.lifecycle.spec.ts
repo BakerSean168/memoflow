@@ -933,6 +933,10 @@ async function nativeFlow() {
   };
 }
 
+// A full app-vue run on a shared 4-core host starves these polls well past the 1s default.
+const waitFor = <T>(callback: () => T | Promise<T>) =>
+  vi.waitFor(callback, { timeout: 10_000, interval: 100 });
+
 it.each(['implicit default', 'saved instance'])(
   'integrates Registry → Probe → Select → Connection → Compose → Send for %s with Profile and quota isolation',
   async (kind) => {
@@ -971,7 +975,7 @@ it.each(['implicit default', 'saved instance'])(
       ({ wrapper } = await mountView(flow.provide));
       await flushPromises();
       if (kind === 'saved instance') {
-        await vi.waitFor(() => expect(wrapper!.vm.canSendMessage).toBe(true));
+        await waitFor(() => expect(wrapper!.vm.canSendMessage).toBe(true));
         expect(wrapper.vm.runtimeChoice).toMatchObject({
           connectionId: before[0].id,
           modelId: 'fixture-model',
@@ -981,7 +985,7 @@ it.each(['implicit default', 'saved instance'])(
       const instance = (await flow.registry.list('profile-a')).instances.find(
         (i) => i.instanceId === 'codex',
       )!;
-      await vi.waitFor(() =>
+      await waitFor(() =>
         expect(
           wrapper!.vm.composerModels.filter(
             (model: { agentInstanceId?: string }) => model.agentInstanceId === 'codex',
@@ -1008,8 +1012,8 @@ it.each(['implicit default', 'saved instance'])(
       expect(flow.requests.filter(([method]) => method === 'turn/start')).toHaveLength(0);
       composer.vm.$emit('update:modelValue', 'Hello from profile A');
       composer.vm.$emit('send');
-      await vi.waitFor(() => expect(wrapper!.vm.chatTimeline.at(-1)?.status).toBe('success'));
-      await vi.waitFor(() => expect(wrapper!.vm.chatLoading).toBe(false));
+      await waitFor(() => expect(wrapper!.vm.chatTimeline.at(-1)?.status).toBe('success'));
+      await waitFor(() => expect(wrapper!.vm.chatLoading).toBe(false));
       await flushPromises();
       expect(wrapper.vm.chatTimeline.at(-1)?.content).toBe('Fixture answer');
       expect(wrapper.vm.chatTimeline.at(-1)?.status).toBe('success');
@@ -1026,26 +1030,26 @@ it.each(['implicit default', 'saved instance'])(
       });
       expect(fixture.service.createConversation).not.toHaveBeenCalled();
 
-      await vi.waitFor(() => expect(wrapper!.vm.canSendMessage).toBe(true));
+      await waitFor(() => expect(wrapper!.vm.canSendMessage).toBe(true));
       flow.setFailure();
       wrapper
         .findComponent({ name: 'AIFooterComposer' })
         .vm.$emit('update:modelValue', 'Preserve this limited request');
       expect(wrapper.vm.chatMessage).toBe('Preserve this limited request');
       wrapper.findComponent({ name: 'AIFooterComposer' }).vm.$emit('send');
-      await vi.waitFor(() =>
+      await waitFor(() =>
         expect(wrapper!.vm.chatTimeline.at(-1)?.errorMessage).toBe(
           enErrors.LOCAL_AGENT_QUOTA_EXHAUSTED,
         ),
       );
-      await vi.waitFor(() => expect(wrapper!.vm.chatLoading).toBe(false));
+      await waitFor(() => expect(wrapper!.vm.chatLoading).toBe(false));
       await flushPromises();
       expect(flow.requests.filter(([method]) => method === 'turn/start')).toHaveLength(2);
       expect(wrapper.vm.chatTimeline.at(-1)?.errorMessage).toBe(
         enErrors.LOCAL_AGENT_QUOTA_EXHAUSTED,
       );
       expect(wrapper.vm.chatMessage).toBe('Preserve this limited request');
-      await vi.waitFor(() =>
+      await waitFor(() =>
         expect(wrapper!.find('[data-testid="ai-native-execution-status"]').exists()).toBe(true),
       );
       expect(wrapper.get('[data-testid="ai-native-execution-status"]').text()).toContain(
@@ -1066,7 +1070,7 @@ it.each(['implicit default', 'saved instance'])(
       expect(await flow.store.listConnections('profile-b')).toEqual([]);
       expect(await flow.local.listConversations()).toEqual([]);
       await expect(flow.store.getConversation('profile-b', conversationId)).rejects.toThrow();
-      await vi.waitFor(() =>
+      await waitFor(() =>
         expect(
           wrapper!.vm.composerModels.filter(
             (model: { agentInstanceId?: string }) => model.agentInstanceId === 'codex',
@@ -1089,8 +1093,8 @@ it.each(['implicit default', 'saved instance'])(
       expect(otherComposer.props('canSend')).toBe(true);
       otherComposer.vm.$emit('update:modelValue', 'Hello from profile B');
       otherComposer.vm.$emit('send');
-      await vi.waitFor(() => expect(wrapper!.vm.chatTimeline.at(-1)?.status).toBe('success'));
-      await vi.waitFor(() => expect(wrapper!.vm.chatLoading).toBe(false));
+      await waitFor(() => expect(wrapper!.vm.chatTimeline.at(-1)?.status).toBe('success'));
+      await waitFor(() => expect(wrapper!.vm.chatLoading).toBe(false));
       await flushPromises();
       expect(wrapper.vm.chatTimeline.at(-1)?.content).toBe('Fixture answer');
       expect(wrapper.vm.runtimeChoice).toMatchObject({
