@@ -404,6 +404,9 @@ importers:
       '@memoflow/setting':
         specifier: workspace:*
         version: link:../../packages/setting
+      '@memoflow/shared-primitives':
+        specifier: workspace:*
+        version: link:../../packages/shared-primitives
       '@memoflow/task':
         specifier: workspace:*
         version: link:../../packages/task
@@ -600,6 +603,9 @@ importers:
       '@memoflow/notification':
         specifier: workspace:*
         version: link:../../packages/notification
+      '@memoflow/notification-contracts':
+        specifier: workspace:*
+        version: link:../../packages/notification-contracts
       '@memoflow/powersync-schema':
         specifier: workspace:*
         version: link:../../packages/powersync-schema
@@ -1056,6 +1062,9 @@ importers:
       '@memoflow/notification':
         specifier: workspace:*
         version: link:../../packages/notification
+      '@memoflow/notification-contracts':
+        specifier: workspace:*
+        version: link:../../packages/notification-contracts
       '@memoflow/relation':
         specifier: workspace:*
         version: link:../../packages/relation
@@ -1256,6 +1265,9 @@ importers:
       '@memoflow/ipc-client':
         specifier: workspace:*
         version: link:../ipc-client
+      '@memoflow/notification-contracts':
+        specifier: workspace:*
+        version: link:../notification-contracts
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time
@@ -1323,12 +1335,18 @@ importers:
       '@memoflow/notification':
         specifier: workspace:*
         version: link:../notification
+      '@memoflow/notification-contracts':
+        specifier: workspace:*
+        version: link:../notification-contracts
       '@memoflow/schedule':
         specifier: workspace:*
         version: link:../schedule
       '@memoflow/setting':
         specifier: workspace:*
         version: link:../setting
+      '@memoflow/shared-primitives':
+        specifier: workspace:*
+        version: link:../shared-primitives
       '@memoflow/task':
         specifier: workspace:*
         version: link:../task
@@ -1435,6 +1453,9 @@ importers:
       '@memoflow/notification':
         specifier: workspace:*
         version: link:../notification
+      '@memoflow/notification-contracts':
+        specifier: workspace:*
+        version: link:../notification-contracts
       '@memoflow/relation':
         specifier: workspace:*
         version: link:../relation
@@ -1453,6 +1474,9 @@ importers:
       '@memoflow/setting':
         specifier: workspace:*
         version: link:../setting
+      '@memoflow/shared-primitives':
+        specifier: workspace:*
+        version: link:../shared-primitives
       '@memoflow/task':
         specifier: workspace:*
         version: link:../task
@@ -1626,9 +1650,9 @@ importers:
       '@memoflow/label-contracts':
         specifier: workspace:*
         version: link:../label-contracts
-      '@memoflow/reliable-messaging-contracts':
+      '@memoflow/notification-contracts':
         specifier: workspace:*
-        version: link:../reliable-messaging-contracts
+        version: link:../notification-contracts
       '@memoflow/shared-primitives':
         specifier: workspace:*
         version: link:../shared-primitives
@@ -1786,6 +1810,9 @@ importers:
       '@memoflow/label-contracts':
         specifier: workspace:*
         version: link:../label-contracts
+      '@memoflow/notification-contracts':
+        specifier: workspace:*
+        version: link:../notification-contracts
       '@memoflow/patterns':
         specifier: workspace:*
         version: link:../patterns
@@ -2075,6 +2102,9 @@ importers:
       '@memoflow/ipc-client':
         specifier: workspace:*
         version: link:../ipc-client
+      '@memoflow/notification-contracts':
+        specifier: workspace:*
+        version: link:../notification-contracts
       '@memoflow/operations-contracts':
         specifier: workspace:*
         version: link:../operations-contracts
@@ -2084,6 +2114,9 @@ importers:
       '@memoflow/reliable-messaging-contracts':
         specifier: workspace:*
         version: link:../reliable-messaging-contracts
+      '@memoflow/shared-primitives':
+        specifier: workspace:*
+        version: link:../shared-primitives
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils
@@ -2103,6 +2136,28 @@ importers:
       '@types/express':
         specifier: ^5.0.0
         version: 5.0.6
+
+  packages/notification-contracts:
+    dependencies:
+      '@memoflow/data-portability-contracts':
+        specifier: workspace:*
+        version: link:../data-portability-contracts
+      '@memoflow/reliable-messaging-contracts':
+        specifier: workspace:*
+        version: link:../reliable-messaging-contracts
+      '@memoflow/shared-primitives':
+        specifier: workspace:*
+        version: link:../shared-primitives
+      '@memoflow/transport-contracts':
+        specifier: workspace:*
+        version: link:../transport-contracts
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
+    devDependencies:
+      '@faker-js/faker':
+        specifier: 10.6.0
+        version: 10.6.0
 
   packages/operations-contracts:
     dependencies:
@@ -2226,6 +2281,9 @@ importers:
       '@memoflow/ipc-client':
         specifier: workspace:*
         version: link:../ipc-client
+      '@memoflow/notification-contracts':
+        specifier: workspace:*
+        version: link:../notification-contracts
       '@memoflow/reliable-messaging-contracts':
         specifier: workspace:*
         version: link:../reliable-messaging-contracts
@@ -2349,6 +2407,9 @@ importers:
       '@memoflow/goal-contracts':
         specifier: workspace:*
         version: link:../goal-contracts
+      '@memoflow/notification-contracts':
+        specifier: workspace:*
+        version: link:../notification-contracts
       '@memoflow/reliable-messaging-contracts':
         specifier: workspace:*
         version: link:../reliable-messaging-contracts
@@ -2493,6 +2554,9 @@ importers:
       '@memoflow/label-contracts':
         specifier: workspace:*
         version: link:../label-contracts
+      '@memoflow/notification-contracts':
+        specifier: workspace:*
+        version: link:../notification-contracts
       '@memoflow/patterns':
         specifier: workspace:*
         version: link:../patterns
@@ -2502,6 +2566,9 @@ importers:
       '@memoflow/reliable-messaging-contracts':
         specifier: workspace:*
         version: link:../reliable-messaging-contracts
+      '@memoflow/shared-primitives':
+        specifier: workspace:*
+        version: link:../shared-primitives
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time

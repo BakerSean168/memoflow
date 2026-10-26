@@ -10,6 +10,7 @@
     "@memoflow/ai": "workspace:*",
     "@memoflow/cloud-auth": "workspace:*",
     "@memoflow/contracts": "workspace:*",
+    "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/data-portability": "workspace:*",
     "@memoflow/database": "workspace:*",
     "@memoflow/domain-shared": "workspace:*",

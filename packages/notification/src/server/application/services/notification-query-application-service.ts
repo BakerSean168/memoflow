@@ -2,7 +2,7 @@ import type {
   NotificationClientDTO,
   NotificationInteractionDTO,
   NotificationQuery,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { fail, ok } from '@memoflow/contracts/result';
 import type {

@@ -37,7 +37,7 @@ import {
   type NotificationRequested,
   type NotificationRequestedOutboxInput,
   type NotificationRequestedWriterPort,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
 import type {
   ScheduledHandlerRegistration,

@@ -1,4 +1,4 @@
-import { NotificationActionIntentSchema } from '@memoflow/contracts/notification';
+import { NotificationActionIntentSchema } from '@memoflow/notification-contracts';
 import type {
   AINotificationActionReceipt,
   AINotificationFactProjection,

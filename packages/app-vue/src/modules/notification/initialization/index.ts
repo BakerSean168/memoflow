@@ -12,7 +12,7 @@
 import type {
   NotificationDispatchInAppEvent,
   NotificationEventMap,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import { createTypedEventSubscriber, eventBus } from '@memoflow/utils/domain';
 import { createLogger } from '@memoflow/utils/logger';
 import type { ServerStateInvalidationDispatcher } from '../../../platform/server-state';

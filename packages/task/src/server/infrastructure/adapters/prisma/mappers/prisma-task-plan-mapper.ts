@@ -4,7 +4,7 @@ import { decodeTaskGoalProgress, encodeTaskGoalProgress } from '../../task-goal-
 import type { TaskPlan as PrismaTaskPlan } from '@memoflow/database';
 import { toDateOrNull } from '@memoflow/utils/shared';
 import { IdentityId } from '@memoflow/domain-shared';
-import type { ImportanceLevel } from '@memoflow/contracts/shared';
+import type { ImportanceLevel } from '@memoflow/shared-primitives';
 import {
   TaskPlanCompletionPolicy,
   TaskPlanOutcome,

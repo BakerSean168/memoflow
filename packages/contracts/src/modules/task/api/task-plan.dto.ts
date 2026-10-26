@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { brandedId, ID_PREFIXES } from '@memoflow/shared-primitives';
 import type { IdentityId, TaskPlanId } from '@memoflow/shared-primitives';
 import type { GoalId, KeyResultId } from '@memoflow/goal-contracts';
-import { ImportanceLevel } from '../../../shared/value-objects/importance';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 import type { TaskPlanClientDTO } from '../aggregates/task-plan-client';
 import type { TaskOccurrenceClientDTO } from '../aggregates/task-occurrence-client';
 import { TaskPlanCompletionPolicy } from '../value-objects/task-plan-completion-policy';

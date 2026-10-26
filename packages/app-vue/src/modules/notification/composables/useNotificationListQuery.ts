@@ -11,7 +11,7 @@
 import { computed } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import { useI18n } from 'vue-i18n';
-import type { NotificationClientDTO } from '@memoflow/contracts/notification';
+import type { NotificationClientDTO } from '@memoflow/notification-contracts';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import { NOTIFICATION_SERVICE_KEY } from '../../../di/keys';
 import { useServerStateIdentityScope } from '../../../platform/server-state';

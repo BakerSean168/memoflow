@@ -7,7 +7,7 @@ import {
   NotificationRequestedSchema,
   NOTIFICATION_REQUESTED_MESSAGE_TYPE,
   type NotificationRequested,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import { NotificationRequestedPowerSyncWriterAdapter } from '../notification-requested-writer.powersync.adapter';
 import { PowerSyncNotificationReliableAdapter } from '../power-sync-notification-reliable.adapter';
 

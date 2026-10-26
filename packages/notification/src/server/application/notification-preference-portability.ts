@@ -8,7 +8,7 @@ import {
   NotificationDeliveryPreferencePortablePayloadV3Schema,
   type NotificationChannelType as DeliveryChannel,
   type NotificationDeliveryPreferencePortablePayloadV3,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import { NotificationPreference } from '../domain/aggregates/notification-preference';
 import type { INotificationPreferenceRepository } from '../domain/repositories';
 

@@ -8,7 +8,7 @@ import {
   type NotificationDispatchDesktopEvent,
   type NotificationDispatchInAppEvent,
   type NotificationEventMap,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import type { BusinessOperationReceipt } from '@memoflow/reliable-messaging-contracts';
 
 export type NotificationSseDeliveryEvent =

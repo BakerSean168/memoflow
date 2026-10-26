@@ -10,7 +10,7 @@ import {
   buildIdempotencyKeyString,
 } from '@memoflow/reliable-messaging-contracts';
 import { Notification } from '../../../domain/aggregates/notification';
-import { NotificationChannelType } from '@memoflow/contracts/notification';
+import { NotificationChannelType } from '@memoflow/notification-contracts';
 import { InMemoryReliableAdapter } from './helpers/in-memory-reliable-adapter';
 
 const TEST_TIME_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });

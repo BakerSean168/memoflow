@@ -11,7 +11,7 @@
  * 一次 `reconnect` invalidation。
  */
 
-import type { NotificationDispatchInAppEvent } from '@memoflow/contracts/notification';
+import type { NotificationDispatchInAppEvent } from '@memoflow/notification-contracts';
 import type { ServerStateInvalidationDispatcher } from '../../../platform/server-state';
 
 /** Minimal metadata extracted from an SSE payload (Step 3: no DTO construction). */

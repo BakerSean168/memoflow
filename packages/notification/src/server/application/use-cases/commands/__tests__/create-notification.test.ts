@@ -7,7 +7,7 @@ import {
   NotificationDeliveryPlanOutcome,
   NotificationDeliveryReason,
   NotificationType,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import type { INotificationRepository } from '../../../../domain/repositories/i-notification-repository';
 import type { INotificationPreferenceRepository } from '../../../../domain/repositories/i-notification-preference-repository';
 import { Notification } from '../../../../domain/aggregates/notification';

@@ -3,8 +3,8 @@ import type { NotificationType } from '../value-objects/notification-type';
 import type { NotificationCategory } from '../value-objects/notification-category';
 import type { NotificationMetadataDTO } from '../value-objects/notification-metadata';
 import type { NotificationActionDTO } from '../value-objects/notification-action';
-import type { ImportanceLevel } from '../../../shared/value-objects/importance';
-import type { UrgencyLevel } from '../../../shared/value-objects/urgency';
+import type { ImportanceLevel } from '@memoflow/shared-primitives';
+import type { UrgencyLevel } from '@memoflow/shared-primitives';
 import type { IdentityId, NotificationId, TransferDate } from '@memoflow/shared-primitives';
 
 export interface NotificationNavigationIntentDTO {

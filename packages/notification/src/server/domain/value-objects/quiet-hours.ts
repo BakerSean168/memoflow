@@ -3,7 +3,7 @@ import type {
   NotificationWeekday,
   QuietHoursDTO,
   QuietHoursWindow,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import {
   addYmdDays,
   asHm,

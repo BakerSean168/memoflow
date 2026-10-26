@@ -4,6 +4,9 @@ export * from './ymd';
 export type { Hm } from './hm';
 export type { DurationMs, DurationMin } from './duration';
 
+// 跨域共用叶子枚举（Issue #630 主线裁决，自 @memoflow/contracts 迁入）
+export * from './value-objects';
+
 export * from './ids';
 export * from './zod-extensions';
 

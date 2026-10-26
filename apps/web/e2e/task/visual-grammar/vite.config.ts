@@ -7,6 +7,7 @@ import {
   createWorkspaceSourceAliasEntries,
   createReliableMessagingContractsAliasEntries,
   createOperationsContractsAliasEntries,
+  createNotificationContractsAliasEntries,
   createContractsAliasEntries,
 } from '../../../../../vite.workspace-aliases.ts';
 
@@ -20,6 +21,7 @@ export default defineConfig({
       ...createUiVueSourceAliasEntries(workspace),
       ...createReliableMessagingContractsAliasEntries(workspace),
       ...createOperationsContractsAliasEntries(workspace),
+      ...createNotificationContractsAliasEntries(workspace),
       ...createContractsAliasEntries(workspace),
       ...createWorkspaceSourceAliasEntries(workspace, [
         // Harness-only source access; production package exports stay unchanged.

@@ -3,7 +3,7 @@
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it, vi } from 'vitest';
-import type { NotificationClientDTO } from '@memoflow/contracts/notification';
+import type { NotificationClientDTO } from '@memoflow/notification-contracts';
 import enNotification from '../../../locales/en-US/notification';
 import InAppNotification from './InAppNotification.vue';
 import NotificationItem from './NotificationItem.vue';

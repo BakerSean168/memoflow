@@ -43,9 +43,8 @@
       "@memoflow/ipc-client": ["../../packages/ipc-client/src/index.ts"],
       "@memoflow/http-client": ["../../packages/http-client/src/index.ts"],
       "@memoflow/contracts": ["../../packages/contracts/src/index.ts"],
-      "@memoflow/contracts/notification": [
-        "../../packages/contracts/src/modules/notification/index.ts"
-      ],
+      "@memoflow/notification-contracts": ["../../packages/notification-contracts/src/index.ts"],
+      "@memoflow/notification-contracts/*": ["../../packages/notification-contracts/src/*.ts"],
       "@memoflow/contracts/*": [
         "../../packages/contracts/src/modules/*/index.ts",
         "../../packages/contracts/src/*/index.ts"

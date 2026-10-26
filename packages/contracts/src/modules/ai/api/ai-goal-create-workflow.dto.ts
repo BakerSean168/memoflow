@@ -1,6 +1,6 @@
 import { AgentInstanceSlugSchema } from './local-agent.dto';
 import { z } from 'zod';
-import { ImportanceLevel } from '../../../shared/value-objects/importance';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 import {
   GoalTimeframeSchema,
   KEY_RESULT_DESCRIPTION_MAX_LENGTH,

@@ -4,8 +4,8 @@ import type { NotificationServerDTO } from '../aggregates/notification-server';
 import { NotificationType } from '../value-objects/notification-type';
 import { NotificationCategory } from '../value-objects/notification-category';
 import { NotificationChannelType } from '../value-objects/notification-channel-type';
-import { ImportanceLevel } from '../../../shared/value-objects/importance';
-import { UrgencyLevel } from '../../../shared/value-objects/urgency';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
+import { UrgencyLevel } from '@memoflow/shared-primitives';
 import { NotificationActionIntentSchema } from './notification-action.dto';
 
 export const CreateNotificationSchema = z.object({

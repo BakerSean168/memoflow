@@ -19,10 +19,7 @@ import { describe, expect, it } from 'vitest';
     const dto = readFileSync(resolve(apiDir, '../dtos/batch-result.dto.ts'), 'utf8');
     const responseSchemas = readFileSync(resolve(apiDir, 'response-schemas.ts'), 'utf8');
     const batchDto = readFileSync(resolve(apiDir, 'notification-batch.dto.ts'), 'utf8');
-    const routes = readFileSync(
-      resolve(apiDir, '../../../../../notification/src/api/routes.ts'),
-      'utf8',
-    );
+    const routes = readFileSync(resolve(apiDir, '../../../notification/src/api/routes.ts'), 'utf8');
 
     it('owns BatchOperationResultDTO as z.infer of NotificationBatchResultSchema', () => {
       expect(dto).toContain('Residual 799');
@@ -67,15 +64,9 @@ import { describe, expect, it } from 'vitest';
   describe('notification ids batch request dual retired (residual 671)', () => {
     const apiDir = __dirname;
     const dto = readFileSync(resolve(apiDir, 'notification-batch.dto.ts'), 'utf8');
-    const routes = readFileSync(
-      resolve(apiDir, '../../../../../notification/src/api/routes.ts'),
-      'utf8',
-    );
+    const routes = readFileSync(resolve(apiDir, '../../../notification/src/api/routes.ts'), 'utf8');
     const controller = readFileSync(
-      resolve(
-        apiDir,
-        '../../../../../notification/src/server/transport/notification.controller.ts',
-      ),
+      resolve(apiDir, '../../../notification/src/server/transport/notification.controller.ts'),
       'utf8',
     );
 
@@ -118,15 +109,18 @@ import { describe, expect, it } from 'vitest';
    */
   describe('preference/calendar client dto duals retired (residual 829)', () => {
     const notifApi = __dirname;
-    const scheduleApi = resolve(notifApi, '../../schedule/api');
+    const scheduleApi = resolve(notifApi, '../../../contracts/src/modules/schedule/api');
     const notifAgg = resolve(notifApi, '../aggregates/notification-preference-client.ts');
-    const scheduleAgg = resolve(notifApi, '../../schedule/aggregates/calendar-entry-client.ts');
+    const scheduleAgg = resolve(
+      notifApi,
+      '../../../contracts/src/modules/schedule/aggregates/calendar-entry-client.ts',
+    );
 
     it('owns NotificationPreferenceClientDTO as z.infer of NotificationPreferenceResponseSchema', () => {
       const aggregate = readFileSync(notifAgg, 'utf8');
       const schemas = readFileSync(resolve(notifApi, 'response-schemas.ts'), 'utf8');
       const routes = readFileSync(
-        resolve(notifApi, '../../../../../notification/src/api/routes.ts'),
+        resolve(notifApi, '../../../notification/src/api/routes.ts'),
         'utf8',
       );
       expect(aggregate).toContain('Residual 829');
@@ -175,14 +169,11 @@ import { describe, expect, it } from 'vitest';
     const port = readFileSync(
       resolve(
         apiDir,
-        '../../../../../notification/src/application-client/ports/notification-api-client.port.ts',
+        '../../../notification/src/application-client/ports/notification-api-client.port.ts',
       ),
       'utf8',
     );
-    const routes = readFileSync(
-      resolve(apiDir, '../../../../../notification/src/api/routes.ts'),
-      'utf8',
-    );
+    const routes = readFileSync(resolve(apiDir, '../../../notification/src/api/routes.ts'), 'utf8');
 
     it('owns UnreadCountResponse as z.infer of UnreadCountResponseSchema', () => {
       expect(responseSchemas).toContain('Residual 801');
@@ -196,7 +187,7 @@ import { describe, expect, it } from 'vitest';
     it('notification port re-exports contracts UnreadCountResponse without interface dual', () => {
       expect(port).toContain('Residual 801');
       expect(port).toContain('UnreadCountResponse');
-      expect(port).toContain("from '@memoflow/contracts/notification'");
+      expect(port).toContain("from '@memoflow/notification-contracts'");
       expect(port).toContain('export type { UnreadCountResponse }');
       expect(port).not.toMatch(/export interface UnreadCountResponse\b/);
     });

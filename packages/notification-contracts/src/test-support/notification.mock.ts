@@ -6,13 +6,13 @@
  *
  * Usage:
  * ```ts
- * import { createMockNotification } from '@memoflow/contracts/mocks';
+ * import { createMockNotification } from '@memoflow/notification-contracts/test-support/notification.mock';
  * const notification = createMockNotification();
  * ```
  */
 
 import { faker } from '@faker-js/faker';
-import type { NotificationClientDTO } from '../modules/notification/aggregates/notification-client';
+import type { NotificationClientDTO } from '../aggregates/notification-client';
 
 export function createMockNotification(
   overrides: Partial<NotificationClientDTO> = {},

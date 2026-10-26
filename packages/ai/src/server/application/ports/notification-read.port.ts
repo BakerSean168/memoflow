@@ -1,4 +1,4 @@
-import type { NotificationActionIntent } from '@memoflow/contracts/notification';
+import type { NotificationActionIntent } from '@memoflow/notification-contracts';
 
 export interface AINotificationFactProjection {
   readonly id: string;

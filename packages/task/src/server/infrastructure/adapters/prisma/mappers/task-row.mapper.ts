@@ -12,7 +12,7 @@
  * transport/domain 泄漏 `as unknown as` 强转。
  */
 
-import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 
 const IMPORTANCE_LEVEL_VALUES = Object.values(ImportanceLevel);
 

@@ -15,7 +15,7 @@ import type {
   NotificationClientDTO,
   NotificationPreferenceClientDTO,
   UpdateNotificationPreferenceReq,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import type {
   INotificationApiClient,
   CreateNotificationRequest,

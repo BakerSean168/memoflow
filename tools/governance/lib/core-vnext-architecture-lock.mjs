@@ -290,7 +290,7 @@ export function findCoreVnextArchitectureLockViolations(files) {
 
     if (
       relPath.startsWith('packages/notification/src/') ||
-      relPath.startsWith('packages/contracts/src/modules/notification/')
+      relPath.startsWith('packages/notification-contracts/src/')
     ) {
       pushPatternViolations(
         violations,

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fail, ok } from '@memoflow/contracts/result';
-import type { NotificationClientDTO } from '@memoflow/contracts/notification';
+import type { NotificationClientDTO } from '@memoflow/notification-contracts';
 import { createServerStateRuntime } from '../../../platform/server-state';
 import { useNotificationStore } from '../stores/notification-store';
 import { mountNotificationComposable } from './notificationQueryTestUtils';

@@ -2,7 +2,7 @@ import type {
   NotificationInteractionDTO,
   NotificationInteractionKind,
   NotificationInteractionOutcome,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 
 export interface RecordNotificationInteractionInput {
   readonly idempotencyKey: string;

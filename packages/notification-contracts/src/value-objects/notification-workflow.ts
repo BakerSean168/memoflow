@@ -1,5 +1,5 @@
-import type { ImportanceLevel } from '../../../shared/value-objects/importance';
-import type { UrgencyLevel } from '../../../shared/value-objects/urgency';
+import type { ImportanceLevel } from '@memoflow/shared-primitives';
+import type { UrgencyLevel } from '@memoflow/shared-primitives';
 import type { NotificationCategory } from './notification-category';
 import type { NotificationChannelType } from './notification-channel-type';
 import type { NotificationType } from './notification-type';

@@ -1,5 +1,5 @@
 import type { Prisma, PrismaClient, OutboxMessage } from '@memoflow/database';
-import { NOTIFICATION_REQUESTED_MESSAGE_TYPE } from '@memoflow/contracts/notification';
+import { NOTIFICATION_REQUESTED_MESSAGE_TYPE } from '@memoflow/notification-contracts';
 import {
   assertValidBusinessOperationReceipt,
   buildIdempotencyKeyString,

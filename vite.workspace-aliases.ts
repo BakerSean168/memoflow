@@ -374,6 +374,24 @@ export function createReliableMessagingContractsAliasEntries(workspaceRoot: stri
   ];
 }
 
+export function createNotificationContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const notificationContractsRoot = resolveFromWorkspace(
+    workspaceRoot,
+    'packages/notification-contracts/src',
+  );
+
+  return [
+    {
+      find: /^@memoflow\/notification-contracts$/,
+      replacement: `${notificationContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/notification-contracts\/(.+)$/,
+      replacement: `${notificationContractsRoot}/$1`,
+    },
+  ];
+}
+
 export function createOperationsContractsAliasEntries(workspaceRoot: string): Alias[] {
   const operationsContractsRoot = resolveFromWorkspace(
     workspaceRoot,

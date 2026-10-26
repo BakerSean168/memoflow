@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { PortableReferenceV3Schema } from '@memoflow/data-portability-contracts';
-import { ImportanceLevel } from '../../shared/value-objects/importance';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 import {
   GoalContributionRuleSchema,
   TaskGoalProgressRuleSchema,

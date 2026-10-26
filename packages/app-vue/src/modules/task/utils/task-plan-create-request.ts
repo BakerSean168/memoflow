@@ -3,7 +3,7 @@ import {
   TaskGoalProgressConfigurationSchema,
   type CreateTaskPlanReq,
 } from '@memoflow/contracts/task';
-import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 import type { TaskPlanViewModel } from '../components/types';
 import { toTaskPlanSchedulePayload } from './task-plan-presentation';
 

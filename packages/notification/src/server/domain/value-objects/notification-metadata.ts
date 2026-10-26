@@ -9,7 +9,7 @@ import { ValueObject } from '@memoflow/utils/domain';
 import type {
   NotificationMetadata as INotificationMetadata,
   NotificationMetadataDTO,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 
 /**
  * NotificationMetadata 值对象实现

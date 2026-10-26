@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 import {
   TaskPlanCompletionPolicy,
   TaskPlanOutcome,

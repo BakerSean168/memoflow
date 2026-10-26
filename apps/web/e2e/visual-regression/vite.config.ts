@@ -4,6 +4,7 @@ import schedule from '../schedule/presentation-authority/vite.config.ts';
 import {
   createReliableMessagingContractsAliasEntries,
   createOperationsContractsAliasEntries,
+  createNotificationContractsAliasEntries,
   createAssetsAliasEntries,
   createWorkspaceSourceAliasEntries,
 } from '../../../../vite.workspace-aliases.ts';
@@ -25,6 +26,7 @@ export default defineConfig(({ mode }) =>
         },
         ...createReliableMessagingContractsAliasEntries(workspace),
         ...createOperationsContractsAliasEntries(workspace),
+        ...createNotificationContractsAliasEntries(workspace),
         ...createAssetsAliasEntries(workspace),
         ...createWorkspaceSourceAliasEntries(workspace, [
           ['@memoflow/reminder/method-library', 'packages/reminder/src/method-library/index.ts'],
