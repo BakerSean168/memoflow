@@ -31,13 +31,7 @@ const featureScopeConstraints = [
   },
   {
     sourceTag: 'scope:goal',
-    // temporary: schedule shared-kernel until Schedule* contracts are extracted
-    onlyDependOnLibsWithTags: [
-      ...sharedScopeTags,
-      'scope:goal',
-      'scope:schedule',
-      'scope:scheduler',
-    ],
+    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:goal', 'scope:scheduler'],
   },
   {
     sourceTag: 'scope:notification',
@@ -45,16 +39,16 @@ const featureScopeConstraints = [
   },
   {
     sourceTag: 'scope:reminder',
-    // temporary: schedule shared-kernel until Schedule* contracts are extracted
-    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:reminder', 'scope:schedule'],
+    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:reminder'],
   },
   {
     sourceTag: 'scope:repository',
     onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:repository'],
   },
   {
+    // Schedule surfaces consume the shared UI kit plus this scope's own packages.
     sourceTag: 'scope:schedule',
-    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:schedule'],
+    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:schedule', 'scope:ui'],
   },
   {
     sourceTag: 'scope:scheduler',
@@ -66,13 +60,7 @@ const featureScopeConstraints = [
   },
   {
     sourceTag: 'scope:task',
-    // temporary: schedule shared-kernel until Schedule* contracts are extracted
-    onlyDependOnLibsWithTags: [
-      ...sharedScopeTags,
-      'scope:task',
-      'scope:schedule',
-      'scope:scheduler',
-    ],
+    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:task', 'scope:scheduler'],
   },
   {
     sourceTag: 'scope:data-portability',

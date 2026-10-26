@@ -10126,7 +10126,7 @@
       ]
     },
     {
-      "path": "packages/schedule/src/application-client/planner-conflict-read-model.spec.ts",
+      "path": "packages/schedule-client/src/application-client/planner-conflict-read-model.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/schedule/vitest.config.ts"
@@ -10136,7 +10136,7 @@
       ]
     },
     {
-      "path": "packages/schedule/src/application-client/schedule-client-port-facade-dual.surface.spec.ts",
+      "path": "packages/schedule-client/src/application-client/schedule-client-port-facade-dual.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/schedule/vitest.config.ts"
@@ -13888,8 +13888,8 @@
       "packages/schedule/src/api/schedule-event.routes.spec.ts",
       "packages/schedule/src/api/schedule-route-parsers-keep-boundary.surface.spec.ts",
       "packages/schedule/src/api/schedule-void-success-envelope.surface.spec.ts",
-      "packages/schedule/src/application-client/planner-conflict-read-model.spec.ts",
-      "packages/schedule/src/application-client/schedule-client-port-facade-dual.surface.spec.ts",
+      "packages/schedule-client/src/application-client/planner-conflict-read-model.spec.ts",
+      "packages/schedule-client/src/application-client/schedule-client-port-facade-dual.surface.spec.ts",
       "packages/schedule/src/electron/index-lifecycle.spec.ts",
       "packages/schedule/src/electron/schedule-electron-delete-contract.spec.ts",
       "packages/schedule/src/server/application/schedule-portability.spec.ts",

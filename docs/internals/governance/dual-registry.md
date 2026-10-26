@@ -151,7 +151,7 @@ Product Governance Runtime 已由 ADR-113 退休，因此其已删除 dual/keep-
 | `retired`       | `packages/repository/src/application-client/repository-client-port-dual.surface.spec.ts`                                           |
 | `retired`       | `packages/repository/src/electron/vault-fs-guards-dual.surface.spec.ts`                                                            |
 | `keep_boundary` | `packages/schedule/src/api/schedule-route-parsers-keep-boundary.surface.spec.ts`                                                   |
-| `retired`       | `packages/schedule/src/application-client/schedule-client-port-facade-dual.surface.spec.ts`                                        |
+| `retired`       | `packages/schedule-client/src/application-client/schedule-client-port-facade-dual.surface.spec.ts`                                        |
 | `retired`       | `packages/schedule/src/server/application/scheduler/patterns-scheduler-dual.surface.spec.ts`                                       |
 | `retired`       | `packages/setting/src/application-client/setting-client-port-dual.surface.spec.ts`                                                 |
 | `retired`       | `packages/task/src/api/routes/get-first-query-value-dual.surface.spec.ts`                                                          |

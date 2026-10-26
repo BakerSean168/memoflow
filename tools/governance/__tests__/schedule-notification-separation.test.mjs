@@ -152,7 +152,7 @@ describe('findScheduleNotificationSeparationViolations', () => {
       {
         relPath: 'packages/schedule-orchestration/src/execution/router.ts',
         content: [
-          `import { SourceModule } from '@memoflow/contracts/schedule';`,
+          `import { SourceModule } from '@memoflow/schedule-contracts';`,
           `export function route(task) {`,
           `  if (task.sourceModule === SourceModule.Reminder) return reminder;`,
           `  if (task.sourceModule === SourceModule.Task) return taskSource;`,
