@@ -298,6 +298,21 @@ app.provide(keys.ROUTINE_SERVICE_KEY, {
 } as never);
 app.provide(keys.REPOSITORY_SERVICE_KEY, repository as never);
 app.provide(keys.TASK_SERVICE_KEY, task as never);
+// The shell capsules read the Schedule owner surface through its DI key; the
+// visual fixture has no schedule rows, so reads resolve to an empty window and
+// any write fails closed like the other fixtures.
+app.provide(keys.SCHEDULE_SERVICE_KEY, {
+  getSchedulesByAccount: async () => ok([]),
+  createSchedule: async () => {
+    throw new Error('Unexpected fixture write');
+  },
+  updateSchedule: async () => {
+    throw new Error('Unexpected fixture write');
+  },
+  deleteSchedule: async () => {
+    throw new Error('Unexpected fixture write');
+  },
+} as never);
 app.provide(keys.GOAL_SERVICE_KEY, {
   listGoals: async () => ok({ goals: [], pagination: { hasMore: false } }),
 } as never);
