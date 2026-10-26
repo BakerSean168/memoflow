@@ -8,8 +8,8 @@ import {
 import { GOAL_REMINDER_PAYLOAD_VERSION } from '@memoflow/goal/schedule-projection';
 import { requireYmd } from '@memoflow/contracts/primitives';
 import { GoalStatus, ReminderTriggerType } from '@memoflow/goal-contracts';
-import { buildIdempotencyKeyString } from '@memoflow/contracts/reliable-messaging';
-import type { BusinessOperationReceipt } from '@memoflow/contracts/reliable-messaging';
+import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
+import type { BusinessOperationReceipt } from '@memoflow/reliable-messaging-contracts';
 
 const IDENTITY_ID = 'IdentityId_goal-owner';
 const GOAL_ID = 'GoalId_goal-1';

@@ -4,7 +4,7 @@ import { createMockRepo } from '@memoflow/test-utils/mocks';
 import type { IGoalRepository } from '../../../../domain/repositories/i-goal-repository';
 import { Goal, GoalPolicy } from '../../../../domain';
 import { DeleteGoalUseCase } from '../delete-goal.use-case';
-import type { GoalDependencyReadPort } from '@memoflow/contracts/reliable-messaging';
+import type { GoalDependencyReadPort } from '@memoflow/reliable-messaging-contracts';
 import type { GoalDeletionTransactionRunner } from '../goal-deletion-support';
 
 // ============================================================

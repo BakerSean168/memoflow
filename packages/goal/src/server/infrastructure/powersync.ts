@@ -28,7 +28,7 @@ import type { NotificationRequestedWriterPort } from '@memoflow/contracts/notifi
 import type { ScheduledHandlerRegistration } from '@memoflow/contracts/schedule';
 import type { GoalScheduleProjectionSource } from '../../schedule-projection';
 import { createGoalTaskProgressHandler } from '../application/event-handlers';
-import type { GoalDependencyReadPort } from '@memoflow/contracts/reliable-messaging';
+import type { GoalDependencyReadPort } from '@memoflow/reliable-messaging-contracts';
 import type { GoalRepositorySet } from './prisma';
 
 /**

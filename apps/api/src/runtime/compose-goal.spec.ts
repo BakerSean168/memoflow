@@ -29,7 +29,7 @@ import type { Express, Router } from 'express';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PrismaClient } from '@memoflow/database';
 import type { GoalApiModuleContext } from '@memoflow/goal/api';
-import type { GoalDependencyReadPort } from '@memoflow/contracts/reliable-messaging';
+import type { GoalDependencyReadPort } from '@memoflow/reliable-messaging-contracts';
 import type { GoalRuntimeContributionsInput } from '@memoflow/goal';
 import type { UserTimeContextPort } from '@memoflow/time';
 

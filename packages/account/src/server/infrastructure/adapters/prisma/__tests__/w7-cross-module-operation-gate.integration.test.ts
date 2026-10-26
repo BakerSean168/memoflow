@@ -6,7 +6,7 @@ import {
   OperationTimelineEntrySchema,
   OperationSourceSchema,
 } from '@memoflow/contracts/operations';
-import { buildIdempotencyKeyString } from '@memoflow/contracts/reliable-messaging';
+import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import { createNotificationPrismaModule } from '@memoflow/notification/server';
 // eslint-disable-next-line @nx/enforce-module-boundaries

@@ -16,7 +16,7 @@ import type { IdentityId } from '@memoflow/contracts/primitives';
 import type { ImportanceLevel, UrgencyLevel } from '@memoflow/contracts/shared';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
-import { buildIdempotencyKeyString } from '@memoflow/contracts/reliable-messaging';
+import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
 import type {
   INotificationRepository,
   INotificationPreferenceRepository,

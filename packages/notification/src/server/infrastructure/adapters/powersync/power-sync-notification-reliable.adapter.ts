@@ -18,7 +18,7 @@ import {
   type NotificationOutboxDispatchInput,
   NotificationOutboxDispatchInputSchema,
   type NotificationReliableOperationPort,
-} from '@memoflow/contracts/reliable-messaging';
+} from '@memoflow/reliable-messaging-contracts';
 import type { NotificationMetricsService } from '../../../domain/services/notification-metrics-service';
 
 export interface PowerSyncOutboxRow {

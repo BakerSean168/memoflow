@@ -13,8 +13,8 @@
  */
 
 import { z } from 'zod';
-import { refinePortIdempotencyKey } from '../../reliable-messaging/ports';
-import type { BusinessOperationReceipt } from '../../reliable-messaging/operation-receipt';
+import { refinePortIdempotencyKey } from '@memoflow/reliable-messaging-contracts';
+import type { BusinessOperationReceipt } from '@memoflow/reliable-messaging-contracts';
 import { NotificationChannelType } from '../value-objects/notification-channel-type';
 import { NotificationType } from '../value-objects/notification-type';
 import { NotificationCategory } from '../value-objects/notification-category';

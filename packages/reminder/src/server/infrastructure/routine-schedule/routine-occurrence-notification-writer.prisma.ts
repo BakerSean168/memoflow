@@ -7,7 +7,7 @@ import {
   parseIdempotencyKeyString,
   type BusinessOperationReceipt,
   type OutboxMessageStatus,
-} from '@memoflow/contracts/reliable-messaging';
+} from '@memoflow/reliable-messaging-contracts';
 import type { RoutineOccurrenceTransactionHandle } from '../../domain/ports/routine-occurrence-store.port';
 import type {
   RoutineOccurrenceNotificationRequestInput,

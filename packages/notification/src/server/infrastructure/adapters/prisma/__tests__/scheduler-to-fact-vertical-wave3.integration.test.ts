@@ -8,7 +8,7 @@ import {
   type ScheduledInvocationContext,
   type SchedulingOwner,
 } from '@memoflow/contracts/schedule';
-import { buildIdempotencyKeyString } from '@memoflow/contracts/reliable-messaging';
+import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
 import { NotificationCategory, NotificationType } from '@memoflow/contracts/notification';
 import {
   ReminderTimeUnit,
