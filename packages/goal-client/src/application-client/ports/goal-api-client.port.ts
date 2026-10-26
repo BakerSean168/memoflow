@@ -5,7 +5,7 @@
  * Implementations: HTTP adapters (web), IPC adapters (desktop)
  *
  * All methods return Result<T> for consistent error handling.
- * Types imported from @memoflow/contracts/goal.
+ * Types imported from @memoflow/goal-contracts.
  */
 
 import type { Result } from '@memoflow/contracts/result';
