@@ -5,6 +5,7 @@ import path from 'node:path';
 import {
   createUiVueSourceAliasEntries,
   createWorkspaceSourceAliasEntries,
+  createReliableMessagingContractsAliasEntries,
   createOperationsContractsAliasEntries,
   createContractsAliasEntries,
 } from '../../../../../vite.workspace-aliases.ts';
@@ -17,6 +18,7 @@ export default defineConfig({
   resolve: {
     alias: [
       ...createUiVueSourceAliasEntries(workspace),
+      ...createReliableMessagingContractsAliasEntries(workspace),
       ...createOperationsContractsAliasEntries(workspace),
       ...createContractsAliasEntries(workspace),
       ...createWorkspaceSourceAliasEntries(workspace, [
@@ -93,6 +95,7 @@ export default defineConfig({
         ],
         ['@memoflow/transport-contracts', 'packages/transport-contracts/src/index.ts'],
         ['@memoflow/label-contracts', 'packages/label-contracts/src/index.ts'],
+        ['@memoflow/relation-contracts', 'packages/relation-contracts/src/index.ts'],
         [
           '@memoflow/data-portability-contracts',
           'packages/data-portability-contracts/src/index.ts',

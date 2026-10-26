@@ -8,7 +8,7 @@ import {
   CapabilityMissingStartupException,
   CapabilityTestDoubleForbiddenException,
   buildIdempotencyKeyString,
-} from '@memoflow/contracts/reliable-messaging';
+} from '@memoflow/reliable-messaging-contracts';
 import { Notification } from '../../../domain/aggregates/notification';
 import { NotificationChannelType } from '@memoflow/contracts/notification';
 import { InMemoryReliableAdapter } from './helpers/in-memory-reliable-adapter';

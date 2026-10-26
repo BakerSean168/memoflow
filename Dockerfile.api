@@ -52,7 +52,9 @@ COPY packages/data-portability-contracts/package.json ./packages/data-portabilit
 COPY packages/goal-contracts/package.json ./packages/goal-contracts/package.json
 COPY packages/workspace-contracts/package.json ./packages/workspace-contracts/package.json
 COPY packages/relation/package.json ./packages/relation/package.json
+COPY packages/relation-contracts/package.json ./packages/relation-contracts/package.json
 COPY packages/notification/package.json ./packages/notification/package.json
+COPY packages/reliable-messaging-contracts/package.json ./packages/reliable-messaging-contracts/package.json
 COPY packages/operations-contracts/package.json ./packages/operations-contracts/package.json
 COPY packages/patterns/package.json ./packages/patterns/package.json
 COPY packages/powersync-schema/package.json ./packages/powersync-schema/package.json
@@ -102,7 +104,9 @@ COPY packages/data-portability-contracts ./packages/data-portability-contracts
 COPY packages/goal-contracts ./packages/goal-contracts
 COPY packages/workspace-contracts ./packages/workspace-contracts
 COPY packages/relation ./packages/relation
+COPY packages/relation-contracts ./packages/relation-contracts
 COPY packages/notification ./packages/notification
+COPY packages/reliable-messaging-contracts ./packages/reliable-messaging-contracts
 COPY packages/operations-contracts ./packages/operations-contracts
 COPY packages/patterns ./packages/patterns
 COPY packages/powersync-schema ./packages/powersync-schema

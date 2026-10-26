@@ -70,7 +70,7 @@ import {
   type IGoalRepository,
 } from '@memoflow/goal';
 import { createGoalElectronModule, type GoalElectronModuleDef } from '@memoflow/goal/electron';
-import type { GoalDependencyReadPort } from '@memoflow/contracts/reliable-messaging';
+import type { GoalDependencyReadPort } from '@memoflow/reliable-messaging-contracts';
 import type { UserTimeContextPort } from '@memoflow/time';
 
 /**

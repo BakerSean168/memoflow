@@ -3,7 +3,7 @@ import type {
   ScheduledHandlerResult,
   ScheduledInvocationContext,
 } from '@memoflow/schedule-contracts';
-import { parseIdempotencyKeyString } from '@memoflow/contracts/reliable-messaging';
+import { parseIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
 import type { NotificationRequestedWriterPort } from '@memoflow/contracts/notification';
 import {
   createTaskReminderScheduledHandlerRegistration,

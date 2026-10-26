@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { IdentityId } from '@memoflow/domain-shared';
-import { GoalTaskBindingQueryInputSchema } from '@memoflow/contracts/reliable-messaging';
+import { GoalTaskBindingQueryInputSchema } from '@memoflow/reliable-messaging-contracts';
 import { getPrisma, seedAccount } from '../../../../__tests__/integration-helpers';
 import { PrismaTaskBindingReadPort } from './prisma-task-binding-read-port';
 

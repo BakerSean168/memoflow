@@ -9,7 +9,7 @@ import {
   GoalKnowledgeLinkReqSchema,
   GoalKnowledgeListReqSchema,
   GoalsForKnowledgeReqSchema,
-} from '@memoflow/contracts/relation';
+} from '@memoflow/relation-contracts';
 import { fail, ok } from '@memoflow/contracts/result';
 import type { GoalKnowledgeService } from '@memoflow/relation';
 

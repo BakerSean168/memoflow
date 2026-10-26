@@ -1,5 +1,5 @@
 import type { ModuleManifest } from '@memoflow/host-runtime';
-import { RelationTypes, SubjectTypes, type CreateRelationReq } from '@memoflow/contracts/relation';
+import { RelationTypes, SubjectTypes, type CreateRelationReq } from '@memoflow/relation-contracts';
 import type { RelationService } from './relation-service';
 
 /** Shared Relation owns the generic internal manifest command and relation vocabulary. */

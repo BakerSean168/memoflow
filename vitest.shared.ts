@@ -4,12 +4,14 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import type { Alias, UserConfig } from 'vite';
 import {
+  createReliableMessagingContractsAliasEntries,
   createOperationsContractsAliasEntries,
   createContractsAliasEntries,
   createGoalCoreAliasEntries,
   createSharedPrimitivesAliasEntries,
   createTransportContractsAliasEntries,
   createLabelContractsAliasEntries,
+  createRelationContractsAliasEntries,
   createDataPortabilityContractsAliasEntries,
   createGoalContractsAliasEntries,
   createWorkspaceContractsAliasEntries,
@@ -348,12 +350,14 @@ export function createSharedConfig(options: SharedConfigOptions) {
   const finalAliasEntries: Alias[] = [
     ...resolvedAliasEntries,
     ...commonWorkspaceAliasEntries,
+    ...createReliableMessagingContractsAliasEntries(workspaceRoot),
     ...createOperationsContractsAliasEntries(workspaceRoot),
     ...createContractsAliasEntries(workspaceRoot),
     ...createGoalCoreAliasEntries(workspaceRoot),
     ...createSharedPrimitivesAliasEntries(workspaceRoot),
     ...createTransportContractsAliasEntries(workspaceRoot),
     ...createLabelContractsAliasEntries(workspaceRoot),
+    ...createRelationContractsAliasEntries(workspaceRoot),
     ...createDataPortabilityContractsAliasEntries(workspaceRoot),
     ...createGoalContractsAliasEntries(workspaceRoot),
     ...createWorkspaceContractsAliasEntries(workspaceRoot),

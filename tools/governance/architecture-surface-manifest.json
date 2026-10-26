@@ -6,7 +6,7 @@
       "ruleId": "READ_PORT_GOAL_TASK_BINDING",
       "port": {
         "symbol": "GoalDependencyReadPort",
-        "file": "packages/contracts/src/modules/reliable-messaging/ports.ts"
+        "file": "packages/reliable-messaging-contracts/src/ports.ts"
       },
       "consumerDirs": ["packages/goal/src/server/application"],
       "providers": [
@@ -105,10 +105,10 @@
   ],
   "reliableReceipt": {
     "ruleId": "RELIABLE_RECEIPT_CANONICAL",
-    "validatorFile": "packages/contracts/src/modules/reliable-messaging/ports.ts",
+    "validatorFile": "packages/reliable-messaging-contracts/src/ports.ts",
     "canonicalFiles": [
-      "packages/contracts/src/modules/reliable-messaging/operation-receipt.ts",
-      "packages/contracts/src/modules/reliable-messaging/projection.ts"
+      "packages/reliable-messaging-contracts/src/operation-receipt.ts",
+      "packages/reliable-messaging-contracts/src/projection.ts"
     ],
     "canonicalTypes": ["BusinessOperationReceipt", "ProjectionOperation"],
     "validators": ["assertValidBusinessOperationReceipt", "assertValidProjectionOperation"],

@@ -6,6 +6,7 @@ import vue from '@vitejs/plugin-vue';
 import {
   createAppVueSourceAliasEntries,
   createAssetsAliasEntries,
+  createReliableMessagingContractsAliasEntries,
   createOperationsContractsAliasEntries,
   createContractsAliasEntries,
   createUiVueSourceAliasEntries,
@@ -44,6 +45,7 @@ const config: StorybookConfig = {
           ...createAppVueSourceAliasEntries(workspace),
           ...createAssetsAliasEntries(workspace),
           ...createUiVueSourceAliasEntries(workspace),
+          ...createReliableMessagingContractsAliasEntries(workspace),
           ...createOperationsContractsAliasEntries(workspace),
           ...createContractsAliasEntries(workspace),
           ...createWorkspaceSourceAliasEntries(workspace, [
@@ -123,6 +125,7 @@ const config: StorybookConfig = {
             ],
             ['@memoflow/transport-contracts', 'packages/transport-contracts/src/index.ts'],
             ['@memoflow/label-contracts', 'packages/label-contracts/src/index.ts'],
+            ['@memoflow/relation-contracts', 'packages/relation-contracts/src/index.ts'],
             [
               '@memoflow/data-portability-contracts',
               'packages/data-portability-contracts/src/index.ts',

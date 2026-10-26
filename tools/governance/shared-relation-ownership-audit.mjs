@@ -88,13 +88,13 @@ for (const retiredPath of [
     violations.push(`${retiredPath}: retired Goal-owned Relation path resurrected`);
 }
 
-requireTokens('packages/contracts/src/modules/relation/index.ts', [
+requireTokens('packages/relation-contracts/src/index.ts', [
   "z.object({ type: z.literal('note'), id: KnowledgeDocumentIdSchema }).strict()",
   'KnowledgeDocumentRefSchema',
   'GoalKnowledgeLinkReqSchema',
   'GoalsForKnowledgeReqSchema',
 ]);
-forbidPatterns('packages/contracts/src/modules/relation/index.ts', [
+forbidPatterns('packages/relation-contracts/src/index.ts', [
   [
     /\bKnowledgeNoteProjection(?:Id)?\b/,
     'Relation contract must not use path-derived Knowledge projection identity',

@@ -304,6 +304,20 @@ export const domainResolveAliases = [
     replacement: path.resolve(import.meta.dirname, './packages/transport-contracts/src/index.ts'),
   },
   {
+    find: /^@memoflow\/reliable-messaging-contracts\/(.+)/,
+    replacement: path.resolve(
+      import.meta.dirname,
+      './packages/reliable-messaging-contracts/src/$1',
+    ),
+  },
+  {
+    find: '@memoflow/reliable-messaging-contracts',
+    replacement: path.resolve(
+      import.meta.dirname,
+      './packages/reliable-messaging-contracts/src/index.ts',
+    ),
+  },
+  {
     find: /^@memoflow\/operations-contracts\/(.+)/,
     replacement: path.resolve(import.meta.dirname, './packages/operations-contracts/src/$1'),
   },
@@ -318,6 +332,14 @@ export const domainResolveAliases = [
   {
     find: '@memoflow/label-contracts',
     replacement: path.resolve(import.meta.dirname, './packages/label-contracts/src/index.ts'),
+  },
+  {
+    find: /^@memoflow\/relation-contracts\/(.+)/,
+    replacement: path.resolve(import.meta.dirname, './packages/relation-contracts/src/$1'),
+  },
+  {
+    find: '@memoflow/relation-contracts',
+    replacement: path.resolve(import.meta.dirname, './packages/relation-contracts/src/index.ts'),
   },
   {
     find: /^@memoflow\/data-portability-contracts\/(.+)/,

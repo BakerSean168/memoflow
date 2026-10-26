@@ -167,6 +167,17 @@ const mainWorkspaceAliasEntries = [
     replacement: resolve(import.meta.dirname, '../../packages/transport-contracts/src/index.ts'),
   },
   {
+    find: /^@memoflow\/reliable-messaging-contracts\/(.+)$/,
+    replacement: resolve(import.meta.dirname, '../../packages/reliable-messaging-contracts/src/$1'),
+  },
+  {
+    find: '@memoflow/reliable-messaging-contracts',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/reliable-messaging-contracts/src/index.ts',
+    ),
+  },
+  {
     find: /^@memoflow\/operations-contracts\/(.+)$/,
     replacement: resolve(import.meta.dirname, '../../packages/operations-contracts/src/$1'),
   },
@@ -177,6 +188,10 @@ const mainWorkspaceAliasEntries = [
   {
     find: '@memoflow/label-contracts',
     replacement: resolve(import.meta.dirname, '../../packages/label-contracts/src/index.ts'),
+  },
+  {
+    find: '@memoflow/relation-contracts',
+    replacement: resolve(import.meta.dirname, '../../packages/relation-contracts/src/index.ts'),
   },
   {
     find: '@memoflow/data-portability-contracts',

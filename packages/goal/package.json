@@ -1,7 +1,7 @@
 {
   "name": "@memoflow/goal",
   "version": "0.0.1",
-  "description": "\u76ee\u6807\u6a21\u5757 - OKR \u76ee\u6807\u4e0e\u5173\u952e\u7ed3\u679c\u7ba1\u7406",
+  "description": "目标模块 - OKR 目标与关键结果管理",
   "type": "module",
   "files": [
     "dist"
@@ -49,12 +49,14 @@
     "@memoflow/host-runtime": "workspace:*",
     "@memoflow/label-contracts": "workspace:*",
     "@memoflow/patterns": "workspace:*",
+    "@memoflow/relation-contracts": "workspace:*",
+    "@memoflow/reliable-messaging-contracts": "workspace:*",
+    "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/utils": "workspace:*",
     "@memoflow/workspace-contracts": "workspace:*",
     "express": "^5.2.1",
-    "zod": "^4.6.5",
-    "@memoflow/schedule-contracts": "workspace:*"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@memoflow/test-utils": "workspace:*",

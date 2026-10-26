@@ -16,7 +16,7 @@ import {
   NotificationType,
   type NotificationRequestedWriterPort,
 } from '@memoflow/contracts/notification';
-import { buildIdempotencyKeyString } from '@memoflow/contracts/reliable-messaging';
+import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
 import type {
   ScheduledHandlerRegistration,
   ScheduledInvocationContext,

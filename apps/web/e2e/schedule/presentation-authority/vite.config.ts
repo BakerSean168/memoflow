@@ -5,6 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 import {
   createUiVueSourceAliasEntries,
   createWorkspaceSourceAliasEntries,
+  createReliableMessagingContractsAliasEntries,
   createOperationsContractsAliasEntries,
   createContractsAliasEntries,
 } from '../../../../../vite.workspace-aliases.ts';
@@ -43,6 +44,7 @@ export default defineConfig({
   resolve: {
     alias: [
       ...createUiVueSourceAliasEntries(workspace),
+      ...createReliableMessagingContractsAliasEntries(workspace),
       ...createOperationsContractsAliasEntries(workspace),
       ...createContractsAliasEntries(workspace),
       ...createWorkspaceSourceAliasEntries(workspace, [

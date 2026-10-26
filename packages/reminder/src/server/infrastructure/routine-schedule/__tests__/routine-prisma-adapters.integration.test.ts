@@ -3,7 +3,7 @@ import { IdentityId } from '@memoflow/domain-shared';
 import {
   buildIdempotencyKeyString,
   LeaseFencingException,
-} from '@memoflow/contracts/reliable-messaging';
+} from '@memoflow/reliable-messaging-contracts';
 import { NOTIFICATION_REQUESTED_MESSAGE_TYPE } from '@memoflow/contracts/notification';
 import {
   cleanAll,

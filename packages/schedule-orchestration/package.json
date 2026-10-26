@@ -16,11 +16,12 @@
     "@memoflow/contracts": "workspace:*",
     "@memoflow/goal": "workspace:*",
     "@memoflow/goal-contracts": "workspace:*",
+    "@memoflow/reliable-messaging-contracts": "workspace:*",
     "@memoflow/reminder": "workspace:*",
+    "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/scheduler": "workspace:*",
     "@memoflow/task": "workspace:*",
-    "@memoflow/utils": "workspace:*",
-    "@memoflow/schedule-contracts": "workspace:*"
+    "@memoflow/utils": "workspace:*"
   },
   "devDependencies": {
     "tsup": "^8.3.5",

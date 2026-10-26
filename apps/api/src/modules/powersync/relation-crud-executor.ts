@@ -1,4 +1,4 @@
-import { CreateRelationReqSchema } from '@memoflow/contracts/relation';
+import { CreateRelationReqSchema } from '@memoflow/relation-contracts';
 import type { CrudOperation } from './crud-executor.js';
 import { normalizeCrudData } from './crud-normalization.js';
 
