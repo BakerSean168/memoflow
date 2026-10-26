@@ -7,11 +7,7 @@
 import { KeyResultWeightSnapshot } from '../../../../domain';
 import type { KeyResultWeightSnapshotDTO, SnapshotTrigger } from '@memoflow/goal-contracts';
 import type { IdentityId } from '@memoflow/contracts';
-import type {
-  GoalId,
-  KeyResultId,
-  KeyResultWeightSnapshotId,
-} from '@memoflow/contracts/primitives';
+import type { GoalId, KeyResultId, KeyResultWeightSnapshotId } from '@memoflow/goal-contracts';
 import type { KeyResultWeightSnapshot as PrismaKeyResultWeightSnapshot } from '@memoflow/database';
 
 /**
