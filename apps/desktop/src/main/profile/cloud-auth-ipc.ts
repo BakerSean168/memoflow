@@ -3,7 +3,7 @@ import {
   DesktopCloudConnectionRequestSchema,
   DesktopCloudAttemptRequestSchema,
   type CloudSessionState,
-} from '@memoflow/contracts';
+} from '@memoflow/contracts/cloud-auth';
 import { CloudAuthChannels } from '@memoflow/contracts/electron';
 import { fail, ok } from '@memoflow/contracts/result';
 import { getApiBaseUrl } from '../utils/api-config';

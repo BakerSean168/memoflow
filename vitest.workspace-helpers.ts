@@ -196,6 +196,10 @@ export const domainResolveAliases = [
     replacement: path.resolve(contractsSrc, 'electron/index.ts'),
   },
   {
+    find: '@memoflow/contracts/cloud-auth',
+    replacement: path.resolve(contractsSrc, 'cloud-auth.ts'),
+  },
+  {
     find: '@memoflow/contracts/mocks',
     replacement: path.resolve(contractsSrc, 'mocks/index.ts'),
   },

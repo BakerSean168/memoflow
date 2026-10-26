@@ -7,12 +7,12 @@ import type {
   CloudSessionState,
   CloudSignInRequest,
   CloudSignUpRequest,
-} from '@memoflow/contracts';
+} from '@memoflow/contracts/cloud-auth';
 export type {
   CloudAuthClientPort,
   CloudAuthDesktopClientPort,
   CloudAuthWebClientPort,
-} from '@memoflow/contracts';
+} from '@memoflow/contracts/cloud-auth';
 import { fail, ok, type Result } from '@memoflow/contracts/result';
 import { CloudAuthChannels } from '@memoflow/contracts/electron';
 import type { IResultHttpClient } from '@memoflow/http-client';
@@ -166,7 +166,9 @@ class CloudAuthIpcClient implements CloudAuthDesktopClientPort {
   getSession() {
     return this.ipc.invoke<CloudSessionState>(CloudAuthChannels.SESSION);
   }
-  beginCloudConnection(request: import('@memoflow/contracts').DesktopCloudConnectionRequest) {
+  beginCloudConnection(
+    request: import('@memoflow/contracts/cloud-auth').DesktopCloudConnectionRequest,
+  ) {
     return this.ipc.invoke<DesktopCloudConnectionAttempt>(
       CloudAuthChannels.CLOUD_CONNECTION_BEGIN,
       request,

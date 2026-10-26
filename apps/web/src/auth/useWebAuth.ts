@@ -1,4 +1,4 @@
-import type { CloudSignInRequest, CloudSignUpRequest } from '@memoflow/contracts';
+import type { CloudSignInRequest, CloudSignUpRequest } from '@memoflow/contracts/cloud-auth';
 import type { ResultError } from '@memoflow/contracts/result';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';

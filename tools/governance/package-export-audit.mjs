@@ -75,6 +75,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
     './reliable-messaging',
     './operations',
     './electron',
+    './cloud-auth',
     './mocks',
   ],
   // Transaction composition has no singleton connection side effects; shared owner code

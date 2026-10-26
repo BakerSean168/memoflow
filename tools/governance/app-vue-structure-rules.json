@@ -252,7 +252,7 @@
       "file": "packages/app-vue/src/di/types.ts",
       "requireImports": [
         {
-          "from": "@memoflow/contracts",
+          "from": "@memoflow/contracts/cloud-auth",
           "names": ["CloudAuthClientPort"]
         },
         {

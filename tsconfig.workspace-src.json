@@ -35,6 +35,7 @@
       "@memoflow/contracts/notification": [
         "./packages/contracts/src/modules/notification/index.ts"
       ],
+      "@memoflow/contracts/cloud-auth": ["./packages/contracts/src/cloud-auth.ts"],
       "@memoflow/contracts/*": [
         "./packages/contracts/src/modules/*/index.ts",
         "./packages/contracts/src/*/index.ts"
