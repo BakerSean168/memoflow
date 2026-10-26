@@ -87,7 +87,7 @@ export const TASK_GOAL_NULL_STRINGIFY_PATTERN =
 
 const GOAL_TIME_OWNER_ROOTS = [
   'packages/goal/src/',
-  'packages/contracts/src/modules/goal/',
+  'packages/goal-contracts/src/',
   'packages/app-vue/src/modules/goal/',
   'packages/app-react/src/screens/Goal',
 ];
@@ -112,7 +112,7 @@ const GOAL_TIME_OWNER_FILES = new Set([
 
 const KR_MEASUREMENT_OWNER_ROOTS = [
   'packages/goal/src/',
-  'packages/contracts/src/modules/goal/',
+  'packages/goal-contracts/src/',
   'packages/app-vue/src/modules/goal/',
   'packages/app-react/src/screens/Goal',
 ];

@@ -47,7 +47,7 @@ requireTokens('packages/workspace-contracts/src/goal-workspace.dto.ts', [
   'GoalWorkspaceTaskPageInvocationSchema',
   'GoalWorkspaceKnowledgePageInvocationSchema',
 ]);
-forbidPatterns('packages/contracts/src/modules/goal/api/goal-workspace.dto.ts', [
+forbidPatterns('packages/workspace-contracts/src/goal-workspace.dto.ts', [
   [/\btaskIds\b/, 'Workspace contract must not copy Task ids into Goal authority'],
   [/\bnoteIds\b/, 'Workspace contract must not copy Knowledge ids into Goal authority'],
   [/^\s*keyResults:\s/m, 'Workspace must not duplicate goal.keyResults at the top level'],
