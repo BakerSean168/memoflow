@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { TaskPlanScheduleKind } from '@memoflow/contracts/task';
-import { buildSchedulingKey } from '@memoflow/contracts/schedule';
+import { buildSchedulingKey } from '@memoflow/schedule-contracts';
 import { createTimeContext } from '@memoflow/time';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
 import type { ITaskOccurrenceRepository } from '../domain/repositories/i-task-occurrence-repository';

@@ -1,7 +1,7 @@
 import type {
   InvocationAttempt as InvocationAttemptContract,
   InvocationAttemptOutcome,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import { generateUUID } from '@memoflow/utils/shared';
 
 export type InvocationAttemptState = InvocationAttemptContract;

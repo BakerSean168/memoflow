@@ -1,4 +1,4 @@
-import type { InvocationAttempt, ScheduledInvocation } from '@memoflow/contracts/schedule';
+import type { InvocationAttempt, ScheduledInvocation } from '@memoflow/schedule-contracts';
 
 export interface PowerSyncScheduledInvocationRow {
   id: string;

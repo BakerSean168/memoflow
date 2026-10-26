@@ -8,12 +8,12 @@ import type {
   ConflictDetectionResult,
   ConflictSuggestion,
   ScheduleEventMap,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import {
   CalendarEntryRangeSchema,
   cloneCalendarEntryRange,
   ConflictSeverity,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import { ScheduleId } from '../value-objects/schedule-id';
 
 /** ADR-080 CalendarEntry aggregate state: content + canonical range only. */

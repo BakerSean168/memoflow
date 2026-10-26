@@ -54,10 +54,11 @@
     "@memoflow/database": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",
+    "@memoflow/reliable-messaging-contracts": "workspace:*",
+    "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/utils": "workspace:*",
-    "zod": "^4.6.5",
-    "@memoflow/reliable-messaging-contracts": "workspace:*"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@memoflow/test-utils": "workspace:*"

@@ -28,13 +28,13 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import PlannerCalendar from '../../src/modules/schedule/planner/PlannerCalendar.vue';
+import {
+  PlannerCalendar,
+  type PlannerMutationOutcome,
+  type PlannerMutationRequest,
+  type PlannerOwnerCommandRouter,
+} from '@memoflow/schedule-ui';
 import { plannerPocFixture } from './planner-parity.fixture';
-import type {
-  PlannerMutationOutcome,
-  PlannerMutationRequest,
-  PlannerOwnerCommandRouter,
-} from '../../src/modules/schedule/planner';
 
 const initialDate = Date.parse('2026-08-27T12:00:00Z');
 const failNext = ref(false);

@@ -395,6 +395,12 @@ importers:
       '@memoflow/schedule':
         specifier: workspace:*
         version: link:../../packages/schedule
+      '@memoflow/schedule-client':
+        specifier: workspace:*
+        version: link:../../packages/schedule-client
+      '@memoflow/schedule-contracts':
+        specifier: workspace:*
+        version: link:../../packages/schedule-contracts
       '@memoflow/schedule-orchestration':
         specifier: workspace:*
         version: link:../../packages/schedule-orchestration
@@ -627,9 +633,18 @@ importers:
       '@memoflow/schedule':
         specifier: workspace:*
         version: link:../../packages/schedule
+      '@memoflow/schedule-client':
+        specifier: workspace:*
+        version: link:../../packages/schedule-client
+      '@memoflow/schedule-contracts':
+        specifier: workspace:*
+        version: link:../../packages/schedule-contracts
       '@memoflow/schedule-orchestration':
         specifier: workspace:*
         version: link:../../packages/schedule-orchestration
+      '@memoflow/schedule-ui':
+        specifier: workspace:*
+        version: link:../../packages/schedule-ui
       '@memoflow/scheduler':
         specifier: workspace:*
         version: link:../../packages/scheduler
@@ -1077,9 +1092,12 @@ importers:
       '@memoflow/repository':
         specifier: workspace:*
         version: link:../../packages/repository
-      '@memoflow/schedule':
+      '@memoflow/schedule-client':
         specifier: workspace:*
-        version: link:../../packages/schedule
+        version: link:../../packages/schedule-client
+      '@memoflow/schedule-contracts':
+        specifier: workspace:*
+        version: link:../../packages/schedule-contracts
       '@memoflow/setting':
         specifier: workspace:*
         version: link:../../packages/setting
@@ -1268,6 +1286,9 @@ importers:
       '@memoflow/notification-contracts':
         specifier: workspace:*
         version: link:../notification-contracts
+      '@memoflow/schedule-contracts':
+        specifier: workspace:*
+        version: link:../schedule-contracts
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time
@@ -1338,9 +1359,12 @@ importers:
       '@memoflow/notification-contracts':
         specifier: workspace:*
         version: link:../notification-contracts
-      '@memoflow/schedule':
+      '@memoflow/schedule-client':
         specifier: workspace:*
-        version: link:../schedule
+        version: link:../schedule-client
+      '@memoflow/schedule-contracts':
+        specifier: workspace:*
+        version: link:../schedule-contracts
       '@memoflow/setting':
         specifier: workspace:*
         version: link:../setting
@@ -1468,9 +1492,15 @@ importers:
       '@memoflow/repository':
         specifier: workspace:*
         version: link:../repository
-      '@memoflow/schedule':
+      '@memoflow/schedule-client':
         specifier: workspace:*
-        version: link:../schedule
+        version: link:../schedule-client
+      '@memoflow/schedule-contracts':
+        specifier: workspace:*
+        version: link:../schedule-contracts
+      '@memoflow/schedule-ui':
+        specifier: workspace:*
+        version: link:../schedule-ui
       '@memoflow/setting':
         specifier: workspace:*
         version: link:../setting
@@ -1653,6 +1683,9 @@ importers:
       '@memoflow/notification-contracts':
         specifier: workspace:*
         version: link:../notification-contracts
+      '@memoflow/schedule-contracts':
+        specifier: workspace:*
+        version: link:../schedule-contracts
       '@memoflow/shared-primitives':
         specifier: workspace:*
         version: link:../shared-primitives
@@ -1822,6 +1855,9 @@ importers:
       '@memoflow/reliable-messaging-contracts':
         specifier: workspace:*
         version: link:../reliable-messaging-contracts
+      '@memoflow/schedule-contracts':
+        specifier: workspace:*
+        version: link:../schedule-contracts
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time
@@ -2114,6 +2150,9 @@ importers:
       '@memoflow/reliable-messaging-contracts':
         specifier: workspace:*
         version: link:../reliable-messaging-contracts
+      '@memoflow/schedule-contracts':
+        specifier: workspace:*
+        version: link:../schedule-contracts
       '@memoflow/shared-primitives':
         specifier: workspace:*
         version: link:../shared-primitives
@@ -2287,6 +2326,9 @@ importers:
       '@memoflow/reliable-messaging-contracts':
         specifier: workspace:*
         version: link:../reliable-messaging-contracts
+      '@memoflow/schedule-contracts':
+        specifier: workspace:*
+        version: link:../schedule-contracts
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time
@@ -2361,18 +2403,15 @@ importers:
       '@memoflow/host-runtime':
         specifier: workspace:*
         version: link:../host-runtime
-      '@memoflow/http-client':
-        specifier: workspace:*
-        version: link:../http-client
-      '@memoflow/ipc-client':
-        specifier: workspace:*
-        version: link:../ipc-client
       '@memoflow/operations-contracts':
         specifier: workspace:*
         version: link:../operations-contracts
       '@memoflow/patterns':
         specifier: workspace:*
         version: link:../patterns
+      '@memoflow/schedule-contracts':
+        specifier: workspace:*
+        version: link:../schedule-contracts
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils
@@ -2396,6 +2435,36 @@ importers:
         specifier: ^5.0.0
         version: 5.0.6
 
+  packages/schedule-client:
+    dependencies:
+      '@memoflow/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@memoflow/http-client':
+        specifier: workspace:*
+        version: link:../http-client
+      '@memoflow/ipc-client':
+        specifier: workspace:*
+        version: link:../ipc-client
+      '@memoflow/schedule-contracts':
+        specifier: workspace:*
+        version: link:../schedule-contracts
+      '@memoflow/time':
+        specifier: workspace:*
+        version: link:../time
+
+  packages/schedule-contracts:
+    dependencies:
+      '@memoflow/data-portability-contracts':
+        specifier: workspace:*
+        version: link:../data-portability-contracts
+      '@memoflow/shared-primitives':
+        specifier: workspace:*
+        version: link:../shared-primitives
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
+
   packages/schedule-orchestration:
     dependencies:
       '@memoflow/contracts':
@@ -2416,6 +2485,9 @@ importers:
       '@memoflow/reminder':
         specifier: workspace:*
         version: link:../reminder
+      '@memoflow/schedule-contracts':
+        specifier: workspace:*
+        version: link:../schedule-contracts
       '@memoflow/scheduler':
         specifier: workspace:*
         version: link:../scheduler
@@ -2432,6 +2504,70 @@ importers:
       typescript:
         specifier: npm:@typescript/typescript6@6.0.2
         version: '@typescript/typescript6@6.0.2'
+
+  packages/schedule-ui:
+    dependencies:
+      '@fullcalendar/vue3':
+        specifier: 7.1.0
+        version: 7.1.0(temporal-polyfill@1.0.5)(vue@3.5.43(@typescript/typescript6@6.0.2))
+      '@lucide/vue':
+        specifier: ^1.48.0
+        version: 1.48.0(vue@3.5.43(@typescript/typescript6@6.0.2))
+      '@memoflow/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@memoflow/goal-contracts':
+        specifier: workspace:*
+        version: link:../goal-contracts
+      '@memoflow/http-client':
+        specifier: workspace:*
+        version: link:../http-client
+      '@memoflow/schedule-client':
+        specifier: workspace:*
+        version: link:../schedule-client
+      '@memoflow/schedule-contracts':
+        specifier: workspace:*
+        version: link:../schedule-contracts
+      '@memoflow/time':
+        specifier: workspace:*
+        version: link:../time
+      '@memoflow/ui-vue-shadcn':
+        specifier: workspace:*
+        version: link:../ui-vue-shadcn
+      '@tanstack/vue-query':
+        specifier: 5.103.2
+        version: 5.103.2(vue@3.5.43(@typescript/typescript6@6.0.2))
+      '@vueuse/core':
+        specifier: 15.0.0
+        version: 15.0.0(vue@3.5.43(@typescript/typescript6@6.0.2))
+      pinia:
+        specifier: ^4.0.3
+        version: 4.0.3(@typescript/typescript6@6.0.2)(@vue/devtools-api@8.1.5)(vue@3.5.43(@typescript/typescript6@6.0.2))
+      vue:
+        specifier: ^3.5.43
+        version: 3.5.43(@typescript/typescript6@6.0.2)
+      vue-i18n:
+        specifier: ^11.4.12
+        version: 11.4.12(vue@3.5.43(@typescript/typescript6@6.0.2))
+      vue-router:
+        specifier: ^5.3.1
+        version: 5.3.1(@vue/compiler-sfc@3.5.43)(esbuild@0.28.1)(pinia@4.0.3(@typescript/typescript6@6.0.2)(@vue/devtools-api@8.1.5)(vue@3.5.43(@typescript/typescript6@6.0.2)))(rolldown@1.2.9)(rollup@4.57.1)(vite@8.3.1(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.105.0)(sass@1.105.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.15)(yaml@2.9.0))(vue@3.5.43(@typescript/typescript6@6.0.2))
+      vue-sonner:
+        specifier: ^2.0.8
+        version: 2.0.9
+    devDependencies:
+      '@vitejs/plugin-vue':
+        specifier: 6.0.9
+        version: 6.0.9(vite@8.3.1(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.105.0)(sass@1.105.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.15)(yaml@2.9.0))(vue@3.5.43(@typescript/typescript6@6.0.2))
+      typescript:
+        specifier: npm:@typescript/typescript6@6.0.2
+        version: '@typescript/typescript6@6.0.2'
+      vite:
+        specifier: 8.3.1
+        version: 8.3.1(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.105.0)(sass@1.105.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.15)(yaml@2.9.0)
+      vite-plugin-dts:
+        specifier: 5.1.1
+        version: 5.1.1(@typescript/typescript6@6.0.2)(@vue/language-core@3.3.11)(esbuild@0.28.1)(rolldown@1.2.9)(rollup@4.57.1)(supports-color@10.2.2)(vite@8.3.1(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.105.0)(sass@1.105.0)(stylus@0.57.0(supports-color@10.2.2))(terser@5.46.1)(tsx@4.23.15)(yaml@2.9.0))
 
   packages/scheduler:
     dependencies:
@@ -2456,6 +2592,9 @@ importers:
       '@memoflow/patterns':
         specifier: workspace:*
         version: link:../patterns
+      '@memoflow/schedule-contracts':
+        specifier: workspace:*
+        version: link:../schedule-contracts
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils
@@ -2566,6 +2705,9 @@ importers:
       '@memoflow/reliable-messaging-contracts':
         specifier: workspace:*
         version: link:../reliable-messaging-contracts
+      '@memoflow/schedule-contracts':
+        specifier: workspace:*
+        version: link:../schedule-contracts
       '@memoflow/shared-primitives':
         specifier: workspace:*
         version: link:../shared-primitives

@@ -25,9 +25,12 @@
     "@memoflow/powersync-schema": "workspace:*",
     "@memoflow/relation": "workspace:*",
     "@memoflow/relation-contracts": "workspace:*",
+    "@memoflow/reliable-messaging-contracts": "workspace:*",
     "@memoflow/reminder": "workspace:*",
     "@memoflow/repository": "workspace:*",
     "@memoflow/schedule": "workspace:*",
+    "@memoflow/schedule-client": "workspace:*",
+    "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/schedule-orchestration": "workspace:*",
     "@memoflow/scheduler": "workspace:*",
     "@memoflow/setting": "workspace:*",
@@ -58,8 +61,7 @@
     "node-cron": "^4.6.0",
     "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1",
-    "zod": "^4.6.5",
-    "@memoflow/reliable-messaging-contracts": "workspace:*"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/compression": "^1.7.5",

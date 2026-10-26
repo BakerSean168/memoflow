@@ -39,7 +39,8 @@
     "@memoflow/utils": "workspace:*",
     "cron-parser": "^5.10.1",
     "express": "^5.2.1",
-    "zod": "^4.6.5"
+    "zod": "^4.6.5",
+    "@memoflow/schedule-contracts": "workspace:*"
   },
   "devDependencies": {
     "@memoflow/test-utils": "workspace:*",

@@ -6,6 +6,8 @@ import {
 } from 'vue-router';
 import { createAppAccessGuard } from './guards';
 import { createSettingsSceneGuard } from '../layouts/shell/surface-leave-protocol';
+// The Schedule surfaces consume a host port bound by this composition root.
+import '../di/schedule-ui-host';
 
 import AppShell from '../layouts/shell/AppShell.vue';
 import ShellHomeRoute from '../layouts/shell/shell-home-route';
@@ -15,7 +17,7 @@ import { accountRoutes } from '../modules/account/router';
 import { goalRoutes } from '@memoflow/goal-ui';
 import { taskRoutes } from '../modules/task/router';
 import { routineRoutes } from '../modules/routine/router';
-import { scheduleRoutes } from '../modules/schedule/router';
+import { scheduleRoutes } from '@memoflow/schedule-ui';
 import { repositoryRoutes } from '../modules/repository/router';
 import { notificationRoutes } from '../modules/notification/router';
 import { settingRoutes } from '../modules/setting/router';

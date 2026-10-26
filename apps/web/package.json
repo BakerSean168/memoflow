@@ -25,7 +25,6 @@
     "@memoflow/relation-contracts": "workspace:*",
     "@memoflow/reminder": "workspace:*",
     "@memoflow/repository": "workspace:*",
-    "@memoflow/schedule": "workspace:*",
     "@memoflow/setting": "workspace:*",
     "@memoflow/task": "workspace:*",
     "@memoflow/test-utils": "workspace:*",
@@ -39,7 +38,9 @@
     "vue": "^3.5.43",
     "vue-i18n": "^11.4.12",
     "vue-router": "^5.3.1",
-    "vue-sonner": "^2.0.9"
+    "vue-sonner": "^2.0.9",
+    "@memoflow/schedule-contracts": "workspace:*",
+    "@memoflow/schedule-client": "workspace:*"
   },
   "devDependencies": {
     "@faker-js/faker": "10.6.0",

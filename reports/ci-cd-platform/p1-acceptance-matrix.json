@@ -1,13 +1,19 @@
 [
   {
     "id": "docs",
-    "files": ["docs/internals/testing/README.md"],
+    "files": [
+      "docs/internals/testing/README.md"
+    ],
     "expected": {
       "full": false,
       "targets": {
-        "build": ["governance-tools"],
+        "build": [
+          "governance-tools"
+        ],
         "typecheck": [],
-        "test": ["governance-tools"],
+        "test": [
+          "governance-tools"
+        ],
         "test:contract": [],
         "test:smoke": [],
         "test:integration": [],
@@ -44,9 +50,13 @@
     "actual": {
       "full": false,
       "targets": {
-        "build": ["governance-tools"],
+        "build": [
+          "governance-tools"
+        ],
         "typecheck": [],
-        "test": ["governance-tools"],
+        "test": [
+          "governance-tools"
+        ],
         "test:contract": [],
         "test:smoke": [],
         "test:integration": [],
@@ -98,24 +108,59 @@
   },
   {
     "id": "chat",
-    "files": ["packages/app-vue/src/modules/ai/views/AIChatView.vue"],
+    "files": [
+      "packages/app-vue/src/modules/ai/views/AIChatView.vue"
+    ],
     "expected": {
       "full": false,
       "targets": {
-        "build": ["app-vue", "desktop", "goal-ui", "governance-tools", "ui-storybook", "web"],
-        "typecheck": ["app-vue", "desktop", "ui-storybook", "web"],
-        "test": ["app-vue", "desktop", "governance-tools", "web"],
-        "test:contract": ["goal-ui"],
+        "build": [
+          "app-vue",
+          "desktop",
+          "goal-ui",
+          "governance-tools",
+          "ui-storybook",
+          "web"
+        ],
+        "typecheck": [
+          "app-vue",
+          "desktop",
+          "ui-storybook",
+          "web"
+        ],
+        "test": [
+          "app-vue",
+          "desktop",
+          "governance-tools",
+          "web"
+        ],
+        "test:contract": [
+          "goal-ui"
+        ],
         "test:smoke": [],
         "test:integration": [],
-        "test:boundary": ["desktop"],
-        "test:ipc": ["desktop"],
-        "test:main": ["desktop"],
+        "test:boundary": [
+          "desktop"
+        ],
+        "test:ipc": [
+          "desktop"
+        ],
+        "test:main": [
+          "desktop"
+        ],
         "test:perf": [],
-        "test:interaction": ["ui-storybook"],
-        "e2e:ai-provider": ["web"],
-        "e2e:visual-regression": ["web"],
-        "test:coverage": ["app-vue"]
+        "test:interaction": [
+          "ui-storybook"
+        ],
+        "e2e:ai-provider": [
+          "web"
+        ],
+        "e2e:visual-regression": [
+          "web"
+        ],
+        "test:coverage": [
+          "app-vue"
+        ]
       },
       "jobs": {
         "lint": [
@@ -126,7 +171,9 @@
         ],
         "unit-1": [],
         "unit-2": [],
-        "unit-3": ["desktop:test"],
+        "unit-3": [
+          "desktop:test"
+        ],
         "build": [
           "app-vue:build",
           "desktop:build",
@@ -138,18 +185,35 @@
           "ui-storybook:typecheck",
           "web:typecheck"
         ],
-        "web-unit-1": ["app-vue:test#1/2", "web:test"],
-        "web-unit-2": ["app-vue:test#2/2"],
+        "web-unit-1": [
+          "app-vue:test#1/2",
+          "web:test"
+        ],
+        "web-unit-2": [
+          "app-vue:test#2/2"
+        ],
         "server-unit": [],
-        "verification-children": ["desktop:test:ipc", "desktop:test:main"],
-        "web-visual": ["web:e2e:visual-regression"],
-        "component-browser": ["ui-storybook:test:interaction"],
-        "contract": ["goal-ui:test:contract"]
+        "verification-children": [
+          "desktop:test:ipc",
+          "desktop:test:main"
+        ],
+        "web-visual": [
+          "web:e2e:visual-regression"
+        ],
+        "component-browser": [
+          "ui-storybook:test:interaction"
+        ],
+        "contract": [
+          "goal-ui:test:contract"
+        ]
       },
       "serverShards": [
         {
           "id": "1/1",
-          "keys": ["desktop:test:main", "desktop:test:ipc"],
+          "keys": [
+            "desktop:test:main",
+            "desktop:test:ipc"
+          ],
           "estimatedMs": 7849
         }
       ]
@@ -157,20 +221,53 @@
     "actual": {
       "full": false,
       "targets": {
-        "build": ["app-vue", "desktop", "goal-ui", "governance-tools", "ui-storybook", "web"],
-        "typecheck": ["app-vue", "desktop", "ui-storybook", "web"],
-        "test": ["app-vue", "desktop", "governance-tools", "web"],
-        "test:contract": ["goal-ui"],
+        "build": [
+          "app-vue",
+          "desktop",
+          "goal-ui",
+          "governance-tools",
+          "ui-storybook",
+          "web"
+        ],
+        "typecheck": [
+          "app-vue",
+          "desktop",
+          "ui-storybook",
+          "web"
+        ],
+        "test": [
+          "app-vue",
+          "desktop",
+          "governance-tools",
+          "web"
+        ],
+        "test:contract": [
+          "goal-ui"
+        ],
         "test:smoke": [],
         "test:integration": [],
-        "test:boundary": ["desktop"],
-        "test:ipc": ["desktop"],
-        "test:main": ["desktop"],
+        "test:boundary": [
+          "desktop"
+        ],
+        "test:ipc": [
+          "desktop"
+        ],
+        "test:main": [
+          "desktop"
+        ],
         "test:perf": [],
-        "test:interaction": ["ui-storybook"],
-        "e2e:ai-provider": ["web"],
-        "e2e:visual-regression": ["web"],
-        "test:coverage": ["app-vue"]
+        "test:interaction": [
+          "ui-storybook"
+        ],
+        "e2e:ai-provider": [
+          "web"
+        ],
+        "e2e:visual-regression": [
+          "web"
+        ],
+        "test:coverage": [
+          "app-vue"
+        ]
       },
       "jobs": {
         "lint": [
@@ -181,7 +278,9 @@
         ],
         "unit-1": [],
         "unit-2": [],
-        "unit-3": ["desktop:test"],
+        "unit-3": [
+          "desktop:test"
+        ],
         "build": [
           "app-vue:build",
           "desktop:build",
@@ -193,18 +292,35 @@
           "ui-storybook:typecheck",
           "web:typecheck"
         ],
-        "web-unit-1": ["app-vue:test#1/2", "web:test"],
-        "web-unit-2": ["app-vue:test#2/2"],
+        "web-unit-1": [
+          "app-vue:test#1/2",
+          "web:test"
+        ],
+        "web-unit-2": [
+          "app-vue:test#2/2"
+        ],
         "server-unit": [],
-        "verification-children": ["desktop:test:ipc", "desktop:test:main"],
-        "web-visual": ["web:e2e:visual-regression"],
-        "component-browser": ["ui-storybook:test:interaction"],
-        "contract": ["goal-ui:test:contract"]
+        "verification-children": [
+          "desktop:test:ipc",
+          "desktop:test:main"
+        ],
+        "web-visual": [
+          "web:e2e:visual-regression"
+        ],
+        "component-browser": [
+          "ui-storybook:test:interaction"
+        ],
+        "contract": [
+          "goal-ui:test:contract"
+        ]
       },
       "serverShards": [
         {
           "id": "1/1",
-          "keys": ["desktop:test:main", "desktop:test:ipc"],
+          "keys": [
+            "desktop:test:main",
+            "desktop:test:ipc"
+          ],
           "estimatedMs": 7849
         }
       ]
@@ -219,11 +335,21 @@
   },
   {
     "id": "aiServer",
-    "files": ["packages/ai/src/server/transport/ai-chat.controller.ts"],
+    "files": [
+      "packages/ai/src/server/transport/ai-chat.controller.ts"
+    ],
     "expected": {
       "full": false,
       "targets": {
-        "build": ["ai", "api", "app-vue", "desktop", "governance-tools", "ui-storybook", "web"],
+        "build": [
+          "ai",
+          "api",
+          "app-vue",
+          "desktop",
+          "governance-tools",
+          "ui-storybook",
+          "web"
+        ],
         "typecheck": [
           "ai",
           "api",
@@ -234,18 +360,46 @@
           "ui-storybook",
           "web"
         ],
-        "test": ["ai", "api", "app-vue", "desktop", "governance-tools", "web"],
+        "test": [
+          "ai",
+          "api",
+          "app-vue",
+          "desktop",
+          "governance-tools",
+          "web"
+        ],
         "test:contract": [],
-        "test:smoke": ["api"],
-        "test:integration": ["ai", "api"],
-        "test:boundary": ["desktop"],
-        "test:ipc": ["desktop"],
-        "test:main": ["desktop"],
+        "test:smoke": [
+          "api"
+        ],
+        "test:integration": [
+          "ai",
+          "api"
+        ],
+        "test:boundary": [
+          "desktop"
+        ],
+        "test:ipc": [
+          "desktop"
+        ],
+        "test:main": [
+          "desktop"
+        ],
         "test:perf": [],
-        "test:interaction": ["ui-storybook"],
-        "e2e:ai-provider": ["web"],
-        "e2e:visual-regression": ["web"],
-        "test:coverage": ["ai", "api", "app-vue"]
+        "test:interaction": [
+          "ui-storybook"
+        ],
+        "e2e:ai-provider": [
+          "web"
+        ],
+        "e2e:visual-regression": [
+          "web"
+        ],
+        "test:coverage": [
+          "ai",
+          "api",
+          "app-vue"
+        ]
       },
       "jobs": {
         "lint": [
@@ -256,7 +410,10 @@
         ],
         "unit-1": [],
         "unit-2": [],
-        "unit-3": ["desktop:test", "ai:test"],
+        "unit-3": [
+          "desktop:test",
+          "ai:test"
+        ],
         "build": [
           "ai:build",
           "api:build",
@@ -273,9 +430,16 @@
           "ui-storybook:typecheck",
           "web:typecheck"
         ],
-        "web-unit-1": ["app-vue:test#1/2", "web:test"],
-        "web-unit-2": ["app-vue:test#2/2"],
-        "server-unit": ["api:test"],
+        "web-unit-1": [
+          "app-vue:test#1/2",
+          "web:test"
+        ],
+        "web-unit-2": [
+          "app-vue:test#2/2"
+        ],
+        "server-unit": [
+          "api:test"
+        ],
         "verification-children": [
           "desktop:test:ipc",
           "desktop:test:main",
@@ -304,7 +468,15 @@
     "actual": {
       "full": false,
       "targets": {
-        "build": ["ai", "api", "app-vue", "desktop", "governance-tools", "ui-storybook", "web"],
+        "build": [
+          "ai",
+          "api",
+          "app-vue",
+          "desktop",
+          "governance-tools",
+          "ui-storybook",
+          "web"
+        ],
         "typecheck": [
           "ai",
           "api",
@@ -315,18 +487,46 @@
           "ui-storybook",
           "web"
         ],
-        "test": ["ai", "api", "app-vue", "desktop", "governance-tools", "web"],
+        "test": [
+          "ai",
+          "api",
+          "app-vue",
+          "desktop",
+          "governance-tools",
+          "web"
+        ],
         "test:contract": [],
-        "test:smoke": ["api"],
-        "test:integration": ["ai", "api"],
-        "test:boundary": ["desktop"],
-        "test:ipc": ["desktop"],
-        "test:main": ["desktop"],
+        "test:smoke": [
+          "api"
+        ],
+        "test:integration": [
+          "ai",
+          "api"
+        ],
+        "test:boundary": [
+          "desktop"
+        ],
+        "test:ipc": [
+          "desktop"
+        ],
+        "test:main": [
+          "desktop"
+        ],
         "test:perf": [],
-        "test:interaction": ["ui-storybook"],
-        "e2e:ai-provider": ["web"],
-        "e2e:visual-regression": ["web"],
-        "test:coverage": ["ai", "api", "app-vue"]
+        "test:interaction": [
+          "ui-storybook"
+        ],
+        "e2e:ai-provider": [
+          "web"
+        ],
+        "e2e:visual-regression": [
+          "web"
+        ],
+        "test:coverage": [
+          "ai",
+          "api",
+          "app-vue"
+        ]
       },
       "jobs": {
         "lint": [
@@ -337,7 +537,10 @@
         ],
         "unit-1": [],
         "unit-2": [],
-        "unit-3": ["desktop:test", "ai:test"],
+        "unit-3": [
+          "desktop:test",
+          "ai:test"
+        ],
         "build": [
           "ai:build",
           "api:build",
@@ -354,9 +557,16 @@
           "ui-storybook:typecheck",
           "web:typecheck"
         ],
-        "web-unit-1": ["app-vue:test#1/2", "web:test"],
-        "web-unit-2": ["app-vue:test#2/2"],
-        "server-unit": ["api:test"],
+        "web-unit-1": [
+          "app-vue:test#1/2",
+          "web:test"
+        ],
+        "web-unit-2": [
+          "app-vue:test#2/2"
+        ],
+        "server-unit": [
+          "api:test"
+        ],
         "verification-children": [
           "desktop:test:ipc",
           "desktop:test:main",
@@ -394,23 +604,46 @@
   },
   {
     "id": "desktopMain",
-    "files": ["apps/desktop/src/main/bootstrap.ts"],
+    "files": [
+      "apps/desktop/src/main/bootstrap.ts"
+    ],
     "expected": {
       "full": false,
       "targets": {
-        "build": ["desktop", "governance-tools", "web"],
-        "typecheck": ["desktop", "web"],
-        "test": ["desktop", "governance-tools", "web"],
+        "build": [
+          "desktop",
+          "governance-tools",
+          "web"
+        ],
+        "typecheck": [
+          "desktop",
+          "web"
+        ],
+        "test": [
+          "desktop",
+          "governance-tools",
+          "web"
+        ],
         "test:contract": [],
         "test:smoke": [],
         "test:integration": [],
-        "test:boundary": ["desktop"],
-        "test:ipc": ["desktop"],
-        "test:main": ["desktop"],
+        "test:boundary": [
+          "desktop"
+        ],
+        "test:ipc": [
+          "desktop"
+        ],
+        "test:main": [
+          "desktop"
+        ],
         "test:perf": [],
         "test:interaction": [],
-        "e2e:ai-provider": ["web"],
-        "e2e:visual-regression": ["web"],
+        "e2e:ai-provider": [
+          "web"
+        ],
+        "e2e:visual-regression": [
+          "web"
+        ],
         "test:coverage": []
       },
       "jobs": {
@@ -420,14 +653,26 @@
           "workspace:sync",
           "memoflow:governance-check"
         ],
-        "unit-1": ["desktop:test"],
+        "unit-1": [
+          "desktop:test"
+        ],
         "unit-2": [],
         "unit-3": [],
-        "build": ["desktop:build", "web:build", "desktop:typecheck", "web:typecheck"],
-        "web-unit-1": ["web:test"],
+        "build": [
+          "desktop:build",
+          "web:build",
+          "desktop:typecheck",
+          "web:typecheck"
+        ],
+        "web-unit-1": [
+          "web:test"
+        ],
         "web-unit-2": [],
         "server-unit": [],
-        "verification-children": ["desktop:test:ipc", "desktop:test:main"],
+        "verification-children": [
+          "desktop:test:ipc",
+          "desktop:test:main"
+        ],
         "web-visual": [],
         "component-browser": [],
         "contract": []
@@ -435,7 +680,10 @@
       "serverShards": [
         {
           "id": "1/1",
-          "keys": ["desktop:test:main", "desktop:test:ipc"],
+          "keys": [
+            "desktop:test:main",
+            "desktop:test:ipc"
+          ],
           "estimatedMs": 7849
         }
       ]
@@ -443,19 +691,40 @@
     "actual": {
       "full": false,
       "targets": {
-        "build": ["desktop", "governance-tools", "web"],
-        "typecheck": ["desktop", "web"],
-        "test": ["desktop", "governance-tools", "web"],
+        "build": [
+          "desktop",
+          "governance-tools",
+          "web"
+        ],
+        "typecheck": [
+          "desktop",
+          "web"
+        ],
+        "test": [
+          "desktop",
+          "governance-tools",
+          "web"
+        ],
         "test:contract": [],
         "test:smoke": [],
         "test:integration": [],
-        "test:boundary": ["desktop"],
-        "test:ipc": ["desktop"],
-        "test:main": ["desktop"],
+        "test:boundary": [
+          "desktop"
+        ],
+        "test:ipc": [
+          "desktop"
+        ],
+        "test:main": [
+          "desktop"
+        ],
         "test:perf": [],
         "test:interaction": [],
-        "e2e:ai-provider": ["web"],
-        "e2e:visual-regression": ["web"],
+        "e2e:ai-provider": [
+          "web"
+        ],
+        "e2e:visual-regression": [
+          "web"
+        ],
         "test:coverage": []
       },
       "jobs": {
@@ -465,14 +734,26 @@
           "workspace:sync",
           "memoflow:governance-check"
         ],
-        "unit-1": ["desktop:test"],
+        "unit-1": [
+          "desktop:test"
+        ],
         "unit-2": [],
         "unit-3": [],
-        "build": ["desktop:build", "web:build", "desktop:typecheck", "web:typecheck"],
-        "web-unit-1": ["web:test"],
+        "build": [
+          "desktop:build",
+          "web:build",
+          "desktop:typecheck",
+          "web:typecheck"
+        ],
+        "web-unit-1": [
+          "web:test"
+        ],
         "web-unit-2": [],
         "server-unit": [],
-        "verification-children": ["desktop:test:ipc", "desktop:test:main"],
+        "verification-children": [
+          "desktop:test:ipc",
+          "desktop:test:main"
+        ],
         "web-visual": [],
         "component-browser": [],
         "contract": []
@@ -480,7 +761,10 @@
       "serverShards": [
         {
           "id": "1/1",
-          "keys": ["desktop:test:main", "desktop:test:ipc"],
+          "keys": [
+            "desktop:test:main",
+            "desktop:test:ipc"
+          ],
           "estimatedMs": 7849
         }
       ]
@@ -499,23 +783,46 @@
   },
   {
     "id": "desktopRenderer",
-    "files": ["apps/desktop/src/renderer/App.vue"],
+    "files": [
+      "apps/desktop/src/renderer/App.vue"
+    ],
     "expected": {
       "full": false,
       "targets": {
-        "build": ["desktop", "governance-tools", "web"],
-        "typecheck": ["desktop", "web"],
-        "test": ["desktop", "governance-tools", "web"],
+        "build": [
+          "desktop",
+          "governance-tools",
+          "web"
+        ],
+        "typecheck": [
+          "desktop",
+          "web"
+        ],
+        "test": [
+          "desktop",
+          "governance-tools",
+          "web"
+        ],
         "test:contract": [],
         "test:smoke": [],
         "test:integration": [],
-        "test:boundary": ["desktop"],
-        "test:ipc": ["desktop"],
-        "test:main": ["desktop"],
+        "test:boundary": [
+          "desktop"
+        ],
+        "test:ipc": [
+          "desktop"
+        ],
+        "test:main": [
+          "desktop"
+        ],
         "test:perf": [],
         "test:interaction": [],
-        "e2e:ai-provider": ["web"],
-        "e2e:visual-regression": ["web"],
+        "e2e:ai-provider": [
+          "web"
+        ],
+        "e2e:visual-regression": [
+          "web"
+        ],
         "test:coverage": []
       },
       "jobs": {
@@ -525,22 +832,39 @@
           "workspace:sync",
           "memoflow:governance-check"
         ],
-        "unit-1": ["desktop:test"],
+        "unit-1": [
+          "desktop:test"
+        ],
         "unit-2": [],
         "unit-3": [],
-        "build": ["desktop:build", "web:build", "desktop:typecheck", "web:typecheck"],
-        "web-unit-1": ["web:test"],
+        "build": [
+          "desktop:build",
+          "web:build",
+          "desktop:typecheck",
+          "web:typecheck"
+        ],
+        "web-unit-1": [
+          "web:test"
+        ],
         "web-unit-2": [],
         "server-unit": [],
-        "verification-children": ["desktop:test:ipc", "desktop:test:main"],
-        "web-visual": ["web:e2e:visual-regression"],
+        "verification-children": [
+          "desktop:test:ipc",
+          "desktop:test:main"
+        ],
+        "web-visual": [
+          "web:e2e:visual-regression"
+        ],
         "component-browser": [],
         "contract": []
       },
       "serverShards": [
         {
           "id": "1/1",
-          "keys": ["desktop:test:main", "desktop:test:ipc"],
+          "keys": [
+            "desktop:test:main",
+            "desktop:test:ipc"
+          ],
           "estimatedMs": 7849
         }
       ]
@@ -548,19 +872,40 @@
     "actual": {
       "full": false,
       "targets": {
-        "build": ["desktop", "governance-tools", "web"],
-        "typecheck": ["desktop", "web"],
-        "test": ["desktop", "governance-tools", "web"],
+        "build": [
+          "desktop",
+          "governance-tools",
+          "web"
+        ],
+        "typecheck": [
+          "desktop",
+          "web"
+        ],
+        "test": [
+          "desktop",
+          "governance-tools",
+          "web"
+        ],
         "test:contract": [],
         "test:smoke": [],
         "test:integration": [],
-        "test:boundary": ["desktop"],
-        "test:ipc": ["desktop"],
-        "test:main": ["desktop"],
+        "test:boundary": [
+          "desktop"
+        ],
+        "test:ipc": [
+          "desktop"
+        ],
+        "test:main": [
+          "desktop"
+        ],
         "test:perf": [],
         "test:interaction": [],
-        "e2e:ai-provider": ["web"],
-        "e2e:visual-regression": ["web"],
+        "e2e:ai-provider": [
+          "web"
+        ],
+        "e2e:visual-regression": [
+          "web"
+        ],
         "test:coverage": []
       },
       "jobs": {
@@ -570,22 +915,39 @@
           "workspace:sync",
           "memoflow:governance-check"
         ],
-        "unit-1": ["desktop:test"],
+        "unit-1": [
+          "desktop:test"
+        ],
         "unit-2": [],
         "unit-3": [],
-        "build": ["desktop:build", "web:build", "desktop:typecheck", "web:typecheck"],
-        "web-unit-1": ["web:test"],
+        "build": [
+          "desktop:build",
+          "web:build",
+          "desktop:typecheck",
+          "web:typecheck"
+        ],
+        "web-unit-1": [
+          "web:test"
+        ],
         "web-unit-2": [],
         "server-unit": [],
-        "verification-children": ["desktop:test:ipc", "desktop:test:main"],
-        "web-visual": ["web:e2e:visual-regression"],
+        "verification-children": [
+          "desktop:test:ipc",
+          "desktop:test:main"
+        ],
+        "web-visual": [
+          "web:e2e:visual-regression"
+        ],
         "component-browser": [],
         "contract": []
       },
       "serverShards": [
         {
           "id": "1/1",
-          "keys": ["desktop:test:main", "desktop:test:ipc"],
+          "keys": [
+            "desktop:test:main",
+            "desktop:test:ipc"
+          ],
           "estimatedMs": 7849
         }
       ]
@@ -603,16 +965,30 @@
   },
   {
     "id": "apiRoute",
-    "files": ["apps/api/src/shared/infrastructure/http/routes/infrastructure-routes.ts"],
+    "files": [
+      "apps/api/src/shared/infrastructure/http/routes/infrastructure-routes.ts"
+    ],
     "expected": {
       "full": false,
       "targets": {
-        "build": ["api", "governance-tools"],
-        "typecheck": ["api"],
-        "test": ["api", "governance-tools"],
+        "build": [
+          "api",
+          "governance-tools"
+        ],
+        "typecheck": [
+          "api"
+        ],
+        "test": [
+          "api",
+          "governance-tools"
+        ],
         "test:contract": [],
-        "test:smoke": ["api"],
-        "test:integration": ["api"],
+        "test:smoke": [
+          "api"
+        ],
+        "test:integration": [
+          "api"
+        ],
         "test:boundary": [],
         "test:ipc": [],
         "test:main": [],
@@ -620,7 +996,9 @@
         "test:interaction": [],
         "e2e:ai-provider": [],
         "e2e:visual-regression": [],
-        "test:coverage": ["api"]
+        "test:coverage": [
+          "api"
+        ]
       },
       "jobs": {
         "lint": [
@@ -632,11 +1010,19 @@
         "unit-1": [],
         "unit-2": [],
         "unit-3": [],
-        "build": ["api:build", "api:typecheck"],
+        "build": [
+          "api:build",
+          "api:typecheck"
+        ],
         "web-unit-1": [],
         "web-unit-2": [],
-        "server-unit": ["api:test"],
-        "verification-children": ["api:test:smoke", "api:test:integration"],
+        "server-unit": [
+          "api:test"
+        ],
+        "verification-children": [
+          "api:test:smoke",
+          "api:test:integration"
+        ],
         "web-visual": [],
         "component-browser": [],
         "contract": []
@@ -644,7 +1030,10 @@
       "serverShards": [
         {
           "id": "1/1",
-          "keys": ["api:test:integration", "api:test:smoke"],
+          "keys": [
+            "api:test:integration",
+            "api:test:smoke"
+          ],
           "estimatedMs": 30330
         }
       ]
@@ -652,12 +1041,24 @@
     "actual": {
       "full": false,
       "targets": {
-        "build": ["api", "governance-tools"],
-        "typecheck": ["api"],
-        "test": ["api", "governance-tools"],
+        "build": [
+          "api",
+          "governance-tools"
+        ],
+        "typecheck": [
+          "api"
+        ],
+        "test": [
+          "api",
+          "governance-tools"
+        ],
         "test:contract": [],
-        "test:smoke": ["api"],
-        "test:integration": ["api"],
+        "test:smoke": [
+          "api"
+        ],
+        "test:integration": [
+          "api"
+        ],
         "test:boundary": [],
         "test:ipc": [],
         "test:main": [],
@@ -665,7 +1066,9 @@
         "test:interaction": [],
         "e2e:ai-provider": [],
         "e2e:visual-regression": [],
-        "test:coverage": ["api"]
+        "test:coverage": [
+          "api"
+        ]
       },
       "jobs": {
         "lint": [
@@ -677,11 +1080,19 @@
         "unit-1": [],
         "unit-2": [],
         "unit-3": [],
-        "build": ["api:build", "api:typecheck"],
+        "build": [
+          "api:build",
+          "api:typecheck"
+        ],
         "web-unit-1": [],
         "web-unit-2": [],
-        "server-unit": ["api:test"],
-        "verification-children": ["api:test:smoke", "api:test:integration"],
+        "server-unit": [
+          "api:test"
+        ],
+        "verification-children": [
+          "api:test:smoke",
+          "api:test:integration"
+        ],
         "web-visual": [],
         "component-browser": [],
         "contract": []
@@ -689,7 +1100,10 @@
       "serverShards": [
         {
           "id": "1/1",
-          "keys": ["api:test:integration", "api:test:smoke"],
+          "keys": [
+            "api:test:integration",
+            "api:test:smoke"
+          ],
           "estimatedMs": 30330
         }
       ]
@@ -709,7 +1123,9 @@
   },
   {
     "id": "taskServer",
-    "files": ["packages/task/src/server/transport/task.transport-handlers.ts"],
+    "files": [
+      "packages/task/src/server/transport/task.transport-handlers.ts"
+    ],
     "expected": {
       "full": false,
       "targets": {
@@ -750,16 +1166,43 @@
           "web"
         ],
         "test:contract": [],
-        "test:smoke": ["api"],
-        "test:integration": ["account", "api", "notification", "task"],
-        "test:boundary": ["desktop"],
-        "test:ipc": ["desktop"],
-        "test:main": ["desktop"],
-        "test:perf": ["task"],
-        "test:interaction": ["ui-storybook"],
-        "e2e:ai-provider": ["web"],
-        "e2e:visual-regression": ["web"],
-        "test:coverage": ["account", "api", "app-vue", "notification", "task"]
+        "test:smoke": [
+          "api"
+        ],
+        "test:integration": [
+          "account",
+          "api",
+          "notification",
+          "task"
+        ],
+        "test:boundary": [
+          "desktop"
+        ],
+        "test:ipc": [
+          "desktop"
+        ],
+        "test:main": [
+          "desktop"
+        ],
+        "test:perf": [
+          "task"
+        ],
+        "test:interaction": [
+          "ui-storybook"
+        ],
+        "e2e:ai-provider": [
+          "web"
+        ],
+        "e2e:visual-regression": [
+          "web"
+        ],
+        "test:coverage": [
+          "account",
+          "api",
+          "app-vue",
+          "notification",
+          "task"
+        ]
       },
       "jobs": {
         "lint": [
@@ -768,9 +1211,17 @@
           "workspace:sync",
           "memoflow:governance-check"
         ],
-        "unit-1": ["task:test", "account:test", "schedule-orchestration:test"],
-        "unit-2": ["desktop:test"],
-        "unit-3": ["notification:test"],
+        "unit-1": [
+          "task:test",
+          "account:test",
+          "schedule-orchestration:test"
+        ],
+        "unit-2": [
+          "desktop:test"
+        ],
+        "unit-3": [
+          "notification:test"
+        ],
         "build": [
           "account:build",
           "api:build",
@@ -793,9 +1244,16 @@
           "ui-storybook:typecheck",
           "web:typecheck"
         ],
-        "web-unit-1": ["app-vue:test#1/2", "web:test"],
-        "web-unit-2": ["app-vue:test#2/2"],
-        "server-unit": ["api:test"],
+        "web-unit-1": [
+          "app-vue:test#1/2",
+          "web:test"
+        ],
+        "web-unit-2": [
+          "app-vue:test#2/2"
+        ],
+        "server-unit": [
+          "api:test"
+        ],
         "verification-children": [
           "desktop:test:ipc",
           "desktop:test:main",
@@ -812,7 +1270,11 @@
       "serverShards": [
         {
           "id": "1/2",
-          "keys": ["api:test:integration", "desktop:test:main", "desktop:test:ipc"],
+          "keys": [
+            "api:test:integration",
+            "desktop:test:main",
+            "desktop:test:ipc"
+          ],
           "estimatedMs": 33529
         },
         {
@@ -867,16 +1329,43 @@
           "web"
         ],
         "test:contract": [],
-        "test:smoke": ["api"],
-        "test:integration": ["account", "api", "notification", "task"],
-        "test:boundary": ["desktop"],
-        "test:ipc": ["desktop"],
-        "test:main": ["desktop"],
-        "test:perf": ["task"],
-        "test:interaction": ["ui-storybook"],
-        "e2e:ai-provider": ["web"],
-        "e2e:visual-regression": ["web"],
-        "test:coverage": ["account", "api", "app-vue", "notification", "task"]
+        "test:smoke": [
+          "api"
+        ],
+        "test:integration": [
+          "account",
+          "api",
+          "notification",
+          "task"
+        ],
+        "test:boundary": [
+          "desktop"
+        ],
+        "test:ipc": [
+          "desktop"
+        ],
+        "test:main": [
+          "desktop"
+        ],
+        "test:perf": [
+          "task"
+        ],
+        "test:interaction": [
+          "ui-storybook"
+        ],
+        "e2e:ai-provider": [
+          "web"
+        ],
+        "e2e:visual-regression": [
+          "web"
+        ],
+        "test:coverage": [
+          "account",
+          "api",
+          "app-vue",
+          "notification",
+          "task"
+        ]
       },
       "jobs": {
         "lint": [
@@ -885,9 +1374,17 @@
           "workspace:sync",
           "memoflow:governance-check"
         ],
-        "unit-1": ["task:test", "account:test", "schedule-orchestration:test"],
-        "unit-2": ["desktop:test"],
-        "unit-3": ["notification:test"],
+        "unit-1": [
+          "task:test",
+          "account:test",
+          "schedule-orchestration:test"
+        ],
+        "unit-2": [
+          "desktop:test"
+        ],
+        "unit-3": [
+          "notification:test"
+        ],
         "build": [
           "account:build",
           "api:build",
@@ -910,9 +1407,16 @@
           "ui-storybook:typecheck",
           "web:typecheck"
         ],
-        "web-unit-1": ["app-vue:test#1/2", "web:test"],
-        "web-unit-2": ["app-vue:test#2/2"],
-        "server-unit": ["api:test"],
+        "web-unit-1": [
+          "app-vue:test#1/2",
+          "web:test"
+        ],
+        "web-unit-2": [
+          "app-vue:test#2/2"
+        ],
+        "server-unit": [
+          "api:test"
+        ],
         "verification-children": [
           "desktop:test:ipc",
           "desktop:test:main",
@@ -929,7 +1433,11 @@
       "serverShards": [
         {
           "id": "1/2",
-          "keys": ["api:test:integration", "desktop:test:main", "desktop:test:ipc"],
+          "keys": [
+            "api:test:integration",
+            "desktop:test:main",
+            "desktop:test:ipc"
+          ],
           "estimatedMs": 33529
         },
         {
@@ -954,7 +1462,9 @@
   },
   {
     "id": "aiContract",
-    "files": ["packages/contracts/src/modules/ai/api/response-schemas.ts"],
+    "files": [
+      "packages/contracts/src/modules/ai/api/response-schemas.ts"
+    ],
     "expected": {
       "full": true,
       "targets": {
@@ -997,7 +1507,10 @@
           "reminder",
           "repository",
           "schedule",
+          "schedule-client",
+          "schedule-contracts",
           "schedule-orchestration",
+          "schedule-ui",
           "scheduler",
           "setting",
           "shared-primitives",
@@ -1051,7 +1564,10 @@
           "reminder",
           "repository",
           "schedule",
+          "schedule-client",
+          "schedule-contracts",
           "schedule-orchestration",
+          "schedule-ui",
           "scheduler",
           "setting",
           "shared-primitives",
@@ -1106,7 +1622,10 @@
           "reminder",
           "repository",
           "schedule",
+          "schedule-client",
+          "schedule-contracts",
           "schedule-orchestration",
+          "schedule-ui",
           "scheduler",
           "setting",
           "shared-primitives",
@@ -1132,11 +1651,15 @@
           "operations-contracts",
           "relation-contracts",
           "reliable-messaging-contracts",
+          "schedule-client",
+          "schedule-contracts",
           "shared-primitives",
           "transport-contracts",
           "workspace-contracts"
         ],
-        "test:smoke": ["api"],
+        "test:smoke": [
+          "api"
+        ],
         "test:integration": [
           "account",
           "ai",
@@ -1152,13 +1675,27 @@
           "scheduler",
           "task"
         ],
-        "test:boundary": ["desktop"],
-        "test:ipc": ["desktop"],
-        "test:main": ["desktop"],
-        "test:perf": ["task"],
-        "test:interaction": ["ui-storybook"],
-        "e2e:ai-provider": ["web"],
-        "e2e:visual-regression": ["web"],
+        "test:boundary": [
+          "desktop"
+        ],
+        "test:ipc": [
+          "desktop"
+        ],
+        "test:main": [
+          "desktop"
+        ],
+        "test:perf": [
+          "task"
+        ],
+        "test:interaction": [
+          "ui-storybook"
+        ],
+        "e2e:ai-provider": [
+          "web"
+        ],
+        "e2e:visual-regression": [
+          "web"
+        ],
         "test:coverage": [
           "account",
           "ai",
@@ -1189,10 +1726,9 @@
           "schedule:test",
           "goal-client:test",
           "powersync-schema:test",
-          "schedule-orchestration:test",
-          "setting:test",
-          "utils:test",
-          "relation:test",
+          "ui-core:test",
+          "cloud-auth:test",
+          "data-portability:test",
           "label:test",
           "ipc-client:test"
         ],
@@ -1200,11 +1736,12 @@
           "task:test",
           "account:test",
           "assets:test",
-          "ui-core:test",
-          "cloud-auth:test",
-          "data-portability:test",
+          "schedule-ui:test",
+          "time:test",
+          "ui-vue-shadcn:test",
+          "scheduler:test",
           "patterns:test",
-          "domain-shared:test"
+          "http-client:test"
         ],
         "unit-3": [
           "desktop:test",
@@ -1213,11 +1750,12 @@
           "repository:test",
           "goal-core:test",
           "quality:test",
-          "time:test",
-          "ui-vue-shadcn:test",
-          "scheduler:test",
+          "schedule-orchestration:test",
+          "setting:test",
+          "utils:test",
+          "relation:test",
           "agent-gateway:test",
-          "http-client:test"
+          "domain-shared:test"
         ],
         "build": [
           "account:build",
@@ -1256,7 +1794,10 @@
           "reminder:build",
           "repository:build",
           "schedule:build",
+          "schedule-client:build",
+          "schedule-contracts:build",
           "schedule-orchestration:build",
+          "schedule-ui:build",
           "scheduler:build",
           "setting:build",
           "shared-primitives:build",
@@ -1308,7 +1849,10 @@
           "reminder:typecheck",
           "repository:typecheck",
           "schedule:typecheck",
+          "schedule-client:typecheck",
+          "schedule-contracts:typecheck",
           "schedule-orchestration:typecheck",
+          "schedule-ui:typecheck",
           "scheduler:typecheck",
           "setting:typecheck",
           "shared-primitives:typecheck",
@@ -1324,9 +1868,18 @@
           "workspace-contracts:typecheck",
           "database:runtime-scripts:build"
         ],
-        "web-unit-1": ["web:test", "app-vue:test#1/2"],
-        "web-unit-2": ["app-vue:test#2/2"],
-        "server-unit": ["api:test", "migrator:test", "database:test"],
+        "web-unit-1": [
+          "web:test",
+          "app-vue:test#1/2"
+        ],
+        "web-unit-2": [
+          "app-vue:test#2/2"
+        ],
+        "server-unit": [
+          "api:test",
+          "database:test",
+          "migrator:test"
+        ],
         "verification-children": [
           "desktop:test:ipc",
           "desktop:test:main",
@@ -1345,8 +1898,12 @@
           "scheduler:test:integration",
           "task:test:integration"
         ],
-        "web-visual": ["web:e2e:visual-regression"],
-        "component-browser": ["ui-storybook:test:interaction"],
+        "web-visual": [
+          "web:e2e:visual-regression"
+        ],
+        "component-browser": [
+          "ui-storybook:test:interaction"
+        ],
         "contract": [
           "contracts:test:contract",
           "data-portability-contracts:test:contract",
@@ -1359,6 +1916,8 @@
           "operations-contracts:test:contract",
           "relation-contracts:test:contract",
           "reliable-messaging-contracts:test:contract",
+          "schedule-client:test:contract",
+          "schedule-contracts:test:contract",
           "shared-primitives:test:contract",
           "transport-contracts:test:contract",
           "workspace-contracts:test:contract"
@@ -1443,7 +2002,10 @@
           "reminder",
           "repository",
           "schedule",
+          "schedule-client",
+          "schedule-contracts",
           "schedule-orchestration",
+          "schedule-ui",
           "scheduler",
           "setting",
           "shared-primitives",
@@ -1497,7 +2059,10 @@
           "reminder",
           "repository",
           "schedule",
+          "schedule-client",
+          "schedule-contracts",
           "schedule-orchestration",
+          "schedule-ui",
           "scheduler",
           "setting",
           "shared-primitives",
@@ -1552,7 +2117,10 @@
           "reminder",
           "repository",
           "schedule",
+          "schedule-client",
+          "schedule-contracts",
           "schedule-orchestration",
+          "schedule-ui",
           "scheduler",
           "setting",
           "shared-primitives",
@@ -1578,11 +2146,15 @@
           "operations-contracts",
           "relation-contracts",
           "reliable-messaging-contracts",
+          "schedule-client",
+          "schedule-contracts",
           "shared-primitives",
           "transport-contracts",
           "workspace-contracts"
         ],
-        "test:smoke": ["api"],
+        "test:smoke": [
+          "api"
+        ],
         "test:integration": [
           "account",
           "ai",
@@ -1598,13 +2170,27 @@
           "scheduler",
           "task"
         ],
-        "test:boundary": ["desktop"],
-        "test:ipc": ["desktop"],
-        "test:main": ["desktop"],
-        "test:perf": ["task"],
-        "test:interaction": ["ui-storybook"],
-        "e2e:ai-provider": ["web"],
-        "e2e:visual-regression": ["web"],
+        "test:boundary": [
+          "desktop"
+        ],
+        "test:ipc": [
+          "desktop"
+        ],
+        "test:main": [
+          "desktop"
+        ],
+        "test:perf": [
+          "task"
+        ],
+        "test:interaction": [
+          "ui-storybook"
+        ],
+        "e2e:ai-provider": [
+          "web"
+        ],
+        "e2e:visual-regression": [
+          "web"
+        ],
         "test:coverage": [
           "account",
           "ai",
@@ -1635,10 +2221,9 @@
           "schedule:test",
           "goal-client:test",
           "powersync-schema:test",
-          "schedule-orchestration:test",
-          "setting:test",
-          "utils:test",
-          "relation:test",
+          "ui-core:test",
+          "cloud-auth:test",
+          "data-portability:test",
           "label:test",
           "ipc-client:test"
         ],
@@ -1646,11 +2231,12 @@
           "task:test",
           "account:test",
           "assets:test",
-          "ui-core:test",
-          "cloud-auth:test",
-          "data-portability:test",
+          "schedule-ui:test",
+          "time:test",
+          "ui-vue-shadcn:test",
+          "scheduler:test",
           "patterns:test",
-          "domain-shared:test"
+          "http-client:test"
         ],
         "unit-3": [
           "desktop:test",
@@ -1659,11 +2245,12 @@
           "repository:test",
           "goal-core:test",
           "quality:test",
-          "time:test",
-          "ui-vue-shadcn:test",
-          "scheduler:test",
+          "schedule-orchestration:test",
+          "setting:test",
+          "utils:test",
+          "relation:test",
           "agent-gateway:test",
-          "http-client:test"
+          "domain-shared:test"
         ],
         "build": [
           "account:build",
@@ -1702,7 +2289,10 @@
           "reminder:build",
           "repository:build",
           "schedule:build",
+          "schedule-client:build",
+          "schedule-contracts:build",
           "schedule-orchestration:build",
+          "schedule-ui:build",
           "scheduler:build",
           "setting:build",
           "shared-primitives:build",
@@ -1754,7 +2344,10 @@
           "reminder:typecheck",
           "repository:typecheck",
           "schedule:typecheck",
+          "schedule-client:typecheck",
+          "schedule-contracts:typecheck",
           "schedule-orchestration:typecheck",
+          "schedule-ui:typecheck",
           "scheduler:typecheck",
           "setting:typecheck",
           "shared-primitives:typecheck",
@@ -1770,9 +2363,18 @@
           "workspace-contracts:typecheck",
           "database:runtime-scripts:build"
         ],
-        "web-unit-1": ["web:test", "app-vue:test#1/2"],
-        "web-unit-2": ["app-vue:test#2/2"],
-        "server-unit": ["api:test", "migrator:test", "database:test"],
+        "web-unit-1": [
+          "web:test",
+          "app-vue:test#1/2"
+        ],
+        "web-unit-2": [
+          "app-vue:test#2/2"
+        ],
+        "server-unit": [
+          "api:test",
+          "database:test",
+          "migrator:test"
+        ],
         "verification-children": [
           "desktop:test:ipc",
           "desktop:test:main",
@@ -1791,8 +2393,12 @@
           "scheduler:test:integration",
           "task:test:integration"
         ],
-        "web-visual": ["web:e2e:visual-regression"],
-        "component-browser": ["ui-storybook:test:interaction"],
+        "web-visual": [
+          "web:e2e:visual-regression"
+        ],
+        "component-browser": [
+          "ui-storybook:test:interaction"
+        ],
         "contract": [
           "contracts:test:contract",
           "data-portability-contracts:test:contract",
@@ -1805,6 +2411,8 @@
           "operations-contracts:test:contract",
           "relation-contracts:test:contract",
           "reliable-messaging-contracts:test:contract",
+          "schedule-client:test:contract",
+          "schedule-contracts:test:contract",
           "shared-primitives:test:contract",
           "transport-contracts:test:contract",
           "workspace-contracts:test:contract"
@@ -1847,13 +2455,15 @@
         }
       ]
     },
-    "manifestDigest": "110ad60c1efddc4b46cc22ae8cea673b5f46281a68d9b58948d193c706722830",
+    "manifestDigest": "43ec160cb52c010b092f5067ce0dd7329e0d57236dd517aaef6c077e813ddf9f",
     "skips": {},
     "receiptExecution": "unverified: replay computes the real Nx plan; it does not execute product suites"
   },
   {
     "id": "workflow",
-    "files": [".github/workflows/ci.yml"],
+    "files": [
+      ".github/workflows/ci.yml"
+    ],
     "expected": {
       "full": true,
       "targets": {
@@ -1896,7 +2506,10 @@
           "reminder",
           "repository",
           "schedule",
+          "schedule-client",
+          "schedule-contracts",
           "schedule-orchestration",
+          "schedule-ui",
           "scheduler",
           "setting",
           "shared-primitives",
@@ -1950,7 +2563,10 @@
           "reminder",
           "repository",
           "schedule",
+          "schedule-client",
+          "schedule-contracts",
           "schedule-orchestration",
+          "schedule-ui",
           "scheduler",
           "setting",
           "shared-primitives",
@@ -2005,7 +2621,10 @@
           "reminder",
           "repository",
           "schedule",
+          "schedule-client",
+          "schedule-contracts",
           "schedule-orchestration",
+          "schedule-ui",
           "scheduler",
           "setting",
           "shared-primitives",
@@ -2031,11 +2650,15 @@
           "operations-contracts",
           "relation-contracts",
           "reliable-messaging-contracts",
+          "schedule-client",
+          "schedule-contracts",
           "shared-primitives",
           "transport-contracts",
           "workspace-contracts"
         ],
-        "test:smoke": ["api"],
+        "test:smoke": [
+          "api"
+        ],
         "test:integration": [
           "account",
           "ai",
@@ -2051,13 +2674,27 @@
           "scheduler",
           "task"
         ],
-        "test:boundary": ["desktop"],
-        "test:ipc": ["desktop"],
-        "test:main": ["desktop"],
-        "test:perf": ["task"],
-        "test:interaction": ["ui-storybook"],
-        "e2e:ai-provider": ["web"],
-        "e2e:visual-regression": ["web"],
+        "test:boundary": [
+          "desktop"
+        ],
+        "test:ipc": [
+          "desktop"
+        ],
+        "test:main": [
+          "desktop"
+        ],
+        "test:perf": [
+          "task"
+        ],
+        "test:interaction": [
+          "ui-storybook"
+        ],
+        "e2e:ai-provider": [
+          "web"
+        ],
+        "e2e:visual-regression": [
+          "web"
+        ],
         "test:coverage": [
           "account",
           "ai",
@@ -2088,10 +2725,9 @@
           "schedule:test",
           "goal-client:test",
           "powersync-schema:test",
-          "schedule-orchestration:test",
-          "setting:test",
-          "utils:test",
-          "relation:test",
+          "ui-core:test",
+          "cloud-auth:test",
+          "data-portability:test",
           "label:test",
           "ipc-client:test"
         ],
@@ -2099,11 +2735,12 @@
           "task:test",
           "account:test",
           "assets:test",
-          "ui-core:test",
-          "cloud-auth:test",
-          "data-portability:test",
+          "schedule-ui:test",
+          "time:test",
+          "ui-vue-shadcn:test",
+          "scheduler:test",
           "patterns:test",
-          "domain-shared:test"
+          "http-client:test"
         ],
         "unit-3": [
           "desktop:test",
@@ -2112,11 +2749,12 @@
           "repository:test",
           "goal-core:test",
           "quality:test",
-          "time:test",
-          "ui-vue-shadcn:test",
-          "scheduler:test",
+          "schedule-orchestration:test",
+          "setting:test",
+          "utils:test",
+          "relation:test",
           "agent-gateway:test",
-          "http-client:test"
+          "domain-shared:test"
         ],
         "build": [
           "account:build",
@@ -2155,7 +2793,10 @@
           "reminder:build",
           "repository:build",
           "schedule:build",
+          "schedule-client:build",
+          "schedule-contracts:build",
           "schedule-orchestration:build",
+          "schedule-ui:build",
           "scheduler:build",
           "setting:build",
           "shared-primitives:build",
@@ -2207,7 +2848,10 @@
           "reminder:typecheck",
           "repository:typecheck",
           "schedule:typecheck",
+          "schedule-client:typecheck",
+          "schedule-contracts:typecheck",
           "schedule-orchestration:typecheck",
+          "schedule-ui:typecheck",
           "scheduler:typecheck",
           "setting:typecheck",
           "shared-primitives:typecheck",
@@ -2223,9 +2867,18 @@
           "workspace-contracts:typecheck",
           "database:runtime-scripts:build"
         ],
-        "web-unit-1": ["web:test", "app-vue:test#1/2"],
-        "web-unit-2": ["app-vue:test#2/2"],
-        "server-unit": ["api:test", "migrator:test", "database:test"],
+        "web-unit-1": [
+          "web:test",
+          "app-vue:test#1/2"
+        ],
+        "web-unit-2": [
+          "app-vue:test#2/2"
+        ],
+        "server-unit": [
+          "api:test",
+          "database:test",
+          "migrator:test"
+        ],
         "verification-children": [
           "desktop:test:ipc",
           "desktop:test:main",
@@ -2244,8 +2897,12 @@
           "scheduler:test:integration",
           "task:test:integration"
         ],
-        "web-visual": ["web:e2e:visual-regression"],
-        "component-browser": ["ui-storybook:test:interaction"],
+        "web-visual": [
+          "web:e2e:visual-regression"
+        ],
+        "component-browser": [
+          "ui-storybook:test:interaction"
+        ],
         "contract": [
           "contracts:test:contract",
           "data-portability-contracts:test:contract",
@@ -2258,6 +2915,8 @@
           "operations-contracts:test:contract",
           "relation-contracts:test:contract",
           "reliable-messaging-contracts:test:contract",
+          "schedule-client:test:contract",
+          "schedule-contracts:test:contract",
           "shared-primitives:test:contract",
           "transport-contracts:test:contract",
           "workspace-contracts:test:contract"
@@ -2342,7 +3001,10 @@
           "reminder",
           "repository",
           "schedule",
+          "schedule-client",
+          "schedule-contracts",
           "schedule-orchestration",
+          "schedule-ui",
           "scheduler",
           "setting",
           "shared-primitives",
@@ -2396,7 +3058,10 @@
           "reminder",
           "repository",
           "schedule",
+          "schedule-client",
+          "schedule-contracts",
           "schedule-orchestration",
+          "schedule-ui",
           "scheduler",
           "setting",
           "shared-primitives",
@@ -2451,7 +3116,10 @@
           "reminder",
           "repository",
           "schedule",
+          "schedule-client",
+          "schedule-contracts",
           "schedule-orchestration",
+          "schedule-ui",
           "scheduler",
           "setting",
           "shared-primitives",
@@ -2477,11 +3145,15 @@
           "operations-contracts",
           "relation-contracts",
           "reliable-messaging-contracts",
+          "schedule-client",
+          "schedule-contracts",
           "shared-primitives",
           "transport-contracts",
           "workspace-contracts"
         ],
-        "test:smoke": ["api"],
+        "test:smoke": [
+          "api"
+        ],
         "test:integration": [
           "account",
           "ai",
@@ -2497,13 +3169,27 @@
           "scheduler",
           "task"
         ],
-        "test:boundary": ["desktop"],
-        "test:ipc": ["desktop"],
-        "test:main": ["desktop"],
-        "test:perf": ["task"],
-        "test:interaction": ["ui-storybook"],
-        "e2e:ai-provider": ["web"],
-        "e2e:visual-regression": ["web"],
+        "test:boundary": [
+          "desktop"
+        ],
+        "test:ipc": [
+          "desktop"
+        ],
+        "test:main": [
+          "desktop"
+        ],
+        "test:perf": [
+          "task"
+        ],
+        "test:interaction": [
+          "ui-storybook"
+        ],
+        "e2e:ai-provider": [
+          "web"
+        ],
+        "e2e:visual-regression": [
+          "web"
+        ],
         "test:coverage": [
           "account",
           "ai",
@@ -2534,10 +3220,9 @@
           "schedule:test",
           "goal-client:test",
           "powersync-schema:test",
-          "schedule-orchestration:test",
-          "setting:test",
-          "utils:test",
-          "relation:test",
+          "ui-core:test",
+          "cloud-auth:test",
+          "data-portability:test",
           "label:test",
           "ipc-client:test"
         ],
@@ -2545,11 +3230,12 @@
           "task:test",
           "account:test",
           "assets:test",
-          "ui-core:test",
-          "cloud-auth:test",
-          "data-portability:test",
+          "schedule-ui:test",
+          "time:test",
+          "ui-vue-shadcn:test",
+          "scheduler:test",
           "patterns:test",
-          "domain-shared:test"
+          "http-client:test"
         ],
         "unit-3": [
           "desktop:test",
@@ -2558,11 +3244,12 @@
           "repository:test",
           "goal-core:test",
           "quality:test",
-          "time:test",
-          "ui-vue-shadcn:test",
-          "scheduler:test",
+          "schedule-orchestration:test",
+          "setting:test",
+          "utils:test",
+          "relation:test",
           "agent-gateway:test",
-          "http-client:test"
+          "domain-shared:test"
         ],
         "build": [
           "account:build",
@@ -2601,7 +3288,10 @@
           "reminder:build",
           "repository:build",
           "schedule:build",
+          "schedule-client:build",
+          "schedule-contracts:build",
           "schedule-orchestration:build",
+          "schedule-ui:build",
           "scheduler:build",
           "setting:build",
           "shared-primitives:build",
@@ -2653,7 +3343,10 @@
           "reminder:typecheck",
           "repository:typecheck",
           "schedule:typecheck",
+          "schedule-client:typecheck",
+          "schedule-contracts:typecheck",
           "schedule-orchestration:typecheck",
+          "schedule-ui:typecheck",
           "scheduler:typecheck",
           "setting:typecheck",
           "shared-primitives:typecheck",
@@ -2669,9 +3362,18 @@
           "workspace-contracts:typecheck",
           "database:runtime-scripts:build"
         ],
-        "web-unit-1": ["web:test", "app-vue:test#1/2"],
-        "web-unit-2": ["app-vue:test#2/2"],
-        "server-unit": ["api:test", "migrator:test", "database:test"],
+        "web-unit-1": [
+          "web:test",
+          "app-vue:test#1/2"
+        ],
+        "web-unit-2": [
+          "app-vue:test#2/2"
+        ],
+        "server-unit": [
+          "api:test",
+          "database:test",
+          "migrator:test"
+        ],
         "verification-children": [
           "desktop:test:ipc",
           "desktop:test:main",
@@ -2690,8 +3392,12 @@
           "scheduler:test:integration",
           "task:test:integration"
         ],
-        "web-visual": ["web:e2e:visual-regression"],
-        "component-browser": ["ui-storybook:test:interaction"],
+        "web-visual": [
+          "web:e2e:visual-regression"
+        ],
+        "component-browser": [
+          "ui-storybook:test:interaction"
+        ],
         "contract": [
           "contracts:test:contract",
           "data-portability-contracts:test:contract",
@@ -2704,6 +3410,8 @@
           "operations-contracts:test:contract",
           "relation-contracts:test:contract",
           "reliable-messaging-contracts:test:contract",
+          "schedule-client:test:contract",
+          "schedule-contracts:test:contract",
           "shared-primitives:test:contract",
           "transport-contracts:test:contract",
           "workspace-contracts:test:contract"
@@ -2746,30 +3454,58 @@
         }
       ]
     },
-    "manifestDigest": "a17fba201908119a6349f011229994235de96a870e0a32e098806ee3829da55f",
+    "manifestDigest": "f20173f4bf901546064dc43e1cadcd607ab032d31bca89a71e4f019c174a4b9f",
     "skips": {},
     "receiptExecution": "unverified: replay computes the real Nx plan; it does not execute product suites"
   },
   {
     "id": "testOnly",
-    "files": ["packages/app-vue/src/modules/ai/components/AIMessageContent.spec.ts"],
+    "files": [
+      "packages/app-vue/src/modules/ai/components/AIMessageContent.spec.ts"
+    ],
     "expected": {
       "full": false,
       "targets": {
-        "build": ["goal-ui", "governance-tools", "ui-storybook"],
-        "typecheck": ["app-vue"],
-        "test": ["app-vue", "governance-tools", "test-system-v2"],
-        "test:contract": ["goal-ui"],
+        "build": [
+          "goal-ui",
+          "governance-tools",
+          "ui-storybook"
+        ],
+        "typecheck": [
+          "app-vue"
+        ],
+        "test": [
+          "app-vue",
+          "governance-tools",
+          "test-system-v2"
+        ],
+        "test:contract": [
+          "goal-ui"
+        ],
         "test:smoke": [],
         "test:integration": [],
-        "test:boundary": ["desktop"],
-        "test:ipc": ["desktop"],
-        "test:main": ["desktop"],
+        "test:boundary": [
+          "desktop"
+        ],
+        "test:ipc": [
+          "desktop"
+        ],
+        "test:main": [
+          "desktop"
+        ],
         "test:perf": [],
-        "test:interaction": ["ui-storybook"],
-        "e2e:ai-provider": ["web"],
-        "e2e:visual-regression": ["web"],
-        "test:coverage": ["app-vue"]
+        "test:interaction": [
+          "ui-storybook"
+        ],
+        "e2e:ai-provider": [
+          "web"
+        ],
+        "e2e:visual-regression": [
+          "web"
+        ],
+        "test:coverage": [
+          "app-vue"
+        ]
       },
       "jobs": {
         "lint": [
@@ -2781,19 +3517,39 @@
         "unit-1": [],
         "unit-2": [],
         "unit-3": [],
-        "build": ["goal-ui:build", "ui-storybook:build", "app-vue:typecheck"],
-        "web-unit-1": ["app-vue:test#1/2"],
-        "web-unit-2": ["app-vue:test#2/2"],
+        "build": [
+          "goal-ui:build",
+          "ui-storybook:build",
+          "app-vue:typecheck"
+        ],
+        "web-unit-1": [
+          "app-vue:test#1/2"
+        ],
+        "web-unit-2": [
+          "app-vue:test#2/2"
+        ],
         "server-unit": [],
-        "verification-children": ["desktop:test:ipc", "desktop:test:main"],
-        "web-visual": ["web:e2e:visual-regression"],
-        "component-browser": ["ui-storybook:test:interaction"],
-        "contract": ["goal-ui:test:contract"]
+        "verification-children": [
+          "desktop:test:ipc",
+          "desktop:test:main"
+        ],
+        "web-visual": [
+          "web:e2e:visual-regression"
+        ],
+        "component-browser": [
+          "ui-storybook:test:interaction"
+        ],
+        "contract": [
+          "goal-ui:test:contract"
+        ]
       },
       "serverShards": [
         {
           "id": "1/1",
-          "keys": ["desktop:test:main", "desktop:test:ipc"],
+          "keys": [
+            "desktop:test:main",
+            "desktop:test:ipc"
+          ],
           "estimatedMs": 7849
         }
       ]
@@ -2801,20 +3557,46 @@
     "actual": {
       "full": false,
       "targets": {
-        "build": ["goal-ui", "governance-tools", "ui-storybook"],
-        "typecheck": ["app-vue"],
-        "test": ["app-vue", "governance-tools", "test-system-v2"],
-        "test:contract": ["goal-ui"],
+        "build": [
+          "goal-ui",
+          "governance-tools",
+          "ui-storybook"
+        ],
+        "typecheck": [
+          "app-vue"
+        ],
+        "test": [
+          "app-vue",
+          "governance-tools",
+          "test-system-v2"
+        ],
+        "test:contract": [
+          "goal-ui"
+        ],
         "test:smoke": [],
         "test:integration": [],
-        "test:boundary": ["desktop"],
-        "test:ipc": ["desktop"],
-        "test:main": ["desktop"],
+        "test:boundary": [
+          "desktop"
+        ],
+        "test:ipc": [
+          "desktop"
+        ],
+        "test:main": [
+          "desktop"
+        ],
         "test:perf": [],
-        "test:interaction": ["ui-storybook"],
-        "e2e:ai-provider": ["web"],
-        "e2e:visual-regression": ["web"],
-        "test:coverage": ["app-vue"]
+        "test:interaction": [
+          "ui-storybook"
+        ],
+        "e2e:ai-provider": [
+          "web"
+        ],
+        "e2e:visual-regression": [
+          "web"
+        ],
+        "test:coverage": [
+          "app-vue"
+        ]
       },
       "jobs": {
         "lint": [
@@ -2826,19 +3608,39 @@
         "unit-1": [],
         "unit-2": [],
         "unit-3": [],
-        "build": ["goal-ui:build", "ui-storybook:build", "app-vue:typecheck"],
-        "web-unit-1": ["app-vue:test#1/2"],
-        "web-unit-2": ["app-vue:test#2/2"],
+        "build": [
+          "goal-ui:build",
+          "ui-storybook:build",
+          "app-vue:typecheck"
+        ],
+        "web-unit-1": [
+          "app-vue:test#1/2"
+        ],
+        "web-unit-2": [
+          "app-vue:test#2/2"
+        ],
         "server-unit": [],
-        "verification-children": ["desktop:test:ipc", "desktop:test:main"],
-        "web-visual": ["web:e2e:visual-regression"],
-        "component-browser": ["ui-storybook:test:interaction"],
-        "contract": ["goal-ui:test:contract"]
+        "verification-children": [
+          "desktop:test:ipc",
+          "desktop:test:main"
+        ],
+        "web-visual": [
+          "web:e2e:visual-regression"
+        ],
+        "component-browser": [
+          "ui-storybook:test:interaction"
+        ],
+        "contract": [
+          "goal-ui:test:contract"
+        ]
       },
       "serverShards": [
         {
           "id": "1/1",
-          "keys": ["desktop:test:main", "desktop:test:ipc"],
+          "keys": [
+            "desktop:test:main",
+            "desktop:test:ipc"
+          ],
           "estimatedMs": 7849
         }
       ]
@@ -2854,7 +3656,9 @@
   },
   {
     "id": "mainDocs",
-    "files": ["docs/internals/testing/README.md"],
+    "files": [
+      "docs/internals/testing/README.md"
+    ],
     "expected": {
       "full": true,
       "targets": {
@@ -2897,7 +3701,10 @@
           "reminder",
           "repository",
           "schedule",
+          "schedule-client",
+          "schedule-contracts",
           "schedule-orchestration",
+          "schedule-ui",
           "scheduler",
           "setting",
           "shared-primitives",
@@ -2951,7 +3758,10 @@
           "reminder",
           "repository",
           "schedule",
+          "schedule-client",
+          "schedule-contracts",
           "schedule-orchestration",
+          "schedule-ui",
           "scheduler",
           "setting",
           "shared-primitives",
@@ -3006,7 +3816,10 @@
           "reminder",
           "repository",
           "schedule",
+          "schedule-client",
+          "schedule-contracts",
           "schedule-orchestration",
+          "schedule-ui",
           "scheduler",
           "setting",
           "shared-primitives",
@@ -3032,11 +3845,15 @@
           "operations-contracts",
           "relation-contracts",
           "reliable-messaging-contracts",
+          "schedule-client",
+          "schedule-contracts",
           "shared-primitives",
           "transport-contracts",
           "workspace-contracts"
         ],
-        "test:smoke": ["api"],
+        "test:smoke": [
+          "api"
+        ],
         "test:integration": [
           "account",
           "ai",
@@ -3052,13 +3869,27 @@
           "scheduler",
           "task"
         ],
-        "test:boundary": ["desktop"],
-        "test:ipc": ["desktop"],
-        "test:main": ["desktop"],
-        "test:perf": ["task"],
-        "test:interaction": ["ui-storybook"],
-        "e2e:ai-provider": ["web"],
-        "e2e:visual-regression": ["web"],
+        "test:boundary": [
+          "desktop"
+        ],
+        "test:ipc": [
+          "desktop"
+        ],
+        "test:main": [
+          "desktop"
+        ],
+        "test:perf": [
+          "task"
+        ],
+        "test:interaction": [
+          "ui-storybook"
+        ],
+        "e2e:ai-provider": [
+          "web"
+        ],
+        "e2e:visual-regression": [
+          "web"
+        ],
         "test:coverage": [
           "account",
           "ai",
@@ -3089,10 +3920,9 @@
           "schedule:test",
           "goal-client:test",
           "powersync-schema:test",
-          "schedule-orchestration:test",
-          "setting:test",
-          "utils:test",
-          "relation:test",
+          "ui-core:test",
+          "cloud-auth:test",
+          "data-portability:test",
           "label:test",
           "ipc-client:test"
         ],
@@ -3100,11 +3930,12 @@
           "task:test",
           "account:test",
           "assets:test",
-          "ui-core:test",
-          "cloud-auth:test",
-          "data-portability:test",
+          "schedule-ui:test",
+          "time:test",
+          "ui-vue-shadcn:test",
+          "scheduler:test",
           "patterns:test",
-          "domain-shared:test"
+          "http-client:test"
         ],
         "unit-3": [
           "desktop:test",
@@ -3113,11 +3944,12 @@
           "repository:test",
           "goal-core:test",
           "quality:test",
-          "time:test",
-          "ui-vue-shadcn:test",
-          "scheduler:test",
+          "schedule-orchestration:test",
+          "setting:test",
+          "utils:test",
+          "relation:test",
           "agent-gateway:test",
-          "http-client:test"
+          "domain-shared:test"
         ],
         "build": [
           "account:build",
@@ -3156,7 +3988,10 @@
           "reminder:build",
           "repository:build",
           "schedule:build",
+          "schedule-client:build",
+          "schedule-contracts:build",
           "schedule-orchestration:build",
+          "schedule-ui:build",
           "scheduler:build",
           "setting:build",
           "shared-primitives:build",
@@ -3208,7 +4043,10 @@
           "reminder:typecheck",
           "repository:typecheck",
           "schedule:typecheck",
+          "schedule-client:typecheck",
+          "schedule-contracts:typecheck",
           "schedule-orchestration:typecheck",
+          "schedule-ui:typecheck",
           "scheduler:typecheck",
           "setting:typecheck",
           "shared-primitives:typecheck",
@@ -3224,9 +4062,18 @@
           "workspace-contracts:typecheck",
           "database:runtime-scripts:build"
         ],
-        "web-unit-1": ["web:test", "app-vue:test#1/2"],
-        "web-unit-2": ["app-vue:test#2/2"],
-        "server-unit": ["api:test", "migrator:test", "database:test"],
+        "web-unit-1": [
+          "web:test",
+          "app-vue:test#1/2"
+        ],
+        "web-unit-2": [
+          "app-vue:test#2/2"
+        ],
+        "server-unit": [
+          "api:test",
+          "database:test",
+          "migrator:test"
+        ],
         "verification-children": [
           "desktop:test:ipc",
           "desktop:test:main",
@@ -3246,8 +4093,12 @@
           "task:test:integration",
           "task:test:perf"
         ],
-        "web-visual": ["web:e2e:visual-regression#1/1"],
-        "component-browser": ["ui-storybook:test:interaction"],
+        "web-visual": [
+          "web:e2e:visual-regression#1/1"
+        ],
+        "component-browser": [
+          "ui-storybook:test:interaction"
+        ],
         "contract": [
           "contracts:test:contract",
           "data-portability-contracts:test:contract",
@@ -3260,6 +4111,8 @@
           "operations-contracts:test:contract",
           "relation-contracts:test:contract",
           "reliable-messaging-contracts:test:contract",
+          "schedule-client:test:contract",
+          "schedule-contracts:test:contract",
           "shared-primitives:test:contract",
           "transport-contracts:test:contract",
           "workspace-contracts:test:contract"
@@ -3345,7 +4198,10 @@
           "reminder",
           "repository",
           "schedule",
+          "schedule-client",
+          "schedule-contracts",
           "schedule-orchestration",
+          "schedule-ui",
           "scheduler",
           "setting",
           "shared-primitives",
@@ -3399,7 +4255,10 @@
           "reminder",
           "repository",
           "schedule",
+          "schedule-client",
+          "schedule-contracts",
           "schedule-orchestration",
+          "schedule-ui",
           "scheduler",
           "setting",
           "shared-primitives",
@@ -3454,7 +4313,10 @@
           "reminder",
           "repository",
           "schedule",
+          "schedule-client",
+          "schedule-contracts",
           "schedule-orchestration",
+          "schedule-ui",
           "scheduler",
           "setting",
           "shared-primitives",
@@ -3480,11 +4342,15 @@
           "operations-contracts",
           "relation-contracts",
           "reliable-messaging-contracts",
+          "schedule-client",
+          "schedule-contracts",
           "shared-primitives",
           "transport-contracts",
           "workspace-contracts"
         ],
-        "test:smoke": ["api"],
+        "test:smoke": [
+          "api"
+        ],
         "test:integration": [
           "account",
           "ai",
@@ -3500,13 +4366,27 @@
           "scheduler",
           "task"
         ],
-        "test:boundary": ["desktop"],
-        "test:ipc": ["desktop"],
-        "test:main": ["desktop"],
-        "test:perf": ["task"],
-        "test:interaction": ["ui-storybook"],
-        "e2e:ai-provider": ["web"],
-        "e2e:visual-regression": ["web"],
+        "test:boundary": [
+          "desktop"
+        ],
+        "test:ipc": [
+          "desktop"
+        ],
+        "test:main": [
+          "desktop"
+        ],
+        "test:perf": [
+          "task"
+        ],
+        "test:interaction": [
+          "ui-storybook"
+        ],
+        "e2e:ai-provider": [
+          "web"
+        ],
+        "e2e:visual-regression": [
+          "web"
+        ],
         "test:coverage": [
           "account",
           "ai",
@@ -3537,10 +4417,9 @@
           "schedule:test",
           "goal-client:test",
           "powersync-schema:test",
-          "schedule-orchestration:test",
-          "setting:test",
-          "utils:test",
-          "relation:test",
+          "ui-core:test",
+          "cloud-auth:test",
+          "data-portability:test",
           "label:test",
           "ipc-client:test"
         ],
@@ -3548,11 +4427,12 @@
           "task:test",
           "account:test",
           "assets:test",
-          "ui-core:test",
-          "cloud-auth:test",
-          "data-portability:test",
+          "schedule-ui:test",
+          "time:test",
+          "ui-vue-shadcn:test",
+          "scheduler:test",
           "patterns:test",
-          "domain-shared:test"
+          "http-client:test"
         ],
         "unit-3": [
           "desktop:test",
@@ -3561,11 +4441,12 @@
           "repository:test",
           "goal-core:test",
           "quality:test",
-          "time:test",
-          "ui-vue-shadcn:test",
-          "scheduler:test",
+          "schedule-orchestration:test",
+          "setting:test",
+          "utils:test",
+          "relation:test",
           "agent-gateway:test",
-          "http-client:test"
+          "domain-shared:test"
         ],
         "build": [
           "account:build",
@@ -3604,7 +4485,10 @@
           "reminder:build",
           "repository:build",
           "schedule:build",
+          "schedule-client:build",
+          "schedule-contracts:build",
           "schedule-orchestration:build",
+          "schedule-ui:build",
           "scheduler:build",
           "setting:build",
           "shared-primitives:build",
@@ -3656,7 +4540,10 @@
           "reminder:typecheck",
           "repository:typecheck",
           "schedule:typecheck",
+          "schedule-client:typecheck",
+          "schedule-contracts:typecheck",
           "schedule-orchestration:typecheck",
+          "schedule-ui:typecheck",
           "scheduler:typecheck",
           "setting:typecheck",
           "shared-primitives:typecheck",
@@ -3672,9 +4559,18 @@
           "workspace-contracts:typecheck",
           "database:runtime-scripts:build"
         ],
-        "web-unit-1": ["web:test", "app-vue:test#1/2"],
-        "web-unit-2": ["app-vue:test#2/2"],
-        "server-unit": ["api:test", "migrator:test", "database:test"],
+        "web-unit-1": [
+          "web:test",
+          "app-vue:test#1/2"
+        ],
+        "web-unit-2": [
+          "app-vue:test#2/2"
+        ],
+        "server-unit": [
+          "api:test",
+          "database:test",
+          "migrator:test"
+        ],
         "verification-children": [
           "desktop:test:ipc",
           "desktop:test:main",
@@ -3694,8 +4590,12 @@
           "task:test:integration",
           "task:test:perf"
         ],
-        "web-visual": ["web:e2e:visual-regression#1/1"],
-        "component-browser": ["ui-storybook:test:interaction"],
+        "web-visual": [
+          "web:e2e:visual-regression#1/1"
+        ],
+        "component-browser": [
+          "ui-storybook:test:interaction"
+        ],
         "contract": [
           "contracts:test:contract",
           "data-portability-contracts:test:contract",
@@ -3708,6 +4608,8 @@
           "operations-contracts:test:contract",
           "relation-contracts:test:contract",
           "reliable-messaging-contracts:test:contract",
+          "schedule-client:test:contract",
+          "schedule-contracts:test:contract",
           "shared-primitives:test:contract",
           "transport-contracts:test:contract",
           "workspace-contracts:test:contract"
@@ -3751,13 +4653,15 @@
         }
       ]
     },
-    "manifestDigest": "08ea98197380fe8eee85c00d1d0f2665689c64296d9efbc4dbc610349990f9a4",
+    "manifestDigest": "1f4d08ba97e220c392adbbbc6acc9cdf55092f0b23591936a9ad9eefedcd8cd7",
     "skips": {},
     "receiptExecution": "unverified: replay computes the real Nx plan; it does not execute product suites"
   },
   {
     "id": "taskClient",
-    "files": ["packages/task/src/client/index.ts"],
+    "files": [
+      "packages/task/src/client/index.ts"
+    ],
     "expected": {
       "full": false,
       "targets": {
@@ -3798,16 +4702,43 @@
           "web"
         ],
         "test:contract": [],
-        "test:smoke": ["api"],
-        "test:integration": ["account", "api", "notification", "task"],
-        "test:boundary": ["desktop"],
-        "test:ipc": ["desktop"],
-        "test:main": ["desktop"],
-        "test:perf": ["task"],
-        "test:interaction": ["ui-storybook"],
-        "e2e:ai-provider": ["web"],
-        "e2e:visual-regression": ["web"],
-        "test:coverage": ["account", "api", "app-vue", "notification", "task"]
+        "test:smoke": [
+          "api"
+        ],
+        "test:integration": [
+          "account",
+          "api",
+          "notification",
+          "task"
+        ],
+        "test:boundary": [
+          "desktop"
+        ],
+        "test:ipc": [
+          "desktop"
+        ],
+        "test:main": [
+          "desktop"
+        ],
+        "test:perf": [
+          "task"
+        ],
+        "test:interaction": [
+          "ui-storybook"
+        ],
+        "e2e:ai-provider": [
+          "web"
+        ],
+        "e2e:visual-regression": [
+          "web"
+        ],
+        "test:coverage": [
+          "account",
+          "api",
+          "app-vue",
+          "notification",
+          "task"
+        ]
       },
       "jobs": {
         "lint": [
@@ -3816,9 +4747,17 @@
           "workspace:sync",
           "memoflow:governance-check"
         ],
-        "unit-1": ["task:test", "account:test", "schedule-orchestration:test"],
-        "unit-2": ["desktop:test"],
-        "unit-3": ["notification:test"],
+        "unit-1": [
+          "task:test",
+          "account:test",
+          "schedule-orchestration:test"
+        ],
+        "unit-2": [
+          "desktop:test"
+        ],
+        "unit-3": [
+          "notification:test"
+        ],
         "build": [
           "account:build",
           "api:build",
@@ -3841,9 +4780,16 @@
           "ui-storybook:typecheck",
           "web:typecheck"
         ],
-        "web-unit-1": ["app-vue:test#1/2", "web:test"],
-        "web-unit-2": ["app-vue:test#2/2"],
-        "server-unit": ["api:test"],
+        "web-unit-1": [
+          "app-vue:test#1/2",
+          "web:test"
+        ],
+        "web-unit-2": [
+          "app-vue:test#2/2"
+        ],
+        "server-unit": [
+          "api:test"
+        ],
         "verification-children": [
           "desktop:test:ipc",
           "desktop:test:main",
@@ -3853,14 +4799,22 @@
           "notification:test:integration",
           "task:test:integration"
         ],
-        "web-visual": ["web:e2e:visual-regression"],
-        "component-browser": ["ui-storybook:test:interaction"],
+        "web-visual": [
+          "web:e2e:visual-regression"
+        ],
+        "component-browser": [
+          "ui-storybook:test:interaction"
+        ],
         "contract": []
       },
       "serverShards": [
         {
           "id": "1/2",
-          "keys": ["api:test:integration", "desktop:test:main", "desktop:test:ipc"],
+          "keys": [
+            "api:test:integration",
+            "desktop:test:main",
+            "desktop:test:ipc"
+          ],
           "estimatedMs": 33529
         },
         {
@@ -3915,16 +4869,43 @@
           "web"
         ],
         "test:contract": [],
-        "test:smoke": ["api"],
-        "test:integration": ["account", "api", "notification", "task"],
-        "test:boundary": ["desktop"],
-        "test:ipc": ["desktop"],
-        "test:main": ["desktop"],
-        "test:perf": ["task"],
-        "test:interaction": ["ui-storybook"],
-        "e2e:ai-provider": ["web"],
-        "e2e:visual-regression": ["web"],
-        "test:coverage": ["account", "api", "app-vue", "notification", "task"]
+        "test:smoke": [
+          "api"
+        ],
+        "test:integration": [
+          "account",
+          "api",
+          "notification",
+          "task"
+        ],
+        "test:boundary": [
+          "desktop"
+        ],
+        "test:ipc": [
+          "desktop"
+        ],
+        "test:main": [
+          "desktop"
+        ],
+        "test:perf": [
+          "task"
+        ],
+        "test:interaction": [
+          "ui-storybook"
+        ],
+        "e2e:ai-provider": [
+          "web"
+        ],
+        "e2e:visual-regression": [
+          "web"
+        ],
+        "test:coverage": [
+          "account",
+          "api",
+          "app-vue",
+          "notification",
+          "task"
+        ]
       },
       "jobs": {
         "lint": [
@@ -3933,9 +4914,17 @@
           "workspace:sync",
           "memoflow:governance-check"
         ],
-        "unit-1": ["task:test", "account:test", "schedule-orchestration:test"],
-        "unit-2": ["desktop:test"],
-        "unit-3": ["notification:test"],
+        "unit-1": [
+          "task:test",
+          "account:test",
+          "schedule-orchestration:test"
+        ],
+        "unit-2": [
+          "desktop:test"
+        ],
+        "unit-3": [
+          "notification:test"
+        ],
         "build": [
           "account:build",
           "api:build",
@@ -3958,9 +4947,16 @@
           "ui-storybook:typecheck",
           "web:typecheck"
         ],
-        "web-unit-1": ["app-vue:test#1/2", "web:test"],
-        "web-unit-2": ["app-vue:test#2/2"],
-        "server-unit": ["api:test"],
+        "web-unit-1": [
+          "app-vue:test#1/2",
+          "web:test"
+        ],
+        "web-unit-2": [
+          "app-vue:test#2/2"
+        ],
+        "server-unit": [
+          "api:test"
+        ],
         "verification-children": [
           "desktop:test:ipc",
           "desktop:test:main",
@@ -3970,14 +4966,22 @@
           "notification:test:integration",
           "task:test:integration"
         ],
-        "web-visual": ["web:e2e:visual-regression"],
-        "component-browser": ["ui-storybook:test:interaction"],
+        "web-visual": [
+          "web:e2e:visual-regression"
+        ],
+        "component-browser": [
+          "ui-storybook:test:interaction"
+        ],
         "contract": []
       },
       "serverShards": [
         {
           "id": "1/2",
-          "keys": ["api:test:integration", "desktop:test:main", "desktop:test:ipc"],
+          "keys": [
+            "api:test:integration",
+            "desktop:test:main",
+            "desktop:test:ipc"
+          ],
           "estimatedMs": 33529
         },
         {

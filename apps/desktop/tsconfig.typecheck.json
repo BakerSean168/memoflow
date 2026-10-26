@@ -21,7 +21,7 @@
       "@memoflow/goal/electron": ["../../packages/goal/dist/electron/index.d.ts"],
       "@memoflow/task/client": ["../../packages/task/dist/client/index.d.ts"],
       "@memoflow/task/electron": ["../../packages/task/dist/electron/index.d.ts"],
-      "@memoflow/schedule/client": ["../../packages/schedule/dist/client/index.d.ts"],
+      "@memoflow/schedule-client": ["../../packages/schedule-client/dist/index.d.ts"],
       "@memoflow/schedule/electron": ["../../packages/schedule/dist/electron/index.d.ts"],
       "@memoflow/reminder/routine-runtime": [
         "../../packages/reminder/dist/routine-runtime/index.d.ts"

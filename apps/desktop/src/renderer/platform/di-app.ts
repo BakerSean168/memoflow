@@ -13,7 +13,7 @@ import { createGoalIpcClient } from '@memoflow/goal-client';
 import { createGoalKnowledgeIpcClient } from '@memoflow/relation/client';
 import { createLabelIpcClient } from '@memoflow/label/client';
 import { createTaskIpcClient } from '@memoflow/task/client';
-import { createScheduleIpcClient } from '@memoflow/schedule/client';
+import { createScheduleIpcClient } from '@memoflow/schedule-client';
 import { createRepositoryIpcClient } from '@memoflow/repository/client';
 import { createNotificationIpcClient } from '@memoflow/notification/client';
 import { createRoutineIpcClient } from '@memoflow/reminder/client';

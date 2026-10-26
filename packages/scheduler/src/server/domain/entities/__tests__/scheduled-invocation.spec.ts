@@ -3,7 +3,7 @@ import type {
   InvocationAttemptOutcome,
   ScheduledInvocationRetryPolicy,
   ScheduledInvocationStatus,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import {
   ScheduledInvocation,
   ScheduledInvocationTransitionError,

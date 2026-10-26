@@ -47,7 +47,7 @@ import TaskCapsulePreview from './previews/TaskCapsulePreview.vue';
 import RoutineCapsulePreview from '../../modules/routine/components/RoutineCapsulePreview.vue';
 import NoteCapsulePreview from './previews/NoteCapsulePreview.vue';
 import ScheduleCapsulePreview from './previews/ScheduleCapsulePreview.vue';
-import type { CalendarEventItem } from '../../modules/schedule/composables/useCalendarView';
+import type { CalendarEventItem } from '@memoflow/schedule-ui';
 import NotificationCapsulePreview from '../../modules/notification/components/NotificationCapsulePreview.vue';
 import ConversationSidebar from './ConversationSidebar.vue';
 import BusinessPanel from './BusinessPanel.vue';

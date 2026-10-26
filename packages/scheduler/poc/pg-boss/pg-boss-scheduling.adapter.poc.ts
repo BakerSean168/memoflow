@@ -8,7 +8,7 @@ import type {
   SchedulingReconcileFailureCode,
   SchedulingReconcileReceipt,
   SchedulingRetryPolicy,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import {
   DuplicateSchedulingKeyError,
   assertSchedulingOwner,

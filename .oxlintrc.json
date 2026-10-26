@@ -165,12 +165,7 @@
           },
           {
             "sourceTag": "scope:reminder",
-            "onlyDependOnLibsWithTags": [
-              "scope:shared",
-              "scope:patterns",
-              "scope:reminder",
-              "scope:schedule"
-            ]
+            "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:reminder"]
           },
           {
             "sourceTag": "scope:repository",
@@ -178,7 +173,12 @@
           },
           {
             "sourceTag": "scope:schedule",
-            "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:schedule"]
+            "onlyDependOnLibsWithTags": [
+              "scope:shared",
+              "scope:patterns",
+              "scope:schedule",
+              "scope:ui"
+            ]
           },
           {
             "sourceTag": "scope:scheduler",
@@ -194,7 +194,6 @@
               "scope:shared",
               "scope:patterns",
               "scope:task",
-              "scope:schedule",
               "scope:scheduler"
             ]
           },

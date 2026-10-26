@@ -84,12 +84,12 @@
         "packages/scheduler/src/server/infrastructure/adapters/prisma/schedule-execution-prisma.repository.ts",
         "packages/scheduler/src/server/infrastructure/adapters/powersync/schedule-task-powersync.repository.ts",
         "packages/scheduler/src/server/infrastructure/adapters/powersync/schedule-execution-powersync.repository.ts",
-        "packages/contracts/src/modules/schedule/aggregates/schedule-task-client.ts",
-        "packages/contracts/src/modules/schedule/aggregates/schedule-task-server.ts",
-        "packages/contracts/src/modules/schedule/entities/schedule-execution-client.ts",
-        "packages/contracts/src/modules/schedule/entities/schedule-execution-server.ts",
-        "packages/contracts/src/modules/schedule/value-objects/source-module.ts",
-        "packages/contracts/src/modules/schedule/value-objects/schedule-config.ts"
+        "packages/schedule-contracts/src/aggregates/schedule-task-client.ts",
+        "packages/schedule-contracts/src/aggregates/schedule-task-server.ts",
+        "packages/schedule-contracts/src/entities/schedule-execution-client.ts",
+        "packages/schedule-contracts/src/entities/schedule-execution-server.ts",
+        "packages/schedule-contracts/src/value-objects/source-module.ts",
+        "packages/schedule-contracts/src/value-objects/schedule-config.ts"
       ]
     },
     {

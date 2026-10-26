@@ -32,7 +32,7 @@
       "@memoflow/task/schedule-projection": [
         "../../packages/task/src/schedule-projection/index.ts"
       ],
-      "@memoflow/schedule/client": ["../../packages/schedule/src/client/index.ts"],
+      "@memoflow/schedule-client": ["../../packages/schedule-client/src/index.ts"],
       "@memoflow/schedule/electron": ["../../packages/schedule/src/electron/index.ts"],
       "@memoflow/reminder/routine-runtime": [
         "../../packages/reminder/src/routine-runtime/index.ts"

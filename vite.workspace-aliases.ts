@@ -409,3 +409,30 @@ export function createOperationsContractsAliasEntries(workspaceRoot: string): Al
     },
   ];
 }
+
+export function createScheduleContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const scheduleContractsRoot = resolveFromWorkspace(
+    workspaceRoot,
+    'packages/schedule-contracts/src',
+  );
+
+  return [
+    {
+      find: /^@memoflow\/schedule-contracts$/,
+      replacement: `${scheduleContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/schedule-contracts\/(.+)$/,
+      replacement: `${scheduleContractsRoot}/$1`,
+    },
+  ];
+}
+
+export function createScheduleUiAliasEntries(workspaceRoot: string): Alias[] {
+  return [
+    {
+      find: /^@memoflow\/schedule-ui$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/schedule-ui/src/index.ts'),
+    },
+  ];
+}

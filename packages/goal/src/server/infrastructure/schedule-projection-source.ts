@@ -10,8 +10,8 @@ import {
   goalTimeframeStartBoundary,
   goalTimeframeEndBoundary,
 } from '@memoflow/goal-contracts';
-import type { ScheduledIntent, SchedulingOwner } from '@memoflow/contracts/schedule';
-import { buildSchedulingKey } from '@memoflow/contracts/schedule';
+import type { ScheduledIntent, SchedulingOwner } from '@memoflow/schedule-contracts';
+import { buildSchedulingKey } from '@memoflow/schedule-contracts';
 import {
   addYmdDays,
   asInstant,

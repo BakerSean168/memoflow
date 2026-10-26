@@ -9,7 +9,7 @@ import {
   type CalendarEventItem,
   type ScheduleCapsuleSnapshot,
   useCalendarView,
-} from '../../../modules/schedule/composables/useCalendarView';
+} from '@memoflow/schedule-ui';
 import {
   CapsulePreviewFooter,
   CapsulePreviewHeader,

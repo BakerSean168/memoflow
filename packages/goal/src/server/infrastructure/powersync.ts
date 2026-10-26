@@ -25,7 +25,7 @@ import {
   type GoalReminderFirePayload,
 } from './goal-reminder-fire.handler';
 import type { NotificationRequestedWriterPort } from '@memoflow/notification-contracts';
-import type { ScheduledHandlerRegistration } from '@memoflow/contracts/schedule';
+import type { ScheduledHandlerRegistration } from '@memoflow/schedule-contracts';
 import type { GoalScheduleProjectionSource } from '../../schedule-projection';
 import { createGoalTaskProgressHandler } from '../application/event-handlers';
 import type { GoalDependencyReadPort } from '@memoflow/reliable-messaging-contracts';

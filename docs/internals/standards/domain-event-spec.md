@@ -64,7 +64,7 @@ schedule:task:created        ❌ (旧形态，已废弃)
 - 不包含信封字段
 
 ```typescript
-// packages/contracts/src/modules/schedule/domain/events/schedule-task-created.event.ts
+// packages/schedule-contracts/src/domain/events/schedule-task-created.event.ts
 import type { ScheduleTaskId } from '../../../../primitives';
 import type { SourceModule } from '../../value-objects';
 
@@ -97,7 +97,7 @@ export type ScheduleEventMap = {
 在聚合根的业务方法中使用 `addDomainEvent`，泛型参数引用 event map 中的类型：
 
 ```typescript
-import type { ScheduleEventMap } from '@memoflow/contracts/schedule';
+import type { ScheduleEventMap } from '@memoflow/schedule-contracts';
 
 export class ScheduleTask extends AggregateRoot<ScheduleTaskId> {
   public pause(reason?: string): void {

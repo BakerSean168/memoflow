@@ -3,7 +3,7 @@ import type { Context } from '@memoflow/contracts/shared';
 import type {
   ScheduledInvocationDiagnostic,
   ScheduledInvocationDiagnosticQuery,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 
 /** Read-only internal/dev/ops diagnostics surface for canonical Scheduler invocations. */
 export interface SchedulerApplicationPort {

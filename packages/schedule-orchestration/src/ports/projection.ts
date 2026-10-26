@@ -3,7 +3,7 @@ import type {
   ScheduledHandlerResult,
   ScheduledInvocationContext,
   SchedulingPort,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import type { GoalScheduleProjectionSource } from '@memoflow/goal/schedule-projection';
 import type { RoutineScheduleProjectionSource } from '@memoflow/reminder/schedule-projection/routine';
 import type { RoutineTemporaryOverrideStore } from '@memoflow/reminder/schedule-execution/routine';

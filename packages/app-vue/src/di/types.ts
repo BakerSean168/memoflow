@@ -25,7 +25,7 @@ import type { NotificationClientPort } from '@memoflow/notification/client';
 import type { GoalKnowledgeClientPort } from '@memoflow/relation/client';
 import type { RepositoryClientPort } from '@memoflow/repository/client';
 import type { RoutineClientPort } from '@memoflow/reminder/client';
-import type { ScheduleClientPort } from '@memoflow/schedule/client';
+import type { ScheduleClientPort } from '@memoflow/schedule-client';
 import type { SettingClientPort } from '@memoflow/setting/client';
 import type { TaskClientPort } from '@memoflow/task/client';
 import type { DataPortabilityClientPort } from '@memoflow/data-portability/client';

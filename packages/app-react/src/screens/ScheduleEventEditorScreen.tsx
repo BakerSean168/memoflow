@@ -9,7 +9,7 @@ import type {
   ConflictDetectionResult,
   CreateScheduleRequest,
   UpdateScheduleRequest,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 
 import { useScheduleService } from '../hooks/useScheduleService';
 import { getProductTime } from '../utils/product-time';

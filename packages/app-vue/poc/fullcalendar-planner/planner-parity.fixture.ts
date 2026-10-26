@@ -3,7 +3,7 @@ import type {
   PlannerEditableCapabilities,
   PlannerOwnerCommandTarget,
   PlannerSourceType,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import { asInstant, asYmd } from '@memoflow/time';
 
 /** Browser-only PLAN-4304 parity fixture over the canonical Planner contract. */
