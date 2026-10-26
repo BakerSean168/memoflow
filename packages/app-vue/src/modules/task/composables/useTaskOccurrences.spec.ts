@@ -4,7 +4,7 @@ import { createI18n } from 'vue-i18n';
 import { VueQueryPlugin } from '@tanstack/vue-query';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ok } from '@memoflow/contracts/result';
-import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
 import { createTestPinia } from '@memoflow/test-utils';
 import { TASK_SERVICE_KEY } from '../../../di/keys';
 import {

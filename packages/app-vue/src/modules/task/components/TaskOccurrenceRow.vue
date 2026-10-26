@@ -170,7 +170,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Badge, Button, Checkbox } from '@memoflow/ui-vue-shadcn';
 import { Circle, CircleCheck, ClockAlert, SkipForward } from '@lucide/vue';
-import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
 import {
   getTaskOccurrenceScheduleLabel,
   getTaskOccurrenceStatusLabel,

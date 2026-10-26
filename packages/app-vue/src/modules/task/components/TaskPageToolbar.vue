@@ -244,7 +244,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@memoflow/ui-vue-shadcn';
-import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO } from '@memoflow/task-contracts';
 import {
   LabelFilterPopover,
   ProductSingleSelectFilter,

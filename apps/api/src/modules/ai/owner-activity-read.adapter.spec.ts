@@ -1,4 +1,4 @@
-import { TaskOccurrenceStatus } from '@memoflow/contracts/task';
+import { TaskOccurrenceStatus } from '@memoflow/task-contracts';
 import { describe, expect, it, vi } from 'vitest';
 import { OwnerActivityAIReadAdapter } from './owner-activity-read.adapter';
 

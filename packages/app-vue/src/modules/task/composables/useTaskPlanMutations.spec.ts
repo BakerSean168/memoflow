@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { fail, ok, type Result } from '@memoflow/contracts/result';
-import type { TaskPlanClientDTO } from '@memoflow/contracts/task';
+import type { TaskPlanClientDTO } from '@memoflow/task-contracts';
 import { taskPlanQueryKeys } from '../../../platform/server-state/query-keys';
 import { mountTaskComposable } from './taskQueryTestUtils';
 import { useTaskPlanMutations } from './useTaskPlanMutations';

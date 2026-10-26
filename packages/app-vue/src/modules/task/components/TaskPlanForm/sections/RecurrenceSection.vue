@@ -199,8 +199,8 @@ import {
   RECURRENCE_RULE_DEFAULTS,
   TaskPlanScheduleSchema,
   TaskYmdSchema,
-} from '@memoflow/contracts/task';
-import type { TaskPlanSchedule, TaskRecurrence, TaskRecurrenceEnd } from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
+import type { TaskPlanSchedule, TaskRecurrence, TaskRecurrenceEnd } from '@memoflow/task-contracts';
 import type { TaskPlanViewModel } from '../../types';
 import {
   Switch,

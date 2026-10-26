@@ -1,6 +1,6 @@
 import { computed, onScopeDispose, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { TaskPlanClientDTO } from '@memoflow/contracts/task';
+import type { TaskPlanClientDTO } from '@memoflow/task-contracts';
 import { unwrap } from '@memoflow/contracts/result';
 import { TASK_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';

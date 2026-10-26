@@ -670,7 +670,7 @@
 </template>
 
 <script setup lang="ts">
-import { TaskGoalProgressConfigurationSchema } from '@memoflow/contracts/task';
+import { TaskGoalProgressConfigurationSchema } from '@memoflow/task-contracts';
 
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -726,7 +726,7 @@ import {
   TaskReminderType,
   type TaskReminderConfigDTO,
   type UpdateTaskPlanReq,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import AppEmptyState from '../../../components/shared/AppEmptyState.vue';
 import ModuleHeader from '../../../components/shared/ModuleHeader.vue';
 import {

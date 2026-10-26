@@ -13,7 +13,7 @@ import type {
   RescheduleTaskInput,
   SetTaskOccurrenceChecklistItemReq,
   TaskPlanClientDTO,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { createComposableHandleError } from '../../../shared/utils/create-composable-handle-error';
 import { executeDesktopAuthenticatedResult } from '../../../shared/utils/execute-desktop-authenticated-result';

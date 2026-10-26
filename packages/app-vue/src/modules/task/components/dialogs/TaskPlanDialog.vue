@@ -96,9 +96,9 @@ import type {
   TaskNativeEditSession,
   TaskNativeSubmitContext,
 } from '../../composables/taskNativeEditSession';
-import type { TaskPlanClientDTO } from '@memoflow/contracts/task';
+import type { TaskPlanClientDTO } from '@memoflow/task-contracts';
 import { useLabelCatalog } from '../../../../shared/composables/useLabelCatalog';
-import { TaskPlanScheduleSchema } from '@memoflow/contracts/task';
+import { TaskPlanScheduleSchema } from '@memoflow/task-contracts';
 import { getProductTime } from '../../../../shared/utils/product-time';
 import { useTaskGoalBindingOptions } from '../../composables/useTaskGoalBindingOptions';
 import { ProductEditorFrame, ProductInlineValidation } from '../../../../shared/components';

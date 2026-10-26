@@ -231,7 +231,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { Button, useConfirm } from '@memoflow/ui-vue-shadcn';
 import { CalendarCheck2, CircleAlert, ListChecks, Loader2, RefreshCw } from '@lucide/vue';
-import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO } from '@memoflow/task-contracts';
 import TaskOccurrenceInspectDialog from '../components/dialogs/TaskOccurrenceInspectDialog.vue';
 import TaskOccurrenceRow from '../components/TaskOccurrenceRow.vue';
 import TaskPageToolbar from '../components/TaskPageToolbar.vue';

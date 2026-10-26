@@ -14,7 +14,7 @@
 import { eventBus } from '@memoflow/utils/domain';
 import { createTypedEventSubscriber } from '@memoflow/utils/domain';
 import { createLogger } from '@memoflow/utils/logger';
-import type { TaskEventMap } from '@memoflow/contracts/task';
+import type { TaskEventMap } from '@memoflow/task-contracts';
 import type { TaskModuleRuntimeContribution } from '../task.module';
 
 const logger = createLogger('TaskRuntime');

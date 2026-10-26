@@ -3,7 +3,7 @@ import {
   TaskPlanCompletionPolicy,
   TaskPlanOutcome,
   TaskPlanStatus,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import { ImportanceLevel } from '@memoflow/shared-primitives';
 import { TaskPlan, type TaskPlanState } from './task-plan';
 

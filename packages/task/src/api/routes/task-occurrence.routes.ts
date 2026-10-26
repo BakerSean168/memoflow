@@ -22,10 +22,13 @@ import {
   SetTaskOccurrenceChecklistItemInvocationSchema,
   SkipTaskOccurrenceInvocationSchema,
   TaskOccurrenceIdCommandInvocationSchema,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import { brandedId } from '@memoflow/contracts/primitives';
-import type { TaskOccurrenceId, TaskPlanId } from '@memoflow/contracts/primitives';
-import type { TaskOccurrenceStatus } from '@memoflow/contracts/task';
+import type {
+  TaskOccurrenceId,
+  TaskOccurrenceStatus,
+  TaskPlanId,
+} from '@memoflow/task-contracts';
 import type { TaskOccurrenceController } from '../../server/transport/task-occurrence.controller';
 // Residual 983: sole getFirstQueryValue (local dual retired).
 import { getFirstQueryValue } from './get-first-query-value';

@@ -1,5 +1,5 @@
 import type { TaskOccurrence as PrismaTaskOccurrence } from '@memoflow/database';
-import { TaskOccurrenceResultKind, TaskOccurrenceStatus } from '@memoflow/contracts/task';
+import { TaskOccurrenceResultKind, TaskOccurrenceStatus } from '@memoflow/task-contracts';
 import { describe, expect, it } from 'vitest';
 import { aPrefixedUuid } from '@memoflow/test-utils/fixtures';
 import { PrismaTaskOccurrenceMapper } from './prisma-task-occurrence-mapper';

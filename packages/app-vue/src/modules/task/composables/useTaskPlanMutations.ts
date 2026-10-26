@@ -19,7 +19,7 @@ import type {
   CreateTaskPlanReq,
   TaskPlanClientDTO,
   UpdateTaskPlanReq,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import { TASK_SERVICE_KEY, DESKTOP_AUTH_API_KEY } from '../../../di/keys';
 import { useServerStateIdentityScope, useServerStateRuntime } from '../../../platform/server-state';

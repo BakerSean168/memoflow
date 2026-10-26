@@ -143,7 +143,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { Badge, Button, Checkbox, Dialog } from '@memoflow/ui-vue-shadcn';
-import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO } from '@memoflow/task-contracts';
 import ProductDialogShell from '../../../../shared/components/ProductDialogShell.vue';
 import { formatProductDateTime } from '../../../../shared/utils/product-time';
 import { useTaskPlanWorkspaceQuery } from '../../composables/useTaskPlanWorkspaceQuery';

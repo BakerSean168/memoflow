@@ -14,8 +14,8 @@ import { TaskPlan } from '../../../domain/aggregates/task-plan';
 import { TaskPlanSchedule, TaskReminderConfig } from '../../../domain/value-objects';
 import { TaskPlanId } from '../../../domain/value-objects/task-plan-id';
 import { TaskOccurrenceGenerationService } from '../../../domain/services/index';
-import type { CreateTaskPlanInput, CreateTaskPlanRes } from '@memoflow/contracts/task';
-import { TaskPlanStatus } from '@memoflow/contracts/task';
+import type { CreateTaskPlanInput, CreateTaskPlanRes } from '@memoflow/task-contracts';
+import { TaskPlanStatus } from '@memoflow/task-contracts';
 import { createLogger } from '@memoflow/utils/logger';
 import { createTimeFacade, type TimeContext, type UserTimeContextPort } from '@memoflow/time';
 import type { Result } from '@memoflow/contracts/result';
@@ -28,7 +28,7 @@ import {
   TaskGoalBindingTrigger,
   TaskPlanScheduleKind,
   TaskRecurrenceEndKind,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 
 /**
  * Create Task Template Service

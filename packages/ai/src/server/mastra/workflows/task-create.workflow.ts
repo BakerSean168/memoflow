@@ -1,5 +1,5 @@
 import type { ExternalTaskApply } from '../runtime/workflow-runtime.port';
-import { CreateTaskPlanSchema } from '@memoflow/contracts/task';
+import { CreateTaskPlanSchema } from '@memoflow/task-contracts';
 import { createStep, createWorkflow } from '@mastra/core/workflows';
 import { z } from 'zod';
 import {

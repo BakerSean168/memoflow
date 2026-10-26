@@ -1,5 +1,5 @@
-import { TaskHmSchema, TaskYmdSchema } from '@memoflow/contracts/task';
-import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
+import { TaskHmSchema, TaskYmdSchema } from '@memoflow/task-contracts';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
 const day = new Date(2026, 7, 28).getTime();
 
 export function instance(

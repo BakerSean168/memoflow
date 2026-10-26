@@ -1,6 +1,6 @@
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it } from 'vitest';
-import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
 import enTask from '../../../locales/en-US/task';
 import { startOfDayMs } from '../../../shared/utils/product-time';
 import {

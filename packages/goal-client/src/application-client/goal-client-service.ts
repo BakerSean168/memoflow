@@ -43,10 +43,10 @@ import type {
   GetGoalWorkspaceReq,
   GoalWorkspaceReadModel,
   GoalWorkspaceTaskPageRequest,
-  GoalWorkspaceTaskPage,
   GoalWorkspacePageRequest,
   GoalWorkspaceKnowledgePage,
 } from '@memoflow/workspace-contracts';
+import type { TaskGoalContextPage } from '@memoflow/task-contracts';
 import type { IGoalApiClient } from './ports/goal-api-client.port';
 // ─── Client Application Port ────────────────────────────────────────────────
 
@@ -74,7 +74,7 @@ export interface GoalClientPort {
   getGoalWorkspaceTasks(
     goalId: string,
     request?: GoalWorkspaceTaskPageRequest,
-  ): Promise<Result<GoalWorkspaceTaskPage>>;
+  ): Promise<Result<TaskGoalContextPage>>;
   getGoalWorkspaceKnowledge(
     goalId: string,
     request?: GoalWorkspacePageRequest,
@@ -257,7 +257,7 @@ export class GoalClientService implements GoalClientPort {
   async getGoalWorkspaceTasks(
     goalId: string,
     request?: GoalWorkspaceTaskPageRequest,
-  ): Promise<Result<GoalWorkspaceTaskPage>> {
+  ): Promise<Result<TaskGoalContextPage>> {
     return this.goalApi.getGoalWorkspaceTasks(goalId, request);
   }
 

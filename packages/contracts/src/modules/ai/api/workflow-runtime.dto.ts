@@ -5,7 +5,7 @@ import {
   FailureReferenceSchema,
   strictFailureDetails,
 } from '@memoflow/transport-contracts/result';
-import { CreateTaskPlanSchema } from '../../task';
+import { CreateTaskPlanSchema } from '@memoflow/task-contracts';
 import {
   GoalCreateClientInputSchema,
   GoalPlanDraftSchema,

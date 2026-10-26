@@ -8,7 +8,7 @@ import {
 import {
   CreateTaskPlanSchema,
   TaskGoalProgressConfigurationSchema,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import { computed, onScopeDispose, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';

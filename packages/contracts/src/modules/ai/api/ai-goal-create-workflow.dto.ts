@@ -13,7 +13,7 @@ import {
   GoalContributionRuleSchema,
   TaskPlanScheduleSchema,
   TaskReminderConfigSchema,
-} from '../../task';
+} from '@memoflow/task-contracts';
 
 /**
  * Canonical product contract for the durable `goal.create` Workflow.

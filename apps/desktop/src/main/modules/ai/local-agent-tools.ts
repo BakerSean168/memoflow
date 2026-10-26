@@ -31,7 +31,7 @@ import {
   TaskAgentUpdateSchema,
   TaskAgentCompleteSchema,
   TaskAgentReceiptSchema,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
 import {

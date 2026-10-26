@@ -151,7 +151,7 @@ describe('HARD-7102 core vNext architecture lock', () => {
         content: `function read(template) { return template.tags; }`,
       },
       {
-        relPath: 'packages/contracts/src/modules/task/api/task-plan.dto.ts',
+        relPath: 'packages/task-contracts/src/api/task-plan.dto.ts',
         content: `export interface LegacyTaskInput { tags?: string[]; color?: string | null; }`,
       },
       {
@@ -261,7 +261,7 @@ describe('HARD-7102 core vNext architecture lock', () => {
         content: `export interface RecurrenceRule { frequency: 'daily' | 'weekly'; }`,
       },
       {
-        relPath: 'packages/contracts/src/modules/task/api/task-plan.dto.ts',
+        relPath: 'packages/task-contracts/src/api/task-plan.dto.ts',
         content: `export interface TaskInput { labelIds?: string[]; }`,
       },
       {

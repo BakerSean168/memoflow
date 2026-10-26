@@ -86,6 +86,7 @@
     "relation-contracts": "runtime-lib",
     "reliable-messaging-contracts": "runtime-lib",
     "operations-contracts": "runtime-lib",
+    "task-contracts": "runtime-lib",
     "schedule-contracts": "runtime-lib",
     "schedule-client": "runtime-lib",
     "schedule-ui": "ui-lib"

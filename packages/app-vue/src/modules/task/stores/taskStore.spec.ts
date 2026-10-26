@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
-import type { TaskOccurrenceId, TaskPlanId } from '@memoflow/contracts/primitives';
+import type {
+  TaskOccurrenceClientDTO,
+  TaskOccurrenceId,
+  TaskPlanId,
+} from '@memoflow/task-contracts';
 import { createTestPinia } from '@memoflow/test-utils';
 import { useTaskStore } from './task-store';
 

@@ -7,7 +7,7 @@ import TaskCompletionMeasurementDialog from './TaskCompletionMeasurementDialog.v
 import { useTaskOccurrenceActionCoordinator } from '../../composables/useTaskOccurrenceActionCoordinator';
 import { instance } from '../task-quick-test-fixtures';
 import enUS from '../../../../locales/en-US';
-import type { TaskGoalBindingDTO } from '@memoflow/contracts/task';
+import type { TaskGoalBindingDTO } from '@memoflow/task-contracts';
 installGoalUiHost();
 const owner = vi.hoisted(() => ({ read: vi.fn() }));
 vi.mock('@memoflow/goal-ui/composables/useGoal', () => ({

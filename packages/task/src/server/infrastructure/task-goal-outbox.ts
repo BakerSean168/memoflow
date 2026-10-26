@@ -10,7 +10,7 @@ import {
   type TaskOccurrenceCompletedEvent,
   type TaskPlanOutcomeChangedEvent,
   type TaskUncompletedEvent,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 
 export interface TaskGoalOutboxRecord {
   eventId: string;

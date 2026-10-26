@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { TaskGoalLinkSchema } from '@memoflow/contracts/task';
+import { TaskGoalLinkSchema } from '@memoflow/task-contracts';
 import { TaskGoalBinding } from './task-goal-binding';
 const ids = {
   goalId: 'GoalId_11111111-1111-4111-8111-111111111111',

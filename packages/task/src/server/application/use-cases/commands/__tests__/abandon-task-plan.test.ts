@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
-import { TaskPlanOutcome, TaskPlanStatus } from '@memoflow/contracts/task';
+import { TaskPlanOutcome, TaskPlanStatus } from '@memoflow/task-contracts';
 import type { ITaskPlanRepository } from '../../../../domain/repositories/i-task-plan-repository';
 import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
 import { aOneTimeTask, TASK_TEST_USER_TIME_CONTEXT_PORT } from '../../../../../testing';

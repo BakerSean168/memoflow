@@ -9,7 +9,7 @@ import {
   TaskAgentCompleteSchema,
   TaskAgentReceiptSchema,
   type TaskAgentReceipt,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import type { UserTimeContextPort } from '@memoflow/time';
 import type { IEventBus } from '@memoflow/patterns';

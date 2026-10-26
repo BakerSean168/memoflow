@@ -5,7 +5,7 @@ import {
   TaskPlanOutcome,
   TaskPlanScheduleKind,
   TaskRecurrenceEndKind,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import { ImportanceLevel } from '@memoflow/shared-primitives';
 import type { Ymd } from '@memoflow/contracts/primitives';
 import { IdentityId } from '@memoflow/domain-shared';

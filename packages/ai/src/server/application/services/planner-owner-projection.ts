@@ -3,7 +3,7 @@ import type {
   ScheduleCalendarEventProjection,
   TaskCalendarEventProjection,
 } from '@memoflow/schedule-contracts';
-import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
 import type { Instant, Ymd } from '@memoflow/time';
 
 export interface PlannerProductTimePort {

@@ -8,7 +8,7 @@ import {
   createMockGoalMutationReceipt,
   createMockKeyResult,
 } from '@memoflow/goal-contracts/test-support/goal.mock';
-import type { UpdateTaskPlanReq, TaskPlanClientDTO } from '@memoflow/contracts/task';
+import type { UpdateTaskPlanReq, TaskPlanClientDTO } from '@memoflow/task-contracts';
 import { GOAL_SERVICE_KEY, LABEL_SERVICE_KEY, TASK_SERVICE_KEY } from '@memoflow/app-vue/di/keys';
 import type { IGoalService, ILabelService, ITaskService } from '@memoflow/app-vue/di/types';
 import { productionLocaleMessages } from '@memoflow/app-vue/locales/production-messages';

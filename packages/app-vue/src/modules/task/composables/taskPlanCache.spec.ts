@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { TaskPlanClientDTO } from '@memoflow/contracts/task';
+import type { TaskPlanClientDTO } from '@memoflow/task-contracts';
 import { createTestServerStateRuntime } from '../../../platform/server-state';
 import { taskPlanQueryKeys } from '../../../platform/server-state/query-keys';
 import {

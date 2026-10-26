@@ -1,6 +1,6 @@
 import { isReactive, reactive } from 'vue';
 import { describe, expect, it } from 'vitest';
-import type { TaskPlanClientDTO } from '@memoflow/contracts/task';
+import type { TaskPlanClientDTO } from '@memoflow/task-contracts';
 import { mapTaskPlanDtoToViewModel } from './task-plan-presentation';
 
 function taskPlan(overrides: Partial<TaskPlanClientDTO> = {}): TaskPlanClientDTO {

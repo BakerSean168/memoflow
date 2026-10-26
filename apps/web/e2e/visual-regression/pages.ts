@@ -11,7 +11,7 @@ import type {
   CreateRoutineRequest,
   CreateRoutineProfileRequest,
 } from '@memoflow/contracts/routine';
-import type { CreateTaskPlanReq } from '@memoflow/contracts/task';
+import type { CreateTaskPlanReq } from '@memoflow/task-contracts';
 import { RoutineConfigurationSnapshotSchema } from '@memoflow/contracts/routine';
 import { AIWorkflowRunViewSchema } from '@memoflow/contracts/ai';
 import { fail, ok } from '@memoflow/contracts/result';

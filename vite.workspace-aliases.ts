@@ -410,6 +410,21 @@ export function createOperationsContractsAliasEntries(workspaceRoot: string): Al
   ];
 }
 
+export function createTaskContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const taskContractsRoot = resolveFromWorkspace(workspaceRoot, 'packages/task-contracts/src');
+
+  return [
+    {
+      find: /^@memoflow\/task-contracts$/,
+      replacement: `${taskContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/task-contracts\/(.+)$/,
+      replacement: `${taskContractsRoot}/$1`,
+    },
+  ];
+}
+
 export function createScheduleContractsAliasEntries(workspaceRoot: string): Alias[] {
   const scheduleContractsRoot = resolveFromWorkspace(
     workspaceRoot,

@@ -249,8 +249,8 @@
 import { ProductInlineValidation } from '../../../../../shared/components';
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { TaskReminderType, ReminderTimeUnit } from '@memoflow/contracts/task';
-import type { TaskReminderConfigDTO } from '@memoflow/contracts/task';
+import { TaskReminderType, ReminderTimeUnit } from '@memoflow/task-contracts';
+import type { TaskReminderConfigDTO } from '@memoflow/task-contracts';
 import type { TaskPlanViewModel } from '../../types';
 import {
   Card,

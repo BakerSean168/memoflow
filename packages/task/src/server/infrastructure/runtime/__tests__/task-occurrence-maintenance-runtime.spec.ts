@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { TaskPlanStatus } from '@memoflow/contracts/task';
+import { TaskPlanStatus } from '@memoflow/task-contracts';
 import { createTimeContext, createTimeFacade } from '@memoflow/time';
 import { createTaskOccurrenceMaintenanceRuntime } from '../task-occurrence-maintenance-runtime';
 

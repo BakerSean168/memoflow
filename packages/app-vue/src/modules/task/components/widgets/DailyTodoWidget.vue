@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { Card } from '@memoflow/ui-vue-shadcn';
 import { useTaskToday } from '../../composables/useTaskToday';
 import TaskQuickSurface from '../TaskQuickSurface.vue';
-import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO } from '@memoflow/task-contracts';
 const emit = defineEmits<{
   'view-all': [];
   'open-plan': [id: string];

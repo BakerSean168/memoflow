@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { TaskPlanScheduleKind } from '@memoflow/contracts/task';
+import { TaskPlanScheduleKind } from '@memoflow/task-contracts';
 import { buildSchedulingKey } from '@memoflow/schedule-contracts';
 import { createTimeContext } from '@memoflow/time';
 import { createMockRepo } from '@memoflow/test-utils/mocks';

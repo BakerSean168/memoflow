@@ -1,0 +1,118 @@
+/**
+ * Task - Response Schemas (Zod)
+ *
+ * OpenAPI 响应体 Zod Schema，路由文件统一从此处导入。
+ * These schemas must match what controllers actually return (the ClientDTO interfaces).
+ */
+
+import { z } from 'zod';
+import { TaskGoalProgressConfigurationSchema } from '../value-objects/task-goal-binding';
+import { LabelClientDTOSchema } from '@memoflow/label-contracts';
+import { brandedId } from '@memoflow/shared-primitives';
+import type { IdentityId } from '@memoflow/shared-primitives';
+import type { TaskPlanId } from '../value-objects/task-plan-id';
+import type { TaskOccurrenceId } from '../value-objects/task-occurrence-id';
+import {
+  TaskGoalBindingSchema,
+  TaskReminderConfigSchema,
+  TaskPlanScheduleSchema,
+} from './task-plan.dto';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
+import { TaskOccurrenceStatus } from '../value-objects/task-occurrence-status';
+import { TaskPlanStatus } from '../value-objects/task-plan-status';
+import { TaskPlanOutcome } from '../value-objects/task-plan-outcome';
+import { TaskPlanCompletionPolicy } from '../value-objects/task-plan-completion-policy';
+import { TaskOccurrenceScheduleSnapshotSchema } from '../value-objects/task-occurrence-schedule-snapshot';
+import { TaskOccurrenceResultSchema } from '../value-objects/task-occurrence-result';
+import { TaskOccurrenceChecklistItemSchema } from '../value-objects/task-occurrence-checklist';
+import { ChecklistItemDefinitionSchema } from '../value-objects/checklist-item-definition';
+
+// ============ TaskPlan Response Schema ============
+
+export const TaskPlanResponseSchema = z.object({
+  id: brandedId<TaskPlanId>(),
+  identityId: brandedId<IdentityId>(),
+  name: z.string(),
+  description: z.string().nullable(),
+  schedule: TaskPlanScheduleSchema,
+  reminderConfig: TaskReminderConfigSchema.nullable(),
+  importance: z.enum(ImportanceLevel),
+  goalBinding: TaskGoalBindingSchema.nullable().transform((binding) =>
+    binding ? { ...binding, ...TaskGoalProgressConfigurationSchema.parse(binding) } : null,
+  ),
+  checklist: z.array(ChecklistItemDefinitionSchema),
+  labels: z.array(LabelClientDTOSchema),
+  status: z.enum(TaskPlanStatus),
+  outcome: z.enum(TaskPlanOutcome),
+  completionPolicy: z.enum(TaskPlanCompletionPolicy),
+  closedAt: z.number().nullable(),
+  archivedAt: z.number().nullable(),
+  abandonedReason: z.string().nullable(),
+  version: z.number(),
+  createdAt: z.number(),
+  updatedAt: z.number(),
+  deletedAt: z.number().nullable(),
+  occurrenceCount: z.number(),
+  completedOccurrenceCount: z.number(),
+  pendingOccurrenceCount: z.number(),
+  dueOccurrenceCount: z.number(),
+  completedDueOccurrenceCount: z.number(),
+  completionWindowDays: z.literal(30),
+  futurePendingOccurrenceCount: z.number(),
+  singleOccurrenceStatus: z.enum(TaskOccurrenceStatus).nullable(),
+  completionRate: z.number(),
+});
+
+export const CreateTaskPlanResponseSchema = z.object({
+  plan: TaskPlanResponseSchema,
+  occurrenceCount: z.number().int().nonnegative(),
+  todayOccurrenceCreated: z.boolean(),
+});
+
+export const TaskPlanListResponseSchema = z.object({
+  plans: z.array(TaskPlanResponseSchema),
+  total: z.number(),
+});
+
+// ============ TaskOccurrence Response Schema ============
+
+// TASK-7306: transport exposes the same canonical occurrence truth as the server
+// aggregate. `dueAt` / `isOverdue` are explicit Product-Time read projections only.
+export const TaskOccurrenceResponseSchema = z.object({
+  id: brandedId<TaskOccurrenceId>(),
+  planId: brandedId<TaskPlanId>(),
+  identityId: brandedId<IdentityId>(),
+  occurrenceKey: z.string().min(1),
+  scheduleSnapshot: TaskOccurrenceScheduleSnapshotSchema,
+  importanceSnapshot: z.enum(ImportanceLevel),
+  status: z.enum(TaskOccurrenceStatus),
+  actualStartAt: z.number().nullable(),
+  result: TaskOccurrenceResultSchema.nullable(),
+  checklistState: z.array(TaskOccurrenceChecklistItemSchema),
+  dueAt: z.number(),
+  isOverdue: z.boolean(),
+  version: z.number(),
+  createdAt: z.number(),
+  updatedAt: z.number(),
+  deletedAt: z.number().nullable(),
+});
+
+// ============ Inferred response aliases ============
+// ADR-047: the RPC map imports ONLY inferred types from `../api`; these aliases
+// are the type surface the protocol layer references (no `z.infer` in maps).
+// ADR-047：RPC map 只从 `../api` 导入推导类型；这些别名是 protocol 层引用的
+// 类型表面（map 内不再出现 `z.infer`）。
+
+export type TaskPlanResponse = z.infer<typeof TaskPlanResponseSchema>;
+export type TaskOccurrenceResponse = z.infer<typeof TaskOccurrenceResponseSchema>;
+
+// Residual 837: TaskPlanHistoryClientDTO dual retired — sole TaskPlanHistoryResponseSchema + z.infer
+// (semantic type is z.infer alias in entities/task-plan-history-client.ts).
+// Residual 843: TaskPlanHistoryServerDTO also z.infer of this schema (client+server single-track).
+export const TaskPlanHistoryResponseSchema = z.object({
+  id: z.string(),
+  planId: z.string(),
+  action: z.string(),
+  changes: z.unknown(),
+  createdAt: z.number(),
+});

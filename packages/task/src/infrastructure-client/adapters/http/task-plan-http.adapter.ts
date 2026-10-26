@@ -18,9 +18,8 @@ import type {
   BindToGoalReq,
   AbandonTaskPlanReq,
   TaskPlanOccurrencesQuery,
-  GetTaskWorkspaceReq,
-  TaskPlanWorkspace,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
+import type { GetTaskWorkspaceReq, TaskPlanWorkspace } from '@memoflow/workspace-contracts';
 
 /**
  * TaskPlanHttpAdapter

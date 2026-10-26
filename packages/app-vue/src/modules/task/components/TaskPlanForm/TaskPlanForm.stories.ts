@@ -3,7 +3,7 @@ import { expect, userEvent, within } from 'storybook/test';
 import { provide, ref, toRaw } from 'vue';
 import { LABEL_SERVICE_KEY } from '../../../../di/keys';
 import type { ILabelService } from '../../../../di/types';
-import { TaskYmdSchema } from '@memoflow/contracts/task';
+import { TaskYmdSchema } from '@memoflow/task-contracts';
 import type { TaskPlanViewModel } from '../types';
 import TaskPlanForm from './TaskPlanForm.vue';
 

@@ -1,7 +1,7 @@
 import {
   TaskPlanStatus as TaskPlanStatusContract,
   type TaskPlanStatus as ITaskPlanStatus,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 
 /**
  * 📝 任务模板状态 - 任务模板的生命周期状态

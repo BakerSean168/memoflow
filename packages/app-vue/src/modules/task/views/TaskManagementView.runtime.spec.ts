@@ -6,7 +6,7 @@ import { createTestPinia } from '@memoflow/test-utils';
 import { ok } from '@memoflow/contracts/result';
 import type { UseTaskPlanListQueryComposableOptions } from '../composables/useTaskPlanListQuery';
 import type { TaskPlanListQueryInput } from '../../../platform/server-state/query-keys';
-import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO } from '@memoflow/task-contracts';
 import { GOAL_SERVICE_KEY, TASK_SERVICE_KEY } from '../../../di/keys';
 import {
   createTestServerStateRuntime,
@@ -136,7 +136,7 @@ beforeEach(() => {
 
 function render(
   detailFails = false,
-  goalBinding: import('@memoflow/contracts/task').TaskGoalBindingDTO | null = null,
+  goalBinding: import('@memoflow/task-contracts').TaskGoalBindingDTO | null = null,
 ) {
   const pinia = createTestPinia();
   const store = useTaskStore(pinia);

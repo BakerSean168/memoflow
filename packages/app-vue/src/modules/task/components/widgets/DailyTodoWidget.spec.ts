@@ -2,7 +2,7 @@ import { defineComponent, ref } from 'vue';
 import { createI18n } from 'vue-i18n';
 import { flushPromises, mount } from '@vue/test-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
 import { useTaskToday } from '../../composables/useTaskToday';
 import DailyTodoWidget from './DailyTodoWidget.vue';
 

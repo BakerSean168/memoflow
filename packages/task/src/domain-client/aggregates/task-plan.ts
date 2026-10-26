@@ -1,4 +1,4 @@
-import { TaskGoalProgressConfigurationSchema } from '@memoflow/contracts/task';
+import { TaskGoalProgressConfigurationSchema } from '@memoflow/task-contracts';
 /**
  * TaskPlan Aggregate Root - Domain Client
  * 任务模板聚合根 - 领域客户端
@@ -21,10 +21,11 @@ import type {
   TaskPlanOutcomeValue,
   TaskPlanCompletionPolicyValue,
   ChecklistItemDefinitionDTO,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import type { ImportanceLevel } from '@memoflow/shared-primitives';
 import type { LabelClientDTO } from '@memoflow/label-contracts';
-import type { IdentityId, Instant, TaskPlanId } from '@memoflow/contracts/primitives';
+import type { IdentityId, Instant } from '@memoflow/contracts/primitives';
+import type { TaskPlanId } from '@memoflow/task-contracts';
 import type { GoalId, KeyResultId } from '@memoflow/goal-contracts';
 import { AggregateRoot } from '@memoflow/utils/domain';
 

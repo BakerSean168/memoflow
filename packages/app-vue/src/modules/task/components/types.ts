@@ -1,11 +1,11 @@
-import type { TaskGoalProgressRule } from '@memoflow/contracts/task';
+import type { TaskGoalProgressRule } from '@memoflow/task-contracts';
 import type { KeyResultCalculationMethod } from '@memoflow/goal-contracts';
 import type {
   ChecklistItemDefinitionDTO,
   TaskGoalBindingTriggerValue,
   TaskPlanClientDTO,
   TaskPlanSchedule,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import type { LabelClientDTO } from '@memoflow/label-contracts';
 
 export type TaskSurface = 'today' | 'plans';

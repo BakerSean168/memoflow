@@ -4,8 +4,7 @@
  * TASK-7306: client state mirrors canonical TaskOccurrence transport.
  */
 
-import type { TaskOccurrenceId } from '@memoflow/contracts/primitives';
-import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO, TaskOccurrenceId } from '@memoflow/task-contracts';
 import { AggregateRoot } from '@memoflow/utils/domain';
 
 export type TaskOccurrenceState = TaskOccurrenceClientDTO;

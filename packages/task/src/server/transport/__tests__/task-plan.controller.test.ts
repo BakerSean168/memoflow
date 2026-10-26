@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ok, fail, isOk } from '@memoflow/contracts/result';
-import { CreateTaskPlanSchema, type TaskPlanClientDTO } from '@memoflow/contracts/task';
+import { CreateTaskPlanSchema, type TaskPlanClientDTO } from '@memoflow/task-contracts';
 import { TaskPlanController, type TaskPlanUseCases } from '../task-plan.controller';
 
 // ---------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
 import TaskOccurrenceQuickRow from './TaskOccurrenceQuickRow.vue';
 withDefaults(
   defineProps<{

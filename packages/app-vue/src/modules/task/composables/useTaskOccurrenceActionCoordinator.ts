@@ -1,5 +1,5 @@
 import { readonly, ref } from 'vue';
-import type { TaskGoalBindingDTO } from '@memoflow/contracts/task';
+import type { TaskGoalBindingDTO } from '@memoflow/task-contracts';
 import { useTaskOccurrences } from './useTaskOccurrences';
 
 export type TaskOccurrenceOperations = Pick<

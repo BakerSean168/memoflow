@@ -7,7 +7,7 @@ import {
   TaskPlanOutcome,
   TaskPlanScheduleKind,
   TaskRecurrenceEndKind,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import { TaskPlan } from '../domain/aggregates/task-plan';
 import { TaskOccurrence } from '../domain/aggregates/task-occurrence';
 import {

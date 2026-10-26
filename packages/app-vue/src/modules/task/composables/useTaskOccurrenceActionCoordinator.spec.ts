@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { TaskGoalBindingDTO } from '@memoflow/contracts/task';
+import type { TaskGoalBindingDTO } from '@memoflow/task-contracts';
 import { instance } from '../components/task-quick-test-fixtures';
 import { useTaskOccurrenceActionCoordinator } from './useTaskOccurrenceActionCoordinator';
 

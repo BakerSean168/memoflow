@@ -4,7 +4,7 @@ import {
   TaskOccurrenceResultKind,
   TaskOccurrenceStatus,
   TaskTimingKind,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import { IdentityId } from '@memoflow/domain-shared';
 import { createTimeContext } from '@memoflow/time';
 import { describe, expect, it } from 'vitest';

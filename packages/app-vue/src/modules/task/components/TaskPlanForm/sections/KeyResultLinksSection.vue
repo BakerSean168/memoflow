@@ -266,10 +266,10 @@
 </template>
 
 <script setup lang="ts">
-import { TaskGoalProgressConfigurationSchema } from '@memoflow/contracts/task';
+import { TaskGoalProgressConfigurationSchema } from '@memoflow/task-contracts';
 
 import { ref, computed, watch, onMounted } from 'vue';
-import { TaskGoalBindingTrigger, type TaskGoalBindingTriggerValue } from '@memoflow/contracts/task';
+import { TaskGoalBindingTrigger, type TaskGoalBindingTriggerValue } from '@memoflow/task-contracts';
 import type { TaskPlanViewModel, GoalBindingOption, KeyResultBindingOption } from '../../types';
 import {
   Card,

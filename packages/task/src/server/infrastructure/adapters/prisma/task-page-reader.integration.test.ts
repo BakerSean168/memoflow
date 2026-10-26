@@ -14,7 +14,7 @@ import {
   seedAccount,
   disconnectPrisma,
 } from '../../../../__tests__/integration-helpers';
-import { TaskPlanScheduleKind } from '@memoflow/contracts/task';
+import { TaskPlanScheduleKind } from '@memoflow/task-contracts';
 import type { Ymd } from '@memoflow/contracts/primitives';
 
 beforeEach(cleanAll);

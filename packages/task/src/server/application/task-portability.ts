@@ -1,4 +1,4 @@
-import { TaskGoalProgressConfigurationSchema } from '@memoflow/contracts/task';
+import { TaskGoalProgressConfigurationSchema } from '@memoflow/task-contracts';
 import { createHash } from 'node:crypto';
 import type {
   PortableCapability,
@@ -6,7 +6,7 @@ import type {
   PortableCapabilityReceipt,
   PortableReferenceV3,
 } from '@memoflow/contracts/data-portability';
-import { TaskPortablePayloadV3Schema, type TaskPortablePayloadV3 } from '@memoflow/contracts/task';
+import { TaskPortablePayloadV3Schema, type TaskPortablePayloadV3 } from '@memoflow/task-contracts';
 import type { ITaskPlanRepository } from '../domain/repositories/i-task-plan-repository';
 import type { ITaskOccurrenceRepository } from '../domain/repositories/i-task-occurrence-repository';
 import type { TaskCanonicalRestoreService } from './services/task-canonical-restore.service';

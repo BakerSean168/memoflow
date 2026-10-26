@@ -16,7 +16,7 @@ import type {
   SkipTaskOccurrenceReq,
   RescheduleTaskInput,
   SetTaskOccurrenceChecklistItemReq,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 
 /**
  * TaskOccurrenceHttpAdapter

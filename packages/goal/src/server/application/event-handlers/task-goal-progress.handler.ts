@@ -4,7 +4,7 @@ import {
   TaskGoalRecordingMode,
   type TaskGoalProgressOutboxEventV2,
   type TaskGoalSettlementSource,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import { ResultErrorException } from '@memoflow/contracts/result';
 import type { IGoalRecordRepository, IGoalRepository } from '../../domain';
 import { CreateGoalRecordUseCase } from '../use-cases/commands/create-goal-record.use-case';

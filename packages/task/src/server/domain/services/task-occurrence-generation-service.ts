@@ -7,7 +7,7 @@
 
 import { TaskPlan, TaskOccurrence } from '../aggregates';
 import * as occurrenceGeneration from '../aggregates/occurrence-generation.policy';
-import { TASK_OCCURRENCE_GENERATION_CONFIG } from '@memoflow/contracts/task';
+import { TASK_OCCURRENCE_GENERATION_CONFIG } from '@memoflow/task-contracts';
 import { createTimeFacade, type TimeContext } from '@memoflow/time';
 
 const { TARGET_GENERATE_AHEAD_DAYS } = TASK_OCCURRENCE_GENERATION_CONFIG;

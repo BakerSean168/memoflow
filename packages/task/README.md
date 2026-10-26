@@ -5,7 +5,7 @@
 ## 公开 seam
 
 ```text
-@memoflow/contracts/task
+@memoflow/task-contracts
 
 @memoflow/task
 @memoflow/task/api

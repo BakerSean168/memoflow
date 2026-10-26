@@ -3,7 +3,8 @@ import { mount } from '@vue/test-utils';
 import { defineComponent, h, ref, toValue } from 'vue';
 import { createI18n } from 'vue-i18n';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { TaskOccurrenceClientDTO, TaskPlanWorkspace } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO } from '@memoflow/task-contracts';
+import type { TaskPlanWorkspace } from '@memoflow/workspace-contracts';
 import enTask from '../../../../locales/en-US/task';
 import TaskOccurrenceInspectDialog from './TaskOccurrenceInspectDialog.vue';
 

@@ -5,9 +5,9 @@ import type {
   GoalWorkspaceKnowledgePage,
   GoalWorkspacePageRequest,
   GoalWorkspaceReadModel,
-  GoalWorkspaceTaskPage,
   GoalWorkspaceTaskPageRequest,
 } from '@memoflow/workspace-contracts';
+import type { TaskGoalContextPage } from '@memoflow/task-contracts';
 import { presentErrorMessage } from '@memoflow/http-client';
 
 /**
@@ -18,7 +18,7 @@ import { presentErrorMessage } from '@memoflow/http-client';
 export function useGoalWorkspace(goalId: MaybeRefOrGetter<string | null>) {
   const service = goalUiHost.useStrictInject(goalUiHost.GOAL_SERVICE_KEY, 'GoalService');
   const workspace = ref<GoalWorkspaceReadModel | null>(null);
-  const taskPage = ref<GoalWorkspaceTaskPage | null>(null);
+  const taskPage = ref<TaskGoalContextPage | null>(null);
   const knowledgePage = ref<GoalWorkspaceKnowledgePage | null>(null);
   const isLoading = ref(false);
   const error = ref<string | null>(null);

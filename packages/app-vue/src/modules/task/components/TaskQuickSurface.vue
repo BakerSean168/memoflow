@@ -9,7 +9,7 @@ import {
   CapsulePreviewShell,
   CapsulePreviewState,
 } from '../../../shared/components';
-import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
 import {
   useTaskOccurrenceActionCoordinator,
   type TaskOccurrenceOperations,

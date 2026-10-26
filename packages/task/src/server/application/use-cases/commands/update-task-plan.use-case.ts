@@ -18,7 +18,7 @@ import {
   TaskRecurrenceEndKind,
   type TaskPlanClientDTO,
   type UpdateTaskPlanReq,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { error, fail, ok } from '@memoflow/contracts/result';
 import { createLogger } from '@memoflow/utils/logger';

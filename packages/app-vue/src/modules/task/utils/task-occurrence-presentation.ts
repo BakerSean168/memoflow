@@ -1,5 +1,5 @@
 import type { ComposerTranslation } from 'vue-i18n';
-import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
 import { formatProductYmd, isSameDayMs } from '../../../shared/utils/product-time';
 export type TaskOccurrenceSort = 'time' | 'status' | 'title';
 

@@ -6,7 +6,7 @@ import type { Instant } from '@memoflow/contracts/primitives';
 
 import { Entity } from '@memoflow/utils/domain';
 import { generateUUID } from '@memoflow/utils/shared';
-import type { TaskPlanHistoryServerDTO, TaskPlanHistoryClientDTO } from '@memoflow/contracts/task';
+import type { TaskPlanHistoryServerDTO, TaskPlanHistoryClientDTO } from '@memoflow/task-contracts';
 
 /**
  * Internal state interface for TaskPlanHistory

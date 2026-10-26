@@ -13,7 +13,7 @@
  */
 
 import type { QueryKey } from '@tanstack/vue-query';
-import type { ListTaskPlanFilters } from '@memoflow/contracts/task';
+import type { ListTaskPlanFilters } from '@memoflow/task-contracts';
 
 // ─── Notification ─────────────────────────────────────────────────────────────
 

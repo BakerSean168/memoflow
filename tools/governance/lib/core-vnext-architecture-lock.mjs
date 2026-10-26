@@ -304,7 +304,8 @@ export function findCoreVnextArchitectureLockViolations(files) {
 
     if (
       relPath.startsWith('packages/contracts/src/') ||
-      relPath.startsWith('packages/schedule-contracts/src/')
+      relPath.startsWith('packages/schedule-contracts/src/') ||
+      relPath.startsWith('packages/task-contracts/src/')
     ) {
       pushPatternViolations(
         violations,
@@ -377,7 +378,7 @@ export function findCoreVnextArchitectureLockViolations(files) {
       );
     }
     if (
-      relPath === 'packages/contracts/src/modules/task/api/task-plan.dto.ts' ||
+      relPath === 'packages/task-contracts/src/api/task-plan.dto.ts' ||
       relPath === 'packages/task/src/server/domain/aggregates/task-plan.state.ts'
     ) {
       pushPatternViolations(

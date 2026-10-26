@@ -2,7 +2,7 @@ import { ref } from 'vue';
 import { flushPromises } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ok } from '@memoflow/contracts/result';
-import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
 import { createTestServerStateRuntime } from '../../../platform/server-state';
 import { taskPlanQueryKeys } from '../../../platform/server-state/query-keys';
 import { startOfDayMs, endOfDayMs } from '../../../shared/utils/product-time';

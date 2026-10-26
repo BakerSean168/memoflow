@@ -25,7 +25,7 @@ import {
   TaskHmSchema,
   TaskYmdSchema,
   type TaskOccurrenceClientDTO,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import {
   instance,
   template,

@@ -1,4 +1,4 @@
-import type { CreateTaskPlanReq } from '@memoflow/contracts/task';
+import type { CreateTaskPlanReq } from '@memoflow/task-contracts';
 import { ImportanceLevel } from '@memoflow/shared-primitives';
 import { getProductTodayYmd } from '../../../shared/utils/product-time';
 

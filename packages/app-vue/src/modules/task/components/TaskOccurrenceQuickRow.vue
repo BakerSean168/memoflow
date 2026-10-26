@@ -157,7 +157,7 @@ import {
   DropdownMenuItem,
 } from '@memoflow/ui-vue-shadcn';
 import { ChevronRight, Circle, CircleCheck, Loader2, MoreHorizontal } from '@lucide/vue';
-import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
 
 const props = defineProps<{
   occurrence: TaskOccurrenceClientDTO;

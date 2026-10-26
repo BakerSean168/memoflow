@@ -1,6 +1,6 @@
 import { computed, type MaybeRefOrGetter, toValue } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
-import type { GetTaskWorkspaceReq } from '@memoflow/contracts/task';
+import type { GetTaskWorkspaceReq } from '@memoflow/workspace-contracts';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import { TASK_SERVICE_KEY } from '../../../di/keys';
 import { useServerStateIdentityScope } from '../../../platform/server-state';

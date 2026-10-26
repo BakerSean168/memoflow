@@ -6280,6 +6280,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/contracts/src/modules/agent-gateway/task-mcp-read-boundary.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/contracts/src/modules/ai/api/agent-instance.dto.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6457,110 +6465,6 @@
     },
     {
       "path": "packages/contracts/src/modules/setting/preferences/product-feature-map-public.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/api/complete-task-occurrence.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/api/dual-registry.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/api/task-goal-context.dto.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/api/task-plan.dto.test.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/api/task-read-schema.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/api/task-workspace.dto.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/domain/events/task-goal-progress-outbox.event.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/portable-v3.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/protocol/task-rpc-map.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/value-objects/checklist-item-definition.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/value-objects/task-goal-binding.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/value-objects/task-occurrence-result.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/task/value-objects/task-plan-schedule.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -10522,6 +10426,102 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/task-contracts/src/api/complete-task-occurrence.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/api/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/api/task-goal-context.dto.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/api/task-plan.dto.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/api/task-read-schema.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/domain/events/task-goal-progress-outbox.event.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/portable-v3.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/protocol/task-rpc-map.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/value-objects/checklist-item-definition.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/value-objects/task-goal-binding.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/value-objects/task-occurrence-result.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/task-contracts/src/value-objects/task-plan-schedule.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/task/src/api/module-lifecycle.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11727,6 +11727,14 @@
     },
     {
       "path": "packages/workspace-contracts/src/goal-workspace.dto.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/workspace-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/workspace-contracts/src/task-workspace.dto.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/workspace-contracts/vitest.config.ts"
@@ -12940,7 +12948,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 45
+      "fileCount": 33
     },
     {
       "id": "packages/data-portability-contracts/vitest.config.ts",
@@ -13174,6 +13182,13 @@
       "fileCount": 3
     },
     {
+      "id": "packages/task-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 12
+    },
+    {
       "id": "packages/task/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
@@ -13220,7 +13235,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 1
+      "fileCount": 2
     }
   ],
   "measurementSuites": {
@@ -13965,7 +13980,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1123,
+    "unit": 1124,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

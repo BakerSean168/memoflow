@@ -6,13 +6,13 @@ import type {
   TaskOccurrenceClientDTO,
   TaskOccurrenceResult,
   TaskOccurrenceServerDTO,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import {
   TaskOccurrenceChecklistItemSchema,
   TaskOccurrenceResultKind,
   TaskOccurrenceResultSchema,
   TaskOccurrenceStatus,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import { ImportanceLevel } from '@memoflow/shared-primitives';
 import { IdentityId } from '@memoflow/domain-shared';
 import { createTimeFacade, type TimeContext } from '@memoflow/time';

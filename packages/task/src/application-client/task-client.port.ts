@@ -10,9 +10,8 @@ import type {
   SkipTaskOccurrenceReq,
   RescheduleTaskInput,
   SetTaskOccurrenceChecklistItemReq,
-  GetTaskWorkspaceReq,
-  TaskPlanWorkspace,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
+import type { GetTaskWorkspaceReq, TaskPlanWorkspace } from '@memoflow/workspace-contracts';
 import type { TaskPlanListParams } from './ports/task-plan-api-client.port';
 import type { TaskPlan } from '../domain-client/aggregates/task-plan';
 import type { TaskOccurrence } from '../domain-client/aggregates/task-occurrence';

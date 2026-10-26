@@ -4,7 +4,7 @@ import {
   createMockTaskPlanList,
   createMockTaskOccurrence,
   createMockTaskOccurrenceList,
-} from '@memoflow/contracts/mocks';
+} from '@memoflow/task-contracts/test-support/task.mock';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 const PLANS = `${API_BASE}/task-plans`;

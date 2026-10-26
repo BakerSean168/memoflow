@@ -12,7 +12,7 @@ import {
   TaskAgentUpdateSchema,
   TaskAgentCompleteSchema,
   TaskAgentPersistedReceiptSchema,
-} from '../task';
+} from '@memoflow/task-contracts';
 
 /**
  * Gateway descriptors compose owner schemas; no goal field semantics are

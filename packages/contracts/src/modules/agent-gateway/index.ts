@@ -6,7 +6,7 @@ import {
   TaskReadOccurrenceSchema,
   TaskPlanReadIdSchema,
   TaskOccurrenceReadIdSchema,
-} from '../task';
+} from '@memoflow/task-contracts';
 import { GoalClientDTOSchema, KeyResultClientDTOSchema } from '@memoflow/goal-contracts';
 
 /** External Goal reads deliberately omit review bodies and private cross-owner context. */

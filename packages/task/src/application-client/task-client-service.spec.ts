@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { error, ok } from '@memoflow/contracts/result';
-import { createMockTaskPlan } from '@memoflow/contracts/mocks';
+import { createMockTaskPlan } from '@memoflow/task-contracts/test-support/task.mock';
 import { TaskClientService } from './task-client-service';
 import { TaskPlanHttpAdapter } from '../infrastructure-client/adapters/http/task-plan-http.adapter';
 import { TaskPlanIpcAdapter } from '../infrastructure-client/adapters/ipc/task-plan-ipc.adapter';

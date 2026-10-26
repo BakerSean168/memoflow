@@ -3,7 +3,7 @@ import { mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it } from 'vitest';
-import { ReminderTimeUnit, TaskReminderType } from '@memoflow/contracts/task';
+import { ReminderTimeUnit, TaskReminderType } from '@memoflow/task-contracts';
 import type { TaskPlanViewModel } from '../../types';
 import ReminderSection from './ReminderSection.vue';
 

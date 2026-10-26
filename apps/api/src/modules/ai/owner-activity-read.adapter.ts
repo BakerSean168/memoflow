@@ -1,6 +1,6 @@
 import { projectAIOwnerActivity } from '@memoflow/ai';
 import type { IAIActivityReadPort } from '@memoflow/ai/ports';
-import { TaskOccurrenceStatus } from '@memoflow/contracts/task';
+import { TaskOccurrenceStatus } from '@memoflow/task-contracts';
 import type { IGoalRepository } from '@memoflow/goal';
 import type { IScheduleRepository } from '@memoflow/schedule';
 import type { ITaskOccurrenceRepository, ITaskPlanRepository } from '@memoflow/task';

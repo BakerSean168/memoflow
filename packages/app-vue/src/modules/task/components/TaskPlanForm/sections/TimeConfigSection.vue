@@ -202,8 +202,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, shallowRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { TaskPlanScheduleSchema, TaskTimingSchema } from '@memoflow/contracts/task';
-import type { TaskPlanSchedule, TaskTiming } from '@memoflow/contracts/task';
+import { TaskPlanScheduleSchema, TaskTimingSchema } from '@memoflow/task-contracts';
+import type { TaskPlanSchedule, TaskTiming } from '@memoflow/task-contracts';
 import type { TaskPlanViewModel } from '../../types';
 import {
   Button,

@@ -6,8 +6,8 @@ import { clearDialogDrafts } from '../../../../layouts/shell/dialog-draft-store'
 import TaskPlanDialog from './TaskPlanDialog.vue';
 import TaskPlanForm from '../TaskPlanForm/TaskPlanForm.vue';
 import type { TaskNativeEditSession } from '../../composables/taskNativeEditSession';
-import { CreateTaskPlanSchema } from '@memoflow/contracts/task';
-import { createMockTaskPlan } from '@memoflow/contracts/mocks';
+import { CreateTaskPlanSchema } from '@memoflow/task-contracts';
+import { createMockTaskPlan } from '@memoflow/task-contracts/test-support/task.mock';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const confirmMock = vi.hoisted(() => vi.fn(async () => true));

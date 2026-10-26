@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ok, error } from '@memoflow/contracts/result';
-import type { TaskGoalProgressOutboxEventV2 } from '@memoflow/contracts/task';
+import type { TaskGoalProgressOutboxEventV2 } from '@memoflow/task-contracts';
 import { GoalTaskProgressHandler } from './task-goal-progress.handler';
 
 function applyEvent(

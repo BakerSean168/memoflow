@@ -6,12 +6,8 @@
  *
  * @example
  * ```ts
- * import {
- *   createMockTaskPlan,
- *   createMockAccount,
- * } from '@memoflow/contracts/mocks';
+ * import { createMockAccount } from '@memoflow/contracts/mocks';
  * ```
  */
 
-export * from './task.mock';
 export * from './account.mock';

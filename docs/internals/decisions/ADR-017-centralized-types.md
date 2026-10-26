@@ -36,7 +36,7 @@ We enforce **Absolute Type Centralization**.
 ### Implementation
 
 - `packages/contracts` becomes the **Type Registry** of the system.
-- Other packages import types: `import type { Task } from '@memoflow/contracts/task';`.
+- Other packages import types: `import type { Task } from '@memoflow/task-contracts';` (superseded as-built: the Task contract tree left `@memoflow/contracts` in Issue #630 §4.2).
 - It is **FORBIDDEN** to `export interface` a domain object from `packages/domain-*`. Domain classes should `implements` the interface from Contracts.
 
 ## Consequences

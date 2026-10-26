@@ -2,7 +2,7 @@ import { ref } from 'vue';
 import { flushPromises } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ok } from '@memoflow/contracts/result';
-import type { TaskPlanClientDTO } from '@memoflow/contracts/task';
+import type { TaskPlanClientDTO } from '@memoflow/task-contracts';
 import { createServerStateRuntime } from '../../../platform/server-state';
 import { mountTaskComposable } from './taskQueryTestUtils';
 import { useTaskPlanListQuery } from './useTaskPlanListQuery';

@@ -19,7 +19,7 @@ import {
   type TaskPlanOutcomeValue,
   type TaskPlanSchedule as TaskPlanScheduleDTO,
   type TaskReminderConfigDTO,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import { IdentityId } from '@memoflow/domain-shared';
 import { TaskOccurrence } from '../../domain/aggregates/task-occurrence';
 import { TaskPlan } from '../../domain/aggregates/task-plan';

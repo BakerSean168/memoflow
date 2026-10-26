@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { GetTaskWorkspaceInvocationSchema } from '@memoflow/contracts/task';
+import { GetTaskWorkspaceInvocationSchema } from '@memoflow/workspace-contracts';
 import { errorCodeToHttpStatus } from '@memoflow/contracts/result';
 import type { TaskWorkspaceApplicationPort } from '@memoflow/task';
 import type { IApiModule, IApiModuleContext } from '../../shared/contracts/api-module.js';

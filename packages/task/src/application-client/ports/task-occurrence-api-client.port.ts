@@ -14,7 +14,7 @@ import type {
   SkipTaskOccurrenceReq,
   RescheduleTaskInput,
   SetTaskOccurrenceChecklistItemReq,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 
 export interface ITaskOccurrenceApiClient {
   getTaskOccurrences(params?: {

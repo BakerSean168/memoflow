@@ -9,8 +9,8 @@ import type {
   TaskEventMap,
   TaskGoalProgressRule,
   GoalContributionRule,
-} from '@memoflow/contracts/task';
-import { TaskPlanCompletionPolicy, TaskPlanOutcome } from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
+import { TaskPlanCompletionPolicy, TaskPlanOutcome } from '@memoflow/task-contracts';
 import { ImportanceLevel } from '@memoflow/shared-primitives';
 import { TaskPlanStatus } from '../../domain/value-objects/task-plan-status';
 import { TaskPlanId } from '../../domain/value-objects/task-plan-id';

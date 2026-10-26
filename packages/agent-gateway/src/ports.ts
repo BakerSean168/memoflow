@@ -6,7 +6,7 @@ import type {
   TaskReadPage,
   TaskOccurrenceReadPage,
   TaskAgentPersistedReceipt,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import type { RoutineAgentPersistedReceipt } from '@memoflow/contracts/routine';
 import type { GatewayWriteToolName } from './write-tool-descriptors';
 import type { GatewayAssistedToolName } from './assisted-tool-descriptors';

@@ -6,7 +6,7 @@
  */
 
 import { createLogger } from '@memoflow/utils/logger';
-import { TASK_OCCURRENCE_GENERATION_CONFIG } from '@memoflow/contracts/task';
+import { TASK_OCCURRENCE_GENERATION_CONFIG } from '@memoflow/task-contracts';
 import type { ITaskOccurrenceRepository, ITaskPlanRepository } from '../../domain/repositories';
 import type { TaskModuleRuntimeContribution } from '../task.module';
 import { TaskOccurrenceGenerationService } from '../../domain/services';

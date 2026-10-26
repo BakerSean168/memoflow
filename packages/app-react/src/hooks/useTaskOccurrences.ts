@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO } from '@memoflow/task-contracts';
 import type { TaskOccurrence } from '@memoflow/task/client';
 import { presentErrorMessage } from '@memoflow/http-client';
 

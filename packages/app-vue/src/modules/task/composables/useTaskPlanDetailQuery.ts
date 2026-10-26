@@ -9,7 +9,7 @@ import { computed, type MaybeRefOrGetter, toValue } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import { useI18n } from 'vue-i18n';
 import { unwrap } from '@memoflow/contracts/result';
-import type { TaskPlanClientDTO } from '@memoflow/contracts/task';
+import type { TaskPlanClientDTO } from '@memoflow/task-contracts';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import { TASK_SERVICE_KEY } from '../../../di/keys';
 import { useServerStateIdentityScope } from '../../../platform/server-state';

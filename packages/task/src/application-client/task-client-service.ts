@@ -1,4 +1,4 @@
-import { TaskGoalProgressConfigurationSchema } from '@memoflow/contracts/task';
+import { TaskGoalProgressConfigurationSchema } from '@memoflow/task-contracts';
 /**
  * Task Client Service
  *
@@ -27,9 +27,8 @@ import type {
   TaskReminderConfig,
   TaskGoalBinding,
   TaskGoalBindingDTO,
-  GetTaskWorkspaceReq,
-  TaskPlanWorkspace,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
+import type { GetTaskWorkspaceReq, TaskPlanWorkspace } from '@memoflow/workspace-contracts';
 import type { ITaskPlanApiClient, TaskPlanListParams } from './ports/task-plan-api-client.port';
 import type { ITaskOccurrenceApiClient } from './ports/task-occurrence-api-client.port';
 import { TaskPlan } from '../domain-client/aggregates/task-plan';

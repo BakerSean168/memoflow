@@ -10,7 +10,7 @@
 import type { ITaskPlanRepository } from '../../../domain/repositories/i-task-plan-repository';
 import type { ITaskOccurrenceRepository } from '../../../domain/repositories/i-task-occurrence-repository';
 import { TaskOccurrenceGenerationService } from '../../../domain/services/index';
-import type { TaskPlanClientDTO } from '@memoflow/contracts/task';
+import type { TaskPlanClientDTO } from '@memoflow/task-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error, fail } from '@memoflow/contracts/result';
 import { createLogger } from '@memoflow/utils/logger';

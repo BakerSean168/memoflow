@@ -13,7 +13,7 @@ import type {
   TaskReminderConfigDTO,
   TaskReminderType,
   ReminderTimeUnit,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 
 /**
  * 单个提醒触发器
