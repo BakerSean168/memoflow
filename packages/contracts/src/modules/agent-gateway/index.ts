@@ -7,7 +7,7 @@ import {
   TaskPlanReadIdSchema,
   TaskOccurrenceReadIdSchema,
 } from '../task';
-import { GoalClientDTOSchema, KeyResultClientDTOSchema } from '../goal';
+import { GoalClientDTOSchema, KeyResultClientDTOSchema } from '@memoflow/goal-contracts';
 
 /** External Goal reads deliberately omit review bodies and private cross-owner context. */
 export const ExternalGoalSchema = GoalClientDTOSchema.pick({

@@ -9,18 +9,18 @@
  *
  * ```typescript
  * // ✅ 推荐：从子路径导入（极致 Tree-Shaking）
- * import { GoalServerDTO, GoalStatus } from '@memoflow/contracts/goal';
+ * import { GoalServerDTO, GoalStatus } from '@memoflow/goal-contracts';
  * import { TaskPlanServer } from '@memoflow/contracts/task';
  * import { HttpResponse, ResultCode } from '@memoflow/contracts/result';
  *
  * // ✅ 命名空间导入（避免命名冲突）
- * import * as GoalContracts from '@memoflow/contracts/goal';
+ * import * as GoalContracts from '@memoflow/goal-contracts';
  * import * as TaskContracts from '@memoflow/contracts/task';
  * ```
  *
  * 子路径列表：
  * - @memoflow/contracts/task       - 任务模块
- * - @memoflow/contracts/goal       - 目标模块
+ * - @memoflow/goal-contracts       - 目标模块（P2 已独立成包）
  * - @memoflow/contracts/repository - 仓库模块
  * - @memoflow/contracts/account    - 账户模块
  * - @memoflow/contracts/schedule   - 调度模块

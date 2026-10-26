@@ -7,7 +7,7 @@ import {
   KEY_RESULT_TITLE_MAX_LENGTH,
   KeyResultCalculationMethod,
   CreateGoalSchema,
-} from '../../goal';
+} from '@memoflow/goal-contracts';
 import { KnowledgeDocumentRefSchema } from '../../repository';
 import {
   GoalContributionRuleSchema,

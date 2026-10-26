@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { WorkspaceEventSchema } from './workspace-event.dto';
 import { GoalPlanGoalSchema, GoalPlanningSeedSchema } from './ai-goal-create-workflow.dto';
-import { CreateGoalSchema } from '../../goal';
+import { CreateGoalSchema } from '@memoflow/goal-contracts';
 
 describe('Workspace workflow event contract', () => {
   const action = {

@@ -7,7 +7,7 @@
  */
 import { z } from 'zod';
 import { LabelColorSchema } from '@memoflow/label-contracts';
-import { PortableReferenceV3Schema } from '../data-portability/dtos/portable-v3.dto';
+import { PortableReferenceV3Schema } from '@memoflow/data-portability-contracts';
 
 const LabelPortableReferenceV3Schema = PortableReferenceV3Schema.refine(
   (ref) => ref.startsWith('labels:'),

@@ -16,7 +16,7 @@ import { describe, expect, it } from 'vitest';
    */
   describe('contracts dead *Res dual single-track surface', () => {
     const goalApi = __dirname;
-    const modules = resolve(goalApi, '../..');
+    const modules = resolve(goalApi, '../../../contracts/src/modules');
 
     const files: Array<[string, string[]]> = [
       [
@@ -255,7 +255,7 @@ import { describe, expect, it } from 'vitest';
     const responseSchemas = readFileSync(resolve(apiDir, 'response-schemas.ts'), 'utf8');
     const aggregate = readFileSync(resolve(apiDir, '../aggregates/goal-record-client.ts'), 'utf8');
     const routes = readFileSync(
-      resolve(apiDir, '../../../../../goal/src/api/routes/goal-record.routes.ts'),
+      resolve(apiDir, '../../../goal/src/api/routes/goal-record.routes.ts'),
       'utf8',
     );
 

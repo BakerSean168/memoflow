@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { GoalRecordAuthorship, GoalRecordAuthorshipSchema } from '../entities/goal-record-server';
 import { GoalRecordClientDTOSchema } from './response-schemas';
 import { CreateGoalRecordSchema } from './goal-record.dto';
-import { createMockGoalRecord } from '../../../mocks/goal.mock';
+import { createMockGoalRecord } from '../test-support/goal.mock';
 
 describe('GoalRecord provenance contract', () => {
   it('freezes exactly three persisted authorship values', () => {

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { PortableReferenceV3Schema } from '../data-portability/dtos/portable-v3.dto';
+import { PortableReferenceV3Schema } from '@memoflow/data-portability-contracts';
 import { ConversationStatus } from './value-objects/conversation-status';
 
 const AIConversationPortableReferenceV3Schema = PortableReferenceV3Schema.refine(

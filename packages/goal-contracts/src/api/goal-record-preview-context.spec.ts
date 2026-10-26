@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { GoalRecordListResSchema, KeyResultClientDTOSchema } from './response-schemas';
-import { createMockKeyResult } from '../../../mocks';
+import { createMockKeyResult } from '../test-support/goal.mock';
 
 const kr = createMockKeyResult();
 const context = {

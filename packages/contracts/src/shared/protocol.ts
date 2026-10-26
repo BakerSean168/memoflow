@@ -3,8 +3,8 @@ import type { AccountRpcMap } from '../modules/account/protocol/account-rpc-map'
 import type { AIEventMap } from '../modules/ai/protocol/ai-event-map';
 import type { AIRpcMap } from '../modules/ai/protocol/ai-rpc-map';
 import type { DataPortabilityRpcMap } from '../modules/data-portability/protocol/data-portability-rpc-map';
-import type { GoalEventMap } from '../modules/goal/protocol/goal-event-map';
-import type { GoalRpcMap } from '../modules/goal/protocol/goal-rpc-map';
+import type { GoalEventMap } from '@memoflow/goal-contracts';
+import type { GoalRpcMap } from '@memoflow/goal-contracts';
 import type { NotificationEventMap } from '../modules/notification/protocol/notification-event-map';
 import type { NotificationRpcMap } from '../modules/notification/protocol/notification-rpc-map';
 import type { RepositoryEventMap } from '../modules/repository/protocol/repository-event-map';

@@ -17,10 +17,6 @@
       "types": "./dist/modules/task/index.d.ts",
       "import": "./dist/modules/task/index.js"
     },
-    "./goal": {
-      "types": "./dist/modules/goal/index.d.ts",
-      "import": "./dist/modules/goal/index.js"
-    },
     "./reliable-messaging": {
       "types": "./dist/modules/reliable-messaging/index.d.ts",
       "import": "./dist/modules/reliable-messaging/index.js"
@@ -104,7 +100,9 @@
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^9.1.0",
+    "@memoflow/data-portability-contracts": "workspace:*",
     "@memoflow/desktop-contracts": "workspace:*",
+    "@memoflow/goal-contracts": "workspace:*",
     "@memoflow/label-contracts": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/transport-contracts": "workspace:*",

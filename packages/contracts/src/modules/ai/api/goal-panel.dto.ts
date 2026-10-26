@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { KeyResultCalculationMethod, GoalStatus, GoalTimeframeSchema } from '../../goal';
+import { KeyResultCalculationMethod, GoalStatus, GoalTimeframeSchema } from '@memoflow/goal-contracts';
 
 export const GoalPanelStatusSchema = z.enum(GoalStatus);
 export type GoalPanelStatus = z.infer<typeof GoalPanelStatusSchema>;
