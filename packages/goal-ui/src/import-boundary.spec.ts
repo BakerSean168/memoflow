@@ -24,7 +24,9 @@ describe('Goal UI dependency boundary', () => {
             name.startsWith('@memoflow/app-vue') ||
             /^@memoflow\/(?:goal|ai|relation)(?:\/|$)/.test(name) ||
             (name.startsWith('.') &&
-              !resolve(file, '@goal-ui-test-host/modules', name).startsWith(import.meta.dirname + '/')),
+              !resolve(file, '@goal-ui-test-host/modules', name).startsWith(
+                import.meta.dirname + '/',
+              )),
         )
         .map(([, name]) => `${file}: ${name}`);
     });

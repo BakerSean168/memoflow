@@ -5,7 +5,9 @@ import { beforeEach, expect, it, vi } from 'vitest';
 import { createMockGoalMutationReceipt } from '@memoflow/goal-contracts/test-support/goal.mock';
 import { useGoalWorkspace } from './useGoalWorkspace';
 const service = vi.hoisted(() => ({ getGoalWorkspace: vi.fn() }));
-vi.mock('@goal-ui-test-host/shared/utils/useStrictInject', () => ({ useStrictInject: () => service }));
+vi.mock('@goal-ui-test-host/shared/utils/useStrictInject', () => ({
+  useStrictInject: () => service,
+}));
 beforeEach(() => vi.clearAllMocks());
 function response(id: string) {
   return {

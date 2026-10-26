@@ -36,7 +36,9 @@ vi.mock('vue-router', () => ({
 vi.mock('../composables/useGoal', () => ({
   useGoal: () => ({ getGoalAggregateView: actions.aggregate }),
 }));
-vi.mock('@goal-ui-test-host/shared/utils/useStrictInject', () => ({ useStrictInject: () => actions }));
+vi.mock('@goal-ui-test-host/shared/utils/useStrictInject', () => ({
+  useStrictInject: () => actions,
+}));
 vi.mock('@memoflow/ui-vue-shadcn', async (original) => ({
   ...(await original<typeof import('@memoflow/ui-vue-shadcn')>()),
   useConfirm: actions.confirm,
