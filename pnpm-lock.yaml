@@ -1635,9 +1635,6 @@ importers:
       '@memoflow/notification-contracts':
         specifier: workspace:*
         version: link:../notification-contracts
-      '@memoflow/reliable-messaging-contracts':
-        specifier: workspace:*
-        version: link:../reliable-messaging-contracts
       '@memoflow/shared-primitives':
         specifier: workspace:*
         version: link:../shared-primitives
