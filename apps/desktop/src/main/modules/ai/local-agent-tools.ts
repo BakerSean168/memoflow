@@ -25,7 +25,7 @@ import {
   GoalAgentCreateSchema,
   GoalAgentUpdateSchema,
   GoalAgentReceiptSchema,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import {
   TaskAgentCreateSchema,
   TaskAgentUpdateSchema,

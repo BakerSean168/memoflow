@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { GoalReviewSignalSchema, type GoalReviewSystemContext } from '@memoflow/contracts/goal';
+import { GoalReviewSignalSchema, type GoalReviewSystemContext } from '@memoflow/goal-contracts';
 import { analyzeGoalReviewSignals } from './goal-review-signal-analyzer';
 
 function facts(start = 20, end = 40): Omit<GoalReviewSystemContext, 'signals'> {

@@ -15,7 +15,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import type { GoalRecordClientDTO } from '@memoflow/contracts/goal';
+import type { GoalRecordClientDTO } from '@memoflow/goal-contracts';
 import { formatProductDateTime } from '../../../../shared/utils/product-time';
 
 const { t } = useI18n();

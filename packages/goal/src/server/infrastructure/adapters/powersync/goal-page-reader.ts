@@ -1,5 +1,5 @@
 import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
-import type { GoalClientDTO, GoalPageQuery } from '@memoflow/contracts/goal';
+import type { GoalClientDTO, GoalPageQuery } from '@memoflow/goal-contracts';
 import { ok, error, type Result } from '@memoflow/contracts/result';
 import { SearchGoalPageUseCase } from '../../../application/use-cases/queries/search-goal-page.use-case';
 import { PowerSyncGoalMapper } from './mappers/powersync-goal.mapper';

@@ -1,17 +1,17 @@
 import { z } from 'zod';
 import type { GoalId, KnowledgeSpaceId } from '@memoflow/shared-primitives';
 import { brandedId } from '@memoflow/shared-primitives/zod-extensions';
-import { KnowledgeDocumentIdSchema } from '../../repository';
+import { KnowledgeDocumentIdSchema } from '@memoflow/contracts/repository';
 import {
   TaskGoalContextItemSchema,
   TaskGoalContextPageSchema,
   TaskGoalContextSummarySchema,
-} from '../../task';
+} from '@memoflow/contracts/task';
 import {
   GoalClientDTOSchema,
   GoalRecordClientDTOSchema,
   GoalReviewClientDTOSchema,
-} from './response-schemas';
+} from '@memoflow/goal-contracts';
 
 /** Bounded pagination used by Goal Workspace context collections. */
 export const GoalWorkspacePageRequestSchema = z

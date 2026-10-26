@@ -9,7 +9,7 @@ import { z } from 'zod';
 import {
   PortableCapabilityKeySchema,
   PortableBackupEnvelopeV3Schema,
-} from '../dtos/portable-v3.dto';
+} from '@memoflow/data-portability-contracts';
 
 export const ExportPortableDataV3ReqSchema = z
   .object({

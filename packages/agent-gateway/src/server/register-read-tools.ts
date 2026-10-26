@@ -11,7 +11,7 @@ import {
   TaskOccurrenceGetOutputSchema,
   TaskOccurrenceListOutputSchema,
 } from '@memoflow/contracts/agent-gateway';
-import { GoalPagePositionSchema, type GoalClientDTO } from '@memoflow/contracts/goal';
+import { GoalPagePositionSchema, type GoalClientDTO } from '@memoflow/goal-contracts';
 import { TaskPlanPositionSchema, TaskOccurrencePositionSchema } from '@memoflow/contracts/task';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import {

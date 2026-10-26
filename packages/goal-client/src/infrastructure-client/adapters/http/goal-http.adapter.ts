@@ -32,13 +32,15 @@ import type {
   DeleteGoalRecordReq,
   GetGoalRecordsRes,
   GetGoalAggregateRes,
+} from '@memoflow/goal-contracts';
+import type {
   GetGoalWorkspaceReq,
   GoalWorkspaceReadModel,
   GoalWorkspaceTaskPageRequest,
   GoalWorkspaceTaskPage,
   GoalWorkspacePageRequest,
   GoalWorkspaceKnowledgePage,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/workspace-contracts';
 
 export class GoalHttpAdapter implements IGoalApiClient {
   private readonly baseUrl = '/goals';

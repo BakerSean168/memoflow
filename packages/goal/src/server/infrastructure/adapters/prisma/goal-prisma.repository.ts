@@ -23,8 +23,8 @@ import type {
   KeyResultServerDTO,
   GoalPageQuery,
   GoalClientDTO,
-} from '@memoflow/contracts/goal';
-import { LabelColorSchema, type LabelDto } from '@memoflow/contracts/label';
+} from '@memoflow/goal-contracts';
+import { LabelColorSchema, type LabelDto } from '@memoflow/label-contracts';
 import {
   AggregateRepositoryBase,
   createEventBusAdapter,

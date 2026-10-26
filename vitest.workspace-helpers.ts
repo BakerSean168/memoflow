@@ -312,6 +312,33 @@ export const domainResolveAliases = [
     replacement: path.resolve(import.meta.dirname, './packages/label-contracts/src/index.ts'),
   },
   {
+    find: /^@memoflow\/data-portability-contracts\/(.+)/,
+    replacement: path.resolve(import.meta.dirname, './packages/data-portability-contracts/src/$1'),
+  },
+  {
+    find: '@memoflow/data-portability-contracts',
+    replacement: path.resolve(
+      import.meta.dirname,
+      './packages/data-portability-contracts/src/index.ts',
+    ),
+  },
+  {
+    find: /^@memoflow\/goal-contracts\/(.+)/,
+    replacement: path.resolve(import.meta.dirname, './packages/goal-contracts/src/$1'),
+  },
+  {
+    find: '@memoflow/goal-contracts',
+    replacement: path.resolve(import.meta.dirname, './packages/goal-contracts/src/index.ts'),
+  },
+  {
+    find: /^@memoflow\/workspace-contracts\/(.+)/,
+    replacement: path.resolve(import.meta.dirname, './packages/workspace-contracts/src/$1'),
+  },
+  {
+    find: '@memoflow/workspace-contracts',
+    replacement: path.resolve(import.meta.dirname, './packages/workspace-contracts/src/index.ts'),
+  },
+  {
     find: /^@memoflow\/desktop-contracts\/(.+)/,
     replacement: path.resolve(import.meta.dirname, './packages/desktop-contracts/src/$1'),
   },

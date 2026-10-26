@@ -7,8 +7,6 @@
  * @example
  * ```ts
  * import {
- *   createMockGoal,
- *   createMockGoalList,
  *   createMockTaskPlan,
  *   createMockAccount,
  *   createMockNotification,
@@ -16,7 +14,6 @@
  * ```
  */
 
-export * from './goal.mock';
 export * from './task.mock';
 export * from './account.mock';
 export * from './notification.mock';

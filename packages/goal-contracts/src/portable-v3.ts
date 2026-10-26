@@ -5,7 +5,7 @@ import {
   GoalReviewKeyResultSignalSchema,
   GoalReviewKeyResultMovementEvidenceSchema,
 } from './value-objects/goal-review-context';
-import { PortableReferenceV3Schema } from '../data-portability/dtos/portable-v3.dto';
+import { PortableReferenceV3Schema } from '@memoflow/data-portability-contracts';
 import { GoalReminderConfigDTOSchema } from './value-objects/goal-reminder-config';
 import { GoalStatus } from './value-objects/goal-status';
 import { GoalTimeframeSchema } from './value-objects/goal-timeframe';

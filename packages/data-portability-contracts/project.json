@@ -1,0 +1,64 @@
+{
+  "name": "data-portability-contracts",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "packages/data-portability-contracts/src",
+  "tags": ["scope:shared", "type:lib", "layer:shared"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --build packages/data-portability-contracts/tsconfig.json"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/packages/data-portability-contracts/dist"],
+      "cache": true,
+      "options": {
+        "command": "node ../../node_modules/tsup/dist/cli-default.js && tsc -p tsconfig.build.json",
+        "cwd": "packages/data-portability-contracts"
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ../../node_modules/tsup/dist/cli-default.js --watch",
+        "cwd": "packages/data-portability-contracts"
+      }
+    },
+    "lint": {
+      "options": {
+        "args": ["**/*.{ts,js}"]
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "inputs": ["default", "^production"],
+      "cache": true,
+      "options": {
+        "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
+        "cwd": "packages/data-portability-contracts"
+      }
+    },
+    "test:watch": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "node ../../node_modules/vitest/vitest.mjs --config vitest.config.ts",
+        "cwd": "packages/data-portability-contracts"
+      }
+    },
+    "test:contract": {
+      "executor": "nx:run-commands",
+      "inputs": ["default", "^production"],
+      "cache": true,
+      "dependsOn": ["build"],
+      "options": {
+        "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
+        "cwd": "packages/data-portability-contracts"
+      }
+    }
+  }
+}

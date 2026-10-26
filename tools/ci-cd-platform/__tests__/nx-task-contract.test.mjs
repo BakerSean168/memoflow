@@ -435,10 +435,13 @@ test('Unit/Contract aliases come from exact Nx execution configuration, not proj
   const selected = await selectCiTasks({ files: [], full: true });
   assert.deepEqual(selected.unitContractAliases, [
     'contracts',
+    'data-portability-contracts',
     'desktop-contracts',
+    'goal-contracts',
     'host-runtime',
     'label-contracts',
     'shared-primitives',
     'transport-contracts',
+    'workspace-contracts',
   ]);
 });

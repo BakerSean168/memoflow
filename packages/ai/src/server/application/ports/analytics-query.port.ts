@@ -1,5 +1,5 @@
 import type { UserTimeContext } from '@memoflow/time';
-import type { GoalClientDTO, GoalHomeProgressSummary } from '@memoflow/contracts/goal';
+import type { GoalClientDTO, GoalHomeProgressSummary } from '@memoflow/goal-contracts';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
 import type { ChatExecutionProviderConfig, ChatExecutionUsage } from './chat-execution.port';
 import type { AIActivityItem } from './activity-read.port';

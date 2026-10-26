@@ -1,7 +1,7 @@
 import {
   GoalReviewWindowOptionsSchema,
   type GoalReviewWindowInput,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import { error, ok, type Result } from '@memoflow/contracts/result';
 import { createTimeFacade, type TimeContext } from '@memoflow/time';
 import type { GoalReview } from '../../domain/entities/goal-review';

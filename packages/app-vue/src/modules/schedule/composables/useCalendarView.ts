@@ -10,7 +10,7 @@ import { useSchedule } from './useSchedule';
 import { useTask } from '../../task/composables/useTask';
 import { GOAL_SERVICE_KEY, ROUTINE_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
-import type { GoalClientDTO } from '@memoflow/contracts/goal';
+import type { GoalClientDTO } from '@memoflow/goal-contracts';
 import type {
   TaskOccurrenceClientDTO,
   TaskOccurrenceStatus,

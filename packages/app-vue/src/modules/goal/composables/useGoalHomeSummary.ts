@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { GoalHomeProgressSummary } from '@memoflow/contracts/goal';
+import type { GoalHomeProgressSummary } from '@memoflow/goal-contracts';
 import { GOAL_SERVICE_KEY } from '../../../di/keys';
 import { createComposableHandleError } from '../../../shared/utils/create-composable-handle-error';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';

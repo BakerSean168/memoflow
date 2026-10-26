@@ -9,7 +9,7 @@ import {
   goalTimeframeLabel,
   type GoalRecordClientDTO,
   type KeyResultClientDTO,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import { useGoalService } from '../hooks/useGoalService';
 
 import {

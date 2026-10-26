@@ -5,7 +5,7 @@ import {
   type IElectronModuleContext,
 } from '@memoflow/contracts/electron';
 import { withAuthenticatedIdentity } from '@memoflow/host-runtime/electron-ipc';
-import { CreateLabelReqSchema, ListLabelsReqSchema } from '@memoflow/contracts/label';
+import { CreateLabelReqSchema, ListLabelsReqSchema } from '@memoflow/label-contracts';
 import { fail, ok } from '@memoflow/contracts/result';
 import type { LabelService } from '@memoflow/label';
 import { toLabelClientDTO } from '@memoflow/label/client';

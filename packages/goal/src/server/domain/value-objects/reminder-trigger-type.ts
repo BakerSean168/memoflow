@@ -1,7 +1,7 @@
 import {
   ReminderTriggerType as ReminderTriggerTypeContract,
   type ReminderTriggerType as IReminderTriggerType,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 
 export type ReminderTriggerType = IReminderTriggerType & { readonly __brand: unique symbol };
 

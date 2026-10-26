@@ -3,7 +3,7 @@ import type {
   GoalClientDTO,
   GoalNativeAiLease,
   GoalNativeDraftDTO,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import type { OwnerNativeEditSession } from '../../../shared/composables/ownerNativeEditSession';
 
 export type GoalNativeDraft = GoalNativeDraftDTO;

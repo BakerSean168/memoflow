@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { presentErrorMessage } from '@memoflow/http-client';
-import type { CreateGoalReq, UpdateGoalReq } from '@memoflow/contracts/goal';
+import type { CreateGoalReq, UpdateGoalReq } from '@memoflow/goal-contracts';
 
 import { useGoalDetail } from '../hooks/useGoalDetail';
 import { useGoalService } from '../hooks/useGoalService';

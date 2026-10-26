@@ -76,6 +76,9 @@
     "shared-primitives": "runtime-lib",
     "transport-contracts": "runtime-lib",
     "label-contracts": "runtime-lib",
+    "data-portability-contracts": "runtime-lib",
+    "goal-contracts": "runtime-lib",
+    "workspace-contracts": "runtime-lib",
     "desktop-contracts": "runtime-lib",
     "host-runtime": "runtime-lib"
   },

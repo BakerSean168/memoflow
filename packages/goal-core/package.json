@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@memoflow/contracts": "workspace:*",
+    "@memoflow/goal-contracts": "workspace:*",
     "@memoflow/utils": "workspace:*"
   }
 }

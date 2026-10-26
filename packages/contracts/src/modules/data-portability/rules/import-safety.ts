@@ -5,8 +5,8 @@
  * other sensitive data from leaking into portable import files.
  */
 
-import type { PortableBackupEnvelopeV3 } from '../dtos/portable-v3.dto';
-import { PortableBackupEnvelopeV3Schema } from '../dtos/portable-v3.dto';
+import type { PortableBackupEnvelopeV3 } from '@memoflow/data-portability-contracts';
+import { PortableBackupEnvelopeV3Schema } from '@memoflow/data-portability-contracts';
 
 // ============ Banned Key Detection ============
 

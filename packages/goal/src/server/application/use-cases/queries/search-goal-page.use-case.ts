@@ -1,4 +1,4 @@
-import { GoalPageQuerySchema, type GoalPage } from '@memoflow/contracts/goal';
+import { GoalPageQuerySchema, type GoalPage } from '@memoflow/goal-contracts';
 import { error, ok, type Result } from '@memoflow/contracts/result';
 import type { GoalPageReadPort } from '../../ports/goal-page-read.port';
 

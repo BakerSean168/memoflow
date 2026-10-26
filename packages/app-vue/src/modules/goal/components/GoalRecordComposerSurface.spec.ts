@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Input } from '@memoflow/ui-vue-shadcn';
 import GoalRecordComposerSurface from './GoalRecordComposerSurface.vue';
 import enUS from '../../../locales/en-US';
-import { KeyResultCalculationMethod } from '@memoflow/contracts/goal';
+import { KeyResultCalculationMethod } from '@memoflow/goal-contracts';
 const owner = vi.hoisted(() => ({ read: vi.fn() }));
 vi.mock('../composables/useGoal', () => ({
   useGoal: () => ({ getKeyResultById: () => undefined, getGoalRecordPreviewContext: owner.read }),

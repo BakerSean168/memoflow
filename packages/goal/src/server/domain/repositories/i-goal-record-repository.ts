@@ -18,9 +18,9 @@
  * 这与其他仓储（IGoalRepository 等）保持一致
  */
 
-import type { GoalRecordQueryOptionsDTO } from '@memoflow/contracts/goal';
+import type { GoalRecordQueryOptionsDTO } from '@memoflow/goal-contracts';
 import type { GoalRecord } from '../aggregates/goal-record';
-import type { GoalRecordSourceTypeValue } from '@memoflow/contracts/goal';
+import type { GoalRecordSourceTypeValue } from '@memoflow/goal-contracts';
 
 /**
  * GoalRecord 查询选项（领域层扩展）

@@ -6,7 +6,7 @@ import {
   createMockGoalRecord,
   createMockGoalReview,
   createMockKeyResult,
-} from '@memoflow/contracts/mocks';
+} from '@memoflow/goal-contracts/test-support/goal.mock';
 import { useGoalStore } from './goal-store';
 
 describe('Goal store vNext', () => {

@@ -8,7 +8,7 @@ import type {
   GoalRecordClientDTO,
   GoalMutationReceipt,
   GetGoalAggregateRes,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 
 export interface GoalState {
   goalById: Record<string, GoalClientDTO>;

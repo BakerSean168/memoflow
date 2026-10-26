@@ -32,7 +32,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { CircleCheck, CircleDashed, CircleDot, CircleOff } from '@lucide/vue';
-import { GoalStatus, type GoalStatus as GoalStatusValue } from '@memoflow/contracts/goal';
+import { GoalStatus, type GoalStatus as GoalStatusValue } from '@memoflow/goal-contracts';
 import { editableGoalStatuses } from '../composables/goalStatusTransitions';
 import {
   DropdownMenu,

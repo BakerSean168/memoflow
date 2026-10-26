@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { KeyResultMeasurement } from '@memoflow/contracts/goal';
+import type { KeyResultMeasurement } from '@memoflow/goal-contracts';
 import { calculateKeyResultProgress } from './key-result-progress-calculator';
 
 describe('GOAL-7204 canonical KR Measurement V3 calculator', () => {

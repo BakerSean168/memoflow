@@ -12,7 +12,7 @@
       "@memoflow/contracts": ["../../packages/contracts/src/index.ts"],
       "@memoflow/contracts/account": ["../../packages/contracts/src/modules/account/index.ts"],
       "@memoflow/contracts/ai": ["../../packages/contracts/src/modules/ai/index.ts"],
-      "@memoflow/contracts/goal": ["../../packages/contracts/src/modules/goal/index.ts"],
+      "@memoflow/goal-contracts": ["../../packages/goal-contracts/src/index.ts"],
       "@memoflow/contracts/notification": [
         "../../packages/contracts/src/modules/notification/index.ts"
       ],

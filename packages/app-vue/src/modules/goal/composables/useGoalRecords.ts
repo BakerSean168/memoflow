@@ -11,7 +11,7 @@ import type {
   CreateGoalRecordReq,
   CreateGoalReviewReq,
   UpdateGoalRecordReq,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import { executeGoalOperation, createGoalErrorHandler } from './goalOperations';
 
 export function useGoalRecords() {

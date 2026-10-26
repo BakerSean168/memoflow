@@ -63,7 +63,7 @@ if (
   violations.push('LabelDto timestamps must remain Instant');
 }
 
-const goalSchema = read('packages/contracts/src/modules/goal/api/response-schemas.ts');
+const goalSchema = read('packages/goal-contracts/src/api/response-schemas.ts');
 if (!goalSchema.includes('color: LabelColorSchema.nullable()')) {
   violations.push('Goal label projection must reuse LabelColorSchema');
 }

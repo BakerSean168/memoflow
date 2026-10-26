@@ -2,13 +2,13 @@ import type { Instant } from '@memoflow/contracts/primitives';
 import {
   KEY_RESULT_DESCRIPTION_MAX_LENGTH,
   KEY_RESULT_TITLE_MAX_LENGTH,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import type {
   GoalTimeframe,
   KeyResultCalculationMethod,
   KeyResultClientDTO,
   KeyResultServerDTO,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import { Entity } from '@memoflow/utils/domain';
 import { KeyResultId } from '../../domain';
 import { calculateKeyResultProgress } from '../services/key-result-progress-calculator';

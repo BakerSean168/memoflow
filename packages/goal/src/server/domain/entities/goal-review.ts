@@ -6,8 +6,8 @@ import type {
   Instant,
   TransferDate,
 } from '@memoflow/contracts/primitives';
-import type { GoalReviewServerDTO, GoalReviewSystemContext } from '@memoflow/contracts/goal';
-import { GoalReviewSystemContextSchema } from '@memoflow/contracts/goal';
+import type { GoalReviewServerDTO, GoalReviewSystemContext } from '@memoflow/goal-contracts';
+import { GoalReviewSystemContextSchema } from '@memoflow/goal-contracts';
 import { GoalReviewId } from '../../domain';
 
 export interface GoalReviewState {
@@ -123,12 +123,12 @@ export class GoalReview extends Entity<IGoalReviewId> {
     };
   }
 
-  public toClientDTO(): import('@memoflow/contracts/goal').GoalReviewClientDTO {
+  public toClientDTO(): import('@memoflow/goal-contracts').GoalReviewClientDTO {
     return {
-      id: String(this.id) as import('@memoflow/contracts/goal').GoalReviewClientDTO['id'],
+      id: String(this.id) as import('@memoflow/goal-contracts').GoalReviewClientDTO['id'],
       goalId: String(
         this._props.goalId,
-      ) as import('@memoflow/contracts/goal').GoalReviewClientDTO['goalId'],
+      ) as import('@memoflow/goal-contracts').GoalReviewClientDTO['goalId'],
       reflection: this._props.reflection,
       challenges: this._props.challenges,
       adjustments: this._props.adjustments,

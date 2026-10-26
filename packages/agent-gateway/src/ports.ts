@@ -16,7 +16,7 @@ import type {
   GoalClientDTO,
   GoalPage,
   GoalPageQuery,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import type { ExecutionContext, RequestContext } from '@memoflow/contracts/shared';
 
 /** Read cancellation stays separate from the canonical ExecutionContext. */

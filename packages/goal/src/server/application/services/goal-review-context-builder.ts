@@ -1,5 +1,5 @@
 import { analyzeGoalReviewSignals } from './goal-review-signal-analyzer';
-import type { GoalReviewSystemContext } from '@memoflow/contracts/goal';
+import type { GoalReviewSystemContext } from '@memoflow/goal-contracts';
 import type { Goal } from '../../domain/aggregates/goal';
 import type { IGoalRecordRepository } from '../../domain/repositories/i-goal-record-repository';
 import { calculateKeyResultProgress } from '../../domain/services/key-result-progress-calculator';

@@ -6,7 +6,7 @@
  *
  * Usage:
  * ```ts
- * import { createMockGoal, createMockGoalList } from '@memoflow/contracts/mocks';
+ * import { createMockGoal, createMockGoalList } from '@memoflow/goal-contracts/test-support/goal.mock';
  * const goal = createMockGoal({ name: 'Custom Goal' });
  * const goals = createMockGoalList(5);
  * ```
@@ -14,15 +14,15 @@
 
 import { faker } from '@faker-js/faker';
 import { requireYmd } from '@memoflow/shared-primitives';
-import type { GoalClientDTO } from '../modules/goal/aggregates/goal-client';
-import type { KeyResultClientDTO } from '../modules/goal/entities/key-result-client';
-import type { GoalRecordClientDTO } from '../modules/goal/aggregates/goal-record-client';
-import type { GoalReviewClientDTO } from '../modules/goal/entities/goal-review-client';
+import type { GoalClientDTO } from '../aggregates/goal-client';
+import type { KeyResultClientDTO } from '../entities/key-result-client';
+import type { GoalRecordClientDTO } from '../aggregates/goal-record-client';
+import type { GoalReviewClientDTO } from '../entities/goal-review-client';
 import type {
   GoalAggregateReadModel,
   GoalMutationReceipt,
   QueryGoalsRes,
-} from '../modules/goal/api/response-schemas';
+} from '../api/response-schemas';
 import type { KeyResultId } from '@memoflow/shared-primitives';
 
 // ============================================================================

@@ -1,4 +1,4 @@
-import type { GoalClientDTO } from '@memoflow/contracts/goal';
+import type { GoalClientDTO } from '@memoflow/goal-contracts';
 import type { TaskPlanClientDTO } from '@memoflow/contracts/task';
 import type { AISelectedEntityContextProjection } from '../ports/selected-entity-context-read.port';
 

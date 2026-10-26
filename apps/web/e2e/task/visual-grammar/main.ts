@@ -4,7 +4,10 @@ import { createApp, defineComponent, h, ref } from 'vue';
 import { createPinia } from 'pinia';
 import { createI18n } from 'vue-i18n';
 import { createMemoryHistory, createRouter, RouterView } from 'vue-router';
-import { createMockGoalMutationReceipt, createMockKeyResult } from '@memoflow/contracts/mocks';
+import {
+  createMockGoalMutationReceipt,
+  createMockKeyResult,
+} from '@memoflow/goal-contracts/test-support/goal.mock';
 import type { UpdateTaskPlanReq, TaskPlanClientDTO } from '@memoflow/contracts/task';
 import { GOAL_SERVICE_KEY, LABEL_SERVICE_KEY, TASK_SERVICE_KEY } from '@memoflow/app-vue/di/keys';
 import type { IGoalService, ILabelService, ITaskService } from '@memoflow/app-vue/di/types';

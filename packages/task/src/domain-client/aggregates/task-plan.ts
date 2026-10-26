@@ -23,7 +23,7 @@ import type {
   ChecklistItemDefinitionDTO,
 } from '@memoflow/contracts/task';
 import type { ImportanceLevel } from '@memoflow/contracts/shared';
-import type { LabelClientDTO } from '@memoflow/contracts/label';
+import type { LabelClientDTO } from '@memoflow/label-contracts';
 import type {
   GoalId,
   IdentityId,

@@ -57,7 +57,7 @@ import {
   type AddKeyResultReq,
   type GoalTimeframe,
   type KeyResultClientDTO,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import { Button, Dialog } from '@memoflow/ui-vue-shadcn';
 import { ProductDialogShell } from '../../../../shared/components';
 import { useDialogCloseGuard } from '../../../../shared/composables/useDialogCloseGuard';

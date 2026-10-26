@@ -69,6 +69,13 @@ const desktopRendererDevWorkspaceEntries = [
   ],
   ['@memoflow/transport-contracts', 'packages/transport-contracts/src/index.ts'],
   ['@memoflow/label-contracts', 'packages/label-contracts/src/index.ts'],
+  ['@memoflow/data-portability-contracts', 'packages/data-portability-contracts/src/index.ts'],
+  [
+    '@memoflow/goal-contracts/test-support/goal.mock',
+    'packages/goal-contracts/src/test-support/goal.mock.ts',
+  ],
+  ['@memoflow/goal-contracts', 'packages/goal-contracts/src/index.ts'],
+  ['@memoflow/workspace-contracts', 'packages/workspace-contracts/src/index.ts'],
   ['@memoflow/desktop-contracts/auth-context', 'packages/desktop-contracts/src/auth-context.ts'],
   ['@memoflow/desktop-contracts/database', 'packages/desktop-contracts/src/database.ts'],
   [

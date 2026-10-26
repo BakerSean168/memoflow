@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { GoalReviewClientDTOSchema, GoalReviewSystemContextSchema } from '@memoflow/contracts/goal';
+import { GoalReviewClientDTOSchema, GoalReviewSystemContextSchema } from '@memoflow/goal-contracts';
 import { Goal, GoalReview } from '../../../../domain';
 import { GoalPrismaRepository } from '../goal-prisma.repository';
 import { PrismaGoalMapper } from './prisma-goal-mapper';

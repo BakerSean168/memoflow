@@ -3,8 +3,8 @@ import {
   GoalRecordListResSchema,
   KeyResultClientDTOSchema,
   KeyResultProgressDTOSchema,
-} from '@memoflow/contracts/goal';
-import { createMockKeyResult } from '@memoflow/contracts/mocks';
+} from '@memoflow/goal-contracts';
+import { createMockKeyResult } from '@memoflow/goal-contracts/test-support/goal.mock';
 import { ok } from '@memoflow/contracts/result';
 import { GoalHttpAdapter } from './http/goal-http.adapter';
 import { GoalIpcAdapter } from './ipc/goal-ipc.adapter';

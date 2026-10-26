@@ -10,9 +10,9 @@ import type { Instant } from '@memoflow/contracts/primitives';
  * - Instance toDTO(): GoalClientDTO
  */
 
-import type { GoalClientDTO, GoalReminderConfig, GoalTimeframe } from '@memoflow/contracts/goal';
-import type { LabelDto } from '@memoflow/contracts/label';
-import { GoalStatus } from '@memoflow/contracts/goal';
+import type { GoalClientDTO, GoalReminderConfig, GoalTimeframe } from '@memoflow/goal-contracts';
+import type { LabelDto } from '@memoflow/label-contracts';
+import { GoalStatus } from '@memoflow/goal-contracts';
 import { AggregateRoot } from '@memoflow/utils/domain';
 import { GoalId } from '@memoflow/goal-core/ids';
 import { IdentityId } from '@memoflow/domain-shared/shared';

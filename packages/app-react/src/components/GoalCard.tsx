@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 
-import { GoalStatus, goalTimeframeLabel } from '@memoflow/contracts/goal';
+import { GoalStatus, goalTimeframeLabel } from '@memoflow/goal-contracts';
 import type { GoalSummary } from '../hooks/useGoals';
 import { emptyKind, getProductTime } from '../utils/product-time';
 import {

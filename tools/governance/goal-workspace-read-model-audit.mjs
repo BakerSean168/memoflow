@@ -38,7 +38,7 @@ function forbidPatterns(relativePath, patterns) {
   }
 }
 
-requireTokens('packages/contracts/src/modules/goal/api/goal-workspace.dto.ts', [
+requireTokens('packages/workspace-contracts/src/goal-workspace.dto.ts', [
   'GoalWorkspaceReadModelSchema',
   'taskContext:',
   'knowledgeContext:',
@@ -47,12 +47,12 @@ requireTokens('packages/contracts/src/modules/goal/api/goal-workspace.dto.ts', [
   'GoalWorkspaceTaskPageInvocationSchema',
   'GoalWorkspaceKnowledgePageInvocationSchema',
 ]);
-forbidPatterns('packages/contracts/src/modules/goal/api/goal-workspace.dto.ts', [
+forbidPatterns('packages/workspace-contracts/src/goal-workspace.dto.ts', [
   [/\btaskIds\b/, 'Workspace contract must not copy Task ids into Goal authority'],
   [/\bnoteIds\b/, 'Workspace contract must not copy Knowledge ids into Goal authority'],
   [/^\s*keyResults:\s/m, 'Workspace must not duplicate goal.keyResults at the top level'],
 ]);
-forbidPatterns('packages/contracts/src/modules/goal/api/response-schemas.ts', [
+forbidPatterns('packages/goal-contracts/src/api/response-schemas.ts', [
   [/\btaskIds\b/, 'GoalClientDTO must not own Task ids'],
   [/\bnoteIds\b/, 'GoalClientDTO must not own Knowledge ids'],
 ]);

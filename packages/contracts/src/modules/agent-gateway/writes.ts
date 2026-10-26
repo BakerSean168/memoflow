@@ -6,7 +6,7 @@ import {
   GoalAgentKeyResultCreateSchema,
   GoalAgentKeyResultUpdateSchema,
   GoalAgentPersistedReceiptSchema,
-} from '../goal';
+} from '@memoflow/goal-contracts';
 import {
   TaskAgentCreateSchema,
   TaskAgentUpdateSchema,

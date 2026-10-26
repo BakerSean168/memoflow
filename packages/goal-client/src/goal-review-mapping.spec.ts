@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { GoalReviewClientDTOSchema } from '@memoflow/contracts/goal';
+import { GoalReviewClientDTOSchema } from '@memoflow/goal-contracts';
 import { GoalReview } from './domain-client/entities/goal-review';
 
 describe('Goal client review DTO parity', () => {

@@ -6,7 +6,7 @@
     "name": "bakersean",
     "email": "lulouhao@stu.sicau.edu.cn"
   },
-  "description": "知行 (MemoFlow) desktop application",
+  "description": "\u77e5\u884c (MemoFlow) desktop application",
   "homepage": "https://github.com/BakerSean168/memoflow",
   "repository": {
     "type": "git",
@@ -28,9 +28,11 @@
     "@memoflow/domain-shared": "workspace:*",
     "@memoflow/goal": "workspace:*",
     "@memoflow/goal-client": "workspace:*",
+    "@memoflow/goal-contracts": "workspace:*",
     "@memoflow/host-runtime": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",
     "@memoflow/label": "workspace:*",
+    "@memoflow/label-contracts": "workspace:*",
     "@memoflow/notification": "workspace:*",
     "@memoflow/powersync-schema": "workspace:*",
     "@memoflow/relation": "workspace:*",
@@ -43,6 +45,7 @@
     "@memoflow/task": "workspace:*",
     "@memoflow/ui-vue-shadcn": "workspace:*",
     "@memoflow/utils": "workspace:*",
+    "@memoflow/workspace-contracts": "workspace:*",
     "@powersync/common": "2.3.0",
     "@powersync/node": "1.1.0",
     "@prisma/adapter-pg": "7.10.0",

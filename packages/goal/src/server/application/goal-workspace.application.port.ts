@@ -5,7 +5,7 @@ import type {
   GoalWorkspaceReadModel,
   GoalWorkspaceTaskPage,
   GoalWorkspaceTaskPageRequest,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/workspace-contracts';
 import type { Result } from '@memoflow/contracts/result';
 
 /** Read-only ADR-069 Goal Workspace application surface. */

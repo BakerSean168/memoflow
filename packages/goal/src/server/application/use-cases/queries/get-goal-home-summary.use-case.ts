@@ -1,5 +1,5 @@
 /** Goal-owned Home progress read model. */
-import type { GoalHomeProgressSummary } from '@memoflow/contracts/goal';
+import type { GoalHomeProgressSummary } from '@memoflow/goal-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { ok } from '@memoflow/contracts/result';
 import type { IGoalRepository } from '../../../domain';

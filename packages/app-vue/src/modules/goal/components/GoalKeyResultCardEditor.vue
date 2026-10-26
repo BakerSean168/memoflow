@@ -198,7 +198,7 @@ import {
   KEY_RESULT_TITLE_MAX_LENGTH,
   type KeyResultCalculationMethod,
   type GoalTimeframe,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import {
   Button,
   Input,

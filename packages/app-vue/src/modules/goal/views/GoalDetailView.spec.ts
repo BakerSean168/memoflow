@@ -6,11 +6,11 @@ import {
   createMockGoalMutationReceipt,
   createMockKeyResult,
   createMockGoalRecord,
-} from '@memoflow/contracts/mocks';
+} from '@memoflow/goal-contracts/test-support/goal.mock';
 import { productionLocaleMessages } from '../../../locales/production-messages';
 import GoalDetailView from './GoalDetailView.vue';
 import { Select } from '@memoflow/ui-vue-shadcn';
-import { goalTimeframeLabel } from '@memoflow/contracts/goal';
+import { goalTimeframeLabel } from '@memoflow/goal-contracts';
 import GoalKeyResultTrajectoryPlot from '../components/GoalKeyResultTrajectoryPlot.vue';
 import GoalKeyResultDirectControls from '../components/GoalKeyResultDirectControls.vue';
 import { KEY_RESULT_CALCULATION_METHODS } from '../utils';

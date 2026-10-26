@@ -1,5 +1,5 @@
 import { ValueObject } from '@memoflow/utils/domain';
-import type { KeyResultCalculationMethod, KeyResultMeasurement } from '@memoflow/contracts/goal';
+import type { KeyResultCalculationMethod, KeyResultMeasurement } from '@memoflow/goal-contracts';
 import { calculateKeyResultProgress } from '../services/key-result-progress-calculator';
 
 /** Immutable KR Measurement V3 server value object. Arithmetic delegates to the canonical calculator. */

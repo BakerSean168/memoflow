@@ -9,7 +9,7 @@ import type { PrismaClient, GoalRecord as PrismaGoalRecord, Prisma } from '@memo
 import type { IGoalRecordRepository, GoalRecordQueryOptions } from '../../../domain';
 import { GoalRecord } from '../../../domain';
 import { PrismaGoalRecordMapper } from './mappers/prisma-goal-record-mapper';
-import type { GoalRecordSourceTypeValue } from '@memoflow/contracts/goal';
+import type { GoalRecordSourceTypeValue } from '@memoflow/goal-contracts';
 
 export class GoalRecordPrismaRepository implements IGoalRecordRepository {
   constructor(private readonly prisma: PrismaClient | Prisma.TransactionClient) {}

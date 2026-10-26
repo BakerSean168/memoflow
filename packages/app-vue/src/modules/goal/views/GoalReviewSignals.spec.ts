@@ -7,7 +7,7 @@ import { GOAL_SERVICE_KEY } from '../../../di/keys';
 import { productionLocaleMessages } from '../../../locales/production-messages';
 import { goalRoutes } from '../router';
 import GoalDetailView from './GoalDetailView.vue';
-import { createMockGoalMutationReceipt } from '@memoflow/contracts/mocks';
+import { createMockGoalMutationReceipt } from '@memoflow/goal-contracts/test-support/goal.mock';
 
 const calls = vi.hoisted(() => ({
   getGoalWorkspace: vi.fn(),

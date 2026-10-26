@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { GoalStatus } from '@memoflow/contracts/goal';
+import { GoalStatus } from '@memoflow/goal-contracts';
 import type {
   ScheduledIntent,
   SchedulingOwner,

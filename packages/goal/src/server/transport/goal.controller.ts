@@ -12,7 +12,7 @@
 
 import type { Result } from '@memoflow/contracts/result';
 import { fail, ok } from '@memoflow/contracts/result';
-import { ListGoalFiltersSchema } from '@memoflow/contracts/goal';
+import { ListGoalFiltersSchema } from '@memoflow/goal-contracts';
 import { formatZodErrors } from '@memoflow/utils/result';
 import type {
   AddKeyResultReq,
@@ -34,7 +34,7 @@ import type {
   UpdateKeyResultProgressReq,
   UpdateKeyResultReq,
   UpdateGoalReviewReq,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { IdentityId } from '@memoflow/contracts/primitives';
 import { toKeyResultListResponse } from './mappers';

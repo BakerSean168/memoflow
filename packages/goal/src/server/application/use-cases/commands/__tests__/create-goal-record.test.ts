@@ -3,7 +3,7 @@ import type { TaskGoalProgressOutboxEventV2 } from '@memoflow/contracts/task';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
-import type { KeyResultCalculationMethod } from '@memoflow/contracts/goal';
+import type { KeyResultCalculationMethod } from '@memoflow/goal-contracts';
 import { Goal, GoalRecord } from '../../../../domain';
 import type { IGoalRepository } from '../../../../domain/repositories/i-goal-repository';
 import type { IGoalRecordRepository } from '../../../../domain/repositories/i-goal-record-repository';

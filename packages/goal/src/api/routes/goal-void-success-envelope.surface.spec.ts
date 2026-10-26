@@ -7,7 +7,7 @@ describe('goal mutation success envelope surface', () => {
   const recordRoutes = readFileSync(resolve(__dirname, './goal-record.routes.ts'), 'utf8');
   const electron = readFileSync(resolve(__dirname, '../../electron/index.ts'), 'utf8');
   const responseSchemas = readFileSync(
-    resolve(__dirname, '../../../../contracts/src/modules/goal/api/response-schemas.ts'),
+    resolve(__dirname, '../../../../goal-contracts/src/api/response-schemas.ts'),
     'utf8',
   );
 

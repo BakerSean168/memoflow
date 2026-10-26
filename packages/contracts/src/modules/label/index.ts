@@ -1,9 +1,10 @@
 /**
- * 兼容 shim（P2，Issue #634）：Label 核心契约真身已迁至 @memoflow/label-contracts，
- * 本文件仅作单向 re-export，新代码禁止再引用 `@memoflow/contracts/label`。
- * portable 组合（./portable-v3）暂留守本包，随 data-portability 契约阶段结算。
- * 淘汰条件：全仓 `@memoflow/contracts/label` 引用计数为 0，且 contracts 与 main CI
- * 各绿一轮，并在 Issue #634 记录摘除证据后，删除本 shim 并摘除 exports 子路径。
+ * Label Contracts —— 过渡入口（仅余 portable 组合）
+ *
+ * Label 核心契约本体已迁入 @memoflow/label-contracts（P2 / PR #650），
+ * 仓内核心消费方已在本 PR 改为直引 @memoflow/label-contracts。
+ * 本文件仅保留 portable v3 组合的再导出；该组合将在紧随其后的
+ * Label 收尾步迁入 @memoflow/label-contracts，届时删除本入口与
+ * contracts 的 ./label 子路径。
  */
-export * from '@memoflow/label-contracts';
 export * from './portable-v3';

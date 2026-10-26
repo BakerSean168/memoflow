@@ -38,13 +38,15 @@ import type {
   GetGoalRecordsRes,
   GetGoalReviewsRes,
   GetGoalAggregateRes,
+} from '@memoflow/goal-contracts';
+import type {
   GetGoalWorkspaceReq,
   GoalWorkspaceReadModel,
   GoalWorkspaceTaskPageRequest,
   GoalWorkspaceTaskPage,
   GoalWorkspacePageRequest,
   GoalWorkspaceKnowledgePage,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/workspace-contracts';
 import type { IGoalApiClient } from './ports/goal-api-client.port';
 import {
   Goal,

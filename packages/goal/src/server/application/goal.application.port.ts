@@ -14,7 +14,7 @@ import type {
   QueryGoalsRes,
   UpdateGoalReq,
   UpdateGoalRes,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type {
@@ -81,7 +81,7 @@ export interface GoalApplicationPort {
     identityId: string,
     keyResult: {
       title: string;
-      aggregationMethod?: import('@memoflow/contracts/goal').KeyResultCalculationMethod;
+      aggregationMethod?: import('@memoflow/goal-contracts').KeyResultCalculationMethod;
       initialValue?: number;
       targetValue: number;
       currentValue?: number;
@@ -101,7 +101,7 @@ export interface GoalApplicationPort {
       weight?: number;
       initialValue?: number;
       target?: GoalTimeframe | null;
-      aggregationMethod?: import('@memoflow/contracts/goal').KeyResultCalculationMethod;
+      aggregationMethod?: import('@memoflow/goal-contracts').KeyResultCalculationMethod;
       currentValue?: number;
       targetValue?: number;
       unit?: string;

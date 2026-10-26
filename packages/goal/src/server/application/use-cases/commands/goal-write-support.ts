@@ -1,5 +1,5 @@
 import type { IGoalRecordRepository, IGoalRepository } from '../../../domain';
-import type { GoalNativeAiLease } from '@memoflow/contracts/goal';
+import type { GoalNativeAiLease } from '@memoflow/goal-contracts';
 import type {
   BusinessOperationReceipt,
   GoalRecordReceiptInput,

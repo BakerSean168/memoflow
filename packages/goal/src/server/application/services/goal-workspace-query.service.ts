@@ -1,6 +1,6 @@
+import { GoalClientDTOSchema } from '@memoflow/goal-contracts';
 import {
   GetGoalWorkspaceReqSchema,
-  GoalClientDTOSchema,
   GoalWorkspaceKnowledgeItemSchema,
   GoalWorkspaceKnowledgePageSchema,
   GoalWorkspacePageRequestSchema,
@@ -8,7 +8,7 @@ import {
   GoalWorkspaceTaskPageRequestSchema,
   GoalWorkspaceTaskPageSchema,
   type GoalWorkspaceKnowledgeItem,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/workspace-contracts';
 import { error, ok } from '@memoflow/contracts/result';
 import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
 import { GoalKnowledgeEdgeListReqSchema } from '@memoflow/contracts/relation';

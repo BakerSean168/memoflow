@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import type { ImportanceLevel } from '@memoflow/contracts/shared';
 import type { GoalId, KeyResultId } from '@memoflow/contracts/primitives';
-import type { LabelClientDTO } from '@memoflow/contracts/label';
+import type { LabelClientDTO } from '@memoflow/label-contracts';
 import type { TaskPlanClientDTO, TaskPlanStatus, TaskPlanSchedule } from '@memoflow/contracts/task';
 import type { TaskPlan } from '@memoflow/task/client';
 import { presentErrorMessage } from '@memoflow/http-client';

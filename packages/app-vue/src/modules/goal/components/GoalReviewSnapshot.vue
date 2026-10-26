@@ -71,7 +71,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { Progress } from '@memoflow/ui-vue-shadcn';
-import type { GoalReviewSystemContext } from '@memoflow/contracts/goal';
+import type { GoalReviewSystemContext } from '@memoflow/goal-contracts';
 import { formatProductDate } from '../../../shared/utils/product-time';
 
 defineProps<{ context: GoalReviewSystemContext; caption: string }>();

@@ -1,7 +1,7 @@
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createI18n } from 'vue-i18n';
-import { createMockKeyResult } from '@memoflow/contracts/mocks';
+import { createMockKeyResult } from '@memoflow/goal-contracts/test-support/goal.mock';
 import { productionLocaleMessages } from '../../../locales/production-messages';
 import GoalKeyResultDirectControls from './GoalKeyResultDirectControls.vue';
 import GoalTimeframePicker from './GoalTimeframePicker.vue';

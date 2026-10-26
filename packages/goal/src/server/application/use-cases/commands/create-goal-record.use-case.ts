@@ -16,7 +16,7 @@ import {
   KeyResultCalculationMethod,
   type GoalMutationReceipt,
   type GoalRecordSource,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
 import type { IdentityId, KeyResultId } from '@memoflow/contracts/primitives';

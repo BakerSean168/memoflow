@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { GoalStatus } from '@memoflow/contracts/goal';
+import { GoalStatus } from '@memoflow/goal-contracts';
 import { IdentityId } from '@memoflow/domain-shared';
 import { requireYmd } from '@memoflow/contracts/primitives';
 import { Goal } from './goal';

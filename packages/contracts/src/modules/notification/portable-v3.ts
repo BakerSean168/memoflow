@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { PortableReferenceV3Schema } from '../data-portability/dtos/portable-v3.dto';
+import { PortableReferenceV3Schema } from '@memoflow/data-portability-contracts';
 import { ImportanceLevel } from '../../shared/value-objects/importance';
 import { UrgencyLevel } from '../../shared/value-objects/urgency';
 import { NotificationCategory } from './value-objects/notification-category';

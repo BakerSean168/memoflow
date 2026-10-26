@@ -71,7 +71,7 @@ import { ScrollArea, Skeleton, useConfirm } from '@memoflow/ui-vue-shadcn';
 import GoalProgressRow from '../components/GoalProgressRow.vue';
 import AppEmptyState from '../../../components/shared/AppEmptyState.vue';
 import { useGoal } from '../composables/useGoal';
-import type { GoalClientDTO } from '@memoflow/contracts/goal';
+import type { GoalClientDTO } from '@memoflow/goal-contracts';
 
 const { t } = useI18n();
 const router = useRouter();

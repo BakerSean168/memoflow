@@ -13,7 +13,7 @@ import type {
   GoalReminderConfigDTO,
   ReminderTrigger,
   ReminderTriggerType,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 
 /**
  * GoalReminderConfig 值对象实现

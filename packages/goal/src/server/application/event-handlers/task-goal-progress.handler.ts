@@ -1,4 +1,4 @@
-import { GoalRecordAuthorship, GoalRecordSourceType } from '@memoflow/contracts/goal';
+import { GoalRecordAuthorship, GoalRecordSourceType } from '@memoflow/goal-contracts';
 import {
   TaskGoalSettlementSourceType,
   TaskGoalRecordingMode,

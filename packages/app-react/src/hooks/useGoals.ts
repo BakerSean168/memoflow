@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { compareGoalTimeframesByEnd } from '@memoflow/contracts/goal';
+import { compareGoalTimeframesByEnd } from '@memoflow/goal-contracts';
 import type {
   GoalAggregateReadModel,
   GoalClientDTO,
   GoalStatus,
   GoalTimeframe,
   KeyResultClientDTO,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import type { Goal } from '@memoflow/goal-client';
 import { presentErrorMessage } from '@memoflow/http-client';
 

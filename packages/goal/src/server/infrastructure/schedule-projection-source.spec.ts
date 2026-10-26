@@ -6,7 +6,7 @@ import {
   goalScheduleProjectionEventNames,
 } from './schedule-projection-source';
 import { buildSchedulingKey } from '@memoflow/contracts/schedule';
-import { GoalStatus, ReminderTriggerType, type GoalTimeframe } from '@memoflow/contracts/goal';
+import { GoalStatus, ReminderTriggerType, type GoalTimeframe } from '@memoflow/goal-contracts';
 import { requireYmd } from '@memoflow/contracts/primitives';
 import { createTimeContext, createTimeFacade } from '@memoflow/time';
 

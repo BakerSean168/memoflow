@@ -12,7 +12,7 @@ import {
 } from '../../../domain';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
-import type { GoalMutationReceipt } from '@memoflow/contracts/goal';
+import type { GoalMutationReceipt } from '@memoflow/goal-contracts';
 import { type GoalWriteTransactionRunner } from './goal-write-support';
 import { createGoalMutationReceipt } from './goal-mutation-receipt';
 

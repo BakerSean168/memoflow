@@ -3,7 +3,7 @@
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it, vi } from 'vitest';
-import type { GoalClientDTO } from '@memoflow/contracts/goal';
+import type { GoalClientDTO } from '@memoflow/goal-contracts';
 import { requireYmd } from '@memoflow/contracts/primitives';
 import { ActionableWrapper, type MenuAction } from '../../../components/shared';
 import GoalProgressRow from './GoalProgressRow.vue';

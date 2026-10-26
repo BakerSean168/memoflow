@@ -19,11 +19,11 @@ import GoalModuleLayout from '../modules/goal/views/GoalModuleLayout.vue';
 import GoalDialog from '../modules/goal/components/dialogs/GoalDialog.vue';
 import { productionLocaleMessages } from '../locales/production-messages';
 import { useGoal } from '../modules/goal/composables/useGoal';
-import { createMockGoal } from '@memoflow/contracts/mocks';
+import { createMockGoal } from '@memoflow/goal-contracts/test-support/goal.mock';
 import { GOAL_DRAFT_CHECKPOINT_KEY } from '../di/keys';
 import type { GoalDraftCheckpointStore } from '../modules/goal/infrastructure/goal-draft-checkpoint.indexeddb';
-import type { GoalDraftCheckpointSnapshot } from '@memoflow/contracts/goal';
-import type { GetGoalAggregateRes } from '@memoflow/contracts/goal';
+import type { GoalDraftCheckpointSnapshot } from '@memoflow/goal-contracts';
+import type { GetGoalAggregateRes } from '@memoflow/goal-contracts';
 import type { GoalNativeEditSession } from '../modules/goal/composables/goalNativeEditSession';
 import { provideGoalNativeSurface } from '../layouts/shell/useGoalNativeSurface';
 import {

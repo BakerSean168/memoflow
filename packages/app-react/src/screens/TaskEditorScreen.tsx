@@ -6,7 +6,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { presentErrorMessage } from '@memoflow/http-client';
 
 import { ImportanceLevel } from '@memoflow/contracts/shared';
-import type { LabelClientDTO } from '@memoflow/contracts/label';
+import type { LabelClientDTO } from '@memoflow/label-contracts';
 import {
   TaskPlanScheduleSchema,
   TaskTimeType,

@@ -40,7 +40,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Plus, Target } from '@lucide/vue';
-import type { GoalSystemView } from '@memoflow/contracts/goal';
+import type { GoalSystemView } from '@memoflow/goal-contracts';
 import {
   LabelFilterPopover,
   ProductSingleSelectFilter,

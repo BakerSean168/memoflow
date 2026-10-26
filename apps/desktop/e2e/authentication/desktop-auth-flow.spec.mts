@@ -12,7 +12,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { _electron as electron } from 'playwright';
 import type { ElectronApplication } from 'playwright';
 import { GoalChannels } from '@memoflow/contracts/electron';
-import { QueryGoalsResSchema } from '@memoflow/contracts/goal';
+import { QueryGoalsResSchema } from '@memoflow/goal-contracts';
 import { z } from 'zod';
 
 async function launchDesktop(

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { PortableReferenceV3Schema } from '../data-portability/dtos/portable-v3.dto';
+import { PortableReferenceV3Schema } from '@memoflow/data-portability-contracts';
 import { CalendarEntryRangeSchema } from './calendar-entry-range';
 
 const SchedulePortableReferenceV3Schema = PortableReferenceV3Schema.refine(

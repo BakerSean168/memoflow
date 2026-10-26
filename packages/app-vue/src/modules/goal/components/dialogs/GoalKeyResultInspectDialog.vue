@@ -152,9 +152,9 @@ import {
   type GoalClientDTO,
   type GoalRecordClientDTO,
   type GoalTimeframe,
-  type GoalWorkspaceTaskPage,
   type KeyResultClientDTO,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
+import { type GoalWorkspaceTaskPage } from '@memoflow/workspace-contracts';
 import { ProductDialogShell } from '../../../../shared/components';
 import { GOAL_SERVICE_KEY } from '../../../../di/keys';
 import { useStrictInject } from '../../../../shared/utils/useStrictInject';

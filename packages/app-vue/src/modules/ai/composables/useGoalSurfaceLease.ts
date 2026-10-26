@@ -1,6 +1,6 @@
 import { onScopeDispose } from 'vue';
 import type { WorkflowRuntimeClient } from '@memoflow/ai/client';
-import type { GoalNativeAiLease } from '@memoflow/contracts/goal';
+import type { GoalNativeAiLease } from '@memoflow/goal-contracts';
 
 type Grant = { runId: string; token: string; fence: number; expiresAt: number };
 

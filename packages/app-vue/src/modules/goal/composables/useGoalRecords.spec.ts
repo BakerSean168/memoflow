@@ -2,13 +2,13 @@ import { defineComponent, h } from 'vue';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it, vi } from 'vitest';
-import { KeyResultCalculationMethod } from '@memoflow/contracts/goal';
+import { KeyResultCalculationMethod } from '@memoflow/goal-contracts';
 import {
   createMockGoal,
   createMockGoalMutationReceipt,
   createMockGoalRecord,
   createMockKeyResult,
-} from '@memoflow/contracts/mocks';
+} from '@memoflow/goal-contracts/test-support/goal.mock';
 import { ok } from '@memoflow/contracts/result';
 import { GOAL_SERVICE_KEY } from '../../../di/keys';
 import { useGoalStore } from '../stores/goal-store';

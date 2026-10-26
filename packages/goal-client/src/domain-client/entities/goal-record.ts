@@ -10,7 +10,7 @@ import type { Instant } from '@memoflow/contracts/primitives';
  * - Instance toDTO(): GoalRecordClientDTO
  */
 
-import type { GoalRecordClientDTO } from '@memoflow/contracts/goal';
+import type { GoalRecordClientDTO } from '@memoflow/goal-contracts';
 import { Entity } from '@memoflow/utils/domain';
 import { GoalRecordId, KeyResultId, GoalId } from '@memoflow/goal-core/ids';
 

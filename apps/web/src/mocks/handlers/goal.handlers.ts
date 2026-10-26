@@ -15,14 +15,14 @@ import {
   createMockGoalRecordList,
   createMockGoalReview,
   createMockGoalReviewList,
-} from '@memoflow/contracts/mocks';
-import { GoalStatus } from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts/test-support/goal.mock';
+import { GoalStatus } from '@memoflow/goal-contracts';
 import type {
   GoalClientDTO,
   GoalRecordClientDTO,
   GoalReviewClientDTO,
   KeyResultClientDTO,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 const GOALS = `${API_BASE}/goals`;

@@ -28,12 +28,12 @@ import {
   GoalRecordAuthorship,
   GoalRecordAuthorshipSchema,
   GoalRecordSourceType,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import type {
   GoalRecordServerDTO,
   GoalRecordSource,
   GoalRecordSourceTypeValue,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import type { IdentityId, Instant } from '@memoflow/contracts/primitives';
 
 // 内部状态接口
@@ -261,11 +261,11 @@ export class GoalRecord extends Entity<GoalRecordId> {
   public toClientDTO(
     goalId: string,
     valueAfter: number = this._props.value,
-  ): import('@memoflow/contracts/goal').GoalRecordClientDTO {
+  ): import('@memoflow/goal-contracts').GoalRecordClientDTO {
     return {
       id: this.id,
       keyResultId: this._props.keyResultId,
-      goalId: goalId as import('@memoflow/contracts/goal').GoalRecordClientDTO['goalId'],
+      goalId: goalId as import('@memoflow/goal-contracts').GoalRecordClientDTO['goalId'],
       value: this._props.value,
       valueAfter,
       comment: this._props.note,

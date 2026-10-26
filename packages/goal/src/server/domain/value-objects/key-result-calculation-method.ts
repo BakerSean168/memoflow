@@ -1,7 +1,7 @@
 import {
   KeyResultCalculationMethod as KeyResultCalculationMethodContract,
   type KeyResultCalculationMethod as IKeyResultCalculationMethod,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 
 export type KeyResultCalculationMethod = IKeyResultCalculationMethod & {
   readonly __brand: unique symbol;
