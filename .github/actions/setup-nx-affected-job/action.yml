@@ -25,6 +25,10 @@ inputs:
     description: Whether to restore the lockfile-keyed Nx cache
     required: false
     default: 'true'
+  changes-only:
+    description: Install only the Nx planner closure without postinstall scripts or task cache
+    required: false
+    default: 'false'
   consume-delivery-manifest:
     description: Download and validate the manifest produced by Changes
     required: false
@@ -118,7 +122,7 @@ runs:
     # Nx 23 defaults its local cache to ~/.nx/<workspace-hash>/cache; pin it to
     # the workspace. Nx also requires its SQLite index to recognize restored results.
     - name: Pin Nx cache directory
-      if: ${{ inputs.enable-nx-cache == 'true' }}
+      if: ${{ inputs.enable-nx-cache == 'true' && inputs.changes-only != 'true' }}
       shell: bash
       run: |
         {
@@ -129,7 +133,7 @@ runs:
         } >> "$GITHUB_ENV"
 
     - name: Cache Nx task results
-      if: ${{ inputs.enable-nx-cache == 'true' }}
+      if: ${{ inputs.enable-nx-cache == 'true' && inputs.changes-only != 'true' }}
       id: nx-cache
       uses: ./.github/actions/restore-main-cache
       with:
@@ -153,7 +157,17 @@ runs:
         # Browser binaries depend only on the lockfile, not on the shard.
         key: playwright-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pnpm-lock.yaml') }}
 
+    # Changes only needs Nx's project/task planner and workspace metadata.
+    # The root workspace closure contains the Nx plugins required by nx.json;
+    # other workspace dev/install scripts are not needed to read project graphs.
+    # Conservative fallback still happens in selectCiTasks if Nx cannot plan.
+    - name: Install Nx planner dependencies
+      if: ${{ inputs.changes-only == 'true' }}
+      shell: bash
+      run: pnpm install --filter . --frozen-lockfile --ignore-scripts --prefer-offline --reporter=append-only
+
     - name: Install dependencies
+      if: ${{ inputs.changes-only != 'true' }}
       shell: bash
       run: pnpm install --frozen-lockfile --reporter=append-only
 

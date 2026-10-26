@@ -4,6 +4,7 @@ import { buildDeliveryManifest, writeManifestOutputs } from './generate-delivery
 import { digest } from './lib/contracts.mjs';
 import { candidateRequired, requireProof } from './lib/ci-evidence.mjs';
 import { git, gitCommit, inputsDigest, changedFiles } from './lib/github-evidence.mjs';
+import { ensureChangesRange } from './lib/changes-range.mjs';
 
 async function main() {
   const event = JSON.parse(await readFile(process.env.GITHUB_EVENT_PATH, 'utf8'));
@@ -16,6 +17,14 @@ async function main() {
     (event.before && event.before !== '0000000000000000000000000000000000000000'
       ? event.before
       : checkout.parents[0]?.sha);
+  // A shallow checkout can omit the event's exact base on multi-commit pushes
+  // or uncommon PR histories. Hydrate immutable endpoints, never substitute
+  // a mutable branch tip. An unavailable range fails closed.
+  await ensureChangesRange({
+    base,
+    head,
+    pullRequest: eventName === 'pull_request',
+  });
   const isMainPush = eventName === 'push' && process.env.GITHUB_REF === 'refs/heads/main';
   const candidate =
     isMainPush && (await candidateRequired({ before: event.before, sha: head, changedFiles }));
