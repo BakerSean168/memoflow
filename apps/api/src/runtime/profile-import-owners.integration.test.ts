@@ -1,7 +1,7 @@
 import { afterAll, beforeEach, expect, it } from 'vitest';
 import { GoalPortablePayloadV3Schema } from '@memoflow/goal-contracts';
 import { TaskPortablePayloadV3Schema } from '@memoflow/contracts/task';
-import { LabelPortablePayloadV3Schema } from '@memoflow/contracts/label';
+import { LabelPortablePayloadV3Schema } from '@memoflow/label-contracts';
 import type {
   PortableCapabilityExecutionContext,
   PortableReferenceV3,

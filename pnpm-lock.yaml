@@ -1924,6 +1924,9 @@ importers:
 
   packages/label-contracts:
     dependencies:
+      '@memoflow/data-portability-contracts':
+        specifier: workspace:*
+        version: link:../data-portability-contracts
       '@memoflow/shared-primitives':
         specifier: workspace:*
         version: link:../shared-primitives
