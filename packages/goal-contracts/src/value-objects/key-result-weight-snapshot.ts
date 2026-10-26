@@ -6,14 +6,10 @@
  * 注意：Contracts 包只包含纯类型定义，不包含业务逻辑或方法
  */
 
-import type {
-  Instant,
-  TransferDate,
-  KeyResultWeightSnapshotId,
-  GoalId,
-  KeyResultId,
-  IdentityId,
-} from '@memoflow/shared-primitives';
+import type { Instant, TransferDate, IdentityId } from '@memoflow/shared-primitives';
+import type { GoalId } from './goal-id';
+import type { KeyResultId } from './key-result-id';
+import type { KeyResultWeightSnapshotId } from './key-result-weight-snapshot-id';
 
 // ============ 枚举定义 ============
 

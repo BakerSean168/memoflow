@@ -12,7 +12,8 @@ import {
 } from '../value-objects/key-result-limits';
 import { GoalTimeframeSchema } from '../value-objects/goal-timeframe';
 import { brandedId } from '@memoflow/shared-primitives';
-import type { GoalId, KeyResultId } from '@memoflow/shared-primitives';
+import type { GoalId } from '../value-objects/goal-id';
+import type { KeyResultId } from '../value-objects/key-result-id';
 import type { KeyResultClientDTO } from '../entities/key-result-client';
 import { GoalIdParamsSchema } from './goal-crud.dto';
 import { KeyResultListResSchema } from './response-schemas';

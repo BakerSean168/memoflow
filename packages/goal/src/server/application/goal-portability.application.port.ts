@@ -5,12 +5,8 @@ import type {
   GoalRecordSourceTypeValue,
   GoalReviewSystemContext,
 } from '@memoflow/goal-contracts';
-import type {
-  GoalRecordId,
-  GoalReviewId,
-  Instant,
-  KeyResultId,
-} from '@memoflow/contracts/primitives';
+import type { Instant } from '@memoflow/contracts/primitives';
+import type { GoalRecordId, GoalReviewId, KeyResultId } from '@memoflow/goal-contracts';
 import type { LabelDto } from '@memoflow/label-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';

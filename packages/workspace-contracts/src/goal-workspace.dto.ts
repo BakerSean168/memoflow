@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import type { GoalId, KnowledgeSpaceId } from '@memoflow/shared-primitives';
+import type { KnowledgeSpaceId } from '@memoflow/shared-primitives';
+import type { GoalId } from '@memoflow/goal-contracts';
 import { brandedId } from '@memoflow/shared-primitives/zod-extensions';
 import { KnowledgeDocumentIdSchema } from '@memoflow/contracts/repository';
 import {

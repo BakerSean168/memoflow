@@ -12,7 +12,7 @@ import type {
   TaskGoalProgressRule,
 } from '@memoflow/contracts/task';
 import { TaskGoalProgressConfigurationSchema } from '@memoflow/contracts/task';
-import type { GoalId, KeyResultId } from '@memoflow/contracts/primitives';
+import type { GoalId, KeyResultId } from '@memoflow/goal-contracts';
 
 export class TaskGoalBinding extends ValueObject<TaskGoalLinkDTO> implements ITaskGoalLink {
   private constructor(props: TaskGoalLinkDTO) {

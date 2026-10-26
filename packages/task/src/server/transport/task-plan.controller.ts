@@ -27,7 +27,7 @@ import type {
   AbandonTaskPlanReq,
 } from '@memoflow/contracts/task';
 import type { Context } from '@memoflow/contracts/shared';
-import type { GoalId } from '@memoflow/contracts/primitives';
+import type { GoalId } from '@memoflow/goal-contracts';
 import { IdentityId } from '@memoflow/domain-shared';
 import type { CreateTaskPlanUseCase } from '../application/use-cases/commands/create-task-plan.use-case';
 import type { GetTaskPlanUseCase } from '../application/use-cases/queries/get-task-plan.use-case';

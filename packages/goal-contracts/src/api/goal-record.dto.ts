@@ -6,7 +6,8 @@
 
 import { z } from 'zod';
 import { brandedId } from '@memoflow/shared-primitives';
-import type { GoalId, KeyResultId } from '@memoflow/shared-primitives';
+import type { GoalId } from '../value-objects/goal-id';
+import type { KeyResultId } from '../value-objects/key-result-id';
 import { GoalRecordListResSchema } from './response-schemas';
 
 // ============================================================================

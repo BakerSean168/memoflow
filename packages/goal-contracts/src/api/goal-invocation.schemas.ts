@@ -19,7 +19,10 @@
 
 import { z } from 'zod';
 import { brandedId } from '@memoflow/shared-primitives';
-import type { GoalId, KeyResultId, GoalReviewId, GoalRecordId } from '@memoflow/shared-primitives';
+import type { GoalId } from '../value-objects/goal-id';
+import type { GoalRecordId } from '../value-objects/goal-record-id';
+import type { GoalReviewId } from '../value-objects/goal-review-id';
+import type { KeyResultId } from '../value-objects/key-result-id';
 import { CloneGoalSchema, GoalVersionCommandSchema, UpdateGoalSchema } from './goal-crud.dto';
 import {
   AddKeyResultSchema,

@@ -5,6 +5,9 @@
 
 export type { GoalId } from './goal-id';
 export type { KeyResultId } from './key-result-id';
+export type { GoalRecordId } from './goal-record-id';
+export type { GoalReviewId } from './goal-review-id';
+export type { KeyResultWeightSnapshotId } from './key-result-weight-snapshot-id';
 
 export {
   GoalTimeframeSchema,

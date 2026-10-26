@@ -12,12 +12,6 @@ export type ExampleId = string & { readonly __brand: 'ExampleId' };
 /** 账户/身份 ID */
 export type IdentityId = string & { readonly __brand: 'IdentityId' };
 
-/** 目标 ID */
-export type GoalId = string & { readonly __brand: 'GoalId' };
-
-/** 关键结果 ID */
-export type KeyResultId = string & { readonly __brand: 'KeyResultId' };
-
 /** 任务模板 ID */
 export type TaskPlanId = string & { readonly __brand: 'TaskPlanId' };
 
@@ -100,15 +94,6 @@ export type DataSnapshotId = string & { readonly __brand: 'DataSnapshotId' };
 
 /** 应用配置 ID */
 export type AppConfigId = string & { readonly __brand: 'AppConfigId' };
-
-/** 目标记录 ID */
-export type GoalRecordId = string & { readonly __brand: 'GoalRecordId' };
-
-/** 目标评审 ID */
-export type GoalReviewId = string & { readonly __brand: 'GoalReviewId' };
-
-/** 关键结果权重快照 ID */
-export type KeyResultWeightSnapshotId = string & { readonly __brand: 'KeyResultWeightSnapshotId' };
 
 /** AI Provider 配置 ID */
 export type AiProviderConfigId = string & { readonly __brand: 'AiProviderConfigId' };

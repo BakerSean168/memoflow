@@ -7,12 +7,9 @@
 
 import { z } from 'zod';
 
-import type {
-  TransferDate,
-  GoalRecordId,
-  KeyResultId,
-  IdentityId,
-} from '@memoflow/shared-primitives';
+import type { TransferDate, IdentityId } from '@memoflow/shared-primitives';
+import type { GoalRecordId } from '../value-objects/goal-record-id';
+import type { KeyResultId } from '../value-objects/key-result-id';
 
 export const GoalRecordAuthorship = {
   Manual: 'Manual',

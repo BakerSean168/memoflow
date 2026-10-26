@@ -23,7 +23,7 @@ import type {
   GoalMutationReceipt,
   QueryGoalsRes,
 } from '../api/response-schemas';
-import type { KeyResultId } from '@memoflow/shared-primitives';
+import type { KeyResultId } from '../value-objects/key-result-id';
 
 // ============================================================================
 // GoalClientDTO

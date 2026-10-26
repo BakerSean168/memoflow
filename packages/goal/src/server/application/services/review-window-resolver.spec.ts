@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createTimeContext } from '@memoflow/time';
-import type { GoalReviewId } from '@memoflow/contracts/primitives';
+import type { GoalReviewId } from '@memoflow/goal-contracts';
 import { ReviewWindowResolver, selectPreviousGoalReview } from './review-window-resolver';
 
 const timeContext = createTimeContext({ timeZone: 'America/New_York', weekStartsOn: 0 });

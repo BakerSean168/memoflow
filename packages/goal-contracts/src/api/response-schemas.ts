@@ -8,13 +8,11 @@
 import { z } from 'zod';
 import { LabelColorSchema } from '@memoflow/label-contracts';
 import { brandedId } from '@memoflow/shared-primitives';
-import type {
-  GoalId,
-  GoalReviewId,
-  KeyResultId,
-  IdentityId,
-  GoalRecordId,
-} from '@memoflow/shared-primitives';
+import type { IdentityId } from '@memoflow/shared-primitives';
+import type { GoalId } from '../value-objects/goal-id';
+import type { GoalRecordId } from '../value-objects/goal-record-id';
+import type { GoalReviewId } from '../value-objects/goal-review-id';
+import type { KeyResultId } from '../value-objects/key-result-id';
 import { GoalRecordAuthorshipSchema, GoalRecordSourceType } from '../entities/goal-record-server';
 import { GoalStatus } from '../value-objects/goal-status';
 import { GoalReviewSystemContextSchema } from '../value-objects/goal-review-context';

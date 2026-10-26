@@ -35,7 +35,7 @@ import type {
   GoalProgressCalculationResultDTO,
   ProgressPreviewDTO,
 } from '@memoflow/goal-contracts';
-import type { KeyResultId } from '@memoflow/contracts/primitives';
+import type { KeyResultId } from '@memoflow/goal-contracts';
 
 /**
  * GoalProgressCalculator 领域服务
