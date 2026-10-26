@@ -1,4 +1,4 @@
-import type { CloudSignUpRequest } from '@memoflow/contracts';
+import type { CloudSignUpRequest } from '@memoflow/contracts/cloud-auth';
 import type { AuthContext } from './useAuthContext';
 import { reportAuthCatchFailure, reportAuthResultFailure } from './reportAuthOperationFailure';
 

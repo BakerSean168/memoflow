@@ -1,7 +1,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import type { CloudAuthResponse } from '@memoflow/contracts';
+import type { CloudAuthResponse } from '@memoflow/contracts/cloud-auth';
 import type { ResultError } from '@memoflow/contracts/result';
 import type { IAuthService } from '../../../di/types';
 import { useAuthenticationStore } from '../stores/authentication-store';

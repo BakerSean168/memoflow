@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
 import { provide } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { CloudAuthWebClientPort } from '@memoflow/contracts';
+import type { CloudAuthWebClientPort } from '@memoflow/contracts/cloud-auth';
 import { AUTH_SERVICE_KEY } from '@memoflow/app-vue/di';
 import { AUTH_WEB_SERVICE_KEY } from './service';
 import { enUSAuthMessages, zhCNAuthMessages } from './messages';

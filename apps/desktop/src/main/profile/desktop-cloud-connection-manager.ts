@@ -1,4 +1,4 @@
-import { BetterAuthSessionResponseSchema } from '@memoflow/contracts';
+import { BetterAuthSessionResponseSchema } from '@memoflow/contracts/cloud-auth';
 import { createLogger } from '@memoflow/utils/logger';
 import type { ProfileCloudState } from '@memoflow/contracts/electron';
 import { getApiBaseUrl } from '../utils/api-config';

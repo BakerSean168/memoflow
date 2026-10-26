@@ -4,7 +4,7 @@ import { createI18n } from 'vue-i18n';
 import { createPinia } from 'pinia';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fail, ok } from '@memoflow/contracts/result';
-import type { CloudAuthClientPort } from '@memoflow/contracts';
+import type { CloudAuthClientPort } from '@memoflow/contracts/cloud-auth';
 import { AUTH_SERVICE_KEY } from '../../../di/keys';
 import { useAuthenticationStore } from '../../authentication/stores/authentication-store';
 import CloudPasswordSection from './CloudPasswordSection.vue';
