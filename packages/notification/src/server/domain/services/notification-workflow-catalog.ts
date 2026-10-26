@@ -1,4 +1,4 @@
-import { ImportanceLevel, UrgencyLevel } from '@memoflow/contracts/shared';
+import { ImportanceLevel, UrgencyLevel } from '@memoflow/shared-primitives';
 import {
   NotificationCategory,
   NotificationChannelType,

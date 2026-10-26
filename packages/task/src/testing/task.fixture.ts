@@ -6,7 +6,7 @@
  */
 
 import { IdentityId } from '@memoflow/domain-shared';
-import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 import {
   DayOfWeek,
   TaskPlanScheduleKind,

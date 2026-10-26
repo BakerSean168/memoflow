@@ -1,6 +1,6 @@
 import { decodeTaskGoalProgress, encodeTaskGoalProgress } from '../../task-goal-progress-codec';
 import { IdentityId } from '@memoflow/domain-shared';
-import type { ImportanceLevel } from '@memoflow/contracts/shared';
+import type { ImportanceLevel } from '@memoflow/shared-primitives';
 import {
   TaskPlanCompletionPolicy,
   TaskPlanOutcome,

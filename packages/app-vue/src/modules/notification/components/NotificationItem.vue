@@ -153,7 +153,7 @@ import type {
   NotificationActionIntent,
   NotificationClientDTO,
 } from '@memoflow/contracts/notification';
-import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 import { ActionableWrapper, menuLabel } from '../../../components/shared';
 import type { MenuAction } from '../../../components/shared';
 import { presentNotification } from '../presentation/notification-presentation';

@@ -8,7 +8,7 @@ import {
   TASK_TEST_TIME_CONTEXT,
 } from '../../../../testing';
 import { IdentityId } from '@memoflow/domain-shared';
-import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 import {
   TaskPlanScheduleKind,
   type TaskRecurrence,

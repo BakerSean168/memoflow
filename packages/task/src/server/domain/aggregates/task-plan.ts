@@ -11,7 +11,7 @@ import type {
   GoalContributionRule,
 } from '@memoflow/contracts/task';
 import { TaskPlanCompletionPolicy, TaskPlanOutcome } from '@memoflow/contracts/task';
-import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 import { TaskPlanStatus } from '../../domain/value-objects/task-plan-status';
 import { TaskPlanId } from '../../domain/value-objects/task-plan-id';
 import type { TaskOccurrenceId } from '../../domain/value-objects/task-occurrence-id';

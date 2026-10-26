@@ -6,7 +6,7 @@ import type {
   IElectronDatabaseQueryResult,
   IElectronDatabaseTransaction,
 } from '@memoflow/contracts/electron';
-import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 import {
   TaskGoalBindingTrigger,
   TaskPlanOutcome,

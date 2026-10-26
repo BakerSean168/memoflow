@@ -13,7 +13,7 @@ import {
   TaskOccurrenceResultSchema,
   TaskOccurrenceStatus,
 } from '@memoflow/contracts/task';
-import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 import { IdentityId } from '@memoflow/domain-shared';
 import { createTimeFacade, type TimeContext } from '@memoflow/time';
 import { AggregateRoot } from '@memoflow/utils/domain';

@@ -6,7 +6,7 @@ import type {
   NotificationType,
   NotificationChannelType,
 } from '@memoflow/contracts/notification';
-import type { ImportanceLevel, UrgencyLevel } from '@memoflow/contracts/shared';
+import type { ImportanceLevel, UrgencyLevel } from '@memoflow/shared-primitives';
 import type {
   INotificationRepository,
   NotificationDeliveryUsage,

@@ -401,6 +401,9 @@ importers:
       '@memoflow/setting':
         specifier: workspace:*
         version: link:../../packages/setting
+      '@memoflow/shared-primitives':
+        specifier: workspace:*
+        version: link:../../packages/shared-primitives
       '@memoflow/task':
         specifier: workspace:*
         version: link:../../packages/task
@@ -1123,9 +1126,6 @@ importers:
 
   packages/account:
     dependencies:
-      '@memoflow/operations-contracts':
-        specifier: workspace:*
-        version: link:../operations-contracts
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -1144,6 +1144,9 @@ importers:
       '@memoflow/ipc-client':
         specifier: workspace:*
         version: link:../ipc-client
+      '@memoflow/operations-contracts':
+        specifier: workspace:*
+        version: link:../operations-contracts
       '@memoflow/patterns':
         specifier: workspace:*
         version: link:../patterns
@@ -1317,6 +1320,9 @@ importers:
       '@memoflow/setting':
         specifier: workspace:*
         version: link:../setting
+      '@memoflow/shared-primitives':
+        specifier: workspace:*
+        version: link:../shared-primitives
       '@memoflow/task':
         specifier: workspace:*
         version: link:../task
@@ -1435,6 +1441,9 @@ importers:
       '@memoflow/setting':
         specifier: workspace:*
         version: link:../setting
+      '@memoflow/shared-primitives':
+        specifier: workspace:*
+        version: link:../shared-primitives
       '@memoflow/task':
         specifier: workspace:*
         version: link:../task
@@ -1951,9 +1960,6 @@ importers:
 
   packages/notification:
     dependencies:
-      '@memoflow/operations-contracts':
-        specifier: workspace:*
-        version: link:../operations-contracts
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -1975,12 +1981,18 @@ importers:
       '@memoflow/ipc-client':
         specifier: workspace:*
         version: link:../ipc-client
+      '@memoflow/operations-contracts':
+        specifier: workspace:*
+        version: link:../operations-contracts
       '@memoflow/patterns':
         specifier: workspace:*
         version: link:../patterns
       '@memoflow/reliable-messaging-contracts':
         specifier: workspace:*
         version: link:../reliable-messaging-contracts
+      '@memoflow/shared-primitives':
+        specifier: workspace:*
+        version: link:../shared-primitives
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils
@@ -2009,12 +2021,12 @@ importers:
 
   packages/patterns:
     dependencies:
-      '@memoflow/operations-contracts':
-        specifier: workspace:*
-        version: link:../operations-contracts
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@memoflow/operations-contracts':
+        specifier: workspace:*
+        version: link:../operations-contracts
       '@memoflow/reliable-messaging-contracts':
         specifier: workspace:*
         version: link:../reliable-messaging-contracts
@@ -2124,9 +2136,6 @@ importers:
 
   packages/repository:
     dependencies:
-      '@memoflow/operations-contracts':
-        specifier: workspace:*
-        version: link:../operations-contracts
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -2145,6 +2154,9 @@ importers:
       '@memoflow/ipc-client':
         specifier: workspace:*
         version: link:../ipc-client
+      '@memoflow/operations-contracts':
+        specifier: workspace:*
+        version: link:../operations-contracts
       '@memoflow/patterns':
         specifier: workspace:*
         version: link:../patterns
@@ -2170,9 +2182,6 @@ importers:
 
   packages/schedule:
     dependencies:
-      '@memoflow/operations-contracts':
-        specifier: workspace:*
-        version: link:../operations-contracts
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -2191,6 +2200,9 @@ importers:
       '@memoflow/ipc-client':
         specifier: workspace:*
         version: link:../ipc-client
+      '@memoflow/operations-contracts':
+        specifier: workspace:*
+        version: link:../operations-contracts
       '@memoflow/patterns':
         specifier: workspace:*
         version: link:../patterns
@@ -2378,6 +2390,9 @@ importers:
       '@memoflow/reliable-messaging-contracts':
         specifier: workspace:*
         version: link:../reliable-messaging-contracts
+      '@memoflow/shared-primitives':
+        specifier: workspace:*
+        version: link:../shared-primitives
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time

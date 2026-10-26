@@ -16,6 +16,7 @@
     "@memoflow/ai": "workspace:*",
     "@memoflow/cloud-auth": "workspace:*",
     "@memoflow/contracts": "workspace:*",
+    "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/goal-client": "workspace:*",
     "@memoflow/goal-contracts": "workspace:*",
     "@memoflow/http-client": "workspace:*",

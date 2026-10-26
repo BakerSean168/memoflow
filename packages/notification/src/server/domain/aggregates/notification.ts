@@ -11,7 +11,7 @@ import type {
   IdentityId,
   NotificationId as NotificationIdBranded,
 } from '@memoflow/contracts/primitives';
-import { ImportanceLevel, UrgencyLevel } from '@memoflow/contracts/shared';
+import { ImportanceLevel, UrgencyLevel } from '@memoflow/shared-primitives';
 import { AggregateRoot } from '@memoflow/utils/domain';
 import { NotificationId, NotificationAction, NotificationMetadata } from '../value-objects';
 

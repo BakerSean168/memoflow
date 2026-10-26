@@ -5,7 +5,7 @@ import type {
   NotificationMetadataDTO,
   NotificationNavigationIntentDTO,
 } from '@memoflow/contracts/notification';
-import type { ImportanceLevel, UrgencyLevel } from '@memoflow/contracts/shared';
+import type { ImportanceLevel, UrgencyLevel } from '@memoflow/shared-primitives';
 import { Notification } from '../../../../domain/aggregates/notification';
 import {
   NotificationId,

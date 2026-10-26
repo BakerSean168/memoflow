@@ -18,8 +18,8 @@ import type { BusinessOperationReceipt } from '@memoflow/reliable-messaging-cont
 import { NotificationChannelType } from '../value-objects/notification-channel-type';
 import { NotificationType } from '../value-objects/notification-type';
 import { NotificationCategory } from '../value-objects/notification-category';
-import { ImportanceLevel } from '../../../shared/value-objects/importance';
-import { UrgencyLevel } from '../../../shared/value-objects/urgency';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
+import { UrgencyLevel } from '@memoflow/shared-primitives';
 import {
   NotificationActionIntentSchema,
   NotificationEntityRefSchema,

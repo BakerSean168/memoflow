@@ -11,7 +11,7 @@ import type {
   CategoryPreferenceDTO,
   ChannelPreference,
 } from '@memoflow/contracts/notification';
-import type { ImportanceLevel } from '@memoflow/contracts/shared';
+import type { ImportanceLevel } from '@memoflow/shared-primitives';
 
 /**
  * CategoryPreference 值对象实现

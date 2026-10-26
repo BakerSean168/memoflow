@@ -5,7 +5,7 @@ import {
   TaskOccurrenceStatus,
   TaskTimingSchema,
 } from '@memoflow/contracts/task';
-import type { ImportanceLevel } from '@memoflow/contracts/shared';
+import type { ImportanceLevel } from '@memoflow/shared-primitives';
 import { IdentityId } from '@memoflow/domain-shared';
 import { TaskOccurrence } from '../../../../domain/aggregates/task-occurrence';
 import { TaskOccurrenceId } from '../../../../domain/value-objects/task-occurrence-id';

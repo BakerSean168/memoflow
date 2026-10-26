@@ -13,7 +13,7 @@ import {
   NotificationDeliveryPlanOutcome,
 } from '@memoflow/contracts/notification';
 import type { IdentityId } from '@memoflow/contracts/primitives';
-import type { ImportanceLevel, UrgencyLevel } from '@memoflow/contracts/shared';
+import type { ImportanceLevel, UrgencyLevel } from '@memoflow/shared-primitives';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
 import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';

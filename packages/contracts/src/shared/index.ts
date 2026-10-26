@@ -4,12 +4,8 @@
  * 这些类型作为整个系统的契约，各个domain包根据这些接口来实现具体逻辑
  */
 
-// 重新导出重要性级别类型
-export * from './value-objects/importance';
-// 重新导出紧急性级别类型
-export * from './value-objects/urgency';
-// 重新导出优先级级别类型
-export * from './value-objects/priority';
+// 重要性/紧急性/优先级叶子枚举已迁至 @memoflow/shared-primitives（Issue #630 主线裁决）。
+
 // 重新导出共享的类型
 export * from './shared';
 // 重新导出共享的DTOs
@@ -32,8 +28,6 @@ export type {
   RequestContext,
 } from '@memoflow/transport-contracts';
 export * from './account-active-checker';
-
-export * from './value-objects';
 
 // P1 S4（Issue #633）：ModuleManifest/CommandRegistry 与
 // ServerTransportModuleContext/ServerModuleHandle 真身已迁至

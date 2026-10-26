@@ -1,7 +1,7 @@
 import type { NotificationCategory } from '../value-objects/notification-category';
 import type { NotificationType } from '../value-objects/notification-type';
-import type { ImportanceLevel } from '../../../shared/value-objects/importance';
-import type { UrgencyLevel } from '../../../shared/value-objects/urgency';
+import type { ImportanceLevel } from '@memoflow/shared-primitives';
+import type { UrgencyLevel } from '@memoflow/shared-primitives';
 import type { IdentityId, NotificationId } from '@memoflow/shared-primitives';
 
 export interface NotificationDispatchBase {
