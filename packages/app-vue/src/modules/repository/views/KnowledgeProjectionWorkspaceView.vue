@@ -407,7 +407,7 @@ import {
   type KnowledgeNoteTreeMetadataDTO,
   type KnowledgeNoteTreeNodeDTO,
   type KnowledgeRemoteBindingClientDTO,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import { usePanelSurfaceStatus } from '../../../layouts/shell/usePanelSurfaceStatus';
 import { usePanelWidth } from '../../../layouts/shell/usePanelWidth';
 import type { PanelSurfaceStatus } from '../../../layouts/shell/useAppShellStore';

@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it } from 'vitest';
-import type { KnowledgeRemoteBindingClientDTO } from '@memoflow/contracts/repository';
+import type { KnowledgeRemoteBindingClientDTO } from '@memoflow/repository-contracts';
 import KnowledgeNoteCatalog from './KnowledgeNoteCatalog.vue';
 
 const i18n = createI18n({

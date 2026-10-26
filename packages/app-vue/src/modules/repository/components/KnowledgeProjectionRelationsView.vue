@@ -193,7 +193,7 @@ import type {
   KnowledgeNoteLinkGraphEdgeDTO,
   KnowledgeNoteLinkGraphNodeDTO,
   KnowledgeNoteLinkGraphResponse,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import { REPOSITORY_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 

@@ -7,7 +7,7 @@ import type {
   LocalVaultBindingSnapshotDTO,
   LocalVaultNoteDTO,
   LocalVaultNoteSummaryDTO,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import { REPOSITORY_SERVICE_KEY } from '../../../di/keys';
 import type { IRepositoryService } from '../../../di/types';
 import KnowledgeCaptureReviewDialog from '../components/KnowledgeCaptureReviewDialog.vue';

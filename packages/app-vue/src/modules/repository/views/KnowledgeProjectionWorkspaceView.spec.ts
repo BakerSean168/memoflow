@@ -8,7 +8,7 @@ import type {
   KnowledgeNoteProjectionClientDTO,
   KnowledgeNoteProjectionSummaryDTO,
   KnowledgeRemoteBindingClientDTO,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import { REPOSITORY_SERVICE_KEY } from '../../../di/keys';
 import type { IRepositoryService } from '../../../di/types';
 import { providePanelWidth } from '../../../layouts/shell/usePanelWidth';

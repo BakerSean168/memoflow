@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type {
   KnowledgeRemoteBindingClientDTO,
   SyncKnowledgeRepositoryRes,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import { fail, ok } from '@memoflow/contracts/result';
 import {
   DesktopKnowledgeRepositoryAutoSyncScheduler,

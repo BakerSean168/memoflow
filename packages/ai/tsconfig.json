@@ -16,7 +16,7 @@
       "@memoflow/contracts/electron": ["../contracts/src/electron/index.ts"],
       "@memoflow/goal-contracts": ["../goal-contracts/src/index.ts"],
       "@memoflow/contracts/primitives": ["../contracts/src/primitives/index.ts"],
-      "@memoflow/contracts/repository": ["../contracts/src/modules/repository/index.ts"],
+      "@memoflow/repository-contracts": ["../../packages/repository-contracts/src/index.ts"],
       "@memoflow/contracts/shared": ["../contracts/src/shared/index.ts"],
       "@memoflow/transport-contracts": ["../transport-contracts/src/index.ts"],
       "@memoflow/transport-contracts/result": ["../transport-contracts/src/result/index.ts"],

@@ -66,6 +66,8 @@
       "@memoflow/task/*": ["./packages/task/src/*/index.ts"],
       "@memoflow/repository": ["./packages/repository/src/index.ts"],
       "@memoflow/repository/*": ["./packages/repository/src/*/index.ts"],
+      "@memoflow/repository-contracts": ["./packages/repository-contracts/src/index.ts"],
+      "@memoflow/repository-contracts/*": ["./packages/repository-contracts/src/*.ts"],
       "@memoflow/reminder": ["./packages/reminder/src/index.ts"],
       "@memoflow/reminder/*": ["./packages/reminder/src/*/index.ts"],
       "@memoflow/notification": ["./packages/notification/src/index.ts"],

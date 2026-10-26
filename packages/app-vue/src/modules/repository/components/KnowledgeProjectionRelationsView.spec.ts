@@ -3,7 +3,7 @@ import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it, vi } from 'vitest';
 import { ok, type Result } from '@memoflow/contracts/result';
-import type { KnowledgeNoteLinkGraphResponse } from '@memoflow/contracts/repository';
+import type { KnowledgeNoteLinkGraphResponse } from '@memoflow/repository-contracts';
 import type { IRepositoryService } from '../../../di/types';
 import { REPOSITORY_SERVICE_KEY } from '../../../di/keys';
 import KnowledgeProjectionRelationsView from './KnowledgeProjectionRelationsView.vue';

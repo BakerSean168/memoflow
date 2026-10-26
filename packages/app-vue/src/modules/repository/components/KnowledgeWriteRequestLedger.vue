@@ -11,7 +11,7 @@ import { onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Alert, AlertDescription, AlertTitle, Badge, Button } from '@memoflow/ui-vue-shadcn';
 import { AlertCircle, Loader2, RefreshCw, RotateCcw } from '@lucide/vue';
-import type { KnowledgeWriteRequestClientDTO } from '@memoflow/contracts/repository';
+import type { KnowledgeWriteRequestClientDTO } from '@memoflow/repository-contracts';
 import { useKnowledgeWriteRequestLedger } from '../composables/useKnowledgeWriteRequestLedger';
 
 const { t } = useI18n();

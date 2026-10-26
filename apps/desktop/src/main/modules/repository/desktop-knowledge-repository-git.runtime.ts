@@ -8,7 +8,7 @@ import type {
   KnowledgeRepositoryExecutableReconciliationAction,
   KnowledgeRepositorySyncConflictContext,
   KnowledgeRepositorySyncOutcome,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 
 const DEFAULT_TIMEOUT_MS = 120_000;
 const MAX_CAPTURE_BYTES = 1024 * 1024;

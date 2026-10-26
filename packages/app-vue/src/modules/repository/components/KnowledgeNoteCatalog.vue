@@ -270,7 +270,7 @@ import type {
   KnowledgeNoteProjectionSummaryDTO,
   KnowledgeNoteTreeNodeDTO,
   KnowledgeRemoteBindingClientDTO,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import { useI18n } from 'vue-i18n';
 import DocumentCatalogRow from './DocumentCatalogRow.vue';
 import DocumentCatalogSearch from './DocumentCatalogSearch.vue';

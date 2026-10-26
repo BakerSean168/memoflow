@@ -16,7 +16,7 @@ import { toast } from 'vue-sonner';
 import {
   KnowledgeDocumentIdSchema,
   type KnowledgeDocumentRef,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import type {
   AIWorkflowRunView,
   AIChatPermissionMode,

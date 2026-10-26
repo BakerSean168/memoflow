@@ -2,7 +2,7 @@ import { defineComponent, h } from 'vue';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it } from 'vitest';
-import type { KnowledgeNoteProjectionClientDTO } from '@memoflow/contracts/repository';
+import type { KnowledgeNoteProjectionClientDTO } from '@memoflow/repository-contracts';
 import KnowledgeNoteContextPanel from './KnowledgeNoteContextPanel.vue';
 
 const i18n = createI18n({

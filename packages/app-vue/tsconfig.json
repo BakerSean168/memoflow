@@ -17,8 +17,8 @@
         "../../packages/contracts/src/modules/notification/index.ts"
       ],
       "@memoflow/contracts/primitives": ["../../packages/contracts/src/primitives/index.ts"],
-      "@memoflow/contracts/repository": [
-        "../../packages/contracts/src/modules/repository/index.ts"
+      "@memoflow/repository-contracts": [
+        "../../packages/repository-contracts/src/index.ts"
       ],
       "@memoflow/contracts/result": ["../../packages/contracts/src/result/index.ts"],
       "@memoflow/contracts/schedule": ["../../packages/contracts/src/modules/schedule/index.ts"],

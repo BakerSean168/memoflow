@@ -17,7 +17,7 @@ import type {
 import {
   KnowledgeDocumentIdSchema,
   KnowledgeDocumentIdentityOriginSchema,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import type { ServerHeldDataDisclosureSource } from '../application/server-held-data-disclosure.source';
 
 function iso(value: Date): string {

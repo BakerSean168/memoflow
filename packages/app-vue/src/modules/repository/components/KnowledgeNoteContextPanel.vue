@@ -98,7 +98,7 @@
 import { computed } from 'vue';
 import { Badge, Button } from '@memoflow/ui-vue-shadcn';
 import { Info, Link2, ListTree, PanelRight, X } from '@lucide/vue';
-import type { KnowledgeNoteProjectionClientDTO } from '@memoflow/contracts/repository';
+import type { KnowledgeNoteProjectionClientDTO } from '@memoflow/repository-contracts';
 import { useI18n } from 'vue-i18n';
 import { stripMarkdownFrontmatter } from '../../../shared/utils/safe-markdown';
 import KnowledgeProjectionRelationsView from './KnowledgeProjectionRelationsView.vue';

@@ -6,7 +6,7 @@ import { fail, ok } from '@memoflow/contracts/result';
 import type {
   KnowledgeWriteRequestClientDTO,
   ListKnowledgeWriteRequestsRes,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import { REPOSITORY_SERVICE_KEY } from '../../../di/keys';
 import KnowledgeWriteRequestLedger from './KnowledgeWriteRequestLedger.vue';
 

@@ -1,12 +1,13 @@
 import { z } from 'zod';
-import type { KnowledgeDocumentId, TaskPlanId } from '@memoflow/shared-primitives';
+import type { TaskPlanId } from '@memoflow/shared-primitives';
+import type { KnowledgeDocumentId } from '@memoflow/repository-contracts';
 import type { GoalId } from '@memoflow/goal-contracts';
 import { brandedId } from '@memoflow/shared-primitives/zod-extensions';
 import {
   KnowledgeDocumentIdSchema,
   KnowledgeDocumentRefSchema,
   type KnowledgeDocumentRef,
-} from '../repository';
+} from '@memoflow/repository-contracts';
 
 export const SubjectTypes = ['note', 'goal', 'task', 'habit', 'wallet'] as const;
 export type SubjectType = (typeof SubjectTypes)[number];

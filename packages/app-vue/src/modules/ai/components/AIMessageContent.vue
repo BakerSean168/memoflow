@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { inject, onBeforeUnmount, ref, watch, watchEffect } from 'vue';
 import { routerKey } from 'vue-router';
-import { KnowledgeDocumentIdSchema } from '@memoflow/contracts/repository';
+import { KnowledgeDocumentIdSchema } from '@memoflow/repository-contracts';
 import { renderSafeMarkdown } from '../../../shared/utils/safe-markdown';
 
 const props = withDefaults(

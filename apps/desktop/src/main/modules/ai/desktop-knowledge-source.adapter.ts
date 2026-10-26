@@ -4,7 +4,7 @@ import {
   KnowledgeDocumentIdSchema,
   type LocalVaultNoteDTO,
   type LocalVaultNoteSummaryDTO,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import { LocalVaultRuntimeError, type LocalVaultElectronPort } from '@memoflow/repository/electron';
 
 /** Local Vault is the only Desktop knowledge source; disconnected Vaults return no cloud fallback. */

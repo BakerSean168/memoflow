@@ -13,7 +13,7 @@ import type {
   LocalVaultNoteDTO,
   LocalVaultNoteSummaryDTO,
   SearchLocalVaultRes,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import { unwrapOrThrowError, type Result } from '@memoflow/contracts/result';
 import { REPOSITORY_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';

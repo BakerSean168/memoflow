@@ -12,8 +12,8 @@ import type {
   KnowledgeNoteTreeResponse,
   ListReferenceableKnowledgeDocumentsReq,
   ReferenceableKnowledgeDocumentListResponse,
-} from '@memoflow/contracts/repository';
-import { KnowledgeDocumentIdSchema } from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
+import { KnowledgeDocumentIdSchema } from '@memoflow/repository-contracts';
 import type { IdentityId } from '@memoflow/contracts/primitives';
 import { ok, ResultErrorException } from '@memoflow/contracts/result';
 // This opt-in acceptance file intentionally crosses the Desktop -> Repository
@@ -131,7 +131,7 @@ class LiveConnectionRepository implements IKnowledgeRemoteBindingRepository {
 
 class LiveObservationRepository implements IRemoteRepositoryObservationRepository {
   constructor(
-    private observation: import('@memoflow/contracts/repository').RemoteRepositoryObservation,
+    private observation: import('@memoflow/repository-contracts').RemoteRepositoryObservation,
   ) {}
   async findByBindingId(bindingId: string) {
     return bindingId === this.observation.bindingId ? this.observation : null;
@@ -141,13 +141,13 @@ class LiveObservationRepository implements IRemoteRepositoryObservationRepositor
       ? new Map([[this.observation.bindingId, this.observation]])
       : new Map();
   }
-  async save(observation: import('@memoflow/contracts/repository').RemoteRepositoryObservation) {
+  async save(observation: import('@memoflow/repository-contracts').RemoteRepositoryObservation) {
     this.observation = observation;
   }
 }
 
 class LiveHistoryFenceRepository implements IRemoteHistoryFenceRepository {
-  constructor(private fence: import('@memoflow/contracts/repository').RemoteHistoryFence) {}
+  constructor(private fence: import('@memoflow/repository-contracts').RemoteHistoryFence) {}
   async findByBindingId(bindingId: string) {
     return bindingId === this.fence.bindingId ? this.fence : null;
   }
@@ -156,7 +156,7 @@ class LiveHistoryFenceRepository implements IRemoteHistoryFenceRepository {
       ? new Map([[this.fence.bindingId, this.fence]])
       : new Map();
   }
-  async save(fence: import('@memoflow/contracts/repository').RemoteHistoryFence) {
+  async save(fence: import('@memoflow/repository-contracts').RemoteHistoryFence) {
     this.fence = fence;
   }
 }

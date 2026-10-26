@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import type { KnowledgeSpaceId } from '@memoflow/shared-primitives';
+import type { KnowledgeSpaceId } from '@memoflow/repository-contracts';
 import type { GoalId } from '@memoflow/goal-contracts';
 import { brandedId } from '@memoflow/shared-primitives/zod-extensions';
-import { KnowledgeDocumentIdSchema } from '@memoflow/contracts/repository';
+import { KnowledgeDocumentIdSchema } from '@memoflow/repository-contracts';
 import {
   TaskGoalContextItemSchema,
   TaskGoalContextPageSchema,
