@@ -122,15 +122,19 @@
           },
           {
             "sourceTag": "tier:core",
-            "notDependOnLibsWithTags": ["tier:client", "tier:server"]
+            "notDependOnLibsWithTags": ["tier:client", "tier:server", "tier:ui"]
           },
           {
             "sourceTag": "tier:client",
-            "notDependOnLibsWithTags": ["tier:server"]
+            "notDependOnLibsWithTags": ["tier:server", "tier:ui"]
           },
           {
             "sourceTag": "tier:server",
-            "notDependOnLibsWithTags": ["tier:client"]
+            "notDependOnLibsWithTags": ["tier:client", "tier:ui"]
+          },
+          {
+            "sourceTag": "tier:ui",
+            "notDependOnLibsWithTags": ["tier:server", "tier:ui"]
           },
           {
             "sourceTag": "scope:account",
@@ -150,6 +154,7 @@
               "scope:shared",
               "scope:patterns",
               "scope:goal",
+              "scope:ui",
               "scope:schedule",
               "scope:scheduler"
             ]
