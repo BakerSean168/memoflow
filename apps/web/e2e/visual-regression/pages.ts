@@ -22,7 +22,7 @@ import { providePanelWidth } from '@memoflow/app-vue/layouts/shell/usePanelWidth
 import { useAuthenticationStore } from '@memoflow/app-vue/modules/authentication/stores/authentication-store';
 import { useAppShellStore } from '@memoflow/app-vue/layouts/shell/useAppShellStore';
 import RoutineConfigurationView from '@memoflow/app-vue/modules/routine/views/RoutineConfigurationView.vue';
-import NotificationListPage from '@memoflow/app-vue/modules/notification/views/NotificationListPage.vue';
+import { NotificationListPage } from '@memoflow/notification-ui';
 import KnowledgeProjectionWorkspaceView from '@memoflow/app-vue/modules/repository/views/KnowledgeProjectionWorkspaceView.vue';
 import UserSettingsView from '@memoflow/app-vue/modules/setting/views/UserSettingsView.vue';
 import TaskManagementView from '@memoflow/app-vue/modules/task/views/TaskManagementView.vue';

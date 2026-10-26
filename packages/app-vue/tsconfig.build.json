@@ -7,6 +7,8 @@
       "@memoflow/goal-ui": ["../goal-ui/dist/index.d.ts"],
       "@memoflow/goal-ui/composables/useGoal": ["../goal-ui/dist/composables/useGoal.d.ts"],
       "@memoflow/goal-ui/*": ["../goal-ui/dist/*.d.ts"],
+      "@memoflow/notification-ui/host": ["../notification-ui/dist/notification-ui-host.d.ts"],
+      "@memoflow/notification-ui": ["../notification-ui/dist/index.d.ts"],
       "@memoflow/contracts": ["../contracts/dist/index.d.ts"],
       "@memoflow/contracts/*": [
         "../contracts/dist/modules/*/index.d.ts",

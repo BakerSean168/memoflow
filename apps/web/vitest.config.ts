@@ -25,6 +25,8 @@ const sharedConfig = createSharedConfig({
     '@memoflow/reminder/client': '../../packages/reminder/src/client/index.ts',
     '@memoflow/ai/client': '../../packages/ai/src/client/index.ts',
     '@memoflow/goal-client': '../../packages/goal-client/src/index.ts',
+    '@memoflow/notification-ui/host': '../../packages/notification-ui/src/notification-ui-host.ts',
+    '@memoflow/notification-ui': '../../packages/notification-ui/src/index.ts',
     '@memoflow/repository/client': '../../packages/repository/src/client/index.ts',
     '@memoflow/task/client': '../../packages/task/src/client/index.ts',
   },

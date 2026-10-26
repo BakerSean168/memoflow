@@ -55,7 +55,7 @@ export { useAccountStore } from './modules/account';
 export { useGoalStore } from '@memoflow/goal-ui';
 export { useTaskStore } from './modules/task';
 export { useScheduleStore } from '@memoflow/schedule-ui';
-export { useNotificationStore } from './modules/notification';
+export { useNotificationStore } from '@memoflow/notification-ui';
 export { usePresentationPreferenceStore } from './modules/setting';
 
 // ── Startup hooks ──
@@ -64,7 +64,7 @@ export {
   createNotificationSseInvalidationSource,
   type NotificationStartupHookOptions,
   type NotificationSseInvalidationSourceOptions,
-} from './modules/notification';
+} from '@memoflow/notification-ui';
 export { createGoalStartupHook } from '@memoflow/goal-ui';
 
 // ── Server-state (RefArch Phase 5 Query Cache pilots) ──

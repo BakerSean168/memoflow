@@ -51,10 +51,6 @@
       "types": "./dist/modules/routine/index.d.ts",
       "import": "./dist/modules/routine/index.js"
     },
-    "./modules/notification": {
-      "types": "./dist/modules/notification/index.d.ts",
-      "import": "./dist/modules/notification/index.js"
-    },
     "./modules/repository": {
       "types": "./dist/modules/repository/index.d.ts",
       "import": "./dist/modules/repository/index.js"
@@ -93,8 +89,8 @@
     "@memoflow/ipc-client": "workspace:*",
     "@memoflow/label": "workspace:*",
     "@memoflow/label-contracts": "workspace:*",
-    "@memoflow/notification": "workspace:*",
     "@memoflow/notification-client": "workspace:*",
+    "@memoflow/notification-ui": "workspace:*",
     "@memoflow/relation": "workspace:*",
     "@memoflow/relation-contracts": "workspace:*",
     "@memoflow/reminder": "workspace:*",

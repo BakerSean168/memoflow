@@ -35,7 +35,7 @@ import { useNativeBusinessPanelBridge } from './useNativeBusinessPanelBridge';
 import { useShellRouterSync, AUTO_FOCUS_VIEWPORT, moduleForPath } from './useShellRouterSync';
 import { useDesktopWindowControls } from '../../shared/composables/useDesktopWindowControls';
 import { hasDesktopAuthApi } from '../../shared/utils/desktop-auth-recovery';
-import { useNotificationUnreadQuery } from '../../modules/notification/composables/useNotificationUnreadQuery';
+import { useNotificationUnreadQuery } from '@memoflow/notification-ui';
 import { useAuthenticationStore } from '../../modules/authentication/stores/authentication-store';
 import { useAccountStore } from '../../modules/account/stores/account-store';
 import AIChatView from '../../modules/ai/views/AIChatView.vue';
@@ -48,7 +48,7 @@ import RoutineCapsulePreview from '../../modules/routine/components/RoutineCapsu
 import NoteCapsulePreview from './previews/NoteCapsulePreview.vue';
 import ScheduleCapsulePreview from './previews/ScheduleCapsulePreview.vue';
 import type { CalendarEventItem } from '@memoflow/schedule-ui';
-import NotificationCapsulePreview from '../../modules/notification/components/NotificationCapsulePreview.vue';
+import { NotificationCapsulePreview } from '@memoflow/notification-ui';
 import ConversationSidebar from './ConversationSidebar.vue';
 import BusinessPanel from './BusinessPanel.vue';
 import TodayOverviewPanel from './TodayOverviewPanel.vue';

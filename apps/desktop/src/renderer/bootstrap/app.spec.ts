@@ -138,7 +138,7 @@ vi.mock('@memoflow/ipc-client', () => ({
   createResultIpcClient: vi.fn(() => ({})),
 }));
 
-vi.mock('@memoflow/app-vue/modules/notification', () => ({
+vi.mock('@memoflow/notification-ui', () => ({
   createNotificationStartupHook: mocks.createNotificationStartupHook,
   createNotificationClickNavigation: vi.fn(() => ({ start: vi.fn(), stop: vi.fn() })),
 }));

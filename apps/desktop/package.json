@@ -37,6 +37,7 @@
     "@memoflow/label-contracts": "workspace:*",
     "@memoflow/notification": "workspace:*",
     "@memoflow/notification-client": "workspace:*",
+    "@memoflow/notification-ui": "workspace:*",
     "@memoflow/powersync-schema": "workspace:*",
     "@memoflow/relation": "workspace:*",
     "@memoflow/relation-contracts": "workspace:*",

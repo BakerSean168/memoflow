@@ -401,6 +401,22 @@ export function createNotificationClientAliasEntries(workspaceRoot: string): Ali
   ];
 }
 
+export function createNotificationUiAliasEntries(workspaceRoot: string): Alias[] {
+  return [
+    {
+      find: /^@memoflow\/notification-ui\/host$/,
+      replacement: resolveFromWorkspace(
+        workspaceRoot,
+        'packages/notification-ui/src/notification-ui-host.ts',
+      ),
+    },
+    {
+      find: /^@memoflow\/notification-ui$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/notification-ui/src/index.ts'),
+    },
+  ];
+}
+
 export function createOperationsContractsAliasEntries(workspaceRoot: string): Alias[] {
   const operationsContractsRoot = resolveFromWorkspace(
     workspaceRoot,

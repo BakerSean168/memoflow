@@ -19,7 +19,7 @@ import { taskRoutes } from '../modules/task/router';
 import { routineRoutes } from '../modules/routine/router';
 import { scheduleRoutes } from '@memoflow/schedule-ui';
 import { repositoryRoutes } from '../modules/repository/router';
-import { notificationRoutes } from '../modules/notification/router';
+import { notificationRoutes } from '@memoflow/notification-ui';
 import { settingRoutes } from '../modules/setting/router';
 import { aiRoutes } from '../modules/ai/router';
 
