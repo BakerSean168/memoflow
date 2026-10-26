@@ -1,4 +1,4 @@
-import type { NotificationNavigationIntentDTO } from '@memoflow/contracts/notification';
+import type { NotificationNavigationIntentDTO } from '@memoflow/notification-contracts';
 
 const CATEGORY_ROUTE: Readonly<Record<string, string>> = {
   goal: '/goals',

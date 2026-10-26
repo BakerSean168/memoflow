@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { IdentityId } from '@memoflow/domain-shared';
-import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 import { ok } from '@memoflow/contracts/result';
 import { TaskGoalBindingTrigger, TaskPlanScheduleKind } from '@memoflow/contracts/task';
 import { eventBus } from '@memoflow/utils/domain';

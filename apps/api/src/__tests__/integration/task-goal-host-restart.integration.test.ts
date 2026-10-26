@@ -4,7 +4,7 @@ import { promisify } from 'node:util';
 import express from 'express';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { TaskGoalBindingTrigger } from '@memoflow/contracts/task';
-import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 import { prisma } from '@memoflow/database';
 import { IdentityId } from '@memoflow/domain-shared';
 import { createGoalPrismaModule, createGoalTaskProgressPrismaHandler } from '@memoflow/goal';

@@ -10,7 +10,7 @@ import {
   NotificationType,
   type NotificationRequestedOutboxInput,
   type NotificationRequestedWriterPort,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import type {
   RoutineOccurrenceNotificationRequestInput,
   RoutineOccurrenceNotificationWriterPort,

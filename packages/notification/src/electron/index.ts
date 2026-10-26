@@ -92,7 +92,7 @@ import {
   NotificationBatchInvocationSchema,
   UpdateNotificationPreferenceSchema,
   ExecuteNotificationActionSchema,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import { createLogger } from '@memoflow/utils/logger';
 import type { NotificationModuleInstance } from '../server/infrastructure';
 import { NotificationController } from '../server/transport';

@@ -16,10 +16,13 @@ import { describe, expect, it } from 'vitest';
    * Cross-module levels remain; module configs stay under modules/*.
    */
   const here = dirname(fileURLToPath(import.meta.url));
+  // Importance/Urgency/Priority 叶子枚举已迁至 @memoflow/shared-primitives（Issue #630 主线裁决）；
+  // 此 surface lock 按 §5.2-4 改指新 canonical 路径，断言保持不变。
+  const vo = join(here, '../../../shared-primitives/src/value-objects');
 
   describe('shared dual config / ZodErrorResponse retired (residual 645)', () => {
     it('value-objects barrel only exports Importance/Urgency/Priority levels', () => {
-      const index = readFileSync(join(here, 'value-objects/index.ts'), 'utf8');
+      const index = readFileSync(join(vo, 'index.ts'), 'utf8');
       expect(index).toContain('Residual 645');
       expect(index).toContain('ImportanceLevel');
       expect(index).toContain('UrgencyLevel');
@@ -31,7 +34,6 @@ import { describe, expect, it } from 'vitest';
     });
 
     it('dead dual config source files stay deleted', () => {
-      const vo = join(here, 'value-objects');
       for (const name of [
         'reminder-config.ts',
         'notification-config.ts',

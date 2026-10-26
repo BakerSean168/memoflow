@@ -49,7 +49,7 @@ import {
   ReplayDeadLetterInvocationSchema,
   ExecuteNotificationActionSchema,
   ExecuteNotificationActionResponseSchema,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import { BusinessOperationReceiptSchema } from '@memoflow/reliable-messaging-contracts';
 import {
   OperationAuditRecordSchema,

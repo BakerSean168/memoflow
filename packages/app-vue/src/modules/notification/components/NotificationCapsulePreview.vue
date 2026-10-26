@@ -150,7 +150,7 @@ import { useNotificationMutations } from '../composables/useNotificationMutation
 import type {
   NotificationActionIntent,
   NotificationClientDTO,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 
 const RECENT_LIMIT = 5;
 

@@ -18,7 +18,7 @@ import type {
   NotificationCategory,
   NotificationEventMap,
   NotificationChannelType,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import { Notification } from '../../../domain/aggregates/notification';
 import { createTypedEventPublisher, eventBus, flushDomainEvents } from '@memoflow/utils/domain';
 import {

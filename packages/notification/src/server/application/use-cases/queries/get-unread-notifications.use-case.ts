@@ -4,7 +4,7 @@
  * 获取未读通知的应用服务
  */
 
-import type { NotificationClientDTO } from '@memoflow/contracts/notification';
+import type { NotificationClientDTO } from '@memoflow/notification-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { ok } from '@memoflow/contracts/result';
 import type { INotificationRepository } from '../../../domain/repositories';

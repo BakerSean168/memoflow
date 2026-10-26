@@ -5,7 +5,7 @@ import {
   NotificationCategory,
   NotificationChannelType,
   NotificationType,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
 import type { BusinessOperationReceipt } from '@memoflow/reliable-messaging-contracts';
 import {

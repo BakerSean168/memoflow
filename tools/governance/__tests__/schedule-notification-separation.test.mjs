@@ -162,7 +162,7 @@ describe('findScheduleNotificationSeparationViolations', () => {
       },
       {
         relPath: 'packages/task/src/server/infrastructure/schedule-execution-source.ts',
-        content: `import { NotificationRequestedWriterPort } from '@memoflow/contracts/notification';\nswitch (source.sourceModule) { ... }`,
+        content: `import { NotificationRequestedWriterPort } from '@memoflow/notification-contracts';\nswitch (source.sourceModule) { ... }`,
       },
       {
         relPath: 'packages/notification/src/server/infrastructure/adapters/prisma/x.ts',

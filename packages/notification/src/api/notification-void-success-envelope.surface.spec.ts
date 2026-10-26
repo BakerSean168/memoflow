@@ -24,7 +24,7 @@ describe('notification void success envelope surface', () => {
     'utf8',
   );
   const responseSchemas = readFileSync(
-    resolve(__dirname, '../../../contracts/src/modules/notification/api/response-schemas.ts'),
+    resolve(__dirname, '../../../notification-contracts/src/api/response-schemas.ts'),
     'utf8',
   );
 

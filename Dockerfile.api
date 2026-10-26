@@ -54,6 +54,7 @@ COPY packages/workspace-contracts/package.json ./packages/workspace-contracts/pa
 COPY packages/relation/package.json ./packages/relation/package.json
 COPY packages/relation-contracts/package.json ./packages/relation-contracts/package.json
 COPY packages/notification/package.json ./packages/notification/package.json
+COPY packages/notification-contracts/package.json ./packages/notification-contracts/package.json
 COPY packages/reliable-messaging-contracts/package.json ./packages/reliable-messaging-contracts/package.json
 COPY packages/operations-contracts/package.json ./packages/operations-contracts/package.json
 COPY packages/patterns/package.json ./packages/patterns/package.json
@@ -106,6 +107,7 @@ COPY packages/workspace-contracts ./packages/workspace-contracts
 COPY packages/relation ./packages/relation
 COPY packages/relation-contracts ./packages/relation-contracts
 COPY packages/notification ./packages/notification
+COPY packages/notification-contracts ./packages/notification-contracts
 COPY packages/reliable-messaging-contracts ./packages/reliable-messaging-contracts
 COPY packages/operations-contracts ./packages/operations-contracts
 COPY packages/patterns ./packages/patterns

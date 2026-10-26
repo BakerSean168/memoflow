@@ -2,7 +2,7 @@ import type {
   NotificationPreferenceServerDTO,
   NotificationPreferenceClientDTO,
   NotificationChannelType,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import type {
   IdentityId,
   NotificationPreferenceId as NotificationPreferenceIdBranded,

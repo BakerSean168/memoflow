@@ -3,7 +3,7 @@ import type { Result } from '@memoflow/contracts/result';
 import { fail, ok } from '@memoflow/contracts/result';
 import type { Context } from '@memoflow/contracts/shared';
 import type { NotificationInboxPort } from '../application';
-import { NotificationQuerySchema } from '@memoflow/contracts/notification';
+import { NotificationQuerySchema } from '@memoflow/notification-contracts';
 import type {
   CleanupOldNotificationsReq,
   CreateNotificationReq,
@@ -11,7 +11,7 @@ import type {
   ExecuteNotificationActionRes,
   MarkAsReadBatchReq,
   UpdateNotificationPreferenceReq,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import { formatZodErrors } from '@memoflow/utils/result';
 
 export class NotificationController {

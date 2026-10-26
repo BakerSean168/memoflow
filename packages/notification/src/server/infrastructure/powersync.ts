@@ -36,7 +36,7 @@ import type {
   INotificationRepository,
   INotificationPreferenceRepository,
 } from '../domain/repositories';
-import type { NotificationRequestedWriterPort } from '@memoflow/contracts/notification';
+import type { NotificationRequestedWriterPort } from '@memoflow/notification-contracts';
 
 export interface CreateNotificationPowerSyncModuleOptions {
   readonly userTimeContextPort: UserTimeContextPort;

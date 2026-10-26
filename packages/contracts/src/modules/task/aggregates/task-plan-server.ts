@@ -14,7 +14,7 @@ import type {
 } from '../value-objects';
 
 // Import shared types
-import { ImportanceLevel } from '../../../shared/value-objects/importance';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 
 // ============ DTO Definitions ============
 

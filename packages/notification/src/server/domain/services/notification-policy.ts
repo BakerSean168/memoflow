@@ -9,7 +9,7 @@ import {
   type NotificationDeliveryReason as DeliveryReason,
   type NotificationPreferenceDecisionSource as PreferenceDecisionSource,
   type NotificationWorkflowDefinitionDTO,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import { BusinessRuleViolationError } from '@memoflow/utils/errors';
 import type { NotificationPreference } from '../aggregates/notification-preference';
 import type { QuietHours } from '../value-objects/quiet-hours';

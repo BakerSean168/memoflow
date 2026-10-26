@@ -2,7 +2,7 @@
  * Notification client seam.
  *
  * Public notification contracts stay centralized in
- * `@memoflow/contracts/notification`.
+ * `@memoflow/notification-contracts`.
  * Callers depend on this seam instead of the old application-client /
  * infrastructure-client layered exports.
  */

@@ -2,7 +2,7 @@ import type { Instant } from '@memoflow/contracts/primitives';
 import {
   ImportanceLevel,
   type ImportanceLevel as ImportanceLevelValue,
-} from '@memoflow/contracts/shared';
+} from '@memoflow/shared-primitives';
 import {
   TaskOccurrenceChecklistItemSchema,
   TaskOccurrenceResultSchema,

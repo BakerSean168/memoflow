@@ -10,7 +10,7 @@ import {
 import { TaskPlanStatus } from '../../domain/value-objects/task-plan-status';
 import { InvalidDateRangeError, InvalidTaskPlanStateError } from '../value-objects/task-errors';
 import { TaskOccurrenceScheduleSnapshot } from '../value-objects';
-import type { ImportanceLevel } from '@memoflow/contracts/shared';
+import type { ImportanceLevel } from '@memoflow/shared-primitives';
 import type { IdentityId } from '@memoflow/domain-shared';
 import type { TaskPlanId } from '../../domain/value-objects/task-plan-id';
 import { TaskOccurrence } from './task-occurrence';

@@ -4,7 +4,7 @@ import type {
   ScheduledInvocationContext,
 } from '@memoflow/schedule-contracts';
 import { parseIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
-import type { NotificationRequestedWriterPort } from '@memoflow/contracts/notification';
+import type { NotificationRequestedWriterPort } from '@memoflow/notification-contracts';
 import {
   createTaskReminderScheduledHandlerRegistration,
   buildTaskReminderOperationId,

@@ -8,7 +8,7 @@
  */
 
 import { ref, type App } from 'vue';
-import type { ExecuteNotificationActionReq } from '@memoflow/contracts/notification';
+import type { ExecuteNotificationActionReq } from '@memoflow/notification-contracts';
 import { createCloudAuthHttpClient, createExternalAgentHttpClient } from '@memoflow/cloud-auth';
 import { EXTERNAL_AGENT_SERVICE_KEY } from '@memoflow/app-vue/di';
 import {

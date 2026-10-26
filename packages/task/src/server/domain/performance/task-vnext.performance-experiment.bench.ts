@@ -6,7 +6,7 @@ import {
   TaskPlanScheduleKind,
   TaskRecurrenceEndKind,
 } from '@memoflow/contracts/task';
-import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 import type { Ymd } from '@memoflow/contracts/primitives';
 import { IdentityId } from '@memoflow/domain-shared';
 import { asYmd, createTimeContext } from '@memoflow/time';

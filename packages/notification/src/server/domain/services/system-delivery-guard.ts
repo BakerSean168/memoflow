@@ -2,7 +2,7 @@ import {
   NotificationDeliveryPlanOutcome,
   NotificationDeliveryReason,
   type NotificationChannelType,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import type { NotificationDeliveryUsage } from '../repositories/i-notification-repository';
 
 export interface SystemDeliveryGuardLimits {

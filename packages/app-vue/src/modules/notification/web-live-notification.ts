@@ -3,7 +3,7 @@ import type {
   ExecuteNotificationActionRes,
   NotificationActionIntent,
   NotificationDispatchInAppEvent,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { toast } from 'vue-sonner';
 import { presentBrowserSystemNotification } from './browser-system-notification';

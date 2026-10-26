@@ -46,6 +46,8 @@
   "scripts": {},
   "dependencies": {
     "@memoflow/contracts": "workspace:*",
+    "@memoflow/notification-contracts": "workspace:*",
+    "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/database": "workspace:*",
     "@memoflow/domain-shared": "workspace:*",
     "@memoflow/goal-contracts": "workspace:*",

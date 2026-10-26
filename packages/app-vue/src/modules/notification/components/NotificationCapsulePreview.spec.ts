@@ -4,7 +4,7 @@ import { computed, nextTick, ref } from 'vue';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { NotificationClientDTO } from '@memoflow/contracts/notification';
+import type { NotificationClientDTO } from '@memoflow/notification-contracts';
 import NotificationCapsulePreview from './NotificationCapsulePreview.vue';
 
 const notificationsRef = ref<NotificationClientDTO[]>([]);

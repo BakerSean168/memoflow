@@ -15,7 +15,7 @@ import {
   TaskReminderConfigSchema,
   TaskPlanScheduleSchema,
 } from './task-plan.dto';
-import { ImportanceLevel } from '../../../shared/value-objects/importance';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 import { TaskOccurrenceStatus } from '../value-objects/task-occurrence-status';
 import { TaskPlanStatus } from '../value-objects/task-plan-status';
 import { TaskPlanOutcome } from '../value-objects/task-plan-outcome';

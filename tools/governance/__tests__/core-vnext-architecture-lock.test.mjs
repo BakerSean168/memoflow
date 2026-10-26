@@ -9,7 +9,7 @@ const canonicalNotificationFiles = [
   {
     relPath: 'packages/notification/src/server/infrastructure/runtime/notification.runtime.ts',
     content: `
-      import { NOTIFICATION_REQUESTED_MESSAGE_TYPE } from '@memoflow/contracts/notification';
+      import { NOTIFICATION_REQUESTED_MESSAGE_TYPE } from '@memoflow/notification-contracts';
       function getCreateNotificationUseCase() { return null; }
       async function processNotificationRequested() { getCreateNotificationUseCase(); }
     `,

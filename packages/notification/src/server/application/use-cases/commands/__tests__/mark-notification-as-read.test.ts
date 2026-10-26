@@ -3,7 +3,7 @@ import { createMockRepo } from '@memoflow/test-utils/mocks';
 import { anIdentityId } from '@memoflow/test-utils/fixtures';
 import type { INotificationRepository } from '../../../../domain/repositories/i-notification-repository';
 import { Notification } from '../../../../domain/aggregates/notification';
-import { NotificationCategory, NotificationType } from '@memoflow/contracts/notification';
+import { NotificationCategory, NotificationType } from '@memoflow/notification-contracts';
 import { MarkNotificationAsReadUseCase } from '../mark-notification-as-read.use-case';
 
 function anUnreadFact(identityId = anIdentityId()) {

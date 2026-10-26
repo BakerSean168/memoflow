@@ -9,7 +9,7 @@ import {
   type SchedulingOwner,
 } from '@memoflow/schedule-contracts';
 import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
-import { NotificationCategory, NotificationType } from '@memoflow/contracts/notification';
+import { NotificationCategory, NotificationType } from '@memoflow/notification-contracts';
 import {
   ReminderTimeUnit,
   TaskOccurrenceStatus,

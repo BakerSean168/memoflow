@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { NotificationChannelType } from '@memoflow/contracts/notification';
+import { NotificationChannelType } from '@memoflow/notification-contracts';
 import { asHm, requireTimeZoneId } from '@memoflow/time';
 import { NotificationPreference } from '../../../../../domain/aggregates/notification-preference';
 import { QuietHours } from '../../../../../domain/value-objects/quiet-hours';

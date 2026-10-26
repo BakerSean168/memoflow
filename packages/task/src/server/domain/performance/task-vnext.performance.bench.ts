@@ -10,7 +10,7 @@ import {
 import { TaskPlan } from '../aggregates/task-plan';
 import { TaskPlanId } from '../value-objects/task-plan-id';
 import { TaskPlanStatus } from '../value-objects/task-plan-status';
-import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 import type { Ymd } from '@memoflow/contracts/primitives';
 import { IdentityId } from '@memoflow/domain-shared';
 import { createTaskRecurrenceDateAdapter } from '../aggregates/task-recurrence-date.adapter';

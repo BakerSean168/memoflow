@@ -1,4 +1,4 @@
-import type { ImportanceLevel } from '@memoflow/contracts/shared';
+import type { ImportanceLevel } from '@memoflow/shared-primitives';
 import type { Instant } from '@memoflow/contracts/primitives';
 import type { IdentityId } from '@memoflow/domain-shared';
 import type { TaskPlanCompletionPolicyValue, TaskPlanOutcomeValue } from '@memoflow/contracts/task';

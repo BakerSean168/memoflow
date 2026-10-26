@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 
-import type { NotificationClientDTO } from '@memoflow/contracts/notification';
+import type { NotificationClientDTO } from '@memoflow/notification-contracts';
 
 import {
   PrimaryButton,

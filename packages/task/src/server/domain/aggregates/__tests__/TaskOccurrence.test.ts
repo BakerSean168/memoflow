@@ -1,5 +1,5 @@
 import type { Ymd } from '@memoflow/contracts/primitives';
-import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 import {
   TaskOccurrenceResultKind,
   TaskOccurrenceStatus,

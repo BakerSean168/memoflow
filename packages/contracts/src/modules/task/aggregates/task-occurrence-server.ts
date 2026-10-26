@@ -11,7 +11,7 @@ import type {
   TaskPlanId,
   TransferDate,
 } from '@memoflow/shared-primitives';
-import type { ImportanceLevel } from '../../../shared/value-objects/importance';
+import type { ImportanceLevel } from '@memoflow/shared-primitives';
 import type {
   TaskOccurrenceChecklistItem,
   TaskOccurrenceResult,

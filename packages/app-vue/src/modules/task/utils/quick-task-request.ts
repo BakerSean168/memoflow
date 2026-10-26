@@ -1,5 +1,5 @@
 import type { CreateTaskPlanReq } from '@memoflow/contracts/task';
-import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 import { getProductTodayYmd } from '../../../shared/utils/product-time';
 
 export function buildQuickTaskRequest(title: string): CreateTaskPlanReq {

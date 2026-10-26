@@ -4,7 +4,7 @@ import {
   TaskPlanOutcome,
   TaskPlanStatus,
 } from '@memoflow/contracts/task';
-import { ImportanceLevel } from '@memoflow/contracts/shared';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 import { TaskPlan, type TaskPlanState } from './task-plan';
 
 function stateWithGoalOnlyLink(): TaskPlanState {

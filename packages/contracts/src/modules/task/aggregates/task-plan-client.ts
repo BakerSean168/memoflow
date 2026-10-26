@@ -9,7 +9,7 @@ import type { TaskPlanStatus } from '../value-objects/task-plan-status';
 import type { TaskPlanOutcome } from '../value-objects/task-plan-outcome';
 import type { TaskPlanCompletionPolicy } from '../value-objects/task-plan-completion-policy';
 import type { TaskOccurrenceStatus } from '../value-objects/task-occurrence-status';
-import { ImportanceLevel } from '../../../shared/value-objects/importance';
+import { ImportanceLevel } from '@memoflow/shared-primitives';
 import type {
   TaskPlanSchedule,
   TaskReminderConfigDTO,
