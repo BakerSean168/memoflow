@@ -55,7 +55,7 @@
     },
     "test:contract": {
       "executor": "nx:run-commands",
-      "inputs": ["default", "^production"],
+      "inputs": ["default", "^production", "{workspaceRoot}/packages/app-vue/src/**/*"],
       "cache": true,
       "dependsOn": ["build"],
       "options": {
@@ -63,8 +63,5 @@
         "cwd": "packages/goal-ui"
       }
     }
-  },
-  "namedInputs": {
-    "default": ["{projectRoot}/**/*", "sharedGlobals", "{workspaceRoot}/packages/app-vue/src/**/*"]
   }
 }
