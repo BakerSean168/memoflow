@@ -5,7 +5,7 @@
 ## 公开 seam
 
 ```text
-@memoflow/contracts/goal
+@memoflow/goal-contracts
 
 @memoflow/goal
 @memoflow/goal/api

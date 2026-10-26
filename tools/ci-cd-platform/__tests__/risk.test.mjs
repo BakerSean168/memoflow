@@ -226,7 +226,7 @@ test('explicit full main policy enables every execution lane while coverage stay
 
 test('classifyCapabilities maps stories to componentBrowser only', () => {
   const caps = classifyCapabilities({
-    changedFiles: ['packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.stories.ts'],
+    changedFiles: ['packages/goal-ui/src/components/dialogs/GoalDialog.stories.ts'],
     scope: { unit: [], integration: [], boundary: [], coverage: [], perf: [], webFlowFiles: [] },
   });
   assert.equal(caps.componentBrowser.files.length, 1);

@@ -23,7 +23,7 @@ import type {
   LocalAgentModelOptions,
 } from '@memoflow/contracts/ai';
 import { useAI } from './useAI';
-import { useGoal } from '../../goal/composables/useGoal';
+import { useGoal } from '@memoflow/goal-ui';
 import { useTask } from '../../task/composables/useTask';
 import { useRecentKnowledgeNotes } from '../../repository/composables/useRecentKnowledgeNotes';
 import { useReferenceableKnowledgeNotes } from '../../repository/composables/useReferenceableKnowledgeNotes';

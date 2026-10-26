@@ -16,13 +16,11 @@
   },
   "dependencies": {
     "@memoflow/contracts": "workspace:*",
-    "@memoflow/domain-shared": "workspace:*",
     "@memoflow/goal-contracts": "workspace:*",
     "@memoflow/goal-core": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",
-    "@memoflow/label-contracts": "workspace:*",
-    "@memoflow/utils": "workspace:*",
+    "@memoflow/transport-contracts": "workspace:*",
     "@memoflow/workspace-contracts": "workspace:*"
   }
 }

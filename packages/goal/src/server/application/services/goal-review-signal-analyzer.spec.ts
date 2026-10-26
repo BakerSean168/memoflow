@@ -18,9 +18,9 @@ describe('Goal review observed-fact signals', () => {
     for (const path of [
       './goal-review-signal-analyzer.ts',
       './goal-review-context-builder.ts',
-      '../../../../../app-vue/src/modules/goal/components/GoalReviewSnapshot.vue',
-      '../../../../../app-vue/src/modules/goal/components/dialogs/GoalReviewCreateDialog.vue',
-      '../../../../../app-vue/src/modules/goal/components/dialogs/GoalReviewInspectDialog.vue',
+      '../../../../../goal-ui/src/components/GoalReviewSnapshot.vue',
+      '../../../../../goal-ui/src/components/dialogs/GoalReviewCreateDialog.vue',
+      '../../../../../goal-ui/src/components/dialogs/GoalReviewInspectDialog.vue',
     ]) {
       const source = readFileSync(new URL(path, import.meta.url), 'utf8');
       expect(source).not.toMatch(/@memoflow\/ai|AI_SERVICE|useAI|generateText|generateObject|llm/i);

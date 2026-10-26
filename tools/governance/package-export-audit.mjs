@@ -41,6 +41,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   'label-contracts': ['./*'],
   'data-portability-contracts': ['./*'],
   'goal-contracts': ['./*'],
+  'goal-ui': ['./composables/useGoal', './host'],
   'notification-contracts': ['./*'],
   'schedule-contracts': ['./*'],
   'workspace-contracts': ['./*'],

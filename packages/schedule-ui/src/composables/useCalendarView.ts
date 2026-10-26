@@ -30,7 +30,6 @@ import { scheduleUiHost } from '../schedule-ui-host';
 
 const PLANNER_GOAL_PAGE_SIZE = 100;
 const PLANNER_TASK_PLAN_LIMIT = 200;
-type PlannerGoalEntity = { toDTO(): GoalClientDTO };
 
 // ============ 统一内部事件类型 ============
 
@@ -324,7 +323,7 @@ export function useCalendarView() {
         queryKey: scheduleUiHost.plannerOwnerQueryKeys.goals(identityScope),
         staleTime: force ? 0 : scheduleUiHost.PLANNER_OWNER_STALE_TIME_MS,
         queryFn: async () => {
-          const collectedGoals: PlannerGoalEntity[] = [];
+          const collectedGoals: GoalClientDTO[] = [];
           let page = 1;
           let hasMore = true;
 
@@ -340,7 +339,7 @@ export function useCalendarView() {
             page += 1;
           }
 
-          return collectedGoals.map((goal) => goal.toDTO());
+          return collectedGoals;
         },
       });
       const routinesPromise = scheduleUiHost.fetchRoutineUpcomingCached({

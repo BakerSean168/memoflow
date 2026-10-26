@@ -41,7 +41,7 @@ vi.mock('@memoflow/app-vue/modules/account', () => ({
   useAccountStore: () => ({ getCurrentAccountId: 'profile-1', setInitialized: vi.fn() }),
 }));
 
-vi.mock('@memoflow/app-vue/modules/goal', () => ({
+vi.mock('@memoflow/goal-ui', () => ({
   useGoalStore: () => ({ setInitialized: vi.fn() }),
 }));
 

@@ -2,7 +2,8 @@ import type { WorkspaceEventStreamOptions, WorkflowRuntimeClient } from '@memofl
 import type { WorkspaceEvent } from '@memoflow/contracts/ai';
 
 type Listener = { receive(event: WorkspaceEvent): Promise<void>; stop(): void };
-const subscriptions = new WeakMap<WorkflowRuntimeClient, WorkspaceSubscription>();
+type WorkspaceEventSource = Pick<WorkflowRuntimeClient, 'streamWorkspaceEvents'>;
+const subscriptions = new WeakMap<WorkspaceEventSource, WorkspaceSubscription>();
 
 /** One authenticated transport per host client; projections own their snapshot calibration. */
 class WorkspaceSubscription {
@@ -11,7 +12,7 @@ class WorkspaceSubscription {
   private timer: ReturnType<typeof setTimeout> | undefined;
   private cursor: string | undefined;
   private ready = false;
-  constructor(private readonly runtime: WorkflowRuntimeClient) {}
+  constructor(private readonly runtime: WorkspaceEventSource) {}
 
   reset(): void {
     this.controller?.abort();
@@ -128,7 +129,7 @@ class WorkspaceSubscription {
 }
 
 export function subscribeWorkspaceEvents(
-  runtime: WorkflowRuntimeClient,
+  runtime: WorkspaceEventSource,
   options: WorkspaceEventStreamOptions,
 ): Promise<void> {
   if (!runtime.streamWorkspaceEvents)
@@ -142,6 +143,6 @@ export function subscribeWorkspaceEvents(
 }
 
 /** Establish a fresh live/snapshot boundary before dropping bounded projection metadata. */
-export function resetWorkspaceEvents(runtime: WorkflowRuntimeClient): void {
+export function resetWorkspaceEvents(runtime: WorkspaceEventSource): void {
   subscriptions.get(runtime)?.reset();
 }

@@ -52,7 +52,7 @@ export { createAppRouter } from './router';
 // ── Stores (consumed by app containers for DI/provide) ──
 export { useAuthenticationStore } from './modules/authentication';
 export { useAccountStore } from './modules/account';
-export { useGoalStore } from './modules/goal';
+export { useGoalStore } from '@memoflow/goal-ui';
 export { useTaskStore } from './modules/task';
 export { useScheduleStore } from '@memoflow/schedule-ui';
 export { useNotificationStore } from './modules/notification';
@@ -65,7 +65,7 @@ export {
   type NotificationStartupHookOptions,
   type NotificationSseInvalidationSourceOptions,
 } from './modules/notification';
-export { createGoalStartupHook } from './modules/goal';
+export { createGoalStartupHook } from '@memoflow/goal-ui';
 
 // ── Server-state (RefArch Phase 5 Query Cache pilots) ──
 // Host composition surface only (§3.6): feature query keys and cache-patch helpers stay

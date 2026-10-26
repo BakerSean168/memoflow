@@ -1,3 +1,4 @@
+import { installGoalUiHost } from '../../../../di/goal-ui-host';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { beforeEach, expect, it, vi } from 'vitest';
@@ -7,8 +8,9 @@ import { useTaskOccurrenceActionCoordinator } from '../../composables/useTaskOcc
 import { instance } from '../task-quick-test-fixtures';
 import enUS from '../../../../locales/en-US';
 import type { TaskGoalBindingDTO } from '@memoflow/contracts/task';
+installGoalUiHost();
 const owner = vi.hoisted(() => ({ read: vi.fn() }));
-vi.mock('../../../goal/composables/useGoal', () => ({
+vi.mock('@memoflow/goal-ui/composables/useGoal', () => ({
   useGoal: () => ({ getKeyResultById: () => undefined, getGoalRecordPreviewContext: owner.read }),
 }));
 beforeEach(() => {

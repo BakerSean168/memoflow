@@ -1,0 +1,54 @@
+{
+  "name": "@memoflow/goal-ui",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./composables/useGoal": {
+      "types": "./dist/composables/useGoal.d.ts",
+      "import": "./dist/composables/useGoal.js"
+    },
+    "./host": {
+      "types": "./dist/goal-ui-host.d.ts",
+      "import": "./dist/host.js"
+    }
+  },
+  "dependencies": {
+    "@lucide/vue": "^1.48.0",
+    "@memoflow/contracts": "workspace:*",
+    "@memoflow/goal-client": "workspace:*",
+    "@memoflow/goal-contracts": "workspace:*",
+    "@memoflow/http-client": "workspace:*",
+    "@memoflow/label-contracts": "workspace:*",
+    "@memoflow/relation-contracts": "workspace:*",
+    "@memoflow/shared-primitives": "workspace:*",
+    "@memoflow/time": "workspace:*",
+    "@memoflow/transport-contracts": "workspace:*",
+    "@memoflow/ui-vue-shadcn": "workspace:*",
+    "@memoflow/utils": "workspace:*",
+    "@memoflow/workspace-contracts": "workspace:*",
+    "@tanstack/vue-query": "5.103.2",
+    "@vueuse/core": "15.0.0",
+    "echarts": "^6.1.0",
+    "pinia": "^4.0.3",
+    "pinia-plugin-persistedstate": "^4.7.1",
+    "uuid": "^14.0.2",
+    "vue": "^3.5.43",
+    "vue-echarts": "^8.3.0",
+    "vue-i18n": "^11.4.12",
+    "vue-router": "^5.3.1",
+    "vue-sonner": "^2.0.8"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "6.0.9",
+    "typescript": "npm:@typescript/typescript6@6.0.2",
+    "vite": "8.3.1",
+    "vite-plugin-dts": "5.1.1"
+  }
+}

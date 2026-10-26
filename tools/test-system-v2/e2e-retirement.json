@@ -121,8 +121,8 @@
       "reason": "Aggressive reduction authorized in Issue #625: routine behavior is owned by existing component/unit/API/database tests. Browser-specific geometry and complete UI-to-server journeys are deliberately no longer duplicated; this is not a claim of assertion-for-assertion equivalence.",
       "sourceSha256": "458b22a073f105287d7dde13749b35a77e579eb97bc48094a4e7992d8972e5ec",
       "replacements": [
-        "packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.spec.ts",
-        "packages/app-vue/src/modules/goal/views/GoalDetailView.spec.ts",
+        "packages/goal-ui/src/components/dialogs/GoalDialog.spec.ts",
+        "packages/goal-ui/src/views/GoalDetailView.spec.ts",
         "apps/api/src/runtime/goal-task-http.integration.test.ts"
       ],
       "issue": "https://github.com/BakerSean168/memoflow/issues/625",
@@ -324,9 +324,7 @@
       "path": "apps/web/e2e/ai/goal-workflow/checkpoint-identity.spec.ts",
       "reason": "User authorized the remaining ordinary Web Flow to retire in Issue #625. Existing state/checkpoint/event/component contracts and real HTTP/PostgreSQL authentication own the lower-layer behavior. Actual browser reload, IndexedDB host assembly, cross-browser transport and UI auth navigation are accepted signal losses, not assertion-equivalent replacements.",
       "sourceSha256": "ee299bd8b4616d07d402d75073c6503a6daddf2322677b46840207449ee88cee",
-      "replacements": [
-        "packages/app-vue/src/modules/goal/composables/useGoalDraftCheckpoint.spec.ts"
-      ],
+      "replacements": ["packages/goal-ui/src/composables/useGoalDraftCheckpoint.spec.ts"],
       "issue": "https://github.com/BakerSean168/memoflow/issues/625",
       "coverageDisposition": "lower-layer ownership; accepted loss of ordinary whole-system Web journey"
     },

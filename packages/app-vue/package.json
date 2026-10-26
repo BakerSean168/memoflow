@@ -43,10 +43,6 @@
       "types": "./dist/modules/account/index.d.ts",
       "import": "./dist/modules/account/index.js"
     },
-    "./modules/goal": {
-      "types": "./dist/modules/goal/index.d.ts",
-      "import": "./dist/modules/goal/index.js"
-    },
     "./modules/task": {
       "types": "./dist/modules/task/index.d.ts",
       "import": "./dist/modules/task/index.js"
@@ -92,6 +88,7 @@
     "@memoflow/data-portability": "workspace:*",
     "@memoflow/goal-client": "workspace:*",
     "@memoflow/goal-contracts": "workspace:*",
+    "@memoflow/goal-ui": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",
     "@memoflow/label": "workspace:*",

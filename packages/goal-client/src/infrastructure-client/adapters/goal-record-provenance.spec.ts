@@ -33,7 +33,7 @@ describe('Goal client record provenance', () => {
           expect(record.authorship).toBe(authorship);
           expect(record.source).toEqual(dto.source);
           expect(record.recordedAt).toBe(1000);
-          expect(GoalRecordClientDTOSchema.parse(record.toDTO())).toEqual(dto);
+          expect(GoalRecordClientDTOSchema.parse(record)).toEqual(dto);
         }
       }
     },

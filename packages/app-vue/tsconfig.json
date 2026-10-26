@@ -9,6 +9,10 @@
     "types": ["node", "vite/client"],
     "paths": {
       "@/*": ["./src/*"],
+      "@memoflow/goal-ui/host": ["../goal-ui/dist/goal-ui-host.d.ts"],
+      "@memoflow/goal-ui": ["../goal-ui/dist/index.d.ts"],
+      "@memoflow/goal-ui/composables/useGoal": ["../goal-ui/dist/composables/useGoal.d.ts"],
+      "@memoflow/goal-ui/*": ["../goal-ui/dist/*.d.ts"],
       "@memoflow/contracts": ["../../packages/contracts/src/index.ts"],
       "@memoflow/contracts/account": ["../../packages/contracts/src/modules/account/index.ts"],
       "@memoflow/contracts/ai": ["../../packages/contracts/src/modules/ai/index.ts"],

@@ -342,7 +342,7 @@ test('storybook-only changes select no Web specs (Q4 Component Browser lane owns
     selectWebSpecs({
       enabled: true,
       full: false,
-      files: ['packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.stories.ts'],
+      files: ['packages/goal-ui/src/components/dialogs/GoalDialog.stories.ts'],
     }),
     { specs: [], fallback: false },
   );
@@ -350,7 +350,7 @@ test('storybook-only changes select no Web specs (Q4 Component Browser lane owns
     enabled: true,
     full: false,
     files: [
-      'packages/app-vue/src/modules/goal/components/dialogs/GoalDialog.stories.ts',
+      'packages/goal-ui/src/components/dialogs/GoalDialog.stories.ts',
       'apps/web/e2e/ai/provider-onboarding.spec.ts',
     ],
   });

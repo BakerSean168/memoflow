@@ -54,7 +54,6 @@ export default defineConfig({
           'src/modules/authentication/index.ts',
         ),
         'modules/account/index': path.resolve(__dirname, 'src/modules/account/index.ts'),
-        'modules/goal/index': path.resolve(__dirname, 'src/modules/goal/index.ts'),
         'modules/task/index': path.resolve(__dirname, 'src/modules/task/index.ts'),
         'modules/routine/index': path.resolve(__dirname, 'src/modules/routine/index.ts'),
         'modules/notification/index': path.resolve(__dirname, 'src/modules/notification/index.ts'),

@@ -213,11 +213,15 @@ export function classifyCapabilities({ changedFiles, scope }) {
       // A migrated contract must run when its production component changes,
       // not only when the Story itself changes. Nx supplies transitive package
       // consumers; the Web-owned auth view is additionally an explicit input.
+      // Migrated feature UI packages are production views too: their Story
+      // contracts live in ui-storybook, so a component edit there must run the
+      // component browser lane even when the changed project is the library.
       files: changedFiles.filter(
         (file) =>
           STORY_PATTERN.test(file) ||
           file.startsWith('apps/web/src/auth/') ||
           file.startsWith('packages/app-vue/src/') ||
+          file.startsWith('packages/goal-ui/src/') ||
           file.startsWith('packages/ui-vue-shadcn/src/') ||
           (scope?.projects ?? []).includes('ui-storybook'),
       ),

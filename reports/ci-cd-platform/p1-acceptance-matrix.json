@@ -102,10 +102,10 @@
     "expected": {
       "full": false,
       "targets": {
-        "build": ["app-vue", "desktop", "governance-tools", "ui-storybook", "web"],
+        "build": ["app-vue", "desktop", "goal-ui", "governance-tools", "ui-storybook", "web"],
         "typecheck": ["app-vue", "desktop", "ui-storybook", "web"],
         "test": ["app-vue", "desktop", "governance-tools", "web"],
-        "test:contract": [],
+        "test:contract": ["goal-ui"],
         "test:smoke": [],
         "test:integration": [],
         "test:boundary": ["desktop"],
@@ -130,6 +130,7 @@
         "build": [
           "app-vue:build",
           "desktop:build",
+          "goal-ui:build",
           "ui-storybook:build",
           "web:build",
           "app-vue:typecheck",
@@ -143,7 +144,7 @@
         "verification-children": ["desktop:test:ipc", "desktop:test:main"],
         "web-visual": ["web:e2e:visual-regression"],
         "component-browser": ["ui-storybook:test:interaction"],
-        "contract": []
+        "contract": ["goal-ui:test:contract"]
       },
       "serverShards": [
         {
@@ -156,10 +157,10 @@
     "actual": {
       "full": false,
       "targets": {
-        "build": ["app-vue", "desktop", "governance-tools", "ui-storybook", "web"],
+        "build": ["app-vue", "desktop", "goal-ui", "governance-tools", "ui-storybook", "web"],
         "typecheck": ["app-vue", "desktop", "ui-storybook", "web"],
         "test": ["app-vue", "desktop", "governance-tools", "web"],
-        "test:contract": [],
+        "test:contract": ["goal-ui"],
         "test:smoke": [],
         "test:integration": [],
         "test:boundary": ["desktop"],
@@ -184,6 +185,7 @@
         "build": [
           "app-vue:build",
           "desktop:build",
+          "goal-ui:build",
           "ui-storybook:build",
           "web:build",
           "app-vue:typecheck",
@@ -197,7 +199,7 @@
         "verification-children": ["desktop:test:ipc", "desktop:test:main"],
         "web-visual": ["web:e2e:visual-regression"],
         "component-browser": ["ui-storybook:test:interaction"],
-        "contract": []
+        "contract": ["goal-ui:test:contract"]
       },
       "serverShards": [
         {
@@ -207,12 +209,11 @@
         }
       ]
     },
-    "manifestDigest": "56dbbbdbf520a7ac64d34c27f332126ed3fa29b754989a73b0b0c0a24e4a4091",
+    "manifestDigest": "5770ba0a5efd3b86fa24dc680cbb5851f91aea2790c5147968ca515877655397",
     "skips": {
       "unit-1": "no affected primary tasks for this resource pool",
       "unit-2": "no affected primary tasks for this resource pool",
-      "server-unit": "no affected primary tasks for this resource pool",
-      "contract": "no affected primary tasks for this resource pool"
+      "server-unit": "no affected primary tasks for this resource pool"
     },
     "receiptExecution": "unverified: replay computes the real Nx plan; it does not execute product suites"
   },
@@ -977,6 +978,7 @@
           "goal-client",
           "goal-contracts",
           "goal-core",
+          "goal-ui",
           "governance-tools",
           "host-runtime",
           "http-client",
@@ -1033,6 +1035,7 @@
           "goal-client",
           "goal-contracts",
           "goal-core",
+          "goal-ui",
           "host-runtime",
           "http-client",
           "ipc-client",
@@ -1089,6 +1092,7 @@
           "goal-client",
           "goal-contracts",
           "goal-core",
+          "goal-ui",
           "governance-tools",
           "host-runtime",
           "http-client",
@@ -1130,6 +1134,7 @@
           "data-portability-contracts",
           "desktop-contracts",
           "goal-contracts",
+          "goal-ui",
           "host-runtime",
           "label-contracts",
           "notification-contracts",
@@ -1245,6 +1250,7 @@
           "goal-client:build",
           "goal-contracts:build",
           "goal-core:build",
+          "goal-ui:build",
           "host-runtime:build",
           "http-client:build",
           "ipc-client:build",
@@ -1298,6 +1304,7 @@
           "goal-client:typecheck",
           "goal-contracts:typecheck",
           "goal-core:typecheck",
+          "goal-ui:typecheck",
           "host-runtime:typecheck",
           "http-client:typecheck",
           "ipc-client:typecheck",
@@ -1363,6 +1370,7 @@
           "data-portability-contracts:test:contract",
           "desktop-contracts:test:contract",
           "goal-contracts:test:contract",
+          "goal-ui:test:contract",
           "host-runtime:test:contract",
           "label-contracts:test:contract",
           "notification-contracts:test:contract",
@@ -1436,6 +1444,7 @@
           "goal-client",
           "goal-contracts",
           "goal-core",
+          "goal-ui",
           "governance-tools",
           "host-runtime",
           "http-client",
@@ -1492,6 +1501,7 @@
           "goal-client",
           "goal-contracts",
           "goal-core",
+          "goal-ui",
           "host-runtime",
           "http-client",
           "ipc-client",
@@ -1548,6 +1558,7 @@
           "goal-client",
           "goal-contracts",
           "goal-core",
+          "goal-ui",
           "governance-tools",
           "host-runtime",
           "http-client",
@@ -1589,6 +1600,7 @@
           "data-portability-contracts",
           "desktop-contracts",
           "goal-contracts",
+          "goal-ui",
           "host-runtime",
           "label-contracts",
           "notification-contracts",
@@ -1704,6 +1716,7 @@
           "goal-client:build",
           "goal-contracts:build",
           "goal-core:build",
+          "goal-ui:build",
           "host-runtime:build",
           "http-client:build",
           "ipc-client:build",
@@ -1757,6 +1770,7 @@
           "goal-client:typecheck",
           "goal-contracts:typecheck",
           "goal-core:typecheck",
+          "goal-ui:typecheck",
           "host-runtime:typecheck",
           "http-client:typecheck",
           "ipc-client:typecheck",
@@ -1822,6 +1836,7 @@
           "data-portability-contracts:test:contract",
           "desktop-contracts:test:contract",
           "goal-contracts:test:contract",
+          "goal-ui:test:contract",
           "host-runtime:test:contract",
           "label-contracts:test:contract",
           "notification-contracts:test:contract",
@@ -1872,7 +1887,7 @@
         }
       ]
     },
-    "manifestDigest": "189a8e9289451830229c445756b3c3762c41b1f6f6c2392b2085121566d2db64",
+    "manifestDigest": "43ec160cb52c010b092f5067ce0dd7329e0d57236dd517aaef6c077e813ddf9f",
     "skips": {},
     "receiptExecution": "unverified: replay computes the real Nx plan; it does not execute product suites"
   },
@@ -1902,6 +1917,7 @@
           "goal-client",
           "goal-contracts",
           "goal-core",
+          "goal-ui",
           "governance-tools",
           "host-runtime",
           "http-client",
@@ -1958,6 +1974,7 @@
           "goal-client",
           "goal-contracts",
           "goal-core",
+          "goal-ui",
           "host-runtime",
           "http-client",
           "ipc-client",
@@ -2014,6 +2031,7 @@
           "goal-client",
           "goal-contracts",
           "goal-core",
+          "goal-ui",
           "governance-tools",
           "host-runtime",
           "http-client",
@@ -2055,6 +2073,7 @@
           "data-portability-contracts",
           "desktop-contracts",
           "goal-contracts",
+          "goal-ui",
           "host-runtime",
           "label-contracts",
           "notification-contracts",
@@ -2170,6 +2189,7 @@
           "goal-client:build",
           "goal-contracts:build",
           "goal-core:build",
+          "goal-ui:build",
           "host-runtime:build",
           "http-client:build",
           "ipc-client:build",
@@ -2223,6 +2243,7 @@
           "goal-client:typecheck",
           "goal-contracts:typecheck",
           "goal-core:typecheck",
+          "goal-ui:typecheck",
           "host-runtime:typecheck",
           "http-client:typecheck",
           "ipc-client:typecheck",
@@ -2288,6 +2309,7 @@
           "data-portability-contracts:test:contract",
           "desktop-contracts:test:contract",
           "goal-contracts:test:contract",
+          "goal-ui:test:contract",
           "host-runtime:test:contract",
           "label-contracts:test:contract",
           "notification-contracts:test:contract",
@@ -2361,6 +2383,7 @@
           "goal-client",
           "goal-contracts",
           "goal-core",
+          "goal-ui",
           "governance-tools",
           "host-runtime",
           "http-client",
@@ -2417,6 +2440,7 @@
           "goal-client",
           "goal-contracts",
           "goal-core",
+          "goal-ui",
           "host-runtime",
           "http-client",
           "ipc-client",
@@ -2473,6 +2497,7 @@
           "goal-client",
           "goal-contracts",
           "goal-core",
+          "goal-ui",
           "governance-tools",
           "host-runtime",
           "http-client",
@@ -2514,6 +2539,7 @@
           "data-portability-contracts",
           "desktop-contracts",
           "goal-contracts",
+          "goal-ui",
           "host-runtime",
           "label-contracts",
           "notification-contracts",
@@ -2629,6 +2655,7 @@
           "goal-client:build",
           "goal-contracts:build",
           "goal-core:build",
+          "goal-ui:build",
           "host-runtime:build",
           "http-client:build",
           "ipc-client:build",
@@ -2682,6 +2709,7 @@
           "goal-client:typecheck",
           "goal-contracts:typecheck",
           "goal-core:typecheck",
+          "goal-ui:typecheck",
           "host-runtime:typecheck",
           "http-client:typecheck",
           "ipc-client:typecheck",
@@ -2747,6 +2775,7 @@
           "data-portability-contracts:test:contract",
           "desktop-contracts:test:contract",
           "goal-contracts:test:contract",
+          "goal-ui:test:contract",
           "host-runtime:test:contract",
           "label-contracts:test:contract",
           "notification-contracts:test:contract",
@@ -2797,7 +2826,7 @@
         }
       ]
     },
-    "manifestDigest": "079f59973daf73d5586ef804d568bcec8d532f753781806d578b09fb722d5005",
+    "manifestDigest": "f20173f4bf901546064dc43e1cadcd607ab032d31bca89a71e4f019c174a4b9f",
     "skips": {},
     "receiptExecution": "unverified: replay computes the real Nx plan; it does not execute product suites"
   },
@@ -2807,10 +2836,10 @@
     "expected": {
       "full": false,
       "targets": {
-        "build": ["governance-tools", "ui-storybook"],
+        "build": ["goal-ui", "governance-tools", "ui-storybook"],
         "typecheck": ["app-vue"],
         "test": ["app-vue", "governance-tools", "test-system-v2"],
-        "test:contract": [],
+        "test:contract": ["goal-ui"],
         "test:smoke": [],
         "test:integration": [],
         "test:boundary": ["desktop"],
@@ -2832,14 +2861,14 @@
         "unit-1": [],
         "unit-2": [],
         "unit-3": [],
-        "build": ["ui-storybook:build", "app-vue:typecheck"],
+        "build": ["goal-ui:build", "ui-storybook:build", "app-vue:typecheck"],
         "web-unit-1": ["app-vue:test#1/2"],
         "web-unit-2": ["app-vue:test#2/2"],
         "server-unit": [],
         "verification-children": ["desktop:test:ipc", "desktop:test:main"],
         "web-visual": ["web:e2e:visual-regression"],
         "component-browser": ["ui-storybook:test:interaction"],
-        "contract": []
+        "contract": ["goal-ui:test:contract"]
       },
       "serverShards": [
         {
@@ -2852,10 +2881,10 @@
     "actual": {
       "full": false,
       "targets": {
-        "build": ["governance-tools", "ui-storybook"],
+        "build": ["goal-ui", "governance-tools", "ui-storybook"],
         "typecheck": ["app-vue"],
         "test": ["app-vue", "governance-tools", "test-system-v2"],
-        "test:contract": [],
+        "test:contract": ["goal-ui"],
         "test:smoke": [],
         "test:integration": [],
         "test:boundary": ["desktop"],
@@ -2877,14 +2906,14 @@
         "unit-1": [],
         "unit-2": [],
         "unit-3": [],
-        "build": ["ui-storybook:build", "app-vue:typecheck"],
+        "build": ["goal-ui:build", "ui-storybook:build", "app-vue:typecheck"],
         "web-unit-1": ["app-vue:test#1/2"],
         "web-unit-2": ["app-vue:test#2/2"],
         "server-unit": [],
         "verification-children": ["desktop:test:ipc", "desktop:test:main"],
         "web-visual": ["web:e2e:visual-regression"],
         "component-browser": ["ui-storybook:test:interaction"],
-        "contract": []
+        "contract": ["goal-ui:test:contract"]
       },
       "serverShards": [
         {
@@ -2894,13 +2923,12 @@
         }
       ]
     },
-    "manifestDigest": "88e4c2eecb534adbac9ed39e79f19cf671a444a35b9b85259a2f8a956bff435e",
+    "manifestDigest": "5e915f43a8f354b1de0d2f356d3c60857bb76d82fb4d3d9821f849f65d6ee927",
     "skips": {
       "unit-1": "no affected primary tasks for this resource pool",
       "unit-2": "no affected primary tasks for this resource pool",
       "unit-3": "no affected primary tasks for this resource pool",
-      "server-unit": "no affected primary tasks for this resource pool",
-      "contract": "no affected primary tasks for this resource pool"
+      "server-unit": "no affected primary tasks for this resource pool"
     },
     "receiptExecution": "unverified: replay computes the real Nx plan; it does not execute product suites"
   },
@@ -2930,6 +2958,7 @@
           "goal-client",
           "goal-contracts",
           "goal-core",
+          "goal-ui",
           "governance-tools",
           "host-runtime",
           "http-client",
@@ -2986,6 +3015,7 @@
           "goal-client",
           "goal-contracts",
           "goal-core",
+          "goal-ui",
           "host-runtime",
           "http-client",
           "ipc-client",
@@ -3042,6 +3072,7 @@
           "goal-client",
           "goal-contracts",
           "goal-core",
+          "goal-ui",
           "governance-tools",
           "host-runtime",
           "http-client",
@@ -3083,6 +3114,7 @@
           "data-portability-contracts",
           "desktop-contracts",
           "goal-contracts",
+          "goal-ui",
           "host-runtime",
           "label-contracts",
           "notification-contracts",
@@ -3198,6 +3230,7 @@
           "goal-client:build",
           "goal-contracts:build",
           "goal-core:build",
+          "goal-ui:build",
           "host-runtime:build",
           "http-client:build",
           "ipc-client:build",
@@ -3251,6 +3284,7 @@
           "goal-client:typecheck",
           "goal-contracts:typecheck",
           "goal-core:typecheck",
+          "goal-ui:typecheck",
           "host-runtime:typecheck",
           "http-client:typecheck",
           "ipc-client:typecheck",
@@ -3317,6 +3351,7 @@
           "data-portability-contracts:test:contract",
           "desktop-contracts:test:contract",
           "goal-contracts:test:contract",
+          "goal-ui:test:contract",
           "host-runtime:test:contract",
           "label-contracts:test:contract",
           "notification-contracts:test:contract",
@@ -3391,6 +3426,7 @@
           "goal-client",
           "goal-contracts",
           "goal-core",
+          "goal-ui",
           "governance-tools",
           "host-runtime",
           "http-client",
@@ -3447,6 +3483,7 @@
           "goal-client",
           "goal-contracts",
           "goal-core",
+          "goal-ui",
           "host-runtime",
           "http-client",
           "ipc-client",
@@ -3503,6 +3540,7 @@
           "goal-client",
           "goal-contracts",
           "goal-core",
+          "goal-ui",
           "governance-tools",
           "host-runtime",
           "http-client",
@@ -3544,6 +3582,7 @@
           "data-portability-contracts",
           "desktop-contracts",
           "goal-contracts",
+          "goal-ui",
           "host-runtime",
           "label-contracts",
           "notification-contracts",
@@ -3659,6 +3698,7 @@
           "goal-client:build",
           "goal-contracts:build",
           "goal-core:build",
+          "goal-ui:build",
           "host-runtime:build",
           "http-client:build",
           "ipc-client:build",
@@ -3712,6 +3752,7 @@
           "goal-client:typecheck",
           "goal-contracts:typecheck",
           "goal-core:typecheck",
+          "goal-ui:typecheck",
           "host-runtime:typecheck",
           "http-client:typecheck",
           "ipc-client:typecheck",
@@ -3778,6 +3819,7 @@
           "data-portability-contracts:test:contract",
           "desktop-contracts:test:contract",
           "goal-contracts:test:contract",
+          "goal-ui:test:contract",
           "host-runtime:test:contract",
           "label-contracts:test:contract",
           "notification-contracts:test:contract",
@@ -3829,7 +3871,7 @@
         }
       ]
     },
-    "manifestDigest": "977e3bff375bcc325541a229330cc24f5a8a0d7e7e86ddd4f2222678a0664b73",
+    "manifestDigest": "1f4d08ba97e220c392adbbbc6acc9cdf55092f0b23591936a9ad9eefedcd8cd7",
     "skips": {},
     "receiptExecution": "unverified: replay computes the real Nx plan; it does not execute product suites"
   },

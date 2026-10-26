@@ -1,4 +1,7 @@
-import { getKeyResultCalculationLabel, KEY_RESULT_CALCULATION_PRESENTATION } from '../../goal';
+import {
+  getKeyResultCalculationLabel,
+  KEY_RESULT_CALCULATION_PRESENTATION,
+} from '@memoflow/goal-ui';
 import { inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Result } from '@memoflow/contracts/result';

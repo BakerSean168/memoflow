@@ -1,3 +1,4 @@
+import { installGoalUiHost } from '@memoflow/app-vue/di';
 /**
  * Web Platform - full app DI container.
  *
@@ -131,6 +132,7 @@ const taskService = createLazyService(async () => {
 });
 
 export function installAppServices(app: App): void {
+  installGoalUiHost();
   app.provide(ACCOUNT_SERVICE_KEY, accountService);
   app.provide(AUTH_SERVICE_KEY, authService);
   app.provide(EXTERNAL_AGENT_SERVICE_KEY, createExternalAgentHttpClient(window.location.origin));

@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { GoalReviewClientDTOSchema } from '@memoflow/goal-contracts';
-import { GoalReview } from './domain-client/entities/goal-review';
+import { createGoalClientService } from './application-client';
+import { ok } from '@memoflow/transport-contracts';
+import type { IGoalApiClient } from './application-client/ports/goal-api-client.port';
 
 describe('Goal client review DTO parity', () => {
-  it('preserves persisted review signals through DTO -> client entity -> DTO', () => {
+  it('preserves persisted review signals through the client DTO port', async () => {
     const context = {
       windowStartAt: 1,
       windowEndAt: 2,
@@ -28,8 +30,12 @@ describe('Goal client review DTO parity', () => {
       createdAt: 2,
       updatedAt: 2,
     });
-    expect(GoalReviewClientDTOSchema.parse(GoalReview.load(dto).toDTO()).systemContext).toEqual(
-      context,
-    );
+    const service = createGoalClientService({
+      getGoalReviewsByGoal: async () => ok({ data: [dto] }),
+    } as IGoalApiClient);
+    const result = await service.getGoalReviews(dto.goalId);
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw result.error;
+    expect(GoalReviewClientDTOSchema.parse(result.data.reviews[0]).systemContext).toEqual(context);
   });
 });

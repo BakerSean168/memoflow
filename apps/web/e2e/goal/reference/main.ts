@@ -28,12 +28,14 @@ import type {
 } from '@memoflow/app-vue/di/types';
 import { productionLocaleMessages } from '@memoflow/app-vue/locales/production-messages';
 import { installServerStateRuntime } from '@memoflow/app-vue/platform/server-state';
-import GoalModuleLayout from '@memoflow/app-vue/modules/goal/views/GoalModuleLayout.vue';
-import GoalListView from '@memoflow/app-vue/modules/goal/views/GoalListView.vue';
-import GoalDetailView from '@memoflow/app-vue/modules/goal/views/GoalDetailView.vue';
-import GoalDialog from '@memoflow/app-vue/modules/goal/components/dialogs/GoalDialog.vue';
-import type { GoalNativeEditSession } from '@memoflow/app-vue/modules/goal/composables/goalNativeEditSession';
-import { goalRoutes } from '@memoflow/app-vue/modules/goal/router';
+import {
+  GoalListView,
+  GoalModuleLayout,
+  GoalDetailView,
+  GoalDialog,
+  goalRoutes,
+  type GoalNativeEditSession,
+} from '@memoflow/goal-ui';
 import '../../../../../apps/web/src/styles/index.css';
 
 const { previewGoalRecord } = await import('@memoflow/goal-client');
@@ -98,7 +100,7 @@ function previewContext() {
 // Deliberately partial ports: unimplemented operations must fail, rather than fake success.
 const service = {
   async listGoals() {
-    return ok({ goals: [{ toDTO: () => goal }], pagination: { hasMore: false, total: 1 } });
+    return ok({ goals: [goal], pagination: { hasMore: false, total: 1 } });
   },
   async getGoalWorkspace() {
     calls.push('workspace');
@@ -204,7 +206,7 @@ const service = {
   },
   async getGoalReviews() {
     calls.push('reviews');
-    return ok({ reviews: goal.reviews.map((review) => ({ toDTO: () => review })) });
+    return ok({ reviews: goal.reviews });
   },
 } as unknown as IGoalService;
 const parent = goalRoutes[0]!;

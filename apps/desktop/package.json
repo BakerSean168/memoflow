@@ -30,6 +30,7 @@
     "@memoflow/goal": "workspace:*",
     "@memoflow/goal-client": "workspace:*",
     "@memoflow/goal-contracts": "workspace:*",
+    "@memoflow/goal-ui": "workspace:*",
     "@memoflow/host-runtime": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",
     "@memoflow/label": "workspace:*",

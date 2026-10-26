@@ -6,7 +6,7 @@ import {
   type GoalPlanDraft,
   type GoalPlanDraftContent,
 } from '@memoflow/contracts/ai';
-import type { GoalNativeEditSession } from '../../goal/composables/goalNativeEditSession';
+import type { GoalNativeEditSession } from '@memoflow/goal-ui';
 import type { EditableGoalKnowledge, EditableGoalTask } from './types';
 export type GoalNativeProjection = {
   mode: 'clarification' | 'review';

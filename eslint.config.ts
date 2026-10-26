@@ -31,7 +31,14 @@ const featureScopeConstraints = [
   },
   {
     sourceTag: 'scope:goal',
-    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:goal', 'scope:scheduler'],
+    // temporary: schedule shared-kernel until Schedule* contracts are extracted
+    onlyDependOnLibsWithTags: [
+      ...sharedScopeTags,
+      'scope:goal',
+      'scope:ui',
+      'scope:schedule',
+      'scope:scheduler',
+    ],
   },
   {
     sourceTag: 'scope:notification',
@@ -142,15 +149,19 @@ const moduleBoundaryDepConstraints = [
   // so a banned tier cannot be reached through an intermediary package.
   {
     sourceTag: 'tier:core',
-    notDependOnLibsWithTags: ['tier:client', 'tier:server'],
+    notDependOnLibsWithTags: ['tier:client', 'tier:server', 'tier:ui'],
   },
   {
     sourceTag: 'tier:client',
-    notDependOnLibsWithTags: ['tier:server'],
+    notDependOnLibsWithTags: ['tier:server', 'tier:ui'],
   },
   {
     sourceTag: 'tier:server',
-    notDependOnLibsWithTags: ['tier:client'],
+    notDependOnLibsWithTags: ['tier:client', 'tier:ui'],
+  },
+  {
+    sourceTag: 'tier:ui',
+    notDependOnLibsWithTags: ['tier:server', 'tier:ui'],
   },
   // ============ Scope-level feature isolation (ADR-033 M3) ============
   ...featureScopeConstraints,
@@ -481,7 +492,7 @@ export default tseslint.config(
         'packages/app-vue/src/modules/task/utils/task-plan-presentation.ts',
         'packages/app-vue/src/modules/task/utils/format-task-duration.ts',
         'packages/app-vue/src/shared/utils/format-schedule-duration-minutes.ts',
-        'packages/app-vue/src/modules/goal/utils/goal-timeline.ts',
+        'packages/goal-ui/src/utils/goal-timeline.ts',
         // P3 residual 1207 durable boundary
         'packages/app-vue/src/modules/notification/views/SSEMonitorPage.vue',
         // Session bootstrap may createTimeFacade

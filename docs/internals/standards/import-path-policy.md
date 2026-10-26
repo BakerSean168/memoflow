@@ -37,7 +37,7 @@ updated: 2026-07-27T00:00:00
 ```ts
 // good
 import { createTimeFacade } from '@memoflow/time';
-import type { GoalClientDTO } from '@memoflow/contracts/goal';
+import type { GoalClientDTO } from '@memoflow/goal-contracts';
 import { GoalHttpAdapter } from '@memoflow/goal-client';
 
 // bad — 跨包深路径 / 源码路径

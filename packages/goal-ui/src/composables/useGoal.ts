@@ -1,0 +1,323 @@
+import { goalUiHost } from '../goal-ui-host';
+/**
+ * useGoal - 目标模块主 composable
+ *
+ * 编排 GoalClientService 调用 + Store 更新 + 错误处理。
+ * 通过 inject(goalUiHost.GOAL_SERVICE_KEY) 获取服务实例，
+ * 使用 Result<T> 模式替代 try/catch。
+ *
+ * 子实体操作已拆分：
+ * - useGoalFilters: filter/search
+ * - useKeyResults: key result CRUD
+ * - useGoalRecords: records + reviews
+ * - goalOperations: 共享 orchestration helpers
+ */
+
+import { computed, ref, inject } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useGoalStore } from '../stores/goal-store';
+
+import {
+  GoalStatus,
+  type GoalStatus as GoalStatusValue,
+  type GoalClientDTO,
+  type CreateGoalReq,
+  type UpdateGoalReq,
+  type GetGoalAggregateRes,
+} from '@memoflow/goal-contracts';
+import { executeGoalOperation, createGoalErrorHandler } from './goalOperations';
+import { useGoalFilters } from './useGoalFilters';
+import { useKeyResults } from './useKeyResults';
+import { useGoalRecords } from './useGoalRecords';
+import { isGoalStatusTransitionAllowed } from './goalStatusTransitions';
+
+export function useGoal() {
+  const store = useGoalStore();
+  const service = goalUiHost.useStrictInject(goalUiHost.GOAL_SERVICE_KEY, 'GoalService');
+  const checkpointStore = inject(goalUiHost.GOAL_DRAFT_CHECKPOINT_KEY, undefined);
+  const { t } = useI18n();
+  const savingId = ref<string | null>(null);
+  const lastCreateRejected = ref(false);
+
+  const goals = computed(() => store.goals);
+  const selectedGoal = computed(() => store.selectedGoal);
+  const keyResults = computed(() => store.keyResults);
+  const goalReviews = computed(() => store.goalReviews);
+  const goalRecords = computed(() => store.goalRecords);
+  const isLoading = computed(() => store.isLoading);
+  const error = computed(() => store.error);
+  const isSaving = computed(() => savingId.value !== null);
+
+  const opOpts = {
+    t,
+    setError: (msg: string | null) => store.setError(msg),
+    onError: createGoalErrorHandler(t, (msg) => store.setError(msg)),
+  };
+
+  // ── Goal CRUD ────────────────────────────────────────────────────────
+
+  async function fetchGoals() {
+    store.setLoading(true);
+    store.setError(null);
+    try {
+      const searchQuery = store.searchQuery || undefined;
+      const params = {
+        systemView: store.systemView,
+        page: store.pagination.page,
+        pageSize: store.pagination.pageSize,
+        labelIdsAll: store.labelIdsAll.length ? [...store.labelIdsAll] : undefined,
+      };
+
+      const result = await service.listGoals({
+        ...params,
+        query: searchQuery,
+      });
+
+      if (result.ok) {
+        store.setGoals(result.data.goals ?? [], result.data.pagination?.total ?? 0);
+      } else {
+        opOpts.onError(result.error, 'goal.error.loadListFailed', 'fetchGoals');
+      }
+    } catch (e: unknown) {
+      opOpts.onError(e, 'goal.error.loadListException', 'fetchGoals');
+    } finally {
+      store.setLoading(false);
+    }
+  }
+
+  async function createGoal(req: CreateGoalReq) {
+    const identityScope = checkpointStore?.scope();
+    lastCreateRejected.value = false;
+    savingId.value = 'new';
+    store.setError(null);
+    try {
+      const data = await executeGoalOperation(
+        async () => {
+          const result = await service.createGoal(goalUiHost.sanitizeForIpc(req));
+          lastCreateRejected.value = !result.ok && result.error.code === 'VALIDATION_ERROR';
+          return result;
+        },
+        {
+          ...opOpts,
+          fallbackKey: 'goal.error.createFailed',
+          scope: 'createGoal',
+        },
+      );
+      if (data && checkpointStore?.scope() === identityScope) {
+        store.applyGoalMutationReceipt(data);
+        return data.readModel;
+      }
+      return null;
+    } finally {
+      savingId.value = null;
+    }
+  }
+
+  async function updateGoal(id: string, req: UpdateGoalReq) {
+    const identityScope = checkpointStore?.scope();
+    savingId.value = id;
+    store.setError(null);
+    try {
+      const data = await executeGoalOperation(
+        () => service.updateGoal(id, goalUiHost.sanitizeForIpc(req)),
+        {
+          ...opOpts,
+          fallbackKey: 'goal.error.updateFailed',
+          scope: 'updateGoal',
+        },
+      );
+      if (data && checkpointStore?.scope() === identityScope) {
+        store.applyGoalMutationReceipt(data);
+        return data.readModel;
+      }
+      return null;
+    } finally {
+      savingId.value = null;
+    }
+  }
+
+  async function deleteGoal(id: string) {
+    savingId.value = id;
+    store.setError(null);
+    try {
+      const expectedVersion = store.getGoalById(id)?.version;
+      if (expectedVersion === undefined) return false;
+      const receipt = await executeGoalOperation(
+        () => service.deleteGoal(id, { expectedVersion }),
+        {
+          ...opOpts,
+          fallbackKey: 'goal.error.deleteFailed',
+          scope: 'deleteGoal',
+        },
+      );
+      if (receipt) {
+        store.applyGoalMutationReceipt(receipt);
+        store.removeGoal(id);
+        return true;
+      }
+      return false;
+    } finally {
+      savingId.value = null;
+    }
+  }
+
+  // ── Goal lifecycle ───────────────────────────────────────────────────
+
+  async function applyLifecycleMutation(
+    id: string,
+    mutate: (expectedVersion: number) => ReturnType<typeof service.planGoal>,
+    fallbackKey: string,
+    scope: string,
+  ) {
+    savingId.value = id;
+    store.setError(null);
+    try {
+      const expectedVersion = store.getGoalById(id)?.version;
+      if (expectedVersion === undefined) return false;
+      const receipt = await executeGoalOperation(() => mutate(expectedVersion), {
+        ...opOpts,
+        fallbackKey,
+        scope,
+      });
+      if (!receipt) return false;
+      store.applyGoalMutationReceipt(receipt);
+      return true;
+    } finally {
+      savingId.value = null;
+    }
+  }
+
+  async function planGoal(id: string) {
+    return applyLifecycleMutation(
+      id,
+      (expectedVersion) => service.planGoal(id, expectedVersion),
+      'goal.error.planFailed',
+      'planGoal',
+    );
+  }
+
+  async function activateGoal(id: string) {
+    return applyLifecycleMutation(
+      id,
+      (expectedVersion) => service.activateGoal(id, expectedVersion),
+      'goal.error.activateFailed',
+      'activateGoal',
+    );
+  }
+
+  async function completeGoal(id: string) {
+    return applyLifecycleMutation(
+      id,
+      (expectedVersion) => service.completeGoal(id, expectedVersion),
+      'goal.error.completeFailed',
+      'completeGoal',
+    );
+  }
+
+  async function abandonGoal(id: string) {
+    return applyLifecycleMutation(
+      id,
+      (expectedVersion) => service.abandonGoal(id, expectedVersion),
+      'goal.error.abandonFailed',
+      'abandonGoal',
+    );
+  }
+
+  async function transitionGoalStatus(goal: GoalClientDTO, targetStatus: GoalStatusValue) {
+    if (goal.status === targetStatus) return goal;
+    if (!isGoalStatusTransitionAllowed(goal.status, targetStatus)) return null;
+
+    const id = String(goal.id);
+    savingId.value = id;
+    store.setError(null);
+    try {
+      const fallbackKey =
+        targetStatus === GoalStatus.Planned
+          ? 'goal.error.planFailed'
+          : targetStatus === GoalStatus.InProgress
+            ? 'goal.error.activateFailed'
+            : targetStatus === GoalStatus.Completed
+              ? 'goal.error.completeFailed'
+              : 'goal.error.abandonFailed';
+      const receipt = await executeGoalOperation(
+        () =>
+          targetStatus === GoalStatus.Planned
+            ? service.planGoal(id, goal.version)
+            : targetStatus === GoalStatus.InProgress
+              ? service.activateGoal(id, goal.version)
+              : targetStatus === GoalStatus.Completed
+                ? service.completeGoal(id, goal.version)
+                : service.abandonGoal(id, goal.version),
+        {
+          ...opOpts,
+          fallbackKey,
+          scope: `transitionGoalStatus:${goal.status}->${targetStatus}`,
+        },
+      );
+      if (!receipt) return null;
+      store.applyGoalMutationReceipt(receipt);
+      return receipt.readModel;
+    } finally {
+      savingId.value = null;
+    }
+  }
+
+  // ── Aggregate View ───────────────────────────────────────────────────
+
+  async function getGoalAggregateView(goalId: string): Promise<GetGoalAggregateRes | null> {
+    store.setLoading(true);
+    store.setError(null);
+    try {
+      const data = await executeGoalOperation(() => service.getGoalAggregateView(goalId), {
+        ...opOpts,
+        fallbackKey: 'goal.error.loadAggregateViewFailed',
+        scope: 'getGoalAggregateView',
+      });
+      if (data) {
+        store.hydrateAggregate(data);
+        return data;
+      }
+      return null;
+    } finally {
+      store.setLoading(false);
+    }
+  }
+
+  // ── Sub-composables ──────────────────────────────────────────────────
+
+  const filters = useGoalFilters(fetchGoals);
+  const keyResultOps = useKeyResults();
+  const recordOps = useGoalRecords();
+
+  return {
+    // View state
+    goals,
+    selectedGoal,
+    getKeyResultById: store.getKeyResultById,
+    keyResults,
+    goalReviews,
+    goalRecords,
+    isLoading,
+    isSaving,
+    error,
+    // Goal CRUD
+    fetchGoals,
+    createGoal,
+    lastCreateRejected,
+    updateGoal,
+    deleteGoal,
+    planGoal,
+    activateGoal,
+    completeGoal,
+    abandonGoal,
+    transitionGoalStatus,
+    // Aggregate view
+    getGoalAggregateView,
+    // Filters (delegated)
+    ...filters,
+    // Key Result CRUD (delegated)
+    ...keyResultOps,
+    // Records + Reviews (delegated)
+    ...recordOps,
+  };
+}

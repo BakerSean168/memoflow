@@ -179,7 +179,7 @@ describe('HARD-7102 core vNext architecture lock', () => {
         content: `const base = kr.startingValue ?? kr.progressBaselineValue;`,
       },
       {
-        relPath: 'packages/app-vue/src/modules/goal/LegacyKr.vue',
+        relPath: 'packages/goal-ui/src/LegacyKr.vue',
         content: `const hidden = keyResult.trackingBaseValue;`,
       },
       {

@@ -219,6 +219,26 @@ export function createDataPortabilityContractsAliasEntries(workspaceRoot: string
   ];
 }
 
+export function createGoalUiAliasEntries(workspaceRoot: string): Alias[] {
+  return [
+    {
+      find: /^@memoflow\/goal-ui\/host$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/goal-ui/src/goal-ui-host.ts'),
+    },
+    {
+      find: /^@memoflow\/goal-ui\/composables\/useGoal$/,
+      replacement: resolveFromWorkspace(
+        workspaceRoot,
+        'packages/goal-ui/src/composables/useGoal.ts',
+      ),
+    },
+    {
+      find: /^@memoflow\/goal-ui$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/goal-ui/src/index.ts'),
+    },
+  ];
+}
+
 export function createGoalContractsAliasEntries(workspaceRoot: string): Alias[] {
   const goalContractsRoot = resolveFromWorkspace(workspaceRoot, 'packages/goal-contracts/src');
 
