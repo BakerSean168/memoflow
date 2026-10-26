@@ -255,7 +255,7 @@ test('all selected Unit suites have one existing-project owner, including the tw
       .filter(
         (project) =>
           !['memoflow', 'governance-tools', 'test-system-v2'].includes(project) &&
-          !(project === 'contracts' && jobs.contract.length),
+          !jobs.contract.includes(`${project}:test:contract`),
       )
       .flatMap((project) =>
         project === 'app-vue' ? ['app-vue:test#1/2', 'app-vue:test#2/2'] : [`${project}:test`],

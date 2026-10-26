@@ -80,7 +80,7 @@
       },
       "serverShards": []
     },
-    "manifestDigest": "d2e608a30eed8f52bcd847719e040f744f7dbc727aaf77699d937213bbd38404",
+    "manifestDigest": "8d975183970d63138b5723491f6214063032a1125c2cf858729907d978efd2e9",
     "skips": {
       "unit-1": "no affected primary tasks for this resource pool",
       "unit-2": "no affected primary tasks for this resource pool",
@@ -207,7 +207,7 @@
         }
       ]
     },
-    "manifestDigest": "aada2c2a58e081dc029fb64dd2de2391f2bcff4c6dbe015118c0dbe547c44f17",
+    "manifestDigest": "e4ee64ce2d39c73e1610ab3f2e0fce5563da097761839a63986e36008fe8fadc",
     "skips": {
       "unit-1": "no affected primary tasks for this resource pool",
       "unit-2": "no affected primary tasks for this resource pool",
@@ -381,7 +381,7 @@
         }
       ]
     },
-    "manifestDigest": "4e12e19b3b4f844ec1f50aa27fd75b5003e2d8ecc2dfe9098d36239aeb7cded1",
+    "manifestDigest": "ddec0ad7f2790bbbbfdd3b8f2bf94e3129f1d00334eac1b3c79fc26e35a5f6c9",
     "skips": {
       "unit-1": "no affected primary tasks for this resource pool",
       "unit-2": "no affected primary tasks for this resource pool",
@@ -484,7 +484,7 @@
         }
       ]
     },
-    "manifestDigest": "0b7c057e20ea3a06608b1197a4d945ba008680132b93ce3d7af452139383cdee",
+    "manifestDigest": "4073f7b6843b79eaefc7cc74400a1ecb0aef4b40464f9cced210cf40ba3981cc",
     "skips": {
       "unit-2": "no affected primary tasks for this resource pool",
       "unit-3": "no affected primary tasks for this resource pool",
@@ -589,7 +589,7 @@
         }
       ]
     },
-    "manifestDigest": "c72a4040ecb368bfd459ffdb570cb768bc72051df96046eff3518956d7cd46c1",
+    "manifestDigest": "220c2b5e35e85f4e209ce88f82ca6afe2cc362792e6156d5ea9861c458d8fd58",
     "skips": {
       "unit-2": "no affected primary tasks for this resource pool",
       "unit-3": "no affected primary tasks for this resource pool",
@@ -693,7 +693,7 @@
         }
       ]
     },
-    "manifestDigest": "648cc84851e4755921d259f71d852ec37352994940e01ee5ac44eef902648280",
+    "manifestDigest": "e3a0b2e07021125593986b5093fb6e9c34b1b17805784016d442aa3104fd7ba7",
     "skips": {
       "unit-1": "no affected primary tasks for this resource pool",
       "unit-2": "no affected primary tasks for this resource pool",
@@ -943,7 +943,7 @@
         }
       ]
     },
-    "manifestDigest": "43b1d5e056747ae5a83e88707db4d38687031a12bc86e9c2312d7761a6dfa5b0",
+    "manifestDigest": "d9995c66c5609bbf4da88cb07f2db6fefc02d8f9611a299896bccb375a601f00",
     "skips": {
       "web-visual": "no affected primary tasks for this resource pool",
       "component-browser": "Nx selected the combined project; this diff has no browser resource inputs, and its primary Unit tasks remain selected",
@@ -1150,12 +1150,12 @@
           "ai:test",
           "reminder:test",
           "schedule:test",
-          "desktop-contracts:test",
-          "host-runtime:test",
-          "quality:test",
-          "ui-core:test",
-          "cloud-auth:test",
-          "data-portability:test",
+          "goal-client:test",
+          "powersync-schema:test",
+          "schedule-orchestration:test",
+          "setting:test",
+          "utils:test",
+          "relation:test",
           "label:test",
           "ipc-client:test"
         ],
@@ -1163,28 +1163,24 @@
           "task:test",
           "account:test",
           "assets:test",
-          "goal-core:test",
-          "powersync-schema:test",
-          "transport-contracts:test",
-          "time:test",
-          "ui-vue-shadcn:test",
-          "scheduler:test",
+          "ui-core:test",
+          "cloud-auth:test",
+          "data-portability:test",
           "patterns:test",
-          "http-client:test"
+          "domain-shared:test"
         ],
         "unit-3": [
           "desktop:test",
           "notification:test",
           "ci-cd-platform:test",
           "repository:test",
-          "goal-client:test",
-          "shared-primitives:test",
-          "schedule-orchestration:test",
-          "setting:test",
-          "utils:test",
-          "relation:test",
+          "goal-core:test",
+          "quality:test",
+          "time:test",
+          "ui-vue-shadcn:test",
+          "scheduler:test",
           "agent-gateway:test",
-          "domain-shared:test"
+          "http-client:test"
         ],
         "build": [
           "account:build",
@@ -1275,7 +1271,7 @@
         ],
         "web-unit-1": ["web:test", "app-vue:test#1/2"],
         "web-unit-2": ["app-vue:test#2/2"],
-        "server-unit": ["api:test", "database:test", "migrator:test"],
+        "server-unit": ["api:test", "migrator:test", "database:test"],
         "verification-children": [
           "desktop:test:ipc",
           "desktop:test:main",
@@ -1537,12 +1533,12 @@
           "ai:test",
           "reminder:test",
           "schedule:test",
-          "desktop-contracts:test",
-          "host-runtime:test",
-          "quality:test",
-          "ui-core:test",
-          "cloud-auth:test",
-          "data-portability:test",
+          "goal-client:test",
+          "powersync-schema:test",
+          "schedule-orchestration:test",
+          "setting:test",
+          "utils:test",
+          "relation:test",
           "label:test",
           "ipc-client:test"
         ],
@@ -1550,28 +1546,24 @@
           "task:test",
           "account:test",
           "assets:test",
-          "goal-core:test",
-          "powersync-schema:test",
-          "transport-contracts:test",
-          "time:test",
-          "ui-vue-shadcn:test",
-          "scheduler:test",
+          "ui-core:test",
+          "cloud-auth:test",
+          "data-portability:test",
           "patterns:test",
-          "http-client:test"
+          "domain-shared:test"
         ],
         "unit-3": [
           "desktop:test",
           "notification:test",
           "ci-cd-platform:test",
           "repository:test",
-          "goal-client:test",
-          "shared-primitives:test",
-          "schedule-orchestration:test",
-          "setting:test",
-          "utils:test",
-          "relation:test",
+          "goal-core:test",
+          "quality:test",
+          "time:test",
+          "ui-vue-shadcn:test",
+          "scheduler:test",
           "agent-gateway:test",
-          "domain-shared:test"
+          "http-client:test"
         ],
         "build": [
           "account:build",
@@ -1662,7 +1654,7 @@
         ],
         "web-unit-1": ["web:test", "app-vue:test#1/2"],
         "web-unit-2": ["app-vue:test#2/2"],
-        "server-unit": ["api:test", "database:test", "migrator:test"],
+        "server-unit": ["api:test", "migrator:test", "database:test"],
         "verification-children": [
           "desktop:test:ipc",
           "desktop:test:main",
@@ -1728,7 +1720,7 @@
         }
       ]
     },
-    "manifestDigest": "3a42359795c054df79621f04255a402ec1d8565d2fad56b1e2fdf7a26aa82495",
+    "manifestDigest": "7ad14904522e56c88d09304865caaaba02a1fca915ef87bd50dc6041470a654b",
     "skips": {},
     "receiptExecution": "unverified: replay computes the real Nx plan; it does not execute product suites"
   },
@@ -1931,12 +1923,12 @@
           "ai:test",
           "reminder:test",
           "schedule:test",
-          "desktop-contracts:test",
-          "host-runtime:test",
-          "quality:test",
-          "ui-core:test",
-          "cloud-auth:test",
-          "data-portability:test",
+          "goal-client:test",
+          "powersync-schema:test",
+          "schedule-orchestration:test",
+          "setting:test",
+          "utils:test",
+          "relation:test",
           "label:test",
           "ipc-client:test"
         ],
@@ -1944,28 +1936,24 @@
           "task:test",
           "account:test",
           "assets:test",
-          "goal-core:test",
-          "powersync-schema:test",
-          "transport-contracts:test",
-          "time:test",
-          "ui-vue-shadcn:test",
-          "scheduler:test",
+          "ui-core:test",
+          "cloud-auth:test",
+          "data-portability:test",
           "patterns:test",
-          "http-client:test"
+          "domain-shared:test"
         ],
         "unit-3": [
           "desktop:test",
           "notification:test",
           "ci-cd-platform:test",
           "repository:test",
-          "goal-client:test",
-          "shared-primitives:test",
-          "schedule-orchestration:test",
-          "setting:test",
-          "utils:test",
-          "relation:test",
+          "goal-core:test",
+          "quality:test",
+          "time:test",
+          "ui-vue-shadcn:test",
+          "scheduler:test",
           "agent-gateway:test",
-          "domain-shared:test"
+          "http-client:test"
         ],
         "build": [
           "account:build",
@@ -2056,7 +2044,7 @@
         ],
         "web-unit-1": ["web:test", "app-vue:test#1/2"],
         "web-unit-2": ["app-vue:test#2/2"],
-        "server-unit": ["api:test", "database:test", "migrator:test"],
+        "server-unit": ["api:test", "migrator:test", "database:test"],
         "verification-children": [
           "desktop:test:ipc",
           "desktop:test:main",
@@ -2318,12 +2306,12 @@
           "ai:test",
           "reminder:test",
           "schedule:test",
-          "desktop-contracts:test",
-          "host-runtime:test",
-          "quality:test",
-          "ui-core:test",
-          "cloud-auth:test",
-          "data-portability:test",
+          "goal-client:test",
+          "powersync-schema:test",
+          "schedule-orchestration:test",
+          "setting:test",
+          "utils:test",
+          "relation:test",
           "label:test",
           "ipc-client:test"
         ],
@@ -2331,28 +2319,24 @@
           "task:test",
           "account:test",
           "assets:test",
-          "goal-core:test",
-          "powersync-schema:test",
-          "transport-contracts:test",
-          "time:test",
-          "ui-vue-shadcn:test",
-          "scheduler:test",
+          "ui-core:test",
+          "cloud-auth:test",
+          "data-portability:test",
           "patterns:test",
-          "http-client:test"
+          "domain-shared:test"
         ],
         "unit-3": [
           "desktop:test",
           "notification:test",
           "ci-cd-platform:test",
           "repository:test",
-          "goal-client:test",
-          "shared-primitives:test",
-          "schedule-orchestration:test",
-          "setting:test",
-          "utils:test",
-          "relation:test",
+          "goal-core:test",
+          "quality:test",
+          "time:test",
+          "ui-vue-shadcn:test",
+          "scheduler:test",
           "agent-gateway:test",
-          "domain-shared:test"
+          "http-client:test"
         ],
         "build": [
           "account:build",
@@ -2443,7 +2427,7 @@
         ],
         "web-unit-1": ["web:test", "app-vue:test#1/2"],
         "web-unit-2": ["app-vue:test#2/2"],
-        "server-unit": ["api:test", "database:test", "migrator:test"],
+        "server-unit": ["api:test", "migrator:test", "database:test"],
         "verification-children": [
           "desktop:test:ipc",
           "desktop:test:main",
@@ -2509,7 +2493,7 @@
         }
       ]
     },
-    "manifestDigest": "11d859bff57164bb0f9eeafe988217ed5248c5c0025409cc3306b46b13c4ad8a",
+    "manifestDigest": "ad1c78904b69d79cb4a4cdecad486a5634c8b917a901519a4001118b34ec36bc",
     "skips": {},
     "receiptExecution": "unverified: replay computes the real Nx plan; it does not execute product suites"
   },
@@ -2606,7 +2590,7 @@
         }
       ]
     },
-    "manifestDigest": "d5230f5d9a3a0a7ba61dabb0f4126d722c91c8ae31631ee79fc10beb8be0f1c2",
+    "manifestDigest": "828da72b2f36576abed4132b520a8a138e0c6ae927d6de93385eab3140dd9be1",
     "skips": {
       "unit-1": "no affected primary tasks for this resource pool",
       "unit-2": "no affected primary tasks for this resource pool",
@@ -2815,12 +2799,12 @@
           "ai:test",
           "reminder:test",
           "schedule:test",
-          "desktop-contracts:test",
-          "host-runtime:test",
-          "quality:test",
-          "ui-core:test",
-          "cloud-auth:test",
-          "data-portability:test",
+          "goal-client:test",
+          "powersync-schema:test",
+          "schedule-orchestration:test",
+          "setting:test",
+          "utils:test",
+          "relation:test",
           "label:test",
           "ipc-client:test"
         ],
@@ -2828,28 +2812,24 @@
           "task:test",
           "account:test",
           "assets:test",
-          "goal-core:test",
-          "powersync-schema:test",
-          "transport-contracts:test",
-          "time:test",
-          "ui-vue-shadcn:test",
-          "scheduler:test",
+          "ui-core:test",
+          "cloud-auth:test",
+          "data-portability:test",
           "patterns:test",
-          "http-client:test"
+          "domain-shared:test"
         ],
         "unit-3": [
           "desktop:test",
           "notification:test",
           "ci-cd-platform:test",
           "repository:test",
-          "goal-client:test",
-          "shared-primitives:test",
-          "schedule-orchestration:test",
-          "setting:test",
-          "utils:test",
-          "relation:test",
+          "goal-core:test",
+          "quality:test",
+          "time:test",
+          "ui-vue-shadcn:test",
+          "scheduler:test",
           "agent-gateway:test",
-          "domain-shared:test"
+          "http-client:test"
         ],
         "build": [
           "account:build",
@@ -2940,7 +2920,7 @@
         ],
         "web-unit-1": ["web:test", "app-vue:test#1/2"],
         "web-unit-2": ["app-vue:test#2/2"],
-        "server-unit": ["api:test", "database:test", "migrator:test"],
+        "server-unit": ["api:test", "migrator:test", "database:test"],
         "verification-children": [
           "desktop:test:ipc",
           "desktop:test:main",
@@ -3204,12 +3184,12 @@
           "ai:test",
           "reminder:test",
           "schedule:test",
-          "desktop-contracts:test",
-          "host-runtime:test",
-          "quality:test",
-          "ui-core:test",
-          "cloud-auth:test",
-          "data-portability:test",
+          "goal-client:test",
+          "powersync-schema:test",
+          "schedule-orchestration:test",
+          "setting:test",
+          "utils:test",
+          "relation:test",
           "label:test",
           "ipc-client:test"
         ],
@@ -3217,28 +3197,24 @@
           "task:test",
           "account:test",
           "assets:test",
-          "goal-core:test",
-          "powersync-schema:test",
-          "transport-contracts:test",
-          "time:test",
-          "ui-vue-shadcn:test",
-          "scheduler:test",
+          "ui-core:test",
+          "cloud-auth:test",
+          "data-portability:test",
           "patterns:test",
-          "http-client:test"
+          "domain-shared:test"
         ],
         "unit-3": [
           "desktop:test",
           "notification:test",
           "ci-cd-platform:test",
           "repository:test",
-          "goal-client:test",
-          "shared-primitives:test",
-          "schedule-orchestration:test",
-          "setting:test",
-          "utils:test",
-          "relation:test",
+          "goal-core:test",
+          "quality:test",
+          "time:test",
+          "ui-vue-shadcn:test",
+          "scheduler:test",
           "agent-gateway:test",
-          "domain-shared:test"
+          "http-client:test"
         ],
         "build": [
           "account:build",
@@ -3329,7 +3305,7 @@
         ],
         "web-unit-1": ["web:test", "app-vue:test#1/2"],
         "web-unit-2": ["app-vue:test#2/2"],
-        "server-unit": ["api:test", "database:test", "migrator:test"],
+        "server-unit": ["api:test", "migrator:test", "database:test"],
         "verification-children": [
           "desktop:test:ipc",
           "desktop:test:main",
@@ -3397,7 +3373,7 @@
         }
       ]
     },
-    "manifestDigest": "0b8e5edb8a149f260d40b8147de790ef4d314a2e1b88aa1868a496387166e09f",
+    "manifestDigest": "2c58980ab760bf91255a5794b727c4fcd98a8eed27e8d2b00a0834561acf0671",
     "skips": {},
     "receiptExecution": "unverified: replay computes the real Nx plan; it does not execute product suites"
   },
@@ -3638,7 +3614,7 @@
         }
       ]
     },
-    "manifestDigest": "aabb488a07fc68900fe083ee583b4215ce22a63d6cd5b17ff59e3271c34e8359",
+    "manifestDigest": "11b271884dfff68d6e916f665465a63e68655850bd6f713bbd34344fb31c0316",
     "skips": {
       "contract": "no affected primary tasks for this resource pool"
     },

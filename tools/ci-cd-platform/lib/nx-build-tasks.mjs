@@ -40,6 +40,14 @@ export function selectBuildTasks(projectGraph, keys) {
       }
     }
   }
+  // The canonical database artifact owns dist/, while runtime scripts own a
+  // nested output. Restore/finish the parent artifact before the child writer.
+  // Keep this CI resource ordering here rather than changing a business target.
+  if (graph.tasks['database:build'] && graph.tasks['database:runtime-scripts:build']) {
+    graph.dependencies['database:runtime-scripts:build'] = [
+      ...new Set([...graph.dependencies['database:runtime-scripts:build'], 'database:build']),
+    ];
+  }
   graph.roots = Object.keys(graph.tasks).filter(
     (id) => graph.dependencies[id].length === 0 && graph.continuousDependencies[id].length === 0,
   );

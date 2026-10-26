@@ -643,7 +643,9 @@ export function contractRoutedProjects({ scope, laneDetails }) {
   const unit = scope?.unit ?? [];
   return unit.filter(
     (project) =>
-      (project === 'contracts' && laneDetails?.contract?.required === true) ||
+      ((scope?.selection?.unitContractAliases ?? ['contracts']).includes(project) &&
+        laneDetails?.contract?.required === true &&
+        (!scope?.tasks || scope.tasks['test:contract']?.includes(project))) ||
       (scope?.tasks && ['governance-tools', 'test-system-v2'].includes(project)),
   );
 }

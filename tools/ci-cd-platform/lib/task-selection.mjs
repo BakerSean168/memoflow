@@ -1,4 +1,5 @@
 import { createRequire } from 'node:module';
+import { digest } from './contracts.mjs';
 
 const require = createRequire(import.meta.url);
 process.env.NX_DAEMON ??= 'false';
@@ -96,6 +97,28 @@ export async function selectCiTasks({ files, base, head, full }) {
     targets,
     fallback,
     noopTasks,
+    unitContractAliases: targets.test.filter(
+      (project) =>
+        targets['test:contract'].includes(project) &&
+        equivalentUnitContractTargets(graph.nodes[project].data.targets),
+    ),
     projects: [...new Set(Object.values(targets).flat())].sort(),
   };
+}
+
+// A target name is not a suite identity. Only route both targets to Contract
+// when Nx would invoke the exact same executor/options/configurations.
+export function equivalentUnitContractTargets(targets) {
+  const fingerprint = (target) =>
+    target &&
+    (typeof target.options?.command === 'string' || Array.isArray(target.options?.commands))
+      ? digest({
+          executor: target.executor,
+          options: target.options,
+          configurations: target.configurations ?? {},
+          defaultConfiguration: target.defaultConfiguration ?? null,
+        })
+      : null;
+  const unit = fingerprint(targets?.test);
+  return unit !== null && unit === fingerprint(targets?.['test:contract']);
 }

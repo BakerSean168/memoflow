@@ -146,6 +146,7 @@ export async function detectScope({
       engine: 'nx-task-inputs',
       fallback: selection.fallback,
       noopTasks: selection.noopTasks,
+      unitContractAliases: selection.unitContractAliases,
     },
     unit: list('test').filter((p) => p !== 'ui-storybook'),
     // Coverage measurements are selected separately by Nightly Audit.

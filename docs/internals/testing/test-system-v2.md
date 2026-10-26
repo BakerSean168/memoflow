@@ -414,11 +414,13 @@ receipt 同时记录实际调度命令及自身 Nx 结果；失败、跳过或�
 | Test Web Browser/Visual | ui-storybook:test:interaction；Web/Renderer Visual                    | Chromium，Visual 保留当前 PR 代表集         |
 | Test Server Unit        | api:test、database:test、migrator:test（仅选择存在且受影响的 target） | Node，无 Postgres服务                       |
 | Test Server 集成        | API/DB/HTTP、Desktop IPC/Main boundary                                | 原三分片，每个 runner 一次 Postgres 准备    |
-| Test Contracts          | contracts:test:contract                                               | 唯一 primary，不重复执行 contracts:test     |
+| Test Contracts          | test:contract                                                         | 相同 Nx 命令的 Unit 别名只执行一次          |
 
 业务包中的 client/server/electron 仍是混合 Nx Project，本轮不猜测目录语义、不拆业务项目，
 不修改 Oracle2 consumer switch 或 Host Runtime 的生产源码。通用 Test 的权重调优另行评估。
 `ci-dispatch-v2` 明确记录当前归属并由 Check 重算，旧 dispatch 版本不能充当新运行证据。
+若某项目的 `test` 与 `test:contract` 使用完全相同的 Nx executor/options/configurations，
+选中两者时只在 Contract pool 执行一次；不同配置的 Unit/Contract 仍各自保留。
 
 ### Provider behavior coverage
 

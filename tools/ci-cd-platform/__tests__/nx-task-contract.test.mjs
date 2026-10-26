@@ -259,6 +259,11 @@ test('mixed Build + Typecheck selects exact initiating tasks with one shared dep
   );
   assert.equal(selection.taskGraph.tasks['app-vue:build'], undefined, 'no extra production build');
   assert.equal(selection.taskIds.filter((id) => id === 'database:prisma-generate').length, 1);
+  const artifacts = selectBuildTasks(graph, ['database:build', 'database:runtime-scripts:build']);
+  assert.ok(
+    artifacts.taskGraph.dependencies['database:runtime-scripts:build'].includes('database:build'),
+    'nested artifact output cannot race the database parent cache restore',
+  );
   assert.throws(() => selectBuildTasks(graph, []));
   assert.throws(() => selectBuildTasks(graph, ['api:test']));
 });
@@ -356,4 +361,45 @@ test('real Nx merged scheduler runs both targets concurrently, deduplicates depe
   } finally {
     await rm(root, { recursive: true, force: true });
   }
+});
+
+test('Unit/Contract aliases come from exact Nx execution configuration, not project-name guesses', async () => {
+  const { equivalentUnitContractTargets, selectCiTasks } =
+    await import('../lib/task-selection.mjs');
+  const target = {
+    executor: 'nx:run-commands',
+    options: { command: 'vitest run --config vitest.config.ts', cwd: 'fixture' },
+  };
+  assert.equal(
+    equivalentUnitContractTargets({
+      test: target,
+      'test:contract': { ...target, dependsOn: ['build'] },
+    }),
+    true,
+  );
+  assert.equal(
+    equivalentUnitContractTargets({
+      test: target,
+      'test:contract': {
+        ...target,
+        options: { ...target.options, command: 'vitest run --config vitest.contract.config.ts' },
+      },
+    }),
+    false,
+  );
+  assert.equal(
+    equivalentUnitContractTargets({
+      test: { executor: 'nx:noop' },
+      'test:contract': { executor: 'nx:noop' },
+    }),
+    false,
+  );
+  const selected = await selectCiTasks({ files: [], full: true });
+  assert.deepEqual(selected.unitContractAliases, [
+    'contracts',
+    'desktop-contracts',
+    'host-runtime',
+    'shared-primitives',
+    'transport-contracts',
+  ]);
 });
