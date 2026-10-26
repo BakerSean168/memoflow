@@ -43,6 +43,7 @@ COPY packages/desktop-contracts/package.json ./packages/desktop-contracts/packag
 COPY packages/domain-shared/package.json ./packages/domain-shared/package.json
 COPY packages/goal/package.json ./packages/goal/package.json
 COPY packages/goal-core/package.json ./packages/goal-core/package.json
+COPY packages/host-runtime/package.json ./packages/host-runtime/package.json
 COPY packages/http-client/package.json ./packages/http-client/package.json
 COPY packages/ipc-client/package.json ./packages/ipc-client/package.json
 COPY packages/label/package.json ./packages/label/package.json
@@ -85,6 +86,7 @@ COPY packages/desktop-contracts ./packages/desktop-contracts
 COPY packages/domain-shared ./packages/domain-shared
 COPY packages/goal ./packages/goal
 COPY packages/goal-core ./packages/goal-core
+COPY packages/host-runtime ./packages/host-runtime
 COPY packages/http-client ./packages/http-client
 COPY packages/ipc-client ./packages/ipc-client
 COPY packages/label ./packages/label
