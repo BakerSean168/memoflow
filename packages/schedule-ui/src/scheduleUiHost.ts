@@ -3,7 +3,11 @@ import type { QueryClient } from '@tanstack/vue-query';
 import type { TimeFacade } from '@memoflow/time';
 import type { Result } from '@memoflow/contracts/result';
 import type { GoalClientDTO } from '@memoflow/goal-contracts';
-import type { RescheduleTaskInput, TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
+import type {
+  RescheduleTaskInput,
+  TaskOccurrenceClientDTO,
+  TaskPlanClientDTO,
+} from '@memoflow/contracts/task';
 import type { ScheduleClientPort } from '@memoflow/schedule-client';
 
 export type PanelSurfaceStatus = 'clean' | 'dirty' | 'busy';
@@ -51,8 +55,8 @@ export interface RoutineUpcomingOccurrence {
   readonly occurrenceKey: string;
   readonly title: string;
   readonly description?: string | null;
-  readonly occurrenceAt: number | string;
-  readonly endAt?: number | string | null;
+  readonly occurrenceAt: number;
+  readonly endAt?: number | null;
   readonly revision: number;
 }
 

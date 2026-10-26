@@ -6658,62 +6658,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/notification/api/dual-registry.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/notification/api/notification-entity-ref.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/notification/integration/notification-requested.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/notification/portable-v3.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/notification/protocol/asset-image-key-dual.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/notification/protocol/notification-rpc-map.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/notification/value-objects/dual-registry.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/contracts/src/modules/repository/aggregates/dual-registry.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -8634,6 +8578,62 @@
       "primarySuite": "unit",
       "collectors": [
         "packages/label/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-contracts/src/api/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-contracts/src/api/notification-entity-ref.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-contracts/src/integration/notification-requested.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-contracts/src/portable-v3.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-contracts/src/protocol/asset-image-key-dual.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-contracts/src/protocol/notification-rpc-map.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/notification-contracts/src/value-objects/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/notification-contracts/vitest.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -12974,7 +12974,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 52
+      "fileCount": 45
     },
     {
       "id": "packages/data-portability-contracts/vitest.config.ts",
@@ -13073,6 +13073,13 @@
       "suite": "unit",
       "runner": "vitest",
       "fileCount": 6
+    },
+    {
+      "id": "packages/notification-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 7
     },
     {
       "id": "packages/notification/vitest.config.ts",
