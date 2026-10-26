@@ -100,7 +100,7 @@ function previewContext() {
 // Deliberately partial ports: unimplemented operations must fail, rather than fake success.
 const service = {
   async listGoals() {
-    return ok({ goals: [{ toDTO: () => goal }], pagination: { hasMore: false, total: 1 } });
+    return ok({ goals: [goal], pagination: { hasMore: false, total: 1 } });
   },
   async getGoalWorkspace() {
     calls.push('workspace');
@@ -206,7 +206,7 @@ const service = {
   },
   async getGoalReviews() {
     calls.push('reviews');
-    return ok({ reviews: goal.reviews.map((review) => ({ toDTO: () => review })) });
+    return ok({ reviews: goal.reviews });
   },
 } as unknown as IGoalService;
 const parent = goalRoutes[0]!;
