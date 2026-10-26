@@ -2,7 +2,7 @@ import { defineComponent, h } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fail, ok } from '@memoflow/contracts/result';
-import type { CloudAuthWebClientPort } from '@memoflow/contracts';
+import type { CloudAuthWebClientPort } from '@memoflow/contracts/cloud-auth';
 const githubPopupMocks = vi.hoisted(() => ({
   startGithubPopupSignIn: vi.fn(async () => ({ kind: 'authenticated' as const })),
 }));

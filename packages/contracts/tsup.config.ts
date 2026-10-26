@@ -38,6 +38,7 @@ export default createTsupConfig({
     'src/result/index.ts',
     'src/shared/index.ts',
     'src/electron/index.ts',
+    'src/cloud-auth.ts',
 
     // 原语类型入口
     'src/primitives/index.ts',

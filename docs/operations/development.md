@@ -12,22 +12,14 @@ pnpm nx run web:serve
 pnpm nx run desktop:serve-safe
 ```
 
-Use `pnpm nx run desktop:serve` only when dependency builds and native Electron modules are ready. Don't kill another worktree's ports or processes.
+Use `pnpm nx run desktop:serve` only when dependency builds and native Electron modules are ready.
 
-## Issue → branch → PR
+## Issue → PR
 
-1. Read the Issue, the active code and this repository's [AGENTS.md](../../AGENTS.md). `git status --short --branch` must be understood before any edits.
-2. Fetch `main` and create a short-lived branch in an isolated worktree for this Issue. Keep one writer per worktree; a reviewer uses a fixed SHA/read-only copy.
-3. Implement one small concern. Iterate with the nearest test, then `pnpm check:changed` before pushing.
-4. Open a PR with a short problem/fix explanation and actual test evidence; include before/after screenshots for visual changes.
-5. Follow required PR checks and review comments. If Git reports conflicts, resolve them on that branch and run affected checks. PRs are independent; the Ruleset does not require rechecking every PR against the newest `main` just because another PR merged.
-6. When required checks pass, merge through GitHub. The next independent task may start without waiting for post-merge Main CI. Normal feature development does not trigger a Release.
-7. Remove the branch/worktree only after confirming there are no unpublished commits, untracked changes or live processes.
+1. Read the Issue, relevant code and this repository's [AGENTS.md](../../AGENTS.md).
+2. Implement one focused change. Iterate with the nearest test, then `pnpm check:changed` before pushing.
+3. Open a PR with a short problem/fix explanation and actual test evidence; include before/after screenshots for visual changes.
+4. Follow required PR checks and review comments. Resolve any reported conflicts and run affected checks.
+5. Merge through GitHub once required checks pass. Main CI is a post-merge observation, not a requirement to delay independent work. Ordinary feature development does not trigger a Release.
 
-GitHub Issues contain active plans, decisions and interruption checkpoints. No task-level Markdown plans in the repo. See [Testing](./testing.md) and [Release](./release.md) for their own boundaries.
-
-## Parallel safety
-
-Multiple agents may build independent PRs in parallel, but must not share a mutable worktree, test database, dev process or an uncommitted file. A root/shared configuration change should be disclosed in its PR and preferably isolated from unrelated feature work.
-
-PR CI is a merge gate; Main CI is a post-merge observation, not a requirement for each developer to stay idle. The platform's CI workflow and [ruleset](../../.github/rulesets/main.json) are the source of truth for required checks.
+GitHub Issues contain active plans, decisions and interruption checkpoints. No task-level Markdown plans in the repo. See [Testing](./testing.md) and [Release](./release.md) for their own boundaries. The actual required PR checks are defined by GitHub Actions and the [ruleset](../../.github/rulesets/main.json).

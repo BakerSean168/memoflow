@@ -91,6 +91,10 @@ export function createContractsAliasEntries(workspaceRoot: string): Alias[] {
       replacement: `${contractsRoot}/electron/index.ts`,
     },
     {
+      find: /^@memoflow\/contracts\/cloud-auth$/,
+      replacement: `${contractsRoot}/cloud-auth.ts`,
+    },
+    {
       find: /^@memoflow\/contracts\/mocks$/,
       replacement: `${contractsRoot}/mocks/index.ts`,
     },

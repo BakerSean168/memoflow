@@ -3,12 +3,12 @@ import type {
   CloudAuthResponse,
   DesktopCloudConnectionAttempt,
   DesktopCloudConnectionStatus,
-} from '@memoflow/contracts';
+} from '@memoflow/contracts/cloud-auth';
 import {
   BetterAuthSessionResponseSchema,
   type DesktopCloudConnectionRequest,
   type DesktopCloudConnectionResult,
-} from '@memoflow/contracts';
+} from '@memoflow/contracts/cloud-auth';
 import { fail, ok, type Result, type ResultError } from '@memoflow/contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
 import { getApiBaseUrl } from '../utils/api-config';
