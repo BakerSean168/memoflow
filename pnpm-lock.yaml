@@ -1736,6 +1736,10 @@ importers:
       '@memoflow/transport-contracts':
         specifier: workspace:*
         version: link:../transport-contracts
+    devDependencies:
+      '@types/express':
+        specifier: ^5.0.6
+        version: 5.0.6
 
   packages/http-client:
     dependencies:

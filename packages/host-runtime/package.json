@@ -21,5 +21,8 @@
   "dependencies": {
     "@memoflow/desktop-contracts": "workspace:*",
     "@memoflow/transport-contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6"
   }
 }
