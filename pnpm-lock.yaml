@@ -2198,9 +2198,9 @@ importers:
       '@internationalized/date':
         specifier: 3.12.4
         version: 3.12.4
-      '@memoflow/contracts':
+      '@memoflow/shared-primitives':
         specifier: workspace:*
-        version: link:../contracts
+        version: link:../shared-primitives
       date-fns:
         specifier: ^4.4.0
         version: 4.4.0

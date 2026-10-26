@@ -5,12 +5,6 @@ const config = baseLibraryConfig('@memoflow/time');
 export default {
   ...config,
   entry: ['src/index.ts'],
-  external: [
-    ...(config.external || []),
-    '@date-fns/tz',
-    '@memoflow/contracts',
-    'date-fns',
-    'rrule',
-  ],
+  external: [...(config.external || []), '@date-fns/tz', 'date-fns', 'rrule'],
   dts: createLocalOnlyDtsPaths(),
 };

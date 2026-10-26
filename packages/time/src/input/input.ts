@@ -1,4 +1,4 @@
-import type { Hm, Instant, Ymd } from '@memoflow/contracts/primitives';
+import type { Hm, Instant, Ymd } from '@memoflow/shared-primitives';
 import type { TimeCodec } from '../codec/codec';
 import type { TimeContext, TimePresentationStyle } from '../types';
 import { asInstant } from '../codec/brand';
