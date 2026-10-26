@@ -1,0 +1,661 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "vue"],
+  "categories": {
+    "correctness": "off"
+  },
+  "env": {
+    "builtin": true
+  },
+  "ignorePatterns": [
+    "**/dist/**",
+    "**/build/**",
+    "**/node_modules/**",
+    "**/coverage/**",
+    "**/.nx/**",
+    "**/test-results/**",
+    "**/playwright-report/**",
+    "**/playwright-*-report/**",
+    "**/dist-renderer/**",
+    "**/dist-electron/**",
+    "**/src/generated/prisma/**",
+    "**/*.min.js",
+    "**/*.d.ts"
+  ],
+  "rules": {
+    "no-array-constructor": "error",
+    "no-unused-expressions": "error",
+    "no-unused-vars": [
+      "warn",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_"
+      }
+    ],
+    "vue/no-arrow-functions-in-watch": "error",
+    "vue/no-async-in-computed-properties": "error",
+    "vue/no-computed-properties-in-data": "error",
+    "vue/no-deprecated-data-object-declaration": "error",
+    "vue/no-deprecated-delete-set": "error",
+    "vue/no-deprecated-destroyed-lifecycle": "error",
+    "vue/no-deprecated-events-api": "error",
+    "vue/no-deprecated-model-definition": "error",
+    "vue/no-deprecated-props-default-this": "error",
+    "vue/no-deprecated-vue-config-keycodes": "error",
+    "vue/no-dupe-keys": "error",
+    "vue/no-export-in-script-setup": "error",
+    "vue/no-expose-after-await": "error",
+    "vue/no-lifecycle-after-await": "error",
+    "vue/no-reserved-component-names": "error",
+    "vue/no-reserved-keys": "error",
+    "vue/no-reserved-props": "error",
+    "vue/no-shared-component-data": "error",
+    "vue/no-side-effects-in-computed-properties": "warn",
+    "vue/no-watch-after-await": "error",
+    "vue/prefer-import-from-vue": "error",
+    "vue/require-prop-type-constructor": "error",
+    "vue/require-render-return": "error",
+    "vue/require-slots-as-functions": "error",
+    "vue/return-in-computed-property": "error",
+    "vue/return-in-emits-validator": "error",
+    "vue/valid-define-emits": "error",
+    "vue/valid-define-options": "error",
+    "vue/valid-define-props": "error",
+    "vue/valid-next-tick": "error",
+    "typescript/no-duplicate-enum-values": "error",
+    "typescript/no-explicit-any": "warn",
+    "typescript/no-extra-non-null-assertion": "error",
+    "typescript/no-misused-new": "error",
+    "typescript/no-non-null-asserted-optional-chain": "error",
+    "typescript/no-unnecessary-type-constraint": "error",
+    "typescript/no-unsafe-declaration-merging": "error",
+    "typescript/no-wrapper-object-types": "error",
+    "typescript/prefer-as-const": "error",
+    "typescript/prefer-namespace-keyword": "error",
+    "typescript/triple-slash-reference": "error",
+    "@nx/enforce-module-boundaries": [
+      "error",
+      {
+        "enforceBuildableLibDependency": true,
+        "allow": ["./generated/prisma/**", "@memoflow/test-utils", "@memoflow/test-utils/*"],
+        "checkDynamicDependenciesExceptions": ["@memoflow/database"],
+        "depConstraints": [
+          {
+            "sourceTag": "layer:shared",
+            "onlyDependOnLibsWithTags": ["layer:shared"]
+          },
+          {
+            "sourceTag": "layer:infra",
+            "onlyDependOnLibsWithTags": ["layer:shared", "layer:infra"]
+          },
+          {
+            "sourceTag": "layer:domain",
+            "onlyDependOnLibsWithTags": ["layer:shared", "layer:infra", "layer:domain"]
+          },
+          {
+            "sourceTag": "layer:ui",
+            "onlyDependOnLibsWithTags": ["layer:shared", "layer:infra", "layer:domain", "layer:ui"]
+          },
+          {
+            "sourceTag": "layer:app",
+            "onlyDependOnLibsWithTags": [
+              "layer:shared",
+              "layer:infra",
+              "layer:domain",
+              "layer:ui",
+              "layer:app"
+            ]
+          },
+          {
+            "sourceTag": "layer:testing",
+            "onlyDependOnLibsWithTags": ["layer:shared", "layer:infra", "layer:testing"]
+          },
+          {
+            "sourceTag": "layer:service",
+            "onlyDependOnLibsWithTags": ["layer:shared"]
+          },
+          {
+            "sourceTag": "tier:core",
+            "notDependOnLibsWithTags": ["tier:client", "tier:server"]
+          },
+          {
+            "sourceTag": "tier:client",
+            "notDependOnLibsWithTags": ["tier:server"]
+          },
+          {
+            "sourceTag": "tier:server",
+            "notDependOnLibsWithTags": ["tier:client"]
+          },
+          {
+            "sourceTag": "scope:account",
+            "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:account"]
+          },
+          {
+            "sourceTag": "scope:ai",
+            "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:ai"]
+          },
+          {
+            "sourceTag": "scope:authentication",
+            "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:authentication"]
+          },
+          {
+            "sourceTag": "scope:goal",
+            "onlyDependOnLibsWithTags": [
+              "scope:shared",
+              "scope:patterns",
+              "scope:goal",
+              "scope:schedule",
+              "scope:scheduler"
+            ]
+          },
+          {
+            "sourceTag": "scope:notification",
+            "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:notification"]
+          },
+          {
+            "sourceTag": "scope:reminder",
+            "onlyDependOnLibsWithTags": [
+              "scope:shared",
+              "scope:patterns",
+              "scope:reminder",
+              "scope:schedule"
+            ]
+          },
+          {
+            "sourceTag": "scope:repository",
+            "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:repository"]
+          },
+          {
+            "sourceTag": "scope:schedule",
+            "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:schedule"]
+          },
+          {
+            "sourceTag": "scope:scheduler",
+            "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:scheduler"]
+          },
+          {
+            "sourceTag": "scope:setting",
+            "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:setting"]
+          },
+          {
+            "sourceTag": "scope:task",
+            "onlyDependOnLibsWithTags": [
+              "scope:shared",
+              "scope:patterns",
+              "scope:task",
+              "scope:schedule",
+              "scope:scheduler"
+            ]
+          },
+          {
+            "sourceTag": "scope:data-portability",
+            "onlyDependOnLibsWithTags": [
+              "scope:shared",
+              "scope:patterns",
+              "scope:data-portability",
+              "scope:goal",
+              "scope:task",
+              "scope:reminder",
+              "scope:notification",
+              "scope:setting"
+            ]
+          },
+          {
+            "sourceTag": "scope:app-vue",
+            "onlyDependOnLibsWithTags": [
+              "scope:shared",
+              "scope:patterns",
+              "scope:app-vue",
+              "scope:ui",
+              "scope:account",
+              "scope:ai",
+              "scope:authentication",
+              "scope:goal",
+              "scope:notification",
+              "scope:reminder",
+              "scope:repository",
+              "scope:schedule",
+              "scope:scheduler",
+              "scope:setting",
+              "scope:task",
+              "scope:data-portability"
+            ]
+          },
+          {
+            "sourceTag": "scope:app-react",
+            "onlyDependOnLibsWithTags": [
+              "scope:shared",
+              "scope:patterns",
+              "scope:app-react",
+              "scope:ui",
+              "scope:account",
+              "scope:ai",
+              "scope:authentication",
+              "scope:goal",
+              "scope:notification",
+              "scope:reminder",
+              "scope:repository",
+              "scope:schedule",
+              "scope:scheduler",
+              "scope:setting",
+              "scope:task",
+              "scope:data-portability"
+            ]
+          },
+          {
+            "sourceTag": "scope:web",
+            "onlyDependOnLibsWithTags": [
+              "scope:shared",
+              "scope:patterns",
+              "scope:ui",
+              "scope:account",
+              "scope:ai",
+              "scope:authentication",
+              "scope:goal",
+              "scope:notification",
+              "scope:reminder",
+              "scope:repository",
+              "scope:schedule",
+              "scope:scheduler",
+              "scope:setting",
+              "scope:task",
+              "scope:data-portability",
+              "scope:app-vue",
+              "scope:app-react",
+              "scope:web",
+              "scope:desktop",
+              "scope:mobile",
+              "scope:api",
+              "scope:test-utils",
+              "scope:tools",
+              "scope:meta"
+            ]
+          },
+          {
+            "sourceTag": "scope:desktop",
+            "onlyDependOnLibsWithTags": [
+              "scope:shared",
+              "scope:patterns",
+              "scope:ui",
+              "scope:account",
+              "scope:ai",
+              "scope:authentication",
+              "scope:goal",
+              "scope:notification",
+              "scope:reminder",
+              "scope:repository",
+              "scope:schedule",
+              "scope:scheduler",
+              "scope:setting",
+              "scope:task",
+              "scope:data-portability",
+              "scope:app-vue",
+              "scope:app-react",
+              "scope:web",
+              "scope:desktop",
+              "scope:mobile",
+              "scope:api",
+              "scope:test-utils",
+              "scope:tools",
+              "scope:meta"
+            ]
+          },
+          {
+            "sourceTag": "scope:mobile",
+            "onlyDependOnLibsWithTags": [
+              "scope:shared",
+              "scope:patterns",
+              "scope:ui",
+              "scope:account",
+              "scope:ai",
+              "scope:authentication",
+              "scope:goal",
+              "scope:notification",
+              "scope:reminder",
+              "scope:repository",
+              "scope:schedule",
+              "scope:scheduler",
+              "scope:setting",
+              "scope:task",
+              "scope:data-portability",
+              "scope:app-vue",
+              "scope:app-react",
+              "scope:web",
+              "scope:desktop",
+              "scope:mobile",
+              "scope:api",
+              "scope:test-utils",
+              "scope:tools",
+              "scope:meta"
+            ]
+          },
+          {
+            "sourceTag": "scope:api",
+            "onlyDependOnLibsWithTags": [
+              "scope:shared",
+              "scope:patterns",
+              "scope:ui",
+              "scope:account",
+              "scope:ai",
+              "scope:authentication",
+              "scope:goal",
+              "scope:notification",
+              "scope:reminder",
+              "scope:repository",
+              "scope:schedule",
+              "scope:scheduler",
+              "scope:setting",
+              "scope:task",
+              "scope:data-portability",
+              "scope:app-vue",
+              "scope:app-react",
+              "scope:web",
+              "scope:desktop",
+              "scope:mobile",
+              "scope:api",
+              "scope:test-utils",
+              "scope:tools",
+              "scope:meta"
+            ]
+          },
+          {
+            "sourceTag": "scope:ui",
+            "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:ui"]
+          },
+          {
+            "sourceTag": "scope:test-utils",
+            "onlyDependOnLibsWithTags": [
+              "scope:shared",
+              "scope:patterns",
+              "scope:test-utils",
+              "scope:tools"
+            ]
+          },
+          {
+            "sourceTag": "scope:tools",
+            "onlyDependOnLibsWithTags": [
+              "scope:shared",
+              "scope:patterns",
+              "scope:tools",
+              "scope:test-utils"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["**/*.{js,mjs,cjs,ts,mts,cts,vue}"],
+      "env": {
+        "browser": true,
+        "node": true
+      }
+    },
+    {
+      "files": ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"],
+      "rules": {
+        "constructor-super": "off",
+        "getter-return": "off",
+        "no-class-assign": "off",
+        "no-const-assign": "off",
+        "no-dupe-class-members": "off",
+        "no-dupe-keys": "off",
+        "no-func-assign": "off",
+        "no-import-assign": "off",
+        "no-new-native-nonconstructor": "off",
+        "no-obj-calls": "off",
+        "no-redeclare": "off",
+        "no-setter-return": "off",
+        "no-this-before-super": "off",
+        "no-unreachable": "off",
+        "no-unsafe-negation": "off",
+        "no-var": "error",
+        "no-with": "off",
+        "prefer-const": "error",
+        "prefer-rest-params": "error",
+        "prefer-spread": "error"
+      }
+    },
+    {
+      "files": [
+        "apps/**/src/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx,vue}",
+        "packages/**/src/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx,vue}",
+        "tools/**/src/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx,vue}"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "@memoflow/utils",
+                "message": "Import from a specific subpath instead: @memoflow/utils/logger, @memoflow/utils/domain, @memoflow/utils/errors, @memoflow/utils/shared, @memoflow/utils/result, @memoflow/utils/frontend, @memoflow/utils/validation, @memoflow/utils/lifecycle."
+              },
+              {
+                "name": "date-fns",
+                "message": "ADR-037/TIME-1206: import time from @memoflow/time. Production date-fns is confined to packages/time/src/engine/**; legacy exemptions are retired."
+              }
+            ],
+            "patterns": [
+              {
+                "group": ["date-fns/*", "date-fns/fp", "date-fns/locale", "date-fns/locale/*"],
+                "message": "ADR-037: date-fns subpaths are engine-only. Use @memoflow/time."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "apps/**/src/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx,vue}",
+        "packages/**/src/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx,vue}"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "date-fns",
+                "message": "ADR-037/TIME-1206: import time from @memoflow/time. Production date-fns is confined to packages/time/src/engine/**; legacy exemptions are retired."
+              }
+            ],
+            "patterns": [
+              {
+                "group": ["@memoflow/test-utils", "@memoflow/test-utils/*"],
+                "message": "Production code must not import test-only utilities."
+              },
+              {
+                "group": ["date-fns/*", "date-fns/fp", "date-fns/locale", "date-fns/locale/*"],
+                "message": "ADR-037: date-fns subpaths are engine-only. Use @memoflow/time."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "packages/repository/src/application-server/__tests__/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+        "packages/repository/src/application-server/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["../../infrastructure-server/**", "../../api/**"],
+                "message": "Repository application tests must use ../../testing seams instead of private infrastructure or api paths."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "packages/ai/src/application-server/__tests__/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+        "packages/ai/src/application-server/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["**/infrastructure-server/**", "**/api/**"],
+                "message": "AI application tests must use src/testing seams instead of private infrastructure or api paths."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "apps/api/src/**/*.ts",
+        "packages/contracts/src/**/*.ts",
+        "packages/domain-shared/src/**/*.ts",
+        "packages/setting/src/**/*.ts",
+        "packages/patterns/src/**/*.ts",
+        "packages/notification/src/**/*.ts",
+        "packages/account/src/**/*.ts",
+        "packages/authentication/src/**/*.ts",
+        "packages/ai/src/**/*.ts",
+        "packages/repository/src/**/*.ts",
+        "packages/reminder/src/**/*.ts",
+        "packages/schedule/src/**/*.ts",
+        "packages/task/src/**/*.ts",
+        "packages/goal/src/**/*.ts"
+      ],
+      "rules": {
+        "no-unused-vars": [
+          "error",
+          {
+            "argsIgnorePattern": "^_",
+            "varsIgnorePattern": "^_",
+            "caughtErrorsIgnorePattern": "^_"
+          }
+        ],
+        "typescript/no-explicit-any": "error"
+      }
+    },
+    {
+      "files": ["**/*.stories.@(ts|tsx|js|jsx|mjs|cjs)", "**/*.story.@(ts|tsx|js|jsx|mjs|cjs)"],
+      "rules": {
+        "import/no-anonymous-default-export": "off",
+        "react/rules-of-hooks": "off"
+      },
+      "plugins": ["react", "import"]
+    },
+    {
+      "files": [
+        "**/eslint.config.{js,mjs,cjs,ts,mts,cts}",
+        "**/tsup.config.{js,mjs,cjs,ts,mts,cts}",
+        "**/vite.config.{js,mjs,cjs,ts,mts,cts}",
+        "**/vitest*.config.{js,mjs,cjs,ts,mts,cts}"
+      ],
+      "rules": {
+        "@nx/enforce-module-boundaries": "off"
+      }
+    },
+    {
+      "files": [
+        "**/__tests__/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+        "**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+        "**/src/test/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+        "**/e2e/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "@memoflow/utils",
+                "message": "Import from a specific subpath instead: @memoflow/utils/logger, @memoflow/utils/domain, @memoflow/utils/errors, @memoflow/utils/shared, @memoflow/utils/result, @memoflow/utils/frontend, @memoflow/utils/validation, @memoflow/utils/lifecycle."
+              },
+              {
+                "name": "date-fns",
+                "message": "ADR-037/TIME-1206: import time from @memoflow/time. Production date-fns is confined to packages/time/src/engine/**; legacy exemptions are retired."
+              }
+            ],
+            "patterns": [
+              {
+                "group": ["date-fns/*", "date-fns/fp", "date-fns/locale", "date-fns/locale/*"],
+                "message": "ADR-037: date-fns subpaths are engine-only. Use @memoflow/time."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["packages/time/src/engine/**/*"],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    },
+    {
+      "files": [
+        "**/__tests__/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+        "**/test/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+        "**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"
+      ],
+      "rules": {
+        "typescript/no-explicit-any": "warn",
+        "no-unused-vars": [
+          "warn",
+          {
+            "argsIgnorePattern": "^_",
+            "varsIgnorePattern": "^_",
+            "caughtErrorsIgnorePattern": "^_"
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "**/src/testing/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+        "**/src/test/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "@memoflow/utils",
+                "message": "Import from a specific subpath instead: @memoflow/utils/logger, @memoflow/utils/domain, @memoflow/utils/errors, @memoflow/utils/shared, @memoflow/utils/result, @memoflow/utils/frontend, @memoflow/utils/validation, @memoflow/utils/lifecycle."
+              },
+              {
+                "name": "date-fns",
+                "message": "ADR-037/TIME-1206: import time from @memoflow/time. Production date-fns is confined to packages/time/src/engine/**; legacy exemptions are retired."
+              }
+            ],
+            "patterns": [
+              {
+                "group": ["date-fns/*", "date-fns/fp", "date-fns/locale", "date-fns/locale/*"],
+                "message": "ADR-037: date-fns subpaths are engine-only. Use @memoflow/time."
+              }
+            ]
+          }
+        ],
+        "typescript/no-explicit-any": "warn",
+        "no-unused-vars": [
+          "warn",
+          {
+            "argsIgnorePattern": "^_",
+            "varsIgnorePattern": "^_",
+            "caughtErrorsIgnorePattern": "^_"
+          }
+        ]
+      }
+    }
+  ],
+  "jsPlugins": ["@nx/oxlint/boundaries-plugin"]
+}

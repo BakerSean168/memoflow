@@ -12366,6 +12366,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/quality/__tests__/hybrid-lint.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "quality:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/runtime/host-dev-env.spec.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -12785,7 +12793,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "node-test",
-      "fileCount": 2
+      "fileCount": 3
     },
     {
       "id": "test-system-v2:test",
@@ -13983,7 +13991,7 @@
     "boundary-main": 12,
     "e2e": 40,
     "perf": 2,
-    "governance": 84
+    "governance": 85
   },
   "e2eGovernance": {
     "version": 2,
