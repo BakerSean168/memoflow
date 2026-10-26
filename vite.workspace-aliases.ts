@@ -172,6 +172,21 @@ export function createTransportContractsAliasEntries(workspaceRoot: string): Ali
   ];
 }
 
+export function createLabelContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const labelContractsRoot = resolveFromWorkspace(workspaceRoot, 'packages/label-contracts/src');
+
+  return [
+    {
+      find: /^@memoflow\/label-contracts$/,
+      replacement: `${labelContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/label-contracts\/(.+)$/,
+      replacement: `${labelContractsRoot}/$1`,
+    },
+  ];
+}
+
 export function createDesktopContractsAliasEntries(workspaceRoot: string): Alias[] {
   const desktopContractsRoot = resolveFromWorkspace(
     workspaceRoot,

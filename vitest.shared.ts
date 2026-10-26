@@ -8,6 +8,7 @@ import {
   createGoalCoreAliasEntries,
   createSharedPrimitivesAliasEntries,
   createTransportContractsAliasEntries,
+  createLabelContractsAliasEntries,
   createDesktopContractsAliasEntries,
   createHostRuntimeAliasEntries,
 } from './vite.workspace-aliases.ts';
@@ -364,6 +365,7 @@ export function createSharedConfig(options: SharedConfigOptions) {
     ...createGoalCoreAliasEntries(workspaceRoot),
     ...createSharedPrimitivesAliasEntries(workspaceRoot),
     ...createTransportContractsAliasEntries(workspaceRoot),
+    ...createLabelContractsAliasEntries(workspaceRoot),
     ...createDesktopContractsAliasEntries(workspaceRoot),
     ...createHostRuntimeAliasEntries(workspaceRoot),
     ...baseAliasEntries,

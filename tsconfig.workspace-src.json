@@ -17,6 +17,8 @@
       "@memoflow/host-runtime/electron-ipc": ["./packages/host-runtime/src/electron-ipc/index.ts"],
       "@memoflow/host-runtime/*": ["./packages/host-runtime/src/*.ts"],
       "@memoflow/goal-client": ["./packages/goal-client/src/index.ts"],
+      "@memoflow/label-contracts": ["./packages/label-contracts/src/index.ts"],
+      "@memoflow/label-contracts/*": ["./packages/label-contracts/src/*.ts"],
       "@memoflow/database": ["./packages/database/src/index.ts"],
       "@memoflow/database/transaction": ["./packages/database/src/transaction.ts"],
       "@memoflow/database/environment": ["./packages/database/src/load-workspace-env.ts"],

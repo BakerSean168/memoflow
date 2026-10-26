@@ -6882,7 +6882,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/label/label-contract.spec.ts",
+      "path": "packages/contracts/src/modules/label/label-portable-v3.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -8730,6 +8730,14 @@
       "primarySuite": "unit",
       "collectors": [
         "packages/ipc-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/label-contracts/src/label-contract.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/label-contracts/vitest.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -13008,6 +13016,13 @@
       "fileCount": 1
     },
     {
+      "id": "packages/label-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 1
+    },
+    {
       "id": "packages/label/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
@@ -13915,7 +13930,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1118,
+    "unit": 1119,
     "integration": 57,
     "smoke": 3,
     "boundary-ipc": 6,

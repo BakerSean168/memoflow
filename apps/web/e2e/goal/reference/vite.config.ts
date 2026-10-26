@@ -89,6 +89,7 @@ export default defineConfig({
           'packages/transport-contracts/src/execution-context.ts',
         ],
         ['@memoflow/transport-contracts', 'packages/transport-contracts/src/index.ts'],
+        ['@memoflow/label-contracts', 'packages/label-contracts/src/index.ts'],
         [
           '@memoflow/desktop-contracts/auth-context',
           'packages/desktop-contracts/src/auth-context.ts',

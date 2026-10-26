@@ -36,6 +36,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   'shared-primitives': ['./*'],
   'transport-contracts': ['./*'],
   'desktop-contracts': ['./*'],
+  'label-contracts': ['./*'],
   'host-runtime': ['./electron-ipc'],
   task: ['./analytics', './testing', './schema', './schedule-execution', './schedule-projection'],
   ai: ['./agent-gateway', './ports', './schema', './testing'],

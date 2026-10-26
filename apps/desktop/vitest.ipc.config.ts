@@ -161,6 +161,10 @@ const ipcWorkspaceAliasEntries = [
     replacement: resolve(import.meta.dirname, '../../packages/transport-contracts/src/index.ts'),
   },
   {
+    find: '@memoflow/label-contracts',
+    replacement: resolve(import.meta.dirname, '../../packages/label-contracts/src/index.ts'),
+  },
+  {
     find: '@memoflow/desktop-contracts/auth-context',
     replacement: resolve(
       import.meta.dirname,
