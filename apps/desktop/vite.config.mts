@@ -107,7 +107,7 @@ const desktopRendererDevWorkspaceEntries = [
   ['@memoflow/ipc-client', 'packages/ipc-client/src/index.ts'],
   ['@memoflow/cloud-auth', 'packages/cloud-auth/src/index.ts'],
   ['@memoflow/task/client', 'packages/task/src/client/index.ts'],
-  ['@memoflow/schedule/client', 'packages/schedule/src/client/index.ts'],
+  ['@memoflow/schedule-client', 'packages/schedule-client/src/index.ts'],
   ['@memoflow/schedule/electron', 'packages/schedule/src/electron/index.ts'],
   ['@memoflow/notification/client', 'packages/notification/src/client/index.ts'],
   ['@memoflow/reminder/client', 'packages/reminder/src/client/index.ts'],

@@ -7,7 +7,7 @@ import {
   type ScheduledIntent,
   type ScheduledInvocationContext,
   type SchedulingOwner,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
 import { NotificationCategory, NotificationType } from '@memoflow/notification-contracts';
 import {

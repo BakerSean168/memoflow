@@ -2,7 +2,7 @@ import type {
   InvocationAttempt as PrismaAttempt,
   ScheduledInvocation as PrismaInvocation,
 } from '@memoflow/database';
-import type { InvocationAttempt, ScheduledInvocation } from '@memoflow/contracts/schedule';
+import type { InvocationAttempt, ScheduledInvocation } from '@memoflow/schedule-contracts';
 
 function jsonValue(value: unknown): unknown {
   return value === undefined ? null : value;

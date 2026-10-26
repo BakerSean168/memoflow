@@ -20,7 +20,8 @@
         "../../packages/contracts/src/modules/repository/index.ts"
       ],
       "@memoflow/contracts/result": ["../../packages/contracts/src/result/index.ts"],
-      "@memoflow/contracts/schedule": ["../../packages/contracts/src/modules/schedule/index.ts"],
+      "@memoflow/schedule-contracts": ["../../packages/schedule-contracts/src/index.ts"],
+      "@memoflow/schedule-contracts/*": ["../../packages/schedule-contracts/src/*.ts"],
       "@memoflow/contracts/setting": ["../../packages/contracts/src/modules/setting/index.ts"],
       "@memoflow/contracts/shared": ["../../packages/contracts/src/shared/index.ts"],
       "@memoflow/contracts/task": ["../../packages/contracts/src/modules/task/index.ts"],
@@ -42,7 +43,7 @@
       "@memoflow/http-client": ["../../packages/http-client/src/index.ts"],
       "@memoflow/ai/client": ["../../packages/ai/dist/client/index.d.ts"],
       "@memoflow/goal-client": ["../../packages/goal-client/dist/index.d.ts"],
-      "@memoflow/schedule/client": ["../../packages/schedule/dist/client/index.d.ts"],
+      "@memoflow/schedule-client": ["../../packages/schedule-client/dist/index.d.ts"],
       "@memoflow/notification/client": ["../../packages/notification/dist/client/index.d.ts"],
       "@memoflow/reminder/client": ["../../packages/reminder/dist/client/index.d.ts"],
       "@memoflow/task/client": ["../../packages/task/dist/client/index.d.ts"],

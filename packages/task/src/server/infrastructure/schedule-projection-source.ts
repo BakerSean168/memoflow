@@ -9,8 +9,8 @@ import type {
   ScheduledIntent,
   SchedulingOwner,
   SchedulingPriority,
-} from '@memoflow/contracts/schedule';
-import { buildSchedulingKey } from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
+import { buildSchedulingKey } from '@memoflow/schedule-contracts';
 import type { ITaskOccurrenceRepository, ITaskPlanRepository } from '../domain';
 import type { TaskOccurrence } from '../domain/aggregates/task-occurrence';
 import {

@@ -7,7 +7,7 @@ import type {
   DetectConflictsInternalQuery,
   ResolveConflictRequest,
   ResolveConflictResponseDTO,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import { ScheduleConflictDetectionService } from './schedule-conflict-detection-service';
 import { ScheduleEventApplicationService } from './schedule-event-application-service';
 

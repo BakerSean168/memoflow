@@ -2,7 +2,7 @@ import {
   buildSchedulingOwnerKey,
   type SchedulingOwner,
   type SchedulingReconcileReceipt,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import { createLogger } from '@memoflow/utils/logger';
 import type {
   ProjectionRepairCounters,

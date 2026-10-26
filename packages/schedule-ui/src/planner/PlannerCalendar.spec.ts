@@ -1,0 +1,249 @@
+import FullCalendar from '@fullcalendar/vue3';
+import type { EventDropInfo } from '@fullcalendar/vue3';
+import { mount } from '@vue/test-utils';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
+import { asInstant } from '@memoflow/time';
+import type {
+  CalendarEventProjection,
+  PlannerConflictProjection,
+} from '@memoflow/schedule-contracts';
+import PlannerCalendar from './PlannerCalendar.vue';
+import { setProductTimePreferences } from '@schedule-ui-test-host/shared/utils/product-time';
+
+const scheduleProjection: Extract<CalendarEventProjection, { sourceType: 'schedule' }> = {
+  identityId: 'identity-1',
+  sourceType: 'schedule',
+  sourceId: 'calendar-entry-1',
+  title: 'Deep work',
+  start: asInstant(Date.parse('2026-08-27T02:00:00.000Z')),
+  end: asInstant(Date.parse('2026-08-27T03:00:00.000Z')),
+  allDay: false,
+  occupancy: 'blocking',
+  displayMetadata: { semantic: 'calendar-entry' },
+  editableCapabilities: { move: true, resize: true },
+  ownerCommandTarget: { ownerType: 'schedule.calendar-entry', ownerId: 'calendar-entry-1' },
+  revision: 3,
+};
+
+const scheduleTaskConflict: PlannerConflictProjection = {
+  id: 'schedule:calendar-entry-1|task:task-occurrence-1|1787796000000:1787799600000',
+  identityId: 'identity-1',
+  left: { sourceType: 'schedule', sourceId: 'calendar-entry-1' },
+  right: { sourceType: 'task', sourceId: 'task-occurrence-1' },
+  overlapRange: {
+    kind: 'Timed',
+    start: asInstant(Date.parse('2026-08-27T02:30:00.000Z')),
+    end: asInstant(Date.parse('2026-08-27T03:00:00.000Z')),
+  },
+  overlapDurationMs: 30 * 60_000,
+  severity: 'Moderate',
+  suggestions: [],
+};
+
+describe('PlannerCalendar production renderer (PLAN-4304)', () => {
+  afterEach(() => setProductTimePreferences(createDefaultUserPreferenceProfile()));
+  it('renders canonical projections and emits the FullCalendar-owned visible range', async () => {
+    const wrapper = mount(PlannerCalendar, {
+      attachTo: document.body,
+      props: {
+        projections: [scheduleProjection],
+        ownerCommands: {
+          route: vi.fn(async () => ({ status: 'unsupported' as const, message: 'unused' })),
+        },
+        view: 'week',
+        initialDate: Date.parse('2026-08-27T12:00:00.000Z'),
+      },
+    });
+
+    await vi.waitFor(() => expect(wrapper.emitted('range-change')?.length).toBeGreaterThan(0));
+    expect(wrapper.find('[data-testid="schedule-fullcalendar"]').exists()).toBe(true);
+    const eventRoot = wrapper.get('[data-testid="schedule-event-schedule-calendar-entry-1"]');
+    expect(eventRoot.classes()).toContain('planner-source-schedule');
+    expect((eventRoot.element as HTMLElement).style.getPropertyValue('--planner-source-hsl')).toBe(
+      'var(--primary)',
+    );
+    expect(eventRoot.classes()).toContain('planner-event-timed');
+    expect(eventRoot.classes()).toContain('planner-occupancy-blocking');
+    expect(wrapper.text()).toContain('Deep work');
+    const eventContent = wrapper.get(
+      '[data-testid="schedule-event-content-schedule-calendar-entry-1"]',
+    );
+    await eventRoot.trigger('click');
+    expect(wrapper.emitted('event-click')).toEqual([[scheduleProjection]]);
+    expect(eventContent.text()).toBe('Deep work');
+    expect(eventContent.text()).not.toContain('10:00');
+    expect(wrapper.emitted('range-change')?.at(-1)?.[0]).toEqual(
+      expect.objectContaining({ view: 'week' }),
+    );
+
+    wrapper.unmount();
+  });
+
+  it('emits one semantic range even when projection updates make FullCalendar refresh its options', async () => {
+    const wrapper = mount(PlannerCalendar, {
+      attachTo: document.body,
+      props: {
+        projections: [],
+        ownerCommands: {
+          route: vi.fn(async () => ({ status: 'unsupported' as const, message: 'unused' })),
+        },
+        view: 'week',
+        initialDate: Date.parse('2026-08-27T12:00:00.000Z'),
+      },
+    });
+    await vi.waitFor(() => expect(wrapper.emitted('range-change')?.length).toBeGreaterThan(0));
+    const initialRangeEvents = wrapper.emitted('range-change')?.length ?? 0;
+
+    await wrapper.setProps({ projections: [scheduleProjection] });
+    await vi.waitFor(() => expect(wrapper.text()).toContain('Deep work'));
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    expect(wrapper.emitted('range-change')).toHaveLength(initialRangeEvents);
+    wrapper.unmount();
+  });
+
+  it('switches Day/Week/Month through FullCalendar and reports the new product-visible range', async () => {
+    const wrapper = mount(PlannerCalendar, {
+      attachTo: document.body,
+      props: {
+        projections: [],
+        ownerCommands: {
+          route: vi.fn(async () => ({ status: 'unsupported' as const, message: 'unused' })),
+        },
+        view: 'week',
+        initialDate: Date.parse('2026-08-27T12:00:00.000Z'),
+      },
+    });
+    await vi.waitFor(() => expect(wrapper.emitted('range-change')?.length).toBeGreaterThan(0));
+
+    await wrapper.setProps({ view: 'month' });
+    await vi.waitFor(() =>
+      expect(wrapper.emitted('range-change')?.at(-1)?.[0]).toEqual(
+        expect.objectContaining({ view: 'month' }),
+      ),
+    );
+
+    await wrapper.setProps({ view: 'day' });
+    await vi.waitFor(() =>
+      expect(wrapper.emitted('range-change')?.at(-1)?.[0]).toEqual(
+        expect.objectContaining({ view: 'day' }),
+      ),
+    );
+
+    wrapper.unmount();
+  });
+
+  it('binds FullCalendar day boundaries to the session IANA timezone across DST', async () => {
+    const profile = createDefaultUserPreferenceProfile();
+    setProductTimePreferences({
+      ...profile,
+      regional: { ...profile.regional, timeZone: 'America/New_York', weekStartsOn: 0 },
+    });
+
+    const wrapper = mount(PlannerCalendar, {
+      attachTo: document.body,
+      props: {
+        projections: [],
+        ownerCommands: {
+          route: vi.fn(async () => ({ status: 'unsupported' as const, message: 'unused' })),
+        },
+        view: 'day',
+        initialDate: Date.parse('2026-03-08T16:00:00.000Z'),
+      },
+    });
+
+    await vi.waitFor(() => expect(wrapper.emitted('range-change')?.length).toBeGreaterThan(0));
+    const range = wrapper.emitted('range-change')?.at(-1)?.[0] as { start: number; end: number };
+    expect(range.start).toBe(Date.parse('2026-03-08T05:00:00.000Z'));
+    expect(range.end).toBe(Date.parse('2026-03-09T03:59:59.999Z'));
+    wrapper.unmount();
+  });
+
+  it('renders conflict affordance only from the derived Planner conflict read model', async () => {
+    const wrapper = mount(PlannerCalendar, {
+      attachTo: document.body,
+      props: {
+        projections: [scheduleProjection],
+        conflicts: [scheduleTaskConflict],
+        ownerCommands: {
+          route: vi.fn(async () => ({ status: 'unsupported' as const, message: 'unused' })),
+        },
+        view: 'week',
+        initialDate: Date.parse('2026-08-27T12:00:00.000Z'),
+      },
+    });
+
+    await vi.waitFor(() =>
+      expect(wrapper.find('.planner-event-conflict-icon').exists()).toBe(true),
+    );
+    const content = wrapper.find(
+      '[data-testid="schedule-event-content-schedule-calendar-entry-1"]',
+    );
+    expect(content.classes()).toContain('planner-tone-warning');
+    const root = wrapper.get('[data-testid="schedule-event-schedule-calendar-entry-1"]');
+    expect(root.classes()).toContain('planner-tone-warning');
+    expect(root.classes()).toContain('planner-source-schedule');
+    expect((root.element as HTMLElement).style.getPropertyValue('--planner-source-hsl')).toBe(
+      'var(--primary)',
+    );
+
+    await wrapper.setProps({ conflicts: [] });
+    await vi.waitFor(() =>
+      expect(wrapper.find('.planner-event-conflict-icon').exists()).toBe(false),
+    );
+    expect(root.classes()).toContain('planner-tone-default');
+    expect(root.classes()).not.toContain('planner-tone-warning');
+    wrapper.unmount();
+  });
+
+  it('keeps the MemoFlow loading state outside FullCalendar timing ownership', () => {
+    const wrapper = mount(PlannerCalendar, {
+      props: {
+        projections: [],
+        ownerCommands: {
+          route: vi.fn(async () => ({ status: 'unsupported' as const, message: 'unused' })),
+        },
+        view: 'week',
+        loading: true,
+      },
+    });
+
+    expect(wrapper.find('[data-testid="schedule-fullcalendar"]').attributes('aria-busy')).toBe(
+      'true',
+    );
+    expect(wrapper.find('[data-testid="schedule-calendar-loading"]').exists()).toBe(true);
+    wrapper.unmount();
+  });
+  it('reports one outcome for a replayed FullCalendar gesture, then accepts a distinct gesture', async () => {
+    const route = vi.fn().mockResolvedValue({
+      status: 'conflict',
+      code: 'CONFLICT',
+      reason: 'generic',
+      message: 'conflict',
+      ownerType: 'schedule.calendar-entry',
+    });
+    const wrapper = mount(PlannerCalendar, {
+      props: { projections: [scheduleProjection], ownerCommands: { route }, view: 'week' },
+    });
+    const options = wrapper.getComponent(FullCalendar).props('options');
+    const info = {
+      event: {
+        start: new Date(Number(scheduleProjection.start) + 60_000),
+        end: new Date(Number(scheduleProjection.end) + 60_000),
+        allDay: false,
+        extendedProps: { projection: scheduleProjection },
+      },
+      revert: vi.fn(),
+    } as unknown as EventDropInfo;
+    options.eventDrop?.(info);
+    options.eventDrop?.({ ...info });
+    await vi.waitFor(() => expect(wrapper.emitted('mutation')).toHaveLength(1));
+    expect(route).toHaveBeenCalledOnce();
+    expect(info.revert).toHaveBeenCalledOnce();
+    options.eventDrop?.({ ...info, revert: vi.fn() });
+    await vi.waitFor(() => expect(wrapper.emitted('mutation')).toHaveLength(2));
+    expect(route).toHaveBeenCalledTimes(2);
+    wrapper.unmount();
+  });
+});

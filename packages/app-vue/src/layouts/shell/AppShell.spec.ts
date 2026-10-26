@@ -29,7 +29,8 @@ vi.mock('../../modules/notification/composables/useNotificationUnreadQuery', asy
   };
 });
 
-vi.mock('../../modules/schedule/composables/useCalendarView', () => ({
+vi.mock('@memoflow/schedule-ui', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@memoflow/schedule-ui')>()),
   formatScheduleCapsuleLabel: () => '',
   useCalendarView: () => ({
     getScheduleCapsuleSnapshot: () => null,

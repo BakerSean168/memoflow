@@ -76,7 +76,7 @@ packages/scheduler
 但是：
 
 ```text
-packages/contracts/src/modules/schedule
+packages/schedule-contracts/src
 ```
 
 仍同时包含：
@@ -114,10 +114,10 @@ SchedulingReconcileOperation
 长期目标：
 
 ```text
-@memoflow/contracts/schedule
+@memoflow/schedule-contracts
   = product Planner/Calendar contract only
 
-@memoflow/contracts/scheduler
+@memoflow/schedule-contractsr
   = Temporal Engine contract only
 ```
 

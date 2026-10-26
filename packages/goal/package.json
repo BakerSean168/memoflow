@@ -51,12 +51,13 @@
     "@memoflow/label-contracts": "workspace:*",
     "@memoflow/patterns": "workspace:*",
     "@memoflow/relation-contracts": "workspace:*",
+    "@memoflow/reliable-messaging-contracts": "workspace:*",
+    "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/utils": "workspace:*",
     "@memoflow/workspace-contracts": "workspace:*",
     "express": "^5.2.1",
-    "zod": "^4.6.5",
-    "@memoflow/reliable-messaging-contracts": "workspace:*"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@memoflow/test-utils": "workspace:*",

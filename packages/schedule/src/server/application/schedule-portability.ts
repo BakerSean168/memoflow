@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import {
   SchedulePortablePayloadV3Schema,
   type SchedulePortablePayloadV3,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import type {
   PortableCapability,
   PortableCapabilityExecutionContext,

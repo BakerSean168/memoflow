@@ -36,7 +36,7 @@ import { OperationTimelineEntrySchema } from '@memoflow/operations-contracts';
 import type { OperationTimelineEntry } from '@memoflow/operations-contracts';
 import type { ScheduleRebuildOutboxDTO } from '../domain/repositories/i-schedule-repository';
 import { eventBus } from '@memoflow/utils/domain';
-import type { CreateScheduleRequest, UpdateScheduleRequest } from '@memoflow/contracts/schedule';
+import type { CreateScheduleRequest, UpdateScheduleRequest } from '@memoflow/schedule-contracts';
 import { resultify } from '@memoflow/utils/result';
 
 export interface ScheduleModuleRuntimeContribution {

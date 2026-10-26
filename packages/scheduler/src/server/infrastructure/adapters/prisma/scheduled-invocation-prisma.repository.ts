@@ -6,7 +6,7 @@ import type {
   ScheduledInvocationStatus,
   SchedulingOwner,
   SchedulingReconcileReceipt,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import type {
   IScheduledInvocationRepository,
   ScheduledInvocationClaim,

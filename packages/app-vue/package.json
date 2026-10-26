@@ -51,10 +51,6 @@
       "types": "./dist/modules/task/index.d.ts",
       "import": "./dist/modules/task/index.js"
     },
-    "./modules/schedule": {
-      "types": "./dist/modules/schedule/index.d.ts",
-      "import": "./dist/modules/schedule/index.js"
-    },
     "./modules/routine": {
       "types": "./dist/modules/routine/index.d.ts",
       "import": "./dist/modules/routine/index.js"
@@ -105,7 +101,9 @@
     "@memoflow/relation-contracts": "workspace:*",
     "@memoflow/reminder": "workspace:*",
     "@memoflow/repository": "workspace:*",
-    "@memoflow/schedule": "workspace:*",
+    "@memoflow/schedule-client": "workspace:*",
+    "@memoflow/schedule-contracts": "workspace:*",
+    "@memoflow/schedule-ui": "workspace:*",
     "@memoflow/setting": "workspace:*",
     "@memoflow/task": "workspace:*",
     "@memoflow/time": "workspace:*",

@@ -21,7 +21,7 @@ import type {
   ScheduledHandlerRegistration,
   ScheduledInvocationContext,
   ScheduledHandlerResult,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import {
   ReminderTimeUnit,
   TaskOccurrenceStatus,

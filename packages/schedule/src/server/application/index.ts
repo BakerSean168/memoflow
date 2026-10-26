@@ -8,4 +8,4 @@ export {
   SchedulePortableCapability,
   createSchedulePortableCapability,
 } from './schedule-portability';
-export type { SchedulePortablePayloadV3 } from '@memoflow/contracts/schedule';
+export type { SchedulePortablePayloadV3 } from '@memoflow/schedule-contracts';

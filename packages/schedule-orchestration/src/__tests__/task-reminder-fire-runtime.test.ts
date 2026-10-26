@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { NotificationRequestedWriterPort } from '@memoflow/notification-contracts';
-import { buildSchedulingKey, type ScheduledInvocationContext } from '@memoflow/contracts/schedule';
+import { buildSchedulingKey, type ScheduledInvocationContext } from '@memoflow/schedule-contracts';
 import { ScheduledHandlerRegistry } from '@memoflow/scheduler';
 import {
   TASK_REMINDER_PAYLOAD_VERSION,

@@ -3,7 +3,7 @@ import type {
   ScheduledInvocationStatus,
   SchedulingOwner,
   SchedulingReconcileReceipt,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
 import type {
   IScheduledInvocationRepository,

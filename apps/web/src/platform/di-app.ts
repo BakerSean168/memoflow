@@ -86,7 +86,7 @@ const routineService = createLazyService(async () => {
 });
 
 const scheduleService = createLazyService(async () => {
-  const { createScheduleHttpClient } = await import('@memoflow/schedule/client');
+  const { createScheduleHttpClient } = await import('@memoflow/schedule-client');
   return createScheduleHttpClient(resultHttpClient);
 });
 

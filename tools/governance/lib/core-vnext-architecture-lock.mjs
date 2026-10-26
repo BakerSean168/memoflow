@@ -17,6 +17,7 @@ const EXECUTION_ROOTS = [
 const UI_ROOTS = [
   'packages/app-react/src/',
   'packages/app-vue/src/',
+  'packages/schedule-ui/src/',
   'apps/desktop/src/renderer/',
   'apps/web/src/',
 ];
@@ -304,7 +305,10 @@ export function findCoreVnextArchitectureLockViolations(files) {
       );
     }
 
-    if (relPath.startsWith('packages/contracts/src/')) {
+    if (
+      relPath.startsWith('packages/contracts/src/') ||
+      relPath.startsWith('packages/schedule-contracts/src/')
+    ) {
       pushPatternViolations(
         violations,
         relPath,

@@ -41,7 +41,10 @@ const SERVER_SEMANTIC_CORE_DIRS = new Map([['setting', ['preferences']]]);
  * `client` root requirement is satisfied by the declared sibling package
  * instead of an in-package `src/client` directory.
  */
-const STANDALONE_CLIENT_PACKAGES = new Map([['goal', 'goal-client']]);
+const STANDALONE_CLIENT_PACKAGES = new Map([
+  ['goal', 'goal-client'],
+  ['schedule', 'schedule-client'],
+]);
 
 const EXCEPTIONS = new Set([
   'powersync-schema',

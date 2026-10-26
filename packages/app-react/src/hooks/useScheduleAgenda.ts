@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import type { CalendarEntryClientDTO } from '@memoflow/contracts/schedule';
+import type { CalendarEntryClientDTO } from '@memoflow/schedule-contracts';
 import { presentErrorMessage } from '@memoflow/http-client';
 
 import { useAppSession } from './useAppSession';

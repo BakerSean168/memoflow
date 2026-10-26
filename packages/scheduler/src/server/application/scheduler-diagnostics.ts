@@ -3,7 +3,7 @@ import type {
   InvocationAttemptDiagnostic,
   ScheduledInvocation,
   ScheduledInvocationDiagnostic,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 
 export function toInvocationAttemptDiagnostic(
   attempt: InvocationAttempt | null,

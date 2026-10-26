@@ -5,7 +5,7 @@ import type {
   SchedulingOwner,
   SchedulingPort,
   SchedulingReconcileReceipt,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import {
   GOAL_REMINDER_PAYLOAD_VERSION,
   type GoalReminderScheduledPayload,

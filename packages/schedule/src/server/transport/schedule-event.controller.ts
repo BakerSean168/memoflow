@@ -17,7 +17,7 @@ import {
   DeleteScheduleRequestSchema,
   type GetSchedulesByTimeRangeInternalQuery,
   type DetectConflictsInternalQuery,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import { formatZodErrors } from '@memoflow/utils/result';
 
 export class ScheduleEventController {

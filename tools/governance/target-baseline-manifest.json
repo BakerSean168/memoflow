@@ -80,11 +80,14 @@
     "goal-contracts": "runtime-lib",
     "notification-contracts": "runtime-lib",
     "workspace-contracts": "runtime-lib",
-    "relation-contracts": "runtime-lib",
     "desktop-contracts": "runtime-lib",
     "host-runtime": "runtime-lib",
+    "relation-contracts": "runtime-lib",
     "reliable-messaging-contracts": "runtime-lib",
-    "operations-contracts": "runtime-lib"
+    "operations-contracts": "runtime-lib",
+    "schedule-contracts": "runtime-lib",
+    "schedule-client": "runtime-lib",
+    "schedule-ui": "ui-lib"
   },
   "exemptions": [
     {

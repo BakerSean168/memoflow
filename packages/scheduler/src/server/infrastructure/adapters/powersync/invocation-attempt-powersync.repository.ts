@@ -1,4 +1,4 @@
-import type { InvocationAttempt } from '@memoflow/contracts/schedule';
+import type { InvocationAttempt } from '@memoflow/schedule-contracts';
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import type { IInvocationAttemptRepository } from '../../../domain/repositories/i-invocation-attempt-repository';
 import {

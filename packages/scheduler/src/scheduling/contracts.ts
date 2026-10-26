@@ -13,4 +13,4 @@ export type {
   SchedulingReconcileFailureCode,
   SchedulingReconcileReceipt,
   SchedulingRetryPolicy,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';

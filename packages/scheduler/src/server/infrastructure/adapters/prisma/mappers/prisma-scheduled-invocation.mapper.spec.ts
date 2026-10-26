@@ -3,7 +3,7 @@ import type {
   InvocationAttempt as PrismaInvocationAttempt,
   ScheduledInvocation as PrismaScheduledInvocation,
 } from '@memoflow/database';
-import type { InvocationAttempt, ScheduledInvocation } from '@memoflow/contracts/schedule';
+import type { InvocationAttempt, ScheduledInvocation } from '@memoflow/schedule-contracts';
 import {
   PrismaInvocationAttemptMapper,
   PrismaScheduledInvocationMapper,

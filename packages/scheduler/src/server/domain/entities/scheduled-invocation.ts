@@ -5,7 +5,7 @@ import type {
   ScheduledInvocationStatus,
   SchedulingOwner,
   SchedulingPriority,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import { generateUUID } from '@memoflow/utils/shared';
 
 export interface ScheduledInvocationState extends ScheduledInvocationContract {}

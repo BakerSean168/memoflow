@@ -1,5 +1,5 @@
 import type { Prisma, PrismaClient } from '@memoflow/database';
-import type { InvocationAttempt } from '@memoflow/contracts/schedule';
+import type { InvocationAttempt } from '@memoflow/schedule-contracts';
 import type { IInvocationAttemptRepository } from '../../../domain/repositories/i-invocation-attempt-repository';
 import { PrismaInvocationAttemptMapper } from './mappers/prisma-scheduled-invocation.mapper';
 

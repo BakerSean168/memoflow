@@ -5360,136 +5360,6 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/schedule/components/calendar-event-semantics.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/schedule/composables/useCalendarView.capsule.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/schedule/composables/useCalendarView.owner-cache.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/schedule/composables/useCalendarView.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/schedule/composables/useScheduleCalendar.cache.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/schedule/planner/PlannerCalendar.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/schedule/planner/calendar-event-projection.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/schedule/planner/planner-fullcalendar-mutation.adapter.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/schedule/planner/planner-owner-command.router.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/schedule/planner/planner-presentation.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/schedule/stores/scheduleStore.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/schedule/views/ScheduleInspect.characterization.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
       "path": "packages/app-vue/src/modules/setting/components/AISettings.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6813,30 +6683,6 @@
     },
     {
       "path": "packages/contracts/src/modules/repository/api/knowledge-note-projection.dto.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/schedule/api/dual-registry.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/schedule/calendar-entry-range.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/schedule/portable-v3.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -10010,6 +9856,46 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/schedule-client/src/application-client/planner-conflict-read-model.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-client/src/application-client/schedule-client-port-facade-dual.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-contracts/src/api/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-contracts/src/calendar-entry-range.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-contracts/src/portable-v3.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/schedule-orchestration/src/__tests__/goal-handler-registry.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10066,6 +9952,110 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/schedule-ui/src/components/CreateScheduleDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-ui/src/components/calendar-event-semantics.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-ui/src/composables/useCalendarView.capsule.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-ui/src/composables/useCalendarView.owner-cache.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-ui/src/composables/useCalendarView.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-ui/src/composables/useScheduleCalendar.cache.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-ui/src/planner/PlannerCalendar.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-ui/src/planner/calendar-event-projection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-ui/src/planner/planner-fullcalendar-mutation.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-ui/src/planner/planner-owner-command.router.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-ui/src/planner/planner-presentation.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-ui/src/stores/scheduleStore.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/schedule-ui/src/views/ScheduleInspect.characterization.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/schedule/src/api/module-lifecycle.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10117,26 +10107,6 @@
     },
     {
       "path": "packages/schedule/src/api/schedule-void-success-envelope.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/schedule/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/schedule/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/schedule/src/application-client/planner-conflict-read-model.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/schedule/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/schedule/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/schedule/src/application-client/schedule-client-port-facade-dual.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/schedule/vitest.config.ts"
@@ -12505,7 +12475,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 250
+      "fileCount": 237
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -12561,7 +12531,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 21
+      "fileCount": 19
     },
     {
       "id": "packages/schedule/vitest.mappers.config.ts",
@@ -12983,7 +12953,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 250
+      "fileCount": 237
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -13004,7 +12974,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 48
+      "fileCount": 45
     },
     {
       "id": "packages/data-portability-contracts/vitest.config.ts",
@@ -13175,6 +13145,20 @@
       "fileCount": 36
     },
     {
+      "id": "packages/schedule-client/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 2
+    },
+    {
+      "id": "packages/schedule-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 3
+    },
+    {
       "id": "packages/schedule-orchestration/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
@@ -13182,11 +13166,18 @@
       "fileCount": 7
     },
     {
+      "id": "packages/schedule-ui/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 13
+    },
+    {
       "id": "packages/schedule/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 21
+      "fileCount": 19
     },
     {
       "id": "packages/scheduler/vitest.config.ts",
@@ -13604,19 +13595,6 @@
       "packages/app-vue/src/modules/routine/components/RoutineProfileDialog.spec.ts",
       "packages/app-vue/src/modules/routine/components/RoutineUpcomingWidget.spec.ts",
       "packages/app-vue/src/modules/routine/views/RoutineConfigurationView.spec.ts",
-      "packages/app-vue/src/modules/schedule/components/CreateScheduleDialog.spec.ts",
-      "packages/app-vue/src/modules/schedule/components/calendar-event-semantics.spec.ts",
-      "packages/app-vue/src/modules/schedule/composables/useCalendarView.capsule.spec.ts",
-      "packages/app-vue/src/modules/schedule/composables/useCalendarView.owner-cache.spec.ts",
-      "packages/app-vue/src/modules/schedule/composables/useCalendarView.spec.ts",
-      "packages/app-vue/src/modules/schedule/composables/useScheduleCalendar.cache.spec.ts",
-      "packages/app-vue/src/modules/schedule/planner/PlannerCalendar.spec.ts",
-      "packages/app-vue/src/modules/schedule/planner/calendar-event-projection.spec.ts",
-      "packages/app-vue/src/modules/schedule/planner/planner-fullcalendar-mutation.adapter.spec.ts",
-      "packages/app-vue/src/modules/schedule/planner/planner-owner-command.router.spec.ts",
-      "packages/app-vue/src/modules/schedule/planner/planner-presentation.spec.ts",
-      "packages/app-vue/src/modules/schedule/stores/scheduleStore.spec.ts",
-      "packages/app-vue/src/modules/schedule/views/ScheduleInspect.characterization.spec.ts",
       "packages/app-vue/src/modules/setting/components/AISettings.spec.ts",
       "packages/app-vue/src/modules/setting/components/AccountSettingsSection.spec.ts",
       "packages/app-vue/src/modules/setting/components/AntigravityAcpDownload.spec.ts",
@@ -13909,8 +13887,6 @@
       "packages/schedule/src/api/schedule-event.routes.spec.ts",
       "packages/schedule/src/api/schedule-route-parsers-keep-boundary.surface.spec.ts",
       "packages/schedule/src/api/schedule-void-success-envelope.surface.spec.ts",
-      "packages/schedule/src/application-client/planner-conflict-read-model.spec.ts",
-      "packages/schedule/src/application-client/schedule-client-port-facade-dual.surface.spec.ts",
       "packages/schedule/src/electron/index-lifecycle.spec.ts",
       "packages/schedule/src/electron/schedule-electron-delete-contract.spec.ts",
       "packages/schedule/src/server/application/schedule-portability.spec.ts",
