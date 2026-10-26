@@ -51,10 +51,17 @@
       "expected": {
         "full": false,
         "targets": {
-          "build": ["app-vue", "desktop", "governance-tools", "ui-storybook", "web"],
-          "typecheck": ["app-vue", "desktop", "ui-storybook", "web"],
-          "test": ["app-vue", "desktop", "governance-tools", "web"],
-          "test:contract": [],
+          "build": [
+            "app-vue",
+            "desktop",
+            "goal-ui",
+            "governance-tools",
+            "ui-storybook",
+            "web"
+          ],
+          "typecheck": ["app-vue", "desktop", "goal-ui", "ui-storybook", "web"],
+          "test": ["app-vue", "desktop", "goal-ui", "governance-tools", "web"],
+          "test:contract": ["goal-ui"],
           "test:smoke": [],
           "test:integration": [],
           "test:boundary": ["desktop"],
@@ -79,10 +86,12 @@
           "build": [
             "app-vue:build",
             "desktop:build",
+            "goal-ui:build",
             "ui-storybook:build",
             "web:build",
             "app-vue:typecheck",
             "desktop:typecheck",
+            "goal-ui:typecheck",
             "ui-storybook:typecheck",
             "web:typecheck"
           ],
@@ -92,7 +101,7 @@
           "verification-children": ["desktop:test:ipc", "desktop:test:main"],
           "web-visual": ["web:e2e:visual-regression"],
           "component-browser": ["ui-storybook:test:interaction"],
-          "contract": []
+          "contract": ["goal-ui:test:contract"]
         },
         "serverShards": [
           {
@@ -109,7 +118,15 @@
       "expected": {
         "full": false,
         "targets": {
-          "build": ["ai", "api", "app-vue", "desktop", "governance-tools", "ui-storybook", "web"],
+          "build": [
+            "ai",
+            "api",
+            "app-vue",
+            "desktop",
+            "governance-tools",
+            "ui-storybook",
+            "web"
+          ],
           "typecheck": [
             "ai",
             "api",
@@ -120,7 +137,14 @@
             "ui-storybook",
             "web"
           ],
-          "test": ["ai", "api", "app-vue", "desktop", "governance-tools", "web"],
+          "test": [
+            "ai",
+            "api",
+            "app-vue",
+            "desktop",
+            "governance-tools",
+            "web"
+          ],
           "test:contract": [],
           "test:smoke": ["api"],
           "test:integration": ["ai", "api"],
@@ -219,7 +243,12 @@
           "unit-1": ["desktop:test"],
           "unit-2": [],
           "unit-3": [],
-          "build": ["desktop:build", "web:build", "desktop:typecheck", "web:typecheck"],
+          "build": [
+            "desktop:build",
+            "web:build",
+            "desktop:typecheck",
+            "web:typecheck"
+          ],
           "web-unit-1": ["web:test"],
           "web-unit-2": [],
           "server-unit": [],
@@ -268,7 +297,12 @@
           "unit-1": ["desktop:test"],
           "unit-2": [],
           "unit-3": [],
-          "build": ["desktop:build", "web:build", "desktop:typecheck", "web:typecheck"],
+          "build": [
+            "desktop:build",
+            "web:build",
+            "desktop:typecheck",
+            "web:typecheck"
+          ],
           "web-unit-1": ["web:test"],
           "web-unit-2": [],
           "server-unit": [],
@@ -288,7 +322,9 @@
     },
     {
       "id": "apiRoute",
-      "files": ["apps/api/src/shared/infrastructure/http/routes/infrastructure-routes.ts"],
+      "files": [
+        "apps/api/src/shared/infrastructure/http/routes/infrastructure-routes.ts"
+      ],
       "expected": {
         "full": false,
         "targets": {
@@ -337,7 +373,9 @@
     },
     {
       "id": "taskServer",
-      "files": ["packages/task/src/server/transport/task.transport-handlers.ts"],
+      "files": [
+        "packages/task/src/server/transport/task.transport-handlers.ts"
+      ],
       "expected": {
         "full": false,
         "targets": {
@@ -396,7 +434,11 @@
             "workspace:sync",
             "memoflow:governance-check"
           ],
-          "unit-1": ["task:test", "account:test", "schedule-orchestration:test"],
+          "unit-1": [
+            "task:test",
+            "account:test",
+            "schedule-orchestration:test"
+          ],
           "unit-2": ["desktop:test"],
           "unit-3": ["notification:test"],
           "build": [
@@ -440,7 +482,11 @@
         "serverShards": [
           {
             "id": "1/2",
-            "keys": ["api:test:integration", "desktop:test:main", "desktop:test:ipc"],
+            "keys": [
+              "api:test:integration",
+              "desktop:test:main",
+              "desktop:test:ipc"
+            ],
             "estimatedMs": 33529
           },
           {
@@ -482,6 +528,7 @@
             "goal-client",
             "goal-contracts",
             "goal-core",
+            "goal-ui",
             "governance-tools",
             "host-runtime",
             "http-client",
@@ -531,6 +578,7 @@
             "goal-client",
             "goal-contracts",
             "goal-core",
+            "goal-ui",
             "host-runtime",
             "http-client",
             "ipc-client",
@@ -580,6 +628,7 @@
             "goal-client",
             "goal-contracts",
             "goal-core",
+            "goal-ui",
             "governance-tools",
             "host-runtime",
             "http-client",
@@ -614,6 +663,7 @@
             "data-portability-contracts",
             "desktop-contracts",
             "goal-contracts",
+            "goal-ui",
             "host-runtime",
             "label-contracts",
             "shared-primitives",
@@ -722,6 +772,7 @@
             "goal-client:build",
             "goal-contracts:build",
             "goal-core:build",
+            "goal-ui:build",
             "host-runtime:build",
             "http-client:build",
             "ipc-client:build",
@@ -768,6 +819,7 @@
             "goal-client:typecheck",
             "goal-contracts:typecheck",
             "goal-core:typecheck",
+            "goal-ui:typecheck",
             "host-runtime:typecheck",
             "http-client:typecheck",
             "ipc-client:typecheck",
@@ -826,6 +878,7 @@
             "data-portability-contracts:test:contract",
             "desktop-contracts:test:contract",
             "goal-contracts:test:contract",
+            "goal-ui:test:contract",
             "host-runtime:test:contract",
             "label-contracts:test:contract",
             "shared-primitives:test:contract",
@@ -897,6 +950,7 @@
             "goal-client",
             "goal-contracts",
             "goal-core",
+            "goal-ui",
             "governance-tools",
             "host-runtime",
             "http-client",
@@ -946,6 +1000,7 @@
             "goal-client",
             "goal-contracts",
             "goal-core",
+            "goal-ui",
             "host-runtime",
             "http-client",
             "ipc-client",
@@ -995,6 +1050,7 @@
             "goal-client",
             "goal-contracts",
             "goal-core",
+            "goal-ui",
             "governance-tools",
             "host-runtime",
             "http-client",
@@ -1029,6 +1085,7 @@
             "data-portability-contracts",
             "desktop-contracts",
             "goal-contracts",
+            "goal-ui",
             "host-runtime",
             "label-contracts",
             "shared-primitives",
@@ -1137,6 +1194,7 @@
             "goal-client:build",
             "goal-contracts:build",
             "goal-core:build",
+            "goal-ui:build",
             "host-runtime:build",
             "http-client:build",
             "ipc-client:build",
@@ -1183,6 +1241,7 @@
             "goal-client:typecheck",
             "goal-contracts:typecheck",
             "goal-core:typecheck",
+            "goal-ui:typecheck",
             "host-runtime:typecheck",
             "http-client:typecheck",
             "ipc-client:typecheck",
@@ -1241,6 +1300,7 @@
             "data-portability-contracts:test:contract",
             "desktop-contracts:test:contract",
             "goal-contracts:test:contract",
+            "goal-ui:test:contract",
             "host-runtime:test:contract",
             "label-contracts:test:contract",
             "shared-primitives:test:contract",
@@ -1288,14 +1348,30 @@
     },
     {
       "id": "testOnly",
-      "files": ["packages/app-vue/src/modules/ai/components/AIMessageContent.spec.ts"],
+      "files": [
+        "packages/app-vue/src/modules/ai/components/AIMessageContent.spec.ts"
+      ],
       "expected": {
         "full": false,
         "targets": {
-          "build": ["governance-tools", "ui-storybook"],
-          "typecheck": ["app-vue"],
-          "test": ["app-vue", "governance-tools", "test-system-v2"],
-          "test:contract": [],
+          "build": [
+            "app-vue",
+            "desktop",
+            "goal-ui",
+            "governance-tools",
+            "ui-storybook",
+            "web"
+          ],
+          "typecheck": ["app-vue", "desktop", "goal-ui", "ui-storybook", "web"],
+          "test": [
+            "app-vue",
+            "desktop",
+            "goal-ui",
+            "governance-tools",
+            "test-system-v2",
+            "web"
+          ],
+          "test:contract": ["goal-ui"],
           "test:smoke": [],
           "test:integration": [],
           "test:boundary": ["desktop"],
@@ -1316,15 +1392,26 @@
           ],
           "unit-1": [],
           "unit-2": [],
-          "unit-3": [],
-          "build": ["ui-storybook:build", "app-vue:typecheck"],
-          "web-unit-1": ["app-vue:test#1/2"],
+          "unit-3": ["desktop:test"],
+          "build": [
+            "app-vue:build",
+            "desktop:build",
+            "goal-ui:build",
+            "ui-storybook:build",
+            "web:build",
+            "app-vue:typecheck",
+            "desktop:typecheck",
+            "goal-ui:typecheck",
+            "ui-storybook:typecheck",
+            "web:typecheck"
+          ],
+          "web-unit-1": ["app-vue:test#1/2", "web:test"],
           "web-unit-2": ["app-vue:test#2/2"],
           "server-unit": [],
           "verification-children": ["desktop:test:ipc", "desktop:test:main"],
           "web-visual": ["web:e2e:visual-regression"],
           "component-browser": ["ui-storybook:test:interaction"],
-          "contract": []
+          "contract": ["goal-ui:test:contract"]
         },
         "serverShards": [
           {
@@ -1362,6 +1449,7 @@
             "goal-client",
             "goal-contracts",
             "goal-core",
+            "goal-ui",
             "governance-tools",
             "host-runtime",
             "http-client",
@@ -1411,6 +1499,7 @@
             "goal-client",
             "goal-contracts",
             "goal-core",
+            "goal-ui",
             "host-runtime",
             "http-client",
             "ipc-client",
@@ -1460,6 +1549,7 @@
             "goal-client",
             "goal-contracts",
             "goal-core",
+            "goal-ui",
             "governance-tools",
             "host-runtime",
             "http-client",
@@ -1494,6 +1584,7 @@
             "data-portability-contracts",
             "desktop-contracts",
             "goal-contracts",
+            "goal-ui",
             "host-runtime",
             "label-contracts",
             "shared-primitives",
@@ -1602,6 +1693,7 @@
             "goal-client:build",
             "goal-contracts:build",
             "goal-core:build",
+            "goal-ui:build",
             "host-runtime:build",
             "http-client:build",
             "ipc-client:build",
@@ -1648,6 +1740,7 @@
             "goal-client:typecheck",
             "goal-contracts:typecheck",
             "goal-core:typecheck",
+            "goal-ui:typecheck",
             "host-runtime:typecheck",
             "http-client:typecheck",
             "ipc-client:typecheck",
@@ -1707,6 +1800,7 @@
             "data-portability-contracts:test:contract",
             "desktop-contracts:test:contract",
             "goal-contracts:test:contract",
+            "goal-ui:test:contract",
             "host-runtime:test:contract",
             "label-contracts:test:contract",
             "shared-primitives:test:contract",
@@ -1814,7 +1908,11 @@
             "workspace:sync",
             "memoflow:governance-check"
           ],
-          "unit-1": ["task:test", "account:test", "schedule-orchestration:test"],
+          "unit-1": [
+            "task:test",
+            "account:test",
+            "schedule-orchestration:test"
+          ],
           "unit-2": ["desktop:test"],
           "unit-3": ["notification:test"],
           "build": [
@@ -1858,7 +1956,11 @@
         "serverShards": [
           {
             "id": "1/2",
-            "keys": ["api:test:integration", "desktop:test:main", "desktop:test:ipc"],
+            "keys": [
+              "api:test:integration",
+              "desktop:test:main",
+              "desktop:test:ipc"
+            ],
             "estimatedMs": 33529
           },
           {

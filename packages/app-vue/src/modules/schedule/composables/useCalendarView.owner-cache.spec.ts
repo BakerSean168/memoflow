@@ -127,15 +127,13 @@ describe('useCalendarView Planner owner cache', () => {
         ok({
           goals: [
             {
-              toDTO: () => ({
-                id: 'goal',
-                identityId: 'identity-1',
-                name: 'Goal',
-                status: 'InProgress',
-                start: { kind: 'day', date: '2026-09-28' },
-                target: null,
-                version: 3,
-              }),
+              id: 'goal',
+              identityId: 'identity-1',
+              name: 'Goal',
+              status: 'InProgress',
+              start: { kind: 'day', date: '2026-09-28' },
+              target: null,
+              version: 3,
             },
           ],
           pagination: { hasMore: false },

@@ -4800,256 +4800,6 @@
       ]
     },
     {
-      "path": "packages/goal-ui/src/components/GoalKeyResultDirectControls.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal-ui/src/components/GoalKeyResultEditors.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal-ui/src/components/GoalKeyResultTrajectoryPlot.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal-ui/src/components/GoalPageToolbar.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal-ui/src/components/GoalProgressRow.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal-ui/src/components/GoalRecordComposerSurface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal-ui/src/components/GoalRecordPreview.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal-ui/src/components/cards/GoalRecordCard.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal-ui/src/components/dialogs/GoalDialog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal-ui/src/components/dialogs/GoalKeyResultInspectDialog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal-ui/src/components/dialogs/GoalRecordDialog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal-ui/src/components/dialogs/KeyResultDialog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal-ui/src/composables/goal-status-transitions.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal-ui/src/composables/useGoal.label-filter.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal-ui/src/composables/useGoalDraftCheckpoint.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal-ui/src/composables/useGoalHomeSummary.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal-ui/src/composables/useGoalRecords.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal-ui/src/composables/useGoalWorkspace.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal-ui/src/index.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal-ui/src/stores/goalStore.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal-ui/src/utils/key-result-calculation-presentation.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal-ui/src/utils/progress.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal-ui/src/views/GoalDetailView.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal-ui/src/views/GoalListView.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal-ui/src/views/GoalReviewSignals.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
       "path": "packages/app-vue/src/modules/notification/browser-system-notification.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -7466,6 +7216,14 @@
       ]
     },
     {
+      "path": "packages/goal-client/src/goal-dto-port.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/goal-client/src/goal-review-mapping.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -7630,6 +7388,214 @@
       "primarySuite": "unit",
       "collectors": [
         "packages/goal-core/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/components/GoalKeyResultDirectControls.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/components/GoalKeyResultEditors.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/components/GoalKeyResultTrajectoryPlot.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/components/GoalPageToolbar.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/components/GoalProgressRow.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/components/GoalRecordComposerSurface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/components/GoalRecordPreview.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/components/cards/GoalRecordCard.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/components/dialogs/GoalDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/components/dialogs/GoalKeyResultInspectDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/components/dialogs/GoalRecordDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/components/dialogs/KeyResultDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/composables/goal-status-transitions.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/composables/useGoal.label-filter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/composables/useGoalDraftCheckpoint.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/composables/useGoalHomeSummary.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/composables/useGoalRecords.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/composables/useGoalWorkspace.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/import-boundary.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/index.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/stores/goalStore.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/utils/key-result-calculation-presentation.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/utils/progress.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/views/GoalDetailView.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/views/GoalListView.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-ui/src/views/GoalReviewSignals.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-ui/vitest.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -12505,7 +12471,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 250
+      "fileCount": 225
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -12983,7 +12949,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 250
+      "fileCount": 225
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -13046,7 +13012,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 7
+      "fileCount": 8
     },
     {
       "id": "packages/goal-contracts/vitest.config.ts",
@@ -13061,6 +13027,13 @@
       "suite": "unit",
       "runner": "vitest",
       "fileCount": 1
+    },
+    {
+      "id": "packages/goal-ui/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 26
     },
     {
       "id": "packages/goal/vitest.config.ts",
@@ -13520,31 +13493,6 @@
       "packages/app-vue/src/modules/ai/composables/workspaceEventSubscription.spec.ts",
       "packages/app-vue/src/modules/authentication/composables/usePassword.spec.ts",
       "packages/app-vue/src/modules/authentication/stores/authenticationStore.spec.ts",
-      "packages/goal-ui/src/components/GoalKeyResultDirectControls.spec.ts",
-      "packages/goal-ui/src/components/GoalKeyResultEditors.spec.ts",
-      "packages/goal-ui/src/components/GoalKeyResultTrajectoryPlot.spec.ts",
-      "packages/goal-ui/src/components/GoalPageToolbar.spec.ts",
-      "packages/goal-ui/src/components/GoalProgressRow.spec.ts",
-      "packages/goal-ui/src/components/GoalRecordComposerSurface.spec.ts",
-      "packages/goal-ui/src/components/GoalRecordPreview.spec.ts",
-      "packages/goal-ui/src/components/cards/GoalRecordCard.spec.ts",
-      "packages/goal-ui/src/components/dialogs/GoalDialog.spec.ts",
-      "packages/goal-ui/src/components/dialogs/GoalKeyResultInspectDialog.spec.ts",
-      "packages/goal-ui/src/components/dialogs/GoalRecordDialog.spec.ts",
-      "packages/goal-ui/src/components/dialogs/KeyResultDialog.spec.ts",
-      "packages/goal-ui/src/composables/goal-status-transitions.spec.ts",
-      "packages/goal-ui/src/composables/useGoal.label-filter.spec.ts",
-      "packages/goal-ui/src/composables/useGoalDraftCheckpoint.spec.ts",
-      "packages/goal-ui/src/composables/useGoalHomeSummary.spec.ts",
-      "packages/goal-ui/src/composables/useGoalRecords.spec.ts",
-      "packages/goal-ui/src/composables/useGoalWorkspace.spec.ts",
-      "packages/goal-ui/src/index.spec.ts",
-      "packages/goal-ui/src/stores/goalStore.spec.ts",
-      "packages/goal-ui/src/utils/key-result-calculation-presentation.spec.ts",
-      "packages/goal-ui/src/utils/progress.spec.ts",
-      "packages/goal-ui/src/views/GoalDetailView.spec.ts",
-      "packages/goal-ui/src/views/GoalListView.spec.ts",
-      "packages/goal-ui/src/views/GoalReviewSignals.spec.ts",
       "packages/app-vue/src/modules/notification/browser-system-notification.spec.ts",
       "packages/app-vue/src/modules/notification/components/NotificationCapsulePreview.spec.ts",
       "packages/app-vue/src/modules/notification/components/notificationSemanticControls.spec.ts",
@@ -14013,7 +13961,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1121,
+    "unit": 1123,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

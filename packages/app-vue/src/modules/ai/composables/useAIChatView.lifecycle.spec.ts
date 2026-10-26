@@ -158,9 +158,10 @@ vi.mock('./useAI', async () => {
     }),
   };
 });
-vi.mock('../../goal/composables/useGoal', async () => {
+vi.mock('@memoflow/goal-ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@memoflow/goal-ui')>();
   const { ref } = await import('vue');
-  return { useGoal: () => ({ goals: ref([]), fetchGoals: vi.fn() }) };
+  return { ...actual, useGoal: () => ({ goals: ref([]), fetchGoals: vi.fn() }) };
 });
 vi.mock('../../task/composables/useTask', async () => {
   const { ref } = await import('vue');
