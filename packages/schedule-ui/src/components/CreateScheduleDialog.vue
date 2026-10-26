@@ -371,8 +371,13 @@ import { requireYmd, type Instant, type Ymd } from '@memoflow/contracts/primitiv
 import { formatDisplayDate } from '@memoflow/time';
 import { scheduleUiHost } from '../scheduleUiHost';
 
-const { ProductDatePicker, ProductDateTimePicker, ProductEditorFrame, ProductInlineValidation, ProductPropertyChip } =
-  scheduleUiHost.components;
+const {
+  ProductDatePicker,
+  ProductDateTimePicker,
+  ProductEditorFrame,
+  ProductInlineValidation,
+  ProductPropertyChip,
+} = scheduleUiHost.components;
 
 type ScheduleProperty = 'location' | 'attendees';
 
@@ -494,7 +499,9 @@ const timedEndInstant = computed<Instant | null>(() =>
 );
 
 const timedStartLabel = computed(() =>
-  timedStartInstant.value == null ? '—' : scheduleUiHost.formatProductDateTime(timedStartInstant.value),
+  timedStartInstant.value == null
+    ? '—'
+    : scheduleUiHost.formatProductDateTime(timedStartInstant.value),
 );
 const timedEndLabel = computed(() =>
   timedEndInstant.value == null ? '—' : scheduleUiHost.formatProductDateTime(timedEndInstant.value),

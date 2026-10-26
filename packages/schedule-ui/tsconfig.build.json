@@ -18,9 +18,7 @@
       "@memoflow/ui-vue-shadcn/components/ui/*": [
         "../ui-vue-shadcn/dist/components/ui/*/index.d.ts"
       ],
-      "@memoflow/ui-vue-shadcn/composables/*": [
-        "../ui-vue-shadcn/dist/composables/*.d.ts"
-      ],
+      "@memoflow/ui-vue-shadcn/composables/*": ["../ui-vue-shadcn/dist/composables/*.d.ts"],
       "@memoflow/ui-vue-shadcn/*": ["../ui-vue-shadcn/dist/*"]
     }
   }

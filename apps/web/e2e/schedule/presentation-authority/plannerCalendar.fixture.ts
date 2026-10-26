@@ -1,9 +1,5 @@
 import { computed, ref } from 'vue';
-import {
-  projectCalendarEntry,
-  projectTaskOccurrence,
-  useSchedule,
-} from '@memoflow/schedule-ui';
+import { projectCalendarEntry, projectTaskOccurrence, useSchedule } from '@memoflow/schedule-ui';
 import { useTask } from '@memoflow/app-vue/modules/task/composables/useTask';
 export { toLocalDateKey } from './useCalendarView.fixture';
 

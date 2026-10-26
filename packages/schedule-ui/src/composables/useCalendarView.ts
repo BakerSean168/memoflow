@@ -222,8 +222,14 @@ export function taskOccurrencesToEvents(
 export function useCalendarView() {
   const schedule = useSchedule();
   const task = scheduleUiHost.useTask();
-  const goalService = scheduleUiHost.useStrictInject(scheduleUiHost.GOAL_SERVICE_KEY, 'GoalService');
-  const routineService = scheduleUiHost.useStrictInject(scheduleUiHost.ROUTINE_SERVICE_KEY, 'RoutineService');
+  const goalService = scheduleUiHost.useStrictInject(
+    scheduleUiHost.GOAL_SERVICE_KEY,
+    'GoalService',
+  );
+  const routineService = scheduleUiHost.useStrictInject(
+    scheduleUiHost.ROUTINE_SERVICE_KEY,
+    'RoutineService',
+  );
   const runtime = scheduleUiHost.useServerStateRuntime();
   const resolveIdentityScope = scheduleUiHost.useServerStateIdentityScope();
   const plannerGoals = ref<Parameters<typeof projectPlannerReadModel>[0]['goals']>([]);

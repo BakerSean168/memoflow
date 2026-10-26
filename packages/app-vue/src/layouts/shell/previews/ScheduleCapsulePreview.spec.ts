@@ -4,10 +4,7 @@ import { createI18n } from 'vue-i18n';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
 import { setProductTimePreferences } from '../../../shared/utils/product-time';
-import type {
-  CalendarEventItem,
-  ScheduleCapsuleSnapshot,
-} from '@memoflow/schedule-ui';
+import type { CalendarEventItem, ScheduleCapsuleSnapshot } from '@memoflow/schedule-ui';
 import ScheduleCapsulePreview from './ScheduleCapsulePreview.vue';
 
 const capsuleEvents = ref<CalendarEventItem[]>([]);

@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
-import { getProductTime, setProductTimePreferences } from '@schedule-ui-test-host/shared/utils/product-time';
+import {
+  getProductTime,
+  setProductTimePreferences,
+} from '@schedule-ui-test-host/shared/utils/product-time';
 import { taskOccurrencesToEvents, toLocalDateKey } from './useCalendarView';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
 import type { TaskPlanId, TaskOccurrenceId, IdentityId } from '@memoflow/contracts/primitives';

@@ -7,11 +7,12 @@
  * package still imports no host internals from production code.
  */
 import { ref } from 'vue';
+import { bindScheduleUiHost, type ScheduleUiHost } from '../scheduleUiHost';
 import {
-  bindScheduleUiHost,
-  type ScheduleUiHost,
-} from '../scheduleUiHost';
-import { GOAL_SERVICE_KEY, ROUTINE_SERVICE_KEY, SCHEDULE_SERVICE_KEY } from '@schedule-ui-test-host/di/keys';
+  GOAL_SERVICE_KEY,
+  ROUTINE_SERVICE_KEY,
+  SCHEDULE_SERVICE_KEY,
+} from '@schedule-ui-test-host/di/keys';
 import { useStrictInject } from '@schedule-ui-test-host/shared/utils/useStrictInject';
 import { sanitizeForIpc } from '@schedule-ui-test-host/shared/utils/ipc/sanitize-for-ipc';
 import { createComposableHandleError } from '@schedule-ui-test-host/shared/utils/create-composable-handle-error';
@@ -52,9 +53,7 @@ import {
 } from '@schedule-ui-test-host/shared/components/index.ts';
 import TaskOccurrenceQuickSurface from '@schedule-ui-test-host/modules/task/components/TaskOccurrenceQuickSurface.vue';
 
-export function createScheduleUiTestHost(
-  overrides: Partial<ScheduleUiHost> = {},
-): ScheduleUiHost {
+export function createScheduleUiTestHost(overrides: Partial<ScheduleUiHost> = {}): ScheduleUiHost {
   return {
     SCHEDULE_SERVICE_KEY,
     GOAL_SERVICE_KEY,
