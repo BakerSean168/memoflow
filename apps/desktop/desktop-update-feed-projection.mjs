@@ -6,7 +6,7 @@
 export const DESKTOP_UPDATE_FEED_CONTRACT = Object.freeze({
   kind: 'desktop-update-feed-projection',
   schemaVersion: 1,
-  channels: Object.freeze(['stable', 'beta', 'canary']),
+  channels: Object.freeze(['stable', 'beta', 'canary', 'nightly']),
   lanes: Object.freeze(
     [
       {

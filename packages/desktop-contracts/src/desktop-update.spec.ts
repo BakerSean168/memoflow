@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   DesktopUpdateCapabilitiesSchema,
+  DesktopUpdateChannelSchema,
   DesktopUpdateDiagnosticsSchema,
   DesktopUpdateChannels,
   DesktopUpdateSnapshotSchema,
@@ -38,6 +39,12 @@ const diagnostics = {
 };
 
 describe('Desktop Update contract', () => {
+  it('accepts the explicit Nightly channel but rejects arbitrary release channels', () => {
+    expect(DesktopUpdateChannelSchema.parse('nightly')).toBe('nightly');
+    expect(DesktopUpdateChannelSchema.parse('stable')).toBe('stable');
+    expect(DesktopUpdateChannelSchema.safeParse('unknown').success).toBe(false);
+  });
+
   it('accepts bounded diagnostics and rejects secret fields at every object boundary', () => {
     expect(DesktopUpdateDiagnosticsSchema.safeParse(diagnostics).success).toBe(true);
     for (const key of ['feedUrl', 'path', 'error', 'provider', 'releaseNotes', 'message']) {

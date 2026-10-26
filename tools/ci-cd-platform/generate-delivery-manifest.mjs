@@ -14,6 +14,7 @@ import {
 import { classifyRisk, selectLanes } from './lib/risk.mjs';
 import { buildLaneDetails } from './lib/lane-details.mjs';
 import { detectScope } from './lib/scope-detector.mjs';
+import { buildDispatch } from './lib/dispatch.mjs';
 
 import { planUnitShards, unitJobEnabled } from './lib/unit-shards.mjs';
 
@@ -95,6 +96,20 @@ export async function buildDeliveryManifest({
     scope: resolvedScope,
     full: effectiveFull,
   });
+  if (resolvedScope.tasks) {
+    laneDetails.componentBrowser = {
+      ...laneDetails.componentBrowser,
+      required: resolvedScope.browserRequired,
+      skipReason: resolvedScope.browserRequired
+        ? null
+        : 'no browser task inputs in this resource scope',
+    };
+    laneDetails.contract = {
+      ...laneDetails.contract,
+      required: resolvedScope.tasks['test:contract'].length > 0,
+      skipReason: resolvedScope.tasks['test:contract'].length ? null : 'no affected contract task',
+    };
+  }
   // Q4/T2: contract-routed projects leave the Unit shards (see
   // contractRoutedProjects in lib/lane-details.mjs).
   const routed = contractRoutedProjects({ scope: resolvedScope, laneDetails });
@@ -114,14 +129,9 @@ export async function buildDeliveryManifest({
     risk,
     scope: resolvedScope,
     laneDetails,
-    // Coverage mode: coverage projects run their test:coverage target in the
-    // shards, whose thresholds are defined over each project's full suite —
-    // they must not be file-split and are weighed by their measured coverage
-    // durations (see planUnitShards).
-    unitShards: planUnitShards(shardUnitProjects, {
-      coverage: selectedLanes.coverage === true,
-      unsplittable: selectedLanes.coverage === true ? resolvedScope.coverage : [],
-    }),
+    // Unit shards always run the plain test target; coverage measurement is
+    // nightly-audit-only and never re-weighs or de-splits the CI plan.
+    unitShards: planUnitShards(shardUnitProjects),
     webShards,
     lanes: selectedLanes,
     provenance: buildProvenance({
@@ -129,6 +139,7 @@ export async function buildDeliveryManifest({
       input,
     }),
   };
+  if (resolvedScope.tasks) manifest.dispatch = buildDispatch(manifest);
   const result = { ...manifest, digest: digest(manifest) };
   validateDeliveryManifest(result);
   return result;
@@ -137,6 +148,11 @@ export async function buildDeliveryManifest({
 export async function writeManifestOutputs(manifest, output) {
   if (process.env.GITHUB_OUTPUT) {
     const lines = [
+      `visual_matrix=${JSON.stringify({ shard: [...new Set((manifest.dispatch?.jobs['web-visual'].tasks ?? []).map((task) => task.shard ?? '1/1'))] })}`,
+      `server_matrix=${JSON.stringify({ shard: manifest.dispatch?.serverShards.map((s) => s.id) ?? [] })}`,
+      ...Object.entries(manifest.dispatch?.jobs ?? {}).map(
+        ([id, detail]) => `job_${id.replaceAll('-', '_')}=${detail.required}`,
+      ),
       `web_matrix=${JSON.stringify({ shard: manifest.lanes.web ? manifest.webShards.shards.map(({ id }) => id) : [] })}`,
       `web_specs=${JSON.stringify(manifest.webShards.specs)}`,
       `web_estimated_total_ms=${manifest.webShards.estimatedTotalMs}`,

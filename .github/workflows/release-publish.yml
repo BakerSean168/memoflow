@@ -1,27 +1,36 @@
-name: Release Publish
+name: Promote Nightly to Stable
 
 on:
-  workflow_run:
-    workflows: ['Publish Main Candidate']
-    types: [completed]
-    branches: [main]
-  workflow_dispatch:
+  workflow_call:
     inputs:
+      channel:
+        type: string
+        required: true
+      tag:
+        type: string
+        required: true
+      sha:
+        type: string
+        required: true
+      ci_run_id:
+        type: string
+        required: true
       dry_run:
-        description: Verify release evidence without publishing (workflow remains disabled manually)
         type: boolean
         default: true
-      tag:
-        description: Existing draft tag or intended tag for a verified release-SHA recovery
+  workflow_dispatch:
+    inputs:
+      nightly_tag:
+        description: Published verified Nightly to promote (not necessarily the newest)
+        type: string
         required: true
-        type: string
-      release_sha:
-        description: Exact successful-main-CI release merge SHA to recover if the tag was not created
-        required: false
-        type: string
+      dry_run:
+        description: Verify selected Nightly without publishing Stable
+        type: boolean
+        default: true
 
 concurrency:
-  group: release-publish-${{ github.event.workflow_run.head_sha || inputs.tag || github.run_id }}
+  group: release-publication-${{ inputs.channel || 'stable' }}
   cancel-in-progress: false
 
 permissions:
@@ -31,322 +40,165 @@ permissions:
 
 jobs:
   resolve:
-    name: Resolve Release Candidate
-    permissions: { contents: read, actions: read, pull-requests: read }
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      github.event.workflow_run.conclusion == 'success'
+    name: Resolve immutable release source
+    if: github.repository == 'BakerSean168/memoflow' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     outputs:
-      eligible: ${{ steps.contract.outputs.eligible }}
-      tag: ${{ steps.contract.outputs.tag }}
-      version: ${{ steps.contract.outputs.version }}
-      sha: ${{ steps.contract.outputs.sha }}
-      ci_run_id: ${{ steps.ci.outputs.run_id }}
+      eligible: ${{ steps.plan.outputs.eligible }}
+      tag: ${{ steps.plan.outputs.tag }}
+      version: ${{ steps.plan.outputs.version }}
+      sha: ${{ steps.plan.outputs.sha }}
+      ci_run_id: ${{ steps.plan.outputs.ci_run_id }}
+      channel: ${{ steps.plan.outputs.channel }}
+      source_nightly: ${{ steps.plan.outputs.source_nightly }}
+      source_nightly_digest: ${{ steps.plan.outputs.source_nightly_digest }}
+      runtime_digest: ${{ steps.plan.outputs.runtime_digest }}
     steps:
-      - name: Checkout candidate
+      - name: Checkout pinned release control plane
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || inputs.release_sha || inputs.tag }}
+          ref: ${{ github.workflow_sha }}
           fetch-depth: 0
-
-      - name: Checkout current release recovery verifier
-        if: github.event_name == 'workflow_dispatch' && inputs.release_sha != ''
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          ref: ${{ github.sha }}
-          path: .release-recovery-control
-          fetch-depth: 1
-
-      - name: Require exact replay SHA and current main control plane
-        if: github.event_name == 'workflow_dispatch' && inputs.release_sha != ''
-        env:
-          REQUESTED_SHA: ${{ inputs.release_sha }}
-          RELEASE_TAG: ${{ inputs.tag }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          test "$GITHUB_REF" = refs/heads/main
-          [[ "$REQUESTED_SHA" =~ ^[0-9a-f]{40}$ ]]
-          test "$(git rev-parse HEAD)" = "$REQUESTED_SHA"
-          test "$(git -C .release-recovery-control rev-parse HEAD)" = "$GITHUB_SHA"
-          git fetch origin main --no-tags
-          test "$(git rev-parse origin/main)" = "$GITHUB_SHA"
-          test "$(git show "$GITHUB_SHA:package.json" | jq -r .version)" = "${RELEASE_TAG#v}"
-          test "$(git show "$GITHUB_SHA:.release-please-manifest.json" | jq -r '."."')" = "${RELEASE_TAG#v}"
-
-      - name: Resolve release contract
-        id: contract
-        env:
-          RELEASE_TAG: ${{ inputs.tag }}
-          RELEASE_SHA_REPLAY: ${{ inputs.release_sha }}
-        shell: bash
-        run: |
-          args=(--github-output)
-          contract=./tools/ci-cd-platform/release-tools/release-contract.mjs
-          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
-            args+=(--require-release --expected-tag "$RELEASE_TAG")
-            if [ -n "$RELEASE_SHA_REPLAY" ]; then
-              contract=./.release-recovery-control/tools/ci-cd-platform/release-tools/release-contract.mjs
-            fi
-          fi
-          node "$contract" "${args[@]}"
-
-      - name: Require release SHA to remain on main
-        if: steps.contract.outputs.eligible == 'true'
-        shell: bash
-        run: |
-          git fetch origin main --no-tags
-          git merge-base --is-ancestor HEAD origin/main
-
-      - name: Resolve exact successful CI
-        if: steps.contract.outputs.eligible == 'true'
-        id: ci
+      - name: Verify selected Nightly or scheduled source
+        id: plan
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         env:
-          RELEASE_SHA: ${{ steps.contract.outputs.sha }}
+          REQUESTED_CHANNEL: ${{ inputs.channel || 'stable' }}
+          RELEASE_TAG: ${{ inputs.tag }}
+          RELEASE_SHA: ${{ inputs.sha }}
+          CI_RUN_ID: ${{ inputs.ci_run_id }}
+          SOURCE_NIGHTLY: ${{ inputs.nightly_tag }}
         with:
+          # Draft visibility is needed for idempotent retries. This step remains read-only.
+          github-token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
           script: |
-            const sha = process.env.RELEASE_SHA;
-            if (context.eventName === 'workflow_run') {
-              const candidateRun = context.payload.workflow_run;
-              if (
-                candidateRun.head_sha !== sha ||
-                candidateRun.conclusion !== 'success' ||
-                candidateRun.head_branch !== 'main'
-              ) {
-                core.setFailed(`workflow_run is not successful exact-SHA candidate publication for ${sha}`);
-                return;
-              }
-            }
-            const response = await github.rest.actions.listWorkflowRuns({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'ci.yml',
-              head_sha: sha,
-              status: 'success',
-              per_page: 20,
-            });
-            const run = response.data.workflow_runs.find(
-              (candidate) => candidate.head_sha === sha && candidate.event === 'push' && candidate.head_branch === 'main',
-            );
-            if (!run) core.setFailed(`No successful exact-SHA main CI run found for ${sha}`);
-            else core.setOutput('run_id', String(run.id));
-
+            const lifecycle = require('./tools/ci-cd-platform/lib/release-lifecycle.cjs');
+            const channel = process.env.REQUESTED_CHANNEL;
+            if (channel === 'stable' && context.eventName !== 'workflow_dispatch') throw new Error('Stable requires explicit operator dispatch');
+            if (channel === 'nightly' && !context.workflow.includes('Nightly Release')) throw new Error('Nightly must use its scheduled eligibility controller');
+            const plan = await lifecycle.resolveReleasePlan({ github, ...context.repo, channel, tag: process.env.RELEASE_TAG, sha: process.env.RELEASE_SHA, ciRunId: process.env.CI_RUN_ID, nightlyTag: process.env.SOURCE_NIGHTLY });
+            lifecycle.output(core, plan);
+            await core.summary.addHeading('Release plan').addCodeBlock(JSON.stringify(plan, null, 2), 'json').write();
+      - name: Checkout exact release SHA
+        if: steps.plan.outputs.eligible == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ steps.plan.outputs.sha }}
+          fetch-depth: 0
       - uses: ./.github/actions/setup-nx-affected-job
-        if: steps.contract.outputs.eligible == 'true'
+        if: steps.plan.outputs.eligible == 'true'
         with: { node-version: '24', setup-python: 'false', setup-uv: 'false' }
-      - name: Verify release test and artifact provenance before mutation
-        if: steps.contract.outputs.eligible == 'true'
+      - name: Verify source main CI and artifact chain before mutation
+        if: steps.plan.outputs.eligible == 'true'
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          TESTED_SHA: ${{ steps.contract.outputs.sha }}
-          CI_RUN_ID: ${{ steps.ci.outputs.run_id }}
-          CANDIDATE_RUN_ID: ${{ github.event.workflow_run.id }}
+          TESTED_SHA: ${{ steps.plan.outputs.sha }}
+          CI_RUN_ID: ${{ steps.plan.outputs.ci_run_id }}
         run: node ./tools/ci-cd-platform/verify-ci-promotion.mjs
 
-      - name: No-op summary
-        if: steps.contract.outputs.eligible != 'true'
-        run: echo "CI completed for a non-release main commit; no release action is required." >> "$GITHUB_STEP_SUMMARY"
-
   prepare:
-    name: Create or Resume Draft Release
-    permissions: { contents: write }
+    name: Create or resume immutable draft
     needs: resolve
     if: needs.resolve.outputs.eligible == 'true' && inputs.dry_run != true
+    permissions: { contents: write }
     runs-on: ubuntu-latest
-    outputs:
-      already_published: ${{ steps.prepare.outputs.already_published }}
     steps:
-      - name: Checkout exact release SHA
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: ${{ needs.resolve.outputs.sha }}
-          fetch-depth: 0
-
-      - name: Checkout current release recovery verifier for notes
-        if: github.event_name == 'workflow_dispatch' && inputs.release_sha != ''
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          ref: ${{ github.sha }}
-          path: .release-recovery-control
-          fetch-depth: 1
-
-      - name: Recheck replay control plane before creating the Draft
-        if: github.event_name == 'workflow_dispatch' && inputs.release_sha != ''
-        shell: bash
-        run: |
-          set -euo pipefail
-          git fetch origin main --no-tags
-          test "$(git rev-parse origin/main)" = "$GITHUB_SHA"
-
-      - name: Extract release notes
-        env:
-          RELEASE_TAG: ${{ needs.resolve.outputs.tag }}
-          RELEASE_SHA_REPLAY: ${{ inputs.release_sha }}
-        shell: bash
-        run: |
-          contract=./tools/ci-cd-platform/release-tools/release-contract.mjs
-          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && [ -n "$RELEASE_SHA_REPLAY" ]; then
-            contract=./.release-recovery-control/tools/ci-cd-platform/release-tools/release-contract.mjs
-          fi
-          node "$contract" --require-release --expected-tag "$RELEASE_TAG" --write-notes release-notes.md
-
+          ref: ${{ github.workflow_sha }}
       - name: Require dedicated release API credential
         env:
           RELEASE_WRITE_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
-        shell: bash
-        run: |
-          test -n "$RELEASE_WRITE_TOKEN" || {
-            echo 'RELEASE_PLEASE_TOKEN is required to create/publish GitHub Releases' >&2
-            exit 1
-          }
-
+        run: test -n "$RELEASE_WRITE_TOKEN"
       - name: Create or validate draft release and tag
-        id: prepare
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         env:
           RELEASE_TAG: ${{ needs.resolve.outputs.tag }}
           RELEASE_SHA: ${{ needs.resolve.outputs.sha }}
+          RELEASE_CHANNEL: ${{ needs.resolve.outputs.channel }}
         with:
           github-token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           script: |
-            const fs = require('node:fs');
-            const tag = process.env.RELEASE_TAG;
-            const sha = process.env.RELEASE_SHA;
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
+            const { ensureDraft } = require('./tools/ci-cd-platform/lib/release-lifecycle.cjs');
+            await ensureDraft({ github, ...context.repo, tag: process.env.RELEASE_TAG, sha: process.env.RELEASE_SHA, channel: process.env.RELEASE_CHANNEL });
 
-            async function resolveTagSha() {
-              try {
-                const ref = await github.rest.git.getRef({ owner, repo, ref: `tags/${tag}` });
-                let resolved = ref.data.object.sha;
-                if (ref.data.object.type === 'tag') {
-                  const annotated = await github.rest.git.getTag({ owner, repo, tag_sha: resolved });
-                  resolved = annotated.data.object.sha;
-                }
-                return resolved;
-              } catch (error) {
-                if (error.status === 404) return null;
-                throw error;
-              }
-            }
+  build-candidate:
+    name: Exact-SHA Nightly images
+    needs: [resolve, prepare]
+    if: needs.resolve.outputs.channel == 'nightly'
+    permissions: { contents: read, actions: read, pull-requests: read, packages: write }
+    uses: ./.github/workflows/candidate-publish.yml
+    with:
+      sha: ${{ needs.resolve.outputs.sha }}
+      ci_run_id: ${{ needs.resolve.outputs.ci_run_id }}
+      dry_run: false
+      promote_staging: false
+    secrets: inherit
 
-            async function getRelease() {
-              const releases = await github.paginate(github.rest.repos.listReleases, {
-                owner,
-                repo,
-                per_page: 100,
-              });
-              const matches = releases.filter((release) => release.tag_name === tag);
-              if (matches.length > 1) {
-                const identities = matches.map((release) => `${release.id}:${release.draft ? 'draft' : 'published'}`);
-                core.setFailed(`${tag} has ambiguous release records: ${identities.join(', ')}`);
-                return { ambiguous: true, release: null };
-              }
-              return { ambiguous: false, release: matches[0] ?? null };
-            }
-
-            const existingTagSha = await resolveTagSha();
-            if (existingTagSha && existingTagSha !== sha) {
-              core.setFailed(`${tag} already points to ${existingTagSha}, expected ${sha}`);
-              return;
-            }
-
-            if (!existingTagSha) {
-              // Create the immutable ref first. GITHUB_TOKEN-created tag pushes do not
-              // recursively start normal push workflows, and a tag-first partial state
-              // is directly resumable through workflow_dispatch if release creation fails.
-              await github.rest.git.createRef({ owner, repo, ref: `refs/tags/${tag}`, sha });
-            }
-
-            const resolvedRelease = await getRelease();
-            if (resolvedRelease.ambiguous) return;
-            let release = resolvedRelease.release;
-            if (release && !release.draft) {
-              core.setOutput('already_published', 'true');
-              core.setOutput('release_id', String(release.id));
-              return;
-            }
-            if (!release) {
-              release = (
-                await github.rest.repos.createRelease({
-                  owner,
-                  repo,
-                  tag_name: tag,
-                  target_commitish: sha,
-                  name: tag,
-                  body: fs.readFileSync('release-notes.md', 'utf8'),
-                  draft: true,
-                })
-              ).data;
-            }
-            core.setOutput('already_published', 'false');
-            core.setOutput('release_id', String(release.id));
+  release-quality:
+    name: Exact-source release acceptance
+    needs: [resolve, prepare]
+    permissions: { contents: read, actions: read }
+    uses: ./.github/workflows/release-quality.yml
+    with:
+      sha: ${{ needs.resolve.outputs.sha }}
+    secrets: inherit
 
   release-assets:
-    name: Desktop Release Lane
+    name: Desktop native acceptance and packaging
+    needs: [resolve, prepare]
     permissions: { contents: write, actions: read, pull-requests: read }
-    needs:
-      - resolve
-      - prepare
-    if: needs.prepare.outputs.already_published != 'true'
     uses: ./.github/workflows/release-assets.yml
     with:
       tag: ${{ needs.resolve.outputs.tag }}
       sha: ${{ needs.resolve.outputs.sha }}
+      channel: ${{ needs.resolve.outputs.channel }}
       macos_signing_mode: ${{ vars.MACOS_RELEASE_MODE || 'unsigned-pilot' }}
     secrets: inherit
 
   publish-images:
-    name: Docker Release Lane
+    name: Digest-preserving image tags
+    needs: [resolve, prepare, build-candidate]
+    if: >-
+      always() && needs.prepare.result == 'success' &&
+      ((needs.resolve.outputs.channel == 'nightly' && needs.build-candidate.result == 'success') ||
+       (needs.resolve.outputs.channel == 'stable' && needs.build-candidate.result == 'skipped'))
     permissions: { contents: write, actions: read, pull-requests: read, packages: write }
-    needs:
-      - resolve
-      - prepare
-    if: needs.prepare.outputs.already_published != 'true'
     uses: ./.github/workflows/publish-images.yml
     with:
       tag: ${{ needs.resolve.outputs.tag }}
       sha: ${{ needs.resolve.outputs.sha }}
       ci_run_id: ${{ needs.resolve.outputs.ci_run_id }}
+      channel: ${{ needs.resolve.outputs.channel }}
+      source_nightly: ${{ needs.resolve.outputs.source_nightly }}
     secrets: inherit
 
   finalize:
-    name: Release Postflight & Publish
-    permissions: { contents: write, actions: read, pull-requests: write }
-    needs:
-      - resolve
-      - prepare
-      - release-assets
-      - publish-images
+    name: Verify all release evidence and publish
+    needs: [resolve, prepare, build-candidate, release-assets, publish-images, release-quality]
     if: >-
-      always() &&
-      needs.resolve.outputs.eligible == 'true' &&
-      needs.prepare.result == 'success' &&
-      needs.prepare.outputs.already_published != 'true' &&
-      needs.release-assets.result == 'success' &&
-      needs.publish-images.result == 'success'
+      always() && needs.prepare.result == 'success' &&
+      needs.release-assets.result == 'success' && needs.publish-images.result == 'success' &&
+      needs.release-quality.result == 'success'
+    permissions: { contents: write, actions: read, pull-requests: read }
     runs-on: ubuntu-latest
     steps:
       - name: Checkout release tooling
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ needs.resolve.outputs.sha }}
-
           fetch-depth: 0
       - uses: ./.github/actions/setup-nx-affected-job
         with: { node-version: '24', setup-python: 'false', setup-uv: 'false' }
-
       - name: Download lane evidence from draft release
         env:
           GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           RELEASE_TAG: ${{ needs.resolve.outputs.tag }}
         run: |
+          set -euo pipefail
           mkdir -p .release-evidence
-          test "$(gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft)" = "true"
+          test "$(gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft)" = true
           gh release download "$RELEASE_TAG" --pattern desktop-release-manifest.json --pattern docker-release-manifest.json --pattern candidate-set-v1.json --dir .release-evidence
-
       - name: Revalidate source chain before public release
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -354,96 +206,73 @@ jobs:
           CI_RUN_ID: ${{ needs.resolve.outputs.ci_run_id }}
           CANDIDATE_MANIFEST: .release-evidence/candidate-set-v1.json
         run: node ./tools/ci-cd-platform/verify-ci-promotion.mjs
-
       - name: Verify the remote Draft contains every manifest-owned Desktop asset
         env:
           GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           RELEASE_TAG: ${{ needs.resolve.outputs.tag }}
-          REPOSITORY: ${{ github.repository }}
-        shell: bash
         run: |
           set -euo pipefail
           release_api_url="$(gh release view "$RELEASE_TAG" --json apiUrl --jq .apiUrl)"
           test -n "$release_api_url"
           gh api "$release_api_url" > .release-evidence/github-release.json
-          node ./tools/ci-cd-platform/release-tools/verify-desktop-release-assets.mjs \
-            .release-evidence/desktop-release-manifest.json \
-            .release-evidence/github-release.json
-
-      - name: Build canonical release manifest
+          node ./tools/ci-cd-platform/release-tools/verify-desktop-release-assets.mjs .release-evidence/desktop-release-manifest.json .release-evidence/github-release.json
+      - name: Download exact-source release acceptance receipt
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: release-quality-receipt
+          path: .release-evidence
+      - name: Build canonical release manifest and Nightly source receipt
         env:
           RELEASE_TAG: ${{ needs.resolve.outputs.tag }}
           RELEASE_SHA: ${{ needs.resolve.outputs.sha }}
           CI_RUN_ID: ${{ needs.resolve.outputs.ci_run_id }}
+          RELEASE_CHANNEL: ${{ needs.resolve.outputs.channel }}
+          SOURCE_NIGHTLY: ${{ needs.resolve.outputs.source_nightly }}
+          SOURCE_NIGHTLY_DIGEST: ${{ needs.resolve.outputs.source_nightly_digest }}
+          NIGHTLY_RUNTIME_DIGEST: ${{ needs.build-candidate.outputs.runtime_digest || needs.resolve.outputs.runtime_digest }}
         run: |
-          node ./tools/ci-cd-platform/release-tools/build-release-manifest.mjs \
-            .release-evidence/desktop-release-manifest.json \
-            .release-evidence/docker-release-manifest.json \
-            .release-evidence/candidate-set-v1.json \
-            "$RELEASE_TAG" "$RELEASE_SHA" "$CI_RUN_ID" release-manifest.json
-
+          node ./tools/ci-cd-platform/release-tools/build-release-manifest.mjs .release-evidence/desktop-release-manifest.json .release-evidence/docker-release-manifest.json .release-evidence/candidate-set-v1.json "$RELEASE_TAG" "$RELEASE_SHA" "$CI_RUN_ID" release-manifest.json
+          node ./tools/ci-cd-platform/release-tools/finalize-release-channel.mjs release-manifest.json .release-evidence
       - name: Upload canonical manifest and publish
         env:
           GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           RELEASE_TAG: ${{ needs.resolve.outputs.tag }}
+          RELEASE_CHANNEL: ${{ needs.resolve.outputs.channel }}
         run: |
+          set -euo pipefail
           gh release upload "$RELEASE_TAG" release-manifest.json --clobber
-          gh release edit "$RELEASE_TAG" --draft=false --latest
-          echo "Published $RELEASE_TAG after exact-SHA CI, Desktop assets, Docker images, and release evidence all passed." >> "$GITHUB_STEP_SUMMARY"
+          if [ "$RELEASE_CHANNEL" = nightly ]; then
+            gh release upload "$RELEASE_TAG" nightly-manifest.json --clobber
+            gh release edit "$RELEASE_TAG" --draft=false --prerelease --latest=false
+          else
+            gh release edit "$RELEASE_TAG" --draft=false --prerelease=false --latest
+          fi
+          echo "Published $RELEASE_TAG with exact-SHA CI, native and image evidence; no Production deployment." >> "$GITHUB_STEP_SUMMARY"
 
   reconcile-release-pr:
-    name: Mark Release PR Tagged
-    needs:
-      - resolve
-      - prepare
-    if: >-
-      always() &&
-      needs.resolve.outputs.eligible == 'true' &&
-      needs.prepare.result == 'success'
+    name: Reconcile successful Stable publication
+    needs: [resolve, finalize]
+    if: needs.resolve.outputs.channel == 'stable' && needs.finalize.result == 'success'
+    permissions: { contents: read, pull-requests: write, issues: write }
     runs-on: ubuntu-latest
     steps:
       - name: Reconcile release-please labels
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         env:
           RELEASE_SHA: ${{ needs.resolve.outputs.sha }}
+          RELEASE_VERSION: ${{ needs.resolve.outputs.version }}
         with:
           github-token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           script: |
-            const sha = process.env.RELEASE_SHA;
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-            const pulls = await github.paginate(github.rest.pulls.list, {
-              owner,
-              repo,
-              state: 'closed',
-              base: context.payload.repository.default_branch,
-              per_page: 100,
-            });
-            const releasePr = pulls.find(
-              (pull) => pull.merged_at && pull.merge_commit_sha === sha,
-            );
-            if (!releasePr) {
-              core.setFailed(`No merged release PR found for ${sha}`);
-              return;
+            const pulls = await github.paginate(github.rest.pulls.list, { ...context.repo, state: 'closed', base: 'main', per_page: 100 });
+            const expectedTitle = `chore(main): release ${process.env.RELEASE_VERSION}`;
+            const matches = pulls.filter(p => p.merged_at && p.title === expectedTitle);
+            if (matches.length > 1) throw new Error('ambiguous Release Please milestone');
+            const releasePr = matches[0];
+            if (!releasePr) { core.notice('No pending Release Please PR for this already-versioned source'); return; }
+            const comparison = (await github.rest.repos.compareCommits({ ...context.repo, basehead: `${releasePr.merge_commit_sha}...${process.env.RELEASE_SHA}` })).data;
+            if (!['ahead', 'identical'].includes(comparison.status)) throw new Error('Release Please milestone is not in selected Nightly source');
+            await github.rest.issues.addLabels({ ...context.repo, issue_number: releasePr.number, labels: ['autorelease: tagged'] });
+            if (releasePr.labels.some(l => (typeof l === 'string' ? l : l.name) === 'autorelease: pending')) {
+              await github.rest.issues.removeLabel({ ...context.repo, issue_number: releasePr.number, name: 'autorelease: pending' });
             }
-
-            const labels = releasePr.labels
-              .map((label) => (typeof label === 'string' ? label : label.name))
-              .filter(Boolean);
-            if (!labels.includes('autorelease: tagged')) {
-              await github.rest.issues.addLabels({
-                owner,
-                repo,
-                issue_number: releasePr.number,
-                labels: ['autorelease: tagged'],
-              });
-            }
-            if (labels.includes('autorelease: pending')) {
-              await github.rest.issues.removeLabel({
-                owner,
-                repo,
-                issue_number: releasePr.number,
-                name: 'autorelease: pending',
-              });
-            }
-            core.info(`Marked release PR #${releasePr.number} tagged for ${sha}`);

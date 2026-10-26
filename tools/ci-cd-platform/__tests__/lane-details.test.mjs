@@ -4,14 +4,14 @@ import { contractRoutedProjects } from '../lib/contracts.mjs';
 
 const required = { contract: { required: true, targets: ['test:contract'] } };
 
-test('contract routing removes contracts from unit shards only when others remain', () => {
+test('contract routing removes contracts from unit shards including a contracts-only diff', () => {
   assert.deepEqual(
     contractRoutedProjects({ scope: { unit: ['contracts', 'goal'] }, laneDetails: required }),
     ['contracts'],
   );
   assert.deepEqual(
     contractRoutedProjects({ scope: { unit: ['contracts'] }, laneDetails: required }),
-    [],
+    ['contracts'],
   );
   assert.deepEqual(
     contractRoutedProjects({ scope: { unit: ['goal'] }, laneDetails: required }),

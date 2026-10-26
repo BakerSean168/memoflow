@@ -3,6 +3,11 @@ name: Release Assets
 on:
   workflow_call:
     inputs:
+      channel:
+        description: Release channel (nightly or stable)
+        required: false
+        type: string
+        default: stable
       tag:
         required: true
         type: string
@@ -19,6 +24,11 @@ on:
         default: all
   workflow_dispatch:
     inputs:
+      channel:
+        description: Release channel (nightly or stable)
+        required: false
+        type: string
+        default: stable
       tag:
         description: Existing draft release tag to build and upload assets for
         required: true
@@ -67,6 +77,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       release_tag: ${{ steps.resolve.outputs.release_tag }}
+      release_channel: ${{ inputs.channel || 'stable' }}
       release_sha: ${{ steps.resolve.outputs.release_sha }}
       macos_signing_mode: ${{ steps.resolve.outputs.macos_signing_mode }}
       desktop_matrix: ${{ steps.resolve.outputs.desktop_matrix }}
@@ -161,7 +172,9 @@ jobs:
     uses: ./.github/workflows/desktop-update-e2e.yml
     with:
       ref: ${{ needs.prepare-release.outputs.release_sha }}
-      qa_overlay_ref: ${{ github.workflow_sha }}
+      # Historical Nightly promotion must validate tests from that immutable
+      # source, never silently overlay newer product inputs from current main.
+      qa_overlay_ref: ${{ needs.prepare-release.outputs.release_sha }}
 
   build-release-assets:
     needs: prepare-release
@@ -225,7 +238,9 @@ jobs:
         shell: bash
         env:
           RELEASE_TAG: ${{ needs.prepare-release.outputs.release_tag }}
-        run: node ../release-tooling/tools/ci-cd-platform/release-tools/release-contract.mjs --require-release --expected-tag "$RELEASE_TAG"
+          RELEASE_CHANNEL: ${{ inputs.channel || 'stable' }}
+        run: |
+          node ../release-tooling/tools/ci-cd-platform/release-tools/prepare-release-source.mjs "$RELEASE_TAG" "$RELEASE_CHANNEL" --apply
 
       - name: Build desktop application
         working-directory: release-source
@@ -485,7 +500,7 @@ jobs:
           node ./tools/ci-cd-platform/release-tools/create-desktop-manifest.mjs artifacts "$RELEASE_TAG" "$RELEASE_SHA" desktop-release-manifest.json
           node ./tools/ci-cd-platform/release-tools/verify-desktop-update-metadata.mjs desktop-release-manifest.json artifacts
           node ./tools/ci-cd-platform/release-tools/materialize-desktop-update-feed.mjs \
-            desktop-release-manifest.json artifacts desktop-update-feed stable
+            desktop-release-manifest.json artifacts desktop-update-feed "${{ inputs.channel || 'stable' }}"
           node ./tools/ci-cd-platform/release-tools/materialize-desktop-update-rollout.mjs \
             desktop-update-feed/desktop-update-feed-publication.json desktop-update-feed desktop-update-rollout 10
           node --input-type=module <<'NODE'
@@ -493,6 +508,11 @@ jobs:
           const manifest = JSON.parse(await readFile('desktop-release-manifest.json', 'utf8'));
           await writeFile('SHA256SUMS.txt', `${manifest.assets.map((asset) => `${asset.sha256}  ${asset.name}`).join('\n')}\n`);
           NODE
+
+      - name: Archive channel-specific feed
+        shell: bash
+        run: |
+          tar -czf desktop-update-feed.tar.gz -C desktop-update-feed .
 
       - name: Retain Desktop update feed evidence
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
@@ -530,7 +550,7 @@ jobs:
             exit 1
           }
           gh release upload "$RELEASE_TAG" "${files[@]}" \
-            desktop-release-manifest.json SHA256SUMS.txt --clobber
+            desktop-release-manifest.json SHA256SUMS.txt desktop-update-feed.tar.gz --clobber
           release_api_url="$(gh release view "$RELEASE_TAG" --json apiUrl --jq .apiUrl)"
           test -n "$release_api_url"
           gh api "$release_api_url" > github-release-assets.json

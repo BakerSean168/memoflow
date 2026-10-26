@@ -363,7 +363,7 @@ async function promotionRerunFixture() {
     `/repos/${repository}/actions/runs/101/attempts/1/jobs?per_page=100`,
   );
   source.jobs.push({
-    name: 'Scope Detector',
+    name: 'Changes',
     run_id: 101,
     run_attempt: 1,
     head_sha: sha,
@@ -373,7 +373,7 @@ async function promotionRerunFixture() {
   source.total_count = source.jobs.length;
   // The current attempt is authoritative for CI Check and every Unit job.
   const current = structuredClone(source);
-  current.jobs.find((job) => job.name === 'Scope Detector').run_attempt = 2;
+  current.jobs.find((job) => job.name === 'Changes').run_attempt = 2;
   f.responses.set(`/repos/${repository}/actions/runs/101/attempts/2/jobs?per_page=100`, current);
   // The immutable ci-evidence-v1 artifact retains runAttempt=1 even though
   // GitHub reran the CI jobs and CI Check turned green in attempt 2.
@@ -391,14 +391,14 @@ test('promotion authenticates a successful original scope attempt after CI rerun
 });
 
 for (const mutation of [
-  'source Scope Detector missing',
-  'source Scope Detector duplicated',
-  'source Scope Detector failed',
-  'source Scope Detector cancelled',
-  'source Scope Detector incomplete',
-  'source Scope Detector wrong run',
-  'source Scope Detector wrong attempt',
-  'source Scope Detector wrong SHA',
+  'source Changes missing',
+  'source Changes duplicated',
+  'source Changes failed',
+  'source Changes cancelled',
+  'source Changes incomplete',
+  'source Changes wrong run',
+  'source Changes wrong attempt',
+  'source Changes wrong SHA',
   'current CI Check failed',
   'current Unit shard failed',
   'future evidence attempt',
@@ -408,24 +408,24 @@ for (const mutation of [
 ]) {
   test(`promotion rejects rerun evidence with ${mutation}`, async () => {
     const f = await promotionRerunFixture();
-    const producer = f.source.jobs.find((job) => job.name === 'Scope Detector');
-    if (mutation === 'source Scope Detector missing') {
+    const producer = f.source.jobs.find((job) => job.name === 'Changes');
+    if (mutation === 'source Changes missing') {
       f.source.jobs = f.source.jobs.filter((job) => job !== producer);
       f.source.total_count = f.source.jobs.length;
-    } else if (mutation === 'source Scope Detector duplicated') {
+    } else if (mutation === 'source Changes duplicated') {
       f.source.jobs.push(structuredClone(producer));
       f.source.total_count = f.source.jobs.length;
-    } else if (mutation === 'source Scope Detector failed') {
+    } else if (mutation === 'source Changes failed') {
       producer.conclusion = 'failure';
-    } else if (mutation === 'source Scope Detector cancelled') {
+    } else if (mutation === 'source Changes cancelled') {
       producer.conclusion = 'cancelled';
-    } else if (mutation === 'source Scope Detector incomplete') {
+    } else if (mutation === 'source Changes incomplete') {
       f.source.total_count += 1;
-    } else if (mutation === 'source Scope Detector wrong run') {
+    } else if (mutation === 'source Changes wrong run') {
       producer.run_id = 100;
-    } else if (mutation === 'source Scope Detector wrong attempt') {
+    } else if (mutation === 'source Changes wrong attempt') {
       producer.run_attempt = 2;
-    } else if (mutation === 'source Scope Detector wrong SHA') {
+    } else if (mutation === 'source Changes wrong SHA') {
       producer.head_sha = head;
     } else if (mutation === 'current CI Check failed') {
       f.current.jobs.find((job) => job.name === 'CI Check').conclusion = 'failure';

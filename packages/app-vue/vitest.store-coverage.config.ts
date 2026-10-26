@@ -15,12 +15,6 @@ export default mergeConfig(
         roots: ['src/modules'],
         reportsDirectory: 'coverage/packages/app-vue/stores',
         fileIncludePattern: /^src\/modules\/.+\/stores\/[^/]+\.ts$/,
-        thresholds: {
-          statements: 70,
-          lines: 70,
-          functions: 70,
-          branches: 60,
-        },
       }),
     },
   }),

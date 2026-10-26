@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memoflow.dev/schemas/ci-task-receipt-v1.schema.json",
+  "type": "object",
+  "required": [
+    "kind",
+    "version",
+    "job",
+    "key",
+    "taskDigest",
+    "planDigest",
+    "commit",
+    "runId",
+    "runAttempt",
+    "manifestDigest",
+    "command",
+    "resourceShard",
+    "exitCode",
+    "durationMs",
+    "digest"
+  ],
+  "properties": {
+    "kind": {
+      "const": "ci-task-receipt-v1"
+    },
+    "version": {
+      "const": 1
+    },
+    "job": {
+      "type": "string"
+    },
+    "key": {
+      "type": "string"
+    },
+    "taskDigest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "planDigest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "commit": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "runId": {
+      "type": "string"
+    },
+    "runAttempt": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "manifestDigest": {
+      "type": ["string", "null"]
+    },
+    "command": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "resourceShard": {
+      "type": ["string", "null"]
+    },
+    "exitCode": {
+      "type": ["integer", "null"]
+    },
+    "durationMs": {
+      "type": "number",
+      "minimum": 0
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  },
+  "additionalProperties": true
+}

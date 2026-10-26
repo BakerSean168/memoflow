@@ -25,7 +25,8 @@ function assertReleaseConfig(value: unknown): asserts value is DesktopUpdateRele
     !config.channels ||
     typeof config.channels.stable !== 'string' ||
     typeof config.channels.beta !== 'string' ||
-    typeof config.channels.canary !== 'string'
+    typeof config.channels.canary !== 'string' ||
+    typeof config.channels.nightly !== 'string'
   ) {
     throw new Error('Desktop Update release configuration is invalid');
   }
@@ -48,4 +49,9 @@ export function resolveDesktopUpdateFeed(channel: DesktopUpdateChannelDTO): Desk
     channel: releaseConfig.channels[channel],
     tagNamePrefix: releaseConfig.tagNamePrefix,
   });
+}
+
+/** Keep Nightly binaries on their own prerelease channel; stable never opts in. */
+export function resolveDesktopUpdateChannelForVersion(version: string): DesktopUpdateChannelDTO {
+  return /^\d+\.\d+\.\d+-nightly\.\d{8}\.\d+$/u.test(version) ? 'nightly' : 'stable';
 }

@@ -54,9 +54,10 @@ Migrator、Database、Database Runtime 属于同一 production artifact closure�
 dependencies 递归计算。Web shard 和 `publish-images.yml` 都会在使用前验证每个内容 digest、source
 manifest digest 以及 closure 目录集合。
 
-PR coverage 由 `Coverage Oracle` 门禁；`.github/workflows/coverage.yml` 的 schedule/manual 车道继续
-执行完整 configured project lists，作为 affected 图漏检的 nightly 兜底。PR `test:perf` 只执行固定
-seed 的排序/service budget；真实 GC、memory 和长采样在 `performance-experiment.yml` nightly 车道，
+Coverage 是测量而非门禁（2026-10-25 起）：PR/Main CI 不做覆盖率仪表化，旧 `Coverage Oracle`
+期望已删除；`nightly-audit.yml` 的 schedule/manual 车道继续执行完整 configured project lists，
+上传覆盖率报告作为 affected 图漏检的独立观测。PR `test:perf` 只执行固定
+seed 的排序/service budget；真实 GC、memory 和长采样在 `performance-experiment` nightly 车道，
 并明确要求 `--expose-gc`。
 
 本地对应入口：
@@ -100,9 +101,9 @@ runner-minutes 目标已达成；公开仓库 billing API 返回的 0 billable m
 runner-minutes、cache 命中和实际 shard 平衡，不把单次测量写成永久保证。
 
 手动触发的完整 Coverage workflow [run 30970172037](https://github.com/BakerSean168/memoflow/actions/runs/30970172037)
-已验证 full configured project selection 不再 false-green；它实际执行 governed domain、store 和 use-case
-coverage，并在 `schedule:test:coverage:use-cases` 的 branch coverage `56.33% < 60%` 时失败。该回归保持
-原 threshold，证明 nightly audit 和 coverage regression gate 都会 fail closed。
+历史性地验证过 full configured project selection 不再 false-green（当时还在 threshold 时代，
+`schedule:test:coverage:use-cases` 的 branch coverage `56.33% < 60%` 使其失败）。2026-10-25 起
+固定百分比门禁已删除，nightly audit 只测量与上传报告；测试行为失败仍 fail closed。
 
 覆盖 nightly-audit 修复后的最终 PR head `c85759766` 由
 [Actions run 30971373609](https://github.com/BakerSean168/memoflow/actions/runs/30971373609) 验证，七个

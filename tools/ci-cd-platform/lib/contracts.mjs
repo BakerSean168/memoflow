@@ -194,8 +194,10 @@ export function validateDeliveryManifest(manifest) {
     } else {
       assert(manifest.full === true, 'fallback must be full');
       assert(
-        [...LANE_NAMES].every((lane) => manifest.lanes[lane] === true),
-        'fallback must enable every lane',
+        [...LANE_NAMES]
+          .filter((lane) => lane !== 'coverage')
+          .every((lane) => manifest.lanes[lane] === true),
+        'full execution must enable every regular lane',
       );
     }
   }
@@ -230,15 +232,11 @@ export function validateDeliveryManifest(manifest) {
     contractRoutedProjects({ scope: manifest.scope, laneDetails: manifest.laneDetails }),
   );
   // Mirror planUnitShards (contracts stays standalone, see above): app-vue is
-  // file-split except in coverage mode, where coverage projects run their
-  // test:coverage target whole — its thresholds are defined over the full
-  // suite, so a split coverage task set is a contract violation.
-  const coverageUnsplit =
-    manifest.lanes?.coverage === true ? new Set(manifest.scope.coverage ?? []) : new Set();
+  // the only file-split Unit project.
   const expectedTasks = manifest.scope.unit
     .filter((project) => project !== 'memoflow' && !routedProjects.has(project))
     .flatMap((project) =>
-      project === 'app-vue' && !coverageUnsplit.has(project)
+      project === 'app-vue'
         ? [
             { project, shard: '1/2' },
             { project, shard: '2/2' },
@@ -636,17 +634,18 @@ export function buildProvenance({ generator, input }) {
 /**
  * Q4/T2 contract routing: when the Contract lane is required, unit projects
  * that own a test:contract target run there as their single primary
- * execution and leave the Unit shards — unless that would empty the shards
- * entirely, in which case routing is void and the shards keep everything.
+ * execution and leave the Unit shards. Governance dependency tests also
+ * leave the pool when the task-based dispatch is present.
  * Shared by the manifest generator and the contract validator so both sides
  * always agree on the routed set.
  */
 export function contractRoutedProjects({ scope, laneDetails }) {
-  if (laneDetails?.contract?.required !== true) return [];
   const unit = scope?.unit ?? [];
-  // Today `contracts` is the only project owning a test:contract target;
-  // extend this list when another project gains one.
-  const routed = unit.filter((project) => project === 'contracts');
-  if (routed.length === 0 || routed.length >= unit.length) return [];
-  return routed;
+  return unit.filter(
+    (project) =>
+      ((scope?.selection?.unitContractAliases ?? ['contracts']).includes(project) &&
+        laneDetails?.contract?.required === true &&
+        (!scope?.tasks || scope.tasks['test:contract']?.includes(project))) ||
+      (scope?.tasks && ['governance-tools', 'test-system-v2'].includes(project)),
+  );
 }

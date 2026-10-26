@@ -1,10 +1,8 @@
-import { execFile } from 'node:child_process';
 import { createRequire } from 'node:module';
-import { promisify } from 'node:util';
 import path from 'node:path';
-import { webFlowCandidateFiles } from './risk.mjs';
+import { classifyRisk, webFlowCandidateFiles } from './risk.mjs';
+import { selectCiTasks } from './task-selection.mjs';
 
-const exec = promisify(execFile);
 const require = createRequire(import.meta.url);
 export const SCOPE_VERSION = 1;
 
@@ -101,37 +99,8 @@ export function createNxShowProjectsInvocation(args, cwd) {
   };
 }
 
-async function nxProjects(args, cwd) {
-  const invocation = createNxShowProjectsInvocation(args, cwd);
-  try {
-    const { stdout } = await exec(invocation.command, invocation.args, {
-      cwd,
-      maxBuffer: 4 * 1024 * 1024,
-      env: {
-        ...process.env,
-        NODE_OPTIONS: `${process.env.NODE_OPTIONS ?? ''} --require=${invocation.bootstrap}`.trim(),
-      },
-    });
-    const projects = JSON.parse(stdout);
-    if (!Array.isArray(projects) || !projects.every((project) => typeof project === 'string')) {
-      throw new Error('Nx returned an invalid project list');
-    }
-    return projects.sort();
-  } catch (error) {
-    const detail = [error?.stderr, error?.stdout]
-      .filter((value) => typeof value === 'string' && value.trim())
-      .map((value) => value.trim())
-      .join('\n')
-      .slice(0, 4000);
-    throw new Error(
-      `Nx project scope query failed (${args.join(' ')}): ${detail || error?.message || 'unknown error'}`,
-      { cause: error },
-    );
-  }
-}
-
 export async function detectScope({
-  root = process.cwd(),
+  root: _root = process.cwd(),
   base = process.env.NX_BASE,
   head = process.env.NX_HEAD,
   full = false,
@@ -141,134 +110,56 @@ export async function detectScope({
     throw new Error('detectScope requires the changed file list for non-full scope');
   }
 
-  // Safety valve: CI configuration, root config, contracts, database force full audit
-  const isGlobal = full || (Array.isArray(files) && isGlobalSurface(files));
-  const effectiveFull = isGlobal;
-
-  const common = effectiveFull
-    ? []
-    : [
-        '--affected',
-        ...(base && head
-          ? [`--base=${base}`, `--head=${head}`]
-          : files && files.length > 0
-            ? [`--files=${files.join(',')}`]
-            : []),
-      ];
-
-  const projects = await nxProjects(common, root);
-  const target = async (name) => nxProjects([...common, `--with-target=${name}`], root);
-
-  if (effectiveFull) {
-    const [rawUnit, coverage, smoke, integration, boundary, perf] = await Promise.all([
-      target('test'),
-      target('test:coverage'),
-      target('test:smoke'),
-      target('test:integration'),
-      target('test:boundary'),
-      target('test:perf'),
-    ]);
-    const unit = rawUnit.filter((p) => p !== 'ui-storybook' && p !== 'memoflow');
-    const webFlowFiles = [];
-    const webFlow = true;
-    const desktopFlow = true;
-    return {
-      version: SCOPE_VERSION,
-      base: base ?? null,
-      head: head ?? null,
-      full: true,
-      projects,
-      unit,
-      coverage,
-      smoke,
-      integration,
-      boundary,
-      perf,
-      webFlow,
-      webFlowFiles,
-      desktopFlow,
-    };
-  }
-
-  // Affected non-global run: determine real owners and layers
-  const touchedOwners = new Set(files.map(resolveProjectOwner).filter((p) => p !== 'memoflow'));
-  const touchedLayers = new Set([...touchedOwners].map((p) => PROJECT_LAYERS[p]).filter(Boolean));
-
-  const touchesBrowser = files.some(
-    (f) =>
-      f.startsWith('apps/web/') ||
-      f.startsWith('packages/app-vue/') ||
-      f.startsWith('packages/ui-vue-shadcn/') ||
-      f.startsWith('packages/ui-core/') ||
-      f.startsWith('packages/app-react/'),
+  const risk = classifyRisk(files ?? []);
+  const global =
+    full ||
+    isGlobalSurface((files ?? []).filter((file) => classifyRisk([file]).level !== 'docs')) ||
+    ['root', 'release'].includes(risk.level);
+  const selection = await selectCiTasks({ files: files ?? [], base, head, full: global });
+  const effectiveFull = global || selection.fallback !== null;
+  const targets = selection.targets;
+  const list = (name) => targets[name].filter((p) => p !== 'memoflow');
+  // Resource policy only: never use semantic layers to discard affected Unit,
+  // Build, Types or Integration tasks. The combined domain projects stay intact.
+  const browserInput = (files ?? []).some(
+    (file) =>
+      /^(apps\/(web|storybook)\/|apps\/desktop\/src\/renderer\/)/u.test(file) ||
+      (file.startsWith('packages/') &&
+        !/^packages\/[^/]+\/src\/(?:server|infrastructure-server|electron)\//u.test(file)),
   );
-
-  const touchesDesktop = files.some(
-    (f) => f.startsWith('apps/desktop/') || f.startsWith('packages/repository/src/electron/'),
-  );
-
-  const isPureBackend =
-    touchedLayers.size > 0 &&
-    [...touchedLayers].every((l) => ['domain', 'infra', 'app:backend'].includes(l));
-
-  // Conservative diffusion: pure backend changes never light up the browser flow
-  let webFlow = false;
-  let webFlowFiles = [];
-  if (touchesBrowser && !isPureBackend) {
-    webFlowFiles = webFlowCandidateFiles(files);
-    if (webFlowFiles.length > 0) {
-      const webFlowProjects = await nxProjects(
-        ['--affected', `--files=${webFlowFiles.join(',')}`],
-        root,
-      );
-      webFlow = webFlowProjects.some((project) => ['web', 'api'].includes(project));
-    }
-  }
-
-  const desktopFlow = touchesDesktop;
-
-  const [rawUnit, coverage, smoke, rawIntegration, rawBoundary, perf] = await Promise.all([
-    target('test'),
-    target('test:coverage'),
-    target('test:smoke'),
-    target('test:integration'),
-    touchesDesktop ? target('test:boundary') : Promise.resolve([]),
-    target('test:perf'),
-  ]);
-
-  // Constrain unit tests: only affected projects within the touched layer(s)
-  const unit = rawUnit.filter((project) => {
-    if (project === 'ui-storybook' || project === 'memoflow') return false;
-    if (touchedOwners.has(project)) return true;
-    const projectLayer = PROJECT_LAYERS[project];
-    return touchedLayers.has(projectLayer);
-  });
-
-  const boundary = rawBoundary.filter((p) => p !== 'memoflow');
-  const integration = rawIntegration.filter((project) => {
-    if (project === 'memoflow') return false;
-    if (touchedOwners.has(project)) return true;
-    const projectLayer = PROJECT_LAYERS[project];
-    return (
-      touchedLayers.has(projectLayer) ||
-      (isPureBackend && ['domain', 'infra', 'app:backend'].includes(projectLayer))
-    );
-  });
-
+  const webFlowFiles = webFlowCandidateFiles(files ?? []);
+  const webFlow =
+    effectiveFull ||
+    (browserInput &&
+      targets['e2e:ai-provider'].includes('web') &&
+      webFlowFiles.some((f) => !f.includes('.stories.')) &&
+      !(files ?? []).every((f) => f.startsWith('apps/storybook/')));
   return {
     version: SCOPE_VERSION,
     base: base ?? null,
     head: head ?? null,
-    full: false,
-    projects,
-    unit,
-    coverage,
-    smoke,
-    integration,
-    boundary,
-    perf,
+    full: effectiveFull,
+    projects: selection.projects,
+    tasks: targets,
+    selection: {
+      version: 1,
+      engine: 'nx-task-inputs',
+      fallback: selection.fallback,
+      noopTasks: selection.noopTasks,
+      unitContractAliases: selection.unitContractAliases,
+    },
+    unit: list('test').filter((p) => p !== 'ui-storybook'),
+    // Coverage measurements are selected separately by Nightly Audit.
+    coverage: list('test:coverage'),
+    smoke: list('test:smoke'),
+    integration: list('test:integration'),
+    boundary: list('test:boundary'),
+    perf: list('test:perf'),
     webFlow,
     webFlowFiles,
-    desktopFlow,
+    desktopFlow:
+      targets['test:main'].includes('desktop') || targets['test:ipc'].includes('desktop'),
+    browserRequired:
+      (effectiveFull || browserInput) && targets['test:interaction'].includes('ui-storybook'),
   };
 }

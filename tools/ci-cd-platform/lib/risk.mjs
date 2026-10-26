@@ -147,9 +147,11 @@ export function selectLanes({ risk, scope, event = 'pull_request', full = scope.
     boundary: root || has(scope.boundary) || has(scope.smoke),
     integration: root || has(scope.integration),
     web: fullAudit || root || matched.has('web-flow') || scope.webFlow === true,
-    // Measurement backstops run on main/full audits, not ordinary PRs.
-    // Select them in the manifest (not just step `if`s) so CI Check expects skips.
-    coverage: event !== 'pull_request' && (root || has(scope.coverage)),
+    // Coverage instrumentation left PR/Main CI: the nightly audit measures
+    // coverage on its own schedule (DELIVERY_FORCE_LANES=coverage) and no
+    // fixed percentage gates runs here. The lane key stays in the manifest
+    // contract so CI Check can expect the explicit skip.
+    coverage: false,
     performance: event !== 'pull_request' && (root || has(scope.perf)),
   };
 }

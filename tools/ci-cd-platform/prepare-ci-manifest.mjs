@@ -2,14 +2,8 @@
 import { readFile, mkdir, writeFile, appendFile } from 'node:fs/promises';
 import { buildDeliveryManifest, writeManifestOutputs } from './generate-delivery-manifest.mjs';
 import { digest } from './lib/contracts.mjs';
-import { resolvePrEvidence, candidateRequired, requireProof } from './lib/ci-evidence.mjs';
-import {
-  githubEvidenceClient,
-  git,
-  gitCommit,
-  inputsDigest,
-  changedFiles,
-} from './lib/github-evidence.mjs';
+import { candidateRequired, requireProof } from './lib/ci-evidence.mjs';
+import { git, gitCommit, inputsDigest, changedFiles } from './lib/github-evidence.mjs';
 
 async function main() {
   const event = JSON.parse(await readFile(process.env.GITHUB_EVENT_PATH, 'utf8'));
@@ -27,35 +21,18 @@ async function main() {
     isMainPush && (await candidateRequired({ before: event.before, sha: head, changedFiles }));
   let execution;
   if (isMainPush) {
-    try {
-      execution = await resolvePrEvidence({
-        ...githubEvidenceClient(),
-        sha: head,
-        before: event.before,
-        regenerateManifest: buildDeliveryManifest,
-      });
-    } catch (error) {
-      execution = { mode: 'full', reason: error.message };
-    }
-    execution = { ...execution, candidate };
+    execution = {
+      mode: 'full',
+      reason: 'Main always executes complete regular Linux validation',
+      candidate,
+    };
   }
   const manifest = await buildDeliveryManifest({
     base,
     head,
-    full: isMainPush ? execution.mode !== 'reuse' : eventName !== 'pull_request',
+    full: eventName !== 'pull_request',
   });
   if (execution) {
-    if (execution.mode === 'reuse') {
-      manifest.lanes = Object.fromEntries(Object.keys(manifest.lanes).map((lane) => [lane, false]));
-      if (manifest.laneDetails) {
-        manifest.laneDetails = Object.fromEntries(
-          Object.entries(manifest.laneDetails).map(([capability, detail]) => [
-            capability,
-            { ...detail, required: false, skipReason: 'reused pull request evidence' },
-          ]),
-        );
-      }
-    }
     manifest.execution = execution;
     const { digest: _digest, ...content } = manifest;
     manifest.digest = digest(content);
@@ -80,7 +57,7 @@ async function main() {
   if (process.env.GITHUB_OUTPUT)
     await appendFile(
       process.env.GITHUB_OUTPUT,
-      `build_required=${Boolean(manifest.lanes.validate || (execution?.mode === 'reuse' && candidate))}\n`,
+      `build_required=${manifest.dispatch.jobs.build.required}\n`,
     );
   if (process.env.GITHUB_STEP_SUMMARY)
     await appendFile(

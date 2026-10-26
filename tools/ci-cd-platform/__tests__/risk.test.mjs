@@ -172,7 +172,7 @@ test('PR measurement lanes stay off even for root scope or an explicit full PR',
   }
 });
 
-test('full events enable every lane', () => {
+test('full events enable every execution lane while coverage stays nightly-audit-only', () => {
   const lanes = selectLanes({
     risk: { level: 'docs' },
     scope: {
@@ -192,12 +192,12 @@ test('full events enable every lane', () => {
     boundary: true,
     integration: true,
     web: true,
-    coverage: true,
+    coverage: false,
     performance: true,
   });
 });
 
-test('explicit full main policy enables every lane even for docs risk', () => {
+test('explicit full main policy enables every execution lane while coverage stays nightly-audit-only', () => {
   const lanes = selectLanes({
     risk: { level: 'docs', matchedLevels: ['docs'] },
     scope: {
@@ -219,7 +219,7 @@ test('explicit full main policy enables every lane even for docs risk', () => {
     boundary: true,
     integration: true,
     web: true,
-    coverage: true,
+    coverage: false,
     performance: true,
   });
 });

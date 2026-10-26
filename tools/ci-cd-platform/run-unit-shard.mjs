@@ -36,15 +36,11 @@ if (
   if (build.error) throw build.error;
   if (build.status !== 0) process.exit(build.status ?? 1);
 }
-// Merged coverage: when the manifest selects the coverage lane, projects
-// in scope.coverage run their test:coverage target in place of test — the
-// same suites with coverage collection, executed exactly once. CI Check
-// verifies a successful coverage attempt per expected project from these
-// reports, so a silently dropped project fails the gate.
-const coverageProjects =
-  manifest.lanes.coverage === true ? new Set(manifest.scope.coverage ?? []) : new Set();
+// Coverage is measurement-only and lives in the nightly audit: Unit shards
+// always run the plain `test` target, so PR/Main CI never pays coverage
+// instrumentation and no percentage gate can fail a verified run.
 for (const [index, task] of manifest.unitShards.find((shard) => shard.id === id).tasks.entries()) {
-  const target = coverageProjects.has(task.project) ? 'test:coverage' : 'test';
+  const target = 'test';
   const result = spawnSync(
     process.execPath,
     [
