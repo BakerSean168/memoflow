@@ -17,10 +17,6 @@
       "types": "./dist/modules/task/index.d.ts",
       "import": "./dist/modules/task/index.js"
     },
-    "./operations": {
-      "types": "./dist/modules/operations/index.d.ts",
-      "import": "./dist/modules/operations/index.js"
-    },
     "./primitives": {
       "types": "./dist/primitives/index.d.ts",
       "import": "./dist/primitives/index.js"
@@ -80,10 +76,6 @@
     "./mocks": {
       "types": "./dist/mocks/index.d.ts",
       "import": "./dist/mocks/index.js"
-    },
-    "./label": {
-      "types": "./dist/modules/label/index.d.ts",
-      "import": "./dist/modules/label/index.js"
     },
     "./relation": {
       "types": "./dist/modules/relation/index.d.ts",

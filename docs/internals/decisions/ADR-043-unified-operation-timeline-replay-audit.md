@@ -25,13 +25,13 @@ W0-W6 将 Reminder、Notification、Account Closure、Schedule rebuild、Knowled
 2. **缺失的运维入口**：Reminder replay 只存在于 adapter 层，Schedule rebuild 与 Account closure 完全没有 timeline/replay 入口。
 3. **审计缺失**：没有任何模块记录“谁在何时对哪个 operation 做了什么”（query / replay），最小权限无从谈起。
 4. **指标命名发散**：各模块使用进程内 collector，无 `memoflow.` 统一前缀，dashboard 无法跨模块聚合。
-5. **W7 第一轮审查（2026-08-12）发现**：`@memoflow/contracts/operations` 声明 export 无 JS 产物；governance 未登记 `./operations`；`timeline_query` 审计未实现；replay 与审计不原子；Knowledge 缺审计依赖仍可成功；统一指标只接两模块；跨模块门禁缺 Knowledge。
+5. **W7 第一轮审查（2026-08-12）发现**：contracts 的旧 operations 子路径 声明 export 无 JS 产物；governance 未登记 `./operations`；`timeline_query` 审计未实现；replay 与审计不原子；Knowledge 缺审计依赖仍可成功；统一指标只接两模块；跨模块门禁缺 Knowledge。
 
 ## 2. 决策
 
 ### 2.1 统一 `OperationTimelineEntry` 契约
 
-在 `@memoflow/contracts/operations` 定义：
+在 `@memoflow/operations-contracts` 定义：
 
 - `OperationTimelineEntrySchema`：`source`（reminder/notification/schedule-rebuild/account-closure/knowledge-projection）、`operationId`、`status`（8 态统一词典）、`failureReason`、`attempts`、`nextRetryAt`、`replayable`、`updatedAt`。
 - `OperationTimelineQuerySchema`：identity-scoped 查询（`source?`、`status?`、`limit ≤ 200`）。
@@ -40,7 +40,7 @@ W0-W6 将 Reminder、Notification、Account Closure、Schedule rebuild、Knowled
 
 每个模块通过共享映射器（`@memoflow/patterns/operations`）把自己的 ledger 映射为该契约，并在输出边界执行 `OperationTimelineEntrySchema.parse` —— 未过契约的输出不得宣称成功（禁止 silent success / no-op fallback）。
 
-**构建产物门禁**：`@memoflow/contracts/operations` 与 `@memoflow/patterns/operations` 均为真实 JS/DTS 构建入口（tsup entry），surface 测试断言 dist 产物存在；发布前必须通过 `node -e "import('@memoflow/contracts/operations')"` smoke import。
+**构建产物门禁**：`@memoflow/operations-contracts` 与 `@memoflow/patterns/operations` 均为真实 JS/DTS 构建入口（tsup entry），surface 测试断言 dist 产物存在；发布前必须通过 `node -e "import('@memoflow/operations-contracts')"` smoke import。
 
 ### 2.2 最小权限的 timeline 查询与 replay 入口
 

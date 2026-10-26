@@ -5,6 +5,7 @@ import path from 'node:path';
 import type { Alias, UserConfig } from 'vite';
 import {
   createReliableMessagingContractsAliasEntries,
+  createOperationsContractsAliasEntries,
   createContractsAliasEntries,
   createGoalCoreAliasEntries,
   createSharedPrimitivesAliasEntries,
@@ -346,6 +347,7 @@ export function createSharedConfig(options: SharedConfigOptions) {
     ...resolvedAliasEntries,
     ...commonWorkspaceAliasEntries,
     ...createReliableMessagingContractsAliasEntries(workspaceRoot),
+    ...createOperationsContractsAliasEntries(workspaceRoot),
     ...createContractsAliasEntries(workspaceRoot),
     ...createGoalCoreAliasEntries(workspaceRoot),
     ...createSharedPrimitivesAliasEntries(workspaceRoot),

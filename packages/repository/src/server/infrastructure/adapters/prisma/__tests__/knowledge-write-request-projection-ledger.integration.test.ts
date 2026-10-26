@@ -20,7 +20,7 @@ import type {
   KnowledgeNoteProjectionUpsert,
 } from '../../../../application/ports/knowledge-note-projection.repository';
 import type { IKnowledgeRemoteBindingRepository } from '../../../../application/ports/knowledge-remote-binding.repositories';
-import type { OperationAuditRecord, OperationTimelineEntry } from '@memoflow/contracts/operations';
+import type { OperationAuditRecord, OperationTimelineEntry } from '@memoflow/operations-contracts';
 import type { KnowledgeRemoteBindingServerDTO } from '@memoflow/contracts/repository';
 import { KnowledgeDocumentIdSchema } from '@memoflow/contracts/repository';
 import { KnowledgeNoteCommitService } from '../../../../application/services/knowledge-note-commit.service';

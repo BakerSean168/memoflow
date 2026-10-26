@@ -6788,14 +6788,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/label/label-portable-v3.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/contracts/src/modules/notification/api/dual-registry.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6845,14 +6837,6 @@
     },
     {
       "path": "packages/contracts/src/modules/notification/value-objects/dual-registry.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/operations/operations-dist.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -8752,6 +8736,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/label-contracts/src/label-portable-v3.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/label-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/label/src/__tests__/label-registry-characterization.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -9230,6 +9222,14 @@
       "measurementCollectors": [
         "packages/notification/vitest.config.ts"
       ]
+    },
+    {
+      "path": "packages/operations-contracts/src/operations-dist.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/operations-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
     },
     {
       "path": "packages/patterns/src/events/create-event-bus-adapter-dual.surface.spec.ts",
@@ -13004,7 +13004,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 58
+      "fileCount": 56
     },
     {
       "id": "packages/data-portability-contracts/vitest.config.ts",
@@ -13095,7 +13095,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 1
+      "fileCount": 2
     },
     {
       "id": "packages/label/vitest.config.ts",
@@ -13110,6 +13110,13 @@
       "suite": "unit",
       "runner": "vitest",
       "fileCount": 40
+    },
+    {
+      "id": "packages/operations-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 1
     },
     {
       "id": "packages/patterns/vitest.config.ts",

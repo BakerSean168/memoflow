@@ -7,6 +7,7 @@ import {
   createAppVueSourceAliasEntries,
   createAssetsAliasEntries,
   createReliableMessagingContractsAliasEntries,
+  createOperationsContractsAliasEntries,
   createContractsAliasEntries,
   createUiVueSourceAliasEntries,
   createWorkspaceSourceAliasEntries,
@@ -210,6 +211,7 @@ export default defineConfig(({ mode, command }) => {
   const envSpecificAliases = isDev
     ? [
         ...createReliableMessagingContractsAliasEntries(workspaceRoot),
+        ...createOperationsContractsAliasEntries(workspaceRoot),
         ...createContractsAliasEntries(workspaceRoot),
       ]
     : [];

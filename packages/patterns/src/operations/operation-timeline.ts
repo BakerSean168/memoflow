@@ -3,7 +3,7 @@ import {
   type OperationStatus,
   type OperationTimelineEntry,
   type OperationSource as OperationSourceType,
-} from '@memoflow/contracts/operations';
+} from '@memoflow/operations-contracts';
 import type { BusinessOperationReceipt } from '@memoflow/reliable-messaging-contracts';
 import type { ProjectionOperation } from '@memoflow/reliable-messaging-contracts';
 

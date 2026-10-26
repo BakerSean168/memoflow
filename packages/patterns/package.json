@@ -41,8 +41,9 @@
   },
   "dependencies": {
     "@memoflow/contracts": "workspace:*",
-    "@memoflow/utils": "workspace:*",
-    "@memoflow/reliable-messaging-contracts": "workspace:*"
+    "@memoflow/operations-contracts": "workspace:*",
+    "@memoflow/reliable-messaging-contracts": "workspace:*",
+    "@memoflow/utils": "workspace:*"
   },
   "devDependencies": {
     "@nx/vite": "23.2.1",

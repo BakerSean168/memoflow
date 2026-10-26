@@ -6,6 +6,7 @@ import {
   createUiVueSourceAliasEntries,
   createWorkspaceSourceAliasEntries,
   createReliableMessagingContractsAliasEntries,
+  createOperationsContractsAliasEntries,
   createContractsAliasEntries,
 } from '../../../../../vite.workspace-aliases.ts';
 
@@ -46,6 +47,7 @@ export default defineConfig({
     alias: [
       ...createUiVueSourceAliasEntries(workspace),
       ...createReliableMessagingContractsAliasEntries(workspace),
+      ...createOperationsContractsAliasEntries(workspace),
       ...createContractsAliasEntries(workspace),
       ...createWorkspaceSourceAliasEntries(workspace, [
         ['@memoflow/app-vue', 'packages/app-vue/src'],

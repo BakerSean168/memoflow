@@ -6,7 +6,7 @@ import type {
 import {
   LabelPortablePayloadV3Schema,
   type LabelPortablePayloadV3,
-} from '@memoflow/contracts/label';
+} from '@memoflow/label-contracts';
 import { normalizeLabelName } from '../domain/label';
 import type { LabelService } from './label-service';
 

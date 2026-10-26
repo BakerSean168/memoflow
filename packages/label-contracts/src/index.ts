@@ -74,3 +74,5 @@ export interface ListLabelsQuery {
   readonly search?: string | null;
   readonly limit?: number;
 }
+
+export * from './portable-v3';

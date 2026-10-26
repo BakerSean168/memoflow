@@ -335,3 +335,21 @@ export function createReliableMessagingContractsAliasEntries(workspaceRoot: stri
     },
   ];
 }
+
+export function createOperationsContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const operationsContractsRoot = resolveFromWorkspace(
+    workspaceRoot,
+    'packages/operations-contracts/src',
+  );
+
+  return [
+    {
+      find: /^@memoflow\/operations-contracts$/,
+      replacement: `${operationsContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/operations-contracts\/(.+)$/,
+      replacement: `${operationsContractsRoot}/$1`,
+    },
+  ];
+}

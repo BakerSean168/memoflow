@@ -54,7 +54,7 @@ import { BusinessOperationReceiptSchema } from '@memoflow/reliable-messaging-con
 import {
   OperationAuditRecordSchema,
   OperationTimelineEntrySchema,
-} from '@memoflow/contracts/operations';
+} from '@memoflow/operations-contracts';
 import type { NotificationInboxPort, NotificationOperationsPort } from '../server/application';
 import { NotificationController } from '../server/transport/notification.controller';
 import { NotificationOperationsController } from '../server/transport/notification-operations.controller';
