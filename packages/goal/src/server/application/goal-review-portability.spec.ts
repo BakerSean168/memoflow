@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { GoalPortablePayloadV3Schema } from '@memoflow/contracts/goal';
+import { GoalPortablePayloadV3Schema } from '@memoflow/goal-contracts';
 import type {
   PortableCapabilityExecutionContext,
   PortableReferenceV3,

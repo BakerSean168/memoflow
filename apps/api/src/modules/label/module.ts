@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { CreateLabelReqSchema, ListLabelsReqSchema } from '@memoflow/contracts/label';
+import { CreateLabelReqSchema, ListLabelsReqSchema } from '@memoflow/label-contracts';
 import type { LabelService } from '@memoflow/label';
 import { toLabelClientDTO } from '@memoflow/label/client';
 import type { IApiModule, IApiModuleContext } from '../../shared/contracts/api-module.js';

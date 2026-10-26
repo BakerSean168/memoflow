@@ -2,7 +2,7 @@ import {
   goalTimeframeStartBoundary,
   goalTimeframeEndBoundary,
   type GoalClientDTO,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import type {
   CalendarEntryClientDTO,
   CalendarEventProjection,

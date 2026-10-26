@@ -1,5 +1,5 @@
 import { ok } from '@memoflow/contracts/result';
-import { KeyResultCalculationMethod } from '@memoflow/contracts/goal';
+import { KeyResultCalculationMethod } from '@memoflow/goal-contracts';
 import { TaskGoalLinkSchema } from '@memoflow/contracts/task';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';

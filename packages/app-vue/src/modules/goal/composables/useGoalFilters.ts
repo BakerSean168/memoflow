@@ -1,5 +1,5 @@
 import { computed } from 'vue';
-import type { GoalSystemView } from '@memoflow/contracts/goal';
+import type  { GoalSystemView } from '@memoflow/goal-contracts';
 import { useGoalStore } from '../stores/goal-store';
 export function useGoalFilters(fetchGoals: () => Promise<void>) {
   const store = useGoalStore();

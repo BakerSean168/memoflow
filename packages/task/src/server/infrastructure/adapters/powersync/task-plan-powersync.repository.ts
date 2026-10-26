@@ -7,7 +7,7 @@ import {
 import { TaskPlan } from '../../../domain/aggregates/task-plan';
 import type { IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
 import type { TaskPlanStatus } from '@memoflow/contracts/task';
-import { LabelColorSchema, type LabelClientDTO } from '@memoflow/contracts/label';
+import { LabelColorSchema, type LabelClientDTO } from '@memoflow/label-contracts';
 import { AggregateRepositoryBase, createEventBusAdapter, type IEventBus } from '@memoflow/patterns';
 import { eventBus } from '@memoflow/utils/domain';
 import {

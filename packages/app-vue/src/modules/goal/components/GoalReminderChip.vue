@@ -77,7 +77,7 @@ import {
   ReminderTriggerType,
   type GoalReminderConfigDTO,
   type GoalTimeframe,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import {
   Button,
   DropdownMenu,

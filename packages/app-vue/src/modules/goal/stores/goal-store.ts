@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type {
+import type  {
   GoalClientDTO,
   GoalSystemView,
   GoalStatus,
@@ -8,7 +8,7 @@ import type {
   GoalRecordClientDTO,
   GoalMutationReceipt,
   GetGoalAggregateRes,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 
 export interface GoalState {
   goalById: Record<string, GoalClientDTO>;

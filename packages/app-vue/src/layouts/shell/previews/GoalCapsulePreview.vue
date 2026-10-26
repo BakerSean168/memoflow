@@ -12,7 +12,7 @@ import {
   goalTimeframeEndBoundary,
   goalTimeframeLabel,
   type GoalHomeProgressItem,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import { useGoalHomeSummary } from '../../../modules/goal/composables/useGoalHomeSummary';
 import {
   CapsulePreviewFooter,

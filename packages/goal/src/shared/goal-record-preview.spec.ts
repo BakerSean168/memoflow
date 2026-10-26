@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { KeyResultProgress } from '@memoflow/contracts/goal';
+import type  { KeyResultProgress } from '@memoflow/goal-contracts';
 import {
   previewGoalRecord as preview,
   calculateKeyResultProgress,

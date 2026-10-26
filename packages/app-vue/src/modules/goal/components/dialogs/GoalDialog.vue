@@ -303,7 +303,7 @@ import {
   type GoalReminderConfigDTO,
   type GoalClientDTO,
   type GoalTimeframe,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import { Button, Label, Popover, PopoverContent, PopoverTrigger } from '@memoflow/ui-vue-shadcn';
 import {
   LabelPicker,

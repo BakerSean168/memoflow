@@ -136,7 +136,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Pencil, Trash2 } from '@lucide/vue';
-import { goalTimeframeLabel, isPastGoalTarget, type GoalClientDTO } from '@memoflow/contracts/goal';
+import { goalTimeframeLabel, isPastGoalTarget, type GoalClientDTO } from '@memoflow/goal-contracts';
 import { Badge, Progress } from '@memoflow/ui-vue-shadcn';
 import { ActionableWrapper, type MenuAction } from '../../../components/shared';
 import { getProductTodayYmd } from '../../../shared/utils/product-time';

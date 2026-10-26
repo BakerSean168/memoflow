@@ -10,41 +10,8 @@
 
 import type { Result } from '@memoflow/contracts/result';
 import { map as mapResult } from '@memoflow/contracts/result';
-import type {
-  CreateGoalReq,
-  UpdateGoalReq,
-  DeleteGoalReq,
-  CloneGoalReq,
-  AddKeyResultReq,
-  UpdateKeyResultReq,
-  DeleteKeyResultReq,
-  CreateGoalRecordReq,
-  UpdateGoalRecordReq,
-  DeleteGoalRecordReq,
-  CreateGoalReviewReq,
-  UpdateGoalReviewReq,
-  DeleteGoalReviewReq,
-  GoalReviewClientDTO,
-  GoalReviewSystemContext,
-  GoalReviewWindowInput,
-  GoalClientDTO,
-  GoalMutationReceipt,
-  GoalSystemView,
-  KeyResultClientDTO,
-  GoalRecordClientDTO,
-  QueryGoalsRes,
-  GoalHomeProgressSummary,
-  GetKeyResultsRes,
-  GetGoalRecordsRes,
-  GetGoalReviewsRes,
-  GetGoalAggregateRes,
-  GetGoalWorkspaceReq,
-  GoalWorkspaceReadModel,
-  GoalWorkspaceTaskPageRequest,
-  GoalWorkspaceTaskPage,
-  GoalWorkspacePageRequest,
-  GoalWorkspaceKnowledgePage,
-} from '@memoflow/contracts/goal';
+import type  { CreateGoalReq, UpdateGoalReq, DeleteGoalReq, CloneGoalReq, AddKeyResultReq, UpdateKeyResultReq, DeleteKeyResultReq, CreateGoalRecordReq, UpdateGoalRecordReq, DeleteGoalRecordReq, CreateGoalReviewReq, UpdateGoalReviewReq, DeleteGoalReviewReq, GoalReviewClientDTO, GoalReviewSystemContext, GoalReviewWindowInput, GoalClientDTO, GoalMutationReceipt, GoalSystemView, KeyResultClientDTO, GoalRecordClientDTO, QueryGoalsRes, GoalHomeProgressSummary, GetKeyResultsRes, GetGoalRecordsRes, GetGoalReviewsRes, GetGoalAggregateRes } from '@memoflow/goal-contracts';
+import type  { GetGoalWorkspaceReq, GoalWorkspaceReadModel, GoalWorkspaceTaskPageRequest, GoalWorkspaceTaskPage, GoalWorkspacePageRequest, GoalWorkspaceKnowledgePage } from '@memoflow/workspace-contracts';
 import type { IGoalApiClient } from './ports/goal-api-client.port';
 import {
   Goal,

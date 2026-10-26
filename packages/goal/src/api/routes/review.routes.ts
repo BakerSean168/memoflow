@@ -20,7 +20,7 @@ import {
   CreateReviewInvocationSchema,
   UpdateReviewInvocationSchema,
   DeleteReviewInvocationSchema,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import { brandedId } from '@memoflow/contracts/primitives';
 import type { GoalId } from '@memoflow/contracts/primitives';
 import type { GoalController } from '../../server/transport/goal.controller';

@@ -11,12 +11,12 @@ import type { RoutineAgentPersistedReceipt } from '@memoflow/contracts/routine';
 import type { GatewayWriteToolName } from './write-tool-descriptors';
 import type { GatewayAssistedToolName } from './assisted-tool-descriptors';
 import type { GatewayFailureCode } from '@memoflow/contracts/agent-gateway';
-import type {
+import type  {
   GoalAgentPersistedReceipt,
   GoalClientDTO,
   GoalPage,
   GoalPageQuery,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import type { ExecutionContext, RequestContext } from '@memoflow/contracts/shared';
 
 /** Read cancellation stays separate from the canonical ExecutionContext. */

@@ -1,17 +1,17 @@
-import type {
+import type  {
   GoalServerDTO,
   GoalMutationReceipt,
   CreateGoalReq,
   GoalRecordSourceTypeValue,
   GoalReviewSystemContext,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import type {
   GoalRecordId,
   GoalReviewId,
   Instant,
   KeyResultId,
 } from '@memoflow/contracts/primitives';
-import type { LabelDto } from '@memoflow/contracts/label';
+import type  { LabelDto } from '@memoflow/label-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { Goal, GoalRecord, GoalReview } from '../domain';

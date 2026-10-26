@@ -5,7 +5,7 @@ import {
   goalTimeframeFromStartBoundary,
   goalTimeframeStartBoundary,
   type GoalTimeframe,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import { requireYmd } from '@memoflow/contracts/primitives';
 
 export interface GoalStartTimeframePersistencePair {

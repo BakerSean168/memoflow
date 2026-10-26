@@ -3,7 +3,7 @@ import type {
   GoalPlanDraftRef,
   GoalPlanExecutionReceipt,
 } from '@memoflow/contracts/ai';
-import type { GoalStatus, CreateGoalReq } from '@memoflow/contracts/goal';
+import type  { GoalStatus, CreateGoalReq } from '@memoflow/goal-contracts';
 import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
 import type { KnowledgeDocumentRef } from '@memoflow/contracts/repository';
 import type { Result } from '@memoflow/contracts/result';

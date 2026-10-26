@@ -4,7 +4,7 @@ import {
   goalTimeframeEndBoundary,
   goalTimeframeStartBoundary,
   ReminderTriggerType,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import type { GoalNativeDraft, GoalNativePatch } from './goalNativeEditSession';
 import { isGoalStatusTransitionAllowed } from './goalStatusTransitions';
 

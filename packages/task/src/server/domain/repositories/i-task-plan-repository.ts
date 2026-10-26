@@ -10,7 +10,7 @@
 
 import type { TaskPlan } from '../aggregates';
 import type { ListTaskPlanFilters, TaskPlanStatus } from '@memoflow/contracts/task';
-import type { LabelClientDTO } from '@memoflow/contracts/label';
+import type  { LabelClientDTO } from '@memoflow/label-contracts';
 
 export class TaskLabelOwnershipError extends Error {
   readonly code = 'VALIDATION_ERROR' as const;

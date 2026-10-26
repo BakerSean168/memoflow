@@ -147,14 +147,8 @@
 import { onBeforeUnmount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Button, Dialog } from '@memoflow/ui-vue-shadcn';
-import {
-  goalTimeframeLabel,
-  type GoalClientDTO,
-  type GoalRecordClientDTO,
-  type GoalTimeframe,
-  type GoalWorkspaceTaskPage,
-  type KeyResultClientDTO,
-} from '@memoflow/contracts/goal';
+import { goalTimeframeLabel, type GoalClientDTO, type GoalRecordClientDTO, type GoalTimeframe, type KeyResultClientDTO } from '@memoflow/goal-contracts';
+import { type GoalWorkspaceTaskPage } from '@memoflow/workspace-contracts';
 import { ProductDialogShell } from '../../../../shared/components';
 import { GOAL_SERVICE_KEY } from '../../../../di/keys';
 import { useStrictInject } from '../../../../shared/utils/useStrictInject';

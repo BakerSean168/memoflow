@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import { expect, fn, userEvent, within } from 'storybook/test';
 import { provide, ref } from 'vue';
-import { createMockGoalMutationReceipt } from '@memoflow/contracts/mocks';
-import type { CreateGoalReq } from '@memoflow/contracts/goal';
+import { createMockGoalMutationReceipt } from '@memoflow/goal-contracts/test-support/goal.mock';
+import type  { CreateGoalReq } from '@memoflow/goal-contracts';
 import { GOAL_SERVICE_KEY, LABEL_SERVICE_KEY } from '../../../../di/keys';
 import type { IGoalService, ILabelService } from '../../../../di/types';
 import GoalDialog from './GoalDialog.vue';

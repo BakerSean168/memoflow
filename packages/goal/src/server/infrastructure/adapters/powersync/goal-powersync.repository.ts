@@ -4,8 +4,8 @@ import {
   type IGoalRepository,
 } from '../../../domain';
 import { Goal } from '../../../domain';
-import type { GoalSystemView, KeyResultWeightSnapshotDTO } from '@memoflow/contracts/goal';
-import { LabelColorSchema, type LabelDto } from '@memoflow/contracts/label';
+import type  { GoalSystemView, KeyResultWeightSnapshotDTO } from '@memoflow/goal-contracts';
+import { LabelColorSchema, type LabelDto } from '@memoflow/label-contracts';
 import {
   AggregateRepositoryBase,
   createEventBusAdapter,

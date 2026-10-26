@@ -3,7 +3,7 @@ import { createI18n } from 'vue-i18n';
 import { nextTick } from 'vue';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import enUS from '../../../../locales/en-US';
-import type { KeyResultClientDTO } from '@memoflow/contracts/goal';
+import type  { KeyResultClientDTO } from '@memoflow/goal-contracts';
 import KeyResultDialog from './KeyResultDialog.vue';
 import GoalTimeframePicker from '../GoalTimeframePicker.vue';
 

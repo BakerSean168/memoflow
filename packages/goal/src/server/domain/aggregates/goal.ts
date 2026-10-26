@@ -1,5 +1,5 @@
 import type { Instant } from '@memoflow/contracts/primitives';
-import type { LabelDto } from '@memoflow/contracts/label';
+import type  { LabelDto } from '@memoflow/label-contracts';
 /**
  * Goal 聚合根实现
  * 实现 GoalServer 接口
@@ -33,25 +33,25 @@ import { AggregateRoot } from '@memoflow/utils/domain';
 import { IdentityId } from '@memoflow/domain-shared';
 import { addYmdDays } from '@memoflow/time';
 import { GoalId, KeyResultWeightSnapshotId, KeyResultId } from '../value-objects';
-import type { GoalEventMap } from '@memoflow/contracts/goal';
+import type  { GoalEventMap } from '@memoflow/goal-contracts';
 import {
   GoalStatus,
   ReminderTriggerType,
   goalTimeframeStartBoundary,
   goalTimeframeEndBoundary,
-} from '@memoflow/contracts/goal';
-import type {
+} from '@memoflow/goal-contracts';
+import type  {
   SnapshotTrigger,
   GoalReminderConfigDTO,
   GoalReviewSystemContext,
   GoalTimeframe,
-} from '@memoflow/contracts/goal';
-import type {
+} from '@memoflow/goal-contracts';
+import type  {
   GoalServerDTO,
   GoalReviewServerDTO,
   KeyResultServerDTO,
   ReminderTrigger,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import { KeyResult } from '../entities/key-result';
 import { GoalReview } from '../entities/goal-review';
 import {
@@ -1022,12 +1022,12 @@ export class Goal extends AggregateRoot<GoalId> {
    */
   public toClientDTO(
     includeChildren: true,
-  ): import('@memoflow/contracts/goal').GoalAggregateReadModel;
-  public toClientDTO(includeChildren?: false): import('@memoflow/contracts/goal').GoalClientDTO;
-  public toClientDTO(includeChildren: boolean): import('@memoflow/contracts/goal').GoalClientDTO;
+  ): import('@memoflow/goal-contracts').GoalAggregateReadModel;
+  public toClientDTO(includeChildren?: false): import('@memoflow/goal-contracts').GoalClientDTO;
+  public toClientDTO(includeChildren: boolean): import('@memoflow/goal-contracts').GoalClientDTO;
   public toClientDTO(
     includeChildren: boolean = false,
-  ): import('@memoflow/contracts/goal').GoalClientDTO {
+  ): import('@memoflow/goal-contracts').GoalClientDTO {
     const totalKeyResults = this._props.keyResults.length;
     const completedKeyResults = this._props.keyResults.filter((kr) => kr.isCompleted()).length;
 

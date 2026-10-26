@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it } from 'vitest';
-import type { GoalRecordClientDTO } from '@memoflow/contracts/goal';
+import type  { GoalRecordClientDTO } from '@memoflow/goal-contracts';
 import GoalRecordCard from './GoalRecordCard.vue';
 import enGoal from '../../../../locales/en-US/goal';
 import zhGoal from '../../../../locales/zh-CN/goal';

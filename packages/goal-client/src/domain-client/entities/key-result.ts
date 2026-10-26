@@ -10,11 +10,11 @@ import type { Instant } from '@memoflow/contracts/primitives';
  * - Instance toDTO(): KeyResultClientDTO
  */
 
-import type {
+import type  {
   GoalTimeframe,
   KeyResultClientDTO,
   KeyResultProgress,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import { Entity } from '@memoflow/utils/domain';
 import { KeyResultId } from '@memoflow/goal-core/ids';
 

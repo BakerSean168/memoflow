@@ -7,13 +7,13 @@
  */
 
 import type { IGoalRepository } from '../../../domain';
-import { CreateGoalSchema } from '@memoflow/contracts/goal';
-import type {
+import { CreateGoalSchema } from '@memoflow/goal-contracts';
+import type  {
   CloneGoalReq,
   CreateGoalReq,
   GoalClientDTO,
   GoalMutationReceipt,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { error } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';

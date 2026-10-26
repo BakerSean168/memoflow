@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CreateGoalRecordSchema, UpdateGoalRecordSchema } from '@memoflow/contracts/goal';
+import { CreateGoalRecordSchema, UpdateGoalRecordSchema } from '@memoflow/goal-contracts';
 import { GoalRecord } from './goal-record';
 
 describe('GoalRecord owned entity', () => {

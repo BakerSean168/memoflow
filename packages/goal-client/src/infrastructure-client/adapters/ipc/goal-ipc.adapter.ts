@@ -8,38 +8,8 @@
 import type { Result } from '@memoflow/contracts/result';
 import { GoalChannels, GoalWorkspaceChannels } from '@memoflow/contracts/electron';
 import type { IGoalApiClient, IResultIpcClient } from '../types';
-import type {
-  GoalClientDTO,
-  GoalMutationReceipt,
-  GoalSystemView,
-  CreateGoalReq,
-  UpdateGoalReq,
-  DeleteGoalReq,
-  CloneGoalReq,
-  QueryGoalsRes,
-  GoalHomeProgressSummary,
-  AddKeyResultReq,
-  UpdateKeyResultReq,
-  DeleteKeyResultReq,
-  GetKeyResultsRes,
-  CreateGoalReviewReq,
-  GoalReviewSystemContext,
-  GoalReviewWindowInput,
-  UpdateGoalReviewReq,
-  DeleteGoalReviewReq,
-  GetGoalReviewsRes,
-  CreateGoalRecordReq,
-  UpdateGoalRecordReq,
-  DeleteGoalRecordReq,
-  GetGoalRecordsRes,
-  GetGoalAggregateRes,
-  GetGoalWorkspaceReq,
-  GoalWorkspaceReadModel,
-  GoalWorkspaceTaskPageRequest,
-  GoalWorkspaceTaskPage,
-  GoalWorkspacePageRequest,
-  GoalWorkspaceKnowledgePage,
-} from '@memoflow/contracts/goal';
+import type  { GoalClientDTO, GoalMutationReceipt, GoalSystemView, CreateGoalReq, UpdateGoalReq, DeleteGoalReq, CloneGoalReq, QueryGoalsRes, GoalHomeProgressSummary, AddKeyResultReq, UpdateKeyResultReq, DeleteKeyResultReq, GetKeyResultsRes, CreateGoalReviewReq, GoalReviewSystemContext, GoalReviewWindowInput, UpdateGoalReviewReq, DeleteGoalReviewReq, GetGoalReviewsRes, CreateGoalRecordReq, UpdateGoalRecordReq, DeleteGoalRecordReq, GetGoalRecordsRes, GetGoalAggregateRes } from '@memoflow/goal-contracts';
+import type  { GetGoalWorkspaceReq, GoalWorkspaceReadModel, GoalWorkspaceTaskPageRequest, GoalWorkspaceTaskPage, GoalWorkspacePageRequest, GoalWorkspaceKnowledgePage } from '@memoflow/workspace-contracts';
 
 export class GoalIpcAdapter implements IGoalApiClient {
   constructor(private readonly ipcClient: IResultIpcClient) {}

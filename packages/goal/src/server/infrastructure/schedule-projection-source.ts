@@ -1,15 +1,15 @@
-import type {
+import type  {
   GoalEventMap,
   GoalServerDTO,
   GoalTimeframe,
   ReminderTrigger,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import {
   GoalStatus,
   ReminderTriggerType,
   goalTimeframeStartBoundary,
   goalTimeframeEndBoundary,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import type { ScheduledIntent, SchedulingOwner } from '@memoflow/contracts/schedule';
 import { buildSchedulingKey } from '@memoflow/contracts/schedule';
 import {

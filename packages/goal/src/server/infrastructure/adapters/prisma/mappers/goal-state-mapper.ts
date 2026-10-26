@@ -5,13 +5,13 @@
  * Shared by Prisma and PowerSync mappers.
  */
 
-import type {
+import type  {
   KeyResultWeightSnapshotDTO,
   KeyResultCalculationMethod,
   GoalReminderConfigDTO,
   GoalReviewSystemContext,
-} from '@memoflow/contracts/goal';
-import { GoalStatus } from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
+import { GoalStatus } from '@memoflow/goal-contracts';
 import { IdentityId } from '@memoflow/domain-shared';
 import { decodeGoalStartTimeframe, decodeGoalTimeframe } from '../../goal-timeframe-persistence';
 import { GoalId, GoalReviewId, KeyResultId } from '../../../../domain';

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { GoalStatus } from '@memoflow/contracts/goal';
+import { GoalStatus } from '@memoflow/goal-contracts';
 import { editableGoalStatuses, isGoalStatusTransitionAllowed } from './goalStatusTransitions';
 
 describe('Goal status editor lifecycle guard', () => {

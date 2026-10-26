@@ -4,7 +4,7 @@
  * non-finite → 0. Intentionally not shell clamp(value, min, max) geometry sole
  * (variable range + max < min fail-safe).
  */
-import type { GoalClientDTO, KeyResultProgress } from '@memoflow/contracts/goal';
+import type  { GoalClientDTO, KeyResultProgress } from '@memoflow/goal-contracts';
 
 // Residual 1083 keep-boundary: fixed 0–100 percentage clamp (no geometry dual).
 function clampPercentage(value: number): number {

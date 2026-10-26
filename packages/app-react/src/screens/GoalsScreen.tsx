@@ -1,6 +1,6 @@
 import { RefreshControl, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { GoalStatus } from '@memoflow/contracts/goal';
+import { GoalStatus } from '@memoflow/goal-contracts';
 
 import { GoalCard } from '../components/GoalCard';
 import { useAppSession } from '../hooks/useAppSession';

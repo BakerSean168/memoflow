@@ -3,7 +3,7 @@ import {
   GoalDraftCheckpointSnapshotSchema,
   type GoalDraftCheckpointContent,
   type GoalDraftCheckpointSnapshot,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 
 export interface GoalDraftCheckpointStore {
   scope(): string | null;

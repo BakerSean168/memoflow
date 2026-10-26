@@ -95,7 +95,7 @@ import {
   UpdateKeyResultInvocationSchema,
   UpdateReviewInvocationSchema,
   UpdateRecordInvocationSchema,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 
 const logger = createLogger('GoalElectron');
 const allChannels = Object.values(GoalChannels);

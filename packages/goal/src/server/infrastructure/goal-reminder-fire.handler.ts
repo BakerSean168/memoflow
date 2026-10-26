@@ -28,7 +28,7 @@ import {
   GoalTimeframeSchema,
   ReminderTriggerType,
   type GoalServerDTO,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import {
   NotificationCategory,
   NotificationChannelType,

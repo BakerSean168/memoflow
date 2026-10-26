@@ -4,7 +4,7 @@
  * Goal module runtime root.
  *
  * Public goal contracts are centralized in
- * `@memoflow/contracts/goal`.
+ * `@memoflow/goal-contracts`.
  * Root exports are limited to the canonical server composition root.
  * Client / API / Electron seams use dedicated subpaths.
  * Goal-specific analytics, events, and schedule orchestration seams

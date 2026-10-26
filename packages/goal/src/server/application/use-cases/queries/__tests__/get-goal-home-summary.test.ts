@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { GoalStatus } from '@memoflow/contracts/goal';
+import { GoalStatus } from '@memoflow/goal-contracts';
 import { createMockRepo } from '@memoflow/test-utils';
 import type { IGoalRepository } from '../../../../domain';
 import { GetGoalHomeSummaryUseCase } from '../get-goal-home-summary.use-case';

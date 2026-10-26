@@ -7,7 +7,7 @@ import { createI18n } from 'vue-i18n';
 import { defineComponent, h, KeepAlive, nextTick, ref } from 'vue';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { productionLocaleMessages } from '../../../../locales/production-messages';
-import { createMockGoal, createMockKeyResult } from '@memoflow/contracts/mocks';
+import { createMockGoal, createMockKeyResult } from '@memoflow/goal-contracts/test-support/goal.mock';
 import {
   CreateGoalSchema,
   GoalDraftCheckpointContentSchema,
@@ -16,7 +16,7 @@ import {
   KeyResultCalculationMethod,
   ReminderTriggerType,
   type GoalReminderConfigDTO,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import { Dialog } from '@memoflow/ui-vue-shadcn';
 import { LabelPicker } from '../../../../shared/components';
 import GoalReminderChip from '../GoalReminderChip.vue';

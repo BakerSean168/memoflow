@@ -3,7 +3,7 @@ import {
   GoalStatus,
   type GoalDraftCheckpointSnapshot,
   type GoalNativeDraftDTO,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import {
   GoalDraftCheckpointConflict,
   type GoalDraftCheckpointStore,

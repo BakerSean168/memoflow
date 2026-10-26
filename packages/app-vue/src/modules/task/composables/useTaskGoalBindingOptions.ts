@@ -2,7 +2,7 @@ import { getKeyResultCalculationLabel, KEY_RESULT_CALCULATION_PRESENTATION } fro
 import { inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Result } from '@memoflow/contracts/result';
-import type { GetGoalAggregateRes, KeyResultClientDTO } from '@memoflow/contracts/goal';
+import type  { GetGoalAggregateRes, KeyResultClientDTO } from '@memoflow/goal-contracts';
 import { GOAL_SERVICE_KEY, DESKTOP_AUTH_API_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import type {

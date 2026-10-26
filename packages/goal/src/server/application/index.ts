@@ -4,7 +4,7 @@
  * Provides services for goal management on the server side.
  * Each service orchestrates domain objects and repositories.
  *
- * 类型定义请从 @memoflow/contracts/goal 导入
+ * 类型定义请从 @memoflow/goal-contracts 导入
  */
 
 // ============================================================

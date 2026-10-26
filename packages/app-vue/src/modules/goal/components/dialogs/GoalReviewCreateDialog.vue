@@ -91,7 +91,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Button, Dialog, Label, Textarea } from '@memoflow/ui-vue-shadcn';
-import type { GoalReviewClientDTO, GoalReviewSystemContext } from '@memoflow/contracts/goal';
+import type  { GoalReviewClientDTO, GoalReviewSystemContext } from '@memoflow/goal-contracts';
 import { presentErrorMessage } from '@memoflow/http-client';
 import { ProductDialogShell } from '../../../../shared/components';
 import { GOAL_SERVICE_KEY } from '../../../../di/keys';

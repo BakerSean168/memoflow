@@ -114,7 +114,7 @@ import {
   type GoalTimeframe,
   type KeyResultClientDTO,
   type UpdateKeyResultReq,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import {
   Button,
   Popover,

@@ -6,6 +6,7 @@
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^9.1.0",
     "@memoflow/account": "workspace:*",
+    "@memoflow/agent-gateway": "workspace:*",
     "@memoflow/ai": "workspace:*",
     "@memoflow/cloud-auth": "workspace:*",
     "@memoflow/contracts": "workspace:*",
@@ -13,12 +14,15 @@
     "@memoflow/database": "workspace:*",
     "@memoflow/domain-shared": "workspace:*",
     "@memoflow/goal": "workspace:*",
+    "@memoflow/goal-contracts": "workspace:*",
     "@memoflow/host-runtime": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/label": "workspace:*",
+    "@memoflow/label-contracts": "workspace:*",
     "@memoflow/notification": "workspace:*",
     "@memoflow/patterns": "workspace:*",
     "@memoflow/powersync-schema": "workspace:*",
+    "@memoflow/relation": "workspace:*",
     "@memoflow/reminder": "workspace:*",
     "@memoflow/repository": "workspace:*",
     "@memoflow/schedule": "workspace:*",
@@ -27,6 +31,7 @@
     "@memoflow/setting": "workspace:*",
     "@memoflow/task": "workspace:*",
     "@memoflow/utils": "workspace:*",
+    "@memoflow/workspace-contracts": "workspace:*",
     "@opentelemetry/api": "^1.9.1",
     "@opentelemetry/context-async-hooks": "^2.11.0",
     "@opentelemetry/core": "^2.11.0",
@@ -51,9 +56,7 @@
     "node-cron": "^4.6.0",
     "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1",
-    "zod": "^4.6.5",
-    "@memoflow/relation": "workspace:*",
-    "@memoflow/agent-gateway": "workspace:*"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/compression": "^1.7.5",

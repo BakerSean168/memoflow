@@ -16,7 +16,7 @@ import {
   GoalAgentPersistedResultSchema,
   GoalAgentPersistedReceiptSchema,
   type GoalMutationReceipt,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import type { IEventBus } from '@memoflow/patterns';
 import { GoalPolicy } from '../../../domain';

@@ -148,7 +148,7 @@ import {
   goalTimeframeLabel,
   KeyResultCalculationMethod,
   type GoalTimeframe,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import { Button } from '@memoflow/ui-vue-shadcn';
 import { getKeyResultCalculationLabel } from '../utils';
 import GoalKeyResultCardEditor from './GoalKeyResultCardEditor.vue';

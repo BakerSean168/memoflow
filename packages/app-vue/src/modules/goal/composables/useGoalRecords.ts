@@ -7,11 +7,11 @@ import { useGoalStore } from '../stores/goal-store';
 import { GOAL_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import { sanitizeForIpc } from '../../../shared/utils/ipc';
-import type {
+import type  {
   CreateGoalRecordReq,
   CreateGoalReviewReq,
   UpdateGoalRecordReq,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import { executeGoalOperation, createGoalErrorHandler } from './goalOperations';
 
 export function useGoalRecords() {

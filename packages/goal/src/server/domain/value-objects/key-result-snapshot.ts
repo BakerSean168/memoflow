@@ -1,9 +1,9 @@
 import { ValueObject } from '@memoflow/utils/domain';
-import type {
+import type  {
   KeyResultCalculationMethod,
   KeyResultSnapshot as IKeyResultSnapshot,
   KeyResultSnapshotDTO,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import type { KeyResultId } from '@memoflow/contracts/primitives';
 
 /** Immutable authoritative KR measurement snapshot used by Goal Review. */

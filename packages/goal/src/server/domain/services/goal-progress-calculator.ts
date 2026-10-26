@@ -30,11 +30,11 @@ import type {
   GoalRecordQueryOptions,
 } from '../repositories/i-goal-record-repository';
 import { KeyResultProgress } from '../value-objects/key-result-progress';
-import type {
+import type  {
   ProgressCalculationResultDTO,
   GoalProgressCalculationResultDTO,
   ProgressPreviewDTO,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import type { KeyResultId } from '@memoflow/contracts/primitives';
 
 /**

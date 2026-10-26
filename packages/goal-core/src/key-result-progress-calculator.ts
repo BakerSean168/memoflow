@@ -1,8 +1,8 @@
-import type {
+import type  {
   KeyResultCalculationMethod,
   KeyResultMeasurement,
   GoalRecordAggregationSnapshot,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 
 export type KeyResultProgressDirection = 'increasing' | 'decreasing';
 

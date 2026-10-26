@@ -17,14 +17,17 @@
     "@memoflow/cloud-auth": "workspace:*",
     "@memoflow/contracts": "workspace:*",
     "@memoflow/goal-client": "workspace:*",
+    "@memoflow/goal-contracts": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/label": "workspace:*",
+    "@memoflow/label-contracts": "workspace:*",
     "@memoflow/notification": "workspace:*",
     "@memoflow/schedule": "workspace:*",
     "@memoflow/setting": "workspace:*",
     "@memoflow/task": "workspace:*",
     "@memoflow/time": "workspace:*",
-    "@memoflow/ui-react-native": "workspace:*"
+    "@memoflow/ui-react-native": "workspace:*",
+    "@memoflow/workspace-contracts": "workspace:*"
   },
   "peerDependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",

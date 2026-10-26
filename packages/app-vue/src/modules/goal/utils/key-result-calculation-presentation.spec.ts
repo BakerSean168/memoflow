@@ -1,6 +1,6 @@
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it } from 'vitest';
-import { KeyResultCalculationMethod } from '@memoflow/contracts/goal';
+import { KeyResultCalculationMethod } from '@memoflow/goal-contracts';
 import { productionLocaleMessages } from '../../../locales/production-messages';
 import {
   KEY_RESULT_CALCULATION_METHODS,

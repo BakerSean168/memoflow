@@ -1,4 +1,4 @@
-import { GoalStatus, type GoalStatus as GoalStatusValue } from '@memoflow/contracts/goal';
+import { GoalStatus, type GoalStatus as GoalStatusValue } from '@memoflow/goal-contracts';
 
 const transitions: Record<GoalStatusValue, readonly GoalStatusValue[]> = {
   [GoalStatus.Planned]: [GoalStatus.InProgress, GoalStatus.Abandoned],

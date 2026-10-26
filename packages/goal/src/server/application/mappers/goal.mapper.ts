@@ -5,7 +5,7 @@
  */
 
 import { Goal } from '../../domain';
-import type { GoalClientDTO, GoalServerDTO } from '@memoflow/contracts/goal';
+import type  { GoalClientDTO, GoalServerDTO } from '@memoflow/goal-contracts';
 
 /**
  * Goal Mapper

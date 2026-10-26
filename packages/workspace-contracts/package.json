@@ -22,6 +22,7 @@
     "@memoflow/contracts": "workspace:*",
     "@memoflow/goal-contracts": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",
+    "@memoflow/workspace-contracts": "workspace:*",
     "zod": "^4.6.5"
   }
 }

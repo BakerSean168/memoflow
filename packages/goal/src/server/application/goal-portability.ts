@@ -1,10 +1,10 @@
 import { createHash } from 'node:crypto';
-import type {
+import type  {
   GoalMutationReceipt,
   GoalPortableDefinitionV3,
   GoalPortablePayloadV3,
-} from '@memoflow/contracts/goal';
-import { GoalPortablePayloadV3Schema, GoalStatus } from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
+import { GoalPortablePayloadV3Schema, GoalStatus } from '@memoflow/goal-contracts';
 import { LabelPortablePayloadV3Schema } from '@memoflow/contracts/label';
 import type {
   PortableCapability,

@@ -15,7 +15,7 @@ import type {
 import type { GoalApplicationPort } from '@memoflow/goal';
 import { IdentityId } from '@memoflow/domain-shared/shared';
 import { TaskOccurrenceStatus } from '@memoflow/contracts/task';
-import type { GoalHomeProgressSummary } from '@memoflow/contracts/goal';
+import type  { GoalHomeProgressSummary } from '@memoflow/goal-contracts';
 import type { UserTimeContextPort } from '@memoflow/time';
 import { createTimeFacade } from '@memoflow/time';
 

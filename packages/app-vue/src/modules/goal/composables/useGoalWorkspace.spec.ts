@@ -1,7 +1,7 @@
 import { effectScope, ref } from 'vue';
 import { flushPromises } from '@vue/test-utils';
 import { beforeEach, expect, it, vi } from 'vitest';
-import { createMockGoalMutationReceipt } from '@memoflow/contracts/mocks';
+import { createMockGoalMutationReceipt } from '@memoflow/goal-contracts/test-support/goal.mock';
 import { useGoalWorkspace } from './useGoalWorkspace';
 const service = vi.hoisted(() => ({ getGoalWorkspace: vi.fn() }));
 vi.mock('../../../shared/utils/useStrictInject', () => ({ useStrictInject: () => service }));

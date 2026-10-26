@@ -1,4 +1,4 @@
-import type { GetGoalRes, KeyResultClientDTO } from '@memoflow/contracts/goal';
+import type  { GetGoalRes, KeyResultClientDTO } from '@memoflow/goal-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import type { TaskKnowledgeEdgeListReq, TaskKnowledgeEdgePage } from '@memoflow/contracts/relation';
 import type { KnowledgeDocumentId, KnowledgeSpaceId } from '@memoflow/contracts/primitives';

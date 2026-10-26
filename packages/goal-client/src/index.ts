@@ -2,7 +2,7 @@
  * Goal client seam.
  *
  * Public goal contracts stay centralized in
- * `@memoflow/contracts/goal`.
+ * `@memoflow/goal-contracts`.
  * Callers depend on this seam instead of the old application-client /
  * infrastructure-client layered exports.
  */

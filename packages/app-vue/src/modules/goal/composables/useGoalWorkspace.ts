@@ -1,12 +1,12 @@
 import { ref, toValue, watch, type MaybeRefOrGetter } from 'vue';
-import type {
+import type  {
   GetGoalWorkspaceReq,
   GoalWorkspaceKnowledgePage,
   GoalWorkspacePageRequest,
   GoalWorkspaceReadModel,
   GoalWorkspaceTaskPage,
   GoalWorkspaceTaskPageRequest,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/workspace-contracts';
 import { presentErrorMessage } from '@memoflow/http-client';
 import { GOAL_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';

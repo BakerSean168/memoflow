@@ -48,7 +48,7 @@ import {
   CloneGoalUseCase,
   BatchUpdateKeyResultWeightsUseCase,
 } from '../application';
-import type { GoalSystemView } from '@memoflow/contracts/goal';
+import type  { GoalSystemView } from '@memoflow/goal-contracts';
 import type { UserTimeContextPort } from '@memoflow/time';
 import { GoalReviewContextBuilder } from '../application';
 import { ReviewWindowResolver } from '../application/services/review-window-resolver';

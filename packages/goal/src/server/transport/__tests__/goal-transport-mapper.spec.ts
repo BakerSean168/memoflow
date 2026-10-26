@@ -11,8 +11,8 @@
  */
 import { describe, expect, it } from 'vitest';
 import { toIdentityId, toKeyResultListResponse } from '../mappers';
-import { KeyResultListResSchema } from '@memoflow/contracts/goal';
-import type { GoalClientDTO } from '@memoflow/contracts/goal';
+import { KeyResultListResSchema } from '@memoflow/goal-contracts';
+import type  { GoalClientDTO } from '@memoflow/goal-contracts';
 
 const GOAL_ID = 'IGoalId_550e8400-e29b-41d4-a716-446655440000';
 const KR_ID = 'IKeyResultId_550e8400-e29b-41d4-a716-446655440001';

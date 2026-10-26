@@ -8,12 +8,12 @@
  */
 
 import { ValueObject } from '@memoflow/utils/domain';
-import type {
+import type  {
   GoalReminderConfig as IGoalReminderConfig,
   GoalReminderConfigDTO,
   ReminderTrigger,
   ReminderTriggerType,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 
 /**
  * GoalReminderConfig 值对象实现

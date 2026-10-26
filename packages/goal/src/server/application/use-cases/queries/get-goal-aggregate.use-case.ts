@@ -6,7 +6,7 @@
  */
 
 import type { IGoalRecordRepository, IGoalRepository } from '../../../domain';
-import type { GetGoalAggregateRes } from '@memoflow/contracts/goal';
+import type  { GetGoalAggregateRes } from '@memoflow/goal-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
 

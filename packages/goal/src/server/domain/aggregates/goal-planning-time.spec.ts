@@ -4,7 +4,7 @@ import {
   ReminderTriggerType,
   goalTimeframeEndBoundary,
   goalTimeframeStartBoundary,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import { Goal } from './goal';
 import {
   GoalInvalidPlanningWindowError,

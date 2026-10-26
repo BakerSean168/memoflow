@@ -12,12 +12,12 @@ import {
   GetGoalAggregateResSchema,
   QueryGoalsResSchema,
   UpdateGoalSchema,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import {
   createMockGoal,
   createMockGoalMutationReceipt,
   createMockQueryGoalsRes,
-} from '@memoflow/contracts/mocks';
+} from '@memoflow/goal-contracts/test-support/goal.mock';
 
 describe('goal handlers contracts', () => {
   it('exposes only the canonical goal route prefix', () => {

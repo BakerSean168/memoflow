@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { RefreshControl, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
-import { GoalStatus, goalTimeframeLabel, isPastGoalTarget } from '@memoflow/contracts/goal';
+import { GoalStatus, goalTimeframeLabel, isPastGoalTarget } from '@memoflow/goal-contracts';
 import { presentErrorMessage } from '@memoflow/http-client';
 
 import { useGoalService } from '../hooks/useGoalService';

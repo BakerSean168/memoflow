@@ -64,7 +64,7 @@ import {
   goalTimeframeStartBoundary,
   type GoalTimeframe,
   type GoalTimeframeKind,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import type { Ymd } from '@memoflow/contracts/primitives';
 import { Popover, PopoverContent, PopoverTrigger } from '@memoflow/ui-vue-shadcn';
 import ProductPropertyChip from './ProductPropertyChip.vue';

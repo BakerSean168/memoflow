@@ -1,4 +1,4 @@
-import { KeyResultCalculationMethod } from '@memoflow/contracts/goal';
+import { KeyResultCalculationMethod } from '@memoflow/goal-contracts';
 
 export const KEY_RESULT_CALCULATION_METHODS = [
   KeyResultCalculationMethod.Sum,

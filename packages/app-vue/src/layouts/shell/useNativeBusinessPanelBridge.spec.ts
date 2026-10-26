@@ -6,7 +6,7 @@ import type {
   GoalNativeDraftState,
   GoalNativeEditSession,
 } from '../../modules/goal/composables/goalNativeEditSession';
-import { GoalStatus } from '@memoflow/contracts/goal';
+import { GoalStatus } from '@memoflow/goal-contracts';
 
 // Mock useGoalNativeSurface
 let mockSession: any = null;

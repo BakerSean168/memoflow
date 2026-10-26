@@ -765,7 +765,7 @@ import {
   type GoalTimeframe,
   type UpdateKeyResultReq,
   type UpdateGoalReq,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 import { presentErrorMessage } from '@memoflow/http-client';
 import { addYmdDays } from '@memoflow/time';
 import AppEmptyState from '../../../components/shared/AppEmptyState.vue';

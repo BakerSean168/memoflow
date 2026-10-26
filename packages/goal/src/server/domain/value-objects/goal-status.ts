@@ -1,7 +1,7 @@
 import {
   GoalStatus as GoalStatusContract,
   type GoalStatus as IGoalStatus,
-} from '@memoflow/contracts/goal';
+} from '@memoflow/goal-contracts';
 
 export type GoalStatus = IGoalStatus & { readonly __brand: unique symbol };
 
