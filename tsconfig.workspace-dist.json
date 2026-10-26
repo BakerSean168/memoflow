@@ -29,6 +29,8 @@
       ],
       "@memoflow/operations-contracts": ["./packages/operations-contracts/dist/index.d.ts"],
       "@memoflow/operations-contracts/*": ["./packages/operations-contracts/dist/*.d.ts"],
+      "@memoflow/relation-contracts": ["./packages/relation-contracts/dist/index.d.ts"],
+      "@memoflow/relation-contracts/*": ["./packages/relation-contracts/dist/*.d.ts"],
       "@memoflow/data-portability-contracts": [
         "./packages/data-portability-contracts/dist/index.d.ts"
       ],

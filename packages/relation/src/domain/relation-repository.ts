@@ -3,7 +3,7 @@ import type {
   RelationType,
   SubjectRef,
   SubjectType,
-} from '@memoflow/contracts/relation';
+} from '@memoflow/relation-contracts';
 
 export interface AddRelationInput {
   readonly identityId: string;

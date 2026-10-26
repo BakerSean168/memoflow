@@ -4,7 +4,7 @@ import {
   GoalKnowledgeListReqSchema,
   RelationDTOSchema,
   SubjectRefSchema,
-} from '@memoflow/contracts/relation';
+} from '@memoflow/relation-contracts';
 import type { RelationRepository } from '../domain/relation-repository';
 import { GoalKnowledgeService } from '../application/goal-knowledge-service';
 

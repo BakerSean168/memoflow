@@ -3,7 +3,7 @@ import {
   GoalKnowledgeLinkReqSchema,
   GoalKnowledgeListReqSchema,
   GoalsForKnowledgeReqSchema,
-} from '@memoflow/contracts/relation';
+} from '@memoflow/relation-contracts';
 import type { GoalKnowledgeService } from '@memoflow/relation';
 import type { IApiModule, IApiModuleContext } from '../../shared/contracts/api-module.js';
 import type { AuthenticatedRequest } from '../../shared/infrastructure/http/middlewares/auth-middleware.js';

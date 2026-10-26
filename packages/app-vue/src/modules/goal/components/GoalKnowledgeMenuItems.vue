@@ -63,7 +63,7 @@ import {
 import {
   GoalKnowledgeLinkReqSchema,
   GoalKnowledgeListReqSchema,
-} from '@memoflow/contracts/relation';
+} from '@memoflow/relation-contracts';
 import { GOAL_KNOWLEDGE_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import { useReferenceableKnowledgeNotes } from '../../repository/composables/useReferenceableKnowledgeNotes';

@@ -24,6 +24,7 @@
     "@memoflow/patterns": "workspace:*",
     "@memoflow/powersync-schema": "workspace:*",
     "@memoflow/relation": "workspace:*",
+    "@memoflow/relation-contracts": "workspace:*",
     "@memoflow/reminder": "workspace:*",
     "@memoflow/repository": "workspace:*",
     "@memoflow/schedule": "workspace:*",

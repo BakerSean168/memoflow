@@ -183,6 +183,24 @@ export function createLabelContractsAliasEntries(workspaceRoot: string): Alias[]
   ];
 }
 
+export function createRelationContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const relationContractsRoot = resolveFromWorkspace(
+    workspaceRoot,
+    'packages/relation-contracts/src',
+  );
+
+  return [
+    {
+      find: /^@memoflow\/relation-contracts$/,
+      replacement: `${relationContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/relation-contracts\/(.+)$/,
+      replacement: `${relationContractsRoot}/$1`,
+    },
+  ];
+}
+
 export function createDataPortabilityContractsAliasEntries(workspaceRoot: string): Alias[] {
   const dataPortabilityContractsRoot = resolveFromWorkspace(
     workspaceRoot,

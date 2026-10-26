@@ -198,6 +198,10 @@ const mainWorkspaceAliasEntries = [
     replacement: resolve(import.meta.dirname, '../../packages/label-contracts/src/index.ts'),
   },
   {
+    find: '@memoflow/relation-contracts',
+    replacement: resolve(import.meta.dirname, '../../packages/relation-contracts/src/index.ts'),
+  },
+  {
     find: '@memoflow/data-portability-contracts',
     replacement: resolve(
       import.meta.dirname,

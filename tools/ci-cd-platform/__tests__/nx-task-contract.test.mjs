@@ -442,6 +442,7 @@ test('Unit/Contract aliases come from exact Nx execution configuration, not proj
     'label-contracts',
     'notification-contracts',
     'operations-contracts',
+    'relation-contracts',
     'reliable-messaging-contracts',
     'shared-primitives',
     'transport-contracts',

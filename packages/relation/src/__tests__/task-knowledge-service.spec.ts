@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { RelationDTOSchema, SubjectRefSchema } from '@memoflow/contracts/relation';
+import { RelationDTOSchema, SubjectRefSchema } from '@memoflow/relation-contracts';
 import type { RelationRepository } from '../domain/relation-repository';
 import { TaskKnowledgeService } from '../application/task-knowledge-service';
 

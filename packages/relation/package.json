@@ -22,7 +22,8 @@
     "@memoflow/goal-contracts": "workspace:*",
     "@memoflow/host-runtime": "workspace:*",
     "@memoflow/http-client": "workspace:*",
-    "@memoflow/ipc-client": "workspace:*"
+    "@memoflow/ipc-client": "workspace:*",
+    "@memoflow/relation-contracts": "workspace:*"
   },
   "devDependencies": {
     "@memoflow/test-utils": "workspace:*",
