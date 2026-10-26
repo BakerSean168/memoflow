@@ -1,5 +1,7 @@
 export type DesktopUpdateInstallReceiptStage =
-  'restart-requested' | 'shutdown-complete' | 'installer-handoff';
+  | 'restart-requested'
+  | 'shutdown-complete'
+  | 'installer-handoff';
 
 export interface DesktopUpdateInstallReceipt {
   readonly previousVersion: string;

@@ -174,7 +174,8 @@ test('real Windows Electron Workspace IPC authenticates start, ack, stop, cursor
     );
     expect(create).toMatchObject({ ok: true });
     const createdConversation = create.data as
-      { id?: string; conversation?: { id?: string } } | undefined;
+      | { id?: string; conversation?: { id?: string } }
+      | undefined;
     const goalConversationId = createdConversation?.id ?? createdConversation?.conversation?.id;
     expect(goalConversationId, 'native owner-created Conversation id must exist').toBeTruthy();
     await probe.waitForFunction(

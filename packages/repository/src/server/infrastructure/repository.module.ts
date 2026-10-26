@@ -21,7 +21,8 @@ import { createLogger } from '@memoflow/utils/logger';
 const logger = createLogger('RepositoryModule');
 
 export type RepositoryRuntimeContributionsInput =
-  RepositoryModuleRuntimeContribution | readonly RepositoryModuleRuntimeContribution[];
+  | RepositoryModuleRuntimeContribution
+  | readonly RepositoryModuleRuntimeContribution[];
 
 export interface RepositoryModuleDependencies {
   readonly runtimeContributions?: RepositoryRuntimeContributionsInput;

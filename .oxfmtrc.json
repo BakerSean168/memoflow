@@ -1,0 +1,26 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "semi": true,
+  "singleQuote": true,
+  "printWidth": 100,
+  "endOfLine": "lf",
+  "sortPackageJson": false,
+  "ignorePatterns": [
+    "/dist",
+    "/build",
+    "/coverage",
+    "/.nx/cache",
+    "/.nx/workspace-data",
+    "/.workbuddy",
+    "/node_modules",
+    "**/.pytest-temp",
+    "**/.pytest_cache",
+    "/apps/ai-service/.pytest-temp",
+    "package-lock.json",
+    "yarn.lock",
+    "pnpm-lock.yaml",
+    "/graph.json",
+    "packages/database/src/generated",
+    "tools/test-system-v2/test-inventory.json"
+  ]
+}

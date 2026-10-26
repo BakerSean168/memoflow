@@ -103,7 +103,8 @@ function getQuerySchema(def: RouteDef): SchemaLike | undefined {
 
 function getResponseSchema(def: RouteDef, status: number): SchemaLike | undefined {
   return def.responses?.[String(status)]?.content?.['application/json']?.schema as
-    SchemaLike | undefined;
+    | SchemaLike
+    | undefined;
 }
 
 interface LedgerRow {

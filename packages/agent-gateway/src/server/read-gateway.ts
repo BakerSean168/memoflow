@@ -240,7 +240,11 @@ export function createReadGateway(options: Options) {
         async function call<T>(
           name: ToolName,
           requiredScope:
-            'goals:read' | 'tasks:read' | 'goals:write' | 'tasks:write' | 'routines:write',
+            | 'goals:read'
+            | 'tasks:read'
+            | 'goals:write'
+            | 'tasks:write'
+            | 'routines:write',
           operation: () => Promise<T>,
         ) {
           tool = name;

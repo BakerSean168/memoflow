@@ -15,7 +15,8 @@ export interface SchedulerModuleRuntimeContribution {
 }
 
 export type SchedulerRuntimeContributionsInput =
-  SchedulerModuleRuntimeContribution | readonly SchedulerModuleRuntimeContribution[];
+  | SchedulerModuleRuntimeContribution
+  | readonly SchedulerModuleRuntimeContribution[];
 
 export interface SchedulerModuleDependencies {
   readonly scheduledInvocationRepository: IScheduledInvocationRepository;

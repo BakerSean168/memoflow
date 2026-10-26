@@ -312,7 +312,8 @@ describe('RoutineEditorDialog Product controls', () => {
 
     await element('#routine-editor-form').trigger('submit');
     const saved = wrapper.emitted('save')?.at(-1)?.[0] as
-      { profileIds: string[]; trigger: RoutineTriggerDto | null } | undefined;
+      | { profileIds: string[]; trigger: RoutineTriggerDto | null }
+      | undefined;
     expect(saved?.profileIds).toEqual(['profile-1']);
     expect(saved?.trigger).toBeNull();
   });

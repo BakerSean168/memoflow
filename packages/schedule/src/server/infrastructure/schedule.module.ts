@@ -45,7 +45,8 @@ export interface ScheduleModuleRuntimeContribution {
 }
 
 export type ScheduleRuntimeContributionsInput =
-  ScheduleModuleRuntimeContribution | readonly ScheduleModuleRuntimeContribution[];
+  | ScheduleModuleRuntimeContribution
+  | readonly ScheduleModuleRuntimeContribution[];
 
 export interface ScheduleModuleDependencies {
   readonly scheduleRepository: IScheduleRepository;

@@ -50,6 +50,7 @@ coverage
 
 # Code quality reports
 jscpd-report
+reports/quality/
 
 # Affected-selector shadow artifacts are uploaded by CI, not committed
 reports/ci-cd-platform/affected-shadow-*.json

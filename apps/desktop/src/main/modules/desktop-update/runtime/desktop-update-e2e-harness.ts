@@ -34,7 +34,11 @@ export interface DesktopUpdateE2EHarnessOptions {
 }
 
 type DesktopUpdateE2EPhase =
-  'candidate-verified' | 'checking' | 'ready' | 'install-requested' | 'failed';
+  | 'candidate-verified'
+  | 'checking'
+  | 'ready'
+  | 'install-requested'
+  | 'failed';
 
 interface DesktopUpdateE2EStatus {
   readonly phase: DesktopUpdateE2EPhase;

@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
- * Git-aware Prettier runner (VNext Q1).
+ * Git-aware Oxfmt runner.
  *
- * Replaces raw `prettier --check .` / `prettier --write .`, which scan the
+ * Avoids raw `oxfmt .`, which scans the
  * whole working tree including files Git does not manage. This runner only
- * ever passes Git-managed, ignore-filtered, Prettier-supported files to
- * Prettier, classifies everything it skips, and emits a verifiable receipt.
+ * ever passes Git-managed, ignore-filtered, Oxfmt-supported files to
+ * Oxfmt, classifies everything it skips, and emits a verifiable receipt.
  *
  * Modes: --all | --changed [--base <ref>] [--head <ref>] | --files a,b,c
  * Action: --check (default) | --write
@@ -46,30 +46,40 @@ export function stableDigest(value) {
   return createHash('sha256').update(JSON.stringify(value)).digest('hex');
 }
 
-function runPrettier(root, prettierBin, action, files) {
-  const flag = action === 'write' ? '--write' : '--list-different';
+function invokeOxfmt(root, bin, action, files) {
+  if (!files.length) return { listed: [], status: 0 };
   const listed = [];
-  let status = 0;
+  // Keep each argv well under OS command-line limits on Windows/Linux/macOS.
   for (let i = 0; i < files.length; i += CHUNK) {
     const chunk = files.slice(i, i + CHUNK);
-    const result = spawnSync(process.execPath, [prettierBin, flag, ...chunk], {
+    const result = spawnSync(bin, [action, ...chunk], {
       cwd: root,
       encoding: 'utf8',
       maxBuffer: 64 * 1024 * 1024,
     });
     if (result.error) throw result.error;
-    if (result.status !== 0 && action === 'write') status = result.status;
-    const lines = (result.stdout ?? '')
-      .split('\n')
-      .map((l) => l.trim())
+    const entries = (result.stdout ?? '')
+      .split(/\r?\n/u)
+      .map((line) => line.trim())
       .filter(Boolean);
-    listed.push(...lines);
-    if (result.status !== 0 && action === 'check' && lines.length === 0 && result.stderr) {
-      process.stderr.write(result.stderr);
-      status = result.status;
+    // --list-different returns 1 for differences, 0 for no differences.
+    // Other statuses or an error without reported paths fail closed.
+    if (
+      result.status !== 0 &&
+      (action !== '--list-different' || result.status !== 1 || !entries.length)
+    ) {
+      throw new Error(
+        `Oxfmt ${action} exited ${result.status}: ${result.stderr ?? result.stdout ?? ''}`,
+      );
     }
+    const selected = new Set(chunk);
+    for (const entry of entries) {
+      if (!selected.has(entry))
+        throw new Error(`Unexpected Oxfmt result outside planned files: ${entry}`);
+    }
+    listed.push(...entries);
   }
-  return { listed: listed.sort(), status };
+  return { listed: [...new Set(listed)].sort(), status: 0 };
 }
 
 function main() {
@@ -83,26 +93,37 @@ function main() {
     head: args.head,
     files: args.files,
   });
-  const prettierBin =
-    process.env.QUALITY_PRETTIER_BIN ??
-    path.join(workspaceRoot, 'node_modules', 'prettier', 'bin', 'prettier.cjs');
-  let listed = [];
-  let toolStatus = 0;
-  if (plan.checkable.length > 0) {
-    ({ listed, status: toolStatus } = runPrettier(root, prettierBin, args.action, plan.checkable));
+  const oxfmtBin =
+    process.env.QUALITY_OXFMT_BIN ?? path.join(workspaceRoot, 'node_modules', '.bin', 'oxfmt');
+  // Oxfmt --write reports a summary rather than the files it changed. Read
+  // the exact set first, then write only that set, then verify convergence.
+  const { listed: different } = invokeOxfmt(root, oxfmtBin, '--list-different', plan.checkable);
+  if (args.action === 'write' && different.length > 0) {
+    for (let i = 0; i < different.length; i += CHUNK) {
+      const chunk = different.slice(i, i + CHUNK);
+      const result = spawnSync(oxfmtBin, ['--write', ...chunk], {
+        cwd: root,
+        encoding: 'utf8',
+        maxBuffer: 64 * 1024 * 1024,
+      });
+      if (result.error || result.status !== 0) {
+        throw new Error(`Oxfmt write failed: ${result.error ?? result.stderr ?? result.stdout}`);
+      }
+    }
+    const { listed: remaining } = invokeOxfmt(root, oxfmtBin, '--list-different', different);
+    if (remaining.length) throw new Error(`Oxfmt write did not converge: ${remaining.join(', ')}`);
   }
-  const different = args.action === 'check' ? listed : [];
-  const exitCode = args.action === 'check' ? (different.length > 0 ? 1 : toolStatus) : toolStatus;
+  const exitCode = args.action === 'check' && different.length > 0 ? 1 : 0;
   const receipt = {
     kind: 'quality-fmt-receipt-v1',
-    tool: 'prettier',
+    tool: 'oxfmt',
     mode: args.mode,
     action: args.action,
     base: args.mode === 'changed' ? args.base : null,
     head: args.mode === 'changed' ? args.head : null,
     filesChecked: plan.checkable.length,
-    filesDifferent: different,
-    filesWritten: args.action === 'write' ? listed : [],
+    filesDifferent: args.action === 'check' ? different : [],
+    filesWritten: args.action === 'write' ? different : [],
     skipped: {
       deleted: plan.skipped.deleted.length,
       renamed: plan.skipped.renamed.length,

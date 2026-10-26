@@ -16,7 +16,7 @@
   - Copilot MCP (AI 增强工具)
   - Nx Console
   - Vue Volar
-  - Prettier
+  - Oxfmt
   - 中文语言包
 ✓ MCP 工具:
   - nx-mcp-server (Nx 工作区管理)

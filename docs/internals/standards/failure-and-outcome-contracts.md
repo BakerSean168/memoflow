@@ -901,7 +901,8 @@ const LegacyAuthFailureAliases = {
 ```ts
 // 1. Domain
 export type RenameGoalFault =
-  { kind: 'GoalArchived'; goalId: GoalId } | { kind: 'GoalNameTooLong'; maxLength: number };
+  | { kind: 'GoalArchived'; goalId: GoalId }
+  | { kind: 'GoalNameTooLong'; maxLength: number };
 
 // 2. Contracts
 export type RenameGoalFailure =

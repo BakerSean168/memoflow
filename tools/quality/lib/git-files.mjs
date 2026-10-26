@@ -2,8 +2,8 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 
-/** File extensions Prettier can format in this repository. */
-export const PRETTIER_EXTENSIONS = new Set([
+/** File extensions Oxfmt can format in this repository. */
+export const OXFMT_EXTENSIONS = new Set([
   '.ts',
   '.tsx',
   '.mts',
@@ -132,7 +132,7 @@ const REGEX_SPECIAL = /[.+^${}()|[\]\\]/g;
 
 /**
  * Minimal gitignore-style glob → RegExp covering the pattern forms this
- * repository uses in .prettierignore: anchored paths (`/dist`,
+ * repository retains in .prettierignore: anchored paths (`/dist`,
  * `packages/.../generated`), `**` segments, single `*`, and bare basenames
  * (`pnpm-lock.yaml`). A pattern also matches everything below a directory it
  * names.
@@ -175,7 +175,7 @@ export function isIgnored(patterns, file) {
   return patterns.some((pattern) => globToRegExp(pattern).test(file));
 }
 
-export function classifyPath(file, patterns, extensions = PRETTIER_EXTENSIONS) {
+export function classifyPath(file, patterns, extensions = OXFMT_EXTENSIONS) {
   if (isIgnored(patterns, file)) return 'ignored';
   if (!extensions.has(path.posix.extname(file))) return 'unsupported';
   return 'checkable';

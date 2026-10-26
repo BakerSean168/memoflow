@@ -19,7 +19,8 @@ export interface DataPortabilityModuleDependencies {
   readonly nowIsoString?: () => string;
   readonly createBatchId?: () => string;
   readonly runtimeContributions?:
-    DataPortabilityModuleRuntimeContribution | readonly DataPortabilityModuleRuntimeContribution[];
+    | DataPortabilityModuleRuntimeContribution
+    | readonly DataPortabilityModuleRuntimeContribution[];
 }
 
 export interface DataPortabilityModuleRuntimeContribution {
@@ -44,7 +45,8 @@ export interface DataPortabilityModuleInstance {
 
 function normalizeRuntimeContributions(
   runtimeContributions?:
-    DataPortabilityModuleRuntimeContribution | readonly DataPortabilityModuleRuntimeContribution[],
+    | DataPortabilityModuleRuntimeContribution
+    | readonly DataPortabilityModuleRuntimeContribution[],
 ): readonly DataPortabilityModuleRuntimeContribution[] {
   if (!runtimeContributions) return [];
   return Array.isArray(runtimeContributions)

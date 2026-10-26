@@ -60,9 +60,19 @@ export interface UseAIKnowledgeCaptureOptions {
 }
 
 export type TaskWorkflowStage =
-  'collect' | 'clarification' | 'confirm' | 'result' | 'plan' | 'execute';
+  | 'collect'
+  | 'clarification'
+  | 'confirm'
+  | 'result'
+  | 'plan'
+  | 'execute';
 export type KnowledgeCaptureWorkflowStage =
-  'collect' | 'clarification' | 'confirm' | 'result' | 'plan' | 'execute';
+  | 'collect'
+  | 'clarification'
+  | 'confirm'
+  | 'result'
+  | 'plan'
+  | 'execute';
 
 /** Options for useAIKnowledgeQaWorkflow composable. */
 export interface UseAIKnowledgeQaWorkflowOptions {
@@ -77,7 +87,11 @@ export interface UseAIKnowledgeQaWorkflowOptions {
 }
 
 export type WorkflowMode =
-  'chat' | 'goal-create' | 'task-create' | 'knowledge-capture' | 'knowledge-qa';
+  | 'chat'
+  | 'goal-create'
+  | 'task-create'
+  | 'knowledge-capture'
+  | 'knowledge-qa';
 
 export type MessageStatus = 'generating' | 'success' | 'error' | 'aborted' | 'interrupted';
 
@@ -105,7 +119,14 @@ export type ChatToolApproval = Extract<
   conversationId: string;
   runId: string;
   status:
-    'pending' | 'sending' | 'approved' | 'declined' | 'cancelled' | 'failed' | 'stale' | 'unknown';
+    | 'pending'
+    | 'sending'
+    | 'approved'
+    | 'declined'
+    | 'cancelled'
+    | 'failed'
+    | 'stale'
+    | 'unknown';
   errorMessage?: string;
   parked?: boolean;
 };
@@ -163,7 +184,8 @@ export type ChatAskUserRequest = {
 export type ChatAskUserAnswer = AssistantRuntimeToolAnswerCommand['answer'];
 
 export type ConversationSummary =
-  (ConversationListRes['data'][number] & { runtimeKind?: 'builtin' }) | LocalAgentConversation;
+  | (ConversationListRes['data'][number] & { runtimeKind?: 'builtin' })
+  | LocalAgentConversation;
 
 export type ProviderListItem = {
   id: string;
@@ -229,7 +251,13 @@ export type KnowledgeAnswer = QueryKnowledgeRes & {
   relatedNotes?: KnowledgeRelatedNote[];
 };
 export type GoalWorkflowStage =
-  'collect' | 'clarification' | 'draft' | 'plan' | 'confirm' | 'execute' | 'result';
+  | 'collect'
+  | 'clarification'
+  | 'draft'
+  | 'plan'
+  | 'confirm'
+  | 'execute'
+  | 'result';
 
 export interface GoalClarificationView {
   needsClarification: true;

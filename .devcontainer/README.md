@@ -66,7 +66,7 @@ Model Context Protocol (MCP) 服务器配置：
 - ✅ Copilot MCP (Model Context Protocol)
 - ✅ Nx Console (Nx 工作区管理)
 - ✅ Vue - Volar (Vue 3 支持)
-- ✅ Prettier (代码格式化)
+- ✅ Oxfmt (代码格式化)
 - ✅ 中文语言包
 - ✅ GitHub Actions
 - ✅ Pull Request 管理

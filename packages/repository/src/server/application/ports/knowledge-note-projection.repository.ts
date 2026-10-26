@@ -8,7 +8,11 @@ import type {
 } from '@memoflow/contracts/repository';
 
 export type GithubWebhookDeliveryStatus =
-  'Received' | 'Processing' | 'Processed' | 'Ignored' | 'Failed';
+  | 'Received'
+  | 'Processing'
+  | 'Processed'
+  | 'Ignored'
+  | 'Failed';
 
 export interface GithubWebhookDeliveryRecord {
   id: string;

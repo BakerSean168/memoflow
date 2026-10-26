@@ -45,7 +45,10 @@ export type RoutineScheduleExecutionOutcome =
   | {
       readonly kind: 'skipped';
       readonly reason:
-        'routine-unavailable' | 'no-eligible-occurrence' | 'revision-drifted' | 'already-finalized';
+        | 'routine-unavailable'
+        | 'no-eligible-occurrence'
+        | 'revision-drifted'
+        | 'already-finalized';
       readonly occurrenceId: string | null;
     }
   | { readonly kind: 'retryable'; readonly error: string }

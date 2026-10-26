@@ -82,7 +82,8 @@ const logger = createLogger('GoalModule');
 // ---------------------------------------------------------------------------
 
 export type GoalRuntimeContributionsInput =
-  GoalModuleRuntimeContribution | readonly GoalModuleRuntimeContribution[];
+  | GoalModuleRuntimeContribution
+  | readonly GoalModuleRuntimeContribution[];
 
 export interface GoalModuleDependencies {
   readonly goalRepository: IGoalRepository;

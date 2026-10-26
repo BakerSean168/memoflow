@@ -10,7 +10,13 @@ import type { LabelClientDTO } from '@memoflow/contracts/label';
 
 export type TaskSurface = 'today' | 'plans';
 export type TaskPlanStateFilter =
-  'all' | 'active' | 'paused' | 'succeeded' | 'failed' | 'abandoned' | 'archived';
+  | 'all'
+  | 'active'
+  | 'paused'
+  | 'succeeded'
+  | 'failed'
+  | 'abandoned'
+  | 'archived';
 
 export interface TaskGoalContributionViewModel {
   value: number;

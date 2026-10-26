@@ -37,7 +37,8 @@ describe('createAppRouter', () => {
     expect(route).toBeTruthy();
     // Lazy component resolves to AuthPlatformEntry for web main shell.
     const loader = route?.components?.default as
-      (() => Promise<{ default: { name?: string; __name?: string } }>) | undefined;
+      | (() => Promise<{ default: { name?: string; __name?: string } }>)
+      | undefined;
     expect(typeof loader).toBe('function');
     const mod = await loader!();
     const name = mod.default.name ?? mod.default.__name ?? '';

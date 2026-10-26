@@ -40,7 +40,11 @@ export interface IAgentInstanceRepository {
 export class AgentRegistryError extends Error {
   constructor(
     readonly code:
-      'NOT_FOUND' | 'CONFLICT' | 'VALIDATION_ERROR' | 'FORBIDDEN' | 'AI_CONFIGURATION_REQUIRED',
+      | 'NOT_FOUND'
+      | 'CONFLICT'
+      | 'VALIDATION_ERROR'
+      | 'FORBIDDEN'
+      | 'AI_CONFIGURATION_REQUIRED',
   ) {
     super(
       {
