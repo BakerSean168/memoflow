@@ -1,4 +1,4 @@
-import type { ServerModuleHandle, ServerTransportModuleContext } from '@memoflow/contracts/shared';
+import type { ServerModuleHandle, ServerTransportModuleContext } from '@memoflow/host-runtime';
 import type { SchedulerModuleInstance } from '../server/infrastructure';
 import { registerSchedulerRoutes } from './routes';
 

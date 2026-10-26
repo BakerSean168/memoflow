@@ -186,6 +186,21 @@ export function createDesktopContractsAliasEntries(workspaceRoot: string): Alias
   ];
 }
 
+export function createHostRuntimeAliasEntries(workspaceRoot: string): Alias[] {
+  const hostRuntimeRoot = resolveFromWorkspace(workspaceRoot, 'packages/host-runtime/src');
+
+  return [
+    {
+      find: /^@memoflow\/host-runtime$/,
+      replacement: `${hostRuntimeRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/host-runtime\/(.+)$/,
+      replacement: `${hostRuntimeRoot}/$1`,
+    },
+  ];
+}
+
 export function createUiVueSourceAliasEntries(workspaceRoot: string): Alias[] {
   const uiVueRoot = resolveFromWorkspace(workspaceRoot, 'packages/ui-vue-shadcn/src');
   const uiCoreRoot = resolveFromWorkspace(workspaceRoot, 'packages/ui-core/src');

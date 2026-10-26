@@ -347,6 +347,9 @@ importers:
       '@memoflow/goal':
         specifier: workspace:*
         version: link:../../packages/goal
+      '@memoflow/host-runtime':
+        specifier: workspace:*
+        version: link:../../packages/host-runtime
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../../packages/http-client
@@ -555,6 +558,9 @@ importers:
       '@memoflow/goal-client':
         specifier: workspace:*
         version: link:../../packages/goal-client
+      '@memoflow/host-runtime':
+        specifier: workspace:*
+        version: link:../../packages/host-runtime
       '@memoflow/ipc-client':
         specifier: workspace:*
         version: link:../../packages/ipc-client
@@ -1090,6 +1096,9 @@ importers:
       '@memoflow/domain-shared':
         specifier: workspace:*
         version: link:../domain-shared
+      '@memoflow/host-runtime':
+        specifier: workspace:*
+        version: link:../host-runtime
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client
@@ -1178,6 +1187,9 @@ importers:
       '@memoflow/domain-shared':
         specifier: workspace:*
         version: link:../domain-shared
+      '@memoflow/host-runtime':
+        specifier: workspace:*
+        version: link:../host-runtime
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client
@@ -1558,6 +1570,9 @@ importers:
       '@memoflow/database':
         specifier: workspace:*
         version: link:../database
+      '@memoflow/host-runtime':
+        specifier: workspace:*
+        version: link:../host-runtime
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client
@@ -1657,6 +1672,9 @@ importers:
       '@memoflow/goal-core':
         specifier: workspace:*
         version: link:../goal-core
+      '@memoflow/host-runtime':
+        specifier: workspace:*
+        version: link:../host-runtime
       '@memoflow/patterns':
         specifier: workspace:*
         version: link:../patterns
@@ -1709,6 +1727,19 @@ importers:
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils
+
+  packages/host-runtime:
+    dependencies:
+      '@memoflow/desktop-contracts':
+        specifier: workspace:*
+        version: link:../desktop-contracts
+      '@memoflow/transport-contracts':
+        specifier: workspace:*
+        version: link:../transport-contracts
+    devDependencies:
+      '@types/express':
+        specifier: ^5.0.6
+        version: 5.0.6
 
   packages/http-client:
     dependencies:
@@ -1781,6 +1812,9 @@ importers:
       '@memoflow/domain-shared':
         specifier: workspace:*
         version: link:../domain-shared
+      '@memoflow/host-runtime':
+        specifier: workspace:*
+        version: link:../host-runtime
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client
@@ -1853,6 +1887,9 @@ importers:
       '@memoflow/database':
         specifier: workspace:*
         version: link:../database
+      '@memoflow/host-runtime':
+        specifier: workspace:*
+        version: link:../host-runtime
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client
@@ -1912,6 +1949,9 @@ importers:
       '@memoflow/domain-shared':
         specifier: workspace:*
         version: link:../domain-shared
+      '@memoflow/host-runtime':
+        specifier: workspace:*
+        version: link:../host-runtime
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client
@@ -1952,6 +1992,9 @@ importers:
       '@memoflow/domain-shared':
         specifier: workspace:*
         version: link:../domain-shared
+      '@memoflow/host-runtime':
+        specifier: workspace:*
+        version: link:../host-runtime
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client
@@ -2023,6 +2066,9 @@ importers:
       '@memoflow/domain-shared':
         specifier: workspace:*
         version: link:../domain-shared
+      '@memoflow/host-runtime':
+        specifier: workspace:*
+        version: link:../host-runtime
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client
@@ -2066,6 +2112,9 @@ importers:
       '@memoflow/domain-shared':
         specifier: workspace:*
         version: link:../domain-shared
+      '@memoflow/host-runtime':
+        specifier: workspace:*
+        version: link:../host-runtime
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client
@@ -2112,6 +2161,9 @@ importers:
       '@memoflow/domain-shared':
         specifier: workspace:*
         version: link:../domain-shared
+      '@memoflow/host-runtime':
+        specifier: workspace:*
+        version: link:../host-runtime
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client

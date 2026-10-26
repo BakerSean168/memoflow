@@ -1,0 +1,28 @@
+{
+  "name": "@memoflow/host-runtime",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./electron-ipc": {
+      "types": "./dist/electron-ipc/index.d.ts",
+      "import": "./dist/electron-ipc/index.js"
+    }
+  },
+  "dependencies": {
+    "@memoflow/desktop-contracts": "workspace:*",
+    "@memoflow/transport-contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6"
+  }
+}

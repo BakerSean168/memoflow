@@ -89,6 +89,8 @@ const desktopRendererDevWorkspaceEntries = [
     'packages/desktop-contracts/src/profile-access.ts',
   ],
   ['@memoflow/desktop-contracts', 'packages/desktop-contracts/src/index.ts'],
+  ['@memoflow/host-runtime/electron-ipc', 'packages/host-runtime/src/electron-ipc/index.ts'],
+  ['@memoflow/host-runtime', 'packages/host-runtime/src/index.ts'],
   ['@memoflow/goal/electron', 'packages/goal/src/electron/index.ts'],
   ['@memoflow/ipc-client', 'packages/ipc-client/src/index.ts'],
   ['@memoflow/cloud-auth', 'packages/cloud-auth/src/index.ts'],

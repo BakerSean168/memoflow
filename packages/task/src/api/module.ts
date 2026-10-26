@@ -74,7 +74,7 @@
  * 不会创建第二个实例；上述显式状态机即每个 handle 自己的状态。
  */
 
-import type { ServerModuleHandle, ServerTransportModuleContext } from '@memoflow/contracts/shared';
+import type { ServerModuleHandle, ServerTransportModuleContext } from '@memoflow/host-runtime';
 import { createLogger } from '@memoflow/utils/logger';
 import type { TaskModuleInstance } from '../server/infrastructure';
 import { createTaskTransportHandlers } from '../server/transport';

@@ -19,6 +19,7 @@
   "dependencies": {
     "@memoflow/contracts": "workspace:*",
     "@memoflow/database": "workspace:*",
+    "@memoflow/host-runtime": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/ipc-client": "workspace:*"
   },

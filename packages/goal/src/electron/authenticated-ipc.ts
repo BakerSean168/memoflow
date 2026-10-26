@@ -18,10 +18,8 @@
  * `ipcAdapterWithValidation` 内部执行。
  */
 
-import {
-  createAuthenticatedIpcWrapper,
-  type IElectronModuleContext,
-} from '@memoflow/contracts/electron';
+import { createAuthenticatedIpcWrapper } from '@memoflow/host-runtime/electron-ipc';
+import type { IElectronModuleContext } from '@memoflow/contracts/electron';
 import type { Result } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { ipcAdapterWithValidation } from '@memoflow/utils/result';

@@ -45,6 +45,7 @@
     "@memoflow/database": "workspace:*",
     "@memoflow/domain-shared": "workspace:*",
     "@memoflow/goal-core": "workspace:*",
+    "@memoflow/host-runtime": "workspace:*",
     "@memoflow/patterns": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/utils": "workspace:*",

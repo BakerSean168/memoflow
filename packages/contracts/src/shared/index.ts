@@ -31,10 +31,15 @@ export type {
   ExecutionSource,
   RequestContext,
 } from '@memoflow/transport-contracts';
-export type { ServerModuleHandle, ServerTransportModuleContext } from './server-module-context';
 export * from './account-active-checker';
 
 export * from './value-objects';
 
-export * from './module-manifest';
+// P1 S4（Issue #633）：ModuleManifest/CommandRegistry 与
+// ServerTransportModuleContext/ServerModuleHandle 真身已迁至
+// @memoflow/host-runtime。注意本桶不设 re-export shim：contracts 是
+// layer:shared，模块边界规则禁止 shared 依赖 layer:infra（host-runtime），
+// 任何指向 host-runtime 的导入（含 type-only）都会触发
+// @nx/enforce-module-boundaries。因此全部消费方已在本步直接改引
+// @memoflow/host-runtime，此处不再转出这批符号。
 export * from './keyboard-keymap';

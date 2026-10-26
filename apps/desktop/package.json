@@ -28,6 +28,7 @@
     "@memoflow/domain-shared": "workspace:*",
     "@memoflow/goal": "workspace:*",
     "@memoflow/goal-client": "workspace:*",
+    "@memoflow/host-runtime": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",
     "@memoflow/label": "workspace:*",
     "@memoflow/notification": "workspace:*",
