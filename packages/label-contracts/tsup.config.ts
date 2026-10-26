@@ -5,11 +5,11 @@
  * 打包工具：tsup (基于 esbuild)，与 contracts / shared-primitives 同款工厂配置
  */
 
-import { createTsupConfig } from "../../tools/build/tsup.base.config.ts";
+import { createTsupConfig } from '../../tools/build/tsup.base.config.ts';
 
 export default createTsupConfig({
-  packageName: "@memoflow/label-contracts",
-  entry: ["src/index.ts"],
+  packageName: '@memoflow/label-contracts',
+  entry: ['src/index.ts'],
   extraOptions: {
     dts: false,
   },
