@@ -3,7 +3,7 @@ import {
   unwrapOrThrowError,
   type Result,
   type ResultErrorDetail,
-} from '@memoflow/contracts/result';
+} from '@memoflow/transport-contracts/result';
 
 export { ResultErrorException as ResultClientError };
 

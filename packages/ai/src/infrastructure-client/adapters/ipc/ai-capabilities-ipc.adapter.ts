@@ -1,6 +1,6 @@
 import { AIChannels } from '@memoflow/contracts/electron';
 import type { AICapabilities } from '@memoflow/contracts/ai';
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 import type { IAICapabilitiesApiClient, IResultIpcClient } from '../types';
 
 /**

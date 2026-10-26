@@ -1205,6 +1205,9 @@ importers:
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time
+      '@memoflow/transport-contracts':
+        specifier: workspace:*
+        version: link:../transport-contracts
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils

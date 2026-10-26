@@ -20,6 +20,11 @@
         "../contracts/dist/modules/*/index.d.ts",
         "../contracts/dist/*/index.d.ts"
       ],
+      "@memoflow/transport-contracts": ["../transport-contracts/dist/index.d.ts"],
+      "@memoflow/transport-contracts/*": [
+        "../transport-contracts/dist/*/index.d.ts",
+        "../transport-contracts/dist/*.d.ts"
+      ],
       "@memoflow/utils": ["../utils/dist/index.d.ts"],
       "@memoflow/utils/*": ["../utils/dist/*/index.d.ts", "../utils/dist/*.d.ts"]
     }

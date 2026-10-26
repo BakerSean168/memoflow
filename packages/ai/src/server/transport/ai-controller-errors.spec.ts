@@ -3,7 +3,7 @@ import {
   fail,
   toHttpResponse,
   toIpcResult,
-} from '@memoflow/contracts/result';
+} from '@memoflow/transport-contracts/result';
 import { describe, expect, it } from 'vitest';
 import { LocalAgentError } from '../../shared/local-agent-error';
 import { AIExecutionError } from '../../shared/ai-execution-error';

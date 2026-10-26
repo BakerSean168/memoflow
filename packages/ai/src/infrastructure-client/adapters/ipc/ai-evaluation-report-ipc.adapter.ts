@@ -3,7 +3,7 @@ import type {
   GetAIEvaluationOverviewReq,
   GetAIEvaluationOverviewRes,
 } from '@memoflow/contracts/ai';
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 import type { AIEvaluationReportApiClient, IResultIpcClient } from '../types';
 
 /** IPC adapter — returns Result, never throws (residual 98). */

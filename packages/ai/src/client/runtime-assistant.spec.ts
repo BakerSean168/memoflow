@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { AIChannels, AIStreamChannels } from '@memoflow/contracts/electron';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import type { IResultHttpClient } from '@memoflow/http-client';
 import {
   AssistantRuntimeHttpClient,

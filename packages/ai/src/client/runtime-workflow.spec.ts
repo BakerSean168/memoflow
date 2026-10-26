@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { AIChannels, AIStreamChannels } from '@memoflow/contracts/electron';
 import { EventEmitter } from 'node:events';
 import type { ElectronBridge } from '@memoflow/ipc-client';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import type { IResultHttpClient } from '@memoflow/http-client';
 import { WorkflowRuntimeHttpClient, WorkflowRuntimeIpcClient } from './runtime-workflow';
 

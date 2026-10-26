@@ -5,7 +5,7 @@ import {
   type AIRuntimeUsageSummary,
 } from '@memoflow/contracts/ai';
 import { AIChannels } from '@memoflow/contracts/electron';
-import { unwrapOrThrowError } from '@memoflow/contracts/result';
+import { unwrapOrThrowError } from '@memoflow/transport-contracts/result';
 import type { IResultHttpClient } from '@memoflow/http-client';
 import type { IResultIpcClient } from '@memoflow/ipc-client';
 import { createResultClientError } from '../infrastructure-client/adapters/result-client-error';

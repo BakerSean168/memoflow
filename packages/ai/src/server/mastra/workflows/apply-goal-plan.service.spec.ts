@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { GoalPlanDraftSchema, GoalPlanExecutionReceiptSchema } from '@memoflow/contracts/ai';
-import { error, ok } from '@memoflow/contracts/result';
+import { error, ok } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { ApplyGoalPlanService } from './apply-goal-plan.service';
 import { goalWorkflowEntityId } from './deterministic-entity-id';

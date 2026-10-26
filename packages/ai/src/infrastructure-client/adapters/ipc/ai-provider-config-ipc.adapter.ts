@@ -17,7 +17,7 @@ import type {
   CommitAIProviderReplacementReq,
   AIProviderModelCatalogSnapshot,
 } from '@memoflow/contracts/ai';
-import { map, type Result } from '@memoflow/contracts/result';
+import { map, type Result } from '@memoflow/transport-contracts/result';
 
 /**
  * IPC adapter for AI provider-config ports.

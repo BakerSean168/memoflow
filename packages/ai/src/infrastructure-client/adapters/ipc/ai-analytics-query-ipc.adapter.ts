@@ -1,7 +1,7 @@
 import type { AIAnalyticsQueryApiClient, IResultIpcClient } from '../types';
 import { AIChannels } from '@memoflow/contracts/electron';
 import type { QueryAnalyticsReq, QueryAnalyticsRes } from '@memoflow/contracts/ai';
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 
 /** IPC adapter — returns Result, never throws (residual 98). */
 export class AIAnalyticsQueryIpcAdapter implements AIAnalyticsQueryApiClient {

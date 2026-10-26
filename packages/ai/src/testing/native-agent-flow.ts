@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import { AIChannels, AIStreamChannels } from '@memoflow/contracts/electron';
 import {
   LocalAgentClientCommandSchema,

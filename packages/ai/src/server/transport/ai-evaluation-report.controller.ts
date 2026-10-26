@@ -1,4 +1,4 @@
-import { fail, type Result } from '@memoflow/contracts/result';
+import { fail, type Result } from '@memoflow/transport-contracts/result';
 import {
   GetAIEvaluationOverviewSchema,
   type GetAIEvaluationOverviewReq,

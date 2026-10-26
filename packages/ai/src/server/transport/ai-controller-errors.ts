@@ -1,4 +1,8 @@
-import { errorCodeToHttpStatus, fail, type PublicFailure } from '@memoflow/contracts/result';
+import {
+  errorCodeToHttpStatus,
+  fail,
+  type PublicFailure,
+} from '@memoflow/transport-contracts/result';
 import { toAIPublicFailure, type AIPublicFailureOptions } from '../../shared/ai-public-failure';
 
 export interface AITransportFailure {

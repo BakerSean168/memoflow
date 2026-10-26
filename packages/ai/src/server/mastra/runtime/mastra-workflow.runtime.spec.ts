@@ -17,7 +17,7 @@ import {
   KnowledgeNoteDraftContentSchema,
   TaskPlanDraftContentSchema,
 } from '@memoflow/contracts/ai';
-import { error, ok } from '@memoflow/contracts/result';
+import { error, ok } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createTimeContext } from '@memoflow/time';

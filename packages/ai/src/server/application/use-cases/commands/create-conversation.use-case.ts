@@ -1,5 +1,5 @@
-import type { Result } from '@memoflow/contracts/result';
-import { ok, error } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { ok, error } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { IAIConversationRepository } from '../../../domain/repositories/i-ai-conversation-repository';
 import { AIConversation as AIConversationServer } from '../../../domain/aggregates/ai-conversation';

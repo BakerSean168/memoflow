@@ -99,7 +99,7 @@ import {
   WorkspaceStreamStopSchema,
 } from '@memoflow/contracts/ai';
 import { workspaceEventStream } from '../server/transport/workspace-event-stream';
-import { fail, ok } from '@memoflow/contracts/result';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 import { formatZodErrors } from '@memoflow/utils/result';
 import { createLogger } from '@memoflow/utils/logger';
 import type { AITransportModuleInstance } from '../server/infrastructure';

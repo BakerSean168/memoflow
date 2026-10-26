@@ -8,7 +8,7 @@ import type {
   ReindexKnowledgeReq,
   ReindexKnowledgeRes,
 } from '@memoflow/contracts/ai';
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 
 /** IPC adapter — returns Result, never throws (residual 98). */
 export class AIKnowledgeQueryIpcAdapter implements AIKnowledgeQueryApiClient {

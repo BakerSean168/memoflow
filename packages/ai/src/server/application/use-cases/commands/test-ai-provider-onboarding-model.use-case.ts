@@ -1,4 +1,4 @@
-import { ok, type Result } from '@memoflow/contracts/result';
+import { ok, type Result } from '@memoflow/transport-contracts/result';
 import type {
   TestAIProviderOnboardingModelReq,
   TestAIProviderOnboardingModelRes,

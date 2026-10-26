@@ -1,5 +1,5 @@
-import type { Result } from '@memoflow/contracts/result';
-import { ok, error } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { ok, error } from '@memoflow/transport-contracts/result';
 import type { IAIProviderConfigRepository } from '../../../domain/repositories/i-ai-provider-config-repository';
 import type { IAIProviderSecretVault } from '../../ports';
 import type { IAgentInstanceRepository } from '../../agent-instance/agent-instance.repository';
