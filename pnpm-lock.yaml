@@ -1626,9 +1626,9 @@ importers:
 
   packages/domain-shared:
     dependencies:
-      '@memoflow/contracts':
+      '@memoflow/shared-primitives':
         specifier: workspace:*
-        version: link:../contracts
+        version: link:../shared-primitives
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils

@@ -20,7 +20,7 @@ export default createTsupConfig({
     // 当前仅保留 shared 子路径（其余模块入口已收缩）
     'src/shared/index.ts',
   ],
-  external: ['@memoflow/contracts', '@memoflow/utils'],
+  external: ['@memoflow/utils'],
   extraOptions: {
     dts: createLocalOnlyDtsPaths(),
   },
