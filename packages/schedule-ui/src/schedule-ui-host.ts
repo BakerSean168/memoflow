@@ -23,7 +23,7 @@ export interface ScheduleGoalPort {
     labelIdsAll?: string[];
   }): Promise<
     Result<{
-      goals: ReadonlyArray<{ toDTO(): GoalClientDTO }>;
+      goals: ReadonlyArray<GoalClientDTO>;
       pagination?: { hasMore?: boolean };
     }>
   >;
