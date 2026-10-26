@@ -17,8 +17,9 @@
       "@memoflow/contracts/goal": ["../contracts/src/modules/goal/index.ts"],
       "@memoflow/contracts/primitives": ["../contracts/src/primitives/index.ts"],
       "@memoflow/contracts/repository": ["../contracts/src/modules/repository/index.ts"],
-      "@memoflow/contracts/result": ["../contracts/src/result/index.ts"],
       "@memoflow/contracts/shared": ["../contracts/src/shared/index.ts"],
+      "@memoflow/transport-contracts": ["../transport-contracts/src/index.ts"],
+      "@memoflow/transport-contracts/result": ["../transport-contracts/src/result/index.ts"],
       "@memoflow/time": ["../time/src/index.ts"],
       "@memoflow/utils": ["../utils/src/index.ts"],
       "@memoflow/utils/result": ["../utils/src/result/index.ts"]
