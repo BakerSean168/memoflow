@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/schedule/src",
   "projectType": "library",
-  "tags": ["scope:schedule", "type:lib", "layer:domain"],
+  "tags": ["scope:schedule", "type:lib", "layer:domain", "tier:server"],
   "targets": {
     "build": {
       "executor": "nx:run-commands",

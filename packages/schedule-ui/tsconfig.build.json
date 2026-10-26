@@ -1,0 +1,27 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"],
+      "@memoflow/contracts": ["../contracts/dist/index.d.ts"],
+      "@memoflow/contracts/*": [
+        "../contracts/dist/modules/*/index.d.ts",
+        "../contracts/dist/*/index.d.ts"
+      ],
+      "@memoflow/goal-contracts": ["../goal-contracts/dist/index.d.ts"],
+      "@memoflow/schedule-contracts": ["../schedule-contracts/dist/index.d.ts"],
+      "@memoflow/schedule-contracts/*": ["../schedule-contracts/dist/*.d.ts"],
+      "@memoflow/schedule-client": ["../schedule-client/dist/index.d.ts"],
+      "@memoflow/http-client": ["../http-client/dist/index.d.ts"],
+      "@memoflow/time": ["../time/dist/index.d.ts"],
+      "@memoflow/ui-vue-shadcn": ["../ui-vue-shadcn/dist/index.d.ts"],
+      "@memoflow/ui-vue-shadcn/components/ui/*": [
+        "../ui-vue-shadcn/dist/components/ui/*/index.d.ts"
+      ],
+      "@memoflow/ui-vue-shadcn/composables/*": [
+        "../ui-vue-shadcn/dist/composables/*.d.ts"
+      ],
+      "@memoflow/ui-vue-shadcn/*": ["../ui-vue-shadcn/dist/*"]
+    }
+  }
+}

@@ -1,5 +1,5 @@
-import type { CalendarEntryRange } from '@memoflow/contracts/schedule';
-import { CalendarEntryRangeSchema } from '@memoflow/contracts/schedule';
+import type { CalendarEntryRange } from '@memoflow/schedule-contracts';
+import { CalendarEntryRangeSchema } from '@memoflow/schedule-contracts';
 import { CalendarEntry } from '../../../../domain/aggregates/calendar-entry';
 import type { CalendarEntryState } from '../../../../domain/aggregates/calendar-entry';
 import { ScheduleId } from '../../../../domain/value-objects/schedule-id';

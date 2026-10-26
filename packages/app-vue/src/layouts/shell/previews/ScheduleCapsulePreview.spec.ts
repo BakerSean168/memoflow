@@ -7,7 +7,7 @@ import { setProductTimePreferences } from '../../../shared/utils/product-time';
 import type {
   CalendarEventItem,
   ScheduleCapsuleSnapshot,
-} from '../../../modules/schedule/composables/useCalendarView';
+} from '@memoflow/schedule-ui';
 import ScheduleCapsulePreview from './ScheduleCapsulePreview.vue';
 
 const capsuleEvents = ref<CalendarEventItem[]>([]);
@@ -19,10 +19,8 @@ const useCalendarView = vi.fn(() => ({
   getScheduleCapsuleSnapshot,
 }));
 
-vi.mock('../../../modules/schedule/composables/useCalendarView', async (importOriginal) => ({
-  ...(await importOriginal<
-    typeof import('../../../modules/schedule/composables/useCalendarView')
-  >()),
+vi.mock('@memoflow/schedule-ui', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@memoflow/schedule-ui')>()),
   useCalendarView: () => useCalendarView(),
 }));
 

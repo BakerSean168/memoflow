@@ -1,5 +1,5 @@
 import { toResultErrorException } from '@memoflow/contracts/result';
-import type { CalendarEntryServerDTO, ConflictDetectionResult } from '@memoflow/contracts/schedule';
+import type { CalendarEntryServerDTO, ConflictDetectionResult } from '@memoflow/schedule-contracts';
 import type { CalendarEntryState } from '../../domain/aggregates/calendar-entry';
 import { CalendarEntry as DomainCalendarEntry } from '../../domain/aggregates/calendar-entry';
 import type { IScheduleRepository } from '../../domain/repositories/i-schedule-repository';

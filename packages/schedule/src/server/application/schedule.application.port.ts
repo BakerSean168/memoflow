@@ -7,7 +7,7 @@ import type {
   GetSchedulesByTimeRangeInternalQuery,
   ResolveConflictRequest,
   UpdateScheduleRequest,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 
 /**
  * Planner/Calendar operational surface.

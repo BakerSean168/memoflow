@@ -1,0 +1,48 @@
+{
+  "extends": "../../tsconfig.workspace-src.json",
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "composite": false,
+    "incremental": false,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "types": ["node", "vite/client"],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@memoflow/contracts": ["../contracts/src/index.ts"],
+      "@memoflow/contracts/primitives": ["../contracts/src/primitives/index.ts"],
+      "@memoflow/contracts/result": ["../contracts/src/result/index.ts"],
+      "@memoflow/contracts/setting": ["../contracts/src/modules/setting/index.ts"],
+      "@memoflow/contracts/task": ["../contracts/src/modules/task/index.ts"],
+      "@memoflow/contracts/*": [
+        "../contracts/src/modules/*/index.ts",
+        "../contracts/src/*/index.ts"
+      ],
+      "@memoflow/goal-contracts": ["../goal-contracts/src/index.ts"],
+      "@memoflow/schedule-contracts": ["../schedule-contracts/src/index.ts"],
+      "@memoflow/schedule-contracts/*": ["../schedule-contracts/src/*.ts"],
+      "@memoflow/schedule-client": ["../schedule-client/dist/index.d.ts"],
+      "@memoflow/http-client": ["../http-client/src/index.ts"],
+      "@memoflow/time": ["../time/src/index.ts"],
+      "@memoflow/ui-vue-shadcn": ["../ui-vue-shadcn/dist/index.d.ts"],
+      "@memoflow/ui-vue-shadcn/components/ui/*": [
+        "../ui-vue-shadcn/dist/components/ui/*/index.d.ts"
+      ],
+      "@memoflow/ui-vue-shadcn/composables/*": [
+        "../ui-vue-shadcn/dist/composables/*.d.ts"
+      ],
+      "@memoflow/ui-vue-shadcn/*": ["../ui-vue-shadcn/dist/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/test",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/*.stories.ts",
+    "**/*.test.tsx",
+    "**/*.spec.tsx"
+  ]
+}

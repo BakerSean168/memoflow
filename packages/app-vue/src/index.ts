@@ -1,3 +1,6 @@
+// Schedule surfaces are hosted by this composition root (Issue #630 §4.4).
+import './di/schedule-ui-host';
+
 // ── DI ──
 export {
   ACCOUNT_SERVICE_KEY,
@@ -51,7 +54,7 @@ export { useAuthenticationStore } from './modules/authentication';
 export { useAccountStore } from './modules/account';
 export { useGoalStore } from './modules/goal';
 export { useTaskStore } from './modules/task';
-export { useScheduleStore } from './modules/schedule';
+export { useScheduleStore } from '@memoflow/schedule-ui';
 export { useNotificationStore } from './modules/notification';
 export { usePresentationPreferenceStore } from './modules/setting';
 

@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.workspace-src.json",
+  "compilerOptions": {
+    "lib": ["ES2020"],
+    "types": ["node", "vitest/globals"],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@memoflow/contracts": ["../contracts/src/index.ts"],
+      "@memoflow/contracts/result": ["../contracts/src/result/index.ts"],
+      "@memoflow/contracts/electron": ["../contracts/src/electron/index.ts"],
+      "@memoflow/schedule-contracts": ["../schedule-contracts/src/index.ts"],
+      "@memoflow/schedule-contracts/*": ["../schedule-contracts/src/*.ts"],
+      "@memoflow/http-client": ["../http-client/src/index.ts"],
+      "@memoflow/ipc-client": ["../ipc-client/src/index.ts"],
+      "@memoflow/time": ["../time/src/index.ts"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
+}
