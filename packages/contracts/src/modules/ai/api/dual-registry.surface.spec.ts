@@ -467,8 +467,14 @@ import { describe, expect, it } from 'vitest';
     });
 
     it('retires GoalTimeRangeSummary dual; GoalClientDTO remains as z.infer', () => {
-      const goalClient = readFileSync(resolve(modules, 'goal/aggregates/goal-client.ts'), 'utf8');
-      const goalIndex = readFileSync(resolve(modules, 'goal/aggregates/index.ts'), 'utf8');
+      const goalClient = readFileSync(
+        resolve(modules, '../../../goal-contracts/src/aggregates/goal-client.ts'),
+        'utf8',
+      );
+      const goalIndex = readFileSync(
+        resolve(modules, '../../../goal-contracts/src/aggregates/index.ts'),
+        'utf8',
+      );
       expect(goalClient).not.toMatch(/export interface GoalTimeRangeSummary\b/);
       expect(goalIndex).not.toContain('GoalTimeRangeSummary');
       expect(goalClient).toContain(
