@@ -78,6 +78,10 @@ jobs:
             --dir reports/production/release-evidence
           test -s reports/production/release-evidence/release-manifest.json
           test -s reports/production/release-evidence/candidate-set-v1.json
+          # Legacy Stable releases remain selectable for rollback. New channel-tagged
+          # manifests must be Stable, never a Nightly or an arbitrary draft.
+          channel="$(jq -r '.channel // "stable"' reports/production/release-evidence/release-manifest.json)"
+          test "$channel" = stable
           echo "release_sha=$release_sha" >> "$GITHUB_OUTPUT"
 
       - name: Validate release, candidate, and source main CI

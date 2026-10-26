@@ -6,7 +6,7 @@ tags:
   - delivery
 description: MemoFlow Delivery Platform V3 目标架构、状态机、artifact channel 与控制面边界
 created: 2026-09-02T16:15:00+08:00
-updated: 2026-09-02T16:15:00+08:00
+updated: 2026-10-26T13:00:00+08:00
 ---
 
 # MemoFlow Delivery Platform V3
@@ -32,93 +32,44 @@ No step is allowed to infer the next step merely from a mutable tag or a green p
 
 ```text
 feature/fix/refactor branch
-            │
-            ▼
-        pull request
-            │
-            ▼
- Delivery Manifest V2
-            │
-   ┌────────┼─────────┬──────────┐
-   ▼        ▼         ▼          ▼
-Governance Quality  Desktop  DB/Web Experience
-   │        │         │          │
-   └────────┴── Stable Oracles ──┘
-            │
-            ▼
-           main
-            │
-            ▼
- full exact-SHA CI
-            │
-            ▼
- Server Candidate Publish
-   Web + API + Migrator
-            │
-   ACR digest == GHCR digest
-            │
-            ▼
- candidate-set-v1.json
-            │
-            ▼
- staging-latest coherent channel
-            │
-            ▼
- GCP staging deploy watcher
-            │
-            ▼
- canonical staging state
+        -> PR: full Lint + Nx Changes
+        -> Build+Typecheck / Test / Test Web / Test Server
+        -> strict CI Check with task receipts
+        -> protected main merge
+        -> complete exact-SHA main CI (validation ends here)
 
- successful main CI
-            │
-            ▼
- Prepare Release / release-please
-            │
-            ▼
- protected Release PR
-            │
-            ▼
- release merge SHA full CI
-            │
-            ▼
- Release Publish
-   ┌────────┴────────┐
-   ▼                 ▼
-promote Server   build Desktop installers
-candidate digest Win/Linux/mac Intel/arm64
-   └────────┬────────┘
-            ▼
- canonical release-manifest.json
-            │
-            ▼
- Published GitHub Release
-            │
-            ▼
- explicit Deploy Production
-            │
-            ▼
- coherent production channel
-            │
-            ▼
- Alibaba deploy watcher
- backup → migrate → deploy → verify
-            │
-            ▼
- production deploy state
+eligible Nightly timer/manual retry
+        -> same-SHA main build closure
+        -> Web/API/Migrator dual-registry immutable images
+        -> Desktop native packages and release-specific acceptance
+        -> verified prerelease + Nightly feed + nightly-manifest.json
+
+manual Prepare Release -> protected version/changelog PR -> main CI
+        -> verified Nightly from that versioned source
+        -> manual Stable selection by Nightly tag
+        -> same-source Desktop repack + image digest promotion
+        -> published Stable release-manifest.json
+        -> manual Deploy Production + environment approval
+        -> one production-selected control pointer
+        -> production host watcher: backup / migrate / verify / atomic state
+
+optional explicit staging promotion
+        -> coherent staging-latest pointer
+        -> host-owned staging watcher (not an automatic main/Nightly side effect)
 ```
 
 ## 3. State and identity model
 
-| State               | Authority          | Immutable identity                        | Mutable pointer       |
-| ------------------- | ------------------ | ----------------------------------------- | --------------------- |
-| PR                  | GitHub branch      | head SHA + manifest digest                | branch head           |
-| Main verified       | GitHub CI          | merge SHA + CI run                        | main                  |
-| Candidate           | Candidate Publish  | image digests + candidate manifest digest | `sha-<revision>`      |
-| Staging selected    | Artifact publisher | exact candidate manifest                  | `staging-latest`      |
-| Staging deployed    | GCP watcher        | revision + digests + state file           | running containers    |
-| Release             | Release Publish    | tag SHA + release manifest + asset hashes | Latest Release marker |
-| Production selected | Deploy Production  | release manifest digest                   | desired/prod channel  |
-| Production deployed | Alibaba watcher    | deployment state + image digests + schema | running containers    |
+| State               | Authority             | Immutable identity                        | Mutable pointer       |
+| ------------------- | --------------------- | ----------------------------------------- | --------------------- |
+| PR                  | GitHub branch         | head SHA + manifest digest                | branch head           |
+| Main verified       | GitHub CI             | merge SHA + CI run                        | main                  |
+| Candidate           | Nightly image builder | image digests + candidate manifest digest | `sha-<revision>`      |
+| Staging selected    | Artifact publisher    | exact candidate manifest                  | `staging-latest`      |
+| Staging deployed    | Host-owned watcher    | revision + digests + state file           | running containers    |
+| Release             | Release Publish       | tag SHA + release manifest + asset hashes | Latest Release marker |
+| Production selected | Deploy Production     | release manifest digest                   | desired/prod channel  |
+| Production deployed | Host-owned watcher    | deployment state + image digests + schema | running containers    |
 
 Mutable pointers are discovery mechanisms only. Every mutating consumer re-resolves immutable identities before acting.
 
@@ -238,12 +189,12 @@ Physical jobs may be consolidated after shadow comparison. A consolidated qualit
 
 Candidate publication invariants:
 
-- source event is successful `push` CI on `main`;
+- source evidence is successful `push` CI on `main`, but publication is explicitly invoked by Nightly rather than a main-CI `workflow_run`;
 - downloaded build closure belongs to exact SHA and delivery manifest;
 - each image has `org.opencontainers.image.revision=<gitSha>`;
 - ACR and GHCR top-level manifest digests equal build output;
 - candidate manifest is self-digested and uploaded as durable workflow evidence;
-- `staging-latest` moves only as one coherent set and only for current main.
+- `staging-latest` moves only after explicit selection, as one coherent set and only for current main; the Nightly caller does not request this mutation.
 - The staging runtime also carries the reviewed runtime-dependency mirror contract; PostgreSQL, Redis and PowerSync are resolved to exact mirrored digests from that candidate-bound contract, never from stale host image pins.
 
 ## 7. Canonical staging

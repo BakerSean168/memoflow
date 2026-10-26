@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-/** Release channel selected by the Desktop Update runtime. Phase 1 exposes stable only. */
-export const DesktopUpdateChannelSchema = z.enum(['stable', 'beta', 'canary']);
+/** Release channel selected by the installed Desktop version or an explicit operator policy. */
+export const DesktopUpdateChannelSchema = z.enum(['stable', 'beta', 'canary', 'nightly']);
 export type DesktopUpdateChannelDTO = z.infer<typeof DesktopUpdateChannelSchema>;
 
 /** Distinguishes a user-requested operation from silent shell-owned background work. */

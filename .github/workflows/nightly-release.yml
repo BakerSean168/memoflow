@@ -1,17 +1,18 @@
-name: Nightly Release Eligibility
+name: Nightly Release
 
-# Eligibility preflight only. The publishing lane is intentionally not enabled
-# until the full Nightly -> Stable release migration is validated end to end.
 on:
   schedule:
     - cron: '8,38 * * * *'
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Resolve eligibility without publishing
+        type: boolean
+        default: true
 
 concurrency:
-  # Schedule and manual recovery may never race or silently cancel an active check.
   group: memoflow-nightly-release
   cancel-in-progress: false
-  queue: max
 
 permissions:
   contents: read
@@ -29,40 +30,46 @@ jobs:
       ci_run_id: ${{ steps.check.outputs.ci_run_id }}
       nightly_tag: ${{ steps.check.outputs.nightly_tag }}
     steps:
-      - name: Checkout only Nightly eligibility logic
+      - name: Checkout only release decision logic
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
+          ref: ${{ github.workflow_sha }}
           fetch-depth: 1
           persist-credentials: false
           sparse-checkout: tools/ci-cd-platform/lib
-
-      - name: Evaluate exact-SHA main CI and Nightly gap
+      - name: Evaluate exact-SHA main CI and six-hour gap
         id: check
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         with:
+          # Draft visibility is needed for idempotent retries. This step remains read-only.
+          github-token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
           script: |
             const { resolveNightlyEligibility } = require('./tools/ci-cd-platform/lib/nightly-eligibility.cjs');
-            const result = await resolveNightlyEligibility({
-              github,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              runNumber: Number(process.env.GITHUB_RUN_NUMBER),
-            });
-            core.setOutput('eligible', String(result.eligible));
-            core.setOutput('source_sha', result.mainSha ?? '');
-            core.setOutput('ci_run_id', String(result.ciRunId ?? ''));
-            core.setOutput('nightly_tag', result.nightlyTag ?? '');
-            core.summary
-              .addHeading('Nightly release eligibility')
-              .addRaw('Decision: ' + (result.eligible ? 'ELIGIBLE' : 'SKIP') + '\n')
-              .addRaw('Reason: ' + result.reason + '\n')
-              .addRaw('Main SHA: ' + (result.mainSha ?? 'unknown') + '\n')
-              .addRaw('Matching CI run: ' + (result.ciRunId ?? 'none') + '\n')
-              .addRaw('Next release tag: ' + (result.nightlyTag ?? 'none') + '\n')
-              .addRaw('\nThis workflow does not build or publish releases yet. See Issue #628.\n');
-            await core.summary.write();
+            const run = (await github.rest.actions.getWorkflowRun({ ...context.repo, run_id: context.runId })).data;
+            // Reruns keep their original timestamp/tag instead of inventing a new version.
+            const result = await resolveNightlyEligibility({ github, ...context.repo, tagTime: run.created_at, runNumber: Number(process.env.GITHUB_RUN_NUMBER) });
             if (result.eligible) {
-              core.notice('Nightly eligible: ' + result.nightlyTag + ' (' + result.mainSha + ')');
-            } else {
-              core.info('Skipping Nightly: ' + result.reason);
+              const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, { ...context.repo, run_id: result.ciRunId, per_page: 100 });
+              if (!artifacts.some(a => a.name === 'ci-build-artifacts' && !a.expired)) {
+                result.eligible = false; result.reason = 'no_runtime_build_artifact';
+              }
             }
+            core.setOutput('eligible', String(result.eligible));
+            core.setOutput('source_sha', result.mainSha || '');
+            core.setOutput('ci_run_id', String(result.ciRunId || ''));
+            core.setOutput('nightly_tag', result.nightlyTag || '');
+            await core.summary.addHeading('Nightly decision').addCodeBlock(JSON.stringify(result, null, 2), 'json').write();
+  publish:
+    name: Verified Nightly publication
+    needs: resolve
+    if: needs.resolve.outputs.eligible == 'true' && inputs.dry_run != true
+    permissions:
+      { contents: write, actions: read, packages: write, pull-requests: write, issues: write }
+    uses: ./.github/workflows/release-publish.yml
+    with:
+      channel: nightly
+      tag: ${{ needs.resolve.outputs.nightly_tag }}
+      sha: ${{ needs.resolve.outputs.source_sha }}
+      ci_run_id: ${{ needs.resolve.outputs.ci_run_id }}
+      dry_run: false
+    secrets: inherit

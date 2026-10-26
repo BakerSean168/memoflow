@@ -55,6 +55,31 @@ function createHarness() {
 }
 
 describe('ElectronUpdaterAdapter', () => {
+  it('permits only the configured Nightly prerelease channel without automatic downloads or downgrades', async () => {
+    const { updater, adapter } = createHarness();
+    await adapter.initialize({
+      channel: 'nightly',
+      feed: {
+        provider: 'github',
+        owner: 'BakerSean168',
+        repo: 'memoflow',
+        channel: 'nightly',
+        tagNamePrefix: 'v',
+      },
+    });
+    expect(updater.allowPrerelease).toBe(true);
+    expect(updater.allowDowngrade).toBe(false);
+    expect(updater.autoDownload).toBe(false);
+    expect(updater.autoInstallOnAppQuit).toBe(false);
+    expect(updater.setFeedURL).toHaveBeenCalledWith({
+      provider: 'github',
+      owner: 'BakerSean168',
+      repo: 'memoflow',
+      channel: 'nightly',
+      tagNamePrefix: 'v',
+    });
+  });
+
   it('owns SDK policy instead of delegating product policy to electron-updater defaults', async () => {
     const { updater, adapter } = createHarness();
 

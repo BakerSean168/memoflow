@@ -1,0 +1,112 @@
+name: Release acceptance
+on:
+  workflow_call:
+    inputs:
+      sha:
+        type: string
+        required: true
+permissions:
+  contents: read
+  actions: read
+jobs:
+  acceptance:
+    name: Release Web and Provider acceptance
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.5-pg18
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_pass
+          POSTGRES_DB: memoflow_test
+        ports:
+          - 5433:5432
+        options: --health-cmd "pg_isready -U test_user -d memoflow_test" --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://test_user:test_pass@127.0.0.1:5433/memoflow_test
+      JWT_SECRET: test-jwt-secret-for-e2e-testing-purposes
+      TZ: UTC
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ inputs.sha }}
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-nx-affected-job
+        with:
+          node-version: '24'
+          setup-python: 'false'
+          setup-uv: 'false'
+          capabilities: node,pnpm,playwright,postgres
+      - name: Bind standalone audit commands to a full Web lane input
+        env:
+          NX_HEAD: ${{ inputs.sha }}
+          DELIVERY_FORCE_LANES: web
+        run: >
+          node ./tools/ci-cd-platform/generate-delivery-manifest.mjs
+
+          node ./tools/ci-cd-platform/create-lane-input.mjs --lane web --manifest
+          scope/delivery-manifest-v1.json --output reports/ci-cd-platform/web-input-v1.json
+
+          echo 'DELIVERY_MANIFEST_PATH=scope/delivery-manifest-v1.json' >> "$GITHUB_ENV"
+
+          echo 'LANE_INPUT_PATH=reports/ci-cd-platform/web-input-v1.json' >> "$GITHUB_ENV"
+      - name: Prepare database
+        run: pnpm exec nx run database:prisma-push
+      - name: Install Chromium
+        run: pnpm exec playwright install chromium
+      - name: Run extended Web Flow audit
+        env:
+          NODE_OPTIONS: --require=${{ github.workspace }}/tools/ci/node-process-bootstrap.cjs
+          DELIVERY_LANE: web
+          TEST_REPORT_NAME: web-flow-audit
+        run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run web:e2e:audit
+      - name: Run secure AI Provider acceptance
+        if: ${{ !cancelled() }}
+        env:
+          DELIVERY_LANE: web
+          TEST_REPORT_NAME: web-ai-provider-audit
+          E2E_OPENROUTER_API_KEY: ${{ secrets.E2E_OPENROUTER_API_KEY }}
+        run: node ./tools/test-system-v2/run-command.mjs -- pnpm exec nx run web:e2e:ai-provider
+      - name: Record successful exact-source acceptance
+        env:
+          EXPECTED_SHA: ${{ inputs.sha }}
+        run: |-
+          node - <<'NODE'
+          const fs=require('fs'),cp=require('child_process'),assert=require('assert/strict');
+          const sha=cp.execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
+          assert.equal(sha,process.env.EXPECTED_SHA);
+          fs.writeFileSync('release-quality-receipt.json',JSON.stringify({kind:'release-quality-receipt',schemaVersion:1,gitSha:sha,status:'passed',web:'passed',provider:'passed',runId:Number(process.env.GITHUB_RUN_ID),runAttempt:Number(process.env.GITHUB_RUN_ATTEMPT)},null,2)+'\n');
+          NODE
+      - name: Upload release acceptance receipt
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: release-quality-receipt
+          path: release-quality-receipt.json
+          if-no-files-found: error
+          retention-days: 90
+      - name: Upload audit reports
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: release-acceptance-reports-${{ github.run_id }}
+          path: |
+            apps/web/test-results/audit-results.json
+            apps/web/test-results/provider-results.json
+            reports/ci-cd-platform/web-input-v1.json
+            scope/delivery-manifest-v1.json
+            reports/test-system-v2
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload failure evidence
+        if: failure()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: release-acceptance-failure-${{ github.run_id }}
+          path: |
+            apps/web/test-results
+            apps/web/playwright-audit-report
+          if-no-files-found: ignore
+          retention-days: 7

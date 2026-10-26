@@ -207,8 +207,8 @@ test('only published prereleases matching the Nightly scheme participate', () =>
   assert.throws(() => nightly.findLatestNightly([rawRelease({ published_at: null })]), /missing/u);
 });
 
-test('nightly version previews next patch and is deterministic for time and run', () => {
-  assert.equal(nightly.makeNightlyTag('0.22.1', NOW, 198), 'v0.22.2-nightly.20261025.198');
+test('nightly version preserves Release Please source and is deterministic for time and run', () => {
+  assert.equal(nightly.makeNightlyTag('0.22.1', NOW, 198), 'v0.22.1-nightly.20261025.198');
   assert.throws(
     () => nightly.makeNightlyTag('0.22.1-nightly.1', NOW, 198),
     /unexpected desktop version/u,
@@ -228,7 +228,7 @@ test('GitHub adapter binds main SHA, completed CI and its exact successful CI Ch
   });
   assert.equal(output.eligible, true);
   assert.equal(output.reason, 'first_nightly');
-  assert.equal(output.nightlyTag, 'v0.22.2-nightly.20261025.198');
+  assert.equal(output.nightlyTag, 'v0.22.1-nightly.20261025.198');
   assert.equal(output.mainSha, SHA_MAIN);
   assert.equal(output.ciRunId, 1234);
   assert.equal(fixture.calls[0].head_sha, SHA_MAIN);
@@ -286,7 +286,7 @@ test('API failures and tag collisions abort rather than declaring eligibility', 
     /unexpected desktop version/u,
   );
   await assert.rejects(
-    () => resolve({ releases: [rawRelease({ tag_name: 'v0.22.2-nightly.20261025.198' })] }),
+    () => resolve({ releases: [rawRelease({ tag_name: 'v0.22.1-nightly.20261025.198' })] }),
     /tag already exists/u,
   );
 });
@@ -319,5 +319,21 @@ test('workflow checks eligibility without installing repository dependencies or 
   assert.doesNotMatch(
     workflow,
     /pnpm install|npm install|nx build|gh release create|docker build|docker push/u,
+  );
+});
+
+test('same-source failed Nightly resumes one existing draft rather than producing duplicate tags', async () => {
+  const draft = rawRelease({
+    tag_name: 'v0.22.1-nightly.20261024.177',
+    draft: true,
+    target_commitish: SHA_MAIN,
+  });
+  const outcome = await resolve({ releases: [draft] });
+  assert.equal(outcome.eligible, true);
+  assert.equal(outcome.nightlyTag, draft.tag_name);
+  assert.equal(outcome.stableVersion, '0.22.1');
+  await assert.rejects(
+    () => resolve({ releases: [draft, { ...draft, tag_name: 'v0.22.1-nightly.20261024.178' }] }),
+    /ambiguous Nightly drafts/u,
   );
 });

@@ -11,12 +11,6 @@ function assertSha(sha, label) {
   return sha;
 }
 
-function resolveNextNightlyVersion(currentVersion) {
-  const match = /^(\d+)\.(\d+)\.(\d+)$/u.exec(currentVersion);
-  if (!match) throw new Error('unexpected desktop version: ' + currentVersion);
-  return match[1] + '.' + match[2] + '.' + (Number(match[3]) + 1);
-}
-
 function makeNightlyTag(currentVersion, now, runNumber) {
   const timestamp = Date.parse(now);
   if (!Number.isFinite(timestamp)) throw new Error('invalid Nightly timestamp');
@@ -24,7 +18,9 @@ function makeNightlyTag(currentVersion, now, runNumber) {
     throw new Error('Nightly run number must be positive');
   }
   const date = new Date(timestamp).toISOString().slice(0, 10).replaceAll('-', '');
-  return 'v' + resolveNextNightlyVersion(currentVersion) + '-nightly.' + date + '.' + runNumber;
+  if (!/^\d+\.\d+\.\d+$/u.test(currentVersion))
+    throw new Error('unexpected desktop version: ' + currentVersion);
+  return 'v' + currentVersion + '-nightly.' + date + '.' + runNumber;
 }
 
 function findLatestNightly(releases) {
@@ -111,6 +107,7 @@ async function resolveNightlyEligibility({
   repo,
   now = new Date().toISOString(),
   runNumber,
+  tagTime,
 }) {
   if (!github?.rest || typeof github.paginate !== 'function') {
     throw new Error('GitHub client is required');
@@ -230,9 +227,29 @@ async function resolveNightlyEligibility({
   ) {
     throw new Error('release version drift between Desktop, root package and Release Please');
   }
-  const tag = makeNightlyTag(desktop.version, now, runNumber);
-  if (releases.some((release) => release.tag_name === tag)) {
-    throw new Error('Nightly release tag already exists: ' + tag);
+  // Resume one immutable draft for the same source instead of producing an
+  // unbounded new draft on every timer tick after a packaging failure.
+  const drafts = releases.filter(
+    (release) =>
+      release.draft === true &&
+      release.prerelease === true &&
+      NIGHTLY_TAG_RE.test(release.tag_name ?? '') &&
+      release.tag_name.startsWith('v' + desktop.version + '-nightly.') &&
+      release.target_commitish === mainSha,
+  );
+  if (drafts.length > 1) throw new Error('ambiguous Nightly drafts for source SHA');
+  const tag = drafts[0]?.tag_name ?? makeNightlyTag(desktop.version, tagTime ?? now, runNumber);
+  const existing = releases.filter((release) => release.tag_name === tag);
+  if (existing.length) {
+    // A retry may resume only its own unpublished draft at the same immutable source.
+    if (
+      existing.length !== 1 ||
+      !existing[0].draft ||
+      existing[0].prerelease !== true ||
+      existing[0].target_commitish !== mainSha
+    ) {
+      throw new Error('Nightly release tag already exists: ' + tag);
+    }
   }
 
   // The scheduled event can be delayed. Fail closed if main moves while GitHub
@@ -256,7 +273,7 @@ async function resolveNightlyEligibility({
     ciRunId: verifiedCi.id,
     lastNightlyTag: last?.tag ?? null,
     nightlyTag: tag,
-    stableVersion: resolveNextNightlyVersion(desktop.version),
+    stableVersion: desktop.version,
   };
 }
 
@@ -266,6 +283,5 @@ module.exports = {
   decideNightly,
   findLatestNightly,
   makeNightlyTag,
-  resolveNextNightlyVersion,
   resolveNightlyEligibility,
 };

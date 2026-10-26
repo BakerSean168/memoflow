@@ -1,14 +1,32 @@
-name: Publish Main Candidate
+name: Build Release Candidate Images
 
 on:
-  workflow_run:
-    workflows: [CI]
-    types: [completed]
-    branches: [main]
+  workflow_call:
+    outputs:
+      runtime_digest:
+        description: Verified immutable staging runtime digest, without selector mutation
+        value: ${{ jobs.runtime-artifact.outputs.digest }}
+    inputs:
+      sha:
+        required: true
+        type: string
+      ci_run_id:
+        required: true
+        type: string
+      dry_run:
+        type: boolean
+        default: false
+      promote_staging:
+        type: boolean
+        default: false
   workflow_dispatch:
     inputs:
+      promote_staging:
+        description: Explicitly select this verified current-main candidate for staging
+        type: boolean
+        default: false
       dry_run:
-        description: Verify evidence without publishing (workflow remains disabled manually)
+        description: Verify evidence without publishing
         type: boolean
         default: true
       ci_run_id:
@@ -21,7 +39,7 @@ on:
         type: string
 
 concurrency:
-  group: main-candidate-${{ github.event.workflow_run.head_sha || inputs.sha }}
+  group: candidate-images-${{ inputs.sha }}
   cancel-in-progress: false
 
 permissions:
@@ -36,11 +54,7 @@ env:
 jobs:
   resolve:
     name: Resolve exact-SHA main candidate
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.workflow_run.conclusion == 'success' &&
-       github.event.workflow_run.event == 'push' &&
-       github.event.workflow_run.head_branch == 'main')
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     outputs:
       eligible: ${{ steps.evidence.outputs.eligible }}
@@ -53,13 +67,13 @@ jobs:
       - name: Checkout exact tested revision
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: ${{ github.event.workflow_run.head_sha || inputs.sha }}
+          ref: ${{ inputs.sha }}
           fetch-depth: 0
       - id: meta
         name: Bind candidate to successful main CI
         env:
-          TESTED_SHA: ${{ github.event.workflow_run.head_sha || inputs.sha }}
-          CI_RUN_ID: ${{ github.event.workflow_run.id || inputs.ci_run_id }}
+          TESTED_SHA: ${{ inputs.sha }}
+          CI_RUN_ID: ${{ inputs.ci_run_id }}
         shell: bash
         run: |
           set -euo pipefail
@@ -82,7 +96,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           TESTED_SHA: ${{ steps.meta.outputs.revision }}
           CI_RUN_ID: ${{ steps.meta.outputs.ci_run_id }}
-        run: node ./tools/ci-cd-platform/verify-ci-promotion.mjs --allow-docs
+        run: node ./tools/ci-cd-platform/verify-ci-promotion.mjs
       - name: Upload verified source chain
         if: steps.evidence.outputs.eligible == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
@@ -411,6 +425,7 @@ jobs:
 
   promote-staging:
     name: Promote coherent staging-latest channel
+    if: inputs.promote_staging == true
     permissions: { contents: read, actions: read, pull-requests: read, packages: write }
     needs: [resolve, candidate-manifest, runtime-artifact]
     runs-on: ubuntu-latest

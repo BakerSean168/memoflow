@@ -259,5 +259,36 @@ test('release workflow materializes and retains feed evidence after metadata clo
     workflow,
     /publication_class|publicationClass|extraMetadata\.memoflowUpdate/u,
   );
-  assert.match(workflow, /desktop-release-manifest\.json artifacts desktop-update-feed stable/u);
+  assert.match(
+    workflow,
+    /desktop-release-manifest\.json artifacts desktop-update-feed "\$\{\{ inputs\.channel \|\| 'stable' \}\}"/u,
+  );
+  assert.match(workflow, /desktop-update-feed\.tar\.gz/u);
+  assert.match(workflow, /default: stable/u);
+});
+
+test('Nightly feed is isolated from the stable pointer and retains canonical native asset hashes', async () => {
+  const fixture = await createFixture();
+  try {
+    const outputRoot = path.join(fixture.cwd, 'nightly-feed');
+    const { receipt: publication } = await materializeDesktopUpdateFeed({
+      manifestPath: fixture.manifestPath,
+      artifactRoot: fixture.artifactRoot,
+      outputRoot,
+      channel: 'nightly',
+    });
+    assert.equal(publication.channel, 'nightly');
+    assert.equal(publication.pointer.name, 'nightly');
+    assert.ok(publication.pointer.targetPrefix.endsWith('/nightly'));
+    assert.ok(
+      publication.lanes.every((lane) => lane.targetRelativeDirectory.startsWith('nightly/')),
+    );
+    assert.ok(
+      publication.lanes.every((lane) =>
+        lane.files.every((file) => !file.targetRelativePath.includes('/stable/')),
+      ),
+    );
+  } finally {
+    await rm(fixture.cwd, { recursive: true, force: true });
+  }
 });
