@@ -7,7 +7,10 @@ import {
   DesktopUpdateCoordinator,
 } from '../application/desktop-update-coordinator';
 import type { DesktopUpdateEngine, DesktopUpdateFeed } from '../application/desktop-update-engine';
-import { resolveDesktopUpdateFeed } from '../application/desktop-update-feed';
+import {
+  resolveDesktopUpdateFeed,
+  resolveDesktopUpdateChannelForVersion,
+} from '../application/desktop-update-feed';
 import { ElectronUpdaterAdapter } from '../infrastructure/electron-updater.adapter';
 import { resolveLinuxPackageType } from '../infrastructure/linux-package-type.resolver';
 import {
@@ -100,7 +103,7 @@ export function composeDesktopUpdateShellRuntime(
 ): DesktopUpdateShellRuntime {
   const installation = detectDesktopInstallationOwner(collectDesktopInstallationEvidence(host));
   const engine = options.engine ?? new ElectronUpdaterAdapter();
-  const channel = options.channel ?? 'stable';
+  const channel = options.channel ?? resolveDesktopUpdateChannelForVersion(host.currentVersion);
   const feed = installation.capabilities.canCheck
     ? (options.feedOverride ?? resolveDesktopUpdateFeed(channel))
     : undefined;

@@ -41,89 +41,55 @@ test('release-please prepares a Release PR only on manual verified-main dispatch
   assert.equal(JSON.parse(config).packages['.']['skip-github-release'], true);
 });
 
-test('release publish waits for exact candidate publication then resolves the bound successful main CI before release lanes', async () => {
+test('Stable publication requires an explicitly selected verified Nightly and all release lanes', async () => {
   const workflow = await readRepoFile('.github/workflows/release-publish.yml');
-
-  assert.match(workflow, /workflow_run:/);
-  assert.match(workflow, /workflows:\s*\[?['"]?Publish Main Candidate['"]?\]?/);
-  assert.match(workflow, /types:\s*\[?completed\]?/);
-  assert.match(workflow, /workflow_dispatch:/);
-  assert.match(workflow, /workflow_run\.conclusion == 'success'/);
-  assert.match(workflow, /workflow_id: 'ci\.yml'/);
-  assert.match(workflow, /candidateRun\.head_sha !== sha/u);
-  assert.match(workflow, /candidateRun\.head_branch !== 'main'/u);
+  assert.match(workflow, /workflow_call:/u);
+  assert.match(workflow, /workflow_dispatch:/u);
+  assert.match(workflow, /nightly_tag:[\s\S]*required: true/u);
+  assert.doesNotMatch(workflow, /workflow_run:|^  push:|^  schedule:/mu);
+  assert.match(workflow, /Stable requires explicit operator dispatch/u);
+  assert.match(workflow, /resolveReleasePlan/u);
   assert.match(
     workflow,
     /Revalidate source chain before public release[\s\S]*?verify-ci-promotion\.mjs/u,
   );
-  assert.match(workflow, /release-assets\.yml/);
+  assert.match(workflow, /release-assets\.yml/u);
+  assert.match(workflow, /publish-images\.yml/u);
+  assert.match(workflow, /release-quality\.yml/u);
   assert.match(
     workflow,
-    /macos_signing_mode: \$\{\{ vars\.MACOS_RELEASE_MODE \|\| 'unsigned-pilot' \}\}/,
+    /macos_signing_mode: \$\{\{ vars\.MACOS_RELEASE_MODE \|\| 'unsigned-pilot' \}\}/u,
   );
-  assert.match(workflow, /publish-images\.yml/);
-  assert.match(workflow, /draft:\s*true|draft: true/);
-  assert.match(workflow, /release-manifest\.json/);
-  assert.match(workflow, /--draft=false/);
-  assert.match(workflow, /pull-requests: write/);
-  assert.match(workflow, /merge_commit_sha === sha/);
-  assert.match(workflow, /github\.paginate\(github\.rest\.repos\.listReleases/u);
-  assert.match(workflow, /release\.tag_name === tag/u);
-  assert.match(workflow, /matches\.length > 1/u);
-  assert.match(workflow, /ambiguous release records/u);
-  assert.doesNotMatch(workflow, /getReleaseByTag/u);
-  assert.match(workflow, /autorelease: pending/);
-  assert.match(workflow, /autorelease: tagged/);
-  assert.match(workflow, /needs\.prepare\.result == 'success'/);
-  assert.doesNotMatch(workflow, /needs\.finalize\.result == 'success'/);
+  assert.match(workflow, /ensureDraft/u);
+  assert.match(workflow, /release-manifest\.json/u);
+  assert.match(workflow, /--draft=false --prerelease=false --latest/u);
+  assert.match(workflow, /--draft=false --prerelease --latest=false/u);
+  assert.match(workflow, /needs\.release-quality\.result == 'success'/u);
+  assert.match(workflow, /needs\.finalize\.result == 'success'/u);
+  assert.match(workflow, /autorelease: pending/u);
+  assert.match(workflow, /autorelease: tagged/u);
+  assert.match(workflow, /releasePr\.merge_commit_sha/u);
 });
 
-test('release retry can recover an already-tested release SHA without manually creating a tag', async () => {
+test('release recovery uses an immutable draft or published Nightly instead of arbitrary SHA dispatch', async () => {
   const workflow = await readRepoFile('.github/workflows/release-publish.yml');
-  const checkout = workflowStep(workflow, 'Checkout candidate');
-  const verifier = workflowStep(workflow, 'Checkout current release recovery verifier');
-  const sourceGuard = workflowStep(
-    workflow,
-    'Require exact replay SHA and current main control plane',
-  );
-  const contract = workflowStep(workflow, 'Resolve release contract');
-  const notes = workflowStep(workflow, 'Extract release notes');
-
-  assert.match(workflow, /release_sha:\s*\n\s*description:/u);
-  assert.match(workflow, /dry_run:[\s\S]*?default: true/u);
-  assert.match(checkout, /inputs\.release_sha \|\| inputs\.tag/u);
-  assert.match(checkout, /fetch-depth:\s*0/u);
-  assert.match(verifier, /github\.event_name == 'workflow_dispatch' && inputs\.release_sha != ''/u);
-  assert.match(verifier, /ref: \$\{\{ github\.sha \}\}/u);
-  assert.match(verifier, /path: \.release-recovery-control/u);
-  assert.match(sourceGuard, /test "\$GITHUB_REF" = refs\/heads\/main/u);
-  assert.match(sourceGuard, /test "\$\(git rev-parse HEAD\)" = "\$REQUESTED_SHA"/u);
+  const controller = await readRepoFile('tools/ci-cd-platform/lib/release-lifecycle.cjs');
+  assert.match(workflow, /dry_run:[\s\S]*default: true/u);
   assert.match(
-    sourceGuard,
-    /test "\$\(git -C \.release-recovery-control rev-parse HEAD\)" = "\$GITHUB_SHA"/u,
+    workflowStep(workflow, 'Checkout pinned release control plane'),
+    /ref: \$\{\{ github\.workflow_sha \}\}/u,
   );
-  assert.match(sourceGuard, /test "\$\(git rev-parse origin\/main\)" = "\$GITHUB_SHA"/u);
-  assert.match(sourceGuard, /git show "\$GITHUB_SHA:package\.json"/u);
-  assert.match(sourceGuard, /git show "\$GITHUB_SHA:\.release-please-manifest\.json"/u);
   assert.match(
-    workflowStep(workflow, 'Recheck replay control plane before creating the Draft'),
-    /test "\$\(git rev-parse origin\/main\)" = "\$GITHUB_SHA"/u,
+    workflowStep(workflow, 'Checkout exact release SHA'),
+    /ref: \$\{\{ steps\.plan\.outputs\.sha \}\}/u,
   );
-  assert.match(contract, /RELEASE_SHA_REPLAY:/u);
-  assert.match(contract, /--require-release --expected-tag/u);
-  assert.match(
-    contract,
-    /contract=\.\/\.release-recovery-control\/tools\/ci-cd-platform\/release-tools\/release-contract\.mjs/u,
-  );
-  assert.match(workflow, /name: Checkout current release recovery verifier for notes/u);
-  assert.match(notes, /RELEASE_SHA_REPLAY:/u);
-  assert.match(
-    notes,
-    /node "\$contract" --require-release --expected-tag "\$RELEASE_TAG" --write-notes release-notes\.md/u,
-  );
-  assert.match(workflow, /git merge-base --is-ancestor HEAD origin\/main/u);
-  assert.match(workflow, /No successful exact-SHA main CI run found/u);
-  assert.match(workflow, /Verify release test and artifact provenance before mutation/u);
+  assert.match(workflow, /verify-ci-promotion\.mjs/u);
+  assert.match(controller, /immutable release tag collision/u);
+  assert.match(controller, /published releases are immutable/u);
+  assert.match(controller, /selected Nightly must be published and prerelease/u);
+  assert.match(controller, /no successful exact-SHA main CI/u);
+  assert.match(controller, /release tag collision/u);
+  assert.match(controller, /already_published/u);
 });
 
 test('desktop and Docker release lanes validate source identity through the pinned caller verifier', async () => {
@@ -139,7 +105,7 @@ test('desktop and Docker release lanes validate source identity through the pinn
   assert.match(desktopSource, /ref: \$\{\{ needs\.prepare-release\.outputs\.release_sha \}\}/u);
   assert.match(
     desktopContract,
-    /node \.\.\/release-tooling\/tools\/ci-cd-platform\/release-tools\/release-contract\.mjs/u,
+    /node \.\.\/release-tooling\/tools\/ci-cd-platform\/release-tools\/prepare-release-source\.mjs/u,
   );
 
   const dockerSource = workflowStep(images, 'Checkout exact release tooling');
@@ -150,9 +116,9 @@ test('desktop and Docker release lanes validate source identity through the pinn
   assert.match(dockerControl, /path: \.release-promotion-control/u);
   assert.match(
     dockerContract,
-    /node \.\/\.release-promotion-control\/tools\/ci-cd-platform\/release-tools\/release-contract\.mjs/u,
+    /node \.\/\.release-promotion-control\/tools\/ci-cd-platform\/release-tools\/prepare-release-source\.mjs/u,
   );
-  assert.match(dockerContract, /--require-release --expected-tag "\$RELEASE_TAG"/u);
+  assert.match(dockerContract, /"\$RELEASE_TAG" "\$RELEASE_CHANNEL"/u);
 });
 
 test('GitHub Release mutations use the configured operator token instead of the limited Actions integration token', async () => {
@@ -205,7 +171,7 @@ test('release validation checkouts retain merge-parent history', async () => {
   const desktopCheckout = workflowStep(assets, 'Checkout exact release source');
   const dockerCheckout = workflowStep(images, 'Checkout exact release tooling');
 
-  assert.match(prepareCheckout, /ref: \$\{\{ needs\.resolve\.outputs\.sha \}\}/);
+  assert.match(prepareCheckout, /ref: \$\{\{ steps\.plan\.outputs\.sha \}\}/);
   assert.match(desktopCheckout, /ref: \$\{\{ needs\.prepare-release\.outputs\.release_sha \}\}/);
   assert.match(dockerCheckout, /ref: \$\{\{ needs\.prepare-release\.outputs\.release_sha \}\}/);
   for (const step of [prepareCheckout, desktopCheckout, dockerCheckout]) {
@@ -317,12 +283,12 @@ test('targeted Desktop recovery avoids repeat package builds and update gates an
   assert.match(isolation, /TOKEN\|SECRET\|PASSWORD\|CREDENTIAL\|AUTH/u);
 });
 
-test('release Windows updater uses exact tagged runtime but may overlay bounded newer tests only', async () => {
+test('release Windows updater uses selected immutable source tests while standalone recovery supports bounded overlays', async () => {
   const [assets, workflow] = await Promise.all([
     readRepoFile('.github/workflows/release-assets.yml'),
     readRepoFile('.github/workflows/desktop-update-e2e.yml'),
   ]);
-  assert.match(assets, /qa_overlay_ref: \$\{\{ github\.workflow_sha \}\}/u);
+  assert.match(assets, /qa_overlay_ref: \$\{\{ needs\.prepare-release\.outputs\.release_sha \}\}/u);
   assert.match(assets, /ref: \$\{\{ needs\.prepare-release\.outputs\.release_sha \}\}/u);
   assert.match(workflow, /qa_overlay_ref:[\s\S]*?type: string/u);
   assert.match(workflow, /recovery_platform:[\s\S]*?default: all/u);
@@ -499,11 +465,8 @@ test('release image publication carbon-copies one exact candidate to China ACR a
 
   assert.match(workflow, /packages:\s*write/);
   assert.match(caller, /packages:\s*write/);
-  assert.match(workflow, /candidate-publish\.yml/u);
-  assert.match(
-    workflow,
-    /CANDIDATE_RUN_ID: \$\{\{ needs\.resolve-candidate\.outputs\.run_id \}\}/u,
-  );
+  assert.match(workflow, /verifyPublishedNightly/u);
+  assert.match(workflow, /CANDIDATE_MANIFEST: reports\/candidate\/candidate-set-v1\.json/u);
   assert.match(workflow, /verify-ci-promotion\.mjs/u);
   assert.match(workflow, /candidate-manifest\.mjs --validate/u);
   assert.match(workflow, /name: Login to ACR/u);

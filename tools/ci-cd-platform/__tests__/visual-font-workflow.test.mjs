@@ -10,7 +10,7 @@ const workflow = readFileSync(
   new URL('../../../.github/workflows/ci.yml', import.meta.url),
   'utf8',
 );
-const shard = workflow.match(/^  web-specialized:\n([\s\S]*?)(?=^  \S)/mu)?.[1];
+const shard = workflow.match(/^  web-visual:\n([\s\S]*?)(?=^  \S)/mu)?.[1];
 assert.ok(shard, 'Web Flow shard job must exist');
 const fontStep = shard.match(
   /      - name: Provision visual regression fonts\n([\s\S]*?)(?=^      - |^      #)/mu,
@@ -92,7 +92,10 @@ function runPreflight({
 
 test('visual shards provision Noble fonts before comparisons; PR representatives run once', () => {
   assert.match(shard, /runs-on: ubuntu-24\.04/u);
-  assert.match(shard, /matrix: \$\{\{ fromJSON\(needs.scope-detector.outputs.web_matrix\) \}\}/u);
+  assert.match(
+    shard,
+    /matrix: \$\{\{ fromJSON\(needs.scope-detector.outputs.visual_matrix\) \}\}/u,
+  );
   assert.ok(fontStep, 'font prerequisite must exist in the matrix job');
   assert.match(fontStep, /shell: bash/u);
   assert.match(fontStep, /timeout-minutes: 5/u);
@@ -105,8 +108,7 @@ test('visual shards provision Noble fonts before comparisons; PR representatives
   );
   const provisionIndex = shard.indexOf('- name: Provision visual regression fonts');
   assert.ok(shard.indexOf('playwright install chromium') < provisionIndex);
-  assert.ok(provisionIndex < shard.indexOf('run-web-shard.mjs'));
-  assert.ok(provisionIndex < shard.indexOf('nx run web:e2e:visual-regression'));
+  assert.ok(provisionIndex < shard.indexOf('run-ci-tasks.mjs web-visual visual-pr'));
   assert.equal((workflow.match(/name: Provision visual regression fonts/gu) ?? []).length, 1);
 });
 
@@ -117,7 +119,7 @@ test('PR visual selection is nonempty and smaller; nightly/manual retain the ful
   );
   assert.ok(nightly.on.schedule.length > 0);
   assert.ok(Object.hasOwn(config.on, 'workflow_dispatch'));
-  const steps = config.jobs['web-specialized'].steps;
+  const steps = config.jobs['web-visual'].steps;
   const representative = steps.find(
     (step) => step.name === 'Product visual representatives (compare only)',
   );

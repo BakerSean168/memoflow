@@ -19,7 +19,7 @@ env:
 
 jobs:
   coverage:
-    name: Coverage Gates
+    name: Coverage Statistics
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -92,7 +92,7 @@ jobs:
           echo "has_target=$([ -n "$selected_projects" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
           echo "projects=$selected_projects" >> "$GITHUB_OUTPUT"
 
-      - name: Run governed coverage gates
+      - name: Run governed coverage statistics
         env:
           NODE_OPTIONS: --require=${{ github.workspace }}/tools/ci/node-process-bootstrap.cjs
           DELIVERY_LANE: coverage
@@ -156,6 +156,15 @@ jobs:
           setup-python: 'false'
           setup-uv: 'false'
           capabilities: node,pnpm,playwright,postgres
+      - name: Bind standalone audit commands to a full Web lane input
+        env:
+          NX_HEAD: ${{ github.sha }}
+          DELIVERY_FORCE_LANES: web
+        run: |
+          node ./tools/ci-cd-platform/generate-delivery-manifest.mjs
+          node ./tools/ci-cd-platform/create-lane-input.mjs --lane web --manifest scope/delivery-manifest-v1.json --output reports/ci-cd-platform/web-input-v1.json
+          echo 'DELIVERY_MANIFEST_PATH=scope/delivery-manifest-v1.json' >> "$GITHUB_ENV"
+          echo 'LANE_INPUT_PATH=reports/ci-cd-platform/web-input-v1.json' >> "$GITHUB_ENV"
       - name: Prepare database
         run: pnpm exec nx run database:prisma-push
       - name: Install Chromium
@@ -180,6 +189,9 @@ jobs:
           name: web-flow-audit-${{ github.run_id }}
           path: |
             apps/web/test-results/audit-results.json
+            apps/web/test-results/provider-results.json
+            reports/ci-cd-platform/web-input-v1.json
+            scope/delivery-manifest-v1.json
             reports/test-system-v2
           if-no-files-found: error
           retention-days: 14

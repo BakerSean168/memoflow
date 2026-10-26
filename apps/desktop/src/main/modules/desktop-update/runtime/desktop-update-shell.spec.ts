@@ -44,6 +44,32 @@ afterEach(() => {
 });
 
 describe('Desktop Update shell composition', () => {
+  it('isolates a packaged Nightly from stable update discovery and honors an explicit override', async () => {
+    for (const override of [undefined, 'stable'] as const) {
+      const engine = new FakeEngine();
+      const runtime = composeDesktopUpdateShellRuntime(
+        {
+          currentVersion: '1.2.3-nightly.20261026.17',
+          isPackaged: true,
+          platform: 'win32',
+          env: {},
+        },
+        { engine, policy: { mode: 'manual' }, ...(override ? { channel: override } : {}) },
+      );
+      await runtime.coordinator.initialize();
+      expect(engine.initialize).toHaveBeenCalledWith({
+        channel: override ?? 'nightly',
+        feed: {
+          provider: 'github',
+          owner: 'BakerSean168',
+          repo: 'memoflow',
+          channel: override ? 'latest' : 'nightly',
+          tagNamePrefix: 'v',
+        },
+      });
+    }
+  });
+
   it('keeps development builds fail-closed without initializing electron-updater', async () => {
     const engine = new FakeEngine();
     const runtime = composeDesktopUpdateShellRuntime(

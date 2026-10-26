@@ -2791,55 +2791,5 @@
       "hit": true
     }
   ],
-  "unmeasuredProjects": ["assets", "migrator", "powersync-schema", "ui-core"],
-  "coverageRanking": [
-    {
-      "project": "goal",
-      "p50Seconds": 68.4
-    },
-    {
-      "project": "task",
-      "p50Seconds": 58.0
-    },
-    {
-      "project": "ai",
-      "p50Seconds": 32.2
-    },
-    {
-      "project": "notification",
-      "p50Seconds": 26.6
-    },
-    {
-      "project": "reminder",
-      "p50Seconds": 15.7
-    },
-    {
-      "project": "account",
-      "p50Seconds": 15.2
-    },
-    {
-      "project": "schedule",
-      "p50Seconds": 9.6
-    },
-    {
-      "project": "api",
-      "p50Seconds": 8.4
-    },
-    {
-      "project": "setting",
-      "p50Seconds": 7.4
-    },
-    {
-      "project": "scheduler",
-      "p50Seconds": 3.4
-    },
-    {
-      "project": "domain-shared",
-      "p50Seconds": 3.4
-    },
-    {
-      "project": "data-portability",
-      "p50Seconds": 3.2
-    }
-  ]
+  "unmeasuredProjects": ["assets", "migrator", "powersync-schema", "ui-core"]
 }

@@ -4,9 +4,9 @@ tags:
   - release
   - deployment
   - desktop
-description: MemoFlow Release Lifecycle V3，覆盖自动 Release PR、Server candidate promotion 与跨平台 Desktop 资产
+description: MemoFlow Release Lifecycle V3，覆盖定时 Nightly、人工 Stable 晋升、Server digest promotion 与跨平台 Desktop 资产
 created: 2026-09-02T16:15:00+08:00
-updated: 2026-09-05T13:05:00+08:00
+updated: 2026-10-26T13:00:00+08:00
 ---
 
 # MemoFlow Release Lifecycle V3
@@ -17,7 +17,8 @@ updated: 2026-09-05T13:05:00+08:00
 
 ```text
 Prepare Release   decides and prepares version metadata
-Release Publish   publishes immutable Server/Desktop artifacts
+Nightly Release   publishes verified prerelease Server/Desktop artifacts
+Stable Promotion  manually promotes a selected verified Nightly source
 Deploy Production selects a Published Release for runtime rollout
 Runtime Watcher   mutates production safely
 ```
@@ -28,8 +29,8 @@ These authorities remain separate.
 
 ### Trigger
 
-- successful `CI` workflow completion for a `push` to `main`;
-- manual `workflow_dispatch` for retry/reconciliation.
+- manual `workflow_dispatch` on `main`, after successful exact-SHA CI;
+- no automatic release preparation or publication on ordinary main pushes.
 
 ### Effect
 
@@ -51,40 +52,33 @@ The Release PR is an ordinary protected PR. Its merge SHA must pass full main CI
 
 ## 4. Release candidate resolution
 
-The automatic publication trigger is a successful `Publish Main Candidate` completion for `main`, not raw CI completion. This orders the lifecycle as:
+The scheduler checks every 30 minutes, but creates a Nightly only when the current main SHA has successful complete CI and a canonical runtime build artifact, contains new commits and is at least six hours after the previous published Nightly. Main CI does not trigger publication through `workflow_run`.
 
 ```text
-successful exact-SHA main CI
-        ↓
-Publish Main Candidate
-        ↓
-validated candidate-set/v1
-        ↓
-Release Publish
+successful exact-SHA main CI + eligible timer/manual retry
+        -> immutable candidate images and staging runtime
+        -> native Desktop packages + source acceptance
+        -> verified Nightly prerelease and channel feed
+        -> explicit operator selection of a published Nightly
+        -> same-source Desktop repack + immutable image digest retag
+        -> verified Stable publication
+        -> separate manual Production selection
 ```
 
-Manual `workflow_dispatch` remains recovery-only. In both automatic and manual paths, Release Publish independently resolves the exact successful `ci.yml` push run and requires it to match the candidate-set identity.
+Stable may select any still-verifiable published Nightly, not only the newest. It revalidates the selected tag, exact main CI, publication-run identity, manifest hashes, native asset hashes and image digest parity. A Draft, failed Nightly, foreign repository, version downgrade or tag collision cannot authorize promotion. Main can advance without changing the selected source SHA.
 
-Release Publish is eligible only when it can prove:
-
-1. exact SHA belongs to `main`;
-2. exact successful main CI exists;
-3. release commit/version/CHANGELOG identities agree;
-4. exact server candidate manifest exists for the SHA;
-5. candidate images pass ACR/GHCR digest parity;
-6. no immutable tag/release identity collides;
-7. required Desktop platform policy is known.
+Root/Desktop versions and the Release Please manifest at the source SHA remain the version authority. Nightly applies a temporary prerelease suffix only in packaging metadata; Stable uses the prepared source version. Prepare and merge a new Release Please milestone before promoting a new stable version. See [Release runbook](../operations/release.md) for operator actions and recovery.
 
 ## 5. Draft-first publication
 
 Release Publish first creates or resumes:
 
 ```text
-vX.Y.Z immutable Git tag
-Draft GitHub Release
+vX.Y.Z-nightly.YYYYMMDD.run or vX.Y.Z immutable Git tag
+Draft GitHub Release with explicit channel
 ```
 
-A failed Server promotion, Desktop platform, manifest or postflight leaves the Release Draft and resumable.
+A failed Server promotion, Desktop platform, release acceptance, manifest or postflight leaves the Release Draft and resumable. One same-source Nightly draft is resumed on retry; published tags and assets are immutable.
 
 ## 6. Server artifact promotion
 
@@ -170,8 +164,11 @@ Windows and Linux continue to publish their current updater metadata. macOS upda
 - server candidate manifest digest;
 - Web/API/Migrator image digests and both distributions;
 - Desktop manifest digest and platform coverage;
-- signing state;
+- signing state and channel-isolated update feed;
+- same-run/source Web and Provider acceptance receipt;
 - postflight result.
+
+`nightly-manifest.json` additionally binds the publication run, the four canonical evidence documents and the immutable staging-runtime digest. Stable records the selected Nightly manifest digest, same-source repack policy and digest-retag policy.
 
 Draft becomes Published only when all required identities and assets are present.
 
@@ -181,7 +178,7 @@ Draft becomes Published only when all required identities and assets are present
 
 It creates `memoflow.production-set/v1`, which binds release SHA/tag, candidate and delivery-manifest identity, exact application/runtime digests, and the current `controlPlaneSha`. The selector builds only `memoflow-production-runtime`, then moves one `production-selected` control pointer. It does not rebuild Web/API/Migrator, move their tags independently, run SSH commands, or mutate Compose on the runtime host.
 
-Alibaba consumes that control artifact with `deployment/production/production-deploy-watch.sh`. The canonical production compose contains no Watchtower or mutable application fallback. Runtime mutation remains a host-owned transaction with backup, migrator-first rollout, health verification, atomic state, pre-migration restore and post-migration `BLOCKED` semantics.
+The configured production host consumes that control artifact with `deployment/production/production-deploy-watch.sh`. The canonical production compose contains no Watchtower or mutable application fallback. Runtime mutation remains a host-owned transaction with backup, migrator-first rollout, health verification, atomic state, pre-migration restore and post-migration `BLOCKED` semantics.
 
 ## 10. Rollback
 

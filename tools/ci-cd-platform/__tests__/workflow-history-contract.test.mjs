@@ -14,5 +14,5 @@ test('scheduled Nx workflows retain enough history for the HEAD~1 fallback', asy
 
   assert.match(nightly, /Performance Experiment[\s\S]*?fetch-depth:\s*2/u);
   assert.match(nightly, /Web Flow Full Audit[\s\S]*?fetch-depth:\s*2/u);
-  assert.match(nightly, /Coverage Gates[\s\S]*?fetch-depth:\s*0/u);
+  assert.match(nightly, /Coverage Statistics[\s\S]*?fetch-depth:\s*0/u);
 });

@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import fs from 'node:fs';
+import { describe, expect, it, vi } from 'vitest';
 import { findWindowsPowerShellPath, isWslRuntime, WindowsUserDpapiProvider } from './wsl-dpapi';
 
 describe('WSL Windows DPAPI bridge', () => {
@@ -29,7 +30,12 @@ describe('WSL Windows DPAPI bridge', () => {
   });
 
   it('does not advertise DPAPI when Windows PowerShell is unavailable', () => {
-    const provider = new WindowsUserDpapiProvider({ isWsl: true, powershellPath: null });
-    expect(provider.isAvailable()).toBe(false);
+    const probe = vi.spyOn(fs, 'existsSync').mockReturnValue(false);
+    try {
+      const provider = new WindowsUserDpapiProvider({ isWsl: true, powershellPath: null });
+      expect(provider.isAvailable()).toBe(false);
+    } finally {
+      probe.mockRestore();
+    }
   });
 });

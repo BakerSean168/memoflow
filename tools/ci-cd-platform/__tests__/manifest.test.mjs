@@ -111,7 +111,12 @@ test('push to main is an exhaustive full audit regardless of changed path', asyn
     files: ['docs/README.md'],
   });
   assert.equal(manifest.full, true);
-  assert.ok(Object.values(manifest.lanes).every(Boolean));
+  // Coverage measurement is nightly-audit-only and stays off even on main.
+  const executionLanes = Object.fromEntries(
+    Object.entries(manifest.lanes).filter(([lane]) => lane !== 'coverage'),
+  );
+  assert.ok(Object.values(executionLanes).every(Boolean));
+  assert.equal(manifest.lanes.coverage, false);
 });
 
 test('scope discovery invokes the installed Nx CLI directly instead of racing pnpm exec wrappers', () => {
@@ -186,33 +191,11 @@ test('Unit LPT is deterministic, complete, fixed at three jobs and only splits a
   }
 });
 
-test('Unit LPT never file-splits unsplittable projects (coverage thresholds need the full suite)', () => {
+test('Unit LPT rejects invalid project lists without a mode surface', () => {
   const projects = ['app-vue', 'desktop', 'web', 'new-project'];
-  const plan = planUnitShards(projects, { unsplittable: ['app-vue'] });
-  const tasks = plan.flatMap(({ tasks }) => tasks);
-  assert.deepEqual(
-    tasks.filter((task) => task.project === 'app-vue'),
-    [{ project: 'app-vue' }],
-  );
-  assert.equal(tasks.length, projects.length);
-  assert.deepEqual(plan, planUnitShards([...projects].reverse(), { unsplittable: ['app-vue'] }));
-});
-
-test('Unit LPT weighs coverage projects by their coverage durations in coverage mode', () => {
-  // Test weights: app-vue 302 (split 151/151), goal 182, task 159 — the split
-  // halves dominate placement. Goal/task use measured coverage weights; app-vue
-  // keeps the full Unit weight because coverage now executes all of its tests.
-  const projects = ['app-vue', 'goal', 'task'];
-  const testPlan = planUnitShards(projects);
-  assert.equal(
-    testPlan.flatMap(({ tasks }) => tasks).filter((task) => task.project === 'app-vue').length,
-    2,
-  );
-  const coveragePlan = planUnitShards(projects, { coverage: true, unsplittable: ['app-vue'] });
-  assert.deepEqual(
-    coveragePlan.map(({ tasks }) => tasks.map((task) => task.project)),
-    [['app-vue'], ['goal'], ['task']],
-  );
+  const plan = planUnitShards(projects);
+  assert.equal(plan.flatMap(({ tasks }) => tasks).length, projects.length + 1);
+  assert.deepEqual(plan, planUnitShards([...projects].reverse()));
 });
 
 test('Unit LPT keeps app-vue file shards on different jobs for the Full Audit workload', async () => {
@@ -579,7 +562,7 @@ test('injected scope stays authoritative under a main-push event (regression)', 
   assert.equal(m.scope.full, m.full);
 });
 
-test('Unit runner swaps in test:coverage for coverage-selected projects only', async () => {
+test('Unit runner never instruments coverage, even when the coverage lane is forced', async () => {
   const root = await mkdtemp(path.join(os.tmpdir(), 'memoflow-unit-coverage-'));
   try {
     const manifest = await buildDeliveryManifest({
@@ -591,7 +574,7 @@ test('Unit runner swaps in test:coverage for coverage-selected projects only', a
       files: ['nx.json'],
       scope: { ...scope, full: true, unit: ['desktop', 'web'], coverage: ['desktop'] },
     });
-    assert.equal(manifest.lanes.coverage, true);
+    assert.equal(manifest.lanes.coverage, false);
     const manifestPath = path.join(root, 'manifest.json');
     const inputPath = path.join(root, 'input.json');
     const callsPath = path.join(root, 'calls.jsonl');
@@ -631,12 +614,16 @@ appendFileSync(process.env.UNIT_CALLS_PATH, JSON.stringify(process.argv.slice(2)
         'exec',
         'nx',
         'run',
-        `${task.project}:${task.project === 'desktop' ? 'test:coverage' : 'test'}`,
+        `${task.project}:test`,
         '--outputStyle=static',
         ...(task.shard ? [`--shard=${task.shard}`, '--maxWorkers=2'] : []),
       ]),
     );
     assert.deepEqual(calls, expected);
+    assert.equal(
+      calls.some((call) => call.some((argument) => String(argument).includes('test:coverage'))),
+      false,
+    );
   } finally {
     await rm(root, { recursive: true, force: true });
   }

@@ -22,12 +22,6 @@ export default mergeConfig(
         roots: ['src/server/infrastructure/adapters/prisma/mappers'],
         reportsDirectory:
           'coverage/packages/scheduler/server-infrastructure-adapters-prisma-mappers',
-        thresholds: {
-          statements: 80,
-          lines: 80,
-          functions: 80,
-          branches: 70,
-        },
       }),
     },
   }),

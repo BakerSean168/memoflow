@@ -139,6 +139,25 @@ const moduleBoundaryDepConstraints = [
     sourceTag: 'layer:service',
     onlyDependOnLibsWithTags: ['layer:shared'],
   },
+  // ============ Domain tier isolation (goal pilot, Issue #634) ============
+  // A feature scope split into core/client/server packages (goal-core,
+  // goal-client, goal) carries one extra `tier:*` tag per package. The pure
+  // domain core must not depend on the client or server tiers, and the
+  // client and server tiers must not depend on each other; both may depend
+  // on tier:core. `notDependOnLibsWithTags` also rejects transitive paths,
+  // so a banned tier cannot be reached through an intermediary package.
+  {
+    sourceTag: 'tier:core',
+    notDependOnLibsWithTags: ['tier:client', 'tier:server'],
+  },
+  {
+    sourceTag: 'tier:client',
+    notDependOnLibsWithTags: ['tier:server'],
+  },
+  {
+    sourceTag: 'tier:server',
+    notDependOnLibsWithTags: ['tier:client'],
+  },
   // ============ Scope-level feature isolation (ADR-033 M3) ============
   ...featureScopeConstraints,
   {

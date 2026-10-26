@@ -378,7 +378,7 @@ test('desktop update feed projection resolves canonical lanes and channel substi
     },
   ];
 
-  for (const channel of ['stable', 'beta', 'canary']) {
+  for (const channel of ['stable', 'beta', 'canary', 'nightly']) {
     for (const expectation of expectations) {
       const projection = resolveDesktopUpdateFeedProjection({
         channel,

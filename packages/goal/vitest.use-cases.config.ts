@@ -21,12 +21,6 @@ export default mergeConfig(
         projectRoot: import.meta.dirname,
         roots: ['src/server/application/use-cases'],
         reportsDirectory: 'coverage/packages/goal/server-application-use-cases',
-        thresholds: {
-          statements: 70,
-          lines: 70,
-          functions: 70,
-          branches: 60,
-        },
       }),
     },
   }),

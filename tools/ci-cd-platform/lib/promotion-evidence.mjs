@@ -5,7 +5,7 @@ import { requireProof, verifyCiRun, verifyPrEvidence, verifyUnitJobs } from './c
  * GitHub reruns keep immutable named artifacts from the original scope job.
  * Do not pretend the artifact was produced by the latest attempt: prove its
  * recorded attempt belongs to this same, exact-SHA CI run and that the sole
- * source Scope Detector completed successfully. The latest CI Check and all
+ * source Changes completed successfully. The latest CI Check and all
  * required Unit shards remain independently required by verifyCiRun /
  * verifyUnitJobs; neither can be satisfied with an older failed attempt.
  */
@@ -27,7 +27,7 @@ async function verifyEvidenceSourceAttempt({ api, repository, run, evidence }) {
       source.total_count === source.jobs.length,
     'incomplete source-attempt jobs',
   );
-  const producers = source.jobs.filter((job) => job.name === 'Scope Detector');
+  const producers = source.jobs.filter((job) => job.name === 'Changes');
   requireProof(
     producers.length === 1 &&
       producers[0].run_id === run.id &&
@@ -87,15 +87,9 @@ export async function verifyPromotionEvidence(options) {
     requireProof(
       manifest.execution.mode === 'full' &&
         manifest.full === true &&
-        [
-          'governance',
-          'validate',
-          'boundary',
-          'integration',
-          'web',
-          'coverage',
-          'performance',
-        ].every((lane) => manifest.lanes[lane] === true),
+        ['governance', 'validate', 'boundary', 'integration', 'web', 'performance'].every(
+          (lane) => manifest.lanes[lane] === true,
+        ),
       'main has no full test evidence',
     );
     testEvidence = {

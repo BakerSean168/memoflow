@@ -3,6 +3,16 @@ name: Publish Docker Images
 on:
   workflow_call:
     inputs:
+      channel:
+        description: nightly or stable
+        type: string
+        required: false
+        default: stable
+      source_nightly:
+        description: Published verified Nightly for Stable promotion
+        type: string
+        required: false
+        default: ''
       tag:
         required: true
         type: string
@@ -14,6 +24,16 @@ on:
         type: string
   workflow_dispatch:
     inputs:
+      channel:
+        description: nightly or stable
+        type: string
+        required: false
+        default: stable
+      source_nightly:
+        description: Published verified Nightly for Stable promotion
+        type: string
+        required: false
+        default: ''
       tag:
         description: Existing draft release tag to promote images for
         required: true
@@ -84,52 +104,10 @@ jobs:
             core.setOutput('release_tag', tag);
             core.setOutput('release_sha', tagSha);
 
-  resolve-candidate:
-    name: Resolve Exact Server Candidate
-    permissions: { contents: read, actions: read }
-    needs: prepare-release
-    runs-on: ubuntu-latest
-    outputs:
-      run_id: ${{ steps.resolve.outputs.run_id }}
-    steps:
-      - name: Resolve successful candidate-set artifact
-        id: resolve
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
-        env:
-          RELEASE_SHA: ${{ needs.prepare-release.outputs.release_sha }}
-        with:
-          script: |
-            const sha = process.env.RELEASE_SHA;
-            const artifactName = `candidate-set-${sha}`;
-            const response = await github.rest.actions.listWorkflowRuns({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'candidate-publish.yml',
-              head_sha: sha,
-              status: 'success',
-              per_page: 50,
-            });
-            for (const run of response.data.workflow_runs) {
-              if (run.head_sha !== sha || run.conclusion !== 'success') continue;
-              const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, {
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                run_id: run.id,
-                per_page: 100,
-              });
-              if (artifacts.some((artifact) => artifact.name === artifactName && !artifact.expired)) {
-                core.setOutput('run_id', String(run.id));
-                core.info(`Using candidate-set from run ${run.id} for ${sha}`);
-                return;
-              }
-            }
-            core.setFailed(`No successful exact-SHA candidate-set artifact found for ${sha}`);
-
   promote-candidate:
     name: Promote Candidate Images Without Rebuild
     needs:
       - prepare-release
-      - resolve-candidate
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -155,7 +133,31 @@ jobs:
       - name: Validate release contract
         env:
           RELEASE_TAG: ${{ needs.prepare-release.outputs.release_tag }}
-        run: node ./.release-promotion-control/tools/ci-cd-platform/release-tools/release-contract.mjs --require-release --expected-tag "$RELEASE_TAG"
+          RELEASE_CHANNEL: ${{ inputs.channel || 'stable' }}
+        run: node ./.release-promotion-control/tools/ci-cd-platform/release-tools/prepare-release-source.mjs "$RELEASE_TAG" "$RELEASE_CHANNEL"
+
+      - name: Download same-run Nightly candidate identity
+        if: inputs.channel == 'nightly'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: candidate-set-${{ needs.prepare-release.outputs.release_sha }}
+          path: reports/candidate
+
+      - name: Resolve and verify published Nightly for immutable image promotion
+        if: inputs.channel != 'nightly'
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        env:
+          SOURCE_NIGHTLY: ${{ inputs.source_nightly }}
+          RELEASE_SHA: ${{ needs.prepare-release.outputs.release_sha }}
+          CI_RUN_ID: ${{ inputs.ci_run_id }}
+        with:
+          script: |
+            const fs = require('node:fs');
+            const lifecycle = require('./.release-promotion-control/tools/ci-cd-platform/lib/release-lifecycle.cjs');
+            const source = await lifecycle.verifyPublishedNightly({ github, ...context.repo, tag: process.env.SOURCE_NIGHTLY });
+            if (source.sha !== process.env.RELEASE_SHA || String(source.nightly.ciRunId) !== process.env.CI_RUN_ID) throw new Error('promotion must preserve Nightly SHA and CI identity');
+            fs.mkdirSync('reports/candidate', { recursive: true });
+            fs.writeFileSync('reports/candidate/candidate-set-v1.json', JSON.stringify(source.candidate, null, 2) + '\n');
 
       - uses: ./.github/actions/setup-nx-affected-job
         with: { node-version: '${{ env.NODE_VERSION }}', setup-python: 'false', setup-uv: 'false' }
@@ -164,7 +166,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           TESTED_SHA: ${{ needs.prepare-release.outputs.release_sha }}
           CI_RUN_ID: ${{ inputs.ci_run_id }}
-          CANDIDATE_RUN_ID: ${{ needs.resolve-candidate.outputs.run_id }}
+          CANDIDATE_MANIFEST: reports/candidate/candidate-set-v1.json
         run: node ./tools/ci-cd-platform/verify-ci-promotion.mjs
 
       - name: Validate candidate and exact successful main CI identity

@@ -179,7 +179,7 @@ describe('Antigravity explicit Google sign-in state machine', () => {
     expect(done.status).toMatchObject({ status: 'ready' });
     expect(fixture.verify).toHaveBeenCalledTimes(1);
     expect(transport.closed).toBe(true);
-    expect(existsSync(tempDirectory(transport))).toBe(false);
+    await waitFor(() => !existsSync(tempDirectory(transport)));
     expect(JSON.stringify(done)).not.toContain('fixture-refresh-token');
     expect(JSON.stringify(done)).not.toContain('secret-authorization-code');
   });

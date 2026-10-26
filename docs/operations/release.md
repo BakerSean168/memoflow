@@ -1,17 +1,27 @@
 # Release
 
-Normal feature PRs can merge after required PR checks pass. Main CI runs independently; **a merge does not publish a release**. The release process is a separate operator action with exact-SHA evidence.
+PRs run the affected validation tasks; main CI runs the regular complete Linux suite. **Successful main CI does not directly publish a candidate or a Stable release.** Release creation and production selection are separate, exact-source operations.
 
-## Current workflow
+## Nightly and Stable
 
-1. Choose a release milestone and trigger [`Prepare Release`](../../.github/workflows/release-please.yml) on `main`. The workflow checks the current main SHA and its successful CI evidence before creating or updating the release-please PR.
-2. Review and merge the release PR. The new merge commit must have a successful **exact-SHA main CI**; CI from a different commit is not sufficient.
-3. [`Release Publish`](../../.github/workflows/release-publish.yml) verifies release identity, creates the draft GitHub Release/tag, and invokes the Desktop and image release lanes.
-4. [Desktop assets](../../.github/workflows/release-assets.yml) and [Docker images](../../.github/workflows/publish-images.yml) produce verifiable release artifacts. Publication occurs only after the required postflight evidence is complete.
-5. Deploying or selecting a published release for production remains a separate operation; it does not follow from the tag alone. See [Deployment](./deployment.md).
+1. [Nightly Release](../../.github/workflows/nightly-release.yml) checks every 30 minutes. It requires a successful exact-SHA main `CI Check`, a retained canonical build artifact, commits newer than the previous published Nightly, and at least six hours since that publication. A docs-only main revision without a runtime artifact is a no-op. Manual dispatch defaults to `dry_run: true`.
+2. An eligible Nightly reuses the validated main build closure for Web/API/Migrator images. Both registries must expose identical amd64/arm64 OCI digests. The separate staging-runtime artifact is produced without moving any staging or production selector.
+3. Desktop packaging builds Windows x64, Linux x64, macOS x64 and macOS ARM64. The existing package closure, installed update, runtime smoke and signing policy remain mandatory. The source-level [release acceptance](../../.github/workflows/release-quality.yml) also runs the extended Web and Provider journeys against an isolated database; these expensive checks are not on the normal PR critical path.
+4. Only after all lanes pass is the draft published as a prerelease, never marked GitHub's latest Stable. `nightly-manifest.json` binds the immutable source SHA, main CI, publication run, canonical manifests and release-quality results. Native assets are checksummed and the channel-specific feed is included as `desktop-update-feed.tar.gz`.
+5. To publish Stable, manually run [Promote Nightly to Stable](../../.github/workflows/release-publish.yml) on `main`, select the exact published `nightly_tag`, and inspect a dry run before setting `dry_run: false`. The selected Nightly need not be the newest, but its source and required evidence must still be verifiable. Draft, failed, tampered or foreign-source releases are rejected.
+6. Stable preserves that Nightly's Git SHA. Desktop assets are **repackaged from the same source** under the stable version, with native acceptance repeated; their binary hashes are not claimed to equal the Nightly packages. Docker images are retagged from their immutable Nightly digests, not rebuilt. Published version downgrades and collisions with an existing version at another SHA are rejected.
+7. [Deploy Production](../../.github/workflows/deploy-production.yml) remains a separate manual selection of an already-published non-prerelease Stable, with its existing environment gate, immutable digests and rollback rules. Publishing Nightly or Stable does not select production. See [Deployment](./deployment.md).
 
-If a release lane fails, the release remains Draft; correct the root cause and retry against the same immutable tag/SHA according to the workflow. Do not move immutable tags, skip evidence gates or publish failed Drafts manually.
+## Version authority and update channels
 
-Scheduled [Nightly Audit](../../.github/workflows/nightly-audit.yml) is a separate quality lane, not a shortcut around release gates. The `.github/workflows/` files and exact artifact manifests are the execution truth.
+Release Please remains the source of the stable version. Root `package.json`, Desktop `package.json` and `.release-please-manifest.json` must agree at the selected immutable SHA. Nightly packaging applies a temporary `-nightly.YYYYMMDD.run` suffix to the two package manifests **after installation**, without a Git commit or alteration to the Release Please manifest. An installed `X.Y.Z-nightly.YYYYMMDD.run` binary selects the Nightly prerelease channel by default; stable binaries never opt in. Explicit operator channel overrides remain authoritative. GitHub update discovery uses the installed custom prerelease channel and its canonical metadata fallback. Update metadata is published under a separate `nightly/` feed prefix; it never replaces the stable feed pointer. Signing eligibility still applies, including withholding automatic-update lanes for unsigned macOS pilot artifacts.
 
-For architectural reasons and deployment contracts, consult [Release Lifecycle V3](../internals/release-lifecycle-v3.md) and [Delivery Platform](../internals/delivery-platform-v3.md) when relevant. GitHub Issues hold pending release work; this runbook contains no phase plans or historical operator handoff reports.
+For a new stable version, first run [Prepare Release](../../.github/workflows/release-please.yml), review and merge its version/changelog PR, then wait for exact-SHA main CI and a verified Nightly from that versioned source. Stable promotion uses the version already recorded in that source, not a newly invented version or a new source commit. A Nightly based on an already-published version can remain useful for testing, but cannot overwrite that Stable tag. Successful Stable publication reconciles the matching Release Please milestone labels.
+
+## Failure recovery and verification
+
+Packaging or acceptance failure leaves a Draft and cannot publish it. The scheduler resumes a single draft already associated with the same SHA instead of producing a new draft on every timer tick. An ambiguous set of drafts, a changed immutable tag or mismatched source evidence fails closed. Fix the failing lane and rerun the workflow; do not move tags or publish a failed draft manually. A Stable dispatch against the same already-published tag/SHA is an idempotent no-op.
+
+Scheduled [Nightly Audit](../../.github/workflows/nightly-audit.yml) remains independent: it measures coverage and runs extended audits, not release authorization. Fixed coverage percentages do not gate PR or main CI. Release tests and real native packaging are required again by the publication workflows; passing local contract tests alone is not a claim that a native package was built or published.
+
+The execution truth is the workflow code and its exact-source artifacts. See [Release Lifecycle V3](../internals/release-lifecycle-v3.md) and [Delivery Platform](../internals/delivery-platform-v3.md) for the underlying provenance and deployment contracts. Implementation checkpoints and pending work belong in GitHub Issues, not this runbook.

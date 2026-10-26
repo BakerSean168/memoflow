@@ -2874,6 +2874,24 @@
       ]
     },
     {
+      "path": "packages/ai/src/api/routes/assistant-sse.http.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/ai/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/ai/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/ai/src/api/routes/provider-onboarding.http.integration.spec.ts",
+      "primarySuite": "integration",
+      "collectors": [
+        "packages/ai/vitest.integration.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/ai/src/api/routes/workspace-sse.http.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6882,7 +6900,7 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/label/label-portable-v3.spec.ts",
+      "path": "packages/contracts/src/modules/label/label-contract.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -8730,14 +8748,6 @@
       "primarySuite": "unit",
       "collectors": [
         "packages/ipc-client/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/label-contracts/src/label-contract.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/label-contracts/vitest.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -11892,6 +11902,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/ci-cd-platform/__tests__/dispatch.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "ci-cd-platform:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/ci-cd-platform/__tests__/esm-entrypoint.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -11941,6 +11959,14 @@
     },
     {
       "path": "tools/ci-cd-platform/__tests__/nightly-audit-failure.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "ci-cd-platform:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "tools/ci-cd-platform/__tests__/nightly-release-eligibility.test.mjs",
       "primarySuite": "governance",
       "collectors": [
         "ci-cd-platform:test"
@@ -12037,6 +12063,14 @@
     },
     {
       "path": "tools/ci-cd-platform/__tests__/registry.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "ci-cd-platform:test"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "tools/ci-cd-platform/__tests__/release-lifecycle.test.mjs",
       "primarySuite": "governance",
       "collectors": [
         "ci-cd-platform:test"
@@ -12432,7 +12466,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 115
+      "fileCount": 116
     },
     {
       "id": "packages/app-vue/vitest.store-coverage.config.ts",
@@ -12582,7 +12616,7 @@
       "runner": "playwright",
       "fileCount": 6,
       "e2eOwnership": {
-        "lane": "required",
+        "lane": "nightly",
         "lifecycle": "active",
         "execution": {
           "kind": "nx",
@@ -12590,11 +12624,6 @@
           "entrypoint": "apps/web/e2e/helpers/run-ai-provider-playwright.ts"
         },
         "automation": [
-          {
-            "kind": "github-workflow",
-            "workflow": ".github/workflows/ci.yml",
-            "entrypoint": "tools/test-system-v2/run-web-shard.mjs"
-          },
           {
             "kind": "github-workflow",
             "workflow": ".github/workflows/nightly-audit.yml",
@@ -12726,7 +12755,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "node-test",
-      "fileCount": 44
+      "fileCount": 47
     },
     {
       "id": "memoflow:test:governance",
@@ -12775,7 +12804,7 @@
       "type": "primary",
       "suite": "integration",
       "runner": "vitest",
-      "fileCount": 1
+      "fileCount": 2
     },
     {
       "id": "packages/database/vitest.integration.config.ts",
@@ -12915,7 +12944,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 115
+      "fileCount": 116
     },
     {
       "id": "packages/app-vue/vitest.config.ts",
@@ -13010,13 +13039,6 @@
     },
     {
       "id": "packages/ipc-client/vitest.config.ts",
-      "type": "primary",
-      "suite": "unit",
-      "runner": "vitest",
-      "fileCount": 1
-    },
-    {
-      "id": "packages/label-contracts/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
@@ -13247,6 +13269,7 @@
       "packages/ai/src/api/routes/ai-runtime.goal-surface-lease.spec.ts",
       "packages/ai/src/api/routes/ai-runtime.routes.test.ts",
       "packages/ai/src/api/routes/ai-void-success-envelope.surface.spec.ts",
+      "packages/ai/src/api/routes/assistant-sse.http.spec.ts",
       "packages/ai/src/api/routes/workspace-sse.http.spec.ts",
       "packages/ai/src/client/runtime-assistant.spec.ts",
       "packages/ai/src/client/runtime-usage.spec.ts",
@@ -13931,13 +13954,13 @@
   "unexpected": [],
   "counts": {
     "unit": 1119,
-    "integration": 57,
+    "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,
     "boundary-main": 12,
     "e2e": 40,
     "perf": 2,
-    "governance": 80
+    "governance": 83
   },
   "e2eGovernance": {
     "version": 2,
@@ -13945,8 +13968,8 @@
     "countsByLane": {
       "desktop": 13,
       "local-validation": 6,
+      "nightly": 6,
       "reference": 6,
-      "required": 6,
       "secure-acceptance": 1,
       "specialized": 5,
       "visual-artifact": 3
@@ -13958,7 +13981,7 @@
       "supplemental": 27
     },
     "automatedCollectorCount": 2,
-    "automationBindingCount": 4
+    "automationBindingCount": 3
   },
   "e2eRetirement": {
     "version": 1,

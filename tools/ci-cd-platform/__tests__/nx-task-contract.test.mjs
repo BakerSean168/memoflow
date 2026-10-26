@@ -63,10 +63,11 @@ test('Nx cache in CI is written to the same directory the cache action saves', a
   );
 });
 
-test('CI verifies Nx sync generators before affected selection is trusted', async () => {
-  const ci = await read('.github/workflows/ci.yml');
-  const governance = ci.slice(ci.indexOf('  governance:\n'), ci.indexOf('  static-analysis:\n'));
-  assert.match(governance, /pnpm exec nx sync:check/u);
+test('Lint validates Nx sync independently of Changes', async () => {
+  const workflow = (await import('yaml')).default.parse(await read('.github/workflows/ci.yml'));
+  assert.equal(workflow.jobs.lint.needs, undefined);
+  assert.ok(workflow.jobs.lint.steps.some((step) => step.run?.includes('run-ci-tasks.mjs lint')));
+  assert.match(await read('tools/ci-cd-platform/lib/dispatch.mjs'), /'sync:check'/u);
 });
 
 test('typecheck hashes the spec files it type-checks and declares no outputs', async () => {
@@ -230,4 +231,213 @@ test('restored Nx artifacts require the matching SQLite index to produce a cache
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
+});
+
+test('mixed Build + Typecheck selects exact initiating tasks with one shared dependency graph', async () => {
+  const { selectBuildTasks } = await import('../lib/nx-build-tasks.mjs');
+  const { createProjectGraphAsync } = require('nx/src/project-graph/project-graph');
+  const graph = await createProjectGraphAsync({ exitOnError: true });
+  const selection = selectBuildTasks(graph, [
+    'api:build',
+    'app-vue:typecheck',
+    'database:typecheck',
+  ]);
+  assert.deepEqual(selection.initiatingTaskIds, [
+    'api:build',
+    'app-vue:typecheck',
+    'database:typecheck',
+  ]);
+  assert.ok(selection.taskGraph.tasks['database:prisma-generate']);
+  assert.ok(
+    selection.taskGraph.dependencies['database:typecheck'].includes('database:prisma-generate'),
+  );
+  assert.ok(selection.taskGraph.tasks['contracts:build']);
+  assert.equal(
+    selection.taskGraph.tasks['api:typecheck'],
+    undefined,
+    'no project/target cross product',
+  );
+  assert.equal(selection.taskGraph.tasks['app-vue:build'], undefined, 'no extra production build');
+  assert.equal(selection.taskIds.filter((id) => id === 'database:prisma-generate').length, 1);
+  const artifacts = selectBuildTasks(graph, ['database:build', 'database:runtime-scripts:build']);
+  assert.ok(
+    artifacts.taskGraph.dependencies['database:runtime-scripts:build'].includes('database:build'),
+    'nested artifact output cannot race the database parent cache restore',
+  );
+  assert.throws(() => selectBuildTasks(graph, []));
+  assert.throws(() => selectBuildTasks(graph, ['api:test']));
+});
+
+test('real Nx merged scheduler runs both targets concurrently, deduplicates dependencies and exposes failures', async () => {
+  const { mkdtemp, mkdir, writeFile, symlink, rm, readdir } = await import('node:fs/promises');
+  const { tmpdir } = await import('node:os');
+  const { spawnSync } = await import('node:child_process');
+  const root = await mkdtemp(path.join(tmpdir(), 'nx-build-graph-'));
+  try {
+    await symlink(path.resolve('node_modules'), path.join(root, 'node_modules'), 'dir');
+    await writeFile(
+      path.join(root, 'nx.json'),
+      JSON.stringify({
+        parallel: 3,
+        targetDefaults: { build: { dependsOn: ['^build'] }, typecheck: { dependsOn: ['^build'] } },
+      }),
+    );
+    await writeFile(
+      path.join(root, 'package.json'),
+      JSON.stringify({ name: 'graph-fixture', private: true }),
+    );
+    await writeFile(
+      path.join(root, 'step.cjs'),
+      `const fs=require('fs');const name=process.argv[2];fs.appendFileSync('executed.jsonl',JSON.stringify({name,start:Date.now()})+'\\n');setTimeout(()=>{fs.appendFileSync('executed.jsonl',JSON.stringify({name,end:Date.now()})+'\\n');process.exit(name==='b-typecheck'&&process.env.FAIL_TYPES==='1'?1:0)},150);`,
+    );
+    for (const name of ['a', 'b', 'shared']) {
+      await mkdir(path.join(root, name));
+      await writeFile(
+        path.join(root, name, 'project.json'),
+        JSON.stringify({
+          name,
+          ...(name !== 'shared' ? { implicitDependencies: ['shared'] } : {}),
+          targets: Object.fromEntries(
+            ['build', 'typecheck'].map((target) => [
+              target,
+              {
+                executor: 'nx:run-commands',
+                options: { command: `node step.cjs ${name}-${target}` },
+              },
+            ]),
+          ),
+        }),
+      );
+    }
+    // Every Nx state location must resolve inside the fixture root; the runner
+    // exports absolute paths for the outer checkout.
+    const nxState = {
+      NX_WORKSPACE_DATA_DIRECTORY: path.join(root, '.nx/workspace-data'),
+      NX_PROJECT_GRAPH_CACHE_DIRECTORY: path.join(root, '.nx/workspace-data'),
+      NX_CACHE_DIRECTORY: path.join(root, '.nx/cache'),
+    };
+    const execute = (env = {}) =>
+      spawnSync(
+        process.execPath,
+        [path.resolve('tools/ci-cd-platform/run-nx-build-tasks.mjs'), 'a:build', 'b:typecheck'],
+        {
+          cwd: root,
+          encoding: 'utf8',
+          env: {
+            ...process.env,
+            ...env,
+            NX_DAEMON: 'false',
+            NX_WORKSPACE_ROOT_PATH: root,
+            ...nxState,
+            CI: 'true',
+          },
+        },
+      );
+    // The runner exports absolute Nx state paths for the real workspace
+    // (NX_WORKSPACE_DATA_DIRECTORY / NX_CACHE_DIRECTORY). A fixture that inherits
+    // them resolves the outer checkout's state instead of its own temporary root.
+    const inheritedData = path.join(root, 'inherited-workspace-data');
+    const inheritedCache = path.join(root, 'inherited-cache');
+    await mkdir(inheritedData, { recursive: true });
+    await mkdir(inheritedCache, { recursive: true });
+    const inherited = {
+      NX_WORKSPACE_DATA_DIRECTORY: process.env.NX_WORKSPACE_DATA_DIRECTORY,
+      NX_CACHE_DIRECTORY: process.env.NX_CACHE_DIRECTORY,
+    };
+    process.env.NX_WORKSPACE_DATA_DIRECTORY = inheritedData;
+    process.env.NX_CACHE_DIRECTORY = inheritedCache;
+    let success;
+    try {
+      success = execute();
+    } finally {
+      for (const [key, value] of Object.entries(inherited)) {
+        if (value === undefined) delete process.env[key];
+        else process.env[key] = value;
+      }
+    }
+    assert.equal(success.status, 0, success.stdout + success.stderr);
+    assert.deepEqual(
+      await readdir(inheritedData),
+      [],
+      'fixture Nx workspace data must stay inside its temporary root',
+    );
+    assert.deepEqual(
+      await readdir(inheritedCache),
+      [],
+      'fixture Nx task cache must stay inside its temporary root',
+    );
+    const lines = (await readFile(path.join(root, 'executed.jsonl'), 'utf8'))
+      .trim()
+      .split('\n')
+      .map(JSON.parse);
+    assert.deepEqual(
+      lines
+        .filter((r) => r.start)
+        .map((r) => r.name)
+        .sort(),
+      ['a-build', 'b-typecheck', 'shared-build'],
+    );
+    assert.ok(
+      lines.find((r) => r.name === 'b-typecheck' && r.start).start <
+        lines.find((r) => r.name === 'a-build' && r.end).end,
+      'independent targets overlap',
+    );
+    const failure = execute({ FAIL_TYPES: '1' });
+    assert.equal(failure.status, 1, failure.stdout + failure.stderr);
+    const result = JSON.parse(
+      await readFile(
+        path.join(
+          root,
+          'reports/ci-tasks',
+          (await readdir(path.join(root, 'reports/ci-tasks')))[0],
+        ),
+        'utf8',
+      ),
+    );
+    assert.equal(result.tasks['a:build'].status, 'success');
+    assert.equal(result.tasks['b:typecheck'].status, 'failure');
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('Unit/Contract aliases come from exact Nx execution configuration, not project-name guesses', async () => {
+  const { equivalentUnitContractTargets, selectCiTasks } =
+    await import('../lib/task-selection.mjs');
+  const target = {
+    executor: 'nx:run-commands',
+    options: { command: 'vitest run --config vitest.config.ts', cwd: 'fixture' },
+  };
+  assert.equal(
+    equivalentUnitContractTargets({
+      test: target,
+      'test:contract': { ...target, dependsOn: ['build'] },
+    }),
+    true,
+  );
+  assert.equal(
+    equivalentUnitContractTargets({
+      test: target,
+      'test:contract': {
+        ...target,
+        options: { ...target.options, command: 'vitest run --config vitest.contract.config.ts' },
+      },
+    }),
+    false,
+  );
+  assert.equal(
+    equivalentUnitContractTargets({
+      test: { executor: 'nx:noop' },
+      'test:contract': { executor: 'nx:noop' },
+    }),
+    false,
+  );
+  const selected = await selectCiTasks({ files: [], full: true });
+  assert.deepEqual(selected.unitContractAliases, [
+    'contracts',
+    'desktop-contracts',
+    'host-runtime',
+    'shared-primitives',
+    'transport-contracts',
+  ]);
 });

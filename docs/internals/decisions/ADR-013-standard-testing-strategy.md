@@ -50,9 +50,7 @@ it('should create task', async () => {
 
 ### 4. Coverage Goals
 
-- **Domain:** 80% (Core logic must be solid).
-- **Application:** 70%.
-- **Critical Paths:** 90%.
+Coverage is **measurement, not a gate**（2026-10-25 起）：不再维护固定百分比硬门禁；PR/Main CI 不做覆盖率仪表化，Nightly Audit 每日独立测量并上传报告，百分比只用于观察回归趋势。质量由测试行为断言和各 lane 的 fail-closed 保证。
 
 ## Consequences
 

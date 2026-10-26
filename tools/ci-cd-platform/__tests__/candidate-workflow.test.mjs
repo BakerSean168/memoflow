@@ -8,22 +8,18 @@ import { fileURLToPath } from 'node:url';
 
 const read = (file) => readFile(new URL(`../../../${file}`, import.meta.url), 'utf8');
 
-test('candidate publication is a successful-main-CI-only build-once path', async () => {
+test('candidate builds are explicitly called by Nightly, never an automatic main CI side effect', async () => {
   const workflow = await read('.github/workflows/candidate-publish.yml');
-  assert.match(workflow, /workflow_run:/u);
-  assert.match(workflow, /workflows: \[CI\]/u);
-  assert.match(workflow, /branches: \[main\]/u);
-  assert.match(workflow, /workflow_run\.conclusion == 'success'/u);
-  assert.match(workflow, /workflow_run\.event == 'push'/u);
-  assert.match(workflow, /workflow_run\.head_branch == 'main'/u);
-  assert.doesNotMatch(workflow, /pull_request:/u);
+  assert.match(workflow, /workflow_call:/u);
+  assert.match(workflow, /workflow_dispatch:/u);
+  assert.doesNotMatch(workflow, /workflow_run:|^  push:|pull_request:/mu);
+  assert.match(workflow, /if: github\.ref == 'refs\/heads\/main'/u);
+  assert.match(workflow, /dry_run:[\s\S]*default: true/u);
+  assert.match(workflow, /promote_staging:[\s\S]*default: false/u);
   assert.match(workflow, /name: Download exact CI build closure/u);
   assert.match(workflow, /CI_RUN_ID: \$\{\{ needs\.resolve\.outputs\.ci_run_id \}\}/u);
   assert.match(workflow, /download-ci-build\.mjs/u);
-  assert.match(
-    workflow,
-    /Revalidate source chain before staging mutation[\s\S]*?verify-ci-promotion\.mjs/u,
-  );
+  assert.match(workflow, /verify-ci-promotion\.mjs/u);
   assert.match(workflow, /USE_PREBUILT_ARTIFACT=1/u);
 });
 

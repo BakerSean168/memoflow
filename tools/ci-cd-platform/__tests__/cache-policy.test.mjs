@@ -140,8 +140,8 @@ test('workspace cache keys bind lockfile and architecture; only Nx binds job, ma
   );
   const ci = await read('.github/workflows/ci.yml');
   assert.match(
-    ci.slice(ci.indexOf('  web-specialized:')),
-    /cache-variant: web-\$\{\{ strategy.job-index \}\}/u,
+    ci.slice(ci.indexOf('  web-visual:')),
+    /cache-variant: visual-\$\{\{ strategy.job-index \}\}/u,
   );
 });
 
