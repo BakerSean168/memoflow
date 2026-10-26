@@ -3,7 +3,6 @@ import type { QueryClient, QueryKey } from '@tanstack/vue-query';
 import type { NotificationClientPort } from '@memoflow/notification-client';
 import type { Result } from '@memoflow/transport-contracts';
 import type { TimeFacade } from '@memoflow/time';
-import type { Ymd } from '@memoflow/shared-primitives';
 
 /** Semantic presentation tone vocabulary owned by the host design system. */
 export type NotificationSemanticTone =
@@ -72,8 +71,6 @@ export interface NotificationQueryKeys {
   detail(identityScope: string, id: string): QueryKey;
   unread(identityScope: string): QueryKey;
 }
-
-type DateValue = number | string | Date | null | undefined;
 
 /** Renderer composition dependencies. The host retains DI, cache, locale and platform ownership. */
 export interface NotificationUiHost {

@@ -8,10 +8,7 @@
  */
 
 import type { IResultHttpClient } from '@memoflow/http-client';
-import {
-  createNotificationClientService,
-  type NotificationClientPort,
-} from './application-client';
+import { createNotificationClientService, type NotificationClientPort } from './application-client';
 import {
   NotificationHttpAdapter,
   createNotificationHttpAdapters,

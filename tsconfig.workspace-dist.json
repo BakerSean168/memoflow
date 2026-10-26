@@ -47,7 +47,9 @@
       "@memoflow/notification-contracts/*": ["./packages/notification-contracts/dist/*.d.ts"],
       "@memoflow/notification-client": ["./packages/notification-client/dist/index.d.ts"],
       "@memoflow/notification-ui/*": ["./packages/notification-ui/dist/*.d.ts"],
-      "@memoflow/notification-ui/host": ["./packages/notification-ui/dist/notification-ui-host.d.ts"],
+      "@memoflow/notification-ui/host": [
+        "./packages/notification-ui/dist/notification-ui-host.d.ts"
+      ],
       "@memoflow/notification-ui": ["./packages/notification-ui/dist/index.d.ts"],
       "@memoflow/schedule-contracts": ["./packages/schedule-contracts/dist/index.d.ts"],
       "@memoflow/schedule-contracts/*": ["./packages/schedule-contracts/dist/*.d.ts"],
