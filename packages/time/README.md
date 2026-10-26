@@ -49,10 +49,10 @@ time.codec.parseYmd('2026-07-26');
 
 ## Docs
 
-- Constitution: `docs/architecture/adr/ADR-037-product-time-system.md`
-- Context/calendar ADR: `docs/architecture/adr/ADR-100-product-time-context-and-timezone-aware-calendar.md`
-- Presentation/public-surface ADR: `docs/architecture/adr/ADR-101-product-time-presentation-and-compatibility-surface.md`
-- Design: `docs/architecture/product-time-system.md`
+- Constitution: `docs/internals/decisions/ADR-037-product-time-system.md`
+- Context/calendar ADR: `docs/internals/decisions/ADR-100-product-time-context-and-timezone-aware-calendar.md`
+- Presentation/public-surface ADR: `docs/internals/decisions/ADR-101-product-time-presentation-and-compatibility-surface.md`
+- Design: `docs/internals/product-time-system.md`
 - Presentation knobs: [`TIME_STYLE.md`](./TIME_STYLE.md)
 - Registry: `tools/governance/time-registry.json`
 

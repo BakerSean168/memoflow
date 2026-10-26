@@ -133,9 +133,9 @@
         "tools/governance/engineering-rules.json",
         "tools/governance/pinned-engineering-rules.json",
         "tools/governance/engineering-rule-adapter.mjs",
-        "docs/governance/README.md",
-        "docs/standards/README.md",
-        "docs/architecture/adr/ADR-113-retire-product-governance-runtime-keep-engineering-governance.md"
+        "docs/internals/governance/README.md",
+        "docs/internals/standards/README.md",
+        "docs/internals/decisions/ADR-113-retire-product-governance-runtime-keep-engineering-governance.md"
       ]
     }
   ]

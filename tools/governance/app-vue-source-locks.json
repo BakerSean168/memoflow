@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "description": "Deterministic app-vue retirement/boundary source locks that remain text-only after #502 AST migration. Behaviour belongs in Vue Test Utils specs; see docs/analysis/2026-10-19-app-vue-source-lock-ledger.md.",
+  "description": "Deterministic app-vue retirement/boundary source locks that remain text-only after #502 AST migration. Behaviour belongs in Vue Test Utils specs; historical migration notes remain in Git history.",
   "entries": [
     {
       "id": "desktop-bridge-electron-bridge-dual",
@@ -130,7 +130,7 @@
       "origin": "packages/app-vue/src/modules/ai/composables/use-ai-chat-host-dispatch.surface.spec.ts",
       "locks": [
         {
-          "file": "docs/architecture/ai-runtime-path-map.md",
+          "file": "docs/internals/ai-runtime-path-map.md",
           "require": [
             "AssistantRuntimeClient",
             "/ai/runtime/assistant/sse",

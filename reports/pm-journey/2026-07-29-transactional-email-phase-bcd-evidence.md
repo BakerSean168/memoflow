@@ -24,11 +24,11 @@ Finish residual work from `docs/plan/active/2026-07-28-transactional-email-smtp.
 
 ## Docs
 
-- `docs/guides/development/transactional-email-smtp.md` (new)
-- `docs/guides/development/README.md`, `local.docker.md`
+- `docs/operations/transactional-email.md` (new)
+- `docs/operations/README.md`, `local.docker.md`
 - `docs/plan/active/2026-07-17-auth-account-security-closure.md` §3.5
 - Plan §12 checklist + Phase B/D marked done; active README updated
-- `docs/product/modules/authentication.md` note
+- `docs/internals/product/modules/authentication.md` note
 
 ## Tests
 

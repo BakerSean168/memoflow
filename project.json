@@ -8,13 +8,10 @@
       "cache": true,
       "inputs": [
         "{workspaceRoot}/AGENTS.md",
-        "{workspaceRoot}/AGENTS.md",
         "{workspaceRoot}/CLAUDE.md",
         "{workspaceRoot}/README.md",
         "{workspaceRoot}/docs/**/*",
         "{workspaceRoot}/.github/copilot-instructions.md",
-        "{workspaceRoot}/.github/GITFLOW*.md",
-        "{workspaceRoot}/.github/prompts/*.md",
         "{workspaceRoot}/nx.json",
         "{workspaceRoot}/eslint.config.ts",
         "{workspaceRoot}/package.json",

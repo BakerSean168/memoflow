@@ -163,7 +163,7 @@ describe('legacy editor/repository runtime surface', () => {
 
   it('ADR-031 and server-feature-shape audit exclude retired synthetic/editor packages (residual 184)', () => {
     const adr031 = readFileSync(
-      resolve(repoRoot, 'docs/architecture/adr/ADR-031-server-feature-standard-shape.md'),
+      resolve(repoRoot, 'docs/internals/decisions/ADR-031-server-feature-standard-shape.md'),
       'utf8',
     );
     const shapeAudit = readFileSync(

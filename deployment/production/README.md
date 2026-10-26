@@ -1,8 +1,8 @@
 # MemoFlow canonical production delivery
 
-> Status: OCI multi-architecture release contract implemented. The **Oracle2-native, app-only production-selected watcher** is maintained under [oracle2/](oracle2/README.md), separate from the Alibaba watcher. Check Issue #543 for actual host activation evidence.
+> Status: OCI multi-architecture release contract implemented. The **Oracle2-native, app-only production-selected watcher** is maintained under [oracle2/](./oracle2/README.md), separate from the Alibaba watcher. Check Issue #543 for actual host activation evidence.
 >
-> **Oracle2 operator gate:** The Alibaba watcher/Compose below own a separate Caddy and ports 80/443. **Never install them on Oracle2.** Only [the new Oracle2-native installer](oracle2/README.md) can adopt the existing app-only Compose after checks, and it does not enable the timer automatically.
+> **Oracle2 operator gate:** The Alibaba watcher/Compose below own a separate Caddy and ports 80/443. **Never install them on Oracle2.** Only [the new Oracle2-native installer](./oracle2/README.md) can adopt the existing app-only Compose after checks, and it does not enable the timer automatically.
 >
 > Release inputs must now use immutable OCI indexes containing both `linux/amd64` and `linux/arm64`; a single-architecture release or mirror is rejected before the `production-selected` pointer can move.
 >
@@ -38,7 +38,7 @@ rejects all port, network, volume, secret, mount, service, and shared-Caddy
 changes. It generates no rollout command, starts/stops no container, and does
 not validate that the selected images can actually run on ARM64; that is a
 separate OCI-platform and runtime acceptance gate. **The Oracle2-native watcher and timer source lives in
-[oracle2/](oracle2/README.md). Do not use the historical Alibaba installer
+[oracle2/](./oracle2/README.md). Do not use the historical Alibaba installer
 on Oracle2. Timer activation requires explicit host acceptance.**
 
 This directory is the runtime authority for Delivery Platform V3 production deployment. It replaces the historical model where application containers could be changed independently through mutable image tags or Watchtower.

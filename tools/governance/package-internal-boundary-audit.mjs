@@ -18,7 +18,9 @@ if (!report.passed) {
   for (const violation of report.violations) {
     console.error(`  ${violation.file}:${violation.line}: ${violation.message}`);
   }
-  console.error('\nSee docs/standards/architecture.md for package-internal layering rules.');
+  console.error(
+    '\nSee docs/internals/standards/architecture.md for package-internal layering rules.',
+  );
   process.exitCode = 1;
 } else {
   console.log(

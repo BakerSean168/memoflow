@@ -37,7 +37,7 @@ const SERVER_SEMANTIC_CORE_DIRS = new Map([['setting', ['preferences']]]);
 /**
  * Packages whose client surface was extracted into a standalone client
  * package by the modular architecture refactor (see
- * docs/architecture/goal-package-boundaries.md). For these packages the
+ * docs/internals/goal-package-boundaries.md). For these packages the
  * `client` root requirement is satisfied by the declared sibling package
  * instead of an in-package `src/client` directory.
  */

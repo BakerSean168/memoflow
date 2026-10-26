@@ -2,37 +2,25 @@ import { access, readdir, readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 
 const ROOT = process.cwd();
-const ADR_DIR = path.join(ROOT, 'docs/architecture/adr');
+const ADR_DIR = path.join(ROOT, 'docs/internals/decisions');
 const ADR_INDEX = path.join(ADR_DIR, 'README.md');
 const RETIRED_LEGACY_WORKSPACE = ['.', 'open', 'code'].join('');
 
 const ENTRY_DOCS = [
   'AGENTS.md',
   'README.md',
-  'docs/getting-started/README.md',
-  'docs/architecture/README.md',
-  'docs/architecture/adr/README.md',
-  'docs/standards/README.md',
-  'docs/guides/development/README.md',
-  'docs/test/README.md',
-  'docs/governance/README.md',
-  'docs/plan/README.md',
+  'docs/README.md',
+  'docs/internals/README.md',
+  'docs/internals/decisions/README.md',
+  'docs/internals/standards/README.md',
+  'docs/internals/testing/README.md',
+  'docs/internals/governance/README.md',
+  'docs/operations/README.md',
 ];
 
 const CONFIG_FILES = ['nx.json', 'eslint.config.ts', 'package.json', 'project.json'];
 
 const AGENT_SHIMS = ['CLAUDE.md'];
-const CANONICAL_PROMPTS = [
-  '.github/prompts/memoflow.architecture.prompt.md',
-  '.github/prompts/memoflow.development.prompt.md',
-  '.github/prompts/memoflow.migration.prompt.md',
-  '.github/prompts/memoflow.overview.prompt.md',
-  '.github/prompts/dev.prompt.md',
-  '.github/prompts/new.prompt.md',
-  '.github/prompts/product.prompt.md',
-  '.github/prompts/program.prompt.md',
-];
-const DEPRECATED_GITFLOW_DOCS = ['.github/GITFLOW.md', '.github/GITFLOW_QUICK_REFERENCE.md'];
 
 const TEXT_FILE_EXTENSIONS = new Set([
   '.cjs',
@@ -74,7 +62,6 @@ const adrFiles = await checkAdrFiles();
 await checkAdrIndex(adrFiles);
 await checkEntryDocLinks();
 await checkLegacyConfigReferences();
-await checkDeprecatedGitflowDocs();
 await checkProjectTags();
 await checkLocalEslintConfigs();
 
@@ -105,22 +92,12 @@ async function checkCanonicalAgentFiles() {
   if (!copilotInstructions.includes('AGENTS.md')) {
     errors.push('.github/copilot-instructions.md 必须引用 AGENTS.md。');
   }
-
-  for (const promptPath of CANONICAL_PROMPTS) {
-    await expectExists(path.join(ROOT, promptPath), `缺少 prompt 文件 ${promptPath}`);
-    const content = await readFile(path.join(ROOT, promptPath), 'utf8');
-    if (!content.includes('AGENTS.md')) {
-      errors.push(`${promptPath} 必须引用 AGENTS.md。`);
-    }
-  }
 }
 
 async function checkRetiredPlanWorkspace() {
-  await expectExists(path.join(ROOT, 'docs/plan/README.md'), '缺少历史归档指引。');
-  await expectDirectory(path.join(ROOT, 'docs/plan/archive'), '缺少历史归档目录。');
   try {
-    await stat(path.join(ROOT, 'docs/plan/active'));
-    errors.push('任务级 Active Plan 已退役：不得重新创建 docs/plan/active。');
+    await stat(path.join(ROOT, 'docs/plan'));
+    errors.push('docs/plan 已退役：当前任务仅使用 GitHub Issue，历史文档通过 Git 追溯。');
   } catch (error) {
     if (error?.code !== 'ENOENT') throw error;
   }
@@ -168,7 +145,7 @@ async function checkAdrFiles() {
   const adrEntries = [];
 
   for (const filename of adrFiles) {
-    const relativePath = path.join('docs/architecture/adr', filename);
+    const relativePath = path.join('docs/internals/decisions', filename);
     const fullPath = path.join(ADR_DIR, filename);
     const filenameMatch = /^ADR-(\d{3})-[a-z0-9-]+\.md$/.exec(filename);
     if (!filenameMatch) {
@@ -230,7 +207,7 @@ async function checkAdrIndex(adrFiles) {
 
   for (const adrFile of adrFiles) {
     if (!linkedNumbers.has(adrFile.number)) {
-      errors.push(`${adrFile.relativePath} 没有出现在 docs/architecture/adr/README.md 索引中。`);
+      errors.push(`${adrFile.relativePath} 没有出现在 docs/internals/decisions/README.md 索引中。`);
     }
   }
 }
@@ -271,21 +248,6 @@ async function checkLegacyConfigReferences() {
     }
     if (content.includes('eslint.config.js')) {
       errors.push(`${configFile} 仍然引用 eslint.config.js。`);
-    }
-  }
-}
-
-async function checkDeprecatedGitflowDocs() {
-  for (const docPath of DEPRECATED_GITFLOW_DOCS) {
-    await expectExists(path.join(ROOT, docPath), `缺少废弃提示文档 ${docPath}`);
-    const content = await readFile(path.join(ROOT, docPath), 'utf8');
-    if (
-      !content.includes('已废弃') ||
-      !content.includes('docs/guides/development/git-workflow.md')
-    ) {
-      errors.push(
-        `${docPath} 必须明确声明已废弃，并指向 docs/guides/development/git-workflow.md。`,
-      );
     }
   }
 }
