@@ -52,7 +52,9 @@
       "file": "packages/schedule-ui/src/views/ScheduleCalendarView.vue",
       "forbidElements": ["DevScheduleDebugPanel"],
       "forbidIdentifiers": ["scheduleTasks"],
-      "requireExpressions": ["useStrictInject(GOAL_SERVICE_KEY, 'GoalService')"],
+      "requireExpressions": [
+        "scheduleUiHost.useStrictInject(scheduleUiHost.GOAL_SERVICE_KEY, 'GoalService')"
+      ],
       "requireExpressionPatterns": [
         {
           "pattern": "goal: \\{ updateGoal: goal\\.updateGoal\\.bind\\(goal\\) \\}"
@@ -79,7 +81,12 @@
         }
       ],
       "requireIdentifiers": ["projections", "fetchRoutineUpcomingCached"],
-      "requireExpressions": ["useStrictInject(ROUTINE_SERVICE_KEY, 'RoutineService')"],
+      "requireExpressions": [],
+      "requireExpressionPatterns": [
+        {
+          "pattern": "scheduleUiHost\\.useStrictInject\\(\\s*scheduleUiHost\\.ROUTINE_SERVICE_KEY,\\s*'RoutineService',?\\s*\\)"
+        }
+      ],
       "requireObjectProperties": [
         {
           "name": "service",
@@ -123,8 +130,8 @@
       "forbidCalls": ["createTask"],
       "requireTypeNodes": [
         "Pick<ScheduleClientPort, 'updateSchedule'>",
-        "Pick<TaskClientPort, 'rescheduleOccurrence'>",
-        "Pick<GoalClientPort, 'updateGoal'>"
+        "PlannerTaskCommandPort",
+        "PlannerGoalCommandPort"
       ]
     },
     {
