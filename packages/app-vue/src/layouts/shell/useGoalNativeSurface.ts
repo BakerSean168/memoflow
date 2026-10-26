@@ -1,43 +1,20 @@
-import {
-  inject,
-  nextTick,
-  onScopeDispose,
-  provide,
-  shallowRef,
-  watch,
-  type InjectionKey,
-} from 'vue';
+import { nextTick, onScopeDispose, provide, shallowRef, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import type {
-  GoalNativeDraftState,
-  GoalNativeEditSession,
-} from '../../modules/goal/composables/goalNativeEditSession';
-import type { OwnerNativeEditSurface } from '../../shared/composables/ownerNativeEditSession';
+import {
+  GoalNativeSurfaceKey,
+  type GoalNativeEditSession,
+  type GoalNativeSurfaceHost,
+} from '../../modules/goal';
 import { navigateBusinessSurface } from './surface-leave-protocol';
 import { useAppShellStore } from './useAppShellStore';
 
-export interface GoalAIEditSurface extends OwnerNativeEditSurface<GoalNativeEditSession> {
-  isAvailable(): boolean;
-  openControlledCreate(ownerId: string): Promise<GoalNativeEditSession>;
-  /** Explicit restart intent may reclaim this exact mounted user draft without reopening it. */
-  reclaimControlledCreate(
-    ownerId: string,
-    session: GoalNativeEditSession,
-    snapshot: GoalNativeDraftState,
-  ): GoalNativeEditSession;
-  openControlled(
-    ownerId: string,
-    options?: { mode?: 'create' | 'edit'; goalId?: string },
-  ): Promise<GoalNativeEditSession>;
-  getControlledSession(ownerId: string): GoalNativeEditSession | null;
-  releaseControlledSession(ownerId: string): void;
-}
-interface GoalNativeSurfaceHost extends GoalAIEditSurface {
-  register(fullPath: string, session: GoalNativeEditSession): () => void;
-}
-const GoalNativeSurfaceKey: InjectionKey<GoalNativeSurfaceHost> = Symbol('GoalNativeSurface');
-
+/**
+ * Host implementation of the Goal native surface port (the port contracts —
+ * GoalNativeSurfaceKey, GoalAIEditSurface, useGoalNativeSurface — are owned by
+ * modules/goal/composables/goalSurfaceHost). One registry per mounted shell;
+ * this provider wires it to the shell store and the shell leave protocol.
+ */
 /** One registry per mounted shell; route and owner lifecycle determine readiness. */
 export function provideGoalNativeSurface(): GoalNativeSurfaceHost {
   const router = useRouter();
@@ -286,25 +263,4 @@ export function provideGoalNativeSurface(): GoalNativeSurfaceHost {
   };
   provide(GoalNativeSurfaceKey, host);
   return host;
-}
-
-/** Consumers get only semantic opening/location. Registration belongs to the owner. */
-export function useGoalNativeSurface(): GoalAIEditSurface {
-  const host = inject(GoalNativeSurfaceKey);
-  if (!host) throw new Error('Goal native surface requires AppShell');
-  return {
-    openCreate: host.openCreate,
-    openExisting: host.openExisting,
-    locate: host.locate,
-    isAvailable: host.isAvailable,
-    openControlledCreate: host.openControlledCreate,
-    reclaimControlledCreate: host.reclaimControlledCreate,
-    openControlled: host.openControlled,
-    getControlledSession: host.getControlledSession,
-    releaseControlledSession: host.releaseControlledSession,
-  };
-}
-
-export function useGoalNativeSurfaceRegistration(): GoalNativeSurfaceHost | null {
-  return inject(GoalNativeSurfaceKey, null);
 }
