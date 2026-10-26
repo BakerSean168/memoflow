@@ -6852,14 +6852,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/operations/operations-dist.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/contracts/src/modules/relation/relation-contract.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -9238,6 +9230,14 @@
       "measurementCollectors": [
         "packages/notification/vitest.config.ts"
       ]
+    },
+    {
+      "path": "packages/operations-contracts/src/operations-dist.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/operations-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
     },
     {
       "path": "packages/patterns/src/events/create-event-bus-adapter-dual.surface.spec.ts",
@@ -13004,7 +13004,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 59
+      "fileCount": 58
     },
     {
       "id": "packages/data-portability-contracts/vitest.config.ts",
@@ -13110,6 +13110,13 @@
       "suite": "unit",
       "runner": "vitest",
       "fileCount": 40
+    },
+    {
+      "id": "packages/operations-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 1
     },
     {
       "id": "packages/patterns/vitest.config.ts",

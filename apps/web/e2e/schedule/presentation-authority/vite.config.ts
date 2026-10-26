@@ -5,6 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 import {
   createUiVueSourceAliasEntries,
   createWorkspaceSourceAliasEntries,
+  createOperationsContractsAliasEntries,
   createContractsAliasEntries,
 } from '../../../../../vite.workspace-aliases.ts';
 
@@ -44,6 +45,7 @@ export default defineConfig({
   resolve: {
     alias: [
       ...createUiVueSourceAliasEntries(workspace),
+      ...createOperationsContractsAliasEntries(workspace),
       ...createContractsAliasEntries(workspace),
       ...createWorkspaceSourceAliasEntries(workspace, [
         ['@memoflow/app-vue', 'packages/app-vue/src'],

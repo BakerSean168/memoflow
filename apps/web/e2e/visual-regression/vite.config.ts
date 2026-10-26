@@ -2,6 +2,7 @@ import path from 'node:path';
 import { defineConfig, mergeConfig } from 'vite';
 import schedule from '../schedule/presentation-authority/vite.config.ts';
 import {
+  createOperationsContractsAliasEntries,
   createAssetsAliasEntries,
   createWorkspaceSourceAliasEntries,
 } from '../../../../vite.workspace-aliases.ts';
@@ -21,6 +22,7 @@ export default defineConfig(({ mode }) =>
               : 'apps/web/src/styles/index.css',
           ),
         },
+        ...createOperationsContractsAliasEntries(workspace),
         ...createAssetsAliasEntries(workspace),
         ...createWorkspaceSourceAliasEntries(workspace, [
           ['@memoflow/reminder/method-library', 'packages/reminder/src/method-library/index.ts'],

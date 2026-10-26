@@ -4,7 +4,7 @@ import type {
   ListAccountsUseCase,
   UpdateAccountProfileUseCase,
 } from './use-cases';
-import type { OperationTimelineEntry, OperationAuditRecord } from '@memoflow/contracts/operations';
+import type { OperationTimelineEntry, OperationAuditRecord } from '@memoflow/operations-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 

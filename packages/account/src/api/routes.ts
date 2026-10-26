@@ -35,7 +35,7 @@ import { map as mapResult } from '@memoflow/contracts/result';
 import {
   OperationTimelineEntrySchema,
   OperationAuditRecordSchema,
-} from '@memoflow/contracts/operations';
+} from '@memoflow/operations-contracts';
 import { AccountController } from '../server/transport';
 import type { AccountApplicationPort } from '../server/application';
 import type { BusinessDataSummaryReader } from '../server/application';

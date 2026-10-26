@@ -6,6 +6,7 @@ import vue from '@vitejs/plugin-vue';
 import {
   createAppVueSourceAliasEntries,
   createAssetsAliasEntries,
+  createOperationsContractsAliasEntries,
   createContractsAliasEntries,
   createUiVueSourceAliasEntries,
   createWorkspaceSourceAliasEntries,
@@ -43,6 +44,7 @@ const config: StorybookConfig = {
           ...createAppVueSourceAliasEntries(workspace),
           ...createAssetsAliasEntries(workspace),
           ...createUiVueSourceAliasEntries(workspace),
+          ...createOperationsContractsAliasEntries(workspace),
           ...createContractsAliasEntries(workspace),
           ...createWorkspaceSourceAliasEntries(workspace, [
             ['@memoflow/domain-shared/shared', 'packages/domain-shared/src/shared/index.ts'],

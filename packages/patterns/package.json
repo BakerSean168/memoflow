@@ -41,6 +41,7 @@
   },
   "dependencies": {
     "@memoflow/contracts": "workspace:*",
+    "@memoflow/operations-contracts": "workspace:*",
     "@memoflow/utils": "workspace:*"
   },
   "devDependencies": {

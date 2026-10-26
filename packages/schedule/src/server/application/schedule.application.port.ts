@@ -1,6 +1,6 @@
 import type { Result } from '@memoflow/contracts/result';
 import type { Context } from '@memoflow/contracts/shared';
-import type { OperationTimelineEntry, OperationAuditRecord } from '@memoflow/contracts/operations';
+import type { OperationTimelineEntry, OperationAuditRecord } from '@memoflow/operations-contracts';
 import type {
   CreateScheduleRequest,
   DetectConflictsInternalQuery,
