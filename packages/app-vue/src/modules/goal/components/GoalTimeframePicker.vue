@@ -26,7 +26,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import type  { GoalTimeframe } from '@memoflow/goal-contracts';
+import type { GoalTimeframe } from '@memoflow/goal-contracts';
 import type { Ymd } from '@memoflow/contracts/primitives';
 import { ProductTimeframePicker } from '../../../shared/components';
 

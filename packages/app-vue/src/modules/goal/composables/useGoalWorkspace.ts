@@ -1,5 +1,5 @@
 import { ref, toValue, watch, type MaybeRefOrGetter } from 'vue';
-import type  {
+import type {
   GetGoalWorkspaceReq,
   GoalWorkspaceKnowledgePage,
   GoalWorkspacePageRequest,

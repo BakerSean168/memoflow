@@ -11,7 +11,7 @@ import {
   type IGoalRepository,
 } from '../../../domain';
 import { GoalPolicy } from '../../../domain';
-import type  { UpdateGoalReq, UpdateGoalRes } from '@memoflow/goal-contracts';
+import type { UpdateGoalReq, UpdateGoalRes } from '@memoflow/goal-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
 import { createGoalMutationReceipt } from './goal-mutation-receipt';

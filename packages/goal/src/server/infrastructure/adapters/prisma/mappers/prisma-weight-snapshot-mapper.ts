@@ -5,7 +5,7 @@
  */
 
 import { KeyResultWeightSnapshot } from '../../../../domain';
-import type  { KeyResultWeightSnapshotDTO, SnapshotTrigger } from '@memoflow/goal-contracts';
+import type { KeyResultWeightSnapshotDTO, SnapshotTrigger } from '@memoflow/goal-contracts';
 import type { IdentityId } from '@memoflow/contracts';
 import type {
   GoalId,

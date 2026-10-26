@@ -19,6 +19,14 @@
       "@memoflow/goal-client": ["./packages/goal-client/src/index.ts"],
       "@memoflow/label-contracts": ["./packages/label-contracts/src/index.ts"],
       "@memoflow/label-contracts/*": ["./packages/label-contracts/src/*.ts"],
+      "@memoflow/data-portability-contracts": [
+        "./packages/data-portability-contracts/src/index.ts"
+      ],
+      "@memoflow/data-portability-contracts/*": ["./packages/data-portability-contracts/src/*.ts"],
+      "@memoflow/goal-contracts": ["./packages/goal-contracts/src/index.ts"],
+      "@memoflow/goal-contracts/*": ["./packages/goal-contracts/src/*.ts"],
+      "@memoflow/workspace-contracts": ["./packages/workspace-contracts/src/index.ts"],
+      "@memoflow/workspace-contracts/*": ["./packages/workspace-contracts/src/*.ts"],
       "@memoflow/database": ["./packages/database/src/index.ts"],
       "@memoflow/database/transaction": ["./packages/database/src/transaction.ts"],
       "@memoflow/database/environment": ["./packages/database/src/load-workspace-env.ts"],

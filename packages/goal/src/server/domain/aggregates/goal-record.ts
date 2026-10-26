@@ -29,7 +29,7 @@ import {
   GoalRecordAuthorshipSchema,
   GoalRecordSourceType,
 } from '@memoflow/goal-contracts';
-import type  {
+import type {
   GoalRecordServerDTO,
   GoalRecordSource,
   GoalRecordSourceTypeValue,

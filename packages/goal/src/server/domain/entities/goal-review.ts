@@ -6,7 +6,7 @@ import type {
   Instant,
   TransferDate,
 } from '@memoflow/contracts/primitives';
-import type  { GoalReviewServerDTO, GoalReviewSystemContext } from '@memoflow/goal-contracts';
+import type { GoalReviewServerDTO, GoalReviewSystemContext } from '@memoflow/goal-contracts';
 import { GoalReviewSystemContextSchema } from '@memoflow/goal-contracts';
 import { GoalReviewId } from '../../domain';
 

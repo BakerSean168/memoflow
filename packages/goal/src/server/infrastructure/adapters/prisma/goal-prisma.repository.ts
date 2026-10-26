@@ -18,7 +18,7 @@ import {
   type IGoalRepository,
 } from '../../../domain';
 import { Goal } from '../../../domain';
-import type  {
+import type {
   GoalSystemView,
   KeyResultServerDTO,
   GoalPageQuery,

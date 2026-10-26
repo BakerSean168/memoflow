@@ -74,7 +74,7 @@
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { previewGoalRecord } from '@memoflow/goal-client';
-import type  { GoalRecordPreviewContext } from '@memoflow/goal-contracts';
+import type { GoalRecordPreviewContext } from '@memoflow/goal-contracts';
 import { Badge, Input, Label, Textarea } from '@memoflow/ui-vue-shadcn';
 import { Diff, Ruler } from '@lucide/vue';
 import { ProductPropertyChip } from '../../../shared/components';

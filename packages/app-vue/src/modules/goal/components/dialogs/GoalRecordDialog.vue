@@ -56,7 +56,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type  { GoalRecordClientDTO } from '@memoflow/goal-contracts';
+import type { GoalRecordClientDTO } from '@memoflow/goal-contracts';
 import { Button, Dialog } from '@memoflow/ui-vue-shadcn';
 import { ProductDialogShell } from '../../../../shared/components';
 import { useDialogCloseGuard } from '../../../../shared/composables/useDialogCloseGuard';

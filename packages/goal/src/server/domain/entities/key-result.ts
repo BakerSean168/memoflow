@@ -3,7 +3,7 @@ import {
   KEY_RESULT_DESCRIPTION_MAX_LENGTH,
   KEY_RESULT_TITLE_MAX_LENGTH,
 } from '@memoflow/goal-contracts';
-import type  {
+import type {
   GoalTimeframe,
   KeyResultCalculationMethod,
   KeyResultClientDTO,

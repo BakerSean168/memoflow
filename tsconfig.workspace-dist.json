@@ -21,6 +21,16 @@
       "@memoflow/goal-client": ["./packages/goal-client/dist/index.d.ts"],
       "@memoflow/label-contracts": ["./packages/label-contracts/dist/index.d.ts"],
       "@memoflow/label-contracts/*": ["./packages/label-contracts/dist/*.d.ts"],
+      "@memoflow/data-portability-contracts": [
+        "./packages/data-portability-contracts/dist/index.d.ts"
+      ],
+      "@memoflow/data-portability-contracts/*": [
+        "./packages/data-portability-contracts/dist/*.d.ts"
+      ],
+      "@memoflow/goal-contracts": ["./packages/goal-contracts/dist/index.d.ts"],
+      "@memoflow/goal-contracts/*": ["./packages/goal-contracts/dist/*.d.ts"],
+      "@memoflow/workspace-contracts": ["./packages/workspace-contracts/dist/index.d.ts"],
+      "@memoflow/workspace-contracts/*": ["./packages/workspace-contracts/dist/*.d.ts"],
       "@memoflow/database": ["./packages/database/dist/index.d.ts"],
       "@memoflow/database/prisma": ["./packages/database/dist/generated/prisma/client.d.ts"],
       "@memoflow/powersync-schema": ["./packages/powersync-schema/dist/index.d.ts"],

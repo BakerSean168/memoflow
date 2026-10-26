@@ -15,7 +15,7 @@ import { BarChart } from 'echarts/charts';
 import { TitleComponent, TooltipComponent, GridComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import type { ECElementEvent } from 'echarts';
-import type  { GoalClientDTO, GoalRecordClientDTO } from '@memoflow/goal-contracts';
+import type { GoalClientDTO, GoalRecordClientDTO } from '@memoflow/goal-contracts';
 import { getProductTime, productTimeRevision } from '../../../../shared/utils/product-time';
 
 use([TitleComponent, TooltipComponent, GridComponent, BarChart, CanvasRenderer]);

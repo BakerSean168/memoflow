@@ -1,4 +1,4 @@
-import type  { GoalClientDTO, KeyResultProgress } from '@memoflow/goal-contracts';
+import type { GoalClientDTO, KeyResultProgress } from '@memoflow/goal-contracts';
 import { describe, expect, it } from 'vitest';
 import { getGoalOverallProgress, getKeyResultProgressPercentage } from './progress';
 

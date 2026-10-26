@@ -10,7 +10,7 @@ import type { Instant } from '@memoflow/contracts/primitives';
  * - Instance toDTO(): KeyResultClientDTO
  */
 
-import type  {
+import type {
   GoalTimeframe,
   KeyResultClientDTO,
   KeyResultProgress,

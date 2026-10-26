@@ -55,7 +55,7 @@ import {
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import type  { GoalClientDTO, GoalSystemView } from '@memoflow/goal-contracts';
+import type { GoalClientDTO, GoalSystemView } from '@memoflow/goal-contracts';
 import { GoalDialog } from '../components';
 import GoalPageToolbar from '../components/GoalPageToolbar.vue';
 import { useGoal } from '../composables/useGoal';

@@ -347,6 +347,9 @@ importers:
       '@memoflow/goal':
         specifier: workspace:*
         version: link:../../packages/goal
+      '@memoflow/goal-contracts':
+        specifier: workspace:*
+        version: link:../../packages/goal-contracts
       '@memoflow/host-runtime':
         specifier: workspace:*
         version: link:../../packages/host-runtime
@@ -356,6 +359,9 @@ importers:
       '@memoflow/label':
         specifier: workspace:*
         version: link:../../packages/label
+      '@memoflow/label-contracts':
+        specifier: workspace:*
+        version: link:../../packages/label-contracts
       '@memoflow/notification':
         specifier: workspace:*
         version: link:../../packages/notification
@@ -392,6 +398,9 @@ importers:
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../../packages/utils
+      '@memoflow/workspace-contracts':
+        specifier: workspace:*
+        version: link:../../packages/workspace-contracts
       '@opentelemetry/api':
         specifier: ^1.9.1
         version: 1.9.1
@@ -558,6 +567,9 @@ importers:
       '@memoflow/goal-client':
         specifier: workspace:*
         version: link:../../packages/goal-client
+      '@memoflow/goal-contracts':
+        specifier: workspace:*
+        version: link:../../packages/goal-contracts
       '@memoflow/host-runtime':
         specifier: workspace:*
         version: link:../../packages/host-runtime
@@ -567,6 +579,9 @@ importers:
       '@memoflow/label':
         specifier: workspace:*
         version: link:../../packages/label
+      '@memoflow/label-contracts':
+        specifier: workspace:*
+        version: link:../../packages/label-contracts
       '@memoflow/notification':
         specifier: workspace:*
         version: link:../../packages/notification
@@ -603,6 +618,9 @@ importers:
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../../packages/utils
+      '@memoflow/workspace-contracts':
+        specifier: workspace:*
+        version: link:../../packages/workspace-contracts
       '@powersync/common':
         specifier: 2.3.0
         version: 2.3.0
@@ -1002,12 +1020,18 @@ importers:
       '@memoflow/goal-client':
         specifier: workspace:*
         version: link:../../packages/goal-client
+      '@memoflow/goal-contracts':
+        specifier: workspace:*
+        version: link:../../packages/goal-contracts
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../../packages/http-client
       '@memoflow/label':
         specifier: workspace:*
         version: link:../../packages/label
+      '@memoflow/label-contracts':
+        specifier: workspace:*
+        version: link:../../packages/label-contracts
       '@memoflow/notification':
         specifier: workspace:*
         version: link:../../packages/notification
@@ -1142,6 +1166,9 @@ importers:
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@memoflow/goal-contracts':
+        specifier: workspace:*
+        version: link:../goal-contracts
       '@modelcontextprotocol/node':
         specifier: 2.1.1
         version: 2.1.1(@modelcontextprotocol/server@2.3.1)
@@ -1187,6 +1214,9 @@ importers:
       '@memoflow/domain-shared':
         specifier: workspace:*
         version: link:../domain-shared
+      '@memoflow/goal-contracts':
+        specifier: workspace:*
+        version: link:../goal-contracts
       '@memoflow/host-runtime':
         specifier: workspace:*
         version: link:../host-runtime
@@ -1245,12 +1275,18 @@ importers:
       '@memoflow/goal-client':
         specifier: workspace:*
         version: link:../goal-client
+      '@memoflow/goal-contracts':
+        specifier: workspace:*
+        version: link:../goal-contracts
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client
       '@memoflow/label':
         specifier: workspace:*
         version: link:../label
+      '@memoflow/label-contracts':
+        specifier: workspace:*
+        version: link:../label-contracts
       '@memoflow/notification':
         specifier: workspace:*
         version: link:../notification
@@ -1269,6 +1305,9 @@ importers:
       '@memoflow/ui-react-native':
         specifier: workspace:*
         version: link:../ui-react-native
+      '@memoflow/workspace-contracts':
+        specifier: workspace:*
+        version: link:../workspace-contracts
     devDependencies:
       expo:
         specifier: ~57.0.25
@@ -1342,6 +1381,9 @@ importers:
       '@memoflow/goal-client':
         specifier: workspace:*
         version: link:../goal-client
+      '@memoflow/goal-contracts':
+        specifier: workspace:*
+        version: link:../goal-contracts
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client
@@ -1351,6 +1393,9 @@ importers:
       '@memoflow/label':
         specifier: workspace:*
         version: link:../label
+      '@memoflow/label-contracts':
+        specifier: workspace:*
+        version: link:../label-contracts
       '@memoflow/notification':
         specifier: workspace:*
         version: link:../notification
@@ -1381,6 +1426,9 @@ importers:
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils
+      '@memoflow/workspace-contracts':
+        specifier: workspace:*
+        version: link:../workspace-contracts
       '@tanstack/vue-query':
         specifier: 5.103.2
         version: 5.103.2(vue@3.5.43(@typescript/typescript6@6.0.2))
@@ -1527,9 +1575,15 @@ importers:
       '@asteasolutions/zod-to-openapi':
         specifier: ^9.1.0
         version: 9.1.0(zod@4.6.5)
+      '@memoflow/data-portability-contracts':
+        specifier: workspace:*
+        version: link:../data-portability-contracts
       '@memoflow/desktop-contracts':
         specifier: workspace:*
         version: link:../desktop-contracts
+      '@memoflow/goal-contracts':
+        specifier: workspace:*
+        version: link:../goal-contracts
       '@memoflow/label-contracts':
         specifier: workspace:*
         version: link:../label-contracts
@@ -1595,6 +1649,12 @@ importers:
       '@types/express':
         specifier: ^5.0.0
         version: 5.0.6
+
+  packages/data-portability-contracts:
+    dependencies:
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
 
   packages/database:
     dependencies:
@@ -1672,12 +1732,18 @@ importers:
       '@memoflow/domain-shared':
         specifier: workspace:*
         version: link:../domain-shared
+      '@memoflow/goal-contracts':
+        specifier: workspace:*
+        version: link:../goal-contracts
       '@memoflow/goal-core':
         specifier: workspace:*
         version: link:../goal-core
       '@memoflow/host-runtime':
         specifier: workspace:*
         version: link:../host-runtime
+      '@memoflow/label-contracts':
+        specifier: workspace:*
+        version: link:../label-contracts
       '@memoflow/patterns':
         specifier: workspace:*
         version: link:../patterns
@@ -1687,6 +1753,9 @@ importers:
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils
+      '@memoflow/workspace-contracts':
+        specifier: workspace:*
+        version: link:../workspace-contracts
       express:
         specifier: ^5.2.1
         version: 5.2.1(supports-color@10.2.2)
@@ -1709,6 +1778,9 @@ importers:
       '@memoflow/domain-shared':
         specifier: workspace:*
         version: link:../domain-shared
+      '@memoflow/goal-contracts':
+        specifier: workspace:*
+        version: link:../goal-contracts
       '@memoflow/goal-core':
         specifier: workspace:*
         version: link:../goal-core
@@ -1718,15 +1790,46 @@ importers:
       '@memoflow/ipc-client':
         specifier: workspace:*
         version: link:../ipc-client
+      '@memoflow/label-contracts':
+        specifier: workspace:*
+        version: link:../label-contracts
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils
+      '@memoflow/workspace-contracts':
+        specifier: workspace:*
+        version: link:../workspace-contracts
+
+  packages/goal-contracts:
+    dependencies:
+      '@memoflow/data-portability-contracts':
+        specifier: workspace:*
+        version: link:../data-portability-contracts
+      '@memoflow/label-contracts':
+        specifier: workspace:*
+        version: link:../label-contracts
+      '@memoflow/shared-primitives':
+        specifier: workspace:*
+        version: link:../shared-primitives
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
+    devDependencies:
+      '@asteasolutions/zod-to-openapi':
+        specifier: ^9.1.0
+        version: 9.1.0(zod@4.6.5)
+      '@faker-js/faker':
+        specifier: 10.6.0
+        version: 10.6.0
 
   packages/goal-core:
     dependencies:
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@memoflow/goal-contracts':
+        specifier: workspace:*
+        version: link:../goal-contracts
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils
@@ -1827,6 +1930,9 @@ importers:
       '@memoflow/domain-shared':
         specifier: workspace:*
         version: link:../domain-shared
+      '@memoflow/goal-contracts':
+        specifier: workspace:*
+        version: link:../goal-contracts
       '@memoflow/host-runtime':
         specifier: workspace:*
         version: link:../host-runtime
@@ -2050,6 +2156,9 @@ importers:
       '@memoflow/goal':
         specifier: workspace:*
         version: link:../goal
+      '@memoflow/goal-contracts':
+        specifier: workspace:*
+        version: link:../goal-contracts
       '@memoflow/reminder':
         specifier: workspace:*
         version: link:../reminder
@@ -2176,6 +2285,9 @@ importers:
       '@memoflow/domain-shared':
         specifier: workspace:*
         version: link:../domain-shared
+      '@memoflow/goal-contracts':
+        specifier: workspace:*
+        version: link:../goal-contracts
       '@memoflow/host-runtime':
         specifier: workspace:*
         version: link:../host-runtime
@@ -2185,6 +2297,9 @@ importers:
       '@memoflow/ipc-client':
         specifier: workspace:*
         version: link:../ipc-client
+      '@memoflow/label-contracts':
+        specifier: workspace:*
+        version: link:../label-contracts
       '@memoflow/patterns':
         specifier: workspace:*
         version: link:../patterns
@@ -2467,6 +2582,21 @@ importers:
       typescript:
         specifier: npm:@typescript/typescript6@6.0.2
         version: '@typescript/typescript6@6.0.2'
+
+  packages/workspace-contracts:
+    dependencies:
+      '@memoflow/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@memoflow/goal-contracts':
+        specifier: workspace:*
+        version: link:../goal-contracts
+      '@memoflow/shared-primitives':
+        specifier: workspace:*
+        version: link:../shared-primitives
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
 
 packages:
 

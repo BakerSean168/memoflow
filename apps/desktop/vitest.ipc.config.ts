@@ -165,6 +165,21 @@ const ipcWorkspaceAliasEntries = [
     replacement: resolve(import.meta.dirname, '../../packages/label-contracts/src/index.ts'),
   },
   {
+    find: '@memoflow/data-portability-contracts',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/data-portability-contracts/src/index.ts',
+    ),
+  },
+  {
+    find: '@memoflow/goal-contracts',
+    replacement: resolve(import.meta.dirname, '../../packages/goal-contracts/src/index.ts'),
+  },
+  {
+    find: '@memoflow/workspace-contracts',
+    replacement: resolve(import.meta.dirname, '../../packages/workspace-contracts/src/index.ts'),
+  },
+  {
     find: '@memoflow/desktop-contracts/auth-context',
     replacement: resolve(
       import.meta.dirname,

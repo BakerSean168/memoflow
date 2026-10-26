@@ -1,5 +1,5 @@
 import { ReviewWindowResolver } from '../../services/review-window-resolver';
-import type  { GoalReviewSystemContext, GoalReviewWindowInput } from '@memoflow/goal-contracts';
+import type { GoalReviewSystemContext, GoalReviewWindowInput } from '@memoflow/goal-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { error, ok } from '@memoflow/contracts/result';
 import type { IGoalRepository } from '../../../domain';

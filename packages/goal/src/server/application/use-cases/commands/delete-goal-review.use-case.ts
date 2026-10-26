@@ -5,7 +5,7 @@
  */
 
 import { GoalPolicy, GoalVersionConflictError, type IGoalRepository } from '../../../domain';
-import type  { GoalMutationReceipt } from '@memoflow/goal-contracts';
+import type { GoalMutationReceipt } from '@memoflow/goal-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
 import { createGoalMutationReceipt } from './goal-mutation-receipt';

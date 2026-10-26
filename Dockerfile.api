@@ -48,6 +48,9 @@ COPY packages/http-client/package.json ./packages/http-client/package.json
 COPY packages/ipc-client/package.json ./packages/ipc-client/package.json
 COPY packages/label/package.json ./packages/label/package.json
 COPY packages/label-contracts/package.json ./packages/label-contracts/package.json
+COPY packages/data-portability-contracts/package.json ./packages/data-portability-contracts/package.json
+COPY packages/goal-contracts/package.json ./packages/goal-contracts/package.json
+COPY packages/workspace-contracts/package.json ./packages/workspace-contracts/package.json
 COPY packages/relation/package.json ./packages/relation/package.json
 COPY packages/notification/package.json ./packages/notification/package.json
 COPY packages/patterns/package.json ./packages/patterns/package.json
@@ -92,6 +95,9 @@ COPY packages/http-client ./packages/http-client
 COPY packages/ipc-client ./packages/ipc-client
 COPY packages/label ./packages/label
 COPY packages/label-contracts ./packages/label-contracts
+COPY packages/data-portability-contracts ./packages/data-portability-contracts
+COPY packages/goal-contracts ./packages/goal-contracts
+COPY packages/workspace-contracts ./packages/workspace-contracts
 COPY packages/relation ./packages/relation
 COPY packages/notification ./packages/notification
 COPY packages/patterns ./packages/patterns

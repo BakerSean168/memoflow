@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "review": "P1.1 #628: explicit existing Nx project owners, exact merged Build/Types, Provider acceptance Nightly-only + P2 #634 label-contracts registration",
+  "review": "P1.1 #628: explicit existing Nx project owners, exact merged Build/Types, Provider acceptance Nightly-only + P2 #634 label-contracts registration + P2 #634 goal-contracts / workspace-contracts / data-portability-contracts registration",
   "cases": [
     {
       "id": "docs",
@@ -473,12 +473,14 @@
             "cloud-auth",
             "contracts",
             "data-portability",
+            "data-portability-contracts",
             "database",
             "desktop",
             "desktop-contracts",
             "domain-shared",
             "goal",
             "goal-client",
+            "goal-contracts",
             "goal-core",
             "governance-tools",
             "host-runtime",
@@ -505,7 +507,8 @@
             "ui-storybook",
             "ui-vue-shadcn",
             "utils",
-            "web"
+            "web",
+            "workspace-contracts"
           ],
           "typecheck": [
             "@memoflow/test-utils",
@@ -519,12 +522,14 @@
             "cloud-auth",
             "contracts",
             "data-portability",
+            "data-portability-contracts",
             "database",
             "desktop",
             "desktop-contracts",
             "domain-shared",
             "goal",
             "goal-client",
+            "goal-contracts",
             "goal-core",
             "host-runtime",
             "http-client",
@@ -552,7 +557,8 @@
             "ui-storybook",
             "ui-vue-shadcn",
             "utils",
-            "web"
+            "web",
+            "workspace-contracts"
           ],
           "test": [
             "account",
@@ -565,12 +571,14 @@
             "cloud-auth",
             "contracts",
             "data-portability",
+            "data-portability-contracts",
             "database",
             "desktop",
             "desktop-contracts",
             "domain-shared",
             "goal",
             "goal-client",
+            "goal-contracts",
             "goal-core",
             "governance-tools",
             "host-runtime",
@@ -598,15 +606,19 @@
             "ui-core",
             "ui-vue-shadcn",
             "utils",
-            "web"
+            "web",
+            "workspace-contracts"
           ],
           "test:contract": [
             "contracts",
+            "data-portability-contracts",
             "desktop-contracts",
+            "goal-contracts",
             "host-runtime",
             "label-contracts",
             "shared-primitives",
-            "transport-contracts"
+            "transport-contracts",
+            "workspace-contracts"
           ],
           "test:smoke": ["api"],
           "test:integration": [
@@ -701,12 +713,14 @@
             "cloud-auth:build",
             "contracts:build",
             "data-portability:build",
+            "data-portability-contracts:build",
             "database:build",
             "desktop:build",
             "desktop-contracts:build",
             "domain-shared:build",
             "goal:build",
             "goal-client:build",
+            "goal-contracts:build",
             "goal-core:build",
             "host-runtime:build",
             "http-client:build",
@@ -733,6 +747,7 @@
             "ui-vue-shadcn:build",
             "utils:build",
             "web:build",
+            "workspace-contracts:build",
             "@memoflow/test-utils:typecheck",
             "account:typecheck",
             "agent-gateway:typecheck",
@@ -744,12 +759,14 @@
             "cloud-auth:typecheck",
             "contracts:typecheck",
             "data-portability:typecheck",
+            "data-portability-contracts:typecheck",
             "database:typecheck",
             "desktop:typecheck",
             "desktop-contracts:typecheck",
             "domain-shared:typecheck",
             "goal:typecheck",
             "goal-client:typecheck",
+            "goal-contracts:typecheck",
             "goal-core:typecheck",
             "host-runtime:typecheck",
             "http-client:typecheck",
@@ -778,6 +795,7 @@
             "ui-vue-shadcn:typecheck",
             "utils:typecheck",
             "web:typecheck",
+            "workspace-contracts:typecheck",
             "database:runtime-scripts:build"
           ],
           "web-unit-1": ["web:test", "app-vue:test#1/2"],
@@ -805,11 +823,14 @@
           "component-browser": ["ui-storybook:test:interaction"],
           "contract": [
             "contracts:test:contract",
+            "data-portability-contracts:test:contract",
             "desktop-contracts:test:contract",
+            "goal-contracts:test:contract",
             "host-runtime:test:contract",
             "label-contracts:test:contract",
             "shared-primitives:test:contract",
-            "transport-contracts:test:contract"
+            "transport-contracts:test:contract",
+            "workspace-contracts:test:contract"
           ]
         },
         "serverShards": [
@@ -867,12 +888,14 @@
             "cloud-auth",
             "contracts",
             "data-portability",
+            "data-portability-contracts",
             "database",
             "desktop",
             "desktop-contracts",
             "domain-shared",
             "goal",
             "goal-client",
+            "goal-contracts",
             "goal-core",
             "governance-tools",
             "host-runtime",
@@ -899,7 +922,8 @@
             "ui-storybook",
             "ui-vue-shadcn",
             "utils",
-            "web"
+            "web",
+            "workspace-contracts"
           ],
           "typecheck": [
             "@memoflow/test-utils",
@@ -913,12 +937,14 @@
             "cloud-auth",
             "contracts",
             "data-portability",
+            "data-portability-contracts",
             "database",
             "desktop",
             "desktop-contracts",
             "domain-shared",
             "goal",
             "goal-client",
+            "goal-contracts",
             "goal-core",
             "host-runtime",
             "http-client",
@@ -946,7 +972,8 @@
             "ui-storybook",
             "ui-vue-shadcn",
             "utils",
-            "web"
+            "web",
+            "workspace-contracts"
           ],
           "test": [
             "account",
@@ -959,12 +986,14 @@
             "cloud-auth",
             "contracts",
             "data-portability",
+            "data-portability-contracts",
             "database",
             "desktop",
             "desktop-contracts",
             "domain-shared",
             "goal",
             "goal-client",
+            "goal-contracts",
             "goal-core",
             "governance-tools",
             "host-runtime",
@@ -992,15 +1021,19 @@
             "ui-core",
             "ui-vue-shadcn",
             "utils",
-            "web"
+            "web",
+            "workspace-contracts"
           ],
           "test:contract": [
             "contracts",
+            "data-portability-contracts",
             "desktop-contracts",
+            "goal-contracts",
             "host-runtime",
             "label-contracts",
             "shared-primitives",
-            "transport-contracts"
+            "transport-contracts",
+            "workspace-contracts"
           ],
           "test:smoke": ["api"],
           "test:integration": [
@@ -1095,12 +1128,14 @@
             "cloud-auth:build",
             "contracts:build",
             "data-portability:build",
+            "data-portability-contracts:build",
             "database:build",
             "desktop:build",
             "desktop-contracts:build",
             "domain-shared:build",
             "goal:build",
             "goal-client:build",
+            "goal-contracts:build",
             "goal-core:build",
             "host-runtime:build",
             "http-client:build",
@@ -1127,6 +1162,7 @@
             "ui-vue-shadcn:build",
             "utils:build",
             "web:build",
+            "workspace-contracts:build",
             "@memoflow/test-utils:typecheck",
             "account:typecheck",
             "agent-gateway:typecheck",
@@ -1138,12 +1174,14 @@
             "cloud-auth:typecheck",
             "contracts:typecheck",
             "data-portability:typecheck",
+            "data-portability-contracts:typecheck",
             "database:typecheck",
             "desktop:typecheck",
             "desktop-contracts:typecheck",
             "domain-shared:typecheck",
             "goal:typecheck",
             "goal-client:typecheck",
+            "goal-contracts:typecheck",
             "goal-core:typecheck",
             "host-runtime:typecheck",
             "http-client:typecheck",
@@ -1172,6 +1210,7 @@
             "ui-vue-shadcn:typecheck",
             "utils:typecheck",
             "web:typecheck",
+            "workspace-contracts:typecheck",
             "database:runtime-scripts:build"
           ],
           "web-unit-1": ["web:test", "app-vue:test#1/2"],
@@ -1199,11 +1238,14 @@
           "component-browser": ["ui-storybook:test:interaction"],
           "contract": [
             "contracts:test:contract",
+            "data-portability-contracts:test:contract",
             "desktop-contracts:test:contract",
+            "goal-contracts:test:contract",
             "host-runtime:test:contract",
             "label-contracts:test:contract",
             "shared-primitives:test:contract",
-            "transport-contracts:test:contract"
+            "transport-contracts:test:contract",
+            "workspace-contracts:test:contract"
           ]
         },
         "serverShards": [
@@ -1311,12 +1353,14 @@
             "cloud-auth",
             "contracts",
             "data-portability",
+            "data-portability-contracts",
             "database",
             "desktop",
             "desktop-contracts",
             "domain-shared",
             "goal",
             "goal-client",
+            "goal-contracts",
             "goal-core",
             "governance-tools",
             "host-runtime",
@@ -1343,7 +1387,8 @@
             "ui-storybook",
             "ui-vue-shadcn",
             "utils",
-            "web"
+            "web",
+            "workspace-contracts"
           ],
           "typecheck": [
             "@memoflow/test-utils",
@@ -1357,12 +1402,14 @@
             "cloud-auth",
             "contracts",
             "data-portability",
+            "data-portability-contracts",
             "database",
             "desktop",
             "desktop-contracts",
             "domain-shared",
             "goal",
             "goal-client",
+            "goal-contracts",
             "goal-core",
             "host-runtime",
             "http-client",
@@ -1390,7 +1437,8 @@
             "ui-storybook",
             "ui-vue-shadcn",
             "utils",
-            "web"
+            "web",
+            "workspace-contracts"
           ],
           "test": [
             "account",
@@ -1403,12 +1451,14 @@
             "cloud-auth",
             "contracts",
             "data-portability",
+            "data-portability-contracts",
             "database",
             "desktop",
             "desktop-contracts",
             "domain-shared",
             "goal",
             "goal-client",
+            "goal-contracts",
             "goal-core",
             "governance-tools",
             "host-runtime",
@@ -1436,15 +1486,19 @@
             "ui-core",
             "ui-vue-shadcn",
             "utils",
-            "web"
+            "web",
+            "workspace-contracts"
           ],
           "test:contract": [
             "contracts",
+            "data-portability-contracts",
             "desktop-contracts",
+            "goal-contracts",
             "host-runtime",
             "label-contracts",
             "shared-primitives",
-            "transport-contracts"
+            "transport-contracts",
+            "workspace-contracts"
           ],
           "test:smoke": ["api"],
           "test:integration": [
@@ -1539,12 +1593,14 @@
             "cloud-auth:build",
             "contracts:build",
             "data-portability:build",
+            "data-portability-contracts:build",
             "database:build",
             "desktop:build",
             "desktop-contracts:build",
             "domain-shared:build",
             "goal:build",
             "goal-client:build",
+            "goal-contracts:build",
             "goal-core:build",
             "host-runtime:build",
             "http-client:build",
@@ -1571,6 +1627,7 @@
             "ui-vue-shadcn:build",
             "utils:build",
             "web:build",
+            "workspace-contracts:build",
             "@memoflow/test-utils:typecheck",
             "account:typecheck",
             "agent-gateway:typecheck",
@@ -1582,12 +1639,14 @@
             "cloud-auth:typecheck",
             "contracts:typecheck",
             "data-portability:typecheck",
+            "data-portability-contracts:typecheck",
             "database:typecheck",
             "desktop:typecheck",
             "desktop-contracts:typecheck",
             "domain-shared:typecheck",
             "goal:typecheck",
             "goal-client:typecheck",
+            "goal-contracts:typecheck",
             "goal-core:typecheck",
             "host-runtime:typecheck",
             "http-client:typecheck",
@@ -1616,6 +1675,7 @@
             "ui-vue-shadcn:typecheck",
             "utils:typecheck",
             "web:typecheck",
+            "workspace-contracts:typecheck",
             "database:runtime-scripts:build"
           ],
           "web-unit-1": ["web:test", "app-vue:test#1/2"],
@@ -1644,11 +1704,14 @@
           "component-browser": ["ui-storybook:test:interaction"],
           "contract": [
             "contracts:test:contract",
+            "data-portability-contracts:test:contract",
             "desktop-contracts:test:contract",
+            "goal-contracts:test:contract",
             "host-runtime:test:contract",
             "label-contracts:test:contract",
             "shared-primitives:test:contract",
-            "transport-contracts:test:contract"
+            "transport-contracts:test:contract",
+            "workspace-contracts:test:contract"
           ]
         },
         "serverShards": [

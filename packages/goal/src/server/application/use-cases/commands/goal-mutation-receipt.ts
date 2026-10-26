@@ -1,4 +1,4 @@
-import type  { GoalMutationReceipt, GoalRecordClientDTO } from '@memoflow/goal-contracts';
+import type { GoalMutationReceipt, GoalRecordClientDTO } from '@memoflow/goal-contracts';
 import type {
   GoalId,
   GoalRecordId,

@@ -14,7 +14,7 @@ import type { Result } from '@memoflow/contracts/result';
 import { fail, ok } from '@memoflow/contracts/result';
 import { ListGoalFiltersSchema } from '@memoflow/goal-contracts';
 import { formatZodErrors } from '@memoflow/utils/result';
-import type  {
+import type {
   AddKeyResultReq,
   BatchUpdateKeyResultWeightsReq,
   CloneGoalReq,

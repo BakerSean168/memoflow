@@ -16,7 +16,7 @@ import {
   Button,
 } from '@memoflow/ui-vue-shadcn';
 import { Target, ArrowRight } from '@lucide/vue';
-import type  { GoalHomeProgressItem } from '@memoflow/goal-contracts';
+import type { GoalHomeProgressItem } from '@memoflow/goal-contracts';
 
 withDefaults(
   defineProps<{

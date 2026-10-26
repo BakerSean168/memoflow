@@ -1,5 +1,5 @@
 import type { Instant } from '@memoflow/contracts/primitives';
-import type  { LabelDto } from '@memoflow/label-contracts';
+import type { LabelDto } from '@memoflow/label-contracts';
 /**
  * Goal 聚合根实现
  * 实现 GoalServer 接口
@@ -33,20 +33,20 @@ import { AggregateRoot } from '@memoflow/utils/domain';
 import { IdentityId } from '@memoflow/domain-shared';
 import { addYmdDays } from '@memoflow/time';
 import { GoalId, KeyResultWeightSnapshotId, KeyResultId } from '../value-objects';
-import type  { GoalEventMap } from '@memoflow/goal-contracts';
+import type { GoalEventMap } from '@memoflow/goal-contracts';
 import {
   GoalStatus,
   ReminderTriggerType,
   goalTimeframeStartBoundary,
   goalTimeframeEndBoundary,
 } from '@memoflow/goal-contracts';
-import type  {
+import type {
   SnapshotTrigger,
   GoalReminderConfigDTO,
   GoalReviewSystemContext,
   GoalTimeframe,
 } from '@memoflow/goal-contracts';
-import type  {
+import type {
   GoalServerDTO,
   GoalReviewServerDTO,
   KeyResultServerDTO,

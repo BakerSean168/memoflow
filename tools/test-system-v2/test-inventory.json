@@ -6788,118 +6788,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/goal/api/dual-registry.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/goal/api/goal-home-summary.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/goal/api/goal-label-projection-contract.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/goal/api/goal-lifecycle-contract.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/goal/api/goal-record-preview-context.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/goal/api/goal-record-provenance.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/goal/api/goal-review-signals.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/goal/api/goal-review-window.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/goal/api/goal-workspace.dto.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/goal/api/key-result-limits.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/goal/portable-v3.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/goal/protocol/goal-rpc-map.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/goal/value-objects/dual-registry.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/goal/value-objects/goal-timeframe.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/contracts/src/modules/label/label-portable-v3.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -7622,6 +7510,110 @@
       "primarySuite": "unit",
       "collectors": [
         "packages/goal-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-contracts/src/api/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-contracts/src/api/goal-home-summary.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-contracts/src/api/goal-label-projection-contract.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-contracts/src/api/goal-lifecycle-contract.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-contracts/src/api/goal-record-preview-context.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-contracts/src/api/goal-record-provenance.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-contracts/src/api/goal-review-signals.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-contracts/src/api/goal-review-window.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-contracts/src/api/key-result-limits.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-contracts/src/portable-v3.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-contracts/src/protocol/goal-rpc-map.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-contracts/src/value-objects/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-contracts/src/value-objects/goal-timeframe.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-contracts/vitest.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -11790,6 +11782,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/workspace-contracts/src/goal-workspace.dto.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/workspace-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/agent-skills/validate-local-deploy/scripts/image-freshness.spec.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -12988,7 +12988,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 73
+      "fileCount": 59
+    },
+    {
+      "id": "packages/data-portability-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 0
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -13024,6 +13031,13 @@
       "suite": "unit",
       "runner": "vitest",
       "fileCount": 7
+    },
+    {
+      "id": "packages/goal-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 13
     },
     {
       "id": "packages/goal-core/vitest.config.ts",
@@ -13192,6 +13206,13 @@
       "suite": "unit",
       "runner": "vitest",
       "fileCount": 13
+    },
+    {
+      "id": "packages/workspace-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 1
     }
   ],
   "measurementSuites": {

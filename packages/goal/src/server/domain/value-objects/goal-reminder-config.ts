@@ -8,7 +8,7 @@
  */
 
 import { ValueObject } from '@memoflow/utils/domain';
-import type  {
+import type {
   GoalReminderConfig as IGoalReminderConfig,
   GoalReminderConfigDTO,
   ReminderTrigger,

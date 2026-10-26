@@ -1,5 +1,14 @@
 import { GoalClientDTOSchema } from '@memoflow/goal-contracts';
-import { GetGoalWorkspaceReqSchema, GoalWorkspaceKnowledgeItemSchema, GoalWorkspaceKnowledgePageSchema, GoalWorkspacePageRequestSchema, GoalWorkspaceReadModelSchema, GoalWorkspaceTaskPageRequestSchema, GoalWorkspaceTaskPageSchema, type GoalWorkspaceKnowledgeItem } from '@memoflow/workspace-contracts';
+import {
+  GetGoalWorkspaceReqSchema,
+  GoalWorkspaceKnowledgeItemSchema,
+  GoalWorkspaceKnowledgePageSchema,
+  GoalWorkspacePageRequestSchema,
+  GoalWorkspaceReadModelSchema,
+  GoalWorkspaceTaskPageRequestSchema,
+  GoalWorkspaceTaskPageSchema,
+  type GoalWorkspaceKnowledgeItem,
+} from '@memoflow/workspace-contracts';
 import { error, ok } from '@memoflow/contracts/result';
 import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
 import { GoalKnowledgeEdgeListReqSchema } from '@memoflow/contracts/relation';

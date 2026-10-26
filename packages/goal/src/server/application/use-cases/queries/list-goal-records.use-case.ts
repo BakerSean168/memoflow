@@ -11,7 +11,7 @@ import type { IGoalRecordRepository, IGoalRepository } from '../../../domain';
 import type { Goal, GoalRecord } from '../../../domain';
 import { KeyResultProgress } from '../../../domain';
 import { createGoalRecordAggregationSnapshot } from '../../../../shared/key-result-progress-calculator';
-import type  { GetGoalRecordsRes } from '@memoflow/goal-contracts';
+import type { GetGoalRecordsRes } from '@memoflow/goal-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
 

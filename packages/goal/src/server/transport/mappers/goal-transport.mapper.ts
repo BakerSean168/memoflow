@@ -13,8 +13,8 @@
  */
 
 import type { IdentityId } from '@memoflow/contracts/primitives';
-import type  { GoalClientDTO } from '@memoflow/goal-contracts';
-import type  { GetKeyResultsRes } from '@memoflow/goal-contracts';
+import type { GoalClientDTO } from '@memoflow/goal-contracts';
+import type { GetKeyResultsRes } from '@memoflow/goal-contracts';
 
 /**
  * Converts a plain context identity string into the branded `IdentityId` the

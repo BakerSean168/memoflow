@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import type  { GoalReviewClientDTO } from '@memoflow/goal-contracts';
+import type { GoalReviewClientDTO } from '@memoflow/goal-contracts';
 import { presentErrorMessage } from '@memoflow/http-client';
 import { useAppSession } from './useAppSession';
 import { useGoalService } from './useGoalService';

@@ -17,7 +17,7 @@ import {
   createMockGoalReviewList,
 } from '@memoflow/goal-contracts/test-support/goal.mock';
 import { GoalStatus } from '@memoflow/goal-contracts';
-import type  {
+import type {
   GoalClientDTO,
   GoalRecordClientDTO,
   GoalReviewClientDTO,

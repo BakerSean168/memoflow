@@ -4,7 +4,7 @@
  */
 import type { UserPreferenceProfile } from '@memoflow/contracts/setting';
 import type { Ymd } from '@memoflow/contracts/primitives';
-import type  { GoalTimeframe } from '@memoflow/goal-contracts';
+import type { GoalTimeframe } from '@memoflow/goal-contracts';
 import {
   createSystemTimeZoneSource,
   createTimeContext,

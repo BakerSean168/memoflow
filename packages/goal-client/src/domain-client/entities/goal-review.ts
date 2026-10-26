@@ -1,5 +1,5 @@
 /** Goal Review V2 read entity. */
-import type  { GoalReviewClientDTO, GoalReviewSystemContext } from '@memoflow/goal-contracts';
+import type { GoalReviewClientDTO, GoalReviewSystemContext } from '@memoflow/goal-contracts';
 import { GoalReviewSystemContextSchema } from '@memoflow/goal-contracts';
 import { Entity } from '@memoflow/utils/domain';
 import { GoalReviewId, GoalId } from '@memoflow/goal-core/ids';

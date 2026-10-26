@@ -37,7 +37,10 @@
     // 路径别名：仅用于包内部的相对导入
     "paths": {
       // 包内部别名：@/ 指向 src 目录
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      // 跨域组装引用的叶子投影（各域拆分后改指其独立 contracts 包）
+      "@memoflow/contracts/repository": ["../contracts/src/modules/repository/index.ts"],
+      "@memoflow/contracts/task": ["../contracts/src/modules/task/index.ts"]
     }
   },
 

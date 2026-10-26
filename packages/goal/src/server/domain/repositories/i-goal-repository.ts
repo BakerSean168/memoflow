@@ -8,8 +8,8 @@
  * - 隐藏数据访问细节
  */
 
-import type  { GoalSystemView } from '@memoflow/goal-contracts';
-import type  { LabelDto } from '@memoflow/label-contracts';
+import type { GoalSystemView } from '@memoflow/goal-contracts';
+import type { LabelDto } from '@memoflow/label-contracts';
 import type { Goal } from '../aggregates/goal';
 
 export class GoalVersionConflictError extends Error {

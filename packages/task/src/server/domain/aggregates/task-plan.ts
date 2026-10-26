@@ -2,7 +2,7 @@
  * TaskPlan aggregate (Server)
  */
 
-import type  { LabelClientDTO } from '@memoflow/label-contracts';
+import type { LabelClientDTO } from '@memoflow/label-contracts';
 import type {
   TaskPlanClientDTO,
   TaskPlanServerDTO,

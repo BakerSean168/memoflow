@@ -187,6 +187,57 @@ export function createLabelContractsAliasEntries(workspaceRoot: string): Alias[]
   ];
 }
 
+export function createDataPortabilityContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const dataPortabilityContractsRoot = resolveFromWorkspace(
+    workspaceRoot,
+    'packages/data-portability-contracts/src',
+  );
+
+  return [
+    {
+      find: /^@memoflow\/data-portability-contracts$/,
+      replacement: `${dataPortabilityContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/data-portability-contracts\/(.+)$/,
+      replacement: `${dataPortabilityContractsRoot}/$1`,
+    },
+  ];
+}
+
+export function createGoalContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const goalContractsRoot = resolveFromWorkspace(workspaceRoot, 'packages/goal-contracts/src');
+
+  return [
+    {
+      find: /^@memoflow\/goal-contracts$/,
+      replacement: `${goalContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/goal-contracts\/(.+)$/,
+      replacement: `${goalContractsRoot}/$1`,
+    },
+  ];
+}
+
+export function createWorkspaceContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const workspaceContractsRoot = resolveFromWorkspace(
+    workspaceRoot,
+    'packages/workspace-contracts/src',
+  );
+
+  return [
+    {
+      find: /^@memoflow\/workspace-contracts$/,
+      replacement: `${workspaceContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/workspace-contracts\/(.+)$/,
+      replacement: `${workspaceContractsRoot}/$1`,
+    },
+  ];
+}
+
 export function createDesktopContractsAliasEntries(workspaceRoot: string): Alias[] {
   const desktopContractsRoot = resolveFromWorkspace(
     workspaceRoot,

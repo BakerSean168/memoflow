@@ -1,5 +1,5 @@
 import { ValueObject } from '@memoflow/utils/domain';
-import type  {
+import type {
   KeyResultCalculationMethod,
   KeyResultSnapshot as IKeyResultSnapshot,
   KeyResultSnapshotDTO,

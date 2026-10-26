@@ -3,7 +3,7 @@
 import { shallowMount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it } from 'vitest';
-import type  { GoalSystemView } from '@memoflow/goal-contracts';
+import type { GoalSystemView } from '@memoflow/goal-contracts';
 import { LabelFilterPopover, ProductSingleSelectFilter } from '../../../shared/components';
 import GoalPageToolbar from './GoalPageToolbar.vue';
 

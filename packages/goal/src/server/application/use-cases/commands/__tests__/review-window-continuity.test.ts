@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
-import type  { GoalReviewWindowOptions } from '@memoflow/goal-contracts';
+import type { GoalReviewWindowOptions } from '@memoflow/goal-contracts';
 import type { IdentityId } from '@memoflow/contracts/primitives';
 import { createTimeContext } from '@memoflow/time';
 import {

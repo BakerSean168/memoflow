@@ -8,7 +8,7 @@
 
 import type { IGoalRepository } from '../../../domain';
 import { CreateGoalSchema } from '@memoflow/goal-contracts';
-import type  {
+import type {
   CloneGoalReq,
   CreateGoalReq,
   GoalClientDTO,

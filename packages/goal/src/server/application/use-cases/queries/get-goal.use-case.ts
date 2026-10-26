@@ -6,7 +6,7 @@
  */
 
 import type { IGoalRepository } from '../../../domain';
-import type  { GetGoalRes, KeyResultClientDTO } from '@memoflow/goal-contracts';
+import type { GetGoalRes, KeyResultClientDTO } from '@memoflow/goal-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
 

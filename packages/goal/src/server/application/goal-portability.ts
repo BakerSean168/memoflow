@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import type  {
+import type {
   GoalMutationReceipt,
   GoalPortableDefinitionV3,
   GoalPortablePayloadV3,

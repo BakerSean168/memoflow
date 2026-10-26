@@ -6,7 +6,7 @@ import { defineComponent, h, nextTick } from 'vue';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import TodayOverviewPanel from './TodayOverviewPanel.vue';
 import GoalProgressWidget from '../../modules/goal/components/widgets/GoalProgressWidget.vue';
-import type  { GoalHomeProgressItem } from '@memoflow/goal-contracts';
+import type { GoalHomeProgressItem } from '@memoflow/goal-contracts';
 
 const goalHomeMocks = vi.hoisted(() => ({
   refresh: vi.fn(async () => undefined),

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { compareGoalTimeframesByEnd } from '@memoflow/goal-contracts';
-import type  {
+import type {
   GoalAggregateReadModel,
   GoalClientDTO,
   GoalStatus,

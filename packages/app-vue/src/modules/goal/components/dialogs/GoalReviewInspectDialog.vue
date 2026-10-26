@@ -72,7 +72,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { Button, Dialog } from '@memoflow/ui-vue-shadcn';
-import type  { GoalReviewClientDTO } from '@memoflow/goal-contracts';
+import type { GoalReviewClientDTO } from '@memoflow/goal-contracts';
 import { ProductDialogShell } from '../../../../shared/components';
 import { formatProductDate } from '../../../../shared/utils/product-time';
 import GoalReviewSnapshot from '../GoalReviewSnapshot.vue';

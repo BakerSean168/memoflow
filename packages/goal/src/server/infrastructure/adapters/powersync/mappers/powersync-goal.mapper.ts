@@ -1,4 +1,4 @@
-import type  { KeyResultWeightSnapshotDTO } from '@memoflow/goal-contracts';
+import type { KeyResultWeightSnapshotDTO } from '@memoflow/goal-contracts';
 import { GoalReviewSystemContextSchema } from '@memoflow/goal-contracts';
 import { Goal } from '../../../../domain';
 import { rawDataToGoalState } from '../../prisma/mappers/goal-state-mapper';

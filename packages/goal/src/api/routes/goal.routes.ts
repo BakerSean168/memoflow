@@ -27,7 +27,7 @@ import {
   CloneGoalInvocationSchema,
   BatchKeyResultWeightsInvocationSchema,
 } from '@memoflow/goal-contracts';
-import type  { ListGoalFilters } from '@memoflow/goal-contracts';
+import type { ListGoalFilters } from '@memoflow/goal-contracts';
 import { brandedId, parseYmd } from '@memoflow/contracts/primitives';
 import type { GoalId } from '@memoflow/contracts/primitives';
 import type { GoalController } from '../../server/transport/goal.controller';

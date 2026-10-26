@@ -10,7 +10,7 @@ import {
   createMockKeyResult,
   createMockGoalRecord,
 } from '@memoflow/goal-contracts/test-support/goal.mock';
-import type  {
+import type {
   GoalReviewSystemContext,
   CreateGoalReq,
   CreateGoalReviewReq,

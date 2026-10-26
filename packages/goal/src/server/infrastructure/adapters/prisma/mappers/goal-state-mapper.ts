@@ -5,7 +5,7 @@
  * Shared by Prisma and PowerSync mappers.
  */
 
-import type  {
+import type {
   KeyResultWeightSnapshotDTO,
   KeyResultCalculationMethod,
   GoalReminderConfigDTO,

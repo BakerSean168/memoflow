@@ -15,7 +15,7 @@ import { PieChart } from 'echarts/charts';
 import { TitleComponent, TooltipComponent, LegendComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import type { ECElementEvent } from 'echarts';
-import type  { GoalClientDTO } from '@memoflow/goal-contracts';
+import type { GoalClientDTO } from '@memoflow/goal-contracts';
 
 use([TitleComponent, TooltipComponent, LegendComponent, PieChart, CanvasRenderer]);
 

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type  {
+import type {
   GoalClientDTO,
   GoalSystemView,
   GoalStatus,

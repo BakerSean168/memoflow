@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { RefreshControl, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
-import type  { CreateGoalReviewReq } from '@memoflow/goal-contracts';
+import type { CreateGoalReviewReq } from '@memoflow/goal-contracts';
 import { presentErrorMessage } from '@memoflow/http-client';
 import { useGoalDetail } from '../hooks/useGoalDetail';
 import { useGoalReviews } from '../hooks/useGoalReviews';

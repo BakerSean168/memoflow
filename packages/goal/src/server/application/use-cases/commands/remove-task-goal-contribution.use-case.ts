@@ -1,4 +1,4 @@
-import type  { GoalRecordSourceTypeValue } from '@memoflow/goal-contracts';
+import type { GoalRecordSourceTypeValue } from '@memoflow/goal-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { error, ok } from '@memoflow/contracts/result';
 import type { IGoalRecordRepository, IGoalRepository } from '../../../domain';

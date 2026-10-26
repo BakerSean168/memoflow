@@ -3,7 +3,7 @@ import { GoalRecord } from '../../../domain';
 import type { GoalPowerSyncDatabase, PowerSyncLockContext } from './shared';
 import { toDbDateTime } from './shared';
 import { PowerSyncGoalRecordMapper } from './mappers/powersync-goal-record.mapper';
-import type  { GoalRecordSourceTypeValue } from '@memoflow/goal-contracts';
+import type { GoalRecordSourceTypeValue } from '@memoflow/goal-contracts';
 
 function buildTimeFilters(options?: GoalRecordQueryOptions): {
   clauses: string[];

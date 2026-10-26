@@ -15,7 +15,7 @@
       "@memoflow/contracts/shared": ["../contracts/src/shared/index.ts"],
       "@memoflow/contracts/primitives": ["../contracts/src/primitives/index.ts"],
       "@memoflow/contracts/electron": ["../contracts/src/electron/index.ts"],
-      "@memoflow/contracts/goal": ["../contracts/src/modules/goal/index.ts"],
+      "@memoflow/goal-contracts": ["../goal-contracts/src/index.ts"],
       "@memoflow/contracts/task": ["../contracts/src/modules/task/index.ts"],
       "@memoflow/contracts/operations": ["../contracts/src/modules/operations/index.ts"],
       "@memoflow/test-utils": ["../test-utils/src/index.ts"],

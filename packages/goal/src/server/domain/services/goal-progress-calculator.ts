@@ -30,7 +30,7 @@ import type {
   GoalRecordQueryOptions,
 } from '../repositories/i-goal-record-repository';
 import { KeyResultProgress } from '../value-objects/key-result-progress';
-import type  {
+import type {
   ProgressCalculationResultDTO,
   GoalProgressCalculationResultDTO,
   ProgressPreviewDTO,

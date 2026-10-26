@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type  { GoalReviewWindowInput } from '@memoflow/goal-contracts';
+import type { GoalReviewWindowInput } from '@memoflow/goal-contracts';
 import { GoalReviewWindowQuerySchema } from '@memoflow/goal-contracts';
 import { GoalChannels } from '@memoflow/contracts/electron';
 import { ok } from '@memoflow/contracts/result';

@@ -12,7 +12,7 @@ import type {
   KeyResultWeightSnapshot as PrismaKeyResultWeightSnapshot,
 } from '@memoflow/database';
 import { GoalReviewSystemContextSchema } from '@memoflow/goal-contracts';
-import type  { KeyResultWeightSnapshotDTO } from '@memoflow/goal-contracts';
+import type { KeyResultWeightSnapshotDTO } from '@memoflow/goal-contracts';
 import type { RawGoalData, RawKeyResultData, RawGoalReviewData } from './goal-state-mapper';
 
 /** Prisma Date/DateTime → Instant (epoch ms). Required fields never null. */

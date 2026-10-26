@@ -7,7 +7,10 @@ import { createI18n } from 'vue-i18n';
 import { defineComponent, h, KeepAlive, nextTick, ref } from 'vue';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { productionLocaleMessages } from '../../../../locales/production-messages';
-import { createMockGoal, createMockKeyResult } from '@memoflow/goal-contracts/test-support/goal.mock';
+import {
+  createMockGoal,
+  createMockKeyResult,
+} from '@memoflow/goal-contracts/test-support/goal.mock';
 import {
   CreateGoalSchema,
   GoalDraftCheckpointContentSchema,

@@ -1,4 +1,4 @@
-import type  { GoalRecordPreviewContext } from '@memoflow/goal-contracts';
+import type { GoalRecordPreviewContext } from '@memoflow/goal-contracts';
 import {
   appendGoalRecordSnapshot,
   calculateKeyResultProgress,

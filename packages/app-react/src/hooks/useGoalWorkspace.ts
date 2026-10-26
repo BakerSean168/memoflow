@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type  {
+import type {
   GetGoalWorkspaceReq,
   GoalWorkspaceKnowledgePage,
   GoalWorkspacePageRequest,

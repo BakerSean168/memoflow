@@ -1,4 +1,4 @@
-import type  { GoalReviewSignal, GoalReviewSystemContext } from '@memoflow/goal-contracts';
+import type { GoalReviewSignal, GoalReviewSystemContext } from '@memoflow/goal-contracts';
 
 /** Pure observed-fact diagnosis. The context builder owns all measurement arithmetic. */
 export function analyzeGoalReviewSignals(
