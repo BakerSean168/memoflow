@@ -161,6 +161,17 @@ const ipcWorkspaceAliasEntries = [
     replacement: resolve(import.meta.dirname, '../../packages/transport-contracts/src/index.ts'),
   },
   {
+    find: /^@memoflow\/reliable-messaging-contracts\/(.+)$/,
+    replacement: resolve(import.meta.dirname, '../../packages/reliable-messaging-contracts/src/$1'),
+  },
+  {
+    find: '@memoflow/reliable-messaging-contracts',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/reliable-messaging-contracts/src/index.ts',
+    ),
+  },
+  {
     find: '@memoflow/label-contracts',
     replacement: resolve(import.meta.dirname, '../../packages/label-contracts/src/index.ts'),
   },

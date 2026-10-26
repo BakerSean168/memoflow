@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "sourceRoot": "packages/shared-primitives/src",
-  "tags": ["scope:shared", "type:lib", "layer:shared"],
+  "tags": ["scope:shared", "type:lib", "layer:shared", "platform:contract-foundation"],
   "targets": {
     "typecheck": {
       "executor": "nx:run-commands",

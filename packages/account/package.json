@@ -40,7 +40,8 @@
     "express": "^5.2.1",
     "tslib": "^2.3.0",
     "zod": "^4.6.5",
-    "@memoflow/time": "workspace:*"
+    "@memoflow/time": "workspace:*",
+    "@memoflow/reliable-messaging-contracts": "workspace:*"
   },
   "devDependencies": {
     "@memoflow/notification": "workspace:*",

@@ -304,6 +304,20 @@ export const domainResolveAliases = [
     replacement: path.resolve(import.meta.dirname, './packages/transport-contracts/src/index.ts'),
   },
   {
+    find: /^@memoflow\/reliable-messaging-contracts\/(.+)/,
+    replacement: path.resolve(
+      import.meta.dirname,
+      './packages/reliable-messaging-contracts/src/$1',
+    ),
+  },
+  {
+    find: '@memoflow/reliable-messaging-contracts',
+    replacement: path.resolve(
+      import.meta.dirname,
+      './packages/reliable-messaging-contracts/src/index.ts',
+    ),
+  },
+  {
     find: /^@memoflow\/label-contracts\/(.+)/,
     replacement: path.resolve(import.meta.dirname, './packages/label-contracts/src/$1'),
   },
