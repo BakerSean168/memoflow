@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { SubjectRefSchema } from '@memoflow/contracts/relation';
+import { SubjectRefSchema } from '@memoflow/relation-contracts';
 import type { RelationRepository } from '../domain/relation-repository';
 import { RelationService } from '../application/relation-service';
 

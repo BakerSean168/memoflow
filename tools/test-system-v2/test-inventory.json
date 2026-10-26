@@ -9296,6 +9296,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/relation-contracts/src/relation-contract.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/relation-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/relation/src/__tests__/goal-knowledge-service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -13127,6 +13135,13 @@
     },
     {
       "id": "packages/powersync-schema/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 1
+    },
+    {
+      "id": "packages/relation-contracts/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",

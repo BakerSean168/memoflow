@@ -79,6 +79,7 @@
     "data-portability-contracts": "runtime-lib",
     "goal-contracts": "runtime-lib",
     "workspace-contracts": "runtime-lib",
+    "relation-contracts": "runtime-lib",
     "desktop-contracts": "runtime-lib",
     "host-runtime": "runtime-lib",
     "reliable-messaging-contracts": "runtime-lib",

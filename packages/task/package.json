@@ -54,6 +54,7 @@
     "@memoflow/ipc-client": "workspace:*",
     "@memoflow/label-contracts": "workspace:*",
     "@memoflow/patterns": "workspace:*",
+    "@memoflow/relation-contracts": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/utils": "workspace:*",
     "date-fns": "^4.4.0",
