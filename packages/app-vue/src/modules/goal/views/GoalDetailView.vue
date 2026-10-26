@@ -801,10 +801,7 @@ import GoalTimeframePicker from '../components/GoalTimeframePicker.vue';
 import { useGoalWorkspace } from '../composables/useGoalWorkspace';
 import { GOAL_SERVICE_KEY } from '../../../di/keys';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
-import {
-  useGoalSurfaceLeaveGuard,
-  useGoalSurfaceStatus,
-} from '../composables/goalSurfaceHost';
+import { useGoalSurfaceLeaveGuard, useGoalSurfaceStatus } from '../composables/goalSurfaceHost';
 
 type KeyResultInput = Omit<AddKeyResultReq, 'goalId' | 'expectedVersion'>;
 type LifecycleAction = 'plan' | 'activate' | 'complete' | 'abandon';
