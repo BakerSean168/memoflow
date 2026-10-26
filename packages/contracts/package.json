@@ -37,10 +37,6 @@
       "types": "./dist/modules/account/index.d.ts",
       "import": "./dist/modules/account/index.js"
     },
-    "./schedule": {
-      "types": "./dist/modules/schedule/index.d.ts",
-      "import": "./dist/modules/schedule/index.js"
-    },
     "./setting": {
       "types": "./dist/modules/setting/index.d.ts",
       "import": "./dist/modules/setting/index.js"
@@ -100,6 +96,7 @@
     "@memoflow/desktop-contracts": "workspace:*",
     "@memoflow/goal-contracts": "workspace:*",
     "@memoflow/label-contracts": "workspace:*",
+    "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/transport-contracts": "workspace:*",
     "zod": "^4.6.5"

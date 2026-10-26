@@ -23,7 +23,6 @@ export default createTsupConfig({
     'src/modules/agent-gateway/index.ts',
     'src/modules/repository/index.ts',
     'src/modules/account/index.ts',
-    'src/modules/schedule/index.ts',
     'src/modules/setting/index.ts',
     'src/modules/notification/index.ts',
     'src/modules/routine/index.ts',

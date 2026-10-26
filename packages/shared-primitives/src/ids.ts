@@ -21,9 +21,6 @@ export type TaskOccurrenceId = string & { readonly __brand: 'TaskOccurrenceId' }
 /** Routine Profile ID */
 export type RoutineProfileId = string & { readonly __brand: 'RoutineProfileId' };
 
-/** 日程 ID */
-export type ScheduleId = string & { readonly __brand: 'ScheduleId' };
-
 /** Stable managed knowledge document ID carried by Markdown frontmatter. */
 export type KnowledgeDocumentId = string & { readonly __brand: 'KnowledgeDocumentId' };
 
