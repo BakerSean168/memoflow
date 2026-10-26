@@ -1,6 +1,6 @@
 /** Shared personal classification contract (ADR-054 / ADR-103). */
 import { z } from 'zod';
-import type { Instant } from '../../primitives/instant';
+import type { Instant } from '@memoflow/shared-primitives/instant';
 import { PortableReferenceV3Schema } from '../data-portability/dtos/portable-v3.dto';
 
 const LabelPortableReferenceV3Schema = PortableReferenceV3Schema.refine(

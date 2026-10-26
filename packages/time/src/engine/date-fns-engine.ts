@@ -14,7 +14,7 @@ import {
   startOfWeek as dfStartOfWeek,
 } from 'date-fns';
 import { TZDateMini } from '@date-fns/tz';
-import type { Hm, Instant, Ymd } from '@memoflow/contracts/primitives';
+import type { Hm, Instant, Ymd } from '@memoflow/shared-primitives';
 import type { TimeDateStyle, TimeEngine, TimeZoneId, Weekday } from '../types';
 import { asHm, asInstant, asYmd, isHmShape, isYmdShape } from '../codec/brand';
 

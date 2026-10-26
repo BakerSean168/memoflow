@@ -1,5 +1,5 @@
 import type { GoalServerDTO } from '../../aggregates/goal-server';
-import type { IdentityId } from '../../../../primitives';
+import type { IdentityId } from '@memoflow/shared-primitives';
 
 export interface GoalStatusChangedEvent {
   identityId: IdentityId;

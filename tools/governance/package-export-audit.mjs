@@ -32,6 +32,11 @@ const STRICT_ALLOWED_SUBPATHS = {};
 
 const PACKAGE_SPECIFIC_SUBPATHS = {
   goal: ['./analytics', './events', './schedule-execution', './schedule-projection'],
+  'goal-core': ['./goal-record-preview', './ids', './key-result-progress-calculator'],
+  'shared-primitives': ['./*'],
+  'transport-contracts': ['./*'],
+  'desktop-contracts': ['./*'],
+  'host-runtime': ['./electron-ipc'],
   task: ['./analytics', './testing', './schema', './schedule-execution', './schedule-projection'],
   ai: ['./agent-gateway', './ports', './schema', './testing'],
   repository: ['./schema', './server'],

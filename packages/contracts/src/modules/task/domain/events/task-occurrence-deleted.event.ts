@@ -1,4 +1,4 @@
-import type { IdentityId, TaskOccurrenceId, TaskPlanId } from '../../../../primitives';
+import type { IdentityId, TaskOccurrenceId, TaskPlanId } from '@memoflow/shared-primitives';
 
 export interface TaskOccurrenceDeletedEvent {
   identityId: IdentityId;

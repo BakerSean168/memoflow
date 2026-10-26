@@ -6604,94 +6604,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/electron/authenticated-ipc.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/electron/desktop-update.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/electron/device-notification-preference.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/electron/intervention-window.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/electron/ipc-channels.account-surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/electron/ipc-channels.ai-surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/electron/ipc-channels.goal-surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/electron/ipc-channels.renderer-events.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/electron/ipc-channels.schedule-surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/electron/ipc-channels.system-surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/electron/ipc-channels.task-surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/contracts/src/modules/account/api/account-birthday-ymd.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -7156,14 +7068,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/setting/preferences/product-module-index-paths.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/contracts/src/modules/task/api/complete-task-occurrence.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -7269,70 +7173,6 @@
     },
     {
       "path": "packages/contracts/src/modules/transport-cast-inventory.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/primitives/command.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/primitives/time-zone-id.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/primitives/ymd.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/result/failure-policy.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/result/ipc-envelope.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/result/public-failure.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/result/result-error-exception.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/result/transports.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -7640,6 +7480,86 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/desktop-contracts/src/desktop-update.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/desktop-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/desktop-contracts/src/device-notification-preference.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/desktop-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/desktop-contracts/src/intervention-window.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/desktop-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/desktop-contracts/src/ipc-channels.account-surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/desktop-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/desktop-contracts/src/ipc-channels.ai-surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/desktop-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/desktop-contracts/src/ipc-channels.goal-surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/desktop-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/desktop-contracts/src/ipc-channels.renderer-events.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/desktop-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/desktop-contracts/src/ipc-channels.schedule-surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/desktop-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/desktop-contracts/src/ipc-channels.system-surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/desktop-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/desktop-contracts/src/ipc-channels.task-surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/desktop-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/domain-shared/src/shared/primitives/__tests__/identity-id.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -7648,6 +7568,70 @@
       "measurementCollectors": [
         "packages/domain-shared/vitest.config.ts"
       ]
+    },
+    {
+      "path": "packages/goal-client/src/goal-review-mapping.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-client/src/import-boundary.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-client/src/infrastructure-client/adapters/goal-record-preview-context.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-client/src/infrastructure-client/adapters/goal-record-provenance.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-client/src/infrastructure-client/adapters/goal-review-window.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-client/src/infrastructure-client/adapters/goal-workspace-client-parity.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-client/src/infrastructure-client/adapters/ipc/goal-ipc-channels.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/goal-core/src/progress.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal-core/vitest.config.ts"
+      ],
+      "measurementCollectors": []
     },
     {
       "path": "packages/goal/src/__tests__/dual-registry.surface.spec.ts",
@@ -7741,56 +7725,6 @@
     },
     {
       "path": "packages/goal/src/import-safety.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/goal/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/goal/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal/src/infrastructure-client/adapters/goal-record-preview-context.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/goal/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/goal/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal/src/infrastructure-client/adapters/goal-record-provenance.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/goal/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/goal/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal/src/infrastructure-client/adapters/goal-review-window.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/goal/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/goal/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal/src/infrastructure-client/adapters/goal-workspace-client-parity.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/goal/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/goal/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/goal/src/infrastructure-client/adapters/ipc/goal-ipc-channels.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/goal/vitest.config.ts"
@@ -8760,6 +8694,14 @@
       "measurementCollectors": [
         "packages/goal/vitest.config.ts"
       ]
+    },
+    {
+      "path": "packages/host-runtime/src/electron-ipc/authenticated-ipc.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/host-runtime/vitest.config.ts"
+      ],
+      "measurementCollectors": []
     },
     {
       "path": "packages/http-client/src/__tests__/email-verification-circuit.test.ts",
@@ -10612,6 +10554,30 @@
       ]
     },
     {
+      "path": "packages/shared-primitives/src/command.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/shared-primitives/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/shared-primitives/src/time-zone-id.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/shared-primitives/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/shared-primitives/src/ymd.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/shared-primitives/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/task/src/api/module-lifecycle.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11632,6 +11598,54 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/transport-contracts/src/execution-context.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/transport-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/transport-contracts/src/result/failure-policy.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/transport-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/transport-contracts/src/result/ipc-envelope.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/transport-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/transport-contracts/src/result/public-failure.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/transport-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/transport-contracts/src/result/result-error-exception.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/transport-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/transport-contracts/src/result/transports.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/transport-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/ui-core/src/form/validation.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12472,7 +12486,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 102
+      "fileCount": 97
     },
     {
       "id": "packages/goal/vitest.mappers.config.ts",
@@ -12950,7 +12964,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 93
+      "fileCount": 73
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -12967,7 +12981,28 @@
       "fileCount": 17
     },
     {
+      "id": "packages/desktop-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 10
+    },
+    {
       "id": "packages/domain-shared/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 1
+    },
+    {
+      "id": "packages/goal-client/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 7
+    },
+    {
+      "id": "packages/goal-core/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
@@ -12978,7 +13013,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 102
+      "fileCount": 97
+    },
+    {
+      "id": "packages/host-runtime/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 1
     },
     {
       "id": "packages/http-client/vitest.config.ts",
@@ -13072,6 +13114,13 @@
       "fileCount": 12
     },
     {
+      "id": "packages/shared-primitives/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 3
+    },
+    {
       "id": "packages/task/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
@@ -13084,6 +13133,13 @@
       "suite": "unit",
       "runner": "vitest",
       "fileCount": 10
+    },
+    {
+      "id": "packages/transport-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 6
     },
     {
       "id": "packages/ui-core/vitest.config.ts",
@@ -13591,11 +13647,6 @@
       "packages/goal/src/electron/goal-electron.surface.spec.ts",
       "packages/goal/src/electron/index.spec.ts",
       "packages/goal/src/import-safety.spec.ts",
-      "packages/goal/src/infrastructure-client/adapters/goal-record-preview-context.spec.ts",
-      "packages/goal/src/infrastructure-client/adapters/goal-record-provenance.spec.ts",
-      "packages/goal/src/infrastructure-client/adapters/goal-review-window.spec.ts",
-      "packages/goal/src/infrastructure-client/adapters/goal-workspace-client-parity.spec.ts",
-      "packages/goal/src/infrastructure-client/adapters/ipc/goal-ipc-channels.surface.spec.ts",
       "packages/goal/src/server/application/errors/weight-snapshot-errors.spec.ts",
       "packages/goal/src/server/application/event-handlers/__tests__/register-goal-event-listeners.test.ts",
       "packages/goal/src/server/application/event-handlers/task-goal-progress.handler.spec.ts",
@@ -13894,7 +13945,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1116,
+    "unit": 1119,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

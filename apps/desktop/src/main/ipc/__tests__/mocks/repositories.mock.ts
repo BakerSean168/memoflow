@@ -5,7 +5,7 @@
  */
 
 import { vi } from 'vitest';
-import { Goal } from '@memoflow/goal/client';
+import { Goal } from '@memoflow/goal-client';
 import { GoalStatus, type GoalServerDTO, type GoalId } from '@memoflow/contracts/goal';
 import type { IdentityId } from '@memoflow/contracts/primitives';
 

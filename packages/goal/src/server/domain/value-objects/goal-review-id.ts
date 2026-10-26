@@ -1,10 +1,2 @@
-import { createIdType } from '@memoflow/utils/domain';
-
-import type { GoalReviewId as IGoalReviewId } from '@memoflow/contracts/primitives';
-
-/**
- * GoalReviewId 值对象
- * 用于强类型化目标评审 ID
- */
-export const GoalReviewId = createIdType<IGoalReviewId>('IGoalReviewId');
-export type GoalReviewId = IGoalReviewId;
+// Canonical cross-runtime factory; do not import server/domain from the client.
+export { GoalReviewId } from '@memoflow/goal-core/ids';

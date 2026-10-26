@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it } from 'vitest';
-import { previewGoalRecord, createGoalRecordAggregationSnapshot } from '@memoflow/goal/client';
+import { previewGoalRecord, createGoalRecordAggregationSnapshot } from '@memoflow/goal-client';
 import enUS from '../../../locales/en-US';
 import GoalRecordPreview from './GoalRecordPreview.vue';
 

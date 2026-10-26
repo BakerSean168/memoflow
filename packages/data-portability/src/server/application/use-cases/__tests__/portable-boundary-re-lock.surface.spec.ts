@@ -64,7 +64,7 @@ describe('Data Portability V3-only anti-resurrection locks', () => {
       'utf8',
     );
     const channels = readFileSync(
-      resolve(repoRoot, 'packages/contracts/src/electron/ipc-channels.ts'),
+      resolve(repoRoot, 'packages/desktop-contracts/src/ipc-channels.ts'),
       'utf8',
     );
     expect(safety).toContain("kind === 'memoflow.server-held-data-disclosure'");

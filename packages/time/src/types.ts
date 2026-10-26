@@ -5,7 +5,7 @@ import type {
   TimeZoneId,
   TransferDate,
   Ymd,
-} from '@memoflow/contracts/primitives';
+} from '@memoflow/shared-primitives';
 
 export type { Instant, TimeZoneId, TransferDate, Ymd, Hm };
 

@@ -1,4 +1,4 @@
-import type { TransferDate } from '../../../primitives';
+import type { TransferDate } from '@memoflow/shared-primitives';
 import type { NotificationChannelType } from './notification-channel-type';
 
 /** Decision made before a delivery attempt is created. */

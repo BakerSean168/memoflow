@@ -70,7 +70,13 @@
     "governance-tools": "tooling-lib",
     "time": "runtime-lib",
     "agent-gateway": "runtime-lib",
-    "ui-storybook": "app"
+    "ui-storybook": "app",
+    "goal-core": "runtime-lib",
+    "goal-client": "runtime-lib",
+    "shared-primitives": "runtime-lib",
+    "transport-contracts": "runtime-lib",
+    "desktop-contracts": "runtime-lib",
+    "host-runtime": "runtime-lib"
   },
   "exemptions": [
     {

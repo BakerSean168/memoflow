@@ -1,4 +1,4 @@
-import { createAuthenticatedIpcWrapper } from '@memoflow/contracts/electron';
+import { createAuthenticatedIpcWrapper } from '@memoflow/host-runtime/electron-ipc';
 
 /**
  * Account IPC auth wrapper — resolves the canonical `ExecutionContext` once per

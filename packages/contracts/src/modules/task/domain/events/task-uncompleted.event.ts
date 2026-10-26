@@ -8,7 +8,7 @@
  * - aggregateId 已由 addDomainEvent 自动生成，无需重复定义
  * - occurredAt 已由 addDomainEvent 自动生成，无需重复定义
  */
-import type { IdentityId, TaskOccurrenceId, TaskPlanId } from '../../../../primitives';
+import type { IdentityId, TaskOccurrenceId, TaskPlanId } from '@memoflow/shared-primitives';
 
 export interface TaskUncompletedEvent {
   identityId: IdentityId;

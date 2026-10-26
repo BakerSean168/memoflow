@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { YmdSchema, type Hm } from '../../../primitives';
+import { YmdSchema, type Hm } from '@memoflow/shared-primitives';
 import { DayOfWeek } from './day-of-week';
 import { RecurrenceFrequency } from './recurrence-frequency';
 

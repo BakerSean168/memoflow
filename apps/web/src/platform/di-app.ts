@@ -52,7 +52,7 @@ const accountService = createLazyService(async () => {
 });
 
 const goalService = createLazyService(async () => {
-  const { createGoalHttpClient } = await import('@memoflow/goal/client');
+  const { createGoalHttpClient } = await import('@memoflow/goal-client');
   return createGoalHttpClient(resultHttpClient);
 });
 

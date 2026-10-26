@@ -8,7 +8,10 @@ import { describe, expect, it } from 'vitest';
  */
 describe('product feature-map + web public debug surface', () => {
   const repoRoot = resolve(__dirname, '../../../../../../');
-  const featureMap = readFileSync(resolve(repoRoot, 'docs/product/feature-map.md'), 'utf8');
+  const featureMap = readFileSync(
+    resolve(repoRoot, 'docs/internals/product/feature-map.md'),
+    'utf8',
+  );
   const publicDir = resolve(repoRoot, 'apps/web/public');
 
   it('feature-map auth row describes the Better Auth and local Profile split', () => {

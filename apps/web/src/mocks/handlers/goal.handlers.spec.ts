@@ -32,7 +32,7 @@ describe('goal handlers contracts', () => {
   });
 
   it('uses the vNext create, update, search, aggregate, and clone contracts', async () => {
-    const { GoalHttpAdapter } = await import('@memoflow/goal/client');
+    const { GoalHttpAdapter } = await import('@memoflow/goal-client');
     const httpClient = createHttpClientSpy();
     const adapter = new GoalHttpAdapter(httpClient);
     const aggregateResponse = createMockGoalAggregateResponse(createMockGoal().id);

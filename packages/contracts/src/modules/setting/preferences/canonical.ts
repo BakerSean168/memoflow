@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { TimeZoneIdSchema, type TimeZoneId } from '../../../primitives';
+import { TimeZoneIdSchema, type TimeZoneId } from '@memoflow/shared-primitives';
 
 export const PREFERENCE_NAMESPACES = ['presentation', 'regional'] as const;
 

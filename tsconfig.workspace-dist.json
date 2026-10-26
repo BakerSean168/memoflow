@@ -2,6 +2,23 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "paths": {
+      "@memoflow/goal-core": ["./packages/goal-core/dist/index.d.ts"],
+      "@memoflow/goal-core/*": ["./packages/goal-core/dist/*.d.ts"],
+      "@memoflow/shared-primitives": ["./packages/shared-primitives/dist/index.d.ts"],
+      "@memoflow/shared-primitives/*": ["./packages/shared-primitives/dist/*.d.ts"],
+      "@memoflow/transport-contracts": ["./packages/transport-contracts/dist/index.d.ts"],
+      "@memoflow/transport-contracts/result": [
+        "./packages/transport-contracts/dist/result/index.d.ts"
+      ],
+      "@memoflow/transport-contracts/*": ["./packages/transport-contracts/dist/*.d.ts"],
+      "@memoflow/desktop-contracts": ["./packages/desktop-contracts/dist/index.d.ts"],
+      "@memoflow/desktop-contracts/*": ["./packages/desktop-contracts/dist/*.d.ts"],
+      "@memoflow/host-runtime": ["./packages/host-runtime/dist/index.d.ts"],
+      "@memoflow/host-runtime/electron-ipc": [
+        "./packages/host-runtime/dist/electron-ipc/index.d.ts"
+      ],
+      "@memoflow/host-runtime/*": ["./packages/host-runtime/dist/*.d.ts"],
+      "@memoflow/goal-client": ["./packages/goal-client/dist/index.d.ts"],
       "@memoflow/database": ["./packages/database/dist/index.d.ts"],
       "@memoflow/database/prisma": ["./packages/database/dist/generated/prisma/client.d.ts"],
       "@memoflow/powersync-schema": ["./packages/powersync-schema/dist/index.d.ts"],

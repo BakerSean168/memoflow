@@ -17,8 +17,222 @@ const mainWorkspaceAliasEntries = [
     replacement: resolve(import.meta.dirname, '../../packages/domain-shared/src/shared/index.ts'),
   },
   {
-    find: '@memoflow/goal/client',
-    replacement: resolve(import.meta.dirname, '../../packages/goal/src/client/index.ts'),
+    find: '@memoflow/goal-client',
+    replacement: resolve(import.meta.dirname, '../../packages/goal-client/src/index.ts'),
+  },
+  {
+    find: '@memoflow/goal-core/ids',
+    replacement: resolve(import.meta.dirname, '../../packages/goal-core/src/ids.ts'),
+  },
+  {
+    find: '@memoflow/goal-core/key-result-progress-calculator',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/goal-core/src/key-result-progress-calculator.ts',
+    ),
+  },
+  {
+    find: '@memoflow/goal-core/goal-record-preview',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/goal-core/src/goal-record-preview.ts',
+    ),
+  },
+  {
+    find: '@memoflow/goal-core',
+    replacement: resolve(import.meta.dirname, '../../packages/goal-core/src/index.ts'),
+  },
+  {
+    find: '@memoflow/shared-primitives/command',
+    replacement: resolve(import.meta.dirname, '../../packages/shared-primitives/src/command.ts'),
+  },
+  {
+    find: '@memoflow/shared-primitives/duration',
+    replacement: resolve(import.meta.dirname, '../../packages/shared-primitives/src/duration.ts'),
+  },
+  {
+    find: '@memoflow/shared-primitives/hm',
+    replacement: resolve(import.meta.dirname, '../../packages/shared-primitives/src/hm.ts'),
+  },
+  {
+    find: '@memoflow/shared-primitives/ids',
+    replacement: resolve(import.meta.dirname, '../../packages/shared-primitives/src/ids.ts'),
+  },
+  {
+    find: '@memoflow/shared-primitives/instant',
+    replacement: resolve(import.meta.dirname, '../../packages/shared-primitives/src/instant.ts'),
+  },
+  {
+    find: '@memoflow/shared-primitives/runtime',
+    replacement: resolve(import.meta.dirname, '../../packages/shared-primitives/src/runtime.ts'),
+  },
+  {
+    find: '@memoflow/shared-primitives/time-zone-id',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/shared-primitives/src/time-zone-id.ts',
+    ),
+  },
+  {
+    find: '@memoflow/shared-primitives/transfer-date',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/shared-primitives/src/transfer-date.ts',
+    ),
+  },
+  {
+    find: '@memoflow/shared-primitives/ymd',
+    replacement: resolve(import.meta.dirname, '../../packages/shared-primitives/src/ymd.ts'),
+  },
+  {
+    find: '@memoflow/shared-primitives/zod-extensions',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/shared-primitives/src/zod-extensions.ts',
+    ),
+  },
+  {
+    find: '@memoflow/shared-primitives',
+    replacement: resolve(import.meta.dirname, '../../packages/shared-primitives/src/index.ts'),
+  },
+  {
+    find: '@memoflow/transport-contracts/result/codes',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/transport-contracts/src/result/codes.ts',
+    ),
+  },
+  {
+    find: '@memoflow/transport-contracts/result/core',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/transport-contracts/src/result/core.ts',
+    ),
+  },
+  {
+    find: '@memoflow/transport-contracts/result/failure-compat',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/transport-contracts/src/result/failure-compat.ts',
+    ),
+  },
+  {
+    find: '@memoflow/transport-contracts/result/failure-policy',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/transport-contracts/src/result/failure-policy.ts',
+    ),
+  },
+  {
+    find: '@memoflow/transport-contracts/result/http',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/transport-contracts/src/result/http.ts',
+    ),
+  },
+  {
+    find: '@memoflow/transport-contracts/result/ipc',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/transport-contracts/src/result/ipc.ts',
+    ),
+  },
+  {
+    find: '@memoflow/transport-contracts/result/public-failure',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/transport-contracts/src/result/public-failure.ts',
+    ),
+  },
+  {
+    find: '@memoflow/transport-contracts/result',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/transport-contracts/src/result/index.ts',
+    ),
+  },
+  {
+    find: '@memoflow/transport-contracts/context',
+    replacement: resolve(import.meta.dirname, '../../packages/transport-contracts/src/context.ts'),
+  },
+  {
+    find: '@memoflow/transport-contracts/execution-context',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/transport-contracts/src/execution-context.ts',
+    ),
+  },
+  {
+    find: '@memoflow/transport-contracts',
+    replacement: resolve(import.meta.dirname, '../../packages/transport-contracts/src/index.ts'),
+  },
+  {
+    find: '@memoflow/desktop-contracts/auth-context',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/desktop-contracts/src/auth-context.ts',
+    ),
+  },
+  {
+    find: '@memoflow/desktop-contracts/database',
+    replacement: resolve(import.meta.dirname, '../../packages/desktop-contracts/src/database.ts'),
+  },
+  {
+    find: '@memoflow/desktop-contracts/desktop-update',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/desktop-contracts/src/desktop-update.ts',
+    ),
+  },
+  {
+    find: '@memoflow/desktop-contracts/device-notification-preference',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/desktop-contracts/src/device-notification-preference.ts',
+    ),
+  },
+  {
+    find: '@memoflow/desktop-contracts/focus-window',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/desktop-contracts/src/focus-window.ts',
+    ),
+  },
+  {
+    find: '@memoflow/desktop-contracts/intervention-window',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/desktop-contracts/src/intervention-window.ts',
+    ),
+  },
+  {
+    find: '@memoflow/desktop-contracts/ipc-channels',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/desktop-contracts/src/ipc-channels.ts',
+    ),
+  },
+  {
+    find: '@memoflow/desktop-contracts/profile-access',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/desktop-contracts/src/profile-access.ts',
+    ),
+  },
+  {
+    find: '@memoflow/desktop-contracts',
+    replacement: resolve(import.meta.dirname, '../../packages/desktop-contracts/src/index.ts'),
+  },
+  {
+    find: '@memoflow/host-runtime/electron-ipc',
+    replacement: resolve(
+      import.meta.dirname,
+      '../../packages/host-runtime/src/electron-ipc/index.ts',
+    ),
+  },
+  {
+    find: '@memoflow/host-runtime',
+    replacement: resolve(import.meta.dirname, '../../packages/host-runtime/src/index.ts'),
   },
   {
     find: '@memoflow/goal/electron',

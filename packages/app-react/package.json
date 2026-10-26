@@ -16,7 +16,7 @@
     "@memoflow/ai": "workspace:*",
     "@memoflow/cloud-auth": "workspace:*",
     "@memoflow/contracts": "workspace:*",
-    "@memoflow/goal": "workspace:*",
+    "@memoflow/goal-client": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/label": "workspace:*",
     "@memoflow/notification": "workspace:*",

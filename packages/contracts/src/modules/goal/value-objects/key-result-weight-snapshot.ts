@@ -13,7 +13,7 @@ import type {
   GoalId,
   KeyResultId,
   IdentityId,
-} from '../../../primitives';
+} from '@memoflow/shared-primitives';
 
 // ============ 枚举定义 ============
 

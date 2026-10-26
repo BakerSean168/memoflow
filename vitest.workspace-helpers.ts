@@ -276,6 +276,46 @@ export const domainResolveAliases = [
     replacement: path.resolve(import.meta.dirname, './packages/goal/src/index.ts'),
   },
   {
+    find: /^@memoflow\/goal-core\/(.+)/,
+    replacement: path.resolve(import.meta.dirname, './packages/goal-core/src/$1'),
+  },
+  {
+    find: '@memoflow/goal-core',
+    replacement: path.resolve(import.meta.dirname, './packages/goal-core/src/index.ts'),
+  },
+  {
+    find: /^@memoflow\/shared-primitives\/(.+)/,
+    replacement: path.resolve(import.meta.dirname, './packages/shared-primitives/src/$1'),
+  },
+  {
+    find: '@memoflow/shared-primitives',
+    replacement: path.resolve(import.meta.dirname, './packages/shared-primitives/src/index.ts'),
+  },
+  {
+    find: /^@memoflow\/transport-contracts\/(.+)/,
+    replacement: path.resolve(import.meta.dirname, './packages/transport-contracts/src/$1'),
+  },
+  {
+    find: '@memoflow/transport-contracts',
+    replacement: path.resolve(import.meta.dirname, './packages/transport-contracts/src/index.ts'),
+  },
+  {
+    find: /^@memoflow\/desktop-contracts\/(.+)/,
+    replacement: path.resolve(import.meta.dirname, './packages/desktop-contracts/src/$1'),
+  },
+  {
+    find: '@memoflow/desktop-contracts',
+    replacement: path.resolve(import.meta.dirname, './packages/desktop-contracts/src/index.ts'),
+  },
+  {
+    find: /^@memoflow\/host-runtime\/(.+)/,
+    replacement: path.resolve(import.meta.dirname, './packages/host-runtime/src/$1'),
+  },
+  {
+    find: '@memoflow/host-runtime',
+    replacement: path.resolve(import.meta.dirname, './packages/host-runtime/src/index.ts'),
+  },
+  {
     find: /^@memoflow\/task\/(.+)/,
     replacement: path.resolve(import.meta.dirname, './packages/task/src/$1/index.ts'),
   },

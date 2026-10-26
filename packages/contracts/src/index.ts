@@ -34,8 +34,8 @@
 // ============================================================
 // Primitives
 // ============================================================
-export { brandedId } from './primitives';
-export type { IdentityId, TimeZoneId } from './primitives';
+export { brandedId } from '@memoflow/shared-primitives';
+export type { IdentityId, TimeZoneId } from '@memoflow/shared-primitives';
 
 // ============================================================
 // Operations (W7 统一 operation timeline / replay / audit)
@@ -106,7 +106,7 @@ export {
   publicFailureToHttpStatus,
   isClientError,
   isServerError,
-} from './result';
+} from '@memoflow/transport-contracts';
 
 export type {
   Result,
@@ -143,7 +143,7 @@ export type {
   IpcResult,
   HttpResponse,
   HttpResponseOptions,
-} from './result';
+} from '@memoflow/transport-contracts';
 
 export type {
   CloudAccountSummary,

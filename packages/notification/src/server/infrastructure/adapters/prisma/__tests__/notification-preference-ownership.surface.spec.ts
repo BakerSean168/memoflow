@@ -38,7 +38,7 @@ describe('notification preference ownership and product/operations split', () =>
   );
   const electron = readFileSync(resolve(__dirname, '../../../../../electron/index.ts'), 'utf8');
   const channels = readFileSync(
-    resolve(__dirname, '../../../../../../../contracts/src/electron/ipc-channels.ts'),
+    resolve(__dirname, '../../../../../../../desktop-contracts/src/ipc-channels.ts'),
     'utf8',
   );
   const clientPort = readFileSync(

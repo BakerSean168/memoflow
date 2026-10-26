@@ -109,6 +109,98 @@ export function createContractsAliasEntries(workspaceRoot: string): Alias[] {
   ];
 }
 
+export function createGoalCoreAliasEntries(workspaceRoot: string): Alias[] {
+  const goalCoreRoot = resolveFromWorkspace(workspaceRoot, 'packages/goal-core/src');
+
+  return [
+    {
+      find: /^@memoflow\/goal-core$/,
+      replacement: `${goalCoreRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/goal-core\/ids$/,
+      replacement: `${goalCoreRoot}/ids.ts`,
+    },
+    {
+      find: /^@memoflow\/goal-core\/key-result-progress-calculator$/,
+      replacement: `${goalCoreRoot}/key-result-progress-calculator.ts`,
+    },
+    {
+      find: /^@memoflow\/goal-core\/goal-record-preview$/,
+      replacement: `${goalCoreRoot}/goal-record-preview.ts`,
+    },
+  ];
+}
+
+export function createSharedPrimitivesAliasEntries(workspaceRoot: string): Alias[] {
+  const sharedPrimitivesRoot = resolveFromWorkspace(
+    workspaceRoot,
+    'packages/shared-primitives/src',
+  );
+
+  return [
+    {
+      find: /^@memoflow\/shared-primitives$/,
+      replacement: `${sharedPrimitivesRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/shared-primitives\/(.+)$/,
+      replacement: `${sharedPrimitivesRoot}/$1`,
+    },
+  ];
+}
+
+export function createTransportContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const transportContractsRoot = resolveFromWorkspace(
+    workspaceRoot,
+    'packages/transport-contracts/src',
+  );
+
+  return [
+    {
+      find: /^@memoflow\/transport-contracts$/,
+      replacement: `${transportContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/transport-contracts\/(.+)$/,
+      replacement: `${transportContractsRoot}/$1`,
+    },
+  ];
+}
+
+export function createDesktopContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const desktopContractsRoot = resolveFromWorkspace(
+    workspaceRoot,
+    'packages/desktop-contracts/src',
+  );
+
+  return [
+    {
+      find: /^@memoflow\/desktop-contracts$/,
+      replacement: `${desktopContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/desktop-contracts\/(.+)$/,
+      replacement: `${desktopContractsRoot}/$1`,
+    },
+  ];
+}
+
+export function createHostRuntimeAliasEntries(workspaceRoot: string): Alias[] {
+  const hostRuntimeRoot = resolveFromWorkspace(workspaceRoot, 'packages/host-runtime/src');
+
+  return [
+    {
+      find: /^@memoflow\/host-runtime$/,
+      replacement: `${hostRuntimeRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/host-runtime\/(.+)$/,
+      replacement: `${hostRuntimeRoot}/$1`,
+    },
+  ];
+}
+
 export function createUiVueSourceAliasEntries(workspaceRoot: string): Alias[] {
   const uiVueRoot = resolveFromWorkspace(workspaceRoot, 'packages/ui-vue-shadcn/src');
   const uiCoreRoot = resolveFromWorkspace(workspaceRoot, 'packages/ui-core/src');

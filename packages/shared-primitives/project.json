@@ -1,0 +1,64 @@
+{
+  "name": "shared-primitives",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "packages/shared-primitives/src",
+  "tags": ["scope:shared", "type:lib", "layer:shared"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --build packages/shared-primitives/tsconfig.json"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/packages/shared-primitives/dist"],
+      "cache": true,
+      "options": {
+        "command": "node ../../node_modules/tsup/dist/cli-default.js && tsc -p tsconfig.build.json",
+        "cwd": "packages/shared-primitives"
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ../../node_modules/tsup/dist/cli-default.js --watch",
+        "cwd": "packages/shared-primitives"
+      }
+    },
+    "lint": {
+      "options": {
+        "args": ["**/*.{ts,js}"]
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "inputs": ["default", "^production"],
+      "cache": true,
+      "options": {
+        "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
+        "cwd": "packages/shared-primitives"
+      }
+    },
+    "test:watch": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "node ../../node_modules/vitest/vitest.mjs --config vitest.config.ts",
+        "cwd": "packages/shared-primitives"
+      }
+    },
+    "test:contract": {
+      "executor": "nx:run-commands",
+      "inputs": ["default", "^production"],
+      "cache": true,
+      "dependsOn": ["build"],
+      "options": {
+        "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
+        "cwd": "packages/shared-primitives"
+      }
+    }
+  }
+}

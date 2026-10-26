@@ -1,10 +1,10 @@
 import { ipcMain } from 'electron';
 import {
   TaskWorkspaceChannels,
-  withAuthenticatedIdentity,
   type IElectronModule,
   type IElectronModuleContext,
 } from '@memoflow/contracts/electron';
+import { withAuthenticatedIdentity } from '@memoflow/host-runtime/electron-ipc';
 import { GetTaskWorkspaceInvocationSchema } from '@memoflow/contracts/task';
 import { fail } from '@memoflow/contracts/result';
 import type { TaskWorkspaceApplicationPort } from '@memoflow/task';

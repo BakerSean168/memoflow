@@ -57,7 +57,7 @@
  *   仍为 no-op。
  */
 
-import type { ServerModuleHandle, ServerTransportModuleContext } from '@memoflow/contracts/shared';
+import type { ServerModuleHandle, ServerTransportModuleContext } from '@memoflow/host-runtime';
 import { createLogger } from '@memoflow/utils/logger';
 import type { SettingModuleInstance } from '../server/infrastructure';
 import type { UserTimeContextPort } from '@memoflow/time';

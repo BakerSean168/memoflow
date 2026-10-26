@@ -22,13 +22,24 @@ export type {
   AppRpcRegistryExtensions,
 } from './protocol';
 export type { IDomainEvent } from './domain-event.interface';
-export type { Context } from './context';
-export type { ExecutionContext, ExecutionSource, RequestContext } from './execution-context';
-export type { ServerModuleHandle, ServerTransportModuleContext } from './server-module-context';
+// P1 S2（Issue #633）：ExecutionContext/RequestContext/Context 真身已迁至
+// @memoflow/transport-contracts，本桶仅单向 re-export 兼容，新代码请直接
+// 引用 @memoflow/transport-contracts。
+export type {
+  Context,
+  ExecutionContext,
+  ExecutionSource,
+  RequestContext,
+} from '@memoflow/transport-contracts';
 export * from './account-active-checker';
 
 export * from './value-objects';
-export * from './dtos';
 
-export * from './module-manifest';
+// P1 S4（Issue #633）：ModuleManifest/CommandRegistry 与
+// ServerTransportModuleContext/ServerModuleHandle 真身已迁至
+// @memoflow/host-runtime。注意本桶不设 re-export shim：contracts 是
+// layer:shared，模块边界规则禁止 shared 依赖 layer:infra（host-runtime），
+// 任何指向 host-runtime 的导入（含 type-only）都会触发
+// @nx/enforce-module-boundaries。因此全部消费方已在本步直接改引
+// @memoflow/host-runtime，此处不再转出这批符号。
 export * from './keyboard-keymap';

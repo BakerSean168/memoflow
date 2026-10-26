@@ -18,8 +18,8 @@
  */
 
 import { z } from 'zod';
-import { brandedId } from '../../../primitives';
-import type { GoalId, KeyResultId, GoalReviewId, GoalRecordId } from '../../../primitives';
+import { brandedId } from '@memoflow/shared-primitives';
+import type { GoalId, KeyResultId, GoalReviewId, GoalRecordId } from '@memoflow/shared-primitives';
 import { CloneGoalSchema, GoalVersionCommandSchema, UpdateGoalSchema } from './goal-crud.dto';
 import {
   AddKeyResultSchema,

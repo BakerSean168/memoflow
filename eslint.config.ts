@@ -105,7 +105,7 @@ const moduleBoundaryDepConstraints = [
     // domain-server must NOT import infra; this rule allows domain -> infra
     // because composition roots (api/module.ts, electron-entry) live inside
     // domain-tagged packages and need to wire infra implementations.
-    // See docs/standards/architecture.md "包内分层说明".
+    // See docs/internals/standards/architecture.md "包内分层说明".
     sourceTag: 'layer:domain',
     onlyDependOnLibsWithTags: ['layer:shared', 'layer:infra', 'layer:domain'],
   },

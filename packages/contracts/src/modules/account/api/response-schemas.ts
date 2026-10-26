@@ -5,7 +5,7 @@
  */
 
 import { z } from 'zod';
-import { brandedId, YmdSchema } from '../../../primitives';
+import { brandedId, YmdSchema } from '@memoflow/shared-primitives';
 import type { IdentityId } from '../value-objects/identity-id';
 import { AccountStatus } from '../value-objects/account-status';
 import { GenderType } from '../value-objects/gender-type';

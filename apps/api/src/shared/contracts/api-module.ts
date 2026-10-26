@@ -29,7 +29,7 @@
  */
 
 import type { RequestHandler } from 'express';
-import type { ServerModuleHandle, ServerTransportModuleContext } from '@memoflow/contracts/shared';
+import type { ServerModuleHandle, ServerTransportModuleContext } from '@memoflow/host-runtime';
 import type { PrismaClient } from '@memoflow/database';
 
 /**

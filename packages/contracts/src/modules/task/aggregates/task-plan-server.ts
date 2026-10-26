@@ -2,7 +2,7 @@
  * TaskPlan Aggregate Root - Server Interface
  */
 
-import type { TaskPlanId, IdentityId, TransferDate } from '../../../primitives';
+import type { TaskPlanId, IdentityId, TransferDate } from '@memoflow/shared-primitives';
 import type { TaskPlanStatus } from '../value-objects/task-plan-status';
 import type { TaskPlanOutcome } from '../value-objects/task-plan-outcome';
 import type { TaskPlanCompletionPolicy } from '../value-objects/task-plan-completion-policy';

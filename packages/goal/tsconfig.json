@@ -4,6 +4,8 @@
     "lib": ["ES2020"],
     "types": ["node", "vitest/globals"],
     "paths": {
+      "@memoflow/goal-core": ["../goal-core/src/index.ts"],
+      "@memoflow/goal-core/*": ["../goal-core/src/*"],
       "@/*": ["./src/*"],
       "@memoflow/database": ["../database/src/index.ts"],
       "@memoflow/database/transaction": ["../database/src/transaction.ts"],

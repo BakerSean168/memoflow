@@ -1,16 +1,3 @@
-## Canonical Repo Instructions
+# Copilot instructions
 
-Repository-specific collaboration rules live in [`../AGENTS.md`](../AGENTS.md).
-
-Copilot should treat that file as the canonical source for:
-
-- command and validation conventions
-- GitHub Issue-only task and handoff protocol
-- documentation and governance entry points
-- repository change policy
-
-## GitHub/Copilot-Specific Notes
-
-- Default response language is Chinese unless the user clearly asks for another language.
-- Keep suggestions aligned with the current repo structure, not historical layouts.
-- When a prompt conflicts with `AGENTS.md`, prefer `AGENTS.md`.
+Follow [`AGENTS.md`](../AGENTS.md) as the single repository instruction source. Use Chinese in responses unless the user requests another language. Do not infer the project structure from historical examples; inspect the active code and configuration.

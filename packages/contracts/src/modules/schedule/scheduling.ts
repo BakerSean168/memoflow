@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { Instant } from '../../primitives';
+import type { Instant } from '@memoflow/shared-primitives';
 
 /** Neutral owner of one complete desired scheduling set. */
 export interface SchedulingOwner {

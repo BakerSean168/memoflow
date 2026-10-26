@@ -66,7 +66,7 @@ owner, reason, and expiry metadata for every remaining historical finding.
 ## Dual Registry
 
 - **Machine source of truth**: [`dual-registry.json`](./dual-registry.json)
-- **Human summary**: [`../../docs/governance/dual-registry.md`](../../docs/governance/dual-registry.md)
+- **Human summary**: [`../../docs/internals/governance/dual-registry.md`](../../docs/internals/governance/dual-registry.md)
 
 Each `*dual*.surface.spec.ts` and `*keep-boundary*.spec.ts` is classified as:
 
@@ -80,7 +80,7 @@ Regenerate after dual surface moves:
 
 ```bash
 # from repo root (script embedded in elegance residual; or re-run classifier)
-node -e "console.log('see docs/governance/dual-registry.md')"
+node -e "console.log('see docs/internals/governance/dual-registry.md')"
 ```
 
 E3b tax cut may merge many `*-dual.surface.spec.ts` in one directory into `dual-registry.surface.spec.ts` (table/describe suite). Locks must be preserved.

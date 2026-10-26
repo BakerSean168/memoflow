@@ -5,8 +5,8 @@
  */
 
 import { z } from 'zod';
-import { brandedId, YmdSchema } from '../../../primitives';
-import type { GoalId, IdentityId, KeyResultId } from '../../../primitives';
+import { brandedId, YmdSchema } from '@memoflow/shared-primitives';
+import type { GoalId, IdentityId, KeyResultId } from '@memoflow/shared-primitives';
 import type { GoalClientDTO } from '../aggregates/goal-client';
 import { GoalStatus } from '../value-objects/goal-status';
 import { GoalSystemView } from '../value-objects/goal-system-view';

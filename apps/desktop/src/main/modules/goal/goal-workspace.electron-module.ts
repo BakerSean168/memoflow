@@ -1,10 +1,10 @@
 import { ipcMain } from 'electron';
 import {
   GoalWorkspaceChannels,
-  withAuthenticatedIdentity,
   type IElectronModule,
   type IElectronModuleContext,
 } from '@memoflow/contracts/electron';
+import { withAuthenticatedIdentity } from '@memoflow/host-runtime/electron-ipc';
 import {
   GetGoalWorkspaceInvocationSchema,
   GoalWorkspaceKnowledgePageInvocationSchema,

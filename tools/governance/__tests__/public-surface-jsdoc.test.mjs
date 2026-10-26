@@ -103,7 +103,7 @@ describe('public-surface-jsdoc-audit (positive real-code run)', () => {
     const result = runAudit(
       path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..'),
       [
-        'packages/contracts/src/shared/server-module-context.ts',
+        'packages/host-runtime/src/server-module-context.ts',
         'apps/api/src/shared/infrastructure/observability/http-request-observation.ts',
         'tools/governance/lib/architecture-surface.mjs',
       ],

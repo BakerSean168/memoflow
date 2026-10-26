@@ -1,11 +1,7 @@
-import { requireTimeZoneId } from '@memoflow/contracts/primitives';
+import { requireTimeZoneId } from '@memoflow/shared-primitives';
 import type { TimeContext, TimeZoneId, Weekday } from '../types';
 
-export {
-  isIanaTimeZoneId,
-  parseTimeZoneId,
-  requireTimeZoneId,
-} from '@memoflow/contracts/primitives';
+export { isIanaTimeZoneId, parseTimeZoneId, requireTimeZoneId } from '@memoflow/shared-primitives';
 
 /**
  * Explicit input source for the host/user IANA zone.

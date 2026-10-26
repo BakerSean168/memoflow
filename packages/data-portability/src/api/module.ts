@@ -61,7 +61,7 @@ import type { ProfileImportApplicationPort } from '../server/infrastructure/pris
  *   仍为 no-op。
  */
 
-import type { ServerModuleHandle, ServerTransportModuleContext } from '@memoflow/contracts/shared';
+import type { ServerModuleHandle, ServerTransportModuleContext } from '@memoflow/host-runtime';
 import { createLogger } from '@memoflow/utils/logger';
 import { registerDataPortabilityRoutes } from './routes';
 import type { DataPortabilityModuleInstance } from '../server/infrastructure';

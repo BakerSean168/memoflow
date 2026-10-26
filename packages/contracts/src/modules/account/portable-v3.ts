@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { YmdSchema } from '../../primitives';
+import { YmdSchema } from '@memoflow/shared-primitives';
 import { GenderType } from './value-objects/gender-type';
 
 /**

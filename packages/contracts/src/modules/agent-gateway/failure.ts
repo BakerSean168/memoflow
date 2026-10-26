@@ -4,7 +4,7 @@ import {
   defineFailureRegistry,
   EmptyFailureDetailsSchema,
   type PublicFailureOf,
-} from '../../result';
+} from '@memoflow/transport-contracts/result';
 
 /** Management operations never automatically replay consent or credential mutations. */
 const management = {

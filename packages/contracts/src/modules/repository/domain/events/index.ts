@@ -1,4 +1,4 @@
-import type { IdentityId, RepositoryId, ResourceId } from '../../../../primitives';
+import type { IdentityId, RepositoryId, ResourceId } from '@memoflow/shared-primitives';
 
 /**
  * Fired when knowledge runtime creates/updates/deletes a note projection or

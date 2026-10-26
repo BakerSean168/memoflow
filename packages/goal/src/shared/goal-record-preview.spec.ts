@@ -4,7 +4,7 @@ import {
   previewGoalRecord as preview,
   calculateKeyResultProgress,
   createGoalRecordAggregationSnapshot,
-} from '../client';
+} from '@memoflow/goal-core';
 import { calculateKeyResultProgress as serverCalculator } from '../server/domain/services/key-result-progress-calculator';
 import { KeyResultProgress as ServerProgress } from '../server/domain/value-objects/key-result-progress';
 

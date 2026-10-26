@@ -45,12 +45,8 @@
     "apps/mobile/**",
     "packages/**",
     "tools/**",
-    "docs/product/**",
-    "docs/architecture/**",
-    "docs/standards/**",
-    "docs/guides/development/**",
-    "docs/test/**",
-    "docs/governance/**"
+    "docs/internals/**",
+    "docs/operations/**"
   ],
   "ignore": {
     "useGitignore": true,

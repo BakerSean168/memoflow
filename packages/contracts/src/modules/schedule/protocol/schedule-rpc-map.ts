@@ -1,4 +1,4 @@
-import type { ScheduleId } from '../../../primitives';
+import type { ScheduleId } from '@memoflow/shared-primitives';
 import type {
   CreateScheduleRequest,
   UpdateScheduleRequest,

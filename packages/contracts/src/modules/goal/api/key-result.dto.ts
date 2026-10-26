@@ -11,8 +11,8 @@ import {
   KEY_RESULT_TITLE_MAX_LENGTH,
 } from '../value-objects/key-result-limits';
 import { GoalTimeframeSchema } from '../value-objects/goal-timeframe';
-import { brandedId } from '../../../primitives';
-import type { GoalId, KeyResultId } from '../../../primitives';
+import { brandedId } from '@memoflow/shared-primitives';
+import type { GoalId, KeyResultId } from '@memoflow/shared-primitives';
 import type { KeyResultClientDTO } from '../entities/key-result-client';
 import { GoalIdParamsSchema } from './goal-crud.dto';
 import { KeyResultListResSchema } from './response-schemas';

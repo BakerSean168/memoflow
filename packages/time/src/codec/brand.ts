@@ -1,4 +1,4 @@
-import type { Hm, Instant, TransferDate, Ymd } from '@memoflow/contracts/primitives';
+import type { Hm, Instant, TransferDate, Ymd } from '@memoflow/shared-primitives';
 
 export function isFiniteInstantMs(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value);

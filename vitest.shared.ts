@@ -3,7 +3,14 @@ import { defineConfig, mergeConfig } from 'vitest/config';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import type { Alias, UserConfig } from 'vite';
-import { createContractsAliasEntries } from './vite.workspace-aliases.ts';
+import {
+  createContractsAliasEntries,
+  createGoalCoreAliasEntries,
+  createSharedPrimitivesAliasEntries,
+  createTransportContractsAliasEntries,
+  createDesktopContractsAliasEntries,
+  createHostRuntimeAliasEntries,
+} from './vite.workspace-aliases.ts';
 
 /**
  * Shared Vitest configuration for all projects
@@ -334,6 +341,11 @@ export function createSharedConfig(options: SharedConfigOptions) {
     ...resolvedAliasEntries,
     ...commonWorkspaceAliasEntries,
     ...createContractsAliasEntries(workspaceRoot),
+    ...createGoalCoreAliasEntries(workspaceRoot),
+    ...createSharedPrimitivesAliasEntries(workspaceRoot),
+    ...createTransportContractsAliasEntries(workspaceRoot),
+    ...createDesktopContractsAliasEntries(workspaceRoot),
+    ...createHostRuntimeAliasEntries(workspaceRoot),
     ...baseAliasEntries,
   ];
 

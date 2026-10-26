@@ -14,7 +14,7 @@
     "@memoflow/contracts": "workspace:*",
     "@memoflow/data-portability": "workspace:*",
     "@memoflow/database": "workspace:*",
-    "@memoflow/goal": "workspace:*",
+    "@memoflow/goal-client": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/label": "workspace:*",
     "@memoflow/notification": "workspace:*",

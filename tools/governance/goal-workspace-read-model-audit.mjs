@@ -153,15 +153,15 @@ requireTokens('apps/desktop/src/main/modules/goal/goal-workspace.electron-module
   'GoalWorkspaceChannels.TASKS',
   'GoalWorkspaceChannels.KNOWLEDGE',
 ]);
-requireTokens('packages/contracts/src/electron/ipc-channels.ts', [
+requireTokens('packages/desktop-contracts/src/ipc-channels.ts', [
   "GET: 'goal:workspace:get'",
   "TASKS: 'goal:workspace:tasks'",
   "KNOWLEDGE: 'goal:workspace:knowledge'",
 ]);
 
 for (const clientPath of [
-  'packages/goal/src/infrastructure-client/adapters/http/goal-http.adapter.ts',
-  'packages/goal/src/infrastructure-client/adapters/ipc/goal-ipc.adapter.ts',
+  'packages/goal-client/src/infrastructure-client/adapters/http/goal-http.adapter.ts',
+  'packages/goal-client/src/infrastructure-client/adapters/ipc/goal-ipc.adapter.ts',
 ]) {
   requireTokens(clientPath, [
     'getGoalWorkspace(',

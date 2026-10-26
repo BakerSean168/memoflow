@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createMockAccount } from '../../../mocks/account.mock';
-import { requireYmd } from '../../../primitives';
+import { requireYmd } from '@memoflow/shared-primitives';
 import { AccountResponseSchema } from './response-schemas';
 
 describe('Account birthday Ymd wire contract (TIME-1206)', () => {

@@ -33,7 +33,7 @@
  * 3. `destroy()` for cleanup, idempotent and a no-op after `failed`.
  */
 
-import type { ServerModuleHandle, ServerTransportModuleContext } from '@memoflow/contracts/shared';
+import type { ServerModuleHandle, ServerTransportModuleContext } from '@memoflow/host-runtime';
 import { createLogger } from '@memoflow/utils/logger';
 import type { AITransportModuleInstance } from '../server/infrastructure';
 import {

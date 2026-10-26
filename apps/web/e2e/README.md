@@ -1,6 +1,6 @@
 # Web E2E
 
-`apps/web/e2e` 只存放 Web 端到端测试本身与少量测试辅助代码。运行入口、测试分层和全仓库测试策略统一以 [`docs/test/`](../../../docs/test/README.md) 为准，这里不再重复维护一套厚文档。
+`apps/web/e2e` 只存放 Web 端到端测试本身与少量测试辅助代码。运行入口、测试分层和全仓库测试策略统一以 [`docs/internals/testing/`](../../../docs/internals/testing/README.md) 为准，这里不再重复维护一套厚文档。
 
 ## 目录边界
 
@@ -36,7 +36,7 @@ AI Goal Workflow 旅程拆分在 `ai/goal-workflow/*.spec.ts`，共享路由 moc
 - 常规 Web E2E：[`apps/web/playwright.config.ts`](../playwright.config.ts)
 - 同步回归 E2E：[`apps/web/playwright.sync.config.ts`](../playwright.sync.config.ts)
 - 常规 E2E 配置常量：[`apps/web/e2e/config.ts`](./config.ts)
-- sync 账号与 desktop 启动 helper：[`apps/web/e2e/sync/helpers/`](./sync/helpers/)
+- sync 账号与 desktop 启动 helper：[`apps/web/e2e/sync/helpers/`](./sync/helpers)
 
 ## Ownership 与执行车道
 

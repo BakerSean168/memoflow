@@ -7,14 +7,14 @@
 
 import { z } from 'zod';
 import { LabelColorSchema } from '../../label';
-import { brandedId } from '../../../primitives';
+import { brandedId } from '@memoflow/shared-primitives';
 import type {
   GoalId,
   GoalReviewId,
   KeyResultId,
   IdentityId,
   GoalRecordId,
-} from '../../../primitives';
+} from '@memoflow/shared-primitives';
 import { GoalRecordAuthorshipSchema, GoalRecordSourceType } from '../entities/goal-record-server';
 import { GoalStatus } from '../value-objects/goal-status';
 import { GoalReviewSystemContextSchema } from '../value-objects/goal-review-context';

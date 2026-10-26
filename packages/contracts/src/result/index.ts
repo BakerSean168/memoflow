@@ -1,33 +1,7 @@
 /**
- * Result Pattern - unified result types and protocol adapters.
- *
- * @module @memoflow/contracts/result
+ * 兼容 shim（P1 S2，Issue #633）：result 真身已迁至 @memoflow/transport-contracts，
+ * 本文件仅作单向 re-export，新代码禁止再引用 `@memoflow/contracts/result`。
+ * 淘汰条件：全仓该 specifier 引用计数为 0，且 contracts 与 main CI 各绿一轮，
+ * 并在 Issue #633 记录摘除证据后，删除本 shim 并摘除 exports 子路径。
  */
-
-export * from './core';
-export * from './public-failure';
-export * from './failure-policy';
-export * from './failure-compat';
-
-export { toIpcResult, fromIpcResult, isIpcResultEnvelope, type IpcResult } from './ipc';
-
-export {
-  toHttpResponse,
-  fromHttpResponse,
-  getHttpStatusCode,
-  errorCodeToHttpStatus,
-  HttpResponseBuilder,
-  createHttpResponseBuilder,
-  isClientError,
-  isServerError,
-  publicFailureToHttpStatus,
-  defineFailureHttpPolicy,
-  FailureCategoryToHttpStatus,
-  ResultCodeToHttpStatus,
-  type FailureHttpRule,
-  type FailureHttpPolicy,
-  type HttpResponse,
-  type HttpResponseOptions,
-} from './http';
-
-// Residual 615: retired success-boolean action dual-track helpers (Result envelope only).
+export * from '@memoflow/transport-contracts/result';

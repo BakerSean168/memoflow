@@ -7,7 +7,7 @@
  * - 预览功能（用户保存前预览进度变化）
  */
 
-import type { GoalId, KeyResultId } from '../../../primitives';
+import type { GoalId, KeyResultId } from '@memoflow/shared-primitives';
 
 /**
  * 单个 KeyResult 的计算结果 DTO
