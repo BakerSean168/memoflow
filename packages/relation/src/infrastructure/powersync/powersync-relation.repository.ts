@@ -1,5 +1,5 @@
 import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
-import { RelationDTOSchema, type RelationDTO, type SubjectRef } from '@memoflow/contracts/relation';
+import { RelationDTOSchema, type RelationDTO, type SubjectRef } from '@memoflow/relation-contracts';
 import type {
   AddRelationInput,
   RelationPage,

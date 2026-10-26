@@ -6,7 +6,7 @@ import {
   KnowledgeDocumentIdSchema,
   KnowledgeDocumentRefSchema,
   type KnowledgeDocumentRef,
-} from '../repository';
+} from '@memoflow/contracts/repository';
 
 export const SubjectTypes = ['note', 'goal', 'task', 'habit', 'wallet'] as const;
 export type SubjectType = (typeof SubjectTypes)[number];

@@ -6844,14 +6844,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/relation/relation-contract.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/contracts/src/modules/repository/aggregates/dual-registry.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -9292,6 +9284,14 @@
       "primarySuite": "unit",
       "collectors": [
         "packages/powersync-schema/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/relation-contracts/src/relation-contract.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/relation-contracts/vitest.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -13004,7 +13004,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 56
+      "fileCount": 55
     },
     {
       "id": "packages/data-portability-contracts/vitest.config.ts",
@@ -13127,6 +13127,13 @@
     },
     {
       "id": "packages/powersync-schema/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 1
+    },
+    {
+      "id": "packages/relation-contracts/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",

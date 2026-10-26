@@ -8,6 +8,7 @@ const sharedConfig = createSharedConfig({
   aliases: {
     '@memoflow/contracts/ai': '../../packages/contracts/src/modules/ai',
     '@memoflow/goal-contracts': '../../packages/goal-contracts/src',
+    '@memoflow/relation-contracts': '../../packages/relation-contracts/src',
     '@memoflow/workspace-contracts': '../../packages/workspace-contracts/src',
     '@memoflow/contracts/primitives': '../../packages/contracts/src/primitives',
     '@memoflow/reliable-messaging-contracts': '../../packages/reliable-messaging-contracts/src',

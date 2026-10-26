@@ -11,7 +11,7 @@ import {
   type GoalKnowledgeListReq,
   type GoalsForKnowledgeReq,
   type RelationDTO,
-} from '@memoflow/contracts/relation';
+} from '@memoflow/relation-contracts';
 import type { KnowledgeDocumentRef } from '@memoflow/contracts/repository';
 import type { GoalId } from '@memoflow/goal-contracts';
 import type { RelationRepository } from '../domain/relation-repository';

@@ -49,6 +49,7 @@
     "@memoflow/host-runtime": "workspace:*",
     "@memoflow/label-contracts": "workspace:*",
     "@memoflow/patterns": "workspace:*",
+    "@memoflow/relation-contracts": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/utils": "workspace:*",
     "@memoflow/workspace-contracts": "workspace:*",

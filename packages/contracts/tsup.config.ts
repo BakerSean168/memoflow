@@ -29,7 +29,6 @@ export default createTsupConfig({
     'src/modules/routine/index.ts',
     'src/modules/ai/index.ts',
     'src/modules/data-portability/index.ts',
-    'src/modules/relation/index.ts',
     // 其他模块入口
     'src/result/index.ts',
     'src/shared/index.ts',

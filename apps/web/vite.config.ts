@@ -102,6 +102,7 @@ const webDevWorkspaceEntries = [
   ],
   ['@memoflow/transport-contracts', 'packages/transport-contracts/src/index.ts'],
   ['@memoflow/label-contracts', 'packages/label-contracts/src/index.ts'],
+  ['@memoflow/relation-contracts', 'packages/relation-contracts/src/index.ts'],
   ['@memoflow/data-portability-contracts', 'packages/data-portability-contracts/src/index.ts'],
   [
     '@memoflow/goal-contracts/test-support/goal.mock',
