@@ -1,4 +1,4 @@
-import { goalUiHost } from '../goalUiHost';
+import { goalUiHost } from '../goal-ui-host';
 import { ref, toValue, watch, type MaybeRefOrGetter } from 'vue';
 import type {
   GetGoalWorkspaceReq,

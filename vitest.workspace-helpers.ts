@@ -369,7 +369,7 @@ export const domainResolveAliases = [
   },
   {
     find: /^@memoflow\/goal-ui\/host$/,
-    replacement: path.resolve(import.meta.dirname, './packages/goal-ui/src/goalUiHost.ts'),
+    replacement: path.resolve(import.meta.dirname, './packages/goal-ui/src/goal-ui-host.ts'),
   },
   {
     find: /^@memoflow\/goal-ui\/composables\/useGoal$/,

@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { goalUiHost } from '../goalUiHost';
+import { goalUiHost } from '../goal-ui-host';
 const { LabelFilterPopover } = goalUiHost.components;
 const { ProductSingleSelectFilter } = goalUiHost.components;
 const { ProductSurfaceHeader } = goalUiHost.components;
@@ -46,7 +46,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Plus, Target } from '@lucide/vue';
 import type { GoalSystemView } from '@memoflow/goal-contracts';
-import type { GoalLabelOption as LabelPickerOption } from '../goalUiHost';
+import type { GoalLabelOption as LabelPickerOption } from '../goal-ui-host';
 
 const props = defineProps<{
   systemViews: Array<{ id: GoalSystemView; label: string }>;

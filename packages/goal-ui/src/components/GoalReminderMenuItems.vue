@@ -80,7 +80,7 @@
 </template>
 
 <script setup lang="ts">
-import { goalUiHost } from '../goalUiHost';
+import { goalUiHost } from '../goal-ui-host';
 const { formatProductDateTime } = goalUiHost;
 const { getProductTime } = goalUiHost;
 const { getProductTodayYmd } = goalUiHost;

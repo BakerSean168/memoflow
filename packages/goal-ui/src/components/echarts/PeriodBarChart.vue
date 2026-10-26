@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import { goalUiHost } from '../../goalUiHost';
+import { goalUiHost } from '../../goal-ui-host';
 const { getProductTime } = goalUiHost;
 const { productTimeRevision } = goalUiHost;
 import { computed } from 'vue';

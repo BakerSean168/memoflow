@@ -1,4 +1,4 @@
-import { goalUiHost } from '../goalUiHost';
+import { goalUiHost } from '../goal-ui-host';
 /**
  * useKeyResults — Key result CRUD composable
  */

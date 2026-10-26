@@ -70,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import { goalUiHost } from '../../goalUiHost';
+import { goalUiHost } from '../../goal-ui-host';
 const { ProductDialogShell } = goalUiHost.components;
 const { formatProductDate } = goalUiHost;
 import { useI18n } from 'vue-i18n';

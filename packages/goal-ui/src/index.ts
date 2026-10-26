@@ -61,7 +61,7 @@ export { createGoalStartupHook } from './initialization';
 
 export { createGoalDraftCheckpointStore } from './infrastructure/goal-draft-checkpoint.indexeddb';
 
-export { bindGoalUiHost, type GoalUiHost } from './goalUiHost';
+export { bindGoalUiHost, type GoalUiHost } from './goal-ui-host';
 export type { GoalDraftCheckpointStore } from './infrastructure/goal-draft-checkpoint.indexeddb';
 export { default as GoalDetailView } from './views/GoalDetailView.vue';
 export { default as GoalListView } from './views/GoalListView.vue';

@@ -133,7 +133,7 @@
 </template>
 
 <script setup lang="ts">
-import { goalUiHost } from '../goalUiHost';
+import { goalUiHost } from '../goal-ui-host';
 const { ActionableWrapper } = goalUiHost.components;
 const { getProductTodayYmd } = goalUiHost;
 import { computed } from 'vue';
@@ -141,7 +141,7 @@ import { useI18n } from 'vue-i18n';
 import { Pencil, Trash2 } from '@lucide/vue';
 import { goalTimeframeLabel, isPastGoalTarget, type GoalClientDTO } from '@memoflow/goal-contracts';
 import { Badge, Progress } from '@memoflow/ui-vue-shadcn';
-import type { GoalMenuAction as MenuAction } from '../goalUiHost';
+import type { GoalMenuAction as MenuAction } from '../goal-ui-host';
 
 import { getGoalOverallProgress } from '../utils/progress';
 

@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { goalUiHost } from '../goalUiHost';
+import { goalUiHost } from '../goal-ui-host';
 const { vKeyboardList } = goalUiHost;
 const { AppEmptyState } = goalUiHost.components;
 

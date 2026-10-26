@@ -189,7 +189,7 @@
 </template>
 
 <script setup lang="ts">
-import { goalUiHost } from '../goalUiHost';
+import { goalUiHost } from '../goal-ui-host';
 const { ProductAutoTextarea } = goalUiHost.components;
 const { useTransientFeedback } = goalUiHost;
 const { formatProductYmd } = goalUiHost;

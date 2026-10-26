@@ -39,7 +39,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: {
-        host: path.resolve(__dirname, 'src/goalUiHost.ts'),
+        host: path.resolve(__dirname, 'src/goal-ui-host.ts'),
         index: path.resolve(__dirname, 'src/index.ts'),
         'composables/useGoal': path.resolve(__dirname, 'src/composables/useGoal.ts'),
       },

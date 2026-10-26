@@ -141,7 +141,7 @@ const config: StorybookConfig = {
               '@memoflow/goal-ui/composables/useGoal',
               'packages/goal-ui/src/composables/useGoal.ts',
             ],
-            ['@memoflow/goal-ui/host', 'packages/goal-ui/src/goalUiHost.ts'],
+            ['@memoflow/goal-ui/host', 'packages/goal-ui/src/goal-ui-host.ts'],
             ['@memoflow/goal-ui', 'packages/goal-ui/src/index.ts'],
             ['@goal-ui-test-host', 'packages/app-vue/src'],
             ['@memoflow/workspace-contracts', 'packages/workspace-contracts/src/index.ts'],

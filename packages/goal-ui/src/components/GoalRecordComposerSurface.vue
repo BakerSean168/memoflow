@@ -71,7 +71,7 @@
 </template>
 
 <script setup lang="ts">
-import { goalUiHost } from '../goalUiHost';
+import { goalUiHost } from '../goal-ui-host';
 const { ProductPropertyChip } = goalUiHost.components;
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';

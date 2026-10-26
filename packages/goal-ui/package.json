@@ -15,7 +15,7 @@
       "import": "./dist/composables/useGoal.js"
     },
     "./host": {
-      "types": "./dist/goalUiHost.d.ts",
+      "types": "./dist/goal-ui-host.d.ts",
       "import": "./dist/host.js"
     }
   },

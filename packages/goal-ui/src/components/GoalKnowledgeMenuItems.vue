@@ -50,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import { goalUiHost } from '../goalUiHost';
+import { goalUiHost } from '../goal-ui-host';
 const { GOAL_KNOWLEDGE_SERVICE_KEY } = goalUiHost;
 const { useStrictInject } = goalUiHost;
 const { useReferenceableKnowledgeNotes } = goalUiHost;

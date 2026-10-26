@@ -1,4 +1,4 @@
-import { goalUiHost } from '../goalUiHost';
+import { goalUiHost } from '../goal-ui-host';
 
 export interface TimelineSnapshot {
   timestamp: number;

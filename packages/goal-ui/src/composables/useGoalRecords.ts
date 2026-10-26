@@ -1,4 +1,4 @@
-import { goalUiHost } from '../goalUiHost';
+import { goalUiHost } from '../goal-ui-host';
 /**
  * useGoalRecords — Goal records and reviews composable
  */

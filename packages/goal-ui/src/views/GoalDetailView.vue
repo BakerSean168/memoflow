@@ -709,7 +709,7 @@
 </template>
 
 <script setup lang="ts">
-import { goalUiHost } from '../goalUiHost';
+import { goalUiHost } from '../goal-ui-host';
 const { AppEmptyState } = goalUiHost.components;
 const { ModuleHeader } = goalUiHost.components;
 const { ProductAutoTextarea } = goalUiHost.components;

@@ -35,7 +35,7 @@
       "@memoflow/data-portability-contracts/*": ["./packages/data-portability-contracts/src/*.ts"],
       "@memoflow/goal-ui/composables/useGoal": ["./packages/goal-ui/src/composables/useGoal.ts"],
       "@memoflow/goal-ui/*": ["./packages/goal-ui/src/*.ts"],
-      "@memoflow/goal-ui/host": ["./packages/goal-ui/src/goalUiHost.ts"],
+      "@memoflow/goal-ui/host": ["./packages/goal-ui/src/goal-ui-host.ts"],
       "@memoflow/goal-ui": ["./packages/goal-ui/src/index.ts"],
       "@memoflow/goal-contracts": ["./packages/goal-contracts/src/index.ts"],
       "@memoflow/goal-contracts/*": ["./packages/goal-contracts/src/*.ts"],

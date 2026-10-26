@@ -70,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import { goalUiHost } from '../goalUiHost';
+import { goalUiHost } from '../goal-ui-host';
 const { ProductDateTimePicker } = goalUiHost.components;
 const { ProductPropertyChip } = goalUiHost.components;
 const { formatProductDateTime } = goalUiHost;

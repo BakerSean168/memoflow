@@ -50,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import { goalUiHost } from '../../goalUiHost';
+import { goalUiHost } from '../../goal-ui-host';
 const { ProductDialogShell } = goalUiHost.components;
 const { useDialogCloseGuard } = goalUiHost;
 import { computed, reactive, ref, watch } from 'vue';

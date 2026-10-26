@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import { goalUiHost } from '../goalUiHost';
+import { goalUiHost } from '../goal-ui-host';
 const { ProductTimeframePicker } = goalUiHost.components;
 import { useI18n } from 'vue-i18n';
 import type { GoalTimeframe } from '@memoflow/goal-contracts';

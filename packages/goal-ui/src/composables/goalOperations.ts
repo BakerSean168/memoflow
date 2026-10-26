@@ -1,4 +1,4 @@
-import { goalUiHost } from '../goalUiHost';
+import { goalUiHost } from '../goal-ui-host';
 /**
  * Goal Operations — reusable service-call + store-update patterns
  *

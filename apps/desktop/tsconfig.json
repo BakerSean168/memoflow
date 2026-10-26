@@ -15,7 +15,7 @@
       "@common/*": ["./common/*"],
       "@memoflow/app-vue": ["../../packages/app-vue/src/index.ts"],
       "@memoflow/goal-ui": ["../../packages/goal-ui/src/index.ts"],
-      "@memoflow/goal-ui/host": ["../../packages/goal-ui/src/goalUiHost.ts"],
+      "@memoflow/goal-ui/host": ["../../packages/goal-ui/src/goal-ui-host.ts"],
       "@memoflow/ui-vue-shadcn/composables/*": ["../../packages/ui-vue-shadcn/src/composables/*"],
       "@memoflow/ai/client": ["../../packages/ai/src/client/index.ts"],
       "@memoflow/ai/electron": ["../../packages/ai/src/electron/index.ts"],

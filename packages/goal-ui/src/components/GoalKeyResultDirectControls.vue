@@ -105,7 +105,7 @@
 </template>
 
 <script setup lang="ts">
-import { goalUiHost } from '../goalUiHost';
+import { goalUiHost } from '../goal-ui-host';
 const { ProductAutoTextarea } = goalUiHost.components;
 const { ProductPopoverSurface } = goalUiHost.components;
 import { computed, nextTick, ref, watch } from 'vue';

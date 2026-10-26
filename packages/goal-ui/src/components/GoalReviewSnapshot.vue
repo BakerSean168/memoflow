@@ -69,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import { goalUiHost } from '../goalUiHost';
+import { goalUiHost } from '../goal-ui-host';
 const { formatProductDate } = goalUiHost;
 import { useI18n } from 'vue-i18n';
 import { Progress } from '@memoflow/ui-vue-shadcn';

@@ -223,7 +223,7 @@ export function createGoalUiAliasEntries(workspaceRoot: string): Alias[] {
   return [
     {
       find: /^@memoflow\/goal-ui\/host$/,
-      replacement: resolveFromWorkspace(workspaceRoot, 'packages/goal-ui/src/goalUiHost.ts'),
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/goal-ui/src/goal-ui-host.ts'),
     },
     {
       find: /^@memoflow\/goal-ui\/composables\/useGoal$/,
