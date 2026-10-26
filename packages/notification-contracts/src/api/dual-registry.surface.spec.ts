@@ -109,11 +109,11 @@ import { describe, expect, it } from 'vitest';
    */
   describe('preference/calendar client dto duals retired (residual 829)', () => {
     const notifApi = __dirname;
-    const scheduleApi = resolve(notifApi, '../../../contracts/src/modules/schedule/api');
+    const scheduleApi = resolve(notifApi, '../../../schedule-contracts/src/api');
     const notifAgg = resolve(notifApi, '../aggregates/notification-preference-client.ts');
     const scheduleAgg = resolve(
       notifApi,
-      '../../../contracts/src/modules/schedule/aggregates/calendar-entry-client.ts',
+      '../../../schedule-contracts/src/aggregates/calendar-entry-client.ts',
     );
 
     it('owns NotificationPreferenceClientDTO as z.infer of NotificationPreferenceResponseSchema', () => {
@@ -137,7 +137,7 @@ import { describe, expect, it } from 'vitest';
       const aggregate = readFileSync(scheduleAgg, 'utf8');
       const schemas = readFileSync(resolve(scheduleApi, 'response-schemas.ts'), 'utf8');
       const routes = readFileSync(
-        resolve(scheduleApi, '../../../../../schedule/src/api/schedule-event.routes.ts'),
+        resolve(scheduleApi, '../../../schedule/src/api/schedule-event.routes.ts'),
         'utf8',
       );
       expect(aggregate).toContain('Residual 829');

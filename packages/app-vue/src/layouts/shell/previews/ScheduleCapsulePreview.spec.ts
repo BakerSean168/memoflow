@@ -4,6 +4,8 @@ import { createI18n } from 'vue-i18n';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
 import { setProductTimePreferences } from '../../../shared/utils/product-time';
+// The preview consumes @memoflow/schedule-ui helpers that read the bound host.
+import '../../../di/schedule-ui-host';
 import type { CalendarEventItem, ScheduleCapsuleSnapshot } from '@memoflow/schedule-ui';
 import ScheduleCapsulePreview from './ScheduleCapsulePreview.vue';
 

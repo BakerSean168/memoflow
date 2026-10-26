@@ -82,7 +82,7 @@ export interface FetchRoutineUpcomingCachedOptions {
 export interface ScheduleUiHost {
   SCHEDULE_SERVICE_KEY: InjectionKey<ScheduleClientPort>;
   GOAL_SERVICE_KEY: InjectionKey<ScheduleGoalPort>;
-  ROUTINE_SERVICE_KEY: InjectionKey<unknown>;
+  ROUTINE_SERVICE_KEY: InjectionKey<RoutineUpcomingSourcePort>;
 
   useStrictInject<T>(key: InjectionKey<T>, name?: string): T;
   sanitizeForIpc<T>(value: T): T;

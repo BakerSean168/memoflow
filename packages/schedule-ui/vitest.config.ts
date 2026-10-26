@@ -17,6 +17,12 @@ export default mergeConfig(
         replacement: path.resolve(workspaceRoot, 'packages/app-vue/src/$1'),
       },
     ],
+    // The test host resolves @schedule-ui-test-host/* into app-vue source, which
+    // imports the Goal client. app-vue's own vitest config aliases it to source
+    // for the same reason: the published entry is an unbuilt dist in test jobs.
+    aliases: {
+      '@memoflow/goal-client': '../../packages/goal-client/src/index.ts',
+    },
   }),
   defineConfig({
     root: import.meta.dirname,
