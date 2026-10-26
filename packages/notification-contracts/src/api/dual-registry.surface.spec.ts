@@ -169,7 +169,7 @@ import { describe, expect, it } from 'vitest';
     const port = readFileSync(
       resolve(
         apiDir,
-        '../../../notification/src/application-client/ports/notification-api-client.port.ts',
+        '../../../notification-client/src/application-client/ports/notification-api-client.port.ts',
       ),
       'utf8',
     );

@@ -31,6 +31,7 @@ const config: StorybookConfig = {
     : [
         '../../../packages/ui-vue-shadcn/src/**/*.stories.@(js|jsx|ts|tsx|vue)',
         '../../../packages/app-vue/src/**/*.stories.@(js|jsx|ts|tsx|vue)',
+        '../../../packages/notification-ui/src/**/*.stories.@(js|jsx|ts|tsx|vue)',
         '../../../apps/web/src/auth/*.stories.ts',
       ],
   addons: ['@storybook/addon-docs', '@storybook/addon-vitest'],
