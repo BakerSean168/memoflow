@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { RelationChannels } from '@memoflow/contracts/electron';
-import { GoalKnowledgeLinkReqSchema } from '@memoflow/contracts/relation';
+import { GoalKnowledgeLinkReqSchema } from '@memoflow/relation-contracts';
 import { createGoalKnowledgeHttpClient, createGoalKnowledgeIpcClient } from './index';
 
 const request = GoalKnowledgeLinkReqSchema.parse({

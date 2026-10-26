@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
-import { buildIdempotencyKeyString } from '@memoflow/contracts/reliable-messaging';
+import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
 import { asInstant } from '@memoflow/time';
 import type {
   ApplyRoutineInteractionInput,

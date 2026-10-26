@@ -5,7 +5,7 @@ import {
   seedAccount,
 } from '@memoflow/test-utils/setup/integration-helpers';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { SubjectRefSchema } from '@memoflow/contracts/relation';
+import { SubjectRefSchema } from '@memoflow/relation-contracts';
 import { PrismaRelationRepository } from '../infrastructure/prisma/prisma-relation.repository';
 
 const GOAL_REF = SubjectRefSchema.parse({

@@ -26,7 +26,7 @@ import {
   type PrismaNotificationWithRelations,
 } from './mappers/notification-prisma.mapper';
 
-import { NotificationOutboxDispatchInputSchema } from '@memoflow/contracts/reliable-messaging';
+import { NotificationOutboxDispatchInputSchema } from '@memoflow/reliable-messaging-contracts';
 import { randomUUID } from 'crypto';
 
 const notificationEventPublisher = createTypedEventPublisher<NotificationEventMap>(eventBus);

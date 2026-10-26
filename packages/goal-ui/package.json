@@ -26,6 +26,7 @@
     "@memoflow/goal-contracts": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/label-contracts": "workspace:*",
+    "@memoflow/relation-contracts": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/transport-contracts": "workspace:*",

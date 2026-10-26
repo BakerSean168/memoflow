@@ -1,4 +1,4 @@
-import { LeaseFencingException } from '@memoflow/contracts/reliable-messaging';
+import { LeaseFencingException } from '@memoflow/reliable-messaging-contracts';
 import type { RecurrenceEnginePort } from '@memoflow/time';
 import {
   computeDurableElapsedNextOccurrence,

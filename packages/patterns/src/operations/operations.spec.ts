@@ -5,7 +5,7 @@ import {
   OperationReplayRequestSchema,
   OperationTimelineEntrySchema,
   OperationTimelineQuerySchema,
-} from '@memoflow/contracts/operations';
+} from '@memoflow/operations-contracts';
 import {
   mapProjectionToTimelineEntry,
   mapReceiptToTimelineEntry,

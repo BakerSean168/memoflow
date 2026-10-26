@@ -10,7 +10,7 @@ import type { GoalMutationReceipt } from '@memoflow/goal-contracts';
 import { GoalStatus } from '@memoflow/goal-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
-import { buildIdempotencyKeyString } from '@memoflow/contracts/reliable-messaging';
+import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
 import { createGoalMutationReceipt } from './goal-mutation-receipt';
 import { type GoalWriteTransactionRunner } from './goal-write-support';
 

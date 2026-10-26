@@ -80,8 +80,11 @@
     "goal-contracts": "runtime-lib",
     "goal-ui": "runtime-lib",
     "workspace-contracts": "runtime-lib",
+    "relation-contracts": "runtime-lib",
     "desktop-contracts": "runtime-lib",
-    "host-runtime": "runtime-lib"
+    "host-runtime": "runtime-lib",
+    "reliable-messaging-contracts": "runtime-lib",
+    "operations-contracts": "runtime-lib"
   },
   "exemptions": [
     {

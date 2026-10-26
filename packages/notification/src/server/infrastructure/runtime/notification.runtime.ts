@@ -16,7 +16,7 @@ import {
   type CapabilityStatus,
   type LeaseClaim,
   type NotificationOutboxDispatchInput,
-} from '@memoflow/contracts/reliable-messaging';
+} from '@memoflow/reliable-messaging-contracts';
 import type {
   OperationAuditRecordInput,
   OperationAuditRepository,

@@ -54,7 +54,7 @@ import { GoalReviewContextBuilder } from '../application';
 import { ReviewWindowResolver } from '../application/services/review-window-resolver';
 import { createLogger } from '@memoflow/utils/logger';
 import type { GoalApplicationPort } from '../application';
-import type { GoalDependencyReadPort } from '@memoflow/contracts/reliable-messaging';
+import type { GoalDependencyReadPort } from '@memoflow/reliable-messaging-contracts';
 import type { GoalWriteTransactionRunner } from '../application/use-cases/commands/goal-write-support';
 import type { GoalDeletionTransactionRunner } from '../application/use-cases/commands/goal-deletion-support';
 import {

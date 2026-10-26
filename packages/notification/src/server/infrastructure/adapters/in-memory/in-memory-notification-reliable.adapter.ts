@@ -5,7 +5,7 @@ import {
   type LeaseClaim,
   type NotificationOutboxDispatchInput,
   type NotificationReliableOperationPort,
-} from '@memoflow/contracts/reliable-messaging';
+} from '@memoflow/reliable-messaging-contracts';
 
 export interface DurableOutboxRow {
   id: string;

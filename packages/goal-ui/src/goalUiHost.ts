@@ -9,7 +9,7 @@ import type {
   GoalKnowledgeLinkReq,
   GoalKnowledgeListReq,
   GoalKnowledgeRelation,
-} from '@memoflow/contracts/relation';
+} from '@memoflow/relation-contracts';
 import type {
   AIWorkflowRunView,
   AIWorkflowGetClientRequest,

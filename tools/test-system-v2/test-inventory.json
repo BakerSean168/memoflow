@@ -6538,14 +6538,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/label/label-portable-v3.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/contracts/src/modules/notification/api/dual-registry.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6595,30 +6587,6 @@
     },
     {
       "path": "packages/contracts/src/modules/notification/value-objects/dual-registry.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/operations/operations-dist.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/relation/relation-contract.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/reliable-messaging/reliable-messaging-contracts.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -8726,6 +8694,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/label-contracts/src/label-portable-v3.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/label-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/label/src/__tests__/label-registry-characterization.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -9206,6 +9182,14 @@
       ]
     },
     {
+      "path": "packages/operations-contracts/src/operations-dist.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/operations-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/patterns/src/events/create-event-bus-adapter-dual.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -9270,6 +9254,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/relation-contracts/src/relation-contract.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/relation-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/relation/src/__tests__/goal-knowledge-service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -9314,6 +9306,14 @@
       "primarySuite": "unit",
       "collectors": [
         "packages/relation/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/reliable-messaging-contracts/src/reliable-messaging-contracts.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/reliable-messaging-contracts/vitest.config.ts"
       ],
       "measurementCollectors": []
     },
@@ -12970,7 +12970,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 59
+      "fileCount": 55
     },
     {
       "id": "packages/data-portability-contracts/vitest.config.ts",
@@ -13068,7 +13068,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 1
+      "fileCount": 2
     },
     {
       "id": "packages/label/vitest.config.ts",
@@ -13085,6 +13085,13 @@
       "fileCount": 40
     },
     {
+      "id": "packages/operations-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 1
+    },
+    {
       "id": "packages/patterns/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
@@ -13099,11 +13106,25 @@
       "fileCount": 1
     },
     {
+      "id": "packages/relation-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 1
+    },
+    {
       "id": "packages/relation/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
       "fileCount": 5
+    },
+    {
+      "id": "packages/reliable-messaging-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 1
     },
     {
       "id": "packages/reminder/vitest.config.ts",

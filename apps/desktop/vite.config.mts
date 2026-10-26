@@ -12,6 +12,8 @@ import {
 import {
   createAppVueSourceAliasEntries,
   createAssetsAliasEntries,
+  createReliableMessagingContractsAliasEntries,
+  createOperationsContractsAliasEntries,
   createContractsAliasEntries,
   createUiVueSourceAliasEntries,
   createWorkspaceSourceAliasEntries,
@@ -69,6 +71,7 @@ const desktopRendererDevWorkspaceEntries = [
   ],
   ['@memoflow/transport-contracts', 'packages/transport-contracts/src/index.ts'],
   ['@memoflow/label-contracts', 'packages/label-contracts/src/index.ts'],
+  ['@memoflow/relation-contracts', 'packages/relation-contracts/src/index.ts'],
   ['@memoflow/data-portability-contracts', 'packages/data-portability-contracts/src/index.ts'],
   [
     '@memoflow/goal-contracts/test-support/goal.mock',
@@ -150,6 +153,8 @@ export default defineConfig(({ command, mode }) => {
         ...createAppVueSourceAliasEntries(workspaceRoot),
         ...createAssetsAliasEntries(workspaceRoot),
         ...createUiVueSourceAliasEntries(workspaceRoot),
+        ...createReliableMessagingContractsAliasEntries(workspaceRoot),
+        ...createOperationsContractsAliasEntries(workspaceRoot),
         ...createContractsAliasEntries(workspaceRoot),
         ...createWorkspaceSourceAliasEntries(workspaceRoot, desktopRendererDevWorkspaceEntries),
       ]

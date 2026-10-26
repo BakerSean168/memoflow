@@ -75,10 +75,6 @@ export function createContractsAliasEntries(workspaceRoot: string): Alias[] {
       replacement: `${contractsRoot}/primitives/$1`,
     },
     {
-      find: /^@memoflow\/contracts\/reliable-messaging$/,
-      replacement: `${contractsRoot}/modules/reliable-messaging/index.ts`,
-    },
-    {
       find: /^@memoflow\/contracts\/shared$/,
       replacement: `${contractsRoot}/shared/index.ts`,
     },
@@ -183,6 +179,24 @@ export function createLabelContractsAliasEntries(workspaceRoot: string): Alias[]
     {
       find: /^@memoflow\/label-contracts\/(.+)$/,
       replacement: `${labelContractsRoot}/$1`,
+    },
+  ];
+}
+
+export function createRelationContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const relationContractsRoot = resolveFromWorkspace(
+    workspaceRoot,
+    'packages/relation-contracts/src',
+  );
+
+  return [
+    {
+      find: /^@memoflow\/relation-contracts$/,
+      replacement: `${relationContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/relation-contracts\/(.+)$/,
+      replacement: `${relationContractsRoot}/$1`,
     },
   ];
 }
@@ -338,6 +352,42 @@ export function createAssetsAliasEntries(workspaceRoot: string): Alias[] {
     {
       find: /^@memoflow\/assets$/,
       replacement: `${assetsRoot}/index.ts`,
+    },
+  ];
+}
+
+export function createReliableMessagingContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const reliableMessagingContractsRoot = resolveFromWorkspace(
+    workspaceRoot,
+    'packages/reliable-messaging-contracts/src',
+  );
+
+  return [
+    {
+      find: /^@memoflow\/reliable-messaging-contracts$/,
+      replacement: `${reliableMessagingContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/reliable-messaging-contracts\/(.+)$/,
+      replacement: `${reliableMessagingContractsRoot}/$1`,
+    },
+  ];
+}
+
+export function createOperationsContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const operationsContractsRoot = resolveFromWorkspace(
+    workspaceRoot,
+    'packages/operations-contracts/src',
+  );
+
+  return [
+    {
+      find: /^@memoflow\/operations-contracts$/,
+      replacement: `${operationsContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/operations-contracts\/(.+)$/,
+      replacement: `${operationsContractsRoot}/$1`,
     },
   ];
 }

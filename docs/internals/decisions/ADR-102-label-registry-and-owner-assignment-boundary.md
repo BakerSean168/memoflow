@@ -116,7 +116,7 @@ PowerSync schema 仍可以包含这些关系表，但 mapper/repository ownershi
 
 ## 6. Contracts
 
-从 `@memoflow/contracts/label` 迁出：
+从 `@memoflow/label-contracts` 导出（原 `@memoflow/contracts` 已清零）：
 
 ```text
 GoalLabelAssignmentCommand

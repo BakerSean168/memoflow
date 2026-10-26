@@ -31,7 +31,7 @@ import type { NotificationRequestedWriterPort } from '@memoflow/contracts/notifi
 import type { ScheduledHandlerRegistration } from '@memoflow/contracts/schedule';
 import type { GoalScheduleProjectionSource } from '../../schedule-projection';
 import { createGoalTaskProgressHandler } from '../application/event-handlers';
-import type { GoalDependencyReadPort } from '@memoflow/contracts/reliable-messaging';
+import type { GoalDependencyReadPort } from '@memoflow/reliable-messaging-contracts';
 import type { IGoalRecordRepository, IGoalRepository, IWalletRepository } from '../domain';
 import type { IHabitRepository } from '../application/use-cases/commands/habit.use-cases';
 import type { GoalWriteTransactionRunner } from '../application/use-cases/commands/goal-write-support';

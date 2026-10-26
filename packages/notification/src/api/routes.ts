@@ -50,11 +50,11 @@ import {
   ExecuteNotificationActionSchema,
   ExecuteNotificationActionResponseSchema,
 } from '@memoflow/contracts/notification';
-import { BusinessOperationReceiptSchema } from '@memoflow/contracts/reliable-messaging';
+import { BusinessOperationReceiptSchema } from '@memoflow/reliable-messaging-contracts';
 import {
   OperationAuditRecordSchema,
   OperationTimelineEntrySchema,
-} from '@memoflow/contracts/operations';
+} from '@memoflow/operations-contracts';
 import type { NotificationInboxPort, NotificationOperationsPort } from '../server/application';
 import { NotificationController } from '../server/transport/notification.controller';
 import { NotificationOperationsController } from '../server/transport/notification-operations.controller';

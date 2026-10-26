@@ -19,7 +19,8 @@
     "@memoflow/reminder": "workspace:*",
     "@memoflow/scheduler": "workspace:*",
     "@memoflow/task": "workspace:*",
-    "@memoflow/utils": "workspace:*"
+    "@memoflow/utils": "workspace:*",
+    "@memoflow/reliable-messaging-contracts": "workspace:*"
   },
   "devDependencies": {
     "tsup": "^8.3.5",

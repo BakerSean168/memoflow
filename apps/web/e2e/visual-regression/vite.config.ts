@@ -2,6 +2,8 @@ import path from 'node:path';
 import { defineConfig, mergeConfig } from 'vite';
 import schedule from '../schedule/presentation-authority/vite.config.ts';
 import {
+  createReliableMessagingContractsAliasEntries,
+  createOperationsContractsAliasEntries,
   createAssetsAliasEntries,
   createWorkspaceSourceAliasEntries,
 } from '../../../../vite.workspace-aliases.ts';
@@ -21,6 +23,8 @@ export default defineConfig(({ mode }) =>
               : 'apps/web/src/styles/index.css',
           ),
         },
+        ...createReliableMessagingContractsAliasEntries(workspace),
+        ...createOperationsContractsAliasEntries(workspace),
         ...createAssetsAliasEntries(workspace),
         ...createWorkspaceSourceAliasEntries(workspace, [
           ['@memoflow/reminder/method-library', 'packages/reminder/src/method-library/index.ts'],
@@ -96,6 +100,7 @@ export default defineConfig(({ mode }) =>
           ],
           ['@memoflow/transport-contracts', 'packages/transport-contracts/src/index.ts'],
           ['@memoflow/label-contracts', 'packages/label-contracts/src/index.ts'],
+          ['@memoflow/relation-contracts', 'packages/relation-contracts/src/index.ts'],
           [
             '@memoflow/data-portability-contracts',
             'packages/data-portability-contracts/src/index.ts',

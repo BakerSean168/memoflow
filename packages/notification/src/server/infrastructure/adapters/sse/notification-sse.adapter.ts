@@ -9,7 +9,7 @@ import {
   type NotificationDispatchInAppEvent,
   type NotificationEventMap,
 } from '@memoflow/contracts/notification';
-import type { BusinessOperationReceipt } from '@memoflow/contracts/reliable-messaging';
+import type { BusinessOperationReceipt } from '@memoflow/reliable-messaging-contracts';
 
 export type NotificationSseDeliveryEvent =
   | NotificationDispatchInAppEvent

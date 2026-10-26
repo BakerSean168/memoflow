@@ -140,6 +140,12 @@ const moduleBoundaryDepConstraints = [
     sourceTag: 'layer:service',
     onlyDependOnLibsWithTags: ['layer:shared'],
   },
+  {
+    // Platform contracts only depend on foundational contract primitives.
+    sourceTag: 'tier:platform-contracts',
+    onlyDependOnLibsWithTags: ['platform:contract-foundation'],
+    notDependOnLibsWithTags: ['tier:core', 'tier:client', 'tier:server'],
+  },
   // ============ Domain tier isolation (goal pilot, Issue #634) ============
   // A feature scope split into core/client/server packages (goal-core,
   // goal-client, goal) carries one extra `tier:*` tag per package. The pure

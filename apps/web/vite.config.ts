@@ -6,6 +6,8 @@ import path from 'node:path';
 import {
   createAppVueSourceAliasEntries,
   createAssetsAliasEntries,
+  createReliableMessagingContractsAliasEntries,
+  createOperationsContractsAliasEntries,
   createContractsAliasEntries,
   createUiVueSourceAliasEntries,
   createWorkspaceSourceAliasEntries,
@@ -100,6 +102,7 @@ const webDevWorkspaceEntries = [
   ],
   ['@memoflow/transport-contracts', 'packages/transport-contracts/src/index.ts'],
   ['@memoflow/label-contracts', 'packages/label-contracts/src/index.ts'],
+  ['@memoflow/relation-contracts', 'packages/relation-contracts/src/index.ts'],
   ['@memoflow/data-portability-contracts', 'packages/data-portability-contracts/src/index.ts'],
   [
     '@memoflow/goal-contracts/test-support/goal.mock',
@@ -209,7 +212,13 @@ export default defineConfig(({ mode, command }) => {
     ...(isDev ? createUiVueSourceAliasEntries(workspaceRoot) : []),
   ];
 
-  const envSpecificAliases = isDev ? createContractsAliasEntries(workspaceRoot) : [];
+  const envSpecificAliases = isDev
+    ? [
+        ...createReliableMessagingContractsAliasEntries(workspaceRoot),
+        ...createOperationsContractsAliasEntries(workspaceRoot),
+        ...createContractsAliasEntries(workspaceRoot),
+      ]
+    : [];
 
   const resolveAliases = [
     ...createAppVueSourceAliasEntries(workspaceRoot),

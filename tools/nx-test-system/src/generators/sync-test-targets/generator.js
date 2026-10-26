@@ -39,7 +39,7 @@ const coverageConfigsByProject = new Map([
 
 // P2：contracts/patterns 的 unit test 包含 operations dist surface 门禁，
 // 因此 `test` target 必须在自身 `build` 之后运行（clean checkout 自洽）。
-const buildFirstVitestProjects = new Set(['contracts', 'patterns']);
+const buildFirstVitestProjects = new Set(['contracts', 'patterns', 'operations-contracts']);
 
 function createVitestCommand(cwd, args) {
   const executable = cwd

@@ -6,14 +6,14 @@ import {
   type OperationAuditQuery,
   type OperationAuditRecord,
   type OperationSource,
-} from '@memoflow/contracts/operations';
+} from '@memoflow/operations-contracts';
 
 export type {
   OperationAuditAction,
   OperationAuditQuery,
   OperationAuditRecord,
   OperationSource,
-} from '@memoflow/contracts/operations';
+} from '@memoflow/operations-contracts';
 
 export interface OperationAuditRecordInput {
   actorIdentityId: string;

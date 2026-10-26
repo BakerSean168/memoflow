@@ -67,7 +67,7 @@ import {
 import {
   GoalKnowledgeLinkReqSchema,
   GoalKnowledgeListReqSchema,
-} from '@memoflow/contracts/relation';
+} from '@memoflow/relation-contracts';
 
 interface KnowledgeCandidate {
   documentId: string;

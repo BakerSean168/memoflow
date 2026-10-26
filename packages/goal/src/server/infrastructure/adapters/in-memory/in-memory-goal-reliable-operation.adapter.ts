@@ -5,7 +5,7 @@ import {
   type BusinessOperationReceipt,
   type GoalRecordReceiptInput,
   type GoalReliableOperationPort,
-} from '@memoflow/contracts/reliable-messaging';
+} from '@memoflow/reliable-messaging-contracts';
 
 export class InMemoryGoalReliableOperationAdapter implements GoalReliableOperationPort {
   private readonly receipts = new Map<string, BusinessOperationReceipt>();
