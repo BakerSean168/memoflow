@@ -1115,4 +1115,7 @@ it.each(['implicit default', 'saved instance'])(
       await flow.close();
     }
   },
+  // The full Registry → Probe → Select → Connection → Compose → Send flow runs two profiles
+  // with real storage and many vi.waitFor polls; on a loaded host it exceeds the 5s default.
+  30_000,
 );
