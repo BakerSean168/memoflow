@@ -5,7 +5,7 @@ import {
   type LabelDto,
   type ListLabelsQuery,
   type UpdateLabelCommand,
-} from '@memoflow/contracts/label';
+} from '@memoflow/label-contracts';
 import type { Clock } from '@memoflow/time';
 import { normalizeLabelName, validateLabelName } from '../domain/label';
 import type { LabelRepository } from '../domain/label-repository';

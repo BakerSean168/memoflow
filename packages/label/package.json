@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@memoflow/contracts": "workspace:*",
+    "@memoflow/label-contracts": "workspace:*",
     "@memoflow/database": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",

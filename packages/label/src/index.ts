@@ -5,8 +5,8 @@ export type {
   UpdateLabelCommand,
   DeleteLabelCommand,
   ListLabelsQuery,
-} from '@memoflow/contracts/label';
-export { LabelColorSchema } from '@memoflow/contracts/label';
+} from '@memoflow/label-contracts';
+export { LabelColorSchema } from '@memoflow/label-contracts';
 export { normalizeLabelName, validateLabelName, normalizeLabelColor } from './domain/label';
 export type { LabelRecord, NewLabelRecord } from './domain/label';
 export type { LabelListOptions, LabelRepository } from './domain/label-repository';

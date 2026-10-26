@@ -6,7 +6,7 @@ import type {
   LabelClientDTO,
   LabelDto,
   ListLabelsReq,
-} from '@memoflow/contracts/label';
+} from '@memoflow/label-contracts';
 import type { Result } from '@memoflow/contracts/result';
 
 export interface LabelClientPort {

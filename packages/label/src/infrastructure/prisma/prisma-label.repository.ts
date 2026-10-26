@@ -1,4 +1,4 @@
-import { LabelColorSchema } from '@memoflow/contracts/label';
+import { LabelColorSchema } from '@memoflow/label-contracts';
 import type { PrismaClient } from '@memoflow/database';
 import type { LabelRecord, NewLabelRecord } from '../../domain/label';
 import type { LabelListOptions, LabelRepository } from '../../domain/label-repository';
