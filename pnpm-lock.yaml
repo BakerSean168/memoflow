@@ -1712,9 +1712,9 @@ importers:
 
   packages/http-client:
     dependencies:
-      '@memoflow/contracts':
+      '@memoflow/transport-contracts':
         specifier: workspace:*
-        version: link:../contracts
+        version: link:../transport-contracts
       axios:
         specifier: 1.20.0
         version: 1.20.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)

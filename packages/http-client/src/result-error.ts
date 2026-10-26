@@ -1,5 +1,5 @@
-import type { JsonObject, ResultError } from '@memoflow/contracts/result';
-import { ResultCode, isPublicFailure } from '@memoflow/contracts/result';
+import type { JsonObject, ResultError } from '@memoflow/transport-contracts/result';
+import { ResultCode, isPublicFailure } from '@memoflow/transport-contracts/result';
 
 export type ResultErrorMessageKey =
   | 'BAD_REQUEST'

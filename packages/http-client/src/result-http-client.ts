@@ -31,9 +31,9 @@ import type {
   AxiosResponse,
   InternalAxiosRequestConfig,
 } from 'axios';
-import type { Result, ResultError } from '@memoflow/contracts/result';
-import { fail, fromHttpResponse } from '@memoflow/contracts/result';
-import type { HttpResponse } from '@memoflow/contracts/result';
+import type { Result, ResultError } from '@memoflow/transport-contracts/result';
+import { fail, fromHttpResponse } from '@memoflow/transport-contracts/result';
+import type { HttpResponse } from '@memoflow/transport-contracts/result';
 import type {
   HttpClientConfig,
   IResultHttpClient,
