@@ -28,9 +28,10 @@
         "../../packages/ui-vue-shadcn/dist/composables/*.d.ts"
       ],
       "@memoflow/contracts": ["../../packages/contracts/dist/index.d.ts"],
-      "@memoflow/contracts/notification": [
-        "../../packages/contracts/dist/modules/notification/index.d.ts"
+      "@memoflow/notification-contracts": [
+        "../../packages/notification-contracts/dist/index.d.ts"
       ],
+      "@memoflow/notification-contracts/*": ["../../packages/notification-contracts/dist/*.d.ts"],
       "@memoflow/contracts/*": [
         "../../packages/contracts/dist/modules/*/index.d.ts",
         "../../packages/contracts/dist/*/index.d.ts"

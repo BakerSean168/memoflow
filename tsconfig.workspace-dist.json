@@ -37,6 +37,8 @@
       ],
       "@memoflow/goal-contracts": ["./packages/goal-contracts/dist/index.d.ts"],
       "@memoflow/goal-contracts/*": ["./packages/goal-contracts/dist/*.d.ts"],
+      "@memoflow/notification-contracts": ["./packages/notification-contracts/dist/index.d.ts"],
+      "@memoflow/notification-contracts/*": ["./packages/notification-contracts/dist/*.d.ts"],
       "@memoflow/workspace-contracts": ["./packages/workspace-contracts/dist/index.d.ts"],
       "@memoflow/workspace-contracts/*": ["./packages/workspace-contracts/dist/*.d.ts"],
       "@memoflow/database": ["./packages/database/dist/index.d.ts"],

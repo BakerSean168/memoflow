@@ -8,6 +8,7 @@ import {
   createAssetsAliasEntries,
   createReliableMessagingContractsAliasEntries,
   createOperationsContractsAliasEntries,
+  createNotificationContractsAliasEntries,
   createContractsAliasEntries,
   createUiVueSourceAliasEntries,
   createWorkspaceSourceAliasEntries,
@@ -47,6 +48,7 @@ const config: StorybookConfig = {
           ...createUiVueSourceAliasEntries(workspace),
           ...createReliableMessagingContractsAliasEntries(workspace),
           ...createOperationsContractsAliasEntries(workspace),
+          ...createNotificationContractsAliasEntries(workspace),
           ...createContractsAliasEntries(workspace),
           ...createWorkspaceSourceAliasEntries(workspace, [
             ['@memoflow/domain-shared/shared', 'packages/domain-shared/src/shared/index.ts'],

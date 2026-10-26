@@ -33,6 +33,12 @@
       "@memoflow/data-portability-contracts/*": ["./packages/data-portability-contracts/src/*.ts"],
       "@memoflow/goal-contracts": ["./packages/goal-contracts/src/index.ts"],
       "@memoflow/goal-contracts/*": ["./packages/goal-contracts/src/*.ts"],
+      "@memoflow/notification-contracts": [
+        "./packages/notification-contracts/src/index.ts"
+      ],
+      "@memoflow/notification-contracts/*": [
+        "./packages/notification-contracts/src/*.ts"
+      ],
       "@memoflow/workspace-contracts": ["./packages/workspace-contracts/src/index.ts"],
       "@memoflow/workspace-contracts/*": ["./packages/workspace-contracts/src/*.ts"],
       "@memoflow/database": ["./packages/database/src/index.ts"],
@@ -50,9 +56,6 @@
       "@memoflow/utils": ["./packages/utils/src/index.ts"],
       "@memoflow/utils/*": ["./packages/utils/src/*/index.ts", "./packages/utils/src/*.ts"],
       "@memoflow/contracts": ["./packages/contracts/src/index.ts"],
-      "@memoflow/contracts/notification": [
-        "./packages/contracts/src/modules/notification/index.ts"
-      ],
       "@memoflow/contracts/cloud-auth": ["./packages/contracts/src/cloud-auth.ts"],
       "@memoflow/contracts/*": [
         "./packages/contracts/src/modules/*/index.ts",

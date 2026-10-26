@@ -13,9 +13,8 @@
       "@memoflow/contracts/account": ["../../packages/contracts/src/modules/account/index.ts"],
       "@memoflow/contracts/ai": ["../../packages/contracts/src/modules/ai/index.ts"],
       "@memoflow/goal-contracts": ["../../packages/goal-contracts/src/index.ts"],
-      "@memoflow/contracts/notification": [
-        "../../packages/contracts/src/modules/notification/index.ts"
-      ],
+      "@memoflow/notification-contracts": ["../../packages/notification-contracts/src/index.ts"],
+      "@memoflow/notification-contracts/*": ["../../packages/notification-contracts/src/*.ts"],
       "@memoflow/contracts/primitives": ["../../packages/contracts/src/primitives/index.ts"],
       "@memoflow/contracts/repository": [
         "../../packages/contracts/src/modules/repository/index.ts"
