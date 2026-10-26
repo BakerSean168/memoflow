@@ -8,7 +8,7 @@ import { computed, onScopeDispose, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
 import { GOAL_SERVICE_KEY } from '../../../di/keys';
-import { useGoalNativeSurface } from '../../../layouts/shell/useGoalNativeSurface';
+import { useGoalNativeSurface } from '../../../modules/goal';
 import { useLabelCatalog } from '../../../shared/composables/useLabelCatalog';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
 import type {

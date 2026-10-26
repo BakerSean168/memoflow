@@ -9,7 +9,7 @@ import {
 import { getCurrentInstance, onBeforeUnmount, onMounted } from 'vue';
 import { useAppShellStore } from './useAppShellStore';
 import { moduleForPath } from './useShellRouterSync';
-import { useGoalNativeSurface, type GoalAIEditSurface } from './useGoalNativeSurface';
+import { useGoalNativeSurface, type GoalAIEditSurface } from '../../modules/goal';
 
 export function useNativeBusinessPanelBridge(
   goalSurface: GoalAIEditSurface = useGoalNativeSurface(),

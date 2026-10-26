@@ -21,16 +21,20 @@ const errorRef = ref<string | null>(null);
 const ensureGoalSummary = vi.fn().mockResolvedValue(undefined);
 const refreshGoalSummary = vi.fn().mockResolvedValue(undefined);
 
-vi.mock('../../../modules/goal/composables/useGoalHomeSummary', () => ({
-  useGoalHomeSummary: () => ({
-    goals: computed(() => goalProgressRef.value),
-    activeCount: computed(() => activeGoalsRef.value),
-    isLoading: computed(() => isLoadingRef.value),
-    error: computed(() => errorRef.value),
-    ensure: ensureGoalSummary,
-    refresh: refreshGoalSummary,
-  }),
-}));
+vi.mock('../../../modules/goal', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../modules/goal')>();
+  return {
+    ...actual,
+    useGoalHomeSummary: () => ({
+      goals: computed(() => goalProgressRef.value),
+      activeCount: computed(() => activeGoalsRef.value),
+      isLoading: computed(() => isLoadingRef.value),
+      error: computed(() => errorRef.value),
+      ensure: ensureGoalSummary,
+      refresh: refreshGoalSummary,
+    }),
+  };
+});
 
 const i18n = createI18n({
   legacy: false,

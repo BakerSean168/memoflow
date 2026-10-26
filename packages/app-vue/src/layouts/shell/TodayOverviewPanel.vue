@@ -4,9 +4,8 @@ import { useI18n } from 'vue-i18n';
 import { Button } from '@memoflow/ui-vue-shadcn';
 import { Plus, Target } from '@lucide/vue';
 import DailyTodoWidget from '../../modules/task/components/widgets/DailyTodoWidget.vue';
-import GoalProgressWidget from '../../modules/goal/components/widgets/GoalProgressWidget.vue';
 import RoutineUpcomingWidget from '../../modules/routine/components/RoutineUpcomingWidget.vue';
-import { useGoalHomeSummary } from '../../modules/goal/composables/useGoalHomeSummary';
+import { GoalProgressWidget, useGoalHomeSummary } from '../../modules/goal';
 import { getProductTime, productTimeRevision } from '../../shared/utils/product-time';
 
 const props = defineProps<{ active: boolean }>();
