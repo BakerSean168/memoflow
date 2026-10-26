@@ -21,10 +21,6 @@
       "types": "./dist/modules/reliable-messaging/index.d.ts",
       "import": "./dist/modules/reliable-messaging/index.js"
     },
-    "./operations": {
-      "types": "./dist/modules/operations/index.d.ts",
-      "import": "./dist/modules/operations/index.js"
-    },
     "./primitives": {
       "types": "./dist/primitives/index.d.ts",
       "import": "./dist/primitives/index.js"

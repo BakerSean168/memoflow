@@ -52,7 +52,7 @@ import {
   type ListKnowledgeWriteRequestsRes,
   type KnowledgeWriteRequestReplayResponse,
 } from '@memoflow/contracts/repository';
-import { OperationAuditQuerySchema } from '@memoflow/contracts/operations';
+import { OperationAuditQuerySchema } from '@memoflow/operations-contracts';
 import { formatZodErrors } from '@memoflow/utils/result';
 
 export interface KnowledgeRepositoryConnectionUseCases {

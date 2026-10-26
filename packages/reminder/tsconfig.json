@@ -20,7 +20,8 @@
       "@memoflow/contracts/reliable-messaging": [
         "../contracts/src/modules/reliable-messaging/index.ts"
       ],
-      "@memoflow/contracts/operations": ["../contracts/src/modules/operations/index.ts"],
+      "@memoflow/operations-contracts": ["../operations-contracts/src/index.ts"],
+      "@memoflow/operations-contracts/*": ["../operations-contracts/src/*.ts"],
       "@memoflow/time": ["../time/src/index.ts"],
       "@memoflow/test-utils": ["../test-utils/src/index.ts"],
       "@memoflow/test-utils/*": ["../test-utils/src/*", "../test-utils/src/*.ts"],

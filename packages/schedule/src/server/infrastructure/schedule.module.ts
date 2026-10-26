@@ -32,8 +32,8 @@ import {
   runTimelineQueryWithAudit,
   globalUnifiedOperationMetrics,
 } from '@memoflow/patterns/operations';
-import { OperationTimelineEntrySchema } from '@memoflow/contracts/operations';
-import type { OperationTimelineEntry } from '@memoflow/contracts/operations';
+import { OperationTimelineEntrySchema } from '@memoflow/operations-contracts';
+import type { OperationTimelineEntry } from '@memoflow/operations-contracts';
 import type { ScheduleRebuildOutboxDTO } from '../domain/repositories/i-schedule-repository';
 import { eventBus } from '@memoflow/utils/domain';
 import type { CreateScheduleRequest, UpdateScheduleRequest } from '@memoflow/contracts/schedule';

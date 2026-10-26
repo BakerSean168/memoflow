@@ -321,3 +321,21 @@ export function createAssetsAliasEntries(workspaceRoot: string): Alias[] {
     },
   ];
 }
+
+export function createOperationsContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const operationsContractsRoot = resolveFromWorkspace(
+    workspaceRoot,
+    'packages/operations-contracts/src',
+  );
+
+  return [
+    {
+      find: /^@memoflow\/operations-contracts$/,
+      replacement: `${operationsContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/operations-contracts\/(.+)$/,
+      replacement: `${operationsContractsRoot}/$1`,
+    },
+  ];
+}

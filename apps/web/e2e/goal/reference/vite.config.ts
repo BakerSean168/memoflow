@@ -5,6 +5,7 @@ import path from 'node:path';
 import {
   createUiVueSourceAliasEntries,
   createWorkspaceSourceAliasEntries,
+  createOperationsContractsAliasEntries,
   createContractsAliasEntries,
 } from '../../../../../vite.workspace-aliases.ts';
 
@@ -16,6 +17,7 @@ export default defineConfig({
   resolve: {
     alias: [
       ...createUiVueSourceAliasEntries(workspace),
+      ...createOperationsContractsAliasEntries(workspace),
       ...createContractsAliasEntries(workspace),
       ...createWorkspaceSourceAliasEntries(workspace, [
         // Harness-only source access; production package exports stay unchanged.

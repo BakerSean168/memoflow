@@ -13,8 +13,8 @@ import type { IKnowledgeRepositoryProjectionService } from '../application/ports
 import type { IKnowledgeNoteCommitService } from '../application/ports/knowledge-note-commit.service.port';
 import type { OperationAuditRepository } from '@memoflow/patterns/operations';
 import { runTimelineQueryWithAudit } from '@memoflow/patterns/operations';
-import { OperationTimelineEntrySchema } from '@memoflow/contracts/operations';
-import type { OperationTimelineEntry } from '@memoflow/contracts/operations';
+import { OperationTimelineEntrySchema } from '@memoflow/operations-contracts';
+import type { OperationTimelineEntry } from '@memoflow/operations-contracts';
 import type { KnowledgeWriteRequestClientDTO } from '@memoflow/contracts/repository';
 import { createLogger } from '@memoflow/utils/logger';
 

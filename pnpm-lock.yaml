@@ -1117,6 +1117,9 @@ importers:
 
   packages/account:
     dependencies:
+      '@memoflow/operations-contracts':
+        specifier: workspace:*
+        version: link:../operations-contracts
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -1930,6 +1933,9 @@ importers:
 
   packages/notification:
     dependencies:
+      '@memoflow/operations-contracts':
+        specifier: workspace:*
+        version: link:../operations-contracts
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -1974,8 +1980,17 @@ importers:
         specifier: ^5.0.0
         version: 5.0.6
 
+  packages/operations-contracts:
+    dependencies:
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
+
   packages/patterns:
     dependencies:
+      '@memoflow/operations-contracts':
+        specifier: workspace:*
+        version: link:../operations-contracts
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -2070,6 +2085,9 @@ importers:
 
   packages/repository:
     dependencies:
+      '@memoflow/operations-contracts':
+        specifier: workspace:*
+        version: link:../operations-contracts
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -2113,6 +2131,9 @@ importers:
 
   packages/schedule:
     dependencies:
+      '@memoflow/operations-contracts':
+        specifier: workspace:*
+        version: link:../operations-contracts
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts

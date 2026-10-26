@@ -2,22 +2,22 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-const PACKAGE_ROOT = resolve(import.meta.dirname, '..', '..', '..');
+const PACKAGE_ROOT = resolve(import.meta.dirname, '..');
 
-describe('P1-1 @memoflow/contracts/operations 发布产物存在性门禁', () => {
-  const distDir = resolve(PACKAGE_ROOT, 'dist/modules/operations');
+describe('P1-1 @memoflow/operations-contracts 发布产物存在性门禁', () => {
+  const distDir = resolve(PACKAGE_ROOT, 'dist');
 
-  it('package.json 的 ./operations export 指向 dist/modules/operations/index.js', () => {
+  it('package.json 根 export 指向 dist/index.js', () => {
     const pkg = JSON.parse(readFileSync(resolve(PACKAGE_ROOT, 'package.json'), 'utf8')) as {
       exports: Record<string, { import?: string; types?: string }>;
     };
-    expect(pkg.exports['./operations'].import).toBe('./dist/modules/operations/index.js');
-    expect(pkg.exports['./operations'].types).toBe('./dist/modules/operations/index.d.ts');
+    expect(pkg.exports['.'].import).toBe('./dist/index.js');
+    expect(pkg.exports['.'].types).toBe('./dist/index.d.ts');
   });
 
-  it('tsup entry 已登记 src/modules/operations/index.ts', () => {
+  it('tsup entry 已登记 src/index.ts', () => {
     const tsup = readFileSync(resolve(PACKAGE_ROOT, 'tsup.config.ts'), 'utf8');
-    expect(tsup).toContain("'src/modules/operations/index.ts'");
+    expect(tsup).toContain("'src/index.ts'");
   });
 
   it('dist 产物存在（每个新 export 的 JS/DTS）', () => {

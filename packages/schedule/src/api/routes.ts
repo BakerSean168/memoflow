@@ -11,7 +11,7 @@ import {
 import {
   OperationTimelineEntrySchema,
   OperationAuditRecordSchema,
-} from '@memoflow/contracts/operations';
+} from '@memoflow/operations-contracts';
 import type { ScheduleApplicationPort } from '../server/application';
 
 interface PlatformMiddleware {

@@ -167,6 +167,14 @@ const mainWorkspaceAliasEntries = [
     replacement: resolve(import.meta.dirname, '../../packages/transport-contracts/src/index.ts'),
   },
   {
+    find: /^@memoflow\/operations-contracts\/(.+)$/,
+    replacement: resolve(import.meta.dirname, '../../packages/operations-contracts/src/$1'),
+  },
+  {
+    find: '@memoflow/operations-contracts',
+    replacement: resolve(import.meta.dirname, '../../packages/operations-contracts/src/index.ts'),
+  },
+  {
     find: '@memoflow/label-contracts',
     replacement: resolve(import.meta.dirname, '../../packages/label-contracts/src/index.ts'),
   },

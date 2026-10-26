@@ -30,7 +30,7 @@ import {
 import {
   OperationTimelineEntrySchema,
   OperationAuditRecordSchema,
-} from '@memoflow/contracts/operations';
+} from '@memoflow/operations-contracts';
 import { successResponse, errorResponse, RouteRegistrar } from '@memoflow/utils/result';
 import type { RepositoryApplicationPort } from '../../server/application';
 import { KnowledgeRepositoryConnectionController } from '../../server/transport/knowledge-repository-connection.controller';
