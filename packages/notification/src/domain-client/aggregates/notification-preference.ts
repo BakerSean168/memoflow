@@ -2,7 +2,7 @@ import type {
   NotificationPreferenceClientDTO,
   NotificationChannelType,
   QuietHoursDTO,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import { AggregateRoot } from '@memoflow/utils/domain';
 import { NotificationPreferenceId } from '../../server/domain/value-objects/notification-preference-id';
 import { IdentityId } from '@memoflow/domain-shared';

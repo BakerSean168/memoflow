@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
 import { anIdentityId } from '@memoflow/test-utils/fixtures';
-import { NotificationChannelType } from '@memoflow/contracts/notification';
+import { NotificationChannelType } from '@memoflow/notification-contracts';
 import type { INotificationPreferenceRepository } from '../../../../domain/repositories';
 import { NotificationPreference } from '../../../../domain/aggregates/notification-preference';
 import { UpdateNotificationPreferenceUseCase } from '../update-notification-preference.use-case';

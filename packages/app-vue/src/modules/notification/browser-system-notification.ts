@@ -1,4 +1,4 @@
-import type { NotificationDispatchInAppEvent } from '@memoflow/contracts/notification';
+import type { NotificationDispatchInAppEvent } from '@memoflow/notification-contracts';
 import { resolveNotificationDestination } from './notification-destination';
 
 const BROWSER_NOTIFICATION_PREFERENCE_KEY = 'memoflow:notification:browser-system-presentation';

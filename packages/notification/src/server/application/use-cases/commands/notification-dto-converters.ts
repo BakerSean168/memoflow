@@ -3,7 +3,7 @@ import type {
   NotificationClientDTO,
   NotificationPreferenceServerDTO,
   NotificationPreferenceClientDTO,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 
 export function toNotificationClientDTO(serverDTO: NotificationServerDTO): NotificationClientDTO {
   return { ...serverDTO };

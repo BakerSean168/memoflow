@@ -15,7 +15,7 @@ import {
   NotificationRequestedOutboxInputSchema,
   type NotificationRequestedWriterPort,
   NOTIFICATION_REQUESTED_MESSAGE_TYPE,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import {
   assertValidBusinessOperationReceipt,
   type BusinessOperationReceipt,

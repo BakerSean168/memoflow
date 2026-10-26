@@ -1,5 +1,5 @@
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
-import type { NotificationChannelType, QuietHoursDTO } from '@memoflow/contracts/notification';
+import type { NotificationChannelType, QuietHoursDTO } from '@memoflow/notification-contracts';
 import { parseJsonSafe } from '@memoflow/utils/shared';
 import { NotificationPreference } from '../../../domain/aggregates/notification-preference';
 import { QuietHours } from '../../../domain/value-objects/quiet-hours';

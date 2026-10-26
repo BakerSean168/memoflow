@@ -21,7 +21,7 @@ import {
   NotificationRequestedOutboxInputSchema,
   type NotificationRequestedWriterPort,
   NOTIFICATION_REQUESTED_MESSAGE_TYPE,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import type { BusinessOperationReceipt } from '@memoflow/reliable-messaging-contracts';
 import { mapPrismaSharedOutboxToReceipt } from '../prisma/notification-requested-writer.prisma.adapter';
 import {

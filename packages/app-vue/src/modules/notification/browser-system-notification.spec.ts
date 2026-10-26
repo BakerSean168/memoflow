@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { NotificationDispatchInAppEvent } from '@memoflow/contracts/notification';
+import type { NotificationDispatchInAppEvent } from '@memoflow/notification-contracts';
 import {
   browserSystemNotificationPermission,
   browserSystemNotificationTargetUrl,

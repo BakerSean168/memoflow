@@ -1,5 +1,5 @@
 import type { ComposerTranslation } from 'vue-i18n';
-import type { NotificationClientDTO } from '@memoflow/contracts/notification';
+import type { NotificationClientDTO } from '@memoflow/notification-contracts';
 import type { SemanticTone } from '../../../shared/constants/semantic-tone';
 
 export type NotificationCategoryToken =

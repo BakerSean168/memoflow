@@ -10,7 +10,7 @@ import type {
   CategoryPreference as ICategoryPreference,
   CategoryPreferenceDTO,
   ChannelPreference,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import type { ImportanceLevel } from '@memoflow/shared-primitives';
 
 /**

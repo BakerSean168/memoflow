@@ -47,7 +47,7 @@ import { vKeyboardList } from '../../../shared/keyboard/list-adapter';
 import { Loader2, Bell } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import NotificationItem from './NotificationItem.vue';
-import type { NotificationClientDTO } from '@memoflow/contracts/notification';
+import type { NotificationClientDTO } from '@memoflow/notification-contracts';
 
 interface Props {
   notifications: NotificationClientDTO[];

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
 import type { INotificationRepository } from '../../domain/repositories';
 import { NotificationMaintenanceApplicationService } from './notification-maintenance-application-service';
-import { NotificationCategory } from '@memoflow/contracts/notification';
+import { NotificationCategory } from '@memoflow/notification-contracts';
 
 const IDENTITY_ID = 'IdentityId_550e8400-e29b-41d4-a716-446655440001';
 

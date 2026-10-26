@@ -20,7 +20,7 @@ import type {
   NotificationClientDTO,
   NotificationPreferenceClientDTO,
   UpdateNotificationPreferenceReq,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import { toNotificationQueryParams } from './notification-http.mapper';
 
 /**

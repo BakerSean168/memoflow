@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import type {
   NotificationChannelType,
   NotificationPreferenceClientDTO,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import { presentErrorMessage } from '@memoflow/http-client';
 
 import { useAppSession } from './useAppSession';

@@ -25,7 +25,6 @@
  * - @memoflow/contracts/account    - 账户模块
  * - @memoflow/contracts/schedule   - 调度模块
  * - @memoflow/contracts/setting    - 设置模块
- * - @memoflow/contracts/notification - 通知模块
  * - @memoflow/contracts/ai         - AI模块
  * - @memoflow/contracts/result     - Result Pattern (新，推荐)
  * - @memoflow/contracts/shared     - 共享类型

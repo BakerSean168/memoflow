@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { NotificationRequestedWriterPort } from '@memoflow/contracts/notification';
+import type { NotificationRequestedWriterPort } from '@memoflow/notification-contracts';
 import { buildSchedulingKey, type ScheduledInvocationContext } from '@memoflow/contracts/schedule';
 import { ScheduledHandlerRegistry } from '@memoflow/scheduler';
 import {

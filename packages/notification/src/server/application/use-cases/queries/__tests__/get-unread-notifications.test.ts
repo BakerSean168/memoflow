@@ -4,7 +4,7 @@ import { anIdentityId } from '@memoflow/test-utils/fixtures';
 import type { INotificationRepository } from '../../../../domain/repositories/i-notification-preference-repository';
 import { GetUnreadNotificationsUseCase } from '../get-unread-notifications.use-case';
 import { Notification } from '../../../../domain/aggregates/notification';
-import { NotificationType, NotificationCategory } from '@memoflow/contracts/notification';
+import { NotificationType, NotificationCategory } from '@memoflow/notification-contracts';
 
 describe('GetUnreadNotificationsUseCase', () => {
   let notificationRepo: ReturnType<typeof createMockRepo<INotificationRepository>>;

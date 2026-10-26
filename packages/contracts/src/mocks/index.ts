@@ -9,11 +9,9 @@
  * import {
  *   createMockTaskPlan,
  *   createMockAccount,
- *   createMockNotification,
  * } from '@memoflow/contracts/mocks';
  * ```
  */
 
 export * from './task.mock';
 export * from './account.mock';
-export * from './notification.mock';

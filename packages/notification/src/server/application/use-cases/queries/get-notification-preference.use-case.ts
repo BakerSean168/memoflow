@@ -5,7 +5,7 @@
  */
 
 import { NotificationPreferenceDomainService } from '../../../domain/services/notification-preference-domain-service';
-import type { NotificationPreferenceClientDTO } from '@memoflow/contracts/notification';
+import type { NotificationPreferenceClientDTO } from '@memoflow/notification-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { ok } from '@memoflow/contracts/result';
 import type { INotificationPreferenceRepository } from '../../../domain/repositories/i-notification-preference-repository';

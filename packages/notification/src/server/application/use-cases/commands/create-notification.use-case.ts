@@ -7,11 +7,11 @@ import type {
   NotificationType,
   NotificationCategory,
   NotificationChannelType,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import {
   NotificationChannelType as ChannelType,
   NotificationDeliveryPlanOutcome,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import type { IdentityId } from '@memoflow/contracts/primitives';
 import type { ImportanceLevel, UrgencyLevel } from '@memoflow/shared-primitives';
 import type { Result } from '@memoflow/contracts/result';

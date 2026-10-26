@@ -8,7 +8,7 @@
 
 import type { Router } from 'vue-router';
 import { RendererEventChannels } from '@memoflow/contracts/electron';
-import type { NotificationNavigationIntentDTO } from '@memoflow/contracts/notification';
+import type { NotificationNavigationIntentDTO } from '@memoflow/notification-contracts';
 import type { ElectronBridge } from '../../../di/keys';
 import { createLogger } from '@memoflow/utils/logger';
 import { resolveNotificationDestination } from '../notification-destination';

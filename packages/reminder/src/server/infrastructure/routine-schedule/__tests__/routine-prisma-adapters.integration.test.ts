@@ -4,7 +4,7 @@ import {
   buildIdempotencyKeyString,
   LeaseFencingException,
 } from '@memoflow/reliable-messaging-contracts';
-import { NOTIFICATION_REQUESTED_MESSAGE_TYPE } from '@memoflow/contracts/notification';
+import { NOTIFICATION_REQUESTED_MESSAGE_TYPE } from '@memoflow/notification-contracts';
 import {
   cleanAll,
   disconnectPrisma,

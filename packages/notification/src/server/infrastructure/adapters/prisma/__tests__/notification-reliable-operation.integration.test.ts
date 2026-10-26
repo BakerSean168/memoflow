@@ -6,7 +6,7 @@ import {
   NotificationType,
   NotificationCategory,
   NotificationChannelType,
-} from '@memoflow/contracts/notification';
+} from '@memoflow/notification-contracts';
 import { NotificationReliableOperationPrismaAdapter } from '../notification-reliable-operation-prisma.adapter';
 import { NotificationPrismaRepository } from '../notification-prisma.repository';
 import { NotificationPreferencePrismaRepository } from '../notification-preference-prisma.repository';
