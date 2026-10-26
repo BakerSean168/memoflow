@@ -2,7 +2,7 @@ import type { Result } from '@memoflow/contracts/result';
 import type {
   ScheduledInvocationDiagnostic,
   ScheduledInvocationDiagnosticQuery,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 
 /** Read-only client capability for Temporal Engine diagnostics. */
 export interface SchedulerClientPort {

@@ -1,5 +1,5 @@
-import type { ScheduledIntent, SchedulingOwner } from '@memoflow/contracts/schedule';
-import { buildSchedulingKey } from '@memoflow/contracts/schedule';
+import type { ScheduledIntent, SchedulingOwner } from '@memoflow/schedule-contracts';
+import { buildSchedulingKey } from '@memoflow/schedule-contracts';
 
 /** Neutral scheduler-handler keys for durable Routine timing lanes. */
 export const ROUTINE_WALLCLOCK_HANDLER_KEY = 'routine.wallclock.fire';

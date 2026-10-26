@@ -3,7 +3,7 @@ import type { Result } from '@memoflow/contracts/result';
 import type {
   ScheduledInvocationDiagnostic,
   ScheduledInvocationDiagnosticQuery,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import type { IResultIpcClient, SchedulerDiagnosticsApiClient } from '../types';
 
 export class SchedulerDiagnosticsIpcAdapter implements SchedulerDiagnosticsApiClient {

@@ -5,7 +5,7 @@ import type {
   ScheduledIntent,
   SchedulingOwner,
   SchedulingReconcileReceipt,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 
 export interface ScheduledInvocationClaim {
   readonly invocation: ScheduledInvocation;

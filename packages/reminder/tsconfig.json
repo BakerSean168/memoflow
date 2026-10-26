@@ -16,7 +16,8 @@
       "@memoflow/contracts/shared": ["../contracts/src/shared/index.ts"],
       "@memoflow/contracts/primitives": ["../contracts/src/primitives/index.ts"],
       "@memoflow/contracts/electron": ["../contracts/src/electron/index.ts"],
-      "@memoflow/contracts/schedule": ["../contracts/src/modules/schedule/index.ts"],
+      "@memoflow/schedule-contracts": ["../schedule-contracts/src/index.ts"],
+      "@memoflow/schedule-contracts/*": ["../schedule-contracts/src/*.ts"],
       "@memoflow/contracts/reliable-messaging": [
         "../contracts/src/modules/reliable-messaging/index.ts"
       ],

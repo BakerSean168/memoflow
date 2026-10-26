@@ -22,12 +22,13 @@
     "@memoflow/label": "workspace:*",
     "@memoflow/label-contracts": "workspace:*",
     "@memoflow/notification": "workspace:*",
-    "@memoflow/schedule": "workspace:*",
     "@memoflow/setting": "workspace:*",
     "@memoflow/task": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/ui-react-native": "workspace:*",
-    "@memoflow/workspace-contracts": "workspace:*"
+    "@memoflow/workspace-contracts": "workspace:*",
+    "@memoflow/schedule-contracts": "workspace:*",
+    "@memoflow/schedule-client": "workspace:*"
   },
   "peerDependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",

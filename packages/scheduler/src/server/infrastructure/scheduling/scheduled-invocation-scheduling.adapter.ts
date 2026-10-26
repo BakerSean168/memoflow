@@ -17,7 +17,7 @@ import {
 } from '../../../scheduling';
 import { ScheduledInvocation } from '../../domain/entities/scheduled-invocation';
 import type { IScheduledInvocationRepository } from '../../domain/repositories/i-scheduled-invocation-repository';
-import type { ScheduledInvocation as ScheduledInvocationState } from '@memoflow/contracts/schedule';
+import type { ScheduledInvocation as ScheduledInvocationState } from '@memoflow/schedule-contracts';
 
 export interface ScheduledInvocationSchedulingAdapterOptions {
   readonly now?: () => number;

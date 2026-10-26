@@ -1,4 +1,4 @@
-import type { ScheduledHandlerRegistration } from '@memoflow/contracts/schedule';
+import type { ScheduledHandlerRegistration } from '@memoflow/schedule-contracts';
 import {
   ROUTINE_ELAPSED_HANDLER_KEY,
   ROUTINE_ELAPSED_PAYLOAD_VERSION,

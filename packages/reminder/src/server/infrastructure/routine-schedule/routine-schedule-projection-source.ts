@@ -1,4 +1,4 @@
-import type { ScheduledIntent, SchedulingOwner } from '@memoflow/contracts/schedule';
+import type { ScheduledIntent, SchedulingOwner } from '@memoflow/schedule-contracts';
 import { asInstant, type RecurrenceEnginePort } from '@memoflow/time';
 import {
   computeDurableElapsedNextOccurrence,

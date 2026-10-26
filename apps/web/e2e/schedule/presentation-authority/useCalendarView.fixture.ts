@@ -1,6 +1,6 @@
 import { ref } from 'vue';
-import type { PlannerProjectionSource } from '@memoflow/app-vue/modules/schedule/planner/planner-presentation';
-import { plannerProjectionSourceLabel } from '@memoflow/app-vue/modules/schedule/planner/planner-presentation';
+import type { PlannerProjectionSource } from '@memoflow/schedule-ui';
+import { plannerProjectionSourceLabel } from '@memoflow/schedule-ui';
 import { getProductTime, productTimeRevision } from '@memoflow/app-vue/shared/utils/product-time';
 
 export interface CalendarEventItem {

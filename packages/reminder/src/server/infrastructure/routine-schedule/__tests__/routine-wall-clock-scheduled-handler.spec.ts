@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { ScheduledInvocationContext } from '@memoflow/contracts/schedule';
+import type { ScheduledInvocationContext } from '@memoflow/schedule-contracts';
 import { createRoutineWallClockScheduledHandler } from '../routine-wall-clock-scheduled-handler';
 import type {
   RoutineScheduleExecutionOutcome,

@@ -43,7 +43,7 @@ import type {
   ScheduledHandlerRegistration,
   ScheduledHandlerResult,
   ScheduledInvocationContext,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import { z } from 'zod';
 import type { IGoalRepository } from '../domain';
 import {

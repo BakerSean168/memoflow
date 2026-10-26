@@ -3,7 +3,7 @@ import type {
   ScheduledInvocation,
   ScheduledInvocationDiagnostic,
   ScheduledInvocationDiagnosticQuery,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import type { SchedulerApplicationPort } from '../application';
 import { toScheduledInvocationDiagnostic } from '../application';
 import type { IInvocationAttemptRepository } from '../domain/repositories/i-invocation-attempt-repository';

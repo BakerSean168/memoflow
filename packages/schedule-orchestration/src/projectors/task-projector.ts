@@ -1,4 +1,4 @@
-import type { SchedulingPort } from '@memoflow/contracts/schedule';
+import type { SchedulingPort } from '@memoflow/schedule-contracts';
 import type { TaskScheduleProjectionSource } from '@memoflow/task/schedule-projection';
 
 export interface TaskProjector {

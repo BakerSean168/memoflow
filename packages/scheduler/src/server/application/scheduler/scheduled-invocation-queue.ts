@@ -2,7 +2,7 @@ import { MinHeap } from '@memoflow/patterns/scheduler';
 import type { IScheduleTimer } from '@memoflow/patterns/scheduler';
 import { NodeTimer } from '@memoflow/patterns/scheduler';
 import type { IScheduledInvocationRepository } from '../../domain/repositories/i-scheduled-invocation-repository';
-import type { ScheduledInvocation } from '@memoflow/contracts/schedule';
+import type { ScheduledInvocation } from '@memoflow/schedule-contracts';
 import { generateUUID } from '@memoflow/utils/shared';
 
 interface InvocationQueueItem {

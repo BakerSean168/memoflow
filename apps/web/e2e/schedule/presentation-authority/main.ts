@@ -6,13 +6,16 @@ import type {
   CalendarEventProjection,
   CreateScheduleRequest,
   UpdateScheduleRequest,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import { asInstant, asYmd } from '@memoflow/time';
-import PlannerCalendar, {
+import {
+  PlannerCalendar,
+  PlannerDayDialog,
+  PlannerEventDialog,
+  ScheduleCalendarView,
+  useScheduleStore,
   type PlannerCalendarView,
-} from '@memoflow/app-vue/modules/schedule/planner/PlannerCalendar.vue';
-import PlannerDayDialog from '@memoflow/app-vue/modules/schedule/components/PlannerDayDialog.vue';
-import PlannerEventDialog from '@memoflow/app-vue/modules/schedule/components/PlannerEventDialog.vue';
+} from '@memoflow/schedule-ui';
 import ScheduleCapsulePreview from '@memoflow/app-vue/layouts/shell/previews/ScheduleCapsulePreview.vue';
 import { productionLocaleMessages } from '@memoflow/app-vue/locales/production-messages';
 import { providePanelWidth } from '@memoflow/app-vue/layouts/shell/usePanelWidth';
@@ -29,7 +32,6 @@ import {
 } from '@memoflow/app-vue/modules/task/components/task-quick-test-fixtures';
 import { createPinia } from 'pinia';
 import { Toaster } from 'vue-sonner';
-import ScheduleCalendarView from '@memoflow/app-vue/modules/schedule/views/ScheduleCalendarView.vue';
 import GlobalConfirmDialog from '@memoflow/app-vue/shared/components/GlobalConfirmDialog.vue';
 import {
   SCHEDULE_SERVICE_KEY,
@@ -37,7 +39,8 @@ import {
   GOAL_SERVICE_KEY,
 } from '@memoflow/app-vue/di/keys';
 import { installServerStateRuntime } from '@memoflow/app-vue/platform/server-state';
-import { useScheduleStore } from '@memoflow/app-vue/modules/schedule/stores/schedule-store';
+// Bind the Schedule host port exactly as the production renderer does.
+import '@memoflow/app-vue/di/schedule-ui-host';
 import '../../../src/styles/index.css';
 
 const params = new URLSearchParams(location.search);

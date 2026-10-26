@@ -3,7 +3,7 @@ import type {
   ScheduledIntent,
   ScheduledInvocation as ScheduledInvocationState,
   SchedulingOwner,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import { buildSchedulingKey, SchedulingReconcileError } from '../../../../scheduling';
 import { ScheduledInvocation } from '../../../domain/entities/scheduled-invocation';
 import type { IScheduledInvocationRepository } from '../../../domain/repositories/i-scheduled-invocation-repository';

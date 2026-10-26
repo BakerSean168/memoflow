@@ -4,7 +4,7 @@ import type {
   SchedulingOwner,
   SchedulingPort,
   SchedulingReconcileReceipt,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import type {
   RoutineScheduleProjectionEventMap,
   RoutineScheduleProjectionSource,

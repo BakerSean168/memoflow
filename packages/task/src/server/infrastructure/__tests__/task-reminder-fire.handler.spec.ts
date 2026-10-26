@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type {
   ScheduledHandlerResult,
   ScheduledInvocationContext,
-} from '@memoflow/contracts/schedule';
+} from '@memoflow/schedule-contracts';
 import { parseIdempotencyKeyString } from '@memoflow/contracts/reliable-messaging';
 import type { NotificationRequestedWriterPort } from '@memoflow/contracts/notification';
 import {

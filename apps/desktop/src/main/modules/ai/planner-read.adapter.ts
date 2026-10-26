@@ -1,5 +1,5 @@
 import type { Context } from '@memoflow/contracts/shared';
-import { CalendarEntryResponseSchema } from '@memoflow/contracts/schedule';
+import { CalendarEntryResponseSchema } from '@memoflow/schedule-contracts';
 import { unwrap } from '@memoflow/contracts/result';
 import {
   projectPlannerCalendarEntry,
@@ -9,7 +9,7 @@ import {
 } from '@memoflow/ai';
 import { IdentityId } from '@memoflow/domain-shared/shared';
 import type { ScheduleEventApplicationPort } from '@memoflow/schedule';
-import { derivePlannerConflicts } from '@memoflow/schedule/client';
+import { derivePlannerConflicts } from '@memoflow/schedule-client';
 import type { TaskApplicationPort } from '@memoflow/task';
 import { createTimeFacade, type UserTimeContextPort } from '@memoflow/time';
 

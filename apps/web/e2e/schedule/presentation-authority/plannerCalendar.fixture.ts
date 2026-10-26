@@ -1,10 +1,10 @@
 import { computed, ref } from 'vue';
-import { useSchedule } from '@memoflow/app-vue/modules/schedule/composables/useSchedule';
-import { useTask } from '@memoflow/app-vue/modules/task/composables/useTask';
 import {
   projectCalendarEntry,
   projectTaskOccurrence,
-} from '@memoflow/app-vue/modules/schedule/planner/calendar-event-projection';
+  useSchedule,
+} from '@memoflow/schedule-ui';
+import { useTask } from '@memoflow/app-vue/modules/task/composables/useTask';
 export { toLocalDateKey } from './useCalendarView.fixture';
 
 // Only owner aggregation is doubled; Schedule and Task reads/actions use production composables.
