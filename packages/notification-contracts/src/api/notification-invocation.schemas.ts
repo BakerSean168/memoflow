@@ -19,7 +19,7 @@
 
 import { z } from 'zod';
 import { brandedId } from '@memoflow/shared-primitives';
-import type { NotificationId } from '@memoflow/shared-primitives';
+import type { NotificationId } from '../value-objects/notification-id';
 
 /** `:id` path param for a notification-scoped route. 通知作用域路由的 `:id` path 参数。 */
 export const NotificationIdParamsSchema = z.object({ id: brandedId<NotificationId>() });

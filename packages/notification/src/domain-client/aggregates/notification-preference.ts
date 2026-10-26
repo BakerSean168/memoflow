@@ -2,14 +2,12 @@ import type {
   NotificationPreferenceClientDTO,
   NotificationChannelType,
   QuietHoursDTO,
+  NotificationPreferenceId as NotificationPreferenceIdBranded,
 } from '@memoflow/notification-contracts';
 import { AggregateRoot } from '@memoflow/utils/domain';
 import { NotificationPreferenceId } from '../../server/domain/value-objects/notification-preference-id';
 import { IdentityId } from '@memoflow/domain-shared';
-import type {
-  NotificationPreferenceId as NotificationPreferenceIdBranded,
-  IdentityId as IdentityIdBranded,
-} from '@memoflow/contracts/primitives';
+import type { IdentityId as IdentityIdBranded } from '@memoflow/shared-primitives';
 
 export interface NotificationPreferenceState {
   id: NotificationPreferenceId;

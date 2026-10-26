@@ -3,6 +3,11 @@
  * 通知值对象导出
  */
 
+// ============ Branded IDs ============
+export type { NotificationId } from './notification-id';
+export type { NotificationPreferenceId } from './notification-preference-id';
+export type { NotificationInteractionId } from './notification-interaction-id';
+
 // ============ NotificationAction ============
 export type {
   NotificationAction,

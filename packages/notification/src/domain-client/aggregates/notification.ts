@@ -3,15 +3,13 @@ import type {
   NotificationType,
   NotificationCategory,
   NotificationNavigationIntentDTO,
+  NotificationId as NotificationIdBranded,
 } from '@memoflow/notification-contracts';
 import type { ImportanceLevel, UrgencyLevel } from '@memoflow/shared-primitives';
 import { AggregateRoot } from '@memoflow/utils/domain';
 import { NotificationId } from '../../server/domain/value-objects/notification-id';
 import { IdentityId } from '@memoflow/domain-shared';
-import type {
-  NotificationId as NotificationIdBranded,
-  IdentityId as IdentityIdBranded,
-} from '@memoflow/contracts/primitives';
+import type { IdentityId as IdentityIdBranded } from '@memoflow/shared-primitives';
 
 export interface NotificationState {
   id: NotificationId;

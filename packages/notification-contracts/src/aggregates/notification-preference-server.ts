@@ -3,11 +3,8 @@ import type {
   NotificationWorkflowOverridesDTO,
 } from '../value-objects/notification-workflow';
 import type { QuietHoursDTO } from '../value-objects/quiet-hours';
-import type {
-  IdentityId,
-  NotificationPreferenceId,
-  TransferDate,
-} from '@memoflow/shared-primitives';
+import type { IdentityId, TransferDate } from '@memoflow/shared-primitives';
+import type { NotificationPreferenceId } from '../value-objects/notification-preference-id';
 
 /** User-owned notification preferences. Platform delivery guards are not user state. */
 export interface NotificationPreferenceServerDTO {

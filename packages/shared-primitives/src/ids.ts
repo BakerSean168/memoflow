@@ -62,15 +62,6 @@ export type SettingHistoryId = string & { readonly __brand: 'SettingHistoryId' }
 /** 设置分组 ID */
 export type SettingGroupId = string & { readonly __brand: 'SettingGroupId' };
 
-/** 通知 ID */
-export type NotificationId = string & { readonly __brand: 'NotificationId' };
-
-/** 通知偏好 ID */
-export type NotificationPreferenceId = string & { readonly __brand: 'NotificationPreferenceId' };
-
-/** Notification interaction fact ID */
-export type NotificationInteractionId = string & { readonly __brand: 'NotificationInteractionId' };
-
 /** AI 对话 ID */
 export type AiConversationId = string & { readonly __brand: 'AiConversationId' };
 
