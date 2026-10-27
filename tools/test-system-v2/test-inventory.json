@@ -4800,156 +4800,6 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/setting/components/AISettings.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/components/AccountSettingsSection.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/components/AntigravityAcpDownload.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/components/DesktopUpdateSettingsSection.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/components/KeyboardSettings.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/components/NotificationSettings.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/components/SettingsResetSection.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/components/UserPreferenceSettingsSection.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/components/ai-provider-default-policy.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/components/desktop-update-settings.presentation.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/composables/usePreferencePortability.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/composables/usePresentationBootstrap.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/setting/stores/presentationPreferenceStore.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
       "path": "packages/app-vue/src/modules/task/components/TaskOccurrenceCompactList.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6083,30 +5933,6 @@
     },
     {
       "path": "packages/contracts/src/modules/ai/portable-v3.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/setting/preferences/canonical.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/setting/preferences/portable-v3.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/setting/preferences/product-feature-map-public.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -10334,6 +10160,166 @@
       ]
     },
     {
+      "path": "packages/setting-client/src/infrastructure-client/adapters/canonical-preference-client.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-client/src/setting-dto-port.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-contracts/src/preferences/canonical.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-contracts/src/preferences/portable-v3.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-contracts/src/preferences/product-feature-map-public.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/components/AISettings.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/components/AccountSettingsSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/components/AntigravityAcpDownload.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/components/DesktopUpdateSettingsSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/components/KeyboardSettings.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/components/KnowledgeRepositorySettings.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/components/NotificationSettings.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/components/SettingAdvancedActions.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/components/SettingsResetSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/components/UserPreferenceSettingsSection.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/components/ai-provider-default-policy.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/components/desktop-update-settings.presentation.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/composables/usePreferencePortability.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/composables/usePresentationBootstrap.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/setting-ui/src/stores/presentationPreferenceStore.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/setting-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/setting/src/api/module-lifecycle.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10355,16 +10341,6 @@
     },
     {
       "path": "packages/setting/src/electron/index-lifecycle.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/setting/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/setting/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/setting/src/infrastructure-client/adapters/canonical-preference-client.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/setting/vitest.config.ts"
@@ -12397,7 +12373,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 181
+      "fileCount": 166
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -12481,7 +12457,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 12
+      "fileCount": 11
     },
     {
       "id": "packages/task/vitest.config.ts",
@@ -12875,7 +12851,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 181
+      "fileCount": 166
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -12896,7 +12872,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 40
+      "fileCount": 37
     },
     {
       "id": "packages/data-portability-contracts/vitest.config.ts",
@@ -13172,11 +13148,32 @@
       "fileCount": 14
     },
     {
+      "id": "packages/setting-client/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 2
+    },
+    {
+      "id": "packages/setting-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 3
+    },
+    {
+      "id": "packages/setting-ui/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 15
+    },
+    {
       "id": "packages/setting/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 12
+      "fileCount": 11
     },
     {
       "id": "packages/shared-primitives/vitest.config.ts",
@@ -13524,21 +13521,6 @@
       "packages/app-vue/src/modules/ai/composables/workspaceEventSubscription.spec.ts",
       "packages/app-vue/src/modules/authentication/composables/usePassword.spec.ts",
       "packages/app-vue/src/modules/authentication/stores/authenticationStore.spec.ts",
-      "packages/app-vue/src/modules/setting/components/AISettings.spec.ts",
-      "packages/app-vue/src/modules/setting/components/AccountSettingsSection.spec.ts",
-      "packages/app-vue/src/modules/setting/components/AntigravityAcpDownload.spec.ts",
-      "packages/app-vue/src/modules/setting/components/DesktopUpdateSettingsSection.spec.ts",
-      "packages/app-vue/src/modules/setting/components/KeyboardSettings.spec.ts",
-      "packages/app-vue/src/modules/setting/components/KnowledgeRepositorySettings.spec.ts",
-      "packages/app-vue/src/modules/setting/components/NotificationSettings.spec.ts",
-      "packages/app-vue/src/modules/setting/components/SettingAdvancedActions.spec.ts",
-      "packages/app-vue/src/modules/setting/components/SettingsResetSection.spec.ts",
-      "packages/app-vue/src/modules/setting/components/UserPreferenceSettingsSection.spec.ts",
-      "packages/app-vue/src/modules/setting/components/ai-provider-default-policy.spec.ts",
-      "packages/app-vue/src/modules/setting/components/desktop-update-settings.presentation.spec.ts",
-      "packages/app-vue/src/modules/setting/composables/usePreferencePortability.spec.ts",
-      "packages/app-vue/src/modules/setting/composables/usePresentationBootstrap.spec.ts",
-      "packages/app-vue/src/modules/setting/stores/presentationPreferenceStore.spec.ts",
       "packages/app-vue/src/modules/task/components/TaskOccurrenceCompactList.spec.ts",
       "packages/app-vue/src/modules/task/components/TaskOccurrenceQuickRow.spec.ts",
       "packages/app-vue/src/modules/task/components/TaskOccurrenceQuickSurface.spec.ts",
@@ -13843,7 +13825,6 @@
       "packages/setting/src/api/module-lifecycle.spec.ts",
       "packages/setting/src/api/routes.spec.ts",
       "packages/setting/src/electron/index-lifecycle.spec.ts",
-      "packages/setting/src/infrastructure-client/adapters/canonical-preference-client.spec.ts",
       "packages/setting/src/server/application/use-cases/commands/__tests__/import-settings.test.ts",
       "packages/setting/src/server/application/use-cases/queries/__tests__/export-settings.test.ts",
       "packages/setting/src/server/infrastructure/__tests__/setting-module-partial-start.spec.ts",
@@ -13943,7 +13924,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1126,
+    "unit": 1127,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

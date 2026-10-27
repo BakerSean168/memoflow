@@ -3152,6 +3152,9 @@ importers:
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client
+      '@memoflow/repository-contracts':
+        specifier: workspace:*
+        version: link:../repository-contracts
       '@memoflow/setting-client':
         specifier: workspace:*
         version: link:../setting-client
