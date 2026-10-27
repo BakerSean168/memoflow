@@ -1,7 +1,7 @@
 /** Product Notification controller shared by HTTP and IPC transports. */
 import type { Result } from '@memoflow/transport-contracts/result';
 import { fail, ok } from '@memoflow/transport-contracts/result';
-import type { Context } from '@memoflow/contracts/shared';
+import type { Context } from '@memoflow/transport-contracts';
 import type { NotificationInboxPort } from '../application';
 import { NotificationQuerySchema } from '@memoflow/notification-contracts';
 import type {

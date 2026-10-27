@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import crypto from 'node:crypto';
 import type { SharedPathResolver } from '../paths';
 import { computeProfileId } from '../paths';
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { createLogger } from '@memoflow/utils/logger';
 
 const logger = createLogger('ProfileRegistry');

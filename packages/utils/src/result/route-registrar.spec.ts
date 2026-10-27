@@ -15,7 +15,7 @@ import { RouteRegistrar } from './route-registrar';
 import type { ExpressLikeRequest } from './express-adapter';
 import type { Result } from '@memoflow/transport-contracts/result';
 import { ok } from '@memoflow/transport-contracts/result';
-import type { ExecutionContext, RequestContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext, RequestContext } from '@memoflow/transport-contracts';
 import { z } from 'zod';
 
 const CARRIER: RequestContext = {

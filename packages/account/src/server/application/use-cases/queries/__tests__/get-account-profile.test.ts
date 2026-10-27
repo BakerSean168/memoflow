@@ -3,7 +3,7 @@ import { createMockRepo } from '@memoflow/test-utils/mocks';
 import type { IAccountRepository } from '../../../../domain/repositories/i-account-repository';
 import { Account } from '../../../../domain/aggregates/account';
 import { AccountStatus } from '@memoflow/account-contracts';
-import { IdentityId } from '@memoflow/domain-shared/shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { GetAccountProfileUseCase } from '../get-account-profile.use-case';
 import { asInstant } from '@memoflow/time';
 

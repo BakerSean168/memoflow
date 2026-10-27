@@ -2,7 +2,7 @@ import { createGoalPrismaPageQuery } from '../../prisma';
 import { SearchGoalPageUseCase } from '../../../application/use-cases/queries/search-goal-page.use-case';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { prisma } from '@memoflow/database';
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { createTimeContext } from '@memoflow/time';
 import { requireYmd } from '@memoflow/shared-primitives';
 import { Goal } from '../../../domain/aggregates/goal';

@@ -5,7 +5,7 @@ import type {
   AIWorkflowRunView,
   AIWorkflowStartClientRequest,
 } from '@memoflow/ai-contracts';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type { GoalWorkflowEventSource } from '../../application/ports/goal-workflow-events.port';
 
 /**

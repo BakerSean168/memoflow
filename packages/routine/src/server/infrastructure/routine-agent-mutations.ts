@@ -8,7 +8,7 @@ import {
   RoutineAgentCreateSchema,
   RoutineAgentPersistedReceiptSchema,
 } from '@memoflow/routine-contracts';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import { asInstant, createRecurrenceEngine } from '@memoflow/time';
 import { createRoutinePrismaRepositories } from './prisma';
 import { createRoutineCoachCommandService } from '../application/services/routine-coach-command.service';

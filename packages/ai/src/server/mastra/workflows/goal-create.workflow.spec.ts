@@ -21,7 +21,7 @@ import {
   type GoalResearchEvidence,
 } from '@memoflow/ai-contracts';
 import { error, ok } from '@memoflow/transport-contracts/result';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { GoalPlannerPort, GoalPlannerRequest } from '../agents/goal-planner.worker';
 import { ApplyGoalPlanService } from './apply-goal-plan.service';

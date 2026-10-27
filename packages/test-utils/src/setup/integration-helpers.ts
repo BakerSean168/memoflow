@@ -4,7 +4,7 @@
  * goal/schedule/reminder/task __tests__/integration-helpers.ts.
  */
 import type { Prisma, PrismaClient } from '@memoflow/database';
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { cleanAllTables } from './database';
 
 let prismaPromise: Promise<PrismaClient> | null = null;

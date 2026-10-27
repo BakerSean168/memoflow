@@ -9,3 +9,5 @@
 export * from './result';
 export type { Context } from './context';
 export type { ExecutionContext, ExecutionSource, RequestContext } from './execution-context';
+
+export type { ClientInfo } from './client-info';

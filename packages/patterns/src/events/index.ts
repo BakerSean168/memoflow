@@ -1,7 +1,7 @@
 // Event patterns - base event handler and dispatcher
 // Residual 1031: sole createEventBusAdapter + event interfaces (goal dual re-exports).
 
-import type { IDomainEvent } from '@memoflow/contracts/shared';
+import type { IDomainEvent } from '@memoflow/shared-primitives';
 
 /**
  * Event handler type

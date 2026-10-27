@@ -15,7 +15,7 @@ import { ImportanceLevel } from '@memoflow/shared-primitives';
 import { TaskPlanStatus } from '../../domain/value-objects/task-plan-status';
 import { TaskPlanId } from '../../domain/value-objects/task-plan-id';
 import type { TaskOccurrenceId } from '../../domain/value-objects/task-occurrence-id';
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import type { Instant } from '@memoflow/shared-primitives';
 import { type TimeContext } from '@memoflow/time';
 

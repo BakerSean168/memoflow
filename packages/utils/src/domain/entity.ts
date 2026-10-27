@@ -1,4 +1,4 @@
-import type { Equatable } from '@memoflow/contracts/shared';
+import type { Equatable } from '@memoflow/shared-primitives';
 
 export abstract class Entity<TId extends string | number | Equatable> {
   protected constructor(public readonly id: TId) {

@@ -1,7 +1,7 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { ImportanceLevel } from '@memoflow/shared-primitives';
 import { TaskOccurrenceResultKind, TaskTimingKind } from '@memoflow/task-contracts';
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { asYmd } from '@memoflow/time';
 import { TaskOccurrence } from '../../../domain/aggregates/task-occurrence';
 import { TaskPlanPrismaRepository } from './task-plan-prisma.repository';

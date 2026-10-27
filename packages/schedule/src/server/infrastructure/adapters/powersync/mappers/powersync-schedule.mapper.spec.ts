@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { aPrefixedUuid } from '@memoflow/test-utils/fixtures';
 import { requireYmd } from '@memoflow/shared-primitives';
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { CalendarEntry } from '../../../../domain/aggregates/calendar-entry';
 import { PowerSyncScheduleMapper, type PowerSyncScheduleRow } from './powersync-schedule.mapper';
 

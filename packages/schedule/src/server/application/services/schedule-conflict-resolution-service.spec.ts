@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { requireYmd } from '@memoflow/shared-primitives';
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import type { IScheduleRepository } from '../../domain/repositories/i-schedule-repository';
 import { CalendarEntry } from '../../domain/aggregates/calendar-entry';
 import { ScheduleConflictDetectionService } from './schedule-conflict-detection-service';

@@ -2,7 +2,7 @@ import { toAIPublicFailure } from '../../../../shared/ai-public-failure';
 import type { AgentInstanceRegistry } from '../../agent-instance/agent-instance.registry';
 import type { Result } from '@memoflow/transport-contracts/result';
 import { ok, error } from '@memoflow/transport-contracts/result';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type { ExpandKnowledgeReq, ExpandKnowledgeRes } from '@memoflow/ai-contracts';
 import { createLogger } from '@memoflow/utils/logger';
 

@@ -42,7 +42,9 @@
     "zod": "^4.6.5",
     "@memoflow/transport-contracts": "workspace:*",
     "@memoflow/desktop-contracts": "workspace:*",
-    "@memoflow/shared-primitives": "workspace:*"
+    "@memoflow/shared-primitives": "workspace:*",
+    "@memoflow/schedule": "workspace:*",
+    "@memoflow/test-utils": "workspace:*"
   },
   "devDependencies": {
     "@memoflow/notification": "workspace:*",

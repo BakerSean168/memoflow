@@ -7,7 +7,7 @@ import type { Prisma, PrismaClient } from '@memoflow/database';
 import { GetGoalUseCase } from '../../../application/use-cases/queries/get-goal.use-case';
 import { AddGoalKeyResultUseCase } from '../../../application/use-cases/commands/add-goal-key-result.use-case';
 import { UpdateGoalKeyResultUseCase } from '../../../application/use-cases/commands/update-goal-key-result.use-case';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import {
   GoalAgentCreateSchema,
   GoalAgentUpdateSchema,

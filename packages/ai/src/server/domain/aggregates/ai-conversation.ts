@@ -4,7 +4,7 @@ import { ConversationStatus } from '@memoflow/ai-contracts';
 import type { AIEventMap } from '@memoflow/ai-contracts';
 import type { IdentityId as IIdentityId } from '@memoflow/shared-primitives';
 import { AiConversationId } from '../value-objects/ai-conversation-id';
-import { IdentityId } from '@memoflow/domain-shared/shared';
+import { IdentityId } from '@memoflow/utils/domain';
 
 export interface AIConversationState {
   id: AiConversationId;

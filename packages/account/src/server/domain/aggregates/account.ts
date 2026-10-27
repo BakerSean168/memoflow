@@ -5,7 +5,7 @@ import type { AccountClientDTO, AccountServerDTO } from '@memoflow/account-contr
 import { AggregateRoot } from '@memoflow/utils/domain';
 
 // IdentityId from shared primitives (cross-module shared type)
-import { IdentityId } from '@memoflow/domain-shared/shared';
+import { IdentityId } from '@memoflow/utils/domain';
 
 import { AccountProfile, AccountStatus } from '../value-objects';
 

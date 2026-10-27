@@ -16,3 +16,10 @@
 
 export * from './module-manifest';
 export type { ServerModuleHandle, ServerTransportModuleContext } from './server-module-context';
+
+export type {
+  AppEventRegistry,
+  AppRpcRegistry,
+  AppEventRegistryExtensions,
+  AppRpcRegistryExtensions,
+} from './shared/protocol';

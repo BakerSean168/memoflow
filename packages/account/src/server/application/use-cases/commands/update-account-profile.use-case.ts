@@ -4,7 +4,7 @@
 
 import type { Result } from '@memoflow/transport-contracts/result';
 import { ok, error } from '@memoflow/transport-contracts/result';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type { IAccountRepository } from '../../../domain';
 import type { AccountClientDTO, UpdateAccountReq } from '@memoflow/account-contracts';
 import type { Clock } from '@memoflow/time';

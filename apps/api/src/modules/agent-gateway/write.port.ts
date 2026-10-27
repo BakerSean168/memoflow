@@ -24,7 +24,7 @@ import {
   GatewayTaskUpdateSchema,
   GatewayTaskCompleteSchema,
 } from '@memoflow/agent-gateway';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type { UserTimeContextPort } from '@memoflow/time';
 import { ResultErrorException } from '@memoflow/transport-contracts/result';
 import { z } from 'zod';

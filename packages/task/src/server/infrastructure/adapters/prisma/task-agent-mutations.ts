@@ -4,7 +4,7 @@ import {
   type ExternalMutationAuthority,
 } from '@memoflow/database/transaction';
 import type { Prisma, PrismaClient } from '@memoflow/database';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import { brandedId, ID_PREFIXES, type IdentityId } from '@memoflow/shared-primitives';
 import {
   CreateTaskPlanSchema,

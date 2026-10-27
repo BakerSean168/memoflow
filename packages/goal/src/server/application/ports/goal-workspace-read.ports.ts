@@ -1,4 +1,4 @@
-import type { KnowledgeDocumentId, KnowledgeSpaceId } from '@memoflow/shared-primitives';
+import type { KnowledgeDocumentId, KnowledgeSpaceId } from '@memoflow/repository-contracts';
 import type { GoalKnowledgeEdgeListReq, GoalKnowledgeEdgePage } from '@memoflow/relation-contracts';
 import type {
   TaskGoalContextPage,

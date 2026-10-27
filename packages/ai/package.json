@@ -63,7 +63,9 @@
     "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@anthropic-ai/sdk": "0.133.0",
-    "@memoflow/shared-primitives": "workspace:*"
+    "@memoflow/shared-primitives": "workspace:*",
+    "@memoflow/powersync-schema": "workspace:*",
+    "@memoflow/test-utils": "workspace:*"
   },
   "name": "@memoflow/ai",
   "module": "./dist/index.js",

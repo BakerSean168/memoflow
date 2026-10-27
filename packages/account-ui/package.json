@@ -31,7 +31,8 @@
     "vue-i18n": "^11.4.12",
     "vue-router": "^5.3.1",
     "vue-sonner": "^2.0.8",
-    "@memoflow/transport-contracts": "workspace:*"
+    "@memoflow/transport-contracts": "workspace:*",
+    "@memoflow/test-utils": "workspace:*"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "6.0.9",

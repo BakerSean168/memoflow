@@ -16,7 +16,7 @@ import type {
 } from '@memoflow/goal-contracts';
 import type { Result } from '@memoflow/transport-contracts/result';
 import { error } from '@memoflow/transport-contracts/result';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type { CreateGoalUseCase } from './create-goal.use-case';
 
 export class CloneGoalUseCase {

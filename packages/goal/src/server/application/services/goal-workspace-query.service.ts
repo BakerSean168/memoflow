@@ -10,7 +10,7 @@ import {
 } from '@memoflow/workspace-contracts';
 import { TaskGoalContextPageSchema } from '@memoflow/task-contracts';
 import { error, ok } from '@memoflow/transport-contracts/result';
-import type { KnowledgeDocumentId } from '@memoflow/shared-primitives';
+import type { KnowledgeDocumentId } from '@memoflow/repository-contracts';
 import { GoalKnowledgeEdgeListReqSchema } from '@memoflow/relation-contracts';
 import type { IGoalRecordRepository, IGoalRepository } from '../../domain';
 import { ListGoalRecordsUseCase } from '../use-cases/queries/list-goal-records.use-case';

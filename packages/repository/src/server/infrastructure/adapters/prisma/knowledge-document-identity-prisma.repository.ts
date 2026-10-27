@@ -1,5 +1,5 @@
 import type { PrismaClient } from '@memoflow/database';
-import type { KnowledgeDocumentId, KnowledgeSpaceId } from '@memoflow/shared-primitives';
+import type { KnowledgeDocumentId, KnowledgeSpaceId } from '@memoflow/repository-contracts';
 import type {
   IKnowledgeDocumentIdentityRepository,
   KnowledgeDocumentIdentityRecord,

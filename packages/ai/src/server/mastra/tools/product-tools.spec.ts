@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import { RequestContext } from '@mastra/core/request-context';
 import { createMemoFlowProductTools, RoutineTriggerSchema } from './product-tools';
 import {

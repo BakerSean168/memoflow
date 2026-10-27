@@ -28,7 +28,7 @@
  * ✅ 允许依赖：
  * - @memoflow/utils（基类：AggregateRoot, Entity）
  * - @memoflow/contracts（DTO 接口、事件 Map）
- * - @memoflow/domain-shared（共享身份值对象）
+ * - @memoflow/utils/domain（共享身份值对象）
  *
  * ❌ 禁止依赖：
  * - domain-client（客户端领域模型）

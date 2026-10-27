@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { prisma } from '@memoflow/database';
 import { PrismaAccountClosureOperationRepository } from '../account-closure-operation-prisma.repository';
-import { IdentityId } from '@memoflow/domain-shared/shared';
+import { IdentityId } from '@memoflow/utils/domain';
 
 describe('PrismaAccountClosureOperationRepository Integration Test', () => {
   const repo = new PrismaAccountClosureOperationRepository(prisma);

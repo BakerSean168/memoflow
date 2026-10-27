@@ -14,3 +14,6 @@ export * from './zod-extensions';
 export * from './runtime';
 export * from './command';
 export * from './time-zone-id';
+
+export type { IDomainEvent } from './domain-event.interface';
+export type { Equatable } from './equatable';

@@ -1,5 +1,5 @@
 import type { Result } from '@memoflow/transport-contracts/result';
-import type { Context } from '@memoflow/contracts/shared';
+import type { Context } from '@memoflow/transport-contracts';
 import type { NotificationOperationsPort } from '../application';
 
 /** Operations/admin controller kept outside the product Inbox port. */

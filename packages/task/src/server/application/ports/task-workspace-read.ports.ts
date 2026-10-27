@@ -5,7 +5,7 @@ import type {
 } from '@memoflow/goal-contracts';
 import type { Result } from '@memoflow/transport-contracts/result';
 import type { TaskKnowledgeEdgeListReq, TaskKnowledgeEdgePage } from '@memoflow/relation-contracts';
-import type { KnowledgeDocumentId, KnowledgeSpaceId } from '@memoflow/shared-primitives';
+import type { KnowledgeDocumentId, KnowledgeSpaceId } from '@memoflow/repository-contracts';
 
 export interface TaskGoalMeasurementReadPort {
   getKeyResultMeasurementContext(

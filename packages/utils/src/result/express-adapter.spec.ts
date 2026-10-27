@@ -17,7 +17,7 @@ import {
   fail,
   ok,
 } from '@memoflow/transport-contracts/result';
-import type { ExecutionContext, RequestContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext, RequestContext } from '@memoflow/transport-contracts';
 
 const AdapterFailureRegistry = defineFailureRegistry({
   TEST_PROVIDER_UNAVAILABLE: {

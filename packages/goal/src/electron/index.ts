@@ -73,7 +73,7 @@
 import { ipcMain } from 'electron';
 import { GoalChannels, type IElectronModuleContext } from '@memoflow/desktop-contracts';
 import { createLogger } from '@memoflow/utils/logger';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type { GoalModuleInstance } from '../server/infrastructure';
 import { GoalController } from '../server/transport/goal.controller';
 import { createGoalTransportHandlers } from '../server/transport';

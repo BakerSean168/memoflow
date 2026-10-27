@@ -1,6 +1,6 @@
 import { toResultErrorException } from '@memoflow/transport-contracts/result';
 import type { CalendarEntryClientDTO, CalendarEntryRange } from '@memoflow/schedule-contracts';
-import type { IdentityId } from '@memoflow/domain-shared';
+import type { IdentityId } from '@memoflow/utils/domain';
 import { CalendarEntry } from '../../domain/aggregates/calendar-entry';
 import type { IScheduleRepository } from '../../domain/repositories/i-schedule-repository';
 

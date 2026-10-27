@@ -42,7 +42,7 @@ import {
   toIpcResult,
   fail,
 } from '@memoflow/transport-contracts/result';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 // Residual 945: formatZodErrors dual retired — sole body in format-zod-errors.
 import { formatZodErrors } from './format-zod-errors';
 

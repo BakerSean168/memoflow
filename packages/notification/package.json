@@ -54,7 +54,12 @@
     "express": "^5.2.1",
     "zod": "^4.6.5",
     "@memoflow/transport-contracts": "workspace:*",
-    "@memoflow/desktop-contracts": "workspace:*"
+    "@memoflow/desktop-contracts": "workspace:*",
+    "@memoflow/time": "workspace:*",
+    "@memoflow/test-utils": "workspace:*",
+    "@memoflow/task": "workspace:*",
+    "@memoflow/goal": "workspace:*",
+    "@memoflow/routine": "workspace:*"
   },
   "devDependencies": {
     "@memoflow/powersync-schema": "workspace:*",

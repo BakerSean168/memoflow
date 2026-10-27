@@ -1,5 +1,5 @@
 import { afterAll, beforeEach, expect, it } from 'vitest';
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { createTimeContext } from '@memoflow/time';
 import { createTaskPrismaReadQueries } from './task-page-reader';
 import { TaskPlan } from '../../../domain/aggregates/task-plan';

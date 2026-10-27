@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
 import type { IAccountRepository } from '../../../../domain/repositories/i-account-repository';
 import { Account } from '../../../../domain/aggregates/account';
-import { IdentityId } from '@memoflow/domain-shared/shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { CloseAccountUseCase } from '../close-account.use-case';
 import { AccountClosureCoordinator } from '../../../services/account-closure-coordinator';
 import { InMemoryAccountClosureOperationRepository } from '../../../../infrastructure/adapters/in-memory/account-closure-operation-in-memory.repository';

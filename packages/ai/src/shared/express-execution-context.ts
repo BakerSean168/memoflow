@@ -20,7 +20,7 @@
  * instead of defining a second one.
  */
 
-import type { ExecutionContext, RequestContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext, RequestContext } from '@memoflow/transport-contracts';
 import { defaultExtractContext, readExpressRequestContext } from '@memoflow/utils/result';
 
 /**

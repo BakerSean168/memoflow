@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { GatewayWriteAuthority } from '../ports';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import { createReadGateway } from './read-gateway';
 
 const context = {

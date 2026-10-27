@@ -5,7 +5,7 @@ import { AIConversation } from '../../../domain/aggregates/ai-conversation';
 import type { AIEventMap } from '@memoflow/ai-contracts';
 import { ConversationStatus } from '@memoflow/ai-contracts';
 import { AiConversationId } from '../../../domain/value-objects/ai-conversation-id';
-import { IdentityId } from '@memoflow/domain-shared/shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { createTypedEventPublisher, eventBus, flushDomainEvents } from '@memoflow/utils/domain';
 
 const aiEventPublisher = createTypedEventPublisher<AIEventMap>(eventBus);

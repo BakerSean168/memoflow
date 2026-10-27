@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
 import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import {
   GoalAgentCreateSchema,
   GoalAgentUpdateSchema,

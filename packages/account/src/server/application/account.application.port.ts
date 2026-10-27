@@ -6,7 +6,7 @@ import type {
 } from './use-cases';
 import type { OperationTimelineEntry, OperationAuditRecord } from '@memoflow/operations-contracts';
 import type { Result } from '@memoflow/transport-contracts/result';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 
 /**
  * Transport-neutral account application surface.

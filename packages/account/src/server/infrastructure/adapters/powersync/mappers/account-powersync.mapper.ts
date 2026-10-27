@@ -8,7 +8,7 @@
  */
 import type { AccountState } from '../../../../domain';
 import { Account } from '../../../../domain';
-import { IdentityId } from '@memoflow/domain-shared/shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { AccountProfile, AccountStatus } from '../../../../domain/value-objects';
 import type { AccountProfileDTO } from '@memoflow/account-contracts';
 

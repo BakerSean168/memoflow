@@ -54,7 +54,6 @@
     "@memoflow/goal-contracts": "workspace:*",
     "@memoflow/label-contracts": "workspace:*",
     "@memoflow/notification-contracts": "workspace:*",
-    "@memoflow/routine-contracts": "workspace:*",
     "@memoflow/repository-contracts": "workspace:*",
     "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/setting-contracts": "workspace:*",

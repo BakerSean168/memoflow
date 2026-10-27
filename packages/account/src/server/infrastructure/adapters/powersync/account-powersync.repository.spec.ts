@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { IdentityId } from '@memoflow/domain-shared/shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { eventBus } from '@memoflow/utils/domain';
 import { Account } from '../../../domain';
 import { asInstant } from '@memoflow/time';

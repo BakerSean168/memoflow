@@ -36,5 +36,6 @@
     "monorepo"
   ],
   "author": "BakerSean168",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {}
 }

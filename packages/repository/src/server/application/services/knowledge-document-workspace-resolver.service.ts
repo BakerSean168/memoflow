@@ -1,4 +1,4 @@
-import type { KnowledgeDocumentId, KnowledgeSpaceId } from '@memoflow/shared-primitives';
+import type { KnowledgeDocumentId, KnowledgeSpaceId } from '@memoflow/repository-contracts';
 import type { IKnowledgeDocumentIdentityRepository } from '../ports/knowledge-document-identity.repository';
 import type { IKnowledgeRemoteBindingRepository } from '../ports/knowledge-remote-binding.repositories';
 import type { IKnowledgeNoteProjectionRepository } from '../ports/knowledge-note-projection.repository';

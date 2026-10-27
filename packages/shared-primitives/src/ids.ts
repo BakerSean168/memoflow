@@ -12,40 +12,6 @@ export type ExampleId = string & { readonly __brand: 'ExampleId' };
 /** 账户/身份 ID */
 export type IdentityId = string & { readonly __brand: 'IdentityId' };
 
-/** Routine Profile ID */
-
-/** Stable managed knowledge document ID carried by Markdown frontmatter. */
-export type KnowledgeDocumentId = string & { readonly __brand: 'KnowledgeDocumentId' };
-
-/** Knowledge logical space ID */
-export type KnowledgeSpaceId = string & { readonly __brand: 'KnowledgeSpaceId' };
-
-/** Desktop Local Vault binding ID */
-export type LocalVaultBindingId = string & { readonly __brand: 'LocalVaultBindingId' };
-
-/** Cloud/remote knowledge source binding ID */
-export type KnowledgeRemoteBindingId = string & { readonly __brand: 'KnowledgeRemoteBindingId' };
-
-/** 仓库 ID */
-export type RepositoryId = string & { readonly __brand: 'RepositoryId' };
-
-/** 资源 ID */
-export type ResourceId = string & { readonly __brand: 'ResourceId' };
-
-/** 文件夹 ID */
-export type FolderId = string & { readonly __brand: 'FolderId' };
-
-/** 资源版本 ID */
-export type ResourceVersionId = string & { readonly __brand: 'ResourceVersionId' };
-
-/** 资源链接 ID */
-export type ResourceLinkId = string & { readonly __brand: 'ResourceLinkId' };
-
-/** 资源书签 ID */
-export type BookmarkId = string & { readonly __brand: 'BookmarkId' };
-
-/** AI 对话 ID */
-
 /** 同步配置 ID */
 export type SyncProfileId = string & { readonly __brand: 'SyncProfileId' };
 
@@ -60,12 +26,6 @@ export type PendingChangeId = string & { readonly __brand: 'PendingChangeId' };
 
 /** 应用配置 ID */
 export type AppConfigId = string & { readonly __brand: 'AppConfigId' };
-
-/** AI Provider 配置 ID */
-
-/** AI Provider connection ID (the persisted user-owned provider connection). */
-
-/** Opaque reference into the host-owned provider SecretVault. */
 
 // ==========================================
 // ID Prefix Constants

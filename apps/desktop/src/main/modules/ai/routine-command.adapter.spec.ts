@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type { RoutineDefinition, RoutineProfileStore } from '@memoflow/routine/server';
 import {
   createRoutineCoachCommandService,

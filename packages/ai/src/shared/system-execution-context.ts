@@ -14,7 +14,7 @@
  */
 
 import { randomUUID } from 'node:crypto';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 
 /**
  * Builds a canonical `source: 'system'` `ExecutionContext`.

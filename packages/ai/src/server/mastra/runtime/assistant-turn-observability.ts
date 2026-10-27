@@ -1,4 +1,4 @@
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type { AIExecutionRecordInput, IAIExecutionRecordPort } from '../../application/ports';
 import type { ResolvedAIModel } from '../models';
 import {

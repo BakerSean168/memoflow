@@ -1,4 +1,4 @@
-import type { IDomainEvent } from '@memoflow/contracts/shared';
+import type { IDomainEvent } from '@memoflow/shared-primitives';
 import {
   TaskGoalBindingTrigger,
   TaskGoalRecordingMode,

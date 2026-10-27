@@ -11,7 +11,7 @@
  */
 
 import type { Result } from '@memoflow/transport-contracts/result';
-import type { Context } from '@memoflow/contracts/shared';
+import type { Context } from '@memoflow/transport-contracts';
 import { isOk, ok } from '@memoflow/transport-contracts/result';
 import type {
   GetTaskOccurrencesByRangeReq,

@@ -12,7 +12,7 @@ import { TaskPlanId } from '../value-objects/task-plan-id';
 import { TaskPlanStatus } from '../value-objects/task-plan-status';
 import { ImportanceLevel } from '@memoflow/shared-primitives';
 import type { Ymd } from '@memoflow/shared-primitives';
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { createTaskRecurrenceDateAdapter } from '../aggregates/task-recurrence-date.adapter';
 import { TaskPlanOutcomeEvaluator } from '../services/task-plan-outcome-evaluator';
 import { asYmd, createTimeContext } from '@memoflow/time';

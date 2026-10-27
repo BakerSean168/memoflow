@@ -6,7 +6,7 @@ import { AccountClosureCoordinator } from '../../../../application/services/acco
 import { AccountClosureOutboxEventPublisher } from '../../../adapters/outbox/account-closure-outbox-event-publisher';
 import { PrismaCloudAuthRevocationAdapter } from '../../../adapters/cloud-auth/cloud-auth-revocation.adapter';
 import { AccountClosedWorker } from '../../../workers/account-closed.worker';
-import { IdentityId } from '@memoflow/domain-shared/shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { Account } from '../../../../domain/aggregates/account';
 // Historical W3/W4 baseline: this integration test wires the real cross-module
 // consumers into AccountClosedWorker. scope:account may not depend on other

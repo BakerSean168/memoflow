@@ -31,7 +31,7 @@
 
 import { ok, error } from '@memoflow/transport-contracts/result';
 import type { ConversationEventSource } from '../domain/repositories/conversation-events.port';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type { IAIConversationRepository, IAIProviderConfigRepository } from '../domain';
 import type {
   AIEvaluationOperationsPort,

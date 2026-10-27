@@ -4,7 +4,7 @@ import {
   type AIProviderConfigServerDTO,
   type CommitAIProviderOnboardingReq,
 } from '@memoflow/ai-contracts';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import { AiProviderConfigId } from '../../../domain/value-objects/ai-provider-config-id';
 import { normalizeOpenAICompatibleModelId } from '../../../shared/openai-compatible-normalize';
 import type {

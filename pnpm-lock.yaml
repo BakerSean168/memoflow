@@ -434,6 +434,12 @@ importers:
       '@memoflow/task-contracts':
         specifier: workspace:*
         version: link:../../packages/task-contracts
+      '@memoflow/test-utils':
+        specifier: workspace:*
+        version: link:../../packages/test-utils
+      '@memoflow/time':
+        specifier: workspace:*
+        version: link:../../packages/time
       '@memoflow/transport-contracts':
         specifier: workspace:*
         version: link:../../packages/transport-contracts
@@ -741,6 +747,12 @@ importers:
       '@memoflow/task-ui':
         specifier: workspace:*
         version: link:../../packages/task-ui
+      '@memoflow/test-utils':
+        specifier: workspace:*
+        version: link:../../packages/test-utils
+      '@memoflow/time':
+        specifier: workspace:*
+        version: link:../../packages/time
       '@memoflow/transport-contracts':
         specifier: workspace:*
         version: link:../../packages/transport-contracts
@@ -1336,12 +1348,18 @@ importers:
       '@memoflow/reliable-messaging-contracts':
         specifier: workspace:*
         version: link:../reliable-messaging-contracts
+      '@memoflow/schedule':
+        specifier: workspace:*
+        version: link:../schedule
       '@memoflow/setting-contracts':
         specifier: workspace:*
         version: link:../setting-contracts
       '@memoflow/shared-primitives':
         specifier: workspace:*
         version: link:../shared-primitives
+      '@memoflow/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time
@@ -1434,6 +1452,9 @@ importers:
       '@memoflow/ipc-client':
         specifier: workspace:*
         version: link:../ipc-client
+      '@memoflow/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
       '@memoflow/transport-contracts':
         specifier: workspace:*
         version: link:../transport-contracts
@@ -1561,6 +1582,9 @@ importers:
       '@memoflow/notification-contracts':
         specifier: workspace:*
         version: link:../notification-contracts
+      '@memoflow/powersync-schema':
+        specifier: workspace:*
+        version: link:../powersync-schema
       '@memoflow/repository-contracts':
         specifier: workspace:*
         version: link:../repository-contracts
@@ -1573,6 +1597,9 @@ importers:
       '@memoflow/task-contracts':
         specifier: workspace:*
         version: link:../task-contracts
+      '@memoflow/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time
@@ -1683,6 +1710,9 @@ importers:
       '@memoflow/goal-contracts':
         specifier: workspace:*
         version: link:../goal-contracts
+      '@memoflow/goal-ui':
+        specifier: workspace:*
+        version: link:../goal-ui
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client
@@ -2054,6 +2084,9 @@ importers:
       '@memoflow/task-ui':
         specifier: workspace:*
         version: link:../task-ui
+      '@memoflow/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time
@@ -2187,6 +2220,9 @@ importers:
       '@memoflow/transport-contracts':
         specifier: workspace:*
         version: link:../transport-contracts
+      '@memoflow/utils':
+        specifier: workspace:*
+        version: link:../utils
       argon2:
         specifier: 0.45.1
         version: 0.45.1
@@ -2263,9 +2299,6 @@ importers:
       '@memoflow/repository-contracts':
         specifier: workspace:*
         version: link:../repository-contracts
-      '@memoflow/routine-contracts':
-        specifier: workspace:*
-        version: link:../routine-contracts
       '@memoflow/schedule-contracts':
         specifier: workspace:*
         version: link:../schedule-contracts
@@ -2468,6 +2501,9 @@ importers:
       '@memoflow/reliable-messaging-contracts':
         specifier: workspace:*
         version: link:../reliable-messaging-contracts
+      '@memoflow/repository-contracts':
+        specifier: workspace:*
+        version: link:../repository-contracts
       '@memoflow/schedule-contracts':
         specifier: workspace:*
         version: link:../schedule-contracts
@@ -2666,9 +2702,39 @@ importers:
 
   packages/host-runtime:
     dependencies:
+      '@memoflow/account-contracts':
+        specifier: workspace:*
+        version: link:../account-contracts
+      '@memoflow/ai-contracts':
+        specifier: workspace:*
+        version: link:../ai-contracts
+      '@memoflow/data-portability-contracts':
+        specifier: workspace:*
+        version: link:../data-portability-contracts
       '@memoflow/desktop-contracts':
         specifier: workspace:*
         version: link:../desktop-contracts
+      '@memoflow/goal-contracts':
+        specifier: workspace:*
+        version: link:../goal-contracts
+      '@memoflow/notification-contracts':
+        specifier: workspace:*
+        version: link:../notification-contracts
+      '@memoflow/repository-contracts':
+        specifier: workspace:*
+        version: link:../repository-contracts
+      '@memoflow/routine-contracts':
+        specifier: workspace:*
+        version: link:../routine-contracts
+      '@memoflow/schedule-contracts':
+        specifier: workspace:*
+        version: link:../schedule-contracts
+      '@memoflow/setting-contracts':
+        specifier: workspace:*
+        version: link:../setting-contracts
+      '@memoflow/task-contracts':
+        specifier: workspace:*
+        version: link:../task-contracts
       '@memoflow/transport-contracts':
         specifier: workspace:*
         version: link:../transport-contracts
@@ -2781,6 +2847,9 @@ importers:
       '@memoflow/domain-shared':
         specifier: workspace:*
         version: link:../domain-shared
+      '@memoflow/goal':
+        specifier: workspace:*
+        version: link:../goal
       '@memoflow/goal-contracts':
         specifier: workspace:*
         version: link:../goal-contracts
@@ -2799,15 +2868,27 @@ importers:
       '@memoflow/reliable-messaging-contracts':
         specifier: workspace:*
         version: link:../reliable-messaging-contracts
+      '@memoflow/routine':
+        specifier: workspace:*
+        version: link:../routine
       '@memoflow/schedule-contracts':
         specifier: workspace:*
         version: link:../schedule-contracts
       '@memoflow/shared-primitives':
         specifier: workspace:*
         version: link:../shared-primitives
+      '@memoflow/task':
+        specifier: workspace:*
+        version: link:../task
       '@memoflow/task-contracts':
         specifier: workspace:*
         version: link:../task-contracts
+      '@memoflow/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
+      '@memoflow/time':
+        specifier: workspace:*
+        version: link:../time
       '@memoflow/transport-contracts':
         specifier: workspace:*
         version: link:../transport-contracts
@@ -3090,6 +3171,9 @@ importers:
       '@memoflow/shared-primitives':
         specifier: workspace:*
         version: link:../shared-primitives
+      '@memoflow/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
       '@memoflow/transport-contracts':
         specifier: workspace:*
         version: link:../transport-contracts
@@ -3315,6 +3399,9 @@ importers:
       '@memoflow/routine-contracts':
         specifier: workspace:*
         version: link:../routine-contracts
+      '@memoflow/setting-contracts':
+        specifier: workspace:*
+        version: link:../setting-contracts
       '@memoflow/shared-primitives':
         specifier: workspace:*
         version: link:../shared-primitives
@@ -3519,6 +3606,9 @@ importers:
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client
+      '@memoflow/routine-ui':
+        specifier: workspace:*
+        version: link:../routine-ui
       '@memoflow/schedule-client':
         specifier: workspace:*
         version: link:../schedule-client
@@ -3534,6 +3624,9 @@ importers:
       '@memoflow/task-contracts':
         specifier: workspace:*
         version: link:../task-contracts
+      '@memoflow/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time
@@ -3711,6 +3804,9 @@ importers:
       '@lucide/vue':
         specifier: ^1.48.0
         version: 1.48.0(vue@3.5.43(@typescript/typescript6@6.0.2))
+      '@memoflow/ai':
+        specifier: workspace:*
+        version: link:../ai
       '@memoflow/ai-contracts':
         specifier: workspace:*
         version: link:../ai-contracts
@@ -3781,9 +3877,6 @@ importers:
       '@asteasolutions/zod-to-openapi':
         specifier: ^9.1.0
         version: 9.1.0(zod@4.6.5)
-      '@memoflow/shared-primitives':
-        specifier: workspace:*
-        version: 'link:'
       zod:
         specifier: ^4.6.5
         version: 4.6.5
@@ -3826,6 +3919,9 @@ importers:
       '@memoflow/reliable-messaging-contracts':
         specifier: workspace:*
         version: link:../reliable-messaging-contracts
+      '@memoflow/repository-contracts':
+        specifier: workspace:*
+        version: link:../repository-contracts
       '@memoflow/schedule-contracts':
         specifier: workspace:*
         version: link:../schedule-contracts
@@ -4033,6 +4129,9 @@ importers:
       '@memoflow/powersync-schema':
         specifier: workspace:*
         version: link:../powersync-schema
+      '@memoflow/utils':
+        specifier: workspace:*
+        version: link:../utils
       '@vue/test-utils':
         specifier: ^2.5.1
         version: 2.5.1(@vue/compiler-dom@3.5.43)(@vue/server-renderer@3.5.43)(vue@3.5.43(@typescript/typescript6@6.0.2))
@@ -4089,9 +4188,6 @@ importers:
 
   packages/transport-contracts:
     dependencies:
-      '@memoflow/transport-contracts':
-        specifier: workspace:*
-        version: 'link:'
       zod:
         specifier: ^4.6.5
         version: 4.6.5
@@ -4238,6 +4334,12 @@ importers:
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@memoflow/host-runtime':
+        specifier: workspace:*
+        version: link:../host-runtime
+      '@memoflow/shared-primitives':
+        specifier: workspace:*
+        version: link:../shared-primitives
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time

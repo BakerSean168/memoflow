@@ -13,7 +13,7 @@ import type {
   IAnalyticsReadPort,
 } from '@memoflow/ai/ports';
 import type { GoalApplicationPort } from '@memoflow/goal';
-import { IdentityId } from '@memoflow/domain-shared/shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { TaskOccurrenceStatus } from '@memoflow/task-contracts';
 import type { GoalHomeProgressSummary } from '@memoflow/goal-contracts';
 import type { UserTimeContextPort } from '@memoflow/time';

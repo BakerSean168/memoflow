@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ok } from '@memoflow/transport-contracts/result';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import { AIProviderConfigController } from './ai-provider-config.controller';
 
 const cx = { identityId: 'identity-1' } as ExecutionContext;

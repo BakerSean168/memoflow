@@ -18,7 +18,7 @@ import {
   TaskPlanDraftContentSchema,
 } from '@memoflow/ai-contracts';
 import { error, ok } from '@memoflow/transport-contracts/result';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createTimeContext } from '@memoflow/time';
 import { AIContextAssembler } from '../context';

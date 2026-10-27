@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { IdentityId } from '@memoflow/domain-shared/shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import type { AIProviderCredentialRef } from '@memoflow/ai-contracts';
 import { AIProviderConfig } from '../ai-provider-config';
 

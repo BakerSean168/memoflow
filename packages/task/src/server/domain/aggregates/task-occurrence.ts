@@ -14,7 +14,7 @@ import {
   TaskOccurrenceStatus,
 } from '@memoflow/task-contracts';
 import { ImportanceLevel } from '@memoflow/shared-primitives';
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { createTimeFacade, type TimeContext } from '@memoflow/time';
 import { AggregateRoot } from '@memoflow/utils/domain';
 import { TaskOccurrenceId } from '../../domain/value-objects/task-occurrence-id';

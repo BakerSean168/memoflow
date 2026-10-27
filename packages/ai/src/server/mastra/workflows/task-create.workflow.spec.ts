@@ -11,7 +11,7 @@ import {
   type TaskPlanningDecision,
 } from '@memoflow/ai-contracts';
 import { error, ok } from '@memoflow/transport-contracts/result';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { TaskPlannerPort, TaskPlannerRequest } from '../agents/task-planner.worker';
 import { taskWorkflowEntityId } from './deterministic-entity-id';

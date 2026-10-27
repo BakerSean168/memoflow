@@ -10,7 +10,7 @@ import { registerReadTools } from './register-read-tools';
 import { readToolDescriptors, type GatewayReadToolName } from '../read-tool-descriptors';
 import { createMcpHandler, McpServer } from '@modelcontextprotocol/server';
 import { z } from 'zod';
-import type { ExecutionContext, RequestContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext, RequestContext } from '@memoflow/transport-contracts';
 import {
   GatewayReadError,
   type GatewayAuditEvent,

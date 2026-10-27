@@ -1,4 +1,4 @@
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type {
   IAIExecutionRecordPort,
   IKnowledgeIndexRepository,

@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { prisma } from '@memoflow/database';
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { GoalId, GoalPolicy } from '../../../domain';
 import { CreateGoalUseCase } from '../../../application/use-cases/commands/create-goal.use-case';
 import { GoalPrismaRepository } from './goal-prisma.repository';

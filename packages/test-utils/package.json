@@ -23,7 +23,8 @@
     "@vue/test-utils": "^2.5.1",
     "pg": "8.23.0",
     "pinia": "^4.0.3",
-    "vitest": "4.1.11"
+    "vitest": "4.1.11",
+    "@memoflow/utils": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "24.13.3",

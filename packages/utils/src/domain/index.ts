@@ -13,3 +13,5 @@ export {
   createTypedEventSubscriber,
 } from './typed-event-port';
 export type { Publisher, Subscriber, TypedEventPort } from './typed-event-port';
+
+export { IdentityId } from './identity-id';

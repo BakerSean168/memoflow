@@ -15,7 +15,7 @@
  */
 
 import type { AggregateRoot } from '@memoflow/utils/domain';
-import type { Equatable } from '@memoflow/contracts/shared';
+import type { Equatable } from '@memoflow/shared-primitives';
 import type { CausationId, CorrelationId } from '@memoflow/shared-primitives/command';
 import type { IEventBus } from '../events';
 import type { IOutboxWriter } from '../outbox';

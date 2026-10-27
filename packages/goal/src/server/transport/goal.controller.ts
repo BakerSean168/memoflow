@@ -35,7 +35,7 @@ import type {
   UpdateKeyResultReq,
   UpdateGoalReviewReq,
 } from '@memoflow/goal-contracts';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type { IdentityId } from '@memoflow/shared-primitives';
 import { toKeyResultListResponse } from './mappers';
 import type {

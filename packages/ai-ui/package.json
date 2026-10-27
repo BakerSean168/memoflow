@@ -53,7 +53,8 @@
     "@memoflow/task-client": "workspace:*",
     "@memoflow/repository-client": "workspace:*",
     "@memoflow/ai-client": "workspace:*",
-    "@memoflow/repository-contracts": "workspace:*"
+    "@memoflow/repository-contracts": "workspace:*",
+    "@memoflow/goal-ui": "workspace:*"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "6.0.9",

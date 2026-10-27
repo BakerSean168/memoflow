@@ -6,7 +6,7 @@ import {
   TaskTimingSchema,
 } from '@memoflow/task-contracts';
 import type { ImportanceLevel } from '@memoflow/shared-primitives';
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { TaskOccurrence } from '../../../../domain/aggregates/task-occurrence';
 import { TaskOccurrenceId } from '../../../../domain/value-objects/task-occurrence-id';
 import { TaskPlanId } from '../../../../domain/value-objects/task-plan-id';

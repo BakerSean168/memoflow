@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import { ElectronAuthResolutionError } from '@memoflow/desktop-contracts';
 import type { IElectronAuthContext } from '@memoflow/desktop-contracts';
 

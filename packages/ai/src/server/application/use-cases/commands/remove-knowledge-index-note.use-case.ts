@@ -1,4 +1,4 @@
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type { IKnowledgeIndexRepository, KnowledgeDocumentIndexRef } from '../../ports';
 
 /** Removes a deleted source resource from the derived AI index. */

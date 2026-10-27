@@ -17,11 +17,11 @@ import {
   GoalReminderConfig,
   KeyResultId,
 } from '../../../domain';
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import type { CreateGoalReq, GoalMutationReceipt } from '@memoflow/goal-contracts';
 import type { Result } from '@memoflow/transport-contracts/result';
 import { ok, error } from '@memoflow/transport-contracts/result';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import { createGoalMutationReceipt } from './goal-mutation-receipt';
 import { createLogger } from '@memoflow/utils/logger';
 import type { GoalWriteTransactionRunner } from './goal-write-support';

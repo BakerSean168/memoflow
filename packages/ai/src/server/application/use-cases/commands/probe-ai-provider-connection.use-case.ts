@@ -4,7 +4,7 @@ import {
   type ProbeAIProviderConnectionReq,
   type ProbeAIProviderConnectionRes,
 } from '@memoflow/ai-contracts';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import { AIExecutionError } from '../../../../shared/ai-execution-error';
 import type {
   IAIProviderCredentialProbePort,

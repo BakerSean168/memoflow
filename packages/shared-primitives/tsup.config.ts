@@ -17,6 +17,8 @@ export default createTsupConfig({
     'src/index.ts',
     'src/command.ts',
     'src/duration.ts',
+    'src/domain-event.interface.ts',
+    'src/equatable.ts',
     'src/hm.ts',
     'src/ids.ts',
     'src/instant.ts',
