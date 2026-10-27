@@ -1340,6 +1340,9 @@ importers:
 
   packages/agent-gateway:
     dependencies:
+      '@memoflow/ai-contracts':
+        specifier: workspace:*
+        version: link:../ai-contracts
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
