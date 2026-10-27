@@ -93,6 +93,8 @@ requireTokens('packages/relation-contracts/src/index.ts', [
   'KnowledgeDocumentRefSchema',
   'GoalKnowledgeLinkReqSchema',
   'GoalsForKnowledgeReqSchema',
+  'export interface GoalKnowledgeClientPort',
+  'listGoalsForKnowledge',
 ]);
 forbidPatterns('packages/relation-contracts/src/index.ts', [
   [
@@ -119,11 +121,27 @@ requireTokens('packages/relation/src/application/goal-knowledge-service.ts', [
   "relationType: 'related'",
 ]);
 requireTokens('packages/relation/src/client/index.ts', [
-  'GoalKnowledgeClientPort',
+  "export type { GoalKnowledgeClientPort } from '@memoflow/relation-contracts'",
   'linkGoalKnowledge',
   'unlinkGoalKnowledge',
   'listGoalKnowledge',
   'listGoalsForKnowledge',
+]);
+forbidPatterns('packages/relation/src/client/index.ts', [
+  [
+    /\bexport interface GoalKnowledgeClientPort\b/,
+    'Relation client must re-export the shared contract port, not redeclare it',
+  ],
+]);
+requireTokens('packages/goal-ui/src/goal-ui-host.ts', [
+  'export type GoalKnowledgePort = Pick<',
+  'GoalKnowledgeClientPort',
+]);
+forbidPatterns('packages/goal-ui/src/goal-ui-host.ts', [
+  [
+    /\bexport interface GoalKnowledgePort\b/,
+    'Goal UI host port must narrow the shared relation port, not redeclare it',
+  ],
 ]);
 for (const file of productionTypeScriptFiles(join(root, 'packages/relation/src'))) {
   const source = readFileSync(file, 'utf8');

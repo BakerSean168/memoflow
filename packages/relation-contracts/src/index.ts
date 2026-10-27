@@ -3,6 +3,7 @@ import type { KnowledgeDocumentId } from '@memoflow/repository-contracts';
 import type { TaskPlanId } from '@memoflow/task-contracts';
 import type { GoalId } from '@memoflow/goal-contracts';
 import { brandedId } from '@memoflow/shared-primitives/zod-extensions';
+import type { Result } from '@memoflow/transport-contracts/result';
 import {
   KnowledgeDocumentIdSchema,
   KnowledgeDocumentRefSchema,
@@ -81,6 +82,23 @@ export const GoalKnowledgeRelationSchema = z
 export type GoalKnowledgeRelation = z.infer<typeof GoalKnowledgeRelationSchema>;
 
 export type GoalKnowledgeDocumentRef = KnowledgeDocumentRef;
+
+/**
+ * Goal↔Knowledge relation port shared by every surface.
+ * 跨表面共享的 Goal↔Knowledge 关系端口。
+ *
+ * The contract owns the port shape only; HTTP, IPC and in-process adapters live
+ * with their transports. Consumers that need a subset narrow it with `Pick<>`
+ * instead of redeclaring the members.
+ * 契约只负责端口形状，HTTP/IPC/进程内适配器归属各自传输层；只需子集的消费方用
+ * `Pick<>` 收窄，不重复声明成员。
+ */
+export interface GoalKnowledgeClientPort {
+  linkGoalKnowledge(request: GoalKnowledgeLinkReq): Promise<Result<GoalKnowledgeRelation>>;
+  unlinkGoalKnowledge(request: GoalKnowledgeLinkReq): Promise<Result<{ unlinked: boolean }>>;
+  listGoalKnowledge(request: GoalKnowledgeListReq): Promise<Result<GoalKnowledgeRelation[]>>;
+  listGoalsForKnowledge(request: GoalsForKnowledgeReq): Promise<Result<GoalKnowledgeRelation[]>>;
+}
 
 export const GoalKnowledgeEdgePageRequestSchema = z
   .object({

@@ -4,12 +4,7 @@ import type { TimeFacade } from '@memoflow/time';
 import type { Ymd } from '@memoflow/shared-primitives';
 import type { GoalClientPort } from '@memoflow/goal-client';
 import type { LabelClientDTO } from '@memoflow/label-contracts';
-import type { Result } from '@memoflow/transport-contracts';
-import type {
-  GoalKnowledgeLinkReq,
-  GoalKnowledgeListReq,
-  GoalKnowledgeRelation,
-} from '@memoflow/relation-contracts';
+import type { GoalKnowledgeClientPort } from '@memoflow/relation-contracts';
 import type {
   AIWorkflowRunView,
   AIWorkflowGetClientRequest,
@@ -25,11 +20,15 @@ export interface GoalWorkflowReadPort {
   get(request: AIWorkflowGetClientRequest): Promise<AIWorkflowRunView | null>;
   streamWorkspaceEvents?(options: GoalWorkspaceEventStreamOptions): Promise<void>;
 }
-export interface GoalKnowledgePort {
-  linkGoalKnowledge(request: GoalKnowledgeLinkReq): Promise<Result<GoalKnowledgeRelation>>;
-  unlinkGoalKnowledge(request: GoalKnowledgeLinkReq): Promise<Result<{ unlinked: boolean }>>;
-  listGoalKnowledge(request: GoalKnowledgeListReq): Promise<Result<GoalKnowledgeRelation[]>>;
-}
+/**
+ * Goal surfaces only manage links for one Goal; the reverse (knowledge→goals)
+ * lookup stays out of this surface.
+ * Goal 界面只管理单个 Goal 的关联，知识→Goal 的反查不进入该表面。
+ */
+export type GoalKnowledgePort = Pick<
+  GoalKnowledgeClientPort,
+  'linkGoalKnowledge' | 'unlinkGoalKnowledge' | 'listGoalKnowledge'
+>;
 import type { ResultErrorTranslateFn, translateResultErrorMessage } from '@memoflow/http-client';
 import type { GoalDraftCheckpointStore } from './infrastructure/goal-draft-checkpoint.indexeddb';
 

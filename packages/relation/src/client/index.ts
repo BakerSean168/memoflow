@@ -1,20 +1,9 @@
 import type { IResultHttpClient } from '@memoflow/http-client';
 import type { IResultIpcClient } from '@memoflow/ipc-client';
 import { RelationChannels } from '@memoflow/desktop-contracts';
-import type {
-  GoalKnowledgeLinkReq,
-  GoalKnowledgeListReq,
-  GoalKnowledgeRelation,
-  GoalsForKnowledgeReq,
-} from '@memoflow/relation-contracts';
-import type { Result } from '@memoflow/transport-contracts/result';
+import type { GoalKnowledgeClientPort } from '@memoflow/relation-contracts';
 
-export interface GoalKnowledgeClientPort {
-  linkGoalKnowledge(request: GoalKnowledgeLinkReq): Promise<Result<GoalKnowledgeRelation>>;
-  unlinkGoalKnowledge(request: GoalKnowledgeLinkReq): Promise<Result<{ unlinked: boolean }>>;
-  listGoalKnowledge(request: GoalKnowledgeListReq): Promise<Result<GoalKnowledgeRelation[]>>;
-  listGoalsForKnowledge(request: GoalsForKnowledgeReq): Promise<Result<GoalKnowledgeRelation[]>>;
-}
+export type { GoalKnowledgeClientPort } from '@memoflow/relation-contracts';
 
 export function createGoalKnowledgeHttpClient(
   httpClient: IResultHttpClient,

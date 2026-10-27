@@ -23,6 +23,7 @@
     "@memoflow/repository-contracts": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/task-contracts": "workspace:*",
+    "@memoflow/transport-contracts": "workspace:*",
     "zod": "^4.6.5"
   }
 }
