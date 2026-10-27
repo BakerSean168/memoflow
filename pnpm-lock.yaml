@@ -2389,9 +2389,6 @@ importers:
       '@memoflow/shared-primitives':
         specifier: workspace:*
         version: link:../shared-primitives
-      '@memoflow/task-contracts':
-        specifier: workspace:*
-        version: link:../task-contracts
       '@memoflow/transport-contracts':
         specifier: workspace:*
         version: link:../transport-contracts
@@ -2456,9 +2453,6 @@ importers:
       '@memoflow/shared-primitives':
         specifier: workspace:*
         version: link:../shared-primitives
-      '@memoflow/task-contracts':
-        specifier: workspace:*
-        version: link:../task-contracts
       '@memoflow/time':
         specifier: workspace:*
         version: link:../time

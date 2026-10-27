@@ -19,7 +19,6 @@
     "@memoflow/goal-core": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",
-    "@memoflow/task-contracts": "workspace:*",
     "@memoflow/transport-contracts": "workspace:*",
     "@memoflow/goal-workspace-contracts": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",

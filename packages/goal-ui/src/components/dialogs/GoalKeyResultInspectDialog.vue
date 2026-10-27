@@ -160,7 +160,7 @@ import {
   type GoalTimeframe,
   type KeyResultClientDTO,
 } from '@memoflow/goal-contracts';
-import type { TaskGoalContextPage } from '@memoflow/task-contracts';
+import type { GoalWorkspaceTaskPage } from '@memoflow/goal-workspace-contracts';
 
 import GoalKeyResultTrajectoryPlot from '../GoalKeyResultTrajectoryPlot.vue';
 import GoalRecordCard from '../cards/GoalRecordCard.vue';
@@ -184,7 +184,7 @@ const records = ref<GoalRecordClientDTO[]>([]);
 const recordTotal = ref(0);
 const recordLoading = ref(false);
 const recordError = ref(false);
-const tasks = ref<TaskGoalContextPage['items']>([]);
+const tasks = ref<GoalWorkspaceTaskPage['items']>([]);
 const taskTotal = ref(0);
 const taskLoading = ref(false);
 const taskError = ref(false);

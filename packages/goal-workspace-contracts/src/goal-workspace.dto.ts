@@ -50,6 +50,17 @@ export const GoalWorkspaceTaskPageInvocationSchema = GoalWorkspaceTaskPageReques
 });
 export type GoalWorkspaceTaskPageInvocation = z.input<typeof GoalWorkspaceTaskPageInvocationSchema>;
 
+/** Goal Workspace Task page projection; the item shape stays Task-owned. */
+export const GoalWorkspaceTaskPageSchema = z
+  .object({
+    items: z.array(TaskGoalContextItemSchema),
+    total: z.number().int().min(0),
+    limit: z.number().int().min(1).max(100),
+    offset: z.number().int().min(0),
+  })
+  .strict();
+export type GoalWorkspaceTaskPage = z.infer<typeof GoalWorkspaceTaskPageSchema>;
+
 const knowledgeItemBase = z.object({
   relationId: z.string().min(1),
   documentId: KnowledgeDocumentIdSchema,
