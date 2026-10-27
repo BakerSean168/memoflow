@@ -1,6 +1,4 @@
-import {
-  type RoutineScheduleProjectionEventMap,
-} from '@memoflow/routine-contracts';
+import { type RoutineScheduleProjectionEventMap } from '@memoflow/routine-contracts';
 import {
   type RoutineElapsedOccurrencePayload,
   type RoutineWallClockOccurrencePayload,

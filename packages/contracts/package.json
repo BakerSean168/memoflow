@@ -80,7 +80,8 @@
     "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/transport-contracts": "workspace:*",
-    "zod": "^4.6.5"
+    "zod": "^4.6.5",
+    "@memoflow/routine-contracts": "workspace:*"
   },
   "devDependencies": {
     "@faker-js/faker": "10.6.0",
