@@ -574,8 +574,8 @@
     },
     {
       "id": "r655",
-      "path": "packages/account-contracts/src/entities/account-entities-dual.surface.spec.ts",
-      "package": "packages/account-contracts",
+      "path": "packages/contracts/src/modules/account/entities/account-entities-dual.surface.spec.ts",
+      "package": "packages/contracts",
       "class": "retired",
       "sole": "../../goal/entities",
       "blast": "surface lock (retired)",
