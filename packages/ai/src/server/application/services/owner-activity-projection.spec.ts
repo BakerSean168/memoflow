@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { projectAIOwnerActivity } from './owner-activity-projection';
+import { mergeAIActivityItems, projectAIOwnerActivity } from './owner-activity-projection';
 
 describe('projectAIOwnerActivity', () => {
   it('filters, orders and bounds owner facts without creating durable activity truth', () => {
@@ -72,5 +72,20 @@ describe('projectAIOwnerActivity', () => {
     expect(result).toHaveLength(10);
     expect(result[0]?.id).toBe('task-created-task-11');
     expect(result[9]?.id).toBe('task-created-task-2');
+  });
+});
+
+describe('mergeAIActivityItems', () => {
+  it('keeps pre-projected entries stable across timestamp ties and bounds the result', () => {
+    const result = mergeAIActivityItems(
+      [
+        { id: 'goal-1', type: 'goal_updated', description: 'goal', timestamp: 8_000 },
+        { id: 'task-1', type: 'task_created', description: 'task', timestamp: 10_000 },
+        { id: 'schedule-1', type: 'schedule_created', description: 'schedule', timestamp: 8_000 },
+      ],
+      2,
+    );
+
+    expect(result.map((item) => item.id)).toEqual(['task-1', 'goal-1']);
   });
 });

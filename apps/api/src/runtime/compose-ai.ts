@@ -37,10 +37,22 @@ import {
 } from '@memoflow/ai';
 import { createAIApiModule, type AIApiModuleDef } from '@memoflow/ai/api';
 import type { RepositoryApplicationPort } from '@memoflow/repository';
-import { createGoalPrismaRepositories, type GoalApplicationPort } from '@memoflow/goal';
-import { createTaskPrismaRepositories, type TaskApplicationPort } from '@memoflow/task';
+import {
+  createGoalPrismaRepositories,
+  GoalActivityReadService,
+  type GoalApplicationPort,
+} from '@memoflow/goal';
+import {
+  createTaskPrismaRepositories,
+  TaskActivityReadService,
+  type TaskApplicationPort,
+} from '@memoflow/task';
 import type { RoutineCoachCommandPort } from '@memoflow/routine/routine-runtime';
-import type { IScheduleRepository, ScheduleEventApplicationPort } from '@memoflow/schedule';
+import {
+  ScheduleActivityReadService,
+  type IScheduleRepository,
+  type ScheduleEventApplicationPort,
+} from '@memoflow/schedule';
 import type { NotificationInboxPort } from '@memoflow/notification';
 import type { LabelService } from '@memoflow/label';
 import type { GoalKnowledgeService, KnowledgeDocumentRefResolver } from '@memoflow/relation';
@@ -121,10 +133,16 @@ export function composeAI(dependencies: ComposeAIDependencies): ComposedAI {
   );
   const notificationReadPort = new NotificationAIReadAdapter(dependencies.notificationInbox);
   const activityReadPort: IAIActivityReadPort = new OwnerActivityAIReadAdapter({
-    goalRepository: goalRepositories.goalRepository,
-    taskPlanRepository: taskRepositories.taskPlanRepository,
-    taskOccurrenceRepository: taskRepositories.taskOccurrenceRepository,
-    scheduleRepository: dependencies.scheduleRepository,
+    goalActivity: new GoalActivityReadService({
+      goalRepository: goalRepositories.goalRepository,
+    }),
+    taskActivity: new TaskActivityReadService({
+      taskPlanRepository: taskRepositories.taskPlanRepository,
+      taskOccurrenceRepository: taskRepositories.taskOccurrenceRepository,
+    }),
+    scheduleActivity: new ScheduleActivityReadService({
+      scheduleRepository: dependencies.scheduleRepository,
+    }),
   });
   const analyticsReadPort = new ControlledAnalyticsReadAdapter({
     goalApplicationPort: dependencies.goalApplicationPort,

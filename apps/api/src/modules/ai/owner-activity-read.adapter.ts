@@ -1,64 +1,41 @@
-import { projectAIOwnerActivity } from '@memoflow/ai';
+import { mergeAIActivityItems } from '@memoflow/ai';
 import type { IAIActivityReadPort } from '@memoflow/ai/ports';
-import { TaskOccurrenceStatus } from '@memoflow/task-contracts';
-import type { IGoalRepository } from '@memoflow/goal';
-import type { IScheduleRepository } from '@memoflow/schedule';
-import type { ITaskOccurrenceRepository, ITaskPlanRepository } from '@memoflow/task';
+import type { GoalActivityReadService } from '@memoflow/goal';
+import type { ScheduleActivityReadService } from '@memoflow/schedule';
+import type { TaskActivityReadService } from '@memoflow/task';
 
 export interface OwnerActivityAIReadDependencies {
-  readonly goalRepository: IGoalRepository;
-  readonly taskPlanRepository: ITaskPlanRepository;
-  readonly taskOccurrenceRepository: ITaskOccurrenceRepository;
-  readonly scheduleRepository: IScheduleRepository;
+  readonly goalActivity: Pick<GoalActivityReadService, 'listRecentActivity'>;
+  readonly taskActivity: Pick<TaskActivityReadService, 'listRecentActivity'>;
+  readonly scheduleActivity: Pick<ScheduleActivityReadService, 'listRecentActivity'>;
 }
 
 /**
- * API-side recent-activity projection derived directly from owner truth.
+ * API-side recent-activity assembly from domain-owned activity capabilities.
  *
  * HOME-1804 retired the cross-domain activity ledger: recent activity is a
  * bounded AI consumer projection, not a second durable product authority.
+ * Domains own the fact-to-entry mapping; this host only assembles the streams.
  */
 export class OwnerActivityAIReadAdapter implements IAIActivityReadPort {
   constructor(private readonly dependencies: OwnerActivityAIReadDependencies) {}
 
   async listRecent(input: Parameters<IAIActivityReadPort['listRecent']>[0]) {
-    const [goals, taskPlans, taskOccurrences, schedules] = await Promise.all([
-      this.dependencies.goalRepository.findByIdentityId(input.identityId, {
-        includeChildren: false,
-        systemView: 'active',
+    const [tasks, goals, schedules] = await Promise.all([
+      this.dependencies.taskActivity.listRecentActivity(input.identityId, {
+        since: input.since,
+        limit: input.limit,
       }),
-      this.dependencies.taskPlanRepository.findByIdentityId(input.identityId),
-      this.dependencies.taskOccurrenceRepository.findByIdentityId(input.identityId),
-      this.dependencies.scheduleRepository.findByIdentityId(input.identityId),
+      this.dependencies.goalActivity.listRecentActivity(input.identityId, {
+        since: input.since,
+        limit: input.limit,
+      }),
+      this.dependencies.scheduleActivity.listRecentActivity(input.identityId, {
+        since: input.since,
+        limit: input.limit,
+      }),
     ]);
 
-    return projectAIOwnerActivity({
-      goals: goals.map((goal) => ({
-        id: String(goal.id),
-        name: goal.name,
-        updatedAt: Number(goal.updatedAt),
-        deleted: goal.deletedAt !== null,
-      })),
-      taskPlans: taskPlans.map((task) => ({
-        id: String(task.id),
-        title: task.title,
-        createdAt: Number(task.createdAt),
-        deleted: task.deletedAt !== null,
-      })),
-      taskOccurrences: taskOccurrences.map((occurrence) => ({
-        id: String(occurrence.id),
-        planId: String(occurrence.planId),
-        completed: occurrence.status === TaskOccurrenceStatus.Completed,
-        timestamp: occurrence.result?.recordedAt ?? Number(occurrence.updatedAt),
-        deleted: occurrence.deletedAt !== null,
-      })),
-      schedules: schedules.map((schedule) => ({
-        id: String(schedule.id),
-        title: schedule.title,
-        createdAt: Number(schedule.createdAt),
-      })),
-      since: input.since,
-      limit: input.limit,
-    });
+    return mergeAIActivityItems([...tasks, ...goals, ...schedules], input.limit);
   }
 }

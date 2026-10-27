@@ -192,6 +192,16 @@
       ]
     },
     {
+      "path": "apps/api/src/modules/ai/owner-activity-read.adapter.equivalence.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/api/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "apps/api/vitest.config.ts"
+      ]
+    },
+    {
       "path": "apps/api/src/modules/ai/owner-activity-read.adapter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -1169,6 +1179,14 @@
     },
     {
       "path": "apps/desktop/src/main/modules/ai/__tests__/desktop-knowledge-source.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "apps/desktop/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "apps/desktop/src/main/modules/ai/desktop-activity-read.adapter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "apps/desktop/vitest.config.ts"
@@ -6486,6 +6504,16 @@
       ]
     },
     {
+      "path": "packages/goal/src/server/application/services/goal-activity-read.service.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/goal/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/goal/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/goal/src/server/application/services/goal-review-context-builder.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -9398,6 +9426,16 @@
       ]
     },
     {
+      "path": "packages/schedule/src/server/application/services/schedule-activity-read.service.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/schedule/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/schedule/vitest.config.ts"
+      ]
+    },
+    {
       "path": "packages/schedule/src/server/application/services/schedule-conflict-resolution-service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -10419,6 +10457,16 @@
     },
     {
       "path": "packages/task/src/server/application/outbox/task-goal-outbox-dispatcher.test.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/task/vitest.config.ts"
+      ],
+      "measurementCollectors": [
+        "packages/task/vitest.config.ts"
+      ]
+    },
+    {
+      "path": "packages/task/src/server/application/services/task-activity-read.service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/task/vitest.config.ts"
@@ -12206,7 +12254,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 64
+      "fileCount": 65
     },
     {
       "id": "packages/account/vitest.config.ts",
@@ -12241,7 +12289,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 97
+      "fileCount": 98
     },
     {
       "id": "packages/goal/vitest.mappers.config.ts",
@@ -12276,7 +12324,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 19
+      "fileCount": 20
     },
     {
       "id": "packages/schedule/vitest.mappers.config.ts",
@@ -12311,7 +12359,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 81
+      "fileCount": 82
     },
     {
       "id": "packages/task/vitest.mappers.config.ts",
@@ -12649,14 +12697,14 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 64
+      "fileCount": 65
     },
     {
       "id": "apps/desktop/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 99
+      "fileCount": 100
     },
     {
       "id": "apps/migrator/vitest.config.ts",
@@ -12831,7 +12879,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 97
+      "fileCount": 98
     },
     {
       "id": "packages/host-runtime/vitest.config.ts",
@@ -13027,7 +13075,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 19
+      "fileCount": 20
     },
     {
       "id": "packages/scheduler/vitest.config.ts",
@@ -13104,7 +13152,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 81
+      "fileCount": 82
     },
     {
       "id": "packages/time/vitest.config.ts",
@@ -13151,6 +13199,7 @@
       "apps/api/src/modules/ai/controlled-analytics-read.adapter.spec.ts",
       "apps/api/src/modules/ai/goal-plan-mutation.adapter.spec.ts",
       "apps/api/src/modules/ai/notification-read.adapter.spec.ts",
+      "apps/api/src/modules/ai/owner-activity-read.adapter.equivalence.spec.ts",
       "apps/api/src/modules/ai/owner-activity-read.adapter.spec.ts",
       "apps/api/src/modules/ai/planner-read.adapter.spec.ts",
       "apps/api/src/modules/ai/repository-knowledge-cloud-data-purger.adapter.test.ts",
@@ -13462,6 +13511,7 @@
       "packages/goal/src/server/application/goal-portability.spec.ts",
       "packages/goal/src/server/application/goal-review-portability.spec.ts",
       "packages/goal/src/server/application/services/__tests__/goal-workspace-query.service.spec.ts",
+      "packages/goal/src/server/application/services/goal-activity-read.service.spec.ts",
       "packages/goal/src/server/application/services/goal-review-context-builder.spec.ts",
       "packages/goal/src/server/application/services/goal-review-signal-analyzer.spec.ts",
       "packages/goal/src/server/application/services/review-window-resolver.spec.ts",
@@ -13624,6 +13674,7 @@
       "packages/schedule/src/server/application/schedule-portability.spec.ts",
       "packages/schedule/src/server/application/services/__tests__/schedule-domain-event-publisher.spec.ts",
       "packages/schedule/src/server/application/services/__tests__/schedule-w5-concurrency-projection.spec.ts",
+      "packages/schedule/src/server/application/services/schedule-activity-read.service.spec.ts",
       "packages/schedule/src/server/application/services/schedule-conflict-resolution-service.spec.ts",
       "packages/schedule/src/server/application/services/schedule-event-application-service.spec.ts",
       "packages/schedule/src/server/domain/aggregates/__tests__/calendar-entry.spec.ts",
@@ -13666,6 +13717,7 @@
       "packages/task/src/electron/index.spec.ts",
       "packages/task/src/import-safety.spec.ts",
       "packages/task/src/server/application/outbox/task-goal-outbox-dispatcher.test.ts",
+      "packages/task/src/server/application/services/task-activity-read.service.spec.ts",
       "packages/task/src/server/application/services/task-canonical-restore.service.spec.ts",
       "packages/task/src/server/application/services/task-workspace-query.service.spec.ts",
       "packages/task/src/server/application/task-portability.spec.ts",
@@ -13745,7 +13797,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1130,
+    "unit": 1135,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,
