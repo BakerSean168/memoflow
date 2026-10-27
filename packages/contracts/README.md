@@ -115,7 +115,7 @@ import { AccountDTO } from '@memoflow/contracts/account';
 | `@memoflow/schedule-contracts`         | 调度模块契约     |
 | `@memoflow/contracts/setting`          | 设置模块契约     |
 | `@memoflow/contracts/ai`               | AI 模块契约      |
-| `@memoflow/contracts/data-portability` | 数据可移植性契约 |
+| `@memoflow/data-portability-contracts` | 数据可移植性契约 |
 | `@memoflow/contracts/shared`           | 共享基础类型     |
 
 ## 根入口导出内容

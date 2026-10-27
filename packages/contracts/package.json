@@ -41,10 +41,6 @@
       "types": "./dist/modules/ai/index.d.ts",
       "import": "./dist/modules/ai/index.js"
     },
-    "./data-portability": {
-      "types": "./dist/modules/data-portability/index.d.ts",
-      "import": "./dist/modules/data-portability/index.js"
-    },
     "./result": {
       "types": "./dist/result/index.d.ts",
       "import": "./dist/result/index.js"

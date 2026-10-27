@@ -2,11 +2,11 @@ import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { z } from 'zod';
-import { DesktopProfileImportViewSchema } from '@memoflow/contracts/electron';
+import { DesktopProfileImportViewSchema } from '@memoflow/desktop-contracts';
 import {
   ProfileImportCommittedSchema,
   ProfileImportRequestSchema,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 import { LocalProfileIdSchema } from './profile-cleanup';
 import { writeProfileDurableFile } from './profile-durable-file';
 

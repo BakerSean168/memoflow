@@ -7,5 +7,4 @@ export {
   type PortableCapabilityEnvelopeV3,
   type PortableCapabilityKey,
   type PortableReferenceV3,
-} from '@memoflow/data-portability-contracts';
-export * from './server-held-data-disclosure.dto';
+} from './portable-v3.dto';

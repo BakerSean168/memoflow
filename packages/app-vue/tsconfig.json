@@ -15,6 +15,7 @@
       "@memoflow/goal-ui/*": ["../goal-ui/dist/*.d.ts"],
       "@memoflow/notification-ui/host": ["../notification-ui/dist/notification-ui-host.d.ts"],
       "@memoflow/notification-ui": ["../notification-ui/dist/index.d.ts"],
+      "@memoflow/desktop-contracts": ["../../packages/desktop-contracts/src/index.ts"],
       "@memoflow/contracts": ["../../packages/contracts/src/index.ts"],
       "@memoflow/contracts/account": ["../../packages/contracts/src/modules/account/index.ts"],
       "@memoflow/contracts/ai": ["../../packages/contracts/src/modules/ai/index.ts"],

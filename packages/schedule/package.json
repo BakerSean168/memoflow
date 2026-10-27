@@ -1,7 +1,7 @@
 {
   "name": "@memoflow/schedule",
   "version": "0.0.1",
-  "description": "\u8c03\u5ea6\u6a21\u5757 - \u65e5\u7a0b\u4e0e\u65f6\u95f4\u7ba1\u7406",
+  "description": "调度模块 - 日程与时间管理",
   "type": "module",
   "files": [
     "dist"
@@ -26,6 +26,7 @@
   "scripts": {},
   "dependencies": {
     "@memoflow/contracts": "workspace:*",
+    "@memoflow/data-portability-contracts": "workspace:*",
     "@memoflow/database": "workspace:*",
     "@memoflow/domain-shared": "workspace:*",
     "@memoflow/host-runtime": "workspace:*",

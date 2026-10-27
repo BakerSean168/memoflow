@@ -1,8 +1,5 @@
 import { z } from 'zod';
-import {
-  PortableCapabilityKeySchema,
-  PortableReferenceV3Schema,
-} from '@memoflow/data-portability-contracts';
+import { PortableCapabilityKeySchema, PortableReferenceV3Schema } from './dtos/portable-v3.dto';
 import { PortableDataV3ImportResSchema } from './api/portable-v3.dto';
 
 // The existing HTTP body limit is 256 KiB; JSON-string wrapping stays below it.

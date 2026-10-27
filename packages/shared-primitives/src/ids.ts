@@ -76,9 +76,6 @@ export type SyncConflictId = string & { readonly __brand: 'SyncConflictId' };
 /** 待同步变更 ID */
 export type PendingChangeId = string & { readonly __brand: 'PendingChangeId' };
 
-/** 数据快照 ID */
-export type DataSnapshotId = string & { readonly __brand: 'DataSnapshotId' };
-
 /** 应用配置 ID */
 export type AppConfigId = string & { readonly __brand: 'AppConfigId' };
 

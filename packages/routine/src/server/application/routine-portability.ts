@@ -8,7 +8,7 @@ import {
   type PortableCapabilityExecutionContext,
   type PortableCapabilityReceipt,
   type PortableReferenceV3,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 import type {
   ProfileMembership,
   RoutineDefinition,

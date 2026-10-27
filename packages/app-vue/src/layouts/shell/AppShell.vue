@@ -17,7 +17,7 @@
  * - 会话侧栏消费 AIChatView defineExpose 的会话状态（单一 chat session）；
  * - 桌面窗控走 useDesktopWindowControls（Web 端不渲染，V2 决策 #6）。
  */
-import { DesktopProfileImportChannels } from '@memoflow/contracts/electron';
+import { DesktopProfileImportChannels } from '@memoflow/desktop-contracts';
 import { DESKTOP_BRIDGE_KEY } from '../../di/keys';
 import { toast } from 'vue-sonner';
 import { computed, inject, onBeforeUnmount, onMounted, provide, ref, shallowRef, watch } from 'vue';

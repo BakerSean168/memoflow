@@ -344,6 +344,9 @@ importers:
       '@memoflow/data-portability':
         specifier: workspace:*
         version: link:../../packages/data-portability
+      '@memoflow/data-portability-contracts':
+        specifier: workspace:*
+        version: link:../../packages/data-portability-contracts
       '@memoflow/database':
         specifier: workspace:*
         version: link:../../packages/database
@@ -579,9 +582,15 @@ importers:
       '@memoflow/data-portability':
         specifier: workspace:*
         version: link:../../packages/data-portability
+      '@memoflow/data-portability-contracts':
+        specifier: workspace:*
+        version: link:../../packages/data-portability-contracts
       '@memoflow/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@memoflow/desktop-contracts':
+        specifier: workspace:*
+        version: link:../../packages/desktop-contracts
       '@memoflow/domain-shared':
         specifier: workspace:*
         version: link:../../packages/domain-shared
@@ -1189,6 +1198,9 @@ importers:
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@memoflow/data-portability-contracts':
+        specifier: workspace:*
+        version: link:../data-portability-contracts
       '@memoflow/database':
         specifier: workspace:*
         version: link:../database
@@ -1292,6 +1304,9 @@ importers:
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@memoflow/data-portability-contracts':
+        specifier: workspace:*
+        version: link:../data-portability-contracts
       '@memoflow/database':
         specifier: workspace:*
         version: link:../database
@@ -1483,6 +1498,9 @@ importers:
       '@memoflow/data-portability':
         specifier: workspace:*
         version: link:../data-portability
+      '@memoflow/desktop-contracts':
+        specifier: workspace:*
+        version: link:../desktop-contracts
       '@memoflow/goal-client':
         specifier: workspace:*
         version: link:../goal-client
@@ -1765,9 +1783,15 @@ importers:
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@memoflow/data-portability-contracts':
+        specifier: workspace:*
+        version: link:../data-portability-contracts
       '@memoflow/database':
         specifier: workspace:*
         version: link:../database
+      '@memoflow/desktop-contracts':
+        specifier: workspace:*
+        version: link:../desktop-contracts
       '@memoflow/host-runtime':
         specifier: workspace:*
         version: link:../host-runtime
@@ -1777,6 +1801,9 @@ importers:
       '@memoflow/ipc-client':
         specifier: workspace:*
         version: link:../ipc-client
+      '@memoflow/transport-contracts':
+        specifier: workspace:*
+        version: link:../transport-contracts
       '@memoflow/utils':
         specifier: workspace:*
         version: link:../utils
@@ -1836,6 +1863,9 @@ importers:
 
   packages/desktop-contracts:
     dependencies:
+      '@memoflow/data-portability-contracts':
+        specifier: workspace:*
+        version: link:../data-portability-contracts
       '@memoflow/transport-contracts':
         specifier: workspace:*
         version: link:../transport-contracts
@@ -1867,6 +1897,9 @@ importers:
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@memoflow/data-portability-contracts':
+        specifier: workspace:*
+        version: link:../data-portability-contracts
       '@memoflow/database':
         specifier: workspace:*
         version: link:../database
@@ -2116,6 +2149,9 @@ importers:
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@memoflow/data-portability-contracts':
+        specifier: workspace:*
+        version: link:../data-portability-contracts
       '@memoflow/database':
         specifier: workspace:*
         version: link:../database
@@ -2162,6 +2198,9 @@ importers:
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@memoflow/data-portability-contracts':
+        specifier: workspace:*
+        version: link:../data-portability-contracts
       '@memoflow/database':
         specifier: workspace:*
         version: link:../database
@@ -2478,6 +2517,9 @@ importers:
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@memoflow/data-portability-contracts':
+        specifier: workspace:*
+        version: link:../data-portability-contracts
       '@memoflow/database':
         specifier: workspace:*
         version: link:../database
@@ -2618,6 +2660,9 @@ importers:
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@memoflow/data-portability-contracts':
+        specifier: workspace:*
+        version: link:../data-portability-contracts
       '@memoflow/database':
         specifier: workspace:*
         version: link:../database
@@ -2850,6 +2895,9 @@ importers:
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@memoflow/data-portability-contracts':
+        specifier: workspace:*
+        version: link:../data-portability-contracts
       '@memoflow/database':
         specifier: workspace:*
         version: link:../database
@@ -2899,6 +2947,9 @@ importers:
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@memoflow/data-portability-contracts':
+        specifier: workspace:*
+        version: link:../data-portability-contracts
       '@memoflow/database':
         specifier: workspace:*
         version: link:../database

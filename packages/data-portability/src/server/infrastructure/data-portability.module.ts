@@ -1,8 +1,8 @@
 import type {
   PortableCapability,
   PortableDataV3ImportRes,
-} from '@memoflow/contracts/data-portability';
-import { ResultCode, ResultErrorException } from '@memoflow/contracts/result';
+} from '@memoflow/data-portability-contracts';
+import { ResultCode, ResultErrorException } from '@memoflow/transport-contracts/result';
 import type { DataPortabilityApplicationPort } from '../application';
 import { PortableCapabilityCoordinator } from '../application/portable-capability-coordinator';
 import type { PortableImportReceiptV3 } from '../application/portable-capability-coordinator';

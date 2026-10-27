@@ -42,15 +42,16 @@
   "scripts": {},
   "dependencies": {
     "@memoflow/contracts": "workspace:*",
-    "@memoflow/notification-contracts": "workspace:*",
+    "@memoflow/data-portability-contracts": "workspace:*",
     "@memoflow/database": "workspace:*",
+    "@memoflow/host-runtime": "workspace:*",
+    "@memoflow/notification-contracts": "workspace:*",
     "@memoflow/reliable-messaging-contracts": "workspace:*",
+    "@memoflow/routine-contracts": "workspace:*",
     "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/utils": "workspace:*",
-    "zod": "^4.6.5",
-    "@memoflow/routine-contracts": "workspace:*",
-    "@memoflow/host-runtime": "workspace:*"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@memoflow/test-utils": "workspace:*"

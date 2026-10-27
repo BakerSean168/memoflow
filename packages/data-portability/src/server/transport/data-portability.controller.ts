@@ -4,9 +4,9 @@
  * Zod validation and use case orchestration.
  */
 
-import type { Result } from '@memoflow/contracts/result';
-import { fail, ok } from '@memoflow/contracts/result';
-import type { Context } from '@memoflow/contracts/shared';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { fail, ok } from '@memoflow/transport-contracts/result';
+import type { Context } from '@memoflow/transport-contracts';
 import {
   ExportServerHeldDataDisclosureReqSchema,
   ExportPortableDataV3ReqSchema,
@@ -14,7 +14,7 @@ import {
   type ExportServerHeldDataDisclosureRes,
   type ExportPortableDataV3Res,
   type PortableDataV3ImportRes,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 import { formatZodErrors } from '@memoflow/utils/result';
 import type {
   DataPortabilityApplicationPort,

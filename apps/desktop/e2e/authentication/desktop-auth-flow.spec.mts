@@ -2,7 +2,7 @@ import {
   ProfileImportRequestSchema,
   type ProfileImportPlan,
   type ProfileImportCommitted,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 import fs from 'node:fs';
 import http from 'node:http';
 import os from 'node:os';
