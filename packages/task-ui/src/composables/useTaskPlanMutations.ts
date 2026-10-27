@@ -7,7 +7,7 @@
  *   snapshot 全部匹配 list/detail/graph entries、按 id patch；任一 failure exact restore
  *   快照；onSettled 一律经 dispatcher invalidate（组件不再手动 refresh）。
  *
- * 所有 service 调用继续走 `executeDesktopAuthenticatedResult`（Desktop auth recovery），
+ * 所有 service 调用继续走 `taskUiHost.executeDesktopAuthenticatedResult`（Desktop auth recovery），
  * 网络失败经 runtime `networkMode: 'always'` + `retry:0` 立即进入 onError/rollback。
  */
 import { computed, inject } from 'vue';
@@ -28,7 +28,7 @@ import {
   restoreTaskPlanSnapshot,
   snapshotTaskPlanCache,
 } from './taskPlanCache';
-import { DESKTOP_AUTH_API_KEY, TASK_SERVICE_KEY, createComposableHandleError, executeDesktopAuthenticatedResult, sanitizeForIpc, taskPlanQueryKeys, useServerStateIdentityScope, useServerStateRuntime, useStrictInject } from '../task-ui-host.ts';
+import { taskUiHost } from '../task-ui-host';
 
 /** Feedback intent for create (plan §2.2: preserve occurrenceCount/todayOccurrenceCreated feedback). */
 export type CreatePlanFeedbackIntent = 'plan' | 'quick';
@@ -38,13 +38,13 @@ export type CreatePlanFeedbackIntent = 'plan' | 'quick';
  * 创建任务计划 mutation 集合。
  */
 export function useTaskPlanMutations() {
-  const service = useStrictInject(TASK_SERVICE_KEY, 'TaskService');
-  const desktopApi = inject(DESKTOP_AUTH_API_KEY, undefined);
-  const runtime = useServerStateRuntime();
-  const resolveIdentityScope = useServerStateIdentityScope();
+  const service = taskUiHost.useStrictInject(taskUiHost.TASK_SERVICE_KEY, 'TaskService');
+  const desktopApi = inject(taskUiHost.DESKTOP_AUTH_API_KEY, undefined);
+  const runtime = taskUiHost.useServerStateRuntime();
+  const resolveIdentityScope = taskUiHost.useServerStateIdentityScope();
   const { t } = useI18n();
 
-  const handleError = createComposableHandleError({
+  const handleError = taskUiHost.createComposableHandleError({
     t,
     setError: () => {},
     report: (message) => {
@@ -56,7 +56,7 @@ export function useTaskPlanMutations() {
     operation: () => Promise<Result<T>>,
     fallbackKey: string,
   ): Promise<Result<T>> {
-    return executeDesktopAuthenticatedResult({
+    return taskUiHost.executeDesktopAuthenticatedResult({
       operation,
       logScope: 'Task',
       t,
@@ -90,7 +90,7 @@ export function useTaskPlanMutations() {
       feedbackIntent?: CreatePlanFeedbackIntent;
     }) => {
       const result = await executeTaskOperation(
-        () => service.createPlan(sanitizeForIpc(req)),
+        () => service.createPlan(taskUiHost.sanitizeForIpc(req)),
         'task.error.createFailed',
       );
       return unwrap(result);
@@ -118,7 +118,7 @@ export function useTaskPlanMutations() {
   const updatePlan = useMutation({
     mutationFn: async ({ id, req }: { id: string; req: UpdateTaskPlanReq }) => {
       const result = await executeTaskOperation(
-        () => service.updatePlan(id, sanitizeForIpc(req)),
+        () => service.updatePlan(id, taskUiHost.sanitizeForIpc(req)),
         'task.error.updateFailed',
       );
       return unwrap(result);
@@ -226,7 +226,7 @@ export function useTaskPlanMutations() {
       onMutate: async (id) => {
         const identityScope = resolveIdentityScope();
         await runtime.queryClient.cancelQueries({
-          queryKey: taskPlanQueryKeys.identity(identityScope),
+          queryKey: taskUiHost.taskPlanQueryKeys.identity(identityScope),
         });
         const snapshot = snapshotTaskPlanCache(runtime.queryClient, identityScope);
         // Derive the status patch from a complete cached projection; never a bare {id,status}.

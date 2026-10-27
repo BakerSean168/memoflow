@@ -749,8 +749,7 @@ import {
   toTaskPlanSchedulePayload,
 } from '../utils/task-plan-presentation';
 import { sortTaskOccurrences } from '../utils/task-occurrence-presentation';
-import { getProductTime, useLabelCatalog } from '../task-ui-host.ts';
-import { taskUiHost } from '../task-ui-host.ts';
+import { taskUiHost } from '../task-ui-host';
 const AppEmptyState = taskUiHost.components['AppEmptyState'];
 const LabelCommandPanel = taskUiHost.components['LabelCommandPanel'];
 const ModuleHeader = taskUiHost.components['ModuleHeader'];
@@ -776,7 +775,7 @@ const showGoalEditor = ref(false);
 const showLabelsEditor = ref(false);
 const showReminderEditor = ref(false);
 const customReminderPickerOpen = ref(false);
-const customReminderMinValue = ref(Number(getProductTime().now()));
+const customReminderMinValue = ref(Number(taskUiHost.getProductTime().now()));
 
 const {
   workspace,
@@ -815,7 +814,7 @@ const {
   loadGoalBinding,
   loadKeyResults,
 } = useTaskGoalBindingOptions();
-const { options: labelOptions, isLoading: labelsLoading, createLabel } = useLabelCatalog();
+const { options: labelOptions, isLoading: labelsLoading, createLabel } = taskUiHost.useLabelCatalog();
 
 const currentTemplate = computed(() => workspace.value?.plan ?? null);
 const viewModel = computed(() =>
@@ -957,7 +956,7 @@ function openReminderEditor(): void {
 }
 
 function openCustomReminderPicker(): void {
-  customReminderMinValue.value = Number(getProductTime().now());
+  customReminderMinValue.value = Number(taskUiHost.getProductTime().now());
   customReminderPickerOpen.value = true;
 }
 
@@ -1109,7 +1108,7 @@ async function saveReminderConfig(value: TaskReminderConfigDTO | null): Promise<
 }
 
 async function addCustomAbsoluteReminder(value: number): Promise<void> {
-  const now = Number(getProductTime().now());
+  const now = Number(taskUiHost.getProductTime().now());
   const rounded = Math.floor(value / 60_000) * 60_000;
   if (!Number.isFinite(rounded) || rounded <= now) return;
   const existing = reminderTriggers.value;

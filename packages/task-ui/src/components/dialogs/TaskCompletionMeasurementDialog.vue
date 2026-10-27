@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { Button, Dialog } from '@memoflow/ui-vue-shadcn';
 import type { TaskOccurrenceClientDTO } from '@memoflow/task-contracts';
 import type { useTaskOccurrenceActionCoordinator } from '../../composables/useTaskOccurrenceActionCoordinator';
-import { taskUiHost, useDialogCloseGuard } from '../../task-ui-host.ts';
+import { taskUiHost } from '../../task-ui-host';
 const ProductDialogShell = taskUiHost.components['ProductDialogShell'];
 // 裁决二: the Goal composer is injected by the host (slot) — no direct goal-ui import.
 const GoalComposerSlot = taskUiHost.components['GoalRecordComposerSurface'];
@@ -28,7 +28,7 @@ watch(
   },
   { flush: 'sync' },
 );
-const { requestClose } = useDialogCloseGuard({
+const { requestClose } = taskUiHost.useDialogCloseGuard({
   dirty,
   busy,
   onClose: () => props.coordinator.cancelMeasurement(),

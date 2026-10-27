@@ -139,6 +139,34 @@ export interface TaskUiKeyResultCalculationPresentation {
   recordPromptLabelKey: string;
 }
 
+/**
+ * Aliases for the host contract shapes Task surfaces name directly. The host
+ * module stays the single import surface for the package.
+ */
+export type LabelPickerOption = TaskUiLabelOption;
+export type MenuAction = TaskUiMenuAction;
+export type ServerStateRuntime = TaskUiServerStateRuntime;
+export type TaskPlanListQueryInput = TaskUiTaskPlanListQueryInput;
+
+/** Owner-defined semantic editing contract; snapshots must not hold reactive state. */
+export interface OwnerNativeEditSession<
+  Patch,
+  Child,
+  ChildId,
+  Field,
+  State,
+  SubmitContext = void,
+  SubmitResult = void,
+> {
+  patch(changes: Patch): void;
+  addChild(child: Child): void;
+  removeChild(child: ChildId): void;
+  focus(field: Field): Promise<void>;
+  requestSubmit(context?: SubmitContext): Promise<SubmitResult>;
+  requestCancel(): void;
+  readDraftState(): State;
+}
+
 /** Renderer composition dependencies for the Task surfaces. */
 export interface TaskUiHost {
   // ---- DI keys ----

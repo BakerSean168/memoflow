@@ -12,7 +12,7 @@ import { useTaskPlanMutations } from '../composables/useTaskPlanMutations';
 import { buildQuickTaskRequest } from '../utils/quick-task-request';
 import TaskCompletionMeasurementDialog from './dialogs/TaskCompletionMeasurementDialog.vue';
 import TaskOccurrenceCompactList from './TaskOccurrenceCompactList.vue';
-import { taskUiHost } from '../task-ui-host.ts';
+import { taskUiHost } from '../task-ui-host';
 const CapsulePreviewFooter = taskUiHost.components['CapsulePreviewFooter'];
 const CapsulePreviewHeader = taskUiHost.components['CapsulePreviewHeader'];
 const CapsulePreviewShell = taskUiHost.components['CapsulePreviewShell'];

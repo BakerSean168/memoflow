@@ -10,7 +10,7 @@
 
 import { hashKey, type QueryClient, type QueryKey } from '@tanstack/vue-query';
 import type { TaskPlanClientDTO, UpdateTaskPlanReq } from '@memoflow/task-contracts';
-import { taskPlanQueryKeys } from '../task-ui-host.ts';
+import { taskUiHost } from '../task-ui-host';
 
 /** Shape of a list data payload stored under a task-plan list key. */
 interface TemplateCollectionData {
@@ -48,11 +48,11 @@ export function getTaskPlanFromCache(
   id: string,
 ): TaskPlanClientDTO | undefined {
   const detail = queryClient.getQueryData<TaskPlanClientDTO>(
-    taskPlanQueryKeys.detail(identityScope, id),
+    taskUiHost.taskPlanQueryKeys.detail(identityScope, id),
   );
   if (detail) return detail;
   const entries = queryClient.getQueriesData<unknown>({
-    queryKey: taskPlanQueryKeys.identity(identityScope),
+    queryKey: taskUiHost.taskPlanQueryKeys.identity(identityScope),
   });
   for (const [, data] of entries) {
     if (!isCollectionData(data)) continue;
@@ -72,7 +72,7 @@ export function patchTaskPlanEverywhere(
   template: TaskPlanClientDTO,
 ): void {
   const entries = queryClient.getQueriesData<unknown>({
-    queryKey: taskPlanQueryKeys.identity(identityScope),
+    queryKey: taskUiHost.taskPlanQueryKeys.identity(identityScope),
   });
   for (const [queryKey, data] of entries) {
     if (!data) continue;
@@ -88,7 +88,7 @@ export function patchTaskPlanEverywhere(
     }
   }
   queryClient.setQueryData<TaskPlanClientDTO>(
-    taskPlanQueryKeys.detail(identityScope, template.id),
+    taskUiHost.taskPlanQueryKeys.detail(identityScope, template.id),
     template,
   );
 }
@@ -103,7 +103,7 @@ export function removeTaskPlanFromCache(
   id: string,
 ): void {
   const entries = queryClient.getQueriesData<unknown>({
-    queryKey: taskPlanQueryKeys.identity(identityScope),
+    queryKey: taskUiHost.taskPlanQueryKeys.identity(identityScope),
   });
   for (const [queryKey, data] of entries) {
     if (!data) continue;
@@ -116,7 +116,7 @@ export function removeTaskPlanFromCache(
       queryClient.removeQueries({ queryKey });
     }
   }
-  queryClient.removeQueries({ queryKey: taskPlanQueryKeys.detail(identityScope, id) });
+  queryClient.removeQueries({ queryKey: taskUiHost.taskPlanQueryKeys.detail(identityScope, id) });
 }
 
 /**
@@ -140,7 +140,7 @@ export function snapshotTaskPlanCache(
   identityScope: string,
 ): TaskPlanCacheSnapshot {
   const entries = queryClient.getQueriesData<unknown>({
-    queryKey: taskPlanQueryKeys.identity(identityScope),
+    queryKey: taskUiHost.taskPlanQueryKeys.identity(identityScope),
   });
   return {
     entries,
@@ -169,7 +169,7 @@ export function restoreTaskPlanSnapshot(
   // Remove newly-created keys (e.g. a detail key the optimistic patch introduced).
   // 移除快照中不存在的、由 optimistic patch 新建的 key。
   const current = queryClient.getQueriesData<unknown>({
-    queryKey: taskPlanQueryKeys.identity(identityScope),
+    queryKey: taskUiHost.taskPlanQueryKeys.identity(identityScope),
   });
   for (const [queryKey] of current) {
     if (!snapshot.existingKeys.has(hashKey(queryKey))) {

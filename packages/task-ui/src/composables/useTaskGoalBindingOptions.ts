@@ -8,14 +8,7 @@ import type {
   TaskGoalBindingDisplay,
   TaskGoalBindingViewModel,
 } from '../components/types';
-import {
-  DESKTOP_AUTH_API_KEY,
-  GOAL_SERVICE_KEY,
-  KEY_RESULT_CALCULATION_PRESENTATION,
-  executeDesktopAuthenticatedResult,
-  getKeyResultCalculationLabel,
-  useStrictInject,
-} from '../task-ui-host.ts';
+import { taskUiHost } from '../task-ui-host';
 
 type GoalOptionDTO = {
   id: string;
@@ -64,9 +57,9 @@ function mapKeyResultOption(
     title: dto.title,
     weight: dto.weight,
     calculationMethod: dto.progress.aggregationMethod,
-    methodLabel: getKeyResultCalculationLabel(dto.progress.aggregationMethod, t),
+    methodLabel: taskUiHost.getKeyResultCalculationLabel(dto.progress.aggregationMethod, t),
     recordInputKind:
-      KEY_RESULT_CALCULATION_PRESENTATION[dto.progress.aggregationMethod].recordInputKind,
+      taskUiHost.KEY_RESULT_CALCULATION_PRESENTATION[dto.progress.aggregationMethod].recordInputKind,
     unit: dto.progress.unit,
     currentValue: current,
     targetValue: target,
@@ -81,8 +74,8 @@ function mapKeyResultOption(
 const GOAL_BINDING_PAGE_SIZE = 100;
 
 export function useTaskGoalBindingOptions() {
-  const goalService = useStrictInject(GOAL_SERVICE_KEY, 'GoalService');
-  const desktopApi = inject(DESKTOP_AUTH_API_KEY, undefined);
+  const goalService = taskUiHost.useStrictInject(taskUiHost.GOAL_SERVICE_KEY, 'GoalService');
+  const desktopApi = inject(taskUiHost.DESKTOP_AUTH_API_KEY, undefined);
   const { t } = useI18n();
 
   const goals = ref<GoalBindingOption[]>([]);
@@ -100,7 +93,7 @@ export function useTaskGoalBindingOptions() {
     operation: () => Promise<Result<T>>,
     fallbackKey: string,
   ): Promise<Result<T>> {
-    return executeDesktopAuthenticatedResult({
+    return taskUiHost.executeDesktopAuthenticatedResult({
       operation,
       logScope: 'TaskGoalBindingOptions',
       t,

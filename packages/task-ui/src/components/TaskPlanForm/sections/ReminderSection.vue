@@ -270,14 +270,13 @@ import {
 } from '@memoflow/ui-vue-shadcn';
 import { Bell, Calendar as CalendarIcon, CalendarClock, Plus, Timer, Trash2 } from '@lucide/vue';
 import { padTwoDigits } from '@memoflow/time';
-import { getProductTime, handleCalendarSelect } from '../../../task-ui-host.ts';
-import { taskUiHost } from '../../../task-ui-host.ts';
+import { taskUiHost } from '../../../task-ui-host';
 const ProductInlineValidation = taskUiHost.components['ProductInlineValidation'];
 
 const { t } = useI18n();
 
 // TIME-1206: reminder date display is Ymd-only; wall-clock resolution uses the session Product Time context.
-// Residual 1270: handleAbsoluteDateSelect Date/toDate dual retired onto handleCalendarSelect sole; absoluteTime composition stays co-located.
+// Residual 1270: handleAbsoluteDateSelect Date/toDate dual retired onto taskUiHost.handleCalendarSelect sole; absoluteTime composition stays co-located.
 
 // 类型别名
 const ReminderType = TaskReminderType;
@@ -292,11 +291,11 @@ const minuteOptions = Array.from({ length: 60 }, (_, i) => padTwoDigits(i));
 /** Extract date part (YYYY-MM-DD) from a timestamp */
 function getAbsoluteDatePart(ts?: number | null): string | null {
   if (!ts) return null;
-  return String(getProductTime().calendar.toYmd(ts));
+  return String(taskUiHost.getProductTime().calendar.toYmd(ts));
 }
 
 function formatAbsoluteDateDisplay(datePart: string): string {
-  const time = getProductTime();
+  const time = taskUiHost.getProductTime();
   const ymd = time.input.parseDateValue(datePart);
   if (!ymd) return datePart;
   return time.format.date(time.codec.startOfYmd(ymd));
@@ -305,13 +304,13 @@ function formatAbsoluteDateDisplay(datePart: string): string {
 /** Residual 1312: absolute hour/minute pad dual retired onto padTwoDigits sole. */
 function getAbsoluteHour(ts?: number | null): string {
   if (!ts) return '00';
-  return String(getProductTime().input.timeValue(ts)).slice(0, 2);
+  return String(taskUiHost.getProductTime().input.timeValue(ts)).slice(0, 2);
 }
 
 /** Residual 1312: absolute minute pad dual retired onto padTwoDigits sole. */
 function getAbsoluteMinute(ts?: number | null): string {
   if (!ts) return '00';
-  return String(getProductTime().input.timeValue(ts)).slice(3, 5);
+  return String(taskUiHost.getProductTime().input.timeValue(ts)).slice(3, 5);
 }
 
 /** Get a Date for Calendar :selected from a timestamp */
@@ -321,11 +320,11 @@ function getAbsoluteCalendarDate(ts?: number | null): Date | undefined {
 }
 
 /** Handle calendar date selection for absolute time trigger */
-/** Residual 1270: Date/toDate dual retired onto handleCalendarSelect sole. */
+/** Residual 1270: Date/toDate dual retired onto taskUiHost.handleCalendarSelect sole. */
 /** Soft residual 1270: absoluteTime hour/minute composition remains co-located (no force-merge into sole). */
 function handleAbsoluteDateSelect(index: number, date: unknown) {
   let dateStr = '';
-  handleCalendarSelect(date, (value) => {
+  taskUiHost.handleCalendarSelect(date, (value) => {
     dateStr = value;
   });
   if (!dateStr) {
@@ -335,7 +334,7 @@ function handleAbsoluteDateSelect(index: number, date: unknown) {
   }
   const hour = getAbsoluteHour(triggers.value[index].absoluteTime);
   const minute = getAbsoluteMinute(triggers.value[index].absoluteTime);
-  const time = getProductTime();
+  const time = taskUiHost.getProductTime();
   const ymd = time.input.parseDateValue(dateStr);
   const hm = time.input.parseTimeValue(`${hour}:${minute}`);
   const instant = ymd && hm ? time.input.combine(ymd, hm) : null;
@@ -346,7 +345,7 @@ function handleAbsoluteDateSelect(index: number, date: unknown) {
 /** Update hour or minute part of absolute time */
 function updateAbsoluteTimePart(index: number, part: 'hour' | 'minute', value: string) {
   const currentTs = triggers.value[index].absoluteTime;
-  const time = getProductTime();
+  const time = taskUiHost.getProductTime();
   const datePart = getAbsoluteDatePart(currentTs) || String(time.calendar.toYmd(time.now()));
   let hour = getAbsoluteHour(currentTs);
   let minute = getAbsoluteMinute(currentTs);

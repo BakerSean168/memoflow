@@ -33,7 +33,7 @@ import { useI18n } from 'vue-i18n';
 import { Label } from '@memoflow/ui-vue-shadcn';
 import { useBasicInfoValidation } from '../../../composables/useBasicInfoValidation';
 import type { TaskPlanViewModel } from '../../types';
-import { taskUiHost } from '../../../task-ui-host.ts';
+import { taskUiHost } from '../../../task-ui-host';
 const ProductAutoTextarea = taskUiHost.components['ProductAutoTextarea'];
 const ProductInlineValidation = taskUiHost.components['ProductInlineValidation'];
 

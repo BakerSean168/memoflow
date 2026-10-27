@@ -99,14 +99,13 @@ import type {
 import type { TaskPlanClientDTO } from '@memoflow/task-contracts';
 import { TaskPlanScheduleSchema } from '@memoflow/task-contracts';
 import { useTaskGoalBindingOptions } from '../../composables/useTaskGoalBindingOptions';
-import { getProductTime, useDialogCloseGuard, useDialogDraftStore, useLabelCatalog } from '../../task-ui-host.ts';
-import { taskUiHost } from '../../task-ui-host.ts';
+import { taskUiHost } from '../../task-ui-host';
 const ProductEditorFrame = taskUiHost.components['ProductEditorFrame'];
 const ProductInlineValidation = taskUiHost.components['ProductInlineValidation'];
 
 const { t } = useI18n();
 const submitError = ref('');
-const dialogDraftStore = useDialogDraftStore();
+const dialogDraftStore = taskUiHost.useDialogDraftStore();
 const {
   goals: goalOptions,
   keyResultsByGoal,
@@ -134,7 +133,7 @@ function createBlankTemplate(): TaskPlanViewModel {
     checklist: [],
     schedule: TaskPlanScheduleSchema.parse({
       kind: 'OneTime',
-      date: getProductTime().input.dateValue(Date.now()),
+      date: taskUiHost.getProductTime().input.dateValue(Date.now()),
       timing: { kind: 'AllDay' },
     }),
     reminderConfig: null,
@@ -233,7 +232,7 @@ const isDirty = computed(
     draftBaseline.value !== null &&
     JSON.stringify(localTemplate.value) !== draftBaseline.value,
 );
-const { resolveNames } = useLabelCatalog();
+const { resolveNames } = taskUiHost.useLabelCatalog();
 let submitCoordinator: (() => Promise<void>) | null = null;
 let cancelCoordinator: (() => Promise<void>) | null = null;
 let invalidateSession: (() => void) | null = null;
@@ -341,7 +340,7 @@ async function closeNow(): Promise<void> {
   cancelOwner();
 }
 
-const { requestClose } = useDialogCloseGuard({
+const { requestClose } = taskUiHost.useDialogCloseGuard({
   dirty: isDirty,
   busy: saving,
   onClose: closeNow,

@@ -8,8 +8,8 @@ import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { createPinia, setActivePinia } from 'pinia';
 import { VueQueryPlugin } from '@tanstack/vue-query';
-import { type ServerStateRuntime } from '../task-ui-host.ts';
-import { SERVER_STATE_IDENTITY_SCOPE_KEY, SERVER_STATE_RUNTIME_KEY, TASK_SERVICE_KEY, createTestServerStateRuntime } from '../task-ui-host.ts';
+import { taskUiHost } from '../task-ui-host';
+import type { ServerStateRuntime } from '../task-ui-host';
 
 const i18n = createI18n({
   legacy: false,
@@ -60,7 +60,7 @@ export function mountTaskComposable<T>(
   options: MountTaskComposableOptions,
 ): { api: T; runtime: ServerStateRuntime } {
   let api!: T;
-  const runtime = options.runtime ?? createTestServerStateRuntime();
+  const runtime = options.runtime ?? taskUiHost.createTestServerStateRuntime();
   const pinia = createPinia();
   setActivePinia(pinia);
 
@@ -81,9 +81,9 @@ export function mountTaskComposable<T>(
     global: {
       plugins: [[VueQueryPlugin, { queryClient: runtime.queryClient }], pinia, i18n],
       provide: {
-        [TASK_SERVICE_KEY as symbol]: options.service,
-        [SERVER_STATE_RUNTIME_KEY]: runtime,
-        [SERVER_STATE_IDENTITY_SCOPE_KEY]: resolveIdentityScope,
+        [taskUiHost.TASK_SERVICE_KEY as symbol]: options.service,
+        [taskUiHost.SERVER_STATE_RUNTIME_KEY]: runtime,
+        [taskUiHost.SERVER_STATE_IDENTITY_SCOPE_KEY]: resolveIdentityScope,
       },
     },
   });

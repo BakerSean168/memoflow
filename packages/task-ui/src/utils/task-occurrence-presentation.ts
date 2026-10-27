@@ -1,6 +1,6 @@
 import type { ComposerTranslation } from 'vue-i18n';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
-import { formatProductYmd, isSameDayMs } from '../task-ui-host.ts';
+import { taskUiHost } from '../task-ui-host';
 
 export type TaskOccurrenceSort = 'time' | 'status' | 'title';
 
@@ -31,7 +31,7 @@ export function isTaskOccurrenceOnTodaySurface(
   instance: TaskOccurrenceClientDTO,
   now = Date.now(),
 ): boolean {
-  return isSameDayMs(instance.dueAt, now) || isTaskOccurrenceOverdue(instance, now);
+  return taskUiHost.isSameDayMs(instance.dueAt, now) || isTaskOccurrenceOverdue(instance, now);
 }
 
 export function getTaskOccurrenceStatusLabel(
@@ -49,7 +49,7 @@ export function getTaskOccurrenceScheduleLabel(
   t: ComposerTranslation,
   instance: TaskOccurrenceClientDTO,
 ): string {
-  const date = formatProductYmd(instance.scheduleSnapshot.date);
+  const date = taskUiHost.formatProductYmd(instance.scheduleSnapshot.date);
   const timing = instance.scheduleSnapshot.timing;
   if (timing.kind === 'At') {
     return t('task.occurrence.scheduleAt', { date, time: timing.time });

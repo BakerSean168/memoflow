@@ -24,28 +24,28 @@
     <Clock3 class="mr-2 h-4 w-4 text-muted-foreground" />
     <span class="min-w-0 flex-1">{{ t('task.reminderMenu.inOneHour') }}</span>
     <span class="ml-4 whitespace-nowrap text-xs tabular-nums text-muted-foreground">
-      {{ formatProductDateTime(oneHourPreset) }}
+      {{ taskUiHost.formatProductDateTime(oneHourPreset) }}
     </span>
   </DropdownMenuItem>
   <DropdownMenuItem :disabled="addDisabled" @select.prevent="addAbsolute(tomorrowPreset)">
     <Sunrise class="mr-2 h-4 w-4 text-muted-foreground" />
     <span class="min-w-0 flex-1">{{ t('task.reminderMenu.tomorrow') }}</span>
     <span class="ml-4 whitespace-nowrap text-xs tabular-nums text-muted-foreground">
-      {{ formatProductDateTime(tomorrowPreset) }}
+      {{ taskUiHost.formatProductDateTime(tomorrowPreset) }}
     </span>
   </DropdownMenuItem>
   <DropdownMenuItem :disabled="addDisabled" @select.prevent="addAbsolute(nextWeekPreset)">
     <CalendarDays class="mr-2 h-4 w-4 text-muted-foreground" />
     <span class="min-w-0 flex-1">{{ t('task.reminderMenu.nextWeek') }}</span>
     <span class="ml-4 whitespace-nowrap text-xs tabular-nums text-muted-foreground">
-      {{ formatProductDateTime(nextWeekPreset) }}
+      {{ taskUiHost.formatProductDateTime(nextWeekPreset) }}
     </span>
   </DropdownMenuItem>
   <DropdownMenuItem :disabled="addDisabled" @select.prevent="addAbsolute(nextMonthPreset)">
     <CalendarRange class="mr-2 h-4 w-4 text-muted-foreground" />
     <span class="min-w-0 flex-1">{{ t('task.reminderMenu.nextMonth') }}</span>
     <span class="ml-4 whitespace-nowrap text-xs tabular-nums text-muted-foreground">
-      {{ formatProductDateTime(nextMonthPreset) }}
+      {{ taskUiHost.formatProductDateTime(nextMonthPreset) }}
     </span>
   </DropdownMenuItem>
 
@@ -86,7 +86,7 @@ import {
 import type { Ymd } from '@memoflow/contracts/primitives';
 import { DropdownMenuItem, DropdownMenuSeparator } from '@memoflow/ui-vue-shadcn';
 import { addYmdDays } from '@memoflow/time';
-import { formatProductDateTime, getProductTime, getProductTodayYmd, productTimeRevision } from '../task-ui-host.ts';
+import { taskUiHost } from '../task-ui-host';
 
 const props = withDefaults(
   defineProps<{
@@ -110,7 +110,7 @@ const atLimit = computed(() => activeTriggers.value.length >= MAX_REMINDERS);
 const addDisabled = computed(() => props.disabled || atLimit.value);
 
 function currentNow(): number {
-  return Number(getProductTime().now());
+  return Number(taskUiHost.getProductTime().now());
 }
 
 function roundToMinute(value: number): number {
@@ -118,22 +118,22 @@ function roundToMinute(value: number): number {
 }
 
 const oneHourPreset = computed(() => {
-  void productTimeRevision.value;
+  void taskUiHost.productTimeRevision.value;
   return roundToMinute(currentNow() + 60 * 60 * 1000);
 });
 
 function atMorning(daysFromToday: number): number {
-  const day = addYmdDays(getProductTodayYmd(), daysFromToday);
-  return Number(getProductTime().input.combine(day, '09:00') ?? currentNow());
+  const day = addYmdDays(taskUiHost.getProductTodayYmd(), daysFromToday);
+  return Number(taskUiHost.getProductTime().input.combine(day, '09:00') ?? currentNow());
 }
 
 const tomorrowPreset = computed(() => {
-  void productTimeRevision.value;
+  void taskUiHost.productTimeRevision.value;
   return atMorning(1);
 });
 
 const nextWeekPreset = computed(() => {
-  void productTimeRevision.value;
+  void taskUiHost.productTimeRevision.value;
   return atMorning(7);
 });
 
@@ -154,9 +154,9 @@ function addOneCalendarMonth(date: Ymd): Ymd {
 }
 
 const nextMonthPreset = computed(() => {
-  void productTimeRevision.value;
-  const day = addOneCalendarMonth(getProductTodayYmd());
-  return Number(getProductTime().input.combine(day, '09:00') ?? currentNow());
+  void taskUiHost.productTimeRevision.value;
+  const day = addOneCalendarMonth(taskUiHost.getProductTodayYmd());
+  return Number(taskUiHost.getProductTime().input.combine(day, '09:00') ?? currentNow());
 });
 
 function appendTrigger(trigger: TaskReminderConfigDTO['triggers'][number]): void {

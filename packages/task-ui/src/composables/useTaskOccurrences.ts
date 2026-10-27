@@ -1,5 +1,5 @@
 /**
- * Residual 975: createComposableHandleError toast report path.
+ * Residual 975: taskUiHost.createComposableHandleError toast report path.
  */
 import { inject } from 'vue';
 import { toast } from 'vue-sonner';
@@ -12,19 +12,19 @@ import type {
 } from '@memoflow/task-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { patchTaskPlanEverywhere } from './taskPlanCache';
-import { DESKTOP_AUTH_API_KEY, TASK_OCCURRENCE_STALE_TIME_MS, TASK_SERVICE_KEY, createComposableHandleError, executeDesktopAuthenticatedResult, sanitizeForIpc, taskOccurrenceQueryKeys, useServerStateIdentityScope, useServerStateRuntime, useStrictInject } from '../task-ui-host.ts';
+import { taskUiHost } from '../task-ui-host';
 
 type TaskOccurrenceDTO = ReturnType<typeof useTaskStore>['instances'][number];
 
 export function useTaskOccurrences() {
-  const service = useStrictInject(TASK_SERVICE_KEY, 'TaskService');
-  const desktopApi = inject(DESKTOP_AUTH_API_KEY, undefined);
+  const service = taskUiHost.useStrictInject(taskUiHost.TASK_SERVICE_KEY, 'TaskService');
+  const desktopApi = inject(taskUiHost.DESKTOP_AUTH_API_KEY, undefined);
   const store = useTaskStore();
-  const runtime = useServerStateRuntime();
-  const resolveIdentityScope = useServerStateIdentityScope();
+  const runtime = taskUiHost.useServerStateRuntime();
+  const resolveIdentityScope = taskUiHost.useServerStateIdentityScope();
   const { t } = useI18n();
 
-  const handleError = createComposableHandleError({
+  const handleError = taskUiHost.createComposableHandleError({
     t,
     setError: (message) => store.setError(message),
     report: (message) => {
@@ -37,7 +37,7 @@ export function useTaskOccurrences() {
     fallbackKey: string,
     options: { suppressErrorReport?: boolean } = {},
   ): Promise<Result<T>> {
-    return executeDesktopAuthenticatedResult({
+    return taskUiHost.executeDesktopAuthenticatedResult({
       operation,
       logScope: 'Task',
       t,
@@ -65,11 +65,11 @@ export function useTaskOccurrences() {
   async function updateInstanceProjection(dto: TaskOccurrenceDTO): Promise<TaskOccurrenceDTO> {
     store.updateInstance(dto);
     runtime.queryClient.setQueryData(
-      taskOccurrenceQueryKeys.detail(resolveIdentityScope(), String(dto.id)),
+      taskUiHost.taskOccurrenceQueryKeys.detail(resolveIdentityScope(), String(dto.id)),
       dto,
     );
     runtime.queryClient.setQueriesData<TaskOccurrenceDTO[]>(
-      { queryKey: taskOccurrenceQueryKeys.ranges(resolveIdentityScope()) },
+      { queryKey: taskUiHost.taskOccurrenceQueryKeys.ranges(resolveIdentityScope()) },
       (current) =>
         current?.map((item) => (String(item.id) === String(dto.id) ? dto : item)) ?? current,
     );
@@ -81,7 +81,7 @@ export function useTaskOccurrences() {
     store.setLoading(true);
     store.setError(null);
     try {
-      const payload = sanitizeForIpc(query) as Parameters<typeof service.listOccurrences>[0];
+      const payload = taskUiHost.sanitizeForIpc(query) as Parameters<typeof service.listOccurrences>[0];
       const result = await executeTaskOperation(
         () => service.listOccurrences(payload),
         'task.error.loadInstancesFailed',
@@ -102,7 +102,7 @@ export function useTaskOccurrences() {
   ) {
     const identityScope = resolveIdentityScope();
     const includeOverdueOpen = options.includeOverdueOpen ?? false;
-    const queryKey = taskOccurrenceQueryKeys.range(
+    const queryKey = taskUiHost.taskOccurrenceQueryKeys.range(
       identityScope,
       startDate,
       endDate,
@@ -115,7 +115,7 @@ export function useTaskOccurrences() {
     try {
       const instances = await runtime.queryClient.fetchQuery<TaskOccurrenceDTO[]>({
         queryKey,
-        staleTime: options.force ? 0 : TASK_OCCURRENCE_STALE_TIME_MS,
+        staleTime: options.force ? 0 : taskUiHost.TASK_OCCURRENCE_STALE_TIME_MS,
         queryFn: async () => {
           const result = await executeTaskOperation(
             () =>
@@ -154,7 +154,7 @@ export function useTaskOccurrences() {
 
   async function completeOccurrence(id: string, request?: CompleteTaskOccurrenceReq) {
     const result = await executeTaskOperation(
-      () => service.completeOccurrence(id, sanitizeForIpc(request)),
+      () => service.completeOccurrence(id, taskUiHost.sanitizeForIpc(request)),
       'task.error.completeFailed',
     );
     if (result.ok) {
@@ -197,7 +197,7 @@ export function useTaskOccurrences() {
     options: { suppressErrorReport?: boolean } = {},
   ) {
     const result = await executeTaskOperation(
-      () => service.rescheduleOccurrence(id, sanitizeForIpc(request) as RescheduleTaskInput),
+      () => service.rescheduleOccurrence(id, taskUiHost.sanitizeForIpc(request) as RescheduleTaskInput),
       'task.error.operationFailed',
       options,
     );
@@ -215,7 +215,7 @@ export function useTaskOccurrences() {
       () =>
         service.setOccurrenceChecklistItem(
           id,
-          sanitizeForIpc(request) as SetTaskOccurrenceChecklistItemReq,
+          taskUiHost.sanitizeForIpc(request) as SetTaskOccurrenceChecklistItemReq,
         ),
       'task.error.operationFailed',
     );

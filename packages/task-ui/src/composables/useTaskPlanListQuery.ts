@@ -10,9 +10,9 @@ import { useQuery } from '@tanstack/vue-query';
 import { useI18n } from 'vue-i18n';
 import { unwrap } from '@memoflow/contracts/result';
 import type { TaskPlanClientDTO } from '@memoflow/task-contracts';
-import { type TaskPlanListQueryInput } from '../task-ui-host.ts';
+import { taskUiHost } from '../task-ui-host';
+import type { TaskPlanListQueryInput } from '../task-ui-host';
 import { translateResultErrorMessage as translateResultError } from '@memoflow/http-client';
-import { TASK_SERVICE_KEY, TASK_TEMPLATE_STALE_TIME_MS, canonicalizeTaskPlanListQuery, sanitizeForIpc, taskPlanQueryKeys, useServerStateIdentityScope, useStrictInject } from '../task-ui-host.ts';
 
 /** Options for the Task template list query. 任务模板列表查询选项。 */
 export type UseTaskPlanListQueryOptions = TaskPlanListQueryInput;
@@ -56,12 +56,12 @@ function useTaskPlanListQueryImpl({
   params = {},
   enabled = true,
 }: UseTaskPlanListQueryComposableOptions) {
-  const service = useStrictInject(TASK_SERVICE_KEY, 'TaskService');
-  const resolveIdentityScope = useServerStateIdentityScope();
+  const service = taskUiHost.useStrictInject(taskUiHost.TASK_SERVICE_KEY, 'TaskService');
+  const resolveIdentityScope = taskUiHost.useServerStateIdentityScope();
   const { t } = useI18n();
 
   const canonical = computed(() =>
-    canonicalizeTaskPlanListQuery({
+    taskUiHost.canonicalizeTaskPlanListQuery({
       page: 1,
       limit: 20,
       ...toValue(params),
@@ -72,10 +72,10 @@ function useTaskPlanListQueryImpl({
     const identityScope = resolveIdentityScope();
     const queryParams = canonical.value;
     return {
-      queryKey: taskPlanQueryKeys.list(identityScope, queryParams),
+      queryKey: taskUiHost.taskPlanQueryKeys.list(identityScope, queryParams),
       queryFn: async () => {
         const result = await service.listPlans(
-          sanitizeForIpc(queryParams) as Parameters<typeof service.listPlans>[0],
+          taskUiHost.sanitizeForIpc(queryParams) as Parameters<typeof service.listPlans>[0],
         );
         const data = unwrap(result);
         return {
@@ -83,7 +83,7 @@ function useTaskPlanListQueryImpl({
           total: data.total ?? 0,
         };
       },
-      staleTime: TASK_TEMPLATE_STALE_TIME_MS,
+      staleTime: taskUiHost.TASK_TEMPLATE_STALE_TIME_MS,
       enabled: toValue(enabled),
     };
   });

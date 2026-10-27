@@ -218,7 +218,7 @@ import { CalendarDays, Check, Clock3, Timer } from '@lucide/vue';
 import { requireYmd, type Ymd } from '@memoflow/contracts/primitives';
 import { translateResultErrorMessage as translateResultError } from '@memoflow/http-client';
 import { padTwoDigits } from '@memoflow/time';
-import { taskUiHost } from '../../../task-ui-host.ts';
+import { taskUiHost } from '../../../task-ui-host';
 const ProductDatePicker = taskUiHost.components['ProductDatePicker'];
 const ProductInlineValidation = taskUiHost.components['ProductInlineValidation'];
 

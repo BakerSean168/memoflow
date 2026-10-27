@@ -14,7 +14,7 @@
         <dd>{{ getTaskOccurrenceScheduleLabel(t, occurrence) }}</dd>
         <template v-if="occurrence.actualStartAt !== null">
           <dt class="text-muted-foreground">{{ t('task.inspect.actualStart') }}</dt>
-          <dd>{{ formatProductDateTime(occurrence.actualStartAt) }}</dd>
+          <dd>{{ taskUiHost.formatProductDateTime(occurrence.actualStartAt) }}</dd>
         </template>
       </dl>
       <section v-if="occurrence.checklistState.length" class="mt-4 space-y-2">
@@ -50,7 +50,7 @@
         class="mt-4 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-3 text-sm"
       >
         <dt class="text-muted-foreground">{{ t('task.inspect.recordedAt') }}</dt>
-        <dd>{{ formatProductDateTime(occurrence.result.recordedAt) }}</dd>
+        <dd>{{ taskUiHost.formatProductDateTime(occurrence.result.recordedAt) }}</dd>
         <template v-if="occurrence.result.kind === 'Completed'">
           <template v-if="occurrence.result.actualDurationMinutes !== null">
             <dt class="text-muted-foreground">{{ t('task.inspect.duration') }}</dt>
@@ -146,8 +146,7 @@ import { Badge, Button, Checkbox, Dialog } from '@memoflow/ui-vue-shadcn';
 import type { TaskOccurrenceClientDTO } from '@memoflow/task-contracts';
 import { useTaskPlanWorkspaceQuery } from '../../composables/useTaskPlanWorkspaceQuery';
 import { getTaskOccurrenceScheduleLabel } from '../../utils/task-occurrence-presentation';
-import { formatProductDateTime } from '../../task-ui-host.ts';
-import { taskUiHost } from '../../task-ui-host.ts';
+import { taskUiHost } from '../../task-ui-host';
 const ProductDialogShell = taskUiHost.components['ProductDialogShell'];
 
 const props = defineProps<{

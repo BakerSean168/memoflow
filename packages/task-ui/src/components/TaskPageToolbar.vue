@@ -247,8 +247,8 @@ import {
 import type { TaskOccurrenceClientDTO } from '@memoflow/task-contracts';
 import type { TaskPlanStateFilter, TaskSurface } from './types';
 import type { TaskOccurrenceSort } from '../utils/task-occurrence-presentation';
-import { type LabelPickerOption } from '../task-ui-host.ts';
-import { taskUiHost } from '../task-ui-host.ts';
+import { taskUiHost } from '../task-ui-host';
+import type { LabelPickerOption } from '../task-ui-host';
 const LabelFilterPopover = taskUiHost.components['LabelFilterPopover'];
 const ProductSingleSelectFilter = taskUiHost.components['ProductSingleSelectFilter'];
 const ProductSurfaceHeader = taskUiHost.components['ProductSurfaceHeader'];

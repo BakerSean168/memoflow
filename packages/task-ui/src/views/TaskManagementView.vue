@@ -256,15 +256,14 @@ import {
   sortTaskOccurrences,
   type TaskOccurrenceSort,
 } from '../utils/task-occurrence-presentation';
-import { type TaskPlanListQueryInput } from '../task-ui-host.ts';
-import { GOAL_SERVICE_KEY, isTodayMs, usePanelSurfaceStatus, useServerStateIdentityScope, useStrictInject, useTaskNativeSurfaceRegistration, vKeyboardList } from '../task-ui-host.ts';
-import { taskUiHost } from '../task-ui-host.ts';
+import { taskUiHost } from '../task-ui-host';
+import type { TaskPlanListQueryInput } from '../task-ui-host';
 const AppEmptyState = taskUiHost.components['AppEmptyState'];
 
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
-const nativeSurface = useTaskNativeSurfaceRegistration();
+const nativeSurface = taskUiHost.useTaskNativeSurfaceRegistration();
 let unregisterSession: (() => void) | null = null;
 let surfaceActive = true;
 function handleSessionChange(session: TaskNativeEditSession | null) {
@@ -287,9 +286,9 @@ const fullCreateDirty = ref(false);
 const quickCreateDirty = ref(false);
 const fullCreateBusy = ref(false);
 
-const goalService = useStrictInject(GOAL_SERVICE_KEY, 'GoalService');
+const goalService = taskUiHost.useStrictInject(taskUiHost.GOAL_SERVICE_KEY, 'GoalService');
 
-const resolveIdentityScope = useServerStateIdentityScope();
+const resolveIdentityScope = taskUiHost.useServerStateIdentityScope();
 const planPage = ref(1);
 
 const activeSurface = ref<TaskSurface>('today');
@@ -359,7 +358,7 @@ const {
   enabled: () => activeSurface.value === 'plans',
 });
 const { createPlanSafe, abandonPlanSafe, deletePlanSafe, isSaving } = useTaskPlanMutations();
-usePanelSurfaceStatus(
+taskUiHost.usePanelSurfaceStatus(
   computed(() =>
     fullCreateBusy.value || isSaving.value
       ? 'busy'
@@ -490,13 +489,13 @@ const occurrenceGroups = computed(() =>
       key: 'overdue' as const,
       label: t('task.management.group.overdue'),
       occurrences: visibleOccurrences.value.filter(
-        (occurrence) => !isTodayMs(occurrence.dueAt) && isTaskOccurrenceOverdue(occurrence),
+        (occurrence) => !taskUiHost.isTodayMs(occurrence.dueAt) && isTaskOccurrenceOverdue(occurrence),
       ),
     },
     {
       key: 'today' as const,
       label: t('task.management.group.today'),
-      occurrences: visibleOccurrences.value.filter((occurrence) => isTodayMs(occurrence.dueAt)),
+      occurrences: visibleOccurrences.value.filter((occurrence) => taskUiHost.isTodayMs(occurrence.dueAt)),
     },
   ].filter((group) => group.occurrences.length > 0),
 );

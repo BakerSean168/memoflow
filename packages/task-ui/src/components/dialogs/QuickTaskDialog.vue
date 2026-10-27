@@ -62,8 +62,7 @@ import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Zap } from '@lucide/vue';
 import { Button, Input, Label } from '@memoflow/ui-vue-shadcn';
-import { useDialogCloseGuard } from '../../task-ui-host.ts';
-import { taskUiHost } from '../../task-ui-host.ts';
+import { taskUiHost } from '../../task-ui-host';
 const ProductEditorFrame = taskUiHost.components['ProductEditorFrame'];
 const ProductInlineValidation = taskUiHost.components['ProductInlineValidation'];
 
@@ -118,7 +117,7 @@ function closeNow(): void {
   emit('update:modelValue', false);
 }
 
-const { requestClose } = useDialogCloseGuard({
+const { requestClose } = taskUiHost.useDialogCloseGuard({
   dirty: isDirty,
   busy: () => props.saving,
   onClose: closeNow,

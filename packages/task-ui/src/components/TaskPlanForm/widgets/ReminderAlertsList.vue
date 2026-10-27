@@ -114,7 +114,7 @@ import {
 } from '@memoflow/ui-vue-shadcn';
 import { Plus, Trash2 } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
-import { getProductTime } from '../../../task-ui-host.ts';
+import { taskUiHost } from '../../../task-ui-host';
 
 const { t } = useI18n();
 
@@ -185,7 +185,7 @@ const errorMessage = computed(() => {
 const formatAbsoluteTimeInput = (alert: ReminderAlert): string => {
   const value = alert.timing.absoluteTime;
   if (!value) return '';
-  return String(getProductTime().input.timeValue(value.getTime()));
+  return String(taskUiHost.getProductTime().input.timeValue(value.getTime()));
 };
 
 const handleAbsoluteTimeChange = (timeValue: string, alertIndex: number) => {
@@ -199,7 +199,7 @@ const handleAbsoluteTimeChange = (timeValue: string, alertIndex: number) => {
       return;
     }
 
-    const time = getProductTime();
+    const time = taskUiHost.getProductTime();
     const ymd = time.calendar.toYmd(time.now());
     const hm = time.input.parseTimeValue(timeValue);
     if (hm == null) return;

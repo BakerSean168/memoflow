@@ -111,8 +111,8 @@ import {
   getTaskPlanScheduleDate,
   getTaskPlanScheduleTimeDisplay,
 } from '../utils/task-plan-presentation';
-import { type MenuAction } from '../task-ui-host.ts';
-import { taskUiHost } from '../task-ui-host.ts';
+import { taskUiHost } from '../task-ui-host';
+import type { MenuAction } from '../task-ui-host';
 const ActionableWrapper = taskUiHost.components['ActionableWrapper'];
 
 const props = defineProps<{ plan: TaskPlanViewModel }>();

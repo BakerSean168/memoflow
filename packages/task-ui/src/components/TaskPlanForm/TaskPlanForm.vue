@@ -268,8 +268,7 @@ import ChecklistSection from './sections/ChecklistSection.vue';
 import { useTaskPlanForm } from '../../composables/useTaskPlanForm';
 import type { TaskPlanFormEmits, TaskPlanFormProps, TaskPlanViewModel } from '../types';
 import { getTaskPlanScheduleTimeDisplay } from '../../utils/task-plan-presentation';
-import { useLabelCatalog } from '../../task-ui-host.ts';
-import { taskUiHost } from '../../task-ui-host.ts';
+import { taskUiHost } from '../../task-ui-host';
 const LabelPicker = taskUiHost.components['LabelPicker'];
 const ProductAutoTextarea = taskUiHost.components['ProductAutoTextarea'];
 const ProductPropertyChip = taskUiHost.components['ProductPropertyChip'];
@@ -307,7 +306,7 @@ const {
   options: labelOptions,
   isLoading: labelsLoading,
   createLabel,
-} = useLabelCatalog();
+} = taskUiHost.useLabelCatalog();
 
 const taskPlanBeingEdited = computed(() => props.modelValue);
 const goals = computed(() => props.goals ?? []);

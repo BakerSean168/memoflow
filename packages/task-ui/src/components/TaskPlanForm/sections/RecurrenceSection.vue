@@ -229,8 +229,7 @@ import {
 } from '@lucide/vue';
 import { addYmdDays } from '@memoflow/time';
 import { formatDisplayDate } from '@memoflow/time';
-import { getProductTime, handleCalendarSelect } from '../../../task-ui-host.ts';
-import { taskUiHost } from '../../../task-ui-host.ts';
+import { taskUiHost } from '../../../task-ui-host';
 const ProductInlineValidation = taskUiHost.components['ProductInlineValidation'];
 
 const { t, locale } = useI18n();
@@ -350,14 +349,14 @@ const endDateAsDate = computed(() =>
   endDate.value ? new Date(`${endDate.value}T00:00:00`) : undefined,
 );
 function handleEndDateCalendarSelect(date: unknown): void {
-  handleCalendarSelect(date, (value) => {
+  taskUiHost.handleCalendarSelect(date, (value) => {
     endDate.value = value;
   });
 }
 function getDefaultEndDate(): string {
   return String(
     addYmdDays(
-      getProductTime().calendar.toYmd(Date.now()),
+      taskUiHost.getProductTime().calendar.toYmd(Date.now()),
       RECURRENCE_RULE_DEFAULTS.DEFAULT_END_DATE_DAYS,
     ),
   );

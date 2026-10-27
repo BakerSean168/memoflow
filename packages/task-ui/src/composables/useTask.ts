@@ -13,13 +13,13 @@ import { useTaskStore } from '../stores/task-store';
 import { useTaskOccurrences } from './useTaskOccurrences';
 import { useTaskPlanListQuery } from './useTaskPlanListQuery';
 import { waitForTaskPlanQuery } from './taskPlanCache';
-import { type TaskPlanListQueryInput } from '../task-ui-host.ts';
-import { canonicalizeTaskPlanListQuery, taskPlanQueryKeys, useServerStateIdentityScope, useServerStateRuntime } from '../task-ui-host.ts';
+import { taskUiHost } from '../task-ui-host';
+import type { TaskPlanListQueryInput } from '../task-ui-host';
 
 export function useTask() {
   const store = useTaskStore();
-  const runtime = useServerStateRuntime();
-  const resolveIdentityScope = useServerStateIdentityScope();
+  const runtime = taskUiHost.useServerStateRuntime();
+  const resolveIdentityScope = taskUiHost.useServerStateIdentityScope();
   const listParams = ref<TaskPlanListQueryInput>({});
   // P2-4: keep the default list query disabled until `fetchTemplates` requests it, so no
   // avoidable default `limit:20` fetch fires before a consumer supplies its own params.
@@ -41,9 +41,9 @@ export function useTask() {
       labelIdsAll: query?.labelIdsAll,
     };
     listRequested.value = true;
-    const queryKey = taskPlanQueryKeys.list(
+    const queryKey = taskUiHost.taskPlanQueryKeys.list(
       resolveIdentityScope(),
-      canonicalizeTaskPlanListQuery(listParams.value),
+      taskUiHost.canonicalizeTaskPlanListQuery(listParams.value),
     );
     // An errored query makes the waiter settle instantly without re-requesting; force a
     // refetch so a consumer's retry actually retries (P2-2). Fresh/pending keys still wait.

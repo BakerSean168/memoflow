@@ -4,7 +4,7 @@ import type { TaskPlanClientDTO, TaskPlanSchedule } from '@memoflow/task-contrac
 import { ImportanceLevel } from '@memoflow/shared-primitives';
 import { TaskPlanScheduleSchema } from '@memoflow/task-contracts';
 import type { TaskPlanViewModel } from '../components/types';
-import { formatProductDate, formatProductDateTime } from '../task-ui-host.ts';
+import { taskUiHost } from '../task-ui-host';
 
 type Translate = ComposerTranslation<Record<string, never>, string>;
 
@@ -77,7 +77,7 @@ export function getTaskPlanScheduleDate(schedule: TaskPlanSchedule): string {
 
 /** Keep absolute reminder timestamp presentation behind the Task presentation boundary. */
 export function formatTaskReminderAbsoluteTime(value: number): string {
-  return formatProductDateTime(value);
+  return taskUiHost.formatProductDateTime(value);
 }
 
 export function getTaskRecurrenceText(t: Translate, dto: TaskPlanClientDTO): string {
@@ -154,6 +154,6 @@ export function mapTaskPlanDtoToViewModel(dto: TaskPlanClientDTO, t: Translate):
     futurePendingOccurrenceCount: dto.futurePendingOccurrenceCount ?? 0,
     singleOccurrenceStatus: dto.singleOccurrenceStatus ?? null,
     completionRate: dto.completionRate ?? 0,
-    formattedCreatedAt: dto.createdAt ? formatProductDate(dto.createdAt) : undefined,
+    formattedCreatedAt: dto.createdAt ? taskUiHost.formatProductDate(dto.createdAt) : undefined,
   };
 }

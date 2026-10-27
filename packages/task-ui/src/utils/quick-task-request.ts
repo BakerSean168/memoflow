@@ -1,6 +1,6 @@
 import type { CreateTaskPlanReq } from '@memoflow/task-contracts';
 import { ImportanceLevel } from '@memoflow/shared-primitives';
-import { getProductTodayYmd } from '../task-ui-host.ts';
+import { taskUiHost } from '../task-ui-host';
 
 export function buildQuickTaskRequest(title: string): CreateTaskPlanReq {
   return {
@@ -8,7 +8,7 @@ export function buildQuickTaskRequest(title: string): CreateTaskPlanReq {
     description: null,
     schedule: {
       kind: 'OneTime',
-      date: getProductTodayYmd(),
+      date: taskUiHost.getProductTodayYmd(),
       timing: { kind: 'AllDay' },
     },
     reminderConfig: null,

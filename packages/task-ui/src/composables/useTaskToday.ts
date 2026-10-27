@@ -5,16 +5,16 @@ import { unwrap } from '@memoflow/contracts/result';
 import { isTaskOccurrenceOnTodaySurface } from '../utils/task-occurrence-presentation';
 import { useTaskStore } from '../stores/task-store';
 import { useTaskOccurrences } from './useTaskOccurrences';
-import { TASK_SERVICE_KEY, TASK_TEMPLATE_STALE_TIME_MS, endOfDayMs, startOfDayMs, taskPlanQueryKeys, useServerStateIdentityScope, useServerStateRuntime, useStrictInject } from '../task-ui-host.ts';
+import { taskUiHost } from '../task-ui-host';
 
 /** Canonical Today owner projection shared by Management, Home and Capsule. */
 export function useTaskToday() {
   const store = useTaskStore();
   const { t } = useI18n();
   const operations = useTaskOccurrences();
-  const resolveIdentityScope = useServerStateIdentityScope();
-  const runtime = useServerStateRuntime();
-  const taskService = useStrictInject(TASK_SERVICE_KEY, 'TaskService');
+  const resolveIdentityScope = taskUiHost.useServerStateIdentityScope();
+  const runtime = taskUiHost.useServerStateRuntime();
+  const taskService = taskUiHost.useStrictInject(taskUiHost.TASK_SERVICE_KEY, 'TaskService');
   const templates = ref<TaskPlanClientDTO[]>([]);
   const detailsLoading = ref(false);
   const detailsError = ref(false);
@@ -37,8 +37,8 @@ export function useTaskToday() {
     try {
       const now = Date.now();
       const occurrences = await operations.fetchInstancesByDateRange(
-        startOfDayMs(now),
-        endOfDayMs(now),
+        taskUiHost.startOfDayMs(now),
+        taskUiHost.endOfDayMs(now),
         {
           force,
           includeOverdueOpen: true,
@@ -52,8 +52,8 @@ export function useTaskToday() {
       const details = await Promise.all(
         missingPlanIds.map((planId) =>
           runtime.queryClient.fetchQuery({
-            queryKey: taskPlanQueryKeys.detail(identityScope, planId),
-            staleTime: force ? 0 : TASK_TEMPLATE_STALE_TIME_MS,
+            queryKey: taskUiHost.taskPlanQueryKeys.detail(identityScope, planId),
+            staleTime: force ? 0 : taskUiHost.TASK_TEMPLATE_STALE_TIME_MS,
             queryFn: async () => unwrap(await taskService.getPlan(planId)),
           }),
         ),

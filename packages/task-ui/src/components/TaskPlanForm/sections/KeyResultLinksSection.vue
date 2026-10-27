@@ -287,10 +287,7 @@ import {
 } from '@memoflow/ui-vue-shadcn';
 import { Target, Flag, PlusCircle, Link2, LoaderCircle, RotateCw } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
-import {
-  getKeyResultRecordPromptLabel,
-  normalizeSelectString,
-} from '../../../task-ui-host.ts';
+import { taskUiHost } from '../../../task-ui-host';
 
 const { t } = useI18n();
 
@@ -353,7 +350,7 @@ const selectedKeyResult = computed(() =>
 const fixedAllowed = computed(() => selectedKeyResult.value?.calculationMethod === 'Sum');
 const recordPromptLabel = computed(() =>
   selectedKeyResult.value
-    ? getKeyResultRecordPromptLabel(selectedKeyResult.value.calculationMethod, t)
+    ? taskUiHost.getKeyResultRecordPromptLabel(selectedKeyResult.value.calculationMethod, t)
     : '',
 );
 
@@ -455,7 +452,7 @@ const handleLinkToggle = (enabled: boolean | null) => {
 };
 
 const handleGoalChange = async (value: unknown) => {
-  const goalId = normalizeSelectString(value);
+  const goalId = taskUiHost.normalizeSelectString(value);
   selectedGoalId.value = goalId ?? null;
   selectedKeyResultId.value = null;
   mode.value = 'LinkOnly';
@@ -470,7 +467,7 @@ const handleGoalChange = async (value: unknown) => {
 };
 
 const handleKeyResultChange = (value: unknown) => {
-  selectedKeyResultId.value = normalizeSelectString(value);
+  selectedKeyResultId.value = taskUiHost.normalizeSelectString(value);
   reconcileMode();
   updateBinding();
   validateAndEmit();
@@ -489,7 +486,7 @@ const reconcileMode = () => {
   }
 };
 const handleModeChange = (rawValue: unknown) => {
-  const next = normalizeSelectString(rawValue);
+  const next = taskUiHost.normalizeSelectString(rawValue);
   if (next !== 'LinkOnly' && next !== 'FixedAutomatic' && next !== 'PromptedMeasurement') return;
   if (!selectedKeyResultId.value || (next === 'FixedAutomatic' && !fixedAllowed.value)) return;
   mode.value = next;
@@ -518,7 +515,7 @@ const handleSuggestionChange = (rawValue: string | number) => {
 };
 
 const handleTriggerChange = (rawValue: unknown) => {
-  const value = normalizeSelectString(rawValue);
+  const value = taskUiHost.normalizeSelectString(rawValue);
   if (value === TaskGoalBindingTrigger.PlanCompletion && !wholePlanTriggerAllowed.value) {
     return;
   }
