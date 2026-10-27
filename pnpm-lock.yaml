@@ -1122,6 +1122,9 @@ importers:
       '@memoflow/account-client':
         specifier: workspace:*
         version: link:../../packages/account-client
+      '@memoflow/account-contracts':
+        specifier: workspace:*
+        version: link:../../packages/account-contracts
       '@memoflow/account-ui':
         specifier: workspace:*
         version: link:../../packages/account-ui
