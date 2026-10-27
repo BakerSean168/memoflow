@@ -13,12 +13,12 @@ describe('knowledge write-request ledger client/server contract surface (W6-A)',
   const dto = readFileSync(
     resolve(
       __dirname,
-      '../../../contracts/src/modules/repository/api/knowledge-note-projection.dto.ts',
+      '../../../repository-contracts/src/api/knowledge-note-projection.dto.ts',
     ),
     'utf8',
   );
   const clientPort = readFileSync(
-    resolve(__dirname, '../application-client/ports/repository-api-client.port.ts'),
+    resolve(__dirname, './ports/repository-api-client.port.ts'),
     'utf8',
   );
   const httpAdapter = readFileSync(
@@ -30,11 +30,11 @@ describe('knowledge write-request ledger client/server contract surface (W6-A)',
     'utf8',
   );
   const appPort = readFileSync(
-    resolve(__dirname, '../server/application/repository.application.port.ts'),
+    resolve(__dirname, '../../../repository/src/server/application/repository.application.port.ts'),
     'utf8',
   );
   const routes = readFileSync(
-    resolve(__dirname, '../api/routes/knowledge-repository-connection.routes.ts'),
+    resolve(__dirname, '../../../repository/src/api/routes/knowledge-repository-connection.routes.ts'),
     'utf8',
   );
 
@@ -70,7 +70,7 @@ describe('knowledge write-request ledger client/server contract surface (W6-A)',
   });
 
   it('electron main registers list/replay IPC handlers over the remote connection port', () => {
-    const electron = readFileSync(resolve(__dirname, '../electron/index.ts'), 'utf8');
+    const electron = readFileSync(resolve(__dirname, '../../../repository/src/electron/index.ts'), 'utf8');
     expect(electron).toContain('RepositoryChannels.KNOWLEDGE_WRITE_REQUEST_LIST');
     expect(electron).toContain('RepositoryChannels.KNOWLEDGE_WRITE_REQUEST_REPLAY');
     expect(electron).toContain('port.listKnowledgeWriteRequests(');

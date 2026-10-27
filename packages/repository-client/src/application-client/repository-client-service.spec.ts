@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts';
 import type { IRepositoryApiClient } from './ports/repository-api-client.port';
 import { RepositoryClientService } from './repository-client-service';
 

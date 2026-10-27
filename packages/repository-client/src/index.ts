@@ -3,26 +3,26 @@
  *
  * Public repository contracts stay centralized in
  * `@memoflow/repository-contracts`.
- * Callers depend on this seam instead of the old application-client /
- * infrastructure-client layered exports.
+ * Callers depend on this seam instead of the layered application-client /
+ * infrastructure-client internals.
  */
 
 import type { IResultHttpClient } from '@memoflow/http-client';
-import { createRepositoryClientService, type RepositoryClientPort } from '../application-client';
+import { createRepositoryClientService, type RepositoryClientPort } from './application-client';
 import {
   RepositoryHttpAdapter,
   createRepositoryHttpAdapters,
   type RepositoryHttpAdapters,
-} from '../infrastructure-client/adapters/http';
+} from './infrastructure-client/adapters/http';
 import {
   RepositoryIpcAdapter,
   createRepositoryIpcAdapters,
   type RepositoryIpcAdapters,
-} from '../infrastructure-client/adapters/ipc';
+} from './infrastructure-client/adapters/ipc';
 import type {
   IRepositoryApiClient,
   IResultIpcClient,
-} from '../infrastructure-client/adapters/types';
+} from './infrastructure-client/adapters/types';
 
 export type {
   RepositoryClientPort,
@@ -44,6 +44,7 @@ export function createRepositoryIpcClient(ipcClient: IResultIpcClient): Reposito
 export {
   RepositoryHttpAdapter,
   RepositoryIpcAdapter,
+  createRepositoryClientService,
   createRepositoryHttpAdapters,
   createRepositoryIpcAdapters,
 };

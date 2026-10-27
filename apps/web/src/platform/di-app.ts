@@ -77,7 +77,7 @@ export function executeWebNotificationAction(request: ExecuteNotificationActionR
 }
 
 const repositoryService = createLazyService(async () => {
-  const { createRepositoryHttpClient } = await import('@memoflow/repository/client');
+  const { createRepositoryHttpClient } = await import('@memoflow/repository-client');
   return createRepositoryHttpClient(resultHttpClient);
 });
 

@@ -461,3 +461,30 @@ export function createScheduleUiAliasEntries(workspaceRoot: string): Alias[] {
     },
   ];
 }
+
+export function createRepositoryClientAliasEntries(workspaceRoot: string): Alias[] {
+  return [
+    {
+      find: /^@memoflow\/repository-client$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/repository-client/src/index.ts'),
+    },
+  ];
+}
+
+export function createRepositoryContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const repositoryContractsRoot = resolveFromWorkspace(
+    workspaceRoot,
+    'packages/repository-contracts/src',
+  );
+
+  return [
+    {
+      find: /^@memoflow\/repository-contracts$/,
+      replacement: `${repositoryContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/repository-contracts\/(.+)$/,
+      replacement: `${repositoryContractsRoot}/$1`,
+    },
+  ];
+}

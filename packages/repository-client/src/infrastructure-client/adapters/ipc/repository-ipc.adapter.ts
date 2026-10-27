@@ -5,8 +5,8 @@
  * Uses tryCatch for consistent Result<T> error handling.
  */
 
-import { fail, type Result } from '@memoflow/contracts/result';
-import { RepositoryChannels } from '@memoflow/contracts/electron';
+import { fail, type Result } from '@memoflow/transport-contracts';
+import { RepositoryChannels } from '@memoflow/desktop-contracts';
 import type { IResultIpcClient, IRepositoryApiClient } from '../types';
 import type {
   LocalVaultBindingSnapshotDTO,

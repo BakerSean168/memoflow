@@ -5,7 +5,7 @@
  * Repository/Folder/Resource/Bookmark CRUD is not part of the client surface.
  */
 
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts';
 import type {
   LocalVaultBindingSnapshotDTO,
   SelectLocalVaultReq,

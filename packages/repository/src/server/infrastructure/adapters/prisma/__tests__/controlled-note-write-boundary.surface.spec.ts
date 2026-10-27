@@ -20,12 +20,12 @@ describe('controlled note-write boundary surface', () => {
   const apiClientPort = readFileSync(
     resolve(
       repoRoot,
-      'packages/repository/src/application-client/ports/repository-api-client.port.ts',
+      'packages/repository-client/src/application-client/ports/repository-api-client.port.ts',
     ),
     'utf8',
   );
   const clientPort = readFileSync(
-    resolve(repoRoot, 'packages/repository/src/application-client/repository-client.port.ts'),
+    resolve(repoRoot, 'packages/repository-client/src/application-client/repository-client.port.ts'),
     'utf8',
   );
   const knowledgeRoutes = readFileSync(
@@ -50,7 +50,7 @@ describe('controlled note-write boundary surface', () => {
   const createConfirmedDto = readFileSync(
     resolve(
       repoRoot,
-      'packages/contracts/src/modules/repository/api/knowledge-note-projection.dto.ts',
+      'packages/repository-contracts/src/api/knowledge-note-projection.dto.ts',
     ),
     'utf8',
   );

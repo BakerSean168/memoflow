@@ -36,7 +36,7 @@ describe('legacy editor/repository runtime surface', () => {
     'utf8',
   );
   const repositoryRpcMap = readFileSync(
-    resolve(repoRoot, 'packages/contracts/src/modules/repository/protocol/repository-rpc-map.ts'),
+    resolve(repoRoot, 'packages/repository-contracts/src/protocol/repository-rpc-map.ts'),
     'utf8',
   );
   const desktopMain = readFileSync(resolve(repoRoot, 'apps/desktop/src/main/main.ts'), 'utf8');

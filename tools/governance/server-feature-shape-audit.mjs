@@ -45,6 +45,7 @@ const STANDALONE_CLIENT_PACKAGES = new Map([
   ['goal', 'goal-client'],
   ['schedule', 'schedule-client'],
   ['notification', 'notification-client'],
+  ['repository', 'repository-client'],
 ]);
 
 const EXCEPTIONS = new Set([

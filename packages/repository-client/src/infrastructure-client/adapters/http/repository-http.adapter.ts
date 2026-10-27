@@ -5,7 +5,7 @@
  * Uses IResultHttpClient for making HTTP requests.
  */
 
-import { fail, type Result } from '@memoflow/contracts/result';
+import { fail, type Result } from '@memoflow/transport-contracts';
 import type { IResultHttpClient } from '@memoflow/http-client';
 import type { IRepositoryApiClient } from '../types';
 import type {

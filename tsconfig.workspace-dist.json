@@ -88,6 +88,7 @@
       "@memoflow/repository/*": ["./packages/repository/dist/*/index.d.ts"],
       "@memoflow/repository-contracts": ["./packages/repository-contracts/dist/index.d.ts"],
       "@memoflow/repository-contracts/*": ["./packages/repository-contracts/dist/*.d.ts"],
+      "@memoflow/repository-client": ["./packages/repository-client/dist/index.d.ts"],
       "@memoflow/reminder": ["./packages/reminder/dist/index.d.ts"],
       "@memoflow/reminder/*": ["./packages/reminder/dist/*/index.d.ts"],
       "@memoflow/notification": ["./packages/notification/dist/index.d.ts"],
