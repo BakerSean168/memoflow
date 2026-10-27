@@ -491,6 +491,7 @@ export default tseslint.config(
       files: [
         'packages/app-vue/src/modules/**/*.{ts,tsx,vue}',
         'packages/app-vue/src/layouts/**/*.{ts,tsx,vue}',
+        'packages/ai-ui/src/**/*.{ts,tsx,vue}',
         'packages/app-react/src/**/*.{ts,tsx}',
       ],
       ignores: [

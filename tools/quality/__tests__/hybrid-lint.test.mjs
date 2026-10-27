@@ -49,9 +49,9 @@ test('residual selection retains Vue templates, Storybook, product time and JSON
   assert.ok(paths.some((p) => p.endsWith('.stories.ts')));
 });
 
-test('Oxlint must reject AI importing forbidden Task public package', async () => {
+test('Oxlint must reject AI client importing forbidden Task server package', async () => {
   await probe(
-    'packages/ai/src/__quality_oxc_boundary_probe.ts',
+    'packages/ai-client/src/__quality_oxc_boundary_probe.ts',
     "import { value } from '@memoflow/task';\nexport const x = value;\n",
     (file) => {
       const result = runOx(file);
