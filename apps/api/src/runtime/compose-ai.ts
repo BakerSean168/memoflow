@@ -39,7 +39,7 @@ import { createAIApiModule, type AIApiModuleDef } from '@memoflow/ai/api';
 import type { RepositoryApplicationPort } from '@memoflow/repository';
 import { createGoalPrismaRepositories, type GoalApplicationPort } from '@memoflow/goal';
 import { createTaskPrismaRepositories, type TaskApplicationPort } from '@memoflow/task';
-import type { RoutineCoachCommandPort } from '@memoflow/reminder/routine-runtime';
+import type { RoutineCoachCommandPort } from '@memoflow/routine/routine-runtime';
 import type { IScheduleRepository, ScheduleEventApplicationPort } from '@memoflow/schedule';
 import type { NotificationInboxPort } from '@memoflow/notification';
 import type { LabelService } from '@memoflow/label';

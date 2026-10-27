@@ -167,6 +167,11 @@ import {
   plannerSemanticI18nKey,
 } from '../planner/planner-presentation';
 
+// Keep declaration emit on the public projection type instead of its private base.
+defineSlots<{
+  'owner-content'?(props: { event: CalendarEventProjection }): unknown;
+}>();
+
 const props = withDefaults(
   defineProps<{
     open: boolean;

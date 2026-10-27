@@ -6,7 +6,7 @@
     "name": "bakersean",
     "email": "lulouhao@stu.sicau.edu.cn"
   },
-  "description": "知行 (MemoFlow) desktop application",
+  "description": "\u77e5\u884c (MemoFlow) desktop application",
   "homepage": "https://github.com/BakerSean168/memoflow",
   "repository": {
     "type": "git",
@@ -41,7 +41,7 @@
     "@memoflow/powersync-schema": "workspace:*",
     "@memoflow/relation": "workspace:*",
     "@memoflow/relation-contracts": "workspace:*",
-    "@memoflow/reminder": "workspace:*",
+    "@memoflow/routine": "workspace:*",
     "@memoflow/repository": "workspace:*",
     "@memoflow/schedule": "workspace:*",
     "@memoflow/schedule-client": "workspace:*",
@@ -100,7 +100,9 @@
     "winston": "3.19.0",
     "winston-daily-rotate-file": "5.0.0",
     "xtend": "4.0.2",
-    "@memoflow/reliable-messaging-contracts": "workspace:*"
+    "@memoflow/reliable-messaging-contracts": "workspace:*",
+    "@memoflow/routine-contracts": "workspace:*",
+    "@memoflow/routine-client": "workspace:*"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

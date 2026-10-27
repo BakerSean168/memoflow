@@ -23,10 +23,10 @@ export default mergeConfig(
         ),
       },
       {
-        find: /^@memoflow\/reminder\/schedule-projection$/,
+        find: /^@memoflow\/routine\/schedule-projection$/,
         replacement: path.resolve(
           import.meta.dirname,
-          '../reminder/src/server/infrastructure/schedule-projection-source.ts',
+          '../routine/src/server/infrastructure/schedule-projection-source.ts',
         ),
       },
       {

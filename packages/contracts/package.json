@@ -37,10 +37,6 @@
       "types": "./dist/modules/setting/index.d.ts",
       "import": "./dist/modules/setting/index.js"
     },
-    "./routine": {
-      "types": "./dist/modules/routine/index.d.ts",
-      "import": "./dist/modules/routine/index.js"
-    },
     "./ai": {
       "types": "./dist/modules/ai/index.d.ts",
       "import": "./dist/modules/ai/index.js"
@@ -84,7 +80,8 @@
     "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/transport-contracts": "workspace:*",
-    "zod": "^4.6.5"
+    "zod": "^4.6.5",
+    "@memoflow/routine-contracts": "workspace:*"
   },
   "devDependencies": {
     "@faker-js/faker": "10.6.0",

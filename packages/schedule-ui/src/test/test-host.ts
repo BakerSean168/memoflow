@@ -1,3 +1,4 @@
+import { installRoutineUiHost } from '@schedule-ui-test-host/di/routine-ui-host';
 /**
  * Schedule UI test host.
  *
@@ -30,7 +31,7 @@ import {
   SCHEDULE_CALENDAR_STALE_TIME_MS,
 } from '@schedule-ui-test-host/platform/server-state/query-policy';
 import { useTask } from '@schedule-ui-test-host/modules/task/composables/useTask';
-import { fetchRoutineUpcomingCached } from '@schedule-ui-test-host/modules/routine/composables/routineUpcomingCache';
+import { fetchRoutineUpcomingCached } from '@memoflow/routine-ui/composables/routineUpcomingCache';
 import { usePanelWidth } from '@schedule-ui-test-host/layouts/shell/usePanelWidth';
 import { usePanelSurfaceStatus } from '@schedule-ui-test-host/layouts/shell/usePanelSurfaceStatus';
 import {
@@ -94,6 +95,7 @@ export function createScheduleUiTestHost(overrides: Partial<ScheduleUiHost> = {}
 }
 
 export function bindDefaultScheduleUiHost(): ScheduleUiHost {
+  installRoutineUiHost();
   const host = createScheduleUiTestHost();
   bindScheduleUiHost(host);
   return host;

@@ -4,7 +4,7 @@ import type {
   IdleSensorPort,
   UserIdleObserved,
   UserResumeObserved,
-} from '@memoflow/reminder/routine-runtime';
+} from '@memoflow/routine/routine-runtime';
 
 interface ElectronIdleCapability {
   getSystemIdleTime(): number;

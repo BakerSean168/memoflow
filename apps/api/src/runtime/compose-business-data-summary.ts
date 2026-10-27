@@ -7,7 +7,7 @@ import { createGoalBusinessDataPresence } from '@memoflow/goal';
 import { createTaskBusinessDataPresence } from '@memoflow/task';
 import { createLabelBusinessDataPresence } from '@memoflow/label';
 import { createScheduleBusinessDataPresence } from '@memoflow/schedule';
-import { createRoutineBusinessDataPresence } from '@memoflow/reminder/routine-runtime';
+import { createRoutineBusinessDataPresence } from '@memoflow/routine/routine-runtime';
 import { createRepositoryBusinessDataPresence } from '@memoflow/repository';
 import { createAiBusinessDataPresence } from '@memoflow/ai';
 import { createNotificationBusinessDataPresence } from '@memoflow/notification';

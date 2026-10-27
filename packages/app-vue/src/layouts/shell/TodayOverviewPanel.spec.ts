@@ -1,3 +1,4 @@
+import { installRoutineUiHost } from '../../di/routine-ui-host';
 import { installGoalUiHost } from '../../di/goal-ui-host';
 /** @vitest-environment happy-dom */
 
@@ -258,3 +259,5 @@ describe('TodayOverviewPanel', () => {
 });
 
 installGoalUiHost();
+
+installRoutineUiHost();

@@ -1,0 +1,58 @@
+{
+  "name": "@memoflow/routine",
+  "version": "0.0.1",
+  "description": "Routine vNext runtime, scheduling, intervention and protocol owner",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./schedule-execution": {
+      "types": "./dist/schedule-execution/index.d.ts",
+      "import": "./dist/schedule-execution/index.js"
+    },
+    "./schedule-execution/routine": {
+      "types": "./dist/schedule-execution/routine.d.ts",
+      "import": "./dist/schedule-execution/routine.js"
+    },
+    "./schedule-projection": {
+      "types": "./dist/schedule-projection/index.d.ts",
+      "import": "./dist/schedule-projection/index.js"
+    },
+    "./schedule-projection/routine": {
+      "types": "./dist/schedule-projection/routine.d.ts",
+      "import": "./dist/schedule-projection/routine.js"
+    },
+    "./routine-runtime": {
+      "types": "./dist/routine-runtime/index.d.ts",
+      "import": "./dist/routine-runtime/index.js"
+    },
+    "./server": {
+      "types": "./dist/server/index.d.ts",
+      "import": "./dist/server/index.js"
+    }
+  },
+  "scripts": {},
+  "dependencies": {
+    "@memoflow/contracts": "workspace:*",
+    "@memoflow/notification-contracts": "workspace:*",
+    "@memoflow/database": "workspace:*",
+    "@memoflow/reliable-messaging-contracts": "workspace:*",
+    "@memoflow/schedule-contracts": "workspace:*",
+    "@memoflow/time": "workspace:*",
+    "@memoflow/utils": "workspace:*",
+    "zod": "^4.6.5",
+    "@memoflow/routine-contracts": "workspace:*",
+    "@memoflow/host-runtime": "workspace:*"
+  },
+  "devDependencies": {
+    "@memoflow/test-utils": "workspace:*"
+  }
+}

@@ -49,7 +49,7 @@ const runnerConfig = {
     ],
   },
   'reminder-unit': {
-    cwd: 'packages/reminder',
+    cwd: 'packages/routine',
     command: [
       'node',
       '../../node_modules/vitest/vitest.mjs',
