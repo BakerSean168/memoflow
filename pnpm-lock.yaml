@@ -1395,6 +1395,12 @@ importers:
       '@memoflow/account-contracts':
         specifier: workspace:*
         version: link:../account-contracts
+      '@memoflow/agent-gateway':
+        specifier: workspace:*
+        version: link:../agent-gateway
+      '@memoflow/cloud-auth-contracts':
+        specifier: workspace:*
+        version: link:../cloud-auth-contracts
       '@memoflow/contracts':
         specifier: workspace:*
         version: link:../contracts

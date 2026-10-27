@@ -35,7 +35,7 @@ export function useAccountProfile() {
       return;
     }
 
-    setAccount(result.data.account.toDTO());
+    setAccount(result.data.account);
     setCloudIdentity(result.data.cloudIdentity);
     setIsLoading(false);
   }

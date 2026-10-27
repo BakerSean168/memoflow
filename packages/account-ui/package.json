@@ -19,6 +19,8 @@
     "@lucide/vue": "^1.48.0",
     "@memoflow/account-client": "workspace:*",
     "@memoflow/account-contracts": "workspace:*",
+    "@memoflow/agent-gateway": "workspace:*",
+    "@memoflow/cloud-auth-contracts": "workspace:*",
     "@memoflow/contracts": "workspace:*",
     "@memoflow/desktop-contracts": "workspace:*",
     "@memoflow/http-client": "workspace:*",
