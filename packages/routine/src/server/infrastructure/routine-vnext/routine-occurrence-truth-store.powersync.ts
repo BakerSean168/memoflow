@@ -1,3 +1,9 @@
+import {
+  ROUTINE_INTERACTION_ACTIONS,
+  ROUTINE_OCCURRENCE_RESOLUTION_KINDS,
+  ROUTINE_OCCURRENCE_RESOLUTION_STATES,
+  ROUTINE_OCCURRENCE_TRIGGER_KINDS,
+} from '@memoflow/routine-contracts';
 import { randomUUID } from 'node:crypto';
 import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
 import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
@@ -11,12 +17,7 @@ import type {
   RoutineOccurrenceFact,
   RoutineOccurrenceTruthStore,
 } from '../../domain/ports';
-import {
-  ROUTINE_INTERACTION_ACTIONS,
-  ROUTINE_OCCURRENCE_RESOLUTION_KINDS,
-  ROUTINE_OCCURRENCE_RESOLUTION_STATES,
-  ROUTINE_OCCURRENCE_TRIGGER_KINDS,
-} from '../../domain/ports';
+
 import { serializeRoutineTemporaryOverride } from './trigger-persistence-parity';
 
 const ROUTINE_OCCURRENCE_SOURCE = 'routine';

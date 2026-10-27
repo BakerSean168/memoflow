@@ -1,5 +1,5 @@
+import { type RoutineScheduleProjectionEventMap } from '@memoflow/routine-contracts';
 import { createTypedEventPublisher, eventBus } from '@memoflow/utils/domain';
-import type { RoutineScheduleProjectionEventMap } from './routine-schedule-projection-source';
 
 /** Owner-domain notifier used after durable temporary-override changes. */
 export function createRoutineOverrideChangedNotifier(): (input: {

@@ -1,6 +1,7 @@
+import { type RoutineScheduleProjectionEventMap } from '@memoflow/routine-contracts';
 import type { GoalScheduleProjectionEventMap } from '@memoflow/goal/schedule-projection';
 import { GOAL_SCHEDULING_OWNER_TYPE } from '@memoflow/goal/schedule-projection';
-import type { RoutineScheduleProjectionEventMap } from '@memoflow/routine/schedule-projection/routine';
+
 import { ROUTINE_SCHEDULING_OWNER_TYPE } from '@memoflow/routine/schedule-projection/routine';
 import type { TaskScheduleProjectionEventMap } from '@memoflow/task/schedule-projection';
 import { TASK_SCHEDULING_OWNER_TYPE } from '@memoflow/task/schedule-projection';

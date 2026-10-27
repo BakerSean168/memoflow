@@ -1,8 +1,10 @@
+import {
+  routineScheduleProjectionEventNames,
+  type RoutineScheduleProjectionEventMap,
+} from '@memoflow/routine-contracts';
 import type { SchedulingPort } from '@memoflow/schedule-contracts';
 import {
   createRoutineScheduleProjectionEventHandlers,
-  routineScheduleProjectionEventNames,
-  type RoutineScheduleProjectionEventMap,
   type RoutineScheduleProjectionSource,
 } from '@memoflow/routine/schedule-projection/routine';
 import type { Subscriber } from '@memoflow/utils/domain';

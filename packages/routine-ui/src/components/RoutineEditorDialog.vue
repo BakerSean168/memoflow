@@ -182,8 +182,10 @@
 
 <script setup lang="ts">
 import { routineUiHost } from '../routine-ui-host';
-const { getProductTime, getProductTodayYmd, useDialogCloseGuard, useTransientFeedback } = routineUiHost;
-const { ProductAutoTextarea, ProductEditorFrame, ProductInlineValidation, ProductPropertyChip } = routineUiHost.components;
+const { getProductTime, getProductTodayYmd, useDialogCloseGuard, useTransientFeedback } =
+  routineUiHost;
+const { ProductAutoTextarea, ProductEditorFrame, ProductInlineValidation, ProductPropertyChip } =
+  routineUiHost.components;
 
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -207,9 +209,6 @@ import {
   requireTimeZoneId,
   requireYmd,
 } from '@memoflow/shared-primitives';
-
-
-
 
 import ActiveUsageTriggerEditor from './ActiveUsageTriggerEditor.vue';
 import ElapsedTriggerEditor from './ElapsedTriggerEditor.vue';

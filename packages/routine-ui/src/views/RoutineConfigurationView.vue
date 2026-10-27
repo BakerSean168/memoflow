@@ -425,9 +425,14 @@
 
 <script setup lang="ts">
 import { routineUiHost } from '../routine-ui-host';
-const { formatProductHm, getProductTime, getProductTodayYmd, usePanelSurfaceStatus, vKeyboardList } = routineUiHost;
+const {
+  formatProductHm,
+  getProductTime,
+  getProductTodayYmd,
+  usePanelSurfaceStatus,
+  vKeyboardList,
+} = routineUiHost;
 const { AppEmptyState, ModuleHeader, ProductSingleSelectFilter } = routineUiHost.components;
-
 
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -470,15 +475,12 @@ import {
   type RoutineMethodRecord,
 } from '@memoflow/routine-contracts/method-library';
 
-
-
 import RoutineEditorDialog, {
   type RoutineEditorPreset,
 } from '../components/RoutineEditorDialog.vue';
 import RoutineProfileDialog from '../components/RoutineProfileDialog.vue';
 
 import { useRoutineConfiguration } from '../composables/useRoutineConfiguration';
-
 
 type RoutineStateFilter = 'all' | 'enabled' | 'disabled';
 

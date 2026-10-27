@@ -1,5 +1,6 @@
+import { type RoutineOccurrenceResolutionState } from '@memoflow/routine-contracts';
 import { asInstant, type Instant } from '@memoflow/time';
-import type { RoutineOccurrenceResolutionState } from '../ports/routine-occurrence-truth-store.port';
+
 import type { ElapsedTrigger, RoutineTemporaryOverride } from './trigger';
 
 export interface DurableElapsedOccurrenceSnapshot {

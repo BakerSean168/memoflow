@@ -51,7 +51,6 @@ import {
   DropdownMenuTrigger,
 } from '@memoflow/ui-vue-shadcn';
 
-
 const props = defineProps<{
   profiles: readonly RoutineProfileDto[];
   disabled?: boolean;

@@ -25,8 +25,6 @@ export {
   buildRoutineWallClockPayload,
   parseRoutineElapsedPayload,
   parseRoutineWallClockPayload,
-  type RoutineElapsedOccurrencePayload,
-  type RoutineWallClockOccurrencePayload,
 } from '../server/infrastructure/routine-schedule/routine-schedule-contract';
 export { createInMemoryRoutineOccurrenceStore } from '../server/infrastructure/routine-schedule/routine-occurrence-store.in-memory';
 export { PrismaRoutineOccurrenceStore } from '../server/infrastructure/routine-schedule/routine-occurrence-store.prisma';

@@ -42,11 +42,22 @@ export default defineConfig({
       entry: {
         host: path.resolve(__dirname, 'src/routine-ui-host.ts'),
         index: path.resolve(__dirname, 'src/index.ts'),
-        'components/RoutineCapsulePreview': path.resolve(__dirname, 'src/components/RoutineCapsulePreview.vue'),
-        'components/RoutineUpcomingWidget': path.resolve(__dirname, 'src/components/RoutineUpcomingWidget.vue'),
-        'views/RoutineConfigurationView': path.resolve(__dirname, 'src/views/RoutineConfigurationView.vue'),
-        'composables/routineUpcomingCache': path.resolve(__dirname, 'src/composables/routineUpcomingCache.ts'),
-
+        'components/RoutineCapsulePreview': path.resolve(
+          __dirname,
+          'src/components/RoutineCapsulePreview.vue',
+        ),
+        'components/RoutineUpcomingWidget': path.resolve(
+          __dirname,
+          'src/components/RoutineUpcomingWidget.vue',
+        ),
+        'views/RoutineConfigurationView': path.resolve(
+          __dirname,
+          'src/views/RoutineConfigurationView.vue',
+        ),
+        'composables/routineUpcomingCache': path.resolve(
+          __dirname,
+          'src/composables/routineUpcomingCache.ts',
+        ),
       },
       formats: ['es'],
       fileName: (_format, entryName) => `${entryName}.js`,

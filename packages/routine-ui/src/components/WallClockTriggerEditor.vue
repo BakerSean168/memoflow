@@ -117,7 +117,8 @@
 
 <script setup lang="ts">
 import { routineUiHost } from '../routine-ui-host';
-const { ProductDatePicker, ProductPropertyChip, ProductTimePicker, ProductTimeZoneSelector } = routineUiHost.components;
+const { ProductDatePicker, ProductPropertyChip, ProductTimePicker, ProductTimeZoneSelector } =
+  routineUiHost.components;
 
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';

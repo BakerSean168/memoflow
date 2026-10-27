@@ -1,9 +1,9 @@
+import { type RoutineWallClockOccurrencePayload } from '@memoflow/routine-contracts';
 import type { ScheduledHandlerRegistration } from '@memoflow/schedule-contracts';
 import {
   ROUTINE_WALLCLOCK_HANDLER_KEY,
   ROUTINE_WALLCLOCK_PAYLOAD_VERSION,
   parseRoutineWallClockPayload,
-  type RoutineWallClockOccurrencePayload,
 } from './routine-schedule-contract';
 import type { RoutineScheduleExecutionSource } from './routine-schedule-execution-source';
 

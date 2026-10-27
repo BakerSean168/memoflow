@@ -1,3 +1,4 @@
+import { type RoutineOccurrenceCommittedEvent } from '@memoflow/routine-contracts';
 import { LeaseFencingException } from '@memoflow/reliable-messaging-contracts';
 import type { RecurrenceEnginePort } from '@memoflow/time';
 import {
@@ -9,10 +10,7 @@ import type { RoutineOccurrenceNotificationWriterPort } from '../../domain/ports
 import { buildRoutineOccurrenceNotificationRequest } from './routine-occurrence-notification-writer';
 import type { RoutineOccurrenceStore } from '../../domain/ports/routine-occurrence-store.port';
 import type { RoutineTemporaryOverrideStore } from '../../domain/ports/routine-temporary-override-store.port';
-import type {
-  RoutineOccurrenceCommittedEvent,
-  RoutineScheduleStateReader,
-} from './routine-schedule-projection-source';
+import type { RoutineScheduleStateReader } from './routine-schedule-projection-source';
 
 export const ROUTINE_OCCURRENCE_LEASE_MS = 30_000;
 

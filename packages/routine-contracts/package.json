@@ -21,6 +21,7 @@
   "dependencies": {
     "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/transport-contracts": "workspace:*",
-    "zod": "^4.6.5"
+    "zod": "^4.6.5",
+    "@memoflow/data-portability-contracts": "workspace:*"
   }
 }

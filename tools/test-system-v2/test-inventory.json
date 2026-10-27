@@ -4930,56 +4930,6 @@
       ]
     },
     {
-      "path": "packages/routine-ui/src/components/RoutineCapsulePreview.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/routine-ui/src/components/RoutineEditorDialog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/routine-ui/src/components/RoutineProfileDialog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/routine-ui/src/components/RoutineUpcomingWidget.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/routine-ui/src/views/RoutineConfigurationView.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
       "path": "packages/app-vue/src/modules/setting/components/AISettings.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -9448,27 +9398,63 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/routine/src/__tests__/package-root-owner-surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/routine/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/routine/vitest.config.ts"
-      ]
-    },
-    {
       "path": "packages/routine-client/src/client.spec.ts",
       "primarySuite": "unit",
       "collectors": [
-        "packages/routine/vitest.config.ts"
+        "packages/routine-client/vitest.config.ts"
       ],
-      "measurementCollectors": [
-        "packages/routine/vitest.config.ts"
-      ]
+      "measurementCollectors": []
     },
     {
       "path": "packages/routine-contracts/src/method-library/method-library.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/routine-ui/src/components/RoutineCapsulePreview.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/routine-ui/src/components/RoutineEditorDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/routine-ui/src/components/RoutineProfileDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/routine-ui/src/components/RoutineUpcomingWidget.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/routine-ui/src/views/RoutineConfigurationView.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/routine-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/routine/src/__tests__/package-root-owner-surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/routine/vitest.config.ts"
@@ -12421,7 +12407,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 199
+      "fileCount": 194
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -12470,7 +12456,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 33
+      "fileCount": 31
     },
     {
       "id": "packages/schedule/vitest.config.ts",
@@ -12899,7 +12885,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 199
+      "fileCount": 194
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -13105,11 +13091,32 @@
       "fileCount": 36
     },
     {
+      "id": "packages/routine-client/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 1
+    },
+    {
+      "id": "packages/routine-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 1
+    },
+    {
+      "id": "packages/routine-ui/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 5
+    },
+    {
       "id": "packages/routine/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 33
+      "fileCount": 31
     },
     {
       "id": "packages/schedule-client/vitest.config.ts",
@@ -13519,11 +13526,6 @@
       "packages/app-vue/src/modules/repository/router/index.spec.ts",
       "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.spec.ts",
       "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.spec.ts",
-      "packages/routine-ui/src/components/RoutineCapsulePreview.spec.ts",
-      "packages/routine-ui/src/components/RoutineEditorDialog.spec.ts",
-      "packages/routine-ui/src/components/RoutineProfileDialog.spec.ts",
-      "packages/routine-ui/src/components/RoutineUpcomingWidget.spec.ts",
-      "packages/routine-ui/src/views/RoutineConfigurationView.spec.ts",
       "packages/app-vue/src/modules/setting/components/AISettings.spec.ts",
       "packages/app-vue/src/modules/setting/components/AccountSettingsSection.spec.ts",
       "packages/app-vue/src/modules/setting/components/AntigravityAcpDownload.spec.ts",
@@ -13777,8 +13779,6 @@
       "packages/notification/src/server/transport/__tests__/notification-transport-parity.spec.ts",
       "packages/notification/src/server/transport/notification-usecases-export.surface.spec.ts",
       "packages/routine/src/__tests__/package-root-owner-surface.spec.ts",
-      "packages/routine-client/src/client.spec.ts",
-      "packages/routine-contracts/src/method-library/method-library.spec.ts",
       "packages/routine/src/server/application/routine-portability.spec.ts",
       "packages/routine/src/server/application/services/routine-coach-command.service.spec.ts",
       "packages/routine/src/server/application/services/routine-configuration-query.service.spec.ts",

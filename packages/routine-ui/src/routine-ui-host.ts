@@ -8,7 +8,24 @@ import type { translateResultErrorMessage } from '@memoflow/http-client';
 /** Renderer capabilities supplied by the application's composition root. */
 export interface RoutineUiHost {
   ROUTINE_SERVICE_KEY: InjectionKey<RoutineClientPort>;
-  components: Record<'AppEmptyState' | 'CapsulePreviewFooter' | 'CapsulePreviewHeader' | 'CapsulePreviewShell' | 'CapsulePreviewState' | 'ModuleHeader' | 'ProductAutoTextarea' | 'ProductDatePicker' | 'ProductEditorFrame' | 'ProductInlineValidation' | 'ProductPopoverSurface' | 'ProductPropertyChip' | 'ProductSingleSelectFilter' | 'ProductTimePicker' | 'ProductTimeZoneSelector', Component>;
+  components: Record<
+    | 'AppEmptyState'
+    | 'CapsulePreviewFooter'
+    | 'CapsulePreviewHeader'
+    | 'CapsulePreviewShell'
+    | 'CapsulePreviewState'
+    | 'ModuleHeader'
+    | 'ProductAutoTextarea'
+    | 'ProductDatePicker'
+    | 'ProductEditorFrame'
+    | 'ProductInlineValidation'
+    | 'ProductPopoverSurface'
+    | 'ProductPropertyChip'
+    | 'ProductSingleSelectFilter'
+    | 'ProductTimePicker'
+    | 'ProductTimeZoneSelector',
+    Component
+  >;
   vKeyboardList: ObjectDirective<HTMLElement>;
   useStrictInject<T>(key: InjectionKey<T>, name?: string): T;
   translateResultError: typeof translateResultErrorMessage;
@@ -28,7 +45,10 @@ export interface RoutineUiHost {
   getProductTime(): TimeFacade;
   getProductTodayYmd(): Ymd;
   productTimeRevision: Ref<number>;
-  formatProductHm(value: number | string | Date | null | undefined, empty?: string | { display?: string; unknown?: string }): string;
+  formatProductHm(
+    value: number | string | Date | null | undefined,
+    empty?: string | { display?: string; unknown?: string },
+  ): string;
   startOfDayMs(value: number): number;
   endOfDayMs(value: number): number;
 }

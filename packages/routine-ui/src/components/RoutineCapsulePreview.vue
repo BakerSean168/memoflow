@@ -101,19 +101,24 @@
 
 <script setup lang="ts">
 import { routineUiHost } from '../routine-ui-host';
-const { ROUTINE_SERVICE_KEY, endOfDayMs, formatProductHm, routineUpcomingQueryKeys, startOfDayMs, useServerStateIdentityScope, useServerStateRuntime, useStrictInject } = routineUiHost;
-const { CapsulePreviewFooter, CapsulePreviewHeader, CapsulePreviewShell, CapsulePreviewState } = routineUiHost.components;
+const {
+  ROUTINE_SERVICE_KEY,
+  endOfDayMs,
+  formatProductHm,
+  routineUpcomingQueryKeys,
+  startOfDayMs,
+  useServerStateIdentityScope,
+  useServerStateRuntime,
+  useStrictInject,
+} = routineUiHost;
+const { CapsulePreviewFooter, CapsulePreviewHeader, CapsulePreviewShell, CapsulePreviewState } =
+  routineUiHost.components;
 
 import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ArrowRight, Clock3, Loader2, RotateCcw } from '@lucide/vue';
 import { Button } from '@memoflow/ui-vue-shadcn';
 import type { RoutineUpcomingOccurrence } from '@memoflow/routine-contracts';
-
-
-
-
-
 
 import { fetchRoutineUpcomingCached } from '../composables/routineUpcomingCache';
 

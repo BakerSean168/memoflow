@@ -1,3 +1,7 @@
+import {
+  type RoutineWallClockOccurrencePayload,
+  type RoutineElapsedOccurrencePayload,
+} from '@memoflow/routine-contracts';
 import type { ScheduledIntent, SchedulingOwner } from '@memoflow/schedule-contracts';
 import { buildSchedulingKey } from '@memoflow/schedule-contracts';
 
@@ -9,30 +13,6 @@ export const ROUTINE_WALLCLOCK_PAYLOAD_VERSION = 1;
 export const ROUTINE_ELAPSED_PAYLOAD_VERSION = 1;
 
 export const ROUTINE_SCHEDULING_OWNER_TYPE = 'routine.routine';
-
-export interface RoutineWallClockOccurrencePayload {
-  readonly routineId: string;
-  readonly identityId: string;
-  readonly occurrenceKey: string;
-  readonly scheduledFor: number;
-  readonly sourceRevision: string | number | null;
-}
-
-export interface RoutineElapsedOccurrencePayload {
-  readonly routineId: string;
-  readonly identityId: string;
-  readonly occurrenceKey: string;
-  /**
-   * Optional NotificationRequested idempotency instance. Snooze wake-ups use a
-   * distinct value while still targeting the same business occurrenceKey.
-   */
-  readonly notificationOccurrenceKey?: string;
-  /** Actual Scheduler wake-up time; may be shifted by a temporary override. */
-  readonly scheduledFor: number;
-  /** Canonical business due boundary before any snooze/suppress delay. */
-  readonly dueAt: number;
-  readonly sourceRevision: string | number | null;
-}
 
 export function buildRoutineWallClockPayload(input: {
   readonly routineId: string;

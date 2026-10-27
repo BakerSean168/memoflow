@@ -1,3 +1,11 @@
+import {
+  routineScheduleProjectionEventNames,
+  type RoutineScheduleProjectionEventMap,
+} from '@memoflow/routine-contracts';
+import {
+  type RoutineElapsedOccurrencePayload,
+  type RoutineWallClockOccurrencePayload,
+} from '@memoflow/routine-contracts';
 import type { ScheduledIntent, SchedulingOwner } from '@memoflow/schedule-contracts';
 import { asInstant, type RecurrenceEnginePort } from '@memoflow/time';
 import {
@@ -15,8 +23,6 @@ import {
   buildRoutineElapsedIntent,
   buildRoutineWallClockIntent,
   buildRoutineWallClockOwner,
-  type RoutineElapsedOccurrencePayload,
-  type RoutineWallClockOccurrencePayload,
 } from './routine-schedule-contract';
 
 /** Runtime snapshot consumed by the durable projection lane. */
@@ -68,43 +74,6 @@ export interface RoutineScheduleProjectionHandlers {
   upsertRoutine(routineId: string, identityId: string): Promise<void>;
   deleteRoutine(routineId: string, identityId: string): Promise<void>;
 }
-
-export interface RoutineOccurrenceCommittedEvent {
-  readonly routineId: string;
-  readonly identityId: string;
-  readonly occurrenceKey: string;
-  readonly scheduledFor: number;
-}
-
-/** Snooze/override changed: rebuild the routine's desired scheduling set now. */
-export interface RoutineOverrideChangedEvent {
-  readonly routineId: string;
-  readonly identityId: string;
-}
-
-/** Durable owner truth changed and the Scheduler projection must be rebuilt. */
-export interface RoutineScheduleChangedEvent {
-  readonly routineId: string;
-  readonly identityId: string;
-}
-
-/**
- * NOTE: this stays a TYPE LITERAL, not an interface. `TypedEventMap` constrains
- * the keyed payload map to `Record<string, unknown>`, and only a type literal
- * carries an implicit string index signature. Interfaces do NOT — they would
- * widen to `string` and instantly break every `Subscriber<...>` wiring.
- */
-export type RoutineScheduleProjectionEventMap = {
-  readonly 'routine:occurrence-committed': RoutineOccurrenceCommittedEvent;
-  readonly 'routine:override-changed': RoutineOverrideChangedEvent;
-  readonly 'routine:schedule-changed': RoutineScheduleChangedEvent;
-};
-
-export const routineScheduleProjectionEventNames = [
-  'routine:occurrence-committed',
-  'routine:override-changed',
-  'routine:schedule-changed',
-] as const satisfies readonly (keyof RoutineScheduleProjectionEventMap)[];
 
 export function createRoutineScheduleProjectionEventHandlers(
   projector: RoutineScheduleProjectionHandlers,

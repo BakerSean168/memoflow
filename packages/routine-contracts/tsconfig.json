@@ -1,31 +1,12 @@
 {
-  // 继承基础配置
   "extends": "../../tsconfig.workspace-src.json",
-
   "compilerOptions": {
     "rootDir": "../..",
-    // 输出目录：编译后的 JavaScript 和类型声明文件
-    "outDir": "./dist",
-
-    // 纯 tsup 模式配置：不使用 tsc 输出，由 tsup 统一处理 JS 和 DTS
     "noEmit": true,
-    // 禁用增量编译（noEmit 时不能使用 incremental）
     "incremental": false,
-
-    // 标准库：仅包含 ES2020（纯类型定义包，不依赖特定环境）
     "lib": ["ES2020"],
-    "types": ["node"],
-
-    // 路径别名：仅用于包内部的相对导入
-    "paths": {
-      "@/*": ["./src/*"],
-      "@memoflow/shared-primitives": ["../shared-primitives/src/index.ts"]
-    }
+    "types": ["node"]
   },
-
-  // 包含的文件：所有 src 目录下的 TypeScript 文件
   "include": ["src"],
-
-  // 排除的文件
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
 }

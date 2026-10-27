@@ -21,17 +21,10 @@ export {
   buildRoutineWallClockSchedulingKey,
   parseRoutineElapsedPayload,
   parseRoutineWallClockPayload,
-  type RoutineElapsedOccurrencePayload,
-  type RoutineWallClockOccurrencePayload,
 } from './routine-schedule/routine-schedule-contract';
 export {
   createRoutineScheduleProjectionEventHandlers,
   createRoutineScheduleProjectionSource,
-  routineScheduleProjectionEventNames,
-  type RoutineOccurrenceCommittedEvent,
-  type RoutineOverrideChangedEvent,
-  type RoutineScheduleChangedEvent,
-  type RoutineScheduleProjectionEventMap,
   type RoutineScheduleProjectionHandlers,
   type RoutineScheduleProjectionPlan,
   type RoutineScheduleProjectionSource,

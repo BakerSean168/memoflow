@@ -6,7 +6,6 @@
  * projection. The full seam at ./index.ts continues to export both lanes.
  */
 export {
-  routineScheduleProjectionEventNames,
   createRoutineScheduleProjectionEventHandlers,
   createRoutineScheduleProjectionSource,
 } from '../server/infrastructure/routine-schedule/routine-schedule-projection-source';
@@ -14,10 +13,6 @@ export { ROUTINE_SCHEDULING_OWNER_TYPE } from '../server/infrastructure/routine-
 export { createRoutinePrismaScheduleProjectionSource } from '../server/infrastructure/routine-schedule/routine-schedule-projection-source.prisma';
 export { createPrismaRoutineScheduleStateReader } from '../server/infrastructure/routine-schedule/routine-schedule-state-reader.prisma';
 export type {
-  RoutineOccurrenceCommittedEvent,
-  RoutineOverrideChangedEvent,
-  RoutineScheduleChangedEvent,
-  RoutineScheduleProjectionEventMap,
   RoutineScheduleProjectionHandlers,
   RoutineScheduleProjectionPlan,
   RoutineScheduleProjectionSource,

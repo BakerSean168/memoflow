@@ -1,9 +1,10 @@
+import { type RoutineOccurrenceCommittedEvent } from '@memoflow/routine-contracts';
 import type { PrismaClient } from '@memoflow/database';
 import { createRecurrenceEngine, type RecurrenceEnginePort } from '@memoflow/time';
 import { PrismaRoutineOccurrenceNotificationWriter } from './routine-occurrence-notification-writer.prisma';
 import { PrismaRoutineOccurrenceStore } from './routine-occurrence-store.prisma';
 import type { RoutineScheduleExecutionDeps } from './routine-schedule-execution-source';
-import type { RoutineOccurrenceCommittedEvent } from './routine-schedule-projection-source';
+
 import { createPrismaRoutineScheduleStateReader } from './routine-schedule-state-reader.prisma';
 import { PrismaRoutineTemporaryOverrideStore } from './routine-temporary-override-store.prisma';
 

@@ -1,9 +1,9 @@
+import { type RoutineElapsedOccurrencePayload } from '@memoflow/routine-contracts';
 import type { ScheduledHandlerRegistration } from '@memoflow/schedule-contracts';
 import {
   ROUTINE_ELAPSED_HANDLER_KEY,
   ROUTINE_ELAPSED_PAYLOAD_VERSION,
   parseRoutineElapsedPayload,
-  type RoutineElapsedOccurrencePayload,
 } from './routine-schedule-contract';
 import type { RoutineScheduleExecutionSource } from './routine-schedule-execution-source';
 

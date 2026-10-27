@@ -1,4 +1,5 @@
-import type { RoutineOverrideChangedEvent } from '@memoflow/routine/schedule-projection/routine';
+import { type RoutineOverrideChangedEvent } from '@memoflow/routine-contracts';
+
 import type { RoutineTemporaryOverrideStore } from '@memoflow/routine/schedule-execution/routine';
 
 /**

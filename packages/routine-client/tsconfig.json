@@ -2,18 +2,10 @@
   "extends": "../../tsconfig.workspace-src.json",
   "compilerOptions": {
     "rootDir": "../..",
+    "noEmit": true,
+    "incremental": false,
     "lib": ["ES2020"],
-    "types": ["node", "vitest/globals"],
-    "paths": {
-      "@/*": ["./src/*"],
-      "@memoflow/desktop-contracts": ["../desktop-contracts/src/index.ts"],
-      "@memoflow/desktop-contracts/*": ["../desktop-contracts/src/*.ts"],
-      "@memoflow/http-client": ["../http-client/src/index.ts"],
-      "@memoflow/ipc-client": ["../ipc-client/src/index.ts"],
-      "@memoflow/routine-contracts": ["../routine-contracts/src/index.ts"],
-      "@memoflow/routine-contracts/*": ["../routine-contracts/src/*.ts"],
-      "@memoflow/transport-contracts": ["../transport-contracts/src/index.ts"]
-    }
+    "types": ["node"]
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]

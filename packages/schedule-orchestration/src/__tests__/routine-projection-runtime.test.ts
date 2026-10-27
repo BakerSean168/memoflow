@@ -1,3 +1,7 @@
+import {
+  type RoutineScheduleProjectionEventMap,
+  type RoutineWallClockOccurrencePayload,
+} from '@memoflow/routine-contracts';
 import { describe, expect, it, vi } from 'vitest';
 import type {
   ScheduledIntent,
@@ -5,11 +9,8 @@ import type {
   SchedulingPort,
   SchedulingReconcileReceipt,
 } from '@memoflow/schedule-contracts';
-import type {
-  RoutineScheduleProjectionEventMap,
-  RoutineScheduleProjectionSource,
-} from '@memoflow/routine/schedule-projection/routine';
-import type { RoutineWallClockOccurrencePayload } from '@memoflow/routine/schedule-execution/routine';
+import type { RoutineScheduleProjectionSource } from '@memoflow/routine/schedule-projection/routine';
+
 import type { Subscriber } from '@memoflow/utils/domain';
 import { createRoutineProjectionRuntime } from '../runtime/routine-projection-runtime';
 
