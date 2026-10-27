@@ -170,7 +170,12 @@
           },
           {
             "sourceTag": "scope:routine",
-            "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:routine"]
+            "onlyDependOnLibsWithTags": [
+              "scope:shared",
+              "scope:patterns",
+              "scope:routine",
+              "scope:ui"
+            ]
           },
           {
             "sourceTag": "scope:repository",
