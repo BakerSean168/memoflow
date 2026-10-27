@@ -165,7 +165,7 @@ Desktop Update
 边界：
 
 ```text
-@memoflow/contracts/electron
+@memoflow/desktop-contracts
     ↑ renderer-safe contracts only
     │
 apps/desktop
@@ -1199,7 +1199,7 @@ Explicit：
 进入：
 
 ```text
-@memoflow/contracts/electron
+@memoflow/desktop-contracts
 ```
 
 ## 19.2 Channel Shape

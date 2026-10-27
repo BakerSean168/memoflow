@@ -124,7 +124,7 @@ memoflow/
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "paths": {
-      "@memoflow/contracts": ["packages/contracts/src/index.ts"],
+      "@memoflow/shared-primitives": ["packages/shared-primitives/src/index.ts"],
       "@memoflow/utils": ["packages/utils/src/index.ts"]
     }
   }

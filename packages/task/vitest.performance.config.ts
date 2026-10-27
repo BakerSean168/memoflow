@@ -4,16 +4,12 @@ import { createSharedConfig } from '../../vitest.shared.ts';
 
 export const taskPerformanceAliases = {
   '@memoflow/task-contracts': '../task-contracts/src/index.ts',
-  '@memoflow/contracts/result': '../contracts/src/result/index.ts',
-  '@memoflow/contracts/shared': '../contracts/src/shared/index.ts',
-  '@memoflow/contracts/primitives': '../contracts/src/primitives/index.ts',
   '@memoflow/test-utils': '../test-utils/src/index.ts',
   '@memoflow/test-utils/mocks': '../test-utils/src/mocks/index.ts',
   '@memoflow/test-utils/helpers/result-matchers': '../test-utils/src/helpers/result-matchers.ts',
   '@memoflow/task/testing': './src/testing/index.ts',
   '@memoflow/task': './src/index.ts',
   '@memoflow/time': '../time/src/index.ts',
-  '@memoflow/domain-shared': '../../packages/domain-shared/src',
   '@memoflow/database': '../../packages/database/src',
 };
 

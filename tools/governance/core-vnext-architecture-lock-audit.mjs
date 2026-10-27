@@ -16,7 +16,6 @@ const scanRoots = [
   'packages/routine/src',
   'packages/scheduler/src',
   'packages/notification/src',
-  'packages/contracts/src',
   'packages/ai/src',
   'packages/ai-contracts/src',
   'packages/ai-client/src',

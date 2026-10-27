@@ -21,7 +21,7 @@ export interface IEventEmitter {
 
 /**
  * 重新导出已有的领域事件接口
- * 统一使用 @memoflow/contracts/shared 中的 IDomainEvent
+ * 统一使用 @memoflow/transport-contracts 中的 IDomainEvent
  */
 export type { IDomainEvent };
 
@@ -33,7 +33,7 @@ export type { IDomainEvent };
  * - 支持同步和异步处理
  *
  * 【设计说明】
- * 使用项目已有的 IDomainEvent 接口 (来自 @memoflow/contracts/shared)
+ * 使用项目已有的 IDomainEvent 接口 (来自 @memoflow/transport-contracts)
  * 字段包括：eventType, payload, aggregateId, occurredAt
  */
 export interface IEventBus {

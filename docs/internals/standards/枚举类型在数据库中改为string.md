@@ -55,7 +55,7 @@ TypeScript
 // libs/infrastructure-server/src/repositories/PrismaDeviceRepository.ts
 
 import { DeviceInfo } from '@memoflow/domain-server'; // 你的领域对象
-import type { DeviceInfoPersistenceDTO } from '@memoflow/contracts';
+import type { DeviceInfoPersistenceDTO } from '@memoflow/transport-contracts';
 import { prisma } from '../prisma';
 
 // 假设这是 Prisma 返回的原生数据

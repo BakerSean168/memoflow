@@ -279,7 +279,7 @@ packages/
 // packages/app-server/src/goal/use-cases/create-goal.ts
 import { Goal } from '@memoflow/domain-server';
 import { IGoalRepository } from '@memoflow/infra/ports';
-import { CreateGoalDTO, GoalDTO } from '@memoflow/contracts';
+import { CreateGoalDTO, GoalDTO } from '@memoflow/goal-contracts';
 import { GoalMapper } from '../mappers/goal-mapper';
 
 export class CreateGoal {
@@ -349,7 +349,7 @@ apps/desktop/
 │   │
 │   └── 复用:
 │       ├── @memoflow/domain-client
-│       ├── @memoflow/contracts
+│       ├── 旧聚合契约包（已退役）
 │       └── @memoflow/ui (tokens/v1)
 │
 ├── electron-builder.json5

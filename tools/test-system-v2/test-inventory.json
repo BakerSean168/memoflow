@@ -5530,22 +5530,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/transport-cast-inventory.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/shared/dual-registry.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/data-portability-contracts/src/import-boundary.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5940,16 +5924,6 @@
         "packages/desktop-contracts/vitest.config.ts"
       ],
       "measurementCollectors": []
-    },
-    {
-      "path": "packages/domain-shared/src/shared/primitives/__tests__/identity-id.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/domain-shared/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/domain-shared/vitest.config.ts"
-      ]
     },
     {
       "path": "packages/goal-client/src/goal-dto-port.spec.ts",
@@ -13462,7 +13436,6 @@
       "packages/data-portability/src/server/infrastructure/__tests__/data-portability-module-partial-start.spec.ts",
       "packages/data-portability/src/server/infrastructure/prisma-server-held-data-disclosure.source.test.ts",
       "packages/data-portability/src/server/transport/data-portability.controller.test.ts",
-      "packages/domain-shared/src/shared/primitives/__tests__/identity-id.spec.ts",
       "packages/goal/src/__tests__/dual-registry.surface.spec.ts",
       "packages/goal/src/api/__tests__/goal-api-module-gate.surface.spec.ts",
       "packages/goal/src/api/module-lifecycle.spec.ts",

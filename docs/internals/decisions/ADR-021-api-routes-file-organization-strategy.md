@@ -11,7 +11,7 @@
 
 ## Implementation note (Residual 619 / 2026-07-22)
 
-Historical route samples used the removed `@memoflow/contracts/response` package. Use `@memoflow/contracts/result` `createHttpResponseBuilder` / `Result` + `expressAdapter` / `RouteRegistrar` instead.
+Historical route samples used the removed `@memoflow/transport-contracts/result` package. Use `@memoflow/transport-contracts/result` `createHttpResponseBuilder` / `Result` + `expressAdapter` / `RouteRegistrar` instead.
 
 在 ADR-020 中，我们决定将所有业务逻辑从 API 项目迁移到 packages。随之而来的是如何组织 API 中剩余的路由文件的问题。
 
@@ -75,7 +75,7 @@ import { Router as ExpressRouter } from 'express';
 import type { AuthenticatedRequest } from '../../../../shared/infrastructure/http/middlewares/authMiddleware';
 import { authMiddleware } from '../../../../shared/infrastructure/http/middlewares/authMiddleware';
 import { SomeApplicationService } from '@memoflow/application-server';
-import { createHttpResponseBuilder } from '@memoflow/contracts/result';
+import { createHttpResponseBuilder } from '@memoflow/transport-contracts/result';
 import { createLogger } from '@memoflow/utils';
 
 const logger = createLogger('FeatureRoutes');
@@ -345,7 +345,7 @@ import {
   AuthenticationApplicationService,
   AccountApplicationService,
 } from '@memoflow/application-server';
-import { createHttpResponseBuilder } from '@memoflow/contracts/result';
+import { createHttpResponseBuilder } from '@memoflow/transport-contracts/result';
 import { createLogger } from '@memoflow/utils';
 
 const logger = createLogger('AuthenticationLoginRoutes');
@@ -449,7 +449,7 @@ import { Router as ExpressRouter } from 'express';
 import type { AuthenticatedRequest } from '../../../../shared/infrastructure/http/middlewares/authMiddleware';
 import { authMiddleware } from '../../../../shared/infrastructure/http/middlewares/authMiddleware';
 import { SessionManagementApplicationService } from '@memoflow/application-server';
-import { createHttpResponseBuilder } from '@memoflow/contracts/result';
+import { createHttpResponseBuilder } from '@memoflow/transport-contracts/result';
 import { createLogger } from '@memoflow/utils';
 
 const logger = createLogger('AuthenticationSessionRoutes');

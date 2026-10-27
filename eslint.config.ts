@@ -680,28 +680,6 @@ export default tseslint.config(
       },
     },
     {
-      files: ['packages/contracts/src/**/*.ts'],
-      ignores: ['**/__tests__/**', '**/test/**', '**/*.spec.ts', '**/*.test.ts'],
-      rules: {
-        '@typescript-eslint/no-explicit-any': 'error',
-        '@typescript-eslint/no-unused-vars': [
-          'error',
-          { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
-        ],
-      },
-    },
-    {
-      files: ['packages/domain-shared/src/**/*.ts'],
-      ignores: ['**/__tests__/**', '**/test/**', '**/*.spec.ts', '**/*.test.ts'],
-      rules: {
-        '@typescript-eslint/no-explicit-any': 'error',
-        '@typescript-eslint/no-unused-vars': [
-          'error',
-          { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
-        ],
-      },
-    },
-    {
       files: ['packages/setting/src/**/*.ts'],
       ignores: ['**/__tests__/**', '**/test/**', '**/*.spec.ts', '**/*.test.ts'],
       rules: {

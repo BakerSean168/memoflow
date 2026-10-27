@@ -26,10 +26,8 @@
   "scripts": {},
   "dependencies": {
     "@memoflow/account-contracts": "workspace:*",
-    "@memoflow/contracts": "workspace:*",
     "@memoflow/data-portability-contracts": "workspace:*",
     "@memoflow/database": "workspace:*",
-    "@memoflow/domain-shared": "workspace:*",
     "@memoflow/host-runtime": "workspace:*",
     "@memoflow/operations-contracts": "workspace:*",
     "@memoflow/patterns": "workspace:*",

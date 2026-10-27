@@ -12,9 +12,8 @@ function collectTsFiles(root: string): string[] {
   });
 }
 
-describe('third-party date types stay out of @memoflow/contracts (TIME-1101)', () => {
+describe('third-party date types stay out of @memoflow/transport-contracts (TIME-1101)', () => {
   it('does not import recurrence/UI date libraries from feature contracts', () => {
-    const contractsRoot = path.resolve(__dirname, '../../../contracts/src');
     const violations = collectTsFiles(contractsRoot).flatMap((file) => {
       const source = readFileSync(file, 'utf8');
       return FORBIDDEN_CONTRACT_IMPORTS.filter(

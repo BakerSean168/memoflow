@@ -9,17 +9,10 @@
     "types": ["node", "vite/client"],
     "paths": {
       "@/*": ["./src/*"],
-      "@memoflow/contracts": ["../contracts/src/index.ts"],
-      "@memoflow/contracts/primitives": ["../contracts/src/primitives/index.ts"],
-      "@memoflow/contracts/result": ["../contracts/src/result/index.ts"],
       "@memoflow/setting-contracts": ["../setting-contracts/src/index.ts"],
       "@memoflow/setting-contracts/*": ["../setting-contracts/src/*.ts"],
       "@memoflow/task-contracts": ["../task-contracts/src/index.ts"],
       "@memoflow/task-contracts/*": ["../task-contracts/src/*.ts"],
-      "@memoflow/contracts/*": [
-        "../contracts/src/modules/*/index.ts",
-        "../contracts/src/*/index.ts"
-      ],
       "@memoflow/goal-contracts": ["../goal-contracts/src/index.ts"],
       "@memoflow/schedule-contracts": ["../schedule-contracts/src/index.ts"],
       "@memoflow/schedule-contracts/*": ["../schedule-contracts/src/*.ts"],

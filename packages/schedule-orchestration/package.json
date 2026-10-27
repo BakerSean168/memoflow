@@ -13,7 +13,6 @@
     }
   },
   "dependencies": {
-    "@memoflow/contracts": "workspace:*",
     "@memoflow/notification-contracts": "workspace:*",
     "@memoflow/goal": "workspace:*",
     "@memoflow/goal-contracts": "workspace:*",

@@ -22,8 +22,8 @@ test('Web and Desktop visual harnesses resolve IPC and shared domain dependencie
     );
     for (const [specifier, source] of [
       ['@memoflow/ipc-client', 'packages/ipc-client/src/index.ts'],
-      ['@memoflow/domain-shared', 'packages/domain-shared/src/index.ts'],
-      ['@memoflow/domain-shared/shared', 'packages/domain-shared/src/shared/index.ts'],
+      ['@memoflow/utils/domain', 'packages/domain-shared/src/index.ts'],
+      ['@memoflow/utils/domain', 'packages/domain-shared/src/shared/index.ts'],
     ]) {
       const resolved = await config.createResolver()(
         specifier,

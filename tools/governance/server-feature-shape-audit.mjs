@@ -16,7 +16,6 @@ const PACKAGES_DIR = join(import.meta.dirname, '..', '..', 'packages');
 
 const FORBIDDEN_LEGACY_ROOT_DIRS = [
   'domain-server',
-  'domain-shared',
   'application-server',
   'infrastructure-server',
   'controllers',
@@ -55,8 +54,6 @@ const STANDALONE_CLIENT_PACKAGES = new Map([
 
 const EXCEPTIONS = new Set([
   'powersync-schema',
-  'domain-shared',
-  'contracts',
   'patterns',
   'utils',
   'test-utils',

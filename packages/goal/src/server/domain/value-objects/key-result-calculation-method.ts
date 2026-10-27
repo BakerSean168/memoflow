@@ -8,7 +8,7 @@ export type KeyResultCalculationMethod = IKeyResultCalculationMethod & {
 };
 
 // Derive the valid-value set from the contracts source of truth so a new status
-// only ever has to be added in one place (@memoflow/contracts).
+// only ever has to be added in one place (@memoflow/transport-contracts).
 const VALUES: IKeyResultCalculationMethod[] = Object.values(KeyResultCalculationMethodContract);
 
 export const KeyResultCalculationMethod = {

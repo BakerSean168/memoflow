@@ -86,7 +86,7 @@ L5: Apps（应用入口）
 
 ### 依赖规则
 
-- ✅ **可依赖**: `@memoflow/contracts`
+- ✅ **可依赖**: `@memoflow/transport-contracts`
 - ❌ **禁止依赖**: domain/infrastructure/application 层
 - ✅ **被依赖**: application/infrastructure 层可使用 patterns
 

@@ -27,7 +27,7 @@
  * 【依赖规则】
  * ✅ 允许依赖：
  * - @memoflow/utils（基类：AggregateRoot, Entity）
- * - @memoflow/contracts（DTO 接口、事件 Map）
+ * - @memoflow/transport-contracts（DTO 接口、事件 Map）
  * - @memoflow/utils/domain（共享身份值对象）
  *
  * ❌ 禁止依赖：

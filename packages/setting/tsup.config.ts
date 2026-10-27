@@ -6,12 +6,5 @@ export default defineConfig({
   dts: false,
   clean: true,
   sourcemap: true,
-  external: [
-    'electron',
-    '@memoflow/utils',
-    '@memoflow/contracts',
-    '@memoflow/database',
-    'express',
-    'zod',
-  ],
+  external: ['electron', '@memoflow/utils', '@memoflow/database', 'express', 'zod'],
 });

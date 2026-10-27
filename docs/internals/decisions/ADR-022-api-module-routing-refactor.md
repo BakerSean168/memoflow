@@ -11,7 +11,7 @@
 
 ## Implementation note (Residual 619 / 2026-07-22)
 
-Historical route samples used the removed `@memoflow/contracts/response` package. Use `@memoflow/contracts/result` `createHttpResponseBuilder` / `Result` + `expressAdapter` / `RouteRegistrar` instead.
+Historical route samples used the removed `@memoflow/transport-contracts/result` package. Use `@memoflow/transport-contracts/result` `createHttpResponseBuilder` / `Result` + `expressAdapter` / `RouteRegistrar` instead.
 
 在 API 项目的早期阶段，我们采用了**单文件路由**的架构模式：每个模块的所有路由都放在一个单一的文件中。
 
@@ -97,7 +97,7 @@ import type { Router } from 'express';
 import { Router as ExpressRouter } from 'express';
 import { authMiddleware } from '../../../../shared/infrastructure/http/middlewares/authMiddleware';
 import { SomeApplicationService } from '@memoflow/application-server';
-import { createHttpResponseBuilder } from '@memoflow/contracts/result';
+import { createHttpResponseBuilder } from '@memoflow/transport-contracts/result';
 import { createLogger } from '@memoflow/utils';
 
 const logger = createLogger('[Module][Feature]Routes');

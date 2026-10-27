@@ -33,7 +33,7 @@ updated: 2026-02-19
 
 ### 为什么选择这个方案？
 
-1. **与现有 Zod Schema 无缝集成** — 直接复用 `@memoflow/contracts` 中的 Schema
+1. **与现有 Zod Schema 无缝集成** — 直接复用 `旧聚合契约包（已退役）` 中的 Schema
 2. **维护成本低** — Schema 变更时文档自动同步
 3. **无侵入性** — 不需要修改现有代码结构
 4. **标准 OpenAPI 3.0 输出** — 兼容 Swagger UI 和其他工具

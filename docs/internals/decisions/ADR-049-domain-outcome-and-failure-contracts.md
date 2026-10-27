@@ -89,7 +89,7 @@ Domain Fault：
 - 不携带 HTTP status、i18n key、provider code、requestId、traceId、timestamp 或 stack payload；
 - 默认不属于 public contract；
 - 由 application mapper 决定是否、如何公开；
-- 不因为跨包复用而自动移动到 `@memoflow/contracts`。
+- 不因为跨包复用而自动移动到 `旧聚合契约包（已退役）`。
 
 示例：
 
@@ -150,7 +150,7 @@ packages/contracts/src/modules/<feature>/outcomes.ts
 
 或 feature contract 下等价的 operation-specific 文件。
 
-通用 JSON-safe primitive 定义在 `@memoflow/contracts/result`：
+通用 JSON-safe primitive 定义在 `@memoflow/transport-contracts/result`：
 
 ```ts
 export type FailureCategory =
@@ -293,7 +293,7 @@ Application、UI 和 E2E 不得 import provider error class、依赖 provider co
 - `Retry-After`、authentication challenge、cache/header policy；
 - safe response serialization。
 
-IPC/SSE 使用自己的 projection。`@memoflow/contracts/result` 不再是 feature-specific HTTP status
+IPC/SSE 使用自己的 projection。`@memoflow/transport-contracts/result` 不再是 feature-specific HTTP status
 registry 的长期 owner。
 
 兼容期保留当前 `ResultCodeToHttpStatus`，但新增 feature public code 必须通过 feature HTTP registry 或
@@ -390,8 +390,8 @@ packages/task/src/server/domain/faults/
 packages/task/src/server/application/failures/
 packages/task/src/server/infrastructure/adapters/prisma/prisma-task-failure.mapper.ts
 packages/task/src/server/transport/http/task-failure-http.ts
-packages/contracts/src/modules/task/outcomes.ts
-packages/contracts/src/modules/task/failures.ts
+packages/task-contracts/src/outcomes.ts
+packages/task-contracts/src/failures.ts
 ```
 
 目录名可按 feature 现有结构调整，但所有权不得改变。

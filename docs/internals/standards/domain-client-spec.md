@@ -42,7 +42,7 @@ updated: 2026-08-17T00:00:00+09:00
 
 ### 3.1 允许依赖
 
-- `@memoflow/contracts/<feature>` public snapshot/outcome/failure；
+- `旧聚合契约包（已退役）/<feature>` public snapshot/outcome/failure；
 - feature public client/application port；
 - presentation-safe shared primitives；
 - UI framework（仅 presentation/store/composable 层）；

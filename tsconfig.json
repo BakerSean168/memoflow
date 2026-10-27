@@ -30,9 +30,6 @@
     { "path": "./apps/api" },
     { "path": "./apps/web" },
     { "path": "./apps/desktop" },
-
-    // 基础库（无依赖，最先构建）
-    { "path": "./packages/contracts" },
     { "path": "./packages/utils" },
 
     // 客户端和服务端领域逻辑（依赖基础库）

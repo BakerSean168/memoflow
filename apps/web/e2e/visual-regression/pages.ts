@@ -14,7 +14,7 @@ import type {
 import type { CreateTaskPlanReq } from '@memoflow/task-contracts';
 import { RoutineConfigurationSnapshotSchema } from '@memoflow/routine-contracts';
 import { AIWorkflowRunViewSchema } from '@memoflow/ai-contracts';
-import { fail, ok } from '@memoflow/contracts/result';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 import * as keys from '@memoflow/app-vue/di/keys';
 import { productionLocaleMessages } from '@memoflow/app-vue/locales/production-messages';
 import { installServerStateRuntime } from '@memoflow/app-vue/platform/server-state';

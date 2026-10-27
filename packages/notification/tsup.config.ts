@@ -17,11 +17,8 @@ export default defineConfig({
   external: [
     'electron',
     '@memoflow/utils',
-    '@memoflow/contracts',
     '@memoflow/http-client',
     '@memoflow/database',
-    '@memoflow/domain-shared',
-    '@memoflow/domain-shared/shared',
     'express',
     'zod',
   ],

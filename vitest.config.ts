@@ -28,11 +28,9 @@ export default defineConfig({
     // Root vitest.config.ts is a pure workspace registry.
     // Project-local vitest.config.ts files own project behavior, aliases, and coverage.
     projects: [
-      './packages/contracts/vitest.config.ts',
       './packages/utils/vitest.config.ts',
       './packages/assets/vitest.config.ts',
       './packages/patterns/vitest.config.ts',
-      './packages/domain-shared/vitest.config.ts',
       './packages/account/vitest.config.ts',
       './packages/ai/vitest.config.ts',
       './packages/cloud-auth/vitest.config.ts',

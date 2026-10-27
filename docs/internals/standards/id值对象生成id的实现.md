@@ -49,7 +49,7 @@ TypeScript
 
 ```
 // libs/contracts/src/domain/types/UserId.ts
-import { IdGenerator } from '@memoflow/domain-shared';
+import { IdGenerator } from '@memoflow/utils/domain';
 
 // 1. 类型定义
 export type UserId = string & { readonly __brand: unique symbol };
@@ -118,7 +118,7 @@ TypeScript
 
 ```
 // libs/contracts/src/domain/types/SessionId.ts
-import { createIdType } from '@memoflow/domain-shared';
+import { createIdType } from '@memoflow/utils/domain';
 
 // 1. 定义类型
 export type SessionId = string & { readonly __brand: unique symbol };

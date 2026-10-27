@@ -59,17 +59,11 @@
       "@memoflow/notification/electron": ["../../packages/notification/dist/electron/index.d.ts"],
       "@memoflow/ipc-client": ["../../packages/ipc-client/dist/index.d.ts"],
       "@memoflow/http-client": ["../../packages/http-client/dist/index.d.ts"],
-      "@memoflow/contracts": ["../../packages/contracts/dist/index.d.ts"],
       "@memoflow/notification-contracts": ["../../packages/notification-contracts/dist/index.d.ts"],
       "@memoflow/notification-contracts/*": ["../../packages/notification-contracts/dist/*.d.ts"],
       "@memoflow/repository-client": ["../../packages/repository-client/dist/index.d.ts"],
       "@memoflow/repository-contracts": ["../../packages/repository-contracts/dist/index.d.ts"],
       "@memoflow/repository-contracts/*": ["../../packages/repository-contracts/dist/*.d.ts"],
-      "@memoflow/contracts/*": [
-        "../../packages/contracts/dist/modules/*/index.d.ts",
-        "../../packages/contracts/dist/*/index.d.ts"
-      ],
-      "@memoflow/domain-shared": ["../../packages/domain-shared/dist/index.d.ts"],
       "@memoflow/utils": ["../../packages/utils/dist/index.d.ts"],
       "@memoflow/utils/*": [
         "../../packages/utils/dist/*/index.d.ts",

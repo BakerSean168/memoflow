@@ -6,7 +6,7 @@
  *
  * @module @memoflow/desktop-contracts
  *
- * P1 S3（Issue #633）自 @memoflow/contracts 的 electron 子路径提取：桌面平台
+ * P1 S3（Issue #633）自 @memoflow/transport-contracts 的 electron 子路径提取：桌面平台
  * 纯契约（渠道常量、桌面功能 Schema、宿主 Port 接口）真身迁至本包，本包为
  * 唯一权威定义。运行时中间件 authenticated-ipc 不在本包（见 P1 S4 的
  * host-runtime）。#630 §4.11 结算了 profile-import 与 data-portability 的所有权

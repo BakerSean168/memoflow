@@ -9,7 +9,6 @@ export default defineConfig({
   external: [
     'electron',
     '@memoflow/utils',
-    '@memoflow/contracts',
     '@memoflow/database',
     '@memoflow/patterns',
     'express',

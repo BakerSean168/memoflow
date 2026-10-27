@@ -42,7 +42,7 @@ export interface IAINotificationReadPort {
     readonly limit?: number;
   }): Promise<AIUnreadNotificationSummary>;
   executeAction(input: {
-    readonly context: import('@memoflow/contracts/shared').ExecutionContext;
+    readonly context: import('@memoflow/transport-contracts').ExecutionContext;
     readonly notificationId: string;
     readonly actionKey: string;
   }): Promise<AINotificationActionReceipt>;

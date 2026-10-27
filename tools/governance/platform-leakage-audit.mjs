@@ -21,7 +21,6 @@ const ROOT = path.join(import.meta.dirname, '..', '..');
 const SHARED_PACKAGE_DIRS = [
   'packages/app-vue',
   'packages/app-react',
-  'packages/contracts',
   'packages/utils',
   'packages/patterns',
   'packages/http-client',
@@ -38,7 +37,6 @@ const FORBIDDEN_PATTERNS = [
 // Format: relative path from repo root (forward slashes)
 const ALLOWLIST = new Set([
   // contracts: Electron IPC channel types — will be moved to runtime-specific subpackage (Batch 5.5)
-  'packages/contracts/src/result/ipc.ts',
 ]);
 
 const SKIP_DIRS = new Set([

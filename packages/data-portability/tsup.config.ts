@@ -8,7 +8,6 @@ export default defineConfig({
   sourcemap: true,
   external: [
     '@memoflow/utils',
-    '@memoflow/contracts',
     '@memoflow/http-client',
     '@memoflow/database',
     'electron',

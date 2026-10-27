@@ -13,7 +13,7 @@ const manifest = validateDeliveryManifest(
 );
 if (!unitJobEnabled(manifest, id)) throw new Error(`Manifest disabled ${id}`);
 // Q4 routing moves the contracts TESTS to the Contract lane, but sibling
-// suites in this shard resolve @memoflow/contracts/* subpaths to dist at
+// suites in this shard resolve @memoflow/transport-contracts/* subpaths to dist at
 // runtime (previously an ambient side effect of contracts:test's build
 // dependency in the same job). Build the artifact explicitly; do not run
 // the tests here.

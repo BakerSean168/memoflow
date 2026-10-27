@@ -20,7 +20,7 @@ import ScheduleCapsulePreview from '@memoflow/app-vue/layouts/shell/previews/Sch
 import { productionLocaleMessages } from '@memoflow/app-vue/locales/production-messages';
 import { providePanelWidth } from '@memoflow/app-vue/layouts/shell/usePanelWidth';
 import { createMemoryHistory, createRouter, RouterView } from 'vue-router';
-import { fail, ok } from '@memoflow/contracts/result';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 import {
   TaskHmSchema,
   TaskYmdSchema,

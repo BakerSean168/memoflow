@@ -25,7 +25,6 @@
     "@memoflow/setting": "workspace:*",
     "@memoflow/setting-contracts": "workspace:*",
     "@memoflow/cloud-auth": "workspace:*",
-    "@memoflow/contracts": "workspace:*",
     "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/ai-contracts": "workspace:*",
     "@memoflow/task-client": "workspace:*",

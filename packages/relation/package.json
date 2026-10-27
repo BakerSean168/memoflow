@@ -17,7 +17,6 @@
     }
   },
   "dependencies": {
-    "@memoflow/contracts": "workspace:*",
     "@memoflow/database": "workspace:*",
     "@memoflow/goal-contracts": "workspace:*",
     "@memoflow/host-runtime": "workspace:*",

@@ -117,7 +117,7 @@ function registerValidatedChannel<TInput, TOutput>(
   schema: ZodLikeSchema<TInput>,
   controllerFn: (
     data: TInput,
-    context: import('@memoflow/contracts/shared').ExecutionContext,
+    context: import('@memoflow/transport-contracts').ExecutionContext,
   ) => Promise<import('@memoflow/transport-contracts/result').Result<TOutput>>,
   projectArgs: (args: unknown) => unknown,
 ): void {

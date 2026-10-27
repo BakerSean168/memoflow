@@ -21,7 +21,7 @@ export class PowerSyncTaskWriteTransactionRunner implements TaskWriteTransaction
   async run<T>(work: (repositories: TaskWriteRepositories) => Promise<T>): Promise<T> {
     const bufferedEventBus = new BufferedTaskWriteEventBus();
 
-    let postCommitEvents: import('@memoflow/contracts/shared').IDomainEvent[] = [];
+    let postCommitEvents: import('@memoflow/transport-contracts').IDomainEvent[] = [];
     const result = await this.db.writeTransaction(async (tx: IElectronDatabaseTransaction) => {
       const result = await work({
         planRepository: new PowerSyncTaskPlanRepository(tx, bufferedEventBus),

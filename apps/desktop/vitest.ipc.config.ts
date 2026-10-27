@@ -7,10 +7,6 @@ import { createSharedConfig } from '../../vitest.shared.ts';
 // exact entrypoint instead of relying on directory resolution.
 const ipcWorkspaceAliasEntries = [
   {
-    find: '@memoflow/domain-shared/shared',
-    replacement: resolve(import.meta.dirname, '../../packages/domain-shared/src/shared/index.ts'),
-  },
-  {
     find: '@memoflow/goal-client',
     replacement: resolve(import.meta.dirname, '../../packages/goal-client/src/index.ts'),
   },

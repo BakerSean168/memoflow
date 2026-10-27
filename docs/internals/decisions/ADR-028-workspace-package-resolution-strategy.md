@@ -28,7 +28,7 @@ Recent examples in this repository include:
 
 - `apps/web/tsconfig.json` resolving selected packages to source for typing and IDE support.
 - `apps/web/vite.config.ts` resolving selected runtime imports to source for development.
-- Workspace packages such as `@memoflow/ai` and `@memoflow/contracts` exposing build artifacts through `package.json` `exports`.
+- Workspace packages such as `@memoflow/ai` and `旧聚合契约包（已退役）` exposing build artifacts through `package.json` `exports`.
 
 We need one documented rule set that explains when to use `tsconfig`, when to use Vite aliasing, when to rely on `exports`, and how Nx build ordering supports the final production path.
 
@@ -205,7 +205,7 @@ Responsible for:
 
 ### Package-to-package development
 
-When one workspace package depends on another shared package such as `@memoflow/contracts` or `@memoflow/utils`:
+When one workspace package depends on another shared package such as `旧聚合契约包（已退役）` or `@memoflow/utils`:
 
 - declare the dependency in the package's `package.json`
 - use `tsconfig` paths so TypeScript can resolve source during development
@@ -233,13 +233,13 @@ When building an app for verification, packaging, or release:
 
 ### Example A: Package depending on shared contracts
 
-`packages/ai` depends on `@memoflow/contracts`.
+`packages/ai` depends on `旧聚合契约包（已退役）`.
 
 Expected setup:
 
-- `packages/ai/package.json` declares `@memoflow/contracts`
+- `packages/ai/package.json` declares `旧聚合契约包（已退役）`
 - `packages/ai/tsconfig.json` inherits the workspace source map for development
-- `@memoflow/contracts/package.json` exports built entrypoints from `dist`
+- `@memoflow/package-contracts.json` exports built entrypoints from `dist`
 
 This package build scenario does not require Vite aliasing.
 

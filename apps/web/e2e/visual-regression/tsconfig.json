@@ -7,7 +7,6 @@
     "types": ["node", "vite/client", "pinia-plugin-persistedstate"],
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "paths": {
-      "@memoflow/contracts": ["../../../../packages/contracts/src/index.ts"],
       "@memoflow/account-contracts": ["../../../../packages/account-contracts/src/index.ts"],
       "@memoflow/account-contracts/*": ["../../../../packages/account-contracts/src/*.ts"],
       "@memoflow/ai-contracts": ["../../../../packages/ai-contracts/src/index.ts"],
@@ -18,20 +17,13 @@
       "@memoflow/notification-contracts/*": [
         "../../../../packages/notification-contracts/src/*.ts"
       ],
-      "@memoflow/contracts/primitives": ["../../../../packages/contracts/src/primitives/index.ts"],
       "@memoflow/repository-contracts": ["../../../../packages/repository-contracts/src/index.ts"],
-      "@memoflow/contracts/result": ["../../../../packages/contracts/src/result/index.ts"],
       "@memoflow/schedule-contracts": ["../../../../packages/schedule-contracts/src/index.ts"],
       "@memoflow/schedule-contracts/*": ["../../../../packages/schedule-contracts/src/*.ts"],
       "@memoflow/setting-contracts": ["../../../../packages/setting-contracts/src/index.ts"],
       "@memoflow/setting-contracts/*": ["../../../../packages/setting-contracts/src/*.ts"],
-      "@memoflow/contracts/shared": ["../../../../packages/contracts/src/shared/index.ts"],
       "@memoflow/task-contracts": ["../../../../packages/task-contracts/src/index.ts"],
       "@memoflow/task-contracts/*": ["../../../../packages/task-contracts/src/*.ts"],
-      "@memoflow/contracts/*": [
-        "../../../../packages/contracts/src/modules/*/index.ts",
-        "../../../../packages/contracts/src/*/index.ts"
-      ],
       "@memoflow/assets": ["../../../../packages/assets/src/index.ts"],
       "@memoflow/assets/audio": ["../../../../packages/assets/src/audio/index.ts"],
       "@memoflow/assets/images": ["../../../../packages/assets/src/images/index.ts"],

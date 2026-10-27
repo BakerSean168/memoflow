@@ -849,8 +849,8 @@
     },
     {
       "id": "r645",
-      "path": "packages/contracts/src/shared/dual-registry.surface.spec.ts",
-      "package": "packages/contracts",
+      "path": "packages/host-runtime/src/shared/dual-registry.surface.spec.ts",
+      "package": "packages/host-runtime",
       "class": "retired",
       "sole": null,
       "blast": "surface lock (retired); suite describes=2",

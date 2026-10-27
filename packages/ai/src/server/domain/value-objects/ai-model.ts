@@ -9,7 +9,7 @@ import { AIModel as AIModelContract, type AIModel as IAIModel } from '@memoflow/
 export type AIModel = IAIModel & { readonly __brand: unique symbol };
 
 // Derive the valid-value set from the contracts source of truth so a new status
-// only ever has to be added in one place (@memoflow/contracts).
+// only ever has to be added in one place (@memoflow/transport-contracts).
 const VALUES: IAIModel[] = Object.values(AIModelContract);
 
 export const AIModel = {

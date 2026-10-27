@@ -111,7 +111,7 @@ interface UserPreferenceProfile {
 
 说明：
 
-> **2026-09-09 implementation clarification:** `TimeZoneId` 是跨模块 portable primitive，与 `Instant / Ymd / Hm` 一样 canonicalized in `@memoflow/contracts/primitives`，同时提供唯一 IANA validator/schema。`@memoflow/time` 继续拥有 `TimeContext`、Clock/Calendar/Format 与 require/resolve 行为并 re-export 该 primitive。这样保留 Product Time 语义所有权，同时避免 `contracts -> time -> contracts` package cycle。
+> **2026-09-09 implementation clarification:** `TimeZoneId` 是跨模块 portable primitive，与 `Instant / Ymd / Hm` 一样 canonicalized in `@memoflow/shared-primitives`，同时提供唯一 IANA validator/schema。`@memoflow/time` 继续拥有 `TimeContext`、Clock/Calendar/Format 与 require/resolve 行为并 re-export 该 primitive。这样保留 Product Time 语义所有权，同时避免 `contracts -> time -> contracts` package cycle。
 
 1. `LocaleId` 与 `TimeZoneId` 使用 MemoFlow Time/Presentation 已有语义，不在 Setting 自建第二套；
 2. `timeZone` 必须是经 `@memoflow/time` `isIanaTimeZoneId()` 验证的 IANA zone；

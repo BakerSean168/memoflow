@@ -25,9 +25,7 @@
   },
   "dependencies": {
     "@better-auth/prisma-adapter": "1.7.6",
-    "@memoflow/contracts": "workspace:*",
     "@memoflow/database": "workspace:*",
-    "@memoflow/domain-shared": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",
     "argon2": "0.45.1",

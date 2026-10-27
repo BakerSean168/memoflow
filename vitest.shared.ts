@@ -323,10 +323,6 @@ export function createSharedConfig(options: SharedConfigOptions) {
       replacement: path.resolve(workspaceRoot, 'packages/database/src/powersync-schema.ts'),
     },
     {
-      find: /^@memoflow\/domain-shared\/(.+)$/,
-      replacement: path.resolve(workspaceRoot, 'packages/domain-shared/src/$1'),
-    },
-    {
       find: /^@memoflow\/utils\/(.+)$/,
       replacement: path.resolve(workspaceRoot, 'packages/utils/src/$1'),
     },
@@ -345,7 +341,6 @@ export function createSharedConfig(options: SharedConfigOptions) {
 
   const commonBareAliases: Record<string, string> = Object.fromEntries([
     ['@memoflow/database', path.resolve(workspaceRoot, 'packages/database/src/index.ts')],
-    ['@memoflow/domain-shared', path.resolve(workspaceRoot, 'packages/domain-shared/src/index.ts')],
     ['@memoflow/utils', path.resolve(workspaceRoot, 'packages/utils/src/index.ts')],
     ['@memoflow/test-utils', path.resolve(workspaceRoot, 'packages/test-utils/src/index.ts')],
     ...commonWorkspacePackages.map((packageName) => [

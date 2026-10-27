@@ -66,17 +66,11 @@
       "@memoflow/ipc-client": ["../../packages/ipc-client/src/index.ts"],
       "@memoflow/http-client": ["../../packages/http-client/src/index.ts"],
       "@memoflow/desktop-contracts": ["../../packages/desktop-contracts/src/index.ts"],
-      "@memoflow/contracts": ["../../packages/contracts/src/index.ts"],
       "@memoflow/notification-contracts": ["../../packages/notification-contracts/src/index.ts"],
       "@memoflow/notification-contracts/*": ["../../packages/notification-contracts/src/*.ts"],
       "@memoflow/repository-client": ["../../packages/repository-client/src/index.ts"],
       "@memoflow/repository-contracts": ["../../packages/repository-contracts/src/index.ts"],
       "@memoflow/repository-contracts/*": ["../../packages/repository-contracts/src/*.ts"],
-      "@memoflow/contracts/*": [
-        "../../packages/contracts/src/modules/*/index.ts",
-        "../../packages/contracts/src/*/index.ts"
-      ],
-      "@memoflow/domain-shared": ["../../packages/domain-shared/src/index.ts"],
       "@memoflow/utils": ["../../packages/utils/src/index.ts"],
       "@memoflow/utils/*": ["../../packages/utils/src/*/index.ts", "../../packages/utils/src/*.ts"],
       "@memoflow/goal/analytics": ["../../packages/goal/src/analytics/index.ts"],

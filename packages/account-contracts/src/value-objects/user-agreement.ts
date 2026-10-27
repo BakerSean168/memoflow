@@ -1,7 +1,7 @@
 /**
  * 用户协议同意信息 —— 账户域值对象。
  *
- * 真身自 @memoflow/contracts/shared.ts 迁入（Issue #630 §2.2 / §4.8）。
+ * 真身自 @memoflow/transport-contracts.ts 迁入（Issue #630 §2.2 / §4.8）。
  */
 export type UserAgreement = {
   agreedToTerms: boolean;

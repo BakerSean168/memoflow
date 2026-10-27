@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { expect, test } from '@playwright/test';
 import { _electron as electron } from 'playwright';
-import { AIChannels } from '@memoflow/contracts/electron';
+import { AIChannels } from '@memoflow/desktop-contracts';
 import { createIsolatedNativeAgentEnvironment } from './packaged-runtime/isolated-native-env';
 
 type Rpc = { ok: boolean; data?: unknown; error?: { code: string } };

@@ -17,7 +17,6 @@
     }
   },
   "dependencies": {
-    "@memoflow/contracts": "workspace:*",
     "@memoflow/data-portability-contracts": "workspace:*",
     "@memoflow/database": "workspace:*",
     "@memoflow/http-client": "workspace:*",

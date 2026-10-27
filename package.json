@@ -40,7 +40,7 @@
     "test:integration": "pnpm nx run-many -t test:integration --projects=task,goal,schedule,scheduler,routine --parallel=1",
     "test:integration:task": "pnpm nx run task:test:integration",
     "test:all": "pnpm nx run-many -t test --projects=task,api",
-    "test:coverage:domain": "pnpm nx run-many -t test:coverage --projects=account,ai,cloud-auth,domain-shared,goal,notification,routine,schedule,scheduler,setting,task",
+    "test:coverage:domain": "pnpm nx run-many -t test:coverage --projects=account,ai,cloud-auth,goal,notification,routine,schedule,scheduler,setting,task",
     "test:coverage:affected": "pnpm nx affected -t test:coverage",
     "test:api": "pnpm nx run api:test",
     "test:web": "pnpm nx run web:test",
@@ -126,7 +126,6 @@
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^9.1.0",
-    "@memoflow/contracts": "workspace:*",
     "@memoflow/patterns": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/utils": "workspace:*",

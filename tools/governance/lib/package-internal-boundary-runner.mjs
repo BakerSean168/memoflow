@@ -5,7 +5,6 @@ import { findBoundaryViolations, shouldSkipSourceFile } from './package-internal
 
 const legacy = [
   'domain-server',
-  'domain-shared',
   'application-server',
   'infrastructure-server',
   'controllers',
@@ -57,8 +56,6 @@ const rules = [
 ];
 const exceptions = new Set([
   'powersync-schema',
-  'domain-shared',
-  'contracts',
   'patterns',
   'utils',
   'test-utils',

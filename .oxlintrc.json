@@ -919,8 +919,6 @@
     {
       "files": [
         "apps/api/src/**/*.ts",
-        "packages/contracts/src/**/*.ts",
-        "packages/domain-shared/src/**/*.ts",
         "packages/setting/src/**/*.ts",
         "packages/patterns/src/**/*.ts",
         "packages/notification/src/**/*.ts",

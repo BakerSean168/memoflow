@@ -35,7 +35,7 @@ reference-module tests
 仓库当前规模约为：
 
 ```text
-packages/contracts/src/modules/governance  ~40 files
+packages/governance-contracts/src  ~40 files
 packages/governance                        ~103 files
 packages/app-vue/src/modules/governance     ~36 files
 ```
@@ -68,7 +68,7 @@ failure-contract audits
 本 ADR 采纳后，以下 Product Governance surface 进入 destructive retirement：
 
 - `packages/governance`；
-- `packages/contracts/src/modules/governance`；
+- `packages/governance-contracts/src`；
 - `packages/app-vue/src/modules/governance`；
 - Governance Prisma/PowerSync models；
 - Governance API/IPC/client composition；

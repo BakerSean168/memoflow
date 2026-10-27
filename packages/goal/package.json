@@ -41,10 +41,8 @@
   },
   "scripts": {},
   "dependencies": {
-    "@memoflow/contracts": "workspace:*",
     "@memoflow/data-portability-contracts": "workspace:*",
     "@memoflow/database": "workspace:*",
-    "@memoflow/domain-shared": "workspace:*",
     "@memoflow/goal-contracts": "workspace:*",
     "@memoflow/goal-core": "workspace:*",
     "@memoflow/host-runtime": "workspace:*",

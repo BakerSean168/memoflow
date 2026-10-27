@@ -172,8 +172,6 @@ export default defineConfig(({ mode }) =>
           ['@memoflow/host-runtime', 'packages/host-runtime/src/index.ts'],
           ['@memoflow/http-client', 'packages/http-client/src/index.ts'],
           ['@memoflow/ipc-client', 'packages/ipc-client/src/index.ts'],
-          ['@memoflow/domain-shared/shared', 'packages/domain-shared/src/shared/index.ts'],
-          ['@memoflow/domain-shared', 'packages/domain-shared/src/index.ts'],
           ['@memoflow/routine-client', 'packages/routine-client/src/index.ts'],
           ['@memoflow/repository-client', 'packages/repository-client/src/index.ts'],
           ['@memoflow/ai-client', 'packages/ai-client/src/index.ts'],

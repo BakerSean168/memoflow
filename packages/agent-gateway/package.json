@@ -17,7 +17,6 @@
     }
   },
   "dependencies": {
-    "@memoflow/contracts": "workspace:*",
     "@memoflow/goal-contracts": "workspace:*",
     "@memoflow/task-contracts": "workspace:*",
     "@modelcontextprotocol/node": "2.1.1",

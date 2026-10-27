@@ -114,7 +114,7 @@ MemoFlow RecurrenceRule / TaskPlan policy
 current adapter   mature OSS adapter
 ```
 
-第三方库只位于 infrastructure / policy-engine seam；其对象不得泄漏进 `@memoflow/contracts`。
+第三方库只位于 infrastructure / policy-engine seam；其对象不得泄漏进 `旧聚合契约包（已退役）`。
 
 ## 5. 完整 OSS App 默认 Borrow semantics，不 Borrow product state
 

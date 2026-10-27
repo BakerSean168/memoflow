@@ -1,6 +1,6 @@
 /**
  * @memoflow/account-contracts
- * 账户模块 - 契约层（真身自 @memoflow/contracts/modules/account 迁入，Issue #630 §4.8）
+ * 账户模块 - 契约层（真身自 @memoflow/transport-contracts/modules/account 迁入，Issue #630 §4.8）
  *
  * Residual 661: empty dual entities/dtos barrel re-exports retired.
  * AccountClient/Server DTOs live under aggregates; API under api/.

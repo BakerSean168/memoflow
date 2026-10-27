@@ -27,7 +27,6 @@
     "vue": "^3.5.43",
     "@memoflow/cloud-auth": "workspace:*",
     "@memoflow/setting-ui": "workspace:*",
-    "@memoflow/contracts": "workspace:*",
     "@memoflow/task-client": "workspace:*",
     "@memoflow/setting-client": "workspace:*",
     "@memoflow/data-portability": "workspace:*",

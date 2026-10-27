@@ -240,7 +240,7 @@ L1 Platform             → Date / Intl / 可注入 Clock
 - AI 路径地图（展示无关，边界参考）：[`../ai-runtime-path-map.md`](../ai-runtime-path-map.md)
 - Dual Registry：[`../../governance/dual-registry.md`](../governance/dual-registry.md)
 - 优雅化 plan：[`../../plan/archive/2026-07-26-codebase-elegance-foundation.md`](https://github.com/BakerSean168/memoflow/blob/7a45112e1840950ead1ba98b748fc70fa1b38344/docs/plan/archive/2026-07-26-codebase-elegance-foundation.md)
-- primitives：`packages/contracts/src/primitives/{instant,transfer-date,ymd,hm}.ts`
+- primitives：`packages/shared-primitives/src/{instant,transfer-date,ymd,hm}.ts`
 - VO 模式：`packages/goal/src/server/domain/value-objects/goal-time-range.ts`
 - 历史：PersistenceDate 移除 plan archive；residual 859 Instant/TransferDate dual keep-boundary
 

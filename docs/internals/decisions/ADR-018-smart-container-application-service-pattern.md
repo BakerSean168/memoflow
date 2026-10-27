@@ -153,7 +153,7 @@ import { useMessage } from '@memoflow/ui-vuetify';
  * ✅ Imports ApplicationService from packages
  * ✅ No local ApplicationService needed
  * ✅ Same logic can be ported to React Hook
- * ✅ All types from @memoflow/contracts
+ * ✅ All types from 旧聚合契约包（已退役）
  */
 export function useGoal() {
   const store = useGoalStore();
@@ -213,7 +213,7 @@ import { useMessage } from '@memoflow/ui-react';
  *
  * ✅ Same imports and logic as Vue version!
  * ✅ Only React-specific state management syntax
- * ✅ All types from @memoflow/contracts (shared)
+ * ✅ All types from 旧聚合契约包（已退役） (shared)
  */
 export function useGoal() {
   const store = useGoalStore();

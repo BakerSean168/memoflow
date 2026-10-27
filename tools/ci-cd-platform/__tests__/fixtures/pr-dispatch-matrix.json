@@ -519,7 +519,7 @@
     },
     {
       "id": "aiContract",
-      "files": ["packages/contracts/src/shared/protocol.ts"],
+      "files": ["packages/host-runtime/src/shared/protocol.ts"],
       "expected": {
         "full": true,
         "targets": {

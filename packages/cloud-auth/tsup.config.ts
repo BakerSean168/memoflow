@@ -8,7 +8,6 @@ export default defineConfig({
   sourcemap: true,
   external: [
     '@memoflow/database',
-    '@memoflow/contracts',
     '@memoflow/cloud-auth-contracts',
     '@memoflow/agent-gateway',
     '@memoflow/http-client',

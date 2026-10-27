@@ -21,7 +21,6 @@
     "@memoflow/account-contracts": "workspace:*",
     "@memoflow/agent-gateway": "workspace:*",
     "@memoflow/cloud-auth-contracts": "workspace:*",
-    "@memoflow/contracts": "workspace:*",
     "@memoflow/desktop-contracts": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",

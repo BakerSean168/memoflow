@@ -6,7 +6,7 @@ import {
 export type ReminderTriggerType = IReminderTriggerType & { readonly __brand: unique symbol };
 
 // Derive the valid-value set from the contracts source of truth so a new status
-// only ever has to be added in one place (@memoflow/contracts).
+// only ever has to be added in one place (@memoflow/transport-contracts).
 const VALUES: IReminderTriggerType[] = Object.values(ReminderTriggerTypeContract);
 
 export const ReminderTriggerType = {

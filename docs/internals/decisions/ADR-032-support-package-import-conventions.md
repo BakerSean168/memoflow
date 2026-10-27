@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-Support packages (`@memoflow/utils`, `@memoflow/contracts`, `@memoflow/app-vue`, etc.) grew organically
+Support packages (`@memoflow/utils`, `旧聚合契约包（已退役）`, `@memoflow/app-vue`, etc.) grew organically
 and developed "god barrel" exports — a single root `index.ts` that re-exports everything. This creates:
 
 - **Coupling**: consumers pull in the entire surface area even when they only need `createLogger`

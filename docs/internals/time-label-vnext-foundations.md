@@ -29,7 +29,7 @@ Shared Label Registry
 ## 2. Target topology
 
 ```text
-@memoflow/contracts primitives
+旧聚合契约包（已退役） primitives
 │
 ├── Instant / Ymd / Hm / TimeZoneId
 │        │

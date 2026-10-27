@@ -56,7 +56,7 @@ AI 区是持续协作入口，业务工作区则拥有结构化状态和更大�
 
 | 工程问题       | MemoFlow 的处理方式                                              |
 | -------------- | ---------------------------------------------------------------- |
-| 多端一致性     | 集中式 `@memoflow/contracts` + transport parity                  |
+| 多端一致性     | 集中式 `旧聚合契约包（已退役）` + transport parity               |
 | AI 运行时      | TypeScript + Mastra，内嵌在产品运行时中                          |
 | 持久 AI 工作流 | 类型化 workflow state、恢复/取消路径、产品持有 projection        |
 | 模块化业务领域 | Goal / Task / Schedule / Reminder / Notification / Repository 包 |

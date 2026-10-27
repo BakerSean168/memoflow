@@ -118,7 +118,7 @@ composition-root tests
 `packages/governance` 的 public seam 和内部结构继续作为新 feature / 重构 feature 的首选参考：
 
 ```text
-@memoflow/contracts/governance
+@memoflow/governance-contracts
 @memoflow/governance
 @memoflow/governance/api
 @memoflow/governance/client
@@ -233,7 +233,7 @@ Governance 作为教材必须比普通 feature 更严格，而不是因为“业
 ## Explicitly forbidden
 
 - 删除 `packages/governance` 作为“无真实业务价值”的清理动作；
-- 将 `packages/governance` 或 `packages/contracts/src/modules/governance` 加入 retirement manifest；
+- 将 `packages/governance` 或 `packages/governance-contracts/src` 加入 retirement manifest；
 - 把 Rule/RuleRevision 强制迁入 Knowledge；
 - 让 CI 直接从开发者本地 Governance DB 动态读取规则；
 - 用某个复杂真实业务模块完全取代 Governance 的 reference role；

@@ -150,7 +150,7 @@ test('CI contract tests hash the external files they inspect', async () => {
     'project.json',
     'packages/database/project.json',
     'apps/api/project.json',
-    'packages/contracts/tsup.config.ts',
+    'packages/host-runtime/tsup.config.ts',
     'tools/build/normalize-generated-prisma.mjs',
     'apps/desktop/desktop-update-rollout.mjs',
     'apps/desktop/e2e/packaged-runtime/isolated-native-env.ts',
@@ -251,7 +251,7 @@ test('mixed Build + Typecheck selects exact initiating tasks with one shared dep
   assert.ok(
     selection.taskGraph.dependencies['database:typecheck'].includes('database:prisma-generate'),
   );
-  assert.ok(selection.taskGraph.tasks['contracts:build']);
+  assert.ok(selection.taskGraph.tasks['host-runtime:build']);
   assert.equal(
     selection.taskGraph.tasks['api:typecheck'],
     undefined,
@@ -441,7 +441,6 @@ test('Unit/Contract aliases come from exact Nx execution configuration, not proj
     'ai-contracts',
     'ai-ui',
     'cloud-auth-contracts',
-    'contracts',
     'data-portability-contracts',
     'desktop-contracts',
     'goal-contracts',

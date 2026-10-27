@@ -16,7 +16,6 @@ export const domainResolveAtAlias = {
     const packagesDir = path.resolve(import.meta.dirname, 'packages');
 
     const domainPackages = [
-      'contracts',
       'task',
       'setting',
       'goal',
@@ -85,49 +84,6 @@ export const taskDeepImportResolver = {
   },
 };
 
-export const contractsDeepImportResolver = {
-  name: 'contracts-deep-import-resolver',
-  enforce: 'pre' as const,
-  async resolveId(
-    this: {
-      resolve: (id: string, importer: string, opts: Record<string, unknown>) => Promise<unknown>;
-    },
-    source: string,
-    importer: string | undefined,
-    options: Record<string, unknown>,
-  ) {
-    const match = source.match(/^@memoflow\/contracts\/(.+)/);
-    if (!match || !importer) return null;
-    const subpath = match[1];
-    const contractsSrc = path.resolve(import.meta.dirname, 'packages/contracts/src');
-
-    const modulesIndex = path.resolve(contractsSrc, 'modules', subpath, 'index.ts');
-    const modulesResult = await this.resolve(modulesIndex, importer, {
-      ...options,
-      skipSelf: true,
-    });
-    if (modulesResult) return modulesResult;
-
-    const topLevelIndex = path.resolve(contractsSrc, subpath, 'index.ts');
-    const topLevelResult = await this.resolve(topLevelIndex, importer, {
-      ...options,
-      skipSelf: true,
-    });
-    if (topLevelResult) return topLevelResult;
-
-    const directFile = path.resolve(contractsSrc, `${subpath}.ts`);
-    const directResult = await this.resolve(directFile, importer, {
-      ...options,
-      skipSelf: true,
-    });
-    if (directResult) return directResult;
-
-    return null;
-  },
-};
-
-const contractsSrc = path.resolve(import.meta.dirname, './packages/contracts/src');
-
 export const domainResolveAliases = [
   {
     find: '@memoflow/database/transaction',
@@ -147,14 +103,6 @@ export const domainResolveAliases = [
   {
     find: '@memoflow/database',
     replacement: path.resolve(import.meta.dirname, './packages/database/src/index.ts'),
-  },
-  {
-    find: /^@memoflow\/domain-shared\/(.+)/,
-    replacement: path.resolve(import.meta.dirname, './packages/domain-shared/src/$1/index.ts'),
-  },
-  {
-    find: '@memoflow/domain-shared',
-    replacement: path.resolve(import.meta.dirname, './packages/domain-shared/src/index.ts'),
   },
   {
     find: /^@memoflow\/utils\/(.+)/,
@@ -181,36 +129,8 @@ export const domainResolveAliases = [
     replacement: path.resolve(import.meta.dirname, './packages/test-utils/src/index.ts'),
   },
   {
-    find: '@memoflow/contracts/result',
-    replacement: path.resolve(contractsSrc, 'result/index.ts'),
-  },
-  {
-    find: '@memoflow/contracts/shared',
-    replacement: path.resolve(contractsSrc, 'shared/index.ts'),
-  },
-  {
-    find: '@memoflow/contracts/primitives',
-    replacement: path.resolve(contractsSrc, 'primitives/index.ts'),
-  },
-  {
-    find: '@memoflow/contracts/electron',
-    replacement: path.resolve(contractsSrc, 'electron/index.ts'),
-  },
-  {
     find: /^@memoflow\/cloud-auth-contracts$/,
     replacement: path.resolve(import.meta.dirname, './packages/cloud-auth-contracts/src/index.ts'),
-  },
-  {
-    find: /^@memoflow\/contracts\/modules\/(.+)/,
-    replacement: path.resolve(contractsSrc, 'modules/$1/index.ts'),
-  },
-  {
-    find: /^@memoflow\/contracts\/(.+)/,
-    replacement: path.resolve(contractsSrc, 'modules/$1/index.ts'),
-  },
-  {
-    find: '@memoflow/contracts',
-    replacement: path.resolve(contractsSrc, 'index.ts'),
   },
   {
     find: /^@memoflow\/time\/(.+)/,
