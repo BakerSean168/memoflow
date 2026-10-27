@@ -11,7 +11,7 @@ import { ref } from 'vue';
 import { createResultIpcClient } from '@memoflow/ipc-client';
 import { toast } from 'vue-sonner';
 import { getI18nGlobal } from '@memoflow/app-vue/plugins/i18n';
-import { createAccountIpcClient } from '@memoflow/account/client';
+import { createAccountIpcClient } from '@memoflow/account-client';
 import { createCloudAuthIpcClient } from '@memoflow/cloud-auth';
 import { createGoalIpcClient } from '@memoflow/goal-client';
 import { createGoalKnowledgeIpcClient } from '@memoflow/relation/client';

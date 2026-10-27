@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@memoflow/account": "workspace:*",
+    "@memoflow/account-client": "workspace:*",
     "@memoflow/account-contracts": "workspace:*",
     "@memoflow/ai": "workspace:*",
     "@memoflow/cloud-auth": "workspace:*",

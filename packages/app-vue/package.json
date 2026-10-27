@@ -72,6 +72,7 @@
     "@lezer/highlight": "1.2.4",
     "@lucide/vue": "^1.48.0",
     "@memoflow/account": "workspace:*",
+    "@memoflow/account-client": "workspace:*",
     "@memoflow/account-contracts": "workspace:*",
     "@memoflow/ai": "workspace:*",
     "@memoflow/assets": "workspace:*",

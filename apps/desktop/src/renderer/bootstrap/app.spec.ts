@@ -130,7 +130,7 @@ vi.mock('@memoflow/cloud-auth', () => ({
   createCloudAuthIpcClient: vi.fn(() => ({ getSession: mocks.getCloudSession })),
 }));
 
-vi.mock('@memoflow/account/client', () => ({
+vi.mock('@memoflow/account-client', () => ({
   createAccountIpcClient: vi.fn(() => ({ getMyProfile: mocks.getMyProfile })),
 }));
 

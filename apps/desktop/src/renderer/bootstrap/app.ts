@@ -34,7 +34,7 @@ import {
 import { shouldRedirectAuthenticatedDesktopEntry } from './route-entry';
 import { createCloudAuthIpcClient } from '@memoflow/cloud-auth';
 import { createResultIpcClient } from '@memoflow/ipc-client';
-import { createAccountIpcClient } from '@memoflow/account/client';
+import { createAccountIpcClient } from '@memoflow/account-client';
 
 export async function bootstrapMainApp() {
   const app = createApp(App);
