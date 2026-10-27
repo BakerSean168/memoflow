@@ -117,7 +117,7 @@ export interface AiUiHost {
   useStrictInject<T>(key: InjectionKey<T>, name?: string): T;
   useServerStateIdentityScope(): () => string;
   useLabelCatalog(): {
-    options: Ref<Array<{ id: string; name: string; color: string | null }>>;
+    options: Ref<Array<{ id: string; name: string; color?: string | null }>>;
     isLoading: Ref<boolean>;
     isCreating: Ref<boolean>;
     createLabel(name: string): Promise<LabelClientDTO>;
@@ -141,11 +141,14 @@ export interface AiUiHost {
   useAppShellStore(): {
     rightPanelOpen: boolean;
     panelSurface: string;
-    activeTab: {
-      module: 'goal' | 'task' | 'note' | 'schedule' | 'routine' | 'notification';
-      route: string;
-      title: string;
-    } | null;
+    activeTab:
+      | {
+          module: 'goal' | 'task' | 'note' | 'schedule' | 'routine' | 'notification';
+          route: string;
+          title: string;
+        }
+      | null
+      | undefined;
     openTab(input: { module: 'goal'; route: string; title: string; intent: 'deeplink' }): unknown;
   };
   canLeaveBusinessSurface(t?: (key: string) => string, to?: RouteLocationNormalized): boolean;

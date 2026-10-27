@@ -17,6 +17,10 @@
     "./*": {
       "types": "./dist/*.d.ts",
       "import": "./dist/*.js"
+    },
+    "./router": {
+      "types": "./dist/router/index.d.ts",
+      "import": "./dist/router.js"
     }
   },
   "dependencies": {

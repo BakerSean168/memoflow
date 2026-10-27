@@ -3,7 +3,7 @@ import { useGoalNativeSurface } from '@memoflow/goal-ui';
 import { useReferenceableKnowledgeNotes } from '@memoflow/repository-ui';
 import { openLocalAgentNoteReview } from '@memoflow/repository-ui';
 import { useRecentKnowledgeNotes } from '@memoflow/repository-ui';
-import { useTask } from '@memoflow/task-ui/composables/useTask';
+import { useTask } from '@memoflow/task-ui';
 import { useGoal } from '@memoflow/goal-ui';
 import { bindAiUiHost } from '@memoflow/ai-ui/host';
 import {
