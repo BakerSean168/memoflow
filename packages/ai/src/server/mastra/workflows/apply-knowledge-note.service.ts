@@ -1,7 +1,7 @@
 import type {
   KnowledgeCaptureExecutionFailure,
   KnowledgeCaptureExecutionReceipt,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { ResultError } from '@memoflow/transport-contracts/result';
 import { knowledgeCaptureRequestId } from './deterministic-entity-id';
 import type {

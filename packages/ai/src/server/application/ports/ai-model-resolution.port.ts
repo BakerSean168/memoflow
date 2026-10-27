@@ -1,4 +1,4 @@
-import type { AIModelCapabilitySnapshot, AIModelCatalogSnapshot } from '@memoflow/contracts/ai';
+import type { AIModelCapabilitySnapshot, AIModelCatalogSnapshot } from '@memoflow/ai-contracts';
 
 export interface AIModelSelectionInput {
   readonly identityId: string;

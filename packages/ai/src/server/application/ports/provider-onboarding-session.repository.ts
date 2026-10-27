@@ -2,8 +2,8 @@ import type {
   AIModelInfo,
   AIProviderDefinitionId,
   ProbeAIProviderConnectionRes,
-} from '@memoflow/contracts/ai';
-import type { AIProviderCredentialRef } from '@memoflow/contracts/primitives';
+} from '@memoflow/ai-contracts';
+import type { AIProviderCredentialRef } from '@memoflow/ai-contracts';
 
 export type AIProviderOnboardingCredentialStatus =
   ProbeAIProviderConnectionRes['credential']['status'];

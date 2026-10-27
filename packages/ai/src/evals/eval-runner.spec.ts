@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AIEvaluationReportSchema } from '@memoflow/contracts/ai';
+import { AIEvaluationReportSchema } from '@memoflow/ai-contracts';
 import {
   RecordedReplayAIEvalExecutor,
   compareAIEvaluationReports,

@@ -27,7 +27,10 @@ import { describe, expect, it } from 'vitest';
       ],
       [resolve(goalApi, 'goal-record.dto.ts'), ['CreateGoalRecordRes', 'DeleteGoalRecordRes']],
       [resolve(goalApi, 'key-result.dto.ts'), ['UpdateKeyResultRes', 'UpdateKeyResultProgressRes']],
-      [resolve(modules, 'ai/api/ai-provider-config.dto.ts'), ['RefreshAIProviderModelsRes']],
+      [
+        resolve(goalApi, '../../../ai-contracts/src/api/ai-provider-config.dto.ts'),
+        ['RefreshAIProviderModelsRes'],
+      ],
       [
         resolve(repoContracts, 'api/knowledge-repository-connection.dto.ts'),
         ['CreateKnowledgeRepositoryConnectionRes'],

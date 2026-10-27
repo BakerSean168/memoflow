@@ -2,7 +2,7 @@ import type {
   GoalPlanDraft,
   GoalPlanDraftRef,
   GoalPlanExecutionReceipt,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { GoalStatus, CreateGoalReq } from '@memoflow/goal-contracts';
 import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
 import type { KnowledgeDocumentRef } from '@memoflow/repository-contracts';

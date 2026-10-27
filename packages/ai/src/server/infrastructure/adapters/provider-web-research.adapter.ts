@@ -3,7 +3,7 @@ import {
   GoalResearchSourceSchema,
   type GoalResearchIntent,
   type GoalResearchSource,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { IAIProviderConfigRepository } from '../../domain';
 import type {
   AIWebResearchCapabilityInput,

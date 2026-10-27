@@ -3,7 +3,7 @@ import type {
   AgentInstance,
   AgentInstanceModelBinding,
   AgentRegistrySnapshot,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 
 /** Host persistence boundary. Every mutation is owner scoped and atomic, including native compatibility and model ownership checks. */
 export interface IAgentInstanceRepository {

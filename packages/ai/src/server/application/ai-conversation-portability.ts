@@ -9,7 +9,7 @@ import type {
 import {
   AIConversationPortablePayloadV3Schema,
   type AIConversationPortablePayloadV3,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { AIConversation } from '../domain/aggregates/ai-conversation';
 import type { IAIConversationRepository } from '../domain/repositories/i-ai-conversation-repository';
 import { ConversationStatus } from '../domain/value-objects/conversation-status';

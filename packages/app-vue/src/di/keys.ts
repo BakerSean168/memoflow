@@ -16,8 +16,8 @@ import type {
   DesktopNotificationPreferencePatch,
 } from '@memoflow/contracts/electron';
 import type { ElectronBridge } from '@memoflow/ipc-client';
-import type { LocalAgentClient, AgentRegistryClient } from '@memoflow/ai/client';
-import type { AIRuntimeSurface } from '@memoflow/contracts/ai';
+import type { LocalAgentClient, AgentRegistryClient } from '@memoflow/ai-client';
+import type { AIRuntimeSurface } from '@memoflow/ai-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import type { DesktopAuthApi } from '../shared/utils/desktop-auth-recovery';
 import type {

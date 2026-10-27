@@ -652,11 +652,11 @@ import {
       ),
     ];
     const goalWorkflow = readFileSync(
-      resolve(sharedDir, '../../../app-vue/src/modules/ai/composables/useAIGoalWorkflow.ts'),
+      resolve(sharedDir, '../../../ai-ui/src/composables/useAIGoalWorkflow.ts'),
       'utf8',
     );
     const workflowPersistence = readFileSync(
-      resolve(sharedDir, '../../../app-vue/src/modules/ai/composables/useAIWorkflowPersistence.ts'),
+      resolve(sharedDir, '../../../ai-ui/src/composables/useAIWorkflowPersistence.ts'),
       'utf8',
     );
 

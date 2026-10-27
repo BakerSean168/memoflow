@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // Keep `@memoflow/*` bare specifiers in declaration emit. The workspace dist
+    // aliases would otherwise be rewritten into relative paths that consumers
+    // cannot resolve from `packages/ai-ui/dist`.
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
+}

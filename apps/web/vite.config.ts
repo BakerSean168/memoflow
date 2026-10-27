@@ -113,6 +113,7 @@ const webDevWorkspaceEntries = [
     'packages/goal-contracts/src/test-support/goal.mock.ts',
   ],
   ['@memoflow/goal-contracts', 'packages/goal-contracts/src/index.ts'],
+  ['@memoflow/ai-contracts', 'packages/ai-contracts/src/index.ts'],
   ['@memoflow/goal-ui/composables/useGoal', 'packages/goal-ui/src/composables/useGoal.ts'],
   ['@memoflow/goal-ui/host', 'packages/goal-ui/src/goal-ui-host.ts'],
   ['@memoflow/notification-ui/host', 'packages/notification-ui/src/notification-ui-host.ts'],
@@ -153,7 +154,7 @@ const webDevWorkspaceEntries = [
   ['@memoflow/task-client', 'packages/task-client/src/index.ts'],
   ['@memoflow/task-ui/host', 'packages/task-ui/src/task-ui-host.ts'],
   ['@memoflow/task-ui', 'packages/task-ui/src'],
-  ['@memoflow/ai/client', 'packages/ai/src/client/index.ts'],
+  ['@memoflow/ai-client', 'packages/ai-client/src/index.ts'],
 ] as const;
 
 /**

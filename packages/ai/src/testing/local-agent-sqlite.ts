@@ -1,5 +1,5 @@
 import { DatabaseSync, type SQLInputValue } from 'node:sqlite';
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 
 export function createLocalAgentSqlite(): IElectronDatabase & { close(): void } {
   const sql = new DatabaseSync(':memory:');

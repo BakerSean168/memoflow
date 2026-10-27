@@ -26,7 +26,7 @@ import {
   AIWorkflowRunViewSchema,
   AIWorkflowStartClientRequestSchema,
   type AssistantRuntimeEvent,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { createHttpResponseBuilder, formatZodErrors } from '@memoflow/utils/result';
 import {
   AssistantConversationUnavailableError,

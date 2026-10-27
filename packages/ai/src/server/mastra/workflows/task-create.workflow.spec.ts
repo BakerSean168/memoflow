@@ -9,7 +9,7 @@ import {
   AIWorkflowSuspensionSchema,
   TaskPlanDraftContentSchema,
   type TaskPlanningDecision,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { error, ok } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { afterEach, describe, expect, it, vi } from 'vitest';

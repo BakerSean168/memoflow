@@ -75002,7 +75002,7 @@
                 }
               ],
               "outputs": [
-                "{workspaceRoot}/coverage/packages/ai/src/client/runtime-assistant.spec.ts"
+                "{workspaceRoot}/coverage/packages/ai-client/src/runtime-assistant.spec.ts"
               ],
               "metadata": {
                 "technologies": [
@@ -75021,7 +75021,7 @@
               "executor": "nx:run-commands",
               "options": {
                 "cwd": "packages/ai",
-                "command": "vitest run src/client/runtime-assistant.spec.ts --coverage.reportsDirectory=/home/dev/projects/_worktrees/memoflow-gov-7903/coverage/packages/ai/src/client/runtime-assistant.spec.ts"
+                "command": "vitest run src/client/runtime-assistant.spec.ts --coverage.reportsDirectory=/home/dev/projects/_worktrees/memoflow-gov-7903/coverage/packages/ai-client/src/runtime-assistant.spec.ts"
               },
               "configurations": {},
               "parallelism": true
@@ -75065,7 +75065,7 @@
                 }
               ],
               "outputs": [
-                "{workspaceRoot}/coverage/packages/ai/src/client/runtime-usage.spec.ts"
+                "{workspaceRoot}/coverage/packages/ai-client/src/runtime-usage.spec.ts"
               ],
               "metadata": {
                 "technologies": [
@@ -75084,7 +75084,7 @@
               "executor": "nx:run-commands",
               "options": {
                 "cwd": "packages/ai",
-                "command": "vitest run src/client/runtime-usage.spec.ts --coverage.reportsDirectory=/home/dev/projects/_worktrees/memoflow-gov-7903/coverage/packages/ai/src/client/runtime-usage.spec.ts"
+                "command": "vitest run src/client/runtime-usage.spec.ts --coverage.reportsDirectory=/home/dev/projects/_worktrees/memoflow-gov-7903/coverage/packages/ai-client/src/runtime-usage.spec.ts"
               },
               "configurations": {},
               "parallelism": true
@@ -75128,7 +75128,7 @@
                 }
               ],
               "outputs": [
-                "{workspaceRoot}/coverage/packages/ai/src/client/runtime-workflow.spec.ts"
+                "{workspaceRoot}/coverage/packages/ai-client/src/runtime-workflow.spec.ts"
               ],
               "metadata": {
                 "technologies": [
@@ -75147,7 +75147,7 @@
               "executor": "nx:run-commands",
               "options": {
                 "cwd": "packages/ai",
-                "command": "vitest run src/client/runtime-workflow.spec.ts --coverage.reportsDirectory=/home/dev/projects/_worktrees/memoflow-gov-7903/coverage/packages/ai/src/client/runtime-workflow.spec.ts"
+                "command": "vitest run src/client/runtime-workflow.spec.ts --coverage.reportsDirectory=/home/dev/projects/_worktrees/memoflow-gov-7903/coverage/packages/ai-client/src/runtime-workflow.spec.ts"
               },
               "configurations": {},
               "parallelism": true
@@ -80362,9 +80362,9 @@
                 "{workspaceRoot}/coverage/packages/ai/src/api/routes/ai-provider-onboarding.routes.spec.ts",
                 "{workspaceRoot}/coverage/packages/ai/src/api/routes/ai-runtime.routes.test.ts",
                 "{workspaceRoot}/coverage/packages/ai/src/api/routes/ai-void-success-envelope.surface.spec.ts",
-                "{workspaceRoot}/coverage/packages/ai/src/client/runtime-assistant.spec.ts",
-                "{workspaceRoot}/coverage/packages/ai/src/client/runtime-usage.spec.ts",
-                "{workspaceRoot}/coverage/packages/ai/src/client/runtime-workflow.spec.ts",
+                "{workspaceRoot}/coverage/packages/ai-client/src/runtime-assistant.spec.ts",
+                "{workspaceRoot}/coverage/packages/ai-client/src/runtime-usage.spec.ts",
+                "{workspaceRoot}/coverage/packages/ai-client/src/runtime-workflow.spec.ts",
                 "{workspaceRoot}/coverage/packages/ai/src/electron/ai-electron.surface.spec.ts",
                 "{workspaceRoot}/coverage/packages/ai/src/electron/index-lifecycle.spec.ts",
                 "{workspaceRoot}/coverage/packages/ai/src/evals/eval-runner.spec.ts",

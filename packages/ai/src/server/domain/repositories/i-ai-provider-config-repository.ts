@@ -7,7 +7,7 @@
  * - 由基础设施层实现（Prisma / PowerSync / memory）
  */
 
-import type { AIProviderConfigServerDTO } from '@memoflow/contracts/ai';
+import type { AIProviderConfigServerDTO } from '@memoflow/ai-contracts';
 
 export type SetDefaultProviderOutcome = 'SET' | 'NOT_FOUND' | 'CONFLICT';
 export type SaveProviderOutcome = 'SAVED' | 'CONFLICT';

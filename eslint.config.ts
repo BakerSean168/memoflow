@@ -23,7 +23,14 @@ const featureScopeConstraints = [
   },
   {
     sourceTag: 'scope:ai',
-    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:ai'],
+    onlyDependOnLibsWithTags: [
+      ...sharedScopeTags,
+      'scope:ai',
+      'scope:ui',
+      'scope:repository',
+      'scope:goal',
+      'scope:task',
+    ],
   },
   {
     sourceTag: 'scope:authentication',
@@ -484,6 +491,7 @@ export default tseslint.config(
       files: [
         'packages/app-vue/src/modules/**/*.{ts,tsx,vue}',
         'packages/app-vue/src/layouts/**/*.{ts,tsx,vue}',
+        'packages/ai-ui/src/**/*.{ts,tsx,vue}',
         'packages/app-react/src/**/*.{ts,tsx}',
       ],
       ignores: [
@@ -563,6 +571,42 @@ export default tseslint.config(
             allow: [
               ...moduleBoundaryOptions.allow,
               '@memoflow/routine-ui/composables/routineUpcomingCache',
+            ],
+          },
+        ],
+      },
+    },
+    {
+      // AI renderer integration tests compose real owner editors and native harnesses.
+      files: ['packages/ai-ui/src/**/*.spec.ts'],
+      rules: {
+        '@nx/enforce-module-boundaries': [
+          'error',
+          {
+            ...moduleBoundaryOptions,
+            allow: [
+              ...moduleBoundaryOptions.allow,
+              '@memoflow/ai/testing',
+              '@memoflow/repository-ui',
+              '@memoflow/task-ui',
+            ],
+          },
+        ],
+      },
+    },
+    {
+      // Native integration fixture composes real clients with the server runtime.
+      files: ['packages/ai/src/testing/native-agent-flow.ts'],
+      rules: {
+        '@nx/enforce-module-boundaries': [
+          'error',
+          {
+            ...moduleBoundaryOptions,
+            allow: [
+              ...moduleBoundaryOptions.allow,
+              '@memoflow/ai-client/local-agent',
+              '@memoflow/ai-client/agent-instance',
+              '@memoflow/ai-client/runtime-assistant',
             ],
           },
         ],

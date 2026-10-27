@@ -51,6 +51,7 @@ COPY packages/label/package.json ./packages/label/package.json
 COPY packages/label-contracts/package.json ./packages/label-contracts/package.json
 COPY packages/data-portability-contracts/package.json ./packages/data-portability-contracts/package.json
 COPY packages/goal-contracts/package.json ./packages/goal-contracts/package.json
+COPY packages/ai-contracts/package.json ./packages/ai-contracts/package.json
 COPY packages/workspace-contracts/package.json ./packages/workspace-contracts/package.json
 COPY packages/relation/package.json ./packages/relation/package.json
 COPY packages/relation-contracts/package.json ./packages/relation-contracts/package.json
@@ -109,6 +110,7 @@ COPY packages/label ./packages/label
 COPY packages/label-contracts ./packages/label-contracts
 COPY packages/data-portability-contracts ./packages/data-portability-contracts
 COPY packages/goal-contracts ./packages/goal-contracts
+COPY packages/ai-contracts ./packages/ai-contracts
 COPY packages/workspace-contracts ./packages/workspace-contracts
 COPY packages/relation ./packages/relation
 COPY packages/relation-contracts ./packages/relation-contracts

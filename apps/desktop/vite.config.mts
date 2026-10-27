@@ -21,7 +21,7 @@ import {
 } from '../../vite.workspace-aliases.ts';
 
 const desktopRendererDevWorkspaceEntries = [
-  ['@memoflow/ai/client', 'packages/ai/src/client/index.ts'],
+  ['@memoflow/ai-client', 'packages/ai-client/src/index.ts'],
   ['@memoflow/ai/electron', 'packages/ai/src/electron/index.ts'],
   ['@memoflow/goal-client', 'packages/goal-client/src/index.ts'],
   ['@memoflow/goal-core/ids', 'packages/goal-core/src/ids.ts'],
@@ -79,6 +79,7 @@ const desktopRendererDevWorkspaceEntries = [
     'packages/goal-contracts/src/test-support/goal.mock.ts',
   ],
   ['@memoflow/goal-contracts', 'packages/goal-contracts/src/index.ts'],
+  ['@memoflow/ai-contracts', 'packages/ai-contracts/src/index.ts'],
   ['@memoflow/goal-ui/composables/useGoal', 'packages/goal-ui/src/composables/useGoal.ts'],
   ['@memoflow/goal-ui/host', 'packages/goal-ui/src/goal-ui-host.ts'],
   ['@memoflow/notification-ui/host', 'packages/notification-ui/src/notification-ui-host.ts'],

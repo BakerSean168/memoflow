@@ -14,7 +14,7 @@ import type {
   AIWorkflowRunView,
   AIWorkflowGetClientRequest,
   WorkspaceEvent,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 
 export interface GoalWorkspaceEventStreamOptions {
   cursor?: string;

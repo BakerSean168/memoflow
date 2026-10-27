@@ -5,6 +5,7 @@ import {
 } from '@memoflow/setting-contracts';
 import {
   installGoalUiHost,
+  installAiUiHost,
   installNotificationUiHost,
   installRepositoryUiHost,
   installRoutineUiHost,
@@ -18,6 +19,7 @@ export function bootstrapVisualApp(params: URLSearchParams, timeZone = 'UTC') {
   // Production app wiring lives in installAppServices(); the harness mounts
   // goal-ui surfaces without it, so bind the extracted host up front.
   installGoalUiHost();
+  installAiUiHost();
   installTaskUiHost();
   installNotificationUiHost();
   installRepositoryUiHost();

@@ -6,7 +6,7 @@ const sharedConfig = createSharedConfig({
   projectRoot: import.meta.dirname,
   environment: 'node',
   aliases: {
-    '@memoflow/contracts/ai': '../../packages/contracts/src/modules/ai',
+    '@memoflow/ai-contracts': '../../packages/ai-contracts/src',
     '@memoflow/goal-contracts': '../../packages/goal-contracts/src',
     '@memoflow/relation-contracts': '../../packages/relation-contracts/src',
     '@memoflow/workspace-contracts': '../../packages/workspace-contracts/src',

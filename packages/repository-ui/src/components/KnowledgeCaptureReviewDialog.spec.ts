@@ -2,12 +2,12 @@ import { installRepositoryUiHost } from '@repository-ui-test-host/di/repository-
 import { createPinia, setActivePinia, type Pinia } from 'pinia';
 import { useAppShellStore } from '@repository-ui-test-host/layouts/shell/useAppShellStore';
 import { canLeaveBusinessSurface } from '@repository-ui-test-host/layouts/shell/surface-leave-protocol';
-import { canLeaveAIWorkflowReview } from '@repository-ui-test-host/modules/ai/composables/chatViewHelpers';
+import { canLeaveAIWorkflowReview } from '@repository-ui-test-host/ai/chatViewHelpers';
 import { KeepAlive, defineComponent, h, ref } from 'vue';
 import { mount, flushPromises } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { KnowledgeDraftSchema } from '@memoflow/contracts/ai';
+import { KnowledgeDraftSchema } from '@memoflow/ai-contracts';
 import type {
   KnowledgeCaptureSourceOption,
   KnowledgeCaptureNativeEditSession,

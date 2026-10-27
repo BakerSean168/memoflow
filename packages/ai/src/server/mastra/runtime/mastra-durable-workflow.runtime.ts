@@ -20,7 +20,7 @@ import {
   type GoalCreateWorkflowInput,
   type AIGoalSurfaceLeaseRequest,
   type AIGoalSurfaceLeaseResponse,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { IGoalSurfaceLeaseRepository } from '../../application/ports/goal-surface-lease.port';
 import type { IAIUsageReadPort } from '../../application/ports';

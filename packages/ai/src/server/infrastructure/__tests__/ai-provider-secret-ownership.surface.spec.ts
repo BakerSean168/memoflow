@@ -13,12 +13,8 @@ function source(relativePath: string): string {
 
 describe('AI provider secret ownership surface', () => {
   it('keeps public connection DTOs and repository projections secret-free', () => {
-    const clientDto = source(
-      'packages/contracts/src/modules/ai/aggregates/ai-provider-config-client.ts',
-    );
-    const serverDto = source(
-      'packages/contracts/src/modules/ai/aggregates/ai-provider-config-server.ts',
-    );
+    const clientDto = source('packages/ai-contracts/src/aggregates/ai-provider-config-client.ts');
+    const serverDto = source('packages/ai-contracts/src/aggregates/ai-provider-config-server.ts');
     const domain = source('packages/ai/src/server/domain/aggregates/ai-provider-config.ts');
     const prismaRepository = source(
       'packages/ai/src/server/infrastructure/adapters/prisma/ai-provider-config-prisma.repository.ts',

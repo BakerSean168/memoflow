@@ -23,7 +23,7 @@ import {
   type TestAIProviderOnboardingModelReq,
   type TestAIProviderOnboardingModelRes,
   type AIProviderModelCatalogSnapshot,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { formatZodErrors } from '@memoflow/utils/result';
 
 interface AIProviderConfigControllerService {

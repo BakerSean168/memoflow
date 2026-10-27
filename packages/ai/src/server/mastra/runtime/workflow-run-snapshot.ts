@@ -2,7 +2,7 @@ import {
   GoalCreateWorkflowInputSchema,
   TaskCreateWorkflowInputSchema,
   KnowledgeCaptureWorkflowInputSchema,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import {
   GOAL_CREATE_WORKFLOW_ID,
   TASK_CREATE_WORKFLOW_ID,

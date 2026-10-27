@@ -1,4 +1,4 @@
-import type { GoalResearchIntent } from '@memoflow/contracts/ai';
+import type { GoalResearchIntent } from '@memoflow/ai-contracts';
 
 export interface GoalResearchPolicy {
   readonly enabled: boolean;

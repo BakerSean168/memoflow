@@ -10,9 +10,9 @@ import {
   ConversationNameSchema,
   AIConversationClientDTOSchema,
   ConversationListResSchema,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { brandedId } from '@memoflow/contracts/primitives';
-import type { AiConversationId } from '@memoflow/contracts/primitives';
+import type { AiConversationId } from '@memoflow/ai-contracts';
 import type { AIChatController } from '../../server/transport/ai-chat.controller';
 
 interface PlatformMiddleware {

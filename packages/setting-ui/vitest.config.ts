@@ -22,6 +22,9 @@ export default mergeConfig(
     aliases: {
       // Test-only: AISettings.spec reuses the AI feature's native-agent fixture.
       '@memoflow/ai/testing': '../../packages/ai/src/testing/index.ts',
+      '@memoflow/goal-client': '../../packages/goal-client/src/index.ts',
+      '@memoflow/task-client': '../../packages/task-client/src/index.ts',
+      '@memoflow/ai-client': '../../packages/ai-client/src/index.ts',
       '@memoflow/setting-client': '../../packages/setting-client/src/index.ts',
       '@memoflow/setting-contracts': '../../packages/setting-contracts/src/index.ts',
       '@memoflow/desktop-contracts': '../../packages/desktop-contracts/src/index.ts',

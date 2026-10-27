@@ -1,6 +1,6 @@
 import type { PrismaClient } from '@memoflow/database';
-import type { AIModelInfo, AIProviderCatalogId } from '@memoflow/contracts/ai';
-import type { AIProviderCredentialRef } from '@memoflow/contracts/primitives';
+import type { AIModelInfo, AIProviderCatalogId } from '@memoflow/ai-contracts';
+import type { AIProviderCredentialRef } from '@memoflow/ai-contracts';
 import type {
   AIProviderOnboardingSessionRecord,
   CreateAIProviderOnboardingSessionInput,

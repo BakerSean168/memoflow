@@ -1,4 +1,4 @@
-import type { AIProviderConfigServerDTO } from '@memoflow/contracts/ai';
+import type { AIProviderConfigServerDTO } from '@memoflow/ai-contracts';
 
 export interface PowerSyncAIProviderConfigRow {
   id: string;

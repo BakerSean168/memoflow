@@ -9,7 +9,7 @@ import type {
   LocalAgentAuthState,
   LocalAgentConnection,
   LocalAgentStatus,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { LocalAgentError } from '../../shared/local-agent-error';
 import { NativeRpcTransport, type NativeProcessOptions } from './native-rpc-transport';
 import { antigravityLoginFailure } from './native-failure';

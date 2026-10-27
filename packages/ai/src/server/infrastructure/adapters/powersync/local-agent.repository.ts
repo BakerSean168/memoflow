@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
+import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import {
   AssistantRuntimeMessageViewSchema,
   AssistantRuntimeChoiceSchema,
@@ -13,7 +13,7 @@ import {
   type LocalAgentConnectionInput,
   type LocalAgentConnection,
   type LocalAgentConversationCreate,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { nextHistoryTimestamp } from '../../../../shared/history-order';
 import { LocalAgentError } from '../../../../shared/local-agent-error';
 

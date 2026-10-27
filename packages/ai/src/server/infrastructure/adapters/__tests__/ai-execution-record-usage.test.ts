@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaClient } from '@memoflow/database';
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import { AIExecutionRecordPrismaAdapter } from '../prisma/ai-execution-record-prisma.adapter';
 import { AIExecutionRecordPowerSyncAdapter } from '../powersync/ai-execution-record-powersync.adapter';
 

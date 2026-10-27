@@ -1,4 +1,4 @@
-import type { AIProviderCredentialRef } from '@memoflow/contracts/primitives';
+import type { AIProviderCredentialRef } from '@memoflow/ai-contracts';
 
 /** Plaintext is intentionally shaped as an edge-only value, not a DTO field. */
 export interface ResolvedAIProviderCredential {

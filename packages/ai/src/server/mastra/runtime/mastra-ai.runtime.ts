@@ -28,7 +28,7 @@ import {
   type AIGoalSurfaceLeaseResponse,
   type AssistantRuntimeEvent,
   type AssistantRuntimeHistoryView,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type {
   AIUsageSummary,
@@ -785,7 +785,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
 
   async cancelAskUserSuspension(input: {
     context: ExecutionContext;
-    command: import('@memoflow/contracts/ai').AssistantRuntimeToolAnswerCommand;
+    command: import('@memoflow/ai-contracts').AssistantRuntimeToolAnswerCommand;
   }): Promise<boolean> {
     if (input.command.action !== 'cancel' || !input.context.identityId || input.command.identityId)
       return false;
@@ -869,7 +869,7 @@ export class MastraAIRuntime implements AIWorkflowRuntimePort {
 
   async answerToolSuspension(input: {
     context: ExecutionContext;
-    command: import('@memoflow/contracts/ai').AssistantRuntimeToolAnswerCommand;
+    command: import('@memoflow/ai-contracts').AssistantRuntimeToolAnswerCommand;
   }): Promise<boolean> {
     if (input.command.action === 'cancel') return this.cancelAskUserSuspension(input);
     if (!input.context.identityId || input.command.identityId) return false;

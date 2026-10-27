@@ -67,7 +67,7 @@ import {
   AIChannels,
   AIStreamChannels,
   type IElectronModuleContext,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import {
   AssistantRuntimeApprovalCommandSchema,
   AssistantAttentionListRequestSchema,
@@ -97,7 +97,7 @@ import {
   WorkspaceStreamRequestSchema,
   WorkspaceStreamAckSchema,
   WorkspaceStreamStopSchema,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { workspaceEventStream } from '../server/transport/workspace-event-stream';
 import { fail, ok } from '@memoflow/transport-contracts/result';
 import { formatZodErrors } from '@memoflow/utils/result';
@@ -105,7 +105,11 @@ import { createLogger } from '@memoflow/utils/logger';
 import type { AITransportModuleInstance } from '../server/infrastructure';
 import { toAITransportFailure } from '../server/transport';
 import { AgentInstanceController } from '../server/transport/agent-instance.controller';
-import { withAuthenticatedValue } from './authenticated-ipc';
+import { createAuthenticatedIpcWrapper } from '@memoflow/host-runtime/electron-ipc';
+const withAuthenticatedValue = createAuthenticatedIpcWrapper({
+  unexpectedErrorCode: 'INTERNAL_ERROR',
+  unexpectedErrorMessage: 'AI operation failed',
+});
 import { ConversationAttentionObserver } from '../server/application/services/conversation-attention-observer';
 
 const logger = createLogger('AIElectron');
@@ -129,10 +133,10 @@ type ModuleHandleState = 'created' | 'registered' | 'disposed' | 'failed';
  * AI Electron 模块 handle。
  *
  * Structurally compatible with `IElectronModule` from
- * `@memoflow/contracts/electron`, but defined locally so this seam stays
+ * `@memoflow/desktop-contracts`, but defined locally so this seam stays
  * host-shaped: the factory returns it already bound to one instance.
  *
- * 与 `@memoflow/contracts/electron` 的 `IElectronModule` 结构兼容，
+ * 与 `@memoflow/desktop-contracts` 的 `IElectronModule` 结构兼容，
  * 但在本地定义，使该 seam 保持宿主形状：工厂返回时已绑定到单个实例。
  */
 export interface AIElectronModuleDef {

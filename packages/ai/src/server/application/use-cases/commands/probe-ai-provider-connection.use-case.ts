@@ -3,7 +3,7 @@ import {
   getAIProviderCatalogEntry,
   type ProbeAIProviderConnectionReq,
   type ProbeAIProviderConnectionRes,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { AIExecutionError } from '../../../../shared/ai-execution-error';
 import type {

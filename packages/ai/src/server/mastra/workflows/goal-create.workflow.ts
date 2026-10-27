@@ -16,7 +16,7 @@ import {
   type GoalPlanDraft,
   type GoalResearchEvidence,
   type GoalPlanningDecision,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import {
   readGoalPlannerResearchEvidence,

@@ -1,6 +1,6 @@
 import { createIdType } from '@memoflow/utils/domain';
 
-import type { AiProviderConfigId as IAiProviderConfigId } from '@memoflow/contracts/primitives';
+import type { AiProviderConfigId as IAiProviderConfigId } from '@memoflow/ai-contracts';
 
 /**
  * AiProviderConfigId 值对象

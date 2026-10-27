@@ -2,7 +2,7 @@ import { ok, type Result } from '@memoflow/transport-contracts/result';
 import type {
   TestAIProviderOnboardingModelReq,
   TestAIProviderOnboardingModelRes,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { AIExecutionError } from '../../../../shared/ai-execution-error';
 import { normalizeOpenAICompatibleModelId } from '../../../shared/openai-compatible-normalize';

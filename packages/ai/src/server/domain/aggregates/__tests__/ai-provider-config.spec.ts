@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { IdentityId } from '@memoflow/domain-shared/shared';
-import type { AIProviderCredentialRef } from '@memoflow/contracts/primitives';
+import type { AIProviderCredentialRef } from '@memoflow/ai-contracts';
 import { AIProviderConfig } from '../ai-provider-config';
 
 describe('AIProviderConfig aggregate', () => {

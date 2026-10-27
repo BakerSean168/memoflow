@@ -30,7 +30,7 @@ import type {
   ProbeAIProviderReplacementReq,
   TestAIProviderOnboardingModelReq,
   TestAIProviderOnboardingModelRes,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type {
   DesktopAccessSnapshot,
   DesktopNotificationPreference,

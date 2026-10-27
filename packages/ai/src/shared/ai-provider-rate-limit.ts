@@ -1,7 +1,7 @@
 import {
   AIRateLimitPublicFailureSchema,
   type AIWorkflowTerminalFailure,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 
 type LimitMetadata = Pick<AIWorkflowTerminalFailure, 'details' | 'retryHint'>;
 const MAX_DELAY_MS = 86_400_000;

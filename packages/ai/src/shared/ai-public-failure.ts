@@ -1,7 +1,7 @@
 import { extractStructuredResultError } from '@memoflow/transport-contracts/result';
 import { LocalAgentError, localAgentFailureMessage } from './local-agent-error';
 import { isAIExecutionError, type AIExecutionErrorKind } from './ai-execution-error';
-import type { AIWorkflowTerminalFailure } from '@memoflow/contracts/ai';
+import type { AIWorkflowTerminalFailure } from '@memoflow/ai-contracts';
 import { readAIProviderRateLimit } from './ai-provider-rate-limit';
 
 /** Public AI failure codes accepted at the runtime boundary. */

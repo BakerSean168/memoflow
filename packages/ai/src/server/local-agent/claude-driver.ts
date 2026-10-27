@@ -7,8 +7,8 @@ import type {
   LocalAgentRequest,
   LocalAgentRequestResponse,
   LocalAgentStatus,
-} from '@memoflow/contracts/ai';
-import { LocalAgentModelOptionValueSchema } from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
+import { LocalAgentModelOptionValueSchema } from '@memoflow/ai-contracts';
 import type { NativeAgentEvent, NativeAgentRunInput } from './codex-driver';
 import { LocalAgentError } from '../../shared/local-agent-error';
 import { NativeEventQueue } from './native-event-queue';

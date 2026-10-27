@@ -3,7 +3,7 @@ import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { AIEvaluationReportSchema, type GetAIEvaluationOverviewRes } from '@memoflow/contracts/ai';
+import { AIEvaluationReportSchema, type GetAIEvaluationOverviewRes } from '@memoflow/ai-contracts';
 
 import type {
   AIEvaluationHistoryRecord,

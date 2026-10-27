@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { TaskCreateClientInputSchema, AIWorkflowRunViewSchema } from '@memoflow/contracts/ai';
+import { TaskCreateClientInputSchema, AIWorkflowRunViewSchema } from '@memoflow/ai-contracts';
 import { GatewayTaskReceiptSchema } from './writes';
 
 /** Consent pins an existing user-owned model setting; never accepts provider credentials. */

@@ -1,14 +1,14 @@
 import { join } from 'node:path';
 import { ok } from '@memoflow/transport-contracts/result';
-import { AIChannels, AIStreamChannels } from '@memoflow/contracts/electron';
+import { AIChannels, AIStreamChannels } from '@memoflow/desktop-contracts';
 import {
   LocalAgentClientCommandSchema,
   AgentRegistryCommandSchema,
   AssistantRuntimeClientCommandSchema,
-} from '@memoflow/contracts/ai';
-import { createLocalAgentIpcClient } from '../client/local-agent';
-import { createAgentRegistryIpcClient } from '../client/agent-instance';
-import { createAssistantRuntimeIpcClient } from '../client/runtime-assistant';
+} from '@memoflow/ai-contracts';
+import { createLocalAgentIpcClient } from '@memoflow/ai-client/local-agent';
+import { createAgentRegistryIpcClient } from '@memoflow/ai-client/agent-instance';
+import { createAssistantRuntimeIpcClient } from '@memoflow/ai-client/runtime-assistant';
 import type { IResultIpcClient } from '@memoflow/ipc-client';
 import { createLocalAgentSqlite } from './local-agent-sqlite';
 import { AgentInstanceRegistry } from '../server/application/agent-instance/agent-instance.registry';

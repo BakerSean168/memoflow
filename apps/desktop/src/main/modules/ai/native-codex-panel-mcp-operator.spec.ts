@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { LocalAgentRepository } from '@memoflow/ai';
 import { createTimeContext } from '@memoflow/time';
 import { createPowerSyncSqliteFixture } from '@memoflow/test-utils/helpers/powersync-sqlite';
-import type { NativePanelIpcResponse } from '@memoflow/contracts/ai';
+import type { NativePanelIpcResponse } from '@memoflow/ai-contracts';
 import type { IDesktopNativePanelBridge } from './desktop-native-panel-bridge';
 import { createDesktopLocalAgentTools } from './local-agent-tools';
 

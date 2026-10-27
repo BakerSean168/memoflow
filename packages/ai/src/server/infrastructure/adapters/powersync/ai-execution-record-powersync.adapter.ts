@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import type {
   AIExecutionRecordInput,
   AIUsageQuery,

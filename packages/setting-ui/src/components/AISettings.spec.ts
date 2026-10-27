@@ -22,7 +22,7 @@ import {
   type LocalAgentConnection,
   type LocalAgentStatus,
   type ProbeAIProviderConnectionRes,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { ok } from '@memoflow/contracts/result';
 import {
   AI_LOCAL_AGENT_KEY,

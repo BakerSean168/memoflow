@@ -7,7 +7,7 @@ import {
   type GetConversationRes,
   type UpdateConversationReq,
   type UpdateConversationRes,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { formatZodErrors } from '@memoflow/utils/result';
 
 interface AIConversationControllerService {

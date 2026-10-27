@@ -6,7 +6,7 @@ import {
   TaskWorkflowSuspensionSchema,
   KnowledgeWorkflowSuspensionSchema,
   type AIWorkflowRunView,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import {
   GOAL_CREATE_LIFECYCLE_STEP_ID,
   GoalCreateWorkflowOutputSchema,

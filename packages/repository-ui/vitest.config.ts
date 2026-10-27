@@ -11,6 +11,13 @@ export default mergeConfig(
     environment: 'happy-dom',
     aliasEntries: [
       {
+        find: '@repository-ui-test-host/ai/chatViewHelpers',
+        replacement: path.resolve(
+          import.meta.dirname,
+          '../ai-ui/src/composables/chatViewHelpers.ts',
+        ),
+      },
+      {
         find: '@repository-ui-test-host/shared/utils/useStrictInject',
         replacement: path.resolve(import.meta.dirname, 'src/utils/useStrictInject.ts'),
       },

@@ -234,9 +234,9 @@
       "reason": "Aggressive reduction authorized in Issue #625: routine behavior is owned by existing component/unit/API/database tests. Browser-specific geometry and complete UI-to-server journeys are deliberately no longer duplicated; this is not a claim of assertion-for-assertion equivalence.",
       "sourceSha256": "50407d59fc5514f1b950e833e00415c67e23874fae53945574039c74a7c3b6ac",
       "replacements": [
-        "packages/app-vue/src/modules/ai/composables/useAIModelSelection.agent-instance.spec.ts",
-        "packages/app-vue/src/modules/ai/composables/useAIChatSession.spec.ts",
-        "packages/app-vue/src/modules/ai/composables/useAssistantStream.spec.ts"
+        "packages/ai-ui/src/composables/useAIModelSelection.agent-instance.spec.ts",
+        "packages/ai-ui/src/composables/useAIChatSession.spec.ts",
+        "packages/ai-ui/src/composables/useAssistantStream.spec.ts"
       ],
       "issue": "https://github.com/BakerSean168/memoflow/issues/625",
       "coverageDisposition": "lower-layer coverage; accepted loss of whole-system UI journey signal"
@@ -247,7 +247,7 @@
       "sourceSha256": "47920079a35a50289ca68bf5616686afdff7e95c2b271e704a9f91c99bc723c5",
       "replacements": [
         "packages/app-vue/src/layouts/shell/AppShell.spec.ts",
-        "packages/app-vue/src/modules/ai/composables/useAIChatView.lifecycle.spec.ts"
+        "packages/ai-ui/src/composables/useAIChatView.lifecycle.spec.ts"
       ],
       "issue": "https://github.com/BakerSean168/memoflow/issues/625",
       "coverageDisposition": "lower-layer coverage; accepted loss of whole-system UI journey signal"
@@ -257,7 +257,7 @@
       "reason": "Provider loading/empty/reset UI states are covered below E2E; aggressive retirement authorized in Issue #625. Browser-to-API reset journey is deliberately no longer duplicated.",
       "sourceSha256": "f2a577a55ff655e36bd37bdff7527ae4302191f91ce1d84b18bd818084965288",
       "replacements": [
-        "packages/app-vue/src/modules/ai/components/AIComposerControls.spec.ts",
+        "packages/ai-ui/src/components/AIComposerControls.spec.ts",
         "packages/app-vue/src/modules/setting/components/AISettings.spec.ts",
         "apps/api/src/__tests__/integration/agent-instance-registry.integration.test.ts"
       ],
@@ -269,7 +269,7 @@
       "reason": "User explicitly authorized retirement in Issue #625: existing workflow/component/subscription/notification contracts own this behavior. Whole-browser refresh assembly, real-time SSE network observation and notification UI-to-DB orchestration are deliberately no longer required; lower-layer coverage is not assertion-for-assertion equivalence.",
       "sourceSha256": "9c8ec927c72f1ea7416e83756718d8967c7b48776a5f51c30d73f1bc645d1b9a",
       "replacements": [
-        "packages/app-vue/src/modules/ai/composables/useAIGoalWorkflow.spec.ts",
+        "packages/ai-ui/src/composables/useAIGoalWorkflow.spec.ts",
         "packages/ai/src/server/mastra/workflows/goal-create.workflow.spec.ts"
       ],
       "issue": "https://github.com/BakerSean168/memoflow/issues/625",
@@ -280,7 +280,7 @@
       "reason": "User explicitly authorized retirement in Issue #625: existing workflow/component/subscription/notification contracts own this behavior. Whole-browser refresh assembly, real-time SSE network observation and notification UI-to-DB orchestration are deliberately no longer required; lower-layer coverage is not assertion-for-assertion equivalence.",
       "sourceSha256": "1faf7a7c8b85e5a3af6ef480c8ec9abd2c551fffba9b8f2782b873b764e6be05",
       "replacements": [
-        "packages/app-vue/src/modules/ai/composables/useAITaskWorkflow.spec.ts",
+        "packages/ai-ui/src/composables/useAITaskWorkflow.spec.ts",
         "packages/ai/src/server/mastra/workflows/task-create.workflow.spec.ts"
       ],
       "issue": "https://github.com/BakerSean168/memoflow/issues/625",
@@ -290,7 +290,7 @@
       "path": "apps/web/e2e/ai/goal-workflow/knowledge.spec.ts",
       "reason": "User explicitly authorized retirement in Issue #625: existing workflow/component/subscription/notification contracts own this behavior. Whole-browser refresh assembly, real-time SSE network observation and notification UI-to-DB orchestration are deliberately no longer required; lower-layer coverage is not assertion-for-assertion equivalence.",
       "sourceSha256": "689e41869b80f109dc7a1cd9db8b09b92262dfec2ee93f871e4dff062254beac",
-      "replacements": ["packages/app-vue/src/modules/ai/composables/useAIKnowledgeCapture.spec.ts"],
+      "replacements": ["packages/ai-ui/src/composables/useAIKnowledgeCapture.spec.ts"],
       "issue": "https://github.com/BakerSean168/memoflow/issues/625",
       "coverageDisposition": "existing lower-layer contracts; user accepts loss of browser refresh/network/notification whole-system signal"
     },
@@ -299,8 +299,8 @@
       "reason": "User explicitly authorized retirement in Issue #625: existing workflow/component/subscription/notification contracts own this behavior. Whole-browser refresh assembly, real-time SSE network observation and notification UI-to-DB orchestration are deliberately no longer required; lower-layer coverage is not assertion-for-assertion equivalence.",
       "sourceSha256": "6b81b74bb71f5388517f5f61bd486bac80130c20cdcd5327984637a3e1837c08",
       "replacements": [
-        "packages/app-vue/src/modules/ai/composables/useGoalWorkflowEvents.spec.ts",
-        "packages/app-vue/src/modules/ai/composables/useAIGoalWorkflow.spec.ts",
+        "packages/ai-ui/src/composables/useGoalWorkflowEvents.spec.ts",
+        "packages/ai-ui/src/composables/useAIGoalWorkflow.spec.ts",
         "packages/ai/src/api/routes/workspace-sse.http.spec.ts"
       ],
       "issue": "https://github.com/BakerSean168/memoflow/issues/625",
@@ -332,7 +332,7 @@
       "path": "apps/web/e2e/ai/goal-workflow/multi-session.spec.ts",
       "reason": "User authorized the remaining ordinary Web Flow to retire in Issue #625. Existing state/checkpoint/event/component contracts and real HTTP/PostgreSQL authentication own the lower-layer behavior. Actual browser reload, IndexedDB host assembly, cross-browser transport and UI auth navigation are accepted signal losses, not assertion-equivalent replacements.",
       "sourceSha256": "ad06ea2a204a9e0d1c4477e7595ad12c1766d0645658460551907fe6241765e8",
-      "replacements": ["packages/app-vue/src/modules/ai/composables/useAIChatSession.spec.ts"],
+      "replacements": ["packages/ai-ui/src/composables/useAIChatSession.spec.ts"],
       "issue": "https://github.com/BakerSean168/memoflow/issues/625",
       "coverageDisposition": "lower-layer ownership; accepted loss of ordinary whole-system Web journey"
     },

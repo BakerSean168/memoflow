@@ -1,7 +1,7 @@
 import { expect, it, vi } from 'vitest';
 import type { HookInput } from '@anthropic-ai/claude-agent-sdk';
-import { LocalAgentStatusSchema } from '@memoflow/contracts/ai';
-import type { LocalAgentConnection } from '@memoflow/contracts/ai';
+import { LocalAgentStatusSchema } from '@memoflow/ai-contracts';
+import type { LocalAgentConnection } from '@memoflow/ai-contracts';
 import { ClaudeDriver, type ClaudeQueryFactory } from './claude-driver';
 import { nativeIdentity } from './native-identity';
 

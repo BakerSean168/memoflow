@@ -1,7 +1,7 @@
 {
   "name": "@memoflow/account",
   "version": "0.0.1",
-  "description": "账户模块 - 用户账户生命周期管理",
+  "description": "\u8d26\u6237\u6a21\u5757 - \u7528\u6237\u8d26\u6237\u751f\u547d\u5468\u671f\u7ba1\u7406",
   "type": "module",
   "files": [
     "dist"

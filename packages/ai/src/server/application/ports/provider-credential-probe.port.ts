@@ -1,4 +1,4 @@
-import type { AIProviderCredentialProbeStrategy } from '@memoflow/contracts/ai';
+import type { AIProviderCredentialProbeStrategy } from '@memoflow/ai-contracts';
 
 export interface ProviderCredentialProbeInput {
   readonly strategy: AIProviderCredentialProbeStrategy;

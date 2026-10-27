@@ -1,5 +1,6 @@
 import {
   installGoalUiHost,
+  installAiUiHost,
   installNotificationUiHost,
   installRepositoryUiHost,
   installRoutineUiHost,
@@ -32,7 +33,7 @@ import {
   createAgentRegistryIpcClient,
   createRuntimeUsageIpcClient,
   createWorkflowRuntimeIpcClient,
-} from '@memoflow/ai/client';
+} from '@memoflow/ai-client';
 import { createDataPortabilityIpcClient } from '@memoflow/data-portability/client';
 import {
   ACCOUNT_SERVICE_KEY,
@@ -95,6 +96,7 @@ export function installDesktopAppServices(
   initialSnapshot: DesktopAccessSnapshot | null = null,
 ): void {
   installGoalUiHost();
+  installAiUiHost();
   installTaskUiHost();
   installNotificationUiHost();
   installRepositoryUiHost();

@@ -66,6 +66,9 @@ export function createContractsAliasEntries(workspaceRoot: string): Alias[] {
   const contractsRoot = resolveFromWorkspace(workspaceRoot, 'packages/contracts/src');
 
   return [
+    ...createAiContractsAliasEntries(workspaceRoot),
+    ...createAiClientAliasEntries(workspaceRoot),
+    ...createAiUiAliasEntries(workspaceRoot),
     {
       find: /^@memoflow\/cloud-auth-contracts\/(.+)$/,
       replacement: resolveFromWorkspace(workspaceRoot, 'packages/cloud-auth-contracts/src/$1'),
@@ -267,6 +270,10 @@ export function createGoalUiAliasEntries(workspaceRoot: string): Alias[] {
       ),
     },
     {
+      find: /^@memoflow\/goal-ui\/(.+)$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/goal-ui/src/$1'),
+    },
+    {
       find: /^@memoflow\/goal-ui$/,
       replacement: resolveFromWorkspace(workspaceRoot, 'packages/goal-ui/src/index.ts'),
     },
@@ -284,6 +291,21 @@ export function createGoalContractsAliasEntries(workspaceRoot: string): Alias[] 
     {
       find: /^@memoflow\/goal-contracts\/(.+)$/,
       replacement: `${goalContractsRoot}/$1`,
+    },
+  ];
+}
+
+export function createAiContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const aiContractsRoot = resolveFromWorkspace(workspaceRoot, 'packages/ai-contracts/src');
+
+  return [
+    {
+      find: /^@memoflow\/ai-contracts$/,
+      replacement: `${aiContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/ai-contracts\/(.+)$/,
+      replacement: `${aiContractsRoot}/$1`,
     },
   ];
 }
@@ -648,8 +670,29 @@ export function createRepositoryUiAliasEntries(workspaceRoot: string): Alias[] {
       ),
     },
     {
+      find: /^@memoflow\/repository-ui\/(.+)$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/repository-ui/src/$1'),
+    },
+    {
       find: /^@memoflow\/repository-ui$/,
       replacement: resolveFromWorkspace(workspaceRoot, 'packages/repository-ui/src/index.ts'),
     },
+  ];
+}
+
+export function createAiClientAliasEntries(workspaceRoot: string): Alias[] {
+  const root = resolveFromWorkspace(workspaceRoot, 'packages/ai-client/src');
+  return [
+    { find: /^@memoflow\/ai-client$/, replacement: `${root}/index.ts` },
+    { find: /^@memoflow\/ai-client\/(.+)$/, replacement: `${root}/$1` },
+  ];
+}
+
+export function createAiUiAliasEntries(workspaceRoot: string): Alias[] {
+  const root = resolveFromWorkspace(workspaceRoot, 'packages/ai-ui/src');
+  return [
+    { find: /^@memoflow\/ai-ui\/host$/, replacement: `${root}/ai-ui-host.ts` },
+    { find: /^@memoflow\/ai-ui$/, replacement: `${root}/index.ts` },
+    { find: /^@memoflow\/ai-ui\/(.+)$/, replacement: `${root}/$1` },
   ];
 }

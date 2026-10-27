@@ -13,7 +13,7 @@ import {
   type LocalAgentConnectionInput,
   type LocalAgentDriver,
   type LocalAgentStatus,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { SystemChannels } from '@memoflow/contracts/electron';
 import { settingUiHost } from '../setting-ui-host';
 

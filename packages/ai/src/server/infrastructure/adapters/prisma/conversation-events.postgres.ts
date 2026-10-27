@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { Pool, type PoolClient } from 'pg';
 import { z } from 'zod';
-import { AIConversationClientDTOSchema } from '@memoflow/contracts/ai';
+import { AIConversationClientDTOSchema } from '@memoflow/ai-contracts';
 import type {
   ConversationChange,
   ConversationEventSource,

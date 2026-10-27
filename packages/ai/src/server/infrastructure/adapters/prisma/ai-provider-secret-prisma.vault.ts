@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { PrismaClient } from '@memoflow/database';
-import type { AIProviderCredentialRef } from '@memoflow/contracts/primitives';
+import type { AIProviderCredentialRef } from '@memoflow/ai-contracts';
 import type {
   IAIProviderSecretVault,
   ResolveAIProviderCredentialInput,

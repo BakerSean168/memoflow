@@ -1,7 +1,7 @@
 import express, { type RequestHandler } from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
-import type { AssistantRuntimeEvent } from '@memoflow/contracts/ai';
+import type { AssistantRuntimeEvent } from '@memoflow/ai-contracts';
 import { registerAIRuntimeRoutes } from './ai-runtime.routes';
 
 // Transport contract only: runtime/model/persistence semantics stay with their

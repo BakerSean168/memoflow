@@ -8,7 +8,7 @@ import {
   type AssistantRunOutcome,
   type AssistantToolActivityView,
   type AssistantRuntimeHistoryView,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { compareHistoryTimestamps } from '../../../shared/history-order';
 import type { AssistantConversationShellSource } from './assistant-conversation-shell.port';
 

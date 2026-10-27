@@ -1,7 +1,7 @@
 import type { AccountEventMap } from '../modules/account/protocol/account-event-map';
 import type { AccountRpcMap } from '../modules/account/protocol/account-rpc-map';
-import type { AIEventMap } from '../modules/ai/protocol/ai-event-map';
-import type { AIRpcMap } from '../modules/ai/protocol/ai-rpc-map';
+import type { AIEventMap } from '@memoflow/ai-contracts/protocol/ai-event-map';
+import type { AIRpcMap } from '@memoflow/ai-contracts/protocol/ai-rpc-map';
 import type { DataPortabilityRpcMap } from '@memoflow/data-portability-contracts';
 import type { GoalEventMap } from '@memoflow/goal-contracts';
 import type { GoalRpcMap } from '@memoflow/goal-contracts';

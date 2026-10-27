@@ -20,7 +20,7 @@ describe('ai void success envelope surface', () => {
   );
   const electron = readFileSync(resolve(__dirname, '../../electron/index.ts'), 'utf8');
   const responseSchemas = readFileSync(
-    resolve(__dirname, '../../../../contracts/src/modules/ai/api/response-schemas.ts'),
+    resolve(__dirname, '../../../../ai-contracts/src/api/response-schemas.ts'),
     'utf8',
   );
 

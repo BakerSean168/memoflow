@@ -1,4 +1,4 @@
-import type { ConversationStatus } from '@memoflow/contracts/ai';
+import type { ConversationStatus } from '@memoflow/ai-contracts';
 import { IdentityId } from '@memoflow/domain-shared/shared';
 import { AIConversation } from '../../../../domain/aggregates/ai-conversation';
 import { AiConversationId } from '../../../../domain/value-objects/ai-conversation-id';

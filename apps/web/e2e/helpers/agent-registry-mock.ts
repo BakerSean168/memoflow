@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test';
 import {
   AgentRegistrySnapshotSchema,
   AIProviderModelCatalogSnapshotSchema,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 
 /** Complements provider/runtime fixtures with the same Agent authority the live host exposes. */
 export async function installMastraRegistryMock(

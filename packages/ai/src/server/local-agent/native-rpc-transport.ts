@@ -1,6 +1,6 @@
 import { execFile, spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { z } from 'zod';
-import type { LocalAgentDriver } from '@memoflow/contracts/ai';
+import type { LocalAgentDriver } from '@memoflow/ai-contracts';
 import { LocalAgentError } from '../../shared/local-agent-error';
 import { resolveNativeExecutable } from './native-executable';
 import { nativeFailure } from './native-failure';

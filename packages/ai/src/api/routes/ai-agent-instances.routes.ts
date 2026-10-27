@@ -11,7 +11,7 @@ import {
   AgentInstanceSchema,
   AgentRegistrySnapshotSchema,
   AgentRegistryCommandSchema,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { AgentInstanceController } from '../../server/transport/agent-instance.controller';
 
 interface PlatformMiddleware {

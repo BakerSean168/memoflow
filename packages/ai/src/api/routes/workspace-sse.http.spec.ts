@@ -8,7 +8,7 @@ import { once } from 'node:events';
 import express from 'express';
 import type { WorkflowRunState } from '@mastra/core/workflows';
 import { describe, expect, it } from 'vitest';
-import { WorkspaceEventSchema } from '@memoflow/contracts/ai';
+import { WorkspaceEventSchema } from '@memoflow/ai-contracts';
 import type { AIWorkflowRuntimePort } from '../../server/mastra/runtime';
 import { createMastraStorage } from '../../server/mastra/runtime/storage';
 import { getGoalWorkflowEventSource } from '../../server/mastra/runtime/goal-workflow-events.registry';

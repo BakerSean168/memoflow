@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
-import { AIConversationClientDTOSchema } from '@memoflow/contracts/ai';
+import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
+import { AIConversationClientDTOSchema } from '@memoflow/ai-contracts';
 import type {
   ConversationChange,
   ConversationEventSource,

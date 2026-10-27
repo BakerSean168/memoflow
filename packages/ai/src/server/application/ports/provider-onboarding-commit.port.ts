@@ -1,5 +1,5 @@
-import type { AIProviderConnectionServerDTO } from '@memoflow/contracts/ai';
-import type { AIProviderCredentialRef } from '@memoflow/contracts/primitives';
+import type { AIProviderConnectionServerDTO } from '@memoflow/ai-contracts';
+import type { AIProviderCredentialRef } from '@memoflow/ai-contracts';
 
 export type AIProviderOnboardingCommitOutcome = 'COMMITTED' | 'SESSION_UNAVAILABLE' | 'CONFLICT';
 export type AIProviderReplacementCommitOutcome =
