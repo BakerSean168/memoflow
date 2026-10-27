@@ -1,7 +1,7 @@
 import type { PrismaClient } from '@memoflow/database';
 import type { TimeContext } from '@memoflow/time';
 import { Habit, type HabitState } from '../../../domain/habit/habit';
-import type { IHabitRepository } from '../../../application/use-cases/commands/habit.use-cases';
+import type { IHabitRepository } from '../../../domain';
 
 function toState(row: {
   id: string;

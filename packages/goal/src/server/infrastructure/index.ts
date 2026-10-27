@@ -25,9 +25,13 @@ export {
 export type { GoalApplicationPort } from '../application';
 
 // ============ Repository Ports referenced by GoalRepositorySet ============
-export type { IGoalRecordRepository, IGoalRepository, IWalletRepository } from '../domain';
+export type {
+  IHabitRepository,
+  IGoalRecordRepository,
+  IGoalRepository,
+  IWalletRepository,
+} from '../domain';
 export type { GoalWriteTransactionRunner } from '../application/use-cases/commands/goal-write-support';
-export type { IHabitRepository } from '../application/use-cases/commands/habit.use-cases';
 
 export {
   createGoalPrismaModule,

@@ -32,8 +32,12 @@ import type { ScheduledHandlerRegistration } from '@memoflow/schedule-contracts'
 import type { GoalScheduleProjectionSource } from '../../schedule-projection';
 import { createGoalTaskProgressHandler } from '../application/event-handlers';
 import type { GoalDependencyReadPort } from '@memoflow/reliable-messaging-contracts';
-import type { IGoalRecordRepository, IGoalRepository, IWalletRepository } from '../domain';
-import type { IHabitRepository } from '../application/use-cases/commands/habit.use-cases';
+import type {
+  IHabitRepository,
+  IGoalRecordRepository,
+  IGoalRepository,
+  IWalletRepository,
+} from '../domain';
 import type { GoalWriteTransactionRunner } from '../application/use-cases/commands/goal-write-support';
 
 /**

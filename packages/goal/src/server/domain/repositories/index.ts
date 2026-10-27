@@ -13,3 +13,4 @@ export type {
   WalletAccountDTO,
   WalletTransactionDTO,
 } from './i-wallet-repository';
+export type { IHabitRepository } from './i-habit-repository';

@@ -1,15 +1,8 @@
 import type { Result } from '@memoflow/transport-contracts/result';
 import { error, ok } from '@memoflow/transport-contracts/result';
 import { Habit, type HabitFrequency, type HabitState } from '../../../domain/habit/habit';
+import type { IHabitRepository } from '../../../domain';
 import type { TimeContext, UserTimeContextPort } from '@memoflow/time';
-
-/** Habit 仓储端口（Prisma/PowerSync 实现）。 */
-export interface IHabitRepository {
-  save(habit: Habit, timeContext: TimeContext, now?: number): Promise<void>;
-  findByIdForIdentity(identityId: string, id: string): Promise<Habit | null>;
-  findByIdentityId(identityId: string): Promise<Habit[]>;
-  deleteByIdentityId(identityId: string, id: string): Promise<void>;
-}
 
 export interface CreateHabitReq {
   name: string;

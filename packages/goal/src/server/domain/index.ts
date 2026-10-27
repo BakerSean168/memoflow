@@ -52,6 +52,9 @@ export type {
 // R7 钱包仓储 Port（domain-owned）
 export type { IWalletRepository, WalletAccountDTO, WalletTransactionDTO } from './repositories';
 
+// R4 Habit 仓储 Port（domain-owned）
+export type { IHabitRepository } from './repositories';
+
 // 领域服务（只保留真正的领域服务）
 export { GoalPolicy, GoalProgressCalculator, calculateKeyResultProgress } from './services';
 

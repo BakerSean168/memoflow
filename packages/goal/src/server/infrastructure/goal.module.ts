@@ -15,7 +15,12 @@
  * 只使用构造函数注入，不使用隐藏的服务定位器。
  */
 
-import type { IGoalRepository, IGoalRecordRepository, IWalletRepository } from '../domain';
+import type {
+  IHabitRepository,
+  IGoalRepository,
+  IGoalRecordRepository,
+  IWalletRepository,
+} from '../domain';
 import { GoalPolicy } from '../domain';
 import {
   CreateGoalUseCase,
@@ -61,7 +66,6 @@ import {
   CreateHabitUseCase,
   RecordHabitCheckInUseCase,
   ListHabitUseCase,
-  type IHabitRepository,
 } from '../application/use-cases/commands/habit.use-cases';
 import {
   CreateWalletAccountUseCase,

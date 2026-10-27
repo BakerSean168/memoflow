@@ -53,7 +53,7 @@ export {
   type IGoalRecordRepository,
   type IWalletRepository,
 } from './server';
-export type { IHabitRepository } from './server/application/use-cases/commands/habit.use-cases';
+export type { IHabitRepository } from './server/domain/repositories/i-habit-repository';
 export type { GoalWriteTransactionRunner } from './server/application/use-cases/commands/goal-write-support';
 
 export {
