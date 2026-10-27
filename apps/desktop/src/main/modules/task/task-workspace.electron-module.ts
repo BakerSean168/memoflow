@@ -5,7 +5,7 @@ import {
   type IElectronModuleContext,
 } from '@memoflow/desktop-contracts';
 import { withAuthenticatedIdentity } from '@memoflow/host-runtime/electron-ipc';
-import { GetTaskWorkspaceInvocationSchema } from '@memoflow/workspace-contracts';
+import { GetTaskWorkspaceInvocationSchema } from '@memoflow/task-workspace-contracts';
 import { fail } from '@memoflow/transport-contracts/result';
 import type { TaskWorkspaceApplicationPort } from '@memoflow/task';
 

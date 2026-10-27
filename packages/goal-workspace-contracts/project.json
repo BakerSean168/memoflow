@@ -1,45 +1,59 @@
 {
-  "name": "workspace-contracts",
+  "name": "goal-workspace-contracts",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
-  "sourceRoot": "packages/workspace-contracts/src",
-  "tags": ["scope:shared", "type:lib", "layer:shared"],
+  "sourceRoot": "packages/goal-workspace-contracts/src",
+  "tags": [
+    "scope:shared",
+    "type:lib",
+    "layer:shared",
+    "tier:core"
+  ],
   "targets": {
     "typecheck": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsc --build packages/workspace-contracts/tsconfig.json"
+        "command": "tsc --build packages/goal-workspace-contracts/tsconfig.json"
       }
     },
     "build": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/packages/workspace-contracts/dist"],
+      "outputs": [
+        "{workspaceRoot}/packages/goal-workspace-contracts/dist"
+      ],
       "cache": true,
       "options": {
         "command": "node ../../node_modules/tsup/dist/cli-default.js && tsc -p tsconfig.build.json",
-        "cwd": "packages/workspace-contracts"
+        "cwd": "packages/goal-workspace-contracts"
       }
     },
     "serve": {
       "executor": "nx:run-commands",
       "options": {
         "command": "node ../../node_modules/tsup/dist/cli-default.js --watch",
-        "cwd": "packages/workspace-contracts"
+        "cwd": "packages/goal-workspace-contracts"
       }
     },
     "lint": {
       "options": {
-        "args": ["**/*.{ts,js}"]
+        "args": [
+          "**/*.{ts,js}"
+        ]
       }
     },
     "test": {
       "executor": "nx:run-commands",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "inputs": ["default", "^production"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
+      "inputs": [
+        "default",
+        "^production"
+      ],
       "cache": true,
       "options": {
         "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
-        "cwd": "packages/workspace-contracts"
+        "cwd": "packages/goal-workspace-contracts"
       }
     },
     "test:watch": {
@@ -47,17 +61,22 @@
       "cache": false,
       "options": {
         "command": "node ../../node_modules/vitest/vitest.mjs --config vitest.config.ts",
-        "cwd": "packages/workspace-contracts"
+        "cwd": "packages/goal-workspace-contracts"
       }
     },
     "test:contract": {
       "executor": "nx:run-commands",
-      "inputs": ["default", "^production"],
+      "inputs": [
+        "default",
+        "^production"
+      ],
       "cache": true,
-      "dependsOn": ["build"],
+      "dependsOn": [
+        "build"
+      ],
       "options": {
         "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
-        "cwd": "packages/workspace-contracts"
+        "cwd": "packages/goal-workspace-contracts"
       }
     }
   }

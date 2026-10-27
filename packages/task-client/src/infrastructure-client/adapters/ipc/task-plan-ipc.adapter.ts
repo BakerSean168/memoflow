@@ -19,7 +19,7 @@ import type {
   AbandonTaskPlanReq,
   TaskPlanOccurrencesQuery,
 } from '@memoflow/task-contracts';
-import type { GetTaskWorkspaceReq, TaskPlanWorkspace } from '@memoflow/workspace-contracts';
+import type { GetTaskWorkspaceReq, TaskPlanWorkspace } from '@memoflow/task-workspace-contracts';
 
 export class TaskPlanIpcAdapter implements ITaskPlanApiClient {
   constructor(private readonly ipcClient: IResultIpcClient) {}

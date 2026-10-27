@@ -1,5 +1,5 @@
 /**
- * @memoflow/workspace-contracts 打包配置
+ * @memoflow/task-workspace-contracts 打包配置
  *
  * 包类型：跨域组合契约（Goal Workspace 读模型、Goal/Label portable v3 组合），
  * 只做只读组装投影，叶子契约仍归各业务 contracts 包所有（P3 协作契约 / Issue #635）。
@@ -9,7 +9,7 @@
 import { createTsupConfig } from '../../tools/build/tsup.base.config.ts';
 
 export default createTsupConfig({
-  packageName: '@memoflow/workspace-contracts',
+  packageName: '@memoflow/task-workspace-contracts',
   entry: ['src/index.ts'],
   extraOptions: {
     dts: false,

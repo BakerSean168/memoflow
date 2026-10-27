@@ -25,7 +25,7 @@ import type {
   TaskOccurrenceClientDTO,
   TaskPlanClientDTO,
 } from '@memoflow/task-contracts';
-import type { GetTaskWorkspaceReq, TaskPlanWorkspace } from '@memoflow/workspace-contracts';
+import type { GetTaskWorkspaceReq, TaskPlanWorkspace } from '@memoflow/task-workspace-contracts';
 import type { ITaskPlanApiClient, TaskPlanListParams } from './ports/task-plan-api-client.port';
 import type { ITaskOccurrenceApiClient } from './ports/task-occurrence-api-client.port';
 import type { TaskClientPort } from './task-client.port';

@@ -271,20 +271,38 @@ export function createAiContractsAliasEntries(workspaceRoot: string): Alias[] {
   ];
 }
 
-export function createWorkspaceContractsAliasEntries(workspaceRoot: string): Alias[] {
-  const workspaceContractsRoot = resolveFromWorkspace(
+export function createGoalWorkspaceContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const goalWorkspaceContractsRoot = resolveFromWorkspace(
     workspaceRoot,
-    'packages/workspace-contracts/src',
+    'packages/goal-workspace-contracts/src',
   );
 
   return [
     {
-      find: /^@memoflow\/workspace-contracts$/,
-      replacement: `${workspaceContractsRoot}/index.ts`,
+      find: /^@memoflow\/goal-workspace-contracts$/,
+      replacement: `${goalWorkspaceContractsRoot}/index.ts`,
     },
     {
-      find: /^@memoflow\/workspace-contracts\/(.+)$/,
-      replacement: `${workspaceContractsRoot}/$1`,
+      find: /^@memoflow\/goal-workspace-contracts\/(.+)$/,
+      replacement: `${goalWorkspaceContractsRoot}/$1`,
+    },
+  ];
+}
+
+export function createTaskWorkspaceContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const taskWorkspaceContractsRoot = resolveFromWorkspace(
+    workspaceRoot,
+    'packages/task-workspace-contracts/src',
+  );
+
+  return [
+    {
+      find: /^@memoflow\/task-workspace-contracts$/,
+      replacement: `${taskWorkspaceContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/task-workspace-contracts\/(.+)$/,
+      replacement: `${taskWorkspaceContractsRoot}/$1`,
     },
   ];
 }

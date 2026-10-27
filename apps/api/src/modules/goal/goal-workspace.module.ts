@@ -3,7 +3,7 @@ import {
   GetGoalWorkspaceInvocationSchema,
   GoalWorkspaceKnowledgePageInvocationSchema,
   GoalWorkspaceTaskPageInvocationSchema,
-} from '@memoflow/workspace-contracts';
+} from '@memoflow/goal-workspace-contracts';
 import { errorCodeToHttpStatus, type Result } from '@memoflow/transport-contracts/result';
 import type { GoalWorkspaceApplicationPort } from '@memoflow/goal';
 import type { IApiModule, IApiModuleContext } from '../../shared/contracts/api-module.js';

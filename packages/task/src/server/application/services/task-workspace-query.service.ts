@@ -2,7 +2,7 @@ import {
   GetTaskWorkspaceReqSchema,
   TaskPlanWorkspaceSchema,
   type TaskPlanWorkspace,
-} from '@memoflow/workspace-contracts';
+} from '@memoflow/task-workspace-contracts';
 import { error, ok, type Result } from '@memoflow/transport-contracts/result';
 import type { ITaskPlanRepository } from '../../domain/repositories/i-task-plan-repository';
 import type { ITaskOccurrenceRepository } from '../../domain/repositories/i-task-occurrence-repository';

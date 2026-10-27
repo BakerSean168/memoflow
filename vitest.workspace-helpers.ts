@@ -494,12 +494,26 @@ export const domainResolveAliases = [
     replacement: path.resolve(import.meta.dirname, './packages/schedule-ui/src/index.ts'),
   },
   {
-    find: /^@memoflow\/workspace-contracts\/(.+)/,
-    replacement: path.resolve(import.meta.dirname, './packages/workspace-contracts/src/$1'),
+    find: /^@memoflow\/goal-workspace-contracts\/(.+)/,
+    replacement: path.resolve(import.meta.dirname, './packages/goal-workspace-contracts/src/$1'),
   },
   {
-    find: '@memoflow/workspace-contracts',
-    replacement: path.resolve(import.meta.dirname, './packages/workspace-contracts/src/index.ts'),
+    find: /^@memoflow\/task-workspace-contracts\/(.+)/,
+    replacement: path.resolve(import.meta.dirname, './packages/task-workspace-contracts/src/$1'),
+  },
+  {
+    find: '@memoflow/goal-workspace-contracts',
+    replacement: path.resolve(
+      import.meta.dirname,
+      './packages/goal-workspace-contracts/src/index.ts',
+    ),
+  },
+  {
+    find: '@memoflow/task-workspace-contracts',
+    replacement: path.resolve(
+      import.meta.dirname,
+      './packages/task-workspace-contracts/src/index.ts',
+    ),
   },
   {
     find: /^@memoflow\/desktop-contracts\/(.+)/,
