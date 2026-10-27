@@ -36,6 +36,7 @@
     "@memoflow/host-runtime": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",
+    "@memoflow/repository-contracts": "workspace:*",
     "@memoflow/transport-contracts": "workspace:*",
     "@memoflow/utils": "workspace:*",
     "express": "^5.2.1",

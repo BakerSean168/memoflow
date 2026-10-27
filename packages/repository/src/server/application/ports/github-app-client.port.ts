@@ -1,4 +1,4 @@
-import type { GitHubInstallationRepositoryDTO } from '@memoflow/contracts/repository';
+import type { GitHubInstallationRepositoryDTO } from '@memoflow/repository-contracts';
 
 export type GitHubAppClientFailure =
   | { readonly kind: 'not_found' }

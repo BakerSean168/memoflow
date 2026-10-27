@@ -484,11 +484,11 @@ import type {
   KnowledgeRepositorySyncOutcome,
   KnowledgeRepositorySyncPendingContext,
   RemoteRepositoryBlockReason,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import {
   KnowledgeRepositorySyncConflictContextSchema,
   KnowledgeRepositorySyncPendingContextSchema,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import { settingUiHost } from '../setting-ui-host';
 
 const {

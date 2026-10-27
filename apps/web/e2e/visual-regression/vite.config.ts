@@ -124,6 +124,9 @@ export default defineConfig(({ mode }) =>
           ['@memoflow/notification-ui', 'packages/notification-ui/src/index.ts'],
           ['@memoflow/setting-ui/host', 'packages/setting-ui/src/setting-ui-host.ts'],
           ['@memoflow/setting-ui', 'packages/setting-ui/src/index.ts'],
+          ['@memoflow/repository-ui/host', 'packages/repository-ui/src/repository-ui-host.ts'],
+          ['@memoflow/repository-ui', 'packages/repository-ui/src/index.ts'],
+          ['@memoflow/repository-contracts', 'packages/repository-contracts/src/index.ts'],
           ['@memoflow/goal-ui', 'packages/goal-ui/src/index.ts'],
           ['@memoflow/workspace-contracts', 'packages/workspace-contracts/src/index.ts'],
           [
@@ -166,7 +169,7 @@ export default defineConfig(({ mode }) =>
           ['@memoflow/domain-shared/shared', 'packages/domain-shared/src/shared/index.ts'],
           ['@memoflow/domain-shared', 'packages/domain-shared/src/index.ts'],
           ['@memoflow/routine-client', 'packages/routine-client/src/index.ts'],
-          ['@memoflow/repository/client', 'packages/repository/src/client/index.ts'],
+          ['@memoflow/repository-client', 'packages/repository-client/src/index.ts'],
           ['@memoflow/ai/client', 'packages/ai/src/client/index.ts'],
           ['@memoflow/notification-client', 'packages/notification-client/src/index.ts'],
           ['@memoflow/setting-client', 'packages/setting-client/src/index.ts'],

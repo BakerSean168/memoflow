@@ -4,7 +4,7 @@ import type {
   GitHubInstallationRepositoryDTO,
   KnowledgeNoteProjectionClientDTO,
   KnowledgeRemoteBindingServerDTO,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import type {
   IKnowledgeRemoteBindingRepository,
   IRemoteHistoryFenceRepository,

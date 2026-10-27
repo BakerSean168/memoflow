@@ -1,6 +1,6 @@
 import type { ChatExecutionProviderConfig, ChatExecutionUsage } from './chat-execution.port';
 import type { KnowledgeIndexedNote } from './knowledge-ingestion.port';
-import type { KnowledgeDocumentRef } from '@memoflow/contracts/repository';
+import type { KnowledgeDocumentRef } from '@memoflow/repository-contracts';
 
 export interface KnowledgeQueryCitation {
   documentRef: KnowledgeDocumentRef;

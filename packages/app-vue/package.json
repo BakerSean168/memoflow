@@ -47,10 +47,6 @@
       "types": "./dist/modules/task/index.d.ts",
       "import": "./dist/modules/task/index.js"
     },
-    "./modules/repository": {
-      "types": "./dist/modules/repository/index.d.ts",
-      "import": "./dist/modules/repository/index.js"
-    },
     "./modules/ai": {
       "types": "./dist/modules/ai/index.d.ts",
       "import": "./dist/modules/ai/index.js"
@@ -86,6 +82,9 @@
     "@memoflow/relation": "workspace:*",
     "@memoflow/relation-contracts": "workspace:*",
     "@memoflow/repository": "workspace:*",
+    "@memoflow/repository-client": "workspace:*",
+    "@memoflow/repository-contracts": "workspace:*",
+    "@memoflow/repository-ui": "workspace:*",
     "@memoflow/routine-client": "workspace:*",
     "@memoflow/routine-contracts": "workspace:*",
     "@memoflow/routine-ui": "workspace:*",

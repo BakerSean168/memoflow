@@ -47,7 +47,9 @@
       "@memoflow/agent-gateway": ["../../packages/agent-gateway/src/index.ts"],
       "@memoflow/agent-gateway/*": ["../../packages/agent-gateway/src/*/index.ts"],
       "@memoflow/goal/*": ["../../packages/goal/src/*/index.ts"],
-      "@memoflow/task/*": ["../../packages/task/src/*/index.ts"]
+      "@memoflow/task/*": ["../../packages/task/src/*/index.ts"],
+      "@memoflow/repository-contracts": ["../../packages/repository-contracts/src/index.ts"],
+      "@memoflow/repository-contracts/*": ["../../packages/repository-contracts/src/*.ts"]
     }
   },
   "include": ["src/**/*"],

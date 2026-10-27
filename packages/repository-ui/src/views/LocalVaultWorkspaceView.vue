@@ -1,0 +1,450 @@
+<template>
+  <div
+    class="flex h-full min-h-0 flex-col overflow-hidden bg-background"
+    data-testid="local-vault-workspace"
+  >
+    <div
+      v-if="error"
+      class="flex items-center justify-between gap-3 border-b border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive"
+      role="alert"
+    >
+      <span class="min-w-0 truncate">{{ error }}</span>
+      <Button variant="ghost" size="sm" @click="loadBinding">{{ t('common.retry') }}</Button>
+    </div>
+
+    <div
+      v-if="!isBound"
+      class="grid min-h-0 flex-1 place-items-center overflow-auto"
+      data-testid="local-vault-empty"
+    >
+      <DocumentWorkspaceState
+        kind="empty"
+        :title="t('repository.localVault.selectTitle')"
+        :description="t('repository.localVault.selectDescription')"
+      >
+        <template #icon>
+          <div
+            class="grid h-12 w-12 place-items-center rounded-xl bg-[hsl(var(--surface-raised)/0.66)] shadow-[inset_0_0_0_1px_hsl(var(--border-subtle)/0.58)]"
+          >
+            <FolderOpen class="h-7 w-7 text-muted-foreground" />
+          </div>
+        </template>
+        <template #actions>
+          <Button :disabled="loading" data-testid="local-vault-select" @click="selectVault">
+            <Loader2 v-if="loading" class="mr-2 h-4 w-4 animate-spin" />
+            <FolderOpen v-else class="mr-2 h-4 w-4" />
+            {{ t('repository.localVault.selectAction') }}
+          </Button>
+        </template>
+      </DocumentWorkspaceState>
+    </div>
+
+    <template v-else>
+      <DocumentWorkspaceToolbar data-testid="local-vault-document-toolbar">
+        <template v-if="activeNote">
+          <h1 class="min-w-0 max-w-[46%] truncate text-[13px] font-semibold tracking-[-0.01em]">
+            {{ activeNote.title }}
+          </h1>
+          <span class="min-w-0 truncate text-[11px] text-[hsl(var(--foreground-subtle))]">
+            {{ activeNote.relativePath }}
+          </span>
+          <Badge
+            v-for="tag in activeNote.tags.slice(0, 3)"
+            :key="tag"
+            variant="outline"
+            class="hidden shrink-0 @3xl/panel:inline-flex"
+          >
+            {{ tag }}
+          </Badge>
+        </template>
+        <span v-else class="truncate text-sm font-medium text-muted-foreground">
+          {{ t('repository.localVault.selectNote') }}
+        </span>
+
+        <template #actions>
+          <Button
+            v-if="activeNote"
+            variant="ghost"
+            size="sm"
+            class="h-7 shrink-0 px-2 text-xs"
+            data-testid="local-vault-open-note-obsidian"
+            @click="openInObsidian(activeNote.relativePath)"
+          >
+            <ExternalLink class="mr-1.5 h-3.5 w-3.5" />
+            {{ t('repository.localVault.openNote') }}
+          </Button>
+        </template>
+      </DocumentWorkspaceToolbar>
+
+      <div
+        class="grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(12rem,38%)_minmax(0,1fr)] @3xl/panel:grid-cols-[minmax(15rem,21rem)_minmax(0,1fr)] @3xl/panel:grid-rows-1"
+      >
+        <aside
+          class="flex min-h-0 flex-col border-b border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface)/0.55)] @3xl/panel:border-b-0 @3xl/panel:border-r"
+          data-testid="local-vault-catalog"
+        >
+          <div class="border-b border-[hsl(var(--border-subtle))] px-3 py-2.5">
+            <DocumentSourceStatus
+              :title="binding?.displayName ?? ''"
+              :subtitle="binding?.rootPath ?? ''"
+              :count-label="String(notes.length)"
+            >
+              <template #icon>
+                <HardDrive class="h-4 w-4" />
+              </template>
+              <template #actions>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  class="h-7 w-7"
+                  :aria-label="t('repository.localVault.rescan')"
+                  :title="t('repository.localVault.rescan')"
+                  :disabled="loading"
+                  data-testid="local-vault-rescan"
+                  @click="scan"
+                >
+                  <RefreshCw class="h-3.5 w-3.5" :class="{ 'animate-spin': loading }" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  class="h-7 w-7"
+                  :aria-label="t('repository.localVault.openRoot')"
+                  :title="t('repository.localVault.openRoot')"
+                  @click="openInObsidian()"
+                >
+                  <ExternalLink class="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  class="h-7 w-7"
+                  :aria-label="t('repository.localVault.changeVault')"
+                  :title="t('repository.localVault.changeVault')"
+                  @click="selectVault"
+                >
+                  <FolderSync class="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  class="h-7 w-7 text-destructive/75 hover:bg-destructive/10 hover:text-destructive"
+                  :aria-label="t('repository.localVault.detach')"
+                  :title="t('repository.localVault.detach')"
+                  data-testid="local-vault-detach"
+                  @click="confirmDetach"
+                >
+                  <Unplug class="h-3.5 w-3.5" />
+                </Button>
+              </template>
+            </DocumentSourceStatus>
+          </div>
+
+          <div class="px-2.5 pb-2 pt-2.5">
+            <DocumentCatalogSearch
+              v-model="searchQuery"
+              :placeholder="t('repository.localVault.searchPlaceholder')"
+              :clear-label="t('common.clear')"
+              test-id="local-vault-search"
+              @submit="submitSearch"
+              @clear="clearSearch"
+            />
+          </div>
+
+          <div
+            v-bind="containerProps"
+            class="min-h-0 flex-1 overflow-auto px-1.5"
+            data-testid="local-vault-catalog-scroll"
+          >
+            <div
+              v-if="displayedNotes.length"
+              v-keyboard-list="keyboardList"
+              v-bind="wrapperProps"
+              role="list"
+            >
+              <div
+                v-for="{ data: note, index } in virtualNotes"
+                :key="note.relativePath"
+                role="listitem"
+                :style="{ height: `${rowHeight}px` }"
+                :aria-posinset="index + 1"
+                :aria-setsize="displayedNotes.length"
+              >
+                <DocumentCatalogRow
+                  :style="{ height: `${rowHeight - 2}px` }"
+                  :data-keyboard-item="note.relativePath"
+                  :selected="activeNote?.relativePath === note.relativePath"
+                  :data-testid="`local-vault-note-${note.relativePath}`"
+                  @activate="openNote(note)"
+                  @dblclick="openInObsidian(note.relativePath)"
+                >
+                  {{ note.title }}
+                  <template #meta>{{ note.relativePath }}</template>
+                  <template v-if="resultExcerpt(note.relativePath)" #description>
+                    {{ resultExcerpt(note.relativePath) }}
+                  </template>
+                </DocumentCatalogRow>
+              </div>
+            </div>
+
+            <DocumentWorkspaceState v-if="loading && displayedNotes.length === 0" kind="loading" />
+            <DocumentWorkspaceState
+              v-else-if="displayedNotes.length === 0"
+              kind="empty"
+              :title="
+                searchActive
+                  ? t('repository.localVault.noSearchResults')
+                  : t('repository.localVault.noNotes')
+              "
+            />
+          </div>
+        </aside>
+
+        <main class="min-h-0 overflow-hidden">
+          <div v-if="activeNote" class="h-full min-h-0">
+            <div
+              class="h-full min-h-0 overflow-y-auto scrollbar-gutter-stable"
+              data-scroll-host="local-vault-preview"
+            >
+              <KnowledgeMarkdownPreview
+                :markdown="activeNote.contentMarkdown"
+                :title="activeNote.title"
+                data-testid="local-vault-preview"
+                @vault-link="openWikiLink"
+              />
+            </div>
+          </div>
+          <DocumentWorkspaceState
+            v-else
+            class="h-full"
+            kind="empty"
+            :title="t('repository.localVault.selectNote')"
+            :description="t('repository.localVault.selectNoteDescription')"
+          >
+            <template #icon>
+              <BookOpen class="h-8 w-8 text-muted-foreground" />
+            </template>
+          </DocumentWorkspaceState>
+        </main>
+      </div>
+    </template>
+
+    <KnowledgeCaptureReviewDialog
+      :open="knowledgeCaptureDialogOpen"
+      :source-options="knowledgeCaptureSourceOptions"
+      default-source-key="local_vault"
+      @update:open="handleKnowledgeCaptureOpenChange"
+    />
+  </div>
+</template>
+
+<script setup lang="ts">
+import { repositoryUiHost } from '../repository-ui-host';
+
+const vKeyboardList = repositoryUiHost.vKeyboardList;
+import { computed, nextTick, onBeforeUnmount, onDeactivated, onMounted, watch } from 'vue';
+import { useVirtualList } from '@vueuse/core';
+import { useI18n } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
+import {
+  BookOpen,
+  ExternalLink,
+  FolderOpen,
+  FolderSync,
+  HardDrive,
+  Loader2,
+  RefreshCw,
+  Unplug,
+} from '@lucide/vue';
+import { Badge, Button, useConfirm } from '@memoflow/ui-vue-shadcn';
+import DocumentCatalogRow from '../components/DocumentCatalogRow.vue';
+import DocumentCatalogSearch from '../components/DocumentCatalogSearch.vue';
+import DocumentSourceStatus from '../components/DocumentSourceStatus.vue';
+import DocumentWorkspaceState from '../components/DocumentWorkspaceState.vue';
+import DocumentWorkspaceToolbar from '../components/DocumentWorkspaceToolbar.vue';
+import KnowledgeMarkdownPreview from '../components/KnowledgeMarkdownPreview.vue';
+import KnowledgeCaptureReviewDialog from '../components/KnowledgeCaptureReviewDialog.vue';
+import { useLocalVault } from '../composables/useLocalVault';
+import {
+  knowledgeCaptureSourceKey,
+  type KnowledgeCaptureSourceOption,
+} from '../composables/knowledgeCaptureNativeEditSession';
+
+const { t } = useI18n();
+const route = useRoute();
+const router = useRouter();
+const {
+  binding,
+  activeNote,
+  searchQuery,
+  searchResults,
+  searchActive,
+  loading,
+  error,
+  isBound,
+  displayedNotes,
+  loadBinding,
+  selectVault,
+  detachVault,
+  scan,
+  openNote,
+  search,
+  clearSearch,
+  openInObsidian,
+  openWikiLink,
+  notes,
+} = useLocalVault();
+
+const rowHeight = computed(() => (searchActive.value ? 100 : 56));
+const {
+  list: virtualNotes,
+  containerProps,
+  wrapperProps,
+  scrollTo,
+} = useVirtualList(displayedNotes, {
+  itemHeight: () => rowHeight.value,
+  overscan: 6,
+});
+const noteIds = computed(() => displayedNotes.value.map((note) => note.relativePath));
+const keyboardList = {
+  virtual: {
+    getIds: () => noteIds.value,
+    async reveal(id: string): Promise<void> {
+      const index = noteIds.value.indexOf(id);
+      if (index < 0) return;
+      scrollTo(index, { block: 'nearest' });
+      await nextTick();
+    },
+  },
+};
+watch(
+  displayedNotes,
+  () => {
+    const container = containerProps.ref.value;
+    if (container) container.scrollTop = 0;
+    containerProps.onScroll();
+  },
+  { flush: 'post' },
+);
+
+const knowledgeCaptureDialogOpen = computed(() => route.query.dialog === 'knowledge-capture');
+const knowledgeCaptureSourceOptions = computed<KnowledgeCaptureSourceOption[]>(() => {
+  if (!isBound.value || !binding.value) return [];
+  const source = { kind: 'local_vault' as const };
+  return [
+    {
+      key: knowledgeCaptureSourceKey(source),
+      label: binding.value.displayName || t('repository.localVault.selectTitle'),
+      source,
+    },
+  ];
+});
+
+async function handleKnowledgeCaptureOpenChange(open: boolean): Promise<void> {
+  if (open) return;
+  const query = { ...route.query };
+  delete query.dialog;
+  await router.replace({ name: 'repository', query });
+}
+
+function noteQueryId(): string {
+  const raw = route.query.note;
+  if (typeof raw === 'string') return raw;
+  if (Array.isArray(raw) && typeof raw[0] === 'string') return raw[0];
+  return '';
+}
+
+let refreshedNoteQuery = '';
+let attemptedNoteQuery = '';
+let attemptedCatalog: typeof notes.value | null = null;
+watch(noteQueryId, () => {
+  refreshedNoteQuery = '';
+  attemptedNoteQuery = '';
+  attemptedCatalog = null;
+});
+
+async function applyNoteQuerySelection(): Promise<void> {
+  const requested = noteQueryId();
+  if (!requested || loading.value) return;
+  let target =
+    notes.value.find((note) => note.knowledgeDocumentId === requested) ??
+    notes.value.find((note) => note.relativePath === requested) ??
+    notes.value.find((note) => note.title === requested) ??
+    null;
+  if (
+    !target &&
+    isBound.value &&
+    requested.startsWith('kdoc_') &&
+    refreshedNoteQuery !== requested
+  ) {
+    refreshedNoteQuery = requested;
+    await scan();
+    target = notes.value.find((note) => note.knowledgeDocumentId === requested) ?? null;
+  }
+  if (!target) return;
+  if (activeNote.value?.relativePath === target.relativePath) return;
+  if (attemptedNoteQuery === requested && attemptedCatalog === notes.value) return;
+  attemptedNoteQuery = requested;
+  attemptedCatalog = notes.value;
+  await openNote(target);
+}
+
+onMounted(() => {
+  void applyNoteQuerySelection();
+});
+
+watch(
+  () => [route.query.note, isBound.value, loading.value, notes.value],
+  () => {
+    void applyNoteQuerySelection();
+  },
+);
+
+const LOCAL_SEARCH_DEBOUNCE_MS = 220;
+let localSearchTimer: ReturnType<typeof setTimeout> | null = null;
+function stopSearchTimer(): void {
+  if (localSearchTimer) clearTimeout(localSearchTimer);
+  localSearchTimer = null;
+}
+function submitSearch(): void {
+  stopSearchTimer();
+  void search();
+}
+
+watch(searchQuery, () => {
+  stopSearchTimer();
+  localSearchTimer = setTimeout(() => {
+    localSearchTimer = null;
+    if (searchQuery.value.trim()) void search();
+    else clearSearch();
+  }, LOCAL_SEARCH_DEBOUNCE_MS);
+});
+
+onBeforeUnmount(stopSearchTimer);
+onDeactivated(stopSearchTimer);
+
+const resultExcerpts = computed(
+  () =>
+    new Map(
+      searchResults.value.map((item) => [
+        item.note.relativePath,
+        item.matches[0]?.lineContent ?? '',
+      ]),
+    ),
+);
+
+function resultExcerpt(relativePath: string): string {
+  return resultExcerpts.value.get(relativePath) ?? '';
+}
+
+async function confirmDetach(): Promise<void> {
+  const confirmed = await useConfirm({
+    title: t('repository.localVault.detachTitle'),
+    description: t('repository.localVault.detachDescription'),
+    confirmText: t('repository.localVault.detach'),
+    cancelText: t('common.cancel'),
+    variant: 'destructive',
+  });
+  if (confirmed) await detachVault();
+}
+</script>

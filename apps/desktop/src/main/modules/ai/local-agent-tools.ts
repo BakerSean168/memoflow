@@ -5,7 +5,7 @@ import type { IKnowledgeSourcePort, KnowledgeSourceNote } from '@memoflow/ai/por
 import {
   KnowledgeDocumentIdSchema,
   KnowledgeDocumentIdWireSchema,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import {
   createTaskPowerSyncReadQueries,
   createTaskPowerSyncAgentMutations,

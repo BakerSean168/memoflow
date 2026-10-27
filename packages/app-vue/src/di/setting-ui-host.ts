@@ -28,7 +28,7 @@ import AgentDriverIcon from '../modules/ai/components/AgentDriverIcon.vue';
 import AccountProfileSection from '../modules/account/components/AccountProfileSection.vue';
 import CloudPasswordSection from '../modules/account/components/CloudPasswordSection.vue';
 import ExternalAgentConnectionsSection from '../modules/account/components/ExternalAgentConnectionsSection.vue';
-import { KnowledgeWriteRequestLedger } from '../modules/repository/components';
+import { KnowledgeWriteRequestLedger } from '@memoflow/repository-ui';
 import {
   getAIErrorMessage,
   getNativeAgentExecutionFailureMessage,

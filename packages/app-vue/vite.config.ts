@@ -55,7 +55,6 @@ export default defineConfig({
         ),
         'modules/account/index': path.resolve(__dirname, 'src/modules/account/index.ts'),
         'modules/task/index': path.resolve(__dirname, 'src/modules/task/index.ts'),
-        'modules/repository/index': path.resolve(__dirname, 'src/modules/repository/index.ts'),
         'modules/ai/index': path.resolve(__dirname, 'src/modules/ai/index.ts'),
       },
       formats: ['es'],

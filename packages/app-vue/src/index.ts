@@ -1,5 +1,9 @@
 // Schedule and Setting surfaces are hosted by this composition root
 // (Issue #630 §4.4 / §4.9).
+// Repository surfaces are hosted by this composition root (Issue #630 §4.7).
+import './di/repository-ui-host';
+
+// Schedule surfaces are hosted by this composition root (Issue #630 §4.4).
 import './di/schedule-ui-host';
 import './di/setting-ui-host';
 

@@ -23,7 +23,8 @@
     "@memoflow/host-runtime": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",
-    "@memoflow/relation-contracts": "workspace:*"
+    "@memoflow/relation-contracts": "workspace:*",
+    "@memoflow/repository-contracts": "workspace:*"
   },
   "devDependencies": {
     "@memoflow/test-utils": "workspace:*",

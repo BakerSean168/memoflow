@@ -4,7 +4,7 @@ import { fail, ok } from '@memoflow/contracts/result';
 import {
   MAX_KNOWLEDGE_ATTACHMENT_BYTES,
   RepositoryNoteMutationType,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import type {
   KnowledgeAttachmentContentResponse,
   KnowledgeAttachmentProjectionListResponse,
@@ -24,9 +24,9 @@ import type {
   GitHubInstallationRepositoryDTO,
   KnowledgeProjectionCheckpoint,
   RemoteRepositoryBlockReason,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import { createLogger } from '@memoflow/utils/logger';
-import type { KnowledgeRemoteBindingServerDTO } from '@memoflow/contracts/repository';
+import type { KnowledgeRemoteBindingServerDTO } from '@memoflow/repository-contracts';
 import { GitHubAppClientFailureError } from '../ports/github-app-client.port';
 import type { GitHubBlobContent, IGitHubAppClient } from '../ports/github-app-client.port';
 import type {

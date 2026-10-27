@@ -5,7 +5,7 @@ import { watch, type ChokidarOptions, type FSWatcher } from 'chokidar';
 import {
   KnowledgeRemoteBindingClientSchema,
   type KnowledgeRemoteBindingClientDTO,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import type { LocalVaultElectronPort } from '@memoflow/repository/electron';
 // Residual 957: isMissing/isTemporaryFile duals retired — sole repository electron vault-fs-guards.
 import { isMissing, isTemporaryFile } from '@memoflow/repository/electron';

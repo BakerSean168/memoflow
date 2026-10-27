@@ -1,6 +1,7 @@
 import {
   installGoalUiHost,
   installNotificationUiHost,
+  installRepositoryUiHost,
   installRoutineUiHost,
 } from '@memoflow/app-vue/di';
 /**
@@ -81,7 +82,7 @@ export function executeWebNotificationAction(request: ExecuteNotificationActionR
 }
 
 const repositoryService = createLazyService(async () => {
-  const { createRepositoryHttpClient } = await import('@memoflow/repository/client');
+  const { createRepositoryHttpClient } = await import('@memoflow/repository-client');
   return createRepositoryHttpClient(resultHttpClient);
 });
 
@@ -138,6 +139,7 @@ const taskService = createLazyService(async () => {
 export function installAppServices(app: App): void {
   installGoalUiHost();
   installNotificationUiHost();
+  installRepositoryUiHost();
   installRoutineUiHost();
   app.provide(ACCOUNT_SERVICE_KEY, accountService);
   app.provide(AUTH_SERVICE_KEY, authService);

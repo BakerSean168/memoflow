@@ -4,7 +4,7 @@ import type { AiProviderConfigId, AiConversationId, IdentityId } from '@memoflow
 import {
   KnowledgeDocumentIdSchema,
   KnowledgeDocumentRefSchema,
-} from '../../repository/aggregates/knowledge-document-identity';
+} from '@memoflow/repository-contracts';
 import { TestAIProviderResultDTOSchema } from '../dtos/provider-test-result.dto';
 import { TokenUsageSchema } from '../value-objects/token-usage';
 import { ConversationStatus } from '../value-objects/conversation-status';

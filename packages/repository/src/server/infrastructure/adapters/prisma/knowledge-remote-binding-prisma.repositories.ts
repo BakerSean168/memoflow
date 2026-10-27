@@ -6,7 +6,7 @@ import type {
   RemoteHistoryFence,
   RemoteRepositoryBlockReason,
   RemoteRepositoryObservation,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import type {
   IKnowledgeProjectionCheckpointRepository,
   IKnowledgeRemoteBindingRepository,

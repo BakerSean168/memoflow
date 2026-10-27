@@ -5,7 +5,7 @@ import type {
   KnowledgeRepositoryInstallationTokenRes,
   KnowledgeRepositoryReconciliationPreview,
   ListKnowledgeRepositoryConnectionsRes,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import type { Result } from '@memoflow/contracts/result';
 
 /**

@@ -8,7 +8,7 @@ import {
   SystemChannels,
   type DesktopAccessSnapshot,
 } from '@memoflow/contracts/electron';
-import type { KnowledgeRemoteBindingClientDTO } from '@memoflow/contracts/repository';
+import type { KnowledgeRemoteBindingClientDTO } from '@memoflow/repository-contracts';
 import { fail, ok } from '@memoflow/contracts/result';
 import {
   DESKTOP_ACCESS_SNAPSHOT_KEY,
@@ -16,7 +16,10 @@ import {
   REPOSITORY_SERVICE_KEY,
 } from '@setting-ui-test-host/di/keys';
 import type { IRepositoryService } from '@setting-ui-test-host/di/types';
+import { installRepositoryUiHost } from '@setting-ui-test-host/di/repository-ui-host';
 import KnowledgeRepositorySettings from './KnowledgeRepositorySettings.vue';
+
+installRepositoryUiHost();
 
 const routerMocks = vi.hoisted(() => ({
   query: {} as Record<string, string>,

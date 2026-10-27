@@ -23,6 +23,7 @@
     "@memoflow/contracts": "workspace:*",
     "@memoflow/desktop-contracts": "workspace:*",
     "@memoflow/http-client": "workspace:*",
+    "@memoflow/repository-contracts": "workspace:*",
     "@memoflow/setting-client": "workspace:*",
     "@memoflow/setting-contracts": "workspace:*",
     "@memoflow/time": "workspace:*",

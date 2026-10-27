@@ -10,7 +10,7 @@ import {
   type GoalPlanningDecision,
   type GoalResearchEvidence,
 } from '@memoflow/contracts/ai';
-import { KnowledgeDocumentRefSchema } from '@memoflow/contracts/repository';
+import { KnowledgeDocumentRefSchema } from '@memoflow/repository-contracts';
 import { z } from 'zod';
 import type {
   ChatExecutionUsage,

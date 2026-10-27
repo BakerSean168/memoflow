@@ -25,10 +25,6 @@
       "types": "./dist/primitives/*.d.ts",
       "import": "./dist/primitives/*.js"
     },
-    "./repository": {
-      "types": "./dist/modules/repository/index.d.ts",
-      "import": "./dist/modules/repository/index.js"
-    },
     "./account": {
       "types": "./dist/modules/account/index.d.ts",
       "import": "./dist/modules/account/index.js"
@@ -70,6 +66,7 @@
     "@memoflow/label-contracts": "workspace:*",
     "@memoflow/notification-contracts": "workspace:*",
     "@memoflow/routine-contracts": "workspace:*",
+    "@memoflow/repository-contracts": "workspace:*",
     "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/setting-contracts": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",

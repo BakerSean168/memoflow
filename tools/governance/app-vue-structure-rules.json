@@ -269,7 +269,7 @@
           "from": "@memoflow/ai/client"
         },
         {
-          "from": "@memoflow/repository/client"
+          "from": "@memoflow/repository-client"
         },
         {
           "from": "@memoflow/relation/client"

@@ -57,7 +57,7 @@ import type {
   StartKnowledgeRepositoryInstallationRes,
   SyncKnowledgeRepositoryReq,
   SyncKnowledgeRepositoryRes,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import type { DeviceKeymap, KeyboardCommandId } from '@memoflow/desktop-contracts';
 import type { SettingClientPort } from '@memoflow/setting-client';
 import type { TimeFacade } from '@memoflow/time';

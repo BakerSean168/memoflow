@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { PrismaClient } from '@memoflow/database';
-import type { KnowledgeRemoteBindingServerDTO } from '@memoflow/contracts/repository';
+import type { KnowledgeRemoteBindingServerDTO } from '@memoflow/repository-contracts';
 import { KnowledgeRemoteBindingPrismaRepository } from './knowledge-remote-binding-prisma.repositories';
 
 const BINDING_ID = 'KnowledgeRemoteBindingId_550e8400-e29b-41d4-a716-446655440300' as never;

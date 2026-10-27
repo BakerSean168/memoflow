@@ -167,13 +167,12 @@ vi.mock('../../task/composables/useTask', async () => {
   const { ref } = await import('vue');
   return { useTask: () => ({ templates: ref([]), fetchTemplates: vi.fn() }) };
 });
-vi.mock('../../repository/composables/useRecentKnowledgeNotes', async () => {
-  const { ref } = await import('vue');
-  return { useRecentKnowledgeNotes: () => ({ notes: ref([]), load: vi.fn() }) };
-});
-vi.mock('../../repository/composables/useReferenceableKnowledgeNotes', async () => {
+vi.mock('@memoflow/repository-ui', async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>();
   const { ref } = await import('vue');
   return {
+    ...actual,
+    useRecentKnowledgeNotes: () => ({ notes: ref([]), load: vi.fn() }),
     useReferenceableKnowledgeNotes: () => ({ notes: ref([]), load: vi.fn(), cancel: vi.fn() }),
   };
 });

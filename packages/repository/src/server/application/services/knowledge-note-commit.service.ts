@@ -10,7 +10,7 @@ import {
   type AdoptKnowledgeDocumentReq,
   type AdoptKnowledgeDocumentResponse,
   type GitHubInstallationRepositoryDTO,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import { createLogger } from '@memoflow/utils/logger';
 import { GitHubAppClientFailureError } from '../ports/github-app-client.port';
 import type { GitHubFileCommitResult, IGitHubAppClient } from '../ports/github-app-client.port';

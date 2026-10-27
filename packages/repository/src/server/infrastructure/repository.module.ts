@@ -15,7 +15,7 @@ import type { OperationAuditRepository } from '@memoflow/patterns/operations';
 import { runTimelineQueryWithAudit } from '@memoflow/patterns/operations';
 import { OperationTimelineEntrySchema } from '@memoflow/operations-contracts';
 import type { OperationTimelineEntry } from '@memoflow/operations-contracts';
-import type { KnowledgeWriteRequestClientDTO } from '@memoflow/contracts/repository';
+import type { KnowledgeWriteRequestClientDTO } from '@memoflow/repository-contracts';
 import { createLogger } from '@memoflow/utils/logger';
 
 const logger = createLogger('RepositoryModule');
