@@ -25,10 +25,6 @@
       "types": "./dist/modules/account/index.d.ts",
       "import": "./dist/modules/account/index.js"
     },
-    "./setting": {
-      "types": "./dist/modules/setting/index.d.ts",
-      "import": "./dist/modules/setting/index.js"
-    },
     "./ai": {
       "types": "./dist/modules/ai/index.d.ts",
       "import": "./dist/modules/ai/index.js"
@@ -65,13 +61,14 @@
     "@memoflow/goal-contracts": "workspace:*",
     "@memoflow/label-contracts": "workspace:*",
     "@memoflow/notification-contracts": "workspace:*",
+    "@memoflow/routine-contracts": "workspace:*",
     "@memoflow/repository-contracts": "workspace:*",
     "@memoflow/schedule-contracts": "workspace:*",
+    "@memoflow/setting-contracts": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/task-contracts": "workspace:*",
     "@memoflow/transport-contracts": "workspace:*",
-    "zod": "^4.6.5",
-    "@memoflow/routine-contracts": "workspace:*"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@faker-js/faker": "10.6.0",

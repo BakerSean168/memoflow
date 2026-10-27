@@ -396,11 +396,27 @@ export const domainResolveAliases = [
     replacement: path.resolve(import.meta.dirname, './packages/notification-client/src/index.ts'),
   },
   {
+    find: /^@memoflow\/setting-contracts$/,
+    replacement: path.resolve(import.meta.dirname, './packages/setting-contracts/src/index.ts'),
+  },
+  {
+    find: /^@memoflow\/setting-client$/,
+    replacement: path.resolve(import.meta.dirname, './packages/setting-client/src/index.ts'),
+  },
+  {
     find: /^@memoflow\/notification-ui\/host$/,
     replacement: path.resolve(
       import.meta.dirname,
       './packages/notification-ui/src/notification-ui-host.ts',
     ),
+  },
+  {
+    find: /^@memoflow\/setting-ui\/host$/,
+    replacement: path.resolve(import.meta.dirname, './packages/setting-ui/src/setting-ui-host.ts'),
+  },
+  {
+    find: /^@memoflow\/setting-ui$/,
+    replacement: path.resolve(import.meta.dirname, './packages/setting-ui/src/index.ts'),
   },
   {
     find: /^@memoflow\/notification-ui$/,

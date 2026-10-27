@@ -20,7 +20,7 @@ import {
   ResetUserPreferencesBodySchema,
   ResetUserPreferencesResponseSchema,
   UserPreferenceProfileSchema,
-} from '@memoflow/contracts/setting';
+} from '@memoflow/setting-contracts';
 import { SettingController } from '../server/transport';
 import type { SettingApplicationPort } from '../server/application';
 

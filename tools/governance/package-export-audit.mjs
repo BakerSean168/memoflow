@@ -46,6 +46,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   'routine-client': [],
   'routine-contracts': ['./method-library'],
   'notification-ui': ['./host'],
+  'setting-ui': ['./host'],
   'routine-ui': [
     './host',
     './components/RoutineCapsulePreview',
@@ -57,6 +58,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   'task-contracts': ['./*'],
   'task-ui': ['./host', './composables/*', './components/*'],
   'schedule-contracts': ['./*'],
+  'setting-contracts': ['./*'],
   'workspace-contracts': ['./*'],
   'relation-contracts': ['./*'],
   'repository-contracts': ['./*'],
@@ -145,7 +147,6 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
     './modules/task',
     './modules/schedule',
     './modules/repository',
-    './modules/setting',
     './modules/ai',
   ],
 };

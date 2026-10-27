@@ -36,6 +36,7 @@
     "@memoflow/schedule-orchestration": "workspace:*",
     "@memoflow/scheduler": "workspace:*",
     "@memoflow/setting": "workspace:*",
+    "@memoflow/setting-contracts": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/task": "workspace:*",
     "@memoflow/task-contracts": "workspace:*",

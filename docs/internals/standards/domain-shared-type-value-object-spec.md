@@ -68,7 +68,7 @@ export type OrderStatus = OrderStatusDTO & { readonly __brand: unique symbol };
 
 ```typescript
 // 1. 引入 Contract 定义
-import type { ThemeModeDTO } from '@memoflow/contracts/settings';
+import type { ThemeModeDTO } from '@memoflow/setting-contracts';
 
 // 2. 定义 Branded Type
 export type ThemeMode = ThemeModeDTO & { readonly __brand: unique symbol };

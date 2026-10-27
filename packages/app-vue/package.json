@@ -43,10 +43,6 @@
       "types": "./dist/modules/account/index.d.ts",
       "import": "./dist/modules/account/index.js"
     },
-    "./modules/setting": {
-      "types": "./dist/modules/setting/index.d.ts",
-      "import": "./dist/modules/setting/index.js"
-    },
     "./modules/ai": {
       "types": "./dist/modules/ai/index.d.ts",
       "import": "./dist/modules/ai/index.js"
@@ -92,6 +88,9 @@
     "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/schedule-ui": "workspace:*",
     "@memoflow/setting": "workspace:*",
+    "@memoflow/setting-client": "workspace:*",
+    "@memoflow/setting-contracts": "workspace:*",
+    "@memoflow/setting-ui": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/task-client": "workspace:*",
     "@memoflow/task-contracts": "workspace:*",

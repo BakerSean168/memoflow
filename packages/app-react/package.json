@@ -27,6 +27,8 @@
     "@memoflow/schedule-client": "workspace:*",
     "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/setting": "workspace:*",
+    "@memoflow/setting-client": "workspace:*",
+    "@memoflow/setting-contracts": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/task-client": "workspace:*",
     "@memoflow/task-contracts": "workspace:*",

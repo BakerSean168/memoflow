@@ -455,6 +455,7 @@ test('Unit/Contract aliases come from exact Nx execution configuration, not proj
     'routine-ui',
     'schedule-client',
     'schedule-contracts',
+    'setting-contracts',
     'shared-primitives',
     'task-client',
     'task-contracts',

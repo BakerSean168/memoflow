@@ -470,7 +470,7 @@
       "id": "rule-aisettings-provider-onboarding-v2-165",
       "contract": "AISettings.provider-onboarding-v2",
       "reason": "AISettings.provider-onboarding-v2: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/setting/components/AISettings.vue",
+      "file": "packages/setting-ui/src/components/AISettings.vue",
       "forbidElements": ["AI_PROVIDER_TEMPLATES", "OnboardingStep"],
       "forbidIdentifiers": [
         "submitQuickProvider",
@@ -497,7 +497,7 @@
       "id": "rule-aisettings-provider-onboarding-v2-166",
       "contract": "AISettings.provider-onboarding-v2",
       "reason": "AISettings.provider-onboarding-v2: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/setting/components/AgentInstanceWizard.vue",
+      "file": "packages/setting-ui/src/components/AgentInstanceWizard.vue",
       "forbidElements": ["AI_PROVIDER_TEMPLATES", "OnboardingStep"],
       "forbidIdentifiers": [
         "submitQuickProvider",
@@ -510,7 +510,7 @@
       "id": "rule-aisettings-provider-onboarding-v2-167",
       "contract": "AISettings.provider-onboarding-v2",
       "reason": "AISettings.provider-onboarding-v2: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/setting/components/MastraAgentSettings.vue",
+      "file": "packages/setting-ui/src/components/MastraAgentSettings.vue",
       "forbidElements": [
         {
           "name": "Dialog",
@@ -555,7 +555,7 @@
       "id": "rule-use-data-portability-171",
       "contract": "use-data-portability",
       "reason": "use-data-portability: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/setting/composables/useDataPortability.ts",
+      "file": "packages/setting-ui/src/composables/useDataPortability.ts",
       "requireIdentifiers": ["DATA_PORTABILITY_SERVICE_KEY", "DESKTOP_AUTH_API_KEY"],
       "requireStatements": [
         "const isServerDisclosureAvailable = ref(service !== undefined && desktopApi === undefined);"
@@ -589,7 +589,7 @@
       "id": "rule-use-data-portability-173",
       "contract": "use-data-portability",
       "reason": "use-data-portability: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/setting/components/DataSettingsSection.vue",
+      "file": "packages/setting-ui/src/components/DataSettingsSection.vue",
       "requireClassTokens": ["isServerDisclosureAvailable", "exportServerHeldDataDisclosure"],
       "requireAttributes": [
         {

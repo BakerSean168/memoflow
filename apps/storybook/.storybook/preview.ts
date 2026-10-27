@@ -1,6 +1,7 @@
 /* eslint-disable @nx/enforce-module-boundaries -- Storybook config imports workspace helpers and packages */
 import { installGoalUiHost } from '../../../packages/app-vue/src/di/goal-ui-host';
 import { installNotificationUiHost } from '../../../packages/app-vue/src/di/notification-ui-host';
+import { installSettingUiHost } from '../../../packages/app-vue/src/di/setting-ui-host';
 import { installTaskUiHost } from '../../../packages/app-vue/src/di/task-ui-host';
 import { installRepositoryUiHost } from '../../../packages/app-vue/src/di/repository-ui-host';
 import { setup, type Preview } from '@storybook/vue3-vite';
@@ -14,6 +15,7 @@ import '../../../packages/ui-vue-shadcn/src/styles/globals.css';
 setup((app) => {
   installGoalUiHost();
   installNotificationUiHost();
+  installSettingUiHost();
   installTaskUiHost();
   installRepositoryUiHost();
   app.use(createPinia());

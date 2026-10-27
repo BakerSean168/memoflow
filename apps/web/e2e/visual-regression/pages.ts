@@ -24,7 +24,7 @@ import { useAppShellStore } from '@memoflow/app-vue/layouts/shell/useAppShellSto
 import RoutineConfigurationView from '@memoflow/routine-ui/views/RoutineConfigurationView';
 import { NotificationListPage } from '@memoflow/notification-ui';
 import { KnowledgeProjectionWorkspaceView } from '@memoflow/repository-ui';
-import UserSettingsView from '@memoflow/app-vue/modules/setting/views/UserSettingsView.vue';
+import { UserSettingsView } from '@memoflow/app-vue';
 import { TaskManagementView } from '@memoflow/task-ui';
 import GlobalConfirmDialog from '@memoflow/app-vue/shared/components/GlobalConfirmDialog.vue';
 import AppShell from '@memoflow/app-vue/layouts/shell/AppShell.vue';

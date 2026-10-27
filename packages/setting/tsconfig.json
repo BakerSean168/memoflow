@@ -6,11 +6,11 @@
     "paths": {
       "@/*": ["./src/*"],
       "@memoflow/database": ["../database/src/index.ts"],
-      "@memoflow/http-client": ["../http-client/src/index.ts"],
       "@memoflow/contracts": ["../contracts/src/index.ts"],
       "@memoflow/domain-shared": ["../domain-shared/src/index.ts"],
       "@memoflow/domain-shared/shared": ["../domain-shared/src/shared/index.ts"],
-      "@memoflow/contracts/setting": ["../contracts/src/modules/setting/index.ts"],
+      "@memoflow/setting-contracts": ["../setting-contracts/src/index.ts"],
+      "@memoflow/setting-contracts/*": ["../setting-contracts/src/*.ts"],
       "@memoflow/contracts/result": ["../contracts/src/result/index.ts"],
       "@memoflow/contracts/shared": ["../contracts/src/shared/index.ts"],
       "@memoflow/contracts/primitives": ["../contracts/src/primitives/index.ts"],

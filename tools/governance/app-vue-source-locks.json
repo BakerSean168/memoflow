@@ -81,10 +81,10 @@
     {
       "id": "AISettings.provider-onboarding-v2",
       "decision": "#502 triaged: structural parts moved to app-vue-structure-rules.json; residual text locks keep a reason.",
-      "origin": "packages/app-vue/src/modules/setting/components/AISettings.provider-onboarding-v2.surface.spec.ts",
+      "origin": "packages/setting-ui/src/components/AISettings.provider-onboarding-v2.surface.spec.ts",
       "locks": [
         {
-          "file": "packages/app-vue/src/modules/setting/components/MastraAgentSettings.vue",
+          "file": "packages/setting-ui/src/components/MastraAgentSettings.vue",
           "region": {
             "start": "async function verifyConnection",
             "end": "async function refreshModels"
@@ -93,7 +93,7 @@
           "reason": "AISettings.provider-onboarding-v2: residual source-order/region/count assertion (1 matcher(s)) not expressible as AST; structural coverage: rule-aisettings-provider-onboarding-v2-167."
         },
         {
-          "file": "packages/app-vue/src/modules/setting/components/MastraAgentSettings.vue",
+          "file": "packages/setting-ui/src/components/MastraAgentSettings.vue",
           "region": {
             "start": "async function verifyConnection",
             "end": "async function refreshModels"
@@ -111,7 +111,7 @@
     {
       "id": "use-data-portability",
       "decision": "#502 triaged: structural parts moved to app-vue-structure-rules.json; residual text locks keep a reason.",
-      "origin": "packages/app-vue/src/modules/setting/composables/use-data-portability.surface.spec.ts",
+      "origin": "packages/setting-ui/src/composables/use-data-portability.surface.spec.ts",
       "locks": [
         {
           "file": "packages/data-portability/src/infrastructure-client/adapters/ipc/data-portability-ipc.adapter.ts",

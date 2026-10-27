@@ -1,0 +1,57 @@
+{
+  "name": "setting-ui",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "packages/setting-ui/src",
+  "tags": ["scope:setting", "type:lib", "type:vue", "layer:ui", "tier:ui"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["^build"],
+      "options": {
+        "command": "node ../../node_modules/vue-tsc/bin/vue-tsc.js --noEmit --declaration false --declarationMap false -p tsconfig.json",
+        "cwd": "packages/setting-ui"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/packages/setting-ui/dist"],
+      "cache": true,
+      "dependsOn": ["^build"],
+      "options": {
+        "command": "node ../../node_modules/vite/bin/vite.js build",
+        "cwd": "packages/setting-ui"
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ../../node_modules/vite/bin/vite.js build --watch",
+        "cwd": "packages/setting-ui"
+      }
+    },
+    "lint": {
+      "options": {
+        "args": ["**/*.{ts,tsx,vue}"]
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "inputs": ["default", "^production"],
+      "cache": true,
+      "options": {
+        "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
+        "cwd": "packages/setting-ui"
+      }
+    },
+    "test:watch": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "node ../../node_modules/vitest/vitest.mjs --config vitest.config.ts",
+        "cwd": "packages/setting-ui"
+      }
+    }
+  }
+}

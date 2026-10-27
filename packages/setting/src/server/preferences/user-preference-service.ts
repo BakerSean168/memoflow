@@ -6,14 +6,14 @@ import type {
   PreferenceNamespaceResponse,
   PreferenceRevisionConflict,
   UserPreferenceProfile,
-} from '@memoflow/contracts/setting';
+} from '@memoflow/setting-contracts';
 import {
   PreferenceMutationReceiptSchema,
   PreferenceRevisionConflictSchema,
   createDefaultPreferenceNamespace,
   createDefaultUserPreferenceProfile,
   parsePreferenceNamespace,
-} from '@memoflow/contracts/setting';
+} from '@memoflow/setting-contracts';
 import { UserPreferenceDocument } from './user-preference-document';
 import type { IUserPreferenceRepository } from './user-preference-repository';
 

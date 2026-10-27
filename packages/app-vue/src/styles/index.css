@@ -12,6 +12,7 @@
 @source '../../../task-ui/src';
 @source '../../../schedule-ui/src';
 @source '../../../notification-ui/src';
+@source '../../../setting-ui/src';
 @source '../../../repository-ui/src';
 @source '../../../routine-ui/src';
 @source '..';

@@ -1,8 +1,8 @@
-import type { PreferenceNamespace, PreferenceNamespaceResponse } from '@memoflow/contracts/setting';
+import type { PreferenceNamespace, PreferenceNamespaceResponse } from '@memoflow/setting-contracts';
 import {
   parsePreferenceNamespace,
   parsePreferenceNamespacePayload,
-} from '@memoflow/contracts/setting';
+} from '@memoflow/setting-contracts';
 import { isDeepStrictEqual } from 'node:util';
 import { normalizeCrudData } from './crud-normalization.js';
 import type { CrudDelegateContainer } from './table-mapping.js';

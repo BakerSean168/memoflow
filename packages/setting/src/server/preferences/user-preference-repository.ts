@@ -1,4 +1,4 @@
-import type { PreferenceNamespace } from '@memoflow/contracts/setting';
+import type { PreferenceNamespace } from '@memoflow/setting-contracts';
 import type { UserPreferenceDocument } from './user-preference-document';
 
 export type PreferenceCreateResult =

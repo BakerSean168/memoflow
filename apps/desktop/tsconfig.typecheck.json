@@ -17,6 +17,10 @@
       "@memoflow/notification-ui/host": [
         "../../packages/notification-ui/dist/notification-ui-host.d.ts"
       ],
+      "@memoflow/desktop-contracts": ["../../packages/desktop-contracts/dist/index.d.ts"],
+      "@memoflow/desktop-contracts/*": ["../../packages/desktop-contracts/dist/*.d.ts"],
+      "@memoflow/setting-ui": ["../../packages/setting-ui/dist/index.d.ts"],
+      "@memoflow/setting-ui/host": ["../../packages/setting-ui/dist/setting-ui-host.d.ts"],
       "@memoflow/task-ui/*": [
         "../../packages/task-ui/dist/*.d.ts",
         "../../packages/task-ui/dist/*"
@@ -40,6 +44,7 @@
       ],
       "@memoflow/routine-client": ["../../packages/routine-client/dist/index.d.ts"],
       "@memoflow/notification-client": ["../../packages/notification-client/dist/index.d.ts"],
+      "@memoflow/setting-client": ["../../packages/setting-client/dist/index.d.ts"],
       "@memoflow/notification/electron": ["../../packages/notification/dist/electron/index.d.ts"],
       "@memoflow/ipc-client": ["../../packages/ipc-client/dist/index.d.ts"],
       "@memoflow/http-client": ["../../packages/http-client/dist/index.d.ts"],

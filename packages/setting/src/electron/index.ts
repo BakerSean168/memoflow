@@ -69,7 +69,7 @@ import {
   ResetUserPreferencesBodySchema,
   parsePreferenceNamespacePatch,
   type PreferenceRevisionConflict,
-} from '@memoflow/contracts/setting';
+} from '@memoflow/setting-contracts';
 import { fail } from '@memoflow/contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
 import type { SettingModuleInstance } from '../server/infrastructure';

@@ -473,6 +473,47 @@ export function createNotificationUiAliasEntries(workspaceRoot: string): Alias[]
   ];
 }
 
+export function createSettingContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const settingContractsRoot = resolveFromWorkspace(
+    workspaceRoot,
+    'packages/setting-contracts/src',
+  );
+
+  return [
+    {
+      find: /^@memoflow\/setting-contracts$/,
+      replacement: `${settingContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/setting-contracts\/(.+)$/,
+      replacement: `${settingContractsRoot}/$1`,
+    },
+  ];
+}
+export function createSettingClientAliasEntries(workspaceRoot: string): Alias[] {
+  return [
+    {
+      find: /^@memoflow\/setting-client$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/setting-client/src/index.ts'),
+    },
+  ];
+}
+export function createSettingUiAliasEntries(workspaceRoot: string): Alias[] {
+  return [
+    {
+      find: /^@memoflow\/setting-ui\/host$/,
+      replacement: resolveFromWorkspace(
+        workspaceRoot,
+        'packages/setting-ui/src/setting-ui-host.ts',
+      ),
+    },
+    {
+      find: /^@memoflow\/setting-ui$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/setting-ui/src/index.ts'),
+    },
+  ];
+}
+
 export function createOperationsContractsAliasEntries(workspaceRoot: string): Alias[] {
   const operationsContractsRoot = resolveFromWorkspace(
     workspaceRoot,

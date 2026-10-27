@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { enableAutoUnmount, flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
-import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
+import { createDefaultUserPreferenceProfile } from '@memoflow/setting-contracts';
 import { setProductTimePreferences } from '../utils/product-time';
 import { productionLocaleMessages } from '../../locales/production-messages';
 import ProductDateTimePicker from './ProductDateTimePicker.vue';

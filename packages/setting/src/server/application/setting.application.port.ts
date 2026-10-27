@@ -5,7 +5,7 @@ import type {
   PreferenceNamespaceResponse,
   PreferenceRevisionConflict,
   UserPreferenceProfile,
-} from '@memoflow/contracts/setting';
+} from '@memoflow/setting-contracts';
 import type { ResetUserPreferencesResult } from '../preferences';
 import type { ExportSettings, ImportSettings } from './use-cases';
 

@@ -20,6 +20,10 @@
       "@memoflow/notification-ui/host": [
         "../../packages/notification-ui/src/notification-ui-host.ts"
       ],
+      "@memoflow/desktop-contracts": ["../../packages/desktop-contracts/src/index.ts"],
+      "@memoflow/desktop-contracts/*": ["../../packages/desktop-contracts/src/*.ts"],
+      "@memoflow/setting-ui": ["../../packages/setting-ui/src/index.ts"],
+      "@memoflow/setting-ui/host": ["../../packages/setting-ui/src/setting-ui-host.ts"],
       "@memoflow/task-ui/*": ["../../packages/task-ui/src/*.ts", "../../packages/task-ui/src/*"],
       "@memoflow/task-ui/host": ["../../packages/task-ui/src/task-ui-host.ts"],
       "@memoflow/task-ui": ["../../packages/task-ui/src/index.ts"],
@@ -46,6 +50,7 @@
       "@memoflow/routine/routine-runtime": ["../../packages/routine/src/routine-runtime/index.ts"],
       "@memoflow/routine-client": ["../../packages/routine-client/src/index.ts"],
       "@memoflow/notification-client": ["../../packages/notification-client/src/index.ts"],
+      "@memoflow/setting-client": ["../../packages/setting-client/src/index.ts"],
       "@memoflow/notification/electron": ["../../packages/notification/src/electron/index.ts"],
       "@memoflow/ipc-client": ["../../packages/ipc-client/src/index.ts"],
       "@memoflow/http-client": ["../../packages/http-client/src/index.ts"],

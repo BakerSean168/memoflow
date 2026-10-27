@@ -24,7 +24,7 @@
  * - @memoflow/repository-contracts - 仓库模块
  * - @memoflow/contracts/account    - 账户模块
  * - @memoflow/schedule-contracts   - 调度模块
- * - @memoflow/contracts/setting    - 设置模块
+ * - @memoflow/setting-contracts    - 设置模块（已独立成包）
  * - @memoflow/contracts/ai         - AI模块
  * - @memoflow/contracts/result     - Result Pattern (新，推荐)
  * - @memoflow/contracts/shared     - 共享类型

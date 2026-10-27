@@ -56,7 +56,10 @@ describe('server feature shape semantic core', () => {
     const src = makeSourceRoot({ omit: ['client'] });
     expect(auditPackageShape('notification', src)).toBeNull();
     expect(auditPackageShape('task', src)).toBeNull();
-    expect(auditPackageShape('setting', src)).toEqual({ package: 'setting', missing: ['client'] });
     expect(auditPackageShape('repository', src)).toBeNull();
+    // Setting's semantic core is server/preferences, so its fixture needs it too;
+    // setting-client (#630) now owns the extracted client surface.
+    const settingSrc = makeSourceRoot({ semanticCore: 'preferences', omit: ['client'] });
+    expect(auditPackageShape('setting', settingSrc)).toBeNull();
   });
 });

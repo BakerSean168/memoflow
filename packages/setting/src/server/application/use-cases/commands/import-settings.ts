@@ -3,7 +3,7 @@ import {
   PreferencePortableDocumentV3Schema,
   PreferencePortableImportReceiptV3Schema,
   type PreferencePortableImportReceiptV3,
-} from '@memoflow/contracts/setting';
+} from '@memoflow/setting-contracts';
 import type { PreferencePortableService } from '../../../preferences/preference-portability';
 
 export class ImportSettings {

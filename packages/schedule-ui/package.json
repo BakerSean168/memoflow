@@ -22,6 +22,7 @@
     "@memoflow/http-client": "workspace:*",
     "@memoflow/schedule-client": "workspace:*",
     "@memoflow/schedule-contracts": "workspace:*",
+    "@memoflow/setting-contracts": "workspace:*",
     "@memoflow/task-contracts": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/ui-vue-shadcn": "workspace:*",

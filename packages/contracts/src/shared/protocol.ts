@@ -12,8 +12,8 @@ import type { RepositoryRpcMap } from '@memoflow/repository-contracts';
 import type { RoutineScheduleProjectionEventMap } from '@memoflow/routine-contracts';
 import type { ScheduleEventMap } from '@memoflow/schedule-contracts';
 import type { ScheduleRpcMap } from '@memoflow/schedule-contracts';
-import type { SettingEventMap } from '../modules/setting/protocol/setting-event-map';
-import type { SettingRpcMap } from '../modules/setting/protocol/setting-rpc-map';
+import type { SettingEventMap } from '@memoflow/setting-contracts';
+import type { SettingRpcMap } from '@memoflow/setting-contracts';
 import type { TaskEventMap, TaskRpcMap } from '@memoflow/task-contracts';
 
 /**

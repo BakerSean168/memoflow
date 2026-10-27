@@ -46,6 +46,7 @@ const STANDALONE_CLIENT_PACKAGES = new Map([
   ['schedule', 'schedule-client'],
   ['task', 'task-client'],
   ['notification', 'notification-client'],
+  ['setting', 'setting-client'],
   ['repository', 'repository-client'],
   ['routine', 'routine-client'],
 ]);

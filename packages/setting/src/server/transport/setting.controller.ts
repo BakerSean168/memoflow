@@ -11,7 +11,7 @@ import {
   ResetUserPreferencesBodySchema,
   parsePreferenceNamespacePatch,
   type PreferenceRevisionConflict,
-} from '@memoflow/contracts/setting';
+} from '@memoflow/setting-contracts';
 import { formatZodErrors } from '@memoflow/utils/result';
 import type { SettingApplicationPort } from '../application';
 

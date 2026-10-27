@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
+import { createDefaultUserPreferenceProfile } from '@memoflow/setting-contracts';
 import type { CalendarEventProjection } from '@memoflow/schedule-contracts';
 import { asInstant, asYmd } from '@memoflow/time';
 import { setProductTimePreferences } from '@schedule-ui-test-host/shared/utils/product-time';
