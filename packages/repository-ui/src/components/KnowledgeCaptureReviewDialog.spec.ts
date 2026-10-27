@@ -11,7 +11,7 @@ import { KnowledgeDraftSchema } from '@memoflow/contracts/ai';
 import type {
   KnowledgeCaptureSourceOption,
   KnowledgeCaptureNativeEditSession,
-} from '../composables/knowledge-capture-native-edit-session';
+} from '../composables/knowledgeCaptureNativeEditSession';
 import KnowledgeCaptureReviewDialog from './KnowledgeCaptureReviewDialog.vue';
 
 const host = vi.hoisted(() => ({ register: vi.fn(), unregister: vi.fn() }));

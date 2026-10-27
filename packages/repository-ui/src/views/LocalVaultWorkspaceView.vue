@@ -268,7 +268,7 @@ import { useLocalVault } from '../composables/useLocalVault';
 import {
   knowledgeCaptureSourceKey,
   type KnowledgeCaptureSourceOption,
-} from '../composables/knowledge-capture-native-edit-session';
+} from '../composables/knowledgeCaptureNativeEditSession';
 
 const { t } = useI18n();
 const route = useRoute();

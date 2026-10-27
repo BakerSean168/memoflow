@@ -90,7 +90,10 @@
     "schedule-client": "runtime-lib",
     "schedule-ui": "ui-lib",
     "notification-client": "runtime-lib",
-    "notification-ui": "ui-lib"
+    "notification-ui": "ui-lib",
+    "repository-contracts": "runtime-lib",
+    "repository-client": "runtime-lib",
+    "repository-ui": "ui-lib"
   },
   "exemptions": [
     {

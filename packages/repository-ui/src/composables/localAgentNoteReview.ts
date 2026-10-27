@@ -1,6 +1,6 @@
 import type { ConfirmedLocalVaultWriteReq } from '@memoflow/repository-contracts';
 import { KnowledgeDocumentIdSchema } from '@memoflow/repository-contracts';
-import type { KnowledgeCaptureNativeEditSession } from './knowledge-capture-native-edit-session';
+import type { KnowledgeCaptureNativeEditSession } from './knowledgeCaptureNativeEditSession';
 
 /** User-initiated capture through the existing Repository editor, without AI execution. */
 export async function openLocalAgentNoteReview(options: {

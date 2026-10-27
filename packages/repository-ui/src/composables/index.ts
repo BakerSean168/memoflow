@@ -7,7 +7,7 @@ export type {
   ReferenceableKnowledgeNoteQuery,
 } from './useReferenceableKnowledgeNotes';
 export { useKnowledgeWriteRequestLedger } from './useKnowledgeWriteRequestLedger';
-export { openLocalAgentNoteReview } from './local-agent-note-review';
+export { openLocalAgentNoteReview } from './localAgentNoteReview';
 export {
   knowledgeCaptureSourceKey,
   nativeDraftFromKnowledgeDraft,
@@ -18,4 +18,4 @@ export {
   type KnowledgeCaptureNativePatch,
   type KnowledgeCaptureNativeSubmitContext,
   type KnowledgeCaptureSourceOption,
-} from './knowledge-capture-native-edit-session';
+} from './knowledgeCaptureNativeEditSession';

@@ -10,7 +10,7 @@ import { z } from 'zod';
 import {
   KnowledgeDocumentIdSchema,
   KnowledgeDocumentIdentityOriginSchema,
-} from '../../repository/aggregates/knowledge-document-identity';
+} from '@memoflow/repository-contracts';
 
 const NullableStringSchema = z.string().nullable();
 

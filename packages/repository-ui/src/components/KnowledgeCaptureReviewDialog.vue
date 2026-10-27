@@ -147,7 +147,7 @@ import {
   type KnowledgeCaptureNativePatch,
   type KnowledgeCaptureNativeSubmitContext,
   type KnowledgeCaptureSourceOption,
-} from '../composables/knowledge-capture-native-edit-session';
+} from '../composables/knowledgeCaptureNativeEditSession';
 
 const { ProductDialogShell } = repositoryUiHost.components;
 

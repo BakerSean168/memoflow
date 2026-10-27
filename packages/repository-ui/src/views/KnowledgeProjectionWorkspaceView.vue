@@ -418,7 +418,7 @@ import KnowledgeCaptureReviewDialog from '../components/KnowledgeCaptureReviewDi
 import {
   knowledgeCaptureSourceKey,
   type KnowledgeCaptureSourceOption,
-} from '../composables/knowledge-capture-native-edit-session';
+} from '../composables/knowledgeCaptureNativeEditSession';
 
 const { t, locale } = useI18n();
 const router = useRouter();

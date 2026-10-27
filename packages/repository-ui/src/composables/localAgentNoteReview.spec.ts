@@ -2,8 +2,8 @@ import { expect, it, vi } from 'vitest';
 import type {
   KnowledgeCaptureNativeEditSession,
   KnowledgeCaptureNativeDraft,
-} from './knowledge-capture-native-edit-session';
-import { openLocalAgentNoteReview } from './local-agent-note-review';
+} from './knowledgeCaptureNativeEditSession';
+import { openLocalAgentNoteReview } from './localAgentNoteReview';
 
 it('opens the existing owner editor and saves only the exact user-confirmed draft', async () => {
   let draft: KnowledgeCaptureNativeDraft = {
