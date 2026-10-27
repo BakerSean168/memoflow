@@ -37,8 +37,8 @@ test('authoritative Nx boundary policy must match the Oxlint bridge exactly', as
 });
 
 test('residual selection retains Vue templates, Storybook, product time and JSON rule owners', () => {
-  assert.equal(isResidual('packages/app-vue/src/modules/task/TaskCard.vue'), true);
-  assert.equal(isResidual('packages/app-vue/src/modules/task/formatter.ts'), true);
+  assert.equal(isResidual('packages/app-vue/src/modules/setting/components/AISettings.vue'), true);
+  assert.equal(isResidual('packages/app-vue/src/modules/ai/composables/useAIChatView.ts'), true);
   assert.equal(isResidual('packages/app-react/src/hooks/useTime.tsx'), true);
   assert.equal(isResidual('apps/storybook/src/MyCard.stories.ts'), true);
   assert.equal(isResidual('packages/patterns/tsconfig.json'), true);
@@ -77,7 +77,7 @@ test('Oxlint must reject production test-only imports while allowing the test se
 
 test('ESLint residual must reject Vue v-for without a key', async () => {
   await probe(
-    'packages/app-vue/src/modules/task/__quality_oxc_vue_probe.vue',
+    'packages/app-vue/src/modules/ai/__quality_oxc_vue_probe.vue',
     '<template><span v-for="item in items">{{ item }}</span></template>\n<script setup lang="ts">const items = [1, 2];</script>\n',
     (file) => {
       assert.equal(isResidual(file), true);
@@ -90,7 +90,7 @@ test('ESLint residual must reject Vue v-for without a key', async () => {
 
 test('ESLint residual must reject prohibited product time formatting', async () => {
   await probe(
-    'packages/app-vue/src/modules/task/__quality_oxc_time_probe.ts',
+    'packages/app-vue/src/modules/ai/__quality_oxc_time_probe.ts',
     'export const x = new Date().toLocaleDateString();\n',
     (file) => {
       assert.equal(isResidual(file), true);

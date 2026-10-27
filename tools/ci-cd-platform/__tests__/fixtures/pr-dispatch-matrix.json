@@ -57,12 +57,13 @@
             "goal-ui",
             "governance-tools",
             "notification-ui",
+            "task-ui",
             "ui-storybook",
             "web"
           ],
           "typecheck": ["app-vue", "desktop", "ui-storybook", "web"],
           "test": ["app-vue", "desktop", "governance-tools", "web"],
-          "test:contract": ["goal-ui", "notification-ui"],
+          "test:contract": ["goal-ui", "notification-ui", "task-ui"],
           "test:smoke": [],
           "test:integration": [],
           "test:boundary": ["desktop"],
@@ -89,6 +90,7 @@
             "desktop:build",
             "goal-ui:build",
             "notification-ui:build",
+            "task-ui:build",
             "ui-storybook:build",
             "web:build",
             "app-vue:typecheck",
@@ -102,7 +104,11 @@
           "verification-children": ["desktop:test:ipc", "desktop:test:main"],
           "web-visual": ["web:e2e:visual-regression"],
           "component-browser": ["ui-storybook:test:interaction"],
-          "contract": ["goal-ui:test:contract", "notification-ui:test:contract"]
+          "contract": [
+            "goal-ui:test:contract",
+            "notification-ui:test:contract",
+            "task-ui:test:contract"
+          ]
         },
         "serverShards": [
           {
@@ -523,6 +529,7 @@
             "task",
             "task-client",
             "task-contracts",
+            "task-ui",
             "time",
             "transport-contracts",
             "ui-core",
@@ -584,6 +591,7 @@
             "task",
             "task-client",
             "task-contracts",
+            "task-ui",
             "time",
             "transport-contracts",
             "ui-core",
@@ -646,6 +654,7 @@
             "task",
             "task-client",
             "task-contracts",
+            "task-ui",
             "test-system-v2",
             "time",
             "transport-contracts",
@@ -674,6 +683,7 @@
             "shared-primitives",
             "task-client",
             "task-contracts",
+            "task-ui",
             "transport-contracts",
             "workspace-contracts"
           ],
@@ -810,6 +820,7 @@
             "task:build",
             "task-client:build",
             "task-contracts:build",
+            "task-ui:build",
             "time:build",
             "transport-contracts:build",
             "ui-core:build",
@@ -869,6 +880,7 @@
             "task:typecheck",
             "task-client:typecheck",
             "task-contracts:typecheck",
+            "task-ui:typecheck",
             "time:typecheck",
             "transport-contracts:typecheck",
             "ui-core:typecheck",
@@ -922,6 +934,7 @@
             "shared-primitives:test:contract",
             "task-client:test:contract",
             "task-contracts:test:contract",
+            "task-ui:test:contract",
             "transport-contracts:test:contract",
             "workspace-contracts:test:contract"
           ]
@@ -1021,6 +1034,7 @@
             "task",
             "task-client",
             "task-contracts",
+            "task-ui",
             "time",
             "transport-contracts",
             "ui-core",
@@ -1082,6 +1096,7 @@
             "task",
             "task-client",
             "task-contracts",
+            "task-ui",
             "time",
             "transport-contracts",
             "ui-core",
@@ -1144,6 +1159,7 @@
             "task",
             "task-client",
             "task-contracts",
+            "task-ui",
             "test-system-v2",
             "time",
             "transport-contracts",
@@ -1172,6 +1188,7 @@
             "shared-primitives",
             "task-client",
             "task-contracts",
+            "task-ui",
             "transport-contracts",
             "workspace-contracts"
           ],
@@ -1308,6 +1325,7 @@
             "task:build",
             "task-client:build",
             "task-contracts:build",
+            "task-ui:build",
             "time:build",
             "transport-contracts:build",
             "ui-core:build",
@@ -1367,6 +1385,7 @@
             "task:typecheck",
             "task-client:typecheck",
             "task-contracts:typecheck",
+            "task-ui:typecheck",
             "time:typecheck",
             "transport-contracts:typecheck",
             "ui-core:typecheck",
@@ -1420,6 +1439,7 @@
             "shared-primitives:test:contract",
             "task-client:test:contract",
             "task-contracts:test:contract",
+            "task-ui:test:contract",
             "transport-contracts:test:contract",
             "workspace-contracts:test:contract"
           ]
@@ -1468,10 +1488,10 @@
       "expected": {
         "full": false,
         "targets": {
-          "build": ["goal-ui", "governance-tools", "notification-ui", "ui-storybook"],
+          "build": ["goal-ui", "governance-tools", "notification-ui", "task-ui", "ui-storybook"],
           "typecheck": ["app-vue"],
           "test": ["app-vue", "governance-tools", "test-system-v2"],
-          "test:contract": ["goal-ui", "notification-ui"],
+          "test:contract": ["goal-ui", "notification-ui", "task-ui"],
           "test:smoke": [],
           "test:integration": [],
           "test:boundary": ["desktop"],
@@ -1496,6 +1516,7 @@
           "build": [
             "goal-ui:build",
             "notification-ui:build",
+            "task-ui:build",
             "ui-storybook:build",
             "app-vue:typecheck"
           ],
@@ -1505,7 +1526,11 @@
           "verification-children": ["desktop:test:ipc", "desktop:test:main"],
           "web-visual": ["web:e2e:visual-regression"],
           "component-browser": ["ui-storybook:test:interaction"],
-          "contract": ["goal-ui:test:contract", "notification-ui:test:contract"]
+          "contract": [
+            "goal-ui:test:contract",
+            "notification-ui:test:contract",
+            "task-ui:test:contract"
+          ]
         },
         "serverShards": [
           {
@@ -1574,6 +1599,7 @@
             "task",
             "task-client",
             "task-contracts",
+            "task-ui",
             "time",
             "transport-contracts",
             "ui-core",
@@ -1635,6 +1661,7 @@
             "task",
             "task-client",
             "task-contracts",
+            "task-ui",
             "time",
             "transport-contracts",
             "ui-core",
@@ -1697,6 +1724,7 @@
             "task",
             "task-client",
             "task-contracts",
+            "task-ui",
             "test-system-v2",
             "time",
             "transport-contracts",
@@ -1725,6 +1753,7 @@
             "shared-primitives",
             "task-client",
             "task-contracts",
+            "task-ui",
             "transport-contracts",
             "workspace-contracts"
           ],
@@ -1861,6 +1890,7 @@
             "task:build",
             "task-client:build",
             "task-contracts:build",
+            "task-ui:build",
             "time:build",
             "transport-contracts:build",
             "ui-core:build",
@@ -1920,6 +1950,7 @@
             "task:typecheck",
             "task-client:typecheck",
             "task-contracts:typecheck",
+            "task-ui:typecheck",
             "time:typecheck",
             "transport-contracts:typecheck",
             "ui-core:typecheck",
@@ -1974,6 +2005,7 @@
             "shared-primitives:test:contract",
             "task-client:test:contract",
             "task-contracts:test:contract",
+            "task-ui:test:contract",
             "transport-contracts:test:contract",
             "workspace-contracts:test:contract"
           ]
@@ -2023,18 +2055,27 @@
       "expected": {
         "full": false,
         "targets": {
-          "build": ["app-vue", "desktop", "governance-tools", "task-client", "ui-storybook", "web"],
+          "build": [
+            "app-vue",
+            "desktop",
+            "governance-tools",
+            "task-client",
+            "task-ui",
+            "ui-storybook",
+            "web"
+          ],
           "typecheck": [
             "app-react",
             "app-vue",
             "desktop",
             "mobile",
             "task-client",
+            "task-ui",
             "ui-storybook",
             "web"
           ],
-          "test": ["app-vue", "desktop", "governance-tools", "task-client", "web"],
-          "test:contract": ["task-client"],
+          "test": ["app-vue", "desktop", "governance-tools", "task-client", "task-ui", "web"],
+          "test:contract": ["task-client", "task-ui"],
           "test:smoke": [],
           "test:integration": [],
           "test:boundary": ["desktop"],
@@ -2060,6 +2101,7 @@
             "app-vue:build",
             "desktop:build",
             "task-client:build",
+            "task-ui:build",
             "ui-storybook:build",
             "web:build",
             "app-react:typecheck",
@@ -2067,6 +2109,7 @@
             "desktop:typecheck",
             "mobile:typecheck",
             "task-client:typecheck",
+            "task-ui:typecheck",
             "ui-storybook:typecheck",
             "web:typecheck"
           ],
@@ -2076,7 +2119,7 @@
           "verification-children": ["desktop:test:ipc", "desktop:test:main"],
           "web-visual": ["web:e2e:visual-regression"],
           "component-browser": ["ui-storybook:test:interaction"],
-          "contract": ["task-client:test:contract"]
+          "contract": ["task-client:test:contract", "task-ui:test:contract"]
         },
         "serverShards": [
           {

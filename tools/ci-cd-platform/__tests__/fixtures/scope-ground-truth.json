@@ -1746,11 +1746,11 @@
       "rationale": "Minimal counterexample from the #488 review: Desktop main + shared Vue view must run BOTH Desktop boundary and Web Flow (old selectLanes gave web=false).",
       "files": [
         "apps/desktop/src/main/index.ts",
-        "packages/app-vue/src/modules/task/views/TaskManagementView.vue"
+        "packages/task-ui/src/views/TaskManagementView.vue"
       ],
       "scope": {
         "projects": [
-          "app-vue",
+          "task-ui",
           "ci-cd-platform",
           "desktop",
           "governance-tools",
@@ -1759,14 +1759,14 @@
           "web"
         ],
         "unit": [
-          "app-vue",
+          "task-ui",
           "ci-cd-platform",
           "desktop",
           "governance-tools",
           "test-system-v2",
           "web"
         ],
-        "coverage": ["app-vue"],
+        "coverage": ["task-ui"],
         "smoke": [],
         "integration": [],
         "boundary": ["desktop"],

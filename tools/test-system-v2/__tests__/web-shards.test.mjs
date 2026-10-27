@@ -207,7 +207,7 @@ test('ordinary owners have no Flow/core floor while specialized acceptance and v
   for (const file of [
     'packages/notification/src/api/index.ts',
     'packages/goal/src/index.ts',
-    'packages/app-vue/src/modules/task/view.vue',
+    'packages/task-ui/src/views/view.vue',
     'nx.json',
   ]) {
     const selected = selectWebSpecs({ enabled: true, files: [file] });

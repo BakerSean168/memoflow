@@ -52,7 +52,7 @@ test('mixed Desktop + shared Vue change keeps Desktop boundary and Web Flow', ()
   assert.equal(entry.expected.lanes.web, true);
   assert.equal(entry.expected.lanes.boundary, true);
   assert.deepEqual(webFlowCandidateFiles(entry.files), [
-    'packages/app-vue/src/modules/task/views/TaskManagementView.vue',
+    'packages/task-ui/src/views/TaskManagementView.vue',
   ]);
 });
 
