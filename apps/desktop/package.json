@@ -111,9 +111,7 @@
     "@memoflow/notification-ui": "workspace:*",
     "@memoflow/scheduler": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",
-    "@memoflow/transport-contracts": "workspace:*",
-    "@memoflow/time": "workspace:*",
-    "@memoflow/test-utils": "workspace:*"
+    "@memoflow/transport-contracts": "workspace:*"
   },
   "desktopName": "memoflow.desktop",
   "name": "@memoflow/desktop",

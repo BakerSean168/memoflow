@@ -34,8 +34,7 @@
     "vue-router": "^5.3.1",
     "@memoflow/ai-contracts": "workspace:*",
     "@memoflow/transport-contracts": "workspace:*",
-    "@memoflow/shared-primitives": "workspace:*",
-    "@memoflow/ai": "workspace:*"
+    "@memoflow/shared-primitives": "workspace:*"
   },
   "devDependencies": {
     "@memoflow/test-utils": "workspace:*",

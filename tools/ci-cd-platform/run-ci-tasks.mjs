@@ -64,8 +64,8 @@ await mkdir('reports/ci-tasks', { recursive: true });
 // cache restoration and task parallelism; no cross product of unrelated targets.
 if (job.startsWith('unit-') || job.startsWith('web-unit-') || job === 'server-unit') {
   const setup = await run(
-    ['pnpm', 'exec', 'nx', 'run', 'contracts:build', '--outputStyle=static'],
-    `${job}-contracts-build`,
+    ['pnpm', 'exec', 'nx', 'run', 'host-runtime:build', '--outputStyle=static'],
+    `${job}-runtime-contracts-build`,
   );
   if (setup.exitCode !== 0 || setup.signal || setup.error)
     throw new Error('Unit runtime contracts build failed');

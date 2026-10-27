@@ -189,7 +189,7 @@ const LINT_EXTENSIONS = new Set([
 const TYPE_EXTENSIONS = new Set(['.ts', '.tsx', '.mts', '.cts', '.vue']);
 const STORY_PATTERN = /(?:\.stories\.[^/]+$|^apps\/storybook\/)/u;
 const CONTRACT_PATTERN =
-  /^(?:packages\/contracts\/|apps\/api\/src\/shared\/infrastructure\/openapi\/|packages\/[^/]+\/src\/contracts\/)/u;
+  /^(?:packages\/(?:[^/]+-contracts|shared-primitives)\/|apps\/api\/src\/shared\/infrastructure\/openapi\/|packages\/[^/]+\/src\/contracts\/)/u;
 
 function extensionOf(file) {
   const dot = file.lastIndexOf('.');

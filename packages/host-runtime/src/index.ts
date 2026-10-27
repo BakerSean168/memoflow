@@ -7,7 +7,7 @@
  *
  * @module @memoflow/host-runtime
  *
- * P1 S4（Issue #633）自 @memoflow/transport-contracts 的 shared 子路径提取：这两组
+ * P1 S4（Issue #633）自旧聚合契约包的 shared 子路径提取：这两组
  * 内容是宿主组合契约与有状态运行时实现（CommandRegistry），不是纯契约，
  * 真身迁至本包，本包为唯一权威定义。桌面 IPC 鉴权中间件工厂在
  * `./electron-ipc` 子路径。注意：contracts/shared 桶不设 re-export shim

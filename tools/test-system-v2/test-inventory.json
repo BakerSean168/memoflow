@@ -7380,6 +7380,22 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/host-runtime/src/modules/transport-cast-inventory.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/host-runtime/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/host-runtime/src/shared/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/host-runtime/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/http-client/src/__tests__/email-verification-circuit.test.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11384,6 +11400,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/utils/src/domain/__tests__/identity-id.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/utils/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/utils/src/domain/create-id-type.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -12213,13 +12237,6 @@
       "fileCount": 14
     },
     {
-      "id": "packages/domain-shared/vitest.config.ts",
-      "type": "measurement",
-      "suite": "coverage",
-      "runner": "vitest",
-      "fileCount": 1
-    },
-    {
       "id": "packages/goal/vitest.config.ts",
       "type": "measurement",
       "suite": "coverage",
@@ -12747,13 +12764,6 @@
       "fileCount": 12
     },
     {
-      "id": "packages/contracts/vitest.config.ts",
-      "type": "primary",
-      "suite": "unit",
-      "runner": "vitest",
-      "fileCount": 2
-    },
-    {
       "id": "packages/data-portability-contracts/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
@@ -12780,13 +12790,6 @@
       "suite": "unit",
       "runner": "vitest",
       "fileCount": 10
-    },
-    {
-      "id": "packages/domain-shared/vitest.config.ts",
-      "type": "primary",
-      "suite": "unit",
-      "runner": "vitest",
-      "fileCount": 1
     },
     {
       "id": "packages/goal-client/vitest.config.ts",
@@ -12828,7 +12831,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 1
+      "fileCount": 3
     },
     {
       "id": "packages/http-client/vitest.config.ts",
@@ -13122,7 +13125,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 13
+      "fileCount": 14
     },
     {
       "id": "packages/workspace-contracts/vitest.config.ts",

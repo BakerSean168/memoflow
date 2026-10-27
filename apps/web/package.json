@@ -53,7 +53,6 @@
     "@memoflow/ui-core": "workspace:*",
     "@lucide/vue": "^1.48.0",
     "@memoflow/schedule-contracts": "workspace:*",
-    "@memoflow/test-utils": "workspace:*",
     "@memoflow/ui-vue-shadcn": "workspace:*",
     "pinia": "^4.0.3",
     "@memoflow/task-ui": "workspace:*",

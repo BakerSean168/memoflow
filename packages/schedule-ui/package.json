@@ -33,9 +33,7 @@
     "vue-router": "^5.3.1",
     "vue-sonner": "^2.0.8",
     "@memoflow/shared-primitives": "workspace:*",
-    "@memoflow/transport-contracts": "workspace:*",
-    "@memoflow/test-utils": "workspace:*",
-    "@memoflow/routine-ui": "workspace:*"
+    "@memoflow/transport-contracts": "workspace:*"
   },
   "peerDependencies": {
     "vue": "^3.5.39"

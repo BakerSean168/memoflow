@@ -65,7 +65,6 @@
       "@memoflow/notification/electron": ["../../packages/notification/src/electron/index.ts"],
       "@memoflow/ipc-client": ["../../packages/ipc-client/src/index.ts"],
       "@memoflow/http-client": ["../../packages/http-client/src/index.ts"],
-      "@memoflow/desktop-contracts": ["../../packages/desktop-contracts/src/index.ts"],
       "@memoflow/notification-contracts": ["../../packages/notification-contracts/src/index.ts"],
       "@memoflow/notification-contracts/*": ["../../packages/notification-contracts/src/*.ts"],
       "@memoflow/repository-client": ["../../packages/repository-client/src/index.ts"],
