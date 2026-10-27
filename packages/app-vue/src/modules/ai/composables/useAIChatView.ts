@@ -16,7 +16,7 @@ import { toast } from 'vue-sonner';
 import {
   KnowledgeDocumentIdSchema,
   type KnowledgeDocumentRef,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import type {
   AIWorkflowRunView,
   AIChatPermissionMode,
@@ -25,8 +25,7 @@ import type {
 import { useAI } from './useAI';
 import { useGoal } from '@memoflow/goal-ui';
 import { useTask } from '@memoflow/task-ui';
-import { useRecentKnowledgeNotes } from '../../repository/composables/useRecentKnowledgeNotes';
-import { useReferenceableKnowledgeNotes } from '../../repository/composables/useReferenceableKnowledgeNotes';
+import { useRecentKnowledgeNotes } from '@memoflow/repository-ui';
 import { useAIModelCatalog, composerAgentKey } from './useAIModelCatalog';
 import { sortAgentInstances } from '../agent-instance-order';
 import { antigravityEffortVariant, presentAntigravityModels } from './antigravityModelPresentation';
@@ -64,7 +63,7 @@ import {
   ASSISTANT_SURFACE_KEY,
 } from '../../../di/keys';
 import { useKnowledgeNativeSurfaceRegistration } from '../../../layouts/shell/useKnowledgeNativeSurface';
-import { openLocalAgentNoteReview } from '../../repository/composables/localAgentNoteReview';
+import { openLocalAgentNoteReview, useReferenceableKnowledgeNotes } from '@memoflow/repository-ui';
 import { unwrapOrThrowError } from '@memoflow/contracts/result';
 import type {
   AIWorkspaceRecentGoal,

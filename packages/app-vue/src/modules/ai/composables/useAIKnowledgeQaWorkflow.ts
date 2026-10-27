@@ -4,7 +4,7 @@ import { toast } from 'vue-sonner';
 import type { KnowledgeAnswer, UseAIKnowledgeQaWorkflowOptions } from './types';
 import { getAIErrorMessage } from './error';
 import { unwrap } from '@memoflow/contracts/result';
-import type { KnowledgeDocumentRef } from '@memoflow/contracts/repository';
+import type { KnowledgeDocumentRef } from '@memoflow/repository-contracts';
 
 type KnowledgeRelatedNote = NonNullable<KnowledgeAnswer['relatedNotes']>[number];
 

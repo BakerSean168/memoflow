@@ -11,6 +11,8 @@ import {
   createNotificationContractsAliasEntries,
   createTaskContractsAliasEntries,
   createContractsAliasEntries,
+  createRepositoryContractsAliasEntries,
+  createRepositoryClientAliasEntries,
   createUiVueSourceAliasEntries,
   createWorkspaceSourceAliasEntries,
 } from '../../../vite.workspace-aliases.ts';
@@ -54,6 +56,8 @@ const config: StorybookConfig = {
           ...createNotificationContractsAliasEntries(workspace),
           ...createTaskContractsAliasEntries(workspace),
           ...createContractsAliasEntries(workspace),
+          ...createRepositoryContractsAliasEntries(workspace),
+          ...createRepositoryClientAliasEntries(workspace),
           ...createWorkspaceSourceAliasEntries(workspace, [
             ['@memoflow/domain-shared/shared', 'packages/domain-shared/src/shared/index.ts'],
             ['@memoflow/domain-shared', 'packages/domain-shared/src/index.ts'],
@@ -156,6 +160,9 @@ const config: StorybookConfig = {
             ['@memoflow/goal-ui', 'packages/goal-ui/src/index.ts'],
             ['@goal-ui-test-host', 'packages/app-vue/src'],
             ['@task-ui-test-host', 'packages/app-vue/src'],
+            ['@memoflow/repository-ui/host', 'packages/repository-ui/src/repository-ui-host.ts'],
+            ['@memoflow/repository-ui', 'packages/repository-ui/src/index.ts'],
+            ['@repository-ui-test-host', 'packages/app-vue/src'],
             ['@memoflow/workspace-contracts', 'packages/workspace-contracts/src/index.ts'],
             [
               '@memoflow/desktop-contracts/auth-context',

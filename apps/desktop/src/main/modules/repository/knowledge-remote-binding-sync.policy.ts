@@ -1,4 +1,4 @@
-import type { KnowledgeRemoteBindingClientDTO } from '@memoflow/contracts/repository';
+import type { KnowledgeRemoteBindingClientDTO } from '@memoflow/repository-contracts';
 
 export interface ReadyKnowledgeRemoteSyncState {
   readonly repositoryId: string;

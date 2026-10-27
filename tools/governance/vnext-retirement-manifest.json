@@ -112,7 +112,7 @@
       "requiredPaths": [
         "packages/goal-ui/src/components/dialogs/GoalDialog.vue",
         "packages/task-ui/src/components/dialogs/TaskPlanDialog.vue",
-        "packages/app-vue/src/modules/repository/components/KnowledgeCaptureReviewDialog.vue"
+        "packages/repository-ui/src/components/KnowledgeCaptureReviewDialog.vue"
       ]
     },
     {

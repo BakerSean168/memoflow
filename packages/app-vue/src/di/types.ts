@@ -23,7 +23,7 @@ import type { GoalClientPort } from '@memoflow/goal-client';
 import type { LabelClientPort } from '@memoflow/label/client';
 import type { NotificationClientPort } from '@memoflow/notification-client';
 import type { GoalKnowledgeClientPort } from '@memoflow/relation/client';
-import type { RepositoryClientPort } from '@memoflow/repository/client';
+import type { RepositoryClientPort } from '@memoflow/repository-client';
 import type { RoutineClientPort } from '@memoflow/routine-client';
 import type { ScheduleClientPort } from '@memoflow/schedule-client';
 import type { SettingClientPort } from '@memoflow/setting/client';

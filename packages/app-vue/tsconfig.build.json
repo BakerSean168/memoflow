@@ -12,6 +12,10 @@
       "@memoflow/task-ui/host": ["../task-ui/dist/task-ui-host.d.ts"],
       "@memoflow/task-ui/*": ["../task-ui/dist/*.d.ts", "../task-ui/dist/*"],
       "@memoflow/task-ui": ["../task-ui/dist/index.d.ts"],
+      "@memoflow/repository-ui/host": ["../repository-ui/dist/repository-ui-host.d.ts"],
+      "@memoflow/repository-ui": ["../repository-ui/dist/index.d.ts"],
+      "@memoflow/repository-contracts": ["../repository-contracts/dist/index.d.ts"],
+      "@memoflow/repository-contracts/*": ["../repository-contracts/dist/*.d.ts"],
       "@memoflow/contracts": ["../contracts/dist/index.d.ts"],
       "@memoflow/contracts/*": [
         "../contracts/dist/modules/*/index.d.ts",
@@ -32,7 +36,7 @@
       "@memoflow/notification-client": ["../notification-client/dist/index.d.ts"],
       "@memoflow/routine-client": ["../routine-client/dist/index.d.ts"],
       "@memoflow/task-client": ["../task-client/dist/index.d.ts"],
-      "@memoflow/repository/client": ["../repository/dist/client/index.d.ts"]
+      "@memoflow/repository-client": ["../repository-client/dist/index.d.ts"]
     }
   }
 }

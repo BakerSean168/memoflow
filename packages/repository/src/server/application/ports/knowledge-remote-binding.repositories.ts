@@ -3,7 +3,7 @@ import type {
   KnowledgeRemoteBindingServerDTO,
   RemoteHistoryFence,
   RemoteRepositoryObservation,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 
 export interface IKnowledgeSpaceRepository {
   ensure(id: string): Promise<void>;

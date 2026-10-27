@@ -3,7 +3,7 @@ import {
   type KnowledgeRemoteBindingClientDTO,
   type SyncKnowledgeRepositoryReq,
   type SyncKnowledgeRepositoryRes,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import { fail, ok, type Result } from '@memoflow/contracts/result';
 import { LocalVaultRuntimeError, type LocalVaultElectronPort } from '@memoflow/repository/electron';
 import {

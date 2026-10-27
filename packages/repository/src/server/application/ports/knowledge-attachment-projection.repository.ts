@@ -1,4 +1,4 @@
-import type { KnowledgeAttachmentProjectionClientDTO } from '@memoflow/contracts/repository';
+import type { KnowledgeAttachmentProjectionClientDTO } from '@memoflow/repository-contracts';
 
 export interface KnowledgeAttachmentProjectionUpsert {
   id: string;

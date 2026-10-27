@@ -20,9 +20,7 @@
         "../../../../packages/notification-contracts/src/*.ts"
       ],
       "@memoflow/contracts/primitives": ["../../../../packages/contracts/src/primitives/index.ts"],
-      "@memoflow/contracts/repository": [
-        "../../../../packages/contracts/src/modules/repository/index.ts"
-      ],
+      "@memoflow/repository-contracts": ["../../../../packages/repository-contracts/src/index.ts"],
       "@memoflow/contracts/result": ["../../../../packages/contracts/src/result/index.ts"],
       "@memoflow/schedule-contracts": ["../../../../packages/schedule-contracts/src/index.ts"],
       "@memoflow/schedule-contracts/*": ["../../../../packages/schedule-contracts/src/*.ts"],
@@ -54,7 +52,7 @@
       "@memoflow/notification/client": ["../../../../packages/notification/dist/client/index.d.ts"],
       "@memoflow/routine-client": ["../../../../packages/routine-client/dist/index.d.ts"],
       "@memoflow/task-client": ["../../../../packages/task-client/dist/index.d.ts"],
-      "@memoflow/repository/client": ["../../../../packages/repository/dist/client/index.d.ts"],
+      "@memoflow/repository-client": ["../../../../packages/repository-client/dist/index.d.ts"],
       "@memoflow/test-utils": ["../../../../packages/test-utils/src/index.ts"],
       "@memoflow/test-utils/*": [
         "../../../../packages/test-utils/src/*",

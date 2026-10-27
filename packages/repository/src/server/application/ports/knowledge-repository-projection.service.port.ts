@@ -29,7 +29,7 @@ import type {
   ResolveKnowledgeNoteReferenceReq,
   ListKnowledgeWriteRequestsReq,
   ListKnowledgeWriteRequestsRes,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import type {
   GithubWebhookIngressRequest,
   GithubWebhookIngressResponse,

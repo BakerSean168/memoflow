@@ -1,5 +1,5 @@
 import { createSign } from 'node:crypto';
-import type { GitHubInstallationRepositoryDTO } from '@memoflow/contracts/repository';
+import type { GitHubInstallationRepositoryDTO } from '@memoflow/repository-contracts';
 import { GitHubAppClientFailureError } from '../../application/ports/github-app-client.port';
 import type {
   GitHubAppInstallationInventory,

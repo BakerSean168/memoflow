@@ -59,6 +59,9 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   'schedule-contracts': ['./*'],
   'workspace-contracts': ['./*'],
   'relation-contracts': ['./*'],
+  'repository-contracts': ['./*'],
+  'repository-client': [],
+  'repository-ui': ['./host'],
   'host-runtime': ['./electron-ipc'],
   task: ['./analytics', './testing', './schema', './schedule-execution', './schedule-projection'],
   ai: ['./agent-gateway', './ports', './schema', './testing'],
@@ -78,7 +81,6 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   contracts: [
     './agent-gateway',
     './relation',
-    './repository',
     './account',
     './setting',
     './ai',

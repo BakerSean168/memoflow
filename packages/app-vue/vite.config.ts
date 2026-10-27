@@ -54,7 +54,6 @@ export default defineConfig({
           'src/modules/authentication/index.ts',
         ),
         'modules/account/index': path.resolve(__dirname, 'src/modules/account/index.ts'),
-        'modules/repository/index': path.resolve(__dirname, 'src/modules/repository/index.ts'),
         'modules/setting/index': path.resolve(__dirname, 'src/modules/setting/index.ts'),
         'modules/ai/index': path.resolve(__dirname, 'src/modules/ai/index.ts'),
       },

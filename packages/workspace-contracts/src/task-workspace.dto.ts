@@ -14,7 +14,7 @@ import { brandedId } from '@memoflow/shared-primitives';
 import {
   KnowledgeDocumentIdSchema,
   KnowledgeDocumentRefSchema,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import { GoalReferenceSchema, KeyResultReferenceSchema } from '@memoflow/goal-contracts';
 import { TaskOccurrenceResponseSchema, TaskPlanResponseSchema } from '@memoflow/task-contracts';
 import { LabelClientDTOSchema } from '@memoflow/label-contracts';

@@ -6,6 +6,7 @@ import {
 import {
   installGoalUiHost,
   installNotificationUiHost,
+  installRepositoryUiHost,
   installRoutineUiHost,
   installTaskUiHost,
 } from '@memoflow/app-vue/di';
@@ -18,6 +19,7 @@ export function bootstrapVisualApp(params: URLSearchParams, timeZone = 'UTC') {
   installGoalUiHost();
   installTaskUiHost();
   installNotificationUiHost();
+  installRepositoryUiHost();
   installRoutineUiHost();
   const locale = params.get('locale') === 'zh-CN' ? 'zh-CN' : 'en-US';
   const theme = params.get('theme') === 'dark' ? 'dark' : 'light';

@@ -24,7 +24,7 @@ const isLoadingRef = ref(false);
 const load = vi.fn().mockResolvedValue(undefined);
 const ensure = vi.fn().mockResolvedValue(undefined);
 
-vi.mock('../../../modules/repository/composables/useRecentKnowledgeNotes', () => ({
+vi.mock('@memoflow/repository-ui', () => ({
   useRecentKnowledgeNotes: () => ({
     notes: notesRef,
     error: errorRef,

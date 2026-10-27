@@ -20,12 +20,15 @@ describe('controlled note-write boundary surface', () => {
   const apiClientPort = readFileSync(
     resolve(
       repoRoot,
-      'packages/repository/src/application-client/ports/repository-api-client.port.ts',
+      'packages/repository-client/src/application-client/ports/repository-api-client.port.ts',
     ),
     'utf8',
   );
   const clientPort = readFileSync(
-    resolve(repoRoot, 'packages/repository/src/application-client/repository-client.port.ts'),
+    resolve(
+      repoRoot,
+      'packages/repository-client/src/application-client/repository-client.port.ts',
+    ),
     'utf8',
   );
   const knowledgeRoutes = readFileSync(
@@ -48,10 +51,7 @@ describe('controlled note-write boundary surface', () => {
     'utf8',
   );
   const createConfirmedDto = readFileSync(
-    resolve(
-      repoRoot,
-      'packages/contracts/src/modules/repository/api/knowledge-note-projection.dto.ts',
-    ),
+    resolve(repoRoot, 'packages/repository-contracts/src/api/knowledge-note-projection.dto.ts'),
     'utf8',
   );
   const aiKnowledgeDto = readFileSync(
@@ -59,18 +59,15 @@ describe('controlled note-write boundary surface', () => {
     'utf8',
   );
   const vueRepositoryRouter = readFileSync(
-    resolve(repoRoot, 'packages/app-vue/src/modules/repository/router/index.ts'),
+    resolve(repoRoot, 'packages/repository-ui/src/router/index.ts'),
     'utf8',
   );
   const projectionWorkspace = readFileSync(
-    resolve(
-      repoRoot,
-      'packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.vue',
-    ),
+    resolve(repoRoot, 'packages/repository-ui/src/views/KnowledgeProjectionWorkspaceView.vue'),
     'utf8',
   );
   const localVaultWorkspace = readFileSync(
-    resolve(repoRoot, 'packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.vue'),
+    resolve(repoRoot, 'packages/repository-ui/src/views/LocalVaultWorkspaceView.vue'),
     'utf8',
   );
 

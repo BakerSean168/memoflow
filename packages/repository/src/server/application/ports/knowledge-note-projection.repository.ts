@@ -5,7 +5,7 @@ import type {
   KnowledgeNoteTreeResponse,
   ListReferenceableKnowledgeDocumentsReq,
   ReferenceableKnowledgeDocumentListResponse,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 
 export type GithubWebhookDeliveryStatus =
   | 'Received'

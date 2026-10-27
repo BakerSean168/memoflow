@@ -94,6 +94,9 @@
     "schedule-ui": "ui-lib",
     "notification-client": "runtime-lib",
     "notification-ui": "ui-lib",
+    "repository-contracts": "runtime-lib",
+    "repository-client": "runtime-lib",
+    "repository-ui": "ui-lib",
     "routine-client": "runtime-lib",
     "routine-contracts": "runtime-lib",
     "routine-ui": "ui-lib"

@@ -8,7 +8,7 @@ import {
 } from '@memoflow/contracts/ai';
 import type { CreateGoalReq } from '@memoflow/goal-contracts';
 import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
-import type { KnowledgeDocumentRef } from '@memoflow/contracts/repository';
+import type { KnowledgeDocumentRef } from '@memoflow/repository-contracts';
 import type { ResultError } from '@memoflow/transport-contracts/result';
 import type { CreateTaskPlanReq } from '@memoflow/task-contracts';
 import { goalWorkflowEntityId, goalWorkflowMutationRequestId } from './deterministic-entity-id';

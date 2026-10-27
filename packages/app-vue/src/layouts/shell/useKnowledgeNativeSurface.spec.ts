@@ -6,7 +6,7 @@ import { createMemoryHistory, createRouter } from 'vue-router';
 import { describe, expect, it, vi } from 'vitest';
 import { provideKnowledgeNativeSurface } from './useKnowledgeNativeSurface';
 import { useAppShellStore } from './useAppShellStore';
-import type { KnowledgeCaptureNativeEditSession } from '../../modules/repository/composables/knowledgeCaptureNativeEditSession';
+import type { KnowledgeCaptureNativeEditSession } from '@memoflow/repository-ui';
 
 async function setup(initialPath = '/repository?dialog=knowledge-capture') {
   const pinia = createPinia();

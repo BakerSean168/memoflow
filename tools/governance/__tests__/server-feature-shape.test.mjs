@@ -57,5 +57,6 @@ describe('server feature shape semantic core', () => {
     expect(auditPackageShape('notification', src)).toBeNull();
     expect(auditPackageShape('task', src)).toBeNull();
     expect(auditPackageShape('setting', src)).toEqual({ package: 'setting', missing: ['client'] });
+    expect(auditPackageShape('repository', src)).toBeNull();
   });
 });

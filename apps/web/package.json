@@ -25,8 +25,12 @@
     "@memoflow/notification-ui": "workspace:*",
     "@memoflow/relation": "workspace:*",
     "@memoflow/relation-contracts": "workspace:*",
-    "@memoflow/routine": "workspace:*",
     "@memoflow/repository": "workspace:*",
+    "@memoflow/repository-client": "workspace:*",
+    "@memoflow/repository-contracts": "workspace:*",
+    "@memoflow/repository-ui": "workspace:*",
+    "@memoflow/routine": "workspace:*",
+    "@memoflow/routine-client": "workspace:*",
     "@memoflow/schedule-client": "workspace:*",
     "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/setting": "workspace:*",
@@ -44,10 +48,7 @@
     "vue": "^3.5.43",
     "vue-i18n": "^11.4.12",
     "vue-router": "^5.3.1",
-    "vue-sonner": "^2.0.9",
-    "@memoflow/schedule-contracts": "workspace:*",
-    "@memoflow/schedule-client": "workspace:*",
-    "@memoflow/routine-client": "workspace:*"
+    "vue-sonner": "^2.0.9"
   },
   "devDependencies": {
     "@faker-js/faker": "10.6.0",

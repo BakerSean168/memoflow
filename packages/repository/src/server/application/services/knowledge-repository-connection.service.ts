@@ -22,7 +22,7 @@ import type {
   PreviewKnowledgeRepositoryReconciliationReq,
   StartKnowledgeRepositoryInstallationReq,
   StartKnowledgeRepositoryInstallationRes,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import type {
   GitHubAppInstallationInventory,
   IGitHubAppClient,

@@ -7,7 +7,7 @@ import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
 import {
   KnowledgeDocumentIdSchema,
   LocalVaultBindingClientDTOSchema,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import type {
   ConfirmedLocalVaultWriteReq,
   ConfirmedLocalVaultWriteRes,
@@ -23,7 +23,7 @@ import type {
   SearchLocalVaultReq,
   SearchLocalVaultRes,
   SelectLocalVaultReq,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 // Residual 957: isMissing/isTemporaryFile duals retired — sole vault-fs-guards.
 import { isMissing, isTemporaryFile } from './vault-fs-guards';
 

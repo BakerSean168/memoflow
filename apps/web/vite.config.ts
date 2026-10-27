@@ -141,7 +141,7 @@ const webDevWorkspaceEntries = [
   ['@memoflow/host-runtime', 'packages/host-runtime/src/index.ts'],
   ['@memoflow/schedule-client', 'packages/schedule-client/src/index.ts'],
   ['@memoflow/notification-client', 'packages/notification-client/src/index.ts'],
-  ['@memoflow/repository/client', 'packages/repository/src/client/index.ts'],
+  ['@memoflow/repository-client', 'packages/repository-client/src/index.ts'],
   ['@memoflow/routine-client', 'packages/routine-client/src/index.ts'],
   ['@memoflow/task-client', 'packages/task-client/src/index.ts'],
   ['@memoflow/task-ui/host', 'packages/task-ui/src/task-ui-host.ts'],

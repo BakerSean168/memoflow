@@ -1,7 +1,7 @@
 import type { Result } from '@memoflow/transport-contracts/result';
 import { ok, error } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
-import { KnowledgeDocumentIdSchema } from '@memoflow/contracts/repository';
+import { KnowledgeDocumentIdSchema } from '@memoflow/repository-contracts';
 import type { ReindexKnowledgeReq, ReindexKnowledgeRes } from '@memoflow/contracts/ai';
 import { createLogger } from '@memoflow/utils/logger';
 

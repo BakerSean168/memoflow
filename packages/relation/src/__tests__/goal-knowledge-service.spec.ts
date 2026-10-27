@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { KnowledgeDocumentRef } from '@memoflow/contracts/repository';
+import type { KnowledgeDocumentRef } from '@memoflow/repository-contracts';
 import {
   GoalKnowledgeListReqSchema,
   RelationDTOSchema,

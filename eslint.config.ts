@@ -51,7 +51,7 @@ const featureScopeConstraints = [
   },
   {
     sourceTag: 'scope:repository',
-    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:repository'],
+    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:repository', 'scope:ui'],
   },
   {
     // Schedule surfaces consume the shared UI kit plus this scope's own packages.

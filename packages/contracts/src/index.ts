@@ -21,7 +21,7 @@
  * 子路径列表：
  * - @memoflow/task-contracts       - 任务模块
  * - @memoflow/goal-contracts       - 目标模块（P2 已独立成包）
- * - @memoflow/contracts/repository - 仓库模块
+ * - @memoflow/repository-contracts - 仓库模块
  * - @memoflow/contracts/account    - 账户模块
  * - @memoflow/schedule-contracts   - 调度模块
  * - @memoflow/contracts/setting    - 设置模块

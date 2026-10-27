@@ -179,7 +179,12 @@
           },
           {
             "sourceTag": "scope:repository",
-            "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:repository"]
+            "onlyDependOnLibsWithTags": [
+              "scope:shared",
+              "scope:patterns",
+              "scope:repository",
+              "scope:ui"
+            ]
           },
           {
             "sourceTag": "scope:schedule",
@@ -528,7 +533,12 @@
               },
               {
                 "sourceTag": "scope:repository",
-                "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:repository"]
+                "onlyDependOnLibsWithTags": [
+                  "scope:shared",
+                  "scope:patterns",
+                  "scope:repository",
+                  "scope:ui"
+                ]
               },
               {
                 "sourceTag": "scope:schedule",

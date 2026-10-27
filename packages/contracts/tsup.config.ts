@@ -20,7 +20,6 @@ export default createTsupConfig({
     'src/index.ts',
     // 模块入口（完整模块导出）
     'src/modules/agent-gateway/index.ts',
-    'src/modules/repository/index.ts',
     'src/modules/account/index.ts',
     'src/modules/setting/index.ts',
     'src/modules/notification/index.ts',

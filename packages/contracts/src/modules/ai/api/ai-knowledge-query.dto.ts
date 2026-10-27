@@ -2,7 +2,7 @@ import { AgentInstanceSlugSchema } from './local-agent.dto';
 import { z } from 'zod';
 import { brandedId } from '@memoflow/shared-primitives';
 import type { AiProviderConfigId } from '@memoflow/shared-primitives';
-import { KnowledgeDocumentIdSchema } from '../../repository/aggregates/knowledge-document-identity';
+import { KnowledgeDocumentIdSchema } from '@memoflow/repository-contracts';
 import { KnowledgeCitationSchema, QueryKnowledgeResSchema } from './response-schemas';
 
 export const QueryKnowledgeSchema = z.object({

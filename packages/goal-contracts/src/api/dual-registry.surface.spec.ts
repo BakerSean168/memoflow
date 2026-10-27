@@ -17,6 +17,7 @@ import { describe, expect, it } from 'vitest';
   describe('contracts dead *Res dual single-track surface', () => {
     const goalApi = __dirname;
     const modules = resolve(goalApi, '../../../contracts/src/modules');
+    const repoContracts = resolve(goalApi, '../../../repository-contracts/src');
 
     const files: Array<[string, string[]]> = [
       [
@@ -27,7 +28,7 @@ import { describe, expect, it } from 'vitest';
       [resolve(goalApi, 'key-result.dto.ts'), ['UpdateKeyResultRes', 'UpdateKeyResultProgressRes']],
       [resolve(modules, 'ai/api/ai-provider-config.dto.ts'), ['RefreshAIProviderModelsRes']],
       [
-        resolve(modules, 'repository/api/knowledge-repository-connection.dto.ts'),
+        resolve(repoContracts, 'api/knowledge-repository-connection.dto.ts'),
         ['CreateKnowledgeRepositoryConnectionRes'],
       ],
       [
@@ -40,7 +41,7 @@ import { describe, expect, it } from 'vitest';
         resolve(goalApi, 'goal-crud.dto.ts'),
         ['BatchUpdateGoalStatusRes', 'BatchMoveGoalsRes', 'BatchDeleteGoalsRes'],
       ],
-      [resolve(modules, 'repository/aggregates/local-vault-binding.ts'), ['SelectLocalVaultRes']],
+      [resolve(repoContracts, 'aggregates/local-vault-binding.ts'), ['SelectLocalVaultRes']],
     ];
 
     it('does not export dead *Res identity dual aliases', () => {

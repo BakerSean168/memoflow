@@ -1,8 +1,8 @@
 import type {
   ExecuteKnowledgeRepositoryReconciliationReq,
   ExecuteKnowledgeRepositoryReconciliationRes,
-} from '@memoflow/contracts/repository';
-import { ExecuteKnowledgeRepositoryReconciliationSchema } from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
+import { ExecuteKnowledgeRepositoryReconciliationSchema } from '@memoflow/repository-contracts';
 import { fail, ok, type Result } from '@memoflow/contracts/result';
 import { LocalVaultRuntimeError, type LocalVaultElectronPort } from '@memoflow/repository/electron';
 import {

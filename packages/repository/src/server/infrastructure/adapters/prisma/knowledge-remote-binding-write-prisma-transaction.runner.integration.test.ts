@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { prisma } from '@memoflow/database';
-import type { KnowledgeRemoteBindingServerDTO } from '@memoflow/contracts/repository';
+import type { KnowledgeRemoteBindingServerDTO } from '@memoflow/repository-contracts';
 import { cleanAllTables } from '@memoflow/test-utils/setup/database';
 import { KnowledgeRemoteBindingWritePrismaTransactionRunner } from './knowledge-remote-binding-write-prisma-transaction.runner';
 

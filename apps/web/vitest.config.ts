@@ -29,8 +29,8 @@ const sharedConfig = createSharedConfig({
     '@memoflow/notification-ui': '../../packages/notification-ui/src/index.ts',
     '@memoflow/task-ui/host': '../../packages/task-ui/src/task-ui-host.ts',
     '@memoflow/task-ui': '../../packages/task-ui/src/index.ts',
-    '@memoflow/repository/client': '../../packages/repository/src/client/index.ts',
     '@memoflow/task-client': '../../packages/task-client/src/index.ts',
+    '@memoflow/repository-client': '../../packages/repository-client/src/index.ts',
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }) as any;
