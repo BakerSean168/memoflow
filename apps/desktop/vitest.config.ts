@@ -6,6 +6,7 @@ import {
   createWorkspaceSourceAliasEntries,
   createUiVueSourceAliasEntries,
   createGoalUiAliasEntries,
+  createTaskUiAliasEntries,
 } from '../../vite.workspace-aliases.ts';
 
 // Desktop renderer tests import many workspace packages through their source
@@ -50,6 +51,7 @@ const sharedConfig = createSharedConfig({
     { find: /^electron$/, replacement: './test-support/electron.stub.ts' },
     ...createAppVueSourceAliasEntries(import.meta.dirname + '/../..'),
     ...createGoalUiAliasEntries(import.meta.dirname + '/../..'),
+    ...createTaskUiAliasEntries(import.meta.dirname + '/../..'),
     ...createUiVueSourceAliasEntries(import.meta.dirname + '/../..'),
     ...createWorkspaceSourceAliasEntries(
       import.meta.dirname + '/../..',

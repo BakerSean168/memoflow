@@ -20,6 +20,12 @@
       "@memoflow/notification-ui/host": [
         "../../packages/notification-ui/src/notification-ui-host.ts"
       ],
+      "@memoflow/task-ui/*": [
+        "../../packages/task-ui/src/*.ts",
+        "../../packages/task-ui/src/*"
+      ],
+      "@memoflow/task-ui/host": ["../../packages/task-ui/src/task-ui-host.ts"],
+      "@memoflow/task-ui": ["../../packages/task-ui/src/index.ts"],
       "@memoflow/ui-vue-shadcn/composables/*": ["../../packages/ui-vue-shadcn/src/composables/*"],
       "@memoflow/ai/client": ["../../packages/ai/src/client/index.ts"],
       "@memoflow/ai/electron": ["../../packages/ai/src/electron/index.ts"],

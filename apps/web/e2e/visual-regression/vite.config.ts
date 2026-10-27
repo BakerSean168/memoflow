@@ -119,6 +119,8 @@ export default defineConfig(({ mode }) =>
             'packages/notification-ui/src/notification-ui-host.ts',
           ],
           ['@memoflow/notification-ui', 'packages/notification-ui/src/index.ts'],
+          ['@memoflow/task-ui/host', 'packages/task-ui/src/task-ui-host.ts'],
+          ['@memoflow/task-ui', 'packages/task-ui/src'],
           ['@memoflow/goal-ui', 'packages/goal-ui/src/index.ts'],
           ['@memoflow/workspace-contracts', 'packages/workspace-contracts/src/index.ts'],
           [

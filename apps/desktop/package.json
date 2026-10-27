@@ -54,6 +54,7 @@
     "@memoflow/task": "workspace:*",
     "@memoflow/task-client": "workspace:*",
     "@memoflow/task-contracts": "workspace:*",
+    "@memoflow/task-ui": "workspace:*",
     "@memoflow/ui-vue-shadcn": "workspace:*",
     "@memoflow/utils": "workspace:*",
     "@memoflow/workspace-contracts": "workspace:*",

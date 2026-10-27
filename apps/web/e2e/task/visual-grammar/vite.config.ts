@@ -110,6 +110,8 @@ export default defineConfig({
         ['@memoflow/goal-ui/composables/useGoal', 'packages/goal-ui/src/composables/useGoal.ts'],
         ['@memoflow/goal-ui/host', 'packages/goal-ui/src/goal-ui-host.ts'],
         ['@memoflow/goal-ui', 'packages/goal-ui/src/index.ts'],
+        ['@memoflow/task-ui/host', 'packages/task-ui/src/task-ui-host.ts'],
+        ['@memoflow/task-ui', 'packages/task-ui/src'],
         ['@memoflow/workspace-contracts', 'packages/workspace-contracts/src/index.ts'],
         [
           '@memoflow/desktop-contracts/auth-context',

@@ -9,6 +9,9 @@
       "@memoflow/goal-ui/*": ["../goal-ui/dist/*.d.ts"],
       "@memoflow/notification-ui/host": ["../notification-ui/dist/notification-ui-host.d.ts"],
       "@memoflow/notification-ui": ["../notification-ui/dist/index.d.ts"],
+      "@memoflow/task-ui/host": ["../task-ui/dist/task-ui-host.d.ts"],
+      "@memoflow/task-ui/*": ["../task-ui/dist/*.d.ts", "../task-ui/dist/*"],
+      "@memoflow/task-ui": ["../task-ui/dist/index.d.ts"],
       "@memoflow/contracts": ["../contracts/dist/index.d.ts"],
       "@memoflow/contracts/*": [
         "../contracts/dist/modules/*/index.d.ts",
