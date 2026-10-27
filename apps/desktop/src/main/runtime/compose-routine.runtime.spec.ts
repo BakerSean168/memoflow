@@ -6,13 +6,13 @@ import type {
   IElectronDatabaseTransaction,
 } from '@memoflow/contracts/electron';
 import type { NotificationRequestedWriterPort } from '@memoflow/notification';
-import { createActiveUsageTrigger, createElapsedTrigger } from '@memoflow/reminder/server';
+import { createActiveUsageTrigger, createElapsedTrigger } from '@memoflow/routine/server';
 import type {
   IdleSensorPort,
   ProtocolBreakCompletionFact,
   UserIdleObserved,
   UserResumeObserved,
-} from '@memoflow/reminder/routine-runtime';
+} from '@memoflow/routine/routine-runtime';
 import { composeRoutine } from './compose-routine';
 
 class RoutineDb implements IElectronDatabase {

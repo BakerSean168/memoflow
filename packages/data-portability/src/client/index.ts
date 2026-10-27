@@ -2,7 +2,7 @@
  * Data portability client seam.
  *
  * Public data portability contracts stay centralized in
- * `@memoflow/contracts/data-portability`.
+ * `@memoflow/data-portability-contracts`.
  * Callers depend on this seam instead of the old
  * application-client / infrastructure-client layered exports.
  */

@@ -1,0 +1,60 @@
+{
+  "name": "@memoflow/routine-ui",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./host": {
+      "types": "./dist/routine-ui-host.d.ts",
+      "import": "./dist/host.js"
+    },
+    "./components/RoutineCapsulePreview": {
+      "types": "./dist/components/RoutineCapsulePreview.vue.d.ts",
+      "import": "./dist/components/RoutineCapsulePreview.js"
+    },
+    "./components/RoutineUpcomingWidget": {
+      "types": "./dist/components/RoutineUpcomingWidget.vue.d.ts",
+      "import": "./dist/components/RoutineUpcomingWidget.js"
+    },
+    "./views/RoutineConfigurationView": {
+      "types": "./dist/views/RoutineConfigurationView.vue.d.ts",
+      "import": "./dist/views/RoutineConfigurationView.js"
+    },
+    "./composables/routineUpcomingCache": {
+      "types": "./dist/composables/routineUpcomingCache.d.ts",
+      "import": "./dist/composables/routineUpcomingCache.js"
+    }
+  },
+  "dependencies": {
+    "@lucide/vue": "^1.48.0",
+    "@memoflow/desktop-contracts": "workspace:*",
+    "@memoflow/http-client": "workspace:*",
+    "@memoflow/ipc-client": "workspace:*",
+    "@memoflow/shared-primitives": "workspace:*",
+    "@memoflow/time": "workspace:*",
+    "@memoflow/transport-contracts": "workspace:*",
+    "@memoflow/ui-vue-shadcn": "workspace:*",
+    "@memoflow/utils": "workspace:*",
+    "@tanstack/vue-query": "5.103.2",
+    "pinia": "^4.0.3",
+    "vue": "^3.5.43",
+    "vue-i18n": "^11.4.12",
+    "vue-router": "^5.3.1",
+    "vue-sonner": "^2.0.8",
+    "@memoflow/routine-client": "workspace:*",
+    "@memoflow/routine-contracts": "workspace:*",
+    "@memoflow/contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "6.0.9",
+    "typescript": "npm:@typescript/typescript6@6.0.2",
+    "vite": "8.3.1",
+    "vite-plugin-dts": "5.1.1"
+  }
+}

@@ -13,7 +13,7 @@ import {
   type ProfileImportCommitRequest,
   type ProfileImportCommitted,
   type ProfileImportOperation as ProfileImportOperationResult,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 import { PortableCapabilityRegistry } from '../application/portable-capability';
 import { PortableCapabilityCoordinator } from '../application/portable-capability-coordinator';
 import { profileImportDigest } from '../application/profile-import-manifest';

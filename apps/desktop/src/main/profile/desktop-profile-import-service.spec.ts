@@ -9,7 +9,7 @@ import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import type {
   ProfileImportPlan,
   ProfileImportCommitted,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 import { profileImportDigest } from '@memoflow/data-portability';
 import { createProfilePathResolver } from '../paths';
 import { composeProfilePortability } from './compose-profile-portability';

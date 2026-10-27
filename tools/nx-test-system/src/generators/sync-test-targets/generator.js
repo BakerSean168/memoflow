@@ -14,7 +14,7 @@ const governedDomainProjects = new Set([
   'domain-shared',
   'goal',
   'notification',
-  'reminder',
+  'routine',
   'schedule',
   'setting',
   'task',
@@ -31,7 +31,7 @@ const governedRequiredTargets = ['test', 'test:watch', 'test:coverage'];
 const coverageConfigsByProject = new Map([
   ['goal', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
   // R4-2201C: legacy Reminder CRUD use-case/mapper slices were physically retired; Routine uses the canonical suite.
-  ['reminder', ['vitest.config.ts']],
+  ['routine', ['vitest.config.ts']],
   // CLEAN-6304: Temporal Engine use cases moved to @memoflow/scheduler; Schedule keeps Calendar/Planner + mapper coverage only.
   ['schedule', ['vitest.config.ts', 'vitest.mappers.config.ts']],
   ['task', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],

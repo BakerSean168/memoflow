@@ -29,11 +29,11 @@
       "@memoflow/goal/schedule-projection": [
         "../../packages/goal/dist/schedule-projection/index.d.ts"
       ],
-      "@memoflow/reminder/schedule-execution": [
-        "../../packages/reminder/dist/schedule-execution/index.d.ts"
+      "@memoflow/routine/schedule-execution": [
+        "../../packages/routine/dist/schedule-execution/index.d.ts"
       ],
-      "@memoflow/reminder/schedule-projection": [
-        "../../packages/reminder/dist/schedule-projection/index.d.ts"
+      "@memoflow/routine/schedule-projection": [
+        "../../packages/routine/dist/schedule-projection/index.d.ts"
       ],
       "@memoflow/task/api": ["../../packages/task/dist/api/index.d.ts"],
       "@memoflow/notification": ["../../packages/notification/dist/index.d.ts"],

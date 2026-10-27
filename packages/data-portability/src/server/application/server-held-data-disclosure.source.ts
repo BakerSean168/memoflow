@@ -1,4 +1,4 @@
-import type { ServerHeldDataDisclosureDataV1 } from '@memoflow/contracts/data-portability';
+import type { ServerHeldDataDisclosureDataV1 } from './server-held-data-disclosure.v1.dto';
 
 /**
  * Read-only source for repository-cloud records already held by the server.

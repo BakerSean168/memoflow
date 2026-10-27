@@ -1,0 +1,67 @@
+{
+  "name": "routine-ui",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "packages/routine-ui/src",
+  "tags": ["scope:routine", "type:lib", "type:vue", "layer:ui", "tier:ui"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["^build"],
+      "options": {
+        "command": "node ../../node_modules/vue-tsc/bin/vue-tsc.js --noEmit --declaration false --declarationMap false -p tsconfig.json",
+        "cwd": "packages/routine-ui"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/packages/routine-ui/dist"],
+      "cache": true,
+      "dependsOn": ["^build"],
+      "options": {
+        "command": "node ../../node_modules/vite/bin/vite.js build",
+        "cwd": "packages/routine-ui"
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ../../node_modules/vite/bin/vite.js build --watch",
+        "cwd": "packages/routine-ui"
+      }
+    },
+    "lint": {
+      "options": {
+        "args": ["**/*.{ts,tsx,vue}"]
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "inputs": ["default", "^production"],
+      "cache": true,
+      "options": {
+        "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
+        "cwd": "packages/routine-ui"
+      }
+    },
+    "test:watch": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "node ../../node_modules/vitest/vitest.mjs --config vitest.config.ts",
+        "cwd": "packages/routine-ui"
+      }
+    },
+    "test:contract": {
+      "executor": "nx:run-commands",
+      "inputs": ["default", "^production", "{workspaceRoot}/packages/app-vue/src/**/*"],
+      "cache": true,
+      "dependsOn": ["build"],
+      "options": {
+        "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
+        "cwd": "packages/routine-ui"
+      }
+    }
+  }
+}

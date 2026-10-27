@@ -1025,8 +1025,8 @@
     },
     {
       "id": "r286",
-      "path": "packages/reminder/src/application-client/reminder-client-port-dual.surface.spec.ts",
-      "package": "packages/reminder",
+      "path": "packages/routine/src/application-client/reminder-client-port-dual.surface.spec.ts",
+      "package": "packages/routine",
       "class": "retired",
       "sole": "reminder-client-service.ts",
       "blast": "surface lock (retired)",

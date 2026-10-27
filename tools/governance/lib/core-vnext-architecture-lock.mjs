@@ -6,13 +6,13 @@
 
 import { findPatternMatches } from './source-scan.mjs';
 
-const FEATURE_ROOTS = ['packages/goal/src/', 'packages/task/src/', 'packages/reminder/src/'];
+const FEATURE_ROOTS = ['packages/goal/src/', 'packages/task/src/', 'packages/routine/src/'];
 const EXECUTION_ROOTS = [
   'packages/scheduler/src/server/',
   'packages/schedule-orchestration/src/',
   'packages/goal/src/server/',
   'packages/task/src/server/',
-  'packages/reminder/src/server/',
+  'packages/routine/src/server/',
 ];
 const UI_ROOTS = [
   'packages/app-react/src/',
@@ -96,7 +96,6 @@ const GOAL_TIME_OWNER_FILES = new Set([
   'packages/app-react/src/components/GoalCard.tsx',
   'packages/app-react/src/hooks/useGoals.ts',
   'packages/database/prisma/schema/goal.prisma',
-  'packages/contracts/src/modules/data-portability/dtos/portable-goals.dto.ts',
   'packages/contracts/src/modules/ai/api/ai-goal-create-workflow.dto.ts',
   'packages/ai/src/server/mastra/agents/goal-planner.worker.ts',
   'packages/ai/src/server/mastra/workflows/apply-goal-plan.service.ts',
@@ -122,7 +121,6 @@ const KR_MEASUREMENT_OWNER_FILES = new Set([
   'packages/app-react/src/hooks/useGoals.ts',
   'packages/database/prisma/schema/goal.prisma',
   'packages/powersync-schema/src/index.ts',
-  'packages/contracts/src/modules/data-portability/dtos/portable-goals.dto.ts',
   'packages/data-portability/src/server/application/import-store/data-portability-import-store.ts',
   'packages/data-portability/src/server/application/use-cases/importers/goal.importer.ts',
   'packages/data-portability/src/server/application/use-cases/projections/goal.projection.ts',
@@ -279,7 +277,7 @@ export function findCoreVnextArchitectureLockViolations(files) {
       );
     }
 
-    if (relPath.startsWith('packages/reminder/src/')) {
+    if (relPath.startsWith('packages/routine/src/')) {
       pushPatternViolations(
         violations,
         relPath,

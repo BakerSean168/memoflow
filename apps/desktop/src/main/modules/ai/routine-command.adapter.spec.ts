@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
-import type { RoutineDefinition, RoutineProfileStore } from '@memoflow/reminder/server';
+import type { RoutineDefinition, RoutineProfileStore } from '@memoflow/routine/server';
 import {
   createRoutineCoachCommandService,
   createInMemoryProtocolSessionStore,
   createInMemoryRoutineRuntimeContextStore,
-} from '@memoflow/reminder/routine-runtime';
+} from '@memoflow/routine/routine-runtime';
 import { DesktopRoutineAICommandAdapter } from './routine-command.adapter';
 
 const context: ExecutionContext = {

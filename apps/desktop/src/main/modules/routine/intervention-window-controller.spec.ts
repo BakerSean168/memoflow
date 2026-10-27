@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   createInterventionRuntime,
   type InterventionPolicy,
-} from '@memoflow/reminder/routine-runtime';
+} from '@memoflow/routine/routine-runtime';
 import {
   createInterventionWindowController,
   type InterventionWindowHost,

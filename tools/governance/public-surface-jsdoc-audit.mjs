@@ -37,7 +37,7 @@ const FEATURE_MODULES = [
   'ai',
   'data-portability',
   'notification',
-  'reminder',
+  'routine',
   'repository',
   'schedule',
   'setting',

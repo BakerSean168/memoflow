@@ -3,7 +3,7 @@ import { GoalPortablePayloadV3Schema } from '@memoflow/goal-contracts';
 import type {
   PortableCapabilityExecutionContext,
   PortableReferenceV3,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 import {
   cleanAll,
   disconnectPrisma,

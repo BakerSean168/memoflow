@@ -2,8 +2,8 @@ import { afterAll, beforeEach, expect, it, vi } from 'vitest';
 import { prisma, type Prisma } from '@memoflow/database';
 import { createGoalPrismaAgentMutations } from '@memoflow/goal';
 import { IdentityId } from '@memoflow/domain-shared';
-import { RoutineAgentCreateSchema } from '@memoflow/contracts/routine';
-import { RoutineDefinition, createRoutinePrismaAgentMutations } from '@memoflow/reminder';
+import { RoutineAgentCreateSchema } from '@memoflow/routine-contracts';
+import { RoutineDefinition, createRoutinePrismaAgentMutations } from '@memoflow/routine';
 import { createReadGateway } from '@memoflow/agent-gateway/server';
 import { createScopedPatService, isScopedPatAuthorityCurrent } from '@memoflow/cloud-auth/server';
 import { createAccountPrismaActiveQuery } from '@memoflow/account';
@@ -13,12 +13,12 @@ import {
   disconnectPrisma,
   seedAccount,
 } from '@memoflow/test-utils/setup/integration-helpers';
-import { createRoutinePrismaScheduleProjectionSource } from '@memoflow/reminder/schedule-projection/routine';
+import { createRoutinePrismaScheduleProjectionSource } from '@memoflow/routine/schedule-projection/routine';
 import {
   createRoutinePrismaScheduleExecutionDeps,
   createRoutineScheduleExecutionSource,
   parseRoutineWallClockPayload,
-} from '@memoflow/reminder/schedule-execution/routine';
+} from '@memoflow/routine/schedule-execution/routine';
 import {
   createSchedulerPrismaRepositories,
   createScheduledInvocationSchedulingPort,

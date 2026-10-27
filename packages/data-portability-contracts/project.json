@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "library",
   "sourceRoot": "packages/data-portability-contracts/src",
-  "tags": ["scope:shared", "type:lib", "layer:shared"],
+  "tags": ["scope:shared", "type:lib", "layer:shared", "tier:core"],
   "targets": {
     "typecheck": {
       "executor": "nx:run-commands",

@@ -1,4 +1,4 @@
-import type { RoutineScheduleExecutionDeps } from '@memoflow/reminder/schedule-execution/routine';
+import type { RoutineScheduleExecutionDeps } from '@memoflow/routine/schedule-execution/routine';
 
 /**
  * Canonical owner execution dependencies.

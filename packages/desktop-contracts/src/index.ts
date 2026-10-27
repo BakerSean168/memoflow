@@ -9,8 +9,9 @@
  * P1 S3（Issue #633）自 @memoflow/contracts 的 electron 子路径提取：桌面平台
  * 纯契约（渠道常量、桌面功能 Schema、宿主 Port 接口）真身迁至本包，本包为
  * 唯一权威定义。运行时中间件 authenticated-ipc 不在本包（见 P1 S4 的
- * host-runtime）；profile-import 与 data-portability 所有权纠缠，冻结于
- * contracts 残余——两者在过渡期仍由 `@memoflow/contracts/electron` 桶转出。
+ * host-runtime）。#630 §4.11 结算了 profile-import 与 data-portability 的所有权
+ * 纠缠：桌面包装 Schema 归本包，领域 Schema 归 data-portability-contracts，
+ * 依赖单向本包 → data-portability-contracts。
  */
 
 export type { IElectronAuthContext, ElectronAuthResolutionCode } from './auth-context';
@@ -133,3 +134,4 @@ export {
   RenameProfileRequestSchema,
 } from './profile-access';
 export type { CreateGuestProfileRequest, RenameProfileRequest } from './profile-access';
+export * from './profile-import';

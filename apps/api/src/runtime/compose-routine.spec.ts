@@ -36,12 +36,12 @@ const mocks = vi.hoisted(() => {
   };
 });
 
-vi.mock('@memoflow/reminder', () => ({
+vi.mock('@memoflow/routine', () => ({
   createRoutinePrismaRepositories: mocks.createRoutinePrismaRepositories,
   createRoutinePortableCapability: mocks.createRoutinePortableCapability,
 }));
 
-vi.mock('@memoflow/reminder/routine-runtime', () => ({
+vi.mock('@memoflow/routine/routine-runtime', () => ({
   createInMemoryRoutineRuntimeContextStore: mocks.createInMemoryRoutineRuntimeContextStore,
   createRoutineOverrideChangedNotifier: mocks.createRoutineOverrideChangedNotifier,
   createRoutineScheduleChangedNotifier: mocks.createRoutineScheduleChangedNotifier,

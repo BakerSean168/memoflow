@@ -8,7 +8,7 @@ import { composeBusinessDataSummary } from './compose-business-data-summary';
  * operation. Business writes remain in owner-provided capabilities.
  */
 
-import type { PortableCapability } from '@memoflow/contracts/data-portability';
+import type { PortableCapability } from '@memoflow/data-portability-contracts';
 import type { PrismaClient } from '@memoflow/database';
 import {
   createDataPortabilityModule,

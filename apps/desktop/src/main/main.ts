@@ -64,10 +64,10 @@ import { composeTask } from './runtime/compose-task';
 import { composeAccount } from './runtime/compose-account';
 import { composeNotification } from './runtime/compose-notification';
 import { composeRoutine } from './runtime/compose-routine';
-import { registerRoutineNotificationOwnerCommands } from '@memoflow/reminder';
+import { registerRoutineNotificationOwnerCommands } from '@memoflow/routine';
 import { createRoutineConfigurationElectronModule } from './modules/routine/configuration.electron-module';
-import { PowerSyncProtocolSessionStore } from '@memoflow/reminder/server';
-import { createProtocolSessionRuntime } from '@memoflow/reminder/routine-runtime';
+import { PowerSyncProtocolSessionStore } from '@memoflow/routine/server';
+import { createProtocolSessionRuntime } from '@memoflow/routine/routine-runtime';
 import {
   createFocusWindowController,
   createFocusWindowElectronModule,

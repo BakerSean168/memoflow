@@ -4,7 +4,7 @@ import { createReadStream, promises as fs } from 'node:fs';
 import path from 'node:path';
 import { z } from 'zod';
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
-import type { ProfileImportBlocker } from '@memoflow/contracts/data-portability';
+import type { ProfileImportBlocker } from '@memoflow/data-portability-contracts';
 import { profileImportDigest } from '@memoflow/data-portability';
 import { readProfileSqliteSnapshot } from './profile-sqlite-snapshot';
 

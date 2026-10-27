@@ -19,7 +19,7 @@ import {
   createRoutinePowerSyncRepositories,
   createRoutinePortableCapability,
   loadPowerSyncRoutineLocalRegistrations,
-} from '@memoflow/reminder';
+} from '@memoflow/routine';
 import {
   createInterventionRuntime,
   createElapsedRuntime,
@@ -40,8 +40,8 @@ import {
   createInMemoryRoutineRuntimeContextStore,
   type RoutineCoachCommandPort,
   type RoutineConfigurationQueryPort,
-} from '@memoflow/reminder/routine-runtime';
-import type { IdleSensorPort } from '@memoflow/reminder/routine-runtime';
+} from '@memoflow/routine/routine-runtime';
+import type { IdleSensorPort } from '@memoflow/routine/routine-runtime';
 import { WindowsIdleSensorAdapter } from '../modules/routine/windows-idle-sensor.adapter';
 
 /** Dependencies the Routine composer needs from the desktop host runtime. */

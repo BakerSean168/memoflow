@@ -2,7 +2,7 @@ import type {
   PortableCapability,
   PortableCapabilityExecutionContext,
   PortableCapabilityReceipt,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 import {
   NotificationChannelType,
   NotificationDeliveryPreferencePortablePayloadV3Schema,
