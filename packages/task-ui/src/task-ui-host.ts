@@ -25,12 +25,15 @@ export interface TaskUiDesktopAuthApi {
   invoke?: (channel: string, ...args: unknown[]) => Promise<unknown>;
 }
 
-/** Result error shape consumed by the error helpers. */
-export interface TaskUiResultErrorLike {
-  code?: string | null;
-  message?: string;
-  status?: number;
-}
+/** Result error shape consumed by the error helpers (may be absent). */
+export type TaskUiResultErrorLike =
+  | {
+      code?: string | null;
+      message?: string;
+      status?: number;
+    }
+  | null
+  | undefined;
 
 export type TaskUiTranslateFn = (key: string, params?: Record<string, unknown>) => string;
 
@@ -70,9 +73,25 @@ export interface TaskUiTaskOccurrenceQueryKeys {
   ): readonly unknown[];
 }
 
+/** Task-owned invalidation intent accepted by the renderer dispatcher. */
+export interface TaskUiTaskPlanInvalidation {
+  target: 'task-plan';
+  identityScope: string;
+  source: 'mutation' | 'powersync' | 'reconnect';
+  projection?: 'all' | 'lists' | 'details';
+  entityId?: string;
+  dedupeKey?: string;
+}
+
+export interface TaskUiInvalidationDispatcher {
+  invalidate(intent: TaskUiTaskPlanInvalidation): Promise<void>;
+  clearIdentity(identityScope: string): void;
+}
+
 /** Renderer-owned server-state runtime. */
 export interface TaskUiServerStateRuntime {
   queryClient: QueryClient;
+  dispatcher: TaskUiInvalidationDispatcher;
   dispose(): void;
   clearIdentity(identityScope: string): void;
 }
@@ -135,7 +154,7 @@ export interface TaskUiGoalBindingPort {
 
 export interface TaskUiKeyResultCalculationPresentation {
   labelKey: string;
-  recordInputKind: string;
+  recordInputKind: 'delta' | 'sample';
   recordPromptLabelKey: string;
 }
 
@@ -228,7 +247,7 @@ export interface TaskUiHost {
 
   // ---- surface status & native registration ----
   usePanelSurfaceStatus(status: Ref<TaskUiPanelSurfaceStatus>): void;
-  useTaskNativeSurfaceRegistration<Session>(): TaskUiNativeSurfaceHost<Session> | null;
+  useTaskNativeSurfaceRegistration(): TaskUiNativeSurfaceHost<unknown> | null;
 
   // ---- select / calendar / keyboard ----
   normalizeSelectString(value: unknown): string | null;

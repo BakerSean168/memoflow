@@ -16,7 +16,7 @@ import { TASK_SERVICE_KEY } from '../../../di/keys';
 import { useTaskNativeSurface } from '../../../layouts/shell/useTaskNativeSurface';
 import { useLabelCatalog } from '../../../shared/composables/useLabelCatalog';
 import { useStrictInject } from '../../../shared/utils/useStrictInject';
-import type { TaskNativeEditSession } from '../../task/composables/taskNativeEditSession';
+import type { TaskNativeEditSession } from '@memoflow/task-ui';
 import { getAIErrorMessage } from './error';
 import type { UseAITaskWorkflowOptions } from './types';
 

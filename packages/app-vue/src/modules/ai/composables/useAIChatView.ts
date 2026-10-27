@@ -24,7 +24,7 @@ import type {
 } from '@memoflow/contracts/ai';
 import { useAI } from './useAI';
 import { useGoal } from '@memoflow/goal-ui';
-import { useTask } from '../../task/composables/useTask';
+import { useTask } from '@memoflow/task-ui';
 import { useRecentKnowledgeNotes } from '../../repository/composables/useRecentKnowledgeNotes';
 import { useReferenceableKnowledgeNotes } from '../../repository/composables/useReferenceableKnowledgeNotes';
 import { useAIModelCatalog, composerAgentKey } from './useAIModelCatalog';

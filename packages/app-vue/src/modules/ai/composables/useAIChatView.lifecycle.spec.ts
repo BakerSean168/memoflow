@@ -163,7 +163,7 @@ vi.mock('@memoflow/goal-ui', async (importOriginal) => {
   const { ref } = await import('vue');
   return { ...actual, useGoal: () => ({ goals: ref([]), fetchGoals: vi.fn() }) };
 });
-vi.mock('../../task/composables/useTask', async () => {
+vi.mock('@memoflow/task-ui/composables/useTask', async () => {
   const { ref } = await import('vue');
   return { useTask: () => ({ templates: ref([]), fetchTemplates: vi.fn() }) };
 });
