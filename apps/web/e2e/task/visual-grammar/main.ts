@@ -8,6 +8,7 @@ import {
   createMockGoalMutationReceipt,
   createMockKeyResult,
 } from '@memoflow/goal-contracts/test-support/goal.mock';
+import { toGoalReference, toKeyResultReference } from '@memoflow/goal-contracts';
 import type { UpdateTaskPlanReq, TaskPlanClientDTO } from '@memoflow/task-contracts';
 import { GOAL_SERVICE_KEY, LABEL_SERVICE_KEY, TASK_SERVICE_KEY } from '@memoflow/app-vue/di/keys';
 import type { IGoalService, ILabelService, ITaskService } from '@memoflow/app-vue/di/types';
@@ -85,8 +86,9 @@ const taskService = {
             availability: params.get('owner') === 'missing' ? 'Missing' : 'Available',
             goalId: goal.id,
             keyResultId: goal.keyResults[0]!.id,
-            goal: params.get('owner') === 'missing' ? null : goal,
-            keyResult: params.get('owner') === 'missing' ? null : goal.keyResults[0],
+            goal: params.get('owner') === 'missing' ? null : toGoalReference(goal),
+            keyResult:
+              params.get('owner') === 'missing' ? null : toKeyResultReference(goal.keyResults[0]!),
           }
         : null,
       occurrenceSummary: {

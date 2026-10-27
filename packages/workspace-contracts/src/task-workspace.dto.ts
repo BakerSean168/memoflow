@@ -1,9 +1,21 @@
+/**
+ * Task Workspace composition contract (ADR-075 / Issue #635 §三).
+ *
+ * This is cross-domain assembly, so it lives in the neutral workspace package
+ * rather than in either business domain: `task` owns the plan/occurrence
+ * projections, `goal` owns the Goal/KeyResult references and the host wires the
+ * Goal read port. Availability always retains the binding ids; the `Available`
+ * branch carries only what a Task surface renders, never the Goal aggregate.
+ */
 import { z } from 'zod';
 import type { TaskPlanId } from '@memoflow/task-contracts';
 import type { GoalId, KeyResultId } from '@memoflow/goal-contracts';
 import { brandedId } from '@memoflow/shared-primitives';
-import { KnowledgeDocumentIdSchema, KnowledgeDocumentRefSchema } from '@memoflow/contracts/repository';
-import { GoalClientDTOSchema, KeyResultClientDTOSchema } from '@memoflow/goal-contracts';
+import {
+  KnowledgeDocumentIdSchema,
+  KnowledgeDocumentRefSchema,
+} from '@memoflow/contracts/repository';
+import { GoalReferenceSchema, KeyResultReferenceSchema } from '@memoflow/goal-contracts';
 import { TaskOccurrenceResponseSchema, TaskPlanResponseSchema } from '@memoflow/task-contracts';
 import { LabelClientDTOSchema } from '@memoflow/label-contracts';
 
@@ -38,8 +50,8 @@ export const TaskWorkspaceGoalContextSchema = z.discriminatedUnion('availability
   goalContextBase
     .extend({
       availability: z.literal('Available'),
-      goal: GoalClientDTOSchema,
-      keyResult: KeyResultClientDTOSchema.nullable(),
+      goal: GoalReferenceSchema,
+      keyResult: KeyResultReferenceSchema.nullable(),
     })
     .strict(),
   goalContextBase

@@ -151,8 +151,8 @@ describe('TaskOccurrenceInspectDialog', () => {
         availability: 'Available',
         goalId: 'secret-goal',
         keyResultId: 'secret-kr',
-        goal: { name: 'Learn deeply' },
-        keyResult: { title: 'Practice weekly' },
+        goal: { goalId: 'secret-goal', goalTitle: 'Learn deeply' },
+        keyResult: { keyResultId: 'secret-kr', keyResultTitle: 'Practice weekly' },
       } as TaskPlanWorkspace['goalContext'],
     };
     const wrapper = render();

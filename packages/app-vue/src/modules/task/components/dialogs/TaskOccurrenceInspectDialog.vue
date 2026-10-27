@@ -81,9 +81,9 @@
           {{ t('task.detail.goalContextUnavailable') }}
         </p>
         <template v-else-if="workspace.goalContext?.availability === 'Available'">
-          <p class="break-words">{{ workspace.goalContext.goal.name }}</p>
+          <p class="break-words">{{ workspace.goalContext.goal.goalTitle }}</p>
           <p v-if="workspace.goalContext.keyResult" class="mt-1 break-words text-muted-foreground">
-            {{ workspace.goalContext.keyResult.title }}
+            {{ workspace.goalContext.keyResult.keyResultTitle }}
           </p>
           <p v-else-if="workspace.goalContext.keyResultId" class="text-muted-foreground">
             {{ t('task.inspect.krMissing') }}

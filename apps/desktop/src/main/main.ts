@@ -96,7 +96,8 @@ import { getApiBaseUrl } from './utils/api-config';
 import { createLogger } from '@memoflow/utils/logger';
 import type { AccountClosureReceiptDTO } from '@memoflow/contracts/account';
 import { createRuntimeOwnership } from '@memoflow/contracts/primitives';
-import { ResultErrorException } from '@memoflow/contracts/result';
+import { ok, ResultErrorException } from '@memoflow/contracts/result';
+import { toGoalReference, toKeyResultReference } from '@memoflow/goal-contracts';
 import { getSharedPathResolver } from './runtime-init';
 import { WindowManager } from './lifecycle/window-manager';
 import type { ProfilePathResolver } from './paths';
@@ -428,7 +429,19 @@ async function registerBusinessModules(
     taskPlanRepository: taskComposed.repositories.taskPlanRepository,
     taskOccurrenceRepository: taskComposed.repositories.taskOccurrenceRepository,
     userTimeContextPort: settingElectronModule.userTimeContextPort,
-    goalReadPort: goalComposed.applicationPort,
+    goalReadPort: {
+      getGoalReference: async (goalId, keyResultId, identityId) => {
+        const goal = await goalComposed.applicationPort.getGoal(goalId, identityId, true);
+        if (!goal.ok) return goal;
+        const boundKeyResult = keyResultId
+          ? (goal.data.keyResults?.find((item) => String(item.id) === keyResultId) ?? null)
+          : null;
+        return ok({
+          goal: toGoalReference(goal.data),
+          keyResult: boundKeyResult ? toKeyResultReference(boundKeyResult) : null,
+        });
+      },
+    },
     knowledgeRelationReadPort: taskKnowledgeService,
     knowledgeContextReadPort: new LocalVaultKnowledgeWorkspaceResolver(localVaultRuntime),
   });

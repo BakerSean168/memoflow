@@ -16,3 +16,4 @@ export * from './goal-page.dto';
 
 export * from './agent-mutation.dto';
 export * from './goal-draft-checkpoint.dto';
+export * from './goal-reference.dto';

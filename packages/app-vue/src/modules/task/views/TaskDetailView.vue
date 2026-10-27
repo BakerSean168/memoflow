@@ -845,7 +845,7 @@ const linkedNotes = computed(() => workspace.value?.linkedNotes ?? []);
 const goalContextText = computed(() => {
   const context = workspace.value?.goalContext;
   if (!context) return t('task.detail.goalBindingNone');
-  if (context.availability === 'Available') return context.goal.name;
+  if (context.availability === 'Available') return context.goal.goalTitle;
   return t(`task.detail.goalContext${context.availability}`);
 });
 const goalContextAvailable = computed(
@@ -854,7 +854,7 @@ const goalContextAvailable = computed(
 const goalContextKeyResultName = computed(() => {
   const context = workspace.value?.goalContext;
   return context?.availability === 'Available' && context.keyResult
-    ? context.keyResult.title
+    ? context.keyResult.keyResultTitle
     : null;
 });
 const scheduleChipLabel = computed(() => {

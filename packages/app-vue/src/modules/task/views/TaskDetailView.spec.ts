@@ -153,7 +153,7 @@ describe('Task Detail optional property grammar', () => {
       goalContext: {
         availability: 'Available',
         goalId: 'goal',
-        goal: { name: 'Owner Goal' },
+        goal: { goalId: 'goal', goalTitle: 'Owner Goal' },
         keyResult: null,
       },
     });

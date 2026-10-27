@@ -69,7 +69,11 @@ export class TaskWorkspaceQueryService implements TaskWorkspaceApplicationPort {
   ) {
     if (!binding) return null;
     try {
-      const result = await this.deps.goalReadPort.getGoal(binding.goalId, identityId, true);
+      const result = await this.deps.goalReadPort.getGoalReference(
+        binding.goalId,
+        binding.keyResultId ?? null,
+        identityId,
+      );
       if (!result.ok) {
         if (result.error.code === 'NOT_FOUND')
           return {
@@ -95,15 +99,12 @@ export class TaskWorkspaceQueryService implements TaskWorkspaceApplicationPort {
           goal: null,
           keyResult: null,
         };
-      const keyResult = binding.keyResultId
-        ? (result.data.keyResults?.find((item) => String(item.id) === binding.keyResultId) ?? null)
-        : null;
       return {
         availability: 'Available' as const,
         goalId: binding.goalId,
         keyResultId: binding.keyResultId ?? null,
-        goal: result.data,
-        keyResult,
+        goal: result.data.goal,
+        keyResult: result.data.keyResult,
       };
     } catch {
       return {
