@@ -4800,136 +4800,6 @@
       ]
     },
     {
-      "path": "packages/app-vue/src/modules/repository/components/DocumentPresentationPrimitives.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/repository/components/KnowledgeCaptureReviewDialog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/repository/components/KnowledgeMarkdownPreview.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/repository/components/KnowledgeNoteCatalog.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/repository/components/KnowledgeNoteContextPanel.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/repository/components/KnowledgeWriteRequestLedger.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/repository/composables/localAgentNoteReview.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/repository/composables/useRecentKnowledgeNotes.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/repository/composables/useReferenceableKnowledgeNotes.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/repository/router/index.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
-      "path": "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/app-vue/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/app-vue/vitest.store-coverage.config.ts"
-      ]
-    },
-    {
       "path": "packages/app-vue/src/modules/routine/components/RoutineCapsulePreview.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -6271,38 +6141,6 @@
     },
     {
       "path": "packages/contracts/src/modules/data-portability/portable-v3-contract.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/repository/aggregates/dual-registry.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/repository/api/dual-registry.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/repository/api/knowledge-document-identity.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/modules/repository/api/knowledge-note-projection.dto.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/contracts/vitest.config.ts"
@@ -9498,6 +9336,182 @@
       ]
     },
     {
+      "path": "packages/repository-client/src/application-client/knowledge-write-request-ledger-contract.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-client/src/application-client/repository-client-service.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-client/src/infrastructure-client/adapters/http/repository-http.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-client/src/infrastructure-client/adapters/ipc/repository-ipc.adapter.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-client/src/repository-dto-port.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-contracts/src/aggregates/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-contracts/src/api/dual-registry.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-contracts/src/api/knowledge-document-identity.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-contracts/src/api/knowledge-note-projection.dto.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-contracts/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-ui/src/components/DocumentPresentationPrimitives.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-ui/src/components/KnowledgeCaptureReviewDialog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-ui/src/components/KnowledgeMarkdownPreview.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-ui/src/components/KnowledgeNoteCatalog.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-ui/src/components/KnowledgeNoteContextPanel.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-ui/src/components/KnowledgeProjectionRelationsView.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-ui/src/components/KnowledgeWriteRequestLedger.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-ui/src/composables/localAgentNoteReview.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-ui/src/composables/useRecentKnowledgeNotes.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-ui/src/composables/useReferenceableKnowledgeNotes.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-ui/src/router/index.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-ui/src/views/KnowledgeProjectionWorkspaceView.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/repository-ui/src/views/LocalVaultWorkspaceView.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/repository-ui/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/repository/src/api/module-lifecycle.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -9515,22 +9529,6 @@
     },
     {
       "path": "packages/repository/src/api/routes/knowledge-repository-connection.routes.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/repository/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/repository/src/application-client/knowledge-write-request-ledger-contract.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/repository/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/repository/src/application-client/repository-client-service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/repository/vitest.config.ts"
@@ -9579,22 +9577,6 @@
     },
     {
       "path": "packages/repository/src/electron/vault-fs-guards-dual.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/repository/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/repository/src/infrastructure-client/adapters/http/repository-http.adapter.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/repository/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/repository/src/infrastructure-client/adapters/ipc/repository-ipc.adapter.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/repository/vitest.config.ts"
@@ -12421,7 +12403,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 199
+      "fileCount": 186
     },
     {
       "id": "packages/data-portability/vitest.config.ts",
@@ -12899,7 +12881,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 199
+      "fileCount": 186
     },
     {
       "id": "packages/assets/vitest.config.ts",
@@ -12920,7 +12902,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 45
+      "fileCount": 41
     },
     {
       "id": "packages/data-portability-contracts/vitest.config.ts",
@@ -13105,11 +13087,32 @@
       "fileCount": 33
     },
     {
+      "id": "packages/repository-client/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 5
+    },
+    {
+      "id": "packages/repository-contracts/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 4
+    },
+    {
+      "id": "packages/repository-ui/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 13
+    },
+    {
       "id": "packages/repository/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 36
+      "fileCount": 32
     },
     {
       "id": "packages/schedule-client/vitest.config.ts",
@@ -13506,19 +13509,6 @@
       "packages/app-vue/src/modules/ai/composables/workspaceEventSubscription.spec.ts",
       "packages/app-vue/src/modules/authentication/composables/usePassword.spec.ts",
       "packages/app-vue/src/modules/authentication/stores/authenticationStore.spec.ts",
-      "packages/app-vue/src/modules/repository/components/DocumentPresentationPrimitives.spec.ts",
-      "packages/app-vue/src/modules/repository/components/KnowledgeCaptureReviewDialog.spec.ts",
-      "packages/app-vue/src/modules/repository/components/KnowledgeMarkdownPreview.spec.ts",
-      "packages/app-vue/src/modules/repository/components/KnowledgeNoteCatalog.spec.ts",
-      "packages/app-vue/src/modules/repository/components/KnowledgeNoteContextPanel.spec.ts",
-      "packages/app-vue/src/modules/repository/components/KnowledgeProjectionRelationsView.spec.ts",
-      "packages/app-vue/src/modules/repository/components/KnowledgeWriteRequestLedger.spec.ts",
-      "packages/app-vue/src/modules/repository/composables/localAgentNoteReview.spec.ts",
-      "packages/app-vue/src/modules/repository/composables/useRecentKnowledgeNotes.spec.ts",
-      "packages/app-vue/src/modules/repository/composables/useReferenceableKnowledgeNotes.spec.ts",
-      "packages/app-vue/src/modules/repository/router/index.spec.ts",
-      "packages/app-vue/src/modules/repository/views/KnowledgeProjectionWorkspaceView.spec.ts",
-      "packages/app-vue/src/modules/repository/views/LocalVaultWorkspaceView.spec.ts",
       "packages/app-vue/src/modules/routine/components/RoutineCapsulePreview.spec.ts",
       "packages/app-vue/src/modules/routine/components/RoutineEditorDialog.spec.ts",
       "packages/app-vue/src/modules/routine/components/RoutineProfileDialog.spec.ts",
@@ -13945,7 +13935,7 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1124,
+    "unit": 1125,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,

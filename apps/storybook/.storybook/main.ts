@@ -148,6 +148,11 @@ const config: StorybookConfig = {
               'packages/notification-ui/src/notification-ui-host.ts',
             ],
             ['@memoflow/notification-ui', 'packages/notification-ui/src/index.ts'],
+            [
+              '@memoflow/repository-ui/host',
+              'packages/repository-ui/src/repository-ui-host.ts',
+            ],
+            ['@memoflow/repository-ui', 'packages/repository-ui/src/index.ts'],
             ['@memoflow/goal-ui', 'packages/goal-ui/src/index.ts'],
             ['@goal-ui-test-host', 'packages/app-vue/src'],
             ['@memoflow/workspace-contracts', 'packages/workspace-contracts/src/index.ts'],

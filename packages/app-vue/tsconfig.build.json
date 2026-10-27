@@ -9,6 +9,10 @@
       "@memoflow/goal-ui/*": ["../goal-ui/dist/*.d.ts"],
       "@memoflow/notification-ui/host": ["../notification-ui/dist/notification-ui-host.d.ts"],
       "@memoflow/notification-ui": ["../notification-ui/dist/index.d.ts"],
+      "@memoflow/repository-ui/host": ["../repository-ui/dist/repository-ui-host.d.ts"],
+      "@memoflow/repository-ui": ["../repository-ui/dist/index.d.ts"],
+      "@memoflow/repository-contracts": ["../repository-contracts/dist/index.d.ts"],
+      "@memoflow/repository-contracts/*": ["../repository-contracts/dist/*.d.ts"],
       "@memoflow/contracts": ["../contracts/dist/index.d.ts"],
       "@memoflow/contracts/*": [
         "../contracts/dist/modules/*/index.d.ts",
