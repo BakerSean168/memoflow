@@ -142,7 +142,15 @@
           },
           {
             "sourceTag": "scope:ai",
-            "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:ai"]
+            "onlyDependOnLibsWithTags": [
+              "scope:shared",
+              "scope:patterns",
+              "scope:ai",
+              "scope:ui",
+              "scope:repository",
+              "scope:goal",
+              "scope:task"
+            ]
           },
           {
             "sourceTag": "scope:authentication",

@@ -1,4 +1,5 @@
 /* eslint-disable @nx/enforce-module-boundaries -- Storybook config imports workspace helpers and packages */
+import { installAiUiHost } from '../../../packages/app-vue/src/di/ai-ui-host';
 import { installGoalUiHost } from '../../../packages/app-vue/src/di/goal-ui-host';
 import { installNotificationUiHost } from '../../../packages/app-vue/src/di/notification-ui-host';
 import { installSettingUiHost } from '../../../packages/app-vue/src/di/setting-ui-host';
@@ -13,6 +14,7 @@ import { installServerStateRuntime } from '../../../packages/app-vue/src/platfor
 import '../../../packages/ui-vue-shadcn/src/styles/globals.css';
 
 setup((app) => {
+  installAiUiHost();
   installGoalUiHost();
   installNotificationUiHost();
   installSettingUiHost();
