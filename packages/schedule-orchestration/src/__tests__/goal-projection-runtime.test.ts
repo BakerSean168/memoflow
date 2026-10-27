@@ -12,7 +12,7 @@ import {
   type GoalScheduleProjectionEventMap,
   type GoalScheduleProjectionSource,
 } from '@memoflow/goal/schedule-projection';
-import { requireYmd } from '@memoflow/contracts/primitives';
+import { requireYmd } from '@memoflow/shared-primitives';
 import type { Subscriber } from '@memoflow/utils/domain';
 import { createGoalProjectionRuntime } from '../runtime/goal-projection-runtime';
 

@@ -11,7 +11,7 @@ import {
   AIConversationClientDTOSchema,
   ConversationListResSchema,
 } from '@memoflow/ai-contracts';
-import { brandedId } from '@memoflow/contracts/primitives';
+import { brandedId } from '@memoflow/shared-primitives';
 import type { AiConversationId } from '@memoflow/ai-contracts';
 import type { AIChatController } from '../../server/transport/ai-chat.controller';
 

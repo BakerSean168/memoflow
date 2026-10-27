@@ -2,7 +2,7 @@ import type {
   ProbeAIProviderReplacementReq,
   ProbeAIProviderConnectionRes,
 } from '@memoflow/ai-contracts';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import { AIExecutionError } from '../../../../shared/ai-execution-error';
 import type { IAIProviderConfigRepository } from '../../../domain/repositories/i-ai-provider-config-repository';
 import { ProbeAIProviderConnectionUseCase } from './probe-ai-provider-connection.use-case';

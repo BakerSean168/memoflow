@@ -1,7 +1,7 @@
 import { flushPromises, mount } from '@vue/test-utils';
 import { describe, expect, it, vi } from 'vitest';
 import { DESKTOP_BRIDGE_KEY } from '../../di/keys';
-import { SystemChannels } from '@memoflow/contracts/electron';
+import { SystemChannels } from '@memoflow/desktop-contracts';
 import ReleaseNotes from './ReleaseNotes.vue';
 
 describe('ReleaseNotes', () => {

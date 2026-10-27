@@ -15,8 +15,8 @@ updated: 2026-08-17T00:00:00+09:00
 
 - `apps/*` 是运行时容器，负责入口、宿主装配、环境配置、生命周期和平台适配。
 - `packages/<feature>` 是垂直业务切片，内部包含 domain、application、transport、infrastructure 和 client seam。
-- `packages/contracts` 是**跨边界稳定契约中心**，只拥有 request、query、snapshot、outcome、public failure、event、RPC 和 serialization primitive。
-- `packages/domain-shared` 只保存真正跨 bounded context 且业务语义一致的值对象和纯领域 primitive。
+- `packages/<feature>-contracts` 拥有本域稳定 DTO、Schema、ID 与 Event/RPC Map；shared-primitives 与 transport-contracts 拥有平台原语和 Result 协议。跨域工作区读模型归 workspace-contracts，宿主的全局 Event/RPC 注册表归 host-runtime。
+- 共享纯类型归 shared-primitives；IdentityId companion 等技术实现归 utils/domain。旧聚合契约包与 domain-shared 已解散（#630 / #637）。
 - `packages/utils` 保存技术性、无业务所有权的通用能力，不拥有全局业务错误层级。
 - 数据库、PowerSync、HTTP client、IPC client 等基础设施 package 不承载 feature business policy。
 - 文档、代码和治理脚本都以当前 Nx 工作区和可执行证据为准；目标架构通过迁移计划逐步实现，不假装当前代码已经全部符合。
@@ -54,7 +54,7 @@ host composer -> concrete infrastructure + feature factory
 
 ## 3. 垂直 Feature Package
 
-当前采用单 package 多层模式：
+服务端实现留在本域 package；契约、client、UI 各自拥有独立 Nx 边界（label / relation 等小包维持既有布局）。服务端包内分层：
 
 ```text
 packages/<feature>/src/

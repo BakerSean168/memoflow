@@ -3,7 +3,7 @@
  * 设置模块 - 统一导出
  *
  * Canonical Setting contracts. Legacy UserSetting aggregate/category surfaces
- * are retired. 真身自 @memoflow/contracts/modules/setting 迁入（Issue #630 §4.9）。
+ * are retired. 真身自 @memoflow/transport-contracts/modules/setting 迁入（Issue #630 §4.9）。
  */
 
 // ============ Value Objects ============

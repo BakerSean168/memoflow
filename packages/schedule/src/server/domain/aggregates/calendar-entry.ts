@@ -1,5 +1,5 @@
 import { AggregateRoot } from '@memoflow/utils/domain';
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import type {
   CalendarEntryClientDTO,
   CalendarEntryRange,

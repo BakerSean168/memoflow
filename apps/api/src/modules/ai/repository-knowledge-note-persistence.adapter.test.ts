@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import type { KnowledgeRemoteBindingClientDTO } from '@memoflow/repository-contracts';
 import type { RepositoryApplicationPort } from '@memoflow/repository';
 import { RepositoryKnowledgeNotePersistenceAdapter } from './repository-knowledge-note-persistence.adapter';

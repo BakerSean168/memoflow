@@ -43,7 +43,7 @@ Errors must carry a machine-readable `code` (e.g., `AUTH_TOKEN_EXPIRED`, `TASK_N
 - **Service Layer:** Throw specific errors (`throw new NotFoundError()`) to abort logic flow.
 - **Boundary Layer (Controller/IPC):** Catch exceptions and convert them to `Result<T>`.
   ```typescript
-  import { ok, fail } from '@memoflow/contracts/result';
+  import { ok, fail } from '@memoflow/transport-contracts/result';
 
   try {
     await service.doIt();

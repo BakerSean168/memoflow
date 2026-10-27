@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { DesktopFeatureChannels, SystemChannels } from '@memoflow/contracts/electron';
+import { DesktopFeatureChannels, SystemChannels } from '@memoflow/desktop-contracts';
 
 const mocks = vi.hoisted(() => ({
   ipcHandle: vi.fn(),

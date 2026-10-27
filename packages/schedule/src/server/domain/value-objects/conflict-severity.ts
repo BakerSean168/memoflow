@@ -16,7 +16,7 @@ export type ConflictSeverity = IConflictSeverity & { readonly __brand: unique sy
  * 用于校验和遍历
  */
 // Derive the valid-value set from the contracts source of truth so a new status
-// only ever has to be added in one place (@memoflow/contracts).
+// only ever has to be added in one place (@memoflow/transport-contracts).
 const VALUES: IConflictSeverity[] = Object.values(ConflictSeverityContract);
 
 /**

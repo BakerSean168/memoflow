@@ -5,9 +5,9 @@
  * Shared by both Express (HTTP) and IPC transport layers.
  */
 
-import type { Result } from '@memoflow/contracts/result';
-import { fail, ok } from '@memoflow/contracts/result';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { fail, ok } from '@memoflow/transport-contracts/result';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import { UpdateAccountSchema, CloseAccountSchema } from '@memoflow/account-contracts';
 import type { GetAccountRes, UpdateAccountRes } from '@memoflow/account-contracts';
 import { formatZodErrors } from '@memoflow/utils/result';

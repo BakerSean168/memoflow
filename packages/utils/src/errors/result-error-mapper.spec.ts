@@ -6,7 +6,7 @@ import {
   createPublicFailure,
   defineFailureRegistry,
   toLegacyResultError,
-} from '@memoflow/contracts/result';
+} from '@memoflow/transport-contracts/result';
 import type { ILogger } from '../logger/types';
 import { recordDiagnosticFailure } from './diagnostic-failure';
 import { mapInfraErrorToFailure, mapInfraErrorToResultError } from './result-error-mapper';

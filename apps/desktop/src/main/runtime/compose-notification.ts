@@ -35,7 +35,7 @@
  * runtime（显式 channel capabilities + transport）→ notification instance → Electron module。
  */
 
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import type { UserTimeContextPort } from '@memoflow/time';
 import {
   createDefaultElectronDesktopTransport,

@@ -2,7 +2,7 @@ import { defineComponent, h } from 'vue';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it, vi } from 'vitest';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import { SETTING_SERVICE_KEY } from '@setting-ui-test-host/di/keys';
 import { usePreferencePortability } from './usePreferencePortability';
 

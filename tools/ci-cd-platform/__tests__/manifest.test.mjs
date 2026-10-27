@@ -543,7 +543,7 @@ test('manifest laneDetails marks contract changes as required', async () => {
     base: 'base',
     head: 'head',
     scope,
-    files: ['packages/contracts/src/index.ts'],
+    files: ['packages/goal-contracts/src/index.ts'],
   });
   assert.equal(m.laneDetails.contract.required, true);
   assert.equal(m.laneDetails.contract.skipReason, null);
@@ -556,7 +556,7 @@ test('injected scope stays authoritative under a main-push event (regression)', 
     event: 'push',
     ref: 'refs/heads/main',
     scope,
-    files: ['packages/contracts/src/index.ts'],
+    files: ['packages/goal-contracts/src/index.ts'],
   });
   assert.equal(m.full, false);
   assert.equal(m.scope.full, m.full);
@@ -635,7 +635,7 @@ test('migrated browser contracts run for production views and transitive package
     ['apps/web/src/auth/validation.ts', ['web']],
     ['packages/goal-ui/src/components/dialogs/GoalDialog.vue', ['app-vue']],
     ['packages/ui-vue-shadcn/src/components/ui/input/Input.vue', ['ui-vue-shadcn']],
-    ['packages/contracts/src/index.ts', ['contracts', 'ui-storybook']],
+    ['packages/goal-contracts/src/index.ts', ['goal-contracts', 'ui-storybook']],
   ]) {
     const m = await buildDeliveryManifest({
       base: 'base',

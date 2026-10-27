@@ -14,7 +14,7 @@ import { computed, inject } from 'vue';
 import { useMutation } from '@tanstack/vue-query';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
-import { unwrap, type Result } from '@memoflow/contracts/result';
+import { unwrap, type Result } from '@memoflow/transport-contracts/result';
 import type {
   CreateTaskPlanReq,
   TaskPlanClientDTO,

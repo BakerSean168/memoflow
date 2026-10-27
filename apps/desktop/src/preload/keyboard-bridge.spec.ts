@@ -2,8 +2,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, expect, it, vi } from 'vitest';
-import { KeyboardChannels } from '@memoflow/contracts/electron';
-import { unwrapOrThrowError } from '@memoflow/contracts/result';
+import { KeyboardChannels } from '@memoflow/desktop-contracts';
+import { unwrapOrThrowError } from '@memoflow/transport-contracts/result';
 import { createResultIpcClient, type ElectronBridge } from '@memoflow/ipc-client';
 import { registerKeyboardHandlers } from '../main/ipc/keyboard-handlers';
 

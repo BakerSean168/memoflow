@@ -28,12 +28,6 @@ export default {
     'src/validation/index.ts',
     'src/winston.ts',
   ],
-  external: [
-    ...(config.external || []),
-    'winston',
-    'winston-daily-rotate-file',
-    '@memoflow/contracts',
-    'zod',
-  ],
+  external: [...(config.external || []), 'winston', 'winston-daily-rotate-file', 'zod'],
   dts: createLocalOnlyDtsPaths(),
 };

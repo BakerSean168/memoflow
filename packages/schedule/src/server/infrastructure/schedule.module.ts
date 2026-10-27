@@ -25,7 +25,7 @@ import {
   ScheduleDomainEventPublisherRuntime,
 } from '../application/services/schedule-domain-event-publisher';
 import type { LeaseCoordinatorPort } from '@memoflow/patterns/lease';
-import { ok, fail, toResultErrorException } from '@memoflow/contracts/result';
+import { ok, fail, toResultErrorException } from '@memoflow/transport-contracts/result';
 import { createEventBusAdapter } from '@memoflow/patterns';
 import type { OperationAuditRepository } from '@memoflow/patterns/operations';
 import {

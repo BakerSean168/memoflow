@@ -12,8 +12,8 @@ import type {
   PortableCapabilityReceipt,
   PortableReferenceV3,
 } from '@memoflow/data-portability-contracts';
-import type { Result } from '@memoflow/contracts/result';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { Result } from '@memoflow/transport-contracts/result';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type { GoalApplicationPort } from './goal.application.port';
 import type {
   GoalPortabilityApplicationPort,

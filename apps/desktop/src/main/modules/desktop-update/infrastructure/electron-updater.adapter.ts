@@ -5,7 +5,7 @@ import type {
   DesktopUpdateFailureDTO,
   DesktopUpdateProgressDTO,
   DesktopUpdateReleaseDTO,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import type { AppUpdater, ProgressInfo, UpdateInfo as ElectronUpdateInfo } from 'electron-updater';
 import {
   DesktopUpdateEngineError,

@@ -28,7 +28,7 @@ import {
   BatchKeyResultWeightsInvocationSchema,
 } from '@memoflow/goal-contracts';
 import type { ListGoalFilters } from '@memoflow/goal-contracts';
-import { brandedId, parseYmd } from '@memoflow/contracts/primitives';
+import { brandedId, parseYmd } from '@memoflow/shared-primitives';
 import type { GoalId } from '@memoflow/goal-contracts';
 import type { GoalController } from '../../server/transport/goal.controller';
 // Residual 985: sole parseBoolean (local dual retired).

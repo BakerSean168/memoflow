@@ -3,7 +3,7 @@
 // 跨模块副作用的持久化兜底：事件总线失败时写入 outbox
 // ==========================================
 
-import type { CausationId, CorrelationId, MessageId } from '@memoflow/contracts/primitives/command';
+import type { CausationId, CorrelationId, MessageId } from '@memoflow/shared-primitives/command';
 
 export interface OutboxEnqueueInput {
   /** 消息类型（通常等于领域事件 eventType）。 */

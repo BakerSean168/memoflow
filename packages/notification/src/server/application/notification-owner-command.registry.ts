@@ -2,7 +2,7 @@ import type {
   NotificationActionIntent,
   NotificationEntityRef,
 } from '@memoflow/notification-contracts';
-import type { JsonValue } from '@memoflow/contracts/result';
+import type { JsonValue } from '@memoflow/transport-contracts/result';
 
 interface InputSchema<T> {
   parse(value: unknown): T;

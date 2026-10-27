@@ -4,7 +4,7 @@ import type {
   IElectronDatabase,
   IElectronDatabaseQueryResult,
   IElectronDatabaseTransaction,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import { asInstant } from '@memoflow/time';
 import { createSnoozeOverride } from '../../domain/routine';
 import { PowerSyncRoutineOccurrenceTruthStore } from './routine-occurrence-truth-store.powersync';

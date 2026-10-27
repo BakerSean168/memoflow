@@ -1,4 +1,4 @@
-import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
+import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import { RelationDTOSchema, type RelationDTO, type SubjectRef } from '@memoflow/relation-contracts';
 import type {
   AddRelationInput,

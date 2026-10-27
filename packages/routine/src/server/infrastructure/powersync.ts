@@ -1,4 +1,4 @@
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import { PowerSyncProtocolSessionStore } from './routine-vnext/protocol-session-store.powersync';
 import { PowerSyncRoutineOccurrenceTruthStore } from './routine-vnext/routine-occurrence-truth-store.powersync';
 import { PowerSyncRoutineProfileStore } from './routine-vnext/routine-profile-store.powersync';

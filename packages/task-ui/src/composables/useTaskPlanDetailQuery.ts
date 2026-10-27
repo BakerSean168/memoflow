@@ -8,7 +8,7 @@
 import { computed, type MaybeRefOrGetter, toValue } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import { useI18n } from 'vue-i18n';
-import { unwrap } from '@memoflow/contracts/result';
+import { unwrap } from '@memoflow/transport-contracts/result';
 import type { TaskPlanClientDTO } from '@memoflow/task-contracts';
 import { translateResultErrorMessage as translateResultError } from '@memoflow/http-client';
 import { taskUiHost } from '../task-ui-host';

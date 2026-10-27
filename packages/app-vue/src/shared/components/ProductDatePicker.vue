@@ -71,7 +71,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { CalendarDays } from '@lucide/vue';
-import type { Ymd } from '@memoflow/contracts/primitives';
+import type { Ymd } from '@memoflow/shared-primitives';
 import { Button, Popover, PopoverContent, PopoverTrigger } from '@memoflow/ui-vue-shadcn';
 import ProductPropertyChip from './ProductPropertyChip.vue';
 import ProductTemporalPickerSurface, {

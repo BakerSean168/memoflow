@@ -8,8 +8,8 @@ import type { ITaskPlanRepository } from '../../../domain/repositories/i-task-pl
 import type { ITaskOccurrenceRepository } from '../../../domain/repositories/i-task-occurrence-repository';
 import { TaskOccurrenceGenerationService } from '../../../domain/services/index';
 import type { TaskOccurrenceClientDTO } from '@memoflow/task-contracts';
-import type { Result } from '@memoflow/contracts/result';
-import { ok, error, fail } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { ok, error, fail } from '@memoflow/transport-contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
 import type { UserTimeContextPort } from '@memoflow/time';
 import {

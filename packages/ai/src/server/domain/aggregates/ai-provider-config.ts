@@ -9,10 +9,10 @@ import type {
   AIProviderConfigClientDTO,
   AIProviderConfigServerDTO,
 } from '@memoflow/ai-contracts';
-import type { IdentityId as IIdentityId } from '@memoflow/contracts/primitives';
+import type { IdentityId as IIdentityId } from '@memoflow/shared-primitives';
 import type { AIProviderCredentialRef } from '@memoflow/ai-contracts';
 import { AiProviderConfigId } from '../../domain/value-objects/ai-provider-config-id';
-import { IdentityId } from '@memoflow/domain-shared/shared';
+import { IdentityId } from '@memoflow/utils/domain';
 
 export interface AIProviderConfigState {
   id: AiProviderConfigId;

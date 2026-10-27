@@ -54,7 +54,7 @@ HOME-1804 的当前产品证据表明：Desktop 从未需要独立 durable activ
 
 ```text
 @memoflow/dashboard
-@memoflow/contracts/dashboard
+@memoflow/dashboard-contracts
 GET /dashboard/stats
 dashboard:get-stats
 Dashboard Vue module

@@ -1,6 +1,6 @@
 <script lang="ts">
 import { computed, defineComponent, h, inject } from 'vue';
-import { SystemChannels } from '@memoflow/contracts/electron';
+import { SystemChannels } from '@memoflow/desktop-contracts';
 import { createLogger } from '@memoflow/utils/logger';
 import { DESKTOP_BRIDGE_KEY } from '../../di/keys';
 import { renderReleaseNotes } from '../utils/release-notes';

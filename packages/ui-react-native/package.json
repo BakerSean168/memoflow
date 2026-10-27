@@ -21,5 +21,6 @@
     "expo": "~57.0.25",
     "expo-status-bar": "~57.0.1",
     "typescript": "npm:@typescript/typescript6@6.0.2"
-  }
+  },
+  "dependencies": {}
 }

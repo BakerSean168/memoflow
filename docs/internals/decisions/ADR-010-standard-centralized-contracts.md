@@ -10,7 +10,7 @@ Accepted — Amended by ADR-049
 
 ## Implementation note (Residual 617 / 2026-07-22)
 
-Shared operation outcomes live under `@memoflow/contracts/result` as `Result<T>`
+Shared operation outcomes live under `@memoflow/transport-contracts/result` as `Result<T>`
 (and IPC/HTTP envelopes). The retired `ActionResult` / `CountResult` dual-track
 helpers must not be reintroduced.
 
@@ -44,7 +44,7 @@ All shared types must be defined in the unique source of truth: `packages/contra
 
 ```typescript
 // Correct
-import type { Task, CreateTaskRequest } from '@memoflow/contracts';
+import type { Task, CreateTaskRequest } from '@memoflow/task-contracts';
 
 // Incorrect
 export interface MyLocalTask { id: string... } // ❌ Don't redefine

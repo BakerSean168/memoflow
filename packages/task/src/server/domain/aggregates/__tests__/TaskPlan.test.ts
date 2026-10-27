@@ -19,7 +19,7 @@ import { TaskOccurrenceGenerationService } from '../../services/task-occurrence-
 import type { TaskPlanState } from '../task-plan.state';
 import { TaskPlanStatus } from '../../../domain/value-objects/task-plan-status';
 import { TaskPlanId } from '../../../domain/value-objects/task-plan-id';
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { ImportanceLevel } from '@memoflow/shared-primitives';
 import {
   DayOfWeek,

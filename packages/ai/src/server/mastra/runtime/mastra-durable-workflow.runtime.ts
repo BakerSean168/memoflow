@@ -21,7 +21,7 @@ import {
   type AIGoalSurfaceLeaseRequest,
   type AIGoalSurfaceLeaseResponse,
 } from '@memoflow/ai-contracts';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type { IGoalSurfaceLeaseRepository } from '../../application/ports/goal-surface-lease.port';
 import type { IAIUsageReadPort } from '../../application/ports';
 import {

@@ -1,4 +1,4 @@
-import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
+import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import type { IEventBus } from '@memoflow/patterns';
 import type { GoalRelationCleanupPort } from '../../../application/ports/goal-relation-cleanup.port';
 import type {

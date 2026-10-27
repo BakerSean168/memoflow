@@ -8,7 +8,7 @@ import type {
   AccountClosedEventPayload,
 } from '../../ports/account-closure-event-publisher.port';
 import { Account } from '../../../domain/aggregates/account';
-import { IdentityId } from '@memoflow/domain-shared/shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { AccountStatus } from '../../../domain/value-objects';
 import { createAccountModule, createAccountUseCases } from '../../../infrastructure/account.module';
 import { asInstant, createFixedClock } from '@memoflow/time';

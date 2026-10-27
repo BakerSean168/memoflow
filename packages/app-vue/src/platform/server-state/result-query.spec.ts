@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fail, ok } from '@memoflow/contracts/result';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 import { resultQueryFn } from './result-query';
 
 describe('resultQueryFn (plan §3.4)', () => {

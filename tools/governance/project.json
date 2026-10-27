@@ -30,7 +30,6 @@
       "{workspaceRoot}/vitest*.ts",
       "{workspaceRoot}/tsconfig.workspace-*.json",
       "{workspaceRoot}/pnpm-lock.yaml",
-      "{workspaceRoot}/graph.json",
       "{workspaceRoot}/tools/nx-test-system/src/generators/sync-test-targets/generator.js",
       "{workspaceRoot}/tools/test/test-target-governance.mjs",
       "{workspaceRoot}/apps/web/e2e/**/*.ts",

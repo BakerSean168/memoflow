@@ -5,7 +5,7 @@ import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AIWorkflowRunViewSchema, TaskPlanDraftSchema } from '@memoflow/ai-contracts';
-import { error, ok } from '@memoflow/contracts/result';
+import { error, ok } from '@memoflow/transport-contracts/result';
 import type { TaskPlanViewModel } from '@memoflow/task-ui';
 import type { TaskNativeEditSession } from '@memoflow/task-ui';
 import { useAITaskWorkflow } from './useAITaskWorkflow';

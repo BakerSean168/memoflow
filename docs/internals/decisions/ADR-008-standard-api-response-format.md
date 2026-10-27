@@ -11,7 +11,7 @@ Accepted
 ## Implementation note (Residual 617 / 2026-07-22)
 
 Stage-6 deleted the zero-consumer `ActionResult` / `actionOk` dual-track helpers from
-`@memoflow/contracts/result`. Transport truth is **only** `Result<T>` plus boundary
+`@memoflow/transport-contracts/result`. Transport truth is **only** `Result<T>` plus boundary
 envelopes `IpcResult<T>` / `HttpResponse<T>`. Do not reintroduce `success: boolean`
 or `ActionResult`-style parallel types.
 
@@ -21,7 +21,7 @@ Inconsistent API response formats make frontend integration and cross-service co
 
 ## Decision
 
-All operations must return a unified response object structure. We adopt the `ok: boolean` pattern defined in `@memoflow/contracts`.
+All operations must return a unified response object structure. We adopt the `ok: boolean` pattern defined in `旧聚合契约包（已退役）`.
 
 ### 1. Unified Response Structure
 
@@ -40,7 +40,7 @@ interface BaseResponse<T> {
 
 ### 3. Usage of Contract Types
 
-Implementations must use the exact types from `@memoflow/contracts/result`:
+Implementations must use the exact types from `@memoflow/transport-contracts/result`:
 
 - **All operations:** `Result<T>` (`ok` / `fail` / `error` helpers)
 - **IPC boundary:** `IpcResult<T>` (`toIpcResult` / `fromIpcResult`)
@@ -50,8 +50,8 @@ Implementations must use the exact types from `@memoflow/contracts/result`:
 ### 4. Code Example
 
 ```typescript
-import type { Result } from '@memoflow/contracts/result';
-import { ok, fail } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { ok, fail } from '@memoflow/transport-contracts/result';
 
 // Correct
 export async function getUser(id: string): Promise<Result<User>> {

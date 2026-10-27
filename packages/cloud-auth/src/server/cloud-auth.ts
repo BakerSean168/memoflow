@@ -1,5 +1,5 @@
 import type { PrismaClient } from '@memoflow/database';
-import { IdentityId } from '@memoflow/domain-shared/shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { betterAuth, type BetterAuthOptions } from 'better-auth';
 import { fromNodeHeaders, toNodeHandler } from 'better-auth/node';

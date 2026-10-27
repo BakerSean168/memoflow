@@ -1,4 +1,4 @@
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import type { AnalyticsTaskDashboard } from '@memoflow/ai/ports';
 import { describe, expect, it, vi } from 'vitest';
 import { DesktopAnalyticsReadAdapter } from './desktop-analytics-read.adapter';

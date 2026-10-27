@@ -7,7 +7,7 @@ import {
 } from './schedule-projection-source';
 import { buildSchedulingKey } from '@memoflow/schedule-contracts';
 import { GoalStatus, ReminderTriggerType, type GoalTimeframe } from '@memoflow/goal-contracts';
-import { requireYmd } from '@memoflow/contracts/primitives';
+import { requireYmd } from '@memoflow/shared-primitives';
 import { createTimeContext, createTimeFacade } from '@memoflow/time';
 
 const TEST_TIME_CONTEXT = createTimeContext({ timeZone: 'UTC', weekStartsOn: 1 });

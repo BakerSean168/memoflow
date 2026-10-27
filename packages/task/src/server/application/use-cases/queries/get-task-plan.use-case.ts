@@ -13,9 +13,9 @@ import type {
 import { TaskOccurrenceStatus } from '../../../domain/value-objects';
 import type { TaskOccurrence } from '../../../domain/aggregates/task-occurrence';
 import type { GetTaskPlanRes } from '@memoflow/task-contracts';
-import type { Ymd } from '@memoflow/contracts/primitives';
-import type { Result } from '@memoflow/contracts/result';
-import { ok } from '@memoflow/contracts/result';
+import type { Ymd } from '@memoflow/shared-primitives';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import { createTimeFacade, type UserTimeContextPort } from '@memoflow/time';
 
 export class GetTaskPlanUseCase {

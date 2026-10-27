@@ -3,7 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { expect, test } from '@playwright/test';
 import { _electron as electron, type ElectronApplication } from 'playwright';
-import { AIChannels } from '@memoflow/contracts/electron';
+import { AIChannels } from '@memoflow/desktop-contracts';
 import { createIsolatedNativeAgentEnvironment } from './packaged-runtime/isolated-native-env';
 import { verifyInstalledNativeBinary } from './support/installed-native-provenance';
 

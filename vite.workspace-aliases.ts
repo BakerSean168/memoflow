@@ -63,8 +63,6 @@ export function createAppVueSourceAliasEntries(workspaceRoot: string): Alias[] {
 }
 
 export function createContractsAliasEntries(workspaceRoot: string): Alias[] {
-  const contractsRoot = resolveFromWorkspace(workspaceRoot, 'packages/contracts/src');
-
   return [
     ...createAiContractsAliasEntries(workspaceRoot),
     ...createAiClientAliasEntries(workspaceRoot),
@@ -99,49 +97,12 @@ export function createContractsAliasEntries(workspaceRoot: string): Alias[] {
       find: /^@memoflow\/routine-client$/,
       replacement: resolveFromWorkspace(workspaceRoot, 'packages/routine-client/src/index.ts'),
     },
-
-    {
-      find: /^@memoflow\/contracts\/primitives$/,
-      replacement: `${contractsRoot}/primitives/index.ts`,
-    },
-    {
-      find: /^@memoflow\/contracts\/primitives\/(.+)$/,
-      replacement: `${contractsRoot}/primitives/$1`,
-    },
-    {
-      find: /^@memoflow\/contracts\/shared$/,
-      replacement: `${contractsRoot}/shared/index.ts`,
-    },
-    {
-      find: /^@memoflow\/contracts\/result$/,
-      replacement: `${contractsRoot}/result/index.ts`,
-    },
-    {
-      find: /^@memoflow\/contracts\/electron$/,
-      replacement: `${contractsRoot}/electron/index.ts`,
-    },
     {
       find: /^@memoflow\/cloud-auth-contracts$/,
       replacement: resolveFromWorkspace(
         workspaceRoot,
         'packages/cloud-auth-contracts/src/index.ts',
       ),
-    },
-    {
-      find: /^@memoflow\/contracts\/mocks$/,
-      replacement: `${contractsRoot}/mocks/index.ts`,
-    },
-    {
-      find: /^@memoflow\/contracts\/modules\/(.+)$/,
-      replacement: `${contractsRoot}/modules/$1/index.ts`,
-    },
-    {
-      find: /^@memoflow\/contracts\/(.+)$/,
-      replacement: `${contractsRoot}/modules/$1/index.ts`,
-    },
-    {
-      find: /^@memoflow\/contracts$/,
-      replacement: `${contractsRoot}/index.ts`,
     },
   ];
 }

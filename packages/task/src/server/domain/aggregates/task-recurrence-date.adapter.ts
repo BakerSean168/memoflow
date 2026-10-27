@@ -11,7 +11,7 @@ import {
   type TimeContext,
 } from '@memoflow/time';
 import type { TaskRecurrence } from '@memoflow/task-contracts';
-import type { Ymd } from '@memoflow/contracts/primitives';
+import type { Ymd } from '@memoflow/shared-primitives';
 
 const FREQUENCY_MAP: Record<
   (typeof TaskRecurrenceFrequency)[keyof typeof TaskRecurrenceFrequency],

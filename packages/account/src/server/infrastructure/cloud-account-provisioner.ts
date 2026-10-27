@@ -1,5 +1,5 @@
 import type { PrismaClient } from '@memoflow/database';
-import { IdentityId } from '@memoflow/domain-shared/shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { Account, type IAccountRepository } from '../domain';
 import type { Clock } from '@memoflow/time';
 import { createAccountPrismaRepository } from './prisma';

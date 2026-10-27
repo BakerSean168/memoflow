@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { IDomainEvent } from '@memoflow/contracts/shared';
+import type { IDomainEvent } from '@memoflow/shared-primitives';
 import type { IEventBus } from '@memoflow/patterns';
 import type {
   IScheduleRepository,

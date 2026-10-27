@@ -4,8 +4,8 @@ import {
   type ExternalMutationAuthority,
 } from '@memoflow/database/transaction';
 import type { Prisma, PrismaClient } from '@memoflow/database';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
-import { brandedId, ID_PREFIXES, type IdentityId } from '@memoflow/contracts/primitives';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
+import { brandedId, ID_PREFIXES, type IdentityId } from '@memoflow/shared-primitives';
 import {
   CreateTaskPlanSchema,
   TaskAgentCreateSchema,
@@ -15,7 +15,7 @@ import {
   TaskAgentPersistedReceiptSchema,
   type TaskAgentReceipt,
 } from '@memoflow/task-contracts';
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 import type { UserTimeContextPort } from '@memoflow/time';
 import type { IEventBus } from '@memoflow/patterns';
 import type { TaskGoalMeasurementReadPort } from '../../../application/ports/task-workspace-read.ports';

@@ -131,7 +131,7 @@ Product Governance Runtime 已由 ADR-113 退休，因此其已删除 dual/keep-
 | `retired`       | `packages/contracts/src/result/action-result-dual.surface.spec.ts`                                                                 |
 | `keep_boundary` | `packages/contracts/src/result/is-record-keep-boundary.surface.spec.ts`                                                            |
 | `retired`       | `packages/contracts/src/shared/dtos/shared-dtos-dual.surface.spec.ts`                                                              |
-| `retired`       | `packages/contracts/src/shared/dual-registry.surface.spec.ts`                                                                      |
+| `retired`       | `packages/host-runtime/src/shared/dual-registry.surface.spec.ts`                                                                   |
 | `retired`       | `packages/data-portability/src/application-client/data-portability-client-port-dual.surface.spec.ts`                               |
 | `retired`       | `packages/data-portability/src/server/application/use-cases/projections/goal-resolve-ref-dual.surface.spec.ts`                     |
 | `keep_boundary` | `packages/data-portability/src/server/application/use-cases/projections/parse-json-field-keep-boundary.surface.spec.ts`            |

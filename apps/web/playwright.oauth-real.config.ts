@@ -11,6 +11,7 @@ const hostDevOrigin = getRealOAuthPlaywrightBaseURL();
  * already-running host-dev runtime that issued the OAuth state.
  */
 export default defineConfig({
+  tsconfig: '../../tsconfig.workspace-src.json',
   testDir: './e2e',
   testMatch: ['**/authentication/auth-oauth-real.spec.ts'],
   timeout: 6 * 60 * 1000,

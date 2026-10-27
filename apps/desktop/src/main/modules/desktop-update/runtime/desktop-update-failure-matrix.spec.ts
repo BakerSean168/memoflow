@@ -1,7 +1,7 @@
 import { EventEmitter } from 'node:events';
 import type { AppUpdater, UpdateInfo } from 'electron-updater';
 import { afterEach, afterAll, describe, expect, it, vi } from 'vitest';
-import type { DesktopUpdateSnapshotDTO } from '@memoflow/contracts/electron';
+import type { DesktopUpdateSnapshotDTO } from '@memoflow/desktop-contracts';
 import { DesktopShutdownCoordinator } from '../../../lifecycle/desktop-shutdown-coordinator';
 import { DesktopUpdateCoordinator } from '../application/desktop-update-coordinator';
 import { DesktopUpdateEngineError } from '../application/desktop-update-engine';

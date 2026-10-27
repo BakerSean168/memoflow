@@ -69,7 +69,6 @@
     "@memoflow/repository-client": "workspace:*",
     "tslib": "^2.8.1",
     "@memoflow/cloud-auth": "workspace:*",
-    "@memoflow/contracts": "workspace:*",
     "@memoflow/ai-contracts": "workspace:*",
     "pg-int8": "1.0.1",
     "@memoflow/setting-client": "workspace:*",
@@ -80,7 +79,6 @@
     "@memoflow/notification": "workspace:*",
     "pg-protocol": "1.16.0",
     "@memoflow/data-portability-contracts": "workspace:*",
-    "@memoflow/domain-shared": "workspace:*",
     "gray-matter": "4.0.3",
     "xtend": "4.0.2",
     "@memoflow/notification-client": "workspace:*",
@@ -111,7 +109,9 @@
     "@memoflow/account-ui": "workspace:*",
     "@powersync/node": "1.1.0",
     "@memoflow/notification-ui": "workspace:*",
-    "@memoflow/scheduler": "workspace:*"
+    "@memoflow/scheduler": "workspace:*",
+    "@memoflow/shared-primitives": "workspace:*",
+    "@memoflow/transport-contracts": "workspace:*"
   },
   "desktopName": "memoflow.desktop",
   "name": "@memoflow/desktop",

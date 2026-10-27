@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { error, ok } from '@memoflow/contracts/result';
+import { error, ok } from '@memoflow/transport-contracts/result';
 import { aOneTimeTask, TASK_TEST_USER_TIME_CONTEXT_PORT } from '../../../testing/task.fixture';
 import { TaskWorkspaceQueryService } from './task-workspace-query.service';
 

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import { PlannerAIReadAdapter } from './planner-read.adapter';
 
 const identityId = 'IdentityId_550e8400-e29b-41d4-a716-446655440000';

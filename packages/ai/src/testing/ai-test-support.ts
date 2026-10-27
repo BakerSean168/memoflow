@@ -1,5 +1,5 @@
 import type { AIProviderConfigServerDTO } from '@memoflow/ai-contracts';
-import type { IdentityId } from '@memoflow/contracts';
+import type { IdentityId } from '@memoflow/shared-primitives';
 import type { AiProviderConfigId, AIProviderCredentialRef } from '@memoflow/ai-contracts';
 import type { IAIProviderSecretVault } from '../server/application/ports';
 import type { IAIConversationRepository, IAIProviderConfigRepository } from '../server/domain';

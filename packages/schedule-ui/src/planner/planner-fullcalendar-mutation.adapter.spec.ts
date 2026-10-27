@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { EventApi } from '@fullcalendar/vue3';
-import { fail, ok } from '@memoflow/contracts/result';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 import type { CalendarEventProjection } from '@memoflow/schedule-contracts';
 import { asInstant, asYmd } from '@memoflow/time';
 import {

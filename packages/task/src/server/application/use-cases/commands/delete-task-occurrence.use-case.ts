@@ -4,8 +4,8 @@
 
 import type { ITaskOccurrenceRepository } from '../../../domain/repositories/i-task-occurrence-repository';
 import type { TaskEventMap } from '@memoflow/task-contracts';
-import type { Result } from '@memoflow/contracts/result';
-import { ok } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import { createTypedEventPublisher, eventBus } from '@memoflow/utils/domain';
 
 const taskEvents =

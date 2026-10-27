@@ -36,9 +36,9 @@ test('live Nx replay covers reviewed PR counterexamples and Main full validation
   assert.ok(byId.desktopRenderer.jobs['web-visual'].length);
   assert.ok(byId.taskClient.jobs['component-browser'].length);
   assert.ok(byId.taskClient.jobs['web-visual'].length);
-  for (const id of ['aiContract', 'workflow', 'mainDocs']) {
+  for (const id of ['workspaceAliases', 'workflow', 'mainDocs']) {
     assert.equal(byId[id].full, true);
-    assert.ok(byId[id].jobs.contract.includes('contracts:test:contract'));
+    assert.ok(byId[id].jobs.contract.includes('host-runtime:test:contract'));
   }
   assert.equal(
     byId.testOnly.jobs.build.includes('app-vue:build'),

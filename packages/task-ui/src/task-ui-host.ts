@@ -11,7 +11,7 @@ import type { TimeFacade } from '@memoflow/time';
 import type { Ymd } from '@memoflow/shared-primitives';
 import type { TaskClientPort } from '@memoflow/task-client';
 import type { LabelClientDTO } from '@memoflow/label-contracts';
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 import type {
   GetGoalAggregateRes,
   GoalClientDTO,

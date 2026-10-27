@@ -6,7 +6,7 @@ import {
 } from '@schedule-ui-test-host/shared/utils/product-time';
 import { taskOccurrencesToEvents, toLocalDateKey } from './useCalendarView';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
-import type { IdentityId } from '@memoflow/contracts/primitives';
+import type { IdentityId } from '@memoflow/shared-primitives';
 import type { TaskOccurrenceId, TaskPlanId } from '@memoflow/task-contracts';
 
 function makeTemplate(overrides: Partial<TaskPlanClientDTO> = {}): TaskPlanClientDTO {

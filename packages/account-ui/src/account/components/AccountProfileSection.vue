@@ -30,7 +30,7 @@ import { LockKeyhole, LogOut } from '@lucide/vue';
 import { toast } from 'vue-sonner';
 import { useAccount } from '../composables/useAccount';
 import { useAuthenticationStore } from '../../authentication/stores/authentication-store';
-import { ProfileAccessChannels } from '@memoflow/contracts/electron';
+import { ProfileAccessChannels } from '@memoflow/desktop-contracts';
 
 const { t } = useI18n();
 const { SettingsDangerZone, SettingsSection } = accountUiHost.components;

@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import {
   RoutineWindowChannels,
   type InterventionWindowProjection,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import type { InterventionWindowHost } from './intervention-window-controller';
 import { resolvePreloadPath } from '../../utils/resolve-preload-path';
 import { getDesktopDevServerUrlOrDefault, usesDesktopViteDevServer } from '../../utils';

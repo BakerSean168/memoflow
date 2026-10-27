@@ -10,7 +10,7 @@ import type {
   TestAIProviderReq,
   TestAIProviderRes,
 } from '@memoflow/ai-contracts';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import { AI_CLIENT_KEY, AI_CONFIGURATION_REVISION_KEY } from '@ai-ui-test-host/di/keys';
 import { useAI } from './useAI';
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DesktopUpdateChannels } from '@memoflow/contracts/electron';
+import { DesktopUpdateChannels } from '@memoflow/desktop-contracts';
 import { ALLOWED_CHANNELS } from './allowed-channels';
 
 describe('Desktop Update preload allow-list', () => {

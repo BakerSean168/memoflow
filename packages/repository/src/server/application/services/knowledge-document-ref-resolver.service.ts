@@ -1,4 +1,4 @@
-import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
+import type { KnowledgeDocumentId } from '@memoflow/repository-contracts';
 import {
   KnowledgeDocumentRefSchema,
   type KnowledgeDocumentRef,

@@ -8,7 +8,7 @@ import {
   type DesktopProfileImportPrepare,
   type DesktopProfileImportCommit,
   type DesktopProfileImportOperationRequest,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import {
   ProfileImportRequestSchema,
   ProfileImportPlanSchema,
@@ -16,7 +16,7 @@ import {
   ProfileImportOperationSchema,
 } from '@memoflow/data-portability-contracts';
 import { profileImportDigest } from '@memoflow/data-portability';
-import { ResultErrorException } from '@memoflow/contracts/result';
+import { ResultErrorException } from '@memoflow/transport-contracts/result';
 import type { DesktopProfileRuntimeManager } from './desktop-profile-runtime-manager';
 import type { CloudSessionStore } from './cloud-session-store';
 import { ProfileImportJournal, type ProfileImportJournalEntry } from './profile-import-journal';

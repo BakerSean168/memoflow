@@ -4,7 +4,7 @@ import {
   GatewayTaskReceiptSchema,
 } from '../contracts';
 import type { McpServer } from '@modelcontextprotocol/server';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import { writeToolDescriptors } from '../write-tool-descriptors';
 import type { GatewayWritePort, GatewayWriteAuthority } from '../ports';
 import type { ReadToolCall } from './register-read-tools';

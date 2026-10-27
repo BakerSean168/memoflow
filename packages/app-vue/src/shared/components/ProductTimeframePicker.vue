@@ -65,7 +65,7 @@ import {
   type GoalTimeframe,
   type GoalTimeframeKind,
 } from '@memoflow/goal-contracts';
-import type { Ymd } from '@memoflow/contracts/primitives';
+import type { Ymd } from '@memoflow/shared-primitives';
 import { Popover, PopoverContent, PopoverTrigger } from '@memoflow/ui-vue-shadcn';
 import ProductPropertyChip from './ProductPropertyChip.vue';
 import ProductTemporalPickerSurface from './ProductTemporalPickerSurface.vue';

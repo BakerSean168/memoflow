@@ -1,6 +1,6 @@
 import { Entity } from './entity';
-import type { IDomainEvent } from '@memoflow/contracts/shared';
-import type { Equatable } from '@memoflow/contracts/shared';
+import type { IDomainEvent } from '@memoflow/shared-primitives';
+import type { Equatable } from '@memoflow/shared-primitives';
 
 export abstract class AggregateRoot<TId extends string | number | Equatable> extends Entity<TId> {
   private _domainEvents: IDomainEvent[] = [];

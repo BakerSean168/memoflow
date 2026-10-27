@@ -3,7 +3,7 @@ import type {
   DesktopUpdateReleaseDTO,
   DesktopUpdateSnapshotDTO,
   DesktopUpdateStateDTO,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import {
   presentDesktopUpdateSettings,
   type DesktopUpdateSettingsKind,

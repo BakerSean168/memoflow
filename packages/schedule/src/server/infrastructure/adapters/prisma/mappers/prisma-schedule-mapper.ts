@@ -6,7 +6,7 @@ import { CalendarEntryRangeSchema } from '@memoflow/schedule-contracts';
 import { CalendarEntry } from '../../../../domain/aggregates/calendar-entry';
 import type { CalendarEntryState } from '../../../../domain/aggregates/calendar-entry';
 import { ScheduleId } from '../../../../domain/value-objects/schedule-id';
-import type { IdentityId } from '@memoflow/domain-shared';
+import type { IdentityId } from '@memoflow/utils/domain';
 
 export class PrismaScheduleMapper {
   private static toRange(data: PrismaSchedule): CalendarEntryRange {

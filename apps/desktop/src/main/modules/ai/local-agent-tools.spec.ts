@@ -5,7 +5,7 @@ import { isAbsolute, join } from 'node:path';
 import { expect, it } from 'vitest';
 import { LocalAgentRepository, LocalAgentRuntime } from '@memoflow/ai';
 import type { AssistantRuntimeEvent } from '@memoflow/ai-contracts';
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import { createTimeContext } from '@memoflow/time';
 import { createDesktopLocalAgentTools } from './local-agent-tools';
 

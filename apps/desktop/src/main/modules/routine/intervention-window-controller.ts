@@ -2,7 +2,7 @@ import type {
   InterventionWindowCommand,
   InterventionWindowProjection,
   InterventionWindowState,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import type { InterventionRuntime, InterventionSnapshot } from '@memoflow/routine/routine-runtime';
 
 const SURFACE_STATES: readonly InterventionWindowState[] = ['Gentle', 'Grace', 'Guided'];

@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { createTimeContext } from '@memoflow/time';
 import type { PrismaClient } from '@memoflow/database';
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import {
   createNotificationPrismaRepositories,
   createNotificationPowerSyncRepositories,

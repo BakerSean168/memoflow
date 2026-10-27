@@ -17,7 +17,7 @@ import {
   TaskPlanStatus,
 } from '@memoflow/task-contracts';
 import { GoalStatus, ReminderTriggerType } from '@memoflow/goal-contracts';
-import { requireYmd } from '@memoflow/contracts/primitives';
+import { requireYmd } from '@memoflow/shared-primitives';
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import {
   buildTaskReminderOperationId,

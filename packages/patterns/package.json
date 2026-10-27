@@ -40,10 +40,10 @@
     }
   },
   "dependencies": {
-    "@memoflow/contracts": "workspace:*",
     "@memoflow/operations-contracts": "workspace:*",
     "@memoflow/reliable-messaging-contracts": "workspace:*",
-    "@memoflow/utils": "workspace:*"
+    "@memoflow/utils": "workspace:*",
+    "@memoflow/shared-primitives": "workspace:*"
   },
   "devDependencies": {
     "@nx/vite": "23.2.1",

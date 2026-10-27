@@ -32,7 +32,7 @@
 
 - 用于领域事件传播、"某事发生 → 别处反应"的联动。
 - 发布方**不关心也不等待**订阅方的返回。
-- 事件形状在 `@memoflow/contracts/<module>/protocol/*-event-map.ts` 集中声明。
+- 事件形状在 `旧聚合契约包（已退役）/<module>/protocol/*-event-map.ts` 集中声明。
 - 生产代码通过 `createTypedEventPublisher` / `createTypedEventSubscriber` 收窄类型面（见 raw-event-bus-audit）。
 - **Payload 自包含**：订阅方不应因为处理事件而回头查发布方的 repository，需要的字段应放进 payload。
 

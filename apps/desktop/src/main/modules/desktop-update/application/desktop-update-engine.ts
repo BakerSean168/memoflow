@@ -3,7 +3,7 @@ import type {
   DesktopUpdateFailureDTO,
   DesktopUpdateProgressDTO,
   DesktopUpdateReleaseDTO,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 
 export type DesktopUpdateEngineCheckResult =
   | { readonly kind: 'available'; readonly release: DesktopUpdateReleaseDTO }

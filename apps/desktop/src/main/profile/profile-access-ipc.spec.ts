@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ProfileAccessChannels } from '@memoflow/contracts/electron';
+import { ProfileAccessChannels } from '@memoflow/desktop-contracts';
 import { registerProfileAccessIpc } from './profile-access-ipc';
 
 type Handler = (_event: unknown, input?: unknown) => Promise<unknown>;

@@ -25,9 +25,9 @@ import {
   type SaveTextFileRequest,
   type OpenTextFileRequest,
 } from '../paths/native-file-dialogs';
-import { DesktopFeatureChannels, SystemChannels } from '@memoflow/contracts/electron';
-import { DesktopNotificationPreferencePatchSchema } from '@memoflow/contracts/electron';
-import { fail, ok } from '@memoflow/contracts/result';
+import { DesktopFeatureChannels, SystemChannels } from '@memoflow/desktop-contracts';
+import { DesktopNotificationPreferencePatchSchema } from '@memoflow/desktop-contracts';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 
 /**
  * @function registerSystemHandlers

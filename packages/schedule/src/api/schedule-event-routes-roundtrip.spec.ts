@@ -2,7 +2,7 @@ import express from 'express';
 import request from 'supertest';
 import type { RequestHandler } from 'express';
 import { describe, expect, it, vi } from 'vitest';
-import { fail, ok } from '@memoflow/contracts/result';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 import type { ScheduleEventApplicationPort } from '../server/application';
 import { registerScheduleEventRoutes } from './schedule-event.routes';
 

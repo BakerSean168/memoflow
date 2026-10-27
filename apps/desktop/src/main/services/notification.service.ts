@@ -16,11 +16,11 @@ import { CustomNotificationManager } from './custom-notification.manager';
 import type { WindowManager } from '../lifecycle/window-manager';
 import { resolveAssetPath, resolveAssetPathFromKey } from '../utils/asset-path';
 import { assetManifest, type AssetImageKey } from '@memoflow/assets';
-import { RendererEventChannels } from '@memoflow/contracts/electron';
+import { RendererEventChannels } from '@memoflow/desktop-contracts';
 import type {
   DesktopNotificationPreference,
   DesktopNotificationPreferencePatch,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import {
   DesktopNotificationPreferenceStore,
   type DesktopNotificationPreferencePathResolver,

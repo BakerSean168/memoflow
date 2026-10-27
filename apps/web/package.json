@@ -27,7 +27,6 @@
     "vue": "^3.5.43",
     "@memoflow/cloud-auth": "workspace:*",
     "@memoflow/setting-ui": "workspace:*",
-    "@memoflow/contracts": "workspace:*",
     "@memoflow/task-client": "workspace:*",
     "@memoflow/setting-client": "workspace:*",
     "@memoflow/data-portability": "workspace:*",
@@ -54,7 +53,6 @@
     "@memoflow/ui-core": "workspace:*",
     "@lucide/vue": "^1.48.0",
     "@memoflow/schedule-contracts": "workspace:*",
-    "@memoflow/test-utils": "workspace:*",
     "@memoflow/ui-vue-shadcn": "workspace:*",
     "pinia": "^4.0.3",
     "@memoflow/task-ui": "workspace:*",
@@ -64,7 +62,8 @@
     "@memoflow/account-client": "workspace:*",
     "@memoflow/account-contracts": "workspace:*",
     "@memoflow/account-ui": "workspace:*",
-    "@memoflow/notification-ui": "workspace:*"
+    "@memoflow/notification-ui": "workspace:*",
+    "@memoflow/transport-contracts": "workspace:*"
   },
   "name": "@memoflow/web"
 }

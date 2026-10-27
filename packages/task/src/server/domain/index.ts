@@ -22,7 +22,7 @@
  * 【依赖规则】
  * ✅ 允许依赖：
  * - @memoflow/utils（基类：AggregateRoot, Entity）
- * - @memoflow/contracts（DTO 接口、事件 Map）
+ * - @memoflow/transport-contracts（DTO 接口、事件 Map）
  * - @memoflow/domain（值对象、枚举）
  *
  * ❌ 禁止依赖：

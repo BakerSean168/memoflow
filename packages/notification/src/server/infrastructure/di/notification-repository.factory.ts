@@ -4,7 +4,7 @@
  */
 
 import type { PrismaClient } from '@memoflow/database';
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 
 import {
   NotificationPrismaRepository,

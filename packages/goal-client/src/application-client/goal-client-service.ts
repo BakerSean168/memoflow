@@ -8,8 +8,8 @@
  * @module application-client/goal-client-service
  */
 
-import type { Result } from '@memoflow/contracts/result';
-import { map as mapResult } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { map as mapResult } from '@memoflow/transport-contracts/result';
 import type {
   CreateGoalReq,
   UpdateGoalReq,
@@ -62,8 +62,8 @@ export interface GoalClientPort {
     status?: string[];
     systemView?: GoalSystemView;
     labelIdsAll?: string[];
-    targetStart?: import('@memoflow/contracts/primitives').Ymd;
-    targetEnd?: import('@memoflow/contracts/primitives').Ymd;
+    targetStart?: import('@memoflow/shared-primitives').Ymd;
+    targetEnd?: import('@memoflow/shared-primitives').Ymd;
   }): Promise<Result<{ goals: GoalClientDTO[]; pagination: QueryGoalsRes['pagination'] }>>;
   updateGoal(id: string, request: UpdateGoalReq): Promise<Result<GoalMutationReceipt>>;
   deleteGoal(id: string, request: DeleteGoalReq): Promise<Result<GoalMutationReceipt>>;
@@ -223,8 +223,8 @@ export class GoalClientService implements GoalClientPort {
     status?: string[];
     systemView?: GoalSystemView;
     labelIdsAll?: string[];
-    targetStart?: import('@memoflow/contracts/primitives').Ymd;
-    targetEnd?: import('@memoflow/contracts/primitives').Ymd;
+    targetStart?: import('@memoflow/shared-primitives').Ymd;
+    targetEnd?: import('@memoflow/shared-primitives').Ymd;
   }): Promise<Result<{ goals: GoalClientDTO[]; pagination: QueryGoalsRes['pagination'] }>> {
     const result = await this.goalApi.getGoals(params);
     return mapResult(result, (data: QueryGoalsRes) => ({

@@ -1,6 +1,6 @@
 import { GoalRecord } from '../../../../domain';
 import { GoalRecordId, KeyResultId } from '../../../../domain';
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { fromDbDateTime } from '../shared';
 
 function requiredMs(value: string | null | undefined): number {

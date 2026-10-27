@@ -17,7 +17,7 @@
  */
 
 import type { PowerSyncDatabase } from '@powersync/node';
-import type { IElectronModule, IElectronModuleContext } from '@memoflow/contracts/electron';
+import type { IElectronModule, IElectronModuleContext } from '@memoflow/desktop-contracts';
 import { createLogger } from '@memoflow/utils/logger';
 
 const logger = createLogger('ElectronBootstrapper');

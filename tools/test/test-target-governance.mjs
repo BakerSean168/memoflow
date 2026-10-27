@@ -11,7 +11,6 @@ const governedDomainProjects = new Set([
   'account',
   'ai',
   'authentication',
-  'domain-shared',
   'goal',
   'notification',
   'routine',

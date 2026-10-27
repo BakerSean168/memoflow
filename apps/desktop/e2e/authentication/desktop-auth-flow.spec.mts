@@ -11,7 +11,7 @@ import type { AddressInfo } from 'node:net';
 import { expect, test, type Page } from '@playwright/test';
 import { _electron as electron } from 'playwright';
 import type { ElectronApplication } from 'playwright';
-import { GoalChannels } from '@memoflow/contracts/electron';
+import { GoalChannels } from '@memoflow/desktop-contracts';
 import { QueryGoalsResSchema } from '@memoflow/goal-contracts';
 import { z } from 'zod';
 

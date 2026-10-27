@@ -51,14 +51,16 @@
     }
   },
   "dependencies": {
-    "@memoflow/contracts": "workspace:*",
     "date-fns": "^4.4.0",
     "lodash-es": "^4.18.1",
     "emittery": "^2.0.0",
     "uuid": "^14.0.2",
     "winston": "3.19.0",
     "winston-daily-rotate-file": "5.0.0",
-    "@memoflow/time": "workspace:*"
+    "@memoflow/time": "workspace:*",
+    "@memoflow/transport-contracts": "workspace:*",
+    "@memoflow/shared-primitives": "workspace:*",
+    "@memoflow/host-runtime": "workspace:*"
   },
   "peerDependencies": {
     "zod": "^4.4.3"

@@ -3,8 +3,8 @@
 import { mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { RoutineWindowChannels, type FocusWindowProjection } from '@memoflow/contracts/electron';
-import { ok } from '@memoflow/contracts/result';
+import { RoutineWindowChannels, type FocusWindowProjection } from '@memoflow/desktop-contracts';
+import { ok } from '@memoflow/transport-contracts/result';
 import FocusWindowApp from './FocusWindowApp.vue';
 
 const t0 = Date.parse('2026-08-27T00:00:00.000Z');

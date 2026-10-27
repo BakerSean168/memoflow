@@ -29,9 +29,7 @@
   },
   "scripts": {},
   "dependencies": {
-    "@memoflow/contracts": "workspace:*",
     "@memoflow/database": "workspace:*",
-    "@memoflow/domain-shared": "workspace:*",
     "@memoflow/host-runtime": "workspace:*",
     "@memoflow/operations-contracts": "workspace:*",
     "@memoflow/repository-contracts": "workspace:*",
@@ -40,7 +38,10 @@
     "express": "^5.2.1",
     "gray-matter": "4.0.3",
     "multer": "2.4.0",
-    "zod": "^4.6.5"
+    "zod": "^4.6.5",
+    "@memoflow/transport-contracts": "workspace:*",
+    "@memoflow/desktop-contracts": "workspace:*",
+    "@memoflow/shared-primitives": "workspace:*"
   },
   "devDependencies": {
     "@types/express": "^5.0.0"

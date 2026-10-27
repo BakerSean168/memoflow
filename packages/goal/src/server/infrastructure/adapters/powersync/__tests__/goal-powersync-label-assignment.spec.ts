@@ -3,7 +3,7 @@ import type {
   IElectronDatabase,
   IElectronDatabaseQueryResult,
   IElectronDatabaseTransaction,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import { describe, expect, it } from 'vitest';
 import { GoalLabelOwnershipError } from '../../../../domain';
 import { GoalPowerSyncRepository } from '../goal-powersync.repository';

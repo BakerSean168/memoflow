@@ -1,5 +1,5 @@
 import { fail, ok, type Result } from '@memoflow/transport-contracts/result';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import {
   CommitAIProviderOnboardingSchema,
   ProbeAIProviderConnectionSchema,

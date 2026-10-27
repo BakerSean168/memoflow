@@ -6,7 +6,7 @@ import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { TaskGoalBindingTrigger } from '@memoflow/task-contracts';
 import { ImportanceLevel } from '@memoflow/shared-primitives';
 import { prisma } from '@memoflow/database';
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { createGoalPrismaModule, createGoalTaskProgressPrismaHandler } from '@memoflow/goal';
 import { PrismaGoalRelationCleanupCapability } from '@memoflow/relation';
 import {

@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { AiConversationId } from '../domain/value-objects/ai-conversation-id';
 import type {
   PortableCapability,

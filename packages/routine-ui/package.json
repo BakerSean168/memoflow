@@ -49,7 +49,7 @@
     "vue-sonner": "^2.0.8",
     "@memoflow/routine-client": "workspace:*",
     "@memoflow/routine-contracts": "workspace:*",
-    "@memoflow/contracts": "workspace:*"
+    "@memoflow/setting-contracts": "workspace:*"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "6.0.9",

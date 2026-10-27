@@ -1,4 +1,4 @@
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { randomUUID } from 'node:crypto';
 import { afterAll, beforeEach, expect, it, vi } from 'vitest';
 import { Mastra } from '@mastra/core/mastra';

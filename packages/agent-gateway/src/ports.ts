@@ -17,7 +17,7 @@ import type {
   GoalPage,
   GoalPageQuery,
 } from '@memoflow/goal-contracts';
-import type { ExecutionContext, RequestContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext, RequestContext } from '@memoflow/transport-contracts';
 
 /** Read cancellation stays separate from the canonical ExecutionContext. */
 export interface GatewayReadBudget {

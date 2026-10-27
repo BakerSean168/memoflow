@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { serialize } from 'node:v8';
 import matter from 'gray-matter';
-import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
+import type { KnowledgeDocumentId } from '@memoflow/repository-contracts';
 import {
   KnowledgeDocumentIdSchema,
   LocalVaultBindingClientDTOSchema,

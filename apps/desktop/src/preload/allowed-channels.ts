@@ -21,7 +21,7 @@ import {
   TaskChannels,
   TaskWorkspaceChannels,
   WindowChannels,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 
 export const SUPPORTED_REPOSITORY_CHANNELS = [
   RepositoryChannels.KNOWLEDGE_CONNECTION_INSTALLATION_START,

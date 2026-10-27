@@ -1,13 +1,13 @@
-import type { Context } from '@memoflow/contracts/shared';
+import type { Context } from '@memoflow/transport-contracts';
 import { CalendarEntryResponseSchema } from '@memoflow/schedule-contracts';
-import { unwrap } from '@memoflow/contracts/result';
+import { unwrap } from '@memoflow/transport-contracts/result';
 import {
   projectPlannerCalendarEntry,
   projectPlannerTaskOccurrence,
   type IAIPlannerReadPort,
   type PlannerProductTimePort,
 } from '@memoflow/ai';
-import { IdentityId } from '@memoflow/domain-shared/shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import type { ScheduleEventApplicationPort } from '@memoflow/schedule';
 import { derivePlannerConflicts } from '@memoflow/schedule-client';
 import type { TaskApplicationPort } from '@memoflow/task';

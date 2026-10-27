@@ -1,4 +1,4 @@
-import type { JsonValue } from '@memoflow/contracts/result';
+import type { JsonValue } from '@memoflow/transport-contracts/result';
 import type { RoutineCoachCommandPort } from './routine-coach-command.service';
 
 interface OwnerRef {

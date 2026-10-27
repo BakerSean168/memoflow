@@ -3,8 +3,8 @@ import type {
   NotificationInteractionDTO,
   NotificationQuery,
 } from '@memoflow/notification-contracts';
-import type { Result } from '@memoflow/contracts/result';
-import { fail, ok } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 import type {
   INotificationInteractionRepository,
   INotificationRepository,

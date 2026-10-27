@@ -10,8 +10,8 @@
  * 3. Returns a Result<T> (transport-agnostic)
  */
 
-import type { Result } from '@memoflow/contracts/result';
-import { fail, ok } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 import { ListGoalFiltersSchema } from '@memoflow/goal-contracts';
 import { formatZodErrors } from '@memoflow/utils/result';
 import type {
@@ -35,8 +35,8 @@ import type {
   UpdateKeyResultReq,
   UpdateGoalReviewReq,
 } from '@memoflow/goal-contracts';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
-import type { IdentityId } from '@memoflow/contracts/primitives';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
+import type { IdentityId } from '@memoflow/shared-primitives';
 import { toKeyResultListResponse } from './mappers';
 import type {
   CreateGoalUseCase,

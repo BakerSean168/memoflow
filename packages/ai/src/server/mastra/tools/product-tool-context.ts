@@ -1,4 +1,4 @@
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 export function executionContext(requestContext: {
   getRaw(key: string): unknown;
 }): ExecutionContext {

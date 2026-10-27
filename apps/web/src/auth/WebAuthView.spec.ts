@@ -2,7 +2,7 @@ import { defineComponent, h, nextTick } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createPinia } from 'pinia';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { fail } from '@memoflow/contracts/result';
+import { fail } from '@memoflow/transport-contracts/result';
 import { AUTH_SERVICE_KEY, installAccountUiHost } from '@memoflow/app-vue/di';
 import WebAuthView from './WebAuthView.vue';
 import { createAuthI18n } from './i18n';

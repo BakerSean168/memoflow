@@ -8,8 +8,8 @@
 import type { IGoalRepository } from '../../../domain';
 import { Goal } from '../../../domain';
 import type { ListGoalsQuery, QueryGoalsRes } from '@memoflow/goal-contracts';
-import type { Result } from '@memoflow/contracts/result';
-import { ok } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 
 /**
  * List Goals Use Case

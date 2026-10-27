@@ -23,7 +23,7 @@
  */
 
 import { Router } from 'express';
-import { ResultCode } from '@memoflow/contracts/result';
+import { ResultCode } from '@memoflow/transport-contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
 import type {
   IApiModule,

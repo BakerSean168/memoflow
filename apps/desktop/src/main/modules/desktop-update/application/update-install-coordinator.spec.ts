@@ -3,7 +3,7 @@ import type {
   DesktopUpdateFailureDTO,
   DesktopUpdateReleaseDTO,
   DesktopUpdateSnapshotDTO,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import { DesktopShutdownCoordinator } from '../../../lifecycle/desktop-shutdown-coordinator';
 import type {
   DesktopUpdateInstallReceipt,

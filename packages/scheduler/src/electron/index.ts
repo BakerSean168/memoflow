@@ -1,6 +1,6 @@
 /** Canonical Temporal Engine read-only diagnostics Electron transport. */
 import { ipcMain } from 'electron';
-import { SchedulerChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
+import { SchedulerChannels, type IElectronModuleContext } from '@memoflow/desktop-contracts';
 import type { ScheduledInvocationDiagnosticQuery } from '@memoflow/schedule-contracts';
 import { createLogger } from '@memoflow/utils/logger';
 import type { SchedulerModuleInstance } from '../server/infrastructure';

@@ -18,7 +18,7 @@ import {
   ListAIProviderConfigsResSchema,
   TestAIProviderResultDTOSchema,
 } from '@memoflow/ai-contracts';
-import { brandedId } from '@memoflow/contracts/primitives';
+import { brandedId } from '@memoflow/shared-primitives';
 import type { AiProviderConfigId } from '@memoflow/ai-contracts';
 import type { AIProviderConfigController } from '../../server/transport/ai-provider-config.controller';
 

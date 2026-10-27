@@ -7,8 +7,8 @@
 
 import type { IGoalRecordRepository, IGoalRepository } from '../../../domain';
 import type { GetGoalAggregateRes } from '@memoflow/goal-contracts';
-import type { Result } from '@memoflow/contracts/result';
-import { ok, error } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { ok, error } from '@memoflow/transport-contracts/result';
 
 export class GetGoalAggregateUseCase {
   constructor(

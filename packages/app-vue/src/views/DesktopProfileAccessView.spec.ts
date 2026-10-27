@@ -1,8 +1,8 @@
 import { flushPromises, mount } from '@vue/test-utils';
 import { describe, expect, it, vi } from 'vitest';
 import { createI18n } from 'vue-i18n';
-import { ok } from '@memoflow/contracts/result';
-import { ProfileAccessChannels, WindowChannels } from '@memoflow/contracts/electron';
+import { ok } from '@memoflow/transport-contracts/result';
+import { ProfileAccessChannels, WindowChannels } from '@memoflow/desktop-contracts';
 import { DESKTOP_BRIDGE_KEY } from '../di/keys';
 import DesktopProfileAccessView from './DesktopProfileAccessView.vue';
 

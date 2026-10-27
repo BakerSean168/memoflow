@@ -8,8 +8,8 @@
 import type { IGoalRepository } from '../../../domain';
 import { Goal } from '../../../domain';
 import type { GoalSystemView, QueryGoalsRes } from '@memoflow/goal-contracts';
-import type { Result } from '@memoflow/contracts/result';
-import { ok } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 
 /**
  * Search Goals Use Case

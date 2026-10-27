@@ -5,7 +5,7 @@ import {
   type TaskGoalProgressOutboxEventV2,
   type TaskGoalSettlementSource,
 } from '@memoflow/task-contracts';
-import { ResultErrorException } from '@memoflow/contracts/result';
+import { ResultErrorException } from '@memoflow/transport-contracts/result';
 import type { IGoalRecordRepository, IGoalRepository } from '../../domain';
 import { CreateGoalRecordUseCase } from '../use-cases/commands/create-goal-record.use-case';
 import { RemoveTaskGoalContributionUseCase } from '../use-cases/commands/remove-task-goal-contribution.use-case';

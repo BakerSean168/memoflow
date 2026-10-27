@@ -1,4 +1,4 @@
-import type { Context } from '@memoflow/contracts/shared';
+import type { Context } from '@memoflow/transport-contracts';
 import type { ScheduledInvocationDiagnosticQuery } from '@memoflow/schedule-contracts';
 import type { SchedulerApplicationPort } from '../application';
 

@@ -12,7 +12,7 @@ import type {
   GoalReviewSystemContext,
 } from '@memoflow/goal-contracts';
 import { GoalStatus } from '@memoflow/goal-contracts';
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { decodeGoalStartTimeframe, decodeGoalTimeframe } from '../../goal-timeframe-persistence';
 import { GoalId, GoalReviewId, KeyResultId } from '../../../../domain';
 import {

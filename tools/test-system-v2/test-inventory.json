@@ -5530,22 +5530,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/contracts/src/modules/transport-cast-inventory.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
-      "path": "packages/contracts/src/shared/dual-registry.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/contracts/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/data-portability-contracts/src/import-boundary.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -5940,16 +5924,6 @@
         "packages/desktop-contracts/vitest.config.ts"
       ],
       "measurementCollectors": []
-    },
-    {
-      "path": "packages/domain-shared/src/shared/primitives/__tests__/identity-id.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/domain-shared/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/domain-shared/vitest.config.ts"
-      ]
     },
     {
       "path": "packages/goal-client/src/goal-dto-port.spec.ts",
@@ -7399,6 +7373,22 @@
     },
     {
       "path": "packages/host-runtime/src/electron-ipc/authenticated-ipc.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/host-runtime/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/host-runtime/src/modules/transport-cast-inventory.surface.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/host-runtime/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/host-runtime/src/shared/dual-registry.surface.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/host-runtime/vitest.config.ts"
@@ -11274,14 +11264,6 @@
       "measurementCollectors": []
     },
     {
-      "path": "packages/time/src/__tests__/third-party-contract-boundary.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/time/vitest.config.ts"
-      ],
-      "measurementCollectors": []
-    },
-    {
       "path": "packages/time/src/__tests__/time-context-calendar.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -11403,6 +11385,14 @@
     },
     {
       "path": "packages/utils/src/domain/__tests__/cross-platform-event-bus.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/utils/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/utils/src/domain/__tests__/identity-id.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/utils/vitest.config.ts"
@@ -12066,6 +12056,14 @@
       "measurementCollectors": []
     },
     {
+      "path": "tools/governance/__tests__/third-party-contract-boundary.test.mjs",
+      "primarySuite": "governance",
+      "collectors": [
+        "tools/governance/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "tools/governance/__tests__/unflushed-events.test.mjs",
       "primarySuite": "governance",
       "collectors": [
@@ -12237,13 +12235,6 @@
       "suite": "coverage",
       "runner": "vitest",
       "fileCount": 14
-    },
-    {
-      "id": "packages/domain-shared/vitest.config.ts",
-      "type": "measurement",
-      "suite": "coverage",
-      "runner": "vitest",
-      "fileCount": 1
     },
     {
       "id": "packages/goal/vitest.config.ts",
@@ -12539,7 +12530,7 @@
       "type": "primary",
       "suite": "governance",
       "runner": "vitest",
-      "fileCount": 20
+      "fileCount": 21
     },
     {
       "id": "apps/api/vitest.integration.config.ts",
@@ -12773,13 +12764,6 @@
       "fileCount": 12
     },
     {
-      "id": "packages/contracts/vitest.config.ts",
-      "type": "primary",
-      "suite": "unit",
-      "runner": "vitest",
-      "fileCount": 2
-    },
-    {
       "id": "packages/data-portability-contracts/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
@@ -12806,13 +12790,6 @@
       "suite": "unit",
       "runner": "vitest",
       "fileCount": 10
-    },
-    {
-      "id": "packages/domain-shared/vitest.config.ts",
-      "type": "primary",
-      "suite": "unit",
-      "runner": "vitest",
-      "fileCount": 1
     },
     {
       "id": "packages/goal-client/vitest.config.ts",
@@ -12854,7 +12831,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 1
+      "fileCount": 3
     },
     {
       "id": "packages/http-client/vitest.config.ts",
@@ -13120,7 +13097,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 10
+      "fileCount": 9
     },
     {
       "id": "packages/transport-contracts/vitest.config.ts",
@@ -13148,7 +13125,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 13
+      "fileCount": 14
     },
     {
       "id": "packages/workspace-contracts/vitest.config.ts",
@@ -13462,7 +13439,6 @@
       "packages/data-portability/src/server/infrastructure/__tests__/data-portability-module-partial-start.spec.ts",
       "packages/data-portability/src/server/infrastructure/prisma-server-held-data-disclosure.source.test.ts",
       "packages/data-portability/src/server/transport/data-portability.controller.test.ts",
-      "packages/domain-shared/src/shared/primitives/__tests__/identity-id.spec.ts",
       "packages/goal/src/__tests__/dual-registry.surface.spec.ts",
       "packages/goal/src/api/__tests__/goal-api-module-gate.surface.spec.ts",
       "packages/goal/src/api/module-lifecycle.spec.ts",
@@ -13762,14 +13738,14 @@
   "duplicate": [],
   "unexpected": [],
   "counts": {
-    "unit": 1131,
+    "unit": 1130,
     "integration": 58,
     "smoke": 3,
     "boundary-ipc": 6,
     "boundary-main": 12,
     "e2e": 40,
     "perf": 2,
-    "governance": 85
+    "governance": 86
   },
   "e2eGovernance": {
     "version": 2,

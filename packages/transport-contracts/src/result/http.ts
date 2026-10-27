@@ -4,7 +4,7 @@
  * 为 HTTP API 提供 Result 到 HTTP Response 的适配
  * 支持 Express、Fastify、Koa 等框架
  *
- * @module @memoflow/contracts/result/http
+ * @module @memoflow/transport-contracts/result/http
  */
 
 // Import ResultCode from codes.ts to avoid circular dependency issues

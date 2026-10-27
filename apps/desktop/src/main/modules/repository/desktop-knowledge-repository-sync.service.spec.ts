@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { KnowledgeRemoteBindingClientDTO } from '@memoflow/repository-contracts';
-import { fail, ok } from '@memoflow/contracts/result';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 import {
   KnowledgeRepositoryGitRuntimeError,
   type KnowledgeRepositorySyncGitRuntimePort,

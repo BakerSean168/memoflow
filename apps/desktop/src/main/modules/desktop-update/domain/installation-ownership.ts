@@ -1,7 +1,7 @@
 import type {
   DesktopInstallationOwnerDTO,
   DesktopUpdateCapabilitiesDTO,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 
 const CAPABILITIES_BY_OWNER: Readonly<
   Record<DesktopInstallationOwnerDTO, DesktopUpdateCapabilitiesDTO>

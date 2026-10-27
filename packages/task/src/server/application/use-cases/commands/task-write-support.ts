@@ -1,4 +1,4 @@
-import { ResultErrorException, type ResultError } from '@memoflow/contracts/result';
+import { ResultErrorException, type ResultError } from '@memoflow/transport-contracts/result';
 import type { ITaskOccurrenceRepository } from '../../../domain/repositories/i-task-occurrence-repository';
 import {
   TaskLabelOwnershipError,

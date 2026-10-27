@@ -15,7 +15,7 @@ import type { Options } from 'tsup';
 interface CreateTsupConfigOptions {
   /**
    * 包名（用于日志输出）
-   * @example '@memoflow/contracts'
+   * @example '@memoflow/transport-contracts'
    */
   packageName: string;
 
@@ -165,5 +165,5 @@ export const domainConfig = (packageName: string) =>
   createTsupConfig({
     packageName,
     // 域模型包通常依赖 contracts 和 utils
-    external: ['@memoflow/contracts', '@memoflow/utils'],
+    external: ['@memoflow/transport-contracts', '@memoflow/utils'],
   });

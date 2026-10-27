@@ -44,14 +44,14 @@ updated: 2026-08-17T00:00:00+09:00
 ### 2.1 允许依赖
 
 - feature 内部纯 domain module；
-- `@memoflow/domain-shared` 中真正跨 bounded context 且语义一致的值对象；
+- `@memoflow/utils/domain` 中真正跨 bounded context 且语义一致的值对象；
 - `@memoflow/utils` 中不带 transport/runtime 语义的纯基类或算法；
 - 少量 serialization-neutral primitives；
 - TypeScript 标准库和纯计算依赖。
 
 ### 2.2 有条件依赖 contracts
 
-领域层不应为了实现 wire DTO 而依赖 `@memoflow/contracts`。只有以下情形允许 type-only 依赖：
+领域层不应为了实现 wire DTO 而依赖 `旧聚合契约包（已退役）`。只有以下情形允许 type-only 依赖：
 
 1. 领域事件的 canonical business fact 已明确同时是跨边界 durable contract，且不存在额外 transport 字段；
 2. 共享 ID/时间 primitive 的语义在 domain 与 transfer 边界完全一致；

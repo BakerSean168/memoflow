@@ -231,7 +231,7 @@ export type AuthFailure =
 
 ### 6.1 所有权
 
-Domain Fault 定义在 owning feature domain，不定义在 `@memoflow/contracts` 或 `@memoflow/utils`。
+Domain Fault 定义在 owning feature domain，不定义在 `旧聚合契约包（已退役）` 或 `@memoflow/utils`。
 
 ```text
 packages/task/src/server/domain/faults/task-domain-fault.ts
@@ -638,7 +638,7 @@ XState snapshot 永远不替代 durable receipt/approval/session ledger。
 
 本轮不引入 `neverthrow`、Effect、Connect 或 Temporal 作为全仓基础。可借鉴其 API/协议/重试思想，
 但不能形成第二套 Result、schema、DI、transport 或 durable runtime。MemoFlow 可在现有 Result 上增加
-少量自有 combinator，但公共签名仍使用 `@memoflow/contracts/result`。
+少量自有 combinator，但公共签名仍使用 `@memoflow/transport-contracts/result`。
 
 ## 13. 禁止模式
 

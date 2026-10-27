@@ -12,7 +12,7 @@
  * 不执行持久化、授权或业务决策。
  */
 
-import type { IdentityId } from '@memoflow/contracts/primitives';
+import type { IdentityId } from '@memoflow/shared-primitives';
 import type { GoalClientDTO } from '@memoflow/goal-contracts';
 import type { GetKeyResultsRes } from '@memoflow/goal-contracts';
 

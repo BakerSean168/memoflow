@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { fail, ok } from '@memoflow/contracts/result';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 import { mountTaskComposable } from './taskQueryTestUtils';
 import { useTask } from './useTask';
 import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';

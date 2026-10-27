@@ -5,8 +5,8 @@ import {
   DesktopUpdateDiagnosticsSchema,
   type DesktopUpdateDiagnosticsDTO,
   type DesktopUpdateSnapshotDTO,
-} from '@memoflow/contracts/electron';
-import { fail, ok } from '@memoflow/contracts/result';
+} from '@memoflow/desktop-contracts';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
 
 const logger = createLogger('DesktopUpdateIpc');

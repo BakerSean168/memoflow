@@ -304,7 +304,6 @@ export function findCoreVnextArchitectureLockViolations(files) {
     }
 
     if (
-      relPath.startsWith('packages/contracts/src/') ||
       relPath.startsWith('packages/schedule-contracts/src/') ||
       relPath.startsWith('packages/task-contracts/src/')
     ) {

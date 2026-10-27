@@ -1,8 +1,8 @@
 <script setup lang="ts">
 /** Data owner composition: V3 preferences portability + full Data Portability + Desktop native file dialogs. */
 import { inject, ref } from 'vue';
-import { SystemChannels } from '@memoflow/contracts/electron';
-import { isOk, type Result } from '@memoflow/contracts/result';
+import { SystemChannels } from '@memoflow/desktop-contracts';
+import { isOk, type Result } from '@memoflow/transport-contracts/result';
 import { settingUiHost } from '../setting-ui-host';
 import { usePreferencePortability } from '../composables/usePreferencePortability';
 import { useDataPortability } from '../composables/useDataPortability';

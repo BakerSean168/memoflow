@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ResultErrorException } from '@memoflow/contracts/result';
+import { ResultErrorException } from '@memoflow/transport-contracts/result';
 import { getApiBaseUrl } from '../utils/api-config';
 
 export async function profileImportHttp<T>(

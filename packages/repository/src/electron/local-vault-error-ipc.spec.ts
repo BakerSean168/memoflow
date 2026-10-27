@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { RepositoryChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
+import { RepositoryChannels, type IElectronModuleContext } from '@memoflow/desktop-contracts';
 
 const mocks = vi.hoisted(() => {
   const handlers = new Map<string, (...args: unknown[]) => unknown>();

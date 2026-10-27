@@ -54,7 +54,7 @@
  * 只会带来隐含顺序与测试负担。
  */
 
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import {
   createGoalEventListenersRuntime,
   createGoalModule,

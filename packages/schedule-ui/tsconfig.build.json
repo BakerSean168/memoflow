@@ -3,11 +3,6 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"],
-      "@memoflow/contracts": ["../contracts/dist/index.d.ts"],
-      "@memoflow/contracts/*": [
-        "../contracts/dist/modules/*/index.d.ts",
-        "../contracts/dist/*/index.d.ts"
-      ],
       "@memoflow/goal-contracts": ["../goal-contracts/dist/index.d.ts"],
       "@memoflow/schedule-contracts": ["../schedule-contracts/dist/index.d.ts"],
       "@memoflow/schedule-contracts/*": ["../schedule-contracts/dist/*.d.ts"],

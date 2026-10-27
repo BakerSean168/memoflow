@@ -11,7 +11,6 @@ const governedDomainProjects = new Set([
   'account',
   'ai',
   'authentication',
-  'domain-shared',
   'goal',
   'notification',
   'routine',
@@ -37,9 +36,9 @@ const coverageConfigsByProject = new Map([
   ['task', ['vitest.config.ts', 'vitest.use-cases.config.ts', 'vitest.mappers.config.ts']],
 ]);
 
-// P2：contracts/patterns 的 unit test 包含 operations dist surface 门禁，
+// patterns / operations-contracts 的 unit test 包含 dist surface 门禁，
 // 因此 `test` target 必须在自身 `build` 之后运行（clean checkout 自洽）。
-const buildFirstVitestProjects = new Set(['contracts', 'patterns', 'operations-contracts']);
+const buildFirstVitestProjects = new Set(['patterns', 'operations-contracts']);
 
 function createVitestCommand(cwd, args) {
   const executable = cwd

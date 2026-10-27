@@ -7,7 +7,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import {
   assertValidBusinessOperationReceipt,
   buildIdempotencyKeyString,

@@ -18,7 +18,6 @@ export const SERVER_SUBLAYERS = new Set(['domain', 'application', 'transport', '
 export const LEGACY_LAYER_NAMES = new Set([
   'domain-server',
   'domain-client',
-  'domain-shared',
   'application-server',
   'application-client',
   'client',
@@ -27,7 +26,6 @@ export const LEGACY_LAYER_NAMES = new Set([
   'infrastructure-client',
   'controllers',
   'api',
-  'contracts',
   'mocks',
   'electron-entry',
 ]);

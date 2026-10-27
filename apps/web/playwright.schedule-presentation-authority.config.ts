@@ -1,6 +1,7 @@
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
+  tsconfig: '../../tsconfig.workspace-src.json',
   testDir: './e2e/schedule/presentation-authority',
   testMatch: '*.spec.ts',
   fullyParallel: false,

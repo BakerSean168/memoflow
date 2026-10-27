@@ -1,5 +1,5 @@
-import { createHttpResponseBuilder } from '@memoflow/contracts/result';
-import type { RequestContext } from '@memoflow/contracts/shared';
+import { createHttpResponseBuilder } from '@memoflow/transport-contracts/result';
+import type { RequestContext } from '@memoflow/transport-contracts';
 
 /**
  * Builds an HttpResponse envelope for one HTTP attempt.

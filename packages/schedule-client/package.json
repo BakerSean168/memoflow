@@ -15,10 +15,11 @@
     }
   },
   "dependencies": {
-    "@memoflow/contracts": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",
     "@memoflow/schedule-contracts": "workspace:*",
-    "@memoflow/time": "workspace:*"
+    "@memoflow/time": "workspace:*",
+    "@memoflow/transport-contracts": "workspace:*",
+    "@memoflow/desktop-contracts": "workspace:*"
   }
 }

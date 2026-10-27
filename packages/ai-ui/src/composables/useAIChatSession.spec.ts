@@ -4,7 +4,7 @@ import { defineComponent, h, nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ok, ResultErrorException } from '@memoflow/contracts/result';
+import { ok, ResultErrorException } from '@memoflow/transport-contracts/result';
 import type { AssistantRuntimeEvent } from '@memoflow/ai-contracts';
 import type {
   AssistantRuntimeClient,

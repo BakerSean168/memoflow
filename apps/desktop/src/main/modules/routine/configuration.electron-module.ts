@@ -3,7 +3,7 @@ import {
   RoutineChannels,
   type IElectronModule,
   type IElectronModuleContext,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import { withAuthenticatedIdentity } from '@memoflow/host-runtime/electron-ipc';
 import {
   ClearRoutineTemporaryOverrideRequestSchema,
@@ -26,7 +26,7 @@ import {
   fail,
   ok,
   type Result,
-} from '@memoflow/contracts/result';
+} from '@memoflow/transport-contracts/result';
 import type {
   RoutineCoachCommandPort,
   RoutineConfigurationQueryPort,

@@ -20,7 +20,6 @@
   },
   "dependencies": {
     "@lucide/vue": "^1.48.0",
-    "@memoflow/contracts": "workspace:*",
     "@memoflow/desktop-contracts": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/repository-contracts": "workspace:*",
@@ -33,7 +32,9 @@
     "vue": "^3.5.43",
     "vue-i18n": "^11.4.12",
     "vue-router": "^5.3.1",
-    "@memoflow/ai-contracts": "workspace:*"
+    "@memoflow/ai-contracts": "workspace:*",
+    "@memoflow/transport-contracts": "workspace:*",
+    "@memoflow/shared-primitives": "workspace:*"
   },
   "devDependencies": {
     "@memoflow/test-utils": "workspace:*",

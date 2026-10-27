@@ -14,7 +14,7 @@ import type {
   LocalVaultNoteSummaryDTO,
   SearchLocalVaultRes,
 } from '@memoflow/repository-contracts';
-import { unwrapOrThrowError, type Result } from '@memoflow/contracts/result';
+import { unwrapOrThrowError, type Result } from '@memoflow/transport-contracts/result';
 import { useI18n } from 'vue-i18n';
 import { repositoryUiHost } from '../repository-ui-host';
 

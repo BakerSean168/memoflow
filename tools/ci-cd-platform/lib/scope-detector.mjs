@@ -48,8 +48,6 @@ export const PROJECT_LAYERS = {
   scheduler: 'infra',
   // shared layer
   assets: 'shared',
-  contracts: 'shared',
-  'domain-shared': 'shared',
   patterns: 'shared',
   'powersync-schema': 'shared',
   time: 'shared',
@@ -66,7 +64,7 @@ export const GLOBAL_SURFACE_PATTERNS = [
   /^\.github\//u,
   /^tools\/(?:ci-cd-platform|test-system-v2|governance|ci|docker|build|mcp)\//u,
   /^(?:package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|nx\.json|tsconfig[^/]*\.json|eslint\.config\.[^/]+|\.npmrc)$/u,
-  /^(?:packages\/contracts|packages\/database)\//u,
+  /^packages\/database\//u,
   /(^|\/)prisma(\/|$)/iu,
 ];
 

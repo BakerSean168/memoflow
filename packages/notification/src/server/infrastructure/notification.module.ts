@@ -23,7 +23,7 @@ import {
   type NotificationOperationsPort,
   type NotificationSseDeliveryEvent,
 } from '../application';
-import { fail, ok } from '@memoflow/contracts/result';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 import type { NotificationDurableRuntimePort } from './runtime/notification.runtime';
 import {
   mapReceiptToTimelineEntry,

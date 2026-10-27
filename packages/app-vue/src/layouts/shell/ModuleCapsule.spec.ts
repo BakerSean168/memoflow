@@ -7,7 +7,7 @@ import { Target } from '@lucide/vue';
 import { defineComponent, h, nextTick, onMounted, onUnmounted } from 'vue';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import ModuleCapsule from './ModuleCapsule.vue';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import { GOAL_SERVICE_KEY } from '../../di/keys';
 import { GOAL_HOME_STALE_TIME_MS } from '../../platform/server-state/query-policy';
 import { useGoalHomeSummary } from '@memoflow/goal-ui';

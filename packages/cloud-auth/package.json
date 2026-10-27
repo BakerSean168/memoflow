@@ -25,9 +25,7 @@
   },
   "dependencies": {
     "@better-auth/prisma-adapter": "1.7.6",
-    "@memoflow/contracts": "workspace:*",
     "@memoflow/database": "workspace:*",
-    "@memoflow/domain-shared": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",
     "argon2": "0.45.1",
@@ -39,7 +37,10 @@
     "@better-auth/oauth-provider": "1.7.6",
     "zod": "4.6.5",
     "@memoflow/cloud-auth-contracts": "workspace:*",
-    "@memoflow/agent-gateway": "workspace:*"
+    "@memoflow/agent-gateway": "workspace:*",
+    "@memoflow/transport-contracts": "workspace:*",
+    "@memoflow/desktop-contracts": "workspace:*",
+    "@memoflow/utils": "workspace:*"
   },
   "devDependencies": {
     "@modelcontextprotocol/client": "2.3.1",

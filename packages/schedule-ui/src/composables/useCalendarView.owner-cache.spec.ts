@@ -2,7 +2,7 @@
 import { defineComponent, h, ref } from 'vue';
 import { mount } from '@vue/test-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import { GOAL_SERVICE_KEY, ROUTINE_SERVICE_KEY } from '@schedule-ui-test-host/di/keys';
 import {
   createTestServerStateRuntime,
@@ -153,6 +153,8 @@ describe('useCalendarView Planner owner cache', () => {
               routineId: 'routine',
               occurrenceKey: 'routine-1',
               title: 'Routine',
+              description: null,
+              editable: false,
               occurrenceAt: Date.UTC(2026, 8, 28, 12),
               endAt: null,
               revision: 2,

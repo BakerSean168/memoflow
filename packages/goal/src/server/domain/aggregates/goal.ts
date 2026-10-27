@@ -1,4 +1,4 @@
-import type { Instant } from '@memoflow/contracts/primitives';
+import type { Instant } from '@memoflow/shared-primitives';
 import type { LabelDto } from '@memoflow/label-contracts';
 /**
  * Goal 聚合根实现
@@ -30,7 +30,7 @@ import type { LabelDto } from '@memoflow/label-contracts';
  */
 
 import { AggregateRoot } from '@memoflow/utils/domain';
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { addYmdDays } from '@memoflow/time';
 import { GoalId, KeyResultWeightSnapshotId, KeyResultId } from '../value-objects';
 import type { GoalEventMap } from '@memoflow/goal-contracts';

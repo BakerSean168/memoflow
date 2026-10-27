@@ -6,7 +6,7 @@
 
 import { vi } from 'vitest';
 import { GoalStatus, type GoalServerDTO, type GoalId } from '@memoflow/goal-contracts';
-import type { IdentityId } from '@memoflow/contracts/primitives';
+import type { IdentityId } from '@memoflow/shared-primitives';
 
 // ===== Goal Repository Mock =====
 

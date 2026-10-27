@@ -1,4 +1,4 @@
-import { parseTimeZoneId, type TimeZoneId } from '@memoflow/contracts/primitives';
+import { parseTimeZoneId, type TimeZoneId } from '@memoflow/shared-primitives';
 
 // Stable choices for runtimes without supportedValuesOf; saved overrides are always added.
 const FALLBACK_TIME_ZONES = [

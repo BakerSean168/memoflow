@@ -5,8 +5,8 @@
  * Communicates with Electron main process for data operations.
  */
 
-import type { Result } from '@memoflow/contracts/result';
-import { GoalChannels, GoalWorkspaceChannels } from '@memoflow/contracts/electron';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { GoalChannels, GoalWorkspaceChannels } from '@memoflow/desktop-contracts';
 import type { IGoalApiClient, IResultIpcClient } from '../types';
 import type {
   GoalClientDTO,
@@ -59,8 +59,8 @@ export class GoalIpcAdapter implements IGoalApiClient {
     status?: string[];
     systemView?: GoalSystemView;
     labelIdsAll?: string[];
-    targetStart?: import('@memoflow/contracts/primitives').Ymd;
-    targetEnd?: import('@memoflow/contracts/primitives').Ymd;
+    targetStart?: import('@memoflow/shared-primitives').Ymd;
+    targetEnd?: import('@memoflow/shared-primitives').Ymd;
     includeChildren?: boolean;
   }): Promise<Result<QueryGoalsRes>> {
     return this.ipcClient.invoke(GoalChannels.LIST, params);

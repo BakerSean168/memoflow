@@ -17,7 +17,6 @@
   },
   "dependencies": {
     "@lucide/vue": "^1.48.0",
-    "@memoflow/contracts": "workspace:*",
     "@memoflow/desktop-contracts": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",

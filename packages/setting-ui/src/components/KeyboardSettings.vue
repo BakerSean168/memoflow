@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { presentErrorMessage } from '@memoflow/http-client';
-import { ResultErrorException } from '@memoflow/contracts/result';
+import { ResultErrorException } from '@memoflow/transport-contracts/result';
 import { computed, onBeforeUnmount, ref } from 'vue';
 import {
   Button,

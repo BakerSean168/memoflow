@@ -14,7 +14,7 @@ import {
   type AssistantRuntimeEvent,
   type AssistantRuntimeSelectedEntity,
 } from '@memoflow/ai-contracts';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type { ResolvedAIModel } from '../models';
 import type { IAIExecutionRecordPort } from '../../application/ports';
 import { memoFlowToolPolicy } from '../tools/product-tool-policy';

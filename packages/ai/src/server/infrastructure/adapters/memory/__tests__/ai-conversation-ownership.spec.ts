@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ConversationStatus } from '@memoflow/ai-contracts';
-import { IdentityId } from '@memoflow/domain-shared/shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { AIConversation } from '../../../../domain/aggregates/ai-conversation';
 import { AIConversationMemoryRepository } from '../ai-conversation-memory.repository';
 

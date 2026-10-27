@@ -15,7 +15,7 @@
  * ai-service runtime config are removed.
  */
 
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import type { GoalApplicationPort } from '@memoflow/goal';
 import type { RoutineCoachCommandPort } from '@memoflow/routine/routine-runtime';
 import type { ScheduleEventApplicationPort } from '@memoflow/schedule';

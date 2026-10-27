@@ -1,6 +1,6 @@
 import { inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 import type { GetGoalAggregateRes, KeyResultClientDTO } from '@memoflow/goal-contracts';
 import type {
   GoalBindingOption,

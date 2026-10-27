@@ -23,8 +23,8 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { NotificationChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
-import { ok } from '@memoflow/contracts/result';
+import { NotificationChannels, type IElectronModuleContext } from '@memoflow/desktop-contracts';
+import { ok } from '@memoflow/transport-contracts/result';
 import type { NotificationModuleInstance } from '../server/infrastructure';
 
 const mocks = vi.hoisted(() => {

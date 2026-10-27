@@ -1,4 +1,4 @@
-import type { Instant } from '@memoflow/contracts/primitives';
+import type { Instant } from '@memoflow/shared-primitives';
 /**
  * TaskPlanHistory 实体实现 (Server)
  * 任务模板历史记录 - 实体

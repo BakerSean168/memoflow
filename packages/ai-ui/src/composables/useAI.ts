@@ -13,7 +13,7 @@ import type {
   ProbeAIProviderReplacementReq,
   CommitAIProviderReplacementReq,
 } from '@memoflow/ai-contracts';
-import { unwrap } from '@memoflow/contracts/result';
+import { unwrap } from '@memoflow/transport-contracts/result';
 import { AI_CLIENT_KEY, AI_CONFIGURATION_REVISION_KEY } from '../ai-ui-host';
 import { useStrictInject } from '../ai-ui-host';
 

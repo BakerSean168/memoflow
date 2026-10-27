@@ -116,7 +116,7 @@
 import { computed, ref, shallowRef, watch } from 'vue';
 import { CalendarClock } from '@lucide/vue';
 import type { DateValue } from '@internationalized/date';
-import type { Instant, Ymd } from '@memoflow/contracts/primitives';
+import type { Instant, Ymd } from '@memoflow/shared-primitives';
 import {
   Button,
   Dialog,

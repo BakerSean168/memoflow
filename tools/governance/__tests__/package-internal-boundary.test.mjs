@@ -192,7 +192,7 @@ describe('findBoundaryViolations — positive cases', () => {
   it('allows server/domain importing from itself and shared layers', () => {
     const content = [
       "import type { SubjectRef } from '../aggregates/subject';",
-      "import { ValueObject } from '@memoflow/domain-shared';",
+      "import { ValueObject } from '@memoflow/utils/domain';",
     ].join('\n');
     const violations = findBoundaryViolations({
       content,

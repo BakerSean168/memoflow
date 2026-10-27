@@ -121,7 +121,7 @@ _注：R1 遗留 `OutboxMessageStatus` (`pending/dispatched/failed/dead`) 作为
 
 ## 3. 与既有 ADR 的关系
 
-- 延续与深化 [ADR-010](./ADR-010-standard-centralized-contracts.md)：所有操作与交付契约集中在 `@memoflow/contracts`。
+- 延续与深化 [ADR-010](./ADR-010-standard-centralized-contracts.md)：所有操作与交付契约集中在 `旧聚合契约包（已退役）`。
 - 延续与深化 [ADR-033](./ADR-033-cross-module-communication-patterns.md) 与 [ADR-038](./ADR-038-goal-consistency-and-reliable-task-contributions.md)：规范跨模块 Outbox/Inbox 和投递意图回执。
 - 强化 [ADR-012](./ADR-012-standard-error-handling.md)：废除 no-op 假成功 fallback，实行 Fail-Fast 原则。
 

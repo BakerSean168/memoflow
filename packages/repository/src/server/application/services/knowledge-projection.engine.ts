@@ -4,12 +4,8 @@ import {
   RepositoryNoteMutationType,
   type KnowledgeRemoteBindingServerDTO,
 } from '@memoflow/repository-contracts';
-import type {
-  IdentityId,
-  KnowledgeDocumentId,
-  RepositoryId,
-  ResourceId,
-} from '@memoflow/contracts/primitives';
+import type { IdentityId } from '@memoflow/shared-primitives';
+import type { KnowledgeDocumentId, RepositoryId, ResourceId } from '@memoflow/repository-contracts';
 import type { IKnowledgeDocumentIdentityRepository } from '../ports/knowledge-document-identity.repository';
 import type {
   IKnowledgeNoteProjectionRepository,

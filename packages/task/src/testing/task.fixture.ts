@@ -5,7 +5,7 @@
  * Uses the domain's own factory methods to ensure valid objects.
  */
 
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { ImportanceLevel } from '@memoflow/shared-primitives';
 import {
   DayOfWeek,

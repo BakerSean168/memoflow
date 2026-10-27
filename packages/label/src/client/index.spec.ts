@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ok } from '@memoflow/contracts/result';
-import { LabelChannels } from '@memoflow/contracts/electron';
+import { ok } from '@memoflow/transport-contracts/result';
+import { LabelChannels } from '@memoflow/desktop-contracts';
 import { createLabelHttpClient, createLabelIpcClient, toLabelClientDTO } from './index';
 
 describe('Label client seam', () => {

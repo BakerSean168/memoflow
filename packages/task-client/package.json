@@ -15,7 +15,6 @@
     }
   },
   "dependencies": {
-    "@memoflow/contracts": "workspace:*",
     "@memoflow/goal-contracts": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",
@@ -23,6 +22,8 @@
     "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/task-contracts": "workspace:*",
     "@memoflow/utils": "workspace:*",
-    "@memoflow/workspace-contracts": "workspace:*"
+    "@memoflow/workspace-contracts": "workspace:*",
+    "@memoflow/transport-contracts": "workspace:*",
+    "@memoflow/desktop-contracts": "workspace:*"
   }
 }

@@ -1,5 +1,5 @@
 import type { CloudSignInRequest, CloudSignUpRequest } from '@memoflow/cloud-auth-contracts';
-import type { ResultError } from '@memoflow/contracts/result';
+import type { ResultError } from '@memoflow/transport-contracts/result';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { startGithubPopupSignIn } from './github-popup-sign-in';

@@ -5,7 +5,7 @@ import type { IAccountRepository } from '../../../domain/repositories/i-account-
 import type { CloudAuthRevocationPort } from '../../ports/cloud-auth-revocation.port';
 import type { AccountClosureEventPublisher } from '../../ports/account-closure-event-publisher.port';
 import { Account } from '../../../domain/aggregates/account';
-import { IdentityId } from '@memoflow/domain-shared/shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { AccountStatus } from '../../../domain/value-objects';
 import { createUnifiedOperationMetricsRecorder } from '@memoflow/patterns/operations';
 import { asInstant, createFixedClock } from '@memoflow/time';

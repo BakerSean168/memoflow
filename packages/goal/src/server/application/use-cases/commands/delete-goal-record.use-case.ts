@@ -10,8 +10,8 @@ import {
   type IGoalRecordRepository,
   type IGoalRepository,
 } from '../../../domain';
-import type { Result } from '@memoflow/contracts/result';
-import { ok, error } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { ok, error } from '@memoflow/transport-contracts/result';
 import type { GoalMutationReceipt } from '@memoflow/goal-contracts';
 import { type GoalWriteTransactionRunner } from './goal-write-support';
 import { createGoalMutationReceipt } from './goal-mutation-receipt';

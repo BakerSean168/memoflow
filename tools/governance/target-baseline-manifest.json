@@ -45,8 +45,6 @@
     "setting": "runtime-lib",
     "data-portability": "runtime-lib",
     "task": "runtime-lib",
-    "domain-shared": "runtime-lib",
-    "contracts": "runtime-lib",
     "label": "runtime-lib",
     "relation": "runtime-lib",
     "repository": "runtime-lib",

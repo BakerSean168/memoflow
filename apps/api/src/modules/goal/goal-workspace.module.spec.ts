@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import type { IApiModuleContext } from '../../shared/contracts/api-module.js';
 import { composeGoalWorkspaceApiModule } from './goal-workspace.module';
 

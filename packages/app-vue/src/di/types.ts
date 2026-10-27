@@ -32,8 +32,8 @@ import type { DataPortabilityClientPort } from '@memoflow/data-portability/clien
 import type {
   DesktopUpdateDiagnosticsDTO,
   DesktopUpdateSnapshotDTO,
-} from '@memoflow/contracts/electron';
-import type { Result } from '@memoflow/contracts/result';
+} from '@memoflow/desktop-contracts';
+import type { Result } from '@memoflow/transport-contracts/result';
 import type { Component } from 'vue';
 
 // ── Service Interfaces (structural, no private members) ──

@@ -5,7 +5,7 @@
  * Does not call legacy database Repository/Resource CRUD endpoints.
  */
 import { inject, ref } from 'vue';
-import { unwrapOrThrowError } from '@memoflow/contracts/result';
+import { unwrapOrThrowError } from '@memoflow/transport-contracts/result';
 import {
   EMAIL_VERIFICATION_MESSAGE_KEY,
   isEmailVerificationRequiredError,

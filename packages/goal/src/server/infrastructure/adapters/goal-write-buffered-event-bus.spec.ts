@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { IDomainEvent } from '@memoflow/contracts/shared';
+import type { IDomainEvent } from '@memoflow/shared-primitives';
 import type { IEventBus } from '@memoflow/patterns';
 import { BufferedGoalWriteEventBus } from './goal-write-buffered-event-bus';
 

@@ -1,6 +1,6 @@
 import { BetterAuthSessionResponseSchema } from '@memoflow/cloud-auth-contracts';
 import { createLogger } from '@memoflow/utils/logger';
-import type { ProfileCloudState } from '@memoflow/contracts/electron';
+import type { ProfileCloudState } from '@memoflow/desktop-contracts';
 import { getApiBaseUrl } from '../utils/api-config';
 import { safeSyncErrorType } from '../database/powersync-health';
 import type { DesktopProfileRuntimeManager } from './desktop-profile-runtime-manager';

@@ -17,7 +17,6 @@ export default defineConfig({
   external: [
     'electron',
     '@memoflow/utils',
-    '@memoflow/contracts',
     '@memoflow/database',
     '@memoflow/http-client',
     '@memoflow/ipc-client',

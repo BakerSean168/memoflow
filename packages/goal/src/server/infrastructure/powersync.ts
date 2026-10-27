@@ -18,7 +18,7 @@ import {
   PowerSyncGoalDeletionTransactionRunner,
   type PowerSyncGoalRelationCleanupFactory,
 } from './adapters/powersync/powersync-goal-deletion-transaction-runner';
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import { createGoalScheduleProjectionSource } from './schedule-projection-source';
 import {
   createGoalReminderFireHandler,

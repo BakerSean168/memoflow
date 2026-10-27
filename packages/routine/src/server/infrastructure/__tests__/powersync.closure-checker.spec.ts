@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import Database from 'better-sqlite3';
-import type { IElectronDatabase, IElectronDatabaseQueryResult } from '@memoflow/contracts/electron';
+import type { IElectronDatabase, IElectronDatabaseQueryResult } from '@memoflow/desktop-contracts';
 import { createPowerSyncClosureChecker } from '../powersync';
 
 function createTestSqliteDatabase(): IElectronDatabase {

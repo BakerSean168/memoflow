@@ -1,4 +1,4 @@
-import type { IDomainEvent } from '@memoflow/contracts/shared';
+import type { IDomainEvent } from '@memoflow/shared-primitives';
 import { createEventBusAdapter, type IEventBus } from '@memoflow/patterns';
 import { eventBus } from '@memoflow/utils/domain';
 import { createLogger } from '@memoflow/utils/logger';

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ipcMain } from 'electron';
-import { RelationChannels } from '@memoflow/contracts/electron';
+import { RelationChannels } from '@memoflow/desktop-contracts';
 import { createGoalKnowledgeElectronModule } from './relation.electron-module';
 
 const LINK = {

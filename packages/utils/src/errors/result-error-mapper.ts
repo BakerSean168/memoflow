@@ -1,5 +1,5 @@
-import type { ResultError, StructuredResultError } from '@memoflow/contracts/result';
-import { extractStructuredResultError } from '@memoflow/contracts/result';
+import type { ResultError, StructuredResultError } from '@memoflow/transport-contracts/result';
+import { extractStructuredResultError } from '@memoflow/transport-contracts/result';
 import { createDiagnosticFailure, type MappedResultFailure } from './diagnostic-failure';
 import { mapPrismaError } from './prisma-error-mapper';
 

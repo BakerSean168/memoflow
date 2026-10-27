@@ -13,7 +13,7 @@ import {
   type TaskPlanDraft,
   type TaskPlanningDecision,
 } from '@memoflow/ai-contracts';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type { TaskPlannerMode, TaskPlannerPort } from '../agents/task-planner.worker';
 import { taskWorkflowEntityId } from './deterministic-entity-id';
 import { ApplyTaskPlanService } from './apply-task-plan.service';

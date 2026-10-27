@@ -140,8 +140,8 @@ describe('AI application capability boundaries', () => {
   it('keeps the application capability module independent of transport and infrastructure', () => {
     const capabilities = read('packages/ai/src/server/application/ai.application.capabilities.ts');
 
-    expect(capabilities).toMatch(/from ['"]@memoflow\/contracts\//);
-    // Contract-layer packages (@memoflow/contracts and @memoflow/*-contracts,
+    expect(capabilities).toMatch(/from ['"]@memoflow\/transport-contracts['"]/);
+    // Contract-layer packages (@memoflow/transport-contracts and @memoflow/*-contracts,
     // e.g. transport-contracts — the canonical home of the Result contract) are
     // contract definitions, not transport implementations, so they are exempt
     // from the specifier ban below. Real transport/infrastructure stays banned:

@@ -7,7 +7,7 @@ import { createPinia } from 'pinia';
 import { h } from 'vue';
 import { createI18n } from 'vue-i18n';
 import { expect, it, vi } from 'vitest';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import { NOTIFICATION_SERVICE_KEY } from '../../di/keys';
 import { installNotificationUiHost } from '../../di/notification-ui-host';
 import { NotificationCapsulePreview } from '@memoflow/notification-ui';

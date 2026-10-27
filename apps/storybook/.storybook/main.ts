@@ -63,8 +63,6 @@ const config: StorybookConfig = {
           ...createRepositoryContractsAliasEntries(workspace),
           ...createRepositoryClientAliasEntries(workspace),
           ...createWorkspaceSourceAliasEntries(workspace, [
-            ['@memoflow/domain-shared/shared', 'packages/domain-shared/src/shared/index.ts'],
-            ['@memoflow/domain-shared', 'packages/domain-shared/src/index.ts'],
             ['@memoflow/http-client', 'packages/http-client/src/index.ts'],
             ['@memoflow/ipc-client', 'packages/ipc-client/src/index.ts'],
             ['@memoflow/setting-client', 'packages/setting-client/src/index.ts'],

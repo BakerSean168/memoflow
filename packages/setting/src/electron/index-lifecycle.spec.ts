@@ -18,7 +18,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { SettingChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
+import { SettingChannels, type IElectronModuleContext } from '@memoflow/desktop-contracts';
 import type { SettingModuleInstance } from '../server/infrastructure';
 
 const mocks = vi.hoisted(() => {

@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { GoalReviewWindowInput } from '@memoflow/goal-contracts';
 import { GoalReviewWindowQuerySchema } from '@memoflow/goal-contracts';
-import { GoalChannels } from '@memoflow/contracts/electron';
-import { ok } from '@memoflow/contracts/result';
+import { GoalChannels } from '@memoflow/desktop-contracts';
+import { ok } from '@memoflow/transport-contracts/result';
 import { GoalHttpAdapter } from './http/goal-http.adapter';
 import { GoalIpcAdapter } from './ipc/goal-ipc.adapter';
 import { createGoalClientService } from '../../application-client';

@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { ID_PREFIXES } from '@memoflow/contracts/primitives';
+import { ID_PREFIXES } from '@memoflow/shared-primitives';
 import type { GoalPlanDraftRef } from '@memoflow/ai-contracts';
 
 export type GoalWorkflowEntityKind = 'goal' | 'key_result' | 'task_plan' | 'knowledge_document';

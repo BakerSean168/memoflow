@@ -7,8 +7,8 @@
  * Prisma 实现位于 `infrastructure/adapters/prisma/wallet-prisma.repository.ts`。
  */
 
-import type { Result } from '@memoflow/contracts/result';
-import { error, ok } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { error, ok } from '@memoflow/transport-contracts/result';
 import type { IWalletRepository, WalletAccountDTO, WalletTransactionDTO } from '../../../domain';
 import { WalletAccountNotFoundError } from '../../../domain/errors/wallet-account-not-found-error';
 

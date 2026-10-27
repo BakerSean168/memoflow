@@ -32,8 +32,8 @@ import {
   TaskAgentCompleteSchema,
   TaskAgentReceiptSchema,
 } from '@memoflow/task-contracts';
-import type { Result } from '@memoflow/contracts/result';
-import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
+import type { Result } from '@memoflow/transport-contracts/result';
+import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import {
   GoalPanelSnapshotSchema,
   GoalPanelPatchCommandSchema,

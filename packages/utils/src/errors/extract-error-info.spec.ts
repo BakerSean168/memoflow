@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ResultErrorException } from '@memoflow/contracts/result';
+import { ResultErrorException } from '@memoflow/transport-contracts/result';
 import { extractErrorInfo } from './extract-error-info';
 
 describe('extractErrorInfo', () => {

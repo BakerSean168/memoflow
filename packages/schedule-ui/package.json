@@ -17,7 +17,6 @@
   "dependencies": {
     "@fullcalendar/vue3": "7.1.0",
     "@lucide/vue": "^1.48.0",
-    "@memoflow/contracts": "workspace:*",
     "@memoflow/goal-contracts": "workspace:*",
     "@memoflow/http-client": "workspace:*",
     "@memoflow/schedule-client": "workspace:*",
@@ -32,7 +31,10 @@
     "vue": "^3.5.43",
     "vue-i18n": "^11.4.12",
     "vue-router": "^5.3.1",
-    "vue-sonner": "^2.0.8"
+    "vue-sonner": "^2.0.8",
+    "@memoflow/shared-primitives": "workspace:*",
+    "@memoflow/transport-contracts": "workspace:*",
+    "@memoflow/routine-contracts": "workspace:*"
   },
   "peerDependencies": {
     "vue": "^3.5.39"

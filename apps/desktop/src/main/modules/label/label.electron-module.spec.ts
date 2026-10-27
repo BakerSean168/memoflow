@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ipcMain } from 'electron';
-import { LabelChannels } from '@memoflow/contracts/electron';
+import { LabelChannels } from '@memoflow/desktop-contracts';
 import { createLabelElectronModule } from './label.electron-module';
 
 const handlers = new Map<string, (...args: unknown[]) => unknown>();

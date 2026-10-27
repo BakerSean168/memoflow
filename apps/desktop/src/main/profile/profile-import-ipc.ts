@@ -6,8 +6,8 @@ import {
   DesktopProfileImportPrepareSchema,
   DesktopProfileImportCommitSchema,
   DesktopProfileImportOperationRequestSchema,
-} from '@memoflow/contracts/electron';
-import { ok, fail, ResultErrorException } from '@memoflow/contracts/result';
+} from '@memoflow/desktop-contracts';
+import { ok, fail, ResultErrorException } from '@memoflow/transport-contracts/result';
 import type { DesktopProfileImportService } from './desktop-profile-import-service';
 
 export function registerProfileImportIpc(service: DesktopProfileImportService): void {

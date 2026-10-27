@@ -13,8 +13,8 @@ const manifest = validateDeliveryManifest(
 );
 if (!unitJobEnabled(manifest, id)) throw new Error(`Manifest disabled ${id}`);
 // Q4 routing moves the contracts TESTS to the Contract lane, but sibling
-// suites in this shard resolve @memoflow/contracts/* subpaths to dist at
-// runtime (previously an ambient side effect of contracts:test's build
+// suites in this shard resolve @memoflow/transport-contracts/* subpaths to dist at
+// runtime (previously an ambient side effect of host-runtime:test's build
 // dependency in the same job). Build the artifact explicitly; do not run
 // the tests here.
 const shardProjects = manifest.unitShards
@@ -22,11 +22,11 @@ const shardProjects = manifest.unitShards
   .tasks.map((t) => t.project);
 if (
   contractRoutedProjects({ scope: manifest.scope, laneDetails: manifest.laneDetails }).length > 0 &&
-  !shardProjects.includes('contracts')
+  !shardProjects.includes('host-runtime')
 ) {
   const build = spawnSync(
     'pnpm',
-    ['exec', 'nx', 'run', 'contracts:build', '--outputStyle=static'],
+    ['exec', 'nx', 'run', 'host-runtime:build', '--outputStyle=static'],
     {
       stdio: 'inherit',
       env: { ...process.env },

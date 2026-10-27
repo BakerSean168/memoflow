@@ -1,4 +1,4 @@
-import type { StructuredResultError } from '@memoflow/contracts/result';
+import type { StructuredResultError } from '@memoflow/transport-contracts/result';
 import type { ILogger } from '../logger/types';
 
 /** Internal-only failure diagnostics. Never use this type in HTTP, IPC, SSE, or durable contracts. */

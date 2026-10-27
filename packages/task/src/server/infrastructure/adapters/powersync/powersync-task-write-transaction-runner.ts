@@ -1,4 +1,4 @@
-import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
+import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import type { IEventBus } from '@memoflow/patterns';
 import type {
   TaskWriteRepositories,
@@ -21,7 +21,7 @@ export class PowerSyncTaskWriteTransactionRunner implements TaskWriteTransaction
   async run<T>(work: (repositories: TaskWriteRepositories) => Promise<T>): Promise<T> {
     const bufferedEventBus = new BufferedTaskWriteEventBus();
 
-    let postCommitEvents: import('@memoflow/contracts/shared').IDomainEvent[] = [];
+    let postCommitEvents: import('@memoflow/shared-primitives').IDomainEvent[] = [];
     const result = await this.db.writeTransaction(async (tx: IElectronDatabaseTransaction) => {
       const result = await work({
         planRepository: new PowerSyncTaskPlanRepository(tx, bufferedEventBus),

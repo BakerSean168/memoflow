@@ -1,11 +1,11 @@
-import type { Instant } from '@memoflow/contracts/primitives';
+import type { Instant } from '@memoflow/shared-primitives';
 /** Account Aggregate Root - Server-side implementation. */
 
 import type { AccountClientDTO, AccountServerDTO } from '@memoflow/account-contracts';
 import { AggregateRoot } from '@memoflow/utils/domain';
 
 // IdentityId from shared primitives (cross-module shared type)
-import { IdentityId } from '@memoflow/domain-shared/shared';
+import { IdentityId } from '@memoflow/utils/domain';
 
 import { AccountProfile, AccountStatus } from '../value-objects';
 

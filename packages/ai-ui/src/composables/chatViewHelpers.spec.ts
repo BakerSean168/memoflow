@@ -9,7 +9,7 @@ import type { IWorkflowRuntimeService } from '@ai-ui-test-host/di/types';
 import { AIWorkflowRestoreError, loadAuthoritativeWorkflowRun } from './chatViewHelpers';
 import { canLeaveAIWorkflowReview } from './chatViewHelpers';
 import { maybeRenameConversation } from './chatViewHelpers';
-import { ok, error } from '@memoflow/contracts/result';
+import { ok, error } from '@memoflow/transport-contracts/result';
 
 describe('conversation title synchronization', () => {
   it('passes the saved title DTO to the sidebar rather than requiring a list round-trip', async () => {

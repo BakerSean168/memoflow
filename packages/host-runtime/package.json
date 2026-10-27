@@ -20,7 +20,17 @@
   },
   "dependencies": {
     "@memoflow/desktop-contracts": "workspace:*",
-    "@memoflow/transport-contracts": "workspace:*"
+    "@memoflow/transport-contracts": "workspace:*",
+    "@memoflow/account-contracts": "workspace:*",
+    "@memoflow/ai-contracts": "workspace:*",
+    "@memoflow/data-portability-contracts": "workspace:*",
+    "@memoflow/goal-contracts": "workspace:*",
+    "@memoflow/notification-contracts": "workspace:*",
+    "@memoflow/repository-contracts": "workspace:*",
+    "@memoflow/routine-contracts": "workspace:*",
+    "@memoflow/schedule-contracts": "workspace:*",
+    "@memoflow/setting-contracts": "workspace:*",
+    "@memoflow/task-contracts": "workspace:*"
   },
   "devDependencies": {
     "@types/express": "^5.0.6"

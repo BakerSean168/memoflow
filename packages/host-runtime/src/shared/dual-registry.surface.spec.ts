@@ -49,7 +49,10 @@ import { describe, expect, it } from 'vitest';
     });
 
     it('shared.ts keeps ClientInfo/UserAgreement and drops dual error/pagination schemas', () => {
-      const source = readFileSync(join(here, 'shared.ts'), 'utf8');
+      const source = readFileSync(
+        join(here, '../../../transport-contracts/src/client-info.ts'),
+        'utf8',
+      );
       // §5.2-4 / #630 §2.2：UserAgreement 随 account 域迁出，断言按 canonical 新位置钉定，
       // 覆盖不变（同一符号仍在公开契约面上）。
       const accountShared = readFileSync(
@@ -82,7 +85,7 @@ import { describe, expect, it } from 'vitest';
     });
 
     it('shared barrel does not re-export ui-components duals', () => {
-      const index = readFileSync(join(here, 'index.ts'), 'utf8');
+      const index = readFileSync(join(here, '../index.ts'), 'utf8');
       expect(index).not.toContain("from './ui-components'");
       expect(index).not.toContain('SimpleEditorTab');
       expect(index).not.toContain('ContextMenuItem');

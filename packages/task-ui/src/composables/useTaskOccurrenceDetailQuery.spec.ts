@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 import { expect, it, vi } from 'vitest';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import { createTestServerStateRuntime } from '@task-ui-test-host/platform/server-state';
 import { taskOccurrenceQueryKeys } from '@task-ui-test-host/platform/server-state/query-keys';
 import { mountTaskComposable } from './taskQueryTestUtils';

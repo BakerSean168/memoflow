@@ -3,7 +3,7 @@
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import type { RoutineClientPort } from '@memoflow/routine-client';
 import { ROUTINE_SERVICE_KEY } from '@routine-ui-test-host/di/keys';
 import RoutineUpcomingWidget from './RoutineUpcomingWidget.vue';

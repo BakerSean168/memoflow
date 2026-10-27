@@ -1,6 +1,6 @@
 import { createSettingPrismaTimeQuery } from '@memoflow/setting';
 import { createTaskPrismaModule, createTaskPrismaReadQueries } from '@memoflow/task';
-import { requireYmd } from '@memoflow/contracts/primitives';
+import { requireYmd } from '@memoflow/shared-primitives';
 import {
   TaskPlanSearchOutputSchema,
   TaskPlanGetOutputSchema,
@@ -12,7 +12,7 @@ import { once } from 'node:events';
 import express from 'express';
 import { Client, StreamableHTTPClientTransport } from '@modelcontextprotocol/client';
 import { prisma } from '@memoflow/database';
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { createGoalPrismaModule, createGoalPrismaPageQuery } from '@memoflow/goal';
 import { createAccountPrismaActiveQuery } from '@memoflow/account';
 import { createScopedPatService } from '@memoflow/cloud-auth/server';

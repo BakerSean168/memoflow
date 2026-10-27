@@ -36,7 +36,7 @@
 
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
 import { randomUUID } from 'node:crypto';
-import type { RequestContext } from '@memoflow/contracts/shared';
+import type { RequestContext } from '@memoflow/transport-contracts';
 import { createLogger, type ILogger } from '@memoflow/utils/logger';
 import {
   createHttpRequestLoggerObserver,

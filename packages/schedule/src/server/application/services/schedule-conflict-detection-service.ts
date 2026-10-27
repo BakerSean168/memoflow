@@ -1,10 +1,10 @@
-import { toResultErrorException } from '@memoflow/contracts/result';
+import { toResultErrorException } from '@memoflow/transport-contracts/result';
 import type { CalendarEntryServerDTO, ConflictDetectionResult } from '@memoflow/schedule-contracts';
 import type { CalendarEntryState } from '../../domain/aggregates/calendar-entry';
 import { CalendarEntry as DomainCalendarEntry } from '../../domain/aggregates/calendar-entry';
 import type { IScheduleRepository } from '../../domain/repositories/i-schedule-repository';
 import { ScheduleId } from '../../domain/value-objects/schedule-id';
-import type { IdentityId } from '@memoflow/domain-shared';
+import type { IdentityId } from '@memoflow/utils/domain';
 
 const NO_CONFLICTS: ConflictDetectionResult = {
   hasConflict: false,

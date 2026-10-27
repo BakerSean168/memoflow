@@ -17,7 +17,7 @@ import {
   type AIWorkflowRunView,
   type AIWorkflowResumeCommand,
 } from '@memoflow/ai-contracts';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import {
   GatewayReadError,
   type GatewayWriteAuthority,

@@ -6,8 +6,8 @@
 
 import type { ITaskPlanRepository } from '../../../domain/repositories/i-task-plan-repository';
 import type { TaskPlanClientDTO } from '@memoflow/task-contracts';
-import type { Result } from '@memoflow/contracts/result';
-import { ok, error } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { ok, error } from '@memoflow/transport-contracts/result';
 import type { UserTimeContextPort } from '@memoflow/time';
 
 export class UnbindTaskFromGoalUseCase {

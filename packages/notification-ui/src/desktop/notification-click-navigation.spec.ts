@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createMemoryHistory, createRouter } from 'vue-router';
-import { RendererEventChannels } from '@memoflow/contracts/electron';
+import { RendererEventChannels } from '@memoflow/desktop-contracts';
 import {
   createNotificationClickNavigation,
   hasNotificationExternalDestination,

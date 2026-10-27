@@ -16,11 +16,6 @@
       "@memoflow/agent-gateway": ["../../packages/agent-gateway/src/index.ts"],
       "@memoflow/agent-gateway/*": ["../../packages/agent-gateway/src/*/index.ts"],
       "@/*": ["./src/*"],
-      "@memoflow/contracts": ["../../packages/contracts/src/index.ts"],
-      "@memoflow/contracts/*": [
-        "../../packages/contracts/src/modules/*/index.ts",
-        "../../packages/contracts/src/*/index.ts"
-      ],
       "@memoflow/http-client": ["../../packages/http-client/src/index.ts"],
       "@memoflow/utils": ["../../packages/utils/src/index.ts"],
       "@memoflow/utils/*": ["../../packages/utils/src/*/index.ts", "../../packages/utils/src/*.ts"],

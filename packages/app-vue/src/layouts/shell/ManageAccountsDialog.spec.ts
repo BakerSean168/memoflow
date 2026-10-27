@@ -2,13 +2,13 @@ import { defineComponent, ref } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createI18n } from 'vue-i18n';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import {
   ProfileAccessChannels,
   WindowChannels,
   type ProfileSummary,
   RenameProfileRequestSchema,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import { DESKTOP_BRIDGE_KEY } from '../../di/keys';
 import { useDesktopProfiles } from '../../shared/composables/useDesktopProfiles';
 import ManageAccountsDialog from './ManageAccountsDialog.vue';

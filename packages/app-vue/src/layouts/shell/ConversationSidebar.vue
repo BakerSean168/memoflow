@@ -38,7 +38,7 @@ import {
   TooltipContent,
   TooltipProvider,
 } from '@memoflow/ui-vue-shadcn';
-import type { ProfileSummary, ProfileCloudState } from '@memoflow/contracts/electron';
+import type { ProfileSummary, ProfileCloudState } from '@memoflow/desktop-contracts';
 import type {
   ConversationAttentionStatus,
   ConversationAttentionMap,

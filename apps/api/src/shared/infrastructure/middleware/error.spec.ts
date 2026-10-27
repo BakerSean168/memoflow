@@ -7,7 +7,7 @@ import {
   ResultErrorException,
   createPublicFailure,
   defineFailureRegistry,
-} from '@memoflow/contracts/result';
+} from '@memoflow/transport-contracts/result';
 import { applyErrorHandlers } from './error';
 import { CorsRejectionError } from './global';
 import { createRequestContextMiddleware } from '../http/middlewares/request-context.middleware';

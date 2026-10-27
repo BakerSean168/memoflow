@@ -11,7 +11,7 @@
  * established in the task module tests.
  */
 
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 
 /**
  * Residual 1033: sole anIdentityId fixture helper (task testing re-exports).

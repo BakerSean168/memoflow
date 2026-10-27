@@ -2,11 +2,11 @@ import { defineComponent, h, nextTick } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import type {
   DesktopUpdateDiagnosticsDTO,
   DesktopUpdateSnapshotDTO,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import { DESKTOP_UPDATE_SERVICE_KEY } from '@setting-ui-test-host/di/keys';
 import type { DesktopUpdateService } from '@setting-ui-test-host/di/types';
 import enSetting from '@setting-ui-test-host/locales/en-US/setting';

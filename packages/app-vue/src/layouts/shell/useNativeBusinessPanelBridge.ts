@@ -1,4 +1,4 @@
-import { AIChannels } from '@memoflow/contracts/electron';
+import { AIChannels } from '@memoflow/desktop-contracts';
 import {
   GoalPanelSnapshotSchema,
   NativePanelIpcRequestSchema,

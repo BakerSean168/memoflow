@@ -44,8 +44,8 @@ import {
   getHttpStatusCode,
   publicFailureToHttpStatus,
   createHttpResponseBuilder,
-} from '@memoflow/contracts/result';
-import type { ExecutionContext, RequestContext } from '@memoflow/contracts/shared';
+} from '@memoflow/transport-contracts/result';
+import type { ExecutionContext, RequestContext } from '@memoflow/transport-contracts';
 import { mapPrismaError } from '../errors/prisma-error-mapper';
 import { generateUUID } from '../shared/uuid';
 // Residual 945: formatZodErrors dual retired — sole body in format-zod-errors.

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { requireYmd } from '@memoflow/contracts/primitives';
+import { requireYmd } from '@memoflow/shared-primitives';
 import {
   ReminderTriggerType,
   goalTimeframeEndBoundary,

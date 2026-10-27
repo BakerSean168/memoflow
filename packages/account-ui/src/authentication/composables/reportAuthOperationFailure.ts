@@ -2,7 +2,7 @@
  * Shared failure reporting for the active Better Auth login/register operations.
  */
 import { toast } from 'vue-sonner';
-import type { ResultError, ResultMeta } from '@memoflow/contracts/result';
+import type { ResultError, ResultMeta } from '@memoflow/transport-contracts/result';
 import type { PasswordMutationErrorReceipt } from '../stores/authentication-store';
 import type { AuthContext } from './useAuthContext';
 

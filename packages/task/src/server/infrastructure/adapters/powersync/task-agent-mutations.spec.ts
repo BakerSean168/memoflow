@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createPowerSyncSqliteFixture } from '@memoflow/test-utils/helpers/powersync-sqlite';
 import { createTimeContext } from '@memoflow/time';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import { createTaskPowerSyncAgentMutations } from './task-agent-mutations';
 const cx: ExecutionContext = {
   identityId: 'IdentityId_00000000-0000-4000-8000-000000000001',

@@ -1,16 +1,12 @@
 /// <reference types="vitest" />
 import { defineConfig } from 'vitest/config';
 import path from 'node:path';
-import {
-  contractsDeepImportResolver,
-  domainResolveAtAlias,
-  taskResolveAliases,
-} from '../../vitest.workspace-helpers';
+import { domainResolveAtAlias, taskResolveAliases } from '../../vitest.workspace-helpers';
 import { createIntegrationTestEnv } from '../test-utils/src/setup/database';
 import { createVitestReportConfig } from '../../vitest.shared.ts';
 
 export default defineConfig({
-  plugins: [contractsDeepImportResolver, domainResolveAtAlias],
+  plugins: [domainResolveAtAlias],
   resolve: {
     alias: taskResolveAliases,
   },

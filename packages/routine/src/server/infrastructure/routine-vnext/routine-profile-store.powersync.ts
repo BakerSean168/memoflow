@@ -1,4 +1,4 @@
-import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
+import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import type { RoutineProfileStore } from '../../domain/ports';
 import { ProfileMembership, RoutineDefinition, RoutineProfile } from '../../domain/routine';
 import {

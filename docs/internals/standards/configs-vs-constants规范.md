@@ -259,7 +259,7 @@ export const taskStatus = {
 
 - [枚举与常量对象规范](<./枚举与常量对象规范(Enum&Constant-Objects).md>)
 - [enum 写法规范](./enum写法.md)
-- Example Module - [packages/contracts/src/modules/example/](../../packages/contracts/src/modules/example/)
+- Example Module - [packages/example-contracts/src/](../../packages/example-contracts/src/)
 
 ---
 

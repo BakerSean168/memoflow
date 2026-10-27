@@ -3,7 +3,7 @@ import type {
   AccountProfileDTO,
   AccountProfile as IAccountProfile,
 } from '@memoflow/account-contracts';
-import { requireYmd, type Ymd } from '@memoflow/contracts/primitives';
+import { requireYmd, type Ymd } from '@memoflow/shared-primitives';
 import { GenderType } from './gender-type';
 
 function normalizeBirthday(value: AccountProfileDTO['birthday']): Ymd | null {

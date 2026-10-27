@@ -9,7 +9,11 @@
  * error/onError；transport Result 契约不变，UI 反馈继续走现有 i18n/toast 适配器。
  */
 
-import { unwrap, type Result, type ResultErrorException } from '@memoflow/contracts/result';
+import {
+  unwrap,
+  type Result,
+  type ResultErrorException,
+} from '@memoflow/transport-contracts/result';
 
 /**
  * Convert a `Promise<Result<T>>` into a query/mutation function `() => Promise<T>`.

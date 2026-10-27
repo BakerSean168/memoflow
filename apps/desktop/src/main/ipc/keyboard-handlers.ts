@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron';
-import { KeyboardChannels } from '@memoflow/contracts/electron';
-import { fail, ok } from '@memoflow/contracts/result';
+import { KeyboardChannels } from '@memoflow/desktop-contracts';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 import { DeviceKeymapStore, type KeymapProfile } from '../services/device-keymap.store';
 
 export function registerKeyboardHandlers(resolveProfile: () => KeymapProfile | null): void {

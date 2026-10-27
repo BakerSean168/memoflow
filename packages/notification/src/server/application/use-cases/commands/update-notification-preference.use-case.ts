@@ -3,8 +3,8 @@ import type {
   NotificationPreferenceClientDTO,
   UpdateNotificationPreferenceReq,
 } from '@memoflow/notification-contracts';
-import type { Result } from '@memoflow/contracts/result';
-import { error, ok } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { error, ok } from '@memoflow/transport-contracts/result';
 import type { INotificationPreferenceRepository } from '../../../domain/repositories';
 import { QuietHours } from '../../../domain/value-objects/quiet-hours';
 import { asHm } from '@memoflow/time';

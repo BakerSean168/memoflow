@@ -52,7 +52,6 @@ export {
   scheduleUiHost,
   type FetchRoutineUpcomingCachedOptions,
   type PanelSurfaceStatus,
-  type RoutineUpcomingOccurrence,
   type ScheduleGoalPort,
   type ScheduleTaskPlannerPort,
   type ScheduleUiHost,

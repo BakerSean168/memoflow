@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { DesktopUpdateSnapshotDTO } from '@memoflow/contracts/electron';
-import { DesktopUpdateChannels } from '@memoflow/contracts/electron';
+import type { DesktopUpdateSnapshotDTO } from '@memoflow/desktop-contracts';
+import { DesktopUpdateChannels } from '@memoflow/desktop-contracts';
 import {
   registerDesktopUpdateIpc,
   type DesktopUpdateIpcBroadcastPort,

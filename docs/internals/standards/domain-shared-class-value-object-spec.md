@@ -28,7 +28,7 @@ tags: [standard, domain/shared]
 
 - ✅ **允许依赖**:
 - `@memoflow/utils` (ValueObject 基类)
-- `@memoflow/contracts` (DTO 接口, **包含 `PersistenceDTO` 纯类型定义**)
+- `旧聚合契约包（已退役）` (DTO 接口, **包含 `PersistenceDTO` 纯类型定义**)
 - 自身目录内的其他文件 (其他 ValueObject, Enums)
 - 纯 JS/TS 内置对象 (`Date`, `Math`, `RegExp`)
 
@@ -52,7 +52,7 @@ tags: [standard, domain/shared]
 
 ```typescript
 import { ValueObject } from '@memoflow/utils';
-import type { MoneyDTO } from '@memoflow/contracts/finance';
+import type { MoneyDTO } from '@memoflow/finance-contracts';
 
 export class Money extends ValueObject<MoneyDTO> { ... }
 

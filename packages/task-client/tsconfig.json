@@ -5,10 +5,6 @@
     "types": ["node", "vitest/globals"],
     "paths": {
       "@/*": ["./src/*"],
-      "@memoflow/contracts": ["../contracts/src/index.ts"],
-      "@memoflow/contracts/result": ["../contracts/src/result/index.ts"],
-      "@memoflow/contracts/primitives": ["../contracts/src/primitives/index.ts"],
-      "@memoflow/contracts/electron": ["../contracts/src/electron/index.ts"],
       "@memoflow/goal-contracts": ["../goal-contracts/src/index.ts"],
       "@memoflow/http-client": ["../http-client/src/index.ts"],
       "@memoflow/ipc-client": ["../ipc-client/src/index.ts"],

@@ -1,6 +1,6 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { prisma } from '@memoflow/database';
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { Account } from '@memoflow/account/server';
 import { createAccountPrismaModule } from '@memoflow/account/server';
 import { RoutineAccountClosedConsumer } from '@memoflow/routine/server';

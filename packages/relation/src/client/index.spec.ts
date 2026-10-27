@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { RelationChannels } from '@memoflow/contracts/electron';
+import { RelationChannels } from '@memoflow/desktop-contracts';
 import { GoalKnowledgeLinkReqSchema } from '@memoflow/relation-contracts';
 import { createGoalKnowledgeHttpClient, createGoalKnowledgeIpcClient } from './index';
 

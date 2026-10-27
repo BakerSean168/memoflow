@@ -6,7 +6,7 @@ import {
   DesktopNotificationPreferenceSchema,
   type DesktopNotificationPreference,
   type DesktopNotificationPreferencePatch,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 
 export const DEFAULT_DESKTOP_NOTIFICATION_PREFERENCE: DesktopNotificationPreference = {
   presentationMode: 'custom',

@@ -14,8 +14,8 @@ import type {
   ReferenceableKnowledgeDocumentListResponse,
 } from '@memoflow/repository-contracts';
 import { KnowledgeDocumentIdSchema } from '@memoflow/repository-contracts';
-import type { IdentityId } from '@memoflow/contracts/primitives';
-import { ok, ResultErrorException } from '@memoflow/contracts/result';
+import type { IdentityId } from '@memoflow/shared-primitives';
+import { ok, ResultErrorException } from '@memoflow/transport-contracts/result';
 // This opt-in acceptance file intentionally crosses the Desktop -> Repository
 // boundary so the production service and Git runtime are exercised together.
 // eslint-disable-next-line @nx/enforce-module-boundaries

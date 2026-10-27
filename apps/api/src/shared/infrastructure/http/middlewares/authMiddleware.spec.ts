@@ -3,7 +3,7 @@ import type { NextFunction, Response } from 'express';
 import { describe, expect, it, vi } from 'vitest';
 import type { ILogger } from '@memoflow/utils/logger';
 import { createAuthMiddleware, type AuthenticatedRequest } from './auth-middleware';
-import type { RequestContext } from '@memoflow/contracts/shared';
+import type { RequestContext } from '@memoflow/transport-contracts';
 
 function responseStub(): Response {
   const status = vi.fn().mockReturnThis();

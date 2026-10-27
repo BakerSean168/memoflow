@@ -13,8 +13,8 @@ import {
   TaskGoalMeasurementSchema,
   TaskGoalProgressConfigurationSchema,
 } from '@memoflow/task-contracts';
-import type { Result } from '@memoflow/contracts/result';
-import { ok, error, fail } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { ok, error, fail } from '@memoflow/transport-contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
 import {
   mapTaskWriteErrorToResultError,

@@ -15,7 +15,7 @@
  * crash/replay retry carrying the same envelope collapses onto the existing row.
  */
 
-import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
+import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import {
   type NotificationRequestedOutboxInput,
   NotificationRequestedOutboxInputSchema,

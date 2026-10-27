@@ -1,8 +1,8 @@
 import { ReviewWindowResolver } from '../../services/review-window-resolver';
 import { GoalPolicy, GoalVersionConflictError, type IGoalRepository } from '../../../domain';
 import type { CreateGoalReviewReq, GoalMutationReceipt } from '@memoflow/goal-contracts';
-import type { Result } from '@memoflow/contracts/result';
-import { ok, error } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { ok, error } from '@memoflow/transport-contracts/result';
 import { GoalReviewContextBuilder } from '../../services/goal-review-context-builder';
 import { createGoalMutationReceipt } from './goal-mutation-receipt';
 import type { UserTimeContextPort } from '@memoflow/time';

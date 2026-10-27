@@ -5,7 +5,7 @@
 
 import { randomUUID } from 'node:crypto';
 import type { ModuleManifest } from '@memoflow/host-runtime';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type { CreateGoalUseCase } from '../application/use-cases/commands/create-goal.use-case';
 import type {
   CreateWalletAccountUseCase,

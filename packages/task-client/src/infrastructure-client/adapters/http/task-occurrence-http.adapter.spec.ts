@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ok } from '@memoflow/contracts/result';
-import { TaskChannels } from '@memoflow/contracts/electron';
+import { ok } from '@memoflow/transport-contracts/result';
+import { TaskChannels } from '@memoflow/desktop-contracts';
 import { TaskOccurrenceIpcAdapter } from '../ipc/task-occurrence-ipc.adapter';
 import { TaskOccurrenceHttpAdapter } from './task-occurrence-http.adapter';
 

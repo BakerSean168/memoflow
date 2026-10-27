@@ -1,6 +1,6 @@
 import { afterAll, beforeEach, expect, it } from 'vitest';
 import { prisma } from '@memoflow/database';
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { createGoalPrismaAgentMutations } from '@memoflow/goal';
 import { createTaskPrismaAgentMutations } from '@memoflow/task';
 import { createTimeContext } from '@memoflow/time';

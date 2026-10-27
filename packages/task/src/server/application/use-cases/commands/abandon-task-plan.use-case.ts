@@ -1,6 +1,6 @@
 import type { AbandonTaskPlanReq, TaskPlanClientDTO } from '@memoflow/task-contracts';
-import type { Result } from '@memoflow/contracts/result';
-import { error, fail, ok } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { error, fail, ok } from '@memoflow/transport-contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
 import { createTimeFacade, type UserTimeContextPort } from '@memoflow/time';
 import type { ITaskPlanRepository } from '../../../domain/repositories/i-task-plan-repository';

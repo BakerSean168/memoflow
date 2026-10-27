@@ -3,14 +3,14 @@ import {
   RelationChannels,
   type IElectronModule,
   type IElectronModuleContext,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import { withAuthenticatedIdentity } from '@memoflow/host-runtime/electron-ipc';
 import {
   GoalKnowledgeLinkReqSchema,
   GoalKnowledgeListReqSchema,
   GoalsForKnowledgeReqSchema,
 } from '@memoflow/relation-contracts';
-import { fail, ok } from '@memoflow/contracts/result';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 import type { GoalKnowledgeService } from '@memoflow/relation';
 
 export interface GoalKnowledgeElectronModuleOptions {

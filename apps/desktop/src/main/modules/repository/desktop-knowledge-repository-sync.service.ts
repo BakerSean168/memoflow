@@ -4,7 +4,7 @@ import {
   type SyncKnowledgeRepositoryReq,
   type SyncKnowledgeRepositoryRes,
 } from '@memoflow/repository-contracts';
-import { fail, ok, type Result } from '@memoflow/contracts/result';
+import { fail, ok, type Result } from '@memoflow/transport-contracts/result';
 import { LocalVaultRuntimeError, type LocalVaultElectronPort } from '@memoflow/repository/electron';
 import {
   KnowledgeRepositoryGitRuntimeError,

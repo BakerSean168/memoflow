@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { GoalStatus, ReminderTriggerType } from '@memoflow/goal-contracts';
-import { requireYmd } from '@memoflow/contracts/primitives';
+import { requireYmd } from '@memoflow/shared-primitives';
 import {
   NotificationCategory,
   NotificationChannelType,

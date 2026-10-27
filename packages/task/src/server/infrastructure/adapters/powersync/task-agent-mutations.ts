@@ -1,8 +1,8 @@
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
-import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
-import { brandedId, ID_PREFIXES, type IdentityId } from '@memoflow/contracts/primitives';
+import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
+import { brandedId, ID_PREFIXES, type IdentityId } from '@memoflow/shared-primitives';
 import {
   TaskAgentCreateSchema,
   TaskAgentUpdateSchema,
@@ -10,7 +10,7 @@ import {
   TaskAgentReceiptSchema,
   type TaskAgentReceipt,
 } from '@memoflow/task-contracts';
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 import type { UserTimeContextPort } from '@memoflow/time';
 import type { IEventBus } from '@memoflow/patterns';
 import type { TaskGoalMeasurementReadPort } from '../../../application/ports/task-workspace-read.ports';

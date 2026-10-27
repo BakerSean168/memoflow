@@ -7,7 +7,7 @@
 import type { GoalRecord as PrismaGoalRecord } from '@memoflow/database';
 import { GoalRecord } from '../../../../domain';
 import { GoalRecordId, KeyResultId } from '../../../../domain';
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 
 /** Prisma Date/DateTime → Instant (epoch ms). Required fields never null. */
 function requiredInstant(value: Date | string | number | null | undefined): number {

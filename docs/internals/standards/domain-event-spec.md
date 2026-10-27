@@ -23,7 +23,7 @@ tags: [ddd, event, standard]
 2. **Payload** — contracts 中定义的业务数据接口，**只包含业务字段，不包含信封字段**。
 
 ```typescript
-// packages/contracts/src/shared/domain-event.interface.ts
+// packages/shared-primitives/src/domain-event.interface.ts
 export interface IDomainEvent<P = any> {
   eventType: string;
   payload: P;

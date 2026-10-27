@@ -1,5 +1,5 @@
 import type { McpServer } from '@modelcontextprotocol/server';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type { GatewayAssistedPort, GatewayWriteAuthority } from '../ports';
 import { assistedToolDescriptors } from '../assisted-tool-descriptors';
 import type { ReadToolCall } from './register-read-tools';

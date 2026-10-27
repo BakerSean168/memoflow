@@ -1,4 +1,4 @@
-import type { FocusWindowCommand, FocusWindowProjection } from '@memoflow/contracts/electron';
+import type { FocusWindowCommand, FocusWindowProjection } from '@memoflow/desktop-contracts';
 import type {
   ProtocolSessionRuntime,
   ProtocolSessionStore,

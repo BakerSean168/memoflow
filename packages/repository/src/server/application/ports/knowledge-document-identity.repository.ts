@@ -1,4 +1,4 @@
-import type { KnowledgeDocumentId, KnowledgeSpaceId } from '@memoflow/contracts/primitives';
+import type { KnowledgeDocumentId, KnowledgeSpaceId } from '@memoflow/repository-contracts';
 import type { KnowledgeDocumentIdentityOrigin } from '@memoflow/repository-contracts';
 
 export interface KnowledgeDocumentIdentityRecord {

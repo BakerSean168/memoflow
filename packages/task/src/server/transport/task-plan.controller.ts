@@ -10,8 +10,8 @@
  * 3. Returns a Result<T> (transport-agnostic)
  */
 
-import type { Result } from '@memoflow/contracts/result';
-import { isOk, ok } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { isOk, ok } from '@memoflow/transport-contracts/result';
 import type {
   TaskPlanClientDTO,
   CreateTaskPlanRes,
@@ -26,9 +26,9 @@ import type {
   BindToGoalReq,
   AbandonTaskPlanReq,
 } from '@memoflow/task-contracts';
-import type { Context } from '@memoflow/contracts/shared';
+import type { Context } from '@memoflow/transport-contracts';
 import type { GoalId } from '@memoflow/goal-contracts';
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import type { CreateTaskPlanUseCase } from '../application/use-cases/commands/create-task-plan.use-case';
 import type { GetTaskPlanUseCase } from '../application/use-cases/queries/get-task-plan.use-case';
 import type { ListTaskPlansUseCase } from '../application/use-cases/queries/list-task-plans.use-case';

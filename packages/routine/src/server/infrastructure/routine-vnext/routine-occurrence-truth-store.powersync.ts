@@ -5,7 +5,7 @@ import {
   ROUTINE_OCCURRENCE_TRIGGER_KINDS,
 } from '@memoflow/routine-contracts';
 import { randomUUID } from 'node:crypto';
-import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
+import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
 import { asInstant } from '@memoflow/time';
 import type {

@@ -6,7 +6,7 @@ import type {
   GoalWorkspaceTaskPageRequest,
 } from '@memoflow/workspace-contracts';
 import type { TaskGoalContextPage } from '@memoflow/task-contracts';
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 
 /** Read-only ADR-069 Goal Workspace application surface. */
 export interface GoalWorkspaceApplicationPort {

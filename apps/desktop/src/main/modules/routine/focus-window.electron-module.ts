@@ -3,8 +3,8 @@ import {
   FocusWindowCommandSchema,
   RoutineWindowChannels,
   type IElectronModule,
-} from '@memoflow/contracts/electron';
-import { error, ok } from '@memoflow/contracts/result';
+} from '@memoflow/desktop-contracts';
+import { error, ok } from '@memoflow/transport-contracts/result';
 import type { FocusWindowController } from './focus-window-controller';
 
 export function createFocusWindowElectronModule(

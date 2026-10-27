@@ -1,4 +1,4 @@
-import { unwrap } from '@memoflow/contracts/result';
+import { unwrap } from '@memoflow/transport-contracts/result';
 import type { IAINotificationReadPort } from '@memoflow/ai';
 import { projectNotificationAction, projectNotificationInboxPage } from '@memoflow/ai';
 import type { NotificationInboxPort } from '@memoflow/notification';

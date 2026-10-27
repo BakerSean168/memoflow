@@ -37,8 +37,8 @@ import type {
   DesktopNotificationPreferencePatch,
   DesktopUpdateDiagnosticsDTO,
   DesktopUpdateSnapshotDTO,
-} from '@memoflow/contracts/electron';
-import type { Result } from '@memoflow/contracts/result';
+} from '@memoflow/desktop-contracts';
+import type { Result } from '@memoflow/transport-contracts/result';
 import type {
   CompleteKnowledgeRepositoryInstallationReq,
   CompleteKnowledgeRepositoryInstallationRes,

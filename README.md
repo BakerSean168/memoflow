@@ -56,7 +56,7 @@ See [`docs/internals/product/workspace-ui.md`](./docs/internals/product/workspac
 
 | Concern                   | MemoFlow approach                                                                     |
 | ------------------------- | ------------------------------------------------------------------------------------- |
-| Cross-surface consistency | centralized `@memoflow/contracts` + transport parity                                  |
+| Cross-surface consistency | domain-owned `*-contracts` + platform contracts + transport parity                    |
 | AI runtime                | TypeScript + Mastra, hosted inside the product runtime                                |
 | Durable AI workflows      | typed workflow state, recovery/cancel paths, product-owned projections                |
 | Modular business domains  | Goal / Task / Schedule / Reminder / Notification / Repository packages                |

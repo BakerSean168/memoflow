@@ -1,5 +1,5 @@
 import type { AssistantRuntimeEvent } from '@memoflow/ai-contracts';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type { AIExecutionRecordInput } from '../../application/ports';
 import { estimateAIExecutionCost } from '../../application/use-cases/commands/ai-observability';
 import type { ResolvedAIModel } from '../models';

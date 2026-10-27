@@ -86,7 +86,7 @@ updated: 2026-09-09T00:30:00+08:00
 ### 3.4 类型放置与依赖
 
 ```text
-@memoflow/contracts/primitives
+@memoflow/shared-primitives
   - 定义 brand 类型与（可选）zod 扩展
   - 不依赖 app-vue / 业务实现
 
@@ -305,7 +305,7 @@ packages/time/                          @memoflow/time
     index.ts
     free/format-helpers.ts              仅纯字符串/Ymd presentation helper
   README.md
-packages/contracts/src/primitives/
+packages/shared-primitives/src/
   instant.ts / transfer-date.ts         brand ≡
   ymd.ts / hm.ts
 

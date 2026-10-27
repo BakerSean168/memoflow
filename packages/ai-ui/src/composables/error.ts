@@ -3,7 +3,7 @@ import {
   type AIWorkflowExecutionFailure,
   type AIWorkflowTerminalFailure,
 } from '@memoflow/ai-contracts';
-import { extractStructuredResultError } from '@memoflow/contracts/result';
+import { extractStructuredResultError } from '@memoflow/transport-contracts/result';
 import { translateResultError } from '../ai-ui-host';
 import type { LocalAgentExecutionFailure } from '@memoflow/ai-contracts';
 import type { ChatItem } from './types';

@@ -15,7 +15,7 @@ import {
   errorCodeToHttpStatus,
   extractStructuredResultError,
   publicFailureToHttpStatus,
-} from '@memoflow/contracts/result';
+} from '@memoflow/transport-contracts/result';
 import { createApiResponseBuilder } from '../http/response-builder.js';
 import type { RequestContextCarrierRequest } from '../http/middlewares/request-context.middleware.js';
 import { CorsRejectionError } from './global';

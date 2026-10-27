@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron';
-import { ok, fail } from '@memoflow/contracts/result';
+import { ok, fail } from '@memoflow/transport-contracts/result';
 import {
   ProfileAccessChannels,
   type DesktopAccessSnapshot,
@@ -9,7 +9,7 @@ import {
   CreateGuestProfileRequestSchema,
   RenameProfileRequestSchema,
   ProfilePinSchema,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import type { ProfileRegistry } from './profile-registry';
 import type { DesktopProfileRuntimeManager } from './desktop-profile-runtime-manager';
 import type { DesktopCloudConnectionManager } from './desktop-cloud-connection-manager';

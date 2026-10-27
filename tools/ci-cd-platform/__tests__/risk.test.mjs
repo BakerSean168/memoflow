@@ -236,9 +236,9 @@ test('classifyCapabilities maps stories to componentBrowser only', () => {
 
 test('classifyCapabilities maps contract package changes to contract', () => {
   const caps = classifyCapabilities({
-    changedFiles: ['packages/contracts/src/modules/goal.ts', 'docs/guide.md'],
+    changedFiles: ['packages/goal-contracts/src/api/goal-crud.dto.ts', 'docs/guide.md'],
     scope: {
-      unit: ['contracts'],
+      unit: ['goal-contracts'],
       integration: [],
       boundary: [],
       coverage: [],
@@ -246,8 +246,8 @@ test('classifyCapabilities maps contract package changes to contract', () => {
       webFlowFiles: [],
     },
   });
-  assert.deepEqual(caps.contract.files, ['packages/contracts/src/modules/goal.ts']);
-  assert.deepEqual(caps.unit.projects, ['contracts']);
+  assert.deepEqual(caps.contract.files, ['packages/goal-contracts/src/api/goal-crud.dto.ts']);
+  assert.deepEqual(caps.unit.projects, ['goal-contracts']);
   assert.ok(caps.fmt.files.includes('docs/guide.md'));
   assert.equal(caps.lint.files.includes('docs/guide.md'), false);
 });

@@ -12,7 +12,7 @@ import {
   type DesktopUpdateOutcomeDTO,
   type DesktopUpdateSnapshotDTO,
   type DesktopUpdateStateDTO,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import {
   completeDesktopUpdateCheckWithRelease,
   completeDesktopUpdateCheckWithoutRelease,

@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { AIChannels } from '@memoflow/contracts/electron';
+import { AIChannels } from '@memoflow/desktop-contracts';
 import type { LocalToolContext } from '@memoflow/ai';
 
 const electronMock = vi.hoisted(() => ({

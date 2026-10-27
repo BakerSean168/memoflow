@@ -146,7 +146,6 @@ function isElectronMainExternal(id: string): boolean {
 // Workspace packages to exclude from optimizeDeps
 const workspacePkgs = [
   '@memoflow/utils',
-  '@memoflow/contracts',
   '@memoflow/app-vue',
   '@memoflow/goal-ui',
   '@memoflow/notification-ui',

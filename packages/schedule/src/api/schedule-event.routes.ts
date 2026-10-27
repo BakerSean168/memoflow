@@ -30,7 +30,7 @@ import {
   CreateScheduleResponseSchema,
   ResolveConflictResponseSchema,
 } from '@memoflow/schedule-contracts';
-import { brandedId } from '@memoflow/contracts/primitives';
+import { brandedId } from '@memoflow/shared-primitives';
 import type { ScheduleId } from '@memoflow/schedule-contracts';
 import type { ScheduleEventApplicationPort } from '../server/application';
 import { ScheduleEventController } from '../server/transport/schedule-event.controller';

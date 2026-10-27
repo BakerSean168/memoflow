@@ -7,7 +7,7 @@ import {
   anAllDayTiming,
   TASK_TEST_TIME_CONTEXT,
 } from '../../../../testing';
-import { IdentityId } from '@memoflow/domain-shared';
+import { IdentityId } from '@memoflow/utils/domain';
 import { ImportanceLevel } from '@memoflow/shared-primitives';
 import {
   TaskPlanScheduleKind,

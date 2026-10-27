@@ -1,4 +1,4 @@
-import type { DesktopUpdateChannelDTO } from '@memoflow/contracts/electron';
+import type { DesktopUpdateChannelDTO } from '@memoflow/desktop-contracts';
 import releaseConfig from '../../../../../desktop-update-release.json';
 import type { DesktopUpdateFeed } from './desktop-update-engine';
 

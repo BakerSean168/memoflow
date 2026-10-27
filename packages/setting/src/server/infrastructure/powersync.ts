@@ -1,5 +1,5 @@
 /** Canonical Setting PowerSync composition helpers. */
-import type { IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
+import type { IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import type { IUserPreferenceRepository } from '../preferences';
 import { createSettingModule, type SettingModuleInstance } from './setting.module';
 import { UserPreferencePowerSyncRepository } from './adapters/powersync/user-preference-powersync.repository';

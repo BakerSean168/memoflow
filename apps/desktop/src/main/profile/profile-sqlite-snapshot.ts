@@ -1,5 +1,5 @@
 import Database from 'better-sqlite3';
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 
 function bind(parameters: unknown[] = []): (string | number | bigint | Buffer | null)[] {
   return parameters.map((value) => {

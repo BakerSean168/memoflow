@@ -10,9 +10,9 @@ Accepted — Amended by ADR-049
 
 ## Implementation note (Residual 615 / Residual 617 / 2026-07-22)
 
-- `@memoflow/contracts/response` is removed (stage-6).
+- `@memoflow/transport-contracts/result` is removed (stage-6).
 - Zero-consumer `ActionResult` / `actionOk` dual-track helpers are removed from
-  `@memoflow/contracts/result` (Residual 615).
+  `@memoflow/transport-contracts/result` (Residual 615).
 - Canonical surface: `Result<T>` + `IpcResult<T>` + `HttpResponse<T>` only.
 
 ## 2026-08-17 amendment
@@ -35,12 +35,12 @@ This duality causes:
 
 ## Decision
 
-We will **unify all operation results** using the **Result Pattern** defined in `@memoflow/contracts/result`.
+We will **unify all operation results** using the **Result Pattern** defined in `@memoflow/transport-contracts/result`.
 
 ### 1. The Single Source of Truth
 
-- **Module**: `@memoflow/contracts/result` is the **ONLY** legal way to return outcomes from Application-facing boundaries and external APIs.
-- **Legacy**: `@memoflow/contracts/response` is **removed** (stage-6); do not reintroduce.
+- **Module**: `@memoflow/transport-contracts/result` is the **ONLY** legal way to return outcomes from Application-facing boundaries and external APIs.
+- **Legacy**: `@memoflow/transport-contracts/result` is **removed** (stage-6); do not reintroduce.
 
 ### 2. Standard Schema
 

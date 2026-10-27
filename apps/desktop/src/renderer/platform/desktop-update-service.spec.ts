@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { DesktopUpdateChannels, type DesktopUpdateSnapshotDTO } from '@memoflow/contracts/electron';
-import { ok, ResultCode } from '@memoflow/contracts/result';
+import { DesktopUpdateChannels, type DesktopUpdateSnapshotDTO } from '@memoflow/desktop-contracts';
+import { ok, ResultCode } from '@memoflow/transport-contracts/result';
 import type { ElectronBridge, IResultIpcClient } from '@memoflow/ipc-client';
 import { createDesktopUpdateService } from './desktop-update-service';
 

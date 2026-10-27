@@ -41,13 +41,8 @@
       "@memoflow/ui-vue-shadcn/composables/*": [
         "../../packages/ui-vue-shadcn/dist/composables/*.d.ts"
       ],
-      "@memoflow/contracts": ["../../packages/contracts/dist/index.d.ts"],
       "@memoflow/notification-contracts": ["../../packages/notification-contracts/dist/index.d.ts"],
       "@memoflow/notification-contracts/*": ["../../packages/notification-contracts/dist/*.d.ts"],
-      "@memoflow/contracts/*": [
-        "../../packages/contracts/dist/modules/*/index.d.ts",
-        "../../packages/contracts/dist/*/index.d.ts"
-      ],
       "@memoflow/notification/commands": ["../../packages/notification/dist/commands/index.d.ts"],
       "@memoflow/goal/analytics": ["../../packages/goal/dist/analytics/index.d.ts"],
       "@memoflow/goal/events": ["../../packages/goal/dist/events/index.d.ts"],

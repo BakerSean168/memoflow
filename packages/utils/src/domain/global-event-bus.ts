@@ -1,5 +1,5 @@
 import { CrossPlatformEventBus } from './cross-platform-event-bus';
-import type { AppEventRegistry } from '@memoflow/contracts/shared';
+import type { AppEventRegistry } from '@memoflow/host-runtime';
 
 // ===================== Runtime-local 事件总线 =====================
 

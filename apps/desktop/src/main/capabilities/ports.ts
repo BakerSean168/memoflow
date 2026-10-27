@@ -143,11 +143,11 @@ export interface AutoLaunchPort {
  * notification was rendered; callers that need the raw instance cast it.
  */
 export interface NotificationPort {
-  getDevicePreference(): import('@memoflow/contracts/electron').DesktopNotificationPreference;
+  getDevicePreference(): import('@memoflow/desktop-contracts').DesktopNotificationPreference;
   updateDevicePreference(
-    patch: import('@memoflow/contracts/electron').DesktopNotificationPreferencePatch,
-  ): import('@memoflow/contracts/electron').DesktopNotificationPreference;
-  resetDevicePreference(): import('@memoflow/contracts/electron').DesktopNotificationPreference;
+    patch: import('@memoflow/desktop-contracts').DesktopNotificationPreferencePatch,
+  ): import('@memoflow/desktop-contracts').DesktopNotificationPreference;
+  resetDevicePreference(): import('@memoflow/desktop-contracts').DesktopNotificationPreference;
 
   // ===== Do Not Disturb =====
   enableDND(): void;

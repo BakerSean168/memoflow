@@ -1,4 +1,4 @@
-import { createIdType } from '@memoflow/utils/domain';
+import { createIdType } from './create-id-type';
 
 import type { IdentityId as IIdentityId } from '@memoflow/shared-primitives';
 

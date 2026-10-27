@@ -10,7 +10,7 @@
  * `KnowledgeRepositoryConnectionService` 类，使深层模块不通过类型声明依赖具体服务类型。
  */
 
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 import type {
   CompleteKnowledgeRepositoryInstallationReq,
   CompleteKnowledgeRepositoryInstallationRes,

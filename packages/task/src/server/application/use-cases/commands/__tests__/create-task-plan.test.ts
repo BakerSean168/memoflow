@@ -1,4 +1,4 @@
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import { KeyResultCalculationMethod } from '@memoflow/goal-contracts';
 import { TaskGoalLinkSchema } from '@memoflow/task-contracts';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';

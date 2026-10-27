@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import { DeviceAuthCoordinator } from './device-auth-coordinator';
 
 vi.mock('../utils/api-config', () => ({

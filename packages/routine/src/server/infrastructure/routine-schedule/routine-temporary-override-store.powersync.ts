@@ -1,4 +1,4 @@
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import type { RoutineTemporaryOverride } from '../../domain/routine';
 import type { RoutineTemporaryOverrideStore } from '../../domain/ports/routine-temporary-override-store.port';
 import {

@@ -1,0 +1,7 @@
+{
+  "extends": "../../tsconfig.workspace-src.json",
+  "compilerOptions": {
+    // Playwright applies paths to .mts importers only when allowJs is enabled.
+    "allowJs": true
+  }
+}

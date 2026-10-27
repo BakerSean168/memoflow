@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createMockGoalRecord } from '@memoflow/goal-contracts/test-support/goal.mock';
 import { GoalRecordClientDTOSchema } from '@memoflow/goal-contracts';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import { GoalHttpAdapter } from './http/goal-http.adapter';
 import { GoalIpcAdapter } from './ipc/goal-ipc.adapter';
 import { createGoalClientService } from '../../application-client';

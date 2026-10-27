@@ -5,7 +5,7 @@
  */
 
 import type { Request } from 'express';
-import type { ClientInfo } from '@memoflow/contracts/shared';
+import type { ClientInfo } from '@memoflow/transport-contracts';
 import crypto from 'crypto';
 
 /**

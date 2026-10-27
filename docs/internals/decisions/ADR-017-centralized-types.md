@@ -6,7 +6,7 @@ Superseded by ADR-049
 
 ## Supersession note
 
-Absolute type centralization is no longer the target architecture. ADR-049 adopts boundary-first contracts: stable wire/public/durable types remain in `@memoflow/contracts`, while domain models and implementation-specific types remain in the owning feature.
+Absolute type centralization is no longer the target architecture. ADR-049 adopts boundary-first contracts: stable wire/public/durable types remain in `旧聚合契约包（已退役）`, while domain models and implementation-specific types remain in the owning feature.
 
 ## Context
 
@@ -18,7 +18,7 @@ We enforce **Absolute Type Centralization**.
 
 ### The Rule
 
-**All public data types, business entities, DTOs, and shared enumerations MUST reside in `@memoflow/contracts`.**
+**All public data types, business entities, DTOs, and shared enumerations MUST reside in `旧聚合契约包（已退役）`.**
 
 ### Scope
 
@@ -36,7 +36,7 @@ We enforce **Absolute Type Centralization**.
 ### Implementation
 
 - `packages/contracts` becomes the **Type Registry** of the system.
-- Other packages import types: `import type { Task } from '@memoflow/task-contracts';` (superseded as-built: the Task contract tree left `@memoflow/contracts` in Issue #630 §4.2).
+- Other packages import types: `import type { Task } from '@memoflow/task-contracts';` (superseded as-built: the Task contract tree left `旧聚合契约包（已退役）` in Issue #630 §4.2).
 - It is **FORBIDDEN** to `export interface` a domain object from `packages/domain-*`. Domain classes should `implements` the interface from Contracts.
 
 ## Consequences

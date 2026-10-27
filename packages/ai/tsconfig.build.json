@@ -13,13 +13,6 @@
       "@memoflow/database": ["../database/dist/index.d.ts"],
       "@memoflow/database/prisma": ["../database/dist/generated/prisma/client.d.ts"],
       "@memoflow/http-client": ["../http-client/dist/index.d.ts"],
-      "@memoflow/domain-shared": ["../domain-shared/dist/index.d.ts"],
-      "@memoflow/domain-shared/shared": ["../domain-shared/dist/shared/index.d.ts"],
-      "@memoflow/contracts": ["../contracts/dist/index.d.ts"],
-      "@memoflow/contracts/*": [
-        "../contracts/dist/modules/*/index.d.ts",
-        "../contracts/dist/*/index.d.ts"
-      ],
       "@memoflow/transport-contracts": ["../transport-contracts/dist/index.d.ts"],
       "@memoflow/transport-contracts/*": [
         "../transport-contracts/dist/*/index.d.ts",

@@ -1,4 +1,4 @@
-import { extractStructuredResultError } from '@memoflow/contracts/result';
+import { extractStructuredResultError } from '@memoflow/transport-contracts/result';
 import type {
   AssistantRuntimeEvent,
   AssistantRuntimeSelectedEntity,

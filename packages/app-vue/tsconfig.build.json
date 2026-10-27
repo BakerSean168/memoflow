@@ -22,11 +22,6 @@
       "@memoflow/repository-ui": ["../repository-ui/dist/index.d.ts"],
       "@memoflow/repository-contracts": ["../repository-contracts/dist/index.d.ts"],
       "@memoflow/repository-contracts/*": ["../repository-contracts/dist/*.d.ts"],
-      "@memoflow/contracts": ["../contracts/dist/index.d.ts"],
-      "@memoflow/contracts/*": [
-        "../contracts/dist/modules/*/index.d.ts",
-        "../contracts/dist/*/index.d.ts"
-      ],
       "@memoflow/assets": ["../assets/dist/index.d.ts"],
       "@memoflow/assets/*": ["../assets/dist/*/index.d.ts"],
       "@memoflow/ui-vue-shadcn": ["../ui-vue-shadcn/dist/index.d.ts"],

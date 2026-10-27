@@ -27,7 +27,7 @@ We enforce strict TypeScript usage to maximize safety and compiler help.
 
 - Use `import type { ... }` for type-only imports to aid bundlers/transpilers.
   ```typescript
-  import type { Task } from '@memoflow/contracts';
+  import type { Task } from '@memoflow/task-contracts';
   ```
 
 ### 3. No Inline Types

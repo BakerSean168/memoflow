@@ -2,7 +2,7 @@ import {
   DesktopUpdateDiagnosticsSchema,
   type DesktopUpdateDiagnosticsDTO,
   type DesktopUpdateSnapshotDTO,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import { createLogger } from '@memoflow/utils/logger';
 import type { DesktopUpdateDiagnosticsObservation } from './desktop-update-coordinator';
 import type { DesktopUpdateInstallReceiptStore } from './desktop-update-install-receipt';

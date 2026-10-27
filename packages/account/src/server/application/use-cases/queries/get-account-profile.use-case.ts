@@ -2,9 +2,9 @@
  * Get Account Profile Use Case
  */
 
-import type { Result } from '@memoflow/contracts/result';
-import { ok } from '@memoflow/contracts/result';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type { IAccountRepository } from '../../../domain';
 import type { AccountClientDTO } from '@memoflow/account-contracts';
 

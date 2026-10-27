@@ -3,8 +3,8 @@ import {
   InterventionWindowCommandSchema,
   RoutineWindowChannels,
   type IElectronModule,
-} from '@memoflow/contracts/electron';
-import { error, ok } from '@memoflow/contracts/result';
+} from '@memoflow/desktop-contracts';
+import { error, ok } from '@memoflow/transport-contracts/result';
 import type { InterventionWindowController } from './intervention-window-controller';
 
 export function createInterventionWindowElectronModule(

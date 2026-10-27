@@ -3,10 +3,10 @@ import {
   LabelChannels,
   type IElectronModule,
   type IElectronModuleContext,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import { withAuthenticatedIdentity } from '@memoflow/host-runtime/electron-ipc';
 import { CreateLabelReqSchema, ListLabelsReqSchema } from '@memoflow/label-contracts';
-import { fail, ok } from '@memoflow/contracts/result';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 import type { LabelService } from '@memoflow/label';
 import { toLabelClientDTO } from '@memoflow/label/client';
 

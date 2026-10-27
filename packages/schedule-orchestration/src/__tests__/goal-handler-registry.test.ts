@@ -6,7 +6,7 @@ import {
   GOAL_REMINDER_NOTIFICATION_SOURCE,
 } from '@memoflow/goal/schedule-execution';
 import { GOAL_REMINDER_PAYLOAD_VERSION } from '@memoflow/goal/schedule-projection';
-import { requireYmd } from '@memoflow/contracts/primitives';
+import { requireYmd } from '@memoflow/shared-primitives';
 import { GoalStatus, ReminderTriggerType } from '@memoflow/goal-contracts';
 import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
 import type { BusinessOperationReceipt } from '@memoflow/reliable-messaging-contracts';

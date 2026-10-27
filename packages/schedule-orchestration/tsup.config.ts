@@ -12,11 +12,6 @@ export default {
   tsconfig: 'tsconfig.build.json',
   dts: createLocalOnlyDtsPaths(
     {
-      '@memoflow/contracts': ['../../packages/contracts/src/index.ts'],
-      '@memoflow/contracts/*': [
-        '../../packages/contracts/src/modules/*/index.ts',
-        '../../packages/contracts/src/*/index.ts',
-      ],
       '@memoflow/goal': ['../../packages/goal/dist/index.d.ts'],
       '@memoflow/goal/schedule-execution': [
         '../../packages/goal/dist/schedule-execution/index.d.ts',

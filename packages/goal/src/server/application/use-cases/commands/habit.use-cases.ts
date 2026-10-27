@@ -1,5 +1,5 @@
-import type { Result } from '@memoflow/contracts/result';
-import { error, ok } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { error, ok } from '@memoflow/transport-contracts/result';
 import { Habit, type HabitFrequency, type HabitState } from '../../../domain/habit/habit';
 import type { TimeContext, UserTimeContextPort } from '@memoflow/time';
 

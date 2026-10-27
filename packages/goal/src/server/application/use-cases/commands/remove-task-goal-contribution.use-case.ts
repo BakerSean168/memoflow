@@ -1,6 +1,6 @@
 import type { GoalRecordSourceTypeValue } from '@memoflow/goal-contracts';
-import type { Result } from '@memoflow/contracts/result';
-import { error, ok } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { error, ok } from '@memoflow/transport-contracts/result';
 import type { IGoalRecordRepository, IGoalRepository } from '../../../domain';
 import { GoalVersionConflictError, KeyResultProgress } from '../../../domain';
 import { type GoalWriteTransactionRunner } from './goal-write-support';

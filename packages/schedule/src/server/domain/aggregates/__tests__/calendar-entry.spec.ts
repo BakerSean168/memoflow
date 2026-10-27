@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { requireYmd } from '@memoflow/contracts/primitives';
-import { IdentityId } from '@memoflow/domain-shared';
+import { requireYmd } from '@memoflow/shared-primitives';
+import { IdentityId } from '@memoflow/utils/domain';
 import { CalendarEntry } from '../calendar-entry';
 import { ScheduleId } from '../../value-objects/schedule-id';
 

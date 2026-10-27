@@ -3,7 +3,7 @@ import { BrowserWindow, screen } from 'electron';
 import {
   RoutineWindowChannels,
   type InterventionWindowProjection,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import { ElectronInterventionWindowHost } from './electron-intervention-window.host';
 
 const projection: InterventionWindowProjection = {

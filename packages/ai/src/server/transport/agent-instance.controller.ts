@@ -7,7 +7,7 @@ import {
   type AgentInstance,
   type AgentRegistrySnapshot,
 } from '@memoflow/ai-contracts';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type { AgentInstanceRegistry } from '../application/agent-instance/agent-instance.registry';
 import { AgentRegistryError } from '../application/agent-instance/agent-instance.repository';
 

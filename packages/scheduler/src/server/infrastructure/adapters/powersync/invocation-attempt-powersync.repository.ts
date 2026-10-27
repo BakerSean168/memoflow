@@ -1,5 +1,5 @@
 import type { InvocationAttempt } from '@memoflow/schedule-contracts';
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import type { IInvocationAttemptRepository } from '../../../domain/repositories/i-invocation-attempt-repository';
 import {
   PowerSyncInvocationAttemptMapper,

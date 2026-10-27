@@ -3,9 +3,9 @@ import type {
   KeyResultReference,
   KeyResultClientDTO,
 } from '@memoflow/goal-contracts';
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 import type { TaskKnowledgeEdgeListReq, TaskKnowledgeEdgePage } from '@memoflow/relation-contracts';
-import type { KnowledgeDocumentId, KnowledgeSpaceId } from '@memoflow/contracts/primitives';
+import type { KnowledgeDocumentId, KnowledgeSpaceId } from '@memoflow/repository-contracts';
 
 export interface TaskGoalMeasurementReadPort {
   getKeyResultMeasurementContext(

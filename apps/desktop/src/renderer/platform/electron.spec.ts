@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createTestPinia } from '@memoflow/test-utils';
-import { RendererEventChannels } from '@memoflow/contracts/electron';
+import { RendererEventChannels } from '@memoflow/desktop-contracts';
 import type { ServerStateInvalidation } from '@memoflow/app-vue';
 import { initElectronFeatures } from './electron';
 

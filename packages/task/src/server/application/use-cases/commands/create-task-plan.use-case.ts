@@ -18,8 +18,8 @@ import type { CreateTaskPlanInput, CreateTaskPlanRes } from '@memoflow/task-cont
 import { TaskPlanStatus } from '@memoflow/task-contracts';
 import { createLogger } from '@memoflow/utils/logger';
 import { createTimeFacade, type TimeContext, type UserTimeContextPort } from '@memoflow/time';
-import type { Result } from '@memoflow/contracts/result';
-import { error, fail, ok } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { error, fail, ok } from '@memoflow/transport-contracts/result';
 import {
   mapTaskWriteErrorToResultError,
   type TaskWriteTransactionRunner,

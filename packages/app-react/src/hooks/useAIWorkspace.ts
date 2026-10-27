@@ -7,7 +7,7 @@ import {
   type AssistantRuntimeHistoryView,
   type AssistantRuntimeMessageView,
 } from '@memoflow/ai-contracts';
-import { unwrap } from '@memoflow/contracts/result';
+import { unwrap } from '@memoflow/transport-contracts/result';
 import { presentErrorMessage } from '@memoflow/http-client';
 
 import { useAppSession } from './useAppSession';

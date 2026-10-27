@@ -1,5 +1,5 @@
 import type { PrismaClient } from '@memoflow/database';
-import type { IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
+import type { IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 
 export function createScheduleLeasePrismaRepository(
   db: PrismaClient,

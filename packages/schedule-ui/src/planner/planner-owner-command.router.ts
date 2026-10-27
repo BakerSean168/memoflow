@@ -1,6 +1,6 @@
 import type { ScheduleClientPort } from '@memoflow/schedule-client';
 import { presentErrorMessage } from '@memoflow/http-client';
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 import type { CalendarEventProjection, PlannerEventRange } from '@memoflow/schedule-contracts';
 import type { RescheduleTaskInput } from '@memoflow/task-contracts';
 import { asHm, type Hm, type Instant, type Ymd } from '@memoflow/time';

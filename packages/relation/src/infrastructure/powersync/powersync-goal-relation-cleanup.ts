@@ -1,4 +1,4 @@
-import type { IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
+import type { IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import type { GoalRelationCleanupCapability } from '../../application/goal-relation-cleanup';
 
 /** Transaction-scoped Shared Relation cleanup used by Goal deletion orchestration. */

@@ -1,4 +1,4 @@
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type { RecurrenceFrequency, RecurrenceWeekday } from '@memoflow/time';
 
 export type AIProtocolMethodId = '50-10-protocol' | 'pomodoro';

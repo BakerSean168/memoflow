@@ -1,4 +1,4 @@
-import type { IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
+import type { IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import { GetGoalUseCase } from '../../../application/use-cases/queries/get-goal.use-case';
 import { GoalPowerSyncRepository } from './goal-powersync.repository';
 

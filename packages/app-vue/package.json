@@ -81,7 +81,6 @@
     "highlight.js": "11.12.0",
     "@memoflow/ai": "workspace:*",
     "@memoflow/repository-client": "workspace:*",
-    "@memoflow/contracts": "workspace:*",
     "@memoflow/ai-contracts": "workspace:*",
     "@internationalized/date": "^3.12.4",
     "@memoflow/setting-client": "workspace:*",
@@ -107,7 +106,8 @@
     "@memoflow/schedule-client": "workspace:*",
     "@lezer/highlight": "1.2.4",
     "@fullcalendar/vue3": "7.1.0",
-    "@memoflow/notification-ui": "workspace:*"
+    "@memoflow/notification-ui": "workspace:*",
+    "@memoflow/transport-contracts": "workspace:*"
   },
   "name": "@memoflow/app-vue",
   "peerDependencies": {

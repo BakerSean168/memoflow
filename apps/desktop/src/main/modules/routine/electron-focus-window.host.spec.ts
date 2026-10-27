@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { BrowserWindow } from 'electron';
-import { RoutineWindowChannels, type FocusWindowProjection } from '@memoflow/contracts/electron';
+import { RoutineWindowChannels, type FocusWindowProjection } from '@memoflow/desktop-contracts';
 import { ElectronFocusWindowHost } from './electron-focus-window.host';
 import { ElectronFocusTaskbarAdapter } from './focus-window-taskbar.adapter';
 

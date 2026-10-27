@@ -83,8 +83,8 @@ import {
   RoutineWindowChannels,
   type FocusWindowCommand,
   type FocusWindowProjection,
-} from '@memoflow/contracts/electron';
-import type { Result } from '@memoflow/contracts/result';
+} from '@memoflow/desktop-contracts';
+import type { Result } from '@memoflow/transport-contracts/result';
 
 const projection = ref<FocusWindowProjection | null>(null);
 const collapsed = ref(false);

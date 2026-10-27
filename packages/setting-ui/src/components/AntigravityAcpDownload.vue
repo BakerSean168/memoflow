@@ -3,7 +3,7 @@ import { inject, ref } from 'vue';
 import { Download, ExternalLink } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
 import { Button } from '@memoflow/ui-vue-shadcn';
-import { SystemChannels } from '@memoflow/contracts/electron';
+import { SystemChannels } from '@memoflow/desktop-contracts';
 import { settingUiHost } from '../setting-ui-host';
 
 /**

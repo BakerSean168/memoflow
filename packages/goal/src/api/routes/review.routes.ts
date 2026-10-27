@@ -21,7 +21,7 @@ import {
   UpdateReviewInvocationSchema,
   DeleteReviewInvocationSchema,
 } from '@memoflow/goal-contracts';
-import { brandedId } from '@memoflow/contracts/primitives';
+import { brandedId } from '@memoflow/shared-primitives';
 import type { GoalId } from '@memoflow/goal-contracts';
 import type { GoalController } from '../../server/transport/goal.controller';
 

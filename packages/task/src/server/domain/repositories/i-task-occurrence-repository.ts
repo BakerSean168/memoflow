@@ -10,7 +10,7 @@
 
 import type { TaskOccurrence } from '../aggregates';
 import type { TaskOccurrenceStatus } from '@memoflow/task-contracts';
-import type { Ymd } from '@memoflow/contracts/primitives';
+import type { Ymd } from '@memoflow/shared-primitives';
 
 export interface TaskPlanStatsWindow {
   /** Inclusive start of the Product Time calendar-date window. */

@@ -4,7 +4,7 @@
  * 核心错误码定义，被其他 result 模块文件使用
  * 此文件不应导入任何其他 result 模块文件，以避免循环依赖
  *
- * @module @memoflow/contracts/result/codes
+ * @module @memoflow/transport-contracts/result/codes
  */
 
 /**

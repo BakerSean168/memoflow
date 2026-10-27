@@ -4,7 +4,7 @@ import {
   createCorrelationId,
   createMessageId,
   type MessageId,
-} from '@memoflow/contracts/primitives/command';
+} from '@memoflow/shared-primitives/command';
 
 /**
  * Prisma OutboxWriter adapter（R1-2 接线示范）。

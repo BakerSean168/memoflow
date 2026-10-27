@@ -30,7 +30,7 @@ import {
   PLANNER_OWNER_STALE_TIME_MS,
   SCHEDULE_CALENDAR_STALE_TIME_MS,
 } from '@schedule-ui-test-host/platform/server-state/query-policy';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import { fetchRoutineUpcomingCached } from '@memoflow/routine-ui/composables/routineUpcomingCache';
 import { usePanelWidth } from '@schedule-ui-test-host/layouts/shell/usePanelWidth';
 import { usePanelSurfaceStatus } from '@schedule-ui-test-host/layouts/shell/usePanelSurfaceStatus';

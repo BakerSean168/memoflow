@@ -1,4 +1,4 @@
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import type { ActiveUsageRoutineRegistration } from '../../runtime/active-usage';
 import type { ElapsedRoutineRegistration } from '../../runtime/elapsed';
 import { asInstant } from '@memoflow/time';

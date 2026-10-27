@@ -2,7 +2,7 @@ import { randomBytes, randomUUID } from 'node:crypto';
 import { createServer, type Server } from 'node:http';
 import { createMcpHandler, McpServer } from '@modelcontextprotocol/server';
 import { toNodeHandler } from '@modelcontextprotocol/node';
-import type { ExecutionContext } from '@memoflow/contracts/shared';
+import type { ExecutionContext } from '@memoflow/transport-contracts';
 import type { IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import type { LocalAgentRepository } from '../infrastructure/adapters/powersync/local-agent.repository';
 import type { LocalAgentToolBridgePort, LocalAgentToolGrant } from './local-agent-runtime';

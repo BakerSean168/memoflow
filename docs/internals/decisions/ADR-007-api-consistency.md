@@ -47,7 +47,7 @@ Desktop 的 `GoalApplicationService` 缺少 Review 相关方法：
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    @memoflow/contracts                           │
+│                    旧聚合契约包（已退役）                           │
 │  ┌───────────────┐  ┌──────────────────┐  ┌─────────────────┐   │
 │  │    Enums      │  │      DTOs        │  │    Requests     │   │
 │  │  (TaskType)   │  │ (GoalClientDTO)  │  │ (CreateGoal...) │   │
@@ -154,7 +154,7 @@ export interface ReminderTemplateFormData {
 import type {
   CreateReminderTemplateRequest,
   UpdateReminderTemplateRequest,
-} from '@memoflow/contracts/reminder';
+} from '@memoflow/routine-contracts';
 
 interface ReminderTemplateDialogProps {
   onSave: (data: CreateReminderTemplateRequest, isEdit: boolean) => Promise<void>;
@@ -194,7 +194,7 @@ function ReminderTemplateDialog({ onSave }: ReminderTemplateDialogProps) {
 #### 2. 在 contracts 包中定义完整的 API Client 接口
 
 ```typescript
-// packages/contracts/src/modules/goal/api-client.interface.ts
+// packages/goal-contracts/src/api-client.interface.ts
 export interface IGoalApiClient {
   // 明确定义所有方法签名
   createGoal(request: CreateGoalRequest): Promise<GoalClientDTO>;
