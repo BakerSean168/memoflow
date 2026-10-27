@@ -660,6 +660,9 @@ importers:
       '@memoflow/setting':
         specifier: workspace:*
         version: link:../../packages/setting
+      '@memoflow/setting-client':
+        specifier: workspace:*
+        version: link:../../packages/setting-client
       '@memoflow/setting-contracts':
         specifier: workspace:*
         version: link:../../packages/setting-contracts
@@ -1119,6 +1122,9 @@ importers:
       '@memoflow/setting':
         specifier: workspace:*
         version: link:../../packages/setting
+      '@memoflow/setting-client':
+        specifier: workspace:*
+        version: link:../../packages/setting-client
       '@memoflow/setting-contracts':
         specifier: workspace:*
         version: link:../../packages/setting-contracts
@@ -1395,6 +1401,9 @@ importers:
       '@memoflow/setting':
         specifier: workspace:*
         version: link:../setting
+      '@memoflow/setting-client':
+        specifier: workspace:*
+        version: link:../setting-client
       '@memoflow/setting-contracts':
         specifier: workspace:*
         version: link:../setting-contracts
@@ -1537,6 +1546,9 @@ importers:
       '@memoflow/setting':
         specifier: workspace:*
         version: link:../setting
+      '@memoflow/setting-client':
+        specifier: workspace:*
+        version: link:../setting-client
       '@memoflow/setting-contracts':
         specifier: workspace:*
         version: link:../setting-contracts
@@ -2753,12 +2765,6 @@ importers:
       '@memoflow/host-runtime':
         specifier: workspace:*
         version: link:../host-runtime
-      '@memoflow/http-client':
-        specifier: workspace:*
-        version: link:../http-client
-      '@memoflow/ipc-client':
-        specifier: workspace:*
-        version: link:../ipc-client
       '@memoflow/setting-contracts':
         specifier: workspace:*
         version: link:../setting-contracts
@@ -2781,6 +2787,24 @@ importers:
       '@types/express':
         specifier: ^5.0.0
         version: 5.0.6
+
+  packages/setting-client:
+    dependencies:
+      '@memoflow/desktop-contracts':
+        specifier: workspace:*
+        version: link:../desktop-contracts
+      '@memoflow/http-client':
+        specifier: workspace:*
+        version: link:../http-client
+      '@memoflow/ipc-client':
+        specifier: workspace:*
+        version: link:../ipc-client
+      '@memoflow/setting-contracts':
+        specifier: workspace:*
+        version: link:../setting-contracts
+      '@memoflow/transport-contracts':
+        specifier: workspace:*
+        version: link:../transport-contracts
 
   packages/setting-contracts:
     dependencies:

@@ -43,6 +43,7 @@
       ],
       "@memoflow/reminder/client": ["../../packages/reminder/src/client/index.ts"],
       "@memoflow/notification-client": ["../../packages/notification-client/src/index.ts"],
+      "@memoflow/setting-client": ["../../packages/setting-client/src/index.ts"],
       "@memoflow/notification/electron": ["../../packages/notification/src/electron/index.ts"],
       "@memoflow/ipc-client": ["../../packages/ipc-client/src/index.ts"],
       "@memoflow/http-client": ["../../packages/http-client/src/index.ts"],

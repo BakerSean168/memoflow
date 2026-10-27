@@ -6,7 +6,6 @@
     "paths": {
       "@/*": ["./src/*"],
       "@memoflow/database": ["../database/src/index.ts"],
-      "@memoflow/http-client": ["../http-client/src/index.ts"],
       "@memoflow/contracts": ["../contracts/src/index.ts"],
       "@memoflow/domain-shared": ["../domain-shared/src/index.ts"],
       "@memoflow/domain-shared/shared": ["../domain-shared/src/shared/index.ts"],

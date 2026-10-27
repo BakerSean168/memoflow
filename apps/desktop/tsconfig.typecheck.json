@@ -32,6 +32,7 @@
       ],
       "@memoflow/reminder/client": ["../../packages/reminder/dist/client/index.d.ts"],
       "@memoflow/notification-client": ["../../packages/notification-client/dist/index.d.ts"],
+      "@memoflow/setting-client": ["../../packages/setting-client/dist/index.d.ts"],
       "@memoflow/notification/electron": ["../../packages/notification/dist/electron/index.d.ts"],
       "@memoflow/ipc-client": ["../../packages/ipc-client/dist/index.d.ts"],
       "@memoflow/http-client": ["../../packages/http-client/dist/index.d.ts"],

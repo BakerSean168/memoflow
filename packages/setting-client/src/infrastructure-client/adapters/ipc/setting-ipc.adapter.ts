@@ -1,6 +1,6 @@
 /** Canonical Setting IPC adapter. */
-import type { Result } from '@memoflow/contracts/result';
-import { SettingChannels } from '@memoflow/contracts/electron';
+import type { Result } from '@memoflow/transport-contracts';
+import { SettingChannels } from '@memoflow/desktop-contracts';
 import type { IResultIpcClient, ISettingApiClient } from '../types';
 import type {
   PreferenceMutationReceipt,

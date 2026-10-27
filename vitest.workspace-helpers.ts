@@ -333,6 +333,14 @@ export const domainResolveAliases = [
     replacement: path.resolve(import.meta.dirname, './packages/notification-client/src/index.ts'),
   },
   {
+    find: /^@memoflow\/setting-contracts$/,
+    replacement: path.resolve(import.meta.dirname, './packages/setting-contracts/src/index.ts'),
+  },
+  {
+    find: /^@memoflow\/setting-client$/,
+    replacement: path.resolve(import.meta.dirname, './packages/setting-client/src/index.ts'),
+  },
+  {
     find: /^@memoflow\/notification-ui\/host$/,
     replacement: path.resolve(
       import.meta.dirname,

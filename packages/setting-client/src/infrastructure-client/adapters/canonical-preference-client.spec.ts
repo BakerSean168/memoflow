@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { SettingChannels } from '@memoflow/contracts/electron';
+import { SettingChannels } from '@memoflow/desktop-contracts';
 import { SettingHttpAdapter } from './http/setting-http.adapter';
 import { SettingIpcAdapter } from './ipc/setting-ipc.adapter';
 

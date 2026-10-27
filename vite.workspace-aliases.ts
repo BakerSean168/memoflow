@@ -461,3 +461,27 @@ export function createScheduleUiAliasEntries(workspaceRoot: string): Alias[] {
     },
   ];
 }
+
+export function createSettingContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const settingContractsRoot = resolveFromWorkspace(workspaceRoot, 'packages/setting-contracts/src');
+
+  return [
+    {
+      find: /^@memoflow\/setting-contracts$/,
+      replacement: `${settingContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/setting-contracts\/(.+)$/,
+      replacement: `${settingContractsRoot}/$1`,
+    },
+  ];
+}
+
+export function createSettingClientAliasEntries(workspaceRoot: string): Alias[] {
+  return [
+    {
+      find: /^@memoflow\/setting-client$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/setting-client/src/index.ts'),
+    },
+  ];
+}

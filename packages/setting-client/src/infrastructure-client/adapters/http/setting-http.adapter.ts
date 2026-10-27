@@ -1,5 +1,5 @@
 /** Canonical Setting HTTP adapter. */
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts';
 import type { IResultHttpClient, ISettingApiClient } from '../types';
 import type {
   PreferenceMutationReceipt,

@@ -17,7 +17,7 @@ import { createScheduleIpcClient } from '@memoflow/schedule-client';
 import { createRepositoryIpcClient } from '@memoflow/repository/client';
 import { createNotificationIpcClient } from '@memoflow/notification-client';
 import { createRoutineIpcClient } from '@memoflow/reminder/client';
-import { createSettingIpcClient } from '@memoflow/setting/client';
+import { createSettingIpcClient } from '@memoflow/setting-client';
 import {
   createAIIpcClient,
   createAssistantRuntimeIpcClient,
