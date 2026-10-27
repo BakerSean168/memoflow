@@ -123,7 +123,7 @@ describe('HARD-7102 core vNext architecture lock', () => {
         content: `function project(timezone: Timezone = 'Asia/Shanghai') { return timezone; }`,
       },
       {
-        relPath: 'packages/reminder/src/server/runtime.ts',
+        relPath: 'packages/routine/src/server/runtime.ts',
         content: `const cronContribution = new ReminderSchedulerService();`,
       },
       {

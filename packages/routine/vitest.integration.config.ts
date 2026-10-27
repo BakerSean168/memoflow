@@ -12,11 +12,11 @@ import { createVitestReportConfig } from '../../vitest.shared.ts';
 export default defineConfig({
   plugins: [contractsDeepImportResolver, domainResolveAtAlias],
   resolve: {
-    alias: createPackageResolveAliases('reminder'),
+    alias: createPackageResolveAliases('routine'),
   },
   test: {
-    name: 'reminder-integration',
-    ...createVitestReportConfig(import.meta.dirname, 'reminder-integration'),
+    name: 'routine-integration',
+    ...createVitestReportConfig(import.meta.dirname, 'routine-integration'),
     root: import.meta.dirname,
     globals: true,
     environment: 'node',

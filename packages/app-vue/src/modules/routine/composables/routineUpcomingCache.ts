@@ -1,6 +1,6 @@
 import type { QueryClient } from '@tanstack/vue-query';
 import type { RoutineUpcomingOccurrence } from '@memoflow/contracts/routine';
-import type { RoutineClientPort } from '@memoflow/reminder/client';
+import type { RoutineClientPort } from '@memoflow/routine/client';
 import { routineUpcomingQueryKeys } from '../../../platform/server-state/query-keys';
 import { ROUTINE_UPCOMING_STALE_TIME_MS } from '../../../platform/server-state/query-policy';
 

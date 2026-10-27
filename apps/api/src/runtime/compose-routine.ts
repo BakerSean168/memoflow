@@ -4,7 +4,7 @@ import {
   createRoutinePrismaRepositories,
   createRoutinePortableCapability,
   type RoutineCoachCommandPort,
-} from '@memoflow/reminder';
+} from '@memoflow/routine';
 import {
   createInMemoryRoutineRuntimeContextStore,
   createRoutineCoachCommandService,
@@ -12,7 +12,7 @@ import {
   createRoutineOverrideChangedNotifier,
   createRoutineScheduleChangedNotifier,
   type RoutineConfigurationQueryPort,
-} from '@memoflow/reminder/routine-runtime';
+} from '@memoflow/routine/routine-runtime';
 
 export interface ComposeRoutineDependencies {
   readonly db: PrismaClient;

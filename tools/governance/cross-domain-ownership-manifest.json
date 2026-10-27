@@ -6,13 +6,13 @@
       "packagePath": "packages/account",
       "forbiddenProductionDependencies": [
         "@memoflow/cloud-auth",
-        "@memoflow/reminder",
+        "@memoflow/routine",
         "@memoflow/notification",
         "@memoflow/repository"
       ],
       "forbiddenProductionImports": [
         "@memoflow/cloud-auth",
-        "@memoflow/reminder",
+        "@memoflow/routine",
         "@memoflow/notification",
         "@memoflow/repository"
       ],
@@ -21,7 +21,7 @@
           "path": "packages/account/tsconfig.json",
           "values": [
             "@memoflow/cloud-auth",
-            "@memoflow/reminder/server",
+            "@memoflow/routine/server",
             "@memoflow/notification/server",
             "@memoflow/repository/server"
           ]
@@ -96,13 +96,13 @@
       ]
     },
     {
-      "id": "reminder",
-      "packagePath": "packages/reminder",
+      "id": "routine",
+      "packagePath": "packages/routine",
       "forbiddenProductionDependencies": ["@memoflow/schedule"],
       "forbiddenProductionImports": ["@memoflow/schedule"],
       "forbiddenConfigurationReferences": [
         {
-          "path": "packages/reminder/tsup.config.ts",
+          "path": "packages/routine/tsup.config.ts",
           "values": ["@memoflow/schedule"]
         }
       ]

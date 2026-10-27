@@ -11,7 +11,7 @@ import { createNotificationPrismaPortability } from '@memoflow/notification';
 import {
   createRoutinePrismaRepositories,
   createRoutinePortableCapability,
-} from '@memoflow/reminder';
+} from '@memoflow/routine';
 
 /** Owner restore seams only: no second runtime, timers, transports, or independent commits. */
 export function composeProfileImportCapabilities(

@@ -12,7 +12,7 @@ const ROOT = path.join(import.meta.dirname, '..', '..');
 const scanRoots = [
   'packages/goal/src',
   'packages/task/src',
-  'packages/reminder/src',
+  'packages/routine/src',
   'packages/scheduler/src',
   'packages/notification/src',
   'packages/contracts/src',

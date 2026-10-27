@@ -4,7 +4,7 @@ import {
   routineScheduleProjectionEventNames,
   type RoutineScheduleProjectionEventMap,
   type RoutineScheduleProjectionSource,
-} from '@memoflow/reminder/schedule-projection/routine';
+} from '@memoflow/routine/schedule-projection/routine';
 import type { Subscriber } from '@memoflow/utils/domain';
 import type { RuntimeContribution } from '../ports/runtime-contribution';
 import { createRoutineProjector } from '../projectors/routine-projector';

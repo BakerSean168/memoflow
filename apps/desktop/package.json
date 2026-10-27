@@ -41,7 +41,7 @@
     "@memoflow/powersync-schema": "workspace:*",
     "@memoflow/relation": "workspace:*",
     "@memoflow/relation-contracts": "workspace:*",
-    "@memoflow/reminder": "workspace:*",
+    "@memoflow/routine": "workspace:*",
     "@memoflow/repository": "workspace:*",
     "@memoflow/schedule": "workspace:*",
     "@memoflow/schedule-client": "workspace:*",

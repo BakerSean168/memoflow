@@ -27,10 +27,10 @@
       "@memoflow/task/electron": ["../../packages/task/dist/electron/index.d.ts"],
       "@memoflow/schedule-client": ["../../packages/schedule-client/dist/index.d.ts"],
       "@memoflow/schedule/electron": ["../../packages/schedule/dist/electron/index.d.ts"],
-      "@memoflow/reminder/routine-runtime": [
-        "../../packages/reminder/dist/routine-runtime/index.d.ts"
+      "@memoflow/routine/routine-runtime": [
+        "../../packages/routine/dist/routine-runtime/index.d.ts"
       ],
-      "@memoflow/reminder/client": ["../../packages/reminder/dist/client/index.d.ts"],
+      "@memoflow/routine/client": ["../../packages/routine/dist/client/index.d.ts"],
       "@memoflow/notification-client": ["../../packages/notification-client/dist/index.d.ts"],
       "@memoflow/notification/electron": ["../../packages/notification/dist/electron/index.d.ts"],
       "@memoflow/ipc-client": ["../../packages/ipc-client/dist/index.d.ts"],
@@ -59,11 +59,11 @@
         "../../packages/notification/dist/schedule-execution/index.d.ts"
       ],
       "@memoflow/notification/commands": ["../../packages/notification/dist/commands/index.d.ts"],
-      "@memoflow/reminder/schedule-execution": [
-        "../../packages/reminder/dist/schedule-execution/index.d.ts"
+      "@memoflow/routine/schedule-execution": [
+        "../../packages/routine/dist/schedule-execution/index.d.ts"
       ],
-      "@memoflow/reminder/schedule-projection": [
-        "../../packages/reminder/dist/schedule-projection/index.d.ts"
+      "@memoflow/routine/schedule-projection": [
+        "../../packages/routine/dist/schedule-projection/index.d.ts"
       ],
       "@memoflow/task": ["../../packages/task/dist/index.d.ts"],
       "@memoflow/task/schedule-execution": [

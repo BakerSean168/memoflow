@@ -386,12 +386,12 @@ importers:
       '@memoflow/reliable-messaging-contracts':
         specifier: workspace:*
         version: link:../../packages/reliable-messaging-contracts
-      '@memoflow/reminder':
-        specifier: workspace:*
-        version: link:../../packages/reminder
       '@memoflow/repository':
         specifier: workspace:*
         version: link:../../packages/repository
+      '@memoflow/routine':
+        specifier: workspace:*
+        version: link:../../packages/routine
       '@memoflow/schedule':
         specifier: workspace:*
         version: link:../../packages/schedule
@@ -630,12 +630,12 @@ importers:
       '@memoflow/reliable-messaging-contracts':
         specifier: workspace:*
         version: link:../../packages/reliable-messaging-contracts
-      '@memoflow/reminder':
-        specifier: workspace:*
-        version: link:../../packages/reminder
       '@memoflow/repository':
         specifier: workspace:*
         version: link:../../packages/repository
+      '@memoflow/routine':
+        specifier: workspace:*
+        version: link:../../packages/routine
       '@memoflow/schedule':
         specifier: workspace:*
         version: link:../../packages/schedule
@@ -1098,12 +1098,12 @@ importers:
       '@memoflow/relation-contracts':
         specifier: workspace:*
         version: link:../../packages/relation-contracts
-      '@memoflow/reminder':
-        specifier: workspace:*
-        version: link:../../packages/reminder
       '@memoflow/repository':
         specifier: workspace:*
         version: link:../../packages/repository
+      '@memoflow/routine':
+        specifier: workspace:*
+        version: link:../../packages/routine
       '@memoflow/schedule-client':
         specifier: workspace:*
         version: link:../../packages/schedule-client
@@ -1220,12 +1220,12 @@ importers:
       '@memoflow/notification':
         specifier: workspace:*
         version: link:../notification
-      '@memoflow/reminder':
-        specifier: workspace:*
-        version: link:../reminder
       '@memoflow/repository':
         specifier: workspace:*
         version: link:../repository
+      '@memoflow/routine':
+        specifier: workspace:*
+        version: link:../routine
       '@types/express':
         specifier: ^5.0.0
         version: 5.0.6
@@ -1504,12 +1504,12 @@ importers:
       '@memoflow/relation-contracts':
         specifier: workspace:*
         version: link:../relation-contracts
-      '@memoflow/reminder':
-        specifier: workspace:*
-        version: link:../reminder
       '@memoflow/repository':
         specifier: workspace:*
         version: link:../repository
+      '@memoflow/routine':
+        specifier: workspace:*
+        version: link:../routine
       '@memoflow/schedule-client':
         specifier: workspace:*
         version: link:../schedule-client
@@ -2403,43 +2403,6 @@ importers:
         specifier: ^4.6.5
         version: 4.6.5
 
-  packages/reminder:
-    dependencies:
-      '@memoflow/contracts':
-        specifier: workspace:*
-        version: link:../contracts
-      '@memoflow/database':
-        specifier: workspace:*
-        version: link:../database
-      '@memoflow/http-client':
-        specifier: workspace:*
-        version: link:../http-client
-      '@memoflow/ipc-client':
-        specifier: workspace:*
-        version: link:../ipc-client
-      '@memoflow/notification-contracts':
-        specifier: workspace:*
-        version: link:../notification-contracts
-      '@memoflow/reliable-messaging-contracts':
-        specifier: workspace:*
-        version: link:../reliable-messaging-contracts
-      '@memoflow/schedule-contracts':
-        specifier: workspace:*
-        version: link:../schedule-contracts
-      '@memoflow/time':
-        specifier: workspace:*
-        version: link:../time
-      '@memoflow/utils':
-        specifier: workspace:*
-        version: link:../utils
-      zod:
-        specifier: ^4.6.5
-        version: 4.6.5
-    devDependencies:
-      '@memoflow/test-utils':
-        specifier: workspace:*
-        version: link:../test-utils
-
   packages/repository:
     dependencies:
       '@memoflow/contracts':
@@ -2485,6 +2448,43 @@ importers:
       '@types/express':
         specifier: ^5.0.0
         version: 5.0.6
+
+  packages/routine:
+    dependencies:
+      '@memoflow/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@memoflow/database':
+        specifier: workspace:*
+        version: link:../database
+      '@memoflow/http-client':
+        specifier: workspace:*
+        version: link:../http-client
+      '@memoflow/ipc-client':
+        specifier: workspace:*
+        version: link:../ipc-client
+      '@memoflow/notification-contracts':
+        specifier: workspace:*
+        version: link:../notification-contracts
+      '@memoflow/reliable-messaging-contracts':
+        specifier: workspace:*
+        version: link:../reliable-messaging-contracts
+      '@memoflow/schedule-contracts':
+        specifier: workspace:*
+        version: link:../schedule-contracts
+      '@memoflow/time':
+        specifier: workspace:*
+        version: link:../time
+      '@memoflow/utils':
+        specifier: workspace:*
+        version: link:../utils
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
+    devDependencies:
+      '@memoflow/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
 
   packages/schedule:
     dependencies:
@@ -2579,9 +2579,9 @@ importers:
       '@memoflow/reliable-messaging-contracts':
         specifier: workspace:*
         version: link:../reliable-messaging-contracts
-      '@memoflow/reminder':
+      '@memoflow/routine':
         specifier: workspace:*
-        version: link:../reminder
+        version: link:../routine
       '@memoflow/schedule-contracts':
         specifier: workspace:*
         version: link:../schedule-contracts

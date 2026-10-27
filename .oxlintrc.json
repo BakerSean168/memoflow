@@ -169,8 +169,8 @@
             ]
           },
           {
-            "sourceTag": "scope:reminder",
-            "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:reminder"]
+            "sourceTag": "scope:routine",
+            "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:routine"]
           },
           {
             "sourceTag": "scope:repository",
@@ -210,7 +210,7 @@
               "scope:data-portability",
               "scope:goal",
               "scope:task",
-              "scope:reminder",
+              "scope:routine",
               "scope:notification",
               "scope:setting"
             ]
@@ -227,7 +227,7 @@
               "scope:authentication",
               "scope:goal",
               "scope:notification",
-              "scope:reminder",
+              "scope:routine",
               "scope:repository",
               "scope:schedule",
               "scope:scheduler",
@@ -248,7 +248,7 @@
               "scope:authentication",
               "scope:goal",
               "scope:notification",
-              "scope:reminder",
+              "scope:routine",
               "scope:repository",
               "scope:schedule",
               "scope:scheduler",
@@ -268,7 +268,7 @@
               "scope:authentication",
               "scope:goal",
               "scope:notification",
-              "scope:reminder",
+              "scope:routine",
               "scope:repository",
               "scope:schedule",
               "scope:scheduler",
@@ -297,7 +297,7 @@
               "scope:authentication",
               "scope:goal",
               "scope:notification",
-              "scope:reminder",
+              "scope:routine",
               "scope:repository",
               "scope:schedule",
               "scope:scheduler",
@@ -326,7 +326,7 @@
               "scope:authentication",
               "scope:goal",
               "scope:notification",
-              "scope:reminder",
+              "scope:routine",
               "scope:repository",
               "scope:schedule",
               "scope:scheduler",
@@ -355,7 +355,7 @@
               "scope:authentication",
               "scope:goal",
               "scope:notification",
-              "scope:reminder",
+              "scope:routine",
               "scope:repository",
               "scope:schedule",
               "scope:scheduler",
@@ -541,7 +541,7 @@
         "packages/authentication/src/**/*.ts",
         "packages/ai/src/**/*.ts",
         "packages/repository/src/**/*.ts",
-        "packages/reminder/src/**/*.ts",
+        "packages/routine/src/**/*.ts",
         "packages/schedule/src/**/*.ts",
         "packages/task/src/**/*.ts",
         "packages/goal/src/**/*.ts"

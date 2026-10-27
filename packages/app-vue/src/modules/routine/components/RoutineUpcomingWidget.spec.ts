@@ -4,7 +4,7 @@ import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ok } from '@memoflow/contracts/result';
-import type { RoutineClientPort } from '@memoflow/reminder/client';
+import type { RoutineClientPort } from '@memoflow/routine/client';
 import { ROUTINE_SERVICE_KEY } from '../../../di/keys';
 import RoutineUpcomingWidget from './RoutineUpcomingWidget.vue';
 

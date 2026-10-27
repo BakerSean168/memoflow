@@ -72,7 +72,7 @@ const AUDITED_PACKAGES = new Set([
   'data-portability',
   'goal',
   'notification',
-  'reminder',
+  'routine',
   'repository',
   'schedule',
   'setting',

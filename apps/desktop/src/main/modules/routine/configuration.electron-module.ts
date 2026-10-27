@@ -31,7 +31,7 @@ import type {
   RoutineCoachCommandPort,
   RoutineConfigurationQueryPort,
   RoutineTrigger,
-} from '@memoflow/reminder';
+} from '@memoflow/routine';
 
 export interface RoutineConfigurationElectronModuleOptions {
   readonly commandPort: RoutineCoachCommandPort;

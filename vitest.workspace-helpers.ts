@@ -20,7 +20,7 @@ export const domainResolveAtAlias = {
       'task',
       'setting',
       'goal',
-      'reminder',
+      'routine',
       'ai',
       'cloud-auth',
       'account',
@@ -240,12 +240,12 @@ export const domainResolveAliases = [
     replacement: path.resolve(import.meta.dirname, './packages/scheduler/src/index.ts'),
   },
   {
-    find: /^@memoflow\/reminder\/(.+)/,
-    replacement: path.resolve(import.meta.dirname, './packages/reminder/src/$1'),
+    find: /^@memoflow\/routine\/(.+)/,
+    replacement: path.resolve(import.meta.dirname, './packages/routine/src/$1'),
   },
   {
-    find: '@memoflow/reminder',
-    replacement: path.resolve(import.meta.dirname, './packages/reminder/src/index.ts'),
+    find: '@memoflow/routine',
+    replacement: path.resolve(import.meta.dirname, './packages/routine/src/index.ts'),
   },
   {
     find: /^@memoflow\/notification\/(.+)/,

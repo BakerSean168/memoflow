@@ -1,7 +1,7 @@
 /**
- * @memoflow/reminder
+ * @memoflow/routine
  *
- * Historical package name; production authority is Routine vNext only.
+ * Routine domain server authority.
  * Legacy Reminder owner surfaces were retired by
  * R4-2201C.
  */

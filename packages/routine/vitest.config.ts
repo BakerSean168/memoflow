@@ -5,7 +5,7 @@ import { createPackageVitestConfig } from '../../vitest.shared.ts';
 const baseConfig = createPackageVitestConfig({
   projectRoot: import.meta.dirname,
   environment: 'node',
-  name: 'reminder',
+  name: 'routine',
   governedCoverage: { extraRoots: ['src/server/domain/routine'] },
 });
 

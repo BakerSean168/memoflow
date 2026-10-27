@@ -55,7 +55,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   'cloud-auth': ['./server'],
   'agent-gateway': ['./server'],
   notification: ['./commands', './schedule-execution', './server'],
-  reminder: [
+  routine: [
     './schema',
     './schedule-execution',
     './schedule-execution/routine',

@@ -1,5 +1,5 @@
 {
-  "name": "@memoflow/reminder",
+  "name": "@memoflow/routine",
   "version": "0.0.1",
   "description": "Routine vNext runtime, scheduling, intervention and protocol owner",
   "type": "module",

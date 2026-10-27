@@ -25,7 +25,7 @@
     "@memoflow/notification-ui": "workspace:*",
     "@memoflow/relation": "workspace:*",
     "@memoflow/relation-contracts": "workspace:*",
-    "@memoflow/reminder": "workspace:*",
+    "@memoflow/routine": "workspace:*",
     "@memoflow/repository": "workspace:*",
     "@memoflow/setting": "workspace:*",
     "@memoflow/task": "workspace:*",

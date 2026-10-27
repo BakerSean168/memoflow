@@ -38,7 +38,7 @@
     "cloud-auth": "runtime-lib",
     "goal": "runtime-lib",
     "notification": "runtime-lib",
-    "reminder": "runtime-lib",
+    "routine": "runtime-lib",
     "schedule": "runtime-lib",
     "scheduler": "runtime-lib",
     "schedule-orchestration": "runtime-lib",

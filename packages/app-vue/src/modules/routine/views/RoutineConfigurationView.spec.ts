@@ -2,7 +2,7 @@ import { flushPromises, shallowMount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { createMemoryHistory, createRouter } from 'vue-router';
 import { describe, expect, it, vi } from 'vitest';
-import type { RoutineClientPort } from '@memoflow/reminder/client';
+import type { RoutineClientPort } from '@memoflow/routine/client';
 import { ROUTINE_SERVICE_KEY } from '../../../di/keys';
 import { ProductSingleSelectFilter } from '../../../shared/components';
 import { productionLocaleMessages } from '../../../locales/production-messages';

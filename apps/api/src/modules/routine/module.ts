@@ -19,7 +19,7 @@ import type {
   RoutineCoachCommandPort,
   RoutineConfigurationQueryPort,
   RoutineTrigger,
-} from '@memoflow/reminder';
+} from '@memoflow/routine';
 import type { IApiModule, IApiModuleContext } from '../../shared/contracts/api-module.js';
 import type { AuthenticatedRequest } from '../../shared/infrastructure/http/middlewares/auth-middleware.js';
 import { createApiResponseBuilder } from '../../shared/infrastructure/http/response-builder.js';

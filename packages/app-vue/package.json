@@ -93,7 +93,7 @@
     "@memoflow/notification-ui": "workspace:*",
     "@memoflow/relation": "workspace:*",
     "@memoflow/relation-contracts": "workspace:*",
-    "@memoflow/reminder": "workspace:*",
+    "@memoflow/routine": "workspace:*",
     "@memoflow/repository": "workspace:*",
     "@memoflow/schedule-client": "workspace:*",
     "@memoflow/schedule-contracts": "workspace:*",

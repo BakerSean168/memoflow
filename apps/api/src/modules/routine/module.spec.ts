@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
-import type { RoutineCoachCommandPort, RoutineConfigurationQueryPort } from '@memoflow/reminder';
+import type { RoutineCoachCommandPort, RoutineConfigurationQueryPort } from '@memoflow/routine';
 import type { IApiModuleContext } from '../../shared/contracts/api-module.js';
 import { composeRoutineApiModule } from './module.js';
 

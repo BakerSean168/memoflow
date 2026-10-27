@@ -464,7 +464,7 @@ import {
   ROUTINE_METHOD_CATALOG,
   type RoutineMethodId,
   type RoutineMethodRecord,
-} from '@memoflow/reminder/method-library';
+} from '@memoflow/routine/method-library';
 import AppEmptyState from '../../../components/shared/AppEmptyState.vue';
 import ModuleHeader from '../../../components/shared/ModuleHeader.vue';
 import { ProductSingleSelectFilter } from '../../../shared/components';

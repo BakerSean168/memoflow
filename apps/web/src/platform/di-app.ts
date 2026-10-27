@@ -82,7 +82,7 @@ const repositoryService = createLazyService(async () => {
 });
 
 const routineService = createLazyService(async () => {
-  const { createRoutineHttpClient } = await import('@memoflow/reminder/client');
+  const { createRoutineHttpClient } = await import('@memoflow/routine/client');
   return createRoutineHttpClient(resultHttpClient);
 });
 

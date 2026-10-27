@@ -8,8 +8,8 @@ import type {
 import type {
   RoutineScheduleProjectionEventMap,
   RoutineScheduleProjectionSource,
-} from '@memoflow/reminder/schedule-projection/routine';
-import type { RoutineWallClockOccurrencePayload } from '@memoflow/reminder/schedule-execution/routine';
+} from '@memoflow/routine/schedule-projection/routine';
+import type { RoutineWallClockOccurrencePayload } from '@memoflow/routine/schedule-execution/routine';
 import type { Subscriber } from '@memoflow/utils/domain';
 import { createRoutineProjectionRuntime } from '../runtime/routine-projection-runtime';
 

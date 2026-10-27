@@ -25,7 +25,7 @@ const CANONICAL_ROUTINE_EXPORTS = [
 
 const ROOT_IMPORT_BUDGET_MS = 60_000;
 
-describe('@memoflow/reminder R4-2201C owner surface', () => {
+describe('@memoflow/routine R4-2201C owner surface', () => {
   let rootExportNames: readonly string[];
 
   const routineProjection = readFileSync(

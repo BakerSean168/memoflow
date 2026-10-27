@@ -3,7 +3,7 @@ import type {
   InterventionWindowProjection,
   InterventionWindowState,
 } from '@memoflow/contracts/electron';
-import type { InterventionRuntime, InterventionSnapshot } from '@memoflow/reminder/routine-runtime';
+import type { InterventionRuntime, InterventionSnapshot } from '@memoflow/routine/routine-runtime';
 
 const SURFACE_STATES: readonly InterventionWindowState[] = ['Gentle', 'Grace', 'Guided'];
 const STATE_PRIORITY: Readonly<Record<InterventionWindowState, number>> = {
