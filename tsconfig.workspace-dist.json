@@ -81,6 +81,12 @@
       "@memoflow/goal-contracts/*": ["./packages/goal-contracts/dist/*.d.ts"],
       "@memoflow/notification-contracts": ["./packages/notification-contracts/dist/index.d.ts"],
       "@memoflow/notification-contracts/*": ["./packages/notification-contracts/dist/*.d.ts"],
+      "@memoflow/task-contracts": ["./packages/task-contracts/dist/index.d.ts"],
+      "@memoflow/task-contracts/*": ["./packages/task-contracts/dist/*.d.ts"],
+      "@memoflow/task-client": ["./packages/task-client/dist/index.d.ts"],
+      "@memoflow/task-ui/host": ["./packages/task-ui/dist/task-ui-host.d.ts"],
+      "@memoflow/task-ui/*": ["./packages/task-ui/dist/*.d.ts", "./packages/task-ui/dist/*"],
+      "@memoflow/task-ui": ["./packages/task-ui/dist/index.d.ts"],
       "@memoflow/notification-client": ["./packages/notification-client/dist/index.d.ts"],
       "@memoflow/notification-ui/*": ["./packages/notification-ui/dist/*.d.ts"],
       "@memoflow/notification-ui/host": [

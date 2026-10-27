@@ -68,7 +68,8 @@ const featureScopeConstraints = [
   },
   {
     sourceTag: 'scope:task',
-    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:task', 'scope:scheduler'],
+    // Task surfaces consume the shared UI kit plus this scope's own packages.
+    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:task', 'scope:scheduler', 'scope:ui'],
   },
   {
     sourceTag: 'scope:data-portability',

@@ -6,6 +6,7 @@ import {
   createWorkspaceSourceAliasEntries,
   createUiVueSourceAliasEntries,
   createGoalUiAliasEntries,
+  createTaskUiAliasEntries,
 } from '../../vite.workspace-aliases.ts';
 
 // Desktop renderer tests import many workspace packages through their source
@@ -19,7 +20,7 @@ const desktopTestWorkspaceEntries = [
   ['@memoflow/goal/electron', 'packages/goal/src/electron/index.ts'],
   ['@memoflow/goal/schedule-execution', 'packages/goal/src/schedule-execution/index.ts'],
   ['@memoflow/goal/schedule-projection', 'packages/goal/src/schedule-projection/index.ts'],
-  ['@memoflow/task/client', 'packages/task/src/client/index.ts'],
+  ['@memoflow/task-client', 'packages/task-client/src/index.ts'],
   ['@memoflow/task/electron', 'packages/task/src/electron/index.ts'],
   ['@memoflow/task/schedule-execution', 'packages/task/src/schedule-execution/index.ts'],
   ['@memoflow/task/schedule-projection', 'packages/task/src/schedule-projection/index.ts'],
@@ -50,6 +51,7 @@ const sharedConfig = createSharedConfig({
     { find: /^electron$/, replacement: './test-support/electron.stub.ts' },
     ...createAppVueSourceAliasEntries(import.meta.dirname + '/../..'),
     ...createGoalUiAliasEntries(import.meta.dirname + '/../..'),
+    ...createTaskUiAliasEntries(import.meta.dirname + '/../..'),
     ...createUiVueSourceAliasEntries(import.meta.dirname + '/../..'),
     ...createWorkspaceSourceAliasEntries(
       import.meta.dirname + '/../..',

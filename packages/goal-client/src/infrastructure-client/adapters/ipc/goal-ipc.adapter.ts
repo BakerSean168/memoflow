@@ -38,10 +38,10 @@ import type {
   GetGoalWorkspaceReq,
   GoalWorkspaceReadModel,
   GoalWorkspaceTaskPageRequest,
-  GoalWorkspaceTaskPage,
   GoalWorkspacePageRequest,
   GoalWorkspaceKnowledgePage,
 } from '@memoflow/workspace-contracts';
+import type { TaskGoalContextPage } from '@memoflow/task-contracts';
 
 export class GoalIpcAdapter implements IGoalApiClient {
   constructor(private readonly ipcClient: IResultIpcClient) {}
@@ -92,7 +92,7 @@ export class GoalIpcAdapter implements IGoalApiClient {
   async getGoalWorkspaceTasks(
     goalId: string,
     request?: GoalWorkspaceTaskPageRequest,
-  ): Promise<Result<GoalWorkspaceTaskPage>> {
+  ): Promise<Result<TaskGoalContextPage>> {
     return this.ipcClient.invoke(GoalWorkspaceChannels.TASKS, { goalId, ...request });
   }
 

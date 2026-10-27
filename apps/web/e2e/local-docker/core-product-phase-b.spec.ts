@@ -1,5 +1,5 @@
 import { expect, test, type APIResponse, type Locator, type Page } from '@playwright/test';
-import type { TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO } from '@memoflow/task-contracts';
 import { API_CONFIG, TIMEOUT_CONFIG } from '../config';
 import { registerAndLogin } from '../helpers/testHelpers';
 

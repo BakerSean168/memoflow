@@ -17,7 +17,7 @@ import {
   type ChecklistItemDefinitionDTO,
   type TaskTiming,
   type TaskRecurrence,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import { anIdentityId } from '@memoflow/test-utils/fixtures';
 import {
   createTimeContext,

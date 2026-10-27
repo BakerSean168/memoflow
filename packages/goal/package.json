@@ -54,6 +54,7 @@
     "@memoflow/relation-contracts": "workspace:*",
     "@memoflow/reliable-messaging-contracts": "workspace:*",
     "@memoflow/schedule-contracts": "workspace:*",
+    "@memoflow/task-contracts": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/utils": "workspace:*",
     "@memoflow/workspace-contracts": "workspace:*",

@@ -1,6 +1,6 @@
 import type { Ymd } from '@memoflow/contracts/primitives';
 import type { IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
-import type { TaskOccurrenceStatus } from '@memoflow/contracts/task';
+import type { TaskOccurrenceStatus } from '@memoflow/task-contracts';
 import { AggregateRepositoryBase, createEventBusAdapter, type IEventBus } from '@memoflow/patterns';
 import { eventBus } from '@memoflow/utils/domain';
 import { TaskOccurrence } from '../../../domain/aggregates/task-occurrence';

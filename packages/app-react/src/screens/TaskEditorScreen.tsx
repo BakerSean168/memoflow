@@ -12,7 +12,7 @@ import {
   TaskTimeType,
   type CreateTaskPlanReq,
   type UpdateTaskPlanReq,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 
 import { useTaskPlanDetail } from '../hooks/useTaskPlanDetail';
 import { useTaskService } from '../hooks/useTaskService';

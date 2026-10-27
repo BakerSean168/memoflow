@@ -4,9 +4,9 @@ import type {
   GoalWorkspaceKnowledgePage,
   GoalWorkspacePageRequest,
   GoalWorkspaceReadModel,
-  GoalWorkspaceTaskPage,
   GoalWorkspaceTaskPageRequest,
 } from '@memoflow/workspace-contracts';
+import type { TaskGoalContextPage } from '@memoflow/task-contracts';
 import { presentErrorMessage } from '@memoflow/http-client';
 import { useAppSession } from './useAppSession';
 import { useGoalService } from './useGoalService';
@@ -20,7 +20,7 @@ export function useGoalWorkspace(goalId: string | null) {
   const service = useGoalService();
   const { isRemoteAuthenticated } = useAppSession();
   const [workspace, setWorkspace] = useState<GoalWorkspaceReadModel | null>(null);
-  const [taskPage, setTaskPage] = useState<GoalWorkspaceTaskPage | null>(null);
+  const [taskPage, setTaskPage] = useState<TaskGoalContextPage | null>(null);
   const [knowledgePage, setKnowledgePage] = useState<GoalWorkspaceKnowledgePage | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

@@ -3,7 +3,7 @@ import { ValueObject } from '@memoflow/utils/domain';
 import type {
   ChecklistItemDefinition as IChecklistItemDefinition,
   ChecklistItemDefinitionDTO,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 
 /** Plan-owned checklist definition. Per-occurrence completion lives on TaskOccurrence. */
 export class ChecklistItemDefinition

@@ -10,7 +10,7 @@ import {
 import {
   TaskPortablePayloadV3Schema,
   TaskPortableGoalLinkV3Schema,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import type { ITaskPlanRepository } from '../domain/repositories/i-task-plan-repository';
 import type { ITaskOccurrenceRepository } from '../domain/repositories/i-task-occurrence-repository';
 import type { TaskCanonicalRestoreService } from './services/task-canonical-restore.service';

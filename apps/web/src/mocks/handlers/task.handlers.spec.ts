@@ -10,7 +10,7 @@ describe('task handlers contracts', () => {
   });
 
   it('uses the same plan occurrence routes and query shape as the adapter', async () => {
-    const { TaskPlanHttpAdapter } = await import('@memoflow/task/client');
+    const { TaskPlanHttpAdapter } = await import('@memoflow/task-client');
     const httpClient = createHttpClientSpy();
     const adapter = new TaskPlanHttpAdapter(httpClient);
 
@@ -27,7 +27,7 @@ describe('task handlers contracts', () => {
   }, 30_000);
 
   it('uses explicit missed occurrence facts and never calls check-expired', async () => {
-    const { TaskOccurrenceHttpAdapter } = await import('@memoflow/task/client');
+    const { TaskOccurrenceHttpAdapter } = await import('@memoflow/task-client');
     const httpClient = createHttpClientSpy();
     const adapter = new TaskOccurrenceHttpAdapter(httpClient);
 
@@ -51,7 +51,7 @@ describe('task handlers contracts', () => {
   }, 30_000);
 
   it('uses the current plan list route without retired hierarchy filters', async () => {
-    const { TaskPlanHttpAdapter } = await import('@memoflow/task/client');
+    const { TaskPlanHttpAdapter } = await import('@memoflow/task-client');
     const httpClient = createHttpClientSpy();
     const adapter = new TaskPlanHttpAdapter(httpClient);
 
@@ -70,7 +70,7 @@ describe('task handlers contracts', () => {
   }, 30_000);
 
   it('updates plans via PATCH to match the HTTP adapter', async () => {
-    const { TaskPlanHttpAdapter } = await import('@memoflow/task/client');
+    const { TaskPlanHttpAdapter } = await import('@memoflow/task-client');
     const httpClient = createHttpClientSpy();
     const adapter = new TaskPlanHttpAdapter(httpClient);
     await adapter.updateTaskPlan('plan-1', { name: 'Renamed' } as never);

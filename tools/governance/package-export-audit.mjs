@@ -54,6 +54,8 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
     './composables/routineUpcomingCache',
   ],
   'notification-contracts': ['./*'],
+  'task-contracts': ['./*'],
+  'task-ui': ['./host', './composables/*', './components/*'],
   'schedule-contracts': ['./*'],
   'workspace-contracts': ['./*'],
   'relation-contracts': ['./*'],
@@ -78,7 +80,6 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   ],
   contracts: [
     './agent-gateway',
-    './task',
     './relation',
     './account',
     './setting',

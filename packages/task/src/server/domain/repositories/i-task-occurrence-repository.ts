@@ -9,7 +9,7 @@
  */
 
 import type { TaskOccurrence } from '../aggregates';
-import type { TaskOccurrenceStatus } from '@memoflow/contracts/task';
+import type { TaskOccurrenceStatus } from '@memoflow/task-contracts';
 import type { Ymd } from '@memoflow/contracts/primitives';
 
 export interface TaskPlanStatsWindow {

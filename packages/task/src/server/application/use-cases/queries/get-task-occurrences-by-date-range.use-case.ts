@@ -5,7 +5,7 @@
  */
 
 import type { ITaskOccurrenceRepository } from '../../../domain/repositories/i-task-occurrence-repository';
-import type { GetTaskOccurrencesByRangeRes } from '@memoflow/contracts/task';
+import type { GetTaskOccurrencesByRangeRes } from '@memoflow/task-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { ok } from '@memoflow/contracts/result';
 import type { TaskOccurrenceProjectionService } from '../../services/task-occurrence-projection.service';

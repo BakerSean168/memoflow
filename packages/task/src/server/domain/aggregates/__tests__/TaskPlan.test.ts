@@ -29,8 +29,8 @@ import {
   TaskPlanScheduleKind,
   TaskRecurrenceEndKind,
   TaskTimingKind,
-} from '@memoflow/contracts/task';
-import type { TaskRecurrence, TaskTiming } from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
+import type { TaskRecurrence, TaskTiming } from '@memoflow/task-contracts';
 import { TaskReminderConfig, TaskGoalBinding, TaskPlanSchedule } from '../../value-objects';
 import {
   canonicalTaskPlanScheduleForTest,

@@ -13,7 +13,8 @@
       "@memoflow/contracts/primitives": ["../contracts/src/primitives/index.ts"],
       "@memoflow/contracts/result": ["../contracts/src/result/index.ts"],
       "@memoflow/contracts/setting": ["../contracts/src/modules/setting/index.ts"],
-      "@memoflow/contracts/task": ["../contracts/src/modules/task/index.ts"],
+      "@memoflow/task-contracts": ["../task-contracts/src/index.ts"],
+      "@memoflow/task-contracts/*": ["../task-contracts/src/*.ts"],
       "@memoflow/contracts/*": [
         "../contracts/src/modules/*/index.ts",
         "../contracts/src/*/index.ts"

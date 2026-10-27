@@ -17,6 +17,12 @@
       "@memoflow/notification-ui/host": [
         "../../packages/notification-ui/dist/notification-ui-host.d.ts"
       ],
+      "@memoflow/task-ui/*": [
+        "../../packages/task-ui/dist/*.d.ts",
+        "../../packages/task-ui/dist/*"
+      ],
+      "@memoflow/task-ui/host": ["../../packages/task-ui/dist/task-ui-host.d.ts"],
+      "@memoflow/task-ui": ["../../packages/task-ui/dist/index.d.ts"],
       "@memoflow/repository-ui": ["../../packages/repository-ui/dist/index.d.ts"],
       "@memoflow/repository-ui/host": ["../../packages/repository-ui/dist/repository-ui-host.d.ts"],
       "@memoflow/ui-vue-shadcn/composables/*": ["../../packages/ui-vue-shadcn/src/composables/*"],
@@ -25,7 +31,7 @@
       "@memoflow/ai/ports": ["../../packages/ai/dist/ports/index.d.ts"],
       "@memoflow/goal-client": ["../../packages/goal-client/dist/index.d.ts"],
       "@memoflow/goal/electron": ["../../packages/goal/dist/electron/index.d.ts"],
-      "@memoflow/task/client": ["../../packages/task/dist/client/index.d.ts"],
+      "@memoflow/task-client": ["../../packages/task-client/dist/index.d.ts"],
       "@memoflow/task/electron": ["../../packages/task/dist/electron/index.d.ts"],
       "@memoflow/schedule-client": ["../../packages/schedule-client/dist/index.d.ts"],
       "@memoflow/schedule/electron": ["../../packages/schedule/dist/electron/index.d.ts"],

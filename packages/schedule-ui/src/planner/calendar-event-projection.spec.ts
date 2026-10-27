@@ -1,7 +1,7 @@
 import { describe, expect, expectTypeOf, it } from 'vitest';
 import type { GoalClientDTO } from '@memoflow/goal-contracts';
 import type { CalendarEntryClientDTO, CalendarEventProjection } from '@memoflow/schedule-contracts';
-import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
 import { asInstant, asYmd, type Instant, type Ymd } from '@memoflow/time';
 import {
   projectCalendarEntry,

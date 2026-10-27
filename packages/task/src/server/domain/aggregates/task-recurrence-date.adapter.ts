@@ -1,4 +1,4 @@
-import { RecurrenceFrequency as TaskRecurrenceFrequency } from '@memoflow/contracts/task';
+import { RecurrenceFrequency as TaskRecurrenceFrequency } from '@memoflow/task-contracts';
 import {
   asHm,
   asInstant,
@@ -10,7 +10,7 @@ import {
   type RecurrenceWeekday,
   type TimeContext,
 } from '@memoflow/time';
-import type { TaskRecurrence } from '@memoflow/contracts/task';
+import type { TaskRecurrence } from '@memoflow/task-contracts';
 import type { Ymd } from '@memoflow/contracts/primitives';
 
 const FREQUENCY_MAP: Record<

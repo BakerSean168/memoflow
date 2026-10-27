@@ -12,12 +12,6 @@ export type ExampleId = string & { readonly __brand: 'ExampleId' };
 /** 账户/身份 ID */
 export type IdentityId = string & { readonly __brand: 'IdentityId' };
 
-/** 任务模板 ID */
-export type TaskPlanId = string & { readonly __brand: 'TaskPlanId' };
-
-/** 任务实例 ID */
-export type TaskOccurrenceId = string & { readonly __brand: 'TaskOccurrenceId' };
-
 /** Routine Profile ID */
 
 /** Stable managed knowledge document ID carried by Markdown frontmatter. */

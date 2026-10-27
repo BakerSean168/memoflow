@@ -1,6 +1,6 @@
 import { createIdType } from '@memoflow/utils/domain';
 
-import type { TaskPlanId as ITaskPlanId } from '@memoflow/contracts/primitives';
+import type { TaskPlanId as ITaskPlanId } from '@memoflow/task-contracts';
 
 /**
  * TaskPlanId 值对象

@@ -5,7 +5,7 @@ import {
   type TaskPlanExecutionReceipt,
 } from '@memoflow/contracts/ai';
 import type { ResultError } from '@memoflow/transport-contracts/result';
-import type { CreateTaskPlanReq } from '@memoflow/contracts/task';
+import type { CreateTaskPlanReq } from '@memoflow/task-contracts';
 import { taskWorkflowEntityId } from './deterministic-entity-id';
 import type { ApplyTaskPlanInput, TaskPlanMutationPort } from './task-plan-mutation.port';
 import { toWorkflowFailure } from './workflow-failure';

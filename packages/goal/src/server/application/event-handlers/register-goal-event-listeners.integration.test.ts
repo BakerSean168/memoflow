@@ -1,7 +1,7 @@
 /** End-to-end Task -> Goal V2 durable settlement integration. */
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { IdentityId } from '@memoflow/domain-shared';
-import type { TaskGoalProgressOutboxEventV2 } from '@memoflow/contracts/task';
+import type { TaskGoalProgressOutboxEventV2 } from '@memoflow/task-contracts';
 import { Goal } from '../../domain/aggregates/goal';
 import { GoalPrismaRepository } from '../../infrastructure/adapters/prisma/goal-prisma.repository';
 import { GoalRecordPrismaRepository } from '../../infrastructure/adapters/prisma/goal-record-prisma.repository';

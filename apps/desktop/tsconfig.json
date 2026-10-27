@@ -20,6 +20,9 @@
       "@memoflow/notification-ui/host": [
         "../../packages/notification-ui/src/notification-ui-host.ts"
       ],
+      "@memoflow/task-ui/*": ["../../packages/task-ui/src/*.ts", "../../packages/task-ui/src/*"],
+      "@memoflow/task-ui/host": ["../../packages/task-ui/src/task-ui-host.ts"],
+      "@memoflow/task-ui": ["../../packages/task-ui/src/index.ts"],
       "@memoflow/repository-ui": ["../../packages/repository-ui/src/index.ts"],
       "@memoflow/repository-ui/host": ["../../packages/repository-ui/src/repository-ui-host.ts"],
       "@memoflow/ui-vue-shadcn/composables/*": ["../../packages/ui-vue-shadcn/src/composables/*"],
@@ -32,7 +35,7 @@
       "@memoflow/goal/schedule-projection": [
         "../../packages/goal/src/schedule-projection/index.ts"
       ],
-      "@memoflow/task/client": ["../../packages/task/src/client/index.ts"],
+      "@memoflow/task-client": ["../../packages/task-client/src/index.ts"],
       "@memoflow/task/electron": ["../../packages/task/src/electron/index.ts"],
       "@memoflow/task/schedule-execution": ["../../packages/task/src/schedule-execution/index.ts"],
       "@memoflow/task/schedule-projection": [

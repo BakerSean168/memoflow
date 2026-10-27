@@ -6,7 +6,7 @@ import {
   TaskOccurrenceReadIdSchema,
   TaskReadPlanSchema,
   TaskReadOccurrenceSchema,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import { ok, error } from '@memoflow/contracts/result';
 import { createTimeFacade, type UserTimeContextPort } from '@memoflow/time';
 import { PrismaTaskPlanMapper, PrismaTaskOccurrenceMapper } from './mappers';

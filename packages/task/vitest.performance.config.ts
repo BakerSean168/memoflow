@@ -3,7 +3,7 @@ import { defineConfig, mergeConfig, type UserConfig } from 'vitest/config';
 import { createSharedConfig } from '../../vitest.shared.ts';
 
 export const taskPerformanceAliases = {
-  '@memoflow/contracts/task': '../contracts/src/modules/task/index.ts',
+  '@memoflow/task-contracts': '../task-contracts/src/index.ts',
   '@memoflow/contracts/result': '../contracts/src/result/index.ts',
   '@memoflow/contracts/shared': '../contracts/src/shared/index.ts',
   '@memoflow/contracts/primitives': '../contracts/src/primitives/index.ts',

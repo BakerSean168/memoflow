@@ -12,7 +12,7 @@ import {
   TaskReminderConfigSchema,
   type TaskPlanCompletionPolicyValue,
   type TaskPlanOutcomeValue,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import { TaskPlan } from '../../../../domain/aggregates/task-plan';
 import { TaskPlanId } from '../../../../domain/value-objects/task-plan-id';
 import { TaskPlanStatus } from '../../../../domain/value-objects/task-plan-status';

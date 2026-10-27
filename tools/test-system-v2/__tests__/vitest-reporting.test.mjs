@@ -2,6 +2,57 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 
+test('browser harnesses resolve extracted Task imports from source without package builds', () => {
+  const script = `
+    import assert from 'node:assert/strict';
+    import path from 'node:path';
+    import { createServer } from 'vite';
+    import visualConfig from './apps/web/e2e/visual-regression/vite.config.ts';
+    import storybookConfig from './apps/storybook/.storybook/main.ts';
+    import webConfig from './apps/web/vite.config.ts';
+    const configs = [
+      ['visual', visualConfig({ mode: 'test', command: 'serve' })],
+      ['storybook', await storybookConfig.viteFinal({}, { configType: 'DEVELOPMENT' })],
+      ['web', webConfig({ mode: 'production', command: 'build' })],
+    ];
+    for (const [name, config] of configs) {
+      const server = await createServer({
+        ...config, configFile: false,
+        server: { middlewareMode: true, watch: null },
+        optimizeDeps: { noDiscovery: true, include: [] },
+      });
+      try {
+        const imports = name === 'web' ? [
+          ['@memoflow/routine-client', 'packages/routine-client/src/index.ts'],
+        ] : [
+          ['@memoflow/task-contracts', 'packages/task-contracts/src/index.ts'],
+        ];
+        if (name === 'storybook') imports.push([
+          '@task-ui-test-host/di/keys', 'packages/app-vue/src/di/keys.ts',
+        ]);
+        for (const [specifier, expected] of imports) {
+          const resolved = await server.environments.client.pluginContainer.resolveId(
+            specifier,
+            path.resolve('packages/task-ui/src/components/TaskPlanForm/TaskPlanForm.stories.ts'),
+          );
+          assert.equal(resolved?.id, path.resolve(expected), name + ': ' + specifier);
+        }
+      } finally {
+        await server.close();
+      }
+    }
+  `;
+  const result = spawnSync(
+    process.execPath,
+    ['--import', 'tsx', '--input-type=module', '-e', script],
+    {
+      encoding: 'utf8',
+      timeout: 45000,
+    },
+  );
+  assert.equal(result.status, 0, result.stderr);
+});
+
 const useCaseCoverageConfigs = ['task', 'goal'].flatMap((project) => [
   `packages/${project}/vitest.config.ts`,
   `packages/${project}/vitest.use-cases.config.ts`,

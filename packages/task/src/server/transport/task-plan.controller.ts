@@ -25,7 +25,7 @@ import type {
   GenerateOccurrencesReq,
   BindToGoalReq,
   AbandonTaskPlanReq,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import type { Context } from '@memoflow/contracts/shared';
 import type { GoalId } from '@memoflow/goal-contracts';
 import { IdentityId } from '@memoflow/domain-shared';

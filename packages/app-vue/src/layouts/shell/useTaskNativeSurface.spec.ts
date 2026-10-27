@@ -6,7 +6,7 @@ import { createMemoryHistory, createRouter } from 'vue-router';
 import { describe, expect, it, vi } from 'vitest';
 import { provideTaskNativeSurface } from './useTaskNativeSurface';
 import { useAppShellStore } from './useAppShellStore';
-import type { TaskNativeEditSession } from '../../modules/task/composables/taskNativeEditSession';
+import type { TaskNativeEditSession } from '@memoflow/task-ui';
 
 async function setup() {
   const pinia = createPinia();

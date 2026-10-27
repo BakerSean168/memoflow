@@ -209,7 +209,8 @@
               "scope:shared",
               "scope:patterns",
               "scope:task",
-              "scope:scheduler"
+              "scope:scheduler",
+              "scope:ui"
             ]
           },
           {

@@ -13,10 +13,6 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./task": {
-      "types": "./dist/modules/task/index.d.ts",
-      "import": "./dist/modules/task/index.js"
-    },
     "./primitives": {
       "types": "./dist/primitives/index.d.ts",
       "import": "./dist/primitives/index.js"
@@ -72,6 +68,7 @@
     "@memoflow/repository-contracts": "workspace:*",
     "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",
+    "@memoflow/task-contracts": "workspace:*",
     "@memoflow/transport-contracts": "workspace:*",
     "zod": "^4.6.5",
     "@memoflow/routine-contracts": "workspace:*"

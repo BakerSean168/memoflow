@@ -9,7 +9,7 @@ import {
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import type { TaskNativeEditSession } from '../../modules/task/composables/taskNativeEditSession';
+import type { TaskNativeEditSession } from '@memoflow/task-ui';
 import type { OwnerNativeEditSurface } from '../../shared/composables/ownerNativeEditSession';
 import { navigateBusinessSurface } from './surface-leave-protocol';
 import { useAppShellStore } from './useAppShellStore';

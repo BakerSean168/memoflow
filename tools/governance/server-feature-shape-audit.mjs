@@ -44,6 +44,7 @@ const SERVER_SEMANTIC_CORE_DIRS = new Map([['setting', ['preferences']]]);
 const STANDALONE_CLIENT_PACKAGES = new Map([
   ['goal', 'goal-client'],
   ['schedule', 'schedule-client'],
+  ['task', 'task-client'],
   ['notification', 'notification-client'],
   ['repository', 'repository-client'],
   ['routine', 'routine-client'],

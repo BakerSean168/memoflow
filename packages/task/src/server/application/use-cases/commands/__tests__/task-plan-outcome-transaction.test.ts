@@ -5,7 +5,7 @@ import {
   TaskPlanCompletionPolicy,
   TaskPlanOutcome,
   TaskPlanStatus,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
 import type { ITaskPlanRepository } from '../../../../domain/repositories/i-task-plan-repository';
 import {

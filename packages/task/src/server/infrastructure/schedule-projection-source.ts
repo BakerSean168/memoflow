@@ -3,8 +3,8 @@ import type {
   TaskEventMap,
   TaskReminderType,
   TaskPlanServerDTO,
-} from '@memoflow/contracts/task';
-import { TaskOccurrenceStatus } from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
+import { TaskOccurrenceStatus } from '@memoflow/task-contracts';
 import type {
   ScheduledIntent,
   SchedulingOwner,

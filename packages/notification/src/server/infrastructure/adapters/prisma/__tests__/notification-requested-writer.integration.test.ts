@@ -13,7 +13,7 @@ import {
   TaskOccurrenceStatus,
   TaskReminderType,
   TaskPlanStatus,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import { GoalStatus, ReminderTriggerType } from '@memoflow/goal-contracts';
 import { requireYmd } from '@memoflow/contracts/primitives';
 // eslint-disable-next-line @nx/enforce-module-boundaries

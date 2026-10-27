@@ -15,6 +15,9 @@
       "@memoflow/goal-ui/*": ["../goal-ui/dist/*.d.ts"],
       "@memoflow/notification-ui/host": ["../notification-ui/dist/notification-ui-host.d.ts"],
       "@memoflow/notification-ui": ["../notification-ui/dist/index.d.ts"],
+      "@memoflow/task-ui/host": ["../task-ui/dist/task-ui-host.d.ts"],
+      "@memoflow/task-ui/*": ["../task-ui/dist/*.d.ts", "../task-ui/dist/*"],
+      "@memoflow/task-ui": ["../task-ui/dist/index.d.ts"],
       "@memoflow/repository-ui/host": ["../repository-ui/dist/repository-ui-host.d.ts"],
       "@memoflow/repository-ui": ["../repository-ui/dist/index.d.ts"],
       "@memoflow/desktop-contracts": ["../../packages/desktop-contracts/src/index.ts"],
@@ -32,7 +35,8 @@
       "@memoflow/schedule-contracts/*": ["../../packages/schedule-contracts/src/*.ts"],
       "@memoflow/contracts/setting": ["../../packages/contracts/src/modules/setting/index.ts"],
       "@memoflow/contracts/shared": ["../../packages/contracts/src/shared/index.ts"],
-      "@memoflow/contracts/task": ["../../packages/contracts/src/modules/task/index.ts"],
+      "@memoflow/task-contracts": ["../../packages/task-contracts/src/index.ts"],
+      "@memoflow/task-contracts/*": ["../../packages/task-contracts/src/*.ts"],
       "@memoflow/contracts/*": [
         "../../packages/contracts/src/modules/*/index.ts",
         "../../packages/contracts/src/*/index.ts"
@@ -54,7 +58,7 @@
       "@memoflow/schedule-client": ["../../packages/schedule-client/dist/index.d.ts"],
       "@memoflow/notification-client": ["../../packages/notification-client/dist/index.d.ts"],
       "@memoflow/routine-client": ["../../packages/routine-client/dist/index.d.ts"],
-      "@memoflow/task/client": ["../../packages/task/dist/client/index.d.ts"],
+      "@memoflow/task-client": ["../../packages/task-client/dist/index.d.ts"],
       "@memoflow/repository-client": ["../../packages/repository-client/dist/index.d.ts"],
       "@memoflow/test-utils": ["../../packages/test-utils/src/index.ts"],
       "@memoflow/test-utils/*": [

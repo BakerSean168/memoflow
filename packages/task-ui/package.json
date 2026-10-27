@@ -1,0 +1,54 @@
+{
+  "name": "@memoflow/task-ui",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./host": {
+      "types": "./dist/task-ui-host.d.ts",
+      "import": "./dist/host.js"
+    },
+    "./composables/*": {
+      "types": "./dist/composables/*.d.ts",
+      "import": "./dist/composables/*.js"
+    },
+    "./components/*": "./dist/components/*"
+  },
+  "dependencies": {
+    "@lucide/vue": "^1.48.0",
+    "@memoflow/contracts": "workspace:*",
+    "@memoflow/goal-client": "workspace:*",
+    "@memoflow/goal-contracts": "workspace:*",
+    "@memoflow/http-client": "workspace:*",
+    "@memoflow/label-contracts": "workspace:*",
+    "@memoflow/shared-primitives": "workspace:*",
+    "@memoflow/task-client": "workspace:*",
+    "@memoflow/task-contracts": "workspace:*",
+    "@memoflow/time": "workspace:*",
+    "@memoflow/ui-vue-shadcn": "workspace:*",
+    "@memoflow/utils": "workspace:*",
+    "@memoflow/workspace-contracts": "workspace:*",
+    "@tanstack/vue-query": "5.103.2",
+    "@vueuse/core": "15.0.0",
+    "pinia": "^4.0.3",
+    "pinia-plugin-persistedstate": "^4.7.1",
+    "uuid": "^14.0.2",
+    "vue": "^3.5.43",
+    "vue-i18n": "^11.4.12",
+    "vue-router": "^5.3.1",
+    "vue-sonner": "^2.0.8"
+  },
+  "devDependencies": {
+    "@memoflow/test-utils": "workspace:*",
+    "@vitejs/plugin-vue": "6.0.9",
+    "typescript": "npm:@typescript/typescript6@6.0.2",
+    "vite": "8.3.1",
+    "vite-plugin-dts": "5.1.1"
+  }
+}
