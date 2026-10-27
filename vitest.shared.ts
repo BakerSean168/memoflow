@@ -331,6 +331,10 @@ export function createSharedConfig(options: SharedConfigOptions) {
       find: /^@memoflow\/test-utils\/(.+)$/,
       replacement: path.resolve(workspaceRoot, 'packages/test-utils/src/$1'),
     },
+    {
+      find: /^@memoflow\/ai\/adapters$/,
+      replacement: path.resolve(workspaceRoot, 'packages/ai/src/adapters/index.ts'),
+    },
     ...commonWorkspacePackages.map(
       (packageName) =>
         ({

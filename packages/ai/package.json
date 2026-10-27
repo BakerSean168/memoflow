@@ -27,6 +27,10 @@
     "./agent-gateway": {
       "types": "./dist/agent-gateway.d.ts",
       "import": "./dist/agent-gateway.js"
+    },
+    "./adapters": {
+      "types": "./dist/adapters/index.d.ts",
+      "import": "./dist/adapters/index.js"
     }
   },
   "dependencies": {

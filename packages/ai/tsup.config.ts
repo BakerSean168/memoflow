@@ -8,6 +8,7 @@ export default defineConfig({
     'src/electron/index.ts',
     'src/testing/index.ts',
     'src/agent-gateway.ts',
+    'src/adapters/index.ts',
   ],
   format: ['esm'],
   dts: false,

@@ -61,6 +61,7 @@
       "@memoflow/ai": ["../../packages/ai/dist/index.d.ts"],
       "@memoflow/ai/*": ["../../packages/ai/dist/*/index.d.ts", "../../packages/ai/dist/*.d.ts"],
       "@memoflow/ai/ports": ["../../packages/ai/dist/ports/index.d.ts"],
+      "@memoflow/ai/adapters": ["../../packages/ai/dist/adapters/index.d.ts"],
       "@memoflow/goal/analytics": ["../../packages/goal/dist/analytics/index.d.ts"],
       "@memoflow/task/analytics": ["../../packages/task/dist/analytics/index.d.ts"],
       "@api/shared": ["../../apps/api/src/shared/index.ts"]

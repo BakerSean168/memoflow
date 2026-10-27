@@ -75,7 +75,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   'repository-ui': ['./host'],
   'host-runtime': ['./electron-ipc'],
   task: ['./analytics', './testing', './schema', './schedule-execution', './schedule-projection'],
-  ai: ['./agent-gateway', './ports', './schema', './testing'],
+  ai: ['./adapters', './agent-gateway', './ports', './schema', './testing'],
   repository: ['./schema', './server'],
   'cloud-auth': ['./server'],
   'agent-gateway': ['./server'],
