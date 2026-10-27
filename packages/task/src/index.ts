@@ -38,6 +38,10 @@ export {
   TaskWorkspaceQueryService,
   type TaskWorkspaceApplicationPort,
   type TaskWorkspaceQueryServiceDependencies,
+  TaskActivityReadService,
+  type TaskActivityItem,
+  type TaskActivityReadOptions,
+  type TaskActivityReadServiceDependencies,
 } from './server';
 export type { TaskWriteTransactionRunner } from './server/application/use-cases/commands/task-write-support';
 

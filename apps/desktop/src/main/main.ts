@@ -26,9 +26,17 @@ import { DesktopShutdownCoordinator } from './lifecycle/desktop-shutdown-coordin
 import { ElectronBootstrapper } from './bootstrap';
 
 // ── Module Electron Entry Points ─────────────────────────────────────
-import { PowerSyncTaskBindingReadPort, TaskWorkspaceQueryService } from '@memoflow/task';
+import {
+  PowerSyncTaskBindingReadPort,
+  TaskActivityReadService,
+  TaskWorkspaceQueryService,
+} from '@memoflow/task';
 import { GetTaskDashboardUseCase } from '@memoflow/task/analytics';
-import { createGoalTaskProgressPowerSyncHandler, GoalWorkspaceQueryService } from '@memoflow/goal';
+import {
+  createGoalTaskProgressPowerSyncHandler,
+  GoalActivityReadService,
+  GoalWorkspaceQueryService,
+} from '@memoflow/goal';
 import { createTaskReminderScheduledHandlerRegistration } from '@memoflow/task/schedule-execution';
 import { createTaskPowerSyncScheduleProjectionSource } from '@memoflow/task/schedule-projection';
 import { createScheduleOrchestrationModule } from '@memoflow/schedule-orchestration';
@@ -39,7 +47,10 @@ import {
   createElectronLocalVaultPlatform,
   LocalVaultRuntimeError,
 } from '@memoflow/repository/electron';
-import { createSchedulePowerSyncRepositories } from '@memoflow/schedule';
+import {
+  createSchedulePowerSyncRepositories,
+  ScheduleActivityReadService,
+} from '@memoflow/schedule';
 import { createSchedulerPowerSyncRepositories } from '@memoflow/scheduler';
 import {
   LabelService,
@@ -477,12 +488,18 @@ async function registerBusinessModules(
     settingElectronModule.userTimeContextPort,
   );
   const notificationReadPort = new DesktopNotificationAIReadAdapter(notificationComposed.inbox);
-  const activityReadPort = new DesktopActivityAIReadAdapter(
-    goalComposed.repositories.goalRepository,
-    taskComposed.repositories.taskPlanRepository,
-    taskComposed.repositories.taskOccurrenceRepository,
-    scheduleComposed.repositories.scheduleRepository,
-  );
+  const activityReadPort = new DesktopActivityAIReadAdapter({
+    goalActivity: new GoalActivityReadService({
+      goalRepository: goalComposed.repositories.goalRepository,
+    }),
+    taskActivity: new TaskActivityReadService({
+      taskPlanRepository: taskComposed.repositories.taskPlanRepository,
+      taskOccurrenceRepository: taskComposed.repositories.taskOccurrenceRepository,
+    }),
+    scheduleActivity: new ScheduleActivityReadService({
+      scheduleRepository: scheduleComposed.repositories.scheduleRepository,
+    }),
+  });
 
   // 5. Account/data-portability/setting/AI/repository with explicit instances.
   //    account/data-portability/setting/AI/repository 均以显式实例组装。

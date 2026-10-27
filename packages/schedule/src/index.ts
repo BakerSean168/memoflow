@@ -17,6 +17,10 @@ export {
   type SchedulePowerSyncRepositories,
   SchedulePortableCapability,
   createSchedulePortableCapability,
+  ScheduleActivityReadService,
+  type ScheduleActivityItem,
+  type ScheduleActivityReadOptions,
+  type ScheduleActivityReadServiceDependencies,
 } from './server';
 export type { IScheduleRepository } from './server';
 export { createScheduleBusinessDataPresence } from './server/infrastructure/business-data-presence';
