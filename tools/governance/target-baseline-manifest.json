@@ -93,7 +93,7 @@
     "setting-client": "runtime-lib",
     "setting-contracts": "runtime-lib",
     "notification-ui": "ui-lib",
-    "setting-ui": "ui-lib"
+    "setting-ui": "ui-lib",
     "notification-ui": "ui-lib",
     "routine-client": "runtime-lib",
     "routine-contracts": "runtime-lib",
