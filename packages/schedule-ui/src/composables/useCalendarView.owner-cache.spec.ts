@@ -153,6 +153,8 @@ describe('useCalendarView Planner owner cache', () => {
               routineId: 'routine',
               occurrenceKey: 'routine-1',
               title: 'Routine',
+              description: null,
+              editable: false,
               occurrenceAt: Date.UTC(2026, 8, 28, 12),
               endAt: null,
               revision: 2,

@@ -3,6 +3,7 @@ import type { QueryClient } from '@tanstack/vue-query';
 import type { TimeFacade } from '@memoflow/time';
 import type { Result } from '@memoflow/transport-contracts/result';
 import type { GoalClientDTO } from '@memoflow/goal-contracts';
+import type { RoutineUpcomingOccurrence } from '@memoflow/routine-contracts';
 import type {
   RescheduleTaskInput,
   TaskOccurrenceClientDTO,
@@ -47,17 +48,6 @@ export interface ScheduleTaskPlannerPort {
     request: RescheduleTaskInput,
     options?: { suppressErrorReport?: boolean },
   ): Promise<Result<unknown>>;
-}
-
-export interface RoutineUpcomingOccurrence {
-  readonly identityId: string;
-  readonly routineId: string;
-  readonly occurrenceKey: string;
-  readonly title: string;
-  readonly description?: string | null;
-  readonly occurrenceAt: number;
-  readonly endAt?: number | null;
-  readonly revision: number;
 }
 
 /** Narrow Routine read seam consumed by the Planner calendar. */

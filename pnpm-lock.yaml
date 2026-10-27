@@ -3349,6 +3349,9 @@ importers:
       '@memoflow/http-client':
         specifier: workspace:*
         version: link:../http-client
+      '@memoflow/routine-contracts':
+        specifier: workspace:*
+        version: link:../routine-contracts
       '@memoflow/schedule-client':
         specifier: workspace:*
         version: link:../schedule-client
