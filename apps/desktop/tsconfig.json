@@ -20,6 +20,10 @@
       "@memoflow/notification-ui/host": [
         "../../packages/notification-ui/src/notification-ui-host.ts"
       ],
+      "@memoflow/desktop-contracts": ["../../packages/desktop-contracts/src/index.ts"],
+      "@memoflow/desktop-contracts/*": ["../../packages/desktop-contracts/src/*.ts"],
+      "@memoflow/setting-ui": ["../../packages/setting-ui/src/index.ts"],
+      "@memoflow/setting-ui/host": ["../../packages/setting-ui/src/setting-ui-host.ts"],
       "@memoflow/ui-vue-shadcn/composables/*": ["../../packages/ui-vue-shadcn/src/composables/*"],
       "@memoflow/ai/client": ["../../packages/ai/src/client/index.ts"],
       "@memoflow/ai/electron": ["../../packages/ai/src/electron/index.ts"],

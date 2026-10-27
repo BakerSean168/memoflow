@@ -55,10 +55,6 @@
       "types": "./dist/modules/repository/index.d.ts",
       "import": "./dist/modules/repository/index.js"
     },
-    "./modules/setting": {
-      "types": "./dist/modules/setting/index.d.ts",
-      "import": "./dist/modules/setting/index.js"
-    },
     "./modules/ai": {
       "types": "./dist/modules/ai/index.d.ts",
       "import": "./dist/modules/ai/index.js"
@@ -79,11 +75,8 @@
     "@memoflow/ai": "workspace:*",
     "@memoflow/assets": "workspace:*",
     "@memoflow/contracts": "workspace:*",
-    "@memoflow/notification-contracts": "workspace:*",
-    "@memoflow/setting-client": "workspace:*",
-    "@memoflow/setting-contracts": "workspace:*",
-    "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/data-portability": "workspace:*",
+    "@memoflow/desktop-contracts": "workspace:*",
     "@memoflow/goal-client": "workspace:*",
     "@memoflow/goal-contracts": "workspace:*",
     "@memoflow/goal-ui": "workspace:*",
@@ -92,6 +85,7 @@
     "@memoflow/label": "workspace:*",
     "@memoflow/label-contracts": "workspace:*",
     "@memoflow/notification-client": "workspace:*",
+    "@memoflow/notification-contracts": "workspace:*",
     "@memoflow/notification-ui": "workspace:*",
     "@memoflow/relation": "workspace:*",
     "@memoflow/relation-contracts": "workspace:*",
@@ -101,6 +95,10 @@
     "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/schedule-ui": "workspace:*",
     "@memoflow/setting": "workspace:*",
+    "@memoflow/setting-client": "workspace:*",
+    "@memoflow/setting-contracts": "workspace:*",
+    "@memoflow/setting-ui": "workspace:*",
+    "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/task": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/ui-vue-shadcn": "workspace:*",

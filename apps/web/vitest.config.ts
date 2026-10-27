@@ -28,6 +28,8 @@ const sharedConfig = createSharedConfig({
     '@memoflow/goal-client': '../../packages/goal-client/src/index.ts',
     '@memoflow/notification-ui/host': '../../packages/notification-ui/src/notification-ui-host.ts',
     '@memoflow/notification-ui': '../../packages/notification-ui/src/index.ts',
+    '@memoflow/setting-ui/host': '../../packages/setting-ui/src/setting-ui-host.ts',
+    '@memoflow/setting-ui': '../../packages/setting-ui/src/index.ts',
     '@memoflow/repository/client': '../../packages/repository/src/client/index.ts',
     '@memoflow/task/client': '../../packages/task/src/client/index.ts',
   },

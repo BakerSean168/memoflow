@@ -417,6 +417,22 @@ export function createNotificationUiAliasEntries(workspaceRoot: string): Alias[]
   ];
 }
 
+export function createSettingUiAliasEntries(workspaceRoot: string): Alias[] {
+  return [
+    {
+      find: /^@memoflow\/setting-ui\/host$/,
+      replacement: resolveFromWorkspace(
+        workspaceRoot,
+        'packages/setting-ui/src/setting-ui-host.ts',
+      ),
+    },
+    {
+      find: /^@memoflow\/setting-ui$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/setting-ui/src/index.ts'),
+    },
+  ];
+}
+
 export function createOperationsContractsAliasEntries(workspaceRoot: string): Alias[] {
   const operationsContractsRoot = resolveFromWorkspace(
     workspaceRoot,

@@ -20,7 +20,7 @@ import { routineRoutes } from '../modules/routine/router';
 import { scheduleRoutes } from '@memoflow/schedule-ui';
 import { repositoryRoutes } from '../modules/repository/router';
 import { notificationRoutes } from '@memoflow/notification-ui';
-import { settingRoutes } from '../modules/setting/router';
+import { settingRoutes } from '@memoflow/setting-ui';
 import { aiRoutes } from '../modules/ai/router';
 
 export function createAppRouter(options?: {

@@ -54,10 +54,6 @@ vi.mock('@memoflow/schedule-ui', async (importOriginal) => ({
   useScheduleStore: () => ({ setInitialized: vi.fn() }),
 }));
 
-vi.mock('@memoflow/app-vue/modules/setting', () => ({
-  useUserSettingStore: () => ({ setInitialized: vi.fn() }),
-}));
-
 function emitDbChanged(tables: string[]): void {
   for (const cb of handlers.get(RendererEventChannels.DB_CHANGED) ?? []) {
     cb({ tables });

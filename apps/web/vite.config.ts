@@ -114,6 +114,8 @@ const webDevWorkspaceEntries = [
   ['@memoflow/goal-ui/host', 'packages/goal-ui/src/goal-ui-host.ts'],
   ['@memoflow/notification-ui/host', 'packages/notification-ui/src/notification-ui-host.ts'],
   ['@memoflow/notification-ui', 'packages/notification-ui/src/index.ts'],
+  ['@memoflow/setting-ui/host', 'packages/setting-ui/src/setting-ui-host.ts'],
+  ['@memoflow/setting-ui', 'packages/setting-ui/src/index.ts'],
   ['@memoflow/goal-ui', 'packages/goal-ui/src/index.ts'],
   ['@memoflow/workspace-contracts', 'packages/workspace-contracts/src/index.ts'],
   ['@memoflow/desktop-contracts/auth-context', 'packages/desktop-contracts/src/auth-context.ts'],

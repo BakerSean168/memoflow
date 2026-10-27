@@ -550,7 +550,7 @@ import {
     const appVueStore = readFileSync(
       resolve(
         sharedDir,
-        '../../../app-vue/src/modules/setting/stores/presentation-preference-store.ts',
+        '../../../setting-ui/src/stores/presentation-preference-store.ts',
       ),
       'utf8',
     );

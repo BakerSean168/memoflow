@@ -63,8 +63,9 @@ const featureScopeConstraints = [
     onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:scheduler'],
   },
   {
+    // Setting surfaces consume the shared UI kit (notification/schedule precedent).
     sourceTag: 'scope:setting',
-    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:setting'],
+    onlyDependOnLibsWithTags: [...sharedScopeTags, 'scope:setting', 'scope:ui'],
   },
   {
     sourceTag: 'scope:task',
