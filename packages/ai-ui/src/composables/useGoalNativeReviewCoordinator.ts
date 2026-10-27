@@ -8,9 +8,7 @@ import { computed, onScopeDispose, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
 import { GOAL_SERVICE_KEY } from '../ai-ui-host';
-import { useGoalNativeSurface } from '../ai-ui-host';
-import { useLabelCatalog } from '../ai-ui-host';
-import { useStrictInject } from '../ai-ui-host';
+import { aiUiHost } from '../ai-ui-host';
 import type {
   GoalNativeDraftState,
   GoalNativeEditSession,
@@ -53,7 +51,7 @@ export function useGoalNativeReviewCoordinator(input: {
     projectRun,
   } = input;
   const { t } = useI18n();
-  const nativeSurface = useGoalNativeSurface();
+  const nativeSurface = aiUiHost.useGoalNativeSurface();
   const goalSurfaceConflict = ref(false);
   const goalSurfaceReady = ref(false);
   const goalManualHandoff = ref(false);
@@ -68,8 +66,8 @@ export function useGoalNativeReviewCoordinator(input: {
     epoch: number;
     runId?: string;
   } | null = null;
-  const labelCatalog = useLabelCatalog();
-  const goalService = useStrictInject(GOAL_SERVICE_KEY, 'GoalService');
+  const labelCatalog = aiUiHost.useLabelCatalog();
+  const goalService = aiUiHost.useStrictInject(GOAL_SERVICE_KEY, 'GoalService');
   let nativeSession: GoalNativeEditSession | null = null;
   let projectedRunId: string | null = null;
   let projectedRevision: number | null = null;

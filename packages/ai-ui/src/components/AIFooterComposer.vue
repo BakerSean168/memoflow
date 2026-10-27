@@ -40,7 +40,7 @@
             v-for="attachment in attachments"
             :key="attachment.id"
             class="group inline-flex h-7 max-w-[15rem] items-center gap-1.5 rounded-lg bg-[hsl(var(--surface-raised))] pl-1.5 pr-1 text-[11px] text-foreground"
-            :class="semanticElevationClass('inset')"
+            :class="aiUiHost.semanticElevationClass('inset')"
             data-testid="ai-composer-attachment-chip"
           >
             <img
@@ -67,7 +67,7 @@
             v-for="entity in contextEntities"
             :key="`${entity.entityType}:${entity.id}`"
             class="inline-flex h-7 max-w-[15rem] items-center gap-1.5 rounded-lg bg-[hsl(var(--surface-raised))] pl-2 pr-1 text-[11px] text-foreground"
-            :class="semanticElevationClass('inset')"
+            :class="aiUiHost.semanticElevationClass('inset')"
             data-testid="ai-composer-entity-chip"
             :title="
               entity.origin === 'surface'
@@ -99,7 +99,7 @@
         <div
           v-if="mentionSuggestions.length"
           class="absolute bottom-[calc(100%-0.25rem)] left-2 z-50 w-[min(20rem,calc(100%-1rem))] overflow-hidden rounded-xl border border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-overlay))] p-1"
-          :class="semanticElevationClass('floating')"
+          :class="aiUiHost.semanticElevationClass('floating')"
           data-testid="ai-composer-mention-menu"
         >
           <div class="px-2 py-1.5 text-[11px] font-medium text-muted-foreground">
@@ -387,7 +387,7 @@ import type {
   ComposerAttachment,
   ComposerContextEntity,
 } from '../composables/types';
-import { semanticElevationClass } from '../ai-ui-host';
+import { aiUiHost } from '../ai-ui-host';
 import { COMPOSER_TEXTAREA_MAX_PX, type ComposerDensity } from '../ai-ui-host';
 
 const props = withDefaults(

@@ -4,12 +4,12 @@ import {
   type AIWorkflowTerminalFailure,
 } from '@memoflow/ai-contracts';
 import { extractStructuredResultError } from '@memoflow/transport-contracts/result';
-import { translateResultError } from '../ai-ui-host';
+import { aiUiHost } from '../ai-ui-host';
 import type { LocalAgentExecutionFailure } from '@memoflow/ai-contracts';
 import type { ChatItem } from './types';
 
 export function getAIErrorMessage(error: unknown, t: (key: string) => string, fallbackKey: string) {
-  return translateResultError(error, t, { fallbackKey });
+  return aiUiHost.translateResultError(error, t, { fallbackKey });
 }
 
 export function workflowInterruptionFailure(error: unknown): AIWorkflowTerminalFailure {

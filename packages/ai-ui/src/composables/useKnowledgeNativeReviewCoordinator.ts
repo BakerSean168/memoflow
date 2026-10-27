@@ -2,12 +2,11 @@ import type { AIWorkflowRunView, KnowledgeDraft } from '@memoflow/ai-contracts';
 import { onScopeDispose, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { toast } from 'vue-sonner';
-import { useKnowledgeNativeSurface } from '../ai-ui-host';
+import { aiUiHost } from '../ai-ui-host';
 import type {
   KnowledgeCaptureNativeDraft,
   KnowledgeCaptureNativeEditSession,
 } from '../host-ports/knowledge-session';
-import { nativeDraftFromKnowledgeDraft } from '../ai-ui-host';
 import { getAIErrorMessage } from './error';
 import type { UseAIKnowledgeCaptureOptions } from './types';
 
@@ -23,7 +22,7 @@ export function useKnowledgeNativeReviewCoordinator(input: {
 }) {
   const { options, knowledgeCaptureRun, knowledgeCaptureResuming, projectRun, resume } = input;
   const { t } = useI18n();
-  const nativeSurface = useKnowledgeNativeSurface();
+  const nativeSurface = aiUiHost.useKnowledgeNativeSurface();
 
   let nativeSession: KnowledgeCaptureNativeEditSession | null = null;
   let projectedRunId: string | null = null;
@@ -106,7 +105,7 @@ export function useKnowledgeNativeReviewCoordinator(input: {
   }
 
   function canonicalNativeDraft(draft: KnowledgeDraft): KnowledgeCaptureNativeDraft {
-    return nativeDraftFromKnowledgeDraft(draft);
+    return aiUiHost.nativeDraftFromKnowledgeDraft(draft);
   }
 
   async function reconcileOwnerDraft(

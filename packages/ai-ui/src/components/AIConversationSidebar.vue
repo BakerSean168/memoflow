@@ -200,7 +200,7 @@
           <div
             v-if="recentKnowledgeNotesEmailVerificationRequired"
             class="space-y-1 rounded-lg px-3 py-2 text-sm"
-            :class="semanticToneStatusClass('warning')"
+            :class="aiUiHost.semanticToneStatusClass('warning')"
             data-testid="ai-sidebar-email-verification"
             role="status"
           >
@@ -226,7 +226,7 @@
 
 <script setup lang="ts">
 import { ref, type Component } from 'vue';
-import { semanticToneStatusClass } from '../ai-ui-host';
+import { aiUiHost } from '../ai-ui-host';
 import MemoFlowAiIcon from './MemoFlowAiIcon.vue';
 import {
   ChevronDown,

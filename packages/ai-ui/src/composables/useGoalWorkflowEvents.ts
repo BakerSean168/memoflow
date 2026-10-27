@@ -1,4 +1,4 @@
-import { subscribeWorkspaceEvents } from '../ai-ui-host';
+import { aiUiHost } from '../ai-ui-host';
 import { ref, watch } from 'vue';
 import {
   GoalWorkflowLiveActionJournalSchema,
@@ -131,7 +131,7 @@ export function useGoalWorkflowEvents(options: {
       };
       const connect = async () => {
         try {
-          await subscribeWorkspaceEvents(options.runtime, {
+          await aiUiHost.subscribeWorkspaceEvents(options.runtime, {
             cursor,
             signal: controller.signal,
             onEvent: receive,

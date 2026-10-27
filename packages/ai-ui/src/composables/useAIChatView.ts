@@ -1,5 +1,5 @@
 import { useAIWorkflowReconciliation } from './useAIWorkflowReconciliation';
-import { canLeaveBusinessSurface } from '../ai-ui-host';
+import { aiUiHost } from '../ai-ui-host';
 import {
   computed,
   inject,
@@ -23,14 +23,10 @@ import type {
   LocalAgentModelOptions,
 } from '@memoflow/ai-contracts';
 import { useAI } from './useAI';
-import { useGoal } from '../ai-ui-host';
-import { useTask } from '../ai-ui-host';
-import { useRecentKnowledgeNotes } from '../ai-ui-host';
 import { useAIModelCatalog, composerAgentKey } from './useAIModelCatalog';
 import { sortAgentInstances } from '../agent-instance-order';
 import { antigravityEffortVariant, presentAntigravityModels } from './antigravityModelPresentation';
 import { useLocalAssistantChoices } from './useLocalAssistantChoices';
-import { useServerStateIdentityScope } from '../ai-ui-host';
 import { getAIErrorMessage, getNativeAgentExecutionFailureMessage } from './error';
 import { useAIChatSession } from './useAIChatSession';
 import { useAIModelSelection } from './useAIModelSelection';
@@ -51,7 +47,6 @@ import {
   loadAuthoritativeWorkflowRun,
   maybeRenameConversation,
 } from './chatViewHelpers';
-import { useStrictInject } from '../ai-ui-host';
 import {
   AI_ASSISTANT_RUNTIME_KEY,
   AI_AGENT_REGISTRY_KEY,
@@ -62,8 +57,6 @@ import {
   AI_WORKFLOW_RUNTIME_KEY,
   ASSISTANT_SURFACE_KEY,
 } from '../ai-ui-host';
-import { useKnowledgeNativeSurfaceRegistration } from '../ai-ui-host';
-import { openLocalAgentNoteReview, useReferenceableKnowledgeNotes } from '../ai-ui-host';
 import { unwrapOrThrowError } from '@memoflow/transport-contracts/result';
 import type {
   AIWorkspaceRecentGoal,
@@ -89,13 +82,13 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   const route = useRoute();
   const router = useRouter();
   const { service, providers, loadProviders, refreshProviderModels } = useAI();
-  const assistantRuntime = useStrictInject(AI_ASSISTANT_RUNTIME_KEY, 'AIAssistantRuntime');
-  const runtimeUsage = useStrictInject(AI_RUNTIME_USAGE_KEY, 'AIRuntimeUsage');
-  const workflowRuntime = useStrictInject(AI_WORKFLOW_RUNTIME_KEY, 'AIWorkflowRuntime');
-  const assistantSurface = useStrictInject(ASSISTANT_SURFACE_KEY, 'AIRuntimeSurface');
+  const assistantRuntime = aiUiHost.useStrictInject(AI_ASSISTANT_RUNTIME_KEY, 'AIAssistantRuntime');
+  const runtimeUsage = aiUiHost.useStrictInject(AI_RUNTIME_USAGE_KEY, 'AIRuntimeUsage');
+  const workflowRuntime = aiUiHost.useStrictInject(AI_WORKFLOW_RUNTIME_KEY, 'AIWorkflowRuntime');
+  const assistantSurface = aiUiHost.useStrictInject(ASSISTANT_SURFACE_KEY, 'AIRuntimeSurface');
   const localAgent = inject(AI_LOCAL_AGENT_KEY, undefined);
   const agentRegistryClient = inject(AI_AGENT_REGISTRY_KEY, undefined);
-  const resolveIdentity = useServerStateIdentityScope();
+  const resolveIdentity = aiUiHost.useServerStateIdentityScope();
   const catalog = useAIModelCatalog({
     resolveIdentity,
     registry: agentRegistryClient,
@@ -121,14 +114,14 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       (!agentRegistrySnapshot.value && modelCatalogLoading.value),
   );
   const repository = inject(REPOSITORY_SERVICE_KEY, undefined);
-  const knowledgeNativeSurface = useKnowledgeNativeSurfaceRegistration();
+  const knowledgeNativeSurface = aiUiHost.useKnowledgeNativeSurfaceRegistration();
   async function saveLocalNote(content: string) {
     if (!localAgent || !repository || !knowledgeNativeSurface) return;
     try {
       const binding = unwrapOrThrowError(await repository.getLocalVaultBinding());
       if (!binding || binding.health.state !== 'Available')
         throw new Error('Select an available local Vault first');
-      await openLocalAgentNoteReview({
+      await aiUiHost.openLocalAgentNoteReview({
         content,
         surface: knowledgeNativeSurface,
         bindingId: binding.binding.id,
@@ -143,10 +136,10 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       toast.error(t('aiAssistant.local.noteSaveFailed'));
     }
   }
-  const { goals, fetchGoals } = useGoal();
-  const task = useTask();
-  const recentKnowledgeNotes = useRecentKnowledgeNotes();
-  const referenceableKnowledgeNotes = useReferenceableKnowledgeNotes();
+  const { goals, fetchGoals } = aiUiHost.useGoal();
+  const task = aiUiHost.useTask();
+  const recentKnowledgeNotes = aiUiHost.useRecentKnowledgeNotes();
+  const referenceableKnowledgeNotes = aiUiHost.useReferenceableKnowledgeNotes();
   const formatters = useAIFormatters();
 
   async function requestOpenKnowledgeNote(note: string | KnowledgeDocumentRef): Promise<void> {
@@ -277,7 +270,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
   const localChoices = useLocalAssistantChoices(
     localAgent,
     chatSession.runtimeChoice,
-    useServerStateIdentityScope(),
+    aiUiHost.useServerStateIdentityScope(),
   );
   const selectedNativeModel = computed(() => {
     const choice = chatSession.runtimeChoice.value;
@@ -1032,7 +1025,7 @@ export function useAIChatView(options: UseAIChatViewOptions) {
       () =>
         toolMode.value === 'chat' ||
         toolMode.value === 'knowledge-qa' ||
-        canLeaveBusinessSurface(t),
+        aiUiHost.canLeaveBusinessSurface(t),
       () => toast.info(t('shell.panel.busyTransitionHint')),
     );
   }

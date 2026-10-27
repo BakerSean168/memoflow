@@ -21,7 +21,7 @@
           <div
             v-if="item.role === 'user'"
             class="max-w-[88%] rounded-[16px] rounded-br-[6px] bg-[hsl(var(--surface-raised))] px-3.5 py-2.5 text-[13.5px] leading-6 text-foreground @md/ai:max-w-[82%] @xl/ai:max-w-[78%]"
-            :class="semanticElevationClass('raised')"
+            :class="aiUiHost.semanticElevationClass('raised')"
           >
             <div v-if="item.attachments?.length" class="mb-2 flex flex-wrap gap-1.5">
               <span
@@ -46,7 +46,7 @@
           <div v-else class="flex w-full min-w-0 gap-3">
             <div
               class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--surface-raised))] text-[hsl(var(--foreground-subtle))]"
-              :class="semanticElevationClass('inset')"
+              :class="aiUiHost.semanticElevationClass('inset')"
               aria-hidden="true"
             >
               <MemoFlowAiIcon class="h-3.5 w-3.5" />
@@ -324,7 +324,7 @@
         <div class="w-full max-w-xl text-center" data-testid="ai-welcome-state">
           <div
             class="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(var(--surface-raised)/0.72)] text-[hsl(var(--foreground-muted))]"
-            :class="semanticElevationClass('raised')"
+            :class="aiUiHost.semanticElevationClass('raised')"
           >
             <component
               :is="
@@ -365,7 +365,7 @@
           >
             <div
               class="mx-auto flex max-w-md items-center gap-2.5 rounded-xl bg-[hsl(var(--surface-raised)/0.5)] px-3 py-2.5 text-left"
-              :class="semanticElevationClass('inset')"
+              :class="aiUiHost.semanticElevationClass('inset')"
             >
               <Settings2 class="h-4 w-4 shrink-0 text-muted-foreground" />
               <span class="min-w-0 flex-1 text-xs leading-5 text-muted-foreground">
@@ -487,7 +487,7 @@ import {
   type ChatAskUserAnswer,
   type WorkflowMode,
 } from '../composables/types';
-import { semanticElevationClass } from '../ai-ui-host';
+import { aiUiHost } from '../ai-ui-host';
 import { useAIFormatters } from '../composables/useAIFormatters';
 import { getGoalWorkflowInterruptionMessage } from '../composables/error';
 

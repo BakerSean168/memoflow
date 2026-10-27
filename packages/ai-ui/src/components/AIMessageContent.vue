@@ -2,7 +2,7 @@
 import { inject, onBeforeUnmount, ref, watch, watchEffect } from 'vue';
 import { routerKey } from 'vue-router';
 import { KnowledgeDocumentIdSchema } from '@memoflow/repository-contracts';
-import { renderSafeMarkdown } from '../ai-ui-host';
+import { aiUiHost } from '../ai-ui-host';
 
 const props = withDefaults(
   defineProps<{
@@ -37,7 +37,7 @@ function openReference(event: MouseEvent) {
   event.preventDefault();
   void router.push(href);
 }
-const rendered = ref(renderSafeMarkdown(props.content));
+const rendered = ref(aiUiHost.renderSafeMarkdown(props.content));
 const contentElement = ref<HTMLElement | null>(null);
 // v-html creates native links. Bind to those semantic controls after each
 // render so keyboard activation works without making the text container clickable.
@@ -61,7 +61,7 @@ function cancelRenderTimer() {
 
 function renderPendingContent() {
   cancelRenderTimer();
-  rendered.value = renderSafeMarkdown(pendingContent);
+  rendered.value = aiUiHost.renderSafeMarkdown(pendingContent);
 }
 
 watch(
