@@ -2490,6 +2490,22 @@
       "measurementCollectors": []
     },
     {
+      "path": "packages/account-client/src/account-dto-port.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
+      "path": "packages/account-client/src/application-client/services/account-client-service.spec.ts",
+      "primarySuite": "unit",
+      "collectors": [
+        "packages/account-client/vitest.config.ts"
+      ],
+      "measurementCollectors": []
+    },
+    {
       "path": "packages/account-contracts/src/api/account-birthday-ymd.spec.ts",
       "primarySuite": "unit",
       "collectors": [
@@ -2551,26 +2567,6 @@
     },
     {
       "path": "packages/account/src/api/routes.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/account/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/account/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/account/src/application-client/services/account-client-port-mapping-dual.surface.spec.ts",
-      "primarySuite": "unit",
-      "collectors": [
-        "packages/account/vitest.config.ts"
-      ],
-      "measurementCollectors": [
-        "packages/account/vitest.config.ts"
-      ]
-    },
-    {
-      "path": "packages/account/src/application-client/services/account-client-service.spec.ts",
       "primarySuite": "unit",
       "collectors": [
         "packages/account/vitest.config.ts"
@@ -12401,7 +12397,7 @@
       "type": "measurement",
       "suite": "coverage",
       "runner": "vitest",
-      "fileCount": 27
+      "fileCount": 25
     },
     {
       "id": "packages/ai/vitest.config.ts",
@@ -12868,6 +12864,13 @@
       "fileCount": 19
     },
     {
+      "id": "packages/account-client/vitest.config.ts",
+      "type": "primary",
+      "suite": "unit",
+      "runner": "vitest",
+      "fileCount": 2
+    },
+    {
       "id": "packages/account-contracts/vitest.config.ts",
       "type": "primary",
       "suite": "unit",
@@ -12879,7 +12882,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 27
+      "fileCount": 25
     },
     {
       "id": "packages/agent-gateway/vitest.config.ts",
@@ -12921,7 +12924,7 @@
       "type": "primary",
       "suite": "unit",
       "runner": "vitest",
-      "fileCount": 44
+      "fileCount": 39
     },
     {
       "id": "packages/data-portability-contracts/vitest.config.ts",
@@ -13308,8 +13311,6 @@
       "packages/account/src/api/account-void-success-envelope.surface.spec.ts",
       "packages/account/src/api/module-lifecycle.spec.ts",
       "packages/account/src/api/routes.spec.ts",
-      "packages/account/src/application-client/services/account-client-port-mapping-dual.surface.spec.ts",
-      "packages/account/src/application-client/services/account-client-service.spec.ts",
       "packages/account/src/electron/desktop-account-profile-sync.spec.ts",
       "packages/account/src/electron/index.spec.ts",
       "packages/account/src/server/application/account-portability.spec.ts",
