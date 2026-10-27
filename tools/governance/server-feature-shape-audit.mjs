@@ -44,6 +44,7 @@ const SERVER_SEMANTIC_CORE_DIRS = new Map([['setting', ['preferences']]]);
 const STANDALONE_CLIENT_PACKAGES = new Map([
   ['goal', 'goal-client'],
   ['schedule', 'schedule-client'],
+  ['notification', 'notification-client'],
 ]);
 
 const EXCEPTIONS = new Set([
