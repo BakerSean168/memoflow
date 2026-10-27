@@ -8,9 +8,8 @@
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "paths": {
       "@memoflow/contracts": ["../../../../packages/contracts/src/index.ts"],
-      "@memoflow/contracts/account": [
-        "../../../../packages/contracts/src/modules/account/index.ts"
-      ],
+      "@memoflow/account-contracts": ["../../../../packages/account-contracts/src/index.ts"],
+      "@memoflow/account-contracts/*": ["../../../../packages/account-contracts/src/*.ts"],
       "@memoflow/ai-contracts": ["../../../../packages/ai-contracts/src/index.ts"],
       "@memoflow/goal-contracts": ["../../../../packages/goal-contracts/src/index.ts"],
       "@memoflow/notification-contracts": [

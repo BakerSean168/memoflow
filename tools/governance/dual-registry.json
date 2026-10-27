@@ -552,8 +552,8 @@
     },
     {
       "id": "r825",
-      "path": "packages/contracts/src/modules/account/api/dual-registry.surface.spec.ts",
-      "package": "packages/contracts",
+      "path": "packages/account-contracts/src/api/dual-registry.surface.spec.ts",
+      "package": "packages/account-contracts",
       "class": "retired",
       "sole": "response-schemas.ts",
       "blast": "surface lock (retired); suite describes=2",
@@ -563,8 +563,8 @@
     },
     {
       "id": "r661",
-      "path": "packages/contracts/src/modules/account/empty-dual-barrel.surface.spec.ts",
-      "package": "packages/contracts",
+      "path": "packages/account-contracts/src/empty-dual-barrel.surface.spec.ts",
+      "package": "packages/account-contracts",
       "class": "retired",
       "sole": "..",
       "blast": "surface lock (retired)",

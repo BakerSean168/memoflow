@@ -1,5 +1,5 @@
-import type { UpdateAccountReq, UpdateAccountRes } from '@memoflow/contracts/account';
-import { UpdateAccountSchema } from '@memoflow/contracts/account';
+import type { UpdateAccountReq, UpdateAccountRes } from '@memoflow/account-contracts';
+import { UpdateAccountSchema } from '@memoflow/account-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { fail } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
@@ -21,7 +21,7 @@ export interface DesktopAccountProfileSyncOptions {
   closeCloudAccount?(
     token: string,
     request: { reason: string },
-  ): Promise<import('@memoflow/contracts/account').AccountClosureReceiptDTO>;
+  ): Promise<import('@memoflow/account-contracts').AccountClosureReceiptDTO>;
   /** Set the local closure-requested marker BEFORE the cloud close call (required, fail-closed). */
   markAccountClosing(): Promise<void>;
   /** Clear the marker when the cloud close FAILS (restore local access; no permanent lock). */

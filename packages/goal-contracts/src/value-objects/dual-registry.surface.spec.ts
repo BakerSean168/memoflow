@@ -19,7 +19,7 @@ import { describe, expect, it } from 'vitest';
    */
   describe('instant transfer-date dual keep-boundary (residual 859)', () => {
     const goalVo = __dirname;
-    const accountVo = resolve(goalVo, '../../../contracts/src/modules/account/value-objects');
+    const accountVo = resolve(goalVo, '../../../account-contracts/src/value-objects');
     const taskVo = resolve(goalVo, '../../../task-contracts/src/value-objects');
     const primitives = resolve(goalVo, '../../../shared-primitives/src');
     const taskPlanSchedule = readFileSync(resolve(taskVo, 'task-plan-schedule.ts'), 'utf8');

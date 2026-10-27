@@ -21,7 +21,7 @@ import { ElectronBootstrapper } from '../bootstrap';
 import type { IElectronAuthContext } from '@memoflow/contracts/electron';
 import type { WindowManager } from '../lifecycle/window-manager';
 import { Account } from '@memoflow/account/electron';
-import type { AccountClientDTO } from '@memoflow/contracts/account';
+import type { AccountClientDTO } from '@memoflow/account-contracts';
 import { ElectronProfileKeyStore } from './profile-key-store';
 import { ProfilePinStore } from './profile-pin-store';
 import { CloudSessionStore } from './cloud-session-store';

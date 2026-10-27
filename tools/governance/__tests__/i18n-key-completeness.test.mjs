@@ -22,6 +22,7 @@ const SCAN_ROOTS = [
   resolve(WORKSPACE_ROOT, 'apps/web/src'),
   // Extracted UI packages keep their surface keys in their own sources (#630 §4.9).
   resolve(WORKSPACE_ROOT, 'packages/setting-ui/src'),
+  resolve(WORKSPACE_ROOT, 'packages/account-ui/src'),
 ];
 const SOURCE_EXTS = new Set(['.vue', '.ts', '.tsx']);
 /** Match t('a.b'), $t("a.b.c"), te(`x.y`) with dotted keys only. */

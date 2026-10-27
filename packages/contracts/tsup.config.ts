@@ -19,7 +19,6 @@ export default createTsupConfig({
     // 根入口（精简版，只导出核心类型和常用枚举）
     'src/index.ts',
     // 模块入口（完整模块导出）
-    'src/modules/account/index.ts',
     'src/modules/notification/index.ts',
     // 其他模块入口
     'src/result/index.ts',
@@ -30,9 +29,6 @@ export default createTsupConfig({
     'src/primitives/index.ts',
     'src/primitives/command.ts',
     'src/primitives/runtime.ts',
-
-    // Mock 数据生成器（仅用于开发/测试）
-    'src/mocks/index.ts',
   ],
   extraOptions: {
     dts: false,

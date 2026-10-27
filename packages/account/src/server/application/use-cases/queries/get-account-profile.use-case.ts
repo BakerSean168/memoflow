@@ -6,7 +6,7 @@ import type { Result } from '@memoflow/contracts/result';
 import { ok } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { IAccountRepository } from '../../../domain';
-import type { AccountClientDTO } from '@memoflow/contracts/account';
+import type { AccountClientDTO } from '@memoflow/account-contracts';
 
 export class GetAccountProfileUseCase {
   constructor(private readonly accountRepository: IAccountRepository) {}

@@ -14,6 +14,7 @@ import {
   createAssetsAliasEntries,
   createReliableMessagingContractsAliasEntries,
   createOperationsContractsAliasEntries,
+  createAccountContractsAliasEntries,
   createNotificationContractsAliasEntries,
   createContractsAliasEntries,
   createUiVueSourceAliasEntries,
@@ -21,6 +22,7 @@ import {
 } from '../../vite.workspace-aliases.ts';
 
 const desktopRendererDevWorkspaceEntries = [
+  ['@memoflow/account-client', 'packages/account-client/src/index.ts'],
   ['@memoflow/ai-client', 'packages/ai-client/src/index.ts'],
   ['@memoflow/ai/electron', 'packages/ai/src/electron/index.ts'],
   ['@memoflow/goal-client', 'packages/goal-client/src/index.ts'],
@@ -170,6 +172,7 @@ export default defineConfig(({ command, mode }) => {
         ...createUiVueSourceAliasEntries(workspaceRoot),
         ...createReliableMessagingContractsAliasEntries(workspaceRoot),
         ...createOperationsContractsAliasEntries(workspaceRoot),
+        ...createAccountContractsAliasEntries(workspaceRoot),
         ...createNotificationContractsAliasEntries(workspaceRoot),
         ...createContractsAliasEntries(workspaceRoot),
         ...createWorkspaceSourceAliasEntries(workspaceRoot, desktopRendererDevWorkspaceEntries),

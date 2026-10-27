@@ -21,9 +21,17 @@
       "types": "./dist/primitives/*.d.ts",
       "import": "./dist/primitives/*.js"
     },
-    "./account": {
-      "types": "./dist/modules/account/index.d.ts",
-      "import": "./dist/modules/account/index.js"
+    "./repository": {
+      "types": "./dist/modules/repository/index.d.ts",
+      "import": "./dist/modules/repository/index.js"
+    },
+    "./setting": {
+      "types": "./dist/modules/setting/index.d.ts",
+      "import": "./dist/modules/setting/index.js"
+    },
+    "./ai": {
+      "types": "./dist/modules/ai/index.d.ts",
+      "import": "./dist/modules/ai/index.js"
     },
     "./result": {
       "types": "./dist/result/index.d.ts",
@@ -36,14 +44,11 @@
     "./electron": {
       "types": "./dist/electron/index.d.ts",
       "import": "./dist/electron/index.js"
-    },
-    "./mocks": {
-      "types": "./dist/mocks/index.d.ts",
-      "import": "./dist/mocks/index.js"
     }
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^9.1.0",
+    "@memoflow/account-contracts": "workspace:*",
     "@memoflow/data-portability-contracts": "workspace:*",
     "@memoflow/desktop-contracts": "workspace:*",
     "@memoflow/goal-contracts": "workspace:*",

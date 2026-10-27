@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "review": "P1.1 #628: explicit existing Nx project owners, exact merged Build/Types, Provider acceptance Nightly-only + P2 #634 label-contracts registration + P2 #634 goal-contracts / workspace-contracts / data-portability-contracts registration + P2 #630 relation-contracts registration + P2 #630 notification-contracts registration + P2 #635 task-contracts registration + #630 routine domain rename and contracts/client/UI extraction (real Nx replay) + #630 repository contracts/client/UI merge (real Nx replay)",
+  "review": "P1.1 #628: explicit existing Nx project owners, exact merged Build/Types, Provider acceptance Nightly-only + P2 #634 label-contracts registration + P2 #634 goal-contracts / workspace-contracts / data-portability-contracts registration + P2 #630 relation-contracts registration + P2 #630 notification-contracts registration + P2 #635 task-contracts registration + #630 routine domain rename and contracts/client/UI extraction (real Nx replay) + #630 repository contracts/client/UI merge (real Nx replay) + #630 account domain contracts package extraction (real Nx replay) + #630 account domain UI extraction (real Nx replay)",
   "cases": [
     {
       "id": "docs",
@@ -52,6 +52,7 @@
         "full": false,
         "targets": {
           "build": [
+            "account-ui",
             "ai-ui",
             "app-vue",
             "desktop",
@@ -67,6 +68,7 @@
           "typecheck": ["app-vue", "desktop", "ui-storybook", "web"],
           "test": ["app-vue", "desktop", "governance-tools", "web"],
           "test:contract": [
+            "account-ui",
             "ai-ui",
             "goal-ui",
             "notification-ui",
@@ -96,6 +98,7 @@
           "unit-2": [],
           "unit-3": ["desktop:test"],
           "build": [
+            "account-ui:build",
             "ai-ui:build",
             "app-vue:build",
             "desktop:build",
@@ -118,6 +121,7 @@
           "web-visual": ["web:e2e:visual-regression"],
           "component-browser": ["ui-storybook:test:interaction"],
           "contract": [
+            "account-ui:test:contract",
             "ai-ui:test:contract",
             "goal-ui:test:contract",
             "notification-ui:test:contract",
@@ -522,6 +526,9 @@
           "build": [
             "@memoflow/test-utils",
             "account",
+            "account-client",
+            "account-contracts",
+            "account-ui",
             "agent-gateway",
             "ai",
             "ai-client",
@@ -596,6 +603,9 @@
           "typecheck": [
             "@memoflow/test-utils",
             "account",
+            "account-client",
+            "account-contracts",
+            "account-ui",
             "agent-gateway",
             "ai",
             "ai-client",
@@ -671,6 +681,9 @@
           ],
           "test": [
             "account",
+            "account-client",
+            "account-contracts",
+            "account-ui",
             "agent-gateway",
             "ai",
             "ai-client",
@@ -745,6 +758,9 @@
             "workspace-contracts"
           ],
           "test:contract": [
+            "account-client",
+            "account-contracts",
+            "account-ui",
             "ai-client",
             "ai-contracts",
             "ai-ui",
@@ -866,6 +882,9 @@
           ],
           "build": [
             "account:build",
+            "account-client:build",
+            "account-contracts:build",
+            "account-ui:build",
             "agent-gateway:build",
             "ai:build",
             "ai-client:build",
@@ -937,6 +956,9 @@
             "workspace-contracts:build",
             "@memoflow/test-utils:typecheck",
             "account:typecheck",
+            "account-client:typecheck",
+            "account-contracts:typecheck",
+            "account-ui:typecheck",
             "agent-gateway:typecheck",
             "ai:typecheck",
             "ai-client:typecheck",
@@ -1035,6 +1057,9 @@
           "web-visual": ["web:e2e:visual-regression"],
           "component-browser": ["ui-storybook:test:interaction"],
           "contract": [
+            "account-client:test:contract",
+            "account-contracts:test:contract",
+            "account-ui:test:contract",
             "ai-client:test:contract",
             "ai-contracts:test:contract",
             "ai-ui:test:contract",
@@ -1116,6 +1141,9 @@
           "build": [
             "@memoflow/test-utils",
             "account",
+            "account-client",
+            "account-contracts",
+            "account-ui",
             "agent-gateway",
             "ai",
             "ai-client",
@@ -1190,6 +1218,9 @@
           "typecheck": [
             "@memoflow/test-utils",
             "account",
+            "account-client",
+            "account-contracts",
+            "account-ui",
             "agent-gateway",
             "ai",
             "ai-client",
@@ -1265,6 +1296,9 @@
           ],
           "test": [
             "account",
+            "account-client",
+            "account-contracts",
+            "account-ui",
             "agent-gateway",
             "ai",
             "ai-client",
@@ -1339,6 +1373,9 @@
             "workspace-contracts"
           ],
           "test:contract": [
+            "account-client",
+            "account-contracts",
+            "account-ui",
             "ai-client",
             "ai-contracts",
             "ai-ui",
@@ -1460,6 +1497,9 @@
           ],
           "build": [
             "account:build",
+            "account-client:build",
+            "account-contracts:build",
+            "account-ui:build",
             "agent-gateway:build",
             "ai:build",
             "ai-client:build",
@@ -1531,6 +1571,9 @@
             "workspace-contracts:build",
             "@memoflow/test-utils:typecheck",
             "account:typecheck",
+            "account-client:typecheck",
+            "account-contracts:typecheck",
+            "account-ui:typecheck",
             "agent-gateway:typecheck",
             "ai:typecheck",
             "ai-client:typecheck",
@@ -1629,6 +1672,9 @@
           "web-visual": ["web:e2e:visual-regression"],
           "component-browser": ["ui-storybook:test:interaction"],
           "contract": [
+            "account-client:test:contract",
+            "account-contracts:test:contract",
+            "account-ui:test:contract",
             "ai-client:test:contract",
             "ai-contracts:test:contract",
             "ai-ui:test:contract",
@@ -1708,6 +1754,7 @@
         "full": false,
         "targets": {
           "build": [
+            "account-ui",
             "ai-ui",
             "goal-ui",
             "governance-tools",
@@ -1720,6 +1767,7 @@
           "typecheck": ["app-vue"],
           "test": ["app-vue", "governance-tools", "test-system-v2"],
           "test:contract": [
+            "account-ui",
             "ai-ui",
             "goal-ui",
             "notification-ui",
@@ -1749,6 +1797,7 @@
           "unit-2": [],
           "unit-3": [],
           "build": [
+            "account-ui:build",
             "ai-ui:build",
             "goal-ui:build",
             "notification-ui:build",
@@ -1765,6 +1814,7 @@
           "web-visual": ["web:e2e:visual-regression"],
           "component-browser": ["ui-storybook:test:interaction"],
           "contract": [
+            "account-ui:test:contract",
             "ai-ui:test:contract",
             "goal-ui:test:contract",
             "notification-ui:test:contract",
@@ -1792,6 +1842,9 @@
           "build": [
             "@memoflow/test-utils",
             "account",
+            "account-client",
+            "account-contracts",
+            "account-ui",
             "agent-gateway",
             "ai",
             "ai-client",
@@ -1866,6 +1919,9 @@
           "typecheck": [
             "@memoflow/test-utils",
             "account",
+            "account-client",
+            "account-contracts",
+            "account-ui",
             "agent-gateway",
             "ai",
             "ai-client",
@@ -1941,6 +1997,9 @@
           ],
           "test": [
             "account",
+            "account-client",
+            "account-contracts",
+            "account-ui",
             "agent-gateway",
             "ai",
             "ai-client",
@@ -2015,6 +2074,9 @@
             "workspace-contracts"
           ],
           "test:contract": [
+            "account-client",
+            "account-contracts",
+            "account-ui",
             "ai-client",
             "ai-contracts",
             "ai-ui",
@@ -2136,6 +2198,9 @@
           ],
           "build": [
             "account:build",
+            "account-client:build",
+            "account-contracts:build",
+            "account-ui:build",
             "agent-gateway:build",
             "ai:build",
             "ai-client:build",
@@ -2207,6 +2272,9 @@
             "workspace-contracts:build",
             "@memoflow/test-utils:typecheck",
             "account:typecheck",
+            "account-client:typecheck",
+            "account-contracts:typecheck",
+            "account-ui:typecheck",
             "agent-gateway:typecheck",
             "ai:typecheck",
             "ai-client:typecheck",
@@ -2306,6 +2374,9 @@
           "web-visual": ["web:e2e:visual-regression#1/1"],
           "component-browser": ["ui-storybook:test:interaction"],
           "contract": [
+            "account-client:test:contract",
+            "account-contracts:test:contract",
+            "account-ui:test:contract",
             "ai-client:test:contract",
             "ai-contracts:test:contract",
             "ai-ui:test:contract",
@@ -2481,6 +2552,7 @@
           "build": [
             "@memoflow/test-utils",
             "account",
+            "account-ui",
             "agent-gateway",
             "ai",
             "ai-ui",
@@ -2528,6 +2600,7 @@
           "typecheck": [
             "@memoflow/test-utils",
             "account",
+            "account-ui",
             "agent-gateway",
             "ai",
             "ai-ui",
@@ -2575,6 +2648,7 @@
           ],
           "test": [
             "account",
+            "account-ui",
             "agent-gateway",
             "ai",
             "ai-ui",
@@ -2619,6 +2693,7 @@
             "workspace-contracts"
           ],
           "test:contract": [
+            "account-ui",
             "ai-ui",
             "contracts",
             "goal-ui",
@@ -2711,6 +2786,7 @@
           ],
           "build": [
             "account:build",
+            "account-ui:build",
             "agent-gateway:build",
             "ai:build",
             "ai-ui:build",
@@ -2755,6 +2831,7 @@
             "workspace-contracts:build",
             "@memoflow/test-utils:typecheck",
             "account:typecheck",
+            "account-ui:typecheck",
             "agent-gateway:typecheck",
             "ai:typecheck",
             "ai-ui:typecheck",
@@ -2824,6 +2901,7 @@
           "web-visual": ["web:e2e:visual-regression"],
           "component-browser": ["ui-storybook:test:interaction"],
           "contract": [
+            "account-ui:test:contract",
             "ai-ui:test:contract",
             "contracts:test:contract",
             "goal-ui:test:contract",
@@ -3044,6 +3122,7 @@
           "build": [
             "@memoflow/test-utils",
             "account",
+            "account-ui",
             "agent-gateway",
             "ai",
             "ai-client",
@@ -3091,6 +3170,7 @@
           "typecheck": [
             "@memoflow/test-utils",
             "account",
+            "account-ui",
             "agent-gateway",
             "ai",
             "ai-client",
@@ -3138,6 +3218,7 @@
           ],
           "test": [
             "account",
+            "account-ui",
             "agent-gateway",
             "ai",
             "ai-client",
@@ -3182,6 +3263,7 @@
             "workspace-contracts"
           ],
           "test:contract": [
+            "account-ui",
             "ai-client",
             "ai-contracts",
             "ai-ui",
@@ -3274,6 +3356,7 @@
           ],
           "build": [
             "account:build",
+            "account-ui:build",
             "agent-gateway:build",
             "ai:build",
             "ai-client:build",
@@ -3318,6 +3401,7 @@
             "workspace-contracts:build",
             "@memoflow/test-utils:typecheck",
             "account:typecheck",
+            "account-ui:typecheck",
             "agent-gateway:typecheck",
             "ai:typecheck",
             "ai-client:typecheck",
@@ -3387,6 +3471,7 @@
           "web-visual": ["web:e2e:visual-regression"],
           "component-browser": ["ui-storybook:test:interaction"],
           "contract": [
+            "account-ui:test:contract",
             "ai-client:test:contract",
             "ai-contracts:test:contract",
             "ai-ui:test:contract",
@@ -3604,6 +3689,147 @@
           "web-visual": ["web:e2e:visual-regression"],
           "component-browser": ["ui-storybook:test:interaction"],
           "contract": ["ai-ui:test:contract"]
+        },
+        "serverShards": [
+          {
+            "id": "1/1",
+            "keys": ["desktop:test:main", "desktop:test:ipc"],
+            "estimatedMs": 7849
+          }
+        ]
+      }
+    },
+    {
+      "id": "account-client",
+      "files": ["packages/account-client/src/index.ts"],
+      "expected": {
+        "full": false,
+        "targets": {
+          "build": [
+            "account-client",
+            "account-ui",
+            "app-vue",
+            "desktop",
+            "governance-tools",
+            "ui-storybook",
+            "web"
+          ],
+          "typecheck": [
+            "account-client",
+            "account-ui",
+            "app-react",
+            "app-vue",
+            "desktop",
+            "mobile",
+            "ui-storybook",
+            "web"
+          ],
+          "test": ["account-client", "account-ui", "app-vue", "desktop", "governance-tools", "web"],
+          "test:contract": ["account-client", "account-ui"],
+          "test:smoke": [],
+          "test:integration": [],
+          "test:boundary": ["desktop"],
+          "test:ipc": ["desktop"],
+          "test:main": ["desktop"],
+          "test:perf": [],
+          "test:interaction": ["ui-storybook"],
+          "e2e:ai-provider": ["web"],
+          "e2e:visual-regression": ["web"],
+          "test:coverage": ["app-vue"]
+        },
+        "jobs": {
+          "lint": [
+            "workspace:lint",
+            "workspace:format",
+            "workspace:sync",
+            "memoflow:governance-check"
+          ],
+          "unit-1": [],
+          "unit-2": [],
+          "unit-3": ["desktop:test"],
+          "build": [
+            "account-client:build",
+            "account-ui:build",
+            "app-vue:build",
+            "desktop:build",
+            "ui-storybook:build",
+            "web:build",
+            "account-client:typecheck",
+            "account-ui:typecheck",
+            "app-react:typecheck",
+            "app-vue:typecheck",
+            "desktop:typecheck",
+            "mobile:typecheck",
+            "ui-storybook:typecheck",
+            "web:typecheck"
+          ],
+          "web-unit-1": ["app-vue:test#1/2", "web:test"],
+          "web-unit-2": ["app-vue:test#2/2"],
+          "server-unit": [],
+          "verification-children": ["desktop:test:ipc", "desktop:test:main"],
+          "web-visual": ["web:e2e:visual-regression"],
+          "component-browser": ["ui-storybook:test:interaction"],
+          "contract": ["account-client:test:contract", "account-ui:test:contract"]
+        },
+        "serverShards": [
+          {
+            "id": "1/1",
+            "keys": ["desktop:test:main", "desktop:test:ipc"],
+            "estimatedMs": 7849
+          }
+        ]
+      }
+    },
+    {
+      "id": "account-ui",
+      "files": ["packages/account-ui/src/account/components/AccountProfileSection.vue"],
+      "expected": {
+        "full": false,
+        "targets": {
+          "build": ["account-ui", "app-vue", "desktop", "governance-tools", "ui-storybook", "web"],
+          "typecheck": ["account-ui", "app-vue", "desktop", "ui-storybook", "web"],
+          "test": ["account-ui", "app-vue", "desktop", "governance-tools", "web"],
+          "test:contract": ["account-ui"],
+          "test:smoke": [],
+          "test:integration": [],
+          "test:boundary": ["desktop"],
+          "test:ipc": ["desktop"],
+          "test:main": ["desktop"],
+          "test:perf": [],
+          "test:interaction": ["ui-storybook"],
+          "e2e:ai-provider": ["web"],
+          "e2e:visual-regression": ["web"],
+          "test:coverage": ["app-vue"]
+        },
+        "jobs": {
+          "lint": [
+            "workspace:lint",
+            "workspace:format",
+            "workspace:sync",
+            "memoflow:governance-check"
+          ],
+          "unit-1": [],
+          "unit-2": [],
+          "unit-3": ["desktop:test"],
+          "build": [
+            "account-ui:build",
+            "app-vue:build",
+            "desktop:build",
+            "ui-storybook:build",
+            "web:build",
+            "account-ui:typecheck",
+            "app-vue:typecheck",
+            "desktop:typecheck",
+            "ui-storybook:typecheck",
+            "web:typecheck"
+          ],
+          "web-unit-1": ["app-vue:test#1/2", "web:test"],
+          "web-unit-2": ["app-vue:test#2/2"],
+          "server-unit": [],
+          "verification-children": ["desktop:test:ipc", "desktop:test:main"],
+          "web-visual": ["web:e2e:visual-regression"],
+          "component-browser": ["ui-storybook:test:interaction"],
+          "contract": ["account-ui:test:contract"]
         },
         "serverShards": [
           {

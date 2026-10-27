@@ -15,8 +15,7 @@ import {
   createNotificationClickNavigation,
 } from '@memoflow/notification-ui';
 import { usePresentationPreferenceStore } from '@memoflow/app-vue';
-import { useAuthenticationStore } from '@memoflow/app-vue/modules/authentication';
-import { useAccountStore } from '@memoflow/app-vue/modules/account';
+import { useAccountStore, useAuthenticationStore } from '@memoflow/account-ui';
 import { progressStart, progressDone } from '@memoflow/ui-vue-shadcn/composables/useProgressBar';
 
 import App from '../App.vue';
@@ -34,7 +33,7 @@ import {
 import { shouldRedirectAuthenticatedDesktopEntry } from './route-entry';
 import { createCloudAuthIpcClient } from '@memoflow/cloud-auth';
 import { createResultIpcClient } from '@memoflow/ipc-client';
-import { createAccountIpcClient } from '@memoflow/account/client';
+import { createAccountIpcClient } from '@memoflow/account-client';
 
 export async function bootstrapMainApp() {
   const app = createApp(App);
@@ -61,7 +60,7 @@ export async function bootstrapMainApp() {
   const localAccount = await createAccountIpcClient(
     createResultIpcClient({ bridge }),
   ).getMyProfile();
-  if (localAccount.ok) accountStore.setCurrentAccount(localAccount.data.account.toDTO());
+  if (localAccount.ok) accountStore.setCurrentAccount(localAccount.data.account);
   else accountStore.reset();
 
   const router = createAppRouter({

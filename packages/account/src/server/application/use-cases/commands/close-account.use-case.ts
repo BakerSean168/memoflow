@@ -6,7 +6,7 @@
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
-import type { CloseAccountReq } from '@memoflow/contracts/account';
+import type { CloseAccountReq } from '@memoflow/account-contracts';
 import type {
   AccountClosureCoordinator,
   AccountClosureReceipt,

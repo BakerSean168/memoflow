@@ -25,12 +25,12 @@ import {
   AccountViewSchema,
   AccountClosureReceiptSchema,
   BusinessDataSummarySchema,
-} from '@memoflow/contracts/account';
+} from '@memoflow/account-contracts';
 import type {
   AccountClientDTO,
   AccountView,
   CloudIdentitySummary,
-} from '@memoflow/contracts/account';
+} from '@memoflow/account-contracts';
 import { map as mapResult } from '@memoflow/contracts/result';
 import {
   OperationTimelineEntrySchema,

@@ -14,11 +14,11 @@ describe('account close receipt envelope surface', () => {
   );
   const electron = readFileSync(resolve(__dirname, '../electron/index.ts'), 'utf8');
   const lifecycle = readFileSync(
-    resolve(__dirname, '../../../contracts/src/modules/account/api/account-lifecycle.dto.ts'),
+    resolve(__dirname, '../../../account-contracts/src/api/account-lifecycle.dto.ts'),
     'utf8',
   );
   const dtosIndex = readFileSync(
-    resolve(__dirname, '../../../contracts/src/modules/account/dtos/index.ts'),
+    resolve(__dirname, '../../../account-contracts/src/dtos/index.ts'),
     'utf8',
   );
 

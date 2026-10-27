@@ -138,7 +138,12 @@
           },
           {
             "sourceTag": "scope:account",
-            "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:account"]
+            "onlyDependOnLibsWithTags": [
+              "scope:shared",
+              "scope:patterns",
+              "scope:account",
+              "scope:ui"
+            ]
           },
           {
             "sourceTag": "scope:ai",
@@ -501,7 +506,12 @@
               },
               {
                 "sourceTag": "scope:account",
-                "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:account"]
+                "onlyDependOnLibsWithTags": [
+                  "scope:shared",
+                  "scope:patterns",
+                  "scope:account",
+                  "scope:ui"
+                ]
               },
               {
                 "sourceTag": "scope:ai",
@@ -1126,7 +1136,12 @@
               },
               {
                 "sourceTag": "scope:account",
-                "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:account"]
+                "onlyDependOnLibsWithTags": [
+                  "scope:shared",
+                  "scope:patterns",
+                  "scope:account",
+                  "scope:ui"
+                ]
               },
               {
                 "sourceTag": "scope:ai",
@@ -1495,7 +1510,12 @@
               },
               {
                 "sourceTag": "scope:account",
-                "onlyDependOnLibsWithTags": ["scope:shared", "scope:patterns", "scope:account"]
+                "onlyDependOnLibsWithTags": [
+                  "scope:shared",
+                  "scope:patterns",
+                  "scope:account",
+                  "scope:ui"
+                ]
               },
               {
                 "sourceTag": "scope:ai",

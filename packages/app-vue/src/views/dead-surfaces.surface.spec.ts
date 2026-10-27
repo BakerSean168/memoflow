@@ -1,7 +1,7 @@
 import { installGoalUiHost } from '../di/goal-ui-host';
 import { describe, expect, it } from 'vitest';
 import { goalRoutes } from '@memoflow/goal-ui';
-import { accountRoutes } from '../modules/account/router';
+import { accountRoutes } from '@memoflow/account-ui';
 
 // Retired barrel exports / files are governance locks (app-vue-source-locks.json#dead-surfaces).
 

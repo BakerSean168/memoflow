@@ -8,6 +8,7 @@ import {
   createAssetsAliasEntries,
   createReliableMessagingContractsAliasEntries,
   createOperationsContractsAliasEntries,
+  createAccountContractsAliasEntries,
   createNotificationContractsAliasEntries,
   createContractsAliasEntries,
   createUiVueSourceAliasEntries,
@@ -53,6 +54,7 @@ const webBundledDevWorkspaceEntries = [
 ] as const;
 
 const webDevWorkspaceEntries = [
+  ['@memoflow/account-client', 'packages/account-client/src/index.ts'],
   ['@memoflow/cloud-auth-contracts', 'packages/cloud-auth-contracts/src/index.ts'],
   ['@memoflow/agent-gateway/server', 'packages/agent-gateway/src/server/index.ts'],
   ['@memoflow/agent-gateway', 'packages/agent-gateway/src/index.ts'],
@@ -229,6 +231,7 @@ export default defineConfig(({ mode, command }) => {
     ? [
         ...createReliableMessagingContractsAliasEntries(workspaceRoot),
         ...createOperationsContractsAliasEntries(workspaceRoot),
+        ...createAccountContractsAliasEntries(workspaceRoot),
         ...createNotificationContractsAliasEntries(workspaceRoot),
         ...createContractsAliasEntries(workspaceRoot),
       ]

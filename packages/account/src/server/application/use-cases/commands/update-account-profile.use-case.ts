@@ -6,7 +6,7 @@ import type { Result } from '@memoflow/contracts/result';
 import { ok, error } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { IAccountRepository } from '../../../domain';
-import type { AccountClientDTO, UpdateAccountReq } from '@memoflow/contracts/account';
+import type { AccountClientDTO, UpdateAccountReq } from '@memoflow/account-contracts';
 import type { Clock } from '@memoflow/time';
 
 export class UpdateAccountProfileUseCase {

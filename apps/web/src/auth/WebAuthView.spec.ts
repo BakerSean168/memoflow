@@ -3,9 +3,12 @@ import { flushPromises, mount } from '@vue/test-utils';
 import { createPinia } from 'pinia';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fail } from '@memoflow/contracts/result';
-import { AUTH_SERVICE_KEY } from '@memoflow/app-vue/di';
+import { AUTH_SERVICE_KEY, installAccountUiHost } from '@memoflow/app-vue/di';
 import WebAuthView from './WebAuthView.vue';
 import { createAuthI18n } from './i18n';
+
+// The view renders account-ui password surfaces, which reach the host facade.
+installAccountUiHost();
 
 vi.mock('vue-sonner', () => ({
   toast: {

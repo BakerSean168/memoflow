@@ -2,6 +2,8 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "paths": {
+      "@memoflow/account-ui": ["./packages/account-ui/src/index.ts"],
+      "@memoflow/account-ui/host": ["./packages/account-ui/src/account-ui-host.ts"],
       "@memoflow/cloud-auth-contracts": ["./packages/cloud-auth-contracts/src/index.ts"],
       "@memoflow/cloud-auth-contracts/*": ["./packages/cloud-auth-contracts/src/*.ts"],
       "@memoflow/routine-ui": ["./packages/routine-ui/src/index.ts"],
@@ -130,6 +132,9 @@
       "@memoflow/assets/*": ["./packages/assets/src/*/index.ts", "./packages/assets/src/*.ts"],
       "@memoflow/domain-shared": ["./packages/domain-shared/src/index.ts"],
       "@memoflow/domain-shared/*": ["./packages/domain-shared/src/*/index.ts"],
+      "@memoflow/account-contracts": ["./packages/account-contracts/src/index.ts"],
+      "@memoflow/account-contracts/*": ["./packages/account-contracts/src/*.ts"],
+      "@memoflow/account-client": ["./packages/account-client/src/index.ts"],
       "@memoflow/account": ["./packages/account/src/index.ts"],
       "@memoflow/account/*": ["./packages/account/src/*/index.ts"],
       "@memoflow/cloud-auth": ["./packages/cloud-auth/src/index.ts"],

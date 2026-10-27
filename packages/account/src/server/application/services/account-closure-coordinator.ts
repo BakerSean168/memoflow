@@ -395,7 +395,7 @@ export class AccountClosureCoordinator {
           ? account.toServerDTO()
           : ({
               id: identityId,
-            } as unknown as import('@memoflow/contracts/account').AccountServerDTO);
+            } as unknown as import('@memoflow/account-contracts').AccountServerDTO);
 
         const finishedNow = new Date(this.clock.now());
         const eventId = record.eventId ?? `closure:${record.id}:closed`;

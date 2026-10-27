@@ -32,7 +32,7 @@ import {
   DESKTOP_CLOUD_AUTH_SERVICE_KEY,
 } from '../../di/keys';
 import { readDesktopAccessSnapshot } from '../../shared/utils/desktop-profile-access';
-import { useAuthenticationStore } from '../../modules/authentication/stores/authentication-store';
+import { useAuthenticationStore } from '@memoflow/account-ui';
 
 const props = defineProps<{
   open: boolean;

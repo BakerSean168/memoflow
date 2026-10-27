@@ -47,8 +47,10 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   'goal-ui': ['./composables/useGoal', './host'],
   'notification-client': [],
   'routine-client': [],
+  'account-client': [],
   'routine-contracts': ['./method-library'],
   'notification-ui': ['./host'],
+  'account-ui': ['./host'],
   'setting-ui': ['./host'],
   'routine-ui': [
     './host',
@@ -58,6 +60,8 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
     './composables/routineUpcomingCache',
   ],
   'notification-contracts': ['./*'],
+  'account-contracts': ['./*'],
+  account: ['./api', './electron'],
   'task-contracts': ['./*'],
   'task-ui': ['./host', './composables/*', './components/*'],
   'schedule-contracts': ['./*'],
@@ -86,7 +90,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   ],
   contracts: [
     './relation',
-    './account',
+    './repository',
     './setting',
     './ai',
     './response',
@@ -95,7 +99,6 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
     './primitives',
     './primitives/*',
     './electron',
-    './mocks',
   ],
   // Transaction composition has no singleton connection side effects; shared owner code
   // can import it in Desktop without initializing the API's PostgreSQL client.
@@ -143,8 +146,6 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
     './shared/utils/desktop-profile-access',
     './plugins/i18n',
     './router',
-    './modules/authentication',
-    './modules/account',
     './modules/goal',
     './modules/task',
     './modules/schedule',

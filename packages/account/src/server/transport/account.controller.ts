@@ -8,8 +8,8 @@
 import type { Result } from '@memoflow/contracts/result';
 import { fail, ok } from '@memoflow/contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
-import { UpdateAccountSchema, CloseAccountSchema } from '@memoflow/contracts/account';
-import type { GetAccountRes, UpdateAccountRes } from '@memoflow/contracts/account';
+import { UpdateAccountSchema, CloseAccountSchema } from '@memoflow/account-contracts';
+import type { GetAccountRes, UpdateAccountRes } from '@memoflow/account-contracts';
 import { formatZodErrors } from '@memoflow/utils/result';
 import type { AccountApplicationPort } from '../application';
 
@@ -42,7 +42,7 @@ export class AccountController {
   async closeAccount(
     input: unknown,
     cx: ExecutionContext,
-  ): Promise<Result<import('@memoflow/contracts/account').CloseAccountRes>> {
+  ): Promise<Result<import('@memoflow/account-contracts').CloseAccountRes>> {
     const parsed = CloseAccountSchema.safeParse(input);
     if (!parsed.success) {
       return fail({

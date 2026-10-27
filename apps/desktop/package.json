@@ -106,6 +106,9 @@
     "@memoflow/schedule-ui": "workspace:*",
     "@memoflow/schedule-client": "workspace:*",
     "@memoflow/account": "workspace:*",
+    "@memoflow/account-client": "workspace:*",
+    "@memoflow/account-contracts": "workspace:*",
+    "@memoflow/account-ui": "workspace:*",
     "@powersync/node": "1.1.0",
     "@memoflow/notification-ui": "workspace:*",
     "@memoflow/scheduler": "workspace:*"

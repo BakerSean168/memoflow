@@ -11,7 +11,7 @@
  *    追踪到外部源码目录并触发 `rootDir: "./src"` 违规。
  */
 
-import type { AccountClientPort } from '@memoflow/account/client';
+import type { AccountClientPort } from '@memoflow/account-client';
 import type {
   AIClientPort,
   AssistantRuntimeClient,

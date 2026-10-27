@@ -12,7 +12,7 @@ import {
 // Desktop renderer tests import many workspace packages through their source
 // entrypoints so Electron-specific adapters stay aligned with local edits.
 const desktopTestWorkspaceEntries = [
-  ['@memoflow/account/client', 'packages/account/src/client/index.ts'],
+  ['@memoflow/account-client', 'packages/account-client/src/index.ts'],
   ['@memoflow/account/electron', 'packages/account/src/electron/index.ts'],
   ['@memoflow/goal-client', 'packages/goal-client/src/index.ts'],
   ['@memoflow/notification-ui/host', 'packages/notification-ui/src/notification-ui-host.ts'],

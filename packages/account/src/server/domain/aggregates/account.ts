@@ -1,7 +1,7 @@
 import type { Instant } from '@memoflow/contracts/primitives';
 /** Account Aggregate Root - Server-side implementation. */
 
-import type { AccountClientDTO, AccountServerDTO } from '@memoflow/contracts/account';
+import type { AccountClientDTO, AccountServerDTO } from '@memoflow/account-contracts';
 import { AggregateRoot } from '@memoflow/utils/domain';
 
 // IdentityId from shared primitives (cross-module shared type)
@@ -9,7 +9,7 @@ import { IdentityId } from '@memoflow/domain-shared/shared';
 
 import { AccountProfile, AccountStatus } from '../value-objects';
 
-import type { AccountEventMap } from '@memoflow/contracts/account';
+import type { AccountEventMap } from '@memoflow/account-contracts';
 
 /** Domain state interface for the Account aggregate */
 export interface AccountState {

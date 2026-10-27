@@ -31,19 +31,14 @@
     "./router": {
       "types": "./dist/router/index.d.ts",
       "import": "./dist/router/index.js"
-    },
-    "./modules/authentication": {
-      "types": "./dist/modules/authentication/index.d.ts",
-      "import": "./dist/modules/authentication/index.js"
-    },
-    "./modules/account": {
-      "types": "./dist/modules/account/index.d.ts",
-      "import": "./dist/modules/account/index.js"
     }
   },
   "dependencies": {
     "@tanstack/vue-query": "5.103.2",
     "@memoflow/account": "workspace:*",
+    "@memoflow/account-client": "workspace:*",
+    "@memoflow/account-contracts": "workspace:*",
+    "@memoflow/account-ui": "workspace:*",
     "@memoflow/repository-ui": "workspace:*",
     "@memoflow/routine-contracts": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",

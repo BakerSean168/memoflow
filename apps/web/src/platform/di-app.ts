@@ -1,4 +1,5 @@
 import {
+  installAccountUiHost,
   installGoalUiHost,
   installAiUiHost,
   installNotificationUiHost,
@@ -55,7 +56,7 @@ const authService = createCloudAuthHttpClient(resultHttpClient, {
 });
 
 const accountService = createLazyService(async () => {
-  const { createAccountHttpClient } = await import('@memoflow/account/client');
+  const { createAccountHttpClient } = await import('@memoflow/account-client');
   return createAccountHttpClient(resultHttpClient);
 });
 
@@ -139,6 +140,7 @@ const taskService = createLazyService(async () => {
 });
 
 export function installAppServices(app: App): void {
+  installAccountUiHost();
   installGoalUiHost();
   installAiUiHost();
   installTaskUiHost();

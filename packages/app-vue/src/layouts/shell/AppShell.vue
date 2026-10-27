@@ -36,8 +36,7 @@ import { useShellRouterSync, AUTO_FOCUS_VIEWPORT, moduleForPath } from './useShe
 import { useDesktopWindowControls } from '../../shared/composables/useDesktopWindowControls';
 import { hasDesktopAuthApi } from '../../shared/utils/desktop-auth-recovery';
 import { useNotificationUnreadQuery } from '@memoflow/notification-ui';
-import { useAuthenticationStore } from '../../modules/authentication/stores/authentication-store';
-import { useAccountStore } from '../../modules/account/stores/account-store';
+import { useAccountStore, useAuthenticationStore } from '@memoflow/account-ui';
 import AIChatView from '@memoflow/ai-ui/views/AIChatView.vue';
 import type { ConversationSummary } from '@memoflow/ai-ui/composables/types';
 import WindowHeader, { type WindowHeaderCapsule } from './WindowHeader.vue';

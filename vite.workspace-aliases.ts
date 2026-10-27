@@ -367,6 +367,17 @@ export function createUiVueSourceAliasEntries(workspaceRoot: string): Alias[] {
 
   return [
     {
+      find: /^@memoflow\/account-ui\/host$/,
+      replacement: resolveFromWorkspace(
+        workspaceRoot,
+        'packages/account-ui/src/account-ui-host.ts',
+      ),
+    },
+    {
+      find: /^@memoflow\/account-ui$/,
+      replacement: resolveFromWorkspace(workspaceRoot, 'packages/account-ui/src/index.ts'),
+    },
+    {
       find: /^@memoflow\/routine-ui$/,
       replacement: resolveFromWorkspace(workspaceRoot, 'packages/routine-ui/src/index.ts'),
     },
@@ -656,6 +667,24 @@ export function createRepositoryContractsAliasEntries(workspaceRoot: string): Al
     {
       find: /^@memoflow\/repository-contracts\/(.+)$/,
       replacement: `${repositoryContractsRoot}/$1`,
+    },
+  ];
+}
+
+export function createAccountContractsAliasEntries(workspaceRoot: string): Alias[] {
+  const accountContractsRoot = resolveFromWorkspace(
+    workspaceRoot,
+    'packages/account-contracts/src',
+  );
+
+  return [
+    {
+      find: /^@memoflow\/account-contracts$/,
+      replacement: `${accountContractsRoot}/index.ts`,
+    },
+    {
+      find: /^@memoflow\/account-contracts\/(.+)$/,
+      replacement: `${accountContractsRoot}/$1`,
     },
   ];
 }

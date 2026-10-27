@@ -4,6 +4,7 @@ import {
   type UserPreferenceProfile,
 } from '@memoflow/setting-contracts';
 import {
+  installAccountUiHost,
   installGoalUiHost,
   installAiUiHost,
   installNotificationUiHost,
@@ -18,6 +19,7 @@ import { setProductTimePreferences } from '@memoflow/app-vue/shared/utils/produc
 export function bootstrapVisualApp(params: URLSearchParams, timeZone = 'UTC') {
   // Production app wiring lives in installAppServices(); the harness mounts
   // goal-ui surfaces without it, so bind the extracted host up front.
+  installAccountUiHost();
   installGoalUiHost();
   installAiUiHost();
   installTaskUiHost();

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import type { AccountClientDTO, CloudIdentitySummary } from '@memoflow/contracts/account';
+import type { AccountClientDTO, CloudIdentitySummary } from '@memoflow/account-contracts';
 import { presentErrorMessage } from '@memoflow/http-client';
 
 import { useAppSession } from './useAppSession';
@@ -35,7 +35,7 @@ export function useAccountProfile() {
       return;
     }
 
-    setAccount(result.data.account.toDTO());
+    setAccount(result.data.account);
     setCloudIdentity(result.data.cloudIdentity);
     setIsLoading(false);
   }

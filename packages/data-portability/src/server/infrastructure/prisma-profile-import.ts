@@ -1,7 +1,7 @@
 import { ProfileImportError } from '../application/profile-import-error';
 import { z } from 'zod';
 import type { Prisma, PrismaClient, ProfileImportOperation } from '@memoflow/database';
-import { BusinessDataSummarySchema, type BusinessDataSummary } from '@memoflow/contracts/account';
+import { BusinessDataSummarySchema, type BusinessDataSummary } from '@memoflow/account-contracts';
 import {
   ProfileImportRequestSchema,
   ProfileImportCommitRequestSchema,

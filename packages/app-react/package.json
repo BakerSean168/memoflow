@@ -34,6 +34,8 @@
     "@memoflow/schedule-client": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/account": "workspace:*",
+    "@memoflow/account-client": "workspace:*",
+    "@memoflow/account-contracts": "workspace:*",
     "@memoflow/goal-client": "workspace:*"
   },
   "name": "@memoflow/app-react",

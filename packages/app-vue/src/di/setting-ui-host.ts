@@ -25,9 +25,11 @@ import {
   SettingsStatusBlock,
 } from '../components/shared/settings';
 import AgentDriverIcon from '@memoflow/ai-ui/components/AgentDriverIcon.vue';
-import AccountProfileSection from '../modules/account/components/AccountProfileSection.vue';
-import CloudPasswordSection from '../modules/account/components/CloudPasswordSection.vue';
-import ExternalAgentConnectionsSection from '../modules/account/components/ExternalAgentConnectionsSection.vue';
+import {
+  AccountProfileSection,
+  CloudPasswordSection,
+  ExternalAgentConnectionsSection,
+} from '@memoflow/account-ui';
 import { KnowledgeWriteRequestLedger } from '@memoflow/repository-ui';
 import {
   getAIErrorMessage,

@@ -27,7 +27,6 @@ export type {
   ExecutionSource,
   RequestContext,
 } from '@memoflow/transport-contracts';
-export * from './account-active-checker';
 
 // P1 S4（Issue #633）：ModuleManifest/CommandRegistry 与
 // ServerTransportModuleContext/ServerModuleHandle 真身已迁至

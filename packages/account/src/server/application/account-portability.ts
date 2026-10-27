@@ -6,7 +6,7 @@ import type {
 import {
   PortableAccountProfileV3Schema,
   type PortableAccountProfileV3,
-} from '@memoflow/contracts/account';
+} from '@memoflow/account-contracts';
 import { PreferencePortablePayloadV3Schema } from '@memoflow/setting-contracts';
 import {
   instantToYmdInTimeZone,

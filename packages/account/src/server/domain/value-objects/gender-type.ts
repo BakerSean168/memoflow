@@ -1,7 +1,7 @@
 import {
   GenderType as GenderTypeContract,
   type GenderType as IGenderType,
-} from '@memoflow/contracts/account';
+} from '@memoflow/account-contracts';
 
 export type GenderType = IGenderType & { readonly __brand: unique symbol };
 

@@ -55,6 +55,7 @@ describe('server feature shape semantic core', () => {
     // still need an in-package src/client directory.
     const src = makeSourceRoot({ omit: ['client'] });
     expect(auditPackageShape('notification', src)).toBeNull();
+    expect(auditPackageShape('account', src)).toBeNull();
     expect(auditPackageShape('task', src)).toBeNull();
     expect(auditPackageShape('repository', src)).toBeNull();
     // Setting's semantic core is server/preferences, so its fixture needs it too;

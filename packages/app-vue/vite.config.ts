@@ -49,11 +49,6 @@ export default defineConfig({
         ),
         'plugins/i18n': path.resolve(__dirname, 'src/plugins/i18n.ts'),
         'router/index': path.resolve(__dirname, 'src/router/index.ts'),
-        'modules/authentication/index': path.resolve(
-          __dirname,
-          'src/modules/authentication/index.ts',
-        ),
-        'modules/account/index': path.resolve(__dirname, 'src/modules/account/index.ts'),
       },
       formats: ['es'],
       fileName: (_format, entryName) => `${entryName}.js`,

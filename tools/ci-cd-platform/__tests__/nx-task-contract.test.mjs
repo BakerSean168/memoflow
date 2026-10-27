@@ -434,6 +434,9 @@ test('Unit/Contract aliases come from exact Nx execution configuration, not proj
   );
   const selected = await selectCiTasks({ files: [], full: true });
   assert.deepEqual(selected.unitContractAliases, [
+    'account-client',
+    'account-contracts',
+    'account-ui',
     'ai-client',
     'ai-contracts',
     'ai-ui',

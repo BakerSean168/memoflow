@@ -4,6 +4,7 @@ import schedule from '../schedule/presentation-authority/vite.config.ts';
 import {
   createReliableMessagingContractsAliasEntries,
   createOperationsContractsAliasEntries,
+  createAccountContractsAliasEntries,
   createNotificationContractsAliasEntries,
   createTaskContractsAliasEntries,
   createAssetsAliasEntries,
@@ -27,6 +28,7 @@ export default defineConfig(({ mode }) =>
         },
         ...createReliableMessagingContractsAliasEntries(workspace),
         ...createOperationsContractsAliasEntries(workspace),
+        ...createAccountContractsAliasEntries(workspace),
         ...createNotificationContractsAliasEntries(workspace),
         ...createTaskContractsAliasEntries(workspace),
         ...createAssetsAliasEntries(workspace),

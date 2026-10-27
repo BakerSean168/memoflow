@@ -12,6 +12,7 @@ export default mergeConfig(
     environment: 'happy-dom',
     aliasEntries: createUiVueSourceAliasEntries(workspaceRoot),
     aliases: {
+      '@memoflow/account-client': '../../packages/account-client/src/index.ts',
       '@memoflow/http-client': '../../packages/http-client/src/index.ts',
       '@memoflow/ipc-client': '../../packages/ipc-client/src/index.ts',
       '@memoflow/ai-client': '../../packages/ai-client/src/index.ts',

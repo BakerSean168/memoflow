@@ -32,6 +32,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc tsconfig.base.json t
 COPY apps/api/package.json ./apps/api/package.json
 COPY apps/migrator/package.json ./apps/migrator/package.json
 COPY packages/account/package.json ./packages/account/package.json
+COPY packages/account-contracts/package.json ./packages/account-contracts/package.json
 COPY packages/ai/package.json ./packages/ai/package.json
 COPY packages/cloud-auth/package.json ./packages/cloud-auth/package.json
 COPY packages/cloud-auth-contracts/package.json ./packages/cloud-auth-contracts/package.json
@@ -92,6 +93,7 @@ RUN --mount=type=cache,id=memoflow-api-pnpm-store,target=/pnpm/store \
 COPY apps/api ./apps/api
 COPY apps/migrator ./apps/migrator
 COPY packages/account ./packages/account
+COPY packages/account-contracts ./packages/account-contracts
 COPY packages/ai ./packages/ai
 COPY packages/cloud-auth ./packages/cloud-auth
 COPY packages/cloud-auth-contracts ./packages/cloud-auth-contracts

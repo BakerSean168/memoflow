@@ -1,4 +1,5 @@
 import {
+  installAccountUiHost,
   installGoalUiHost,
   installAiUiHost,
   installNotificationUiHost,
@@ -14,7 +15,7 @@ import { ref } from 'vue';
 import { createResultIpcClient } from '@memoflow/ipc-client';
 import { toast } from 'vue-sonner';
 import { getI18nGlobal } from '@memoflow/app-vue/plugins/i18n';
-import { createAccountIpcClient } from '@memoflow/account/client';
+import { createAccountIpcClient } from '@memoflow/account-client';
 import { createCloudAuthIpcClient } from '@memoflow/cloud-auth';
 import { createGoalIpcClient } from '@memoflow/goal-client';
 import { createGoalKnowledgeIpcClient } from '@memoflow/relation/client';
@@ -68,8 +69,7 @@ import {
   defaultModuleCapsules,
 } from '@memoflow/app-vue/di';
 import { createGoalDraftCheckpointStore } from '@memoflow/goal-ui';
-import { useAuthenticationStore } from '@memoflow/app-vue/modules/authentication';
-import { useAccountStore } from '@memoflow/app-vue/modules/account';
+import { useAccountStore, useAuthenticationStore } from '@memoflow/account-ui';
 import { readDesktopAccessSnapshot } from '@memoflow/app-vue/desktop';
 // Residual 941: host bridge via requireElectronBridge sole helper.
 import { requireElectronBridge } from './electron-bridge';
@@ -95,6 +95,7 @@ export function installDesktopAppServices(
   app: App,
   initialSnapshot: DesktopAccessSnapshot | null = null,
 ): void {
+  installAccountUiHost();
   installGoalUiHost();
   installAiUiHost();
   installTaskUiHost();

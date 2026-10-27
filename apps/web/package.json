@@ -61,6 +61,9 @@
     "@memoflow/schedule-client": "workspace:*",
     "pinia-plugin-persistedstate": "^4.7.1",
     "@memoflow/account": "workspace:*",
+    "@memoflow/account-client": "workspace:*",
+    "@memoflow/account-contracts": "workspace:*",
+    "@memoflow/account-ui": "workspace:*",
     "@memoflow/notification-ui": "workspace:*"
   },
   "name": "@memoflow/web"

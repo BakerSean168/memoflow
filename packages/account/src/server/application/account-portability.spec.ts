@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { PortableAccountProfileV3Schema } from '@memoflow/contracts/account';
-
+import { PortableAccountProfileV3Schema } from '@memoflow/account-contracts';
 import { PreferencePortablePayloadV3Schema } from '@memoflow/setting-contracts';
 import type { PortableCapabilityExecutionContext } from '@memoflow/data-portability-contracts';
 import type { Instant } from '@memoflow/contracts/primitives';

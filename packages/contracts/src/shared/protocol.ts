@@ -1,5 +1,5 @@
-import type { AccountEventMap } from '../modules/account/protocol/account-event-map';
-import type { AccountRpcMap } from '../modules/account/protocol/account-rpc-map';
+import type { AccountEventMap } from '@memoflow/account-contracts';
+import type { AccountRpcMap } from '@memoflow/account-contracts';
 import type { AIEventMap } from '@memoflow/ai-contracts/protocol/ai-event-map';
 import type { AIRpcMap } from '@memoflow/ai-contracts/protocol/ai-rpc-map';
 import type { DataPortabilityRpcMap } from '@memoflow/data-portability-contracts';

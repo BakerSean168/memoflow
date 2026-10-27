@@ -13,7 +13,7 @@ import AppShell from '../layouts/shell/AppShell.vue';
 import ShellHomeRoute from '../layouts/shell/shell-home-route';
 
 // Module routes
-import { accountRoutes } from '../modules/account/router';
+import { accountRoutes } from '@memoflow/account-ui';
 import { goalRoutes } from '@memoflow/goal-ui';
 import { taskRoutes } from '@memoflow/task-ui';
 import { routineRoutes } from '@memoflow/routine-ui';

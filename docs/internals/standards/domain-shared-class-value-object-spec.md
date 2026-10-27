@@ -91,7 +91,7 @@ export class Money extends ValueObject<MoneyDTO> { ... }
 ```typescript
 import { ValueObject } from '@memoflow/utils';
 // 1. 引入 Contracts 中的 DTO 和 PersistenceDTO
-import type { AccountProfileDTO, AccountProfilePersistenceDTO } from '@memoflow/contracts/account';
+import type { AccountProfileDTO, AccountProfilePersistenceDTO } from '@memoflow/account-contracts';
 import { GenderType } from './gender-type';
 
 export class AccountProfile extends ValueObject<AccountProfileDTO> {

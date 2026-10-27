@@ -65,7 +65,7 @@ const mocks = vi.hoisted(() => {
     })),
     getMyProfile: vi.fn(async () => ({
       ok: true,
-      data: { account: { toDTO: () => ({ id: 'cloud-1' }) } },
+      data: { account: { id: 'cloud-1' }, cloudIdentity: null },
     })),
     createNotificationStartupHook: vi.fn(() => notificationHook),
     installDesktopServerStateRuntime: vi.fn(() => serverStateRuntime),
@@ -108,11 +108,8 @@ vi.mock('@memoflow/app-vue/router', () => ({
   createAppRouter: mocks.createAppRouter,
 }));
 
-vi.mock('@memoflow/app-vue/modules/authentication', () => ({
+vi.mock('@memoflow/account-ui', () => ({
   useAuthenticationStore: mocks.useAuthenticationStore,
-}));
-
-vi.mock('@memoflow/app-vue/modules/account', () => ({
   useAccountStore: vi.fn(() => mocks.accountStore),
 }));
 
@@ -130,7 +127,7 @@ vi.mock('@memoflow/cloud-auth', () => ({
   createCloudAuthIpcClient: vi.fn(() => ({ getSession: mocks.getCloudSession })),
 }));
 
-vi.mock('@memoflow/account/client', () => ({
+vi.mock('@memoflow/account-client', () => ({
   createAccountIpcClient: vi.fn(() => ({ getMyProfile: mocks.getMyProfile })),
 }));
 

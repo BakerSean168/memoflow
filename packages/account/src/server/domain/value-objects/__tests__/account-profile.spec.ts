@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { AccountProfile } from '../account-profile';
 import { GenderType } from '../gender-type';
-import type { AccountProfileDTO } from '@memoflow/contracts/account';
+import type { AccountProfileDTO } from '@memoflow/account-contracts';
 import { requireYmd } from '@memoflow/contracts/primitives';
 
 // ---------------------------------------------------------------------------
