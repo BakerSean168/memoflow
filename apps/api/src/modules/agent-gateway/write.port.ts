@@ -26,7 +26,7 @@ import {
 } from '@memoflow/agent-gateway';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { UserTimeContextPort } from '@memoflow/time';
-import { ResultErrorException } from '@memoflow/contracts/result';
+import { ResultErrorException } from '@memoflow/transport-contracts/result';
 import { z } from 'zod';
 /** API composition binds application operations, never exposes business repositories to MCP. */
 export function bindGatewayWrites(

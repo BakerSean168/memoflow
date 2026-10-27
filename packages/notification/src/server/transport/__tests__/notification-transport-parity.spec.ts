@@ -26,7 +26,7 @@
  */
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import type { RequestHandler } from 'express';
-import { NotificationChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
+import { NotificationChannels, type IElectronModuleContext } from '@memoflow/desktop-contracts';
 import type { ExecutionContext, RequestContext } from '@memoflow/contracts/shared';
 import type { NotificationInboxPort, NotificationOperationsPort } from '../../application';
 import { registerNotificationRoutes } from '../../../api/routes';

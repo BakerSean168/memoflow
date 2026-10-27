@@ -36,7 +36,8 @@
     "@memoflow/account": "workspace:*",
     "@memoflow/account-client": "workspace:*",
     "@memoflow/account-contracts": "workspace:*",
-    "@memoflow/goal-client": "workspace:*"
+    "@memoflow/goal-client": "workspace:*",
+    "@memoflow/transport-contracts": "workspace:*"
   },
   "name": "@memoflow/app-react",
   "peerDependencies": {

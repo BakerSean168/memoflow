@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import { createSchedulerPowerSyncModule, createSchedulerPowerSyncRepositories } from '../powersync';
 import { createScheduledInvocationRuntimeContribution } from '../runtime';
 

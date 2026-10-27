@@ -6,7 +6,7 @@
  */
 import { computed } from 'vue';
 import { useMutation, useQuery } from '@tanstack/vue-query';
-import { unwrap } from '@memoflow/contracts/result';
+import { unwrap } from '@memoflow/transport-contracts/result';
 import type { LabelClientDTO } from '@memoflow/label-contracts';
 import { LABEL_SERVICE_KEY } from '../../di/keys';
 import { useServerStateIdentityScope, useServerStateRuntime } from '../../platform/server-state';

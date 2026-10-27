@@ -1,5 +1,5 @@
 import { session } from 'electron';
-import { ResultErrorException } from '@memoflow/contracts/result';
+import { ResultErrorException } from '@memoflow/transport-contracts/result';
 import { ProfileCleanup, LocalProfileIdSchema } from './profile-cleanup';
 import { randomUUID } from 'node:crypto';
 import type { Clock } from '@memoflow/time';
@@ -18,7 +18,7 @@ import { ProfileRegistry, type ProfileDescriptor } from './profile-registry';
 import { ProfileSnapshotService } from './profile-snapshot-service';
 import { DesktopProfileAccessContext } from './profile-access-context';
 import { ElectronBootstrapper } from '../bootstrap';
-import type { IElectronAuthContext } from '@memoflow/contracts/electron';
+import type { IElectronAuthContext } from '@memoflow/desktop-contracts';
 import type { WindowManager } from '../lifecycle/window-manager';
 import { Account } from '@memoflow/account/electron';
 import type { AccountClientDTO } from '@memoflow/account-contracts';

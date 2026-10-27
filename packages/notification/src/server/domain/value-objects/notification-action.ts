@@ -1,5 +1,5 @@
 import { ValueObject } from '@memoflow/utils/domain';
-import { isJsonValue } from '@memoflow/contracts/result';
+import { isJsonValue } from '@memoflow/transport-contracts/result';
 import type { NotificationActionDTO } from '@memoflow/notification-contracts';
 
 function cloneAction(action: NotificationActionDTO): NotificationActionDTO {

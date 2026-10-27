@@ -10,7 +10,7 @@ import type { TaskGoalMeasurementReadPort } from '../application/ports';
  * 仅在 Electron 主进程中使用。
  */
 
-import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
+import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import type { UserTimeContextPort } from '@memoflow/time';
 import {
   createTaskModule,

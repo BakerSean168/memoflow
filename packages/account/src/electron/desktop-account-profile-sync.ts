@@ -1,7 +1,7 @@
 import type { UpdateAccountReq, UpdateAccountRes } from '@memoflow/account-contracts';
 import { UpdateAccountSchema } from '@memoflow/account-contracts';
-import type { Result } from '@memoflow/contracts/result';
-import { fail } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { fail } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { formatZodErrors } from '@memoflow/utils/result';
 import type { UpdateAccountProfileUseCase } from '../server/application';

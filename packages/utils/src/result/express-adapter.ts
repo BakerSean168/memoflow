@@ -44,7 +44,7 @@ import {
   getHttpStatusCode,
   publicFailureToHttpStatus,
   createHttpResponseBuilder,
-} from '@memoflow/contracts/result';
+} from '@memoflow/transport-contracts/result';
 import type { ExecutionContext, RequestContext } from '@memoflow/contracts/shared';
 import { mapPrismaError } from '../errors/prisma-error-mapper';
 import { generateUUID } from '../shared/uuid';

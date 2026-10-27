@@ -14,9 +14,9 @@
  * 导入 package `/api` transport seam；app-local adapter 保持在 port 接口之后。
  */
 import type { KnowledgeNotePersistedRef } from '@memoflow/ai-contracts';
-import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
+import type { KnowledgeDocumentId } from '@memoflow/shared-primitives';
 import type { RepositoryApplicationPort } from '@memoflow/repository';
-import { ResultErrorException } from '@memoflow/contracts/result';
+import { ResultErrorException } from '@memoflow/transport-contracts/result';
 import type {
   CreateKnowledgeNotePersistenceInput,
   CreateKnowledgeNotePersistenceResult,

@@ -5,8 +5,8 @@
  * Uses ResultIpcClient — all methods return Result<T> directly.
  */
 
-import type { Result } from '@memoflow/contracts/result';
-import { TaskChannels } from '@memoflow/contracts/electron';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { TaskChannels } from '@memoflow/desktop-contracts';
 import type { ITaskOccurrenceApiClient, IResultIpcClient } from '../types';
 import type {
   GetTaskOccurrencesByRangeReq,

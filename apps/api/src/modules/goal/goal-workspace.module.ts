@@ -4,7 +4,7 @@ import {
   GoalWorkspaceKnowledgePageInvocationSchema,
   GoalWorkspaceTaskPageInvocationSchema,
 } from '@memoflow/workspace-contracts';
-import { errorCodeToHttpStatus, type Result } from '@memoflow/contracts/result';
+import { errorCodeToHttpStatus, type Result } from '@memoflow/transport-contracts/result';
 import type { GoalWorkspaceApplicationPort } from '@memoflow/goal';
 import type { IApiModule, IApiModuleContext } from '../../shared/contracts/api-module.js';
 import type { AuthenticatedRequest } from '../../shared/infrastructure/http/middlewares/auth-middleware.js';

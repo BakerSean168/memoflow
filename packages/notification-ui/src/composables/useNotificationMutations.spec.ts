@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { fail, ok } from '@memoflow/contracts/result';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 import type { NotificationClientDTO } from '@memoflow/notification-contracts';
 import { notificationQueryKeys } from '@notification-ui-test-host/platform/server-state/query-keys';
 import { mountNotificationComposable } from '../test-support/notification-query-test-utils';

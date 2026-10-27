@@ -1,5 +1,5 @@
 import { LabelColorSchema } from '@memoflow/label-contracts';
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import type { LabelRecord, NewLabelRecord } from '../../domain/label';
 import type { LabelListOptions, LabelRepository } from '../../domain/label-repository';
 

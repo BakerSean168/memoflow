@@ -1,4 +1,4 @@
-import type { DesktopUpdateSnapshotDTO } from '@memoflow/contracts/electron';
+import type { DesktopUpdateSnapshotDTO } from '@memoflow/desktop-contracts';
 
 export type DesktopUpdateShellIndicatorKind = 'ready' | 'attention';
 

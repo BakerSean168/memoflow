@@ -83,7 +83,7 @@ import {
   TaskReminderType,
   type TaskReminderConfigDTO,
 } from '@memoflow/task-contracts';
-import type { Ymd } from '@memoflow/contracts/primitives';
+import type { Ymd } from '@memoflow/shared-primitives';
 import { DropdownMenuItem, DropdownMenuSeparator } from '@memoflow/ui-vue-shadcn';
 import { addYmdDays } from '@memoflow/time';
 import { taskUiHost } from '../task-ui-host';

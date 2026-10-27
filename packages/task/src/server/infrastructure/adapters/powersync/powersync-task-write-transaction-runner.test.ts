@@ -1,11 +1,11 @@
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import type {
   IElectronDatabase,
   IElectronDatabaseQueryResult,
   IElectronDatabaseTransaction,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import { ImportanceLevel } from '@memoflow/shared-primitives';
 import {
   TaskGoalBindingTrigger,

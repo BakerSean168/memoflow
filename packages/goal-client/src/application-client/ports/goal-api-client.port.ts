@@ -8,7 +8,7 @@
  * Types imported from @memoflow/goal-contracts.
  */
 
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 import type {
   GoalClientDTO,
   GoalMutationReceipt,
@@ -54,8 +54,8 @@ export interface IGoalApiClient {
     status?: string[];
     systemView?: GoalSystemView;
     labelIdsAll?: string[];
-    targetStart?: import('@memoflow/contracts/primitives').Ymd;
-    targetEnd?: import('@memoflow/contracts/primitives').Ymd;
+    targetStart?: import('@memoflow/shared-primitives').Ymd;
+    targetEnd?: import('@memoflow/shared-primitives').Ymd;
     includeChildren?: boolean;
   }): Promise<Result<QueryGoalsRes>>;
   getHomeSummary(): Promise<Result<GoalHomeProgressSummary>>;

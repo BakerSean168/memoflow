@@ -23,7 +23,10 @@
     "@memoflow/http-client": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",
     "@memoflow/label-contracts": "workspace:*",
-    "@memoflow/time": "workspace:*"
+    "@memoflow/time": "workspace:*",
+    "@memoflow/desktop-contracts": "workspace:*",
+    "@memoflow/transport-contracts": "workspace:*",
+    "@memoflow/shared-primitives": "workspace:*"
   },
   "devDependencies": {
     "@memoflow/test-utils": "workspace:*",

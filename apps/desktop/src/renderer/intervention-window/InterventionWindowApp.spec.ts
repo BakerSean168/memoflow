@@ -6,8 +6,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   RoutineWindowChannels,
   type InterventionWindowProjection,
-} from '@memoflow/contracts/electron';
-import { ok } from '@memoflow/contracts/result';
+} from '@memoflow/desktop-contracts';
+import { ok } from '@memoflow/transport-contracts/result';
 import InterventionWindowApp from './InterventionWindowApp.vue';
 
 const t0 = Date.parse('2026-08-27T04:00:00.000Z');

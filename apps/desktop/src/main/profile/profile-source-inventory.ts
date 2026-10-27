@@ -1,9 +1,9 @@
-import { ResultErrorException } from '@memoflow/contracts/result';
+import { ResultErrorException } from '@memoflow/transport-contracts/result';
 import { createHash } from 'node:crypto';
 import { createReadStream, promises as fs } from 'node:fs';
 import path from 'node:path';
 import { z } from 'zod';
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import type { ProfileImportBlocker } from '@memoflow/data-portability-contracts';
 import { profileImportDigest } from '@memoflow/data-portability';
 import { readProfileSqliteSnapshot } from './profile-sqlite-snapshot';

@@ -1,5 +1,5 @@
 import type { Instant } from '@memoflow/time';
-import { ResultCode, ResultErrorException } from '@memoflow/contracts/result';
+import { ResultCode, ResultErrorException } from '@memoflow/transport-contracts/result';
 import {
   findRoutineMethod,
   type RoutineMethodId,

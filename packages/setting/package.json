@@ -39,7 +39,9 @@
     "@memoflow/utils": "workspace:*",
     "date-fns": "^4.4.0",
     "express": "^5.2.1",
-    "zod": "^4.6.5"
+    "zod": "^4.6.5",
+    "@memoflow/desktop-contracts": "workspace:*",
+    "@memoflow/transport-contracts": "workspace:*"
   },
   "devDependencies": {
     "@types/express": "^5.0.0"

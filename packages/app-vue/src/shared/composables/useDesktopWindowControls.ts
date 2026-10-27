@@ -13,9 +13,9 @@
  * DesktopAuthApi is invoke-only — window controls must not collapse onto it.
  */
 import { inject, reactive } from 'vue';
-import { isOk, type Result } from '@memoflow/contracts/result';
+import { isOk, type Result } from '@memoflow/transport-contracts/result';
 import { DESKTOP_BRIDGE_KEY, type ElectronBridge } from '../../di/keys';
-import { RendererEventChannels, WindowChannels } from '@memoflow/contracts/electron';
+import { RendererEventChannels, WindowChannels } from '@memoflow/desktop-contracts';
 
 export interface WindowControlsState {
   isMaximized: boolean;

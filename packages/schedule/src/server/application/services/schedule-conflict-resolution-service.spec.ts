@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { requireYmd } from '@memoflow/contracts/primitives';
+import { requireYmd } from '@memoflow/shared-primitives';
 import { IdentityId } from '@memoflow/domain-shared';
 import type { IScheduleRepository } from '../../domain/repositories/i-schedule-repository';
 import { CalendarEntry } from '../../domain/aggregates/calendar-entry';

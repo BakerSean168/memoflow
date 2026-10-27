@@ -5,7 +5,7 @@ import {
   type TaskPlanPageQuery,
 } from '../../../domain/repositories/i-task-plan-repository';
 import { TaskPlan } from '../../../domain/aggregates/task-plan';
-import type { IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
+import type { IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import type { TaskPlanStatus } from '@memoflow/task-contracts';
 import { LabelColorSchema, type LabelClientDTO } from '@memoflow/label-contracts';
 import { AggregateRepositoryBase, createEventBusAdapter, type IEventBus } from '@memoflow/patterns';

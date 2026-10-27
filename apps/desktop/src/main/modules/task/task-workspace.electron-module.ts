@@ -3,10 +3,10 @@ import {
   TaskWorkspaceChannels,
   type IElectronModule,
   type IElectronModuleContext,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import { withAuthenticatedIdentity } from '@memoflow/host-runtime/electron-ipc';
 import { GetTaskWorkspaceInvocationSchema } from '@memoflow/workspace-contracts';
-import { fail } from '@memoflow/contracts/result';
+import { fail } from '@memoflow/transport-contracts/result';
 import type { TaskWorkspaceApplicationPort } from '@memoflow/task';
 
 export function createTaskWorkspaceElectronModule(options: {

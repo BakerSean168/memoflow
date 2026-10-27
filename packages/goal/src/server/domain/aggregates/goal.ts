@@ -1,4 +1,4 @@
-import type { Instant } from '@memoflow/contracts/primitives';
+import type { Instant } from '@memoflow/shared-primitives';
 import type { LabelDto } from '@memoflow/label-contracts';
 /**
  * Goal 聚合根实现

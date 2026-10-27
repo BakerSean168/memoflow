@@ -1,6 +1,6 @@
 import type { Context } from '@memoflow/contracts/shared';
 import { CalendarEntryResponseSchema } from '@memoflow/schedule-contracts';
-import { unwrap } from '@memoflow/contracts/result';
+import { unwrap } from '@memoflow/transport-contracts/result';
 import {
   projectPlannerCalendarEntry,
   projectPlannerTaskOccurrence,

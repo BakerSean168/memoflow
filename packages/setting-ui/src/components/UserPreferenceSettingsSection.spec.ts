@@ -1,7 +1,7 @@
 import { defineComponent, h, type PropType } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fail, ok } from '@memoflow/contracts/result';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 import type { PreferenceNamespace, UserPreferenceProfile } from '@memoflow/setting-contracts';
 import { createTestPinia } from '@memoflow/test-utils';
 import { SETTING_SERVICE_KEY } from '@setting-ui-test-host/di/keys';

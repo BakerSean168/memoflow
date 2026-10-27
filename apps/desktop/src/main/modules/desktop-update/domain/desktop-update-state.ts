@@ -5,7 +5,7 @@ import type {
   DesktopUpdateReleaseDTO,
   DesktopUpdateStateDTO,
   DesktopUpdateOperationDTO,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 
 type StateType = DesktopUpdateStateDTO['type'];
 type StateOf<T extends StateType> = Extract<DesktopUpdateStateDTO, { type: T }>;

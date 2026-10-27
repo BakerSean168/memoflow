@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, h } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
-import { fail, ok } from '@memoflow/contracts/result';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 import { NOTIFICATION_SERVICE_KEY } from '@notification-ui-test-host/di/keys';
 import {
   NOTIFICATION_PREFERENCE_MODULES,

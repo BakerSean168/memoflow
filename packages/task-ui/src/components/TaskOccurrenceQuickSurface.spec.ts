@@ -3,7 +3,7 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { createPinia } from 'pinia';
 import { createI18n } from 'vue-i18n';
 import { VueQueryPlugin } from '@tanstack/vue-query';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import { TASK_SERVICE_KEY } from '@task-ui-test-host/di/keys';
 import {
   createTestServerStateRuntime,

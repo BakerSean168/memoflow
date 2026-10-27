@@ -1,7 +1,7 @@
 /**
  * 从未知错误中提取错误信息
  */
-import { extractStructuredResultError } from '@memoflow/contracts/result';
+import { extractStructuredResultError } from '@memoflow/transport-contracts/result';
 
 export function extractErrorInfo(error: unknown): {
   code: string;

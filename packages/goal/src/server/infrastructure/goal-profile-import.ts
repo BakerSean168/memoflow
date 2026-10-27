@@ -1,4 +1,4 @@
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import { createGoalPowerSyncRepositories } from './powersync';
 import type { GoalRepositorySet } from './prisma';
 import type { Prisma } from '@memoflow/database';

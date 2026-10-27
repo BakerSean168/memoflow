@@ -1,4 +1,4 @@
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import { createAccountPowerSyncRepositories } from './powersync';
 import type { Prisma } from '@memoflow/database';
 import { createSystemClock, type UserTimeContextPort } from '@memoflow/time';

@@ -3,7 +3,7 @@ import { mount, flushPromises } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { createPinia } from 'pinia';
 import { describe, expect, it, vi } from 'vitest';
-import { fail } from '@memoflow/contracts/result';
+import { fail } from '@memoflow/transport-contracts/result';
 import type { AccountClientPort } from '@memoflow/account-client';
 import {
   ACCOUNT_SERVICE_KEY,
@@ -13,7 +13,7 @@ import {
   DESKTOP_ACCESS_SNAPSHOT_KEY,
   DESKTOP_BRIDGE_KEY,
 } from '@account-ui-test-host/di/keys';
-import { ProfileAccessChannels } from '@memoflow/contracts/electron';
+import { ProfileAccessChannels } from '@memoflow/desktop-contracts';
 import AccountProfileSection from './AccountProfileSection.vue';
 import { useAuthenticationStore } from '../../authentication/stores/authentication-store';
 

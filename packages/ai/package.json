@@ -62,7 +62,8 @@
     "@ai-sdk/openai-compatible-v6": "npm:@ai-sdk/openai-compatible@2.0.62",
     "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/time": "workspace:*",
-    "@anthropic-ai/sdk": "0.133.0"
+    "@anthropic-ai/sdk": "0.133.0",
+    "@memoflow/shared-primitives": "workspace:*"
   },
   "name": "@memoflow/ai",
   "module": "./dist/index.js",

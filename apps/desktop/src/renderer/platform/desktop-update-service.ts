@@ -4,8 +4,8 @@ import {
   DesktopUpdateDiagnosticsSchema,
   type DesktopUpdateDiagnosticsDTO,
   type DesktopUpdateSnapshotDTO,
-} from '@memoflow/contracts/electron';
-import { fail, ok, ResultCode, type Result } from '@memoflow/contracts/result';
+} from '@memoflow/desktop-contracts';
+import { fail, ok, ResultCode, type Result } from '@memoflow/transport-contracts/result';
 import type { DesktopUpdateService } from '@memoflow/app-vue/di';
 import type { ElectronBridge, IResultIpcClient } from '@memoflow/ipc-client';
 

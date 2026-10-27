@@ -9,8 +9,8 @@ import { calculateKeyResultProgress, type IGoalRepository } from '../../../domai
 import type { Goal } from '../../../domain';
 import type { GoalStatus, GoalTimeframe } from '@memoflow/goal-contracts';
 import { createLogger } from '@memoflow/utils/logger';
-import type { Result } from '@memoflow/contracts/result';
-import { ok, error } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { ok, error } from '@memoflow/transport-contracts/result';
 
 const logger = createLogger('GoalCrossModuleQueryService');
 

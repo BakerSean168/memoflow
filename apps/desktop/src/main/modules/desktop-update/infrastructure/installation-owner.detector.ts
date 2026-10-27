@@ -1,7 +1,7 @@
 import type {
   DesktopInstallationOwnerDTO,
   DesktopUpdateCapabilitiesDTO,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import { capabilitiesForInstallationOwner } from '../domain/installation-ownership';
 
 export type DesktopInstallationPlatform = 'win32' | 'darwin' | 'linux' | 'other';

@@ -4,7 +4,7 @@ import {
   type AIRuntimeUsage,
   type AssistantRuntimeChoice,
 } from '@memoflow/ai-contracts';
-import { unwrap } from '@memoflow/contracts/result';
+import { unwrap } from '@memoflow/transport-contracts/result';
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
 import { resetWorkspaceEvents, subscribeWorkspaceEvents } from '../ai-ui-host';
 import { useI18n } from 'vue-i18n';

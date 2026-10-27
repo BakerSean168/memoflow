@@ -1,6 +1,6 @@
 import Database from 'better-sqlite3';
 import { describe, expect, it, vi } from 'vitest';
-import type { IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
+import type { IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import type { IEventBus } from '@memoflow/patterns';
 import {
   PowerSyncTaskPlanMapper,

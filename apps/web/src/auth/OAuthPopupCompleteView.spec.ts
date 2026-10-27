@@ -1,6 +1,6 @@
 import { flushPromises, mount } from '@vue/test-utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import OAuthPopupCompleteView from './OAuthPopupCompleteView.vue';
 import { createAuthI18n } from './i18n';
 import { AUTH_WEB_SERVICE_KEY } from './service';

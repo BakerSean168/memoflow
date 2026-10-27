@@ -4,8 +4,8 @@ import {
   DesktopCloudAttemptRequestSchema,
   type CloudSessionState,
 } from '@memoflow/cloud-auth-contracts';
-import { CloudAuthChannels } from '@memoflow/contracts/electron';
-import { fail, ok } from '@memoflow/contracts/result';
+import { CloudAuthChannels } from '@memoflow/desktop-contracts';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 import { getApiBaseUrl } from '../utils/api-config';
 import type { DesktopProfileRuntimeManager } from './desktop-profile-runtime-manager';
 import type { DeviceAuthCoordinator } from './device-auth-coordinator';

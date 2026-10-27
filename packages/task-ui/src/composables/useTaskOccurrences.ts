@@ -10,7 +10,7 @@ import type {
   RescheduleTaskInput,
   SetTaskOccurrenceChecklistItemReq,
 } from '@memoflow/task-contracts';
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 import { patchTaskPlanEverywhere } from './taskPlanCache';
 import { taskUiHost } from '../task-ui-host';
 

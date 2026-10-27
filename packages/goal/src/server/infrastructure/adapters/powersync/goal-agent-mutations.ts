@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
-import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
+import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import {
   GoalAgentCreateSchema,
@@ -9,7 +9,7 @@ import {
   type GoalAgentReceipt,
   type GoalMutationReceipt,
 } from '@memoflow/goal-contracts';
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 import type { IEventBus } from '@memoflow/patterns';
 import { GoalPolicy } from '../../../domain';
 import { CreateGoalUseCase } from '../../../application/use-cases/commands/create-goal.use-case';

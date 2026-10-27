@@ -62,7 +62,7 @@
  * goal progress handler。不接收未使用的 transport 对象。
  */
 
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import {
   createTaskModule,
   createTaskPowerSyncGoalOutboxRuntime,

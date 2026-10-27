@@ -2,7 +2,7 @@ import {
   GoalReviewWindowOptionsSchema,
   type GoalReviewWindowInput,
 } from '@memoflow/goal-contracts';
-import { error, ok, type Result } from '@memoflow/contracts/result';
+import { error, ok, type Result } from '@memoflow/transport-contracts/result';
 import { createTimeFacade, type TimeContext } from '@memoflow/time';
 import type { GoalReview } from '../../domain/entities/goal-review';
 import type { GoalReviewWindow } from './goal-review-context-builder';

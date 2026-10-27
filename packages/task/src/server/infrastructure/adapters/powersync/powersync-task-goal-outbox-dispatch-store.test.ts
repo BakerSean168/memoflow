@@ -3,7 +3,7 @@ import type {
   IElectronDatabase,
   IElectronDatabaseQueryResult,
   IElectronDatabaseTransaction,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import { PowerSyncTaskGoalOutboxDispatchStore } from './powersync-task-goal-outbox-dispatch-store';
 
 interface OutboxRow {

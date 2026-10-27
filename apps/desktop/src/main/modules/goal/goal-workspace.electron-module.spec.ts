@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ipcMain } from 'electron';
-import { GoalWorkspaceChannels } from '@memoflow/contracts/electron';
-import { ok } from '@memoflow/contracts/result';
+import { GoalWorkspaceChannels } from '@memoflow/desktop-contracts';
+import { ok } from '@memoflow/transport-contracts/result';
 import { createGoalWorkspaceElectronModule } from './goal-workspace.electron-module';
 
 const GOAL_ID = 'IGoalId_550e8400-e29b-41d4-a716-446655440000';

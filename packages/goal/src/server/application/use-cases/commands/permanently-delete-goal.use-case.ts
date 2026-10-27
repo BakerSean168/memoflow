@@ -7,8 +7,8 @@
  */
 
 import { GoalPolicy, GoalVersionConflictError } from '../../../domain';
-import type { Result } from '@memoflow/contracts/result';
-import { ok, error } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { ok, error } from '@memoflow/transport-contracts/result';
 import type { GoalDeletionTransactionRunner } from './goal-deletion-support';
 
 /**

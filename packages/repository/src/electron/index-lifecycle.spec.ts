@@ -18,8 +18,8 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { RepositoryChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
-import { ok } from '@memoflow/contracts/result';
+import { RepositoryChannels, type IElectronModuleContext } from '@memoflow/desktop-contracts';
+import { ok } from '@memoflow/transport-contracts/result';
 import { EventEmitter } from 'node:events';
 import { LocalVaultRuntimeError } from './local-vault-runtime';
 

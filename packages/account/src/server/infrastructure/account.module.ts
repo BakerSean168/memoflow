@@ -20,7 +20,7 @@ import {
 } from '@memoflow/patterns/operations';
 import type { OperationTimelineEntry, OperationAuditRecord } from '@memoflow/operations-contracts';
 import { OperationTimelineEntrySchema } from '@memoflow/operations-contracts';
-import { ok, fail } from '@memoflow/contracts/result';
+import { ok, fail } from '@memoflow/transport-contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
 import type { AccountClosureOperationRecord } from '../domain/repositories/i-account-closure-operation-repository';
 

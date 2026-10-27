@@ -3,7 +3,7 @@ import type {
   DesktopUpdateFailureDTO,
   DesktopUpdateReleaseDTO,
   DesktopUpdateSnapshotDTO,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import { capabilitiesForInstallationOwner } from '../domain/installation-ownership';
 import {
   DesktopUpdateEngineError,

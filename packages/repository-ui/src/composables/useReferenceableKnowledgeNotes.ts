@@ -6,7 +6,7 @@
  * Consumers never paginate arbitrary notes and then filter for memoflow_id.
  */
 import { inject, ref } from 'vue';
-import { unwrapOrThrowError } from '@memoflow/contracts/result';
+import { unwrapOrThrowError } from '@memoflow/transport-contracts/result';
 import { repositoryUiHost } from '../repository-ui-host';
 import { useStrictInject } from '../utils/useStrictInject';
 

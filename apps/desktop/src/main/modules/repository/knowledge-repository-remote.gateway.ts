@@ -16,7 +16,7 @@ import type {
   StartKnowledgeRepositoryInstallationReq,
   StartKnowledgeRepositoryInstallationRes,
 } from '@memoflow/repository-contracts';
-import { fail, ok, type Result } from '@memoflow/contracts/result';
+import { fail, ok, type Result } from '@memoflow/transport-contracts/result';
 import { createApiUrl } from '../../utils/api-config';
 // Residual 947: isRecord/hasDataKey duals retired — sole desktop http-envelope-guards.
 import { hasDataKey, isRecord } from '../../utils/http-envelope-guards';

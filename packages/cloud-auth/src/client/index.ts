@@ -13,8 +13,8 @@ export type {
   CloudAuthDesktopClientPort,
   CloudAuthWebClientPort,
 } from '@memoflow/cloud-auth-contracts';
-import { fail, ok, type Result } from '@memoflow/contracts/result';
-import { CloudAuthChannels } from '@memoflow/contracts/electron';
+import { fail, ok, type Result } from '@memoflow/transport-contracts/result';
+import { CloudAuthChannels } from '@memoflow/desktop-contracts';
 import type { IResultHttpClient } from '@memoflow/http-client';
 import type { IResultIpcClient } from '@memoflow/ipc-client';
 import { mapBetterAuthFailure } from './adapters/better-auth-error-mapper.js';

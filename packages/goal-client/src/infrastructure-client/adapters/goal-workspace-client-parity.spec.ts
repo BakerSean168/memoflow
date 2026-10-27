@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { GoalWorkspaceChannels } from '@memoflow/contracts/electron';
-import { ok } from '@memoflow/contracts/result';
+import { GoalWorkspaceChannels } from '@memoflow/desktop-contracts';
+import { ok } from '@memoflow/transport-contracts/result';
 import { GoalHttpAdapter } from './http/goal-http.adapter';
 import { GoalIpcAdapter } from './ipc/goal-ipc.adapter';
 

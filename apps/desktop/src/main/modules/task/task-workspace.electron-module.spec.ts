@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ipcMain } from 'electron';
-import { TaskChannels, TaskWorkspaceChannels } from '@memoflow/contracts/electron';
-import { ok } from '@memoflow/contracts/result';
+import { TaskChannels, TaskWorkspaceChannels } from '@memoflow/desktop-contracts';
+import { ok } from '@memoflow/transport-contracts/result';
 import { createTaskWorkspaceElectronModule } from './task-workspace.electron-module';
 
 const PLAN_ID = 'ITaskPlanId_550e8400-e29b-41d4-a716-446655440000';

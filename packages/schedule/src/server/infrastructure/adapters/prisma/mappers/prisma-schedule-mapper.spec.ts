@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { aPrefixedUuid } from '@memoflow/test-utils/fixtures';
 import type { Schedule as PrismaSchedule } from '@memoflow/database';
-import { requireYmd } from '@memoflow/contracts/primitives';
+import { requireYmd } from '@memoflow/shared-primitives';
 import { IdentityId } from '@memoflow/domain-shared';
 import { CalendarEntry } from '../../../../domain/aggregates/calendar-entry';
 import { PrismaScheduleMapper } from './prisma-schedule-mapper';

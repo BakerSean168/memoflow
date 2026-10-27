@@ -3,7 +3,7 @@ import type {
   IElectronDatabase,
   IElectronDatabaseQueryResult,
   IElectronDatabaseTransaction,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import { RoutinePreferences } from '../../domain/routine';
 import { PowerSyncRoutinePreferencesStore } from './routine-preferences-store.powersync';
 

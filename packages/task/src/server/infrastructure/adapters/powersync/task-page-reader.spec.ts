@@ -1,6 +1,6 @@
 import { DatabaseSync, type SQLInputValue } from 'node:sqlite';
 import { expect, it } from 'vitest';
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import { createTimeContext } from '@memoflow/time';
 import { createTaskPowerSyncReadQueries } from './task-page-reader';
 

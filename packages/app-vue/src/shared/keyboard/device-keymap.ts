@@ -1,13 +1,13 @@
 import { inject, onBeforeUnmount, watch, type Ref } from 'vue';
-import { unwrapOrThrowError } from '@memoflow/contracts/result';
+import { unwrapOrThrowError } from '@memoflow/transport-contracts/result';
 import { createResultIpcClient } from '@memoflow/ipc-client';
 import {
   DeviceKeymapSchema,
   DeviceKeymapSnapshotSchema,
   type DeviceKeymap,
 } from '@memoflow/desktop-contracts';
-import { KeyboardChannels } from '@memoflow/contracts/electron';
-import type { DesktopAccessSnapshot } from '@memoflow/contracts/electron';
+import { KeyboardChannels } from '@memoflow/desktop-contracts';
+import type { DesktopAccessSnapshot } from '@memoflow/desktop-contracts';
 import { DESKTOP_BRIDGE_KEY } from '../../di/keys';
 import { keyboard } from './runtime';
 import { validateKeymap } from './keymap';

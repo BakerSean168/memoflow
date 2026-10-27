@@ -17,7 +17,7 @@ import { AI_WORKFLOW_STORAGE_KEY, useAIWorkflowPersistence } from './useAIWorkfl
 import { loadAuthoritativeWorkflowRun } from './chatViewHelpers';
 import type { ChatModelOption } from './types';
 
-import { error, ok } from '@memoflow/contracts/result';
+import { error, ok } from '@memoflow/transport-contracts/result';
 
 const native = vi.hoisted(() => ({
   readGoal: vi.fn(),

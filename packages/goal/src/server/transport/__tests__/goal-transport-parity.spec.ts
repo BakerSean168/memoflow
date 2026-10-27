@@ -27,7 +27,7 @@
  */
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import type { RequestHandler } from 'express';
-import { GoalChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
+import { GoalChannels, type IElectronModuleContext } from '@memoflow/desktop-contracts';
 import type { ExecutionContext, RequestContext } from '@memoflow/contracts/shared';
 import type { GoalApplicationPort } from '../../application';
 import { createGoalTransportHandlers } from '..';

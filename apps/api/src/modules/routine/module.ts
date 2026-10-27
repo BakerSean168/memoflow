@@ -14,7 +14,7 @@ import {
   UpdateRoutineProfileRequestSchema,
   UpdateRoutineRequestSchema,
 } from '@memoflow/routine-contracts';
-import { ResultCode, extractStructuredResultError } from '@memoflow/contracts/result';
+import { ResultCode, extractStructuredResultError } from '@memoflow/transport-contracts/result';
 import type {
   RoutineCoachCommandPort,
   RoutineConfigurationQueryPort,

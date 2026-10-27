@@ -47,7 +47,7 @@ export {
   // IPC
   toIpcResult,
   fromIpcResult,
-} from '@memoflow/contracts/result';
+} from '@memoflow/transport-contracts/result';
 
 export type {
   Result,
@@ -64,7 +64,7 @@ export type {
   IpcResult,
   HttpResponse,
   HttpResponseOptions,
-} from '@memoflow/contracts/result';
+} from '@memoflow/transport-contracts/result';
 
 // ============================================================================
 // Express Adapter

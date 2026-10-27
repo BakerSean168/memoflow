@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { promises as fs } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import type { DesktopUpdateSnapshotDTO } from '@memoflow/contracts/electron';
+import type { DesktopUpdateSnapshotDTO } from '@memoflow/desktop-contracts';
 import type { DesktopUpdateInstallReceiptStore } from '../application/desktop-update-install-receipt';
 import {
   resolveDesktopUpdateE2EConfig,

@@ -1,7 +1,7 @@
 /** Pure canonical-schedule policies for Task occurrence generation. */
 
 import { createTimeFacade, type TimeContext } from '@memoflow/time';
-import type { Ymd } from '@memoflow/contracts/primitives';
+import type { Ymd } from '@memoflow/shared-primitives';
 import {
   TaskPlanScheduleKind,
   type ChecklistItemDefinitionDTO,

@@ -3,7 +3,7 @@ import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createTestPinia } from '@memoflow/test-utils';
-import { fail, ok } from '@memoflow/contracts/result';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 import {
   DESKTOP_NOTIFICATION_DEVICE_PREFERENCE_KEY,
   NOTIFICATION_SERVICE_KEY,

@@ -4,7 +4,7 @@ import type {
   IElectronDatabase,
   IElectronDatabaseQueryResult,
   IElectronDatabaseTransaction,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import {
   createElapsedTrigger,
   ProfileMembership,

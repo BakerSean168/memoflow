@@ -4,7 +4,7 @@
  * 为 IPC 通信提供 Result Pattern 适配
  * 统一 Main Process 和 Renderer Process 的数据交换格式
  *
- * @module @memoflow/contracts/result/ipc
+ * @module @memoflow/transport-contracts/result/ipc
  */
 
 // Import ResultCode from codes.ts to avoid circular dependency issues

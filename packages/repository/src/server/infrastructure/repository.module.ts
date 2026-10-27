@@ -6,7 +6,7 @@
  * Folder / Resource / Bookmark CRUD is no longer assembled here.
  */
 
-import { fail, ok, type Result, ResultErrorException } from '@memoflow/contracts/result';
+import { fail, ok, type Result, ResultErrorException } from '@memoflow/transport-contracts/result';
 import type { RepositoryApplicationPort } from '../application';
 import type { IKnowledgeRepositoryConnectionService } from '../application/ports/knowledge-repository-connection.service.port';
 import type { IKnowledgeRepositoryProjectionService } from '../application/ports/knowledge-repository-projection.service.port';

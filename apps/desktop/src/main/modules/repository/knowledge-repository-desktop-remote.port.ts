@@ -6,7 +6,7 @@ import type {
   KnowledgeRepositoryReconciliationPreview,
   ListKnowledgeRepositoryConnectionsRes,
 } from '@memoflow/repository-contracts';
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 
 /**
  * Online operations used by the Desktop-owned local Vault/Git runtime.

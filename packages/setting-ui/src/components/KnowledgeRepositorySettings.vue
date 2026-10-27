@@ -474,7 +474,7 @@ import {
   Unplug,
 } from '@lucide/vue';
 import { Badge, Button, Checkbox, Dialog, Label, useConfirm } from '@memoflow/ui-vue-shadcn';
-import { SystemChannels } from '@memoflow/contracts/electron';
+import { SystemChannels } from '@memoflow/desktop-contracts';
 import type {
   GitHubInstallationRepositoryDTO,
   KnowledgeRemoteBindingClientDTO,

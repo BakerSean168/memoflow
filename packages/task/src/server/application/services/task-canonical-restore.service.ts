@@ -1,4 +1,4 @@
-import type { Instant } from '@memoflow/contracts/primitives';
+import type { Instant } from '@memoflow/shared-primitives';
 import {
   ImportanceLevel,
   type ImportanceLevel as ImportanceLevelValue,

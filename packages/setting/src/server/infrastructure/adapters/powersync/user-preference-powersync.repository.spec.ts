@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type {
   IElectronDatabaseQueryResult,
   IElectronDatabaseTransaction,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import { UserPreferenceDocument } from '../../../preferences';
 import {
   PowerSyncUserPreferenceMapper,

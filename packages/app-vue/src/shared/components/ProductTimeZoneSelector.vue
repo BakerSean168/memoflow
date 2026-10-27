@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { Check, Globe } from '@lucide/vue';
-import { parseTimeZoneId, type TimeZoneId } from '@memoflow/contracts/primitives';
+import { parseTimeZoneId, type TimeZoneId } from '@memoflow/shared-primitives';
 import {
   Command,
   CommandEmpty,

@@ -1,7 +1,7 @@
 import { ref } from 'vue';
 import { flushPromises } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
 import { createTestServerStateRuntime } from '@task-ui-test-host/platform/server-state';
 import { taskPlanQueryKeys } from '@task-ui-test-host/platform/server-state/query-keys';

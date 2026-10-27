@@ -2,7 +2,7 @@
  * Domain errors for Goal value objects
  */
 
-import { ResultErrorException } from '@memoflow/contracts/result';
+import { ResultErrorException } from '@memoflow/transport-contracts/result';
 
 export class InvalidWeightError extends ResultErrorException {
   constructor(field: string, value: number) {

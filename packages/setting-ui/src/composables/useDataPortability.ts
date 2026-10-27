@@ -7,8 +7,8 @@
  */
 
 import { ref, inject } from 'vue';
-import { SystemChannels } from '@memoflow/contracts/electron';
-import { isOk, type Result } from '@memoflow/contracts/result';
+import { SystemChannels } from '@memoflow/desktop-contracts';
+import { isOk, type Result } from '@memoflow/transport-contracts/result';
 import { settingUiHost } from '../setting-ui-host';
 
 export function useDataPortability() {

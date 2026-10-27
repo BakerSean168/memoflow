@@ -5,7 +5,7 @@ import {
   type DesktopCloudConnectionRequest,
   type DesktopCloudConnectionResult,
 } from '@memoflow/cloud-auth-contracts';
-import { fail, ok, type Result } from '@memoflow/contracts/result';
+import { fail, ok, type Result } from '@memoflow/transport-contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
 import { getApiBaseUrl } from '../utils/api-config';
 import type { DesktopCloudConnectionManager } from './desktop-cloud-connection-manager';

@@ -1,4 +1,4 @@
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import type { LeaseCoordinatorPort } from '@memoflow/patterns/lease';
 import type { IScheduleRepository } from '../domain';
 import { PowerSyncScheduleRepository } from './adapters/powersync/schedule-powersync.repository';

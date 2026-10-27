@@ -8,8 +8,8 @@
 import type { ITaskPlanRepository } from '../../../domain/repositories/i-task-plan-repository';
 import type { ITaskOccurrenceRepository } from '../../../domain/repositories/i-task-occurrence-repository';
 import type { QueryTaskPlansInternal, QueryTaskPlansRes } from '@memoflow/task-contracts';
-import type { Result } from '@memoflow/contracts/result';
-import { ok } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import { createTimeFacade, type UserTimeContextPort } from '@memoflow/time';
 
 const DEFAULT_PAGE = 1;

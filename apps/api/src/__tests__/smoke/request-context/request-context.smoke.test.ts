@@ -13,7 +13,7 @@ import { createAIApiModule } from '@memoflow/ai/api';
 import { createAIModuleForTests } from '@memoflow/ai/testing';
 import type { AssistantRuntimeEvent } from '@memoflow/ai-contracts';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import { expressAdapter } from '@memoflow/utils/result';
 import { applyGlobalMiddleware } from '../../../shared/infrastructure/middleware/global';
 import { applyErrorHandlers } from '../../../shared/infrastructure/middleware/error';

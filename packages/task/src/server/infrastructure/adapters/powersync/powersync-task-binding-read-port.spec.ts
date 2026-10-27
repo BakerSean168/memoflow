@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import Database from 'better-sqlite3';
-import type { IElectronDatabase, IElectronDatabaseQueryResult } from '@memoflow/contracts/electron';
+import type { IElectronDatabase, IElectronDatabaseQueryResult } from '@memoflow/desktop-contracts';
 import { GoalTaskBindingQueryInputSchema } from '@memoflow/reliable-messaging-contracts';
 import { PowerSyncTaskBindingReadPort } from './powersync-task-binding-read-port';
 

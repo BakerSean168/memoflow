@@ -4,7 +4,7 @@
  * HTTP implementation of IGoalApiClient using ResultHttpClient.
  */
 
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 import type { IGoalApiClient, IResultHttpClient } from '../types';
 import type { GoalId } from '@memoflow/goal-contracts';
 import type {
@@ -60,8 +60,8 @@ export class GoalHttpAdapter implements IGoalApiClient {
     status?: string[];
     systemView?: GoalSystemView;
     labelIdsAll?: string[];
-    targetStart?: import('@memoflow/contracts/primitives').Ymd;
-    targetEnd?: import('@memoflow/contracts/primitives').Ymd;
+    targetStart?: import('@memoflow/shared-primitives').Ymd;
+    targetEnd?: import('@memoflow/shared-primitives').Ymd;
     includeChildren?: boolean;
   }): Promise<Result<QueryGoalsRes>> {
     const requestParams = {

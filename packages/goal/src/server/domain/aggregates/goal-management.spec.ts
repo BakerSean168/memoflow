@@ -1,7 +1,7 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import { Goal } from './goal';
 import { GoalInvalidPlanningWindowError, GoalReminderConfig } from '../../domain';
-import { requireYmd } from '@memoflow/contracts/primitives';
+import { requireYmd } from '@memoflow/shared-primitives';
 
 function createGoal(overrides?: Partial<Parameters<typeof Goal.create>[0]>): Goal {
   return Goal.create({

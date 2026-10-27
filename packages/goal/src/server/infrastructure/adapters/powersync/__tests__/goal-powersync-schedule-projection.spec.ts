@@ -4,7 +4,7 @@ import type {
   IElectronDatabase,
   IElectronDatabaseQueryResult,
   IElectronDatabaseTransaction,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import { GoalPowerSyncRepository } from '../goal-powersync.repository';
 import { PowerSyncGoalMapper } from '../mappers/powersync-goal.mapper';
 import { createGoalScheduleProjectionSource } from '../../../schedule-projection-source';

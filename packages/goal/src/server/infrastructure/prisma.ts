@@ -1,4 +1,4 @@
-import { ok, error } from '@memoflow/contracts/result';
+import { ok, error } from '@memoflow/transport-contracts/result';
 import { GoalReadLimitError } from './adapters/prisma/goal-prisma.repository';
 import { SearchGoalPageUseCase } from '../application/use-cases/queries/search-goal-page.use-case';
 /**

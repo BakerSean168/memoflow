@@ -22,6 +22,8 @@
     "@memoflow/ipc-client": "workspace:*",
     "@memoflow/task-contracts": "workspace:*",
     "@memoflow/transport-contracts": "workspace:*",
-    "@memoflow/workspace-contracts": "workspace:*"
+    "@memoflow/workspace-contracts": "workspace:*",
+    "@memoflow/shared-primitives": "workspace:*",
+    "@memoflow/desktop-contracts": "workspace:*"
   }
 }

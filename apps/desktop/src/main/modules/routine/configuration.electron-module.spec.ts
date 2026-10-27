@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ipcMain } from 'electron';
-import { RoutineChannels } from '@memoflow/contracts/electron';
+import { RoutineChannels } from '@memoflow/desktop-contracts';
 import type { RoutineCoachCommandPort, RoutineConfigurationQueryPort } from '@memoflow/routine';
 import { createRoutineConfigurationElectronModule } from './configuration.electron-module';
 

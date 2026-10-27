@@ -1,5 +1,5 @@
-import type { Ymd } from '@memoflow/contracts/primitives';
-import type { IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
+import type { Ymd } from '@memoflow/shared-primitives';
+import type { IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import { describe, expect, it, vi } from 'vitest';
 import type { TaskOccurrence } from '../../../domain/aggregates/task-occurrence';
 import { PowerSyncTaskOccurrenceRepository } from './task-occurrence-powersync.repository';

@@ -14,7 +14,7 @@ import {
   type LocalAgentDriver,
   type LocalAgentStatus,
 } from '@memoflow/ai-contracts';
-import { SystemChannels } from '@memoflow/contracts/electron';
+import { SystemChannels } from '@memoflow/desktop-contracts';
 import { settingUiHost } from '../setting-ui-host';
 
 const { SettingsPropertyRow, AgentDriverIcon } = settingUiHost.components;

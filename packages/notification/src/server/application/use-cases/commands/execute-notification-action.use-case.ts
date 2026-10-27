@@ -2,8 +2,8 @@ import type {
   ExecuteNotificationActionRes,
   NotificationActionIntent,
 } from '@memoflow/notification-contracts';
-import type { Result } from '@memoflow/contracts/result';
-import { error, ok } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { error, ok } from '@memoflow/transport-contracts/result';
 import type {
   INotificationInteractionRepository,
   INotificationRepository,

@@ -2,8 +2,8 @@ import type {
   SetTaskOccurrenceChecklistItemReq,
   TaskOccurrenceOperationRes,
 } from '@memoflow/task-contracts';
-import type { Result } from '@memoflow/contracts/result';
-import { error, ok } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { error, ok } from '@memoflow/transport-contracts/result';
 import type { ITaskOccurrenceRepository } from '../../../domain/repositories/i-task-occurrence-repository';
 import type { TaskOccurrenceProjectionService } from '../../services/task-occurrence-projection.service';
 import type { TaskWriteRepositories, TaskWriteTransactionRunner } from './task-write-support';

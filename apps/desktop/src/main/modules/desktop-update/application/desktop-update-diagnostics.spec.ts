@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { DesktopUpdateSnapshotDTO } from '@memoflow/contracts/electron';
+import type { DesktopUpdateSnapshotDTO } from '@memoflow/desktop-contracts';
 import { capabilitiesForInstallationOwner } from '../domain/installation-ownership';
 import type {
   DesktopUpdateInstallReceipt,

@@ -8,8 +8,8 @@ import {
   PowerSyncScheduleMapper,
   type PowerSyncScheduleRow,
 } from './mappers/powersync-schedule.mapper';
-import type { IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
-import { toResultErrorException } from '@memoflow/contracts/result';
+import type { IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
+import { toResultErrorException } from '@memoflow/transport-contracts/result';
 
 type Queryable = IElectronDatabaseTransaction;
 

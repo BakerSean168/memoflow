@@ -2,7 +2,7 @@
 import { computed, inject, onBeforeUnmount, onMounted, ref } from 'vue';
 import { AlertTriangle, Download } from '@lucide/vue';
 import { useI18n } from 'vue-i18n';
-import type { DesktopUpdateSnapshotDTO } from '@memoflow/contracts/electron';
+import type { DesktopUpdateSnapshotDTO } from '@memoflow/desktop-contracts';
 import { DESKTOP_UPDATE_SERVICE_KEY } from '../../di/keys';
 import { presentDesktopUpdateShellIndicator } from './desktop-update-shell-indicator.presentation';
 

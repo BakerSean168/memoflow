@@ -367,7 +367,7 @@ import {
 } from '@lucide/vue';
 import { Badge, Button, Input, Label, Switch, Textarea } from '@memoflow/ui-vue-shadcn';
 import type { CalendarEntryClientDTO, CreateScheduleRequest } from '@memoflow/schedule-contracts';
-import { requireYmd, type Instant, type Ymd } from '@memoflow/contracts/primitives';
+import { requireYmd, type Instant, type Ymd } from '@memoflow/shared-primitives';
 import { formatDisplayDate } from '@memoflow/time';
 import { scheduleUiHost } from '../schedule-ui-host';
 

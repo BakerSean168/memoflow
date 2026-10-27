@@ -31,7 +31,7 @@ import type {
   AccountView,
   CloudIdentitySummary,
 } from '@memoflow/account-contracts';
-import { map as mapResult } from '@memoflow/contracts/result';
+import { map as mapResult } from '@memoflow/transport-contracts/result';
 import {
   OperationTimelineEntrySchema,
   OperationAuditRecordSchema,
@@ -39,7 +39,7 @@ import {
 import { AccountController } from '../server/transport';
 import type { AccountApplicationPort } from '../server/application';
 import type { BusinessDataSummaryReader } from '../server/application';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 
 interface PlatformMiddleware {
   readonly auth: RequestHandler;

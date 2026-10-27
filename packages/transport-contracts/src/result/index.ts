@@ -1,7 +1,7 @@
 /**
  * Result Pattern - unified result types and protocol adapters.
  *
- * @module @memoflow/contracts/result
+ * @module @memoflow/transport-contracts/result
  */
 
 export * from './core';

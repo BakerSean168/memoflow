@@ -13,8 +13,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import { RouteRegistrar } from './route-registrar';
 import type { ExpressLikeRequest } from './express-adapter';
-import type { Result } from '@memoflow/contracts/result';
-import { ok } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext, RequestContext } from '@memoflow/contracts/shared';
 import { z } from 'zod';
 

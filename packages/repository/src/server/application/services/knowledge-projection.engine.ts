@@ -9,7 +9,7 @@ import type {
   KnowledgeDocumentId,
   RepositoryId,
   ResourceId,
-} from '@memoflow/contracts/primitives';
+} from '@memoflow/shared-primitives';
 import type { IKnowledgeDocumentIdentityRepository } from '../ports/knowledge-document-identity.repository';
 import type {
   IKnowledgeNoteProjectionRepository,

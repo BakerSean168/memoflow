@@ -16,7 +16,7 @@ import { PrismaClient } from '@memoflow/database';
 import { PrismaPg } from '@prisma/adapter-pg';
 import type { IEventBus } from '@memoflow/patterns';
 import { createEventBusAdapter } from '@memoflow/patterns';
-import type { IElectronDatabase, IElectronDatabaseQueryResult } from '@memoflow/contracts/electron';
+import type { IElectronDatabase, IElectronDatabaseQueryResult } from '@memoflow/desktop-contracts';
 import { CrossPlatformEventBus, eventBus } from '@memoflow/utils/domain';
 import { ScheduleEventDeliveryLogConsumer } from '../../consumers/schedule-event-delivery-log.consumer';
 import { createUnifiedOperationMetricsRecorder } from '@memoflow/patterns/operations';

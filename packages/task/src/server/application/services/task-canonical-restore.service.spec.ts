@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { Instant } from '@memoflow/contracts/primitives';
+import type { Instant } from '@memoflow/shared-primitives';
 import { IdentityId } from '@memoflow/domain-shared';
 import { TaskOccurrenceId } from '../../domain/value-objects/task-occurrence-id';
 import { TaskPlanId } from '../../domain/value-objects/task-plan-id';

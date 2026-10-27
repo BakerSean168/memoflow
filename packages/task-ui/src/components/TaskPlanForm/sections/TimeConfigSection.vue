@@ -215,7 +215,7 @@ import {
   SelectItem,
 } from '@memoflow/ui-vue-shadcn';
 import { CalendarDays, Check, Clock3, Timer } from '@lucide/vue';
-import { requireYmd, type Ymd } from '@memoflow/contracts/primitives';
+import { requireYmd, type Ymd } from '@memoflow/shared-primitives';
 import { translateResultErrorMessage as translateResultError } from '@memoflow/http-client';
 import { padTwoDigits } from '@memoflow/time';
 import { taskUiHost } from '../../../task-ui-host';

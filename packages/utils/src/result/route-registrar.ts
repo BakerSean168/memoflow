@@ -50,7 +50,7 @@
  * ```
  */
 
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import {
   expressAdapter,

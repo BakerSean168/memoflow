@@ -1,5 +1,5 @@
-import { ProfileAccessChannels, type DesktopAccessSnapshot } from '@memoflow/contracts/electron';
-import { fromIpcResult, isOk, type IpcResult } from '@memoflow/contracts/result';
+import { ProfileAccessChannels, type DesktopAccessSnapshot } from '@memoflow/desktop-contracts';
+import { fromIpcResult, isOk, type IpcResult } from '@memoflow/transport-contracts/result';
 
 // Residual 903: sole desktop invoke-api shape DesktopAuthApi.
 // Residual 919: DesktopBootstrapApi name dual fully retired — hydrate uses DesktopAuthApi.

@@ -149,7 +149,7 @@
 import { computed, inject, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Label, Switch } from '@memoflow/ui-vue-shadcn';
-import type { DesktopNotificationPreference } from '@memoflow/contracts/electron';
+import type { DesktopNotificationPreference } from '@memoflow/desktop-contracts';
 import {
   settingUiHost,
   type SettingNotificationPreferenceModule,

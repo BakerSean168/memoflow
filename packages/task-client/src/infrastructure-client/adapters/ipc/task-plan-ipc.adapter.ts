@@ -5,8 +5,8 @@
  * Uses ResultIpcClient — all methods return Result<T> directly.
  */
 
-import type { Result } from '@memoflow/contracts/result';
-import { TaskChannels, TaskWorkspaceChannels } from '@memoflow/contracts/electron';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { TaskChannels, TaskWorkspaceChannels } from '@memoflow/desktop-contracts';
 import type { ITaskPlanApiClient, IResultIpcClient, TaskPlanListParams } from '../types';
 import type {
   TaskPlanClientDTO,

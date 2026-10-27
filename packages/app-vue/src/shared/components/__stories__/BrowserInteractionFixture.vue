@@ -5,7 +5,7 @@
  * Popover behavior with DOM stubs. No API, database or native Electron access.
  */
 import { ref } from 'vue';
-import type { Instant } from '@memoflow/contracts/primitives';
+import type { Instant } from '@memoflow/shared-primitives';
 import ProductEditorFrame from '@memoflow/app-vue/shared/components/ProductEditorFrame.vue';
 import ProductDateTimePicker from '@memoflow/app-vue/shared/components/ProductDateTimePicker.vue';
 import ProductSingleSelectFilter from '@memoflow/app-vue/shared/components/ProductSingleSelectFilter.vue';

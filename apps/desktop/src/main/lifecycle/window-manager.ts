@@ -20,8 +20,8 @@ import {
   RendererEventChannels,
   WindowChannels,
   ProfileIdSchema,
-} from '@memoflow/contracts/electron';
-import { fail, ok } from '@memoflow/contracts/result';
+} from '@memoflow/desktop-contracts';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
 import type { ScheduleRuntimeController } from '../runtime/compose-schedule';
 import { applyWindowChromeTheme, createNativeWindowChromeOptions } from './desktop-chrome';

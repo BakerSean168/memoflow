@@ -2,7 +2,7 @@
  * Residual 945: sole formatZodErrors helper body.
  * Express and IPC result adapters share this; local dual bodies retired.
  */
-import type { ResultErrorDetail } from '@memoflow/contracts/result';
+import type { ResultErrorDetail } from '@memoflow/transport-contracts/result';
 
 /**
  * Format Zod issues into ResultErrorDetail array.

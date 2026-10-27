@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import type { NotificationDispatchInAppEvent } from '@memoflow/notification-contracts';
 
 const mocks = vi.hoisted(() => {

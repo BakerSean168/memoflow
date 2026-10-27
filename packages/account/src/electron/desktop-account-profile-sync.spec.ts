@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import type { AccountClientDTO } from '@memoflow/account-contracts';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { DesktopAccountProfileSync } from './desktop-account-profile-sync';

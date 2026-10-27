@@ -24,7 +24,7 @@ import type {
   DesktopCloudConnectionAttempt,
   DesktopCloudConnectionRequest,
 } from '@memoflow/cloud-auth-contracts';
-import { SystemChannels, WindowChannels } from '@memoflow/contracts/electron';
+import { SystemChannels, WindowChannels } from '@memoflow/desktop-contracts';
 import ProductDialogShell from '../../shared/components/ProductDialogShell.vue';
 import {
   DESKTOP_ACCESS_SNAPSHOT_KEY,

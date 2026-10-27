@@ -1,7 +1,7 @@
 import type { RequestHandler } from 'express';
 import { Router } from 'express';
 import { describe, expect, it, vi } from 'vitest';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import type { RepositoryApplicationPort } from '../../server/application';
 import { registerKnowledgeRepositoryConnectionRoutes } from './knowledge-repository-connection.routes';
 import { registerRepositoryRoutes } from './index';

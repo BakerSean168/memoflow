@@ -5,7 +5,7 @@ import { afterAll, describe, expect, it } from 'vitest';
 import express from 'express';
 import type { RequestHandler } from 'express';
 import { prisma } from '@memoflow/database';
-import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
+import type { KnowledgeDocumentId } from '@memoflow/shared-primitives';
 import type {
   GitHubAppInstallationInventory,
   GitHubMarkdownChanges,

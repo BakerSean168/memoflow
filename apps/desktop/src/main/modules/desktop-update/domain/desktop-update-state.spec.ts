@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type {
-  DesktopUpdateFailureDTO,
-  DesktopUpdateReleaseDTO,
-} from '@memoflow/contracts/electron';
+import type { DesktopUpdateFailureDTO, DesktopUpdateReleaseDTO } from '@memoflow/desktop-contracts';
 import {
   InvalidDesktopUpdateTransitionError,
   completeDesktopUpdateCheckWithRelease,

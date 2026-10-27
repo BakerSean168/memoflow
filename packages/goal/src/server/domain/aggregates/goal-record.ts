@@ -34,7 +34,7 @@ import type {
   GoalRecordSource,
   GoalRecordSourceTypeValue,
 } from '@memoflow/goal-contracts';
-import type { IdentityId, Instant } from '@memoflow/contracts/primitives';
+import type { IdentityId, Instant } from '@memoflow/shared-primitives';
 
 // 内部状态接口
 export interface GoalRecordState {

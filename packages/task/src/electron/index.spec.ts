@@ -18,9 +18,9 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { type IElectronModuleContext } from '@memoflow/contracts/electron';
-import { ok } from '@memoflow/contracts/result';
-import { TaskChannels } from '@memoflow/contracts/electron';
+import { type IElectronModuleContext } from '@memoflow/desktop-contracts';
+import { ok } from '@memoflow/transport-contracts/result';
+import { TaskChannels } from '@memoflow/desktop-contracts';
 import type { TaskApplicationPort } from '../server/application';
 import type { TaskModuleInstance } from '../server/infrastructure';
 

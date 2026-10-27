@@ -7,7 +7,7 @@ import {
   TaskRecurrenceEndKind,
 } from '@memoflow/task-contracts';
 import { ImportanceLevel } from '@memoflow/shared-primitives';
-import type { Ymd } from '@memoflow/contracts/primitives';
+import type { Ymd } from '@memoflow/shared-primitives';
 import { IdentityId } from '@memoflow/domain-shared';
 import { asYmd, createTimeContext } from '@memoflow/time';
 import { TaskPlan } from '../aggregates/task-plan';

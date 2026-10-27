@@ -3,7 +3,7 @@
  * Single session — Screens must not createTimeFacade for routine display.
  */
 import type { UserPreferenceProfile } from '@memoflow/setting-contracts';
-import type { Ymd } from '@memoflow/contracts/primitives';
+import type { Ymd } from '@memoflow/shared-primitives';
 import type { GoalTimeframe } from '@memoflow/goal-contracts';
 import {
   createSystemTimeZoneSource,

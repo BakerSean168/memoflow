@@ -1,4 +1,4 @@
-import { ok, type Result } from '@memoflow/contracts/result';
+import { ok, type Result } from '@memoflow/transport-contracts/result';
 import type { IResultHttpClient } from '@memoflow/http-client';
 import type { z } from 'zod';
 import { expect, vi } from 'vitest';

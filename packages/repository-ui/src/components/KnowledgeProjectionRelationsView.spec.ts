@@ -2,7 +2,7 @@ import { defineComponent, h } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it, vi } from 'vitest';
-import { ok, type Result } from '@memoflow/contracts/result';
+import { ok, type Result } from '@memoflow/transport-contracts/result';
 import type { KnowledgeNoteLinkGraphResponse } from '@memoflow/repository-contracts';
 import type { IRepositoryService } from '@repository-ui-test-host/di/types';
 import { REPOSITORY_SERVICE_KEY } from '@repository-ui-test-host/di/keys';

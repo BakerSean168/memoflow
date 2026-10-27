@@ -3,8 +3,8 @@ import type {
   CreateScheduleRequest,
   UpdateScheduleRequest,
 } from '@memoflow/schedule-contracts';
-import type { Result } from '@memoflow/contracts/result';
-import { fail } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { fail } from '@memoflow/transport-contracts/result';
 import type { ScheduleContext } from './useScheduleContext';
 import { scheduleUiHost } from '../schedule-ui-host';
 

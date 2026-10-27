@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { TimeZoneIdSchema, YmdSchema } from '@memoflow/contracts/primitives';
+import { TimeZoneIdSchema, YmdSchema } from '@memoflow/shared-primitives';
 const instantSchema = z.number().int().nonnegative();
 const hmSchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/);
 const weekdaySchema = z.union([

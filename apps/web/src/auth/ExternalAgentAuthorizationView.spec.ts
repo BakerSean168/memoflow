@@ -1,7 +1,7 @@
 import { mount, flushPromises } from '@vue/test-utils';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createI18nPlugin, loadLocaleMessages } from '@memoflow/app-vue/plugins/i18n';
-import { ok, fail } from '@memoflow/contracts/result';
+import { ok, fail } from '@memoflow/transport-contracts/result';
 import { EXTERNAL_AGENT_SERVICE_KEY } from '@memoflow/app-vue/di';
 import { AUTH_WEB_SERVICE_KEY } from './service';
 import ExternalAgentAuthorizationView from './ExternalAgentAuthorizationView.vue';

@@ -1,6 +1,6 @@
 import type { TaskPlanMutationPort } from '@memoflow/ai';
-import type { IdentityId } from '@memoflow/contracts/primitives';
-import { error, ok } from '@memoflow/contracts/result';
+import type { IdentityId } from '@memoflow/shared-primitives';
+import { error, ok } from '@memoflow/transport-contracts/result';
 import type { LabelService } from '@memoflow/label';
 import type { TaskApplicationPort } from '@memoflow/task';
 

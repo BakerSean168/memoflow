@@ -4,7 +4,7 @@ import type {
   IElectronDatabase,
   IElectronDatabaseQueryResult,
   IElectronDatabaseTransaction,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import { asInstant } from '@memoflow/time';
 import { ProtocolDefinition, ProtocolSession } from '../../domain/routine';
 import { ProtocolSessionVersionConflictError } from '../../domain/ports';

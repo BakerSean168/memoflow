@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
-import { ElectronAuthResolutionError } from '@memoflow/contracts/electron';
-import type { IElectronAuthContext } from '@memoflow/contracts/electron';
+import { ElectronAuthResolutionError } from '@memoflow/desktop-contracts';
+import type { IElectronAuthContext } from '@memoflow/desktop-contracts';
 
 /**
  * Electron business modules need a local owner, not a cloud session.

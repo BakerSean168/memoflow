@@ -3,7 +3,7 @@ import { defineComponent, h, reactive, ref, toValue, type ComputedRef, type Ref 
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { createTestPinia } from '@memoflow/test-utils';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import type { UseTaskPlanListQueryComposableOptions } from '../composables/useTaskPlanListQuery';
 import type { TaskPlanListQueryInput } from '@task-ui-test-host/platform/server-state/query-keys';
 import type { TaskOccurrenceClientDTO } from '@memoflow/task-contracts';

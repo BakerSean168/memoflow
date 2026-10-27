@@ -6,7 +6,7 @@ import {
   DesktopProfileImportChannels as Channels,
   type DesktopProfileImportView,
   type ProfileSummary,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import { DESKTOP_BRIDGE_KEY } from '../../di/keys';
 import shell from '../../locales/en-US/shell';
 import ProfileImportDialog from './ProfileImportDialog.vue';

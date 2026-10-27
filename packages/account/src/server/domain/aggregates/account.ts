@@ -1,4 +1,4 @@
-import type { Instant } from '@memoflow/contracts/primitives';
+import type { Instant } from '@memoflow/shared-primitives';
 /** Account Aggregate Root - Server-side implementation. */
 
 import type { AccountClientDTO, AccountServerDTO } from '@memoflow/account-contracts';

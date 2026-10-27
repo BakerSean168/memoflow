@@ -1,5 +1,5 @@
 import type { KnowledgeCaptureSource, KnowledgeNotePersistedRef } from '@memoflow/ai-contracts';
-import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
+import type { KnowledgeDocumentId } from '@memoflow/shared-primitives';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 
 export interface CreateKnowledgeNotePersistenceInput {

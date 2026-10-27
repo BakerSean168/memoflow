@@ -39,7 +39,9 @@
     "@better-auth/oauth-provider": "1.7.6",
     "zod": "4.6.5",
     "@memoflow/cloud-auth-contracts": "workspace:*",
-    "@memoflow/agent-gateway": "workspace:*"
+    "@memoflow/agent-gateway": "workspace:*",
+    "@memoflow/transport-contracts": "workspace:*",
+    "@memoflow/desktop-contracts": "workspace:*"
   },
   "devDependencies": {
     "@modelcontextprotocol/client": "2.3.1",

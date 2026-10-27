@@ -6,8 +6,8 @@
 
 import type { ITaskPlanRepository } from '../../../domain/repositories/i-task-plan-repository';
 import type { ITaskOccurrenceRepository } from '../../../domain/repositories/i-task-occurrence-repository';
-import type { Result } from '@memoflow/contracts/result';
-import { fail, ok } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
 import {
   mapTaskWriteErrorToResultError,

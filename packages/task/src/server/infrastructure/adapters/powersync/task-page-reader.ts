@@ -1,4 +1,4 @@
-import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
+import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import {
   TaskPlanReadQuerySchema,
   TaskOccurrenceReadQuerySchema,
@@ -7,7 +7,7 @@ import {
   TaskReadPlanSchema,
   TaskReadOccurrenceSchema,
 } from '@memoflow/task-contracts';
-import { ok, error } from '@memoflow/contracts/result';
+import { ok, error } from '@memoflow/transport-contracts/result';
 import { createTimeFacade, type UserTimeContextPort } from '@memoflow/time';
 import {
   PowerSyncTaskPlanMapper,

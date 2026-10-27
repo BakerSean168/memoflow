@@ -1,4 +1,4 @@
-import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
+import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import { SubjectRefSchema } from '@memoflow/relation-contracts';
 import { describe, expect, it, vi } from 'vitest';
 import { PowerSyncRelationRepository } from '../infrastructure/powersync/powersync-relation.repository';

@@ -111,7 +111,9 @@
     "@memoflow/account-ui": "workspace:*",
     "@powersync/node": "1.1.0",
     "@memoflow/notification-ui": "workspace:*",
-    "@memoflow/scheduler": "workspace:*"
+    "@memoflow/scheduler": "workspace:*",
+    "@memoflow/shared-primitives": "workspace:*",
+    "@memoflow/transport-contracts": "workspace:*"
   },
   "desktopName": "memoflow.desktop",
   "name": "@memoflow/desktop",

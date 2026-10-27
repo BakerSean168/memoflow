@@ -7,8 +7,8 @@
  * @module application-client/task-client-service
  */
 
-import type { Result } from '@memoflow/contracts/result';
-import { error, ok, map as mapResult } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { error, ok, map as mapResult } from '@memoflow/transport-contracts/result';
 import { TaskGoalProgressConfigurationSchema } from '@memoflow/task-contracts';
 import type {
   CreateTaskPlanReq,

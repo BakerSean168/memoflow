@@ -23,6 +23,8 @@
     "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/task-contracts": "workspace:*",
     "@memoflow/utils": "workspace:*",
-    "@memoflow/workspace-contracts": "workspace:*"
+    "@memoflow/workspace-contracts": "workspace:*",
+    "@memoflow/transport-contracts": "workspace:*",
+    "@memoflow/desktop-contracts": "workspace:*"
   }
 }

@@ -1,4 +1,4 @@
-import type { IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
+import type { IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import type { PreferenceNamespace } from '@memoflow/setting-contracts';
 import type {
   IUserPreferenceRepository,

@@ -1,6 +1,6 @@
 import { createSettingPrismaTimeQuery } from '@memoflow/setting';
 import { createTaskPrismaModule, createTaskPrismaReadQueries } from '@memoflow/task';
-import { requireYmd } from '@memoflow/contracts/primitives';
+import { requireYmd } from '@memoflow/shared-primitives';
 import {
   TaskPlanSearchOutputSchema,
   TaskPlanGetOutputSchema,

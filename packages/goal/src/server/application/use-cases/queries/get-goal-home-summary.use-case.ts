@@ -1,7 +1,7 @@
 /** Goal-owned Home progress read model. */
 import type { GoalHomeProgressSummary } from '@memoflow/goal-contracts';
-import type { Result } from '@memoflow/contracts/result';
-import { ok } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import type { IGoalRepository } from '../../../domain';
 
 const HOME_GOAL_LIMIT = 5;

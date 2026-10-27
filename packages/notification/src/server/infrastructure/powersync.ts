@@ -29,7 +29,7 @@ import {
   NotificationRequestedPowerSyncWriterAdapter,
 } from './adapters/powersync';
 import type { NotificationMetricsService } from '../domain/services/notification-metrics-service';
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import type { UserTimeContextPort } from '@memoflow/time';
 import type {
   INotificationInteractionRepository,

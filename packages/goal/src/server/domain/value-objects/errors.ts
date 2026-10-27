@@ -3,8 +3,8 @@
  * 目标模块领域错误
  */
 
-import { ResultErrorException } from '@memoflow/contracts/result';
-import type { Ymd } from '@memoflow/contracts/primitives';
+import { ResultErrorException } from '@memoflow/transport-contracts/result';
+import type { Ymd } from '@memoflow/shared-primitives';
 import type { GoalId } from './goal-id';
 
 /**

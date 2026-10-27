@@ -9,7 +9,7 @@
  * `KnowledgeNoteCommitService` 类。
  */
 
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 import type {
   CreateConfirmedKnowledgeNoteReq,
   CreateConfirmedKnowledgeNoteResponse,

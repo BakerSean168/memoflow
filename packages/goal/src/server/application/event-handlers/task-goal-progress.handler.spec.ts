@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ok, error } from '@memoflow/contracts/result';
+import { ok, error } from '@memoflow/transport-contracts/result';
 import type { TaskGoalProgressOutboxEventV2 } from '@memoflow/task-contracts';
 import { GoalTaskProgressHandler } from './task-goal-progress.handler';
 

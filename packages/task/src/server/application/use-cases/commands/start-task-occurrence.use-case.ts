@@ -4,8 +4,8 @@
 
 import type { ITaskOccurrenceRepository } from '../../../domain/repositories/i-task-occurrence-repository';
 import type { TaskOccurrenceClientDTO } from '@memoflow/task-contracts';
-import type { Result } from '@memoflow/contracts/result';
-import { ok, error } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { ok, error } from '@memoflow/transport-contracts/result';
 import type { TaskOccurrenceProjectionService } from '../../services/task-occurrence-projection.service';
 
 export class StartTaskOccurrenceUseCase {

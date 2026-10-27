@@ -3,7 +3,7 @@
  * 任务模块领域错误
  */
 
-import { ResultErrorException } from '@memoflow/contracts/result';
+import { ResultErrorException } from '@memoflow/transport-contracts/result';
 
 /**
  * 任务模板未找到错误

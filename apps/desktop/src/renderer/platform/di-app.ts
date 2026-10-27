@@ -80,8 +80,8 @@ import {
   WindowChannels,
   type DesktopNotificationPreferencePatch,
   type DesktopAccessSnapshot,
-} from '@memoflow/contracts/electron';
-import { fromIpcResult, isOk, type IpcResult } from '@memoflow/contracts/result';
+} from '@memoflow/desktop-contracts';
+import { fromIpcResult, isOk, type IpcResult } from '@memoflow/transport-contracts/result';
 
 function getAppT(): (key: string) => string {
   try {

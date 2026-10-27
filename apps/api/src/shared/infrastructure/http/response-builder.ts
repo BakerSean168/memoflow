@@ -1,4 +1,4 @@
-import { createHttpResponseBuilder } from '@memoflow/contracts/result';
+import { createHttpResponseBuilder } from '@memoflow/transport-contracts/result';
 import type { RequestContext } from '@memoflow/contracts/shared';
 
 /**

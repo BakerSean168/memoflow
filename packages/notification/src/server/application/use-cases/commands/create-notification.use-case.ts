@@ -12,10 +12,10 @@ import {
   NotificationChannelType as ChannelType,
   NotificationDeliveryPlanOutcome,
 } from '@memoflow/notification-contracts';
-import type { IdentityId } from '@memoflow/contracts/primitives';
+import type { IdentityId } from '@memoflow/shared-primitives';
 import type { ImportanceLevel, UrgencyLevel } from '@memoflow/shared-primitives';
-import type { Result } from '@memoflow/contracts/result';
-import { ok, error } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { ok, error } from '@memoflow/transport-contracts/result';
 import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
 import type {
   INotificationRepository,

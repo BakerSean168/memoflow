@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ipcMain } from 'electron';
-import { RoutineWindowChannels, type FocusWindowCommand } from '@memoflow/contracts/electron';
+import { RoutineWindowChannels, type FocusWindowCommand } from '@memoflow/desktop-contracts';
 import type { FocusWindowController } from './focus-window-controller';
 import { createFocusWindowElectronModule } from './focus-window.electron-module';
 

@@ -1,4 +1,4 @@
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 
 /** Internal/admin operational seam. Product clients must not receive this capability. */
 export interface NotificationOperationsPort {

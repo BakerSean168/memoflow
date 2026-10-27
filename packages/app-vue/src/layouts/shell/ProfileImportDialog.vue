@@ -8,7 +8,7 @@ import {
   DesktopProfileImportViewSchema,
   type DesktopProfileImportView,
   type ProfileSummary,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import { DESKTOP_BRIDGE_KEY } from '../../di/keys';
 import ProductDialogShell from '../../shared/components/ProductDialogShell.vue';
 

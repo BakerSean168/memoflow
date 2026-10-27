@@ -33,7 +33,7 @@
  * 恰好接受这一个依赖，不多不少。
  */
 
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import {
   createSettingModule,
   createSettingPowerSyncRepositories,

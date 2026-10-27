@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import type { Hm } from '@memoflow/contracts/primitives';
+import type { Hm } from '@memoflow/shared-primitives';
 import { Input } from '@memoflow/ui-vue-shadcn';
 import { getProductTime } from '../utils/product-time';
 

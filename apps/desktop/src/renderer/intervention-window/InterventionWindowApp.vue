@@ -52,8 +52,8 @@ import {
   RoutineWindowChannels,
   type InterventionWindowCommand,
   type InterventionWindowProjection,
-} from '@memoflow/contracts/electron';
-import type { Result } from '@memoflow/contracts/result';
+} from '@memoflow/desktop-contracts';
+import type { Result } from '@memoflow/transport-contracts/result';
 import { getElectronBridge } from '../platform/electron-bridge';
 
 const projection = ref<InterventionWindowProjection | null>(null);

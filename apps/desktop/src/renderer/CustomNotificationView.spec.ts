@@ -2,7 +2,7 @@
 import { mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { NotificationChannels } from '@memoflow/contracts/electron';
+import { NotificationChannels } from '@memoflow/desktop-contracts';
 import CustomNotificationView from './CustomNotificationView.vue';
 
 const bridge = vi.hoisted(() => ({

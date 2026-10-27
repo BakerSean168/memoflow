@@ -1,8 +1,8 @@
 import { BrowserWindow } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import type { FocusWindowProjection } from '@memoflow/contracts/electron';
-import { RoutineWindowChannels } from '@memoflow/contracts/electron';
+import type { FocusWindowProjection } from '@memoflow/desktop-contracts';
+import { RoutineWindowChannels } from '@memoflow/desktop-contracts';
 import type { FocusWindowHost } from './focus-window-controller';
 import { resolvePreloadPath } from '../../utils/resolve-preload-path';
 import { getDesktopDevServerUrlOrDefault, usesDesktopViteDevServer } from '../../utils';

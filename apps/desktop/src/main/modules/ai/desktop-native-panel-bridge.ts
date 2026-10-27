@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { BrowserWindow } from 'electron';
 import { ipcMain } from 'electron';
-import { AIChannels } from '@memoflow/contracts/electron';
+import { AIChannels } from '@memoflow/desktop-contracts';
 import {
   NativePanelIpcRequestSchema,
   NativePanelIpcResponseSchema,

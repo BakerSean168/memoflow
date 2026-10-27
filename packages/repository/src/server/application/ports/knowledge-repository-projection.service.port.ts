@@ -12,7 +12,7 @@
  * （`start` / `stop`），因为投影服务同时就是 durable runtime contribution。
  */
 
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 import type {
   KnowledgeAttachmentContentResponse,
   KnowledgeAttachmentProjectionListResponse,

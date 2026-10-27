@@ -1,4 +1,4 @@
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import { createSystemClock } from '@memoflow/time';
 import { createAccountPowerSyncPortableCapability } from '@memoflow/account';
 import { createSettingPowerSyncModule } from '@memoflow/setting';

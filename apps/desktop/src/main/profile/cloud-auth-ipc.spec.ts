@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { CloudAuthChannels } from '@memoflow/contracts/electron';
-import { ok } from '@memoflow/contracts/result';
+import { CloudAuthChannels } from '@memoflow/desktop-contracts';
+import { ok } from '@memoflow/transport-contracts/result';
 import { registerCloudAuthIpc } from './cloud-auth-ipc';
 
 vi.mock('../utils/api-config', () => ({

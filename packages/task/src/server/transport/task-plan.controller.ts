@@ -10,8 +10,8 @@
  * 3. Returns a Result<T> (transport-agnostic)
  */
 
-import type { Result } from '@memoflow/contracts/result';
-import { isOk, ok } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { isOk, ok } from '@memoflow/transport-contracts/result';
 import type {
   TaskPlanClientDTO,
   CreateTaskPlanRes,

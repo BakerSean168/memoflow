@@ -22,8 +22,8 @@ import {
   createAuthenticatedIdentityIpcWrapper,
   createAuthenticatedIpcWrapper,
 } from '@memoflow/host-runtime/electron-ipc';
-import type { IElectronModuleContext } from '@memoflow/contracts/electron';
-import type { Result } from '@memoflow/contracts/result';
+import type { IElectronModuleContext } from '@memoflow/desktop-contracts';
+import type { Result } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { ipcAdapterWithValidation } from '@memoflow/utils/result';
 
@@ -78,7 +78,7 @@ export function withAuthenticatedValidation<TInput, TOutput>(
 ): (
   event: IpcInvokeEventLike,
   args: unknown,
-) => Promise<import('@memoflow/contracts/result').IpcResult<TOutput>> {
+) => Promise<import('@memoflow/transport-contracts/result').IpcResult<TOutput>> {
   return (event, args) =>
     withAuthenticatedValue(ctx, async (requestContext) =>
       ipcAdapterWithValidation(schema, (data) => controllerFn(data, requestContext), {

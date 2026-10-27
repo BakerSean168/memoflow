@@ -1,7 +1,7 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
-import type { DesktopUpdateSnapshotDTO } from '@memoflow/contracts/electron';
+import type { DesktopUpdateSnapshotDTO } from '@memoflow/desktop-contracts';
 import type { DesktopUpdateFeed } from '../application/desktop-update-engine';
 import type { DesktopUpdateInstallReceiptStore } from '../application/desktop-update-install-receipt';
 

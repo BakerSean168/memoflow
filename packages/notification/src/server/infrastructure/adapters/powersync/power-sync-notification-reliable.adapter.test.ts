@@ -3,7 +3,7 @@ import type {
   IElectronDatabase,
   IElectronDatabaseQueryResult,
   IElectronDatabaseTransaction,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import { PowerSyncNotificationReliableAdapter } from './power-sync-notification-reliable.adapter';
 
 class RecordingDatabase implements IElectronDatabase {

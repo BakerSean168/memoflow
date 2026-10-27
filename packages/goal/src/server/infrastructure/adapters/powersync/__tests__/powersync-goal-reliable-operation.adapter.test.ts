@@ -7,7 +7,7 @@ import type {
   IElectronDatabase,
   IElectronDatabaseQueryResult,
   IElectronDatabaseTransaction,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import { CompleteGoalUseCase } from '../../../../application/use-cases/commands/complete-goal.use-case';
 import { GoalPolicy } from '../../../../domain';
 import { GoalPowerSyncRepository } from '../goal-powersync.repository';

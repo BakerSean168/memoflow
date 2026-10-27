@@ -51,7 +51,9 @@
     "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/utils": "workspace:*",
-    "zod": "^4.6.5"
+    "zod": "^4.6.5",
+    "@memoflow/transport-contracts": "workspace:*",
+    "@memoflow/desktop-contracts": "workspace:*"
   },
   "devDependencies": {
     "@memoflow/test-utils": "workspace:*"

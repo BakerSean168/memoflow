@@ -3,7 +3,7 @@
  * 权重快照应用层错误
  */
 
-import { ResultErrorException } from '@memoflow/contracts/result';
+import { ResultErrorException } from '@memoflow/transport-contracts/result';
 
 /**
  * Goal 未找到错误

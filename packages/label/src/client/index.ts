@@ -1,13 +1,13 @@
 import type { IResultHttpClient } from '@memoflow/http-client';
 import type { IResultIpcClient } from '@memoflow/ipc-client';
-import { LabelChannels } from '@memoflow/contracts/electron';
+import { LabelChannels } from '@memoflow/desktop-contracts';
 import type {
   CreateLabelReq,
   LabelClientDTO,
   LabelDto,
   ListLabelsReq,
 } from '@memoflow/label-contracts';
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 
 export interface LabelClientPort {
   listLabels(request?: ListLabelsReq): Promise<Result<LabelClientDTO[]>>;

@@ -3,7 +3,7 @@ installAiUiHost();
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import { createNativeAgentFlowFixture } from '@memoflow/ai/testing';
 import { flushPromises, shallowMount } from '@vue/test-utils';
 import { createPinia } from 'pinia';

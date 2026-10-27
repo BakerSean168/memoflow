@@ -22,7 +22,7 @@ import {
 import type {
   DesktopUpdateDiagnosticsDTO,
   DesktopUpdateSnapshotDTO,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import { settingUiHost } from '../setting-ui-host';
 import { presentDesktopUpdateSettings } from './desktop-update-settings.presentation';
 

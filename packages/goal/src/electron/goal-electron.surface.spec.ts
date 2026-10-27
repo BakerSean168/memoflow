@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { GoalChannels } from '@memoflow/contracts/electron';
+import { GoalChannels } from '@memoflow/desktop-contracts';
 import { createTimeContext } from '@memoflow/time';
 
 const TEST_USER_TIME_CONTEXT_PORT = {
@@ -24,7 +24,7 @@ describe('createGoalElectronModule channel surface', () => {
 
   it('registers handlers via GoalChannels and does not redefine a local Ch map', () => {
     expect(source).toContain('GoalChannels');
-    expect(source).toContain("from '@memoflow/contracts/electron'");
+    expect(source).toContain("from '@memoflow/desktop-contracts'");
     expect(source).not.toMatch(/const Ch = \{/);
     expect(source).toContain('Object.values(GoalChannels)');
     expect(source).toContain('GoalChannels.LIST');

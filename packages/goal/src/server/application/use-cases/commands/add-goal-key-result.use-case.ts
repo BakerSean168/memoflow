@@ -5,8 +5,8 @@
 import { GoalVersionConflictError, type IGoalRepository } from '../../../domain';
 import { GoalPolicy } from '../../../domain';
 import type { GoalMutationReceipt, GoalTimeframe } from '@memoflow/goal-contracts';
-import type { Result } from '@memoflow/contracts/result';
-import { ok, error } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { ok, error } from '@memoflow/transport-contracts/result';
 import { createGoalMutationReceipt } from './goal-mutation-receipt';
 
 export class AddGoalKeyResultUseCase {

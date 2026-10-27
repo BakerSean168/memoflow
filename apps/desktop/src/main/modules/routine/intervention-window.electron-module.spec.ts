@@ -1,9 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ipcMain } from 'electron';
-import {
-  RoutineWindowChannels,
-  type InterventionWindowCommand,
-} from '@memoflow/contracts/electron';
+import { RoutineWindowChannels, type InterventionWindowCommand } from '@memoflow/desktop-contracts';
 import type { InterventionWindowController } from './intervention-window-controller';
 import { createInterventionWindowElectronModule } from './intervention-window.electron-module';
 

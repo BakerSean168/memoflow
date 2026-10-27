@@ -11,7 +11,7 @@ import {
   defineFailureRegistry,
   fail,
   ok,
-} from '@memoflow/contracts/result';
+} from '@memoflow/transport-contracts/result';
 import type { ExecutionContext, RequestContext } from '@memoflow/contracts/shared';
 
 const AdapterFailureRegistry = defineFailureRegistry({

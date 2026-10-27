@@ -7,7 +7,7 @@ import type {
   KnowledgeRemoteBindingClientDTO,
   SyncKnowledgeRepositoryRes,
 } from '@memoflow/repository-contracts';
-import { fail, ok } from '@memoflow/contracts/result';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 import {
   DesktopKnowledgeRepositoryAutoSyncScheduler,
   shouldIgnoreKnowledgeRepositoryWatchPath,

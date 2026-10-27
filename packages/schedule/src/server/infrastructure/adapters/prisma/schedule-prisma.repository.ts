@@ -14,7 +14,7 @@ import type {
 import { CalendarEntry } from '../../../domain/aggregates/calendar-entry';
 import { LeaseLostError } from '@memoflow/patterns/lease';
 import { PrismaScheduleMapper } from './mappers/prisma-schedule-mapper';
-import { toResultErrorException } from '@memoflow/contracts/result';
+import { toResultErrorException } from '@memoflow/transport-contracts/result';
 import type { UnifiedOperationMetricsRecorder } from '@memoflow/patterns/operations';
 
 interface ScheduleDb {

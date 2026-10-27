@@ -11,7 +11,7 @@
  * the Routine-owned seams exported by the package separately.
  */
 
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import type { NotificationRequestedWriterPort } from '@memoflow/notification-contracts';
 import {
   buildRoutineOccurrenceNotificationRequest,

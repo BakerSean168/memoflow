@@ -1,4 +1,4 @@
-import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
+import type { KnowledgeDocumentId } from '@memoflow/shared-primitives';
 import { KnowledgeDocumentIdSchema } from '@memoflow/repository-contracts';
 
 export type KnowledgeDocumentIdentityFailureCode =

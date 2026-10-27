@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { GoalStatus } from '@memoflow/goal-contracts';
 import { IdentityId } from '@memoflow/domain-shared';
-import { requireYmd } from '@memoflow/contracts/primitives';
+import { requireYmd } from '@memoflow/shared-primitives';
 import { Goal } from './goal';
 
 function createGoal() {

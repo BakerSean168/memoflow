@@ -1,7 +1,7 @@
 /** Planner/Calendar Electron transport. Worker diagnostics live in @memoflow/scheduler/electron. */
 import { ipcMain } from 'electron';
-import { ok } from '@memoflow/contracts/result';
-import { ScheduleChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
+import { ok } from '@memoflow/transport-contracts/result';
+import { ScheduleChannels, type IElectronModuleContext } from '@memoflow/desktop-contracts';
 import { createLogger } from '@memoflow/utils/logger';
 import type { ScheduleModuleInstance } from '../server/infrastructure';
 import { ScheduleEventController } from '../server/transport';

@@ -1,7 +1,7 @@
 import type {
   DesktopUpdateReleaseDTO,
   DesktopUpdateSnapshotDTO,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 
 export type DesktopUpdateSettingsKind =
   | 'loading'

@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import type { IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
+import type { IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import {
   assertValidBusinessOperationReceipt,
   GoalRecordReceiptInputSchema,

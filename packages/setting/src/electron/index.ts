@@ -61,7 +61,7 @@
  */
 
 import { ipcMain } from 'electron';
-import { SettingChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
+import { SettingChannels, type IElectronModuleContext } from '@memoflow/desktop-contracts';
 import {
   PatchPreferenceNamespaceBodySchema,
   PreferenceNamespaceSchema,
@@ -70,7 +70,7 @@ import {
   parsePreferenceNamespacePatch,
   type PreferenceRevisionConflict,
 } from '@memoflow/setting-contracts';
-import { fail } from '@memoflow/contracts/result';
+import { fail } from '@memoflow/transport-contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
 import type { SettingModuleInstance } from '../server/infrastructure';
 import type { UserTimeContextPort } from '@memoflow/time';
@@ -110,10 +110,10 @@ type ModuleHandleState = 'created' | 'registered' | 'disposed' | 'failed';
  * 设置 Electron 模块 handle。
  *
  * Structurally compatible with `IElectronModule` from
- * `@memoflow/contracts/electron`, but defined locally so this seam stays
+ * `@memoflow/desktop-contracts`, but defined locally so this seam stays
  * host-shaped: the factory returns it already bound to one instance.
  *
- * 与 `@memoflow/contracts/electron` 的 `IElectronModule` 结构兼容，
+ * 与 `@memoflow/desktop-contracts` 的 `IElectronModule` 结构兼容，
  * 但在本地定义，使该 seam 保持宿主形状：工厂返回时已绑定到单个实例。
  */
 export interface SettingElectronModuleDef {

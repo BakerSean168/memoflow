@@ -1,5 +1,5 @@
 import type { CloudAuthWebClientPort } from '@memoflow/cloud-auth-contracts';
-import type { ResultError } from '@memoflow/contracts/result';
+import type { ResultError } from '@memoflow/transport-contracts/result';
 
 export type GithubPopupSignInResult =
   | { kind: 'authenticated' }

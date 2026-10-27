@@ -19,8 +19,8 @@ import {
 } from '../../../domain';
 import { IdentityId } from '@memoflow/domain-shared';
 import type { CreateGoalReq, GoalMutationReceipt } from '@memoflow/goal-contracts';
-import type { Result } from '@memoflow/contracts/result';
-import { ok, error } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { ok, error } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { createGoalMutationReceipt } from './goal-mutation-receipt';
 import { createLogger } from '@memoflow/utils/logger';

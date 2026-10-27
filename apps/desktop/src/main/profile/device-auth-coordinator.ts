@@ -9,7 +9,7 @@ import {
   type DesktopCloudConnectionRequest,
   type DesktopCloudConnectionResult,
 } from '@memoflow/cloud-auth-contracts';
-import { fail, ok, type Result, type ResultError } from '@memoflow/contracts/result';
+import { fail, ok, type Result, type ResultError } from '@memoflow/transport-contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
 import { getApiBaseUrl } from '../utils/api-config';
 import type { DesktopProfileRuntimeManager } from './desktop-profile-runtime-manager';

@@ -2,7 +2,7 @@ import { createLogger } from '@memoflow/utils/logger';
 import type {
   DesktopUpdateFailureDTO,
   DesktopUpdateSnapshotDTO,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import type { DesktopShutdownCoordinator } from '../../../lifecycle/desktop-shutdown-coordinator';
 import type {
   DesktopUpdateInstallReceipt,

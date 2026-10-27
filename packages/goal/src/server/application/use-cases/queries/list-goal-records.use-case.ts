@@ -12,8 +12,8 @@ import type { Goal, GoalRecord } from '../../../domain';
 import { KeyResultProgress } from '../../../domain';
 import { createGoalRecordAggregationSnapshot } from '../../../../shared/key-result-progress-calculator';
 import type { GetGoalRecordsRes } from '@memoflow/goal-contracts';
-import type { Result } from '@memoflow/contracts/result';
-import { ok, error } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { ok, error } from '@memoflow/transport-contracts/result';
 
 export interface ListGoalRecordsParams {
   identityId: string;

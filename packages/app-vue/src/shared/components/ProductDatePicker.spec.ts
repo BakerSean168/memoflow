@@ -1,6 +1,6 @@
 import { DOMWrapper, flushPromises, mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
-import { requireYmd } from '@memoflow/contracts/primitives';
+import { requireYmd } from '@memoflow/shared-primitives';
 import ProductDatePicker from './ProductDatePicker.vue';
 
 describe('ProductDatePicker', () => {

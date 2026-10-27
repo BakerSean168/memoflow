@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
-import { SystemChannels } from '@memoflow/contracts/electron';
+import { SystemChannels } from '@memoflow/desktop-contracts';
 import { DESKTOP_BRIDGE_KEY } from '@setting-ui-test-host/di/keys';
 import enSetting from '@setting-ui-test-host/locales/en-US/setting';
 import AntigravityAcpDownload from './AntigravityAcpDownload.vue';

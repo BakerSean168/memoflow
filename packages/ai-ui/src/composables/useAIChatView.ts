@@ -64,7 +64,7 @@ import {
 } from '../ai-ui-host';
 import { useKnowledgeNativeSurfaceRegistration } from '../ai-ui-host';
 import { openLocalAgentNoteReview, useReferenceableKnowledgeNotes } from '../ai-ui-host';
-import { unwrapOrThrowError } from '@memoflow/contracts/result';
+import { unwrapOrThrowError } from '@memoflow/transport-contracts/result';
 import type {
   AIWorkspaceRecentGoal,
   AIWorkspaceRecentKnowledgeNote,

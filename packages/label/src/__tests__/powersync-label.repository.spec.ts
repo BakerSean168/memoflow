@@ -1,4 +1,4 @@
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import { describe, expect, it, vi } from 'vitest';
 import { PowerSyncLabelRepository } from '../infrastructure/powersync/powersync-label.repository';
 

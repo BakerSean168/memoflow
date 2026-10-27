@@ -1,14 +1,14 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { GoalChannels, GoalWorkspaceChannels } from '@memoflow/contracts/electron';
+import { GoalChannels, GoalWorkspaceChannels } from '@memoflow/desktop-contracts';
 
 describe('GoalIpcAdapter vNext channel surface', () => {
   const source = readFileSync(resolve(__dirname, 'goal-ipc.adapter.ts'), 'utf8');
 
   it('uses canonical Goal + Goal Workspace channels without legacy status surfaces', () => {
     expect(source).toContain(
-      "import { GoalChannels, GoalWorkspaceChannels } from '@memoflow/contracts/electron'",
+      "import { GoalChannels, GoalWorkspaceChannels } from '@memoflow/desktop-contracts'",
     );
     expect(source).toContain('GoalChannels.CREATE');
     expect(source).toContain('GoalChannels.ABANDON');

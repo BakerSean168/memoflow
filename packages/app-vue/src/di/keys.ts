@@ -14,11 +14,11 @@ import type {
   DesktopAccessSnapshot,
   DesktopNotificationPreference,
   DesktopNotificationPreferencePatch,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import type { ElectronBridge } from '@memoflow/ipc-client';
 import type { LocalAgentClient, AgentRegistryClient } from '@memoflow/ai-client';
 import type { AIRuntimeSurface } from '@memoflow/ai-contracts';
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 import type { DesktopAuthApi } from '../shared/utils/desktop-auth-recovery';
 import type {
   IAccountService,

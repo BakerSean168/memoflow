@@ -1,7 +1,7 @@
 import { computed, onScopeDispose, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { TaskPlanClientDTO } from '@memoflow/task-contracts';
-import { unwrap } from '@memoflow/contracts/result';
+import { unwrap } from '@memoflow/transport-contracts/result';
 import { isTaskOccurrenceOnTodaySurface } from '../utils/task-occurrence-presentation';
 import { useTaskStore } from '../stores/task-store';
 import { useTaskOccurrences } from './useTaskOccurrences';

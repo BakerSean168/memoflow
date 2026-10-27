@@ -1,4 +1,4 @@
-import type { Ymd } from '@memoflow/contracts/primitives';
+import type { Ymd } from '@memoflow/shared-primitives';
 import { createTimeFacade, type TimeContext } from '@memoflow/time';
 
 /** Canonical deterministic occurrence identity: `{planId}:{scheduleDate}`. */

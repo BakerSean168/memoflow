@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { ok, fail, isOk } from '@memoflow/contracts/result';
+import { ok, fail, isOk } from '@memoflow/transport-contracts/result';
 import { anIdentityId } from '../../../testing';
 import type { TaskOccurrenceClientDTO } from '@memoflow/task-contracts';
 import {

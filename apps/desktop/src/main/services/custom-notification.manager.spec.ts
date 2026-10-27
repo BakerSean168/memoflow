@@ -1,6 +1,6 @@
 import { BrowserWindow, ipcMain } from 'electron';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { NotificationChannels, RendererEventChannels } from '@memoflow/contracts/electron';
+import { NotificationChannels, RendererEventChannels } from '@memoflow/desktop-contracts';
 import { CustomNotificationManager } from './custom-notification.manager';
 
 describe('CustomNotificationManager lifecycle', () => {

@@ -9,8 +9,8 @@
 
 import { ipcMain } from 'electron';
 import type { IpcMainInvokeEvent } from 'electron';
-import { CacheChannels, GoalChannels, TaskChannels } from '@memoflow/contracts/electron';
-import { ok } from '@memoflow/contracts/result';
+import { CacheChannels, GoalChannels, TaskChannels } from '@memoflow/desktop-contracts';
+import { ok } from '@memoflow/transport-contracts/result';
 import { isDesktopDevelopmentRuntime } from './dev-runtime';
 
 // ============ Types ============

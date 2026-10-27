@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { unwrapOrThrowError } from '@memoflow/contracts/result';
+import { unwrapOrThrowError } from '@memoflow/transport-contracts/result';
 import type {
   PreferenceMutationReceipt,
   PreferenceNamespacePatch,

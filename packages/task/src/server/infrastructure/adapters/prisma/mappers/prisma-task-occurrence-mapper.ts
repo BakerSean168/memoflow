@@ -1,5 +1,5 @@
 import type { TaskOccurrence as PrismaTaskOccurrence } from '@memoflow/database';
-import type { Ymd } from '@memoflow/contracts/primitives';
+import type { Ymd } from '@memoflow/shared-primitives';
 import {
   TaskOccurrenceChecklistItemSchema,
   TaskOccurrenceResultSchema,

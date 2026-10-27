@@ -64,7 +64,8 @@
     "@memoflow/account-client": "workspace:*",
     "@memoflow/account-contracts": "workspace:*",
     "@memoflow/account-ui": "workspace:*",
-    "@memoflow/notification-ui": "workspace:*"
+    "@memoflow/notification-ui": "workspace:*",
+    "@memoflow/transport-contracts": "workspace:*"
   },
   "name": "@memoflow/web"
 }

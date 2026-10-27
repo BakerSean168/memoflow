@@ -1,5 +1,5 @@
 import { onScopeDispose, watch } from 'vue';
-import { WindowChannels } from '@memoflow/contracts/electron';
+import { WindowChannels } from '@memoflow/desktop-contracts';
 import { usePresentationPreferenceStore } from '../stores/presentation-preference-store';
 import { settingUiHost } from '../setting-ui-host';
 

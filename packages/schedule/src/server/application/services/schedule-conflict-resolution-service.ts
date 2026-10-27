@@ -1,4 +1,4 @@
-import { toResultErrorException } from '@memoflow/contracts/result';
+import { toResultErrorException } from '@memoflow/transport-contracts/result';
 import type {
   CalendarEntryClientDTO,
   ConflictDetectionResult,

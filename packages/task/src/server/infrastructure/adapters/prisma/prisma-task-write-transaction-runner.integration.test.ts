@@ -3,7 +3,7 @@ import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vites
 import '@memoflow/test-utils/helpers/result-matchers';
 import { IdentityId } from '@memoflow/domain-shared';
 import { ImportanceLevel } from '@memoflow/shared-primitives';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import { TaskGoalBindingTrigger, TaskPlanScheduleKind } from '@memoflow/task-contracts';
 import { eventBus } from '@memoflow/utils/domain';
 import { TaskPlan } from '../../../domain/aggregates/task-plan';

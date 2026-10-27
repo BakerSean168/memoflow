@@ -4,7 +4,7 @@ import type {
   PortableCapabilityExecutionContext,
   PortableReferenceV3,
 } from '@memoflow/data-portability-contracts';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import { Goal } from '../domain';
 import { GoalPortableCapability } from './goal-portability';
 import {

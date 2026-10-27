@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import Database from 'better-sqlite3';
 import { randomUUID } from 'crypto';
-import type { IElectronDatabase, IElectronDatabaseQueryResult } from '@memoflow/contracts/electron';
+import type { IElectronDatabase, IElectronDatabaseQueryResult } from '@memoflow/desktop-contracts';
 import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
 import {
   NotificationRequestedSchema,

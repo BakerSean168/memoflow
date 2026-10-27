@@ -1,4 +1,4 @@
-import { ResultErrorException } from '@memoflow/contracts/result';
+import { ResultErrorException } from '@memoflow/transport-contracts/result';
 
 /**
  * 业务规则违规错误

@@ -1,7 +1,7 @@
 import { TaskGoalBinding } from '../../../domain/value-objects/task-goal-binding';
 import type { TaskGoalLinkInput } from '@memoflow/task-contracts';
 import type { TaskGoalMeasurementReadPort } from '../../ports';
-import { error, type Result } from '@memoflow/contracts/result';
+import { error, type Result } from '@memoflow/transport-contracts/result';
 
 /** Never infer measurements or read Goal persistence from Task. */
 export async function validateTaskGoalProgress(

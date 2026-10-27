@@ -1,4 +1,4 @@
-import { requireYmd, type Ymd } from '@memoflow/contracts/primitives';
+import { requireYmd, type Ymd } from '@memoflow/shared-primitives';
 
 export type ParsedProductDateInput =
   | { kind: 'day'; date: Ymd }

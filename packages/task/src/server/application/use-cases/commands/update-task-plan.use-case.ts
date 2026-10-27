@@ -19,8 +19,8 @@ import {
   type TaskPlanClientDTO,
   type UpdateTaskPlanReq,
 } from '@memoflow/task-contracts';
-import type { Result } from '@memoflow/contracts/result';
-import { error, fail, ok } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { error, fail, ok } from '@memoflow/transport-contracts/result';
 import { createLogger } from '@memoflow/utils/logger';
 import { createTimeFacade, type UserTimeContextPort } from '@memoflow/time';
 import {

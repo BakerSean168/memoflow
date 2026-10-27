@@ -1,6 +1,6 @@
 import type { createTaskPrismaReadQueries } from '@memoflow/task';
 import { GatewayReadError, type TaskReadPort } from '@memoflow/agent-gateway';
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 
 function unwrap<T>(result: Result<T>): T {
   if (result.ok) return result.data;

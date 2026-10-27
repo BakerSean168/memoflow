@@ -1,5 +1,5 @@
 import type { BrowserWindow } from 'electron';
-import type { FocusWindowProjection } from '@memoflow/contracts/electron';
+import type { FocusWindowProjection } from '@memoflow/desktop-contracts';
 import type { FocusTaskbarIntegrationPort } from './focus-window-controller';
 
 /** Optional Electron taskbar progress adapter; no domain state is stored here. */

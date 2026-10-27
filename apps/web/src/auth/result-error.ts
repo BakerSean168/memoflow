@@ -1,4 +1,4 @@
-import type { ResultError } from '@memoflow/contracts/result';
+import type { ResultError } from '@memoflow/transport-contracts/result';
 import {
   translateResultErrorMessage,
   type ResultErrorTranslateFn,

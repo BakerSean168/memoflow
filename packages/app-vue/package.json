@@ -107,7 +107,8 @@
     "@memoflow/schedule-client": "workspace:*",
     "@lezer/highlight": "1.2.4",
     "@fullcalendar/vue3": "7.1.0",
-    "@memoflow/notification-ui": "workspace:*"
+    "@memoflow/notification-ui": "workspace:*",
+    "@memoflow/transport-contracts": "workspace:*"
   },
   "name": "@memoflow/app-vue",
   "peerDependencies": {

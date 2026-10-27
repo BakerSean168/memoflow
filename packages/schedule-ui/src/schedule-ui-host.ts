@@ -1,7 +1,7 @@
 import type { Component, InjectionKey, MaybeRefOrGetter, ObjectDirective, Ref } from 'vue';
 import type { QueryClient } from '@tanstack/vue-query';
 import type { TimeFacade } from '@memoflow/time';
-import type { Result } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
 import type { GoalClientDTO } from '@memoflow/goal-contracts';
 import type {
   RescheduleTaskInput,

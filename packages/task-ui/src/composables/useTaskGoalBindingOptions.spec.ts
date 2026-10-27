@@ -1,7 +1,7 @@
 import { createApp, defineComponent, h } from 'vue';
 import { createI18n } from 'vue-i18n';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import { DESKTOP_AUTH_API_KEY, GOAL_SERVICE_KEY } from '@task-ui-test-host/di/keys';
 import { useTaskGoalBindingOptions } from './useTaskGoalBindingOptions';
 import { taskUiHost } from '../task-ui-host';

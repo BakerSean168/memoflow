@@ -23,7 +23,8 @@
     "@memoflow/scheduler": "workspace:*",
     "@memoflow/task": "workspace:*",
     "@memoflow/utils": "workspace:*",
-    "@memoflow/routine-contracts": "workspace:*"
+    "@memoflow/routine-contracts": "workspace:*",
+    "@memoflow/shared-primitives": "workspace:*"
   },
   "devDependencies": {
     "tsup": "^8.3.5",

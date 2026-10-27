@@ -1,7 +1,7 @@
 import type {
   DesktopUpdateChannelDTO,
   DesktopUpdateDisableReasonDTO,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import {
   type DesktopUpdatePolicy,
   DesktopUpdateCoordinator,

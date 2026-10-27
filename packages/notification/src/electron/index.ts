@@ -79,8 +79,8 @@
  */
 
 import { ipcMain } from 'electron';
-import { NotificationChannels, type IElectronModuleContext } from '@memoflow/contracts/electron';
-import { ok } from '@memoflow/contracts/result';
+import { NotificationChannels, type IElectronModuleContext } from '@memoflow/desktop-contracts';
+import { ok } from '@memoflow/transport-contracts/result';
 import {
   CreateNotificationSchema,
   DeleteNotificationInvocationSchema,
@@ -123,7 +123,7 @@ function registerValidatedChannel<TInput, TOutput>(
   controllerFn: (
     data: TInput,
     context: import('@memoflow/contracts/shared').ExecutionContext,
-  ) => Promise<import('@memoflow/contracts/result').Result<TOutput>>,
+  ) => Promise<import('@memoflow/transport-contracts/result').Result<TOutput>>,
   projectArgs?: (args: unknown) => unknown,
 ): void {
   ipcMain.handle(channel, (event, args) =>
@@ -198,10 +198,10 @@ type ModuleHandleState = 'created' | 'registered' | 'disposed' | 'failed';
  * 通知 Electron 模块 handle。
  *
  * Structurally compatible with `IElectronModule` from
- * `@memoflow/contracts/electron`, but defined locally so this seam stays
+ * `@memoflow/desktop-contracts`, but defined locally so this seam stays
  * host-shaped: the factory returns it already bound to one instance.
  *
- * 与 `@memoflow/contracts/electron` 的 `IElectronModule` 结构兼容，
+ * 与 `@memoflow/desktop-contracts` 的 `IElectronModule` 结构兼容，
  * 但在本地定义，使该 seam 保持宿主形状：工厂返回时已绑定到单个实例。
  */
 export interface NotificationElectronModuleDef {

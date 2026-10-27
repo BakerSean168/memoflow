@@ -5,8 +5,8 @@ import type { TaskFilters } from '../../../domain/repositories/i-task-plan-repos
 import type { TaskPlanClientDTO, TaskOccurrenceClientDTO } from '@memoflow/task-contracts';
 import { ImportanceLevel } from '@memoflow/shared-primitives';
 import { TaskOccurrenceStatus, TaskPlanStatus } from '@memoflow/task-contracts';
-import type { Result } from '@memoflow/contracts/result';
-import { ok } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import { createTimeFacade, type TimeContext, type UserTimeContextPort } from '@memoflow/time';
 
 interface TaskDashboardResponse {

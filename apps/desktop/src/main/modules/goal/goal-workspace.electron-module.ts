@@ -3,14 +3,14 @@ import {
   GoalWorkspaceChannels,
   type IElectronModule,
   type IElectronModuleContext,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import { withAuthenticatedIdentity } from '@memoflow/host-runtime/electron-ipc';
 import {
   GetGoalWorkspaceInvocationSchema,
   GoalWorkspaceKnowledgePageInvocationSchema,
   GoalWorkspaceTaskPageInvocationSchema,
 } from '@memoflow/workspace-contracts';
-import { fail } from '@memoflow/contracts/result';
+import { fail } from '@memoflow/transport-contracts/result';
 import type { GoalWorkspaceApplicationPort } from '@memoflow/goal';
 
 export function createGoalWorkspaceElectronModule(options: {

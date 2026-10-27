@@ -5,7 +5,7 @@ import type {
   IElectronDatabase,
   IElectronDatabaseQueryResult,
   IElectronDatabaseTransaction,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import { NotificationChannelType } from '@memoflow/notification-contracts';
 import { buildIdempotencyKeyString } from '@memoflow/reliable-messaging-contracts';
 import { asHm, createTimeContext, requireTimeZoneId } from '@memoflow/time';

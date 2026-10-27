@@ -11,7 +11,7 @@ import { TaskPlan } from '../aggregates/task-plan';
 import { TaskPlanId } from '../value-objects/task-plan-id';
 import { TaskPlanStatus } from '../value-objects/task-plan-status';
 import { ImportanceLevel } from '@memoflow/shared-primitives';
-import type { Ymd } from '@memoflow/contracts/primitives';
+import type { Ymd } from '@memoflow/shared-primitives';
 import { IdentityId } from '@memoflow/domain-shared';
 import { createTaskRecurrenceDateAdapter } from '../aggregates/task-recurrence-date.adapter';
 import { TaskPlanOutcomeEvaluator } from '../services/task-plan-outcome-evaluator';

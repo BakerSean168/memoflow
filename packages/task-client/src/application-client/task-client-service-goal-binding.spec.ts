@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import { createMockTaskPlan } from '@memoflow/task-contracts/test-support/task.mock';
 import type { TaskGoalBindingDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
 import { TaskClientService } from './task-client-service';

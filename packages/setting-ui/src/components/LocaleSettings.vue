@@ -151,7 +151,7 @@ import {
   type PresentationPreferences,
   type RegionalPreferences,
 } from '@memoflow/setting-contracts';
-import { TimeZoneIdSchema } from '@memoflow/contracts/primitives';
+import { TimeZoneIdSchema } from '@memoflow/shared-primitives';
 
 type DateStyle = RegionalPreferences['dateStyle'];
 type TimeStyle = RegionalPreferences['timeStyle'];

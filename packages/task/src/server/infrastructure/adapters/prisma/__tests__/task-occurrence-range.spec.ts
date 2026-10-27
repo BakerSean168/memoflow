@@ -1,7 +1,7 @@
 import { expect, it, vi } from 'vitest';
 import type { PrismaClient } from '@memoflow/database';
-import type { IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
-import type { Ymd } from '@memoflow/contracts/primitives';
+import type { IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
+import type { Ymd } from '@memoflow/shared-primitives';
 import { TaskOccurrencePrismaRepository } from '../task-occurrence-prisma.repository';
 import { PowerSyncTaskOccurrenceRepository } from '../../powersync/task-occurrence-powersync.repository';
 

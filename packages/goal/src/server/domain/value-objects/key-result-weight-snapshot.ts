@@ -15,7 +15,7 @@
 
 import { ValueObject } from '@memoflow/utils/domain';
 import type { KeyResultWeightSnapshotDTO, SnapshotTrigger } from '@memoflow/goal-contracts';
-import type { IdentityId } from '@memoflow/contracts/primitives';
+import type { IdentityId } from '@memoflow/shared-primitives';
 import type { GoalId, KeyResultId, KeyResultWeightSnapshotId } from '@memoflow/goal-contracts';
 
 /**

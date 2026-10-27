@@ -5,7 +5,7 @@ import {
   KeyResultProgressDTOSchema,
 } from '@memoflow/goal-contracts';
 import { createMockKeyResult } from '@memoflow/goal-contracts/test-support/goal.mock';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import { GoalHttpAdapter } from './http/goal-http.adapter';
 import { GoalIpcAdapter } from './ipc/goal-ipc.adapter';
 import { createGoalClientService } from '../../application-client';

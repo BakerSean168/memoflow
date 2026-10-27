@@ -4,7 +4,7 @@ import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { prisma } from '@memoflow/database';
 import { IdentityId } from '@memoflow/domain-shared';
 import { createTimeContext } from '@memoflow/time';
-import { requireYmd } from '@memoflow/contracts/primitives';
+import { requireYmd } from '@memoflow/shared-primitives';
 import { Goal } from '../../../domain/aggregates/goal';
 import { GoalLabelOwnershipError, GoalReminderConfig } from '../../../domain';
 import { GoalPrismaRepository } from './goal-prisma.repository';

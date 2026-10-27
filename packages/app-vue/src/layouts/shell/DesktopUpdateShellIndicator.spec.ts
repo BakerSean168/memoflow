@@ -3,8 +3,8 @@
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it, vi } from 'vitest';
-import { fail, ok, ResultCode } from '@memoflow/contracts/result';
-import type { DesktopUpdateSnapshotDTO } from '@memoflow/contracts/electron';
+import { fail, ok, ResultCode } from '@memoflow/transport-contracts/result';
+import type { DesktopUpdateSnapshotDTO } from '@memoflow/desktop-contracts';
 import { DESKTOP_UPDATE_SERVICE_KEY } from '../../di/keys';
 import type { DesktopUpdateService } from '../../di/types';
 import DesktopUpdateShellIndicator from './DesktopUpdateShellIndicator.vue';

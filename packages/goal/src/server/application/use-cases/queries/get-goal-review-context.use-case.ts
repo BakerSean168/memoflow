@@ -1,7 +1,7 @@
 import { ReviewWindowResolver } from '../../services/review-window-resolver';
 import type { GoalReviewSystemContext, GoalReviewWindowInput } from '@memoflow/goal-contracts';
-import type { Result } from '@memoflow/contracts/result';
-import { error, ok } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { error, ok } from '@memoflow/transport-contracts/result';
 import type { IGoalRepository } from '../../../domain';
 import { GoalReviewContextBuilder } from '../../services/goal-review-context-builder';
 import type { UserTimeContextPort } from '@memoflow/time';

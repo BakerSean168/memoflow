@@ -7,9 +7,9 @@ import {
   ProfileAccessChannels,
   SystemChannels,
   type DesktopAccessSnapshot,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import type { KnowledgeRemoteBindingClientDTO } from '@memoflow/repository-contracts';
-import { fail, ok } from '@memoflow/contracts/result';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 import {
   DESKTOP_ACCESS_SNAPSHOT_KEY,
   DESKTOP_BRIDGE_KEY,

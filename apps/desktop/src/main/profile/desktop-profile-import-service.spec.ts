@@ -5,7 +5,7 @@ import path from 'node:path';
 import Database from 'better-sqlite3';
 import { afterEach, expect, it, vi } from 'vitest';
 import { PowerSyncAppSchema } from '@memoflow/powersync-schema';
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import type {
   ProfileImportPlan,
   ProfileImportCommitted,

@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import matter from 'gray-matter';
-import type { Result } from '@memoflow/contracts/result';
-import { fail, ok } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 import {
   CreateConfirmedKnowledgeNoteSchema,
   AdoptKnowledgeDocumentSchema,

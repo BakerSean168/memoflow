@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { error, ok } from '@memoflow/contracts/result';
+import { error, ok } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { DesktopGoalPlanMutationAdapter } from './goal-plan-mutation.adapter';
 

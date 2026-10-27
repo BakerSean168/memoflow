@@ -6,7 +6,7 @@ import {
   ProfileAccessChannels,
   WindowChannels,
   type ProfileSummary,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import { DESKTOP_BRIDGE_KEY } from '../../di/keys';
 import { translateResultError } from '../utils/translate-result-error';
 

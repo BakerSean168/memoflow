@@ -45,7 +45,7 @@
  * 负责 transport 注册与生命周期。
  */
 
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import {
   createAccountModule,
   createAccountPowerSyncRepositories,

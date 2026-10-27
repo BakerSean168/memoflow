@@ -3,7 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import type { KnowledgeRemoteBindingClientDTO } from '@memoflow/repository-contracts';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import {
   DesktopKnowledgeRepositoryGitRuntime,
   NodeGitProcessPort,

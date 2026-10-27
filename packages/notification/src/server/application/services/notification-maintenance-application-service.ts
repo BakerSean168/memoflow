@@ -4,8 +4,8 @@ import type {
   NotificationCategory,
   NotificationClientDTO,
 } from '@memoflow/notification-contracts';
-import type { Result } from '@memoflow/contracts/result';
-import { fail, ok } from '@memoflow/contracts/result';
+import type { Result } from '@memoflow/transport-contracts/result';
+import { fail, ok } from '@memoflow/transport-contracts/result';
 import { toNotificationClientDTO } from '../use-cases/commands/notification-dto-converters';
 import type { INotificationRepository } from '../../domain/repositories';
 

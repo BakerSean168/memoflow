@@ -24,7 +24,9 @@
     "@memoflow/http-client": "workspace:*",
     "@memoflow/ipc-client": "workspace:*",
     "@memoflow/relation-contracts": "workspace:*",
-    "@memoflow/repository-contracts": "workspace:*"
+    "@memoflow/repository-contracts": "workspace:*",
+    "@memoflow/desktop-contracts": "workspace:*",
+    "@memoflow/transport-contracts": "workspace:*"
   },
   "devDependencies": {
     "@memoflow/test-utils": "workspace:*",

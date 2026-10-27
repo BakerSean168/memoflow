@@ -1,4 +1,4 @@
-import { unwrapOrThrowError } from '@memoflow/contracts/result';
+import { unwrapOrThrowError } from '@memoflow/transport-contracts/result';
 import type {
   PreferenceNamespaceResponse,
   UserPreferenceProfile,

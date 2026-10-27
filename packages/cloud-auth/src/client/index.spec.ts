@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { CloudAuthChannels } from '@memoflow/contracts/electron';
+import { CloudAuthChannels } from '@memoflow/desktop-contracts';
 import { createCloudAuthHttpClient, createCloudAuthIpcClient } from './index';
 
 function jsonResponse(body: unknown, status = 200): Response {

@@ -6,7 +6,7 @@
  * Called once during app startup.
  */
 import type { App } from 'vue';
-import { RendererEventChannels } from '@memoflow/contracts/electron';
+import { RendererEventChannels } from '@memoflow/desktop-contracts';
 
 import { useAccountStore } from '@memoflow/account-ui';
 import { useGoalStore } from '@memoflow/goal-ui';

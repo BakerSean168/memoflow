@@ -3,7 +3,7 @@ import type {
   ExecuteKnowledgeRepositoryReconciliationRes,
 } from '@memoflow/repository-contracts';
 import { ExecuteKnowledgeRepositoryReconciliationSchema } from '@memoflow/repository-contracts';
-import { fail, ok, type Result } from '@memoflow/contracts/result';
+import { fail, ok, type Result } from '@memoflow/transport-contracts/result';
 import { LocalVaultRuntimeError, type LocalVaultElectronPort } from '@memoflow/repository/electron';
 import {
   KnowledgeRepositoryGitRuntimeError,

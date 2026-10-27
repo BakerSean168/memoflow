@@ -1,6 +1,6 @@
 /** Goal Review V2: an immutable system snapshot plus editable reflection. */
 import { Entity } from '@memoflow/utils/domain';
-import type { Instant, TransferDate } from '@memoflow/contracts/primitives';
+import type { Instant, TransferDate } from '@memoflow/shared-primitives';
 import type { GoalId as IGoalId, GoalReviewId as IGoalReviewId } from '@memoflow/goal-contracts';
 import type { GoalReviewServerDTO, GoalReviewSystemContext } from '@memoflow/goal-contracts';
 import { GoalReviewSystemContextSchema } from '@memoflow/goal-contracts';

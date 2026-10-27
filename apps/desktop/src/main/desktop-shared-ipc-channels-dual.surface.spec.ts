@@ -1,12 +1,12 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { RepositoryChannels } from '@memoflow/contracts/electron';
+import { RepositoryChannels } from '@memoflow/desktop-contracts';
 import { SUPPORTED_REPOSITORY_CHANNELS } from '../preload/allowed-channels';
 
 /**
  * Residual 256: desktop shared/types ipc-channels dual re-export barrel is gone.
- * Callers import channels from @memoflow/contracts/electron.
+ * Callers import channels from @memoflow/desktop-contracts.
  */
 describe('desktop shared ipc-channels dual single-track surface', () => {
   const desktopSrc = resolve(__dirname, '..');
@@ -49,9 +49,9 @@ describe('desktop shared ipc-channels dual single-track surface', () => {
   it('preload and notification view import channels from contracts', () => {
     const preloadSrc = readFileSync(preload, 'utf8');
     const viewSrc = readFileSync(notificationView, 'utf8');
-    expect(preloadSrc).toContain("from '@memoflow/contracts/electron'");
+    expect(preloadSrc).toContain("from '@memoflow/desktop-contracts'");
     expect(preloadSrc).not.toContain('shared/types/ipc-channels');
-    expect(viewSrc).toContain("from '@memoflow/contracts/electron'");
+    expect(viewSrc).toContain("from '@memoflow/desktop-contracts'");
     expect(viewSrc).not.toContain('shared/types/ipc-channels');
   });
 });
