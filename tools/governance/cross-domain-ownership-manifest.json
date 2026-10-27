@@ -251,6 +251,20 @@
       "reason": "Integration tests compose public owner server modules to verify closure and scheduler-to-fact behavior; those packages are dev-only dependencies.",
       "retireBy": "permanent",
       "architectureJustification": "Test-only composition exercises the same public ports used by host composition and cannot create production ownership coupling because production imports and dependencies are audited separately."
+    },
+    {
+      "id": "task-contracts-goal-id-reference",
+      "owner": "@memoflow/task-contracts",
+      "reason": "Task contracts reference only the GoalId and KeyResultId branded IDs from @memoflow/goal-contracts, in four files.",
+      "retireBy": "permanent",
+      "architectureJustification": "ADR-049 rejects a global type registry and keeps business IDs with their owning domain, so a cross-domain contract edge limited to two branded IDs records Task's business reference to Goal without duplicating identity types."
+    },
+    {
+      "id": "relation-contracts-domain-subject-refs",
+      "owner": "@memoflow/relation-contracts",
+      "reason": "Relation contracts compose their own SubjectRef vocabulary from GoalId, TaskPlanId and KnowledgeDocumentId, plus KnowledgeDocumentRef, in a single composition entry.",
+      "retireBy": "permanent",
+      "architectureJustification": "ADR-049 assigns business ID vocabulary to owning domains; Relation is a shared capability whose subject union must name Goal, Task and Knowledge subjects, so it composes owner IDs instead of redefining them."
     }
   ]
 }
