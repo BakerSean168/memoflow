@@ -6,3 +6,9 @@ export {
   SchedulePortableCapability,
   createSchedulePortableCapability,
 } from './application/schedule-portability';
+export { ScheduleActivityReadService } from './application/services/schedule-activity-read.service';
+export type {
+  ScheduleActivityItem,
+  ScheduleActivityReadOptions,
+  ScheduleActivityReadServiceDependencies,
+} from './application/services/schedule-activity-read.service';
