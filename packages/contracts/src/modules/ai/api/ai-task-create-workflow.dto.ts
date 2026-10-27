@@ -1,7 +1,11 @@
 import { AgentInstanceSlugSchema } from './local-agent.dto';
 import { z } from 'zod';
 import { ImportanceLevel } from '@memoflow/shared-primitives';
-import { TaskGoalLinkSchema, TaskPlanScheduleSchema, TaskReminderConfigSchema } from '@memoflow/task-contracts';
+import {
+  TaskGoalLinkSchema,
+  TaskPlanScheduleSchema,
+  TaskReminderConfigSchema,
+} from '@memoflow/task-contracts';
 
 /**
  * Canonical product contract for ADR-052-style `task.create` Mastra Workflow.
