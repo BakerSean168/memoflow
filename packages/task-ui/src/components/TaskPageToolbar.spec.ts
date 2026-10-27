@@ -3,11 +3,13 @@
 import { shallowMount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { describe, expect, it } from 'vitest';
-import { LabelFilterPopover, ProductSingleSelectFilter } from '@task-ui-test-host/shared/components';
+import {
+  LabelFilterPopover,
+  ProductSingleSelectFilter,
+} from '@task-ui-test-host/shared/components';
 import TaskPageToolbar from './TaskPageToolbar.vue';
 import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
 installTaskUiHost();
-
 
 const i18n = createI18n({
   legacy: false,

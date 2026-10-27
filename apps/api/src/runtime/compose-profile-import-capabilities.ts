@@ -1,5 +1,5 @@
 import type { Prisma } from '@memoflow/database';
-import type { PortableCapability } from '@memoflow/contracts/data-portability';
+import type { PortableCapability } from '@memoflow/data-portability-contracts';
 import { createAccountPrismaPortableCapability } from '@memoflow/account';
 import { createAiPrismaPortableCapability } from '@memoflow/ai';
 import { createGoalPrismaPortableCapability } from '@memoflow/goal';
@@ -11,7 +11,7 @@ import { createNotificationPrismaPortability } from '@memoflow/notification';
 import {
   createRoutinePrismaRepositories,
   createRoutinePortableCapability,
-} from '@memoflow/reminder';
+} from '@memoflow/routine';
 
 /** Owner restore seams only: no second runtime, timers, transports, or independent commits. */
 export function composeProfileImportCapabilities(

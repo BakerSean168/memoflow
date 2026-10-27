@@ -489,13 +489,16 @@ const occurrenceGroups = computed(() =>
       key: 'overdue' as const,
       label: t('task.management.group.overdue'),
       occurrences: visibleOccurrences.value.filter(
-        (occurrence) => !taskUiHost.isTodayMs(occurrence.dueAt) && isTaskOccurrenceOverdue(occurrence),
+        (occurrence) =>
+          !taskUiHost.isTodayMs(occurrence.dueAt) && isTaskOccurrenceOverdue(occurrence),
       ),
     },
     {
       key: 'today' as const,
       label: t('task.management.group.today'),
-      occurrences: visibleOccurrences.value.filter((occurrence) => taskUiHost.isTodayMs(occurrence.dueAt)),
+      occurrences: visibleOccurrences.value.filter((occurrence) =>
+        taskUiHost.isTodayMs(occurrence.dueAt),
+      ),
     },
   ].filter((group) => group.occurrences.length > 0),
 );

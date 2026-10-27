@@ -1,8 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import {
-  parsePortableBackupEnvelopeV3,
-  ServerHeldDataDisclosureEnvelopeV1Schema,
-} from '@memoflow/contracts/data-portability';
+import { parsePortableBackupEnvelopeV3 } from '@memoflow/data-portability-contracts';
+import { ServerHeldDataDisclosureEnvelopeV1Schema } from '../../server-held-data-disclosure.v1.dto';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 

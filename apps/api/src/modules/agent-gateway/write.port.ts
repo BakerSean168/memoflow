@@ -1,5 +1,5 @@
 import { createGoalPrismaAgentMutations, createGoalPrismaAgentReadPort } from '@memoflow/goal';
-import { createRoutinePrismaAgentMutations } from '@memoflow/reminder';
+import { createRoutinePrismaAgentMutations } from '@memoflow/routine';
 import { isScopedPatAuthorityCurrent } from '@memoflow/cloud-auth/server';
 import { createAccountPrismaActiveQuery } from '@memoflow/account';
 import { createTaskPrismaAgentMutations } from '@memoflow/task';

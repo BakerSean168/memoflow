@@ -282,7 +282,7 @@
         "patterns",
         "powersync-schema",
         "relation",
-        "reminder",
+        "routine",
         "repository",
         "schedule",
         "schedule-orchestration",
@@ -309,7 +309,7 @@
         "task",
         "ai",
         "notification",
-        "reminder",
+        "routine",
         "account",
         "schedule",
         "api",
@@ -367,7 +367,7 @@
       "p95Seconds": 59.62
     },
     {
-      "project": "reminder",
+      "project": "routine",
       "samples": 1,
       "p50Seconds": 50.78,
       "p95Seconds": 50.78
@@ -1000,7 +1000,7 @@
     },
     {
       "runId": 39194294936,
-      "project": "reminder",
+      "project": "routine",
       "durationSeconds": 50.78,
       "vitestSetupSeconds": 0.0
     },
@@ -1369,7 +1369,7 @@
       "vitestSetupP95Seconds": 0.0
     },
     {
-      "project": "reminder",
+      "project": "routine",
       "firstObservations": 1,
       "firstHits": 0,
       "laterObservations": 1,
@@ -2317,13 +2317,13 @@
       "hit": true
     },
     {
-      "project": "reminder",
+      "project": "routine",
       "runId": 39194294936,
       "firstObservation": true,
       "hit": false
     },
     {
-      "project": "reminder",
+      "project": "routine",
       "runId": 39194294936,
       "firstObservation": false,
       "hit": true

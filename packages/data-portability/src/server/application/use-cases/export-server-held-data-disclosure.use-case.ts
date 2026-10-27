@@ -1,8 +1,8 @@
+import type { ExportServerHeldDataDisclosureRes } from '@memoflow/data-portability-contracts';
 import {
   ServerHeldDataDisclosureEnvelopeV1Schema,
-  type ExportServerHeldDataDisclosureRes,
   type ServerHeldDataDisclosureEnvelopeV1,
-} from '@memoflow/contracts/data-portability';
+} from '../server-held-data-disclosure.v1.dto';
 import { createLogger } from '@memoflow/utils/logger';
 import type { ServerHeldDataDisclosureSource } from '../server-held-data-disclosure.source';
 

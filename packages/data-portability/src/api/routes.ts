@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ok } from '@memoflow/contracts/result';
+import { ok } from '@memoflow/transport-contracts/result';
 import type { ProfileImportApplicationPort } from '../server/infrastructure/prisma-profile-import';
 import {
   ProfileImportRequestSchema,
@@ -7,7 +7,7 @@ import {
   ProfileImportPlanSchema,
   ProfileImportCommittedSchema,
   ProfileImportOperationSchema,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 /**
  * Data Portability API Routes
  *
@@ -33,7 +33,7 @@ import {
   PortableDataV3ImportReqSchema,
   ExportPortableDataV3ResSchema,
   PortableDataV3ImportResSchema,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 import { DataPortabilityController, ServerHeldDataDisclosureController } from '../server/transport';
 import type {
   DataPortabilityApplicationPort,

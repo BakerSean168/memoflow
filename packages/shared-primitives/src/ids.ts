@@ -13,7 +13,6 @@ export type ExampleId = string & { readonly __brand: 'ExampleId' };
 export type IdentityId = string & { readonly __brand: 'IdentityId' };
 
 /** Routine Profile ID */
-export type RoutineProfileId = string & { readonly __brand: 'RoutineProfileId' };
 
 /** Stable managed knowledge document ID carried by Markdown frontmatter. */
 export type KnowledgeDocumentId = string & { readonly __brand: 'KnowledgeDocumentId' };
@@ -70,9 +69,6 @@ export type SyncConflictId = string & { readonly __brand: 'SyncConflictId' };
 
 /** 待同步变更 ID */
 export type PendingChangeId = string & { readonly __brand: 'PendingChangeId' };
-
-/** 数据快照 ID */
-export type DataSnapshotId = string & { readonly __brand: 'DataSnapshotId' };
 
 /** 应用配置 ID */
 export type AppConfigId = string & { readonly __brand: 'AppConfigId' };

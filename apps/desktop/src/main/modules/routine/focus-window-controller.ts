@@ -2,7 +2,7 @@ import type { FocusWindowCommand, FocusWindowProjection } from '@memoflow/contra
 import type {
   ProtocolSessionRuntime,
   ProtocolSessionStore,
-} from '@memoflow/reminder/routine-runtime';
+} from '@memoflow/routine/routine-runtime';
 
 export interface FocusWindowHost {
   show(projection: FocusWindowProjection): void;

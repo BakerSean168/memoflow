@@ -9,7 +9,6 @@ import TaskOccurrenceRow from './TaskOccurrenceRow.vue';
 import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
 installTaskUiHost();
 
-
 const i18n = createI18n({
   legacy: false,
   locale: 'en-US',

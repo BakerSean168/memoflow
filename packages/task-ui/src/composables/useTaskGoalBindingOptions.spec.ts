@@ -10,10 +10,7 @@ installTaskUiHost();
 
 // The canonical Key Result calculation vocabulary is Goal-owned and reaches Task
 // only through the host slot, so the table is driven off that slot.
-const KEY_RESULT_CALCULATION_METHODS = Object.keys(
-  taskUiHost.KEY_RESULT_CALCULATION_PRESENTATION,
-);
-
+const KEY_RESULT_CALCULATION_METHODS = Object.keys(taskUiHost.KEY_RESULT_CALCULATION_PRESENTATION);
 
 const i18n = createI18n({
   legacy: false,
@@ -149,8 +146,7 @@ describe('useTaskGoalBindingOptions', () => {
         title: 'Temperature',
         calculationMethod: method,
         methodLabel: taskUiHost.getKeyResultCalculationLabel(method, i18n.global.t),
-        recordInputKind:
-          taskUiHost.KEY_RESULT_CALCULATION_PRESENTATION[method].recordInputKind,
+        recordInputKind: taskUiHost.KEY_RESULT_CALCULATION_PRESENTATION[method].recordInputKind,
         unit: '°C',
         currentValue: -2,
         targetValue: 10,

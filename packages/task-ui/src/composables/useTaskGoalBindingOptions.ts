@@ -59,7 +59,8 @@ function mapKeyResultOption(
     calculationMethod: dto.progress.aggregationMethod,
     methodLabel: taskUiHost.getKeyResultCalculationLabel(dto.progress.aggregationMethod, t),
     recordInputKind:
-      taskUiHost.KEY_RESULT_CALCULATION_PRESENTATION[dto.progress.aggregationMethod].recordInputKind,
+      taskUiHost.KEY_RESULT_CALCULATION_PRESENTATION[dto.progress.aggregationMethod]
+        .recordInputKind,
     unit: dto.progress.unit,
     currentValue: current,
     targetValue: target,

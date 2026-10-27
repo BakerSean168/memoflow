@@ -6,7 +6,7 @@
  * import store; owner capabilities retain their own desktop persistence seams.
  */
 
-import type { PortableCapability } from '@memoflow/contracts/data-portability';
+import type { PortableCapability } from '@memoflow/data-portability-contracts';
 import { createDataPortabilityModule } from '@memoflow/data-portability';
 import {
   createDataPortabilityElectronModule,

@@ -5,7 +5,7 @@ import { LabelPortablePayloadV3Schema } from '@memoflow/label-contracts';
 import type {
   PortableCapabilityExecutionContext,
   PortableReferenceV3,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 import { createGoalPrismaPortableCapability } from '@memoflow/goal';
 import { createTaskPrismaPortableCapability } from '@memoflow/task';
 import { createLabelPrismaPortableCapability } from '@memoflow/label';

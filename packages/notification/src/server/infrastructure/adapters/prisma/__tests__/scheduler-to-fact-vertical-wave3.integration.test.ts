@@ -43,9 +43,9 @@ import {
   createRoutinePrismaScheduleExecutionDeps,
   createRoutineWallClockExecutionSource,
   createRoutineWallClockScheduledHandler,
-} from '@memoflow/reminder/schedule-execution/routine';
+} from '@memoflow/routine/schedule-execution/routine';
 // eslint-disable-next-line @nx/enforce-module-boundaries
-import { ROUTINE_SCHEDULING_OWNER_TYPE } from '@memoflow/reminder/schedule-projection/routine';
+import { ROUTINE_SCHEDULING_OWNER_TYPE } from '@memoflow/routine/schedule-projection/routine';
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import {
   ScheduledHandlerRegistry,

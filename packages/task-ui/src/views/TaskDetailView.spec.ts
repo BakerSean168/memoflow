@@ -12,7 +12,6 @@ import zhTask from '@task-ui-test-host/locales/zh-CN/task';
 import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
 installTaskUiHost();
 
-
 const actions = vi.hoisted(() => ({
   completeOccurrence: vi.fn(),
   uncompleteOccurrence: vi.fn(),

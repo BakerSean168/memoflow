@@ -5,8 +5,8 @@ import type {
   SchedulingPort,
 } from '@memoflow/schedule-contracts';
 import type { GoalScheduleProjectionSource } from '@memoflow/goal/schedule-projection';
-import type { RoutineScheduleProjectionSource } from '@memoflow/reminder/schedule-projection/routine';
-import type { RoutineTemporaryOverrideStore } from '@memoflow/reminder/schedule-execution/routine';
+import type { RoutineScheduleProjectionSource } from '@memoflow/routine/schedule-projection/routine';
+import type { RoutineTemporaryOverrideStore } from '@memoflow/routine/schedule-execution/routine';
 import type { IScheduledInvocationRepository } from '@memoflow/scheduler';
 import type { TaskScheduleProjectionSource } from '@memoflow/task/schedule-projection';
 import type { ScheduleOrchestrationExecutionDeps } from './execution';

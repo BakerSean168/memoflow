@@ -3,7 +3,6 @@ import { formatTaskDuration } from './format-task-duration';
 import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
 installTaskUiHost();
 
-
 describe('formatTaskDuration', () => {
   it('uses locale-aware duration units', () => {
     expect(formatTaskDuration(0, 'zh-CN')).toBe('0分钟');

@@ -9,7 +9,6 @@ import { instance } from '../components/task-quick-test-fixtures';
 import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
 installTaskUiHost();
 
-
 it('deduplicates owner reads in the shared cache and isolates identity changes', async () => {
   const identity = ref('identity-1');
   const runtime = createTestServerStateRuntime();

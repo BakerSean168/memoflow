@@ -23,7 +23,6 @@ import { useTaskStore } from '../stores/task-store';
 import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
 installTaskUiHost();
 
-
 enableAutoUnmount(afterEach);
 function host(prompt = false, missing?: 'occurrence' | 'plan') {
   const runtime = createTestServerStateRuntime();

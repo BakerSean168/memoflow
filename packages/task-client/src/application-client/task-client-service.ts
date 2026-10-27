@@ -90,7 +90,9 @@ export class TaskClientService implements TaskClientPort {
 
   async createPlan(
     request: CreateTaskPlanReq,
-  ): Promise<Result<{ plan: TaskPlanClientDTO; occurrenceCount: number; todayOccurrenceCreated: boolean }>> {
+  ): Promise<
+    Result<{ plan: TaskPlanClientDTO; occurrenceCount: number; todayOccurrenceCreated: boolean }>
+  > {
     const result = await this.templateApi.createTaskPlan(request);
     return mapResult(result, (data) => ({
       plan: normalizeTaskPlanDTO(data.plan),

@@ -5,7 +5,6 @@ import { useTaskOccurrenceActionCoordinator } from './useTaskOccurrenceActionCoo
 import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
 installTaskUiHost();
 
-
 function setup(binding?: TaskGoalBindingDTO) {
   const result = instance({ status: 'Completed' });
   const operations = {

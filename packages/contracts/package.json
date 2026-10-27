@@ -33,17 +33,9 @@
       "types": "./dist/modules/setting/index.d.ts",
       "import": "./dist/modules/setting/index.js"
     },
-    "./routine": {
-      "types": "./dist/modules/routine/index.d.ts",
-      "import": "./dist/modules/routine/index.js"
-    },
     "./ai": {
       "types": "./dist/modules/ai/index.d.ts",
       "import": "./dist/modules/ai/index.js"
-    },
-    "./data-portability": {
-      "types": "./dist/modules/data-portability/index.d.ts",
-      "import": "./dist/modules/data-portability/index.js"
     },
     "./result": {
       "types": "./dist/result/index.d.ts",
@@ -81,7 +73,8 @@
     "@memoflow/shared-primitives": "workspace:*",
     "@memoflow/task-contracts": "workspace:*",
     "@memoflow/transport-contracts": "workspace:*",
-    "zod": "^4.6.5"
+    "zod": "^4.6.5",
+    "@memoflow/routine-contracts": "workspace:*"
   },
   "devDependencies": {
     "@faker-js/faker": "10.6.0",

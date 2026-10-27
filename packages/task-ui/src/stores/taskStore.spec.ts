@@ -9,7 +9,6 @@ import { useTaskStore } from './task-store';
 import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
 installTaskUiHost();
 
-
 function createInstance(overrides: Partial<TaskOccurrenceClientDTO> = {}): TaskOccurrenceClientDTO {
   return {
     id: 'instance-1' as TaskOccurrenceId,

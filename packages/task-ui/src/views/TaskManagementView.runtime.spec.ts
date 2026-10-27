@@ -106,7 +106,6 @@ import TaskManagementView from './TaskManagementView.vue';
 import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
 installTaskUiHost();
 
-
 const toolbar = defineComponent({
   name: 'TaskPageToolbar',
   props: ['goalScopeLabel'],

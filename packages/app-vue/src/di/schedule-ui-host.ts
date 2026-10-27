@@ -44,7 +44,7 @@ import {
 import { usePanelWidth } from '../layouts/shell/usePanelWidth';
 import { usePanelSurfaceStatus } from '../layouts/shell/usePanelSurfaceStatus';
 import { useTask } from '@memoflow/task-ui';
-import { fetchRoutineUpcomingCached } from '../modules/routine/composables/routineUpcomingCache';
+import { fetchRoutineUpcomingCached } from '@memoflow/routine-ui/composables/routineUpcomingCache';
 import { TaskOccurrenceQuickSurface } from '@memoflow/task-ui';
 import { GOAL_SERVICE_KEY, ROUTINE_SERVICE_KEY, SCHEDULE_SERVICE_KEY } from './keys';
 

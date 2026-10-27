@@ -814,7 +814,11 @@ const {
   loadGoalBinding,
   loadKeyResults,
 } = useTaskGoalBindingOptions();
-const { options: labelOptions, isLoading: labelsLoading, createLabel } = taskUiHost.useLabelCatalog();
+const {
+  options: labelOptions,
+  isLoading: labelsLoading,
+  createLabel,
+} = taskUiHost.useLabelCatalog();
 
 const currentTemplate = computed(() => workspace.value?.plan ?? null);
 const viewModel = computed(() =>

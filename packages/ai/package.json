@@ -50,6 +50,7 @@
     "@mastra/memory": "1.32.0",
     "@mastra/pg": "1.27.0",
     "@memoflow/contracts": "workspace:*",
+    "@memoflow/data-portability-contracts": "workspace:*",
     "@memoflow/database": "workspace:*",
     "@memoflow/domain-shared": "workspace:*",
     "@memoflow/goal-contracts": "workspace:*",

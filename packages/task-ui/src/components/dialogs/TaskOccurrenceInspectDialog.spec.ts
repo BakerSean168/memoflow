@@ -10,7 +10,6 @@ import TaskOccurrenceInspectDialog from './TaskOccurrenceInspectDialog.vue';
 import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
 installTaskUiHost();
 
-
 const context = vi.hoisted(() => ({ read: vi.fn() }));
 vi.mock('../../composables/useTaskPlanWorkspaceQuery', () => ({
   useTaskPlanWorkspaceQuery: (...args: unknown[]) => context.read(...args),

@@ -11,7 +11,6 @@ import {
 import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
 installTaskUiHost();
 
-
 const SCOPE = 'identity-1';
 
 function template(overrides: Partial<TaskPlanClientDTO> = {}): TaskPlanClientDTO {

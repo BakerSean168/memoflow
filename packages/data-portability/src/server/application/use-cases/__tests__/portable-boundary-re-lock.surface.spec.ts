@@ -28,7 +28,7 @@ describe('Data Portability V3-only anti-resurrection locks', () => {
   it('has no V1/V2 Data Portability production authority', () => {
     const roots = [
       resolve(repoRoot, 'packages/data-portability/src'),
-      resolve(repoRoot, 'packages/contracts/src/modules/data-portability'),
+      resolve(repoRoot, 'packages/data-portability-contracts/src'),
     ];
     const hits = roots.flatMap(productionSources).flatMap((file) => {
       const source = readFileSync(file, 'utf8');
@@ -39,9 +39,9 @@ describe('Data Portability V3-only anti-resurrection locks', () => {
 
   it('does not retain the retired V1/V2 source files or import route', () => {
     for (const path of [
-      'packages/contracts/src/modules/data-portability/api/export-user-data.dto.ts',
-      'packages/contracts/src/modules/data-portability/api/import-user-data.dto.ts',
-      'packages/contracts/src/modules/data-portability/dtos/portable-envelope.dto.ts',
+      'packages/data-portability-contracts/src/api/export-user-data.dto.ts',
+      'packages/data-portability-contracts/src/api/import-user-data.dto.ts',
+      'packages/data-portability-contracts/src/dtos/portable-envelope.dto.ts',
       'packages/data-portability/src/server/application/use-cases/export-user-data.use-case.ts',
       'packages/data-portability/src/server/application/use-cases/import-user-data.use-case.ts',
       'packages/data-portability/src/server/application/import-store/data-portability-import-store.ts',
@@ -53,7 +53,7 @@ describe('Data Portability V3-only anti-resurrection locks', () => {
 
   it('keeps disclosure separate and rejects it at the V3 parser boundary', () => {
     const safety = readFileSync(
-      resolve(repoRoot, 'packages/contracts/src/modules/data-portability/rules/import-safety.ts'),
+      resolve(repoRoot, 'packages/data-portability-contracts/src/rules/import-safety.ts'),
       'utf8',
     );
     const disclosure = readFileSync(

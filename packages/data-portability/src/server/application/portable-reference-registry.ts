@@ -3,11 +3,11 @@ import type {
   PortableReferencePort,
   PortableReferenceV3,
   ProfileImportBinding,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 import {
   PortableCapabilityKeySchema,
   PortableReferenceV3Schema,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 
 /**
  * Operation-local mapping between private persistence identifiers and portable refs.

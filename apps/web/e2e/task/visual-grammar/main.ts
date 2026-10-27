@@ -16,10 +16,7 @@ import { productionLocaleMessages } from '@memoflow/app-vue/locales/production-m
 import { installServerStateRuntime } from '@memoflow/app-vue/platform/server-state';
 import { TaskDetailView, TaskManagementView } from '@memoflow/task-ui';
 import TaskPlanDialog from '@memoflow/task-ui/components/dialogs/TaskPlanDialog.vue';
-import {
-  template,
-  instance,
-} from '@memoflow/task-ui/components/task-quick-test-fixtures';
+import { template, instance } from '@memoflow/task-ui/components/task-quick-test-fixtures';
 import '../../../../../apps/web/src/styles/index.css';
 
 faker.seed(3101);

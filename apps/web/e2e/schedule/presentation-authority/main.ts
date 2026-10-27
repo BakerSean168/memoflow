@@ -26,10 +26,7 @@ import {
   TaskYmdSchema,
   type TaskOccurrenceClientDTO,
 } from '@memoflow/task-contracts';
-import {
-  instance,
-  template,
-} from '@memoflow/task-ui/components/task-quick-test-fixtures';
+import { instance, template } from '@memoflow/task-ui/components/task-quick-test-fixtures';
 import { createPinia } from 'pinia';
 import { Toaster } from 'vue-sonner';
 import GlobalConfirmDialog from '@memoflow/app-vue/shared/components/GlobalConfirmDialog.vue';

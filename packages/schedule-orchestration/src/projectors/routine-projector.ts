@@ -1,5 +1,5 @@
 import type { SchedulingPort } from '@memoflow/schedule-contracts';
-import type { RoutineScheduleProjectionSource } from '@memoflow/reminder/schedule-projection/routine';
+import type { RoutineScheduleProjectionSource } from '@memoflow/routine/schedule-projection/routine';
 
 export interface RoutineProjector {
   upsertRoutine(routineId: string, identityId: string): Promise<void>;

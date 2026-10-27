@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ipcMain } from 'electron';
 import { RoutineChannels } from '@memoflow/contracts/electron';
-import type { RoutineCoachCommandPort, RoutineConfigurationQueryPort } from '@memoflow/reminder';
+import type { RoutineCoachCommandPort, RoutineConfigurationQueryPort } from '@memoflow/routine';
 import { createRoutineConfigurationElectronModule } from './configuration.electron-module';
 
 const handlers = new Map<string, (...args: unknown[]) => unknown>();

@@ -74,7 +74,7 @@
       "evidence": [
         {
           "runner": "reminder-unit",
-          "file": "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-schedule-execution-source.spec.ts",
+          "file": "packages/routine/src/server/infrastructure/routine-schedule/__tests__/routine-schedule-execution-source.spec.ts",
           "title": "skips cleanly on revision drift"
         }
       ]
@@ -85,7 +85,7 @@
       "evidence": [
         {
           "runner": "reminder-unit",
-          "file": "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-wall-clock-scheduled-handler.spec.ts",
+          "file": "packages/routine/src/server/infrastructure/routine-schedule/__tests__/routine-wall-clock-scheduled-handler.spec.ts",
           "title": "maps a skip to a skipped result without retry semantics"
         }
       ]
@@ -96,7 +96,7 @@
       "evidence": [
         {
           "runner": "reminder-unit",
-          "file": "packages/reminder/src/server/infrastructure/routine-schedule/__tests__/routine-wall-clock-scheduled-handler.spec.ts",
+          "file": "packages/routine/src/server/infrastructure/routine-schedule/__tests__/routine-wall-clock-scheduled-handler.spec.ts",
           "title": "maps a transient failure to a retryable HANDLER_EXECUTION_FAILED"
         }
       ]
@@ -184,12 +184,12 @@
       "evidence": [
         {
           "runner": "reminder-unit",
-          "file": "packages/reminder/src/server/runtime/active-usage/active-usage.runtime.spec.ts",
+          "file": "packages/routine/src/server/runtime/active-usage/active-usage.runtime.spec.ts",
           "title": "restores an accumulator snapshot without counting process downtime"
         },
         {
           "runner": "reminder-unit",
-          "file": "packages/reminder/src/server/runtime/routine-activity/routine-activity-sensor.runtime.spec.ts",
+          "file": "packages/routine/src/server/runtime/routine-activity/routine-activity-sensor.runtime.spec.ts",
           "title": "cleans subscriptions and restarts without duplicate listeners"
         }
       ]
@@ -200,7 +200,7 @@
       "evidence": [
         {
           "runner": "reminder-unit",
-          "file": "packages/reminder/src/server/runtime/protocol/protocol-session.runtime.spec.ts",
+          "file": "packages/routine/src/server/runtime/protocol/protocol-session.runtime.spec.ts",
           "title": "recovers crash-during-focus and crash-during-break from persisted deadlines"
         }
       ]

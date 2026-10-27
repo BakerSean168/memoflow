@@ -19,7 +19,7 @@ import {
   UpdateRoutinePreferencesRequestSchema,
   UpdateRoutineProfileRequestSchema,
   UpdateRoutineRequestSchema,
-} from '@memoflow/contracts/routine';
+} from '@memoflow/routine-contracts';
 import {
   ResultCode,
   extractStructuredResultError,
@@ -31,7 +31,7 @@ import type {
   RoutineCoachCommandPort,
   RoutineConfigurationQueryPort,
   RoutineTrigger,
-} from '@memoflow/reminder';
+} from '@memoflow/routine';
 
 export interface RoutineConfigurationElectronModuleOptions {
   readonly commandPort: RoutineCoachCommandPort;

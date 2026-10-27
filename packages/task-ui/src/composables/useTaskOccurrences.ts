@@ -81,7 +81,9 @@ export function useTaskOccurrences() {
     store.setLoading(true);
     store.setError(null);
     try {
-      const payload = taskUiHost.sanitizeForIpc(query) as Parameters<typeof service.listOccurrences>[0];
+      const payload = taskUiHost.sanitizeForIpc(query) as Parameters<
+        typeof service.listOccurrences
+      >[0];
       const result = await executeTaskOperation(
         () => service.listOccurrences(payload),
         'task.error.loadInstancesFailed',
@@ -197,7 +199,8 @@ export function useTaskOccurrences() {
     options: { suppressErrorReport?: boolean } = {},
   ) {
     const result = await executeTaskOperation(
-      () => service.rescheduleOccurrence(id, taskUiHost.sanitizeForIpc(request) as RescheduleTaskInput),
+      () =>
+        service.rescheduleOccurrence(id, taskUiHost.sanitizeForIpc(request) as RescheduleTaskInput),
       'task.error.operationFailed',
       options,
     );

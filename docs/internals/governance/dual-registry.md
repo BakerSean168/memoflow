@@ -45,7 +45,7 @@ Product Governance Runtime 已由 ADR-113 退休，因此其已删除 dual/keep-
 | `packages/goal`             |       3 |             3 |     0 |
 | `packages/notification`     |       1 |             0 |     0 |
 | `packages/patterns`         |       1 |             0 |     0 |
-| `packages/reminder`         |       1 |             0 |     0 |
+| `packages/routine`          |       1 |             0 |     0 |
 | `packages/repository`       |       2 |             0 |     0 |
 | `packages/schedule`         |       2 |             1 |     0 |
 | `packages/setting`          |       1 |             0 |     0 |
@@ -147,7 +147,7 @@ Product Governance Runtime 已由 ADR-113 退休，因此其已删除 dual/keep-
 | `keep_boundary` | `packages/goal/src/server/infrastructure/build-task-name-keep-boundary.surface.spec.ts`                                            |
 | `retired`       | `packages/notification/src/application-client/notification-client-port-dual.surface.spec.ts`                                       |
 | `retired`       | `packages/patterns/src/events/create-event-bus-adapter-dual.surface.spec.ts`                                                       |
-| `retired`       | `packages/reminder/src/application-client/reminder-client-port-dual.surface.spec.ts`                                               |
+| `retired`       | `packages/routine/src/application-client/reminder-client-port-dual.surface.spec.ts`                                                |
 | `retired`       | `packages/repository/src/application-client/repository-client-port-dual.surface.spec.ts`                                           |
 | `retired`       | `packages/repository/src/electron/vault-fs-guards-dual.surface.spec.ts`                                                            |
 | `keep_boundary` | `packages/schedule/src/api/schedule-route-parsers-keep-boundary.surface.spec.ts`                                                   |

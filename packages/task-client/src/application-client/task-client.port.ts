@@ -21,8 +21,12 @@ export interface TaskClientPort {
   // Task Plan Operations
   createPlan(
     request: CreateTaskPlanReq,
-  ): Promise<Result<{ plan: TaskPlanClientDTO; occurrenceCount: number; todayOccurrenceCreated: boolean }>>;
-  listPlans(params?: TaskPlanListParams): Promise<Result<{ plans: TaskPlanClientDTO[]; total: number }>>;
+  ): Promise<
+    Result<{ plan: TaskPlanClientDTO; occurrenceCount: number; todayOccurrenceCreated: boolean }>
+  >;
+  listPlans(
+    params?: TaskPlanListParams,
+  ): Promise<Result<{ plans: TaskPlanClientDTO[]; total: number }>>;
   getPlan(id: string): Promise<Result<TaskPlanClientDTO>>;
   updatePlan(id: string, request: UpdateTaskPlanReq): Promise<Result<TaskPlanClientDTO>>;
   deletePlan(id: string): Promise<Result<void>>;
@@ -62,12 +66,18 @@ export interface TaskClientPort {
     request?: CompleteTaskOccurrenceReq,
   ): Promise<Result<TaskOccurrenceClientDTO>>;
   uncompleteOccurrence(id: string): Promise<Result<TaskOccurrenceClientDTO>>;
-  skipOccurrence(id: string, request?: SkipTaskOccurrenceReq): Promise<Result<TaskOccurrenceClientDTO>>;
+  skipOccurrence(
+    id: string,
+    request?: SkipTaskOccurrenceReq,
+  ): Promise<Result<TaskOccurrenceClientDTO>>;
   markOccurrenceMissed(
     id: string,
     request?: MarkTaskOccurrenceMissedReq,
   ): Promise<Result<TaskOccurrenceClientDTO>>;
-  rescheduleOccurrence(id: string, request: RescheduleTaskInput): Promise<Result<TaskOccurrenceClientDTO>>;
+  rescheduleOccurrence(
+    id: string,
+    request: RescheduleTaskInput,
+  ): Promise<Result<TaskOccurrenceClientDTO>>;
   setOccurrenceChecklistItem(
     id: string,
     request: SetTaskOccurrenceChecklistItemReq,

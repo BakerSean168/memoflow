@@ -1,3 +1,4 @@
+import { installRoutineUiHost } from '@schedule-ui-test-host/di/routine-ui-host';
 /**
  * Schedule UI test host.
  *
@@ -30,7 +31,7 @@ import {
   SCHEDULE_CALENDAR_STALE_TIME_MS,
 } from '@schedule-ui-test-host/platform/server-state/query-policy';
 import { ok } from '@memoflow/contracts/result';
-import { fetchRoutineUpcomingCached } from '@schedule-ui-test-host/modules/routine/composables/routineUpcomingCache';
+import { fetchRoutineUpcomingCached } from '@memoflow/routine-ui/composables/routineUpcomingCache';
 import { usePanelWidth } from '@schedule-ui-test-host/layouts/shell/usePanelWidth';
 import { usePanelSurfaceStatus } from '@schedule-ui-test-host/layouts/shell/usePanelSurfaceStatus';
 import {
@@ -73,14 +74,16 @@ export const TaskOccurrenceQuickSurface = defineComponent({
   name: 'TaskOccurrenceQuickSurface',
   props: { occurrenceId: { type: String, required: true } },
   emits: ['open-plan'],
-  setup: (props, { emit }) => () =>
-    h('div', { 'data-testid': 'task-occurrence-quick-surface' }, [
-      h('button', {
-        type: 'button',
-        'data-testid': 'task-open-plan',
-        onClick: () => emit('open-plan', props.occurrenceId),
-      }),
-    ]),
+  setup:
+    (props, { emit }) =>
+    () =>
+      h('div', { 'data-testid': 'task-occurrence-quick-surface' }, [
+        h('button', {
+          type: 'button',
+          'data-testid': 'task-open-plan',
+          onClick: () => emit('open-plan', props.occurrenceId),
+        }),
+      ]),
 });
 
 export function createScheduleUiTestHost(overrides: Partial<ScheduleUiHost> = {}): ScheduleUiHost {
@@ -124,6 +127,7 @@ export function createScheduleUiTestHost(overrides: Partial<ScheduleUiHost> = {}
 }
 
 export function bindDefaultScheduleUiHost(): ScheduleUiHost {
+  installRoutineUiHost();
   const host = createScheduleUiTestHost();
   bindScheduleUiHost(host);
   return host;

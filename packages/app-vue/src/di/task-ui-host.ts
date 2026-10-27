@@ -1,9 +1,5 @@
 import { bindTaskUiHost } from '@memoflow/task-ui/host';
-import {
-  DESKTOP_AUTH_API_KEY,
-  GOAL_SERVICE_KEY,
-  TASK_SERVICE_KEY,
-} from './keys';
+import { DESKTOP_AUTH_API_KEY, GOAL_SERVICE_KEY, TASK_SERVICE_KEY } from './keys';
 import {
   SERVER_STATE_IDENTITY_SCOPE_KEY,
   SERVER_STATE_RUNTIME_KEY,
@@ -48,7 +44,11 @@ import ProductSingleSelectFilter from '../shared/components/ProductSingleSelectF
 import ProductSurfaceHeader from '../shared/components/ProductSurfaceHeader.vue';
 import ResponsivePrimaryAction from '../shared/components/ResponsivePrimaryAction.vue';
 import { GoalRecordComposerSurface } from '@memoflow/goal-ui';
-import { getKeyResultCalculationLabel, getKeyResultRecordPromptLabel, KEY_RESULT_CALCULATION_PRESENTATION } from '@memoflow/goal-ui';
+import {
+  getKeyResultCalculationLabel,
+  getKeyResultRecordPromptLabel,
+  KEY_RESULT_CALCULATION_PRESENTATION,
+} from '@memoflow/goal-ui';
 import type { InjectionKey } from 'vue';
 import type { TaskUiGoalBindingPort } from '@memoflow/task-ui/host';
 import { useDialogCloseGuard } from '../shared/composables/useDialogCloseGuard';

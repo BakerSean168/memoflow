@@ -40,7 +40,8 @@ const GoalComposerDouble = defineComponent({
     );
     watch(isValid, (valid) => emit('validity-change', valid), { immediate: true });
     const isDirty = computed(
-      () => draft.value.value !== (props.initialValue ?? '') || draft.value.note !== props.initialNote,
+      () =>
+        draft.value.value !== (props.initialValue ?? '') || draft.value.note !== props.initialNote,
     );
     watch(isDirty, (dirty) => emit('dirty-change', dirty), { immediate: true });
     function submit() {

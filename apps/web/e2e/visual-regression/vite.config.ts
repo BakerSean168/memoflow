@@ -29,7 +29,10 @@ export default defineConfig(({ mode }) =>
         ...createNotificationContractsAliasEntries(workspace),
         ...createAssetsAliasEntries(workspace),
         ...createWorkspaceSourceAliasEntries(workspace, [
-          ['@memoflow/reminder/method-library', 'packages/reminder/src/method-library/index.ts'],
+          [
+            '@memoflow/routine-contracts/method-library',
+            'packages/routine-contracts/src/method-library/index.ts',
+          ],
           ['@memoflow/utils/domain', 'packages/utils/src/domain/index.ts'],
           ['@memoflow/task-client', 'packages/task-client/src/index.ts'],
           ['@memoflow/goal-client', 'packages/goal-client/src/index.ts'],
@@ -162,7 +165,7 @@ export default defineConfig(({ mode }) =>
           ['@memoflow/ipc-client', 'packages/ipc-client/src/index.ts'],
           ['@memoflow/domain-shared/shared', 'packages/domain-shared/src/shared/index.ts'],
           ['@memoflow/domain-shared', 'packages/domain-shared/src/index.ts'],
-          ['@memoflow/reminder/client', 'packages/reminder/src/client/index.ts'],
+          ['@memoflow/routine-client', 'packages/routine-client/src/index.ts'],
           ['@memoflow/repository/client', 'packages/repository/src/client/index.ts'],
           ['@memoflow/ai/client', 'packages/ai/src/client/index.ts'],
           ['@memoflow/notification-client', 'packages/notification-client/src/index.ts'],

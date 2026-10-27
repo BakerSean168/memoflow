@@ -19,7 +19,6 @@ import { useTaskOccurrences } from './useTaskOccurrences';
 import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
 installTaskUiHost();
 
-
 vi.mock('vue-sonner', () => ({
   toast: { error: vi.fn(), success: vi.fn() },
 }));

@@ -69,8 +69,8 @@ import {
   PrismaAccountClosureOperationRepository,
   createCloudAccountProvisioner,
 } from '@memoflow/account';
-import { RoutineAccountClosedConsumer } from '@memoflow/reminder/server';
-import { registerRoutineNotificationOwnerCommands } from '@memoflow/reminder';
+import { RoutineAccountClosedConsumer } from '@memoflow/routine/server';
+import { registerRoutineNotificationOwnerCommands } from '@memoflow/routine';
 import { NotificationAccountClosedConsumer } from '@memoflow/notification/server';
 import { RepositoryAccountClosedConsumer } from '@memoflow/repository/server';
 import {
@@ -93,12 +93,12 @@ import { toGoalReference, toKeyResultReference } from '@memoflow/goal-contracts'
 import { TaskWorkspaceQueryService } from '@memoflow/task';
 import { GetTaskDashboardUseCase } from '@memoflow/task/analytics';
 import { createTaskPrismaScheduleProjectionSource } from '@memoflow/task/schedule-projection';
-import { createRoutinePrismaScheduleExecutionDeps } from '@memoflow/reminder/schedule-execution';
-import { createRoutinePrismaScheduleProjectionSource } from '@memoflow/reminder/schedule-projection';
+import { createRoutinePrismaScheduleExecutionDeps } from '@memoflow/routine/schedule-execution';
+import { createRoutinePrismaScheduleProjectionSource } from '@memoflow/routine/schedule-projection';
 import { composeTask } from './runtime/compose-task';
 import { composeTaskWorkspaceApiModule } from './modules/task/task-workspace.module.js';
 import { composeRoutineApiModule } from './modules/routine/module.js';
-import { createRoutineScheduleChangedNotifier } from '@memoflow/reminder/routine-runtime';
+import { createRoutineScheduleChangedNotifier } from '@memoflow/routine/routine-runtime';
 // 基础设施模块（直接在 API 内部定义）
 import { composePowerSyncApiModule } from './modules/powersync/module.js';
 import { composeLabelApiModule } from './modules/label/module.js';

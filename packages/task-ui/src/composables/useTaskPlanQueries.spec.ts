@@ -10,7 +10,6 @@ import { useTaskPlanDetailQuery } from './useTaskPlanDetailQuery';
 import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
 installTaskUiHost();
 
-
 function template(overrides: Partial<TaskPlanClientDTO> = {}): TaskPlanClientDTO {
   return {
     id: 'template-1' as TaskPlanClientDTO['id'],

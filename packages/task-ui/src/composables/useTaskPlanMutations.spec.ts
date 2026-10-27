@@ -7,7 +7,6 @@ import { useTaskPlanMutations } from './useTaskPlanMutations';
 import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
 installTaskUiHost();
 
-
 const SCOPE = 'identity-1';
 
 function template(overrides: Partial<TaskPlanClientDTO> = {}): TaskPlanClientDTO {
@@ -213,9 +212,7 @@ describe('useTaskPlanMutations (plan §3.4)', () => {
     const service = makeService({
       createPlan: vi
         .fn()
-        .mockResolvedValue(
-          ok({ plan: created, occurrenceCount: 7, todayOccurrenceCreated: true }),
-        ),
+        .mockResolvedValue(ok({ plan: created, occurrenceCount: 7, todayOccurrenceCreated: true })),
     });
     const { api, runtime } = mountTaskComposable(() => useTaskPlanMutations(), { service });
     const invalidate = vi.spyOn(runtime.dispatcher, 'invalidate');

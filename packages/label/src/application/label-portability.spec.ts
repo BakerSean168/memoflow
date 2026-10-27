@@ -3,7 +3,7 @@ import type {
   PortableCapabilityExecutionContext,
   PortableReferencePort,
   PortableReferenceV3,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 import type { LabelDto } from '@memoflow/label-contracts';
 import type { LabelService } from './label-service';
 import { LabelPortableCapability } from './label-portability';

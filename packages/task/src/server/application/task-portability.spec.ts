@@ -6,7 +6,7 @@ import {
   type PortableCapabilityExecutionContext,
   type PortableReferencePort,
   type PortableReferenceV3,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 import {
   TaskPortablePayloadV3Schema,
   TaskPortableGoalLinkV3Schema,

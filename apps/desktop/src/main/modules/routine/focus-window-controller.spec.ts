@@ -3,8 +3,8 @@ import { asInstant } from '@memoflow/time';
 import {
   createInMemoryProtocolSessionStore,
   createProtocolSessionRuntime,
-} from '@memoflow/reminder/routine-runtime';
-import { ProtocolDefinition, ProtocolSession } from '@memoflow/reminder/server';
+} from '@memoflow/routine/routine-runtime';
+import { ProtocolDefinition, ProtocolSession } from '@memoflow/routine/server';
 import {
   createFocusWindowController,
   type FocusTaskbarIntegrationPort,

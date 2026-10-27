@@ -166,8 +166,8 @@
       "reason": "Aggressive reduction authorized in Issue #625: routine behavior is owned by existing component/unit/API/database tests. Browser-specific geometry and complete UI-to-server journeys are deliberately no longer duplicated; this is not a claim of assertion-for-assertion equivalence.",
       "sourceSha256": "f1eabfea79f2995efa1f7eff1e413d3ed360e039a38dffc30cd29ed4bdb5acf4",
       "replacements": [
-        "packages/app-vue/src/modules/routine/views/RoutineConfigurationView.spec.ts",
-        "packages/app-vue/src/modules/routine/components/RoutineEditorDialog.spec.ts"
+        "packages/routine-ui/src/views/RoutineConfigurationView.spec.ts",
+        "packages/routine-ui/src/components/RoutineEditorDialog.spec.ts"
       ],
       "issue": "https://github.com/BakerSean168/memoflow/issues/625",
       "coverageDisposition": "lower-layer coverage; accepted loss of whole-system UI journey signal"

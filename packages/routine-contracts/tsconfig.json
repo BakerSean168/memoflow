@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.workspace-src.json",
+  "compilerOptions": {
+    "rootDir": "../..",
+    "noEmit": true,
+    "incremental": false,
+    "lib": ["ES2020"],
+    "types": ["node"]
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
+}

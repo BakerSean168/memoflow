@@ -8,7 +8,6 @@ import DailyTodoWidget from './DailyTodoWidget.vue';
 import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
 installTaskUiHost();
 
-
 vi.mock('../../composables/useTaskPlanMutations', () => ({
   useTaskPlanMutations: () => ({ createPlanSafe: vi.fn(), isSaving: ref(false) }),
 }));

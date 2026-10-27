@@ -62,7 +62,7 @@ const focusedRunners = {
     ],
   },
   'reminder-unit': {
-    cwd: 'packages/reminder',
+    cwd: 'packages/routine',
     command: [
       'node',
       '../../node_modules/vitest/vitest.mjs',
@@ -72,7 +72,7 @@ const focusedRunners = {
     ],
   },
   'reminder-integration': {
-    cwd: 'packages/reminder',
+    cwd: 'packages/routine',
     command: [
       'node',
       '../../node_modules/vitest/vitest.mjs',

@@ -9,7 +9,6 @@ import TaskPlanForm from '../TaskPlanForm.vue';
 import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
 installTaskUiHost();
 
-
 vi.mock('@task-ui-test-host/shared/composables/useLabelCatalog', () => ({
   useLabelCatalog: () => ({
     labels: ref([]),

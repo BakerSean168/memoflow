@@ -12,7 +12,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
 installTaskUiHost();
 
-
 const confirmMock = vi.hoisted(() => vi.fn(async () => true));
 vi.mock('@memoflow/ui-vue-shadcn', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@memoflow/ui-vue-shadcn')>();

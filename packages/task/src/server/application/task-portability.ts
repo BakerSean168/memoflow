@@ -5,7 +5,7 @@ import type {
   PortableCapabilityExecutionContext,
   PortableCapabilityReceipt,
   PortableReferenceV3,
-} from '@memoflow/contracts/data-portability';
+} from '@memoflow/data-portability-contracts';
 import { TaskPortablePayloadV3Schema, type TaskPortablePayloadV3 } from '@memoflow/task-contracts';
 import type { ITaskPlanRepository } from '../domain/repositories/i-task-plan-repository';
 import type { ITaskOccurrenceRepository } from '../domain/repositories/i-task-occurrence-repository';

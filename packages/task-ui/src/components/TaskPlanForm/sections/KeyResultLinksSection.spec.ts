@@ -7,7 +7,6 @@ import KeyResultLinksSection from './KeyResultLinksSection.vue';
 import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
 installTaskUiHost();
 
-
 const SelectStub = defineComponent({
   name: 'TestSelect',
   props: ['modelValue', 'disabled'],

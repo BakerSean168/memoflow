@@ -5,7 +5,6 @@ import { mapTaskPlanDtoToViewModel } from './task-plan-presentation';
 import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
 installTaskUiHost();
 
-
 function taskPlan(overrides: Partial<TaskPlanClientDTO> = {}): TaskPlanClientDTO {
   return {
     id: 'ITaskPlanId_11111111-1111-4111-8111-111111111111' as TaskPlanClientDTO['id'],

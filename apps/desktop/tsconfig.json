@@ -20,10 +20,7 @@
       "@memoflow/notification-ui/host": [
         "../../packages/notification-ui/src/notification-ui-host.ts"
       ],
-      "@memoflow/task-ui/*": [
-        "../../packages/task-ui/src/*.ts",
-        "../../packages/task-ui/src/*"
-      ],
+      "@memoflow/task-ui/*": ["../../packages/task-ui/src/*.ts", "../../packages/task-ui/src/*"],
       "@memoflow/task-ui/host": ["../../packages/task-ui/src/task-ui-host.ts"],
       "@memoflow/task-ui": ["../../packages/task-ui/src/index.ts"],
       "@memoflow/ui-vue-shadcn/composables/*": ["../../packages/ui-vue-shadcn/src/composables/*"],
@@ -44,14 +41,13 @@
       ],
       "@memoflow/schedule-client": ["../../packages/schedule-client/src/index.ts"],
       "@memoflow/schedule/electron": ["../../packages/schedule/src/electron/index.ts"],
-      "@memoflow/reminder/routine-runtime": [
-        "../../packages/reminder/src/routine-runtime/index.ts"
-      ],
-      "@memoflow/reminder/client": ["../../packages/reminder/src/client/index.ts"],
+      "@memoflow/routine/routine-runtime": ["../../packages/routine/src/routine-runtime/index.ts"],
+      "@memoflow/routine-client": ["../../packages/routine-client/src/index.ts"],
       "@memoflow/notification-client": ["../../packages/notification-client/src/index.ts"],
       "@memoflow/notification/electron": ["../../packages/notification/src/electron/index.ts"],
       "@memoflow/ipc-client": ["../../packages/ipc-client/src/index.ts"],
       "@memoflow/http-client": ["../../packages/http-client/src/index.ts"],
+      "@memoflow/desktop-contracts": ["../../packages/desktop-contracts/src/index.ts"],
       "@memoflow/contracts": ["../../packages/contracts/src/index.ts"],
       "@memoflow/notification-contracts": ["../../packages/notification-contracts/src/index.ts"],
       "@memoflow/notification-contracts/*": ["../../packages/notification-contracts/src/*.ts"],

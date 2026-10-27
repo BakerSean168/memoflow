@@ -5,7 +5,6 @@ import { useTask } from './useTask';
 import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
 installTaskUiHost();
 
-
 function makeService() {
   return {
     listPlans: vi.fn(),
@@ -40,9 +39,7 @@ describe('useTask legacy facade (P2-2)', () => {
     const service = makeService();
     service.listPlans
       .mockResolvedValueOnce(fail({ code: 'VALIDATION_ERROR', message: 'boom' }))
-      .mockResolvedValueOnce(
-        ok({ plans: [{ id: 'tpl-1', name: 'Write tests' }], total: 1 }),
-      );
+      .mockResolvedValueOnce(ok({ plans: [{ id: 'tpl-1', name: 'Write tests' }], total: 1 }));
     const { api } = mountTaskComposable(() => useTask(), { service });
 
     await api.fetchTemplates({ page: 1, limit: 20 });
