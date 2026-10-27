@@ -1,4 +1,5 @@
 /** @vitest-environment jsdom */
+import { installTaskUiHost } from '../../../di/task-ui-host';
 import { computed, ref } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
@@ -40,6 +41,8 @@ vi.mock('@memoflow/task-ui/composables/useTaskPlanMutations', () => ({
     isSaving: createSaving,
   }),
 }));
+
+installTaskUiHost();
 
 const i18n = createI18n({
   legacy: false,
