@@ -84,6 +84,7 @@
       "@memoflow/ai-ui/*": ["./packages/ai-ui/dist/*.d.ts"],
       "@memoflow/goal-ui/host": ["./packages/goal-ui/dist/goal-ui-host.d.ts"],
       "@memoflow/ai-ui/host": ["./packages/ai-ui/dist/ai-ui-host.d.ts"],
+      "@memoflow/ai-ui/router": ["./packages/ai-ui/dist/router/index.d.ts"],
       "@memoflow/goal-ui": ["./packages/goal-ui/dist/index.d.ts"],
       "@memoflow/ai-ui": ["./packages/ai-ui/dist/index.d.ts"],
       "@memoflow/goal-contracts": ["./packages/goal-contracts/dist/index.d.ts"],

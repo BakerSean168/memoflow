@@ -40,6 +40,7 @@
       "@memoflow/ai-ui": ["../../packages/ai-ui/src/index.ts"],
       "@memoflow/ai-ui/*": ["../../packages/ai-ui/src/*.ts"],
       "@memoflow/ai-ui/host": ["../../packages/ai-ui/src/ai-ui-host.ts"],
+      "@memoflow/ai-ui/router": ["../../packages/ai-ui/src/ai-ui-host.ts"],
       "@memoflow/ai-client": ["../../packages/ai-client/src/index.ts"],
       "@memoflow/ai/electron": ["../../packages/ai/src/electron/index.ts"],
       "@memoflow/ai/ports": ["../../packages/ai/src/ports/index.ts"],

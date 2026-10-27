@@ -42,6 +42,7 @@
       "@memoflow/ai-ui": ["../ai-ui/dist/index.d.ts"],
       "@memoflow/ai-ui/*": ["../ai-ui/dist/*.d.ts"],
       "@memoflow/ai-ui/host": ["../ai-ui/dist/ai-ui-host.d.ts"],
+      "@memoflow/ai-ui/router": ["../ai-ui/dist/router/index.d.ts"],
       "@memoflow/ai-client": ["../ai-client/dist/index.d.ts"],
       "@memoflow/goal-client": ["../goal-client/dist/index.d.ts"],
       "@memoflow/schedule-client": ["../schedule-client/dist/index.d.ts"],
