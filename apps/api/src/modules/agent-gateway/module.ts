@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { CreateScopedPatSchema } from '@memoflow/contracts/agent-gateway';
+import { CreateScopedPatSchema } from '@memoflow/agent-gateway';
 import type { PilotAdmission } from './pilot-admission';
 import { createReadGateway, toNodeHandler } from '@memoflow/agent-gateway/server';
 import type {

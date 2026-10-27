@@ -34,7 +34,9 @@ export const ExternalGoalSchema = GoalClientDTOSchema.pick({
       .max(100),
   })
   .strict();
-export const GoalGetInputSchema = z.strictObject({ id: GoalClientDTOSchema.shape.id });
+export const GoalGetInputSchema = z.strictObject({
+  id: GoalClientDTOSchema.shape.id,
+});
 export const GoalGetOutputSchema = z.strictObject({ goal: ExternalGoalSchema });
 export const GoalSearchInputSchema = z.strictObject({
   query: z.string().trim().max(200).default(''),
@@ -136,8 +138,12 @@ export type GatewayFailureCode = z.infer<typeof GatewayFailureCodeSchema>;
 
 export const ExternalTaskPlanSchema = TaskReadPlanSchema.strict();
 export const ExternalTaskOccurrenceSchema = TaskReadOccurrenceSchema.strict();
-export const TaskPlanGetInputSchema = z.strictObject({ id: TaskPlanReadIdSchema });
-export const TaskPlanGetOutputSchema = z.strictObject({ plan: ExternalTaskPlanSchema });
+export const TaskPlanGetInputSchema = z.strictObject({
+  id: TaskPlanReadIdSchema,
+});
+export const TaskPlanGetOutputSchema = z.strictObject({
+  plan: ExternalTaskPlanSchema,
+});
 export const TaskPlanSearchInputSchema = GoalSearchInputSchema;
 export const TaskPlanSearchOutputSchema = z.strictObject({
   items: z.array(ExternalTaskPlanSchema).max(100),
@@ -145,7 +151,9 @@ export const TaskPlanSearchOutputSchema = z.strictObject({
   nextCursor: z.string().max(2048).nullable(),
   truncated: z.literal('response-budget').optional(),
 });
-export const TaskOccurrenceGetInputSchema = z.strictObject({ id: TaskOccurrenceReadIdSchema });
+export const TaskOccurrenceGetInputSchema = z.strictObject({
+  id: TaskOccurrenceReadIdSchema,
+});
 export const TaskOccurrenceGetOutputSchema = z.strictObject({
   occurrence: ExternalTaskOccurrenceSchema,
 });

@@ -2,6 +2,10 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "paths": {
+      "@memoflow/agent-gateway": ["./packages/agent-gateway/dist/index.d.ts"],
+      "@memoflow/agent-gateway/*": ["./packages/agent-gateway/dist/*/index.d.ts"],
+      "@memoflow/cloud-auth-contracts": ["./packages/cloud-auth-contracts/dist/index.d.ts"],
+      "@memoflow/cloud-auth-contracts/*": ["./packages/cloud-auth-contracts/dist/*.d.ts"],
       "@memoflow/routine-ui": ["./packages/routine-ui/dist/index.d.ts"],
       "@memoflow/routine-ui/host": ["./packages/routine-ui/dist/routine-ui-host.d.ts"],
       "@memoflow/routine-ui/components/RoutineCapsulePreview": [
@@ -111,7 +115,6 @@
       "@memoflow/utils": ["./packages/utils/dist/index.d.ts"],
       "@memoflow/utils/*": ["./packages/utils/dist/*/index.d.ts", "./packages/utils/dist/*.d.ts"],
       "@memoflow/contracts": ["./packages/contracts/dist/index.d.ts"],
-      "@memoflow/contracts/cloud-auth": ["./packages/contracts/dist/cloud-auth.d.ts"],
       "@memoflow/contracts/*": [
         "./packages/contracts/dist/modules/*/index.d.ts",
         "./packages/contracts/dist/*/index.d.ts"

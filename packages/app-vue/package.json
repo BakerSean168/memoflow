@@ -114,7 +114,9 @@
     "vue-echarts": "^8.3.0",
     "vue-i18n": "^11.4.12",
     "vue-router": "^5.3.1",
-    "vue-sonner": "^2.0.8"
+    "vue-sonner": "^2.0.8",
+    "@memoflow/cloud-auth-contracts": "workspace:*",
+    "@memoflow/agent-gateway": "workspace:*"
   },
   "peerDependencies": {
     "vue": "^3.5.39"

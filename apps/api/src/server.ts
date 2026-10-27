@@ -35,7 +35,7 @@ import { bindGatewayWrites } from './modules/agent-gateway/write.port';
 import { composeAgentGatewayModule } from './modules/agent-gateway/module';
 import { bindAssistedWorkflow } from './modules/agent-gateway/assisted-workflow';
 import { AiAssistedWorkflowRepository } from '@memoflow/ai/agent-gateway';
-import { GatewayTaskReceiptSchema } from '@memoflow/contracts/agent-gateway';
+import { GatewayTaskReceiptSchema } from '@memoflow/agent-gateway';
 import { externalMutationReceiptId } from '@memoflow/database/transaction';
 import { createPilotAdmission } from './modules/agent-gateway/pilot-admission';
 import { createApiRedisClient } from './shared/infrastructure/redis/create-redis-client';

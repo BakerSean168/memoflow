@@ -11,7 +11,7 @@ import {
   TaskOccurrenceGetOutputSchema,
   TaskOccurrenceListInputSchema,
   TaskOccurrenceListOutputSchema,
-} from '@memoflow/contracts/agent-gateway';
+} from './contracts';
 
 const readAnnotations = {
   readOnlyHint: true,

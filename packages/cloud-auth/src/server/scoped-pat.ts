@@ -1,8 +1,5 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
-import {
-  CreateScopedPatSchema,
-  type CreateScopedPatInput,
-} from '@memoflow/contracts/agent-gateway';
+import { CreateScopedPatSchema, type CreateScopedPatInput } from '@memoflow/agent-gateway';
 import type { RequestContext } from '@memoflow/contracts/shared';
 import type { PrismaClient, Prisma } from '@memoflow/database';
 

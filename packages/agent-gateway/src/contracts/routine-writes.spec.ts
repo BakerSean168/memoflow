@@ -36,8 +36,10 @@ describe('hosted one-shot Routine contract', () => {
       'recurrence',
     ])
       expect(
-        GatewayRoutineCreateSchema.safeParse({ ...input, trigger: { ...input.trigger, [key]: 1 } })
-          .success,
+        GatewayRoutineCreateSchema.safeParse({
+          ...input,
+          trigger: { ...input.trigger, [key]: 1 },
+        }).success,
       ).toBe(false);
     for (const patch of [
       { name: '' },
@@ -55,13 +57,18 @@ describe('hosted one-shot Routine contract', () => {
       { timeZone: 'invalid/zone' },
     ])
       expect(
-        GatewayRoutineCreateSchema.safeParse({ ...input, trigger: { ...input.trigger, ...patch } })
-          .success,
+        GatewayRoutineCreateSchema.safeParse({
+          ...input,
+          trigger: { ...input.trigger, ...patch },
+        }).success,
       ).toBe(false);
   });
   it('issues the fifth PAT scope explicitly while OAuth stays read-only', () => {
     expect(
-      CreateScopedPatSchema.parse({ name: 'routine', scopes: ['routines:write'] }).scopes,
+      CreateScopedPatSchema.parse({
+        name: 'routine',
+        scopes: ['routines:write'],
+      }).scopes,
     ).toEqual(['routines:write']);
     expect(
       CreateScopedPatSchema.parse({
@@ -77,7 +84,11 @@ describe('hosted one-shot Routine contract', () => {
     const receipt = {
       receiptId: 'a'.repeat(64),
       result: {
-        routine: { id: '5b5d8a2b-9934-4be8-8e07-3f62ed122e15', version: 1, name: 'Review' },
+        routine: {
+          id: '5b5d8a2b-9934-4be8-8e07-3f62ed122e15',
+          version: 1,
+          name: 'Review',
+        },
         scheduledFor: 1792458000000,
       },
       replayed: false,

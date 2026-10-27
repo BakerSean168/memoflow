@@ -113,7 +113,8 @@
     "undici": "^8.11.2",
     "winston": "3.19.0",
     "winston-daily-rotate-file": "5.0.0",
-    "xtend": "4.0.2"
+    "xtend": "4.0.2",
+    "@memoflow/cloud-auth-contracts": "workspace:*"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -59,6 +59,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   'task-ui': ['./host', './composables/*', './components/*'],
   'schedule-contracts': ['./*'],
   'setting-contracts': ['./*'],
+  'cloud-auth-contracts': ['./*'],
   'workspace-contracts': ['./*'],
   'relation-contracts': ['./*'],
   'repository-contracts': ['./*'],
@@ -81,7 +82,6 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
     './server',
   ],
   contracts: [
-    './agent-gateway',
     './relation',
     './account',
     './setting',
@@ -92,7 +92,6 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
     './primitives',
     './primitives/*',
     './electron',
-    './cloud-auth',
     './mocks',
   ],
   // Transaction composition has no singleton connection side effects; shared owner code

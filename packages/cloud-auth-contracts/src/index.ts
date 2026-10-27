@@ -62,7 +62,10 @@ export const BetterAuthSessionResponseSchema = z.object({
     name: z.string(),
     emailVerified: z.boolean().optional(),
   }),
-  session: z.object({ id: z.string().min(1), expiresAt: z.string().datetime() }),
+  session: z.object({
+    id: z.string().min(1),
+    expiresAt: z.string().datetime(),
+  }),
 });
 
 export const DesktopCloudAttemptRequestSchema = z.object({ attemptId: z.string().uuid() }).strict();

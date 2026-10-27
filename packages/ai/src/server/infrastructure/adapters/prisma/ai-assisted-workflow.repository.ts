@@ -1,6 +1,6 @@
 import { Client } from 'pg';
 import type { PrismaClient, AiAssistedWorkflow } from '@memoflow/database';
-import type { AssistedConsentSchema } from '@memoflow/contracts/agent-gateway';
+import type { AssistedConsentSchema } from '@memoflow/agent-gateway';
 import type { z } from 'zod';
 
 export class AiAssistedWorkflowError extends Error {

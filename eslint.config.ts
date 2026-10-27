@@ -138,7 +138,8 @@ const moduleBoundaryDepConstraints = [
     onlyDependOnLibsWithTags: ['layer:shared'],
   },
   {
-    // Platform contracts only depend on foundational contract primitives.
+    // Platform contracts (including cloud-auth-contracts) only depend on foundational
+    // contract primitives; scope:authentication uses the existing feature scope rule.
     sourceTag: 'tier:platform-contracts',
     onlyDependOnLibsWithTags: ['platform:contract-foundation'],
     notDependOnLibsWithTags: ['tier:core', 'tier:client', 'tier:server'],

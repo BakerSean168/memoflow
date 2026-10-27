@@ -1,4 +1,4 @@
-import type { CloudAuthWebClientPort } from '@memoflow/contracts/cloud-auth';
+import type { CloudAuthWebClientPort } from '@memoflow/cloud-auth-contracts';
 import { inject, type InjectionKey } from 'vue';
 
 export const AUTH_WEB_SERVICE_KEY: InjectionKey<CloudAuthWebClientPort> =
