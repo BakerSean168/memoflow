@@ -1,4 +1,4 @@
-import type { TaskOccurrenceOperationRes } from '@memoflow/contracts/task';
+import type { TaskOccurrenceOperationRes } from '@memoflow/task-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { error, ok } from '@memoflow/contracts/result';
 import type { ITaskOccurrenceRepository } from '../../../domain/repositories/i-task-occurrence-repository';

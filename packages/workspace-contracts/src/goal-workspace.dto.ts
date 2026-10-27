@@ -1,13 +1,9 @@
 import { z } from 'zod';
-import type { KnowledgeSpaceId } from '@memoflow/shared-primitives';
+import type { KnowledgeSpaceId } from '@memoflow/repository-contracts';
 import type { GoalId } from '@memoflow/goal-contracts';
 import { brandedId } from '@memoflow/shared-primitives/zod-extensions';
-import { KnowledgeDocumentIdSchema } from '@memoflow/contracts/repository';
-import {
-  TaskGoalContextItemSchema,
-  TaskGoalContextPageSchema,
-  TaskGoalContextSummarySchema,
-} from '@memoflow/contracts/task';
+import { KnowledgeDocumentIdSchema } from '@memoflow/repository-contracts';
+import { TaskGoalContextItemSchema, TaskGoalContextSummarySchema } from '@memoflow/task-contracts';
 import {
   GoalClientDTOSchema,
   GoalRecordClientDTOSchema,
@@ -53,9 +49,6 @@ export const GoalWorkspaceTaskPageInvocationSchema = GoalWorkspaceTaskPageReques
   goalId: brandedId<GoalId>(),
 });
 export type GoalWorkspaceTaskPageInvocation = z.input<typeof GoalWorkspaceTaskPageInvocationSchema>;
-
-export const GoalWorkspaceTaskPageSchema = TaskGoalContextPageSchema;
-export type GoalWorkspaceTaskPage = z.infer<typeof GoalWorkspaceTaskPageSchema>;
 
 const knowledgeItemBase = z.object({
   relationId: z.string().min(1),

@@ -6,11 +6,11 @@ import type {
   TaskReadPage,
   TaskOccurrenceReadPage,
   TaskAgentPersistedReceipt,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import type { RoutineAgentPersistedReceipt } from '@memoflow/routine-contracts';
 import type { GatewayWriteToolName } from './write-tool-descriptors';
 import type { GatewayAssistedToolName } from './assisted-tool-descriptors';
-import type { GatewayFailureCode } from '@memoflow/contracts/agent-gateway';
+import type { GatewayFailureCode } from './contracts';
 import type {
   GoalAgentPersistedReceipt,
   GoalClientDTO,
@@ -142,9 +142,9 @@ export interface GatewayWritePort {
 
 /** Fully implemented lifecycle is supplied only behind the assisted rollout flag. */
 export interface GatewayAssistedPort {
-  start: WriteCall<import('@memoflow/contracts/agent-gateway').AssistedView>;
-  get: WriteCall<import('@memoflow/contracts/agent-gateway').AssistedView>;
-  review: WriteCall<import('@memoflow/contracts/agent-gateway').AssistedView>;
-  resume: WriteCall<import('@memoflow/contracts/agent-gateway').AssistedView>;
-  cancel: WriteCall<import('@memoflow/contracts/agent-gateway').AssistedView>;
+  start: WriteCall<import('@memoflow/agent-gateway').AssistedView>;
+  get: WriteCall<import('@memoflow/agent-gateway').AssistedView>;
+  review: WriteCall<import('@memoflow/agent-gateway').AssistedView>;
+  resume: WriteCall<import('@memoflow/agent-gateway').AssistedView>;
+  cancel: WriteCall<import('@memoflow/agent-gateway').AssistedView>;
 }

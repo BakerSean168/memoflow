@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { PrismaClient } from '@memoflow/database';
-import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
-import { ConversationStatus } from '@memoflow/contracts/ai';
-import type { AIEventMap } from '@memoflow/contracts/ai';
+import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
+import { ConversationStatus } from '@memoflow/ai-contracts';
+import type { AIEventMap } from '@memoflow/ai-contracts';
 import { createTypedEventSubscriber, eventBus } from '@memoflow/utils/domain';
 import { AIConversation } from '../../../domain/aggregates/ai-conversation';
 import { AIConversationPrismaRepository } from '../prisma/ai-conversation-prisma.repository';

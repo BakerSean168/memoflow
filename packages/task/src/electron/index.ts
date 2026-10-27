@@ -90,7 +90,7 @@ import {
   TaskOccurrenceIdCommandInvocationSchema,
   TaskPlanIdCommandInvocationSchema,
   UpdateTaskPlanInvocationSchema,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import { createLogger } from '@memoflow/utils/logger';
 import type { TaskModuleInstance } from '../server/infrastructure';
 import { createTaskTransportHandlers } from '../server/transport';

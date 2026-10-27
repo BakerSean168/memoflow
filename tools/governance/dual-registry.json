@@ -310,7 +310,7 @@
     },
     {
       "id": "r248",
-      "path": "packages/app-vue/src/modules/ai/composables/dual-registry.surface.spec.ts",
+      "path": "packages/ai-ui/src/composables/dual-registry.surface.spec.ts",
       "package": "packages/app-vue",
       "class": "retired",
       "sole": "types.ts",
@@ -585,7 +585,7 @@
     },
     {
       "id": "r757",
-      "path": "packages/contracts/src/modules/ai/api/dual-registry.surface.spec.ts",
+      "path": "packages/ai-contracts/src/api/dual-registry.surface.spec.ts",
       "package": "packages/contracts",
       "class": "retired",
       "sole": "ai-agent.dto.ts",
@@ -596,7 +596,7 @@
     },
     {
       "id": "r1186",
-      "path": "packages/contracts/src/modules/ai/configs/get-template-by-id-keep-boundary.surface.spec.ts",
+      "path": "packages/ai-contracts/src/configs/get-template-by-id-keep-boundary.surface.spec.ts",
       "package": "packages/contracts",
       "class": "keep_boundary",
       "sole": "ai-provider-template.ts",
@@ -794,8 +794,8 @@
     },
     {
       "id": "r649",
-      "path": "packages/contracts/src/modules/task/aggregates/task-dependency-server-dual.surface.spec.ts",
-      "package": "packages/contracts",
+      "path": "packages/task-contracts/src/aggregates/task-dependency-server-dual.surface.spec.ts",
+      "package": "packages/task-contracts",
       "class": "retired",
       "sole": "../entities",
       "blast": "surface lock (retired)",
@@ -805,8 +805,8 @@
     },
     {
       "id": "r697",
-      "path": "packages/contracts/src/modules/task/api/dual-registry.surface.spec.ts",
-      "package": "packages/contracts",
+      "path": "packages/task-contracts/src/api/dual-registry.surface.spec.ts",
+      "package": "packages/task-contracts",
       "class": "retired",
       "sole": "response-schemas.ts",
       "blast": "surface lock (retired); suite describes=13",
@@ -1113,7 +1113,7 @@
     },
     {
       "id": "r296",
-      "path": "packages/task/src/application-client/task-client-port-facade-dual.surface.spec.ts",
+      "path": "packages/task-client/src/application-client/task-client-port-facade-dual.surface.spec.ts",
       "package": "packages/task",
       "class": "retired",
       "sole": "task-client-service.ts",

@@ -1,5 +1,5 @@
 import type { ITaskOccurrenceRepository } from '../../../domain/repositories/i-task-occurrence-repository';
-import type { SkipTaskOccurrenceReq, TaskOccurrenceOperationRes } from '@memoflow/contracts/task';
+import type { SkipTaskOccurrenceReq, TaskOccurrenceOperationRes } from '@memoflow/task-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { ok, error, fail } from '@memoflow/contracts/result';
 import { createLogger } from '@memoflow/utils/logger';

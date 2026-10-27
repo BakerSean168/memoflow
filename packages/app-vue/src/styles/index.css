@@ -9,8 +9,13 @@
 @source '../../../ui-core/src';
 @source '../../../ui-vue-shadcn/src';
 @source '../../../goal-ui/src';
+@source '../../../task-ui/src';
 @source '../../../schedule-ui/src';
 @source '../../../notification-ui/src';
+@source '../../../setting-ui/src';
+@source '../../../repository-ui/src';
 @source '../../../routine-ui/src';
 @source '../../../account-ui/src';
 @source '..';
+
+@source '../../../ai-ui/src';

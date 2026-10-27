@@ -11,7 +11,7 @@ import {
   type AIModelCapabilityMap,
   type AIModelCapabilitySnapshot,
   type AIModelCatalogSnapshot,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { IAIProviderConfigRepository } from '../../domain/repositories/i-ai-provider-config-repository';
 import {
   resolveActiveProviderConfig,

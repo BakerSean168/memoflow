@@ -2,8 +2,8 @@ import { createContext, type PropsWithChildren, useContext, useRef } from 'react
 
 import type { AccountClientPort } from '@memoflow/account-client';
 import { createAccountHttpClient } from '@memoflow/account-client';
-import type { AIClientPort, AssistantRuntimeClient } from '@memoflow/ai/client';
-import { createAIHttpClient, createAssistantRuntimeHttpClient } from '@memoflow/ai/client';
+import type { AIClientPort, AssistantRuntimeClient } from '@memoflow/ai-client';
+import { createAIHttpClient, createAssistantRuntimeHttpClient } from '@memoflow/ai-client';
 import type { GoalClientPort } from '@memoflow/goal-client';
 import type { LabelClientPort } from '@memoflow/label/client';
 import { createLabelHttpClient } from '@memoflow/label/client';
@@ -12,10 +12,10 @@ import type { NotificationClientPort } from '@memoflow/notification-client';
 import { createNotificationHttpClient } from '@memoflow/notification-client';
 import type { ScheduleClientPort } from '@memoflow/schedule-client';
 import { createScheduleHttpClient } from '@memoflow/schedule-client';
-import type { SettingClientPort } from '@memoflow/setting/client';
-import { createSettingHttpClient } from '@memoflow/setting/client';
-import type { TaskClientPort } from '@memoflow/task/client';
-import { createTaskHttpClient } from '@memoflow/task/client';
+import type { SettingClientPort } from '@memoflow/setting-client';
+import { createSettingHttpClient } from '@memoflow/setting-client';
+import type { TaskClientPort } from '@memoflow/task-client';
+import { createTaskHttpClient } from '@memoflow/task-client';
 import type { IResultHttpClient } from '@memoflow/http-client';
 
 import { useAppSession } from './app-session-provider';

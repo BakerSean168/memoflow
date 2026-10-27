@@ -2,7 +2,7 @@ import {
   AIEvaluationReportSchema,
   type AIEvaluationCheck,
   type AIEvaluationResult,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type {
   AIEvalCase,
   AIEvalCheckDefinition,

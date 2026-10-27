@@ -1,5 +1,5 @@
-import type { TaskTiming } from '@memoflow/contracts/task';
-import { TaskTimingKind } from '@memoflow/contracts/task';
+import type { TaskTiming } from '@memoflow/task-contracts';
+import { TaskTimingKind } from '@memoflow/task-contracts';
 import type { Instant, Ymd } from '@memoflow/contracts/primitives';
 import { asHm, combineYmdHmWithTimeZone, createTimeFacade, type TimeContext } from '@memoflow/time';
 

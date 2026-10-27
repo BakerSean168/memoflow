@@ -1,4 +1,4 @@
-import type { DeviceKeymap } from '@memoflow/contracts/shared';
+import type { DeviceKeymap } from '@memoflow/desktop-contracts';
 import {
   commandDefinitions,
   type KeyboardCommandId,

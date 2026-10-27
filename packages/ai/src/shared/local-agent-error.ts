@@ -1,4 +1,4 @@
-import type { LocalAgentDriver } from '@memoflow/contracts/ai';
+import type { LocalAgentDriver } from '@memoflow/ai-contracts';
 
 /** Public failures contain no provider stderr, credentials, configuration or raw protocol data. */
 export const LOCAL_AGENT_FAILURES = {

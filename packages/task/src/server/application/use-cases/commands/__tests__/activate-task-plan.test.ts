@@ -4,7 +4,7 @@ import { createMockRepo } from '@memoflow/test-utils/mocks';
 import { aLoadedTaskPlan, TASK_TEST_TIME_CONTEXT } from '../../../../../testing';
 import type { ITaskPlanRepository } from '../../../../domain/repositories/i-task-plan-repository';
 import type { ITaskOccurrenceRepository } from '../../../../domain/repositories/i-task-occurrence-repository';
-import { TaskPlanStatus } from '@memoflow/contracts/task';
+import { TaskPlanStatus } from '@memoflow/task-contracts';
 import { ActivateTaskPlanUseCase } from '../activate-task-plan.use-case';
 import { createInlineTaskWriteTransactionRunner } from '../task-write-support';
 

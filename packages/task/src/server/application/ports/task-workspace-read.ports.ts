@@ -1,4 +1,8 @@
-import type { GetGoalRes, KeyResultClientDTO } from '@memoflow/goal-contracts';
+import type {
+  GoalReference,
+  KeyResultReference,
+  KeyResultClientDTO,
+} from '@memoflow/goal-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import type { TaskKnowledgeEdgeListReq, TaskKnowledgeEdgePage } from '@memoflow/relation-contracts';
 import type { KnowledgeDocumentId, KnowledgeSpaceId } from '@memoflow/contracts/primitives';
@@ -10,8 +14,17 @@ export interface TaskGoalMeasurementReadPort {
     identityId: string,
   ): Promise<Result<Pick<KeyResultClientDTO, 'id' | 'title' | 'progress'>>>;
 }
+/** Goal-owned display pair; Goal stays the authority for id and title (#635). */
+export interface TaskWorkspaceGoalReference {
+  readonly goal: GoalReference;
+  readonly keyResult: KeyResultReference | null;
+}
 export interface TaskWorkspaceGoalReadPort {
-  getGoal(id: string, identityId: string, includeChildren?: boolean): Promise<Result<GetGoalRes>>;
+  getGoalReference(
+    goalId: string,
+    keyResultId: string | null,
+    identityId: string,
+  ): Promise<Result<TaskWorkspaceGoalReference>>;
 }
 export interface TaskWorkspaceKnowledgeRelationReadPort {
   listEdgeRefsForTask(

@@ -1,6 +1,6 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { execFile } from 'node:child_process';
-import type { LocalAgentConnection } from '@memoflow/contracts/ai';
+import type { LocalAgentConnection } from '@memoflow/ai-contracts';
 import { nativeVersion, probeNativeVersion, resolveNativeExecutable } from './native-executable';
 it('resolves Windows npm launchers with space paths to Node argv without a shell', () => {
   const root = 'C:\\Users\\Test User\\AppData\\Roaming\\npm';

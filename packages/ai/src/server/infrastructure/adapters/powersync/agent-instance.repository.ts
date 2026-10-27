@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { createHash, randomUUID } from 'node:crypto';
-import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
+import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/desktop-contracts';
 import {
   AgentConversationSelectionSchema,
   type AgentConversationSelection,
@@ -12,7 +12,7 @@ import {
   type AgentInstanceModelBinding,
   type AgentRegistrySnapshot,
   type LocalAgentConnection,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import {
   AgentRegistryError,
   type IAgentInstanceRepository,

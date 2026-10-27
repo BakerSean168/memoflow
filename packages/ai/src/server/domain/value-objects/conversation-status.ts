@@ -1,7 +1,7 @@
 import {
   ConversationStatus as ConversationStatusContract,
   type ConversationStatus as IConversationStatus,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 
 /**
  * ConversationStatus 枚举类型

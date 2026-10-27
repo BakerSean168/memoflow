@@ -10,22 +10,22 @@
  * ```typescript
  * // ✅ 推荐：从子路径导入（极致 Tree-Shaking）
  * import { GoalServerDTO, GoalStatus } from '@memoflow/goal-contracts';
- * import { TaskPlanServer } from '@memoflow/contracts/task';
+ * import { TaskPlanServer } from '@memoflow/task-contracts';
  * import { HttpResponse, ResultCode } from '@memoflow/contracts/result';
  *
  * // ✅ 命名空间导入（避免命名冲突）
  * import * as GoalContracts from '@memoflow/goal-contracts';
- * import * as TaskContracts from '@memoflow/contracts/task';
+ * import * as TaskContracts from '@memoflow/task-contracts';
  * ```
  *
  * 子路径列表：
- * - @memoflow/contracts/task       - 任务模块
+ * - @memoflow/task-contracts       - 任务模块
  * - @memoflow/goal-contracts       - 目标模块（P2 已独立成包）
- * - @memoflow/contracts/repository - 仓库模块
+ * - @memoflow/repository-contracts - 仓库模块（已独立成包）
  * - @memoflow/account-contracts    - 账户模块（已独立成包）
  * - @memoflow/schedule-contracts   - 调度模块
- * - @memoflow/contracts/setting    - 设置模块
- * - @memoflow/contracts/ai         - AI模块
+ * - @memoflow/setting-contracts    - 设置模块（已独立成包）
+ * - @memoflow/ai-contracts         - AI模块
  * - @memoflow/contracts/result     - Result Pattern (新，推荐)
  * - @memoflow/contracts/shared     - 共享类型
  */
@@ -139,28 +139,3 @@ export type {
   HttpResponse,
   HttpResponseOptions,
 } from '@memoflow/transport-contracts';
-
-export type {
-  CloudAccountSummary,
-  CloudSessionSummary,
-  CloudAuthResponse,
-  CloudSessionState,
-  CloudSignInRequest,
-  CloudSignUpRequest,
-  CloudSessionClientPort,
-  CloudAuthClientPort,
-  CloudAuthWebClientPort,
-  CloudAuthDesktopClientPort,
-  DeviceAuthorizationDecisionStatus,
-  DeviceAuthorizationVerification,
-  DesktopCloudConnectionStatus,
-  DesktopCloudConnectionAttempt,
-} from './cloud-auth';
-
-export {
-  DesktopCloudConnectionRequestSchema,
-  DesktopCloudAttemptRequestSchema,
-  CloudAuthResponseSchema,
-  BetterAuthSessionResponseSchema,
-} from './cloud-auth';
-export type { DesktopCloudConnectionRequest, DesktopCloudConnectionResult } from './cloud-auth';

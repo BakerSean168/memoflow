@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import type { IAIProviderSecretVault } from '../../application/ports/provider-secret-vault.port';
 import { AISecretCipher } from '../security/ai-secret-cipher';
 import { PowerSyncAIProviderSecretVault } from './powersync/ai-provider-secret-powersync.vault';

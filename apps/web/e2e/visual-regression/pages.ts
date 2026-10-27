@@ -11,9 +11,9 @@ import type {
   CreateRoutineRequest,
   CreateRoutineProfileRequest,
 } from '@memoflow/routine-contracts';
-import type { CreateTaskPlanReq } from '@memoflow/contracts/task';
+import type { CreateTaskPlanReq } from '@memoflow/task-contracts';
 import { RoutineConfigurationSnapshotSchema } from '@memoflow/routine-contracts';
-import { AIWorkflowRunViewSchema } from '@memoflow/contracts/ai';
+import { AIWorkflowRunViewSchema } from '@memoflow/ai-contracts';
 import { fail, ok } from '@memoflow/contracts/result';
 import * as keys from '@memoflow/app-vue/di/keys';
 import { productionLocaleMessages } from '@memoflow/app-vue/locales/production-messages';
@@ -23,16 +23,13 @@ import { useAuthenticationStore } from '@memoflow/account-ui';
 import { useAppShellStore } from '@memoflow/app-vue/layouts/shell/useAppShellStore';
 import RoutineConfigurationView from '@memoflow/routine-ui/views/RoutineConfigurationView';
 import { NotificationListPage } from '@memoflow/notification-ui';
-import KnowledgeProjectionWorkspaceView from '@memoflow/app-vue/modules/repository/views/KnowledgeProjectionWorkspaceView.vue';
-import UserSettingsView from '@memoflow/app-vue/modules/setting/views/UserSettingsView.vue';
-import TaskManagementView from '@memoflow/app-vue/modules/task/views/TaskManagementView.vue';
+import { KnowledgeProjectionWorkspaceView } from '@memoflow/repository-ui';
+import { UserSettingsView } from '@memoflow/app-vue';
+import { TaskManagementView } from '@memoflow/task-ui';
 import GlobalConfirmDialog from '@memoflow/app-vue/shared/components/GlobalConfirmDialog.vue';
 import AppShell from '@memoflow/app-vue/layouts/shell/AppShell.vue';
 import ListPageShell from '@memoflow/app-vue/components/shared/ListPageShell.vue';
-import {
-  template,
-  instance,
-} from '@memoflow/app-vue/modules/task/components/task-quick-test-fixtures';
+import { template, instance } from '@memoflow/task-ui/components/task-quick-test-fixtures';
 import '../../src/styles/index.css';
 
 const params = new URLSearchParams(location.search);
@@ -163,14 +160,14 @@ const task = {
     writes.push({ owner: 'task', name: request.name });
     if (params.has('failCreate') && taskAttempts++ === 0)
       return fail({ code: 'INTERNAL_ERROR', message: 'Offline: retry the same draft' });
-    const created = { ...template, title: request.name, schedule: request.schedule };
-    return ok({ plan: { toDTO: () => created }, occurrenceCount: 1, todayOccurrenceCreated: true });
+    const created = { ...template, name: request.name, schedule: request.schedule };
+    return ok({ plan: created, occurrenceCount: 1, todayOccurrenceCreated: true });
   },
-  listPlans: async () => ok({ plans: [{ toDTO: () => template }], total: 1 }),
-  listOccurrencesByDateRange: async () => ok([{ toDTO: () => instance() }]),
+  listPlans: async () => ok({ plans: [template], total: 1 }),
+  listOccurrencesByDateRange: async () => ok([instance()]),
   getPlan: async (id: string) =>
     id === String(template.id)
-      ? ok({ id: template.id, toDTO: () => template })
+      ? ok(template)
       : fail({ code: 'NOT_FOUND', message: 'Fixture owner has not been created' }),
 };
 const notifications = [

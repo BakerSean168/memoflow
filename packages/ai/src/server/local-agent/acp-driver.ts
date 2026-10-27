@@ -8,7 +8,7 @@ import type {
   LocalAgentRequest,
   LocalAgentRequestResponse,
   LocalAgentStatus,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { NativeAgentEvent, NativeAgentRunInput } from './codex-driver';
 import { NativeRpcTransport, type NativeProcessOptions } from './native-rpc-transport';
 import { NativeEventQueue } from './native-event-queue';

@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { expect, it } from 'vitest';
 import { LocalVaultRuntime } from '@memoflow/repository/electron';
-import { KnowledgeDocumentIdSchema } from '@memoflow/contracts/repository';
+import { KnowledgeDocumentIdSchema } from '@memoflow/repository-contracts';
 import { LocalAgentRepository } from '@memoflow/ai';
 import { createPowerSyncSqliteFixture } from '@memoflow/test-utils/helpers/powersync-sqlite';
 import { createTimeContext } from '@memoflow/time';

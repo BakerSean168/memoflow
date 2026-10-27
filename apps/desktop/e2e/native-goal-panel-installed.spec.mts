@@ -5,7 +5,7 @@ import { randomUUID } from 'node:crypto';
 import { expect, test, type Page } from '@playwright/test';
 import { _electron as electron, type ElectronApplication } from 'playwright';
 import { AIChannels, GoalChannels } from '@memoflow/contracts/electron';
-import type { GoalPanelCommand, NativePanelIpcResponse } from '@memoflow/contracts/ai';
+import type { GoalPanelCommand, NativePanelIpcResponse } from '@memoflow/ai-contracts';
 import { createIsolatedNativeAgentEnvironment } from './packaged-runtime/isolated-native-env';
 import { verifyInstalledNativeBinary } from './support/installed-native-provenance';
 

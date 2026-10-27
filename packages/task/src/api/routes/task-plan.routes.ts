@@ -26,10 +26,9 @@ import {
   AbandonTaskPlanInvocationSchema,
   BindTaskToGoalInvocationSchema,
   TaskPlanIdCommandInvocationSchema,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import { brandedId } from '@memoflow/contracts/primitives';
-import type { TaskPlanId } from '@memoflow/contracts/primitives';
-import type { ListTaskPlanFilters } from '@memoflow/contracts/task';
+import type { ListTaskPlanFilters, TaskPlanId } from '@memoflow/task-contracts';
 import type { TaskPlanController } from '../../server/transport/task-plan.controller';
 // Residual 983: sole getFirstQueryValue (local dual retired).
 import { getFirstQueryValue } from './get-first-query-value';

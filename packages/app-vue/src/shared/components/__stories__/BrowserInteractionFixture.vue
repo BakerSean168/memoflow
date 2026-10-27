@@ -9,9 +9,8 @@ import type { Instant } from '@memoflow/contracts/primitives';
 import ProductEditorFrame from '@memoflow/app-vue/shared/components/ProductEditorFrame.vue';
 import ProductDateTimePicker from '@memoflow/app-vue/shared/components/ProductDateTimePicker.vue';
 import ProductSingleSelectFilter from '@memoflow/app-vue/shared/components/ProductSingleSelectFilter.vue';
-import AIComposerControls from '@memoflow/app-vue/modules/ai/components/AIComposerControls.vue';
-import WeekdaySelector from '@memoflow/app-vue/modules/task/components/TaskPlanForm/widgets/WeekdaySelector.vue';
-import MonthDaySelector from '@memoflow/app-vue/modules/task/components/TaskPlanForm/widgets/MonthDaySelector.vue';
+import AIComposerControls from '@memoflow/ai-ui/components/AIComposerControls.vue';
+import { MonthDaySelector, WeekdaySelector } from '@memoflow/task-ui';
 
 const props = defineProps<{
   scenario?: 'dialog' | 'panel' | 'picker' | 'filter' | 'recurrence' | 'model';

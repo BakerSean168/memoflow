@@ -1,0 +1,67 @@
+{
+  "name": "task-ui",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "packages/task-ui/src",
+  "tags": ["scope:task", "type:lib", "type:vue", "layer:ui", "tier:ui"],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["^build"],
+      "options": {
+        "command": "node ../../node_modules/vue-tsc/bin/vue-tsc.js --noEmit --declaration false --declarationMap false -p tsconfig.json",
+        "cwd": "packages/task-ui"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/packages/task-ui/dist"],
+      "cache": true,
+      "dependsOn": ["^build"],
+      "options": {
+        "command": "node ../../node_modules/vite/bin/vite.js build",
+        "cwd": "packages/task-ui"
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ../../node_modules/vite/bin/vite.js build --watch",
+        "cwd": "packages/task-ui"
+      }
+    },
+    "lint": {
+      "options": {
+        "args": ["**/*.{ts,tsx,vue}"]
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "inputs": ["default", "^production"],
+      "cache": true,
+      "options": {
+        "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
+        "cwd": "packages/task-ui"
+      }
+    },
+    "test:watch": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "node ../../node_modules/vitest/vitest.mjs --config vitest.config.ts",
+        "cwd": "packages/task-ui"
+      }
+    },
+    "test:contract": {
+      "executor": "nx:run-commands",
+      "inputs": ["default", "^production", "{workspaceRoot}/packages/app-vue/src/**/*"],
+      "cache": true,
+      "dependsOn": ["build"],
+      "options": {
+        "command": "node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts",
+        "cwd": "packages/task-ui"
+      }
+    }
+  }
+}

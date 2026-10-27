@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { isAbsolute, join } from 'node:path';
 import { expect, it } from 'vitest';
 import { LocalAgentRepository, LocalAgentRuntime } from '@memoflow/ai';
-import type { AssistantRuntimeEvent } from '@memoflow/contracts/ai';
+import type { AssistantRuntimeEvent } from '@memoflow/ai-contracts';
 import type { IElectronDatabase } from '@memoflow/contracts/electron';
 import { createTimeContext } from '@memoflow/time';
 import { createDesktopLocalAgentTools } from './local-agent-tools';

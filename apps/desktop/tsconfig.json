@@ -10,6 +10,10 @@
     "declarationMap": false,
     "sourceMap": false,
     "paths": {
+      "@memoflow/cloud-auth-contracts": ["../../packages/cloud-auth-contracts/src/index.ts"],
+      "@memoflow/cloud-auth-contracts/*": ["../../packages/cloud-auth-contracts/src/*.ts"],
+      "@memoflow/agent-gateway": ["../../packages/agent-gateway/src/index.ts"],
+      "@memoflow/agent-gateway/*": ["../../packages/agent-gateway/src/*/index.ts"],
       "@/*": ["./src/*"],
       "@electron/*": ["./electron/*"],
       "@common/*": ["./common/*"],
@@ -20,8 +24,24 @@
       "@memoflow/notification-ui/host": [
         "../../packages/notification-ui/src/notification-ui-host.ts"
       ],
+      "@memoflow/desktop-contracts": ["../../packages/desktop-contracts/src/index.ts"],
+      "@memoflow/desktop-contracts/*": ["../../packages/desktop-contracts/src/*.ts"],
+      "@memoflow/setting-ui": ["../../packages/setting-ui/src/index.ts"],
+      "@memoflow/setting-ui/host": ["../../packages/setting-ui/src/setting-ui-host.ts"],
+      "@memoflow/task-ui/*": ["../../packages/task-ui/src/*.ts", "../../packages/task-ui/src/*"],
+      "@memoflow/task-ui/host": ["../../packages/task-ui/src/task-ui-host.ts"],
+      "@memoflow/task-ui": ["../../packages/task-ui/src/index.ts"],
+      "@memoflow/repository-ui": ["../../packages/repository-ui/src/index.ts"],
+      "@memoflow/repository-ui/host": ["../../packages/repository-ui/src/repository-ui-host.ts"],
       "@memoflow/ui-vue-shadcn/composables/*": ["../../packages/ui-vue-shadcn/src/composables/*"],
-      "@memoflow/ai/client": ["../../packages/ai/src/client/index.ts"],
+      "@memoflow/ai-contracts": ["../../packages/ai-contracts/src/index.ts"],
+      "@memoflow/ai-contracts/*": ["../../packages/ai-contracts/src/*.ts"],
+      "@memoflow/ai-client/*": ["../../packages/ai-client/src/*.ts"],
+      "@memoflow/ai-ui": ["../../packages/ai-ui/src/index.ts"],
+      "@memoflow/ai-ui/*": ["../../packages/ai-ui/src/*.ts"],
+      "@memoflow/ai-ui/host": ["../../packages/ai-ui/src/ai-ui-host.ts"],
+      "@memoflow/ai-ui/router": ["../../packages/ai-ui/src/ai-ui-host.ts"],
+      "@memoflow/ai-client": ["../../packages/ai-client/src/index.ts"],
       "@memoflow/ai/electron": ["../../packages/ai/src/electron/index.ts"],
       "@memoflow/ai/ports": ["../../packages/ai/src/ports/index.ts"],
       "@memoflow/goal-client": ["../../packages/goal-client/src/index.ts"],
@@ -30,7 +50,7 @@
       "@memoflow/goal/schedule-projection": [
         "../../packages/goal/src/schedule-projection/index.ts"
       ],
-      "@memoflow/task/client": ["../../packages/task/src/client/index.ts"],
+      "@memoflow/task-client": ["../../packages/task-client/src/index.ts"],
       "@memoflow/task/electron": ["../../packages/task/src/electron/index.ts"],
       "@memoflow/task/schedule-execution": ["../../packages/task/src/schedule-execution/index.ts"],
       "@memoflow/task/schedule-projection": [
@@ -41,6 +61,7 @@
       "@memoflow/routine/routine-runtime": ["../../packages/routine/src/routine-runtime/index.ts"],
       "@memoflow/routine-client": ["../../packages/routine-client/src/index.ts"],
       "@memoflow/notification-client": ["../../packages/notification-client/src/index.ts"],
+      "@memoflow/setting-client": ["../../packages/setting-client/src/index.ts"],
       "@memoflow/notification/electron": ["../../packages/notification/src/electron/index.ts"],
       "@memoflow/ipc-client": ["../../packages/ipc-client/src/index.ts"],
       "@memoflow/http-client": ["../../packages/http-client/src/index.ts"],
@@ -48,6 +69,9 @@
       "@memoflow/contracts": ["../../packages/contracts/src/index.ts"],
       "@memoflow/notification-contracts": ["../../packages/notification-contracts/src/index.ts"],
       "@memoflow/notification-contracts/*": ["../../packages/notification-contracts/src/*.ts"],
+      "@memoflow/repository-client": ["../../packages/repository-client/src/index.ts"],
+      "@memoflow/repository-contracts": ["../../packages/repository-contracts/src/index.ts"],
+      "@memoflow/repository-contracts/*": ["../../packages/repository-contracts/src/*.ts"],
       "@memoflow/contracts/*": [
         "../../packages/contracts/src/modules/*/index.ts",
         "../../packages/contracts/src/*/index.ts"

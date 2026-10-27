@@ -17,6 +17,8 @@ import { describe, expect, it } from 'vitest';
   describe('contracts dead *Res dual single-track surface', () => {
     const goalApi = __dirname;
     const modules = resolve(goalApi, '../../../contracts/src/modules');
+    const settingApi = resolve(goalApi, '../../../setting-contracts/src/api');
+    const repoContracts = resolve(goalApi, '../../../repository-contracts/src');
 
     const files: Array<[string, string[]]> = [
       [
@@ -25,19 +27,25 @@ import { describe, expect, it } from 'vitest';
       ],
       [resolve(goalApi, 'goal-record.dto.ts'), ['CreateGoalRecordRes', 'DeleteGoalRecordRes']],
       [resolve(goalApi, 'key-result.dto.ts'), ['UpdateKeyResultRes', 'UpdateKeyResultProgressRes']],
-      [resolve(modules, 'ai/api/ai-provider-config.dto.ts'), ['RefreshAIProviderModelsRes']],
       [
-        resolve(modules, 'repository/api/knowledge-repository-connection.dto.ts'),
+        resolve(goalApi, '../../../ai-contracts/src/api/ai-provider-config.dto.ts'),
+        ['RefreshAIProviderModelsRes'],
+      ],
+      [
+        resolve(repoContracts, 'api/knowledge-repository-connection.dto.ts'),
         ['CreateKnowledgeRepositoryConnectionRes'],
       ],
-      [resolve(modules, 'task/api/task-schedule.dto.ts'), ['ToggleTaskCompletionRes']],
-      [resolve(modules, 'setting/api/sync.dto.ts'), ['SyncSettingsRes']],
+      [
+        resolve(goalApi, '../../../task-contracts/src/api/task-schedule.dto.ts'),
+        ['ToggleTaskCompletionRes'],
+      ],
+      [resolve(settingApi, 'sync.dto.ts'), ['SyncSettingsRes']],
       // residual 290
       [
         resolve(goalApi, 'goal-crud.dto.ts'),
         ['BatchUpdateGoalStatusRes', 'BatchMoveGoalsRes', 'BatchDeleteGoalsRes'],
       ],
-      [resolve(modules, 'repository/aggregates/local-vault-binding.ts'), ['SelectLocalVaultRes']],
+      [resolve(repoContracts, 'aggregates/local-vault-binding.ts'), ['SelectLocalVaultRes']],
     ];
 
     it('does not export dead *Res identity dual aliases', () => {

@@ -1,4 +1,4 @@
-import type { AIRuntimeUsage } from '@memoflow/contracts/ai';
+import type { AIRuntimeUsage } from '@memoflow/ai-contracts';
 import type { ChatExecutionUsage } from './chat-execution.port';
 
 export interface AICostEstimate {

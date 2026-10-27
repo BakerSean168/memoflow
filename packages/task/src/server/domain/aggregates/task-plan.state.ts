@@ -1,7 +1,7 @@
 import type { ImportanceLevel } from '@memoflow/shared-primitives';
 import type { Instant } from '@memoflow/contracts/primitives';
 import type { IdentityId } from '@memoflow/domain-shared';
-import type { TaskPlanCompletionPolicyValue, TaskPlanOutcomeValue } from '@memoflow/contracts/task';
+import type { TaskPlanCompletionPolicyValue, TaskPlanOutcomeValue } from '@memoflow/task-contracts';
 import type { TaskPlanStatus } from '../../domain/value-objects/task-plan-status';
 import type { TaskPlanId } from '../../domain/value-objects/task-plan-id';
 import type {

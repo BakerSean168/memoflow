@@ -37,8 +37,8 @@ import { useDesktopWindowControls } from '../../shared/composables/useDesktopWin
 import { hasDesktopAuthApi } from '../../shared/utils/desktop-auth-recovery';
 import { useNotificationUnreadQuery } from '@memoflow/notification-ui';
 import { useAccountStore, useAuthenticationStore } from '@memoflow/account-ui';
-import AIChatView from '../../modules/ai/views/AIChatView.vue';
-import type { ConversationSummary } from '../../modules/ai/composables/types';
+import AIChatView from '@memoflow/ai-ui/views/AIChatView.vue';
+import type { ConversationSummary } from '@memoflow/ai-ui/composables/types';
 import WindowHeader, { type WindowHeaderCapsule } from './WindowHeader.vue';
 import DesktopUpdateShellIndicator from './DesktopUpdateShellIndicator.vue';
 import GoalCapsulePreview from './previews/GoalCapsulePreview.vue';

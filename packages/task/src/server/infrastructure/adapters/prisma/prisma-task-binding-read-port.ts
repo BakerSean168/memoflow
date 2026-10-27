@@ -14,7 +14,7 @@ import {
   type TaskGoalContextPage,
   type TaskGoalContextPageRequest,
   type TaskGoalContextSummary,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import type { TaskGoalContextReadPort } from '../../../application/ports';
 
 const contextSelect = {

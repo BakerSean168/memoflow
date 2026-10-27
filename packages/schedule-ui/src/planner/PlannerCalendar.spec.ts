@@ -2,7 +2,7 @@ import FullCalendar from '@fullcalendar/vue3';
 import type { EventDropInfo } from '@fullcalendar/vue3';
 import { mount } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
+import { createDefaultUserPreferenceProfile } from '@memoflow/setting-contracts';
 import { asInstant } from '@memoflow/time';
 import type {
   CalendarEventProjection,

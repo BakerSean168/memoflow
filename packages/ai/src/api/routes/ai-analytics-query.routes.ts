@@ -5,7 +5,7 @@ import {
   errorResponse,
   successResponse,
 } from '@memoflow/utils/result';
-import { QueryAnalyticsSchema, QueryAnalyticsResSchema } from '@memoflow/contracts/ai';
+import { QueryAnalyticsSchema, QueryAnalyticsResSchema } from '@memoflow/ai-contracts';
 import type { AIAnalyticsQueryController } from '../../server/transport/ai-analytics-query.controller';
 
 interface PlatformMiddleware {

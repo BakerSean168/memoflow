@@ -42,7 +42,7 @@ import type { ProfileSummary, ProfileCloudState } from '@memoflow/contracts/elec
 import type {
   ConversationAttentionStatus,
   ConversationAttentionMap,
-} from '../../modules/ai/composables/useConversationAttention';
+} from '@memoflow/ai-ui/composables/useConversationAttention';
 
 interface ConversationEntry {
   id: string;

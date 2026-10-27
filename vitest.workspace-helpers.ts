@@ -197,12 +197,8 @@ export const domainResolveAliases = [
     replacement: path.resolve(contractsSrc, 'electron/index.ts'),
   },
   {
-    find: '@memoflow/contracts/cloud-auth',
-    replacement: path.resolve(contractsSrc, 'cloud-auth.ts'),
-  },
-  {
-    find: '@memoflow/contracts/mocks',
-    replacement: path.resolve(contractsSrc, 'mocks/index.ts'),
+    find: /^@memoflow\/cloud-auth-contracts$/,
+    replacement: path.resolve(import.meta.dirname, './packages/cloud-auth-contracts/src/index.ts'),
   },
   {
     find: /^@memoflow\/contracts\/modules\/(.+)/,
@@ -397,8 +393,28 @@ export const domainResolveAliases = [
     ),
   },
   {
+    find: /^@memoflow\/repository-contracts$/,
+    replacement: path.resolve(import.meta.dirname, './packages/repository-contracts/src/index.ts'),
+  },
+  {
+    find: /^@memoflow\/repository-contracts\/(.+)/,
+    replacement: path.resolve(import.meta.dirname, './packages/repository-contracts/src/$1'),
+  },
+  {
+    find: /^@memoflow\/repository-client$/,
+    replacement: path.resolve(import.meta.dirname, './packages/repository-client/src/index.ts'),
+  },
+  {
     find: /^@memoflow\/notification-client$/,
     replacement: path.resolve(import.meta.dirname, './packages/notification-client/src/index.ts'),
+  },
+  {
+    find: /^@memoflow\/setting-contracts$/,
+    replacement: path.resolve(import.meta.dirname, './packages/setting-contracts/src/index.ts'),
+  },
+  {
+    find: /^@memoflow\/setting-client$/,
+    replacement: path.resolve(import.meta.dirname, './packages/setting-client/src/index.ts'),
   },
   {
     find: /^@memoflow\/notification-ui\/host$/,
@@ -408,8 +424,43 @@ export const domainResolveAliases = [
     ),
   },
   {
+    find: /^@memoflow\/setting-ui\/host$/,
+    replacement: path.resolve(import.meta.dirname, './packages/setting-ui/src/setting-ui-host.ts'),
+  },
+  {
+    find: /^@memoflow\/setting-ui$/,
+    replacement: path.resolve(import.meta.dirname, './packages/setting-ui/src/index.ts'),
+  },
+  {
     find: /^@memoflow\/notification-ui$/,
     replacement: path.resolve(import.meta.dirname, './packages/notification-ui/src/index.ts'),
+  },
+  {
+    find: /^@memoflow\/task-ui\/host$/,
+    replacement: path.resolve(import.meta.dirname, './packages/task-ui/src/task-ui-host.ts'),
+  },
+  {
+    find: /^@memoflow\/task-ui\/(.+)$/,
+    replacement: path.resolve(import.meta.dirname, './packages/task-ui/src/$1'),
+  },
+  {
+    find: /^@memoflow\/task-ui$/,
+    replacement: path.resolve(import.meta.dirname, './packages/task-ui/src/index.ts'),
+  },
+  {
+    find: /^@memoflow\/repository-ui\/host$/,
+    replacement: path.resolve(
+      import.meta.dirname,
+      './packages/repository-ui/src/repository-ui-host.ts',
+    ),
+  },
+  {
+    find: /^@memoflow\/repository-ui\/(.+)$/,
+    replacement: path.resolve(import.meta.dirname, './packages/repository-ui/src/$1'),
+  },
+  {
+    find: /^@memoflow\/repository-ui$/,
+    replacement: path.resolve(import.meta.dirname, './packages/repository-ui/src/index.ts'),
   },
   {
     find: /^@memoflow\/operations-contracts\/(.+)/,
@@ -447,6 +498,34 @@ export const domainResolveAliases = [
     ),
   },
   {
+    find: /^@memoflow\/ai-contracts\/(.+)/,
+    replacement: path.resolve(import.meta.dirname, './packages/ai-contracts/src/$1'),
+  },
+  {
+    find: /^@memoflow\/ai-contracts$/,
+    replacement: path.resolve(import.meta.dirname, './packages/ai-contracts/src/index.ts'),
+  },
+  {
+    find: /^@memoflow\/ai-ui\/host$/,
+    replacement: path.resolve(import.meta.dirname, './packages/ai-ui/src/ai-ui-host.ts'),
+  },
+  {
+    find: /^@memoflow\/ai-client\/(.+)$/,
+    replacement: path.resolve(import.meta.dirname, './packages/ai-client/src/$1'),
+  },
+  {
+    find: /^@memoflow\/ai-client$/,
+    replacement: path.resolve(import.meta.dirname, './packages/ai-client/src/index.ts'),
+  },
+  {
+    find: /^@memoflow\/ai-ui\/(.+)$/,
+    replacement: path.resolve(import.meta.dirname, './packages/ai-ui/src/$1'),
+  },
+  {
+    find: /^@memoflow\/ai-ui$/,
+    replacement: path.resolve(import.meta.dirname, './packages/ai-ui/src/index.ts'),
+  },
+  {
     find: /^@memoflow\/goal-contracts\/(.+)/,
     replacement: path.resolve(import.meta.dirname, './packages/goal-contracts/src/$1'),
   },
@@ -459,12 +538,24 @@ export const domainResolveAliases = [
     replacement: path.resolve(import.meta.dirname, './packages/goal-ui/src/composables/useGoal.ts'),
   },
   {
+    find: /^@memoflow\/goal-ui\/(.+)$/,
+    replacement: path.resolve(import.meta.dirname, './packages/goal-ui/src/$1'),
+  },
+  {
     find: /^@memoflow\/goal-ui$/,
     replacement: path.resolve(import.meta.dirname, './packages/goal-ui/src/index.ts'),
   },
   {
     find: '@memoflow/goal-contracts',
     replacement: path.resolve(import.meta.dirname, './packages/goal-contracts/src/index.ts'),
+  },
+  {
+    find: /^@memoflow\/task-contracts\/(.+)/,
+    replacement: path.resolve(import.meta.dirname, './packages/task-contracts/src/$1'),
+  },
+  {
+    find: '@memoflow/task-contracts',
+    replacement: path.resolve(import.meta.dirname, './packages/task-contracts/src/index.ts'),
   },
   {
     find: /^@memoflow\/schedule-contracts\/(.+)/,
@@ -524,6 +615,18 @@ export const domainResolveAliases = [
       import.meta.dirname,
       './packages/schedule-orchestration/src/index.ts',
     ),
+  },
+  {
+    find: /^@memoflow\/cloud-auth-contracts\/(.+)$/,
+    replacement: path.resolve(import.meta.dirname, './packages/cloud-auth-contracts/src/$1'),
+  },
+  {
+    find: /^@memoflow\/agent-gateway$/,
+    replacement: path.resolve(import.meta.dirname, './packages/agent-gateway/src/index.ts'),
+  },
+  {
+    find: /^@memoflow\/agent-gateway\/server$/,
+    replacement: path.resolve(import.meta.dirname, './packages/agent-gateway/src/server/index.ts'),
   },
   {
     find: /^@memoflow\/cloud-auth\/(.+)/,

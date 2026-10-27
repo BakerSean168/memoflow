@@ -9,7 +9,7 @@
  */
 
 import type { TaskPlan } from '../aggregates';
-import type { ListTaskPlanFilters, TaskPlanStatus } from '@memoflow/contracts/task';
+import type { ListTaskPlanFilters, TaskPlanStatus } from '@memoflow/task-contracts';
 import type { LabelClientDTO } from '@memoflow/label-contracts';
 
 export class TaskLabelOwnershipError extends Error {

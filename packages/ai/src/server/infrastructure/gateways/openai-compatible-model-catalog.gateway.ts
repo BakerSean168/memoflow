@@ -1,4 +1,4 @@
-import type { AIModelInfo } from '@memoflow/contracts/ai';
+import type { AIModelInfo } from '@memoflow/ai-contracts';
 import { createLogger } from '@memoflow/utils/logger';
 import { AIExecutionError } from '../../../shared/ai-execution-error';
 import type { ProviderFetch } from '../security/provider-safe-fetch';

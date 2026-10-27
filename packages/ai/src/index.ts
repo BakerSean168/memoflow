@@ -3,7 +3,7 @@
  *
  * AI module runtime root.
  *
- * Public AI contracts are centralized in `@memoflow/contracts/ai`.
+ * Public AI contracts are centralized in `@memoflow/ai-contracts`.
  * Root exports are limited to the canonical server composition roots:
  * ingredient factories, set types, module factory, runtime contribution
  * factories and port types. Client / API / Electron seams use dedicated

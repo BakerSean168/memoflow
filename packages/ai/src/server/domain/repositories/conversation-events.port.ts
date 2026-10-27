@@ -1,4 +1,4 @@
-import type { AIConversationClientDTO } from '@memoflow/contracts/ai';
+import type { AIConversationClientDTO } from '@memoflow/ai-contracts';
 
 export interface ConversationChange {
   eventId: string;

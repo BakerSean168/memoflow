@@ -35,6 +35,7 @@ COPY packages/account/package.json ./packages/account/package.json
 COPY packages/account-contracts/package.json ./packages/account-contracts/package.json
 COPY packages/ai/package.json ./packages/ai/package.json
 COPY packages/cloud-auth/package.json ./packages/cloud-auth/package.json
+COPY packages/cloud-auth-contracts/package.json ./packages/cloud-auth-contracts/package.json
 COPY packages/agent-gateway/package.json ./packages/agent-gateway/package.json
 COPY packages/contracts/package.json ./packages/contracts/package.json
 COPY packages/data-portability/package.json ./packages/data-portability/package.json
@@ -51,6 +52,7 @@ COPY packages/label/package.json ./packages/label/package.json
 COPY packages/label-contracts/package.json ./packages/label-contracts/package.json
 COPY packages/data-portability-contracts/package.json ./packages/data-portability-contracts/package.json
 COPY packages/goal-contracts/package.json ./packages/goal-contracts/package.json
+COPY packages/ai-contracts/package.json ./packages/ai-contracts/package.json
 COPY packages/workspace-contracts/package.json ./packages/workspace-contracts/package.json
 COPY packages/relation/package.json ./packages/relation/package.json
 COPY packages/relation-contracts/package.json ./packages/relation-contracts/package.json
@@ -63,14 +65,17 @@ COPY packages/powersync-schema/package.json ./packages/powersync-schema/package.
 COPY packages/routine/package.json ./packages/routine/package.json
 COPY packages/routine-contracts/package.json ./packages/routine-contracts/package.json
 COPY packages/repository/package.json ./packages/repository/package.json
+COPY packages/repository-contracts/package.json ./packages/repository-contracts/package.json
 COPY packages/schedule/package.json ./packages/schedule/package.json
 COPY packages/schedule-client/package.json ./packages/schedule-client/package.json
 COPY packages/schedule-contracts/package.json ./packages/schedule-contracts/package.json
 COPY packages/scheduler/package.json ./packages/scheduler/package.json
 COPY packages/schedule-orchestration/package.json ./packages/schedule-orchestration/package.json
 COPY packages/setting/package.json ./packages/setting/package.json
+COPY packages/setting-contracts/package.json ./packages/setting-contracts/package.json
 COPY packages/shared-primitives/package.json ./packages/shared-primitives/package.json
 COPY packages/task/package.json ./packages/task/package.json
+COPY packages/task-contracts/package.json ./packages/task-contracts/package.json
 COPY packages/test-utils/package.json ./packages/test-utils/package.json
 COPY packages/time/package.json ./packages/time/package.json
 COPY packages/transport-contracts/package.json ./packages/transport-contracts/package.json
@@ -91,6 +96,7 @@ COPY packages/account ./packages/account
 COPY packages/account-contracts ./packages/account-contracts
 COPY packages/ai ./packages/ai
 COPY packages/cloud-auth ./packages/cloud-auth
+COPY packages/cloud-auth-contracts ./packages/cloud-auth-contracts
 COPY packages/agent-gateway ./packages/agent-gateway
 COPY packages/contracts ./packages/contracts
 COPY packages/data-portability ./packages/data-portability
@@ -106,6 +112,7 @@ COPY packages/label ./packages/label
 COPY packages/label-contracts ./packages/label-contracts
 COPY packages/data-portability-contracts ./packages/data-portability-contracts
 COPY packages/goal-contracts ./packages/goal-contracts
+COPY packages/ai-contracts ./packages/ai-contracts
 COPY packages/workspace-contracts ./packages/workspace-contracts
 COPY packages/relation ./packages/relation
 COPY packages/relation-contracts ./packages/relation-contracts
@@ -118,14 +125,17 @@ COPY packages/powersync-schema ./packages/powersync-schema
 COPY packages/routine ./packages/routine
 COPY packages/routine-contracts ./packages/routine-contracts
 COPY packages/repository ./packages/repository
+COPY packages/repository-contracts ./packages/repository-contracts
 COPY packages/schedule ./packages/schedule
 COPY packages/schedule-client ./packages/schedule-client
 COPY packages/schedule-contracts ./packages/schedule-contracts
 COPY packages/scheduler ./packages/scheduler
 COPY packages/schedule-orchestration ./packages/schedule-orchestration
 COPY packages/setting ./packages/setting
+COPY packages/setting-contracts ./packages/setting-contracts
 COPY packages/shared-primitives ./packages/shared-primitives
 COPY packages/task ./packages/task
+COPY packages/task-contracts ./packages/task-contracts
 COPY packages/test-utils ./packages/test-utils
 COPY packages/time ./packages/time
 COPY packages/transport-contracts ./packages/transport-contracts

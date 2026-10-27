@@ -1,9 +1,9 @@
-import { LocalAgentStatusSchema } from '@memoflow/contracts/ai';
+import { LocalAgentStatusSchema } from '@memoflow/ai-contracts';
 import { expect, it, vi } from 'vitest';
 import { mkdtemp, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import type { LocalAgentConnection } from '@memoflow/contracts/ai';
+import type { LocalAgentConnection } from '@memoflow/ai-contracts';
 import { PiDriver } from './pi-driver';
 import { NativeRpcTransport } from './native-rpc-transport';
 import { LocalAgentError } from '../../shared/local-agent-error';

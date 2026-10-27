@@ -3,14 +3,14 @@ import type {
   PreferenceNamespacePatch,
   PreferenceNamespacePayload,
   PreferenceNamespaceResponse,
-} from '@memoflow/contracts/setting';
+} from '@memoflow/setting-contracts';
 import {
   PreferenceNamespaceResponseSchema,
   createDefaultPreferenceNamespace,
   parsePreferenceNamespace,
   parsePreferenceNamespacePatch,
   parsePreferenceNamespacePayload,
-} from '@memoflow/contracts/setting';
+} from '@memoflow/setting-contracts';
 
 export interface UserPreferenceDocumentState<N extends PreferenceNamespace = PreferenceNamespace> {
   id: string;

@@ -12,7 +12,7 @@ import type {
   TaskOccurrenceClientDTO,
   TaskOccurrenceStatus,
   TaskPlanClientDTO,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import type { CalendarEventProjection } from '@memoflow/schedule-contracts';
 import { asInstant } from '@memoflow/time';
 import {

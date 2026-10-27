@@ -8,7 +8,7 @@ import {
   TASK_TEST_OCCURRENCE_PROJECTION,
   TASK_TEST_TIME_CONTEXT,
 } from '../../../../../testing';
-import { TaskPlanStatus } from '@memoflow/contracts/task';
+import { TaskPlanStatus } from '@memoflow/task-contracts';
 import { InvalidTaskPlanStateError } from '../../../../domain/value-objects/task-errors';
 import { GenerateTaskOccurrencesUseCase } from '../generate-task-occurrences.use-case';
 import { MarkTaskOccurrenceMissedUseCase } from '../mark-task-occurrence-missed.use-case';

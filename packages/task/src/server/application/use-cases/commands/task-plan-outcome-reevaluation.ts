@@ -1,5 +1,5 @@
-import { TaskPlanOutcome, TaskPlanStatus } from '@memoflow/contracts/task';
-import type { TaskOccurrenceId } from '@memoflow/contracts/primitives';
+import { TaskPlanOutcome, TaskPlanStatus } from '@memoflow/task-contracts';
+import type { TaskOccurrenceId } from '@memoflow/task-contracts';
 import { TaskPlanOutcomeEvaluator } from '../../../domain/services/task-plan-outcome-evaluator';
 import type { TaskWriteRepositories } from './task-write-support';
 import type { TimeContext } from '@memoflow/time';

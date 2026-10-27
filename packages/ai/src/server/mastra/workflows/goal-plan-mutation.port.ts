@@ -2,13 +2,13 @@ import type {
   GoalPlanDraft,
   GoalPlanDraftRef,
   GoalPlanExecutionReceipt,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { GoalStatus, CreateGoalReq } from '@memoflow/goal-contracts';
 import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
-import type { KnowledgeDocumentRef } from '@memoflow/contracts/repository';
+import type { KnowledgeDocumentRef } from '@memoflow/repository-contracts';
 import type { Result } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
-import type { CreateTaskPlanReq } from '@memoflow/contracts/task';
+import type { CreateTaskPlanReq } from '@memoflow/task-contracts';
 
 export type GoalMutationResult = {
   goalId: string;

@@ -1,5 +1,5 @@
 import { presentErrorMessage } from '@memoflow/http-client';
-import type { DeviceKeymap } from '@memoflow/contracts/shared';
+import type { DeviceKeymap } from '@memoflow/desktop-contracts';
 export interface KeymapStorage {
   read(): Promise<unknown>;
   write(keymap: DeviceKeymap): Promise<unknown>;

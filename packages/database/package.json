@@ -1,7 +1,7 @@
 {
   "name": "@memoflow/database",
   "version": "0.0.1",
-  "description": "MemoFlow Shared Database Infrastructure — Prisma Schema, Client, and Connection Management",
+  "description": "MemoFlow Shared Database Infrastructure \u2014 Prisma Schema, Client, and Connection Management",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

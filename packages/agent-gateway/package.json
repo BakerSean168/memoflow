@@ -19,9 +19,14 @@
   "dependencies": {
     "@memoflow/contracts": "workspace:*",
     "@memoflow/goal-contracts": "workspace:*",
+    "@memoflow/task-contracts": "workspace:*",
     "@modelcontextprotocol/node": "2.1.1",
     "@modelcontextprotocol/server": "2.3.1",
     "zod": "4.6.5",
-    "@memoflow/routine-contracts": "workspace:*"
-  }
+    "@memoflow/routine-contracts": "workspace:*",
+    "@memoflow/transport-contracts": "workspace:*",
+    "@memoflow/ai-contracts": "workspace:*"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts"
 }

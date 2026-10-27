@@ -2,12 +2,12 @@ import { describe, expect, it, vi } from 'vitest';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { LocalAgentStatusSchema } from '@memoflow/contracts/ai';
+import { LocalAgentStatusSchema } from '@memoflow/ai-contracts';
 import {
   createNativeAgentFlowFixture,
   type NativeProbeFailure,
 } from '../../testing/native-agent-flow';
-import type { LocalAgentConnection } from '@memoflow/contracts/ai';
+import type { LocalAgentConnection } from '@memoflow/ai-contracts';
 import { NativeRpcTransport } from './native-rpc-transport';
 import { CodexDriver } from './codex-driver';
 

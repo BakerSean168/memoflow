@@ -12,7 +12,7 @@ import type {
 } from '../../../domain/repositories/i-task-occurrence-repository';
 import { TaskOccurrenceStatus } from '../../../domain/value-objects';
 import type { TaskOccurrence } from '../../../domain/aggregates/task-occurrence';
-import type { GetTaskPlanRes } from '@memoflow/contracts/task';
+import type { GetTaskPlanRes } from '@memoflow/task-contracts';
 import type { Ymd } from '@memoflow/contracts/primitives';
 import type { Result } from '@memoflow/contracts/result';
 import { ok } from '@memoflow/contracts/result';

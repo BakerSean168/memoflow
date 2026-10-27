@@ -5,7 +5,7 @@ import {
   getPrisma,
   seedAccount,
 } from '@memoflow/test-utils/setup/integration-helpers';
-import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
+import { createDefaultUserPreferenceProfile } from '@memoflow/setting-contracts';
 import { composeBusinessDataSummary } from './compose-business-data-summary';
 
 beforeAll(async () => {

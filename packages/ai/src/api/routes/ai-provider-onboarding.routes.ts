@@ -11,7 +11,7 @@ import {
   ProbeAIProviderConnectionResSchema,
   TestAIProviderOnboardingModelSchema,
   TestAIProviderOnboardingModelResSchema,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { AIProviderConfigController } from '../../server/transport/ai-provider-config.controller';
 
 interface PlatformMiddleware {

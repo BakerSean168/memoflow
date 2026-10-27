@@ -1,4 +1,4 @@
-import type { AIEvaluationReport } from '@memoflow/contracts/ai';
+import type { AIEvaluationReport } from '@memoflow/ai-contracts';
 
 export type AIEvalCaseType = 'open_chat' | 'goal_planning' | 'knowledge_answer';
 export type AIEvalEvidenceSource = 'recorded_replay' | 'live';

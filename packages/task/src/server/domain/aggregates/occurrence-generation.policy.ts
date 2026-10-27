@@ -6,7 +6,7 @@ import {
   TaskPlanScheduleKind,
   type ChecklistItemDefinitionDTO,
   type TaskPlanSchedule,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import { TaskPlanStatus } from '../../domain/value-objects/task-plan-status';
 import { InvalidDateRangeError, InvalidTaskPlanStateError } from '../value-objects/task-errors';
 import { TaskOccurrenceScheduleSnapshot } from '../value-objects';

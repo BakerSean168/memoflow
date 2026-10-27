@@ -39,10 +39,10 @@ import type {
   GetGoalWorkspaceReq,
   GoalWorkspaceReadModel,
   GoalWorkspaceTaskPageRequest,
-  GoalWorkspaceTaskPage,
   GoalWorkspacePageRequest,
   GoalWorkspaceKnowledgePage,
 } from '@memoflow/workspace-contracts';
+import type { TaskGoalContextPage } from '@memoflow/task-contracts';
 
 export interface IGoalApiClient {
   // Goal CRUD
@@ -71,7 +71,7 @@ export interface IGoalApiClient {
   getGoalWorkspaceTasks(
     goalId: string,
     request?: GoalWorkspaceTaskPageRequest,
-  ): Promise<Result<GoalWorkspaceTaskPage>>;
+  ): Promise<Result<TaskGoalContextPage>>;
   getGoalWorkspaceKnowledge(
     goalId: string,
     request?: GoalWorkspacePageRequest,

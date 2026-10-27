@@ -3,7 +3,7 @@ import type {
   AIModelCapabilityMap,
   AIModelCapabilitySnapshot,
   AIModelCatalogSnapshot,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type {
   IAIModelCapabilitySnapshotPort,
   IAIModelCatalogPort,

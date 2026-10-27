@@ -1,12 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
+import { createDefaultUserPreferenceProfile } from '@memoflow/setting-contracts';
 import {
   getProductTime,
   setProductTimePreferences,
 } from '@schedule-ui-test-host/shared/utils/product-time';
 import { taskOccurrencesToEvents, toLocalDateKey } from './useCalendarView';
-import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/contracts/task';
-import type { TaskPlanId, TaskOccurrenceId, IdentityId } from '@memoflow/contracts/primitives';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
+import type { IdentityId } from '@memoflow/contracts/primitives';
+import type { TaskOccurrenceId, TaskPlanId } from '@memoflow/task-contracts';
 
 function makeTemplate(overrides: Partial<TaskPlanClientDTO> = {}): TaskPlanClientDTO {
   const now = Date.now();

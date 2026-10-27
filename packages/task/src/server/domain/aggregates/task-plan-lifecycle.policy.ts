@@ -1,6 +1,6 @@
 /** Canonical Task plan lifecycle/outcome transitions (ADR-057). */
-import type { TaskEventMap, TaskPlanOutcomeValue } from '@memoflow/contracts/task';
-import { TaskPlanOutcome } from '@memoflow/contracts/task';
+import type { TaskEventMap, TaskPlanOutcomeValue } from '@memoflow/task-contracts';
+import { TaskPlanOutcome } from '@memoflow/task-contracts';
 import { TaskPlanStatus } from '../../domain/value-objects/task-plan-status';
 import { InvalidTaskPlanStateError } from '../value-objects/task-errors';
 import type { TaskPlanProps } from './task-plan.state';
@@ -10,7 +10,7 @@ export interface LifecycleContext {
   props: TaskPlanProps;
   addHistory(action: string, changes?: unknown): void;
   publishDomainEvent<T>(eventName: string, payload: T): void;
-  toServerDTO(): import('@memoflow/contracts/task').TaskPlanServerDTO;
+  toServerDTO(): import('@memoflow/task-contracts').TaskPlanServerDTO;
 }
 
 function assertNotDeleted(ctx: LifecycleContext, action: string): void {

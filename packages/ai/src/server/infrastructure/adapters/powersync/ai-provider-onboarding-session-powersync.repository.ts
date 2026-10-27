@@ -1,5 +1,5 @@
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
-import type { AIModelInfo, AIProviderCatalogId } from '@memoflow/contracts/ai';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
+import type { AIModelInfo, AIProviderCatalogId } from '@memoflow/ai-contracts';
 import type {
   AIProviderOnboardingCredentialStatus,
   AIProviderOnboardingDiscoveryStatus,

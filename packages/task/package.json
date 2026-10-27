@@ -1,7 +1,7 @@
 {
   "name": "@memoflow/task",
   "version": "0.0.1",
-  "description": "任务模块 - 任务模板、实例与依赖管理",
+  "description": "\u4efb\u52a1\u6a21\u5757 - \u4efb\u52a1\u6a21\u677f\u3001\u5b9e\u4f8b\u4e0e\u4f9d\u8d56\u7ba1\u7406",
   "type": "module",
   "files": [
     "dist"
@@ -21,10 +21,6 @@
     "./api": {
       "types": "./dist/api/index.d.ts",
       "import": "./dist/api/index.js"
-    },
-    "./client": {
-      "types": "./dist/client/index.d.ts",
-      "import": "./dist/client/index.js"
     },
     "./schedule-execution": {
       "types": "./dist/schedule-execution/index.d.ts",
@@ -51,8 +47,6 @@
     "@memoflow/domain-shared": "workspace:*",
     "@memoflow/goal-contracts": "workspace:*",
     "@memoflow/host-runtime": "workspace:*",
-    "@memoflow/http-client": "workspace:*",
-    "@memoflow/ipc-client": "workspace:*",
     "@memoflow/label-contracts": "workspace:*",
     "@memoflow/notification-contracts": "workspace:*",
     "@memoflow/patterns": "workspace:*",
@@ -60,8 +54,10 @@
     "@memoflow/reliable-messaging-contracts": "workspace:*",
     "@memoflow/schedule-contracts": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",
+    "@memoflow/task-contracts": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/utils": "workspace:*",
+    "@memoflow/workspace-contracts": "workspace:*",
     "date-fns": "^4.4.0",
     "express": "^5.2.1",
     "zod": "^4.6.5"

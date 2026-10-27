@@ -6,7 +6,7 @@
  */
 
 import { http, HttpResponse } from 'msw';
-import { createMockAccount } from '@memoflow/contracts/mocks';
+import { createMockAccount } from '@memoflow/account-contracts/test-support/account.mock';
 
 // 1. 读取环境变量中的基础路径 (与你的 http client 保持一致)
 // 如果获取不到，默认回退到 '/api/v1' 以防万一

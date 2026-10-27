@@ -45,17 +45,14 @@ vi.mock('@memoflow/goal-ui', () => ({
   useGoalStore: () => ({ setInitialized: vi.fn() }),
 }));
 
-vi.mock('@memoflow/app-vue/modules/task', () => ({
+vi.mock('@memoflow/task-ui', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@memoflow/task-ui')>()),
   useTaskStore: () => ({ setInitialized: vi.fn() }),
 }));
 
 vi.mock('@memoflow/schedule-ui', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@memoflow/schedule-ui')>()),
   useScheduleStore: () => ({ setInitialized: vi.fn() }),
-}));
-
-vi.mock('@memoflow/app-vue/modules/setting', () => ({
-  useUserSettingStore: () => ({ setInitialized: vi.fn() }),
 }));
 
 function emitDbChanged(tables: string[]): void {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ConversationStatus } from '@memoflow/contracts/ai';
+import { ConversationStatus } from '@memoflow/ai-contracts';
 import { AIConversation } from '../ai-conversation';
 
 describe('AIConversation product shell', () => {

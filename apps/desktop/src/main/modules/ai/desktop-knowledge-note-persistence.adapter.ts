@@ -1,5 +1,5 @@
-import type { KnowledgeNotePersistedRef } from '@memoflow/contracts/ai';
-import type { LocalVaultNoteDTO } from '@memoflow/contracts/repository';
+import type { KnowledgeNotePersistedRef } from '@memoflow/ai-contracts';
+import type { LocalVaultNoteDTO } from '@memoflow/repository-contracts';
 import type {
   CreateKnowledgeNotePersistenceInput,
   CreateKnowledgeNotePersistenceResult,

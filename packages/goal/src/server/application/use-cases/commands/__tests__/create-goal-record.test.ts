@@ -1,5 +1,5 @@
 import { GoalTaskProgressHandler } from '../../../event-handlers/task-goal-progress.handler';
-import type { TaskGoalProgressOutboxEventV2 } from '@memoflow/contracts/task';
+import type { TaskGoalProgressOutboxEventV2 } from '@memoflow/task-contracts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';

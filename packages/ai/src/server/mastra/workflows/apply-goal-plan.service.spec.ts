@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { GoalPlanDraftSchema, GoalPlanExecutionReceiptSchema } from '@memoflow/contracts/ai';
+import { GoalPlanDraftSchema, GoalPlanExecutionReceiptSchema } from '@memoflow/ai-contracts';
 import { error, ok } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { ApplyGoalPlanService } from './apply-goal-plan.service';

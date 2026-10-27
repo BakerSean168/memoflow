@@ -767,14 +767,14 @@
   {
     "key": "goal.dialog.feasibilityAnalysis",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/GoalDialog.vue"
     ]
   },
   {
     "key": "goal.dialog.feasibilityPlaceholder",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/GoalDialog.vue"
     ]
   },
@@ -793,14 +793,14 @@
   {
     "key": "goal.dialog.importance",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/GoalDialog.vue"
     ]
   },
   {
     "key": "goal.dialog.importanceImportant",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/GoalDialog.vue",
       "packages/goal-ui/src/views/GoalDetailView.vue"
     ]
@@ -808,7 +808,7 @@
   {
     "key": "goal.dialog.importanceMinor",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/GoalDialog.vue",
       "packages/goal-ui/src/views/GoalDetailView.vue"
     ]
@@ -816,7 +816,7 @@
   {
     "key": "goal.dialog.importanceModerate",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/GoalDialog.vue",
       "packages/goal-ui/src/views/GoalDetailView.vue"
     ]
@@ -824,14 +824,14 @@
   {
     "key": "goal.dialog.importancePlaceholder",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/GoalDialog.vue"
     ]
   },
   {
     "key": "goal.dialog.importanceTrivial",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/GoalDialog.vue",
       "packages/goal-ui/src/views/GoalDetailView.vue"
     ]
@@ -839,7 +839,7 @@
   {
     "key": "goal.dialog.importanceVital",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/GoalDialog.vue",
       "packages/goal-ui/src/views/GoalDetailView.vue"
     ]
@@ -875,14 +875,14 @@
   {
     "key": "goal.dialog.motivation",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/GoalDialog.vue"
     ]
   },
   {
     "key": "goal.dialog.motivationPlaceholder",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/GoalDialog.vue"
     ]
   },
@@ -949,35 +949,35 @@
   {
     "key": "goal.dialog.startDate",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/GoalDialog.vue"
     ]
   },
   {
     "key": "goal.dialog.tags",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/GoalDialog.vue"
     ]
   },
   {
     "key": "goal.dialog.tagsHint",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/GoalDialog.vue"
     ]
   },
   {
     "key": "goal.dialog.tagsPlaceholder",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/GoalDialog.vue"
     ]
   },
   {
     "key": "goal.dialog.targetDate",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/GoalDialog.vue"
     ]
   },
@@ -1413,35 +1413,35 @@
   {
     "key": "goal.krDialog.calcAverage",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
     ]
   },
   {
     "key": "goal.krDialog.calcCumulative",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
     ]
   },
   {
     "key": "goal.krDialog.calcLatest",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
     ]
   },
   {
     "key": "goal.krDialog.calcMax",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
     ]
   },
   {
     "key": "goal.krDialog.calcMethod",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
     ]
   },
@@ -1452,7 +1452,7 @@
   {
     "key": "goal.krDialog.calcMin",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
     ]
   },
@@ -1471,7 +1471,7 @@
   {
     "key": "goal.krDialog.currentValue",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
     ]
   },
@@ -1482,7 +1482,7 @@
   {
     "key": "goal.krDialog.descPlaceholder",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
     ]
   },
@@ -1505,7 +1505,7 @@
   {
     "key": "goal.krDialog.namePlaceholder",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
     ]
   },
@@ -1520,21 +1520,21 @@
   {
     "key": "goal.krDialog.selectCalcMethod",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
     ]
   },
   {
     "key": "goal.krDialog.selectValueType",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
     ]
   },
   {
     "key": "goal.krDialog.startValue",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
     ]
   },
@@ -1545,7 +1545,7 @@
   {
     "key": "goal.krDialog.targetValue",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
     ]
   },
@@ -1564,21 +1564,21 @@
   {
     "key": "goal.krDialog.valueType",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
     ]
   },
   {
     "key": "goal.krDialog.valueTypeAbsolute",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
     ]
   },
   {
     "key": "goal.krDialog.valueTypeBinary",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
     ]
   },
@@ -1589,21 +1589,21 @@
   {
     "key": "goal.krDialog.valueTypeIncremental",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
     ]
   },
   {
     "key": "goal.krDialog.valueTypePercentage",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
     ]
   },
   {
     "key": "goal.krDialog.weight",
     "files": [
-      "packages/app-vue/src/modules/ai/components/AIGoalDraftEditor.vue",
+      "packages/ai-ui/src/components/AIGoalDraftEditor.vue",
       "packages/goal-ui/src/components/dialogs/KeyResultDialog.vue"
     ]
   },

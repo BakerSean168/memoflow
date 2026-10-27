@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { TaskPlanScheduleKind, TaskRecurrenceEndKind } from '@memoflow/contracts/task';
+import { TaskPlanScheduleKind, TaskRecurrenceEndKind } from '@memoflow/task-contracts';
 import { TaskPlanStatus } from '../../domain/value-objects/task-plan-status';
 import {
   aLoadedTaskPlan,

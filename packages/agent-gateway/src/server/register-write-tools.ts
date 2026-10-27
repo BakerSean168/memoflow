@@ -2,7 +2,7 @@ import {
   GatewayRoutineReceiptSchema,
   GatewayGoalReceiptSchema,
   GatewayTaskReceiptSchema,
-} from '@memoflow/contracts/agent-gateway';
+} from '../contracts';
 import type { McpServer } from '@modelcontextprotocol/server';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { writeToolDescriptors } from '../write-tool-descriptors';

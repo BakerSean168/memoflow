@@ -8,7 +8,7 @@ import {
   AgentRegistrySnapshotSchema,
   LocalAgentConnectionSchema,
   type LocalAgentConnection,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { createIsolatedNativeAgentEnvironment } from './packaged-runtime/isolated-native-env';
 
 type Bridge = {

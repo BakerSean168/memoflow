@@ -1,7 +1,7 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
 import { createTypedEventPublisher, eventBus } from '@memoflow/utils/domain';
-import type { TaskEventMap, TaskGoalBindingDTO } from '@memoflow/contracts/task';
+import type { TaskEventMap, TaskGoalBindingDTO } from '@memoflow/task-contracts';
 import { ok } from '@memoflow/contracts/result';
 import type { IGoalRepository } from '../../../domain/repositories/i-goal-repository';
 import type { IGoalRecordRepository } from '../../../domain/repositories/i-goal-record-repository';

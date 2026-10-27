@@ -19,25 +19,16 @@ export default createTsupConfig({
     // 根入口（精简版，只导出核心类型和常用枚举）
     'src/index.ts',
     // 模块入口（完整模块导出）
-    'src/modules/task/index.ts',
-    'src/modules/agent-gateway/index.ts',
-    'src/modules/repository/index.ts',
-    'src/modules/setting/index.ts',
     'src/modules/notification/index.ts',
-    'src/modules/ai/index.ts',
     // 其他模块入口
     'src/result/index.ts',
     'src/shared/index.ts',
     'src/electron/index.ts',
-    'src/cloud-auth.ts',
 
     // 原语类型入口
     'src/primitives/index.ts',
     'src/primitives/command.ts',
     'src/primitives/runtime.ts',
-
-    // Mock 数据生成器（仅用于开发/测试）
-    'src/mocks/index.ts',
   ],
   extraOptions: {
     dts: false,

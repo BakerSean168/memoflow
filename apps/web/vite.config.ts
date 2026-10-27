@@ -55,6 +55,9 @@ const webBundledDevWorkspaceEntries = [
 
 const webDevWorkspaceEntries = [
   ['@memoflow/account-client', 'packages/account-client/src/index.ts'],
+  ['@memoflow/cloud-auth-contracts', 'packages/cloud-auth-contracts/src/index.ts'],
+  ['@memoflow/agent-gateway/server', 'packages/agent-gateway/src/server/index.ts'],
+  ['@memoflow/agent-gateway', 'packages/agent-gateway/src/index.ts'],
   ['@memoflow/cloud-auth', 'packages/cloud-auth/src/index.ts'],
   ['@memoflow/goal-client', 'packages/goal-client/src/index.ts'],
   ['@memoflow/goal-core/ids', 'packages/goal-core/src/ids.ts'],
@@ -112,10 +115,13 @@ const webDevWorkspaceEntries = [
     'packages/goal-contracts/src/test-support/goal.mock.ts',
   ],
   ['@memoflow/goal-contracts', 'packages/goal-contracts/src/index.ts'],
+  ['@memoflow/ai-contracts', 'packages/ai-contracts/src/index.ts'],
   ['@memoflow/goal-ui/composables/useGoal', 'packages/goal-ui/src/composables/useGoal.ts'],
   ['@memoflow/goal-ui/host', 'packages/goal-ui/src/goal-ui-host.ts'],
   ['@memoflow/notification-ui/host', 'packages/notification-ui/src/notification-ui-host.ts'],
   ['@memoflow/notification-ui', 'packages/notification-ui/src/index.ts'],
+  ['@memoflow/setting-ui/host', 'packages/setting-ui/src/setting-ui-host.ts'],
+  ['@memoflow/setting-ui', 'packages/setting-ui/src/index.ts'],
   ['@memoflow/goal-ui', 'packages/goal-ui/src/index.ts'],
   ['@memoflow/workspace-contracts', 'packages/workspace-contracts/src/index.ts'],
   ['@memoflow/desktop-contracts/auth-context', 'packages/desktop-contracts/src/auth-context.ts'],
@@ -143,10 +149,14 @@ const webDevWorkspaceEntries = [
   ['@memoflow/host-runtime', 'packages/host-runtime/src/index.ts'],
   ['@memoflow/schedule-client', 'packages/schedule-client/src/index.ts'],
   ['@memoflow/notification-client', 'packages/notification-client/src/index.ts'],
+  ['@memoflow/setting-client', 'packages/setting-client/src/index.ts'],
   ['@memoflow/repository/client', 'packages/repository/src/client/index.ts'],
+  ['@memoflow/repository-client', 'packages/repository-client/src/index.ts'],
   ['@memoflow/routine-client', 'packages/routine-client/src/index.ts'],
-  ['@memoflow/task/client', 'packages/task/src/client/index.ts'],
-  ['@memoflow/ai/client', 'packages/ai/src/client/index.ts'],
+  ['@memoflow/task-client', 'packages/task-client/src/index.ts'],
+  ['@memoflow/task-ui/host', 'packages/task-ui/src/task-ui-host.ts'],
+  ['@memoflow/task-ui', 'packages/task-ui/src'],
+  ['@memoflow/ai-client', 'packages/ai-client/src/index.ts'],
 ] as const;
 
 /**

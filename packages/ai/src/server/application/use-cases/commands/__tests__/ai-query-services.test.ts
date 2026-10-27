@@ -6,8 +6,8 @@ import {
   type ExpandKnowledgeReq,
   type QueryAnalyticsReq,
   type QueryKnowledgeReq,
-} from '@memoflow/contracts/ai';
-import { KnowledgeDocumentRefSchema } from '@memoflow/contracts/repository';
+} from '@memoflow/ai-contracts';
+import { KnowledgeDocumentRefSchema } from '@memoflow/repository-contracts';
 
 import type { IAIProviderConfigRepository } from '../../../../domain/repositories/i-ai-provider-config-repository';
 import type {

@@ -35,7 +35,7 @@ import { bindGatewayWrites } from './modules/agent-gateway/write.port';
 import { composeAgentGatewayModule } from './modules/agent-gateway/module';
 import { bindAssistedWorkflow } from './modules/agent-gateway/assisted-workflow';
 import { AiAssistedWorkflowRepository } from '@memoflow/ai/agent-gateway';
-import { GatewayTaskReceiptSchema } from '@memoflow/contracts/agent-gateway';
+import { GatewayTaskReceiptSchema } from '@memoflow/agent-gateway';
 import { externalMutationReceiptId } from '@memoflow/database/transaction';
 import { createPilotAdmission } from './modules/agent-gateway/pilot-admission';
 import { createApiRedisClient } from './shared/infrastructure/redis/create-redis-client';
@@ -88,6 +88,8 @@ import { createSchedulePrismaRepositories } from '@memoflow/schedule';
 import { createSchedulerPrismaRepositories } from '@memoflow/scheduler';
 import { createScheduleOrchestrationModule } from '@memoflow/schedule-orchestration';
 import { createTaskReminderScheduledHandlerRegistration } from '@memoflow/task/schedule-execution';
+import { ok } from '@memoflow/contracts/result';
+import { toGoalReference, toKeyResultReference } from '@memoflow/goal-contracts';
 import { TaskWorkspaceQueryService } from '@memoflow/task';
 import { GetTaskDashboardUseCase } from '@memoflow/task/analytics';
 import { createTaskPrismaScheduleProjectionSource } from '@memoflow/task/schedule-projection';
@@ -434,7 +436,19 @@ async function bootstrap(): Promise<void> {
     taskPlanRepository: taskComposed.taskPlanRepository,
     taskOccurrenceRepository: taskComposed.taskOccurrenceRepository,
     userTimeContextPort: settingApiModule.userTimeContextPort,
-    goalReadPort: goalComposed.applicationPort,
+    goalReadPort: {
+      getGoalReference: async (goalId, keyResultId, identityId) => {
+        const goal = await goalComposed.applicationPort.getGoal(goalId, identityId, true);
+        if (!goal.ok) return goal;
+        const boundKeyResult = keyResultId
+          ? (goal.data.keyResults?.find((item) => String(item.id) === keyResultId) ?? null)
+          : null;
+        return ok({
+          goal: toGoalReference(goal.data),
+          keyResult: boundKeyResult ? toKeyResultReference(boundKeyResult) : null,
+        });
+      },
+    },
     knowledgeRelationReadPort: taskKnowledgeService,
     knowledgeContextReadPort: repositoryApiModule.knowledgeDocumentWorkspaceResolver,
   });

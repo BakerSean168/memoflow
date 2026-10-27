@@ -1,7 +1,7 @@
 {
   "name": "@memoflow/setting",
   "version": "0.0.1",
-  "description": "设置模块 - 用户与系统配置",
+  "description": "\u8bbe\u7f6e\u6a21\u5757 - \u7528\u6237\u4e0e\u7cfb\u7edf\u914d\u7f6e",
   "type": "module",
   "files": [
     "dist"
@@ -34,8 +34,7 @@
     "@memoflow/database": "workspace:*",
     "@memoflow/domain-shared": "workspace:*",
     "@memoflow/host-runtime": "workspace:*",
-    "@memoflow/http-client": "workspace:*",
-    "@memoflow/ipc-client": "workspace:*",
+    "@memoflow/setting-contracts": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/utils": "workspace:*",
     "date-fns": "^4.4.0",

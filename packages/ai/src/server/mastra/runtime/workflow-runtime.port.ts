@@ -4,7 +4,7 @@ import type {
   AIGoalSurfaceLeaseResponse,
   AIWorkflowRunView,
   AIWorkflowStartClientRequest,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { GoalWorkflowEventSource } from '../../application/ports/goal-workflow-events.port';
 
@@ -16,7 +16,7 @@ import type { GoalWorkflowEventSource } from '../../application/ports/goal-workf
  */
 export type ExternalTaskApply = (
   input: import('../workflows/task-plan-mutation.port').ApplyTaskPlanInput,
-) => Promise<import('@memoflow/contracts/ai').TaskPlanExecutionReceipt>;
+) => Promise<import('@memoflow/ai-contracts').TaskPlanExecutionReceipt>;
 
 export interface ExternalWorkflowInvocation {
   readonly connectionId: string;

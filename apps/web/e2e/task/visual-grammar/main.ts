@@ -8,18 +8,15 @@ import {
   createMockGoalMutationReceipt,
   createMockKeyResult,
 } from '@memoflow/goal-contracts/test-support/goal.mock';
-import type { UpdateTaskPlanReq, TaskPlanClientDTO } from '@memoflow/contracts/task';
+import { toGoalReference, toKeyResultReference } from '@memoflow/goal-contracts';
+import type { UpdateTaskPlanReq, TaskPlanClientDTO } from '@memoflow/task-contracts';
 import { GOAL_SERVICE_KEY, LABEL_SERVICE_KEY, TASK_SERVICE_KEY } from '@memoflow/app-vue/di/keys';
 import type { IGoalService, ILabelService, ITaskService } from '@memoflow/app-vue/di/types';
 import { productionLocaleMessages } from '@memoflow/app-vue/locales/production-messages';
 import { installServerStateRuntime } from '@memoflow/app-vue/platform/server-state';
-import TaskManagementView from '@memoflow/app-vue/modules/task/views/TaskManagementView.vue';
-import TaskDetailView from '@memoflow/app-vue/modules/task/views/TaskDetailView.vue';
-import TaskPlanDialog from '@memoflow/app-vue/modules/task/components/dialogs/TaskPlanDialog.vue';
-import {
-  template,
-  instance,
-} from '@memoflow/app-vue/modules/task/components/task-quick-test-fixtures';
+import { TaskDetailView, TaskManagementView } from '@memoflow/task-ui';
+import TaskPlanDialog from '@memoflow/task-ui/components/dialogs/TaskPlanDialog.vue';
+import { template, instance } from '@memoflow/task-ui/components/task-quick-test-fixtures';
 import '../../../../../apps/web/src/styles/index.css';
 
 faker.seed(3101);
@@ -65,16 +62,16 @@ const ok = <T>(data: T) => ({ ok: true as const, data });
 // Partial injected ports: unexpected operations fail instead of pretending success.
 const taskService = {
   async listPlans() {
-    return ok({ plans: [{ toDTO: () => plan }], total: 1 });
+    return ok({ plans: [plan], total: 1 });
   },
   async listOccurrencesByDateRange() {
-    return ok([{ toDTO: () => instance() }]);
+    return ok([instance()]);
   },
   async getPlan() {
-    return ok({ toDTO: () => plan });
+    return ok(plan);
   },
   async getOccurrence() {
-    return ok({ toDTO: () => instance() });
+    return ok(instance());
   },
   async getWorkspace() {
     return ok({
@@ -85,8 +82,9 @@ const taskService = {
             availability: params.get('owner') === 'missing' ? 'Missing' : 'Available',
             goalId: goal.id,
             keyResultId: goal.keyResults[0]!.id,
-            goal: params.get('owner') === 'missing' ? null : goal,
-            keyResult: params.get('owner') === 'missing' ? null : goal.keyResults[0],
+            goal: params.get('owner') === 'missing' ? null : toGoalReference(goal),
+            keyResult:
+              params.get('owner') === 'missing' ? null : toKeyResultReference(goal.keyResults[0]!),
           }
         : null,
       occurrenceSummary: {
@@ -115,7 +113,7 @@ const taskService = {
         : plan.labels,
       version: plan.version + 1,
     } as TaskPlanClientDTO;
-    return ok({ toDTO: () => plan });
+    return ok(plan);
   },
 } as unknown as ITaskService;
 const goalService = {

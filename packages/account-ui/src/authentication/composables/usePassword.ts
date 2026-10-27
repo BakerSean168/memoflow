@@ -16,7 +16,7 @@
 import { ref } from 'vue';
 import { toast } from 'vue-sonner';
 import { useI18n } from 'vue-i18n';
-import type { CloudAuthClientPort } from '@memoflow/contracts/cloud-auth';
+import type { CloudAuthClientPort } from '@memoflow/cloud-auth-contracts';
 import { useAuthenticationStore } from '../stores/authentication-store';
 import { buildPasswordMutationErrorReceipt } from './reportAuthOperationFailure';
 import { accountUiHost } from '../../account-ui-host';

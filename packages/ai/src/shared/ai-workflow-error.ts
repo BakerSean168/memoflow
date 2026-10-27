@@ -1,4 +1,4 @@
-import { AIRateLimitPublicFailureSchema } from '@memoflow/contracts/ai';
+import { AIRateLimitPublicFailureSchema } from '@memoflow/ai-contracts';
 import type { PublicFailure } from '@memoflow/transport-contracts/result';
 import { toAIPublicFailure } from './ai-public-failure';
 

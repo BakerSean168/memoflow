@@ -1,7 +1,7 @@
 import { AggregateRoot } from '@memoflow/utils/domain';
-import type { AIConversationClientDTO, AIConversationServerDTO } from '@memoflow/contracts/ai';
-import { ConversationStatus } from '@memoflow/contracts/ai';
-import type { AIEventMap } from '@memoflow/contracts/ai';
+import type { AIConversationClientDTO, AIConversationServerDTO } from '@memoflow/ai-contracts';
+import { ConversationStatus } from '@memoflow/ai-contracts';
+import type { AIEventMap } from '@memoflow/ai-contracts';
 import type { IdentityId as IIdentityId } from '@memoflow/contracts/primitives';
 import { AiConversationId } from '../value-objects/ai-conversation-id';
 import { IdentityId } from '@memoflow/domain-shared/shared';

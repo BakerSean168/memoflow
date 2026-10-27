@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import type { AIProviderConfigServerDTO } from '@memoflow/contracts/ai';
+import type { AIProviderConfigServerDTO } from '@memoflow/ai-contracts';
 import type { PrismaClient } from '@memoflow/database';
 
 import { AIProviderConfigPrismaRepository } from '../ai-provider-config-prisma.repository';

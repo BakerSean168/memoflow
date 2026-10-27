@@ -11,7 +11,7 @@ export { TaskOccurrenceId } from './task-occurrence-id';
 export { TaskPlanStatus } from './task-plan-status';
 export { TaskOccurrenceStatus } from './task-occurrence-status';
 export { TaskTimeType } from './task-time-type';
-export { TaskGoalBindingTrigger } from '@memoflow/contracts/task';
+export { TaskGoalBindingTrigger } from '@memoflow/task-contracts';
 
 // Class Value Objects
 export { TaskReminderConfig } from './task-reminder-config';

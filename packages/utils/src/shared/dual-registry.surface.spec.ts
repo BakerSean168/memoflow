@@ -134,7 +134,7 @@ import {
       '../../../ai/src/server/infrastructure/runtime/ai-runtime.ts',
     );
     const localVault = readFileSync(
-      resolve(sharedDir, '../../../app-vue/src/modules/repository/composables/useLocalVault.ts'),
+      resolve(sharedDir, '../../../repository-ui/src/composables/useLocalVault.ts'),
       'utf8',
     );
     const databaseScript = readFileSync(
@@ -548,10 +548,7 @@ import {
       'utf8',
     );
     const appVueStore = readFileSync(
-      resolve(
-        sharedDir,
-        '../../../app-vue/src/modules/setting/stores/presentation-preference-store.ts',
-      ),
+      resolve(sharedDir, '../../../setting-ui/src/stores/presentation-preference-store.ts'),
       'utf8',
     );
 
@@ -655,11 +652,11 @@ import {
       ),
     ];
     const goalWorkflow = readFileSync(
-      resolve(sharedDir, '../../../app-vue/src/modules/ai/composables/useAIGoalWorkflow.ts'),
+      resolve(sharedDir, '../../../ai-ui/src/composables/useAIGoalWorkflow.ts'),
       'utf8',
     );
     const workflowPersistence = readFileSync(
-      resolve(sharedDir, '../../../app-vue/src/modules/ai/composables/useAIWorkflowPersistence.ts'),
+      resolve(sharedDir, '../../../ai-ui/src/composables/useAIWorkflowPersistence.ts'),
       'utf8',
     );
 

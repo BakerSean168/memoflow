@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ok } from '@memoflow/contracts/result';
-import type { KnowledgeRemoteBindingClientDTO } from '@memoflow/contracts/repository';
+import type { KnowledgeRemoteBindingClientDTO } from '@memoflow/repository-contracts';
 import { DesktopKnowledgeRepositoryReconciliationService } from './desktop-knowledge-repository-reconciliation.service';
 import type { KnowledgeRepositoryGitRuntimePort } from './desktop-knowledge-repository-git.runtime';
 

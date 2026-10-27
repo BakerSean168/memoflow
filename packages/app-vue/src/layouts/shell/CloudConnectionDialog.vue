@@ -23,7 +23,7 @@ import {
 import type {
   DesktopCloudConnectionAttempt,
   DesktopCloudConnectionRequest,
-} from '@memoflow/contracts/cloud-auth';
+} from '@memoflow/cloud-auth-contracts';
 import { SystemChannels, WindowChannels } from '@memoflow/contracts/electron';
 import ProductDialogShell from '../../shared/components/ProductDialogShell.vue';
 import {

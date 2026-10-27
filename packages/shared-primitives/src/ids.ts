@@ -12,12 +12,6 @@ export type ExampleId = string & { readonly __brand: 'ExampleId' };
 /** 账户/身份 ID */
 export type IdentityId = string & { readonly __brand: 'IdentityId' };
 
-/** 任务模板 ID */
-export type TaskPlanId = string & { readonly __brand: 'TaskPlanId' };
-
-/** 任务实例 ID */
-export type TaskOccurrenceId = string & { readonly __brand: 'TaskOccurrenceId' };
-
 /** Routine Profile ID */
 
 /** Stable managed knowledge document ID carried by Markdown frontmatter. */
@@ -50,19 +44,7 @@ export type ResourceLinkId = string & { readonly __brand: 'ResourceLinkId' };
 /** 资源书签 ID */
 export type BookmarkId = string & { readonly __brand: 'BookmarkId' };
 
-/** 设置 ID */
-export type SettingId = string & { readonly __brand: 'SettingId' };
-
-export type SettingEntryId = string & { readonly __brand: 'SettingEntryId' };
-
-/** 设置历史 ID */
-export type SettingHistoryId = string & { readonly __brand: 'SettingHistoryId' };
-
-/** 设置分组 ID */
-export type SettingGroupId = string & { readonly __brand: 'SettingGroupId' };
-
 /** AI 对话 ID */
-export type AiConversationId = string & { readonly __brand: 'AiConversationId' };
 
 /** 同步配置 ID */
 export type SyncProfileId = string & { readonly __brand: 'SyncProfileId' };
@@ -80,13 +62,10 @@ export type PendingChangeId = string & { readonly __brand: 'PendingChangeId' };
 export type AppConfigId = string & { readonly __brand: 'AppConfigId' };
 
 /** AI Provider 配置 ID */
-export type AiProviderConfigId = string & { readonly __brand: 'AiProviderConfigId' };
 
 /** AI Provider connection ID (the persisted user-owned provider connection). */
-export type AiProviderConnectionId = AiProviderConfigId;
 
 /** Opaque reference into the host-owned provider SecretVault. */
-export type AIProviderCredentialRef = string & { readonly __brand: 'AIProviderCredentialRef' };
 
 // ==========================================
 // ID Prefix Constants

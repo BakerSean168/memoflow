@@ -1,6 +1,6 @@
 import { RefreshControl, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { TaskPlanStatus } from '@memoflow/contracts/task';
+import { TaskPlanStatus } from '@memoflow/task-contracts';
 
 import { TaskPlanCard } from '../components/TaskPlanCard';
 import { useAppSession } from '../hooks/useAppSession';

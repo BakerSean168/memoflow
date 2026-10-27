@@ -41,6 +41,9 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   'label-contracts': ['./*'],
   'data-portability-contracts': ['./*'],
   'goal-contracts': ['./*'],
+  'ai-contracts': ['./*'],
+  'ai-client': ['./*'],
+  'ai-ui': ['./*'],
   'goal-ui': ['./composables/useGoal', './host'],
   'notification-client': [],
   'routine-client': [],
@@ -48,6 +51,7 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   'routine-contracts': ['./method-library'],
   'notification-ui': ['./host'],
   'account-ui': ['./host'],
+  'setting-ui': ['./host'],
   'routine-ui': [
     './host',
     './components/RoutineCapsulePreview',
@@ -58,9 +62,16 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
   'notification-contracts': ['./*'],
   'account-contracts': ['./*'],
   account: ['./api', './electron'],
+  'task-contracts': ['./*'],
+  'task-ui': ['./host', './composables/*', './components/*'],
   'schedule-contracts': ['./*'],
+  'setting-contracts': ['./*'],
+  'cloud-auth-contracts': ['./*'],
   'workspace-contracts': ['./*'],
   'relation-contracts': ['./*'],
+  'repository-contracts': ['./*'],
+  'repository-client': [],
+  'repository-ui': ['./host'],
   'host-runtime': ['./electron-ipc'],
   task: ['./analytics', './testing', './schema', './schedule-execution', './schedule-projection'],
   ai: ['./agent-gateway', './ports', './schema', './testing'],
@@ -78,8 +89,6 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
     './server',
   ],
   contracts: [
-    './agent-gateway',
-    './task',
     './relation',
     './repository',
     './setting',
@@ -90,8 +99,6 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
     './primitives',
     './primitives/*',
     './electron',
-    './cloud-auth',
-    './mocks',
   ],
   // Transaction composition has no singleton connection side effects; shared owner code
   // can import it in Desktop without initializing the API's PostgreSQL client.
@@ -143,8 +150,6 @@ const PACKAGE_SPECIFIC_SUBPATHS = {
     './modules/task',
     './modules/schedule',
     './modules/repository',
-    './modules/setting',
-    './modules/ai',
   ],
 };
 

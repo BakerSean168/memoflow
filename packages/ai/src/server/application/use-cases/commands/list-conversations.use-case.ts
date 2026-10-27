@@ -2,7 +2,7 @@ import type { Result } from '@memoflow/transport-contracts/result';
 import { ok, error } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { IAIConversationRepository } from '../../../domain/repositories/i-ai-conversation-repository';
-import type { ConversationListRes } from '@memoflow/contracts/ai';
+import type { ConversationListRes } from '@memoflow/ai-contracts';
 import { createLogger } from '@memoflow/utils/logger';
 
 const logger = createLogger('ListConversationsUseCase');

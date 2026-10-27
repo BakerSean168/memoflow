@@ -3,16 +3,14 @@
  */
 
 import { AggregateRoot } from '@memoflow/utils/domain';
-import type { AIProviderDefinitionId } from '@memoflow/contracts/ai';
+import type { AIProviderDefinitionId } from '@memoflow/ai-contracts';
 import type {
   AIEventMap,
   AIProviderConfigClientDTO,
   AIProviderConfigServerDTO,
-} from '@memoflow/contracts/ai';
-import type {
-  AIProviderCredentialRef,
-  IdentityId as IIdentityId,
-} from '@memoflow/contracts/primitives';
+} from '@memoflow/ai-contracts';
+import type { IdentityId as IIdentityId } from '@memoflow/contracts/primitives';
+import type { AIProviderCredentialRef } from '@memoflow/ai-contracts';
 import { AiProviderConfigId } from '../../domain/value-objects/ai-provider-config-id';
 import { IdentityId } from '@memoflow/domain-shared/shared';
 

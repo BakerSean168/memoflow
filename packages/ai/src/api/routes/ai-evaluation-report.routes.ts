@@ -1,6 +1,6 @@
 import { Router, type RequestHandler } from 'express';
 import { RouteRegistrar, type OpenApiRegistryLike, successResponse } from '@memoflow/utils/result';
-import { AIEvaluationOverviewSchema } from '@memoflow/contracts/ai';
+import { AIEvaluationOverviewSchema } from '@memoflow/ai-contracts';
 import type { AIEvaluationReportController } from '../../server/transport/ai-evaluation-report.controller';
 
 interface PlatformMiddleware {

@@ -10,7 +10,7 @@ import { RendererEventChannels } from '@memoflow/contracts/electron';
 
 import { useAccountStore } from '@memoflow/account-ui';
 import { useGoalStore } from '@memoflow/goal-ui';
-import { useTaskStore } from '@memoflow/app-vue/modules/task';
+import { useTaskStore } from '@memoflow/task-ui';
 import { useScheduleStore } from '@memoflow/schedule-ui';
 // Residual 941: host bridge via getElectronBridge sole helper.
 import { getElectronBridge } from './electron-bridge';

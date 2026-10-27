@@ -140,7 +140,7 @@ vi.mock('@memoflow/notification-ui', () => ({
   createNotificationClickNavigation: vi.fn(() => ({ start: vi.fn(), stop: vi.fn() })),
 }));
 
-vi.mock('@memoflow/app-vue/modules/setting', () => ({
+vi.mock('@memoflow/app-vue', () => ({
   usePresentationPreferenceStore: mocks.usePresentationPreferenceStore,
 }));
 

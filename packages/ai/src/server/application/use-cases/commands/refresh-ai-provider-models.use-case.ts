@@ -1,7 +1,7 @@
 import type { Result } from '@memoflow/transport-contracts/result';
 import { ok, error } from '@memoflow/transport-contracts/result';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
-import type { AIProviderModelCatalogSnapshot } from '@memoflow/contracts/ai';
+import type { AIProviderModelCatalogSnapshot } from '@memoflow/ai-contracts';
 import { createLogger } from '@memoflow/utils/logger';
 import type { IAIProviderConfigRepository } from '../../../domain/repositories/i-ai-provider-config-repository';
 import type { IAIProviderModelCatalogPort, IAIProviderSecretVault } from '../../ports';

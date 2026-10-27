@@ -1,0 +1,38 @@
+import vue from '@vitejs/plugin-vue';
+import { mergeConfig } from 'vitest/config';
+import { createPackageVitestConfig } from '../../vitest.shared.ts';
+import { createUiVueSourceAliasEntries } from '../../vite.workspace-aliases.ts';
+import path from 'node:path';
+
+export default mergeConfig(
+  createPackageVitestConfig({
+    projectRoot: import.meta.dirname,
+    name: 'setting-ui',
+    environment: 'happy-dom',
+    aliasEntries: [
+      // Test-only seam: the package's specs exercise the real app-vue host binding
+      // (`installSettingUiHost`) and the renderer fixtures it owns. Production
+      // sources inside packages/setting-ui/src hold zero app-vue imports.
+      {
+        find: /^@setting-ui-test-host\/(.+)$/,
+        replacement: path.resolve(import.meta.dirname, '../app-vue/src/$1'),
+      },
+      ...createUiVueSourceAliasEntries(path.resolve(import.meta.dirname, '../..')),
+    ],
+    aliases: {
+      // Test-only: AISettings.spec reuses the AI feature's native-agent fixture.
+      '@memoflow/ai/testing': '../../packages/ai/src/testing/index.ts',
+      '@memoflow/goal-client': '../../packages/goal-client/src/index.ts',
+      '@memoflow/task-client': '../../packages/task-client/src/index.ts',
+      '@memoflow/ai-client': '../../packages/ai-client/src/index.ts',
+      '@memoflow/setting-client': '../../packages/setting-client/src/index.ts',
+      '@memoflow/setting-contracts': '../../packages/setting-contracts/src/index.ts',
+      '@memoflow/desktop-contracts': '../../packages/desktop-contracts/src/index.ts',
+      '@memoflow/http-client': '../../packages/http-client/src/index.ts',
+      '@memoflow/ipc-client': '../../packages/ipc-client/src/index.ts',
+      '@memoflow/time': '../../packages/time/src/index.ts',
+    },
+    setupFiles: ['../app-vue/src/test/setup.ts', './vitest.setup.ts'],
+  }),
+  { plugins: [vue()], test: { include: ['src/**/*.{test,spec}.{ts,tsx}'] } },
+);

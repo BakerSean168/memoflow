@@ -14,7 +14,7 @@ import {
   createNotificationStartupHook,
   createNotificationClickNavigation,
 } from '@memoflow/notification-ui';
-import { usePresentationPreferenceStore } from '@memoflow/app-vue/modules/setting';
+import { usePresentationPreferenceStore } from '@memoflow/app-vue';
 import { useAccountStore, useAuthenticationStore } from '@memoflow/account-ui';
 import { progressStart, progressDone } from '@memoflow/ui-vue-shadcn/composables/useProgressBar';
 

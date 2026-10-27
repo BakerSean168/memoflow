@@ -3,9 +3,9 @@ import type {
   GoalWorkspaceKnowledgePage,
   GoalWorkspacePageRequest,
   GoalWorkspaceReadModel,
-  GoalWorkspaceTaskPage,
   GoalWorkspaceTaskPageRequest,
 } from '@memoflow/workspace-contracts';
+import type { TaskGoalContextPage } from '@memoflow/task-contracts';
 import type { Result } from '@memoflow/contracts/result';
 
 /** Read-only ADR-069 Goal Workspace application surface. */
@@ -19,7 +19,7 @@ export interface GoalWorkspaceApplicationPort {
     identityId: string,
     goalId: string,
     request?: GoalWorkspaceTaskPageRequest,
-  ): Promise<Result<GoalWorkspaceTaskPage>>;
+  ): Promise<Result<TaskGoalContextPage>>;
   listKnowledge(
     identityId: string,
     goalId: string,

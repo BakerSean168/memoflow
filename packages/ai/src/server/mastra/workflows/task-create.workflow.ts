@@ -1,5 +1,5 @@
 import type { ExternalTaskApply } from '../runtime/workflow-runtime.port';
-import { CreateTaskPlanSchema } from '@memoflow/contracts/task';
+import { CreateTaskPlanSchema } from '@memoflow/task-contracts';
 import { createStep, createWorkflow } from '@mastra/core/workflows';
 import { z } from 'zod';
 import {
@@ -12,7 +12,7 @@ import {
   TaskPlanExecutionReceiptSchema,
   type TaskPlanDraft,
   type TaskPlanningDecision,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import type { TaskPlannerMode, TaskPlannerPort } from '../agents/task-planner.worker';
 import { taskWorkflowEntityId } from './deterministic-entity-id';

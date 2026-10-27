@@ -20,7 +20,7 @@ import { describe, expect, it } from 'vitest';
   describe('instant transfer-date dual keep-boundary (residual 859)', () => {
     const goalVo = __dirname;
     const accountVo = resolve(goalVo, '../../../account-contracts/src/value-objects');
-    const taskVo = resolve(goalVo, '../../../contracts/src/modules/task/value-objects');
+    const taskVo = resolve(goalVo, '../../../task-contracts/src/value-objects');
     const primitives = resolve(goalVo, '../../../shared-primitives/src');
     const taskPlanSchedule = readFileSync(resolve(taskVo, 'task-plan-schedule.ts'), 'utf8');
     const taskOccurrenceResult = readFileSync(resolve(taskVo, 'task-occurrence-result.ts'), 'utf8');
@@ -87,7 +87,7 @@ import { describe, expect, it } from 'vitest';
    */
   describe('exact vo dto duals retired (residual 853)', () => {
     const goalVo = __dirname;
-    const taskVo = resolve(goalVo, '../../../contracts/src/modules/task/value-objects');
+    const taskVo = resolve(goalVo, '../../../task-contracts/src/value-objects');
 
     const checklist = readFileSync(resolve(taskVo, 'checklist-item-definition.ts'), 'utf8');
 

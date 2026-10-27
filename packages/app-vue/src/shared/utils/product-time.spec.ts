@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import {
   createDefaultUserPreferenceProfile,
   type UserPreferenceProfile,
-} from '@memoflow/contracts/setting';
+} from '@memoflow/setting-contracts';
 import { formatProductDateTime, formatProductHm, setProductTimePreferences } from './product-time';
 
 afterEach(() => {

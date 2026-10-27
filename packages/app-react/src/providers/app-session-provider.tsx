@@ -12,7 +12,7 @@ import type {
   CloudSessionSummary,
   CloudSignInRequest,
   CloudSignUpRequest,
-} from '@memoflow/contracts/cloud-auth';
+} from '@memoflow/cloud-auth-contracts';
 import {
   createResultHttpClient,
   presentErrorMessage,

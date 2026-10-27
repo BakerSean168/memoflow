@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { AssistantRuntimeEvent } from '@memoflow/contracts/ai';
+import type { AssistantRuntimeEvent } from '@memoflow/ai-contracts';
 import { ConversationAttentionObserver } from './conversation-attention-observer';
 import type { IConversationAttentionPort } from '../ports/conversation-attention.port';
 

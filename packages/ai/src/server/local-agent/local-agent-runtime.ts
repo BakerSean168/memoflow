@@ -16,13 +16,13 @@ import type {
   LocalAgentRequestResponse,
   AssistantRuntimeChoice,
   AssistantRuntimeSelectedEntity,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import {
   LocalAgentConversationSchema,
   LocalAgentStatusSchema,
   LocalAgentActivitySchema,
   LOCAL_AGENT_DEFAULT_EXECUTABLES,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { CodexDriver } from './codex-driver';
 import { ClaudeDriver } from './claude-driver';
 import { PiDriver } from './pi-driver';

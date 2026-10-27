@@ -15,13 +15,13 @@ import ShellHomeRoute from '../layouts/shell/shell-home-route';
 // Module routes
 import { accountRoutes } from '@memoflow/account-ui';
 import { goalRoutes } from '@memoflow/goal-ui';
-import { taskRoutes } from '../modules/task/router';
+import { taskRoutes } from '@memoflow/task-ui';
 import { routineRoutes } from '@memoflow/routine-ui';
 import { scheduleRoutes } from '@memoflow/schedule-ui';
-import { repositoryRoutes } from '../modules/repository/router';
+import { repositoryRoutes } from '@memoflow/repository-ui';
 import { notificationRoutes } from '@memoflow/notification-ui';
-import { settingRoutes } from '../modules/setting/router';
-import { aiRoutes } from '../modules/ai/router';
+import { settingRoutes } from '@memoflow/setting-ui';
+import { aiRoutes } from '@memoflow/ai-ui/router';
 
 export function createAppRouter(options?: {
   history?: RouterHistory;

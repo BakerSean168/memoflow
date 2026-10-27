@@ -8,7 +8,7 @@ import type {
   KnowledgeQueryInput,
   KnowledgeQueryResult,
 } from '../../application/ports';
-import { KnowledgeDocumentRefSchema } from '@memoflow/contracts/repository';
+import { KnowledgeDocumentRefSchema } from '@memoflow/repository-contracts';
 import { OpenAICompatibleGateway } from '../gateways/openai-compatible.gateway';
 import { scoreIndexedResource, tokenize } from './knowledge-index-value-helpers';
 

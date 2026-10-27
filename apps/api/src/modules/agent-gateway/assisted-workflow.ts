@@ -10,13 +10,13 @@ import {
   GatewayTaskReceiptSchema,
   type AssistedStart,
   type AssistedView,
-} from '@memoflow/contracts/agent-gateway';
+} from '@memoflow/agent-gateway';
 import {
   AIWorkflowRunViewSchema,
   TaskPlanExecutionReceiptSchema,
   type AIWorkflowRunView,
   type AIWorkflowResumeCommand,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import {
   GatewayReadError,

@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
-import { WorkspaceEventSchema, type WorkspaceEvent } from '@memoflow/contracts/ai';
+import { WorkspaceEventSchema, type WorkspaceEvent } from '@memoflow/ai-contracts';
 import type { AttentionEventSource } from '../application/ports/attention-events.port';
 import type { GoalWorkflowEventSource } from '../application/ports/goal-workflow-events.port';
 import type { ConversationEventSource } from '../domain/repositories/conversation-events.port';

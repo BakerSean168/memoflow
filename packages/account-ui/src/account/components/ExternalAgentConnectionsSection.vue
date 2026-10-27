@@ -5,7 +5,7 @@ import type {
   OAuthConnection,
   ScopedPatSummary,
   ExternalAgentFailureCode,
-} from '@memoflow/contracts/agent-gateway';
+} from '@memoflow/agent-gateway';
 import { Button } from '@memoflow/ui-vue-shadcn/components/ui/button';
 import { Input } from '@memoflow/ui-vue-shadcn/components/ui/input';
 import { accountUiHost } from '../../account-ui-host';

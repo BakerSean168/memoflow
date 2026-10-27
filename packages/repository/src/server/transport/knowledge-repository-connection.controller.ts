@@ -51,7 +51,7 @@ import {
   type ListKnowledgeWriteRequestsReq,
   type ListKnowledgeWriteRequestsRes,
   type KnowledgeWriteRequestReplayResponse,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import { OperationAuditQuerySchema } from '@memoflow/operations-contracts';
 import { formatZodErrors } from '@memoflow/utils/result';
 

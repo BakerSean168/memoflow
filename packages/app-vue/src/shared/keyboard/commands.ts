@@ -1,5 +1,5 @@
-import type { KeyboardCommandId } from '@memoflow/contracts/shared';
-export type { KeyboardCommandId } from '@memoflow/contracts/shared';
+import type { KeyboardCommandId } from '@memoflow/desktop-contracts';
+export type { KeyboardCommandId } from '@memoflow/desktop-contracts';
 
 export type ShortcutScope = 'app' | 'workspace' | 'preview' | 'list';
 export interface KeyboardHost {

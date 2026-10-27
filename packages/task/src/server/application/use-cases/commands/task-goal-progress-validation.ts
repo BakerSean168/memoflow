@@ -1,5 +1,5 @@
 import { TaskGoalBinding } from '../../../domain/value-objects/task-goal-binding';
-import type { TaskGoalLinkInput } from '@memoflow/contracts/task';
+import type { TaskGoalLinkInput } from '@memoflow/task-contracts';
 import type { TaskGoalMeasurementReadPort } from '../../ports';
 import { error, type Result } from '@memoflow/contracts/result';
 

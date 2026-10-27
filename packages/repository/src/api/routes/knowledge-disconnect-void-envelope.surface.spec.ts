@@ -26,7 +26,7 @@ describe('knowledge disconnect void success envelope surface', () => {
   const dto = readFileSync(
     resolve(
       __dirname,
-      '../../../../contracts/src/modules/repository/api/knowledge-repository-connection.dto.ts',
+      '../../../../repository-contracts/src/api/knowledge-repository-connection.dto.ts',
     ),
     'utf8',
   );

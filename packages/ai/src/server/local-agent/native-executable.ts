@@ -1,7 +1,7 @@
 import { statSync } from 'node:fs';
 import { execFile } from 'node:child_process';
 import { win32 } from 'node:path';
-import type { LocalAgentConnection, LocalAgentDriver } from '@memoflow/contracts/ai';
+import type { LocalAgentConnection, LocalAgentDriver } from '@memoflow/ai-contracts';
 import { LocalAgentError } from '../../shared/local-agent-error';
 
 const npmEntries: Record<LocalAgentDriver, string[]> = {

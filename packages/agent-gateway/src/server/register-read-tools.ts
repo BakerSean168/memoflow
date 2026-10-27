@@ -10,9 +10,9 @@ import {
   TaskPlanSearchOutputSchema,
   TaskOccurrenceGetOutputSchema,
   TaskOccurrenceListOutputSchema,
-} from '@memoflow/contracts/agent-gateway';
+} from '../contracts';
 import { GoalPagePositionSchema, type GoalClientDTO } from '@memoflow/goal-contracts';
-import { TaskPlanPositionSchema, TaskOccurrencePositionSchema } from '@memoflow/contracts/task';
+import { TaskPlanPositionSchema, TaskOccurrencePositionSchema } from '@memoflow/task-contracts';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import {
   GatewayReadError as ControlledError,

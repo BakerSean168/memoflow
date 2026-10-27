@@ -1,5 +1,11 @@
+// Schedule and Setting surfaces are hosted by this composition root
+// (Issue #630 §4.4 / §4.9).
+// Repository surfaces are hosted by this composition root (Issue #630 §4.7).
+import './di/repository-ui-host';
+
 // Schedule surfaces are hosted by this composition root (Issue #630 §4.4).
 import './di/schedule-ui-host';
+import './di/setting-ui-host';
 
 // ── DI ──
 export {
@@ -52,10 +58,10 @@ export { createAppRouter } from './router';
 // ── Stores (consumed by app containers for DI/provide) ──
 export { useAccountStore, useAuthenticationStore } from '@memoflow/account-ui';
 export { useGoalStore } from '@memoflow/goal-ui';
-export { useTaskStore } from './modules/task';
+export { useTaskStore } from '@memoflow/task-ui';
 export { useScheduleStore } from '@memoflow/schedule-ui';
 export { useNotificationStore } from '@memoflow/notification-ui';
-export { usePresentationPreferenceStore } from './modules/setting';
+export { usePresentationPreferenceStore, UserSettingsView } from '@memoflow/setting-ui';
 
 // ── Startup hooks ──
 export {
@@ -81,4 +87,9 @@ export {
 } from './platform/server-state';
 
 // ── Theme / presentation ──
-export { useLocaleSync, usePresentationBootstrap, useThemeSync } from './modules/setting';
+export {
+  applyThemeMode,
+  useLocaleSync,
+  usePresentationBootstrap,
+  useThemeSync,
+} from '@memoflow/setting-ui';

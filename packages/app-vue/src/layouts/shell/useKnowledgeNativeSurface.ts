@@ -10,7 +10,7 @@ import {
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import type { OwnerNativeEditSurface } from '../../shared/composables/ownerNativeEditSession';
-import type { KnowledgeCaptureNativeEditSession } from '../../modules/repository/composables/knowledgeCaptureNativeEditSession';
+import type { KnowledgeCaptureNativeEditSession } from '@memoflow/repository-ui';
 import { navigateBusinessSurface } from './surface-leave-protocol';
 import { useAppShellStore } from './useAppShellStore';
 

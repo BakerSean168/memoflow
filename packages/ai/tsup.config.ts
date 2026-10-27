@@ -5,7 +5,6 @@ export default defineConfig({
     'src/index.ts',
     'src/ports/index.ts',
     'src/api/index.ts',
-    'src/client/index.ts',
     'src/electron/index.ts',
     'src/testing/index.ts',
     'src/agent-gateway.ts',
@@ -16,6 +15,7 @@ export default defineConfig({
   sourcemap: true,
   external: [
     'electron',
+    '@memoflow/ai-client',
     '@memoflow/utils',
     '@memoflow/contracts',
     '@memoflow/http-client',

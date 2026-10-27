@@ -2,9 +2,9 @@
 import type { ITaskPlanRepository } from '../../../domain/repositories/i-task-plan-repository';
 import type { ITaskOccurrenceRepository } from '../../../domain/repositories/i-task-occurrence-repository';
 import type { TaskFilters } from '../../../domain/repositories/i-task-plan-repository';
-import type { TaskPlanClientDTO, TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
+import type { TaskPlanClientDTO, TaskOccurrenceClientDTO } from '@memoflow/task-contracts';
 import { ImportanceLevel } from '@memoflow/shared-primitives';
-import { TaskOccurrenceStatus, TaskPlanStatus } from '@memoflow/contracts/task';
+import { TaskOccurrenceStatus, TaskPlanStatus } from '@memoflow/task-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import { ok } from '@memoflow/contracts/result';
 import { createTimeFacade, type TimeContext, type UserTimeContextPort } from '@memoflow/time';

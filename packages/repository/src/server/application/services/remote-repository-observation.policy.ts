@@ -5,7 +5,7 @@ import type {
   RemoteRepositoryBlockReason,
   RemoteRepositoryEligibility,
   RemoteRepositoryObservation,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import type { GitHubAppInstallationInventory } from '../ports/github-app-client.port';
 
 export function classifyRemoteRepositoryEligibility(

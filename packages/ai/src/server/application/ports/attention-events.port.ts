@@ -1,4 +1,4 @@
-import type { AssistantAttentionView, AssistantAttentionRuntimeKind } from '@memoflow/contracts/ai';
+import type { AssistantAttentionView, AssistantAttentionRuntimeKind } from '@memoflow/ai-contracts';
 
 export interface AttentionChange {
   eventId: string;

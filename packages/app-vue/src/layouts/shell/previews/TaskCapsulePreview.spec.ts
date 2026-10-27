@@ -1,4 +1,5 @@
 /** @vitest-environment jsdom */
+import { installTaskUiHost } from '../../../di/task-ui-host';
 import { computed, ref } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
@@ -17,7 +18,7 @@ const setOccurrenceChecklistItem = vi.fn().mockResolvedValue(undefined);
 const createPlanSafe = vi.fn().mockResolvedValue({ todayOccurrenceCreated: true });
 const createSaving = ref(false);
 
-vi.mock('../../../modules/task/composables/useTaskToday', () => ({
+vi.mock('@memoflow/task-ui/composables/useTaskToday', () => ({
   useTaskToday: () => ({
     instances: computed(() => instancesRef.value),
     templates: computed(() => templatesRef.value),
@@ -34,12 +35,14 @@ vi.mock('../../../modules/task/composables/useTaskToday', () => ({
   }),
 }));
 
-vi.mock('../../../modules/task/composables/useTaskPlanMutations', () => ({
+vi.mock('@memoflow/task-ui/composables/useTaskPlanMutations', () => ({
   useTaskPlanMutations: () => ({
     createPlanSafe,
     isSaving: createSaving,
   }),
 }));
+
+installTaskUiHost();
 
 const i18n = createI18n({
   legacy: false,

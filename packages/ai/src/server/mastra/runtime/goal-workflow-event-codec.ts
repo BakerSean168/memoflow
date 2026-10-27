@@ -2,7 +2,7 @@ import { z } from 'zod';
 import {
   GoalWorkflowLiveActionJournalSchema,
   GoalWorkflowLiveActionRecordSchema,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { AI_PUBLIC_FAILURE_CODES, toAIPublicFailure } from '../../../shared/ai-public-failure';
 import { projectGoalWorkflowPublicState } from './workflow-run-projection';
 import type { GoalWorkflowChange } from '../../application/ports/goal-workflow-events.port';

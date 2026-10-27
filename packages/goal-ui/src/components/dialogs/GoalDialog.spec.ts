@@ -2,7 +2,7 @@ import { installGoalUiHost } from '@goal-ui-test-host/di/goal-ui-host';
 /** @vitest-environment happy-dom */
 
 import type { GoalWorkspaceEventStreamOptions as WorkspaceEventStreamOptions } from '../../goal-ui-host';
-import type { AIWorkflowRunView, WorkspaceEvent } from '@memoflow/contracts/ai';
+import type { AIWorkflowRunView, WorkspaceEvent } from '@memoflow/ai-contracts';
 import { DOMWrapper, flushPromises, mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import { defineComponent, h, KeepAlive, nextTick, ref } from 'vue';

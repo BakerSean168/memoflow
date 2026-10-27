@@ -11,7 +11,7 @@ import request from 'supertest';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createAIApiModule } from '@memoflow/ai/api';
 import { createAIModuleForTests } from '@memoflow/ai/testing';
-import type { AssistantRuntimeEvent } from '@memoflow/contracts/ai';
+import type { AssistantRuntimeEvent } from '@memoflow/ai-contracts';
 import type { ExecutionContext } from '@memoflow/contracts/shared';
 import { ok } from '@memoflow/contracts/result';
 import { expressAdapter } from '@memoflow/utils/result';

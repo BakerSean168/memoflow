@@ -1,0 +1,27 @@
+{
+  "extends": "../../tsconfig.workspace-src.json",
+  "compilerOptions": {
+    "lib": ["ES2020"],
+    "types": ["node", "vitest/globals"],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@memoflow/contracts": ["../contracts/src/index.ts"],
+      "@memoflow/contracts/result": ["../contracts/src/result/index.ts"],
+      "@memoflow/contracts/primitives": ["../contracts/src/primitives/index.ts"],
+      "@memoflow/contracts/electron": ["../contracts/src/electron/index.ts"],
+      "@memoflow/goal-contracts": ["../goal-contracts/src/index.ts"],
+      "@memoflow/http-client": ["../http-client/src/index.ts"],
+      "@memoflow/ipc-client": ["../ipc-client/src/index.ts"],
+      "@memoflow/label-contracts": ["../label-contracts/src/index.ts"],
+      "@memoflow/shared-primitives": ["../shared-primitives/src/index.ts"],
+      "@memoflow/task-contracts": ["../task-contracts/src/index.ts"],
+      "@memoflow/task-contracts/*": ["../task-contracts/src/*.ts"],
+      "@memoflow/utils": ["../utils/src/index.ts"],
+      "@memoflow/utils/domain": ["../utils/src/domain/index.ts"],
+      "@memoflow/workspace-contracts": ["../workspace-contracts/src/index.ts"],
+      "@memoflow/workspace-contracts/*": ["../workspace-contracts/src/*.ts"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
+}

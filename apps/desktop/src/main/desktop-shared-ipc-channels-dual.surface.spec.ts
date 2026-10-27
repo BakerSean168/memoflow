@@ -16,7 +16,7 @@ describe('desktop shared ipc-channels dual single-track surface', () => {
   const preload = resolve(desktopSrc, 'preload/allowed-channels.ts');
   const repositoryIpcAdapter = resolve(
     desktopSrc,
-    '../../../packages/repository/src/infrastructure-client/adapters/ipc/repository-ipc.adapter.ts',
+    '../../../packages/repository-client/src/infrastructure-client/adapters/ipc/repository-ipc.adapter.ts',
   );
   const notificationView = resolve(desktopSrc, 'renderer/CustomNotificationView.vue');
 

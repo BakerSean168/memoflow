@@ -5,7 +5,7 @@ import type { IKnowledgeSourcePort, KnowledgeSourceNote } from '@memoflow/ai/por
 import {
   KnowledgeDocumentIdSchema,
   KnowledgeDocumentIdWireSchema,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 import {
   createTaskPowerSyncReadQueries,
   createTaskPowerSyncAgentMutations,
@@ -20,7 +20,7 @@ import {
 } from '@memoflow/goal';
 import { GatewayReadError } from '@memoflow/agent-gateway';
 import { registerReadTools } from '@memoflow/agent-gateway/server';
-import { GatewayFailureCodeSchema } from '@memoflow/contracts/agent-gateway';
+import { GatewayFailureCodeSchema } from '@memoflow/agent-gateway';
 import {
   GoalAgentCreateSchema,
   GoalAgentUpdateSchema,
@@ -31,7 +31,7 @@ import {
   TaskAgentUpdateSchema,
   TaskAgentCompleteSchema,
   TaskAgentReceiptSchema,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import type { Result } from '@memoflow/contracts/result';
 import type { IElectronDatabase, IElectronDatabaseTransaction } from '@memoflow/contracts/electron';
 import {
@@ -43,7 +43,7 @@ import {
   GoalPanelSubmitCommandSchema,
   GoalPanelSubmitResultSchema,
   type GoalPanelCommand,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import type { IDesktopNativePanelBridge } from './desktop-native-panel-bridge';
 
 function ownerResult<T>(result: Result<T>): T {

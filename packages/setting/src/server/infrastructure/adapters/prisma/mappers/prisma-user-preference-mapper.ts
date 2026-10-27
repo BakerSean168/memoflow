@@ -2,11 +2,11 @@ import type {
   Prisma,
   UserPreferenceRecord as PrismaUserPreferenceRecord,
 } from '@memoflow/database';
-import type { PreferenceNamespace } from '@memoflow/contracts/setting';
+import type { PreferenceNamespace } from '@memoflow/setting-contracts';
 import {
   parsePreferenceNamespace,
   parsePreferenceNamespacePayload,
-} from '@memoflow/contracts/setting';
+} from '@memoflow/setting-contracts';
 import { UserPreferenceDocument } from '../../../../preferences';
 
 export class PrismaUserPreferenceMapper {

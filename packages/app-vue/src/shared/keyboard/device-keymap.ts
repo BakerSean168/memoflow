@@ -5,7 +5,7 @@ import {
   DeviceKeymapSchema,
   DeviceKeymapSnapshotSchema,
   type DeviceKeymap,
-} from '@memoflow/contracts/shared';
+} from '@memoflow/desktop-contracts';
 import { KeyboardChannels } from '@memoflow/contracts/electron';
 import type { DesktopAccessSnapshot } from '@memoflow/contracts/electron';
 import { DESKTOP_BRIDGE_KEY } from '../../di/keys';

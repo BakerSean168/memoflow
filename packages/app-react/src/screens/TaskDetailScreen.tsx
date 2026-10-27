@@ -23,20 +23,20 @@ import {
 } from '@memoflow/ui-react-native';
 
 function formatOccurrenceTiming(
-  timing: import('@memoflow/contracts/task').TaskOccurrenceClientDTO['scheduleSnapshot']['timing'],
+  timing: import('@memoflow/task-contracts').TaskOccurrenceClientDTO['scheduleSnapshot']['timing'],
 ): string {
   if (timing.kind === 'AllDay') return 'All day';
   if (timing.kind === 'At') return `At ${timing.time}`;
   return `${timing.start} - ${timing.end}`;
 }
 
-function formatPlanSchedule(schedule: import('@memoflow/contracts/task').TaskPlanSchedule): string {
+function formatPlanSchedule(schedule: import('@memoflow/task-contracts').TaskPlanSchedule): string {
   if (schedule.timing.kind === 'AllDay') return 'All day';
   if (schedule.timing.kind === 'At') return `At ${schedule.timing.time}`;
   return `${schedule.timing.start} - ${schedule.timing.end}`;
 }
 
-function planScheduleDate(schedule: import('@memoflow/contracts/task').TaskPlanSchedule): string {
+function planScheduleDate(schedule: import('@memoflow/task-contracts').TaskPlanSchedule): string {
   return schedule.kind === 'OneTime' ? schedule.date : schedule.startDate;
 }
 

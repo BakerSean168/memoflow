@@ -8,7 +8,8 @@ import type {
 } from '@memoflow/routine-contracts';
 import { RoutineTriggerSchema } from '@memoflow/routine-contracts';
 import { requireTimeZoneId, requireYmd } from '@memoflow/contracts/primitives';
-import { createDefaultUserPreferenceProfile } from '@memoflow/contracts/setting';
+
+import { createDefaultUserPreferenceProfile } from '@memoflow/setting-contracts';
 import { productionLocaleMessages } from '@routine-ui-test-host/locales/production-messages';
 import {
   getProductTodayYmd,

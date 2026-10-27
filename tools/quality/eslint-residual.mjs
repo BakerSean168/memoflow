@@ -17,6 +17,7 @@ export function isResidual(pathname) {
   if (!/\.[cm]?[jt]sx?$/u.test(pathname)) return false;
   if (/^packages\/app-vue\/src\/(?:modules|layouts)\//u.test(pathname)) return true;
   if (pathname.startsWith('packages/app-react/src/')) return true;
+  if (pathname.startsWith('packages/ai-ui/src/')) return true;
   // Historical repository/AI application-test seam restrictions in the
   // root ESLint policy, retained even when projects have been moved.
   if (/^packages\/(?:ai|repository)\/src\/application-server\//u.test(pathname)) return true;

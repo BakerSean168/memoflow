@@ -28,6 +28,7 @@
     "@memoflow/label-contracts": "workspace:*",
     "@memoflow/relation-contracts": "workspace:*",
     "@memoflow/shared-primitives": "workspace:*",
+    "@memoflow/task-contracts": "workspace:*",
     "@memoflow/time": "workspace:*",
     "@memoflow/transport-contracts": "workspace:*",
     "@memoflow/ui-vue-shadcn": "workspace:*",
@@ -43,7 +44,8 @@
     "vue-echarts": "^8.3.0",
     "vue-i18n": "^11.4.12",
     "vue-router": "^5.3.1",
-    "vue-sonner": "^2.0.8"
+    "vue-sonner": "^2.0.8",
+    "@memoflow/ai-contracts": "workspace:*"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "6.0.9",

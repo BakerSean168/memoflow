@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
-import { TaskPlanScheduleKind } from '@memoflow/contracts/task';
+import { TaskPlanScheduleKind } from '@memoflow/task-contracts';
 import {
   aDailyRecurrence,
   aLoadedTaskPlan,

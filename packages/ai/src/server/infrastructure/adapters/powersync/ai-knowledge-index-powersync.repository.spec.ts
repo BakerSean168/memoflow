@@ -3,7 +3,7 @@ import type {
   IElectronDatabase,
   IElectronTransaction,
   SqlValue,
-} from '@memoflow/contracts/electron';
+} from '@memoflow/desktop-contracts';
 import type { KnowledgeIndexedNote } from '../../../application/ports';
 import { AIKnowledgeIndexPowerSyncRepository } from './ai-knowledge-index-powersync.repository';
 

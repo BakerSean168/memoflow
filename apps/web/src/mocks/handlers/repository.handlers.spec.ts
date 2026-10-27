@@ -4,7 +4,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { repositoryMockRoutes } from './repository.handlers';
 import { createHttpClientSpy } from './_shared/contract-test-helpers';
 
-const loadRepositoryClient = () => import('@memoflow/repository/client');
+const loadRepositoryClient = () => import('@memoflow/repository-client');
 type RepositoryClientModule = Awaited<ReturnType<typeof loadRepositoryClient>>;
 let repositoryClient: RepositoryClientModule;
 

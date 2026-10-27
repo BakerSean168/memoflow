@@ -23,7 +23,7 @@ describe('empty dual barrel re-export single-track surface (residual 661)', () =
   it('schedule contracts and Setting both delete retired DTO barrels from their public surface', () => {
     const packages = packagesRoot;
     const schedule = readFileSync(resolve(packages, 'schedule-contracts/src/index.ts'), 'utf8');
-    const setting = readFileSync(resolve(contractsModules, 'setting/index.ts'), 'utf8');
+    const setting = readFileSync(resolve(packages, 'setting-contracts/src/index.ts'), 'utf8');
     expect(schedule).not.toContain("export * from './dtos'");
     expect(setting).not.toContain("export * from './dtos'");
     expect(schedule).toContain("export * from './api'");
@@ -31,7 +31,8 @@ describe('empty dual barrel re-export single-track surface (residual 661)', () =
     expect(setting).toContain("export * from './preferences'");
     expect(existsSync(resolve(packages, 'schedule-contracts/src/dtos'))).toBe(false);
     expect(existsSync(resolve(contractsModules, 'schedule'))).toBe(false);
-    expect(existsSync(resolve(contractsModules, 'setting/dtos'))).toBe(false);
+    expect(existsSync(resolve(contractsModules, 'setting'))).toBe(false);
+    expect(existsSync(resolve(packages, 'setting-contracts/src/dtos'))).toBe(false);
   });
 
   it('keeps residual-empty dual barrels as note-only files', () => {

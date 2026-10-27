@@ -5,7 +5,7 @@ import {
   TaskPlanOutcome,
   type TaskOccurrenceCompletedEvent,
   type TaskPlanOutcomeChangedEvent,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import { toTaskGoalOutboxRecord } from './task-goal-outbox';
 
 function completionEvent(

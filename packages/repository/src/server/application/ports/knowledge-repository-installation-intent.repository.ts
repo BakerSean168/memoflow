@@ -1,7 +1,7 @@
 import type {
   KnowledgeRepositoryInstallationClientKind,
   KnowledgeRepositoryInstallationIntentStatus,
-} from '@memoflow/contracts/repository';
+} from '@memoflow/repository-contracts';
 
 export interface KnowledgeRepositoryInstallationIntentRecord {
   id: string;

@@ -4,7 +4,7 @@ import * as http from 'node:http';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { LocalAgentConnectionSchema } from '@memoflow/contracts/ai';
+import { LocalAgentConnectionSchema } from '@memoflow/ai-contracts';
 import { AcpDriver } from './acp-driver';
 import { AntigravityLoginManager } from './antigravity-login';
 import {

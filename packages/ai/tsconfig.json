@@ -1,6 +1,5 @@
 {
   "extends": "../../tsconfig.workspace-src.json",
-
   "compilerOptions": {
     "lib": ["ES2020"],
     "types": ["node", "vitest/globals"],
@@ -12,20 +11,26 @@
       "@memoflow/domain-shared": ["../domain-shared/src/index.ts"],
       "@memoflow/domain-shared/shared": ["../domain-shared/src/shared/index.ts"],
       "@memoflow/contracts": ["../contracts/src/index.ts"],
-      "@memoflow/contracts/ai": ["../contracts/src/modules/ai/index.ts"],
-      "@memoflow/contracts/electron": ["../contracts/src/electron/index.ts"],
+      "@memoflow/ai-contracts": ["../ai-contracts/src/index.ts"],
+      "@memoflow/desktop-contracts": ["../desktop-contracts/src/index.ts"],
       "@memoflow/goal-contracts": ["../goal-contracts/src/index.ts"],
       "@memoflow/contracts/primitives": ["../contracts/src/primitives/index.ts"],
-      "@memoflow/contracts/repository": ["../contracts/src/modules/repository/index.ts"],
+      "@memoflow/repository-contracts": ["../../packages/repository-contracts/src/index.ts"],
       "@memoflow/contracts/shared": ["../contracts/src/shared/index.ts"],
       "@memoflow/transport-contracts": ["../transport-contracts/src/index.ts"],
       "@memoflow/transport-contracts/result": ["../transport-contracts/src/result/index.ts"],
       "@memoflow/time": ["../time/src/index.ts"],
       "@memoflow/utils": ["../utils/src/index.ts"],
-      "@memoflow/utils/result": ["../utils/src/result/index.ts"]
+      "@memoflow/utils/result": ["../utils/src/result/index.ts"],
+      "@memoflow/ai-contracts/*": ["../ai-contracts/src/*.ts", "../ai-contracts/src/*/index.ts"],
+      "@memoflow/ai-client": ["../ai-client/src/index.ts"],
+      "@memoflow/ai-client/*": ["../ai-client/src/*.ts", "../ai-client/src/*/index.ts"],
+      "@memoflow/desktop-contracts/*": [
+        "../desktop-contracts/src/*.ts",
+        "../desktop-contracts/src/*/index.ts"
+      ]
     }
   },
-
   "include": ["src"],
   "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
 }

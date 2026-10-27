@@ -21,7 +21,7 @@ describe('TaskWorkspaceQueryService', () => {
       taskPlanRepository: { findByIdForIdentity: vi.fn().mockResolvedValue(plan) } as never,
       taskOccurrenceRepository: occurrences as never,
       userTimeContextPort: TASK_TEST_USER_TIME_CONTEXT_PORT,
-      goalReadPort: { getGoal: vi.fn() },
+      goalReadPort: { getGoalReference: vi.fn() },
       knowledgeRelationReadPort: {
         listEdgeRefsForTask: vi
           .fn()
@@ -70,7 +70,9 @@ describe('TaskWorkspaceQueryService', () => {
   it('maps goal NOT_FOUND and provider failures to distinct fail-soft states while retaining ids', async () => {
     const { service } = harness();
     const goalReadPort = (
-      service as never as { deps: { goalReadPort: { getGoal: ReturnType<typeof vi.fn> } } }
+      service as never as {
+        deps: { goalReadPort: { getGoalReference: ReturnType<typeof vi.fn> } };
+      }
     ).deps.goalReadPort;
     const binding = {
       goalId: 'IGoalId_550e8400-e29b-41d4-a716-446655440000',
@@ -83,7 +85,7 @@ describe('TaskWorkspaceQueryService', () => {
       goalId: binding.goalId,
       keyResultId: binding.keyResultId,
     });
-    goalReadPort.getGoal.mockResolvedValue(error('NOT_FOUND', 'gone'));
+    goalReadPort.getGoalReference.mockResolvedValue(error('NOT_FOUND', 'gone'));
     await expect(
       (service as never as { loadGoalContext: Function }).loadGoalContext('i', binding),
     ).resolves.toMatchObject({
@@ -91,9 +93,14 @@ describe('TaskWorkspaceQueryService', () => {
       goalId: binding.goalId,
       keyResultId: binding.keyResultId,
     });
-    goalReadPort.getGoal.mockResolvedValue(ok({ keyResults: [] }));
-    goalReadPort.getGoal.mockResolvedValue(
-      ok({ name: 'Goal', keyResults: [{ id: binding.keyResultId, title: 'KR' }] }),
+    goalReadPort.getGoalReference.mockResolvedValue(
+      ok({ goal: { goalId: binding.goalId, goalTitle: 'Goal' }, keyResult: null }),
+    );
+    goalReadPort.getGoalReference.mockResolvedValue(
+      ok({
+        goal: { goalId: binding.goalId, goalTitle: 'Goal' },
+        keyResult: { keyResultId: binding.keyResultId, keyResultTitle: 'KR' },
+      }),
     );
     await expect(
       (service as never as { loadGoalContext: Function }).loadGoalContext('i', binding),
@@ -101,7 +108,7 @@ describe('TaskWorkspaceQueryService', () => {
       availability: 'Available',
       goalId: binding.goalId,
       keyResultId: binding.keyResultId,
-      keyResult: { title: 'KR' },
+      keyResult: { keyResultTitle: 'KR' },
     });
   });
 

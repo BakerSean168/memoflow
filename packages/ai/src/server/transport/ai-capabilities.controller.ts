@@ -1,5 +1,5 @@
 import type { Result } from '@memoflow/transport-contracts/result';
-import type { AICapabilities } from '@memoflow/contracts/ai';
+import type { AICapabilities } from '@memoflow/ai-contracts';
 
 interface AICapabilitiesControllerService {
   getCapabilities(): Promise<Result<AICapabilities>>;

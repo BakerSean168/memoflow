@@ -82,7 +82,7 @@ Product Governance Runtime 已由 ADR-113 退休，因此其已删除 dual/keep-
 | `retired`       | `tools/governance/app-vue-source-locks.json#desktop-bridge-electron-bridge-dual`                                                   |
 | `keep_boundary` | `tools/governance/app-vue-source-locks.json#service-client-port-facade-keep-boundary`                                              |
 | `retired`       | `packages/app-vue/src/layouts/shell/clamp-dual.surface.spec.ts`                                                                    |
-| `retired`       | `packages/app-vue/src/modules/ai/composables/dual-registry.surface.spec.ts`                                                        |
+| `retired`       | `packages/ai-ui/src/composables/dual-registry.surface.spec.ts`                                                                     |
 | `keep_boundary` | `tools/governance/app-vue-source-locks.json#password-toast-only-keep-boundary`                                                     |
 | `keep_boundary` | `tools/governance/app-vue-source-locks.json#goal-operations-keep-boundary`                                                         |
 | `keep_boundary` | `tools/governance/app-vue-source-locks.json#clamp-percentage-keep-boundary`                                                        |
@@ -107,8 +107,8 @@ Product Governance Runtime 已由 ADR-113 退休，因此其已删除 dual/keep-
 | `retired`       | `packages/contracts/src/modules/account/api/dual-registry.surface.spec.ts`                                                         |
 | `retired`       | `packages/contracts/src/modules/account/empty-dual-barrel.surface.spec.ts`                                                         |
 | `retired`       | `packages/contracts/src/modules/account/entities/account-entities-dual.surface.spec.ts`                                            |
-| `retired`       | `packages/contracts/src/modules/ai/api/dual-registry.surface.spec.ts`                                                              |
-| `keep_boundary` | `packages/contracts/src/modules/ai/configs/get-template-by-id-keep-boundary.surface.spec.ts`                                       |
+| `retired`       | `packages/ai-contracts/src/api/dual-registry.surface.spec.ts`                                                                      |
+| `keep_boundary` | `packages/ai-contracts/src/configs/get-template-by-id-keep-boundary.surface.spec.ts`                                               |
 | `retired`       | `packages/contracts/src/modules/goal/api/dual-registry.surface.spec.ts`                                                            |
 | `retired`       | `packages/contracts/src/modules/goal/value-objects/dual-registry.surface.spec.ts`                                                  |
 | `retired`       | `packages/contracts/src/modules/notification/aggregates/notification-client-dto-dual.surface.spec.ts`                              |
@@ -155,7 +155,7 @@ Product Governance Runtime 已由 ADR-113 退休，因此其已删除 dual/keep-
 | `retired`       | `packages/schedule/src/server/application/scheduler/patterns-scheduler-dual.surface.spec.ts`                                       |
 | `retired`       | `packages/setting/src/application-client/setting-client-port-dual.surface.spec.ts`                                                 |
 | `retired`       | `packages/task/src/api/routes/get-first-query-value-dual.surface.spec.ts`                                                          |
-| `retired`       | `packages/task/src/application-client/task-client-port-facade-dual.surface.spec.ts`                                                |
+| `retired`       | `packages/task-client/src/application-client/task-client-port-facade-dual.surface.spec.ts`                                         |
 | `retired`       | `packages/task/src/server/infrastructure/normalize-runtime-contributions-dual.surface.spec.ts`                                     |
 | `retired`       | `packages/task/src/testing/an-identity-id-dual.surface.spec.ts`                                                                    |
 | `retired`       | `packages/utils/src/frontend/delay-dual.surface.spec.ts`                                                                           |

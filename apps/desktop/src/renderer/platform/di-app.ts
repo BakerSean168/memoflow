@@ -1,8 +1,11 @@
 import {
   installAccountUiHost,
   installGoalUiHost,
+  installAiUiHost,
   installNotificationUiHost,
+  installRepositoryUiHost,
   installRoutineUiHost,
+  installTaskUiHost,
 } from '@memoflow/app-vue/di';
 /**
  * Desktop Platform DI — IPC Adapter Injection
@@ -17,12 +20,13 @@ import { createCloudAuthIpcClient } from '@memoflow/cloud-auth';
 import { createGoalIpcClient } from '@memoflow/goal-client';
 import { createGoalKnowledgeIpcClient } from '@memoflow/relation/client';
 import { createLabelIpcClient } from '@memoflow/label/client';
-import { createTaskIpcClient } from '@memoflow/task/client';
+import { createTaskIpcClient } from '@memoflow/task-client';
 import { createScheduleIpcClient } from '@memoflow/schedule-client';
-import { createRepositoryIpcClient } from '@memoflow/repository/client';
+import { createRepositoryIpcClient } from '@memoflow/repository-client';
 import { createNotificationIpcClient } from '@memoflow/notification-client';
+
 import { createRoutineIpcClient } from '@memoflow/routine-client';
-import { createSettingIpcClient } from '@memoflow/setting/client';
+import { createSettingIpcClient } from '@memoflow/setting-client';
 import {
   createAIIpcClient,
   createAssistantRuntimeIpcClient,
@@ -30,7 +34,7 @@ import {
   createAgentRegistryIpcClient,
   createRuntimeUsageIpcClient,
   createWorkflowRuntimeIpcClient,
-} from '@memoflow/ai/client';
+} from '@memoflow/ai-client';
 import { createDataPortabilityIpcClient } from '@memoflow/data-portability/client';
 import {
   ACCOUNT_SERVICE_KEY,
@@ -93,7 +97,10 @@ export function installDesktopAppServices(
 ): void {
   installAccountUiHost();
   installGoalUiHost();
+  installAiUiHost();
+  installTaskUiHost();
   installNotificationUiHost();
+  installRepositoryUiHost();
   installRoutineUiHost();
   const bridge = requireElectronBridge('installDesktopAppServices');
 

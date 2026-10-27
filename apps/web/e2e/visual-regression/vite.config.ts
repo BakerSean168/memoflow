@@ -6,6 +6,7 @@ import {
   createOperationsContractsAliasEntries,
   createAccountContractsAliasEntries,
   createNotificationContractsAliasEntries,
+  createTaskContractsAliasEntries,
   createAssetsAliasEntries,
   createWorkspaceSourceAliasEntries,
 } from '../../../../vite.workspace-aliases.ts';
@@ -29,6 +30,7 @@ export default defineConfig(({ mode }) =>
         ...createOperationsContractsAliasEntries(workspace),
         ...createAccountContractsAliasEntries(workspace),
         ...createNotificationContractsAliasEntries(workspace),
+        ...createTaskContractsAliasEntries(workspace),
         ...createAssetsAliasEntries(workspace),
         ...createWorkspaceSourceAliasEntries(workspace, [
           [
@@ -36,7 +38,7 @@ export default defineConfig(({ mode }) =>
             'packages/routine-contracts/src/method-library/index.ts',
           ],
           ['@memoflow/utils/domain', 'packages/utils/src/domain/index.ts'],
-          ['@memoflow/task/client', 'packages/task/src/client/index.ts'],
+          ['@memoflow/task-client', 'packages/task-client/src/index.ts'],
           ['@memoflow/goal-client', 'packages/goal-client/src/index.ts'],
           ['@memoflow/goal-core/ids', 'packages/goal-core/src/ids.ts'],
           [
@@ -124,6 +126,13 @@ export default defineConfig(({ mode }) =>
             'packages/notification-ui/src/notification-ui-host.ts',
           ],
           ['@memoflow/notification-ui', 'packages/notification-ui/src/index.ts'],
+          ['@memoflow/setting-ui/host', 'packages/setting-ui/src/setting-ui-host.ts'],
+          ['@memoflow/setting-ui', 'packages/setting-ui/src/index.ts'],
+          ['@memoflow/task-ui/host', 'packages/task-ui/src/task-ui-host.ts'],
+          ['@memoflow/task-ui', 'packages/task-ui/src'],
+          ['@memoflow/repository-ui/host', 'packages/repository-ui/src/repository-ui-host.ts'],
+          ['@memoflow/repository-ui', 'packages/repository-ui/src/index.ts'],
+          ['@memoflow/repository-contracts', 'packages/repository-contracts/src/index.ts'],
           ['@memoflow/goal-ui', 'packages/goal-ui/src/index.ts'],
           ['@memoflow/workspace-contracts', 'packages/workspace-contracts/src/index.ts'],
           [
@@ -166,9 +175,12 @@ export default defineConfig(({ mode }) =>
           ['@memoflow/domain-shared/shared', 'packages/domain-shared/src/shared/index.ts'],
           ['@memoflow/domain-shared', 'packages/domain-shared/src/index.ts'],
           ['@memoflow/routine-client', 'packages/routine-client/src/index.ts'],
-          ['@memoflow/repository/client', 'packages/repository/src/client/index.ts'],
-          ['@memoflow/ai/client', 'packages/ai/src/client/index.ts'],
+          ['@memoflow/repository-client', 'packages/repository-client/src/index.ts'],
+          ['@memoflow/ai-client', 'packages/ai-client/src/index.ts'],
           ['@memoflow/notification-client', 'packages/notification-client/src/index.ts'],
+          ['@memoflow/setting-client', 'packages/setting-client/src/index.ts'],
+          ['@memoflow/setting-contracts', 'packages/setting-contracts/src/index.ts'],
+          ['@memoflow/setting-contracts/*', 'packages/setting-contracts/src/*.ts'],
         ]),
       ],
     },

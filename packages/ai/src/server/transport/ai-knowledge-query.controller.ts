@@ -10,7 +10,7 @@ import {
   type QueryKnowledgeRes,
   type ReindexKnowledgeReq,
   type ReindexKnowledgeRes,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { formatZodErrors } from '@memoflow/utils/result';
 
 interface AIKnowledgeQueryControllerService {

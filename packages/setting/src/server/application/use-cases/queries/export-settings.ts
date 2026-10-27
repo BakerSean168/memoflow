@@ -3,7 +3,7 @@ import {
   ExportSettingsResponseSchema,
   PreferencePortableDocumentV3Schema,
   type ExportSettingsRes,
-} from '@memoflow/contracts/setting';
+} from '@memoflow/setting-contracts';
 import type { PreferencePortableService } from '../../../preferences/preference-portability';
 
 function exportFileName(exportedAt: string): string {

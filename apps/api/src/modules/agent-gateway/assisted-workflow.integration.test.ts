@@ -23,8 +23,8 @@ import { createScopedPatService } from '@memoflow/cloud-auth/server';
 import { createAccountPrismaActiveQuery } from '@memoflow/account';
 import { createTimeContext } from '@memoflow/time';
 import { GatewayReadError, type GatewayWriteAuthority } from '@memoflow/agent-gateway';
-import { GatewayTaskReceiptSchema, type AssistedView } from '@memoflow/contracts/agent-gateway';
-import { TaskPlanDraftContentSchema, type TaskPlanningDecision } from '@memoflow/contracts/ai';
+import { GatewayTaskReceiptSchema, type AssistedView } from '@memoflow/agent-gateway';
+import { TaskPlanDraftContentSchema, type TaskPlanningDecision } from '@memoflow/ai-contracts';
 import {
   cleanAll,
   seedAccount,

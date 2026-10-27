@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/task/src",
   "projectType": "library",
-  "tags": ["scope:task", "type:lib", "layer:domain"],
+  "tags": ["scope:task", "type:lib", "layer:domain", "tier:server"],
   "targets": {
     "build": {
       "executor": "nx:run-commands",

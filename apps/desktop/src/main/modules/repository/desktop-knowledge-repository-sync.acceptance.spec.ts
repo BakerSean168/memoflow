@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import type { KnowledgeRemoteBindingClientDTO } from '@memoflow/contracts/repository';
+import type { KnowledgeRemoteBindingClientDTO } from '@memoflow/repository-contracts';
 import { ok } from '@memoflow/contracts/result';
 import {
   DesktopKnowledgeRepositoryGitRuntime,

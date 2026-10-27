@@ -36,7 +36,7 @@ import { useNativeBusinessPanelBridge } from '../layouts/shell/useNativeBusiness
 import { useShellRouterSync } from '../layouts/shell/useShellRouterSync';
 import { useAppShellStore, MAX_BUSINESS_TABS } from '../layouts/shell/useAppShellStore';
 import { canLeaveBusinessSurface } from '../layouts/shell/surface-leave-protocol';
-import { canLeaveAIWorkflowReview } from '../modules/ai/composables/chatViewHelpers';
+import { canLeaveAIWorkflowReview } from '@memoflow/ai-ui/composables/chatViewHelpers';
 
 const goalMocks = vi.hoisted(() => ({
   createGoal: vi.fn(),

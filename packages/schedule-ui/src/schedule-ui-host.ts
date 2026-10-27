@@ -7,7 +7,7 @@ import type {
   RescheduleTaskInput,
   TaskOccurrenceClientDTO,
   TaskPlanClientDTO,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import type { ScheduleClientPort } from '@memoflow/schedule-client';
 
 export type PanelSurfaceStatus = 'clean' | 'dirty' | 'busy';

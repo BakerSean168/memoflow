@@ -10,7 +10,7 @@
       "@memoflow/contracts": ["../../../../packages/contracts/src/index.ts"],
       "@memoflow/account-contracts": ["../../../../packages/account-contracts/src/index.ts"],
       "@memoflow/account-contracts/*": ["../../../../packages/account-contracts/src/*.ts"],
-      "@memoflow/contracts/ai": ["../../../../packages/contracts/src/modules/ai/index.ts"],
+      "@memoflow/ai-contracts": ["../../../../packages/ai-contracts/src/index.ts"],
       "@memoflow/goal-contracts": ["../../../../packages/goal-contracts/src/index.ts"],
       "@memoflow/notification-contracts": [
         "../../../../packages/notification-contracts/src/index.ts"
@@ -19,17 +19,15 @@
         "../../../../packages/notification-contracts/src/*.ts"
       ],
       "@memoflow/contracts/primitives": ["../../../../packages/contracts/src/primitives/index.ts"],
-      "@memoflow/contracts/repository": [
-        "../../../../packages/contracts/src/modules/repository/index.ts"
-      ],
+      "@memoflow/repository-contracts": ["../../../../packages/repository-contracts/src/index.ts"],
       "@memoflow/contracts/result": ["../../../../packages/contracts/src/result/index.ts"],
       "@memoflow/schedule-contracts": ["../../../../packages/schedule-contracts/src/index.ts"],
       "@memoflow/schedule-contracts/*": ["../../../../packages/schedule-contracts/src/*.ts"],
-      "@memoflow/contracts/setting": [
-        "../../../../packages/contracts/src/modules/setting/index.ts"
-      ],
+      "@memoflow/setting-contracts": ["../../../../packages/setting-contracts/src/index.ts"],
+      "@memoflow/setting-contracts/*": ["../../../../packages/setting-contracts/src/*.ts"],
       "@memoflow/contracts/shared": ["../../../../packages/contracts/src/shared/index.ts"],
-      "@memoflow/contracts/task": ["../../../../packages/contracts/src/modules/task/index.ts"],
+      "@memoflow/task-contracts": ["../../../../packages/task-contracts/src/index.ts"],
+      "@memoflow/task-contracts/*": ["../../../../packages/task-contracts/src/*.ts"],
       "@memoflow/contracts/*": [
         "../../../../packages/contracts/src/modules/*/index.ts",
         "../../../../packages/contracts/src/*/index.ts"
@@ -46,13 +44,19 @@
       ],
       "@memoflow/ui-vue-shadcn/*": ["../../../../packages/ui-vue-shadcn/dist/*"],
       "@memoflow/http-client": ["../../../../packages/http-client/src/index.ts"],
-      "@memoflow/ai/client": ["../../../../packages/ai/dist/client/index.d.ts"],
+      "@memoflow/ai-contracts/*": ["../../../../packages/ai-contracts/dist/*.d.ts"],
+      "@memoflow/ai-client/*": ["../../../../packages/ai-client/dist/*.d.ts"],
+      "@memoflow/ai-ui": ["../../../../packages/ai-ui/dist/index.d.ts"],
+      "@memoflow/ai-ui/*": ["../../../../packages/ai-ui/dist/*.d.ts"],
+      "@memoflow/ai-ui/host": ["../../../../packages/ai-ui/dist/ai-ui-host.d.ts"],
+      "@memoflow/ai-ui/router": ["../../../../packages/ai-ui/dist/router/index.d.ts"],
+      "@memoflow/ai-client": ["../../../../packages/ai-client/dist/index.d.ts"],
       "@memoflow/goal-client": ["../../../../packages/goal-client/dist/index.d.ts"],
       "@memoflow/schedule-client": ["../../../../packages/schedule-client/dist/index.d.ts"],
       "@memoflow/notification/client": ["../../../../packages/notification/dist/client/index.d.ts"],
       "@memoflow/routine-client": ["../../../../packages/routine-client/dist/index.d.ts"],
-      "@memoflow/task/client": ["../../../../packages/task/dist/client/index.d.ts"],
-      "@memoflow/repository/client": ["../../../../packages/repository/dist/client/index.d.ts"],
+      "@memoflow/task-client": ["../../../../packages/task-client/dist/index.d.ts"],
+      "@memoflow/repository-client": ["../../../../packages/repository-client/dist/index.d.ts"],
       "@memoflow/test-utils": ["../../../../packages/test-utils/src/index.ts"],
       "@memoflow/test-utils/*": [
         "../../../../packages/test-utils/src/*",

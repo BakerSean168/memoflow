@@ -5,7 +5,7 @@ import {
   GoalPlanKeyResultSchema,
   GoalWorkflowActionIdSchema,
   GoalWorkflowLiveActionSchema,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { z } from 'zod';
 import { requireGoalWorkflowLiveActionSink } from '../workflows/goal-business-action-journal';
 

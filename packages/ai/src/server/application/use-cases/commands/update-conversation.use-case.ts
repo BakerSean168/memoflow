@@ -1,7 +1,7 @@
 import type { Result } from '@memoflow/transport-contracts/result';
 import { ok, error } from '@memoflow/transport-contracts/result';
 import type { IAIConversationRepository } from '../../../domain/repositories/i-ai-conversation-repository';
-import type { AIConversationClientDTO, UpdateConversationReq } from '@memoflow/contracts/ai';
+import type { AIConversationClientDTO, UpdateConversationReq } from '@memoflow/ai-contracts';
 
 export class UpdateConversationUseCase {
   constructor(private readonly conversationRepository: IAIConversationRepository) {}

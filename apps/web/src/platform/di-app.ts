@@ -1,8 +1,11 @@
 import {
   installAccountUiHost,
   installGoalUiHost,
+  installAiUiHost,
   installNotificationUiHost,
+  installRepositoryUiHost,
   installRoutineUiHost,
+  installTaskUiHost,
 } from '@memoflow/app-vue/di';
 /**
  * Web Platform - full app DI container.
@@ -82,7 +85,7 @@ export function executeWebNotificationAction(request: ExecuteNotificationActionR
 }
 
 const repositoryService = createLazyService(async () => {
-  const { createRepositoryHttpClient } = await import('@memoflow/repository/client');
+  const { createRepositoryHttpClient } = await import('@memoflow/repository-client');
   return createRepositoryHttpClient(resultHttpClient);
 });
 
@@ -97,7 +100,7 @@ const scheduleService = createLazyService(async () => {
 });
 
 const settingService = createLazyService(async () => {
-  const { createSettingHttpClient } = await import('@memoflow/setting/client');
+  const { createSettingHttpClient } = await import('@memoflow/setting-client');
   return createSettingHttpClient(resultHttpClient);
 });
 
@@ -107,39 +110,42 @@ const dataPortabilityService = createLazyService(async () => {
 });
 
 const aiClient = createLazyService(async () => {
-  const { createAIHttpClient } = await import('@memoflow/ai/client');
+  const { createAIHttpClient } = await import('@memoflow/ai-client');
   return createAIHttpClient(resultHttpClient);
 });
 
 const agentRegistryClient = createLazyService(async () => {
-  const { createAgentRegistryHttpClient } = await import('@memoflow/ai/client');
+  const { createAgentRegistryHttpClient } = await import('@memoflow/ai-client');
   return createAgentRegistryHttpClient(resultHttpClient);
 });
 
 const aiAssistantRuntime = createLazyService(async () => {
-  const { createAssistantRuntimeHttpClient } = await import('@memoflow/ai/client');
+  const { createAssistantRuntimeHttpClient } = await import('@memoflow/ai-client');
   return createAssistantRuntimeHttpClient(resultHttpClient);
 });
 
 const aiWorkflowRuntime = createLazyService(async () => {
-  const { createWorkflowRuntimeHttpClient } = await import('@memoflow/ai/client');
+  const { createWorkflowRuntimeHttpClient } = await import('@memoflow/ai-client');
   return createWorkflowRuntimeHttpClient(resultHttpClient);
 });
 
 const aiRuntimeUsage = createLazyService(async () => {
-  const { createRuntimeUsageHttpClient } = await import('@memoflow/ai/client');
+  const { createRuntimeUsageHttpClient } = await import('@memoflow/ai-client');
   return createRuntimeUsageHttpClient(resultHttpClient);
 });
 
 const taskService = createLazyService(async () => {
-  const { createTaskHttpClient } = await import('@memoflow/task/client');
+  const { createTaskHttpClient } = await import('@memoflow/task-client');
   return createTaskHttpClient(resultHttpClient);
 });
 
 export function installAppServices(app: App): void {
   installAccountUiHost();
   installGoalUiHost();
+  installAiUiHost();
+  installTaskUiHost();
   installNotificationUiHost();
+  installRepositoryUiHost();
   installRoutineUiHost();
   app.provide(ACCOUNT_SERVICE_KEY, accountService);
   app.provide(AUTH_SERVICE_KEY, authService);

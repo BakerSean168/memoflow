@@ -52,6 +52,31 @@ forbidPatterns('packages/workspace-contracts/src/goal-workspace.dto.ts', [
   [/\bnoteIds\b/, 'Workspace contract must not copy Knowledge ids into Goal authority'],
   [/^\s*keyResults:\s/m, 'Workspace must not duplicate goal.keyResults at the top level'],
 ]);
+// Issue #635 step 2: the Task Workspace goal context is a reference, not the
+// Goal aggregate. Four scalars were the whole consumer surface.
+requireTokens('packages/workspace-contracts/src/task-workspace.dto.ts', [
+  'TaskWorkspaceGoalContextSchema',
+  'GoalReferenceSchema',
+  'KeyResultReferenceSchema',
+]);
+forbidPatterns('packages/workspace-contracts/src/task-workspace.dto.ts', [
+  [
+    /\bGoalClientDTOSchema\b/,
+    'Task Workspace contract must not embed the Goal aggregate (use GoalReferenceSchema)',
+  ],
+  [
+    /\bKeyResultClientDTOSchema\b/,
+    'Task Workspace contract must not embed the KeyResult DTO (use KeyResultReferenceSchema)',
+  ],
+]);
+forbidPatterns('packages/task/src/server/application/ports/task-workspace-read.ports.ts', [
+  [/\bGetGoalRes\b/, 'Task goal read port must not receive the Goal command response aggregate'],
+]);
+requireTokens('packages/task/src/server/application/ports/task-workspace-read.ports.ts', [
+  'getGoalReference(',
+  'GoalReference',
+  'KeyResultReference',
+]);
 forbidPatterns('packages/goal-contracts/src/api/response-schemas.ts', [
   [/\btaskIds\b/, 'GoalClientDTO must not own Task ids'],
   [/\bnoteIds\b/, 'GoalClientDTO must not own Knowledge ids'],
@@ -131,6 +156,8 @@ requireTokens('apps/api/src/server.ts', [
   'composeGoalKnowledgeApiModule({ service: goalKnowledgeService })',
   'new GoalWorkspaceQueryService({',
   'composeGoalWorkspaceApiModule({ port: goalWorkspaceService })',
+  'goalReadPort: {',
+  'getGoalReference: async (goalId, keyResultId, identityId) => {',
 ]);
 requireTokens('apps/desktop/src/main/main.ts', [
   'const taskGoalContextReadPort = new PowerSyncTaskBindingReadPort(db)',
@@ -141,6 +168,8 @@ requireTokens('apps/desktop/src/main/main.ts', [
   'service: goalKnowledgeService',
   'new GoalWorkspaceQueryService({',
   'createGoalWorkspaceElectronModule({',
+  'goalReadPort: {',
+  'getGoalReference: async (goalId, keyResultId, identityId) => {',
 ]);
 
 requireTokens('apps/api/src/modules/goal/goal-workspace.module.ts', [

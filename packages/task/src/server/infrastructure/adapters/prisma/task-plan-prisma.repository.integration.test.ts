@@ -13,7 +13,7 @@ import {
   TaskPlanScheduleKind,
   type TaskRecurrence,
   type TaskTiming,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import { TaskPlan } from '../../../domain/aggregates/task-plan';
 import { TaskPlanPrismaRepository } from './task-plan-prisma.repository';
 import { TaskLabelOwnershipError } from '../../../domain/repositories/i-task-plan-repository';

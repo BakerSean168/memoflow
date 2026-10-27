@@ -8,7 +8,7 @@ import {
   LocalAgentConnectionSchema,
   type LocalAgentAuthState,
   type LocalAgentStatus,
-} from '@memoflow/contracts/ai';
+} from '@memoflow/ai-contracts';
 import { LocalAgentError } from '../../shared/local-agent-error';
 import { AntigravityLoginManager, type AntigravityAuthTransport } from './antigravity-login';
 import type { NativeProcessOptions } from './native-rpc-transport';

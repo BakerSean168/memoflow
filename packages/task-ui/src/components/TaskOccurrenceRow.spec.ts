@@ -1,0 +1,183 @@
+/** @vitest-environment happy-dom */
+
+import { mount } from '@vue/test-utils';
+import { createI18n } from 'vue-i18n';
+import { describe, expect, it, vi } from 'vitest';
+import type { TaskOccurrenceClientDTO, TaskPlanClientDTO } from '@memoflow/task-contracts';
+import enTask from '@task-ui-test-host/locales/en-US/task';
+import TaskOccurrenceRow from './TaskOccurrenceRow.vue';
+import { installTaskUiHost } from '@task-ui-test-host/di/task-ui-host';
+installTaskUiHost();
+
+const i18n = createI18n({
+  legacy: false,
+  locale: 'en-US',
+  messages: {
+    'en-US': {
+      task: enTask,
+    },
+  },
+});
+const day = new Date(2026, 7, 28).getTime();
+
+function instance(overrides: Partial<TaskOccurrenceClientDTO> = {}): TaskOccurrenceClientDTO {
+  const status = overrides.status ?? 'Pending';
+  const defaultResult =
+    status === 'Completed'
+      ? {
+          kind: 'Completed' as const,
+          recordedAt: day + 10 * 60 * 60_000,
+          actualDurationMinutes: null,
+          note: null,
+          rating: null,
+        }
+      : status === 'Missed'
+        ? { kind: 'Missed' as const, recordedAt: day + 10 * 60 * 60_000, reason: null }
+        : status === 'Skipped'
+          ? { kind: 'Skipped' as const, recordedAt: day + 10 * 60 * 60_000, reason: null }
+          : null;
+  return {
+    id: 'occurrence-1' as TaskOccurrenceClientDTO['id'],
+    planId: 'plan-1' as TaskOccurrenceClientDTO['planId'],
+    identityId: 'identity-1' as TaskOccurrenceClientDTO['identityId'],
+    occurrenceKey: 'plan-1:2026-08-28',
+    scheduleSnapshot: {
+      date: '2026-08-28' as TaskOccurrenceClientDTO['scheduleSnapshot']['date'],
+      timing: { kind: 'At', time: '09:00' },
+    },
+    importanceSnapshot: 'Moderate',
+    status,
+    actualStartAt: null,
+    result: defaultResult,
+    checklistState: [],
+    dueAt: day + 9 * 60 * 60_000,
+    isOverdue: false,
+    version: 1,
+    createdAt: day,
+    updatedAt: day,
+    deletedAt: null,
+    ...overrides,
+  };
+}
+
+const template = {
+  id: 'plan-1',
+  name: 'Morning review',
+  description: null,
+  status: 'Active',
+  schedule: {
+    kind: 'Recurring',
+    startDate: '2026-08-28',
+    timing: { kind: 'At', time: '09:00' },
+    recurrence: {
+      frequency: 'Daily',
+      interval: 1,
+      byWeekday: [],
+      end: { kind: 'Count', count: 10 },
+    },
+  },
+  importance: 'Moderate',
+  reminderConfig: null,
+  checklist: [{ id: 'check-1', title: 'Prepare evidence', order: 0 }],
+  labels: [{ id: 'label-focus', name: 'Focus', color: null }],
+  goalBinding: { goalId: 'goal-1', keyResultId: 'kr-1', contribution: null },
+} as TaskPlanClientDTO;
+
+function mountRow(overrides: Partial<TaskOccurrenceClientDTO> = {}) {
+  return mount(TaskOccurrenceRow, {
+    props: {
+      occurrence: instance(overrides),
+      template,
+      position: { position: 3, total: 10 },
+      now: day + 12 * 60 * 60_000,
+    },
+    global: { plugins: [i18n] },
+  });
+}
+
+describe('TaskOccurrenceRow', () => {
+  it('renders occurrence state, repeat position, Goal context, and real correction actions', () => {
+    const wrapper = mountRow();
+
+    expect(wrapper.text()).toContain('Morning review');
+    expect(wrapper.text()).toContain('Overdue');
+    expect(wrapper.text()).toContain('Occurrence 3 of 10');
+    expect(wrapper.text()).toContain('Goal linked');
+    expect(wrapper.get('[data-testid="task-occurrence-complete"]')).toBeTruthy();
+    expect(wrapper.get('[data-testid="task-occurrence-missed"]')).toBeTruthy();
+    expect(wrapper.get('[data-testid="task-occurrence-skip"]')).toBeTruthy();
+  });
+
+  it('emits complete, missed, skip, and plan navigation with durable IDs', async () => {
+    const wrapper = mountRow();
+
+    await wrapper.get('[data-testid="task-occurrence-complete"]').trigger('click');
+    await wrapper.get('[data-testid="task-occurrence-missed"]').trigger('click');
+    await wrapper.get('[data-testid="task-occurrence-skip"]').trigger('click');
+    await wrapper.get('button[aria-label="Open plan Morning review"]').trigger('click');
+
+    expect(wrapper.emitted('inspect')).toBeUndefined();
+    expect(wrapper.emitted('complete')).toEqual([['occurrence-1']]);
+    expect(wrapper.emitted('missed')).toEqual([['occurrence-1']]);
+    expect(wrapper.emitted('skip')).toEqual([['occurrence-1']]);
+    expect(wrapper.emitted('open-plan')).toEqual([['plan-1']]);
+  });
+
+  it('renders checklist snapshot items and emits an owner command with optimistic version', async () => {
+    const wrapper = mountRow({
+      checklistState: [
+        {
+          definitionId: 'check-1',
+          titleSnapshot: 'Prepare evidence',
+          orderSnapshot: 0,
+          completed: false,
+          completedAt: null,
+        },
+      ],
+      version: 7,
+    });
+
+    expect(wrapper.get('[data-testid="task-occurrence-checklist"]').text()).toContain(
+      'Prepare evidence',
+    );
+    await wrapper.get('[data-testid="task-occurrence-checklist-check-1"]').trigger('click');
+
+    expect(wrapper.emitted('checklist-change')).toEqual([['occurrence-1', 'check-1', true, 7]]);
+  });
+
+  it('offers undo instead of completing an already-completed occurrence', async () => {
+    const wrapper = mountRow({ status: 'Completed' });
+
+    expect(wrapper.find('[data-testid="task-occurrence-complete"]').exists()).toBe(false);
+    const undo = wrapper.get('[data-testid="task-occurrence-uncomplete"]');
+    await undo.trigger('click');
+    expect(wrapper.emitted('uncomplete')).toEqual([['occurrence-1']]);
+  });
+});
+
+describe('Today inspect intent', () => {
+  it('opens inspect only from the body, preserving independent controls', async () => {
+    const wrapper = mountRow({
+      checklistState: [
+        {
+          definitionId: 'step',
+          titleSnapshot: 'Step',
+          orderSnapshot: 0,
+          completed: false,
+          completedAt: null,
+        },
+      ],
+    });
+    await wrapper.setProps({ inspect: true });
+    const bubbled = vi.fn();
+    wrapper.element.addEventListener('click', bubbled);
+    for (const id of ['complete', 'missed', 'skip', 'checklist-step']) {
+      await wrapper.get(`[data-testid="task-occurrence-${id}"]`).trigger('click');
+    }
+    expect(wrapper.emitted('inspect')).toBeUndefined();
+    expect(bubbled).not.toHaveBeenCalled();
+    await wrapper.get('[data-testid="task-occurrence-body"]').trigger('click');
+    expect(wrapper.emitted('inspect')).toEqual([['occurrence-1']]);
+    expect(wrapper.emitted('open-plan')).toBeUndefined();
+  });
+});

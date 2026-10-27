@@ -4,7 +4,7 @@ import {
   TaskRecurrenceEndKind,
   RecurrenceFrequency,
   type TaskPlanOutcomeValue,
-} from '@memoflow/contracts/task';
+} from '@memoflow/task-contracts';
 import type { Ymd } from '@memoflow/contracts/primitives';
 import type { TaskPlan } from '../aggregates/task-plan';
 import { addYmdDays, createTimeFacade, type TimeContext } from '@memoflow/time';

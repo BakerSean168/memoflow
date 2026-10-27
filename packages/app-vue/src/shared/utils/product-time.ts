@@ -4,7 +4,7 @@ import { shallowRef } from 'vue';
  * Guest bootstrap uses explicit device context; signed-in bootstrap applies canonical preferences.
  * P1: empty kinds via resolveEmptyLabel / emptyKind — no L5 formatDate wrappers.
  */
-import type { UserPreferenceProfile } from '@memoflow/contracts/setting';
+import type { UserPreferenceProfile } from '@memoflow/setting-contracts';
 import type { Ymd } from '@memoflow/contracts/primitives';
 import {
   createSystemTimeZoneSource,

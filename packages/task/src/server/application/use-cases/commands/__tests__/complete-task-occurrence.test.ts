@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import '@memoflow/test-utils/helpers/result-matchers';
 import { createMockRepo } from '@memoflow/test-utils/mocks';
-import { TaskGoalBindingTrigger, TaskPlanOutcome } from '@memoflow/contracts/task';
+import { TaskGoalBindingTrigger, TaskPlanOutcome } from '@memoflow/task-contracts';
 import {
   aLoadedTaskPlan,
   aTaskOccurrence,

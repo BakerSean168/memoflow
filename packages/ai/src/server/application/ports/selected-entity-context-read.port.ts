@@ -1,4 +1,4 @@
-import type { AIContextEntityType } from '@memoflow/contracts/ai';
+import type { AIContextEntityType } from '@memoflow/ai-contracts';
 
 /**
  * Owner-projected context for an explicitly selected product entity.

@@ -1,7 +1,7 @@
 {
   "name": "@memoflow/ipc-client",
   "version": "0.0.1",
-  "description": "MemoFlow IPC Client — Electron IPC communication with Result Pattern",
+  "description": "MemoFlow IPC Client \u2014 Electron IPC communication with Result Pattern",
   "private": true,
   "type": "module",
   "main": "./dist/index.js",

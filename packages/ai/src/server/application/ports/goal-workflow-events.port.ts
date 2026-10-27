@@ -1,4 +1,4 @@
-import type { AIWorkflowRunView, GoalWorkflowLiveActionRecord } from '@memoflow/contracts/ai';
+import type { AIWorkflowRunView, GoalWorkflowLiveActionRecord } from '@memoflow/ai-contracts';
 
 export interface GoalWorkflowChange {
   eventId: string;

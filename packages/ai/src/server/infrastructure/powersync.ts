@@ -8,7 +8,7 @@ import { AttentionEventsPowerSync } from './adapters/powersync/attention-events.
  * AIService/AgentHost capability ports.
  */
 
-import type { IElectronDatabase } from '@memoflow/contracts/electron';
+import type { IElectronDatabase } from '@memoflow/desktop-contracts';
 import { AgentInstancePowerSyncRepository } from './adapters/powersync/agent-instance.repository';
 import type { IAgentInstanceRepository } from '../application/agent-instance/agent-instance.repository';
 import type {

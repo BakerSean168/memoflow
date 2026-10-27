@@ -6,7 +6,7 @@
       "id": "rule-task-authority-49",
       "contract": "task-authority",
       "reason": "task-authority: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/task/stores/task-store.ts",
+      "file": "packages/task-ui/src/stores/task-store.ts",
       "forbidElements": ["TaskPlanClientDTO"],
       "forbidObjectProperties": [
         {
@@ -25,7 +25,7 @@
       "id": "rule-task-authority-50",
       "contract": "task-authority",
       "reason": "task-authority: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/task/views/TaskManagementView.vue",
+      "file": "packages/task-ui/src/views/TaskManagementView.vue",
       "forbidIdentifiers": ["fetchTaskGraph", "refreshTaskManagement"],
       "forbidExpressionPatterns": [
         {
@@ -37,7 +37,7 @@
       "id": "rule-task-authority-51",
       "contract": "task-authority",
       "reason": "task-authority: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/task/views/TaskDetailView.vue",
+      "file": "packages/task-ui/src/views/TaskDetailView.vue",
       "forbidIdentifiers": ["fetchTaskGraph", "fetchTemplate", "loadDetailPage"],
       "forbidExpressionPatterns": [
         {
@@ -259,17 +259,17 @@
       "file": "packages/app-vue/src/di/types.ts",
       "requireImports": [
         {
-          "from": "@memoflow/contracts/cloud-auth",
+          "from": "@memoflow/cloud-auth-contracts",
           "names": ["CloudAuthClientPort"]
         },
         {
           "from": "@memoflow/goal-client"
         },
         {
-          "from": "@memoflow/ai/client"
+          "from": "@memoflow/ai-client"
         },
         {
-          "from": "@memoflow/repository/client"
+          "from": "@memoflow/repository-client"
         },
         {
           "from": "@memoflow/relation/client"
@@ -351,14 +351,14 @@
       "id": "rule-use-ai-chat-host-dispatch-99",
       "contract": "use-ai-chat-host-dispatch",
       "reason": "use-ai-chat-host-dispatch: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/ai/composables/types.ts",
+      "file": "packages/ai-ui/src/composables/types.ts",
       "forbidStringLiterals": ["streamMessage", "listMessages"]
     },
     {
       "id": "rule-use-ai-chat-host-dispatch-100",
       "contract": "use-ai-chat-host-dispatch",
       "reason": "use-ai-chat-host-dispatch: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/ai/composables/useAIChatView.ts",
+      "file": "packages/ai-ui/src/composables/useAIChatView.ts",
       "requireIdentifiers": ["AI_ASSISTANT_RUNTIME_KEY"],
       "requireExpressions": ["useStrictInject(AI_ASSISTANT_RUNTIME_KEY, 'AIAssistantRuntime')"]
     },
@@ -380,7 +380,7 @@
       "id": "rule-use-ai-chat-host-dispatch-103",
       "contract": "use-ai-chat-host-dispatch",
       "reason": "use-ai-chat-host-dispatch: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/ai/components/AIFooterComposer.vue",
+      "file": "packages/ai-ui/src/components/AIFooterComposer.vue",
       "forbidClassTokens": ["ai-chat-execution-profile", "select-execution-profile"],
       "forbidAttributes": [
         {
@@ -398,7 +398,7 @@
       "id": "rule-use-ai-chat-host-dispatch-104",
       "contract": "use-ai-chat-host-dispatch",
       "reason": "use-ai-chat-host-dispatch: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/ai/views/AIChatView.vue",
+      "file": "packages/ai-ui/src/views/AIChatView.vue",
       "forbidAttributes": [
         {
           "name": ":execution-profile-id",
@@ -426,10 +426,10 @@
       "contract": "use-ai-chat-host-dispatch",
       "reason": "use-ai-chat-host-dispatch: AST/type structural rules replacing source-text locks (#502).",
       "files": [
-        "packages/app-vue/src/modules/ai/composables/useAIChatSession.ts",
-        "packages/app-vue/src/modules/ai/composables/useAssistantStream.ts",
-        "packages/app-vue/src/modules/ai/composables/useConversationProjection.ts",
-        "packages/app-vue/src/modules/ai/composables/useAIComposerContext.ts"
+        "packages/ai-ui/src/composables/useAIChatSession.ts",
+        "packages/ai-ui/src/composables/useAssistantStream.ts",
+        "packages/ai-ui/src/composables/useConversationProjection.ts",
+        "packages/ai-ui/src/composables/useAIComposerContext.ts"
       ],
       "forbidIdentifiers": [
         "useAssistantDispatch",
@@ -470,7 +470,7 @@
       "id": "rule-aisettings-provider-onboarding-v2-165",
       "contract": "AISettings.provider-onboarding-v2",
       "reason": "AISettings.provider-onboarding-v2: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/setting/components/AISettings.vue",
+      "file": "packages/setting-ui/src/components/AISettings.vue",
       "forbidElements": ["AI_PROVIDER_TEMPLATES", "OnboardingStep"],
       "forbidIdentifiers": [
         "submitQuickProvider",
@@ -497,7 +497,7 @@
       "id": "rule-aisettings-provider-onboarding-v2-166",
       "contract": "AISettings.provider-onboarding-v2",
       "reason": "AISettings.provider-onboarding-v2: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/setting/components/AgentInstanceWizard.vue",
+      "file": "packages/setting-ui/src/components/AgentInstanceWizard.vue",
       "forbidElements": ["AI_PROVIDER_TEMPLATES", "OnboardingStep"],
       "forbidIdentifiers": [
         "submitQuickProvider",
@@ -510,7 +510,7 @@
       "id": "rule-aisettings-provider-onboarding-v2-167",
       "contract": "AISettings.provider-onboarding-v2",
       "reason": "AISettings.provider-onboarding-v2: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/setting/components/MastraAgentSettings.vue",
+      "file": "packages/setting-ui/src/components/MastraAgentSettings.vue",
       "forbidElements": [
         {
           "name": "Dialog",
@@ -555,7 +555,7 @@
       "id": "rule-use-data-portability-171",
       "contract": "use-data-portability",
       "reason": "use-data-portability: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/setting/composables/useDataPortability.ts",
+      "file": "packages/setting-ui/src/composables/useDataPortability.ts",
       "requireIdentifiers": ["DATA_PORTABILITY_SERVICE_KEY", "DESKTOP_AUTH_API_KEY"],
       "requireStatements": [
         "const isServerDisclosureAvailable = ref(service !== undefined && desktopApi === undefined);"
@@ -589,7 +589,7 @@
       "id": "rule-use-data-portability-173",
       "contract": "use-data-portability",
       "reason": "use-data-portability: AST/type structural rules replacing source-text locks (#502).",
-      "file": "packages/app-vue/src/modules/setting/components/DataSettingsSection.vue",
+      "file": "packages/setting-ui/src/components/DataSettingsSection.vue",
       "requireClassTokens": ["isServerDisclosureAvailable", "exportServerHeldDataDisclosure"],
       "requireAttributes": [
         {

@@ -1,5 +1,5 @@
-import type { TaskOccurrenceScheduleSnapshot as TaskOccurrenceScheduleSnapshotDTO } from '@memoflow/contracts/task';
-import { TaskOccurrenceScheduleSnapshotSchema } from '@memoflow/contracts/task';
+import type { TaskOccurrenceScheduleSnapshot as TaskOccurrenceScheduleSnapshotDTO } from '@memoflow/task-contracts';
+import { TaskOccurrenceScheduleSnapshotSchema } from '@memoflow/task-contracts';
 import type { Instant } from '@memoflow/contracts/primitives';
 import type { TimeContext } from '@memoflow/time';
 import { ValueObject } from '@memoflow/utils/domain';

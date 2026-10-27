@@ -1,21 +1,20 @@
 import type { AccountEventMap } from '@memoflow/account-contracts';
 import type { AccountRpcMap } from '@memoflow/account-contracts';
-import type { AIEventMap } from '../modules/ai/protocol/ai-event-map';
-import type { AIRpcMap } from '../modules/ai/protocol/ai-rpc-map';
+import type { AIEventMap } from '@memoflow/ai-contracts/protocol/ai-event-map';
+import type { AIRpcMap } from '@memoflow/ai-contracts/protocol/ai-rpc-map';
 import type { DataPortabilityRpcMap } from '@memoflow/data-portability-contracts';
 import type { GoalEventMap } from '@memoflow/goal-contracts';
 import type { GoalRpcMap } from '@memoflow/goal-contracts';
 import type { NotificationEventMap } from '@memoflow/notification-contracts';
 import type { NotificationRpcMap } from '@memoflow/notification-contracts';
-import type { RepositoryEventMap } from '../modules/repository/protocol/repository-event-map';
-import type { RepositoryRpcMap } from '../modules/repository/protocol/repository-rpc-map';
+import type { RepositoryEventMap } from '@memoflow/repository-contracts';
+import type { RepositoryRpcMap } from '@memoflow/repository-contracts';
 import type { RoutineScheduleProjectionEventMap } from '@memoflow/routine-contracts';
 import type { ScheduleEventMap } from '@memoflow/schedule-contracts';
 import type { ScheduleRpcMap } from '@memoflow/schedule-contracts';
-import type { SettingEventMap } from '../modules/setting/protocol/setting-event-map';
-import type { SettingRpcMap } from '../modules/setting/protocol/setting-rpc-map';
-import type { TaskEventMap } from '../modules/task/protocol/task-event-map';
-import type { TaskRpcMap } from '../modules/task/protocol/task-rpc-map';
+import type { SettingEventMap } from '@memoflow/setting-contracts';
+import type { SettingRpcMap } from '@memoflow/setting-contracts';
+import type { TaskEventMap, TaskRpcMap } from '@memoflow/task-contracts';
 
 /**
  * Event registry extension seam.

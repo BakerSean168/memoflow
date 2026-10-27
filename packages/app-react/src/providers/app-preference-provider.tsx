@@ -14,7 +14,7 @@ import type {
   PresentationPreferences,
   RegionalPreferences,
   UserPreferenceProfile,
-} from '@memoflow/contracts/setting';
+} from '@memoflow/setting-contracts';
 import { presentErrorMessage } from '@memoflow/http-client';
 
 import { useAppSession } from './app-session-provider';

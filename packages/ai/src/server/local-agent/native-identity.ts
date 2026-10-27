@@ -3,7 +3,7 @@ import { open } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { z } from 'zod';
-import type { LocalAgentConnection, LocalAgentDriver } from '@memoflow/contracts/ai';
+import type { LocalAgentConnection, LocalAgentDriver } from '@memoflow/ai-contracts';
 import { LocalAgentError } from '../../shared/local-agent-error';
 
 const record = z.record(z.string(), z.unknown());

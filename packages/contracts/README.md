@@ -100,7 +100,7 @@ src/modules/account/
 ```typescript
 // ✅ 方式: 从子路径导入完整模块（推荐，极致 Tree-Shaking）
 import { GoalServerDTO, GoalClientDTO } from '@memoflow/goal-contracts';
-import { TaskPlanServer } from '@memoflow/contracts/task';
+import { TaskPlanServer } from '@memoflow/task-contracts';
 import { AccountClientDTO } from '@memoflow/account-contracts';
 ```
 
@@ -108,13 +108,12 @@ import { AccountClientDTO } from '@memoflow/account-contracts';
 
 | 子路径                                 | 说明             |
 | -------------------------------------- | ---------------- |
-| `@memoflow/contracts/task`             | 任务模块契约     |
 | `@memoflow/goal-contracts`             | 目标模块契约     |
-| `@memoflow/contracts/repository`       | 仓库模块契约     |
+| `@memoflow/repository-contracts`       | 仓库模块契约     |
 | `@memoflow/account-contracts`          | 账户模块契约     |
 | `@memoflow/schedule-contracts`         | 调度模块契约     |
-| `@memoflow/contracts/setting`          | 设置模块契约     |
-| `@memoflow/contracts/ai`               | AI 模块契约      |
+| `@memoflow/setting-contracts`          | 设置模块契约     |
+| `@memoflow/ai-contracts`               | AI 模块契约      |
 | `@memoflow/data-portability-contracts` | 数据可移植性契约 |
 | `@memoflow/contracts/shared`           | 共享基础类型     |
 
@@ -168,7 +167,7 @@ import {
 ```typescript
 // ✅ 推荐：明确的模块边界
 import { GoalServerDTO, GoalStatus } from '@memoflow/goal-contracts';
-import { TaskPlanServer } from '@memoflow/contracts/task';
+import { TaskPlanServer } from '@memoflow/task-contracts';
 ```
 
 ### 2. 避免命名冲突时使用命名空间
@@ -176,7 +175,7 @@ import { TaskPlanServer } from '@memoflow/contracts/task';
 ```typescript
 // ✅ 当多个模块有同名类型时
 import * as GoalContracts from '@memoflow/goal-contracts';
-import * as TaskContracts from '@memoflow/contracts/task';
+import * as TaskContracts from '@memoflow/task-contracts';
 
 function process(
   goal: GoalContracts.StatusDTO,  // Goal 的状态

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { AIEvaluationReportSchema } from '../../packages/contracts/src/modules/ai/api/ai-evaluation-report.dto';
+import { AIEvaluationReportSchema } from '../../packages/ai-contracts/src/api/ai-evaluation-report.dto';
 import {
   RecordedReplayAIEvalExecutor,
   compareAIEvaluationReports,

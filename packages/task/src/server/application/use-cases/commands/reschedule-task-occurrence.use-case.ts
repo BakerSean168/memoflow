@@ -1,4 +1,4 @@
-import type { RescheduleTaskInput, TaskOccurrenceClientDTO } from '@memoflow/contracts/task';
+import type { RescheduleTaskInput, TaskOccurrenceClientDTO } from '@memoflow/task-contracts';
 import { error, fail, ok, type Result } from '@memoflow/contracts/result';
 import type { UserTimeContextPort } from '@memoflow/time';
 import { TaskOccurrenceScheduleSnapshot } from '../../../domain/value-objects/task-occurrence-schedule-snapshot';

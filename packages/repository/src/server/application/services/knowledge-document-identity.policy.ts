@@ -1,5 +1,5 @@
 import type { KnowledgeDocumentId } from '@memoflow/contracts/primitives';
-import { KnowledgeDocumentIdSchema } from '@memoflow/contracts/repository';
+import { KnowledgeDocumentIdSchema } from '@memoflow/repository-contracts';
 
 export type KnowledgeDocumentIdentityFailureCode =
   | 'KNOWLEDGE_DOCUMENT_ID_INVALID'
